@@ -208,12 +208,84 @@ Generate Unity dialogue nodes using LLM.
 }
 ```
 
-### POST `/dialogues/export/unity-dialogue`
-Export Unity dialogue to YARN file format.
+## Unity JSON export endpoints (`/api/v1/dialogues`)
 
-**Request Body:** `ExportUnityDialogueRequest`
+JWT required. Implementation: `api/routers/dialogues.py`, `services/unity_dialogue_export_service.py`. Operational guide: [Unity Export (Epic 5)](../guides/unity-export.md).
 
-**Response:** `ExportUnityDialogueResponse`
+### POST `/dialogues/unity/export`
+Validate and write Unity Dialogue JSON to the configured `unity_dialogues_path` (Story 5.1 / FR49).
+
+**Request Body:** `ExportUnityDialogueRequest` — `{ json_content, title, filename? }`
+
+**Response:** `ExportUnityDialogueResponse` — `{ filename, success }`. Field `file_path` is deprecated and **not returned** (no server path leak).
+
+**Errors:** `422` validation (schema, path not configured) ; `500` generic write failure.
+
+### POST `/dialogues/batch-export`
+Export multiple persisted documents to Unity JSON files (Story 5.2 / FR50).
+
+**Request Body:** `BatchExportRequest`
+```json
+{
+  "document_ids": ["my_dialogue"],
+  "skip_validation": false,
+  "filename_strategy": "preserve"
+}
+```
+
+- `document_ids`: 1–64 items (`Defaults.UNITY_EXPORT_BATCH_MAX_ITEMS`)
+- `filename_strategy`: `preserve` (default, `{id}.json`) or `slug` (from title)
+
+**Response:** `BatchExportResponse` — `{ exported[], failed[{ id, errors }], cancelled, success }`
+
+### POST `/dialogues/{document_id}/validate-schema`
+Validate an on-disk persisted document against the Unity export pipeline (Story 5.3 / FR51).
+
+**Response:** `ValidateSchemaResponse` — `is_valid`, `errors`, `errors_structured`, `warnings`, `error_count`
+
+### GET `/dialogues/{document_id}/preview-export`
+Preview export without download or disk write (Story 5.5 / FR53).
+
+**Response:** `ExportPreviewResponse` — `{ json_content, size_bytes, node_count, filename, schema_valid, errors[] }`
+
+### POST `/dialogues/batch-preview-export`
+Batch preview (truncated JSON preview per item when large).
+
+**Request Body:** `BatchExportPreviewRequest` — `{ document_ids }` (1–64)
+
+**Response:** `BatchExportPreviewResponse` — `{ items[], total_size_bytes, dialogue_count }`
+
+### GET `/dialogues/{document_id}/download`
+Download formatted JSON (`indent=2`, UTF-8) as attachment (Story 5.4 / FR52).
+
+**Response:** `application/json;charset=utf-8` with safe `Content-Disposition: attachment; filename="…"`
+
+### POST `/dialogues/batch-download`
+ZIP download of exported files (Story 5.4 / FR52).
+
+**Request Body:** `BatchDownloadRequest` — `{ filenames[], compression?: "store" | "deflate" }` (1–64 filenames)
+
+**Response:** `application/zip` — suggested name `unity-dialogues-export.zip`
+
+---
+
+## Export logs (`/api/v1/exports`)
+
+Business export audit trail (distinct from FastAPI observability logs). Story 5.6 / FR54.
+
+### GET `/exports/logs`
+List export attempts (newest first).
+
+**Query Parameters:**
+- `start_date` (optional): inclusive start (default: 30 days before `end_date`)
+- `end_date` (optional): inclusive end (default: today)
+- `status` (optional): `success` | `failure`
+
+**Response:** `ExportLogsResponse` — `{ entries[], total_count, success_count, failure_count }`
+
+Each entry: `id`, `timestamp`, `dialogue_id`, `filename`, `export_status`, `validation_status`, `cost_eur?`, `file_size_bytes?`, `errors[]`, `warnings_gdd[]`, `source` (`graph` | `library` | `batch` | `unity_export`).
+
+**Persistence:** `data/logs/exports/YYYY-MM-DD.json` — `services/export_log_service.py`
 
 ---
 
@@ -228,6 +300,7 @@ Tous les routes ci-dessous exigent un **JWT** (`Authorization: Bearer …`), com
 | `POST` | `/unity-dialogues/graph/load` | Charger un graphe depuis le stockage |
 | `POST` | `/unity-dialogues/graph/save` | Sauvegarder le graphe |
 | `POST` | `/unity-dialogues/graph/save-and-write` | Sauvegarde + écriture disque (flux principal client) |
+| `POST` | `/unity-dialogues/graph/preview-export` | Preview export graphe sans écriture (Story 5.5 / FR53) |
 
 ### Validation et flux
 
@@ -866,6 +939,7 @@ All routes below require **JWT** (`Depends(get_current_user)` in `api/main.py`).
 | POST | `/load` | Load graph into editor session |
 | POST | `/save` | Save graph |
 | POST | `/save-and-write` | Save and write Unity file |
+| POST | `/preview-export` | Preview export without disk write (Story 5.5) |
 
 ### Generation & cost
 

@@ -135,6 +135,23 @@ ValueError: JWT_SECRET_KEY ne peut pas être la valeur par défaut en production
 Veuillez définir une clé secrète sécurisée dans .env ou les variables d'environnement.
 ```
 
+## Export Unity JSON
+
+Les endpoints d'export (Epic 5) appliquent des contrôles pour éviter la fuite de chemins serveur et le path traversal :
+
+| Contrôle | Implémentation |
+|----------|----------------|
+| Basename uniquement | `safe_export_filename()` rejette `..`, `/`, `\` |
+| Confinement répertoire | `_resolve_export_path()` vérifie `file_path.relative_to(unity_dir)` |
+| Réponses API | `ExportUnityDialogueResponse` ne renvoie plus `file_path` absolu |
+| Téléchargement | `content_disposition_attachment()` neutralise guillemets et CRLF dans le nom de fichier |
+| Taille batch | Max 64 documents/fichiers par requête (`UNITY_EXPORT_BATCH_MAX_ITEMS`) |
+| Erreurs 500 | Messages génériques côté client ; détails dans les logs serveur |
+
+Tous les endpoints export et logs requièrent un **JWT** (`Depends(get_current_user)`). Guide opérationnel : [unity-export.md](./unity-export.md).
+
+---
+
 ## Bonnes Pratiques
 
 ### Secrets

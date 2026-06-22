@@ -68,6 +68,7 @@ Located in `[guides/](./guides/)`
 
 - [Development Guide](./guides/development-guide.md) - Setup, commands, and workflow
 - [GDD Notion Sync](./guides/GDD_NOTION_SYNC.md) - Sync Notion → disque, archives, export NotebookLM, chemins `data/gdd_notion_sync/`
+- [Unity Export (Epic 5)](./guides/unity-export.md) - Validation schéma, export batch, preview/download, logs métier FR54
 - [Development Troubleshooting](./guides/DEVELOPMENT.md) - Development troubleshooting
 - [Deployment Guide](./guides/deployment-guide.md) - Production deployment instructions
 - [Deployment Documentation](./guides/DEPLOYMENT.md) - Deployment documentation

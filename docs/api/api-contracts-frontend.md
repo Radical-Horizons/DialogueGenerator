@@ -42,18 +42,28 @@ Context/GDD data API calls:
 - `buildContext(request)`: Build context summary
 
 ### `dialogues.ts`
-Dialogue generation API calls:
+Dialogue generation and Unity export API calls:
 - `generateUnityDialogue(request)`: Generate Unity dialogue nodes (5min timeout)
 - `estimateTokens(request)`: Estimate token count
 - `previewPrompt(request)`: Preview full prompt
-- `exportUnityDialogue(request)`: Export to YARN format
+- `exportUnityDialogue(request)`: `POST /dialogues/unity/export` — write validated JSON to disk
+- `validateDocumentSchema(documentId)`: `POST /dialogues/{id}/validate-schema`
+- `batchExportUnityDialogues(request)`: `POST /dialogues/batch-export`
+- `previewUnityDialogueExport(documentId)`: `GET /dialogues/{id}/preview-export`
+- `batchPreviewUnityDialogues(request)`: `POST /dialogues/batch-preview-export`
+- `downloadUnityDialogue(documentId)`: `GET /dialogues/{id}/download`
+- `batchDownloadUnityDialogues(request)`: `POST /dialogues/batch-download`
+
+### `exports.ts`
+Export audit log (Story 5.6 / FR54):
+- `getExportLogs(params?)`: `GET /exports/logs` — filter by date range and status
 
 ### `graph.ts`
 Graph editor API calls:
 - `validateGraph(data)`: Validate graph structure
 - `calculateLayout(data)`: Calculate graph layout
-- `exportGraph(data)`: Export graph
-- `importGraph(data)`: Import graph
+- `saveGraphAndWrite(data)`: Save and write Unity JSON (`/graph/save-and-write`)
+- `previewGraphExport(data)`: Preview export without disk write (`/graph/preview-export`)
 - `saveGraph(data)`: Save graph
 
 ### `vocabulary.ts`

@@ -60,23 +60,25 @@ Ces fichiers sont utilisés par l'application pour valider et référencer les t
 
 ### Export des Dialogues Unity JSON
 
-Les **dialogues Unity JSON générés** sont exportés vers un **chemin configuré** (pas dans `data/UnityData/`) :
-- Le chemin est configuré via les paramètres de l'application (`app_config.json`, clé `unity_dialogues_path`)
-- **Chemin actuel** : `DialogueGenerator/Assets/Dialogue/` (dossier réel, plus de lien symbolique)
-- L'export se fait via l'endpoint `/api/v1/dialogues/unity/export`
+Les **dialogues Unity JSON exportés** sont écrits vers un **chemin configuré** (pas dans `data/UnityData/`) :
 
-**⚠️ Problème d'export à résoudre** : Le dossier `Assets/Dialogue/` n'est plus un lien symbolique mais un dossier réel. L'export automatique vers Unity doit être revu pour fonctionner correctement en production. Voir Epic 1 pour les améliorations prévues.
+- **Configuration :** `config/app_config.json` (clé `unity_dialogues_path`) ou API `GET`/`PUT` `/api/v1/config/unity-dialogues-path`
+- **Chemin typique dev :** dossier sous le dépôt ou projet Unity (ex. `Assets/Dialogue/`)
+- **Écriture :** atomique (tmp → rename) avec sidecar `{stem}.seq` pour la concurrence ADR-006
 
-**Action manuelle actuelle** : Les dialogues exportés dans `Assets/Dialogue/` doivent être copiés manuellement vers le projet Unity si nécessaire.
+**Flux principaux :**
 
-### Schéma JSON Unity
+| Contexte | Endpoint | Guide |
+|----------|----------|-------|
+| Éditeur de graphe | `POST /api/v1/unity-dialogues/graph/save-and-write` | [Unity Export](../guides/unity-export.md) |
+| Bibliothèque / batch | `POST /api/v1/dialogues/batch-export`, preview/download | idem |
+| Export JSON brut | `POST /api/v1/dialogues/unity/export` | idem |
 
-Le **schéma JSON Unity** utilisé pour la validation est situé dans :
-- `docs/resources/dialogue-format.schema.json`
+**Validation :** schéma `docs/resources/dialogue-format.schema.json` + règles GDD (voir `services/unity_export_validation_service.py`). Les exports bloquants échouent en `422` avec erreurs structurées.
 
-Ce schéma est utilisé pour valider les dialogues avant export (uniquement en développement, pas en production).
+**Logs métier :** `data/logs/exports/YYYY-MM-DD.json` — consultables via `GET /api/v1/exports/logs`.
 
-**⚠️ Maintenance manuelle requise** : Si Unity met à jour son format de dialogue, ce schéma doit être mis à jour manuellement.
+**Intégration Unity :** copier ou pointer le projet Unity vers le répertoire configuré ; pas de push automatique vers le moteur de jeu.
 
 ## Chemins de Configuration
 
@@ -127,7 +129,7 @@ Pour vérifier que les données sont correctement chargées :
 ## Notes pour le Développement Futur
 
 - **Automatisation GDD** : la sync Notion intégrée couvre le flux API/UI ; la copie depuis `Notion_Scrapper` reste une alternative hors application
-- **Export Unity** : Le système d'export automatique vers Unity doit être revu pour fonctionner avec le dossier réel `Assets/Dialogue/` (voir Epic 1 pour les améliorations prévues)
+- **Export Unity** : pipeline Epic 5 documenté dans [`docs/guides/unity-export.md`](../guides/unity-export.md) — validation schéma, batch (max 64), logs métier
 - **CI/CD** : Intégrer la mise à jour des données GDD dans le pipeline de déploiement
 - **Monitoring** : Ajouter des alertes si les données GDD sont obsolètes ou manquantes
 
@@ -140,12 +142,13 @@ Pour vérifier que les données sont correctement chargées :
 - Documentation des chemins : `.cursor/rules/gdd_paths.mdc`
 
 ### Unity
-- Export des dialogues : `api/routers/dialogues.py` (endpoint `/api/v1/dialogues/unity/export`)
-- Configuration du chemin Unity : `services/configuration_service.py` (méthode `get_unity_dialogues_path()`)
+- Guide export (Epic 5) : [`docs/guides/unity-export.md`](../guides/unity-export.md)
+- Routes HTTP : `api/routers/dialogues.py`, `api/routers/graph_io.py`, `api/routers/exports.py`
+- Configuration du chemin Unity : `services/configuration_service.py` (`get_unity_dialogues_path()`)
 - Schéma JSON Unity : `docs/resources/dialogue-format.schema.json`
-- Validateur de schéma : `api/utils/unity_schema_validator.py`
+- Validateur export : `services/unity_export_validation_service.py`, `api/utils/unity_schema_validator.py`
 - Catalogues Unity (CSV) : `data/UnityData/` (TraitCatalog.csv, SkillCatalog.csv, FlagCatalog.csv)
 
 ---
 
-**Dernière mise à jour** : 2026-04-06 (sync GDD Notion intégrée documentée ; chemins config)
+**Dernière mise à jour** : 2026-06-22 (export Unity Epic 5, sync GDD Notion)

@@ -97,8 +97,10 @@ API /save → GraphConversionService.graph_to_unity_json()
     ↓
 JSON Unity canonique (validé, format Unity conforme)
     ↓
-API /unity/export → Écriture fichier
+API /save-and-write → Écriture fichier (validation + log export)
 ```
+
+Voir [Unity Export (Epic 5)](../guides/unity-export.md) pour preview, batch, téléchargement et journalisation.
 
 ## Points critiques
 
