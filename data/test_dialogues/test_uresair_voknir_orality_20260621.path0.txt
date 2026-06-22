@@ -1,0 +1,10 @@
+--- Nœud 1 (START) ---
+Voknir Esh'Maradel: Je l'ai retrouvée — ou plutôt, son empreinte m'a trouvé dans les ossements. Un fragment de Deshkarta vibre au cœur de la Carte des culpabilités, mais il refuse de s'attacher seul. Pour que je le lie et que la Carte devienne praticable, tu dois renoncer, de ta main, à un souvenir précis : la mort administrative de Verath-ul-Kessar. Si tu refuses, la liaison échoue et le fragment se disloque — il faudra des générations pour le recoller, si jamais.
+=> Uresaïr (choix): J'accepte. Je renonce au souvenir de la mort de Verath-ul-Kessar — lie-le à la Carte, scelle ce coût devant moi.
+
+--- Nœud 2 (node-18ac616735634d1bb1cff89e1eadd791) ---
+Voknir Esh'Maradel: Je pose la Carte sur le creux de pierre et j'attends que tu prononces. Dis le renoncement, touche le fragment — je le prendrai aussitôt. Quand tu t'exécutes, le fragment explose en mèches lumineuses; j'attrape l'une d'elles et un éclat me traverse la paume, s'y fixe comme une clé malfendue. La Carte claque des sutures : elle n'acceptera pas ce vide sans ancre vivante. Tu dois décider maintenant si tu offres un autre souvenir, si tu me laisses accepter davantage en ma place, ou si tu arrêtes tout avant que le fragment ne se disloque complètement.
+=> Uresaïr (choix): Je le permets : qu'il donne un souvenir à la place — je prends le risque qu'il s'y lie davantage.
+
+--- Nœud 3 (node-c5472c84137b4510a4503a75be48915f) ---
+Voknir Esh'Maradel: Tu me permets, donc je fais. Je pose la main sur le fragment et je l'entends avaler quelque chose de moi — pas seulement un conte, mais une clé qui a tourné trop longtemps. Une lame de lumière me traverse la paume; quand je retire ma main, une marque noire y bat comme un petit cœur. La Carte a englouti le souvenir et émet maintenant un chuintement qui ressemble à ta respiration quand tu regardais Verath-ul-Kessar mourir.

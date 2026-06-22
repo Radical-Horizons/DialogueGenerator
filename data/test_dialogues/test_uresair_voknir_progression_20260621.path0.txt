@@ -1,0 +1,10 @@
+--- Nœud 1 (START) ---
+Voknir Esh'Maradel: Je l'ai déplacée à l'aube : la Carte des Culpabilités repose maintenant scellée dans une gaine d'os, sur l'autel de l'Est, au cœur des Plis. Le fragment de Deshkarta réagit à ta présence — il pulse quand ta trame temporelle l'effleure, mais il n'ouvrira sa clef que si une ancre est posée volontairement. Je ne la donnerai ni sans garantie ni gratis : prends un prix, ou j'activerai le siphon du Léviathan et nous payerons tous deux le tribut des visions. Choisis — et vite.
+=> Uresaïr (choix): J'accepte. Prends un fragment de ma mémoire en gage — la Veillée d'An-Zahur. Remets-moi la Carte et le Fragment de Deshkarta ensuite.
+
+--- Nœud 2 (node-828912f71e8b4173bc7be9a757960abb) ---
+Voknir: Très bien. Si tu tiens parole, je prends la Veillée maintenant. Approche la tempe — je plante la pointe d'os et je tire la ficelle du souvenir; tu sentiras un trou froid où elle vivait. Pendant que je scelle ce fil dans la gaine, le fragment réagit : il pulse, et quelque chose sur l'autel se déplace pour que tu puisses t'emparer de la Carte et du Fragment — à une condition que je fixe après l'ancrage.
+=> Uresaïr (choix): Je reste immobile et termine l'échange : prends la Veillée. Je réclame la Carte et le Fragment.
+
+--- Nœud 3 (node-caddfdb6c3bc4d8db6221cc34e653642) ---
+Voknir: Je plante la pointe. Tu sentiras un vide froid, et je tirerai la ficelle : la Veillée sera arrachée et enfermée dans une fiole d'os que je porte. À l'instant même où je scellerai, la gaine sur l'autel s'entrouvrira et la Carte glissera à portée ; le Fragment se mettra à pulser plus fort encore. Saches qu'un sceau restera sur ta tempe, visible des yeux qui savent lire ces marques — et que je réclamerai de toi, un jour choisi par moi, un service dont je fixerai les termes.

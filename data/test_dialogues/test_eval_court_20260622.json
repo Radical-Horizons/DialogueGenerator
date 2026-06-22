@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "1.2.0",
+  "nodes": [
+    {
+      "id": "START",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je t'attendais. La Carte des culpabilités s'est ouverte sans que je la touche : un pli a vomi la mémoire d'un magistrat que je reconnais — et trois silhouettes ont quitté l'atelier ce matin avec des copies floues. Si nous la laissons voyager, ces fragments se feront tribunal et rumeur; si nous la scellons, quelqu'un devra payer le silence. Je ne rendrai pas la décision à ta place, mais je te préviens : quel que soit ton choix, l'atelier perdra l'ancre qui le protège.",
+      "consequences": {
+        "flag": "CARTE_COMPROMISE",
+        "description": "La Carte a produit une copie et des intrus ont emporté des fragments ; l'atelier est désormais tracé par des observateurs."
+      },
+      "choices": [
+        {
+          "text": "Je prends la Carte et la cache dans mes plis temporels — je paierai le prix d'une mémoire en retour.",
+          "targetNode": "node-6748f44ba8614d5ab4beaf93d0327418",
+          "traitRequirements": [
+            {
+              "trait": "Persévérant",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "choice_START_0"
+        },
+        {
+          "text": "Je la brûle ici, maintenant — mieux vaut une disparition consciente qu'un secret qui se répand.",
+          "targetNode": "node-b16001444203495d8741d0052807ebb7",
+          "traitRequirements": [
+            {
+              "trait": "Honnête",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "choice_START_1"
+        }
+      ]
+    },
+    {
+      "id": "node-6748f44ba8614d5ab4beaf93d0327418",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu l'as fait. Quand tu as replié ce...",
+      "consequences": {
+        "flag": "Carte_cachee_dans_les_plis",
+        "description": "La Carte est maintenant logée dans les plis temporels d'Uresaïr; une marque sombre apparaît sur sa peau et la protection de l'atelier vacille."
+      },
+      "choices": [
+        {
+          "text": "Je te rends la Carte. Prends la mémoire qu'il faudra pour sceller — que l'atelier vive, même si je perds ce que je suis.",
+          "targetNode": "node-04b3d0fede3443bf9a982587a37ad164",
+          "choiceId": "choice_node-6748f44ba8614d5ab4beaf93d0327418_0"
+        },
+        {
+          "text": "Non. Je garde ce que j'ai pris. Si l'atelier doit tomber, je l'assumerai seul et je m'en irai avant qu'ils ne comprennent d'où vient la trace.",
+          "targetNode": "node-c44d311cb4394e1a99bd4bcf603f35cd",
+          "choiceId": "choice_node-6748f44ba8614d5ab4beaf93d0327418_1"
+        }
+      ]
+    },
+    {
+      "id": "node-b16001444203495d8741d0052807ebb7",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Si tu l'embrases ici, la flamme consumera la feuille et brisera l'ancre qui tient l'atelier ancré ; ce sera immédiat. Ce n'est pas tout : le pli porte la mémoire d'un magistrat — quand il se consume, cette souvenance cherchera un corps à habiter et la première trace se manifestera dans cette pièce. Je peux t'aider à étouffer les répercussions, mais si je le fais je serai marqué par ce qu'on efface, et l'atelier restera sans protection.",
+      "consequences": {
+        "flag": "atelier_ancre_perdue",
+        "description": "Si l'objet est brûlé ici, l'atelier perdra son ancre de protection immédiatement."
+      },
+      "choices": [
+        {
+          "text": "J'allume. Qu'elle s'efface et que tout parte en fumée.",
+          "targetNode": "node-6d66c0c412584c9a85c235f3b0b29b40",
+          "choiceId": "choice_node-b16001444203495d8741d0052807ebb7_0"
+        },
+        {
+          "text": "On sort et on l'embrase loin d'ici — pas dans l'atelier.",
+          "targetNode": "node-f46320debb8c4aa499d2853a2f34f014",
+          "choiceId": "choice_node-b16001444203495d8741d0052807ebb7_1"
+        }
+      ]
+    },
+    {
+      "id": "node-6d66c0c412584c9a85c235f3b0b29b40",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu l'allumes. Très bien. Je peux recevoir la première trace pour qu'elle ne naisse pas ici, mais pour cela je devrai l'incorporer en silence et renoncer à tracer les runes qui fixent notre refuge. Si j'accepte, je perds la capacité d'ancrer l'atelier et je serai contraint de m'éloigner ; si tu brûles seule, l'ancre se rompra immédiatement et la souvenance éclora dans cette pièce sans médiation.",
+      "consequences": {
+        "flag": "AnchorAtStake",
+        "description": "La décision brisera ou préservera temporairement la protection de l'atelier : si Voknir absorbe la mémoire, il perdra ses runes et devra partir ; si la feuille est consumée ici sans lui, la protection tombera et la première rémanence naîtra dans la salle."
+      }
+    },
+    {
+      "id": "node-f46320debb8c4aa499d2853a2f34f014",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu veux l'emmener dehors et l'embraser loin d'ici. Écoute : je peux briser l'Ancre et porter la marque à ta place — cela étoufferait la souvenance un instant, mais je perdrai ma relation au lieu et je devrai m'éloigner. Si tu pars seule, je ne t'arrêterai pas, mais la première personne que croiseront les flammes pourra se retrouver habitée; il y a une barque amarrée au quai cinq, prête à partir, si tu veux t'éloigner sans traverser la ville. Choisis maintenant; je n'ai pas d'autre moyen et, quoi que tu décides, quelque chose partira avec toi.",
+      "consequences": {
+        "flag": "DECISION_EXPORT_FIRE",
+        "description": "Le joueur a choisi d'éloigner la Carte pour la brûler hors de l'atelier. L'atelier perdra ou verra l'Ancre brisée selon l'option suivante."
+      }
+    },
+    {
+      "id": "node-04b3d0fede3443bf9a982587a37ad164",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je sens le pli vibrer dans ta main. Pour que la Carte cesse de parcourir les rues, je dois arracher une mémoire qui te définit et l'emprisonner dans mon sceau ; sans cela, les copies floues recommenceront à se disperser. Si tu tiens à sauver l'atelier, ce que je prendrai — si tu m'y autorises — sera ton nom véritable : lui ôter, c'est te rendre ineffable, privé de la trace qui te rattache au monde. Le scellement se fera maintenant, ici ; le point fixe qui maintient l'atelier dans la trame du Temps sautera et l'atelier sera livré aux dérives. Choisis quel fragment tu me confies, et je ferai ce que tu demandes.",
+      "consequences": {
+        "flag": "ScellementPossible",
+        "description": "Voknir peut exécuter le rituel maintenant. Le scellement arrêtera la propagation des copies, mais l'atelier perdra son point fixe temporel ; un sacrifice personnel est requis."
+      }
+    },
+    {
+      "id": "node-c44d311cb4394e1a99bd4bcf603f35cd",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu ne m'as pas rendu la Carte. Très bien. Je romps notre accord : si tu gardes la Carte, tu perds le refuge de l'atelier et je ne cacherai plus ton nom sous ce toit. J'ai déjà prévenu un contact discret du Quartier-Ouest — s'il y a une piste, on la reliera à toi. Maintenant choisis, et assume la conséquence.",
+      "consequences": {
+        "flag": "RUPTURE_ET_DEPOT",
+        "description": "Voknir rompt l'alliance ; Uresaïr perd le droit d'accès à l'atelier. Un contact du Quartier-Ouest a été informé et pourra lier toute trace à Uresaïr."
+      }
+    }
+  ]
+}

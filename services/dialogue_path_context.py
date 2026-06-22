@@ -4,13 +4,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
-DIALOGUE_GENERATION_CONSTRAINTS_SUFFIX = (
-    "\n\nContraintes de génération:\n"
-    "- Ne pas ajouter d'attribut test (jet de compétence / barre de test) sur les choix ; "
-    "les traitRequirements restent autorisés.\n"
-    "- Chaque réplique PNJ : 2 à 5 phrases, concis et jouable (sauf climax explicite).\n"
-    "- Conserver le même registre de tutoiement/vouvoiement que le nœud START.\n"
-)
+from services.dialogue_dramatic_progression import DIALOGUE_GENERATION_GLOBAL_CONSTRAINTS
+
+DIALOGUE_GENERATION_CONSTRAINTS_SUFFIX = DIALOGUE_GENERATION_GLOBAL_CONSTRAINTS
 
 
 @dataclass(frozen=True)
@@ -97,6 +93,16 @@ def build_ancestor_path_steps(
         )
     )
     return steps
+
+
+def infer_child_generation_depth(
+    path_steps: Optional[List[DialoguePathStep]],
+) -> int:
+    """Profondeur du nœud à générer (1 = premier enfant après START)."""
+    if not path_steps:
+        return 1
+    choices_taken = sum(1 for step in path_steps if step.player_choice_after)
+    return choices_taken + 1
 
 
 def format_generation_prompt(

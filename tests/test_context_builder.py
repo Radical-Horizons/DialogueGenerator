@@ -1013,11 +1013,14 @@ class TestContextBuilderCustomFieldsWithModes:
         with open(mock_gdd_project_root / "GDD" / "categories" / "personnages.json", "w", encoding="utf-8") as f:
             json.dump(char_data, f)
         
+        # Ces textes sont délibérément plus longs que les limites de troncature du config
+        # (Physiologie: truncate=100, Culture et traditions: truncate=80) pour que
+        # le mode excerpt applique bien la troncature par champ.
         species_data = {"especes": [
             {
                 "Nom": "Van'Doei",
-                "Biologie": {"Physiologie": "Un très long texte sur la physiologie des Van'Doei qui devrait être tronqué en mode excerpt"},
-                "Société et culture": {"Culture et traditions": "Un texte sur la culture qui devrait aussi être tronqué"}
+                "Biologie": {"Physiologie": "Un très long texte sur la physiologie des Van'Doei qui devrait absolument être tronqué en mode excerpt car il dépasse largement la limite de cent caractères définie dans la configuration de test."},
+                "Société et culture": {"Culture et traditions": "Un texte détaillé sur la culture Van'Doei qui doit être tronqué à quatre-vingts caractères maximum selon la config."}
             }
         ]}
         with open(mock_gdd_project_root / "GDD" / "categories" / "especes.json", "w", encoding="utf-8") as f:

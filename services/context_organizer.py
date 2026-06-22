@@ -64,12 +64,19 @@ class ContextOrganizer:
     ESSENTIAL_CONTEXT_FIELDS = {
         "character": [
             # Minimum utile pour écrire une scène/dialogue :
-            "Introduction.Résumé de la fiche",
-            "Registre de langage du personnage",
-            "Expressions courantes",
+            "Introduction.Résumé de la fiche",        # ancien format export
+            "sections.re_sume__de_la_fiche",           # shard Notion
+            "Registre de langage du personnage",       # ancien format export
+            "sections.registre_de_langage_du_personnage",  # shard Notion
+            "Expressions courantes",                   # ancien format export
+            "sections.expressions_courantes",          # shard Notion
+            "sections.voix_et_pre_sence",              # shard Notion (voix principale)
             "Caractérisation.Désir",
+            "sections.de_sir__want",                   # shard Notion
             "Caractérisation.Faiblesse",
+            "sections.faiblesses_et_mort",             # shard Notion
             "Background.Relations",
+            "sections.relations_de_son_vivant",        # shard Notion
         ],
         "location": [
             "Introduction.Résumé de la fiche",
@@ -125,10 +132,11 @@ class ContextOrganizer:
         fields_to_include: List[str],
         organization_mode: str = "default",
         field_labels_map: Optional[Dict[str, str]] = None,
-        element_mode: Optional[str] = None
+        element_mode: Optional[str] = None,
+        truncation_map: Optional[Dict[str, int]] = None,
     ) -> str:
         """Organise les champs d'un élément selon le mode d'organisation.
-        
+
         Args:
             element_data: Données complètes de l'élément
             element_type: Type d'élément ("character", "location", etc.)
@@ -136,7 +144,8 @@ class ContextOrganizer:
             organization_mode: Mode d'organisation ("default", "narrative", "minimal")
             field_labels_map: Dictionnaire {field_path: label} depuis context_config.json (optionnel)
             element_mode: Mode de sélection ("full" ou "excerpt") pour adapter les labels (optionnel)
-            
+            truncation_map: Dictionnaire {field_path: max_chars} pour tronquer par champ (excerpt)
+
         Returns:
             Texte formaté avec les champs organisés.
         """
@@ -176,19 +185,31 @@ class ContextOrganizer:
                 # Continuer avec les champs fournis si la validation échoue
         
         if organization_mode == "minimal":
-            return self._organize_minimal(element_data, element_type, fields_to_include, field_labels_map, element_mode)
+            return self._organize_minimal(element_data, element_type, fields_to_include, field_labels_map, element_mode, truncation_map)
         elif organization_mode == "narrative":
-            return self._organize_narrative(element_data, element_type, fields_to_include, field_labels_map, element_mode)
+            return self._organize_narrative(element_data, element_type, fields_to_include, field_labels_map, element_mode, truncation_map)
         else:  # default
-            return self._organize_default(element_data, element_type, fields_to_include, field_labels_map, element_mode)
+            return self._organize_default(element_data, element_type, fields_to_include, field_labels_map, element_mode, truncation_map)
     
+    @staticmethod
+    def _apply_field_truncation(text: str, max_chars: int) -> str:
+        """Tronque un texte à ``max_chars`` caractères en coupant sur le dernier espace."""
+        if max_chars <= 0 or len(text) <= max_chars:
+            return text
+        cut = text[:max_chars]
+        last_space = cut.rfind(" ")
+        if last_space > max_chars * 0.8:
+            cut = cut[:last_space]
+        return cut + "... (extrait)"
+
     def _organize_default(
         self,
         element_data: Dict,
         element_type: str,
         fields_to_include: List[str],
         field_labels_map: Optional[Dict[str, str]] = None,
-        element_mode: Optional[str] = None
+        element_mode: Optional[str] = None,
+        truncation_map: Optional[Dict[str, int]] = None,
     ) -> str:
         """Organisation par défaut : ordre linéaire des champs."""
         parts = []
@@ -200,6 +221,8 @@ class ContextOrganizer:
             
             label = self._generate_label(field_path, field_labels_map, element_mode)
             formatted_value = self._format_value(value)
+            if truncation_map and field_path in truncation_map:
+                formatted_value = self._apply_field_truncation(formatted_value, truncation_map[field_path])
             parts.append(f"{label}: {formatted_value}")
         
         return "\n".join(parts)
@@ -210,17 +233,16 @@ class ContextOrganizer:
         element_type: str,
         fields_to_include: List[str],
         field_labels_map: Optional[Dict[str, str]] = None,
-        element_mode: Optional[str] = None
+        element_mode: Optional[str] = None,
+        truncation_map: Optional[Dict[str, int]] = None,
     ) -> str:
         """Organisation narrative : groupement par sections logiques."""
-        # Grouper les champs par catégorie
         fields_by_category = defaultdict(list)
         
         for field_path in fields_to_include:
             category = self._categorize_field(field_path, element_type)
             fields_by_category[category or "other"].append(field_path)
         
-        # Construire les sections dans l'ordre défini
         sections = []
         for section_key in self.NARRATIVE_SECTIONS:
             if section_key in fields_by_category:
@@ -235,12 +257,13 @@ class ContextOrganizer:
                     
                     label = self._generate_label(field_path, field_labels_map, element_mode)
                     formatted_value = self._format_value(value)
+                    if truncation_map and field_path in truncation_map:
+                        formatted_value = self._apply_field_truncation(formatted_value, truncation_map[field_path])
                     section_parts.append(f"{label}: {formatted_value}")
                 
-                if len(section_parts) > 1:  # Au moins un champ (en plus du titre)
+                if len(section_parts) > 1:
                     sections.append("\n".join(section_parts))
         
-        # Ajouter les champs non catégorisés à la fin
         if "other" in fields_by_category:
             other_fields = fields_by_category["other"]
             if other_fields:
@@ -252,6 +275,8 @@ class ContextOrganizer:
                     
                     label = self._generate_label(field_path, field_labels_map, element_mode)
                     formatted_value = self._format_value(value)
+                    if truncation_map and field_path in truncation_map:
+                        formatted_value = self._apply_field_truncation(formatted_value, truncation_map[field_path])
                     section_parts.append(f"{label}: {formatted_value}")
                 
                 sections.append("\n".join(section_parts))
@@ -264,23 +289,21 @@ class ContextOrganizer:
         element_type: str,
         fields_to_include: List[str],
         field_labels_map: Optional[Dict[str, str]] = None,
-        element_mode: Optional[str] = None
+        element_mode: Optional[str] = None,
+        truncation_map: Optional[Dict[str, int]] = None,
     ) -> str:
         """Organisation minimale : seulement les champs essentiels."""
-        # Filtrer pour ne garder que les champs essentiels
         essential_fields = self.ESSENTIAL_CONTEXT_FIELDS.get(element_type, [])
         
-        # Intersection entre fields_to_include et essential_fields
         minimal_fields = [
             f for f in fields_to_include 
             if f in essential_fields or any(essential in f for essential in essential_fields)
         ]
         
-        # Si aucun champ essentiel n'est dans la liste, utiliser les premiers champs
         if not minimal_fields:
-            minimal_fields = fields_to_include[:5]  # Limiter à 5 champs
+            minimal_fields = fields_to_include[:5]
         
-        return self._organize_default(element_data, element_type, minimal_fields, field_labels_map, element_mode)
+        return self._organize_default(element_data, element_type, minimal_fields, field_labels_map, element_mode, truncation_map)
     
     def _extract_field_value(self, data: Dict, path: str) -> Optional[any]:
         """Extrait la valeur d'un champ depuis un chemin."""

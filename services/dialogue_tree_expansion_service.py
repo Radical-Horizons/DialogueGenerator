@@ -10,14 +10,11 @@ from typing import Any, Callable, Dict, List, Optional
 from api.schemas.dialogue import ContextSelection, GenerateUnityDialogueRequest
 from core.llm.llm_client import ILLMClient
 from services.document_choice_id_service import ensure_document_choice_ids
-from services.dialogue_path_context import DIALOGUE_GENERATION_CONSTRAINTS_SUFFIX
 from services.graph_node_orchestrator import GraphNodeOrchestrator
 from services.scene_dramatis import enrich_context_selections_for_scene, resolve_scene_dramatis
 from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
 
 logger = logging.getLogger(__name__)
-
-NO_SKILL_TEST_SUFFIX = DIALOGUE_GENERATION_CONSTRAINTS_SUFFIX
 
 ProgressCallback = Callable[[int, int, int, int], None]
 
@@ -173,7 +170,6 @@ class DialogueTreeExpansionService:
         Returns:
             Résultat avec document Unity et métriques.
         """
-        enriched_instructions = f"{user_instructions.strip()}{NO_SKILL_TEST_SUFFIX}"
         dramatis = resolve_scene_dramatis(
             player_character_id=player_character_id,
             npc_speaker_id=npc_speaker_id,
@@ -187,7 +183,7 @@ class DialogueTreeExpansionService:
         context_dict = enriched_context.to_service_dict()
 
         start_request = GenerateUnityDialogueRequest(
-            user_instructions=enriched_instructions,
+            user_instructions=user_instructions.strip(),
             context_selections=enriched_context,
             max_choices=max_choices,
             choices_mode="capped",
@@ -232,12 +228,13 @@ class DialogueTreeExpansionService:
                             llm_client=llm_client,
                             parent_node_id=parent_id,
                             parent_node_content=parent,
-                            user_instructions=enriched_instructions,
+                            user_instructions=user_instructions.strip(),
                             context_selections=context_dict,
                             max_choices=child_max_choices,
                             generate_all_choices=True,
                             dialogue_nodes=list(node_registry.values()),
                             player_character_id=dramatis.player_character_id,
+                            max_depth=max_depth,
                         )
                     except Exception as exc:
                         logger.error(

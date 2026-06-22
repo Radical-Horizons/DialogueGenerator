@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 from api.main import app
 from api.dependencies import get_config_service, get_llm_usage_service
 from models.llm_usage import LLMUsageRecord
+from services.dialogue_dramatic_progression import DEFAULT_NODE_SCENE_INSTRUCTIONS
 
 
 @pytest.fixture
@@ -82,7 +83,7 @@ class TestGetNodePrompt:
         assert data["is_historical"] is False
         assert data.get("message") == "Prompt reconstruit (contexte actuel)"
         raw = data["raw_prompt"]
-        assert "Contexte précédent" in raw
+        assert "Historique du dialogue" in raw
         assert "PNJ" in raw
         assert "Bonjour, que voulez-vous" in raw
         assert "Réponse du joueur" in raw
@@ -175,7 +176,7 @@ class TestGetNodePrompt:
             assert response.status_code == 200
             data = response.json()
             assert "raw_prompt" in data
-            assert "Ecris la réponse du PNJ" in data["raw_prompt"]
+            assert DEFAULT_NODE_SCENE_INSTRUCTIONS.split(":")[0] in data["raw_prompt"]
         finally:
             app.dependency_overrides.pop(get_config_service, None)
 

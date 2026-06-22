@@ -1,40 +1,42 @@
 {
   "character": {
     "1": [
-      {"path": "Nom", "label": "Nom", "truncate": -1},
-      {"path": "values.Alias", "label": "Alias", "truncate": 200},
-      {"path": "values.Occupation", "label": "Occupation/Rôle", "fallback_path": "values.Archétype littéraire", "truncate": 150},
-      {"path": "sections.re_sume__de_la_fiche", "label": "Résumé", "truncate": 600},
-      {"path": "values.Qualités liées", "label": "Qualités", "is_list": true, "list_max_items": 3},
-      {"path": "values.Défauts liés", "label": "Défauts", "is_list": true, "list_max_items": 3}
+      {"path": "Nom", "label": "Nom", "truncate": -1, "is_excerpt": true},
+      {"path": "values.Alias", "label": "Alias", "truncate": 200, "is_excerpt": true},
+      {"path": "values.Occupation", "label": "Occupation/Rôle", "fallback_path": "values.Archétype littéraire", "truncate": 150, "is_excerpt": true},
+      {"path": "sections.re_sume__de_la_fiche", "label": "Résumé", "truncate": 600, "truncate_excerpt": 800, "is_excerpt": true},
+      {"path": "values.Qualités liées", "label": "Qualités", "is_list": true, "list_max_items": 3, "is_excerpt": true},
+      {"path": "values.Défauts liés", "label": "Défauts", "is_list": true, "list_max_items": 3, "is_excerpt": true}
     ],
     "2": [
-      {"path": "values.Espèce", "label": "Espèce", "truncate": -1},
+      {"path": "values.Espèce", "label": "Espèce", "truncate": -1, "is_excerpt": true},
       {"path": "values.Catégorie d\u2019âge", "label": "Âge", "truncate": -1},
       {"path": "values.Genre", "label": "Genre", "truncate": -1},
-      {"path": "sections.de_sir__want", "label": "Désir Principal", "truncate": 1000},
-      {"path": "sections.faiblesses_et_mort", "label": "Faiblesse", "truncate": 1000},
-      {"path": "sections.relations_de_son_vivant", "label": "Relations (extrait)", "truncate": 1200},
-      {"path": "values.Axe idéologique", "label": "Axe Idéologique", "truncate": -1},
+      {"path": "sections.de_sir__want", "label": "Désir Principal", "truncate": 1000, "truncate_excerpt": 500, "is_excerpt": true},
+      {"path": "sections.faiblesses_et_mort", "label": "Faiblesse", "truncate": 1000, "truncate_excerpt": 400, "is_excerpt": true},
+      {"path": "sections.relations_de_son_vivant", "label": "Relations (extrait)", "truncate": 1200, "truncate_excerpt": 600, "is_excerpt": true},
+      {"path": "values.Axe idéologique", "label": "Axe Idéologique", "truncate": -1, "is_excerpt": true},
       {"path": "values.Réponse au problème moral", "label": "Réponse Morale", "truncate": -1}
     ],
     "3": [
       {"path": "sections.contexte", "label": "Contexte Background", "truncate": 1200},
-      {"path": "sections.apparence_et_voix", "label": "Apparence", "truncate": 1000},
-      {"path": "sections.registre_de_langage_du_personnage", "label": "Style de dialogue", "truncate": 700, "condition_flag": "include_dialogue_type"},
-      {"path": "sections.expressions_courantes", "label": "Expressions courantes", "truncate": 500, "condition_flag": "include_dialogue_type"}
+      {"path": "sections.voix_et_pre_sence", "label": "Voix et présence", "truncate": 1000, "truncate_excerpt": 600, "is_excerpt": true},
+      {"path": "sections.voix_et_pre_sence_physique", "label": "Présence physique", "truncate": 600},
+      {"path": "sections.apparence_et_voix", "label": "Apparence", "truncate": 600},
+      {"path": "sections.registre_de_langage_du_personnage", "label": "Style de dialogue", "truncate": 700, "truncate_excerpt": 500, "condition_flag": "include_dialogue_type", "is_excerpt": true},
+      {"path": "sections.expressions_courantes", "label": "Expressions courantes", "truncate": 500, "truncate_excerpt": 300, "condition_flag": "include_dialogue_type", "is_excerpt": true}
     ]
   },
   "location": {
     "1": [
-      {"path": "Nom", "label": "Nom", "truncate": -1},
-      {"path": "values.Rôle", "label": "Fonction", "fallback_path": "values.Catégorie", "truncate": -1},
-      {"path": "sections.re_sume__de_la_fiche", "label": "Résumé", "truncate": 600},
+      {"path": "Nom", "label": "Nom", "truncate": -1, "is_excerpt": true},
+      {"path": "values.Rôle", "label": "Fonction", "fallback_path": "values.Catégorie", "truncate": -1, "is_excerpt": true},
+      {"path": "sections.re_sume__de_la_fiche", "label": "Résumé", "truncate": 600, "truncate_excerpt": 500, "is_excerpt": true},
       {"path": "values.Rôle", "label": "Rôle dans l'intrigue", "truncate": 500}
     ],
     "2": [
-      {"path": "sections.population", "label": "Population (extrait)", "truncate": 1000},
-      {"path": "values.Personnages vivant ici", "label": "Personnages notables", "is_list": true, "list_max_items": 4},
+      {"path": "sections.population", "label": "Population (extrait)", "truncate": 1000, "truncate_excerpt": 500, "is_excerpt": true},
+      {"path": "values.Personnages vivant ici", "label": "Personnages notables", "is_list": true, "list_max_items": 4, "is_excerpt": true},
       {"path": "values.Communautés présentes", "label": "Communautés notables", "is_list": true, "list_max_items": 4}
     ],
     "3": [
@@ -44,15 +46,15 @@
   },
   "item": {
     "1": [
-        {"path": "Nom", "label": "Nom Objet", "truncate": -1},
-        {"path": "values.Type", "label": "Type/Rareté", "fallback_path": "values.Rareté", "truncate": -1},
-        {"path": "sections.re_sume__de_la_fiche", "label": "Résumé Objet", "fallback_path": "sections.description", "truncate": 400},
+        {"path": "Nom", "label": "Nom Objet", "truncate": -1, "is_excerpt": true},
+        {"path": "values.Type", "label": "Type/Rareté", "fallback_path": "values.Rareté", "truncate": -1, "is_excerpt": true},
+        {"path": "sections.re_sume__de_la_fiche", "label": "Résumé Objet", "fallback_path": "sections.description", "truncate": 400, "is_excerpt": true},
         {"path": "sections.fonctionnement", "label": "Fonctionnement de base", "truncate": 300, "condition_path_not_exists": "sections.re_sume__de_la_fiche"}
     ],
     "2": [
-        {"path": "values.Créé par (personne)", "label": "Créé par", "fallback_path": "values.Appartient à", "truncate": -1},
-        {"path": "sections.fonctionnement", "label": "Fonctionnement (détail)", "truncate": 1200},
-        {"path": "sections.apparence___statut_narratif", "label": "Rôle dans l'intrigue", "truncate": 1000}
+        {"path": "values.Créé par (personne)", "label": "Créé par", "fallback_path": "values.Appartient à", "truncate": -1, "is_excerpt": true},
+        {"path": "sections.fonctionnement", "label": "Fonctionnement (détail)", "truncate": 1200, "truncate_excerpt": 600, "is_excerpt": true},
+        {"path": "sections.apparence___statut_narratif", "label": "Rôle dans l'intrigue", "truncate": 1000, "truncate_excerpt": 500, "is_excerpt": true}
     ],
     "3": [
         {"path": "sections.fonctionnement", "label": "Conditions de fonctionnement", "truncate": 1000},
@@ -61,13 +63,13 @@
   },
   "species": {
     "1": [
-        {"path": "Nom", "label": "Nom Espèce", "truncate": -1},
-        {"path": "values.Type", "label": "Type Espèce", "fallback_path": "values.Catégorie", "truncate": -1},
-        {"path": "sections.re_sume__de_la_fiche", "label": "Résumé Espèce", "truncate": 500}
+        {"path": "Nom", "label": "Nom Espèce", "truncate": -1, "is_excerpt": true},
+        {"path": "values.Type", "label": "Type Espèce", "fallback_path": "values.Catégorie", "truncate": -1, "is_excerpt": true},
+        {"path": "sections.re_sume__de_la_fiche", "label": "Résumé Espèce", "truncate": 500, "is_excerpt": true}
     ],
     "2": [
-        {"path": "sections.physiologie", "label": "Physiologie (extrait)", "truncate": 1200},
-        {"path": "sections.culture_et_traditions", "label": "Culture et traditions (extrait)", "truncate": 1000},
+        {"path": "sections.physiologie", "label": "Physiologie (extrait)", "truncate": 1200, "truncate_excerpt": 600, "is_excerpt": true},
+        {"path": "sections.culture_et_traditions", "label": "Culture et traditions (extrait)", "truncate": 1000, "truncate_excerpt": 500, "is_excerpt": true},
         {"path": "values.Représentants", "label": "Représentants notables", "is_list": true, "list_max_items": 4}
     ],
     "3": [
@@ -77,13 +79,13 @@
   },
   "community": {
     "1": [
-        {"path": "Nom", "label": "Nom Communauté", "truncate": -1},
-        {"path": "sections.re_sume__de_la_fiche", "label": "Résumé Communauté", "truncate": 500},
-        {"path": "sections.histoire", "label": "Rôle dans l'intrigue", "truncate": 400}
+        {"path": "Nom", "label": "Nom Communauté", "truncate": -1, "is_excerpt": true},
+        {"path": "sections.re_sume__de_la_fiche", "label": "Résumé Communauté", "truncate": 500, "is_excerpt": true},
+        {"path": "sections.histoire", "label": "Rôle dans l'intrigue", "truncate": 400, "is_excerpt": true}
     ],
     "2": [
-        {"path": "sections.hie_rarchie___ro_les", "label": "Leadership", "truncate": 1000},
-        {"path": "values.Culture", "label": "Valeurs (extrait)", "truncate": 1200},
+        {"path": "sections.hie_rarchie___ro_les", "label": "Leadership", "truncate": 1000, "truncate_excerpt": 500, "is_excerpt": true},
+        {"path": "values.Culture", "label": "Valeurs (extrait)", "truncate": 1200, "truncate_excerpt": 600, "is_excerpt": true},
         {"path": "values.Personnages membres", "label": "Personnages de la comm.", "is_list": true, "list_max_items": 4}
     ],
     "3": [

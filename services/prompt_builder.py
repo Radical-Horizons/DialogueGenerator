@@ -9,6 +9,7 @@ from typing import Optional, TYPE_CHECKING, List, Dict, Any
 import xml.etree.ElementTree as ET
 
 from utils.xml_utils import escape_xml_text
+from services.dialogue_dramatic_progression import DIALOGUE_ORALITY_PROMPT_LINES
 from services.prompt_xml_parsers import build_narrative_guides_xml, build_vocabulary_xml
 from services.context_truncator import ContextTruncator, cap_context_text_to_budget
 
@@ -136,6 +137,82 @@ class PromptBuilder:
         # Ne retourner que si au moins un élément a du contenu
         return contract_elem if has_content else None
     
+    # Titres de sections et mots-clés signalant des champs de voix du speaker.
+    _VOICE_SECTION_TITLES: tuple[str, ...] = ("VOIX ET STYLE",)
+    _VOICE_FIELD_KEYWORDS: tuple[str, ...] = (
+        "Voix", "Style de dialogue", "Expressions courantes",
+        "Présence physique", "Registre", "Langage",
+    )
+
+    def _build_speaker_voice_section(self, input: 'PromptInput') -> Optional[ET.Element]:
+        """Extrait les champs voix du NPC speaker depuis structured_context et les injecte.
+
+        Le bloc ``<speaker_voice>`` est inséré dans ``<technical>`` **avant** la
+        zone soumise au budget de troncature, ce qui garantit sa présence même si
+        la fiche du PNJ est tronquée par le budget contexte.
+
+        Args:
+            input: Objet PromptInput (npc_speaker_id + structured_context requis).
+
+        Returns:
+            Élément XML ``<speaker_voice>`` ou None si aucun contenu trouvé.
+        """
+        if not input.structured_context or not input.npc_speaker_id:
+            return None
+
+        npc_name = input.npc_speaker_id.strip()
+        voice_parts: List[str] = []
+
+        try:
+            for section in input.structured_context.sections:
+                cats = getattr(section, "categories", None) or []
+                for category in cats:
+                    if getattr(category, "type", "") != "characters":
+                        continue
+                    for item in getattr(category, "items", []):
+                        item_name = (getattr(item, "name", None) or "").strip()
+                        real_name = ((getattr(item, "metadata", None) or {}).get("real_name", "") or "").strip()
+                        if item_name != npc_name and real_name != npc_name:
+                            continue
+                        # Trouver la section VOIX ET STYLE d'abord, puis scanner tous les ItemSection
+                        voice_section_content: List[str] = []
+                        other_voice_fields: List[str] = []
+                        for item_section in getattr(item, "sections", []):
+                            title = (getattr(item_section, "title", "") or "").strip().upper()
+                            content = (getattr(item_section, "content", "") or "").strip()
+                            if not content:
+                                continue
+                            if title in self._VOICE_SECTION_TITLES:
+                                voice_section_content.append(content)
+                            else:
+                                for kw in self._VOICE_FIELD_KEYWORDS:
+                                    if kw.lower() in content.lower()[:120]:
+                                        other_voice_fields.append(content)
+                                        break
+                        voice_parts.extend(voice_section_content or other_voice_fields)
+                        break  # PNJ trouvé — on arrête
+                if voice_parts:
+                    break
+        except Exception:
+            logger.debug("_build_speaker_voice_section: erreur de lecture du structured_context", exc_info=True)
+            return None
+
+        if not voice_parts:
+            return None
+
+        raw_content = "\n\n".join(voice_parts)
+        # Limiter à 400 tokens (≈ 1600 caractères) pour rester hors budget contexte
+        if len(raw_content) > 1600:
+            cut = raw_content[:1600]
+            last_nl = cut.rfind("\n")
+            raw_content = (cut[:last_nl] if last_nl > 1200 else cut) + "\n... (extrait)"
+
+        voice_elem = ET.Element("speaker_voice")
+        voice_elem.text = escape_xml_text(
+            f"Voix du PNJ {npc_name} — à respecter dans toutes les répliques `line` :\n{raw_content}"
+        )
+        return voice_elem
+
     def _build_technical_section(self, input: 'PromptInput') -> Optional[ET.Element]:
         """Construit la section <technical> directement en XML.
         
@@ -147,6 +224,12 @@ class PromptBuilder:
         """
         technical_elem = ET.Element("technical")
         has_content = False
+
+        # SECTION VOIX DU SPEAKER — injectée avant la zone soumise au budget contexte
+        speaker_voice_elem = self._build_speaker_voice_section(input)
+        if speaker_voice_elem is not None:
+            technical_elem.append(speaker_voice_elem)
+            has_content = True
         
         # INSTRUCTIONS DE GÉNÉRATION
         gen_elem = ET.SubElement(technical_elem, "generation_instructions")
@@ -155,8 +238,9 @@ class PromptBuilder:
             f"- Speaker (répliques `line`) : {input.npc_speaker_id} — interlocuteur de la scène",
             f"- Choix (`choices`) : voix du PJ {input.player_character_id}",
             "- L'Éthérée ne doit jamais apparaître comme speaker ; ses répliques passent par les choices.",
-            "- Tests d'attributs : Format 'AttributeType+SkillId:DD' (ex: 'Raison+Rhétorique:8'). La compétence est obligatoire."
+            "- Tests d'attributs : Format 'AttributeType+SkillId:DD' (ex: 'Raison+Rhétorique:8'). La compétence est obligatoire.",
         ]
+        gen_parts.extend(DIALOGUE_ORALITY_PROMPT_LINES)
         
         # Instructions sur le nombre de choix
         if input.choices_mode == "capped" and input.max_choices is not None:

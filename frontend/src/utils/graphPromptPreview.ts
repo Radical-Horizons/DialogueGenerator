@@ -8,8 +8,8 @@ import {
 } from './dialoguePathContext'
 
 const DEFAULT_INSTRUCTIONS =
-  'Ecris la réponse du PNJ à ce que dit le PJ. ' +
-  '2 à 5 phrases, concis et jouable ; même registre tu/vous que le START.'
+  'Écris le nœud : paroles du PNJ entre guillemets ; didascalies claires ' +
+  'en *italique* narrateur (3e personne), hors guillemets.'
 
 function textValue(value: unknown): string {
   return typeof value === 'string' ? value : ''

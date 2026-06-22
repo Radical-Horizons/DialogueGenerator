@@ -166,30 +166,30 @@ class ContextConstructionService:
         Returns:
             Contenu formaté de l'élément.
         """
+        truncation_map = None
+        if element_mode == "excerpt":
+            field_manager = self._get_field_manager()
+            truncation_map = field_manager.get_excerpt_truncation_map(element_type)
+
         if filtered_fields:
-            # Utiliser l'organisateur avec les champs personnalisés
             formatted_content = organizer.organize_context(
                 element_data=element_data,
                 element_type=element_type,
                 fields_to_include=filtered_fields,
                 organization_mode=organization_mode,
                 field_labels_map=field_labels_map,
-                element_mode=element_mode
+                element_mode=element_mode,
+                truncation_map=truncation_map,
             )
         else:
-            # Fallback: utiliser la méthode standard
             if self._context_formatter is None:
                 return ""
             formatted_content = self._context_formatter.format_element(
                 element_data,
                 category_key,
-                3,  # level max
+                3,
                 include_dialogue_type=include_dialogue_type
             )
-        
-        # Appliquer la troncature si mode excerpt
-        if element_mode == "excerpt" and self._context_formatter:
-            formatted_content = self._context_formatter._apply_excerpt_truncation(formatted_content, element_type)
         
         return formatted_content
     
@@ -282,7 +282,24 @@ class ContextConstructionService:
             field_labels_map=field_labels_map,
             element_mode=element_mode
         )
-        
+
+        # En mode excerpt, appliquer la troncature par champ sur le contenu textuel
+        # de chaque ItemSection (le path JSON n'a pas accès à truncation_map directement).
+        if context_item and element_mode == "excerpt":
+            field_manager = self._get_field_manager()
+            trunc_map = field_manager.get_excerpt_truncation_map(element_type)
+            if trunc_map:
+                for item_section in context_item.sections:
+                    if not item_section.content:
+                        continue
+                    # Troncature par section (pas par champ individuel ici — on applique
+                    # le max par section en utilisant la somme des troncatures des champs voix
+                    # qui y tombent). Simple heuristique : cap section à 1500 chars.
+                    if len(item_section.content) > 1500:
+                        cut = item_section.content[:1500]
+                        last_nl = cut.rfind("\n")
+                        item_section.content = (cut[:last_nl] if last_nl > 1200 else cut) + "\n... (extrait)"
+
         if context_item:
             # Définir l'ID et le nom affiché (nom canonique de la fiche GDD)
             context_item.id = f"{element_label}_{idx}"

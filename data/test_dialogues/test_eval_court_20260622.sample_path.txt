@@ -1,0 +1,10 @@
+--- Nœud 1 (START) ---
+Voknir Esh'Maradel: Je t'attendais. La Carte des culpabilités s'est ouverte sans que je la touche : un pli a vomi la mémoire d'un magistrat que je reconnais — et trois silhouettes ont quitté l'atelier ce matin avec des copies floues. Si nous la laissons voyager, ces fragments se feront tribunal et rumeur; si nous la scellons, quelqu'un devra payer le silence. Je ne rendrai pas la décision à ta place, mais je te préviens : quel que soit ton choix, l'atelier perdra l'ancre qui le protège.
+=> Uresaïr (choix): Je la brûle ici, maintenant — mieux vaut une disparition consciente qu'un secret qui se répand.
+
+--- Nœud 2 (node-b16001444203495d8741d0052807ebb7) ---
+Voknir Esh'Maradel: Si tu l'embrases ici, la flamme consumera la feuille et brisera l'ancre qui tient l'atelier ancré ; ce sera immédiat. Ce n'est pas tout : le pli porte la mémoire d'un magistrat — quand il se consume, cette souvenance cherchera un corps à habiter et la première trace se manifestera dans cette pièce. Je peux t'aider à étouffer les répercussions, mais si je le fais je serai marqué par ce qu'on efface, et l'atelier restera sans protection.
+=> Uresaïr (choix): J'allume. Qu'elle s'efface et que tout parte en fumée.
+
+--- Nœud 3 (node-6d66c0c412584c9a85c235f3b0b29b40) ---
+Voknir Esh'Maradel: Tu l'allumes. Très bien. Je peux recevoir la première trace pour qu'elle ne naisse pas ici, mais pour cela je devrai l'incorporer en silence et renoncer à tracer les runes qui fixent notre refuge. Si j'accepte, je perds la capacité d'ancrer l'atelier et je serai contraint de m'éloigner ; si tu brûles seule, l'ancre se rompra immédiatement et la souvenance éclora dans cette pièce sans médiation.

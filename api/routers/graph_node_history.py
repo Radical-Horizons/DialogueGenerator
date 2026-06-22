@@ -79,10 +79,9 @@ def _validate_dialogue_exists(
         )
 
 
-_DEFAULT_INSTRUCTIONS = (
-    "Ecris la réponse du PNJ à ce que dit le PJ. "
-    "2 à 5 phrases, concis et jouable ; même registre tu/vous que le START."
-)
+from services.dialogue_dramatic_progression import DEFAULT_NODE_SCENE_INSTRUCTIONS
+
+_DEFAULT_INSTRUCTIONS = DEFAULT_NODE_SCENE_INSTRUCTIONS
 
 
 def _load_unity_nodes_from_dialogue(

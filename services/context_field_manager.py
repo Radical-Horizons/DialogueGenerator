@@ -229,6 +229,35 @@ class ContextFieldManager:
         
         return filtered_fields
     
+    def get_excerpt_truncation_map(self, element_type: str) -> Dict[str, int]:
+        """Retourne un dictionnaire {field_path: truncate_chars} pour le mode excerpt.
+
+        Utilise ``truncate_excerpt`` en priorité, sinon ``truncate`` si > 0.
+        Les champs sans troncature (-1 ou absent) sont exclus du dict
+        (la valeur entière sera conservée).
+
+        Args:
+            element_type: Type d'élément (character, location, …).
+
+        Returns:
+            Dictionnaire {field_path: caractères max} pour les champs avec troncature.
+        """
+        result: Dict[str, int] = {}
+        config_for_type = self.context_config.get(element_type.lower(), {})
+        for _priority, fields in config_for_type.items():
+            for field_config in fields:
+                path = field_config.get("path", "")
+                if not path:
+                    continue
+                truncate_excerpt = field_config.get("truncate_excerpt")
+                truncate = field_config.get("truncate", -1)
+                effective = truncate_excerpt if isinstance(truncate_excerpt, int) and truncate_excerpt > 0 else (
+                    truncate if isinstance(truncate, int) and truncate > 0 else -1
+                )
+                if effective > 0:
+                    result[path] = effective
+        return result
+
     def get_field_labels_map(
         self, 
         element_type: str, 

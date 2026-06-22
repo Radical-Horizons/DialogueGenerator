@@ -18,6 +18,10 @@ from services.configuration_service import ConfigurationService
 from services.llm_usage_service import LLMUsageService
 from services.context_truncator import cap_context_text_to_budget
 from services.scene_dramatis import enrich_context_selections_for_scene, resolve_scene_dramatis
+from services.dialogue_dramatic_progression import (
+    DEFAULT_PROGRESSION_MAX_DEPTH,
+    compose_generation_instructions,
+)
 from services.json_renderer.unity_json_renderer import UnityJsonRenderer
 from api.schemas.dialogue import GenerateUnityDialogueRequest, GenerateUnityDialogueResponse
 from api.exceptions import InternalServerException, ValidationException
@@ -156,6 +160,13 @@ class UnityDialogueOrchestrator:
                 )
             npc_speaker_id = dramatis.npc_speaker_id
             player_character_id = dramatis.player_character_id
+
+            scene_instruction = compose_generation_instructions(
+                request_data.user_instructions or "",
+                depth=0,
+                max_depth=DEFAULT_PROGRESSION_MAX_DEPTH,
+                is_start=True,
+            )
             
             # 2. Charger catalogues (services injectés)
             skills_list = []
@@ -184,7 +195,7 @@ class UnityDialogueOrchestrator:
             
             structured_context = context_builder.build_context_json(
                 selected_elements=context_selections_dict,
-                scene_instruction=request_data.user_instructions,
+                scene_instruction=scene_instruction,
                 field_configs=None,
                 organization_mode="narrative",
                 max_tokens=request_data.max_context_tokens,
@@ -201,7 +212,7 @@ class UnityDialogueOrchestrator:
             
             # 4. Construire le prompt Unity via le builder unique
             prompt_input = PromptInput(
-                user_instructions=request_data.user_instructions,
+                user_instructions=scene_instruction,
                 npc_speaker_id=npc_speaker_id,
                 player_character_id=player_character_id,
                 skills_list=skills_list,

@@ -11,7 +11,10 @@ from pydantic import BaseModel, Field, field_validator
 class UnityDialogueConsequencesContent(BaseModel):
     """Contenu des conséquences (flags narratifs) généré par l'IA."""
     flag: str = Field(..., description="Nom du flag narratif")
-    description: Optional[str] = Field(None, description="Description de la conséquence")
+    description: Optional[str] = Field(
+        None,
+        description="Effet narratif ou mécanique (staging, flags, état du monde) — pas dans line.",
+    )
 
 
 class UnityDialogueTraitRequirementContent(BaseModel):
@@ -28,7 +31,13 @@ class UnityDialogueTraitRequirementContent(BaseModel):
 
 class UnityDialogueChoiceContent(BaseModel):
     """Contenu d'un choix généré par l'IA."""
-    text: str = Field(..., description="Texte du choix")
+    text: str = Field(
+        ...,
+        description=(
+            "Réplique du joueur entre guillemets « … », ou geste en *[italique crochets]* "
+            "(ex. *[Lui tend la main.]*)."
+        ),
+    )
     test: Optional[str] = Field(None, description="Format: AttributeType+SkillId:DD (ex: 'Raison+Rhétorique:8')")
     testCriticalFailureNode: Optional[str] = Field(None, description="ID du nœud cible en cas d'échec critique (score < DD - 5)")
     testFailureNode: Optional[str] = Field(None, description="ID du nœud cible en cas d'échec (score >= DD - 5 et < DD)")
@@ -54,7 +63,13 @@ class UnityDialogueNodeContent(BaseModel):
     L'ID sera généré automatiquement par le système.
     """
     speaker: Optional[str] = Field(None, description="ID du personnage qui parle (contrôlé par l'auteur)")
-    line: Optional[str] = Field(None, description="Texte du dialogue (peut contenir \\n pour retours à la ligne)")
+    line: Optional[str] = Field(
+        None,
+        description=(
+            "Texte du nœud : paroles du PNJ entre guillemets « … » ; didascalies en *italique* "
+            "(markdown), voix narrateur 3e personne, hors guillemets. Retours à la ligne \\n autorisés."
+        ),
+    )
     test: Optional[str] = Field(
         None, 
         description="Format: AttributeType+SkillId:DD (ex: 'Raison+Rhétorique:8'). La compétence est obligatoire."

@@ -1,0 +1,420 @@
+{
+  "schemaVersion": "1.2.0",
+  "nodes": [
+    {
+      "id": "START",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je l'ai retrouvée — ou plutôt, son empreinte m'a trouvé dans les ossements. Un fragment de Deshkarta vibre au cœur de la Carte des culpabilités, mais il refuse de s'attacher seul. Pour que je le lie et que la Carte devienne praticable, tu dois renoncer, de ta main, à un souvenir précis : la mort administrative de Verath-ul-Kessar. Si tu refuses, la liaison échoue et le fragment se disloque — il faudra des générations pour le recoller, si jamais.",
+      "consequences": {
+        "flag": "VOKNIR_OFFRE_POSEE",
+        "description": "Voknir propose de lier un fragment de Deshkarta à la Carte; exige la renonciation d'un souvenir précis (Verath-ul-Kessar)."
+      },
+      "choices": [
+        {
+          "text": "J'accepte. Je renonce au souvenir de la mort de Verath-ul-Kessar — lie-le à la Carte, scelle ce coût devant moi.",
+          "targetNode": "node-18ac616735634d1bb1cff89e1eadd791",
+          "traitRequirements": [
+            {
+              "trait": "Persévérant",
+              "minValue": 5
+            }
+          ],
+          "respectDelta": 1,
+          "choiceId": "choice_START_0"
+        },
+        {
+          "text": "Je refuse. Brûle la Carte plutôt que d'ajouter ma mémoire à ton parchemin — je ne veux pas que tu portes mon passé.",
+          "targetNode": "node-697c837c9ba54350bf26855a675ca868",
+          "traitRequirements": [
+            {
+              "trait": "Orgueilleux",
+              "minValue": 5
+            }
+          ],
+          "influenceDelta": -1,
+          "respectDelta": -2,
+          "choiceId": "choice_START_1"
+        },
+        {
+          "text": "Je feins d'obéir : je te donne un leurre, tu scelles quelque chose de faux, et je reprends la Carte quand tu dormiras.",
+          "targetNode": "node-63c315b946fa482ba6fb75dba93660a3",
+          "traitRequirements": [
+            {
+              "trait": "Manipulateur",
+              "minValue": 5
+            }
+          ],
+          "influenceDelta": 1,
+          "respectDelta": -2,
+          "choiceId": "choice_START_2"
+        }
+      ]
+    },
+    {
+      "id": "node-18ac616735634d1bb1cff89e1eadd791",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je pose la Carte sur le creux de pierre et j'attends que tu prononces. Dis le renoncement, touche le fragment — je le prendrai aussitôt. Quand tu t'exécutes, le fragment explose en mèches lumineuses; j'attrape l'une d'elles et un éclat me traverse la paume, s'y fixe comme une clé malfendue. La Carte claque des sutures : elle n'acceptera pas ce vide sans ancre vivante. Tu dois décider maintenant si tu offres un autre souvenir, si tu me laisses accepter davantage en ma place, ou si tu arrêtes tout avant que le fragment ne se disloque complètement.",
+      "consequences": {
+        "flag": "eclat_fixe_voknir",
+        "description": "Un éclat du fragment s'est fiché dans la paume de Voknir, compromettant le rituel et liant partiellement Voknir au fragment."
+      },
+      "choices": [
+        {
+          "text": "Je le permets : qu'il donne un souvenir à la place — je prends le risque qu'il s'y lie davantage.",
+          "targetNode": "node-c5472c84137b4510a4503a75be48915f",
+          "choiceId": "choice_node-18ac616735634d1bb1cff89e1eadd791_0"
+        },
+        {
+          "text": "Je donne un autre souvenir maintenant — prends ceci aussi et finis la liaison.",
+          "targetNode": "node-93f0bf9a86fd43fbb462b319319943e5",
+          "choiceId": "choice_node-18ac616735634d1bb1cff89e1eadd791_1"
+        },
+        {
+          "text": "J'interromps le rituel et scelle le fragment dans une boîte : on reviendra préparés.",
+          "targetNode": "node-9b29bcfda16a4a3c87d2082e285c5f57",
+          "choiceId": "choice_node-18ac616735634d1bb1cff89e1eadd791_2"
+        }
+      ]
+    },
+    {
+      "id": "node-697c837c9ba54350bf26855a675ca868",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu refuses. Je m'y attendais, mais je ne recule pas devant ce qui peut encore servir. Je plante le fragment dans le parchemin et j'engage le lien à ma manière — il se débat. La salle se tend : une fente s'ouvre dans le sol et un nuage de cendre grise commence à effacer les images brodées au mur, comme si un souvenir était arraché sur le champs.",
+      "consequences": {
+        "flag": "fragment_enracinement_en_cours",
+        "description": "Le fragment a été enfoncé dans le parchemin : la pièce perd des images-mémoire; une fente s'ouvre dans le sol."
+      },
+      "choices": [
+        {
+          "text": "Tenter d'arracher le fragment des mains de Voknir — prendre le risque physique.",
+          "targetNode": "node-63fd2b7f50b8447ba159e51fd9a06037",
+          "choiceId": "choice_node-697c837c9ba54350bf26855a675ca868_0"
+        },
+        {
+          "text": "Agresser Voknir pour le forcer à lâcher prise — violence directe.",
+          "targetNode": "node-ef3e993d602042d1b3616c5da2b72cf0",
+          "choiceId": "choice_node-697c837c9ba54350bf26855a675ca868_1"
+        },
+        {
+          "text": "Céder partiellement : offrir un souvenir moindre à la place — sauvegarder Verath en refusant autre chose.",
+          "targetNode": "node-994853c03a5047448bf6667ab51c5a59",
+          "choiceId": "choice_node-697c837c9ba54350bf26855a675ca868_2"
+        }
+      ]
+    },
+    {
+      "id": "node-63c315b946fa482ba6fb75dba93660a3",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu crois pouvoir meurrir un leurre et repartir avec ce que tu veux quand je dors ? Je t'ai déjà effleuré la tempe quand tu as franchi les Plis : un fil sensible lie désormais ta mémoire à ce que je tiens. Si tu me tends un faux, le fil arracherá la mémoire vraie et l'attache au fragment tout de suite — le leurre se brisera et tu la perdras sans retour. Je peux faire autrement : je la retirerai moi-même, maintenant, si tu persistes à vouloir jouer.",
+      "consequences": {
+        "flag": "FIL_ANCRE_SUR_PJ",
+        "description": "Voknir a ancré un fil sur la mémoire du joueur ; toute tentative de substitution arrachera la mémoire vraie et liera le fragment immédiatement."
+      },
+      "choices": [
+        {
+          "text": "Je fais semblant quand même : je te tends le leurre et j'essaierai de reprendre la Carte plus tard.",
+          "targetNode": "node-c8227d6888af47e08aec861bb3b688d2",
+          "choiceId": "choice_node-63c315b946fa482ba6fb75dba93660a3_0"
+        },
+        {
+          "text": "Je renonce — je te donne le souvenir vrai, et tu le lieras comme tu l'as dit.",
+          "targetNode": "node-42c7cfbbc6f64d49b5200fc24a8808f4",
+          "choiceId": "choice_node-63c315b946fa482ba6fb75dba93660a3_1"
+        },
+        {
+          "text": "Assez : j'essaie de saisir ce que tu tiens maintenant, par la force.",
+          "targetNode": "node-017ab87eaae14c6e89dfc4a7d9225c20",
+          "choiceId": "choice_node-63c315b946fa482ba6fb75dba93660a3_2"
+        }
+      ]
+    },
+    {
+      "id": "node-c5472c84137b4510a4503a75be48915f",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu me permets, donc je fais. Je pose la main sur le fragment et je l'entends avaler quelque chose de moi — pas seulement un conte, mais une clé qui a tourné trop longtemps. Une lame de lumière me traverse la paume; quand je retire ma main, une marque noire y bat comme un petit cœur. La Carte a englouti le souvenir et émet maintenant un chuintement qui ressemble à ta respiration quand tu regardais Verath-ul-Kessar mourir.",
+      "consequences": {
+        "flag": "Voknir_Bound",
+        "description": "Voknir a offert un souvenir en ancre : il porte désormais une marque noire à la paume et a perdu l'accès à un souvenir précis de son passé; la Carte réagit en émettant un bruissement perceptible autour d'Uresaïr."
+      },
+      "choices": [
+        {
+          "text": "Laisse-le poursuivre : qu'il donne davantage de lui-même pour stabiliser la liaison.",
+          "targetNode": "END",
+          "choiceId": "choice_node-c5472c84137b4510a4503a75be48915f_0"
+        },
+        {
+          "text": "Stoppe tout et reprends la Carte : je préfère risquer la dislocation plutôt que de le laisser s'effacer davantage.",
+          "targetNode": "END",
+          "choiceId": "choice_node-c5472c84137b4510a4503a75be48915f_1"
+        },
+        {
+          "text": "Je donne un souvenir moins précieux en échange — prends-le à ma place si cela te sauve.",
+          "targetNode": "END",
+          "choiceId": "choice_node-c5472c84137b4510a4503a75be48915f_2"
+        }
+      ]
+    },
+    {
+      "id": "node-93f0bf9a86fd43fbb462b319319943e5",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je tends la main et je prends le souvenir que tu offres : une aube froide et le goût de cendre sur ta langue. Le fragment se compacte, il claque contre la Carte et laisse une lueur filiforme qui traverse ta nuque — tu sens le vide où Verath tenait sa place, mais quelque chose d'autre s'est glissé au bord de ta pensée, un visage ou un mot qui n'était pas tien. La Carte marque désormais une nouvelle ancre sur son pourtour, une balise nommée « Chambre Sans-Voix » qui n'apparaissait pas avant. Une brûlure froide s'est imprimée dans ma paume; à son centre apparaît un sigil d'argent que je ne reconnais pas — je l'ai pris pour toi, et cela me changera.",
+      "consequences": {
+        "flag": "Carte_Partiellement_Liee",
+        "description": "Le fragment s'est stabilisé : la Carte révèle une nouvelle destination, 'Chambre Sans-Voix'. Uresaïr a perdu le souvenir offert et ressent maintenant un intrus dans sa mémoire. Voknir porte un sigil récemment apparu dans sa paume."
+      },
+      "choices": [
+        {
+          "text": "Je t'offre encore un souvenir — prends-en un autre et finis la liaison.",
+          "targetNode": "END",
+          "choiceId": "choice_node-93f0bf9a86fd43fbb462b319319943e5_0"
+        },
+        {
+          "text": "Stoppe. Conclus la liaison maintenant ; je ne donnerai rien de plus.",
+          "targetNode": "END",
+          "choiceId": "choice_node-93f0bf9a86fd43fbb462b319319943e5_1"
+        },
+        {
+          "text": "Prends plutôt un souvenir de toi en échange — sacrifie quelque chose de ta mémoire pour conclure.",
+          "targetNode": "END",
+          "choiceId": "choice_node-93f0bf9a86fd43fbb462b319319943e5_2"
+        }
+      ]
+    },
+    {
+      "id": "node-9b29bcfda16a4a3c87d2082e285c5f57",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu interrompts le rituel et tu enfermes le fragment dans une boîte ; quand tu refermes le couvercle, l'air oscille et la boîte pousse un souffle froid qui me parcourt. Une fine brûlure sombre se grave sur ta paume — elle n'est pas qu'une marque : elle réagit quand la boîte est touchée et avise quiconque voudra la forcer. Je comprends la prudence, mais je ne laisserai pas ce fardeau hors de ma vue : la boîte restera ici, aux Plis, sous ma garde, jusqu'à ce que nous revenions mieux préparés.",
+      "consequences": {
+        "flag": "FragmentScellé",
+        "description": "Le fragment est enfermé dans une boîte aux Plis ; la paume d'Uresaïr porte une marque réactive. Voknir prend la garde de la boîte."
+      },
+      "choices": [
+        {
+          "text": "Je reprends la boîte et la porte avec moi : je prends la marque et la responsabilité.",
+          "targetNode": "END",
+          "choiceId": "choice_node-9b29bcfda16a4a3c87d2082e285c5f57_0"
+        },
+        {
+          "text": "Tu la gardes ici, mais tu me remets la clé : je veux pouvoir agir seul si nécessaire.",
+          "targetNode": "END",
+          "choiceId": "choice_node-9b29bcfda16a4a3c87d2082e285c5f57_1"
+        },
+        {
+          "text": "Je brise le sceau maintenant et rends le fragment à son ancrage : je préfère le risque à le laisser scellé sans résolution.",
+          "targetNode": "END",
+          "choiceId": "choice_node-9b29bcfda16a4a3c87d2082e285c5f57_2"
+        }
+      ]
+    },
+    {
+      "id": "node-63fd2b7f50b8447ba159e51fd9a06037",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu veux me l'ôter de force ? Viens donc. Je sens déjà le lien se contracter : au contact du fragment, une bande de cendre se déroule du parchemin et se plaque contre ta peau. Si tu arraches brusquement, le fragment peut se fendre — et une portion du souvenir que tu portes se détachera avec lui, peut‑être pour toujours. Je ne reculerai pas ; si tu veux briser la chose, viens le faire en face.",
+      "consequences": {
+        "flag": "CendreLienSurPJ",
+        "description": "Une bande de cendre s'est attachée au poignet du PJ ; le PJ ressent une douleur aiguë et l'amorce d'un effacement de mémoire partiel."
+      },
+      "choices": [
+        {
+          "text": "Tirer d'un coup sec le fragment hors de sa main — prendre le risque que le fragment se brise et que le souvenir soit définitivement perdu.",
+          "targetNode": "END",
+          "choiceId": "choice_node-63fd2b7f50b8447ba159e51fd9a06037_0"
+        },
+        {
+          "text": "Saisir la bande de cendre au poignet et la trancher pour l'isoler — tu acceptes une blessure superficielle pour tenter de préserver la Carte et la mémoire.",
+          "targetNode": "END",
+          "choiceId": "choice_node-63fd2b7f50b8447ba159e51fd9a06037_1"
+        },
+        {
+          "text": "Reculer et frapper Voknir pour le désarmer — tu refuses de toucher la Carte et préfère régler ça par la force contre l'homme plutôt que contre l'objet.",
+          "targetNode": "END",
+          "choiceId": "choice_node-63fd2b7f50b8447ba159e51fd9a06037_2"
+        }
+      ]
+    },
+    {
+      "id": "node-ef3e993d602042d1b3616c5da2b72cf0",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je ne recule pas parce que tu me menaces. Ta lame mord le parchemin, pas mon bras — mais le fragment vibre, et une pluie de cendre grise te couvre le poignet. La suie s'accroche à ta peau comme si elle cherchait une suture ; je sens le lien se recalibrer sur un autre souvenir, plus ancien que ta protestation. Si tu poursuis, tu ne risques plus seulement ma colère : tu risques de perdre quelque chose auquel tu ne pensais pas.",
+      "consequences": {
+        "flag": "FragmentAncreAuPJ",
+        "description": "Des cendres du fragment se collent au poignet d'Uresaïr ; un souvenir d'enfance commence à s'effilocher. Voknir est blessé et désormais plus hostiles envers Uresaïr."
+      },
+      "choices": [
+        {
+          "text": "Frapper encore, viser la main qui tient le parchemin pour briser le lien.",
+          "targetNode": "END",
+          "choiceId": "choice_node-ef3e993d602042d1b3616c5da2b72cf0_0"
+        },
+        {
+          "text": "Saisir le parchemin déchiré et arracher le fragment, quitte à déchirer ce qui reste de la Carte.",
+          "targetNode": "END",
+          "choiceId": "choice_node-ef3e993d602042d1b3616c5da2b72cf0_1"
+        },
+        {
+          "text": "Saisir ton poignet couvert de cendre pour empêcher le lien de s'établir proprement — risquer d'attirer le fragment sur toi plutôt que sur le parchemin.",
+          "targetNode": "END",
+          "choiceId": "choice_node-ef3e993d602042d1b3616c5da2b72cf0_2"
+        }
+      ]
+    },
+    {
+      "id": "node-994853c03a5047448bf6667ab51c5a59",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu proposes un sacrifice moindre ; je le prends comme une trêve. J'adapte le lien pour n'exiger que la mémoire que tu désignes, mais sache que le fragment mordra plus fort pour compenser. Le rituel commence : la fente se referme et un pigment sombre apparaît sur ta peau — marque et porte d'accès. Si tu cèdes, je scelle le morceau en échange de cette trace et d'un accès limité à ce que tu me donnes ; si tu refuses, le fragment se brisera et tout sera perdu.",
+      "consequences": {
+        "flag": "LienPartielInitie",
+        "description": "Le rituel partiel est engagé. Le fragment demande une marque corporelle et un accès restreint aux souvenirs offerts."
+      },
+      "choices": [
+        {
+          "text": "Céder partiellement — je renonce au souvenir du premier serment que j'ai prononcé; garde tout le reste.",
+          "targetNode": "END",
+          "choiceId": "choice_node-994853c03a5047448bf6667ab51c5a59_0"
+        },
+        {
+          "text": "Je donne la mémoire d'un visage aimé, un instant précis : prends-le et laisse la mort hors de ton parchemin.",
+          "targetNode": "END",
+          "choiceId": "choice_node-994853c03a5047448bf6667ab51c5a59_1"
+        },
+        {
+          "text": "Refuser et arracher le fragment du parchemin — mieux vaut briser tout que te laisser me lier ainsi.",
+          "targetNode": "END",
+          "choiceId": "choice_node-994853c03a5047448bf6667ab51c5a59_2"
+        }
+      ]
+    },
+    {
+      "id": "node-c8227d6888af47e08aec861bb3b688d2",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu me tends la réplique ; je la prends sans hésiter. Le faux se fracture d'un bruit sec sous mes doigts — la part vraie du souvenir se détache et se coince au fragment. Je scelle ce morceau dans la Carte et, pour que tu ne me l'arraches pas à l'aveugle, je laisse une balise : chaque fois que tu t'approcheras de l'emplacement où j'ai enfermé ce morceau, un souvenir proche s'effacera de toi comme pour te prévenir. Regarde ton poignet : la marque sombre que je viens d'y graver témoigne que je peux revenir chercher ce que j'ai lié quand je le voudrai.",
+      "consequences": {
+        "flag": "MemoryBound",
+        "description": "La mémoire de la \"mort administrative de Verath-ul-Kessar\" a été arrachée et liée à un fragment scellé dans la Carte. Uresaïr ne peut plus y accéder directement."
+      },
+      "choices": [
+        {
+          "text": "Je me précipite pour arracher la Carte de ses mains.",
+          "targetNode": "END",
+          "choiceId": "choice_node-c8227d6888af47e08aec861bb3b688d2_0"
+        },
+        {
+          "text": "Je m'agenouille et je le supplie — je lui propose une autre mémoire en échange.",
+          "targetNode": "END",
+          "choiceId": "choice_node-c8227d6888af47e08aec861bb3b688d2_1"
+        },
+        {
+          "text": "Je tente de le frapper pour reprendre ce qui m'appartient.",
+          "targetNode": "END",
+          "choiceId": "choice_node-c8227d6888af47e08aec861bb3b688d2_2"
+        }
+      ]
+    },
+    {
+      "id": "node-42c7cfbbc6f64d49b5200fc24a8808f4",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Approche. Je poserai ma paume contre ta tempe et j'extraierai le souvenir — entier, avec sa blessure et sa pesanteur. Sache pourtant qu'il y a un prix concret : je retiendrai un point d'ancrage issu de ce lien — une syllabe de ton nom — et le droit d'éveiller cette mémoire quand je le jugerai nécessaire. Quand je lierai, une marque pâle s'imprimera sur ta peau, visible et indélébile ; elle prouvera que le renoncement a eu lieu et la rendra traçable pour ceux qui savent lire. Tu as choisi de renoncer ; agis maintenant ou recule, mais décide vite — le fragment vibre déjà.",
+      "consequences": {
+        "flag": "MEMORY_BOUND",
+        "description": "Le souvenir vrai est lié : Voknir conserve un ancrage (une syllabe du nom du donneur) et le donneur reçoit une marque pâle sur la tempe indiquant la liaison."
+      },
+      "choices": [
+        {
+          "text": "Je tends ma tempe sans hésiter. Prends-le.",
+          "targetNode": "END",
+          "choiceId": "choice_node-42c7cfbbc6f64d49b5200fc24a8808f4_0"
+        },
+        {
+          "text": "Avant que tu touchés, je te fais jurer que tu ne prononceras jamais la syllabe que tu retiendras.",
+          "targetNode": "END",
+          "choiceId": "choice_node-42c7cfbbc6f64d49b5200fc24a8808f4_1"
+        },
+        {
+          "text": "Je recule. J'ai dit que je renonçais, pas que je me donnerais sans garantie — je me retire.",
+          "targetNode": "END",
+          "choiceId": "choice_node-42c7cfbbc6f64d49b5200fc24a8808f4_2"
+        }
+      ]
+    },
+    {
+      "id": "node-017ab87eaae14c6e89dfc4a7d9225c20",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu crois pouvoir me l'arracher? Je ne te laisserai pas faire. J'ai déjà tissé un lien si fin qu'il se referme par effraction si on le force: tente ta prise et quelque chose en toi partira sans crier gare. Regarde bien — ne me crois pas sur parole.",
+      "consequences": {
+        "flag": "TetherBurn",
+        "description": "Au contact, le fragment lance un filament lumineux qui s'enfonce dans la chair d'Uresaïr; un souvenir d'enfance s'est effacé en éclat. Une marque luminescente reste sur le poignet, signe d'une attache durable et d'un levier entre Voknir et Uresaïr."
+      },
+      "isLongRest": false,
+      "choices": [
+        {
+          "text": "Je me jette en avant et je saisis le fragment à mains nues, je l'arrache de sa prise.",
+          "targetNode": "END",
+          "choiceId": "choice_node-017ab87eaae14c6e89dfc4a7d9225c20_0"
+        },
+        {
+          "text": "Je frappe Voknir au visage pour le déséquilibrer, puis je fonce sur l'objet pour le lui dérober.",
+          "targetNode": "END",
+          "choiceId": "choice_node-017ab87eaae14c6e89dfc4a7d9225c20_1"
+        },
+        {
+          "text": "Je recule en hâte et j'incise ma propre chair pour répandre mon sang: j'offre un substitut immédiat au lien, quitte à perdre un autre souvenir.",
+          "targetNode": "node-13fefd1a16744dafa97b8a6b224d3859",
+          "choiceId": "choice_node-017ab87eaae14c6e89dfc4a7d9225c20_2"
+        }
+      ]
+    },
+    {
+      "id": "node-13fefd1a16744dafa97b8a6b224d3859",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je sens ton sang — amère, chaude, parfaitement offerte. Si j'accepte, le fragment boira ce conduit et cherchera la mémoire la plus accessible dans ta pensée; il n'obéira pas à ton vouloir, mais à l'ordre des impressions. En outre, la liaison éveillera ici une brèche dans les Plis : une portion de la Carte s'éclairera et une résonance de culpabilité se répandra autour de nous. Choisis : je peux lier maintenant, tenter de l'arracher si tu veux, ou renoncer et laisser le fragment se briser.",
+      "consequences": {
+        "flag": "sang_offert",
+        "description": "Le PJ a imprimé son sang au fragment ; la liaison devient possible et une brèche dans les Plis s'éveille."
+      },
+      "choices": [
+        {
+          "text": "Je baisse la tête et je permets la liaison — prends n'importe quel souvenir récent, je renonce à ce qu'il faudra.",
+          "targetNode": "node-770337fc64a44bccb56561abe858998c",
+          "choiceId": "choice_node-13fefd1a16744dafa97b8a6b224d3859_0"
+        },
+        {
+          "text": "Pendant que tu t'apprêtes, j'essaie d'arracher le fragment de ton emprise et de l'emporter.",
+          "targetNode": "node-f688515b8c9d42bc9ba007cd46d68dc5",
+          "choiceId": "choice_node-13fefd1a16744dafa97b8a6b224d3859_1"
+        },
+        {
+          "text": "Je retire ma main : fin de l'offrande. Je ne te donne rien et je m'en vais — que la brèche se referme sans moi.",
+          "targetNode": "node-59042508c67f4f72927ac704149f87dc",
+          "choiceId": "choice_node-13fefd1a16744dafa97b8a6b224d3859_2"
+        }
+      ]
+    },
+    {
+      "id": "node-770337fc64a44bccb56561abe858998c",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je tends la main et je prends ce que tu offres. Le fragment boit ton sang et je décroche de ta mémoire la trace précise — la mort administrative de Verath-ul-Kessar — elle se détache nette et glisse dans ma paume. Sous nos pieds, une portion de la Carte s'allume et une onde de culpabilité se propage dans les Plis : la liaison est effective. Pour sceller cela, j'exige une chose simple et irrévocable : tu t'engages à ne plus revenir ici pour revendiquer le fragment ; si tu romps cette promesse, je détruirai la mémoire liée plutôt que de te la rendre.",
+      "consequences": {
+        "flag": "MEMORY_BOUND",
+        "description": "La mort administrative de Verath-ul-Kessar a été arrachée à la mémoire d'Uresaïr et liée au fragment. La Carte s'est activée partiellement; Voknir exige l'exil de l'accès au fragment comme prix."
+      }
+    },
+    {
+      "id": "node-f688515b8c9d42bc9ba007cd46d68dc5",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu vas pour l'arracher ; je ne te laisse pas faire. J'agrippe ta main et je la fixe : le fragment hurle, une lueur se projette et arrache d'un coup sec un souvenir entier de ta pensée — le serment que tu prêchas la nuit de ton départ se dissout comme s'il n'avait jamais existé. La pierre au-dessus de nous craque sous la tension ; quelque chose de froid entre nous vient d'être consommé. Choisis vite : tu peux garder ce que tu prends en acceptant le prix, céder et me laisser lier proprement, ou détruire le morceau pour couper toute attache.",
+      "consequences": {
+        "flag": "attempted_snatch",
+        "description": "Le PJ a tenté d'arracher le fragment ; un souvenir précis a commencé à se détacher de sa mémoire et la structure environnante a subi des dégâts matériels."
+      }
+    },
+    {
+      "id": "node-59042508c67f4f72927ac704149f87dc",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu retires ta main. Très bien — je ne te retiens pas. Mais je ne laisserai pas cette chose survivre à notre échange: je la brise maintenant pour qu'aucun autre n'en tire profit. Regarde — les éclats tombent et la résonance s'éteint; le passage autour de nous se referme.",
+      "consequences": {
+        "flag": "FRAGMENT_SHATTERED",
+        "description": "Voknir réduit l'éclat en morceaux ; la résonance locale s'éteint et la faille se referme. Retrouver ou recoller un fragment exigera des générations."
+      }
+    }
+  ]
+}

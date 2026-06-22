@@ -152,12 +152,13 @@ def enrich_context_selections_for_scene(
     full_set = set(data.characters_full or [])
     excerpt_set = set(data.characters_excerpt or [])
 
+    # Les protagonistes (PJ + PNJ speaker) doivent toujours être en full pour que
+    # leurs champs voix/registre soient disponibles dans le prompt.
+    # Si l'un d'eux était déjà en excerpt (sélection UI), on le promeut en full.
     for name in (dramatis.player_character_id, dramatis.npc_speaker_id):
-        if name and name != "PNJ" and name not in full_set and name not in excerpt_set:
-            if rng.random() < 0.35:
-                excerpt_set.add(name)
-            else:
-                full_set.add(name)
+        if name and name != "PNJ":
+            excerpt_set.discard(name)
+            full_set.add(name)
 
     if data.scene_location:
         loc_name = data.scene_location.get("sous_lieu") or data.scene_location.get("lieu")

@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import random
 import sys
 import urllib.error
 import urllib.request
@@ -135,6 +136,34 @@ def pick_path(nodes: list[dict[str, Any]], choice_index: int = 0) -> list[dict[s
     return path
 
 
+def pick_random_path(
+    nodes: list[dict[str, Any]],
+    *,
+    rng: random.Random | None = None,
+) -> tuple[list[dict[str, Any]], list[int]]:
+    """Suit un index de choix tiré au hasard à chaque nœud jusqu'à une feuille."""
+    by_id = {n["id"]: n for n in nodes}
+    path: list[dict[str, Any]] = []
+    choices_taken: list[int] = []
+    current_id = "START"
+    visited: set[str] = set()
+    r = rng or random.Random()
+    while current_id in by_id and current_id not in visited:
+        visited.add(current_id)
+        node = by_id[current_id]
+        path.append(node)
+        choices = node.get("choices") or []
+        if not choices:
+            break
+        idx = r.randrange(len(choices))
+        choices_taken.append(idx)
+        target = choices[idx].get("targetNode")
+        if not target or target == "END" or target not in by_id:
+            break
+        current_id = target
+    return path, choices_taken
+
+
 def format_path(path: list[dict[str, Any]], *, player_label: str = "PJ") -> str:
     """Formate un chemin START -> feuille pour relecture console."""
     lines: list[str] = []
@@ -192,13 +221,18 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--print-path",
         action="store_true",
-        help="Afficher (et optionnellement sauver) un chemin en suivant --path-choice à chaque nœud",
+        help="Afficher aussi un chemin fixe (--path-choice) en plus de l'échantillon aléatoire",
     )
     parser.add_argument(
         "--path-choice",
         type=int,
         default=0,
-        help="Index du choix suivi avec --print-path (défaut: 0)",
+        help="Index du choix pour --print-path (défaut: 0)",
+    )
+    parser.add_argument(
+        "--no-sample-path",
+        action="store_true",
+        help="Ne pas afficher ni sauver le chemin aléatoire (désactive l'échantillon par défaut)",
     )
     parser.add_argument(
         "--save-json",
@@ -320,21 +354,37 @@ def main() -> int:
         out.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"JSON local: {out} ({len(nodes)} nœuds)")
 
-    if args.print_path and nodes:
-        player_label = args.player or "PJ"
-        path = pick_path(nodes, args.path_choice)
+    doc_id = result.get("document_id") or args.document_id
+    player_label = args.player or "PJ"
+    path_out_dir = _ROOT / "data" / "test_dialogues"
+    path_out_dir.mkdir(parents=True, exist_ok=True)
+
+    def _emit_path(path: list[dict[str, Any]], header: str, suffix: str) -> None:
         text = format_path(path, player_label=player_label)
         print("\n" + "=" * 60)
-        print(f"CHEMIN (choix {args.path_choice} à chaque étape)")
+        print(header)
         print("=" * 60 + "\n")
         print(text)
-
-        doc_id = result.get("document_id") or args.document_id
         if doc_id:
-            path_out = _ROOT / "data" / "test_dialogues" / f"{doc_id}.path{args.path_choice}.txt"
-            path_out.parent.mkdir(parents=True, exist_ok=True)
-            path_out.write_text(text, encoding="utf-8")
-            print(f"Chemin sauvé: {path_out}")
+            path_file = path_out_dir / f"{doc_id}.{suffix}.txt"
+            path_file.write_text(text, encoding="utf-8")
+            print(f"Chemin sauvé: {path_file}")
+
+    if nodes and not args.no_sample_path:
+        sample_path, sample_choices = pick_random_path(nodes)
+        _emit_path(
+            sample_path,
+            f"CHEMIN ÉCHANTILLON (choix aléatoires: {sample_choices})",
+            "sample_path",
+        )
+
+    if args.print_path and nodes:
+        fixed_path = pick_path(nodes, args.path_choice)
+        _emit_path(
+            fixed_path,
+            f"CHEMIN FIXE (choix {args.path_choice} à chaque étape)",
+            f"path{args.path_choice}",
+        )
 
     return 0
 

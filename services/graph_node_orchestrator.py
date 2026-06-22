@@ -24,16 +24,19 @@ from services.dialogue_path_context import (
     build_ancestor_path_steps,
     build_enriched_generation_prompt,
     format_generation_prompt,
+    infer_child_generation_depth,
+)
+from services.dialogue_dramatic_progression import (
+    DIALOGUE_ORALITY_PROMPT_LINES,
+    compose_generation_instructions,
+    DEFAULT_NODE_SCENE_INSTRUCTIONS,
 )
 from services.graph_generation_service import GraphGenerationService
 from services.unity_dialogue_generation_service import UnityDialogueGenerationService
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_INSTRUCTIONS = (
-    "Ecris la réponse du PNJ à ce que dit le PJ. "
-    "2 à 5 phrases, concis et jouable ; même registre tu/vous que le START."
-)
+DEFAULT_INSTRUCTIONS = DEFAULT_NODE_SCENE_INSTRUCTIONS
 DEFAULT_PLAYER_CHARACTER = PlayableCharacters.DEFAULT_PLAYER
 
 TEST_RESULT_MAPPINGS: list[tuple[str, str]] = [
@@ -164,6 +167,7 @@ class GraphNodeOrchestrator:
         generate_all_choices: bool = False,
         dialogue_nodes: Optional[List[Dict[str, Any]]] = None,
         player_character_id: Optional[str] = None,
+        max_depth: Optional[int] = None,
     ) -> GenerationResult:
         """Point d'entrée unique – dispatche vers le bon mode de génération.
 
@@ -171,7 +175,14 @@ class GraphNodeOrchestrator:
             ValueError: Paramètres incohérents (pas de choix pour batch, index invalide…).
         """
         parent_choices: list = parent_node_content.get("choices", [])
-        instructions = _resolve_instructions(user_instructions)
+        raw_instructions = _resolve_instructions(user_instructions)
+        path_steps = _resolve_path_steps(dialogue_nodes, parent_node_id)
+        instructions = compose_generation_instructions(
+            raw_instructions,
+            depth=infer_child_generation_depth(path_steps),
+            max_depth=max_depth,
+            is_leaf=max_choices == 0,
+        )
         choice_label = player_character_id or DEFAULT_PLAYER_CHARACTER
 
         if generate_all_choices:
