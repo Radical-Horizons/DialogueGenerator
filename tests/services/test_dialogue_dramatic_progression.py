@@ -16,6 +16,16 @@ class TestBeatInstructionFor:
         text = beat_instruction_for(depth=0, max_depth=4, is_start=True)
         assert "accroche" in text.lower()
 
+    def test_first_meeting_start_uses_dedicated_beat(self) -> None:
+        text = beat_instruction_for(
+            depth=0,
+            max_depth=4,
+            is_start=True,
+            scene_type="first_meeting",
+        )
+        assert "première rencontre" in text.lower()
+        assert "ne pas inventer" in text.lower()
+
     def test_leaf_is_cloture(self) -> None:
         text = beat_instruction_for(depth=4, max_depth=4, is_leaf=True)
         assert "clôture" in text.lower()

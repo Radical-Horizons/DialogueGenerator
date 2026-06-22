@@ -1,0 +1,10 @@
+--- Nœud 1 (START) ---
+Voknir Esh'Maradel: Oh — Théomaque… non, non, l'angle confirme : c'est bien vous. Les saints Substrats soient loués. Je suis Voknir Esh'Maradel, cartographe des incrustations temporelles ; pardonnez l'état de mon atelier, la chair des cartes aime la poussière. La carte vivante a vibré quand vous avez franchi la crête des Plis : elle m'a demandé de suivre votre ombre. Si vous cherchez un fragment ou une route brisée, je peux ouvrir mes couches — mais sachez qu'ouvrir une couche coûte un ébranlement de stabilité ici, et quelque chose devra en payer le prix.
+=> Uresaïr (choix): Je veux savoir si tu gardes, parmi tes couches, un fragment de Deshkarta. Dis‑moi où il est, ou je ferme cette porte et m'en vais.
+
+--- Nœud 2 (node-045762897ba74aebbab6993e20b0af3d) ---
+Voknir Esh'Maradel: Vous me pressez, et je vous entendrai sans détour : oui, j'ai un éclat de Deshkarta parmi mes couches. Il n'est pas isolé — il a fusionné à la trame vivante de ma carte, enchâssé dans la spire nord que j'appelle la Dent du Cartographe. Ouvrir cette couche brisera la stabilité des Plis : la crête tremblera, des fissures temporelles s'ouvriront, et quelque chose — un souvenir, un jour, ou la paix d'un village — devra compenser ce dérangement. Dites-moi donc : acceptez-vous le prix, proposez-vous un autre paiement, tentez-vous la force, ou tournez-vous les talons ?
+=> Uresaïr (choix): Très bien. J'accepte le prix — ouvre ta couche.
+
+--- Nœud 3 (node-04cab83e30f74c1f9505d678039bb9f9) ---
+Voknir Esh'Maradel: J'entame l'ouverture de la couche. Pour sceller l'accès, je lierai et détacherai une de mes propres mémoires cartographiques : elle disparaîtra des couches et je ne pourrai plus lire certains détours pendant un cycle complet. L'atelier vibre déjà — la chair de la carte se tend et un fil d'éther commence à chercher votre ombre pour y ancrer le fragment. Si vous maintenez votre volonté, faites votre choix maintenant ; autrement, je referme et rien de tout cela n'aura eu lieu.

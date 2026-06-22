@@ -1,5 +1,64 @@
 [
   {
+    "Nom": "Fondation des Tenants du Gradient",
+    "values": {
+      "Communautés": "8ac6015e-f5bb-4861-adb7-e23133e485cd",
+      "Date de début": "3385",
+      "Date de fin": "3386",
+      "Description": "Entre 3385 et 3386 AG, Ilyena Eonundé du Ressac installe sous la Bibliothèque Sympathique des caisses d'archives récupérées lors de la chute de la Citadelle de Daïlon. Ce dispositif de conservation devient progressivement la communauté souterraine des Tenants du Gradient, organisée autour de la préservation et de la gradation des archives de Vol Reitar.",
+      "Importance": "Notable",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, b8ac3bad-baef-4c92-aceb-ac7ae389629b",
+      "Personnages": "3256e4d2-1b45-80f4-9eeb-de67c6d8955b",
+      "Type d'événement": "Fondation",
+      "Ère": "Ère contemporaine"
+    },
+    "sections": {},
+    "notion_page_id": "cffa9fc7-5d14-42cc-818a-2fe982afccdc"
+  },
+  {
+    "Nom": "Royaumes humains et tentative impériale",
+    "values": {
+      "Date de début": "410",
+      "Date de fin": "690",
+      "Description": "Entre 410 et 690 AG, des dynasties et maisons humaines déjà implantées sur Escelion fondent plusieurs royaumes humains et imposent brièvement une hégémonie impériale sur certains axes commerciaux, ports intérieurs et villes de seuil. Il s'agit d'une véritable tentative de souveraineté humaine régionale, avec fiscalité, armées contractuelles, droit dynastique et appareil de registre. L'ensemble échoue à se stabiliser à cause des rivalités entre maisons, d'une base démographique trop faible, de la dépendance à des intermédiaires et infrastructures non humaines, de la sur-extension des corridors conquis et de l'absence de légitimité commune durable.",
+      "Espèces": "1a16e4d2-1b45-80d7-a920-c3f40e49246b",
+      "Importance": "Important",
+      "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+      "Type d'événement": "Période",
+      "Ère": "Fondation d'Escelion"
+    },
+    "sections": {},
+    "notion_page_id": "db305261-ac19-4ffb-88ec-add000011985"
+  },
+  {
+    "Nom": "L’Assignation à résidence",
+    "values": {
+      "Communautés": "3106e4d2-1b45-8060-a5dc-d901a3e80959",
+      "Date de début": "2970",
+      "Description": "Acte politique fondateur de la Fosse aux Idoles déchues. Les pouvoirs, clergés et autorités déchus de la marge n'y furent ni exécutés ni détruits — ce qui en aurait fait des martyrs — mais « assignés à résidence » dans la cuvette privée de son Deimos. L'Assignation institua un ordre paradoxal : une façade d'autorité confiée à une branche déclassée de l'Héliocentrisme de l'Unique, brandie comme « autorité légitime » telle une marionnette, tandis que les véritables circulations de pouvoir passaient par le blanchiment des dettes adossées aux stèles juridiques rendues caduques par la chute de leurs émetteurs. Loin d'effacer les légitimités obsolètes, l'Assignation les conserva vivantes et surveillées, transformant la Fosse en cité-musée des autorités qu'on ne pouvait pas tuer. Elle scella aussi la réputation de coupe-gorge de la zone, entretenue à dessein pour tenir à distance bourgeoisies et appareils militaires des régions voisines où l'Héliocentrisme régnait encore.",
+      "Importance": "Important",
+      "Lieux": "1b46e4d2-1b45-805c-a426-e1eb48b627a5",
+      "Type d'événement": "Fondation",
+      "Ère": "Âge des Singularités"
+    },
+    "sections": {},
+    "notion_page_id": "79628fa4-3b68-42c1-8700-cc5286a1a3ac"
+  },
+  {
+    "Nom": "Codification de la chaîne signataire de glose",
+    "values": {
+      "Date de début": "2010",
+      "Date de fin": "2050",
+      "Description": "Période de codification, à la Bibliothèque Sympathique, de la pratique de la glose marginale en discipline savante reconnue. Les scriptoria de la Bibliothèque distinguent progressivement le geste du copiste de celui du glosateur. La signature de marge devient obligatoire ; la chaîne signataire de glose, chaîne nominative de transmetteurs portée par chaque annotation, est instituée ; les premières licences de glose sont accordées. Aboutit à la reconnaissance institutionnelle des Hawāshī comme école savante interne à la Bibliothèque, dotée de salles propres (Salle aux Liserés Vides, Mur de l'Arbre Vivant) et de dotations perpétuelles en échange d'un service de traçabilité textuelle rendu aux familles d'Escelion, aux temples et aux autres districts de la Vieille Ville. Marque le passage de la glose d'un savoir-faire scriptorial à une institution dotée, et fixe pour deux millénaires la forme du métier de glosateur.",
+      "Importance": "Notable",
+      "Lieux": "b8ac3bad-baef-4c92-aceb-ac7ae389629b",
+      "Type d'événement": "Fondation",
+      "Ère": "Âge des Doctrines"
+    },
+    "sections": {},
+    "notion_page_id": "b125083a-c5a0-4c49-b2f7-8e32c689495d"
+  },
+  {
     "Nom": "Premières utilisations documentées des Mange-sable par les nomades du Désert des Échos Perdus",
     "values": {
       "Date de début": "3030",
@@ -408,7 +467,7 @@
     "values": {
       "Date de début": "3371",
       "Importance": "Notable",
-      "Personnages 1": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31",
+      "Personnages 1": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31, 6868f847-5748-481f-aae8-961764cb18ee",
       "Type d'événement": "Evénement personnel",
       "Ère": "Âge anentropique"
     },
@@ -1698,11 +1757,11 @@
     "notion_page_id": "2306e4d2-1b45-8093-a2e1-df39ff8fd692"
   },
   {
-    "Nom": "Colonisation Fongique",
+    "Nom": "Émergence du Brouillignon",
     "values": {
       "Date de début": "1234",
       "Date de fin": "1567",
-      "Description": "Apparition du Brouillignon, symbiose entre spores de l'Antichambre des Impossibles et sécrétions racinaires, provoquant contamination mémorielle des premiers colons",
+      "Description": "Apparition du Brouillignon, né de la symbiose entre les émanations de l'Antichambre des Impossibles et la laitance neurocorallienne du bois corallien naissant, provoquant les premières contaminations mémorielles et de phase chez les colons.",
       "Lieux": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1",
       "Type d'événement": "Naissance",
       "Ère": "Âge des Doctrines"

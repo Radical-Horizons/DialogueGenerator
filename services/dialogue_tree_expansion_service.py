@@ -151,6 +151,10 @@ class DialogueTreeExpansionService:
         title: str = "Dialogue auto",
         progress_callback: Optional[ProgressCallback] = None,
         max_concurrency: int = 5,
+        scene_type: Optional[str] = None,
+        include_narrative_guides: bool = True,
+        organization_mode: str = "narrative",
+        max_context_tokens: Optional[int] = None,
     ) -> TreeExpansionResult:
         """Génère un dialogue complet par expansion BFS.
 
@@ -170,17 +174,28 @@ class DialogueTreeExpansionService:
         Returns:
             Résultat avec document Unity et métriques.
         """
+        from constants import Defaults
+
+        context_builder = unity_orchestrator.dialogue_service.context_builder
+        character_catalog = context_builder.get_characters_names()
         dramatis = resolve_scene_dramatis(
             player_character_id=player_character_id,
             npc_speaker_id=npc_speaker_id,
             context_selections=context_selections.model_dump(),
+            character_catalog=character_catalog,
         )
         enriched_context = enrich_context_selections_for_scene(
             context_selections,
             dramatis,
+            character_catalog=character_catalog,
             random_excerpt_count=1,
+            context_builder=context_builder,
         )
         context_dict = enriched_context.to_service_dict()
+
+        effective_max_context = (
+            max_context_tokens if max_context_tokens is not None else Defaults.CONTEXT_TOKENS
+        )
 
         start_request = GenerateUnityDialogueRequest(
             user_instructions=user_instructions.strip(),
@@ -190,6 +205,10 @@ class DialogueTreeExpansionService:
             npc_speaker_id=dramatis.npc_speaker_id,
             player_character_id=dramatis.player_character_id,
             llm_model_identifier=llm_model_identifier,
+            scene_type=scene_type,
+            include_narrative_guides=include_narrative_guides,
+            organization_mode=organization_mode,
+            max_context_tokens=effective_max_context,
         )
         start_response = await unity_orchestrator.generate(start_request)
         start_nodes = _parse_nodes_from_unity_json(start_response.json_content)

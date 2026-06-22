@@ -70,17 +70,45 @@ def test_build_zip_contains_markdown_and_vision(tmp_path: Path) -> None:
     )
     zf = zipfile.ZipFile(BytesIO(raw))
     names = zf.namelist()
-    assert any(n.endswith("00-README.md") for n in names)
     md_names = [n for n in names if n.endswith(".md")]
     assert 1 <= len(md_names) <= 128
-    # Pitch page → bucket production (fallback)
-    prod = next(n for n in names if n.endswith("08-production-et-autres.md"))
+    assert not any(n.endswith("00-README.md") for n in names)
+    # Pitch page → bucket production (fallback), seul fichier du ZIP
+    prod = next(n for n in names if "production" in n)
     body = zf.read(prod).decode("utf-8")
     assert "Pitch" in body
     assert "Hello" in body
-    uni = next(n for n in names if n.endswith("01-univers-narratif.md"))
-    uni_body = zf.read(uni).decode("utf-8")
-    assert '"ok": true' in uni_body
+    assert '"ok": true' in body
+    assert "Export GDD (NotebookLM)" in body
+
+
+def test_small_themes_merge_into_fewer_files(tmp_path: Path) -> None:
+    """Les volets < 120 Ko sont fusionnés avec le thème suivant."""
+    gdd = tmp_path / "GDD_categories"
+    gdd.mkdir(parents=True)
+    for fname, nom in (("Musiques.json", "M1"), ("Pitch.json", "P1")):
+        (gdd / fname).write_text(
+            json.dumps([{"Nom": nom, "sections": {"a": "x" * 500}}], ensure_ascii=False),
+            encoding="utf-8",
+        )
+    settings = {
+        "sources": [
+            {"kind": "page", "category_file": "Musiques.json", "notion_id": _nid()},
+            {"kind": "page", "category_file": "Pitch.json", "notion_id": _nid()},
+        ],
+        "included_categories": [],
+    }
+    parts = build_notebooklm_markdown_parts(
+        gdd_root=gdd,
+        project_root=tmp_path,
+        settings=settings,
+        max_files=64,
+    )
+    assert len(parts) == 1
+    name, body = parts[0]
+    assert "art-audio" in name
+    assert "production" in name
+    assert "P1" in body and "M1" in body
 
 
 def test_oversized_bucket_emits_part_files_without_truncation(tmp_path: Path) -> None:

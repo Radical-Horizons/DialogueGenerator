@@ -1,0 +1,19 @@
+=== scene_instructions (START, expand-tree) ===
+Écris un dialogue RPG court et cohérent.
+
+Beat dramatique (accroche) : tension immédiate (refus, prix, secret, provocation). Pas de report vague.
+
+Contraintes de génération:
+- Format `line` : paroles « … » ; didascalies *italique* narrateur (3e pers.), hors guillemets.
+- Didascalies : claires, concises ; pas de jargon opaque ni rituel commenté dans les guillemets.
+- Interdit : acquiescements vides (« Très bien », « Vous l'avez demandé ») en ouverture.
+- `choices.text` : « réplique PJ » ou *[geste]* ; pas synopsis d'intention.
+- Flags / état durable → `consequences` en complément si besoin.
+- Ne pas ajouter d'attribut test sur les choix ; traitRequirements autorisés.
+- 1 à 4 phrases (didascalie + réplique comptées ensemble) ; même tu/vous que le START.
+- Ne pas répéter formulations déjà dans l'historique.
+
+---
+Resolve 'Uresair': MISSING 
+Resolve 'Uresaïr': OK Uresaïr
+Resolve "Voknir Esh'Maradel": OK Voknir Esh'Maradel

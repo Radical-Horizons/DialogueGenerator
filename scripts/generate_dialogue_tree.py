@@ -19,7 +19,10 @@ _ROOT = Path(__file__).resolve().parent.parent
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from constants import ModelNames
+from constants import ModelNames, PlayableCharacters
+from services.configuration_service import ConfigurationService
+from services.scene_dramatis import resolve_canonical_name_from_catalog
+from services.scene_instruction_loader import build_scene_user_instructions
 
 
 def _base_url() -> str:
@@ -78,12 +81,76 @@ def _empty_context_lists() -> dict[str, list]:
     }
 
 
+def _resolve_cli_names(
+    *,
+    player: str | None,
+    npc: str | None,
+    characters: list[str],
+) -> tuple[str | None, str | None, list[str]]:
+    """Résout les noms vers les libellés GDD canoniques (accents, apostrophes)."""
+    try:
+        from api.container import ServiceContainer
+
+        cb = ServiceContainer().get_context_builder()
+        catalog = cb.get_characters_names()
+    except Exception:
+        catalog = []
+
+    resolved_player = player
+    resolved_npc = npc
+    if catalog:
+        if resolved_player:
+            resolved_player = resolve_canonical_name_from_catalog(resolved_player, catalog)
+        if resolved_npc:
+            resolved_npc = resolve_canonical_name_from_catalog(resolved_npc, catalog)
+        resolved_chars = [
+            resolve_canonical_name_from_catalog(name, catalog) for name in characters
+        ]
+    else:
+        resolved_chars = list(characters)
+
+    for name in (resolved_player, resolved_npc):
+        if name and name not in resolved_chars:
+            resolved_chars.append(name)
+
+    return resolved_player, resolved_npc, list(dict.fromkeys(resolved_chars))
+
+
+def _default_user_instructions(
+    scene_type: str,
+    *,
+    npc: str | None,
+) -> str:
+    """Charge les instructions UI (template + ancrage rencontre_initiale)."""
+    config = ConfigurationService()
+    context_builder = None
+    npc_canon = npc
+    try:
+        from api.container import ServiceContainer
+
+        context_builder = ServiceContainer().get_context_builder()
+        if npc:
+            npc_canon = resolve_canonical_name_from_catalog(
+                npc,
+                context_builder.get_characters_names(),
+            )
+    except Exception:
+        pass
+    return build_scene_user_instructions(
+        config,
+        scene_type,
+        npc_speaker_id=npc_canon,
+        context_builder=context_builder,
+    )
+
+
 def _build_context_selections(args: argparse.Namespace) -> dict[str, Any]:
     """Construit context_selections depuis les arguments CLI."""
-    characters = list(dict.fromkeys(args.characters))
-    for name in (args.player, args.npc):
-        if name and name not in characters:
-            characters.append(name)
+    player, npc, characters = _resolve_cli_names(
+        player=args.player,
+        npc=args.npc,
+        characters=list(args.characters),
+    )
 
     context: dict[str, Any] = {
         "characters_full": characters,
@@ -97,10 +164,10 @@ def _build_context_selections(args: argparse.Namespace) -> dict[str, Any]:
         context["locations_full"] = locations
 
     protagonists: dict[str, str] = {}
-    if args.player:
-        protagonists["personnage_a"] = args.player
-    if args.npc:
-        protagonists["personnage_b"] = args.npc
+    if player:
+        protagonists["personnage_a"] = player
+    if npc:
+        protagonists["personnage_b"] = npc
     if protagonists:
         context["scene_protagonists"] = protagonists
 
@@ -192,10 +259,14 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--characters",
         nargs="+",
-        default=["Uresaïr"],
+        default=[PlayableCharacters.URESAIR],
         help="Personnages GDD (fiches contexte ; défaut: Uresaïr)",
     )
-    parser.add_argument("--player", default=None, help="PJ jouable (player_character_id, voix des choices)")
+    parser.add_argument(
+        "--player",
+        default=PlayableCharacters.URESAIR,
+        help="PJ jouable (player_character_id, voix des choices ; défaut: Uresaïr)",
+    )
     parser.add_argument("--npc", default=None, help="PNJ interlocuteur (npc_speaker_id, speaker des line)")
     parser.add_argument(
         "--locations",
@@ -215,7 +286,24 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--title", default="Dialogue auto", help="Titre du dialogue")
     parser.add_argument("--document-id", default=None, help="ID document (auto-généré si absent)")
-    parser.add_argument("--instructions", default="Écris un dialogue RPG court et cohérent.", help="Consignes scène")
+    parser.add_argument(
+        "--scene-type",
+        default="first_meeting",
+        choices=[
+            "first_meeting",
+            "conversation",
+            "action_scene",
+            "intimate_moment",
+            "revelation",
+            "confrontation",
+        ],
+        help="Type de scène (défaut: first_meeting = première rencontre in-game)",
+    )
+    parser.add_argument(
+        "--instructions",
+        default=None,
+        help="Consignes scène (défaut: template UI selon --scene-type)",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Estimation coût sans génération LLM")
     parser.add_argument("--no-persist", action="store_true", help="Ne pas persister le document")
     parser.add_argument(
@@ -259,8 +347,19 @@ def main() -> int:
     base_url = _base_url()
     context = _build_context_selections(args)
 
+    _, resolved_npc, _ = _resolve_cli_names(
+        player=args.player,
+        npc=args.npc,
+        characters=list(args.characters),
+    )
+    user_instructions = args.instructions
+    if not user_instructions:
+        user_instructions = _default_user_instructions(args.scene_type, npc=resolved_npc or args.npc)
+    if not user_instructions.strip():
+        user_instructions = " "
+
     payload: dict[str, Any] = {
-        "user_instructions": args.instructions,
+        "user_instructions": user_instructions,
         "context_selections": context,
         "max_depth": args.depth,
         "max_choices": args.choices,
@@ -268,6 +367,9 @@ def main() -> int:
         "persist": not args.no_persist,
         "dry_run": args.dry_run,
         "llm_model_identifier": args.model,
+        "scene_type": args.scene_type,
+        "include_narrative_guides": True,
+        "organization_mode": "narrative",
     }
     if args.document_id:
         payload["document_id"] = args.document_id
@@ -304,8 +406,8 @@ def main() -> int:
         print("Scène:", ", ".join(dramatis_bits))
 
     print(
-        f"POST expand-tree model={args.model} depth={args.depth} "
-        f"choices={args.choices} dry_run={args.dry_run}..."
+        f"POST expand-tree model={args.model} scene_type={args.scene_type} "
+        f"depth={args.depth} choices={args.choices} dry_run={args.dry_run}..."
     )
     try:
         result = _api_post(

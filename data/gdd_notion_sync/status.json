@@ -1,11 +1,9 @@
 {
-  "last_started_at": "2026-06-19T13:36:59.558097+00:00",
-  "last_finished_at": "2026-06-19T13:39:22.792934+00:00",
-  "last_success": true,
-  "message": "82 entité(s) mise(s) à jour",
-  "updated_entities": 82,
+  "last_started_at": "2026-06-22T22:34:49.149673+00:00",
+  "last_finished_at": null,
+  "last_success": null,
+  "message": "Synchronisation en cours…",
+  "updated_entities": 0,
   "partial_errors": [],
-  "last_archive_relative": null,
-  "last_mirror_rebuild_used": false,
   "mirror_promotion_pending": false
 }

@@ -20,9 +20,12 @@ from services.gdd_notion_sync_utils import category_file_matches_included, categ
 from services.gdd_paths import resolve_gdd_categories_path
 
 _MAX_FILES_DEFAULT = 64
-_MAX_EXPORT_CHARS_PER_PART = 1_800_000
+# NotebookLM : ~500 000 mots / source (~3 M caractères FR) ; marge sous le plafond officiel.
+_MAX_EXPORT_CHARS_PER_PART = 3_000_000
 # Garde-fou : fichiers de suite (part02…) ; doit rester < ``_MAX_FILES_DEFAULT``.
 _MAX_PARTS_PER_BUCKET = 48
+# En dessous : fusionner avec le voisin plutôt que livrer un fichier quasi vide.
+_MIN_STANDALONE_FILE_CHARS = 120_000
 
 _RE_SPLIT_FICHIER = re.compile(r"(?=\n## Fichier : )")
 _RE_SPLIT_RECORD = re.compile(r"(?=\n## \d+\.\s)")
@@ -352,6 +355,153 @@ def _bucket_part_filename(slug: str, part_index: int) -> str:
     return f"{slug}-part{part_index:02d}.md"
 
 
+@dataclass
+class _ThematicChunk:
+    """Morceau Markdown prêt à être fusionné ou livré tel quel."""
+
+    bucket_order: int
+    bucket_slug: str
+    bucket_title: str
+    filename: str
+    body: str
+
+
+def _slug_thematic_suffix(slug: str) -> str:
+    """Partie thématique d'un slug ``NN-nom`` (sans préfixe numérique)."""
+    parts = slug.split("-", 1)
+    return parts[1] if len(parts) == 2 else slug
+
+
+def _merged_filename(slugs: List[str], part_index: int) -> str:
+    """Nom de fichier pour une fusion de plusieurs thèmes."""
+    if not slugs:
+        return _bucket_part_filename("gdd-export", part_index)
+    if len(slugs) == 1:
+        return _bucket_part_filename(slugs[0], part_index)
+    base = slugs[0]
+    extras = [_slug_thematic_suffix(s) for s in slugs[1:]]
+    merged_base = base + "".join(f"-et-{e}" for e in extras)
+    return _bucket_part_filename(merged_base, part_index)
+
+
+def _build_category_segments(gdd_root: Path, category_files: List[str]) -> List[str]:
+    """Segments Markdown (une entrée par ``category_file``)."""
+    segments: List[str] = []
+    for cf in sorted(set(category_files)):
+        seg_lines: List[str] = [f"---\n\n# Base : {Path(cf).stem}\n\n"]
+        target = _resolve_category_path(gdd_root, cf)
+        json_files = _iter_json_files(target)
+        if not json_files:
+            seg_lines.append("*(Aucun fichier JSON sur disque pour cette source.)*\n\n")
+            segments.append("".join(seg_lines))
+            continue
+        for jf in json_files:
+            rel = jf.relative_to(gdd_root).as_posix()
+            seg_lines.append(f"## Fichier : `{rel}`\n\n")
+            recs = _load_json_records(jf)
+            if not recs:
+                seg_lines.append("*(JSON vide ou invalide.)*\n\n")
+                continue
+            for idx, rec in enumerate(recs, start=1):
+                seg_lines.append(_record_to_markdown(rec, idx))
+        segments.append("".join(seg_lines))
+    return segments
+
+
+def _is_volume_split_part(filename: str) -> bool:
+    """True si le fichier est déjà une suite découpée (``-part02.md``)."""
+    return "-part" in filename.removesuffix(".md")
+
+
+def _coalesce_thematic_chunks(
+    chunks: List[_ThematicChunk],
+    *,
+    max_chars: int,
+) -> List[Tuple[str, str]]:
+    """Fusionne les morceaux voisins pour réduire le nombre de fichiers livrés.
+
+    Les thèmes vides sont omis en amont. Les petits fichiers (< ``_MIN_STANDALONE_FILE_CHARS``)
+    sont absorbés par le voisin suivant (ou précédent en fin de passe) tant que la limite
+    NotebookLM n'est pas dépassée. Les suites ``-part02`` d'un gros thème ne sont jamais fusionnées.
+    """
+    if not chunks:
+        return []
+
+    packed: List[Tuple[str, str]] = []
+    acc_slugs: List[str] = []
+    acc_body = ""
+
+    def flush() -> None:
+        nonlocal acc_body, acc_slugs
+        if not acc_body.strip():
+            acc_body = ""
+            acc_slugs = []
+            return
+        packed.append((_merged_filename(acc_slugs, 1), acc_body))
+        acc_body = ""
+        acc_slugs = []
+
+    for chunk in chunks:
+        piece = chunk.body
+        if not piece.strip():
+            continue
+        if _is_volume_split_part(chunk.filename):
+            flush()
+            packed.append((chunk.filename, piece))
+            continue
+        if not acc_body:
+            acc_body = piece
+            acc_slugs = [chunk.bucket_slug]
+            continue
+        separator = "\n\n---\n\n"
+        if len(acc_body) + len(separator) + len(piece) <= max_chars:
+            acc_body += separator + piece
+            if chunk.bucket_slug not in acc_slugs:
+                acc_slugs.append(chunk.bucket_slug)
+            continue
+        flush()
+        acc_body = piece
+        acc_slugs = [chunk.bucket_slug]
+
+    flush()
+
+    merged: List[Tuple[str, str]] = []
+    idx = 0
+    while idx < len(packed):
+        name, body = packed[idx]
+        next_item = packed[idx + 1] if idx + 1 < len(packed) else None
+        if (
+            len(body) < _MIN_STANDALONE_FILE_CHARS
+            and next_item is not None
+            and not _is_volume_split_part(name)
+            and not _is_volume_split_part(next_item[0])
+        ):
+            next_name, next_body = next_item
+            combined = body.rstrip() + "\n\n---\n\n" + next_body.lstrip()
+            if len(combined) <= max_chars:
+                slug_a = name.removesuffix(".md").split("-part")[0]
+                slug_b = next_name.removesuffix(".md").split("-part")[0]
+                merged.append(
+                    (
+                        _merged_filename(
+                            [slug_a, slug_b] if slug_a != slug_b else [slug_a],
+                            1,
+                        ),
+                        combined,
+                    )
+                )
+                idx += 2
+                continue
+        merged.append((name, body))
+        idx += 1
+
+    return merged
+    """Nom de fichier pour la partie ``part_index`` (1-based) d'un bucket."""
+    if part_index <= 1:
+        return f"{slug}.md"
+    return f"{slug}-part{part_index:02d}.md"
+
+
 def _pack_bucket_markdown_files(
     *,
     slug: str,
@@ -430,14 +580,14 @@ def build_notebooklm_markdown_parts(
 ) -> List[Tuple[str, str]]:
     """Construit des documents Markdown (nom, contenu) pour export NotebookLM.
 
-    Les buckets thématiques dépassant ``max_chars_per_part`` sont découpés en
-    ``{slug}-part02.md``, ``part03``, etc., sans tronquer le texte.
+    Les thèmes sont regroupés puis fusionnés pour limiter le nombre de fichiers :
+    petits volets absorbés, gros thèmes découpés seulement au-delà de ``max_chars_per_part``.
 
     Args:
         gdd_root: Répertoire ``GDD_categories``.
         project_root: Racine du dépôt (pour ``Vision.json``).
         settings: Paramètres sync (``sources``, ``included_categories``).
-        max_files: Nombre max de fichiers ``.md`` dans le ZIP (README + parties).
+        max_files: Nombre max de fichiers ``.md`` dans le ZIP.
         max_chars_per_part: Taille max d'un fichier Markdown avant découpage.
 
     Returns:
@@ -459,6 +609,7 @@ def build_notebooklm_markdown_parts(
 
     vision = _find_vision_json(project_root)
     vision_md = ""
+    vision_attached = False
     if vision and vision.is_file():
         try:
             data = json.loads(vision.read_text(encoding="utf-8"))
@@ -469,64 +620,48 @@ def build_notebooklm_markdown_parts(
             )
         except (OSError, json.JSONDecodeError):
             vision_md = "## Vision (Vision.json)\n\n*(Fichier présent mais illisible.)*\n\n"
+            vision_attached = False
 
-    out: List[Tuple[str, str]] = []
+    thematic_chunks: List[_ThematicChunk] = []
     for bi, bucket in enumerate(_BUCKETS):
+        cats = sorted(set(by_bucket[bi]))
+        if not cats:
+            continue
+
         first_lines: List[str] = [
             f"# {bucket.title}\n",
             f"*{bucket.description}*\n\n",
         ]
-        if bi == 0 and vision_md:
+        if vision_md and not vision_attached:
             first_lines.append(vision_md)
+            vision_attached = True
         first_header = "".join(first_lines)
         continuation_header = (
             f"# {bucket.title} (suite)\n"
             f"*Même regroupement que `{bucket.slug}.md` ; fichier découpé pour la taille "
             f"(limite ~{max_chars_per_part:,} caractères par source NotebookLM).*\n\n"
         )
-        cats = sorted(set(by_bucket[bi]))
-        if not cats:
-            body = first_header + "*(Aucune source dans cette catégorie pour le périmètre actuel.)*\n"
-            out.extend(
-                _pack_bucket_markdown_files(
-                    slug=bucket.slug,
-                    first_header=body,
-                    continuation_header=continuation_header,
-                    segments=[],
-                    max_chars=max_chars_per_part,
+        segments = _build_category_segments(gdd_root, cats)
+        bucket_files = _pack_bucket_markdown_files(
+            slug=bucket.slug,
+            first_header=first_header,
+            continuation_header=continuation_header,
+            segments=segments,
+            max_chars=max_chars_per_part,
+        )
+        for fname, body in bucket_files:
+            thematic_chunks.append(
+                _ThematicChunk(
+                    bucket_order=bi,
+                    bucket_slug=bucket.slug,
+                    bucket_title=bucket.title,
+                    filename=fname,
+                    body=body,
                 )
             )
-            continue
 
-        segments: List[str] = []
-        for cf in cats:
-            seg_lines: List[str] = [f"---\n\n# Base : {Path(cf).stem}\n\n"]
-            target = _resolve_category_path(gdd_root, cf)
-            json_files = _iter_json_files(target)
-            if not json_files:
-                seg_lines.append("*(Aucun fichier JSON sur disque pour cette source.)*\n\n")
-                segments.append("".join(seg_lines))
-                continue
-            for jf in json_files:
-                rel = jf.relative_to(gdd_root).as_posix()
-                seg_lines.append(f"## Fichier : `{rel}`\n\n")
-                recs = _load_json_records(jf)
-                if not recs:
-                    seg_lines.append("*(JSON vide ou invalide.)*\n\n")
-                    continue
-                for idx, rec in enumerate(recs, start=1):
-                    seg_lines.append(_record_to_markdown(rec, idx))
-            segments.append("".join(seg_lines))
-
-        out.extend(
-            _pack_bucket_markdown_files(
-                slug=bucket.slug,
-                first_header=first_header,
-                continuation_header=continuation_header,
-                segments=segments,
-                max_chars=max_chars_per_part,
-            )
-        )
+    out = _coalesce_thematic_chunks(thematic_chunks, max_chars=max_chars_per_part)
+    out.sort(key=lambda item: item[0])
 
     file_lines = "\n".join(f"- `{name}` — {len(text):,} caractères" for name, text in out)
     readme = (
@@ -535,19 +670,25 @@ def build_notebooklm_markdown_parts(
         "(synchronisés depuis Notion).\n\n"
         "## Périmètre\n\n"
         f"- Bases / pages incluses selon la config : **{len(eligible)}** source(s).\n"
-        f"- Fichiers Markdown livrés : **{len(out) + 1}** (dont README ; un thème volumineux "
-        f"est découpé en `{_BUCKETS[0].slug}-part02.md`, etc.).\n"
-        f"- Taille max par fichier : **~{max_chars_per_part:,}** caractères (découpage automatique).\n\n"
+        f"- Fichiers Markdown livrés : **{len(out)}** (petits thèmes fusionnés ; gros volumes "
+        f"découpés en `-part02.md` seulement si nécessaire).\n"
+        f"- Taille max par fichier : **~{max_chars_per_part:,}** caractères "
+        "(sous la limite NotebookLM ~500k mots / source).\n\n"
         "## Fichiers\n\n"
         f"{file_lines}\n"
     )
-    final_out: List[Tuple[str, str]] = [("00-README.md", readme)] + out
-    if len(final_out) > max_files:
+    if out:
+        first_name, first_body = out[0]
+        out[0] = (first_name, readme + "\n\n---\n\n" + first_body)
+    else:
+        out = [("01-gdd-export.md", readme)]
+
+    if len(out) > max_files:
         raise ValueError(
-            f"L'export nécessiterait {len(final_out)} fichiers Markdown (> max_files={max_files}). "
+            f"L'export nécessiterait {len(out)} fichiers Markdown (> max_files={max_files}). "
             "Augmentez le paramètre max_files de la requête."
         )
-    return final_out
+    return out
 
 
 def build_gdd_notebooklm_zip_bytes(

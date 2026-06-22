@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "1.2.0",
+  "nodes": [
+    {
+      "id": "START",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Oh — Théomaque… non, non, l'angle confirme : c'est bien vous. Les saints Substrats soient loués. Je suis Voknir Esh'Maradel, cartographe des incrustations temporelles ; pardonnez l'état de mon atelier, la chair des cartes aime la poussière. La carte vivante a vibré quand vous avez franchi la crête des Plis : elle m'a demandé de suivre votre ombre. Si vous cherchez un fragment ou une route brisée, je peux ouvrir mes couches — mais sachez qu'ouvrir une couche coûte un ébranlement de stabilité ici, et quelque chose devra en payer le prix.",
+      "consequences": {
+        "flag": "VOKNIR_INTRODUCED",
+        "description": "Voknir est rencontré ; accès à son atelier-cartothèque débloqué. La carte vivante a enregistré la signature temporelle d'Uresaïr, indiquant une trace menant vers une anomalie des Plis."
+      },
+      "choices": [
+        {
+          "text": "Je consens. Ouvre la couche et laisse-moi lire la trace, malgré le coût.",
+          "targetNode": "node-13203aa4ed7346668c06e2af03b88dbf",
+          "traitRequirements": [
+            {
+              "trait": "Patient",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "choice_START_0"
+        },
+        {
+          "text": "Je veux savoir si tu gardes, parmi tes couches, un fragment de Deshkarta. Dis‑moi où il est, ou je ferme cette porte et m'en vais.",
+          "targetNode": "node-045762897ba74aebbab6993e20b0af3d",
+          "traitRequirements": [
+            {
+              "trait": "Courageux",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "choice_START_1"
+        }
+      ]
+    },
+    {
+      "id": "node-13203aa4ed7346668c06e2af03b88dbf",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. J'ouvre la couche à votre demande, mais écoutez : arracher une strate exige un contrepoids — il ne suffit pas de mots. Je peux lier l'ouverture à un fragment de votre passé (un souvenir précis que je capterai et retiendrai), ou bien à un objet qui porte votre ancrage ; sans compensation, la couche déchirera une part de l'atelier et la crête réagira. Je vais préparer les instruments d'ancrage ; choisissez maintenant ce que vous offrez, et sachez que je garderai ce lien tant que la trace existera.",
+      "consequences": {
+        "flag": "COUCHE_PREPARATION",
+        "description": "Voknir commence les préparatifs pour ouvrir la couche. La stabilité locale diminuera lors de l'ouverture ; le choix du paiement (souvenir, objet, faveur ou refus) déterminera l'étendue et la nature de la liaison."
+      },
+      "choices": [
+        {
+          "text": "Je donne un souvenir. Prenez-en un fragment de ma mémoire — celui de la nuit où je suis parti.",
+          "targetNode": "node-d858e6ed79a4436a9f04f47f94f1acf7",
+          "choiceId": "choice_node-13203aa4ed7346668c06e2af03b88dbf_0"
+        },
+        {
+          "text": "Je offre un objet ancré : mon médaillon. Qu'il serve de point d'attache.",
+          "targetNode": "node-113d33f268474bdb947b496e89e28e0e",
+          "choiceId": "choice_node-13203aa4ed7346668c06e2af03b88dbf_1"
+        }
+      ]
+    },
+    {
+      "id": "node-045762897ba74aebbab6993e20b0af3d",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Vous me pressez, et je vous entendrai sans détour : oui, j'ai un éclat de Deshkarta parmi mes couches. Il n'est pas isolé — il a fusionné à la trame vivante de ma carte, enchâssé dans la spire nord que j'appelle la Dent du Cartographe. Ouvrir cette couche brisera la stabilité des Plis : la crête tremblera, des fissures temporelles s'ouvriront, et quelque chose — un souvenir, un jour, ou la paix d'un village — devra compenser ce dérangement. Dites-moi donc : acceptez-vous le prix, proposez-vous un autre paiement, tentez-vous la force, ou tournez-vous les talons ?",
+      "consequences": {
+        "flag": "DeshkartaFragmentPresent",
+        "description": "Voknir possède un éclat de Deshkarta fusionné à sa carte, localisé dans la spire nord (la « Dent du Cartographe ») ; l'ouverture d'une couche provoquera une instabilité locale."
+      },
+      "choices": [
+        {
+          "text": "Très bien. J'accepte le prix — ouvre ta couche.",
+          "targetNode": "node-04cab83e30f74c1f9505d678039bb9f9",
+          "choiceId": "choice_node-045762897ba74aebbab6993e20b0af3d_0"
+        },
+        {
+          "text": "Je refuse de céder un souvenir. Je propose un échange : ta couche contre un artefact que je possède.",
+          "targetNode": "node-d759e42d172142bc95f4fff181a467c2",
+          "choiceId": "choice_node-045762897ba74aebbab6993e20b0af3d_1"
+        }
+      ]
+    },
+    {
+      "id": "node-d858e6ed79a4436a9f04f47f94f1acf7",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Donnez-moi la nuit où vous êtes parti : je prélèverai un fragment — une image et la sensation qui la fixe — et je l'insèrerai dans une coquille d'ancrage que je possède. Je garderai ce fil : il résonnera dans mes instruments et permettra à ma couche de s'ouvrir sur la trace que vous cherchez. L'extraction provoquera une vibration sourde dans l'atelier, et une bouche du lieu pourra se sceller ou se déplacer ; préparez-vous à un glissement. Que faites‑vous ?",
+      "consequences": {
+        "flag": "MEMORY_BOUND",
+        "description": "Un fragment du souvenir (la nuit du départ) est lié à Voknir et stocké dans sa coquille d'ancrage. Tant que la trace existe, le lien persistera et pourra être exploité ou exigé."
+      }
+    },
+    {
+      "id": "node-113d33f268474bdb947b496e89e28e0e",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Que vous me confiez votre médaillon : je l'utiliserai comme point d'ancrage. Approchez, posez-le dans le creuset d'étain — je scellerai la liaison et j'en conserverai l'empreinte tant que la trace subsistera. En contrepartie, quatre petites cartes auxiliaires rangées sous la verrière se consumeront en une poussière pâle ; c'est le prix que je peux absorber sans briser la charpente de l'atelier. Si vous acceptez, je prends le médaillon maintenant et la couche s'ouvrira immédiatement.",
+      "consequences": {
+        "flag": "MedallionOffered",
+        "description": "Le PJ propose son médaillon comme ancre. Voknir prépare le rituel ; quatre cartes auxiliaires seront détruites si la liaison est scellée."
+      },
+      "isLongRest": false
+    },
+    {
+      "id": "node-04cab83e30f74c1f9505d678039bb9f9",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "J'entame l'ouverture de la couche. Pour sceller l'accès, je lierai et détacherai une de mes propres mémoires cartographiques : elle disparaîtra des couches et je ne pourrai plus lire certains détours pendant un cycle complet. L'atelier vibre déjà — la chair de la carte se tend et un fil d'éther commence à chercher votre ombre pour y ancrer le fragment. Si vous maintenez votre volonté, faites votre choix maintenant ; autrement, je referme et rien de tout cela n'aura eu lieu.",
+      "consequences": {
+        "flag": "Couche_ouverture_initiee",
+        "description": "Voknir a commencé le rituel d'ouverture ; une mémoire cartographique est liée comme gage et le fragment est en train d'être extrait."
+      },
+      "isLongRest": false
+    },
+    {
+      "id": "node-d759e42d172142bc95f4fff181a467c2",
+      "speaker": "Voknir",
+      "line": "Intéressant — vous tenez à ce qui vous appartient. Je ne refuse pas le troc : j'accepte les artefacts qui portent une résonance, pas les promesses vaines. Si votre objet vibre avec une signature temporelle, je l'incorporerai à ma trame et j'ouvrirai la couche ; cela nécessitera un rituel d'une heure pendant lequel la crête vibrera et la carte s'ouvrira. Attention : l'artefact sera scellé dans la trame et restera inerte pendant vingt-quatre heures après l'échange ; je n'ouvrirai la couche autrement qu'avec cet accord concret.",
+      "consequences": {
+        "flag": "proposition_echange",
+        "description": "Le PJ propose un échange. Voknir a posé les conditions : rituel d'une heure, artefact scellé et inerte 24h après l'échange."
+      },
+      "isLongRest": false
+    }
+  ]
+}

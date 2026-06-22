@@ -101,7 +101,7 @@ async def test_run_sync_list_category_writes_shard_files(tmp_path: Path) -> None
     res = await svc.run_sync(force_full=True, request_id="unit-shards")
     assert res.updated_entities == 1
     assert res.success
-    shard = gdd_dir / "personnages" / f"{pid}.json"
+    shard = gdd_dir / "personnages" / f"Heros_{pid}.json"
     assert shard.is_file()
     out = json.loads(shard.read_text(encoding="utf-8"))
     assert out["Nom"] == "Héros"
@@ -167,7 +167,7 @@ async def test_run_sync_systemes_de_jeu_writes_shard_dir(tmp_path: Path) -> None
     res = await svc.run_sync(force_full=True, request_id="unit-systemes-shards")
     assert res.updated_entities == 1
     assert res.success
-    shard = gdd_dir / "systemes_de_jeu" / f"{pid}.json"
+    shard = gdd_dir / "systemes_de_jeu" / f"Systeme_test_{pid}.json"
     assert shard.is_file()
     out = json.loads(shard.read_text(encoding="utf-8"))
     assert out["Nom"] == "Système test"
@@ -866,7 +866,7 @@ async def test_run_sync_mirror_rebuild_promotes_and_drops_orphan_shard(
     assert res.success
     assert res.mirror_rebuild_used
     assert (gdd_dir / ".archive").is_dir()
-    hero = gdd_dir / "personnages" / f"{pid}.json"
+    hero = gdd_dir / "personnages" / f"Heros_{pid}.json"
     assert hero.is_file()
     assert not (gdd_dir / "personnages" / f"{orphan}.json").exists()
 
@@ -1015,7 +1015,7 @@ async def test_run_sync_mirror_retries_transient_502_on_page_content(
     res = await svc.run_sync(force_full=True, request_id="mirror-retry-ok")
     assert res.success
     assert FlakyContentClient._n == 3
-    assert (gdd_dir / "personnages" / f"{pid}.json").is_file()
+    assert (gdd_dir / "personnages" / f"Heros_{pid}.json").is_file()
 
 
 @pytest.mark.asyncio
@@ -1373,7 +1373,7 @@ async def test_database_sync_fetches_page_body_when_not_in_probe_cache(
     res = await svc.run_sync(force_full=True, request_id="probe-body-regression")
     assert res.success
     assert p_rich in content_calls
-    shard = gdd_dir / "especes" / f"{p_rich}.json"
+    shard = gdd_dir / "especes" / f"Row-22222222_{p_rich}.json"
     assert shard.is_file()
     out = json.loads(shard.read_text(encoding="utf-8"))
     dumped = json.dumps(out, ensure_ascii=False)

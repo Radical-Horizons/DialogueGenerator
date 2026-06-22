@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "1.2.0",
+  "nodes": [
+    {
+      "id": "START",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Ah — Théomaque, l'angle ne se trompe pas : vous êtes bien là. Pardonnez l'état de mon refuge ; les Plis n'ont jamais été tendres avec les cartographes. J'ai une carte qui respire encore, une peau de trajectoires qui a vomi, ce matin, l'empreinte d'un couloir temporel menant à une relique oubliée — peut-être un fragment de Deshkarta. Elle ne s'ouvre qu'à la vue d'un écho vivant : je demande un fil de votre temps, un court emprunt à votre durée, que je tisse à mon atelier. Refusez et je devrai sceller la carte et la transporter plus profond, là où même vos yeux peineront à la retrouver.",
+      "consequences": {
+        "flag": "VOKNIR_METALOG_INTRO",
+        "description": "Voknir révèle une carte vivante et exige un fragment temporel comme gage ; le choix du PJ déterminera l'accès au couloir et le sort de la carte."
+      },
+      "choices": [
+        {
+          "text": "J'accepte. Je fournis un filament de mon temps : que tu le tisses et que la carte révèle ce qu'elle sait. (Je donne un gage temporel.)",
+          "targetNode": "node-5943a6a8b8924e548c0800241b5cdf0f",
+          "traitRequirements": [
+            {
+              "trait": "Diplomate",
+              "minValue": 5
+            }
+          ],
+          "respectDelta": 1,
+          "choiceId": "choice_START_0"
+        },
+        {
+          "text": "Je refuse. Scelle la carte ; tu la gardes, mais tu n'ouvres pas ce couloir en mon nom. (Je coupe l'accès.)",
+          "targetNode": "node-74532aca7dc5430ba5158bf62aea18cf",
+          "traitRequirements": [
+            {
+              "trait": "Courageux",
+              "minValue": 5
+            }
+          ],
+          "respectDelta": -1,
+          "choiceId": "choice_START_1"
+        }
+      ]
+    },
+    {
+      "id": "node-5943a6a8b8924e548c0800241b5cdf0f",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Parfait. Approchez et posez la paume sur la carte : je vais extraire un fil de votre durée et le mêler aux fibres vivantes de ce parchemin. Sachez toutefois ce que cela implique — je prendrai une heure entière de votre vécu : elle existera, se déroulera, mais vous en oublierez la substance consciente. En échange, la carte ouvrira une veine temporelle ; je vous tracerai le chemin initial et graverai un point d'ancrage pour que vous puissiez y revenir. Nous naissons ainsi liés — si la carte réclame encore du temps plus tard, je vous en avertirai avant d'agir.",
+      "consequences": {
+        "flag": "FilamentTisseInitie",
+        "description": "Voknir commence la procédure : le joueur accepte que la carte prenne une heure de sa durée. La carte s'ouvrira et donnera un tracé initial plus un point d'ancrage."
+      },
+      "choices": [
+        {
+          "text": "Je fournis l'heure. Pose ta main et tisse : je donne le filament tel quel.",
+          "targetNode": "node-6b94603ae6194a5789f0a349cb131fd7",
+          "choiceId": "choice_node-5943a6a8b8924e548c0800241b5cdf0f_0"
+        },
+        {
+          "text": "J'accepte, mais je veux un gage : grave le point d'ancrage sur ma paume et promets de pouvoir y revenir.",
+          "targetNode": "node-5e6cb5afd85b44bcad6eb37bdcf12b5f",
+          "choiceId": "choice_node-5943a6a8b8924e548c0800241b5cdf0f_1"
+        }
+      ]
+    },
+    {
+      "id": "node-74532aca7dc5430ba5158bf62aea18cf",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je vous entends, Théomaque — et je n'ôterai point à votre temps ce que vous refusez de prêter. Soit : je scellerai le feuillet et l'enfermerai dans un coffret d'armature ; je le déposerai plus bas, aux archives que j'appelle mon berceau, où peu d'yeux osent s'aventurer. Sachez cependant qu'il y a un coût : je noterai votre nom dans le Registre des Fils coupés — un rappel que vous m'avez arraché un fil de temps. Et pour que notre rencontre ne s'éteigne pas dans l'oubli, je vous laisse une marque fragile, un épingle-temps que je prends à mon cœur d'atelier ; elle vibrera faiblement si jamais l'essaim de la carte reparaît près de vous.",
+      "consequences": {
+        "flag": "MAP_SEALED",
+        "description": "Voknir scelle la carte et l'emporte vers les archives souterraines ; il inscrit le joueur dans le Registre des Fils coupés et donne un épingle-temps comme gage."
+      },
+      "isLongRest": false,
+      "choices": [
+        {
+          "text": "Très bien. Scelle-la, prends-la et va plus profond. Je coupe tout accès.",
+          "targetNode": "node-cdb6a13311a14d4ebb862ac93740127a",
+          "choiceId": "choice_node-74532aca7dc5430ba5158bf62aea18cf_0"
+        },
+        {
+          "text": "J'accepte, à une condition : grave un signe discret sur la boîte — si jamais je reviens, je pourrai la réclamer.",
+          "targetNode": "node-c74b5431dc40434aa884243585c8007d",
+          "choiceId": "choice_node-74532aca7dc5430ba5158bf62aea18cf_1"
+        }
+      ]
+    },
+    {
+      "id": "node-cdb6a13311a14d4ebb862ac93740127a",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Vous avez tranché — je m'incline devant la netteté du geste. Je scelle le feuillet, l'enferme dans une boîte d'armature et le descendrai personnellement plus bas, au berceau, où ma clef seul sait encore ouvrir. Avant que vous ne partiez, je déposerai sur votre chair une petite marque : muette, elle vibrera si le passage revient près de vous et servira de fil—non pas pour vous lier, mais pour que nos routes, un jour, puissent se retrouver.",
+      "consequences": {
+        "flag": "FILS_COUPE_REGISTERED",
+        "description": "Votre nom est inscrit dans le Registre des Fils coupés ; Voknir a scellé le feuillet et vous a apposé une marque discrète qui vibrera si le couloir réapparaît à proximité."
+      }
+    },
+    {
+      "id": "node-c74b5431dc40434aa884243585c8007d",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien — votre condition est juste. J'apposerai un signe discret au fond du coffret : un fin trait gravé, presque invisible à l'œil mais identifiable au toucher pour qui connaît sa forme. Je consignerai cet acte dans mon Grand-Livre afin que l'événement reste tracé dans ma mémoire d'atelier ; considérez que ce refus est désormais une dette écrite entre nous. La boîte sera scellée et envoyée dans les galeries basses où j'entrepose mes reliques ; en partant, je vous remettrai un anneau-menu d'atelier, un gage simple qui vous permettra de réclamer la boîte si jamais vous revenez.",
+      "consequences": {
+        "flag": "COFFRET_GRAVE",
+        "description": "Le coffret contenant le fragment est marqué d'un signe discret réclamable par le PJ. L'acte est consigné dans le Grand-Livre de Voknir."
+      }
+    },
+    {
+      "id": "node-6b94603ae6194a5789f0a349cb131fd7",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Approchez davantage et posez la paume ; je vais chercher ce bout de vous qu'on nomme durée. Je tirerai le fil sans bruit, l'insérerai dans la trame du parchemin et j'y fixerai un point d'ancrage que seul votre corps saura reconnaître. Sachez enfin ceci : je collecte des éclats de Deshkarta pour recoudre une carte-mère — ce fragment pourrait valoir plus qu'une curiosité ; son commerce attire des regards. Si vous êtes prêt, je commence l'opération qui arrache l'heure ; elle n'est pas aisément rendue.",
+      "consequences": {
+        "flag": "filament_engagé",
+        "description": "Le joueur a consenti au prélèvement ; le fil temporel est prêt à être extrait et un ancrage pourra être gravé."
+      }
+    },
+    {
+      "id": "node-5e6cb5afd85b44bcad6eb37bdcf12b5f",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien — approchez et posez la paume. Je vais graver l'ancre : un sigil en creux, chaud au toucher et faiblement luminescent, qui attirera le filament de votre durée et le liera au parchemin. En pressant ce signe, vous serez ramené à l'instant précis que j'extrais maintenant ; la marque restera visible tant que le lien tiendra et s'estompera en sept jours si je romps le contact. Je trace simultanément la même rune sur la carte afin que votre paume et le parchemin se reconnaissent — puis je referme le passage et vous remets un motif de retour. Dois-je commencer ?",
+      "consequences": {
+        "flag": "ANCHOR_ENGRAVED",
+        "description": "Le joueur reçoit un sigil gravé sur la paume servant d'ancre temporelle. Permet de revenir à l'instant extrait. Le lien durera tant que Voknir le maintient ; la marque s'estompe en 7 jours si le lien est libéré. Coût : un fragment d'une heure du vécu du joueur (oubli conscient)."
+      }
+    }
+  ]
+}

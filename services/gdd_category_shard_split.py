@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
 from services.gdd_loader import GDDLoader
+from services.gdd_shard_filenames import build_gdd_shard_filename
 from services.gdd_notion_sync_utils import normalize_notion_id
 
 logger = logging.getLogger(__name__)
@@ -49,12 +50,12 @@ def _safe_stem_from_nom(nom: str, index: int) -> str:
 
 def _shard_filename(rec: Dict[str, Any], index: int) -> str:
     nid = rec.get("notion_page_id")
+    nom = str(rec.get("Nom") or "")
     if isinstance(nid, str) and nid.strip():
         try:
-            return f"{normalize_notion_id(nid.strip())}.json"
+            return build_gdd_shard_filename(nom, nid.strip())
         except ValueError:
             pass
-    nom = str(rec.get("Nom") or "")
     return f"{_safe_stem_from_nom(nom, index)}.json"
 
 

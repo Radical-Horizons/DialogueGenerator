@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prompt>
+  <contract>
+    <priority_rules>En cas de conflit entre les instructions, l'ordre de priorité est :
+1. Instructions de scène (&amp;lt;scene_instructions&amp;gt;) — prévalent sur tout
+2. Directives d'auteur (&amp;lt;author_directives&amp;gt;) — modulent le style global
+3. Règles de génération (&amp;lt;generation_instructions&amp;gt;) et system prompt</priority_rules>
+  <output_format>**IMPORTANT : Génère UN SEUL nœud de dialogue (un nœud = une réplique du PNJ + choix du joueur).**
+Ne génère PAS de séquence de nœuds dans un même appel : l'expansion d'arbre se fait par appels successifs (un nœud par requête). Le Structured Output garantit le format JSON, mais tu dois respecter cette logique métier.</output_format>
+  </contract>
+<technical>
+    <speaker_voice>Voix du PNJ Voknir Esh'Maradel — à respecter dans toutes les répliques `line` :
+Dialogues Liés: 1886e4d2-1b45-81f2-934b-e82c31f6fd73
+Pronoms (pour Dialogues): non précisé
+Voix Et Pre Sence: Voknir mélange précision technique maniaque et lyrisme mystique délirant.
+	Iel s'exprime par saccades nerveuses, entrecoupant ses phrases de coordonnées spatiales et d'équations murmurées. Son débit s'accélère quand iel évoque ses découvertes, ralentit douloureusement sur ses échecs. Iel passe du vouvoiement respectueux au tutoiement intime selon ses fluctuations émotionnelles, et dialogue constamment avec son atelier en arrière-plan.
+Registre De Langage Du Personnage: Voknir mélange précision technique maniaque et lyrisme mystique délirant. Iel s'exprime par saccades nerveuses, entrecoupant ses phrases de coordonnées spatiales et d'équations murmurées. Son débit s'accélère quand iel évoque ses découvertes, ralentit douloureusement sur ses échecs. Iel passe du vouvoiement respectueux au tutoiement intime selon ses fluctuations émotionnelles, et dialogue constamment avec son atelier en arrière-plan.
+Expressions Courantes: - "Les angles mentent, mais les courbes révèlent" (maxime personnelle)
+	- "Écoute, l'atelier murmure..." (avant toute décision importante)
+	- "Mes cartes saignent la vérité" (quand iel défend ses méthodes)
+	- "Par les sept tracés du bannissement..." (juron personnel)
+	- "Iel avait les mains plus chaudes que les miennes." (rare, à voix basse, toujours à propos de Thyra — unique phrase où Voknir ne quantifie rien)
+... (extrait)</speaker_voice>
+  <generation_instructions>Règles de contenu :
+- Speaker (répliques `line`) : Voknir Esh'Maradel — interlocuteur de la scène
+- Choix (`choices`) : voix du PJ Uresaïr
+- L'Éthérée ne doit jamais apparaître comme speaker ; ses répliques passent par les choices.
+- Tests d'attributs : Format 'AttributeType+SkillId:DD' (ex: 'Raison+Rhétorique:8'). La compétence est obligatoire.
+Format `line` (dialogue + didascalie) :
+- Paroles du PNJ entre guillemets français « … » ; au nœud START, fixer tu ou vous dès la première réplique (cohérent sur tout le sous-arbre ; s'appuyer sur la fiche voix du PNJ et les instructions de scène).
+- Didascalies autorisées : *en italique* (markdown *…*), voix narrateur à la 3e personne, hors guillemets, phrases courtes et claires (gestes, lieu, réaction visible). Compensent l'absence d'images en jeu.
+- Exemple : *Voknir pose la Carte sur l'autel.* « Donne-moi ta main. Le prix est fixé. »
+- Interdit dans les guillemets : commentaire de ses propres gestes à la 1re personne (« je plante », « j'attends que tu… ») — mettre le geste en *italique* narrateur.
+- Événements mécaniques (flag, état durable) → aussi `consequences` si pertinent.
+- `choices.text` = réplique PJ entre guillemets « … », ou *[action]* en italique crochets.
+- Pas d'acquiescement vide en ouverture (« Très bien », « Vous l'avez demandé »).
+- Langage clair au premier passage.
+- Nombre de choix : Entre 1 et 2 selon ce qui est approprié pour la scène.</generation_instructions>
+  <available_skills>Compétences disponibles: Acrobaties, Adaptabilité, Affaires, Alchimie, Altération biologique avancée, Arbalètes, Architecture, Archéologie, Arcs, Armement de siège, Armes Contondantes, Armes Perforantes, Armes Tranchantes, Armes de Poing, Armes d’Épaule, Armes à poudre noire, Armes à système de visée, Armure symbiotique, Armures lourdes, Armures légères, Armures spirituelles, Artisanat, Aviation, Biologie, Biotechnologies, Bénédictions religieuses, Chimie, Commandement, Conduite, Conjuration divine, Connaissances de l’Armement, Construction orbitale, Contrôle génétique, Course, Crochetage, Croyances, Création d’armes psychiques, Création d’artefacts, Cybernétique, Diplomatie, Dissimulation, Distorsion de la réalité, Divertissement, Divination, Duperie, Déplacement silencieux, Effet placebo, Elasticité, Endurance, Escalade (et 83 autres compétences)
+Utilise ces compétences dans les tests d'attributs (format: 'AttributeType+NomCompétence:DD').</available_skills>
+  <available_traits>Traits disponibles: Autoritaire, Colérique, Conciliant, Courageux, Cynique, Diplomate, Défaitiste, Empathique, Fiable, Généreux, Honnête, Humble, Idéaliste, Impatient, Imprudent, Insensible, Instable, Intolérant, Irrespectueux, Loyal, Lucide, Lâche, Malhonnête, Manipulateur, Naïf, Obstiné, Orgueilleux, Ouvert, Patient, Persévérant (et 10 autres traits)
+Utilise ces traits dans traitRequirements des choix (format: [{'trait': 'NomTrait', 'minValue': 5}]).
+Les traits peuvent être positifs (ex: 'Courageux') ou négatifs (ex: 'Lâche').</available_traits>
+  </technical>
+<context>
+    <gdd_context>--- CONTEXTE GÉNÉRAL DE LA SCÈNE ---
+
+--- CHARACTERS ---
+--- Voknir Esh'Maradel ---
+--- IDENTITÉ ---
+Nom: Voknir Esh'Maradel
+Alias: Le Cartographe Déchu, L'Oracle des Angles Morts
+Archétype Littéraire: Magicienne / Sorcier
+Catégorie D’âge: Vénérable
+Occupation: Cartographe en exil
+Type: PNJ recrutable
+
+--- CARACTÉRISATION ---
+Défauts Liés: 2146ebdc-4f7b-4965-bb70-c223f76ca997, 2b9bc344-4a82-44b2-9652-9d1ec7324a98, 38ffe371-e852-476a-9b00-7c155a42b403
+Qualité: 8
+Qualités Liées: 892fdf2c-0ceb-44d4-8192-062c0f482adb, 195a60b9-9114-4d47-ab84-dd2878428f81, f9815f24-5531-45cc-a5cf-ba5d41254803
+Faiblesse Weakness: - **Faiblesse psychologique :** Refuse d'admettre ses erreurs cartographiques et réinterprète obsessionnellement les données pour éviter de reconnaître ses limites.
+	- **Faiblesse morale :** Voknir se croit sans contact conscient avec &amp;lt;mention-page url="https://app.notion.com/p/1b76e4d21b4580768f2cdc910ac92b7a"/&amp;gt; et ignore son identité. Iel ignore aussi qu'&amp;lt;mention-page url="https://app.notion.com/p/1ae6e4d21b4580d19290fe72cf1375d7"/&amp;gt; communique avec elle depuis des siècles en secret. Sur la cause du bannissement, Voknir ne dispose pas des éléments : iel sait l’argument officiel (profanation) et soupçonne un tabou lié aux profondeurs, sans pouvoir trancher si le motif réel relève d’un risque doctrinal, d’un secret hiérarchique, ou d’un mélange des deux.
+		- Voknir ignore que les filaments nerveux du Léviathan ont commencé à lui répondre directement — et qu'une part de ses « découvertes » cartographiques récentes lui a été fournie par L'Ensevelie sans signature ni contrepartie affective. Ce qu'il interprète comme la confirmation de sa méthode est un canal de communication unilatéral dont il n'est pas l'émetteur.
+	- **Actions immorales liées :**
+		- Iel a minimisé les dangers des Plis auprès de son enfant, provoquant indirectement sa disparition.
+		- Iel manipule les visiteurs en omettant les risques mortels de ses raccourcis.
+		- Iel prélève des fragments de moelle dans les Rivières Vertébrales pour nourrir ses encres cartographiques, perturbant l'écosystème des Plis.
+Compulsion: Cartographier compulsivement chaque espace qu'iel traverse pour maintenir l'illusion du contrôle sur un monde qui lui a échappé.
+	Face à l'incertitude ou au stress, Voknir trace frénétiquement des motifs géométriques sur toute surface disponible, sa peau, les murs, le sol, comme si documenter l'espace pouvait le protéger de nouveaux échecs.
+
+--- VOIX ET STYLE ---
+Dialogues Liés: 1886e4d2-1b45-81f2-934b-e82c31f6fd73
+Pronoms (pour Dialogues): non précisé
+Voix Et Pre Sence: Voknir mélange précision technique maniaque et lyrisme mystique délirant.
+	Iel s'exprime par saccades nerveuses, entrecoupant ses phrases de coordonnées spatiales et d'équations murmurées. Son débit s'accélère quand iel évoque ses découvertes, ralentit douloureusement sur ses échecs. Iel passe du vouvoiement respectueux au tutoiement intime selon ses fluctuations émotionnelles, et dialogue constamment avec son atelier en arrière-plan.
+Registre De Langage Du Personnage: Voknir mélange précision technique maniaque et lyrisme mystique délirant. Iel s'exprime par saccades nerveuses, entrecoupant ses phrases de coordonnées spatiales et d'équations murmurées. Son débit s'accélère quand iel évoque ses découvertes, ralentit douloureusement sur ses échecs. Iel passe du vouvoiement respectueux au tutoiement intime selon ses fluctuations émotionnelles, et dialogue constamment avec son atelier en arrière-plan.
+Expressions Courantes: - "Les angles mentent, mais les courbes révèlent" (maxime personnelle)
+	- "Écoute, l'atelier murmure..." (avant toute décision importante)
+	- "Mes cartes saignent la vérité" (quand iel défend ses méthodes)
+	- "Par les sept tracés du bannissement..." (juron personnel)
+	- "Iel avait les mains plus chaudes que les miennes." (rare, à voix basse, toujours à propos de Thyra — unique phrase où Voknir ne quantifie rien)
+Exemples De Dialogues Additionnels: "Ne suivez pas le chemin, suivez la fréquence. Quand vous entendrez l'os chanter dans la tonalité de l'indigo – oui, je sais que cela n'a pas de sens pour vous, mais vos oreilles comprendront – tournez vers ce qui semble être en bas mais qui est en réalité l'intérieur. La Chambre Synapale se révélera alors, non pas comme un lieu, mais comme une suggestion de lieu."&amp;lt;br&amp;gt;&amp;lt;br&amp;gt;"Avant... avant tout cela, j'étais celui qui cartographiait l'impossible. Le Cercle des Sept Traceurs me surnommait 'Celui-qui-mesure-les-rêves'. *(Rire amer)* Maintenant, je ne sais même plus si j'existe encore... *(Touchant ses scarifications)* Mais mes cartes, elles, elles saignent toujours la vérité. C'est tout ce qui me reste de sain."&amp;lt;br&amp;gt;&amp;lt;br&amp;gt;"*(En combat, filaments osseux déployés en éventail)* Cinq degrés à l'est. Fissure instable — l'atelier le confirme. Ne pas courir, les Plis n'aiment pas la panique. Trois adversaires, deux points de sortie calculés. J'ai les données. Suivez les angles ou ne me survivez pas. *(Bref, sans regarder)* Les angles, j'ai dit."&amp;lt;br&amp;gt;&amp;lt;br&amp;gt;"*(Au repos, traçant machinalement des formes géométriques sur le sol poussiéreux)* Avant, mes cartes avaient des bords propres. Je savais exactement où elles finissaient — papier, encre, limite. *(Long silence, regard posé sur ses scarifications)* Maintenant, elles finissent là où ma peau finit. Ce n'est peut-être pas une détérioration. L'atelier dit que non. Je commence à croire l'atelier."&amp;lt;br&amp;gt;&amp;lt;br&amp;gt;"*(Devant une paroi inconnue, bras de triangulation oscillant en spirales lentes)* L'atelier le pressentait depuis trois passages. Cette paroi *respire* différemment — regardez la façon dont elle absorbe la lumière aux angles. Ce n'est pas une déformation structurelle, c'est une *intention*. Quelque chose dans le Léviathan organisait délibérément. *(S'arrêtant net)* Pardon. Je transcende les données disponibles. Mais vous l'avez perçu aussi, n'est-ce pas ?"&amp;lt;br&amp;gt;
+
+--- HISTOIRE ET RELATIONS ---
+Relations Principales: 1996e4d2-1b45-80c4-9c73-ddac6322e9bd, dfe78783-9d63-424a-ad5c-aa7726bf6394, b5922a18-76ae-49b5-807c-b5ef963a14cf
+Relations Secondaires: 1c36e4d2-1b45-8095-8449-d7d1749e69ad, 1d95df62-504c-4349-b8ec-63893118af51
+Contexte: En 3390 AG, Voknir vit en exil dans les Plis d'ossements, où iel maintient un atelier-cartothèque de fortune et consigne obsessionnellement les micro-évolutions du labyrinthe. Banni·e du Culte de l'Anentropie, iel survit grâce à ses propres protocoles, continue de transmettre clandestinement certaines données à l'Exégète Amatru et peut être rencontré·e — donc recruté·e — lorsque le groupe atteint son habitat au cours de l'exploration des Plis.
+	Voknir a intégré les anciennes galeries de &amp;lt;mention-page url="https://app.notion.com/p/80dae34f19a3483a8d7c40221f7d8baf"/&amp;gt; à sa cartographie comme marqueurs de frontière passive. Une paroi lissée en spirale indique un ancien substrat riche ; une galerie abandonnée et reprise par des traces Druce indique un basculement de niche. Iel les annote moins comme « lieux de vie » que comme phrases géologiques : ici la pierre fut mangée ; ici le prédateur a imposé silence.
+	Dix-sept Nuées d'immersion dans les Plis ont rendu Voknir biologiquement et cognitivement dépendant·e de cet environnement. Son bras de triangulation, remodelé par le contact prolongé avec les structures osseuses instables, ne trouve plus d'usage fonctionnel dans une géométrie euclidienne stable — les filaments se rétractent faute de distorsions à mesurer, les points d'articulation supplémentaires deviennent douloureux sans sollicitation. Son encre de moelle, calibrée pour réagir aux variations de pression des Plis, reste inerte sur une surface ordinaire. Hors du labyrinthe, Voknir n'est pas un cartographe affaibli : iel est un instrument désaccordé, un outil devenu incompatible avec le reste du monde.
+Relations: **🔴 Cercle 1 — Intime (2-3 relations définissantes)**
+	- **Zhirva-Neth Esh'Nul** (sœur de cendres) : Devenue Garde-Archiviste dans la Jungle Vivarcade, elle ignore que Voknir a survécu à son bannissement. Leurs dernières lettres sur écorce d'Aedre constituent son bien le plus précieux. Iel les relit compulsivement, y cherchant des indices géométriques cachés dans l'écriture de sa sœur.
+	- &amp;lt;mention-page url="https://app.notion.com/p/dfe787839d63424aad5caa7726bf6394"/&amp;gt; (enfant adopté·e disparu·e) : Sa disparition ronge Voknir. La possibilité que Yul soit encore vivant·e (ou autrement « conservé·e ») est une hypothèse que Voknir refuse d'évaluer franchement : l'accepter rendrait l'enquête obligatoire ; la rejeter rendrait la faute définitive.
+	- &amp;lt;mention-page url="https://app.notion.com/p/b5922a1876ae49b5807cb5ef963a14cf"/&amp;gt; (amant Consolé involontaire) : Historien momifié qui travaille dans les &amp;lt;mention-page url="https://app.notion.com/p/1b36e4d21b458048b68ef88492e560d7"/&amp;gt;. Voknir garde un souvenir flou de Thyra et peine à se souvenir de son nom, comme un remords constant qui se dissout sans faiblir.
+	**🟡 Cercle 2 — Amical (3-5 relations fonctionnelles)**
+	- **L'Exégète Amatru** : Rancœur complexe mêlée de reconnaissance filiale. Voknir continue de transmettre anonymement ses découvertes via des tunnels synaptiques, espérant secrètement prouver sa valeur.
+	- &amp;lt;mention-page url="https://app.notion.com/p/1996e4d21b4580c49c73ddac6322e9bd"/&amp;gt; : Fascination intellectuelle et dévotion religieuse. Voknir fait partie des rares personnes à avoir approché la Théomaque durant son isolement. Iel lui a donné plusieurs offrandes au fil des Nuées et reçoit en **3374 AG**, lors d'une tempête pneumatique dans les strates supérieures des Plis, le &amp;lt;mention-page url="https://app.notion.com/p/26f6e4d21b45809ab346d20068dae6bd"/&amp;gt; — noeud spatial en bouteille confié par la Rebelle Immortelle comme protocole de passage et dernier recours cartographique. Uresaïr et Voknir n’ont encore jamais eu de vraie conversation au début du jeu.
+	- **Keth Moross** (ancien collègue) : Seul membre du Cercle des Sept Traceurs à avoir tenté de défendre Voknir, rétrogradé au rang de simple copiste. Voknir ignore son sort actuel mais imagine qu'il poursuit leurs recherches communes.
+	- **&amp;lt;mention-page url="https://app.notion.com/p/1d95df62504c4349b8ec63893118af51"/&amp;gt;** (guide murmurateur, croisé sans être identifié) : Voknir a vu passer ce Van'Doei à la démarche asymétrique une ou deux fois — venu solliciter des cartes des Plis, sans explication développée. Voknir a refusé sans même y réfléchir : ses cartes vivent sur sa peau, son encre de moelle est calibrée pour les Plis et reste inerte sur toute autre surface, et depuis la disparition de Yul (3378 AG) iel s'interdit de laisser quiconque s'approcher de son atelier. Ossian a contourné comme il contourne toujours, et n'est plus revenu. Voknir n'a jamais identifié l'appartenance murmureuse de l'arpenteur, ni mesuré que ses propres incisions sur les parois du Dédale servaient depuis des Nuées de balises à la cellule d'Ossian. Iel l'apprendra au moment du recrutement, et la révélation portera double tranchant : un guide qu'iel a éconduit s'est servi en silence de ses sillons ; et ses anciennes cartes papier pré-exil — celles que les Scripteurs traitaient comme des curiosités face aux Organoïdes neuronaux standard — ont continué de circuler jusqu'à Ossian par d'autres voies (cf. &amp;lt;mention-page url="https://app.notion.com/p/1c06e4d21b4580d6bafdeeb1a8395c2f"/&amp;gt; aux Bibliothèques Veineuses). La symétrie avec ses propres transmissions à Amatru — donner en silence, être utilisé sans accusé de réception — est impossible à ignorer une fois formulée aussi nettement. Ce que Voknir finira par distinguer : Amatru reçoit en silence parce qu'il juge ; Ossian utilise en silence parce qu'il survit. La différence est petite. Elle change tout.
+	- **Le groupe du joueur** : avant le recrutement, indifférence calculée mâtinée d'une curiosité géométrique froide — un groupe en déplacement génère des données de triangulation qu'iel ne peut pas ignorer. Après le recrutement : loyauté conditionnelle bâtie par l'épreuve partagée dans des espaces distordus ; Voknir suit le groupe tant qu'il donne accès à des zones inconnues à cartographier, et commence progressivement à le considérer comme un ancrage stable.
+	**🟢 Cercle 3 — Connaissances (communautés, réseaux, relations éloignées)**
+	- &amp;lt;mention-page url="https://app.notion.com/p/2906e4d21b4580baa2e5d4bd8ad155ac"/&amp;gt; : appartenance périphérique assumée par l'éthique du témoignage, non par dogme. **Axe** : Bienveillance-préoccupation. Voknir s'identifie aux Témoins parce qu'ils partagent la même posture d'exposition subie aux profondeurs — pas parce qu'il approuve leurs méthodes ou leur cohérence doctrinale. **Effets de réputation** : témoin actif — si un Témoin est présent lors d'une exploration des Plis, il peut confirmer ou invalider les relevés de Voknir, créant un mécanisme de validation externe que Voknir accepte à contrecœur mais dont il a besoin.
+	- &amp;lt;mention-page url="https://app.notion.com/p/1c36e4d21b4580958449d7d1749e69ad"/&amp;gt; : dette tragique, loyauté impossible. Zaehria a laissé Yul franchir le Portail Médullaire profond sans tribut mémoriel pour venir rendre visite à Voknir dans les Plis. Yul a disparu peu après. Depuis, leur rapport oscille entre culpabilité partagée, surveillance réciproque et peur très lucide de ce que l'autre pourrait livrer à Amatru sous pression. Voknir sait que la seule fois où la Gardienne a fermé les yeux sur un visiteur, ce visiteur était son enfant — et qu'iel n'en est pas revenu.
+Centres D Inte Re T: - **Théologie :** Voknir n’a jamais perdu son intérêt pour les textes sacrés, les dérivés théoriques du Barvasinkul et les cérémonies. Son état favori est le Caoil (la circulation). Iel pratique de chaque Veille les Récapitulations et se livre chaque Fragment à un Appareillement solitaire et silencieux.
+	- **Dangram :** Joue contre soi-même avec des fragments d'os, se perdant dans des stratégies toujours plus complexes.
+	- **Ballade :** Parcourt de chaque Veille les itinéraires les plus sûrs et les plus stables. Voknir commence presque toujours par &amp;lt;mention-page url="https://app.notion.com/p/2356e4d21b4580b8854cfd70ad9bfc4e"/&amp;gt; ; c’est là que Yul a été vu pour la dernière fois avant sa disparition. Iel s’y arrête parfois pour faire de petits exercices, ou pour vérifier si le lieu a changé pendant la Somme.
+
+--- AUTRES INFORMATIONS ---
+A Créé: 9187f890-b283-4507-98a4-9da1bf022d4d
+Actes Effectifs: 2e0acee9-5107-4256-9e41-3c36344d59b6; 2e0acee9-5107-4256-9e41-3c36344d59b6; 2e0acee9-5107-4256-9e41-3c36344d59b6; 2e0acee9-5107-4256-9e41-3c36344d59b6; 2e0acee9-5107-4256-9e41-3c36344d59b6; 2e0acee9-5107-4256-9e41-3c36344d59b6; 2e0acee9-5107-4256-9e41-3c36344d59b6
+Actes Prévus: 2e0acee9-5107-4256-9e41-3c36344d59b6
+Axe Idéologique: Connexion
+Communautés: 2906e4d2-1b45-80ba-a2e5-d4bd8ad155ac
+Concepts Liés: 07b190d5-afc8-4bc6-ad8a-363ee355c73a, 27d735df-b5e3-418d-887f-9445999a5ae5, 0e003e2b-e803-462b-bc24-ea61543c1782, d976ed40-b264-4384-b4ae-77c2879c7706, 67d66f4b-786c-4b91-a01c-0a49699dd5eb, 417a46d5-03da-49b3-b703-febe446cdcd5, 6b5e10ee-6a9c-49c7-8031-1f6719ddba31, eb7854ee-09bb-43ea-b016-7a26aac0b0ca, 979555a1-9c12-4400-a3b3-340c0554ae93, 8f6e0107-5549-4805-b8a4-035904e85422, fb286474-054c-4231-ac68-e86c2709fdea
+Date De Création: 2025-03-27T22:22:00.000Z
+Date De Naissance: 3357
+Date Vérification: 2026-05-02
+Dates Majeures: 53e4e95f-6f0e-4ea2-9340-7abc9a4846da
+Dernière Modification: 2026-05-31T06:33:00.000Z
+Espèce: 1a16e4d2-1b45-8051-88d9-d744a1bbc095
+Feuilles De Perso: f752b1ec-1d97-4918-ad79-ae73d1c5eb91
+Genre: Non défini
+Inventaires Pnj: 4728749f-fb89-4a67-b8b2-2d6690035005, c599a254-f500-47fc-bbc6-20f537bb8ea7, e84a5699-d645-4a75-8bc1-0468e7d287c2, 7ca06c62-2b56-4db8-a895-39456d5e418a, 0213ffd8-c82a-4610-9374-cc142a0b2d50
+Langues Parlées: 2c6c9f15-dd1c-4f26-a797-089e8273949c, 2a75c5d0-a824-4edf-b86a-12a5bb493269, 23beb27d-8f3d-4aa7-865c-afa946e32b15
+Lieux De Vie: 1b36e4d2-1b45-802c-910a-fb74729b22f8, 1886e4d2-1b45-8150-a894-cfe31d31abd4, 2356e4d2-1b45-8098-93c3-df4a68697585
+Niveau D’ia: co-écrit
+Objets Détenus: ; ; ; 26f6e4d2-1b45-809a-b346-d20068dae6bd; 9187f890-b283-4507-98a4-9da1bf022d4d
+Présence Dans Les Scènes: 1ff6e4d2-1b45-8078-816b-eade8a8d0379
+Présence Dans Les Chapitres: 1ee6e4d2-1b45-8042-896e-c3bacf823a9b, 18a1ba8d-bf8b-4b60-bf6d-7df44c7a38ef, 4a4f2f31-c120-471b-861d-6267866adb2e, bd974188-a0b8-4359-a291-7a419f045c49, 02404796-6760-49f0-8e12-e887e7e98684, 913350c1-0675-41c1-89c5-fab9507997ca, dfd1763c-7dd2-454f-87d4-aef87f9e25a3, 768664ad-d5f0-4c56-a186-6e2b1257f290, b6b646b9-3dc4-4db6-a521-dd32763be781
+Rangs De Communauté: b7d48054-a71b-408d-a829-bd9663e34671
+Référence Visuelle: 2426e4d2-1b45-8181-9266-fdf204fbbbc7, 2436e4d2-1b45-8152-906b-c3d22d702bbc, 2436e4d2-1b45-81d5-9f7b-d03adf715a80
+Réponse Au Problème Moral: Mes cartes sont écrites dans une langue que le système ne comprend pas : ma chair.
+Résumé Ia: Voknir Esh'Maradel, cartographe exilé du Culte de l'Anentropie, vit dans les Plis d'ossements où il consigne obsessivement les distorsions spatiales grâce à des scarifications cartographiques et un bras organique de triangulation; il cherche à prouver que ses découvertes sur le langage spatial des Plis détiennent la clé d’une métamorphose perpétuelle, tout en luttant contre la culpabilité de la profanation qui a causé son bannissement, en transmettant clandestinement ses cartes à l’Exégète Amatru et en offrant aux aventuriers une expertise géométrique, un soutien intellectuel et un bonus de Raison + 1 tant qu’il reste au campement.
+Slug: voknir_esh_maradel
+Âge Ou Nuées Depuis La Naissance: 33
+Épithète: le cartographe
+État: A relire
+État Des Connaissances: 654e563d-59f1-4000-947c-e39dc089ff3f, 1d6dec40-6b9b-4ac8-b981-e3ec8b441720, 5eeb25da-d9dc-43b8-8316-219a3d9112c6
+Re Sume De La Fiche: Ancien cartographe respecté du Culte de l'Anentropie, Voknir Esh'Maradel fut banni·e après avoir profané des écritures sacrées dans une tentative désespérée de sauver son amante Thyra Neth'Kelem des effets d'une faille temporelle. Exilé·e depuis 17 Nuées dans les Plis d'ossements, iel a développé une symbiose troublante avec ce labyrinthe vivant, gravant ses géométries impossibles sur sa propre chair. Cartographe hypervigilant, Voknir apporte au groupe une lecture spatiale instinctive : ses équations ambiantes renforcent les tests de connaissance et d'investigation en zones inconnues ou distordues, et la lecture des textes Kesh-Varash.
+	![](https://prod-files-secure.s3.us-west-2.amazonaws.com/1d8d06fb-9245-45c9-8cb0-4cd4d302ed0d/792c3bd7-bab9-4938-bfb1-91f871773d64/Voknir_1_Gnral.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;amp;X-Amz-Credential=ASIAZI2LB4664EB6763Z%2F20260619%2Fus-west-2%2Fs3%2Faws4_request&amp;amp;X-Amz-Date=20260619T133823Z&amp;amp;X-Amz-Expires=3600&amp;amp;X-Amz-Security-Token=IQoJb3JpZ2luX2VjEPX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDjY4Qt2qFE%2FYR32%2BmCaaoiyZc9hLs2jvCbbE%2B%2BcNkbygIgB9mkPAVlHO3tQvrH9Mu9wUx9q30XQx%2BoUtKfrrm84bIqiAQIvv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDAvTsqvIdoTW%2FdhSuCrcA02czXwKo6yS0nXvE3pQ1WVrcAJqpVWkWJq6dR8xfLeyGkOaXDJW%2Bth8vuVADWLAHPDAzCpWSeIxHeoaDrUevhT069PaPDnDfkXboc7rp5nWjI307%2BB1cIVpK7GopGB%2BmI90ZGX3YguNHKOAh2EOkmJKyak5%2Fa45kXoLfmCVwpDQbjpO5uYTbGWZnQSnHfPM5rCiUoUxUoRgExF6%2FU5%2BdgDEkBvpBswRrDFTPilKgi1Z%2FzjewcJJl01PWg%2BSqyf8x9xxe6LqX7Q3%2BI4X5hAbajHul1%2BXjcRpaFuZVUByiiSSeMibfY6kq2Px8IbQt7mH%2FuI8XjDKibnR0c2Y8GxkbUs6Yf4y4IC6%2FHez5qi8nd7ZNj5M4JFJR0I63scLOxijZWMTAHHYvcDcQEKnfIz5RMN%2BmJtyGx%2BZHKGGy0KNl00K55M0yyWjbunmRmq5kJ2veK5PlbzEFNbTGT%2Fj60p3a5I%2B9upcC1KscFXVIfc0oLJgcYadRUW2b%2FXg8VgfUaAl5ZWtdwsv8Wm%2FCLc%2B31gNUHgosKHdM8BeMh4d5TDgoTLeouhR5FOhVRSHGhgAvOwsnwlM8UdnG8kAYtCTdH3u7oB1igxCe%2FQ%2FfHvGyCiYtXMm6yjD37Wy%2FEQEGWemMN%2Fz1NEGOqUBzAmO5zSL6iT1UfAfA5rsTiHdNx8GKOsdUO97OEh3HlBkvZvuvHQG96Z1u8PSD%2FyxVSKU8PNLJhhYksnjAgLG%2B2f11dekr%2Fp8J9cVHGDdrJM3X4brvKI7Cdq9jKNR7ixkFdBFR86%2BjTDOQqtdxqTGh8b542dWYcLzTgsRH4qWjcYRnwchFE41YegiclgvZGF1WGKumYTyOqmvT6YHC5gTndlR%2Bzd6&amp;amp;X-Amz-Signature=6a7a909767df124cd405d629dcddfaa5d11e0cfb104adf4e105591964dc08560&amp;amp;X-Amz-SignedHeaders=host&amp;amp;x-amz-checksum-mode=ENABLED&amp;amp;x-id=GetObject)
+Guides: &amp;lt;file src="file://%7B%22source%22%3A%22attachment%3A39c167c5-679c-4fa3-8e35-616e9daefde4%3AVoknir_Guide.pdf%22%2C%22permissionRecord%22%3A%7B%22table%22%3A%22block%22%2C%22id%22%3A%222f06e4d2-1b45-8020-a3ef-ddeec2d9c785%22%2C%22spaceId%22%3A%221d8d06fb-9245-45c9-8cb0-4cd4d302ed0d%22%7D%7D"&amp;gt;&amp;lt;/file&amp;gt;
+&amp;lt;pdf src="file://%7B%22source%22%3A%22attachment%3A9828b56c-9430-47fb-a4dd-c2c73d982e82%3AVoknir_Guide.pdf%22%2C%22permissionRecord%22%3A%7B%22table%22%3A%22block%22%2C%22id%22%3A%223656e4d2-1b45-810a-8c93-dd69259a559a%22%2C%22spaceId%22%3A%221d8d06fb-9245-45c9-8cb0-4cd4d302ed0d%22%7D%7D"&amp;gt;&amp;lt;/pdf&amp;gt;
+Corps Et Morphologie: Silhouette voûtée de 2,40 m, très âgé et amaigri. On peut sentir le poids de l’isolement, de la vieillesse et de la maladie  peser sur lui.
+	Sa peau cendrée est entièrement couverte de scarifications cartographiques qui pulsent faiblement selon les distorsions environnantes, créant l'illusion d'une carte vivante.
+	Son bras droit Van'Doei s'est métamorphosé en instrument de triangulation organique. L'humérus et les os de l'avant-bras peuvent se segmenter et s'articuler en multiples points, formant des angles géométriques impossibles pour mesurer les distorsions spatiales. Les doigts se divisent en filaments osseux ténus comme les fils d'un théodolite, capables de s'étendre jusqu'à trois mètres pour tracer des lignes de visée parfaites. Une membrane translucide phosphorescente s'étire entre ces filaments, révélant automatiquement les configurations spatiales en projection cartographique. Ce bras fonctionne comme un compas, un rapporteur et un sextant fusionnés en un seul outil biomécanique.
+Signes D Appartenance: - Voknir porte un masque rudimentaire taillé de ses propres mains dans un morceau d'os après que son masque d’origine lui ait été retiré par le Culte.
+	- Iel porte une tunique de fibres de Lichen-Sang trouée aux endroits où iel se gratte compulsivement pour ajouter de nouvelles cartes.
+	- Avant le bannissement, Voknir avait aussi taillé un Prosôpon d'enfant pour Yul : un masque sobre, presque utilitaire, pensé pour protéger le visage et servir de “leçon de géométrie” plus que de marque de rang. Après 3373 AG, ce Prosôpon devint l'un des derniers signes concrets d'une enfance encore intacte.
+Gestes Et Tics Re Ve Lateurs: - Voknir trace frénétiquement des motifs géométriques sur toute surface disponible quand l'incertitude ou le stress montent.
+	- Voknir ne tient jamais immobile.
+	- Iel marmonne des coordonnées, tape du pied en cadence et fait cliqueter ses instruments pour éviter le silence absolu.
+	- Quand un souvenir de Yul ou de Thyra affleure sans prévenir, les mains de Voknir s'immobilisent d'un coup — plus de tracés, plus de coordonnées, juste une respiration coupée et un regard fixe sur un point que personne d'autre ne voit. Ces moments de silence total sont les seuls où le cartographe cesse d'être un instrument de mesure.
+Ghost: La Veille où Thyra s'est desséchée sous ses yeux, Voknir a compris que la mort, sur Escelion, ne se contente pas de prendre : elle **réécrit**. C'est l'instant où la carte du monde a cessé d'obéir à la promesse implicite du Culte qui a fracturé Voknir, au-delà de la perte de Thyra : *si l'on suit la bonne procédure, si l'on respecte l'ordre des équations, on peut préserver*.
+	Depuis, Voknir vit avec une honte qui se déguise en méthode. La profanation n'a pas été un « accident » : c'était un aveu public que ses compétences n'étaient pas au service de la Fixation, mais de son attachement. Et l'exil, surtout, lui a appris une loi plus cruelle que l'entropie : **la hiérarchie peut décider quel savoir a le droit d'exister**.
+	Ce Ghost s'exprime désormais sous forme d'une croyance inconsciente : si Voknir peut produire une carte parfaite, alors Thyra n'aura pas été perdue « pour rien » ; et si une carte parfaite existe, alors le monde est encore récupérable.
+	Ce que le Ghost dissimule sous la méthode, et que Voknir ne cartographie jamais : transmettre ses relevés à l'Exégète Amatru, Nuée après Nuée, sans jamais recevoir d'accusé de réception, c'est nourrir l'institution qui a décrété quel savoir a le droit d'exister — et qui a décidé que le sien n'en avait pas. La carte parfaite qu'il veut présenter à Amatru ne prouverait pas que le bannissement était injuste : elle validerait le pouvoir de l'Exégète à en juger. Voknir mesure cette géométrie avec la même précision qu'il applique aux distorsions des Plis. C'est précisément ce qu'il ne peut pas s'avouer : il ne sait pas exister hors du regard de celui qui l'a banni.
+Noyau Latent Secondaire: Sous la cuirasse obsessionnelle, Voknir conserve une impulsion plus simple, presque enfantine : **se laisser guider**.
+	Avant le bannissement, cette disposition se traduisait par une confiance rare envers des maîtres, des méthodes, des textes. Après l'exil, elle s'est déplacée vers l'atelier et vers les Plis eux-mêmes : Voknir veut croire qu'il existe, quelque part dans l'os, un *tuteur* qui corrige sans punir.
+	L'atelier n'est pas seulement une hallucination utile. C'est la forme que prend, chez Voknir, une identité possible : celle d'un cartographe qui accepte d'être **apprenti** plutôt que prophète, d'apprendre des contre-mesures au lieu de prouver.
+	Si cet espace intérieur pouvait se stabiliser, Voknir abandonnerait la recherche d'une réhabilitation par Amatru pour chercher à redevenir quelqu'un de fiable.
+De Sir Want: Prouver que ses découvertes sur le langage spatial des Plis détiennent la clé d’une perpétuelle métamorphose libérée de l’entropie.
+	Voknir veut démontrer que les Plis contiennent une forme de conscience primordiale du Léviathan et communiquent effectivement à travers les configurations géométriques. Iel rêve secrètement de présenter à l'Exégète Amatru une cartographie complète des cycles des Plis, espérant non seulement sa réintégration mais sa reconnaissance comme visionnaire incompris.
+	Au fond, cette démonstration cherche à rouvrir un procès bien plus qu’à remporter une victoire scientifique. Si ses cartes ont raison, alors la profanation n’était pas une crise vaine, et Thyra n’a pas été perdue pour une obsession sans objet. Voknir cherche moins à avoir raison qu’à rendre sa faute rétroactivement nécessaire.
+Tableau D Analyse Socio Psychologique: &amp;lt;table fit-page-width="true" header-row="true" header-column="true"&amp;gt;
+&amp;lt;colgroup&amp;gt;
+&amp;lt;col&amp;gt;
+&amp;lt;col width="242"&amp;gt;
+&amp;lt;col width="312"&amp;gt;
+&amp;lt;/colgroup&amp;gt;
+&amp;lt;tr&amp;gt;
+&amp;lt;td&amp;gt;**Niveau**&amp;lt;/td&amp;gt;
+&amp;lt;td&amp;gt;**Description**&amp;lt;/td&amp;gt;
+&amp;lt;td&amp;gt;**Contenu pour ce personnage**&amp;lt;/td&amp;gt;
+&amp;lt;/tr&amp;gt;
+&amp;lt;tr color="gray_bg"&amp;gt;
+&amp;lt;td&amp;gt;**🌱 Racines**&amp;lt;br&amp;gt;*(Prédispositions)*&amp;lt;/td&amp;gt;
+&amp;lt;td&amp;gt;Prédispositions innées et conditions de formation. Ces racines ne déterminent pas les comportements finaux mais créent un terrain sur lequel les niveaux suivants se construisent (ou que les niveaux suivants peuvent filtrer, voire contredire).&amp;lt;/td&amp;gt;
+&amp;lt;td&amp;gt;**Big Five**&amp;lt;br&amp;gt;  • **Ouverture** : Haut (sensibilité aux motifs, appétit de paradoxes)&amp;lt;br&amp;gt;  • **Sérieux** : Haut (discipline de scripteur, rigueur de mesure)&amp;lt;br&amp;gt;  • **Extraversion** : Bas à moyen (hyperverbal en crise, réservé en sécurité)&amp;lt;br&amp;gt;  • **Agréabilité** : Bas (irritabilité, méfiance, impatience envers l'approximation)&amp;lt;br&amp;gt;  • **Neuroticisme** : Haut (hypervigilance, honte active, oscillations)&amp;lt;br&amp;gt;  &amp;lt;br&amp;gt;&amp;lt;br&amp;gt;**Capacités cognitives** : pensée spatiale non-euclidienne, mémoire de trajets quasi parfaite, capacité à convertir des
+... (contexte tronqué)</gdd_context>
+  </context>
+<narrative_guides>
+    <dialogue_guide>
+      <habillage>	**Niveau de langue**
+	- **Registre variable selon le personnage** : chaque personnage parle selon sa propre personnalité, son origine sociale et culturelle
+	- **Du familier au soutenu** : Le forgeron itinérant Grish peut parler de façon familière et directe, tandis que les érudites de la Bibliothèque Sympathique utilisent un registre soutenu
+	- **Vocabulaire adapté** : chaque espèce et culture a ses propres concepts et expressions (pas de réductionnisme)
+	- **Accord de proximité ou de majorité** : pas de primauté du masculin (cf. )
+	- **Ton général du jeu** : sérieux, introspectif, surréaliste
+
+	**Complexité de langage**
+	- **Phrases de longueur variable** : courtes pour les moments de tension, plus longues pour la contemplation et l'introspection
+	- **Vocabulaire riche et précis**, adapté au personnage et à son contexte culturel
+	- **Anachronismes contextuels acceptés** : certaines zones comme la ont un niveau technologique contemporain ou futuriste, ce qui peut se refléter dans le vocabulaire
+	- **Cible** : joueurs et joueuses matures appréciant la profondeur narrative (références : Planescape: Torment, Disco Elysium, Final Fantasy VII à X, Xenogears, Ursula K. Le Guin)
+
+	**Structure type**
+	- **Entrée en matière** : in medias res pour les dialogues majeurs, contextualisation minimale
+	- **Pas de small talk gratuit** : chaque échange doit servir la narration, les thèmes (Conflits de Conscience, Voyage au Cœur de l'Étrange, Des liens d'acier) ou la caractérisation
+	- **Corps du dialogue** :
+		- 2–10 options de dialogue par interaction (cf. )
+		- Minimum 2 choix significatifs par dialogue important
+		- Pas de choix "neutre" ou "skip" — chaque option doit avoir du poids
+	- **Embranchements** : les choix révèlent les dilemmes moraux sans solution idéale
+	- **Fin** : souvent ouverte ou ambiguë, favorisant la réflexion post-dialogue
+	- **Durée cible** : intégration dans la boucle de 5 minutes (mini-scène)
+</habillage>
+    <technique>	**Nombre de caractères minimum et maximum par ligne**
+	- **Maximum** : ≤ 200 mots par panneau. ≤ 80 mots par choix de réponse.
+	- **Contrainte de doublage** : texte synchronisé avec voix + sous-titres
+
+	**Effets des mots ou des lignes**
+	- **Apparition progressive** du texte (style typewriter, \~50 caractères/seconde)
+	- **Possibilité de skip** : touche/bouton dédiée pour passer l'animation
+	- **Sons d'interface** :
+		- Bip doux synchronisé à l'apparition du texte
+		- Tonalité différente selon le personnage parlant (Uresaïr, Eonundé, Vethraak, PNJ)
+		- Son de validation de choix distinct
+	- **Mise en forme autorisée** (codification JSON) :
+		- **Gras** : `\*\*texte\*\*` pour l'emphase
+		- *Italique* : `\*texte\*` pour les pensées, murmures ou ton particulier
+		- ~~Barré~~ : `\~\~texte\~\~` pour les hésitations, corrections
+		- Couleur : `\texte\` pour mise en valeur sémantique (avec parcimonie)
+		- Pause : `\[wait=X\]` pour créer des silences expressifs
+		- Vitesse : `\[speed=X\]` pour ralentir/accélérer ponctuellement
+	- **Limitation** : pas de surutilisation des effets (privilégier la sobriété)
+</technique>
+    <interactivity>	**Choix dans les dialogues**
+	- **Oui, systématiquement** pour les dialogues
+	- **2 à 10 options** pour les dialogues d'exploration narrative standard (cf. )
+	- **Choix exclusifs** : certains ferment des branches définitivement (pas de retour en arrière)
+	- **Choix récursifs** : certains permettent d'approfondir avant de se décider
+	- **Pas de choix "neutre"** : chaque option a un impact (immédiat ou différé)
+
+	**Embranchements dans les dialogues**
+	- **Tous les choix majeurs** créent un embranchement (visible ou invisible)
+	- **Critères d'embranchement** :
+		- Choix liés aux dilemmes moraux centraux (thème Conflits de Conscience)
+		- Choix impliquant Influence/Respect (système mécanique)
+		- Choix révélant/cachant des informations cruciales au lore
+		- Choix affectant les relations entre héroïnes et PNJ
+	- **Embranchements "silencieux"** : certains impacts ne sont visibles qu'à long terme via :
+		- Tags narratifs
+		- Mémoire conversationnelle (flags booléens + compteurs 0–3 par PNJ)
+		- Décroissance après 3 scènes (sauf flags "permanents")
+	- **Pas d'embranchements neutres** : même les choix d'exploration ont un poids narratif ou relationnel
+
+	**Impacte des embranchements**
+	- **Sur l'histoire** : déblocage/verrouillage de quêtes, révélations narratives, accès à des arcs spécifiques
+	- **Sur les relations** :
+		- Modification **Influence** (pression Éthérée sur PJ possédés)
+		- Modification **Respect** (confiance entre Éthérée et PJ)
+		- Modification **Prestige** (réputation auprès des factions)
+	- **Sur les dialogues futurs** : mémoire conversationnelle active (flags + compteurs)
+	- **Sur les capacités** :
+		- Déblocage/blocage de choix futurs selon seuils Influence/Respect
+		- Accès à certaines compétences ou options tactiques
+	- **Sur l'environnement** : modifications visuelles subtiles (PNJ présents/absents, objets déplacés)
+	- **Sur l'accès** : zones, recrutements, quêtes annexes conditionnées par les choix antérieurs
+	- **Architecture en spirale narrative** : révélations progressives modifient rétroactivement la compréhension du joueur (cf. )
+
+	**Gestion des embranchements**
+	- **Points de convergence** :
+		- Rencontres obligatoires avec les trois héroïnes (Uresaïr au Léviathan, Eonundé au Puits Céleste, groupe à Daïlon)
+		- Affrontements avec Valkazer et révélation finale de Jast
+		- Scènes-clés de l'intrigue principale
+	- **Convergence minimale** : Les dialogues sont volontairement explosifs et peuvent mener à tout. Inspiration du Jeu de rôle sur table.
+	- **Branches "mortes" limitées** : éviter les impasses narratives, privilégier les conséquences ambiguës
+	- **Personnages liés par des événements ignorés** : les héroïnes sont connectées par leur passé commun, révélé progressivement (ex: Vethraak ignore qu'Eonundé est une copie de l'amante qu'il a tuée)
+
+Draft - Dialogue Uresaïr et Ethérée
+</interactivity>
+    </dialogue_guide>
+  <narrative_guide># Narration linéaire / directe
+
+	**L'intrigue principale**
+	**Prémisse centrale :** Vous êtes un esprit fragmenté qui possède trois renégates brisées par le même tyran. En tuant son héritier, elles découvrent que ce qui les rendait faibles (être manipulées, contrôlées, réduites à des pions) est précisément ce qui leur permet de détruire le dieu-rêveur qui a figé le monde en castes.
+	**Protagonistes et leurs arcs :**
+	- **L'Éthérée** : Entité collective en quête de possession, lutte entre instinct de domination et volonté de coexistence. Transformation : de l'incapacité à reconnaître l'individualité à l'acceptation de sa vulnérabilité.
+	- **Uresaïr** : Thaumaturge déchue, cherche la paix loin du monde. Arc : de l'isolation volontaire à la réintégration dans le monde comme égale.
+	- **Eonundé** : Copie artificielle révoltée, défie les tyrans. Arc : de la vengeance comme moteur à la construction d'une identité fondée sur la révolte.
+	- **Vethraak** : Courtisan hors caste, vit hors du système. Arc : de l'isolement à l'équilibre entre autonomie et visibilité.
+	**Antagonistes :**
+	- **Valkazer Reitar** : Héritier maudit par l'immortalité défectueuse, force destructrice tragique qui comprend qu'il est le produit d'un monde injuste.
+	- **Vol Reitar** : Créateur de Daïlon, esprit errant cherchant à se reconstituer, symbolise la tyrannie perpétuelle.
+	- **Jast, l'Inéluctable** : Rêveur archétypal qui maintient le panoptique central et fixe la forme du monde. **Note meta** : "Jast" est le nom méta-narratif de cet antagoniste ; totalement inconnu dans le monde. Au mieux, quelques spécialistes ésotériques évoquent l'hypothèse d'un "Rêveur continental", mais sans consensus et avec des théories contradictoires sur ce que cela impliquerait.
+
+	**Les cinématiques**
+	**Nature :** Scènes d'action, moments dynamiques et rythmés où le rythme est contrôlé par le design
+	**Format visuel :**
+	- Panneaux illustrés plein écran en séquence
+	- Possibilité d'animation en boucle (style GIF) ou courtes séquences animées (selon tests techniques)
+	**Dialogues et son :**
+	- Voix + sous-titres synchronisés
+	- Musique calée précisément sur la séquence
+	**Choix interactifs :**
+	- QTE narratifs : temps limité pour décider
+	- 2 à 4 choix par embranchement (mappés sur les touches directionnelles : haut, bas, gauche, droite)
+	- Nombre de choix typiques : 2 à 4
+	- Principe important : pas de choix “à court impact”, chaque choix de cinématique est potentiellement explosif (impact sur toute la séquence).
+	**Embranchements :**
+	- Impact immédiat visible (panneaux alternatifs)
+	- Impact à long terme géré par les systèmes de mémoire (tags, influence, réputation)
+	**Exemples :**
+	- La Vision d'Uresaïr : cauchemar avec choix d'intervenir ou observer la torture
+	- Scènes d’action
+	- Moments de révélation majeurs avec tension dramatique
+
+	**Les barks**
+	**Nature :** Répliques courtes et non-interactives déclenchées par des événements, exprimant les réactions des héroïnes possédées ou les pensées de l'Éthérée
+	**Contexte technique :**
+	- Les dialogues seront doublés, donc pas de combinaison barks/dialogues possible
+	- Les PNJ sont majoritairement statiques, avec leurs propres dialogues formels
+	- Les interactions avec objets passent par des boîtes de dialogue (narrateur)
+	**Événements déclencheurs potentiels :**
+	- **Exploration** : Découverte de lieux significatifs, observation d'éléments environnementaux marquants, approche de points d'intérêt
+	- **Proximité de PNJ** : Passage près d'un personnage (le bark ne remplace pas le dialogue formel)
+	- **Réputation et mémoire** : Entrée dans un lieu avec réputation significative, rencontre avec PNJ lié à un souvenir, déclenchement de tags majeurs
+	- **Gameplay** : Réussite/échec critique d'une action longue, usage d'influence pour forcer une action, première utilisation d'une compétence majeure
+	- **Réactivité aux choix** : Immédiatement après un choix majeur, retour dans un lieu modifié par un choix antérieur
+	- **Atmosphère** : Changements significatifs dans l'environnement, moments de silence prolongé
+	**Variations contextuelles :**
+	- Selon la personnalité de l'héroïne active (Vethraak : détaché et cynique, Eonundé : révoltée, Uresaïr : introspective)
+	- Selon l'état de l'Éthérée (dominante, coexistante, etc.)
+	- Selon la réputation, les relations et les lieux visités
+
+	**L'exploration de l'esprit / les souvenirs revécus**
+	**Structure en spirale narrative :**[\[5\]](https://www.notion.so/11e6e4d21b45807ab475c02430101469)
+	- Révélations progressives sur le passé des héroïnes
+	- Chaque retour modifie la compréhension du joueur
+	- Les personnages sont liés par des événements ignorés (inspiré de Planescape: Torment)
+	- Exemples : Vethraak ignore qu'Eonundé est une copie de l'amante qu'il a tuée
+
+	**Les quêtes annexes**
+	Les quêtes sont documentées dans . Voir exemple : .
+	**Principes directeurs :**
+	- **Choix moraux complexes** : Pas de dichotomie bien/mal. Chaque option doit avoir avantages et inconvénients moralement ambigus (ex: emporter/laisser/détruire)
+	- **Conséquences visibles et invisibles** : Impact immédiat (tags, influence) + effets long terme sur capacités, dialogues, et relations
+	- **Ancrage thématique** : Chaque quête explore au moins un des trois thèmes principaux (Conflits de conscience, Voyage au cœur de l'étrange, Des liens d'acier)
+	- **Contraintes narratives** : Éviter les solutions "parfaites" via des contraintes (ex: "pas 3x le même choix" force la nuance)
+	- **Profondeur psychologique** : Révéler l'intériorité, les motivations et contradictions des personnages
+	- **Ton et durée** : Sérieux, introspectif, surréaliste. Viser 10-20 minutes de gameplay
+	- **Cohérence avec le monde** : Informer la zone et l'intrigue principale (lore, PNJ, récompenses)
+	
+		Plus d’informations dans 
+	
+
+---
+# Narration environnementale
+
+	**Les niveaux de jeu**
+	**Structure géographique d'Escelion :**
+	- **3 zones concentriques** : Vieille Ville → Couronnes Intermédiaires → Périphéries
+	- **Note meta-narrative** : Un Rêveur maintient invisiblement la structure panoptique depuis la Vieille Ville, mais cette réalité est cachée jusqu'à la fin du jeu
+	- **Continent-monde plat** : surplombé d'une voûte rocheuse (ciel de roche)
+	- **Lois physiques fragmentées** : les constantes varient selon les zones
+	- **Éclairage** : Deimos (insectes géants lumineux) et phénomènes locaux
+	**Lieux centraux :**
+	- **Citadelle de Daïlon** : Structure utopique en ruines, cœur de l'intrigue
+	- **Le Léviathan** : Où Uresaïr émerge, gardé par Akthar-Neth
+	- **Le Puits Céleste** : Lieu de rencontre avec Eonundé
+	- **La Vieille Ville** : Panoptique de Jast, système de classification (ressource/intrus/parasite)
+
+	**Les décors**
+	**Esthétique générale :**
+	- Fantasy psychédélique, surfantastique
+	- Surréalisme onirique : léviathans de pierre, cités mécaniques flottantes, étoiles-insectoïdes
+	- Luxe de détails dans un style peint (inspiration Dragon's Crown)
+	- L'étrange comme norme, l'horreur avec des traits aimables
+
+	**Les éléments interactifs**
+	**Objets narratifs majeurs :**
+	- Déclenchent des dialogues formels (comme les PNJ)
+	- Tradition CRPG (ex: Baldur's Gate 2)
+	- Peuvent ouvrir des boîtes de dialogue avec choix multiples
+	- Liés à des quêtes, découvertes lore, ou moments clés
+	**Objets d'examen simples :**
+	- Génèrent un texte flottant (style BG2) **ou** un bark
+	- Permettent d'enrichir l'environnement sans alourdir l'interaction
+	- Contribuent à la narration environnementale
+	**Cohérence avec les systèmes :**
+	- Intégration avec les actions longues (examens approfondis)
+	- Lien avec le système de tags et de mémoire narrative
+	- Respect du ton contemplatif et introspectif du jeu
+
+	**Les visuels des personnages**
+	**Diversité des espèces :**
+	- Van'Doei, Aedres, Imuins et nombreuses autres espèces conscientes
+	- Designs "inhumains" en apparence mais "humains" psychologiquement
+	- Vieillissement variable selon les espèces (ex : Van'Doei adulte à 10 Nuées, vieillard à 30 Nuées)
+
+	**Les animations des personnages**
+	**Système directionnel :**
+	- Sprites 8 directions pour personnages jouables (héroïnes possédées)
+	- Sprites 4 directions pour NPCs standard
+	- Orientation automatique selon direction de mouvement
+	- Flip horizontal automatique si nécessaire
+	**Cycles d'animation :**
+	- **Idle** : Respiration subtile, micro-mouvements naturels
+	- **Walk** : 4-6 frames par direction, 12-15 fps, mouvement mesuré (pas de course)
+	- Transitions fluides idle↔walk (\Structure narrative en Spirale
+Liste de souhaits
+Que se passerait-il si ?…
+L’Immortalité dans Alteir
+Défis de la prémisse
+Principe directeur et conflit central
+Les meilleurs personnages de la prémisse
+Voie unique de cause à effet
+Possibilités de transformation
+</narrative_guide>
+  </narrative_guides>
+<scene_instructions>Rôle narratif : Première rencontre in-game, établissement de la relation, présentation du personnage.
+
+Objectifs :
+- Créer une première impression mémorable du personnage
+- Établir le ton de la relation future (amical, hostile, neutre, etc.)
+- Présenter la personnalité, les motivations ou le contexte du personnage
+- Donner envie au joueur d'interagir à nouveau avec ce personnage
+- Adapter le dialogue selon qu'une relation préexistante existe ou non (même si c'est la première rencontre in-game)
+
+Tensions : Variables selon le contexte. Peut aller de la curiosité bienveillante à la méfiance, en passant par la neutralité.
+
+Ce qui doit s'y produire : Établissement de la relation, révélation de la personnalité du PNJ, création d'un moment marquant qui donne envie de revenir interagir avec ce personnage. Le dialogue doit s'adapter au contexte : si le joueur et le PNJ se connaissent déjà (hors jeu), la première rencontre in-game peut faire référence à cette relation tout en restant une première interaction dans le jeu.
+
+--- Référence canonique (première rencontre in-game ; ne pas recopier mot pour mot) ---
+VOKNIR : Oh Théomaque… non, non, l’angle confirme, c’est bien vous.
+	VOKNIR : Les saints Substrats soient avec vous. Je vous en prie, ayez pitié de mon humble habitat : ces lieux sont indignes de votre auguste présence, mais l’atelier promet que la carte, elle, n’a pas menti.
+	- **Où** : habitat de Voknir dans les Plis d’ossements.
+	- **Quand** : première rencontre avec Voknir lors de l’exploration des Plis.
+	- **Déclencheur** : le groupe approche de son atelier-cartothèque ou suit une anomalie cartographique jusqu’à lui.
+	- **Activité** : Voknir vérifie des cartes vivantes et des mesures impossibles, en dialogue avec son atelier.
+	- **Conditions d'accès** : accès aux Plis d’ossements et survie jusqu’à la zone de l’atelier.
+	- **Convention d'ouverture** : la scène commence par une narration, puis par le dialogue de Voknir. Uresaïr ou une autre hôte de l'Éthérée ne parle jamais en premier.
+
+Beat dramatique (première rencontre in-game) : le PNJ ouvre la scène (convention : le PNJ parle en premier). Créer une première impression mémorable et établir le ton de la relation. Si une relation préexiste dans le lore, la faire sentir sans résumer toute la biographie. S'appuyer uniquement sur le contexte GDD fourni : ne pas inventer de complot, d'agents, d'éclaireurs ni d'artefacts non documentés.
+
+Contraintes de génération:
+- Format `line` : paroles « … » ; didascalies *italique* narrateur (3e pers.), hors guillemets.
+- Didascalies : claires, concises ; pas de jargon opaque ni rituel commenté dans les guillemets.
+- Interdit : acquiescements vides (« Très bien », « Vous l'avez demandé ») en ouverture.
+- `choices.text` : « réplique PJ » ou *[geste]* ; pas synopsis d'intention.
+- Flags / état durable → `consequences` en complément si besoin.
+- Ne pas ajouter d'attribut test sur les choix ; traitRequirements autorisés.
+- 1 à 4 phrases (didascalie + réplique comptées ensemble) ; même tu/vous que le START.
+- Ne pas répéter formulations déjà dans l'historique.
+</scene_instructions>
+</prompt>

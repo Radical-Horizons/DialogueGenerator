@@ -1,0 +1,238 @@
+{
+  "schemaVersion": "1.2.0",
+  "nodes": [
+    {
+      "id": "START",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je n'amène pas de présentations, Uresaïr : mes éclaireurs ont remonté, sous la nef de la Vieille Ville, un fragment qui vibre comme un cœur brisé — un éclat de Deshkarta. Le Culte prévoit de l'exposer cette nuit pour en extraire « la vérité » ; si je l'empêche, ils sauront qui a intervenu. Décide : tu le prends maintenant — au prix d'une attention publique et de visions plus violentes — ou tu me laisses le récupérer à l'ombre, en me confiant le mensonge nécessaire pour le protéger.",
+      "consequences": {
+        "flag": "SHARD_UNDER_CATHEDRAL",
+        "description": "Un fragment de Deshkarta a été découvert sous la Cathédrale de la Vieille Ville ; le Culte prévoit de l'exposer ce soir. Choix du joueur déterminera l'exposition publique ou la récupération en secret."
+      },
+      "choices": [
+        {
+          "text": "Je m'empare du fragment maintenant — qu'ils sachent à qui appartient la vérité (je prends la visibilité et ses douleurs).",
+          "targetNode": "node-ef35fe85711e4e0d8e7d32e7ed3f4c6d",
+          "traitRequirements": [
+            {
+              "trait": "Obstiné",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "choice_START_0"
+        },
+        {
+          "text": "Non. Tu le prends en secret. Cache-le, mens au Culte — je refuse d'attirer leur nid sur notre trace.",
+          "targetNode": "node-eb670b9be6844ed384e13ccb4a31885b",
+          "traitRequirements": [
+            {
+              "trait": "Patient",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "choice_START_1"
+        }
+      ]
+    },
+    {
+      "id": "node-ef35fe85711e4e0d8e7d32e7ed3f4c6d",
+      "speaker": "Voknir",
+      "line": "Tu veux l'exposer ? Très bien. Je vais rompre le sceau qui le maintient silencieux — mais sache ce que cela déclenche : je tranche ma paume et j'y presse l'éclat pour te le rendre transmissible. À l'instant où je le fais, une résonance monte sous la voûte : les torches s'embrasent d'elles‑mêmes et la cloche du sanctuaire répercute trois coups, signe que l'assemblée lève les yeux. Si tu le prends maintenant, tu seras vu et nos esprits seront liés tant que tu porteras cette chose.",
+      "consequences": {
+        "flag": "FragmentExposedPublicly",
+        "description": "Le fragment est rendu public : l'assemblée est alertée et le porteur est lié mentalement au PNJ."
+      },
+      "choices": [
+        {
+          "text": "Je prends l'éclat et je l'expose — que la foule voie et que la vérité me traverse.",
+          "targetNode": "node-cfffd449c1094c6a95a1fdbc134fc4ec",
+          "choiceId": "choice_node-ef35fe85711e4e0d8e7d32e7ed3f4c6d_0"
+        },
+        {
+          "text": "Je prends l'éclat, puis je fuis la nef pour limiter la mise en scène — profite de la diversion pour t'éclipser.",
+          "targetNode": "node-fc706a234bf145d58b1fbadc5b295bb7",
+          "choiceId": "choice_node-ef35fe85711e4e0d8e7d32e7ed3f4c6d_1"
+        }
+      ]
+    },
+    {
+      "id": "node-eb670b9be6844ed384e13ccb4a31885b",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu veux que je le prenne en secret. Je peux l'arracher dans l'ombre, mais l'éclat est lié au lieu : s'il est déplacé sans garde, il projette ses visions sur celui qui le porte et me brise la mémoire quand je tente de les contenir. J'ai un talisman qui retiendra ces images, mais il doit être nourri d'un souvenir réel — je le prends en échange. Donne‑m'en un, ou je refuse et je frapperai le socle ce soir : le bruit réveillera les veilleurs et tout sera exposé.",
+      "consequences": {
+        "flag": "memory_price_offered",
+        "description": "Voknir réclame un souvenir en paiement : accepter lui permet de retirer l'éclat en secret ; refuser conduit à une rupture publique du socle."
+      },
+      "isLongRest": false,
+      "choices": [
+        {
+          "text": "Je te donne un souvenir — prends‑le en secret et repars ce soir.",
+          "targetNode": "node-cc30eabcc00344cc862aad9f17a76f30",
+          "choiceId": "choice_node-eb670b9be6844ed384e13ccb4a31885b_0"
+        },
+        {
+          "text": "Je refuse de céder un souvenir. Si tu ne peux pas l'enlever sans ça, frappe le socle et assume la lumière.",
+          "targetNode": "node-32db30bb896c4ba28201d4b52639ddeb",
+          "choiceId": "choice_node-eb670b9be6844ed384e13ccb4a31885b_1"
+        }
+      ]
+    },
+    {
+      "id": "node-cc30eabcc00344cc862aad9f17a76f30",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je prends ton souvenir. Approche — je poserai ma paume sur ta tempe et le talisman boira l'image ; une fois consommée, tu ne pourras plus la ramener. En échange, je cacherai l'objet dans un refuge que je connais et je laisserai un faux rapport au sanctuaire ce soir, mais le rite exigera que je campe près de l'entrée pendant trois nuits — cela nous rend vulnérables si quelqu'un surveille nos allées. Une marque froide tracera le passage du souvenir sur ta main ; elle permettra à quiconque la reconnaît de deviner qu'un transfert a eu lieu.",
+      "consequences": {
+        "flag": "SOUVENIR_TRANSMIS",
+        "description": "Le joueur remet un souvenir à Voknir : le souvenir sera effacé du souvenir du joueur une fois le talisman nourri. Voknir cache l'objet et laisse un faux rapport au sanctuaire. Le joueur reçoit une marque sur la main."
+      },
+      "isLongRest": false,
+      "choices": [
+        {
+          "text": "Je te donne le visage d'une personne chère — prends‑le maintenant.",
+          "targetNode": "node-4e64c2c72ebe48ae91c6595ad4c646e7",
+          "choiceId": "choice_node-cc30eabcc00344cc862aad9f17a76f30_0"
+        },
+        {
+          "text": "Je te donne un lieu — le souvenir de notre refuge ; préserve les visages.",
+          "targetNode": "node-800e22966bb74fa09126607587d69914",
+          "choiceId": "choice_node-cc30eabcc00344cc862aad9f17a76f30_1"
+        }
+      ]
+    },
+    {
+      "id": "node-32db30bb896c4ba28201d4b52639ddeb",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Tu refuses de céder un souvenir : je frapperai le socle ce soir, seul. L'impact brisera la pierre et enverra des éclats ; le premier corps qui touchera l'un d'eux portera une marque froide qui liera la vision à sa chair. Je subirai la rafale de souvenirs et j'y perdrai des pans de mémoire, mais je ferai ce que tu as demandé.",
+      "consequences": {
+        "flag": "SocleBrisé",
+        "description": "Le socle sera brisé ce soir. Un éclat laissera une marque sur la première main qui le touchera ; Voknir subira une perte de mémoire immédiate."
+      },
+      "choices": [
+        {
+          "text": "Je me tiens prêt : récupère l'éclat et donne‑le moi dès qu'il tombe.",
+          "targetNode": "node-4c442671c0664403bad7946abfd24882",
+          "choiceId": "choice_node-32db30bb896c4ba28201d4b52639ddeb_0"
+        },
+        {
+          "text": "Attends : j'interviens avant toi et le prends moi‑même, même si ça me marque.",
+          "targetNode": "node-f8029379a3e448be80a399dceb0c6080",
+          "choiceId": "choice_node-32db30bb896c4ba28201d4b52639ddeb_1"
+        }
+      ]
+    },
+    {
+      "id": "node-cfffd449c1094c6a95a1fdbc134fc4ec",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je presse ma paume contre la tienne ; le reliquat s'ouvre comme une fissure de verre sur ta peau et projette une lueur froide dans la nef. Une marque noire se dessine sur ma main, nette comme un sceau, et des visages autour de nous se raidissent en la reconnaissant. Un cri part d'un côté de la foule, des fidèles se lèvent, et quelqu'un renverse sa chaise en reculant. Je sens nos pensées se toucher — ta douleur m'atteint comme une lame — et je ne peux plus prétendre être resté à l'écart.",
+      "consequences": {
+        "flag": "marque_devoilee_et_lien",
+        "description": "La marque sur la paume de Voknir est visible ; la foule sait qu'un lien existe entre vous. Le lien mental est actif tant que le reliquat est porté."
+      },
+      "choices": [
+        {
+          "text": "Je m'avance et j'annonce la vision : je prends la douleur, je dis la vérité au peuple.",
+          "targetNode": "node-151cd26f02834c43915dea04f15fc859",
+          "choiceId": "choice_node-cfffd449c1094c6a95a1fdbc134fc4ec_0"
+        },
+        {
+          "text": "Je montre la marque de Voknir à haute voix et j'exige des comptes : qu'il rende des explications maintenant.",
+          "targetNode": "node-d7c64b92703d4d2084c00b28078c4267",
+          "choiceId": "choice_node-cfffd449c1094c6a95a1fdbc134fc4ec_1"
+        }
+      ]
+    },
+    {
+      "id": "node-fc706a234bf145d58b1fbadc5b295bb7",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Pars vite. Je vais me fondre parmi les stalles pour tisser ma fuite, mais je ne peux pas te promettre d'être loin. À l'instant où tu l'as pris, une image m'a traversé — un clocher marqué d'une plaque: « Rue des Lames » — retiens ce nom. Regarde : un homme au premier rang se lève et pointe la porte sud; deux escorteurs se détachent déjà pour l'intercepter.",
+      "consequences": {
+        "flag": "PursuitInitiated",
+        "description": "Des escorteurs se dirigent vers la porte sud ; le nom 'Rue des Lames' est apparu dans la vision et devient un indice exploitable."
+      },
+      "choices": [
+        {
+          "text": "Je fonce vers la porte sud, j'emprunte la Rue des Lames et je me cache dans l'ombre.",
+          "targetNode": "node-d59fe31c563947a78a6c560e1c3a7770",
+          "choiceId": "choice_node-fc706a234bf145d58b1fbadc5b295bb7_0"
+        },
+        {
+          "text": "Je crée une diversion : je cours vers la galerie en criant et j'accuse le culte d'un complot, pour que tu puisses t'éclipser.",
+          "targetNode": "node-eae45633943f49659dc1ee29a28fb691",
+          "choiceId": "choice_node-fc706a234bf145d58b1fbadc5b295bb7_1"
+        }
+      ]
+    },
+    {
+      "id": "node-151cd26f02834c43915dea04f15fc859",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je te pousse vers l'estrade et je laisse la lumière te frapper ; la nef retient son souffle. Le Grand Acolyte Narlen ordonne aux sentinelles de se rapprocher et l'une d'elles claque sa hampe contre le sol comme pour marquer le silence. Une vieille femme se lève en hurlant que les anciens rites sont brisés, et une fissure se dessine sur une dalle proche, projetant des éclats de pierre. Je sens nos esprits liés ; si tu déclares la révélation, je serai contraint de la confirmer à voix haute et d'en payer le prix à tes côtés.",
+      "consequences": {
+        "flag": "Lien_public_et_partagé",
+        "description": "Le lien mental entre Voknir et le porteur devient manifeste : Voknir partagera les visions et leurs douleurs tant que le fragment reste intact ou lié."
+      }
+    },
+    {
+      "id": "node-d7c64b92703d4d2084c00b28078c4267",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu veux des comptes ? Très bien. J'ai pris sur moi de contenir ce fragment par un serment ancien, et la marque que tu brandis n'est pas qu'une signature : c'est l'emprunt de ma parole publique ; si je mens pour toi, je m'éteins peu à peu et le Culte s'en servira comme d'un prétexte. Regarde — deux novices montent déjà entre les bancs, leurs capuchons tirés, et une voix au fond réclame qu'on saisisse l'hérétique. Je refuse de mentir à la cité au prix de ma vie ; je renonce à te couvrir et je m'écarte pour ne pas devenir ton bouclier. Si tu veux la vérité, porte-la toi‑même, ou rends‑moi l'objet et je tenterai seul des négociations nocturnes.",
+      "consequences": {
+        "flag": "Voknir_Renonce",
+        "description": "Voknir avoue son serment et renonce à protéger Uresair publiquement ; l'assemblée se mobilise."
+      }
+    },
+    {
+      "id": "node-d59fe31c563947a78a6c560e1c3a7770",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu t'engouffres dans l'embrasure; je vois déjà les escorteurs se lancer. Un homme en surplis se précipite vers moi et claque la porte latérale pour bloquer la nef — tu auras un passage, mais il sera étroit et surveillé. Je reste sur place: je me rends et j'endosserai la faute, ils me ligoteront pour que tu partes sans être inquiété. Pars maintenant; je te couvre jusqu'à ce qu'on m'atteigne.",
+      "consequences": {
+        "flag": "VoknirCapturé",
+        "description": "Voknir se rend volontairement pour couvrir la fuite du PJ; il sera détenu par le culte."
+      }
+    },
+    {
+      "id": "node-eae45633943f49659dc1ee29a28fb691",
+      "speaker": "Voknir",
+      "line": "Parfait. Je sors de l'ombre et j'endosse la faute : je hurle que c'est moi qui ai touché l'éclat, ils viendront sur moi pendant que tu t'échappes. Deux escorteurs se détachent déjà vers la nef — je feins la confession et je les amènerai loin, quitte à me faire arrêter. Retrouve‑moi sous l'arche brisée au bord du canal; si tu refuses de fuir, je consumerai le mensonge et je resterai ici pour leur colère.",
+      "consequences": {
+        "flag": "Voknir_couvre_toi",
+        "description": "Voknir se déclare coupable publiquement pour permettre à Uresair de fuir ; il prévoit de rejoindre le point de rendez‑vous sous l'arche brisée."
+      }
+    },
+    {
+      "id": "node-4e64c2c72ebe48ae91c6595ad4c646e7",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Bien. Approche — je poses ta tempe contre ma paume et l'amulette boira le visage que tu m'offres. Quand l'image partira, elle partira sans retour : tu ne pourras plus la rappeler, ni en pleurer le manque. Je glisserai la pierre ce soir dans la niche sous la stèle brisée de la galerie des Vents et je déposerai un faux registre au sanctuaire avant minuit ; en contrepartie, une veine pâle parcourra ta main, signe visible pour qui connaît sa langue. Je prends le souvenir maintenant si tu le confirmes ; sinon, je garderai le silence mais frapperai le socle ce soir et l'exposition aura lieu.",
+      "consequences": {
+        "flag": "souvenir_consommé",
+        "description": "Le souvenir donné est consommé par l'amulette et effacé de la mémoire du donneur; la pierre sera cachée sous la stèle brisée de la galerie des Vents et un faux registre sera laissé au sanctuaire."
+      }
+    },
+    {
+      "id": "node-800e22966bb74fa09126607587d69914",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je prends le lieu, mais j'extrais seulement ce qui le rend reconnaissable — les plans, les odeurs, les chemins — pas les visages. L'appareil avalera cette image et t'en dépouillera à jamais ; en opérant, il tracera un signe glacé sur ta main. Après le transfert, je cacherai l'éclat dans mon abri et je tiendrai la garde à l'entrée jusqu'à ce que je puisse partir en sécurité.",
+      "consequences": {
+        "flag": "OfferToTransferPlace",
+        "description": "Le PJ offre le souvenir du refuge ; Voknir peut l'extraire maintenant. Si le transfert a lieu, le joueur perdra la mémoire du lieu et une marque apparaîtra sur sa main ; Voknir gardera l'entrée pendant la durée requise et cachera l'éclat."
+      }
+    },
+    {
+      "id": "node-4c442671c0664403bad7946abfd24882",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je frapperai le socle ce soir, à la tombée du guet. L'impact m'arrachera des pans de mémoire : je perdrai le nom d'un village au sud et la silhouette d'un compagnon que je reconnaîtrais plus. Quand l'éclat tombera, je le déposerai entre tes mains — au contact il te marquera et te liera aux visions jusqu'à ce que le talisman reprenne sa charge. Après la transmission, je me retirerai dans les galeries et j'effacerai toute trace de mon passage pour te garder hors de leur regard.",
+      "consequences": {
+        "flag": "SHARD_TRANSFER_PENDING",
+        "description": "Le socle sera frappé ce soir. Voknir subira une perte de mémoire ciblée et prévoit de transmettre l'éclat au PJ ou de le dissimuler selon la décision du PJ."
+      }
+    },
+    {
+      "id": "node-f8029379a3e448be80a399dceb0c6080",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Tu veux l'arracher toi‑même. Très bien. Si tu le retires sans précaution, il s'implantera à ta chair et t'imposera ses visions comme une pluie froide ; la marque apparaîtra tout de suite, vivante et douloureuse. Je peux fixer sur toi une amulette qui siphonnera ces images, mais elle exige un souvenir véritable pour se nourrir — je le prendrai et le brûlerai pour la lier. Choisis : tu l'arraches sans aide et assumes la marque, ou tu me donnes un souvenir et je pose l'amulette avant que tu t'en empares.",
+      "consequences": {
+        "flag": "decision_fragment_taken",
+        "description": "Le joueur choisira de prendre le fragment maintenant (avec ou sans protection) ; la marque se posera immédiatement si prise, ou l'amulette sera attachée après échange du souvenir."
+      }
+    }
+  ]
+}

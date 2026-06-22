@@ -45,6 +45,11 @@ from api.exceptions import InternalServerException, ValidationException, NotFoun
 from services.dialogue_generation_service import DialogueGenerationService
 from services.configuration_service import ConfigurationService
 from services.scene_dramatis import enrich_context_selections_for_scene, resolve_scene_dramatis
+from services.scene_instruction_loader import augment_first_meeting_instructions
+from services.dialogue_dramatic_progression import (
+    DEFAULT_PROGRESSION_MAX_DEPTH,
+    compose_generation_instructions,
+)
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 from services.unity_dialogue_export_service import (
@@ -181,16 +186,35 @@ def _build_prompt_from_request(
         player_character_id=request_data.player_character_id,
         npc_speaker_id=request_data.npc_speaker_id,
         context_selections=request_data.context_selections.model_dump(),
+        character_catalog=context_builder.get_characters_names(),
     )
     enriched_context = enrich_context_selections_for_scene(
         request_data.context_selections,
         dramatis,
         character_catalog=context_builder.get_characters_names(),
         random_excerpt_count=1,
+        context_builder=context_builder,
     )
     context_selections_dict = enriched_context.to_service_dict()
     npc_speaker_id = dramatis.npc_speaker_id
     player_character_id = dramatis.player_character_id
+
+    raw_scene_instructions = (request_data.user_instructions or "").strip()
+    if getattr(request_data, "scene_type", None) == "first_meeting" and (
+        "--- Référence canonique" not in raw_scene_instructions
+    ):
+        raw_scene_instructions = augment_first_meeting_instructions(
+            raw_scene_instructions,
+            npc_speaker_id=npc_speaker_id,
+            context_builder=context_builder,
+        )
+    scene_instruction = compose_generation_instructions(
+        raw_scene_instructions,
+        depth=0,
+        max_depth=DEFAULT_PROGRESSION_MAX_DEPTH,
+        is_start=True,
+        scene_type=getattr(request_data, "scene_type", None),
+    )
 
     # 4. Construire le contexte GDD via ContextBuilder
     if request_data.previous_dialogue_preview:
@@ -199,7 +223,7 @@ def _build_prompt_from_request(
     # Construire le contexte JSON au plafond de mesure ; le budget utilisateur s'applique au texte.
     structured_context = context_builder.build_context_json(
         selected_elements=context_selections_dict,
-        scene_instruction=request_data.user_instructions,
+        scene_instruction=scene_instruction,
         field_configs=request_data.field_configs,
         organization_mode=request_data.organization_mode or "narrative",
         max_tokens=Defaults.MAX_CONTEXT_TOKENS,
@@ -214,7 +238,7 @@ def _build_prompt_from_request(
 
     # 5. Construire le prompt unifié via le builder unique (PromptInput)
     prompt_input = PromptInput(
-        user_instructions=request_data.user_instructions,
+        user_instructions=scene_instruction,
         npc_speaker_id=npc_speaker_id,
         player_character_id=player_character_id,
         skills_list=skills_list,

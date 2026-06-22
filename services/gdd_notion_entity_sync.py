@@ -13,6 +13,10 @@ from services.gdd_loader import GDDLoader
 from services.gdd_name_resolver import GddNameResolver
 from services.gdd_notion_sync_mapper import extract_page_title
 from services.gdd_notion_sync_utils import category_stem_to_list_category_key, normalize_notion_id
+from services.gdd_shard_filenames import (
+    build_gdd_shard_filename,
+    notion_page_id_from_shard_stem,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -67,14 +71,8 @@ def resolve_canonical_name(
 
 
 def _notion_id_from_shard_path(path: Path) -> Optional[str]:
-    """Extrait l'UUID Notion depuis ``{uuid}.json`` si possible."""
-    stem = path.stem.strip()
-    if not stem:
-        return None
-    try:
-        return normalize_notion_id(stem)
-    except ValueError:
-        return None
+    """Extrait l'UUID Notion depuis un fichier shard (legacy ou ``nom_uuid``)."""
+    return notion_page_id_from_shard_stem(path.stem.strip())
 
 
 def find_notion_page_id_on_disk(
@@ -210,7 +208,7 @@ def resolve_entity_page(
         if notion_hit is not None:
             page_id, title = notion_hit
             list_key = category_stem_to_list_category_key(stem) or stem
-            rel = f"{list_key}/{page_id}.json"
+            rel = f"{list_key}/{build_gdd_shard_filename(title, page_id)}"
             return EntityPageResolution(
                 query_name=query,
                 resolved_name=title,

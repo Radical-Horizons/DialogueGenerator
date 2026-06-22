@@ -18,6 +18,7 @@ from services.configuration_service import ConfigurationService
 from services.llm_usage_service import LLMUsageService
 from services.context_truncator import cap_context_text_to_budget
 from services.scene_dramatis import enrich_context_selections_for_scene, resolve_scene_dramatis
+from services.scene_instruction_loader import augment_first_meeting_instructions
 from services.dialogue_dramatic_progression import (
     DEFAULT_PROGRESSION_MAX_DEPTH,
     compose_generation_instructions,
@@ -144,12 +145,14 @@ class UnityDialogueOrchestrator:
                 player_character_id=request_data.player_character_id,
                 npc_speaker_id=request_data.npc_speaker_id,
                 context_selections=request_data.context_selections.model_dump(),
+                character_catalog=character_catalog,
             )
             enriched_context = enrich_context_selections_for_scene(
                 request_data.context_selections,
                 dramatis,
                 character_catalog=character_catalog,
                 random_excerpt_count=1,
+                context_builder=context_builder,
             )
             context_selections_dict = enriched_context.to_service_dict()
             all_characters = context_selections_dict.get("characters", [])
@@ -161,11 +164,22 @@ class UnityDialogueOrchestrator:
             npc_speaker_id = dramatis.npc_speaker_id
             player_character_id = dramatis.player_character_id
 
+            raw_scene_instructions = (request_data.user_instructions or "").strip()
+            if request_data.scene_type == "first_meeting" and (
+                "--- Référence canonique" not in raw_scene_instructions
+            ):
+                raw_scene_instructions = augment_first_meeting_instructions(
+                    raw_scene_instructions,
+                    npc_speaker_id=npc_speaker_id,
+                    context_builder=context_builder,
+                )
+
             scene_instruction = compose_generation_instructions(
-                request_data.user_instructions or "",
+                raw_scene_instructions,
                 depth=0,
                 max_depth=DEFAULT_PROGRESSION_MAX_DEPTH,
                 is_start=True,
+                scene_type=request_data.scene_type,
             )
             
             # 2. Charger catalogues (services injectés)
@@ -197,17 +211,21 @@ class UnityDialogueOrchestrator:
                 selected_elements=context_selections_dict,
                 scene_instruction=scene_instruction,
                 field_configs=None,
-                organization_mode="narrative",
+                organization_mode=request_data.organization_mode or "narrative",
                 max_tokens=request_data.max_context_tokens,
                 include_dialogue_type=True,
                 element_modes=context_selections_dict.get("_element_modes")
             )
             # Sérialiser en texte pour le LLM, puis appliquer le plafond utilisateur (budget contexte)
+            serialized_context = _coerce_context_text(
+                context_builder.serialize_context_to_text(structured_context)
+            )
+            all_character_names = context_selections_dict.get("characters") or []
             context_summary = cap_context_text_to_budget(
-                _coerce_context_text(
-                    context_builder.serialize_context_to_text(structured_context)
-                ),
+                serialized_context,
                 request_data.max_context_tokens,
+                protect_entity_names=[npc_speaker_id] if npc_speaker_id else None,
+                all_entity_names=all_character_names,
             )
             
             # 4. Construire le prompt Unity via le builder unique

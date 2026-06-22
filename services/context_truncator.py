@@ -2,7 +2,7 @@
 import json
 import logging
 import re
-from typing import Any, Optional, Union
+from typing import Any, Optional, Sequence, Union
 
 # Import tiktoken avec gestion d'erreur
 try:
@@ -150,6 +150,120 @@ class ContextTruncator:
         return '\n'.join(truncated_lines)
 
 
+_GDD_CATEGORY_MARKERS: tuple[str, ...] = (
+    "--- LOCATIONS ---",
+    "--- ITEMS ---",
+    "--- SPECIES ---",
+    "--- COMMUNITIES ---",
+    "--- QUESTS ---",
+    "--- NARRATIVE_STRUCTURES ---",
+    "--- CHAPTERS ---",
+    "--- SCENES ---",
+)
+
+
+def _extract_gdd_entity_block(section_text: str, entity_name: str, entity_names: Sequence[str]) -> str:
+    """Extrait le bloc texte d'une fiche GDD (marqueur ``--- Nom ---``)."""
+    start_marker = f"--- {entity_name} ---"
+    start_idx = section_text.find(start_marker)
+    if start_idx < 0:
+        return ""
+    end_idx = len(section_text)
+    search_from = start_idx + len(start_marker)
+    for other in entity_names:
+        if other == entity_name:
+            continue
+        marker = f"\n--- {other} ---"
+        pos = section_text.find(marker, search_from)
+        if pos >= 0:
+            end_idx = min(end_idx, pos)
+    for cat_marker in _GDD_CATEGORY_MARKERS:
+        pos = section_text.find(f"\n{cat_marker}", search_from)
+        if pos >= 0:
+            end_idx = min(end_idx, pos)
+    return section_text[start_idx:end_idx].strip()
+
+
+def cap_context_text_preserving_entities(
+    text: str,
+    max_tokens: int,
+    protect_entity_names: Sequence[str],
+    *,
+    all_entity_names: Optional[Sequence[str]] = None,
+) -> Optional[str]:
+    """Tronque le contexte GDD en préservant les fiches ``protect_entity_names``.
+
+    Les entités protégées sont conservées intégralement ; le reste est tronqué
+    depuis la fin pour respecter ``max_tokens``.
+
+    Args:
+        text: Contexte sérialisé (format ``--- … ---``).
+        max_tokens: Plafond de tokens.
+        protect_entity_names: Noms de fiches à ne jamais couper.
+        all_entity_names: Tous les noms de fiches présents (délimitation des blocs).
+
+    Returns:
+        Texte tronqué, ou None si la section CHARACTERS est absente.
+    """
+    if not text or max_tokens <= 0 or not protect_entity_names:
+        return None
+
+    truncator = get_shared_truncator()
+    if truncator.count_tokens(text) <= max_tokens:
+        return text
+
+    char_match = re.search(r"\n--- CHARACTERS ---\n", text)
+    if not char_match:
+        return None
+
+    prefix = text[: char_match.end()]
+    characters_body = text[char_match.end() :]
+    names = list(dict.fromkeys(n for n in (all_entity_names or protect_entity_names) if n))
+
+    protected_blocks: list[str] = []
+    for name in protect_entity_names:
+        block = _extract_gdd_entity_block(characters_body, name, names)
+        if block:
+            protected_blocks.append(block)
+
+    if not protected_blocks:
+        return None
+
+    protected_text = "\n\n".join(protected_blocks)
+    assembled = f"{prefix}{protected_text}"
+    if truncator.count_tokens(assembled) > max_tokens:
+        return truncator.truncate_context(text, max_tokens)
+
+    remainder_budget = max_tokens - truncator.count_tokens(assembled)
+    if remainder_budget <= 0:
+        return assembled + "\n... (contexte tronqué)"
+
+    other_blocks: list[str] = []
+    for name in names:
+        if name in protect_entity_names:
+            continue
+        block = _extract_gdd_entity_block(characters_body, name, names)
+        if block:
+            other_blocks.append(block)
+
+    categories_tail = ""
+    for marker in _GDD_CATEGORY_MARKERS:
+        pos = text.find(marker, char_match.end())
+        if pos >= 0:
+            categories_tail = text[pos:].strip()
+            break
+
+    remainder_parts = list(other_blocks)
+    if categories_tail:
+        remainder_parts.append(categories_tail)
+    remainder_text = "\n\n".join(p for p in remainder_parts if p)
+    if not remainder_text:
+        return assembled
+
+    capped_tail = truncator.truncate_context(remainder_text, remainder_budget)
+    return f"{assembled}\n\n{capped_tail}"
+
+
 _SHARED_TRUNCATOR: Optional["ContextTruncator"] = None
 
 
@@ -169,15 +283,24 @@ def get_shared_truncator() -> "ContextTruncator":
     return _SHARED_TRUNCATOR
 
 
-def cap_context_text_to_budget(text: Union[str, Any, None], max_tokens: int) -> str:
+def cap_context_text_to_budget(
+    text: Union[str, Any, None],
+    max_tokens: int,
+    *,
+    protect_entity_names: Optional[Sequence[str]] = None,
+    all_entity_names: Optional[Sequence[str]] = None,
+) -> str:
     """Tronque un texte de contexte sérialisé s'il dépasse ``max_tokens``.
 
     Politique alignée sur la génération Unity (orchestrateur + endpoints dialogue) :
     comptage via ``ContextTruncator.count_tokens`` puis ``truncate_context`` si besoin.
+    Si ``protect_entity_names`` est fourni, les fiches correspondantes sont préservées.
 
     Args:
         text: Contexte après ``serialize_context_to_text`` (ou équivalent).
         max_tokens: Plafond demandé par la requête (ex. ``max_context_tokens``).
+        protect_entity_names: Noms de fiches GDD à ne pas sacrifier à la troncature.
+        all_entity_names: Noms de toutes les fiches (délimitation des blocs).
 
     Returns:
         Texte inchangé si sous le plafond, sinon tronqué avec marqueur de troncature.
@@ -193,6 +316,15 @@ def cap_context_text_to_budget(text: Union[str, Any, None], max_tokens: int) -> 
     truncator = get_shared_truncator()
     if truncator.count_tokens(text) <= max_tokens:
         return text
+    if protect_entity_names:
+        preserved = cap_context_text_preserving_entities(
+            text,
+            max_tokens,
+            protect_entity_names,
+            all_entity_names=all_entity_names,
+        )
+        if preserved is not None:
+            return preserved
     return truncator.truncate_context(text, max_tokens)
 
 

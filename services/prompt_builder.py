@@ -12,6 +12,7 @@ from utils.xml_utils import escape_xml_text
 from services.dialogue_dramatic_progression import DIALOGUE_ORALITY_PROMPT_LINES
 from services.prompt_xml_parsers import build_narrative_guides_xml, build_vocabulary_xml
 from services.context_truncator import ContextTruncator, cap_context_text_to_budget
+from services.context_serializer.text_serializer import TextSerializer
 
 # Réserve tokens pour l’enveloppe XML plate (<context><gdd_context>) quand le XML hiérarchique dépasse le budget.
 _XML_CONTEXT_ENVELOPE_TOKEN_RESERVE = 96
@@ -121,14 +122,24 @@ class PromptBuilder:
                 has_content = True
         
         # RÈGLES DE PRIORITÉ (toujours présentes car essentielles)
-        priority_text = "En cas de conflit entre les instructions, l'ordre de priorité est :\n1. Instructions de scène (SECTION 3) - prévalent sur tout\n2. Directives d'auteur (SECTION 0) - modulent le style global\n3. System prompt - règles générales de base"
+        priority_text = (
+            "En cas de conflit entre les instructions, l'ordre de priorité est :\n"
+            "1. Instructions de scène (<scene_instructions>) — prévalent sur tout\n"
+            "2. Directives d'auteur (<author_directives>) — modulent le style global\n"
+            "3. Règles de génération (<generation_instructions>) et system prompt"
+        )
         if priority_text.strip():
             priority_elem = ET.SubElement(contract_elem, "priority_rules")
             priority_elem.text = escape_xml_text(priority_text)
             has_content = True
         
         # FORMAT DE SORTIE / INTERDICTIONS (toujours présentes car essentielles)
-        format_text = "**IMPORTANT : Génère UN SEUL nœud de dialogue (un nœud = une réplique du PNJ + choix du joueur).**\nNe génère PAS de séquence de nœuds. Le Structured Output garantit le format JSON, mais tu dois respecter cette logique métier."
+        format_text = (
+            "**IMPORTANT : Génère UN SEUL nœud de dialogue (un nœud = une réplique du PNJ + choix du joueur).**\n"
+            "Ne génère PAS de séquence de nœuds dans un même appel : l'expansion d'arbre se fait par "
+            "appels successifs (un nœud par requête). Le Structured Output garantit le format JSON, "
+            "mais tu dois respecter cette logique métier."
+        )
         if format_text.strip():
             format_elem = ET.SubElement(contract_elem, "output_format")
             format_elem.text = escape_xml_text(format_text)
@@ -143,6 +154,16 @@ class PromptBuilder:
         "Voix", "Style de dialogue", "Expressions courantes",
         "Présence physique", "Registre", "Langage",
     )
+
+    def _item_section_text(self, item_section: Any) -> str:
+        """Texte d'une section de fiche (``content`` ou ``raw_content`` sérialisé)."""
+        content = (getattr(item_section, "content", None) or "").strip()
+        if content:
+            return content
+        raw_content = getattr(item_section, "raw_content", None)
+        if raw_content is None:
+            return ""
+        return TextSerializer._raw_content_to_text(raw_content).strip()
 
     def _build_speaker_voice_section(self, input: 'PromptInput') -> Optional[ET.Element]:
         """Extrait les champs voix du NPC speaker depuis structured_context et les injecte.
@@ -164,6 +185,9 @@ class PromptBuilder:
         voice_parts: List[str] = []
 
         try:
+            from services.scene_dramatis import normalize_character_name
+
+            npc_key = normalize_character_name(npc_name)
             for section in input.structured_context.sections:
                 cats = getattr(section, "categories", None) or []
                 for category in cats:
@@ -172,14 +196,16 @@ class PromptBuilder:
                     for item in getattr(category, "items", []):
                         item_name = (getattr(item, "name", None) or "").strip()
                         real_name = ((getattr(item, "metadata", None) or {}).get("real_name", "") or "").strip()
-                        if item_name != npc_name and real_name != npc_name:
+                        if (
+                            normalize_character_name(item_name) != npc_key
+                            and normalize_character_name(real_name) != npc_key
+                        ):
                             continue
-                        # Trouver la section VOIX ET STYLE d'abord, puis scanner tous les ItemSection
                         voice_section_content: List[str] = []
                         other_voice_fields: List[str] = []
                         for item_section in getattr(item, "sections", []):
                             title = (getattr(item_section, "title", "") or "").strip().upper()
-                            content = (getattr(item_section, "content", "") or "").strip()
+                            content = self._item_section_text(item_section)
                             if not content:
                                 continue
                             if title in self._VOICE_SECTION_TITLES:
@@ -190,7 +216,7 @@ class PromptBuilder:
                                         other_voice_fields.append(content)
                                         break
                         voice_parts.extend(voice_section_content or other_voice_fields)
-                        break  # PNJ trouvé — on arrête
+                        break
                 if voice_parts:
                     break
         except Exception:
@@ -317,6 +343,34 @@ class PromptBuilder:
         
         return None
     
+    def _character_names_from_structured(self, structured_context: Any) -> List[str]:
+        """Liste les noms de fiches personnages dans le contexte structuré."""
+        names: List[str] = []
+        for section in getattr(structured_context, "sections", None) or []:
+            for category in getattr(section, "categories", None) or []:
+                if getattr(category, "type", "") != "characters":
+                    continue
+                for item in getattr(category, "items", []) or []:
+                    name = (getattr(item, "name", None) or "").strip()
+                    if name:
+                        names.append(name)
+        return names
+
+    def _cap_gdd_context_text(self, text_ser: str, max_tok: int, input: 'PromptInput') -> str:
+        """Applique le plafond tokens en protégeant la fiche du PNJ speaker."""
+        protect = [input.npc_speaker_id] if input.npc_speaker_id else None
+        all_chars = (
+            self._character_names_from_structured(input.structured_context)
+            if input.structured_context
+            else None
+        )
+        return cap_context_text_to_budget(
+            text_ser,
+            max_tok,
+            protect_entity_names=protect,
+            all_entity_names=all_chars,
+        )
+
     def _build_context_section(self, input: 'PromptInput') -> Optional[ET.Element]:
         """Construit la section <context> directement en XML.
         
@@ -348,7 +402,7 @@ class PromptBuilder:
                 max_tok = input.max_context_tokens
                 if max_tok is not None and max_tok > 0:
                     text_ser = cb.serialize_context_to_text(input.structured_context)
-                    capped_text = cap_context_text_to_budget(text_ser, max_tok)
+                    capped_text = self._cap_gdd_context_text(text_ser, max_tok, input)
                     trunc = ContextTruncator()
                     xml_tok = trunc.count_tokens(
                         ET.tostring(context_root, encoding="unicode", method="xml")
@@ -359,7 +413,7 @@ class PromptBuilder:
                             body_text = capped_text
                         else:
                             inner_budget = max(1, max_tok - _XML_CONTEXT_ENVELOPE_TOKEN_RESERVE)
-                            body_text = cap_context_text_to_budget(text_ser, inner_budget)
+                            body_text = self._cap_gdd_context_text(text_ser, inner_budget, input)
                         flat_ctx = ET.Element("context")
                         gdd_el = ET.SubElement(flat_ctx, "gdd_context")
                         gdd_el.text = escape_xml_text(body_text)
@@ -445,7 +499,12 @@ class PromptBuilder:
             return None
         
         guides_parts = []
-        guides_parts = self._enricher.enrich_with_narrative_guides(guides_parts, input.include_narrative_guides, format_style="unity")
+        guides_parts = self._enricher.enrich_with_narrative_guides(
+            guides_parts,
+            input.include_narrative_guides,
+            format_style="unity",
+            include_rules=False,
+        )
         
         if not guides_parts:
             return None

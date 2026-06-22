@@ -547,10 +547,9 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
             }}
           >
             Télécharge un ZIP Markdown : le GDD local (bases/pages du périmètre Notion ci-dessous, comme une
-            sync) regroupé par thèmes, plus <code style={{ fontSize: '0.85em' }}>Vision.json</code> en tête du
-            volet univers. Chaque thème reste sous une limite de taille NotebookLM : les gros regroupements sont
-            découpés en plusieurs fichiers (<code style={{ fontSize: '0.85em' }}>-part02.md</code>, etc.) sans
-            tronquer le texte.
+            sync) regroupé par thèmes. Les petits volets sont fusionnés ; chaque fichier reste sous la limite
+            NotebookLM (~500k mots / source) — les très gros thèmes seulement sont découpés en{' '}
+            <code style={{ fontSize: '0.85em' }}>-part02.md</code>, etc.
           </p>
           <button
             type="button"

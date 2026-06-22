@@ -47,6 +47,7 @@ from services.gdd_notion_full_sync_checkpoint import (
     validate_checkpoint_for_resume,
 )
 from services.gdd_notion_sync_log import log_sync_event
+from services.gdd_shard_filenames import write_gdd_shard_atomic
 from services.gdd_notion_sync_mirror import (
     archive_gdd_snapshot_if_delta,
     cleanup_staging_only,
@@ -981,15 +982,8 @@ class GddNotionSyncService:
             if use_shards and shard_list_key is not None:
                 shard_dir = out_root / shard_list_key
                 shard_dir.mkdir(parents=True, exist_ok=True)
-                try:
-                    nid_shard = normalize_notion_id(pid_str)
-                    shard_name = f"{nid_shard}.json"
-                except ValueError:
-                    safe = "".join(c for c in pid_str if c.isalnum() or c in "-_")[:72] or "page"
-                    shard_name = f"{safe}.json"
-                shard_path = shard_dir / shard_name
-                write_json_atomic(shard_path, rec_out)
-                gdd_rel = f"{shard_list_key}/{shard_name}"
+                shard_path = write_gdd_shard_atomic(shard_dir, rec_out, pid_str)
+                gdd_rel = f"{shard_list_key}/{shard_path.name}"
             else:
                 out_path = out_root / cat_file
                 existing_raw = read_json_file(out_path, default=[])
@@ -1790,15 +1784,7 @@ class GddNotionSyncService:
                     shard_dir = out_root / shard_list_key
                     shard_dir.mkdir(parents=True, exist_ok=True)
                     for pid_str, rec_out in written_page_records:
-                        try:
-                            nid_shard = normalize_notion_id(pid_str)
-                            shard_name = f"{nid_shard}.json"
-                        except ValueError:
-                            safe = "".join(
-                                c for c in pid_str if c.isalnum() or c in "-_"
-                            )[:72] or "page"
-                            shard_name = f"{safe}.json"
-                        write_json_atomic(shard_dir / shard_name, rec_out)
+                        write_gdd_shard_atomic(shard_dir, rec_out, pid_str)
                 else:
                     if out_path is None:
                         partial.append(f"{cat_file}: écriture — chemin monolithe indéfini")

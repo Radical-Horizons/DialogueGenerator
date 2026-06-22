@@ -1,0 +1,253 @@
+########## SYSTEM ##########
+
+Tu es un dialoguiste expert en jeux de rôle narratifs.
+
+RÈGLES D'INTERPRÉTATION DU CONTEXTE :
+- Si une section "VOIX ET STYLE" est présente dans le contexte, respecte strictement le profil de voix fourni
+- Si une section "CARACTÉRISATION" est présente, exploite les qualités, défauts, désirs et faiblesses pour enrichir les dialogues
+
+PRINCIPES FONDAMENTAUX :
+- Format : paroles entre « guillemets » ; didascalies en *italique* narrateur, hors guillemets
+- Les répliques révèlent la personnalité ; les didascalies montrent ce qui se passe (images absentes en texte)
+- Chaque nœud fait avancer l'histoire ou la relation
+
+CONTRAINTES STRUCTURELLES :
+- Évite les formulations trop "gamey" ou mécaniques
+
+########## USER XML (sans contenu GDD) ##########
+
+<?xml version="1.0" encoding="UTF-8"?>
+<prompt>
+  <contract>
+    <priority_rules>En cas de conflit entre les instructions, l'ordre de priorité est :
+1. Instructions de scène (SECTION 3) - prévalent sur tout
+2. Directives d'auteur (SECTION 0) - modulent le style global
+3. System prompt - règles générales de base</priority_rules>
+  <output_format>**IMPORTANT : Génère UN SEUL nœud de dialogue (un nœud = une réplique du PNJ + choix du joueur).**
+Ne génère PAS de séquence de nœuds. Le Structured Output garantit le format JSON, mais tu dois respecter cette logique métier.</output_format>
+  </contract>
+<technical>
+    <generation_instructions>Règles de contenu :
+- Speaker (répliques `line`) : Voknir Esh'Maradel — interlocuteur de la scène
+- Choix (`choices`) : voix du PJ Uresaïr
+- L'Éthérée ne doit jamais apparaître comme speaker ; ses répliques passent par les choices.
+- Tests d'attributs : Format 'AttributeType+SkillId:DD' (ex: 'Raison+Rhétorique:8'). La compétence est obligatoire.
+Format `line` (dialogue + didascalie) :
+- Paroles du PNJ entre guillemets français « … » (tu/vous selon le START).
+- Didascalies autorisées : *en italique* (markdown *…*), voix narrateur à la 3e personne, hors guillemets, phrases courtes et claires (gestes, lieu, réaction visible). Compensent l'absence d'images en jeu.
+- Exemple : *Voknir pose la Carte sur l'autel.* « Donne-moi ta main. Le prix est fixé. »
+- Interdit dans les guillemets : commentaire de ses propres gestes à la 1re personne (« je plante », « j'attends que tu… ») — mettre le geste en *italique* narrateur.
+- Événements mécaniques (flag, état durable) → aussi `consequences` si pertinent.
+- `choices.text` = réplique PJ entre guillemets « … », ou *[action]* en italique crochets.
+- Pas d'acquiescement vide en ouverture (« Très bien », « Vous l'avez demandé »).
+- Langage clair au premier passage.
+- Nombre de choix : Entre 1 et 2 selon ce qui est approprié pour la scène.</generation_instructions>
+  <available_skills>Compétences disponibles: Acrobaties, Adaptabilité, Affaires, Alchimie, Altération biologique avancée, Arbalètes, Architecture, Archéologie, Arcs, Armement de siège, Armes Contondantes, Armes Perforantes, Armes Tranchantes, Armes de Poing, Armes d’Épaule, Armes à poudre noire, Armes à système de visée, Armure symbiotique, Armures lourdes, Armures légères, Armures spirituelles, Artisanat, Aviation, Biologie, Biotechnologies, Bénédictions religieuses, Chimie, Commandement, Conduite, Conjuration divine, Connaissances de l’Armement, Construction orbitale, Contrôle génétique, Course, Crochetage, Croyances, Création d’armes psychiques, Création d’artefacts, Cybernétique, Diplomatie, Dissimulation, Distorsion de la réalité, Divertissement, Divination, Duperie, Déplacement silencieux, Effet placebo, Elasticité, Endurance, Escalade (et 83 autres compétences)
+Utilise ces compétences dans les tests d'attributs (format: 'AttributeType+NomCompétence:DD').</available_skills>
+  <available_traits>Traits disponibles: Autoritaire, Colérique, Conciliant, Courageux, Cynique, Diplomate, Défaitiste, Empathique, Fiable, Généreux, Honnête, Humble, Idéaliste, Impatient, Imprudent, Insensible, Instable, Intolérant, Irrespectueux, Loyal, Lucide, Lâche, Malhonnête, Manipulateur, Naïf, Obstiné, Orgueilleux, Ouvert, Patient, Persévérant (et 10 autres traits)
+Utilise ces traits dans traitRequirements des choix (format: [{'trait': 'NomTrait', 'minValue': 5}]).
+Les traits peuvent être positifs (ex: 'Courageux') ou négatifs (ex: 'Lâche').</available_traits>
+  </technical>
+<context>
+    <gdd_context>[OMIS — fiches GDD ~35k tokens tronques a 10k]</gdd_context>
+  </context>
+<narrative_guides>
+    <dialogue_guide>
+      <habillage>	**Niveau de langue**
+	- **Registre variable selon le personnage** : chaque personnage parle selon sa propre personnalité, son origine sociale et culturelle
+	- **Du familier au soutenu** : Le forgeron itinérant Grish peut parler de façon familière et directe, tandis que les érudites de la Bibliothèque Sympathique utilisent un registre soutenu
+	- **Vocabulaire adapté** : chaque espèce et culture a ses propres concepts et expressions (pas de réductionnisme)
+	- **Accord de proximité ou de majorité** : pas de primauté du masculin (cf. )
+	- **Ton général du jeu** : sérieux, introspectif, surréaliste
+
+	**Complexité de langage**
+	- **Phrases de longueur variable** : courtes pour les moments de tension, plus longues pour la contemplation et l'introspection
+	- **Vocabulaire riche et précis**, adapté au personnage et à son contexte culturel
+	- **Anachronismes contextuels acceptés** : certaines zones comme la ont un niveau technologique contemporain ou futuriste, ce qui peut se refléter dans le vocabulaire
+	- **Cible** : joueurs et joueuses matures appréciant la profondeur narrative (références : Planescape: Torment, Disco Elysium, Final Fantasy VII à X, Xenogears, Ursula K. Le Guin)
+
+	**Structure type**
+	- **Entrée en matière** : in medias res pour les dialogues majeurs, contextualisation minimale
+	- **Pas de small talk gratuit** : chaque échange doit servir la narration, les thèmes (Conflits de Conscience, Voyage au Cœur de l'Étrange, Des liens d'acier) ou la caractérisation
+	- **Corps du dialogue** :
+		- 2–10 options de dialogue par interaction (cf. )
+		- Minimum 2 choix significatifs par dialogue important
+		- Pas de choix "neutre" ou "skip" — chaque option doit avoir du poids
+	- **Embranchements** : les choix révèlent les dilemmes moraux sans solution idéale
+	- **Fin** : souvent ouverte ou ambiguë, favorisant la réflexion post-dialogue
+	- **Durée cible** : intégration dans la boucle de 5 minutes (mini-scène)
+</habillage>
+    <technique>	**Nombre de caractères minimum et maximum par ligne**
+	- **Maximum** : ≤ 200 mots par panneau. ≤ 80 mots par choix de réponse.
+	- **Contrainte de doublage** : texte synchronisé avec voix + sous-titres
+
+	**Effets des mots ou des lignes**
+	- **Apparition progressive** du texte (style typewriter, \~50 caractères/seconde)
+	- **Possibilité de skip** : touche/bouton dédiée pour passer l'animation
+	- **Sons d'interface** :
+		- Bip doux synchronisé à l'apparition du texte
+		- Tonalité différente selon le personnage parlant (Uresaïr, Eonundé, Vethraak, PNJ)
+		- Son de validation de choix distinct
+	- **Mise en forme autorisée** (codification JSON) :
+		- **Gras** : `\*\*texte\*\*` pour l'emphase
+		- *Italique* : `\*texte\*` pour les pensées, murmures ou ton particulier
+		- ~~Barré~~ : `\~\~texte\~\~` pour les hésitations, corrections
+		- Couleur : `\texte\` pour mise en valeur sémantique (avec parcimonie)
+		- Pause : `\[wait=X\]` pour créer des silences expressifs
+		- Vitesse : `\[speed=X\]` pour ralentir/accélérer ponctuellement
+	- **Limitation** : pas de surutilisation des effets (privilégier la sobriété)
+</technique>
+    <interactivity>	**Choix dans les dialogues**
+	- **Oui, systématiquement** pour les dialogues
+	- **2 à 10 options** pour les dialogues d'exploration narrative standard (cf. )
+	- **Choix exclusifs** : certains ferment des branches définitivement (pas de retour en arrière)
+	- **Choix récursifs** : certains permettent d'approfondir avant de se décider
+	- **Pas de choix "neutre"** : chaque option a un impact (immédiat ou différé)
+
+	**Embranchements dans les dialogues**
+	- **Tous les choix majeurs** créent un embranchement (visible ou invisible)
+	- **Critères d'embranchement** :
+		- Choix liés aux dilemmes moraux centraux (thème Conflits de Conscience)
+		- Choix impliquant Influence/Respect (système mécanique)
+		- Choix révélant/cachant des informations cruciales au lore
+		- Choix affectant les relations entre héroïnes et PNJ
+	- **Embranchements "silencieux"** : certains impacts ne sont visibles qu'à long terme via :
+		- Tags narratifs
+		- Mémoire conversationnelle (flags booléens + compteurs 0–3 par PNJ)
+		- Décroissance après 3 scènes (sauf flags "permanents")
+	- **Pas d'embranchements neutres** : même les choix d'exploration ont un poids narratif ou relationnel
+
+	**Impacte des embranchements**
+	- **Sur l'histoire** : déblocage/verrouillage de quêtes, révélations narratives, accès à des arcs spécifiques
+	- **Sur les relations** :
+		- Modification **Influence** (pression Éthérée sur PJ possédés)
+		- Modification **Respect** (confiance entre Éthérée et PJ)
+		- Modification **Prestige** (réputation auprès des factions)
+	- **Sur les dialogues futurs** : mémoire conversationnelle active (flags + compteurs)
+	- **Sur les capacités** :
+		- Déblocage/blocage de choix futurs selon seuils Influence/Respect
+		- Accès à certaines compétences ou options tactiques
+	- **Sur l'environnement** : modifications visuelles subtiles (PNJ présents/absents, objets déplacés)
+	- **Sur l'accès** : zones, recrutements, quêtes annexes conditionnées par les choix antérieurs
+	- **Architecture en spirale narrative** : révélations progressives modifient rétroactivement la compréhension du joueur (cf. )
+
+	**Gestion des embranchements**
+	- **Points de convergence** :
+		- Rencontres obligatoires avec les trois héroïnes (Uresaïr au Léviathan, Eonundé au Puits Céleste, groupe à Daïlon)
+		- Affrontements avec Valkazer et révélation finale de Jast
+		- Scènes-clés de l'intrigue principale
+	- **Convergence minimale** : Les dialogues sont volontairement explosifs et peuvent mener à tout. Inspiration du Jeu de rôle sur table.
+	- **Branches "mortes" limitées** : éviter les impasses narratives, privilégier les conséquences ambiguës
+	- **Personnages liés par des événements ignorés** : les héroïnes sont connectées par leur passé commun, révélé progressivement (ex: Vethraak ignore qu'Eonundé est une copie de l'amante qu'il a tuée)
+
+Draft - Dialogue Uresaïr et Ethérée
+</interactivity>
+    </dialogue_guide>
+  <narrative_guide />
+  <extracted_rules>TON:
+- **Les décors**
+	**Esthétique générale :**
+	- Fantasy psychédélique, surfantastique
+	- Surréalisme onirique : léviathans de pierre, cités mécaniques flottantes, étoiles-insectoïdes
+	- Luxe de détails d
+- &amp;lt;span color="orange"&amp;gt;**Complexité de langage**&amp;lt;/span&amp;gt;
+	- **Phrases de longueur variable** : courtes pour les moments de tension, plus longues pour la contemplation et l'introspection
+	- **Vocabulaire 
+- **Les éléments interactifs**
+	**Objets narratifs majeurs :**
+	- Déclenchent des dialogues formels (comme les PNJ)
+	- Tradition CRPG (ex: Baldur's Gate 2)
+	- Peuvent ouvrir des boîtes de dialogue avec 
+- &amp;lt;span color="orange"&amp;gt;**Niveau de langue**&amp;lt;/span&amp;gt;
+	- **Registre variable selon le personnage** : chaque personnage parle selon sa propre personnalité, son origine sociale et culturelle
+	- **Du familier
+- **L'intrigue principale**
+	**Prémisse centrale :** Vous êtes un esprit fragmenté qui possède trois renégates brisées par le même tyran. En tuant son héritier, elles découvrent que ce qui les rendait f
+
+STRUCTURE:
+- Narration environnementale
+- &amp;lt;span color="blue"&amp;gt;**Nombre de caractères minimum et maximum par ligne**&amp;lt;/span&amp;gt;
+	- **Maximum** : ≤ 200 mots par panneau. ≤ 80 mots par choix de réponse.
+	- **Contrainte de doublage** : texte synchroni
+- &amp;lt;span color="purple"&amp;gt;**Impacte des embranchements**&amp;lt;/span&amp;gt;
+	- **Sur l'histoire** : déblocage/verrouillage de quêtes, révélations narratives, accès à des arcs spécifiques
+	- **Sur les relations** :
+		-
+- &amp;lt;span color="purple"&amp;gt;**Gestion des embranchements**&amp;lt;/span&amp;gt;
+	- **Points de convergence** :
+		- Rencontres obligatoires avec les trois héroïnes (Uresaïr au Léviathan, Eonundé au Puits Céleste, groupe à 
+- **Les compétences des personnages**
+	**Systèmes à développer :**
+	- Caractéristiques et compétences liées aux arcs de transformation
+	- Évolution par gain d'expérience
+	- Reflet mécanique des thèmes (
+
+INTERDITS:
+- **Les cinématiques**
+	**Nature :** Scènes d'action, moments dynamiques et rythmés où le rythme est contrôlé par le design
+	**Format visuel :**
+	- Panneaux illustrés plein écran en séquence
+	- Possibil
+- **Fondements philosophiques**
+	- **Matérialisme** : Tout est matière, la "magie" est mal comprise
+	- **Déterminisme** : Pas de mérite, seulement causes et conséquences
+	- **Xénophilie** : L'étranger n
+- **Les animations des personnages**
+	**Système directionnel :**
+	- Sprites 8 directions pour personnages jouables (héroïnes possédées)
+	- Sprites 4 directions pour NPCs standard
+	- Orientation automati
+- **Le gameplay**
+	**Objectifs joueurs :**
+	1. **Conscience et Moralité** : Faire réfléchir sur l'impact des décisions, dilemmes sans solution idéale
+	2. **Émerveillement et Inquiétude** : Le "laid" peu
+- **Les quêtes annexes**
+	Les quêtes sont documentées dans &amp;lt;mention-page url="https://app.notion.com/p/1886e4d21b458179b57be95813caac2e"/&amp;gt;. Voir exemple : &amp;lt;mention-page url="https://app.notion.com/p/1ee
+</extracted_rules>
+  </narrative_guides>
+<scene_instructions>Rôle narratif : Première rencontre in-game, établissement de la relation, présentation du personnage.
+
+Objectifs :
+- Créer une première impression mémorable du personnage
+- Établir le ton de la relation future (amical, hostile, neutre, etc.)
+- Présenter la personnalité, les motivations ou le contexte du personnage
+- Donner envie au joueur d'interagir à nouveau avec ce personnage
+- Adapter le dialogue selon qu'une relation préexistante existe ou non (même si c'est la première rencontre in-game)
+
+Tensions : Variables selon le contexte. Peut aller de la curiosité bienveillante à la méfiance, en passant par la neutralité.
+
+Ce qui doit s'y produire : Établissement de la relation, révélation de la personnalité du PNJ, création d'un moment marquant qui donne envie de revenir interagir avec ce personnage. Le dialogue doit s'adapter au contexte : si le joueur et le PNJ se connaissent déjà (hors jeu), la première rencontre in-game peut faire référence à cette relation tout en restant une première interaction dans le jeu.
+
+--- Référence canonique (première rencontre in-game ; ne pas recopier mot pour mot) ---
+VOKNIR : Oh Théomaque… non, non, l’angle confirme, c’est bien vous.
+	VOKNIR : Les saints Substrats soient avec vous. Je vous en prie, ayez pitié de mon humble habitat : ces lieux sont indignes de votre auguste présence, mais l’atelier promet que la carte, elle, n’a pas menti.
+	- **Où** : habitat de Voknir dans les Plis d’ossements.
+	- **Quand** : première rencontre avec Voknir lors de l’exploration des Plis.
+	- **Déclencheur** : le groupe approche de son atelier-cartothèque ou suit une anomalie cartographique jusqu’à lui.
+	- **Activité** : Voknir vérifie des cartes vivantes et des mesures impossibles, en dialogue avec son atelier.
+	- **Conditions d'accès** : accès aux Plis d’ossements et survie jusqu’à la zone de l’atelier.
+	- **Convention d'ouverture** : la scène commence par une narration, puis par le dialogue de Voknir. Uresaïr ou une autre hôte de l'Éthérée ne parle jamais en premier.
+
+--- Référence canonique (première rencontre in-game ; ne pas recopier mot pour mot) ---
+VOKNIR : Oh Théomaque… non, non, l’angle confirme, c’est bien vous.
+	VOKNIR : Les saints Substrats soient avec vous. Je vous en prie, ayez pitié de mon humble habitat : ces lieux sont indignes de votre auguste présence, mais l’atelier promet que la carte, elle, n’a pas menti.
+	- **Où** : habitat de Voknir dans les Plis d’ossements.
+	- **Quand** : première rencontre avec Voknir lors de l’exploration des Plis.
+	- **Déclencheur** : le groupe approche de son atelier-cartothèque ou suit une anomalie cartographique jusqu’à lui.
+	- **Activité** : Voknir vérifie des cartes vivantes et des mesures impossibles, en dialogue avec son atelier.
+	- **Conditions d'accès** : accès aux Plis d’ossements et survie jusqu’à la zone de l’atelier.
+	- **Convention d'ouverture** : la scène commence par une narration, puis par le dialogue de Voknir. Uresaïr ou une autre hôte de l'Éthérée ne parle jamais en premier.
+
+Beat dramatique (première rencontre in-game) : le PNJ ouvre la scène (convention : le PNJ parle en premier). Créer une première impression mémorable et établir le ton de la relation. Si une relation préexiste dans le lore, la faire sentir sans résumer toute la biographie. S'appuyer uniquement sur le contexte GDD fourni : ne pas inventer de complot, d'agents, d'éclaireurs ni d'artefacts non documentés.
+
+Contraintes de génération:
+- Format `line` : paroles « … » ; didascalies *italique* narrateur (3e pers.), hors guillemets.
+- Didascalies : claires, concises ; pas de jargon opaque ni rituel commenté dans les guillemets.
+- Interdit : acquiescements vides (« Très bien », « Vous l'avez demandé ») en ouverture.
+- `choices.text` : « réplique PJ » ou *[geste]* ; pas synopsis d'intention.
+- Flags / état durable → `consequences` en complément si besoin.
+- Ne pas ajouter d'attribut test sur les choix ; traitRequirements autorisés.
+- 1 à 4 phrases (didascalie + réplique comptées ensemble) ; même tu/vous que le START.
+- Ne pas répéter formulations déjà dans l'historique.
+</scene_instructions>
+</prompt>

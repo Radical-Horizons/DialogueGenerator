@@ -143,6 +143,17 @@ class BasePromptRequest(BaseModel):
     narrative_tags: Optional[List[str]] = Field(None, description="Tags narratifs pour guider le ton (ex: tension, humour, dramatique)")
     vocabulary_config: Optional[Dict[str, str]] = Field(None, description="Configuration du vocabulaire par niveau")
     include_narrative_guides: bool = Field(default=True, description="Inclure les guides narratifs dans le prompt")
+    scene_type: Optional[str] = Field(
+        None,
+        description=(
+            "Type de scène (first_meeting, conversation, …) — influence les beats dramatiques "
+            "et l'ancrage première rencontre in-game"
+        ),
+    )
+    organization_mode: Optional[str] = Field(
+        "narrative",
+        description="Mode d'organisation du contexte GDD (default, narrative, minimal)",
+    )
     previous_dialogue_preview: Optional[str] = Field(None, description="Texte formaté du dialogue précédent")
     in_game_flags: Optional[List[Dict[str, Any]]] = Field(None, description="Flags in-game sélectionnés pour la génération réactive")
     llm_model_identifier: str = Field(
@@ -174,7 +185,6 @@ class EstimateTokensRequest(BasePromptRequest):
     Hérite de BasePromptRequest pour garantir que l'estimation utilise les mêmes paramètres que la génération.
     """
     field_configs: Optional[Dict[str, List[str]]] = Field(None, description="Configuration des champs de contexte par type d'élément")
-    organization_mode: Optional[str] = Field(None, description="Mode d'organisation du contexte (default, narrative, minimal)")
 
 class ContextTokenBreakdownRow(BaseModel):
     """Tokens estimés pour un compartiment de la sélection (type + mode), build isolé."""
@@ -422,7 +432,6 @@ class PreviewPromptRequest(BasePromptRequest):
     Utilisé pour visualiser le prompt avant génération, sans estimer les tokens.
     """
     field_configs: Optional[Dict[str, List[str]]] = Field(None, description="Configuration des champs de contexte par type d'élément")
-    organization_mode: Optional[str] = Field(None, description="Mode d'organisation du contexte (default, narrative, minimal)")
 
 
 class PreviewPromptResponse(BaseModel):

@@ -614,7 +614,10 @@ def test_sync_entity_by_name(client: TestClient, tmp_path: Path) -> None:
         assert data["success"] is True
         assert data["resolved_name"] == "Uresaïr"
         assert data["notion_page_id"] == page_id
-        written = json.loads((shard_dir / f"{page_id}.json").read_text(encoding="utf-8"))
+        written = json.loads(
+            (shard_dir / f"Uresair_{page_id}.json").read_text(encoding="utf-8")
+        )
         assert "Corps mis a jour" in json.dumps(written)
+        assert not (shard_dir / f"{page_id}.json").is_file()
     finally:
         app.dependency_overrides.pop(get_gdd_notion_sync_service, None)

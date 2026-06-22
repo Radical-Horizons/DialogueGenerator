@@ -3,8 +3,8 @@
   "values": {
     "Contenu par": "166982c7-3cf0-4947-85c5-0a6df03ff80d",
     "Date de création de la fiche": "2026-05-31T14:03:00.000Z",
-    "Dernière modification": "2026-06-01T00:01:00.000Z",
-    "Faunes & Flores présentes": "04114498-b805-425d-a10b-8efa13462d74, e8ad2abc-ce7b-4206-a439-96ec103b923f",
+    "Dernière modification": "2026-06-04T23:00:00.000Z",
+    "Espèces présentes": "04114498-b805-425d-a10b-8efa13462d74, e8ad2abc-ce7b-4206-a439-96ec103b923f, 442cbe0b-42d9-4630-9925-59d26183409c",
     "Monnaie locale": "Hors Seuil : pêche, passage en barque réglé en service ou en quelques Marques.",
     "Niveau de danger": "Modéré",
     "Niveau d’IA": "co-écrit",
@@ -15,13 +15,13 @@
     "État": "Brouillon IA"
   },
   "sections": {
-    "re_sume__de_la_fiche": "Le premier et le seul lac d'Escelion : une Voie d'Auðumla (eau pure et volontaire) que l'Essouffle endort là où elle ralentit avant de plonger sous la Bibliothèque. Sur elle flotte le Mouillage.",
-    "histoire_du_lieu": "- **L'eau qui ne dormait pas** — partout ailleurs, l'eau hvergique « veut » couler ; on ne décrit aucun lac véritable sur le continent.\n\t- **L'endormissement (depuis 2102 AG)** — au dernier anneau, juste avant les Conduits Inférieurs, l'Essouffle desserre ce qui pressait la Voie : l'eau s'alanguit, oublie son cours et s'étale.\n\t- **Le socle du Mouillage (3156 AG)** — quand le district manque de Lots à donner, les nouvelles arrivantes s'installent sur la nappe immobile.",
+    "re_sume__de_la_fiche": "Une Voie d'Auðumla (eau pure et volontaire) que l'Essouffle endort là où elle ralentit avant de plonger sous la Bibliothèque. Sur elle flotte le Mouillage.",
+    "histoire_du_lieu": "- **L'eau qui ne dormait pas** — partout ailleurs, l'eau hvergique « veut » couler ; les lacs véritables y sont rares.\n\t- **L'endormissement (depuis 2102 AG)** — au dernier anneau, juste avant les Conduits Inférieurs, l'Essouffle desserre ce qui pressait la Voie : l'eau s'alanguit, oublie son cours et s'étale.\n\t- **Le socle du Mouillage (3156 AG)** — quand le district manque de Lots à donner, les nouvelles arrivantes s'installent sur la nappe immobile.",
     "apparence___ambiance": "Une nappe pure et immobile, tiède d'un sommeil. On la dit assoupie, non morte : il arrive qu'un remous la parcoure sans vent, comme un dormeur qui se retourne, et nul batelier n'aime se trouver dessus ces nuits-là. C'est de l'eau vive qui rêve.",
-    "ge_ographie": "À l'endroit où la Voie de Vivarcade ralentit avant de s'engouffrer sous la Bibliothèque Sympathique par les Conduits Inférieurs. On y pêche anguilles et poissons, en évitant les bras chargés d'en-ḫedu.",
+    "ge_ographie": "À l'endroit où la Voie de Vivarcade ralentit avant de s'engouffrer sous la Bibliothèque Sympathique par les Conduits Inférieurs. On y pêche anguilles et poissons, en évitant les bras chargés d'en-ḫedu.\n\tLes **Conduits Inférieurs** qui s'enfoncent sous la Bibliothèque constituent une zone aphotique aquatique abritant au moins une population de <mention-page url=\"https://app.notion.com/p/442cbe0b42d94630992559d26183409c\"/> — fait ignoré de la quasi-totalité des habitants des Jardins intermédiaires.",
     "voies_d_acce_s___transitions": "On la traverse en barque ; elle relie le Mouillage aux quais de la Grande Halle et à la bouche des Conduits Inférieurs.",
     "me_moire_syste_me": "*Nature de la Dormante suivie comme Connaissance Alteir (INCONNU / EXPOSÉ / COMPRIS) plutôt que comme Flag. Flag possible : « remous de la Dormante » observé.*",
-    "remarques_de_conception": "Sous-lieu des <mention-page url=\"https://www.notion.so/166982c73cf0494785c50a6df03ff80d\"/>. Premier lac canon d'Escelion, cohérent avec l'hydrologie (Voies d'Auðumla) : il faut le relâchement de l'Essouffle pour qu'un cours d'eau pur s'attarde.",
+    "remarques_de_conception": "Sous-lieu des <mention-page url=\"https://app.notion.com/p/166982c73cf0494785c50a6df03ff80d\"/>. Lac rare d'Escelion, cohérent avec l'hydrologie (Voies d'Auðumla) : il faut le relâchement de l'Essouffle pour qu'un cours d'eau pur s'attarde.",
     "monnaie_locale": "Hors Seuil : pêche, passage en barque réglé en service ou en quelques Marques."
   },
   "section_titles": {

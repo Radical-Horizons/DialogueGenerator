@@ -82,7 +82,8 @@ class PromptEnricher:
         self,
         prompt_parts: List[str],
         include_narrative_guides: bool,
-        format_style: str = "standard"
+        format_style: str = "standard",
+        include_rules: bool = True,
     ) -> List[str]:
         """Injecte les guides narratifs dans les parties du prompt.
         
@@ -90,6 +91,7 @@ class PromptEnricher:
             prompt_parts: Liste des parties du prompt à enrichir.
             include_narrative_guides: Si True, inclut les guides narratifs.
             format_style: Style de formatage ("standard" ou "unity").
+            include_rules: Si True, inclut les règles extraites (souvent bruitées).
             
         Returns:
             Liste des parties du prompt enrichie avec les guides narratifs.
@@ -110,7 +112,7 @@ class PromptEnricher:
         try:
             guides = guides_service.load_guides()
             if guides.get("dialogue_guide") or guides.get("narrative_guide"):
-                guides_text = guides_service.format_for_prompt(guides, include_rules=True)
+                guides_text = guides_service.format_for_prompt(guides, include_rules=include_rules)
                 if guides_text:
                     if format_style == "unity":
                         prompt_parts.append(guides_text)

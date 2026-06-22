@@ -1,0 +1,14 @@
+--- Nœud 1 (START) ---
+Voknir Esh'Maradel: Je n'amène pas de présentations, Uresaïr : mes éclaireurs ont remonté, sous la nef de la Vieille Ville, un fragment qui vibre comme un cœur brisé — un éclat de Deshkarta. Le Culte prévoit de l'exposer cette nuit pour en extraire « la vérité » ; si je l'empêche, ils sauront qui a intervenu. Décide : tu le prends maintenant — au prix d'une attention publique et de visions plus violentes — ou tu me laisses le récupérer à l'ombre, en me confiant le mensonge nécessaire pour le protéger.
+=> Uresair (choix): Non. Tu le prends en secret. Cache-le, mens au Culte — je refuse d'attirer leur nid sur notre trace.
+
+--- Nœud 2 (node-eb670b9be6844ed384e13ccb4a31885b) ---
+Voknir Esh'Maradel: Tu veux que je le prenne en secret. Je peux l'arracher dans l'ombre, mais l'éclat est lié au lieu : s'il est déplacé sans garde, il projette ses visions sur celui qui le porte et me brise la mémoire quand je tente de les contenir. J'ai un talisman qui retiendra ces images, mais il doit être nourri d'un souvenir réel — je le prends en échange. Donne‑m'en un, ou je refuse et je frapperai le socle ce soir : le bruit réveillera les veilleurs et tout sera exposé.
+=> Uresair (choix): Je te donne un souvenir — prends‑le en secret et repars ce soir.
+
+--- Nœud 3 (node-cc30eabcc00344cc862aad9f17a76f30) ---
+Voknir Esh'Maradel: Je prends ton souvenir. Approche — je poserai ma paume sur ta tempe et le talisman boira l'image ; une fois consommée, tu ne pourras plus la ramener. En échange, je cacherai l'objet dans un refuge que je connais et je laisserai un faux rapport au sanctuaire ce soir, mais le rite exigera que je campe près de l'entrée pendant trois nuits — cela nous rend vulnérables si quelqu'un surveille nos allées. Une marque froide tracera le passage du souvenir sur ta main ; elle permettra à quiconque la reconnaît de deviner qu'un transfert a eu lieu.
+=> Uresair (choix): Je te donne un lieu — le souvenir de notre refuge ; préserve les visages.
+
+--- Nœud 4 (node-800e22966bb74fa09126607587d69914) ---
+Voknir Esh'Maradel: Je prends le lieu, mais j'extrais seulement ce qui le rend reconnaissable — les plans, les odeurs, les chemins — pas les visages. L'appareil avalera cette image et t'en dépouillera à jamais ; en opérant, il tracera un signe glacé sur ta main. Après le transfert, je cacherai l'éclat dans mon abri et je tiendrai la garde à l'entrée jusqu'à ce que je puisse partir en sécurité.

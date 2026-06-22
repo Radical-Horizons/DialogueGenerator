@@ -25,7 +25,7 @@ def test_split_category_writes_shard_files(tmp_path: Path) -> None:
     n = split_category_to_shards(tmp_path, "lieux", dry_run=False)
     assert n == 2
     shard_dir = tmp_path / "lieux"
-    assert (shard_dir / f"{pid}.json").is_file()
+    assert (shard_dir / f"Ville_{pid}.json").is_file()
     assert len(list(shard_dir.glob("*.json"))) == 2
 
 

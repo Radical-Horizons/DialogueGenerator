@@ -1,0 +1,10 @@
+--- Nœud 1 (START) ---
+Voknir Esh'Maradel: Oh — Théomaque… non, non, l'angle confirme : c'est bien vous. Les saints Substrats soient loués. Je suis Voknir Esh'Maradel, cartographe des incrustations temporelles ; pardonnez l'état de mon atelier, la chair des cartes aime la poussière. La carte vivante a vibré quand vous avez franchi la crête des Plis : elle m'a demandé de suivre votre ombre. Si vous cherchez un fragment ou une route brisée, je peux ouvrir mes couches — mais sachez qu'ouvrir une couche coûte un ébranlement de stabilité ici, et quelque chose devra en payer le prix.
+=> Uresaïr (choix): Je consens. Ouvre la couche et laisse-moi lire la trace, malgré le coût.
+
+--- Nœud 2 (node-13203aa4ed7346668c06e2af03b88dbf) ---
+Voknir Esh'Maradel: Très bien. J'ouvre la couche à votre demande, mais écoutez : arracher une strate exige un contrepoids — il ne suffit pas de mots. Je peux lier l'ouverture à un fragment de votre passé (un souvenir précis que je capterai et retiendrai), ou bien à un objet qui porte votre ancrage ; sans compensation, la couche déchirera une part de l'atelier et la crête réagira. Je vais préparer les instruments d'ancrage ; choisissez maintenant ce que vous offrez, et sachez que je garderai ce lien tant que la trace existera.
+=> Uresaïr (choix): Je donne un souvenir. Prenez-en un fragment de ma mémoire — celui de la nuit où je suis parti.
+
+--- Nœud 3 (node-d858e6ed79a4436a9f04f47f94f1acf7) ---
+Voknir Esh'Maradel: Très bien. Donnez-moi la nuit où vous êtes parti : je prélèverai un fragment — une image et la sensation qui la fixe — et je l'insèrerai dans une coquille d'ancrage que je possède. Je garderai ce fil : il résonnera dans mes instruments et permettra à ma couche de s'ouvrir sur la trace que vous cherchez. L'extraction provoquera une vibration sourde dans l'atelier, et une bouche du lieu pourra se sceller ou se déplacer ; préparez-vous à un glissement. Que faites‑vous ?

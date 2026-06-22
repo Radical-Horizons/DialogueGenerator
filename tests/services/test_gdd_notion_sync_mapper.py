@@ -163,6 +163,9 @@ def test_database_id_should_skip_page_blocks_vocab() -> None:
         "935bdaad-d395-4cdb-be6b-7f7f9a6789d2",
         "10f87005-d58e-46cc-94dc-580b4be9a5cd",
         "0e4cee6a-0546-456a-b49d-5592f553cc9a",
+        "5a3b2abf-221b-40c1-9b2a-98c91e13dfd9",
+        "75ab57dc-e48c-4172-8cab-d48f45bda04e",
+        "09204171-5d4d-40e8-9237-d7bac6a5c1a0",
     ):
         assert database_id_should_skip_page_blocks(uid)
         assert database_id_is_compact_table_export(uid)

@@ -17,7 +17,9 @@ DEFAULT_NODE_SCENE_INSTRUCTIONS = (
 # Lignes injectées dans le prompt XML Unity (prompt_builder).
 DIALOGUE_ORALITY_PROMPT_LINES: tuple[str, ...] = (
     "Format `line` (dialogue + didascalie) :",
-    "- Paroles du PNJ entre guillemets français « … » (tu/vous selon le START).",
+    "- Paroles du PNJ entre guillemets français « … » ; au nœud START, fixer tu ou vous "
+    "dès la première réplique (cohérent sur tout le sous-arbre ; s'appuyer sur la fiche voix "
+    "du PNJ et les instructions de scène).",
     "- Didascalies autorisées : *en italique* (markdown *…*), voix narrateur à la 3e personne, "
     "hors guillemets, phrases courtes et claires (gestes, lieu, réaction visible). "
     "Compensent l'absence d'images en jeu.",
@@ -34,6 +36,13 @@ _BEAT_BY_PHASE = {
     "accroche": (
         "Beat dramatique (accroche) : tension immédiate (refus, prix, secret, provocation). "
         "Pas de report vague."
+    ),
+    "first_meeting_start": (
+        "Beat dramatique (première rencontre in-game) : le PNJ ouvre la scène (convention : "
+        "le PNJ parle en premier). Créer une première impression mémorable et établir le ton "
+        "de la relation. Si une relation préexiste dans le lore, la faire sentir sans résumer "
+        "toute la biographie. S'appuyer uniquement sur le contexte GDD fourni : ne pas inventer "
+        "de complot, d'agents, d'éclaireurs ni d'artefacts non documentés."
     ),
     "complication": (
         "Beat dramatique (complication) : la scène bascule (contre-proposition, refus, prix payé, "
@@ -69,9 +78,12 @@ def _resolve_beat_phase(
     max_depth: int,
     is_start: bool,
     is_leaf: bool,
+    scene_type: Optional[str] = None,
 ) -> str:
     """Retourne la clé de phase dramatique pour cette génération."""
     if is_start:
+        if scene_type == "first_meeting":
+            return "first_meeting_start"
         return "accroche"
     if is_leaf:
         return "cloture"
@@ -91,6 +103,7 @@ def beat_instruction_for(
     max_depth: Optional[int] = None,
     is_start: bool = False,
     is_leaf: bool = False,
+    scene_type: Optional[str] = None,
 ) -> str:
     """Instruction de beat à la volée pour une profondeur donnée."""
     effective_max = max_depth if max_depth and max_depth > 0 else DEFAULT_PROGRESSION_MAX_DEPTH
@@ -99,6 +112,7 @@ def beat_instruction_for(
         max_depth=effective_max,
         is_start=is_start,
         is_leaf=is_leaf,
+        scene_type=scene_type,
     )
     return _BEAT_BY_PHASE[phase]
 
@@ -112,6 +126,7 @@ def compose_generation_instructions(
     is_leaf: bool = False,
     include_global_constraints: bool = True,
     include_beat: bool = True,
+    scene_type: Optional[str] = None,
 ) -> str:
     """Assemble consignes utilisateur, beat à la volée et contraintes globales."""
     parts: list[str] = []
@@ -127,6 +142,7 @@ def compose_generation_instructions(
                 max_depth=max_depth,
                 is_start=is_start,
                 is_leaf=is_leaf,
+                scene_type=scene_type,
             )
         )
 

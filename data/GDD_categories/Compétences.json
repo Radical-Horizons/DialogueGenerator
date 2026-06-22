@@ -1,5 +1,18 @@
 [
   {
+    "Nom": "Onirisme",
+    "values": {
+      "Cadre (combiné)": "Surnaturel — Assez faible",
+      "Description": "L'Onirisme exploite les instabilités et propriétés spécifiques du domaine du Rêveur local — lois physiques altérées, perméabilité entre états de conscience, plasticité de la matière dans les zones à forte densité. Compétence de lieu : hors d'un domaine de Rêveur actif, son efficacité chute drastiquement. Ce que le Rêveur tolère, l'Onirisme peut l'employer.",
+      "Famille": "Surnaturel",
+      "Identifiant": "SKI199",
+      "Niveau de Cadre": "Assez faible",
+      "Statut": "Validée"
+    },
+    "sections": {},
+    "notion_page_id": "18b72691-63c3-4ce2-8415-7ac702968e21"
+  },
+  {
     "Nom": "Éloquence",
     "values": {
       "Cadre (combiné)": "Culturel — Nul",
@@ -814,11 +827,11 @@
   {
     "Nom": "Engloutissement des Âmes",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Assez avancé",
+      "Cadre (combiné)": "Surnaturel — Avancé",
       "Description": "Engloutissement des Âmes s'utilise pour déterminer si un individu arrive à s'approprier une partie de l'imagination d'un cadavre qu'il a dévoré. Il peut ainsi gagner un point dans une compétence de Création, de Compétences Sociales ou de Maîtrise des Voies, à condition que la compétence de prédilection de la créature (ou de la personne) dévorée fasse bien partie de l'un de ces trois domaines. La difficulté est fixée au niveau actuel de la compétence à augmenter.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI147",
-      "Niveau de Cadre": "Assez avancé",
+      "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Physique"
     },
@@ -1039,7 +1052,7 @@
     "Nom": "Création d’artefacts",
     "values": {
       "Cadre (combiné)": "Surnaturel — Avancé",
-      "Description": "La compétence \"Création d’artefacts\" permet de concevoir des objets surnaturels avancés dans le cadre d'un jeu de rôle, enrichissant ainsi l'expérience de jeu et offrant de nouvelles possibilités aux personnages.",
+      "Description": "Fixation durable d'une propriété cosmologique — loi instable d'un domaine de Rêveur, cycle Sixing capturé, résidu pré-Agénèse — dans un objet matériel. L'artefact porte la loi. Il ne l'imite pas.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI117",
       "Niveau de Cadre": "Avancé",
@@ -1053,7 +1066,7 @@
     "Nom": "Création d’armes psychiques",
     "values": {
       "Cadre (combiné)": "Surnaturel — Très avancé",
-      "Description": "La compétence \"Création d’armes psychiques\" permet aux utilisateurs de manifester et de contrôler des armes basées sur leur énergie mentale, augmentant ainsi leur puissance au combat dans un cadre surnaturel.",
+      "Description": "Matérialisation d'une intention offensive dans le substrat physique d'un domaine de Rêveur à haute densité. L'objet produit n'est pas symbolique. Il blesse.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI118",
       "Niveau de Cadre": "Très avancé",
@@ -1067,7 +1080,7 @@
     "Nom": "Maîtrise des artefacts",
     "values": {
       "Cadre (combiné)": "Surnaturel — Avancé",
-      "Description": "La compétence \"Maîtrise des artefacts\" permet aux personnages de comprendre, manipuler et utiliser efficacement des objets surnaturels dans le cadre d'un jeu de rôle.",
+      "Description": "Lecture du mécanisme cosmologique inscrit dans un artefact existant, puis activation, réorientation ou désactivation maîtrisée sans déstabiliser la zone environnante. Comprendre la loi capturée, pas seulement l'objet.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI119",
       "Niveau de Cadre": "Avancé",
@@ -1092,24 +1105,10 @@
     "notion_page_id": "af750e6d-fa45-4fd6-8c54-7d66a2a9ebf5"
   },
   {
-    "Nom": "Magie innée",
-    "values": {
-      "Cadre (combiné)": "Surnaturel — Très faible",
-      "Description": "La compétence \"Magie innée\" permet aux personnages de canaliser des pouvoirs surnaturels de manière intuitive, offrant des capacités avancées dans les situations magiques du jeu de rôle.",
-      "Famille": "Surnaturel",
-      "Identifiant": "SKI121",
-      "Niveau de Cadre": "Très faible",
-      "Statut": "Validée",
-      "Tags": "Création"
-    },
-    "sections": {},
-    "notion_page_id": "bfe4ae86-2ef7-4ab6-b093-3f346335b317"
-  },
-  {
     "Nom": "Conjuration divine",
     "values": {
       "Cadre (combiné)": "Surnaturel — Très avancé",
-      "Description": "La compétence \"Conjuration divine\" permet d'invoquer des entités surnaturelles pour obtenir leur aide ou leurs pouvoirs, à un niveau très avancé dans le cadre d'un jeu de rôle.",
+      "Description": "Établissement forcé d'un canal avec une entité de rang Rêveur ou supérieur — entité post-mortelle, Être primordial résiduel, fragment d'une conscience pré-Agénèse. « Divin » : terme épistémique des habitants. La réalité dit : quelque chose d'assez grand pour que le contact lui soit indifférent, et qui répond quand même.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI122",
       "Niveau de Cadre": "Très avancé",
@@ -1123,7 +1122,7 @@
     "Nom": "Distorsion de la réalité",
     "values": {
       "Cadre (combiné)": "Surnaturel — Très avancé",
-      "Description": "La compétence \"Distorsion de la réalité\" permet de manipuler la perception et l'interprétation des événements par les personnages, créant ainsi des situations surnaturelles et déroutantes dans le cadre du jeu de rôle.",
+      "Description": "Forçage des fractures entre régimes métaphysiques adjacents pour modifier temporairement les lois physiques d'un domaine de Rêveur. La réalité locale cède. Elle se referme. Rarement exactement comme avant.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI123",
       "Niveau de Cadre": "Très avancé",
@@ -1150,11 +1149,11 @@
   {
     "Nom": "Télékinésie",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Très faible",
-      "Description": "La compétence de télékinésie permet à un personnage de déplacer des objets par la seule force de sa pensée, offrant ainsi des possibilités créatives et stratégiques dans le cadre de jeux de rôle surnaturels.",
+      "Cadre (combiné)": "Surnaturel — Faible",
+      "Description": "Déplacement de matière par prise directe sur les lois physiques instables d'un domaine de Rêveur. Pas de geste rituel — une volonté qui appuie là où le réel fléchit encore.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI108",
-      "Niveau de Cadre": "Très faible",
+      "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
@@ -1164,11 +1163,11 @@
   {
     "Nom": "Invocation",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Assez faible",
-      "Description": "La compétence \"Invocation\" permet d'appeler et de contrôler des entités surnaturelles pour obtenir leur aide ou réaliser des actions spécifiques dans le cadre d'un jeu de rôle.",
+      "Cadre (combiné)": "Surnaturel — Moyen",
+      "Description": "Protocole visant à attirer ou contraindre une entité non-biologique : Transformateur en transit, résidu pré-Agénèse actif, Sans norme localisé, Oubli ou Fureur issus du Premier. Un Transformateur répond s'il le veut bien. Un Oubli n'a plus assez de volonté pour résister.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI109",
-      "Niveau de Cadre": "Assez faible",
+      "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Création"
     },
@@ -1178,11 +1177,11 @@
   {
     "Nom": "Pyrokinésie",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Très faible",
-      "Description": "La pyrokinesie permet à un individu de manipuler et de contrôler le feu par la pensée, offrant ainsi des capacités offensives et défensives dans un cadre de jeu de rôle.",
+      "Cadre (combiné)": "Surnaturel — Assez avancé",
+      "Description": "Interface directe avec le torrent Sixing igné sans outil intermédiaire. Déclenche ou oriente une libération exothermique dans un rayon court. Dangereux dans les zones à forte pression Sixing.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI110",
-      "Niveau de Cadre": "Très faible",
+      "Niveau de Cadre": "Assez avancé",
       "Statut": "Validée",
       "Tags": "Création"
     },
@@ -1192,11 +1191,11 @@
   {
     "Nom": "Métamorphose",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Très faible",
-      "Description": "La compétence \"Métamorphose\" permet aux personnages de se transformer ou d'altérer leur apparence physique, leur conférant ainsi des capacités surnaturelles et une flexibilité tactique en jeu.",
+      "Cadre (combiné)": "Surnaturel — Faible",
+      "Description": "Remodelage délibéré de sa propre morphologie par un mécanisme que la biologie ne couvre pas. Documenté dans les zones de Rêveurs à forte plasticité organique — et hors de ces zones aussi. Le mécanisme résiste à l'explication.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI111",
-      "Niveau de Cadre": "Très faible",
+      "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Physique"
     },
@@ -1206,11 +1205,11 @@
   {
     "Nom": "Sorcellerie",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Très faible",
-      "Description": "La compétence \"Sorcellerie\" permet aux personnages de manipuler des forces surnaturelles pour réaliser des sorts et des rituels, influençant ainsi le monde qui les entoure.",
+      "Cadre (combiné)": "Surnaturel — Assez faible",
+      "Description": "Exploitation empirique des instabilités aux interfaces entre domaines antagonistes, par protocoles gestuels et vocaux. Pas de magie : une friction des lois physiques, mise à profit. Inutile là où le tissu réel est homogène.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI112",
-      "Niveau de Cadre": "Très faible",
+      "Niveau de Cadre": "Assez faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
@@ -1220,11 +1219,11 @@
   {
     "Nom": "Vagues élémentaires",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Moyen",
+      "Cadre (combiné)": "Surnaturel — Assez avancé",
       "Description": "La compétence \"Vagues élémentaires\" permet de manipuler des forces surnaturelles pour créer des effets variés dans un cadre de jeu de rôle, offrant ainsi des opportunités stratégiques en combat ou en résolution de problèmes.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI113",
-      "Niveau de Cadre": "Moyen",
+      "Niveau de Cadre": "Assez avancé",
       "Statut": "Retirée",
       "Tags": "Création"
     },
@@ -1235,7 +1234,7 @@
     "Nom": "Armures spirituelles",
     "values": {
       "Cadre (combiné)": "Surnaturel — Assez faible",
-      "Description": "Ces bracelets, une fois équipés par une personne dotée d'un grand charisme, émettent une aura qui fait hésiter quiconque tente de vous frapper. Chaque cran au-dessus du niveau diminue de 1 la gêne, chaque cran au-dessous du niveau augmente de 1 la gêne.",
+      "Description": "Bracelets émettant une aura qui fait hésiter quiconque tente de frapper le porteur, par interaction entre son charisme et les fréquences du domaine de Rêveur local. Chaque cran au-dessus du niveau diminue de 1 la gêne ; chaque cran en dessous l'augmente de 1.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI114",
       "Niveau de Cadre": "Assez faible",
@@ -1246,24 +1245,10 @@
     "notion_page_id": "8fcdbef7-534c-4447-9f75-192650c466f3"
   },
   {
-    "Nom": "Magie élémentaire",
-    "values": {
-      "Cadre (combiné)": "Surnaturel — Très faible",
-      "Description": "La Magie élémentaire permet de manipuler les éléments naturels (feu, eau, air, terre, etc.) pour créer des effets surnaturels variés, des simples manifestations élémentaires jusqu'aux vagues et déferlantes élémentaires massives. Elle offre des avantages stratégiques en combat comme en résolution de problèmes.",
-      "Famille": "Surnaturel",
-      "Identifiant": "SKI115",
-      "Niveau de Cadre": "Très faible",
-      "Statut": "Validée",
-      "Tags": "Création"
-    },
-    "sections": {},
-    "notion_page_id": "ede174d1-5ab1-4097-9a20-9981b96cdac1"
-  },
-  {
     "Nom": "Fusion mécanique",
     "values": {
       "Cadre (combiné)": "Surnaturel — Assez faible",
-      "Description": "La compétence \"Fusion mécanique\" permet d'intégrer des éléments surnaturels dans le cadre d'un jeu de rôle, en facilitant des interactions et des créations qui transcendent les limites de la mécanique traditionnelle.",
+      "Description": "Intégration d'un composant Sixing actif ou d'un résidu de domaine dans un artefact mécanique. Le dispositif fonctionne hors de sa logique ordinaire tant qu'il reste dans la zone d'origine de l'élément intégré.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI116",
       "Niveau de Cadre": "Assez faible",
@@ -1641,7 +1626,7 @@
     "Nom": "Alchimie",
     "values": {
       "Cadre (combiné)": "Surnaturel — Très faible",
-      "Description": "La compétence \"Alchimie\" permet d'explorer et d'interagir avec des éléments surnaturels à un niveau très faible dans un cadre de jeu de rôle.",
+      "Description": "Transmutation de matière par des procédés qui miment — peut-être pillent — les mécanismes internes des Transformateurs. Résultats non reproductibles, effets réels. Les Transformateurs eux-mêmes ne reconnaissent pas ces pratiques comme les leurs.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI73",
       "Niveau de Cadre": "Très faible",
@@ -1655,7 +1640,7 @@
     "Nom": "Sensibilité paranormale",
     "values": {
       "Cadre (combiné)": "Surnaturel — Très faible",
-      "Description": "La Sensibilité paranormale permet de percevoir et d'interagir avec des phénomènes surnaturels, des présences invisibles, des manifestations psychiques et des énergies occultes. Cette compétence confère une intuition face à l'étrange et au mystérieux, même à un niveau très faible.",
+      "Description": "Perception des variations du substrat de Jast et des gradients de domaines de Rêveurs : épaississements, frictions de frontière, affleurements actifs du Premier. Signal avant le signe. Fonctionne partout sur Escelion.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI74",
       "Niveau de Cadre": "Très faible",
@@ -1683,7 +1668,7 @@
     "Nom": "Hypnose",
     "values": {
       "Cadre (combiné)": "Surnaturel — Nul",
-      "Description": "La compétence \"Hypnose\" permet d'influencer l'esprit des personnages, leur faisant croire ou ressentir des choses qui ne sont pas réelles, dans un cadre surnaturel.",
+      "Description": "Induction d'un état de suggestibilité accrue par focalisation et langage dirigé. Effets réels sur la perception et la mémoire, non expliqués par la biologie standard. Surnaturel Nul : existe dans notre monde.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI76",
       "Niveau de Cadre": "Nul",
@@ -1697,7 +1682,7 @@
     "Nom": "Effet placebo",
     "values": {
       "Cadre (combiné)": "Surnaturel — Nul",
-      "Description": "La compétence \"Effet placebo\" permet aux personnages d'influencer les résultats d'événements ou d'actions en utilisant des croyances ou des perceptions, même dans un cadre surnaturel.",
+      "Description": "Le corps modifie sa chimie parce qu'on lui a dit de guérir. Mécanisme réel, décorrélé de l'évolution pure. Surnaturel Nul — présent dans notre monde.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI77",
       "Niveau de Cadre": "Nul",
@@ -1711,7 +1696,7 @@
     "Nom": "Bénédictions religieuses",
     "values": {
       "Cadre (combiné)": "Surnaturel — Très faible",
-      "Description": "La compétence \"Bénédictions religieuses\" permet d'invoquer des effets surnaturels bénéfiques, influençant positivement le cadre de jeu de rôle à un niveau faible.",
+      "Description": "Protocoles rituels qui sollicitent les fréquences d'un domaine de Rêveur via un intercesseur symbolique. L'effet, quand il survient, est cosmologique. La foi de l'officiant n'a aucune incidence sur le résultat.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI78",
       "Niveau de Cadre": "Très faible",
@@ -1722,10 +1707,10 @@
     "notion_page_id": "b2d566e0-9645-4a32-a3d3-8c98f174a4f4"
   },
   {
-    "Nom": "Télépathie limitée",
+    "Nom": "Sensopathie",
     "values": {
       "Cadre (combiné)": "Surnaturel — Très faible",
-      "Description": "La compétence \"Télépathie limitée\" permet d'établir une communication mentale restreinte entre les individus, facilitant l'échange d'idées ou d'émotions sans nécessiter de langage verbal.",
+      "Description": "Le Souffle Hakutō-Ah de Jast synchronise biologiquement les habitants d'Escelion. La télépathie limitée exploite ces canaux déjà actifs — une lecture directe du flux. Portée courte, qualité brute.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI79",
       "Niveau de Cadre": "Très faible",
@@ -1738,11 +1723,11 @@
   {
     "Nom": "Divination",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Très faible",
-      "Description": "La compétence de divination permet d'obtenir des informations ou des aperçus sur des événements futurs ou cachés à travers des méthodes surnaturelles de faible niveau.",
+      "Cadre (combiné)": "Surnaturel — Faible",
+      "Description": "Lecture des cycles de Jast — Veille, Harmonie, Discordance, Réalignement — via leurs effets sur les comportements animaliers, les configurations élémentaires, les tensions de domaine. Jast étant continental, cette lecture est accessible partout sur Escelion.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI80",
-      "Niveau de Cadre": "Très faible",
+      "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
@@ -1753,7 +1738,7 @@
     "Nom": "Superstition",
     "values": {
       "Cadre (combiné)": "Surnaturel — Nul",
-      "Description": "La compétence \"Superstition\" sert à influencer les événements et les décisions en s'appuyant sur des croyances surnaturelles, affectant ainsi les actions des personnages dans un cadre de jeu de rôle.",
+      "Description": "Lecture et exploitation des corrélations entre rituels, comportements et événements, sans mécanisme causal rationnel identifié. Surnaturel Nul : présente dans notre monde. Certaines corrélations tiennent quand même.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI81",
       "Niveau de Cadre": "Nul",

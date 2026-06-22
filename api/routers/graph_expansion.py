@@ -137,6 +137,10 @@ async def expand_tree(
             player_character_id=request_data.player_character_id,
             llm_model_identifier=llm_model,
             title=request_data.title,
+            scene_type=request_data.scene_type,
+            include_narrative_guides=request_data.include_narrative_guides,
+            organization_mode=request_data.organization_mode,
+            max_context_tokens=request_data.max_context_tokens,
         )
 
         if request_data.persist:

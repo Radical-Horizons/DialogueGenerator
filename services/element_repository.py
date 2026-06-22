@@ -1,5 +1,6 @@
 """Repository pour l'accès aux éléments GDD par nom avec normalisation."""
 import logging
+import unicodedata
 from enum import Enum
 from typing import Dict, List, Optional, Any
 
@@ -74,7 +75,10 @@ class ElementRepository:
         normalized = normalized.replace('\u201C', '"').replace('\u201D', '"')
         # Normaliser les espaces insécables
         normalized = normalized.replace('\u00A0', ' ')
-        return normalized.strip()
+        # Insensible aux accents (ex. Uresair → Uresaïr)
+        folded = unicodedata.normalize("NFKD", normalized)
+        ascii_folded = "".join(c for c in folded if not unicodedata.combining(c))
+        return ascii_folded.strip().casefold()
     
     def _alias_tokens(self, element_data: Dict[str, Any]) -> List[str]:
         """Extrait les alias normalisés d'un élément GDD."""

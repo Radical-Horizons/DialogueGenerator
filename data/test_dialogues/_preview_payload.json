@@ -1,0 +1,28 @@
+{
+  "user_instructions": "Écris un dialogue RPG court et cohérent.",
+  "npc_speaker_id": "Voknir Esh'Maradel",
+  "player_character_id": "Uresair",
+  "max_choices": 2,
+  "choices_mode": "capped",
+  "organization_mode": "narrative",
+  "context_selections": {
+    "characters_full": ["Uresair", "Voknir Esh'Maradel"],
+    "characters_excerpt": [],
+    "locations_full": [],
+    "locations_excerpt": [],
+    "items_full": [],
+    "items_excerpt": [],
+    "species_full": [],
+    "species_excerpt": [],
+    "communities_full": [],
+    "communities_excerpt": [],
+    "dialogues_examples": [],
+    "scene_protagonists": {
+      "personnage_a": "Uresair",
+      "personnage_b": "Voknir Esh'Maradel"
+    },
+    "scene_location": {
+      "sous_lieu": "Atelier de Voknir"
+    }
+  }
+}

@@ -5,7 +5,7 @@ from typing import List, Dict, Any, Optional, Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from api.schemas.dialogue import ContextSelection
-from constants import ModelNames
+from constants import Defaults, ModelNames
 from services.scene_dramatis import context_has_location
 
 from services.ai_slop_detector import (
@@ -653,6 +653,24 @@ class ExpandTreeRequest(BaseModel):
     document_id: Optional[str] = Field(None, description="Identifiant document (auto si absent)")
     persist: bool = Field(True, description="Persister le document sur disque")
     dry_run: bool = Field(False, description="Estimation coût sans appel LLM")
+    scene_type: Optional[str] = Field(
+        "first_meeting",
+        description="Type de scène (aligné templates UI) — défaut première rencontre in-game",
+    )
+    include_narrative_guides: bool = Field(
+        True,
+        description="Inclure les guides narratifs (défaut UI)",
+    )
+    organization_mode: str = Field(
+        "narrative",
+        description="Mode d'organisation du contexte GDD (défaut UI)",
+    )
+    max_context_tokens: int = Field(
+        default=Defaults.CONTEXT_TOKENS,
+        ge=Defaults.MIN_CONTEXT_TOKENS,
+        le=Defaults.MAX_CONTEXT_TOKENS,
+        description="Budget tokens contexte (aligné UI)",
+    )
 
     @model_validator(mode="after")
     def validate_location_present(self) -> "ExpandTreeRequest":

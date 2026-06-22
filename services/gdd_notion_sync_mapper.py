@@ -18,6 +18,9 @@ NOTION_DATABASE_COMPACT_TABLE_IDS: frozenset[str] = frozenset(
         "2d16e4d2-1b45-8016-ba74-ccb4fbd92b72",  # Vocabulaire Alteir
         "10f87005-d58e-46cc-94dc-580b4be9a5cd",  # Compétences
         "0e4cee6a-0546-456a-b49d-5592f553cc9a",  # Compétences de perso
+        "5a3b2abf-221b-40c1-9b2a-98c91e13dfd9",  # Flags
+        "75ab57dc-e48c-4172-8cab-d48f45bda04e",  # Inventaires_PNJ
+        "09204171-5d4d-40e8-9237-d7bac6a5c1a0",  # Valeurs_de_Flag
     }
 )
 
