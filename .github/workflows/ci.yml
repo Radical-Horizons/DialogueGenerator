@@ -79,7 +79,7 @@ jobs:
   pwa:
     name: PWA installability
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v6
 
@@ -121,6 +121,10 @@ jobs:
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
+
+      - name: Build frontend (PWA prod smoke)
+        run: npm run build
+        working-directory: frontend
 
       - name: Run PWA Playwright smoke
         env:

@@ -37,11 +37,14 @@ export default defineConfig({
       },
     },
     {
-      // Build + preview to validate prod PWA registration.
-      command: 'cd frontend && npm run build && npm run preview -- --host 0.0.0.0 --port 4173',
+      // CI : build explicite dans le workflow ; local : build + preview.
+      command: isCi
+        ? 'npm run preview -- --host 0.0.0.0 --port 4173'
+        : 'npm run build && npm run preview -- --host 0.0.0.0 --port 4173',
+      cwd: 'frontend',
       url: 'http://localhost:4173/index.html',
       reuseExistingServer: false,
-      timeout: isCi ? 900_000 : 180_000,
+      timeout: isCi ? 120_000 : 180_000,
       env: {
         VITE_API_BASE_URL: '',
       },

@@ -32,6 +32,7 @@
     "test:backend:full": "node scripts/pytest-tier.cjs full",
     "test:smoke": "node scripts/pytest-tier.cjs smoke && cd frontend && npx vitest run --bail=1 --reporter=dot",
     "test:premerge": "node scripts/pytest-tier.cjs fast && npm --prefix frontend run lint && npm --prefix frontend test",
+    "test:ci:local": "npm run test:backend:full && npm run test:frontend:vitest:full && npm run test:e2e:pwa",
     "test:e2e:smoke": "npx playwright test --grep \"@smoke\" --reporter=list --workers=1",
     "test:api": "node scripts/getPythonPath.js -m pytest tests/api/",
     "test:frontend": "powershell -ExecutionPolicy Bypass -File scripts/test-frontend.ps1",

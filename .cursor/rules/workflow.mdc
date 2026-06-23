@@ -76,6 +76,8 @@ alwaysApply: false
 
 - **Avant commit** : **T2** recommandé — `npm run test:premerge` +, si changements critiques ou release, **`npm run test:frontend`** (build inclus) et/ou **`npm test`** (pytest complet). **T3** avant merge vers `main` si la CI complète n’a pas encore tourné sur la branche.
 
+- **Avant `git push` vers `main`** (obligatoire agents) : suite CI T3 complète — voir **`.cursor/rules/ci_before_push.mdc`**. Interdit de pousser sur `main` sans les trois jobs verts (backend full, Vitest `VITEST_FULL=1`, PWA). La commande `/commit` avec push suit la même gate.
+
 - **Déploiement** : prod de référence = **VPS OVH** (`docs/deployment/PRODUCTION.md`, URL publique `demo.auto-diffusion.net`). `npm run deploy:build` / `npm run deploy:check` ; déploiement typique `npm run deploy`. Sur le serveur : `ENVIRONMENT=production`, `PUBLIC_ORIGIN` (ou `CORS_ORIGINS`), secrets JWT/OpenAI, etc. **Détail et pièges** : `.cursor/rules/deployment.mdc`.
 
 - **Diagnostic développement** :

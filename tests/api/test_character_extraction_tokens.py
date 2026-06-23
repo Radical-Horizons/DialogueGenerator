@@ -102,52 +102,60 @@ def test_character_extraction_without_field_configs(real_client, sample_characte
 @pytest.mark.api
 def test_character_extraction_with_limited_field_configs(real_client, sample_character_with_data):
     """Test l'extraction avec field_configs limités (générique).
-    
+
     Vérifie que si field_configs contient seulement quelques champs, seule une petite
-    partie est extraite. Ce test est générique et fonctionne avec n'importe quel personnage.
+    partie est extraite. Utilise ``/context/estimate-tokens`` (sans dramatis ni excerpt
+    aléatoire) pour une mesure stable entre environnements.
     """
     character = sample_character_with_data
     character_name = character["name"]
-    raw_tokens = character["raw_tokens"]
-    
-    # Test avec field_configs limités (seulement "Nom")
-    response = real_client.post(
-        "/api/v1/dialogues/estimate-tokens",
-        json={
-            "context_selections": {
-                "characters_full": [character_name],
-                "locations_full": [],
-                "items_full": [],
-                "species_full": [],
-                "communities_full": []
-            },
-            "field_configs": {
-                "character": ["Nom"]  # Seulement le nom
-            },
-            "user_instructions": "Test extraction limitée",
-            "max_context_tokens": 10000,
-            "npc_speaker_id": character_name
-        }
+
+    base_payload = {
+        "context_selections": {
+            "characters_full": [character_name],
+            "locations_full": [],
+            "items_full": [],
+            "species_full": [],
+            "communities_full": [],
+        },
+        "user_instructions": "Test extraction limitée",
+        "max_context_tokens": 10000,
+    }
+
+    response_limited = real_client.post(
+        "/api/v1/context/estimate-tokens",
+        json={**base_payload, "field_configs": {"character": ["Nom"]}},
     )
-    
-    assert response.status_code == 200, f"Erreur: {response.status_code} - {response.text}"
-    data = response.json()
-    
-    context_tokens = data.get("context_tokens", 0)
-    
-    # Vérifier que seulement une petite partie est extraite.
-    # Note : le pipeline ajoute automatiquement un personnage aléatoire en mode excerpt
-    # (random_excerpt_count=1) — ce personnage contribue jusqu'à ~1500 tokens supplémentaires
-    # avec le mode excerpt enrichi (priorités 1+2+voix). Le seuil est < 45 % pour
-    # rester robuste sans régresser sur la vérification principale (field_configs limités).
-    extraction_ratio = context_tokens / raw_tokens if raw_tokens > 0 else 0
-    assert extraction_ratio < 0.45, (
-        f"Extraction trop importante avec field_configs limités: {context_tokens} tokens "
-        f"sur {raw_tokens} bruts ({extraction_ratio:.1%}). Attendu moins de 45%."
+    assert response_limited.status_code == 200, (
+        f"Erreur: {response_limited.status_code} - {response_limited.text}"
     )
-    
-    print(f"\n[OK] Extraction limitée avec field_configs=['Nom']: {context_tokens} tokens "
-          f"sur {raw_tokens} bruts ({extraction_ratio:.1%})")
+    limited_tokens = response_limited.json().get("context_tokens", 0)
+
+    response_full = real_client.post(
+        "/api/v1/context/estimate-tokens",
+        json=base_payload,
+    )
+    assert response_full.status_code == 200, (
+        f"Erreur: {response_full.status_code} - {response_full.text}"
+    )
+    full_tokens = response_full.json().get("context_tokens", 0)
+
+    assert limited_tokens < full_tokens, (
+        f"field_configs=['Nom'] devrait extraire moins que sans limite: "
+        f"{limited_tokens} vs {full_tokens}"
+    )
+
+    if full_tokens > 500:
+        assert limited_tokens <= full_tokens * 0.5, (
+            f"Extraction trop importante avec field_configs limités: {limited_tokens} tokens "
+            f"vs {full_tokens} sans limite ({limited_tokens / full_tokens:.1%}). "
+            "Attendu au plus 50% du mode sans field_configs."
+        )
+
+    print(
+        f"\n[OK] Extraction limitée avec field_configs=['Nom']: {limited_tokens} tokens "
+        f"vs {full_tokens} sans limite ({limited_tokens / full_tokens:.1%})"
+    )
 
 
 @pytest.mark.integration
