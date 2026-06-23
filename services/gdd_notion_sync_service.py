@@ -1041,8 +1041,15 @@ class GddNotionSyncService:
         fresh: bool = False,
         run_scope_category_files: Optional[Tuple[str, ...]] = None,
         apply_staging_despite_errors: bool = False,
+        run_included_categories: Optional[List[str]] = None,
     ) -> GddNotionSyncResult:
-        """Exécute une synchronisation (manuelle ou planifiée)."""
+        """Exécute une synchronisation (manuelle ou planifiée).
+
+        Args:
+            run_included_categories: Filtre éphémère pour ce run uniquement.
+                ``None`` = utiliser ``included_categories`` persisté dans settings.
+                ``[]`` = toutes les bases (pas de filtre).
+        """
         async with self._run_lock:
             return await self._run_sync_locked(
                 force_full=force_full,
@@ -1052,6 +1059,7 @@ class GddNotionSyncService:
                 fresh=fresh,
                 run_scope_category_files=run_scope_category_files,
                 apply_staging_despite_errors=apply_staging_despite_errors,
+                run_included_categories=run_included_categories,
             )
 
     async def _run_sync_locked(
@@ -1064,6 +1072,7 @@ class GddNotionSyncService:
         fresh: bool,
         run_scope_category_files: Optional[Tuple[str, ...]] = None,
         apply_staging_despite_errors: bool = False,
+        run_included_categories: Optional[List[str]] = None,
     ) -> GddNotionSyncResult:
         started = datetime.now(timezone.utc).isoformat()
         self._write_status(
@@ -1103,6 +1112,7 @@ class GddNotionSyncService:
                 fresh=fresh,
                 run_scope_category_files=run_scope_category_files,
                 apply_staging_despite_errors=apply_staging_despite_errors,
+                run_included_categories=run_included_categories,
             )
 
         result = GddNotionSyncResult(success=False, message="")
@@ -1239,6 +1249,7 @@ class GddNotionSyncService:
         *,
         sources: List[Any],
         included_list: List[str],
+        persisted_included_list: List[str],
         eligible_cf: List[str],
         fingerprint: str,
         force_full: bool,
@@ -1328,7 +1339,7 @@ class GddNotionSyncService:
             sync_targets_apply,
             allow_missing_staged=True,
         )
-        prune_included: List[str] = list(included_list)
+        prune_included: List[str] = list(persisted_included_list)
         removed_live = remove_excluded_database_sources_from_live(
             self._gdd_categories_path,
             sources,
@@ -1336,7 +1347,7 @@ class GddNotionSyncService:
         )
         for rel in removed_live:
             log_sync_event(
-                f"Périmètre restreint : supprimé du disque local — {rel}",
+                f"Périmètre restreint (sauvegardé) : supprimé du disque local — {rel}",
                 request_id=request_id,
             )
         clear_checkpoint_files(self._sync_checkpoint_dir)
@@ -1375,6 +1386,7 @@ class GddNotionSyncService:
         fresh: bool = False,
         run_scope_category_files: Optional[Tuple[str, ...]] = None,
         apply_staging_despite_errors: bool = False,
+        run_included_categories: Optional[List[str]] = None,
     ) -> GddNotionSyncResult:
         settings = self._store.load_settings()
         sources = settings.get("sources") or []
@@ -1384,7 +1396,19 @@ class GddNotionSyncService:
                 message="Aucune source Notion configurée (sources[] vide).",
             )
 
-        included_list = [
+        if run_included_categories is not None:
+            included_list = [
+                str(x).strip()
+                for x in run_included_categories
+                if isinstance(x, str) and str(x).strip()
+            ]
+        else:
+            included_list = [
+                str(x).strip()
+                for x in (settings.get("included_categories") or [])
+                if isinstance(x, str) and str(x).strip()
+            ]
+        persisted_included_list = [
             str(x).strip()
             for x in (settings.get("included_categories") or [])
             if isinstance(x, str) and str(x).strip()
@@ -1463,6 +1487,7 @@ class GddNotionSyncService:
             return await self._apply_staging_despite_errors(
                 sources=sources,
                 included_list=included_list,
+                persisted_included_list=persisted_included_list,
                 eligible_cf=eligible_cf,
                 fingerprint=fingerprint,
                 force_full=force_full,
@@ -1859,7 +1884,7 @@ class GddNotionSyncService:
                 sync_targets,
                 allow_missing_staged=False,
             )
-            prune_included: List[str] = [] if scope_set else list(included_list)
+            prune_included: List[str] = [] if scope_set else list(persisted_included_list)
             removed_live = remove_excluded_database_sources_from_live(
                 self._gdd_categories_path,
                 sources,
@@ -1867,7 +1892,7 @@ class GddNotionSyncService:
             )
             for rel in removed_live:
                 log_sync_event(
-                    f"Périmètre restreint : supprimé du disque local — {rel}",
+                    f"Périmètre restreint (sauvegardé) : supprimé du disque local — {rel}",
                     request_id=request_id,
                 )
             clear_checkpoint_files(self._sync_checkpoint_dir)
@@ -1914,24 +1939,30 @@ class GddNotionSyncService:
             notion_id, data_source_ids=data_source_ids
         )
 
-    def build_notebooklm_export_zip(self, *, max_files: int = 64) -> bytes:
+    def build_notebooklm_export_zip(
+        self,
+        *,
+        max_files: int = 64,
+        export_scope: str = "disk",
+    ) -> bytes:
         """Assemble un ZIP Markdown (NotebookLM) depuis le GDD local et la config sync.
-
-        Utilise ``included_categories`` comme filtre de périmètre (même sémantique que la sync).
 
         Args:
             max_files: Nombre maximal de fichiers dans l’archive (1–128), README inclus.
+            export_scope: ``disk`` = tout JSON local des sources ; ``sync`` = filtre
+                ``included_categories`` persisté.
 
         Returns:
             Contenu binaire du fichier ZIP.
 
         Raises:
-            ValueError: Si ``max_files`` est hors bornes.
+            ValueError: Si ``max_files`` est hors bornes ou ``export_scope`` invalide.
         """
-        from services.gdd_notebooklm_export import build_gdd_notebooklm_zip_bytes
+        from services.gdd_notebooklm_export import ExportScope, build_gdd_notebooklm_zip_bytes
 
         if max_files < 1 or max_files > 128:
             raise ValueError("max_files doit être entre 1 et 128")
+        scope: ExportScope = "sync" if export_scope == "sync" else "disk"
         settings = self._store.load_settings()
         project_root = self._gdd_categories_path.resolve().parent.parent
         return build_gdd_notebooklm_zip_bytes(
@@ -1939,4 +1970,5 @@ class GddNotionSyncService:
             project_root=project_root,
             settings=settings,
             max_files=max_files,
+            export_scope=scope,
         )

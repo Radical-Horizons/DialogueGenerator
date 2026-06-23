@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Annotated, List, Optional
+from typing import Annotated, List, Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
@@ -141,6 +141,24 @@ async def run_gdd_notion_sync(
             ),
         ),
     ] = False,
+    included_filter: Annotated[
+        Literal["persisted", "ui"],
+        Query(
+            description=(
+                "persisted (défaut) : filtre ``included_categories`` sauvegardé ; "
+                "ui : filtre éphémère via ``included_category`` (non persisté)."
+            ),
+        ),
+    ] = "persisted",
+    included_category: Annotated[
+        Optional[List[str]],
+        Query(
+            description=(
+                "Avec included_filter=ui : bases cochées pour ce run (répéter le param). "
+                "Absent ou liste vide = toutes les bases."
+            ),
+        ),
+    ] = None,
 ) -> GddNotionSyncRunResponse:
     """Déclenche une synchronisation immédiate."""
     if resume and not full:
@@ -190,6 +208,13 @@ async def run_gdd_notion_sync(
         )
         if scope_norm:
             scope_files = scope_norm
+    run_included: Optional[List[str]] = None
+    if included_filter == "ui":
+        run_included = [
+            str(x).strip()
+            for x in (included_category or [])
+            if isinstance(x, str) and str(x).strip()
+        ]
     result = await svc.run_sync(
         force_full=full,
         mirror_rebuild=mirror_rebuild,
@@ -198,6 +223,7 @@ async def run_gdd_notion_sync(
         fresh=fresh,
         run_scope_category_files=scope_files,
         apply_staging_despite_errors=apply_staging_despite_errors,
+        run_included_categories=run_included,
     )
     return GddNotionSyncRunResponse(
         success=result.success,
@@ -315,10 +341,19 @@ async def download_gdd_notebooklm_export(
             description="Nombre max de fichiers Markdown dans le ZIP (README + thèmes et suites -partNN).",
         ),
     ] = 64,
+    scope: Annotated[
+        Literal["disk", "sync"],
+        Query(
+            description=(
+                "disk (défaut) : tout le GDD local des sources Notion ; "
+                "sync : uniquement le périmètre ``included_categories`` sauvegardé."
+            ),
+        ),
+    ] = "disk",
 ) -> Response:
-    """ZIP : GDD local (Notion sync) regroupé en Markdown pour NotebookLM / présentations."""
+    """ZIP : GDD local regroupé en Markdown pour NotebookLM / présentations."""
     try:
-        payload = svc.build_notebooklm_export_zip(max_files=max_files)
+        payload = svc.build_notebooklm_export_zip(max_files=max_files, export_scope=scope)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except OSError as exc:

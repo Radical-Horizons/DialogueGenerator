@@ -64,6 +64,23 @@ function deriveIncludedDbFilesFromConfig(c: GddNotionSyncConfigPublic): string[]
     .map((s) => s.category_file)
 }
 
+function computeIncludedCategoriesPayloadFromSelection(
+  sources: GddNotionSyncConfigPublic['sources'],
+  selectedFiles: string[],
+): string[] {
+  const dbs = (sources ?? []).filter((s) => s.kind === 'database')
+  const allDbFiles = dbs.map((s) => s.category_file).sort()
+  const sortedSel = [...selectedFiles].sort()
+  const allSelected =
+    dbs.length > 0 &&
+    sortedSel.length === allDbFiles.length &&
+    sortedSel.every((f, i) => f === allDbFiles[i])
+  if (dbs.length === 0 || sortedSel.length === 0 || allSelected) {
+    return []
+  }
+  return sortedSel
+}
+
 /** Listes contexte + cache scène : recharger après changement des fichiers GDD sur disque. */
 function refreshContextAfterGddDiskChange(): void {
   const st = useContextStore.getState()
@@ -119,6 +136,7 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
   const [includedDbFiles, setIncludedDbFiles] = useState<string[]>([])
   const [tokenInput, setTokenInput] = useState('')
   const [saving, setSaving] = useState(false)
+  const [perimeterSaving, setPerimeterSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
 
@@ -229,7 +247,7 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
     return () => window.clearInterval(t)
   }, [progressOpen])
 
-  const busy = phase === 'loading'
+  const busy = phase === 'loading' || perimeterSaving
   const elapsedSec =
     progressOpen && syncStartedAt !== null ? (Date.now() - syncStartedAt) / 1000 : 0
   void elapsedTick
@@ -252,9 +270,34 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
     })
   }, [])
 
+  const persistIncludedPerimeter = useCallback(
+    async (files: string[]) => {
+      if (!config) {
+        return
+      }
+      const payload = computeIncludedCategoriesPayloadFromSelection(config.sources ?? [], files)
+      setPerimeterSaving(true)
+      setSaveError(null)
+      try {
+        const r = await putGddNotionSyncConfig({ included_categories: payload })
+        setConfig(r.config)
+        setIncludedDbFiles(deriveIncludedDbFilesFromConfig(r.config))
+        setSaveMessage('Périmètre des bases enregistré.')
+      } catch (e) {
+        const text = e instanceof Error ? e.message : 'Échec enregistrement du périmètre'
+        setSaveError(text)
+      } finally {
+        setPerimeterSaving(false)
+      }
+    },
+    [config],
+  )
+
   const checkAllDatabaseSources = useCallback(() => {
-    setIncludedDbFiles(databaseSources.map((s) => s.category_file))
-  }, [databaseSources])
+    const files = databaseSources.map((s) => s.category_file)
+    setIncludedDbFiles(files)
+    void persistIncludedPerimeter(files)
+  }, [databaseSources, persistIncludedPerimeter])
 
   const uncheckAllDatabaseSources = useCallback(() => {
     setIncludedDbFiles([])
@@ -263,23 +306,15 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
   /** Bases listées comme secondaires dans le dépôt : non cochées par ce raccourci. */
   const checkEssentialDatabaseSources = useCallback(() => {
     const secondary = new Set(GDD_NOTION_SYNC_SECONDARY_DATABASE_FILES)
-    setIncludedDbFiles(
-      databaseSources.map((s) => s.category_file).filter((f) => !secondary.has(f)),
-    )
-  }, [databaseSources])
+    const files = databaseSources
+      .map((s) => s.category_file)
+      .filter((f) => !secondary.has(f))
+    setIncludedDbFiles(files)
+    void persistIncludedPerimeter(files)
+  }, [databaseSources, persistIncludedPerimeter])
 
   const computeIncludedCategoriesPayload = useCallback((): string[] => {
-    const dbs = (config?.sources ?? []).filter((s) => s.kind === 'database')
-    const allDbFiles = dbs.map((s) => s.category_file).sort()
-    const sortedSel = [...includedDbFiles].sort()
-    const allSelected =
-      dbs.length > 0 &&
-      sortedSel.length === allDbFiles.length &&
-      sortedSel.every((f, i) => f === allDbFiles[i])
-    if (dbs.length === 0 || sortedSel.length === 0 || allSelected) {
-      return []
-    }
-    return sortedSel
+    return computeIncludedCategoriesPayloadFromSelection(config?.sources ?? [], includedDbFiles)
   }, [config?.sources, includedDbFiles])
 
   const runPreviewOneRow = useCallback(
@@ -320,13 +355,11 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
           }
         }, 400)
         try {
-          if (config) {
-            const includedPayload = computeIncludedCategoriesPayload()
-            const rCfg = await putGddNotionSyncConfig({ included_categories: includedPayload })
-            setConfig(rCfg.config)
-            setIncludedDbFiles(deriveIncludedDbFilesFromConfig(rCfg.config))
-          }
-          const r = await postGddNotionSync(full, syncOpts)
+          const includedPayload = computeIncludedCategoriesPayload()
+          const r = await postGddNotionSync(full, {
+            ...syncOpts,
+            includedCategories: includedPayload,
+          })
           await refreshStatus()
           if (full) {
             await refreshArchives()
@@ -355,7 +388,6 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
       refreshArchives,
       refreshCheckpoint,
       onCheckpointDiskChanged,
-      config,
       computeIncludedCategoriesPayload,
     ],
   )
@@ -392,16 +424,17 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
   const dbCount = databaseSources.length
   const pageCount = sources.filter((s) => s.kind === 'page').length
 
-  const handleNotebooklmExport = useCallback(async () => {
+  const handleNotebooklmExport = useCallback(async (scope: 'disk' | 'sync' = 'disk') => {
     setNotebooklmExportError(null)
     setNotebooklmExporting(true)
     try {
-      const blob = await getGddNotebooklmExportZip()
+      const blob = await getGddNotebooklmExportZip(64, scope)
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
       const d = new Date().toISOString().slice(0, 10)
-      a.download = `gdd-notebooklm-export-${d}.zip`
+      const suffix = scope === 'sync' ? '-perimetre-sync' : ''
+      a.download = `gdd-notebooklm-export${suffix}-${d}.zip`
       a.rel = 'noopener'
       document.body.appendChild(a)
       a.click()
@@ -546,28 +579,50 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
               lineHeight: 1.45,
             }}
           >
-            Télécharge un ZIP Markdown : le GDD local (bases/pages du périmètre Notion ci-dessous, comme une
-            sync) regroupé par thèmes. Les petits volets sont fusionnés ; chaque fichier reste sous la limite
-            NotebookLM (~500k mots / source) — les très gros thèmes seulement sont découpés en{' '}
-            <code style={{ fontSize: '0.85em' }}>-part02.md</code>, etc.
+            Télécharge un ZIP Markdown : tout le GDD local disponible sur disque (bases et fiches
+            page synchronisées), regroupé par thèmes. Les petits volets sont fusionnés ; chaque
+            fichier reste sous la limite NotebookLM (~500k mots / source) — les très gros thèmes
+            seulement sont découpés en <code style={{ fontSize: '0.85em' }}>-part02.md</code>, etc.
+            Un second bouton exporte uniquement le périmètre sauvegardé (cases cochées +
+            « Sauver sans sync »).
           </p>
-          <button
-            type="button"
-            onClick={() => void handleNotebooklmExport()}
-            disabled={notebooklmExporting || busy || !config || sources.length === 0}
-            style={{
-              padding: '0.5rem 1rem',
-              borderRadius: '6px',
-              border: `1px solid ${theme.border.primary}`,
-              backgroundColor: theme.background.secondary,
-              color: theme.text.primary,
-              cursor:
-                notebooklmExporting || busy || !config || sources.length === 0 ? 'not-allowed' : 'pointer',
-              opacity: notebooklmExporting || busy || !config || sources.length === 0 ? 0.6 : 1,
-            }}
-          >
-            {notebooklmExporting ? 'Préparation du ZIP…' : 'Télécharger export NotebookLM (.zip)'}
-          </button>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <button
+              type="button"
+              onClick={() => void handleNotebooklmExport('disk')}
+              disabled={notebooklmExporting || busy || !config || sources.length === 0}
+              style={{
+                padding: '0.5rem 1rem',
+                borderRadius: '6px',
+                border: `1px solid ${theme.border.primary}`,
+                backgroundColor: theme.background.secondary,
+                color: theme.text.primary,
+                cursor:
+                  notebooklmExporting || busy || !config || sources.length === 0 ? 'not-allowed' : 'pointer',
+                opacity: notebooklmExporting || busy || !config || sources.length === 0 ? 0.6 : 1,
+              }}
+            >
+              {notebooklmExporting ? 'Préparation du ZIP…' : 'Télécharger tout le GDD local (.zip)'}
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleNotebooklmExport('sync')}
+              disabled={notebooklmExporting || busy || !config || sources.length === 0}
+              style={{
+                padding: '0.5rem 1rem',
+                borderRadius: '6px',
+                border: `1px solid ${theme.border.primary}`,
+                backgroundColor: theme.background.panel,
+                color: theme.text.secondary,
+                cursor:
+                  notebooklmExporting || busy || !config || sources.length === 0 ? 'not-allowed' : 'pointer',
+                opacity: notebooklmExporting || busy || !config || sources.length === 0 ? 0.6 : 1,
+              }}
+              title="Utilise included_categories sauvegardé (Sauver sans sync), pas les cases non enregistrées"
+            >
+              Export périmètre sync sauvegardé
+            </button>
+          </div>
           {notebooklmExportError && (
             <p style={{ margin: '0.5rem 0 0 0', color: theme.state.error.color, fontSize: '0.88rem' }}>
               {notebooklmExportError}
@@ -715,10 +770,8 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                 alors ignorées sur ce run (évite de parcourir tout le hub). Retirez le filtre pour tout resynchroniser.
                 <br />
                 <strong style={{ color: theme.text.primary }}>Cocher essentiels</strong> : coche toutes les bases sauf
-                celles marquées « secondaire » (liste dans le dépôt, ex. assets, prompts,{' '}
-                <code style={{ fontSize: '0.85em' }}>Caractéristiques_—_Uresaïr_(FP).json</code>) — ce n’est pas un
-                périmètre « jeu minimal », seulement un raccourci pour décocher les tables plutôt outil / hors cœur
-                narratif.
+                celles marquées « secondaire » et <strong style={{ color: theme.text.primary }}>enregistre</strong>{' '}
+                immédiatement le périmètre sur le serveur.
                 <br />
                 <strong style={{ color: theme.text.primary }}>Sync complète (bouton global) avec filtre :</strong> les
                 fichiers (ou dossiers shards) des bases <em>non</em> cochées sont <strong>retirés</strong> du dossier GDD
@@ -726,8 +779,10 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                 bouton <strong>Sync cette base</strong> sur une ligne pour une sync complète <em>uniquement</em> sur cette
                 base sans toucher aux autres.
                 <br />
-                <strong style={{ color: theme.text.primary }}>Sync normale ou complète :</strong> les cases sont
-                enregistrées automatiquement sur le serveur au lancement (inutile de cliquer « Enregistrer » avant).
+                <strong style={{ color: theme.text.primary }}>Sync normale ou complète :</strong> les cases
+                cochées s’appliquent à ce run uniquement (filtre éphémère). Le périmètre{' '}
+                <strong>sauvegardé</strong> (Cocher essentiels, Appliquer le périmètre ou Sauver sans sync)
+                détermine quelles bases sont retirées du disque lors d’une sync complète globale.
               </p>
               {databaseSources.length === 0 ? (
                 <p style={{ margin: 0, fontSize: '0.85rem', color: theme.text.secondary }}>
@@ -760,6 +815,15 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                       title="Coche toutes les bases sauf la liste « secondaires » du dépôt (voir constante gddNotionSyncSecondaryDatabases)"
                     >
                       Cocher essentiels
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!config || saving || busy}
+                      onClick={() => void persistIncludedPerimeter(includedDbFiles)}
+                      style={buttonStyle(saving || busy)}
+                      title="Enregistre les cases cochées sans lancer de sync"
+                    >
+                      {perimeterSaving ? 'Enregistrement…' : 'Appliquer le périmètre'}
                     </button>
                   </div>
                   <div
@@ -875,7 +939,7 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
               <strong style={{ color: theme.text.primary }}>Sauver sans sync</strong> : écrit sur le serveur
               l’intervalle, l’auto-sync, la rétention <code style={{ fontSize: '0.85em' }}>.archive/</code>, le token
               ci-dessus et les cases des bases — <strong style={{ color: theme.text.primary }}>sans</strong>{' '}
-              lancer de synchronisation. Une sync enregistre déjà les cases automatiquement.
+              lancer de synchronisation.
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
               <button

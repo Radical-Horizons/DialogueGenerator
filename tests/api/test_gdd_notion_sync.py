@@ -1,6 +1,8 @@
 """Tests API sync GDD Notion (FR18)."""
 import json
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -548,6 +550,103 @@ def test_notebooklm_export_zip(client: TestClient, tmp_path: Path) -> None:
         assert r.headers.get("content-type", "").startswith("application/zip")
         zf = zipfile.ZipFile(BytesIO(r.content))
         assert any(n.endswith(".md") for n in zf.namelist())
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_notebooklm_export_scope_sync_filters_by_included(client: TestClient, tmp_path: Path) -> None:
+    import json as json_lib
+
+    svc = _build_service(tmp_path)
+    gdd = tmp_path / "gdd"
+    (gdd / "A.json").write_text(
+        json_lib.dumps([{"Nom": "OnlyA", "sections": {"a": "b"}}], ensure_ascii=False),
+        encoding="utf-8",
+    )
+    (gdd / "B.json").write_text(
+        json_lib.dumps([{"Nom": "OnlyB", "sections": {"a": "c"}}], ensure_ascii=False),
+        encoding="utf-8",
+    )
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        put = client.put(
+            "/api/v1/gdd-notion-sync/config",
+            json={
+                "sources": [
+                    {
+                        "kind": "page",
+                        "category_file": "A.json",
+                        "notion_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+                    },
+                    {
+                        "kind": "page",
+                        "category_file": "B.json",
+                        "notion_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+                    },
+                ],
+                "included_categories": ["A.json"],
+            },
+        )
+        assert put.status_code == 200
+        r_disk = client.get("/api/v1/gdd-notion-sync/notebooklm-export?scope=disk")
+        assert r_disk.status_code == 200
+        import zipfile
+        from io import BytesIO
+
+        z_disk = zipfile.ZipFile(BytesIO(r_disk.content))
+        md_disk = "".join(z_disk.read(n).decode("utf-8") for n in z_disk.namelist() if n.endswith(".md"))
+        assert "OnlyA" in md_disk and "OnlyB" in md_disk
+        r_sync = client.get("/api/v1/gdd-notion-sync/notebooklm-export?scope=sync")
+        z_sync = zipfile.ZipFile(BytesIO(r_sync.content))
+        md_sync = "".join(z_sync.read(n).decode("utf-8") for n in z_sync.namelist() if n.endswith(".md"))
+        assert "OnlyA" in md_sync
+        assert "OnlyB" not in md_sync
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_sync_ui_included_filter_does_not_persist(client: TestClient, tmp_path: Path) -> None:
+    svc = _build_service(tmp_path)
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        client.put(
+            "/api/v1/gdd-notion-sync/config",
+            json={
+                "sources": [
+                    {
+                        "kind": "database",
+                        "category_file": "Alpha.json",
+                        "notion_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+                    },
+                    {
+                        "kind": "database",
+                        "category_file": "Beta.json",
+                        "notion_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+                    },
+                ],
+                "included_categories": ["Alpha.json"],
+            },
+        )
+        mock_run = AsyncMock(return_value=SimpleNamespace(
+            success=True,
+            message="ok",
+            updated_entities=0,
+            partial_errors=[],
+            mirror_promotion_pending=False,
+        ))
+        with patch.object(svc, "run_sync", mock_run):
+            r = client.post(
+                "/api/v1/gdd-notion-sync/sync"
+                "?included_filter=ui&included_category=Alpha.json&included_category=Beta.json"
+            )
+        assert r.status_code == 200
+        cfg = client.get("/api/v1/gdd-notion-sync/config").json()
+        assert cfg["config"]["included_categories"] == ["Alpha.json"]
+        mock_run.assert_awaited_once()
+        assert mock_run.await_args.kwargs["run_included_categories"] == [
+            "Alpha.json",
+            "Beta.json",
+        ]
     finally:
         app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
 

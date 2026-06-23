@@ -42,7 +42,9 @@ describe('ContextSuggestionsPanel', () => {
     } as ReturnType<typeof useContextStore>)
 
     render(<ContextSuggestionsPanel />)
-    expect(screen.getByTestId('context-suggestions-panel-toggle')).toHaveTextContent(/suggestions \(0\)/i)
+    const toggle = screen.getByTestId('context-suggestions-panel-toggle')
+    expect(toggle).toHaveTextContent(/suggestions/i)
+    expect(toggle).toHaveTextContent('0')
   })
 
   it('suggestions vides et panneau ouvert → affiche message placeholder', async () => {

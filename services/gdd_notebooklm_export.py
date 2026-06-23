@@ -13,7 +13,9 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Tuple
+from typing import Any, Dict, List, Literal, Mapping, Optional, Tuple
+
+ExportScope = Literal["disk", "sync"]
 
 from services.gdd_notion_sync_mirror import GDD_RESERVED_TOP_LEVEL
 from services.gdd_notion_sync_utils import category_file_matches_included, category_stem_to_list_category_key
@@ -46,6 +48,36 @@ def _resolve_category_path(gdd_root: Path, category_file: str) -> Path:
     if sk:
         return (root / sk).resolve()
     return (root / raw).resolve()
+
+
+def eligible_disk_category_files(
+    settings: Mapping[str, Any],
+    gdd_root: Path,
+) -> List[str]:
+    """Sources page/database configurées ayant au moins un JSON sur disque.
+
+    Ignore ``included_categories`` : exporte tout le GDD local disponible pour
+    les sources Notion déclarées.
+    """
+    sources = settings.get("sources") or []
+    root = gdd_root.resolve()
+    out: List[str] = []
+    seen: set[str] = set()
+    for s in sources:
+        if not isinstance(s, dict):
+            continue
+        kind = (s.get("kind") or "").strip().lower()
+        if kind not in ("database", "page"):
+            continue
+        cf = (s.get("category_file") or "").strip()
+        if not cf or cf in seen:
+            continue
+        target = _resolve_category_path(root, cf)
+        if not _iter_json_files(target):
+            continue
+        seen.add(cf)
+        out.append(cf)
+    return out
 
 
 def eligible_sync_category_files(settings: Mapping[str, Any]) -> List[str]:
@@ -577,6 +609,7 @@ def build_notebooklm_markdown_parts(
     settings: Mapping[str, Any],
     max_files: int = _MAX_FILES_DEFAULT,
     max_chars_per_part: int = _MAX_EXPORT_CHARS_PER_PART,
+    export_scope: ExportScope = "disk",
 ) -> List[Tuple[str, str]]:
     """Construit des documents Markdown (nom, contenu) pour export NotebookLM.
 
@@ -589,6 +622,8 @@ def build_notebooklm_markdown_parts(
         settings: Paramètres sync (``sources``, ``included_categories``).
         max_files: Nombre max de fichiers ``.md`` dans le ZIP.
         max_chars_per_part: Taille max d'un fichier Markdown avant découpage.
+        export_scope: ``disk`` = tout JSON local des sources ; ``sync`` = filtre
+            ``included_categories`` (périmètre coché dans l'UI).
 
     Returns:
         Liste de ``(filename.md, texte)`` triée par nom de fichier.
@@ -599,7 +634,10 @@ def build_notebooklm_markdown_parts(
     if max_files < 1:
         raise ValueError("max_files doit être >= 1")
     gdd_root = gdd_root.resolve()
-    eligible = eligible_sync_category_files(settings)
+    if export_scope == "sync":
+        eligible = eligible_sync_category_files(settings)
+    else:
+        eligible = eligible_disk_category_files(settings, gdd_root)
     by_bucket: List[List[str]] = [[] for _ in _BUCKETS]
     for cf in eligible:
         folded = _fold_stem(Path(cf).stem)
@@ -697,6 +735,7 @@ def build_gdd_notebooklm_zip_bytes(
     project_root: Optional[Path] = None,
     settings: Mapping[str, Any],
     max_files: int = _MAX_FILES_DEFAULT,
+    export_scope: ExportScope = "disk",
 ) -> bytes:
     """ZIP UTF-8 contenant les exports Markdown."""
     root = project_root or Path(__file__).resolve().parent.parent
@@ -706,6 +745,7 @@ def build_gdd_notebooklm_zip_bytes(
         project_root=root,
         settings=settings,
         max_files=max_files,
+        export_scope=export_scope,
     )
     buf = BytesIO()
     folder = "gdd-notebooklm-export"

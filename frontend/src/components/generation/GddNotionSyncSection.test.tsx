@@ -63,21 +63,31 @@ vi.mock('../../api/gddNotionSync', () => ({
 describe('GddNotionSyncSection', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockPutConfig.mockImplementation(async (body: { included_categories?: string[] }) => ({
-      config: {
-        schema_version: 1,
-        sync_interval_minutes: 60,
-        auto_sync_enabled: false,
-        sources: [
-          { notion_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', kind: 'database', category_file: 'Alpha.json' },
-          { notion_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', kind: 'database', category_file: 'Beta.json' },
-        ],
-        included_categories: body.included_categories ?? [],
-        mirror_rebuild_on_full_sync: false,
-        archive_retention_count: 10,
-        token_configured: true,
-      },
-    }))
+    mockPutConfig.mockImplementation(async (body: {
+      included_categories?: string[]
+      sync_interval_minutes?: number
+      auto_sync_enabled?: boolean
+      archive_retention_count?: number
+    }) => {
+      const { config: prev } = await mockGetConfig()
+      return {
+        config: {
+          ...prev,
+          ...(body.included_categories !== undefined
+            ? { included_categories: body.included_categories }
+            : {}),
+          ...(body.sync_interval_minutes !== undefined
+            ? { sync_interval_minutes: body.sync_interval_minutes }
+            : {}),
+          ...(body.auto_sync_enabled !== undefined
+            ? { auto_sync_enabled: body.auto_sync_enabled }
+            : {}),
+          ...(body.archive_retention_count !== undefined
+            ? { archive_retention_count: body.archive_retention_count }
+            : {}),
+        },
+      }
+    })
     useContextStore.setState({ gddDataRevision: 0 })
     mockGetStatus.mockResolvedValue({
       last_started_at: null,
@@ -154,10 +164,11 @@ describe('GddNotionSyncSection', () => {
     await waitFor(() => {
       expect(screen.queryByText(/Synchronisation réussie/i)).not.toBeInTheDocument()
     })
-    expect(mockPutConfig).toHaveBeenCalledWith(
-      expect.objectContaining({ included_categories: [] }),
+    expect(mockPutConfig).not.toHaveBeenCalled()
+    expect(mockPostSync).toHaveBeenCalledWith(
+      false,
+      expect.objectContaining({ includedCategories: [] }),
     )
-    expect(mockPostSync).toHaveBeenCalled()
     expect(useContextStore.getState().gddDataRevision).toBe(1)
   })
 
@@ -216,6 +227,9 @@ describe('GddNotionSyncSection', () => {
     const byFile = (name: string) => boxes.find((cb) => cb.closest('label')?.textContent?.includes(name))
     expect(byFile('Alpha.json')?.checked).toBe(true)
     expect(byFile('Notebook.json')?.checked).toBe(false)
+    await waitFor(() => {
+      expect(mockPutConfig).toHaveBeenCalledWith({ included_categories: ['Alpha.json'] })
+    })
   })
 
   it('Cocher essentiels décoche Caractéristiques FP (secondaire)', async () => {
@@ -243,6 +257,9 @@ describe('GddNotionSyncSection', () => {
     const byFile = (name: string) => boxes.find((cb) => cb.closest('label')?.textContent?.includes(name))
     expect(byFile('Alpha.json')?.checked).toBe(true)
     expect(byFile(fp)?.checked).toBe(false)
+    await waitFor(() => {
+      expect(mockPutConfig).toHaveBeenCalled()
+    })
   })
 
   it('Tout décocher puis enregistrer envoie included_categories vide (toutes les bases)', async () => {
@@ -265,8 +282,10 @@ describe('GddNotionSyncSection', () => {
     render(<GddNotionSyncSection />)
     const group = await screen.findByRole('group', { name: /Bases de données Notion/i })
     await user.click(screen.getByRole('button', { name: /Tout décocher/i }))
-    const checkboxes = within(group).getAllByRole('checkbox')
-    expect(checkboxes.every((cb) => !(cb as HTMLInputElement).checked)).toBe(true)
+    await waitFor(() => {
+      const checkboxes = within(group).getAllByRole('checkbox') as HTMLInputElement[]
+      expect(checkboxes.every((cb) => !cb.checked)).toBe(true)
+    })
     await user.click(screen.getByRole('button', { name: /Sauver sans sync/i }))
     await waitFor(() => {
       expect(mockPutConfig).toHaveBeenCalled()
@@ -289,7 +308,11 @@ describe('GddNotionSyncSection', () => {
     await waitFor(() => {
       expect(mockPostSync.mock.calls[0]?.[0]).toBe(true)
     })
-    expect(mockPutConfig).toHaveBeenCalled()
+    expect(mockPutConfig).not.toHaveBeenCalled()
+    expect(mockPostSync).toHaveBeenCalledWith(
+      true,
+      expect.objectContaining({ includedCategories: [] }),
+    )
   })
 
   it('Tester 1 ligne appelle preview-database-row et affiche le JSON', async () => {
@@ -345,7 +368,10 @@ describe('GddNotionSyncSection', () => {
     expect(await screen.findByText(/onglet fermé/i)).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /Reprendre la sync/i }))
     await waitFor(() => {
-      expect(mockPostSync).toHaveBeenCalledWith(true, { resume: true })
+      expect(mockPostSync).toHaveBeenCalledWith(true, {
+        resume: true,
+        includedCategories: [],
+      })
     })
   })
 

@@ -18,6 +18,63 @@ def _nid() -> str:
     return str(uuid.uuid4())
 
 
+def test_eligible_disk_category_files_ignores_included_filter(tmp_path: Path) -> None:
+    gdd = tmp_path / "GDD_categories"
+    gdd.mkdir(parents=True)
+    (gdd / "A.json").write_text("[]", encoding="utf-8")
+    (gdd / "B.json").write_text("[]", encoding="utf-8")
+    settings = {
+        "sources": [
+            {"kind": "database", "category_file": "A.json", "notion_id": _nid()},
+            {"kind": "page", "category_file": "B.json", "notion_id": _nid()},
+            {"kind": "database", "category_file": "C.json", "notion_id": _nid()},
+        ],
+        "included_categories": ["A.json"],
+    }
+    from services.gdd_notebooklm_export import eligible_disk_category_files
+
+    assert eligible_disk_category_files(settings, gdd) == ["A.json", "B.json"]
+
+
+def test_build_zip_disk_scope_includes_all_on_disk_despite_included_filter(tmp_path: Path) -> None:
+    gdd = tmp_path / "GDD_categories"
+    gdd.mkdir(parents=True)
+    (gdd / "A.json").write_text(
+        json.dumps([{"Nom": "A1", "sections": {"x": "y"}}], ensure_ascii=False),
+        encoding="utf-8",
+    )
+    (gdd / "B.json").write_text(
+        json.dumps([{"Nom": "B1", "sections": {"x": "z"}}], ensure_ascii=False),
+        encoding="utf-8",
+    )
+    settings = {
+        "sources": [
+            {"kind": "database", "category_file": "A.json", "notion_id": _nid()},
+            {"kind": "page", "category_file": "B.json", "notion_id": _nid()},
+        ],
+        "included_categories": ["A.json"],
+    }
+    parts = build_notebooklm_markdown_parts(
+        gdd_root=gdd,
+        project_root=tmp_path,
+        settings=settings,
+        max_files=64,
+        export_scope="disk",
+    )
+    body = "\n".join(t for _, t in parts)
+    assert "A1" in body and "B1" in body
+    parts_sync = build_notebooklm_markdown_parts(
+        gdd_root=gdd,
+        project_root=tmp_path,
+        settings=settings,
+        max_files=64,
+        export_scope="sync",
+    )
+    body_sync = "\n".join(t for _, t in parts_sync)
+    assert "A1" in body_sync
+    assert "B1" not in body_sync
+
+
 def test_eligible_sync_category_files_respects_included() -> None:
     settings = {
         "sources": [

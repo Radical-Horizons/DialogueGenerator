@@ -7,6 +7,14 @@ from api.exceptions import ValidationException, InternalServerException
 from models.dialogue_structure.unity_dialogue_node import UnityDialogueGenerationResponse
 
 
+def _wire_context_builder_mock(mock_context_builder, catalog: list[str] | None = None) -> None:
+    """Mocks minimaux pour resolve_scene_dramatis + build_context_json."""
+    names = catalog if catalog is not None else ["character_1"]
+    mock_context_builder.get_characters_names.return_value = names
+    mock_context_builder.build_context_json.return_value = {"test": "context"}
+    mock_context_builder.serialize_context_to_text.return_value = "Context summary"
+
+
 @pytest.fixture
 def mock_services():
     """Crée des mocks pour tous les services nécessaires."""
@@ -65,8 +73,7 @@ async def test_orchestrator_generate_with_events_sequence(orchestrator, sample_r
     
     # Mock context_builder
     mock_context_builder = Mock()
-    mock_context_builder.build_context_json.return_value = {"test": "context"}
-    mock_context_builder.serialize_context_to_text = Mock(return_value="Context summary")
+    _wire_context_builder_mock(mock_context_builder)
     orchestrator.dialogue_service.context_builder = mock_context_builder
     
     # Mock prompt_engine
@@ -174,8 +181,7 @@ async def test_orchestrator_cancellation(orchestrator, sample_request_data, mock
     
     # Mock context_builder
     mock_context_builder = Mock()
-    mock_context_builder.build_context_json.return_value = {"test": "context"}
-    mock_context_builder.serialize_context_to_text = Mock(return_value="Context summary")
+    _wire_context_builder_mock(mock_context_builder)
     orchestrator.dialogue_service.context_builder = mock_context_builder
     
     # Mock prompt_engine
@@ -224,8 +230,7 @@ async def test_orchestrator_generate_rest_usage(orchestrator, sample_request_dat
     
     # Mock context_builder
     mock_context_builder = Mock()
-    mock_context_builder.build_context_json.return_value = {"test": "context"}
-    mock_context_builder.serialize_context_to_text = Mock(return_value="Context summary")
+    _wire_context_builder_mock(mock_context_builder)
     orchestrator.dialogue_service.context_builder = mock_context_builder
     
     # Mock prompt_engine

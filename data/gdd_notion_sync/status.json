@@ -1,9 +1,11 @@
 {
   "last_started_at": "2026-06-22T22:34:49.149673+00:00",
-  "last_finished_at": null,
-  "last_success": null,
-  "message": "Synchronisation en cours…",
-  "updated_entities": 0,
+  "last_finished_at": "2026-06-22T22:36:47.167801+00:00",
+  "last_success": true,
+  "message": "82 entité(s) mise(s) à jour — miroir appliqué (archive : .archive/20260622T223450Z_0efe0454)",
+  "updated_entities": 82,
   "partial_errors": [],
+  "last_archive_relative": ".archive/20260622T223450Z_0efe0454",
+  "last_mirror_rebuild_used": true,
   "mirror_promotion_pending": false
 }

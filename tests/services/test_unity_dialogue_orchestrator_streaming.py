@@ -8,6 +8,14 @@ from models.dialogue_structure.unity_dialogue_node import UnityDialogueGeneratio
 from core.llm.openai.stream_parser import StreamChunk
 
 
+def _wire_context_builder_mock(mock_context_builder, catalog: list[str] | None = None) -> None:
+    """Mocks minimaux pour resolve_scene_dramatis + build_context_json."""
+    names = catalog if catalog is not None else ["character_1"]
+    mock_context_builder.get_characters_names.return_value = names
+    mock_context_builder.build_context_json.return_value = {"test": "context"}
+    mock_context_builder.serialize_context_to_text.return_value = "Context summary"
+
+
 @pytest.fixture
 def mock_services():
     """Crée des mocks pour tous les services nécessaires."""
@@ -133,7 +141,7 @@ async def test_orchestrator_uses_native_streaming_when_available(orchestrator, s
     """Test que l'orchestrateur utilise le streaming natif quand disponible."""
     # Mock des services
     mock_services['dialogue_service'].context_builder = Mock()
-    mock_services['dialogue_service'].context_builder.build_context.return_value = "Test context"
+    _wire_context_builder_mock(mock_services['dialogue_service'].context_builder)
     
     # Créer un objet BuiltPrompt avec des attributs réels (pas des Mocks)
     class BuiltPrompt:
@@ -214,7 +222,7 @@ async def test_orchestrator_fallback_to_non_streaming(orchestrator, sample_reque
     """Test que l'orchestrateur utilise le fallback non-streaming si streaming non disponible."""
     # Mock des services
     mock_services['dialogue_service'].context_builder = Mock()
-    mock_services['dialogue_service'].context_builder.build_context.return_value = "Test context"
+    _wire_context_builder_mock(mock_services['dialogue_service'].context_builder)
     
     # Créer un objet BuiltPrompt avec des attributs réels (pas des Mocks)
     class BuiltPrompt:
@@ -281,7 +289,7 @@ async def test_orchestrator_streaming_with_function_call_chunks(orchestrator, sa
     """Test que l'orchestrateur gère correctement les chunks de function call."""
     # Mock des services
     mock_services['dialogue_service'].context_builder = Mock()
-    mock_services['dialogue_service'].context_builder.build_context.return_value = "Test context"
+    _wire_context_builder_mock(mock_services['dialogue_service'].context_builder)
     
     # Créer un objet BuiltPrompt avec des attributs réels (pas des Mocks)
     class BuiltPrompt:
@@ -370,7 +378,7 @@ async def test_orchestrator_streaming_cancellation(orchestrator, sample_request_
     """Test que l'orchestrateur respecte l'annulation pendant le streaming."""
     # Mock des services
     mock_services['dialogue_service'].context_builder = Mock()
-    mock_services['dialogue_service'].context_builder.build_context.return_value = "Test context"
+    _wire_context_builder_mock(mock_services['dialogue_service'].context_builder)
     
     # Créer un objet BuiltPrompt avec des attributs réels (pas des Mocks)
     class BuiltPrompt:

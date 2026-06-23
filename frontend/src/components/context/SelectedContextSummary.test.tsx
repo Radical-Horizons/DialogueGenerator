@@ -7,6 +7,12 @@ import userEvent from '@testing-library/user-event'
 import { SelectedContextSummary } from './SelectedContextSummary'
 import type { ContextSelection } from '../../types/api'
 
+function expectActiveSelectionsBadgeCount(count: number): void {
+  const toggle = screen.getByTestId('selected-context-summary-toggle')
+  expect(toggle).toHaveTextContent(/sélections actives/i)
+  expect(toggle).toHaveTextContent(String(count))
+}
+
 describe('SelectedContextSummary', () => {
   const mockOnClear = vi.fn()
 
@@ -52,7 +58,7 @@ describe('SelectedContextSummary', () => {
     render(<SelectedContextSummary selections={selections} onClear={mockOnClear} />)
     
     // Total: 2 + 1 + 0 + 1 + 0 + 0 = 4
-    expect(screen.getByText(/sélections actives \(4\)/i)).toBeInTheDocument()
+    expectActiveSelectionsBadgeCount(4)
   })
 
   it('affiche les catégories avec leurs compteurs corrects', async () => {
@@ -118,7 +124,7 @@ describe('SelectedContextSummary', () => {
     const { container } = render(<SelectedContextSummary selections={selectionsWithDuplicates} onClear={mockOnClear} />)
     
     // Le compteur devrait être 3 (il compte tous les éléments du tableau, même les doublons)
-    expect(screen.getByText(/sélections actives \(3\)/i)).toBeInTheDocument()
+    expectActiveSelectionsBadgeCount(3)
     
     // Développer pour voir la liste (bouton toggle)
     const expandButton = screen.getByTestId('selected-context-summary-toggle')
@@ -177,7 +183,7 @@ describe('SelectedContextSummary', () => {
     render(<SelectedContextSummary selections={selections} onClear={mockOnClear} />)
     
     // Total: 2 + 3 + 1 + 1 + 1 + 2 = 10
-    expect(screen.getByText(/sélections actives \(10\)/i)).toBeInTheDocument()
+    expectActiveSelectionsBadgeCount(10)
   })
 
   it('le compteur correspond exactement au nombre d\'éléments uniques dans chaque catégorie', () => {
@@ -201,7 +207,7 @@ describe('SelectedContextSummary', () => {
     
     // Le compteur affiche 3 (2 personnages + 1 lieu), mais il devrait y avoir 2 éléments uniques seulement
     // Ce test documente le comportement actuel : le compteur compte tous les éléments, même les doublons
-    expect(screen.getByText(/sélections actives \(3\)/i)).toBeInTheDocument()
+    expectActiveSelectionsBadgeCount(3)
   })
 
   it('affiche la liste complète des éléments quand développé', async () => {

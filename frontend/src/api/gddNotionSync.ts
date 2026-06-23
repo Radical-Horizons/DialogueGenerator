@@ -165,6 +165,8 @@ export interface PostGddNotionSyncOptions {
   categoryFiles?: string[]
   /** Applique le staging conservé après erreurs partielles (full=true requis). */
   applyStagingDespiteErrors?: boolean
+  /** Filtre UI éphémère (non persisté). ``[]`` = toutes les bases cochées / pas de filtre. */
+  includedCategories?: string[]
 }
 
 export async function postGddNotionSync(
@@ -182,6 +184,15 @@ export async function postGddNotionSync(
   }
   if (opts?.applyStagingDespiteErrors) {
     search.set('apply_staging_despite_errors', 'true')
+  }
+  if (opts?.includedCategories !== undefined) {
+    search.set('included_filter', 'ui')
+    for (const raw of opts.includedCategories) {
+      const t = raw.trim()
+      if (t) {
+        search.append('included_category', t)
+      }
+    }
   }
   for (const raw of opts?.categoryFiles ?? []) {
     const t = raw.trim()
@@ -286,9 +297,14 @@ export async function getGddNotionSyncProgress(): Promise<GddNotionSyncProgressR
 }
 
 /** Télécharge le ZIP Markdown NotebookLM (sources Notion sync + Vision.json ; max_files côté API défaut 64). */
-export async function getGddNotebooklmExportZip(maxFiles = 64): Promise<Blob> {
+export type GddNotebooklmExportScope = 'disk' | 'sync'
+
+export async function getGddNotebooklmExportZip(
+  maxFiles = 64,
+  scope: GddNotebooklmExportScope = 'disk',
+): Promise<Blob> {
   const { data } = await apiClient.get<Blob>('/api/v1/gdd-notion-sync/notebooklm-export', {
-    params: { max_files: maxFiles },
+    params: { max_files: maxFiles, scope },
     responseType: 'blob',
     timeout: API_TIMEOUTS.GDD_NOTEBOOKLM_EXPORT,
   })

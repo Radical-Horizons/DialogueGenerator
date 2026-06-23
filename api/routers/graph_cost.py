@@ -28,6 +28,7 @@ from core.context.context_builder import ContextBuilder
 from services.configuration_service import ConfigurationService
 from services.llm_pricing_service import LLMPricingService
 from services.llm_usage_service import LLMUsageService
+from services.token_estimation_service import TokenEstimationService
 from constants import PlayableCharacters
 from services.scene_dramatis import resolve_scene_dramatis
 
