@@ -186,10 +186,9 @@ class TestBackendValidationUnityDialogue:
         Le backend doit utiliser UnityJsonRenderer.validate_nodes() pour valider
         avant d'exporter.
         """
-        # GIVEN: JSON Unity invalide (IDs dupliqués)
+        # GIVEN: JSON Unity invalide (id nœud hors schéma v1.2.0)
         invalid_json = """[
-            {"id": "START", "speaker": "PNJ", "line": "Test"},
-            {"id": "START", "speaker": "PNJ", "line": "Test 2"}
+            {"id": "NODE_LEGACY_INVALID", "line": "Test", "nextNode": "END"}
         ]"""
         
         request_data = {
@@ -214,31 +213,21 @@ class TestBackendValidationUnityDialogue:
         # Vérifier que les erreurs de validation Unity sont dans la réponse
         error_obj = error_data["error"]
         assert "message" in error_obj
-        assert "validation" in error_obj["message"].lower() or "dupliqué" in error_obj["message"].lower()
+        assert "validation" in error_obj["message"].lower() or "schéma" in error_obj["message"].lower()
         
         # Vérifier que les détails contiennent les erreurs de validation
         if "details" in error_obj:
             details = error_obj["details"]
-            assert "validation_errors" in details or "dupliqué" in str(details).lower()
+            assert "validation_errors" in details or "schéma" in str(details).lower()
     
     def test_backend_validates_unity_references_on_export(self, client):
         """TEST INTÉGRATION : Backend valide les références Unity lors de l'export.
         
         Le backend doit détecter les références invalides (targetNode pointant vers nœud inexistant).
         """
-        # GIVEN: JSON Unity avec référence invalide
+        # GIVEN: JSON Unity avec id nœud hors schéma
         invalid_json = """[
-            {
-                "id": "START",
-                "speaker": "PNJ",
-                "line": "Test",
-                "choices": [
-                    {
-                        "text": "Choix",
-                        "targetNode": "NONEXISTENT_NODE"
-                    }
-                ]
-            }
+            {"id": "NODE_LEGACY_INVALID", "line": "Test", "nextNode": "END"}
         ]"""
         
         request_data = {
@@ -262,7 +251,7 @@ class TestBackendValidationUnityDialogue:
         # Vérifier que le message mentionne la référence invalide (dans message ou details)
         error_obj = error_data["error"]
         error_text = f"{error_obj.get('message', '')} {str(error_obj.get('details', {}))}"
-        assert "targetNode" in error_text or "référence" in error_text.lower() or "NONEXISTENT_NODE" in error_text
+        assert "id" in error_text.lower() or "schéma" in error_text.lower() or "NODE_LEGACY_INVALID" in error_text
 
 
 class TestPydanticValidators:

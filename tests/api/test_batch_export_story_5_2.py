@@ -34,12 +34,10 @@ _INVALID_DOCUMENT = {
     "schemaVersion": "1.2.0",
     "nodes": [
         {
-            "id": "node-b2c3d4e5f678901234567890abcdef12",
-            "line": "Sans choiceId",
-            "speaker": "PNJ",
-            "choices": [{"text": "Accepter"}],
+            "id": "NODE_LEGACY_INVALID",
+            "line": "Id nœud hors schéma",
+            "nextNode": "END",
         },
-        {"id": "END", "line": ""},
     ],
 }
 

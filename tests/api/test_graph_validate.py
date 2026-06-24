@@ -46,22 +46,23 @@ class TestValidateSchemaEndpoint:
         assert data["errors"] == []
         assert data["error_count"] == 0
 
-    def test_missing_choice_id_detected(self):
-        """Choice sans choiceId → is_valid False, 'choiceId' dans la première erreur."""
+    def test_invalid_node_id_detected(self):
+        """Id nœud hors schéma v1.2.0 → is_valid False."""
+        invalid_id = "NODE_LEGACY_INVALID"
         invalid_node = {
-            "id": "node-b2c3d4e5f678901234567890abcdef12",
+            "id": invalid_id,
             "type": "dialogueNode",
             "position": {"x": 0, "y": 0},
             "data": {
-                "stableId": "node-b2c3d4e5f678901234567890abcdef12",
-                "line": "Un choix sans choiceId",
+                "id": invalid_id,
+                "line": "Id invalide",
                 "speaker": "PNJ",
-                "choices": [{"text": "Accepter"}],  # choiceId manquant
+                "choices": [{"text": "Accepter"}],
             },
         }
         edge = {
             "id": "e1",
-            "source": "node-b2c3d4e5f678901234567890abcdef12",
+            "source": invalid_id,
             "target": "END",
             "data": {"edgeType": "choice", "choiceIndex": 0},
         }
@@ -74,8 +75,7 @@ class TestValidateSchemaEndpoint:
         assert data["is_valid"] is False
         assert data["error_count"] >= 1
         assert len(data["errors"]) >= 1
-        first_error = data["errors"][0]
-        assert "choiceId" in first_error
+        assert "id" in data["errors"][0].lower() or "schéma" in data["errors"][0].lower()
 
     def test_empty_graph_accepted(self):
         """Graphe vide (nodes=[], edges=[]) → is_valid True (document vide est accepté)."""

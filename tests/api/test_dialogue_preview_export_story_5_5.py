@@ -89,17 +89,18 @@ class TestGraphPreviewExport:
         assert "nodes" in parsed
 
     def test_invalid_graph_returns_schema_valid_false(self):
-        """Choix sans choiceId stable → schéma invalide (speaker seul n'est plus requis)."""
+        """Id nœud hors schéma v1.2.0 → schema_valid false."""
+        invalid_id = "NODE_LEGACY_INVALID"
         invalid_graph = {
             **_VALID_GRAPH,
             "nodes": [
                 {
-                    "id": _VALID_NODE_ID,
+                    "id": invalid_id,
                     "type": "dialogueNode",
                     "position": {"x": 0, "y": 0},
                     "data": {
-                        "stableId": _VALID_NODE_ID,
-                        "displayName": "Choix invalide",
+                        "id": invalid_id,
+                        "displayName": "Id invalide",
                         "line": "Bonjour",
                         "speaker": "PNJ",
                         "choices": [{"text": "Accepter"}],
@@ -115,7 +116,7 @@ class TestGraphPreviewExport:
             "edges": [
                 {
                     "id": "e1",
-                    "source": _VALID_NODE_ID,
+                    "source": invalid_id,
                     "target": "END",
                     "data": {"edgeType": "choice", "choiceIndex": 0},
                 }

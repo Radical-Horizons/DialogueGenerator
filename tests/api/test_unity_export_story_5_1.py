@@ -52,15 +52,17 @@ _VALID_GRAPH = {
     "metadata": {"title": "Export Test", "node_count": 2, "edge_count": 1},
 }
 
+_INVALID_NODE_ID = "NODE_LEGACY_INVALID"
+
 _INVALID_GRAPH = {
     "nodes": [
         {
-            "id": "node-b2c3d4e5f678901234567890abcdef12",
+            "id": _INVALID_NODE_ID,
             "type": "dialogueNode",
             "position": {"x": 0, "y": 0},
             "data": {
-                "stableId": "node-b2c3d4e5f678901234567890abcdef12",
-                "line": "Choix sans choiceId",
+                "id": _INVALID_NODE_ID,
+                "line": "Id nœud hors schéma v1.2.0",
                 "speaker": "PNJ",
                 "choices": [{"text": "Accepter"}],
             },
@@ -70,7 +72,7 @@ _INVALID_GRAPH = {
     "edges": [
         {
             "id": "e1",
-            "source": "node-b2c3d4e5f678901234567890abcdef12",
+            "source": _INVALID_NODE_ID,
             "target": "END",
             "data": {"edgeType": "choice", "choiceIndex": 0},
         }

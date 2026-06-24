@@ -53,14 +53,16 @@ class TestValidateDocumentSchemaEndpoint:
         assert data["errors"] == []
 
     def test_invalid_document_returns_formatted_errors(self, unity_doc_dir):
-        bad = dict(_VALID_DOC)
-        bad["nodes"] = [
-            {
-                "id": "node-b2c3d4e5f678901234567890abcdef12",
-                "line": "Bad",
-                "choices": [{"text": "No id"}],
-            }
-        ]
+        bad = {
+            "schemaVersion": "1.2.0",
+            "nodes": [
+                {
+                    "id": "NODE_LEGACY_INVALID",
+                    "line": "Bad",
+                    "nextNode": "END",
+                }
+            ],
+        }
         (unity_doc_dir / "bad_doc.json").write_text(
             json.dumps(bad, ensure_ascii=False), encoding="utf-8"
         )
