@@ -174,65 +174,38 @@ def test_character_extraction_field_configs_comparison(real_client, sample_chara
     character = sample_character_with_data
     character_name = character["name"]
     raw_tokens = character["raw_tokens"]
-    
+
+    base_payload = {
+        "context_selections": {
+            "characters_full": [character_name],
+            "locations_full": [],
+            "items_full": [],
+            "species_full": [],
+            "communities_full": [],
+        },
+        "user_instructions": "Test",
+        "max_context_tokens": 10000,
+    }
+
     results = {}
-    
-    # Test 1: Sans field_configs
+
     response1 = real_client.post(
-        "/api/v1/dialogues/estimate-tokens",
-        json={
-            "context_selections": {
-                "characters_full": [character_name],
-                "locations_full": [],
-                "items_full": [],
-                "species_full": [],
-                "communities_full": []
-            },
-            # Pas de field_configs
-            "user_instructions": "Test",
-            "max_context_tokens": 10000,
-            "npc_speaker_id": character_name
-        }
+        "/api/v1/context/estimate-tokens",
+        json=base_payload,
     )
     assert response1.status_code == 200
     results["sans_field_configs"] = response1.json().get("context_tokens", 0)
-    
-    # Test 2: Avec field_configs vide
+
     response2 = real_client.post(
-        "/api/v1/dialogues/estimate-tokens",
-        json={
-            "context_selections": {
-                "characters_full": [character_name],
-                "locations_full": [],
-                "items_full": [],
-                "species_full": [],
-                "communities_full": []
-            },
-            "field_configs": {},  # Dict vide
-            "user_instructions": "Test",
-            "max_context_tokens": 10000,
-            "npc_speaker_id": character_name
-        }
+        "/api/v1/context/estimate-tokens",
+        json={**base_payload, "field_configs": {}},
     )
     assert response2.status_code == 200
     results["field_configs_vide"] = response2.json().get("context_tokens", 0)
-    
-    # Test 3: Avec field_configs contenant liste vide
+
     response3 = real_client.post(
-        "/api/v1/dialogues/estimate-tokens",
-        json={
-            "context_selections": {
-                "characters_full": [character_name],
-                "locations_full": [],
-                "items_full": [],
-                "species_full": [],
-                "communities_full": []
-            },
-            "field_configs": {"character": []},  # Liste vide
-            "user_instructions": "Test",
-            "max_context_tokens": 10000,
-            "npc_speaker_id": character_name
-        }
+        "/api/v1/context/estimate-tokens",
+        json={**base_payload, "field_configs": {"character": []}},
     )
     assert response3.status_code == 200
     results["field_configs_liste_vide"] = response3.json().get("context_tokens", 0)
