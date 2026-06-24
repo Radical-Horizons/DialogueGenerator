@@ -22,7 +22,14 @@ import { ModelSelector } from './ModelSelector'
 import { PresetSelector } from './PresetSelector'
 import { useToast } from '../shared'
 import { StyledSelect } from '../shared/StyledSelect'
-import { CONTEXT_TOKENS_LIMITS, COMPLETION_TOKENS_LIMITS, DEFAULT_MODEL, API_TIMEOUTS } from '../../constants'
+import {
+  CONTEXT_TOKENS_LIMITS,
+  COMPLETION_TOKENS_LIMITS,
+  DEFAULT_MODEL,
+  API_TIMEOUTS,
+  REASONING_EFFORT_MODELS,
+  FULL_REASONING_EFFORT_MODELS,
+} from '../../constants'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import type { DialogueStructure } from '../../types/generation'
 // Hooks métier extraits
@@ -177,6 +184,7 @@ export function GenerationPanel() {
     setMaxCompletionTokens,
     setMaxChoices,
     setNarrativeTags,
+    setLlmModel,
     toast,
   })
 
@@ -485,7 +493,7 @@ export function GenerationPanel() {
           </div>
 
           {/* Colonne Niveau de raisonnement */}
-          {(llmModel === "gpt-5.2" || llmModel === "gpt-5.2-pro" || llmModel === "gpt-5-mini" || llmModel === "gpt-5-nano") && (
+          {(REASONING_EFFORT_MODELS as readonly string[]).includes(llmModel) && (
             <div style={{ flex: isGenerationNarrow ? '1 1 100%' : '1', minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <label
@@ -546,7 +554,7 @@ export function GenerationPanel() {
                 }}
               >
                 {/* Options différentes selon le modèle */}
-                {llmModel === "gpt-5.2" || llmModel === "gpt-5.2-pro" ? (
+                {(FULL_REASONING_EFFORT_MODELS as readonly string[]).includes(llmModel) ? (
                   <>
                     <option value="none">Aucun (rapide, latence minimale)</option>
                     <option value="low">Faible (raisonnement minimal)</option>
@@ -690,6 +698,8 @@ export function GenerationPanel() {
         narrativeTags={narrativeTags}
         availableNarrativeTags={availableNarrativeTags}
         validationErrors={orchestrator.validationErrors}
+        configFixes={orchestrator.configFixes}
+        onApplyConfigFixes={orchestrator.applyConfigFixesToState}
         tokenCount={orchestrator.tokenCount}
         onMaxContextTokensChange={(value) => {
           setMaxContextTokens(value)

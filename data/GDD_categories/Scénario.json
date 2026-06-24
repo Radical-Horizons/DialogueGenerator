@@ -2,7 +2,12 @@
   {
     "Nom": "Scénario",
     "values": {},
-    "sections": {},
+    "sections": {
+      "preamble": "<database url=\"https://app.notion.com/p/1f16e4d21b4580a49ffbcaa2696a1d89\" inline=\"true\"></database>\n<database url=\"https://app.notion.com/p/1f16e4d21b45808aa99fc15c3eb64270\" inline=\"true\"></database>\n<database url=\"https://app.notion.com/p/1886e4d21b4581df8b05fcdd43604be5\" inline=\"false\" data-source-url=\"collection://1886e4d2-1b45-815b-b768-000bd34750ab\">Structure Narrative</database>"
+    },
+    "section_titles": {
+      "preamble": "Préambule"
+    },
     "notion_page_id": "1a16e4d2-1b45-80c9-8779-f1f5de187ba4"
   }
 ]

@@ -50,6 +50,8 @@ export interface UseGenerationOrchestratorOptions {
   setMaxContextTokens: (tokens: number) => void
   /** Setter pour maxCompletionTokens */
   setMaxCompletionTokens: (tokens: number | null) => void
+  /** Setter pour llmModel */
+  setLlmModel: (model: string) => void
   /** Setter pour maxChoices */
   setMaxChoices: (choices: number | null) => void
   /** Setter pour narrativeTags */
@@ -72,6 +74,12 @@ export interface UseGenerationOrchestratorReturn {
   
   // Validation
   validationErrors: Record<string, string>
+  configFixes: import('../utils/generationConfigNormalization').GenerationConfigFix[]
+  applyConfigFixes: () => Partial<{
+    maxContextTokens: number
+    maxCompletionTokens: number | null
+    llmModel: string
+  }>
   validate: () => boolean
   hasErrors: boolean
 
@@ -83,8 +91,7 @@ export interface UseGenerationOrchestratorReturn {
   handleResetSelections: () => void
   handlePreview: () => void
   handleExportUnity: () => void
-  
-  // SSE
+  applyConfigFixesToState: () => void
   connectSSE: (streamUrl: string) => void
   disconnectSSE: () => void
   isSSEConnected: boolean
@@ -119,6 +126,8 @@ export function useGenerationOrchestrator(
   const validation = useGenerationValidation({
     maxContextTokens: options.maxContextTokens,
     maxCompletionTokens: options.maxCompletionTokens,
+    llmModel: options.llmModel,
+    availableModels: options.availableModels,
     tokenCount: estimation.tokenCount,
   })
   const sse = useSSEStreaming({
@@ -147,6 +156,7 @@ export function useGenerationOrchestrator(
     narrativeTags: options.narrativeTags,
     previousDialoguePreview: options.previousDialoguePreview,
     availableModels: options.availableModels,
+    configFixes: validation.configFixes,
     setIsLoading: options.setIsLoading,
     setError: options.setError,
     setAvailableModels: options.setAvailableModels,
@@ -156,9 +166,10 @@ export function useGenerationOrchestrator(
     setMaxCompletionTokens: options.setMaxCompletionTokens,
     setMaxChoices: options.setMaxChoices,
     setNarrativeTags: options.setNarrativeTags,
+    setLlmModel: options.setLlmModel,
     toast: options.toast,
     tokenCount: estimation.tokenCount,
-    connectSSE: sse.connect,  // Passer la fonction de connexion depuis l'orchestrator
+    connectSSE: sse.connect,
   })
 
   // Retourner interface unifiée
@@ -176,6 +187,8 @@ export function useGenerationOrchestrator(
     
     // Validation (UX uniquement)
     validationErrors: validation.validationErrors,
+    configFixes: validation.configFixes,
+    applyConfigFixes: validation.applyConfigFixes,
     validate: validation.validate,
     hasErrors: validation.hasErrors,
     
@@ -187,6 +200,7 @@ export function useGenerationOrchestrator(
     handleResetSelections: handlers.handleResetSelections,
     handlePreview: handlers.handlePreview,
     handleExportUnity: handlers.handleExportUnity,
+    applyConfigFixesToState: handlers.applyConfigFixesToState,
     
     // SSE
     connectSSE: sse.connect,

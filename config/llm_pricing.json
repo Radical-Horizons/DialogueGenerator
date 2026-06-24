@@ -1,5 +1,10 @@
 {
   "models": {
+    "gpt-5.4": {
+      "input_price_per_1M": 2.50,
+      "output_price_per_1M": 15.00,
+      "description": "GPT-5.4 — doc officielle OpenAI : structured outputs, reasoning none–xhigh, 128k sortie max"
+    },
     "gpt-5.2": {
       "input_price_per_1M": 2.50,
       "output_price_per_1M": 10.00,
@@ -56,7 +61,7 @@
       "description": "Mistral Large - Modèle haute performance"
     }
   },
-  "last_updated": "2026-03-06",
+  "last_updated": "2026-06-24",
   "note": "Les prix sont en USD par million de tokens. Taux de conversion USD→EUR : 0.92 (constante dans graph.py, à mettre à jour périodiquement)."
 }
 

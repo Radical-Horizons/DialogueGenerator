@@ -109,6 +109,10 @@ export interface GenerationPanelControlsProps {
   availableNarrativeTags: string[]
   /** Erreurs de validation */
   validationErrors: Record<string, string>
+  /** Correctifs proposés pour aligner l'UI sur l'API */
+  configFixes?: import('../../utils/generationConfigNormalization').GenerationConfigFix[]
+  /** Applique les correctifs (sliders / modèle) */
+  onApplyConfigFixes?: () => void
   /** Token count estimé */
   tokenCount: number | null
   /** Callback pour maxContextTokens */
@@ -133,6 +137,8 @@ export function GenerationPanelControls({
   narrativeTags,
   availableNarrativeTags,
   validationErrors,
+  configFixes = [],
+  onApplyConfigFixes = () => {},
   tokenCount,
   onMaxContextTokensChange,
   onMaxCompletionTokensChange,
@@ -147,6 +153,41 @@ export function GenerationPanelControls({
 
   return (
     <>
+      {configFixes.length > 0 && (
+        <div
+          style={{
+            marginBottom: '1rem',
+            padding: '0.75rem',
+            borderRadius: '4px',
+            border: `1px solid ${theme.state.warning.color}`,
+            backgroundColor: theme.state.warning.background,
+            color: theme.text.primary,
+            fontSize: '0.9rem',
+          }}
+        >
+          <div style={{ marginBottom: '0.5rem' }}>
+            {configFixes.map((fix) => (
+              <div key={fix.field}>{fix.message}</div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={onApplyConfigFixes}
+            style={{
+              padding: '0.35rem 0.75rem',
+              borderRadius: '4px',
+              border: `1px solid ${theme.border.focus}`,
+              backgroundColor: theme.button.primary.background,
+              color: theme.button.primary.color,
+              cursor: 'pointer',
+              fontSize: '0.85rem',
+            }}
+          >
+            Corriger automatiquement
+          </button>
+        </div>
+      )}
+
       {/* Sliders tokens : 2 colonnes (confortable) ou empilés (narrow, proposition 1) */}
       <div style={{ marginBottom: '1rem', minWidth: 0, overflowX: 'hidden' }}>
         <div

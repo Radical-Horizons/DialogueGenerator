@@ -2,7 +2,12 @@
   {
     "Nom": "Guides",
     "values": {},
-    "sections": {},
+    "sections": {
+      "preamble": "<page url=\"https://app.notion.com/p/1886e4d21b4581339cf2ef6486fa001d\">Guide de narration</page>\n<page url=\"https://app.notion.com/p/2816e4d21b4580ae8d68ff077b9807eb\">Tutos</page>\n<page url=\"https://app.notion.com/p/1886e4d21b45812094c4fb4e9666e0cb\">**Guide des dialogues**</page>\n<page url=\"https://app.notion.com/p/2846e4d21b45801b901ce54cad28554e\">Guide musical</page>\n<page url=\"https://app.notion.com/p/2866e4d21b45809e842fdb11228ed77f\">Business Plan</page>\n<database url=\"https://app.notion.com/p/7ad25e00dec24105acfdc9fbd043f45b\" inline=\"false\" data-source-url=\"collection://4b6e730b-5588-484a-8e40-639e509ba5e4\"></database>\n<page url=\"https://app.notion.com/p/2766e4d21b45802b8edce89598fd401a\">Guide des récompenses possibles</page>\n<page url=\"https://app.notion.com/p/97db684d93f94b2faf2377e4509a2140\">Guide des Quêtes</page>\n<page url=\"https://app.notion.com/p/fbe30c8d2e524bbfbbb6f08f9e360943\">Guide de création de personnage</page>\n<page url=\"https://app.notion.com/p/1886e4d21b4580fc838aca60047f3481\">Manifeste du Surréalisme Magique</page>\n<page url=\"https://app.notion.com/p/1cd6e4d21b4580eb9373fb9b774a47c2\">Carte d’Escelion</page>\n<page url=\"https://app.notion.com/p/1b36e4d21b4580a1b403c15a97581e64\">Annexes</page>\n<page url=\"https://app.notion.com/p/1eb6e4d21b458011a6fac39c0ac80690\">L’art du game Design - lenses</page>\n<page url=\"https://app.notion.com/p/1a16e4d21b4580c98779f1f5de187ba4\">Scénario</page>\n<page url=\"https://app.notion.com/p/1ed6e4d21b4580408bcdd9c1cc64a6a0\">Rappel du Core System</page>\n<page url=\"https://app.notion.com/p/16dacd1033dd4822b36b8a76f5e5f394\">Méthodologie des Boucles Expérientielles (McWills)</page>\n<page url=\"https://app.notion.com/p/76743f6f5fdd450b954dffe9adc85031\">Guide de détermination du règne</page>\n<page url=\"https://app.notion.com/p/445e63e7dec94c828286150df5959f3c\">Guide des Noms</page>\n<page url=\"https://app.notion.com/p/ebc63893afdd4b5c97b896f3058dcb05\">Schéma relationnel des bases narratives</page>\n<page url=\"https://app.notion.com/p/05cc77ecfc2447a687e9517bab744f83\">Intégration critique — Le Mont des Réincarnés</page>\n<page url=\"https://app.notion.com/p/3666e4d21b4580729696d9d46310511a\">Fiches Notion sans PDF dans le dossier guides</page>"
+    },
+    "section_titles": {
+      "preamble": "Préambule"
+    },
     "notion_page_id": "1886e4d2-1b45-80b1-a012-ed5ee06d6fe4"
   }
 ]

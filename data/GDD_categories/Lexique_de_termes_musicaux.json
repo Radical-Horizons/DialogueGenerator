@@ -2,7 +2,12 @@
   {
     "Nom": "Lexique de termes musicaux",
     "values": {},
-    "sections": {},
+    "sections": {
+      "section": "<database url=\"https://app.notion.com/p/2996e4d21b458033893ce3acf5fc0260\" inline=\"true\" icon=\"/icons/note-eighth_gray.svg\" data-source-url=\"collection://2996e4d2-1b45-80d6-b826-000bff40c235\">Lexique Musical</database>\n<empty-block/>"
+    },
+    "section_titles": {
+      "section": "#"
+    },
     "notion_page_id": "2996e4d2-1b45-8094-8df4-c206e8e52c16"
   }
 ]

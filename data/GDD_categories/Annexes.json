@@ -2,7 +2,12 @@
   {
     "Nom": "Annexes",
     "values": {},
-    "sections": {},
+    "sections": {
+      "preamble": "<database url=\"https://app.notion.com/p/1886e4d21b458173b73bcabfcbf120e9\" inline=\"true\"></database>\n<database url=\"https://app.notion.com/p/1886e4d21b4581bc9dd9eca74ed8b499\" inline=\"false\" icon=\"/icons/news_gray.svg\" data-source-url=\"collection://1886e4d2-1b45-810f-a0ca-000b1b657083\">Structure Narrative</database>\n<database url=\"https://app.notion.com/p/1886e4d21b458151a8a5c1ca1d7c0861\" inline=\"false\" data-source-url=\"collection://1886e4d2-1b45-81b4-a8a9-000b3128a6d6\"></database>"
+    },
+    "section_titles": {
+      "preamble": "Préambule"
+    },
     "notion_page_id": "1b36e4d2-1b45-80a1-b403-c15a97581e64"
   }
 ]

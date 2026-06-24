@@ -2,7 +2,12 @@
   {
     "Nom": "Dashboard Narratif",
     "values": {},
-    "sections": {},
+    "sections": {
+      "preamble": "<database url=\"https://app.notion.com/p/3346e4d21b45804c9365c128f26e7ed3\" inline=\"true\">Dashboard GDD — Alteir</database>"
+    },
+    "section_titles": {
+      "preamble": "Préambule"
+    },
     "notion_page_id": "99ee87ab-c7f2-478d-b013-e86135a9b9c7"
   }
 ]

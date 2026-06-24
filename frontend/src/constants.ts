@@ -11,6 +11,8 @@
  * Ces constantes doivent correspondre à ModelNames dans constants.py côté backend.
  */
 export const MODEL_NAMES = {
+  /** GPT-5.4 - Modèle frontier (raisonnement, structured output) */
+  GPT_5_4: 'gpt-5.4',
   /** GPT-5.2 - Modèle principal */
   GPT_5_2: 'gpt-5.2',
   /** GPT-5.2 Pro - Modèle avec plus de compute pour raisonnement approfondi */
@@ -22,6 +24,22 @@ export const MODEL_NAMES = {
   /** GPT-5 Nano - Version compacte */
   GPT_5_NANO: 'gpt-5-nano',
 } as const
+
+/** Modèles avec sélecteur reasoning.effort dans le panneau génération. */
+export const REASONING_EFFORT_MODELS = [
+  MODEL_NAMES.GPT_5_4,
+  MODEL_NAMES.GPT_5_2,
+  MODEL_NAMES.GPT_5_2_PRO,
+  MODEL_NAMES.GPT_5_MINI,
+  MODEL_NAMES.GPT_5_NANO,
+] as const
+
+/** Modèles frontier : effort none … xhigh (hors mini/nano). */
+export const FULL_REASONING_EFFORT_MODELS = [
+  MODEL_NAMES.GPT_5_4,
+  MODEL_NAMES.GPT_5_2,
+  MODEL_NAMES.GPT_5_2_PRO,
+] as const
 
 /**
  * Modèle par défaut à utiliser.
@@ -56,10 +74,13 @@ export const CONTEXT_OPTIMIZE_API_ENABLED = true
 /**
  * Limites pour les tokens de completion (génération).
  */
+/** Plafond API ``max_completion_tokens`` — aligner ``constants.py`` ``Defaults.MAX_COMPLETION_TOKENS``. */
+export const API_MAX_COMPLETION_TOKENS = 128_000
+
 export const COMPLETION_TOKENS_LIMITS = {
   /** Minimum autorisé (5K) */
   MIN: 5000,
-  /** Maximum autorisé (64K) */
+  /** Maximum du slider UI (peut être < plafond API) */
   MAX: 64000,
   /** Pas du slider (5K) */
   STEP: 5000,

@@ -10,6 +10,7 @@ from models.dialogue_structure.unity_dialogue_node import (
     UnityDialogueChoiceContent
 )
 from core.llm.llm_client import ILLMClient
+from services.document_choice_id_service import stable_choice_id
 
 logger = logging.getLogger(__name__)
 
@@ -364,8 +365,9 @@ Instructions pour la suite:
         # Gérer les choix
         if node_content.choices:
             choices_list = []
-            for choice_content in node_content.choices:
+            for choice_index, choice_content in enumerate(node_content.choices):
                 choice_dict: Dict[str, Any] = {
+                    "choiceId": stable_choice_id(start_id, choice_index),
                     "text": choice_content.text,
                     "targetNode": "END"  # Placeholder temporaire : sera mis à jour si on génère la suite
                 }

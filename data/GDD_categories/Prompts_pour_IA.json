@@ -3,9 +3,11 @@
     "Nom": "Prompts pour IA",
     "values": {},
     "sections": {
-      "me_thode_de_nettoyage_de_call-out_notion": "Dans Notepad ++ (expression régulière), chercher : \n\n</?aside[^>]*>|<img[^>]*>|(\\r?\\n){3,}\n\nRemplacer : \n\n\\r\\n\\r\\n"
+      "preamble": "<columns>\n\t<column>\n\t\t\n**Quick Actions**\n\t\t\t---\n\t\t\t<database url=\"https://app.notion.com/p/2df6e4d21b4580fdbac9d88c94ac0821\" inline=\"true\"></database>\n**Quick Links**\n<empty-block/>\n\t</column>\n\t<column>\n\t\t\n**Pinned**\n\t\t\t<database url=\"https://app.notion.com/p/2df6e4d21b45807c8966d8a6bcd68e74\" inline=\"true\"></database>\n\t\t\t<page url=\"https://app.notion.com/p/1b098542845842d6a80c0072d8b26f84\">Index Escelion (référence condensée pour IA)</page>\n</column>\n</columns>\n<database url=\"https://app.notion.com/p/7b5970f61bb24694b4439d848546dda2\" inline=\"true\" icon=\"🤖\" data-source-url=\"collection://1a1a447c-2dc3-4210-939a-9a23953b73a8\">Bibliothèque de Prompts</database>\n<database url=\"https://app.notion.com/p/2ec6e4d21b4580159bd0ccb3a73c3bd2\" inline=\"false\" data-source-url=\"collection://2ec6e4d2-1b45-800a-a6d1-000b6f43f1fc\"></database>\n---",
+      "me_thode_de_nettoyage_de_call-out_notion": "Dans Notepad ++ (expression régulière), chercher : \n```markdown\n</?aside[^>]*>|<img[^>]*>|(\\r?\\n){3,}\n```\nRemplacer : \n```markdown\n\\r\\n\\r\\n\n```\n<database url=\"https://app.notion.com/p/28edd8b00f25417eb78ef940de0e65c7\" inline=\"false\" data-source-url=\"collection://8e1c2c02-bbb8-46b7-98f1-84acb4d39340\"></database>\n<page url=\"https://app.notion.com/p/f0985ce92af641cb8f29fbd074417bab\">Skills</page>"
     },
     "section_titles": {
+      "preamble": "Préambule",
       "me_thode_de_nettoyage_de_call-out_notion": "Méthode de nettoyage de call-out Notion"
     },
     "notion_page_id": "1b26e4d2-1b45-8040-9064-c235ef268a3d"

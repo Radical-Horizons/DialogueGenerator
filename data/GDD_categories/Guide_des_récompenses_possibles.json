@@ -3,8 +3,8 @@
     "Nom": "Guide des récompenses possibles",
     "values": {},
     "sections": {
-      "preamble": "Ce guide référence les types de récompenses disponibles dans Alteir, liées aux systèmes de jeu qui les produisent.",
-      "utilisation": "Chaque récompense est catégorisée selon sa nature :\n\n- Tangible : Objets physiques, ressources matérielles\n\n- Mécanique : Bonus, points, statistiques\n\n- Narrative : Déblocages d'histoire, évolutions de personnages\n\n- Émotionnelle : Récompenses intangibles (reconnaissance, impact dramatique)\n\nLes récompenses émotionnelles sont essentielles pour satisfaire les besoins humains identifiés dans les systèmes de jeu."
+      "preamble": "Ce guide référence les types de récompenses disponibles dans Alteir, liées aux systèmes de jeu qui les produisent.\n<database url=\"https://app.notion.com/p/c3c76ea56f1d42d5ad197bf2e5fe01a9\" inline=\"true\">Récompenses types</database>",
+      "utilisation": "Chaque récompense est catégorisée selon sa nature :\n- **Tangible** : Objets physiques, ressources matérielles\n- **Mécanique** : Bonus, points, statistiques\n- **Narrative** : Déblocages d'histoire, évolutions de personnages\n- **Émotionnelle** : Récompenses intangibles (reconnaissance, impact dramatique)\nLes récompenses émotionnelles sont essentielles pour satisfaire les besoins humains identifiés dans les systèmes de jeu."
     },
     "section_titles": {
       "preamble": "Préambule",

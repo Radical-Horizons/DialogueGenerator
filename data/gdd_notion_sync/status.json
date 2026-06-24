@@ -1,11 +1,16 @@
 {
-  "last_started_at": "2026-06-22T22:34:49.149673+00:00",
-  "last_finished_at": "2026-06-22T22:36:47.167801+00:00",
+  "last_started_at": "2026-06-24T16:16:02.728147+00:00",
+  "last_finished_at": "2026-06-24T18:00:44.932909+00:00",
   "last_success": true,
-  "message": "82 entité(s) mise(s) à jour — miroir appliqué (archive : .archive/20260622T223450Z_0efe0454)",
-  "updated_entities": 82,
-  "partial_errors": [],
-  "last_archive_relative": ".archive/20260622T223450Z_0efe0454",
-  "last_mirror_rebuild_used": true,
+  "message": "3368 entité(s) mise(s) à jour — 4 avertissement(s)",
+  "updated_entities": 3368,
+  "partial_errors": [
+    "Caractéristiques_—_Uresaïr_(FP).json: fetch — HTTP 404 — Notion API: object_not_found — Could not find database with ID: dbf0e2f0-55b0-456a-a8e4-1185d04a5e76. Make sure the relevant pages and databases are shared with your integration \"Alteir\". — Client error '404 Not Found' for url 'https://api.notion.com/v1/databases/dbf0e2f0-55b0-456a-a8e4-1185d04a5e76/query'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404",
+    "Valeurs_de_Flag.json: fetch — HTTP 404 — Notion API: object_not_found — Could not find database with ID: 09204171-5d4d-40e8-9237-d7bac6a5c1a0. Make sure the relevant pages and databases are shared with your integration \"Alteir\". — Client error '404 Not Found' for url 'https://api.notion.com/v1/databases/09204171-5d4d-40e8-9237-d7bac6a5c1a0/query'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404",
+    "Règnes_et_espèces.json: fetch — HTTP 404 — Notion API: object_not_found — Could not find page with ID: 2be6e4d2-1b45-80f4-8942-cd456cd0050d. Make sure the relevant pages and databases are shared with your integration \"Alteir\". — Client error '404 Not Found' for url 'https://api.notion.com/v1/pages/2be6e4d2-1b45-80f4-8942-cd456cd0050d'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404",
+    "Référence___Gabarit_et_principes_de_rédaction.json: fetch — HTTP 404 — Notion API: object_not_found — Could not find page with ID: 297e51ac-007e-4506-b1e8-8ff493a418ef. Make sure the relevant pages and databases are shared with your integration \"Alteir\". — Client error '404 Not Found' for url 'https://api.notion.com/v1/pages/297e51ac-007e-4506-b1e8-8ff493a418ef'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+  ],
+  "last_archive_relative": null,
+  "last_mirror_rebuild_used": false,
   "mirror_promotion_pending": false
 }

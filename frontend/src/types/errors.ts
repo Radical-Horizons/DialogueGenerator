@@ -87,6 +87,21 @@ export function getErrorMessage(error: unknown): string {
       if (errorData.details) {
         const details = errorData.details as Record<string, unknown>
         
+        // Champs Pydantic (ex. llm_model_identifier, max_completion_tokens) — visible aussi en prod
+        const fieldLines = Object.entries(details)
+          .filter(([key, value]) => (
+            key !== 'validation_errors'
+            && key !== 'error_type'
+            && key !== 'error'
+            && key !== 'detail'
+            && typeof value === 'string'
+            && value.length > 0
+          ))
+          .map(([key, value]) => `${key}: ${value}`)
+        if (fieldLines.length > 0) {
+          message += `\n\n${fieldLines.slice(0, 4).join('\n')}`
+        }
+        
         // Si c'est une erreur de validation Unity, afficher les erreurs de validation
         if (details.validation_errors && Array.isArray(details.validation_errors)) {
           const validationErrors = details.validation_errors as string[]

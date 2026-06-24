@@ -81,3 +81,28 @@ class TestUnityExportNormalizer:
         raw = json.loads(path.read_text(encoding="utf-8"))
         result = validate_unity_export_document(raw)
         assert result.is_valid is True, result.errors
+
+    def test_generated_start_dialogue_valid_after_normalization(self) -> None:
+        """Régression : génération graphe START + choix test sans choiceId/targetNode."""
+        doc = {
+            "schemaVersion": "1.2.0",
+            "nodes": [
+                {
+                    "id": "START",
+                    "speaker": "PNJ",
+                    "line": "Bonjour",
+                    "choices": [
+                        {
+                            "text": "Tenter",
+                            "test": "Volonté+Adaptabilité:12",
+                        }
+                    ],
+                }
+            ],
+        }
+        result = validate_unity_export_document(doc)
+        assert result.is_valid is True, result.errors
+        choice = doc["nodes"][0]["choices"][0]
+        assert choice["choiceId"] == "choice_START_0"
+        assert choice["targetNode"] == "END"
+        assert choice["test"] == "Volonté+Adaptabilité:12"

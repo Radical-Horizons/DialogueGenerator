@@ -7,7 +7,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useGenerationStore } from '../store/generationStore'
 import { useContextStore } from '../store/contextStore'
 import type { ContextSelection } from '../types/api'
-import { CONTEXT_TOKENS_LIMITS, COMPLETION_TOKENS_LIMITS } from '../constants'
+import { CONTEXT_TOKENS_LIMITS } from '../constants'
+import { normalizeMaxCompletionTokensForUi } from '../utils/generationConfigNormalization'
 import type { SaveStatus } from '../components/shared/SaveStatusIndicator'
 
 const DRAFT_STORAGE_KEY = 'generation_draft'
@@ -225,11 +226,7 @@ export function useGenerationDraft(
           setMaxContextTokens(value)
         }
         if (draft.maxCompletionTokens !== undefined && draft.maxCompletionTokens !== null) {
-          const clampedMaxCompletionTokens = Math.min(
-            Math.max(draft.maxCompletionTokens, COMPLETION_TOKENS_LIMITS.MIN),
-            COMPLETION_TOKENS_LIMITS.MAX
-          )
-          setMaxCompletionTokens(clampedMaxCompletionTokens)
+          setMaxCompletionTokens(normalizeMaxCompletionTokensForUi(draft.maxCompletionTokens))
         }
         if (draft.llmModel !== undefined && draft.llmModel !== 'unknown') {
           setLlmModel(draft.llmModel)

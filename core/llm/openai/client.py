@@ -545,8 +545,8 @@ class OpenAIClient(ILLMClient):
             Nombre maximum de tokens.
         """
         model_lower = self.model_name.lower()
-        if "gpt-5.2" in model_lower:
-            return 128000  # GPT-5.2 et ses variantes supportent 128k tokens
+        if "gpt-5.4" in model_lower or "gpt-5.2" in model_lower:
+            return 128000  # GPT-5.x frontier : 128k tokens de sortie max
         else:
             logger.warning(
                 f"Modèle OpenAI inconnu ou non listé pour get_max_tokens: {self.model_name}. "

@@ -1,0 +1,12 @@
+---
+description: Erreurs de validation API explicites — jamais de 422 opaque pour un réglage UI valide.
+globs: api/schemas/**/*.py, frontend/src/hooks/useGeneration*.ts, frontend/src/utils/generationConfigNormalization.ts, frontend/src/types/errors.ts
+alwaysApply: false
+---
+
+# Validation API explicite
+
+- Les plafonds Pydantic (`Field(ge/le)`) doivent rester **≥ toute valeur que le frontend peut envoyer** pour ce champ, ou le frontend doit normaliser **avant** l'appel (voir `generationConfigNormalization.ts`).
+- Garder alignés : `constants.py` `Defaults`, `api/schemas/dialogue.py`, `frontend/src/constants.ts` (`API_MAX_COMPLETION_TOKENS`).
+- Les handlers FastAPI (`api/main.py` `validation_exception_handler`) renvoient déjà `error.details` par champ : le frontend doit les afficher en prod (`getErrorMessage`), pas seulement en dev.
+- Pour les paramètres simples du panneau génération : proposer une normalisation automatique (`detectGenerationConfigFixes` + bouton « Corriger ») plutôt qu'un échec silencieux.

@@ -12,7 +12,11 @@ import { useVocabularyStore } from '../store/vocabularyStore'
 import { useNarrativeGuidesStore } from '../store/narrativeGuidesStore'
 import { useFlagsStore } from '../store/flagsStore'
 import { useContextConfigStore } from '../store/contextConfigStore'
-import { COMPLETION_TOKENS_LIMITS } from '../constants'
+import {
+  normalizeMaxCompletionTokensForApi,
+  normalizeMaxContextTokensForApi,
+  resolveModelForUnityGeneration,
+} from '../utils/generationConfigNormalization'
 import type { ContextSelection, GenerateUnityDialogueRequest } from '../types/api'
 import type { LLMModelResponse } from '../types/api'
 
@@ -100,17 +104,7 @@ export function useGenerationRequest(): UseGenerationRequestReturn {
     model: string,
     availableModels: LLMModelResponse[]
   ): string => {
-    const validModel = availableModels.find(m => m.model_identifier === model)?.model_identifier
-    if (!validModel) {
-      // Utiliser le premier modèle disponible comme fallback
-      const fallbackModel = availableModels[0]?.model_identifier
-      if (fallbackModel) {
-        return fallbackModel
-      } else {
-        throw new Error(`Aucun modèle LLM disponible. Modèle demandé: ${model}`)
-      }
-    }
-    return validModel
+    return resolveModelForUnityGeneration(model, availableModels)
   }, [])
 
   const buildGenerationRequest = useCallback((
@@ -132,11 +126,9 @@ export function useGenerationRequest(): UseGenerationRequestReturn {
     
     // Valider le modèle
     const modelToUse = validateModel(params.llmModel, params.availableModels)
-    
-    // Clamp maxCompletionTokens si nécessaire
-    const safeMaxCompletionTokens = params.maxCompletionTokens !== null
-      ? Math.min(Math.max(params.maxCompletionTokens, COMPLETION_TOKENS_LIMITS.MIN), COMPLETION_TOKENS_LIMITS.MAX)
-      : null
+
+    const safeMaxContextTokens = normalizeMaxContextTokensForApi(params.maxContextTokens)
+    const safeMaxCompletionTokens = normalizeMaxCompletionTokensForApi(params.maxCompletionTokens)
 
     // Utiliser une valeur par défaut si userInstructions est vide (backend exige min_length=1)
     const userInstructionsValue = params.userInstructions.trim() || ' '
@@ -158,7 +150,7 @@ export function useGenerationRequest(): UseGenerationRequestReturn {
       context_selections: contextSelections,
       npc_speaker_id: sceneSelection.characterB || undefined,
       player_character_id: sceneSelection.characterA || undefined,
-      max_context_tokens: params.maxContextTokens,
+      max_context_tokens: safeMaxContextTokens,
       max_completion_tokens: safeMaxCompletionTokens ?? undefined,
       system_prompt_override: systemPromptOverride || undefined,
       author_profile: authorProfile || undefined,

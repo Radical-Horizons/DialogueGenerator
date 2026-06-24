@@ -2,6 +2,7 @@
 
 Retire les emplacements de choix vides (``__idx_N``), les champs ``null`` rejetés
 par le schéma JSON et les chaînes legacy vides (``condition``, ``test``).
+Ajoute ``choiceId`` manquants et ``targetNode`` par défaut (``END``) pour l'export graphe.
 """
 from __future__ import annotations
 
@@ -9,9 +10,11 @@ import copy
 import re
 from typing import Any, Dict, List, Union
 
+from services.document_choice_id_service import ensure_document_choice_ids
+
 _PLACEHOLDER_CHOICE_ID = re.compile(r"^__idx_\d+$")
 _NULLABLE_INT_FIELDS = ("influenceDelta", "respectDelta")
-_OPTIONAL_STRING_FIELDS = ("condition", "test")
+_OPTIONAL_STRING_FIELDS = ("condition",)
 
 
 def _is_placeholder_choice(choice: Dict[str, Any]) -> bool:
@@ -38,6 +41,9 @@ def _clean_choice(choice: Dict[str, Any]) -> Dict[str, Any]:
         value = cleaned.get(key)
         if value is None or (isinstance(value, str) and not value.strip()):
             cleaned.pop(key, None)
+    target = cleaned.get("targetNode")
+    if not isinstance(target, str) or not target.strip():
+        cleaned["targetNode"] = "END"
     return cleaned
 
 
@@ -75,6 +81,7 @@ def normalize_unity_export_document(
         Document normalisé (copie profonde par défaut).
     """
     doc = document if in_place else copy.deepcopy(document)
+    ensure_document_choice_ids(doc, in_place=True)
     nodes = doc.get("nodes")
     if isinstance(nodes, list):
         doc["nodes"] = [

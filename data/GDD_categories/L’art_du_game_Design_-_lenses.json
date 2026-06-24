@@ -2,7 +2,12 @@
   {
     "Nom": "L’art du game Design - lenses",
     "values": {},
-    "sections": {},
+    "sections": {
+      "preamble": "<database url=\"https://app.notion.com/p/1eb6e4d21b45808687bef8589888b62c\" inline=\"true\" icon=\"/icons/glasses_gray.svg\" data-source-url=\"collection://1eb6e4d2-1b45-8068-9943-000ba7c9e7cf\">Lentilles du Game Designer</database>"
+    },
+    "section_titles": {
+      "preamble": "Préambule"
+    },
     "notion_page_id": "1eb6e4d2-1b45-8011-a6fa-c39c0ac80690"
   }
 ]

@@ -3,13 +3,13 @@
     "Nom": "modules-lieux",
     "values": {},
     "sections": {
-      "modules__lieux": "Sous-workflows à charger selon le type de lieu.",
-      "module___re_gion_majeure": "Quand : nouvelle grande région ou région structurante.\n\n- Définir rôle macro (frontière, réservoir, verrou, sanctuaire, usine, etc.).\n\n- Définir 3-7 sous-lieux obligatoires (économie, social, danger, accès).\n\n- Définir 2 axes de circulation + 2 limitrophes.\n\n- Produire une carte mentale : \"ce que la région produit / ce qu’elle consomme / ce qu’elle interdit\".",
-      "module___point_d_inte_re_t__poi": "Quand : lieu très petit mais jouable.\n\n- 1 fonction narrative claire.\n\n- 1 contrainte forte.\n\n- 1 interaction typique (ce que le joueur fait ici).\n\n- 1 détail biopunk baroque distinctif.",
-      "module___lieu_de_culte": "- Rituel concret (sons, matières, coûts).\n\n- Violence implicite ou paradoxe (éviter sacré lisse).\n\n- Règle locale (interdit, serment, taxe, sacrifice).",
-      "module___lieu_commercial": "- Qu’est-ce qui s’échange ?\n\n- Qu’est-ce qui manque toujours ?\n\n- Mécanisme d’aliénation ou de contrainte (contrat, dette, rationnement).",
-      "module___zone_naturelle": "- Chaîne trophique minimale.\n\n- Adaptations des espèces.\n\n- 1 cycle naturel observable.",
-      "module___lieu_militaire": "- Objectif de contrôle.\n\n- Logistique (ravitaillement, accès).\n\n- 1 faille exploitable (physique, sociale, rituelle)."
+      "modules__lieux": "Sous-workflows à charger selon le type de lieu.\n---",
+      "module___re_gion_majeure": "**Quand** : nouvelle grande région ou région structurante.\n- Définir rôle macro (frontière, réservoir, verrou, sanctuaire, usine, etc.).\n- Définir 3-7 sous-lieux obligatoires (économie, social, danger, accès).\n- Définir 2 axes de circulation + 2 limitrophes.\n- Produire une carte mentale : \"ce que la région produit / ce qu’elle consomme / ce qu’elle interdit\".\n---",
+      "module___point_d_inte_re_t__poi": "**Quand** : lieu très petit mais jouable.\n- 1 fonction narrative claire.\n- 1 contrainte forte.\n- 1 interaction typique (ce que le joueur fait ici).\n- 1 détail biopunk baroque distinctif.\n---",
+      "module___lieu_de_culte": "- Rituel concret (sons, matières, coûts).\n- Violence implicite ou paradoxe (éviter sacré lisse).\n- Règle locale (interdit, serment, taxe, sacrifice).\n---",
+      "module___lieu_commercial": "- Qu’est-ce qui s’échange ?\n- Qu’est-ce qui manque toujours ?\n- Mécanisme d’aliénation ou de contrainte (contrat, dette, rationnement).\n---",
+      "module___zone_naturelle": "- Chaîne trophique minimale.\n- Adaptations des espèces.\n- 1 cycle naturel observable.\n---",
+      "module___lieu_militaire": "- Objectif de contrôle.\n- Logistique (ravitaillement, accès).\n- 1 faille exploitable (physique, sociale, rituelle)."
     },
     "section_titles": {
       "modules__lieux": "Modules (Lieux)",

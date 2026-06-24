@@ -118,8 +118,9 @@ class TestBackendRejectsInvalidRequests:
         error_text = f"{error_obj.get('message', '')} {str(error_obj.get('details', {}))}"
         assert "100" in error_text or "minimum" in error_text.lower()
         
-        # GIVEN: Requête avec max_completion_tokens > 50000 (limite du schéma)
-        request_data["max_completion_tokens"] = 60000
+        # GIVEN: Requête avec max_completion_tokens > MAX_COMPLETION_TOKENS (hors plage API)
+        from constants import Defaults
+        request_data["max_completion_tokens"] = Defaults.MAX_COMPLETION_TOKENS + 1000
         
         # WHEN: Tentative de génération
         response = client.post("/api/v1/dialogues/generate/unity-dialogue", json=request_data)
@@ -138,7 +139,7 @@ class TestBackendRejectsInvalidRequests:
                 error_text = " ".join([err.get("msg", "") for err in detail if isinstance(err, dict)])
             else:
                 error_text = str(detail)
-        assert "50000" in error_text or "maximum" in error_text.lower()
+        assert str(Defaults.MAX_COMPLETION_TOKENS) in error_text or "maximum" in error_text.lower()
     
     def test_backend_returns_clear_error_messages(self, client):
         """TEST INTÉGRATION : Backend retourne des messages d'erreur clairs et actionnables.
@@ -353,14 +354,23 @@ class TestPydanticValidators:
         error_text = str(exc_info.value)
         assert "100" in error_text or "minimum" in error_text.lower()
         
-        # WHEN: max_completion_tokens > 50000 (limite du schéma)
+        # WHEN: max_completion_tokens > MAX_COMPLETION_TOKENS
+        from constants import Defaults
         with pytest.raises(ValidationError) as exc_info2:
             GenerateUnityDialogueRequest(
                 user_instructions="Test",
                 context_selections=context_selection,
-                max_completion_tokens=60000,  # Trop grand
+                max_completion_tokens=Defaults.MAX_COMPLETION_TOKENS + 1000,
                 llm_model_identifier="gpt-5-mini"
             )
-        # THEN: message doit mentionner la limite maximum
         error_text2 = str(exc_info2.value)
-        assert "50000" in error_text2 or "maximum" in error_text2.lower()
+        assert str(Defaults.MAX_COMPLETION_TOKENS) in error_text2 or "maximum" in error_text2.lower()
+
+        # 60K doit être accepté
+        req_60k = GenerateUnityDialogueRequest(
+            user_instructions="Test",
+            context_selections=context_selection,
+            max_completion_tokens=60000,
+            llm_model_identifier="gpt-5-mini",
+        )
+        assert req_60k.max_completion_tokens == 60000

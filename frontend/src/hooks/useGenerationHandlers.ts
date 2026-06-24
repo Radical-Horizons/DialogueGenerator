@@ -1,7 +1,5 @@
 /**
  * Hook pour gérer les handlers de génération et reset.
- * 
- * Extrait la logique de handleGenerate et handlers reset depuis GenerationPanel.
  */
 import { useCallback } from 'react'
 import { useGenerationStore } from '../store/generationStore'
@@ -9,83 +7,81 @@ import { useContextStore } from '../store/contextStore'
 import * as dialoguesAPI from '../api/dialogues'
 import * as configAPI from '../api/config'
 import { getErrorMessage } from '../types/errors'
+import type { APIError } from '../types/errors'
+import type { ToastAction } from '../components/shared/Toast'
 import { useGenerationRequest } from './useGenerationRequest'
 import { useCostGovernance } from './useCostGovernance'
 import { CONTEXT_TOKENS_LIMITS } from '../constants'
+import {
+  applyGenerationConfigFixes,
+  fixesFromApiValidationDetails,
+  type GenerationConfigFix,
+} from '../utils/generationConfigNormalization'
 import type { LLMModelResponse } from '../types/api'
 
 export interface UseGenerationHandlersOptions {
-  /** Instructions utilisateur */
   userInstructions: string
-  /** Max tokens pour contexte */
   maxContextTokens: number
-  /** Max tokens pour completion */
   maxCompletionTokens: number | null
-  /** Modèle LLM sélectionné */
   llmModel: string
-  /** Reasoning effort */
   reasoningEffort: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
-  /** Top_p (nucleus sampling) */
   topP: number | null
-  /** Nombre max de choix */
   maxChoices: number | null
-  /** Mode de choix */
   choicesMode: 'free' | 'capped'
-  /** Tags narratifs */
   narrativeTags: string[]
-  /** Preview du dialogue précédent */
   previousDialoguePreview: string | null
-  /** Modèles disponibles */
   availableModels: LLMModelResponse[]
-  /** Setter pour isLoading */
+  configFixes: GenerationConfigFix[]
   setIsLoading: (loading: boolean) => void
-  /** Setter pour error */
   setError: (error: string | null) => void
-  /** Setter pour availableModels */
   setAvailableModels: (models: LLMModelResponse[]) => void
-  /** Setter pour isDirty */
   setIsDirty: (dirty: boolean) => void
-  /** Setter pour userInstructions */
   setUserInstructions: (instructions: string) => void
-  /** Setter pour maxContextTokens */
   setMaxContextTokens: (tokens: number) => void
-  /** Setter pour maxCompletionTokens */
   setMaxCompletionTokens: (tokens: number | null) => void
-  /** Setter pour maxChoices */
   setMaxChoices: (choices: number | null) => void
-  /** Setter pour narrativeTags */
   setNarrativeTags: (tags: string[]) => void
-  /** Toast function */
-  toast: (message: string, type?: 'success' | 'error' | 'info' | 'warning', duration?: number) => void
-  /** Token count estimé */
+  setLlmModel: (model: string) => void
+  toast: (
+    message: string,
+    type?: 'success' | 'error' | 'info' | 'warning',
+    duration?: number,
+    actions?: ToastAction[],
+  ) => string
   tokenCount: number | null
-  /** Fonction pour connecter SSE (passée depuis orchestrator pour éviter duplication) */
   connectSSE: (streamUrl: string) => void
 }
 
 export interface UseGenerationHandlersReturn {
-  /** Générer un dialogue Unity */
   handleGenerate: () => Promise<void>
-  /** Réinitialiser le formulaire */
   handleReset: () => void
-  /** Réinitialiser tout */
   handleResetAll: () => void
-  /** Réinitialiser les instructions */
   handleResetInstructions: () => void
-  /** Réinitialiser les sélections */
   handleResetSelections: () => void
-  /** Raccourci : prévisualisation via le flux principal / graphe */
   handlePreview: () => void
-  /** Raccourci : export via l’éditeur graphe ou liste Unity */
   handleExportUnity: () => void
+  applyConfigFixesToState: () => void
 }
 
-/**
- * Hook pour gérer les handlers de génération et reset.
- * 
- * @param options - Options avec tous les paramètres nécessaires
- * @returns Handlers de génération et reset
- */
+function applyPatchToState(
+  patch: ReturnType<typeof applyGenerationConfigFixes>,
+  setters: {
+    setMaxContextTokens: (v: number) => void
+    setMaxCompletionTokens: (v: number | null) => void
+    setLlmModel: (v: string) => void
+  },
+): void {
+  if (patch.maxContextTokens !== undefined) {
+    setters.setMaxContextTokens(patch.maxContextTokens)
+  }
+  if (patch.maxCompletionTokens !== undefined) {
+    setters.setMaxCompletionTokens(patch.maxCompletionTokens)
+  }
+  if (patch.llmModel !== undefined) {
+    setters.setLlmModel(patch.llmModel)
+  }
+}
+
 export function useGenerationHandlers(
   options: UseGenerationHandlersOptions
 ): UseGenerationHandlersReturn {
@@ -101,6 +97,7 @@ export function useGenerationHandlers(
     narrativeTags,
     previousDialoguePreview,
     availableModels,
+    configFixes,
     setIsLoading,
     setError,
     setAvailableModels,
@@ -110,9 +107,10 @@ export function useGenerationHandlers(
     setMaxCompletionTokens,
     setMaxChoices,
     setNarrativeTags,
+    setLlmModel,
     toast,
     tokenCount,
-    connectSSE,  // Passé depuis orchestrator pour éviter duplication
+    connectSSE,
   } = options
 
   const {
@@ -123,28 +121,32 @@ export function useGenerationHandlers(
     setUnityDialogueResponse,
     startGeneration,
     resetStreamingState,
-    isGenerating,  // Utiliser isGenerating du store au lieu de isLoading
+    isGenerating,
   } = useGenerationStore()
 
   const { clearSelections } = useContextStore()
   const { checkBudget } = useCostGovernance()
-  
   const { buildContextSelections, buildGenerationRequest } = useGenerationRequest()
 
+  const applyConfigFixesToState = useCallback(() => {
+    const patch = applyGenerationConfigFixes(configFixes)
+    applyPatchToState(patch, { setMaxContextTokens, setMaxCompletionTokens, setLlmModel })
+    if (configFixes.length > 0) {
+      toast('Paramètres de génération corrigés.', 'info')
+    }
+  }, [configFixes, setMaxContextTokens, setMaxCompletionTokens, setLlmModel, toast])
+
   const handleGenerate = useCallback(async () => {
-    // Protection contre les doubles appels
     if (isGenerating) {
       console.warn('handleGenerate appelé alors qu\'une génération est déjà en cours')
       return
     }
 
-    // Validation minimale
     if (!sceneSelection.characterA && !sceneSelection.characterB && !userInstructions.trim()) {
       toast('Veuillez sélectionner au moins un personnage ou ajouter des instructions', 'error')
       return
     }
 
-    // Vérifier le budget avant génération
     const budgetCheck = await checkBudget()
     if (!budgetCheck.allowed) {
       toast(budgetCheck.message || 'Budget dépassé', 'error')
@@ -155,26 +157,15 @@ export function useGenerationHandlers(
     setError(null)
 
     try {
-      buildContextSelections() // appel pour cohérence; la requête utilise buildGenerationRequest qui lit les stores
+      buildContextSelections()
 
-      // NOTE: La validation métier (personnages requis, etc.) est maintenant effectuée par le backend
-      // via les validators Pydantic. Le backend rejettera avec un message clair si la requête est invalide.
-      
-      // Valider que le modèle sélectionné existe dans la liste des modèles disponibles
-      // Si availableModels est vide, essayer de charger les modèles d'abord
       let modelsToCheck = availableModels
       if (modelsToCheck.length === 0) {
-        try {
-          const response = await configAPI.listLLMModels()
-          setAvailableModels(response.models)
-          modelsToCheck = response.models
-        } catch (err) {
-          console.error('Erreur lors du chargement des modèles:', err)
-          throw new Error('Impossible de charger les modèles LLM disponibles')
-        }
+        const response = await configAPI.listLLMModels()
+        setAvailableModels(response.models)
+        modelsToCheck = response.models
       }
-      
-      // Construire la requête avec validation du modèle
+
       const request = buildGenerationRequest({
         userInstructions,
         maxContextTokens,
@@ -189,25 +180,47 @@ export function useGenerationHandlers(
         availableModels: modelsToCheck,
       })
 
-      // Créer le job de génération avec streaming SSE (en-têtes d'estimation pour le middleware budget)
       const job = await dialoguesAPI.createGenerationJob(request, {
         promptTokens: tokenCount ?? undefined,
-        completionTokens: maxCompletionTokens ?? undefined,
+        completionTokens: request.max_completion_tokens ?? undefined,
         llmModelIdentifier: request.llm_model_identifier ?? undefined,
       })
-      
-      // Démarrer la génération avec le job_id
+
       startGeneration(job.job_id)
-      
-      // Connecter le SSE (URL inclut sse_token pour auth sans header Authorization)
       connectSSE(job.stream_url)
     } catch (err) {
+      const axiosErr = err as APIError
       const errorMsg = getErrorMessage(err)
-      const errorDetails = err instanceof Error ? `\n\n${err.message}${err.stack ? `\n\nStack trace:\n${err.stack}` : ''}` : ''
-      const fullErrorMessage = `${errorMsg}${errorDetails}`
-      setError(fullErrorMessage)
-      toast(fullErrorMessage, 'error')
-      // Si la création du job échoue, on peut reset le streaming
+      setError(errorMsg)
+
+      const validationDetails = axiosErr.response?.data?.error?.details as
+        | Record<string, unknown>
+        | undefined
+      const apiFixes = fixesFromApiValidationDetails(
+        validationDetails,
+        { maxContextTokens, maxCompletionTokens, llmModel },
+        availableModels,
+      )
+      const fixes = apiFixes.length > 0 ? apiFixes : configFixes
+
+      if (fixes.length > 0) {
+        const patch = applyGenerationConfigFixes(fixes)
+        toast(errorMsg, 'error', 12_000, [
+          {
+            label: 'Corriger les paramètres',
+            onClick: () => {
+              applyPatchToState(patch, {
+                setMaxContextTokens,
+                setMaxCompletionTokens,
+                setLlmModel,
+              })
+            },
+          },
+        ])
+      } else {
+        toast(errorMsg, 'error')
+      }
+
       resetStreamingState()
     } finally {
       setIsLoading(false)
@@ -229,14 +242,18 @@ export function useGenerationHandlers(
     narrativeTags,
     previousDialoguePreview,
     tokenCount,
+    configFixes,
     startGeneration,
     resetStreamingState,
-    connectSSE,  // Passé depuis orchestrator
+    connectSSE,
     setIsLoading,
     setError,
+    setMaxContextTokens,
+    setMaxCompletionTokens,
+    setLlmModel,
     toast,
     checkBudget,
-    isGenerating,  // Utiliser isGenerating du store pour la protection
+    isGenerating,
   ])
 
   const handleReset = useCallback(() => {
@@ -304,5 +321,6 @@ export function useGenerationHandlers(
     handleResetSelections,
     handlePreview,
     handleExportUnity,
+    applyConfigFixesToState,
   }
 }

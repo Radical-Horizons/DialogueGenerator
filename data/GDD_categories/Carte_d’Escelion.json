@@ -2,7 +2,12 @@
   {
     "Nom": "Carte d’Escelion",
     "values": {},
-    "sections": {},
+    "sections": {
+      "preamble": "![](https://prod-files-secure.s3.us-west-2.amazonaws.com/1d8d06fb-9245-45c9-8cb0-4cd4d302ed0d/21048dd6-c35f-4cb2-85e6-58c5e9996a98/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB466SRD5U4MK%2F20260624%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260624T175529Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEHAaCXVzLXdlc3QtMiJHMEUCIQCjXtDPrcRvVasZQf1CD3larbv7t%2BgpqJj6X1P5gN8W1wIgL2QjJp99vj3aTbDGMgqwQgG3%2Fe6jQ6N6ELr1kc%2B4Dy4q%2FwMIORAAGgw2Mzc0MjMxODM4MDUiDNscgrcBF7kbamOXYCrcAw0e0GG5s8W8U7qMaV2kYndEh4Dp2ys4Pasele4sp7BbmwY0%2Bqp0BBQZoup02BIUGM%2FcDzHOTjUiRAnQCxdLMGbHRp6Nabt249%2BUMVSHNOWwLLAxIDicwbqdfMUvwoEI8Fvi9FwQ1cYZQGwLMljlhx7RzuOAwsTCLCZQVhdv8KykL%2BS0WtXycAxszlsDsW6Bk0lCbfAm6%2B5X0Io8LXQz%2F6VKrmipDseL%2BZdyr2OLgPp61ukE48ENDLftv9FIn7aRc3Qj6KNvEEg4UVoV8Zga9YdVciYzLP%2FWY7TmH%2FwusrQIiY4%2BjK3D%2FsyHnLyYZjLirkIsCbT%2F54VaE5aPlcj82LkfRfESBJe0vMS5F7BdgJ7GuHvBkwk2xy2rYZHsbid%2BKW18hijo7aqiz0PIPzKSjd1g1djjfjQfklwY41yEuAr%2BearyiUX3TCN%2FNxuMJ40H9KRM2Q%2FIJjVsZZERMHlCntmNbuFw58w6h2D2vhg%2Fv5J1NmTOAdxsX7yrsTsOIVYuEp8%2BfhK65F1liZ%2BehzkurUdM3FjA6A1reFGOe1Ws84yaOFX1t%2FWB25wTqyIkkMLXEHPXTDJ9e8ay6fKLB3PrDsHGfNhxQTMxf77%2FD8siWQTE6JKlr1PZ%2F7lyltAQMJv479EGOqUBjTPqC7Nsee3QoUdm8ZcpQrao9rMmtvxnGRSW3iwTLq5eQBXba63o6TkafpOQA%2Bbe633B18gQ7kI%2Fsgv%2BMaBX6HIY%2BBVwOtMr2S5D%2Fr5a%2BDjKCtF0Na%2FnB%2Fc6ZDNBrCuGO%2BAL1V3X2z3nFGrfPi7kMCeLcDdC%2FpD4DT%2FPvYQAdfMZhtE%2BbnETFpYLS3o94mtsyY2dlzF%2FsRA33kBV5j4sGToWVgdS&X-Amz-Signature=7d279c90fc46181c460bfdb3d2345b6edc0ddaca3ce4958ba84d4051f520f050&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject)\n<embed src=\"https://mindmap.so/#json=bbc3c264c6a3457a98d22a611160af07,obeDngwv-UiVi99Ru5D75Q\"></embed>\n<empty-block/>"
+    },
+    "section_titles": {
+      "preamble": "Préambule"
+    },
     "notion_page_id": "1cd6e4d2-1b45-80eb-9373-fb9b774a47c2"
   }
 ]

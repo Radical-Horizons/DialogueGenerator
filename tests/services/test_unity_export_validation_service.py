@@ -54,7 +54,7 @@ class TestRepPalierBlockingValidation:
 class TestFrenchSchemaErrorMessages:
     """AC #2 — messages utilisateur en français pour erreurs schéma."""
 
-    def test_missing_choice_id_message_is_french(self):
+    def test_missing_choice_id_is_healed_by_normalizer(self):
         doc = {
             "schemaVersion": "1.2.0",
             "nodes": [
@@ -62,17 +62,15 @@ class TestFrenchSchemaErrorMessages:
                     "id": "node-b2c3d4e5f678901234567890abcdef12",
                     "line": "Choix sans id",
                     "speaker": "PNJ",
-                    "choices": [{"text": "Accepter"}],
+                    "choices": [{"text": "Accepter", "targetNode": "END"}],
                 },
                 {"id": "END", "line": ""},
             ],
         }
         result = validate_unity_export_document(doc)
-        assert result.is_valid is False
-        assert result.errors
-        first = result.errors[0]
-        assert "Erreur schéma Unity" in first
-        assert "choiceId" in first.lower() or "choiceid" in first.lower()
+        assert result.is_valid is True
+        choice = doc["nodes"][0]["choices"][0]
+        assert choice.get("choiceId")
 
 
 @pytest.mark.unit
@@ -87,9 +85,9 @@ class TestUnifiedValidationVerdict:
                 "position": {"x": 0, "y": 0},
                 "data": {
                     "stableId": "node-b2c3d4e5f678901234567890abcdef12",
-                    "line": "Choix sans choiceId",
+                    "line": "Choix sans texte",
                     "speaker": "PNJ",
-                    "choices": [{"text": "Accepter"}],
+                    "choices": [{"choiceId": "c1", "targetNode": "END"}],
                 },
             },
             {"id": "END", "type": "endNode", "position": {"x": 0, "y": 200}, "data": {"line": ""}},

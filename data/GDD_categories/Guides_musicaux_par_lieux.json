@@ -1,0 +1,44 @@
+[
+  {
+    "Nom": "Guide musical (Plis)",
+    "values": {
+      "Lieux": "1b36e4d2-1b45-802c-910a-fb74729b22f8",
+      "Mots-clés type": "theremin, ethereal, ambient, prepared piano, unsettling, granular, microtonal, mysterious, free tempo, otherworldly",
+      "Piliers": "8431c59e-1bd7-458c-bac8-e57d74168133"
+    },
+    "sections": {
+      "genres_musicaux___sous-genres": "*Genres clairs et connus (ex : Musique classique, rock, metal, ambient, jazz, etc) suivis de sous-genres clairs (hard rock, musique de chambre, opéra, dark ambient, jazz impro) entre parenthèses. Ex: Rock (hard rock)*\n- Ambient (dark ambient, ritual ambient)\n- Néoclassique (minimal néoclassique, néoclassique intimiste)\n- Folk sombre (folk horror, dark folk)\n- Orchestral minimal (musique de chambre minimale, post‑minimalisme orchestral)\n- Metal atmosphérique (post-metal, folk metal)\n- Expérimental électro‑acoustique (musique concrète, drone expérimental)\n- Par strate :\n\t- Strate I : Musique chorale contemporaine + ambient industriel cinématographique\n\t- Strate II : Ambient électronique expérimental\n\t- Strate III : Néoclassique minimal (piano una corda grave, violoncelles/contrebasses sul tasto)\n\t- Strate IV : Choral spectral + drone dark cinématographique + **SF techno-archéologique** (FM drones, pads évolutifs, filtres lents, voix grave très traitée)",
+      "ambiances": "- Principe générique : Plus on est haut dans le Léviathan plus les musiques sont aigues (et potentiellement plus rapides et lumineuses). \n\t- Ordre : Strate I et II (grave) \\> Strate III et IV (très grave)\n- Ambiance générale\n\t- Minéral, rituel, suspendu.\n\t- Pulsations viscérales comme un cœur fossile.\n\t- Harmonies modales sombres, timbres boisés et métalliques traités.\n\t- Textures lentes, halos bioluminescents, chuchotements.\n- Par strate :\n\t- Strate I : rituel froid, autorité, pulsations lentes, drones de « surveillance », low register, contralto, mezzo forte\n\t- Strate II : plus bizarre et moins religieux, matière qui se déforme, espace mouvant, very low register, contralto, mezzo forte\n\t- Strate III : nostalgique et intime, mémoire, motifs lents et retenus, chaleur contenue, very low register, Bass, piano\n\t- Strate IV : très dérangeant, étrange, limites de l’horrifique, very low register, bass, pianissimo",
+      "morceaux_d_influences": "*Morceaux influents, y compris de jeux vidéo*\n- Hollow Knight OST — atmospheres, City of Tears, White Palace\n- Dark Souls/Bloodborne — chœurs traités, sombre liturgie\n- The Witcher 3 — cue “Ladies of the Woods” pour folk horreur\n- Hylics / Annihilation (Ben Salisbury & Geoff Barrow) — textures organiques, drones vivants\n- FFVII Remake — cues texturaux bas-dynamiques, non héroïques\n- Jeremy Soule (Skyrim) — pads choraux discrets, no grandiose\n- Jóhann Jóhannsson — Orphée/Prisoners pour minimalisme sombre\n- Par strate :\n\t- Strate I : Philip Glass — Koyaanisqatsi (title track)\n\t- Strate II : Ben Salisbury & Geoff Barrow — The Alien (Annihilation), segment \\~3:50–4:40\n\t- Strate III : Max Richter — On the Nature of Daylight\n\t- Strate IV : György Ligeti — Requiem: Kyrie (ou Lux Aeterna)",
+      "genres_a__e_viter": "*Genre similaires et proches des genres cibles (qui risquent de ressortir de façon indésirable)*\n- Epic orchestral, trailer music, braams surdimensionnés\n- EDM, trap, dubstep, synthwave rétro\n- Fantasy celtique joviale, taverne médiévale légère\n- Horror jump-scare staccato caricatural, pizzicati cartoon\n- Par strate :\n\t- Strate I : Musique orchestrale épique\n\t- Strate II : Synthwave\n\t- Strate III : Musique romantique mélodramatique\n\t- Strate IV : Horreur percussive"
+    },
+    "section_titles": {
+      "genres_musicaux___sous-genres": "Genres musicaux + sous-genres",
+      "ambiances": "Ambiances",
+      "morceaux_d_influences": "Morceaux d'Influences",
+      "genres_a__e_viter": "Genres à éviter"
+    },
+    "notion_page_id": "2956e4d2-1b45-8087-8343-e0883943d317"
+  },
+  {
+    "Nom": "Guide musical (Léviathan)",
+    "values": {
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Mots-clés type": "brass, triumphant, building, orchestral, resolute, percussion, heroic, anthem, crescendo, determined",
+      "Piliers": "5cdde713-1cd7-4491-8306-2d25e551aecc"
+    },
+    "sections": {
+      "genres_musicaux___sous-genres": "- **Ambient** (Dark ambient, Drone, Industrial ambient, Ritual ambient)\n- **Néoclassique** (Minimalisme, Post-minimalisme, Musique de chambre contemporaine)\n- **Musique traditionnelle rituelle** (Chant grégorien, Chants bouddhistes tibétains, Chants diphoniques tuvans)\n- **Orchestral avant‑gardiste** (Avant‑garde, Musique spectrale, Chœur contemporain)\n- **Électroacoustique** (Musique concrète, Acousmatique, Field recording, Tape music)",
+      "ambiances": "- Globale : Souterrain, Claustrophobe, Imposant, Fourneaux, Minéral, Mort-vivant, initiatique\n- Principe générique : Plus on est haut dans le Léviathan plus les musiques sont aigues (et potentiellement plus rapides et lumineuses). Ordre : Narthex (très aigu) \\> Bains parkourétiques + Bibliothèques veineuses + Nef Centrale (aigue)  \\> Tunnel vertébral + cellules (neutre) \\> Strate I et II (grave) \\> Strate III et IV (très grave)\n- Sites religieux : Religieux, Grandiloquent, Sacré\n- Zones d’habitation : mélancolique, Sombre\n- Dans les plis : étrange, alien",
+      "morceaux_d_influences": "- [Hollow knight - “Dirt Mouth”](https://www.youtube.com/watch?v=eX4de4BH5lM&list=PLmOldskd2VbL7_t-NE9p6rEboq_v0AHko&index=3) : Nostalgique, mélancolique, lent et doux\n- [**Phurpa – Boiler Room In Stereo**](https://www.youtube.com/watch?v=VK5uG2fN6HE)** :** Gong, vocalises\n- [Nier: Automata - Significance](https://www.youtube.com/watch?v=GqQ91CcPYtU&list=PLOLBWlPQqPkvzIqllFjSeLunVAeJExoMB&index=1) : Pour le côté dissonnant\n- [Le Nom de la Rose - Main theme](https://www.youtube.com/watch?v=-eL9nEGZwQU&list=PLH9C08qrQ7S67j83iF2LvTg_Awt0XR9HR) : Bruits de carillons et de cloche, religieux mais mystérieux\n- **Raison d'être** - \"Within the Depths of Silence and Phormations\" : ambient industriel méditatif\n- [Requiem de Schnittke](https://www.youtube.com/watch?v=_OcYNQF_5nU&list=PLxboCpklL6ekxN-rIFAVvdfHhjL8wHppa&index=1) : Post-moderne, mélange de styles (baroque, avant-garde, tango !), déconstruit la forme traditionnelle du requiem",
+      "genres_a__e_viter": "*Genre similaires et proches des genres cibles (qui risquent de ressortir de façon indésirable)*\n- **Ambient lumineux/New Age**\n- **Rock/Metal mélodique accessible**\n- **Horreur**"
+    },
+    "section_titles": {
+      "genres_musicaux___sous-genres": "Genres musicaux + sous-genres",
+      "ambiances": "Ambiances",
+      "morceaux_d_influences": "Morceaux d'Influences",
+      "genres_a__e_viter": "Genres à éviter"
+    },
+    "notion_page_id": "2956e4d2-1b45-807b-8cbb-d83d5ce3af97"
+  }
+]

@@ -69,11 +69,9 @@ describe('ModelSelector', () => {
   it('should group models by provider', () => {
     render(<ModelSelector />);
 
-    // Vérifier les groupes de providers (optgroup) - les labels sont dans les optgroup
     const select = screen.getByRole('combobox');
     const optgroups = select.querySelectorAll('optgroup');
     expect(optgroups.length).toBeGreaterThan(0);
-    // Vérifier que les options sont présentes
     expect(screen.getByText('GPT-5.2')).toBeInTheDocument();
     expect(screen.getByText('Mistral Small Creative')).toBeInTheDocument();
   });
@@ -90,13 +88,9 @@ describe('ModelSelector', () => {
   it('should change model on selection', async () => {
     render(<ModelSelector />);
 
-    // Sélectionner le select
     const select = screen.getByRole('combobox');
-
-    // Changer la valeur
     fireEvent.change(select, { target: { value: 'labs-mistral-small-creative' } });
 
-    // Vérifier que les actions ont été appelées
     await waitFor(() => {
       expect(mockSetProvider).toHaveBeenCalledWith('mistral');
       expect(mockSetModel).toHaveBeenCalledWith('labs-mistral-small-creative');
@@ -139,7 +133,6 @@ describe('ModelSelector', () => {
 
     render(<ModelSelector />);
 
-    // Vérifier que le modèle Mistral est affiché
     expect(screen.getByText(/Mistral Small Creative/i)).toBeInTheDocument();
   });
 

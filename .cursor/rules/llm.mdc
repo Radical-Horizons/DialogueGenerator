@@ -1,8 +1,17 @@
 ---
-description: LLM/OpenAI — SDK v1 AsyncOpenAI, config, tests sans réseau, GPT-5+ Responses API
-globs: ["llm_client.py", "llm_client/**/*.py", "factories/**/*.py", "prompt_engine.py", "config/**/llm*.json", "llm_config.json"]
+description: LLM/OpenAI — ajout de modèles (doc officielle), SDK v1, GPT-5+ Responses API
+globs: ["llm_client.py", "llm_client/**/*.py", "factories/**/*.py", "core/llm/**/*.py", "prompt_engine.py", "constants.py", "frontend/src/constants.ts", "config/**/llm*.json", "llm_config.json", "api/schemas/dialogue.py"]
 alwaysApply: false
 ---
+
+## Ajout d'un modèle LLM
+
+**Obligatoire avant tout ajout** dans `config/llm_config.json`, `config/llm_pricing.json`, `constants.py`, `frontend/src/constants.ts`, validateurs (`api/schemas/dialogue.py`, UI reasoning) :
+
+1. Rechercher **`{slug} API doc`** (ex. `gpt-5.4 API doc`) — ouvrir la **page modèle officielle** du fournisseur.
+2. **Sources autorisées uniquement** : doc API du fournisseur (OpenAI → `developers.openai.com/api/docs/models/…`, Mistral → `docs.mistral.ai`). **Interdit** : blogs, OpenRouter, agrégateurs, guides tiers pour slug, capacités, pricing ou reasoning.
+3. Extraire de cette page : identifiant API, structured outputs (oui/non), valeurs `reasoning.effort`, plafonds tokens, tarifs, endpoints (Responses / Chat).
+4. Aligner backend + frontend + pricing + listes Unity structured output si le modèle les supporte officiellement.
 
 - OpenAI: respecter le SDK v1 (ex: `AsyncOpenAI`) et éviter les patterns legacy.
 - Ne jamais logguer de secrets. Les clés viennent des variables d'environnement/config (ex: `OPENAI_API_KEY`).
@@ -22,6 +31,7 @@ alwaysApply: false
 **Reasoning (phase réflexive)**:
 - Disponible pour tous les modèles GPT-5 via Responses API
 - Paramètres: `reasoning.effort` (valeurs dépendent du modèle), `reasoning.summary` (None/"auto" uniquement)
+- **GPT-5.4** (doc `developers.openai.com/api/docs/models/gpt-5.4`) : `none` (défaut), `low`, `medium`, `high`, `xhigh` ; structured outputs **oui**
 - **GPT-5.2/5.2-pro** : Supportent `none`, `minimal`, `low`, `medium`, `high`, `xhigh`
 - **GPT-5 mini/nano** : Supportent uniquement `minimal`, `low`, `medium`, `high` (pas `none` ni `xhigh`)
 - **reasoning.summary** : Uniquement `"auto"` supporté (les résumés `"detailed"` nécessitent une organisation OpenAI vérifiée Tier 2/3, non disponible actuellement)
@@ -35,6 +45,6 @@ alwaysApply: false
 - Chat Completions: extraire depuis `response.choices[0].message.tool_calls`
 - Usage tokens: `response.usage.input_tokens`/`output_tokens` (Responses) vs `prompt_tokens`/`completion_tokens` (Chat)
 
-**Tous modèles GPT-5**: `gpt-5.2`, `gpt-5.2-pro`, `gpt-5-mini`, `gpt-5-nano` utilisent Responses API par défaut. Chat Completions reste disponible en fallback.
+**Tous modèles GPT-5** : `gpt-5.4`, `gpt-5.2`, `gpt-5.2-pro`, `gpt-5-mini`, `gpt-5-nano` utilisent Responses API par défaut. Chat Completions reste disponible en fallback.
 
 **Documentation complète**: Voir `docs/OPENAI_API_GPT5.md` pour détails complets, exemples de code, et références.

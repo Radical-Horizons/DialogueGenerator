@@ -51,5 +51,56 @@
       "mauvais_exemple_2___le_collecteur_de_souvenirs": "❌ Mauvais exemple 2 : Le Collecteur de Souvenirs"
     },
     "notion_page_id": "3056e4d2-1b45-819a-830d-e8cca671fbc5"
+  },
+  {
+    "Nom": "Stratégie anti-clichés — Patterns",
+    "values": {},
+    "sections": {
+      "strate_gie_anti-cliche_s___patterns": "Guide partagé entre les skills de gestion. Quand la requête SQL sur la Table des patterns révèle un pattern, ce document indique **comment y répondre** — indépendamment du type d'entité concernée (personnage, lieu, communauté, espèce, objet).",
+      "principe_fondamental___diversite__comme_mai_tre-mot": "**Diversité** ne signifie pas seulement variation ethnique/de genre, mais :<br>- Diversité de **motivations** (au-delà du bien/mal)<br>- Diversité de **réponses** au même problème<br>- Diversité d’**échelles** (du banal au cosmique)<br>- Diversité de **perspectives** (pas que des héros)<br>- Diversité de **relations** au pouvoir (pas que résistance ou tyrannie)",
+      "principe___l_apport_doit_e_tre_net_et_re_parti": "Reformuler un fait déjà présent dans la fiche, ses propriétés ou le lore existant n'est **pas** une invention — c'est de la réutilisation lore. Chaque section lourde (biologie, culture, histoire…) doit porter au moins un apport *nouveau*, datable ou conséquent ; concentrer toute l'invention sur une seule section est un échec de diversité.",
+      "trois_niveaux_de_cliche_s_a__e_viter": "1. **Clichés fantasy génériques** (elfe archer, nain forgeron, etc.)\n2. **Clichés SF/biopunk** (cyborg sans âme, mutations = monstruosité)\n3. **Clichés spécifiques Alteir** (liste fournie par le créateur)",
+      "e_tape_1___identifier_l_attente_automatique": "Quand tu crées un personnage, demande-toi :<br>- **Quel est le premier archétype** qui vient à l’esprit pour cette espèce/rôle ?<br>- **Quelle serait la réaction “attendue”** dans cette situation ?<br>- **Quel trait de personnalité** est typiquement associé à ce background ?",
+      "e_tape_2___subvertir_intelligemment": "**Mauvaise subversion** : Inverse pure (forgeron lâche, guerrier intellectuel)<br>**Bonne subversion** : Complexification (forgeron poète qui soude des métaphores, guerrier qui théorise la violence)",
+      "techniques_de_subversion_efficace": "**A. Orthogonalité** : Ajouter dimension inattendue mais cohérente<br>- Thaumaturge déchue → + comptable méticuleuse<br>- Artificier → + phobique du feu<br>- Espion → + collectionneur de papillons obsessionnel\n**B. Contextualisation** : Même trait, contexte inhabituel<br>- Fanatisme religieux → appliqué à la gastronomie<br>- Loyauté absolue → envers un concept abstrait, pas une personne<br>- Quête de vengeance → contre un système économique\n**C. Échelle inversée** : Traiter l’extraordinaire comme banal, le banal comme extraordinaire<br>- Immortel préoccupé par ses impôts<br>- Paysan fasciné par métaphysique du labour<br>- Dieu mineur qui gère une échoppe",
+      "e_tape_3___ancrer_dans_le_ve_cu": "L’innovation sans ancrage = bizarrerie gratuite.\n**Toujours poser** :<br>- Pourquoi ce personnage a-t-il développé ce trait inhabituel ?<br>- Quelle expérience concrète a formé cette perspective unique ?<br>- Comment son entourage réagit-il à son unicité ?",
+      "liste_comple_te": "1. Régions à temporalité variable (sauf nécessité narrative absolue)\n2. Créatures/métiers/lieux liés aux émotions et souvenirs\n3. Champignons et cristaux (sursaturés)\n4. Van’Doei de l’Anentropie très vieux et sages\n5. Fanatiques religieux unidimensionnels\n6. Personnages qui connaissent Jast et Merid\n7. Esprits-ruches (l’Éthérée suffit)\n8. Amnésie avec révélation dramatique\n9. Focus exclusif sur la dystopie à castes (déjà le thème central)",
+      "strate_gies_de_contournement": "**Si tu dois utiliser un élément surexploité :**\n1. **Décentrer** : Rendre secondaire ce qui serait normalement central\n\t- Van’Doei ancien → mais c’est son neveu qui est le PNJ important\n\t- Temporalité variable → mais le personnage s’en fiche, il a d’autres priorités\n2. **Banaliser** : Traiter l’exceptionnel comme ordinaire\n\t- Lieu lié aux souvenirs → mais c’est juste son bureau, et ça l’ennuie\n\t- Cristaux → mais utilisés comme matériau de construction banal\n3. **Subvertir l’attente** : Utiliser l’élément d’une manière inattendue\n\t- Fanatique religieux → de la religion du commerce équitable\n\t- Esprit-ruche → mais dysfonctionnel, schizophrène, incompétent",
+      "questions_pour_forcer_l_originalite": "**Pour l’occupation :**<br>- Quelle profession existe dans ce monde mais pas dans le nôtre ?<br>- Quel métier banal de notre monde serait étrange ici ?<br>- Quelle est la pire/meilleure personne pour faire ce travail ?\n**Pour les motivations :**<br>- Quelle est la motivation la plus prosaïque pour une quête épique ?<br>- Quelle est la motivation la plus grandiose pour une action banale ?<br>- Qu’est-ce qui l’empêche de simplement… partir ?\n**Pour les relations :**<br>- Qui devrait le détester mais l’adore ?<br>- Qui devrait l’aimer mais le méprise ?<br>- Quelle relation toxique maintient-il volontairement ?",
+      "contreparties_et_contradictions": "**Jamais de personnage unidimensionnel.**\nPour chaque qualité dominante, ajouter :<br>- Une **contradiction interne** (générosité → mais contrôlante)<br>- Une **limite contextuelle** (courageux → sauf face aux araignées)<br>- Un **coût caché** (loyal → au détriment de son jugement)",
+      "checklist_anti-cliche_s__toutes_entite_s": "Avant de finaliser une entité, vérifier :",
+      "cliche_s_alteir": "- [ ] N'utilise-t-elle AUCUN des 9 tropes surexploités ?\n- [ ] Si oui, est-ce subverti/décentré/banalisé ?\n- [ ] Apporte-t-elle quelque chose de nouveau à l'univers ?",
+      "innovation": "- [ ] Possède-t-elle au moins UN trait vraiment inattendu ?\n- [ ] Ses caractéristiques distinctives sont-elles ancrées dans son histoire ou sa biologie ?\n- [ ] Pourrait-elle exister dans un contexte non encore créé ?\n- [ ] L'apport est-il **net** (nouveau) et non une reformulation d'un fait déjà présent dans la fiche, ses propriétés ou le lore existant ?\n- [ ] L'invention est-elle **répartie** sur plusieurs sections (pas concentrée sur une seule) ?",
+      "permission_d_inventer": "**TU ES AUTORISÉ ET ENCOURAGÉ À** :<br>- Inventer des **nouveaux lieux** mentionnés dans le background<br>- Créer des **nouvelles communautés** liées au personnage<br>- Imaginer des **nouvelles technologies** cohérentes avec le monde<br>- Proposer des **nouveaux métiers** spécifiques à Alteir<br>- Introduire des **nouvelles factions** mineures<br>- Créer des **membres de famille** non encore documentés\n**Condition** : Cohérence avec les règles cosmologiques établies.",
+      "bon_exemple_1___le_bureaucrate_qadul_doei": "Au lieu de : Cultiste terrifiant qui sacrifie des innocents<br>→ Gestionnaire blasé qui traite les “apports nutritionnels” comme de la paperasse administrative, avec quotas et réunions hebdomadaires.\n**Pourquoi ça marche** : Banalise l’horrifique, crée un décalage comique-sinistre, reste cohérent avec l’espèce.",
+      "bon_exemple_2___l_imuin_technophobe": "Au lieu de : Cyborg optimisé et efficace<br>→ Imuin qui regrette son augmentation, sabote ses propres circuits, mais ne peut pas revenir en arrière. Milite pour le “droit à la régression”.\n**Pourquoi ça marche** : Subvertit l’attente transhumaniste, crée conflit interne, ouvre débats philosophiques.",
+      "bon_exemple_3___le_fre_missant_heureux": "Au lieu de : Victime tragique de transformation corporelle<br>→ Frémissant qui a délibérément choisi sa transformation, la considère comme amélioration, et ne comprend pas pourquoi les autres le plaignent.\n**Pourquoi ça marche** : Retire la dimension “horreur”, normalise la transformation, crée malentendu culturel.",
+      "mauvais_exemple_1___le_sage_atemporel": "Van’Doei de 800 ans vivant dans zone atemporelle, détient secrets cosmiques, guide mystérieux.\n**Pourquoi ça échoue** : Cumule 3 clichés Alteir (Van’Doei ancien + temporalité variable + secrets de Jast).",
+      "mauvais_exemple_2___le_collecteur_de_souvenirs": "Créature qui se nourrit de souvenirs, habite grotte de cristaux mnémoniques, provoque amnésie.\n**Pourquoi ça échoue** : Cumule émotions-souvenirs + cristaux + amnésie."
+    },
+    "section_titles": {
+      "strate_gie_anti-cliche_s___patterns": "Stratégie anti-clichés — Patterns",
+      "principe_fondamental___diversite__comme_mai_tre-mot": "Principe fondamental : Diversité comme maître-mot",
+      "principe___l_apport_doit_e_tre_net_et_re_parti": "Principe : l'apport doit être net et réparti",
+      "trois_niveaux_de_cliche_s_a__e_viter": "Trois niveaux de clichés à éviter",
+      "e_tape_1___identifier_l_attente_automatique": "Étape 1 : Identifier l’attente automatique",
+      "e_tape_2___subvertir_intelligemment": "Étape 2 : Subvertir intelligemment",
+      "techniques_de_subversion_efficace": "Techniques de subversion efficace",
+      "e_tape_3___ancrer_dans_le_ve_cu": "Étape 3 : Ancrer dans le vécu",
+      "liste_comple_te": "Liste complète",
+      "strate_gies_de_contournement": "Stratégies de contournement",
+      "questions_pour_forcer_l_originalite": "Questions pour forcer l’originalité",
+      "contreparties_et_contradictions": "Contreparties et contradictions",
+      "checklist_anti-cliche_s__toutes_entite_s": "Checklist anti-clichés (toutes entités)",
+      "cliche_s_alteir": "Clichés Alteir",
+      "innovation": "Innovation",
+      "permission_d_inventer": "Permission d’inventer",
+      "bon_exemple_1___le_bureaucrate_qadul_doei": "✅ Bon exemple 1 : Le Bureaucrate Qadul’Doei",
+      "bon_exemple_2___l_imuin_technophobe": "✅ Bon exemple 2 : L’Imuin Technophobe",
+      "bon_exemple_3___le_fre_missant_heureux": "✅ Bon exemple 3 : Le Frémissant Heureux",
+      "mauvais_exemple_1___le_sage_atemporel": "❌ Mauvais exemple 1 : Le Sage Atemporel",
+      "mauvais_exemple_2___le_collecteur_de_souvenirs": "❌ Mauvais exemple 2 : Le Collecteur de Souvenirs"
+    },
+    "notion_page_id": "3056e4d2-1b45-819a-830d-e8cca671fbc5"
   }
 ]

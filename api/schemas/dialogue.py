@@ -160,10 +160,11 @@ class BasePromptRequest(BaseModel):
         default=ModelNames.GPT_5_MINI,
         description="Identifiant du modèle LLM (estimation tokens / coût / comptage prompt)",
     )
+    # Plafond API — doit couvrir le slider UI (COMPLETION_TOKENS_LIMITS.MAX) ; voir .cursor/rules/api_validation_errors.mdc
     max_completion_tokens: Optional[int] = Field(
         default=None,
         ge=100,
-        le=50000,
+        le=Defaults.MAX_COMPLETION_TOKENS,
         description="Nombre maximum de tokens de completion à utiliser pour l'estimation de coût",
     )
 
@@ -471,6 +472,7 @@ class GenerateUnityDialogueRequest(BasePromptRequest):
         l'app (tests/coûts), mais cette route doit rester robuste.
         """
         allowed = {
+            ModelNames.GPT_5_4,
             ModelNames.GPT_5_2,
             ModelNames.GPT_5_2_PRO,
             ModelNames.GPT_5_MINI,
@@ -524,13 +526,15 @@ class GenerateUnityDialogueRequest(BasePromptRequest):
         """Valide que max_completion_tokens est dans les limites autorisées (règle métier).
         
         Recommandation OpenAI: 25000 tokens minimum pour reasoning summary.
-        Limite max alignée avec le Field (50000) pour permettre les cas d'usage avancés.
+        Limite max alignée avec Defaults.MAX_COMPLETION_TOKENS (capacités modèles récents).
         """
         if v is not None:
             if v < 100:
                 raise ValueError(f"max_completion_tokens doit être au minimum 100 (reçu: {v})")
-            if v > 50000:
-                raise ValueError(f"max_completion_tokens ne peut pas dépasser 50000 (reçu: {v})")
+            if v > Defaults.MAX_COMPLETION_TOKENS:
+                raise ValueError(
+                    f"max_completion_tokens ne peut pas dépasser {Defaults.MAX_COMPLETION_TOKENS} (reçu: {v})"
+                )
         return v
 
 class GenerateUnityDialogueResponse(BaseModel):

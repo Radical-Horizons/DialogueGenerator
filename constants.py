@@ -45,6 +45,9 @@ class ModelNames:
     Source de vérité unique pour tous les identifiants de modèles.
     Utiliser ces constantes au lieu de strings codées en dur.
     """
+    # Modèles GPT-5.4
+    GPT_5_4 = "gpt-5.4"
+
     # Modèles GPT-5.2
     GPT_5_2 = "gpt-5.2"
     GPT_5_2_PRO = "gpt-5.2-pro"
@@ -63,7 +66,11 @@ class ModelNames:
     DUMMY = "dummy"
     
     # Liste des modèles qui nécessitent max_completion_tokens (au lieu de max_tokens)
-    MODELS_USING_MAX_COMPLETION_TOKENS = [GPT_5_2, GPT_5_2_PRO, GPT_5_2_THINKING, GPT_5_MINI, GPT_5_NANO]
+    MODELS_USING_MAX_COMPLETION_TOKENS = [
+        GPT_5_4,
+        GPT_5_2, GPT_5_2_PRO, GPT_5_2_THINKING,
+        GPT_5_MINI, GPT_5_NANO,
+    ]
     
     # Liste des modèles qui ne supportent pas la température personnalisée
     MODELS_WITHOUT_CUSTOM_TEMPERATURE = [GPT_5_MINI, GPT_5_NANO]
@@ -96,6 +103,8 @@ class Defaults:
     # Limites pour les tokens de contexte (utilisées par l'API et le frontend)
     MAX_CONTEXT_TOKENS = 300000  # Maximum autorisé pour max_context_tokens
     MIN_CONTEXT_TOKENS = 10000  # Plancher sérieux contexte LLM + budget FR20 (Pydantic ge=, UI slider min)
+    # Plafond API max_completion_tokens (aligné capacités modèles GPT-5.x ~128k ; UI slider peut être plus bas)
+    MAX_COMPLETION_TOKENS = 128000
     # Valeur par défaut pour max_completion_tokens (quand None)
     DEFAULT_MAX_COMPLETION_TOKENS = 5000  # Valeur par défaut pour la génération de dialogues
     # Plafond mensuel par défaut (USD) pour un utilisateur sans entrée dans cost_budgets.json (0 = illimité si défini explicitement)

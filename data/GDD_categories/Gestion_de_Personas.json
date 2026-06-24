@@ -3,22 +3,22 @@
     "Nom": "Gestion de Personas",
     "values": {},
     "sections": {
-      "preamble": "Crée, modifie et maintient les personas dans la base Personas. Activer dès qu'on doit créer, modifier, auditer ou supprimer une persona.",
-      "outils_requis": "view, create-pages, update-page, query-data-sources, search.",
-      "quand_utiliser_ce_skill": "- \"Crée une persona pour [domaine]\"\n\n- \"Modifie la persona [nom]\"\n\n- \"Audite les personas existantes\"\n\n- \"Supprime la persona [nom]\"\n\n- \"Quelle persona couvre [domaine] ?\"",
-      "proce_dure": "1. Charger le contexte : si la persona existe, charger sa fiche (view). Sinon, consulter la base Personas pour vérifier qu'aucune persona ne couvre déjà ce périmètre. Si doublon potentiel, proposer une extension.\n\n1. Cadrer : identifier nom, domaine, type (Rôle / Sous-rôle) et mission.\n\n1. Inférer les SoT : charger la Référence : Structure des fiches Personas pour le mapping domaines → SoT. Cumuler SoT communes + spécifiques, dédupliquer, proposer la liste à l'utilisateur pour validation.\n\n1. Propriétés : créer ou mettre à jour la page dans la base avec toutes les propriétés. Charger la Référence : Structure des fiches Personas pour la liste des propriétés et la structure de fiche.\n\n1. Rédiger ou modifier le contenu en respectant la structure stricte (Ton identité → Mission → SoT → Skills).\n\n1. Confirmer à l'utilisateur : nom, domaine, mission, SoT listées.\n\nSuppression : vérifier les mémoires liées → confirmer avec l'utilisateur → supprimer la page → signaler les mémoires orphelines.",
-      "cas_limites": "- Périmètre chevauchant : proposer de fusionner ou clarifier les frontières avant de créer.\n\n- SoT inexistante : signaler la page manquante, ne pas l'inventer.\n\n- Domaine non mappé : lister les SoT communes et demander à l'utilisateur de compléter.\n\n- Suppression avec mémoires : lister les mémoires associées, demander si elles doivent être supprimées, réattribuées ou conservées.",
-      "fallback": "- Besoin flou : poser les questions clés : Quel domaine ? Quel type ? Quelles SoT ?\n\n- Doublon détecté : proposer d'étendre la persona existante.",
-      "garde-fous": "- Ne jamais créer une persona sans avoir vérifié la base existante.\n\n- Ne pas inventer de SoT ; ne lister que des pages existantes et vérifiées.\n\n- Toujours proposer les SoT inférées avant de finaliser (pas d'injection silencieuse).\n\n- Ne jamais supprimer une persona sans confirmation explicite."
+      "preamble": "Crée, modifie et maintient les personas dans la base Personas. Activer dès qu'on doit créer, modifier, auditer ou supprimer une persona. {color=\"gray\"}\n---",
+      "quand_utiliser_ce_skill": "- \"Crée une persona pour \\[domaine\\]\"\n- \"Modifie la persona \\[nom\\]\"\n- \"Audite les personas existantes\"\n- \"Supprime la persona \\[nom\\]\"\n- \"Quelle persona couvre \\[domaine\\] ?\"\n---",
+      "proce_dure": "1. **Charger le contexte** : si la persona existe, charger sa fiche. Sinon, consulter la base <mention-page url=\"https://app.notion.com/p/2ec6e4d21b4580159bd0ccb3a73c3bd2\"/> pour vérifier qu'aucune persona ne couvre déjà ce périmètre. Si doublon potentiel, proposer une extension.\n2. **Cadrer** : identifier nom, domaine, type (Rôle / Sous-rôle) et mission.\n3. **Inférer les SoT** : charger la <mention-page url=\"https://app.notion.com/p/e0f2f2973b6841d9a9d4b5bcff407350\">Référence : Structure des fiches Personas</mention-page> pour le mapping domaines → SoT. Cumuler SoT communes + spécifiques, dédupliquer, proposer la liste à l'utilisateur pour validation.\n4. **Propriétés** : créer ou mettre à jour la page dans la base avec toutes les propriétés. Charger la <mention-page url=\"https://app.notion.com/p/e0f2f2973b6841d9a9d4b5bcff407350\">Référence : Structure des fiches Personas</mention-page> pour la liste des propriétés et la structure de fiche.\n5. **Rédiger ou modifier le contenu** en respectant la structure stricte (Ton identité → Mission → SoT → Skills).\n6. **Confirmer** à l'utilisateur : nom, domaine, mission, SoT listées.\n**Suppression** : vérifier les mémoires liées → confirmer avec l'utilisateur → supprimer la page → signaler les mémoires orphelines.\n---",
+      "cas_limites": "- **Périmètre chevauchant** : proposer de fusionner ou clarifier les frontières avant de créer.\n- **SoT inexistante** : signaler la page manquante, ne pas l'inventer.\n- **Domaine non mappé** : lister les SoT communes et demander à l'utilisateur de compléter.\n- **Suppression avec mémoires** : lister les mémoires associées, demander si elles doivent être supprimées, réattribuées ou conservées.\n---",
+      "fallback": "- **Besoin flou** : poser les questions clés : Quel domaine ? Quel type ? Quelles SoT ?\n- **Doublon détecté** : proposer d'étendre la persona existante.\n---",
+      "garde-fous": "- Ne jamais créer une persona sans avoir vérifié la base existante.\n- Ne pas inventer de SoT ; ne lister que des pages existantes et vérifiées.\n- Toujours proposer les SoT inférées avant de finaliser (pas d'injection silencieuse).\n- Ne jamais supprimer une persona sans confirmation explicite.\n---",
+      "re_fe_rences": "<page url=\"https://app.notion.com/p/b68baa7f27024c6fa6e55d1d255c9191\">Référence : Mapping domaines → SoT</page>\n<page url=\"https://app.notion.com/p/e0f2f2973b6841d9a9d4b5bcff407350\">Référence : Structure des fiches Personas</page>"
     },
     "section_titles": {
       "preamble": "Préambule",
-      "outils_requis": "Outils requis",
       "quand_utiliser_ce_skill": "Quand utiliser ce skill",
       "proce_dure": "Procédure",
       "cas_limites": "Cas limites",
       "fallback": "Fallback",
-      "garde-fous": "Garde-fous"
+      "garde-fous": "Garde-fous",
+      "re_fe_rences": "Références"
     },
     "notion_page_id": "c9cbc6e7-20bf-4e68-b46e-bcea0fd5528e"
   }
