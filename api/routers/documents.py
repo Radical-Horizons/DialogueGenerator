@@ -41,8 +41,8 @@ from api.schemas.documents import (
     ValidateFlagReferencesRequest,
     ValidateFlagReferencesResponse,
 )
-from api.utils.unity_schema_validator import validate_unity_json_structured
 from services.configuration_service import ConfigurationService
+from services.unity_export_validation_service import validate_unity_export_document
 from services.dialogue_flags_service import DialogueFlagsService
 from services.choice_effect_validation import ChoiceEffectValidationService
 from services.visibility_condition_validation import VisibilityConditionValidationService
@@ -690,9 +690,18 @@ async def put_document(
                     request_id=request_id,
                 )
 
-        # Validation (validate_unity_json_structured sans modifier choiceId, ordre choices[], node.id)
-        is_valid, errors_structured = validate_unity_json_structured(doc)
-        validation_report = [{"code": e.get("code", "validation_error"), "message": e.get("message", ""), "path": e.get("path", "")} for e in errors_structured]
+        # Validation export unifiée (normalise choiceId, flags, targetNode, puis schéma + GDD)
+        export_validation = validate_unity_export_document(doc)
+        is_valid = export_validation.is_valid
+        errors_structured = export_validation.errors_structured
+        validation_report = [
+            {
+                "code": e.get("code", "validation_error"),
+                "message": e.get("message", ""),
+                "path": e.get("path", ""),
+            }
+            for e in errors_structured
+        ]
         if isinstance(doc, dict):
             validation_report.extend(validate_document_social_systems(doc))
 
@@ -721,7 +730,7 @@ async def put_document(
                 },
             )
 
-        # Persistance : ne pas modifier choiceId, ordre choices[], node.id (document tel quel)
+        # Persistance : document normalisé par validate_unity_export_document (choiceId, flags, etc.)
         _write_document_blob(base_dir, doc_id, doc)
         _write_meta(base_dir, doc_id, new_revision)
 

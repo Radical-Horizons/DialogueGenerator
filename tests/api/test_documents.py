@@ -417,7 +417,7 @@ class TestPutDocumentDraftVsExport:
     """Tests PUT modes draft vs export (AC4)."""
 
     def _doc_with_missing_choice_id(self):
-        """Document v1.1.0 avec un choice sans choiceId → validation échoue en export."""
+        """Document v1.1.0 avec un choice sans choiceId (auto-healé à la persistance)."""
         return {
             "schemaVersion": "1.1.0",
             "nodes": [
@@ -431,10 +431,17 @@ class TestPutDocumentDraftVsExport:
             ],
         }
 
-    def test_put_draft_mode_rejects_v1_1_0_without_choice_id_400(
+    def _doc_with_schema_invalid_node_id(self):
+        """Document avec id nœud hors schéma (non auto-healable)."""
+        return {
+            "schemaVersion": "1.2.0",
+            "nodes": [{"id": "NODE_LEGACY_INVALID", "line": "Hello", "nextNode": "END"}],
+        }
+
+    def test_put_draft_mode_auto_heals_missing_choice_id(
         self, client, mock_config_service, tmp_path
     ):
-        """Mode draft : document v1.1.0 sans choiceId refusé (Story 16.5 AC3, non contournable en draft)."""
+        """Mode draft : choiceId manquant auto-ajouté à la persistance (normalisation export)."""
         tmp_path.mkdir(parents=True, exist_ok=True)
         mock_config_service.get_unity_dialogues_path.return_value = tmp_path
         doc = self._doc_with_missing_choice_id()
@@ -444,11 +451,25 @@ class TestPutDocumentDraftVsExport:
             json={"document": doc, "revision": 1, "validationMode": "draft"},
         )
 
-        assert response.status_code == 400
-        data = response.json()
-        assert "validationReport" in data
-        assert len(data["validationReport"]) > 0
-        assert not (tmp_path / "draft-doc.json").exists()
+        assert response.status_code == 200
+        persisted = json.loads((tmp_path / "draft-doc.json").read_text(encoding="utf-8"))
+        assert persisted["nodes"][0]["choices"][0]["choiceId"] == "choice_START_0"
+
+    def test_put_export_mode_auto_heals_missing_choice_id(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Mode export : choiceId manquant auto-ajouté, validation OK."""
+        tmp_path.mkdir(parents=True, exist_ok=True)
+        mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+        doc = self._doc_with_missing_choice_id()
+
+        response = client.put(
+            "/api/v1/documents/export-doc",
+            json={"document": doc, "revision": 1, "validationMode": "export"},
+        )
+
+        assert response.status_code == 200
+        assert (tmp_path / "export-doc.json").exists()
 
     def test_put_export_mode_rejects_on_validation_failure_400(
         self, client, mock_config_service, tmp_path
@@ -456,7 +477,7 @@ class TestPutDocumentDraftVsExport:
         """Mode export : validation échoue → 400 + validationReport, pas de persistance."""
         tmp_path.mkdir(parents=True, exist_ok=True)
         mock_config_service.get_unity_dialogues_path.return_value = tmp_path
-        doc = self._doc_with_missing_choice_id()
+        doc = self._doc_with_schema_invalid_node_id()
 
         response = client.put(
             "/api/v1/documents/export-doc",
@@ -475,7 +496,7 @@ class TestPutDocumentDraftVsExport:
         """Header X-Validation-Mode: export override body validationMode."""
         tmp_path.mkdir(parents=True, exist_ok=True)
         mock_config_service.get_unity_dialogues_path.return_value = tmp_path
-        doc = self._doc_with_missing_choice_id()
+        doc = self._doc_with_schema_invalid_node_id()
 
         response = client.put(
             "/api/v1/documents/header-doc",
@@ -486,6 +507,32 @@ class TestPutDocumentDraftVsExport:
         assert response.status_code == 400
         assert "validationReport" in response.json()
         assert not (tmp_path / "header-doc.json").exists()
+
+    def test_put_normalizes_llm_consequences_flag(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Régression graphe : flag LLM minuscules normalisé à la sauvegarde document."""
+        tmp_path.mkdir(parents=True, exist_ok=True)
+        mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+        doc = {
+            "schemaVersion": "1.2.0",
+            "nodes": [
+                {
+                    "id": "START",
+                    "line": "Rencontre",
+                    "consequences": {"flag": "FLAG_rencontre_valkazer_init"},
+                }
+            ],
+        }
+
+        response = client.put(
+            "/api/v1/documents/flag-doc",
+            json={"document": doc, "revision": 1},
+        )
+
+        assert response.status_code == 200
+        persisted = json.loads((tmp_path / "flag-doc.json").read_text(encoding="utf-8"))
+        assert persisted["nodes"][0]["consequences"]["flag"] == "FLAG_RENCONTRE_VALKAZER_INIT"
 
 
 class TestGetLayout:

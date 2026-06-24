@@ -6,7 +6,8 @@ from services.unity_dialogue_generation_service import UnityDialogueGenerationSe
 from models.dialogue_structure.unity_dialogue_node import (
     UnityDialogueGenerationResponse,
     UnityDialogueNodeContent,
-    UnityDialogueChoiceContent
+    UnityDialogueChoiceContent,
+    UnityDialogueConsequencesContent,
 )
 
 
@@ -89,6 +90,27 @@ async def test_enrich_with_ids_single_node(unity_service: UnityDialogueGeneratio
     assert len(start_node["choices"]) == 1
     assert start_node["choices"][0]["text"] == "Choice 1"
     assert start_node["choices"][0]["targetNode"] == "END"  # "END" est un marqueur de fin, pas un vrai nœud
+    assert start_node["choices"][0]["choiceId"] == "choice_START_0"
+
+
+def test_enrich_with_ids_normalizes_llm_consequences_flag(
+    unity_service: UnityDialogueGenerationService,
+):
+    """Régression : flag LLM minuscules normalisé dès enrich_with_ids (graphe + streaming)."""
+    response = UnityDialogueGenerationResponse(
+        title="Rencontre",
+        node=UnityDialogueNodeContent(
+            line="Rencontre",
+            consequences=UnityDialogueConsequencesContent(
+                flag="FLAG_rencontre_valkazer_init",
+                description="Première rencontre",
+            ),
+        ),
+    )
+
+    enriched_nodes = unity_service.enrich_with_ids(response, start_id="START")
+
+    assert enriched_nodes[0]["consequences"]["flag"] == "FLAG_RENCONTRE_VALKAZER_INIT"
 
 
 def test_enrich_with_ids_no_choices(unity_service: UnityDialogueGenerationService):

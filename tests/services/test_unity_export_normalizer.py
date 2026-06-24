@@ -106,3 +106,22 @@ class TestUnityExportNormalizer:
         assert choice["choiceId"] == "choice_START_0"
         assert choice["targetNode"] == "END"
         assert choice["test"] == "Volonté+Adaptabilité:12"
+
+    def test_normalizes_lowercase_consequences_flag(self) -> None:
+        """Régression : flags LLM en camelCase/minuscules → SCREAMING_SNAKE_CASE."""
+        doc = {
+            "schemaVersion": "1.2.0",
+            "nodes": [
+                {
+                    "id": "START",
+                    "line": "Rencontre",
+                    "consequences": {
+                        "flag": "FLAG_rencontre_valkazer_init",
+                        "description": "Première rencontre",
+                    },
+                }
+            ],
+        }
+        result = validate_unity_export_document(doc)
+        assert result.is_valid is True, result.errors
+        assert doc["nodes"][0]["consequences"]["flag"] == "FLAG_RENCONTRE_VALKAZER_INIT"

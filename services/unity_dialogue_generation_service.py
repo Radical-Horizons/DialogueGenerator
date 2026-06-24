@@ -11,6 +11,7 @@ from models.dialogue_structure.unity_dialogue_node import (
 )
 from core.llm.llm_client import ILLMClient
 from services.document_choice_id_service import stable_choice_id
+from services.unity_export_normalizer import normalize_unity_export_document
 
 logger = logging.getLogger(__name__)
 
@@ -408,5 +409,8 @@ Instructions pour la suite:
         # Le validateur accepte "END" comme référence valide même sans nœud explicite.
         # Cela évite d'afficher un nœud "END" éditable dans l'interface, car ce n'est pas un vrai nœud.
         logger.info("Enrichissement terminé: nœud avec ID")
-        return [node_dict]
+        normalized = normalize_unity_export_document(
+            {"schemaVersion": "1.2.0", "nodes": [node_dict]},
+        )
+        return normalized["nodes"]
 
