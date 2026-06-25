@@ -174,7 +174,8 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
   const updateNodeLine = useCallback(
     (nodeId: string, line: string) => {
       clearFieldError(nodeId, 'line')
-      updateNode(nodeId, { line: line.trim() || undefined })
+      // Ne pas trim() le texte entier : les retours à la ligne en fin de bloc sont éditables.
+      updateNode(nodeId, { line: line.trim() === '' ? undefined : line })
     },
     [updateNode, clearFieldError]
   )
