@@ -122,29 +122,18 @@ class ElementLinker:
         return self.get_regions(locations)
 
     def get_scene_sub_location_names(self, parent_name: str, locations: List[Dict]) -> List[str]:
-        """Noms pour le sélecteur « lieu » sous la région parente (scène principale).
+        """Noms pour le sélecteur « sous-lieu » sous le lieu parent (scène principale).
 
-        Utilise ``Contient`` du parent si renseigné ; sinon tous les autres lieux sauf le parent.
+        Retourne uniquement les noms listés dans ``Contient`` de la fiche parente.
 
         Args:
-            parent_name: Nom de la fiche « région » sélectionnée.
+            parent_name: Nom de la fiche lieu sélectionnée.
             locations: Liste des lieux GDD.
 
         Returns:
-            Noms triés.
+            Noms issus de ``Contient``, ou liste vide.
         """
-        if not locations or not parent_name:
-            return []
-        from_contient = self.get_sub_locations(parent_name, locations)
-        if from_contient:
-            return from_contient
-        all_names = [
-            str(loc["Nom"])
-            for loc in locations
-            if isinstance(loc, dict) and loc.get("Nom")
-        ]
-        others = [n for n in all_names if n != parent_name]
-        return sorted(set(others), key=lambda n: n.casefold())
+        return self.get_sub_locations(parent_name, locations)
     
     def extract_linked_names(self, text_field: Optional[str], known_names_list: List[str]) -> Set[str]:
         """Extrait les noms liés depuis un champ texte.

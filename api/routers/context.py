@@ -467,7 +467,7 @@ async def get_scene_sub_locations(
     context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> SubLocationListResponse:
-    """Sous-lieux pour la scène : ``Contient`` du parent ou tous les autres lieux."""
+    """Sous-lieux pour la scène : noms du champ ``Contient`` du lieu parent."""
     if context_builder.get_location_details_by_name(name) is None:
         raise NotFoundException(
             resource_type="Lieu",

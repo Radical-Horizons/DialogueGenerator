@@ -92,14 +92,14 @@ class TestElementLinker:
         names = linker.get_scene_region_names(sample_gdd_data.locations)
         assert names == ["Forêt Sombre"]
 
-    def test_get_scene_sub_location_names_fallback_others(self, linker):
-        """Sans Contient, sous-lieux scène = autres fiches."""
+    def test_get_scene_sub_location_names_without_contient_empty(self, linker):
+        """Sans Contient, aucun sous-lieu proposé pour la scène."""
         locs = [
             {"Nom": "A"},
             {"Nom": "B"},
             {"Nom": "C"},
         ]
-        assert linker.get_scene_sub_location_names("B", locs) == ["A", "C"]
+        assert linker.get_scene_sub_location_names("B", locs) == []
     
     def test_get_sub_locations(self, linker, sample_gdd_data):
         """Test de récupération des sous-lieux."""

@@ -427,30 +427,20 @@ export function useSceneSelection() {
       }
     }
     
-    // Mettre à jour le sous-lieu si il change et que la région est définie
-    if (selection.subLocation && selection.sceneRegion && !contextSubLocations.includes(selection.subLocation)) {
-      toggleSubLocation(selection.subLocation)
-    }
-    
-    // Gérer le sous-lieu
+    // Gérer le sous-lieu (toggleSubLocation met à jour selectedSubLocations + locations_full).
+    // Ne pas appeler toggleLocation ensuite : double bascule qui annule la sélection GDD.
     if (selection.subLocation !== prevSelection.current.subLocation) {
-      // Désélectionner l'ancien sous-lieu comme lieu si il existe et n'est plus sélectionné
-      if (prevSelection.current.subLocation) {
-        const prevSubLocationExistsInLocations = locations.some((loc) => loc.name === prevSelection.current.subLocation)
-        if (prevSubLocationExistsInLocations && allLocations.includes(prevSelection.current.subLocation)) {
-          // Vérifier que ce sous-lieu n'est pas aussi la nouvelle région
-          if (prevSelection.current.subLocation !== selection.sceneRegion) {
-            toggleLocation(prevSelection.current.subLocation)
-          }
-        }
+      if (
+        prevSelection.current.subLocation &&
+        contextSubLocations.includes(prevSelection.current.subLocation)
+      ) {
+        toggleSubLocation(prevSelection.current.subLocation)
       }
-      
-      // Sélectionner le nouveau sous-lieu comme lieu dans le panneau de contexte
-      if (selection.subLocation) {
-        const subLocationExistsInLocations = locations.some((loc) => loc.name === selection.subLocation)
-        if (subLocationExistsInLocations && !allLocations.includes(selection.subLocation)) {
-          toggleLocation(selection.subLocation, 'full')
-        }
+      if (
+        selection.subLocation &&
+        !contextSubLocations.includes(selection.subLocation)
+      ) {
+        toggleSubLocation(selection.subLocation)
       }
     }
 
