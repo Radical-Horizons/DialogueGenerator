@@ -3,6 +3,7 @@ import {
   canonicalizeContextSelections,
   mergeContextCharacterNames,
   resolveCharacterCanonicalName,
+  resolveLocationDisplayName,
 } from './gddEntityNames'
 
 describe('gddEntityNames', () => {
@@ -16,8 +17,24 @@ describe('gddEntityNames', () => {
     },
   ]
 
+  const locationCatalog = [
+    {
+      name: 'Nef Centrale',
+      data: {
+        Nom: 'Nef Centrale',
+        notion_page_id: '1b36e4d2-1b45-80ce-9d1b-f71e60cb8e53',
+      },
+    },
+  ]
+
   it('résout Seigneuresse Uresaïr vers Uresaïr', () => {
     expect(resolveCharacterCanonicalName('Seigneuresse Uresaïr', catalog)).toBe('Uresaïr')
+  })
+
+  it('résout un UUID Notion vers le nom de lieu', () => {
+    expect(
+      resolveLocationDisplayName('1b36e4d2-1b45-80ce-9d1b-f71e60cb8e53', locationCatalog),
+    ).toBe('Nef Centrale')
   })
 
   it('déduplique alias et canonique dans mergeContextCharacterNames', () => {

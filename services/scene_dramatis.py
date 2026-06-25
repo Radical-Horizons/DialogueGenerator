@@ -252,6 +252,14 @@ def enrich_context_selections_for_scene(
 
     if data.scene_location:
         scene_loc = dict(data.scene_location)
+        location_records: Sequence[Dict[str, Any]] = ()
+        if context_builder and hasattr(context_builder, "locations"):
+            location_records = context_builder.locations or ()
+        if location_records:
+            from services.gdd_relation_resolver import resolve_scene_location_labels
+
+            scene_loc.update(resolve_scene_location_labels(scene_loc, location_records))
+
         lieu = scene_loc.get("lieu")
         sous_lieu = scene_loc.get("sous_lieu")
         location_names: Sequence[str] = ()

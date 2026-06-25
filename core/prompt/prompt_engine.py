@@ -35,7 +35,8 @@ class PromptInput:
         narrative_tags: Tags narratifs pour influencer le ton (optionnel).
         choices_mode: Mode de choix ("free" ou "capped").
         max_choices: Nombre maximum de choix si mode "capped" (optionnel).
-        skills_list: Liste des compétences disponibles (optionnel).
+        skills_list: Liste des identifiants compétence Unity (optionnel).
+        attributes_list: Liste des caractéristiques fondamentales (optionnel).
         traits_list: Liste des traits disponibles (optionnel).
         vocabulary_config: Configuration du vocabulaire Alteir (optionnel).
         include_narrative_guides: Si True, inclut les guides narratifs.
@@ -53,6 +54,7 @@ class PromptInput:
     choices_mode: Literal["free", "capped"] = "free"
     max_choices: Optional[int] = None
     skills_list: Optional[List[str]] = None
+    attributes_list: Optional[List[str]] = None
     traits_list: Optional[List[str]] = None
     vocabulary_config: Optional[Dict[str, str]] = None
     include_narrative_guides: bool = True

@@ -7,6 +7,12 @@ if TYPE_CHECKING:
     from services.element_repository import ElementRepository
     from services.element_resolver import ElementResolver
 
+from services.gdd_relation_resolver import (
+    build_notion_page_id_index,
+    get_gdd_property,
+    resolve_relation_field_to_names,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -32,6 +38,25 @@ class ElementLinker:
         """
         self._element_repository = element_repository
         self._element_resolver = element_resolver
+
+    def _find_location_by_name(self, name: str, locations: List[Dict]) -> Optional[Dict]:
+        """Trouve une fiche lieu par ``Nom`` (normalisation via repository si disponible)."""
+        if self._element_repository is not None:
+            found = self._element_repository.get_location_details_by_name(name)
+            if found is not None:
+                return found
+        for loc in locations:
+            if isinstance(loc, dict) and loc.get("Nom") == name:
+                return loc
+        return None
+
+    def _location_names(self, locations: List[Dict]) -> List[str]:
+        """Liste des ``Nom`` de lieux."""
+        return [
+            str(loc["Nom"])
+            for loc in locations
+            if isinstance(loc, dict) and loc.get("Nom")
+        ]
     
     def get_regions(self, locations: List[Dict]) -> List[str]:
         """Retourne des noms de lieux pour l'index « régions » / catalogue.
@@ -65,29 +90,32 @@ class ElementLinker:
         return sorted(set(names), key=lambda n: str(n).casefold())
     
     def get_sub_locations(self, region_name: str, locations: List[Dict]) -> List[str]:
-        """Récupère les sous-lieux listés dans le champ ``Contient`` d'une fiche lieu.
-        
+        """Récupère les sous-lieux listés dans ``Contient`` (``values`` ou racine).
+
+        Les références Notion (UUID) sont résolues en noms de fiches lieux.
+
         Args:
-            region_name: Nom du lieu (région classique ou toute fiche avec ``Contient``).
+            region_name: Nom du lieu parent.
             locations: Liste des lieux depuis GDDData.
-            
+
         Returns:
-            Noms issus de ``Contient`` (séparés par des virgules), ou liste vide.
+            Noms canoniques des sous-lieux, triés.
         """
         if not locations or not region_name:
             return []
-        region_details = None
-        for loc in locations:
-            if isinstance(loc, dict) and loc.get("Nom") == region_name:
-                region_details = loc
-                break
+        region_details = self._find_location_by_name(region_name, locations)
         if not region_details:
             logger.debug("Lieu introuvable pour sous-lieux: %s", region_name)
             return []
-        sub_locations_str = region_details.get("Contient")
-        if isinstance(sub_locations_str, str) and sub_locations_str.strip():
-            return [name.strip() for name in sub_locations_str.split(",") if name.strip()]
-        return []
+        contient_raw = get_gdd_property(region_details, "Contient")
+        if not contient_raw:
+            return []
+        index = build_notion_page_id_index(locations)
+        return resolve_relation_field_to_names(
+            contient_raw,
+            notion_id_index=index,
+            known_names=self._location_names(locations),
+        )
 
     def get_scene_region_names(self, locations: List[Dict]) -> List[str]:
         """Noms pour le sélecteur « région » de la scène principale.
@@ -114,8 +142,7 @@ class ElementLinker:
         for loc in locations:
             if not isinstance(loc, dict) or not loc.get("Nom"):
                 continue
-            raw = loc.get("Contient")
-            if isinstance(raw, str) and raw.strip():
+            if get_gdd_property(loc, "Contient"):
                 with_contient.append(str(loc["Nom"]))
         if with_contient:
             return sorted(set(with_contient), key=lambda n: str(n).casefold())

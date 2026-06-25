@@ -115,7 +115,14 @@ export default defineConfig({
             }
           });
           
-          proxy.on('proxyRes', (proxyRes, req) => {
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            const contentType = proxyRes.headers['content-type'] ?? ''
+            if (typeof contentType === 'string' && contentType.includes('text/event-stream')) {
+              res.setHeader('Cache-Control', 'no-cache, no-transform')
+              res.setHeader('Connection', 'keep-alive')
+              res.setHeader('X-Accel-Buffering', 'no')
+            }
+
             if (debugProxy) {
               const url = req.url || '';
               const status = proxyRes.statusCode || 0;

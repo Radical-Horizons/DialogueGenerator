@@ -447,75 +447,48 @@ export const useGenerationStore = create<GenerationState>((set) => ({
 
   appendChunk: (chunk, sequence) =>
     set((state) => {
-      // Si pas de séquence, comportement legacy (ajout direct) - pour compatibilité
-      if (sequence === undefined) {
-        const newContent = state.streamingContent + chunk;
-        return { streamingContent: newContent };
+      if (sequence === undefined || sequence === null) {
+        return { streamingContent: state.streamingContent + chunk }
       }
-      
-      // Avec séquence : système de réordonnancement pour gérer les cas de buffering
-      // TCP garantit normalement l'ordre, mais on garde ce système comme sécurité
-      
-      // Détecter le début d'une nouvelle génération : si on reçoit séquence 0 alors que
-      // lastProcessedSequence > 0, c'est qu'une nouvelle génération a commencé
-      // (startGeneration n'a pas été appelé à temps ou il y a un délai)
-      if (sequence === 0 && state.lastProcessedSequence >= 0 && state.streamingContent.length > 0) {
-        // Nouvelle génération détectée : ajouter un séparateur au lieu de réinitialiser
-        // IMPORTANT: Réinitialiser complètement le buffer pour éviter les chunks en retard de l'ancienne génération
-        const separator = '\n\n---\n\n'
-        const newBuffer = new Map<number, string>()
-        newBuffer.set(0, chunk)
-        return {
-          streamingContent: state.streamingContent + separator + chunk,
-          chunkBuffer: newBuffer,
-          lastProcessedSequence: 0,
-        }
-      }
-      
-      // Si on a déjà traité ce chunk dans la détection de nouvelle génération, l'ignorer
-      // (peut arriver si le chunk arrive deux fois dans le flux)
-      if (sequence === 0 && state.lastProcessedSequence === 0 && state.chunkBuffer.has(0)) {
-        // Chunk déjà traité, ignorer
+
+      const expected = state.lastProcessedSequence + 1
+      if (sequence < expected) {
         return state
       }
-      
-      const newBuffer = new Map(state.chunkBuffer)
-      newBuffer.set(sequence, chunk)
-      
-      // Utiliser lastProcessedSequence au lieu de currentLength pour éviter les blocages
-      // Si des chunks arrivent dans le désordre, on peut avoir currentLength < lastProcessedSequence
-      let nextExpected = state.lastProcessedSequence + 1
-      let newContent = state.streamingContent
-      
-      // Trier les séquences disponibles
-      const sortedSequences = Array.from(newBuffer.keys()).sort((a, b) => a - b)
-      
-      // Ajouter tous les chunks consécutifs depuis nextExpected
-      // On continue tant qu'on a des chunks consécutifs disponibles
-      let lastAdded = -1
-      for (const seq of sortedSequences) {
-        if (seq === nextExpected) {
-          newContent += newBuffer.get(seq)!
-          newBuffer.delete(seq)
-          lastAdded = seq
-          nextExpected++
-        } else if (seq < nextExpected) {
-          // Chunk en retard (déjà traité ou doublon) - ignorer et nettoyer
-          newBuffer.delete(seq)
-        } else {
-          // Gap détecté (seq > nextExpected), on s'arrête ici et on attend
-          break
+
+      if (sequence > expected) {
+        const newBuffer = new Map(state.chunkBuffer)
+        newBuffer.set(sequence, chunk)
+        let nextExpected = expected
+        let newContent = state.streamingContent
+        let lastAdded = state.lastProcessedSequence
+
+        const sortedSequences = Array.from(newBuffer.keys()).sort((a, b) => a - b)
+        for (const seq of sortedSequences) {
+          if (seq === nextExpected) {
+            newContent += newBuffer.get(seq)!
+            newBuffer.delete(seq)
+            lastAdded = seq
+            nextExpected++
+          } else if (seq < nextExpected) {
+            newBuffer.delete(seq)
+          } else {
+            break
+          }
+        }
+
+        return {
+          streamingContent: newContent,
+          chunkBuffer: newBuffer,
+          lastProcessedSequence: lastAdded,
         }
       }
-      
-      // Mettre à jour lastProcessedSequence si on a ajouté des chunks
-      const newLastProcessedSequence = lastAdded >= 0 ? lastAdded : state.lastProcessedSequence
-      
+
       return {
-        streamingContent: newContent,
-        chunkBuffer: newBuffer,
-        lastProcessedSequence: newLastProcessedSequence,
-      };
+        streamingContent: state.streamingContent + chunk,
+        ...(state.chunkBuffer.size > 0 ? { chunkBuffer: new Map<number, string>() } : {}),
+        lastProcessedSequence: sequence,
+      }
     }),
 
   setStep: (step) =>

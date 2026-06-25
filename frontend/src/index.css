@@ -162,6 +162,103 @@ button.context-gdd-tab:focus-visible {
   box-shadow: inset 0 0 0 2px #646cff;
 }
 
+.dg-mechanical-trait-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 4.5rem auto;
+  grid-template-rows: auto auto;
+  column-gap: 0.5rem;
+  row-gap: 0.25rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+:root {
+  --dg-mechanical-sublabel-offset: calc(0.6875rem * 1.2 + 0.25rem);
+}
+
+.dg-mechanical-sublabel {
+  display: block;
+  margin: 0 0 0.25rem 0 !important;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.dg-mechanical-section-label {
+  display: block;
+  margin: 0 0 0.25rem 0 !important;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.dg-mechanical-input {
+  width: 100%;
+  height: 2.125rem;
+  padding: 0 0.5rem !important;
+  margin: 0 !important;
+  border-radius: 4px !important;
+  font-size: 0.8125rem !important;
+  line-height: 1.2 !important;
+  box-sizing: border-box;
+}
+
+.dg-mechanical-input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.dg-mechanical-input[type='number']::-webkit-outer-spin-button,
+.dg-mechanical-input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.dg-mechanical-btn {
+  height: 2.125rem;
+  min-height: 2.125rem;
+  padding: 0 0.75rem !important;
+  font-size: 0.8125rem !important;
+  line-height: 1.2 !important;
+  border-radius: 4px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.dg-mechanical-test-grid {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 1fr) minmax(7rem, 1.5fr) minmax(3.5rem, 4.5rem);
+  grid-template-rows: auto auto auto;
+  column-gap: 0.65rem;
+  row-gap: 0.25rem;
+  align-items: center;
+}
+
+.dg-mechanical-test-condition-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.dg-mechanical-condition-input-wrap {
+  max-width: 100%;
+}
+
+.dg-mechanical-delta-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.dg-mechanical-delta-field {
+  min-width: 0;
+}
+
 /* React Flow: sélection multiple type Photoshop (pointillés blancs, sans fond) */
 .react-flow {
   --xy-selection-background-color-default: transparent;

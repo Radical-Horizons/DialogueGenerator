@@ -15,6 +15,9 @@ export const GRAPH_TEST_NODE_WIDTH = 200
  */
 export const GRAPH_SIBLING_GAP_X = 64
 
+/** Pas entre colonnes pour des barres de test frères (largeur barre + marge). */
+export const GRAPH_TEST_NODE_COLUMN_STEP = GRAPH_TEST_NODE_WIDTH + GRAPH_SIBLING_GAP_X
+
 /**
  * Pas entre colonnes pour des enfants de type dialogue (largeur carte + marge).
  */

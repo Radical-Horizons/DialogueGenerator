@@ -76,6 +76,44 @@ export function resolveLocationCanonicalName(name: string, catalog: GddCatalogEn
   return resolveCanonicalName(name, catalog)
 }
 
+const NOTION_UUID_PATTERN =
+  /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i
+
+/** Indique si la chaîne ressemble à un identifiant Notion (UUID). */
+export function looksLikeNotionUuid(value: string): boolean {
+  return NOTION_UUID_PATTERN.test(value.trim())
+}
+
+function normalizeNotionUuid(value: string): string {
+  const compact = value.replace(/-/g, '').toLowerCase()
+  if (compact.length !== 32) {
+    return value.trim().toLowerCase()
+  }
+  return `${compact.slice(0, 8)}-${compact.slice(8, 12)}-${compact.slice(12, 16)}-${compact.slice(16, 20)}-${compact.slice(20)}`
+}
+
+/**
+ * Affiche un nom de lieu lisible : résout les UUID Notion via ``notion_page_id`` du catalogue.
+ */
+export function resolveLocationDisplayName(
+  nameOrId: string,
+  catalog: GddCatalogEntry[],
+): string {
+  const trimmed = nameOrId.trim()
+  if (!trimmed) return nameOrId
+  if (!looksLikeNotionUuid(trimmed)) {
+    return resolveLocationCanonicalName(trimmed, catalog)
+  }
+  const target = normalizeNotionUuid(trimmed)
+  for (const item of catalog) {
+    const pageId = item.data?.notion_page_id
+    if (typeof pageId === 'string' && normalizeNotionUuid(pageId) === target) {
+      return item.name
+    }
+  }
+  return trimmed
+}
+
 /** Fusionne full + excerpt en ordre, dédupliqué par nom canonique. */
 export function mergeContextCharacterNames(
   full: string[],

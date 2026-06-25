@@ -13,6 +13,12 @@ import {
   TEST_HANDLE_TO_CHOICE_FIELD,
   CHOICE_FIELD_TO_HANDLE,
 } from '../utils/testNodeSync'
+import { normalizeTestBars } from '../utils/graphNormalizers'
+import {
+  GRAPH_DIALOGUE_NODE_WIDTH,
+  GRAPH_TEST_NODE_COLUMN_STEP,
+  GRAPH_TEST_NODE_WIDTH,
+} from '../utils/graphNodeLayout'
 
 describe('testNodeSync', () => {
   describe('parseTestNodeId', () => {
@@ -115,7 +121,16 @@ describe('testNodeSync', () => {
   })
 
   describe('syncTestNodeFromChoice', () => {
-    const dialogueNodePosition = { x: 100, y: 200 }
+    const createDialogueNode = (
+      position: { x: number; y: number },
+      overrides: Partial<Node> = {}
+    ): Node => ({
+      id: 'dialogue-1',
+      type: 'dialogueNode',
+      position,
+      data: { id: 'dialogue-1', line: 'Short line' },
+      ...overrides,
+    })
 
     it('should create test node when choice has test and no existing test node', () => {
       const choice: Choice = {
@@ -129,7 +144,7 @@ describe('testNodeSync', () => {
         choice,
         0,
         'dialogue-1',
-        dialogueNodePosition,
+        createDialogueNode({ x: 100, y: 200 }),
         null,
         existingEdges
       )
@@ -163,7 +178,7 @@ describe('testNodeSync', () => {
         choice,
         0,
         'dialogue-1',
-        dialogueNodePosition,
+        createDialogueNode({ x: 100, y: 200 }),
         existingTestNode,
         existingEdges
       )
@@ -171,8 +186,41 @@ describe('testNodeSync', () => {
       expect(result.testNode).not.toBeNull()
       expect(result.testNode?.data.test).toBe('Force+Combat:10')
       expect(result.testNode?.data.failureNode).toBe('node-failure')
-      // Position préservée
-      expect(result.testNode?.position).toEqual({ x: 400, y: 300 })
+      expect(result.testNode?.position.x).toBe(140)
+      expect(result.testNode?.position.y).toBeGreaterThan(200)
+    })
+
+    it('should place a new test bar below a tall parent without overlap', () => {
+      const tallParent = createDialogueNode(
+        { x: 100, y: 100 },
+        {
+          measured: { width: 280, height: 420 },
+          width: 280,
+          height: 420,
+          data: {
+            id: 'dialogue-1',
+            title: 'Parent très long',
+            line: 'Texte long '.repeat(20),
+            choices: [],
+          },
+        } as Partial<Node>
+      )
+      const choice: Choice = {
+        text: 'Investigation',
+        test: 'Investigation:9',
+      }
+
+      const result = syncTestNodeFromChoice(
+        choice,
+        0,
+        'dialogue-1',
+        tallParent,
+        null,
+        []
+      )
+
+      expect(result.testNode).not.toBeNull()
+      expect(result.testNode!.position.y).toBeGreaterThan(tallParent.position.y + 420)
     })
 
     it('should delete test node when choice has no test', () => {
@@ -202,7 +250,7 @@ describe('testNodeSync', () => {
         choice,
         0,
         'dialogue-1',
-        dialogueNodePosition,
+        createDialogueNode({ x: 100, y: 200 }),
         existingTestNode,
         existingEdges
       )
@@ -225,7 +273,7 @@ describe('testNodeSync', () => {
         choice,
         0,
         'dialogue-1',
-        dialogueNodePosition,
+        createDialogueNode({ x: 100, y: 200 }),
         null,
         existingEdges
       )
@@ -258,7 +306,7 @@ describe('testNodeSync', () => {
         choice,
         0,
         'dialogue-1',
-        dialogueNodePosition,
+        createDialogueNode({ x: 100, y: 200 }),
         null,
         existingEdges
       )
@@ -281,7 +329,7 @@ describe('testNodeSync', () => {
         choice,
         0,
         'dialogue-1',
-        dialogueNodePosition,
+        createDialogueNode({ x: 100, y: 200 }),
         null,
         existingEdges
       )
@@ -290,6 +338,63 @@ describe('testNodeSync', () => {
         (e) => e.source === 'dialogue-1' && e.target === 'test-node-dialogue-1-choice-0'
       )
       expect(dialogueToTestEdge?.label).toBe('A'.repeat(30) + '...')
+    })
+
+    it('normalizeTestBars recentre plusieurs barres de test sous le parent', () => {
+      const parent: Node = {
+        id: 'START',
+        type: 'dialogueNode',
+        position: { x: 200, y: 80 },
+        data: {
+          id: 'START',
+          line: 'Choisissez',
+          choices: [
+            { text: 'A', test: 'A:8' },
+            { text: 'B', test: 'B:8' },
+            { text: 'C', test: 'C:8' },
+            { text: 'D', test: 'D:8' },
+            { text: 'E', test: 'E:8' },
+          ],
+        },
+      }
+      const stalePositions = [
+        { x: 340, y: 260 },
+        { x: 604, y: 260 },
+        { x: 868, y: 260 },
+        { x: 1132, y: 260 },
+        { x: 1396, y: 260 },
+      ]
+      const nodes: Node[] = [
+        parent,
+        ...stalePositions.map((position, index) => ({
+          id: `test-node-START-choice-${index}`,
+          type: 'testNode' as const,
+          position,
+          data: { id: `test-node-START-choice-${index}`, test: `${index}:8` },
+        })),
+      ]
+      const edges: Edge[] = stalePositions.map((_, index) => ({
+        id: `e:START:choice:__idx_${index}:test`,
+        source: 'START',
+        target: `test-node-START-choice-${index}`,
+        sourceHandle: `choice:__idx_${index}`,
+      }))
+
+      const { nodes: normalized } = normalizeTestBars(nodes, edges)
+      const testNodes = normalized
+        .filter((node) => node.type === 'testNode')
+        .sort((left, right) => left.position.x - right.position.x)
+
+      expect(testNodes).toHaveLength(5)
+      const parentCenterX = parent.position.x + GRAPH_DIALOGUE_NODE_WIDTH / 2
+      const firstCenter = testNodes[0].position.x + GRAPH_TEST_NODE_WIDTH / 2
+      const lastCenter =
+        testNodes[4].position.x + GRAPH_TEST_NODE_WIDTH / 2
+      const rowCenter = (firstCenter + lastCenter) / 2
+      expect(rowCenter).toBeCloseTo(parentCenterX, 1)
+      expect(testNodes[1].position.x - testNodes[0].position.x).toBe(
+        GRAPH_TEST_NODE_COLUMN_STEP,
+      )
     })
   })
 

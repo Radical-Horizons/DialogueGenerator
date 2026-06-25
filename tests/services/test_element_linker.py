@@ -100,6 +100,39 @@ class TestElementLinker:
             {"Nom": "C"},
         ]
         assert linker.get_scene_sub_location_names("B", locs) == []
+
+    def test_get_sub_locations_from_values_contient_uuids(self, linker, repository):
+        """Contient sous values avec UUID Notion → noms de fiches lieux."""
+        linker._element_repository = repository
+        locs = [
+            {
+                "Nom": "Léviathan pétrifié",
+                "values": {
+                    "Contient": (
+                        "1b36e4d2-1b45-80ce-9d1b-f71e60cb8e53, "
+                        "1b36e4d2-1b45-80d1-a752-c46051c2f742"
+                    ),
+                },
+            },
+            {
+                "Nom": "Nef Centrale",
+                "notion_page_id": "1b36e4d2-1b45-80ce-9d1b-f71e60cb8e53",
+            },
+            {
+                "Nom": "Narthex abyssal",
+                "notion_page_id": "1b36e4d2-1b45-80d1-a752-c46051c2f742",
+            },
+        ]
+        subs = linker.get_sub_locations("Léviathan pétrifié", locs)
+        assert subs == ["Narthex abyssal", "Nef Centrale"]
+
+    def test_get_scene_region_names_values_contient(self, linker):
+        """Parent avec Contient dans values apparaît dans les régions scène."""
+        locs = [
+            {"Nom": "Parent", "values": {"Contient": "1b36e4d2-1b45-80ce-9d1b-f71e60cb8e53"}},
+            {"Nom": "Enfant", "notion_page_id": "1b36e4d2-1b45-80ce-9d1b-f71e60cb8e53"},
+        ]
+        assert linker.get_scene_region_names(locs) == ["Parent"]
     
     def test_get_sub_locations(self, linker, sample_gdd_data):
         """Test de récupération des sous-lieux."""

@@ -484,15 +484,7 @@ export function useDialogueLoader(
     } catch (err) {
       useGraphViewStore.getState().resetFlush()
       const fieldErrorCount = useGraphStore.getState().documentFieldErrors.length
-      if (fieldErrorCount > 0) {
-        toast(
-          fieldErrorCount === 1
-            ? 'Corrigez le champ signalé dans le panneau Détails.'
-            : `Corrigez les ${fieldErrorCount} champs signalés dans le panneau Détails.`,
-          'warning',
-          5000,
-        )
-      } else {
+      if (fieldErrorCount === 0) {
         toast(`Erreur lors de la sauvegarde: ${getErrorMessage(err)}`, 'error')
       }
     } finally {

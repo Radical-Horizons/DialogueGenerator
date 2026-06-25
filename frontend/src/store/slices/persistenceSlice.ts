@@ -438,7 +438,11 @@ export const createPersistenceSlice: StateCreator<
         if (!requiresChoiceIdMigration) {
           try {
             const [docRes, layoutRes] = await Promise.all([
-              documentsAPI.putDocument(documentId, { document: doc, revision: docRev }),
+              documentsAPI.putDocument(documentId, {
+                document: doc,
+                revision: docRev,
+                validationMode: 'export',
+              }),
               documentsAPI.putLayout(documentId, {
                 layout: layoutPayload,
                 revision: layoutRev,
@@ -475,7 +479,7 @@ export const createPersistenceSlice: StateCreator<
                 set({ isSaving: false, lastSaveError: msg, syncStatus: 'error' })
               }
               throw new Error(msg)
-            } else if (status === 400) {
+            } else if (status === 400 || status === 422) {
               applySaveFieldValidationErrors(get, set, docErr)
               if (checkStillActive()) {
                 set({ isSaving: false, syncStatus: 'error' })

@@ -63,13 +63,14 @@ describe('useSSEStreaming', () => {
     })
   })
 
-  it('should not create a second EventSource if already connected', async () => {
+  it('should replace an existing EventSource when connect is called again', async () => {
     const { result } = renderHook(() => useSSEStreaming({}))
     await act(async () => {
       result.current.connect('/stream/1')
       result.current.connect('/stream/2')
     })
-    expect(MockEventSource).toHaveBeenCalledTimes(1)
+    expect(MockEventSource).toHaveBeenCalledTimes(2)
+    expect(mockClose).toHaveBeenCalled()
   })
 
   it('should call setTokensUsed when metadata.tokens is 0', async () => {

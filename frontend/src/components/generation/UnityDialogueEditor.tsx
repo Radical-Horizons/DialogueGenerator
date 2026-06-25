@@ -3,13 +3,15 @@
  * Permet d'éditer speaker, line, choices[].text, choices[].targetNode.
  * Préserve tous les autres champs en lecture seule.
  */
-import { memo, useState, useEffect, useCallback, useMemo, useImperativeHandle, forwardRef, type ReactNode } from 'react'
+import { memo, useState, useEffect, useCallback, useMemo, useImperativeHandle, forwardRef, useRef, type ReactNode } from 'react'
 import * as dialoguesAPI from '../../api/dialogues'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
 import { unityDialogueEditorChrome } from '../../theme/responsiveChrome'
+import { mechanicalFormClass } from '../../theme/fieldTokens'
 import { useToast } from '../shared'
 import { InlineFieldError, fieldErrorBorder } from '../shared/InlineFieldError'
+import { AttributeSkillTestEditor } from '../graph/AttributeSkillTestEditor'
 import { TraitRequirementsEditor } from '../shared/TraitRequirementsEditor'
 import { useDialogueEditionNarrow } from '../unityDialogues/DialogueEditionNarrowContext'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
@@ -21,7 +23,6 @@ import type {
 } from '../../types/api'
 import {
   extractValidationIssuesFromApiError,
-  inlineValidationToastMessage,
   type DocumentFieldError,
 } from '../../utils/documentValidationFieldErrors'
 
@@ -135,11 +136,34 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
     })
   }, [])
 
+  const firstFieldError = fieldErrors[0]
+  const contentRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!firstFieldError) return
+    const root = contentRef.current
+    if (!root) return
+    const el = root.querySelector(
+      `[data-validation-field="${firstFieldError.nodeId}::${firstFieldError.field}"]`,
+    )
+    if (!(el instanceof HTMLElement)) return
+    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    el.querySelector<HTMLElement>('input')?.focus()
+  }, [firstFieldError])
+
+  const fieldErrorByKey = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const error of fieldErrors) {
+      map.set(`${error.nodeId}::${error.field}`, error.message)
+    }
+    return map
+  }, [fieldErrors])
+
   const getFieldError = useCallback(
     (nodeId: string, field: string): string | undefined => {
-      return fieldErrors.find((e) => e.nodeId === nodeId && e.field === field)?.message
+      return fieldErrorByKey.get(`${nodeId}::${field}`)
     },
-    [fieldErrors],
+    [fieldErrorByKey],
   )
 
   const clearFieldError = useCallback((nodeId: string, field: string) => {
@@ -253,14 +277,13 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
       toast(`Dialogue sauvegardé: ${result.filename}`, 'success', 5000)
       onSave?.(result.filename)
     } catch (err) {
-      const { fieldErrors: extracted, unmappedMessages } = extractValidationIssuesFromApiError(
+      const { fieldErrors: extracted } = extractValidationIssuesFromApiError(
         err,
         nodes,
       )
       if (extracted.length > 0) {
         setFieldErrors(extracted)
-        setError(unmappedMessages.length > 0 ? unmappedMessages.join('\n') : null)
-        toast(inlineValidationToastMessage(extracted.length), 'warning', 6000)
+        setError(null)
       } else {
         const errorMessage = getErrorMessage(err)
         setError(errorMessage)
@@ -506,6 +529,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
 
       {/* Contenu scrollable */}
       <div
+        ref={contentRef}
         data-testid="unity-dialogue-editor-content"
         style={{
           flex: '1 1 0%',
@@ -520,7 +544,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
         }}
       >
         {/* Erreurs non mappées à un champ */}
-        {error && (
+        {error && fieldErrors.length === 0 && (
           <div
             style={{
               padding: '0.75rem',
@@ -532,22 +556,6 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
             }}
           >
             {error}
-          </div>
-        )}
-
-        {/* Erreurs UX locales (ID manquant) — une ligne par nœud concerné */}
-        {!isValid && validationErrors.length > 0 && fieldErrors.length === 0 && (
-          <div
-            style={{
-              padding: '0.75rem',
-              marginBottom: '1rem',
-              backgroundColor: theme.state.error.background,
-              color: theme.state.error.color,
-              borderRadius: '6px',
-              border: `1px solid ${theme.border.primary}`,
-            }}
-          >
-            Corrigez les champs signalés ci-dessous avant de sauvegarder.
           </div>
         )}
 
@@ -811,97 +819,75 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                             </div>
                             
                             {/* Test et Condition sur une ligne */}
-                            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                              <div style={{ flex: 1 }}>
-                                <label
-                                  style={{
-                                    display: 'block',
-                                    marginBottom: '0.25rem',
-                                    fontSize: '0.8rem',
-                                    fontWeight: 500,
-                                    color: theme.text.primary,
-                                  }}
+                            <div className={mechanicalFormClass.testConditionRow}>
+                              <div>
+                                <span
+                                  className={mechanicalFormClass.sectionLabel}
+                                  style={{ color: theme.text.primary }}
                                 >
                                   Test d'attribut
-                                </label>
-                                <input
-                                  type="text"
-                                  value={choice.test || ''}
-                                  onChange={(e) =>
+                                </span>
+                                <AttributeSkillTestEditor
+                                  value={choice.test}
+                                  onChange={(next) =>
                                     updateChoice(node.id, choiceIndex, {
-                                      test: e.target.value.trim() || undefined,
+                                      test: next,
                                     })
                                   }
-                                  placeholder="Raison+Diplomatie:8"
-                                  aria-invalid={Boolean(testErr)}
-                                  style={{
-                                    width: '100%',
-                                    padding: '0.5rem',
-                                    boxSizing: 'border-box',
-                                    backgroundColor: theme.input.background,
-                                    border: `1px solid ${fieldErrorBorder(Boolean(testErr), theme.input.border)}`,
-                                    color: theme.input.color,
-                                    borderRadius: '4px',
-                                    fontSize: '0.85rem',
-                                    fontFamily: 'monospace',
-                                  }}
+                                  apiErrorMessage={testErr}
+                                  onClearApiError={() =>
+                                    clearFieldError(node.id, `choices.${choiceIndex}.test`)
+                                  }
+                                  validationFieldKey={`${node.id}::choices.${choiceIndex}.test`}
+                                  autoFocus={
+                                    firstFieldError?.nodeId === node.id &&
+                                    firstFieldError?.field === `choices.${choiceIndex}.test`
+                                  }
                                 />
-                                <InlineFieldError message={testErr} />
                               </div>
-                              <div style={{ flex: 1 }}>
-                                <label
-                                  style={{
-                                    display: 'block',
-                                    marginBottom: '0.25rem',
-                                    fontSize: '0.8rem',
-                                    fontWeight: 500,
-                                    color: theme.text.primary,
-                                  }}
+                              <div>
+                                <span
+                                  className={mechanicalFormClass.sectionLabel}
+                                  style={{ color: theme.text.primary }}
                                 >
                                   Condition
-                                </label>
-                                <input
-                                  type="text"
-                                  value={choice.condition || ''}
-                                  onChange={(e) =>
-                                    updateChoice(node.id, choiceIndex, {
-                                      condition: e.target.value.trim() || undefined,
-                                    })
-                                  }
-                                  placeholder="FLAG_NAME"
-                                  aria-invalid={Boolean(conditionErr)}
-                                  style={{
-                                    width: '100%',
-                                    padding: '0.5rem',
-                                    boxSizing: 'border-box',
-                                    backgroundColor: theme.input.background,
-                                    border: `1px solid ${fieldErrorBorder(Boolean(conditionErr), theme.input.border)}`,
-                                    color: theme.input.color,
-                                    borderRadius: '4px',
-                                    fontSize: '0.85rem',
-                                    fontFamily: 'monospace',
-                                  }}
-                                />
-                                <InlineFieldError message={conditionErr} />
+                                </span>
+                                <div className={mechanicalFormClass.conditionInputWrap}>
+                                  <input
+                                    type="text"
+                                    className={mechanicalFormClass.input}
+                                    value={choice.condition || ''}
+                                    onChange={(e) =>
+                                      updateChoice(node.id, choiceIndex, {
+                                        condition: e.target.value.trim() || undefined,
+                                      })
+                                    }
+                                    placeholder="FLAG_NAME"
+                                    aria-invalid={Boolean(conditionErr)}
+                                    style={{
+                                      backgroundColor: theme.input.background,
+                                      border: `1px solid ${fieldErrorBorder(Boolean(conditionErr), theme.input.border)}`,
+                                      color: theme.input.color,
+                                      fontFamily: 'monospace',
+                                    }}
+                                  />
+                                  <InlineFieldError message={conditionErr} />
+                                </div>
                               </div>
                             </div>
 
                             {/* Modificateurs d'influence et respect */}
-                            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                              <div style={{ flex: 1 }}>
-                                <label
-                                  style={{
-                                    display: 'block',
-                                    marginBottom: '0.25rem',
-                                    fontSize: '0.8rem',
-                                    fontWeight: 500,
-                                    color: theme.text.primary,
-                                  }}
+                            <div className={mechanicalFormClass.deltaRow}>
+                              <div className={mechanicalFormClass.deltaField}>
+                                <span
+                                  className={mechanicalFormClass.sectionLabel}
+                                  style={{ color: theme.text.primary }}
                                 >
                                   Influence
-                                </label>
+                                </span>
                                 <input
                                   type="number"
+                                  className={mechanicalFormClass.input}
                                   value={choice.influenceDelta ?? ''}
                                   onChange={(e) => {
                                     const value = e.target.value === '' ? undefined : parseInt(e.target.value, 10)
@@ -911,33 +897,29 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                   }}
                                   placeholder="+1, -1, 0"
                                   style={{
-                                    width: '100%',
-                                    padding: '0.5rem',
-                                    boxSizing: 'border-box',
                                     backgroundColor: theme.input.background,
                                     border: `1px solid ${theme.input.border}`,
-                                    color: choice.influenceDelta !== undefined && choice.influenceDelta >= 0 ? '#4CAF50' : choice.influenceDelta !== undefined ? '#F44336' : theme.input.color,
-                                    borderRadius: '4px',
-                                    fontSize: '0.85rem',
+                                    color:
+                                      choice.influenceDelta !== undefined && choice.influenceDelta >= 0
+                                        ? '#4CAF50'
+                                        : choice.influenceDelta !== undefined
+                                          ? '#F44336'
+                                          : theme.input.color,
                                     fontFamily: 'monospace',
                                     fontWeight: choice.influenceDelta !== undefined ? 'bold' : 'normal',
                                   }}
                                 />
                               </div>
-                              <div style={{ flex: 1 }}>
-                                <label
-                                  style={{
-                                    display: 'block',
-                                    marginBottom: '0.25rem',
-                                    fontSize: '0.8rem',
-                                    fontWeight: 500,
-                                    color: theme.text.primary,
-                                  }}
+                              <div className={mechanicalFormClass.deltaField}>
+                                <span
+                                  className={mechanicalFormClass.sectionLabel}
+                                  style={{ color: theme.text.primary }}
                                 >
                                   Respect
-                                </label>
+                                </span>
                                 <input
                                   type="number"
+                                  className={mechanicalFormClass.input}
                                   value={choice.respectDelta ?? ''}
                                   onChange={(e) => {
                                     const value = e.target.value === '' ? undefined : parseInt(e.target.value, 10)
@@ -947,14 +929,14 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                   }}
                                   placeholder="+1, -1, 0"
                                   style={{
-                                    width: '100%',
-                                    padding: '0.5rem',
-                                    boxSizing: 'border-box',
                                     backgroundColor: theme.input.background,
                                     border: `1px solid ${theme.input.border}`,
-                                    color: choice.respectDelta !== undefined && choice.respectDelta >= 0 ? '#4CAF50' : choice.respectDelta !== undefined ? '#F44336' : theme.input.color,
-                                    borderRadius: '4px',
-                                    fontSize: '0.85rem',
+                                    color:
+                                      choice.respectDelta !== undefined && choice.respectDelta >= 0
+                                        ? '#4CAF50'
+                                        : choice.respectDelta !== undefined
+                                          ? '#F44336'
+                                          : theme.input.color,
                                     fontFamily: 'monospace',
                                     fontWeight: choice.respectDelta !== undefined ? 'bold' : 'normal',
                                   }}
@@ -964,17 +946,12 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
 
                             {/* Traits requis */}
                             <div>
-                              <label
-                                style={{
-                                  display: 'block',
-                                  marginBottom: '0.25rem',
-                                  fontSize: '0.8rem',
-                                  fontWeight: 500,
-                                  color: theme.text.primary,
-                                }}
+                              <span
+                                className={mechanicalFormClass.sectionLabel}
+                                style={{ color: theme.text.primary, display: 'block', marginBottom: '0.35rem' }}
                               >
                                 Traits requis
-                              </label>
+                              </span>
                               <TraitRequirementsEditor
                                 idPrefix={`unity-${node.id}-${choiceIndex}-trait-requirements`}
                                 value={choice.traitRequirements}

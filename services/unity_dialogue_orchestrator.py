@@ -13,6 +13,7 @@ from services.dialogue_generation_service import DialogueGenerationService
 from services.unity_dialogue_generation_service import UnityDialogueGenerationService
 from core.prompt.prompt_engine import PromptEngine, PromptInput, BuiltPrompt
 from services.skill_catalog_service import SkillCatalogService
+from services.prompt_catalog_loader import load_prompt_catalogs
 from services.trait_catalog_service import TraitCatalogService
 from services.configuration_service import ConfigurationService
 from services.llm_usage_service import LLMUsageService
@@ -194,25 +195,9 @@ class UnityDialogueOrchestrator:
             )
             
             # 2. Charger catalogues (services injectés)
-            skills_list = []
-            try:
-                skills_list = self.skill_service.load_skills()
-            except Exception as e:
-                logger.warning(
-                    f"Erreur lors du chargement des compétences (request_id: {self.request_id}): {e}",
-                    exc_info=True
-                )
-                # Continuer avec une liste vide si le chargement échoue
-            
-            traits_list = []
-            try:
-                traits_list = self.trait_service.get_trait_labels()
-            except Exception as e:
-                logger.warning(
-                    f"Erreur lors du chargement des traits (request_id: {self.request_id}): {e}",
-                    exc_info=True
-                )
-                # Continuer avec une liste vide si le chargement échoue
+            skills_list, attributes_list, traits_list = load_prompt_catalogs(
+                self.skill_service, self.trait_service
+            )
             
             # 3. Construire le contexte GDD (JSON obligatoire, plus de fallback)
             if request_data.previous_dialogue_preview:
@@ -245,6 +230,7 @@ class UnityDialogueOrchestrator:
                 npc_speaker_id=npc_speaker_id,
                 player_character_id=player_character_id,
                 skills_list=skills_list,
+                attributes_list=attributes_list,
                 traits_list=traits_list,
                 context_summary=context_summary,
                 structured_context=structured_context,

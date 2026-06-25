@@ -4,7 +4,8 @@
 import type { Node } from 'reactflow'
 import type { SchemaValidationIssue } from '../types/graph'
 import type { APIError } from '../types/errors'
-import { buildUnityNodeIndexToIdMap } from './unityNodeIndexMap'
+import { parseAttributeSkillTest } from './attributeSkillTest'
+import { buildUnityNodeIndexToIdMap, resolveGraphNodeIdFromUnityPath } from './unityNodeIndexMap'
 
 export interface DocumentFieldError {
   nodeId: string
@@ -26,30 +27,46 @@ const PATH_IN_PARENS = /\((nodes\.[^\s)]+)\)/
 const CHAMP_FIELD = /champ '([^']+)'/
 const LEGACY_TEST_VALUE = /'([^']+)'\s+does not match/
 
+/** Message court sous le champ test (évite le dump backend). */
+export function conciseInlineTestMessage(message: string): string {
+  const lower = message.toLowerCase()
+  if (lower.includes('contient un espace') || lower.includes('espace')) {
+    return 'Pas d\'espace — nom GDD sans espace.'
+  }
+  if (lower.includes('dd') && lower.includes('nombre')) {
+    return 'Le DD doit être un nombre entier.'
+  }
+  if (lower.includes('does not match') || lower.includes('format attendu')) {
+    return 'Vérifiez caractéristique, compétence et DD.'
+  }
+  if (message.length > 72) {
+    return `${message.slice(0, 69)}…`
+  }
+  return message
+}
+
 /** Message lisible pour un champ test (repli si l'API renvoie encore la regex jsonschema). */
 export function humanizeTestFieldMessage(field: string, message: string): string {
   if (field !== 'test' && !field.endsWith('.test')) return message
-  if (!message.includes('does not match')) return message
+  if (!message.includes('does not match') && !message.includes('Format attendu')) {
+    return conciseInlineTestMessage(message)
+  }
 
   const valueMatch = LEGACY_TEST_VALUE.exec(message)
   const value = valueMatch?.[1]?.trim() ?? ''
-  const base =
-    "Format attendu : Attribut+Compétence:DD (ex. Raison+Rhétorique:8). L'attribut et la compétence ne doivent contenir ni espace, ni « : », ni « + »."
 
-  if (!value) return base
+  if (!value) return conciseInlineTestMessage(message)
 
-  const colonIdx = value.indexOf(':')
-  const head = colonIdx >= 0 ? value.slice(0, colonIdx) : value
-  const plusIdx = head.indexOf('+')
-  const attribute = plusIdx >= 0 ? head.slice(0, plusIdx) : head
-  const skill = plusIdx >= 0 ? head.slice(plusIdx + 1) : ''
+  const { attribute, skill } = parseAttributeSkillTest(value)
   const spaced = [attribute, skill].find((part) => part.includes(' '))
 
   if (spaced) {
-    return `${base} Valeur reçue : « ${value} » — « ${spaced} » contient un espace ; utilisez le nom exact de la compétence (sans espace), tel que dans le GDD.`
+    return spaced === skill
+      ? 'Pas d\'espace — nom GDD sans espace.'
+      : 'Pas d\'espace dans la caractéristique.'
   }
 
-  return `${base} Valeur reçue : « ${value} ».`
+  return conciseInlineTestMessage(message)
 }
 
 /** Extrait un champ formulaire depuis un message backend sans path structuré. */
@@ -78,6 +95,7 @@ export function resolveNodeIdFromUnityPath(
   path: string | undefined,
   unityNodes: Array<{ id?: string }>,
   graphNodes?: Node[],
+  unityNodeIndexMap?: Map<number, string>,
 ): string | undefined {
   if (!path?.startsWith('nodes')) return undefined
   const indexMatch = /^nodes\.(\d+)/.exec(path)
@@ -88,7 +106,9 @@ export function resolveNodeIdFromUnityPath(
     return unityNode.id
   }
   if (graphNodes) {
-    return buildUnityNodeIndexToIdMap(graphNodes).get(index)
+    const indexMap = unityNodeIndexMap ?? buildUnityNodeIndexToIdMap(graphNodes)
+    const fromMap = resolveGraphNodeIdFromUnityPath(path, indexMap)
+    if (fromMap) return fromMap
   }
   return undefined
 }
@@ -132,6 +152,7 @@ function rowToFieldError(
   row: ValidationReportRow,
   unityNodes: Array<{ id?: string }>,
   graphNodes?: Node[],
+  unityNodeIndexMap?: Map<number, string>,
 ): DocumentFieldError | null {
   const path = row.path?.trim() || extractJsonPathFromMessage(row.message)
   let field = path ? unityPathToFormField(path) : null
@@ -141,7 +162,7 @@ function rowToFieldError(
   if (!field || !isEditableFormField(field)) return null
   const nodeId =
     row.node_id?.trim() ||
-    resolveNodeIdFromUnityPath(path, unityNodes, graphNodes) ||
+    resolveNodeIdFromUnityPath(path, unityNodes, graphNodes, unityNodeIndexMap) ||
     (unityNodes.length === 1 && typeof unityNodes[0]?.id === 'string'
       ? unityNodes[0].id
       : undefined)
@@ -178,8 +199,9 @@ export function mapValidationRowsToFieldErrors(
   unityNodes: Array<{ id?: string }>,
   graphNodes?: Node[],
 ): DocumentFieldError[] {
+  const unityNodeIndexMap = graphNodes ? buildUnityNodeIndexToIdMap(graphNodes) : undefined
   const mapped = rows
-    .map((row) => rowToFieldError(row, unityNodes, graphNodes))
+    .map((row) => rowToFieldError(row, unityNodes, graphNodes, unityNodeIndexMap))
     .filter((e): e is DocumentFieldError => e !== null)
   return dedupeFieldErrors(mapped)
 }
@@ -235,17 +257,22 @@ export function extractValidationIssuesFromApiError(
   graphNodes?: Node[],
 ): ExtractedValidationIssues {
   const rows = rowsFromApiError(error)
-  const fieldErrors = mapValidationRowsToFieldErrors(rows, unityNodes, graphNodes)
-  const mappedRowKeys = new Set(
-    fieldErrors.map((e) => `${e.nodeId}::${e.message}`),
-  )
-  const unmappedMessages = rows
-    .filter((row) => {
-      const fe = rowToFieldError(row, unityNodes, graphNodes)
-      return fe === null
-    })
-    .map((row) => row.message)
-    .filter((m, i, arr) => arr.indexOf(m) === i)
+  const unityNodeIndexMap = graphNodes ? buildUnityNodeIndexToIdMap(graphNodes) : undefined
+  const mapped: DocumentFieldError[] = []
+  const unmappedMessages: string[] = []
+  const seenUnmapped = new Set<string>()
+  for (const row of rows) {
+    const fieldError = rowToFieldError(row, unityNodes, graphNodes, unityNodeIndexMap)
+    if (fieldError) {
+      mapped.push(fieldError)
+      continue
+    }
+    if (!seenUnmapped.has(row.message)) {
+      seenUnmapped.add(row.message)
+      unmappedMessages.push(row.message)
+    }
+  }
+  const fieldErrors = dedupeFieldErrors(mapped)
 
   if (rows.length === 0 && error && typeof error === 'object' && 'response' in error) {
     const axiosError = error as APIError
@@ -255,7 +282,6 @@ export function extractValidationIssuesFromApiError(
     }
   }
 
-  void mappedRowKeys
   return { fieldErrors, unmappedMessages }
 }
 

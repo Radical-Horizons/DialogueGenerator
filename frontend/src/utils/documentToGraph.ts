@@ -13,10 +13,12 @@ import {
 import { TEST_RESULT_EDGE_CONFIG } from './graphEdgeBuilders'
 import {
   childNodeTopLeftX,
+  childNodeTopLeftY,
   GRAPH_DIALOGUE_NODE_WIDTH,
-  GRAPH_OFFSET_PARENT_TO_CHILD_Y,
+  GRAPH_TEST_NODE_COLUMN_STEP,
   GRAPH_TEST_NODE_WIDTH,
 } from './graphNodeLayout'
+import { getLayoutNodeHeight } from './dagreLayout'
 import { stableChoiceId } from './stableChoiceId'
 
 /** Résout l’identité stable d’un choix (choiceId ou fallback index). */
@@ -117,12 +119,13 @@ export function documentToGraph(
 
     const position = getPosition(nodeId, i, layoutPositions)
 
-    nodes.push({
+    const dialogueNode: Node = {
       id: nodeId,
       type: nodeType,
       position,
       data: { ...unityNode },
-    })
+    }
+    nodes.push(dialogueNode)
 
     const choices = unityNode.choices ?? []
     const testedChoiceIndices = choices
@@ -151,8 +154,12 @@ export function documentToGraph(
                   childWidth: GRAPH_TEST_NODE_WIDTH,
                   siblingIndex: rank >= 0 ? rank : 0,
                   siblingCount: Math.max(testedChoiceIndices.length, 1),
+                  columnStep: GRAPH_TEST_NODE_COLUMN_STEP,
                 }),
-                y: position.y + GRAPH_OFFSET_PARENT_TO_CHILD_Y,
+                y: childNodeTopLeftY({
+                  parentY: position.y,
+                  parentHeight: getLayoutNodeHeight(dialogueNode),
+                }),
               }
         nodes.push({
           id: testNodeId,

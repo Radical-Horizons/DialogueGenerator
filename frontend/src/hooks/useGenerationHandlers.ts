@@ -50,6 +50,7 @@ export interface UseGenerationHandlersOptions {
   ) => string
   tokenCount: number | null
   connectSSE: (streamUrl: string) => void
+  disconnectSSE: () => void
 }
 
 export interface UseGenerationHandlersReturn {
@@ -111,6 +112,7 @@ export function useGenerationHandlers(
     toast,
     tokenCount,
     connectSSE,
+    disconnectSSE,
   } = options
 
   const {
@@ -186,6 +188,7 @@ export function useGenerationHandlers(
         llmModelIdentifier: request.llm_model_identifier ?? undefined,
       })
 
+      disconnectSSE()
       startGeneration(job.job_id)
       connectSSE(job.stream_url)
     } catch (err) {
@@ -246,6 +249,7 @@ export function useGenerationHandlers(
     startGeneration,
     resetStreamingState,
     connectSSE,
+    disconnectSSE,
     setIsLoading,
     setError,
     setMaxContextTokens,

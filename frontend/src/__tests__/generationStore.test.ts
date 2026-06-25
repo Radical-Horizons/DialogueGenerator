@@ -41,6 +41,28 @@ describe('generationStore - Streaming Extensions', () => {
     expect(streamingContent).toBe('Hello World')
   })
 
+  it('should append sequenced chunks in order', () => {
+    const { startGeneration, appendChunk } = useGenerationStore.getState()
+    startGeneration('job-1')
+    appendChunk('{', 0)
+    appendChunk('"title"', 1)
+    appendChunk(':', 2)
+
+    const { streamingContent, lastProcessedSequence } = useGenerationStore.getState()
+    expect(streamingContent).toBe('{"title":')
+    expect(lastProcessedSequence).toBe(2)
+  })
+
+  it('should ignore duplicate sequenced chunks', () => {
+    const { startGeneration, appendChunk } = useGenerationStore.getState()
+    startGeneration('job-1')
+    appendChunk('A', 0)
+    appendChunk('B', 0)
+
+    const { streamingContent } = useGenerationStore.getState()
+    expect(streamingContent).toBe('A')
+  })
+
   it('should update currentStep', () => {
     const { startGeneration, setStep, currentStep: initialStep } = useGenerationStore.getState()
     expect(initialStep).toBe('Prompting')

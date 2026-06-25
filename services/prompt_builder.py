@@ -264,7 +264,7 @@ class PromptBuilder:
             f"- Speaker (répliques `line`) : {input.npc_speaker_id} — interlocuteur de la scène",
             f"- Choix (`choices`) : voix du PJ {input.player_character_id}",
             "- L'Éthérée ne doit jamais apparaître comme speaker ; ses répliques passent par les choices.",
-            "- Tests d'attributs : Format 'AttributeType+SkillId:DD' (ex: 'Raison+Rhétorique:8'). La compétence est obligatoire.",
+            "- Tests d'attributs : Format 'Caractéristique+Compétence:DD' (ex. 'Intelligence+Rhétorique:8'). Utilisez exactement les identifiants listés ci-dessous (sans espace).",
         ]
         gen_parts.extend(DIALOGUE_ORALITY_PROMPT_LINES)
         
@@ -283,14 +283,27 @@ class PromptBuilder:
         
         gen_elem.text = escape_xml_text("\n".join(gen_parts))
         has_content = True
+
+        if input.attributes_list:
+            attrs_elem = ET.SubElement(technical_elem, "available_attributes")
+            attrs_text = ", ".join(input.attributes_list)
+            attrs_content = (
+                f"Caractéristiques disponibles: {attrs_text}\n"
+                "Utilisez exactement ces noms (sans espace) avant le « + » dans les tests."
+            )
+            attrs_elem.text = escape_xml_text(attrs_content)
+            has_content = True
         
         # COMPÉTENCES DISPONIBLES
         if input.skills_list:
             skills_elem = ET.SubElement(technical_elem, "available_skills")
-            skills_text = ", ".join(input.skills_list[:50])
-            if len(input.skills_list) > 50:
-                skills_text += f" (et {len(input.skills_list) - 50} autres compétences)"
-            skills_content = f"Compétences disponibles: {skills_text}\nUtilise ces compétences dans les tests d'attributs (format: 'AttributeType+NomCompétence:DD')."
+            skills_text = ", ".join(input.skills_list[:80])
+            if len(input.skills_list) > 80:
+                skills_text += f" (et {len(input.skills_list) - 80} autres compétences)"
+            skills_content = (
+                f"Compétences disponibles (identifiants sans espace): {skills_text}\n"
+                "Utilisez exactement ces identifiants après le « + » (format: Caractéristique+Compétence:DD)."
+            )
             skills_elem.text = escape_xml_text(skills_content)
             has_content = True
         
@@ -452,8 +465,18 @@ class PromptBuilder:
         if input.scene_location:
             context_elem = ET.Element("context")
             location_elem = ET.SubElement(context_elem, "location")
-            lieu = input.scene_location.get("lieu", "Non spécifié")
-            sous_lieu = input.scene_location.get("sous_lieu")
+            scene_loc = dict(input.scene_location)
+            if self._context_builder is not None:
+                from services.gdd_relation_resolver import resolve_scene_location_labels
+
+                scene_loc.update(
+                    resolve_scene_location_labels(
+                        scene_loc,
+                        self._context_builder.locations,
+                    )
+                )
+            lieu = scene_loc.get("lieu", "Non spécifié")
+            sous_lieu = scene_loc.get("sous_lieu")
             location_text = f"Lieu : {lieu}"
             if sous_lieu:
                 location_text += f"\nSous-Lieu : {sous_lieu}"

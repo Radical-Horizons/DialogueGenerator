@@ -78,31 +78,12 @@ from core.prompt.prompt_engine import PromptEngine, PromptInput
 from utils.xml_utils import extract_text_from_element
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
+from services.prompt_catalog_loader import load_prompt_catalogs
 from services.scene_dramatis import resolve_scene_dramatis
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
-
-
-def _load_prompt_catalogs(
-    skill_service: SkillCatalogService,
-    trait_service: TraitCatalogService,
-) -> tuple[List[str], List[str]]:
-    """Charge les catalogues prompt hors GDD (compétences / traits)."""
-    skills_list: List[str] = []
-    try:
-        skills_list = skill_service.load_skills()
-    except Exception as exc:
-        logger.warning("Erreur lors du chargement des compétences: %s", exc, exc_info=True)
-
-    traits_list: List[str] = []
-    try:
-        traits_list = trait_service.get_trait_labels()
-    except Exception as exc:
-        logger.warning("Erreur lors du chargement des traits: %s", exc, exc_info=True)
-
-    return skills_list, traits_list
 
 
 def _resolve_dramatis(request_data: EstimateTokensRequest) -> "SceneDramatis":
@@ -126,6 +107,7 @@ def _build_prompt_input_without_structured_context(
     *,
     context_text: Optional[str],
     skills_list: List[str],
+    attributes_list: List[str],
     traits_list: List[str],
 ) -> PromptInput:
     """Construit l'input prompt pour les sections non-GDD uniquement."""
@@ -145,6 +127,7 @@ def _build_prompt_input_without_structured_context(
         vocabulary_config=request_data.vocabulary_config,
         include_narrative_guides=request_data.include_narrative_guides,
         skills_list=skills_list,
+        attributes_list=attributes_list,
         traits_list=traits_list,
         in_game_flags=None,
         max_context_tokens=request_data.max_context_tokens,
@@ -161,11 +144,12 @@ def _build_lightweight_prompt_structure(
     context_text: str,
 ) -> tuple[int, PromptStructure]:
     """Construit une structure prompt affichable sans créer le raw XML complet."""
-    skills_list, traits_list = _load_prompt_catalogs(skill_service, trait_service)
+    skills_list, attributes_list, traits_list = load_prompt_catalogs(skill_service, trait_service)
     prompt_input = _build_prompt_input_without_structured_context(
         request_data,
         context_text=context_text,
         skills_list=skills_list,
+        attributes_list=attributes_list,
         traits_list=traits_list,
     )
     builder = getattr(prompt_engine, "_prompt_builder", None)

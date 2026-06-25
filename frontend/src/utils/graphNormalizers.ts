@@ -4,7 +4,7 @@
  */
 import type { Node, Edge } from 'reactflow'
 import type { Choice } from '../schemas/nodeEditorSchema'
-import { syncTestNodeFromChoice } from './testNodeSync'
+import { repositionTestNodesUnderDialogue, syncTestNodeFromChoice } from './testNodeSync'
 
 export const VALID_NODE_TYPES = ['dialogueNode', 'testNode', 'endNode'] as const
 
@@ -88,7 +88,7 @@ export function normalizeTestBars(nodes: Node[], edges: Edge[]): { nodes: Node[]
         choice,
         choiceIndex,
         node.id,
-        node.position,
+        node,
         existingTestBar || null,
         currentEdges,
         normalizedNodes,
@@ -106,6 +106,8 @@ export function normalizeTestBars(nodes: Node[], edges: Edge[]): { nodes: Node[]
         dialogueNodeModified = true
       }
     })
+
+    repositionTestNodesUnderDialogue(node, choices, testNodesToKeep)
 
     if (dialogueNodeModified) {
       nodesToUpdate.set(node.id, {

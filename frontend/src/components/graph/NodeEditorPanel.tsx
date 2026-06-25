@@ -7,7 +7,7 @@
  * stables (node.id, choiceId) évitent un reset du panel après édition. Debounce/throttle inchangés.
  */
 import { memo, useEffect, useState, useCallback, useRef, useMemo } from 'react'
-import { useForm, FormProvider, useFormContext, useFieldArray, type FieldErrors } from 'react-hook-form'
+import { useForm, FormProvider, useFormContext, useFieldArray, Controller, type FieldErrors } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useShallow } from 'zustand/react/shallow'
 import { useGraphStore } from '../../store/graphStore'
@@ -42,9 +42,10 @@ import { stableChoiceEdgeId } from '../../utils/graphEdgeBuilders'
 import { countExpandedBatchNodesForChoices } from '../../utils/graphChoiceLabels'
 import {
   childNodeTopLeftX,
+  childNodeTopLeftY,
   GRAPH_DIALOGUE_NODE_WIDTH,
-  GRAPH_OFFSET_PARENT_TO_CHILD_Y,
 } from '../../utils/graphNodeLayout'
+import { getLayoutNodeHeight } from '../../utils/dagreLayout'
 import {
   mergeNodeFormIntoStoreData,
   mergeDialogueNodeFormIntoStoreData,
@@ -53,6 +54,7 @@ import {
   applyLinearNextNodeFromGraphEdges,
 } from '../../utils/mergeNodeEditorForm'
 import { ChoiceEditor } from './ChoiceEditor'
+import { AttributeSkillTestEditor } from './AttributeSkillTestEditor'
 import { ConditionEditor } from './conditions/ConditionEditor'
 import { ConnectionTargetSelect } from './ConnectionTargetSelect'
 import { useEstimation } from '../../hooks/useEstimation'
@@ -80,6 +82,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     clearDocumentFieldError,
   } = useGraphStore()
   const validationFieldErrors = documentFieldErrors ?? []
+  const firstValidationFieldError = validationFieldErrors[0]
   const clearValidationFieldError = clearDocumentFieldError ?? (() => {})
   const { selections } = useContextStore()
   const toast = useToast()
@@ -106,6 +109,18 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         console.error('Erreur lors du chargement des modèles:', err)
       })
   }, [])
+  
+  useEffect(() => {
+    const first = firstValidationFieldError
+    if (!first || first.nodeId !== selectedNodeId) return
+    const el = document.querySelector(
+      `[data-validation-field="${first.nodeId}::${first.field}"]`,
+    )
+    if (!(el instanceof HTMLElement)) return
+    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    const focusable = el.querySelector<HTMLElement>('input, textarea, select')
+    focusable?.focus()
+  }, [firstValidationFieldError, selectedNodeId])
   
   const nodeType = selectedNode?.type || 'dialogueNode'
 
@@ -438,6 +453,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       }
     }
     const pos = parentAfterSync?.position ?? selectedNode.position
+    const parentNode = parentAfterSync ?? selectedNode
     const position = {
       x: childNodeTopLeftX({
         parentX: pos.x,
@@ -446,7 +462,10 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         siblingIndex: choiceIndex,
         siblingCount: Math.max(choices.length, 1),
       }),
-      y: pos.y + GRAPH_OFFSET_PARENT_TO_CHILD_Y,
+      y: childNodeTopLeftY({
+        parentY: pos.y,
+        parentHeight: getLayoutNodeHeight(parentNode),
+      }),
     }
     const node = createEmptyNode(position)
     addNode(node)
@@ -776,36 +795,33 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             >
               Test d'attribut *
             </label>
-            <input
-              type="text"
-              {...register('test', { required: true })}
-              placeholder="Format: Attribut+Compétence:DD"
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: `1px solid ${(errors as FieldErrors<TestNodeData>).test ? theme.state.error.border : theme.border.primary}`,
-                borderRadius: 4,
-                backgroundColor: theme.background.tertiary,
-                color: theme.text.primary,
-                fontSize: remSize('body'),
-                fontFamily: 'monospace',
-              }}
+            <Controller
+              name="test"
+              control={form.control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <AttributeSkillTestEditor
+                  value={field.value}
+                  onChange={(next) => field.onChange(next ?? '')}
+                  apiErrorMessage={nodeFieldError('test')}
+                  onClearApiError={() => {
+                    if (selectedNodeId) clearValidationFieldError(selectedNodeId, 'test')
+                  }}
+                  validationFieldKey={
+                    selectedNodeId ? `${selectedNodeId}::test` : undefined
+                  }
+                  autoFocus={
+                    firstValidationFieldError?.nodeId === selectedNodeId &&
+                    firstValidationFieldError?.field === 'test'
+                  }
+                />
+              )}
             />
             {(errors as FieldErrors<TestNodeData>).test && (
               <div style={{ marginTop: '0.25rem', fontSize: remSize('caption'), color: theme.state.error.color }}>
                 {(errors as FieldErrors<TestNodeData>).test?.message}
               </div>
             )}
-            <div
-              style={{
-                marginTop: '0.25rem',
-                fontSize: remSize('caption'),
-                color: theme.text.secondary,
-                fontStyle: 'italic',
-              }}
-            >
-              Ex: Raison+Rhétorique:8
-            </div>
           </div>
         )}
         

@@ -186,6 +186,7 @@ describe('graphStore - document SoT load/save', () => {
         expect.objectContaining({
           document: expect.objectContaining({ schemaVersion: '1.1.0', nodes: expect.any(Array) }),
           revision: 1,
+          validationMode: 'export',
         })
       )
       expect(documentsAPI.putLayout).toHaveBeenCalledWith(

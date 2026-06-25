@@ -35,6 +35,24 @@ class RuntimeSourceStatus(BaseModel):
     message: str = Field(..., min_length=1)
 
 
+class SkillCheckCatalogEntrySchema(BaseModel):
+    """Entrée caractéristique ou compétence pour l'éditeur de tests."""
+
+    model_config = {"extra": "forbid"}
+
+    id: str = Field(..., min_length=1)
+    label: str = Field(..., min_length=1)
+
+
+class SkillCheckCatalogResponse(BaseModel):
+    """Catalogue complet pour autocomplétion éditeur + validation."""
+
+    model_config = {"extra": "forbid"}
+
+    attributes: list[SkillCheckCatalogEntrySchema]
+    skills: list[SkillCheckCatalogEntrySchema]
+
+
 class GameSystemsIntegrationCatalogResponse(BaseModel):
     """Catalogue affiché par le panneau d'intégration systèmes."""
 

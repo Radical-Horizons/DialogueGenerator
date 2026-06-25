@@ -51,6 +51,7 @@ from services.dialogue_dramatic_progression import (
     compose_generation_instructions,
 )
 from services.skill_catalog_service import SkillCatalogService
+from services.prompt_catalog_loader import load_prompt_catalogs
 from services.trait_catalog_service import TraitCatalogService
 from services.unity_dialogue_export_service import (
     unity_export_schema_validator,
@@ -166,19 +167,7 @@ def _build_prompt_from_request(
     context_selections_dict = request_data.context_selections.to_service_dict()
     
     # 2. Charger catalogues (skills/traits) pour injection
-    skills_list = []
-    try:
-        skills_list = skill_service.load_skills()
-    except Exception as e:
-        logger.warning(f"Erreur lors du chargement des compétences: {e}", exc_info=True)
-        # Continuer avec une liste vide si le chargement échoue
-    
-    traits_list = []
-    try:
-        traits_list = trait_service.get_trait_labels()
-    except Exception as e:
-        logger.warning(f"Erreur lors du chargement des traits: {e}", exc_info=True)
-        # Continuer avec une liste vide si le chargement échoue
+    skills_list, attributes_list, traits_list = load_prompt_catalogs(skill_service, trait_service)
 
     # 3. Résoudre PJ/PNJ et enrichir le contexte
     context_builder = dialogue_service.context_builder
@@ -242,6 +231,7 @@ def _build_prompt_from_request(
         npc_speaker_id=npc_speaker_id,
         player_character_id=player_character_id,
         skills_list=skills_list,
+        attributes_list=attributes_list,
         traits_list=traits_list,
         context_summary=context_text,
         structured_context=structured_context,
@@ -901,19 +891,9 @@ async def get_raw_json_context(
         )
         
         # Construire le prompt pour obtenir le hash (services injectés)
-        skills_list = []
-        try:
-            skills_list = skill_service.load_skills()
-        except Exception as e:
-            logger.warning(f"Erreur lors du chargement des compétences (request_id: {request_id}): {e}", exc_info=True)
-            # Continuer avec une liste vide si le chargement échoue
-        
-        traits_list = []
-        try:
-            traits_list = trait_service.get_trait_labels()
-        except Exception as e:
-            logger.warning(f"Erreur lors du chargement des traits (request_id: {request_id}): {e}", exc_info=True)
-            # Continuer avec une liste vide si le chargement échoue
+        skills_list, attributes_list, traits_list = load_prompt_catalogs(
+            skill_service, trait_service
+        )
         
         dramatis = resolve_scene_dramatis(
             player_character_id=request_data.player_character_id,
@@ -931,6 +911,7 @@ async def get_raw_json_context(
             npc_speaker_id=npc_speaker_id,
             player_character_id=dramatis.player_character_id,
             skills_list=skills_list,
+            attributes_list=attributes_list,
             traits_list=traits_list,
             context_summary=context_text_for_prompt,
             structured_context=structured_context,

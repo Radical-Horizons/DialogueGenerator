@@ -170,6 +170,7 @@ export function useGenerationOrchestrator(
     toast: options.toast,
     tokenCount: estimation.tokenCount,
     connectSSE: sse.connect,
+    disconnectSSE: sse.disconnect,
   })
 
   // Retourner interface unifiée

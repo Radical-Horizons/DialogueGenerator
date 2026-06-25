@@ -736,7 +736,12 @@ export function GenerationPanel() {
       
       {/* Modal de progression streaming (Story 0.2) */}
       <GenerationProgressModal
-        isOpen={isGenerating}
+        isOpen={
+          isGenerating ||
+          currentStep === 'Complete' ||
+          Boolean(streamingError) ||
+          isInterrupting
+        }
         content={streamingContent}
         currentStep={currentStep}
         isMinimized={isMinimized}
@@ -790,6 +795,7 @@ export function GenerationPanel() {
         }}
         onMinimize={minimize}
         onClose={() => {
+          closeEventSource()
           resetStreamingState()
           setIsLoading(false)
         }}

@@ -3,6 +3,7 @@ import {
   childNodeTopLeftX,
   GRAPH_DIALOGUE_NODE_WIDTH,
   GRAPH_SIBLING_COLUMN_STEP,
+  GRAPH_TEST_NODE_COLUMN_STEP,
   GRAPH_TEST_NODE_WIDTH,
   siblingBranchOffset,
 } from '../utils/graphNodeLayout'
@@ -47,6 +48,24 @@ describe('graphNodeLayout', () => {
     })
     const parentCenter = GRAPH_DIALOGUE_NODE_WIDTH / 2
     expect(x + GRAPH_TEST_NODE_WIDTH / 2).toBeCloseTo(parentCenter, 5)
+  })
+
+  it('centre une rangée de barres de test avec le pas compact', () => {
+    const parentX = 120
+    const parentCenter = parentX + GRAPH_DIALOGUE_NODE_WIDTH / 2
+    const xs = [0, 1, 2, 3, 4].map((siblingIndex) =>
+      childNodeTopLeftX({
+        parentX,
+        parentWidth: GRAPH_DIALOGUE_NODE_WIDTH,
+        childWidth: GRAPH_TEST_NODE_WIDTH,
+        siblingIndex,
+        siblingCount: 5,
+        columnStep: GRAPH_TEST_NODE_COLUMN_STEP,
+      }),
+    )
+    const centers = xs.map((x) => x + GRAPH_TEST_NODE_WIDTH / 2)
+    expect((centers[0] + centers[4]) / 2).toBeCloseTo(parentCenter, 5)
+    expect(xs[1] - xs[0]).toBe(GRAPH_TEST_NODE_COLUMN_STEP)
   })
 
   it('applique un éventail léger pour 3 frères en TB', () => {

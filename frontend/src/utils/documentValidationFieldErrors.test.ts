@@ -83,9 +83,9 @@ describe('documentValidationFieldErrors', () => {
       nodes,
     )
     expect(errors[0].field).toBe('choices.0.test')
-    expect(errors[0].message).toContain('Attribut+Compétence:DD')
-    expect(errors[0].message).toContain('Déplacement silencieux')
+    expect(errors[0].message).toContain('espace')
     expect(errors[0].message).not.toContain('does not match')
+    expect(errors[0].message.length).toBeLessThan(80)
   })
 
   it('extracts structured_errors from API error envelope', () => {
@@ -111,5 +111,34 @@ describe('documentValidationFieldErrors', () => {
     const { fieldErrors } = extractValidationIssuesFromApiError(err, [{ id: 'START' }])
     expect(fieldErrors[0]?.field).toBe('choices.0.test')
     expect(fieldErrors[0]?.message).toContain('Format test')
+  })
+
+  it('extracts validationReport from PUT document 400 envelope', () => {
+    const err = {
+      response: {
+        status: 400,
+        data: {
+          validationReport: [
+            {
+              code: 'schema_pattern_test',
+              message:
+                "Format attendu : Attribut+Compétence:DD — « Création d'artefacts » contient un espace",
+              path: 'nodes.0.choices.0.test',
+            },
+          ],
+          message: 'Validation export échouée',
+        },
+      },
+    }
+    const graphNodes = [
+      { id: 'START', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} },
+    ] as import('reactflow').Node[]
+    const { fieldErrors } = extractValidationIssuesFromApiError(
+      err,
+      [{ id: 'START' }],
+      graphNodes,
+    )
+    expect(fieldErrors[0]?.field).toBe('choices.0.test')
+    expect(fieldErrors[0]?.nodeId).toBe('START')
   })
 })

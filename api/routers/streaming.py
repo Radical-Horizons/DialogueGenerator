@@ -249,9 +249,8 @@ async def stream_generation(job_id: str, orchestrator: UnityDialogueOrchestrator
                 payload = {"type": "chunk", "content": chunk_content}
                 if chunk_sequence is not None:
                     payload["sequence"] = chunk_sequence
-                # Flush immédiat : yield avec format SSE strict
-                # Le yield dans un async generator FastAPI envoie immédiatement
                 yield f'data: {json.dumps(payload, ensure_ascii=False)}\n\n'
+                await asyncio.sleep(0)
             elif event.type == 'step':
                 current_step = event.data.get("step", "unknown")
                 yield f'data: {json.dumps({"type": "step", "step": current_step})}\n\n'

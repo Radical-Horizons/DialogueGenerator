@@ -105,9 +105,19 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
   } = useGenerationStore()
 
   const connect = useCallback((streamUrl: string) => {
-    // Ne pas créer plusieurs EventSource
+    // Fermer toute connexion précédente (2e génération, reconnexion après complete, etc.)
     if (eventSourceRef.current) {
-      return
+      closedByClientRef.current = true
+      if (sseErrorDebounceTimerRef.current !== null) {
+        window.clearTimeout(sseErrorDebounceTimerRef.current)
+        sseErrorDebounceTimerRef.current = null
+      }
+      if (eventSourceRef.current.readyState !== EventSource.CLOSED) {
+        eventSourceRef.current.close()
+      }
+      eventSourceRef.current = null
+      setEventSource(null)
+      setIsConnected(false)
     }
     const es = new EventSource(streamUrl)
     // Désactiver la reconnexion automatique d'EventSource (fonctionnalité de génération multiple désactivée)

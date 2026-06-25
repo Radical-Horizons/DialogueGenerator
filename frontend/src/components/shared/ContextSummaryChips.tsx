@@ -3,6 +3,8 @@
  */
 import { theme } from '../../theme'
 import type { SceneSelection } from '../../types/generation'
+import { useContextStore } from '../../store/contextStore'
+import { resolveLocationDisplayName } from '../../utils/gddEntityNames'
 
 interface ContextSummaryChipsProps {
   sceneSelection: SceneSelection
@@ -17,6 +19,7 @@ export function ContextSummaryChips({
   className,
   style,
 }: ContextSummaryChipsProps) {
+  const locations = useContextStore((state) => state.locations)
   const chips: Array<{ label: string; value: string | null }> = []
 
   if (sceneSelection.characterA) {
@@ -26,10 +29,16 @@ export function ContextSummaryChips({
     chips.push({ label: 'PNJ', value: sceneSelection.characterB })
   }
   if (sceneSelection.sceneRegion) {
-    chips.push({ label: 'Région', value: sceneSelection.sceneRegion })
+    chips.push({
+      label: 'Région',
+      value: resolveLocationDisplayName(sceneSelection.sceneRegion, locations),
+    })
   }
   if (sceneSelection.subLocation) {
-    chips.push({ label: 'Sous-lieu', value: sceneSelection.subLocation })
+    chips.push({
+      label: 'Sous-lieu',
+      value: resolveLocationDisplayName(sceneSelection.subLocation, locations),
+    })
   }
   if (tags.length > 0) {
     tags.forEach((tag) => chips.push({ label: 'Tag', value: tag }))

@@ -13,7 +13,20 @@ const baseFieldStyle: CSSProperties = {
   boxSizing: 'border-box',
 }
 
-/** Label d'un champ modifiable. */
+/** Classes CSS pour formulaires mécaniques compacts (voir index.css). */
+export const mechanicalFormClass = {
+  input: 'dg-mechanical-input',
+  sublabel: 'dg-mechanical-sublabel',
+  sectionLabel: 'dg-mechanical-section-label',
+  btn: 'dg-mechanical-btn',
+  testGrid: 'dg-mechanical-test-grid',
+  testConditionRow: 'dg-mechanical-test-condition-row',
+  conditionInputWrap: 'dg-mechanical-condition-input-wrap',
+  deltaRow: 'dg-mechanical-delta-row',
+  deltaField: 'dg-mechanical-delta-field',
+  traitRow: 'dg-mechanical-trait-row',
+} as const
+
 export function editableFieldLabelStyle(): CSSProperties {
   return {
     display: 'block',

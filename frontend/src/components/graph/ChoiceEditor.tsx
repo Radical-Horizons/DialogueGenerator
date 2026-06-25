@@ -6,6 +6,7 @@ import { useFormContext, Controller } from 'react-hook-form'
 import { theme } from '../../theme'
 import { useGraphStore } from '../../store/graphStore'
 import { InlineFieldError, fieldErrorBorder } from '../shared/InlineFieldError'
+import { AttributeSkillTestEditor } from './AttributeSkillTestEditor'
 import type { DialogueNodeData } from '../../schemas/nodeEditorSchema'
 import { ConnectionTargetSelect } from './ConnectionTargetSelect'
 import { ConditionEditor } from './conditions/ConditionEditor'
@@ -30,6 +31,7 @@ export const ChoiceEditor = memo(function ChoiceEditor({
   const { register, formState: { errors }, control, watch } = useFormContext<DialogueNodeData>()
   const isGenerating = useGraphStore((state) => state.isGenerating)
   const documentFieldErrors = useGraphStore((state) => state.documentFieldErrors ?? [])
+  const firstFieldError = documentFieldErrors[0]
   const clearDocumentFieldError = useGraphStore((state) => state.clearDocumentFieldError ?? (() => {}))
   const choicesErrors = errors.choices?.[choiceIndex]
   const choices = watch('choices') || []
@@ -42,13 +44,17 @@ export const ChoiceEditor = memo(function ChoiceEditor({
     )?.message
 
   const textReg = register(`choices.${choiceIndex}.text` as const, { required: true })
-  const testReg = register(`choices.${choiceIndex}.test` as const)
 
   const testSourceNodeId = useMemo(
     () => `test-node-${dialogueNodeId}-choice-${choiceIndex}`,
     [dialogueNodeId, choiceIndex]
   )
   
+  const testFieldKey = `choices.${choiceIndex}.test`
+  const testApiError = apiFieldError('test')
+  const shouldFocusTest =
+    firstFieldError?.nodeId === dialogueNodeId && firstFieldError?.field === testFieldKey
+
   return (
     <div
       style={{
@@ -197,30 +203,22 @@ export const ChoiceEditor = memo(function ChoiceEditor({
         >
           Test d'attribut
         </label>
-        <input
-          type="text"
-          {...testReg}
-          onChange={(e) => {
-            void testReg.onChange(e)
-            clearDocumentFieldError(dialogueNodeId, `choices.${choiceIndex}.test`)
-          }}
-          placeholder="Format: Attribut+Compétence:DD (ex: Raison+Rhétorique:8)"
-          aria-invalid={Boolean(apiFieldError('test'))}
-          style={{
-            width: '100%',
-            padding: '0.5rem',
-            border: `1px solid ${fieldErrorBorder(Boolean(apiFieldError('test')), theme.border.primary)}`,
-            borderRadius: 4,
-            backgroundColor: theme.background.tertiary,
-            color: theme.text.primary,
-            fontSize: '0.85rem',
-            fontFamily: 'monospace',
-          }}
+        <Controller
+          name={`choices.${choiceIndex}.test` as const}
+          control={control}
+          render={({ field }) => (
+            <AttributeSkillTestEditor
+              value={field.value}
+              onChange={(next) => field.onChange(next ?? '')}
+              apiErrorMessage={testApiError}
+              onClearApiError={() =>
+                clearDocumentFieldError(dialogueNodeId, testFieldKey)
+              }
+              validationFieldKey={`${dialogueNodeId}::${testFieldKey}`}
+              autoFocus={shouldFocusTest}
+            />
+          )}
         />
-        <InlineFieldError message={apiFieldError('test')} />
-        <div style={{ marginTop: '0.25rem', fontSize: '0.75rem', color: theme.text.secondary, fontStyle: 'italic' }}>
-          Format: Attribut+Compétence:DD (ex: Raison+Rhétorique:8)
-        </div>
       </div>
       
       {/* TestTargets (affichés seulement si test présent) - Remplace le champ "Nœud cible" */}

@@ -19,11 +19,12 @@ import {
 } from './graphEdgeBuilders'
 import {
   childNodeTopLeftX,
+  childNodeTopLeftY,
   GRAPH_DIALOGUE_NODE_WIDTH,
-  GRAPH_OFFSET_PARENT_TO_CHILD_Y,
-  GRAPH_SIBLING_COLUMN_STEP,
+  GRAPH_TEST_NODE_COLUMN_STEP,
   GRAPH_TEST_NODE_WIDTH,
 } from './graphNodeLayout'
+import { getLayoutNodeHeight } from './dagreLayout'
 import { pickTestConnectionField } from './mergeNodeEditorForm'
 
 /**
@@ -141,6 +142,51 @@ export function getParentChoiceForTestNode(
 }
 
 /**
+ * Recalcule les positions X/Y de toutes les barres de test sous un dialogue,
+ * centrées sur l'axe du parent (évite le décalage progressif à l'ajout incrémental).
+ */
+export function repositionTestNodesUnderDialogue(
+  dialogueNode: Node,
+  choices: Choice[],
+  testNodesToKeep: Map<string, Node>,
+): void {
+  const testedIndices = choices
+    .map((choice, index) => (choice?.test ? index : -1))
+    .filter((index) => index >= 0)
+  if (testedIndices.length === 0) {
+    return
+  }
+
+  const siblingCount = testedIndices.length
+  const parentHeight = getLayoutNodeHeight(dialogueNode)
+
+  testedIndices.forEach((choiceIndex, rank) => {
+    const testBarId = `test-node-${dialogueNode.id}-choice-${choiceIndex}`
+    const existing = testNodesToKeep.get(testBarId)
+    if (!existing) {
+      return
+    }
+    testNodesToKeep.set(testBarId, {
+      ...existing,
+      position: {
+        x: childNodeTopLeftX({
+          parentX: dialogueNode.position.x,
+          parentWidth: GRAPH_DIALOGUE_NODE_WIDTH,
+          childWidth: GRAPH_TEST_NODE_WIDTH,
+          siblingIndex: rank,
+          siblingCount,
+          columnStep: GRAPH_TEST_NODE_COLUMN_STEP,
+        }),
+        y: childNodeTopLeftY({
+          parentY: dialogueNode.position.y,
+          parentHeight,
+        }),
+      },
+    })
+  })
+}
+
+/**
  * Synchronise le TestNode depuis le choix parent (choice → testNode).
  * 
  * Crée, met à jour ou supprime le TestNode selon la présence du champ `test` dans le choix.
@@ -148,7 +194,7 @@ export function getParentChoiceForTestNode(
  * @param choice - Choix parent (Source of Truth)
  * @param choiceIndex - Index du choix dans le DialogueNode
  * @param dialogueNodeId - ID du DialogueNode parent
- * @param dialogueNodePosition - Position du DialogueNode (pour positionner le TestNode)
+ * @param dialogueNode - DialogueNode parent (position + hauteur pour placement sans chevauchement)
  * @param existingTestNode - TestNode existant (null si à créer)
  * @param existingEdges - Liste des edges existants
  * @param nodes - Liste de tous les nodes (pour vérifier existence des nœuds cibles, optionnel)
@@ -159,7 +205,7 @@ export function syncTestNodeFromChoice(
   choice: Choice,
   choiceIndex: number,
   dialogueNodeId: string,
-  dialogueNodePosition: { x: number; y: number },
+  dialogueNode: Node,
   existingTestNode: Node | null,
   existingEdges: Edge[],
   nodes: Node[] = [],
@@ -187,6 +233,7 @@ export function syncTestNodeFromChoice(
   const siblingCount = testedIndices.length > 0 ? testedIndices.length : 1
   const rank = testedIndices.length > 0 ? testedIndices.indexOf(choiceIndex) : 0
   const siblingIndex = rank >= 0 ? rank : 0
+  const dialogueNodePosition = dialogueNode.position
   const defaultNewPosition = {
     x: childNodeTopLeftX({
       parentX: dialogueNodePosition.x,
@@ -194,11 +241,14 @@ export function syncTestNodeFromChoice(
       childWidth: GRAPH_TEST_NODE_WIDTH,
       siblingIndex,
       siblingCount,
-      columnStep: GRAPH_SIBLING_COLUMN_STEP,
+      columnStep: GRAPH_TEST_NODE_COLUMN_STEP,
     }),
-    y: dialogueNodePosition.y + GRAPH_OFFSET_PARENT_TO_CHILD_Y,
+    y: childNodeTopLeftY({
+      parentY: dialogueNodePosition.y,
+      parentHeight: getLayoutNodeHeight(dialogueNode),
+    }),
   }
-  const testNodePosition = existingTestNode?.position || defaultNewPosition
+  const testNodePosition = defaultNewPosition
 
   const testNode: Node = {
     id: testNodeId,

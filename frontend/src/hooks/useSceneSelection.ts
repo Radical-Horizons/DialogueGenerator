@@ -7,7 +7,7 @@ import type { SceneSelection } from '../types/generation'
 import { useContextStore } from '../store/contextStore'
 import { useGenerationStore } from '../store/generationStore'
 import { suggestionRefreshAfterSceneChange } from '../utils/contextSuggestionSync'
-import { mergeContextCharacterNames } from '../utils/gddEntityNames'
+import { mergeContextCharacterNames, looksLikeNotionUuid, resolveLocationDisplayName } from '../utils/gddEntityNames'
 import {
   DEFAULT_PLAYER_CHARACTER,
   isValidNpc,
@@ -192,6 +192,39 @@ export function useSceneSelection() {
       setSelection((prev) => ({ ...prev, subLocation: null }))
     }
   }, [selection.sceneRegion, loadSubLocations])
+
+  // Drafts / anciennes sélections : traduire UUID Notion → nom affiché et stocké.
+  useEffect(() => {
+    const updates: Partial<SceneSelection> = {}
+
+    if (selection.sceneRegion && looksLikeNotionUuid(selection.sceneRegion)) {
+      const resolved = resolveLocationDisplayName(selection.sceneRegion, locations)
+      if (resolved !== selection.sceneRegion) {
+        updates.sceneRegion = resolved
+      }
+    }
+
+    if (selection.subLocation && looksLikeNotionUuid(selection.subLocation)) {
+      const resolved = resolveLocationDisplayName(selection.subLocation, locations)
+      if (
+        resolved !== selection.subLocation &&
+        (data.subLocations.length === 0 || data.subLocations.includes(resolved))
+      ) {
+        updates.subLocation = resolved
+      }
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return
+    }
+
+    setSelection((prev) => ({ ...prev, ...updates }))
+  }, [
+    selection.sceneRegion,
+    selection.subLocation,
+    locations,
+    data.subLocations,
+  ])
 
   // Synchroniser l'état local avec le store au montage initial et quand le store change
   // Cela permet de restaurer les valeurs sauvegardées depuis le draft
