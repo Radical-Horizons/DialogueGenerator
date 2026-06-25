@@ -5,6 +5,7 @@ import { memo, useMemo } from 'react'
 import { useFormContext, Controller } from 'react-hook-form'
 import { theme } from '../../theme'
 import { useGraphStore } from '../../store/graphStore'
+import { InlineFieldError, fieldErrorBorder } from '../shared/InlineFieldError'
 import type { DialogueNodeData } from '../../schemas/nodeEditorSchema'
 import { ConnectionTargetSelect } from './ConnectionTargetSelect'
 import { ConditionEditor } from './conditions/ConditionEditor'
@@ -28,10 +29,20 @@ export const ChoiceEditor = memo(function ChoiceEditor({
 }: ChoiceEditorProps) {
   const { register, formState: { errors }, control, watch } = useFormContext<DialogueNodeData>()
   const isGenerating = useGraphStore((state) => state.isGenerating)
+  const documentFieldErrors = useGraphStore((state) => state.documentFieldErrors ?? [])
+  const clearDocumentFieldError = useGraphStore((state) => state.clearDocumentFieldError ?? (() => {}))
   const choicesErrors = errors.choices?.[choiceIndex]
   const choices = watch('choices') || []
   const currentChoice = choices[choiceIndex]
   const isConnected = currentChoice?.targetNode && currentChoice.targetNode !== 'END'
+
+  const apiFieldError = (subfield: string): string | undefined =>
+    documentFieldErrors.find(
+      (e) => e.nodeId === dialogueNodeId && e.field === `choices.${choiceIndex}.${subfield}`,
+    )?.message
+
+  const textReg = register(`choices.${choiceIndex}.text` as const, { required: true })
+  const testReg = register(`choices.${choiceIndex}.test` as const)
 
   const testSourceNodeId = useMemo(
     () => `test-node-${dialogueNodeId}-choice-${choiceIndex}`,
@@ -130,13 +141,21 @@ export const ChoiceEditor = memo(function ChoiceEditor({
           Texte du choix *
         </label>
         <textarea
-          {...register(`choices.${choiceIndex}.text` as const, { required: true })}
+          {...textReg}
+          onChange={(e) => {
+            void textReg.onChange(e)
+            clearDocumentFieldError(dialogueNodeId, `choices.${choiceIndex}.text`)
+          }}
           placeholder="Texte du choix..."
           rows={3}
+          aria-invalid={Boolean(choicesErrors?.text || apiFieldError('text'))}
           style={{
             width: '100%',
             padding: '0.5rem',
-            border: `1px solid ${choicesErrors?.text ? theme.state.error.border : theme.border.primary}`,
+            border: `1px solid ${fieldErrorBorder(
+              Boolean(choicesErrors?.text || apiFieldError('text')),
+              theme.border.primary,
+            )}`,
             borderRadius: 4,
             backgroundColor: theme.background.tertiary,
             color: theme.text.primary,
@@ -150,6 +169,7 @@ export const ChoiceEditor = memo(function ChoiceEditor({
             {choicesErrors.text.message}
           </div>
         )}
+        <InlineFieldError message={apiFieldError('text')} />
       </div>
       
       {/* Nœud cible (affiché seulement si pas de test) */}
@@ -179,12 +199,17 @@ export const ChoiceEditor = memo(function ChoiceEditor({
         </label>
         <input
           type="text"
-          {...register(`choices.${choiceIndex}.test` as const)}
+          {...testReg}
+          onChange={(e) => {
+            void testReg.onChange(e)
+            clearDocumentFieldError(dialogueNodeId, `choices.${choiceIndex}.test`)
+          }}
           placeholder="Format: Attribut+Compétence:DD (ex: Raison+Rhétorique:8)"
+          aria-invalid={Boolean(apiFieldError('test'))}
           style={{
             width: '100%',
             padding: '0.5rem',
-            border: `1px solid ${theme.border.primary}`,
+            border: `1px solid ${fieldErrorBorder(Boolean(apiFieldError('test')), theme.border.primary)}`,
             borderRadius: 4,
             backgroundColor: theme.background.tertiary,
             color: theme.text.primary,
@@ -192,6 +217,7 @@ export const ChoiceEditor = memo(function ChoiceEditor({
             fontFamily: 'monospace',
           }}
         />
+        <InlineFieldError message={apiFieldError('test')} />
         <div style={{ marginTop: '0.25rem', fontSize: '0.75rem', color: theme.text.secondary, fontStyle: 'italic' }}>
           Format: Attribut+Compétence:DD (ex: Raison+Rhétorique:8)
         </div>

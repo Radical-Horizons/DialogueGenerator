@@ -66,7 +66,8 @@ DIALOGUE_GENERATION_GLOBAL_CONSTRAINTS = (
     "- Interdit : acquiescements vides (« Très bien », « Vous l'avez demandé ») en ouverture.\n"
     "- `choices.text` : « réplique PJ » ou *[geste]* ; pas synopsis d'intention.\n"
     "- Flags / état durable → `consequences` en complément si besoin.\n"
-    "- Ne pas ajouter d'attribut test sur les choix ; traitRequirements autorisés.\n"
+    "- `choices.test` autorisé avec parcimonie quand le choix comporte risque, incertitude, "
+    "pression sociale ou effort notable (format Attribut+Compétence:DD) ; éviter d'en mettre partout.\n"
     "- 1 à 4 phrases (didascalie + réplique comptées ensemble) ; même tu/vous que le START.\n"
     "- Ne pas répéter formulations déjà dans l'historique.\n"
 )

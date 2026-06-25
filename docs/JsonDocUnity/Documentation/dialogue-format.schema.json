@@ -396,9 +396,20 @@
         },
         "allOf": [
           {
-            "if": { "properties": { "cutsceneMode": { "const": true } } },
-            "then": { "properties": { "choices": { "maxItems": 4 } } },
-            "else": true
+            "if": {
+              "type": "object",
+              "required": ["cutsceneMode"],
+              "properties": { "cutsceneMode": { "const": true } }
+            },
+            "then": { "properties": { "choices": { "maxItems": 4 } } }
+          },
+          {
+            "if": {
+              "type": "object",
+              "properties": { "choices": { "type": "array", "minItems": 1 } },
+              "required": ["choices"]
+            },
+            "then": { "properties": { "choices": { "maxItems": 8 } } }
           }
         ]
       }

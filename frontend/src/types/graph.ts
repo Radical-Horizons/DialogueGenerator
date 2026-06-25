@@ -82,6 +82,7 @@ export interface GenerateNodeRequest {
   llm_model_identifier?: string
   target_choice_index?: number | null
   generate_all_choices?: boolean
+  choices_mode?: 'free' | 'capped'
   dialogue_id?: string
   dialogue_nodes?: Array<{
     id: string

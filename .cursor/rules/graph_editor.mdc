@@ -3,6 +3,8 @@ description: Règles spécifiques pour l'éditeur de graphe (GraphEditor/GraphCa
 globs:
   - "frontend/src/components/graph/**"
   - "frontend/src/utils/mergeNodeEditorForm.ts"
+  - "frontend/src/utils/documentValidationFieldErrors.ts"
+  - "frontend/src/components/shared/InlineFieldError.tsx"
   - "frontend/src/store/graphStore.ts"
   - "frontend/src/store/slices/*Slice.ts"
   - "frontend/src/store/graphViewStore.ts"
@@ -17,7 +19,13 @@ globs:
 alwaysApply: false
 ---
 
-- **Invariant éditeur de nœud** : au changement de sélection dans `NodeEditorPanel`, flush le formulaire avec **`mergeNodeFormIntoStoreData()`** / **`mergeDialogueNodeFormIntoStoreData()`** (`frontend/src/utils/mergeNodeEditorForm.ts`), pas un spread `{ ...nodeData, ...formValues }` — sinon `choices[i].targetNode` (rempli par `connectNodes` / `edgeSlice`) peut être écrasé. Détails du flux dans `AGENTS.md` (Learned Workspace Facts).
+- **Invariant éditeur de nœud** : au changement de sélection dans `NodeEditorPanel`, flush le formulaire avec **`mergeNodeFormIntoStoreData()`** / **`mergeDialogueNodeFormIntoStoreData()`** (`frontend/src/utils/mergeNodeEditorForm.ts`), pas un spread `{ ...nodeData, ...formValues }` — sinon `choices[i].targetNode` (rempli par `connectNodes` / `edgeSlice`) peut être écrasé, et `choice.test` peut être effacé si le champ formulaire est vide alors que le store l'a encore. Détails du flux dans `AGENTS.md` (Learned Workspace Facts).
+
+- **Validation inline à la sauvegarde** :
+  - Échec PUT/save → `persistenceSlice.applySaveFieldValidationErrors` remplit `documentFieldErrors` (`uiSlice`) depuis `structured_errors` API.
+  - Affichage : `InlineFieldError` + `fieldErrorBorder` sous le champ (`NodeEditorPanel`, `ChoiceEditor`) ; section liste → champ virtuel `choices`.
+  - Premier nœud en erreur : auto-sélection + `graphViewStore.focusNode`. Toast = rappel court, pas le dump JSON.
+  - Correction utilisateur → `clearDocumentFieldError(nodeId, field)` sur le champ édité. Mapper : `documentValidationFieldErrors.ts`. Règle API : `.cursor/rules/api_validation_errors.mdc`.
 
 - **Architecture contrôlée React Flow (ADR-007)** :
   - `GraphCanvas` reste en **mode controlled** : `nodes` / `edges` proviennent exclusivement de `useGraphStore`, jamais de `useState` local.

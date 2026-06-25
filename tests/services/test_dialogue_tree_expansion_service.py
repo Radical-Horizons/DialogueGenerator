@@ -9,6 +9,7 @@ import pytest
 from api.schemas.dialogue import ContextSelection, GenerateUnityDialogueResponse
 from services.dialogue_tree_expansion_service import (
     DialogueTreeExpansionService,
+    TreeExpansionError,
     _apply_connections,
     estimate_tree_llm_calls,
 )
@@ -152,8 +153,58 @@ async def test_expand_depth_2_choices_2() -> None:
     assert result.levels_expanded == 2
     assert result.llm_calls >= 5
     assert result.document["schemaVersion"] == "1.2.0"
+    assert result.expansion_status == "complete"
     start = next(n for n in result.document["nodes"] if n["id"] == "START")
     assert start["choices"][0]["targetNode"] != "END"
     for node in result.document["nodes"]:
         for choice in node.get("choices") or []:
             assert choice.get("choiceId"), f"choiceId manquant sur {node.get('id')}"
+
+
+@pytest.mark.asyncio
+async def test_expand_fail_fast_on_parent_error() -> None:
+    """Sans allow_partial, un échec parent lève TreeExpansionError."""
+    unity_orchestrator = MagicMock()
+    start_json = json.dumps(
+        [
+            {
+                "id": "START",
+                "line": "Bonjour",
+                "choices": [{"text": "Choix A", "targetNode": "END"}],
+            }
+        ]
+    )
+    unity_orchestrator.generate = AsyncMock(
+        return_value=GenerateUnityDialogueResponse(
+            json_content=start_json,
+            title="Test",
+            raw_prompt="prompt",
+            prompt_hash="hash",
+            estimated_tokens=100,
+        )
+    )
+    unity_orchestrator.dialogue_service.context_builder.get_characters_names.return_value = [
+        "Uresaïr"
+    ]
+
+    graph_orchestrator = MagicMock()
+
+    async def failing_generate(**kwargs: object) -> GenerationResult:
+        raise ValueError("validation simulée")
+
+    graph_orchestrator.generate = failing_generate
+
+    service = DialogueTreeExpansionService(graph_orchestrator=graph_orchestrator)
+    context = ContextSelection(characters_full=["Uresaïr"])
+
+    with pytest.raises(TreeExpansionError, match="START"):
+        await service.expand(
+            unity_orchestrator=unity_orchestrator,
+            llm_client=MagicMock(),
+            user_instructions="Scène de test",
+            context_selections=context,
+            max_depth=1,
+            max_choices=1,
+            llm_model_identifier="gpt-5-mini",
+            allow_partial=False,
+        )

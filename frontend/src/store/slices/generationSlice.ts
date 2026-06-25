@@ -187,6 +187,10 @@ export const createGenerationSlice: StateCreator<
           ? options.target_choice_index
           : null
       const generateAllChoices = options.generate_all_choices === true
+      const choicesMode =
+        options.choices_mode === 'free' || options.choices_mode === 'capped'
+          ? options.choices_mode
+          : undefined
       const onBatchProgress =
         typeof options.onBatchProgress === 'function'
           ? (options.onBatchProgress as (current: number, total: number) => void)
@@ -210,6 +214,7 @@ export const createGenerationSlice: StateCreator<
           llm_model_identifier: llmModelIdentifier,
           target_choice_index: targetChoiceIndex,
           generate_all_choices: generateAllChoices,
+          choices_mode: choicesMode,
           dialogue_id: dialogueIdForCosts,
           dialogue_nodes: dialogueNodesForApi,
         },

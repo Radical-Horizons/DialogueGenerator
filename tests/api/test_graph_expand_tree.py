@@ -112,14 +112,26 @@ async def test_expand_tree_depth_1_with_mock_service(
             document={
                 "schemaVersion": "1.2.0",
                 "nodes": [
-                    {"id": "START", "line": "Hi", "choices": [{"text": "A", "targetNode": "N1"}]},
-                    {"id": "N1", "line": "Bye"},
+                    {
+                        "id": "START",
+                        "line": "Hi",
+                        "choices": [
+                            {
+                                "text": "A",
+                                "targetNode": "node-mockchild01",
+                                "choiceId": "START-choice-0",
+                            }
+                        ],
+                    },
+                    {"id": "node-mockchild01", "line": "Bye"},
                 ],
             },
             node_count=2,
             llm_calls=3,
             levels_expanded=1,
             failed_parents=[],
+            failed_parent_details=[],
+            expansion_status="complete",
             title="Test expand",
         )
     )
@@ -140,4 +152,51 @@ async def test_expand_tree_depth_1_with_mock_service(
     data = ExpandTreeResponse.model_validate(response.json())
     assert data.node_count == 2
     assert data.levels_expanded == 1
+    assert data.expansion_status == "complete"
     mock_expansion.expand.assert_awaited_once()
+
+
+def test_expand_tree_invalid_document_returns_422(
+    mock_config_service: MagicMock,
+    sample_body: dict,
+) -> None:
+    """Document invalide après expansion → 422 avec erreurs schéma."""
+    mock_expansion = MagicMock()
+    mock_expansion.expand = AsyncMock(
+        return_value=TreeExpansionResult(
+            document={
+                "schemaVersion": "1.2.0",
+                "nodes": [
+                    {
+                        "id": "START",
+                        "line": "Hi",
+                        "choices": [
+                            {
+                                "text": "A",
+                                "targetNode": "MISSING_NODE",
+                                "choiceId": "START-choice-0",
+                            }
+                        ],
+                    },
+                ],
+            },
+            node_count=1,
+            llm_calls=1,
+            levels_expanded=0,
+            title="Invalid",
+        )
+    )
+    mock_unity = MagicMock(spec=UnityDialogueOrchestrator)
+
+    app.dependency_overrides[get_config_service] = lambda: mock_config_service
+    app.dependency_overrides[get_dialogue_tree_expansion_service] = lambda: mock_expansion
+    app.dependency_overrides[get_unity_dialogue_orchestrator] = lambda: mock_unity
+
+    with patch("api.routers.graph_expansion.create_llm_client_for_router") as mock_llm_factory:
+        mock_llm_factory.return_value = MagicMock()
+        client = TestClient(app)
+        response = client.post("/api/v1/unity-dialogues/graph/expand-tree", json=sample_body)
+
+    app.dependency_overrides.clear()
+
+    assert response.status_code == 422

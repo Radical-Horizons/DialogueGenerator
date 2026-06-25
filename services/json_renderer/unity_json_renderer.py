@@ -174,8 +174,9 @@ class UnityJsonRenderer:
                     )
             
             # Valider les références dans choices[]
-            if "choices" in node:
-                self._validate_choice_references(node_id, node["choices"], valid_ids, errors)
+            choices = node.get("choices")
+            if choices is not None:
+                self._validate_choice_references(node_id, choices, valid_ids, errors)
         
         return (len(errors) == 0, errors)
     

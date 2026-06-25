@@ -5,6 +5,7 @@
 import type { Node, Edge } from 'reactflow'
 import type { SaveGraphResponse, ValidationErrorDetail } from '../../types/graph'
 import type { DialogueFlagBinding } from '../../types/dialogueFlags'
+import type { DocumentFieldError } from '../../utils/documentValidationFieldErrors'
 
 /** Story 2.14 FR35: snapshot du graphe pour undo/redo (incl. SoT document + layout). */
 export interface GraphSnapshot {
@@ -59,6 +60,8 @@ export interface GraphState {
   // État pending save (auto-save vers backend, pas de draft local)
   hasUnsavedChanges: boolean
   lastSaveError: string | null
+  /** Erreurs validation document mappées sur champs éditables (panneau Détails). */
+  documentFieldErrors: DocumentFieldError[]
   lastSavedAt: number | null
 
   // ADR-006: seq + journal + statut sync
@@ -243,6 +246,10 @@ export interface GraphState {
   markDirty: () => void
 
   setShowDeleteNodeConfirm: (show: boolean) => void
+
+  setDocumentFieldErrors: (errors: DocumentFieldError[]) => void
+  clearDocumentFieldError: (nodeId: string, field: string) => void
+  clearDocumentFieldErrors: () => void
 }
 
 export const initialState = {
@@ -273,6 +280,7 @@ export const initialState = {
   })(),
   hasUnsavedChanges: false,
   lastSaveError: null as string | null,
+  documentFieldErrors: [] as DocumentFieldError[],
   lastSavedAt: null as number | null,
   showDeleteNodeConfirm: false,
   clientSeq: 1,

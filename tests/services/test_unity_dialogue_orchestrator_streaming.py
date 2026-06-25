@@ -192,6 +192,9 @@ async def test_orchestrator_uses_native_streaming_when_available(orchestrator, s
         with patch('services.unity_dialogue_orchestrator.UnityDialogueGenerationService') as mock_unity_service_class:
             mock_unity_service = Mock()
             mock_unity_service_class.return_value = mock_unity_service
+            mock_unity_service.normalize_generation_response.side_effect = (
+                lambda response, max_choices=None: response
+            )
             mock_unity_service.enrich_with_ids.return_value = [{"id": "START", "line": "Test"}]
             
             # Mock renderer
@@ -352,6 +355,9 @@ async def test_orchestrator_streaming_with_function_call_chunks(orchestrator, sa
         with patch('services.unity_dialogue_orchestrator.UnityDialogueGenerationService') as mock_unity_service_class:
             mock_unity_service = Mock()
             mock_unity_service_class.return_value = mock_unity_service
+            mock_unity_service.normalize_generation_response.side_effect = (
+                lambda response, max_choices=None: response
+            )
             mock_unity_service.enrich_with_ids.return_value = [{"id": "START", "line": "Test"}]
             
             # Mock renderer
@@ -430,6 +436,9 @@ async def test_orchestrator_streaming_cancellation(orchestrator, sample_request_
         with patch('services.unity_dialogue_orchestrator.UnityDialogueGenerationService') as mock_unity_service_class:
             mock_unity_service = Mock()
             mock_unity_service_class.return_value = mock_unity_service
+            mock_unity_service.normalize_generation_response.side_effect = (
+                lambda response, max_choices=None: response
+            )
             mock_unity_service.enrich_with_ids.return_value = [{"id": "START"}]
             
             # Mock renderer

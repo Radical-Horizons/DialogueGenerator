@@ -136,6 +136,9 @@ async def test_orchestrator_generate_with_events_sequence(orchestrator, sample_r
             mock_generation_response = Mock()
             mock_generation_response.title = "Test Dialogue"
             mock_unity_service.generate_dialogue_node = AsyncMock(return_value=mock_generation_response)
+            mock_unity_service.normalize_generation_response = (
+                lambda response, max_choices=None: response
+            )
             
             # Mock enrich_with_ids
             mock_enriched_nodes = [{"id": "START", "text": "Test"}]

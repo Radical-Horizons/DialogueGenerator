@@ -44,6 +44,9 @@ export type UISlice = Pick<
   | 'updateMetadata'
   | 'resetGraph'
   | 'setShowDeleteNodeConfirm'
+  | 'setDocumentFieldErrors'
+  | 'clearDocumentFieldError'
+  | 'clearDocumentFieldErrors'
 >
 
 export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, get) => ({
@@ -332,5 +335,21 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
 
   setShowDeleteNodeConfirm: (show) => {
     set({ showDeleteNodeConfirm: show })
+  },
+
+  setDocumentFieldErrors: (errors) => {
+    set({ documentFieldErrors: errors })
+  },
+
+  clearDocumentFieldError: (nodeId, field) => {
+    set({
+      documentFieldErrors: get().documentFieldErrors.filter(
+        (e) => !(e.nodeId === nodeId && e.field === field),
+      ),
+    })
+  },
+
+  clearDocumentFieldErrors: () => {
+    set({ documentFieldErrors: [] })
   },
 })

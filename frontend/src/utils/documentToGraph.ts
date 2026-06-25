@@ -17,10 +17,26 @@ import {
   GRAPH_OFFSET_PARENT_TO_CHILD_Y,
   GRAPH_TEST_NODE_WIDTH,
 } from './graphNodeLayout'
+import { stableChoiceId } from './stableChoiceId'
 
 /** Résout l’identité stable d’un choix (choiceId ou fallback index). */
 function choiceStableId(choice: UnityChoice, choiceIndex: number): string {
   return (choice.choiceId as string) ?? `__idx_${choiceIndex}`
+}
+
+function hasVisibilityConditionItems(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false
+  const items = (value as { items?: unknown }).items
+  return Array.isArray(items) && items.length > 0
+}
+
+function removeEmptyVisibilityConditions(data: Record<string, unknown>): void {
+  if (
+    Object.prototype.hasOwnProperty.call(data, 'visibilityConditions') &&
+    !hasVisibilityConditionItems(data.visibilityConditions)
+  ) {
+    delete data.visibilityConditions
+  }
 }
 
 export interface UnityDocument {
@@ -234,19 +250,20 @@ export function graphToDocument(nodes: Node[], edges: Edge[]): UnityDocument {
     if (node.type === 'testNode') continue
     const data = (node.data ?? {}) as Record<string, unknown>
     const unityNode = { ...data, id: node.id } as Record<string, unknown>
+    removeEmptyVisibilityConditions(unityNode)
     if (node.data?.title !== undefined) unityNode.title = node.data.title
     unityNode.nextNode = undefined
     if (Array.isArray(unityNode.choices)) {
       unityNode.choices = (unityNode.choices as Record<string, unknown>[]).map((choice, idx) => {
         const cleanChoice = { ...choice }
+        removeEmptyVisibilityConditions(cleanChoice)
         delete cleanChoice.targetNode
         delete cleanChoice.testCriticalFailureNode
         delete cleanChoice.testFailureNode
         delete cleanChoice.testSuccessNode
         delete cleanChoice.testCriticalSuccessNode
-        delete cleanChoice.test
         const existing = (cleanChoice.choiceId as string)?.trim()
-        if (!existing) cleanChoice.choiceId = `__idx_${idx}`
+        if (!existing) cleanChoice.choiceId = stableChoiceId(node.id, idx)
         return cleanChoice
       })
     }
@@ -316,6 +333,40 @@ export function graphToDocument(nodes: Node[], edges: Edge[]): UnityDocument {
     }
   }
 
+  // Choix sans cible dialogue explicite → END (placeholder post-génération, aligné enrich_with_ids).
+  // Les choix avec test n'ont pas de targetNode direct (routage via test*Node / TestNode).
+  for (const u of unityNodes) {
+    const choices = u.choices as Record<string, unknown>[] | undefined
+    if (!choices) continue
+    for (const c of choices) {
+      if (c.test !== undefined && c.test !== null && c.test !== '') {
+        delete c.targetNode
+        continue
+      }
+      const tn = c.targetNode
+      if (tn === undefined || tn === null || tn === '') {
+        c.targetNode = 'END'
+      }
+    }
+  }
+
+  // choice.test : SoT = DialogueNode.data.choices (TestNode = vue dérivée). Retirer si absent du store.
+  for (const u of unityNodes) {
+    const inputNode = nodes.find((n) => n.id === (u.id as string) && n.type !== 'testNode')
+    const choices = u.choices as Record<string, unknown>[] | undefined
+    const inputChoices = (inputNode?.data as { choices?: Record<string, unknown>[] } | undefined)
+      ?.choices
+    if (!choices || !inputChoices) continue
+    for (let i = 0; i < choices.length; i++) {
+      const rawTest = inputChoices[i]?.test
+      if (rawTest !== undefined && rawTest !== null && rawTest !== '') {
+        choices[i].test = rawTest
+      } else {
+        delete choices[i].test
+      }
+    }
+  }
+
   // Nœud dialogue sans choix : nextNode depuis arêtes « Suivant » legacy et/ou edgeType nextNode.
   // Si les deux coexistent (ex. disconnect incomplet + reconnect), la cible explicite nextNode prime.
   // Plusieurs « Suivant » seuls : l’ordre du tableau edges n’est pas canonique — tie-break via
@@ -360,35 +411,6 @@ export function graphToDocument(nodes: Node[], edges: Edge[]): UnityDocument {
     }
     if (resolved) {
       u.nextNode = resolved
-    }
-  }
-
-  // Ne garder choice.test que si une arête relie ce choix à un TestNode (évite réapparition après suppression).
-  for (const u of unityNodes) {
-    const choices = u.choices as Record<string, unknown>[] | undefined
-    if (!choices) continue
-    const inputNode = nodes.find((n) => n.id === (u.id as string) && n.type !== 'testNode')
-    for (let i = 0; i < choices.length; i++) {
-      const c = choices[i] as Record<string, unknown> & { choiceId?: string }
-      const choiceId = c.choiceId ?? `__idx_${i}`
-      const sourceHandle = `choice:${choiceId}`
-      const hasEdgeToTestNode = edges.some(
-        (e) =>
-          e.source === u.id &&
-          (e.target.startsWith('test:') || e.target.startsWith('test-node-')) &&
-          (e.sourceHandle === sourceHandle ||
-            (e.data as { choiceIndex?: number })?.choiceIndex === i)
-      )
-      if (hasEdgeToTestNode && inputNode?.data) {
-        const inputChoices = (inputNode.data as { choices?: Record<string, unknown>[] })
-          .choices
-        const inputChoice = inputChoices?.[i]
-        const inputTest =
-          inputChoice && typeof inputChoice === 'object'
-            ? (inputChoice as Record<string, unknown>).test
-            : undefined
-        if (inputTest !== undefined) c.test = inputTest
-      }
     }
   }
 

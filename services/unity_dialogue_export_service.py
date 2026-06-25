@@ -19,7 +19,10 @@ from services.configuration_service import ConfigurationService
 from api.exceptions import ValidationException
 from services.unity_dialogue_download_service import safe_export_filename
 from services.unity_export_normalizer import normalize_unity_export_document
-from services.unity_export_validation_service import unity_export_schema_validator
+from services.unity_export_validation_service import (
+    unity_export_schema_validator,
+    validate_unity_export_document,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -213,13 +216,20 @@ def write_unity_dialogue_to_file(
 
     document = normalize_unity_export_document(document, in_place=True)
 
-    validate_fn = validator or unity_export_schema_validator
-    is_valid, validation_errors = validate_fn(document)
+    structured_errors: List[Dict[str, Any]] = []
+    if validator is None:
+        export_result = validate_unity_export_document(document)
+        is_valid = export_result.is_valid
+        validation_errors = export_result.errors
+        structured_errors = export_result.errors_structured
+    else:
+        is_valid, validation_errors = validator(document)
     if not is_valid:
         raise ValidationException(
             message="Le dialogue Unity contient des erreurs de validation",
             details={
                 "validation_errors": validation_errors,
+                "structured_errors": structured_errors,
                 "json_content": "Le JSON ne respecte pas le schéma Unity (IDs uniques, références valides, etc.)",
             },
             request_id=request_id,

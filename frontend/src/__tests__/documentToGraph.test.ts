@@ -10,6 +10,8 @@ import {
   type UnityDocument,
   type LayoutPositions,
 } from '../utils/documentToGraph'
+import { normalizeTestBars } from '../utils/graphNormalizers'
+import { postGenerationReactFlowGraph } from '../testFixtures/rawPostGeneration'
 
 describe('documentToGraph', () => {
   describe('stable IDs (choiceId present)', () => {
@@ -559,7 +561,7 @@ describe('graphToDocument', () => {
     expect(roundTripEdges.some((e) => e.source === 'test-node-START-choice-0' && e.target === 'NODE_CS')).toBe(true)
   })
 
-  it('omits choice.test when no edge links choice to a test node (deleted TestNode does not reappear)', () => {
+  it('omits choice.test when cleared from store (TestNode deleted)', () => {
     const nodes = [
       {
         id: 'START',
@@ -568,7 +570,7 @@ describe('graphToDocument', () => {
         data: {
           id: 'START',
           choices: [
-            { choiceId: 'a', text: 'A', test: 'Skill:8' },
+            { choiceId: 'a', text: 'A' },
             { choiceId: 'b', text: 'B', test: 'Stat:6' },
           ],
         },
@@ -588,6 +590,56 @@ describe('graphToDocument', () => {
     expect(start?.choices).toHaveLength(2)
     expect((start?.choices?.[0] as { test?: unknown }).test).toBeUndefined()
     expect((start?.choices?.[1] as { test?: unknown }).test).toBe('Stat:6')
+  })
+
+  it('post-generation without TestNodes: normalizeTestBars then round-trip keeps TestNodes', () => {
+    const { nodes, edges } = postGenerationReactFlowGraph()
+    expect(nodes.filter((n) => n.type === 'testNode')).toHaveLength(0)
+
+    const normalized = normalizeTestBars(nodes, edges)
+    expect(normalized.nodes.filter((n) => n.type === 'testNode')).toHaveLength(1)
+    expect(
+      normalized.edges.some(
+        (e) => e.source === 'START' && e.target === 'test-node-START-choice-0'
+      )
+    ).toBe(true)
+
+    const doc = graphToDocument(normalized.nodes, normalized.edges)
+    const start = doc.nodes.find((n) => n.id === 'START')
+    expect((start?.choices?.[0] as { test?: string }).test).toBe('Volonté+Adaptabilité:12')
+
+    const { nodes: reloadedNodes, edges: reloadedEdges } = documentToGraph(doc, undefined)
+    const renormalized = normalizeTestBars(reloadedNodes, reloadedEdges)
+    expect(renormalized.nodes.filter((n) => n.type === 'testNode')).toHaveLength(1)
+  })
+
+  it('omits empty visibilityConditions blocks from nodes and choices', () => {
+    const doc = graphToDocument(
+      [
+        {
+          id: 'START',
+          type: 'dialogueNode',
+          position: { x: 0, y: 0 },
+          data: {
+            id: 'START',
+            line: 'Hello',
+            visibilityConditions: { items: [] },
+            choices: [
+              {
+                choiceId: 'go',
+                text: 'Go',
+                targetNode: 'END',
+                visibilityConditions: { items: [] },
+              },
+            ],
+          },
+        },
+      ] as never,
+      [] as never,
+    )
+    const start = doc.nodes.find((n) => n.id === 'START') as Record<string, unknown>
+    expect(start.visibilityConditions).toBeUndefined()
+    expect((start.choices as Record<string, unknown>[])[0].visibilityConditions).toBeUndefined()
   })
 })
 

@@ -24,12 +24,23 @@ from services.dialogue_dramatic_progression import (
     compose_generation_instructions,
 )
 from services.json_renderer.unity_json_renderer import UnityJsonRenderer
+from services.unity_node_validation_service import infer_choices_mode
 from api.schemas.dialogue import GenerateUnityDialogueRequest, GenerateUnityDialogueResponse
 from api.exceptions import InternalServerException, ValidationException
 from factories.llm_factory import LLMClientFactory
 from models.dialogue_structure.unity_dialogue_node import UnityDialogueGenerationResponse
 
 logger = logging.getLogger(__name__)
+
+
+def _llm_max_choices_for_request(request_data: GenerateUnityDialogueRequest) -> Optional[int]:
+    """Plafond LLM aligné UI (free → None sauf feuille max_choices=0)."""
+    mode = infer_choices_mode(request_data.choices_mode, request_data.max_choices)
+    if request_data.max_choices == 0:
+        return 0
+    if mode == "free":
+        return None
+    return request_data.max_choices
 
 
 def _coerce_context_text(summary: object) -> str:
@@ -399,6 +410,10 @@ class UnityDialogueOrchestrator:
                     logger.error("Aucune réponse générée après le stream complet")
                     yield GenerationEvent(type='error', data={'message': 'Aucune réponse générée', 'code': 'no_response'})
                     return
+                generation_response = unity_service.normalize_generation_response(
+                    generation_response,
+                    max_choices=_llm_max_choices_for_request(request_data),
+                )
             else:
                 # Fallback vers méthode non-streaming (pour DummyLLMClient, MistralClient, etc.)
                 logger.info("Client ne supporte pas le streaming natif, utilisation de la méthode standard")
@@ -406,7 +421,7 @@ class UnityDialogueOrchestrator:
                     llm_client=llm_client,
                     prompt=prompt,
                     system_prompt_override=request_data.system_prompt_override,
-                    max_choices=request_data.max_choices
+                    max_choices=_llm_max_choices_for_request(request_data),
                 )
             
             if check_cancelled():

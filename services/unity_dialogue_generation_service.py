@@ -165,6 +165,105 @@ class UnityDialogueGenerationService:
         
         logger.info("Nœud généré avec succès")
         return result
+
+    def normalize_generation_response(
+        self,
+        result: Any,
+        max_choices: Optional[int] = None,
+    ) -> UnityDialogueGenerationResponse:
+        """Valide et normalise une réponse de génération déjà produite.
+
+        Le streaming natif retourne directement le modèle final, sans repasser par
+        ``generate_dialogue_node``. Cette méthode partage donc les invariants de
+        type et de cardinalité des choix avec le chemin non-streaming.
+
+        Args:
+            result: Réponse brute retournée par le client LLM.
+            max_choices: Nombre maximum de choix autorisé.
+
+        Returns:
+            Réponse Pydantic validée et éventuellement tronquée.
+
+        Raises:
+            ValueError: Si la réponse n'est pas un structured output valide.
+        """
+        if isinstance(result, str):
+            if result.startswith("Erreur:"):
+                raise ValueError(
+                    "Le modèle n'a pas retourné de structured output (JSON structuré). "
+                    f"Détails techniques: {result}"
+                )
+            raise ValueError(
+                "Le modèle a retourné du texte libre au lieu d'un structured output (JSON). "
+                f"Réponse reçue (premiers 200 caractères): {result[:200]}"
+            )
+
+        if isinstance(result, dict):
+            logger.warning(
+                "Le client LLM a retourné un dict, conversion en UnityDialogueGenerationResponse"
+            )
+            try:
+                result = UnityDialogueGenerationResponse.model_validate(result)
+            except Exception as exc:
+                logger.error(
+                    "Erreur lors de la conversion du dict en UnityDialogueGenerationResponse: %s",
+                    exc,
+                )
+                raise ValueError(
+                    "Impossible de convertir le résultat en UnityDialogueGenerationResponse: "
+                    f"{exc}"
+                ) from exc
+
+        if not isinstance(result, UnityDialogueGenerationResponse):
+            raise ValueError(
+                "Type de réponse inattendu: "
+                f"{type(result)}. Attendu: UnityDialogueGenerationResponse."
+            )
+
+        node = result.node
+        if not node.choices and not node.line:
+            logger.warning(
+                "Le nœud généré n'a ni choices ni line. "
+                "Le dialogue se terminera à ce nœud."
+            )
+
+        if max_choices is not None:
+            if node.choices:
+                if max_choices == 0:
+                    logger.warning(
+                        "max_choices=0 mais le nœud a %s choix. Suppression des choix.",
+                        len(node.choices),
+                    )
+                    node.choices = None
+                elif len(node.choices) > max_choices:
+                    logger.warning(
+                        "Le nœud a %s choix, mais max_choices=%s. Troncature.",
+                        len(node.choices),
+                        max_choices,
+                    )
+                    node.choices = node.choices[:max_choices]
+            return result
+
+        if node.choices is not None:
+            num_choices = len(node.choices)
+            if num_choices == 0:
+                raise ValueError(
+                    "Quand 'Nombre max de choix' est vide (libre), le nœud doit avoir entre "
+                    "2 et 8 choix, mais le nœud généré a une liste vide de choix."
+                )
+            if num_choices == 1:
+                raise ValueError(
+                    "Quand 'Nombre max de choix' est vide (libre), le nœud doit avoir entre "
+                    f"2 et 8 choix, mais le nœud généré a seulement {num_choices} choix."
+                )
+            if num_choices > 8:
+                logger.warning(
+                    "max_choices est libre (None) mais le nœud a %s choix (> 8). Troncature à 8 choix.",
+                    num_choices,
+                )
+                node.choices = node.choices[:8]
+
+        return result
     
     async def generate_nodes_for_choice_with_test(
         self,

@@ -75,6 +75,7 @@ async def generate_node(
             generate_all_choices=request_data.generate_all_choices,
             dialogue_nodes=request_data.dialogue_nodes,
             player_character_id=dramatis.player_character_id,
+            choices_mode=request_data.choices_mode,
         )
 
         suggested_connections = [

@@ -6,6 +6,7 @@ from typing import List, Dict, Any, Optional, Callable, Tuple
 from models.dialogue_structure.unity_dialogue_node import UnityDialogueChoiceContent
 from services.dialogue_path_context import build_enriched_generation_prompt
 from services.unity_dialogue_generation_service import UnityDialogueGenerationService, _stable_node_id
+from services.unity_node_validation_service import ChoicesMode, validate_enriched_node
 from core.llm.llm_client import ILLMClient
 
 logger = logging.getLogger(__name__)
@@ -77,6 +78,7 @@ class GraphGenerationService:
         progress_callback: Optional[Callable[[int, int], None]] = None,
         dialogue_nodes: Optional[List[Dict[str, Any]]] = None,
         player_choice_label: str = "PJ",
+        choices_mode: ChoicesMode = "capped",
     ) -> Dict[str, Any]:
         """Génère la suite pour chaque choix du parent sans cible (ou END).
 
@@ -125,6 +127,14 @@ class GraphGenerationService:
             parent_id,
         )
 
+        llm_max_choices: Optional[int]
+        if max_choices == 0:
+            llm_max_choices = 0
+        elif choices_mode == "free":
+            llm_max_choices = None
+        else:
+            llm_max_choices = max_choices
+
         async def generate_for_one_choice(
             choice_index: int, choice: Dict[str, Any]
         ) -> Tuple[
@@ -163,6 +173,12 @@ class GraphGenerationService:
                                 "choice_text": choice.get("text", ""),
                             },
                         )
+                    for test_node in nodes:
+                        validate_enriched_node(
+                            test_node,
+                            max_choices=0,
+                            choices_mode="capped",
+                        )
                     test_node_id = f"test-node-{parent_id}-choice-{choice_index}"
                     connections = _build_test_outcome_connections(test_node_id, conns_raw[0])
                     return (choice_index, nodes, connections, None)
@@ -196,7 +212,7 @@ class GraphGenerationService:
                     llm_client=llm_client,
                     prompt=enriched_instructions,
                     system_prompt_override=system_prompt_override,
-                    max_choices=max_choices,
+                    max_choices=llm_max_choices,
                 )
 
                 start_id = _stable_node_id()
@@ -226,6 +242,11 @@ class GraphGenerationService:
                         [],
                         {"error": "No ID generated", "choice_text": choice_text},
                     )
+                validate_enriched_node(
+                    generated_node,
+                    max_choices=None if choices_mode == "free" and max_choices not in (0, None) else max_choices,
+                    choices_mode="free" if choices_mode == "free" and max_choices not in (0, None) else choices_mode,
+                )
                 connection = {
                     "from": parent_id,
                     "to": generated_node["id"],

@@ -13,6 +13,7 @@ import { useShallow } from 'zustand/react/shallow'
 import { useGraphStore } from '../../store/graphStore'
 import { useGraphViewStore } from '../../store/graphViewStore'
 import { useContextStore } from '../../store/contextStore'
+import { InlineFieldError, fieldErrorBorder } from '../shared/InlineFieldError'
 import { useToast } from '../shared'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
@@ -75,7 +76,11 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     connectNodes,
     disconnectNodes,
     duplicateNode,
+    documentFieldErrors,
+    clearDocumentFieldError,
   } = useGraphStore()
+  const validationFieldErrors = documentFieldErrors ?? []
+  const clearValidationFieldError = clearDocumentFieldError ?? (() => {})
   const { selections } = useContextStore()
   const toast = useToast()
   const [showGenerationOptions, setShowGenerationOptions] = useState(false)
@@ -103,6 +108,14 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
   }, [])
   
   const nodeType = selectedNode?.type || 'dialogueNode'
+
+  const nodeFieldError = useCallback(
+    (field: string): string | undefined =>
+      validationFieldErrors.find(
+        (e) => e.nodeId === selectedNodeId && e.field === field,
+      )?.message,
+    [validationFieldErrors, selectedNodeId],
+  )
   
   // Déterminer le schéma selon le type de nœud
   const schema = nodeType === 'dialogueNode'
@@ -139,6 +152,8 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
   })
   
   const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = form
+  const speakerRegister = register('speaker')
+  const lineRegister = register('line')
   const isFlushingRef = useRef(false)
   const previousSelectedNodeIdRef = useRef<string | null>(null)
   const debouncePushRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -381,6 +396,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
           context_selections: sel,
           npc_speaker_id: npcFromSel,
           llm_model_identifier: llmModelRef.current,
+          choices_mode: 'capped',
         }
       )
       
@@ -459,6 +475,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
           npc_speaker_id: npcSpeakerId,
           llm_model_identifier: llmModelRef.current,
           target_choice_index: choiceIndex,
+          choices_mode: 'capped',
         }
       )
       
@@ -489,6 +506,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         context_selections: sel,
         npc_speaker_id: npcSpeakerId,
         llm_model_identifier: llmModelRef.current,
+        choices_mode: 'capped',
       })
       toast('Nœud généré avec succès', 'success', 2000)
       if (generationResult.nodeId) {
@@ -536,6 +554,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
           npc_speaker_id: npcSpeakerId,
           llm_model_identifier: llmModelRef.current,
           generate_all_choices: true,
+          choices_mode: 'capped',
           onBatchProgress: (current: number, total: number) => {
             setBatchProgress({ current, total })
           },
@@ -645,13 +664,24 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             <label style={editableFieldLabelStyle()}>Speaker</label>
             <input
               type="text"
-              {...register('speaker')}
+              {...speakerRegister}
+              onChange={(e) => {
+                void speakerRegister.onChange(e)
+                if (selectedNodeId) clearValidationFieldError(selectedNodeId, 'speaker')
+              }}
               placeholder="Nom du personnage"
+              aria-invalid={Boolean(nodeFieldError('speaker'))}
               style={{
                 ...editableFieldInputStyle(),
-                border: `1px solid ${(errors as FieldErrors<DialogueNodeData>).speaker ? theme.state.error.border : theme.border.secondary}`,
+                border: `1px solid ${fieldErrorBorder(
+                  Boolean(nodeFieldError('speaker') || (errors as FieldErrors<DialogueNodeData>).speaker),
+                  (errors as FieldErrors<DialogueNodeData>).speaker
+                    ? theme.state.error.border
+                    : theme.border.secondary,
+                )}`,
               }}
             />
+            <InlineFieldError message={nodeFieldError('speaker')} />
           </div>
         )}
         
@@ -660,16 +690,72 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
           <div>
             <label style={editableFieldLabelStyle()}>Dialogue</label>
             <textarea
-              {...register('line')}
+              {...lineRegister}
+              onChange={(e) => {
+                void lineRegister.onChange(e)
+                if (selectedNodeId) clearValidationFieldError(selectedNodeId, 'line')
+              }}
               placeholder="Texte du dialogue..."
               rows={9}
+              aria-invalid={Boolean(nodeFieldError('line'))}
               style={{
                 ...editableFieldTextareaStyle('9rem'),
-                border: `1px solid ${(errors as FieldErrors<DialogueNodeData>).line ? theme.state.error.border : theme.border.secondary}`,
+                border: `1px solid ${fieldErrorBorder(
+                  Boolean(nodeFieldError('line') || (errors as FieldErrors<DialogueNodeData>).line),
+                  (errors as FieldErrors<DialogueNodeData>).line
+                    ? theme.state.error.border
+                    : theme.border.secondary,
+                )}`,
               }}
             />
+            <InlineFieldError message={nodeFieldError('line')} />
           </div>
         )}
+
+        {/* Conséquences (nœuds générés avec flag) */}
+        {nodeType === 'dialogueNode' &&
+          selectedNodeId &&
+          (Boolean(
+            (selectedNode?.data as { consequences?: { flag?: string } } | undefined)?.consequences
+              ?.flag,
+          ) ||
+            nodeFieldError('consequences.flag')) && (
+            <div>
+              <label style={editableFieldLabelStyle()}>Flag (conséquences)</label>
+              <input
+                type="text"
+                defaultValue={
+                  (selectedNode?.data as { consequences?: { flag?: string } })?.consequences
+                    ?.flag ?? ''
+                }
+                onBlur={(e) => {
+                  const flag = e.target.value.trim()
+                  updateNode(selectedNodeId, {
+                    data: {
+                      consequences: {
+                        ...((selectedNode?.data as {
+                          consequences?: { flag?: string; description?: string }
+                        })?.consequences ?? { flag: '' }),
+                        flag,
+                      },
+                    },
+                  })
+                  clearValidationFieldError(selectedNodeId, 'consequences.flag')
+                }}
+                placeholder="FLAG_NOM_EN_MAJUSCULES"
+                aria-invalid={Boolean(nodeFieldError('consequences.flag'))}
+                style={{
+                  ...editableFieldInputStyle(),
+                  fontFamily: 'monospace',
+                  border: `1px solid ${fieldErrorBorder(
+                    Boolean(nodeFieldError('consequences.flag')),
+                    theme.border.secondary,
+                  )}`,
+                }}
+              />
+              <InlineFieldError message={nodeFieldError('consequences.flag')} />
+            </div>
+          )}
 
         {/* Story 9.2 — conditions de visibilité (nœud) */}
         {nodeType === 'dialogueNode' && selectedNodeId && (
@@ -1052,9 +1138,14 @@ function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: Choi
   const { control, getValues } = useFormContext<DialogueNodeData>()
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId)
   const updateNode = useGraphStore((s) => s.updateNode)
+  const documentFieldErrors = useGraphStore((s) => s.documentFieldErrors ?? [])
+  const clearDocumentFieldError = useGraphStore((s) => s.clearDocumentFieldError ?? (() => {}))
   const selectedNode = useGraphStore(
     useShallow((s) => s.nodes.find((n) => n.id === s.selectedNodeId) ?? null)
   )
+  const choicesFieldError = documentFieldErrors.find(
+    (e) => e.nodeId === selectedNodeId && e.field === 'choices',
+  )?.message
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'choices',
@@ -1111,7 +1202,8 @@ function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: Choi
     
     // Supprimer le choix du formulaire après la mise à jour du store
     remove(index)
-  }, [selectedNodeId, selectedNode, remove, getValues, updateNode])
+    clearDocumentFieldError(selectedNodeId, 'choices')
+  }, [selectedNodeId, selectedNode, remove, getValues, updateNode, clearDocumentFieldError])
   
   return (
     <div>
@@ -1128,7 +1220,10 @@ function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: Choi
         </label>
         <button
           type="button"
-          onClick={() => append({ text: '', targetNode: 'END' })}
+          onClick={() => {
+            append({ text: '', targetNode: 'END' })
+            if (selectedNodeId) clearDocumentFieldError(selectedNodeId, 'choices')
+          }}
           style={{
             padding: '0.5rem 0.75rem',
             border: `1px solid ${theme.border.primary}`,
@@ -1142,6 +1237,8 @@ function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: Choi
           + Ajouter un choix
         </button>
       </div>
+
+      <InlineFieldError message={choicesFieldError} />
       
       {fields.length === 0 ? (
         <div
@@ -1149,7 +1246,7 @@ function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: Choi
             padding: '1rem',
             backgroundColor: theme.background.panel,
             borderRadius: 4,
-            border: `1px dashed ${theme.border.primary}`,
+            border: `1px dashed ${fieldErrorBorder(Boolean(choicesFieldError), theme.border.primary)}`,
             textAlign: 'center',
             color: theme.text.secondary,
             fontSize: remSize('body'),

@@ -135,6 +135,47 @@ def test_enrich_with_ids_no_choices(unity_service: UnityDialogueGenerationServic
     # qui ne sont pas générés par l'IA et ne sont pas ajoutés automatiquement
 
 
+def test_normalize_generation_response_accepts_streaming_model(
+    unity_service: UnityDialogueGenerationService,
+):
+    """Régression : le streaming appelle normalize_generation_response avant enrich_with_ids."""
+    response = UnityDialogueGenerationResponse(
+        title="Test Dialogue",
+        node=UnityDialogueNodeContent(
+            speaker="TEST_NPC",
+            line="Test dialogue line",
+            choices=[
+                UnityDialogueChoiceContent(text="Choice 1"),
+                UnityDialogueChoiceContent(text="Choice 2"),
+                UnityDialogueChoiceContent(text="Choice 3"),
+            ],
+        ),
+    )
+
+    result = unity_service.normalize_generation_response(response, max_choices=2)
+
+    assert result is response
+    assert result.node.choices is not None
+    assert len(result.node.choices) == 2
+
+
+def test_normalize_generation_response_rejects_free_single_choice(
+    unity_service: UnityDialogueGenerationService,
+):
+    """Le chemin streaming garde les mêmes invariants que generate_dialogue_node."""
+    response = UnityDialogueGenerationResponse(
+        title="Test Dialogue",
+        node=UnityDialogueNodeContent(
+            speaker="TEST_NPC",
+            line="Test dialogue line",
+            choices=[UnityDialogueChoiceContent(text="Choice 1")],
+        ),
+    )
+
+    with pytest.raises(ValueError, match="doit avoir entre 2 et 8 choix"):
+        unity_service.normalize_generation_response(response, max_choices=None)
+
+
 @pytest.mark.asyncio
 async def test_max_choices_none_valid_2_choices(unity_service: UnityDialogueGenerationService, mock_llm_client):
     """Test que quand max_choices est None (libre), un nœud avec 2 choix est valide."""

@@ -72,7 +72,7 @@ describe('graphStore - document SoT load/save', () => {
       expect(useGraphStore.getState().intentionalCycles).toEqual(['persisted_cycle'])
     })
 
-    it('handles 404 layout as empty layout', async () => {
+    it('uses readable auto-layout when no saved layout exists', async () => {
       vi.mocked(documentsAPI.getDocument).mockResolvedValue({
         document: sampleDocument,
         schemaVersion: '1.1.0',
@@ -83,12 +83,10 @@ describe('graphStore - document SoT load/save', () => {
       await loadDialogueByDocumentId('test-doc')
       const state = useGraphStore.getState()
       expect(state.document).toEqual(sampleDocument)
-      expect(state.layout).toEqual({
-        nodes: {
-          START: { x: 0, y: 0 },
-          END: { x: 0, y: 150 },
-        },
-      })
+      const layoutNodes = state.layout?.nodes as Record<string, { x: number; y: number }>
+      expect(layoutNodes.START).toEqual({ x: 0, y: 0 })
+      expect(layoutNodes.END).not.toEqual({ x: 0, y: 150 })
+      expect(layoutNodes.END.y).toBeGreaterThan(150)
       expect(state.layoutRevision).toBe(1)
       expect(state.nodes.length).toBeGreaterThanOrEqual(2)
     })

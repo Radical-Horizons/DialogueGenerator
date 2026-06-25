@@ -142,6 +142,10 @@ class GenerateNodeRequest(BaseModel):
         None,
         description="Nœuds du graphe pour reconstruire le chemin ancêtre dans le prompt",
     )
+    choices_mode: Optional[Literal["free", "capped"]] = Field(
+        None,
+        description="Mode choix (aligné UI). Si absent : capped si max_choices défini, sinon free.",
+    )
 
 
 class SuggestedConnection(BaseModel):
@@ -671,6 +675,14 @@ class ExpandTreeRequest(BaseModel):
         le=Defaults.MAX_CONTEXT_TOKENS,
         description="Budget tokens contexte (aligné UI)",
     )
+    choices_mode: Optional[Literal["free", "capped"]] = Field(
+        None,
+        description="Mode choix LLM (aligné UI). Défaut : capped (max_choices explicite).",
+    )
+    allow_partial: bool = Field(
+        False,
+        description="Si False, échec immédiat sur parent invalide ; si True, statut partial.",
+    )
 
     @model_validator(mode="after")
     def validate_location_present(self) -> "ExpandTreeRequest":
@@ -693,6 +705,15 @@ class ExpandTreeRequest(BaseModel):
         return value
 
 
+class ExpandTreeParentFailureDetail(BaseModel):
+    """Échec structuré d'expansion sur un nœud parent."""
+
+    parent_id: str = Field(..., description="ID du nœud parent en échec")
+    round_num: int = Field(..., description="Round BFS (1 = premier niveau après START)")
+    error: str = Field(..., description="Message d'erreur")
+    error_code: str = Field("expansion_failed", description="Code machine stable")
+
+
 class ExpandTreeResponse(BaseModel):
     """Réponse après expansion d'arbre de dialogue."""
 
@@ -701,7 +722,19 @@ class ExpandTreeResponse(BaseModel):
     llm_calls_estimated: int = Field(..., description="Appels LLM effectués ou estimés")
     levels_expanded: int = Field(..., description="Niveaux BFS effectivement expandus")
     document_id: str = Field(..., description="Identifiant du document")
-    failed_parents: List[str] = Field(default_factory=list, description="Parents en échec")
+    failed_parents: List[str] = Field(default_factory=list, description="Parents en échec (ids)")
+    failed_parent_details: List[ExpandTreeParentFailureDetail] = Field(
+        default_factory=list,
+        description="Détail des échecs parent (round, message, code)",
+    )
+    expansion_status: Literal["complete", "partial"] = Field(
+        "complete",
+        description="complete si tous les parents expandus ; partial si allow_partial et échecs",
+    )
+    validation_warnings: List[SchemaValidationIssueDetail] = Field(
+        default_factory=list,
+        description="Avertissements schéma export non bloquants (FR51)",
+    )
     cost_usd: Optional[float] = Field(None, description="Coût USD estimé (dry-run ou cumul)")
     llm_model_identifier: str = Field(
         default=ModelNames.GPT_5_MINI,

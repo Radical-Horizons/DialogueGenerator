@@ -9,6 +9,7 @@ import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
 import { unityDialogueEditorChrome } from '../../theme/responsiveChrome'
 import { useToast } from '../shared'
+import { InlineFieldError, fieldErrorBorder } from '../shared/InlineFieldError'
 import { TraitRequirementsEditor } from '../shared/TraitRequirementsEditor'
 import { useDialogueEditionNarrow } from '../unityDialogues/DialogueEditionNarrowContext'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
@@ -18,6 +19,11 @@ import type {
   UnityDialogueChoice,
   ExportUnityDialogueRequest,
 } from '../../types/api'
+import {
+  extractValidationIssuesFromApiError,
+  inlineValidationToastMessage,
+  type DocumentFieldError,
+} from '../../utils/documentValidationFieldErrors'
 
 export interface UnityDialogueEditorProps {
   json_content: string
@@ -66,6 +72,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
   const isActionsNarrow = isNarrow && isActionsNarrowMeasured
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<DocumentFieldError[]>([])
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set())
 
   // Parser et état local des nœuds
@@ -91,6 +98,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
       }
       setNodes(parsed as UnityDialogueNode[])
       setError(null)
+      setFieldErrors([])
     } catch (error) {
       console.error('Erreur lors du parsing du JSON Unity:', error)
       setNodes([])
@@ -127,25 +135,56 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
     })
   }, [])
 
+  const getFieldError = useCallback(
+    (nodeId: string, field: string): string | undefined => {
+      return fieldErrors.find((e) => e.nodeId === nodeId && e.field === field)?.message
+    },
+    [fieldErrors],
+  )
+
+  const clearFieldError = useCallback((nodeId: string, field: string) => {
+    setFieldErrors((prev) => prev.filter((e) => !(e.nodeId === nodeId && e.field === field)))
+  }, [])
+
+  const updateConsequences = useCallback(
+    (nodeId: string, updates: { flag?: string; description?: string }) => {
+      clearFieldError(nodeId, 'consequences.flag')
+      clearFieldError(nodeId, 'consequences.description')
+      setNodes((prev) =>
+        prev.map((node) => {
+          if (node.id !== nodeId) return node
+          const cons = { ...(node.consequences ?? { flag: '' }), ...updates }
+          return { ...node, consequences: cons }
+        }),
+      )
+    },
+    [clearFieldError],
+  )
+
   // Mettre à jour le speaker d'un nœud
   const updateNodeSpeaker = useCallback(
     (nodeId: string, speaker: string) => {
+      clearFieldError(nodeId, 'speaker')
       updateNode(nodeId, { speaker: speaker.trim() || undefined })
     },
-    [updateNode]
+    [updateNode, clearFieldError]
   )
 
   // Mettre à jour le line d'un nœud
   const updateNodeLine = useCallback(
     (nodeId: string, line: string) => {
+      clearFieldError(nodeId, 'line')
       updateNode(nodeId, { line: line.trim() || undefined })
     },
-    [updateNode]
+    [updateNode, clearFieldError]
   )
 
   // Mettre à jour un choix (par nodeId, pas par index)
   const updateChoice = useCallback(
     (nodeId: string, choiceIndex: number, updates: Partial<UnityDialogueChoice>) => {
+      for (const key of Object.keys(updates)) {
+        clearFieldError(nodeId, `choices.${choiceIndex}.${key}`)
+      }
       setNodes((prev) => {
         return prev.map((node) => {
           if (node.id !== nodeId) return node
@@ -155,7 +194,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
         })
       })
     },
-    []
+    [clearFieldError],
   )
 
   // Ajouter un choix (par nodeId, pas par index)
@@ -195,6 +234,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
 
     setIsSaving(true)
     setError(null)
+    setFieldErrors([])
 
     try {
       // Reconstruire le JSON (préserver tous les champs, y compris ceux non édités)
@@ -208,13 +248,23 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
 
       // Le backend validera le schéma Unity (IDs uniques, références valides, etc.)
       const result = await dialoguesAPI.exportUnityDialogue(request)
+      setFieldErrors([])
       toast(`Dialogue sauvegardé: ${result.filename}`, 'success', 5000)
       onSave?.(result.filename)
     } catch (err) {
-      // Le backend retournera une ValidationException avec les détails si le dialogue est invalide
-      const errorMessage = getErrorMessage(err)
-      setError(errorMessage)
-      toast(`Erreur lors de la sauvegarde: ${errorMessage}`, 'error')
+      const { fieldErrors: extracted, unmappedMessages } = extractValidationIssuesFromApiError(
+        err,
+        nodes,
+      )
+      if (extracted.length > 0) {
+        setFieldErrors(extracted)
+        setError(unmappedMessages.length > 0 ? unmappedMessages.join('\n') : null)
+        toast(inlineValidationToastMessage(extracted.length), 'warning', 6000)
+      } else {
+        const errorMessage = getErrorMessage(err)
+        setError(errorMessage)
+        toast(`Erreur lors de la sauvegarde: ${errorMessage}`, 'error')
+      }
     } finally {
       setIsSaving(false)
     }
@@ -468,32 +518,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
           scrollbarGutter: 'stable',
         }}
       >
-        {/* Erreurs de validation */}
-        {!isValid && (
-          <div
-            style={{
-              padding: '0.75rem',
-              marginBottom: '1rem',
-              backgroundColor: theme.state.error.background,
-              color: theme.state.error.color,
-              borderRadius: '6px',
-              border: `1px solid ${theme.border.primary}`,
-            }}
-          >
-            <div style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Erreurs de validation:</div>
-            <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
-              {validationErrors.map((err, i) => (
-                <li key={i} style={{ marginBottom: '0.25rem' }}>
-                  {err.nodeId && `[${err.nodeId}] `}
-                  {err.choiceIndex !== undefined && `Choix ${err.choiceIndex + 1}: `}
-                  {err.message}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Erreur générale */}
+        {/* Erreurs non mappées à un champ */}
         {error && (
           <div
             style={{
@@ -506,6 +531,22 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
             }}
           >
             {error}
+          </div>
+        )}
+
+        {/* Erreurs UX locales (ID manquant) — une ligne par nœud concerné */}
+        {!isValid && validationErrors.length > 0 && fieldErrors.length === 0 && (
+          <div
+            style={{
+              padding: '0.75rem',
+              marginBottom: '1rem',
+              backgroundColor: theme.state.error.background,
+              color: theme.state.error.color,
+              borderRadius: '6px',
+              border: `1px solid ${theme.border.primary}`,
+            }}
+          >
+            Corrigez les champs signalés ci-dessous avant de sauvegarder.
           </div>
         )}
 
@@ -587,17 +628,19 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                   value={node.speaker || ''}
                   onChange={(e) => updateNodeSpeaker(node.id, e.target.value)}
                   placeholder="ex: NPC_1, Player, Narrator"
+                  aria-invalid={Boolean(getFieldError(node.id, 'speaker'))}
                   style={{
                     width: '100%',
                     minWidth: 0,
                     padding: chrome.inputPadding,
                     boxSizing: 'border-box',
                     backgroundColor: theme.input.background,
-                    border: `1px solid ${theme.input.border}`,
+                    border: `1px solid ${fieldErrorBorder(Boolean(getFieldError(node.id, 'speaker')), theme.input.border)}`,
                     color: theme.input.color,
                     borderRadius: '4px',
                   }}
                 />
+                <InlineFieldError message={getFieldError(node.id, 'speaker')} />
               </div>
 
               {/* Line (éditable) */}
@@ -618,20 +661,65 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                   onChange={(e) => updateNodeLine(node.id, e.target.value)}
                   placeholder="Texte du dialogue..."
                   rows={5}
+                  aria-invalid={Boolean(getFieldError(node.id, 'line'))}
                   style={{
                     width: '100%',
                     minWidth: 0,
                     padding: chrome.inputPadding,
                     boxSizing: 'border-box',
                     backgroundColor: theme.input.background,
-                    border: `1px solid ${theme.input.border}`,
+                    border: `1px solid ${fieldErrorBorder(Boolean(getFieldError(node.id, 'line')), theme.input.border)}`,
                     color: theme.input.color,
                     borderRadius: '4px',
                     fontFamily: 'inherit',
                     resize: 'vertical',
                   }}
                 />
+                <InlineFieldError message={getFieldError(node.id, 'line')} />
               </div>
+
+              {/* Conséquences (si présentes ou erreur) */}
+              {(node.consequences ||
+                getFieldError(node.id, 'consequences.flag') ||
+                getFieldError(node.id, 'consequences.description')) && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      marginBottom: '0.5rem',
+                      color: theme.text.primary,
+                      fontSize: `${chrome.labelFontRem}rem`,
+                      fontWeight: 500,
+                    }}
+                  >
+                    Conséquences (flag)
+                  </label>
+                  <input
+                    type="text"
+                    value={node.consequences?.flag ?? ''}
+                    onChange={(e) =>
+                      updateConsequences(node.id, { flag: e.target.value })
+                    }
+                    placeholder="FLAG_NOM_EN_MAJUSCULES"
+                    aria-invalid={Boolean(getFieldError(node.id, 'consequences.flag'))}
+                    style={{
+                      width: '100%',
+                      minWidth: 0,
+                      padding: chrome.inputPadding,
+                      boxSizing: 'border-box',
+                      backgroundColor: theme.input.background,
+                      border: `1px solid ${fieldErrorBorder(
+                        Boolean(getFieldError(node.id, 'consequences.flag')),
+                        theme.input.border,
+                      )}`,
+                      color: theme.input.color,
+                      borderRadius: '4px',
+                      fontFamily: 'monospace',
+                    }}
+                  />
+                  <InlineFieldError message={getFieldError(node.id, 'consequences.flag')} />
+                </div>
+              )}
 
               {/* Choices (éditables) */}
               {node.choices && node.choices.length > 0 && (
@@ -649,13 +737,19 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                   </label>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     {node.choices.map((choice, choiceIndex) => {
-                      const choiceErrors = nodeErrors.filter((e) => e.choiceIndex === choiceIndex)
+                      const textErr = getFieldError(node.id, `choices.${choiceIndex}.text`)
+                      const testErr = getFieldError(node.id, `choices.${choiceIndex}.test`)
+                      const conditionErr = getFieldError(node.id, `choices.${choiceIndex}.condition`)
+                      const targetErr = getFieldError(node.id, `choices.${choiceIndex}.targetNode`)
+                      const hasChoiceFieldError = Boolean(
+                        textErr || testErr || conditionErr || targetErr,
+                      )
                       return (
                         <div
                           key={choiceIndex}
                           style={{
                             padding: '0.75rem',
-                            border: `1px solid ${theme.border.primary}`,
+                            border: `1px solid ${hasChoiceFieldError ? theme.state.error.border : theme.border.primary}`,
                             borderRadius: '6px',
                             backgroundColor: theme.background.secondary,
                           }}
@@ -678,22 +772,20 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                               }
                               placeholder="Texte du choix..."
                               rows={3}
+                              aria-invalid={Boolean(textErr)}
                               style={{
                                 width: '100%',
                                 padding: '0.5rem',
                                 boxSizing: 'border-box',
                                 backgroundColor: theme.input.background,
-                                border: `1px solid ${
-                                  choiceErrors.some((e) => e.message.includes('texte'))
-                                    ? theme.state.error.border
-                                    : theme.input.border
-                                }`,
+                                border: `1px solid ${fieldErrorBorder(Boolean(textErr), theme.input.border)}`,
                                 color: theme.input.color,
                                 borderRadius: '6px',
                                 fontFamily: 'inherit',
                                 resize: 'vertical',
                               }}
                             />
+                            <InlineFieldError message={textErr} />
                           </div>
 
                           {/* Propriétés mécaniques - ÉDITABLES */}
@@ -740,18 +832,20 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                     })
                                   }
                                   placeholder="Raison+Diplomatie:8"
+                                  aria-invalid={Boolean(testErr)}
                                   style={{
                                     width: '100%',
                                     padding: '0.5rem',
                                     boxSizing: 'border-box',
                                     backgroundColor: theme.input.background,
-                                    border: `1px solid ${theme.input.border}`,
+                                    border: `1px solid ${fieldErrorBorder(Boolean(testErr), theme.input.border)}`,
                                     color: theme.input.color,
                                     borderRadius: '4px',
                                     fontSize: '0.85rem',
                                     fontFamily: 'monospace',
                                   }}
                                 />
+                                <InlineFieldError message={testErr} />
                               </div>
                               <div style={{ flex: 1 }}>
                                 <label
@@ -774,18 +868,20 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                     })
                                   }
                                   placeholder="FLAG_NAME"
+                                  aria-invalid={Boolean(conditionErr)}
                                   style={{
                                     width: '100%',
                                     padding: '0.5rem',
                                     boxSizing: 'border-box',
                                     backgroundColor: theme.input.background,
-                                    border: `1px solid ${theme.input.border}`,
+                                    border: `1px solid ${fieldErrorBorder(Boolean(conditionErr), theme.input.border)}`,
                                     color: theme.input.color,
                                     borderRadius: '4px',
                                     fontSize: '0.85rem',
                                     fontFamily: 'monospace',
                                   }}
                                 />
+                                <InlineFieldError message={conditionErr} />
                               </div>
                             </div>
 
@@ -917,17 +1013,14 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                 }
                                 placeholder="ex: NEXT_NODE, END (termine le dialogue)"
                                 list={`node-ids-${node.id}`}
+                                aria-invalid={Boolean(targetErr)}
                                 style={{
                                   flex: 1,
                                   minWidth: 0,
                                   padding: chrome.inputPadding,
                                   boxSizing: 'border-box',
                                   backgroundColor: theme.input.background,
-                                  border: `1px solid ${
-                                    choiceErrors.some((e) => e.message.includes('targetNode'))
-                                      ? theme.state.error.border
-                                      : theme.input.border
-                                  }`,
+                                  border: `1px solid ${fieldErrorBorder(Boolean(targetErr), theme.input.border)}`,
                                   color: theme.input.color,
                                   borderRadius: '6px',
                                   fontFamily: 'monospace',
@@ -964,21 +1057,8 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                 <option key={id} value={id} />
                               ))}
                             </datalist>
+                            <InlineFieldError message={targetErr} />
                           </div>
-                          
-                          {choiceErrors.length > 0 && (
-                            <div
-                              style={{
-                                marginTop: '0.5rem',
-                                fontSize: '0.85rem',
-                                color: theme.state.error.color,
-                              }}
-                            >
-                              {choiceErrors.map((err, i) => (
-                                <div key={i}>{err.message}</div>
-                              ))}
-                            </div>
-                          )}
                         </div>
                       )
                     })}

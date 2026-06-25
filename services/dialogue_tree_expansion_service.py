@@ -13,10 +13,44 @@ from services.document_choice_id_service import ensure_document_choice_ids
 from services.graph_node_orchestrator import GraphNodeOrchestrator
 from services.scene_dramatis import enrich_context_selections_for_scene, resolve_scene_dramatis
 from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
+from services.unity_node_validation_service import (
+    ChoicesMode,
+    infer_choices_mode,
+    validate_enriched_node,
+)
 
 logger = logging.getLogger(__name__)
 
 ProgressCallback = Callable[[int, int, int, int], None]
+ExpansionStatus = str
+
+
+@dataclass
+class TreeExpansionParentFailure:
+    """Échec structuré d'expansion sur un nœud parent."""
+
+    parent_id: str
+    round_num: int
+    error: str
+    error_code: str = "expansion_failed"
+
+
+class TreeExpansionError(Exception):
+    """Erreur bloquante pendant l'expansion BFS (fail-fast)."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        failure: Optional[TreeExpansionParentFailure] = None,
+        failed_parent_details: Optional[List[TreeExpansionParentFailure]] = None,
+    ) -> None:
+        """Initialise avec message et détails optionnels."""
+        super().__init__(message)
+        self.failure = failure
+        self.failed_parent_details = failed_parent_details or (
+            [failure] if failure else []
+        )
 
 
 @dataclass
@@ -28,6 +62,8 @@ class TreeExpansionResult:
     llm_calls: int
     levels_expanded: int
     failed_parents: List[str] = field(default_factory=list)
+    failed_parent_details: List[TreeExpansionParentFailure] = field(default_factory=list)
+    expansion_status: ExpansionStatus = "complete"
     title: str = "Dialogue auto"
 
 
@@ -155,6 +191,8 @@ class DialogueTreeExpansionService:
         include_narrative_guides: bool = True,
         organization_mode: str = "narrative",
         max_context_tokens: Optional[int] = None,
+        choices_mode: Optional[ChoicesMode] = None,
+        allow_partial: bool = False,
     ) -> TreeExpansionResult:
         """Génère un dialogue complet par expansion BFS.
 
@@ -164,17 +202,24 @@ class DialogueTreeExpansionService:
             user_instructions: Consignes utilisateur pour la scène.
             context_selections: Sélection GDD.
             max_depth: Rounds de choix PJ après le START.
-            max_choices: Choix PJ par nœud intermédiaire.
+            max_choices: Choix PJ par nœud intermédiaire (branching BFS).
             npc_speaker_id: PNJ interlocuteur (optionnel).
             llm_model_identifier: Modèle LLM pour le START.
             title: Titre du dialogue.
             progress_callback: ``(level, current, total, node_count)``.
             max_concurrency: Parallélisme max par niveau BFS.
+            choices_mode: Mode capped/free (aligné UI ; défaut capped si plafond).
+            allow_partial: Si False, échec immédiat ; si True, statut partial.
 
         Returns:
             Résultat avec document Unity et métriques.
+
+        Raises:
+            TreeExpansionError: Échec parent en mode fail-fast.
         """
         from constants import Defaults
+
+        effective_choices_mode = infer_choices_mode(choices_mode, max_choices)
 
         context_builder = unity_orchestrator.dialogue_service.context_builder
         character_catalog = context_builder.get_characters_names()
@@ -201,7 +246,7 @@ class DialogueTreeExpansionService:
             user_instructions=user_instructions.strip(),
             context_selections=enriched_context,
             max_choices=max_choices,
-            choices_mode="capped",
+            choices_mode=effective_choices_mode,
             npc_speaker_id=dramatis.npc_speaker_id,
             player_character_id=dramatis.player_character_id,
             llm_model_identifier=llm_model_identifier,
@@ -214,10 +259,16 @@ class DialogueTreeExpansionService:
         start_nodes = _parse_nodes_from_unity_json(start_response.json_content)
         start_node = _find_start_node(start_nodes)
         _truncate_choices(start_node, max_choices)
+        validate_enriched_node(
+            start_node,
+            max_choices=max_choices,
+            choices_mode="capped",
+        )
 
         node_registry: Dict[str, Dict[str, Any]] = {start_node["id"]: start_node}
         llm_calls = 1
         failed_parents: List[str] = []
+        failed_parent_details: List[TreeExpansionParentFailure] = []
         frontier = [start_node["id"]]
         levels_expanded = 0
 
@@ -254,8 +305,14 @@ class DialogueTreeExpansionService:
                             dialogue_nodes=list(node_registry.values()),
                             player_character_id=dramatis.player_character_id,
                             max_depth=max_depth,
+                            choices_mode=effective_choices_mode,
                         )
                     except Exception as exc:
+                        failure = TreeExpansionParentFailure(
+                            parent_id=parent_id,
+                            round_num=round_num,
+                            error=str(exc),
+                        )
                         logger.error(
                             "Échec expansion parent %s (round %s): %s",
                             parent_id,
@@ -263,11 +320,32 @@ class DialogueTreeExpansionService:
                             exc,
                             exc_info=True,
                         )
+                        if not allow_partial:
+                            raise TreeExpansionError(
+                                f"Expansion interrompue sur parent '{parent_id}': {exc}",
+                                failure=failure,
+                            ) from exc
                         failed_parents.append(parent_id)
+                        failed_parent_details.append(failure)
                         return
 
                 batch_calls = result.generated_choices_count or len(result.nodes) or 0
                 llm_calls += max(batch_calls, 1)
+
+                for generated in result.nodes:
+                    if child_max_choices > 0:
+                        _truncate_choices(generated, max_choices)
+                        validate_enriched_node(
+                            generated,
+                            max_choices=max_choices,
+                            choices_mode="capped",
+                        )
+                    else:
+                        validate_enriched_node(
+                            generated,
+                            max_choices=0,
+                            choices_mode="capped",
+                        )
 
                 new_ids = _apply_connections(
                     node_registry,
@@ -298,11 +376,16 @@ class DialogueTreeExpansionService:
                 "nodes": list(node_registry.values()),
             }
         )
+        expansion_status: ExpansionStatus = (
+            "partial" if failed_parent_details else "complete"
+        )
         return TreeExpansionResult(
             document=document,
             node_count=len(node_registry),
             llm_calls=llm_calls,
             levels_expanded=levels_expanded,
             failed_parents=failed_parents,
+            failed_parent_details=failed_parent_details,
+            expansion_status=expansion_status,
             title=dialogue_title,
         )

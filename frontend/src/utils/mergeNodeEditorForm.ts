@@ -36,10 +36,19 @@ export function mergeDialogueNodeFormIntoStoreData(
       storeChoice?.targetNode !== undefined && storeChoice.targetNode !== ''
         ? storeChoice.targetNode
         : fc.targetNode
+    const resolvedTest =
+      storeChoice?.test !== undefined && storeChoice.test !== null && storeChoice.test !== ''
+        ? storeChoice.test
+        : fc.test
+    const { test: _formTest, ...fcWithoutTest } = fc
+    void _formTest
     return {
-      ...fc,
+      ...fcWithoutTest,
       choiceId: storeChoice?.choiceId ?? fc.choiceId,
       targetNode,
+      ...(resolvedTest !== undefined && resolvedTest !== null && resolvedTest !== ''
+        ? { test: resolvedTest }
+        : {}),
       testCriticalFailureNode: storeChoice?.testCriticalFailureNode ?? fc.testCriticalFailureNode,
       testFailureNode: storeChoice?.testFailureNode ?? fc.testFailureNode,
       testSuccessNode: storeChoice?.testSuccessNode ?? fc.testSuccessNode,

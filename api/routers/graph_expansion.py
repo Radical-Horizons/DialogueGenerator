@@ -23,10 +23,17 @@ from api.exceptions import InternalServerException, ValidationException
 from api.routers.documents import _resolve_document_base, _write_document_blob, _write_meta
 from api.routers.graph_cost import _build_representative_prompt_for_estimate
 from api.routers.graph_router_helpers import create_llm_client_for_router
-from api.schemas.graph import ExpandTreeRequest, ExpandTreeResponse
+from api.schemas.graph import (
+    ExpandTreeParentFailureDetail,
+    ExpandTreeRequest,
+    ExpandTreeResponse,
+    SchemaValidationIssueDetail,
+)
 from services.configuration_service import ConfigurationService
 from services.dialogue_tree_expansion_service import (
     DialogueTreeExpansionService,
+    TreeExpansionError,
+    TreeExpansionResult,
     estimate_tree_llm_calls,
 )
 from services.llm_pricing_service import LLMPricingService
@@ -34,6 +41,8 @@ from services.llm_usage_service import LLMUsageService
 from services.token_estimation_service import TokenEstimationService
 from services.unity_dialogue_export_service import write_unity_dialogue_to_file, unity_export_schema_validator
 from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
+from services.unity_export_validation_service import validate_unity_export_document
+from services.json_renderer.unity_json_renderer import UnityJsonRenderer
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +81,75 @@ def _estimate_tree_cost_usd(
     total_calls = estimate_tree_llm_calls(request_data.max_depth, request_data.max_choices)
     total_completion = completion_tokens_per_node * total_calls
     return pricing_service.calculate_cost(model_id, prompt_tokens, total_completion)
+
+
+def _assert_export_document_valid(
+    document: dict,
+    *,
+    request_id: str | None,
+) -> list[SchemaValidationIssueDetail]:
+    """Valide le document final (schéma Unity FR51). Lève si bloquant.
+
+    Returns:
+        Avertissements non bloquants pour la réponse API.
+    """
+    validation = validate_unity_export_document(document)
+    if not validation.is_valid:
+        raise ValidationException(
+            message="Document généré invalide (schéma Unity)",
+            details={
+                "validation_errors": validation.errors,
+                "structured_errors": validation.errors_structured,
+            },
+            request_id=request_id,
+        )
+
+    nodes = document.get("nodes")
+    if isinstance(nodes, list):
+        refs_ok, ref_errors = UnityJsonRenderer().validate_nodes(nodes)
+        if not refs_ok:
+            raise ValidationException(
+                message="Document généré invalide (références nœuds)",
+                details={"validation_errors": ref_errors},
+                request_id=request_id,
+            )
+
+    return [
+        SchemaValidationIssueDetail(**warning)
+        for warning in validation.warnings
+    ]
+
+
+def _expand_tree_response_from_result(
+    result: TreeExpansionResult,
+    *,
+    document_id: str,
+    llm_model: str,
+    cost_usd: float | None,
+    validation_warnings: list[SchemaValidationIssueDetail],
+) -> ExpandTreeResponse:
+    """Mappe un ``TreeExpansionResult`` vers le schéma HTTP."""
+    return ExpandTreeResponse(
+        document=result.document,
+        node_count=result.node_count,
+        llm_calls_estimated=result.llm_calls,
+        levels_expanded=result.levels_expanded,
+        document_id=document_id,
+        failed_parents=result.failed_parents,
+        failed_parent_details=[
+            ExpandTreeParentFailureDetail(
+                parent_id=f.parent_id,
+                round_num=f.round_num,
+                error=f.error,
+                error_code=f.error_code,
+            )
+            for f in result.failed_parent_details
+        ],
+        expansion_status=result.expansion_status,  # type: ignore[arg-type]
+        validation_warnings=validation_warnings,
+        cost_usd=cost_usd,
+        llm_model_identifier=llm_model,
+    )
 
 
 @router.post(
@@ -115,6 +193,9 @@ async def expand_tree(
                 levels_expanded=0,
                 document_id=document_id,
                 failed_parents=[],
+                failed_parent_details=[],
+                expansion_status="complete",
+                validation_warnings=[],
                 cost_usd=cost_usd,
                 llm_model_identifier=llm_model,
             )
@@ -126,43 +207,61 @@ async def expand_tree(
             request_id,
         )
 
-        result = await expansion_service.expand(
-            unity_orchestrator=unity_orchestrator,
-            llm_client=llm_client,
-            user_instructions=request_data.user_instructions,
-            context_selections=request_data.context_selections,
-            max_depth=request_data.max_depth,
-            max_choices=request_data.max_choices,
-            npc_speaker_id=request_data.npc_speaker_id,
-            player_character_id=request_data.player_character_id,
-            llm_model_identifier=llm_model,
-            title=request_data.title,
-            scene_type=request_data.scene_type,
-            include_narrative_guides=request_data.include_narrative_guides,
-            organization_mode=request_data.organization_mode,
-            max_context_tokens=request_data.max_context_tokens,
+        try:
+            result = await expansion_service.expand(
+                unity_orchestrator=unity_orchestrator,
+                llm_client=llm_client,
+                user_instructions=request_data.user_instructions,
+                context_selections=request_data.context_selections,
+                max_depth=request_data.max_depth,
+                max_choices=request_data.max_choices,
+                npc_speaker_id=request_data.npc_speaker_id,
+                player_character_id=request_data.player_character_id,
+                llm_model_identifier=llm_model,
+                title=request_data.title,
+                scene_type=request_data.scene_type,
+                include_narrative_guides=request_data.include_narrative_guides,
+                organization_mode=request_data.organization_mode,
+                max_context_tokens=request_data.max_context_tokens,
+                choices_mode=request_data.choices_mode,
+                allow_partial=request_data.allow_partial,
+            )
+        except TreeExpansionError as exc:
+            details: dict = {
+                "failed_parent_details": [
+                    {
+                        "parent_id": f.parent_id,
+                        "round_num": f.round_num,
+                        "error": f.error,
+                        "error_code": f.error_code,
+                    }
+                    for f in exc.failed_parent_details
+                ],
+            }
+            raise ValidationException(
+                message=str(exc),
+                details=details,
+                request_id=request_id,
+            ) from exc
+
+        validation_warnings = _assert_export_document_valid(
+            result.document,
+            request_id=request_id,
         )
 
         if request_data.persist:
             base_dir, doc_id = _resolve_document_base(document_id, config_service, request_id)
             _write_document_blob(base_dir, doc_id, result.document)
             _write_meta(base_dir, doc_id, 1)
-            try:
-                json_content = json.dumps(result.document, ensure_ascii=False)
-                write_unity_dialogue_to_file(
-                    config_service=config_service,
-                    json_content=json_content,
-                    filename=doc_id,
-                    title=result.title,
-                    request_id=request_id,
-                    validator=unity_export_schema_validator,
-                )
-            except Exception as export_exc:
-                logger.warning(
-                    "Export Unity fichier échoué pour %s (document persisté): %s",
-                    doc_id,
-                    export_exc,
-                )
+            json_content = json.dumps(result.document, ensure_ascii=False)
+            write_unity_dialogue_to_file(
+                config_service=config_service,
+                json_content=json_content,
+                filename=doc_id,
+                title=result.title,
+                request_id=request_id,
+                validator=unity_export_schema_validator,
+            )
 
         logger.info(
             "expand-tree terminé: %s nœuds, %s appels LLM, doc=%s (request_id=%s)",
@@ -172,15 +271,12 @@ async def expand_tree(
             request_id,
         )
 
-        return ExpandTreeResponse(
-            document=result.document,
-            node_count=result.node_count,
-            llm_calls_estimated=result.llm_calls,
-            levels_expanded=result.levels_expanded,
+        return _expand_tree_response_from_result(
+            result,
             document_id=document_id,
-            failed_parents=result.failed_parents,
+            llm_model=llm_model,
             cost_usd=None,
-            llm_model_identifier=llm_model,
+            validation_warnings=validation_warnings,
         )
 
     except ValidationException:

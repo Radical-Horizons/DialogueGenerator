@@ -10,6 +10,7 @@ import type { SaveGraphResponse } from '../../types/graph'
 import * as graphAPI from '../../api/graph'
 import * as documentsAPI from '../../api/documents'
 import { documentToGraph, graphToDocument, buildLayoutFromNodes } from '../../utils/documentToGraph'
+import { calculateDagreLayout } from '../../utils/dagreLayout'
 import { mergeLayoutWithNodePositions } from '../../utils/syncDocLayout'
 import {
   writeSnapshot as journalWriteSnapshot,
@@ -30,6 +31,75 @@ import {
   parseBindingsFromDocument,
 } from '../../utils/dialogueFlagBindings'
 import { getErrorMessage } from '../../types/errors'
+import { useGraphViewStore } from '../graphViewStore'
+import {
+  extractValidationIssuesFromApiError,
+  inlineValidationToastMessage,
+  type DocumentFieldError,
+} from '../../utils/documentValidationFieldErrors'
+
+function unityNodesFromGraph(state: GraphState): Array<{ id?: string }> {
+  const doc = graphToDocument(state.nodes, state.edges) as { nodes?: Array<{ id?: string }> }
+  return doc.nodes ?? []
+}
+
+function hasLayoutPositions(
+  layout: { nodes?: Record<string, { x: number; y: number }> } | undefined
+): boolean {
+  const nodes = layout?.nodes
+  if (!nodes) return false
+  return Object.values(nodes).some(
+    (position) => typeof position?.x === 'number' && typeof position?.y === 'number'
+  )
+}
+
+function normalizeGraphForLoad(
+  nodes: Node[],
+  edges: Edge[],
+  get: () => GraphState,
+  shouldAutoLayout: boolean
+): { nodes: Node[]; edges: Edge[] } {
+  let normalized = normalizeTestBars(nodes, edges)
+  if (shouldAutoLayout && normalized.nodes.length > 1) {
+    const layoutedNodes = calculateDagreLayout(normalized.nodes, normalized.edges, {
+      direction: 'TB',
+      spacingMode: get().layoutSpacingMode,
+    })
+    normalized = normalizeTestBars(layoutedNodes, normalized.edges)
+  }
+  return normalized
+}
+
+function applySaveFieldValidationErrors(
+  get: () => GraphState,
+  set: (partial: Partial<GraphState>) => void,
+  error: unknown,
+): { fieldErrors: DocumentFieldError[]; userMessage: string } {
+  const snap = get()
+  const { fieldErrors, unmappedMessages } = extractValidationIssuesFromApiError(
+    error,
+    unityNodesFromGraph(snap),
+    snap.nodes,
+  )
+  if (fieldErrors.length > 0) {
+    get().setDocumentFieldErrors(fieldErrors)
+    const first = fieldErrors[0]
+    if (first?.nodeId) {
+      get().setSelectedNode(first.nodeId)
+      useGraphViewStore.getState().focusNode(first.nodeId)
+    }
+  } else {
+    get().clearDocumentFieldErrors()
+  }
+  const userMessage =
+    fieldErrors.length > 0
+      ? inlineValidationToastMessage(fieldErrors.length)
+      : unmappedMessages[0] ?? getErrorMessage(error)
+  if (fieldErrors.length > 0) {
+    set({ lastSaveError: null })
+  }
+  return { fieldErrors, userMessage }
+}
 
 export type PersistenceSlice = Pick<
   GraphState,
@@ -88,7 +158,12 @@ export const createPersistenceSlice: StateCreator<
       }))
       edges = normalizeChoiceHandleInEdges(edges, nodes)
 
-      const normalized = normalizeTestBars(nodes, edges)
+      const normalized = normalizeGraphForLoad(
+        nodes,
+        edges,
+        get,
+        !hasLayoutPositions(savedPositions ? { nodes: savedPositions } : undefined)
+      )
       const document = graphToDocument(
         normalized.nodes,
         normalized.edges
@@ -152,7 +227,12 @@ export const createPersistenceSlice: StateCreator<
       }
 
       const { nodes: projectedNodes, edges: projectedEdges } = documentToGraph(doc, layoutPositions)
-      const normalized = normalizeTestBars(projectedNodes, projectedEdges)
+      const normalized = normalizeGraphForLoad(
+        projectedNodes,
+        projectedEdges,
+        get,
+        !hasLayoutPositions(layoutPositions)
+      )
       const layoutBlob = mergeLayoutWithNodePositions(serverLayout, normalized.nodes)
       const nodeCount = normalized.nodes.filter((n) => n.type !== 'testNode').length
 
@@ -204,7 +284,12 @@ export const createPersistenceSlice: StateCreator<
         doc,
         layoutPositions
       )
-      const normalized = normalizeTestBars(projectedNodes, projectedEdges)
+      const normalized = normalizeGraphForLoad(
+        projectedNodes,
+        projectedEdges,
+        get,
+        !hasLayoutPositions(layoutPositions)
+      )
       const hydratedLayout = mergeLayoutWithNodePositions(layoutBlob, normalized.nodes)
       const nodeCount = normalized.nodes.filter((n) => n.type !== 'testNode').length
 
@@ -301,6 +386,7 @@ export const createPersistenceSlice: StateCreator<
 
   saveDialogue: async () => {
     set({ isSaving: true, lastSaveError: null, syncStatus: 'synced' })
+    get().clearDocumentFieldErrors()
     const state = get()
     const documentId = state.documentId ?? state.dialogueMetadata.filename ?? null
 
@@ -369,6 +455,7 @@ export const createPersistenceSlice: StateCreator<
               isSaving: false,
               hasUnsavedChanges: false,
               lastSaveError: null,
+              documentFieldErrors: [],
               lastSavedAt: Date.now(),
               syncStatus: 'synced',
             })
@@ -388,6 +475,12 @@ export const createPersistenceSlice: StateCreator<
                 set({ isSaving: false, lastSaveError: msg, syncStatus: 'error' })
               }
               throw new Error(msg)
+            } else if (status === 400) {
+              applySaveFieldValidationErrors(get, set, docErr)
+              if (checkStillActive()) {
+                set({ isSaving: false, syncStatus: 'error' })
+              }
+              throw docErr
             } else {
               console.warn(
                 `Erreur sauvegarde via API documents, tentative legacy: ${getErrorMessage(docErr)}`
@@ -460,6 +553,7 @@ export const createPersistenceSlice: StateCreator<
         isSaving: false,
         hasUnsavedChanges: false,
         lastSaveError: null,
+        documentFieldErrors: [],
         lastSavedAt: Date.now(),
         lastAckSeq: ackSeq,
         clientSeq: nextSeq,
@@ -478,9 +572,13 @@ export const createPersistenceSlice: StateCreator<
       return response
     } catch (error) {
       if (!checkStillActive()) throw error
-      const message = error instanceof Error ? error.message : String(error)
+      const { fieldErrors, userMessage } = applySaveFieldValidationErrors(get, set, error)
       console.error('Erreur lors de la sauvegarde:', error)
-      set({ isSaving: false, lastSaveError: message, syncStatus: 'error' })
+      set({
+        isSaving: false,
+        lastSaveError: fieldErrors.length > 0 ? null : userMessage,
+        syncStatus: 'error',
+      })
       throw error
     }
   },

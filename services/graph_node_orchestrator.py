@@ -33,6 +33,11 @@ from services.dialogue_dramatic_progression import (
 )
 from services.graph_generation_service import GraphGenerationService
 from services.unity_dialogue_generation_service import UnityDialogueGenerationService
+from services.unity_node_validation_service import (
+    ChoicesMode,
+    infer_choices_mode,
+    validate_enriched_node,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -168,6 +173,7 @@ class GraphNodeOrchestrator:
         dialogue_nodes: Optional[List[Dict[str, Any]]] = None,
         player_character_id: Optional[str] = None,
         max_depth: Optional[int] = None,
+        choices_mode: Optional[ChoicesMode] = None,
     ) -> GenerationResult:
         """Point d'entrée unique – dispatche vers le bon mode de génération.
 
@@ -184,6 +190,7 @@ class GraphNodeOrchestrator:
             is_leaf=max_choices == 0,
         )
         choice_label = player_character_id or DEFAULT_PLAYER_CHARACTER
+        effective_choices_mode = infer_choices_mode(choices_mode, max_choices)
 
         if generate_all_choices:
             return await self._generate_batch(
@@ -197,6 +204,7 @@ class GraphNodeOrchestrator:
                 max_choices=max_choices,
                 dialogue_nodes=dialogue_nodes,
                 player_choice_label=choice_label,
+                choices_mode=effective_choices_mode,
             )
 
         parent_speaker = parent_node_content.get("speaker", "PNJ")
@@ -232,6 +240,7 @@ class GraphNodeOrchestrator:
                 max_choices=max_choices,
                 dialogue_nodes=dialogue_nodes,
                 player_choice_label=choice_label,
+                choices_mode=effective_choices_mode,
             )
 
         if target_choice_index is not None and not parent_choices:
@@ -249,6 +258,7 @@ class GraphNodeOrchestrator:
             target_choice_index=target_choice_index,
             dialogue_nodes=dialogue_nodes,
             player_choice_label=choice_label,
+            choices_mode=effective_choices_mode,
         )
 
     # ------------------------------------------------------------------
@@ -268,6 +278,7 @@ class GraphNodeOrchestrator:
         max_choices: Optional[int],
         dialogue_nodes: Optional[List[Dict[str, Any]]] = None,
         player_choice_label: str = DEFAULT_PLAYER_CHARACTER,
+        choices_mode: ChoicesMode = "capped",
     ) -> GenerationResult:
         if not parent_choices:
             raise ValueError("Aucun choix disponible pour la génération batch.")
@@ -284,6 +295,7 @@ class GraphNodeOrchestrator:
             progress_callback=None,
             dialogue_nodes=dialogue_nodes,
             player_choice_label=player_choice_label,
+            choices_mode=choices_mode,
         )
 
         generated_nodes = batch_result["nodes"]
@@ -398,6 +410,7 @@ class GraphNodeOrchestrator:
         max_choices: Optional[int],
         dialogue_nodes: Optional[List[Dict[str, Any]]] = None,
         player_choice_label: str = DEFAULT_PLAYER_CHARACTER,
+        choices_mode: ChoicesMode = "capped",
     ) -> GenerationResult:
         if not (0 <= target_choice_index < len(parent_choices)):
             raise ValueError(f"Index de choix invalide: {target_choice_index}.")
@@ -436,6 +449,7 @@ class GraphNodeOrchestrator:
             system_prompt_override=system_prompt_override,
             max_choices=max_choices,
             target_choice_index=target_choice_index,
+            choices_mode=choices_mode,
         )
 
     async def _generate_choice_with_test(
@@ -497,6 +511,7 @@ class GraphNodeOrchestrator:
         target_choice_index: Optional[int],
         dialogue_nodes: Optional[List[Dict[str, Any]]] = None,
         player_choice_label: str = DEFAULT_PLAYER_CHARACTER,
+        choices_mode: ChoicesMode = "capped",
     ) -> GenerationResult:
         enriched = _build_enriched_instructions(
             parent_speaker,
@@ -514,6 +529,7 @@ class GraphNodeOrchestrator:
             system_prompt_override=system_prompt_override,
             max_choices=max_choices,
             target_choice_index=target_choice_index,
+            choices_mode=choices_mode,
         )
 
     # ------------------------------------------------------------------
@@ -530,13 +546,21 @@ class GraphNodeOrchestrator:
         system_prompt_override: Optional[str],
         max_choices: Optional[int],
         target_choice_index: Optional[int],
+        choices_mode: ChoicesMode = "capped",
     ) -> GenerationResult:
         """Génération standard + enrichissement IDs + construction des connexions."""
+        if max_choices == 0:
+            llm_max_choices: Optional[int] = 0
+        elif choices_mode == "free":
+            llm_max_choices = None
+        else:
+            llm_max_choices = max_choices
+
         response = await self._generation_service.generate_dialogue_node(
             llm_client=llm_client,
             prompt=enriched_instructions,
             system_prompt_override=system_prompt_override,
-            max_choices=max_choices,
+            max_choices=llm_max_choices,
         )
 
         normalized_parent_id = _normalize_parent_id(parent_node_id)
@@ -550,6 +574,12 @@ class GraphNodeOrchestrator:
             content=response, start_id=start_id
         )
         generated_node = enriched_nodes[0]
+        pre_truncate_free = choices_mode == "free" and max_choices not in (0, None)
+        validate_enriched_node(
+            generated_node,
+            max_choices=None if pre_truncate_free else max_choices,
+            choices_mode="free" if pre_truncate_free else choices_mode,
+        )
 
         connections = self._build_normal_connections(
             parent_node_id=parent_node_id,

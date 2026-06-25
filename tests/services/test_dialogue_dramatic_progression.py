@@ -56,6 +56,13 @@ class TestComposeGenerationInstructions:
         out = compose_generation_instructions("", depth=0, is_start=True)
         assert "guillemets" in out
 
+    def test_allows_choice_tests_with_parsimony(self) -> None:
+        """Régression : le prompt ne doit pas interdire totalement `choices.test`."""
+        out = compose_generation_instructions("Scène test", depth=1, max_depth=4)
+        assert "`choices.test` autorisé" in out
+        assert "éviter d'en mettre partout" in out
+        assert "Ne pas ajouter d'attribut test" not in out
+
     def test_orality_prompt_lines_for_xml(self) -> None:
         joined = "\n".join(DIALOGUE_ORALITY_PROMPT_LINES)
         assert "italique" in joined

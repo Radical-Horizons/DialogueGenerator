@@ -153,6 +153,20 @@ describe('mergeDialogueNodeFormIntoStoreData', () => {
     expect(c?.testSuccessNode).toBe('STORE_S')
     expect(c?.testFailureNode).toBe('FORM_F')
   })
+
+  it('prefers store test string when form omits or clears test field', () => {
+    const nodeData: Record<string, unknown> = {
+      id: 'D1',
+      choices: [{ text: 'c', choiceId: '0', test: 'Raison+Diplomatie:8' }] as Choice[],
+    }
+    const formValues: DialogueNodeData = {
+      id: 'D1',
+      choices: [{ text: 'c', choiceId: '0', test: '' }],
+    }
+    const out = mergeDialogueNodeFormIntoStoreData(nodeData, formValues) as DialogueNodeData
+    expect(out.choices?.[0]?.test).toBe('Raison+Diplomatie:8')
+  })
+
   it('store choice with explicit empty test* string keeps empty (no fallback to form)', () => {
     const nodeData: Record<string, unknown> = {
       id: 'D1',

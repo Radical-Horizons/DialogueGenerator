@@ -335,6 +335,17 @@ def _parse_args() -> argparse.Namespace:
         default=ModelNames.GPT_5_MINI,
         help=f"Modèle LLM (expand-tree : {ModelNames.GPT_5_MINI} uniquement)",
     )
+    parser.add_argument(
+        "--choices-mode",
+        choices=("free", "capped"),
+        default="capped",
+        help="Mode choix LLM (aligné UI ; défaut capped pour branching explicite)",
+    )
+    parser.add_argument(
+        "--allow-partial",
+        action="store_true",
+        help="Continuer l'expansion si un parent échoue (statut partial)",
+    )
     return parser.parse_args()
 
 
@@ -370,6 +381,8 @@ def main() -> int:
         "scene_type": args.scene_type,
         "include_narrative_guides": True,
         "organization_mode": "narrative",
+        "choices_mode": args.choices_mode,
+        "allow_partial": args.allow_partial,
     }
     if args.document_id:
         payload["document_id"] = args.document_id
@@ -430,7 +443,9 @@ def main() -> int:
             "node_count": result.get("node_count"),
             "llm_calls_estimated": result.get("llm_calls_estimated"),
             "levels_expanded": result.get("levels_expanded"),
+            "expansion_status": result.get("expansion_status"),
             "failed_parents": result.get("failed_parents"),
+            "failed_parent_details": result.get("failed_parent_details"),
             "cost_usd": result.get("cost_usd"),
             "llm_model_identifier": result.get("llm_model_identifier"),
         },
@@ -439,8 +454,12 @@ def main() -> int:
     ))
 
     failed = result.get("failed_parents") or []
+    expansion_status = result.get("expansion_status") or "complete"
+    if expansion_status == "partial" and failed:
+        print(f"Expansion partielle: {len(failed)} parent(s) en échec", file=sys.stderr)
+
     total_nodes = result.get("node_count") or 0
-    if total_nodes > 0 and len(failed) > max(1, total_nodes // 10):
+    if args.allow_partial and total_nodes > 0 and len(failed) > max(1, total_nodes // 10):
         print(f"Trop d'échecs parents: {len(failed)}", file=sys.stderr)
         return 2
 

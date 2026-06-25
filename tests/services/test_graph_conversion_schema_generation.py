@@ -3,41 +3,14 @@ from __future__ import annotations
 
 from services.graph_conversion_service import GraphConversionService
 from services.unity_export_validation_service import validate_unity_export_document
-
-
-def _generated_start_graph_payload() -> tuple[list[dict], list[dict]]:
-    """Simule le store React Flow après génération d'un nœud START depuis le graphe."""
-    nodes = [
-        {
-            "id": "START",
-            "type": "dialogueNode",
-            "position": {"x": 0, "y": 0},
-            "data": {
-                "id": "START",
-                "speaker": "PNJ",
-                "line": "Bonjour voyageur",
-                "consequences": {
-                    "flag": "FLAG_rencontre_valkazer_init",
-                    "description": "Première rencontre",
-                },
-                "choices": [
-                    {
-                        "text": "Tenter",
-                        "test": "Volonté+Adaptabilité:12",
-                    }
-                ],
-            },
-        }
-    ]
-    edges: list[dict] = []
-    return nodes, edges
+from tests.fixtures.unity_post_generation import react_flow_graph_payload
 
 
 class TestGraphConversionGeneratedDialogueSchema:
     """validate-schema et export graphe couvrent les sorties LLM brutes."""
 
     def test_graph_to_unity_document_validates_after_generation_like_payload(self) -> None:
-        nodes, edges = _generated_start_graph_payload()
+        nodes, edges = react_flow_graph_payload()
         document = GraphConversionService.graph_to_unity_document(nodes, edges)
         result = validate_unity_export_document(document)
 

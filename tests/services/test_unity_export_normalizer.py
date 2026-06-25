@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from api.utils.unity_schema_validator import validate_unity_json
+from api.utils.unity_schema_validator import validate_unity_json_structured
 from services.unity_export_normalizer import (
     normalize_unity_export_document,
     prepare_unity_export_document,
@@ -84,22 +85,10 @@ class TestUnityExportNormalizer:
 
     def test_generated_start_dialogue_valid_after_normalization(self) -> None:
         """Régression : génération graphe START + choix test sans choiceId/targetNode."""
-        doc = {
-            "schemaVersion": "1.2.0",
-            "nodes": [
-                {
-                    "id": "START",
-                    "speaker": "PNJ",
-                    "line": "Bonjour",
-                    "choices": [
-                        {
-                            "text": "Tenter",
-                            "test": "Volonté+Adaptabilité:12",
-                        }
-                    ],
-                }
-            ],
-        }
+        from tests.fixtures.unity_post_generation import RAW_POST_GENERATION_DOCUMENT
+
+        doc = dict(RAW_POST_GENERATION_DOCUMENT)
+        doc["nodes"] = [dict(RAW_POST_GENERATION_DOCUMENT["nodes"][0])]
         result = validate_unity_export_document(doc)
         assert result.is_valid is True, result.errors
         choice = doc["nodes"][0]["choices"][0]
@@ -109,19 +98,94 @@ class TestUnityExportNormalizer:
 
     def test_normalizes_lowercase_consequences_flag(self) -> None:
         """Régression : flags LLM en camelCase/minuscules → SCREAMING_SNAKE_CASE."""
+        from tests.fixtures.unity_post_generation import RAW_POST_GENERATION_NODE
+
         doc = {
             "schemaVersion": "1.2.0",
             "nodes": [
                 {
                     "id": "START",
                     "line": "Rencontre",
-                    "consequences": {
-                        "flag": "FLAG_rencontre_valkazer_init",
-                        "description": "Première rencontre",
-                    },
+                    "consequences": dict(RAW_POST_GENERATION_NODE["consequences"]),
                 }
             ],
         }
         result = validate_unity_export_document(doc)
         assert result.is_valid is True, result.errors
         assert doc["nodes"][0]["consequences"]["flag"] == "FLAG_RENCONTRE_VALKAZER_INIT"
+
+    def test_removes_empty_visibility_conditions_blocks(self) -> None:
+        """Régression : formulaire graphe sans condition ne persiste pas un bloc vide."""
+        doc = {
+            "schemaVersion": "1.2.0",
+            "nodes": [
+                {
+                    "id": "START",
+                    "line": "Hello",
+                    "visibilityConditions": {"items": []},
+                    "choices": [
+                        {
+                            "choiceId": "go",
+                            "text": "Go",
+                            "targetNode": "END",
+                            "visibilityConditions": {"items": []},
+                        }
+                    ],
+                }
+            ],
+        }
+        result = validate_unity_export_document(doc)
+        assert result.is_valid is True, result.errors
+        node = doc["nodes"][0]
+        assert "visibilityConditions" not in node
+        assert "visibilityConditions" not in node["choices"][0]
+
+    def test_choices_within_limit_passes_without_cutscene(self) -> None:
+        """Régression : 5 choix hors cutscene ne doit pas être rejeté (max 8)."""
+        doc = {
+            "schemaVersion": "1.2.0",
+            "nodes": [
+                {
+                    "id": "START",
+                    "line": "Hello",
+                    "choices": [
+                        {
+                            "choiceId": f"choice_START_{idx}",
+                            "text": f"Choice {idx}",
+                            "targetNode": "END",
+                        }
+                        for idx in range(5)
+                    ],
+                }
+            ],
+        }
+        valid, errors = validate_unity_json_structured(doc)
+        assert valid is True
+        assert errors == []
+
+    def test_choices_too_long_in_cutscene_is_actionable(self) -> None:
+        """Régression UX : maxItems cutscene ne doit pas dumper tout le tableau JSON."""
+        doc = {
+            "schemaVersion": "1.2.0",
+            "nodes": [
+                {
+                    "id": "START",
+                    "line": "Hello",
+                    "cutsceneMode": True,
+                    "choices": [
+                        {
+                            "choiceId": f"choice_START_{idx}",
+                            "text": f"Choice {idx}",
+                            "targetNode": "END",
+                        }
+                        for idx in range(5)
+                    ],
+                }
+            ],
+        }
+        valid, errors = validate_unity_json_structured(doc)
+        assert valid is False
+        assert errors[0]["code"] == "schema_max_items"
+        assert errors[0]["path"] == "nodes.0.choices"
+        assert errors[0]["message"] == "Trop de choix : maximum 4 choix autorisés en mode cutscene."
+        assert "choice_START_0" not in errors[0]["message"]

@@ -1,7 +1,59 @@
 """Formatage des erreurs jsonschema en messages utilisateur français (Story 5.3 / FR51)."""
 from __future__ import annotations
 
+import re
 from typing import Any, Dict, Optional
+
+TEST_FIELD_PATTERN = re.compile(r"^[^\s:+]+\+[^\s:+]+:\d+$")
+
+
+def is_test_field_path(path: str) -> bool:
+    """Indique si le chemin JSON pointe vers un champ ``test`` (nœud ou choix)."""
+    if not path:
+        return False
+    return path == "test" or path.endswith(".test")
+
+
+def format_test_pattern_error(instance: Any) -> str:
+    """Message actionnable pour un champ ``test`` hors format Unity.
+
+    Args:
+        instance: Valeur reçue (ex. ``Raison+Déplacement silencieux:9``).
+
+    Returns:
+        Message utilisateur en français, sans regex technique.
+    """
+    value = str(instance).strip() if instance is not None else ""
+    base = (
+        "Format attendu : Attribut+Compétence:DD (ex. Raison+Rhétorique:8). "
+        "L'attribut et la compétence ne doivent contenir ni espace, ni « : », ni « + »."
+    )
+    if not value:
+        return base
+
+    before_dd, _, dd_part = value.partition(":")
+    if not dd_part.isdigit():
+        return (
+            f"{base} Valeur reçue : « {value} » — le DD après « : » doit être un nombre entier."
+        )
+
+    if "+" not in before_dd:
+        return (
+            f"{base} Valeur reçue : « {value} » — il manque le « + » entre attribut et compétence."
+        )
+
+    attribute, _, skill = before_dd.partition("+")
+    if not attribute or not skill:
+        return f"{base} Valeur reçue : « {value} »."
+
+    if " " in attribute or " " in skill:
+        spaced = attribute if " " in attribute else skill
+        return (
+            f"{base} Valeur reçue : « {value} » — « {spaced} » contient un espace ; "
+            "utilisez le nom exact de la compétence (sans espace), tel que dans le GDD."
+        )
+
+    return f"{base} Valeur reçue : « {value} »."
 
 
 def _field_label_from_path(path: str) -> str:
@@ -43,6 +95,9 @@ def format_jsonschema_error_to_french(error: Any) -> str:
     if "choiceId" in raw_message and "required" in raw_message.lower():
         return f"Erreur schéma Unity : champ requis 'choiceId' manquant ({path or 'choices'})"
 
+    if validator == "pattern" and is_test_field_path(path):
+        return f"Erreur schéma Unity : champ '{field}' — {format_test_pattern_error(getattr(error, 'instance', None))}"
+
     if path:
         return f"Erreur schéma Unity : [{path}] {raw_message}"
     return f"Erreur schéma Unity : {raw_message}"
@@ -69,6 +124,9 @@ def format_structured_error_to_french(structured: Dict[str, Any]) -> str:
         return f"Erreur schéma Unity : champ requis 'choiceId' manquant ({loc})"
 
     if code == "schema_type_mismatch":
+        return message
+
+    if code == "schema_pattern_test":
         return message
 
     if message.startswith("Erreur schéma Unity"):

@@ -94,9 +94,20 @@ def _is_placeholder_choice(choice: Dict[str, Any]) -> bool:
     return True
 
 
+def _remove_empty_visibility_conditions(payload: Dict[str, Any]) -> None:
+    """Supprime un bloc ``visibilityConditions`` vide."""
+    visibility = payload.get("visibilityConditions")
+    if not isinstance(visibility, dict):
+        return
+    items = visibility.get("items")
+    if not isinstance(items, list) or len(items) == 0:
+        payload.pop("visibilityConditions", None)
+
+
 def _clean_choice(choice: Dict[str, Any]) -> Dict[str, Any]:
     """Nettoie un choix exporté pour conformité schéma Unity."""
     cleaned = dict(choice)
+    _remove_empty_visibility_conditions(cleaned)
     for key in _NULLABLE_INT_FIELDS:
         if cleaned.get(key) is None:
             cleaned.pop(key, None)
@@ -118,6 +129,7 @@ def _clean_choice(choice: Dict[str, Any]) -> Dict[str, Any]:
 def _clean_node(node: Dict[str, Any]) -> Dict[str, Any]:
     """Nettoie un nœud Unity (choix, métadonnées vides)."""
     cleaned = dict(node)
+    _remove_empty_visibility_conditions(cleaned)
     if cleaned.get("title") == "":
         cleaned.pop("title", None)
     if "consequences" in cleaned:

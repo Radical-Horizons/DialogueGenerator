@@ -282,6 +282,39 @@ class TestUnitySchemaV1_1_0:
         assert "code" in err and "message" in err and "path" in err
         assert err["code"] == "missing_choice_id" or "choiceId" in err.get("message", "")
 
+    def test_validate_unity_json_structured_rejects_invalid_choice_test(self, real_schema_path):
+        """Test choix avec espace dans compétence : message actionnable, pas de regex."""
+        if not real_schema_path.exists():
+            pytest.skip("Schéma dialogue-format.schema.json absent")
+        document = {
+            "schemaVersion": "1.2.0",
+            "nodes": [
+                {
+                    "id": "START",
+                    "line": "Hello",
+                    "choices": [
+                        {
+                            "choiceId": "choice_START_0",
+                            "text": "Test",
+                            "targetNode": "END",
+                            "test": "Raison+Déplacement silencieux:9",
+                        }
+                    ],
+                }
+            ],
+        }
+        with patch("api.utils.unity_schema_validator._SCHEMA_PATH", real_schema_path):
+            import api.utils.unity_schema_validator
+            api.utils.unity_schema_validator._schema_cache = None
+            is_valid, errors_structured = validate_unity_json_structured(document)
+        assert is_valid is False
+        err = errors_structured[0]
+        assert err["code"] == "schema_pattern_test"
+        assert err["path"] == "nodes.0.choices.0.test"
+        assert "Attribut+Compétence:DD" in err["message"]
+        assert "Déplacement silencieux" in err["message"]
+        assert "^" not in err["message"]
+
     def test_validate_unity_json_structured_accepts_valid_document(self, real_schema_path):
         """Document v1.1.0 valide avec choiceId : validation structurée réussit (True, [])."""
         if not real_schema_path.exists():

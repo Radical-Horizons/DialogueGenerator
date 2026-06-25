@@ -98,6 +98,14 @@ description: Structure et bonnes pratiques pour les tests pytest
 - **Nouvelle fonctionnalité** : Tests requis pour validation, edge cases, erreurs
 - **Couverture** : Viser >80% pour code critique (services, API)
 
+## Persistance Unity / schéma dialogue
+
+- **Fixture canonique** : `tests/fixtures/unity_post_generation.py` (`RAW_POST_GENERATION_DOCUMENT`) et miroir `frontend/src/testFixtures/rawPostGeneration.ts` — réutiliser pour export, PUT, `enrich_with_ids`, validate-schema, Vitest.
+- **Validateur obligatoire** : tout **nouveau chemin de persistance** (save, export, write fichier) doit passer par `validate_unity_export_document` (normalisation + schéma + GDD). Réserver `validate_unity_json_structured` aux tests unitaires du validateur brut ou aux assertions « sans normaliseur ».
+- **Schéma choices** (`docs/resources/dialogue-format.schema.json`, miroir `docs/JsonDocUnity/Documentation/`) : max **8** choix par nœud ; max **4** seulement si `cutsceneMode: true`. Tout `if/then` sur une propriété optionnelle doit inclure `"required": ["cutsceneMode"]` dans le `if` — sinon jsonschema applique le `then` par défaut (piège connu).
+- **Tests régression** : `tests/services/test_unity_export_normalizer.py` (messages `maxItems`, cutscene vs normal) ; `frontend/src/utils/documentValidationFieldErrors.test.ts` (mapping inline).
+- **Contrat intégration** : `tests/integration/test_unity_schema_save_contract.py` et `tests/api/test_graph_generate_node_schema_contract.py` couvrent génération IA → validate-schema → PUT.
+
 ## Références
 
 - **Tiers T0–T3 (vitesse, scripts npm)** : `.cursor/commands/test-tiers.md`

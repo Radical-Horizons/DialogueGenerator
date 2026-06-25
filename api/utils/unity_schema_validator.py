@@ -12,7 +12,9 @@ structurée (utilisée par PUT documents) retombe sur ``UnityJsonRenderer.valida
 import json
 import logging
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from services.unity_schema_error_formatter import format_test_pattern_error, is_test_field_path
 
 logger = logging.getLogger(__name__)
 
@@ -160,6 +162,22 @@ def _error_to_structured(error: Any) -> Dict[str, Any]:
     """Convertit une erreur jsonschema en dict structuré (code, message, path)."""
     path_dot = ".".join(str(p) for p in error.path) if error.path else ""
     msg = getattr(error, "message", str(error))
+    validator = getattr(error, "validator", None)
+    validator_value = getattr(error, "validator_value", None)
+    if validator == "maxItems" and path_dot.endswith("choices"):
+        limit = validator_value if isinstance(validator_value, int) else 8
+        if limit == 4:
+            msg = "Trop de choix : maximum 4 choix autorisés en mode cutscene."
+        else:
+            msg = f"Trop de choix : maximum {limit} choix autorisés pour un nœud Unity."
+        return {"code": "schema_max_items", "message": msg, "path": path_dot}
+    if validator == "minItems" and path_dot.endswith("choices"):
+        msg = "La liste des choix ne doit pas être vide. Supprimez le bloc choices ou ajoutez un choix valide."
+        return {"code": "schema_min_items", "message": msg, "path": path_dot}
+    if validator == "pattern" and is_test_field_path(path_dot):
+        instance = getattr(error, "instance", None)
+        msg = format_test_pattern_error(instance)
+        return {"code": "schema_pattern_test", "message": msg, "path": path_dot}
     code = "missing_choice_id" if "choiceId" in msg and "required" in msg.lower() else "validation_error"
     return {"code": code, "message": msg, "path": path_dot}
 
