@@ -1,6 +1,6 @@
 {
   "name": "dialogue-generator",
-  "version": "1.0.1",
+  "version": "1.7.1",
   "description": "DialogueGenerator - API REST FastAPI + Frontend React",
   "scripts": {
     "setup": "powershell -ExecutionPolicy Bypass -File scripts/setup-venv.ps1",
@@ -23,6 +23,7 @@
     "version:bump:patch": "npm version patch --no-git-tag-version && npm run version:sync",
     "version:bump:minor": "npm version minor --no-git-tag-version && npm run version:sync",
     "version:bump:major": "npm version major --no-git-tag-version && npm run version:sync",
+    "release:commits-since-prod": "powershell -ExecutionPolicy Bypass -File scripts/list-commits-since-prod.ps1",
     "verify:app-version": "node scripts/verify-app-version.js",
     "build:check": "node scripts/verify-app-version.js && node scripts/check-build.js",
     "start": "node scripts/getPythonPath.js -m api.main",

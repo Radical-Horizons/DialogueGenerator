@@ -8,6 +8,7 @@ alwaysApply: false
 ---
 
 - **Référence longue** : `docs/deployment/PRODUCTION.md` (serveur, systemd, nginx, logs, `.env` prod). URL publique de référence : `demo.auto-diffusion.net`.
+- **Release prod (semver + canvas)** : **`.cursor/rules/app_versioning.mdc`** · skill `/prod-release` · deploy `npm run deploy`.
 
 - **Commandes racine** : `npm run deploy:check` (prérequis / `.env` local) ; `npm run deploy:build` (frontend seul) ; `npm run deploy` → `scripts/deploy-production.ps1`. Variantes : `deploy:skip-build`, `deploy:skip-restart`. WSL / Linux : `scripts/deploy-from-wsl.sh`.
 
