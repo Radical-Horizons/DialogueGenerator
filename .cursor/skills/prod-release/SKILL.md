@@ -44,7 +44,7 @@ Rule versioning : [`.cursor/rules/app_versioning.mdc`](../../rules/app_versionin
 # Depuis la racine du dépôt
 powershell -ExecutionPolicy Bypass -File scripts/list-commits-since-prod.ps1
 powershell -ExecutionPolicy Bypass -File scripts/list-commits-since-prod.ps1 -Json
-powershell -ExecutionPolicy Bypass -File scripts/list-commits-since-prod.ps1 -SinceTag v1.2.0
+powershell -ExecutionPolicy Bypass -File scripts/list-commits-since-prod.ps1 -SinceTag v1.7.1
 ```
 
 Lire **chaque** sujet de commit ; regrouper par thème. Pour les epics passées, lister les merges PR (`git log --merges --grep="Epic"`). Cartographie : [`references/epic-pr-map.md`](references/epic-pr-map.md).
@@ -53,8 +53,8 @@ Comptage manuel si besoin :
 
 ```powershell
 git tag -l "v*" --sort=-v:refname
-git rev-list --count v1.2.0..HEAD
-git log v1.2.0..HEAD --oneline
+git rev-list --count v1.7.1..HEAD
+git log v1.7.1..HEAD --oneline
 ```
 
 ---

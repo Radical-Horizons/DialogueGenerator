@@ -36,8 +36,22 @@ Toujours enchaîner `npm run verify:app-version` après un bump.
 2. Committer les trois fichiers version si bumpé.
 3. Mettre à jour le canvas `canvases/app-versions.canvas.tsx` (entrée en tête de `VERSIONS`, `pr` + `epic` + highlights).
 4. Après deploy OK : tag annoté `vX.Y.Z` sur le commit déployé, `git push origin vX.Y.Z`.
+5. Mettre à jour `epic-pr-map.md` (ligne tag + commit) si merge epic ou patch prod.
 
-Checklist complète, canvas, CI T3 : skill **`/prod-release`** (`.cursor/skills/prod-release/SKILL.md`) · cartographie PR → semver : `references/epic-pr-map.md`.
+Checklist complète, canvas, CI T3 : skill **`/prod-release`** (`.cursor/skills/prod-release/SKILL.md`) · cartographie PR → semver : `references/epic-pr-map.md` · échelle tags : `docs/releases/semver-and-tags.md`.
+
+## Tags git
+
+- Format : `vMAJOR.MINOR.PATCH` (annotés), sur le commit merge epic ou commit deploy patch.
+- Lister : `git tag -l "v*" --sort=v:refname` · legacy `1.0` / `v1.1` (deploy infra) ≠ échelle semver.
+- Push : `git push origin vX.Y.Z` (ou `--tags` si lot validé).
+
+## Rétrospective epic (BMAD)
+
+À la clôture d'une epic (`_bmad/bmm/workflows/4-implementation/retrospective/instructions.md`) :
+
+- Section **Version livrée** dans le markdown retro : semver, tag `vX.Y.Z`, PR merge, lien `epic-pr-map.md`.
+- Vérifier que le tag existe sur le commit merge ; sinon le créer et pousser (étape alignement version du workflow).
 
 ## Health prod
 

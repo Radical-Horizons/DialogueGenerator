@@ -98,7 +98,7 @@ Specialized reviewers — invoke with `/name` or naturally. See `.cursor/rules/s
 - **Frontend tests (T1)** : `cd frontend && npx vitest run src/chemin/Fichier.test.ts --reporter=dot` ou `npm run test:quick` ; **T3** : `VITEST_FULL=1` + `npm run test:full` / `test:ci` selon `workflow.mdc`
 - **Start dev**: `npm run dev` or start backend/frontend separately as shown above
 - **Call API (agents)**: `.cursor/commands/api-runbook.md` · `npm run api:invoke -- -Method GET -Path /health`
-- **Passe en prod (semver + canvas versions)**: `.cursor/commands/prod-release.md` · `.cursor/rules/app_versioning.mdc` · `npm run release:commits-since-prod`
+- **Passe en prod (semver + canvas versions)**: `.cursor/commands/prod-release.md` · `.cursor/rules/app_versioning.mdc` · `docs/releases/semver-and-tags.md` · tags git `vX.Y.Z` · rétro epic = section **Version livrée** · `npm run release:commits-since-prod`
 
 ## Learned User Preferences
 

@@ -1329,6 +1329,30 @@ Bob (Scrum Master): "See you all when prep work is done. Meeting adjourned!"
 
 </step>
 
+<step n="10b" goal="Align product version (semver) with epic closure">
+
+<action>Load semver mapping: `.cursor/skills/prod-release/references/epic-pr-map.md` and rule `.cursor/rules/app_versioning.mdc`</action>
+
+<action>Determine shipped semver for Epic {{epic_number}}: +1 minor from chronological epic PR merge order (not epic number). If epic not yet merged, note "pending merge" and skip tag creation.</action>
+
+<action>Verify annotated git tag `vX.Y.0` exists on the epic merge commit; if missing, create with message `Release X.Y.0 — Epic {{epic_number}} (PR #N)` and push `git push origin vX.Y.0`</action>
+
+<action>Confirm `package.json` version matches prod state after any post-epic patches; `npm run verify:app-version`</action>
+
+<action>Ensure canvas `canvases/app-versions.canvas.tsx` has an entry for this semver (highlights from retro themes)</action>
+
+<output>
+Bob (Scrum Master): "Before we file the retro, let's lock the release line."
+
+**Version livrée (semver)** : {{shipped_semver}} · tag `v{{shipped_semver}}` · PR merge {{epic_pr_ref}}
+
+Charlie (Senior Dev): "Tag on merge commit keeps deploy history honest."
+
+Alice (Product Owner): "That goes in the retro doc so stakeholders see what shipped."
+</output>
+
+</step>
+
 <step n="11" goal="Save Retrospective and Update Sprint Status">
 
 <action>Ensure retrospectives folder exists: {implementation_artifacts}</action>
@@ -1349,6 +1373,7 @@ Bob (Scrum Master): "See you all when prep work is done. Meeting adjourned!"
 - Significant discoveries and epic update recommendations (if any)
 - Readiness assessment
 - Commitments and next steps
+- **Version livrée** (semver, tag git `vX.Y.Z`, PR merge, lien `epic-pr-map.md` / `docs/releases/semver-and-tags.md`)
 
 <action>Format retrospective document as readable markdown with clear sections</action>
 <action>Set filename: {implementation_artifacts}/epic-{{epic_number}}-retro-{date}.md</action>
