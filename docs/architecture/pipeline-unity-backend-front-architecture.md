@@ -55,6 +55,9 @@ Le pipeline actuel (Unity ⇄ Backend Python ⇄ Front React Flow) a évolué av
 
 - **Draft** (non bloquant) : autosave autorisé.
 - **Export** (bloquant) : utilise la règle « refus sans choiceId » pour schemaVersion >= 1.1.0 ; erreurs structurées (code, message, path). Voir `api/utils/unity_schema_validator.py` et `validate_unity_json_structured()`.
+- **Normalisation** : `services/unity_export_normalizer.py` nettoie placeholders et champs vides avant validation export.
+- **Écriture disque** : `services/unity_dialogue_export_service.py` — validation schéma, écriture atomique (tmp → fsync → rename), sidecar `last_seq` (ADR-006), garde path traversal (`safe_export_filename`, `_resolve_export_path`).
+- **Journal métier** : `GET /api/v1/exports/logs` — tentatives export dans `data/logs/exports/` (`ExportLogService`).
 
 ---
 

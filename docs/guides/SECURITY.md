@@ -179,6 +179,20 @@ Les endpoints de preview et validation document bornent la taille des payloads *
 
 Dépassement → `422` (validation Pydantic) avant exécution métier.
 
+## Protection path traversal (export Unity)
+
+Les endpoints d'écriture et de téléchargement Unity rejettent les identifiants qui sortiraient du répertoire configuré (`unity_dialogues_path` via `ConfigurationService`).
+
+| Entrée | Validation | Service |
+|--------|------------|---------|
+| `filename` (export, batch-download) | Basename `.json` uniquement ; pas de `..`, `/`, `\` | `safe_export_filename()` — `services/unity_dialogue_download_service.py` |
+| `document_id` (preview, download, validate-schema, batch-export) | Même règles sur l'identifiant sans extension | `safe_document_id()` — `services/unity_persisted_document_io.py` |
+| Chemin d'écriture résolu | `Path.resolve().relative_to(unity_dir)` obligatoire | `_resolve_export_path()` — `services/unity_dialogue_export_service.py` |
+
+**Réponses API** : `ExportUnityDialogueResponse.file_path` est déprécié et non renvoyé — évite la fuite du chemin absolu serveur. Utiliser `filename` côté client.
+
+**Tests de régression** : `tests/api/test_dialogue_download_story_5_4.py` (`TestExportWritePathTraversal`), `tests/services/test_unity_export_validation_service.py`.
+
 ## Réponses d'erreur en production
 
 Quand `ENVIRONMENT=production` :

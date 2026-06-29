@@ -327,12 +327,18 @@ Chaque entrée de log contient :
 
 | Action | Endpoint / UI | Persistance disque | Validation schéma |
 |--------|---------------|-------------------|-------------------|
-| Prévisualiser (graphe) | `POST /api/v1/documents/{id}/unity-export/preview` · menu **Actions → Prévisualiser export** | Non | Oui (réponse JSON normalisée) |
-| Exporter (graphe) | `POST /api/v1/documents/{id}/unity-export` · **Export Unity** | Oui (`Assets/Dialogue/…`) | Oui avant écriture |
-| Batch (liste) | `POST /api/v1/unity-dialogues/batch-export` · page `/unity-dialogues` | Oui | Oui par fichier |
-| Journal export | `GET /api/v1/unity-dialogues/export-log` | — | — |
+| Prévisualiser (graphe) | `POST /api/v1/unity-dialogues/graph/preview-export` · menu **Actions → Prévisualiser export** | Non | Oui (réponse JSON normalisée) |
+| Exporter (graphe) | `POST /api/v1/unity-dialogues/graph/save-and-write` · **Export Unity** (toolbar) | Oui (`unity_dialogues_path`) | Oui avant écriture |
+| Prévisualiser (bibliothèque) | `GET /api/v1/dialogues/{document_id}/preview-export` · page `/unity-dialogues` | Non | Oui |
+| Exporter JSON brut | `POST /api/v1/dialogues/unity/export` | Oui | Oui avant écriture |
+| Batch (liste) | `POST /api/v1/dialogues/batch-export` · page `/unity-dialogues` | Oui | Oui par fichier (sauf `skip_validation`) |
+| Télécharger | `GET /api/v1/dialogues/{document_id}/download` · `POST /api/v1/dialogues/batch-download` (ZIP) | — | — |
+| Valider schéma (bibliothèque) | `POST /api/v1/dialogues/{document_id}/validate-schema` | Non | Oui |
+| Journal export | `GET /api/v1/exports/logs` | — | — |
 
 Normalisation pré-validation : choix placeholder `__idx_*` sans texte ni cible, champs `null`/vides (`influenceDelta`, `respectDelta`, `condition`, `test`, `title`). Service : `services/unity_export_normalizer.py`. Migration legacy : `python scripts/normalize_unity_dialogues.py` (dry-run) puis `--apply`.
+
+**Sécurité écriture** : `filename` et `document_id` sont validés (`safe_export_filename`, `safe_document_id`) — rejet de `..`, `/`, `\` ; le chemin résolu doit rester sous `unity_dialogues_path`. Les réponses n'exposent pas le chemin absolu serveur (`file_path` déprécié). Détail : [`docs/guides/SECURITY.md`](docs/guides/SECURITY.md).
 
 - `GET /api/v1/config/unity-dialogues-path` - Chemin configuré des dialogues Unity
 - `PUT /api/v1/config/unity-dialogues-path` - Configurer le chemin des dialogues Unity

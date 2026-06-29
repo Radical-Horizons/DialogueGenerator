@@ -44,6 +44,8 @@ Mesure : hook `useGraphToolbarLayoutMode` (`frontend/src/hooks/useGraphToolbarLa
 
 > **Note (2026-06)** : l'ancien mode intermédiaire « compact desktop » (640–1099px, deux rangées) a été retiré ; le refactor tri-state complet est couvert par les stories 17.9–17.11 (plus de dette DT-1 séparée).
 
+`GraphEditorHeader` délègue l'UI à des sous-composants (`GraphToolbarTitleBlock`, `GraphToolbarToolsRow`, `GraphToolbarStatusRow`, `GraphToolbarUndoRedoButtons`) et au hook `useGraphToolbarLayoutMode` / `useGraphToolbarMenuItems`.
+
 **Actions principales** :
 
 - **Titre** : Éditable, nom du dialogue
@@ -51,7 +53,7 @@ Mesure : hook `useGraphToolbarLayoutMode` (`frontend/src/hooks/useGraphToolbarLa
 - **Auto-layout** : Organise automatiquement les nœuds (Ctrl+L)
 - **Valider** : Vérifie le graphe (Ctrl+K)
 - **Sauvegarder** : Sauvegarde en Unity JSON (Ctrl+S)
-- **Exporter Unity** : Télécharge le JSON Unity depuis le store (`exportToUnity`)
+- **Exporter Unity** : Valide puis écrit via `POST /api/v1/unity-dialogues/graph/save-and-write` (toolbar). **Prévisualiser export** (menu Actions) appelle `POST …/preview-export` sans écriture disque. Export client local (`exportToUnity` dans le store) reste disponible pour inspection JSON hors disque Unity.
 
 ### Canvas
 
@@ -204,23 +206,23 @@ Option B : Depuis l'URL
 - **unreachable_node** : Nœud inaccessible depuis START
 - **cycle_detected** : Cycle dans le graphe (peut être intentionnel)
 
-## Limitations Actuelles (MVP)
+## Limitations Actuelles
 
 ### Non implémenté
 
-- ❌ Génération de nœuds avec IA (depuis le graphe)
-- ❌ Édition avancée des choix (conditions, mécaniques RPG)
-- ❌ Auto-layout Dagre (avec animation)
-- ❌ Validation visuelle (badges, outline)
-- ❌ Recherche & filtrage
-- ❌ Export PNG/SVG
+- ❌ Export PNG/SVG du graphe
+- ❌ Validation visuelle avancée (badges, outline par erreur sur le canvas)
+
+### Partiellement couvert
+
+- **Édition avancée des choix** : conditions, mécaniques RPG (FR94) via panneaux dédiés ; certains champs Unity restent éditables uniquement en JSON
+- **Auto-layout** : dagre côté client pour recalcul rapide ; autres algorithmes via `POST /graph/calculate-layout`
+- **Recherche** : barre de recherche client (`GraphSearchBar`) ; pas de recherche full-text GDD dans le graphe
 
 ### Workarounds
 
-- **Génération IA** : Utiliser l'interface principale puis ouvrir dans l'éditeur
-- **Édition choix** : Modifier le JSON exporté manuellement
-- **Auto-layout** : Layout basique en cascade (non Dagre)
-- **Recherche** : Utiliser Ctrl+F du navigateur dans le JSON exporté
+- **Export visuel** : capture navigateur ou export JSON Unity
+- **Champs Unity rares** : modifier le JSON exporté ou le document canonique
 
 ## Architecture Technique
 
@@ -232,7 +234,7 @@ Option B : Depuis l'URL
   - `services/context_dropping_detector.py` / `services/ai_slop_detector.py` : Analyses qualité « context dropping » et « AI slop »
   - `services/context_dropping_rules_service.py` : Persistance des règles anti-context-dropping (`data/validation-rules/context-dropping.json`)
 - **API REST** (JWT obligatoire sur ces routes) :
-  - **Graphe** : préfixe `/api/v1/unity-dialogues/graph/` — I/O (`load`, `save`, `save-and-write`), `generate-node`, `estimate-cost`, `validate`, `validate-schema`, `validate-lore-explicit`, `simulate-flow`, `calculate-layout`, `detect-ai-slop`, `detect-context-dropping`, `evaluate-dialogue-quality`, cycle de vie nœuds générés (`prompt`, `nodes/.../accept|reject|regenerate`). Détail et schémas : [Backend API Contracts — Graph editor API](../api/api-contracts-api.md#graph-editor-api-apiv1unity-dialoguesgraph).
+  - **Graphe** : préfixe `/api/v1/unity-dialogues/graph/` — I/O (`load`, `save`, `save-and-write`, `preview-export`), `generate-node`, `estimate-cost`, `validate`, `validate-schema`, `validate-lore-explicit`, `simulate-flow`, `calculate-layout`, `detect-ai-slop`, `detect-context-dropping`, `evaluate-dialogue-quality`, cycle de vie nœuds générés (`prompt`, `nodes/.../accept|reject|regenerate`). Détail et schémas : [Backend API Contracts — Graph editor API](../api/api-contracts-api.md#graph-editor-api-apiv1unity-dialoguesgraph) et [Unity Export Endpoints](../api/api-contracts-api.md#unity-export-endpoints-epic-5--preview-batch-download-logs).
   - **Règles context-dropping** : `/api/v1/validation/rules/context-dropping` (GET/PUT) — utilisées par défaut par `detect-context-dropping` quand les options ne les surchargent pas.
 - **Client TS** : `frontend/src/api/graph.ts`
 
@@ -265,12 +267,10 @@ Pour signaler un bug ou demander une feature :
 
 ### Phase 2 (Futures Features)
 
-1. **AI Generation Panel** : Générer des nœuds en contexte
-2. **Auto-layout Dagre** : Layout avec animation
-3. **Validation Visuelle** : Badges et outlines colorés
-4. **Recherche** : Barre de recherche avec highlight
-5. **Export PNG/SVG** : Export visuel du graphe
-6. **Édition Avancée** : React Hook Form + Zod pour tous les champs
+1. **Auto-layout animé** : transitions lors du recalcul dagre
+2. **Validation Visuelle** : Badges et outlines colorés sur le canvas
+3. **Export PNG/SVG** : Export visuel du graphe
+4. **Recherche GDD** : Highlight croisé contexte / nœuds
 
 ### Phase 3 (Polish)
 

@@ -208,12 +208,64 @@ Generate Unity dialogue nodes using LLM.
 }
 ```
 
-### POST `/dialogues/export/unity-dialogue`
-Export Unity dialogue to YARN file format.
+### POST `/dialogues/unity/export`
+Validate and write Unity JSON to the configured `unity_dialogues_path` (Story 5.1).
 
-**Request Body:** `ExportUnityDialogueRequest`
+**Request Body:** `ExportUnityDialogueRequest` — `{ json_content, title, filename? }`
 
-**Response:** `ExportUnityDialogueResponse`
+**Response:** `ExportUnityDialogueResponse` — `{ filename, success }` (`file_path` is deprecated and not returned).
+
+**Errors:** `422` invalid filename (path traversal) or schema validation failure; `400` if Unity path not configured.
+
+---
+
+## Unity Export Endpoints (Epic 5 — preview, batch, download, logs)
+
+JWT required. Client mirrors: `frontend/src/api/dialogues.ts`, `frontend/src/api/graph.ts`, `frontend/src/api/exports.ts`.
+
+### Graph preview & write (`/api/v1/unity-dialogues/graph`)
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/preview-export` | Preview export from in-memory graph (`SaveGraphRequest` body) without disk write |
+| POST | `/save-and-write` | Convert graph → Unity JSON, validate, atomic write (ADR-006 `seq` / `last_seq`) |
+
+**Preview response:** `ExportPreviewResponse` — `{ json_content, size_bytes, node_count, filename, schema_valid, errors[] }`
+
+### Library / persisted documents (`/api/v1/dialogues`)
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/{document_id}/preview-export` | Preview export of a persisted document |
+| POST | `/{document_id}/validate-schema` | Schema validation only (no write) |
+| GET | `/{document_id}/download` | Download exported `.json` (`Content-Disposition: attachment`) |
+| POST | `/batch-export` | Batch export `document_ids[]` (max 64) |
+| POST | `/batch-preview-export` | Batch preview (`document_ids[]`, max 64) |
+| POST | `/batch-download` | ZIP of exported files (`filenames[]`, `compression`: `store` \| `deflate`) |
+
+**Batch export request:** `BatchExportRequest` — `{ document_ids, skip_validation?, filename_strategy?: "preserve" | "slug" }`
+
+**Batch export response:** `BatchExportResponse` — `{ exported[], failed[{ id, errors[] }], cancelled, success }`
+
+### Export audit log (`/api/v1/exports`)
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/logs` | Business export log (distinct from FastAPI observability logs) |
+
+**Query params:** `start_date`, `end_date` (inclusive, default last 30 days), `status` (`success` \| `failure`).
+
+**Response:** `ExportLogsResponse` — `{ entries[], total_count, success_count, failure_count }`. Each entry includes `source` (`graph` \| `library` \| `batch` \| `unity_export`), `validation_status`, `cost_eur`, `errors[]`.
+
+**Persistence:** `data/logs/exports/YYYY-MM-DD.json` (`ExportLogService`).
+
+### Path traversal protection
+
+`filename`, `document_id`, and batch `filenames[]` must be basenames only. Rejected sequences: `..`, `/`, `\`. Resolved write path must stay under `unity_dialogues_path` (`safe_export_filename`, `safe_document_id`, `_resolve_export_path` in `services/unity_dialogue_export_service.py`). Violations → `422` `ValidationException`.
+
+### Normalization before validation
+
+`services/unity_export_normalizer.py` strips placeholder choices (`__idx_*` without text/target) and empty optional fields before schema validation. CLI migration: `python scripts/normalize_unity_dialogues.py` (dry-run) then `--apply`.
 
 ---
 
@@ -866,6 +918,7 @@ All routes below require **JWT** (`Depends(get_current_user)` in `api/main.py`).
 | POST | `/load` | Load graph into editor session |
 | POST | `/save` | Save graph |
 | POST | `/save-and-write` | Save and write Unity file |
+| POST | `/preview-export` | Preview export without disk write (Story 5.5) |
 
 ### Generation & cost
 
