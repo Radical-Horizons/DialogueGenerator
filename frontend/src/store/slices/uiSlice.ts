@@ -26,6 +26,7 @@ const LORE_VALIDATION_TYPES = new Set<string>([
 export type UISlice = Pick<
   GraphState,
   | 'validateGraph'
+  | 'pruneMissingDisplayNameErrors'
   | 'validateLoreExplicit'
   | 'setSelectedNode'
   | 'setSelectedNodes'
@@ -92,6 +93,16 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
       console.error('Erreur lors de la validation:', error)
       throw error
     }
+  },
+
+  pruneMissingDisplayNameErrors: (nodeIds: string[]) => {
+    if (nodeIds.length === 0) return
+    const fixed = new Set(nodeIds)
+    set((state) => ({
+      validationErrors: state.validationErrors.filter(
+        (e) => e.type !== 'missing_display_name' || !e.node_id || !fixed.has(e.node_id)
+      ),
+    }))
   },
 
   validateLoreExplicit: async (contextSelections) => {

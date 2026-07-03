@@ -24,6 +24,17 @@ function reset() {
     dialoguePreviewActive: false,
     previewEffectHistory: [],
     previewCatalogById: undefined,
+    scenarioPlaythrough: {
+      active: false,
+      currentNodeId: null,
+      history: [],
+      visitedNodeIds: {},
+      visitedChoiceKeys: {},
+      forcedSkillCheckIssue: null,
+      showDevDrawer: false,
+      showGraphPeek: false,
+      transientMessage: null,
+    },
   })
 }
 
@@ -161,14 +172,24 @@ describe('graphViewStore', () => {
 
   describe('Story 9.4 dialogue preview', () => {
     it('enterDialoguePreview active l’état et exitDialoguePreview réinitialise', () => {
-      useGraphViewStore.getState().enterDialoguePreview({
-        flags: { F: true },
-        reputation: { 'a::b': 2 },
-      })
+      useGraphViewStore.getState().enterScenarioPlaythrough(
+        { flags: { F: true }, reputation: { 'a::b': 2 } },
+        [
+          {
+            id: 'START',
+            type: 'dialogueNode',
+            position: { x: 0, y: 0 },
+            data: { id: 'START' },
+          },
+        ],
+        [],
+      )
       expect(useGraphViewStore.getState().dialoguePreviewActive).toBe(true)
+      expect(useGraphViewStore.getState().scenarioPlaythrough.active).toBe(true)
       expect(useGraphViewStore.getState().visibilityEvalState.flags.F).toBe(true)
       useGraphViewStore.getState().exitDialoguePreview()
       expect(useGraphViewStore.getState().dialoguePreviewActive).toBe(false)
+      expect(useGraphViewStore.getState().scenarioPlaythrough.active).toBe(false)
       expect(useGraphViewStore.getState().visibilityEvalState.flags).toEqual({})
     })
   })

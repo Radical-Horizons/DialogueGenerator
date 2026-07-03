@@ -11,15 +11,24 @@ describe('useDialoguePreview', () => {
   beforeEach(() => {
     useGraphStore.setState({
       dialogueFlagBindings: [{ flagId: 'K', type: 'bool', initialValue: true }],
-      nodes: [],
+      nodes: [
+        {
+          id: 'START',
+          type: 'dialogueNode',
+          position: { x: 0, y: 0 },
+          data: { id: 'START', line: 'Hi' },
+        },
+      ],
+      edges: [],
     })
-    useGraphViewStore.getState().exitDialoguePreview()
+    useGraphViewStore.getState().exitScenarioPlaythrough()
   })
 
-  it('enterDialoguePreview hydrate visibilityEvalState depuis les liaisons', () => {
+  it('enterDialoguePreview hydrate visibilityEvalState et active playthrough', () => {
     const { result } = renderHook(() => useDialoguePreview())
     act(() => result.current.enterDialoguePreview())
     expect(useGraphViewStore.getState().dialoguePreviewActive).toBe(true)
+    expect(useGraphViewStore.getState().scenarioPlaythrough.active).toBe(true)
     expect(useGraphViewStore.getState().visibilityEvalState.flags.K).toBe(true)
     act(() => result.current.exitDialoguePreview())
     expect(useGraphViewStore.getState().dialoguePreviewActive).toBe(false)

@@ -7,7 +7,29 @@ import type { Node } from 'reactflow'
 export interface NodeLabelData {
   title?: string
   displayName?: string
+  label?: string
   line?: string
+}
+
+function trimmedField(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+/** True si le nœud a déjà un libellé structurel (FR36 : displayName, title ou label). */
+export function nodeHasStructuralDisplayName(data: NodeLabelData): boolean {
+  return Boolean(
+    trimmedField(data.displayName) ||
+      trimmedField(data.title) ||
+      trimmedField(data.label)
+  )
+}
+
+/**
+ * Valeur proposée pour remplir `displayName` quand FR36 le signale manquant :
+ * première ligne de `line`, sinon l’id du nœud (aligné sur nodeTargetDisplayLabel).
+ */
+export function deriveAutoDisplayName(node: Pick<Node, 'id' | 'data'>): string {
+  return nodeTargetDisplayLabel(node)
 }
 
 /**

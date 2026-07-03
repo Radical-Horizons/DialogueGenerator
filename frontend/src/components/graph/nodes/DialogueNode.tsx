@@ -107,6 +107,8 @@ export const DialogueNode = memo(function DialogueNode({
 
   const visibilityEvalState = useGraphViewStore((s) => s.visibilityEvalState)
   const dialoguePreviewActive = useGraphViewStore((s) => s.dialoguePreviewActive)
+  const scenarioPlaythroughActive = useGraphViewStore((s) => s.scenarioPlaythrough.active)
+  const playthroughReaderActive = dialoguePreviewActive && scenarioPlaythroughActive
   const previewGameSystemsState = useGraphViewStore((s) => s.previewGameSystemsState)
   const applyChoiceEffectsSimulation = useGraphViewStore((s) => s.applyChoiceEffectsSimulation)
   const appendPreviewEffectHistory = useGraphViewStore((s) => s.appendPreviewEffectHistory)
@@ -734,10 +736,10 @@ export const DialogueNode = memo(function DialogueNode({
               type="source"
               position={Position.Bottom}
               id={handleId}
-              isConnectable={!dialoguePreviewActive}
+              isConnectable={!playthroughReaderActive}
               title={label}
               onPointerDown={(e) => {
-                if (!dialoguePreviewActive) return
+                if (!dialoguePreviewActive || playthroughReaderActive) return
                 e.stopPropagation()
                 e.preventDefault()
                 if (!effortAccess.accessible) {
@@ -779,7 +781,7 @@ export const DialogueNode = memo(function DialogueNode({
         <Handle
           type="source"
           position={Position.Bottom}
-          isConnectable={!dialoguePreviewActive}
+          isConnectable={!playthroughReaderActive}
           style={{
             background: '#4A90E2',
             width: 12,

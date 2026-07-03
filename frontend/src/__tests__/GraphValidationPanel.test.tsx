@@ -11,6 +11,7 @@ const hoisted = vi.hoisted(() => {
   const requestFitViewOnNodeIdsMock = vi.fn()
   const setSelectedNodeMock = vi.fn()
   const syncNodeDocumentIdMock = vi.fn()
+  const syncMissingDisplayNamesMock = vi.fn(() => ['n1', 'n2'])
   const batchDeleteNodesMock = vi.fn()
   const validateGraphMock = vi.fn(() => Promise.resolve())
   const defaultGraphStoreMock = () => ({
@@ -19,6 +20,8 @@ const hoisted = vi.hoisted(() => {
     selectedNodeIds: [] as string[],
     setSelectedNode: setSelectedNodeMock,
     syncNodeDocumentId: syncNodeDocumentIdMock,
+    syncMissingDisplayNames: syncMissingDisplayNamesMock,
+    pruneMissingDisplayNameErrors: vi.fn(),
     intentionalCycles: [],
     markCycleAsIntentional: vi.fn(),
     unmarkCycleAsIntentional: vi.fn(),
@@ -30,6 +33,7 @@ const hoisted = vi.hoisted(() => {
     requestFitViewOnNodeIdsMock,
     setSelectedNodeMock,
     syncNodeDocumentIdMock,
+    syncMissingDisplayNamesMock,
     batchDeleteNodesMock,
     validateGraphMock,
     defaultGraphStoreMock,
@@ -41,6 +45,7 @@ const {
   requestFitViewOnNodeIdsMock,
   setSelectedNodeMock,
   syncNodeDocumentIdMock,
+  syncMissingDisplayNamesMock,
   batchDeleteNodesMock,
   validateGraphMock,
   defaultGraphStoreMock,
@@ -67,12 +72,18 @@ describe('GraphValidationPanel (FR36)', () => {
     vi.mocked(useGraphStore).mockImplementation(() => defaultGraphStoreMock() as ReturnType<typeof useGraphStore>)
   })
 
-  it('affiche un groupe pour missing_display_name et focus au clic', () => {
+  it('affiche une seule ligne pour missing_display_name avec le décompte', () => {
     const errors = [
       {
         type: 'missing_display_name',
         node_id: 'n1',
         message: 'Nœud [n1] : DisplayName manquant',
+        severity: 'error',
+      },
+      {
+        type: 'missing_display_name',
+        node_id: 'n2',
+        message: 'Nœud [n2] : DisplayName manquant',
         severity: 'error',
       },
     ]
@@ -82,10 +93,10 @@ describe('GraphValidationPanel (FR36)', () => {
         onClose={noopClose}
       />
     )
-    expect(screen.getByText(/DisplayName manquant \(\d+\)/)).toBeTruthy()
-    fireEvent.click(screen.getByText(/Nœud \[n1\] : DisplayName manquant/))
-    expect(setSelectedNodeMock).toHaveBeenCalledWith('n1')
-    expect(focusNodeMock).toHaveBeenCalledWith('n1')
+    expect(screen.getByText(/DisplayName manquant \(2\)/)).toBeTruthy()
+    expect(screen.queryByText(/Nœud \[n1\]/)).toBeNull()
+    expect(screen.queryByText(/Nœud \[n2\]/)).toBeNull()
+    expect(screen.getByRole('button', { name: /Corriger tous les displayName/i })).toBeTruthy()
   })
 
   it('affiche le libellé FR37 pour missing_dialogue_text et bouton Éditer le nœud', () => {
@@ -128,6 +139,33 @@ describe('GraphValidationPanel (FR36)', () => {
     expect(btn).toBeTruthy()
     fireEvent.click(btn)
     expect(syncNodeDocumentIdMock).toHaveBeenCalledWith('n1')
+  })
+
+  it('corrige tous les displayName manquants et relance la validation', async () => {
+    const errors = [
+      {
+        type: 'missing_display_name',
+        node_id: 'n1',
+        message: 'Nœud [n1] : DisplayName manquant',
+        severity: 'error',
+      },
+      {
+        type: 'missing_display_name',
+        node_id: 'n2',
+        message: 'Nœud [n2] : DisplayName manquant',
+        severity: 'error',
+      },
+    ]
+    render(
+      <GraphValidationPanel
+        validationErrors={errors}
+        onClose={noopClose}
+      />
+    )
+    fireEvent.click(screen.getByRole('button', { name: /Corriger tous les displayName/i }))
+    expect(syncMissingDisplayNamesMock).toHaveBeenCalledWith(['n1', 'n2'])
+    await Promise.resolve()
+    expect(validateGraphMock).toHaveBeenCalled()
   })
 
   it('affiche le résumé lore explicite (FR38) et le badge Lore sur l’erreur', () => {

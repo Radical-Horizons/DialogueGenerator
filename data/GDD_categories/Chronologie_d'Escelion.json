@@ -2521,7 +2521,7 @@
       "Espèces": "22e6e4d2-1b45-80db-8065-d98d26821c2c, 1a16e4d2-1b45-80d7-a920-c3f40e49246b",
       "Importance": "Majeur",
       "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
-      "Personnages 1": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41, f0105182-324b-4626-86c3-a78edbb3d2b6, 5a02a16c-f725-4279-bb11-2f6079a22a51",
+      "Personnages 1": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41, f0105182-324b-4626-86c3-a78edbb3d2b6, 5a02a16c-f725-4279-bb11-2f6079a22a51, a1d57a38-1ec6-4e38-9dd8-20c0e01734f8",
       "Type d'événement": "Naissance",
       "Ère": "Fondation d'Escelion"
     },
@@ -2811,6 +2811,7 @@
       "Description": "Un blizzard cataclysmique contraint les Van’Doei à se disperser à travers Escelion, se scindant en trois traditions majeures : les Gardiens du Foyer, les Cendres Nomades et les Stoïques.",
       "Espèces": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
       "Importance": "Important",
+      "Personnages 1": "a1d57a38-1ec6-4e38-9dd8-20c0e01734f8",
       "Type d'événement": "Catastrophe",
       "Ère": "Âge des Doctrines"
     },
@@ -2909,5 +2910,19 @@
     },
     "sections": {},
     "notion_page_id": "22c6e4d2-1b45-80b3-b406-e1d3822be339"
+  },
+  {
+    "Nom": "La Marche Interdite de Borialis",
+    "values": {
+      "Date de début": "3201",
+      "Date de fin": "3202",
+      "Description": "Aux confins glacés de Borialis, une autorité locale liée au Puits Céleste impose une sentence de stase forcée à plusieurs dizaines de dissidents captifs, les immobilisant en plein champ glaciaire pour les punir sans verser leur sang. La loi cinétique du domaine fait le reste : les condamnés sont vitrifiés vivants en quelques heures, fusionnés à la glace. L'épisode, maquillé en simple accident climatique, provoque la rupture des routes commerciales entre le Puits Céleste et les caravanes du Seuil qui Mord pendant près de vingt ans et durcit durablement la doctrine des Traceurs, qui interdisent depuis toute forme de détention immobile sur le domaine.",
+      "Importance": "Important",
+      "Personnages 1": "342fdcc6-f38d-4843-b1ff-1844324e570c",
+      "Type d'événement": "Catastrophe",
+      "Ère": "Âge anentropique"
+    },
+    "sections": {},
+    "notion_page_id": "59ee83fa-ae97-4058-8c14-a45242f04a51"
   }
 ]

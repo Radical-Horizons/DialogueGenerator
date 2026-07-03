@@ -13,9 +13,11 @@ const DEBOUNCE_MS = 200
 export interface JumpToNodeModalProps {
   isOpen: boolean
   onClose: () => void
+  /** Si fourni, remplace jumpToNode du store (ex. mode playthrough). */
+  onSelectNodeId?: (nodeId: string) => void
 }
 
-export function JumpToNodeModal({ isOpen, onClose }: JumpToNodeModalProps) {
+export function JumpToNodeModal({ isOpen, onClose, onSelectNodeId }: JumpToNodeModalProps) {
   const findNodesByQuery = useGraphStore((s) => s.findNodesByQuery)
   const jumpToNode = useGraphStore((s) => s.jumpToNode)
   const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
@@ -70,10 +72,14 @@ export function JumpToNodeModal({ isOpen, onClose }: JumpToNodeModalProps) {
 
   const handleSelect = useCallback(
     (nodeId: string) => {
-      jumpToNode(nodeId)
+      if (onSelectNodeId) {
+        onSelectNodeId(nodeId)
+      } else {
+        jumpToNode(nodeId)
+      }
       onClose()
     },
-    [jumpToNode, onClose]
+    [jumpToNode, onClose, onSelectNodeId]
   )
 
   const handleSubmit = useCallback(() => {

@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest'
 import type { Node } from 'reactflow'
 import {
   formatTargetOptionLabel,
+  deriveAutoDisplayName,
+  nodeHasStructuralDisplayName,
   nodeTargetDisplayLabel,
 } from '../utils/nodeTargetLabel'
 
@@ -19,6 +21,22 @@ describe('nodeTargetDisplayLabel', () => {
 
   it('ignore title / displayName vides après trim', () => {
     expect(nodeTargetDisplayLabel(n('x', { title: '   ', displayName: 'Ok' }))).toBe('Ok')
+  })
+})
+
+describe('nodeHasStructuralDisplayName', () => {
+  it('accepte displayName, title ou label', () => {
+    expect(nodeHasStructuralDisplayName({ displayName: 'A' })).toBe(true)
+    expect(nodeHasStructuralDisplayName({ title: 'T' })).toBe(true)
+    expect(nodeHasStructuralDisplayName({ label: 'L' })).toBe(true)
+    expect(nodeHasStructuralDisplayName({ line: 'only line' })).toBe(false)
+  })
+})
+
+describe('deriveAutoDisplayName', () => {
+  it('propose première ligne de line ou id', () => {
+    expect(deriveAutoDisplayName(n('n1', { line: 'Bonjour\nsuite' }))).toBe('Bonjour')
+    expect(deriveAutoDisplayName(n('fallback-id', {}))).toBe('fallback-id')
   })
 })
 

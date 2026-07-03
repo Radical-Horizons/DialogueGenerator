@@ -24,8 +24,7 @@ import { GraphQualityLlmPanel } from './GraphQualityLlmPanel'
 import { GraphAiSlopPanel } from './GraphAiSlopPanel'
 import { GraphContextDroppingPanel } from './GraphContextDroppingPanel'
 import { FlowSimulationPanel } from './FlowSimulationPanel'
-import { DialoguePreviewPanel } from './preview/DialoguePreviewPanel'
-import { DialoguePreviewBanner } from './preview/DialoguePreviewBanner'
+import { ScenarioPlaythroughOverlay } from './playthrough/ScenarioPlaythroughOverlay'
 import { GameSystemsIntegrationPanel } from './systems/GameSystemsIntegrationPanel'
 import { SchemaValidationPanel } from './SchemaValidationPanel'
 import { BatchValidationReportModal } from './BatchValidationReportModal'
@@ -43,6 +42,7 @@ import { resolveGraphRouteTarget } from './graphEditorStandalone'
 import { useDialogueLoader } from '../../hooks/useDialogueLoader'
 import { useGraphToolbar } from '../../hooks/useGraphToolbar'
 import { useDialoguePreview } from '../../hooks/useDialoguePreview'
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { useBatchOperations } from '../../hooks/useBatchOperations'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import {
@@ -105,8 +105,8 @@ export function GraphEditor({
   } = useNarrowInlineSize(PANEL_COMFORT_MIN_WIDTH_PX)
 
   const { enterDialoguePreview, exitDialoguePreview } = useDialoguePreview()
-  const dialoguePreviewActive = useGraphViewStore((s) => s.dialoguePreviewActive)
-  const visibilityEvalStateBanner = useGraphViewStore((s) => s.visibilityEvalState)
+  const scenarioPlaythroughActive = useGraphViewStore((s) => s.scenarioPlaythrough.active)
+  const showGraphPeek = useGraphViewStore((s) => s.scenarioPlaythrough.showGraphPeek)
 
   const {
     showValidationPanel,
@@ -114,7 +114,6 @@ export function GraphEditor({
     showAiSlopPanel,
     showContextDroppingPanel,
     showFlowSimulationPanel,
-    showDialoguePreviewPanel,
     setShowDialoguePreviewPanel,
     showGameSystemsIntegrationPanel,
     setShowGameSystemsIntegrationPanel,
@@ -142,8 +141,10 @@ export function GraphEditor({
     handleExportSVG,
   } = toolbar
 
+  const canEditGraph = hasActiveDialogue && !isGraphLoading && !isLoadingDialogue
+
   const handleToggleDialoguePreview = useCallback(() => {
-    if (showDialoguePreviewPanel) {
+    if (scenarioPlaythroughActive) {
       exitDialoguePreview()
       setShowDialoguePreviewPanel(false)
     } else {
@@ -151,16 +152,24 @@ export function GraphEditor({
       setShowDialoguePreviewPanel(true)
     }
   }, [
-    showDialoguePreviewPanel,
+    scenarioPlaythroughActive,
     exitDialoguePreview,
     enterDialoguePreview,
     setShowDialoguePreviewPanel,
   ])
 
-  const handleCloseDialoguePreviewPanel = useCallback(() => {
-    exitDialoguePreview()
-    setShowDialoguePreviewPanel(false)
-  }, [exitDialoguePreview, setShowDialoguePreviewPanel])
+  useKeyboardShortcuts(
+    [
+      {
+        key: 'p',
+        handler: () => handleToggleDialoguePreview(),
+        description: 'Jouer / quitter preview scénario',
+        enabled: hasActiveDialogue && canEditGraph,
+        preventDefault: true,
+      },
+    ],
+    [handleToggleDialoguePreview, hasActiveDialogue, canEditGraph],
+  )
 
   const {
     selectedNodeIdsToDelete,
@@ -172,8 +181,6 @@ export function GraphEditor({
     showValidationReportForSelection,
     setShowValidationReportForSelection,
   } = useBatchOperations(toast)
-
-  const canEditGraph = hasActiveDialogue && !isGraphLoading && !isLoadingDialogue
 
   /** Lore explicite peut n’ajouter aucune entrée dans validationErrors (graphe OK) : afficher quand même le résumé. */
   const showValidationOverlay =
@@ -235,7 +242,9 @@ export function GraphEditor({
           canEditGraph={canEditGraph}
           isStandalone={isStandalone}
           onBack={onBack}
-          showDialoguePreviewPanel={showDialoguePreviewPanel}
+          scenarioPlaythroughActive={scenarioPlaythroughActive}
+          onToggleScenarioPlaythrough={handleToggleDialoguePreview}
+          showDialoguePreviewPanel={scenarioPlaythroughActive}
           onToggleDialoguePreview={handleToggleDialoguePreview}
           headerSelector={
             isGraphEditorNarrow ? (
@@ -325,9 +334,6 @@ export function GraphEditor({
               </div>
             ) : (
               <>
-                {dialoguePreviewActive ? (
-                  <DialoguePreviewBanner visibilityEvalState={visibilityEvalStateBanner} />
-                ) : null}
                 <div
                   data-testid="graph-canvas"
                   style={{
@@ -335,6 +341,8 @@ export function GraphEditor({
                     minHeight: 0,
                     overflow: 'hidden',
                     position: 'relative',
+                    visibility:
+                      scenarioPlaythroughActive && !showGraphPeek ? 'hidden' : 'visible',
                   }}
                 >
                 {toolbar.showSearchBar && !isWorkspaceNarrow && (
@@ -348,9 +356,6 @@ export function GraphEditor({
                     <GraphCanvas />
                   </ReactFlowProvider>
                 </div>
-                  {showDialoguePreviewPanel ? (
-                    <DialoguePreviewPanel onClose={handleCloseDialoguePreviewPanel} />
-                  ) : null}
                   {showGameSystemsIntegrationPanel ? (
                     <GameSystemsIntegrationPanel
                       onClose={() => setShowGameSystemsIntegrationPanel(false)}
@@ -497,6 +502,12 @@ export function GraphEditor({
         validationErrors={graphValidationErrors}
         selectedNodeIds={selectedNodeIds}
       />
+      {scenarioPlaythroughActive ? (
+        <ScenarioPlaythroughOverlay
+          dialogueTitle={activeDialogueFilename ?? 'Dialogue'}
+          onExit={() => setShowDialoguePreviewPanel(false)}
+        />
+      ) : null}
     </div>
   )
 }

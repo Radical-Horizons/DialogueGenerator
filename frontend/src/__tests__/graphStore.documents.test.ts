@@ -304,6 +304,30 @@ describe('graphStore - document SoT load/save', () => {
   })
 
   describe('Task 2.2 - edit via document then re-project', () => {
+    it('syncMissingDisplayNames in document SoT writes displayName to document', async () => {
+      vi.mocked(documentsAPI.getDocument).mockResolvedValue({
+        document: sampleDocument,
+        schemaVersion: '1.1.0',
+        revision: 1,
+      })
+      vi.mocked(documentsAPI.getLayout).mockResolvedValue({
+        layout: sampleLayout,
+        revision: 1,
+      })
+      const { loadDialogueByDocumentId, syncMissingDisplayNames } = useGraphStore.getState()
+      await loadDialogueByDocumentId('test-doc')
+
+      const updated = syncMissingDisplayNames(['START'])
+      expect(updated).toEqual(['START'])
+
+      const state = useGraphStore.getState()
+      const startUnity = (state.document as DocumentNodesRef | null)?.nodes?.find(
+        (n) => n.id === 'START'
+      )
+      expect(startUnity?.displayName).toBe('Hello')
+      expect(state.nodes.find((n) => n.id === 'START')?.data?.displayName).toBe('Hello')
+    })
+
     it('updateNode in document SoT updates document then re-projects (line/speaker)', async () => {
       vi.mocked(documentsAPI.getDocument).mockResolvedValue({
         document: sampleDocument,

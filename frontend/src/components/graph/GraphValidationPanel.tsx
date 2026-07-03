@@ -45,7 +45,9 @@ export function GraphValidationPanel({
     selectedNodeIds,
     setSelectedNode,
     syncNodeDocumentId,
+    syncMissingDisplayNames,
     intentionalCycles,
+    pruneMissingDisplayNameErrors,
     markCycleAsIntentional,
     unmarkCycleAsIntentional,
     batchDeleteNodes,
@@ -139,6 +141,18 @@ export function GraphValidationPanel({
       /* validateGraph loggue déjà */
     }
   }, [batchDeleteNodes, selectedOrphanIdsToDelete, validateGraph])
+
+  const handleDisplayNamesRepaired = useCallback(
+    async (fixedNodeIds: string[]) => {
+      pruneMissingDisplayNameErrors(fixedNodeIds)
+      try {
+        await validateGraph()
+      } catch {
+        /* validateGraph loggue déjà */
+      }
+    },
+    [pruneMissingDisplayNameErrors, validateGraph]
+  )
 
   const tone: 'error' | 'warning' | 'success' =
     errors.length > 0 ? 'error' : warnings.length > 0 ? 'warning' : 'success'
@@ -270,6 +284,8 @@ export function GraphValidationPanel({
           errorsByType={errorsByType}
           setSelectedNode={setSelectedNode}
           syncNodeDocumentId={syncNodeDocumentId}
+          syncMissingDisplayNames={syncMissingDisplayNames}
+          onDisplayNamesRepaired={(fixed) => void handleDisplayNamesRepaired(fixed)}
         />
       ) : null}
 

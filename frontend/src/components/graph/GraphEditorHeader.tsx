@@ -26,7 +26,10 @@ interface GraphEditorHeaderProps {
   canEditGraph: boolean
   isStandalone: boolean
   onBack?: () => void
-  /** Story 9.4 — preview scénario variables / effets. */
+  /** Story 9.4 — preview scénario mode VN. */
+  scenarioPlaythroughActive?: boolean
+  onToggleScenarioPlaythrough?: () => void
+  /** @deprecated alias menu Qualités */
   showDialoguePreviewPanel?: boolean
   onToggleDialoguePreview?: () => void
   /** Slot titre narrow — sélecteur dialogue (Story 17.7). */
@@ -45,6 +48,8 @@ export function GraphEditorHeader({
   onBack,
   showDialoguePreviewPanel = false,
   onToggleDialoguePreview,
+  scenarioPlaythroughActive = false,
+  onToggleScenarioPlaythrough,
   headerSelector,
 }: GraphEditorHeaderProps) {
   const {
@@ -125,7 +130,7 @@ export function GraphEditorHeader({
   const { renderActionsMenuItems, renderQualityMenuItems } = useGraphToolbarMenuItems({
     chrome,
     hasActiveDialogue,
-    showDialoguePreviewPanel,
+    showDialoguePreviewPanel: scenarioPlaythroughActive,
     onToggleDialoguePreview,
     nodes,
     selectedNodeId,
@@ -192,6 +197,9 @@ export function GraphEditorHeader({
     showShortcutsTooltip,
     setShowShortcutsTooltip,
     selectedNodeId,
+    scenarioPlaythroughActive,
+    onToggleScenarioPlaythrough:
+      onToggleScenarioPlaythrough ?? onToggleDialoguePreview,
   }
 
   const statusRowProps = {

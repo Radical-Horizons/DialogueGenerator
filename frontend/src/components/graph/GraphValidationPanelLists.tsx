@@ -13,6 +13,8 @@ import {
   isDocumentIdRepairable,
 } from './validationPanelLabels'
 
+const CONSOLIDATED_BULK_REPAIR_TYPES = new Set(['missing_display_name'])
+
 const LORE_BADGE_TYPES = new Set([
   'lore_contradiction_explicit',
   'lore_contradiction_potential',
@@ -35,16 +37,77 @@ interface ValidationErrorsByTypeProps {
   errorsByType: Record<string, ValidationErrorDetail[]>
   setSelectedNode: (id: string) => void
   syncNodeDocumentId: (id: string) => void
+  syncMissingDisplayNames: (ids: string[]) => string[]
+  onDisplayNamesRepaired?: (fixedNodeIds: string[]) => void
+}
+
+function repairBtnStyle(): CSSProperties {
+  return {
+    fontSize: '0.7rem',
+    padding: '0.2rem 0.45rem',
+    borderRadius: '4px',
+    border: `1px solid ${theme.state.error.border}`,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    color: theme.state.error.color,
+    cursor: 'pointer',
+    flexShrink: 0,
+  }
 }
 
 export function ValidationErrorsByType({
   errorsByType,
   setSelectedNode,
   syncNodeDocumentId,
+  syncMissingDisplayNames,
+  onDisplayNamesRepaired,
 }: ValidationErrorsByTypeProps) {
   return (
     <>
-      {Object.entries(errorsByType).map(([type, typeErrors]) => (
+      {Object.entries(errorsByType).map(([type, typeErrors]) => {
+        if (CONSOLIDATED_BULK_REPAIR_TYPES.has(type)) {
+          const nodeIds = typeErrors
+            .map((e) => e.node_id)
+            .filter((id): id is string => Boolean(id))
+          return (
+            <div
+              key={`error-${type}`}
+              style={{
+                fontSize: '0.75rem',
+                color: theme.state.error.color,
+                marginBottom: '0.75rem',
+                padding: '0.3rem 0.5rem',
+                borderRadius: '4px',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                flexWrap: 'wrap',
+              }}
+            >
+              <span aria-hidden>{getIconForType(type)}</span>
+              <span style={{ flex: '1 1 auto', minWidth: 0 }}>
+                {getLabelForType(type)} ({typeErrors.length})
+              </span>
+              {nodeIds.length > 0 ? (
+                <button
+                  type="button"
+                  aria-label="Corriger tous les displayName manquants"
+                  onClick={() => {
+                    const updated = syncMissingDisplayNames(nodeIds)
+                    if (updated.length > 0) {
+                      onDisplayNamesRepaired?.(updated)
+                    }
+                  }}
+                  style={repairBtnStyle()}
+                >
+                  Corriger tous
+                </button>
+              ) : null}
+            </div>
+          )
+        }
+
+        return (
         <div key={`error-${type}`} style={{ marginBottom: '0.75rem' }}>
           <div
             style={{
@@ -55,6 +118,7 @@ export function ValidationErrorsByType({
               display: 'flex',
               alignItems: 'center',
               gap: '0.4rem',
+              flexWrap: 'wrap',
             }}
           >
             <span>{getIconForType(type)}</span>
@@ -145,16 +209,7 @@ export function ValidationErrorsByType({
                     e.stopPropagation()
                     syncNodeDocumentId(err.node_id as string)
                   }}
-                  style={{
-                    fontSize: '0.7rem',
-                    padding: '0.2rem 0.45rem',
-                    borderRadius: '4px',
-                    border: `1px solid ${theme.state.error.border}`,
-                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                    color: theme.state.error.color,
-                    cursor: 'pointer',
-                    flexShrink: 0,
-                  }}
+                  style={repairBtnStyle()}
                 >
                   Générer stableID
                 </button>
@@ -162,7 +217,8 @@ export function ValidationErrorsByType({
             </div>
           ))}
         </div>
-      ))}
+        )
+      })}
     </>
   )
 }

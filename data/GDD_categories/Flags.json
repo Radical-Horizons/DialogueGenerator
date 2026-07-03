@@ -5781,13 +5781,13 @@
   {
     "Nom": "Flag_lieu_phase_en_cours",
     "values": {
-      "Description narrative": "Phase émotionnelle active du Carnavalier au moment où la joueuse visite le Port des Nappes. Détermine les routes d'accès praticables, les types de résidus en vente et l'état comportemental du personnel.",
+      "Description narrative": "Tableau émotionnel actif du Carnavalier au moment où la joueuse visite le Port des Nappes (Grand Bal, Sérénade, Charivari, Pilori, Cortège, Sabbat), ou blanchiment quand le corail cesse de porter toute charge. Détermine les routes d'accès praticables, les types de résidus en vente et l'état comportemental du personnel.",
       "ID": "FLAG784",
       "Lieu lié": "3bba437c-9511-447b-92f5-e6b19e5d34cf",
       "Portée": "Lieu",
       "Statut": "Défini",
       "Type de valeur": "enum",
-      "Valeurs enum": "EUPHORIE\nMÉLANCOLIE\nCONTEMPLATION\nEXTASE\nREFLUX\nBLANCHIMENT"
+      "Valeurs enum": "GRAND_BAL\nSERENADE\nCHARIVARI\nPILORI\nCORTEGE\nSABBAT\nBLANCHIMENT"
     },
     "sections": {},
     "notion_page_id": "e538be76-2906-4e2e-bebb-cd5c9e05a7ca"
@@ -15384,5 +15384,95 @@
     },
     "sections": {},
     "notion_page_id": "5bdaa4cf-9447-4dd2-b30b-b37144d44627"
+  },
+  {
+    "Nom": "Flag_lieu_forets_corail_temps_veille",
+    "values": {
+      "Description narrative": "Temps du Cycle de Veille (rythme court, à l'échelle d'une Veille) qui module l'amplitude du Tableau actif dans les Forêts de Corail : Montée (l'émotion enfle), Apogée (intensité maximale), Retombée (l'émotion reflue), Étale (le Tableau retombe, moment calme où chacun redevient un peu soi-même). Se combine avec Flag_lieu_forets_corail_tableau_carnavalier, qui porte le Tableau émotionnel.",
+      "ID": "FLAG1202",
+      "Lieu lié": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1",
+      "Portée": "Lieu",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "ETALE\nMONTEE\nAPOGEE\nRETOMBEE"
+    },
+    "sections": {},
+    "notion_page_id": "f6f4d65b-68c6-4520-8edb-46e4f837452e"
+  },
+  {
+    "Nom": "Flag_perso_murmol_genka",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "État du fil Murmöl–Genka, le père adoptif et l'enfant qui a refusé sa succession, réunis par les hasards du convoi au Léviathan. NON_ABORDE : le joueur n'a pas touché à leur lien. EVOQUE : le joueur a appris ou relayé quelque chose de leur brouille. RAPPROCHEMENT : le joueur a amorcé un geste entre eux avant le départ (sans garantir de réconciliation).",
+      "ID": "FLAG1199",
+      "Personnage lié": "6868f847-5748-481f-aae8-961764cb18ee",
+      "Portée": "Personnage",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeurs enum": "NON_ABORDE\nEVOQUE\nRAPPROCHEMENT"
+    },
+    "sections": {},
+    "notion_page_id": "ca5317fd-cd3f-4701-9f84-601594ac37a0"
+  },
+  {
+    "Nom": "Flag_perso_murmol_rencontre",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Où en est le contact du joueur avec Murmöl au Léviathan. NON_RENCONTRE : jamais vu. CROISE : aperçu à l'arrivée du convoi (Narthex) ou dans le sillage de Vethraak, sans interaction. ABORDE : le joueur a parlé ou marchandé à son étal de colporteur.",
+      "ID": "FLAG1201",
+      "Personnage lié": "6868f847-5748-481f-aae8-961764cb18ee",
+      "Portée": "Personnage",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeurs enum": "NON_RENCONTRE\nCROISE\nABORDE"
+    },
+    "sections": {},
+    "notion_page_id": "dd8cace2-c886-4a1a-a520-7200a629e475"
+  },
+  {
+    "Nom": "Flag_perso_murmol_saturation",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Ce que le joueur a perçu du véritable enjeu de Murmöl : la Saturation qui approche (le seuil de renaissance umcut) et sa cale aux invendables. IGNORE : rien. PERCU : indices captés (l'odeur sucrée du retour, ses allusions au coffre qu'il n'ouvre plus). REVELE : Murmöl s'est confié, tard, sur le choix qu'il fuit (rentrer renaître en perdant Genka, ou rester sur les routes et mourir intact).",
+      "ID": "FLAG1200",
+      "Personnage lié": "6868f847-5748-481f-aae8-961764cb18ee",
+      "Portée": "Personnage",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeurs enum": "IGNORE\nPERCU\nREVELE"
+    },
+    "sections": {},
+    "notion_page_id": "119d094a-dfed-4f43-b232-ac96cabb7448"
+  },
+  {
+    "Nom": "Flag_perso_murmol_depart",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Organisation du départ avec Murmöl (ou un autre membre du convoi qui attend au Narthex). NON_PLANIFIE : le joueur n'a pas abordé la question du passage. PLANIFIE : un départ sur le convoi a été convenu. EMBARQUE : le joueur quitte effectivement le Léviathan avec le convoi de Murmöl, vers la Traversée du Désert des Échos (Acte 2).",
+      "ID": "FLAG1198",
+      "Personnage lié": "6868f847-5748-481f-aae8-961764cb18ee",
+      "Portée": "Personnage",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeurs enum": "NON_PLANIFIE\nPLANIFIE\nEMBARQUE"
+    },
+    "sections": {},
+    "notion_page_id": "24c5a359-6f04-45d9-9424-e057cbde5b70"
+  },
+  {
+    "Nom": "Flag_lieu_forets_corail_tableau_carnavalier",
+    "values": {
+      "Description narrative": "État du Tableau émotionnel actif dans les Forêts de Corail (Cycle de Nuée du Carnavalier) : Grand Bal (liesse), Sérénade (tendresse), Charivari (colère), Pilori (dégoût), Cortège (tristesse), Sabbat (effroi). Détermine la teinte du corail et du Brouillignon, les routes accessibles et les comportements sociaux de la région ; l'eau du Rasa-Dhatu reste toujours argentée. Change indépendamment des actions de la joueuse selon les cycles du Rêveur. Se combine avec Flag_lieu_forets_corail_temps_veille pour l'amplitude.",
+      "ID": "FLAG529",
+      "Lieu lié": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1",
+      "Portée": "Lieu",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9, 7d4905b5-1967-4488-b28f-6c69f6abc262",
+      "Systèmes producteurs": "50b3b923-0349-4180-87f6-821d69893949",
+      "Type de valeur": "enum",
+      "Valeurs enum": "TABLEAU_INCONNU\nGRAND_BAL\nSERENADE\nCHARIVARI\nPILORI\nCORTEGE\nSABBAT"
+    },
+    "sections": {},
+    "notion_page_id": "5ef4c83a-d82b-41a9-ba9c-e95c20fe16f2"
   }
 ]

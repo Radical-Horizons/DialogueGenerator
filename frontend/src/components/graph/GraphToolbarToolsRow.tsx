@@ -53,6 +53,57 @@ export interface GraphToolbarToolsRowProps {
   showShortcutsTooltip: boolean
   setShowShortcutsTooltip: React.Dispatch<React.SetStateAction<boolean>>
   selectedNodeId: string | null
+  /** Mode playthrough VN actif. */
+  scenarioPlaythroughActive?: boolean
+  onToggleScenarioPlaythrough?: () => void
+}
+
+function GraphToolbarPlaythroughButton({
+  isNarrowToolbar,
+  chromeStyles,
+  hasActiveDialogue,
+  active,
+  onToggle,
+}: {
+  isNarrowToolbar: boolean
+  chromeStyles: GraphToolbarChromeStyles
+  hasActiveDialogue: boolean
+  active: boolean
+  onToggle?: () => void
+}) {
+  const { graphChromeTouch, graphChromeTouchNarrow, effectiveButtonPadding, effectiveButtonFontSizeRem } =
+    chromeStyles
+  const disabled = !hasActiveDialogue || !onToggle
+
+  return (
+    <button
+      type="button"
+      data-testid="btn-scenario-playthrough"
+      aria-pressed={active}
+      disabled={disabled}
+      onClick={() => onToggle?.()}
+      style={{
+        ...(isNarrowToolbar ? graphChromeTouchNarrow : graphChromeTouch),
+        padding: effectiveButtonPadding,
+        border: `2px solid ${active ? theme.border.focus : theme.button.primary.background}`,
+        borderRadius: '6px',
+        backgroundColor: active ? theme.button.selected.background : theme.button.primary.background,
+        color: theme.button.primary.color,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.55 : 1,
+        fontSize: `${effectiveButtonFontSizeRem}rem`,
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.35rem',
+        fontWeight: 700,
+        whiteSpace: 'nowrap',
+      }}
+      title="Jouer le dialogue — preview scénario (P)"
+    >
+      <span aria-hidden>▶</span>
+      {!isNarrowToolbar && <span>Jouer</span>}
+    </button>
+  )
 }
 
 function GraphToolbarFocusNodeButton({
@@ -543,6 +594,13 @@ export function GraphToolbarToolsGroup(props: GraphToolbarToolsRowProps) {
 
   return (
     <>
+      <GraphToolbarPlaythroughButton
+        isNarrowToolbar={isNarrowToolbar}
+        chromeStyles={chromeStyles}
+        hasActiveDialogue={hasActiveDialogue}
+        active={Boolean(props.scenarioPlaythroughActive)}
+        onToggle={props.onToggleScenarioPlaythrough}
+      />
       <GraphToolbarLayoutDropdown {...props} />
       <GraphToolbarFocusNodeButton
         isNarrowToolbar={isNarrowToolbar}
@@ -682,6 +740,13 @@ export function GraphToolbarToolsRow(props: GraphToolbarToolsRowProps) {
             Recherche
           </button>
         )}
+        <GraphToolbarPlaythroughButton
+          isNarrowToolbar
+          chromeStyles={chromeStyles}
+          hasActiveDialogue={hasActiveDialogue}
+          active={Boolean(props.scenarioPlaythroughActive)}
+          onToggle={props.onToggleScenarioPlaythrough}
+        />
         <GraphToolbarFocusNodeButton
           isNarrowToolbar
           chromeStyles={chromeStyles}

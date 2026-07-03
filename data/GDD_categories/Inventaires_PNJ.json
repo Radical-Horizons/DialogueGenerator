@@ -1546,5 +1546,45 @@
     },
     "sections": {},
     "notion_page_id": "cf7e25fc-eca5-4152-b95b-d9af65528666"
+  },
+  {
+    "Nom": "inventory_cale_aux_invendables",
+    "values": {
+      "Contexte narratif": "Réserve d'objets soustraits à toute cotation que Murmöl traîne de cycle en cycle, d'après la coutume de la genizah. Il cherche à en placer les pièces entre des mains qui les feront circuler avant que la Saturation ne le rattrape.",
+      "ID": "INV125",
+      "Personnage": "6868f847-5748-481f-aae8-961764cb18ee",
+      "Quantité": "1",
+      "Type d'accès": "Stocké",
+      "État": "Pas commencé"
+    },
+    "sections": {},
+    "notion_page_id": "7402895a-8115-4f37-ae67-24408cf34039"
+  },
+  {
+    "Nom": "inventory_urnes_rituelles_de_kheridhen",
+    "values": {
+      "Contexte narratif": "Objet de culte acquis vers 3386 AG sans consulter Genka, à l'origine d'une friction durable. Murmöl le tient pour invendable et le garde au fond de sa caravane ; on le reconnaît au cliquetis et au parfum.",
+      "ID": "INV126",
+      "Objet": "c18c90ee-f0e2-4b7c-96b0-4a2461864e75",
+      "Personnage": "6868f847-5748-481f-aae8-961764cb18ee",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "Pas commencé"
+    },
+    "sections": {},
+    "notion_page_id": "dcb7268b-e0ac-4f98-85d3-7b8ba1bd8d09"
+  },
+  {
+    "Nom": "inventory_sceau_parfum_de_maison",
+    "values": {
+      "Contexte narratif": "Signature olfactive personnelle dont Murmöl scelle ses marchés ; aucun faussaire umcut n'a su la reproduire. Il l'a toujours sur lui.",
+      "ID": "INV124",
+      "Personnage": "6868f847-5748-481f-aae8-961764cb18ee",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Pas commencé"
+    },
+    "sections": {},
+    "notion_page_id": "b0cf181f-4895-42ab-83ef-45cfe9109cfe"
   }
 ]

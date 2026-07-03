@@ -20,6 +20,13 @@ import type { ChoiceEffect } from '../types/choiceEffects'
 import type { VisibilityEvalState } from '../types/visibilityConditions'
 import { applyChoiceEffectsToEvalState } from '../utils/choiceEffects'
 import { DEFAULT_EFFORT_POOL } from '../utils/effortPreview'
+import type { SkillCheckIssue } from '../utils/skillChecks'
+import {
+  findPlaythroughStartNode,
+  type PlaythroughHistoryEntry,
+  type PlaythroughStateSnapshot,
+} from '../utils/scenarioPlaythroughEngine'
+import type { Edge, Node } from 'reactflow'
 
 /** Catalogue flags pour clamp preview (Story 9.4) — réglé par DialoguePreviewPanel. */
 export type PreviewCatalogMap = Record<string, FlagDefinition>
@@ -40,6 +47,31 @@ const DEFAULT_GAME_SYSTEMS_PREVIEW_STATE: PreviewGameSystemsState = {
   reputationValues: {},
   factionTitles: {},
   simulationLimits: [],
+}
+
+export interface ScenarioPlaythroughState {
+  active: boolean
+  currentNodeId: string | null
+  history: PlaythroughHistoryEntry[]
+  visitedNodeIds: Record<string, true>
+  visitedChoiceKeys: Record<string, true>
+  forcedSkillCheckIssue: SkillCheckIssue | null
+  showDevDrawer: boolean
+  showGraphPeek: boolean
+  /** Message éphémère (résultat test) affiché dans l'overlay. */
+  transientMessage: string | null
+}
+
+const DEFAULT_SCENARIO_PLAYTHROUGH: ScenarioPlaythroughState = {
+  active: false,
+  currentNodeId: null,
+  history: [],
+  visitedNodeIds: {},
+  visitedChoiceKeys: {},
+  forcedSkillCheckIssue: null,
+  showDevDrawer: false,
+  showGraphPeek: false,
+  transientMessage: null,
 }
 
 export interface GraphViewState {
@@ -83,6 +115,9 @@ export interface GraphViewState {
   previewCatalogById: PreviewCatalogMap | undefined
   /** Story 9.6 — état simulé stats FR94 pour rendu preview local. */
   previewGameSystemsState: PreviewGameSystemsState
+
+  /** Mode Visual Novel — playthrough scénario. */
+  scenarioPlaythrough: ScenarioPlaythroughState
 
   // --- Actions : instance ---
   registerReactFlowInstance: (instance: ReactFlowInstance) => void
@@ -145,6 +180,27 @@ export interface GraphViewState {
   setPreviewSkill: (skillId: string, value: number) => void
   setPreviewEffortPool: (value: number) => void
   setPreviewSimulationLimits: (limits: string[]) => void
+  consumePreviewEffort: (cost: number) => void
+
+  /** Entre en mode playthrough VN avec état initial et nœud START. */
+  enterScenarioPlaythrough: (
+    initial: VisibilityEvalState,
+    nodes: Node[],
+    edges: Edge[],
+  ) => void
+  exitScenarioPlaythrough: () => void
+  resetScenarioPlaythrough: (nodes: Node[], edges: Edge[]) => void
+  setPlaythroughCurrentNode: (nodeId: string | null) => void
+  pushPlaythroughHistory: (entry: PlaythroughHistoryEntry) => void
+  popPlaythroughHistory: () => PlaythroughHistoryEntry | undefined
+  markPlaythroughVisitedNode: (nodeId: string) => void
+  markPlaythroughVisitedChoice: (choiceKey: string) => void
+  setForcedSkillCheckIssue: (issue: SkillCheckIssue | null) => void
+  togglePlaythroughDevDrawer: () => void
+  togglePlaythroughGraphPeek: () => void
+  setPlaythroughTransientMessage: (message: string | null) => void
+  restorePlaythroughSnapshot: (snapshot: PlaythroughStateSnapshot) => void
+  setScenarioPlaythroughPartial: (partial: Partial<ScenarioPlaythroughState>) => void
 }
 
 export const useGraphViewStore = create<GraphViewState>()((set) => ({
@@ -165,6 +221,7 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
   previewEffectHistory: [],
   previewCatalogById: undefined,
   previewGameSystemsState: DEFAULT_GAME_SYSTEMS_PREVIEW_STATE,
+  scenarioPlaythrough: { ...DEFAULT_SCENARIO_PLAYTHROUGH },
 
   registerReactFlowInstance: (instance) => set({ reactFlowInstance: instance }),
 
@@ -248,6 +305,25 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
       },
     }),
 
+  enterScenarioPlaythrough: (initial, nodes, edges) => {
+    const startId = findPlaythroughStartNode(nodes, edges)
+    set({
+      dialoguePreviewActive: true,
+      previewEffectHistory: [],
+      visibilityEvalState: {
+        flags: { ...initial.flags },
+        reputation: { ...initial.reputation },
+      },
+      previewGameSystemsState: DEFAULT_GAME_SYSTEMS_PREVIEW_STATE,
+      scenarioPlaythrough: {
+        ...DEFAULT_SCENARIO_PLAYTHROUGH,
+        active: true,
+        currentNodeId: startId,
+        visitedNodeIds: startId ? { [startId]: true } : {},
+      },
+    })
+  },
+
   exitDialoguePreview: () =>
     set({
       dialoguePreviewActive: false,
@@ -255,6 +331,33 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
       previewCatalogById: undefined,
       previewGameSystemsState: DEFAULT_GAME_SYSTEMS_PREVIEW_STATE,
       visibilityEvalState: { flags: {}, reputation: {} },
+      scenarioPlaythrough: { ...DEFAULT_SCENARIO_PLAYTHROUGH },
+    }),
+
+  exitScenarioPlaythrough: () =>
+    set({
+      dialoguePreviewActive: false,
+      previewEffectHistory: [],
+      previewCatalogById: undefined,
+      previewGameSystemsState: DEFAULT_GAME_SYSTEMS_PREVIEW_STATE,
+      visibilityEvalState: { flags: {}, reputation: {} },
+      scenarioPlaythrough: { ...DEFAULT_SCENARIO_PLAYTHROUGH },
+    }),
+
+  resetScenarioPlaythrough: (nodes, edges) =>
+    set((s) => {
+      const startId = findPlaythroughStartNode(nodes, edges)
+      return {
+        previewEffectHistory: [],
+        previewGameSystemsState: DEFAULT_GAME_SYSTEMS_PREVIEW_STATE,
+        scenarioPlaythrough: {
+          ...DEFAULT_SCENARIO_PLAYTHROUGH,
+          active: true,
+          currentNodeId: startId,
+          visitedNodeIds: startId ? { [startId]: true } : {},
+          showDevDrawer: s.scenarioPlaythrough.showDevDrawer,
+        },
+      }
     }),
 
   appendPreviewEffectHistory: (lines) =>
@@ -296,6 +399,115 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
         ...s.previewGameSystemsState,
         simulationLimits: [...limits],
       },
+    })),
+
+  consumePreviewEffort: (cost) =>
+    set((s) => ({
+      previewGameSystemsState: {
+        ...s.previewGameSystemsState,
+        effortPool: Math.max(0, s.previewGameSystemsState.effortPool - Math.max(0, cost)),
+      },
+    })),
+
+  setPlaythroughCurrentNode: (nodeId) =>
+    set((s) => ({
+      scenarioPlaythrough: { ...s.scenarioPlaythrough, currentNodeId: nodeId },
+    })),
+
+  pushPlaythroughHistory: (entry) =>
+    set((s) => ({
+      scenarioPlaythrough: {
+        ...s.scenarioPlaythrough,
+        history: [...s.scenarioPlaythrough.history, entry],
+      },
+    })),
+
+  popPlaythroughHistory: () => {
+    let popped: PlaythroughHistoryEntry | undefined
+    useGraphViewStore.setState((s) => {
+      const history = [...s.scenarioPlaythrough.history]
+      popped = history.pop()
+      return {
+        scenarioPlaythrough: { ...s.scenarioPlaythrough, history },
+      }
+    })
+    return popped
+  },
+
+  markPlaythroughVisitedNode: (nodeId) =>
+    set((s) => ({
+      scenarioPlaythrough: {
+        ...s.scenarioPlaythrough,
+        visitedNodeIds: { ...s.scenarioPlaythrough.visitedNodeIds, [nodeId]: true },
+      },
+    })),
+
+  markPlaythroughVisitedChoice: (choiceKey) =>
+    set((s) => ({
+      scenarioPlaythrough: {
+        ...s.scenarioPlaythrough,
+        visitedChoiceKeys: { ...s.scenarioPlaythrough.visitedChoiceKeys, [choiceKey]: true },
+      },
+    })),
+
+  setForcedSkillCheckIssue: (issue) =>
+    set((s) => ({
+      scenarioPlaythrough: { ...s.scenarioPlaythrough, forcedSkillCheckIssue: issue },
+    })),
+
+  togglePlaythroughDevDrawer: () =>
+    set((s) => ({
+      scenarioPlaythrough: {
+        ...s.scenarioPlaythrough,
+        showDevDrawer: !s.scenarioPlaythrough.showDevDrawer,
+      },
+    })),
+
+  togglePlaythroughGraphPeek: () =>
+    set((s) => {
+      const nextPeek = !s.scenarioPlaythrough.showGraphPeek
+      if (nextPeek && s.scenarioPlaythrough.currentNodeId) {
+        return {
+          scenarioPlaythrough: {
+            ...s.scenarioPlaythrough,
+            showGraphPeek: nextPeek,
+          },
+          focusQueue: [...s.focusQueue, s.scenarioPlaythrough.currentNodeId],
+        }
+      }
+      return {
+        scenarioPlaythrough: {
+          ...s.scenarioPlaythrough,
+          showGraphPeek: nextPeek,
+        },
+      }
+    }),
+
+  setPlaythroughTransientMessage: (message) =>
+    set((s) => ({
+      scenarioPlaythrough: { ...s.scenarioPlaythrough, transientMessage: message },
+    })),
+
+  restorePlaythroughSnapshot: (snapshot) =>
+    set({
+      visibilityEvalState: {
+        flags: { ...snapshot.visibilityEvalState.flags },
+        reputation: { ...snapshot.visibilityEvalState.reputation },
+      },
+      previewGameSystemsState: {
+        attributes: { ...snapshot.previewGameSystemsState.attributes },
+        skills: { ...snapshot.previewGameSystemsState.skills },
+        effortPool: snapshot.previewGameSystemsState.effortPool,
+        reputationValues: { ...snapshot.previewGameSystemsState.reputationValues },
+        factionTitles: { ...snapshot.previewGameSystemsState.factionTitles },
+        simulationLimits: [...snapshot.previewGameSystemsState.simulationLimits],
+      },
+      previewEffectHistory: [...snapshot.previewEffectHistory],
+    }),
+
+  setScenarioPlaythroughPartial: (partial) =>
+    set((s) => ({
+      scenarioPlaythrough: { ...s.scenarioPlaythrough, ...partial },
     })),
 }))
 

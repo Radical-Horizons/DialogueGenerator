@@ -20,6 +20,10 @@ import { documentToGraph } from '../../utils/documentToGraph'
 import { syncDocAndLayout } from '../../utils/syncDocLayout'
 import { applyLinearNextNodeFromGraphEdges } from '../../utils/mergeNodeEditorForm'
 import { pruneGraphValidationDiagnostics } from '../../utils/pruneGraphValidationDiagnostics'
+import {
+  deriveAutoDisplayName,
+  nodeHasStructuralDisplayName,
+} from '../../utils/nodeTargetLabel'
 
 /** Nombre max d'entrées dans l'historique de régénération (Story 1.10 - AC#3). */
 const MAX_REGENERATION_HISTORY = 10
@@ -30,6 +34,8 @@ export type NodeSlice = Pick<
   | 'createEmptyNode'
   | 'updateNode'
   | 'syncNodeDocumentId'
+  | 'syncNodeDisplayName'
+  | 'syncMissingDisplayNames'
   | 'deleteNode'
   | 'batchDeleteNodes'
   | 'batchTagNodes'
@@ -154,6 +160,8 @@ function updateDialogueNodeInDocumentSoT(
   const data = updates.data as Record<string, unknown> | undefined
   if (data) {
     if (data.title !== undefined) docNode.title = data.title
+    if (data.displayName !== undefined) docNode.displayName = data.displayName
+    if (data.label !== undefined) docNode.label = data.label
     if (data.line !== undefined) docNode.line = data.line
     if (data.speaker !== undefined) docNode.speaker = data.speaker
     if (data.nextNode !== undefined) docNode.nextNode = data.nextNode
@@ -417,6 +425,34 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
     if (d.id === nodeId) return
     d.id = nodeId
     get().updateNode(nodeId, { data: d })
+  },
+
+  syncNodeDisplayName: (nodeId: string) => {
+    const state = get()
+    const node = state.nodes.find((n) => n.id === nodeId)
+    if (!node?.data || typeof node.data !== 'object') return
+    const data = node.data as Record<string, unknown>
+    if (nodeHasStructuralDisplayName(data)) return
+    const displayName = deriveAutoDisplayName(node)
+    if (!displayName.trim()) return
+    get().updateNode(nodeId, { data: { ...data, displayName } })
+  },
+
+  syncMissingDisplayNames: (nodeIds: string[]) => {
+    const updated: string[] = []
+    const state = get()
+    for (const nodeId of nodeIds) {
+      const node = state.nodes.find((n) => n.id === nodeId)
+      if (!node?.data || typeof node.data !== 'object') continue
+      const data = node.data as Record<string, unknown>
+      if (nodeHasStructuralDisplayName(data)) continue
+      const displayName = deriveAutoDisplayName(node)
+      if (!displayName.trim()) continue
+      get().updateNode(nodeId, { data: { ...data, displayName } }, true)
+      updated.push(nodeId)
+    }
+    if (updated.length > 0) get().markDirty()
+    return updated
   },
 
   addNode: (node: Node) => {
