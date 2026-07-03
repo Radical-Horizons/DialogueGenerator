@@ -67,6 +67,7 @@ from services.gdd_notion_sync_mapper import (
     merge_records_by_nom,
     notion_page_to_compact_row_record,
     notion_page_to_gdd_record_merge_body_and_properties,
+    notion_query_row_has_properties,
 )
 from services.gdd_notion_sync_retry import (
     SyncBackoffPolicy,
@@ -127,6 +128,30 @@ _SYNC_RECOVERABLE: Tuple[Type[BaseException], ...] = (
 
 # Lignes (ordre retour API ``query_database``) pour détecter une base sans corps de page.
 NOTION_DATABASE_BODY_PROBE_ROW_COUNT = 3
+
+
+def _find_notion_query_row(
+    pages: List[Mapping[str, Any]], page_id: str
+) -> Optional[Mapping[str, Any]]:
+    """Retrouve une ligne ``query_database`` par identifiant Notion."""
+    pid_raw = str(page_id or "").strip()
+    if not pid_raw:
+        return None
+    try:
+        pid_norm = normalize_notion_id(pid_raw)
+    except ValueError:
+        pid_norm = pid_raw
+    for row in pages:
+        rid = row.get("id")
+        if not rid:
+            continue
+        try:
+            if normalize_notion_id(str(rid).strip()) == pid_norm:
+                return row
+        except ValueError:
+            if str(rid).strip() == pid_norm:
+                return row
+    return None
 
 
 def _notion_api_error_message_for_partial_errors(response: httpx.Response) -> str:
@@ -876,6 +901,7 @@ class GddNotionSyncService:
         retry_policy = SyncBackoffPolicy()
         notion_id = str(source.get("notion_id", "")).strip()
         ds_ids = self._data_source_ids_from_settings_source(source)
+        pages: List[Mapping[str, Any]] = []
 
         if not resolution.notion_page_id:
             try:
@@ -916,34 +942,41 @@ class GddNotionSyncService:
             }
 
         page_id = resolution.notion_page_id
-        full_page: Dict[str, Any]
         rec_out: Dict[str, Any]
         try:
-
-            async def _read_meta() -> Dict[str, Any]:
-                return await client.get_page(page_id)
-
-            full_page = await self._notion_read_with_retries(
-                _read_meta, retry_policy=retry_policy
-            )
             try:
                 norm_source_id = normalize_notion_id(notion_id)
             except ValueError:
                 norm_source_id = ""
             compact_table = database_id_is_compact_table_export(norm_source_id)
-            if compact_table:
-                rec_out = notion_page_to_compact_row_record(full_page)
+            query_row = _find_notion_query_row(pages, page_id)
+            if (
+                compact_table
+                and query_row is not None
+                and notion_query_row_has_properties(query_row)
+            ):
+                rec_out = notion_page_to_compact_row_record(query_row)
             else:
 
-                async def _read_body() -> str:
-                    return await client.get_page_content(page_id)
+                async def _read_meta() -> Dict[str, Any]:
+                    return await client.get_page(page_id)
 
-                body = await self._notion_read_with_retries(
-                    _read_body, retry_policy=retry_policy
+                full_page = await self._notion_read_with_retries(
+                    _read_meta, retry_policy=retry_policy
                 )
-                rec_out = notion_page_to_gdd_record_merge_body_and_properties(
-                    full_page, body
-                )
+                if compact_table:
+                    rec_out = notion_page_to_compact_row_record(full_page)
+                else:
+
+                    async def _read_body() -> str:
+                        return await client.get_page_content(page_id)
+
+                    body = await self._notion_read_with_retries(
+                        _read_body, retry_policy=retry_policy
+                    )
+                    rec_out = notion_page_to_gdd_record_merge_body_and_properties(
+                        full_page, body
+                    )
             pid_str = str(page_id or "").strip()
             if pid_str:
                 try:
@@ -1692,15 +1725,6 @@ class GddNotionSyncService:
 
             shard_list_key = category_stem_to_list_category_key(Path(cat_file).stem)
             use_shards = shard_list_key is not None
-            out_path: Optional[Path] = None
-            existing: List[Dict[str, Any]] = []
-            if not use_shards:
-                out_path = out_root / cat_file
-                existing_raw = read_json_file(out_path, default=[])
-                existing = (
-                    existing_raw if isinstance(existing_raw, list) else []
-                )
-
             try:
                 norm_source_id = normalize_notion_id(nid)
             except ValueError:
@@ -1710,6 +1734,15 @@ class GddNotionSyncService:
                 and bool(norm_source_id)
                 and database_id_is_compact_table_export(norm_source_id)
             )
+            out_path: Optional[Path] = None
+            existing: List[Dict[str, Any]] = []
+            if not use_shards:
+                out_path = out_root / cat_file
+                if not (compact_table and force_full):
+                    existing_raw = read_json_file(out_path, default=[])
+                    existing = (
+                        existing_raw if isinstance(existing_raw, list) else []
+                    )
 
             body_cache: Dict[str, str] = {}
             probe_sample_all_empty = False
@@ -1743,16 +1776,23 @@ class GddNotionSyncService:
                     current_page_id_short=self._notion_id_short(pid),
                 )
                 try:
-
-                    async def _read_meta() -> Dict[str, Any]:
-                        return await client.get_page(pid)
-
-                    full_page = await self._notion_read_with_retries(
-                        _read_meta, retry_policy=retry_policy
-                    )
                     if compact_table:
-                        rec = notion_page_to_compact_row_record(full_page)
+                        page_for_record: Mapping[str, Any] = p
+                        if not notion_query_row_has_properties(p):
+                            async def _read_meta() -> Dict[str, Any]:
+                                return await client.get_page(pid)
+
+                            page_for_record = await self._notion_read_with_retries(
+                                _read_meta, retry_policy=retry_policy
+                            )
+                        rec = notion_page_to_compact_row_record(page_for_record)
                     else:
+                        async def _read_meta() -> Dict[str, Any]:
+                            return await client.get_page(pid)
+
+                        full_page = await self._notion_read_with_retries(
+                            _read_meta, retry_policy=retry_policy
+                        )
                         pid_key = str(pid or "").strip()
 
                         async def _read_body() -> str:
@@ -1816,8 +1856,11 @@ class GddNotionSyncService:
                         self._sync_progress_update(sources_completed=i)
                         continue
                     new_recs_only = [r for _pid, r in written_page_records]
-                    merged = merge_records_by_nom(existing, new_recs_only)
-                    write_json_atomic(out_path, merged)
+                    if compact_table and force_full:
+                        write_json_atomic(out_path, new_recs_only)
+                    else:
+                        merged = merge_records_by_nom(existing, new_recs_only)
+                        write_json_atomic(out_path, merged)
                 self._append_entity_history(
                     cat_file, shard_list_key, use_shards, written_page_records
                 )

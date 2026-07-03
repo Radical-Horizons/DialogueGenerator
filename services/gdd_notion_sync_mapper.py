@@ -231,6 +231,12 @@ def notion_properties_to_values_flat(properties: Mapping[str, Any]) -> Dict[str,
     return values
 
 
+def notion_query_row_has_properties(page: Mapping[str, Any]) -> bool:
+    """True si une ligne ``query_database`` inclut déjà les colonnes (évite ``get_page``)."""
+    props = page.get("properties")
+    return isinstance(props, dict) and bool(props)
+
+
 def notion_page_to_compact_row_record(page: Mapping[str, Any]) -> Dict[str, Any]:
     """Construit une ligne de base Notion au format compact (colonnes → ``values``).
 
@@ -356,15 +362,17 @@ def merge_records_by_nom(
         Nouvelle liste fusionnée.
     """
     out: List[Dict[str, Any]] = [dict(x) for x in existing]
+    nom_index: Dict[Any, int] = {}
+    for i, item in enumerate(out):
+        nom = item.get("Nom")
+        if nom and nom not in nom_index:
+            nom_index[nom] = i
     for rec in new_records:
         nom = rec.get("Nom")
-        idx: int | None = None
-        for i, item in enumerate(out):
-            if item.get("Nom") == nom:
-                idx = i
-                break
+        idx = nom_index.get(nom)
         if idx is not None:
             out[idx] = dict(rec)
         else:
+            nom_index[nom] = len(out)
             out.append(dict(rec))
     return out

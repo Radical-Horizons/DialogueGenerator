@@ -327,11 +327,13 @@ async def test_database_vocab_skips_blocks_uses_columns(tmp_path: Path) -> None:
 
     class FakeClient:
         content_calls = 0
+        get_page_calls = 0
 
         async def verify_credentials(self) -> dict:
             return {}
 
         async def get_page(self, page_id: str) -> dict:
+            FakeClient.get_page_calls += 1
             return {
                 "id": page_id,
                 "properties": {
@@ -355,10 +357,21 @@ async def test_database_vocab_skips_blocks_uses_columns(tmp_path: Path) -> None:
                 {
                     "id": row_id,
                     "last_edited_time": "2025-06-01T00:00:00.000Z",
+                    "properties": {
+                        "Terme": {
+                            "type": "title",
+                            "title": [{"plain_text": "MotClé"}],
+                        },
+                        "Sens": {
+                            "type": "rich_text",
+                            "rich_text": [{"plain_text": "Définition courte"}],
+                        },
+                    },
                 }
             ]
 
     FakeClient.content_calls = 0
+    FakeClient.get_page_calls = 0
     store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
     store.write_token("dummy-token")
     store.save_settings(
@@ -388,11 +401,93 @@ async def test_database_vocab_skips_blocks_uses_columns(tmp_path: Path) -> None:
     res = await svc.run_sync(force_full=True, request_id="vocab-db")
     assert res.updated_entities == 1
     assert FakeClient.content_calls == 0
+    assert FakeClient.get_page_calls == 0
     out = json.loads((gdd_dir / "vocab_test.json").read_text(encoding="utf-8"))
     assert out[0]["Nom"] == "MotClé"
     assert out[0]["values"]["Sens"] == "Définition courte"
     assert out[0]["sections"] == {}
     assert "Sens" not in str(out[0].get("sections"))
+
+
+@pytest.mark.asyncio
+async def test_compact_table_incremental_uses_query_rows_without_get_page(
+    tmp_path: Path,
+) -> None:
+    """Sync incrémentale compacte : N lignes stale → 0 get_page si query inclut properties."""
+    db_id = "5a3b2abf-221b-40c1-9b2a-98c91e13dfd9"
+    rows = [
+        (
+            "1886e4d2-1b45-8039-b51b-eb3826fce1b5",
+            "FlagA",
+            "2025-06-01T00:00:00.000Z",
+        ),
+        (
+            "2886e4d2-1b45-8039-b51b-eb3826fce1b5",
+            "FlagB",
+            "2025-06-02T00:00:00.000Z",
+        ),
+    ]
+
+    class FakeClient:
+        get_page_calls = 0
+
+        async def verify_credentials(self) -> dict:
+            return {}
+
+        async def get_page(self, page_id: str) -> dict:
+            FakeClient.get_page_calls += 1
+            raise AssertionError("get_page ne doit pas être appelé pour base compacte")
+
+        async def get_page_content(self, page_id: str) -> str:
+            raise AssertionError("get_page_content ne doit pas être appelé")
+
+        async def query_database(self, database_id: str, **_kw) -> list:
+            return [
+                {
+                    "id": pid,
+                    "last_edited_time": edited,
+                    "properties": {
+                        "Name": {
+                            "type": "title",
+                            "title": [{"plain_text": name}],
+                        },
+                    },
+                }
+                for pid, name, edited in rows
+            ]
+
+    FakeClient.get_page_calls = 0
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "sources": [
+                {
+                    "kind": "database",
+                    "notion_id": db_id,
+                    "category_file": "flags_test.json",
+                }
+            ],
+            "included_categories": [],
+        }
+    )
+    gdd_dir = tmp_path / "gdd"
+    gdd_dir.mkdir()
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd_dir,
+        status_path=tmp_path / "status.json",
+        client_factory=lambda _k: FakeClient(),
+    )
+    res = await svc.run_sync(force_full=False, request_id="flags-incr")
+    assert res.updated_entities == 2
+    assert FakeClient.get_page_calls == 0
+    out = json.loads((gdd_dir / "flags_test.json").read_text(encoding="utf-8"))
+    assert {r["Nom"] for r in out} == {"FlagA", "FlagB"}
 
 
 @pytest.mark.asyncio

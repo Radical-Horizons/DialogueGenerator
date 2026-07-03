@@ -33,7 +33,13 @@ Schémas Pydantic : `api/schemas/gdd_notion_sync.py`.
 
 ## Bases « sans corps de page » (optimisation)
 
-Certaines bases Notion n’ont que des **colonnes** (flags, inventaires, skills…) : les lignes existent comme pages mais le **corps** (markdown / blocs) est vide. Pour éviter un `get_page_content` par ligne, le service échantillonne les **3 premières lignes** (ordre du `query_database`). Si aucune n’a de corps, il **omet** `get_page_content` sur le reste des lignes de cette source pour le run en cours. Ce n’est **pas** une erreur : un message **info** est écrit dans `data/logs/gdd_notion_sync.log`. Le titre et les colonnes restent synchronisés via `get_page`. Les bases listées en export **compact** dans le mapper continuent de court-circuiter encore plus tôt (sans sonde).
+Certaines bases Notion n’ont que des **colonnes** (flags, inventaires, skills, vocabulaire…) : les lignes existent comme pages mais le **corps** (markdown / blocs) est vide. Pour ces bases (**export compact**, liste `NOTION_DATABASE_COMPACT_TABLE_IDS` dans le mapper) :
+
+- **Pas de `get_page_content`**.
+- **Pas de `get_page` par ligne** : les colonnes sont lues directement depuis le résultat de **`query_database`** (une requête paginée par base).
+- Sync **complète** compacte monolithe : réécriture du fichier sans relire l’ancien JSON (~1 Mo).
+
+Les autres bases peuvent éviter `get_page_content` après **sonde** sur les 3 premières lignes (ordre du `query_database`) ; titre et colonnes restent synchronisés via `get_page` si la sonde ne suffit pas.
 
 ## Sync incrémentale vs complète
 
