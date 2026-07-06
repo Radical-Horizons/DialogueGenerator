@@ -73,6 +73,10 @@ pwsh -File scripts/Invoke-DialogueApi.ps1 -Method GET -Path '/api/v1/context/cha
 | Lire document | `GET /api/v1/documents/{id}` |
 | Preview FR94 | `POST /api/v1/documents/{id}/preview` |
 | Valider graphe | `POST /api/v1/unity-dialogues/graph/validate` |
+| Preview export graphe | `POST /api/v1/unity-dialogues/graph/preview-export` |
+| Export graphe (disque) | `POST /api/v1/unity-dialogues/graph/save-and-write` |
+| Batch export bibliothèque | `POST /api/v1/dialogues/batch-export` |
+| Logs export | `GET /api/v1/exports/logs` |
 | Coût génération nœud | `POST /api/v1/unity-dialogues/graph/estimate-cost` |
 
 Préfixe graphe : `/api/v1/unity-dialogues/graph/*` — voir [`references/router-map.md`](router-map.md).
