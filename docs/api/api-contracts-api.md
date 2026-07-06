@@ -208,12 +208,52 @@ Generate Unity dialogue nodes using LLM.
 }
 ```
 
-### POST `/dialogues/export/unity-dialogue`
-Export Unity dialogue to YARN file format.
+### POST `/dialogues/unity/export`
+Write Unity JSON to the configured Unity dialogues directory (validation bloquante avant écriture). Remplace l'ancien chemin documenté `/export/unity-dialogue`.
 
-**Request Body:** `ExportUnityDialogueRequest`
+**Request Body:** `ExportUnityDialogueRequest` — `json_content`, optional `filename`, `title`.
 
-**Response:** `ExportUnityDialogueResponse`
+**Response:** `ExportUnityDialogueResponse` — `filename`, `success`.
+
+### POST `/dialogues/batch-export`
+Batch export persisted documents to Unity JSON (FR50).
+
+**Request Body:** `BatchExportRequest` — `document_ids[]`.
+
+**Response:** `BatchExportResponse` — `exported[]`, `failed[]`, `cancelled`, `success`.
+
+### GET `/dialogues/{document_id}/preview-export`
+Preview export for a persisted document without download (FR53).
+
+**Response:** `ExportPreviewResponse` — `json_content`, `size_bytes`, `node_count`, `filename`, `schema_valid`, `errors[]`.
+
+### POST `/dialogues/batch-preview-export`
+Batch preview for library selection (FR53).
+
+**Request Body:** `BatchExportPreviewRequest` — `document_ids[]`.
+
+**Response:** `BatchExportPreviewResponse`.
+
+### GET `/dialogues/{document_id}/download`
+Download exported Unity JSON file (FR52). `Content-Disposition: attachment`.
+
+### POST `/dialogues/batch-download`
+Download multiple exports as ZIP.
+
+**Request Body:** `BatchDownloadRequest`.
+
+---
+
+## Export logs (`/api/v1/exports`)
+
+### GET `/exports/logs`
+List Unity export logs (FR54). JWT required.
+
+**Query:** `start_date`, `end_date` (default last 30 days), `status` (`success` \| `failure`).
+
+**Response:** `ExportLogsResponse` — `entries[]`, `total_count`, `success_count`, `failure_count`.
+
+Storage: `data/logs/exports/YYYY-MM-DD.json` via `ExportLogService`.
 
 ---
 
@@ -228,6 +268,7 @@ Tous les routes ci-dessous exigent un **JWT** (`Authorization: Bearer …`), com
 | `POST` | `/unity-dialogues/graph/load` | Charger un graphe depuis le stockage |
 | `POST` | `/unity-dialogues/graph/save` | Sauvegarder le graphe |
 | `POST` | `/unity-dialogues/graph/save-and-write` | Sauvegarde + écriture disque (flux principal client) |
+| `POST` | `/unity-dialogues/graph/preview-export` | Preview export graphe sans écriture (FR53) |
 
 ### Validation et flux
 
@@ -866,6 +907,7 @@ All routes below require **JWT** (`Depends(get_current_user)` in `api/main.py`).
 | POST | `/load` | Load graph into editor session |
 | POST | `/save` | Save graph |
 | POST | `/save-and-write` | Save and write Unity file |
+| POST | `/preview-export` | Preview graph export without disk write (FR53) |
 
 ### Generation & cost
 

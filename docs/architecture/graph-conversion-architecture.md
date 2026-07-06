@@ -87,17 +87,16 @@ ReactFlow (nodes/edges avec positions)
 ### Sauvegarde (ReactFlow → JSON Unity)
 
 ```
-ReactFlow (nodes/edges + positions)
-    ↓
-API /save → GraphConversionService.graph_to_unity_json()
+API /save-and-write → GraphConversionService.graph_to_unity_json()
     ↓
 [Reconstruction des connexions Unity depuis edges]
 [Exclusion des TestNodes (artefacts visuels)]
 [Reconstruction des 4 résultats de test]
+[Normalisation pré-validation — unity_export_normalizer]
     ↓
 JSON Unity canonique (validé, format Unity conforme)
     ↓
-API /unity/export → Écriture fichier
+Écriture fichier (chemin Unity configuré, validation path traversal)
 ```
 
 ## Points critiques
@@ -117,7 +116,7 @@ Les `TestNode` (barre avec 4 handles) sont **uniquement** des artefacts de visua
 - La reconstruction complexe des connexions depuis les edges
 - La validation Unity
 
-**Solution** : Toujours utiliser `saveDialogue()` → API `/save` (ou `/save-and-write`) pour obtenir le JSON canonique avant de sauvegarder.
+**Solution** : Toujours utiliser `saveDialogue()` → API `/save-and-write` pour obtenir le JSON canonique et persister sur disque. Preview sans écriture : `POST /preview-export`.
 
 **Stratégie save/sync (ADR-006)** : Store = document (une seule source de vérité). Pas de mode draft/save : toute modification est journalisée localement (IndexedDB) et synchronisée vers le serveur en micro-batch 100 ms max avec **seq** monotone. Le serveur applique seq/last_seq et écriture atomique (tmp → fsync → rename). Détails : `_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md` (ADR-006).
 
