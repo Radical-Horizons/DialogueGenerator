@@ -33,7 +33,7 @@ L'éditeur de graphe narratif permet de visualiser, éditer et gérer les dialog
 
 ### Header
 
-`GraphEditorHeader` expose une toolbar **binaire** selon la largeur du conteneur (pas seulement le viewport) :
+`GraphEditorHeader` expose une toolbar **binaire** selon la largeur du conteneur (pas seulement le viewport). Sous-composants (Epic 17.9) : `GraphToolbarTitleBlock`, `GraphToolbarToolsRow`, `GraphToolbarStatusRow`, `GraphToolbarUndoRedoButtons` ; logique menu dans `useGraphToolbarMenuItems.tsx`.
 
 | Mode | Seuil conteneur | Comportement |
 |------|-----------------|--------------|
@@ -50,8 +50,9 @@ Mesure : hook `useGraphToolbarLayoutMode` (`frontend/src/hooks/useGraphToolbarLa
 - **Retour** : Retour au dashboard
 - **Auto-layout** : Organise automatiquement les nœuds (Ctrl+L)
 - **Valider** : Vérifie le graphe (Ctrl+K)
-- **Sauvegarder** : Sauvegarde en Unity JSON (Ctrl+S)
-- **Exporter Unity** : Télécharge le JSON Unity depuis le store (`exportToUnity`)
+- **Sauvegarder** : Sync graphe → API `save-and-write` (Ctrl+S)
+- **Exporter Unity** : Validation schéma puis `POST /unity-dialogues/graph/save-and-write` (écriture disque) ; option **Prévisualiser export** via `preview-export`
+- **Télécharger JSON** : `GET /dialogues/{id}/download` depuis la bibliothèque Unity
 
 ### Canvas
 
@@ -219,7 +220,7 @@ Option B : Depuis l'URL
 
 - **Génération IA** : Utiliser l'interface principale puis ouvrir dans l'éditeur
 - **Édition choix** : Modifier le JSON exporté manuellement
-- **Auto-layout** : Layout basique en cascade (non Dagre)
+- **Auto-layout** : Dagre côté client pour recalcul rapide ; autres algorithmes via `POST /calculate-layout`
 - **Recherche** : Utiliser Ctrl+F du navigateur dans le JSON exporté
 
 ## Architecture Technique
@@ -232,7 +233,9 @@ Option B : Depuis l'URL
   - `services/context_dropping_detector.py` / `services/ai_slop_detector.py` : Analyses qualité « context dropping » et « AI slop »
   - `services/context_dropping_rules_service.py` : Persistance des règles anti-context-dropping (`data/validation-rules/context-dropping.json`)
 - **API REST** (JWT obligatoire sur ces routes) :
-  - **Graphe** : préfixe `/api/v1/unity-dialogues/graph/` — I/O (`load`, `save`, `save-and-write`), `generate-node`, `estimate-cost`, `validate`, `validate-schema`, `validate-lore-explicit`, `simulate-flow`, `calculate-layout`, `detect-ai-slop`, `detect-context-dropping`, `evaluate-dialogue-quality`, cycle de vie nœuds générés (`prompt`, `nodes/.../accept|reject|regenerate`). Détail et schémas : [Backend API Contracts — Graph editor API](../api/api-contracts-api.md#graph-editor-api-apiv1unity-dialoguesgraph).
+  - **Graphe** : préfixe `/api/v1/unity-dialogues/graph/` — I/O (`load`, `save`, `save-and-write`, `preview-export`), `generate-node`, `estimate-cost`, `validate`, `validate-schema`, `validate-lore-explicit`, `simulate-flow`, `calculate-layout`, `detect-ai-slop`, `detect-context-dropping`, `evaluate-dialogue-quality`, cycle de vie nœuds générés (`prompt`, `nodes/.../accept|reject|regenerate`). Détail et schémas : [Backend API Contracts — Graph editor API](../api/api-contracts-api.md#graph-editor-api-apiv1unity-dialoguesgraph).
+  - **Export bibliothèque** : `/api/v1/dialogues/batch-export`, `preview-export`, `download` — voir [Export Unity Epic 5](../../README_API.md#export-unity-epic-5--matrice-preview--export--batch).
+  - **Logs export** : `GET /api/v1/exports/logs`
   - **Règles context-dropping** : `/api/v1/validation/rules/context-dropping` (GET/PUT) — utilisées par défaut par `detect-context-dropping` quand les options ne les surchargent pas.
 - **Client TS** : `frontend/src/api/graph.ts`
 

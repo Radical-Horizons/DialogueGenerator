@@ -327,12 +327,18 @@ Chaque entrée de log contient :
 
 | Action | Endpoint / UI | Persistance disque | Validation schéma |
 |--------|---------------|-------------------|-------------------|
-| Prévisualiser (graphe) | `POST /api/v1/documents/{id}/unity-export/preview` · menu **Actions → Prévisualiser export** | Non | Oui (réponse JSON normalisée) |
-| Exporter (graphe) | `POST /api/v1/documents/{id}/unity-export` · **Export Unity** | Oui (`Assets/Dialogue/…`) | Oui avant écriture |
-| Batch (liste) | `POST /api/v1/unity-dialogues/batch-export` · page `/unity-dialogues` | Oui | Oui par fichier |
-| Journal export | `GET /api/v1/unity-dialogues/export-log` | — | — |
+| Prévisualiser (graphe) | `POST /api/v1/unity-dialogues/graph/preview-export` · menu **Actions → Prévisualiser export** | Non | Oui (réponse JSON normalisée) |
+| Exporter (graphe) | `POST /api/v1/unity-dialogues/graph/save-and-write` · **Export Unity** | Oui (répertoire Unity configuré) | Oui avant écriture |
+| Prévisualiser (bibliothèque) | `GET /api/v1/dialogues/{document_id}/preview-export` · liste `/unity-dialogues` | Non | Oui |
+| Télécharger (bibliothèque) | `GET /api/v1/dialogues/{document_id}/download` | — | — |
+| Batch export | `POST /api/v1/dialogues/batch-export` · page `/unity-dialogues` | Oui | Oui par fichier |
+| Batch preview | `POST /api/v1/dialogues/batch-preview-export` | Non | Oui par fichier |
+| Export JSON brut | `POST /api/v1/dialogues/unity/export` (corps `json_content`) | Oui | Oui avant écriture |
+| Journal export | `GET /api/v1/exports/logs` (`status`, `start_date`, `end_date`) | — | — |
 
 Normalisation pré-validation : choix placeholder `__idx_*` sans texte ni cible, champs `null`/vides (`influenceDelta`, `respectDelta`, `condition`, `test`, `title`). Service : `services/unity_export_normalizer.py`. Migration legacy : `python scripts/normalize_unity_dialogues.py` (dry-run) puis `--apply`.
+
+Sécurité écriture : `safe_export_filename`, `safe_document_id`, `_resolve_export_path` — voir [docs/guides/SECURITY.md](docs/guides/SECURITY.md#export-unity--path-traversal).
 
 - `GET /api/v1/config/unity-dialogues-path` - Chemin configuré des dialogues Unity
 - `PUT /api/v1/config/unity-dialogues-path` - Configurer le chemin des dialogues Unity

@@ -179,6 +179,18 @@ Les endpoints de preview et validation document bornent la taille des payloads *
 
 Dépassement → `422` (validation Pydantic) avant exécution métier.
 
+## Export Unity — path traversal
+
+Les routes d'export Unity (graphe `save-and-write`, bibliothèque `batch-export`, téléchargement) valident les identifiants et noms de fichier **avant** toute écriture ou lecture disque :
+
+| Fonction | Module | Rôle |
+|----------|--------|------|
+| `safe_document_id` | `services/unity_persisted_document_io.py` | Normalise l'id document (pas de `..`, `/`, `\`) |
+| `safe_export_filename` | `services/unity_dialogue_download_service.py` | Basename uniquement, extension `.json` forcée |
+| `_resolve_export_path` | `services/unity_dialogue_export_service.py` | Vérifie que le chemin résolu reste sous le répertoire Unity configuré |
+
+Comportement en cas d'abus : `ValidationException` (422) ou `ValueError` côté service — pas d'écriture hors du dossier Unity. Tests : `tests/services/test_unity_dialogue_download_service.py`, `tests/api/test_unity_export_story_5_1.py`.
+
 ## Réponses d'erreur en production
 
 Quand `ENVIRONMENT=production` :
