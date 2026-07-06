@@ -12,10 +12,11 @@
 | `v1.6.0` | 1.6.0 | #43 | Epic 9 — Variables | `a73255ce` | 2026-06-10 |
 | `v1.7.0` | 1.7.0 | #46 | Epic 5 — Export Unity | `2c5a1ed8` | 2026-06-21 |
 | `v1.7.1` | 1.7.1 | — | patch main post–Epic 5 | `2dcf3a24` | 2026-06-26 |
+| `v1.7.2` | 1.7.2 | — | patch main (playthrough + GDD sync) | `7cb2de2a` | 2026-07-06 |
 
 Baseline : `v1.0.0` → `fe9c3374`. Doc complète : `docs/releases/semver-and-tags.md`.
 
-Prochaine epic mergée → **1.8.0**. Patches main entre deux epics → **1.7.2**, **1.7.3**, …
+Prochaine epic mergée → **1.8.0**. Patches main entre deux epics → **1.7.3**, **1.7.4**, …
 
 ```powershell
 git log --oneline --merges --grep="Epic" -20
