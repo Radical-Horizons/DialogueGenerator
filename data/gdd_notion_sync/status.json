@@ -1,13 +1,11 @@
 {
-  "last_started_at": "2026-07-03T14:37:56.392720+00:00",
-  "last_finished_at": "2026-07-03T15:43:48.058765+00:00",
+  "last_started_at": "2026-07-05T15:21:43.703095+00:00",
+  "last_finished_at": "2026-07-05T15:24:20.042337+00:00",
   "last_success": true,
-  "message": "2914 entité(s) mise(s) à jour — 1 avertissement(s)",
-  "updated_entities": 2914,
-  "partial_errors": [
-    "Valeurs_de_Flag.json: fetch — HTTP 404 — Notion API: object_not_found — Could not find database with ID: 09204171-5d4d-40e8-9237-d7bac6a5c1a0. Make sure the relevant pages and databases are shared with your integration \"Alteir\". — Client error '404 Not Found' for url 'https://api.notion.com/v1/databases/09204171-5d4d-40e8-9237-d7bac6a5c1a0/query'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
-  ],
-  "last_archive_relative": null,
-  "last_mirror_rebuild_used": false,
+  "message": "83 entité(s) mise(s) à jour — miroir appliqué (archive : .archive/20260705T152144Z_51abe406)",
+  "updated_entities": 83,
+  "partial_errors": [],
+  "last_archive_relative": ".archive/20260705T152144Z_51abe406",
+  "last_mirror_rebuild_used": true,
   "mirror_promotion_pending": false
 }
