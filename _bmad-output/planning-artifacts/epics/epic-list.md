@@ -32,7 +32,7 @@ Les utilisateurs peuvent créer, sauvegarder et réutiliser des configurations d
 
 ## Epic 7: Collaboration et contrôle d'accès
 
-Les utilisateurs peuvent travailler en équipe avec authentification sécurisée et rôles (Admin, Writer, Viewer). Le système gère accounts, login/logout, RBAC, partage dialogues, audit logs (V1.5+).
+Comptes fermés (Admin / Writer), invités lecture seule sans compte (liens), SQLite locale (`data/app.db`) pour users, préférences, index dialogues, partages et audit. Voir [epic-07.md](epic-07.md) — stories **7.0–7.9**.
 
 ## Epic 8: Gestion des dialogues et recherche
 

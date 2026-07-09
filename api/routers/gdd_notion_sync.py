@@ -4,10 +4,10 @@ from __future__ import annotations
 import logging
 from typing import Annotated, List, Literal, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import Response
 
-from api.dependencies import get_gdd_notion_sync_service, get_request_id
+from api.dependencies import get_gdd_notion_sync_service, get_request_id, get_service_container
 from api.routers.auth import get_current_user
 from api.schemas.gdd_notion_sync import (
     GddArchiveEntrySchema,
@@ -332,6 +332,7 @@ async def get_gdd_notion_sync_progress(
 
 @router.get("/notebooklm-export")
 async def download_gdd_notebooklm_export(
+    request: Request,
     svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
     max_files: Annotated[
         int,
@@ -353,7 +354,13 @@ async def download_gdd_notebooklm_export(
 ) -> Response:
     """ZIP : GDD local regroupé en Markdown pour NotebookLM / présentations."""
     try:
-        payload = svc.build_notebooklm_export_zip(max_files=max_files, export_scope=scope)
+        container = get_service_container(request)
+        relation_index = container.get_global_relation_index()
+        payload = svc.build_notebooklm_export_zip(
+            max_files=max_files,
+            export_scope=scope,
+            relation_index=relation_index,
+        )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except OSError as exc:

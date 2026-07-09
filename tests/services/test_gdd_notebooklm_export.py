@@ -168,6 +168,173 @@ def test_small_themes_merge_into_fewer_files(tmp_path: Path) -> None:
     assert "P1" in body and "M1" in body
 
 
+def test_values_included_in_markdown_output(tmp_path: Path) -> None:
+    """Les métadonnées ``values`` apparaissent dans le Markdown généré.
+
+    Utilise ``Piliers.json`` (catégorie monolithique, hors liste shards) pour
+    que ``eligible_disk_category_files`` détecte le fichier directement.
+    """
+    gdd = tmp_path / "GDD_categories"
+    gdd.mkdir(parents=True)
+    (gdd / "Piliers.json").write_text(
+        json.dumps(
+            [
+                {
+                    "Nom": "Uresaïr",
+                    "sections": {"intro": "Un guerrier."},
+                    "values": {"Espece": "VanDoei", "Occupation": "Gardien"},
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    settings = {
+        "sources": [{"kind": "page", "category_file": "Piliers.json", "notion_id": _nid()}],
+        "included_categories": [],
+    }
+    parts = build_notebooklm_markdown_parts(
+        gdd_root=gdd,
+        project_root=tmp_path,
+        settings=settings,
+        max_files=64,
+    )
+    body = "\n".join(t for _, t in parts)
+    assert "Espece" in body
+    assert "VanDoei" in body
+    assert "Occupation" in body
+    assert "Gardien" in body
+
+
+def test_uuid_in_values_resolved_via_relation_index(tmp_path: Path) -> None:
+    """Les UUID dans ``values`` sont remplacés par leur Nom via l'index.
+
+    L'index utilise le format UUID canonique avec tirets (sortie de normalize_notion_id).
+    """
+    gdd = tmp_path / "GDD_categories"
+    gdd.mkdir(parents=True)
+    uid = "1a16e4d2-1b45-8051-88d9-d744a1bbc095"
+    (gdd / "Piliers.json").write_text(
+        json.dumps(
+            [{"Nom": "Uresair", "sections": {}, "values": {"Espece": uid}}],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    settings = {
+        "sources": [{"kind": "page", "category_file": "Piliers.json", "notion_id": _nid()}],
+        "included_categories": [],
+    }
+    relation_index = {uid: "VanDoei"}
+    parts = build_notebooklm_markdown_parts(
+        gdd_root=gdd,
+        project_root=tmp_path,
+        settings=settings,
+        max_files=64,
+        relation_index=relation_index,
+    )
+    body = "\n".join(t for _, t in parts)
+    assert "VanDoei" in body
+    assert uid not in body
+
+
+def test_uuid_not_in_index_kept_as_is(tmp_path: Path) -> None:
+    """UUID absent de l'index → conservé tel quel (pas de perte silencieuse)."""
+    gdd = tmp_path / "GDD_categories"
+    gdd.mkdir(parents=True)
+    uid = "00000000-0000-4000-8000-000000000001"
+    (gdd / "Piliers.json").write_text(
+        json.dumps(
+            [{"Nom": "Quelque part", "sections": {}, "values": {"Lie a": uid}}],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    settings = {
+        "sources": [{"kind": "page", "category_file": "Piliers.json", "notion_id": _nid()}],
+        "included_categories": [],
+    }
+    parts = build_notebooklm_markdown_parts(
+        gdd_root=gdd,
+        project_root=tmp_path,
+        settings=settings,
+        max_files=64,
+        relation_index={},
+    )
+    body = "\n".join(t for _, t in parts)
+    assert uid in body
+
+
+def test_skill_pages_excluded_from_disk_export(tmp_path: Path) -> None:
+    """Les pages Skill Notion IA sont exclues des exports quel que soit le mode."""
+    gdd = tmp_path / "GDD_categories"
+    gdd.mkdir(parents=True)
+    (gdd / "Piliers.json").write_text(
+        json.dumps([{"Nom": "Contenu GDD", "sections": {"x": "y"}}], ensure_ascii=False),
+        encoding="utf-8",
+    )
+    for skill_file in ("Skills.json", "Gestion_de_personnages.json", "Skill___Initialisation.json"):
+        (gdd / skill_file).write_text(
+            json.dumps([{"Nom": "Skill tool", "sections": {}}], ensure_ascii=False),
+            encoding="utf-8",
+        )
+    skill_sources = [
+        {"kind": "page", "category_file": "Skills.json", "notion_id": _nid()},
+        {"kind": "page", "category_file": "Gestion_de_personnages.json", "notion_id": _nid()},
+        {"kind": "page", "category_file": "Skill___Initialisation.json", "notion_id": _nid()},
+    ]
+    settings = {
+        "sources": [
+            {"kind": "page", "category_file": "Piliers.json", "notion_id": _nid()},
+            *skill_sources,
+        ],
+        "included_categories": ["Piliers.json", "Skills.json", "Gestion_de_personnages.json"],
+    }
+
+    from services.gdd_notebooklm_export import (
+        eligible_disk_category_files,
+        eligible_sync_category_files,
+    )
+
+    disk_eligible = eligible_disk_category_files(settings, gdd)
+    assert "Skills.json" not in disk_eligible
+    assert "Gestion_de_personnages.json" not in disk_eligible
+    assert "Skill___Initialisation.json" not in disk_eligible
+    assert "Piliers.json" in disk_eligible
+
+    sync_eligible = eligible_sync_category_files(settings)
+    assert "Skills.json" not in sync_eligible
+    assert "Gestion_de_personnages.json" not in sync_eligible
+    assert "Piliers.json" in sync_eligible
+
+    parts = build_notebooklm_markdown_parts(
+        gdd_root=gdd,
+        project_root=tmp_path,
+        settings=settings,
+        max_files=64,
+    )
+    body = "\n".join(t for _, t in parts)
+    assert "Skill tool" not in body
+    assert "Contenu GDD" in body
+
+
+def test_competences_not_excluded(tmp_path: Path) -> None:
+    """Compétences.json (données de jeu) n'est PAS exclu par le filtre Skill."""
+    from services.gdd_notebooklm_export import eligible_disk_category_files
+
+    gdd = tmp_path / "GDD_categories"
+    gdd.mkdir(parents=True)
+    (gdd / "Compétences.json").write_text(
+        json.dumps([{"Nom": "Esquive", "sections": {}}], ensure_ascii=False),
+        encoding="utf-8",
+    )
+    settings = {
+        "sources": [{"kind": "database", "category_file": "Compétences.json", "notion_id": _nid()}],
+        "included_categories": [],
+    }
+    assert "Compétences.json" in eligible_disk_category_files(settings, gdd)
+
+
 def test_oversized_bucket_emits_part_files_without_truncation(tmp_path: Path) -> None:
     """Catégorie monolithique (``Pitch.json``) : pas de dossier shard ``personnages/``."""
     gdd = tmp_path / "GDD_categories"

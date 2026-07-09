@@ -30,8 +30,8 @@
 - **Epic 6**: [Templates et réutilisabilité](epic-06.md)  
   Les utilisateurs peuvent créer, sauvegarder et réutiliser des configurations de génération (instructions, contexte, paramètres). Le système fournit templates pré-built (salutations, confrontation), marketplace (V1.5+), A/B testing (V2.5+) et partage équipe.
 
-- **Epic 7**: [Collaboration et contrôle d'accès](epic-07.md)  
-  Les utilisateurs peuvent travailler en équipe avec authentification sécurisée et rôles (Admin, Writer, Viewer). Le système gère accounts, login/logout, RBAC, partage dialogues, audit logs (V1.5+).
+- **Epic 7**: [Collaboration et contrôle d'accès](epic-07.md) — stories **7.0–7.9**  
+  SQLite `data/app.db`, comptes fermés Admin/Writer, invités lecture seule (liens), RBAC, partage co-édition, audit logs (V1.5+).
 
 - **Epic 8**: [Gestion des dialogues et recherche](epic-08.md)  
   Les utilisateurs peuvent gérer, rechercher, filtrer et organiser leurs dialogues efficacement. Le système permet listing, recherche avancée (nom, personnage, lieu, thème), filtrage par métadonnées, tri, collections/dossiers, indexation rapide (1000+ dialogues), visualisation métadonnées, validation batch et génération batch.

@@ -62,7 +62,8 @@ class ContextConstructionService:
         context_formatter: Optional['ContextFormatter'] = None,
         context_truncator: Optional['ContextTruncator'] = None,
         previous_dialogue_manager: Optional['PreviousDialogueManager'] = None,
-        context_config: Optional[Dict[str, Any]] = None
+        context_config: Optional[Dict[str, Any]] = None,
+        relation_index: Optional[Dict[str, str]] = None,
     ):
         """Initialise le service de construction de contexte.
         
@@ -73,6 +74,8 @@ class ContextConstructionService:
             context_truncator: Truncator pour comptage et troncature de tokens.
             previous_dialogue_manager: Manager du dialogue précédent.
             context_config: Configuration de contexte (pour build_context).
+            relation_index: Index cross-catégorie UUID → Nom pour résoudre les UUIDs dans
+                les champs ``values.*`` lors de la construction du contexte LLM.
         """
         self._element_resolver = element_resolver
         self._context_field_manager = context_field_manager
@@ -81,6 +84,7 @@ class ContextConstructionService:
         self._previous_dialogue_manager = previous_dialogue_manager
         self._context_config = context_config or {}
         self._context_builder: Optional[Any] = None
+        self._relation_index: Optional[Dict[str, str]] = relation_index
     
     def _get_field_manager(self) -> 'ContextFieldManager':
         """Retourne le ContextFieldManager, en levant une erreur si non initialisé.
@@ -347,7 +351,7 @@ class ContextConstructionService:
         """
         from services.context_organizer import ContextOrganizer
         
-        organizer = ContextOrganizer()
+        organizer = ContextOrganizer(relation_index=self._relation_index)
         
         # Contexte du dialogue précédent
         previous_dialogue_formatted = ""

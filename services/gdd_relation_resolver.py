@@ -1,7 +1,9 @@
 """Résolution des champs relation Notion (UUID) vers noms de fiches GDD."""
 from __future__ import annotations
 
+import json
 import re
+from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Set
 
 from services.gdd_notion_sync_utils import normalize_notion_id
@@ -141,6 +143,53 @@ def resolve_relation_value_to_name(
         known_names=names_set,
         known_names_folded=names_folded,
     )
+
+
+def build_global_relation_index(gdd_root: Path) -> Dict[str, str]:
+    """UUID normalisé → ``Nom`` en scannant tous les shards et monolithes de GDD_categories.
+
+    Parcourt récursivement ``gdd_root/*.json`` (dossiers shards inclus) en ignorant
+    ``.archive`` et ``.staging``.  Retourne le premier ``Nom`` trouvé pour chaque UUID ;
+    les collisions (même UUID, deux noms différents) conservent la première entrée.
+
+    Args:
+        gdd_root: Répertoire ``GDD_categories`` (ou équivalent de test).
+
+    Returns:
+        Dictionnaire ``{uuid_normalisé: Nom}``.
+    """
+    from services.gdd_notion_sync_mirror import GDD_RESERVED_TOP_LEVEL
+
+    index: Dict[str, str] = {}
+    resolved_root = Path(gdd_root).resolve()
+
+    for json_path in sorted(resolved_root.rglob("*.json")):
+        rel_parts = json_path.relative_to(resolved_root).parts
+        if any(p in GDD_RESERVED_TOP_LEVEL for p in rel_parts):
+            continue
+        try:
+            raw = json.loads(json_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, ValueError):
+            continue
+
+        records: List[Any] = raw if isinstance(raw, list) else [raw]
+        for record in records:
+            if not isinstance(record, dict):
+                continue
+            nom = record.get("Nom")
+            if not nom or not isinstance(nom, str) or not nom.strip():
+                continue
+            raw_id = record.get("notion_page_id")
+            if not raw_id:
+                continue
+            try:
+                key = normalize_notion_id(str(raw_id).strip())
+            except ValueError:
+                continue
+            if key not in index:
+                index[key] = nom.strip()
+
+    return index
 
 
 def resolve_scene_location_labels(

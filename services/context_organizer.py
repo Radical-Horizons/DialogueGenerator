@@ -1,8 +1,9 @@
 """Service pour organiser intelligemment les sections du contexte dans le prompt."""
 import copy
 import logging
+import re
 from collections import OrderedDict, defaultdict
-from typing import Any, List, Dict, Optional, Tuple
+from typing import Any, List, Dict, Mapping, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -115,9 +116,15 @@ class ContextOrganizer:
         ],
     }
     
-    def __init__(self):
-        """Initialise l'organisateur."""
-        # Importer le déduplicateur
+    def __init__(self, relation_index: Optional[Mapping[str, str]] = None) -> None:
+        """Initialise l'organisateur.
+
+        Args:
+            relation_index: Index cross-catégorie ``{uuid_normalisé: Nom}`` pour résoudre
+                les champs ``values.*`` qui contiennent des UUID Notion bruts.
+                Si ``None``, les UUID restent tels quels dans le prompt.
+        """
+        self._relation_index: Optional[Mapping[str, str]] = relation_index
         try:
             from services.context_serializer.deduplicator import FieldDeduplicator
             self.deduplicator = FieldDeduplicator()
@@ -311,6 +318,39 @@ class ContextOrganizer:
 
         return extract_gdd_field_value(data, path)
     
+    def _resolve_notion_ids(self, value: str) -> str:
+        """Remplace les UUID Notion par leur Nom si disponible dans l'index.
+
+        Ne modifie la chaîne que si elle contient au moins un UUID Notion (32 hex ou
+        format tirets).  Les UUID absents de l'index sont conservés tels quels.
+
+        Args:
+            value: Valeur brute pouvant contenir des UUID séparés par ``, `` ou ``;``.
+
+        Returns:
+            Chaîne avec les UUID remplacés par leurs noms (ou valeur inchangée).
+        """
+        if not self._relation_index or not value:
+            return value
+        from services.gdd_relation_resolver import looks_like_notion_uuid, parse_relation_tokens
+        from services.gdd_notion_sync_utils import normalize_notion_id
+
+        tokens = parse_relation_tokens(value)
+        if not tokens or not any(looks_like_notion_uuid(t) for t in tokens):
+            return value
+        resolved = []
+        for token in tokens:
+            if looks_like_notion_uuid(token):
+                try:
+                    key = normalize_notion_id(token)
+                    name = self._relation_index.get(key)
+                    resolved.append(name if name else token)
+                except ValueError:
+                    resolved.append(token)
+            else:
+                resolved.append(token)
+        return ", ".join(resolved)
+
     def _format_value(self, value: any, for_json: bool = False) -> any:
         """Formate une valeur pour l'affichage.
         
@@ -345,7 +385,8 @@ class ContextOrganizer:
             else:
                 return ", ".join(str(item) for item in value)
         else:
-            return str(value)
+            raw = str(value)
+            return self._resolve_notion_ids(raw)
     
     def _generate_label(
         self, 

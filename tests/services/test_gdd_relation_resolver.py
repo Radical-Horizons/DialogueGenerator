@@ -1,5 +1,9 @@
 """Tests pour la résolution des champs relation Notion (UUID → Nom)."""
+import json
+from pathlib import Path
+
 from services.gdd_relation_resolver import (
+    build_global_relation_index,
     build_notion_page_id_index,
     get_gdd_property,
     resolve_relation_field_to_names,
@@ -50,3 +54,73 @@ def test_unresolved_uuid_omitted_from_contient() -> None:
         known_names=["Site A"],
     )
     assert names == ["Site A"]
+
+
+# --- build_global_relation_index ---
+
+
+def test_build_global_relation_index_monolith(tmp_path: Path) -> None:
+    """Monolithe JSON : tous les enregistrements indexés.
+
+    ``normalize_notion_id`` retourne le format avec tirets ; les clés de l'index
+    sont donc des UUID canoniques ``xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx``.
+    """
+    gdd = tmp_path / "GDD_categories"
+    gdd.mkdir()
+    uid1 = "1a16e4d2-1b45-8051-88d9-d744a1bbc095"
+    uid2 = "1a16e4d2-1b45-8051-88d9-aabbccddeeff"
+    records = [
+        {"Nom": "Uresaïr", "notion_page_id": uid1},
+        {"Nom": "Valkazer", "notion_page_id": uid2},
+    ]
+    (gdd / "Piliers.json").write_text(json.dumps(records), encoding="utf-8")
+    idx = build_global_relation_index(gdd)
+    assert idx.get(uid1) == "Uresaïr"
+    assert idx.get(uid2) == "Valkazer"
+
+
+def test_build_global_relation_index_shard(tmp_path: Path) -> None:
+    """Shards (un fichier par enregistrement) dans un sous-dossier."""
+    gdd = tmp_path / "GDD_categories"
+    shard_dir = gdd / "lieux"
+    shard_dir.mkdir(parents=True)
+    uid = "1b36e4d2-1b45-80ce-9d1b-f71e60cb8e53"
+    shard = {"Nom": "Nef Centrale", "notion_page_id": uid}
+    (shard_dir / "nef_centrale.json").write_text(json.dumps(shard), encoding="utf-8")
+    idx = build_global_relation_index(gdd)
+    assert idx.get(uid) == "Nef Centrale"
+
+
+def test_build_global_relation_index_skips_archive(tmp_path: Path) -> None:
+    """.archive et .staging sont ignorés."""
+    gdd = tmp_path / "GDD_categories"
+    archive = gdd / ".archive" / "snap1"
+    archive.mkdir(parents=True)
+    uid = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
+    (archive / "rec.json").write_text(
+        json.dumps({"Nom": "Secret", "notion_page_id": uid}), encoding="utf-8"
+    )
+    idx = build_global_relation_index(gdd)
+    assert "aaaaaaaa" not in " ".join(idx.keys())
+
+
+def test_build_global_relation_index_empty_dir(tmp_path: Path) -> None:
+    """Répertoire vide → index vide."""
+    gdd = tmp_path / "GDD_categories"
+    gdd.mkdir()
+    assert build_global_relation_index(gdd) == {}
+
+
+def test_build_global_relation_index_first_wins(tmp_path: Path) -> None:
+    """En cas de collision UUID, la première entrée trouvée est conservée."""
+    gdd = tmp_path / "GDD_categories"
+    gdd.mkdir()
+    uid = "1a16e4d2-1b45-8051-88d9-d744a1bbc095"
+    (gdd / "A.json").write_text(
+        json.dumps([{"Nom": "Premier", "notion_page_id": uid}]), encoding="utf-8"
+    )
+    (gdd / "B.json").write_text(
+        json.dumps([{"Nom": "Deuxième", "notion_page_id": uid}]), encoding="utf-8"
+    )
+    idx = build_global_relation_index(gdd)
+    assert idx[uid] in ("Premier", "Deuxième")

@@ -6,7 +6,7 @@ permettant une meilleure gestion du cycle de vie et facilitant les tests.
 import logging
 import os
 from pathlib import Path
-from typing import Optional, TYPE_CHECKING
+from typing import Dict, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from services.dialogue_preview_service import DialoguePreviewService
@@ -72,6 +72,7 @@ class ServiceContainer:
         self._cd_rules_service: Optional[ContextDroppingRulesService] = None
         self._gdd_notion_sync_service: Optional["GddNotionSyncService"] = None
         self._dialogue_preview_service: Optional["DialoguePreviewService"] = None
+        self._global_relation_index: Optional[Dict[str, str]] = None
         logger.debug("ServiceContainer initialisé (services à charger au premier accès)")
     
     def get_config_service(self) -> ConfigurationService:
@@ -107,8 +108,40 @@ class ServiceContainer:
             logger.info("Chargement des fichiers GDD...")
             self._context_builder.load_gdd_files()
             logger.info("ContextBuilder initialisé dans le container avec données GDD chargées.")
+            self._inject_relation_index_into_context_builder()
         return self._context_builder
     
+    def get_global_relation_index(self) -> Dict[str, str]:
+        """Construit et met en cache l'index cross-catégorie UUID → Nom.
+
+        Scanne ``data/GDD_categories/`` une seule fois ; le cache est invalidé après
+        chaque sync Notion réussie via ``invalidate_global_relation_index()``.
+
+        Returns:
+            Dictionnaire ``{uuid_normalisé: Nom}`` pour tous les shards GDD sur disque.
+        """
+        if self._global_relation_index is None:
+            from services.gdd_relation_resolver import build_global_relation_index
+            gdd_dir = self._resolve_gdd_categories_path()
+            self._global_relation_index = build_global_relation_index(gdd_dir)
+            logger.info(
+                "GlobalRelationIndex construit : %d entrées.",
+                len(self._global_relation_index),
+            )
+        return self._global_relation_index
+
+    def invalidate_global_relation_index(self) -> None:
+        """Invalide le cache de l'index global (à appeler après une sync Notion réussie)."""
+        self._global_relation_index = None
+
+    def _inject_relation_index_into_context_builder(self) -> None:
+        """Injecte l'index relation dans le ContextConstructionService du ContextBuilder."""
+        if self._context_builder is None:
+            return
+        ccs = getattr(self._context_builder, "_context_construction_service", None)
+        if ccs is not None:
+            ccs._relation_index = self.get_global_relation_index()
+
     def get_vocabulary_service(self) -> VocabularyService:
         """Retourne le service de vocabulaire.
         
@@ -357,12 +390,17 @@ class ServiceContainer:
             status_path = root / FilePaths.GDD_NOTION_SYNC_DIR / "status.json"
             from services.gdd_context_refresh import reload_context_builder_if_loaded
 
+            def _after_sync() -> None:
+                self.invalidate_global_relation_index()
+                reload_context_builder_if_loaded(self)
+                self._inject_relation_index_into_context_builder()
+
             self._gdd_notion_sync_service = GddNotionSyncService(
                 config_store=store,
                 manifest_path=manifest,
                 gdd_categories_path=gdd_dir,
                 status_path=status_path,
-                after_gdd_disk_mutation=lambda: reload_context_builder_if_loaded(self),
+                after_gdd_disk_mutation=_after_sync,
             )
             logger.info("GddNotionSyncService initialisé dans le container.")
         return self._gdd_notion_sync_service

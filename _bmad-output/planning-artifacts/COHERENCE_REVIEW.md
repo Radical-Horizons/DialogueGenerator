@@ -53,7 +53,7 @@
 
 ### Epic 7: Collaboration et contrôle d'accès
 - **FRs couverts:** FR64-71 (auth, RBAC, partage, audit logs)
-- **Stories:** 8 stories
+- **Stories:** 10 stories (7.0 SQLite … 7.9 settings)
 - **Status:** ✅ Complet - Tous les FRs couverts
 
 ### Epic 8: Gestion des dialogues et recherche
@@ -227,7 +227,7 @@ Toutes les stories suivent le format standard :
 - ✅ Epic 4: Stories 4.1 à 4.13 (13 stories)
 - ✅ Epic 5: Stories 5.1 à 5.6 (6 stories)
 - ✅ Epic 6: Stories 6.1 à 6.9 (9 stories)
-- ✅ Epic 7: Stories 7.1 à 7.8 (8 stories)
+- ✅ Epic 7: Stories 7.0 à 7.9 (10 stories) — SQLite + invités sans compte
 - ✅ Epic 8: Stories 8.1 à 8.9 (9 stories)
 - ✅ Epic 9: Stories 9.1 à 9.6 (6 stories)
 - ✅ Epic 10: Stories 10.1 à 10.6 (6 stories)

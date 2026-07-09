@@ -20,6 +20,12 @@ ExportScope = Literal["disk", "sync"]
 from services.gdd_notion_sync_mirror import GDD_RESERVED_TOP_LEVEL
 from services.gdd_notion_sync_utils import category_file_matches_included, category_stem_to_list_category_key
 from services.gdd_paths import resolve_gdd_categories_path
+from services.gdd_relation_resolver import (
+    build_global_relation_index,
+    looks_like_notion_uuid,
+    parse_relation_tokens,
+)
+from services.gdd_notion_sync_utils import normalize_notion_id
 
 _MAX_FILES_DEFAULT = 64
 # NotebookLM : ~500 000 mots / source (~3 M caractères FR) ; marge sous le plafond officiel.
@@ -37,6 +43,30 @@ def _fold_stem(stem: str) -> str:
     """Stem normalisé (accents → ASCII) en minuscules pour comparaisons."""
     nk = unicodedata.normalize("NFKD", (stem or "").strip())
     return "".join(c for c in nk if not unicodedata.combining(c)).lower()
+
+
+def _is_notion_skill_page(category_file: str) -> bool:
+    """True si ``category_file`` correspond à une page Skill Notion IA.
+
+    Ces pages (``Skills.json``, ``Skill___Initialisation.json``, ``Gestion_de_*.json``,
+    etc.) sont des outils internes pour l'IA Notion et ne contiennent pas de
+    contenu GDD narratif.  Elles doivent être exclues de tous les exports.
+
+    Détection basée sur le stem normalisé :
+    - Préfixe ``"skill"``  → ``Skills.json``, ``Skill___Initialisation.json`` …
+    - Préfixe ``"gestion_"`` → ``Gestion_de_personnages.json``, ``Gestion_de_Lieux.json`` …
+
+    Note : ``Compétences.json`` et ``Compétences_de_perso.json`` (données de jeu) ne
+    commencent pas par ``"skill"`` ou ``"gestion_"`` et ne sont pas affectés.
+
+    Args:
+        category_file: Nom de fichier ou chemin de catégorie (ex. ``"Skills.json"``).
+
+    Returns:
+        ``True`` si la catégorie doit être exclue des exports.
+    """
+    folded = _fold_stem(Path(category_file).stem)
+    return folded.startswith("skill") or folded.startswith("gestion_")
 
 
 def _resolve_category_path(gdd_root: Path, category_file: str) -> Path:
@@ -57,7 +87,8 @@ def eligible_disk_category_files(
     """Sources page/database configurées ayant au moins un JSON sur disque.
 
     Ignore ``included_categories`` : exporte tout le GDD local disponible pour
-    les sources Notion déclarées.
+    les sources Notion déclarées.  Les pages Skill Notion IA (``Skills.json``,
+    ``Gestion_de_*.json``, etc.) sont systématiquement exclues.
     """
     sources = settings.get("sources") or []
     root = gdd_root.resolve()
@@ -72,6 +103,8 @@ def eligible_disk_category_files(
         cf = (s.get("category_file") or "").strip()
         if not cf or cf in seen:
             continue
+        if _is_notion_skill_page(cf):
+            continue
         target = _resolve_category_path(root, cf)
         if not _iter_json_files(target):
             continue
@@ -81,7 +114,10 @@ def eligible_disk_category_files(
 
 
 def eligible_sync_category_files(settings: Mapping[str, Any]) -> List[str]:
-    """Noms ``category_file`` des sources page/database dans le périmètre ``included_categories``."""
+    """Noms ``category_file`` des sources page/database dans le périmètre ``included_categories``.
+
+    Les pages Skill Notion IA sont exclues indépendamment du périmètre coché.
+    """
     sources = settings.get("sources") or []
     inc = settings.get("included_categories") or []
     out: List[str] = []
@@ -94,6 +130,8 @@ def eligible_sync_category_files(settings: Mapping[str, Any]) -> List[str]:
             continue
         cf = (s.get("category_file") or "").strip()
         if not cf or cf in seen:
+            continue
+        if _is_notion_skill_page(cf):
             continue
         if not category_file_matches_included(cf, inc):
             continue
@@ -176,30 +214,85 @@ def _sections_to_markdown(record: Mapping[str, Any]) -> str:
     return "".join(lines)
 
 
-def _record_to_markdown(record: Any, index: int) -> str:
+def _resolve_relation_string(value: str, relation_index: Dict[str, str]) -> str:
+    """Résout les UUID Notion dans une chaîne séparée par virgules/points-virgules.
+
+    Si aucun token n'est un UUID Notion, retourne la valeur inchangée.
+    Les UUID non trouvés dans l'index sont conservés tels quels.
+
+    Args:
+        value: Valeur brute (ex : ``"uuid1, uuid2"`` ou texte libre).
+        relation_index: Index ``{uuid_normalisé: Nom}`` cross-catégorie.
+
+    Returns:
+        Chaîne avec les UUID remplacés par leurs noms.
+    """
+    tokens = parse_relation_tokens(value)
+    if not tokens or not any(looks_like_notion_uuid(t) for t in tokens):
+        return value
+    resolved = []
+    for token in tokens:
+        if looks_like_notion_uuid(token):
+            try:
+                key = normalize_notion_id(token)
+                name = relation_index.get(key)
+                resolved.append(name if name else token)
+            except ValueError:
+                resolved.append(token)
+        else:
+            resolved.append(token)
+    return ", ".join(resolved)
+
+
+def _render_value_lines(key: str, val: Any, relation_index: Dict[str, str]) -> List[str]:
+    """Génère les lignes Markdown ``### key\\n value`` pour un champ scalaire ou structuré."""
+    if val in (None, "", {}, []):
+        return []
+    lines: List[str] = [f"### {key}\n"]
+    if isinstance(val, str):
+        resolved = _resolve_relation_string(val, relation_index) if relation_index else val
+        lines.append(resolved.strip() + "\n\n")
+    elif isinstance(val, (dict, list)):
+        lines.append(
+            "```json\n"
+            + _markdown_escape_fence(json.dumps(val, ensure_ascii=False, indent=2))
+            + "\n```\n\n"
+        )
+    else:
+        lines.append(str(val) + "\n\n")
+    return lines
+
+
+def _record_to_markdown(
+    record: Any,
+    index: int,
+    relation_index: Optional[Dict[str, str]] = None,
+) -> str:
+    """Convertit un enregistrement GDD en bloc Markdown numéroté.
+
+    Args:
+        record: Enregistrement JSON (dict ou valeur primitive/liste).
+        index: Numéro d'ordre dans la catégorie (1-based).
+        relation_index: Index cross-catégorie UUID → Nom pour résoudre les champs relation.
+    """
+    _idx: Dict[str, str] = relation_index or {}
     title = _pick_title(record)
     lines = [f"## {index}. {title}\n"]
     if isinstance(record, dict):
         body = _sections_to_markdown(record)
         if body:
             lines.append(body)
-        skip = {"sections", "section_titles", "values"}
+        skip = {"sections", "section_titles"}
         for k, v in record.items():
             if k in skip:
                 continue
             if v in (None, "", {}, []):
                 continue
-            lines.append(f"### {k}\n")
-            if isinstance(v, (dict, list)):
-                lines.append(
-                    "```json\n"
-                    + _markdown_escape_fence(json.dumps(v, ensure_ascii=False, indent=2))
-                    + "\n```\n\n"
-                )
-            elif isinstance(v, str):
-                lines.append(v.strip() + "\n\n")
-            else:
-                lines.append(str(v) + "\n\n")
+            if k == "values" and isinstance(v, dict):
+                for vk, vv in v.items():
+                    lines.extend(_render_value_lines(vk, vv, _idx))
+                continue
+            lines.extend(_render_value_lines(k, v, _idx))
         return "".join(lines)
     lines.append(
         "```json\n"
@@ -416,7 +509,11 @@ def _merged_filename(slugs: List[str], part_index: int) -> str:
     return _bucket_part_filename(merged_base, part_index)
 
 
-def _build_category_segments(gdd_root: Path, category_files: List[str]) -> List[str]:
+def _build_category_segments(
+    gdd_root: Path,
+    category_files: List[str],
+    relation_index: Optional[Dict[str, str]] = None,
+) -> List[str]:
     """Segments Markdown (une entrée par ``category_file``)."""
     segments: List[str] = []
     for cf in sorted(set(category_files)):
@@ -435,7 +532,7 @@ def _build_category_segments(gdd_root: Path, category_files: List[str]) -> List[
                 seg_lines.append("*(JSON vide ou invalide.)*\n\n")
                 continue
             for idx, rec in enumerate(recs, start=1):
-                seg_lines.append(_record_to_markdown(rec, idx))
+                seg_lines.append(_record_to_markdown(rec, idx, relation_index=relation_index))
         segments.append("".join(seg_lines))
     return segments
 
@@ -610,6 +707,7 @@ def build_notebooklm_markdown_parts(
     max_files: int = _MAX_FILES_DEFAULT,
     max_chars_per_part: int = _MAX_EXPORT_CHARS_PER_PART,
     export_scope: ExportScope = "disk",
+    relation_index: Optional[Dict[str, str]] = None,
 ) -> List[Tuple[str, str]]:
     """Construit des documents Markdown (nom, contenu) pour export NotebookLM.
 
@@ -624,6 +722,8 @@ def build_notebooklm_markdown_parts(
         max_chars_per_part: Taille max d'un fichier Markdown avant découpage.
         export_scope: ``disk`` = tout JSON local des sources ; ``sync`` = filtre
             ``included_categories`` (périmètre coché dans l'UI).
+        relation_index: Index cross-catégorie UUID → Nom pour résoudre les champs relation.
+            Si ``None``, construit automatiquement depuis ``gdd_root``.
 
     Returns:
         Liste de ``(filename.md, texte)`` triée par nom de fichier.
@@ -634,6 +734,9 @@ def build_notebooklm_markdown_parts(
     if max_files < 1:
         raise ValueError("max_files doit être >= 1")
     gdd_root = gdd_root.resolve()
+    _rel_idx: Dict[str, str] = (
+        relation_index if relation_index is not None else build_global_relation_index(gdd_root)
+    )
     if export_scope == "sync":
         eligible = eligible_sync_category_files(settings)
     else:
@@ -679,7 +782,7 @@ def build_notebooklm_markdown_parts(
             f"*Même regroupement que `{bucket.slug}.md` ; fichier découpé pour la taille "
             f"(limite ~{max_chars_per_part:,} caractères par source NotebookLM).*\n\n"
         )
-        segments = _build_category_segments(gdd_root, cats)
+        segments = _build_category_segments(gdd_root, cats, relation_index=_rel_idx)
         bucket_files = _pack_bucket_markdown_files(
             slug=bucket.slug,
             first_header=first_header,
@@ -736,8 +839,18 @@ def build_gdd_notebooklm_zip_bytes(
     settings: Mapping[str, Any],
     max_files: int = _MAX_FILES_DEFAULT,
     export_scope: ExportScope = "disk",
+    relation_index: Optional[Dict[str, str]] = None,
 ) -> bytes:
-    """ZIP UTF-8 contenant les exports Markdown."""
+    """ZIP UTF-8 contenant les exports Markdown.
+
+    Args:
+        gdd_root: Répertoire ``GDD_categories`` (déduit depuis racine si omis).
+        project_root: Racine du dépôt (pour ``Vision.json``).
+        settings: Paramètres sync.
+        max_files: Nombre max de fichiers dans le ZIP.
+        export_scope: ``disk`` ou ``sync``.
+        relation_index: Index UUID → Nom pré-construit (construit depuis ``gdd_root`` si ``None``).
+    """
     root = project_root or Path(__file__).resolve().parent.parent
     gdd = gdd_root or resolve_gdd_categories_path(root)
     parts = build_notebooklm_markdown_parts(
@@ -746,6 +859,7 @@ def build_gdd_notebooklm_zip_bytes(
         settings=settings,
         max_files=max_files,
         export_scope=export_scope,
+        relation_index=relation_index,
     )
     buf = BytesIO()
     folder = "gdd-notebooklm-export"

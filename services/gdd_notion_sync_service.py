@@ -1987,6 +1987,7 @@ class GddNotionSyncService:
         *,
         max_files: int = 64,
         export_scope: str = "disk",
+        relation_index: "Optional[Dict[str, str]]" = None,
     ) -> bytes:
         """Assemble un ZIP Markdown (NotebookLM) depuis le GDD local et la config sync.
 
@@ -2014,4 +2015,6 @@ class GddNotionSyncService:
             settings=settings,
             max_files=max_files,
             export_scope=scope,
+            relation_index=relation_index,
         )
+
