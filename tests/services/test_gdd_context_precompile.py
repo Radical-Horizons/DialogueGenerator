@@ -134,6 +134,26 @@ def test_variant_cache_key_format() -> None:
     assert key == "narrative:full:standard"
 
 
+def test_precompile_entity_unknown_category_returns_zero_no_warning(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Une catégorie absente de STEM_TO_CATEGORY_KEY retourne 0 sans WARNING."""
+    import logging
+
+    from services.gdd_context_precompile import precompile_entity
+
+    mock_cb = MagicMock()
+    record = {"Nom": "Fondation de la Jungle Vivarcade"}
+
+    with caplog.at_level(logging.WARNING, logger="services.gdd_context_precompile"):
+        result = precompile_entity(mock_cb, category_stem="Chronologie_d'Escelion", record=record)
+
+    assert result == 0
+    assert not any(r.levelno >= logging.WARNING for r in caplog.records), (
+        f"Un WARNING inattendu a été émis : {[r.message for r in caplog.records]}"
+    )
+
+
 def test_append_entity_history_triggers_precompile(tmp_path: Path) -> None:
     """Sync : _append_entity_history appelle precompile_entity."""
     from services.gdd_notion_sync_service import GddNotionSyncService

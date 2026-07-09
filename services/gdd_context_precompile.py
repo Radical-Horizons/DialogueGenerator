@@ -404,7 +404,10 @@ def compile_and_save_variant(
         repo_root = Path(PROJECT_ROOT_DIR)
     category_key = STEM_TO_CATEGORY_KEY.get(category_stem)
     if not category_key:
-        raise ValueError(f"Catégorie GDD inconnue: {category_stem}")
+        raise ValueError(
+            f"Catégorie GDD inconnue: {category_stem} "
+            f"(catégories supportées : {sorted(STEM_TO_CATEGORY_KEY)})"
+        )
     nom = str(record.get("Nom") or "").strip() or "unknown"
     construction = context_builder._context_construction_service
     if construction is None:
@@ -581,8 +584,15 @@ def precompile_entity(
     """Précompile toutes les variantes standard pour une entité.
 
     Returns:
-        Nombre de variantes écrites.
+        Nombre de variantes écrites (0 si catégorie non supportée).
     """
+    if category_stem not in STEM_TO_CATEGORY_KEY:
+        logger.debug(
+            "Précompilation ignorée (%s / %s): catégorie non indexée pour le precompile",
+            category_stem,
+            str(record.get("Nom") or "?"),
+        )
+        return 0
     if repo_root is None:
         from core.context.context_builder import PROJECT_ROOT_DIR
 
