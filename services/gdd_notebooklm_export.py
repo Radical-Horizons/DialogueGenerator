@@ -46,7 +46,7 @@ def _fold_stem(stem: str) -> str:
 
 
 def _is_notion_skill_page(category_file: str) -> bool:
-    """True si ``category_file`` correspond à une page Skill Notion IA.
+    """True si ``category_file`` correspond à une page Skill Notion IA (détection par nom).
 
     Ces pages (``Skills.json``, ``Skill___Initialisation.json``, ``Gestion_de_*.json``,
     etc.) sont des outils internes pour l'IA Notion et ne contiennent pas de
@@ -58,6 +58,8 @@ def _is_notion_skill_page(category_file: str) -> bool:
 
     Note : ``Compétences.json`` et ``Compétences_de_perso.json`` (données de jeu) ne
     commencent pas par ``"skill"`` ou ``"gestion_"`` et ne sont pas affectés.
+    La détection par contenu (``_is_notion_skill_content``) complète ce filtre pour
+    les pages skill aux noms arbitraires (ex. ``Recherche_Deep_Dive.json``).
 
     Args:
         category_file: Nom de fichier ou chemin de catégorie (ex. ``"Skills.json"``).
@@ -67,6 +69,59 @@ def _is_notion_skill_page(category_file: str) -> bool:
     """
     folded = _fold_stem(Path(category_file).stem)
     return folded.startswith("skill") or folded.startswith("gestion_")
+
+
+# Signatures de section présentes dans les pages skill Notion IA.
+# Un match sur l'une OU l'autre suffit à classer la page comme skill.
+# - quand_utiliser_ce_skill : présent dans la majorité des skills (= "when to use this skill")
+# - preamble + outils_requis : combinaison universelle dans tous les skills (y compris anciens)
+_SKILL_SECTION_KEYS_ANY = frozenset({"quand_utiliser_ce_skill"})
+_SKILL_SECTION_KEYS_ALL = frozenset({"preamble", "outils_requis"})
+
+
+def _is_notion_skill_content(path: Path) -> bool:
+    """True si le fichier (ou le premier shard du dossier) contient la signature skill Notion IA.
+
+    Deux critères (l'un OU l'autre suffit) :
+    - Présence de ``quand_utiliser_ce_skill`` dans les clés de sections (normalisées).
+    - Présence simultanée de ``preamble`` ET ``outils_requis`` dans les clés de sections.
+
+    Ces structures n'apparaissent pas dans du contenu narratif GDD.  Cette
+    détection par contenu complète ``_is_notion_skill_page`` pour les pages dont le
+    nom ne suit pas la convention ``skill``/``gestion_``.
+
+    Args:
+        path: Chemin vers le fichier JSON monolithe ou le dossier de shards.
+
+    Returns:
+        ``True`` si la signature skill est détectée.
+    """
+    try:
+        if path.is_dir():
+            candidates = sorted(path.glob("*.json"))
+            if not candidates:
+                return False
+            target = candidates[0]
+        elif path.is_file():
+            target = path
+        else:
+            return False
+        raw = json.loads(target.read_text(encoding="utf-8"))
+        records: List[Any] = raw if isinstance(raw, list) else [raw]
+        for record in records:
+            if not isinstance(record, dict):
+                continue
+            sections = record.get("sections")
+            if not isinstance(sections, dict):
+                continue
+            normalized_keys = {_fold_stem(str(k)) for k in sections}
+            if normalized_keys & _SKILL_SECTION_KEYS_ANY:
+                return True
+            if _SKILL_SECTION_KEYS_ALL.issubset(normalized_keys):
+                return True
+    except (OSError, json.JSONDecodeError, ValueError):
+        pass
+    return False
 
 
 def _resolve_category_path(gdd_root: Path, category_file: str) -> Path:
@@ -87,8 +142,9 @@ def eligible_disk_category_files(
     """Sources page/database configurées ayant au moins un JSON sur disque.
 
     Ignore ``included_categories`` : exporte tout le GDD local disponible pour
-    les sources Notion déclarées.  Les pages Skill Notion IA (``Skills.json``,
-    ``Gestion_de_*.json``, etc.) sont systématiquement exclues.
+    les sources Notion déclarées.  Les pages Skill Notion IA sont exclues :
+    - par nom (``Skills.json``, ``Gestion_de_*.json``…)
+    - par contenu (section ``quand_utiliser_ce_skill`` détectée dans le JSON).
     """
     sources = settings.get("sources") or []
     root = gdd_root.resolve()
@@ -108,18 +164,26 @@ def eligible_disk_category_files(
         target = _resolve_category_path(root, cf)
         if not _iter_json_files(target):
             continue
+        if _is_notion_skill_content(target):
+            continue
         seen.add(cf)
         out.append(cf)
     return out
 
 
-def eligible_sync_category_files(settings: Mapping[str, Any]) -> List[str]:
+def eligible_sync_category_files(
+    settings: Mapping[str, Any],
+    gdd_root: Optional[Path] = None,
+) -> List[str]:
     """Noms ``category_file`` des sources page/database dans le périmètre ``included_categories``.
 
-    Les pages Skill Notion IA sont exclues indépendamment du périmètre coché.
+    Les pages Skill Notion IA sont exclues indépendamment du périmètre coché :
+    - par nom (``Skills.json``, ``Gestion_de_*.json``…)
+    - par contenu si ``gdd_root`` est fourni (section ``quand_utiliser_ce_skill``).
     """
     sources = settings.get("sources") or []
     inc = settings.get("included_categories") or []
+    root = gdd_root.resolve() if gdd_root is not None else None
     out: List[str] = []
     seen: set[str] = set()
     for s in sources:
@@ -135,6 +199,10 @@ def eligible_sync_category_files(settings: Mapping[str, Any]) -> List[str]:
             continue
         if not category_file_matches_included(cf, inc):
             continue
+        if root is not None:
+            target = _resolve_category_path(root, cf)
+            if _is_notion_skill_content(target):
+                continue
         seen.add(cf)
         out.append(cf)
     return out
@@ -738,7 +806,7 @@ def build_notebooklm_markdown_parts(
         relation_index if relation_index is not None else build_global_relation_index(gdd_root)
     )
     if export_scope == "sync":
-        eligible = eligible_sync_category_files(settings)
+        eligible = eligible_sync_category_files(settings, gdd_root=gdd_root)
     else:
         eligible = eligible_disk_category_files(settings, gdd_root)
     by_bucket: List[List[str]] = [[] for _ in _BUCKETS]

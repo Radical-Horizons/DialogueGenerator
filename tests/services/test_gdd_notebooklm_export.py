@@ -302,7 +302,7 @@ def test_skill_pages_excluded_from_disk_export(tmp_path: Path) -> None:
     assert "Skill___Initialisation.json" not in disk_eligible
     assert "Piliers.json" in disk_eligible
 
-    sync_eligible = eligible_sync_category_files(settings)
+    sync_eligible = eligible_sync_category_files(settings, gdd_root=gdd)
     assert "Skills.json" not in sync_eligible
     assert "Gestion_de_personnages.json" not in sync_eligible
     assert "Piliers.json" in sync_eligible
@@ -316,6 +316,53 @@ def test_skill_pages_excluded_from_disk_export(tmp_path: Path) -> None:
     body = "\n".join(t for _, t in parts)
     assert "Skill tool" not in body
     assert "Contenu GDD" in body
+
+
+def test_skill_pages_excluded_by_content(tmp_path: Path) -> None:
+    """Pages Skill à noms arbitraires (ex. Recherche_Deep_Dive) exclues par contenu."""
+    from services.gdd_notebooklm_export import eligible_disk_category_files
+
+    gdd = tmp_path / "GDD_categories"
+    gdd.mkdir(parents=True)
+    # Contenu GDD légitime (aucune signature skill)
+    (gdd / "Piliers.json").write_text(
+        json.dumps([{"Nom": "Pilier narratif", "sections": {"intro": "Bienvenue"}}], ensure_ascii=False),
+        encoding="utf-8",
+    )
+    # Page skill à nom quelconque : preamble + outils_requis
+    (gdd / "Recherche_Deep_Dive.json").write_text(
+        json.dumps(
+            [{"Nom": "Recherche Deep Dive", "sections": {"preamble": "Skill IA.", "outils_requis": "search, view"}}],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    # Page skill à nom quelconque : quand_utiliser_ce_skill
+    (gdd / "Game_Design_Skill.json").write_text(
+        json.dumps(
+            [{"Nom": "Game Design", "sections": {"quand_utiliser_ce_skill": "Toujours.", "workflow": "..."}}],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    settings = {
+        "sources": [
+            {"kind": "page", "category_file": "Piliers.json", "notion_id": _nid()},
+            {"kind": "page", "category_file": "Recherche_Deep_Dive.json", "notion_id": _nid()},
+            {"kind": "page", "category_file": "Game_Design_Skill.json", "notion_id": _nid()},
+        ],
+        "included_categories": ["Piliers.json", "Recherche_Deep_Dive.json", "Game_Design_Skill.json"],
+    }
+
+    disk_eligible = eligible_disk_category_files(settings, gdd)
+    assert "Piliers.json" in disk_eligible
+    assert "Recherche_Deep_Dive.json" not in disk_eligible, "preamble+outils_requis doit exclure"
+    assert "Game_Design_Skill.json" not in disk_eligible, "quand_utiliser_ce_skill doit exclure"
+
+    sync_eligible = eligible_sync_category_files(settings, gdd_root=gdd)
+    assert "Piliers.json" in sync_eligible
+    assert "Recherche_Deep_Dive.json" not in sync_eligible
+    assert "Game_Design_Skill.json" not in sync_eligible
 
 
 def test_competences_not_excluded(tmp_path: Path) -> None:
