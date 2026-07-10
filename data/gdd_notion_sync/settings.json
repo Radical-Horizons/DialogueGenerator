@@ -298,56 +298,6 @@
     },
     {
       "kind": "page",
-      "notion_id": "bca57f97-fcaf-42d8-adc1-54a31278a739",
-      "category_file": "Game_Design.json"
-    },
-    {
-      "kind": "page",
-      "notion_id": "07c336d2-286a-47cf-9a6c-2cc6665d4b0f",
-      "category_file": "Gestion_d'Espèces_civilisées.json"
-    },
-    {
-      "kind": "page",
-      "notion_id": "13d5e5c1-f2b7-424d-9874-3b4b5d7ede36",
-      "category_file": "Gestion_d'Objets.json"
-    },
-    {
-      "kind": "page",
-      "notion_id": "38262832-cbfe-4eb0-ae5c-90dea19a0de0",
-      "category_file": "Gestion_de_Communautés.json"
-    },
-    {
-      "kind": "page",
-      "notion_id": "addaacf7-79fe-4290-a8fc-c38f84dbfc94",
-      "category_file": "Gestion_de_Faune,_Flore_et_Classes.json"
-    },
-    {
-      "kind": "page",
-      "notion_id": "03cf0bb6-2112-4a86-844c-59d6cb3fe265",
-      "category_file": "Gestion_de_Lieux.json"
-    },
-    {
-      "kind": "page",
-      "notion_id": "571e0db5-b2d1-4b7e-aaa0-c5a6c6c47ac2",
-      "category_file": "Gestion_de_Patterns.json"
-    },
-    {
-      "kind": "page",
-      "notion_id": "c9cbc6e7-20bf-4e68-b46e-bcea0fd5528e",
-      "category_file": "Gestion_de_Personas.json"
-    },
-    {
-      "kind": "page",
-      "notion_id": "3056e4d2-1b45-819b-8e39-ee744916d38c",
-      "category_file": "Gestion_de_personnages.json"
-    },
-    {
-      "kind": "page",
-      "notion_id": "72a1bcd4-078e-4d0f-a123-61316f0f9794",
-      "category_file": "Gestion_de_Skills.json"
-    },
-    {
-      "kind": "page",
       "notion_id": "fbe30c8d-2e52-4bbf-bbb6-f08f9e360943",
       "category_file": "Guide_de_création_de_personnage.json"
     },
@@ -418,11 +368,6 @@
     },
     {
       "kind": "page",
-      "notion_id": "d218b5e7-91b5-43ec-a53b-942a8922bf33",
-      "category_file": "Initialisation_Créative.json"
-    },
-    {
-      "kind": "page",
       "notion_id": "3056e4d2-1b45-818f-87e1-e5282c4807b1",
       "category_file": "innovation-guidelines.json"
     },
@@ -460,11 +405,6 @@
       "kind": "page",
       "notion_id": "1886e4d2-1b45-80fc-838a-ca60047f3481",
       "category_file": "Manifeste_du_Surréalisme_Fantastique.json"
-    },
-    {
-      "kind": "page",
-      "notion_id": "4e54c9b6-a1ef-4fc8-9825-e9f7d300be52",
-      "category_file": "Meneur_de_Jeu.json"
     },
     {
       "kind": "page",
@@ -508,11 +448,6 @@
     },
     {
       "kind": "page",
-      "notion_id": "2a684d1c-8752-4ffb-8c4b-04883310945f",
-      "category_file": "Prompt_Engineering.json"
-    },
-    {
-      "kind": "page",
       "notion_id": "1b26e4d2-1b45-8040-9064-c235ef268a3d",
       "category_file": "Prompts_pour_IA.json"
     },
@@ -525,11 +460,6 @@
       "kind": "page",
       "notion_id": "1ed6e4d2-1b45-8040-8bcd-d9c1cc64a6a0",
       "category_file": "Rappel_du_Core_System.json"
-    },
-    {
-      "kind": "page",
-      "notion_id": "16745a74-7227-4edf-940e-a4b2304f0888",
-      "category_file": "Recherche_Deep_Dive.json"
     },
     {
       "kind": "page",
@@ -593,33 +523,8 @@
     },
     {
       "kind": "page",
-      "notion_id": "72cd2442-6489-4cc7-88ad-04375cb53971",
-      "category_file": "Skill___Initialisation.json"
-    },
-    {
-      "kind": "page",
-      "notion_id": "f0985ce9-2af6-41cb-8f29-fbd074417bab",
-      "category_file": "Skills.json"
-    },
-    {
-      "kind": "page",
-      "notion_id": "b22bd27f-d273-4614-abce-b800edc76d8c",
-      "category_file": "Sound_Design.json"
-    },
-    {
-      "kind": "page",
       "notion_id": "3056e4d2-1b45-814f-8531-e681e9c8c566",
       "category_file": "species-essentials.json"
-    },
-    {
-      "kind": "page",
-      "notion_id": "89ea7602-f2d1-495d-a816-44d3c3eab106",
-      "category_file": "Spécification_Agile.json"
-    },
-    {
-      "kind": "page",
-      "notion_id": "51bef7e5-74da-4dc5-9a1c-a0a0e13f9091",
-      "category_file": "Structure_Narrative_51bef7e5.json"
     },
     {
       "kind": "page",

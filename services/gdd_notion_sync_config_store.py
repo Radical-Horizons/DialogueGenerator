@@ -123,7 +123,13 @@ class GddNotionSyncConfigStore:
         }
 
     def validate_sources(self, sources: List[Dict[str, Any]]) -> None:
-        """Valide la forme des sources (lève ValueError si invalide)."""
+        """Valide la forme des sources (lève ValueError si invalide).
+
+        Les pages Skill Notion IA (``Skills.json``, ``Gestion_de_*.json``…) sont
+        refusées à l'enregistrement : elles ne doivent jamais être importées.
+        """
+        from services.gdd_notebooklm_export import _is_notion_skill_page
+
         for i, src in enumerate(sources):
             if not isinstance(src, dict):
                 raise ValueError(f"sources[{i}] doit être un objet")
@@ -131,6 +137,12 @@ class GddNotionSyncConfigStore:
                 raise ValueError(f"sources[{i}].kind doit être database ou page")
             if not str(src.get("category_file", "")).strip():
                 raise ValueError(f"sources[{i}].category_file requis")
+            cf = str(src.get("category_file", "")).strip()
+            if _is_notion_skill_page(cf):
+                raise ValueError(
+                    f"sources[{i}].category_file '{cf}' est une page Skill Notion IA "
+                    f"(préfixe 'skill' ou 'gestion_') — ces pages ne doivent pas être importées."
+                )
             raw_id = str(src.get("notion_id", "")).strip()
             if not raw_id:
                 raise ValueError(f"sources[{i}].notion_id requis")
