@@ -75,7 +75,8 @@
     "Nom": "Réponses courtes aux questions simples",
     "values": {
       "Contenu": "Préférence durable de Marc : pour une question factuelle simple, donner la réponse directe en une à deux phrases, sans empiler de nuances, précautions ou mises en perspective non demandées. La première phrase doit être la réponse. Développer uniquement si Marc le demande explicitement. Ne pas confondre rigueur et verbosité.",
-      "Date de création": "2026-06-17T12:53:00.000Z"
+      "Date de création": "2026-06-17T12:53:00.000Z",
+      "Persona": "2ec6e4d2-1b45-8036-b6a5-fdf92cbb92c6"
     },
     "sections": {
       "contenu": "Préférence durable de Marc : pour une question factuelle simple, donner la réponse directe en une à deux phrases, sans empiler de nuances, précautions ou mises en perspective non demandées. La première phrase doit être la réponse. Développer uniquement si Marc le demande explicitement. Ne pas confondre rigueur et verbosité."
@@ -146,11 +147,11 @@
   {
     "Nom": "updatePage : jamais oldStr vide",
     "values": {
-      "Contenu": "Dans connections.notion.updatePage, un contentUpdate avec oldStr: \"\" (chaîne vide) n'est pas équivalent à \"remplacement complet\". L'outil renvoie un succès apparent mais ne modifie pas le contenu — seules les propriétés mises à jour dans le même appel passent. Deux modes valides uniquement : (1) remplacement ciblé avec un oldStr non vide qui matche réellement le texte ; (2) remplacement complet de la page en omettant entièrement le champ oldStr (un seul contentUpdate, juste newStr). Vérifier systématiquement après une refonte que le contenu a bien changé, surtout si l'update porte aussi sur des propriétés qui, elles, semblent réussir.",
+      "Contenu": "Dans connections.notion.updatePage, un contentUpdate avec oldStr: \"\" (chaîne vide) n'est pas équivalent à \"remplacement complet\". L'outil renvoie un succès apparent mais ne modifie pas le contenu — seules les propriétés mises à jour dans le même appel passent.",
       "Date de création": "2026-05-24T23:00:00.000Z"
     },
     "sections": {
-      "contenu": "Dans connections.notion.updatePage, un contentUpdate avec oldStr: \"\" (chaîne vide) n'est pas équivalent à \"remplacement complet\". L'outil renvoie un succès apparent mais ne modifie pas le contenu — seules les propriétés mises à jour dans le même appel passent. Deux modes valides uniquement : (1) remplacement ciblé avec un oldStr non vide qui matche réellement le texte ; (2) remplacement complet de la page en omettant entièrement le champ oldStr (un seul contentUpdate, juste newStr). Vérifier systématiquement après une refonte que le contenu a bien changé, surtout si l'update porte aussi sur des propriétés qui, elles, semblent réussir."
+      "contenu": "Dans connections.notion.updatePage, un contentUpdate avec oldStr: \"\" (chaîne vide) n'est pas équivalent à \"remplacement complet\". L'outil renvoie un succès apparent mais ne modifie pas le contenu — seules les propriétés mises à jour dans le même appel passent."
     },
     "section_titles": {
       "contenu": "Contenu"
@@ -369,7 +370,8 @@
     "Nom": "Pas de création non autorisée",
     "values": {
       "Contenu": "Ne jamais créer, légitimer ou conserver une entité inventée si Marc n’a pas autorisé sa création. Une mention libre peut être exploitable, mais seulement comme candidat à discuter ; si Marc rejette une création non autorisée, supprimer la fiche et nettoyer les références.",
-      "Date de création": "2026-04-30T14:18:00.000Z"
+      "Date de création": "2026-04-30T14:18:00.000Z",
+      "Persona": "2ec6e4d2-1b45-8036-b6a5-fdf92cbb92c6"
     },
     "sections": {
       "contenu": "Ne jamais créer, légitimer ou conserver une entité inventée si Marc n’a pas autorisé sa création. Une mention libre peut être exploitable, mais seulement comme candidat à discuter ; si Marc rejette une création non autorisée, supprimer la fiche et nettoyer les références."
@@ -383,7 +385,8 @@
     "Nom": "Texte libre utilisable",
     "values": {
       "Contenu": "Quand une entité est citée en texte libre dans une page de référence sans fiche dédiée, elle compte comme disponible/assignable si aucune fiche structurée ne l’utilise déjà. Pour les Rêveurs, ne limiter jamais l’inventaire aux pages Personnages : croiser les fiches de catégories et les mentions textuelles.",
-      "Date de création": "2026-04-30T14:03:00.000Z"
+      "Date de création": "2026-04-30T14:03:00.000Z",
+      "Persona": "2ec6e4d2-1b45-8036-b6a5-fdf92cbb92c6"
     },
     "sections": {
       "contenu": "Quand une entité est citée en texte libre dans une page de référence sans fiche dédiée, elle compte comme disponible/assignable si aucune fiche structurée ne l’utilise déjà. Pour les Rêveurs, ne limiter jamais l’inventaire aux pages Personnages : croiser les fiches de catégories et les mentions textuelles."
@@ -397,7 +400,8 @@
     "Nom": "Disponible = assignable",
     "values": {
       "Contenu": "Quand Marc demande quels Rêveurs sont “disponibles”, répondre sur les entités libres/assignables dans la base Personnages, pas sur leur pertinence ou leurs liens au lieu étudié. Faire une requête de disponibilité structurée et donner la liste nette : libres, déjà assignés, à créer si aucun libre.",
-      "Date de création": "2026-04-30T13:59:00.000Z"
+      "Date de création": "2026-04-30T13:59:00.000Z",
+      "Persona": "2ec6e4d2-1b45-8036-b6a5-fdf92cbb92c6"
     },
     "sections": {
       "contenu": "Quand Marc demande quels Rêveurs sont “disponibles”, répondre sur les entités libres/assignables dans la base Personnages, pas sur leur pertinence ou leurs liens au lieu étudié. Faire une requête de disponibilité structurée et donner la liste nette : libres, déjà assignés, à créer si aucun libre."
@@ -544,7 +548,8 @@
     "Nom": "Refuges isolés en Périphéries",
     "values": {
       "Contenu": "Pour une communauté cherchant un endroit isolé et agréable après fuite de Daïlon, ne proposer ni Daïlon ni les Couronnes proches. Lire l’Index et choisir parmi les Périphéries existantes. Daïlon reste lieu d’origine, de captivité, de Purge et de départ ; le refuge final doit être éloigné, habitable et relié à un lieu existant.",
-      "Date de création": "2026-04-29T20:58:00.000Z"
+      "Date de création": "2026-04-29T20:58:00.000Z",
+      "Persona": "2ec6e4d2-1b45-8036-b6a5-fdf92cbb92c6"
     },
     "sections": {
       "contenu": "Pour une communauté cherchant un endroit isolé et agréable après fuite de Daïlon, ne proposer ni Daïlon ni les Couronnes proches. Lire l’Index et choisir parmi les Périphéries existantes. Daïlon reste lieu d’origine, de captivité, de Purge et de départ ; le refuge final doit être éloigné, habitable et relié à un lieu existant."
@@ -733,7 +738,8 @@
     "Nom": "Vues hôtes : sujet + PJ",
     "values": {
       "Contenu": "Pour les vues inline « Ce que les hôtes savent » dans les templates Personnages, le sens correct est « ce que les hôtes savent sur ce personnage » : filtrer État des connaissances sur Personnage qui sait ∈ Uresaïr, Vethraak, Eonundé ET sur le personnage du template comme sujet. Les vues « Ce que les autres savent de lui ou d’elle » doivent exclure les PJ/hôtes.",
-      "Date de création": "2026-04-26T21:53:00.000Z"
+      "Date de création": "2026-04-26T21:53:00.000Z",
+      "Persona": "8090bf81-6da6-49ea-98c4-726f2a9b62af"
     },
     "sections": {
       "contenu": "Pour les vues inline « Ce que les hôtes savent » dans les templates Personnages, le sens correct est « ce que les hôtes savent sur ce personnage » : filtrer État des connaissances sur Personnage qui sait ∈ Uresaïr, Vethraak, Eonundé ET sur le personnage du template comme sujet. Les vues « Ce que les autres savent de lui ou d’elle » doivent exclure les PJ/hôtes."
@@ -747,7 +753,8 @@
     "Nom": "Préférer il ou elle",
     "values": {
       "Contenu": "Marc préfère la formulation « il ou elle » à « iel » dans les templates et libellés génériques, sauf contexte explicitement non-binaire ou pronoms définis autrement par une fiche.",
-      "Date de création": "2026-04-26T21:30:00.000Z"
+      "Date de création": "2026-04-26T21:30:00.000Z",
+      "Persona": "2ec6e4d2-1b45-8036-b6a5-fdf92cbb92c6"
     },
     "sections": {
       "contenu": "Marc préfère la formulation « il ou elle » à « iel » dans les templates et libellés génériques, sauf contexte explicitement non-binaire ou pronoms définis autrement par une fiche."
@@ -921,7 +928,8 @@
     "Nom": "Aligner fiche avec classe = corriger le contenu",
     "values": {
       "Contenu": "\"Aligne X avec Y, une seule exception\" = identifier tous les écarts entre la fiche et le standard de la classe, corriger le contenu pour chaque écart sauf un, nommer l'exception dans la section taxonomie/classification. Ne pas chercher à \"expliquer\" ou \"justifier\" les déviations existantes - les corriger vraiment. Réflexe de conservation du contenu à supprimer dans ce contexte.",
-      "Date de création": "2026-04-23T22:00:00.000Z"
+      "Date de création": "2026-04-23T22:00:00.000Z",
+      "Persona": "2ed6e4d2-1b45-80d3-ac85-e95003cedf01"
     },
     "sections": {
       "contenu": "\"Aligne X avec Y, une seule exception\" = identifier tous les écarts entre la fiche et le standard de la classe, corriger le contenu pour chaque écart sauf un, nommer l'exception dans la section taxonomie/classification. Ne pas chercher à \"expliquer\" ou \"justifier\" les déviations existantes - les corriger vraiment. Réflexe de conservation du contenu à supprimer dans ce contexte."
@@ -2024,5 +2032,140 @@
       "contenu": "Contenu"
     },
     "notion_page_id": "89ce0246-9cfb-4b4a-ba28-4fecc0ab9893"
+  },
+  {
+    "Nom": "Barvasinkul violence institutionnelle",
+    "values": {
+      "Contenu": "Le Barvasinkul doit être lu avec la référence ALMSIVI/Morrowind : violence institutionnelle réelle (armées, polices, tribunaux, châtiments légaux) présentée comme raffinée car complexe, occulte et mystique. La violence métaphorique allégorise une violence concrète. Elle doit rester étrange et décalée, pas calquée sur croisades/inquisitions/théocraties terrestres.",
+      "Date de création": "2026-07-07T10:48:00.000Z",
+      "Persona": "2ec6e4d2-1b45-8036-b6a5-fdf92cbb92c6"
+    },
+    "sections": {
+      "contenu": "Le Barvasinkul doit être lu avec la référence ALMSIVI/Morrowind : violence institutionnelle réelle (armées, polices, tribunaux, châtiments légaux) présentée comme raffinée car complexe, occulte et mystique. La violence métaphorique allégorise une violence concrète. Elle doit rester étrange et décalée, pas calquée sur croisades/inquisitions/théocraties terrestres."
+    },
+    "section_titles": {
+      "contenu": "Contenu"
+    },
+    "notion_page_id": "340ebb17-0bce-44c5-a1e2-76ef199c6b07"
+  },
+  {
+    "Nom": "Éviter le pattern « Grand/Grande X »",
+    "values": {
+      "Contenu": "Le préfixe « Grand/Grande » est massivement saturé dans Escelion (Grande Bifurcation, Grande Synchronisation, Grande Convergence, Grande Séparation, Grand Blizzard, Grand Démembrement, Grande Radiale, etc.). Pour tout nouveau nom d'événement, de période ou d'entité (fiches personnages, lieux, communautés...), éviter par défaut ce préfixe et chercher un nom évocateur plus spécifique (lieu, cause, image concrète) via Choisir un nom commun / Choisir un nom propre. Corrigé sur Borialis : « Grande Détente » → « Détente des Cols », « Grand Zud » → « Festin des Idoles ».",
+      "Date de création": "2026-07-03T15:03:00.000Z",
+      "Persona": "2ec6e4d2-1b45-8036-b6a5-fdf92cbb92c6"
+    },
+    "sections": {
+      "contenu": "Le préfixe « Grand/Grande » est massivement saturé dans Escelion (Grande Bifurcation, Grande Synchronisation, Grande Convergence, Grande Séparation, Grand Blizzard, Grand Démembrement, Grande Radiale, etc.). Pour tout nouveau nom d'événement, de période ou d'entité (fiches personnages, lieux, communautés...), éviter par défaut ce préfixe et chercher un nom évocateur plus spécifique (lieu, cause, image concrète) via Choisir un nom commun / Choisir un nom propre. Corrigé sur Borialis : « Grande Détente » → « Détente des Cols », « Grand Zud » → « Festin des Idoles »."
+    },
+    "section_titles": {
+      "contenu": "Contenu"
+    },
+    "notion_page_id": "6f68aeda-5b79-495e-83d1-fd60fb67cff2"
+  },
+  {
+    "Nom": "Rêveur : placement géographique et Chronologie existante, jamais différés",
+    "values": {
+      "Contenu": "Les deux vérifications sont liées, pas indépendantes : les événements réutilisables de la Chronologie dépendent du Macro-placement (ex. Grande Convergence 888 AG pertinente seulement si le domaine touche le Désert des Echos Perdus). Ordre imposé dans superior-entities et le template Rêveur : (1) Macro-placement du domaine (Vieille Ville / Couronnes / Périphéries / hors-carte), décidable immédiatement via l'Index Escelion/base Lieux ; (2) Cycles ; (3) Histoire, qui réutilise la Chronologie existante en fonction du placement déjà fixé. Les deux étapes 1 et 3 ne sont jamais différées à la création d'une région détaillée ; seule l'identité d'une communauté/culte pas encore créée reste en [TODO].",
+      "Date de création": "2026-07-01T14:17:00.000Z",
+      "Persona": "2ec6e4d2-1b45-8036-b6a5-fdf92cbb92c6"
+    },
+    "sections": {
+      "contenu": "Les deux vérifications sont liées, pas indépendantes : les événements réutilisables de la Chronologie dépendent du Macro-placement (ex. Grande Convergence 888 AG pertinente seulement si le domaine touche le Désert des Echos Perdus). Ordre imposé dans superior-entities et le template Rêveur : (1) Macro-placement du domaine (Vieille Ville / Couronnes / Périphéries / hors-carte), décidable immédiatement via l'Index Escelion/base Lieux ; (2) Cycles ; (3) Histoire, qui réutilise la Chronologie existante en fonction du placement déjà fixé. Les deux étapes 1 et 3 ne sont jamais différées à la création d'une région détaillée ; seule l'identité d'une communauté/culte pas encore créée reste en [TODO]."
+    },
+    "section_titles": {
+      "contenu": "Contenu"
+    },
+    "notion_page_id": "43baaf07-83c4-4e2d-bcf6-e0b2ecee8670"
+  },
+  {
+    "Nom": "Rêveur : sa propre histoire précède la géographie, pas l'inverse",
+    "values": {
+      "Contenu": "Erreur corrigée : ne pas différer la datation de l'histoire propre d'un Rêveur (assemblage territorial, ruptures internes liées à ses cycles) sous prétexte que sa région n'existe pas encore. Un Rêveur EST son domaine et le précède : Jast et la Machine Pérégrine ont une histoire datée avant toute civilisation locale. Sa chronologie se date immédiatement. Seule l'identité d'une entité externe pas encore créée (culte voisin, Rêveur adjacent, communauté) reste en [TODO] — jamais la date elle-même, qui appartient au Rêveur et non à la géographie.",
+      "Date de création": "2026-07-01T14:14:00.000Z",
+      "Persona": "2ec6e4d2-1b45-8036-b6a5-fdf92cbb92c6"
+    },
+    "sections": {
+      "contenu": "Erreur corrigée : ne pas différer la datation de l'histoire propre d'un Rêveur (assemblage territorial, ruptures internes liées à ses cycles) sous prétexte que sa région n'existe pas encore. Un Rêveur EST son domaine et le précède : Jast et la Machine Pérégrine ont une histoire datée avant toute civilisation locale. Sa chronologie se date immédiatement. Seule l'identité d'une entité externe pas encore créée (culte voisin, Rêveur adjacent, communauté) reste en [TODO] — jamais la date elle-même, qui appartient au Rêveur et non à la géographie."
+    },
+    "section_titles": {
+      "contenu": "Contenu"
+    },
+    "notion_page_id": "3e53e362-408a-4a84-bdd0-de949818a662"
+  },
+  {
+    "Nom": "Rêveur : granularité de l'Histoire proportionnelle à la durée réelle",
+    "values": {
+      "Contenu": "Le template Rêveur suggérait un nombre fixe de sous-périodes d'Histoire (« souvent 3 à 6 »), disproportionné pour une entité existant depuis l'Agénèse (potentiellement 3000+ ans). Une première correction (« proportionnel, sans plafond ») laissait le nombre au jugement libre — jugé trop permissif, risque de choix paresseux. Corrigé avec un plancher bloquant calculé : minimum de sous-périodes = arrondi supérieur(années écoulées depuis l'apparition ÷ 300), plancher absolu 4. Ex. Primordial depuis l'Agénèse (~3389 ans) → minimum 12. Référence de densité : Chaudières Démiurgiques, 9 sous-périodes / ~2400 ans.",
+      "Date de création": "2026-07-01T14:01:00.000Z",
+      "Persona": "2ec6e4d2-1b45-8036-b6a5-fdf92cbb92c6"
+    },
+    "sections": {
+      "contenu": "Le template Rêveur suggérait un nombre fixe de sous-périodes d'Histoire (« souvent 3 à 6 »), disproportionné pour une entité existant depuis l'Agénèse (potentiellement 3000+ ans). Une première correction (« proportionnel, sans plafond ») laissait le nombre au jugement libre — jugé trop permissif, risque de choix paresseux. Corrigé avec un plancher bloquant calculé : minimum de sous-périodes = arrondi supérieur(années écoulées depuis l'apparition ÷ 300), plancher absolu 4. Ex. Primordial depuis l'Agénèse (~3389 ans) → minimum 12. Référence de densité : Chaudières Démiurgiques, 9 sous-périodes / ~2400 ans."
+    },
+    "section_titles": {
+      "contenu": "Contenu"
+    },
+    "notion_page_id": "2c06ccb0-e4d2-4876-9f5e-e74aca13f749"
+  },
+  {
+    "Nom": "Process qui déraille : corriger puis relancer en nouvelle session",
+    "values": {
+      "Contenu": "Quand un process déraille en cours de session (ex. un skill mal appliqué), corriger le process (skill/page Créatif/template) ne suffit pas à nettoyer la session courante : le contenu déjà produit reste dans le contexte et continue d'influencer le raisonnement, même si on dit « oublie ça ». On ne peut pas effacer ce qu'on a déjà fait à volonté. La vraie reprise propre exige une nouvelle session, une fois le correctif appliqué durablement. C'est pourquoi corriger le process prime toujours sur retenter la tâche dans le même fil.",
+      "Date de création": "2026-07-01T13:37:00.000Z",
+      "Persona": "2ec6e4d2-1b45-8036-b6a5-fdf92cbb92c6"
+    },
+    "sections": {
+      "contenu": "Quand un process déraille en cours de session (ex. un skill mal appliqué), corriger le process (skill/page Créatif/template) ne suffit pas à nettoyer la session courante : le contenu déjà produit reste dans le contexte et continue d'influencer le raisonnement, même si on dit « oublie ça ». On ne peut pas effacer ce qu'on a déjà fait à volonté. La vraie reprise propre exige une nouvelle session, une fois le correctif appliqué durablement. C'est pourquoi corriger le process prime toujours sur retenter la tâche dans le même fil."
+    },
+    "section_titles": {
+      "contenu": "Contenu"
+    },
+    "notion_page_id": "1a4e7ff2-6a7b-4ad1-b22a-a08efb8b3450"
+  },
+  {
+    "Nom": "Rêveur : cycles avant piliers, jamais après",
+    "values": {
+      "Contenu": "Pour toute fiche de Rêveur, poser le Domaine & Cycles AVANT le brainstorming des germes culturels. Un Rêveur n'est jamais un état constant (« il fait chaud ») : ses cycles sont la loi civilisationnelle fluctuante qui rythme saisons et jours de toute la région et organise la vie de toutes les communautés locales (modèle : Souffle Hakutō-Ah de Jast). Les piliers/germes du brainstorming doivent dériver du cycle comme réponses culturelles, jamais l'inverse. Correctif appliqué dans superior-entities et Workflow canon — Gestion de personnages.",
+      "Date de création": "2026-07-01T13:34:00.000Z",
+      "Persona": "2ec6e4d2-1b45-8036-b6a5-fdf92cbb92c6"
+    },
+    "sections": {
+      "contenu": "Pour toute fiche de Rêveur, poser le Domaine & Cycles AVANT le brainstorming des germes culturels. Un Rêveur n'est jamais un état constant (« il fait chaud ») : ses cycles sont la loi civilisationnelle fluctuante qui rythme saisons et jours de toute la région et organise la vie de toutes les communautés locales (modèle : Souffle Hakutō-Ah de Jast). Les piliers/germes du brainstorming doivent dériver du cycle comme réponses culturelles, jamais l'inverse. Correctif appliqué dans superior-entities et Workflow canon — Gestion de personnages."
+    },
+    "section_titles": {
+      "contenu": "Contenu"
+    },
+    "notion_page_id": "bc192050-8442-48f8-8d0e-6e19f364dc62"
+  },
+  {
+    "Nom": "« Limiter les pages liées » = limiter leur création",
+    "values": {
+      "Contenu": "Dans les notes méta des fiches Lieux (ex. « Lieu non prévu in-game, limiter flags et autres pages liées »), cette consigne porte sur la CRÉATION de nouvelles pages/flags liés, pas sur la propagation vers les fiches déjà existantes. Ne jamais l'invoquer pour justifier l'absence de propagation : décider de propager ou non sur le fond (conséquences factuelles réelles sur les fiches liées existantes).",
+      "Date de création": "2026-06-28T18:56:00.000Z",
+      "Persona": "2ec6e4d2-1b45-8036-b6a5-fdf92cbb92c6"
+    },
+    "sections": {
+      "contenu": "Dans les notes méta des fiches Lieux (ex. « Lieu non prévu in-game, limiter flags et autres pages liées »), cette consigne porte sur la CRÉATION de nouvelles pages/flags liés, pas sur la propagation vers les fiches déjà existantes. Ne jamais l'invoquer pour justifier l'absence de propagation : décider de propager ou non sur le fond (conséquences factuelles réelles sur les fiches liées existantes)."
+    },
+    "section_titles": {
+      "contenu": "Contenu"
+    },
+    "notion_page_id": "0eec3cb1-7313-4ded-943e-08f8a044c283"
+  },
+  {
+    "Nom": "Contraintes matérielles = couche ontologique, pas interdit de phénomène",
+    "values": {
+      "Contenu": "Les contraintes de matérialisme (pas de dieux créateurs, magie = incompris, pas d'âme) portent sur la couche ontologique fondamentale que personne ne connaît, pas sur les phénomènes visibles. Les « dieux locaux » (création d'espèces, manipulation de conscience, contrôle ontologique) sont permis et déjà canoniques. Les mécanismes magiques peuvent être cachés ou incompris même de l'utilisateur. Les procédés matériels sur la conscience (scan, transfert, duplication) sont indiscernables d'opérations sur l'âme du point de vue des habitants. Parallèlement, la puissance symbolique d'un concept (espoir, amour, mort, famille, foi) est un argument créatif légitime indépendant de l'originalité ou du matérialisme : la contrainte de matérialisme s'applique à l'ontologie, pas au symbolisme. Reformulé dans Créatif — Projet Alteir condensé et Créatif — Style & écriture.",
+      "Date de création": "2026-06-25T22:14:00.000Z",
+      "Persona": "2ec6e4d2-1b45-8036-b6a5-fdf92cbb92c6"
+    },
+    "sections": {
+      "contenu": "Les contraintes de matérialisme (pas de dieux créateurs, magie = incompris, pas d'âme) portent sur la couche ontologique fondamentale que personne ne connaît, pas sur les phénomènes visibles. Les « dieux locaux » (création d'espèces, manipulation de conscience, contrôle ontologique) sont permis et déjà canoniques. Les mécanismes magiques peuvent être cachés ou incompris même de l'utilisateur. Les procédés matériels sur la conscience (scan, transfert, duplication) sont indiscernables d'opérations sur l'âme du point de vue des habitants. Parallèlement, la puissance symbolique d'un concept (espoir, amour, mort, famille, foi) est un argument créatif légitime indépendant de l'originalité ou du matérialisme : la contrainte de matérialisme s'applique à l'ontologie, pas au symbolisme. Reformulé dans Créatif — Projet Alteir condensé et Créatif — Style & écriture."
+    },
+    "section_titles": {
+      "contenu": "Contenu"
+    },
+    "notion_page_id": "348db07f-9fdc-4ae7-8757-cca6dc498c30"
   }
 ]

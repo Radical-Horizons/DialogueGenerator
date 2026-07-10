@@ -6134,7 +6134,7 @@
   {
     "Nom": "Flag_lieu_lisiere_pulsation_4",
     "values": {
-      "Description narrative": "Statut de la 4e Grande Pulsation (cycle ontico-temporel majeur propre à la Lisière). Conditionne des événements narratifs à fort enjeu et des dialogues exclusifs avec les Candaces et Peseto.",
+      "Description narrative": "Statut de la 4e Pulsation majeure (cycle ontico-temporel majeur propre à la Lisière). Conditionne des événements narratifs à fort enjeu et des dialogues exclusifs avec les Candaces et Peseto.",
       "ID": "FLAG761",
       "Lieu lié": "2d96e4d2-1b45-806d-8b7c-f84efee399ee",
       "Portée": "Lieu",
@@ -7081,7 +7081,7 @@
     "Nom": "Flag_lieu_nexion_pulsation_4",
     "values": {
       "Actes liés": "31a6e4d2-1b45-8083-b448-d3bbe78d25d3",
-      "Description narrative": "État de la Quatrième Grande Pulsation du Nexion, imminente à l'arrivée du groupe. Événement cosmique qui reconfigure radicalement la géographie et les règles d'accès du district.",
+      "Description narrative": "État de la Quatrième Pulsation majeure du Nexion, imminente à l'arrivée du groupe. Événement cosmique qui reconfigure radicalement la géographie et les règles d'accès du district.",
       "ID": "FLAG689",
       "Lieu lié": "2f06e4d2-1b45-8048-8244-d40ef72873cd",
       "Portée": "Lieu",

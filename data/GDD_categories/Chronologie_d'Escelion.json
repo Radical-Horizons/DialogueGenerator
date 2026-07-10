@@ -23,7 +23,8 @@
       "Description": "Entre 410 et 690 AG, des dynasties et maisons humaines déjà implantées sur Escelion fondent plusieurs royaumes humains et imposent brièvement une hégémonie impériale sur certains axes commerciaux, ports intérieurs et villes de seuil. Il s'agit d'une véritable tentative de souveraineté humaine régionale, avec fiscalité, armées contractuelles, droit dynastique et appareil de registre. L'ensemble échoue à se stabiliser à cause des rivalités entre maisons, d'une base démographique trop faible, de la dépendance à des intermédiaires et infrastructures non humaines, de la sur-extension des corridors conquis et de l'absence de légitimité commune durable.",
       "Espèces": "1a16e4d2-1b45-80d7-a920-c3f40e49246b",
       "Importance": "Important",
-      "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+      "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832, 15f02d22-65fb-4afb-b80e-68925f6f0f3b",
+      "Personnages 1": "a1d57a38-1ec6-4e38-9dd8-20c0e01734f8",
       "Type d'événement": "Période",
       "Ère": "Fondation d'Escelion"
     },
@@ -892,7 +893,7 @@
     "values": {
       "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
       "Date de début": "3056",
-      "Description": "Éruption spectrale majeure tue 23 mineurs dans le Tombeau des Lueurs Dissidentes. Protocoles d'évacuation prédictifs existaient mais furent occultés. Catalyse naissance mouvement ouvrier Lueurs Dissidentes. Création filiale Jung-Harmony-Tech comme structure pare-feu.",
+      "Description": "Éruption spectrale majeure tue 23 mineurs dans le Tombeau des Lueurs Dissidentes ; la déflagration reste visible depuis la Vieille Ville. Protocoles d'évacuation prédictifs existaient mais furent occultés. Catalyse la naissance du mouvement ouvrier Lueurs Dissidentes. Création de la filiale Jung-Harmony-Tech comme structure pare-feu.",
       "Importance": "Notable",
       "Lieux": "1b46e4d2-1b45-80c6-ba2c-e2512a9a56da",
       "Type d'événement": "Catastrophe",
@@ -2520,7 +2521,7 @@
       "Description": "Naissance de 100 rêveurs à partir d’humains sacrifiés sur Merid",
       "Espèces": "22e6e4d2-1b45-80db-8065-d98d26821c2c, 1a16e4d2-1b45-80d7-a920-c3f40e49246b",
       "Importance": "Majeur",
-      "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+      "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832, 15f02d22-65fb-4afb-b80e-68925f6f0f3b",
       "Personnages 1": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41, f0105182-324b-4626-86c3-a78edbb3d2b6, 5a02a16c-f725-4279-bb11-2f6079a22a51, a1d57a38-1ec6-4e38-9dd8-20c0e01734f8",
       "Type d'événement": "Naissance",
       "Ère": "Fondation d'Escelion"
@@ -2808,9 +2809,10 @@
     "values": {
       "Date de début": "1620",
       "Date de fin": "1625",
-      "Description": "Un blizzard cataclysmique contraint les Van’Doei à se disperser à travers Escelion, se scindant en trois traditions majeures : les Gardiens du Foyer, les Cendres Nomades et les Stoïques.",
+      "Description": "Le débordement digestif de Borialis, Rêveur primordial des Marches Couchées, après le plus grand charroi d'idoles déchues jamais recensé (1619 AG) : cinq Nuées de froid excédentaire déferlent bien au-delà de son domaine et ensevelissent des régions qui ignoraient jusqu'au nom des Marches. Le froid continental étouffe les grands feux libres des basses terres chaudes où vivaient alors les Van'Doei, suspend les émergences et couche des communautés entières en dormance sous quinze degrés ; nombre ne s'en relèvent pas. Les survivants se dispersent à travers Escelion, se scindant en trois traditions majeures : les Gardiens du Foyer, les Cendres Nomades et les Stoïques.",
       "Espèces": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
       "Importance": "Important",
+      "Lieux": "15f02d22-65fb-4afb-b80e-68925f6f0f3b",
       "Personnages 1": "a1d57a38-1ec6-4e38-9dd8-20c0e01734f8",
       "Type d'événement": "Catastrophe",
       "Ère": "Âge des Doctrines"
@@ -2924,5 +2926,303 @@
     },
     "sections": {},
     "notion_page_id": "59ee83fa-ae97-4058-8c14-a45242f04a51"
+  },
+  {
+    "Nom": "Essor de la mécanographie lourde et premières mega-architectures pensantes (~2700-3100 AG)",
+    "values": {
+      "Date de début": "2700",
+      "Date de fin": "3100",
+      "Description": "Suite à l'interdit sur les IA distribuées (2487 AG), les guildes et chaebols naissants de la Grande Radiale développent deux technologies fondatrices du cycle techno-féodal : la mécanographie lourde (gestes d'artisans décomposés en cames, gabarits et cartes perforées — bibliothèques confiscables formant un féodalisme de précision) et le monopole de l'heure (verrouillage des rythmes de production sur le Souffle Hakutō-Ah, ancêtre du nunchi). Parallèlement s'élèvent les mega-architectures pensantes : états physiques maintenus à leur limite de stabilité (plasma confiné, réactions sous-critiques, équilibres thermodynamiques pilotés), une par district rentable, délibérément incompatibles entre elles par secret dynastique. Vers 3100 AG, l'Administration capture progressivement l'appareil de gestion et requalifie ces structures par décret, les rendant sourdes et muettes sans les détruire.",
+      "Importance": "Important",
+      "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Période",
+      "Ère": "Âge des Singularités"
+    },
+    "sections": {},
+    "notion_page_id": "da62b697-3758-4e62-ab8c-6a9ebbff0f3b"
+  },
+  {
+    "Nom": "Affaire des Caractères Vivants",
+    "values": {
+      "Date de début": "3380",
+      "Date de fin": "3380",
+      "Description": "La presse vivante des Quartiers de la Lanterne se rebelle : les mots eux-mêmes échappent au contrôle des archives. Signal de la limite du règne de l'Administration — quand le formulable se retourne contre ceux qui le gouvernent.",
+      "Importance": "Notable",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 36e6e4d2-1b45-807a-ac6c-ec253f792406, 1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+      "Type d'événement": "Autre",
+      "Ère": "Âge anentropique"
+    },
+    "sections": {},
+    "notion_page_id": "2001f06b-4af2-47e1-89f7-243ddedcfb90"
+  },
+  {
+    "Nom": "Commune de 3318",
+    "values": {
+      "Date de début": "3318",
+      "Date de fin": "3318",
+      "Description": "Dernière grande insurrection ouverte contre le Conclave des Interfaces, menée depuis les Quartiers de la Lanterne. Écrasée et patrimonialisée en archives consultables — le règne de l'Administration transforme la révolte en document.",
+      "Importance": "Important",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 36e6e4d2-1b45-807a-ac6c-ec253f792406, 1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+      "Type d'événement": "Bataille",
+      "Ère": "Âge anentropique"
+    },
+    "sections": {},
+    "notion_page_id": "ab246e30-1582-4cf2-923c-64c6529bd409"
+  },
+  {
+    "Nom": "Purge des anentropistes",
+    "values": {
+      "Communautés": "1b56e4d2-1b45-8067-989c-d4d2917770f7",
+      "Date de début": "3149",
+      "Date de fin": "3149",
+      "Description": "Purge interne au Barvasinkul visant les membres anentropistes. Fragilise le dernier réseau d'arbitrage transrégional indépendant au moment précis où le Conclave des Interfaces consolide ses prérogatives — la cité perd un contrepouvoir au moment où elle en aurait eu besoin.",
+      "Importance": "Important",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+      "Type d'événement": "Religieux",
+      "Ère": "Âge des Singularités"
+    },
+    "sections": {},
+    "notion_page_id": "0de687c7-443f-4952-a5f4-e3bb78ed0673"
+  },
+  {
+    "Nom": "Incendie de la Tour-Marché Hélicoïdale",
+    "values": {
+      "Date de début": "2089",
+      "Description": "Un feu se déclare dans la tour-marché Héculoïdale de la Grande Radiale — 78 étages de commerce et d'habitation dense. Le feu prend dans un atelier de stockage textile du 23e niveau. La police privée de l'artère, engagée par la guilde dominante, évalue les dommages comme contenables et applique le protocole standard : confinement des niveaux inférieurs pour protéger les stocks Premium, évacuation secondaire des habitants. Le système de ventilation propage le feu vers le haut. 200 personnes tuées — brûlées, asphyxiées ou écrasées dans les escaliers magnétiques en panne. Les secours extérieurs sont refoulés par la police privée invoquant les règlements de juridiction inter-guilde. L'enquête du Conclave révéle que la police privée agissait sur ordre direct de la guilde Héculoïdale pour protéger les contrats d'assurance sur les stocks Premium. Les responsables furent condamnés à des amendes payées par la guilde elle-même, sans conséquence individuelle. L'incident justifia la création d'un Service de Secours Inter-Artères unique sous autorité du Conclave.",
+      "Importance": "Important",
+      "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Catastrophe",
+      "Ère": "Âge des Doctrines"
+    },
+    "sections": {},
+    "notion_page_id": "d6ddabab-046a-4a45-a1c7-72ac519472c8"
+  },
+  {
+    "Nom": "La Grève des Enclumes Rouges",
+    "values": {
+      "Communautés": "22d6e4d2-1b45-80d4-8cb8-ed6cf202f42a",
+      "Date de début": "1218",
+      "Date de fin": "1219",
+      "Description": "Pendant les Guerres de Doctrine, le maître forgeron Van'Doei Kael the Froid rassemble quarante artisans de l'Artère Extractrice et brise leurs enclumes à mains nues, jetant les morceaux dans le conduit central du marché vertical. Quarante ateliers immobilisés pendant 80 Nuées. La grève fait suite à l'assassinat d'un apprenti symbiotiste dans une forge, sous un idéogramme du yì retourné. Les Van'Doei exigent que l'assassinat soit jugé et que les deux camps doctrinaux retirent leurs émissaires des forges. Les Barvasinkul doivent importer leurs composants depuis les Chaudières à prix exorbitant ; les Symbiotistes perdent leurs matrices de gravure artisanales. La grève prend fin quand le chef du shūyuàn symbiotiste livre le coupable — un zealote Junior agissant sans ordre. Kael the Froid se retire du shūyuàn et ne forgea plus jamais.",
+      "Importance": "Notable",
+      "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Bataille",
+      "Ère": "Âge des Doctrines"
+    },
+    "sections": {},
+    "notion_page_id": "a68823ef-b13f-47cc-b75d-b77703ebacc2"
+  },
+  {
+    "Nom": "La Nuit des Cendres",
+    "values": {
+      "Date de début": "3248",
+      "Description": "Huit ans après l'imposition du kokoro-link comme condition d'emploi, un groupe de soixante-douze Déconnectés se rassemble dans le Bazar des Gradients au 9e sous-sol de la Grande Radiale. À 3:00 du matin, une femme Van'Doei nommée Lera la Cendreuse monte sur la plateforme de chargement centrale et brise publiquement son collier de contrainte — un dispositif de surveillance compensatoire que les Déconnectés portent en remplacement de l'implant. Soixante-douze personnes brisèrent leurs colliers dans la nuit. Les morceaux furent jetés dans le conduit de ventilation central et retombèrent sur les échoppes des niveaux inférieurs comme une pluie de cendres métalliques. Le Bureau de Cohésion Sociale arriva à l'aube mais les soixante-douze avait disparu, fondus dans la foule du marché matinal. Lera la Cendreuse ne fut jamais identifiée formellement. Les colliers de contrainte furent remplacés par un modèle inviolable scellé à la forge. Chaque année, à la date anniversaire, quelques morceaux de métal brisé réapparaissent mystérieusement sur la plateforme de chargement.",
+      "Importance": "Notable",
+      "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Autre",
+      "Ère": "Âge anentropique"
+    },
+    "sections": {},
+    "notion_page_id": "089497e4-5ac2-489a-9f62-afbed71e9d6d"
+  },
+  {
+    "Nom": "L'Affaire des Murmures",
+    "values": {
+      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Date de début": "3120",
+      "Date de fin": "3125",
+      "Description": "Un réseau de tracts anonymes intitulés Les Murmures circule dans le Bazar des Gradients de la Grande Radiale. Les tracts reprennent les protocoles d'évacuation occultés par les chaebols lors du Grand Gwi-shin de 3056 AG, citent les noms des vingt-trois morts et dénoncent le coefficient de nunchi comme arithmétique de l'oubli. Les enquêteurs du Bureau de Cohésion Sociale passent trois ans à tracer le réseau sans succès — il utilise les zones de silence du kokoro-link pendant les Cérémonies d'Alignement. En 3123 AG, un agent imuin Intégrateur nommé Vex-Harmon-12 infiltre le réseau et découvre qu'il est l'œuvre de trois techniciens du Dépôt des Incidents du Tombeau. L'un d'eux, Kor-Vel-3, est arrêté à la sortie d'une cantine de la Radiale. Son procès est secret. Les deux autres techniciens disparurent. L'arrestation fit de Kor-Vel-3 une figure de martyr dans les niveaux inférieurs. Le tract numéro 47, publié un mois après son arrestation, portait simplement son nom et la mention Les Murmures ne s'arrêtent pas. Le réseau de sympathisants tissé entre le Tombeau et la Radiale ne s'éteignit jamais.",
+      "Importance": "Notable",
+      "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 1b46e4d2-1b45-80c6-ba2c-e2512a9a56da",
+      "Type d'événement": "Autre",
+      "Ère": "Âge des Singularités"
+    },
+    "sections": {},
+    "notion_page_id": "7cf4ac66-eda1-4cc0-8fdc-32864a443520"
+  },
+  {
+    "Nom": "Grande Scission du Symbiotisme",
+    "values": {
+      "Communautés": "22d6e4d2-1b45-80d4-8cb8-ed6cf202f42a",
+      "Date de début": "1456",
+      "Description": "Le Symbiotisme se divise officiellement en trois branches après des décennies de tensions internes sur l'interprétation du Grand Démembrement et sur la source légitime du fragment sacrificiel : corps offerts, victimes qualifiées, traces lues ou greffes consenties. Dans la Grande Radiale, le Grand Scriptorium de Theren perd son statut de centre doctrinal incontesté. Les Cercles de Souffrance des niveaux inférieurs deviennent des enclaves marginales dans une cité qui ne se reconnaît plus dans le prélèvement rituel. La fracture préfigure la future rivalité entre chaebols pragmatiques et chaebols doctrinaires.",
+      "Importance": "Important",
+      "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Autre",
+      "Ère": "Âge des Doctrines"
+    },
+    "sections": {},
+    "notion_page_id": "3587e416-f61b-4ecb-9058-fa1f7b4439d9"
+  },
+  {
+    "Nom": "Formation du courant des Déconnectés",
+    "values": {
+      "Date de début": "3240",
+      "Date de fin": "3260",
+      "Description": "À la suite de l'imposition du kokoro-link comme condition d'emploi (3240 AG), une fraction des travailleurs de la Grande Radiale refusa l'implant et constitua le courant des Déconnectés. Regroupés dans les niveaux inférieurs des marchés verticaux, ils acceptèrent la discrimination salariale (coefficient nunchi plancher de 0.3/1.0), l'exclusion sociale et la surveillance compensatoire accrue. Ce courant forma le noyau de ce qui deviendrait, un siècle plus tard, le réseau de sympathisants des Lueurs Dissidentes dans le district.",
+      "Importance": "Modéré",
+      "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Période",
+      "Ère": "Âge anentropique"
+    },
+    "sections": {},
+    "notion_page_id": "4f3d3ef3-0428-4c23-b818-ce926efbb7ae"
+  },
+  {
+    "Nom": "Le kokoro-link imposé comme condition d'emploi",
+    "values": {
+      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Date de début": "3240",
+      "Description": "Les grands chaebols — Synaptic Dynamics en tête — font de l'implantation kokoro-link une condition systématique d'embauche. La mesure frappe la Grande Radiale et le Tombeau des lueurs dissidentes, où les mineurs sont contraints d'accepter l'implant pour conserver leur poste. Ce moment pousse une fraction des travailleurs à constituer le courant des Déconnectés — ceux qui refusent l'implant et acceptent la discrimination salariale, l'exclusion sociale et la surveillance compensatoire.",
+      "Importance": "Important",
+      "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 1b46e4d2-1b45-80c6-ba2c-e2512a9a56da",
+      "Type d'événement": "Traité",
+      "Ère": "Âge anentropique"
+    },
+    "sections": {},
+    "notion_page_id": "849ff58e-54ac-4ecc-9085-592be651e0ba"
+  },
+  {
+    "Nom": "Le Traité de la Voie Droite",
+    "values": {
+      "Concepts liés": "b230e1bb-d431-4b7d-bba7-463c254cd5b3",
+      "Date de début": "1340",
+      "Description": "Dans l'Artère Résonnante de la Grande Radiale, Yènora des Sept Voix rédige le Traité de la Voie Droite, qui formule cinq principes de retenue comme pragmatisme collectif. Le texte vise à contenir à la fois les Cercles de Souffrance symbiotiques (où l'arrachement rituel menaçait le lien social) et la logique des marchés montants (où l'échange dissolvait la dette morale entre pairs). Le terme jungdo (정도, « voie droite ») s'impose alors comme norme sociale dans la Radiale, bien avant l'essor des chaebols.",
+      "Importance": "Important",
+      "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Invention",
+      "Ère": "Âge des Doctrines"
+    },
+    "sections": {},
+    "notion_page_id": "f86d7c68-5d3d-4dda-8436-9e9d6d65b5f2"
+  },
+  {
+    "Nom": "Expansion agressive de Tek-Syana-09",
+    "values": {
+      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Date de début": "3386",
+      "Date de fin": "3389",
+      "Description": "Après sa brouille avec le Conclave, Tek-Syana-09 lança une expansion agressive de Synaptic Dynamics : acquisition de médias, rachat d'entreprises rivales, déploiement massif du kokoro-link. Les chaebols qui refusaient l'alignement idéologique se voyaient couper des contrats d'approvisionnement, leurs cadres signalés au Bureau de Cohésion Sociale. Le coefficient de nunchi passa d'un outil de productivité à un instrument de pression biopolitique. Tek prône un « tech-parti » visant à « libérer » Escelion du panoptique pour imposer son propre système de surveillance totale.",
+      "Importance": "Notable",
+      "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Personnages": "2f46e4d2-1b45-8054-b997-e9fe5c9da656",
+      "Type d'événement": "Période",
+      "Ère": "Ère contemporaine"
+    },
+    "sections": {},
+    "notion_page_id": "769dba27-13ae-4a13-a935-360242f0643f"
+  },
+  {
+    "Nom": "Brouille de Tek-Syana-09 avec le Conclave",
+    "values": {
+      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Date de début": "3385",
+      "Description": "Tek-Syana-09 brigua un siège au Conclave des Six Interfaces. L'Interface de la Grande Radiale lui offrit un compromis — le titre de Grand Auto-Secrétaire à l'Efficience Collective (GASEC), poste prestigieux mais dépourvu de pouvoir réel. Après huit mois de tentative d'imposer sa vision jungdo, Tek-Syana-09 explosa en pleine séance du Conclave : insultes, menaces, déploiement théâtral de ses ailes dans la salle. Renvoyé immédiatement. Cette brouille transforma son ambition en ressentiment et le poussa à fonder le « tech-parti de la libération fraternelle ».",
+      "Importance": "Notable",
+      "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Personnages": "2f46e4d2-1b45-8054-b997-e9fe5c9da656",
+      "Type d'événement": "Evénement personnel",
+      "Ère": "Ère contemporaine"
+    },
+    "sections": {},
+    "notion_page_id": "9aa5d4b5-edd8-43f5-9c33-0d12c6883b92"
+  },
+  {
+    "Nom": "L'Ossiaque",
+    "values": {
+      "Date de début": "3246",
+      "Date de fin": "3246",
+      "Description": "Activité intense du Léviathan",
+      "Importance": "Mineur",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Catastrophe",
+      "Ère": "Âge anentropique"
+    },
+    "sections": {},
+    "notion_page_id": "2436e4d2-1b45-800c-a5b7-de8b18650efe"
+  },
+  {
+    "Nom": "Le Sillage de Zharek",
+    "values": {
+      "Date de début": "3107",
+      "Date de fin": "3107",
+      "Description": "Expédition où seuls trois des soixante-quatre explorateurs sont revenus, Zharek lui-même existant désormais en milliers de versions simultanées.",
+      "Importance": "Notable",
+      "Lieux": "1b46e4d2-1b45-8069-b24d-c263445f6a8e",
+      "Type d'événement": "Découverte",
+      "Ère": "Âge des Singularités"
+    },
+    "sections": {},
+    "notion_page_id": "2306e4d2-1b45-80f4-8a63-f37b0f0f1a7c"
+  },
+  {
+    "Nom": "Troisième Pulsation majeure",
+    "values": {
+      "Date de début": "3156",
+      "Date de fin": "3156",
+      "Description": "Troisième spasme d'expansion du Nexion (après 917 et 2102 AG). Coïncide avec le vœu du cycle de Jast : la classe administrative sort victorieuse de la phase de luttes et le Conclave des Interfaces devient le gouvernement effectif de la Vieille Ville. Les effets matériels — Rupture Hydraulique aux Chaudières, fuites de Souffle à la Lisière, crise du formulable à la Bibliothèque, dépôt d'une nouvelle strate aux Jardins — portent la signature physique du verdict.",
+      "Importance": "Majeur",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+      "Type d'événement": "Fondation",
+      "Ère": "Âge anentropique"
+    },
+    "sections": {},
+    "notion_page_id": "2306e4d2-1b45-80d8-9946-c1ca0d339398"
+  },
+  {
+    "Nom": "Seconde Pulsation majeure",
+    "values": {
+      "Date de début": "2102",
+      "Date de fin": "2102",
+      "Description": "Cycles du Souffle Hakutō-Ah rendus prévisibles",
+      "Importance": "Notable",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Catastrophe",
+      "Ère": "Âge des Doctrines"
+    },
+    "sections": {},
+    "notion_page_id": "2306e4d2-1b45-8099-afd0-df5b56d5fcb6"
+  },
+  {
+    "Nom": "L'Axiome perdu",
+    "values": {
+      "Date de début": "2487",
+      "Date de fin": "2487",
+      "Description": "Tentative de résoudre le Théorème de la Discontinuité Harmonique qui crée spontanément le Xyriad",
+      "Importance": "Majeur",
+      "Lieux": "1cc6e4d2-1b45-80fb-b0ec-f0cfe9539620, 1b46e4d2-1b45-8071-88b9-da69653d4987, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Découverte",
+      "Ère": "Âge des Singularités"
+    },
+    "sections": {},
+    "notion_page_id": "2306e4d2-1b45-80fc-a91c-cd7acc2f4543"
+  },
+  {
+    "Nom": "Première Pulsation majeure",
+    "values": {
+      "Date de début": "917",
+      "Date de fin": "917",
+      "Description": "Onde restructurant les bâtiments de la Vieille Ville en motif radial parfait",
+      "Importance": "Modéré",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Catastrophe",
+      "Ère": "Âge des Doctrines"
+    },
+    "sections": {},
+    "notion_page_id": "2306e4d2-1b45-803c-a017-ef74249e30de"
+  },
+  {
+    "Nom": "L'Âge des Greffes",
+    "values": {
+      "Date de début": "834",
+      "Date de fin": "1156",
+      "Description": "Développement de l’élevage aedre",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+      "Importance": "Modéré",
+      "Type d'événement": "Découverte",
+      "Ère": "Fondation d'Escelion"
+    },
+    "sections": {},
+    "notion_page_id": "22c6e4d2-1b45-806b-a882-d7e9a3e6bca3"
   }
 ]
