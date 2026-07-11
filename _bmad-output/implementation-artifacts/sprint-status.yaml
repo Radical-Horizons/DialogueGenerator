@@ -159,7 +159,7 @@ development_status:
   epic-6-retrospective: optional
   epic-7: in-progress
   7-0-fondation-sqlite-application-data-app-db: ready-for-dev
-  7-1-créer-comptes-utilisateurs-admin-only-fr64: backlog
+  7-1-créer-comptes-utilisateurs-admin-only-fr64: ready-for-dev
   7-2-se-connecter-et-se-déconnecter-du-système-fr65: backlog
   7-3-administrateurs-gèrent-les-utilisateurs-fr66: backlog
   7-4-writers-peuvent-créer-éditer-et-supprimer-dialogues-fr67: backlog

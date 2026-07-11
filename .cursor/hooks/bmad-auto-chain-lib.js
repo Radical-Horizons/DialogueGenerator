@@ -296,7 +296,7 @@ function promptFromHookPayload(payload) {
 function shouldArmAutoChain(promptText) {
   const s = String(promptText || "");
   const createStory =
-    /01-custom-sm-create-story|sm-create-story|create-story\/workflow\.yaml|create-story workflow|Context Story:\s*Prepare|\[CS\]\s*Context Story/i.test(
+    /01-custom-sm-create-story|sm-create-story|bmad-create-story|create-story\/SKILL\.md|create-story workflow|Context Story:\s*Prepare|\[CS\]\s*Context Story/i.test(
       s,
     );
   const auto = /\bauto\b|#yolo|\byolo mode\b/i.test(s);
@@ -305,11 +305,11 @@ function shouldArmAutoChain(promptText) {
 
 const FOLLOWUP_DEV_STORY = `/02-custom-dev-story
 
-MODE AUTO (#yolo) : exécuter immédiatement le workflow Dev Story (charger dev.md, config.yaml, workflow.xml, puis \`_bmad/bmm/workflows/4-implementation/dev-story/workflow.yaml\`). Pas de menu, pas d’attente utilisateur entre les sections. Implémenter la story en statut **ready-for-dev** (fichier sous \`_bmad-output/implementation-artifacts/\` + \`sprint-status.yaml\`).`;
+MODE AUTO (#yolo) : exécuter immédiatement le skill bmad-dev-story (.agents/skills/bmad-dev-story/SKILL.md). Pas de menu, pas d’attente utilisateur entre les sections. Implémenter la story en statut **ready-for-dev** (fichier sous \`_bmad-output/implementation-artifacts/\` + \`sprint-status.yaml\`).`;
 
 const FOLLOWUP_CODE_REVIEW = `/03-custom-dev-code-review
 
-MODE AUTO (#yolo) : exécuter le workflow code-review (workflow.xml + \`_bmad/bmm/workflows/4-implementation/code-review/workflow.yaml\`). Enchaîner sans bloquer sur les confirmations ; aux choix numérotés, suivre la logique du workflow.`;
+MODE AUTO (#yolo) : exécuter le skill bmad-code-review (.agents/skills/bmad-code-review/SKILL.md). Enchaîner sans bloquer sur les confirmations ; aux choix numérotés, suivre la logique du skill.`;
 
 /** Réponse minimale si l’agent s’arrête encore sur l’invite finale [1]/[2]/[3]. */
 const FOLLOWUP_REVIEW_OPTION_1 = `1`;
