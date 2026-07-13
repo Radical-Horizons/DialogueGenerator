@@ -441,6 +441,30 @@ Catalogue des familles de systèmes de jeu utilisables dans les dialogues (FR94)
 
 **Reste à faire :** connexion runtime live (Unity/API) non implémentée.
 
+### GET `/mechanics/systems/skill-check-catalog`
+
+Catalogue caractéristiques + compétences pour l'éditeur de tests Unity (`Attribut+Compétence:DD`) et l'autocomplétion frontend.
+
+**Response:** `SkillCheckCatalogResponse`
+
+```json
+{
+  "attributes": [
+    { "id": "Sociabilité", "label": "Sociabilité" },
+    { "id": "Puissance", "label": "Puissance" }
+  ],
+  "skills": [
+    { "id": "Tromperie", "label": "Tromperie" },
+    { "id": "Diplomatie", "label": "Diplomatie" }
+  ]
+}
+```
+
+- **Attributs** : 8 caractéristiques canoniques (`services/skill_check_catalog.py` — `CORE_ATTRIBUTE_ENTRIES`).
+- **Compétences** : lues depuis `data/UnityData/SkillCatalog.csv` via `SkillCatalogService`.
+
+**Client TS :** `frontend/src/api/skillCheckCatalog.ts`. Guide : [`docs/guides/game-systems-integration.md`](../guides/game-systems-integration.md).
+
 ---
 
 ## Documents Endpoints (`/api/v1/documents`)
@@ -843,6 +867,14 @@ Catalog of game-system families (attributes/skills, effort, reputation) and runt
 **Response:** `GameSystemsIntegrationCatalogResponse` — `{ families[], runtime_source }`
 
 Implementation: `api/routers/mechanics_systems.py`, `services/game_systems_integration_service.py`.
+
+### GET `/mechanics/systems/skill-check-catalog`
+
+Attribute and skill catalog for Unity test editor autocomplete (`Attribute+Skill:DC` format).
+
+**Response:** `SkillCheckCatalogResponse` — `{ attributes: [{ id, label }], skills: [{ id, label }] }`
+
+Sources: `CORE_ATTRIBUTE_ENTRIES` (8 attributes) + `data/UnityData/SkillCatalog.csv` via `SkillCatalogService`.
 
 ---
 

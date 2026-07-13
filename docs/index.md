@@ -73,7 +73,7 @@ Located in `[guides/](./guides/)`
 - [Deployment Documentation](./guides/DEPLOYMENT.md) - Deployment documentation
 - [Security](./guides/SECURITY.md) - Security documentation
 - [Testing](./guides/TESTING.md) - Testing guide
-- [Game Systems Integration (FR94)](./guides/game-systems-integration.md) - Skill checks, Effort, Réputation FR94, preview simulée, diagnostics
+- [Game Systems Integration (FR94)](./guides/game-systems-integration.md) - Skill checks, Effort, Réputation FR94, preview playthrough VN, catalogue skill-check, diagnostics
 
 ### Troubleshooting
 
