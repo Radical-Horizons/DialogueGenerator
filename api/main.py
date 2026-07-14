@@ -9,6 +9,7 @@ import sys
 import asyncio
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
+from typing import AsyncIterator
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware as FastAPICORSMiddleware
@@ -28,7 +29,7 @@ from api.config.cors_resolution import resolve_production_cors_origins
 from api.middleware.rate_limiter import get_limiter, rate_limit_exception_handler
 from api.app_version import APP_VERSION
 from services.repositories.sqlite.bootstrap import initialize_database
-from services.repositories.sqlite.state import reset_database_status
+from services.repositories.sqlite.state import mark_database_error, reset_database_status
 
 # Charger le fichier .env en dev (éviter sous pytest pour des tests déterministes)
 if "pytest" not in sys.modules:
@@ -68,12 +69,13 @@ def _validate_security_config() -> None:
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Gère le cycle de vie de l'application (startup/shutdown).
     
     Args:
         app: L'application FastAPI.
     """
+    seed_startup_failed = False
     try:
         # Startup
         logger.info("Démarrage de l'API DialogueGenerator...")
@@ -120,6 +122,23 @@ async def lifespan(app: FastAPI):
                 database_connection=database_connection,
                 database_initialization_failed=database_connection is None,
             )
+            if database_connection is not None:
+                try:
+                    container.get_auth_service().seed_admin_if_needed(
+                        os.environ.get("ADMIN_PASSWORD")
+                    )
+                except Exception:
+                    seed_startup_failed = True
+                    mark_database_error(
+                        database_connection.database_path,
+                        "Échec critique du seed du compte administrateur.",
+                    )
+                    logger.critical(
+                        "Échec critique du seed du compte administrateur; "
+                        "l'application ne peut pas démarrer.",
+                        exc_info=True,
+                    )
+                    raise
             _startup_timer.mark("service_container_created")
 
             context_builder = container.get_context_builder()
@@ -173,6 +192,12 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.error(f"Erreur lors de l'initialisation du container ou de la validation GDD: {e}", exc_info=True)
             _startup_timer.mark("container_init_failed")
+            if seed_startup_failed:
+                if "container" in locals() and container is not None:
+                    container.close()
+                app.state.container = None
+                _startup_timer.log_report()
+                raise
             if "container" in locals() and container is not None:
                 app.state.container = container
                 logger.warning("Container partiellement initialisé stocké dans app.state malgré l'erreur.")
@@ -638,10 +663,12 @@ from api.routers import (
     presets,
     streaming,
     unity_dialogues,
+    users,
 )
 from api.routers.auth import get_current_user
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
+app.include_router(users.router, prefix="/api/v1", tags=["Users"])
 app.include_router(dialogues.router, prefix="/api/v1/dialogues", tags=["Dialogues"])
 app.include_router(streaming.router, prefix="/api/v1/dialogues", tags=["Dialogues"])  # SSE streaming (Story 0.2)
 app.include_router(unity_dialogues.router, prefix="/api/v1/unity-dialogues", tags=["Unity Dialogues"])

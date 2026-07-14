@@ -8,10 +8,13 @@ import os
 import sys
 import json
 from pathlib import Path
-from typing import Annotated
-from fastapi import Depends
+from typing import Annotated, Optional
+
+from fastapi import Depends, HTTPException, status
 from starlette.requests import Request
 from api.container import ServiceContainer
+from api.config.security_config import get_security_config
+from api.services.auth_service import AuthService
 from core.context.context_builder import ContextBuilder
 from core.prompt.prompt_engine import PromptEngine
 from core.llm.llm_client import ILLMClient
@@ -76,6 +79,47 @@ def get_database_connection(request: Request) -> DatabaseConnection:
 def get_user_repository(request: Request) -> UserRepository:
     """Retourne le repository utilisateur partagé du container."""
     return get_service_container(request).get_user_repository()
+
+
+def get_auth_service(request: Request) -> AuthService:
+    """Retourne le service d'authentification du container."""
+    return get_service_container(request).get_auth_service()
+
+
+def require_admin(
+    current_user: Optional[dict[str, object]] = None,
+) -> dict[str, object]:
+    """Vérifie que l'utilisateur courant possède le rôle administrateur.
+
+    Args:
+        current_user: Utilisateur résolu par la dépendance d'authentification.
+
+    Returns:
+        L'utilisateur administrateur validé.
+
+    Raises:
+        HTTPException: Si aucun utilisateur administrateur n'est disponible.
+    """
+    if current_user is None:
+        security_config = get_security_config()
+        if security_config.is_development and security_config.disable_auth:
+            return {
+                "username": "admin",
+                "role": "admin",
+                "is_active": True,
+            }
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin role required",
+        )
+
+    if current_user.get("role") == "admin" and current_user.get("is_active") is True:
+        return current_user
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Admin role required",
+    )
 
 
 # _get_context_builder_singleton() supprimé - utilisez ServiceContainer via get_context_builder()

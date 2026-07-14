@@ -129,7 +129,9 @@ async def get_current_user(
         return {
             "id": "1",
             "username": "admin",
-            "email": "admin@example.com"
+            "email": "admin@example.com",
+            "role": "admin",
+            "is_active": True,
         }
     
     # En production, vérifier le token normalement
@@ -165,6 +167,26 @@ async def get_current_user(
         )
     
     return user
+
+
+async def get_current_user_or_none(
+    request: Request,
+    credentials: Annotated[Optional[HTTPAuthorizationCredentials], Depends(security)] = None,
+) -> Optional[dict[str, object]]:
+    """Résout l'utilisateur courant sans interrompre la vérification d'admin.
+
+    Args:
+        request: Requête HTTP courante.
+        credentials: Identifiants Bearer éventuellement fournis.
+
+    Returns:
+        Utilisateur courant, ou ``None`` si l'authentification échoue.
+    """
+    try:
+        return await get_current_user(request=request, credentials=credentials)
+    except AuthenticationException as exc:
+        logger.debug("Utilisateur non authentifié pour une route admin: %s", exc.detail)
+        return None
 
 
 @router.post("/login", response_model=TokenResponse, status_code=status.HTTP_200_OK)

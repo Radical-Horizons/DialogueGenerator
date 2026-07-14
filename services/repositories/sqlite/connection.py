@@ -86,8 +86,13 @@ class DatabaseConnection:
             return cursor.fetchall()
 
     @contextmanager
-    def transaction(self) -> Iterator[sqlite3.Connection]:
-        """Fournit une transaction exclusive avec rollback automatique.
+    def transaction(self, *, immediate: bool = False) -> Iterator[sqlite3.Connection]:
+        """Fournit une transaction avec rollback automatique.
+
+        Args:
+            immediate: Réserve immédiatement l'écriture SQLite avant le premier
+                accès. À utiliser lorsque plusieurs opérations de lecture et
+                d'écriture doivent être sérialisées entre connexions.
 
         Yields:
             Connexion SQLite utilisée par la transaction.
@@ -97,7 +102,7 @@ class DatabaseConnection:
                 après rollback.
         """
         with self._lock:
-            self._connection.execute("BEGIN")
+            self._connection.execute("BEGIN IMMEDIATE" if immediate else "BEGIN")
             try:
                 yield self._connection
                 self._connection.commit()

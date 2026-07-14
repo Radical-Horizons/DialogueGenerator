@@ -1,6 +1,9 @@
+---
+baseline_commit: 4755e89a
+---
 # Story 7.1: Créer comptes utilisateurs — admin only (FR64)
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -41,30 +44,30 @@ so that **chaque collaborateur a ses identifiants sans inscription publique**.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 : Endpoint `POST /api/v1/users` crée un compte writer (AC: #1, #2, #3, #4)
-  - [ ] 🔴 Test échoue : admin authentifié POST /api/v1/users → 201, UserResponse sans hashed_password, rôle `writer` ; writer POST → 403 ; username dupliqué → 409 ; password < 8 chars → 422
-  - [ ] 🟢 Créer `api/routers/users.py` avec router `/api/v1/users` + `require_admin` dependency ; créer `api/schemas/users.py` (UserCreate, UserResponse) ; ajouter `create_user()` dans `AuthService` qui délègue à `UserRepository.insert()` ; enregistrer le router dans `api/main.py`
-  - [ ] 🔵 Refactor : si `api/routers/users.py` dépasse 80 lignes, séparer la logique métier dans `AuthService` (pas dans le router)
+- [x] Task 1 : Endpoint `POST /api/v1/users` crée un compte writer (AC: #1, #2, #3, #4)
+  - [x] 🔴 Test échoue : admin authentifié POST /api/v1/users → 201, UserResponse sans hashed_password, rôle `writer` ; writer POST → 403 ; username dupliqué → 409 ; password < 8 chars → 422
+  - [x] 🟢 Créer `api/routers/users.py` avec router `/api/v1/users` + `require_admin` dependency ; créer `api/schemas/users.py` (UserCreate, UserResponse) ; ajouter `create_user()` dans `AuthService` qui délègue à `UserRepository.insert()` ; enregistrer le router dans `api/main.py`
+  - [x] 🔵 Refactor : la logique métier reste dans `AuthService` ; le router fait 43 lignes.
 
-- [ ] Task 2 : Seed admin au premier boot depuis `ADMIN_PASSWORD` (AC: #5)
-  - [ ] 🔴 Test échoue : avec env `ADMIN_PASSWORD=test123` et base vide → `UserRepository.find_by_username('admin')` retourne un user role `admin` après boot ; sans `ADMIN_PASSWORD` en production → warning loggé, aucun user seedé
-  - [ ] 🟢 Dans lifespan `api/main.py`, après `run_migrations()`, appeler `seed_admin_if_needed()` dans `AuthService` ; lire `ADMIN_PASSWORD` via `os.environ.get()` ; ne pas seeder si user `admin` existe déjà (idempotent)
-  - [ ] 🔵 Refactor : si seed logic > 20 lignes, extraire dans `AuthService.seed_admin()` plutôt que dans lifespan
+- [x] Task 2 : Seed admin au premier boot depuis `ADMIN_PASSWORD` (AC: #5)
+  - [x] 🔴 Test échoue : avec env `ADMIN_PASSWORD=test123` et base vide → `UserRepository.find_by_username('admin')` retourne un user role `admin` après boot ; sans `ADMIN_PASSWORD` en production → warning loggé, aucun user seedé
+  - [x] 🟢 Dans lifespan `api/main.py`, après `run_migrations()`, appeler `seed_admin_if_needed()` dans `AuthService` ; lire `ADMIN_PASSWORD` via `os.environ.get()` ; ne pas seeder si user `admin` existe déjà (idempotent)
+  - [x] 🔵 Refactor : toute la logique de seed reste dans `AuthService.seed_admin_if_needed()` ; le lifespan ajoute seulement l'appel délégué.
 
-- [ ] Task 3 : `require_admin` dependency FastAPI (AC: #2)
-  - [ ] 🔴 Test échoue : requête avec token writer → 403 ; requête avec token admin → passe ; `DISABLE_AUTH=true` → bypass (comportement dev inchangé)
-  - [ ] 🟢 Ajouter `require_admin` dans `api/dependencies.py` qui vérifie `current_user.role == "admin"` ; lever `HTTPException(403)` sinon ; brancher sur le mécanisme `DISABLE_AUTH` existant (voir `get_current_user` pattern dans auth router)
-  - [ ] 🔵 Refactor : si la vérification de rôle est dupliquée avec `get_current_user`, factoriser un helper `check_role(user, required_role)`
+- [x] Task 3 : `require_admin` dependency FastAPI (AC: #2)
+  - [x] 🔴 Test échoue : requête avec token writer → 403 ; requête avec token admin → passe ; `DISABLE_AUTH=true` → bypass (comportement dev inchangé)
+  - [x] 🟢 Ajouter `require_admin` dans `api/dependencies.py` qui vérifie `current_user.role == "admin"` ; lever `HTTPException(403)` sinon ; brancher sur le mécanisme `DISABLE_AUTH` existant (voir `get_current_user` pattern dans auth router)
+  - [x] 🔵 Refactor : le wrapper `get_current_user_or_none` centralise l'absence d'authentification ; la vérification de rôle n'est pas dupliquée dans le router.
 
-- [ ] Task 4 : `UserRepository.insert()` + `UserRepository.find_by_username()` (AC: #1, #3)
-  - [ ] 🔴 Test échoue : insert user → trouvable par find_by_username ; insert username dupliqué → `IntegrityError` converti en 409 ; find user inexistant → None
-  - [ ] 🟢 Étendre `services/repositories/sqlite/user_repository.py` (créé en 7.0) avec `insert(user_data) -> UserRecord` et `find_by_username(username) -> Optional[UserRecord]` ; gérer `sqlite3.IntegrityError` sur UNIQUE constraint
-  - [ ] 🔵 Refactor : si `UserRecord` TypedDict existe en 7.0, ne pas recréer ; réutiliser le type existant
+- [x] Task 4 : `UserRepository.insert()` + `UserRepository.find_by_username()` (AC: #1, #3)
+  - [x] 🔴 Test échoue : insert user → trouvable par find_by_username ; insert username dupliqué → `IntegrityError` converti en 409 ; find user inexistant → None
+  - [x] 🟢 Étendre `services/repositories/sqlite/user_repository.py` (créé en 7.0) avec `insert(user_data) -> UserRecord` et `find_by_username(username) -> Optional[UserRecord]` ; gérer `sqlite3.IntegrityError` sur UNIQUE constraint
+  - [x] 🔵 Refactor : `UserRecord` TypedDict est défini une seule fois et réutilisé par le Protocol, le repository et `AuthService`.
 
-- [ ] Task 5 : Tests isolation + DISABLE_AUTH (AC: #1, #2, #5, #6)
-  - [ ] 🔴 Test échoue : l'ensemble des tests API users passe avec base temporaire `tmp_path` (fixture `isolated_app_database` de 7.0) ; `DISABLE_AUTH=true` → create user bypass auth mais log warning
-  - [ ] 🟢 Tous les tests `tests/api/test_users.py` utilisent fixture `isolated_app_database` ; aucun test ne lit/écrit `data/app.db`
-  - [ ] 🔵 Refactor : si des helpers de test sont partagés avec epic 7 (ex. `create_admin_token()`), les placer dans `tests/helpers/auth_helpers.py`
+- [x] Task 5 : Tests isolation + DISABLE_AUTH (AC: #1, #2, #5, #6)
+  - [x] 🔴 Test échoue : l'ensemble des tests API users passe avec base temporaire `tmp_path` (fixture `isolated_app_database` de 7.0) ; `DISABLE_AUTH=true` → create user bypass auth mais log warning
+  - [x] 🟢 Tous les tests `tests/api/test_users.py` utilisent fixture `isolated_app_database` ; aucun test ne lit/écrit `data/app.db`
+  - [x] 🔵 Refactor : aucun helper partagé supplémentaire n'est nécessaire ; les overrides d'auth restent locaux à cette suite isolée.
 
 ## Dev Notes
 
@@ -268,10 +271,85 @@ Commits git récents (contexte) :
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+GPT-5.6 Luna
 
 ### Debug Log References
+- 2026-07-14 : le premier test non authentifié a révélé que `DISABLE_AUTH=true` devait continuer à bypasser l'autorisation ; le test 403 force donc explicitement `disable_auth=false`, tandis qu'un test séparé couvre le bypass local.
+- 2026-07-14 : le test de compatibilité avec le token admin historique a confirmé que `_users_db` et le chemin login restent fonctionnels avant 7.2.
+- 2026-07-14 : vérification syntaxique Python et `git diff --check` terminées avec code 0.
+- 2026-07-14 : la revue a imposé une politique commune de mot de passe (minimum 8 caractères, maximum 72 octets UTF-8 bcrypt), un username sans espaces/caractères de contrôle et la réservation insensible à la casse de `admin`.
+- 2026-07-14 : le seed concurrent traite le conflit d'unicité comme idempotent uniquement si l'administrateur gagnant porte bien le rôle `admin`; un rôle différent bloque clairement le démarrage.
+- 2026-07-14 : un échec inattendu de hash/insertion pendant le lifespan est journalisé en critical, marque SQLite indisponible et empêche l'application de démarrer dans un état faussement sain.
+- 2026-07-14 : la revue a imposé une canonicalisation `casefold()` au repository, stockée et retournée de façon cohérente ; le pré-contrôle transactionnel et la contrainte UNIQUE existante empêchent les variantes `Alice`/`alice`, sans modifier la migration 001.
+- 2026-07-14 : un `ADMIN_PASSWORD` défini mais invalide est journalisé sans sa valeur puis propagé comme erreur de configuration ; le lifespan marque SQLite indisponible et refuse de démarrer, tandis que l'absence de variable conserve le warning sans seed.
+- 2026-07-15 : les octets UTF-8 contenant NUL sont refusés avant bcrypt ; la validation Pydantic retourne 422 par champ et le seed ADMIN_PASSWORD suit le chemin de configuration invalide sans journaliser le secret. La régression startup reste couverte par un mot de passe UTF-8 trop long, car Windows interdit les NUL dans les variables d'environnement.
+- 2026-07-15 : les insertions utilisateur utilisent `BEGIN IMMEDIATE` via l'abstraction `DatabaseConnection`, ce qui sérialise lecture, contrôle et insertion entre connexions SQLite ; le second username concurrent, y compris une variante de casse, devient `DuplicateUsernameError` puis 409 côté API.
 
 ### Completion Notes List
+- Task 1 : endpoint `POST /api/v1/users` ajouté avec validation Pydantic, rôle `writer` par défaut, hash bcrypt, réponse filtrée et conflit username en 409.
+- Task 2 : seed admin idempotent depuis `ADMIN_PASSWORD` branché dans le lifespan après l'initialisation SQLite ; absence de variable journalisée en warning sans écriture.
+- Task 3 : contrôle admin ajouté avec refus 403 des writers/non-authentifiés et conservation du bypass local `DISABLE_AUTH=true`.
+- Task 4 : `UserRepository.insert()` et `find_by_username()` ajoutés avec transaction SQLite, conversion de l'unicité username et `UserRecord` partagé.
+- Revue appliquée : validation commune des mots de passe, contrôle des usernames malformés/réservés, seed idempotent et race-safe, invariant de rôles SQLite, rôle et statut actif explicites pour `require_admin`, et échec critique du seed au démarrage.
+- Revue appliquée : canonicalisation transactionnelle des usernames, régression des variantes de casse, validation bloquante d'un `ADMIN_PASSWORD` défini invalide et test réel du lifespan ; Story 7.2 (login SQLite) et 7.8 (audit logging) restent différées.
+- Correctifs edge-case appliqués : NUL dans les mots de passe rejeté avant bcrypt, avec couverture API et du seed admin ; transaction d'insertion SQLite passée en `BEGIN IMMEDIATE`, avec couverture de deux connexions concurrentes et variante de casse.
+- Task 5 : la suite API isolée couvre création, autorisation, validation (dont NUL), seed, idempotence/race, hash, invariant de rôle, statut actif, démarrage critique, configuration admin invalide et absence d'auto-login.
+- Correctifs ciblés : `node scripts/getPythonPath.js -m pytest tests/api/test_users.py tests/api/test_auth.py tests/services/repositories/sqlite/ -v --tb=short` — 40 passed, 0 failed.
+- Backend fast : `npm run test:backend:fast` — 1,948 passed, 3 skipped, 15 deselected, 7 warnings, 0 failed ; aucune flake de timing observée sur cette exécution.
+- Compilation : `node scripts/getPythonPath.js -m compileall -q api services tests/api/test_users.py` — exit code 0.
+- Vérification whitespace : `git diff --check` — exit code 0 (avertissement Git non bloquant sur la conversion CRLF/LF de `api/services/auth_service.py`).
 
 ### File List
+- `api/container.py`
+- `api/dependencies.py`
+- `api/main.py`
+- `api/routers/auth.py`
+- `api/routers/users.py`
+- `api/schemas/users.py`
+- `api/services/auth_service.py`
+- `api/utils/password_policy.py`
+- `services/repositories/sqlite/user_repository.py`
+- `tests/api/test_users.py`
+
+## Suggested Review Order
+
+**API entry point and authorization**
+
+- Start with the admin-only endpoint and its dependency composition.
+  [`users.py:26`](../../api/routers/users.py#L26)
+
+- Verify explicit role and active-status enforcement while preserving local bypass.
+  [`dependencies.py:89`](../../api/dependencies.py#L89)
+
+**Account creation and bootstrap**
+
+- Follow service-level validation, hashing, persistence, and writer defaults.
+  [`auth_service.py:57`](../../api/services/auth_service.py#L57)
+
+- Inspect idempotent admin seeding, conflict handling, and invalid configuration behavior.
+  [`auth_service.py:96`](../../api/services/auth_service.py#L96)
+
+- Confirm startup marks failed admin seeding unhealthy before aborting.
+  [`main.py:127`](../../api/main.py#L127)
+
+**Validation and persistence boundaries**
+
+- Review the shared password policy before bcrypt receives user input.
+  [`password_policy.py:14`](../../api/utils/password_policy.py#L14)
+
+- Check canonical usernames and serialized SQLite writes under concurrent access.
+  [`user_repository.py:71`](../../services/repositories/sqlite/user_repository.py#L71)
+
+- Verify immediate transaction locking remains opt-in for write races.
+  [`connection.py:89`](../../services/repositories/sqlite/connection.py#L89)
+
+**Behavioral evidence**
+
+- Begin with the success, response filtering, and bcrypt persistence contract.
+  [`test_users.py:108`](../../tests/api/test_users.py#L108)
+
+- Check concurrent case variants resolve to the required duplicate behavior.
+  [`test_users.py:210`](../../tests/api/test_users.py#L210)
+
+- Review bootstrap, invalid configuration, and lifespan failure coverage.
+  [`test_users.py:311`](../../tests/api/test_users.py#L311)

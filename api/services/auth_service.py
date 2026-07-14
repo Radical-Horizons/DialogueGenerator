@@ -1,11 +1,21 @@
 """Service d'authentification pour l'API."""
 import logging
+import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+from uuid import uuid4
+
 from jose import JWTError, jwt
 import bcrypt
+
 from api.exceptions import AuthenticationException
 from api.config.security_config import get_security_config
+from api.utils.password_policy import PasswordPolicyError, validate_password
+from services.repositories.sqlite.user_repository import (
+    DuplicateUsernameError,
+    IUserRepository,
+    UserRecord,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -18,13 +28,14 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 class AuthService:
     """Service pour gérer l'authentification et les tokens JWT."""
     
-    def __init__(self):
+    def __init__(self, user_repository: IUserRepository | None = None) -> None:
         """Initialise le service d'authentification."""
         security_config = get_security_config()
         self.secret_key = security_config.jwt_secret_key
         self.algorithm = ALGORITHM
         self.access_token_expire = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         self.refresh_token_expire = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+        self._user_repository = user_repository
         
         # TODO: En production, utiliser une vraie base de données
         # Pour l'instant, utilisateurs en dur (à remplacer)
@@ -37,9 +48,117 @@ class AuthService:
                 "username": "admin",
                 "email": "admin@example.com",
                 "hashed_password": admin_password_hash,
-                "id": "1"
+                "id": "1",
+                "role": "admin",
+                "is_active": True,
             }
         }
+
+    def create_user(
+        self,
+        username: str,
+        email: str,
+        password: str,
+        role: str = "writer",
+    ) -> UserRecord:
+        """Crée un compte dans le repository SQLite injecté.
+
+        Args:
+            username: Nom d'utilisateur unique.
+            email: Adresse email du collaborateur.
+            password: Mot de passe en clair à hasher.
+            role: Rôle persisté, limité à ``admin`` ou ``writer``.
+
+        Returns:
+            Enregistrement utilisateur persisté.
+
+        Raises:
+            RuntimeError: Si aucun repository n'a été injecté.
+            ValueError: Si le rôle demandé n'est pas supporté.
+        """
+        if self._user_repository is None:
+            raise RuntimeError("UserRepository requis pour créer un compte.")
+        if role not in {"admin", "writer"}:
+            raise ValueError(f"Rôle utilisateur non supporté: {role}")
+        validate_password(password)
+
+        user_data = {
+            "id": str(uuid4()),
+            "username": username,
+            "email": email,
+            "hashed_password": self.hash_password(password),
+            "role": role,
+        }
+        user = self._user_repository.insert(user_data)
+        logger.info("Compte utilisateur créé: username=%s role=%s", username, role)
+        return user
+
+    def seed_admin_if_needed(self, admin_password: str | None) -> None:
+        """Sème le compte administrateur si la base n'en contient aucun.
+
+        Args:
+            admin_password: Mot de passe provenant de ``ADMIN_PASSWORD``.
+
+        Returns:
+            ``None``. La méthode est idempotente et ignore un compte existant.
+
+        Raises:
+            PasswordPolicyError: Si ``ADMIN_PASSWORD`` est défini mais invalide.
+        """
+        if self._user_repository is None:
+            logger.debug("Seed admin ignoré: UserRepository non initialisé.")
+            return
+        if admin_password is None:
+            logger.warning(
+                "ADMIN_PASSWORD non défini — compte admin non seedé. "
+                "Définir ADMIN_PASSWORD avant redémarrage (environnement=%s).",
+                os.getenv("ENVIRONMENT", "development"),
+            )
+            return
+
+        try:
+            validate_password(admin_password)
+        except PasswordPolicyError as exc:
+            logger.error("ADMIN_PASSWORD invalide: %s", exc)
+            raise
+
+        existing = self._user_repository.find_by_username("admin")
+        if existing is not None:
+            self._validate_existing_admin(existing)
+            return
+
+        try:
+            self._user_repository.insert(
+                {
+                    "id": str(uuid4()),
+                    "username": "admin",
+                    "email": "admin@example.com",
+                    "hashed_password": self.hash_password(admin_password),
+                    "role": "admin",
+                }
+            )
+        except DuplicateUsernameError:
+            raced_admin = self._user_repository.find_by_username("admin")
+            if raced_admin is None:
+                raise RuntimeError(
+                    "Le seed admin a rencontré un conflit username sans enregistrement admin."
+                )
+            self._validate_existing_admin(raced_admin)
+            logger.info("Seed admin déjà effectué par un autre démarrage concurrent.")
+            return
+        logger.info("Compte admin seedé depuis ADMIN_PASSWORD")
+
+    @staticmethod
+    def _validate_existing_admin(user: UserRecord) -> None:
+        """Vérifie qu'un compte ``admin`` existant peut satisfaire le seed."""
+        if user["role"] != "admin":
+            logger.error(
+                "Seed admin impossible: le username admin existe avec un rôle non administrateur."
+            )
+            raise RuntimeError(
+                "Le username admin existe déjà avec un rôle non administrateur."
+            )
+        logger.debug("Seed admin ignoré: le compte admin existe déjà.")
     
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """Vérifie un mot de passe.
@@ -65,6 +184,7 @@ class AuthService:
         Returns:
             Mot de passe hashé.
         """
+        validate_password(password)
         salt = bcrypt.gensalt()
         hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
         return hashed.decode('utf-8')
@@ -89,7 +209,9 @@ class AuthService:
         return {
             "id": user["id"],
             "username": user["username"],
-            "email": user.get("email")
+            "email": user.get("email"),
+            "role": user["role"],
+            "is_active": user.get("is_active", True),
         }
     
     def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -162,7 +284,9 @@ class AuthService:
             return {
                 "id": user["id"],
                 "username": user["username"],
-                "email": user.get("email")
+                "email": user.get("email"),
+                "role": user["role"],
+                "is_active": user.get("is_active", True),
             }
         return None
 

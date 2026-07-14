@@ -32,6 +32,7 @@ from services.context_rule_service import ContextRuleService
 from services.context_dropping_rules_service import ContextDroppingRulesService
 from services.repositories.sqlite.bootstrap import resolve_database_path
 from services.repositories.sqlite import DatabaseConnection, UserRepository
+from api.services.auth_service import AuthService
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +83,7 @@ class ServiceContainer:
         self._global_relation_index: Optional[Dict[str, str]] = None
         self._database_connection: Optional[DatabaseConnection] = database_connection
         self._user_repository: Optional[UserRepository] = None
+        self._auth_service: Optional[AuthService] = None
         self._database_initialization_failed = database_initialization_failed
         self._database_lock = threading.RLock()
         logger.debug("ServiceContainer initialisé (services à charger au premier accès)")
@@ -108,6 +110,14 @@ class ServiceContainer:
                 self._user_repository = UserRepository(self.get_database_connection())
                 logger.info("UserRepository initialisé dans le container.")
             return self._user_repository
+
+    def get_auth_service(self) -> AuthService:
+        """Retourne le service d'authentification avec son repository injecté."""
+        with self._database_lock:
+            if self._auth_service is None:
+                self._auth_service = AuthService(self.get_user_repository())
+                logger.info("AuthService initialisé dans le container.")
+            return self._auth_service
     
     def get_config_service(self) -> ConfigurationService:
         """Retourne le service de configuration.
@@ -492,6 +502,7 @@ class ServiceContainer:
                 self._database_connection.close()
             self._database_connection = None
             self._user_repository = None
+            self._auth_service = None
     
     def reset(self) -> None:
         """Réinitialise tous les services (utile lors d'un reload uvicorn).
