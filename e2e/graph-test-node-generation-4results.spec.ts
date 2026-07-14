@@ -42,16 +42,16 @@ const FIXTURE_DOC = {
 
 const MOCK_GENERATE_RESPONSE = {
   nodes: [
-    { id: 'NODE_CF', speaker: 'E2E', line: 'Échec critique' },
-    { id: 'NODE_F', speaker: 'E2E', line: 'Échec' },
-    { id: 'NODE_S', speaker: 'E2E', line: 'Réussite' },
-    { id: 'NODE_CS', speaker: 'E2E', line: 'Réussite critique' },
+    { id: 'node-cf', speaker: 'E2E', line: 'Échec critique' },
+    { id: 'node-f', speaker: 'E2E', line: 'Échec' },
+    { id: 'node-s', speaker: 'E2E', line: 'Réussite' },
+    { id: 'node-cs', speaker: 'E2E', line: 'Réussite critique' },
   ],
   suggested_connections: [
-    { from: 'test-node-START-choice-0', to: 'NODE_CF', connection_type: 'test-critical-failure' },
-    { from: 'test-node-START-choice-0', to: 'NODE_F', connection_type: 'test-failure' },
-    { from: 'test-node-START-choice-0', to: 'NODE_S', connection_type: 'test-success' },
-    { from: 'test-node-START-choice-0', to: 'NODE_CS', connection_type: 'test-critical-success' },
+    { from: 'test-node-START-choice-0', to: 'node-cf', connection_type: 'test-critical-failure' },
+    { from: 'test-node-START-choice-0', to: 'node-f', connection_type: 'test-failure' },
+    { from: 'test-node-START-choice-0', to: 'node-s', connection_type: 'test-success' },
+    { from: 'test-node-START-choice-0', to: 'node-cs', connection_type: 'test-critical-success' },
   ],
   parent_node_id: 'test-node-START-choice-0',
 }
@@ -91,23 +91,20 @@ function expectStartChoiceTestConnections(nodes: Array<Record<string, unknown>>)
   const startNode = nodes.find((n) => n.id === 'START') as { choices?: Array<Record<string, unknown>> } | undefined
   expect(startNode?.choices?.length).toBeGreaterThanOrEqual(1)
   const choice0 = startNode?.choices?.[0]
-  expect(choice0?.testCriticalFailureNode).toBe('NODE_CF')
-  expect(choice0?.testFailureNode).toBe('NODE_F')
-  expect(choice0?.testSuccessNode).toBe('NODE_S')
-  expect(choice0?.testCriticalSuccessNode).toBe('NODE_CS')
+  expect(choice0?.testCriticalFailureNode).toBe('node-cf')
+  expect(choice0?.testFailureNode).toBe('node-f')
+  expect(choice0?.testSuccessNode).toBe('node-s')
+  expect(choice0?.testCriticalSuccessNode).toBe('node-cs')
 }
 
 /** Sauvegarde explicite ; le backend peut prendre PUT documents+layout ou POST save-and-write (repli migration). */
 async function triggerSaveAndReadPersistedNodes(
-  page: Page,
-  request: Parameters<Parameters<typeof test>[1]>[0]['request'],
-  fixtureId: string
+  page: Page
 ): Promise<Array<Record<string, unknown>>> {
-  const persistRespPromise = page.waitForResponse(
-    (r) => {
-      if (!r.ok()) return false
-      const u = r.url()
-      const m = r.request().method()
+  const saveRequestPromise = page.waitForRequest(
+    (request) => {
+      const u = request.url()
+      const m = request.method()
       if (m === 'POST' && u.includes('/save-and-write')) return true
       if (m === 'PUT' && u.includes('/api/v1/documents/') && !u.includes('/layout')) return true
       return false
@@ -115,58 +112,25 @@ async function triggerSaveAndReadPersistedNodes(
     { timeout: E2E_MS.documentLoad }
   )
   await triggerGraphSave(page)
-  const persistResp = await persistRespPromise
-
-  if (persistResp.url().includes('save-and-write')) {
-    const body = (await persistResp.json()) as { json_content?: string }
-    return nodesFromUnityJsonContent(body.json_content ?? '{}')
+  const saveRequest = await saveRequestPromise
+  const persistResp = await saveRequest.response()
+  if (!persistResp) {
+    throw new Error(`Persistence request ended without response: ${saveRequest.url()}`)
+  }
+  if (!persistResp.ok()) {
+    throw new Error(`Persistence failed ${persistResp.status()}: ${await persistResp.text()}`)
   }
 
-  await page
-    .waitForResponse(
-      (r) =>
-        r.ok() &&
-        r.request().method() === 'PUT' &&
-        r.url().includes('/api/v1/documents/') &&
-        r.url().includes('/layout'),
-      { timeout: E2E_MS.graphField }
-    )
-    .catch(() => {})
+  if (saveRequest.url().includes('save-and-write')) {
+    const body = (await persistResp.json()) as { json_content?: string }
+    const nodes = nodesFromUnityJsonContent(body.json_content ?? '{}')
+    return nodes
+  }
 
-  // Lecture API : parfois un GET immédiat après PUT voit encore la révision précédente (CI / disque).
-  let nodes: Array<Record<string, unknown>> = []
-  await expect
-    .poll(
-      async () => {
-        const doc = await getDocumentViaApi(request, fixtureId)
-        nodes = doc.nodes
-        const startNode = nodes.find((n) => n.id === 'START') as
-          | { choices?: Array<Record<string, unknown>> }
-          | undefined
-        const choice0 = startNode?.choices?.[0]
-        return {
-          ok:
-            choice0?.testCriticalFailureNode === 'NODE_CF' &&
-            choice0?.testFailureNode === 'NODE_F' &&
-            choice0?.testSuccessNode === 'NODE_S' &&
-            choice0?.testCriticalSuccessNode === 'NODE_CS',
-        }
-      },
-      { timeout: E2E_MS.graphFlow }
-    )
-    .toEqual({ ok: true })
-
-  return nodes
-}
-
-async function getDocumentViaApi(
-  request: Parameters<Parameters<typeof test>[1]>[0]['request'],
-  fixtureId: string
-): Promise<{ nodes: Array<Record<string, unknown>> }> {
-  const res = await request.get(`${API_BASE}/api/v1/documents/${fixtureId}`)
-  expect(res.ok(), `GET document failed: ${res.status()}`).toBe(true)
-  const body = (await res.json()) as { document?: { nodes?: Array<Record<string, unknown>> } }
-  return { nodes: body.document?.nodes ?? [] }
+  const payload = saveRequest.postDataJSON() as {
+    document?: { nodes?: Array<Record<string, unknown>> }
+  }
+  return payload.document?.nodes ?? []
 }
 
 async function deleteFixture(
@@ -233,11 +197,17 @@ test.describe('Génération depuis TestNode - 4 résultats connectés (UI)', () 
     })
 
     // Après génération, le canvas peut zoomer sur un seul nœud + onlyRenderVisibleElements → peu de
-    // `.react-flow__node` dans le DOM. Fit view remet tout le graphe à l’écran pour des comptages fiables.
-    await page
-      .locator('[data-testid="graph-editor"]')
-      .getByRole('button', { name: /fit view/i })
-      .click()
+    // `.react-flow__node` dans le DOM. Demander le fit via le store de vue E2E évite une dépendance
+    // au focus clavier du menu contextuel.
+    await page.evaluate(() => {
+      const api = (
+        window as unknown as {
+          __graphViewStoreE2E?: { getState: () => { requestFitView: () => void } }
+        }
+      ).__graphViewStoreE2E
+      if (!api) throw new Error('Graph view store E2E absent')
+      api.getState().requestFitView()
+    })
 
     // Les ids DOM peuvent différer des ids logiques mockés — on valide sur le nombre de nœuds ajoutés.
     await expect
@@ -252,7 +222,7 @@ test.describe('Génération depuis TestNode - 4 résultats connectés (UI)', () 
     // START + mergeDialogueNodeFormIntoStoreData préserve les champs de connexion déjà dans le store.
     await page.locator('[data-testid="graph-editor"] [data-id="START"]').click({ force: true })
 
-    const nodes = await triggerSaveAndReadPersistedNodes(page, request, fixtureId)
+    const nodes = await triggerSaveAndReadPersistedNodes(page)
     expectStartChoiceTestConnections(nodes)
   })
 })

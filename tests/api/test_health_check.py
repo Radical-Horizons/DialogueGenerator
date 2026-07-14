@@ -129,15 +129,17 @@ def test_check_llm_connectivity_with_api_key():
 def test_perform_health_checks_basic():
     """Test que perform_health_checks retourne les checks de base."""
     with patch("api.utils.health_check.check_config") as mock_check_config, \
-         patch("api.utils.health_check.check_storage") as mock_check_storage:
+         patch("api.utils.health_check.check_storage") as mock_check_storage, \
+         patch("api.utils.health_check.check_database") as mock_check_database:
         
         mock_check_config.return_value = HealthCheckResult("config", "healthy")
         mock_check_storage.return_value = HealthCheckResult("storage", "healthy")
+        mock_check_database.return_value = HealthCheckResult("database", "healthy")
         
         result = perform_health_checks(detailed=False)
         
         assert result["status"] == "healthy"
-        assert len(result["checks"]) == 2
+        assert len(result["checks"]) == 3
         assert result["timestamp"] is None  # Sera ajouté par l'endpoint
         assert "app_version" not in result
 
@@ -146,28 +148,32 @@ def test_perform_health_checks_detailed():
     """Test que perform_health_checks retourne tous les checks en mode détaillé."""
     with patch("api.utils.health_check.check_config") as mock_check_config, \
          patch("api.utils.health_check.check_storage") as mock_check_storage, \
+         patch("api.utils.health_check.check_database") as mock_check_database, \
          patch("api.utils.health_check.check_gdd_files") as mock_check_gdd, \
          patch("api.utils.health_check.check_llm_connectivity") as mock_check_llm:
         
         mock_check_config.return_value = HealthCheckResult("config", "healthy")
         mock_check_storage.return_value = HealthCheckResult("storage", "healthy")
+        mock_check_database.return_value = HealthCheckResult("database", "healthy")
         mock_check_gdd.return_value = HealthCheckResult("gdd_files", "healthy")
         mock_check_llm.return_value = HealthCheckResult("llm_connectivity", "healthy")
         
         result = perform_health_checks(detailed=True)
         
         assert result["status"] == "healthy"
-        assert len(result["checks"]) == 4
+        assert len(result["checks"]) == 5
         assert result["app_version"] == APP_VERSION
 
 
 def test_perform_health_checks_unhealthy():
     """Test que perform_health_checks retourne unhealthy si un check est unhealthy."""
     with patch("api.utils.health_check.check_config") as mock_check_config, \
-         patch("api.utils.health_check.check_storage") as mock_check_storage:
+         patch("api.utils.health_check.check_storage") as mock_check_storage, \
+         patch("api.utils.health_check.check_database") as mock_check_database:
         
         mock_check_config.return_value = HealthCheckResult("config", "unhealthy", "Config error")
         mock_check_storage.return_value = HealthCheckResult("storage", "healthy")
+        mock_check_database.return_value = HealthCheckResult("database", "healthy")
         
         result = perform_health_checks(detailed=False)
         
@@ -177,10 +183,12 @@ def test_perform_health_checks_unhealthy():
 def test_perform_health_checks_degraded():
     """Test que perform_health_checks retourne degraded si un check est degraded."""
     with patch("api.utils.health_check.check_config") as mock_check_config, \
-         patch("api.utils.health_check.check_storage") as mock_check_storage:
+         patch("api.utils.health_check.check_storage") as mock_check_storage, \
+         patch("api.utils.health_check.check_database") as mock_check_database:
         
         mock_check_config.return_value = HealthCheckResult("config", "healthy")
         mock_check_storage.return_value = HealthCheckResult("storage", "degraded", "Warning")
+        mock_check_database.return_value = HealthCheckResult("database", "healthy")
         
         result = perform_health_checks(detailed=False)
         

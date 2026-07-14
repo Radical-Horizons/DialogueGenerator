@@ -518,6 +518,8 @@ export const createPersistenceSlice: StateCreator<
           target: e.target,
           type: e.type,
           label: typeof e.label === 'string' ? e.label : undefined,
+          sourceHandle: e.sourceHandle,
+          targetHandle: e.targetHandle,
           data: e.data,
         })),
         metadata: state.dialogueMetadata,

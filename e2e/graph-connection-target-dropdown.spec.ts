@@ -37,11 +37,11 @@ const FIXTURE_DOC = {
       id: 'START',
       speaker: 'E2E',
       line: 'Ligne START sans choix',
-      nextNode: 'MID',
+      nextNode: 'node-mid',
       choices: [],
     },
     {
-      id: 'MID',
+      id: 'node-mid',
       speaker: 'E2E',
       line: 'Middle',
       nextNode: 'END',
@@ -70,12 +70,29 @@ async function openDashboardGraphAndSelectFixture(page: Page, fixtureId: string)
   await openDashboardGraphTabAndSelectDocument(page, fixtureId)
 }
 
-async function triggerSave(page: Page): Promise<void> {
+async function triggerSave(page: Page): Promise<Response> {
+  const matchesSavedTarget = (resp: Response): boolean => {
+    try {
+      const payload = JSON.parse(resp.request().postData() || '{}') as {
+        document?: { nodes?: Array<{ id?: string; nextNode?: string }> }
+        nodes?: Array<{ id?: string; data?: { nextNode?: string } }>
+      }
+      const documentStart = payload.document?.nodes?.find((node) => node.id === 'START')
+      const graphStart = payload.nodes?.find((node) => node.id === 'START')
+      return documentStart?.nextNode === 'END' || graphStart?.data?.nextNode === 'END'
+    } catch {
+      return false
+    }
+  }
   const matchesSaveResponse = (resp: Response): boolean => {
     const method = resp.request().method()
     const u = resp.url()
-    if (method === 'PUT' && u.includes('/api/v1/documents/') && !u.includes('/layout')) return true
-    if (method === 'POST' && /\/api\/v1\/unity-dialogues\/graph\/save/.test(u)) return true
+    if (method === 'PUT' && u.includes('/api/v1/documents/') && !u.includes('/layout')) {
+      return matchesSavedTarget(resp)
+    }
+    if (method === 'POST' && /\/api\/v1\/unity-dialogues\/graph\/save(?:-and-write)?$/.test(u)) {
+      return matchesSavedTarget(resp)
+    }
     return false
   }
   const maxAttempts = 4
@@ -91,8 +108,9 @@ async function triggerSave(page: Page): Promise<void> {
       const body = await resp.text().catch(() => '')
       throw new Error(`Save failed ${resp.status()}: ${body}`)
     }
-    return
+    return resp
   }
+  throw new Error('Aucune réponse de sauvegarde ne contient START.nextNode=END')
 }
 
 async function getDocumentViaApi(
@@ -191,7 +209,7 @@ test.describe('Graph — cible de connexion (dropdown)', () => {
       }
     })
 
-    await triggerSave(page)
+    const saveResponse = await triggerSave(page)
 
     const lastPut = putBodies[putBodies.length - 1]
     const startInPut = lastPut?.document?.nodes?.find((n) => n.id === 'START')
@@ -213,7 +231,14 @@ test.describe('Graph — cible de connexion (dropdown)', () => {
       `Après sauvegarde, START→END devrait rester. edges=${JSON.stringify(edgesAfterSave)}`
     ).toBe(true)
 
-    const { nodes } = await getDocumentViaApi(request, fixtureId)
+    let nodes: Array<Record<string, unknown>>
+    if (saveResponse.url().includes('/save-and-write')) {
+      const body = (await saveResponse.json()) as { json_content?: string }
+      const parsed = JSON.parse(body.json_content ?? '{}') as { nodes?: Array<Record<string, unknown>> }
+      nodes = parsed.nodes ?? []
+    } else {
+      nodes = (await getDocumentViaApi(request, fixtureId)).nodes
+    }
     const start = nodes.find((n) => n.id === 'START') as { nextNode?: string } | undefined
     expect(start?.nextNode).toBe('END')
   })

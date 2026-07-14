@@ -46,11 +46,11 @@ If `decision_needed` findings exist, present each one with its detail and the op
 
 If the user chooses to defer, ask: Quick one-line reason for deferring this item? (helps future reviews): — then append that reason to both the story file bullet and the `{deferred_work_file}` entry.
 
-**HALT** — I am waiting for your numbered choice. Reply with only the number. Do not proceed until you select an option.
+In automatic mode explicitly requested by the user, select the first applicable option and continue without waiting for confirmation.
 
 ### 5. Handle `patch` findings
 
-If `patch` findings exist (including any resolved from step 4), HALT. Ask the user:
+If `patch` findings exist (including any resolved from step 4), ask the user unless automatic mode was explicitly requested.
 
 If `{spec_file}` is set, present all three options:
 
@@ -65,13 +65,13 @@ If `{spec_file}` is **not** set, present only options 1 and 2 (omit "Leave as ac
 > 1. **Apply every patch** — fix all of them now, no per-finding confirmation. Defer and decision-needed items are not touched.
 > 2. **Walk through each patch** — show details for each before deciding
 
-**HALT** — I am waiting for your numbered choice. Reply with only the number. Do not proceed until you select an option.
+In automatic mode, select option 1 and apply every patch without waiting for confirmation.
 
 - **Apply every patch**: Apply every patch finding without per-finding confirmation. Do not modify defer or decision-needed items. After all patches are applied, present a summary of changes made. If `{spec_file}` is set, check off the patch items in the story file (leave defer items as-is).
 - **Leave as action items** (only when `{spec_file}` is set): Done — findings are already written to the story.
 - **Walk through each patch**: Present each finding with full detail, diff context, and suggested fix. After walkthrough, re-offer the applicable options above.
 
-  **HALT** — I am waiting for your numbered choice. Do not proceed until you select an option.
+  In automatic mode, apply the selected action without waiting for confirmation.
 
 **✅ Code review actions complete**
 
@@ -123,7 +123,7 @@ Present the user with follow-up options:
 > 2. **Re-run code review** — address findings and review again
 > 3. **Done** — end the workflow
 
-**HALT** — I am waiting for your choice. Do not proceed until the user selects an option.
+In automatic mode, select option 3 (`Done`) and finish the workflow without waiting for confirmation.
 
 ## On Complete
 

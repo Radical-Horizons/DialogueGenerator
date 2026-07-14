@@ -12,6 +12,7 @@ spec.loader.exec_module(_middleware_module)
 
 # Exposer les classes
 RequestIDMiddleware = _middleware_module.RequestIDMiddleware
+DatabaseReadinessMiddleware = _middleware_module.DatabaseReadinessMiddleware
 LoggingMiddleware = _middleware_module.LoggingMiddleware
 
-__all__ = ["RequestIDMiddleware", "LoggingMiddleware"]
+__all__ = ["RequestIDMiddleware", "DatabaseReadinessMiddleware", "LoggingMiddleware"]

@@ -1,12 +1,17 @@
 """Configuration globale des tests pytest."""
 import json
 import os
+from pathlib import Path
+from typing import Iterator
 from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
 
 from services.repositories.cost_budget_repository import FileCostBudgetRepository
+from services.repositories.sqlite.bootstrap import initialize_database
+from services.repositories.sqlite.connection import DatabaseConnection
+from services.repositories.sqlite.state import reset_database_status
 
 # IMPORTANT: certains singletons (SecurityConfig / rate limiter) sont initialisés à l'import de `api.main`.
 # On fixe donc l'env AVANT l'import pour éviter des 429 en tests.
@@ -71,7 +76,30 @@ def unlimited_llm_cost_budget(tmp_path):
 
 
 @pytest.fixture(scope="function", autouse=True)
-def setup_service_container():
+def isolated_app_database(tmp_path: Path) -> Iterator[DatabaseConnection]:
+    """Isole chaque test dans une base SQLite temporaire migrée."""
+    previous_database = os.environ.get("APP_DATABASE")
+    database_path = tmp_path / ".pytest-app-database" / "app.db"
+    os.environ["APP_DATABASE"] = str(database_path)
+    reset_database_status()
+    database: DatabaseConnection | None = None
+    try:
+        database = initialize_database(database_path)
+        if database is None:
+            raise RuntimeError(f"Impossible d'initialiser la base de test: {database_path}")
+        yield database
+    finally:
+        if database is not None:
+            database.close()
+        reset_database_status()
+        if previous_database is None:
+            os.environ.pop("APP_DATABASE", None)
+        else:
+            os.environ["APP_DATABASE"] = previous_database
+
+
+@pytest.fixture(scope="function", autouse=True)
+def setup_service_container(isolated_app_database: DatabaseConnection) -> Iterator[None]:
     """Initialise le ServiceContainer dans app.state pour chaque test.
     
     Cette fixture s'exécute automatiquement avant chaque test pour s'assurer
@@ -81,13 +109,13 @@ def setup_service_container():
     from api.container import ServiceContainer
     
     # Initialiser le container dans app.state
-    if not hasattr(app.state, "container") or app.state.container is None:
-        app.state.container = ServiceContainer()
+    app.state.container = ServiceContainer(
+        database_connection=isolated_app_database,
+    )
     
     yield
     
-    # Nettoyer après le test (optionnel, mais bon pour l'isolation)
-    # On peut laisser le container en place pour les tests suivants
+    app.state.container = None
 
 
 @pytest.fixture

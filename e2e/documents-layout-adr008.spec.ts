@@ -80,15 +80,21 @@ async function selectFirst(page: Page, fixtureFilename: string): Promise<string>
  * On évite Ctrl+S car le focus peut être capturé par un <input>.
  */
 async function triggerSave(page: Page): Promise<void> {
-  const waitSave = page.waitForResponse(
-    (resp) =>
-      resp.url().includes('/api/v1/unity-dialogues/graph/save') ||
-      resp.url().includes('/api/v1/documents/') ||
-      resp.url().includes('.layout'),
+  const waitSave = page.waitForRequest(
+    (request) =>
+      (request.method() === 'POST' &&
+        /\/api\/v1\/unity-dialogues\/graph\/save(?:-and-write)?$/.test(request.url())) ||
+      (request.method() === 'PUT' &&
+        request.url().includes('/api/v1/documents/') &&
+        !request.url().includes('/layout')),
     { timeout: E2E_MS.graphCanvas }
   )
   await triggerGraphSave(page)
-  const resp = await waitSave
+  const request = await waitSave
+  const resp = await request.response()
+  if (!resp) {
+    throw new Error(`Save request ended without response: ${request.url()}`)
+  }
   if (!resp.ok()) {
     const body = await resp.text().catch(() => '')
     throw new Error(`Save failed ${resp.status()}: ${body}`)

@@ -324,7 +324,9 @@ export function GenerationPanel() {
   // Exposer les handlers via le store pour Dashboard
   useEffect(() => {
     setActions({
-      handleGenerate: handlersRef.current.handleGenerate,
+      handleGenerate: () => {
+        void handlersRef.current.handleGenerate()
+      },
       handlePreview: handlersRef.current.handlePreview,
       handleExportUnity: handlersRef.current.handleExportUnity,
       handleReset: handlersRef.current.handleReset,
@@ -334,12 +336,20 @@ export function GenerationPanel() {
       saveStatus: draft.saveStatus,
       draftLastSavedAt: draft.draftLastSavedAt,
     })
-  }, [isLoading, draft.isDirty, draft.saveStatus, draft.draftLastSavedAt, setActions])
+  }, [
+    isLoading,
+    draft.isDirty,
+    draft.saveStatus,
+    draft.draftLastSavedAt,
+    setActions,
+  ])
   
   // Initialiser le store au montage
   useEffect(() => {
     setActions({
-      handleGenerate: handlersRef.current.handleGenerate,
+      handleGenerate: () => {
+        void handlersRef.current.handleGenerate()
+      },
       handlePreview: handlersRef.current.handlePreview,
       handleExportUnity: handlersRef.current.handleExportUnity,
       handleReset: handlersRef.current.handleReset,

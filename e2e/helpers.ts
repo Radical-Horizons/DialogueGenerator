@@ -113,17 +113,33 @@ export async function openDashboardGraphTabAndSelectDocument(
     .catch(() => {})
   await page.getByRole('button', { name: /Éditeur de Graphe/i }).click({ timeout: E2E_MS.graphField })
   // Lazy keep-alive : le premier clic sur l’onglet graphe monte GraphEditor + liste.
-  await expect(page.getByTestId('graph-editor')).toBeVisible({ timeout: E2E_MS.graphPanel })
-  // Scoper sur l’éditeur graphe (évite l’input homonyme de l’onglet Édition de Dialogues).
-  await expect(
-    page.locator('[data-testid="graph-editor"] input[placeholder*="Rechercher un dialogue"]')
-  ).toBeVisible({ timeout: E2E_MS.dashboardList })
   const needle = documentStem.replace(/\.json$/i, '')
-  const item = page.getByTestId('unity-dialogue-item').filter({ hasText: needle })
-  await expect(item.first()).toBeVisible({ timeout: E2E_MS.dashboardList })
-  await item.first().click()
+  const graphEditor = page.getByTestId('graph-editor')
+  await expect(graphEditor).toBeVisible({ timeout: E2E_MS.graphPanel })
+
+  const dialogueList = graphEditor.getByTestId('unity-dialogue-list')
+  const comboboxTrigger = graphEditor.getByTestId('dialogue-combobox-trigger')
+  await expect(dialogueList.or(comboboxTrigger)).toBeVisible({ timeout: E2E_MS.dashboardList })
+  if (await dialogueList.isVisible()) {
+    const searchInput = dialogueList.getByPlaceholder(/Rechercher/i)
+    await expect(searchInput).toBeVisible({ timeout: E2E_MS.dashboardList })
+    await searchInput.fill(needle)
+    const item = dialogueList.getByTestId('unity-dialogue-item').first()
+    await expect(item).toBeVisible({ timeout: E2E_MS.dashboardList })
+    await item.click()
+  } else {
+    await comboboxTrigger.click()
+    const comboboxPanel = graphEditor.getByTestId('dialogue-combobox-panel')
+    const searchInput = comboboxPanel.getByTestId('dialogue-combobox-search')
+    await expect(searchInput).toBeVisible({ timeout: E2E_MS.dashboardList })
+    await searchInput.fill(needle)
+    const item = comboboxPanel.getByTestId('unity-dialogue-item').first()
+    await expect(item).toBeVisible({ timeout: E2E_MS.dashboardList })
+    await item.click()
+  }
+
   // Fin de chargement : mieux vaut un nœud React Flow que « Chargement du graphe » (texte dupliqué / onglets keep-alive).
-  await expect(page.locator('[data-testid="graph-editor"] .react-flow__node').first()).toBeVisible({
+  await expect(graphEditor.locator('.react-flow__node').first()).toBeVisible({
     timeout: E2E_MS.graphFirstNode,
   })
 }

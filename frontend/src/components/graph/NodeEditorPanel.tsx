@@ -81,7 +81,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     documentFieldErrors,
     clearDocumentFieldError,
   } = useGraphStore()
-  const validationFieldErrors = documentFieldErrors ?? []
+  const validationFieldErrors = useMemo(() => documentFieldErrors ?? [], [documentFieldErrors])
   const firstValidationFieldError = validationFieldErrors[0]
   const clearValidationFieldError = clearDocumentFieldError ?? (() => {})
   const { selections } = useContextStore()

@@ -39,28 +39,31 @@ test.describe('Presets CRUD Operations [P0]', () => {
 
   test('[P0] should create a new preset', async ({ page }) => {
     // Le bouton "Sauvegarder preset" n'est actif que si une config existe (au moins un personnage sélectionné)
-    const contextPanel = page.locator('div').filter({ has: page.getByRole('button', { name: /personnages/i }) })
-    const firstCheckbox = contextPanel.locator('input[type="checkbox"]').first()
+    const contextPanel = page.getByTestId('context-selector')
+    const firstCheckbox = contextPanel
+      .getByTestId('context-list-scroll')
+      .locator('input[type="checkbox"]')
+      .first()
     const hasContext = await firstCheckbox.isVisible({ timeout: E2E_MS.short }).catch(() => false)
     if (hasContext) await firstCheckbox.click()
 
-    const saveBtn = page.getByTestId('preset-save-btn')
+    const saveBtn = page.getByTestId('preset-save-as-btn')
     const saveVisible = await saveBtn.isVisible({ timeout: E2E_MS.short }).catch(() => false)
     if (!saveVisible) {
-      test.skip('Preset selector (Sauvegarder preset) non visible - test ignoré')
+      test.skip('Preset selector (Enregistrer sous) non visible - test ignoré')
       return
     }
     const wasDisabled = await saveBtn.isDisabled().catch(() => true)
     if (wasDisabled && !hasContext) {
-      test.skip('Aucun contexte sélectionné - bouton Sauvegarder preset désactivé')
+      test.skip('Aucune configuration sélectionnée - bouton Enregistrer sous désactivé')
       return
     }
     await saveBtn.click()
-    await expect(page.getByRole('heading', { name: /nouveau preset/i })).toBeVisible({ timeout: E2E_MS.short })
+    await expect(page.getByRole('heading', { name: /enregistrer sous/i })).toBeVisible({ timeout: E2E_MS.short })
     await page.locator('#preset-name').fill('Test Preset E2E')
     await page.locator('#preset-icon').fill('PRE')
     await page.getByTestId('preset-modal-create-btn').click()
-    await expect(page.getByRole('heading', { name: /nouveau preset/i })).not.toBeVisible({ timeout: E2E_MS.modalLong })
+    await expect(page.getByRole('heading', { name: /enregistrer sous/i })).not.toBeVisible({ timeout: E2E_MS.modalLong })
     await page.getByTestId('preset-dropdown-trigger').click({ timeout: E2E_MS.ui })
     await expect(page.getByText('Test Preset E2E').first()).toBeVisible({ timeout: E2E_MS.graphField })
   })
@@ -138,10 +141,13 @@ test.describe('Presets CRUD Operations [P0]', () => {
   })
 
   test('[P1] should auto-cleanup obsolete references when saving preset', async ({ page }) => {
-    const contextPanel = page.locator('div').filter({ has: page.getByRole('button', { name: /personnages/i }) })
-    const firstCheckbox = contextPanel.locator('input[type="checkbox"]').first()
+    const contextPanel = page.getByTestId('context-selector')
+    const firstCheckbox = contextPanel
+      .getByTestId('context-list-scroll')
+      .locator('input[type="checkbox"]')
+      .first()
     if (await firstCheckbox.isVisible({ timeout: E2E_MS.control }).catch(() => false)) await firstCheckbox.click()
-    const saveBtn = page.getByTestId('preset-save-btn')
+    const saveBtn = page.getByTestId('preset-save-as-btn')
     if (!(await saveBtn.isVisible({ timeout: E2E_MS.control }).catch(() => false)) || await saveBtn.isDisabled()) {
       test.skip('Sauvegarder preset non disponible')
       return
@@ -150,7 +156,7 @@ test.describe('Presets CRUD Operations [P0]', () => {
     await page.locator('#preset-name').fill('Preset Obsolètes E2E')
     await page.locator('#preset-icon').fill('OBS')
     await page.getByTestId('preset-modal-create-btn').click()
-    await expect(page.getByRole('heading', { name: /nouveau preset/i })).not.toBeVisible({ timeout: E2E_MS.modalLong })
+    await expect(page.getByRole('heading', { name: /enregistrer sous/i })).not.toBeVisible({ timeout: E2E_MS.modalLong })
     await page.getByTestId('preset-dropdown-trigger').click()
     await expect(page.getByText(/Preset Obsolètes E2E/i).first()).toBeVisible({ timeout: E2E_MS.short })
   })

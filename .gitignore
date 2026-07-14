@@ -88,6 +88,9 @@ data/logs/
 
 # Data directories (generated/cache files)
 data/cost_budgets.json
+data/app.db
+data/app.db-wal
+data/app.db-shm
 data/llm_usage/
 data/notion_cache/
 data/gdd_notion_sync/notion_token.secret

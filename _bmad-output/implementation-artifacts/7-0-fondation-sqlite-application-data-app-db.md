@@ -1,6 +1,10 @@
+---
+baseline_commit: dc2ee226aa13381e4b3c7d2e24aa95625cd7fc1f
+---
+
 # Story 7.0: fondation-sqlite-application-data-app-db
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -33,25 +37,35 @@ so that **auth, préférences et métadonnées multi-utilisateur sont persistant
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 : Boot applique les migrations SQLite au premier démarrage (AC: #1)
-  - [ ] 🔴 Test échoue : lifespan avec `APP_DATABASE` sur `tmp_path` inexistant → fichier créé, tables `schema_migrations` + `users` + `user_settings` + `app_settings` présentes, version `001` enregistrée ; second boot idempotent (aucune erreur, une seule ligne migration)
-  - [ ] 🟢 Implémenter couche `services/repositories/sqlite/` (connection, runner migrations, `001_initial.sql`) + hook lifespan minimal (voir Dev Notes)
-  - [ ] 🔵 Refactor : isoler la résolution du chemin DB (`FilePaths.APP_DATABASE` + override env) dans un helper unique testable, éviter duplication lifespan/tests. Si applicable : extraire le SQL de `001_initial.sql` en constantes nommées uniquement si le runner devient verbeux.
+- [x] Task 1 : Boot applique les migrations SQLite au premier démarrage (AC: #1)
+  - [x] 🔴 Test échoue : lifespan avec `APP_DATABASE` sur `tmp_path` inexistant → fichier créé, tables `schema_migrations` + `users` + `user_settings` + `app_settings` présentes, version `001` enregistrée ; second boot idempotent (aucune erreur, une seule ligne migration)
+  - [x] 🟢 Implémenter couche `services/repositories/sqlite/` (connection, runner migrations, `001_initial.sql`) + hook lifespan minimal (voir Dev Notes)
+  - [x] 🔵 Refactor : isoler la résolution du chemin DB (`FilePaths.APP_DATABASE` + override env) dans un helper unique testable, éviter duplication lifespan/tests. Si applicable : extraire le SQL de `001_initial.sql` en constantes nommées uniquement si le runner devient verbeux.
 
-- [ ] Task 2 : Échec migration → fail-fast + health `database` unhealthy (AC: #2)
-  - [ ] 🔴 Test échoue : migration invalide (fixture SQL corrompue ou migration forcée en échec) → `perform_health_checks()` contient check `database` unhealthy ; requête métier typique (`GET /api/v1/documents` ou équivalent existant) retourne 503/503-like avec message explicite (pas de données servies depuis DB absente)
-  - [ ] 🟢 Implémenter état global `database_ready` + middleware/dependency fail-fast + `check_database()` dans `health_check.py` (voir Dev Notes)
-  - [ ] 🔵 Refactor : factoriser le pattern « service indisponible au boot » pour que health et middleware lisent la même source d'état (pas deux flags divergents). Si applicable : clarifier nommage du check (`database` vs `storage`).
+- [x] Task 2 : Échec migration → fail-fast + health `database` unhealthy (AC: #2)
+  - [x] 🔴 Test échoue : migration invalide (fixture SQL corrompue ou migration forcée en échec) → `perform_health_checks()` contient check `database` unhealthy ; requête métier typique (`GET /api/v1/documents` ou équivalent existant) retourne 503/503-like avec message explicite (pas de données servies depuis DB absente)
+  - [x] 🟢 Implémenter état global `database_ready` + middleware/dependency fail-fast + `check_database()` dans `health_check.py` (voir Dev Notes)
+  - [x] 🔵 Refactor : factoriser le pattern « service indisponible au boot » pour que health et middleware lisent la même source d'état (pas deux flags divergents). Si applicable : clarifier nommage du check (`database` vs `storage`).
 
-- [ ] Task 3 : Injection DI partagée `DatabaseConnection` / `UserRepository` (AC: #3)
-  - [ ] 🔴 Test échoue : deux appels `container.get_database_connection()` (ou `get_user_repository()`) retournent la même instance ; accès concurrent basique (2 threads lecture `SELECT 1`) ne lève pas d'exception
-  - [ ] 🟢 Enregistrer getters dans `ServiceContainer` + `api/dependencies.py` ; `UserRepository` minimal (CRUD stub ou `ping()` — pas encore branché sur `AuthService`, story 7.1)
-  - [ ] 🔵 Refactor : aligner le reset `container.reset()` pour inclure les nouveaux champs `_database_connection` / `_user_repository` (cohérence reload uvicorn). Si applicable : Protocol `IUserRepository` pour préparer 7.1 sans couplage concret.
+- [x] Task 3 : Injection DI partagée `DatabaseConnection` / `UserRepository` (AC: #3)
+  - [x] 🔴 Test échoue : deux appels `container.get_database_connection()` (ou `get_user_repository()`) retournent la même instance ; accès concurrent basique (2 threads lecture `SELECT 1`) ne lève pas d'exception
+  - [x] 🟢 Enregistrer getters dans `ServiceContainer` + `api/dependencies.py` ; `UserRepository` minimal (CRUD stub ou `ping()` — pas encore branché sur `AuthService`, story 7.1)
+  - [x] 🔵 Refactor : aligner le reset `container.reset()` pour inclure les nouveaux champs `_database_connection` / `_user_repository` (cohérence reload uvicorn). Si applicable : Protocol `IUserRepository` pour préparer 7.1 sans couplage concret.
 
-- [ ] Task 4 : Isolation pytest — jamais `data/app.db` de dev (AC: #4)
-  - [ ] 🔴 Test échoue : avec fixture autouse `conftest`, fichier `data/app.db` du repo (s'il existait) n'est ni créé ni modifié ; variable env `APP_DATABASE` pointe vers `tmp_path`
-  - [ ] 🟢 Étendre `tests/conftest.py` : fixture session/function autouse + documenter override `APP_DATABASE` (voir Dev Notes)
-  - [ ] 🔵 Refactor : harmoniser le pattern d'override DB avec `unlimited_llm_cost_budget` (même style patch env + container). Si applicable : nommer la fixture `isolated_app_database` pour lisibilité des tests futurs epic 7.
+- [x] Task 4 : Isolation pytest — jamais `data/app.db` de dev (AC: #4)
+  - [x] 🔴 Test échoue : avec fixture autouse `conftest`, fichier `data/app.db` du repo (s'il existait) n'est ni créé ni modifié ; variable env `APP_DATABASE` pointe vers `tmp_path`
+  - [x] 🟢 Étendre `tests/conftest.py` : fixture session/function autouse + documenter override `APP_DATABASE` (voir Dev Notes)
+  - [x] 🔵 Refactor : harmoniser le pattern d'override DB avec `unlimited_llm_cost_budget` (même style patch env + container). Si applicable : nommer la fixture `isolated_app_database` pour lisibilité des tests futurs epic 7.
+
+### Review Findings
+
+- [x] [Review][Patch] Protéger l'initialisation lazy de `DatabaseConnection` et `UserRepository` contre les accès concurrents (`api/container.py`).
+- [x] [Review][Patch] Consommer les curseurs SQLite sous verrou et restaurer l'état transactionnel après un échec de commit (`services/repositories/sqlite/connection.py`).
+- [x] [Review][Patch] Refuser les bases sans migrations et détecter les versions de migration dupliquées (`services/repositories/sqlite/migrations/runner.py`).
+- [x] [Review][Patch] Empêcher la recréation d'une connexion non migrée après un échec d'initialisation (`api/container.py`, `api/main.py`).
+- [x] [Review][Patch] Limiter le fail-fast aux routes dépendantes de SQLite et bloquer aussi l'état d'initialisation en attente (`api/middleware.py`).
+- [x] [Review][Patch] Fermer la connexion SQLite et réinitialiser son état lors de l'arrêt de l'API (`api/container.py`, `api/main.py`).
+- [x] [Review][Patch] Vérifier l'accessibilité réelle du fichier SQLite dans `/health` et couvrir les accès concurrents initiaux (`api/utils/health_check.py`, tests SQLite).
 
 ## Dev Notes
 
@@ -118,10 +132,47 @@ so that **auth, préférences et métadonnées multi-utilisateur sont persistant
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+GPT-5.6 Luna
 
 ### Debug Log References
+- 2026-07-11 : le test rouge initial a confirmé l’absence du package `services.repositories.sqlite` avant implémentation.
+- 2026-07-11 : le test de fail-fast initial a confirmé l’absence du check `database`; après correction, health et route métier sont verts.
+- 2026-07-11 : l’injection container et la lecture concurrente ont été validées sans exception.
+- 2026-07-11 : le test d’isolation a confirmé l’usage d’une base migrée sous `tmp_path`; le container de test reçoit la même connexion.
 
 ### Completion Notes List
+- Task 1 : connexion SQLite thread-safe avec WAL, runner transactionnel et migration `001`; le lifespan initialise la base via `APP_DATABASE` ou `data/app.db`. Tests ciblés : 2 passed.
+- Task 2 : état SQLite partagé entre bootstrap, health check et middleware; échec de migration journalisé en critique et routes `/api/v1/*` bloquées en 503. Tests health ciblés : 21 passed.
+- Task 3 : `DatabaseConnection` et `UserRepository` sont lazy, partagés et exposés via `api/dependencies.py`; `reset()` réinitialise les deux champs. Test ciblé : 1 passed.
+- Task 4 : fixture autouse `isolated_app_database` avec override `APP_DATABASE`, migration et restauration d’environnement; suite SQLite/health : 25 passed.
+- Validation finale : backend complet `1931 passed, 3 skipped, 7 warnings` (exit code 0); compilation Python ciblée et `git diff --check` valides.
+
+### Implementation Plan
+- Centraliser résolution du chemin, connexion, état de disponibilité et migrations dans `services/repositories/sqlite/`; injecter la connexion via `ServiceContainer`.
 
 ### File List
+- `constants.py`
+- `.gitignore`
+- `api/container.py`
+- `api/main.py`
+- `api/middleware.py`
+- `api/middleware/__init__.py`
+- `api/utils/health_check.py`
+- `api/dependencies.py`
+- `services/repositories/sqlite/__init__.py`
+- `services/repositories/sqlite/bootstrap.py`
+- `services/repositories/sqlite/connection.py`
+- `services/repositories/sqlite/state.py`
+- `services/repositories/sqlite/user_repository.py`
+- `services/repositories/sqlite/migrations/__init__.py`
+- `services/repositories/sqlite/migrations/runner.py`
+- `services/repositories/sqlite/migrations/001_initial.sql`
+- `tests/services/repositories/sqlite/test_connection.py`
+- `tests/services/repositories/sqlite/test_migrations.py`
+- `tests/api/test_health_database.py`
+- `tests/api/test_health_check.py`
+- `tests/services/repositories/sqlite/test_container_injection.py`
+- `tests/conftest.py`
+- `tests/services/repositories/sqlite/test_pytest_isolation.py`
+- `_bmad-output/implementation-artifacts/7-0-fondation-sqlite-application-data-app-db.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`

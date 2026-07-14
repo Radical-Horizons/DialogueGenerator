@@ -23,6 +23,7 @@ class UIText:
 class FilePaths:
     CONFIG_DIR = Path("config")
     DATA_DIR = Path("data")
+    APP_DATABASE = DATA_DIR / "app.db"
     INTERACTIONS_DIR = DATA_DIR / "interactions"
     LLM_USAGE_DIR = DATA_DIR / "llm_usage"
     COST_BUDGETS_FILE = DATA_DIR / "cost_budgets.json"

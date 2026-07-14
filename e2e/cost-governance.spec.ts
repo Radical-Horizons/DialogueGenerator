@@ -43,24 +43,23 @@ test.describe('Cost Governance — UI (Story 0.7)', () => {
   test.describe.configure({ mode: 'serial' })
 
   const login = async (page: Page) => {
-    const loginHeading = page.getByRole('heading', { name: 'Connexion' })
-    const isLoginPage = await loginHeading.isVisible({ timeout: E2E_MS.probe }).catch(() => false)
-
+    await page.goto('/')
+    const loginHeading = page.getByRole('heading', { name: /connexion/i })
+    const isLoginPage = await loginHeading.isVisible({ timeout: E2E_MS.graphField }).catch(() => false)
     if (isLoginPage) {
       await page.getByLabel(/nom d'utilisateur/i).fill('admin')
       await page.getByLabel(/mot de passe/i).fill('admin123')
       await page.getByRole('button', { name: /se connecter/i }).click()
-      await Promise.race([
-        page.waitForURL('**/', { timeout: E2E_MS.short }).catch(() => {}),
-        page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.short }).catch(() => {}),
-      ])
+      await expect(page).toHaveURL('/', { timeout: E2E_MS.ui })
     }
   }
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/')
     await login(page)
-    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.ui })
+    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({
+      state: 'visible',
+      timeout: E2E_MS.graphField,
+    })
   })
 
   test('AC#3: Dashboard affiche budget et graphique', async ({ page }) => {
@@ -110,16 +109,19 @@ test.describe('Cost Governance — UI (Story 0.7)', () => {
         return
       }
 
-      await page.goto('/')
       await login(page)
       await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.graphField })
 
-      const contextPanel = page.locator('div').filter({ has: page.getByRole('button', { name: /personnages/i }) })
-      const firstCheckbox = contextPanel.locator('input[type="checkbox"]').first()
-      if (await firstCheckbox.isVisible({ timeout: E2E_MS.medium }).catch(() => false)) {
-        await firstCheckbox.click()
-      }
-      await page.keyboard.press('Control+Enter')
+      // La génération exige une scène ou des instructions. Un brief explicite
+      // évite de dépendre de la sélection persistante des personnages.
+      const sceneInstructions = page.locator('#user-instructions-textarea')
+      await expect(sceneInstructions).toBeVisible({ timeout: E2E_MS.medium })
+      await sceneInstructions.fill('Budget governance E2E')
+
+      // Cliquer la CTA visible évite que le focus du champ de recherche intercepte Ctrl+Enter.
+      const generateButton = page.getByRole('button', { name: /^Générer/i }).last()
+      await expect(generateButton).toBeEnabled({ timeout: E2E_MS.graphField })
+      await generateButton.click()
 
       await expect(page.getByText(/Budget atteint à \d/i).first()).toBeVisible({ timeout: E2E_MS.graphField })
     } finally {

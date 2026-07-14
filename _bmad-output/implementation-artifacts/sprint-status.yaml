@@ -38,6 +38,7 @@ project: DialogueGenerator
 project_key: dialogue-generator
 tracking_system: file-system
 story_location: '{project-root}/_bmad-output/implementation-artifacts'
+last_updated: '2026-07-13'
 development_status:
   # Flat list (not nested YAML): each epic block = epic → stories → retrospective, then the NEXT epic starts.
   # Order = delivery sequence (see epic-list.md): 0 → 16 → 1–3 → 17 → 4–15 — not strict epic ID sort.
@@ -158,7 +159,7 @@ development_status:
   6-9-suggérer-templates-basés-sur-scénario-dialogue-fr63: backlog
   epic-6-retrospective: optional
   epic-7: in-progress
-  7-0-fondation-sqlite-application-data-app-db: ready-for-dev
+  7-0-fondation-sqlite-application-data-app-db: done
   7-1-créer-comptes-utilisateurs-admin-only-fr64: ready-for-dev
   7-2-se-connecter-et-se-déconnecter-du-système-fr65: backlog
   7-3-administrateurs-gèrent-les-utilisateurs-fr66: backlog

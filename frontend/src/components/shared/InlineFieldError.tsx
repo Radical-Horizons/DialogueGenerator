@@ -28,6 +28,7 @@ export function InlineFieldError({ message, id }: InlineFieldErrorProps) {
 }
 
 /** Bordure input/textarea en erreur. */
+// eslint-disable-next-line react-refresh/only-export-components -- shared style helper intentionally co-located
 export function fieldErrorBorder(hasError: boolean, defaultBorder: string): string {
   return hasError ? theme.state.error.border : defaultBorder
 }

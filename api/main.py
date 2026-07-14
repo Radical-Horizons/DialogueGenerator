@@ -14,7 +14,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware as FastAPICORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
-from api.middleware import RequestIDMiddleware, LoggingMiddleware
+from api.middleware import (
+    DatabaseReadinessMiddleware,
+    LoggingMiddleware,
+    RequestIDMiddleware,
+)
 from api.middleware.billable_user_context import BillableUserContextMiddleware
 from api.middleware.cost_governance import CostGovernanceMiddleware
 from api.exceptions import APIException, ValidationException
@@ -23,6 +27,8 @@ from api.config.security_config import get_security_config
 from api.config.cors_resolution import resolve_production_cors_origins
 from api.middleware.rate_limiter import get_limiter, rate_limit_exception_handler
 from api.app_version import APP_VERSION
+from services.repositories.sqlite.bootstrap import initialize_database
+from services.repositories.sqlite.state import reset_database_status
 
 # Charger le fichier .env en dev (éviter sous pytest pour des tests déterministes)
 if "pytest" not in sys.modules:
@@ -109,7 +115,11 @@ async def lifespan(app: FastAPI):
             from api.container import ServiceContainer
             from services.context_field_validator import ContextFieldValidator
 
-            container = ServiceContainer()
+            database_connection = initialize_database()
+            container = ServiceContainer(
+                database_connection=database_connection,
+                database_initialization_failed=database_connection is None,
+            )
             _startup_timer.mark("service_container_created")
 
             context_builder = container.get_context_builder()
@@ -288,6 +298,14 @@ async def lifespan(app: FastAPI):
             except asyncio.CancelledError:
                 pass
 
+        container = getattr(app.state, "container", None)
+        if container is not None:
+            try:
+                container.close()
+            except Exception as exc:
+                logger.warning("Erreur lors de la fermeture de la base SQLite: %s", exc, exc_info=True)
+        reset_database_status()
+
 
 _IS_PRODUCTION_ENV = os.getenv("ENVIRONMENT", "development").lower() == "production"
 
@@ -348,6 +366,7 @@ app.add_middleware(
 
 # Middleware personnalisés
 app.add_middleware(RequestIDMiddleware)
+app.add_middleware(DatabaseReadinessMiddleware)
 app.add_middleware(LoggingMiddleware)
 app.add_middleware(CostGovernanceMiddleware)  # Cost governance (Story 0.7)
 app.add_middleware(BillableUserContextMiddleware)

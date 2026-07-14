@@ -244,7 +244,6 @@ export function GraphEditor({
           onBack={onBack}
           scenarioPlaythroughActive={scenarioPlaythroughActive}
           onToggleScenarioPlaythrough={handleToggleDialoguePreview}
-          showDialoguePreviewPanel={scenarioPlaythroughActive}
           onToggleDialoguePreview={handleToggleDialoguePreview}
           headerSelector={
             isGraphEditorNarrow ? (

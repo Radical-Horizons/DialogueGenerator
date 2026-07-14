@@ -1,12 +1,14 @@
 """Health checks pour vérifier les dépendances de l'API."""
 import os
 import logging
+import sqlite3
 import tempfile
 from typing import Dict, Any, Optional
 from pathlib import Path
 from constants import FilePaths
 from api.config.security_config import get_security_config
 from api.app_version import APP_VERSION
+from services.repositories.sqlite.state import get_database_status
 
 # Import canonique (évite les imports racine dépréciés). Optionnel pour éviter dépendances circulaires.
 try:
@@ -274,6 +276,54 @@ def check_config() -> HealthCheckResult:
         )
 
 
+def check_database() -> HealthCheckResult:
+    """Vérifie que la base SQLite est initialisée et accessible."""
+    database_status = get_database_status()
+    if database_status.ready:
+        database_path = database_status.database_path
+        if database_path is None or not database_path.is_file():
+            return HealthCheckResult(
+                name="database",
+                status="unhealthy",
+                message="Le fichier SQLite n'est plus accessible",
+                details={"path": str(database_path) if database_path else None},
+            )
+        try:
+            connection = sqlite3.connect(str(database_path), timeout=1.0)
+            try:
+                connection.execute("SELECT 1").fetchone()
+            finally:
+                connection.close()
+        except (OSError, sqlite3.Error) as exc:
+            logger.error("Sonde SQLite en échec pour %s: %s", database_path, exc)
+            return HealthCheckResult(
+                name="database",
+                status="unhealthy",
+                message="La base SQLite n'est plus opérationnelle",
+                details={"path": str(database_path), "error": str(exc)},
+            )
+        return HealthCheckResult(
+            name="database",
+            status="healthy",
+            message="Base SQLite disponible",
+            details={"path": str(database_status.database_path)},
+        )
+
+    if database_status.error is None:
+        return HealthCheckResult(
+            name="database",
+            status="unhealthy",
+            message="Initialisation SQLite en attente du lifespan",
+        )
+
+    return HealthCheckResult(
+        name="database",
+        status="unhealthy",
+        message=database_status.error or "Base SQLite non initialisée",
+        details={"path": str(database_status.database_path) if database_status.database_path else None},
+    )
+
+
 def check_llm_connectivity() -> HealthCheckResult:
     """Vérifie la connectivité LLM (ping optionnel).
     
@@ -336,7 +386,8 @@ def perform_health_checks(detailed: bool = False) -> Dict[str, Any]:
     """
     checks = [
         check_config(),
-        check_storage()
+        check_storage(),
+        check_database(),
     ]
     
     if detailed:

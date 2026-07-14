@@ -301,6 +301,7 @@ export function useSceneSelection() {
   }, [
     contextSelections.characters_full,
     contextSelections.characters_excerpt,
+    contextSelections.scene_protagonists,
     storeSceneSelection.characterA,
     storeSceneSelection.characterB,
   ])

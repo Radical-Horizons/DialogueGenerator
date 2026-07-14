@@ -5,6 +5,7 @@ permettant une meilleure gestion du cycle de vie et facilitant les tests.
 """
 import logging
 import os
+import threading
 from pathlib import Path
 from typing import Dict, Optional, TYPE_CHECKING
 
@@ -29,6 +30,8 @@ from services.linked_selector import LinkedSelectorService
 from services.notion_import_service import NotionImportService
 from services.context_rule_service import ContextRuleService
 from services.context_dropping_rules_service import ContextDroppingRulesService
+from services.repositories.sqlite.bootstrap import resolve_database_path
+from services.repositories.sqlite import DatabaseConnection, UserRepository
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +43,11 @@ class ServiceContainer:
     remplaçant les singletons globaux par une instance unique dans app.state.
     """
     
-    def __init__(self):
+    def __init__(
+        self,
+        database_connection: Optional[DatabaseConnection] = None,
+        database_initialization_failed: bool = False,
+    ):
         """Initialise le container avec tous les services None (lazy loading).
         
         Les services sont créés à la demande lors du premier accès via les méthodes
@@ -73,7 +80,34 @@ class ServiceContainer:
         self._gdd_notion_sync_service: Optional["GddNotionSyncService"] = None
         self._dialogue_preview_service: Optional["DialoguePreviewService"] = None
         self._global_relation_index: Optional[Dict[str, str]] = None
+        self._database_connection: Optional[DatabaseConnection] = database_connection
+        self._user_repository: Optional[UserRepository] = None
+        self._database_initialization_failed = database_initialization_failed
+        self._database_lock = threading.RLock()
         logger.debug("ServiceContainer initialisé (services à charger au premier accès)")
+
+    def get_database_connection(self) -> DatabaseConnection:
+        """Retourne la connexion SQLite partagée du processus."""
+        with self._database_lock:
+            if self._database_connection is None:
+                if self._database_initialization_failed:
+                    raise RuntimeError(
+                        "La base SQLite est indisponible après un échec d'initialisation."
+                    )
+                self._database_connection = DatabaseConnection(resolve_database_path())
+                logger.info(
+                    "DatabaseConnection initialisée dans le container: %s",
+                    self._database_connection.database_path,
+                )
+            return self._database_connection
+
+    def get_user_repository(self) -> UserRepository:
+        """Retourne le repository utilisateur partagé du processus."""
+        with self._database_lock:
+            if self._user_repository is None:
+                self._user_repository = UserRepository(self.get_database_connection())
+                logger.info("UserRepository initialisé dans le container.")
+            return self._user_repository
     
     def get_config_service(self) -> ConfigurationService:
         """Retourne le service de configuration.
@@ -450,6 +484,14 @@ class ServiceContainer:
             unity_generation_service=self.get_unity_dialogue_generation_service(),
             request_id=request_id
         )
+
+    def close(self) -> None:
+        """Ferme les ressources SQLite détenues par le container."""
+        with self._database_lock:
+            if self._database_connection is not None:
+                self._database_connection.close()
+            self._database_connection = None
+            self._user_repository = None
     
     def reset(self) -> None:
         """Réinitialise tous les services (utile lors d'un reload uvicorn).
@@ -476,4 +518,6 @@ class ServiceContainer:
         self._cd_rules_service = None
         self._gdd_notion_sync_service = None
         self._dialogue_preview_service = None
+        self.close()
+        self._database_initialization_failed = False
         logger.info("ServiceContainer réinitialisé (reload détecté).")

@@ -5,8 +5,10 @@ import time
 import logging
 from typing import Callable
 from fastapi import Request, Response
+from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
+from services.repositories.sqlite.state import get_database_status
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +33,41 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
         response.headers["X-Request-ID"] = request_id
         
         return response
+
+
+class DatabaseReadinessMiddleware(BaseHTTPMiddleware):
+    """Refuse les routes métier tant que SQLite n'est pas prête."""
+
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        """Retourne 503 pour les routes API dépendantes d'une base indisponible."""
+        path = request.url.path
+        is_health_route = path in {
+            "/health",
+            "/health/detailed",
+            "/api/v1/healthcheck",
+        }
+        is_auth_route = path.startswith("/api/v1/auth/")
+        if path.startswith("/api/v1/") and not is_health_route and not is_auth_route:
+            database_status = get_database_status()
+            if not database_status.ready:
+                message = (
+                    f"Base SQLite indisponible: {database_status.error}"
+                    if database_status.error
+                    else "Base SQLite indisponible"
+                )
+                return JSONResponse(
+                    status_code=503,
+                    content={
+                        "error": {
+                            "code": "DATABASE_UNAVAILABLE",
+                            "message": message,
+                            "details": {},
+                            "request_id": getattr(request.state, "request_id", "unknown"),
+                        }
+                    },
+                    headers={"Retry-After": "5"},
+                )
+        return await call_next(request)
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):

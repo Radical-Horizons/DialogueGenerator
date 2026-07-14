@@ -1,7 +1,6 @@
 /**
  * Story 9.4 — entrée/sortie preview ; délègue au mode playthrough VN.
  */
-import { useCallback } from 'react'
 import { useScenarioPlaythrough } from './useScenarioPlaythrough'
 
 export interface UseDialoguePreviewResult {
