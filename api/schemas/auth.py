@@ -1,5 +1,5 @@
 """Schémas Pydantic pour l'authentification."""
-from typing import Optional
+from typing import Literal, Optional
 from pydantic import BaseModel, Field, EmailStr
 
 
@@ -38,6 +38,8 @@ class UserResponse(BaseModel):
     id: str = Field(..., description="Identifiant unique de l'utilisateur")
     username: str = Field(..., description="Nom d'utilisateur")
     email: Optional[EmailStr] = Field(None, description="Adresse email")
+    role: Literal["admin", "writer"] = Field(..., description="Rôle applicatif")
+    is_active: bool = Field(..., description="État actif du compte")
 
 
 class RefreshTokenRequest(BaseModel):

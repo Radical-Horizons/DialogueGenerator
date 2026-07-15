@@ -339,7 +339,9 @@ async def get_current_user_info(
     return UserResponse(
         id=current_user["id"],
         username=current_user["username"],
-        email=current_user.get("email")
+        email=current_user.get("email"),
+        role=current_user["role"],
+        is_active=bool(current_user["is_active"]),
     )
 
 

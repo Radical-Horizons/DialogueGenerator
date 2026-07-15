@@ -22,6 +22,7 @@ from services.repositories.sqlite.connection import DatabaseConnection
 from services.repositories.sqlite.state import get_database_status
 from services.repositories.sqlite.user_repository import (
     DuplicateUsernameError,
+    LastActiveAdminError,
     UserRecord,
     UserRepository,
 )
@@ -102,6 +103,27 @@ def _insert_concurrently(
             }
         )
     except DuplicateUsernameError as exc:
+        return exc
+
+
+def _demote_concurrently(
+    repository: UserRepository,
+    barrier: Barrier,
+    user_id: str,
+) -> UserRecord | LastActiveAdminError:
+    """Tente simultanément de retirer le rôle admin d'un compte."""
+    barrier.wait(timeout=5)
+    try:
+        result = repository.update_role_and_status(
+            user_id,
+            role="writer",
+            is_active=None,
+        )
+        assert result is not None
+        updated, changed = result
+        assert changed is True
+        return updated
+    except LastActiveAdminError as exc:
         return exc
 
 
@@ -508,3 +530,275 @@ def test_require_admin_uses_explicit_role_and_active_status(
         require_admin(current_user)
 
     assert exc_info.value.status_code == 403
+
+
+def test_list_users_as_admin_hides_sensitive_fields(
+    admin_client: TestClient,
+) -> None:
+    """La liste admin expose tous les comptes sans hash."""
+    admin_client.post("/api/v1/users", json=_user_payload("listed-writer"))
+
+    response = admin_client.get("/api/v1/users")
+
+    assert response.status_code == 200
+    assert response.json()[0]["username"] == "listed-writer"
+    assert "hashed_password" not in response.json()[0]
+
+
+def test_list_and_patch_users_require_admin(
+    writer_client: TestClient,
+) -> None:
+    """Un writer ne peut ni lister ni modifier les comptes."""
+    assert writer_client.get("/api/v1/users").status_code == 403
+    assert writer_client.patch(
+        "/api/v1/users/writer-id",
+        json={"is_active": False},
+    ).status_code == 403
+
+
+def test_patch_user_persists_role_and_status_with_structured_log(
+    admin_client: TestClient,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Une mutation valide persiste et journalise acteur, cible et action."""
+    created = admin_client.post(
+        "/api/v1/users",
+        json=_user_payload("promoted-writer"),
+    ).json()
+
+    with caplog.at_level(logging.INFO):
+        response = admin_client.patch(
+            f"/api/v1/users/{created['id']}",
+            json={"role": "admin", "is_active": True},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["role"] == "admin"
+    record = app.state.container.get_user_repository().find_by_id(created["id"])
+    assert record is not None
+    assert record["role"] == "admin"
+    mutation_record = next(
+        record
+        for record in caplog.records
+        if getattr(record, "action", None) == "user.role_status.updated"
+    )
+    assert mutation_record.actor_id == "admin-id"
+    assert mutation_record.target_user_id == created["id"]
+
+
+def test_identical_patch_is_noop_without_timestamp_or_mutation_log(
+    admin_client: TestClient,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Un patch identique ne modifie ni timestamp ni journal de mutation."""
+    created = admin_client.post(
+        "/api/v1/users",
+        json=_user_payload("unchanged-writer"),
+    ).json()
+
+    with caplog.at_level(logging.INFO):
+        response = admin_client.patch(
+            f"/api/v1/users/{created['id']}",
+            json={"role": "writer", "is_active": True},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["updated_at"] == created["updated_at"]
+    assert not any(
+        getattr(record, "action", None) == "user.role_status.updated"
+        for record in caplog.records
+    )
+
+
+def test_repository_returns_transaction_row_without_post_commit_reread(
+    isolated_app_database: DatabaseConnection,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """La réponse provient de la transaction et non d'une relecture exposée aux races."""
+    repository = UserRepository(isolated_app_database)
+    user = repository.insert(
+        {
+            "username": "exact-row",
+            "email": "exact-row@example.com",
+            "hashed_password": "not-used",
+            "role": "writer",
+        }
+    )
+
+    def fail_post_commit_read(user_id: str) -> UserRecord | None:
+        """Échoue si l'implémentation relit la ligne après le commit."""
+        raise AssertionError(f"relecture post-commit inattendue: {user_id}")
+
+    monkeypatch.setattr(repository, "find_by_id", fail_post_commit_read)
+    result = repository.update_role_and_status(
+        user["id"],
+        role="admin",
+        is_active=None,
+    )
+
+    assert result is not None
+    updated, changed = result
+    assert changed is True
+    assert updated["role"] == "admin"
+
+
+def test_patch_user_rejects_missing_invalid_and_empty_payloads(
+    admin_client: TestClient,
+) -> None:
+    """Les cibles absentes et patches invalides ne mutent rien."""
+    assert admin_client.patch(
+        "/api/v1/users/missing",
+        json={"role": "writer"},
+    ).status_code == 404
+    assert admin_client.patch(
+        "/api/v1/users/missing",
+        json={"role": "owner"},
+    ).status_code == 422
+    assert admin_client.patch("/api/v1/users/missing", json={}).status_code == 422
+
+
+def test_last_active_admin_cannot_be_disabled(
+    admin_client: TestClient,
+) -> None:
+    """La désactivation du dernier admin actif retourne 409 sans mutation."""
+    repository = app.state.container.get_user_repository()
+    admin = repository.insert(
+        {
+            "username": "only-admin",
+            "email": "only-admin@example.com",
+            "hashed_password": "not-used",
+            "role": "admin",
+        }
+    )
+
+    response = admin_client.patch(
+        f"/api/v1/users/{admin['id']}",
+        json={"is_active": False},
+    )
+
+    assert response.status_code == 409
+    unchanged = repository.find_by_id(admin["id"])
+    assert unchanged is not None
+    assert unchanged["is_active"] is True
+    assert unchanged["role"] == "admin"
+
+
+def test_concurrent_admin_demotion_preserves_one_active_admin(
+    isolated_app_database: DatabaseConnection,
+) -> None:
+    """Deux retraits concurrents ne peuvent supprimer tous les admins actifs."""
+    first_repository = UserRepository(isolated_app_database)
+    second_database = DatabaseConnection(isolated_app_database.database_path)
+    second_repository = UserRepository(second_database)
+    first_admin = first_repository.insert(
+        {
+            "username": "admin-one",
+            "email": "admin-one@example.com",
+            "hashed_password": "not-used",
+            "role": "admin",
+        }
+    )
+    second_admin = first_repository.insert(
+        {
+            "username": "admin-two",
+            "email": "admin-two@example.com",
+            "hashed_password": "not-used",
+            "role": "admin",
+        }
+    )
+    barrier = Barrier(2)
+
+    try:
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            results = [
+                executor.submit(
+                    _demote_concurrently,
+                    first_repository,
+                    barrier,
+                    first_admin["id"],
+                ),
+                executor.submit(
+                    _demote_concurrently,
+                    second_repository,
+                    barrier,
+                    second_admin["id"],
+                ),
+            ]
+            resolved = [future.result() for future in results]
+    finally:
+        second_database.close()
+
+    assert sum(isinstance(result, LastActiveAdminError) for result in resolved) == 1
+    assert isolated_app_database.execute_scalar(
+        "SELECT COUNT(*) FROM users WHERE role = 'admin' AND is_active = 1"
+    ) == 1
+
+
+def test_app_settings_crud_persists_value_and_author(
+    admin_client: TestClient,
+) -> None:
+    """Le CRUD admin persiste la valeur allowlistée et son auteur."""
+    app.state.container.get_user_repository().insert(
+        {
+            "id": "admin-id",
+            "username": "settings-admin",
+            "email": "settings-admin@example.com",
+            "hashed_password": "not-used",
+            "role": "admin",
+        }
+    )
+
+    created = admin_client.put(
+        "/api/v1/admin/app-settings/notion_sync_enabled",
+        json={"value": True},
+    )
+    listed = admin_client.get(
+        "/api/v1/admin/app-settings",
+    )
+    fetched = admin_client.get(
+        "/api/v1/admin/app-settings/notion_sync_enabled",
+    )
+    deleted = admin_client.delete(
+        "/api/v1/admin/app-settings/notion_sync_enabled",
+    )
+
+    assert created.status_code == 200
+    assert created.json()["value"] is True
+    assert created.json()["updated_by"] is not None
+    assert listed.json() == [created.json()]
+    assert fetched.json() == created.json()
+    assert deleted.status_code == 204
+    assert admin_client.get(
+        "/api/v1/admin/app-settings/notion_sync_enabled",
+    ).status_code == 404
+
+
+def test_app_settings_reject_unknown_key(
+    admin_client: TestClient,
+) -> None:
+    """Une clé inconnue ne peut pas être persistée."""
+    assert admin_client.put(
+        "/api/v1/admin/app-settings/jwt_secret",
+        json={"value": True},
+    ).status_code == 422
+
+
+def test_app_settings_reject_writer(
+    writer_client: TestClient,
+) -> None:
+    """Un writer ne peut pas modifier les réglages."""
+    assert writer_client.put(
+        "/api/v1/admin/app-settings/notion_sync_enabled",
+        json={"value": True},
+    ).status_code == 403
+
+
+def test_app_settings_disable_auth_bypass(client: TestClient) -> None:
+    """Le bypass local conserve l'administration des réglages."""
+    response = client.put(
+        "/api/v1/admin/app-settings/notion_sync_enabled",
+        json={"value": False},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["updated_by"] is None

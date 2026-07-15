@@ -134,7 +134,9 @@ export const useAuthStore = create<AuthState>()(
             user: {
               id: '1',
               username: 'admin',
-              email: 'admin@example.com'
+              email: 'admin@example.com',
+              role: 'admin',
+              is_active: true,
             },
             isAuthenticated: true,
             isLoading: false
@@ -198,6 +200,17 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: STORAGE_KEY,
+      version: 2,
+      migrate: (persistedState, version) => {
+        if (version < 2) {
+          return {
+            ...(persistedState as Partial<AuthState>),
+            user: null,
+            isAuthenticated: false,
+          }
+        }
+        return persistedState as AuthState
+      },
       partialize: (state) => ({
         // Ne persister que l'user et l'état d'authentification
         // Les tokens restent dans localStorage via le client API

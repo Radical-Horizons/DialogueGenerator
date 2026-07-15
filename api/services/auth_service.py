@@ -43,6 +43,7 @@ class AuthService:
         email: str,
         password: str,
         role: str = "writer",
+        actor: dict[str, object] | None = None,
     ) -> UserRecord:
         """Crée un compte dans le repository SQLite injecté.
 
@@ -51,6 +52,7 @@ class AuthService:
             email: Adresse email du collaborateur.
             password: Mot de passe en clair à hasher.
             role: Rôle persisté, limité à ``admin`` ou ``writer``.
+            actor: Administrateur à l'origine de la création, le cas échéant.
 
         Returns:
             Enregistrement utilisateur persisté.
@@ -73,8 +75,70 @@ class AuthService:
             "role": role,
         }
         user = self._user_repository.insert(user_data)
-        logger.info("Compte utilisateur créé: username=%s role=%s", username, role)
+        logger.info(
+            "Compte utilisateur créé",
+            extra={
+                "actor_id": actor.get("id") if actor else None,
+                "actor_username": actor.get("username") if actor else None,
+                "target_user_id": user["id"],
+                "action": "user.created",
+                "new_role": role,
+            },
+        )
         return user
+
+    def list_users(self) -> list[UserRecord]:
+        """Retourne tous les comptes pour l'administration."""
+        if self._user_repository is None:
+            raise RuntimeError("UserRepository requis pour lister les comptes.")
+        return self._user_repository.list_all()
+
+    def update_user(
+        self,
+        user_id: str,
+        *,
+        role: str | None,
+        is_active: bool | None,
+        actor: dict[str, object],
+    ) -> UserRecord | None:
+        """Modifie rôle/état avec invariant transactionnel anti-lockout.
+
+        Args:
+            user_id: Identifiant du compte cible.
+            role: Nouveau rôle éventuel.
+            is_active: Nouvel état éventuel.
+            actor: Administrateur à l'origine de la mutation.
+
+        Returns:
+            Compte mis à jour, ou ``None`` si la cible est absente.
+
+        Raises:
+            RuntimeError: Si le repository n'est pas injecté.
+            LastActiveAdminError: Si le dernier admin actif serait retiré.
+        """
+        if self._user_repository is None:
+            raise RuntimeError("UserRepository requis pour modifier un compte.")
+        update_result = self._user_repository.update_role_and_status(
+            user_id,
+            role=role,
+            is_active=is_active,
+        )
+        if update_result is None:
+            return None
+        updated, changed = update_result
+        if changed:
+            logger.info(
+                "Mutation administrative utilisateur",
+                extra={
+                    "actor_id": actor.get("id"),
+                    "actor_username": actor.get("username"),
+                    "target_user_id": user_id,
+                    "action": "user.role_status.updated",
+                    "new_role": updated["role"],
+                    "new_is_active": updated["is_active"],
+                },
+            )
+        return updated
 
     def seed_admin_if_needed(self, admin_password: str | None) -> None:
         """Sème le compte administrateur si la base n'en contient aucun.

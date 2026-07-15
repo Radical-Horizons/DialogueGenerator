@@ -1,8 +1,9 @@
 """Schémas Pydantic pour la gestion administrative des utilisateurs."""
 
 import unicodedata
+from typing import Literal
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
 from api.utils.password_policy import PasswordPolicyError, validate_password
 
@@ -53,3 +54,33 @@ class UserResponse(BaseModel):
     role: str
     is_active: bool
     created_at: str
+    updated_at: str
+
+
+class UserUpdate(BaseModel):
+    """Champs administratifs modifiables d'un compte."""
+
+    role: Literal["admin", "writer"] | None = None
+    is_active: bool | None = None
+
+    @model_validator(mode="after")
+    def reject_empty_patch(self) -> "UserUpdate":
+        """Refuse un patch ne contenant aucune mutation."""
+        if self.role is None and self.is_active is None:
+            raise ValueError("Le patch utilisateur doit modifier role ou is_active.")
+        return self
+
+
+class AppSettingUpdate(BaseModel):
+    """Valeur booléenne d'un réglage applicatif autorisé."""
+
+    value: bool
+
+
+class AppSettingResponse(BaseModel):
+    """Représentation publique d'un réglage applicatif."""
+
+    key: str
+    value: bool
+    updated_by: str | None
+    updated_at: str

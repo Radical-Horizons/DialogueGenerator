@@ -40,6 +40,21 @@ export interface UserResponse {
   id: string
   username: string
   email?: string
+  role: 'admin' | 'writer'
+  is_active: boolean
+  created_at?: string
+  updated_at?: string
+}
+
+export interface UserCreateRequest {
+  username: string
+  email: string
+  password: string
+}
+
+export interface UserUpdateRequest {
+  role?: 'admin' | 'writer'
+  is_active?: boolean
 }
 
 // Dialogue

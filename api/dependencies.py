@@ -40,7 +40,11 @@ from services.prompt_enricher import PromptEnricher
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
-from services.repositories.sqlite import DatabaseConnection, UserRepository
+from services.repositories.sqlite import (
+    AppSettingsRepository,
+    DatabaseConnection,
+    UserRepository,
+)
 from constants import FilePaths, Defaults
 
 logger = logging.getLogger(__name__)
@@ -79,6 +83,11 @@ def get_database_connection(request: Request) -> DatabaseConnection:
 def get_user_repository(request: Request) -> UserRepository:
     """Retourne le repository utilisateur partagé du container."""
     return get_service_container(request).get_user_repository()
+
+
+def get_app_settings_repository(request: Request) -> AppSettingsRepository:
+    """Retourne le repository des réglages applicatifs du container."""
+    return get_service_container(request).get_app_settings_repository()
 
 
 def get_auth_service(request: Request) -> AuthService:

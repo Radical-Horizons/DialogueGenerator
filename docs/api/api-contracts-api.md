@@ -38,12 +38,62 @@ Refresh access token using refresh token from httpOnly cookie.
 ### GET `/auth/me`
 Get current authenticated user information.
 
-**Response:** `UserResponse`
+**Response:** `UserResponse` including `role` (`admin | writer`) and `is_active`.
 
 ### POST `/auth/logout`
 Logout and invalidate refresh token.
 
 **Response:** `204 No Content`
+
+---
+
+## Administration Endpoints
+
+All endpoints in this section require an authenticated, active `admin`.
+Unauthenticated, inactive, and `writer` callers receive `403`.
+
+### POST `/users`
+Create a `writer` account. Returns `201 UserResponse`. User responses never
+include `hashed_password`. A duplicate username returns `409`; invalid fields
+return `422`.
+
+### GET `/users`
+List all accounts as `UserResponse[]`, ordered by username.
+
+### PATCH `/users/{id}`
+Update `role` (`admin | writer`) and/or `is_active`. Username and email are not
+modifiable. An empty patch or unknown role returns `422`, an unknown account
+returns `404`, and a mutation that would leave no active admin is atomically
+rejected with `409`.
+
+```json
+{
+  "role": "admin",
+  "is_active": true
+}
+```
+
+### GET `/admin/app-settings`
+List persisted, allowlisted non-secret settings.
+
+### GET `/admin/app-settings/{key}`
+Read an allowlisted setting. An absent setting returns `404`.
+
+### PUT `/admin/app-settings/{key}`
+Create or replace a boolean setting and record `updated_by`. The only
+allowlisted key is `notion_sync_enabled`; secret or unknown keys return `422`.
+`updated_by` is nullable only when `DISABLE_AUTH=true` supplies the synthetic
+development admin, which has no persisted SQLite user row. Authenticated admins
+always persist their user ID.
+
+```json
+{
+  "value": true
+}
+```
+
+### DELETE `/admin/app-settings/{key}`
+Delete an allowlisted setting. Returns `204`, or `404` if absent.
 
 ---
 

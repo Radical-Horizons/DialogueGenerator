@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MainLayout } from './components/layout/MainLayout'
@@ -7,6 +7,7 @@ import { Dashboard } from './components/layout/Dashboard'
 import { UnityDialoguesPage } from './components/unityDialogues/UnityDialoguesPage'
 import { UsageDashboard } from './components/usage/UsageDashboard'
 import { GraphEditorPage } from './pages/GraphEditorPage'
+import { UserManagementPanel } from './components/admin/UserManagementPanel'
 import { useAuthStore } from './store/authStore'
 import { ToastContainer } from './components/shared'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
@@ -68,6 +69,27 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
+}
+
+export function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, initialize } = useAuthStore()
+  const [hasResolvedAuth, setHasResolvedAuth] = useState(false)
+
+  useEffect(() => {
+    void initialize()
+      .catch((error) => {
+        console.error('[AdminRoute] Erreur lors de l’initialisation:', error)
+      })
+      .finally(() => setHasResolvedAuth(true))
+  }, [initialize])
+
+  if (!hasResolvedAuth) {
+    return <div role="status">Chargement de la session…</div>
+  }
+  if (user?.role === 'admin' && user.is_active) {
+    return <>{children}</>
+  }
+  return <Navigate to="/" replace />
 }
 
 /**
@@ -179,6 +201,16 @@ function AppRoutes() {
             <ProtectedRoute>
               <GraphEditorPage />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute>
+              <MainLayout>
+                <UserManagementPanel />
+              </MainLayout>
+            </AdminRoute>
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />

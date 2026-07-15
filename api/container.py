@@ -31,7 +31,11 @@ from services.notion_import_service import NotionImportService
 from services.context_rule_service import ContextRuleService
 from services.context_dropping_rules_service import ContextDroppingRulesService
 from services.repositories.sqlite.bootstrap import resolve_database_path
-from services.repositories.sqlite import DatabaseConnection, UserRepository
+from services.repositories.sqlite import (
+    AppSettingsRepository,
+    DatabaseConnection,
+    UserRepository,
+)
 from api.services.auth_service import AuthService
 
 logger = logging.getLogger(__name__)
@@ -83,6 +87,7 @@ class ServiceContainer:
         self._global_relation_index: Optional[Dict[str, str]] = None
         self._database_connection: Optional[DatabaseConnection] = database_connection
         self._user_repository: Optional[UserRepository] = None
+        self._app_settings_repository: Optional[AppSettingsRepository] = None
         self._auth_service: Optional[AuthService] = None
         self._database_initialization_failed = database_initialization_failed
         self._database_lock = threading.RLock()
@@ -110,6 +115,16 @@ class ServiceContainer:
                 self._user_repository = UserRepository(self.get_database_connection())
                 logger.info("UserRepository initialisé dans le container.")
             return self._user_repository
+
+    def get_app_settings_repository(self) -> AppSettingsRepository:
+        """Retourne le repository des réglages applicatifs partagé."""
+        with self._database_lock:
+            if self._app_settings_repository is None:
+                self._app_settings_repository = AppSettingsRepository(
+                    self.get_database_connection()
+                )
+                logger.info("AppSettingsRepository initialisé dans le container.")
+            return self._app_settings_repository
 
     def get_auth_service(self) -> AuthService:
         """Retourne le service d'authentification avec son repository injecté."""
@@ -502,6 +517,7 @@ class ServiceContainer:
                 self._database_connection.close()
             self._database_connection = None
             self._user_repository = None
+            self._app_settings_repository = None
             self._auth_service = None
     
     def reset(self) -> None:

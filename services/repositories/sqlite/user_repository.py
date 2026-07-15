@@ -41,6 +41,10 @@ class DuplicateUsernameError(ValueError):
         self.username = username
 
 
+class LastActiveAdminError(RuntimeError):
+    """Signale qu'une mutation supprimerait le dernier administrateur actif."""
+
+
 class IUserRepository(Protocol):
     """Contrat minimal consommable par les stories d'authentification."""
 
@@ -54,6 +58,24 @@ class IUserRepository(Protocol):
 
     def find_by_username(self, username: str) -> UserRecord | None:
         """Recherche un compte par nom d'utilisateur."""
+        ...
+
+    def find_by_id(self, user_id: str) -> UserRecord | None:
+        """Recherche un compte par identifiant."""
+        ...
+
+    def list_all(self) -> list[UserRecord]:
+        """Retourne tous les comptes."""
+        ...
+
+    def update_role_and_status(
+        self,
+        user_id: str,
+        *,
+        role: str | None,
+        is_active: bool | None,
+    ) -> tuple[UserRecord, bool] | None:
+        """Met à jour atomiquement le rôle et l'état d'un compte."""
         ...
 
 
@@ -166,7 +188,111 @@ class UserRepository:
             ][:1]
         if not rows:
             return None
-        row = rows[0]
+        return self._row_to_record(rows[0])
+
+    def find_by_id(self, user_id: str) -> UserRecord | None:
+        """Recherche un compte par son identifiant stable."""
+        rows = self.database.execute_fetchall(
+            """
+            SELECT id, username, email, hashed_password, role,
+                   is_active, created_at, updated_at
+            FROM users
+            WHERE id = ?
+            LIMIT 1
+            """,
+            (user_id,),
+        )
+        return self._row_to_record(rows[0]) if rows else None
+
+    def list_all(self) -> list[UserRecord]:
+        """Retourne tous les comptes, triés par username canonique."""
+        rows = self.database.execute_fetchall(
+            """
+            SELECT id, username, email, hashed_password, role,
+                   is_active, created_at, updated_at
+            FROM users
+            ORDER BY username COLLATE NOCASE
+            """
+        )
+        return [self._row_to_record(row) for row in rows]
+
+    def update_role_and_status(
+        self,
+        user_id: str,
+        *,
+        role: str | None,
+        is_active: bool | None,
+    ) -> tuple[UserRecord, bool] | None:
+        """Met à jour un compte en préservant au moins un admin actif.
+
+        La transaction ``IMMEDIATE`` sérialise le comptage et l'écriture entre
+        connexions SQLite concurrentes.
+        """
+        if role is not None and role not in SUPPORTED_USER_ROLES:
+            raise ValueError(f"Rôle utilisateur non supporté: {role}")
+
+        with self.database.transaction(immediate=True) as connection:
+            row = connection.execute(
+                """
+                SELECT id, username, email, hashed_password, role,
+                       is_active, created_at, updated_at
+                FROM users
+                WHERE id = ?
+                """,
+                (user_id,),
+            ).fetchone()
+            if row is None:
+                return None
+
+            current = self._row_to_record(tuple(row))
+            next_role = role if role is not None else current["role"]
+            next_is_active = is_active if is_active is not None else current["is_active"]
+            if (
+                next_role == current["role"]
+                and next_is_active == current["is_active"]
+            ):
+                return current, False
+
+            removes_active_admin = (
+                current["role"] == "admin"
+                and current["is_active"]
+                and (next_role != "admin" or not next_is_active)
+            )
+            if removes_active_admin:
+                active_admin_count = int(
+                    connection.execute(
+                        """
+                        SELECT COUNT(*)
+                        FROM users
+                        WHERE role = 'admin' AND is_active = 1
+                        """
+                    ).fetchone()[0]
+                )
+                if active_admin_count <= 1:
+                    raise LastActiveAdminError(
+                        "Au moins un administrateur actif doit être conservé."
+                    )
+
+            updated_at = datetime.now(timezone.utc).isoformat()
+            connection.execute(
+                """
+                UPDATE users
+                SET role = ?, is_active = ?, updated_at = ?
+                WHERE id = ?
+                """,
+                (next_role, int(next_is_active), updated_at, user_id),
+            )
+            updated: UserRecord = {
+                **current,
+                "role": next_role,
+                "is_active": next_is_active,
+                "updated_at": updated_at,
+            }
+            return updated, True
+
+    @staticmethod
+    def _row_to_record(row: tuple[object, ...]) -> UserRecord:
+        """Convertit une ligne SQLite en enregistrement utilisateur typé."""
         return {
             "id": str(row[0]),
             "username": str(row[1]),

@@ -162,7 +162,7 @@ development_status:
   7-0-fondation-sqlite-application-data-app-db: done
   7-1-créer-comptes-utilisateurs-admin-only-fr64: done
   7-2-se-connecter-et-se-déconnecter-du-système-fr65: done
-  7-3-administrateurs-gèrent-les-utilisateurs-fr66: backlog
+  7-3-administrateurs-gèrent-les-utilisateurs-fr66: done
   7-4-writers-peuvent-créer-éditer-et-supprimer-dialogues-fr67: backlog
   7-5-invités-lecture-seule-sans-compte-fr68: backlog
   7-6-partager-dialogues-co-édition-entre-writers-fr69: backlog

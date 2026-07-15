@@ -2,6 +2,7 @@
  * Composant Header avec authentification et barre de recherche.
  */
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { useCommandPalette } from '../../hooks/useCommandPalette'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
@@ -16,6 +17,7 @@ import { TOUCH_TARGET_MIN_PX } from '../../constants'
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuthStore()
+  const navigate = useNavigate()
   const commandPalette = useCommandPalette()
   const { actions } = useGenerationActionsStore()
   const { isGenerating: isGraphGenerating } = useGraphStore()
@@ -362,6 +364,30 @@ export function Header() {
                     {user.username}
                   </div>
                 </div>
+                {user.role === 'admin' && user.is_active && (
+                  <button
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      setIsUserMenuOpen(false)
+                      navigate('/admin/users')
+                    }}
+                    style={{
+                      width: '100%',
+                      minHeight: TOUCH_TARGET_MIN_PX,
+                      marginBottom: '0.5rem',
+                      padding: '0.5rem 0.75rem',
+                      fontSize: remSize('body'),
+                      backgroundColor: theme.button.default.background,
+                      color: theme.button.default.color,
+                      border: `1px solid ${theme.border.primary}`,
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    Gérer les utilisateurs
+                  </button>
+                )}
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
