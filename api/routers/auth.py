@@ -13,7 +13,7 @@ from api.schemas.auth import (
 )
 from api.services.auth_service import AuthService
 from api.exceptions import AuthenticationException
-from api.dependencies import get_request_id
+from api.dependencies import get_auth_service, get_request_id
 from api.config.security_config import get_security_config
 from api.middleware.rate_limiter import get_limiter, get_rate_limit_string
 
@@ -24,10 +24,7 @@ security_config = get_security_config()
 
 router = APIRouter()
 # Bearer optionnel uniquement en dev avec DISABLE_AUTH=true ; sinon erreur 403 si header absent
-security = HTTPBearer(auto_error=False) if (
-    security_config.is_development and security_config.disable_auth
-) else HTTPBearer()
-auth_service = AuthService()
+security = HTTPBearer(auto_error=False)
 _is_production = security_config.is_production
 _cookie_domain = None  # Peut être étendu via config si nécessaire
 _cookie_secure = _is_production  # Secure=True en production uniquement
@@ -57,15 +54,6 @@ def apply_rate_limit(func):
     
     rate_limit_str = get_rate_limit_string()
     return limiter.limit(rate_limit_str)(func)
-
-
-def get_auth_service() -> AuthService:
-    """Retourne le service d'authentification.
-    
-    Returns:
-        Instance de AuthService.
-    """
-    return auth_service
 
 
 def _set_refresh_cookie(response: Response, refresh_token: str) -> None:
@@ -104,8 +92,15 @@ def _delete_refresh_cookie(response: Response) -> None:
 
 async def get_current_user(
     request: Request,
-    credentials: Annotated[Optional[HTTPAuthorizationCredentials], Depends(security)] = None
-) -> dict:
+    auth_service: Annotated[
+        AuthService,
+        Depends(get_auth_service),
+    ],
+    credentials: Annotated[
+        Optional[HTTPAuthorizationCredentials],
+        Depends(security),
+    ] = None,
+) -> dict[str, object]:
     """Dépendance pour obtenir l'utilisateur courant depuis le token JWT.
     
     En développement, retourne automatiquement un utilisateur mock sans vérifier le token.
@@ -152,8 +147,8 @@ async def get_current_user(
             request_id=request_id
         )
     
-    username: str = payload.get("sub")
-    if username is None:
+    username = payload.get("sub")
+    if not isinstance(username, str) or not username:
         raise AuthenticationException(
             message="Token invalide",
             request_id=request_id
@@ -162,7 +157,7 @@ async def get_current_user(
     user = auth_service.get_user_by_username(username)
     if user is None:
         raise AuthenticationException(
-            message="Utilisateur non trouvé",
+            message="Token invalide ou expiré",
             request_id=request_id
         )
     
@@ -171,6 +166,10 @@ async def get_current_user(
 
 async def get_current_user_or_none(
     request: Request,
+    auth_service: Annotated[
+        AuthService,
+        Depends(get_auth_service),
+    ],
     credentials: Annotated[Optional[HTTPAuthorizationCredentials], Depends(security)] = None,
 ) -> Optional[dict[str, object]]:
     """Résout l'utilisateur courant sans interrompre la vérification d'admin.
@@ -183,7 +182,11 @@ async def get_current_user_or_none(
         Utilisateur courant, ou ``None`` si l'authentification échoue.
     """
     try:
-        return await get_current_user(request=request, credentials=credentials)
+        return await get_current_user(
+            request=request,
+            credentials=credentials,
+            auth_service=auth_service,
+        )
     except AuthenticationException as exc:
         logger.debug("Utilisateur non authentifié pour une route admin: %s", exc.detail)
         return None
@@ -194,7 +197,11 @@ async def get_current_user_or_none(
 async def login(
     login_data: LoginRequest,
     request: Request,
-    response: Response
+    response: Response,
+    auth_service: Annotated[
+        AuthService,
+        Depends(get_auth_service),
+    ],
 ) -> TokenResponse:
     """Endpoint de connexion avec rate limiting.
     
@@ -238,9 +245,13 @@ async def login(
 @router.post("/refresh", response_model=TokenResponse, status_code=status.HTTP_200_OK)
 @apply_rate_limit
 async def refresh_token(
-    refresh_data: RefreshTokenRequest,
     request: Request,
-    response: Response
+    response: Response,
+    auth_service: Annotated[
+        AuthService,
+        Depends(get_auth_service),
+    ],
+    refresh_data: RefreshTokenRequest | None = None,
 ) -> TokenResponse:
     """Endpoint de rafraîchissement de token avec rate limiting.
     
@@ -273,7 +284,7 @@ async def refresh_token(
     
     # Chercher le refresh token dans les cookies en priorité, puis dans le body (fallback pour dev)
     refresh_token = request.cookies.get("refresh_token")
-    if not refresh_token:
+    if not refresh_token and security_config.is_development and refresh_data is not None:
         refresh_token = refresh_data.refresh_token
     
     if not refresh_token:
@@ -289,15 +300,22 @@ async def refresh_token(
             request_id=request_id
         )
     
-    username: str = payload.get("sub")
-    if username is None:
+    username = payload.get("sub")
+    if not isinstance(username, str) or not username:
         raise AuthenticationException(
             message="Refresh token invalide",
             request_id=request_id
         )
     
+    user = auth_service.get_user_by_username(username)
+    if user is None:
+        raise AuthenticationException(
+            message="Refresh token invalide ou expiré",
+            request_id=request_id
+        )
+
     # Créer un nouveau access token
-    access_token = auth_service.create_access_token(data={"sub": username})
+    access_token = auth_service.create_access_token(data={"sub": user["username"]})
     
     return TokenResponse(
         access_token=access_token,
@@ -328,6 +346,10 @@ async def get_current_user_info(
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(
     response: Response,
+    auth_service: Annotated[
+        AuthService,
+        Depends(get_auth_service),
+    ],
     credentials: Annotated[
         Optional[HTTPAuthorizationCredentials],
         Depends(HTTPBearer(auto_error=False)),

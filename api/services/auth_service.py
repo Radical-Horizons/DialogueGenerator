@@ -5,10 +5,9 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import uuid4
 
-from jose import JWTError, jwt
 import bcrypt
+from jose import JWTError, jwt
 
-from api.exceptions import AuthenticationException
 from api.config.security_config import get_security_config
 from api.utils.password_policy import PasswordPolicyError, validate_password
 from services.repositories.sqlite.user_repository import (
@@ -23,6 +22,7 @@ logger = logging.getLogger(__name__)
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
 REFRESH_TOKEN_EXPIRE_DAYS = 7
+_DUMMY_PASSWORD_HASH = bcrypt.hashpw(b"timing-only-password", bcrypt.gensalt())
 
 
 class AuthService:
@@ -36,23 +36,6 @@ class AuthService:
         self.access_token_expire = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         self.refresh_token_expire = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
         self._user_repository = user_repository
-        
-        # TODO: En production, utiliser une vraie base de données
-        # Pour l'instant, utilisateurs en dur (à remplacer)
-        # Hash pré-calculé pour "admin123" (généré avec bcrypt.hashpw(b'admin123', bcrypt.gensalt()))
-        # On utilise bcrypt directement au lieu de passlib pour éviter les problèmes de compatibilité
-        admin_password_hash = "$2b$12$U975No5LwfSx0GpHZmMwXeJYUyMGsVdEgaLfOgAqDSd.qgPHt4V/i"
-        
-        self._users_db = {
-            "admin": {
-                "username": "admin",
-                "email": "admin@example.com",
-                "hashed_password": admin_password_hash,
-                "id": "1",
-                "role": "admin",
-                "is_active": True,
-            }
-        }
 
     def create_user(
         self,
@@ -171,9 +154,23 @@ class AuthService:
             True si le mot de passe correspond, False sinon.
         """
         try:
-            return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
-        except Exception:
+            return bcrypt.checkpw(
+                plain_password.encode("utf-8"),
+                hashed_password.encode("utf-8"),
+            )
+        except (TypeError, UnicodeError, ValueError):
             return False
+
+    @staticmethod
+    def _verify_dummy_password(plain_password: str) -> None:
+        """Égalise le coût bcrypt quand le compte recherché est absent."""
+        try:
+            bcrypt.checkpw(
+                plain_password.encode("utf-8"),
+                _DUMMY_PASSWORD_HASH,
+            )
+        except (TypeError, UnicodeError, ValueError):
+            return
     
     def hash_password(self, password: str) -> str:
         """Hash un mot de passe.
@@ -189,29 +186,39 @@ class AuthService:
         hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
         return hashed.decode('utf-8')
     
-    def authenticate_user(self, username: str, password: str) -> Optional[dict]:
-        """Authentifie un utilisateur.
+    def authenticate_user(self, username: str, password: str) -> dict[str, object] | None:
+        """Authentifie un compte SQLite actif.
         
         Args:
             username: Nom d'utilisateur.
             password: Mot de passe.
             
         Returns:
-            Dictionnaire avec les informations de l'utilisateur si authentifié, None sinon.
+            Informations publiques de l'utilisateur si authentifié, sinon ``None``.
         """
-        user = self._users_db.get(username)
-        if not user:
+        if self._user_repository is None:
+            logger.error("Authentification impossible: UserRepository non injecté.")
             return None
-        
+
+        user = self._user_repository.find_by_username(username)
+        if user is None or not user["is_active"]:
+            self._verify_dummy_password(password)
+            logger.debug(
+                "Échec d'authentification pour username=%s: compte absent ou inactif.",
+                username,
+            )
+            return None
+
         if not self.verify_password(password, user["hashed_password"]):
+            logger.debug("Échec d'authentification pour username=%s: mot de passe invalide.", username)
             return None
-        
+
         return {
             "id": user["id"],
             "username": user["username"],
-            "email": user.get("email"),
+            "email": user["email"],
             "role": user["role"],
-            "is_active": user.get("is_active", True),
+            "is_active": user["is_active"],
         }
     
     def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -263,30 +270,39 @@ class AuthService:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
             
             # Vérifier le type de token
-            if payload.get("type") != token_type:
+            if payload.get("type") != token_type or "exp" not in payload:
                 return None
             
             return payload
         except JWTError:
             return None
     
-    def get_user_by_username(self, username: str) -> Optional[dict]:
-        """Récupère un utilisateur par son nom d'utilisateur.
+    def get_user_by_username(self, username: str) -> dict[str, object] | None:
+        """Récupère un compte SQLite actif par son nom d'utilisateur.
         
         Args:
             username: Nom d'utilisateur.
             
         Returns:
-            Dictionnaire avec les informations de l'utilisateur ou None.
+            Informations publiques de l'utilisateur actif, ou ``None``.
         """
-        user = self._users_db.get(username)
-        if user:
-            return {
-                "id": user["id"],
-                "username": user["username"],
-                "email": user.get("email"),
-                "role": user["role"],
-                "is_active": user.get("is_active", True),
-            }
-        return None
+        if self._user_repository is None:
+            logger.error("Résolution utilisateur impossible: UserRepository non injecté.")
+            return None
+
+        user = self._user_repository.find_by_username(username)
+        if user is None or not user["is_active"]:
+            logger.debug(
+                "Utilisateur non résolu pour username=%s: compte absent ou inactif.",
+                username,
+            )
+            return None
+
+        return {
+            "id": user["id"],
+            "username": user["username"],
+            "email": user["email"],
+            "role": user["role"],
+            "is_active": user["is_active"],
+        }
 

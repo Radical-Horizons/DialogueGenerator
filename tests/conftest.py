@@ -12,6 +12,7 @@ from services.repositories.cost_budget_repository import FileCostBudgetRepositor
 from services.repositories.sqlite.bootstrap import initialize_database
 from services.repositories.sqlite.connection import DatabaseConnection
 from services.repositories.sqlite.state import reset_database_status
+from api.config.security_config import get_security_config
 
 # IMPORTANT: certains singletons (SecurityConfig / rate limiter) sont initialisés à l'import de `api.main`.
 # On fixe donc l'env AVANT l'import pour éviter des 429 en tests.
@@ -126,6 +127,17 @@ def client():
         TestClient: Client de test FastAPI.
     """
     return TestClient(app)
+
+
+@pytest.fixture
+def seeded_auth_client(
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> Iterator[TestClient]:
+    """Fournit un client auth réel avec un admin seedé dans SQLite temporaire."""
+    monkeypatch.setattr(get_security_config(), "disable_auth", False)
+    app.state.container.get_auth_service().seed_admin_if_needed("admin123")
+    yield client
 
 
 

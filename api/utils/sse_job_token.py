@@ -9,6 +9,7 @@ from typing import Any, Optional
 from jose import JWTError, jwt
 
 from api.config.security_config import get_security_config
+from api.services.auth_service import AuthService
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,12 @@ SSE_TOKEN_TYPE = "sse_job"
 SSE_TOKEN_EXPIRE_MINUTES = 30
 
 
-def create_sse_job_token(*, job_id: str, username: str) -> str:
+def create_sse_job_token(
+    *,
+    job_id: str,
+    username: str,
+    auth_service: AuthService | None = None,
+) -> str:
     """Crée un JWT limité au stream d'un job (même `sub` que l'access token).
 
     Args:
@@ -27,7 +33,11 @@ def create_sse_job_token(*, job_id: str, username: str) -> str:
     Returns:
         Chaîne JWT à passer en query ``sse_token`` sur le GET stream.
     """
-    security_config = get_security_config()
+    secret_key = (
+        auth_service.secret_key
+        if auth_service is not None
+        else get_security_config().jwt_secret_key
+    )
     now = datetime.now(timezone.utc)
     payload: dict[str, Any] = {
         "sub": username,
@@ -36,10 +46,14 @@ def create_sse_job_token(*, job_id: str, username: str) -> str:
         "iat": int(now.timestamp()),
         "exp": int((now + timedelta(minutes=SSE_TOKEN_EXPIRE_MINUTES)).timestamp()),
     }
-    return jwt.encode(payload, security_config.jwt_secret_key, algorithm=ALGORITHM)
+    return jwt.encode(payload, secret_key, algorithm=ALGORITHM)
 
 
-def verify_sse_job_token(token: str, expected_job_id: str) -> Optional[dict[str, Any]]:
+def verify_sse_job_token(
+    token: str,
+    expected_job_id: str,
+    auth_service: AuthService | None = None,
+) -> Optional[dict[str, Any]]:
     """Valide le jeton SSE et vérifie qu'il correspond au ``job_id``.
 
     Args:
@@ -49,17 +63,21 @@ def verify_sse_job_token(token: str, expected_job_id: str) -> Optional[dict[str,
     Returns:
         Payload décodé si valide, sinon ``None``.
     """
-    security_config = get_security_config()
+    secret_key = (
+        auth_service.secret_key
+        if auth_service is not None
+        else get_security_config().jwt_secret_key
+    )
     try:
         payload = jwt.decode(
             token,
-            security_config.jwt_secret_key,
+            secret_key,
             algorithms=[ALGORITHM],
         )
     except JWTError as e:
         logger.debug("SSE token invalide: %s", e)
         return None
-    if payload.get("typ") != SSE_TOKEN_TYPE:
+    if payload.get("typ") != SSE_TOKEN_TYPE or "exp" not in payload:
         return None
     if payload.get("job_id") != expected_job_id:
         return None

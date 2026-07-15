@@ -25,11 +25,12 @@ from fastapi import APIRouter, Depends, Request, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from api.routers.auth import auth_service, get_current_user
+from api.routers.auth import get_current_user
 from api.schemas.generation_jobs import GenerationJobCreate, GenerationJobResponse, GenerationJobStatus
 from api.services.generation_job_manager import get_job_manager
+from api.services.auth_service import AuthService
 from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
-from api.dependencies import get_unity_dialogue_orchestrator
+from api.dependencies import get_auth_service, get_unity_dialogue_orchestrator
 from api.exceptions import AuthenticationException
 from api.config.security_config import get_security_config
 from api.utils.sse_job_token import create_sse_job_token, verify_sse_job_token
@@ -93,6 +94,10 @@ def _ensure_stream_allowed_for_job(job: Dict[str, Any], stream_auth: SSEStreamAu
 async def authenticate_sse_stream(
     job_id: str,
     request: Request,
+    auth_service: Annotated[
+        AuthService,
+        Depends(get_auth_service),
+    ],
     sse_token: Optional[str] = Query(
         None,
         description="Jeton JWT court (émis à la création du job) pour EventSource sans header Authorization.",
@@ -117,10 +122,14 @@ async def authenticate_sse_stream(
     request_id = getattr(request.state, "request_id", "unknown")
 
     if sse_token:
-        payload = verify_sse_job_token(sse_token, job_id)
+        payload = verify_sse_job_token(
+            sse_token,
+            job_id,
+            auth_service=auth_service,
+        )
         if payload:
             username = payload.get("sub")
-            if username:
+            if isinstance(username, str) and username:
                 user = auth_service.get_user_by_username(username)
                 if user:
                     return SSEStreamAuth(user=user, authenticated_via_sse_token=True)
@@ -129,7 +138,7 @@ async def authenticate_sse_stream(
         pl = auth_service.verify_token(credentials.credentials, token_type="access")
         if pl is not None:
             username = pl.get("sub")
-            if username:
+            if isinstance(username, str) and username:
                 user = auth_service.get_user_by_username(username)
                 if user:
                     return SSEStreamAuth(user=user, authenticated_via_sse_token=False)
@@ -359,6 +368,7 @@ async def create_generation_job(
     job_data: GenerationJobCreate,
     request: Request,
     current_user: Annotated[dict, Depends(get_current_user)],
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> GenerationJobResponse:
     """Crée un nouveau job de génération Unity Dialogue.
     
@@ -378,7 +388,11 @@ async def create_generation_job(
         owner_username=owner_username,
     )
 
-    sse_token = create_sse_job_token(job_id=job_id, username=owner_username)
+    sse_token = create_sse_job_token(
+        job_id=job_id,
+        username=owner_username,
+        auth_service=auth_service,
+    )
     stream_url = (
         f"/api/v1/dialogues/generate/jobs/{job_id}/stream?sse_token={quote_plus(sse_token)}"
     )

@@ -11,7 +11,6 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
 from api.config.security_config import get_security_config
-from api.services.auth_service import AuthService
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +19,6 @@ DEFAULT_BILLABLE_USER_ID = "default_user"
 _billable_user_id: ContextVar[str] = ContextVar(
     "billable_user_id", default=DEFAULT_BILLABLE_USER_ID
 )
-
-_auth = AuthService()
-
 
 def get_billable_user_id() -> str:
     """Retourne l'identifiant utilisateur pour quota/coût (JWT ``sub`` / username ou défaut)."""
@@ -61,7 +57,10 @@ def _user_id_from_authorization(request: Request) -> str:
     if not auth.lower().startswith("bearer "):
         return DEFAULT_BILLABLE_USER_ID
     token = auth[7:].strip()
-    payload = _auth.verify_token(token, token_type="access")
+    container = getattr(request.app.state, "container", None)
+    if container is None:
+        return DEFAULT_BILLABLE_USER_ID
+    payload = container.get_auth_service().verify_token(token, token_type="access")
     if not payload:
         return DEFAULT_BILLABLE_USER_ID
     sub = payload.get("sub")

@@ -127,19 +127,17 @@ def test_create_user_as_admin_succeeds(
 
 
 def test_create_user_with_legacy_admin_token_succeeds(
-    client: TestClient,
-    monkeypatch: pytest.MonkeyPatch,
+    seeded_auth_client: TestClient,
 ) -> None:
-    """Le token admin historique reste accepté avant la migration 7.2."""
-    monkeypatch.setattr(get_security_config(), "disable_auth", False)
-    login_response = client.post(
+    """Le token admin seedé en SQLite reste accepté pour créer un writer."""
+    login_response = seeded_auth_client.post(
         "/api/v1/auth/login",
         json={"username": "admin", "password": "admin123"},
     )
     assert login_response.status_code == 200
 
     token = login_response.json()["access_token"]
-    response = client.post(
+    response = seeded_auth_client.post(
         "/api/v1/users",
         json=_user_payload("legacy-admin-created"),
         headers={"Authorization": f"Bearer {token}"},
