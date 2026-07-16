@@ -61,8 +61,8 @@ vi.mock('../store/contextConfigStore', () => ({
 
 const models: LLMModelResponse[] = [
   {
-    model_identifier: 'gpt-5.2',
-    display_name: 'GPT-5.2',
+    model_identifier: 'gpt-5.6-terra',
+    display_name: 'GPT-5.6 Terra',
     client_type: 'openai',
     max_tokens: 128_000,
   },
@@ -99,7 +99,7 @@ describe('useGenerationRequest', () => {
       maxContextTokens: 42_000,
     })
     expect(req.max_context_tokens).toBe(42_000)
-    expect(req.llm_model_identifier).toBe('gpt-5.2')
+    expect(req.llm_model_identifier).toBe('gpt-5.6-terra')
   })
 
   it('reflète une réduction de plafond dans le payload (cohérence estimation vs build)', () => {

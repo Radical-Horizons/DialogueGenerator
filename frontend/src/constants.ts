@@ -9,43 +9,54 @@
  * 
  * Source de vérité unique pour tous les identifiants de modèles côté frontend.
  * Ces constantes doivent correspondre à ModelNames dans constants.py côté backend.
+ *
+ * Famille GPT-5.6 : Sol = flagship, Terra = équilibre, Luna = volume/coût.
  */
 export const MODEL_NAMES = {
-  /** GPT-5.4 - Modèle frontier (raisonnement, structured output) */
-  GPT_5_4: 'gpt-5.4',
-  /** GPT-5.2 - Modèle principal */
-  GPT_5_2: 'gpt-5.2',
-  /** GPT-5.2 Pro - Modèle avec plus de compute pour raisonnement approfondi */
-  GPT_5_2_PRO: 'gpt-5.2-pro',
-  /** GPT-5.2 Thinking - Alias pour GPT-5.2 Pro (déprécié, utiliser GPT_5_2_PRO) */
-  GPT_5_2_THINKING: 'gpt-5.2-pro',
-  /** GPT-5 Mini - Version économique et rapide */
-  GPT_5_MINI: 'gpt-5-mini',
-  /** GPT-5 Nano - Version compacte */
-  GPT_5_NANO: 'gpt-5-nano',
+  /** GPT-5.6 Sol — flagship */
+  GPT_5_6_SOL: 'gpt-5.6-sol',
+  /** GPT-5.6 Terra — équilibre intelligence/coût */
+  GPT_5_6_TERRA: 'gpt-5.6-terra',
+  /** GPT-5.6 Luna — volume / coût */
+  GPT_5_6_LUNA: 'gpt-5.6-luna',
+  /** Alias API OpenAI gpt-5.6 → Sol */
+  GPT_5_6: 'gpt-5.6',
+  /** @deprecated Alias → Sol */
+  GPT_5_4: 'gpt-5.6-sol',
+  /** @deprecated Alias → Terra */
+  GPT_5_2: 'gpt-5.6-terra',
+  /** @deprecated Alias → Sol */
+  GPT_5_2_PRO: 'gpt-5.6-sol',
+  /** @deprecated Alias → Sol */
+  GPT_5_2_THINKING: 'gpt-5.6-sol',
+  /** @deprecated Alias → Luna */
+  GPT_5_MINI: 'gpt-5.6-luna',
+  /** @deprecated Alias → Luna */
+  GPT_5_NANO: 'gpt-5.6-luna',
 } as const
 
 /** Modèles avec sélecteur reasoning.effort dans le panneau génération. */
 export const REASONING_EFFORT_MODELS = [
-  MODEL_NAMES.GPT_5_4,
-  MODEL_NAMES.GPT_5_2,
-  MODEL_NAMES.GPT_5_2_PRO,
-  MODEL_NAMES.GPT_5_MINI,
-  MODEL_NAMES.GPT_5_NANO,
+  MODEL_NAMES.GPT_5_6_SOL,
+  MODEL_NAMES.GPT_5_6_TERRA,
+  MODEL_NAMES.GPT_5_6_LUNA,
 ] as const
 
-/** Modèles frontier : effort none … xhigh (hors mini/nano). */
+/**
+ * Modèles frontier : effort none … max (tous les tiers GPT-5.6).
+ * Doc : none | low | medium | high | xhigh | max
+ */
 export const FULL_REASONING_EFFORT_MODELS = [
-  MODEL_NAMES.GPT_5_4,
-  MODEL_NAMES.GPT_5_2,
-  MODEL_NAMES.GPT_5_2_PRO,
+  MODEL_NAMES.GPT_5_6_SOL,
+  MODEL_NAMES.GPT_5_6_TERRA,
+  MODEL_NAMES.GPT_5_6_LUNA,
 ] as const
 
 /**
  * Modèle par défaut à utiliser.
  * Doit correspondre à Defaults.MODEL_ID dans constants.py.
  */
-export const DEFAULT_MODEL = MODEL_NAMES.GPT_5_MINI
+export const DEFAULT_MODEL = MODEL_NAMES.GPT_5_6_LUNA
 
 /**
  * Cible tactile minimale (HIG / WCAG 2.5.5) — chrome shell & toolbar graphe (Story 17.2 FR119).
@@ -115,6 +126,3 @@ export const API_TIMEOUTS = {
   /** Lookup tokens précompilés par fiche (cache disque). */
   PRECOMPUTED_ENTITY_TOKENS: 15000,
 } as const
-
-
-

@@ -72,10 +72,10 @@ Tests E2E qui appellent le LLM (accept/reject de nœuds générés). Résolution
 
 ## 4. Chronologie des correctifs
 
-1. **Plan E2E LLM** : port 4243, preflight (clé + budget), gpt-5-nano, suppression des skips, `docs/troubleshooting/e2e-llm.md`, script `test:e2e:llm`, tag `@e2e-llm`.
+1. **Plan E2E LLM** : port 4243, preflight (clé + budget), gpt-5.6-luna, suppression des skips, `docs/troubleshooting/e2e-llm.md`, script `test:e2e:llm`, tag `@e2e-llm`.
 2. **Port** : `playwright.config` → `API_PORT=4243`, health sur 4243 ; `cost-governance` et `graph-cycle-validation` alignés sur 4243.
 3. **Preflight** : `beforeAll` → GET `/health/detailed` (llm_connectivity), GET/PUT budget ; échec explicite sinon.
-4. **Modèle** : `data-testid="llm-model-select"`, `selectOption('gpt-5-nano')` dans le helper de génération.
+4. **Modèle** : `data-testid="llm-model-select"`, `selectOption('gpt-5.6-luna')` dans le helper de génération.
 5. **Skips** : remplacés par `expect` qui échouent, avec messages pointant vers `docs/troubleshooting/e2e-llm.md`.
 6. **Stabilisation** :
    - Sélection du dialogue **par filename** (`tunnel_vertébral_pigments_impossibles.json`) au lieu du titre pour « Tunnel vertébral ».
@@ -95,7 +95,7 @@ Tests E2E qui appellent le LLM (accept/reject de nœuds générés). Résolution
 - **Scoper les actions** : pour des actions sur un élément précis (ex. Reject d'un nœud), restreindre les locators au sous-arbre de cet élément pour éviter de cliquer ailleurs.
 - **Timing** : debounce, sauvegardes, reload — bien documenter les délais nécessaires et les attentes explicites (toast, comptes, visibilité) avant d'asserter.
 - **Fail fast** : preflight + messages d'échec clairs (clé, budget, port) réduisent le temps perdu à chercher « pourquoi ça ne marche pas » en plein milieu d'un test.
-- **Coût des E2E LLM** : utiliser un modèle cheap (gpt-5-nano), timeouts réalistes, retries limités. Documenter tout ça pour que l'équipe comprenne quoi attendre.
+- **Coût des E2E LLM** : utiliser un modèle cheap (gpt-5.6-luna), timeouts réalistes, retries limités. Documenter tout ça pour que l'équipe comprenne quoi attendre.
 
 ---
 

@@ -16,7 +16,7 @@ from services.unity_export_normalizer import normalize_unity_export_document
 logger = logging.getLogger(__name__)
 
 
-def _stable_node_id() -> str:
+def generate_stable_node_id() -> str:
     """Retourne un identifiant stable unique pour un nœud (schema v1.2.0)."""
     return f"node-{uuid.uuid4().hex}"
 
@@ -362,7 +362,7 @@ Instructions pour la suite:
                 system_prompt_override=system_prompt_override,
                 max_choices=None,
             )
-            node_id = _stable_node_id()
+            node_id = generate_stable_node_id()
             enriched = self.enrich_with_ids(
                 content=response,
                 start_id=node_id,

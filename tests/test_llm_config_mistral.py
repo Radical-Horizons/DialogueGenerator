@@ -15,12 +15,12 @@ class TestLLMConfigMistral:
         return {
             "api_key_env_var": "OPENAI_API_KEY",
             "mistral_api_key_env_var": "MISTRAL_API_KEY",
-            "default_model": "gpt-5.2",
+            "default_model": "gpt-5.6-terra",
             "temperature": 0.7,
             "max_tokens": 2000,
             "available_models": [
                 {
-                    "api_identifier": "gpt-5.2",
+                    "api_identifier": "gpt-5.6-terra",
                     "display_name": "GPT-5.2",
                     "client_type": "openai",
                     "parameters": {

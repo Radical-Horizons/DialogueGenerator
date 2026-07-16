@@ -12,7 +12,7 @@ class TestGetLlmFallbackChain:
         """fallback_chain absent dans llm_config → retourne liste vide (pas de fallback)."""
         base_config = {
             "api_key_env_var": "OPENAI_API_KEY",
-            "default_model": "gpt-5.2",
+            "default_model": "gpt-5.6-terra",
             "available_models": [],
         }
         with patch.object(ConfigurationService, "_load_json_file", return_value=base_config):
@@ -36,24 +36,24 @@ class TestGetLlmFallbackChain:
         """fallback_chain avec 2 api_identifier → ordre respecté."""
         base_config = {
             "api_key_env_var": "OPENAI_API_KEY",
-            "fallback_chain": ["gpt-5.2", "labs-mistral-small-creative"],
+            "fallback_chain": ["gpt-5.6-terra", "labs-mistral-small-creative"],
             "available_models": [],
         }
         with patch.object(ConfigurationService, "_load_json_file", return_value=base_config):
             with patch.object(ConfigurationService, "_load_app_config", return_value={}):
                 svc = ConfigurationService()
                 result = svc.get_llm_fallback_chain()
-                assert result == ["gpt-5.2", "labs-mistral-small-creative"]
+                assert result == ["gpt-5.6-terra", "labs-mistral-small-creative"]
 
     def test_fallback_chain_exposed_via_get_llm_config(self) -> None:
         """get_llm_config() contient fallback_chain quand présent dans le fichier."""
         base_config = {
             "api_key_env_var": "OPENAI_API_KEY",
-            "fallback_chain": ["gpt-5.2", "labs-mistral-small-creative"],
+            "fallback_chain": ["gpt-5.6-terra", "labs-mistral-small-creative"],
             "available_models": [],
         }
         with patch.object(ConfigurationService, "_load_json_file", return_value=base_config):
             with patch.object(ConfigurationService, "_load_app_config", return_value={}):
                 svc = ConfigurationService()
                 llm_config = svc.get_llm_config()
-                assert llm_config.get("fallback_chain") == ["gpt-5.2", "labs-mistral-small-creative"]
+                assert llm_config.get("fallback_chain") == ["gpt-5.6-terra", "labs-mistral-small-creative"]

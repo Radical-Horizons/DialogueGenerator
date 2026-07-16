@@ -43,7 +43,7 @@ def client(mock_dialogue_service, monkeypatch):
     })
     mock_config_service.get_available_llm_models = MagicMock(return_value=[
         {
-            "api_identifier": "gpt-5.2-mini",
+            "api_identifier": "gpt-5.6-luna",
             "display_name": "GPT-4o Mini",
             "client_type": "openai"
         }

@@ -55,7 +55,7 @@ alwaysApply: false
   - Tests API : utiliser `TestClient` de FastAPI, pas de serveur réel
   - Mocks : `pytest-mock` pour services externes (LLM, fichiers GDD)
   - Configuration : `pytest.ini` définit les options (asyncio_mode, testpaths, etc.)
-  - **E2E (Playwright)** : fumée → `npm run test:e2e:smoke` (`@smoke` sur les specs listées dans `.cursor/commands/test-tiers.md`) ; complet → `npm run test:e2e` ou `npm run test:e2e:verify`. L'environnement nécessaire pour les E2E est disponible (`.env` avec `OPENAI_API_KEY`, budget, modèle gpt-5-mini). Voir `docs/troubleshooting/e2e-llm.md` pour preflight et dépannage. Post-mortem : `docs/troubleshooting/post-mortem-e2e-llm.md`.
+  - **E2E (Playwright)** : fumée → `npm run test:e2e:smoke` (`@smoke` sur les specs listées dans `.cursor/commands/test-tiers.md`) ; complet → `npm run test:e2e` ou `npm run test:e2e:verify`. L'environnement nécessaire pour les E2E est disponible (`.env` avec `OPENAI_API_KEY`, budget, modèle gpt-5.6-luna). Voir `docs/troubleshooting/e2e-llm.md` pour preflight et dépannage. Post-mortem : `docs/troubleshooting/post-mortem-e2e-llm.md`.
 
 - **Vitest — protocole agents Cursor (source de vérité)** : détail unique ici ; `AGENTS.md` ne fait que résumer. `frontend_testing.mdc` couvre RTL, Playwright et anti-patterns — pas une deuxième copie du protocole d’exécution.
   - **Ne pas** lancer la suite Vitest complète depuis l’agent (workers ouverts). La CI ou une demande explicite utilisateur.

@@ -45,7 +45,7 @@ Avec l'environnement complet (clé, budget, etc.), tous les tests E2E sont exéc
 | Spec | Rôle |
 |------|------|
 | `e2e/e2e-llm-preflight.spec.ts` | Preflight isolé : health, budget GET, auto-ajustement quota (quota 0 → 50), fail-fast sur mauvais port. Aucun appel LLM. |
-| `e2e/graph-node-accept-reject.spec.ts` | Accept/Reject de nœuds générés (LLM). Prérequis : preflight vert, gpt-5-mini, dialogue « Tunnel vertébral ». |
+| `e2e/graph-node-accept-reject.spec.ts` | Accept/Reject de nœuds générés (LLM). Prérequis : preflight vert, gpt-5.6-luna, dialogue « Tunnel vertébral ». |
 
 ## Preflight
 
@@ -61,8 +61,8 @@ L'API doit tourner sur le **port 4243** (aligné avec le proxy Vite en E2E). Pla
 
 ## Modèle
 
-Les E2E utilisent **gpt-5-mini** pour limiter les coûts. Le panneau de génération sélectionne ce modèle via `data-testid="llm-model-select"`.  
-`gpt-5-mini` est défini dans `app_config.json` (`available_models`).
+Les E2E utilisent **gpt-5.6-luna** pour limiter les coûts. Le panneau de génération sélectionne ce modèle via `data-testid="llm-model-select"`.  
+`gpt-5.6-luna` est défini dans `app_config.json` (`available_models`).
 
 ## Comportement des tests
 
@@ -78,7 +78,7 @@ Les E2E utilisent **gpt-5-mini** pour limiter les coûts. Le panneau de généra
 | Clé API manquante | `.env` à la racine avec `OPENAI_API_KEY`, ou variable d'environnement. Redémarrer l'API (ou relancer les E2E). |
 | Budget bloqué | `data/cost_budgets.json` : `quota > 0`, `percentage < 100`. Le preflight peut forcer `quota: 50` si besoin. |
 | API injoignable / ECONNREFUSED | **Lance le serveur avant les tests** : `npm run dev`, puis dans un autre terminal `npm run test:e2e:llm`. L’API doit écouter sur **4243**. Si Playwright a démarré les serveurs et qu’un test a échoué, les retries n’ont plus d’API → relancer les tests avec le serveur déjà up. |
-| Aucun toast de succès | Vérifier les logs frontend/API, budget, modèle gpt-5-mini. S'assurer qu'un dialogue Unity existe (ex. `Assets/Dialogue/*.json`) et que le graphe charge correctement. |
+| Aucun toast de succès | Vérifier les logs frontend/API, budget, modèle gpt-5.6-luna. S'assurer qu'un dialogue Unity existe (ex. `Assets/Dialogue/*.json`) et que le graphe charge correctement. |
 | AC#5 pending introuvable après reload | Draft : debounce 3s, attendre 10s avant reload. Même dialogue « Tunnel vertébral » avant/après. |
 
 ## Références

@@ -97,7 +97,7 @@ export function NarrowOverlayDrawer({
       >
         <div
           style={{
-            padding: '0.5rem 0.75rem',
+            padding: '0.75rem 0.75rem',
             borderBottom: `1px solid ${theme.border.primary}`,
             backgroundColor: theme.background.panelHeader,
             display: 'flex',

@@ -27,7 +27,7 @@ interface LLMStore {
 export const useLLMStore = create<LLMStore>((set) => ({
   // État initial
   provider: (localStorage.getItem('llm-provider') as 'openai' | 'mistral') || 'openai',
-  model: localStorage.getItem('llm-model') || 'gpt-5.2',
+    model: localStorage.getItem('llm-model') || 'gpt-5.6-terra',
   availableModels: [],
 
   // Actions

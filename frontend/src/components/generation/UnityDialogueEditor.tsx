@@ -5,6 +5,7 @@
  */
 import { memo, useState, useEffect, useCallback, useMemo, useImperativeHandle, forwardRef, useRef, type ReactNode } from 'react'
 import * as documentsAPI from '../../api/documents'
+import * as dialoguesAPI from '../../api/dialogues'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
 import { unityDialogueEditorChrome } from '../../theme/responsiveChrome'
@@ -24,6 +25,11 @@ import {
   extractValidationIssuesFromApiError,
   type DocumentFieldError,
 } from '../../utils/documentValidationFieldErrors'
+import {
+  documentIdFromTitle,
+  documentIdWithNumericSuffix,
+  isCanonicalRevisionConflict,
+} from '../../utils/documentIdFromTitle'
 
 export interface UnityDialogueEditorProps {
   json_content: string
@@ -34,6 +40,13 @@ export interface UnityDialogueEditorProps {
   documentRevision?: number
   canEdit?: boolean
   onSave?: (filename: string, revision: number) => void | Promise<void>
+  /**
+   * Notifié à chaque édition locale (JSON Unity array stringifié).
+   * Permet de synchroniser le graphStore avant une sauvegarde graphe (1ʳᵉ génération).
+   */
+  onContentChange?: (jsonContent: string) => void
+  /** Miroir isValid / isSaving pour un bouton Sauvegarder externe (ex. footer Dashboard). */
+  onSaveStateChange?: (state: { isValid: boolean; isSaving: boolean }) => void
   onCancel?: () => void
   extraActions?: ReactNode
   hideHeaderSaveButton?: boolean
@@ -66,6 +79,8 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
   documentRevision = 1,
   canEdit = true,
   onSave,
+  onContentChange,
+  onSaveStateChange,
   onCancel,
   extraActions,
   hideHeaderSaveButton = false,
@@ -80,6 +95,11 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<DocumentFieldError[]>([])
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set())
+  const revisionRef = useRef(documentRevision)
+  const onContentChangeRef = useRef(onContentChange)
+  onContentChangeRef.current = onContentChange
+  const onSaveStateChangeRef = useRef(onSaveStateChange)
+  onSaveStateChangeRef.current = onSaveStateChange
 
   // Parser et état local des nœuds
   const [nodes, setNodes] = useState<UnityDialogueNode[]>(() => {
@@ -94,6 +114,12 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
       return []
     }
   })
+  const nodesRef = useRef(nodes)
+  nodesRef.current = nodes
+
+  const emitContentChange = useCallback((nextNodes: UnityDialogueNode[]) => {
+    onContentChangeRef.current?.(JSON.stringify(nextNodes))
+  }, [])
 
   // Mettre à jour les nœuds quand json_content change
   useEffect(() => {
@@ -101,6 +127,10 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
       const parsed = JSON.parse(json_content)
       if (!Array.isArray(parsed)) {
         throw new Error('Le JSON Unity doit être un tableau de nœuds')
+      }
+      // Évite d'écraser les edits locales quand le parent echo le même contenu.
+      if (JSON.stringify(nodesRef.current) === JSON.stringify(parsed)) {
+        return
       }
       setNodes(parsed as UnityDialogueNode[])
       setError(null)
@@ -111,6 +141,10 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
       setError('Erreur lors du parsing du JSON Unity')
     }
   }, [json_content])
+
+  useEffect(() => {
+    revisionRef.current = documentRevision
+  }, [documentRevision])
 
   // Validation légère pour UX uniquement (feedback immédiat)
   // La validation complète est effectuée par le backend (UnityJsonRenderer.validate_nodes)
@@ -134,12 +168,19 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
   // Le backend validera complètement lors de la sauvegarde
   const isValid = validationErrors.length === 0
 
+  useEffect(() => {
+    onSaveStateChangeRef.current?.({ isValid, isSaving })
+  }, [isValid, isSaving])
+
   // Mettre à jour un nœud (par ID, pas par index)
   const updateNode = useCallback((nodeId: string, updates: Partial<UnityDialogueNode>) => {
     setNodes((prev) => {
-      return prev.map((node) => (node.id === nodeId ? { ...node, ...updates } : node))
+      const next = prev.map((node) => (node.id === nodeId ? { ...node, ...updates } : node))
+      nodesRef.current = next
+      emitContentChange(next)
+      return next
     })
-  }, [])
+  }, [emitContentChange])
 
   const firstFieldError = fieldErrors[0]
   const contentRef = useRef<HTMLDivElement>(null)
@@ -179,15 +220,18 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
     (nodeId: string, updates: { flag?: string; description?: string }) => {
       clearFieldError(nodeId, 'consequences.flag')
       clearFieldError(nodeId, 'consequences.description')
-      setNodes((prev) =>
-        prev.map((node) => {
+      setNodes((prev) => {
+        const next = prev.map((node) => {
           if (node.id !== nodeId) return node
           const cons = { ...(node.consequences ?? { flag: '' }), ...updates }
           return { ...node, consequences: cons }
-        }),
-      )
-    },
-    [clearFieldError],
+        })
+        nodesRef.current = next
+        emitContentChange(next)
+        return next
+      })
+      },
+    [clearFieldError, emitContentChange],
   )
 
   // Mettre à jour le speaker d'un nœud
@@ -216,47 +260,54 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
         clearFieldError(nodeId, `choices.${choiceIndex}.${key}`)
       }
       setNodes((prev) => {
-        return prev.map((node) => {
+        const next = prev.map((node) => {
           if (node.id !== nodeId) return node
-        const choices = [...(node.choices || [])]
-        choices[choiceIndex] = { ...choices[choiceIndex], ...updates }
+          const choices = [...(node.choices || [])]
+          choices[choiceIndex] = { ...choices[choiceIndex], ...updates }
           return { ...node, choices }
         })
+        nodesRef.current = next
+        emitContentChange(next)
+        return next
       })
-    },
-    [clearFieldError],
+      },
+    [clearFieldError, emitContentChange],
   )
 
   // Ajouter un choix (par nodeId, pas par index)
   const addChoice = useCallback(
     (nodeId: string) => {
       setNodes((prev) => {
-        return prev.map((node) => {
+        const next = prev.map((node) => {
           if (node.id !== nodeId) return node
-        const choices = [...(node.choices || [])]
+          const choices = [...(node.choices || [])]
           choices.push({ text: '', targetNode: 'END' })
           return { ...node, choices }
         })
+        nodesRef.current = next
+        emitContentChange(next)
+        return next
       })
-    },
-    []
+      },
+    [emitContentChange]
   )
 
   // Supprimer un choix (par nodeId, pas par index)
   const removeChoice = useCallback((nodeId: string, choiceIndex: number) => {
     setNodes((prev) => {
-      return prev.map((node) => {
+      const next = prev.map((node) => {
         if (node.id !== nodeId) return node
-      const choices = [...(node.choices || [])]
-      choices.splice(choiceIndex, 1)
+        const choices = [...(node.choices || [])]
+        choices.splice(choiceIndex, 1)
         return { ...node, choices: choices.length > 0 ? choices : undefined }
       })
+      nodesRef.current = next
+      emitContentChange(next)
+      return next
     })
-  }, [])
+  }, [emitContentChange])
 
-  // Sauvegarder
-  const handleSave = useCallback(async () => {
-    // Validation minimale côté frontend (IDs présents) - la validation complète est faite par le backend
+  const handleSave = useCallback(async (): Promise<void> => {
     if (!isValid) {
       setError('Corrigez les erreurs de validation avant de sauvegarder')
       return
@@ -265,35 +316,75 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
     setIsSaving(true)
     setError(null)
     setFieldErrors([])
+    const nodesToSave = nodesRef.current
 
     try {
-      // Reconstruire le JSON (préserver tous les champs, y compris ceux non édités)
-      const jsonContent = JSON.stringify(nodes, null, 2)
-
       if (!canEdit) {
         throw new Error("Vous n'avez pas la permission de modifier ce dialogue.")
       }
+
+      const jsonContent = JSON.stringify(nodesToSave, null, 2)
       const documentId = filename?.replace(/\.json$/i, '')
+
+      // Première génération (pas encore de document) → POST unity/export.
+      // Si le nom dérivé du titre existe déjà → réessayer avec _2, _3, … (pas d'écrasement).
       if (!documentId) {
-        throw new Error('Identifiant de dialogue manquant')
+        const dialogueTitle = title || 'Dialogue Unity'
+        const baseId = documentIdFromTitle(dialogueTitle)
+        const maxAttempts = 50
+        let lastError: unknown = null
+        for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+          const candidateId =
+            attempt === 1 ? baseId : documentIdWithNumericSuffix(baseId, attempt)
+          try {
+            const result = await dialoguesAPI.exportUnityDialogue({
+              json_content: jsonContent,
+              title: dialogueTitle,
+              filename: candidateId,
+            })
+            setFieldErrors([])
+            await onSave?.(result.filename, 1)
+            toast(
+              attempt === 1
+                ? `Dialogue sauvegardé: ${result.filename}`
+                : `Dialogue sauvegardé sous un nouveau nom: ${result.filename}`,
+              'success',
+              5000,
+            )
+            return
+          } catch (exportErr) {
+            lastError = exportErr
+            if (!isCanonicalRevisionConflict(exportErr)) {
+              throw exportErr
+            }
+          }
+        }
+        throw lastError instanceof Error
+          ? lastError
+          : new Error(
+              `Impossible de trouver un nom libre pour « ${baseId} » après ${maxAttempts} tentatives.`,
+            )
       }
+
+      // Dialogue existant → PUT documents
       const canonicalDocument = {
         ...(document ?? {}),
         schemaVersion: String(document?.schemaVersion ?? '1.2.0'),
-        nodes: JSON.parse(jsonContent) as UnityDialogueNode[],
+        nodes: nodesToSave,
       }
       const response = await documentsAPI.putDocument(documentId, {
         document: canonicalDocument,
-        revision: documentRevision,
+        revision: revisionRef.current,
         validationMode: 'export',
       })
+      revisionRef.current = response.revision
       setFieldErrors([])
       await onSave?.(`${documentId}.json`, response.revision)
       toast(`Dialogue sauvegardé: ${documentId}.json`, 'success', 5000)
     } catch (err) {
       const { fieldErrors: extracted } = extractValidationIssuesFromApiError(
         err,
-        nodes,
+        nodesToSave,
       )
       if (extracted.length > 0) {
         setFieldErrors(extracted)
@@ -307,16 +398,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
     } finally {
       setIsSaving(false)
     }
-  }, [
-    canEdit,
-    document,
-    documentRevision,
-    filename,
-    isValid,
-    nodes,
-    onSave,
-    toast,
-  ])
+  }, [canEdit, document, filename, isValid, onSave, title, toast])
 
   // Exposer handleSave, isValid et isSaving via ref
   useImperativeHandle(ref, () => ({
@@ -490,9 +572,20 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
               overflowY: 'hidden',
             }}
           >
+            <span
+              aria-live="polite"
+              style={{
+                color: theme.state.error.color,
+                fontSize: `${chrome.subtitleFontRem}rem`,
+                alignSelf: 'center',
+              }}
+            >
+              {error ?? ''}
+            </span>
             {extraActions}
             {!hideHeaderSaveButton && (
               <button
+                type="button"
                 onClick={() => void handleSave().catch(() => undefined)}
                 disabled={isSaving || !isValid || !canEdit}
                 style={{
@@ -510,8 +603,8 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                   borderRadius: '6px',
                   backgroundColor: theme.button.primary.background,
                   color: theme.button.primary.color,
-                  cursor: isValid && !isSaving ? 'pointer' : 'not-allowed',
-                  opacity: isValid && !isSaving ? 1 : 0.6,
+                  cursor: isSaving || !isValid || !canEdit ? 'not-allowed' : 'pointer',
+                  opacity: isSaving || !isValid || !canEdit ? 0.6 : 1,
                   boxSizing: 'border-box',
                   width: isActionsNarrow ? '100%' : undefined,
                   minWidth: isActionsNarrow ? 0 : undefined,

@@ -28,7 +28,6 @@ import {
   DEFAULT_MODEL,
   API_TIMEOUTS,
   REASONING_EFFORT_MODELS,
-  FULL_REASONING_EFFORT_MODELS,
 } from '../../constants'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import type { DialogueStructure } from '../../types/generation'
@@ -81,7 +80,7 @@ export function GenerationPanel() {
   const [maxCompletionTokens, setMaxCompletionTokens] = useState<number | null>(null)
   const [llmModel, setLlmModel] = useState<string>(DEFAULT_MODEL)
   const [reasoningEffort, setReasoningEffort] = useState<
-    'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+    'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | 'max' | null
   >(null)
   const [topP, setTopP] = useState<number | null>(null)
   const [maxChoices, setMaxChoices] = useState<number | null>(null)
@@ -534,11 +533,7 @@ export function GenerationPanel() {
                       justifyContent: 'center',
                       padding: 0,
                     }}
-                    title={
-                      llmModel === "gpt-5-mini" || llmModel === "gpt-5-nano"
-                        ? "Contrôle la profondeur de raisonnement. Mini/nano supportent uniquement minimal, low, medium, high (pas 'none' ni 'xhigh'). Le reasoning est toujours actif."
-                        : "Contrôle la profondeur de raisonnement du modèle. Plus élevé = meilleure qualité mais plus lent et plus coûteux."
-                    }
+                    title="Contrôle la profondeur de raisonnement GPT-5.6 (none → max). Plus élevé = meilleure qualité mais plus lent et plus coûteux."
                   >
                     ?
                   </button>
@@ -546,9 +541,9 @@ export function GenerationPanel() {
               </div>
               <StyledSelect
                 id="reasoning-effort-select"
-                value={reasoningEffort || (llmModel === "gpt-5-mini" || llmModel === "gpt-5-nano" ? 'minimal' : 'none')}
+                value={reasoningEffort || 'none'}
                 onChange={(e) => {
-                  const newValue = e.target.value as 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh'
+                  const newValue = e.target.value as 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | 'max'
                   setReasoningEffort(newValue === 'none' ? null : newValue)
                   draft.markDirty()
                 }}
@@ -563,23 +558,14 @@ export function GenerationPanel() {
                   fontSize: `${genChrome.selectTextFontRem}rem`,
                 }}
               >
-                {/* Options différentes selon le modèle */}
-                {(FULL_REASONING_EFFORT_MODELS as readonly string[]).includes(llmModel) ? (
-                  <>
-                    <option value="none">Aucun (rapide, latence minimale)</option>
-                    <option value="low">Faible (raisonnement minimal)</option>
-                    <option value="medium">Moyen (équilibré, recommandé)</option>
-                    <option value="high">Élevé (raisonnement approfondi)</option>
-                    <option value="xhigh">Très élevé (raisonnement maximal)</option>
-                  </>
-                ) : (
-                  <>
-                    <option value="minimal">Minimal (raisonnement minimal, toujours actif)</option>
-                    <option value="low">Faible (raisonnement léger)</option>
-                    <option value="medium">Moyen (équilibré, recommandé)</option>
-                    <option value="high">Élevé (raisonnement approfondi)</option>
-                  </>
-                )}
+                <>
+                  <option value="none">Aucun (rapide, latence minimale)</option>
+                  <option value="low">Faible</option>
+                  <option value="medium">Moyen (équilibré, recommandé)</option>
+                  <option value="high">Élevé</option>
+                  <option value="xhigh">Très élevé (xhigh)</option>
+                  <option value="max">Maximum (qualité d'abord)</option>
+                </>
               </StyledSelect>
             </div>
           )}
@@ -687,7 +673,7 @@ export function GenerationPanel() {
               color: theme.text.tertiary 
             }}>
               {topP === null ? (
-                'Non utilisé (temperature sera utilisée si disponible)'
+                'Non utilisé — GPT-5.6 n\'accepte ni temperature ni top_p ; régler le niveau de raisonnement.'
               ) : topP < 0.3 ? (
                 'Focalisé (réponses plus déterministes)'
               ) : topP > 0.7 ? (

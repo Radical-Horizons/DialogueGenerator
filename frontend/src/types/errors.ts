@@ -4,6 +4,16 @@
 import type { AxiosError } from 'axios'
 
 /**
+ * Messages utilisateur pour codes API connus (éviter le jargon technique).
+ */
+const USER_FACING_API_CODES: Record<string, string> = {
+  canonical_revision_required:
+    'Un dialogue avec ce nom existe déjà. La sauvegarde va proposer un nom libre (ex. _2).',
+  dialogue_access_denied:
+    'Vous n’avez pas la permission de modifier ce dialogue.',
+}
+
+/**
  * Structure d'erreur API standard.
  */
 export interface APIErrorResponse {
@@ -64,6 +74,17 @@ export function getErrorMessage(error: unknown): string {
           return parts.join('\n')
         }
       }
+      if (typeof detail === 'object' && !Array.isArray(detail)) {
+        const detailObj = detail as { code?: unknown; message?: unknown }
+        const code = typeof detailObj.code === 'string' ? detailObj.code : undefined
+        const mapped = code ? USER_FACING_API_CODES[code] : undefined
+        if (mapped) {
+          return mapped
+        }
+        if (typeof detailObj.message === 'string' && detailObj.message.trim()) {
+          return detailObj.message
+        }
+      }
     }
     const flatMessage = typeof rawData?.message === 'string' ? rawData.message : null
     const validationReport = rawData?.validationReport
@@ -82,6 +103,9 @@ export function getErrorMessage(error: unknown): string {
 
     if (errorData) {
       let message = errorData.message || axiosError.message || 'Une erreur est survenue'
+      if (errorData.code && USER_FACING_API_CODES[errorData.code]) {
+        return USER_FACING_API_CODES[errorData.code]
+      }
       
       // Parser les erreurs de validation (ValidationException)
       if (errorData.details) {

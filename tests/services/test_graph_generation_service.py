@@ -4,7 +4,10 @@ from unittest.mock import Mock, AsyncMock, MagicMock
 from typing import Dict, Any, List
 
 from services.graph_generation_service import GraphGenerationService
-from services.unity_dialogue_generation_service import UnityDialogueGenerationService, _stable_node_id
+from services.unity_dialogue_generation_service import (
+    UnityDialogueGenerationService,
+    generate_stable_node_id,
+)
 from core.llm.llm_client import ILLMClient
 
 
@@ -216,7 +219,7 @@ async def test_generate_nodes_for_all_choices_id_format(mock_llm_client, mock_ge
         UnityDialogueGenerationResponse(title="Dialogue 3", node=mock_nodes_content[2])
     ]
     
-    stable_ids = [_stable_node_id() for _ in range(3)]
+    stable_ids = [generate_stable_node_id() for _ in range(3)]
     mock_enriched_nodes = [
         [{"id": stable_ids[0], "speaker": "PNJ", "line": "Réponse 1", "choices": []}],
         [{"id": stable_ids[1], "speaker": "PNJ", "line": "Réponse 2", "choices": []}],

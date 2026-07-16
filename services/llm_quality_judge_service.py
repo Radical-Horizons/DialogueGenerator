@@ -54,7 +54,7 @@ class LLMQualityJudgeService:
     @staticmethod
     def resolve_default_model_id(config_service: ConfigurationService) -> str:
         """Retourne l'api_identifier du modèle par défaut."""
-        return str(config_service.get_llm_setting("default_model", "gpt-5.2"))
+        return str(config_service.get_llm_setting("default_model", "gpt-5.6-terra"))
 
     @staticmethod
     def resolve_provider_for_model(

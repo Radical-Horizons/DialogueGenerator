@@ -13,6 +13,7 @@ const {
   contextSubLocationsRef,
   contextRegionRef,
   locationsFullRef,
+  sceneSelectionRef,
 } = vi.hoisted(() => ({
   mockToggleSubLocation: vi.fn(),
   mockToggleLocation: vi.fn(),
@@ -21,6 +22,19 @@ const {
   contextSubLocationsRef: { current: [] as string[] },
   contextRegionRef: { current: null as string | null },
   locationsFullRef: { current: [] as string[] },
+  sceneSelectionRef: {
+    current: {
+      characterA: null,
+      characterB: null,
+      sceneRegion: null,
+      subLocation: null,
+    } as {
+      characterA: string | null
+      characterB: string | null
+      sceneRegion: string | null
+      subLocation: string | null
+    },
+  },
 }))
 
 vi.mock('../api/context', () => ({
@@ -34,12 +48,7 @@ vi.mock('../api/context', () => ({
 vi.mock('../store/generationStore', () => ({
   useGenerationStore: vi.fn((selector: (s: { sceneSelection: unknown }) => unknown) =>
     selector({
-      sceneSelection: {
-        characterA: null,
-        characterB: null,
-        sceneRegion: null,
-        subLocation: null,
-      },
+      sceneSelection: sceneSelectionRef.current,
     }),
   ),
 }))
@@ -71,6 +80,7 @@ vi.mock('../store/contextStore', () => {
       { name: 'Forêt Sombre', data: { Nom: 'Forêt Sombre' } },
       { name: 'Clairière', data: { Nom: 'Clairière' } },
       { name: 'Ruines Antiques', data: { Nom: 'Ruines Antiques' } },
+      { name: 'Crypte profonde', data: { Nom: 'Crypte profonde' } },
     ],
     characters: [],
     gddDataRevision: 0,
@@ -103,6 +113,12 @@ describe('useSceneSelection GDD sync', () => {
     contextSubLocationsRef.current = []
     contextRegionRef.current = null
     locationsFullRef.current = []
+    sceneSelectionRef.current = {
+      characterA: null,
+      characterB: null,
+      sceneRegion: null,
+      subLocation: null,
+    }
   })
 
   it('sélectionne le sous-lieu dans le GDD via toggleSubLocation uniquement', async () => {
@@ -141,5 +157,39 @@ describe('useSceneSelection GDD sync', () => {
     expect(mockToggleLocation).not.toHaveBeenCalledWith('Clairière', 'full')
     expect(contextSubLocationsRef.current).toEqual(['Clairière'])
     expect(locationsFullRef.current).toEqual(['Clairière'])
+  })
+
+  it('écarte un lieu non région restauré par un preset', async () => {
+    sceneSelectionRef.current = {
+      characterA: null,
+      characterB: null,
+      sceneRegion: 'Clairière',
+      subLocation: 'Crypte profonde',
+    }
+
+    const { result } = renderHook(() => useSceneSelection())
+
+    await waitFor(() => {
+      expect(result.current.data.regions).toEqual(['Forêt Sombre'])
+      expect(result.current.selection.sceneRegion).toBeNull()
+      expect(result.current.selection.subLocation).toBeNull()
+    })
+  })
+
+  it('écarte un descendant profond absent des enfants directs de la région', async () => {
+    sceneSelectionRef.current = {
+      characterA: null,
+      characterB: null,
+      sceneRegion: 'Forêt Sombre',
+      subLocation: 'Crypte profonde',
+    }
+
+    const { result } = renderHook(() => useSceneSelection())
+
+    await waitFor(() => {
+      expect(result.current.data.subLocations).toEqual(['Clairière', 'Ruines Antiques'])
+      expect(result.current.selection.sceneRegion).toBe('Forêt Sombre')
+      expect(result.current.selection.subLocation).toBeNull()
+    })
   })
 })

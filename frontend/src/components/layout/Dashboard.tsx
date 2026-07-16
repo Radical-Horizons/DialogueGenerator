@@ -273,6 +273,10 @@ export function Dashboard() {
   const [selectedDialogue, setSelectedDialogue] = useState<UnityDialogueMetadata | null>(null)
   const dialogueListRef = useRef<UnityDialogueListRef>(null)
   const unityDialogueEditorRef = useRef<UnityDialogueEditorHandle>(null)
+  const [generatedEditorSaveState, setGeneratedEditorSaveState] = useState({
+    isValid: true,
+    isSaving: false,
+  })
   const { rawPrompt, isEstimating, unityDialogueResponse, setUnityDialogueResponse } = useGenerationStore()
   const generationState = useGenerationStore((state) => ({
     isEstimating: state.isEstimating,
@@ -284,7 +288,24 @@ export function Dashboard() {
   const commandPalette = useCommandPalette()
   
   // État du graphe pour détecter si un nœud est sélectionné et si une génération est en cours
-  const { selectedNodeId, isGenerating: isGraphGenerating } = useGraphStore()
+  const { selectedNodeId, isGenerating: isGraphGenerating, applyUnityDocumentNodes } = useGraphStore()
+
+  const handleGeneratedDialogueContentChange = useCallback(
+    (jsonContent: string) => {
+      try {
+        const parsed: unknown = JSON.parse(jsonContent)
+        if (!Array.isArray(parsed)) return
+        applyUnityDocumentNodes(parsed)
+        const current = useGenerationStore.getState().unityDialogueResponse
+        if (current && current.json_content !== jsonContent) {
+          setUnityDialogueResponse({ ...current, json_content: jsonContent })
+        }
+      } catch {
+        // Contenu partiellement édité / invalide : ignorer jusqu'à la prochaine saisie valide.
+      }
+    },
+    [applyUnityDocumentNodes, setUnityDialogueResponse],
+  )
 
   // Boutons replier/déplier panneaux gauche & droite (layout 3 panneaux)
   const panelsRef = useRef<ResizablePanelsRef>(null)
@@ -468,10 +489,10 @@ export function Dashboard() {
                 json_content={unityDialogueResponse.json_content}
                 title={unityDialogueResponse.title}
                 hideHeaderSaveButton={true}
+                onContentChange={handleGeneratedDialogueContentChange}
+                onSaveStateChange={setGeneratedEditorSaveState}
                 onSave={() => {
-                  // Rafraîchir la liste des dialogues après sauvegarde
                   dialogueListRef.current?.refresh()
-                  // Nettoyer le panneau "Dialogue généré" pour revenir à l'état initial
                   setUnityDialogueResponse(null)
                 }}
               />
@@ -539,7 +560,7 @@ export function Dashboard() {
         </div>
       ),
     },
-  ], [unityDialogueResponse, rawPrompt, isEstimating, rightPanelTab, centerPanelTab, selectedContextItem, selectedContextHistoryStem, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse])
+  ], [unityDialogueResponse, rawPrompt, isEstimating, rightPanelTab, centerPanelTab, selectedContextItem, selectedContextHistoryStem, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse, handleGeneratedDialogueContentChange])
 
   // En mode éditeur de graphe : masquer "Prompt". Hors graphe : masquer "Édition de nœud".
   const visibleRightPanelTabs = useMemo(() => {
@@ -820,10 +841,13 @@ export function Dashboard() {
         {rightPanelTab === 'dialogue' && unityDialogueResponse ? (
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <button
-              onClick={() => unityDialogueEditorRef.current?.handleSave()}
+              type="button"
+              onClick={() => {
+                void unityDialogueEditorRef.current?.handleSave()
+              }}
               disabled={
-                !unityDialogueEditorRef.current?.isValid ||
-                unityDialogueEditorRef.current?.isSaving ||
+                !generatedEditorSaveState.isValid ||
+                generatedEditorSaveState.isSaving ||
                 actions.isLoading ||
                 isGraphGenerating
               }
@@ -837,15 +861,15 @@ export function Dashboard() {
                 border: 'none',
                 borderRadius: '6px',
                 cursor:
-                  unityDialogueEditorRef.current?.isValid &&
-                  !unityDialogueEditorRef.current?.isSaving &&
+                  generatedEditorSaveState.isValid &&
+                  !generatedEditorSaveState.isSaving &&
                   !actions.isLoading &&
                   !isGraphGenerating
                     ? 'pointer'
                     : 'not-allowed',
                 opacity:
-                  unityDialogueEditorRef.current?.isValid &&
-                  !unityDialogueEditorRef.current?.isSaving &&
+                  generatedEditorSaveState.isValid &&
+                  !generatedEditorSaveState.isSaving &&
                   !actions.isLoading &&
                   !isGraphGenerating
                     ? 1
@@ -858,7 +882,7 @@ export function Dashboard() {
               }}
               title="Sauvegarder (Ctrl+S)"
             >
-              {unityDialogueEditorRef.current?.isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
+              {generatedEditorSaveState.isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
             </button>
             <button
               onClick={handlePrimaryGenerateAction}

@@ -35,7 +35,7 @@ class TestOpenAIClient:
     def client_config(self):
         """Fixture pour config client."""
         return {
-            "default_model": "gpt-5.2",
+            "default_model": "gpt-5.6-terra",
             "temperature": 0.7,
             "max_tokens": 1500,
         }
@@ -49,7 +49,7 @@ class TestOpenAIClient:
         """Test initialisation du client."""
         client = OpenAIClient(api_key=mock_api_key, config=client_config)
         
-        assert client.model_name == "gpt-5.2"
+        assert client.model_name == "gpt-5.6-terra"
         assert client.temperature == 0.7
         assert client.max_tokens == 1500
         assert client.client is not None

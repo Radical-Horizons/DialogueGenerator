@@ -631,7 +631,11 @@ async def export_unity_dialogue(
                 status_code=status.HTTP_409_CONFLICT,
                 detail={
                     "code": "canonical_revision_required",
-                    "message": "Utilisez PUT /documents/{id} avec la révision courante.",
+                    "message": (
+                        "Un dialogue avec ce nom existe déjà. "
+                        "Choisissez un autre nom (ex. suffixe _2) ou "
+                        "utilisez PUT /documents/{id} pour le mettre à jour."
+                    ),
                 },
             )
         persistence_service.write_document(

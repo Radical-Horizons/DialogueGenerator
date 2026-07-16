@@ -35,7 +35,7 @@ describe('useLLMStore', () => {
     const { result } = renderHook(() => useLLMStore());
     act(() => {
       result.current.setProvider('openai');
-      result.current.setModel('gpt-5.2');
+      result.current.setModel('gpt-5.6-terra');
       result.current.setAvailableModels([]);
     });
   });
@@ -44,7 +44,7 @@ describe('useLLMStore', () => {
     const { result } = renderHook(() => useLLMStore());
 
     expect(result.current.provider).toBe('openai');
-    expect(result.current.model).toBe('gpt-5.2');
+    expect(result.current.model).toBe('gpt-5.6-terra');
     expect(result.current.availableModels).toEqual([]);
   });
 
@@ -73,8 +73,8 @@ describe('useLLMStore', () => {
 
     const models = [
       {
-        api_identifier: 'gpt-5.2',
-        display_name: 'GPT-5.2',
+        api_identifier: 'gpt-5.6-terra',
+        display_name: 'GPT-5.6 Terra',
         client_type: 'openai' as const,
         parameters: { default_temperature: 0.7, max_tokens: 4096 },
       },
@@ -146,8 +146,8 @@ describe('useLLMStore', () => {
     const mockApiResponse = {
       models: [
         {
-          model_identifier: 'gpt-5.2',
-          display_name: 'GPT-5.2',
+          model_identifier: 'gpt-5.6-terra',
+          display_name: 'GPT-5.6 Terra',
           client_type: 'openai',
           max_tokens: 4096,
         },
@@ -163,8 +163,8 @@ describe('useLLMStore', () => {
 
     const expectedModels = [
       {
-        api_identifier: 'gpt-5.2',
-        display_name: 'GPT-5.2',
+        api_identifier: 'gpt-5.6-terra',
+        display_name: 'GPT-5.6 Terra',
         client_type: 'openai' as const,
         parameters: { default_temperature: 0.7, max_tokens: 4096 },
       },

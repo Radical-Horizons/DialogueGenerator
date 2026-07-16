@@ -24,7 +24,7 @@ def sample_records():
         LLMUsageRecord(
             request_id=f"req_{i}",
             timestamp=base_time - timedelta(hours=i),
-            model_name="gpt-5.2" if i % 2 == 0 else "gpt-3.5-turbo",
+            model_name="gpt-5.6-terra" if i % 2 == 0 else "gpt-3.5-turbo",
             prompt_tokens=1000 + i * 100,
             completion_tokens=500 + i * 50,
             total_tokens=1500 + i * 150,
@@ -113,13 +113,13 @@ def test_get_usage_history_with_filters(client, sample_records, tmp_path):
     
     try:
         # Filtrer par modèle
-        response = client.get("/api/v1/llm-usage/history?model=gpt-5.2&page=1&page_size=10")
+        response = client.get("/api/v1/llm-usage/history?model=gpt-5.6-terra&page=1&page_size=10")
         
         assert response.status_code == 200
         data = response.json()
-        # Vérifier que tous les enregistrements sont pour gpt-5.2
+        # Vérifier que tous les enregistrements sont pour gpt-5.6-terra
         for record in data["records"]:
-            assert record["model_name"] == "gpt-5.2"
+            assert record["model_name"] == "gpt-5.6-terra"
     finally:
         # Nettoyer l'override
         app.dependency_overrides.pop(get_llm_usage_service, None)
@@ -136,7 +136,7 @@ def dialogue_records(tmp_path):
         LLMUsageRecord(
             request_id=f"req_diag_{i}",
             timestamp=base_time,
-            model_name="gpt-5.2",
+            model_name="gpt-5.6-terra",
             prompt_tokens=500,
             completion_tokens=100,
             total_tokens=600,
@@ -221,7 +221,7 @@ def test_get_generation_logs_200_returns_list(client, tmp_path):
         r = LLMUsageRecord(
             request_id=f"req_gl_{i}",
             timestamp=base_time - timedelta(hours=i),
-            model_name="gpt-5.2",
+            model_name="gpt-5.6-terra",
             prompt_tokens=100,
             completion_tokens=50,
             total_tokens=150,
@@ -264,7 +264,7 @@ def test_get_generation_logs_with_filters(client, dialogue_records, tmp_path):
     from models.llm_usage import LLMUsageRecord
     base_time = datetime.now(UTC)
     repo = FileLLMUsageRepository(storage_dir=str(tmp_path))
-    for i, model in enumerate(["gpt-5.2", "mistral-small"]):
+    for i, model in enumerate(["gpt-5.6-terra", "mistral-small"]):
         r = LLMUsageRecord(
             request_id=f"req_f_{i}",
             timestamp=base_time - timedelta(days=i),
@@ -286,13 +286,13 @@ def test_get_generation_logs_with_filters(client, dialogue_records, tmp_path):
     try:
         response = client.get(
             "/api/v1/llm-usage/dialogue/diag_f/generation-logs",
-            params={"model_name": "gpt-5.2"},
+            params={"model_name": "gpt-5.6-terra"},
         )
         assert response.status_code == 200
         data = response.json()
         logs = data["entries"]
         assert len(logs) == 1
-        assert logs[0]["model_name"] == "gpt-5.2"
+        assert logs[0]["model_name"] == "gpt-5.6-terra"
     finally:
         app.dependency_overrides.pop(get_llm_usage_service, None)
 
@@ -324,7 +324,7 @@ def test_llm_usage_record_has_dialogue_fields(sample_records):
     annotated = LLMUsageRecord(
         request_id="req_ann",
         timestamp=datetime.now(UTC),
-        model_name="gpt-5.2",
+        model_name="gpt-5.6-terra",
         prompt_tokens=400,
         completion_tokens=80,
         total_tokens=480,
@@ -404,7 +404,7 @@ def test_usage_history_exposes_dialogue_fields(client, tmp_path):
     record = LLMUsageRecord(
         request_id="req_m2",
         timestamp=datetime.now(UTC),
-        model_name="gpt-5.2",
+        model_name="gpt-5.6-terra",
         prompt_tokens=100,
         completion_tokens=20,
         total_tokens=120,

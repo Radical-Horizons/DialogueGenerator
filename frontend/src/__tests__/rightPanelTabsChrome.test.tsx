@@ -4,7 +4,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { Tabs } from '../components/shared/Tabs'
-import { drawerPanelTabChrome } from '../theme/responsiveChrome'
+import { drawerPanelTabChrome, segmentedTabTypography } from '../theme/responsiveChrome'
 
 const RIGHT_PANEL_WIDTH_PX = 420
 
@@ -48,6 +48,6 @@ describe('right panel tab chrome', () => {
     )
 
     const promptTab = screen.getByRole('button', { name: /^prompt$/i })
-    expect(promptTab.style.minHeight).toBe('44px')
+    expect(promptTab.style.minHeight).toBe(`${segmentedTabTypography.narrow.tabMinHeightPx}px`)
   })
 })

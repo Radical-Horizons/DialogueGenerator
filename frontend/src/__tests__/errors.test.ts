@@ -33,4 +33,21 @@ describe('getErrorMessage', () => {
     expect(msg).toContain('bad node')
     expect(msg).toContain('bad edge')
   })
+
+  it('humanise FastAPI detail object canonical_revision_required', () => {
+    const err = {
+      response: {
+        status: 409,
+        data: {
+          detail: {
+            code: 'canonical_revision_required',
+            message: 'Utilisez PUT /documents/{id} avec la révision courante.',
+          },
+        },
+      },
+    }
+    const msg = getErrorMessage(err)
+    expect(msg).toMatch(/existe déjà/i)
+    expect(msg).not.toMatch(/PUT \/documents/)
+  })
 })

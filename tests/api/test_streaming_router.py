@@ -42,7 +42,7 @@ async def test_create_job_and_stream_real_generation(client: TestClient, monkeyp
     job_request = {
         "user_instructions": "Test dialogue",
         "context_selections": context_selection.model_dump(mode='json'),
-            "llm_model_identifier": "gpt-5-mini"
+            "llm_model_identifier": "gpt-5.6-luna"
     }
     
     response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
@@ -137,7 +137,7 @@ def test_cancel_job(client: TestClient):
     job_request = {
         "user_instructions": "Test dialogue",
         "context_selections": context_selection.model_dump(mode='json'),
-            "llm_model_identifier": "gpt-5-mini"
+            "llm_model_identifier": "gpt-5.6-luna"
     }
     
     response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
@@ -172,7 +172,7 @@ def test_stream_job_uses_job_id_as_orchestrator_request_id(client: TestClient, m
     job_request = {
         "user_instructions": "Test dialogue",
         "context_selections": context_selection.model_dump(mode='json'),
-        "llm_model_identifier": "gpt-5-mini"
+        "llm_model_identifier": "gpt-5.6-luna"
     }
     response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
     assert response.status_code == 201
@@ -236,7 +236,7 @@ async def test_cleanup_automatic_after_completion(client: TestClient, monkeypatc
     job_request = {
         "user_instructions": "Test dialogue",
         "context_selections": context_selection.model_dump(mode='json'),
-            "llm_model_identifier": "gpt-5-mini"
+            "llm_model_identifier": "gpt-5.6-luna"
     }
     
     response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
@@ -320,7 +320,7 @@ def test_stream_job_when_claim_fails_emits_sse_error(client: TestClient, monkeyp
     job_request = {
         "user_instructions": "Test dialogue",
         "context_selections": context_selection.model_dump(mode="json"),
-        "llm_model_identifier": "gpt-5-mini",
+        "llm_model_identifier": "gpt-5.6-luna",
     }
     response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
     assert response.status_code == 201
@@ -401,7 +401,7 @@ def _minimal_job_request() -> dict:
     return {
         "user_instructions": "Test dialogue",
         "context_selections": context_selection.model_dump(mode="json"),
-        "llm_model_identifier": "gpt-5-mini",
+        "llm_model_identifier": "gpt-5.6-luna",
     }
 
 

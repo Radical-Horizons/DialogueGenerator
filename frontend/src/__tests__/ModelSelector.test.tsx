@@ -18,14 +18,14 @@ describe('ModelSelector', () => {
 
   const mockAvailableModels = [
     {
-      api_identifier: 'gpt-5.2',
-      display_name: 'GPT-5.2',
+      api_identifier: 'gpt-5.6-terra',
+      display_name: 'GPT-5.6 Terra',
       client_type: 'openai',
       parameters: { default_temperature: 0.7, max_tokens: 4096 },
     },
     {
-      api_identifier: 'gpt-5.2-pro',
-      display_name: 'GPT-5.2 Pro',
+      api_identifier: 'gpt-5.6-sol',
+      display_name: 'GPT-5.6 Terra Pro',
       client_type: 'openai',
       parameters: { default_temperature: 0.7, max_tokens: 4096 },
     },
@@ -41,7 +41,7 @@ describe('ModelSelector', () => {
     vi.clearAllMocks();
     mockUseLLMStore.mockReturnValue({
       provider: 'openai',
-      model: 'gpt-5.2',
+      model: 'gpt-5.6-terra',
       availableModels: mockAvailableModels,
       setProvider: mockSetProvider,
       setModel: mockSetModel,
@@ -63,7 +63,7 @@ describe('ModelSelector', () => {
     // Vérifier que le modèle actuel est dans le select
     const select = screen.getByRole('combobox');
     expect(select).toBeInTheDocument();
-    expect(select).toHaveValue('gpt-5.2');
+    expect(select).toHaveValue('gpt-5.6-terra');
   });
 
   it('should group models by provider', () => {
@@ -72,7 +72,7 @@ describe('ModelSelector', () => {
     const select = screen.getByRole('combobox');
     const optgroups = select.querySelectorAll('optgroup');
     expect(optgroups.length).toBeGreaterThan(0);
-    expect(screen.getByText('GPT-5.2')).toBeInTheDocument();
+    expect(screen.getByText('GPT-5.6 Terra')).toBeInTheDocument();
     expect(screen.getByText('Mistral Small Creative')).toBeInTheDocument();
   });
 
@@ -82,7 +82,7 @@ describe('ModelSelector', () => {
     // Le composant ne rend pas de texte "Provider actuel:" - vérifier juste que le select est présent
     const select = screen.getByRole('combobox');
     expect(select).toBeInTheDocument();
-    expect(select).toHaveValue('gpt-5.2');
+    expect(select).toHaveValue('gpt-5.6-terra');
   });
 
   it('should change model on selection', async () => {
@@ -107,7 +107,7 @@ describe('ModelSelector', () => {
   it('should handle empty model list', () => {
     mockUseLLMStore.mockReturnValue({
       provider: 'openai',
-      model: 'gpt-5.2',
+      model: 'gpt-5.6-terra',
       availableModels: [],
       setProvider: mockSetProvider,
       setModel: mockSetModel,
@@ -143,12 +143,12 @@ describe('ModelSelector', () => {
     const select = screen.getByRole('combobox');
 
     // Sélectionner un autre modèle OpenAI
-    fireEvent.change(select, { target: { value: 'gpt-5.2-pro' } });
+    fireEvent.change(select, { target: { value: 'gpt-5.6-sol' } });
 
     // Vérifier que le modèle a changé sans changer de provider
     await waitFor(() => {
       expect(mockSetProvider).toHaveBeenCalledWith('openai');
-      expect(mockSetModel).toHaveBeenCalledWith('gpt-5.2-pro');
+      expect(mockSetModel).toHaveBeenCalledWith('gpt-5.6-sol');
     });
   });
 });

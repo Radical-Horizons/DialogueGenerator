@@ -32,7 +32,10 @@ from services.dialogue_dramatic_progression import (
     DEFAULT_NODE_SCENE_INSTRUCTIONS,
 )
 from services.graph_generation_service import GraphGenerationService
-from services.unity_dialogue_generation_service import UnityDialogueGenerationService
+from services.unity_dialogue_generation_service import (
+    UnityDialogueGenerationService,
+    generate_stable_node_id,
+)
 from services.unity_node_validation_service import (
     ChoicesMode,
     infer_choices_mode,
@@ -64,13 +67,6 @@ class GenerationResult:
     connected_choices_count: Optional[int] = None
     failed_choices_count: Optional[int] = None
     total_choices_count: Optional[int] = None
-
-
-def _normalize_parent_id(raw_id: str) -> str:
-    """Garantit le préfixe ``NODE_``."""
-    if raw_id.startswith("NODE_"):
-        return raw_id
-    return f"NODE_{raw_id}"
 
 
 def _resolve_instructions(raw: Optional[str]) -> str:
@@ -366,12 +362,10 @@ class GraphNodeOrchestrator:
         choice_content = UnityDialogueChoiceContent.model_validate(
             {"text": "", "test": test_value}
         )
-        normalized_parent_id = _normalize_parent_id(parent_dialogue_id)
-
         result = await self._generation_service.generate_nodes_for_choice_with_test(
             llm_client=llm_client,
             choice_content=choice_content,
-            parent_node_id=normalized_parent_id,
+            parent_node_id=parent_dialogue_id,
             choice_index=choice_index,
             instructions=instructions,
             parent_speaker=parent_speaker,
@@ -386,7 +380,7 @@ class GraphNodeOrchestrator:
         logger.info(
             "4 nœuds générés depuis TestNode: %s, parent DialogueNode: %s, choice_index: %s",
             test_node_id,
-            normalized_parent_id,
+            parent_dialogue_id,
             choice_index,
         )
 
@@ -465,12 +459,10 @@ class GraphNodeOrchestrator:
         system_prompt_override: Optional[str],
     ) -> GenerationResult:
         choice_content = UnityDialogueChoiceContent.model_validate(choice_data)
-        normalized_parent_id = _normalize_parent_id(parent_node_id)
-
         result = await self._generation_service.generate_nodes_for_choice_with_test(
             llm_client=llm_client,
             choice_content=choice_content,
-            parent_node_id=normalized_parent_id,
+            parent_node_id=parent_node_id,
             choice_index=choice_index,
             instructions=instructions,
             parent_speaker=parent_speaker,
@@ -563,15 +555,9 @@ class GraphNodeOrchestrator:
             max_choices=llm_max_choices,
         )
 
-        normalized_parent_id = _normalize_parent_id(parent_node_id)
-
-        if target_choice_index is not None:
-            start_id = f"{normalized_parent_id}_CHOICE_{target_choice_index}"
-        else:
-            start_id = f"{normalized_parent_id}_CHILD"
-
         enriched_nodes = self._generation_service.enrich_with_ids(
-            content=response, start_id=start_id
+            content=response,
+            start_id=generate_stable_node_id(),
         )
         generated_node = enriched_nodes[0]
         pre_truncate_free = choices_mode == "free" and max_choices not in (0, None)

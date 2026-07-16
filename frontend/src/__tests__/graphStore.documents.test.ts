@@ -27,10 +27,14 @@ const sampleDocument = {
   ],
 }
 
-const sampleLayout = { nodes: { START: { x: 100, y: 200 }, END: { x: 100, y: 350 } } }
+const sampleLayout = {
+  nodes: { START: { x: 100, y: 200 }, END: { x: 100, y: 350 } },
+}
 
 /** document dans le store est typé large ; les tests ciblent la forme Unity avec `nodes`. */
-type DocumentNodesRef = { nodes?: Array<Record<string, unknown> & { id: string }> }
+type DocumentNodesRef = {
+  nodes?: Array<Record<string, unknown> & { id: string }>
+}
 
 describe('graphStore - document SoT load/save', () => {
   beforeEach(() => {
@@ -86,7 +90,9 @@ describe('graphStore - document SoT load/save', () => {
         schemaVersion: '1.1.0',
         revision: 1,
       })
-      vi.mocked(documentsAPI.getLayout).mockRejectedValue({ response: { status: 404 } })
+      vi.mocked(documentsAPI.getLayout).mockRejectedValue({
+        response: { status: 404 },
+      })
       const { loadDialogueByDocumentId } = useGraphStore.getState()
       await loadDialogueByDocumentId('test-doc')
       const state = useGraphStore.getState()
@@ -144,14 +150,21 @@ describe('graphStore - document SoT load/save', () => {
       await loadDialogueByDocumentId('doc-five-choices')
 
       const state = useGraphStore.getState()
-      const childYValues = Array.from({ length: 5 }, (_, index) =>
-        state.nodes.find((node) => node.id === `NODE_${index}`)!.position.y
+      const childYValues = Array.from(
+        { length: 5 },
+        (_, index) => state.nodes.find((node) => node.id === `NODE_${index}`)!.position.y,
       )
-      const persistedYValues = Array.from({ length: 5 }, (_, index) =>
-        ((state.layout?.nodes as Record<string, { x: number; y: number }>)?.[`NODE_${index}`] as {
-          x: number
-          y: number
-        }).y
+      const persistedYValues = Array.from(
+        { length: 5 },
+        (_, index) =>
+          (
+            (state.layout?.nodes as Record<string, { x: number; y: number }>)?.[
+              `NODE_${index}`
+            ] as {
+              x: number
+              y: number
+            }
+          ).y,
       )
 
       expect(childYValues.every((y) => y === 320)).toBe(true)
@@ -176,6 +189,58 @@ describe('graphStore - document SoT load/save', () => {
     })
   })
 
+  describe('applyUnityDocumentNodes (1ʳᵉ génération / panneau droit)', () => {
+    it('propage les edits Unity vers document+graphe et conserve les modifications au save', async () => {
+      vi.mocked(documentsAPI.getDocument).mockResolvedValue({
+        document: sampleDocument,
+        schemaVersion: '1.1.0',
+        revision: 1,
+      })
+      vi.mocked(documentsAPI.getLayout).mockResolvedValue({
+        layout: sampleLayout,
+        revision: 1,
+      })
+      vi.mocked(documentsAPI.putDocument).mockResolvedValue({ revision: 2 })
+      vi.mocked(documentsAPI.putLayout).mockResolvedValue({ revision: 2 })
+
+      const { loadDialogueByDocumentId, applyUnityDocumentNodes, saveDialogue } =
+        useGraphStore.getState()
+      await loadDialogueByDocumentId('test-doc')
+
+      const startBefore = useGraphStore.getState().nodes.find((n) => n.id === 'START')
+      expect(startBefore?.position).toEqual({ x: 100, y: 200 })
+
+      applyUnityDocumentNodes([
+        { id: 'START', speaker: 'NPC', line: 'Texte édité panneau droit', nextNode: 'END' },
+        { id: 'END', line: '' },
+      ])
+
+      const afterEdit = useGraphStore.getState()
+      expect(afterEdit.hasUnsavedChanges).toBe(true)
+      expect((afterEdit.document as DocumentNodesRef).nodes?.[0]?.line).toBe(
+        'Texte édité panneau droit',
+      )
+      const startAfter = afterEdit.nodes.find((n) => n.id === 'START')
+      expect(startAfter?.data?.line).toBe('Texte édité panneau droit')
+      expect(startAfter?.position).toEqual({ x: 100, y: 200 })
+
+      await saveDialogue()
+      expect(documentsAPI.putDocument).toHaveBeenCalledWith(
+        'test-doc',
+        expect.objectContaining({
+          document: expect.objectContaining({
+            nodes: expect.arrayContaining([
+              expect.objectContaining({
+                id: 'START',
+                line: 'Texte édité panneau droit',
+              }),
+            ]),
+          }),
+        }),
+      )
+    })
+  })
+
   describe('saveDialogue with document SoT', () => {
     it('calls putDocument and putLayout when document is set', async () => {
       vi.mocked(documentsAPI.getDocument).mockResolvedValue({
@@ -183,7 +248,10 @@ describe('graphStore - document SoT load/save', () => {
         schemaVersion: '1.1.0',
         revision: 1,
       })
-      vi.mocked(documentsAPI.getLayout).mockResolvedValue({ layout: sampleLayout, revision: 1 })
+      vi.mocked(documentsAPI.getLayout).mockResolvedValue({
+        layout: sampleLayout,
+        revision: 1,
+      })
       vi.mocked(documentsAPI.putDocument).mockResolvedValue({ revision: 2 })
       vi.mocked(documentsAPI.putLayout).mockResolvedValue({ revision: 2 })
       const { loadDialogueByDocumentId, saveDialogue } = useGraphStore.getState()
@@ -192,17 +260,20 @@ describe('graphStore - document SoT load/save', () => {
       expect(documentsAPI.putDocument).toHaveBeenCalledWith(
         'test-doc',
         expect.objectContaining({
-          document: expect.objectContaining({ schemaVersion: '1.1.0', nodes: expect.any(Array) }),
+          document: expect.objectContaining({
+            schemaVersion: '1.1.0',
+            nodes: expect.any(Array),
+          }),
           revision: 1,
           validationMode: 'export',
-        })
+        }),
       )
       expect(documentsAPI.putLayout).toHaveBeenCalledWith(
         'test-doc',
         expect.objectContaining({
           layout: expect.objectContaining({ nodes: expect.any(Object) }),
           revision: 1,
-        })
+        }),
       )
     })
 
@@ -212,7 +283,10 @@ describe('graphStore - document SoT load/save', () => {
         schemaVersion: '1.1.0',
         revision: 1,
       })
-      vi.mocked(documentsAPI.getLayout).mockResolvedValue({ layout: sampleLayout, revision: 1 })
+      vi.mocked(documentsAPI.getLayout).mockResolvedValue({
+        layout: sampleLayout,
+        revision: 1,
+      })
       vi.mocked(documentsAPI.putDocument).mockResolvedValue({ revision: 2 })
       vi.mocked(documentsAPI.putLayout).mockResolvedValue({ revision: 2 })
       const { loadDialogueByDocumentId, saveDialogue } = useGraphStore.getState()
@@ -238,11 +312,15 @@ describe('graphStore - document SoT load/save', () => {
           document: expect.objectContaining({
             schemaVersion: '1.1.0',
             nodes: expect.arrayContaining([
-              expect.objectContaining({ id: 'START', speaker: 'NPC', line: 'Hello' }),
+              expect.objectContaining({
+                id: 'START',
+                speaker: 'NPC',
+                line: 'Hello',
+              }),
               expect.objectContaining({ id: 'END', line: '' }),
             ]),
           }),
-        })
+        }),
       )
       expect(documentsAPI.putLayout).toHaveBeenCalledWith(
         'test-doc',
@@ -253,7 +331,7 @@ describe('graphStore - document SoT load/save', () => {
             }),
           }),
           revision: 1,
-        })
+        }),
       )
     })
 
@@ -263,7 +341,10 @@ describe('graphStore - document SoT load/save', () => {
         schemaVersion: '1.1.0',
         revision: 7,
       })
-      vi.mocked(documentsAPI.getLayout).mockResolvedValue({ layout: sampleLayout, revision: 9 })
+      vi.mocked(documentsAPI.getLayout).mockResolvedValue({
+        layout: sampleLayout,
+        revision: 9,
+      })
       vi.mocked(documentsAPI.putDocument).mockResolvedValue({ revision: 8 })
       vi.mocked(documentsAPI.putLayout).mockResolvedValue({ revision: 10 })
 
@@ -312,9 +393,7 @@ describe('graphStore - document SoT load/save', () => {
         data: { line: 'Dirty', speaker: 'NPC' },
       })
 
-      await expect(useGraphStore.getState().saveDialogue()).rejects.toThrow(
-        'layout unavailable',
-      )
+      await expect(useGraphStore.getState().saveDialogue()).rejects.toThrow('layout unavailable')
       expect(useGraphStore.getState().documentRevision).toBe(2)
       expect(useGraphStore.getState().layoutRevision).toBe(1)
       expect(useGraphStore.getState().hasUnsavedChanges).toBe(true)
@@ -328,6 +407,92 @@ describe('graphStore - document SoT load/save', () => {
       expect(useGraphStore.getState().documentRevision).toBe(3)
       expect(useGraphStore.getState().layoutRevision).toBe(2)
       expect(useGraphStore.getState().hasUnsavedChanges).toBe(false)
+    })
+
+    it('sérialise deux sauvegardes pour conserver la révision et le dernier état', async () => {
+      vi.mocked(documentsAPI.getDocument).mockResolvedValue({
+        document: sampleDocument,
+        schemaVersion: '1.1.0',
+        revision: 1,
+      })
+      vi.mocked(documentsAPI.getLayout).mockResolvedValue({
+        layout: sampleLayout,
+        revision: 1,
+      })
+      let resolveFirstDocumentSave!: (value: { revision: number }) => void
+      vi.mocked(documentsAPI.putDocument)
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              resolveFirstDocumentSave = resolve
+            }),
+        )
+        .mockResolvedValueOnce({ revision: 3 })
+      vi.mocked(documentsAPI.putLayout)
+        .mockResolvedValueOnce({ revision: 2 })
+        .mockResolvedValueOnce({ revision: 3 })
+
+      await useGraphStore.getState().loadDialogueByDocumentId('test-doc')
+      const firstSave = useGraphStore.getState().saveDialogue()
+      await Promise.resolve()
+      useGraphStore.getState().updateNode('START', {
+        data: { line: 'Accepted', speaker: 'NPC' },
+      })
+      const secondSave = useGraphStore.getState().saveDialogue()
+
+      expect(documentsAPI.putDocument).toHaveBeenCalledTimes(1)
+      resolveFirstDocumentSave({ revision: 2 })
+      await firstSave
+      await secondSave
+
+      expect(documentsAPI.putDocument).toHaveBeenNthCalledWith(
+        2,
+        'test-doc',
+        expect.objectContaining({
+          revision: 2,
+          document: expect.objectContaining({
+            nodes: expect.arrayContaining([
+              expect.objectContaining({ id: 'START', line: 'Accepted' }),
+            ]),
+          }),
+        }),
+      )
+      expect(useGraphStore.getState().documentRevision).toBe(3)
+      expect(useGraphStore.getState().layoutRevision).toBe(3)
+    })
+
+    it('conserve le dirty flag lorsqu’une édition arrive pendant la sauvegarde', async () => {
+      vi.mocked(documentsAPI.getDocument).mockResolvedValue({
+        document: sampleDocument,
+        schemaVersion: '1.1.0',
+        revision: 1,
+      })
+      vi.mocked(documentsAPI.getLayout).mockResolvedValue({
+        layout: sampleLayout,
+        revision: 1,
+      })
+      let resolveDocumentSave!: (value: { revision: number }) => void
+      vi.mocked(documentsAPI.putDocument).mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveDocumentSave = resolve
+          }),
+      )
+      vi.mocked(documentsAPI.putLayout).mockResolvedValue({ revision: 2 })
+
+      await useGraphStore.getState().loadDialogueByDocumentId('test-doc')
+      useGraphStore.getState().updateNode('START', {
+        data: { line: 'First edit', speaker: 'NPC' },
+      })
+      const savePromise = useGraphStore.getState().saveDialogue()
+      useGraphStore.getState().updateNode('START', {
+        data: { line: 'Edit during save', speaker: 'NPC' },
+      })
+
+      resolveDocumentSave({ revision: 2 })
+      await savePromise
+
+      expect(useGraphStore.getState().hasUnsavedChanges).toBe(true)
     })
 
     it('ignore un échec tardif après navigation et nettoie isSaving via le nouveau chargement', async () => {
@@ -376,7 +541,10 @@ describe('graphStore - document SoT load/save', () => {
         schemaVersion: '1.1.0',
         revision: 1,
       })
-      vi.mocked(documentsAPI.getLayout).mockResolvedValue({ layout: sampleLayout, revision: 1 })
+      vi.mocked(documentsAPI.getLayout).mockResolvedValue({
+        layout: sampleLayout,
+        revision: 1,
+      })
       vi.mocked(documentsAPI.putDocument).mockResolvedValue({ revision: 2 })
       vi.mocked(documentsAPI.putLayout).mockResolvedValue({ revision: 2 })
       const { loadDialogueByDocumentId, saveDialogue } = useGraphStore.getState()
@@ -389,7 +557,7 @@ describe('graphStore - document SoT load/save', () => {
           layout: expect.objectContaining({
             intentionalCycleIds: ['cycle_a', 'cycle_b'],
           }),
-        })
+        }),
       )
     })
 
@@ -419,7 +587,7 @@ describe('graphStore - document SoT load/save', () => {
         expect(documentsAPI.putLayout).not.toHaveBeenCalled()
         expect(useGraphStore.getState().hasUnsavedChanges).toBe(true)
         expect(useGraphStore.getState().syncStatus).toBe('error')
-      }
+      },
     )
   })
 
@@ -442,7 +610,7 @@ describe('graphStore - document SoT load/save', () => {
 
       const state = useGraphStore.getState()
       const startUnity = (state.document as DocumentNodesRef | null)?.nodes?.find(
-        (n) => n.id === 'START'
+        (n) => n.id === 'START',
       )
       expect(startUnity?.displayName).toBe('Hello')
       expect(state.nodes.find((n) => n.id === 'START')?.data?.displayName).toBe('Hello')
@@ -466,7 +634,9 @@ describe('graphStore - document SoT load/save', () => {
       updateNode('START', { data: { line: 'Hello world', speaker: 'NPC' } })
 
       const state = useGraphStore.getState()
-      const startUnity = (state.document as DocumentNodesRef | null)?.nodes?.find((n) => n.id === 'START')
+      const startUnity = (state.document as DocumentNodesRef | null)?.nodes?.find(
+        (n) => n.id === 'START',
+      )
       expect(startUnity?.line).toBe('Hello world')
       expect(startUnity?.speaker).toBe('NPC')
       const startNode = state.nodes.find((n) => n.id === 'START')
@@ -478,7 +648,12 @@ describe('graphStore - document SoT load/save', () => {
       const docWithChoice = {
         schemaVersion: '1.1.0',
         nodes: [
-          { id: 'START', speaker: 'X', line: 'Hi', choices: [{ choiceId: 'opt', text: 'Go', targetNode: 'END' }] },
+          {
+            id: 'START',
+            speaker: 'X',
+            line: 'Hi',
+            choices: [{ choiceId: 'opt', text: 'Go', targetNode: 'END' }],
+          },
           { id: 'END', line: '' },
         ],
       }
@@ -493,18 +668,26 @@ describe('graphStore - document SoT load/save', () => {
       })
       const { loadDialogueByDocumentId, updateNode } = useGraphStore.getState()
       await loadDialogueByDocumentId('doc-edit')
-      const edgeIdBefore = useGraphStore.getState().edges.find(
-        (e) => e.source === 'START' && e.target === 'END' && e.data?.choiceId === 'opt'
-      )?.id
+      const edgeIdBefore = useGraphStore
+        .getState()
+        .edges.find(
+          (e) => e.source === 'START' && e.target === 'END' && e.data?.choiceId === 'opt',
+        )?.id
 
-      updateNode('START', { data: { line: 'Updated line', speaker: 'X', choices: [{ choiceId: 'opt', text: 'Go', targetNode: 'END' }] } })
+      updateNode('START', {
+        data: {
+          line: 'Updated line',
+          speaker: 'X',
+          choices: [{ choiceId: 'opt', text: 'Go', targetNode: 'END' }],
+        },
+      })
 
       const state = useGraphStore.getState()
-      expect((state.document as DocumentNodesRef | null)?.nodes?.find((n) => n.id === 'START')?.line).toBe(
-        'Updated line'
-      )
+      expect(
+        (state.document as DocumentNodesRef | null)?.nodes?.find((n) => n.id === 'START')?.line,
+      ).toBe('Updated line')
       const edgeAfter = state.edges.find(
-        (e) => e.source === 'START' && e.target === 'END' && e.data?.choiceId === 'opt'
+        (e) => e.source === 'START' && e.target === 'END' && e.data?.choiceId === 'opt',
       )
       expect(edgeAfter?.id).toBe(edgeIdBefore)
       expect(edgeAfter?.sourceHandle).toBe('choice:opt')
@@ -548,7 +731,9 @@ describe('graphStore - document SoT load/save', () => {
       updateNode(testNodeId!, { data: { test: { formula: '2d20' } } })
 
       const state = useGraphStore.getState()
-      const startNode = (state.document as DocumentNodesRef | null)?.nodes?.find((n) => n.id === 'START')
+      const startNode = (state.document as DocumentNodesRef | null)?.nodes?.find(
+        (n) => n.id === 'START',
+      )
       const choice = (startNode?.choices as { test?: { formula?: string } }[])?.[0]
       expect(choice?.test).toEqual({ formula: '2d20' })
       const testNode = state.nodes.find((n) => n.id === 'test-node-START-choice-0')
@@ -611,7 +796,7 @@ describe('graphStore - document SoT load/save', () => {
       await loadDialogueByDocumentId('doc-choiceid')
       const state = useGraphStore.getState()
       const choiceEdge = state.edges.find(
-        (e) => e.source === 'START' && e.target === 'END' && e.data?.choiceId === 'accept'
+        (e) => e.source === 'START' && e.target === 'END' && e.data?.choiceId === 'accept',
       )
       expect(choiceEdge?.sourceHandle).toBe('choice:accept')
       expect(choiceEdge?.id).toBe('e:START:choice:accept')

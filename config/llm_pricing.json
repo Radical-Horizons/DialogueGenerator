@@ -1,49 +1,39 @@
 {
   "models": {
-    "gpt-5.4": {
+    "gpt-5.6-sol": {
+      "input_price_per_1M": 5.00,
+      "output_price_per_1M": 30.00,
+      "description": "GPT-5.6 Sol — flagship (doc OpenAI) : structured outputs, reasoning none–max, 128k sortie, 1.05M contexte"
+    },
+    "gpt-5.6": {
+      "input_price_per_1M": 5.00,
+      "output_price_per_1M": 30.00,
+      "description": "Alias gpt-5.6 → gpt-5.6-sol"
+    },
+    "gpt-5.6-terra": {
       "input_price_per_1M": 2.50,
       "output_price_per_1M": 15.00,
-      "description": "GPT-5.4 — doc officielle OpenAI : structured outputs, reasoning none–xhigh, 128k sortie max"
+      "description": "GPT-5.6 Terra — équilibre intelligence/coût (doc OpenAI)"
     },
-    "gpt-5.2": {
-      "input_price_per_1M": 2.50,
-      "output_price_per_1M": 10.00,
-      "description": "GPT-5.2 - Modèle le plus récent et performant, bon équilibre performance/coût"
-    },
-    "gpt-5-mini": {
-      "input_price_per_1M": 0.15,
-      "output_price_per_1M": 0.60,
-      "description": "GPT-5 Mini - Version économique et rapide"
-    },
-    "gpt-5-nano": {
-      "input_price_per_1M": 0.10,
-      "output_price_per_1M": 0.40,
-      "description": "GPT-5 Nano - Version compacte et très économique"
-    },
-    "gpt-5.2-pro": {
-      "input_price_per_1M": 5.00,
-      "output_price_per_1M": 20.00,
-      "description": "GPT-5.2 Pro - Modèle avec plus de compute pour raisonnement approfondi, plus cher"
-    },
-    "gpt-5.2-thinking": {
-      "input_price_per_1M": 5.00,
-      "output_price_per_1M": 20.00,
-      "description": "GPT-5.2 Thinking - Alias pour gpt-5.2-pro (déprécié, utiliser gpt-5.2-pro)"
+    "gpt-5.6-luna": {
+      "input_price_per_1M": 1.00,
+      "output_price_per_1M": 6.00,
+      "description": "GPT-5.6 Luna — volume / coût (doc OpenAI)"
     },
     "gpt-4o": {
       "input_price_per_1M": 2.50,
       "output_price_per_1M": 10.00,
-      "description": "GPT-4 Optimized - Modèle le plus récent et performant (obsolète, utiliser gpt-5.2)"
+      "description": "GPT-4o — legacy (tests / fallbacks)"
     },
     "gpt-4-turbo": {
       "input_price_per_1M": 10.00,
       "output_price_per_1M": 30.00,
-      "description": "GPT-4 Turbo - Version haute performance"
+      "description": "GPT-4 Turbo — legacy"
     },
     "gpt-3.5-turbo": {
       "input_price_per_1M": 0.50,
       "output_price_per_1M": 1.50,
-      "description": "GPT-3.5 Turbo - Modèle économique"
+      "description": "GPT-3.5 Turbo — legacy"
     },
     "mistral-small-latest": {
       "input_price_per_1M": 0.10,
@@ -61,9 +51,6 @@
       "description": "Mistral Large - Modèle haute performance"
     }
   },
-  "last_updated": "2026-06-24",
-  "note": "Les prix sont en USD par million de tokens. Taux de conversion USD→EUR : 0.92 (constante dans graph.py, à mettre à jour périodiquement)."
+  "last_updated": "2026-07-17",
+  "note": "Les prix sont en USD par million de tokens. Taux de conversion USD→EUR : 0.92 (constante dans graph.py, à mettre à jour périodiquement). Sources : developers.openai.com/api/docs/models/gpt-5.6-{sol,terra,luna}."
 }
-
-
-

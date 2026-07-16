@@ -39,6 +39,6 @@
     "reasoningEffort": null,
     "maxCompletionTokens": null,
     "maxChoices": null,
-    "llmModel": "gpt-5.2"
+    "llmModel": "gpt-5.6-terra"
   }
 }

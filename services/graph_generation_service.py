@@ -5,19 +5,14 @@ from typing import List, Dict, Any, Optional, Callable, Tuple
 
 from models.dialogue_structure.unity_dialogue_node import UnityDialogueChoiceContent
 from services.dialogue_path_context import build_enriched_generation_prompt
-from services.unity_dialogue_generation_service import UnityDialogueGenerationService, _stable_node_id
+from services.unity_dialogue_generation_service import (
+    UnityDialogueGenerationService,
+    generate_stable_node_id,
+)
 from services.unity_node_validation_service import ChoicesMode, validate_enriched_node
 from core.llm.llm_client import ILLMClient
 
 logger = logging.getLogger(__name__)
-
-
-def _normalize_parent_id_for_unity(raw_id: str) -> str:
-    """Garantit le préfixe ``NODE_`` (même règle que GraphNodeOrchestrator)."""
-    s = str(raw_id)
-    if s.startswith("NODE_"):
-        return s
-    return f"NODE_{s}"
 
 
 def _choice_has_nonempty_test(choice: Dict[str, Any]) -> bool:
@@ -150,11 +145,10 @@ class GraphGenerationService:
             if _choice_has_nonempty_test(choice):
                 try:
                     choice_content = UnityDialogueChoiceContent.model_validate(choice)
-                    normalized_parent_id = _normalize_parent_id_for_unity(str(parent_id))
                     result = await self.generation_service.generate_nodes_for_choice_with_test(
                         llm_client=llm_client,
                         choice_content=choice_content,
-                        parent_node_id=normalized_parent_id,
+                        parent_node_id=str(parent_id),
                         choice_index=choice_index,
                         instructions=instructions,
                         parent_speaker=parent_speaker,
@@ -215,7 +209,7 @@ class GraphGenerationService:
                     max_choices=llm_max_choices,
                 )
 
-                start_id = _stable_node_id()
+                start_id = generate_stable_node_id()
                 enriched_nodes = self.generation_service.enrich_with_ids(
                     content=response,
                     start_id=start_id,

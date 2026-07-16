@@ -10,7 +10,7 @@ def pricing_config_path(tmp_path):
     config_file = tmp_path / "llm_pricing.json"
     config_file.write_text("""{
   "models": {
-    "gpt-5.2": {
+    "gpt-5.6-terra": {
       "input_price_per_1M": 2.50,
       "output_price_per_1M": 10.00
     },
@@ -30,9 +30,9 @@ def pricing_service(pricing_config_path):
 
 
 def test_calculate_cost_gpt4o(pricing_service):
-    """Teste le calcul de coût pour gpt-5.2."""
+    """Teste le calcul de coût pour gpt-5.6-terra."""
     cost = pricing_service.calculate_cost(
-        model_name="gpt-5.2",
+        model_name="gpt-5.6-terra",
         prompt_tokens=1000000,
         completion_tokens=500000
     )
@@ -78,7 +78,7 @@ def test_calculate_cost_unknown_model_production_uses_conservative_max(pricing_s
 
 def test_get_model_pricing(pricing_service):
     """Teste la récupération des tarifs d'un modèle."""
-    pricing = pricing_service.get_model_pricing("gpt-5.2")
+    pricing = pricing_service.get_model_pricing("gpt-5.6-terra")
     assert pricing is not None
     assert pricing["input_price_per_1M"] == 2.50
     assert pricing["output_price_per_1M"] == 10.00

@@ -1,23 +1,22 @@
-# OpenAI API pour GPT-5 (tous modèles)
+# OpenAI API pour GPT-5.6 (Sol / Terra / Luna)
 
-Documentation complète de l'utilisation de l'API OpenAI pour tous les modèles GPT-5 dans DialogueGenerator.
+Documentation de l'utilisation de l'API OpenAI Responses pour la famille GPT-5.6 dans DialogueGenerator.
 
 ## Vue d'ensemble
 
-Tous les modèles GPT-5 (5.2, 5.2-pro, 5-mini, 5-nano) utilisent **uniquement la Responses API**, qui offre des fonctionnalités supplémentaires comme la phase réflexive (reasoning) et un format de réponse structuré.
+Les modèles GPT-5.6 (`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`) utilisent **la Responses API**, avec reasoning et structured outputs.
 
-**Modèles concernés**: `gpt-5.2`, `gpt-5.2-pro`, `gpt-5-mini`, `gpt-5-nano`
+**Modèles concernés**: `gpt-5.6-sol` (alias `gpt-5.6`), `gpt-5.6-terra`, `gpt-5.6-luna`
 
-**Note importante**: Chat Completions API est **dépréciée et supprimée** pour tous les modèles GPT-5. Le code utilise exclusivement Responses API.
+**Note importante**: Chat Completions API est **dépréciée** pour GPT-5.x. Le code utilise Responses API quand le nom contient `gpt-5`.
 
 ## API utilisée
 
-### Responses API (Uniquement pour GPT-5)
+### Responses API (GPT-5.6)
 
-Utilisée pour **tous les modèles GPT-5** (5.2, 5.2-pro, 5-mini, 5-nano):
+Utilisée pour Sol / Terra / Luna :
 - `client.responses.create(**params)`
 - Endpoint: `/v1/responses`
-- **Obligatoire** : Chat Completions API est dépréciée et supprimée pour GPT-5
 
 **Note**: Le code utilise automatiquement Responses API pour tous les modèles contenant `gpt-5` dans leur nom.
 
@@ -31,14 +30,15 @@ Utilisée pour **tous les modèles GPT-5** (5.2, 5.2-pro, 5-mini, 5-nano):
 | Tokens max | `max_output_tokens` |
 | Tools | `{"type": "function", "name": "...", "parameters": {...}}` |
 | Tool choice | `{"type": "allowed_tools", "mode": "required", "tools": [...]}` |
-| Temperature | Uniquement si `reasoning.effort == "none"` |
+| Temperature | **Jamais** pour GPT-5.6 (400 si envoyé) |
+| Top_p | **Jamais** pour GPT-5.6 (même gate) |
 | Reasoning | `reasoning.effort` et `reasoning.summary` |
 
 ### Exemple de requête Responses API
 
 ```python
 responses_params = {
-    "model": "gpt-5.2",
+    "model": "gpt-5.6-terra",
     "input": [
         {"role": "system", "content": "Tu es un assistant expert..."},
         {"role": "user", "content": "Génère un dialogue..."}
@@ -97,11 +97,11 @@ Cette section documente tous les paramètres possibles envoyés à l'API OpenAI 
 - **Type**: `string`
 - **Description**: Identifiant du modèle GPT-5 à utiliser
 - **Valeurs possibles**:
-  - `"gpt-5.2"` - Modèle principal (recommandé)
-  - `"gpt-5.2-pro"` - Version avec plus de compute
-  - `"gpt-5-mini"` - Version économique
-  - `"gpt-5-nano"` - Version compacte
-- **Exemple**: `"gpt-5.2"`
+  - `"gpt-5.6-terra"` - Modèle principal (recommandé)
+  - `"gpt-5.6-sol"` - Version avec plus de compute
+  - `"gpt-5.6-luna"` - Version économique
+  - `"gpt-5.6-luna"` - Version compacte
+- **Exemple**: `"gpt-5.6-terra"`
 
 #### `input` (requis)
 - **Type**: `array[object]`
@@ -256,7 +256,7 @@ Cette section documente tous les paramètres possibles envoyés à l'API OpenAI 
 
 ```json
 {
-  "model": "gpt-5.2",
+  "model": "gpt-5.6-terra",
   "instructions": "Tu es un assistant expert en écriture de dialogues pour jeux de rôle (RPG). Tu DOIS utiliser la fonction 'generate_interaction' pour formater ta réponse.",
   "input": [
     {
@@ -324,7 +324,7 @@ Cette section documente tous les paramètres possibles envoyés à l'API OpenAI 
 
 ```json
 {
-  "model": "gpt-5.2",
+  "model": "gpt-5.6-terra",
   "input": [
     {
       "role": "system",
@@ -429,23 +429,11 @@ for item in output_items:
         break
 ```
 
-## Temperature
+## Temperature / top_p
 
-**Contrainte importante**: Temperature est supportée uniquement si `reasoning.effort == "none"` (ou non spécifié).
+**GPT-5.6 (Sol / Terra / Luna)** : ne **jamais** envoyer `temperature` ni `top_p` — l'API répond `400 Unsupported parameter: 'temperature' is not supported with this model` (preuve runtime 2026-07-17). Contrôler via `reasoning.effort` (défaut si omis : `medium`).
 
-Si `reasoning.effort` est défini avec une valeur autre que `"none"`, le paramètre `temperature` est ignoré par l'API.
-
-**Impact pour GPT-5 mini/nano** : Ces modèles ne supportent pas `reasoning.effort="none"`, donc la température n'est **pas disponible** via Responses API pour eux.
-
-**Code de gestion**:
-```python
-# Temperature uniquement si reasoning.effort == "none" (ou non spécifié)
-if reasoning_effort in (None, "none"):
-    responses_params["temperature"] = self.temperature
-else:
-    # Temperature omise car reasoning.effort est défini
-    pass
-```
+Implémentation : `OpenAIParameterBuilder.should_include_temperature` / `should_include_top_p` + `ModelNames.MODELS_WITHOUT_CUSTOM_TEMPERATURE`. Voir `.cursor/rules/llm.mdc`.
 
 ## Parsing de réponse
 
@@ -534,8 +522,8 @@ Tous les modèles GPT-5 utilisent **uniquement** Responses API. Chat Completions
 
 #### GPT-5.2 / GPT-5.2-pro
 
-- **`gpt-5.2`**: Modèle principal, bon équilibre performance/coût
-- **`gpt-5.2-pro`**: Version avec plus de compute pour raisonnement approfondi
+- **`gpt-5.6-terra`**: Modèle principal, bon équilibre performance/coût
+- **`gpt-5.6-sol`**: Version avec plus de compute pour raisonnement approfondi
 
 **Caractéristiques**:
 - ✅ Utilisent Responses API uniquement
@@ -546,8 +534,8 @@ Tous les modèles GPT-5 utilisent **uniquement** Responses API. Chat Completions
 
 #### GPT-5 mini / GPT-5 nano
 
-- **`gpt-5-mini`**: Version économique et rapide
-- **`gpt-5-nano`**: Version compacte
+- **`gpt-5.6-luna`**: Version économique et rapide
+- **`gpt-5.6-luna`**: Version compacte
 
 **Caractéristiques**:
 - ✅ Utilisent Responses API uniquement
@@ -568,7 +556,7 @@ import os
 client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Configuration pour n'importe quel modèle GPT-5 avec reasoning
-model_name = "gpt-5.2"  # ou "gpt-5-mini", "gpt-5-nano", etc.
+model_name = "gpt-5.6-terra"  # ou "gpt-5.6-luna", "gpt-5.6-luna", etc.
 
 # Responses API (uniquement pour GPT-5)
 response = await client.responses.create(

@@ -1086,23 +1086,6 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
           }}
         >
           <button
-            type="submit"
-            style={{
-              flex: 1,
-              padding: '0.75rem',
-              border: 'none',
-              borderRadius: 4,
-              backgroundColor: theme.button.primary.background,
-              color: theme.button.primary.color,
-              cursor: 'pointer',
-              fontSize: remSize('body'),
-              fontWeight: 'bold',
-            }}
-          >
-            💾 Sauvegarder
-          </button>
-
-          <button
             type="button"
             onClick={handleDuplicate}
             style={{

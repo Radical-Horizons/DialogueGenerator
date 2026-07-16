@@ -7,6 +7,7 @@ import userEvent from '@testing-library/user-event'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TOUCH_TARGET_MIN_PX } from '../constants'
+import { segmentedTabTypography } from '../theme/responsiveChrome'
 import { Header } from '../components/layout/Header'
 import { Tabs } from '../components/shared/Tabs'
 import { GraphEditorHeader } from '../components/graph/GraphEditorHeader'
@@ -181,7 +182,7 @@ describe('FR119 touch targets — chrome', () => {
     expect(userBtn.style.height).toBe(`${TOUCH_TARGET_MIN_PX}px`)
   })
 
-  it('Tabs segmentés : minHeight / minWidth 44px en colonne étroite (FR119 mobile)', () => {
+  it('Tabs segmentés : minHeight ≥ 44px / minWidth 44px en colonne étroite (FR119 mobile)', () => {
     render(
       <div style={{ width: 320 }}>
         <Tabs
@@ -195,7 +196,12 @@ describe('FR119 touch targets — chrome', () => {
         />
       </div>
     )
-    expectInlineMinTouch(screen.getByRole('button', { name: 'Onglet A' }) as HTMLElement, 'tab A')
+    const tabA = screen.getByRole('button', { name: 'Onglet A' }) as HTMLElement
+    expect(tabA.style.minHeight, 'tab A minHeight').toBe(
+      `${segmentedTabTypography.narrow.tabMinHeightPx}px`,
+    )
+    expect(tabA.style.minWidth, 'tab A minWidth').toBe(`${TOUCH_TARGET_MIN_PX}px`)
+    expect(segmentedTabTypography.narrow.tabMinHeightPx).toBeGreaterThanOrEqual(TOUCH_TARGET_MIN_PX)
   })
 
   it('GraphEditorHeader : confortable (large) min 44px', () => {
@@ -303,11 +309,16 @@ describe('FR119 touch targets — chrome', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /déplier le panneau gauche/i })).toBeInTheDocument()
     })
-    // Les rails ont été réduits de moitié (22×28px) intentionnellement — l'essentiel est
-    // que les onglets segmentés principaux restent au standard 44px FR119.
-    expectInlineMinTouch(
-      screen.getByRole('button', { name: /génération de dialogues/i }) as HTMLElement,
-      'center segmented tab'
+    // Les rails ont été réduits de moitié intentionnellement — l'essentiel est
+    // que les onglets segmentés principaux restent ≥ 44px FR119 (hauteur chrome +50 %).
+    const centerTab = screen.getByRole('button', {
+      name: /génération de dialogues/i,
+    }) as HTMLElement
+    expect(centerTab.style.minHeight, 'center segmented tab minHeight').toBe(
+      `${segmentedTabTypography.narrow.tabMinHeightPx}px`,
+    )
+    expect(centerTab.style.minWidth, 'center segmented tab minWidth').toBe(
+      `${TOUCH_TARGET_MIN_PX}px`,
     )
   })
 })

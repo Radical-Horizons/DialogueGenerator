@@ -7,7 +7,7 @@
  * - AC#5: Session recovery pour nœuds pending
  *
  * Environnement E2E complet : OPENAI_API_KEY (.env ou variables d'environnement), budget utilisable,
- * modèle gpt-5-mini (panneau ou app_config.json). En cas d'échec : docs/troubleshooting/e2e-llm.md.
+ * modèle gpt-5.6-luna (panneau ou app_config.json). En cas d'échec : docs/troubleshooting/e2e-llm.md.
  */
 import { test, expect, type Page } from '@playwright/test'
 import { promises as fs } from 'node:fs'
@@ -156,7 +156,7 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     await expect(textarea).toBeVisible({ timeout: E2E_MS.short })
     const modelSelect = page.getByTestId('llm-model-select')
     await expect(modelSelect).toBeVisible({ timeout: E2E_MS.control })
-    await modelSelect.selectOption({ value: 'gpt-5-mini' })
+    await modelSelect.selectOption({ value: 'gpt-5.6-luna' })
     await textarea.fill('Réponds brièvement pour ce test E2E.')
     // Mode "Suite" désactive Générer si le nœud a des choix → passer en
     // "Branche" et sélectionner explicitement le premier choix non connecté.
@@ -178,7 +178,7 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     )
     await expect(
       successToast,
-      'Génération LLM : aucun toast de succès. Vérifier logs frontend/API, budget, modèle gpt-5-mini. Voir docs/troubleshooting/e2e-llm.md.'
+      'Génération LLM : aucun toast de succès. Vérifier logs frontend/API, budget, modèle gpt-5.6-luna. Voir docs/troubleshooting/e2e-llm.md.'
     ).toBeVisible({ timeout: E2E_MS.llmSuccessToast })
     await expect(
       page.locator('.react-flow__node:has([data-status="pending"])').first()

@@ -16,10 +16,9 @@ import type { LLMModelResponse } from '../types/api'
 
 /** Modèles acceptés par ``GenerateUnityDialogueRequest`` (structured output Unity). */
 export const UNITY_STRUCTURED_OUTPUT_MODELS = [
-  MODEL_NAMES.GPT_5_4,
-  MODEL_NAMES.GPT_5_2,
-  MODEL_NAMES.GPT_5_2_PRO,
-  MODEL_NAMES.GPT_5_MINI,
+  MODEL_NAMES.GPT_5_6_SOL,
+  MODEL_NAMES.GPT_5_6_TERRA,
+  MODEL_NAMES.GPT_5_6_LUNA,
 ] as const
 
 export type GenerationConfigField = 'maxContextTokens' | 'maxCompletionTokens' | 'llmModel'

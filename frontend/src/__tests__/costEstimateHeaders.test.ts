@@ -4,10 +4,10 @@ import { buildCostEstimateHeaders } from '../api/costEstimateHeaders'
 describe('buildCostEstimateHeaders', () => {
   it('adds X-LLM-Model for non-empty trimmed identifier', () => {
     const h = buildCostEstimateHeaders({
-      llmModelIdentifier: '  gpt-5-mini  ',
+      llmModelIdentifier: '  gpt-5.6-luna  ',
       promptTokens: 10,
     })
-    expect(h?.['X-LLM-Model']).toBe('gpt-5-mini')
+    expect(h?.['X-LLM-Model']).toBe('gpt-5.6-luna')
     expect(h?.['X-Estimated-Prompt-Tokens']).toBe('10')
   })
 

@@ -88,7 +88,7 @@ def client(mock_dialogue_service):
     })
     mock_config_service.get_available_llm_models = MagicMock(return_value=[
         {
-            "api_identifier": "gpt-5.2-mini",
+            "api_identifier": "gpt-5.6-luna",
             "display_name": "GPT-5.2 Mini",
             "client_type": "openai"
         }
@@ -262,7 +262,7 @@ class TestGenerateUnityDialogue:
                 "communities_full": []
             },
             "user_instructions": "Test instructions",
-            "llm_model_identifier": "gpt-5-mini",
+            "llm_model_identifier": "gpt-5.6-luna",
             "max_context_tokens": 10000,
             "max_choices": 2
         }
@@ -287,7 +287,7 @@ class TestGenerateUnityDialogue:
                 "communities_full": []
             },
             "user_instructions": "Test instructions",
-            "llm_model_identifier": "gpt-5-mini"
+            "llm_model_identifier": "gpt-5.6-luna"
         }
         
         response = client.post("/api/v1/dialogues/generate/unity-dialogue", json=request_data)

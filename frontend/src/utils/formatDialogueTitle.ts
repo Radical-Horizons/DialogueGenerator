@@ -12,6 +12,20 @@ export function formatDialogueTitle(filename: string): string {
   return formatted.charAt(0).toUpperCase() + formatted.slice(1)
 }
 
+/**
+ * Dérive un documentId stable depuis un titre libre (création / 1ʳᵉ génération).
+ * Retourne une chaîne vide si le titre ne contient aucun caractère utilisable.
+ */
+export function titleToDocumentId(title: string): string {
+  return title
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/[-\s]+/g, '_')
+    .toLowerCase()
+}
+
 /** Normalise un identifiant de dialogue pour comparer stem, filename et metadata API. */
 export function normalizeDialogueFilenameKey(filename: string): string {
   return filename.replace(/\.json$/i, '').toLowerCase()

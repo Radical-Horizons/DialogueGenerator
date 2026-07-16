@@ -64,7 +64,7 @@ def sample_request_data():
     return GenerateUnityDialogueRequest(
         user_instructions="Test prompt",
         context_selections=context_selection,
-        llm_model_identifier="gpt-5.2"
+        llm_model_identifier="gpt-5.6-terra"
     )
 
 
@@ -72,7 +72,7 @@ def sample_request_data():
 def mock_llm_client_with_streaming():
     """Crée un mock de client LLM avec support streaming."""
     mock_client = Mock()
-    mock_client.model_name = "gpt-5.2"
+    mock_client.model_name = "gpt-5.6-terra"
     mock_client.max_tokens = 32000
     mock_client.temperature = 0.7
     mock_client.reasoning_effort = None
@@ -157,7 +157,7 @@ async def test_orchestrator_uses_native_streaming_when_available(orchestrator, s
     
     # Mock LLM client avec streaming
     mock_llm_client = Mock()
-    mock_llm_client.model_name = "gpt-5.2"
+    mock_llm_client.model_name = "gpt-5.6-terra"
     mock_llm_client.max_tokens = 32000
     mock_llm_client.temperature = 0.7
     mock_llm_client.reasoning_effort = None
@@ -241,7 +241,7 @@ async def test_orchestrator_fallback_to_non_streaming(orchestrator, sample_reque
     
     # Mock LLM client SANS streaming (pas de generate_variants_streaming)
     mock_llm_client = Mock()
-    mock_llm_client.model_name = "gpt-5.2"
+    mock_llm_client.model_name = "gpt-5.6-terra"
     mock_llm_client.max_tokens = 32000
     mock_llm_client.temperature = 0.7
     mock_llm_client.reasoning_effort = None
@@ -308,7 +308,7 @@ async def test_orchestrator_streaming_with_function_call_chunks(orchestrator, sa
     
     # Mock LLM client avec streaming et function call chunks
     mock_llm_client = Mock()
-    mock_llm_client.model_name = "gpt-5.2"
+    mock_llm_client.model_name = "gpt-5.6-terra"
     mock_llm_client.max_tokens = 32000
     mock_llm_client.temperature = 0.7
     mock_llm_client.reasoning_effort = None
@@ -400,7 +400,7 @@ async def test_orchestrator_streaming_cancellation(orchestrator, sample_request_
     
     # Mock LLM client avec streaming
     mock_llm_client = Mock()
-    mock_llm_client.model_name = "gpt-5.2"
+    mock_llm_client.model_name = "gpt-5.6-terra"
     mock_llm_client.max_tokens = 32000
     mock_llm_client.temperature = 0.7
     mock_llm_client.reasoning_effort = None

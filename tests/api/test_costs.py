@@ -113,7 +113,7 @@ def test_get_usage_with_graph(client, temp_budget_file, temp_usage_dir):
         record = LLMUsageRecord(
             request_id=f"req_{i}",
             timestamp=base_time - timedelta(days=i),
-            model_name="gpt-5.2",
+            model_name="gpt-5.6-terra",
             prompt_tokens=1000,
             completion_tokens=500,
             total_tokens=1500,

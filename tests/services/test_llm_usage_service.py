@@ -34,7 +34,7 @@ def test_track_usage(usage_service, mock_repository, mock_pricing_service):
     """Teste l'enregistrement d'un appel LLM."""
     usage_service.track_usage(
         request_id="req_123",
-        model_name="gpt-5.2",
+        model_name="gpt-5.6-terra",
         prompt_tokens=1000,
         completion_tokens=500,
         total_tokens=1500,
@@ -46,7 +46,7 @@ def test_track_usage(usage_service, mock_repository, mock_pricing_service):
     
     # Vérifier que le pricing service a été appelé
     mock_pricing_service.calculate_cost.assert_called_once_with(
-        model_name="gpt-5.2",
+        model_name="gpt-5.6-terra",
         prompt_tokens=1000,
         completion_tokens=500
     )
@@ -56,7 +56,7 @@ def test_track_usage(usage_service, mock_repository, mock_pricing_service):
     saved_record = mock_repository.save.call_args[0][0]
     assert isinstance(saved_record, LLMUsageRecord)
     assert saved_record.request_id == "req_123"
-    assert saved_record.model_name == "gpt-5.2"
+    assert saved_record.model_name == "gpt-5.6-terra"
     assert saved_record.total_tokens == 1500
 
 
@@ -64,7 +64,7 @@ def test_track_usage_with_prompt_and_response(usage_service, mock_repository):
     """Story 1.15: track_usage accepte prompt et response optionnels et les enregistre."""
     usage_service.track_usage(
         request_id="req_prompt",
-        model_name="gpt-5.2",
+        model_name="gpt-5.6-terra",
         prompt_tokens=100,
         completion_tokens=50,
         total_tokens=150,
@@ -92,11 +92,11 @@ def test_track_usage_with_fallback_from_reason(usage_service, mock_repository):
         success=True,
         endpoint="generate/unity-dialogue",
         k_variants=1,
-        fallback_from="gpt-5.2",
+        fallback_from="gpt-5.6-terra",
         fallback_reason="Timeout",
     )
     saved_record = mock_repository.save.call_args[0][0]
-    assert saved_record.fallback_from == "gpt-5.2"
+    assert saved_record.fallback_from == "gpt-5.6-terra"
     assert saved_record.fallback_reason == "Timeout"
 
 
@@ -104,7 +104,7 @@ def test_track_usage_without_prompt_response_backward_compat(usage_service, mock
     """Story 1.15: track_usage sans prompt/response laisse None (rétrocompat)."""
     usage_service.track_usage(
         request_id="req_no_prompt",
-        model_name="gpt-5.2",
+        model_name="gpt-5.6-terra",
         prompt_tokens=100,
         completion_tokens=50,
         total_tokens=150,
@@ -122,7 +122,7 @@ def test_track_usage_with_error(usage_service, mock_repository):
     """Teste l'enregistrement d'un appel en erreur."""
     usage_service.track_usage(
         request_id="req_456",
-        model_name="gpt-5.2",
+        model_name="gpt-5.6-terra",
         prompt_tokens=1000,
         completion_tokens=0,
         total_tokens=1000,
@@ -147,7 +147,7 @@ def test_get_usage_history(usage_service, mock_repository):
         LLMUsageRecord(
             request_id=f"req_{i}",
             timestamp=datetime.now(UTC),
-            model_name="gpt-5.2",
+            model_name="gpt-5.6-terra",
             prompt_tokens=1000,
             completion_tokens=500,
             total_tokens=1500,
@@ -205,7 +205,7 @@ def test_track_usage_with_dialogue_context(usage_service, mock_repository):
     """Teste que track_usage accepte dialogue_id et node_id optionnels."""
     usage_service.track_usage(
         request_id="req_diag_1",
-        model_name="gpt-5.2",
+        model_name="gpt-5.6-terra",
         prompt_tokens=800,
         completion_tokens=200,
         total_tokens=1000,
@@ -225,7 +225,7 @@ def test_track_usage_backwards_compatible_no_dialogue_context(usage_service, moc
     """Teste que track_usage reste compatible sans dialogue_id/node_id."""
     usage_service.track_usage(
         request_id="req_legacy",
-        model_name="gpt-5.2",
+        model_name="gpt-5.6-terra",
         prompt_tokens=500,
         completion_tokens=100,
         total_tokens=600,
@@ -244,7 +244,7 @@ def test_annotate_usage_updates_record(usage_service, mock_repository):
     existing_record = LLMUsageRecord(
         request_id="req_to_annotate",
         timestamp=datetime.now(UTC),
-        model_name="gpt-5.2",
+        model_name="gpt-5.6-terra",
         prompt_tokens=500,
         completion_tokens=100,
         total_tokens=600,
@@ -280,7 +280,7 @@ def test_get_dialogue_costs_aggregation(usage_service, mock_repository):
         LLMUsageRecord(
             request_id=f"req_{i}",
             timestamp=base_time,
-            model_name="gpt-5.2",
+            model_name="gpt-5.6-terra",
             prompt_tokens=400,
             completion_tokens=100,
             total_tokens=500,
@@ -325,7 +325,7 @@ def test_get_dialogue_costs_reflects_deleted_field(usage_service, mock_repositor
         LLMUsageRecord(
             request_id="req_del_0",
             timestamp=base_time,
-            model_name="gpt-5.2",
+            model_name="gpt-5.6-terra",
             prompt_tokens=400,
             completion_tokens=100,
             total_tokens=500,
@@ -340,7 +340,7 @@ def test_get_dialogue_costs_reflects_deleted_field(usage_service, mock_repositor
         LLMUsageRecord(
             request_id="req_del_1",
             timestamp=base_time,
-            model_name="gpt-5.2",
+            model_name="gpt-5.6-terra",
             prompt_tokens=400,
             completion_tokens=100,
             total_tokens=500,
@@ -389,7 +389,7 @@ def test_get_all_dialogues_costs_sorted(usage_service, mock_repository):
             LLMUsageRecord(
                 request_id="req_c1",
                 timestamp=base_time,
-                model_name="gpt-5.2",
+                model_name="gpt-5.6-terra",
                 prompt_tokens=100,
                 completion_tokens=20,
                 total_tokens=120,
@@ -405,7 +405,7 @@ def test_get_all_dialogues_costs_sorted(usage_service, mock_repository):
             LLMUsageRecord(
                 request_id="req_e1",
                 timestamp=base_time,
-                model_name="gpt-5.2",
+                model_name="gpt-5.6-terra",
                 prompt_tokens=5000,
                 completion_tokens=1000,
                 total_tokens=6000,

@@ -15,43 +15,43 @@ export const SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX = 480
 export const segmentedTabTypography = {
   comfortable: {
     fontSizeRem: 0.8,
-    buttonPadding: '0.14rem 0.62rem',
+    buttonPadding: '0.21rem 0.62rem',
     rowGapRem: 0.2,
-    rowPadding: '0.14rem 0.5rem',
-    tabMinHeightPx: 28,
+    rowPadding: '0.21rem 0.5rem',
+    tabMinHeightPx: 42,
   },
   narrow: {
     /** Plancher lisibilité ≈ 12px si root 16px */
     fontSizeRem: 0.75,
-    buttonPadding: '0.26rem 0.48rem',
+    buttonPadding: '0.39rem 0.48rem',
     rowGapRem: 0.2,
-    rowPadding: '0.32rem 0.42rem',
-    /** FR119 : cible tactile sur colonne étroite / mobile */
-    tabMinHeightPx: 44,
+    rowPadding: '0.48rem 0.42rem',
+    /** FR119 : ≥ 44px ; +50 % vs densité précédente pour lisibilité des libellés. */
+    tabMinHeightPx: 66,
   },
 } as const
 
 /** En-têtes latéraux Dashboard (Contexte GDD / Détails) — alignés sur le rail segmenté central. */
 export const panelSideHeaderChrome = {
   comfortable: {
-    padding: '0.15rem 0.75rem',
+    padding: '0.225rem 0.75rem',
   },
   narrow: {
-    padding: '0.32rem 0.75rem',
+    padding: '0.48rem 0.75rem',
   },
 } as const
 
 /** Bouton chevron de repli des panneaux latéraux (desktop uniquement). */
 export const panelCollapseButtonChrome = {
   comfortable: {
-    padding: '0.18rem 0.45rem',
-    minHeightPx: 28,
-    minWidthPx: 28,
+    padding: '0.27rem 0.45rem',
+    minHeightPx: 42,
+    minWidthPx: 42,
   },
   narrow: {
-    padding: '0.35rem 0.5rem',
-    minHeightPx: 44,
-    minWidthPx: 44,
+    padding: '0.525rem 0.5rem',
+    minHeightPx: 66,
+    minWidthPx: 66,
   },
 } as const
 

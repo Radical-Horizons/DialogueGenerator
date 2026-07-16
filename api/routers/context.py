@@ -166,7 +166,7 @@ def _build_lightweight_prompt_structure(
 
     sections: List[PromptSection] = []
     prompt_overhead_tokens = 0
-    model_id = request_data.llm_model_identifier or "gpt-5.2"
+    model_id = request_data.llm_model_identifier or "gpt-5.6-terra"
     for build_section, section_type, title in section_specs:
         elem = build_section(prompt_input)
         if elem is None:

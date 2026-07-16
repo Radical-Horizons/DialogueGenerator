@@ -352,7 +352,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
               onChange={handleSubLocationChange}
               placeholder={
                 selection.sceneRegion
-                  ? 'Lieu ou zone détaillée — Rechercher…'
+                  ? 'Sous-lieu direct de la région — Rechercher…'
                   : 'Choisir d’abord une région'
               }
               disabled={isLoading || !selection.sceneRegion}

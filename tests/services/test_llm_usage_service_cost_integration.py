@@ -43,7 +43,7 @@ def test_track_usage_updates_budget(temp_budget_file, temp_usage_dir):
     # Enregistrer un usage LLM
     usage_service.track_usage(
         request_id="req_test_1",
-        model_name="gpt-5-mini",
+        model_name="gpt-5.6-luna",
         prompt_tokens=1000,
         completion_tokens=500,
         total_tokens=1500,
@@ -83,7 +83,7 @@ def test_track_usage_does_not_update_budget_on_failure(temp_budget_file, temp_us
     # Enregistrer un usage LLM en échec
     usage_service.track_usage(
         request_id="req_test_fail",
-        model_name="gpt-5-mini",
+        model_name="gpt-5.6-luna",
         prompt_tokens=1000,
         completion_tokens=0,
         total_tokens=1000,
@@ -105,7 +105,7 @@ def test_track_usage_with_prompt_response_then_get_by_dialogue_node(temp_usage_d
     usage_service = LLMUsageService(repository=usage_repository)
     usage_service.track_usage(
         request_id="req_int_1",
-        model_name="gpt-5-mini",
+        model_name="gpt-5.6-luna",
         prompt_tokens=100,
         completion_tokens=50,
         total_tokens=150,

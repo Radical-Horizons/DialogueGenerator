@@ -131,8 +131,8 @@ class OpenAIParameterBuilder:
         """Construit la configuration du reasoning selon le modèle.
         
         Args:
-            model_name: Nom du modèle (ex: "gpt-5.2", "gpt-5-mini").
-            reasoning_effort: Niveau d'effort (none, minimal, low, medium, high, xhigh).
+            model_name: Nom du modèle (ex: "gpt-5.6-sol", "gpt-5.6-luna").
+            reasoning_effort: Niveau d'effort (none, minimal, low, medium, high, xhigh, max).
             reasoning_summary: Format du résumé (None ou "auto" uniquement).
                 Note: "detailed" n'est pas supporté car nécessite une organisation OpenAI vérifiée (Tier 2/3).
                 Si "detailed" est fourni, il sera rejeté par la validation du schéma API.
@@ -141,32 +141,16 @@ class OpenAIParameterBuilder:
             Dictionnaire avec la configuration reasoning, ou vide si pas de reasoning.
         """
         reasoning_config = {}
-        is_mini_or_nano = "gpt-5-mini" in model_name or "gpt-5-nano" in model_name
         
         if reasoning_effort is not None:
-            # Valider que le modèle supporte la valeur demandée
-            if reasoning_effort == "none":
-                # "none" uniquement supporté par GPT-5.2/5.2-pro, pas par mini/nano
-                if is_mini_or_nano:
-                    logger.warning(
-                        f"reasoning.effort='none' non supporté par {model_name}. "
-                        f"Utilisation de 'minimal' à la place (reasoning toujours actif pour mini/nano)."
-                    )
-                    reasoning_config["effort"] = "minimal"
-                else:
-                    reasoning_config["effort"] = reasoning_effort
-            elif reasoning_effort == "xhigh":
-                # "xhigh" uniquement supporté par GPT-5.2/5.2-pro
-                if is_mini_or_nano:
-                    logger.warning(
-                        f"reasoning.effort='xhigh' non supporté par {model_name}. "
-                        f"Utilisation de 'high' à la place."
-                    )
-                    reasoning_config["effort"] = "high"
-                else:
-                    reasoning_config["effort"] = reasoning_effort
+            # GPT-5.6 : none | low | medium | high | xhigh | max
+            # « minimal » (legacy mini/nano) → low
+            if reasoning_effort == "minimal":
+                logger.info(
+                    f"reasoning.effort='minimal' (legacy) pour {model_name} → 'low'."
+                )
+                reasoning_config["effort"] = "low"
             else:
-                # Autres valeurs (minimal, low, medium, high) supportées par tous les modèles GPT-5
                 reasoning_config["effort"] = reasoning_effort
             
             # Activer automatiquement summary selon le modèle
@@ -206,7 +190,6 @@ class OpenAIParameterBuilder:
                 f"summary={reasoning_config.get('summary', 'None')}"
             )
         else:
-            # Pas de reasoning explicite : l'API utilisera "medium" par défaut pour mini/nano
             logger.debug(
                 f"Reasoning non spécifié pour {model_name}, l'API utilisera 'medium' par défaut."
             )
@@ -220,6 +203,12 @@ class OpenAIParameterBuilder:
         reasoning_effort: Optional[str],
     ) -> bool:
         """Détermine si la temperature doit être incluse dans les paramètres.
+
+        Règles (doc OpenAI + preuve runtime) :
+
+        - Famille GPT-5.6 : **jamais** (API 400 ``Unsupported parameter: temperature``).
+        - Autres GPT-5 : uniquement si ``reasoning.effort`` est **explicitement** ``none``.
+          ``None`` (omis) ≠ ``none`` : GPT-5.6 omet → défaut API ``medium``.
         
         Args:
             model_name: Nom du modèle.
@@ -229,7 +218,13 @@ class OpenAIParameterBuilder:
         Returns:
             True si temperature doit être incluse, False sinon.
         """
-        # Modèles qui ne supportent pas temperature du tout
+        if ModelNames.is_gpt_5_6_family(model_name):
+            logger.debug(
+                f"Temperature omise pour {model_name} (GPT-5.6 : paramètre non supporté). "
+                f"Utiliser reasoning.effort / text.verbosity."
+            )
+            return False
+
         if model_name in ModelNames.MODELS_WITHOUT_CUSTOM_TEMPERATURE:
             logger.debug(
                 f"Le modèle {model_name} ne supporte pas le paramètre temperature. "
@@ -237,27 +232,33 @@ class OpenAIParameterBuilder:
             )
             return False
         
-        is_mini_or_nano = "gpt-5-mini" in model_name or "gpt-5-nano" in model_name
+        # Responses API: temperature uniquement si effort === "none" (explicite)
+        effective_effort = (
+            reasoning_config.get("effort") if reasoning_config else None
+        )
+        if effective_effort is None:
+            effective_effort = reasoning_effort
         
-        # GPT-5 mini/nano: toujours exclure temperature (car pas de "none")
-        if is_mini_or_nano:
-            logger.debug(
-                f"Temperature omise (Responses API) pour {model_name} "
-                f"(temperature non supportée car reasoning toujours actif)."
-            )
-            return False
-        
-        # Responses API: Temperature uniquement si reasoning.effort == "none" (ou non spécifié)
-        effective_effort = reasoning_config.get("effort") if reasoning_config else reasoning_effort
-        
-        if effective_effort in (None, "none"):
+        if effective_effort == "none":
             return True
-        else:
-            logger.debug(
-                f"Temperature omise (Responses API) car reasoning.effort='{effective_effort}' "
-                f"(temperature supportée uniquement avec reasoning.effort='none' ou non spécifié)."
-            )
-            return False
+
+        logger.debug(
+            f"Temperature omise (Responses API) pour {model_name}: "
+            f"effort={effective_effort!r} (requis: 'none' explicite; "
+            f"omis → défaut medium côté API)."
+        )
+        return False
+
+    @staticmethod
+    def should_include_top_p(
+        model_name: str,
+        reasoning_config: Dict[str, Any],
+        reasoning_effort: Optional[str],
+    ) -> bool:
+        """True si ``top_p`` peut être envoyé (mêmes contraintes que temperature)."""
+        return OpenAIParameterBuilder.should_include_temperature(
+            model_name, reasoning_config, reasoning_effort
+        )
 
     @staticmethod
     def build_responses_params(
@@ -324,21 +325,27 @@ class OpenAIParameterBuilder:
         if reasoning_config:
             responses_params["reasoning"] = reasoning_config
         
-        # Temperature (uniquement si compatible avec reasoning)
+        # Temperature (uniquement si compatible avec le modèle / reasoning)
         if OpenAIParameterBuilder.should_include_temperature(
             model_name, reasoning_config, reasoning_effort
         ):
             responses_params["temperature"] = temperature
         
-        # Top_p (nucleus sampling) - peut coexister avec temperature
+        # Top_p — même gate que temperature (GPT-5.6 : non supporté)
         if top_p is not None:
             if not (0.0 <= top_p <= 1.0):
                 logger.warning(
                     f"top_p={top_p} hors limites (0.0-1.0), sera ignoré pour {model_name}"
                 )
-            else:
+            elif OpenAIParameterBuilder.should_include_top_p(
+                model_name, reasoning_config, reasoning_effort
+            ):
                 responses_params["top_p"] = top_p
                 logger.debug(f"Utilisation de top_p={top_p} pour {model_name}")
+            else:
+                logger.debug(
+                    f"top_p omis pour {model_name} (même contrainte que temperature)."
+                )
         
         # Streaming
         # Responses API : seul `stream=True` est nécessaire.

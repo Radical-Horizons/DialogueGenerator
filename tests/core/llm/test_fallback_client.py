@@ -27,9 +27,9 @@ def mock_fallback_client():
 
 @pytest.fixture
 def create_client_fn(mock_primary_client, mock_fallback_client):
-    """Factory qui retourne primary pour gpt-5.2, fallback pour mistral."""
+    """Factory qui retourne primary pour gpt-5.6-terra, fallback pour mistral."""
     def _create(model_id: str, **kwargs: object) -> ILLMClient:
-        if model_id == "gpt-5.2":
+        if model_id == "gpt-5.6-terra":
             return mock_primary_client
         if model_id == "labs-mistral-small-creative":
             return mock_fallback_client
@@ -41,7 +41,7 @@ def create_client_fn(mock_primary_client, mock_fallback_client):
 async def test_primary_success_no_fallback_call(create_client_fn, mock_primary_client, mock_fallback_client):
     """Client principal réussit → pas d'appel au fallback."""
     client = FallbackLLMClient(
-        model_ids=["gpt-5.2", "labs-mistral-small-creative"],
+        model_ids=["gpt-5.6-terra", "labs-mistral-small-creative"],
         create_client_fn=create_client_fn,
         create_client_kwargs={"config": {}, "available_models": []},
         usage_service=MagicMock(),
@@ -57,7 +57,7 @@ async def test_primary_fails_fallback_succeeds(create_client_fn, mock_primary_cl
     """Client principal échoue 3 fois → fallback utilisé."""
     mock_primary_client.generate_variants = AsyncMock(side_effect=Exception("Timeout"))
     client = FallbackLLMClient(
-        model_ids=["gpt-5.2", "labs-mistral-small-creative"],
+        model_ids=["gpt-5.6-terra", "labs-mistral-small-creative"],
         create_client_fn=create_client_fn,
         create_client_kwargs={"config": {}, "available_models": []},
         usage_service=MagicMock(),
@@ -73,7 +73,7 @@ async def test_all_clients_fail_raises_all_unavailable(create_client_fn, mock_pr
     mock_primary_client.generate_variants = AsyncMock(side_effect=Exception("500"))
     mock_fallback_client.generate_variants = AsyncMock(side_effect=Exception("503"))
     client = FallbackLLMClient(
-        model_ids=["gpt-5.2", "labs-mistral-small-creative"],
+        model_ids=["gpt-5.6-terra", "labs-mistral-small-creative"],
         create_client_fn=create_client_fn,
         create_client_kwargs={"config": {}, "available_models": []},
         usage_service=MagicMock(),
@@ -87,7 +87,7 @@ def test_fallback_client_requires_at_least_two_models():
     """FallbackLLMClient requiert au moins 2 model_ids."""
     with pytest.raises(ValueError, match="au moins 2 model_ids"):
         FallbackLLMClient(
-            model_ids=["gpt-5.2"],
+            model_ids=["gpt-5.6-terra"],
             create_client_fn=MagicMock(),
             create_client_kwargs={},
             usage_service=MagicMock(),
@@ -98,7 +98,7 @@ def test_get_max_tokens_returns_primary_max_tokens(create_client_fn, mock_primar
     """get_max_tokens retourne celui du premier client."""
     mock_primary_client.get_max_tokens.return_value = 16000
     client = FallbackLLMClient(
-        model_ids=["gpt-5.2", "labs-mistral-small-creative"],
+        model_ids=["gpt-5.6-terra", "labs-mistral-small-creative"],
         create_client_fn=create_client_fn,
         create_client_kwargs={"config": {}, "available_models": []},
         usage_service=MagicMock(),
@@ -134,7 +134,7 @@ async def test_fallback_success_calls_track_usage_with_fallback_from_reason():
 
     def create_fn(model_id: str, **kwargs: object) -> ILLMClient:
         nonlocal captured_usage_service
-        if model_id == "gpt-5.2":
+        if model_id == "gpt-5.6-terra":
             return primary_client
         if model_id == "labs-mistral-small-creative":
             captured_usage_service = kwargs.get("usage_service")
@@ -145,7 +145,7 @@ async def test_fallback_success_calls_track_usage_with_fallback_from_reason():
         return MagicMock(spec=ILLMClient)
 
     client = FallbackLLMClient(
-        model_ids=["gpt-5.2", "labs-mistral-small-creative"],
+        model_ids=["gpt-5.6-terra", "labs-mistral-small-creative"],
         create_client_fn=create_fn,
         create_client_kwargs={"config": {}, "available_models": []},
         usage_service=mock_usage,
@@ -155,6 +155,6 @@ async def test_fallback_success_calls_track_usage_with_fallback_from_reason():
     assert result == ["result-fallback"]
     assert mock_usage.track_usage.called
     call_kwargs = mock_usage.track_usage.call_args[1]
-    assert call_kwargs.get("fallback_from") == "gpt-5.2"
+    assert call_kwargs.get("fallback_from") == "gpt-5.6-terra"
     assert call_kwargs.get("fallback_reason") is not None
     assert "Timeout" in str(call_kwargs.get("fallback_reason", ""))

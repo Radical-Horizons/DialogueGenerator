@@ -8,6 +8,7 @@ from core.llm.llm_client import ILLMClient, DummyLLMClient
 from core.llm.openai.client import OpenAIClient
 from core.llm.mistral_client import MistralClient
 from core.llm.fallback_client import FallbackLLMClient
+from constants import ModelNames
 
 logger = logging.getLogger(__name__)
 
@@ -61,13 +62,13 @@ class LLMClientFactory:
         if model_id == "dummy":
             return DummyLLMClient()
 
-        # Mapper les anciens identifiants vers les nouveaux (compatibilité)
-        model_id_mapping = {
-            "gpt-5.2-thinking": "gpt-5.2-pro"  # Ancien identifiant inexistant → nouveau identifiant valide
-        }
-        if model_id in model_id_mapping:
-            logger.warning(f"Modèle '{model_id}' est déprécié. Utilisation de '{model_id_mapping[model_id]}' à la place.")
-            model_id = model_id_mapping[model_id]
+        # Mapper les anciens identifiants vers la famille GPT-5.6
+        normalized_id = ModelNames.normalize_model_id(model_id)
+        if normalized_id != model_id:
+            logger.warning(
+                f"Modèle '{model_id}' est déprécié. Utilisation de '{normalized_id}' à la place."
+            )
+            model_id = normalized_id
 
         # Chercher le modèle par api_identifier (champ dans llm_config.json) ou model_identifier (compatibilité)
         model_config = next(

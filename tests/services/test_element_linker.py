@@ -126,13 +126,35 @@ class TestElementLinker:
         subs = linker.get_sub_locations("Léviathan pétrifié", locs)
         assert subs == ["Narthex abyssal", "Nef Centrale"]
 
-    def test_get_scene_region_names_values_contient(self, linker):
-        """Parent avec Contient dans values apparaît dans les régions scène."""
+    def test_get_scene_region_names_uses_explicit_type_from_values(self, linker):
+        """Le sélecteur scène exclut les parents non région même s'ils ont des enfants."""
         locs = [
-            {"Nom": "Parent", "values": {"Contient": "1b36e4d2-1b45-80ce-9d1b-f71e60cb8e53"}},
-            {"Nom": "Enfant", "notion_page_id": "1b36e4d2-1b45-80ce-9d1b-f71e60cb8e53"},
+            {
+                "Nom": "Région",
+                "values": {
+                    "Type": "Région principale",
+                    "Contient": "11111111-1111-1111-1111-111111111111",
+                },
+            },
+            {
+                "Nom": "Lieu intermédiaire",
+                "values": {
+                    "Type": "Lieu principal",
+                    "Contient": "22222222-2222-2222-2222-222222222222",
+                },
+                "notion_page_id": "11111111-1111-1111-1111-111111111111",
+            },
+            {
+                "Nom": "Lieu profond",
+                "values": {"Type": "Lieu secondaire"},
+                "notion_page_id": "22222222-2222-2222-2222-222222222222",
+            },
         ]
-        assert linker.get_scene_region_names(locs) == ["Parent"]
+        assert linker.get_scene_region_names(locs) == ["Région"]
+        assert linker.get_scene_sub_location_names("Région", locs) == [
+            "Lieu intermédiaire"
+        ]
+        assert linker.get_scene_sub_location_names("Lieu intermédiaire", locs) == []
     
     def test_get_sub_locations(self, linker, sample_gdd_data):
         """Test de récupération des sous-lieux."""

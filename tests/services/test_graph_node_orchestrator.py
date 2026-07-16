@@ -9,7 +9,6 @@ from unittest.mock import MagicMock, AsyncMock, patch
 from services.graph_node_orchestrator import (
     GraphNodeOrchestrator,
     GenerationResult,
-    _normalize_parent_id,
     _resolve_instructions,
     _build_test_connections,
     _build_enriched_instructions,
@@ -19,12 +18,6 @@ from services.graph_node_orchestrator import (
 
 class TestHelperFunctions:
     """Tests pour les fonctions utilitaires."""
-
-    def test_normalize_parent_id_adds_prefix(self):
-        assert _normalize_parent_id("MY_NODE") == "NODE_MY_NODE"
-
-    def test_normalize_parent_id_keeps_existing_prefix(self):
-        assert _normalize_parent_id("NODE_MY_NODE") == "NODE_MY_NODE"
 
     def test_resolve_instructions_with_value(self):
         assert _resolve_instructions("  Do something  ") == "Do something"
@@ -161,6 +154,9 @@ class TestGraphNodeOrchestrator:
         assert result.nodes[0]["id"] == "NODE_P_CHOICE_1"
         assert result.suggested_connections[0]["via_choice_index"] == 1
         assert result.suggested_connections[0]["connection_type"] == "choice"
+        start_id = mock_generation_service.enrich_with_ids.call_args.kwargs["start_id"]
+        assert start_id.startswith("node-")
+        assert len(start_id) == 37
 
     # --- Invalid choice index ---
 

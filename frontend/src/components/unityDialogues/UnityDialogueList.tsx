@@ -16,7 +16,10 @@ import {
 } from './DialogueListContextMenu'
 import { StyledSelect } from '../shared/StyledSelect'
 import { useDialogueListData } from '../../hooks/useDialogueListData'
-import { normalizeDialogueFilenameKey } from '../../utils/formatDialogueTitle'
+import {
+  normalizeDialogueFilenameKey,
+  titleToDocumentId,
+} from '../../utils/formatDialogueTitle'
 import { useToast } from '../shared'
 import { useBatchUnityExport, toDocumentId } from '../../hooks/useBatchUnityExport'
 import { useRegisterUnityBatchExportMenu } from '../../hooks/useRegisterUnityBatchExportMenu'
@@ -144,13 +147,7 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
     const requestedTitle = window.prompt('Titre du nouveau dialogue')
     if (requestedTitle === null) return
     const title = requestedTitle.trim()
-    const documentId = title
-      .normalize('NFKD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^\w\s-]/g, '')
-      .trim()
-      .replace(/[-\s]+/g, '_')
-      .toLowerCase()
+    const documentId = titleToDocumentId(title)
     if (!documentId) {
       toast('Le titre doit contenir au moins une lettre ou un chiffre.', 'error')
       return

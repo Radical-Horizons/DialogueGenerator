@@ -126,7 +126,7 @@ def check_expand_tree(token: str | None) -> tuple[list[str], Path | None]:
         "document_id": "test_dramatis_etheree_uresair_20260621",
         "persist": True,
         "dry_run": False,
-        "llm_model_identifier": "gpt-5-mini",
+        "llm_model_identifier": "gpt-5.6-luna",
     }
     data = _post("/api/v1/unity-dialogues/graph/expand-tree", payload, token)
     doc = data.get("document") or {}

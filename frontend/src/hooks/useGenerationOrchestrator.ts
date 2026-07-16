@@ -10,6 +10,7 @@ import { useGenerationValidation } from './useGenerationValidation'
 import { useSSEStreaming } from './useSSEStreaming'
 import { useGenerationHandlers } from './useGenerationHandlers'
 import { useGraphStore } from '../store/graphStore'
+import { titleToDocumentId } from '../utils/formatDialogueTitle'
 import type { ContextSelection, LLMModelResponse } from '../types/api'
 import type { UseGenerationRequestReturn } from './useGenerationRequest'
 
@@ -132,10 +133,15 @@ export function useGenerationOrchestrator(
   })
   const sse = useSSEStreaming({
     onComplete: async (result: unknown) => {
-      const payload = result as { json_content?: string }
+      const payload = result as { json_content?: string; title?: string }
       if (payload.json_content) {
         try {
-          await loadDialogue(payload.json_content)
+          const fromTitle = payload.title?.trim() ? titleToDocumentId(payload.title) : ''
+          const documentId = fromTitle || `dialogue_${Date.now()}`
+          await loadDialogue(payload.json_content, undefined, documentId)
+          if (payload.title?.trim()) {
+            useGraphStore.getState().updateMetadata({ title: payload.title.trim() })
+          }
         } catch (graphError) {
           console.warn('Erreur lors du chargement du graphe généré:', graphError)
         }

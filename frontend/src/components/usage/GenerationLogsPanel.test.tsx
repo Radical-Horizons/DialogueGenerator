@@ -40,7 +40,7 @@ const twoEntriesResponse: GenerationLogsResponse = {
       request_id: 'req_1',
       timestamp: '2026-03-06T12:00:00.000Z',
       node_id: 'NODE_1',
-      model_name: 'gpt-5.2',
+      model_name: 'gpt-5.6-terra',
       prompt_tokens: 100,
       completion_tokens: 50,
       total_tokens: 150,

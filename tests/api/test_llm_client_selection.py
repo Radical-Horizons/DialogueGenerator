@@ -84,7 +84,7 @@ def test_llm_factory_creates_dummy_when_api_key_missing():
     }
     available_models = [
         {
-            "api_identifier": "gpt-5.2-mini",
+            "api_identifier": "gpt-5.6-luna",
             "display_name": "GPT-4o Mini",
             "client_type": "openai"
         }
@@ -93,7 +93,7 @@ def test_llm_factory_creates_dummy_when_api_key_missing():
     # Simuler l'absence de clé API
     with patch.dict(os.environ, {}, clear=True):
         client = LLMClientFactory.create_client(
-            model_id="gpt-5.2-mini",
+            model_id="gpt-5.6-luna",
             config=config,
             available_models=available_models
         )
@@ -187,7 +187,7 @@ def test_llm_factory_handles_model_without_client_type():
     }
     available_models = [
         {
-            "api_identifier": "gpt-5.2-mini",
+            "api_identifier": "gpt-5.6-luna",
             "display_name": "GPT-4o Mini"
             # Pas de client_type
         }
@@ -198,7 +198,7 @@ def test_llm_factory_handles_model_without_client_type():
             mock_openai.return_value = MagicMock(spec=OpenAIClient)
             
             client = LLMClientFactory.create_client(
-                model_id="gpt-5.2-mini",
+                model_id="gpt-5.6-luna",
                 config=config,
                 available_models=available_models
             )
@@ -208,7 +208,7 @@ def test_llm_factory_handles_model_without_client_type():
 
 
 def test_llm_factory_creates_openai_for_gpt_5_2():
-    """Test spécifique que LLMClientFactory crée un OpenAIClient pour 'gpt-5.2' quand la clé API est présente."""
+    """Test spécifique que LLMClientFactory crée un OpenAIClient pour 'gpt-5.6-terra' quand la clé API est présente."""
     from factories.llm_factory import LLMClientFactory
     
     config = {
@@ -217,7 +217,7 @@ def test_llm_factory_creates_openai_for_gpt_5_2():
     available_models = [
         {
             "display_name": "GPT-5.2 (Recommandé)",
-            "api_identifier": "gpt-5.2",
+            "api_identifier": "gpt-5.6-terra",
             "notes": "Modèle le plus récent et le plus capable, bon équilibre performance/coût."
         }
     ]
@@ -227,23 +227,23 @@ def test_llm_factory_creates_openai_for_gpt_5_2():
             mock_openai.return_value = MagicMock(spec=OpenAIClient)
             
             client = LLMClientFactory.create_client(
-                model_id="gpt-5.2",
+                model_id="gpt-5.6-terra",
                 config=config,
                 available_models=available_models
             )
     
     # Vérifier que OpenAIClient a été appelé (pas DummyLLMClient)
-    assert mock_openai.called, "OpenAIClient devrait être créé pour 'gpt-5.2'"
-    assert not isinstance(client, DummyLLMClient), "DummyLLMClient ne devrait pas être utilisé pour 'gpt-5.2'"
+    assert mock_openai.called, "OpenAIClient devrait être créé pour 'gpt-5.6-terra'"
+    assert not isinstance(client, DummyLLMClient), "DummyLLMClient ne devrait pas être utilisé pour 'gpt-5.6-terra'"
     
     # Vérifier les paramètres d'appel
     call_kwargs = mock_openai.call_args[1]
     assert call_kwargs["api_key"] == "test-key-123"
-    assert call_kwargs["config"]["default_model"] == "gpt-5.2"
+    assert call_kwargs["config"]["default_model"] == "gpt-5.6-terra"
 
 
 def test_llm_factory_uses_dummy_for_gpt_5_2_when_api_key_missing():
-    """Test que LLMClientFactory utilise DummyLLMClient pour 'gpt-5.2' quand la clé API est absente."""
+    """Test que LLMClientFactory utilise DummyLLMClient pour 'gpt-5.6-terra' quand la clé API est absente."""
     from factories.llm_factory import LLMClientFactory
     
     config = {
@@ -252,7 +252,7 @@ def test_llm_factory_uses_dummy_for_gpt_5_2_when_api_key_missing():
     available_models = [
         {
             "display_name": "GPT-5.2 (Recommandé)",
-            "api_identifier": "gpt-5.2",
+            "api_identifier": "gpt-5.6-terra",
             "notes": "Modèle le plus récent et le plus capable, bon équilibre performance/coût."
         }
     ]
@@ -260,7 +260,7 @@ def test_llm_factory_uses_dummy_for_gpt_5_2_when_api_key_missing():
     # Simuler l'absence de clé API
     with patch.dict(os.environ, {}, clear=True):
         client = LLMClientFactory.create_client(
-            model_id="gpt-5.2",
+            model_id="gpt-5.6-terra",
             config=config,
             available_models=available_models
         )
@@ -276,7 +276,7 @@ def test_llm_factory_uses_dummy_for_gpt_5_2_when_api_key_is_ci_placeholder():
     available_models = [
         {
             "display_name": "GPT-5.2 (Recommandé)",
-            "api_identifier": "gpt-5.2",
+            "api_identifier": "gpt-5.6-terra",
             "client_type": "openai",
             "notes": "Modèle le plus récent et le plus capable, bon équilibre performance/coût.",
         }
@@ -284,7 +284,7 @@ def test_llm_factory_uses_dummy_for_gpt_5_2_when_api_key_is_ci_placeholder():
 
     with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-dummy"}):
         client = LLMClientFactory.create_client(
-            model_id="gpt-5.2",
+            model_id="gpt-5.6-terra",
             config=config,
             available_models=available_models,
         )

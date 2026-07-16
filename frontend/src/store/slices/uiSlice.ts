@@ -311,7 +311,10 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
   },
 
   markDirty: () => {
-    set({ hasUnsavedChanges: true })
+    set((state) => ({
+      hasUnsavedChanges: true,
+      clientSeq: state.clientSeq + 1,
+    }))
     const state = get()
     const docId = state.documentId ?? state.dialogueMetadata.filename ?? null
     if (docId) {

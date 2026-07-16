@@ -78,9 +78,8 @@ export function UnityDialogueDetails({
   const handleSave = useCallback(
     async (_savedFilename: string, savedRevision: number) => {
       setRevision(savedRevision)
-      await loadDialogue(true)
     },
-    [loadDialogue]
+    []
   )
 
   const handleDelete = async () => {

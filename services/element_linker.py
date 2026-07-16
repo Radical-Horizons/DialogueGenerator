@@ -1,7 +1,8 @@
 """Service pour gérer les relations et liens entre éléments GDD."""
 import logging
 import re
-from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING
+import unicodedata
+from typing import Any, Dict, List, Optional, Set, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from services.element_repository import ElementRepository
@@ -14,6 +15,19 @@ from services.gdd_relation_resolver import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _is_region_location(location: Dict[str, Any]) -> bool:
+    """Indique si une fiche lieu porte explicitement un type région."""
+    raw_type = get_gdd_property(location, "Type") or get_gdd_property(
+        location,
+        "Catégorie",
+    )
+    if not raw_type:
+        return False
+    normalized = unicodedata.normalize("NFKD", raw_type)
+    folded = "".join(char for char in normalized if not unicodedata.combining(char))
+    return folded.casefold().startswith("region")
 
 
 class ElementLinker:
@@ -120,8 +134,7 @@ class ElementLinker:
     def get_scene_region_names(self, locations: List[Dict]) -> List[str]:
         """Noms pour le sélecteur « région » de la scène principale.
 
-        Priorité : fiches ``Catégorie == "Région"`` ; sinon lieux avec ``Contient`` non vide ;
-        sinon tous les lieux (même logique que ``get_regions`` sans hiérarchie explicite).
+        Seules les fiches explicitement typées comme régions sont proposées.
 
         Args:
             locations: Liste des lieux GDD.
@@ -131,27 +144,17 @@ class ElementLinker:
         """
         if not locations:
             return []
-        typed = [
-            loc.get("Nom")
+        regions = [
+            str(loc["Nom"])
             for loc in locations
-            if isinstance(loc, dict) and loc.get("Nom") and loc.get("Catégorie") == "Région"
+            if isinstance(loc, dict) and loc.get("Nom") and _is_region_location(loc)
         ]
-        if typed:
-            return sorted(set(typed), key=lambda n: str(n).casefold())
-        with_contient: List[str] = []
-        for loc in locations:
-            if not isinstance(loc, dict) or not loc.get("Nom"):
-                continue
-            if get_gdd_property(loc, "Contient"):
-                with_contient.append(str(loc["Nom"]))
-        if with_contient:
-            return sorted(set(with_contient), key=lambda n: str(n).casefold())
-        return self.get_regions(locations)
+        return sorted(set(regions), key=str.casefold)
 
     def get_scene_sub_location_names(self, parent_name: str, locations: List[Dict]) -> List[str]:
         """Noms pour le sélecteur « sous-lieu » sous le lieu parent (scène principale).
 
-        Retourne uniquement les noms listés dans ``Contient`` de la fiche parente.
+        Retourne uniquement les enfants directs d'une fiche explicitement typée région.
 
         Args:
             parent_name: Nom de la fiche lieu sélectionnée.
@@ -160,6 +163,9 @@ class ElementLinker:
         Returns:
             Noms issus de ``Contient``, ou liste vide.
         """
+        parent = self._find_location_by_name(parent_name, locations)
+        if not parent or not _is_region_location(parent):
+            return []
         return self.get_sub_locations(parent_name, locations)
     
     def extract_linked_names(self, text_field: Optional[str], known_names_list: List[str]) -> Set[str]:

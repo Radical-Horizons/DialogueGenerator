@@ -45,19 +45,23 @@ class ModelNames:
     
     Source de vérité unique pour tous les identifiants de modèles.
     Utiliser ces constantes au lieu de strings codées en dur.
-    """
-    # Modèles GPT-5.4
-    GPT_5_4 = "gpt-5.4"
 
-    # Modèles GPT-5.2
-    GPT_5_2 = "gpt-5.2"
-    GPT_5_2_PRO = "gpt-5.2-pro"
-    # Alias pour compatibilité (déprécié, utiliser GPT_5_2_PRO)
-    GPT_5_2_THINKING = "gpt-5.2-pro"
-    
-    # Modèles GPT-5 (versions allégées)
-    GPT_5_MINI = "gpt-5-mini"
-    GPT_5_NANO = "gpt-5-nano"
+    Famille GPT-5.6 (doc OpenAI) : Sol = flagship, Terra = équilibre, Luna = volume/coût.
+    """
+    # GPT-5.6 — tiers durables (developers.openai.com/api/docs/models/gpt-5.6-*)
+    GPT_5_6_SOL = "gpt-5.6-sol"
+    GPT_5_6_TERRA = "gpt-5.6-terra"
+    GPT_5_6_LUNA = "gpt-5.6-luna"
+    # Alias API OpenAI : gpt-5.6 → Sol
+    GPT_5_6 = "gpt-5.6"
+
+    # Alias de code (mêmes valeurs que les slugs 5.6) — préférer GPT_5_6_*
+    GPT_5_4 = GPT_5_6_SOL
+    GPT_5_2 = GPT_5_6_TERRA
+    GPT_5_2_PRO = GPT_5_6_SOL
+    GPT_5_2_THINKING = GPT_5_6_SOL
+    GPT_5_MINI = GPT_5_6_LUNA
+    GPT_5_NANO = GPT_5_6_LUNA
     
     # Modèles obsolètes (pour référence)
     GPT_4_TURBO = "gpt-4-turbo"
@@ -65,19 +69,54 @@ class ModelNames:
     
     # Modèle de test
     DUMMY = "dummy"
+
+    # Anciens slugs API → famille 5.6 (presets, localStorage, tests)
+    LEGACY_MODEL_ID_MAP: dict[str, str] = {
+        "gpt-5.4": GPT_5_6_SOL,
+        "gpt-5.2": GPT_5_6_TERRA,
+        "gpt-5.2-pro": GPT_5_6_SOL,
+        "gpt-5.2-thinking": GPT_5_6_SOL,
+        "gpt-5-mini": GPT_5_6_LUNA,
+        "gpt-5-nano": GPT_5_6_LUNA,
+        "gpt-5.6": GPT_5_6_SOL,
+    }
+
+    @classmethod
+    def normalize_model_id(cls, model_id: str) -> str:
+        """Mappe un identifiant legacy vers le slug GPT-5.6 courant."""
+        return cls.LEGACY_MODEL_ID_MAP.get(model_id, model_id)
     
     # Liste des modèles qui nécessitent max_completion_tokens (au lieu de max_tokens)
     MODELS_USING_MAX_COMPLETION_TOKENS = [
-        GPT_5_4,
-        GPT_5_2, GPT_5_2_PRO, GPT_5_2_THINKING,
-        GPT_5_MINI, GPT_5_NANO,
+        GPT_5_6_SOL, GPT_5_6_TERRA, GPT_5_6_LUNA, GPT_5_6,
     ]
     
-    # Liste des modèles qui ne supportent pas la température personnalisée
-    MODELS_WITHOUT_CUSTOM_TEMPERATURE = [GPT_5_MINI, GPT_5_NANO]
+    # GPT-5.6 Responses API : temperature / top_p rejetés (400 Unsupported parameter).
+    # Preuve runtime 2026-07-17 + doc : omit effort → défaut medium.
+    # Contrôler la « créativité » via reasoning.effort / text.verbosity, pas temperature.
+    MODELS_WITHOUT_CUSTOM_TEMPERATURE = [
+        GPT_5_6_SOL, GPT_5_6_TERRA, GPT_5_6_LUNA, GPT_5_6,
+    ]
     
-    # Liste des modèles qui peuvent avoir des problèmes avec le structured output
-    MODELS_WITH_STRUCTURED_OUTPUT_ISSUES = [GPT_5_MINI, GPT_5_NANO]
+    # Tous les tiers 5.6 supportent structured outputs (doc officielle)
+    MODELS_WITH_STRUCTURED_OUTPUT_ISSUES: list[str] = []
+
+    UNITY_STRUCTURED_OUTPUT_MODELS = (
+        GPT_5_6_SOL,
+        GPT_5_6_TERRA,
+        GPT_5_6_LUNA,
+    )
+
+    @classmethod
+    def is_gpt_5_6_family(cls, model_name: str) -> bool:
+        """True si le slug appartient à la famille GPT-5.6 (Sol/Terra/Luna/alias)."""
+        normalized = cls.normalize_model_id(model_name).lower()
+        return "gpt-5.6" in normalized or normalized in {
+            cls.GPT_5_6_SOL,
+            cls.GPT_5_6_TERRA,
+            cls.GPT_5_6_LUNA,
+            cls.GPT_5_6,
+        }
 
 class PlayableCharacters:
     """PJ jouables Alteir — source de vérité partagée backend/frontend."""
@@ -94,7 +133,7 @@ class Defaults:
     CONTEXT_TOKENS = 10000  # Plancher produit aligné MIN_CONTEXT_TOKENS (contexte LLM utilisable)
     VARIANTS_COUNT = 2
     TEMPERATURE = 0.7
-    MODEL_ID = ModelNames.GPT_5_MINI  # Modèle par défaut
+    MODEL_ID = ModelNames.GPT_5_6_LUNA  # Défaut économique (volume / expand-tree)
     MAX_TOKENS_FOR_CONTEXT_BUILDING = 32000
     SAVE_SETTINGS_DELAY_MS = 1000
     MAIN_SPLITTER_STRETCH_FACTOR_LEFT_PANEL = 1

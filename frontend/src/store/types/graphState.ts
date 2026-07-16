@@ -104,6 +104,11 @@ export interface GraphState {
   loadDialogueByDocumentId: (documentId: string) => Promise<void>
   /** Charge depuis le JSON brut (projection frontend uniquement). Utilisé quand l’API documents renvoie 404. */
   loadDialogueFromRawJson: (jsonContent: string, documentId: string) => Promise<void>
+  /**
+   * Applique des nœuds Unity édités (panneau droit) au graphe + document SoT sans recharger.
+   * Préserve les positions existantes et marque dirty pour la sauvegarde.
+   */
+  applyUnityDocumentNodes: (unityNodes: unknown[]) => void
   /** Incrémente la séquence de chargement pour annulation des requêtes obsolètes. */
   incrementLoadSeq: () => number
   /** Applique les résultats d'un chargement si la séquence correspond. */

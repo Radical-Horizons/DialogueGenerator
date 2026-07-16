@@ -146,7 +146,7 @@ async def test_expand_depth_2_choices_2() -> None:
         context_selections=context,
         max_depth=2,
         max_choices=2,
-        llm_model_identifier="gpt-5-mini",
+        llm_model_identifier="gpt-5.6-luna",
     )
 
     assert result.node_count == 7
@@ -205,6 +205,6 @@ async def test_expand_fail_fast_on_parent_error() -> None:
             context_selections=context,
             max_depth=1,
             max_choices=1,
-            llm_model_identifier="gpt-5-mini",
+            llm_model_identifier="gpt-5.6-luna",
             allow_partial=False,
         )

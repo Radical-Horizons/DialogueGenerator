@@ -44,7 +44,7 @@ Comportement livré — en cas d'écart avec un document, le **code et les tests
     *   `ContextBuilder` charge `data/GDD_categories/` et `Vision.json`.
     *   Sync Notion optionnelle — voir `docs/guides/GDD_NOTION_SYNC.md`.
 *   **LLM** :
-    *   `OpenAIClient` (défaut `gpt-5-mini`) ou `DummyLLMClient` sans clé API.
+    *   `OpenAIClient` (défaut `gpt-5.6-luna`) ou `DummyLLMClient` sans clé API.
 
 ## 📚 Documentation
 

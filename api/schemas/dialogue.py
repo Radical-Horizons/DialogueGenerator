@@ -452,12 +452,12 @@ class PreviewPromptResponse(BaseModel):
 class GenerateUnityDialogueRequest(BasePromptRequest):
     """Requête pour générer un nœud de dialogue au format Unity JSON."""
     reasoning_effort: Optional[
-        Literal["none", "minimal", "low", "medium", "high", "xhigh"]
+        Literal["none", "minimal", "low", "medium", "high", "xhigh", "max"]
     ] = Field(
         None,
         description=(
-            "Niveau de raisonnement pour GPT-5.x (none=rapide, xhigh=très approfondi). "
-            "« minimal » est accepté pour alignement UI (ex. gpt-5-mini)."
+            "Niveau de raisonnement GPT-5.6 (none=rapide, max=exploration maximale). "
+            "« minimal » reste accepté pour compatibilité UI."
         ),
     )
     reasoning_summary: Optional[Literal["auto"]] = Field(None, description="Format du résumé de reasoning (thinking summary). Uniquement 'auto' disponible (les résumés 'detailed' nécessitent une organisation OpenAI vérifiée Tier 2/3, non disponible actuellement). Si None, 'auto' est utilisé par défaut.")
@@ -473,18 +473,18 @@ class GenerateUnityDialogueRequest(BasePromptRequest):
         l'app (tests/coûts), mais cette route doit rester robuste.
         """
         allowed = {
-            ModelNames.GPT_5_4,
-            ModelNames.GPT_5_2,
-            ModelNames.GPT_5_2_PRO,
-            ModelNames.GPT_5_MINI,
+            ModelNames.GPT_5_6_SOL,
+            ModelNames.GPT_5_6_TERRA,
+            ModelNames.GPT_5_6_LUNA,
         }
-        if v not in allowed:
+        normalized = ModelNames.normalize_model_id(v)
+        if normalized not in allowed:
             raise ValueError(
                 "Modèle non supporté pour la génération Unity (structured output requis). "
                 f"Modèles autorisés: {', '.join(sorted(allowed))}. "
                 f"Reçu: {v}"
             )
-        return v
+        return normalized
     
     @field_validator('reasoning_summary', mode='before')
     @classmethod

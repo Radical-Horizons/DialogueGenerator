@@ -4,6 +4,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useGraphStore } from '@/store/graphStore'
 import * as graphAPI from '@/api/graph'
+import * as documentsAPI from '@/api/documents'
 import type { Node } from 'reactflow'
 
 vi.mock('@/api/graph', () => ({
@@ -17,6 +18,20 @@ vi.mock('@/api/graph', () => ({
   calculateLayout: vi.fn(),
 }))
 
+vi.mock('@/api/documents', () => ({
+  putDocument: vi.fn(),
+  putLayout: vi.fn(),
+}))
+
+vi.mock('@/utils/graphJournal', () => ({
+  setPending: vi.fn().mockResolvedValue(undefined),
+  acknowledgeSnapshot: vi.fn().mockResolvedValue(undefined),
+}))
+
+vi.mock('@/api/llmUsage', () => ({
+  markNodeDeleted: vi.fn().mockResolvedValue(undefined),
+}))
+
 vi.mock('@/components/shared/Toast', () => ({
   toastManager: { show: vi.fn() },
 }))
@@ -25,6 +40,20 @@ describe('graphStore - Accept/Reject Nodes (Story 1.4)', () => {
   beforeEach(() => {
     useGraphStore.getState().resetGraph()
     vi.clearAllMocks()
+    useGraphStore.setState({
+      documentId: 'test-dialogue.json',
+      document: { schemaVersion: '1.1.0', nodes: [] },
+      layout: { nodes: {} },
+      documentRevision: 1,
+      layoutRevision: 1,
+    })
+    vi.mocked(documentsAPI.putDocument).mockResolvedValue({ revision: 2 })
+    vi.mocked(documentsAPI.putLayout).mockResolvedValue({ revision: 2 })
+    vi.mocked(graphAPI.validateGraph).mockResolvedValue({
+      errors: [],
+      warnings: [],
+      valid: true,
+    })
   })
 
   describe('acceptNode', () => {
@@ -43,24 +72,19 @@ describe('graphStore - Accept/Reject Nodes (Story 1.4)', () => {
       useGraphStore.getState().addNode(pendingNode)
       useGraphStore.getState().updateMetadata({ filename: 'test-dialogue.json' })
       vi.mocked(graphAPI.acceptNode).mockResolvedValue(undefined)
-      vi.mocked(graphAPI.saveGraphAndWrite).mockResolvedValue({
-        success: true,
-        filename: 'test-dialogue.json',
-        json_content: '[]',
-      })
 
       await useGraphStore.getState().acceptNode('node-1')
 
       const node = useGraphStore.getState().nodes.find((n) => n.id === 'node-1')
       expect(node?.data.status).toBe('accepted')
       expect(graphAPI.acceptNode).toHaveBeenCalledWith('test-dialogue.json', 'node-1')
-      expect(graphAPI.saveGraphAndWrite).toHaveBeenCalled()
+      expect(documentsAPI.putDocument).toHaveBeenCalled()
     })
 
     it('should throw error if node not found', async () => {
-      await expect(
-        useGraphStore.getState().acceptNode('non-existent')
-      ).rejects.toThrow('Nœud non-existent introuvable')
+      await expect(useGraphStore.getState().acceptNode('non-existent')).rejects.toThrow(
+        'Nœud non-existent introuvable',
+      )
     })
 
     it('should rollback status to pending and show toast when saveDialogue fails', async () => {
@@ -78,7 +102,7 @@ describe('graphStore - Accept/Reject Nodes (Story 1.4)', () => {
       useGraphStore.getState().addNode(pendingNode)
       useGraphStore.getState().updateMetadata({ filename: 'test-dialogue.json' })
       vi.mocked(graphAPI.acceptNode).mockResolvedValue(undefined)
-      vi.mocked(graphAPI.saveGraphAndWrite).mockRejectedValue(new Error('Save failed'))
+      vi.mocked(documentsAPI.putDocument).mockRejectedValue(new Error('Save failed'))
 
       await expect(useGraphStore.getState().acceptNode('node-1')).rejects.toThrow('Save failed')
 
@@ -88,7 +112,7 @@ describe('graphStore - Accept/Reject Nodes (Story 1.4)', () => {
       expect(toastManager.show).toHaveBeenCalledWith(
         'Impossible de sauvegarder l\u2019acceptation. Réessayez.',
         'error',
-        5000
+        5000,
       )
     })
   })
@@ -116,23 +140,18 @@ describe('graphStore - Accept/Reject Nodes (Story 1.4)', () => {
       useGraphStore.getState().addNode(otherNode)
       useGraphStore.getState().updateMetadata({ filename: 'test-dialogue.json' })
       vi.mocked(graphAPI.rejectNode).mockResolvedValue(undefined)
-      vi.mocked(graphAPI.saveGraphAndWrite).mockResolvedValue({
-        success: true,
-        filename: 'test-dialogue.json',
-        json_content: '[]',
-      })
 
       await useGraphStore.getState().rejectNode('node-1')
 
       expect(useGraphStore.getState().nodes.find((n) => n.id === 'node-1')).toBeUndefined()
       expect(graphAPI.rejectNode).toHaveBeenCalledWith('test-dialogue.json', 'node-1')
-      expect(graphAPI.saveGraphAndWrite).toHaveBeenCalled()
+      expect(documentsAPI.putDocument).toHaveBeenCalled()
     })
 
     it('should throw error if node not found', async () => {
-      await expect(
-        useGraphStore.getState().rejectNode('non-existent')
-      ).rejects.toThrow('Nœud non-existent introuvable')
+      await expect(useGraphStore.getState().rejectNode('non-existent')).rejects.toThrow(
+        'Nœud non-existent introuvable',
+      )
     })
 
     it('should not modify state and throw when reject API fails', async () => {
@@ -154,7 +173,7 @@ describe('graphStore - Accept/Reject Nodes (Story 1.4)', () => {
       await expect(useGraphStore.getState().rejectNode('node-1')).rejects.toThrow('Network error')
 
       expect(useGraphStore.getState().nodes.find((n) => n.id === 'node-1')).toBeDefined()
-      expect(graphAPI.saveGraphAndWrite).not.toHaveBeenCalled()
+      expect(documentsAPI.putDocument).not.toHaveBeenCalled()
     })
 
     it('should clean parent targetNode when rejecting node referenced by choice', async () => {
@@ -173,23 +192,26 @@ describe('graphStore - Accept/Reject Nodes (Story 1.4)', () => {
         id: 'child-1',
         type: 'dialogueNode',
         position: { x: 200, y: 0 },
-        data: { id: 'child-1', speaker: 'Child', line: 'Ligne', status: 'pending' as const },
+        data: {
+          id: 'child-1',
+          speaker: 'Child',
+          line: 'Ligne',
+          status: 'pending' as const,
+        },
       }
       useGraphStore.getState().addNode(parent)
       useGraphStore.getState().addNode(child)
       useGraphStore.getState().updateMetadata({ filename: 'test-dialogue.json' })
       vi.mocked(graphAPI.rejectNode).mockResolvedValue(undefined)
-      vi.mocked(graphAPI.saveGraphAndWrite).mockResolvedValue({
-        success: true,
-        filename: 'test-dialogue.json',
-        json_content: '[]',
-      })
 
       await useGraphStore.getState().rejectNode('child-1')
 
       expect(useGraphStore.getState().nodes.find((n) => n.id === 'child-1')).toBeUndefined()
       const p = useGraphStore.getState().nodes.find((n) => n.id === 'parent-1')
-      const choices = (p?.data?.choices ?? []) as Array<{ text: string; targetNode?: string }>
+      const choices = (p?.data?.choices ?? []) as Array<{
+        text: string
+        targetNode?: string
+      }>
       expect(choices.some((c) => c.targetNode === 'child-1')).toBe(false)
       expect(choices[0]?.targetNode).toBeUndefined()
     })
@@ -210,17 +232,17 @@ describe('graphStore - Accept/Reject Nodes (Story 1.4)', () => {
         id: 'child-2',
         type: 'dialogueNode',
         position: { x: 200, y: 0 },
-        data: { id: 'child-2', speaker: 'Child', line: 'Ligne', status: 'pending' as const },
+        data: {
+          id: 'child-2',
+          speaker: 'Child',
+          line: 'Ligne',
+          status: 'pending' as const,
+        },
       }
       useGraphStore.getState().addNode(parent)
       useGraphStore.getState().addNode(child)
       useGraphStore.getState().updateMetadata({ filename: 'test-dialogue.json' })
       vi.mocked(graphAPI.rejectNode).mockResolvedValue(undefined)
-      vi.mocked(graphAPI.saveGraphAndWrite).mockResolvedValue({
-        success: true,
-        filename: 'test-dialogue.json',
-        json_content: '[]',
-      })
 
       await useGraphStore.getState().rejectNode('child-2')
 
@@ -276,12 +298,32 @@ describe('graphStore - Accept/Reject Nodes (Story 1.4)', () => {
       vi.mocked(graphAPI.generateNode).mockResolvedValue({
         node: undefined,
         nodes: [
-          { id: 'generated-1', type: 'dialogueNode', speaker: 'PNJ', line: 'Réponse 1' },
-          { id: 'generated-2', type: 'dialogueNode', speaker: 'PNJ', line: 'Réponse 2' },
+          {
+            id: 'generated-1',
+            type: 'dialogueNode',
+            speaker: 'PNJ',
+            line: 'Réponse 1',
+          },
+          {
+            id: 'generated-2',
+            type: 'dialogueNode',
+            speaker: 'PNJ',
+            line: 'Réponse 2',
+          },
         ],
         suggested_connections: [
-          { from: 'parent-1', to: 'generated-1', via_choice_index: 0, connection_type: 'choice' },
-          { from: 'parent-1', to: 'generated-2', via_choice_index: 1, connection_type: 'choice' },
+          {
+            from: 'parent-1',
+            to: 'generated-1',
+            via_choice_index: 0,
+            connection_type: 'choice',
+          },
+          {
+            from: 'parent-1',
+            to: 'generated-2',
+            via_choice_index: 1,
+            connection_type: 'choice',
+          },
         ],
         parent_node_id: 'parent-1',
       })

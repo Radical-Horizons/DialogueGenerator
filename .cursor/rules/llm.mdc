@@ -1,50 +1,19 @@
 ---
-description: LLM/OpenAI — ajout de modèles (doc officielle), SDK v1, GPT-5+ Responses API
+description: LLM/OpenAI — invariants modèles, Responses API, sampling. Procédure : skill llm-model-update.
 globs: ["llm_client.py", "llm_client/**/*.py", "factories/**/*.py", "core/llm/**/*.py", "prompt_engine.py", "constants.py", "frontend/src/constants.ts", "config/**/llm*.json", "llm_config.json", "api/schemas/dialogue.py"]
 alwaysApply: false
 ---
 
-## Ajout d'un modèle LLM
+# LLM / OpenAI — invariants
 
-**Obligatoire avant tout ajout** dans `config/llm_config.json`, `config/llm_pricing.json`, `constants.py`, `frontend/src/constants.ts`, validateurs (`api/schemas/dialogue.py`, UI reasoning) :
+**Ajout ou migration de modèles** → skill **`/llm-model-update`** (`.cursor/skills/llm-model-update/SKILL.md`). Ne pas improviser hors de ce workflow.
 
-1. Rechercher **`{slug} API doc`** (ex. `gpt-5.4 API doc`) — ouvrir la **page modèle officielle** du fournisseur.
-2. **Sources autorisées uniquement** : doc API du fournisseur (OpenAI → `developers.openai.com/api/docs/models/…`, Mistral → `docs.mistral.ai`). **Interdit** : blogs, OpenRouter, agrégateurs, guides tiers pour slug, capacités, pricing ou reasoning.
-3. Extraire de cette page : identifiant API, structured outputs (oui/non), valeurs `reasoning.effort`, plafonds tokens, tarifs, endpoints (Responses / Chat).
-4. Aligner backend + frontend + pricing + listes Unity structured output si le modèle les supporte officiellement.
+## Contraintes persistantes
 
-- OpenAI: respecter le SDK v1 (ex: `AsyncOpenAI`) et éviter les patterns legacy.
-- Ne jamais logguer de secrets. Les clés viennent des variables d'environnement/config (ex: `OPENAI_API_KEY`).
-- Tests: aucune requête réseau; utiliser `DummyLLMClient` ou mocks.
-- JSON: conserver compatibilité Unity (schémas Pydantic / export) et couvrir par tests.
-
-## GPT-5 (tous modèles)
-
-**API recommandée**: Tous les modèles GPT-5 (5.2, 5.2-pro, 5-mini, 5-nano) utilisent Responses API (`client.responses.create`) par défaut. Détermination: modèles contenant `gpt-5` → Responses API.
-
-**Format de requête**:
-- `input` au lieu de `messages` (même structure de messages)
-- `max_output_tokens` au lieu de `max_tokens`/`max_completion_tokens`
-- `tools`: format plat (`{"type": "function", "name": "...", "parameters": {...}}`) au lieu de `{"type": "function", "function": {...}}`
-- `tool_choice`: format `{"type": "allowed_tools", "mode": "required", "tools": [...]}` au lieu de `{"type": "function", "function": {...}}`
-
-**Reasoning (phase réflexive)**:
-- Disponible pour tous les modèles GPT-5 via Responses API
-- Paramètres: `reasoning.effort` (valeurs dépendent du modèle), `reasoning.summary` (None/"auto" uniquement)
-- **GPT-5.4** (doc `developers.openai.com/api/docs/models/gpt-5.4`) : `none` (défaut), `low`, `medium`, `high`, `xhigh` ; structured outputs **oui**
-- **GPT-5.2/5.2-pro** : Supportent `none`, `minimal`, `low`, `medium`, `high`, `xhigh`
-- **GPT-5 mini/nano** : Supportent uniquement `minimal`, `low`, `medium`, `high` (pas `none` ni `xhigh`)
-- **reasoning.summary** : Uniquement `"auto"` supporté (les résumés `"detailed"` nécessitent une organisation OpenAI vérifiée Tier 2/3, non disponible actuellement)
-- Si `reasoning.effort` défini sans `summary`, `summary="auto"` activé automatiquement
-- Réponse: `reasoning_trace` extrait depuis `response.reasoning` et `response.output` (item `type="reasoning"`)
-
-**Temperature**: Supportée uniquement si `reasoning.effort` == "none" (ou non spécifié). Ignorée si `reasoning.effort` est défini. **GPT-5 mini/nano ne peuvent pas utiliser temperature via Responses API** (car pas de `none`), utiliser Chat Completions si nécessaire.
-
-**Parsing de réponse**:
-- Responses API: extraire depuis `response.output` (liste d'items, chercher `type="function_call"` ou `type="tool_call"`)
-- Chat Completions: extraire depuis `response.choices[0].message.tool_calls`
-- Usage tokens: `response.usage.input_tokens`/`output_tokens` (Responses) vs `prompt_tokens`/`completion_tokens` (Chat)
-
-**Tous modèles GPT-5** : `gpt-5.4`, `gpt-5.2`, `gpt-5.2-pro`, `gpt-5-mini`, `gpt-5-nano` utilisent Responses API par défaut. Chat Completions reste disponible en fallback.
-
-**Documentation complète**: Voir `docs/OPENAI_API_GPT5.md` pour détails complets, exemples de code, et références.
+- Sources : **uniquement** doc API fournisseur (`developers.openai.com/api/docs/models/…`, `latest-model`, `reasoning`). Pas blogs / agrégateurs.
+- Ne **jamais** extrapoler les paramètres d'une génération précédente (ex. temperature GPT-5.2 ≠ GPT-5.6).
+- **`None` ≠ `none`** : effort omis sur GPT-5.6 ⇒ défaut API **`medium`**.
+- **GPT-5.6 Sol/Terra/Luna** : ne pas envoyer `temperature` ni `top_p` (400 runtime). Gate : `OpenAIParameterBuilder` + `ModelNames.MODELS_WITHOUT_CUSTOM_TEMPERATURE`.
+- Famille courante : `gpt-5.6-sol` (alias `gpt-5.6`), `gpt-5.6-terra`, `gpt-5.6-luna` — Responses API si le nom contient `gpt-5`.
+- Secrets via env (`OPENAI_API_KEY`) ; tests sans réseau (`DummyLLMClient`).
+- Doc détaillée : `docs/architecture/OPENAI_API_GPT5.md`.

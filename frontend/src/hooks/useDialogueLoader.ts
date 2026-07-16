@@ -110,7 +110,7 @@ export function useDialogueLoader(
       setIsLoadingDialogue(true)
       prevSelectedDialogueRef.current = selectedDialogue
 
-      const state = useGraphStore.getState()
+      let state = useGraphStore.getState()
       const currentFilename = state.dialogueMetadata?.filename ?? state.documentId ?? null
       const isSameDialogue =
         !!currentFilename &&
@@ -123,6 +123,11 @@ export function useDialogueLoader(
         return
       }
 
+      useGraphViewStore.getState().requestFlush()
+      await new Promise<void>((resolve) => {
+        window.setTimeout(resolve, 0)
+      })
+      state = useGraphStore.getState()
       const leavingDirty =
         state.hasUnsavedChanges &&
         !!currentFilename &&
@@ -230,6 +235,35 @@ export function useDialogueLoader(
     resetGraph,
     incrementLoadSeq,
   ])
+
+  useEffect(() => {
+    const flushAndPersist = () => {
+      useGraphViewStore.getState().requestFlush()
+      window.setTimeout(() => {
+        const state = useGraphStore.getState()
+        if (
+          state.hasUnsavedChanges &&
+          !state.isLoading &&
+          !state.isGenerating
+        ) {
+          void saveDialogue().catch((error) => {
+            console.error('Sauvegarde automatique de cycle de vie:', error)
+          })
+        }
+      }, 0)
+    }
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        flushAndPersist()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('pagehide', flushAndPersist)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('pagehide', flushAndPersist)
+    }
+  }, [saveDialogue])
 
   useEffect(() => {
     if (!routeTarget) return

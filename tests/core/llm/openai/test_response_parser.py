@@ -24,7 +24,7 @@ class TestOpenAIResponseParser:
         
         output_items = [mock_item]
         parsed, error, success = OpenAIResponseParser.extract_structured_output(
-            output_items, TestParserModel, "gpt-5.2", variant_index=1
+            output_items, TestParserModel, "gpt-5.6-terra", variant_index=1
         )
         
         assert success is True
@@ -42,7 +42,7 @@ class TestOpenAIResponseParser:
         
         output_items = [mock_item]
         parsed, error, success = OpenAIResponseParser.extract_structured_output(
-            output_items, TestParserModel, "gpt-5.2", variant_index=1
+            output_items, TestParserModel, "gpt-5.6-terra", variant_index=1
         )
         
         assert success is False
@@ -57,7 +57,7 @@ class TestOpenAIResponseParser:
         
         output_items = [mock_item]
         parsed, error, success = OpenAIResponseParser.extract_structured_output(
-            output_items, TestParserModel, "gpt-5.2", variant_index=1
+            output_items, TestParserModel, "gpt-5.6-terra", variant_index=1
         )
         
         assert success is False
@@ -103,7 +103,7 @@ class TestOpenAIResponseParser:
         mock_response.output = [mock_item]
         
         parsed, error, success = OpenAIResponseParser.parse_response(
-            mock_response, TestParserModel, "gpt-5.2", variant_index=1
+            mock_response, TestParserModel, "gpt-5.6-terra", variant_index=1
         )
         
         assert success is True
@@ -119,7 +119,7 @@ class TestOpenAIResponseParser:
         mock_response.output = [mock_item]
         
         parsed, error, success = OpenAIResponseParser.parse_response(
-            mock_response, None, "gpt-5.2", variant_index=1
+            mock_response, None, "gpt-5.6-terra", variant_index=1
         )
         
         assert success is True

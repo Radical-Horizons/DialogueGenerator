@@ -650,8 +650,8 @@ class ExpandTreeRequest(BaseModel):
     npc_speaker_id: Optional[str] = Field(None, description="PNJ interlocuteur")
     player_character_id: Optional[str] = Field(None, description="PJ jouable (voix des choices)")
     llm_model_identifier: str = Field(
-        default=ModelNames.GPT_5_MINI,
-        description="Modèle LLM — expand-tree impose gpt-5-mini (~120 appels)",
+        default=ModelNames.GPT_5_6_LUNA,
+        description="Modèle LLM — expand-tree impose gpt-5.6-luna (~120 appels)",
     )
     title: str = Field("Dialogue auto", description="Titre du dialogue")
     document_id: Optional[str] = Field(None, description="Identifiant document (auto si absent)")
@@ -695,14 +695,15 @@ class ExpandTreeRequest(BaseModel):
 
     @field_validator("llm_model_identifier")
     @classmethod
-    def validate_expand_tree_model_is_mini(cls, value: str) -> str:
-        """Impose gpt-5-mini : expansion BFS = centaines d'appels LLM."""
-        if value != ModelNames.GPT_5_MINI:
+    def validate_expand_tree_model_is_luna(cls, value: str) -> str:
+        """Impose gpt-5.6-luna : expansion BFS = centaines d'appels LLM."""
+        normalized = ModelNames.normalize_model_id(value)
+        if normalized != ModelNames.GPT_5_6_LUNA:
             raise ValueError(
-                f"L'expansion d'arbre requiert {ModelNames.GPT_5_MINI} "
+                f"L'expansion d'arbre requiert {ModelNames.GPT_5_6_LUNA} "
                 f"(coût maîtrisé sur ~120 appels). Reçu: {value}"
             )
-        return value
+        return normalized
 
 
 class ExpandTreeParentFailureDetail(BaseModel):

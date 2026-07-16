@@ -20,7 +20,6 @@ from services.unity_dialogue_generation_service import UnityDialogueGenerationSe
 from services.unity_export_validation_service import validate_unity_export_document
 from tests.fixtures.unity_post_generation import (
     llm_generation_response,
-    react_flow_graph_payload,
 )
 
 
@@ -99,13 +98,23 @@ class TestGraphGenerateNodeSchemaContract:
 
             generation_service_with_mocked_llm.generate_dialogue_node.assert_awaited_once()
 
+            assert node["id"].startswith("node-")
+            assert len(node["id"]) == 37
             choice = node["choices"][0]
-            assert choice["choiceId"] == "choice_NODE_START_CHILD_0"
+            assert choice["choiceId"] == f"choice_{node['id']}_0"
             assert choice["targetNode"] == "END"
             assert choice["test"] == "Volonté+Adaptabilité:12"
             assert node["consequences"]["flag"] == "FLAG_RENCONTRE_VALKAZER_INIT"
 
-            nodes, edges = react_flow_graph_payload()
+            nodes = [
+                {
+                    "id": node["id"],
+                    "type": "dialogueNode",
+                    "position": {"x": 0, "y": 0},
+                    "data": node,
+                }
+            ]
+            edges: list[dict[str, object]] = []
             validate_response = contract_client.post(
                 "/api/v1/unity-dialogues/graph/validate-schema",
                 json={"nodes": nodes, "edges": edges},
@@ -127,6 +136,6 @@ class TestGraphGenerateNodeSchemaContract:
             result = validate_unity_export_document(persisted)
             assert result.is_valid is True, result.errors
             persisted_choice = persisted["nodes"][0]["choices"][0]
-            assert persisted_choice["choiceId"] == "choice_START_0"
+            assert persisted_choice["choiceId"] == f"choice_{node['id']}_0"
             assert persisted_choice["targetNode"] == "END"
             assert persisted["nodes"][0]["consequences"]["flag"] == "FLAG_RENCONTRE_VALKAZER_INIT"

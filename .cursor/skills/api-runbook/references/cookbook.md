@@ -84,7 +84,7 @@ Préfixe graphe : `/api/v1/unity-dialogues/graph/*` — voir [`references/router
 
 ### Expansion dialogue autonome (arbre complet)
 
-Dry-run (estimation ~121 appels LLM, modèle **gpt-5-mini** imposé) :
+Dry-run (estimation ~121 appels LLM, modèle **gpt-5.6-luna** imposé) :
 
 ```powershell
 npm run generate:dialogue-tree -- --dry-run --depth 4 --choices 3 --characters Uresaïr

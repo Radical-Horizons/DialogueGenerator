@@ -122,9 +122,9 @@ def test_expand_tree_requires_location(client: TestClient, sample_body: dict) ->
     assert response.status_code == 422
 
 
-def test_expand_tree_rejects_non_mini_model(client: TestClient, sample_body: dict) -> None:
-    """Seul gpt-5-mini est autorisé pour l'expansion BFS."""
-    sample_body["llm_model_identifier"] = "gpt-5.2"
+def test_expand_tree_rejects_non_luna_model(client: TestClient, sample_body: dict) -> None:
+    """Seul gpt-5.6-luna est autorisé pour l'expansion BFS."""
+    sample_body["llm_model_identifier"] = "gpt-5.6-terra"
     response = client.post("/api/v1/unity-dialogues/graph/expand-tree", json=sample_body)
     assert response.status_code == 422
 

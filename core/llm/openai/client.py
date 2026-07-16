@@ -55,7 +55,7 @@ class OpenAIClient(ILLMClient):
         self.client = AsyncOpenAI(api_key=api_key)
         
         self.llm_config = config if config is not None else {}
-        self.model_name = self.llm_config.get("default_model", "gpt-5.2")
+        self.model_name = self.llm_config.get("default_model", "gpt-5.6-terra")
         self.temperature = self.llm_config.get("temperature", 0.7)
         # Recommandation OpenAI: 25000 tokens minimum pour reasoning summary
         # Utiliser 32000 par défaut pour avoir une marge de sécurité
@@ -545,8 +545,8 @@ class OpenAIClient(ILLMClient):
             Nombre maximum de tokens.
         """
         model_lower = self.model_name.lower()
-        if "gpt-5.4" in model_lower or "gpt-5.2" in model_lower:
-            return 128000  # GPT-5.x frontier : 128k tokens de sortie max
+        if "gpt-5.6" in model_lower or "gpt-5.4" in model_lower or "gpt-5.2" in model_lower:
+            return 128000  # GPT-5.x : 128k tokens de sortie max
         else:
             logger.warning(
                 f"Modèle OpenAI inconnu ou non listé pour get_max_tokens: {self.model_name}. "

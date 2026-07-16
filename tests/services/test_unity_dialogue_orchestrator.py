@@ -63,7 +63,7 @@ def sample_request_data():
     return GenerateUnityDialogueRequest(
         user_instructions="Test dialogue",
         context_selections=context_selection,
-        llm_model_identifier="gpt-5-mini"
+        llm_model_identifier="gpt-5.6-luna"
     )
 
 
@@ -91,7 +91,7 @@ async def test_orchestrator_generate_with_events_sequence(orchestrator, sample_r
     # Mock config service
     mock_services['config_service'].get_llm_config.return_value = {}
     mock_services['config_service'].get_available_llm_models.return_value = [
-        {"model_identifier": "gpt-5-mini"}
+        {"model_identifier": "gpt-5.6-luna"}
     ]
     
     # Mock LLM client factory
@@ -202,7 +202,7 @@ async def test_orchestrator_cancellation(orchestrator, sample_request_data, mock
     # Mock config service
     mock_services['config_service'].get_llm_config.return_value = {}
     mock_services['config_service'].get_available_llm_models.return_value = [
-        {"model_identifier": "gpt-5-mini"}
+        {"model_identifier": "gpt-5.6-luna"}
     ]
 
     # Simuler annulation juste après l'étape "Generating".
@@ -251,7 +251,7 @@ async def test_orchestrator_generate_rest_usage(orchestrator, sample_request_dat
     # Mock config service
     mock_services['config_service'].get_llm_config.return_value = {}
     mock_services['config_service'].get_available_llm_models.return_value = [
-        {"model_identifier": "gpt-5-mini"}
+        {"model_identifier": "gpt-5.6-luna"}
     ]
     
     # Mock LLM client factory
@@ -320,5 +320,5 @@ async def test_orchestrator_validation_error(orchestrator, mock_services):
         GenerateUnityDialogueRequest(
             user_instructions="Test",
             context_selections=context_selection,
-            llm_model_identifier="gpt-5-mini"
+            llm_model_identifier="gpt-5.6-luna"
         )

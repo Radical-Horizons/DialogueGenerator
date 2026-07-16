@@ -256,12 +256,12 @@ def test_middleware_resolve_model_uses_x_llm_model_header_when_known() -> None:
         "root_path": "",
         "scheme": "http",
         "query_string": b"",
-        "headers": [(b"x-llm-model", b"gpt-5-nano")],
+        "headers": [(b"x-llm-model", b"gpt-5.6-luna")],
         "client": ("127.0.0.1", 12345),
         "server": ("127.0.0.1", 80),
     }
     req = Request(scope)
-    assert mw._resolve_model_for_cost_estimate(req) == "gpt-5-nano"
+    assert mw._resolve_model_for_cost_estimate(req) == "gpt-5.6-luna"
 
 
 def test_middleware_resolve_model_ignores_unknown_x_llm_model_header() -> None:

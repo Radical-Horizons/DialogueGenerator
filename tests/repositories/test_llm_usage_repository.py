@@ -18,7 +18,7 @@ def sample_record():
     return LLMUsageRecord(
         request_id="req_123",
         timestamp=datetime.now(UTC),
-        model_name="gpt-5.2",
+        model_name="gpt-5.6-terra",
         prompt_tokens=1000,
         completion_tokens=500,
         total_tokens=1500,

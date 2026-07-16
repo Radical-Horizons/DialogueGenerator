@@ -7,7 +7,11 @@ import type { SceneSelection } from '../types/generation'
 import { useContextStore } from '../store/contextStore'
 import { useGenerationStore } from '../store/generationStore'
 import { suggestionRefreshAfterSceneChange } from '../utils/contextSuggestionSync'
-import { mergeContextCharacterNames, looksLikeNotionUuid, resolveLocationDisplayName } from '../utils/gddEntityNames'
+import {
+  mergeContextCharacterNames,
+  normalizeGddNameForMatch,
+  resolveLocationDisplayName,
+} from '../utils/gddEntityNames'
 import {
   DEFAULT_PLAYER_CHARACTER,
   isValidNpc,
@@ -29,6 +33,11 @@ export interface UseSceneSelectionReturn {
   updateSelection: (updates: Partial<SceneSelection>) => void
   swapCharacters: () => void
   randomizeField: (field: keyof SceneSelection) => void
+}
+
+function findCatalogName(name: string, catalog: string[]): string | null {
+  const normalized = normalizeGddNameForMatch(name)
+  return catalog.find((candidate) => normalizeGddNameForMatch(candidate) === normalized) ?? null
 }
 
 export function useSceneSelection() {
@@ -56,7 +65,10 @@ export function useSceneSelection() {
     subLocation: null,
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [hasLoadedSceneRegions, setHasLoadedSceneRegions] = useState(false)
+  const [loadedSubLocationsRegion, setLoadedSubLocationsRegion] = useState<string | null>(null)
   const isInitialMount = useRef(true)
+  const subLocationRequestSeq = useRef(0)
   const prevSelection = useRef<SceneSelection>({
     characterA: null,
     characterB: null,
@@ -109,6 +121,7 @@ export function useSceneSelection() {
         ...prev,
         regions: contextStore.cachedSceneRegions!.data,
       }))
+      setHasLoadedSceneRegions(true)
       return
     }
 
@@ -122,6 +135,7 @@ export function useSceneSelection() {
         ...prev,
         regions: regionNames,
       }))
+      setHasLoadedSceneRegions(true)
     } catch (err) {
       console.error('Erreur lors du chargement des régions (scène):', err)
       if (contextStore.cachedSceneRegions) {
@@ -129,13 +143,16 @@ export function useSceneSelection() {
           ...prev,
           regions: contextStore.cachedSceneRegions!.data,
         }))
+        setHasLoadedSceneRegions(true)
       }
     }
   }, [])
 
   const loadSubLocations = useCallback(async (regionName: string) => {
+    const requestSeq = ++subLocationRequestSeq.current
     if (!regionName) {
       setData((prev) => ({ ...prev, subLocations: [] }))
+      setLoadedSubLocationsRegion(null)
       return
     }
 
@@ -147,11 +164,13 @@ export function useSceneSelection() {
         ...prev,
         subLocations: cached.data,
       }))
+      setLoadedSubLocationsRegion(regionName)
       return
     }
 
     try {
       const response = await contextAPI.getSceneSubLocations(regionName)
+      if (requestSeq !== subLocationRequestSeq.current) return
       const subLocationNames = [...response.sub_locations].sort()
 
       contextStore.setCachedSceneSubLocations(regionName, subLocationNames)
@@ -160,7 +179,9 @@ export function useSceneSelection() {
         ...prev,
         subLocations: subLocationNames,
       }))
+      setLoadedSubLocationsRegion(regionName)
     } catch (err) {
+      if (requestSeq !== subLocationRequestSeq.current) return
       console.error('Erreur lors du chargement des sous-lieux:', err)
       // En cas d'erreur, utiliser le cache même s'il est expiré si disponible
       const stale = contextStore.cachedSceneSubLocations.get(regionName)
@@ -169,8 +190,10 @@ export function useSceneSelection() {
           ...prev,
           subLocations: stale.data,
         }))
+        setLoadedSubLocationsRegion(regionName)
       } else {
         setData((prev) => ({ ...prev, subLocations: [] }))
+        setLoadedSubLocationsRegion(null)
       }
     }
   }, [])
@@ -179,51 +202,69 @@ export function useSceneSelection() {
 
   useEffect(() => {
     setIsLoading(true)
+    setHasLoadedSceneRegions(false)
     Promise.all([loadCharacters(), loadSceneRegions()]).finally(() => {
       setIsLoading(false)
     })
   }, [loadCharacters, loadSceneRegions, gddDataRevision])
 
   useEffect(() => {
-    if (selection.sceneRegion) {
-      loadSubLocations(selection.sceneRegion)
-    } else {
+    if (!hasLoadedSceneRegions) return
+    if (!selection.sceneRegion) {
+      subLocationRequestSeq.current += 1
       setData((prev) => ({ ...prev, subLocations: [] }))
+      setLoadedSubLocationsRegion(null)
       setSelection((prev) => ({ ...prev, subLocation: null }))
-    }
-  }, [selection.sceneRegion, loadSubLocations])
-
-  // Drafts / anciennes sélections : traduire UUID Notion → nom affiché et stocké.
-  useEffect(() => {
-    const updates: Partial<SceneSelection> = {}
-
-    if (selection.sceneRegion && looksLikeNotionUuid(selection.sceneRegion)) {
-      const resolved = resolveLocationDisplayName(selection.sceneRegion, locations)
-      if (resolved !== selection.sceneRegion) {
-        updates.sceneRegion = resolved
-      }
-    }
-
-    if (selection.subLocation && looksLikeNotionUuid(selection.subLocation)) {
-      const resolved = resolveLocationDisplayName(selection.subLocation, locations)
-      if (
-        resolved !== selection.subLocation &&
-        (data.subLocations.length === 0 || data.subLocations.includes(resolved))
-      ) {
-        updates.subLocation = resolved
-      }
-    }
-
-    if (Object.keys(updates).length === 0) {
       return
     }
 
-    setSelection((prev) => ({ ...prev, ...updates }))
+    const resolved = resolveLocationDisplayName(selection.sceneRegion, locations)
+    const canonicalRegion = findCatalogName(resolved, data.regions)
+    if (!canonicalRegion) {
+      subLocationRequestSeq.current += 1
+      setData((prev) => ({ ...prev, subLocations: [] }))
+      setLoadedSubLocationsRegion(null)
+      setSelection((prev) => ({ ...prev, sceneRegion: null, subLocation: null }))
+      return
+    }
+    if (canonicalRegion !== selection.sceneRegion) {
+      setSelection((prev) => ({ ...prev, sceneRegion: canonicalRegion }))
+      return
+    }
+    void loadSubLocations(canonicalRegion)
   }, [
+    data.regions,
+    hasLoadedSceneRegions,
+    loadSubLocations,
+    locations,
+    selection.sceneRegion,
+  ])
+
+  useEffect(() => {
+    if (
+      !selection.sceneRegion ||
+      loadedSubLocationsRegion !== selection.sceneRegion ||
+      !selection.subLocation
+    ) {
+      return
+    }
+    const resolved = resolveLocationDisplayName(selection.subLocation, locations)
+    const canonicalSubLocation = findCatalogName(resolved, data.subLocations)
+    setSelection((prev) => {
+      if (!canonicalSubLocation) {
+        return { ...prev, subLocation: null }
+      }
+      if (canonicalSubLocation !== prev.subLocation) {
+        return { ...prev, subLocation: canonicalSubLocation }
+      }
+      return prev
+    })
+  }, [
+    data.subLocations,
+    loadedSubLocationsRegion,
+    locations,
     selection.sceneRegion,
     selection.subLocation,
-    locations,
-    data.subLocations,
   ])
 
   // Synchroniser l'état local avec le store au montage initial et quand le store change
@@ -327,18 +368,20 @@ export function useSceneSelection() {
       let sceneRegion: string | null = null
       let subLocation: string | null = null
 
-      if (contextRegion) {
-        sceneRegion = contextRegion
+      const selectedLocationNames = [
+        ...(contextRegion ? [contextRegion] : []),
+        ...(Array.isArray(contextSelections.locations_full) ? contextSelections.locations_full : []),
+        ...(Array.isArray(contextSelections.locations_excerpt) ? contextSelections.locations_excerpt : []),
+      ]
+      const validRegion = selectedLocationNames
+        .map((name) => resolveLocationDisplayName(name, locations))
+        .map((name) => findCatalogName(name, data.regions))
+        .find((name): name is string => name !== null)
+
+      if (validRegion) {
+        sceneRegion = validRegion
         if (contextSubLocations.length > 0) {
           subLocation = contextSubLocations[0]
-        }
-      } else {
-        const allLocations = [
-          ...(Array.isArray(contextSelections.locations_full) ? contextSelections.locations_full : []),
-          ...(Array.isArray(contextSelections.locations_excerpt) ? contextSelections.locations_excerpt : []),
-        ]
-        if (allLocations.length > 0) {
-          sceneRegion = allLocations[0]
         }
       }
 
@@ -360,6 +403,8 @@ export function useSceneSelection() {
     contextSelections.locations_excerpt,
     contextRegion,
     contextSubLocations,
+    data.regions,
+    locations,
     storeSceneSelection.characterA,
     storeSceneSelection.characterB,
     storeSceneSelection.sceneRegion,

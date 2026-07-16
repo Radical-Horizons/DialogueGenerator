@@ -50,7 +50,7 @@ const fullResponse: DialogueCostResponse = {
     {
       node_id: 'node_aaa111',
       timestamp: '2026-03-06T10:00:00.000Z',
-      model_name: 'gpt-5.2',
+      model_name: 'gpt-5.6-terra',
       prompt_tokens: 400,
       completion_tokens: 80,
       cost_eur: 0.0092,
@@ -60,7 +60,7 @@ const fullResponse: DialogueCostResponse = {
     {
       node_id: 'node_bbb222',
       timestamp: '2026-03-06T10:05:00.000Z',
-      model_name: 'gpt-5.2',
+      model_name: 'gpt-5.6-terra',
       prompt_tokens: 450,
       completion_tokens: 90,
       cost_eur: 0.0092,
@@ -70,7 +70,7 @@ const fullResponse: DialogueCostResponse = {
     {
       node_id: 'node_ccc333',
       timestamp: '2026-03-06T10:10:00.000Z',
-      model_name: 'gpt-5.2',
+      model_name: 'gpt-5.6-terra',
       prompt_tokens: 500,
       completion_tokens: 100,
       cost_eur: 0.0092,
@@ -154,7 +154,7 @@ describe('DialogueCostBreakdown', () => {
       expect(screen.getByTestId('dcb-tooltip')).toBeInTheDocument()
     })
     // Vérifier les informations présentes dans le tooltip
-    expect(screen.getByText(/gpt-5.2/i)).toBeInTheDocument()
+    expect(screen.getByText(/gpt-5.6-terra/i)).toBeInTheDocument()
     expect(screen.getByText(/400/)).toBeInTheDocument()
   })
 
