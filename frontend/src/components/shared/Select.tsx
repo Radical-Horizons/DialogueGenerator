@@ -19,7 +19,7 @@ export interface SelectProps {
   disabled?: boolean
   searchable?: boolean
   allowClear?: boolean
-  /** Densité réduite (ex. grille Structure du dialogue en colonne étroite). */
+  /** Densité réduite (colonne étroite / panneau génération). */
   compact?: boolean
   style?: React.CSSProperties
   'data-testid'?: string

@@ -108,11 +108,6 @@ vi.mock('../../../api/context')
 vi.mock('../../../api/config')
 
 // Types pour les props des composants mockés
-interface DialogueStructureWidgetProps {
-  value: string[]
-  onChange: (value: string[]) => void
-}
-
 interface SystemPromptEditorProps {
   onUserInstructionsChange?: (value: string) => void
   onSystemPromptChange?: (value: string) => void
@@ -128,18 +123,6 @@ interface SaveStatusIndicatorProps {
 }
 
 // Mock des composants enfants pour simplifier les tests
-vi.mock('../DialogueStructureWidget', () => ({
-  DialogueStructureWidget: ({ value, onChange }: DialogueStructureWidgetProps) => (
-    <div data-testid="dialogue-structure-widget">
-      <input
-        data-testid="dialogue-structure-input"
-        value={value.join(',')}
-        onChange={(e) => onChange(e.target.value.split(','))}
-      />
-    </div>
-  ),
-}))
-
 vi.mock('../SystemPromptEditor', () => ({
   SystemPromptEditor: ({ onUserInstructionsChange, onSystemPromptChange }: SystemPromptEditorProps) => (
     <div data-testid="system-prompt-editor">

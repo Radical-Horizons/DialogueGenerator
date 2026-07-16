@@ -9,16 +9,3 @@ export interface SceneSelection {
   subLocation: string | null
 }
 
-export type DialogueStructureElement = 'PNJ' | 'PJ' | 'Stop' | ''
-
-export type DialogueStructure = [
-  DialogueStructureElement,
-  DialogueStructureElement,
-  DialogueStructureElement,
-  DialogueStructureElement,
-  DialogueStructureElement,
-  DialogueStructureElement
-]
-
-
-

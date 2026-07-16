@@ -13,7 +13,6 @@ import { useLLMStore } from '../../store/llmStore'
 import { useAuthorProfile } from '../../hooks/useAuthorProfile'
 import { theme } from '../../theme'
 import type { LLMModelResponse } from '../../types/api'
-import { DialogueStructureWidget } from './DialogueStructureWidget'
 import { SystemPromptEditor } from './SystemPromptEditor'
 import { SceneSelectionWidget } from './SceneSelectionWidget'
 import { DialogueFlagsPanel } from './DialogueFlagsPanel'
@@ -30,7 +29,6 @@ import {
   REASONING_EFFORT_MODELS,
 } from '../../constants'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
-import type { DialogueStructure } from '../../types/generation'
 // Hooks métier extraits
 import { useGenerationOrchestrator } from '../../hooks/useGenerationOrchestrator'
 import { useGenerationDraft } from '../../hooks/useGenerationDraft'
@@ -45,10 +43,8 @@ import { GenerationPanelNarrowProvider } from './GenerationPanelNarrowContext'
 export function GenerationPanel() {
   // Stores
   const {
-    dialogueStructure,
     systemPromptOverride,
     gameRules,
-    setDialogueStructure,
     setSystemPromptOverride,
     setGameRules,
     // État streaming (Story 0.2)
@@ -391,12 +387,6 @@ export function GenerationPanel() {
     applyRangeGradient(maxCompletionSliderRef.current, value, COMPLETION_TOKENS_LIMITS.MIN, COMPLETION_TOKENS_LIMITS.MAX)
   }, [applyRangeGradient, maxCompletionTokens])
 
-  const normalizedDialogueStructure = ((): DialogueStructure => {
-    const arr = Array.isArray(dialogueStructure) ? dialogueStructure : []
-    // Le store peut exposer un string[]; le widget attend une structure de longueur 6.
-    return [...arr, '', '', '', '', '', ''].slice(0, 6) as DialogueStructure
-  })()
-
   const { ref: generationScrollRef, isNarrow: isGenerationNarrow } = useNarrowInlineSize(
     PANEL_COMFORT_MIN_WIDTH_PX
   )
@@ -437,14 +427,6 @@ export function GenerationPanel() {
         }}
         onSystemPromptChange={(value) => {
           setSystemPromptOverride(value)
-          draft.markDirty()
-        }}
-      />
-
-      <DialogueStructureWidget
-        value={normalizedDialogueStructure}
-        onChange={(value) => {
-          setDialogueStructure(value)
           draft.markDirty()
         }}
       />
