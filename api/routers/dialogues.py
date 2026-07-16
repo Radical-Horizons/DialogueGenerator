@@ -40,6 +40,7 @@ from api.dependencies import (
     get_export_log_service,
     get_document_persistence_service,
     get_llm_usage_service,
+    require_non_guest,
 )
 from core.prompt.prompt_engine import PromptEngine, PromptInput, BuiltPrompt
 from api.exceptions import InternalServerException, ValidationException, NotFoundException, OpenAIException
@@ -513,6 +514,7 @@ async def estimate_tokens(
 async def generate_unity_dialogue(
     request_data: GenerateUnityDialogueRequest,
     orchestrator: Annotated[UnityDialogueOrchestrator, Depends(get_unity_dialogue_orchestrator)],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> GenerateUnityDialogueResponse:
     """Génère un nœud de dialogue au format Unity JSON.
@@ -520,6 +522,7 @@ async def generate_unity_dialogue(
     Utilise UnityDialogueOrchestrator pour factoriser la logique
     avec le streaming SSE.
     """
+    require_non_guest(current_user)
     try:
         # Appel simple sans streaming (usage REST)
         return await orchestrator.generate(request_data)
@@ -617,7 +620,7 @@ async def export_unity_dialogue(
         unity_dir = Path(unity_path)
         if (unity_dir / f"{document_id}.json").exists():
             try:
-                persistence_service.require_access(
+                persistence_service.require_edit(
                     document_id,
                     current_user,
                     unity_dir / f"{document_id}.json",

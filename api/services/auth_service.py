@@ -22,6 +22,9 @@ logger = logging.getLogger(__name__)
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
 REFRESH_TOKEN_EXPIRE_DAYS = 7
+GUEST_ACCESS_TOKEN_EXPIRE_HOURS = 8
+GUEST_SUBJECT = "guest"
+GUEST_ROLE = "guest"
 _DUMMY_PASSWORD_HASH = bcrypt.hashpw(b"timing-only-password", bcrypt.gensalt())
 
 
@@ -304,7 +307,38 @@ class AuthService:
         to_encode.update({"exp": expire, "type": "access"})
         encoded_jwt = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
         return encoded_jwt
-    
+
+    def create_guest_access_token(self) -> str:
+        """Émet un JWT invité (hors table users) pour la démo lecture seule.
+
+        Returns:
+            Access token JWT avec ``role=guest`` et TTL de 8 heures.
+        """
+        return self.create_access_token(
+            data={"sub": GUEST_SUBJECT, "role": GUEST_ROLE},
+            expires_delta=timedelta(hours=GUEST_ACCESS_TOKEN_EXPIRE_HOURS),
+        )
+
+    @staticmethod
+    def guest_principal() -> dict[str, object]:
+        """Retourne l'identité synthétique invité (aucune ligne SQLite).
+
+        Returns:
+            Dictionnaire compatible avec les dépendances d'auth.
+        """
+        return {
+            "id": GUEST_SUBJECT,
+            "username": GUEST_SUBJECT,
+            "email": None,
+            "role": GUEST_ROLE,
+            "is_active": True,
+        }
+
+    @property
+    def guest_token_expire_seconds(self) -> int:
+        """Durée de validité du token invité en secondes."""
+        return int(timedelta(hours=GUEST_ACCESS_TOKEN_EXPIRE_HOURS).total_seconds())
+
     def create_refresh_token(self, data: dict) -> str:
         """Crée un token de rafraîchissement JWT.
         

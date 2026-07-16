@@ -5,7 +5,7 @@
 - Production: `http://localhost:4242/api/v1` (or configured via `VITE_API_BASE_URL`)
 
 ## Authentication
-All endpoints (except `/auth/login`) require JWT authentication via `Authorization: Bearer <token>` header.
+All endpoints (except `/auth/login` and `/auth/guest`) require JWT authentication via `Authorization: Bearer <token>` header.
 
 ---
 
@@ -30,15 +30,20 @@ Login and obtain access token.
 }
 ```
 
+### POST `/auth/guest`
+Ouvre une session **invité** lecture seule (démo hors projet). Aucun compte SQLite ; JWT `role=guest`, TTL 8 h, **sans** cookie refresh.
+
+**Response:** `TokenResponse`
+
 ### POST `/auth/refresh`
 Refresh access token using refresh token from httpOnly cookie.
 
 **Response:** `TokenResponse`
 
 ### GET `/auth/me`
-Get current authenticated user information.
+Get current authenticated user information. `role` ∈ `admin` | `writer` | `guest`.
 
-**Response:** `UserResponse` including `role` (`admin | writer`) and `is_active`.
+**Response:** `UserResponse` including `role` (`admin | writer | guest`) and `is_active`.
 
 ### POST `/auth/logout`
 Logout and invalidate refresh token.

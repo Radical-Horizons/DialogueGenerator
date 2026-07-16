@@ -197,7 +197,7 @@ async def expand_tree(
             )
             if (existing_base / f"{existing_id}.json").exists():
                 try:
-                    persistence_service.require_access(
+                    persistence_service.require_edit(
                         existing_id,
                         current_user,
                         existing_base / f"{existing_id}.json",
@@ -286,7 +286,7 @@ async def expand_tree(
             base_dir, doc_id = _resolve_document_base(document_id, config_service, request_id)
             if (base_dir / f"{doc_id}.json").exists():
                 try:
-                    persistence_service.require_access(
+                    persistence_service.require_edit(
                         doc_id,
                         current_user,
                         base_dir / f"{doc_id}.json",

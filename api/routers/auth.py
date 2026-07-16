@@ -153,7 +153,10 @@ async def get_current_user(
             message="Token invalide",
             request_id=request_id
         )
-    
+
+    if payload.get("role") == "guest" and username == "guest":
+        return auth_service.guest_principal()
+
     user = auth_service.get_user_by_username(username)
     if user is None:
         raise AuthenticationException(
@@ -239,6 +242,34 @@ async def login(
         access_token=access_token,
         token_type="bearer",
         expires_in=auth_service.access_token_expire.total_seconds()
+    )
+
+
+@router.post("/guest", response_model=TokenResponse, status_code=status.HTTP_200_OK)
+@apply_rate_limit
+async def guest_login(
+    request: Request,
+    auth_service: Annotated[
+        AuthService,
+        Depends(get_auth_service),
+    ],
+) -> TokenResponse:
+    """Ouvre une session invité lecture seule sans compte SQLite.
+
+    Args:
+        request: Requête HTTP.
+        auth_service: Service d'authentification injecté.
+
+    Returns:
+        Access token JWT ``role=guest`` (pas de cookie refresh).
+    """
+    request_id = getattr(request.state, "request_id", "unknown")
+    access_token = auth_service.create_guest_access_token()
+    logger.info("Session invité ouverte (request_id: %s)", request_id)
+    return TokenResponse(
+        access_token=access_token,
+        token_type="bearer",
+        expires_in=auth_service.guest_token_expire_seconds,
     )
 
 

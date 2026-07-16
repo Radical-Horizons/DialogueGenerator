@@ -16,6 +16,7 @@ from api.dependencies import (
     get_export_log_service,
     get_llm_usage_service,
     get_request_id,
+    require_non_guest,
 )
 from api.exceptions import APIException, InternalServerException, ValidationException
 from api.routers.auth import get_current_user
@@ -210,6 +211,7 @@ async def save_graph_and_write(
     ADR-006: Si seq/document_id fournis, seq <= last_seq → conflit explicite ;
     seq > last_seq → écriture atomique + persistance last_seq + ack(seq).
     """
+    require_non_guest(current_user)
     try:
         document: dict[str, object] = {"schemaVersion": "1.2.0", "nodes": []}
         filename = export_filename_from_title(request_data.metadata.title)
@@ -238,7 +240,7 @@ async def save_graph_and_write(
         document_exists = (unity_dir / f"{document_key}.json").exists()
         if document_exists:
             try:
-                persistence_service.require_access(
+                persistence_service.require_edit(
                     document_key,
                     current_user,
                     unity_dir / f"{document_key}.json",

@@ -89,6 +89,11 @@ class DocumentPersistenceService:
         )
 
     @staticmethod
+    def _is_guest(current_user: Mapping[str, object]) -> bool:
+        """Indique si l'acteur est une session invité JWT (hors table users)."""
+        return current_user.get("role") == "guest"
+
+    @staticmethod
     def _normalized_path(path: Path | str) -> str:
         """Normalise un chemin pour une comparaison fiable sous Windows."""
         return os.path.normcase(str(Path(path).resolve()))
@@ -111,7 +116,14 @@ class DocumentPersistenceService:
         current_user: Mapping[str, object],
         document_path: Path | None = None,
     ) -> DialogueCapabilities:
-        """Calcule les capacités owner/admin sans divulguer le propriétaire."""
+        """Calcule les capacités owner/admin/guest sans divulguer le propriétaire."""
+        if self._is_guest(current_user):
+            return DialogueCapabilities(
+                can_read=True,
+                can_edit=False,
+                can_delete=False,
+                is_owner=False,
+            )
         actor_id = self._actor_id(current_user)
         entry = self._repository.find_by_document_id(document_id)
         path_matches = (
@@ -139,11 +151,25 @@ class DocumentPersistenceService:
         current_user: Mapping[str, object],
         document_path: Path | None = None,
     ) -> DialogueCapabilities:
-        """Autorise uniquement le propriétaire ou un administrateur."""
+        """Autorise la lecture pour le propriétaire, un admin ou un invité."""
         capabilities = self.capabilities(document_id, current_user, document_path)
         if not capabilities.can_read:
             raise DialogueAccessDeniedError(
                 f"Accès refusé au dialogue {document_id}"
+            )
+        return capabilities
+
+    def require_edit(
+        self,
+        document_id: str,
+        current_user: Mapping[str, object],
+        document_path: Path | None = None,
+    ) -> DialogueCapabilities:
+        """Autorise uniquement une mutation (owner/admin, jamais invité)."""
+        capabilities = self.require_access(document_id, current_user, document_path)
+        if not capabilities.can_edit:
+            raise DialogueAccessDeniedError(
+                f"Écriture refusée pour le dialogue {document_id}"
             )
         return capabilities
 
@@ -280,7 +306,7 @@ class DocumentPersistenceService:
             existed = document_path.exists()
             entry = self._repository.find_by_document_id(document_id)
             if existed or entry is not None:
-                self.require_access(document_id, current_user, document_path)
+                self.require_edit(document_id, current_user, document_path)
                 if create_only:
                     if existed:
                         current = self.read_document(
@@ -307,6 +333,10 @@ class DocumentPersistenceService:
                     )
                 new_revision = current_revision + 1
             else:
+                if self._is_guest(current_user):
+                    raise DialogueAccessDeniedError(
+                        f"Écriture refusée pour le dialogue {document_id}"
+                    )
                 if client_revision != 1:
                     raise DialogueRevisionConflictError(
                         payload={"schemaVersion": "1.1.0", "nodes": []},
@@ -328,7 +358,7 @@ class DocumentPersistenceService:
                             self._document_bytes(document),
                         )
                     except FileExistsError as exc:
-                        self.require_access(
+                        self.require_edit(
                             document_id,
                             current_user,
                             document_path,
@@ -406,7 +436,7 @@ class DocumentPersistenceService:
     ) -> int:
         """Écrit un layout révisionné et actualise l'index existant."""
         with self._lock:
-            self.require_access(
+            self.require_edit(
                 document_id,
                 current_user,
                 document_base_dir / f"{document_id}.json",
@@ -461,7 +491,7 @@ class DocumentPersistenceService:
         """Supprime document, révisions, layout, séquence et index en compensation."""
         with self._lock:
             document_path = document_base_dir / f"{document_id}.json"
-            self.require_access(document_id, current_user, document_path)
+            self.require_edit(document_id, current_user, document_path)
             if not document_path.exists():
                 raise DialogueNotFoundError(document_id)
             paths: list[Path] = [

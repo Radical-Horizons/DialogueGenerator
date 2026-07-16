@@ -13,8 +13,10 @@ from api.dependencies import (
     get_graph_node_orchestrator,
     get_llm_usage_service,
     get_request_id,
+    require_non_guest,
 )
 from api.exceptions import AllLLMProvidersUnavailableError, InternalServerException, ValidationException
+from api.routers.auth import get_current_user
 from api.routers.graph_cost import fingerprint_for_selections_safe, try_compute_context_relevance
 from api.routers.graph_router_helpers import create_llm_client_for_router, resolve_and_enrich_graph_context
 from api.schemas.graph import GenerateNodeRequest, GenerateNodeResponse, SuggestedConnection
@@ -25,7 +27,14 @@ from services.llm_usage_service import LLMUsageService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
+
+
+def _reject_guest_user(
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+) -> dict[str, object]:
+    """Dépendance FastAPI : refuse les sessions invitées avant le corps métier."""
+    return require_non_guest(current_user)
 
 
 @router.post(
@@ -34,6 +43,7 @@ router = APIRouter()
     status_code=status.HTTP_200_OK,
 )
 async def generate_node(
+    _current_user: Annotated[dict[str, object], Depends(_reject_guest_user)],
     request_data: GenerateNodeRequest,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     orchestrator: Annotated[GraphNodeOrchestrator, Depends(get_graph_node_orchestrator)],

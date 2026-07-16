@@ -30,7 +30,7 @@ from api.schemas.generation_jobs import GenerationJobCreate, GenerationJobRespon
 from api.services.generation_job_manager import get_job_manager
 from api.services.auth_service import AuthService
 from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
-from api.dependencies import get_auth_service, get_unity_dialogue_orchestrator
+from api.dependencies import get_auth_service, get_unity_dialogue_orchestrator, require_non_guest
 from api.exceptions import AuthenticationException
 from api.config.security_config import get_security_config
 from api.utils.sse_job_token import create_sse_job_token, verify_sse_job_token
@@ -380,6 +380,7 @@ async def create_generation_job(
     Returns:
         Job créé avec job_id et stream_url.
     """
+    require_non_guest(current_user)
     job_manager = get_job_manager()
 
     owner_username = _job_owner_label(current_user)

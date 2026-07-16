@@ -143,6 +143,28 @@ def require_admin(
     )
 
 
+def require_non_guest(
+    current_user: dict[str, object],
+) -> dict[str, object]:
+    """Refuse les sessions invitées pour les mutations et la génération.
+
+    Args:
+        current_user: Utilisateur authentifié courant.
+
+    Returns:
+        L'utilisateur s'il n'est pas invité.
+
+    Raises:
+        HTTPException: Si le rôle est ``guest``.
+    """
+    if current_user.get("role") == "guest":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Mode invité : action non autorisée",
+        )
+    return current_user
+
+
 # _get_context_builder_singleton() supprimé - utilisez ServiceContainer via get_context_builder()
 
 
