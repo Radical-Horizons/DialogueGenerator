@@ -36,6 +36,8 @@ import {
 import { downloadAllExportedFiles, downloadPersistedUnityDialogue } from '../../utils/unityExportDownload'
 import { useGraphStore } from '../../store/graphStore'
 import { getDialogueDisplayTitle } from '../../utils/formatDialogueTitle'
+import * as documentsAPI from '../../api/documents'
+import { getErrorMessage } from '../../types/errors'
 
 const BATCH_UNSAVED_WARNING =
   'Le dialogue ouvert a des modifications non sauvegardées. Sauvegardez avant de l’inclure dans l’export batch.'
@@ -77,6 +79,7 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
   } = useDialogueListData()
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [contextMenu, setContextMenu] = useState<DialogueListContextMenuState | null>(null)
+  const [isCreating, setIsCreating] = useState(false)
   const batchPreview = useUnityExportPreview(
     toast,
     {
@@ -136,6 +139,50 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
       onSelectDialogue(dialogue)
     }
   }
+
+  const handleCreateDialogue = useCallback(async () => {
+    const requestedTitle = window.prompt('Titre du nouveau dialogue')
+    if (requestedTitle === null) return
+    const title = requestedTitle.trim()
+    const documentId = title
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\w\s-]/g, '')
+      .trim()
+      .replace(/[-\s]+/g, '_')
+      .toLowerCase()
+    if (!documentId) {
+      toast('Le titre doit contenir au moins une lettre ou un chiffre.', 'error')
+      return
+    }
+    setIsCreating(true)
+    try {
+      await documentsAPI.putDocument(documentId, {
+        document: { schemaVersion: '1.2.0', title, nodes: [] },
+        revision: 1,
+        validationMode: 'draft',
+        createOnly: true,
+      })
+      await refresh()
+      onSelectDialogue({
+        filename: `${documentId}.json`,
+        file_path: '',
+        size_bytes: 0,
+        modified_time: new Date().toISOString(),
+        title,
+        capabilities: {
+          can_read: true,
+          can_edit: true,
+          can_delete: true,
+          is_owner: true,
+        },
+      })
+    } catch (error) {
+      toast(`Création impossible : ${getErrorMessage(error)}`, 'error')
+    } finally {
+      setIsCreating(false)
+    }
+  }, [onSelectDialogue, refresh, toast])
 
   const handleValidateDocumentSchema = useCallback(
     (dialogue: UnityDialogueMetadata) => {
@@ -304,6 +351,23 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
             alignItems: 'center',
           }}
         >
+          <button
+            type="button"
+            data-testid="create-dialogue-button"
+            disabled={isCreating}
+            onClick={() => void handleCreateDialogue()}
+            style={{
+              padding: '0.45rem 0.65rem',
+              border: `1px solid ${theme.button.primary.background}`,
+              borderRadius: '6px',
+              backgroundColor: theme.button.primary.background,
+              color: theme.button.primary.color,
+              cursor: isCreating ? 'wait' : 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            {isCreating ? 'Création…' : 'Nouveau'}
+          </button>
           <input
             ref={searchInputRef}
             type="text"

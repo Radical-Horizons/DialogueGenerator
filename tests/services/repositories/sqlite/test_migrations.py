@@ -33,14 +33,36 @@ def test_lifespan_creates_and_reuses_application_database(tmp_path: Path) -> Non
                 migration_versions = connection.execute(
                     "SELECT version FROM schema_migrations"
                 ).fetchall()
+                dialogue_foreign_keys = {
+                    (row[3], row[2], row[4], row[6])
+                    for row in connection.execute(
+                        "PRAGMA foreign_key_list(dialogues_index)"
+                    )
+                }
 
-            assert {"schema_migrations", "users", "user_settings", "app_settings"} <= tables
-            assert migration_versions == [("001",)]
+            assert {
+                "schema_migrations",
+                "users",
+                "user_settings",
+                "app_settings",
+                "dialogues_index",
+            } <= tables
+            assert migration_versions == [("001",), ("002",), ("003",)]
+            assert dialogue_foreign_keys == {
+                ("owner_id", "users", "id", "SET NULL"),
+                ("last_modified_by", "users", "id", "SET NULL"),
+            }
 
         with TestClient(app):
             with sqlite3.connect(database_path) as connection:
                 assert connection.execute(
                     "SELECT COUNT(*) FROM schema_migrations WHERE version = '001'"
+                ).fetchone() == (1,)
+                assert connection.execute(
+                    "SELECT COUNT(*) FROM schema_migrations WHERE version = '002'"
+                ).fetchone() == (1,)
+                assert connection.execute(
+                    "SELECT COUNT(*) FROM schema_migrations WHERE version = '003'"
                 ).fetchone() == (1,)
     finally:
         os.environ.clear()

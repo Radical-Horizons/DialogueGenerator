@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState, type CSSProperties } from 'react'
 
 import * as unityDialoguesAPI from '../../api/unityDialogues'
 import { useGraphViewStore } from '../../store/graphViewStore'
+import { useGraphStore } from '../../store/graphStore'
 import { theme } from '../../theme'
 import type { UnityDialogueMetadata } from '../../types/api'
 import { getErrorMessage } from '../../types/errors'
@@ -37,6 +38,8 @@ export function DialogueListContextMenu({
   const { dialogue } = state
   const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const hasUnsavedChanges = useGraphStore((store) => store.hasUnsavedChanges)
+  const openDocumentId = useGraphStore((store) => store.documentId)
 
   const { left, top } = clampContextMenuToViewport(
     state.clientX,
@@ -67,7 +70,14 @@ export function DialogueListContextMenu({
 
   const handleDelete = useCallback(async () => {
     if (isDeleting) return
-    if (!window.confirm(`Supprimer le dialogue « ${title} » ? Cette action est irréversible.`)) {
+    const dialogueId = dialogue.filename.replace(/\.json$/i, '')
+    const deletesOpenDirtyDialogue =
+      hasUnsavedChanges &&
+      openDocumentId?.replace(/\.json$/i, '') === dialogueId
+    const warning = deletesOpenDirtyDialogue
+      ? ' Les modifications non sauvegardées seront perdues.'
+      : ''
+    if (!window.confirm(`Supprimer le dialogue « ${title} » ?${warning} Cette action est irréversible.`)) {
       return
     }
     setIsDeleting(true)
@@ -83,7 +93,15 @@ export function DialogueListContextMenu({
       setError(getErrorMessage(err))
       setIsDeleting(false)
     }
-  }, [dialogue.filename, isDeleting, onClose, onDeleted, title])
+  }, [
+    dialogue.filename,
+    hasUnsavedChanges,
+    isDeleting,
+    onClose,
+    onDeleted,
+    openDocumentId,
+    title,
+  ])
 
   const menuItemStyle: CSSProperties = {
     display: 'block',
@@ -174,7 +192,7 @@ export function DialogueListContextMenu({
           Télécharger
         </button>
       )}
-      <button
+      {dialogue.capabilities?.can_delete === true && <button
         type="button"
         role="menuitem"
         data-testid="dialogue-list-context-delete"
@@ -194,7 +212,7 @@ export function DialogueListContextMenu({
         }}
       >
         {isDeleting ? 'Suppression…' : 'Supprimer le dialogue'}
-      </button>
+      </button>}
       {error && (
         <div
           style={{

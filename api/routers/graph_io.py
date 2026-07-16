@@ -8,10 +8,17 @@ import re
 from pathlib import Path
 from typing import Annotated, Optional
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
-from api.dependencies import get_config_service, get_export_log_service, get_llm_usage_service, get_request_id
-from api.exceptions import InternalServerException, ValidationException
+from api.dependencies import (
+    get_config_service,
+    get_document_persistence_service,
+    get_export_log_service,
+    get_llm_usage_service,
+    get_request_id,
+)
+from api.exceptions import APIException, InternalServerException, ValidationException
+from api.routers.auth import get_current_user
 from api.schemas.graph import (
     ExportPreviewResponse,
     GraphMetadata,
@@ -29,10 +36,14 @@ from services.export_log_recorder import (
 from services.export_log_service import ExportLogService
 from services.graph_conversion_service import GraphConversionService
 from services.llm_usage_service import LLMUsageService
+from services.document_persistence_service import (
+    DialogueAccessDeniedError,
+    DocumentPersistenceService,
+)
+from services.document_id_validation import validate_document_id
 from services.unity_dialogue_export_service import (
     read_last_seq,
     unity_export_schema_validator,
-    write_unity_dialogue_to_file,
 )
 from services.unity_export_preview_service import preview_graph_export
 from services.unity_graph_export_serialization import (
@@ -187,55 +198,104 @@ async def save_graph_and_write(
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     export_log_service: Annotated[ExportLogService, Depends(get_export_log_service)],
     llm_usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)] = None,
 ) -> SaveGraphResponse:
     """Convertit le graphe en Unity JSON, valide et écrit le fichier sur disque (un seul appel).
 
-    ADR-006: Si seq/document_id fournis, seq <= last_seq → ne pas écraser (200 + ack(last_seq));
+    ADR-006: Si seq/document_id fournis, seq <= last_seq → conflit explicite ;
     seq > last_seq → écriture atomique + persistance last_seq + ack(seq).
     """
     try:
+        document: dict[str, object] = {"schemaVersion": "1.2.0", "nodes": []}
+        filename = export_filename_from_title(request_data.metadata.title)
+        filename_without_ext = filename[:-5] if filename.lower().endswith(".json") else filename
+        document_key = (
+            request_data.document_id.removesuffix(".json")
+            if request_data.document_id
+            else filename_without_ext
+        )
+        try:
+            document_key = validate_document_id(document_key)
+        except ValueError as exc:
+            raise ValidationException(
+                message=str(exc),
+                details={"field": "document_id"},
+                request_id=request_id,
+            ) from exc
+        unity_path = config_service.get_unity_dialogues_path()
+        if not unity_path:
+            raise ValidationException(
+                message="Le chemin Unity dialogues n'est pas configuré.",
+                details={"field": "unity_dialogues_path"},
+                request_id=request_id,
+            )
+        unity_dir = Path(unity_path)
+        document_exists = (unity_dir / f"{document_key}.json").exists()
+        if document_exists:
+            try:
+                persistence_service.require_access(
+                    document_key,
+                    current_user,
+                    unity_dir / f"{document_key}.json",
+                )
+            except DialogueAccessDeniedError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail={"code": "dialogue_access_denied"},
+                ) from exc
+
         document, json_content = graph_to_unity_json_content(
             request_data.nodes,
             request_data.edges,
             dialogue_flags=request_data.dialogue_flags,
             title=request_data.metadata.title,
         )
-        filename = export_filename_from_title(request_data.metadata.title)
-        filename_without_ext = filename[:-5] if filename.lower().endswith(".json") else filename
-        document_key = filename_without_ext
+        schema_valid, schema_errors = unity_export_schema_validator(document)
+        if not schema_valid:
+            raise ValidationException(
+                message="Le document Unity est invalide.",
+                details={"validation_errors": schema_errors},
+                request_id=request_id,
+            )
 
         seq = request_data.seq
         last_seq: Optional[int] = None
         if seq is not None:
-            unity_path = config_service.get_unity_dialogues_path()
-            if unity_path:
-                unity_dir = Path(unity_path)
-                last_seq = read_last_seq(unity_dir, document_key)
-            if last_seq is not None and seq <= last_seq:
-                logger.info(
-                    "save-and-write: seq %s <= last_seq %s, pas d'écriture (request_id: %s)",
-                    seq,
-                    last_seq,
-                    request_id,
+            last_seq = read_last_seq(unity_dir, document_key)
+            if document_exists and last_seq is not None and seq <= last_seq:
+                raise APIException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    code="SEQUENCE_CONFLICT",
+                    message="La séquence a déjà été reconnue; le payload n'a pas été écrit.",
+                    details={
+                        "ack_seq": last_seq,
+                        "last_seq": last_seq,
+                    },
+                    request_id=request_id,
                 )
-                return SaveGraphResponse(
-                    success=True,
-                    filename=filename,
-                    json_content=json_content,
-                    ack_seq=last_seq,
-                    last_seq=last_seq,
-                )
-
-        _, filename_out = write_unity_dialogue_to_file(
-            config_service=config_service,
-            json_content=json_content,
-            filename=filename_without_ext,
-            request_id=request_id,
-            validator=unity_export_schema_validator,
-            last_seq_after_write=seq,
-            preserve_source_fields=bool(request_data.dialogue_flags),
+        if document_exists:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "code": "canonical_revision_required",
+                    "message": "Utilisez PUT /documents/{id} avec la révision courante.",
+                },
+            )
+        persistence_service.write_document(
+            unity_dir,
+            document_key,
+            document,
+            1,
+            current_user,
+            sequence=seq,
+            create_only=True,
         )
+        filename_out = f"{document_key}.json"
 
         record_graph_export_success(
             export_log_service,
@@ -269,6 +329,8 @@ async def save_graph_and_write(
             filename=filename,
             exc=exc,
         )
+        raise
+    except HTTPException:
         raise
     except ValueError as e:
         logger.warning("Validation error lors de save-and-write (request_id: %s): %s", request_id, e)

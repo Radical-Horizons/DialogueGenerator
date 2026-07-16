@@ -13,10 +13,6 @@ import { documentToGraph, graphToDocument, buildLayoutFromNodes } from '../../ut
 import { calculateDagreLayout } from '../../utils/dagreLayout'
 import { mergeLayoutWithNodePositions } from '../../utils/syncDocLayout'
 import {
-  writeSnapshot as journalWriteSnapshot,
-  clearPending as journalClearPending,
-} from '../../utils/graphJournal'
-import {
   ensureValidNode,
   normalizeChoiceHandleInEdges,
   normalizeTestBars,
@@ -37,6 +33,9 @@ import {
   inlineValidationToastMessage,
   type DocumentFieldError,
 } from '../../utils/documentValidationFieldErrors'
+import {
+  acknowledgeSnapshot as journalAcknowledgeSnapshot,
+} from '../../utils/graphJournal'
 
 function unityNodesFromGraph(state: GraphState): Array<{ id?: string }> {
   const doc = graphToDocument(state.nodes, state.edges) as { nodes?: Array<{ id?: string }> }
@@ -333,7 +332,11 @@ export const createPersistenceSlice: StateCreator<
     let nextSeq = 0
     set((state) => {
       nextSeq = state.activeLoadSeq + 1
-      return { activeLoadSeq: nextSeq }
+      return {
+        activeLoadSeq: nextSeq,
+        activeSaveSeq: state.activeSaveSeq + 1,
+        isSaving: false,
+      }
     })
     return nextSeq
   },
@@ -368,6 +371,8 @@ export const createPersistenceSlice: StateCreator<
         rest.document as Record<string, unknown>
       ),
       isLoading: false,
+      isSaving: false,
+      activeSaveSeq: get().activeSaveSeq + 1,
       validationErrors: [],
       loreExplicitValidationSummary: null,
       highlightedNodeIds: [],
@@ -385,201 +390,119 @@ export const createPersistenceSlice: StateCreator<
   },
 
   saveDialogue: async () => {
-    set({ isSaving: true, lastSaveError: null, syncStatus: 'synced' })
+    let saveOperationSeq = 0
+    set((current) => {
+      saveOperationSeq = current.activeSaveSeq + 1
+      return {
+        activeSaveSeq: saveOperationSeq,
+        isSaving: true,
+        lastSaveError: null,
+        syncStatus: 'synced',
+      }
+    })
     get().clearDocumentFieldErrors()
     const state = get()
+    const saveLoadSeq = state.activeLoadSeq
     const documentId = state.documentId ?? state.dialogueMetadata.filename ?? null
-
-    const checkStillActive = () => {
-      const currentId = get().documentId ?? get().dialogueMetadata.filename ?? null
-      if (currentId !== documentId) {
-        return false
-      }
-      return true
+    if (!documentId || state.document == null) {
+      const error = new Error('Aucun document canonique chargé')
+      set({ isSaving: false, lastSaveError: error.message, syncStatus: 'error' })
+      throw error
     }
 
-    /** Relance la validation API après persistance réussie (FR37 AC#5, tous chemins save). */
-    const runValidationAfterPersist = async () => {
-      if (!checkStillActive()) return
-      try {
-        await get().validateGraph()
-      } catch (err) {
-        console.error('Validation après sauvegarde:', err)
-      }
+    const snap = get()
+    const doc = graphToDocument(snap.nodes, snap.edges) as unknown as Record<string, unknown>
+    applyBindingsToDocument(doc, snap.dialogueFlagBindings ?? [])
+    if (documentRequiresChoiceIdMigration(doc)) {
+      const error = new Error(
+        "Ce dialogue doit être migré avec l'outil de migration choiceId."
+      )
+      set({ isSaving: false, lastSaveError: error.message, syncStatus: 'error' })
+      throw error
     }
-
-    if (state.nodes.length === 0) {
-      set({ isSaving: false })
-      return {
-        success: true,
-        filename: documentId ?? state.dialogueMetadata.filename ?? 'dialogue.json',
-        json_content: '[]',
-      } as SaveGraphResponse
-    }
-
-    try {
-      // Flux principal : PUT document + PUT layout (Story 16.4)
-      // Construire le document depuis le graphe courant pour éviter décalage avec state.document (ex. après suppression TestNode).
-      if (state.document != null && documentId) {
-        const snap = get()
-        const doc = graphToDocument(snap.nodes, snap.edges) as unknown as Record<string, unknown>
-        applyBindingsToDocument(doc, snap.dialogueFlagBindings ?? [])
-        const layoutPayload = mergeIntentionalCycleIdsIntoLayout(
-          mergeLayoutWithNodePositions(
-            snap.layout ?? buildLayoutFromNodes(snap.nodes),
-            snap.nodes
-          ) as Record<string, unknown>,
-          snap.intentionalCycles
-        )
-        const docRev = state.documentRevision ?? 1
-        const layoutRev = state.layoutRevision ?? 1
-        const requiresChoiceIdMigration = documentRequiresChoiceIdMigration(doc)
-
-        if (!requiresChoiceIdMigration) {
-          try {
-            const [docRes, layoutRes] = await Promise.all([
-              documentsAPI.putDocument(documentId, {
-                document: doc,
-                revision: docRev,
-                validationMode: 'export',
-              }),
-              documentsAPI.putLayout(documentId, {
-                layout: layoutPayload,
-                revision: layoutRev,
-              }),
-            ])
-            if (!checkStillActive()) {
-              return { success: true, filename: documentId } as SaveGraphResponse
-            }
-            set({
-              document: doc,
-              layout: layoutPayload,
-              documentRevision: docRes.revision,
-              layoutRevision: layoutRes.revision,
-              isSaving: false,
-              hasUnsavedChanges: false,
-              lastSaveError: null,
-              documentFieldErrors: [],
-              lastSavedAt: Date.now(),
-              syncStatus: 'synced',
-            })
-            await runValidationAfterPersist()
-            return { success: true, filename: documentId } as SaveGraphResponse
-          } catch (docErr: unknown) {
-            const status = (
-              docErr as { response?: { status?: number } }
-            )?.response?.status
-            if (status === 404) {
-              console.warn('Document non trouvé (404), utilisation du chemin legacy')
-              // Continuer avec le chemin legacy ci-dessous
-            } else if (status === 409) {
-              const msg =
-                'Conflit de révision (document ou layout modifié ailleurs). Rechargez ou réessayez.'
-              if (checkStillActive()) {
-                set({ isSaving: false, lastSaveError: msg, syncStatus: 'error' })
-              }
-              throw new Error(msg)
-            } else if (status === 400 || status === 422) {
-              applySaveFieldValidationErrors(get, set, docErr)
-              if (checkStillActive()) {
-                set({ isSaving: false, syncStatus: 'error' })
-              }
-              throw docErr
-            } else {
-              console.warn(
-                `Erreur sauvegarde via API documents, tentative legacy: ${getErrorMessage(docErr)}`
-              )
-              // Continuer avec le chemin legacy
-            }
-          }
-        } else {
-          set({ isSaving: false })
-        }
-      }
-    } catch (docErr: unknown) {
-      console.warn(
-        `Erreur préparation sauvegarde via API documents, utilisation du chemin legacy: ${getErrorMessage(docErr)}`
+    const layoutPayload = mergeIntentionalCycleIdsIntoLayout(
+      mergeLayoutWithNodePositions(
+        snap.layout ?? buildLayoutFromNodes(snap.nodes),
+        snap.nodes
+      ) as Record<string, unknown>,
+      snap.intentionalCycles
+    )
+    const isActiveSave = (): boolean => {
+      const current = get()
+      const currentId = current.documentId ?? current.dialogueMetadata.filename ?? null
+      return (
+        currentId === documentId &&
+        current.activeLoadSeq === saveLoadSeq &&
+        current.activeSaveSeq === saveOperationSeq
       )
     }
 
-    // Chemin legacy (fallback)
-    const seq = state.clientSeq
     try {
-      const response = await graphAPI.saveGraphAndWrite({
-        nodes: state.nodes.map((n) => ({
-          id: n.id,
-          type: n.type ?? 'dialogueNode',
-          position: n.position,
-          data: n.data,
-        })),
-        edges: state.edges.map((e) => ({
-          id: e.id,
-          source: e.source,
-          target: e.target,
-          type: e.type,
-          label: typeof e.label === 'string' ? e.label : undefined,
-          sourceHandle: e.sourceHandle,
-          targetHandle: e.targetHandle,
-          data: e.data,
-        })),
-        metadata: state.dialogueMetadata,
-        seq,
-        document_id: documentId ?? undefined,
+      const docRes = await documentsAPI.putDocument(documentId, {
+        document: doc,
+        revision: state.documentRevision ?? 1,
+        validationMode: 'export',
       })
-
-      if (!checkStillActive()) {
-        return response
+      if (!isActiveSave()) {
+        return { success: true, filename: documentId } as SaveGraphResponse
       }
-
-      const ackSeq = response.ack_seq ?? response.last_seq ?? seq
-      const nextSeq = (response.last_seq ?? response.ack_seq ?? seq) + 1
-
-      if (documentId) {
-        try {
-          await journalWriteSnapshot(documentId, {
-            nodes: state.nodes,
-            edges: state.edges,
-            metadata: state.dialogueMetadata,
-            ackSeq,
-          })
-          await journalClearPending(documentId)
-        } catch (e) {
-          console.warn('Journal IndexedDB (snapshot/clear):', e)
-        }
-      }
-
-      const updatedDocument =
-        state.document ??
-        (graphToDocument(state.nodes, state.edges) as unknown as Record<string, unknown>)
-      const updatedLayout = (
-        state.layout ?? buildLayoutFromNodes(state.nodes)
-      ) as Record<string, unknown>
-
       set({
+        document: doc,
+        documentRevision: docRes.revision,
+      })
+      const layoutRes = await documentsAPI.putLayout(documentId, {
+        layout: layoutPayload,
+        revision: state.layoutRevision ?? 1,
+      })
+      if (!isActiveSave()) {
+        return { success: true, filename: documentId } as SaveGraphResponse
+      }
+      set({
+        document: doc,
+        layout: layoutPayload,
+        documentRevision: docRes.revision,
+        layoutRevision: layoutRes.revision,
         isSaving: false,
         hasUnsavedChanges: false,
         lastSaveError: null,
         documentFieldErrors: [],
         lastSavedAt: Date.now(),
-        lastAckSeq: ackSeq,
-        clientSeq: nextSeq,
         syncStatus: 'synced',
-        documentId: documentId ?? response.filename ?? state.documentId,
-        document: updatedDocument,
-        layout: updatedLayout,
-        documentRevision: state.documentRevision ?? 1,
-        layoutRevision: state.layoutRevision ?? 1,
-        dialogueMetadata: {
-          ...state.dialogueMetadata,
-          filename: response.filename,
-        },
       })
-      await runValidationAfterPersist()
-      return response
+      try {
+        await journalAcknowledgeSnapshot(documentId, {
+          nodes: snap.nodes,
+          edges: snap.edges,
+          metadata: snap.dialogueMetadata,
+          ackSeq: snap.clientSeq,
+        })
+      } catch (journalError) {
+        console.warn('Journal save acknowledgement:', journalError)
+      }
+      try {
+        await get().validateGraph()
+      } catch (validationError) {
+        console.error('Validation après sauvegarde:', validationError)
+      }
+      return { success: true, filename: documentId } as SaveGraphResponse
     } catch (error) {
-      if (!checkStillActive()) throw error
-      const { fieldErrors, userMessage } = applySaveFieldValidationErrors(get, set, error)
-      console.error('Erreur lors de la sauvegarde:', error)
+      if (!isActiveSave()) {
+        throw error
+      }
+      const conflict = error as {
+        response?: { status?: number; data?: { revision?: number } }
+      }
+      if (
+        conflict.response?.status === 409 &&
+        typeof conflict.response.data?.revision === 'number'
+      ) {
+        set({ layoutRevision: conflict.response.data.revision })
+      }
+      const { fieldErrors, userMessage } = applySaveFieldValidationErrors(
+        get,
+        set,
+        error
+      )
       set({
         isSaving: false,
         lastSaveError: fieldErrors.length > 0 ? null : userMessage,

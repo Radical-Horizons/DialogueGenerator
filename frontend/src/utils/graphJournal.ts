@@ -149,6 +149,38 @@ export async function clearPending(documentId: string): Promise<void> {
   })
 }
 
+/** Remplace atomiquement le snapshot acké et efface le pending correspondant. */
+export async function acknowledgeSnapshot(
+  documentId: string,
+  snapshot: GraphSnapshot
+): Promise<void> {
+  const db = await openDb()
+  return new Promise((resolve, reject) => {
+    const store = getStore(db)
+    const getReq = store.get(documentId)
+    getReq.onsuccess = () => {
+      const row: DocumentJournal & { documentId: string } =
+        getReq.result ?? { documentId }
+      row.documentId = documentId
+      row.snapshot = snapshot
+      row.pending = null
+      const putReq = store.put(row)
+      putReq.onsuccess = () => {
+        db.close()
+        resolve()
+      }
+      putReq.onerror = () => {
+        db.close()
+        reject(putReq.error)
+      }
+    }
+    getReq.onerror = () => {
+      db.close()
+      reject(getReq.error)
+    }
+  })
+}
+
 /** Supprime tout le journal d'un document (optionnel, pour tests ou reset). */
 export async function deleteDocument(documentId: string): Promise<void> {
   const db = await openDb()

@@ -10,7 +10,6 @@ un DoS par envoi de très gros JSON (layout = objet libre, non validé en taille
 from copy import deepcopy
 import json
 import logging
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -23,6 +22,7 @@ from api.dependencies import (
     get_dialogue_flag_reference_validation_service,
     get_dialogue_flags_service,
     get_dialogue_preview_service,
+    get_document_persistence_service,
     get_request_id,
     get_visibility_condition_validation_service,
 )
@@ -41,6 +41,7 @@ from api.schemas.documents import (
     ValidateFlagReferencesRequest,
     ValidateFlagReferencesResponse,
 )
+from api.schemas.dialogue_access import DialogueCapabilitiesResponse
 from services.configuration_service import ConfigurationService
 from services.unity_export_validation_service import validate_unity_export_document
 from services.dialogue_flags_service import DialogueFlagsService
@@ -51,20 +52,44 @@ from services.dialogue_flag_reference_validation_service import (
     analysis_to_validation_api_payload,
 )
 from services.game_systems_social_diagnostics import validate_document_social_systems
+from services.document_persistence_service import (
+    DialogueAccessDeniedError,
+    DialogueNotFoundError,
+    DialogueRevisionConflictError,
+    DocumentPersistenceService,
+)
+from services.document_id_validation import validate_document_id
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
 
-META_FILENAME_SUFFIX = ".meta"
-LAYOUT_META_SUFFIX = ".layout.meta"
+def _capabilities_response(
+    capabilities: Any,
+) -> DialogueCapabilitiesResponse:
+    """Sérialise les capacités calculées par le service métier."""
+    return DialogueCapabilitiesResponse(
+        can_read=capabilities.can_read,
+        can_edit=capabilities.can_edit,
+        can_delete=capabilities.can_delete,
+        is_owner=capabilities.is_owner,
+    )
+
+
+def _raise_access_denied(document_id: str) -> None:
+    """Traduit un refus métier en réponse HTTP 403 stable."""
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail={
+            "code": "dialogue_access_denied",
+            "document_id": document_id,
+        },
+    )
 
 
 def _safe_document_id(document_id: str) -> str:
     """Valide l'id document (pas de path traversal). Retourne l'id normalisé."""
-    if ".." in document_id or "/" in document_id or "\\" in document_id:
-        raise ValueError("document_id invalide (path traversal)")
-    return document_id.strip() or ""
+    return validate_document_id(document_id)
 
 
 def _read_document_blob(base_dir: Path, document_id: str) -> tuple[dict, bool]:
@@ -80,87 +105,9 @@ def _read_document_blob(base_dir: Path, document_id: str) -> tuple[dict, bool]:
     return data, False
 
 
-def _read_meta(base_dir: Path, document_id: str) -> int:
-    """Lit la revision depuis {id}.meta. Retourne 1 si pas de .meta."""
-    meta_path = base_dir / f"{document_id}{META_FILENAME_SUFFIX}"
-    if not meta_path.exists():
-        return 1
-    try:
-        data = json.loads(meta_path.read_text(encoding="utf-8"))
-        return int(data.get("revision", 1))
-    except (json.JSONDecodeError, TypeError, ValueError):
-        return 1
-
-
-def _write_document_blob(base_dir: Path, document_id: str, document: dict) -> None:
-    """Écrit le document JSON. Crée le dossier si besoin."""
-    base_dir.mkdir(parents=True, exist_ok=True)
-    path = base_dir / f"{document_id}.json"
-    path.write_text(json.dumps(document, ensure_ascii=False, indent=2), encoding="utf-8")
-
-
-def _write_meta(base_dir: Path, document_id: str, revision: int) -> None:
-    """Écrit {id}.meta avec revision et updated_at."""
-    meta_path = base_dir / f"{document_id}{META_FILENAME_SUFFIX}"
-    meta_path.write_text(
-        json.dumps(
-            {"revision": revision, "updated_at": datetime.now(timezone.utc).isoformat()},
-            ensure_ascii=False,
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
-
-
 def _document_exists(base_dir: Path, document_id: str) -> bool:
     """Indique si le document existe (fichier .json présent)."""
     return (base_dir / f"{document_id}.json").exists()
-
-
-def _read_layout_meta(base_dir: Path, document_id: str) -> int:
-    """Lit la revision depuis {id}.layout.meta. Retourne 1 si pas de .layout.meta."""
-    meta_path = base_dir / f"{document_id}{LAYOUT_META_SUFFIX}"
-    if not meta_path.exists():
-        return 1
-    try:
-        data = json.loads(meta_path.read_text(encoding="utf-8"))
-        return int(data.get("revision", 1))
-    except (json.JSONDecodeError, TypeError, ValueError):
-        return 1
-
-
-def _read_layout_blob(base_dir: Path, document_id: str) -> dict:
-    """Lit le fichier JSON du layout. Lève FileNotFoundError si absent."""
-    path = base_dir / f"{document_id}.layout.json"
-    if not path.exists():
-        raise FileNotFoundError(f"Layout {document_id} non trouvé")
-    raw = path.read_text(encoding="utf-8")
-    return json.loads(raw)
-
-
-def _write_layout_blob(base_dir: Path, document_id: str, layout: dict) -> None:
-    """Écrit le layout JSON. Crée le dossier si besoin."""
-    base_dir.mkdir(parents=True, exist_ok=True)
-    path = base_dir / f"{document_id}.layout.json"
-    path.write_text(json.dumps(layout, ensure_ascii=False, indent=2), encoding="utf-8")
-
-
-def _write_layout_meta(base_dir: Path, document_id: str, revision: int) -> None:
-    """Écrit {id}.layout.meta avec revision et updated_at."""
-    meta_path = base_dir / f"{document_id}{LAYOUT_META_SUFFIX}"
-    meta_path.write_text(
-        json.dumps(
-            {"revision": revision, "updated_at": datetime.now(timezone.utc).isoformat()},
-            ensure_ascii=False,
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
-
-
-def _layout_exists(base_dir: Path, document_id: str) -> bool:
-    """Indique si le layout existe (fichier .layout.json présent)."""
-    return (base_dir / f"{document_id}.layout.json").exists()
 
 
 def _first_missing_choice_id_path(document: dict) -> str | None:
@@ -197,6 +144,11 @@ def _first_missing_choice_id_path(document: dict) -> str | None:
 )
 async def check_migration(
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> CheckMigrationResponse:
     """Liste les documents v1.1.0 ayant au moins un choice sans choiceId (CI / pre-commit gate)."""
@@ -212,6 +164,8 @@ async def check_migration(
             if not path.is_file() or path.suffix.lower() != ".json" or path.name.endswith(".layout.json"):
                 continue
             document_id = path.stem
+            if not persistence_service.can_list(document_id, current_user, path):
+                continue
             try:
                 doc, _ = _read_document_blob(base_dir, document_id)
             except (FileNotFoundError, json.JSONDecodeError):
@@ -298,6 +252,11 @@ def _resolve_layout_base(
 async def get_document(
     document_id: str,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> DocumentGetResponse:
     """Retourne le document persisté avec schemaVersion et revision (pas de reconstruction)."""
@@ -305,8 +264,10 @@ async def get_document(
         base_dir, doc_id = _resolve_document_base(document_id, config_service, request_id)
         base_dir.mkdir(parents=True, exist_ok=True)
 
-        document, was_normalized_from_list = _read_document_blob(base_dir, doc_id)
-        revision = _read_meta(base_dir, doc_id)
+        persisted = persistence_service.read_document(base_dir, doc_id, current_user)
+        document = persisted.document
+        was_normalized_from_list = persisted.was_legacy_list
+        revision = persisted.revision
         schema_version = (document.get("schemaVersion") or "1.1.0") if isinstance(document, dict) else "1.1.0"
 
         # Story 16.5 (AC3) : refus strict document v1.1.0 sans choiceId en flux normal (sauf format legacy tableau)
@@ -325,8 +286,11 @@ async def get_document(
             document=document,
             schemaVersion=schema_version,
             revision=revision,
+            capabilities=_capabilities_response(persisted.capabilities),
         )
-    except FileNotFoundError:
+    except DialogueAccessDeniedError:
+        _raise_access_denied(document_id)
+    except (FileNotFoundError, DialogueNotFoundError):
         raise NotFoundException(
             resource_type="Document",
             resource_id=document_id,
@@ -354,6 +318,11 @@ async def post_document_preview(
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     request_id: Annotated[str, Depends(get_request_id)],
     preview_service: Annotated[Any, Depends(get_dialogue_preview_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
 ) -> DialoguePreviewResponse:
     """Évalue la visibilité nœuds/choix pour un état simulé (Story 9.4).
 
@@ -361,8 +330,9 @@ async def post_document_preview(
     """
     try:
         base_dir, doc_id = _resolve_document_base(document_id, config_service, request_id)
-        document, _ = _read_document_blob(base_dir, doc_id)
-        revision = _read_meta(base_dir, doc_id)
+        persisted = persistence_service.read_document(base_dir, doc_id, current_user)
+        document = persisted.document
+        revision = persisted.revision
         try:
             return preview_service.preview_document(document, body, stored_revision=revision)
         except ValueError as exc:
@@ -376,7 +346,9 @@ async def post_document_preview(
                     },
                 ) from exc
             raise
-    except FileNotFoundError:
+    except DialogueAccessDeniedError:
+        _raise_access_denied(document_id)
+    except (FileNotFoundError, DialogueNotFoundError):
         raise NotFoundException(
             resource_type="Document",
             resource_id=document_id,
@@ -407,6 +379,11 @@ async def post_validate_flag_references(
         Depends(get_dialogue_flag_reference_validation_service),
     ],
     request_id: Annotated[str, Depends(get_request_id)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
 ) -> ValidateFlagReferencesResponse:
     """Valide les références flags vs ``dialogueFlags`` (Story 9.5 / FR93).
 
@@ -417,7 +394,11 @@ async def post_validate_flag_references(
         if body.document is not None:
             payload = body.document
         else:
-            payload, _ = _read_document_blob(base_dir, doc_id)
+            payload = persistence_service.read_document(
+                base_dir,
+                doc_id,
+                current_user,
+            ).document
 
         analysis = flag_ref_svc.analyze_document(payload)
         err_details, warn_details = analysis_to_validation_api_payload(analysis)
@@ -428,7 +409,9 @@ async def post_validate_flag_references(
             errors=err_details,
             warnings=warn_details,
         )
-    except FileNotFoundError:
+    except DialogueAccessDeniedError:
+        _raise_access_denied(document_id)
+    except (FileNotFoundError, DialogueNotFoundError):
         raise NotFoundException(
             resource_type="Document",
             resource_id=document_id,
@@ -457,6 +440,11 @@ async def post_validate_flag_references(
 async def get_layout(
     document_id: str,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> LayoutGetResponse:
     """Retourne le layout persisté (sidecar) avec revision. 404 si document ou layout absent.
@@ -471,12 +459,20 @@ async def get_layout(
                 request_id=request_id,
             )
         layout_base_dir, _ = _resolve_layout_base(document_id, config_service, request_id)
-        layout = _read_layout_blob(layout_base_dir, doc_id)
-        revision = _read_layout_meta(layout_base_dir, doc_id)
+        persisted = persistence_service.read_layout(
+            doc_base_dir,
+            layout_base_dir,
+            doc_id,
+            current_user,
+        )
+        layout = persisted.layout
+        revision = persisted.revision
 
         logger.info(f"GET layout {doc_id} revision={revision} (request_id: {request_id})")
         return LayoutGetResponse(layout=layout, revision=revision)
-    except FileNotFoundError:
+    except DialogueAccessDeniedError:
+        _raise_access_denied(document_id)
+    except (FileNotFoundError, DialogueNotFoundError):
         raise NotFoundException(
             resource_type="Layout",
             resource_id=document_id,
@@ -508,6 +504,11 @@ async def put_layout(
     document_id: str,
     body: PutLayoutRequest,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> PutLayoutResponse | JSONResponse:
     """Persiste le layout ; revision optimiste ; 409 si conflit (AC1).
@@ -525,43 +526,33 @@ async def put_layout(
                 request_id=request_id,
             )
         layout_base_dir, _ = _resolve_layout_base(document_id, config_service, request_id)
-        layout_base_dir.mkdir(parents=True, exist_ok=True)
-
-        client_revision = body.revision
-        if _layout_exists(layout_base_dir, doc_id):
-            current_revision = _read_layout_meta(layout_base_dir, doc_id)
-            if client_revision != current_revision:
-                current_layout = _read_layout_blob(layout_base_dir, doc_id)
-                payload = LayoutGetResponse(
-                    layout=current_layout,
-                    revision=current_revision,
-                )
-                return JSONResponse(
-                    status_code=status.HTTP_409_CONFLICT,
-                    content=payload.model_dump(),
-                )
-            new_revision = current_revision + 1
-        else:
-            if client_revision != 1:
-                current_layout = {}
-                current_revision = 1
-                payload = LayoutGetResponse(
-                    layout=current_layout,
-                    revision=current_revision,
-                )
-                return JSONResponse(
-                    status_code=status.HTTP_409_CONFLICT,
-                    content=payload.model_dump(),
-                )
-            new_revision = 1
-
-        _write_layout_blob(layout_base_dir, doc_id, body.layout)
-        _write_layout_meta(layout_base_dir, doc_id, new_revision)
+        new_revision = persistence_service.write_layout(
+            doc_base_dir,
+            layout_base_dir,
+            doc_id,
+            body.layout,
+            body.revision,
+            current_user,
+        )
 
         logger.info(
             f"PUT layout {doc_id} revision={new_revision} (request_id: {request_id})"
         )
         return PutLayoutResponse(revision=new_revision)
+    except DialogueRevisionConflictError as exc:
+        payload = LayoutGetResponse(layout=exc.payload, revision=exc.revision)
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content=payload.model_dump(),
+        )
+    except DialogueAccessDeniedError:
+        _raise_access_denied(document_id)
+    except DialogueNotFoundError:
+        raise NotFoundException(
+            resource_type="Document",
+            resource_id=document_id,
+            request_id=request_id,
+        )
     except (APIException, ValidationException, NotFoundException):
         raise
     except Exception as e:
@@ -599,6 +590,11 @@ async def put_document(
         ChoiceEffectValidationService,
         Depends(get_choice_effect_validation_service),
     ],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)],
     x_validation_mode: Annotated[str | None, Header(alias="X-Validation-Mode")] = None,
 ) -> PutDocumentResponse | JSONResponse:
@@ -608,8 +604,6 @@ async def put_document(
         base_dir.mkdir(parents=True, exist_ok=True)
 
         doc = deepcopy(body.document) if isinstance(body.document, dict) else body.document
-        client_revision = body.revision
-
         # AC3 : refuser payload type nodes/edges (ancien contrat graphe)
         if isinstance(doc, dict):
             has_nodes = "nodes" in doc
@@ -623,33 +617,6 @@ async def put_document(
                     details={"code": "graph_payload_not_accepted"},
                     request_id=request_id,
                 )
-
-        # Révision optimiste : si document existe, comparer revision
-        if _document_exists(base_dir, doc_id):
-            current_revision = _read_meta(base_dir, doc_id)
-            if client_revision != current_revision:
-                current_doc, _ = _read_document_blob(base_dir, doc_id)
-                schema_ver = (current_doc.get("schemaVersion") or "1.1.0") if isinstance(current_doc, dict) else "1.1.0"
-                payload = DocumentGetResponse(
-                    document=current_doc,
-                    schemaVersion=schema_ver,
-                    revision=current_revision,
-                )
-                return JSONResponse(status_code=status.HTTP_409_CONFLICT, content=payload.model_dump())
-            new_revision = current_revision + 1
-        else:
-            if client_revision != 1:
-                stub_doc = {"schemaVersion": "1.1.0", "nodes": []}
-                payload = DocumentGetResponse(
-                    document=stub_doc,
-                    schemaVersion="1.1.0",
-                    revision=1,
-                )
-                return JSONResponse(
-                    status_code=status.HTTP_409_CONFLICT,
-                    content=payload.model_dump(),
-                )
-            new_revision = 1
 
         # Mode validation : header X-Validation-Mode override body.validationMode
         validation_mode = (x_validation_mode or body.validationMode or "draft").strip().lower()
@@ -730,9 +697,15 @@ async def put_document(
                 },
             )
 
-        # Persistance : document normalisé par validate_unity_export_document (choiceId, flags, etc.)
-        _write_document_blob(base_dir, doc_id, doc)
-        _write_meta(base_dir, doc_id, new_revision)
+        # Persistance : fichier puis index, avec compensation en cas d'échec SQLite.
+        new_revision = persistence_service.write_document(
+            base_dir,
+            doc_id,
+            doc,
+            body.revision,
+            current_user,
+            create_only=body.createOnly,
+        )
 
         logger.info(f"PUT document {doc_id} revision={new_revision} mode={validation_mode} (request_id: {request_id})")
         return PutDocumentResponse(
@@ -740,6 +713,26 @@ async def put_document(
             validationReport=validation_report,
             flagThresholdWarnings=flag_warnings,
         )
+    except DialogueRevisionConflictError as exc:
+        schema_ver = str(exc.payload.get("schemaVersion") or "1.1.0")
+        payload = DocumentGetResponse(
+            document=exc.payload,
+            schemaVersion=schema_ver,
+            revision=exc.revision,
+            capabilities=_capabilities_response(
+                persistence_service.capabilities(
+                    doc_id,
+                    current_user,
+                    base_dir / f"{doc_id}.json",
+                )
+            ),
+        )
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content=payload.model_dump(),
+        )
+    except DialogueAccessDeniedError:
+        _raise_access_denied(document_id)
     except (APIException, ValidationException, NotFoundException):
         raise
     except Exception as e:
@@ -758,30 +751,41 @@ async def put_document(
 async def delete_document(
     document_id: str,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)],
-):
-    """Supprime un document et son layout. Réservé aux fixtures E2E (document_id doit commencer par e2e-)."""
-    doc_id = _safe_document_id(document_id)
-    if not doc_id.startswith("e2e-"):
-        raise ValidationException(
-            message="Suppression réservée aux documents E2E (id commençant par e2e-).",
-            details={"document_id": document_id},
-            request_id=request_id,
-        )
+) -> None:
+    """Supprime le document, ses sidecars et son index après autorisation."""
     try:
         base_dir, resolved_id = _resolve_document_base(document_id, config_service, request_id)
-        layout_base_dir, _ = _resolve_layout_base(document_id, config_service, request_id)
-        removed = 0
-        for path in [
-            base_dir / f"{resolved_id}.json",
-            base_dir / f"{resolved_id}{META_FILENAME_SUFFIX}",
-            layout_base_dir / f"{resolved_id}.layout.json",
-            layout_base_dir / f"{resolved_id}{LAYOUT_META_SUFFIX}",
-        ]:
-            if path.exists():
-                path.unlink()
-                removed += 1
-        logger.info(f"DELETE document {resolved_id} ({removed} fichier(s)) (request_id: {request_id})")
+        configured_layout_path = config_service.get_unity_layouts_path()
+        layout_base_dir = (
+            Path(configured_layout_path)
+            if configured_layout_path
+            else None
+        )
+        persistence_service.delete_document(
+            base_dir,
+            layout_base_dir,
+            resolved_id,
+            current_user,
+        )
+        logger.info(
+            "DELETE document %s (request_id: %s)",
+            resolved_id,
+            request_id,
+        )
+    except DialogueAccessDeniedError:
+        _raise_access_denied(document_id)
+    except DialogueNotFoundError:
+        raise NotFoundException(
+            resource_type="Document",
+            resource_id=document_id,
+            request_id=request_id,
+        )
     except (ValidationException, NotFoundException):
         raise
     except Exception as e:

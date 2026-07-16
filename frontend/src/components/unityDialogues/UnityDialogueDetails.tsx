@@ -2,7 +2,7 @@
  * Composant pour afficher et éditer un dialogue Unity.
  */
 import { useState, useEffect, useCallback, type ReactNode } from 'react'
-import * as unityDialoguesAPI from '../../api/unityDialogues'
+import * as documentsAPI from '../../api/documents'
 import { useGraphViewStore } from '../../store/graphViewStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
@@ -37,16 +37,35 @@ export function UnityDialogueDetails({
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [document, setDocument] = useState<Record<string, unknown> | null>(null)
+  const [revision, setRevision] = useState(1)
+  const [canEdit, setCanEdit] = useState(false)
+  const [canDelete, setCanDelete] = useState(false)
 
-  const loadDialogue = useCallback(async () => {
+  const loadDialogue = useCallback(async (propagateError = false) => {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await unityDialoguesAPI.getUnityDialogue(filename)
-      setJsonContent(response.json_content)
-      setTitle(response.title?.trim() || formatDialogueTitle(filename))
+      const documentId = filename.replace(/\.json$/i, '')
+      const response = await documentsAPI.getDocument(documentId)
+      setDocument(response.document)
+      setRevision(response.revision)
+      setCanEdit(response.capabilities?.can_edit ?? false)
+      setCanDelete(response.capabilities?.can_delete ?? false)
+      const nodes = Array.isArray(response.document.nodes)
+        ? response.document.nodes
+        : []
+      setJsonContent(JSON.stringify(nodes, null, 2))
+      setTitle(
+        typeof response.document.title === 'string' && response.document.title.trim()
+          ? response.document.title
+          : formatDialogueTitle(filename)
+      )
     } catch (err) {
       setError(getErrorMessage(err))
+      if (propagateError) {
+        throw err
+      }
     } finally {
       setIsLoading(false)
     }
@@ -57,9 +76,9 @@ export function UnityDialogueDetails({
   }, [loadDialogue])
 
   const handleSave = useCallback(
-    async () => {
-      // Recharger le dialogue après sauvegarde
-      await loadDialogue()
+    async (_savedFilename: string, savedRevision: number) => {
+      setRevision(savedRevision)
+      await loadDialogue(true)
     },
     [loadDialogue]
   )
@@ -71,7 +90,7 @@ export function UnityDialogueDetails({
 
     setIsDeleting(true)
     try {
-      await unityDialoguesAPI.deleteUnityDialogue(filename)
+      await documentsAPI.deleteDocument(filename.replace(/\.json$/i, ''))
       // Notifier tous les consommateurs (ex. éditeur de graphe) pour synchroniser liste + canvas
       useGraphViewStore.getState().notifyDialogueDeleted(filename)
       // Rafraîchir la liste puis fermer : attendre le refresh pour que la liste soit à jour avant de fermer le panneau
@@ -105,7 +124,7 @@ export function UnityDialogueDetails({
       >
         {error}
         <button
-          onClick={loadDialogue}
+          onClick={() => void loadDialogue()}
           style={{
             marginTop: '0.5rem',
             padding: '0.5rem 1rem',
@@ -137,6 +156,9 @@ export function UnityDialogueDetails({
         title={title}
         subtitle={filename}
         filename={filename.replace('.json', '')}
+        document={document ?? undefined}
+        documentRevision={revision}
+        canEdit={canEdit}
         onSave={handleSave}
         onCancel={onClose}
         headerSelector={headerSelector}
@@ -170,7 +192,7 @@ export function UnityDialogueDetails({
                 </button>
               </div>
             )}
-            <div style={{ gridArea: isNarrow ? 'delete' : undefined, width: isNarrow ? '100%' : undefined }}>
+            {canDelete && <div style={{ gridArea: isNarrow ? 'delete' : undefined, width: isNarrow ? '100%' : undefined }}>
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
@@ -196,7 +218,7 @@ export function UnityDialogueDetails({
               >
                 {isDeleting ? 'Suppression...' : 'Supprimer'}
               </button>
-            </div>
+            </div>}
           </>
         }
       />

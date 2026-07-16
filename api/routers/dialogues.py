@@ -38,6 +38,7 @@ from api.dependencies import (
     get_trait_catalog_service,
     get_unity_dialogue_orchestrator,
     get_export_log_service,
+    get_document_persistence_service,
     get_llm_usage_service,
 )
 from core.prompt.prompt_engine import PromptEngine, PromptInput, BuiltPrompt
@@ -53,10 +54,12 @@ from services.dialogue_dramatic_progression import (
 from services.skill_catalog_service import SkillCatalogService
 from services.prompt_catalog_loader import load_prompt_catalogs
 from services.trait_catalog_service import TraitCatalogService
-from services.unity_dialogue_export_service import (
-    unity_export_schema_validator,
-    write_unity_dialogue_to_file,
+from services.document_persistence_service import (
+    DialogueAccessDeniedError,
+    DocumentPersistenceService,
 )
+from services.document_id_validation import validate_document_id
+from services.unity_export_validation_service import validate_unity_export_document
 from services.batch_export_service import batch_export_documents
 from services.export_log_recorder import (
     extract_validation_errors,
@@ -90,6 +93,32 @@ logger = logging.getLogger(__name__)
 _USD_TO_EUR_RATE: float = 0.92
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
+
+
+def _require_dialogue_access(
+    document_id: str,
+    persistence_service: DocumentPersistenceService,
+    current_user: dict[str, object],
+    config_service: ConfigurationService,
+) -> None:
+    """Refuse toute lecture/export hors propriétaire ou administrateur."""
+    try:
+        resolved_id = validate_document_id(document_id)
+        configured_path = config_service.get_unity_dialogues_path()
+        persistence_service.require_access(
+            resolved_id,
+            current_user,
+            (
+                Path(configured_path) / f"{resolved_id}.json"
+                if configured_path
+                else None
+            ),
+        )
+    except (DialogueAccessDeniedError, ValueError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "dialogue_access_denied"},
+        ) from exc
 
 
 def _transform_openai_error(error: Exception, request_id: str) -> OpenAIException:
@@ -513,6 +542,11 @@ async def export_unity_dialogue(
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     export_log_service: Annotated[ExportLogService, Depends(get_export_log_service)],
     llm_usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> ExportUnityDialogueResponse:
     """Exporte un dialogue Unity JSON vers un fichier.
@@ -533,19 +567,82 @@ async def export_unity_dialogue(
     target_filename = request_data.filename or "dialogue.json"
     parsed_document: Dict[str, Any] | None = None
     try:
+        base_name = request_data.filename or re.sub(
+            r"[-\s]+",
+            "_",
+            re.sub(r"[^\w\s-]", "", request_data.title),
+        )
+        try:
+            document_id = validate_document_id(base_name)
+        except ValueError as exc:
+            raise ValidationException(
+                message=str(exc),
+                details={"field": "filename"},
+                request_id=request_id,
+            ) from exc
+        target_filename = f"{document_id}.json"
+        configured_path = config_service.get_unity_dialogues_path()
+        if configured_path and (
+            Path(configured_path) / target_filename
+        ).exists():
+            _require_dialogue_access(
+                document_id,
+                persistence_service,
+                current_user,
+                config_service,
+            )
         parsed = json.loads(request_data.json_content)
         if isinstance(parsed, dict):
             parsed_document = parsed
         elif isinstance(parsed, list):
             parsed_document = {"schemaVersion": "1.2.0", "nodes": parsed}
-        file_path, filename = write_unity_dialogue_to_file(
-            config_service=config_service,
-            json_content=request_data.json_content,
-            filename=request_data.filename,
-            title=request_data.title,
-            request_id=request_id,
-            validator=unity_export_schema_validator,
+        if parsed_document is None:
+            raise ValidationException(
+                message="Le JSON Unity doit être un document ou une liste de nœuds.",
+                request_id=request_id,
+            )
+        validation = validate_unity_export_document(parsed_document)
+        if not validation.is_valid:
+            raise ValidationException(
+                message="La validation du schéma Unity a échoué.",
+                details={"validation_errors": validation.errors_structured},
+                request_id=request_id,
+            )
+        unity_path = config_service.get_unity_dialogues_path()
+        if not unity_path:
+            raise ValidationException(
+                message="Le chemin Unity dialogues n'est pas configuré.",
+                request_id=request_id,
+            )
+        unity_dir = Path(unity_path)
+        if (unity_dir / f"{document_id}.json").exists():
+            try:
+                persistence_service.require_access(
+                    document_id,
+                    current_user,
+                    unity_dir / f"{document_id}.json",
+                )
+            except DialogueAccessDeniedError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail={"code": "dialogue_access_denied"},
+                ) from exc
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "code": "canonical_revision_required",
+                    "message": "Utilisez PUT /documents/{id} avec la révision courante.",
+                },
+            )
+        persistence_service.write_document(
+            unity_dir,
+            document_id,
+            parsed_document,
+            1,
+            current_user,
+            create_only=True,
         )
+        filename = f"{document_id}.json"
         record_unity_export_success(
             export_log_service,
             llm_usage_service,
@@ -564,6 +661,8 @@ async def export_unity_dialogue(
             filename=target_filename,
             errors=extract_validation_errors(exc),
         )
+        raise
+    except HTTPException:
         raise
     except OSError as exc:
         record_unity_export_failure(
@@ -603,10 +702,22 @@ async def batch_export_unity_dialogues(
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     export_log_service: Annotated[ExportLogService, Depends(get_export_log_service)],
     llm_usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> BatchExportResponse:
     """Exporte plusieurs dialogues persistés vers Unity JSON (Story 5.2 / FR50)."""
     try:
+        for document_id in request_data.document_ids:
+            _require_dialogue_access(
+                document_id,
+                persistence_service,
+                current_user,
+                config_service,
+            )
         result = batch_export_documents(
             config_service,
             request_data.document_ids,
@@ -625,6 +736,8 @@ async def batch_export_unity_dialogues(
             cancelled=result.cancelled,
             success=len(result.exported) > 0 or len(result.failed) == 0,
         )
+    except HTTPException:
+        raise
     except ValidationException:
         raise
     except Exception as e:
@@ -639,10 +752,21 @@ async def batch_export_unity_dialogues(
 async def preview_unity_dialogue_export(
     document_id: str,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> ExportPreviewResponse:
     """Preview export bibliothèque sans téléchargement (Story 5.5 / FR53)."""
     try:
+        _require_dialogue_access(
+            document_id,
+            persistence_service,
+            current_user,
+            config_service,
+        )
         result = preview_persisted_document(config_service, document_id, request_id)
         return ExportPreviewResponse(
             json_content=result.json_content,
@@ -652,6 +776,8 @@ async def preview_unity_dialogue_export(
             schema_valid=result.schema_valid,
             errors=result.errors,
         )
+    except HTTPException:
+        raise
     except FileNotFoundError:
         raise NotFoundException(
             resource_type="Document dialogue",
@@ -680,13 +806,26 @@ async def preview_unity_dialogue_export(
 async def download_unity_dialogue(
     document_id: str,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> Response:
     """Télécharge un dialogue Unity exporté sur disque (Story 5.4 / FR52)."""
     try:
+        _require_dialogue_access(
+            document_id,
+            persistence_service,
+            current_user,
+            config_service,
+        )
         content, filename = read_document_download_payload(
             config_service, document_id, request_id
         )
+    except HTTPException:
+        raise
     except FileNotFoundError:
         raise NotFoundException(
             resource_type="Document dialogue",
@@ -712,10 +851,22 @@ async def download_unity_dialogue(
 async def batch_preview_unity_dialogue_export(
     request_data: BatchExportPreviewRequest,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> BatchExportPreviewResponse:
     """Preview export batch bibliothèque (Story 5.5 / FR53)."""
     try:
+        for document_id in request_data.document_ids:
+            _require_dialogue_access(
+                document_id,
+                persistence_service,
+                current_user,
+                config_service,
+            )
         result = preview_batch_documents(
             config_service, request_data.document_ids, request_id
         )
@@ -734,6 +885,8 @@ async def batch_preview_unity_dialogue_export(
             total_size_bytes=result.total_size_bytes,
             dialogue_count=result.dialogue_count,
         )
+    except HTTPException:
+        raise
     except FileNotFoundError as exc:
         raise NotFoundException(
             resource_type="Document dialogue",

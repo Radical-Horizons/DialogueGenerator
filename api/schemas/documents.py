@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Literal, Optional, Self
 from pydantic import BaseModel, Field, model_validator
 
 from api.schemas.graph import ValidationErrorDetail
+from api.schemas.dialogue_access import DialogueCapabilitiesResponse
 from services.dialogue_preview_limits import MAX_VALIDATE_FLAG_REFERENCES_INLINE_NODES
 
 ValidationMode = Literal["draft", "export"]
@@ -26,6 +27,10 @@ class DocumentGetResponse(BaseModel):
     document: Dict[str, Any] = Field(..., description="Document canonique (schemaVersion, nodes)")
     schemaVersion: str = Field(..., description="Version du schéma depuis le document")
     revision: int = Field(..., ge=1, description="Numéro de révision du document")
+    capabilities: Optional[DialogueCapabilitiesResponse] = Field(
+        default=None,
+        description="Capacités CRUD de l'utilisateur courant.",
+    )
 
 
 class PutDocumentRequest(BaseModel):
@@ -36,6 +41,10 @@ class PutDocumentRequest(BaseModel):
     validationMode: ValidationMode = Field(
         default="draft",
         description="draft: validation non bloquante (autosave) ; export: validation bloquante.",
+    )
+    createOnly: bool = Field(
+        default=False,
+        description="Refuse atomiquement toute création si le document existe déjà.",
     )
 
 

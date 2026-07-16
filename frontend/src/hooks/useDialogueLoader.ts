@@ -22,6 +22,10 @@ interface RouteTarget {
 /** Circuit breaker: backoff après 4xx non-409 pour éviter la boucle d'autosave. */
 const AUTOSAVE_4XX_BACKOFF_MS = 10_000
 
+function isNotFoundError(error: unknown): boolean {
+  return (error as { response?: { status?: number } })?.response?.status === 404
+}
+
 export interface UseDialogueLoaderReturn {
   selectedDialogue: UnityDialogueMetadata | null
   setSelectedDialogue: (d: UnityDialogueMetadata | null) => void
@@ -150,8 +154,8 @@ export function useDialogueLoader(
             await loadDialogueByDocumentId(documentId)
             loaded = true
             break
-          } catch {
-            continue
+          } catch (error) {
+            if (!isNotFoundError(error)) throw error
           }
         }
         
@@ -274,8 +278,8 @@ export function useDialogueLoader(
             await loadDialogueByDocumentId(documentId)
             loaded = true
             break
-          } catch {
-            continue
+          } catch (error) {
+            if (!isNotFoundError(error)) throw error
           }
         }
 

@@ -6,6 +6,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
 import * as dialoguesAPI from '../../api/dialogues'
+import * as documentsAPI from '../../api/documents'
 import { UnityDialogueList } from './UnityDialogueList'
 
 vi.mock('../../api/unityDialogues', () => ({
@@ -15,6 +16,10 @@ vi.mock('../../api/unityDialogues', () => ({
 vi.mock('../../api/dialogues', () => ({
   validateDocumentSchema: vi.fn(),
   batchExportUnityDialogues: vi.fn(),
+}))
+
+vi.mock('../../api/documents', () => ({
+  putDocument: vi.fn(),
 }))
 
 const mockList = vi.mocked(unityDialoguesAPI.listUnityDialogues)
@@ -31,10 +36,17 @@ describe('UnityDialogueList', () => {
           modified_time: '2026-04-08T12:00:00.000Z',
           size_bytes: 1024,
           title: 'Titre API',
+          capabilities: {
+            can_read: true,
+            can_edit: true,
+            can_delete: true,
+            is_owner: true,
+          },
         },
       ],
       total: 1,
     })
+    vi.mocked(documentsAPI.putDocument).mockResolvedValue({ revision: 1 })
   })
 
   it('applique une fontSize explicite au titre dans un conteneur étroit (régression héritage 16px)', async () => {
@@ -102,5 +114,30 @@ describe('UnityDialogueList', () => {
 
     await user.click(item.querySelector('button') ?? item)
     expect(onSelect).toHaveBeenCalledWith(null)
+  })
+
+  it('crée un dialogue vide sans appel LLM et le sélectionne', async () => {
+    const user = userEvent.setup()
+    const onSelect = vi.fn()
+    vi.spyOn(window, 'prompt').mockReturnValue('Nouvelle scène')
+    render(<UnityDialogueList onSelectDialogue={onSelect} selectedFilename={null} />)
+
+    await user.click(await screen.findByTestId('create-dialogue-button'))
+
+    await waitFor(() => {
+      expect(documentsAPI.putDocument).toHaveBeenCalledWith('nouvelle_scene', {
+        document: {
+          schemaVersion: '1.2.0',
+          title: 'Nouvelle scène',
+          nodes: [],
+        },
+        revision: 1,
+        validationMode: 'draft',
+        createOnly: true,
+      })
+    })
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ filename: 'nouvelle_scene.json' })
+    )
   })
 })

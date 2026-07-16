@@ -373,6 +373,35 @@ class TestGraphSaveAndWrite:
         )
         assert response.status_code == 422
 
+    @pytest.mark.parametrize(
+        "document_id",
+        ["CON", "nul.json", "name.", "bad<name"],
+    )
+    def test_save_and_write_rejects_windows_invalid_document_ids(
+        self,
+        client: TestClient,
+        sample_graph_nodes_edges,
+        document_id: str,
+    ) -> None:
+        """Les identifiants incompatibles Windows sont refusés avant écriture."""
+        nodes, edges = sample_graph_nodes_edges
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/save-and-write",
+            json={
+                "nodes": nodes,
+                "edges": edges,
+                "metadata": {
+                    "title": "Safe title",
+                    "node_count": len(nodes),
+                    "edge_count": len(edges),
+                },
+                "document_id": document_id,
+            },
+        )
+
+        assert response.status_code == 422
+        assert list(Path(self._save_and_write_tmp_path).glob("*.json")) == []
+
     def test_save_and_write_with_seq_returns_ack(
         self, client: TestClient, sample_graph_nodes_edges
     ):
@@ -403,12 +432,12 @@ class TestGraphSaveAndWrite:
         assert sidecar.exists()
         assert sidecar.read_text(encoding="utf-8").strip() == "5"
 
-    def test_save_and_write_seq_le_last_seq_skips_write(
+    def test_save_and_write_seq_le_last_seq_returns_conflict(
         self, client: TestClient, sample_graph_nodes_edges
     ):
         """ADR-006: GIVEN seq <= last_seq (already persisted)
         WHEN save-and-write is called
-        THEN 200 with ack_seq=last_seq, file not overwritten."""
+        THEN 409 explicite avec last_seq, fichier non écrasé."""
         nodes, edges = sample_graph_nodes_edges
         request_data = {
             "nodes": nodes,
@@ -435,10 +464,11 @@ class TestGraphSaveAndWrite:
         r2 = client.post(
             "/api/v1/unity-dialogues/graph/save-and-write", json=request_data
         )
-        assert r2.status_code == 200
-        data2 = r2.json()
-        assert data2["ack_seq"] == 3
-        assert data2["last_seq"] == 3
+        assert r2.status_code == 409
+        error = r2.json()["error"]
+        assert error["code"] == "SEQUENCE_CONFLICT"
+        assert error["details"]["ack_seq"] == 3
+        assert error["details"]["last_seq"] == 3
         assert path.read_text(encoding="utf-8") == first_content
 
 

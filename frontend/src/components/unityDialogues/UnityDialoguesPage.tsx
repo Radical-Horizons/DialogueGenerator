@@ -13,6 +13,7 @@ import type { UnityDialogueMetadata } from '../../types/api'
 export function UnityDialoguesPage() {
   const [selectedDialogue, setSelectedDialogue] = useState<UnityDialogueMetadata | null>(null)
   const dialogueListRef = useRef<UnityDialogueListRef>(null)
+  const { ref: pageRef, isNarrow: isPageNarrow } = useNarrowInlineSize(700)
   const { ref: editionWorkspaceRef, isNarrow: isEditionWorkspaceNarrow } = useNarrowInlineSize(
     PANEL_COMFORT_MIN_WIDTH_PX
   )
@@ -22,15 +23,15 @@ export function UnityDialoguesPage() {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100%' }}>
+    <div ref={pageRef} style={{ display: 'flex', height: '100%', minWidth: 0 }}>
       <div
         style={{
-          // Panneau gauche compact pour laisser de la place au panneau d'édition
-          width: 'clamp(260px, 22vw, 340px)',
-          minWidth: '240px',
+          width: isPageNarrow ? '100%' : 'clamp(260px, 22vw, 340px)',
+          minWidth: isPageNarrow ? 0 : '240px',
           borderRight: `1px solid ${theme.border.primary}`,
           overflow: 'hidden',
           backgroundColor: theme.background.panel,
+          display: isPageNarrow && selectedDialogue ? 'none' : 'block',
         }}
       >
         <UnityDialogueList
@@ -41,7 +42,13 @@ export function UnityDialoguesPage() {
       </div>
       <div
         ref={editionWorkspaceRef}
-        style={{ flex: 1, overflow: 'hidden', backgroundColor: theme.background.panel, minWidth: 0 }}
+        style={{
+          flex: 1,
+          overflow: 'hidden',
+          backgroundColor: theme.background.panel,
+          minWidth: 0,
+          display: isPageNarrow && !selectedDialogue ? 'none' : 'block',
+        }}
       >
         <DialogueEditionNarrowProvider value={isEditionWorkspaceNarrow}>
           {selectedDialogue ? (

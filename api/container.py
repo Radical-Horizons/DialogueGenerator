@@ -34,8 +34,10 @@ from services.repositories.sqlite.bootstrap import resolve_database_path
 from services.repositories.sqlite import (
     AppSettingsRepository,
     DatabaseConnection,
+    DialoguesIndexRepository,
     UserRepository,
 )
+from services.document_persistence_service import DocumentPersistenceService
 from api.services.auth_service import AuthService
 
 logger = logging.getLogger(__name__)
@@ -88,6 +90,8 @@ class ServiceContainer:
         self._database_connection: Optional[DatabaseConnection] = database_connection
         self._user_repository: Optional[UserRepository] = None
         self._app_settings_repository: Optional[AppSettingsRepository] = None
+        self._dialogues_index_repository: Optional[DialoguesIndexRepository] = None
+        self._document_persistence_service: Optional[DocumentPersistenceService] = None
         self._auth_service: Optional[AuthService] = None
         self._database_initialization_failed = database_initialization_failed
         self._database_lock = threading.RLock()
@@ -125,6 +129,26 @@ class ServiceContainer:
                 )
                 logger.info("AppSettingsRepository initialisé dans le container.")
             return self._app_settings_repository
+
+    def get_dialogues_index_repository(self) -> DialoguesIndexRepository:
+        """Retourne le repository d'index des dialogues partagé."""
+        with self._database_lock:
+            if self._dialogues_index_repository is None:
+                self._dialogues_index_repository = DialoguesIndexRepository(
+                    self.get_database_connection()
+                )
+                logger.info("DialoguesIndexRepository initialisé dans le container.")
+            return self._dialogues_index_repository
+
+    def get_document_persistence_service(self) -> DocumentPersistenceService:
+        """Retourne l'autorité injectée de persistance et d'accès dialogue."""
+        with self._database_lock:
+            if self._document_persistence_service is None:
+                self._document_persistence_service = DocumentPersistenceService(
+                    self.get_dialogues_index_repository()
+                )
+                logger.info("DocumentPersistenceService initialisé dans le container.")
+            return self._document_persistence_service
 
     def get_auth_service(self) -> AuthService:
         """Retourne le service d'authentification avec son repository injecté."""
@@ -518,6 +542,8 @@ class ServiceContainer:
             self._database_connection = None
             self._user_repository = None
             self._app_settings_repository = None
+            self._dialogues_index_repository = None
+            self._document_persistence_service = None
             self._auth_service = None
     
     def reset(self) -> None:

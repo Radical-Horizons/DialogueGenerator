@@ -4,7 +4,7 @@
  * Préserve tous les autres champs en lecture seule.
  */
 import { memo, useState, useEffect, useCallback, useMemo, useImperativeHandle, forwardRef, useRef, type ReactNode } from 'react'
-import * as dialoguesAPI from '../../api/dialogues'
+import * as documentsAPI from '../../api/documents'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
 import { unityDialogueEditorChrome } from '../../theme/responsiveChrome'
@@ -19,7 +19,6 @@ import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import type {
   UnityDialogueNode,
   UnityDialogueChoice,
-  ExportUnityDialogueRequest,
 } from '../../types/api'
 import {
   extractValidationIssuesFromApiError,
@@ -31,7 +30,10 @@ export interface UnityDialogueEditorProps {
   title?: string
   subtitle?: string
   filename?: string
-  onSave?: (filename: string) => void
+  document?: Record<string, unknown>
+  documentRevision?: number
+  canEdit?: boolean
+  onSave?: (filename: string, revision: number) => void | Promise<void>
   onCancel?: () => void
   extraActions?: ReactNode
   hideHeaderSaveButton?: boolean
@@ -60,6 +62,9 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
   title,
   subtitle,
   filename,
+  document,
+  documentRevision = 1,
+  canEdit = true,
   onSave,
   onCancel,
   extraActions,
@@ -265,17 +270,26 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
       // Reconstruire le JSON (préserver tous les champs, y compris ceux non édités)
       const jsonContent = JSON.stringify(nodes, null, 2)
 
-      const request: ExportUnityDialogueRequest = {
-        json_content: jsonContent,
-        title: title || 'Dialogue Unity',
-        filename: filename, // Si on édite un fichier existant, réutiliser le filename
+      if (!canEdit) {
+        throw new Error("Vous n'avez pas la permission de modifier ce dialogue.")
       }
-
-      // Le backend validera le schéma Unity (IDs uniques, références valides, etc.)
-      const result = await dialoguesAPI.exportUnityDialogue(request)
+      const documentId = filename?.replace(/\.json$/i, '')
+      if (!documentId) {
+        throw new Error('Identifiant de dialogue manquant')
+      }
+      const canonicalDocument = {
+        ...(document ?? {}),
+        schemaVersion: String(document?.schemaVersion ?? '1.2.0'),
+        nodes: JSON.parse(jsonContent) as UnityDialogueNode[],
+      }
+      const response = await documentsAPI.putDocument(documentId, {
+        document: canonicalDocument,
+        revision: documentRevision,
+        validationMode: 'export',
+      })
       setFieldErrors([])
-      toast(`Dialogue sauvegardé: ${result.filename}`, 'success', 5000)
-      onSave?.(result.filename)
+      await onSave?.(`${documentId}.json`, response.revision)
+      toast(`Dialogue sauvegardé: ${documentId}.json`, 'success', 5000)
     } catch (err) {
       const { fieldErrors: extracted } = extractValidationIssuesFromApiError(
         err,
@@ -289,10 +303,20 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
         setError(errorMessage)
         toast(`Erreur lors de la sauvegarde: ${errorMessage}`, 'error')
       }
+      throw err
     } finally {
       setIsSaving(false)
     }
-  }, [isValid, nodes, title, filename, toast, onSave])
+  }, [
+    canEdit,
+    document,
+    documentRevision,
+    filename,
+    isValid,
+    nodes,
+    onSave,
+    toast,
+  ])
 
   // Exposer handleSave, isValid et isSaving via ref
   useImperativeHandle(ref, () => ({
@@ -309,7 +333,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
         handler: (e) => {
           e.preventDefault()
           if (isValid && !isSaving) {
-            handleSave()
+            void handleSave().catch(() => undefined)
           }
         },
         description: 'Sauvegarder le dialogue Unity',
@@ -320,7 +344,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
         handler: (e) => {
           e.preventDefault()
           if (isValid && !isSaving) {
-            handleSave() // Dans l'éditeur, Ctrl+E sauvegarde (export)
+            void handleSave().catch(() => undefined)
           }
         },
         description: 'Exporter/Sauvegarder le dialogue Unity',
@@ -469,8 +493,8 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
             {extraActions}
             {!hideHeaderSaveButton && (
               <button
-                onClick={handleSave}
-                disabled={isSaving || !isValid}
+                onClick={() => void handleSave().catch(() => undefined)}
+                disabled={isSaving || !isValid || !canEdit}
                 style={{
                   gridArea: isActionsNarrow ? 'save' : undefined,
                   flexShrink: isActionsNarrow ? undefined : 0,

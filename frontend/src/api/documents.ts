@@ -43,6 +43,16 @@ export async function putDocument(
 }
 
 /**
+ * Supprime le document canonique, son layout et ses sidecars.
+ */
+export async function deleteDocument(documentId: string): Promise<void> {
+  await apiClient.delete(
+    `/api/v1/documents/${encodeURIComponent(documentId)}`,
+    { timeout: API_TIMEOUTS.DOCUMENT_IO }
+  )
+}
+
+/**
  * Charge le layout du document par id.
  * GET /api/v1/documents/{id}/layout → { layout, revision }.
  * 404 si le document ou le layout n'existe pas.

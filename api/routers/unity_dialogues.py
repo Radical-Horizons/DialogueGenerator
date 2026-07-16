@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Annotated, Optional
 from datetime import datetime
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from api.routers.auth import get_current_user
 from api.schemas.dialogue import (
@@ -18,15 +18,31 @@ from api.schemas.dialogue import (
 )
 from api.dependencies import (
     get_config_service,
+    get_document_persistence_service,
     get_request_id
 )
 from api.exceptions import NotFoundException, ValidationException, InternalServerException
 from services.configuration_service import ConfigurationService
+from services.document_persistence_service import (
+    DialogueAccessDeniedError,
+    DialogueNotFoundError,
+    DocumentPersistenceService,
+)
 from api.utils.unity_schema_validator import load_unity_schema, schema_exists
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
+
+
+def _capabilities_payload(capabilities: object) -> dict[str, bool]:
+    """Convertit les capacités métier en payload Pydantic."""
+    return {
+        "can_read": bool(getattr(capabilities, "can_read")),
+        "can_edit": bool(getattr(capabilities, "can_edit")),
+        "can_delete": bool(getattr(capabilities, "can_delete")),
+        "is_owner": bool(getattr(capabilities, "is_owner")),
+    }
 
 
 def _extract_title_from_json(json_data: list) -> Optional[str]:
@@ -66,6 +82,11 @@ def _extract_title_from_json(json_data: list) -> Optional[str]:
 async def list_unity_dialogues(
     request: Request,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> UnityDialogueListResponse:
     """Liste tous les fichiers de dialogues Unity JSON.
@@ -106,6 +127,13 @@ async def list_unity_dialogues(
         
         for json_file in json_files:
             try:
+                document_id = json_file.stem
+                if not persistence_service.can_list(
+                    document_id,
+                    current_user,
+                    json_file,
+                ):
+                    continue
                 stat = json_file.stat()
                 
                 # Optionnel: extraire un titre depuis le contenu JSON (peut être coûteux si beaucoup de fichiers)
@@ -124,7 +152,14 @@ async def list_unity_dialogues(
                     file_path=str(json_file.absolute()),
                     size_bytes=stat.st_size,
                     modified_time=datetime.fromtimestamp(stat.st_mtime).isoformat(),
-                    title=title
+                    title=title,
+                    capabilities=_capabilities_payload(
+                        persistence_service.capabilities(
+                            document_id,
+                            current_user,
+                            json_file,
+                        )
+                    ),
                 )
                 metadata_list.append(metadata)
             except (OSError, IOError) as e:
@@ -207,6 +242,11 @@ async def read_unity_dialogue(
     filename: str,
     request: Request,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> UnityDialogueReadResponse:
     """Lit un fichier de dialogue Unity JSON.
@@ -249,21 +289,20 @@ async def read_unity_dialogue(
             filename = filename + '.json'
         
         file_path = unity_dir / filename
-        
-        if not file_path.exists():
-            raise NotFoundException(
-                resource_type="Dialogue Unity",
-                resource_id=filename,
-                request_id=request_id
-            )
+        document_id = filename[:-5]
         
         # Lire le fichier
         try:
-            json_content = file_path.read_text(encoding='utf-8')
+            persisted = persistence_service.read_document(
+                unity_dir,
+                document_id,
+                current_user,
+            )
+            json_data = persisted.document
+            json_content = json.dumps(json_data, ensure_ascii=False, indent=2)
             
             # Valider que c'est du JSON valide ; accepter liste ou document canonique (schemaVersion + nodes)
             try:
-                json_data = json.loads(json_content)
                 if isinstance(json_data, dict) and "nodes" in json_data:
                     # Format document (Story 16.2) : renvoyer la liste des nœuds pour compatibilité loadGraph
                     json_data = json_data["nodes"]
@@ -293,9 +332,18 @@ async def read_unity_dialogue(
                 json_content=json_content,
                 title=title,
                 size_bytes=stat.st_size,
-                modified_time=datetime.fromtimestamp(stat.st_mtime).isoformat()
+                modified_time=datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                capabilities=_capabilities_payload(persisted.capabilities),
             )
             
+        except (DialogueAccessDeniedError, DialogueNotFoundError):
+            raise
+        except json.JSONDecodeError as e:
+            raise ValidationException(
+                message=f"Le fichier JSON n'est pas valide: {str(e)}",
+                details={"filename": filename, "json_error": str(e)},
+                request_id=request_id,
+            ) from e
         except (IOError, OSError) as e:
             raise InternalServerException(
                 message=f"Erreur lors de la lecture du fichier '{filename}'",
@@ -303,6 +351,17 @@ async def read_unity_dialogue(
                 request_id=request_id
             )
         
+    except DialogueAccessDeniedError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "dialogue_access_denied", "filename": filename},
+        )
+    except DialogueNotFoundError:
+        raise NotFoundException(
+            resource_type="Dialogue Unity",
+            resource_id=filename,
+            request_id=request_id,
+        )
     except (ValidationException, NotFoundException):
         raise
     except Exception as e:
@@ -322,6 +381,11 @@ async def delete_unity_dialogue(
     filename: str,
     request: Request,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> None:
     """Supprime un fichier de dialogue Unity JSON.
@@ -360,50 +424,35 @@ async def delete_unity_dialogue(
         if not filename.endswith('.json'):
             filename = filename + '.json'
         
-        file_path = unity_dir / filename
-        
-        if not file_path.exists():
-            raise NotFoundException(
-                resource_type="Dialogue Unity",
-                resource_id=filename,
-                request_id=request_id
-            )
-        
         document_key = filename[:-5] if filename.endswith(".json") else filename
-        
-        # Supprimer le fichier dialogue
-        try:
-            file_path.unlink()
-            logger.info(f"Dialogue Unity supprimé: {filename} (request_id: {request_id})")
-        except (OSError, IOError) as e:
-            raise InternalServerException(
-                message=f"Erreur lors de la suppression du fichier '{filename}'",
-                details={"filename": filename, "error": str(e)},
-                request_id=request_id
-            )
-        
-        # Supprimer le layout associé (Assets/Layouts)
         layouts_path = config_service.get_unity_layouts_path()
-        if layouts_path:
-            layout_dir = Path(layouts_path)
-            for sidecar in (f"{document_key}.layout.json", f"{document_key}.layout.meta"):
-                sidecar_path = layout_dir / sidecar
-                if sidecar_path.is_file():
-                    try:
-                        sidecar_path.unlink()
-                        logger.info(f"Layout supprimé: {sidecar} (request_id: {request_id})")
-                    except (OSError, IOError) as e:
-                        logger.warning("Impossible de supprimer le layout %s: %s", sidecar, e)
-        
-        # Supprimer le sidecar last_seq (ADR-006) s'il existe
-        seq_path = unity_dir / f"{document_key}.seq"
-        if seq_path.is_file():
-            try:
-                seq_path.unlink()
-                logger.info(f"Sidecar .seq supprimé pour {document_key} (request_id: {request_id})")
-            except (OSError, IOError) as e:
-                logger.warning("Impossible de supprimer le fichier .seq %s: %s", document_key, e)
-        
+        layout_dir = (
+            Path(layouts_path)
+            if isinstance(layouts_path, (str, Path)) and str(layouts_path)
+            else None
+        )
+        persistence_service.delete_document(
+            unity_dir,
+            layout_dir,
+            document_key,
+            current_user,
+        )
+        logger.info(
+            "Dialogue Unity supprimé: %s (request_id: %s)",
+            filename,
+            request_id,
+        )
+    except DialogueAccessDeniedError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "dialogue_access_denied", "filename": filename},
+        )
+    except DialogueNotFoundError:
+        raise NotFoundException(
+            resource_type="Dialogue Unity",
+            resource_id=filename,
+            request_id=request_id,
+        )
     except (ValidationException, NotFoundException):
         raise
     except Exception as e:

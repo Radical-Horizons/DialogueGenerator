@@ -43,8 +43,10 @@ from services.preset_service import PresetService
 from services.repositories.sqlite import (
     AppSettingsRepository,
     DatabaseConnection,
+    DialoguesIndexRepository,
     UserRepository,
 )
+from services.document_persistence_service import DocumentPersistenceService
 from constants import FilePaths, Defaults
 
 logger = logging.getLogger(__name__)
@@ -88,6 +90,16 @@ def get_user_repository(request: Request) -> UserRepository:
 def get_app_settings_repository(request: Request) -> AppSettingsRepository:
     """Retourne le repository des réglages applicatifs du container."""
     return get_service_container(request).get_app_settings_repository()
+
+
+def get_dialogues_index_repository(request: Request) -> DialoguesIndexRepository:
+    """Retourne le repository d'index des dialogues du container."""
+    return get_service_container(request).get_dialogues_index_repository()
+
+
+def get_document_persistence_service(request: Request) -> DocumentPersistenceService:
+    """Retourne l'autorité de persistance et d'accès des dialogues."""
+    return get_service_container(request).get_document_persistence_service()
 
 
 def get_auth_service(request: Request) -> AuthService:

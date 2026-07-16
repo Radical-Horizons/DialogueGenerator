@@ -10,6 +10,7 @@ if str(_root_dir) not in sys.path:
     sys.path.insert(0, str(_root_dir))
 
 from constants import Defaults, ModelNames
+from api.schemas.dialogue_access import DialogueCapabilitiesResponse
 from services.token_estimation_service import DEFAULT_COMPLETION_TOKENS_PER_NODE
 
 
@@ -692,6 +693,10 @@ class UnityDialogueMetadata(BaseModel):
     size_bytes: int = Field(..., description="Taille en octets")
     modified_time: str = Field(..., description="Date de modification (ISO format)")
     title: Optional[str] = Field(None, description="Titre extrait du dialogue")
+    capabilities: Optional[DialogueCapabilitiesResponse] = Field(
+        default=None,
+        description="Capacités CRUD calculées côté serveur.",
+    )
 
 
 class UnityDialogueListResponse(BaseModel):
@@ -738,6 +743,10 @@ class UnityDialogueReadResponse(BaseModel):
     title: Optional[str] = Field(None, description="Titre extrait du dialogue")
     size_bytes: int = Field(..., description="Taille en octets")
     modified_time: str = Field(..., description="Date de modification (ISO format)")
+    capabilities: Optional[DialogueCapabilitiesResponse] = Field(
+        default=None,
+        description="Capacités CRUD calculées côté serveur.",
+    )
 
 
 class UnityDialoguePreviewRequest(BaseModel):

@@ -3,16 +3,25 @@
  * Alignés sur api/schemas/documents.py (Story 16.2, 16.3).
  */
 
+export interface DialogueCapabilities {
+  can_read: boolean
+  can_edit: boolean
+  can_delete: boolean
+  is_owner: boolean
+}
+
 export interface DocumentGetResponse {
   document: Record<string, unknown>
   schemaVersion: string
   revision: number
+  capabilities?: DialogueCapabilities
 }
 
 export interface PutDocumentRequest {
   document: Record<string, unknown>
   revision: number
   validationMode?: 'draft' | 'export'
+  createOnly?: boolean
 }
 
 export interface PutDocumentResponse {

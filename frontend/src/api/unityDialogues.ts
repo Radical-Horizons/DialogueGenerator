@@ -2,6 +2,7 @@
  * API client pour la bibliothèque de dialogues Unity JSON.
  */
 import apiClient from './client'
+import { deleteDocument } from './documents'
 import type {
   UnityDialogueListResponse,
   UnityDialogueReadResponse,
@@ -32,7 +33,7 @@ export async function getUnityDialogue(filename: string): Promise<UnityDialogueR
  * Supprime un fichier de dialogue Unity JSON.
  */
 export async function deleteUnityDialogue(filename: string): Promise<void> {
-  await apiClient.delete(`/api/v1/unity-dialogues/${encodeURIComponent(filename)}`)
+  await deleteDocument(filename.replace(/\.json$/i, ''))
 }
 
 /**

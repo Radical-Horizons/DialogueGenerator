@@ -223,6 +223,30 @@ class TestUnityExportSuccess:
         choice = on_disk["nodes"][0]["choices"][0]
         assert choice["targetNode"] == node_b
 
+    @pytest.mark.parametrize("filename", ["CON", "lpt1.json", "name.", "bad|name"])
+    def test_export_rejects_windows_invalid_filenames(
+        self,
+        unity_tmp_path: Path,
+        filename: str,
+    ) -> None:
+        """La façade export refuse les noms non créables sous Windows."""
+        unity_document = GraphConversionService.graph_to_unity_json(
+            _VALID_GRAPH["nodes"],
+            _VALID_GRAPH["edges"],
+        )
+
+        response = client.post(
+            "/api/v1/dialogues/unity/export",
+            json={
+                "json_content": unity_document,
+                "filename": filename,
+                "title": "Valid title",
+            },
+        )
+
+        assert response.status_code == 422
+        assert not any(unity_tmp_path.glob("*.json"))
+
 
 @pytest.mark.api
 class TestExportPreservesGddFields:
@@ -459,19 +483,25 @@ class TestUnityExportPerformance:
         assert path.exists()
         assert core_ms < 200, f"export core took {core_ms:.1f} ms (NFR-P3)"
 
+        api_graph = {
+            **_VALID_GRAPH,
+            "seq": 1,
+            "document_id": "Export_Test_API.json",
+        }
         warmup = client.post(
             "/api/v1/unity-dialogues/graph/save-and-write",
-            json=_VALID_GRAPH,
+            json=api_graph,
         )
         assert warmup.status_code == 200
 
         start = time.perf_counter()
         response = client.post(
             "/api/v1/unity-dialogues/graph/save-and-write",
-            json=_VALID_GRAPH,
+            json=api_graph,
         )
         api_ms = (time.perf_counter() - start) * 1000
-        assert response.status_code == 200
+        assert response.status_code == 409
+        assert response.json()["error"]["code"] == "SEQUENCE_CONFLICT"
         assert api_ms < 2000, (
             f"export API après warm-up a pris {api_ms:.1f} ms (garde-fou régression)"
         )

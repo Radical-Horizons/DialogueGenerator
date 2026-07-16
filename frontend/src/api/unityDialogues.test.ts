@@ -3,11 +3,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 vi.mock('./client', () => ({
   default: {
     get: vi.fn(),
-    delete: vi.fn(),
   },
 }))
 
+vi.mock('./documents', () => ({
+  deleteDocument: vi.fn(),
+}))
+
 import apiClient from './client'
+import { deleteDocument } from './documents'
 import { deleteUnityDialogue, getUnityDialogue } from './unityDialogues'
 
 describe('unityDialogues API client', () => {
@@ -24,6 +28,6 @@ describe('unityDialogues API client', () => {
     await deleteUnityDialogue('A #1.json')
 
     expect(apiClient.get).toHaveBeenCalledWith('/api/v1/unity-dialogues/A%20%231.json')
-    expect(apiClient.delete).toHaveBeenCalledWith('/api/v1/unity-dialogues/A%20%231.json')
+    expect(deleteDocument).toHaveBeenCalledWith('A #1')
   })
 })

@@ -48,6 +48,7 @@ export interface GraphState {
   isGenerating: boolean
   isLoading: boolean
   isSaving: boolean
+  activeSaveSeq: number
   validationErrors: ValidationErrorDetail[]
   /** Bandeau contradictions explicites (champ API `summary_explicit_only`, FR39 AC #5). */
   loreExplicitValidationSummary: string | null
@@ -271,6 +272,7 @@ export const initialState = {
   isGenerating: false,
   isLoading: false,
   isSaving: false,
+  activeSaveSeq: 0,
   validationErrors: [] as ValidationErrorDetail[],
   loreExplicitValidationSummary: null as string | null,
   loreExplicitValidationLoading: false,

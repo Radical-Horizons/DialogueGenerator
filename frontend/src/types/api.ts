@@ -512,6 +512,12 @@ export interface UnityDialogueMetadata {
   /** Présent côté UI / listes enrichies ; optionnel selon l’endpoint. */
   node_count?: number
   edge_count?: number
+  capabilities?: {
+    can_read: boolean
+    can_edit: boolean
+    can_delete: boolean
+    is_owner: boolean
+  }
 }
 
 export interface UnityDialogueListResponse {
@@ -525,6 +531,7 @@ export interface UnityDialogueReadResponse {
   title?: string
   size_bytes: number
   modified_time: string
+  capabilities?: UnityDialogueMetadata['capabilities']
 }
 
 export interface UnityDialoguePreviewRequest {

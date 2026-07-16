@@ -495,7 +495,11 @@ Catalogue des familles de systèmes de jeu utilisables dans les dialogues (FR94)
 
 ## Documents Endpoints (`/api/v1/documents`)
 
-Persistance des dialogues canoniques (blob JSON + révision `.meta`, layout sidecar). Implémentation : `api/routers/documents.py`.
+Persistance des dialogues canoniques (blob JSON source de vérité + révision
+`.meta`, layout sidecar et index propriétaire SQLite). Toutes les lectures et
+mutations exigent le propriétaire ou un administrateur. Un fichier historique
+non indexé reste administrable mais n'est jamais attribué implicitement.
+`DISABLE_AUTH=true` conserve le bypass administrateur local.
 
 ### GET `/documents/check-migration`
 Vérifie les documents nécessitant une migration de schéma.
@@ -505,14 +509,22 @@ Vérifie les documents nécessitant une migration de schéma.
 ### GET `/documents/{document_id}`
 Charge le document JSON persisté et sa révision.
 
-**Response:** `DocumentGetResponse` — `document`, `revision`.
+**Response:** `DocumentGetResponse` — `document`, `revision`, `capabilities`
+(`can_read`, `can_edit`, `can_delete`, `is_owner`).
 
 ### PUT `/documents/{document_id}`
 Met à jour le document avec contrôle de révision optimiste (409 si conflit).
 
-**Request Body:** `PutDocumentRequest` — `revision`, `document`.
+**Request Body:** `PutDocumentRequest` — `revision`, `document`, `createOnly?`.
 
 **Response:** `PutDocumentResponse` — inclut `validationReport` (schéma Unity, flags, effets, **diagnostics sociaux FR94**).
+
+Une création (`revision: 1`, fichier absent) attribue le dialogue à l'utilisateur
+courant. `createOnly: true` réserve atomiquement le nom et retourne `409` avec
+l'état canonique si le fichier existe, y compris à révision 1. Codes d'erreur :
+`403` hors propriétaire/admin, `409` en conflit de
+révision, `400/422` en validation ; aucun de ces statuts ne déclenche de voie
+d'écriture legacy.
 
 Codes diagnostic sociaux possibles dans `validationReport` :
 
@@ -767,7 +779,7 @@ All routes require JWT (`Authorization: Bearer <token>`). Schémas : `api/schema
 
 ## Document Endpoints (`/api/v1/documents`)
 
-Canonical Unity dialogue documents with optimistic locking (`revision` in sidecar `.meta` files). Layout sidecars live under `Assets/Layouts/` (separate from dialogue JSON in `Assets/Dialogue/`). Implementation: `api/routers/documents.py`, client `frontend/src/api/documents.ts`.
+Canonical Unity dialogue documents with optimistic locking (`revision` in sidecar `.meta` files). Layout sidecars live under `Assets/Layouts/` (separate from dialogue JSON in `Assets/Dialogue/`). An SQLite index records ownership without replacing the Unity JSON source of truth. Reads and mutations require the owner or an administrator; historical unindexed files remain admin-only and are never claimed implicitly. `DISABLE_AUTH=true` keeps the local administrator bypass. Implementation: `api/routers/documents.py`, `services/document_persistence_service.py`, client `frontend/src/api/documents.ts`.
 
 ### GET `/documents/check-migration`
 
@@ -779,27 +791,29 @@ Lists v1.1.0 documents missing `choiceId` on at least one choice (CI / pre-commi
 
 Load persisted document with `schemaVersion` and `revision`.
 
-**Response:** `DocumentGetResponse` — `{ document, schemaVersion, revision }`
+**Response:** `DocumentGetResponse` — `{ document, schemaVersion, revision, capabilities }`, where `capabilities` contains `can_read`, `can_edit`, `can_delete`, and `is_owner`.
 
-**Errors:** `404` if missing; `400` (`missing_choice_id`) if v1.1.0 document has choices without `choiceId` (except legacy list format normalized on read).
+**Errors:** `403` if the caller is neither owner nor administrator; `404` if missing; `400` (`missing_choice_id`) if v1.1.0 document has choices without `choiceId` (except legacy list format normalized on read).
 
 ### PUT `/documents/{document_id}`
 
 Validate and persist document. Optimistic locking via `revision` in body.
 
-**Request Body:** `PutDocumentRequest` — `{ document, revision, validationMode? }` where `validationMode` is `draft` (default, non-blocking validation) or `export` (blocking).
+**Request Body:** `PutDocumentRequest` — `{ document, revision, validationMode?, createOnly? }` where `validationMode` is `draft` (default, non-blocking validation) or `export` (blocking). `createOnly: true` atomically rejects an existing ID, including an owner-owned revision-1 document.
 
 **Headers (optional):** `X-Validation-Mode` overrides body `validationMode`.
 
 **Response:** `PutDocumentResponse` — `{ revision, validationReport, flagThresholdWarnings? }`
 
-**Errors:** `409` with current `DocumentGetResponse` if revision stale; `400` (`GRAPH_PAYLOAD_NOT_ACCEPTED`) if legacy `nodes`+`edges` payload without `schemaVersion`.
+**Errors:** `403` if the caller cannot edit; `409` with current `DocumentGetResponse` if revision stale; `400` (`GRAPH_PAYLOAD_NOT_ACCEPTED`) or `422` on validation failure. Client errors are terminal: clients must not retry through a legacy persistence route.
 
 ### DELETE `/documents/{document_id}`
 
-Delete document and associated layout/meta sidecars.
+Delete document, layout, revision/sequence sidecars, and ownership index entry atomically from the caller's perspective.
 
 **Response:** `204 No Content`
+
+**Errors:** `403` if the caller cannot delete; `404` if missing.
 
 ### GET `/documents/{document_id}/layout`
 
@@ -807,7 +821,7 @@ Load graph layout sidecar (positions, viewport).
 
 **Response:** `LayoutGetResponse` — `{ layout, revision }`
 
-**Errors:** `404` if document or layout missing.
+**Errors:** `403` if the caller cannot read; `404` if document or layout missing.
 
 ### PUT `/documents/{document_id}/layout`
 
@@ -817,7 +831,7 @@ Persist layout with optimistic locking.
 
 **Response:** `PutLayoutResponse` — `{ revision }`
 
-**Errors:** `409` with current `LayoutGetResponse` if revision stale.
+**Errors:** `403` if the caller cannot edit; `409` with current `LayoutGetResponse` if revision stale.
 
 ### POST `/documents/{document_id}/preview`
 
@@ -899,26 +913,28 @@ Implementation: `api/routers/mechanics_systems.py`, `services/game_systems_integ
 ## Unity Dialogues Endpoints (`/api/v1/unity-dialogues`)
 
 ### GET `/unity-dialogues`
-List all Unity dialogue files.
+Liste uniquement les dialogues lisibles par l'utilisateur courant. Chaque item
+expose les capacités serveur ; les chemins historiques sont visibles aux admins.
 
 **Response:** Dialogue file list
 
 ### GET `/unity-dialogues/{filename}`
-Get specific Unity dialogue file content.
+Façade de lecture compatible, protégée par la même autorité owner/admin.
 
 **Response:** Dialogue file content
 
 ### DELETE `/unity-dialogues/{filename}`
-Delete Unity dialogue file.
+Façade de suppression compatible déléguée au service canonique (document,
+révisions, layout, séquence et index).
 
 **Response:** `204 No Content`
 
-### POST `/unity-dialogues`
-Create or update Unity dialogue file.
-
-**Request Body:** Dialogue file data
-
-**Response:** Created/updated file info
+Les anciennes écritures sans révision (`graph/save-and-write`, export et
+expansion persistée) peuvent créer un nouveau document indexé mais répondent
+`409 canonical_revision_required` si le fichier existe déjà. Toute mise à jour
+passe par `PUT /documents/{document_id}`. Un `seq` déjà reconnu retourne
+`409 SEQUENCE_CONFLICT` avec `ack_seq` et `last_seq` dans `error.details`; aucun
+payload rejeté n'est annoncé comme sauvegardé.
 
 ---
 

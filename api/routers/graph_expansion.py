@@ -8,11 +8,12 @@ import re
 from datetime import datetime, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from api.dependencies import (
     get_config_service,
     get_dialogue_tree_expansion_service,
+    get_document_persistence_service,
     get_llm_pricing_service,
     get_llm_usage_service,
     get_request_id,
@@ -20,7 +21,8 @@ from api.dependencies import (
     get_unity_dialogue_orchestrator,
 )
 from api.exceptions import InternalServerException, ValidationException
-from api.routers.documents import _resolve_document_base, _write_document_blob, _write_meta
+from api.routers.documents import _resolve_document_base
+from api.routers.auth import get_current_user
 from api.routers.graph_cost import _build_representative_prompt_for_estimate
 from api.routers.graph_router_helpers import create_llm_client_for_router
 from api.schemas.graph import (
@@ -36,10 +38,14 @@ from services.dialogue_tree_expansion_service import (
     TreeExpansionResult,
     estimate_tree_llm_calls,
 )
+from services.document_persistence_service import (
+    DialogueAccessDeniedError,
+    DocumentPersistenceService,
+)
 from services.llm_pricing_service import LLMPricingService
 from services.llm_usage_service import LLMUsageService
 from services.token_estimation_service import TokenEstimationService
-from services.unity_dialogue_export_service import write_unity_dialogue_to_file, unity_export_schema_validator
+from services.unity_dialogue_export_service import unity_export_schema_validator
 from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
 from services.unity_export_validation_service import validate_unity_export_document
 from services.json_renderer.unity_json_renderer import UnityJsonRenderer
@@ -165,6 +171,11 @@ async def expand_tree(
     usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
     token_service: Annotated[TokenEstimationService, Depends(get_token_estimation_service)],
     pricing_service: Annotated[LLMPricingService, Depends(get_llm_pricing_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)] = None,
 ) -> ExpandTreeResponse:
     """Génère un dialogue complet par expansion BFS (START + choix PJ récursifs)."""
@@ -178,6 +189,28 @@ async def expand_tree(
         document_id = request_data.document_id or _sanitize_document_id(request_data.title)
         llm_model = request_data.llm_model_identifier
         estimated_calls = estimate_tree_llm_calls(request_data.max_depth, request_data.max_choices)
+        if request_data.persist and not request_data.dry_run:
+            existing_base, existing_id = _resolve_document_base(
+                document_id,
+                config_service,
+                request_id,
+            )
+            if (existing_base / f"{existing_id}.json").exists():
+                try:
+                    persistence_service.require_access(
+                        existing_id,
+                        current_user,
+                        existing_base / f"{existing_id}.json",
+                    )
+                except DialogueAccessDeniedError as exc:
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail={"code": "dialogue_access_denied"},
+                    ) from exc
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail={"code": "canonical_revision_required"},
+                )
 
         if request_data.dry_run:
             cost_usd = _estimate_tree_cost_usd(
@@ -251,16 +284,32 @@ async def expand_tree(
 
         if request_data.persist:
             base_dir, doc_id = _resolve_document_base(document_id, config_service, request_id)
-            _write_document_blob(base_dir, doc_id, result.document)
-            _write_meta(base_dir, doc_id, 1)
-            json_content = json.dumps(result.document, ensure_ascii=False)
-            write_unity_dialogue_to_file(
-                config_service=config_service,
-                json_content=json_content,
-                filename=doc_id,
-                title=result.title,
-                request_id=request_id,
-                validator=unity_export_schema_validator,
+            if (base_dir / f"{doc_id}.json").exists():
+                try:
+                    persistence_service.require_access(
+                        doc_id,
+                        current_user,
+                        base_dir / f"{doc_id}.json",
+                    )
+                except DialogueAccessDeniedError as exc:
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail={"code": "dialogue_access_denied"},
+                    ) from exc
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail={
+                        "code": "canonical_revision_required",
+                        "message": "Une expansion persistée ne peut pas écraser un dialogue existant.",
+                    },
+                )
+            persistence_service.write_document(
+                base_dir,
+                doc_id,
+                result.document,
+                1,
+                current_user,
+                create_only=True,
             )
 
         logger.info(
@@ -279,7 +328,7 @@ async def expand_tree(
             validation_warnings=validation_warnings,
         )
 
-    except ValidationException:
+    except (ValidationException, HTTPException):
         raise
     except Exception as exc:
         logger.exception("Erreur expand-tree (request_id: %s)", request_id)

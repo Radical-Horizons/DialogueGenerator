@@ -5,12 +5,18 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useGraphStore } from '../store/graphStore'
 import * as documentsAPI from '../api/documents'
+import * as graphJournal from '../utils/graphJournal'
 
 vi.mock('../api/documents', () => ({
   getDocument: vi.fn(),
   getLayout: vi.fn(),
   putDocument: vi.fn(),
   putLayout: vi.fn(),
+}))
+
+vi.mock('../utils/graphJournal', () => ({
+  setPending: vi.fn().mockResolvedValue(undefined),
+  acknowledgeSnapshot: vi.fn().mockResolvedValue(undefined),
 }))
 
 const sampleDocument = {
@@ -32,6 +38,8 @@ describe('graphStore - document SoT load/save', () => {
     vi.mocked(documentsAPI.getLayout).mockReset()
     vi.mocked(documentsAPI.putDocument).mockReset()
     vi.mocked(documentsAPI.putLayout).mockReset()
+    vi.mocked(graphJournal.setPending).mockReset().mockResolvedValue(undefined)
+    vi.mocked(graphJournal.acknowledgeSnapshot).mockReset().mockResolvedValue(undefined)
     useGraphStore.getState().resetGraph()
   })
 
@@ -277,6 +285,89 @@ describe('graphStore - document SoT load/save', () => {
       expect(state.lastSaveError).toBeNull()
       expect(state.syncStatus).toBe('synced')
       expect(typeof state.lastSavedAt).toBe('number')
+      expect(graphJournal.acknowledgeSnapshot).toHaveBeenCalledWith(
+        'test-doc',
+        expect.objectContaining({ ackSeq: expect.any(Number) }),
+      )
+    })
+
+    it('conserve la nouvelle révision document si le layout échoue puis retry sans conflit stale', async () => {
+      vi.mocked(documentsAPI.getDocument).mockResolvedValue({
+        document: sampleDocument,
+        schemaVersion: '1.1.0',
+        revision: 1,
+      })
+      vi.mocked(documentsAPI.getLayout).mockResolvedValue({
+        layout: sampleLayout,
+        revision: 1,
+      })
+      vi.mocked(documentsAPI.putDocument)
+        .mockResolvedValueOnce({ revision: 2 })
+        .mockResolvedValueOnce({ revision: 3 })
+      vi.mocked(documentsAPI.putLayout)
+        .mockRejectedValueOnce(new Error('layout unavailable'))
+        .mockResolvedValueOnce({ revision: 2 })
+      await useGraphStore.getState().loadDialogueByDocumentId('test-doc')
+      useGraphStore.getState().updateNode('START', {
+        data: { line: 'Dirty', speaker: 'NPC' },
+      })
+
+      await expect(useGraphStore.getState().saveDialogue()).rejects.toThrow(
+        'layout unavailable',
+      )
+      expect(useGraphStore.getState().documentRevision).toBe(2)
+      expect(useGraphStore.getState().layoutRevision).toBe(1)
+      expect(useGraphStore.getState().hasUnsavedChanges).toBe(true)
+
+      await useGraphStore.getState().saveDialogue()
+
+      expect(documentsAPI.putDocument).toHaveBeenLastCalledWith(
+        'test-doc',
+        expect.objectContaining({ revision: 2 }),
+      )
+      expect(useGraphStore.getState().documentRevision).toBe(3)
+      expect(useGraphStore.getState().layoutRevision).toBe(2)
+      expect(useGraphStore.getState().hasUnsavedChanges).toBe(false)
+    })
+
+    it('ignore un échec tardif après navigation et nettoie isSaving via le nouveau chargement', async () => {
+      vi.mocked(documentsAPI.getDocument).mockResolvedValue({
+        document: sampleDocument,
+        schemaVersion: '1.1.0',
+        revision: 1,
+      })
+      vi.mocked(documentsAPI.getLayout).mockResolvedValue({
+        layout: sampleLayout,
+        revision: 1,
+      })
+      let rejectSave!: (reason: unknown) => void
+      vi.mocked(documentsAPI.putDocument).mockImplementation(
+        () =>
+          new Promise((_resolve, reject) => {
+            rejectSave = reject
+          }),
+      )
+      await useGraphStore.getState().loadDialogueByDocumentId('old-doc')
+      const savePromise = useGraphStore.getState().saveDialogue()
+
+      useGraphStore.getState().incrementLoadSeq()
+      useGraphStore.setState((current) => ({
+        documentId: 'new-doc',
+        dialogueMetadata: {
+          ...current.dialogueMetadata,
+          filename: 'new-doc',
+        },
+        lastSaveError: null,
+        syncStatus: 'synced',
+      }))
+      rejectSave(new Error('late failure'))
+
+      await expect(savePromise).rejects.toThrow('late failure')
+      const state = useGraphStore.getState()
+      expect(state.documentId).toBe('new-doc')
+      expect(state.isSaving).toBe(false)
+      expect(state.lastSaveError).toBeNull()
+      expect(state.syncStatus).toBe('synced')
     })
 
     it('persiste intentionalCycleIds dans le layout sidecar (FR41)', async () => {
@@ -301,6 +392,35 @@ describe('graphStore - document SoT load/save', () => {
         })
       )
     })
+
+    it.each([401, 403, 409, 422])(
+      'propage strictement une erreur %s sans tenter le layout',
+      async (status) => {
+        vi.mocked(documentsAPI.getDocument).mockResolvedValue({
+          document: sampleDocument,
+          schemaVersion: '1.1.0',
+          revision: 1,
+        })
+        vi.mocked(documentsAPI.getLayout).mockResolvedValue({
+          layout: sampleLayout,
+          revision: 1,
+        })
+        vi.mocked(documentsAPI.putDocument).mockRejectedValue({
+          response: { status },
+          message: `HTTP ${status}`,
+        })
+        await useGraphStore.getState().loadDialogueByDocumentId('test-doc')
+        useGraphStore.getState().updateNode('START', {
+          data: { line: 'Dirty', speaker: 'NPC' },
+        })
+
+        await expect(useGraphStore.getState().saveDialogue()).rejects.toBeDefined()
+
+        expect(documentsAPI.putLayout).not.toHaveBeenCalled()
+        expect(useGraphStore.getState().hasUnsavedChanges).toBe(true)
+        expect(useGraphStore.getState().syncStatus).toBe('error')
+      }
+    )
   })
 
   describe('Task 2.2 - edit via document then re-project', () => {

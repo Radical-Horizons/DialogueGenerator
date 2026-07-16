@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -76,6 +77,34 @@ def test_expand_tree_dry_run(client: TestClient, sample_body: dict) -> None:
     assert data["llm_calls_estimated"] == 121
     assert data["levels_expanded"] == 0
     assert data["cost_usd"] is not None
+
+
+def test_expand_tree_dry_run_ignores_existing_persist_target(
+    client: TestClient,
+    sample_body: dict,
+    mock_config_service: MagicMock,
+    tmp_path: Path,
+) -> None:
+    """Une estimation dry-run ne consulte ni ne verrouille le fichier cible."""
+    dialogue_dir = tmp_path / "dialogues"
+    dialogue_dir.mkdir()
+    (dialogue_dir / "existing.json").write_text("{}", encoding="utf-8")
+    mock_config_service.get_unity_dialogues_path.return_value = dialogue_dir
+    sample_body.update(
+        {
+            "dry_run": True,
+            "persist": True,
+            "document_id": "existing",
+        }
+    )
+
+    response = client.post(
+        "/api/v1/unity-dialogues/graph/expand-tree",
+        json=sample_body,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["document_id"] == "existing"
 
 
 def test_expand_tree_requires_character(client: TestClient, sample_body: dict) -> None:

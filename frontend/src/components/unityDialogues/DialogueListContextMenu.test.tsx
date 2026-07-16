@@ -14,6 +14,12 @@ const dialogue = {
   modified_time: '2026-04-08T12:00:00.000Z',
   size_bytes: 1024,
   title: 'Titre test',
+  capabilities: {
+    can_read: true,
+    can_edit: true,
+    can_delete: true,
+    is_owner: true,
+  },
 }
 
 describe('DialogueListContextMenu', () => {
@@ -62,5 +68,44 @@ describe('DialogueListContextMenu', () => {
 
     expect(onDownload).toHaveBeenCalledWith(dialogue)
     expect(onClose).toHaveBeenCalled()
+  })
+
+  it('masque la suppression quand la capacité serveur la refuse', () => {
+    render(
+      <DialogueListContextMenu
+        state={{
+          dialogue: {
+            ...dialogue,
+            capabilities: {
+              can_read: true,
+              can_edit: false,
+              can_delete: false,
+              is_owner: false,
+            },
+          },
+          clientX: 100,
+          clientY: 120,
+        }}
+        onClose={vi.fn()}
+      />,
+    )
+
+    expect(screen.queryByTestId('dialogue-list-context-delete')).not.toBeInTheDocument()
+  })
+
+  it('masque la suppression quand les capacités sont absentes', () => {
+    const dialogueWithoutCapabilities = { ...dialogue, capabilities: undefined }
+    render(
+      <DialogueListContextMenu
+        state={{
+          dialogue: dialogueWithoutCapabilities,
+          clientX: 100,
+          clientY: 120,
+        }}
+        onClose={vi.fn()}
+      />,
+    )
+
+    expect(screen.queryByTestId('dialogue-list-context-delete')).not.toBeInTheDocument()
   })
 })
