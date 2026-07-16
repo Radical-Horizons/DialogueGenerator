@@ -14,15 +14,15 @@ export const SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX = 480
 
 export const segmentedTabTypography = {
   comfortable: {
-    fontSizeRem: 0.8,
+    fontSizeRem: 0.9,
     buttonPadding: '0.21rem 0.62rem',
     rowGapRem: 0.2,
     rowPadding: '0.21rem 0.5rem',
     tabMinHeightPx: 42,
   },
   narrow: {
-    /** Plancher lisibilité ≈ 12px si root 16px */
-    fontSizeRem: 0.75,
+    /** Plancher lisibilité ≥ ~12px (`0.75rem` si root 16px) — un cran au-dessus pour le chrome plus haut. */
+    fontSizeRem: 0.85,
     buttonPadding: '0.39rem 0.48rem',
     rowGapRem: 0.2,
     rowPadding: '0.48rem 0.42rem',
@@ -56,8 +56,8 @@ export const panelCollapseButtonChrome = {
 } as const
 
 export const panelHeaderTitleTypography = {
-  comfortableFontRem: 0.8,
-  narrowFontRem: 0.75,
+  comfortableFontRem: 0.9,
+  narrowFontRem: 0.85,
 } as const
 
 /**

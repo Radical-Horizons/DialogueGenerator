@@ -110,7 +110,7 @@ export function NarrowOverlayDrawer({
           <h2
             id={titleId}
             style={{
-              fontSize: '0.9rem',
+              fontSize: '1rem',
               fontWeight: 700,
               color: theme.text.primary,
               margin: 0,
