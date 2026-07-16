@@ -72,6 +72,22 @@ apiClient.interceptors.response.use(
         return Promise.reject(error)
       }
 
+      // Invité : pas de refresh cookie — forcer la reconnexion
+      try {
+        const payloadPart = token.split('.')[1]
+        if (payloadPart) {
+          const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/')
+          const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4)
+          const payload = JSON.parse(atob(padded)) as { role?: string }
+          if (payload.role === 'guest') {
+            localStorage.removeItem('access_token')
+            return Promise.reject(error)
+          }
+        }
+      } catch {
+        // Ignorer un JWT illisible ; tenter le refresh classique
+      }
+
       try {
         // Si un refresh est déjà en cours, attendre cette Promise
         if (refreshTokenPromise) {

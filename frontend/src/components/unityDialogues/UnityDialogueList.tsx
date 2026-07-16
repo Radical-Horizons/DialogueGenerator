@@ -9,6 +9,7 @@ import { useCallback, useEffect, useImperativeHandle, forwardRef, useMemo, useRe
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import type { UnityDialogueMetadata } from '../../types/api'
+import { useAuthStore } from '../../store/authStore'
 import { UnityDialogueItem } from './UnityDialogueItem'
 import {
   DialogueListContextMenu,
@@ -57,6 +58,7 @@ export interface UnityDialogueListRef {
 export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueListProps>(
   function UnityDialogueList({ onSelectDialogue, selectedFilename }, ref) {
   const toast = useToast()
+  const isGuest = useAuthStore((s) => s.user?.role === 'guest')
   const batch = useBatchUnityExport(toast)
   const [downloadOptions, setDownloadOptionsState] = useState<DownloadExportOptions>(() =>
     loadDownloadExportOptions(),
@@ -351,7 +353,8 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
           <button
             type="button"
             data-testid="create-dialogue-button"
-            disabled={isCreating}
+            disabled={isCreating || isGuest}
+            hidden={isGuest}
             onClick={() => void handleCreateDialogue()}
             style={{
               padding: '0.45rem 0.65rem',
@@ -359,8 +362,9 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
               borderRadius: '6px',
               backgroundColor: theme.button.primary.background,
               color: theme.button.primary.color,
-              cursor: isCreating ? 'wait' : 'pointer',
+              cursor: isCreating || isGuest ? 'not-allowed' : 'pointer',
               flexShrink: 0,
+              display: isGuest ? 'none' : undefined,
             }}
           >
             {isCreating ? 'Création…' : 'Nouveau'}

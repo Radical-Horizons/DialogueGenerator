@@ -40,7 +40,7 @@ export interface UserResponse {
   id: string
   username: string
   email?: string
-  role: 'admin' | 'writer'
+  role: 'admin' | 'writer' | 'guest'
   is_active: boolean
   created_at?: string
   updated_at?: string

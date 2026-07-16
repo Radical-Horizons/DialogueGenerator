@@ -24,6 +24,8 @@ interface GraphEditorHeaderProps {
   handleBatchValidateSelection: () => void
   handleBatchDeleteSelection: () => void
   canEditGraph: boolean
+  /** Ouverture menu Actions (export) même en lecture seule invité. */
+  canOpenGraphActions?: boolean
   isStandalone: boolean
   onBack?: () => void
   /** Story 9.4 — preview scénario mode VN. */
@@ -42,6 +44,7 @@ export function GraphEditorHeader({
   handleBatchValidateSelection,
   handleBatchDeleteSelection,
   canEditGraph,
+  canOpenGraphActions,
   isStandalone,
   onBack,
   onToggleDialoguePreview,
@@ -165,6 +168,7 @@ export function GraphEditorHeader({
     chrome,
     chromeStyles,
     canEditGraph,
+    canOpenGraphActions: canOpenGraphActions ?? canEditGraph,
     hasActiveDialogue,
     isStandalone,
     onBack,

@@ -24,6 +24,8 @@ export interface GraphToolbarToolsRowProps {
   chrome: GraphToolbarChromeTokens
   chromeStyles: GraphToolbarChromeStyles
   canEditGraph: boolean
+  /** Menu Actions (export) — peut rester ouvert en mode invité lecture seule. */
+  canOpenGraphActions?: boolean
   hasActiveDialogue: boolean
   isStandalone: boolean
   onBack?: () => void
@@ -591,6 +593,7 @@ export function GraphToolbarToolsGroup(props: GraphToolbarToolsRowProps) {
     hasActiveDialogue,
   } = props
   const { graphChromeTouch, effectiveButtonPadding, effectiveButtonFontSizeRem } = chromeStyles
+  const actionsMenuEnabled = props.canOpenGraphActions ?? canEditGraph
 
   return (
     <>
@@ -611,6 +614,7 @@ export function GraphToolbarToolsGroup(props: GraphToolbarToolsRowProps) {
       {!isNarrowToolbar && (
         <GraphActionsDropdown
           canEditGraph={canEditGraph}
+          menuEnabled={actionsMenuEnabled}
           isNarrow={false}
           graphChromeTouch={graphChromeTouch}
           buttonPadding={effectiveButtonPadding}
@@ -755,6 +759,7 @@ export function GraphToolbarToolsRow(props: GraphToolbarToolsRowProps) {
         />
         <GraphActionsDropdown
           canEditGraph={canEditGraph}
+          menuEnabled={props.canOpenGraphActions ?? canEditGraph}
           isNarrow={false}
           graphChromeTouch={graphChromeTouchNarrow}
           buttonPadding={chrome.buttonPadding}

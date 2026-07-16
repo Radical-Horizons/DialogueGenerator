@@ -4,10 +4,12 @@
 import { useCallback } from 'react'
 import * as graphAPI from '../api/graph'
 import { useGraphStore } from '../store/graphStore'
+import { useAuthStore } from '../store/authStore'
 import type { UseToastFn } from '../components/shared'
 import type { SchemaValidationIssue } from '../types/graph'
 import { getErrorMessage } from '../types/errors'
 import { buildGraphSchemaApiPayload } from '../utils/buildGraphApiPayload'
+import { downloadUnityExport } from '../components/graph/graphEditorStandalone'
 import {
   EXPORT_VALIDATION_BLOCKED_MESSAGE,
   UNITY_PATH_UNAVAILABLE_MESSAGE,
@@ -76,6 +78,21 @@ export function useUnityExport(
 
       if (!validation.is_valid) {
         toast(EXPORT_VALIDATION_BLOCKED_MESSAGE, 'error')
+        return
+      }
+
+      const isGuest = useAuthStore.getState().user?.role === 'guest'
+      if (isGuest) {
+        const doc = state.document
+        if (!doc) {
+          toast('Document non chargé — impossible d’exporter en mode invité', 'error')
+          return
+        }
+        const filename = state.dialogueMetadata.filename || 'dialogue_export.json'
+        const jsonContent = JSON.stringify(doc, null, 2)
+        registerSuccessfulExport(jsonContent, filename)
+        await downloadUnityExport(jsonContent, filename)
+        toast(`Dialogue exporté (invité) : ${filename}`, 'success', 3000)
         return
       }
 

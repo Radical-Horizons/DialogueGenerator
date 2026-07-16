@@ -6,6 +6,7 @@
 import { useCallback, useMemo } from 'react'
 import { ReactFlowProvider } from 'reactflow'
 import { useQueryClient } from '@tanstack/react-query'
+import { useAuthStore } from '../../store/authStore'
 import { UnityDialogueList } from '../unityDialogues/UnityDialogueList'
 import { DialogueCombobox } from '../unityDialogues/DialogueCombobox'
 import { GraphCanvas } from './GraphCanvas'
@@ -141,7 +142,11 @@ export function GraphEditor({
     handleExportSVG,
   } = toolbar
 
-  const canEditGraph = hasActiveDialogue && !isGraphLoading && !isLoadingDialogue
+  const isGuest = useAuthStore((s) => s.user?.role === 'guest')
+  const canEditGraph =
+    hasActiveDialogue && !isGraphLoading && !isLoadingDialogue && !isGuest
+  const canOpenGraphActions =
+    hasActiveDialogue && !isGraphLoading && !isLoadingDialogue
 
   const handleToggleDialoguePreview = useCallback(() => {
     if (scenarioPlaythroughActive) {
@@ -240,6 +245,7 @@ export function GraphEditor({
           handleBatchValidateSelection={handleBatchValidateSelection}
           handleBatchDeleteSelection={handleBatchDeleteSelection}
           canEditGraph={canEditGraph}
+          canOpenGraphActions={canOpenGraphActions}
           isStandalone={isStandalone}
           onBack={onBack}
           scenarioPlaythroughActive={scenarioPlaythroughActive}

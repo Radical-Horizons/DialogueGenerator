@@ -18,6 +18,16 @@ export async function login(credentials: LoginRequest): Promise<TokenResponse> {
 }
 
 /**
+ * Session invité (démo lecture seule, sans compte SQLite).
+ */
+export async function loginAsGuest(): Promise<TokenResponse> {
+  const response = await apiClient.post<TokenResponse>('/api/v1/auth/guest')
+  const { access_token } = response.data
+  localStorage.setItem('access_token', access_token)
+  return response.data
+}
+
+/**
  * Déconnexion utilisateur.
  */
 export async function logout(): Promise<void> {

@@ -11,6 +11,7 @@ export interface AuthState {
   isAuthenticated: boolean
   isLoading: boolean
   login: (username: string, password: string) => Promise<void>
+  loginAsGuest: () => Promise<void>
   logout: () => Promise<void>
   fetchCurrentUser: () => Promise<void>
   initialize: () => Promise<void>
@@ -87,6 +88,18 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true })
         try {
           await authAPI.login({ username, password })
+          const user = await authAPI.getCurrentUser()
+          set({ user, isAuthenticated: true, isLoading: false })
+        } catch (error) {
+          set({ isLoading: false })
+          throw error
+        }
+      },
+
+      loginAsGuest: async () => {
+        set({ isLoading: true })
+        try {
+          await authAPI.loginAsGuest()
           const user = await authAPI.getCurrentUser()
           set({ user, isAuthenticated: true, isLoading: false })
         } catch (error) {

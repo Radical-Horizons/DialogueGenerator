@@ -11,7 +11,7 @@ export function LoginForm() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const { login, isLoading, isAuthenticated } = useAuthStore()
+  const { login, loginAsGuest, isLoading, isAuthenticated } = useAuthStore()
   const navigate = useNavigate()
 
   // Rediriger si déjà connecté
@@ -28,6 +28,16 @@ export function LoginForm() {
     try {
       await login(username, password)
       // Redirection après connexion réussie
+      navigate('/', { replace: true })
+    } catch (err) {
+      setError(getErrorMessage(err))
+    }
+  }
+
+  const handleGuest = async () => {
+    setError(null)
+    try {
+      await loginAsGuest()
       navigate('/', { replace: true })
     } catch (err) {
       setError(getErrorMessage(err))
@@ -94,6 +104,33 @@ export function LoginForm() {
       >
         {isLoading ? 'Connexion...' : 'Se connecter'}
       </button>
+      <button
+        type="button"
+        data-testid="continue-as-guest"
+        disabled={isLoading}
+        onClick={() => void handleGuest()}
+        style={{
+          width: '100%',
+          marginTop: '0.75rem',
+          padding: '0.75rem',
+          backgroundColor: theme.button.default.background,
+          color: theme.button.default.color,
+          border: `1px solid ${theme.border.primary}`,
+          cursor: isLoading ? 'wait' : 'pointer',
+        }}
+      >
+        Continuer en invité
+      </button>
+      <p
+        style={{
+          marginTop: '0.75rem',
+          color: theme.text.secondary,
+          fontSize: '0.85rem',
+          textAlign: 'center',
+        }}
+      >
+        Mode lecture seule — idéal pour découvrir l&apos;appli sans compte.
+      </p>
     </form>
   )
 }

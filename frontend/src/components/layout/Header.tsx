@@ -104,6 +104,24 @@ export function Header() {
       {/* Section gauche : Titre */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
         <h1 style={{ margin: 0, color: theme.text.primary, fontSize: remSize('title'), fontWeight: 600, whiteSpace: 'nowrap' }}>DialogueGenerator</h1>
+        {user?.role === 'guest' && (
+          <span
+            data-testid="guest-mode-banner"
+            role="status"
+            style={{
+              color: theme.text.primary,
+              fontSize: remSize('small'),
+              fontWeight: 600,
+              padding: '0.25rem 0.55rem',
+              borderRadius: '4px',
+              border: `1px solid ${theme.border.primary}`,
+              backgroundColor: theme.background.tertiary,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Mode invité — lecture seule
+          </span>
+        )}
         <span 
           title={`Date de compilation: ${new Date(__BUILD_DATE__).toLocaleString('fr-FR')}`}
           style={{ 
@@ -172,7 +190,7 @@ export function Header() {
       
       {/* Section droite : Options, Actions, Utilisateur */}
       <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', flexShrink: 1, minWidth: 0, flexWrap: 'wrap' }}>
-        {isAuthenticated && user && actions.handleGenerate && (
+        {isAuthenticated && user && user.role !== 'guest' && actions.handleGenerate && (
           <>
             {/* Bouton Options */}
             <button

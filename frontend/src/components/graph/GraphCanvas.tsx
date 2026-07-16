@@ -27,6 +27,7 @@ import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { useGraphStore } from '../../store/graphStore'
 import { useGraphViewStore } from '../../store/graphViewStore'
 import { useContextStore } from '../../store/contextStore'
+import { useAuthStore } from '../../store/authStore'
 import { theme } from '../../theme'
 import { applyNodeFilters, applyEdgeFilters } from './graphFilterUtils'
 import { useReactFlowHandlers } from '../../hooks/useReactFlowHandlers'
@@ -64,6 +65,7 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
   const setHighlightedNodesInner = useGraphStore((s) => s.setHighlightedNodes)
   const isGraphLoading = useGraphStore((s) => s.isLoading)
   const documentId = useGraphStore((s) => s.documentId)
+  const isGuest = useAuthStore((s) => s.user?.role === 'guest')
   const alreadyFitForDocumentIdRef = useRef<string | null>(null)
 
   // Fit view once per dialogue when load has finished. Signal: !isGraphLoading + documentId (not nodesLength).
@@ -641,9 +643,12 @@ export const GraphCanvas = memo(function GraphCanvas() {
         onPaneClick={onPaneClick}
         onNodeDragStart={onNodeDragStartWrapped}
         onNodeDragStop={onNodeDragStop}
+        nodesDraggable={!isGuest}
+        nodesConnectable={!isGuest}
+        elementsSelectable
         multiSelectionKeyCode="Shift"
-        selectionOnDrag
-        autoPanOnNodeDrag
+        selectionOnDrag={!isGuest}
+        autoPanOnNodeDrag={!isGuest}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         snapToGrid

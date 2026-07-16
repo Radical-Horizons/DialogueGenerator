@@ -14,6 +14,7 @@ describe('LoginForm', () => {
     const mockLogin = vi.fn()
     vi.mocked(useAuthStore).mockReturnValue({
       login: mockLogin,
+      loginAsGuest: vi.fn(),
       isLoading: false,
       isAuthenticated: false,
     } as Partial<AuthState>)
@@ -28,6 +29,7 @@ describe('LoginForm', () => {
     expect(screen.getByLabelText(/nom d'utilisateur/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/mot de passe/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /se connecter/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /continuer en invité/i })).toBeInTheDocument()
   })
 
   it('appelle login avec les bonnes données au submit', async () => {
@@ -36,6 +38,7 @@ describe('LoginForm', () => {
     
     vi.mocked(useAuthStore).mockReturnValue({
       login: mockLogin,
+      loginAsGuest: vi.fn(),
       isLoading: false,
       isAuthenticated: false,
     } as Partial<AuthState>)
@@ -56,6 +59,30 @@ describe('LoginForm', () => {
 
     await waitFor(() => {
       expect(mockLogin).toHaveBeenCalledWith('admin', 'admin123')
+    })
+  })
+
+  it('appelle loginAsGuest au clic Continuer en invité', async () => {
+    const user = userEvent.setup()
+    const mockGuest = vi.fn().mockResolvedValue(undefined)
+
+    vi.mocked(useAuthStore).mockReturnValue({
+      login: vi.fn(),
+      loginAsGuest: mockGuest,
+      isLoading: false,
+      isAuthenticated: false,
+    } as Partial<AuthState>)
+
+    render(
+      <BrowserRouter>
+        <LoginForm />
+      </BrowserRouter>
+    )
+
+    await user.click(screen.getByRole('button', { name: /continuer en invité/i }))
+
+    await waitFor(() => {
+      expect(mockGuest).toHaveBeenCalled()
     })
   })
 })

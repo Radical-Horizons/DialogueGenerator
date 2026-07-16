@@ -7,6 +7,8 @@ import {
 
 export interface GraphActionsDropdownProps {
   canEditGraph: boolean
+  /** Si défini, contrôle l’ouverture du menu (ex. invité : export sans édition). */
+  menuEnabled?: boolean
   isNarrow: boolean
   disabledReason?: string
   graphChromeTouch: React.CSSProperties
@@ -28,6 +30,7 @@ export interface GraphActionsDropdownProps {
 
 export const GraphActionsDropdown = memo(function GraphActionsDropdown({
   canEditGraph,
+  menuEnabled,
   isNarrow,
   graphChromeTouch,
   buttonPadding,
@@ -41,6 +44,7 @@ export const GraphActionsDropdown = memo(function GraphActionsDropdown({
   dropdownTestId = 'btn-actions-dropdown',
   dropdownTitle = 'Actions sur le graphe',
 }: GraphActionsDropdownProps) {
+  const isMenuEnabled = menuEnabled ?? canEditGraph
   return (
     <div
       ref={actionsDropdownRef}
@@ -57,8 +61,8 @@ export const GraphActionsDropdown = memo(function GraphActionsDropdown({
         aria-label={dropdownLabel}
         aria-haspopup="menu"
         aria-expanded={showActionsDropdown}
-        onClick={() => canEditGraph && setShowActionsDropdown((v) => !v)}
-        disabled={!canEditGraph}
+        onClick={() => isMenuEnabled && setShowActionsDropdown((v) => !v)}
+        disabled={!isMenuEnabled}
         style={{
           ...graphChromeTouch,
           padding: buttonPadding,
@@ -66,8 +70,8 @@ export const GraphActionsDropdown = memo(function GraphActionsDropdown({
           borderRadius: '6px',
           backgroundColor: theme.button.default.background,
           color: theme.button.default.color,
-          cursor: canEditGraph ? 'pointer' : 'not-allowed',
-          opacity: canEditGraph ? 1 : 0.6,
+          cursor: isMenuEnabled ? 'pointer' : 'not-allowed',
+          opacity: isMenuEnabled ? 1 : 0.6,
           fontSize: `${buttonFontSizeRem}rem`,
           display: 'inline-flex',
           alignItems: 'center',
