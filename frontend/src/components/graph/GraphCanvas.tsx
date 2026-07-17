@@ -65,7 +65,6 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
   const setHighlightedNodesInner = useGraphStore((s) => s.setHighlightedNodes)
   const isGraphLoading = useGraphStore((s) => s.isLoading)
   const documentId = useGraphStore((s) => s.documentId)
-  const isGuest = useAuthStore((s) => s.user?.role === 'guest')
   const alreadyFitForDocumentIdRef = useRef<string | null>(null)
 
   // Fit view once per dialogue when load has finished. Signal: !isGraphLoading + documentId (not nodesLength).
@@ -180,6 +179,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
       isGenerating: s.isGenerating,
     }))
   )
+  const isGuest = useAuthStore((s) => s.user?.role === 'guest')
 
   const visibleStoreNodes = useMemo(
     () => applyNodeFilters(storeNodes, graphFilters),

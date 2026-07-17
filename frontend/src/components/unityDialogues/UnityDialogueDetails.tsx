@@ -9,6 +9,8 @@ import { theme } from '../../theme'
 import { unityDialogueEditorChrome } from '../../theme/responsiveChrome'
 import { UnityDialogueEditor } from '../generation/UnityDialogueEditor'
 import { useDialogueEditionNarrow } from './DialogueEditionNarrowContext'
+import { DialogueSharingModal } from './DialogueSharingModal'
+import { useAuthStore } from '../../store/authStore'
 import { formatDialogueTitle } from '../../utils/formatDialogueTitle'
 
 interface UnityDialogueDetailsProps {
@@ -32,6 +34,7 @@ export function UnityDialogueDetails({
 }: UnityDialogueDetailsProps) {
   const isNarrow = useDialogueEditionNarrow()
   const tb = isNarrow ? unityDialogueEditorChrome.narrow : unityDialogueEditorChrome.comfortable
+  const userRole = useAuthStore((state) => state.user?.role)
   const [jsonContent, setJsonContent] = useState<string>('')
   const [title, setTitle] = useState<string>('')
   const [isLoading, setIsLoading] = useState(true)
@@ -41,6 +44,9 @@ export function UnityDialogueDetails({
   const [revision, setRevision] = useState(1)
   const [canEdit, setCanEdit] = useState(false)
   const [canDelete, setCanDelete] = useState(false)
+  const [isOwner, setIsOwner] = useState(false)
+  const [shareModalOpen, setShareModalOpen] = useState(false)
+  const canManageShares = isOwner || userRole === 'admin'
 
   const loadDialogue = useCallback(async (propagateError = false) => {
     setIsLoading(true)
@@ -52,6 +58,7 @@ export function UnityDialogueDetails({
       setRevision(response.revision)
       setCanEdit(response.capabilities?.can_edit ?? false)
       setCanDelete(response.capabilities?.can_delete ?? false)
+      setIsOwner(response.capabilities?.is_owner ?? false)
       const nodes = Array.isArray(response.document.nodes)
         ? response.document.nodes
         : []
@@ -150,6 +157,11 @@ export function UnityDialogueDetails({
 
   return (
     <div style={{ height: '100%', overflow: 'hidden' }}>
+      <DialogueSharingModal
+        documentId={filename.replace(/\.json$/i, '')}
+        open={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+      />
       <UnityDialogueEditor
         json_content={jsonContent}
         title={title}
@@ -163,6 +175,35 @@ export function UnityDialogueDetails({
         headerSelector={headerSelector}
         extraActions={
           <>
+            {canManageShares && (
+              <div style={{ gridArea: isNarrow ? 'share' : undefined, width: isNarrow ? '100%' : undefined }}>
+                <button
+                  type="button"
+                  data-testid="dialogue-share-open"
+                  onClick={() => setShareModalOpen(true)}
+                  style={{
+                    padding: tb.toolbarButtonPadding,
+                    minHeight: `${tb.toolbarButtonMinHeightPx}px`,
+                    border: `1px solid ${theme.border.primary}`,
+                    borderRadius: '6px',
+                    backgroundColor: theme.button.secondary.background,
+                    color: theme.button.secondary.color,
+                    cursor: 'pointer',
+                    fontSize: `${tb.toolbarButtonFontRem}rem`,
+                    fontWeight: tb.toolbarButtonFontWeight,
+                    lineHeight: 1.25,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxSizing: 'border-box',
+                    width: isNarrow ? '100%' : undefined,
+                    minWidth: isNarrow ? 0 : undefined,
+                  }}
+                >
+                  Partager
+                </button>
+              </div>
+            )}
             {onGenerateContinuation && (
               <div style={{ gridArea: isNarrow ? 'generate' : undefined, width: isNarrow ? '100%' : undefined }}>
                 <button

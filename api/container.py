@@ -34,10 +34,12 @@ from services.repositories.sqlite.bootstrap import resolve_database_path
 from services.repositories.sqlite import (
     AppSettingsRepository,
     DatabaseConnection,
+    DialogueSharesRepository,
     DialoguesIndexRepository,
     UserRepository,
 )
 from services.document_persistence_service import DocumentPersistenceService
+from services.dialogue_sharing_service import DialogueSharingService
 from api.services.auth_service import AuthService
 
 logger = logging.getLogger(__name__)
@@ -91,7 +93,9 @@ class ServiceContainer:
         self._user_repository: Optional[UserRepository] = None
         self._app_settings_repository: Optional[AppSettingsRepository] = None
         self._dialogues_index_repository: Optional[DialoguesIndexRepository] = None
+        self._dialogue_shares_repository: Optional[DialogueSharesRepository] = None
         self._document_persistence_service: Optional[DocumentPersistenceService] = None
+        self._dialogue_sharing_service: Optional[DialogueSharingService] = None
         self._auth_service: Optional[AuthService] = None
         self._database_initialization_failed = database_initialization_failed
         self._database_lock = threading.RLock()
@@ -140,15 +144,39 @@ class ServiceContainer:
                 logger.info("DialoguesIndexRepository initialisé dans le container.")
             return self._dialogues_index_repository
 
+    def get_dialogue_shares_repository(self) -> DialogueSharesRepository:
+        """Retourne le repository des partages co-édition."""
+        with self._database_lock:
+            if self._dialogue_shares_repository is None:
+                self._dialogue_shares_repository = DialogueSharesRepository(
+                    self.get_database_connection()
+                )
+                logger.info("DialogueSharesRepository initialisé dans le container.")
+            return self._dialogue_shares_repository
+
     def get_document_persistence_service(self) -> DocumentPersistenceService:
         """Retourne l'autorité injectée de persistance et d'accès dialogue."""
         with self._database_lock:
             if self._document_persistence_service is None:
                 self._document_persistence_service = DocumentPersistenceService(
-                    self.get_dialogues_index_repository()
+                    self.get_dialogues_index_repository(),
+                    self.get_dialogue_shares_repository(),
                 )
                 logger.info("DocumentPersistenceService initialisé dans le container.")
             return self._document_persistence_service
+
+    def get_dialogue_sharing_service(self) -> DialogueSharingService:
+        """Retourne le service de partage co-édition entre writers."""
+        with self._database_lock:
+            if self._dialogue_sharing_service is None:
+                self._dialogue_sharing_service = DialogueSharingService(
+                    shares_repository=self.get_dialogue_shares_repository(),
+                    dialogues_index_repository=self.get_dialogues_index_repository(),
+                    user_repository=self.get_user_repository(),
+                    persistence_service=self.get_document_persistence_service(),
+                )
+                logger.info("DialogueSharingService initialisé dans le container.")
+            return self._dialogue_sharing_service
 
     def get_auth_service(self) -> AuthService:
         """Retourne le service d'authentification avec son repository injecté."""
@@ -543,7 +571,9 @@ class ServiceContainer:
             self._user_repository = None
             self._app_settings_repository = None
             self._dialogues_index_repository = None
+            self._dialogue_shares_repository = None
             self._document_persistence_service = None
+            self._dialogue_sharing_service = None
             self._auth_service = None
     
     def reset(self) -> None:

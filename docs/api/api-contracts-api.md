@@ -186,6 +186,32 @@ Build context summary from selected elements.
 
 ## Dialogue Generation Endpoints (`/api/v1/dialogues`)
 
+### Dialogue Shares (Story 7.6 / FR69)
+
+Owner or admin only. Guests receive `403`. Target must be an active `writer`
+account invited by `username`. Co-editors get `can_edit` without `can_delete`.
+
+#### GET `/dialogues/{document_id}/shares`
+List active co-editors as `DialogueShareResponse[]`.
+
+#### POST `/dialogues/{document_id}/shares`
+Invite a writer. Body: `{ "username": "writer-b" }`. Returns `201`.
+Unknown/inactive/non-writer → `404`. Duplicate → `409`. Self/owner share → `400`.
+Non-owner non-admin → `403`.
+
+#### DELETE `/dialogues/{document_id}/shares/{user_id}`
+Revoke a share. Returns `204`, or `404` if absent.
+
+```json
+{
+  "document_id": "shared-doc",
+  "user_id": "writer-b",
+  "username": "writer-b",
+  "permission": "writer",
+  "created_at": "2026-07-17T10:00:00"
+}
+```
+
 ### POST `/dialogues/estimate-tokens`
 Estimate token count for a prompt without generating dialogue.
 

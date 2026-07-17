@@ -47,6 +47,7 @@ from services.repositories.sqlite import (
     UserRepository,
 )
 from services.document_persistence_service import DocumentPersistenceService
+from services.dialogue_sharing_service import DialogueSharingService
 from constants import FilePaths, Defaults
 
 logger = logging.getLogger(__name__)
@@ -100,6 +101,11 @@ def get_dialogues_index_repository(request: Request) -> DialoguesIndexRepository
 def get_document_persistence_service(request: Request) -> DocumentPersistenceService:
     """Retourne l'autorité de persistance et d'accès des dialogues."""
     return get_service_container(request).get_document_persistence_service()
+
+
+def get_dialogue_sharing_service(request: Request) -> DialogueSharingService:
+    """Retourne le service de partage co-édition des dialogues."""
+    return get_service_container(request).get_dialogue_sharing_service()
 
 
 def get_auth_service(request: Request) -> AuthService:

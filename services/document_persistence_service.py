@@ -12,6 +12,9 @@ import threading
 from typing import Mapping
 from uuid import uuid4
 
+from services.repositories.sqlite.dialogue_shares_repository import (
+    DialogueSharesRepository,
+)
 from services.repositories.sqlite.dialogues_index_repository import (
     DialogueIndexEntry,
     DialoguesIndexRepository,
@@ -67,9 +70,14 @@ class PersistedLayout:
 class DocumentPersistenceService:
     """Centralise RBAC, révisions, fichiers et index SQLite."""
 
-    def __init__(self, repository: DialoguesIndexRepository) -> None:
-        """Initialise le service avec son repository injecté."""
+    def __init__(
+        self,
+        repository: DialoguesIndexRepository,
+        shares_repository: DialogueSharesRepository | None = None,
+    ) -> None:
+        """Initialise le service avec l'index et les partages injectés."""
         self._repository = repository
+        self._shares_repository = shares_repository
         self._lock = threading.RLock()
 
     @staticmethod
@@ -116,7 +124,7 @@ class DocumentPersistenceService:
         current_user: Mapping[str, object],
         document_path: Path | None = None,
     ) -> DialogueCapabilities:
-        """Calcule les capacités owner/admin/guest sans divulguer le propriétaire."""
+        """Calcule les capacités owner/admin/guest/co-éditeur sans divulguer le propriétaire."""
         if self._is_guest(current_user):
             return DialogueCapabilities(
                 can_read=True,
@@ -137,12 +145,31 @@ class DocumentPersistenceService:
             and entry is not None
             and entry.owner_id == actor_id
         )
-        allowed = path_matches and (self._is_admin(current_user) or is_owner)
+        if path_matches and (self._is_admin(current_user) or is_owner):
+            return DialogueCapabilities(
+                can_read=True,
+                can_edit=True,
+                can_delete=True,
+                is_owner=is_owner,
+            )
+        is_shared_writer = (
+            path_matches
+            and entry is not None
+            and self._shares_repository is not None
+            and self._shares_repository.has_writer_share(document_id, actor_id)
+        )
+        if is_shared_writer:
+            return DialogueCapabilities(
+                can_read=True,
+                can_edit=True,
+                can_delete=False,
+                is_owner=False,
+            )
         return DialogueCapabilities(
-            can_read=allowed,
-            can_edit=allowed,
-            can_delete=allowed,
-            is_owner=is_owner,
+            can_read=False,
+            can_edit=False,
+            can_delete=False,
+            is_owner=False,
         )
 
     def require_access(
@@ -165,11 +192,25 @@ class DocumentPersistenceService:
         current_user: Mapping[str, object],
         document_path: Path | None = None,
     ) -> DialogueCapabilities:
-        """Autorise uniquement une mutation (owner/admin, jamais invité)."""
+        """Autorise une mutation d'édition (owner/admin/co-éditeur writer)."""
         capabilities = self.require_access(document_id, current_user, document_path)
         if not capabilities.can_edit:
             raise DialogueAccessDeniedError(
                 f"Écriture refusée pour le dialogue {document_id}"
+            )
+        return capabilities
+
+    def require_delete(
+        self,
+        document_id: str,
+        current_user: Mapping[str, object],
+        document_path: Path | None = None,
+    ) -> DialogueCapabilities:
+        """Autorise uniquement la suppression (owner/admin, pas co-éditeur)."""
+        capabilities = self.require_access(document_id, current_user, document_path)
+        if not capabilities.can_delete:
+            raise DialogueAccessDeniedError(
+                f"Suppression refusée pour le dialogue {document_id}"
             )
         return capabilities
 
@@ -491,7 +532,7 @@ class DocumentPersistenceService:
         """Supprime document, révisions, layout, séquence et index en compensation."""
         with self._lock:
             document_path = document_base_dir / f"{document_id}.json"
-            self.require_edit(document_id, current_user, document_path)
+            self.require_delete(document_id, current_user, document_path)
             if not document_path.exists():
                 raise DialogueNotFoundError(document_id)
             paths: list[Path] = [

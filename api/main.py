@@ -646,6 +646,7 @@ from api.routers import (
     config,
     context,
     costs,
+    dialogue_shares,
     dialogues,
     documents,
     exports,
@@ -672,6 +673,7 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(users.router, prefix="/api/v1", tags=["Users"])
 app.include_router(admin.router, prefix="/api/v1", tags=["Admin Settings"])
 app.include_router(dialogues.router, prefix="/api/v1/dialogues", tags=["Dialogues"])
+app.include_router(dialogue_shares.router, prefix="/api/v1/dialogues", tags=["Dialogue Shares"])
 app.include_router(streaming.router, prefix="/api/v1/dialogues", tags=["Dialogues"])  # SSE streaming (Story 0.2)
 app.include_router(unity_dialogues.router, prefix="/api/v1/unity-dialogues", tags=["Unity Dialogues"])
 app.include_router(documents.router, prefix="/api/v1/documents", tags=["Documents"])
