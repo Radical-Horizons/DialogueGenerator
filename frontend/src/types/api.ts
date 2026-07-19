@@ -57,6 +57,34 @@ export interface UserUpdateRequest {
   is_active?: boolean
 }
 
+export interface AuditLogEntry {
+  id: string
+  created_at: string
+  actor_user_id?: string | null
+  actor_username: string
+  action: string
+  target_type: string
+  target_id: string
+  metadata: Record<string, unknown>
+}
+
+export interface AuditLogListResponse {
+  items: AuditLogEntry[]
+  total: number
+  page: number
+  page_size: number
+}
+
+export interface AuditLogListParams {
+  page?: number
+  page_size?: number
+  user_id?: string
+  username?: string
+  action?: string
+  start_date?: string
+  end_date?: string
+}
+
 // Dialogue
 export type ElementMode = 'full' | 'excerpt'
 

@@ -48,6 +48,7 @@ from services.repositories.sqlite import (
 )
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
+from services.audit_log_service import AuditLogService
 from constants import FilePaths, Defaults
 
 logger = logging.getLogger(__name__)
@@ -106,6 +107,11 @@ def get_document_persistence_service(request: Request) -> DocumentPersistenceSer
 def get_dialogue_sharing_service(request: Request) -> DialogueSharingService:
     """Retourne le service de partage co-édition des dialogues."""
     return get_service_container(request).get_dialogue_sharing_service()
+
+
+def get_audit_log_service(request: Request) -> AuditLogService:
+    """Retourne le service d'audit des mutations sensibles."""
+    return get_service_container(request).get_audit_log_service()
 
 
 def get_auth_service(request: Request) -> AuthService:

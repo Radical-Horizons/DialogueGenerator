@@ -9,7 +9,7 @@ import logging
 import os
 from pathlib import Path
 import threading
-from typing import Mapping
+from typing import TYPE_CHECKING, Mapping
 from uuid import uuid4
 
 from services.repositories.sqlite.dialogue_shares_repository import (
@@ -19,6 +19,9 @@ from services.repositories.sqlite.dialogues_index_repository import (
     DialogueIndexEntry,
     DialoguesIndexRepository,
 )
+
+if TYPE_CHECKING:
+    from services.audit_log_service import AuditLogService
 
 logger = logging.getLogger(__name__)
 
@@ -74,10 +77,12 @@ class DocumentPersistenceService:
         self,
         repository: DialoguesIndexRepository,
         shares_repository: DialogueSharesRepository | None = None,
+        audit_log_service: "AuditLogService | None" = None,
     ) -> None:
         """Initialise le service avec l'index et les partages injectés."""
         self._repository = repository
         self._shares_repository = shares_repository
+        self._audit_log_service = audit_log_service
         self._lock = threading.RLock()
 
     @staticmethod
@@ -437,6 +442,17 @@ class DocumentPersistenceService:
                     document_id,
                 )
                 raise
+            if self._audit_log_service is not None:
+                self._audit_log_service.log_action(
+                    action="dialogue.saved",
+                    target_type="dialogue",
+                    target_id=document_id,
+                    actor=current_user,
+                    metadata={
+                        "revision": new_revision,
+                        "created": not existed and entry is None,
+                    },
+                )
             return new_revision
 
     def read_layout(
@@ -559,3 +575,10 @@ class DocumentPersistenceService:
                     document_id,
                 )
                 raise
+            if self._audit_log_service is not None:
+                self._audit_log_service.log_action(
+                    action="dialogue.deleted",
+                    target_type="dialogue",
+                    target_id=document_id,
+                    actor=current_user,
+                )

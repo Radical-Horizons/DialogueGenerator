@@ -2,7 +2,7 @@
 import logging
 import os
 from datetime import datetime, timedelta, timezone
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 from uuid import uuid4
 
 import bcrypt
@@ -15,6 +15,9 @@ from services.repositories.sqlite.user_repository import (
     IUserRepository,
     UserRecord,
 )
+
+if TYPE_CHECKING:
+    from services.audit_log_service import AuditLogService
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +34,11 @@ _DUMMY_PASSWORD_HASH = bcrypt.hashpw(b"timing-only-password", bcrypt.gensalt())
 class AuthService:
     """Service pour gérer l'authentification et les tokens JWT."""
     
-    def __init__(self, user_repository: IUserRepository | None = None) -> None:
+    def __init__(
+        self,
+        user_repository: IUserRepository | None = None,
+        audit_log_service: "AuditLogService | None" = None,
+    ) -> None:
         """Initialise le service d'authentification."""
         security_config = get_security_config()
         self.secret_key = security_config.jwt_secret_key
@@ -39,6 +46,7 @@ class AuthService:
         self.access_token_expire = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         self.refresh_token_expire = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
         self._user_repository = user_repository
+        self._audit_log_service = audit_log_service
 
     def create_user(
         self,
@@ -88,6 +96,14 @@ class AuthService:
                 "new_role": role,
             },
         )
+        if self._audit_log_service is not None:
+            self._audit_log_service.log_action(
+                action="user.created",
+                target_type="user",
+                target_id=user["id"],
+                actor=actor,
+                metadata={"new_role": role, "username": user["username"]},
+            )
         return user
 
     def list_users(self) -> list[UserRecord]:
@@ -141,6 +157,17 @@ class AuthService:
                     "new_is_active": updated["is_active"],
                 },
             )
+            if self._audit_log_service is not None:
+                self._audit_log_service.log_action(
+                    action="user.role_status.updated",
+                    target_type="user",
+                    target_id=user_id,
+                    actor=actor,
+                    metadata={
+                        "new_role": updated["role"],
+                        "new_is_active": updated["is_active"],
+                    },
+                )
         return updated
 
     def seed_admin_if_needed(self, admin_password: str | None) -> None:

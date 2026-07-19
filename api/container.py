@@ -33,11 +33,13 @@ from services.context_dropping_rules_service import ContextDroppingRulesService
 from services.repositories.sqlite.bootstrap import resolve_database_path
 from services.repositories.sqlite import (
     AppSettingsRepository,
+    AuditLogsRepository,
     DatabaseConnection,
     DialogueSharesRepository,
     DialoguesIndexRepository,
     UserRepository,
 )
+from services.audit_log_service import AuditLogService
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
 from api.services.auth_service import AuthService
@@ -94,6 +96,8 @@ class ServiceContainer:
         self._app_settings_repository: Optional[AppSettingsRepository] = None
         self._dialogues_index_repository: Optional[DialoguesIndexRepository] = None
         self._dialogue_shares_repository: Optional[DialogueSharesRepository] = None
+        self._audit_logs_repository: Optional[AuditLogsRepository] = None
+        self._audit_log_service: Optional[AuditLogService] = None
         self._document_persistence_service: Optional[DocumentPersistenceService] = None
         self._dialogue_sharing_service: Optional[DialogueSharingService] = None
         self._auth_service: Optional[AuthService] = None
@@ -154,6 +158,26 @@ class ServiceContainer:
                 logger.info("DialogueSharesRepository initialisé dans le container.")
             return self._dialogue_shares_repository
 
+    def get_audit_logs_repository(self) -> AuditLogsRepository:
+        """Retourne le repository append-only des journaux d'audit."""
+        with self._database_lock:
+            if self._audit_logs_repository is None:
+                self._audit_logs_repository = AuditLogsRepository(
+                    self.get_database_connection()
+                )
+                logger.info("AuditLogsRepository initialisé dans le container.")
+            return self._audit_logs_repository
+
+    def get_audit_log_service(self) -> AuditLogService:
+        """Retourne le service d'audit des mutations sensibles."""
+        with self._database_lock:
+            if self._audit_log_service is None:
+                self._audit_log_service = AuditLogService(
+                    self.get_audit_logs_repository()
+                )
+                logger.info("AuditLogService initialisé dans le container.")
+            return self._audit_log_service
+
     def get_document_persistence_service(self) -> DocumentPersistenceService:
         """Retourne l'autorité injectée de persistance et d'accès dialogue."""
         with self._database_lock:
@@ -161,6 +185,7 @@ class ServiceContainer:
                 self._document_persistence_service = DocumentPersistenceService(
                     self.get_dialogues_index_repository(),
                     self.get_dialogue_shares_repository(),
+                    audit_log_service=self.get_audit_log_service(),
                 )
                 logger.info("DocumentPersistenceService initialisé dans le container.")
             return self._document_persistence_service
@@ -174,6 +199,7 @@ class ServiceContainer:
                     dialogues_index_repository=self.get_dialogues_index_repository(),
                     user_repository=self.get_user_repository(),
                     persistence_service=self.get_document_persistence_service(),
+                    audit_log_service=self.get_audit_log_service(),
                 )
                 logger.info("DialogueSharingService initialisé dans le container.")
             return self._dialogue_sharing_service
@@ -182,7 +208,10 @@ class ServiceContainer:
         """Retourne le service d'authentification avec son repository injecté."""
         with self._database_lock:
             if self._auth_service is None:
-                self._auth_service = AuthService(self.get_user_repository())
+                self._auth_service = AuthService(
+                    self.get_user_repository(),
+                    audit_log_service=self.get_audit_log_service(),
+                )
                 logger.info("AuthService initialisé dans le container.")
             return self._auth_service
     
@@ -572,6 +601,8 @@ class ServiceContainer:
             self._app_settings_repository = None
             self._dialogues_index_repository = None
             self._dialogue_shares_repository = None
+            self._audit_logs_repository = None
+            self._audit_log_service = None
             self._document_persistence_service = None
             self._dialogue_sharing_service = None
             self._auth_service = None

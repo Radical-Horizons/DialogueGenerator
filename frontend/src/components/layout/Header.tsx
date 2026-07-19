@@ -383,6 +383,7 @@ export function Header() {
                   </div>
                 </div>
                 {user.role === 'admin' && user.is_active && (
+                  <>
                   <button
                     onClick={(event) => {
                       event.stopPropagation()
@@ -405,6 +406,29 @@ export function Header() {
                   >
                     Gérer les utilisateurs
                   </button>
+                  <button
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      setIsUserMenuOpen(false)
+                      navigate('/admin/audit-logs')
+                    }}
+                    style={{
+                      width: '100%',
+                      minHeight: TOUCH_TARGET_MIN_PX,
+                      marginBottom: '0.5rem',
+                      padding: '0.5rem 0.75rem',
+                      fontSize: remSize('body'),
+                      backgroundColor: theme.button.default.background,
+                      color: theme.button.default.color,
+                      border: `1px solid ${theme.border.primary}`,
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    Journaux d’audit
+                  </button>
+                  </>
                 )}
                 <button
                   onClick={(e) => {

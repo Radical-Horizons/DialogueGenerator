@@ -29,3 +29,16 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-7-7-voir-qui-a-acces-a-chaque-dialogue-fr70.md`
   summary: Étendre la grille responsive toolbar UnityDialogueEditor pour Permissions + Partager en layout narrow.
   evidence: Revue 7.7 — zones CSS historiques à 4 actions ; boutons supplémentaires peuvent créer des lignes implicites.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-7-8-audit-logs-actions-utilisateurs-fr71.md`
+  summary: À la suppression d'un dialogue, émettre aussi des `dialogue.share.revoked` pour les co-éditeurs orphelins (CASCADE SQLite).
+  evidence: Revue 7.8 — `delete_document` journalise seulement `dialogue.deleted` ; les lignes `dialogue_shares` disparaissent sans entrée revoke.
+- source_spec: `_bmad-output/implementation-artifacts/spec-7-8-audit-logs-actions-utilisateurs-fr71.md`
+  summary: Réduire le bruit d'audit des `dialogue.saved` (autosaves / writes fréquents) via actions distinctes create vs update ou sampling.
+  evidence: Revue 7.8 — chaque write réussie produit une ligne ; acceptable MVP mais noie les événements sécurité.
+- source_spec: `_bmad-output/implementation-artifacts/spec-7-8-audit-logs-actions-utilisateurs-fr71.md`
+  summary: Durcir l'append-only `audit_logs` (triggers SQLite / droits) au-delà de l'absence d'API mutante.
+  evidence: Revue 7.8 — la convention repository n'empêche pas un DELETE SQL direct.
+- source_spec: `_bmad-output/implementation-artifacts/spec-7-8-audit-logs-actions-utilisateurs-fr71.md`
+  summary: Snapshot transactionnel COUNT+SELECT pour pagination audit sous écritures concurrentes.
+  evidence: Revue 7.8 — total et page peuvent diverger brièvement ; hors charge MVP 3–5 users.

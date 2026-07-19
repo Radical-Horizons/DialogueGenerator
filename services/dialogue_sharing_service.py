@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Mapping
+from typing import TYPE_CHECKING, Mapping
 
 from services.document_persistence_service import (
     DialogueAccessDeniedError,
@@ -17,6 +17,9 @@ from services.repositories.sqlite.dialogues_index_repository import (
     DialoguesIndexRepository,
 )
 from services.repositories.sqlite.user_repository import UserRepository
+
+if TYPE_CHECKING:
+    from services.audit_log_service import AuditLogService
 
 
 class DialogueShareNotFoundError(LookupError):
@@ -78,12 +81,14 @@ class DialogueSharingService:
         dialogues_index_repository: DialoguesIndexRepository,
         user_repository: UserRepository,
         persistence_service: DocumentPersistenceService,
+        audit_log_service: AuditLogService | None = None,
     ) -> None:
         """Injecte les dépendances SQLite et l'autorité d'accès."""
         self._shares = shares_repository
         self._index = dialogues_index_repository
         self._users = user_repository
         self._persistence = persistence_service
+        self._audit_log_service = audit_log_service
 
     def _require_share_manager(
         self,
@@ -227,6 +232,18 @@ class DialogueSharingService:
             raise DialogueShareNotFoundError(str(exc)) from exc
         except ValueError as exc:
             raise DialogueShareConflictError(str(exc), code="duplicate") from exc
+        if self._audit_log_service is not None:
+            self._audit_log_service.log_action(
+                action="dialogue.share.granted",
+                target_type="share",
+                target_id=f"{document_id}:{target['id']}",
+                actor=current_user,
+                metadata={
+                    "document_id": document_id,
+                    "shared_user_id": target["id"],
+                    "shared_username": target["username"],
+                },
+            )
         return self._to_view(created)
 
     def revoke_share(
@@ -240,4 +257,15 @@ class DialogueSharingService:
         if not self._shares.delete(document_id, user_id):
             raise DialogueShareNotFoundError(
                 f"Partage introuvable: {document_id}/{user_id}"
+            )
+        if self._audit_log_service is not None:
+            self._audit_log_service.log_action(
+                action="dialogue.share.revoked",
+                target_type="share",
+                target_id=f"{document_id}:{user_id}",
+                actor=current_user,
+                metadata={
+                    "document_id": document_id,
+                    "revoked_user_id": user_id,
+                },
             )

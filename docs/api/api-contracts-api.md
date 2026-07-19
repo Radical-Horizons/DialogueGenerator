@@ -78,6 +78,41 @@ rejected with `409`.
 }
 ```
 
+### GET `/audit-logs` (Story 7.8 / FR71)
+Paginated append-only audit trail. Admin only (`403` for writer/guest).
+Query: `page`, `page_size` (1–200), optional `user_id`, `username`, `action`,
+`start_date`, `end_date` (`YYYY-MM-DD`). Sorted `created_at` DESC.
+Invalid range (`start_date` > `end_date`) → `422`.
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "created_at": "2026-07-19T20:00:00+00:00",
+      "actor_user_id": "admin-a",
+      "actor_username": "admin-a",
+      "action": "user.created",
+      "target_type": "user",
+      "target_id": "writer-b",
+      "metadata": { "new_role": "writer" }
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "page_size": 50
+}
+```
+
+MVP actions: `user.created`, `user.role_status.updated`, `dialogue.saved`,
+`dialogue.deleted`, `dialogue.share.granted`, `dialogue.share.revoked`.
+
+### GET `/audit-logs/export` (Story 7.8 / FR71)
+Same filters as list. Query `format=json|csv` (default `json`). Returns a
+downloadable attachment. Admin only. Exports are capped at 10 000 rows; response
+headers `X-Audit-Export-Total`, `X-Audit-Export-Returned`, and
+`X-Audit-Export-Truncated` indicate whether older matches were omitted.
+
 ### GET `/admin/app-settings`
 List persisted, allowlisted non-secret settings.
 

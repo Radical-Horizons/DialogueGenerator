@@ -4,7 +4,9 @@
 
 ## Goal
 
-Permettre à une équipe narrative authentifiée de collaborer sur des dialogues avec des droits explicites, tout en donnant aux invités un accès en lecture seule sans compte. L’epic remplace les identités volatiles par une fondation SQLite locale, conserve les dialogues comme fichiers JSON, centralise leur propriété et leurs partages, et rend les actions sensibles traçables pour soutenir 3 à 5 utilisateurs concurrents au MVP.
+Permettre à une équipe narrative authentifiée (admin, writers) de collaborer sur des dialogues avec propriété, partage et RBAC explicites, tout en offrant aux visiteurs hors projet une démo lecture seule sans compte. L’epic persiste identités, index, partages et préférences dans SQLite locale (`data/app.db`), conserve les graphes en JSON sur disque, et prépare l’audit des actions sensibles — pour 3 à 5 utilisateurs concurrents au MVP.
+
+**Note produit (stories livrées) :** l’accès invité (7.5) est une **session démo app-wide** via JWT `role=guest`, pas des liens `share_links` par dialogue (reporté). Le panneau permissions (7.7) reflète owner + co-éditeurs uniquement.
 
 ## Stories
 
@@ -13,7 +15,7 @@ Permettre à une équipe narrative authentifiée de collaborer sur des dialogues
 - Story 7.2: Se connecter et se déconnecter du système
 - Story 7.3: Administrateurs gèrent les utilisateurs
 - Story 7.4: Writers créent, éditent et suppriment dialogues
-- Story 7.5: Invités en lecture seule sans compte
+- Story 7.5: Invités en lecture seule sans compte (session démo app-wide)
 - Story 7.6: Partager dialogues en co-édition entre writers
 - Story 7.7: Voir qui a accès à chaque dialogue
 - Story 7.8: Audit logs actions utilisateurs
@@ -21,33 +23,35 @@ Permettre à une équipe narrative authentifiée de collaborer sur des dialogues
 
 ## Requirements & Constraints
 
-- L’inscription publique est fermée. Seul un administrateur crée des comptes; le rôle par défaut est `writer`, et les seuls rôles persistés sont `admin` et `writer`. La lecture invitée ne doit pas créer de compte ni de rôle `viewer`.
-- Le premier démarrage peut créer le compte `admin` seulement à partir de `ADMIN_PASSWORD`; aucun mot de passe ne doit être codé en dur. Les mots de passe sont hashés avec bcrypt, les JWT d’accès expirent après 15 minutes et le refresh repose sur un cookie `httpOnly` de 7 jours.
-- Un writer peut modifier ses propres dialogues et ceux partagés en co-édition. Les partages entre comptes n’acceptent que la permission `writer`; seul le propriétaire ou un administrateur peut les accorder ou les révoquer.
-- Un invité lit un dialogue uniquement avec un lien dédié valide, non expiré et non révoqué. L’API doit refuser toute mutation et toute génération, indépendamment des protections de l’interface; l’export Unity reste autorisé.
-- Les mutations importantes — comptes, rôles, dialogues, partages et révocations — produisent des entrées d’audit append-only. Consultation, filtrage et export des audits sont réservés aux administrateurs.
-- Les accès doivent respecter propriétaire, partage et rôle avec une application systématique côté API. Le système vise 3 à 5 utilisateurs concurrents au MVP, puis 10+; les conflits d’édition doivent être détectés et signalés proprement.
-- Une migration SQLite défaillante doit empêcher les routes métier dépendantes de servir et apparaître explicitement dans les logs et l’état de santé.
-- Le mode local `DISABLE_AUTH=true` et le bypass frontend restent inchangés. Les tests d’authentification réelle utilisent `DISABLE_AUTH=false`; tous les tests SQLite utilisent une base temporaire, jamais `data/app.db`.
+- Inscription publique fermée : seul un admin crée des comptes. Rôles persistés : `admin` | `writer` uniquement — pas de `viewer` en base.
+- Bootstrap : compte seed `admin` au 1er démarrage si `ADMIN_PASSWORD` est défini ; jamais de mot de passe en dur. Mots de passe hashés bcrypt ; JWT access ~15 min + refresh cookie httpOnly 7 j pour les comptes.
+- Writers/admins : CRUD dialogues propres ; co-éditeurs (partage `writer`) peuvent lire/éditer mais pas supprimer ni gérer les partages. Isolation owner stricte sans partage.
+- Invités (FR68, livré 7.5) : bouton « Continuer en invité » → `POST /api/v1/auth/guest` → JWT `role=guest` 8 h, **sans** refresh cookie, **sans** ligne `users`. Lecture globale (liste + graphe) ; mutations, génération LLM et admin → 403 API + UI. Export Unity client-only autorisé. **Ne pas** implémenter `share_links` / liens URL par dialogue (différé).
+- Partage entre comptes (7.6) : permission `writer` seule ; grant/revoke owner ou admin ; invitation par **username** d’un writer actif existant.
+- Visibilité permissions (7.7) : `GET …/permissions` pour users authentifiés non-guest avec `can_read` ; réponse owner + co-éditeurs + `can_manage`. Badges liste : `Privé` | `Co-édité (N)` via `share_count` — pas de badge « Lien invité ».
+- Audit (7.8, à venir) : journal append-only sur mutations réussies ; consultation admin-only, paginée, export CSV/JSON.
+- Préférences (7.9) : namespaces `context` et `generation` ; source de vérité API ; migration localStorage best-effort au 1er login sans écraser le serveur.
+- RBAC appliqué côté API (UI en miroir, jamais seule garde). Migration SQLite échouée → routes métier dépendantes refusées, état visible dans `/health`.
+- Dev local : `DISABLE_AUTH=true` et bypass frontend inchangés. Tests auth réels avec `DISABLE_AUTH=false` ; tests SQLite sur base temporaire, jamais `data/app.db`.
 
 ## Technical Decisions
 
-- La base relationnelle locale est `data/app.db`, créée au démarrage et ignorée par Git avec ses fichiers WAL/SHM. Les migrations SQL sont numérotées, atomiques, idempotentes et suivies dans `schema_migrations`; le mode WAL soutient les lectures concurrentes.
-- SQLite stocke `users`, `user_settings`, `app_settings`, `dialogues_index`, `dialogue_shares`, `share_links` et `audit_logs`. Les graphes restent des JSON sur disque; l’index conserve notamment propriétaire, dernier éditeur, dates et chemin de stockage.
-- L’accès SQLite passe par des repositories sous `services/repositories/sqlite/`. Connexion et repositories sont injectés via `ServiceContainer`; aucun singleton global. `AuthService` délègue à `UserRepository` et remplace le stockage utilisateur en mémoire sans casser les flux login, refresh et logout existants.
-- Les contrôles RBAC sont des dépendances backend sur les routes concernées, puis reflétés dans le frontend. L’index dialogue est mis à jour seulement après la réussite de la persistance du document.
-- Les préférences des namespaces `context` et `generation` ont l’API comme source de vérité. Au premier login, la migration depuis `localStorage` est best-effort et ne remplace jamais des valeurs déjà présentes côté serveur.
-- Les paramètres applicatifs globaux ne contiennent que des valeurs non secrètes. Les actions d’audit sont émises par les services métier afin de journaliser uniquement les mutations réussies.
+- Base `data/app.db` (WAL recommandé), migrations numérotées dans `services/repositories/sqlite/migrations/`, suivi `schema_migrations`. Tables : `users`, `user_settings`, `app_settings`, `dialogues_index`, `dialogue_shares` (migration **004**), `audit_logs`. **`share_links` non implémentée** (différé).
+- Graphes JSON restent sur disque ; `dialogues_index` trace owner, `last_modified_by`, dates, `storage_path`. Upsert index après persistance document réussie.
+- Repositories sous `services/repositories/sqlite/` ; injection via `ServiceContainer` (`api/container.py`). `AuthService` → `UserRepository` (plus de dict in-memory). Guest résolu depuis claim JWT, hors SQLite.
+- Capabilities (`can_read`, `can_edit`, `can_delete`, `can_manage`) centralisées backend ; dépendances `require_admin`, `require_edit`, etc. sur routers concernés.
+- Endpoints clés : `/api/v1/auth/*` (login, refresh, logout, **guest**), `/api/v1/users/*` (admin), `/api/v1/dialogues/{id}/shares`, `/api/v1/dialogues/{id}/permissions`, `/api/v1/users/me/settings`. Pas de `/auth/register` public.
+- `app_settings` : clés non-secrets uniquement, `updated_by` tracé. Audit émis depuis services métier (pas middleware seul).
 
 ## UX & Interaction Patterns
 
-- L’interface masque ou désactive les actions selon les permissions, mais conserve des retours explicites et accessibles en cas de refus. Gestion des utilisateurs et audits sont réservés aux administrateurs.
-- La route invitée affiche clairement « Mode invité — lecture seule » et rend l’édition, le déplacement, la sauvegarde et la génération indisponibles. Un lien expiré ou révoqué produit un message actionnable.
-- Le panneau de permissions présente propriétaire, co-éditeurs et liens invités actifs. Les révocations et promotions administrateur utilisent une confirmation explicite; les formulaires gardent validation en temps réel, focus visible et navigation clavier.
-- La liste des dialogues expose un statut compréhensible — privé, co-édité ou lien invité actif — sans révéler d’information inaccessible.
+- Admin : gestion utilisateurs, promotion admin avec confirmation, audits (7.8). Writer : pas d’accès admin ni gestion comptes.
+- Invité : bannière « Mode invité — lecture seule » ; create/save/generate/delete/admin masqués ou désactivés ; token expiré → retour login sans refresh silencieux.
+- Partage : `DialogueSharingModal` pour invite/révocation (owner/admin). `DialoguePermissionsPanel` pour lecture owner + co-éditeurs et révocation si `can_manage`.
+- Liste dialogues : badge/tooltip `Privé` si `share_count === 0`, sinon `Co-édité (N)`. Guest : pas de panneau permissions (403).
 
 ## Cross-Story Dependencies
 
-- 7.0 débloque toutes les autres stories; 7.1 fournit les comptes à 7.2 et 7.3. 7.4 pose `dialogues_index`, requis par les partages et consommé par le listing/recherche de l’Epic 8.
-- 7.5 et 7.6 alimentent la vue agrégée de 7.7; 7.8 journalise les mutations introduites par 7.3 à 7.7. 7.9 dépend du login persistant de 7.2.
-- L’Epic 0 fournit JWT, rate limiting et configuration de sécurité. L’Epic 10 peut exploiter `last_modified_by` et les audits; la co-édition temps réel reste hors périmètre.
+- 7.0 → fondation pour 7.1–7.9. 7.1 comptes → 7.2 login → 7.3 UI admin. 7.4 `dialogues_index` → 7.6 partages, 7.7 permissions, Epic 8 listing/recherche.
+- 7.5 guest app-wide indépendant des partages ; 7.6 alimente 7.7 ; 7.8 journalise mutations 7.3–7.7 ; 7.9 dépend login 7.2.
+- Epic 0 : JWT, rate limit, SecurityConfig. Epic 10 : `last_modified_by`, audit. Co-édition temps réel hors périmètre.
