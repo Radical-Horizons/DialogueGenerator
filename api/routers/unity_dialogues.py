@@ -18,6 +18,7 @@ from api.schemas.dialogue import (
 )
 from api.dependencies import (
     get_config_service,
+    get_dialogue_sharing_service,
     get_document_persistence_service,
     get_request_id
 )
@@ -28,6 +29,7 @@ from services.document_persistence_service import (
     DialogueNotFoundError,
     DocumentPersistenceService,
 )
+from services.dialogue_sharing_service import DialogueSharingService
 from api.utils.unity_schema_validator import load_unity_schema, schema_exists
 
 logger = logging.getLogger(__name__)
@@ -86,6 +88,10 @@ async def list_unity_dialogues(
         DocumentPersistenceService,
         Depends(get_document_persistence_service),
     ],
+    sharing_service: Annotated[
+        DialogueSharingService,
+        Depends(get_dialogue_sharing_service),
+    ],
     current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> UnityDialogueListResponse:
@@ -123,6 +129,9 @@ async def list_unity_dialogues(
             if not path.name.endswith(".layout.json")
             and not path.name.endswith(".json.json")
         ]
+        share_counts = sharing_service.count_shares_by_document_ids(
+            [path.stem for path in json_files]
+        )
         metadata_list = []
         
         for json_file in json_files:
@@ -153,6 +162,7 @@ async def list_unity_dialogues(
                     size_bytes=stat.st_size,
                     modified_time=datetime.fromtimestamp(stat.st_mtime).isoformat(),
                     title=title,
+                    share_count=share_counts.get(document_id, 0),
                     capabilities=_capabilities_payload(
                         persistence_service.capabilities(
                             document_id,

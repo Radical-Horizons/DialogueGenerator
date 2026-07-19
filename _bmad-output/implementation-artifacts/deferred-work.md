@@ -16,3 +16,16 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-7-5-invites-lecture-seule-sans-compte-fr68.md`
   summary: Appliquer `require_non_guest` de façon systématique à tous les POST métier restants (config write, presets, GDD sync, quality LLM) plutôt qu’aux seuls chemins génération/mutation document.
   evidence: La revue 7.5 a durci generate-node, streaming jobs, unity-dialogue et save-and-write ; d’autres routes authentifiées restent appelables par un JWT guest sans écrire de documents.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-7-7-voir-qui-a-acces-a-chaque-dialogue-fr70.md`
+  summary: Découper les requêtes `IN (...)` de comptage de shares au-delà de la limite de paramètres SQLite.
+  evidence: Revue 7.7 — une bibliothèque très large pourrait faire échouer le listing Unity ; hors MVP (3–5 users).
+- source_spec: `_bmad-output/implementation-artifacts/spec-7-7-voir-qui-a-acces-a-chaque-dialogue-fr70.md`
+  summary: Rafraîchir `share_count` / badges liste après invite ou révocation depuis le panneau ou la modal.
+  evidence: Revue 7.7 — le panneau se met à jour localement mais la liste conserve l'ancien compte jusqu'au prochain fetch.
+- source_spec: `_bmad-output/implementation-artifacts/spec-7-7-voir-qui-a-acces-a-chaque-dialogue-fr70.md`
+  summary: Piège de focus / restauration focus pour DialoguePermissionsPanel (et alignement SharingModal).
+  evidence: Revue 7.7 — `aria-modal` seul ; même dette que la modal Partager 7.6.
+- source_spec: `_bmad-output/implementation-artifacts/spec-7-7-voir-qui-a-acces-a-chaque-dialogue-fr70.md`
+  summary: Étendre la grille responsive toolbar UnityDialogueEditor pour Permissions + Partager en layout narrow.
+  evidence: Revue 7.7 — zones CSS historiques à 4 actions ; boutons supplémentaires peuvent créer des lignes implicites.

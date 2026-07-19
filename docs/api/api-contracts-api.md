@@ -212,6 +212,33 @@ Revoke a share. Returns `204`, or `404` if absent.
 }
 ```
 
+### Dialogue Permissions (Story 7.7 / FR70)
+
+#### GET `/dialogues/{document_id}/permissions`
+Retourne le propriétaire, les co-éditeurs et `can_manage` à tout utilisateur
+authentifié non-guest disposant de `can_read`. `can_manage` vaut `true` pour le
+propriétaire ou un administrateur. Guest ou utilisateur sans lecture → `403` ;
+dialogue absent → `404`.
+
+```json
+{
+  "owner": {
+    "user_id": "writer-a",
+    "username": "writer-a"
+  },
+  "co_editors": [
+    {
+      "document_id": "shared-doc",
+      "user_id": "writer-b",
+      "username": "writer-b",
+      "permission": "writer",
+      "created_at": "2026-07-17T10:00:00"
+    }
+  ],
+  "can_manage": true
+}
+```
+
 ### POST `/dialogues/estimate-tokens`
 Estimate token count for a prompt without generating dialogue.
 
@@ -945,7 +972,9 @@ Implementation: `api/routers/mechanics_systems.py`, `services/game_systems_integ
 
 ### GET `/unity-dialogues`
 Liste uniquement les dialogues lisibles par l'utilisateur courant. Chaque item
-expose les capacités serveur ; les chemins historiques sont visibles aux admins.
+expose les capacités serveur et `share_count` (entier ≥ 0, nombre de
+co-éditeurs) ; les chemins historiques sont visibles aux admins. Le comptage est
+agrégé en une requête batch.
 
 **Response:** Dialogue file list
 

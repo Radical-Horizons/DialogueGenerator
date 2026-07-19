@@ -51,6 +51,23 @@ class DialogueShareView:
     created_at: str
 
 
+@dataclass(frozen=True)
+class DialoguePermissionUserView:
+    """Identité publique minimale d'un propriétaire de dialogue."""
+
+    user_id: str
+    username: str
+
+
+@dataclass(frozen=True)
+class DialoguePermissionsView:
+    """Agrégat lisible des permissions d'un dialogue."""
+
+    owner: DialoguePermissionUserView
+    co_editors: list[DialogueShareView]
+    can_manage: bool
+
+
 class DialogueSharingService:
     """Gère grant/revoke/list des partages writer, réservé owner/admin."""
 
@@ -112,6 +129,62 @@ class DialogueSharingService:
         """Liste les co-éditeurs d'un dialogue pour owner/admin."""
         self._require_share_manager(document_id, current_user)
         return [self._to_view(entry) for entry in self._shares.list_for_document(document_id)]
+
+    def get_permissions(
+        self,
+        document_id: str,
+        current_user: Mapping[str, object],
+    ) -> DialoguePermissionsView:
+        """Retourne owner et co-éditeurs à tout utilisateur non-guest avec lecture."""
+        if current_user.get("role") == "guest":
+            raise DialogueAccessDeniedError(
+                f"Lecture des permissions refusée pour {document_id}"
+            )
+        entry = self._index.find_by_document_id(document_id)
+        if entry is None:
+            raise DialogueShareNotFoundError(f"Dialogue non indexé: {document_id}")
+        capabilities = self._persistence.capabilities(document_id, current_user)
+        if not capabilities.can_read:
+            raise DialogueAccessDeniedError(
+                f"Lecture des permissions refusée pour {document_id}"
+            )
+
+        if not entry.owner_id:
+            owner = DialoguePermissionUserView(
+                user_id="unknown",
+                username="(sans propriétaire)",
+            )
+        else:
+            owner_record = self._users.find_by_id(entry.owner_id)
+            owner = DialoguePermissionUserView(
+                user_id=entry.owner_id,
+                username=(
+                    owner_record["username"]
+                    if owner_record is not None
+                    else entry.owner_id
+                ),
+            )
+        is_admin = (
+            current_user.get("role") == "admin"
+            and current_user.get("is_active") is True
+        )
+        return DialoguePermissionsView(
+            owner=owner,
+            co_editors=[
+                self._to_view(share)
+                for share in self._shares.list_active_writers_for_document(
+                    document_id
+                )
+            ],
+            can_manage=capabilities.is_owner or is_admin,
+        )
+
+    def count_shares_by_document_ids(
+        self,
+        document_ids: list[str],
+    ) -> dict[str, int]:
+        """Retourne les nombres de co-éditeurs pour un lot de documents."""
+        return self._shares.count_by_document_ids(document_ids)
 
     def grant_share(
         self,

@@ -36,6 +36,7 @@ describe('UnityDialogueList', () => {
           modified_time: '2026-04-08T12:00:00.000Z',
           size_bytes: 1024,
           title: 'Titre API',
+          share_count: 0,
           capabilities: {
             can_read: true,
             can_edit: true,
@@ -63,6 +64,35 @@ describe('UnityDialogueList', () => {
     const titleEl = screen.getByTestId('unity-dialogue-item-title')
     expect(titleEl).toHaveStyle({ fontSize: '0.8rem' })
     expect(titleEl).toHaveTextContent('Titre API')
+  })
+
+  it('affiche le badge Privé quand aucun co-éditeur n’existe', async () => {
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+
+    const badge = await screen.findByTestId('unity-dialogue-sharing-badge')
+    expect(badge).toHaveTextContent('Privé')
+    expect(badge).toHaveAttribute('title', 'Privé')
+  })
+
+  it('affiche le nombre de co-éditeurs dans le badge et son tooltip', async () => {
+    mockList.mockResolvedValueOnce({
+      dialogues: [
+        {
+          filename: 'shared.json',
+          file_path: '/data/shared.json',
+          modified_time: '2026-04-08T12:00:00.000Z',
+          size_bytes: 1024,
+          title: 'Partagé',
+          share_count: 2,
+        },
+      ],
+      total: 1,
+    })
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+
+    const badge = await screen.findByTestId('unity-dialogue-sharing-badge')
+    expect(badge).toHaveTextContent('Co-édité (2)')
+    expect(badge).toHaveAttribute('title', 'Co-édité (2)')
   })
 
   it('ouvre un menu contextuel au clic droit avec supprimer le dialogue', async () => {

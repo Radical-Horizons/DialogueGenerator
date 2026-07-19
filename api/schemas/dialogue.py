@@ -693,6 +693,11 @@ class UnityDialogueMetadata(BaseModel):
     size_bytes: int = Field(..., description="Taille en octets")
     modified_time: str = Field(..., description="Date de modification (ISO format)")
     title: Optional[str] = Field(None, description="Titre extrait du dialogue")
+    share_count: int = Field(
+        default=0,
+        ge=0,
+        description="Nombre de co-éditeurs partageant le dialogue.",
+    )
     capabilities: Optional[DialogueCapabilitiesResponse] = Field(
         default=None,
         description="Capacités CRUD calculées côté serveur.",

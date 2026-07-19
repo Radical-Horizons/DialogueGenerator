@@ -9,6 +9,7 @@ import { theme } from '../../theme'
 import { unityDialogueEditorChrome } from '../../theme/responsiveChrome'
 import { UnityDialogueEditor } from '../generation/UnityDialogueEditor'
 import { useDialogueEditionNarrow } from './DialogueEditionNarrowContext'
+import { DialoguePermissionsPanel } from './DialoguePermissionsPanel'
 import { DialogueSharingModal } from './DialogueSharingModal'
 import { useAuthStore } from '../../store/authStore'
 import { formatDialogueTitle } from '../../utils/formatDialogueTitle'
@@ -34,7 +35,8 @@ export function UnityDialogueDetails({
 }: UnityDialogueDetailsProps) {
   const isNarrow = useDialogueEditionNarrow()
   const tb = isNarrow ? unityDialogueEditorChrome.narrow : unityDialogueEditorChrome.comfortable
-  const userRole = useAuthStore((state) => state.user?.role)
+  const authUser = useAuthStore((state) => state.user)
+  const userRole = authUser?.role
   const [jsonContent, setJsonContent] = useState<string>('')
   const [title, setTitle] = useState<string>('')
   const [isLoading, setIsLoading] = useState(true)
@@ -45,8 +47,10 @@ export function UnityDialogueDetails({
   const [canEdit, setCanEdit] = useState(false)
   const [canDelete, setCanDelete] = useState(false)
   const [isOwner, setIsOwner] = useState(false)
+  const [permissionsPanelOpen, setPermissionsPanelOpen] = useState(false)
   const [shareModalOpen, setShareModalOpen] = useState(false)
   const canManageShares = isOwner || userRole === 'admin'
+  const canViewPermissions = Boolean(authUser && userRole !== 'guest')
 
   const loadDialogue = useCallback(async (propagateError = false) => {
     setIsLoading(true)
@@ -162,6 +166,11 @@ export function UnityDialogueDetails({
         open={shareModalOpen}
         onClose={() => setShareModalOpen(false)}
       />
+      <DialoguePermissionsPanel
+        documentId={filename.replace(/\.json$/i, '')}
+        open={permissionsPanelOpen}
+        onClose={() => setPermissionsPanelOpen(false)}
+      />
       <UnityDialogueEditor
         json_content={jsonContent}
         title={title}
@@ -175,6 +184,35 @@ export function UnityDialogueDetails({
         headerSelector={headerSelector}
         extraActions={
           <>
+            {canViewPermissions && (
+              <div style={{ width: isNarrow ? '100%' : undefined }}>
+                <button
+                  type="button"
+                  data-testid="dialogue-permissions-open"
+                  onClick={() => setPermissionsPanelOpen(true)}
+                  style={{
+                    padding: tb.toolbarButtonPadding,
+                    minHeight: `${tb.toolbarButtonMinHeightPx}px`,
+                    border: `1px solid ${theme.border.primary}`,
+                    borderRadius: '6px',
+                    backgroundColor: theme.button.secondary.background,
+                    color: theme.button.secondary.color,
+                    cursor: 'pointer',
+                    fontSize: `${tb.toolbarButtonFontRem}rem`,
+                    fontWeight: tb.toolbarButtonFontWeight,
+                    lineHeight: 1.25,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxSizing: 'border-box',
+                    width: isNarrow ? '100%' : undefined,
+                    minWidth: isNarrow ? 0 : undefined,
+                  }}
+                >
+                  Permissions
+                </button>
+              </div>
+            )}
             {canManageShares && (
               <div style={{ gridArea: isNarrow ? 'share' : undefined, width: isNarrow ? '100%' : undefined }}>
                 <button

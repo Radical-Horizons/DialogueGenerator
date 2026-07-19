@@ -84,6 +84,9 @@ export const UnityDialogueItem = memo(
       }
 
       const titleText = getDialogueDisplayTitle(dialogue)
+      const shareCount = Math.max(0, dialogue.share_count ?? 0)
+      const sharingLabel =
+        shareCount === 0 ? 'Privé' : `Co-édité (${shareCount})`
 
       const selectionStyle = listItemSelectionStyle(isSelected)
 
@@ -132,6 +135,18 @@ export const UnityDialogueItem = memo(
             <span>{formatSize(dialogue.size_bytes)}</span>
             <span aria-hidden>•</span>
             <span>{formatDate(dialogue.modified_time)}</span>
+            <span
+              data-testid="unity-dialogue-sharing-badge"
+              title={sharingLabel}
+              style={{
+                padding: '0.05rem 0.3rem',
+                borderRadius: '999px',
+                border: `1px solid ${theme.border.primary}`,
+                color: theme.text.secondary,
+              }}
+            >
+              {sharingLabel}
+            </span>
           </div>
         </>
       )

@@ -72,6 +72,52 @@ class DialogueSharesRepository:
         )
         return [entry for row in rows if (entry := self._from_row(row)) is not None]
 
+    def list_active_writers_for_document(
+        self,
+        document_id: str,
+    ) -> list[DialogueShareEntry]:
+        """Liste les co-éditeurs writer actifs encore autorisés à éditer."""
+        rows = self._database.execute_fetchall(
+            """
+            SELECT s.document_id, s.user_id, s.permission, s.created_at, u.username
+            FROM dialogue_shares AS s
+            INNER JOIN users AS u ON u.id = s.user_id
+            WHERE s.document_id = ?
+              AND s.permission = 'writer'
+              AND u.role = 'writer'
+              AND u.is_active = 1
+            ORDER BY u.username ASC, s.user_id ASC
+            """,
+            (document_id,),
+        )
+        return [entry for row in rows if (entry := self._from_row(row)) is not None]
+
+    def count_by_document_ids(
+        self,
+        document_ids: list[str],
+    ) -> dict[str, int]:
+        """Compte les partages writer actifs par document (une requête)."""
+        unique_ids = list(dict.fromkeys(document_ids))
+        if not unique_ids:
+            return {}
+        placeholders = ", ".join("?" for _ in unique_ids)
+        rows = self._database.execute_fetchall(
+            f"""
+            SELECT s.document_id, COUNT(*)
+            FROM dialogue_shares AS s
+            INNER JOIN users AS u ON u.id = s.user_id
+            WHERE s.document_id IN ({placeholders})
+              AND s.permission = 'writer'
+              AND u.role = 'writer'
+              AND u.is_active = 1
+            GROUP BY s.document_id
+            """,
+            tuple(unique_ids),
+        )
+        counts = {document_id: 0 for document_id in unique_ids}
+        counts.update({str(row[0]): max(0, int(row[1])) for row in rows})
+        return counts
+
     def create(
         self,
         *,

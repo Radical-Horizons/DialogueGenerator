@@ -11,6 +11,10 @@ from api.dependencies import (
     require_non_guest,
 )
 from api.routers.auth import get_current_user
+from api.schemas.dialogue_permissions import (
+    DialoguePermissionsResponse,
+    DialoguePermissionUserResponse,
+)
 from api.schemas.dialogue_shares import (
     DialogueShareCreateRequest,
     DialogueShareResponse,
@@ -20,6 +24,7 @@ from services.dialogue_sharing_service import (
     DialogueShareNotFoundError,
     DialogueShareSelfShareError,
     DialogueSharingService,
+    DialoguePermissionsView,
     DialogueShareView,
 )
 from services.document_id_validation import validate_document_id
@@ -37,6 +42,55 @@ def _to_response(share: DialogueShareView) -> DialogueShareResponse:
         permission=share.permission,
         created_at=share.created_at,
     )
+
+
+def _permissions_to_response(
+    permissions: DialoguePermissionsView,
+) -> DialoguePermissionsResponse:
+    """Mappe l'agrégat service vers le contrat public."""
+    return DialoguePermissionsResponse(
+        owner=DialoguePermissionUserResponse(
+            user_id=permissions.owner.user_id,
+            username=permissions.owner.username,
+        ),
+        co_editors=[_to_response(share) for share in permissions.co_editors],
+        can_manage=permissions.can_manage,
+    )
+
+
+@router.get(
+    "/{document_id}/permissions",
+    response_model=DialoguePermissionsResponse,
+)
+async def get_dialogue_permissions(
+    document_id: str,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    sharing_service: Annotated[
+        DialogueSharingService, Depends(get_dialogue_sharing_service)
+    ],
+) -> DialoguePermissionsResponse:
+    """Expose owner et co-éditeurs aux utilisateurs autorisés en lecture."""
+    require_non_guest(current_user)
+    try:
+        document_id = validate_document_id(document_id)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        ) from exc
+    try:
+        permissions = sharing_service.get_permissions(document_id, current_user)
+    except DialogueAccessDeniedError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(exc),
+        ) from exc
+    except DialogueShareNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    return _permissions_to_response(permissions)
 
 
 @router.get(

@@ -509,6 +509,7 @@ export interface UnityDialogueMetadata {
   size_bytes: number
   modified_time: string
   title?: string
+  share_count?: number
   /** Présent côté UI / listes enrichies ; optionnel selon l’endpoint. */
   node_count?: number
   edge_count?: number
