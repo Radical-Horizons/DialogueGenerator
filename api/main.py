@@ -666,12 +666,14 @@ from api.routers import (
     presets,
     streaming,
     unity_dialogues,
+    user_settings,
     users,
 )
 from api.routers.auth import get_current_user
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(users.router, prefix="/api/v1", tags=["Users"])
+app.include_router(user_settings.router, prefix="/api/v1", tags=["User Settings"])
 app.include_router(audit_logs.router, prefix="/api/v1", tags=["Audit Logs"])
 app.include_router(admin.router, prefix="/api/v1", tags=["Admin Settings"])
 app.include_router(dialogues.router, prefix="/api/v1/dialogues", tags=["Dialogues"])

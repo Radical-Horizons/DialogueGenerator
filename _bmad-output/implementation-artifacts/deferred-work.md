@@ -42,3 +42,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-7-8-audit-logs-actions-utilisateurs-fr71.md`
   summary: Snapshot transactionnel COUNT+SELECT pour pagination audit sous écritures concurrentes.
   evidence: Revue 7.8 — total et page peuvent diverger brièvement ; hors charge MVP 3–5 users.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-7-9-preferences-utilisateur-synchronisees-serveur.md`
+  summary: Course TOCTOU multi-onglets sur la migrate localStorage → serveur (GET puis PUT des clés absentes).
+  evidence: Revue 7.9 — un second client peut peupler le serveur entre GET et PUT migrate ; acceptable best-effort MVP.

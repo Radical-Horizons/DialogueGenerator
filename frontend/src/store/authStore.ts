@@ -5,6 +5,10 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { UserResponse } from '../types/api'
 import * as authAPI from '../api/auth'
+import {
+  resetUserSettingsSync,
+  synchronizeUserSettings,
+} from '../hooks/useUserSettingsSync'
 
 export interface AuthState {
   user: UserResponse | null
@@ -77,6 +81,21 @@ const clearStoredTokens = () => {
   localStorage.removeItem('refresh_token')
 }
 
+const SETTINGS_SYNC_TIMEOUT_MS = 10_000
+
+async function syncUserSettingsNonBlocking(user: UserResponse): Promise<void> {
+  try {
+    await Promise.race([
+      synchronizeUserSettings(user),
+      new Promise<void>((resolve) => {
+        window.setTimeout(resolve, SETTINGS_SYNC_TIMEOUT_MS)
+      }),
+    ])
+  } catch (error) {
+    console.warn('Synchronisation des préférences utilisateur impossible:', error)
+  }
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -89,7 +108,9 @@ export const useAuthStore = create<AuthState>()(
         try {
           await authAPI.login({ username, password })
           const user = await authAPI.getCurrentUser()
-          set({ user, isAuthenticated: true, isLoading: false })
+          set({ user, isAuthenticated: true })
+          await syncUserSettingsNonBlocking(user)
+          set({ isLoading: false })
         } catch (error) {
           set({ isLoading: false })
           throw error
@@ -101,7 +122,9 @@ export const useAuthStore = create<AuthState>()(
         try {
           await authAPI.loginAsGuest()
           const user = await authAPI.getCurrentUser()
-          set({ user, isAuthenticated: true, isLoading: false })
+          set({ user, isAuthenticated: true })
+          await syncUserSettingsNonBlocking(user)
+          set({ isLoading: false })
         } catch (error) {
           set({ isLoading: false })
           throw error
@@ -115,6 +138,7 @@ export const useAuthStore = create<AuthState>()(
           // Ignorer les erreurs de déconnexion
         } finally {
           clearStoredTokens()
+          resetUserSettingsSync()
           set({ user: null, isAuthenticated: false })
         }
       },
@@ -123,7 +147,9 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true })
         try {
           const user = await authAPI.getCurrentUser()
-          set({ user, isAuthenticated: true, isLoading: false })
+          set({ user, isAuthenticated: true })
+          await syncUserSettingsNonBlocking(user)
+          set({ isLoading: false })
         } catch (error: unknown) {
           // Si le token est invalide ou utilisateur non connecté, nettoyer la session
           // Ne pas logger les erreurs 401 normales (utilisateur non connecté)
@@ -133,6 +159,7 @@ export const useAuthStore = create<AuthState>()(
             console.error('Erreur lors de la récupération de l\'utilisateur:', error)
           }
           clearStoredTokens()
+          resetUserSettingsSync()
           set({ user: null, isAuthenticated: false, isLoading: false })
           // Rejeter l'erreur pour que l'appelant puisse la gérer
           throw error
@@ -176,7 +203,9 @@ export const useAuthStore = create<AuthState>()(
             // Vérifier que le token est encore valide
             try {
               const user = await authAPI.getCurrentUser()
-              set({ user, isAuthenticated: true, isLoading: false })
+              set({ user, isAuthenticated: true })
+              await syncUserSettingsNonBlocking(user)
+              set({ isLoading: false })
               return // Sortir immédiatement, isLoading déjà à false
             } catch (error: unknown) {
               // Erreur 401 attendue si token invalide, nettoyer et continuer
@@ -186,6 +215,7 @@ export const useAuthStore = create<AuthState>()(
                 console.error('Erreur lors de la récupération de l\'utilisateur:', error)
               }
               clearStoredTokens()
+              resetUserSettingsSync()
               set({ user: null, isAuthenticated: false, isLoading: false })
               return // Sortir immédiatement, isLoading déjà à false
             }
@@ -197,6 +227,7 @@ export const useAuthStore = create<AuthState>()(
         } catch (error) {
           // En cas d'erreur inattendue, s'assurer que isLoading est false
           console.error('Erreur lors de l\'initialisation:', error)
+          resetUserSettingsSync()
           set({ isLoading: false, isAuthenticated: false, user: null })
         } finally {
           // Double sécurité : s'assurer que isLoading est toujours false à la fin

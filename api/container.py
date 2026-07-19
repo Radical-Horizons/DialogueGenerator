@@ -38,6 +38,7 @@ from services.repositories.sqlite import (
     DialogueSharesRepository,
     DialoguesIndexRepository,
     UserRepository,
+    UserSettingsRepository,
 )
 from services.audit_log_service import AuditLogService
 from services.document_persistence_service import DocumentPersistenceService
@@ -93,6 +94,7 @@ class ServiceContainer:
         self._global_relation_index: Optional[Dict[str, str]] = None
         self._database_connection: Optional[DatabaseConnection] = database_connection
         self._user_repository: Optional[UserRepository] = None
+        self._user_settings_repository: Optional[UserSettingsRepository] = None
         self._app_settings_repository: Optional[AppSettingsRepository] = None
         self._dialogues_index_repository: Optional[DialoguesIndexRepository] = None
         self._dialogue_shares_repository: Optional[DialogueSharesRepository] = None
@@ -127,6 +129,16 @@ class ServiceContainer:
                 self._user_repository = UserRepository(self.get_database_connection())
                 logger.info("UserRepository initialisé dans le container.")
             return self._user_repository
+
+    def get_user_settings_repository(self) -> UserSettingsRepository:
+        """Retourne le repository des préférences utilisateur partagé."""
+        with self._database_lock:
+            if self._user_settings_repository is None:
+                self._user_settings_repository = UserSettingsRepository(
+                    self.get_database_connection()
+                )
+                logger.info("UserSettingsRepository initialisé dans le container.")
+            return self._user_settings_repository
 
     def get_app_settings_repository(self) -> AppSettingsRepository:
         """Retourne le repository des réglages applicatifs partagé."""
@@ -598,6 +610,7 @@ class ServiceContainer:
                 self._database_connection.close()
             self._database_connection = None
             self._user_repository = None
+            self._user_settings_repository = None
             self._app_settings_repository = None
             self._dialogues_index_repository = None
             self._dialogue_shares_repository = None

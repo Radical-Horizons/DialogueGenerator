@@ -2,6 +2,7 @@
  * Persistance locale des options « détection AI slop » (FR43, MVP client).
  */
 import type { AiSlopDetectionOptionsState } from '../types/graph'
+import { queueUserSettingUpdate } from '../hooks/useUserSettingsSync'
 
 export type { AiSlopDetectionOptionsState }
 
@@ -46,6 +47,7 @@ export function saveSlopDetectionOptions(opts: AiSlopDetectionOptionsState): voi
   if (typeof localStorage === 'undefined') return
   try {
     localStorage.setItem(SLOP_DETECTION_STORAGE_KEY, JSON.stringify(opts))
+    queueUserSettingUpdate('generation', 'slop_detection', opts)
   } catch {
     /* ignore quota */
   }

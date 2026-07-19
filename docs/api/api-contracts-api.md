@@ -52,6 +52,35 @@ Logout and invalidate refresh token.
 
 ---
 
+## User Settings Endpoints (`/api/v1/users/me/settings`)
+
+These endpoints require an authenticated `admin` or `writer`; guests receive
+`403`. Values are isolated by the persisted SQLite user ID. Allowed namespaces
+are `context` and `generation`; an unknown namespace or key returns `422`.
+
+### GET `/users/me/settings`
+Returns all stored values grouped by namespace. A new account receives `{}`.
+
+### GET `/users/me/settings/{namespace}`
+Returns the namespace as a JSON map. Allowed keys are `config` for `context`,
+and `author_profile`, `draft`, `slop_detection` for `generation`.
+
+### PUT `/users/me/settings/{namespace}`
+Upserts only the supplied keys. Omitted keys are preserved; an empty map is a
+valid no-op. Values may be any JSON value.
+
+```json
+{
+  "author_profile": "Style concis",
+  "draft": { "userInstructions": "Rencontre initiale" }
+}
+```
+
+With `DISABLE_AUTH=true`, the synthetic principal is resolved to the persisted
+SQLite user named `admin` before writes, preserving the foreign key.
+
+---
+
 ## Administration Endpoints
 
 All endpoints in this section require an authenticated, active `admin`.

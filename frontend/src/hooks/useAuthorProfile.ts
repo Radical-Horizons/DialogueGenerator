@@ -2,6 +2,10 @@
  * Hook personnalisé pour gérer le profil d'auteur (global, réutilisable).
  */
 import { useState, useCallback, useEffect, useRef } from 'react'
+import {
+  queueUserSettingUpdate,
+  subscribeUserSettingsHydration,
+} from './useUserSettingsSync'
 
 const SAVED_AUTHOR_PROFILE_KEY = 'dialogue_generator_saved_author_profile'
 
@@ -44,10 +48,23 @@ export function useAuthorProfile() {
     }
   }, [])
 
+  useEffect(
+    () =>
+      subscribeUserSettingsHydration((settings) => {
+        const serverProfile = settings.generation?.author_profile
+        if (typeof serverProfile !== 'string') return
+        setSavedProfile(serverProfile)
+        setAuthorProfile(serverProfile)
+        isInitialLoad.current = false
+      }),
+    [],
+  )
+
   const saveProfile = useCallback((profile: string) => {
     try {
       localStorage.setItem(SAVED_AUTHOR_PROFILE_KEY, profile)
       setSavedProfile(profile)
+      queueUserSettingUpdate('generation', 'author_profile', profile)
     } catch (err) {
       console.error('Erreur lors de la sauvegarde du profil d\'auteur:', err)
       throw new Error('Impossible de sauvegarder le profil d\'auteur')
@@ -88,6 +105,7 @@ export function useAuthorProfile() {
       try {
         localStorage.setItem(SAVED_AUTHOR_PROFILE_KEY, authorProfile)
         setSavedProfile(authorProfile)
+        queueUserSettingUpdate('generation', 'author_profile', authorProfile)
       } catch (err) {
         console.warn('Impossible de sauvegarder automatiquement le profil d\'auteur:', err)
       }

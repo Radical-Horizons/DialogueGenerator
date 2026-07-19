@@ -45,6 +45,7 @@ from services.repositories.sqlite import (
     DatabaseConnection,
     DialoguesIndexRepository,
     UserRepository,
+    UserSettingsRepository,
 )
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
@@ -87,6 +88,11 @@ def get_database_connection(request: Request) -> DatabaseConnection:
 def get_user_repository(request: Request) -> UserRepository:
     """Retourne le repository utilisateur partagé du container."""
     return get_service_container(request).get_user_repository()
+
+
+def get_user_settings_repository(request: Request) -> UserSettingsRepository:
+    """Retourne le repository des préférences utilisateur du container."""
+    return get_service_container(request).get_user_settings_repository()
 
 
 def get_app_settings_repository(request: Request) -> AppSettingsRepository:

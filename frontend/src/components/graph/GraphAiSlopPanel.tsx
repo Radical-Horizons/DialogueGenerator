@@ -1,7 +1,7 @@
 /**
  * Panneau « AI slop » : détection heuristique GPT-isms, répétitions, génériques (FR43).
  */
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useGraphStore } from '../../store/graphStore'
 import { theme } from '../../theme'
 import * as graphAPI from '../../api/graph'
@@ -14,6 +14,7 @@ import {
   type AiSlopDetectionOptionsState,
 } from '../../utils/slopDetectionSettings'
 import { GraphToolFloatingShell } from './GraphToolFloatingShell'
+import { subscribeUserSettingsHydration } from '../../hooks/useUserSettingsSync'
 
 interface GraphAiSlopPanelProps {
   onClose: () => void
@@ -42,10 +43,27 @@ export function GraphAiSlopPanel({ onClose }: GraphAiSlopPanelProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [last, setLast] = useState<DetectAiSlopResponse | null>(null)
+  const skipNextSlopPersist = useRef(true)
 
   useEffect(() => {
+    if (skipNextSlopPersist.current) {
+      skipNextSlopPersist.current = false
+      return
+    }
     saveSlopDetectionOptions(opts)
   }, [opts])
+
+  useEffect(
+    () =>
+      subscribeUserSettingsHydration((settings) => {
+        if (settings.generation?.slop_detection === undefined) return
+        const hydrated = loadSlopDetectionOptions()
+        skipNextSlopPersist.current = true
+        setOpts(hydrated)
+        setKeywordDraft(hydrated.custom_keywords.join(', '))
+      }),
+    [],
+  )
 
   const runDetect = useCallback(async () => {
     setLoading(true)

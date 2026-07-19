@@ -16,6 +16,7 @@ from services.repositories.sqlite.dialogues_index_repository import (
     DialoguesIndexRepository,
 )
 from services.repositories.sqlite.user_repository import UserRepository
+from services.repositories.sqlite.user_settings_repository import UserSettingsRepository
 
 __all__ = [
     "AppSettingsRepository",
@@ -28,4 +29,5 @@ __all__ = [
     "DialogueSharesRepository",
     "DialoguesIndexRepository",
     "UserRepository",
+    "UserSettingsRepository",
 ]

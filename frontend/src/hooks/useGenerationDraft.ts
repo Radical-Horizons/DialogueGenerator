@@ -10,6 +10,10 @@ import type { ContextSelection } from '../types/api'
 import { CONTEXT_TOKENS_LIMITS } from '../constants'
 import { normalizeMaxCompletionTokensForUi } from '../utils/generationConfigNormalization'
 import type { SaveStatus } from '../components/shared/SaveStatusIndicator'
+import {
+  queueUserSettingUpdate,
+  subscribeUserSettingsHydration,
+} from './useUserSettingsSync'
 
 const DRAFT_STORAGE_KEY = 'generation_draft'
 
@@ -171,6 +175,7 @@ export function useGenerationDraft(
     }
     try {
       localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft))
+      queueUserSettingUpdate('generation', 'draft', draft)
       setIsDirty(false)
       setSaveStatus('saved')
       setDraftLastSavedAt(draft.timestamp)
@@ -288,6 +293,16 @@ export function useGenerationDraft(
     loadDraft()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Charger une seule fois au montage
+
+  useEffect(
+    () =>
+      subscribeUserSettingsHydration((settings) => {
+        if (settings.generation?.draft === undefined) return
+        if (isDirty) return
+        loadDraft()
+      }),
+    [isDirty, loadDraft],
+  )
 
   // Détecter les changements dans sceneSelection (après chargement initial)
   const [isInitialLoad, setIsInitialLoad] = useState(true)

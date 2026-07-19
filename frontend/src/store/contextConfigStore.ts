@@ -5,6 +5,11 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import * as configAPI from '../api/config'
 import { CONTEXT_TOKENS_LIMITS } from '../constants'
+import {
+  queueUserSettingUpdate,
+  registerContextSettingsAdapter,
+  USER_SETTING_STORAGE_KEYS,
+} from '../hooks/useUserSettingsSync'
 
 function clampContextTokenBudget(value: number): number {
   const n = Number.isFinite(value) ? Math.round(value) : CONTEXT_TOKENS_LIMITS.DEFAULT
@@ -592,4 +597,71 @@ export const useContextConfigStore = create<ContextConfigState>()(
     }
   )
 )
+
+function persistedContextConfig(state: ContextConfigState): Record<string, unknown> {
+  return {
+    fieldConfigs: state.fieldConfigs,
+    fieldDefaultsInitialized: state.fieldDefaultsInitialized,
+    fieldDefaultsVersion: state.fieldDefaultsVersion,
+    organization: state.organization,
+    contextTokenBudgetMax: state.contextTokenBudgetMax,
+    contextOptimizationPinnedKeys: state.contextOptimizationPinnedKeys,
+    contextOptimizationStrategy: state.contextOptimizationStrategy,
+    contextOptimizationProxyThreshold: state.contextOptimizationProxyThreshold,
+  }
+}
+
+registerContextSettingsAdapter({
+  readLocal: () => {
+    const raw = localStorage.getItem(USER_SETTING_STORAGE_KEYS.context)
+    if (raw === null) return undefined
+    try {
+      const persisted = JSON.parse(raw) as { state?: unknown }
+      return persisted.state
+    } catch {
+      return undefined
+    }
+  },
+  waitForLocalRehydrate: () => {
+    const api = useContextConfigStore.persist
+    if (api.hasHydrated()) return Promise.resolve()
+    return new Promise((resolve) => {
+      const unsub = api.onFinishHydration(() => {
+        unsub()
+        resolve()
+      })
+    })
+  },
+  hydrate: (value) => {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) return
+    const incoming = value as Partial<ContextConfigState>
+    useContextConfigStore.setState((current) => ({
+      ...current,
+      ...incoming,
+      fieldConfigs: incoming.fieldConfigs ?? current.fieldConfigs,
+      fieldDefaultsInitialized:
+        incoming.fieldDefaultsInitialized ?? current.fieldDefaultsInitialized,
+      fieldDefaultsVersion:
+        incoming.fieldDefaultsVersion ?? current.fieldDefaultsVersion,
+      organization: incoming.organization ?? current.organization,
+      contextTokenBudgetMax:
+        incoming.contextTokenBudgetMax ?? current.contextTokenBudgetMax,
+      contextOptimizationPinnedKeys:
+        incoming.contextOptimizationPinnedKeys ?? current.contextOptimizationPinnedKeys,
+      contextOptimizationStrategy:
+        incoming.contextOptimizationStrategy ?? current.contextOptimizationStrategy,
+      contextOptimizationProxyThreshold:
+        incoming.contextOptimizationProxyThreshold ??
+        current.contextOptimizationProxyThreshold,
+    }))
+  },
+})
+
+useContextConfigStore.subscribe((state, previousState) => {
+  const current = persistedContextConfig(state)
+  const previous = persistedContextConfig(previousState)
+  if (JSON.stringify(current) !== JSON.stringify(previous)) {
+    queueUserSettingUpdate('context', 'config', current)
+  }
+})
 
