@@ -11,15 +11,21 @@ export function LoginForm() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const { login, loginAsGuest, isLoading, isAuthenticated } = useAuthStore()
+  const { login, loginAsGuest, isLoading, isAuthenticated, user, bootError, clearBootError } = useAuthStore()
   const navigate = useNavigate()
 
-  // Rediriger si déjà connecté
+  // Rediriger seulement si compte writer/admin (guest doit pouvoir ouvrir /login)
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user && user.role !== 'guest') {
       navigate('/', { replace: true })
     }
-  }, [isAuthenticated, navigate])
+  }, [isAuthenticated, user, navigate])
+
+  useEffect(() => {
+    return () => {
+      clearBootError()
+    }
+  }, [clearBootError])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,7 +53,11 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit} style={{ maxWidth: '400px', margin: '0 auto' }}>
       <h2 style={{ color: theme.text.primary }}>Connexion</h2>
-      {error && <div style={{ color: theme.state.error.color, marginBottom: '1rem' }}>{error}</div>}
+      {(error || bootError) && (
+        <div style={{ color: theme.state.error.color, marginBottom: '1rem' }}>
+          {error || bootError}
+        </div>
+      )}
       <div style={{ marginBottom: '1rem' }}>
         <label htmlFor="username" style={{ color: theme.text.primary }}>
           Nom d'utilisateur:

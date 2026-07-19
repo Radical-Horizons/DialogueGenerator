@@ -19,40 +19,11 @@ import './App.css'
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, initialize } = useAuthStore()
 
-  // En développement, désactiver l'authentification
-  const isDev = import.meta.env.DEV
-
   useEffect(() => {
-    if (isDev) {
-      // En dev, on skip l'initialisation de l'auth
-      return
-    }
-    
-    // Initialiser la session au démarrage (vérifie le token dans localStorage)
-    if (import.meta.env.DEV) {
-      console.log('[ProtectedRoute] Initialisation...')
-    }
-    initialize().then(() => {
-      if (import.meta.env.DEV) {
-        console.log('[ProtectedRoute] Initialisation terminée')
-      }
-    }).catch((error) => {
+    void initialize().catch((error) => {
       console.error('[ProtectedRoute] Erreur lors de l\'initialisation:', error)
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Exécuter une seule fois au montage
-
-  // Log pour debug
-  useEffect(() => {
-    if (import.meta.env.DEV) {
-      console.log('[ProtectedRoute] State changé:', { isLoading, isAuthenticated, isDev })
-    }
-  }, [isLoading, isAuthenticated, isDev])
-
-  // En développement, toujours autoriser l'accès
-  if (isDev) {
-    return <>{children}</>
-  }
+  }, [initialize])
 
   if (isLoading) {
     return (
@@ -69,6 +40,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     )
   }
 
+  // Guest-first : initialize pose une session guest ; /login seulement si échec total
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
 }
 

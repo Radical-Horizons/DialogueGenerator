@@ -14,6 +14,6 @@ alwaysApply: false
 - **Ordre si pas dans cookbook** : serveur up → `/api/openapi.json` → grep `@router` dans `api/routers/`.
 - **Base URL dev** : `http://localhost:4243` (`npm run dev` ou `npm run start:api`).
 - **Invocation unique** : `npm run api:invoke -- -Method … -Path …` ; query params via **`-QueryString key=value`** (pas `-Query @{…}` : npm ne serialise pas les hashtables PowerShell).
-- **Auth dev** : `DISABLE_AUTH=true` → pas de JWT ; sinon login auto via le script.
+- **Auth locale** : défaut `DISABLE_AUTH=false` (JWT + guest UI). Le helper login auto si JWT requis. Pytest force `DISABLE_AUTH=true` via conftest.
 - **Exécuter** et montrer status + JSON ; ne pas réimplémenter la logique métier.
 - **Sync personnages** (Uresaïr, Valkazer, etc.) : `POST /api/v1/gdd-notion-sync/sync-entity` avec `{"name":"…"}` — une fiche, fuzzy ; pas `POST …/sync?category_file=Personnages.json` (base entière).

@@ -108,14 +108,8 @@ describe('user settings synchronization', () => {
     expect(putUserSettingsNamespace).not.toHaveBeenCalled()
   })
 
-  it('ignore les guests et le faux admin Vite', async () => {
+  it('ignore les guests', async () => {
     await synchronizeUserSettings({ ...writer, id: 'guest', role: 'guest' })
-    await synchronizeUserSettings({
-      ...writer,
-      id: '1',
-      username: 'admin',
-      role: 'admin',
-    })
 
     expect(getAllUserSettings).not.toHaveBeenCalled()
   })

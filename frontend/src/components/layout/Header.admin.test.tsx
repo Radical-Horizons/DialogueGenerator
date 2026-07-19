@@ -77,4 +77,26 @@ describe('Header admin navigation', () => {
     expect(screen.getByText('writer')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Gérer les utilisateurs' })).not.toBeInTheDocument()
   })
+
+  it('affiche Connexion pour un invité', () => {
+    mockedUseAuthStore.mockReturnValue({
+      user: {
+        id: 'guest-id',
+        username: 'guest',
+        role: 'guest',
+        is_active: true,
+      },
+      isAuthenticated: true,
+      logout: vi.fn(),
+    } as ReturnType<typeof useAuthStore>)
+    render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByTestId('header-login-button')).toHaveTextContent('Connexion')
+    expect(screen.getByTestId('guest-mode-banner')).toBeInTheDocument()
+    expect(screen.queryByText('Non connecté')).not.toBeInTheDocument()
+  })
 })

@@ -68,10 +68,9 @@ class SecurityConfig(BaseSettings):
     # Environment
     environment: str = "development"
 
-    # Dev only: skip JWT and use mock user (ignored when ENVIRONMENT=production).
-    # Défaut True : le dev local fonctionne sans .env ni login (voir .env.example).
-    # En production, validate_config() impose DISABLE_AUTH=false explicitement.
-    disable_auth: bool = True
+    # Dev/prod: JWT requis par défaut. Pytest force DISABLE_AUTH=true via conftest.
+    # En production, validate_config() refuse disable_auth=true.
+    disable_auth: bool = False
     
     @property
     def is_production(self) -> bool:

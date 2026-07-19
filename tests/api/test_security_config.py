@@ -21,7 +21,7 @@ def test_security_config_default_values():
         assert config.environment == "development"
         assert config.is_development is True
         assert config.is_production is False
-        assert config.disable_auth is True
+        assert config.disable_auth is False
 
 
 def test_security_config_from_env():
@@ -120,16 +120,20 @@ def test_security_config_validate_production_accepts_public_origin_only():
 
 def test_get_security_config_singleton():
     """Test que get_security_config retourne une instance singleton."""
-    with patch.dict(os.environ, {}, clear=True):
-        # Réinitialiser le singleton pour le test
-        import api.config.security_config
+    import api.config.security_config
+
+    try:
+        with patch.dict(os.environ, {"DISABLE_AUTH": "true"}, clear=True):
+            api.config.security_config._security_config = None
+
+            config1 = get_security_config()
+            config2 = get_security_config()
+
+            assert config1 is config2
+    finally:
+        # Évite de laisser un singleton créé sous env vidé (disable_auth=False)
+        # qui polluerait les tests suivants dépendant de DISABLE_AUTH=true.
         api.config.security_config._security_config = None
-        
-        config1 = get_security_config()
-        config2 = get_security_config()
-        
-        # Doit être la même instance
-        assert config1 is config2
 
 
 def test_security_config_rate_limit_boolean():

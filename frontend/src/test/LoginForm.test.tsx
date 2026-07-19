@@ -17,6 +17,9 @@ describe('LoginForm', () => {
       loginAsGuest: vi.fn(),
       isLoading: false,
       isAuthenticated: false,
+      user: null,
+      bootError: null,
+      clearBootError: vi.fn(),
     } as Partial<AuthState>)
 
     render(
@@ -41,6 +44,9 @@ describe('LoginForm', () => {
       loginAsGuest: vi.fn(),
       isLoading: false,
       isAuthenticated: false,
+      user: null,
+      bootError: null,
+      clearBootError: vi.fn(),
     } as Partial<AuthState>)
 
     render(
@@ -71,6 +77,9 @@ describe('LoginForm', () => {
       loginAsGuest: mockGuest,
       isLoading: false,
       isAuthenticated: false,
+      user: null,
+      bootError: null,
+      clearBootError: vi.fn(),
     } as Partial<AuthState>)
 
     render(

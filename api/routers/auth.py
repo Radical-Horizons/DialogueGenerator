@@ -102,22 +102,23 @@ async def get_current_user(
     ] = None,
 ) -> dict[str, object]:
     """Dépendance pour obtenir l'utilisateur courant depuis le token JWT.
-    
-    En développement, retourne automatiquement un utilisateur mock sans vérifier le token.
-    En production, vérifie le token JWT.
-    
+
+    Si ``DISABLE_AUTH=true`` et environnement non-production : utilisateur mock admin
+    (pytest / outillage). Sinon : Bearer JWT obligatoire (y compris guest).
+
     Args:
-        credentials: Credentials HTTP (token). Optionnel en dev.
+        credentials: Credentials HTTP (token). Optionnel si DISABLE_AUTH.
         request: La requête HTTP.
-        
+
     Returns:
         Dictionnaire avec les informations de l'utilisateur.
-        
+
     Raises:
-        AuthenticationException: Si le token est invalide ou expiré (production uniquement).
+        AuthenticationException: Si le token est invalide, expiré ou absent.
     """
-    # Développement + DISABLE_AUTH=true : utilisateur mock sans JWT
-    if security_config.is_development and security_config.disable_auth:
+    # Toujours via get_security_config() (évite singleton stale après reset tests).
+    live_security = get_security_config()
+    if live_security.is_development and live_security.disable_auth:
         logger.debug(
             "DISABLE_AUTH=true: JWT ignoré, utilisateur mock (développement uniquement)"
         )
@@ -129,7 +130,7 @@ async def get_current_user(
             "is_active": True,
         }
     
-    # En production, vérifier le token normalement
+    # Vérifier le token JWT
     request_id = getattr(request.state, "request_id", "unknown")
     
     if credentials is None:

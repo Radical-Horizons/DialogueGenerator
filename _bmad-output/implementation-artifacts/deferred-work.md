@@ -46,3 +46,10 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-7-9-preferences-utilisateur-synchronisees-serveur.md`
   summary: Course TOCTOU multi-onglets sur la migrate localStorage → serveur (GET puis PUT des clés absentes).
   evidence: Revue 7.9 — un second client peut peupler le serveur entre GET et PUT migrate ; acceptable best-effort MVP.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-guest-first-auth-entry.md`
+  summary: Retirer le short-circuit axios refresh token sous `import.meta.env.DEV` dans `frontend/src/api/client.ts`.
+  evidence: Préexistant ; exposé par guest-first + DISABLE_AUTH=false — refresh JWT mid-session toujours skippé en Vite DEV.
+- source_spec: `_bmad-output/implementation-artifacts/spec-guest-first-auth-entry.md`
+  summary: Exercer le parcours guest-first en Playwright (DISABLE_AUTH=false + storageState) au lieu de forcer true dans webServer.env.
+  evidence: Exception Ask First volontaire ; l'entrée guest + Connexion n'est pas couverte E2E aujourd'hui.

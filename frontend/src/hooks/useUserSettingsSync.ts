@@ -43,8 +43,7 @@ let pendingContextHydration: unknown | undefined
 let syncGeneration = 0
 
 export function isUserSettingsSyncEligible(user: UserResponse | null): user is UserResponse {
-  if (!user || user.role === 'guest') return false
-  return !(import.meta.env.DEV && user.id === '1' && user.username === 'admin')
+  return Boolean(user && user.role !== 'guest')
 }
 
 export function registerContextSettingsAdapter(adapter: ContextSettingsAdapter): void {

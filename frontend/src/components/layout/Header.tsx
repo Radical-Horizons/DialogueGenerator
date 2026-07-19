@@ -307,7 +307,7 @@ export function Header() {
           </>
         )}
         
-        {isAuthenticated && user ? (
+        {isAuthenticated && user && user.role !== 'guest' ? (
           <div
             ref={userMenuRef}
             style={{
@@ -460,7 +460,25 @@ export function Header() {
             )}
           </div>
         ) : (
-          <span style={{ color: theme.text.secondary, fontSize: remSize('body') }}>Non connecté</span>
+          <button
+            type="button"
+            data-testid="header-login-button"
+            onClick={() => navigate('/login')}
+            style={{
+              minHeight: TOUCH_TARGET_MIN_PX,
+              minWidth: TOUCH_TARGET_MIN_PX,
+              padding: '0.5rem 1rem',
+              fontSize: remSize('body'),
+              fontWeight: 600,
+              backgroundColor: theme.button.primary.background,
+              color: theme.button.primary.color,
+              border: `1px solid ${theme.border.primary}`,
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            Connexion
+          </button>
         )}
       </div>
       
