@@ -8,6 +8,8 @@ from fastapi.testclient import TestClient
 
 from api.main import app
 
+EXPECTED_MIGRATION_VERSIONS = [("001",), ("002",), ("003",), ("004",), ("005",)]
+
 
 def test_lifespan_creates_and_reuses_application_database(tmp_path: Path) -> None:
     """Le lifespan crée le schéma initial puis le réutilise au second démarrage."""
@@ -31,7 +33,7 @@ def test_lifespan_creates_and_reuses_application_database(tmp_path: Path) -> Non
                     )
                 }
                 migration_versions = connection.execute(
-                    "SELECT version FROM schema_migrations"
+                    "SELECT version FROM schema_migrations ORDER BY version"
                 ).fetchall()
                 dialogue_foreign_keys = {
                     (row[3], row[2], row[4], row[6])
@@ -46,8 +48,10 @@ def test_lifespan_creates_and_reuses_application_database(tmp_path: Path) -> Non
                 "user_settings",
                 "app_settings",
                 "dialogues_index",
+                "dialogue_shares",
+                "audit_logs",
             } <= tables
-            assert migration_versions == [("001",), ("002",), ("003",)]
+            assert migration_versions == EXPECTED_MIGRATION_VERSIONS
             assert dialogue_foreign_keys == {
                 ("owner_id", "users", "id", "SET NULL"),
                 ("last_modified_by", "users", "id", "SET NULL"),
@@ -55,15 +59,11 @@ def test_lifespan_creates_and_reuses_application_database(tmp_path: Path) -> Non
 
         with TestClient(app):
             with sqlite3.connect(database_path) as connection:
-                assert connection.execute(
-                    "SELECT COUNT(*) FROM schema_migrations WHERE version = '001'"
-                ).fetchone() == (1,)
-                assert connection.execute(
-                    "SELECT COUNT(*) FROM schema_migrations WHERE version = '002'"
-                ).fetchone() == (1,)
-                assert connection.execute(
-                    "SELECT COUNT(*) FROM schema_migrations WHERE version = '003'"
-                ).fetchone() == (1,)
+                for version, in EXPECTED_MIGRATION_VERSIONS:
+                    assert connection.execute(
+                        "SELECT COUNT(*) FROM schema_migrations WHERE version = ?",
+                        (version,),
+                    ).fetchone() == (1,)
     finally:
         os.environ.clear()
         os.environ.update(original_environment)
