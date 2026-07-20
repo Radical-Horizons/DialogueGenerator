@@ -1,12 +1,12 @@
 ﻿## Epic 7: Collaboration et contrôle d'accès
 
-Les utilisateurs authentifiés (Admin, Writer) travaillent en équipe avec JWT, RBAC et partage de dialogues. Les **invités sans compte** accèdent en lecture seule via liens dédiés. Une **base SQLite locale** (`data/app.db`) centralise identités, préférences, index dialogues, partages et audit.
+Les utilisateurs authentifiés (Admin, Writer) travaillent en équipe avec JWT, RBAC et partage de dialogues. Les **invités sans compte** accèdent en **lecture seule à toute l’application** (session JWT `role=guest`, pas de compte SQLite). Une **base SQLite locale** (`data/app.db`) centralise identités, préférences, index dialogues, partages et audit.
 
 **FRs covered:** FR64-71 (auth, RBAC, partage, audit logs)
 
 **NFRs covered:** NFR-S2 (Auth Security JWT), NFR-S3 (Data Protection RBAC), NFR-SC2 (Concurrent Users 3-5 MVP, 10+ V2.0+)
 
-**Valeur utilisateur:** Collaboration équipe narrative (Marc + Mathieu + writers) avec contrôle d'accès ; invités en lecture seule sans friction de compte.
+**Valeur utilisateur:** Collaboration équipe narrative (Marc + Mathieu + writers) avec contrôle d'accès ; démo invité lecture seule sans friction de compte.
 
 **Dépendances:** Epic 0 (infra auth JWT existante). Epic 8 consomme `dialogues_index` pour listing/recherche — **7.4 pose l'index**, Epic 8 l'enrichit.
 
@@ -18,9 +18,9 @@ Les utilisateurs authentifiés (Admin, Writer) travaillent en équipe avec JWT, 
 |-------|----------|
 | Inscription | **Fermée** — pas de self-service public. Comptes créés par Admin uniquement. |
 | Rôles compte | **`admin`** (propriétaire) \| **`writer`** (défaut à la création). Pas de rôle `viewer` en base. |
-| Invité sans compte | **Lecture seule** via `share_links` (token URL) — hors table `users`. |
+| Invité sans compte | **Lecture seule app-wide** via JWT `role=guest` (`POST /auth/guest`). **Pas** de liens `share_links` / URL par dialogue (hors intérêt produit — rétro 2026-07-20). |
 | Bootstrap | Compte seed **`admin`** au 1er démarrage ; mot de passe via **`ADMIN_PASSWORD`** (env, jamais en dur dans le repo). |
-| Dev local | Conserver **`DISABLE_AUTH=true`** et bypass frontend dev ; documenter tests auth avec `DISABLE_AUTH=false` + build preview. |
+| Dev local | Guest-first + `DISABLE_AUTH=false` par défaut ; pytest peut forcer `DISABLE_AUTH=true`. |
 
 ---
 

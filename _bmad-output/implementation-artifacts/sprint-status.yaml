@@ -38,7 +38,7 @@ project: DialogueGenerator
 project_key: dialogue-generator
 tracking_system: file-system
 story_location: '{project-root}/_bmad-output/implementation-artifacts'
-last_updated: '2026-07-19'
+last_updated: '2026-07-20'
 development_status:
   # Flat list (not nested YAML): each epic block = epic → stories → retrospective, then the NEXT epic starts.
   # Order = delivery sequence (see epic-list.md): 0 → 16 → 1–3 → 17 → 4–15 — not strict epic ID sort.
@@ -169,7 +169,7 @@ development_status:
   7-7-voir-qui-a-accès-à-chaque-dialogue-fr70: done
   7-8-système-track-actions-utilisateurs-pour-audit-logs-v15-fr71: done
   7-9-préférences-utilisateur-synchronisées-serveur: done
-  epic-7-retrospective: optional
+  epic-7-retrospective: done
   epic-8: backlog
   8-1-lister-tous-les-dialogues-du-système-fr80: backlog
   8-2-rechercher-des-dialogues-nom-personnage-lieu-thème-fr81: backlog
@@ -234,3 +234,33 @@ development_status:
   15-5-mode-override-lock: backlog
   15-6-fallback-gracieux-tests-e2e: backlog
   epic-15-retrospective: optional
+
+action_items:
+  - epic: 7
+    action: "Questions pré-US en français clair (options concrètes ; jargon en note technique)"
+    owner: "Amelia / create-story"
+    status: open
+  - epic: 7
+    action: "Validation manuelle par lots / fin d’epic (pas d’obligation par US)"
+    owner: "Véronique + équipe"
+    status: open
+  - epic: 7
+    action: "E2E finaux = parcours UI ; tests API = filet seulement"
+    owner: "Dana / Playwright"
+    status: open
+  - epic: 7
+    action: "Figer pivot invité app-wide dans planning (share_links hors intérêt)"
+    owner: "Amelia"
+    status: done
+  - epic: 7
+    action: "Refresh badges share_count après share/revoke (quand listing Epic 8)"
+    owner: "Charlie"
+    status: open
+  - epic: 7
+    action: "Durcir POST métier encore joignables en guest (priorité basse)"
+    owner: "Charlie"
+    status: open
+  - epic: 7
+    action: "Prioriser bugs stabilité éditeur de graphe (test users) avant évolutions Epic 8"
+    owner: "Véronique / équipe"
+    status: open

@@ -109,6 +109,10 @@ Specialized reviewers — invoke with `/name` or naturally. See `.cursor/rules/s
 - Do not add comments that narrate what code does; comments must explain non-obvious intent or constraints only.
 - When a pre-existing test fails, verify whether the tested feature was silently removed before dismissing the test as obsolete; restore the feature if it still belongs in the UI.
 - Large component refactors need two passes: first extract logic into hooks, then extract JSX blocks into dedicated child components.
+- Do not require manual UI validation after every user story; lot / end-of-epic validation is enough unless the user asks otherwise.
+- Final E2E proof is UI journeys (screens, clicks, labels); API tests are a safety net, not product “done”.
+- Pre-implementation Ask First questions: plain French, concrete options; keep technical jargon in a short appendix if needed.
+- After Epic 7: prioritize graph-editor stability bugs from user testing over feature epics (e.g. Epic 8) until stability recovers.
 
 ## Learned Workspace Facts
 
