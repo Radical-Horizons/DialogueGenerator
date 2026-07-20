@@ -69,10 +69,10 @@ vi.mock('../components/unityDialogues/UnityDialogueList', () => {
   }
 })
 
-// Mock API documents : rejets immédiats (fake timers + axios sinon peuvent laisser des promesses en suspens).
+// Mock API documents : 404 axios-like pour basculer sur getUnityDialogue + loadDialogueFromRawJson.
 vi.mock('../api/documents', () => ({
-  getDocument: vi.fn().mockRejectedValue(new Error('no document')),
-  getLayout: vi.fn().mockRejectedValue(new Error('no layout')),
+  getDocument: vi.fn().mockRejectedValue({ response: { status: 404 } }),
+  getLayout: vi.fn().mockRejectedValue({ response: { status: 404 } }),
   putDocument: vi.fn().mockResolvedValue({ revision: 2 }),
   putLayout: vi.fn().mockResolvedValue({ revision: 2 }),
 }))
@@ -114,12 +114,10 @@ describe('GraphEditor autosave (ADR-006)', () => {
     const saveDialogueMock: GraphState['saveDialogue'] = vi
       .fn()
       .mockResolvedValue({ success: true, filename: 'doc' } as SaveGraphResponse)
-    const loadDialogueMock: GraphState['loadDialogue'] = vi.fn().mockResolvedValue(undefined)
     const validateGraphMock: GraphState['validateGraph'] = vi.fn().mockResolvedValue(undefined)
 
     useGraphStore.setState({
       saveDialogue: saveDialogueMock,
-      loadDialogue: loadDialogueMock,
       validateGraph: validateGraphMock,
       // Empêcher l'effet autosave de sortir prématurément
       isLoading: false,
@@ -135,11 +133,11 @@ describe('GraphEditor autosave (ADR-006)', () => {
       )
     )
 
-    // L'effet autosave est bloqué pendant le chargement du dialogue (isLoadingDialogue interne).
-    // On laisse d'abord la chaîne de promesses (getUnityDialogue -> loadDialogue -> validateGraph) se résoudre.
+    // Laisse la chaîne getDocument 404 → getUnityDialogue → loadDialogueFromRawJson se résoudre.
     await act(async () => {
       await Promise.resolve()
       await Promise.resolve()
+      await vi.runAllTimersAsync()
     })
 
     const afterLoad = useGraphStore.getState()

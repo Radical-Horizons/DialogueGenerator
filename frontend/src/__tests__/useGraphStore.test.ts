@@ -5,6 +5,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useGraphStore } from '../store/graphStore'
 import type { Node } from 'reactflow'
 import * as graphAPI from '../api/graph'
+import * as documentsAPI from '../api/documents'
 import {
   childNodeTopLeftX,
   childNodeTopLeftY,
@@ -22,6 +23,13 @@ vi.mock('../api/graph', () => ({
   generateNode: vi.fn(),
   validateGraph: vi.fn(),
   calculateLayout: vi.fn(),
+}))
+
+vi.mock('../api/documents', () => ({
+  getDocument: vi.fn(),
+  getLayout: vi.fn(),
+  putDocument: vi.fn(),
+  putLayout: vi.fn(),
 }))
 
 describe('useGraphStore - Pending save state', () => {
@@ -1175,21 +1183,19 @@ describe('useGraphStore - Pending save state', () => {
   })
 
   describe('saveDialogue FR37 post-validation', () => {
-    it('appelle validateGraph après sauvegarde legacy réussie', async () => {
-      vi.mocked(graphAPI.saveGraphAndWrite).mockResolvedValue({
-        success: true,
-        filename: 'd.json',
-        json_content: '{}',
-        last_seq: 1,
-        ack_seq: 1,
-      })
+    it('appelle validateGraph après sauvegarde réussie', async () => {
+      vi.mocked(documentsAPI.putDocument).mockResolvedValue({ revision: 2 })
+      vi.mocked(documentsAPI.putLayout).mockResolvedValue({ revision: 2 })
       vi.mocked(graphAPI.validateGraph).mockResolvedValue({
         valid: true,
         errors: [],
         warnings: [],
       })
       useGraphStore.setState({
-        document: null,
+        document: {
+          schemaVersion: '1.1.0',
+          nodes: [{ id: 'START', speaker: 'PNJ', line: 'hi', choices: [] }],
+        },
         documentId: 'doc',
         dialogueMetadata: {
           title: 't',
@@ -1210,6 +1216,7 @@ describe('useGraphStore - Pending save state', () => {
         isSaving: false,
       })
       await useGraphStore.getState().saveDialogue()
+      expect(documentsAPI.putDocument).toHaveBeenCalled()
       expect(graphAPI.validateGraph).toHaveBeenCalled()
     })
   })
