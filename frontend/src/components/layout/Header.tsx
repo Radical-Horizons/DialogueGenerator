@@ -9,6 +9,7 @@ import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useGraphStore } from '../../store/graphStore'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { GenerationOptionsModal } from '../generation/GenerationOptionsModal'
+import { ChangePasswordModal } from '../auth/ChangePasswordModal'
 import { UnityBatchExportActionsMenuItems } from '../unityDialogues/UnityBatchExportActionsMenuItems'
 import { useUnityBatchExportMenuStore } from '../../store/unityBatchExportMenuStore'
 import { theme } from '../../theme'
@@ -37,6 +38,7 @@ export function Header() {
   >('general')
   const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false)
   const actionsDropdownRef = useRef<HTMLDivElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
 
@@ -192,7 +194,6 @@ export function Header() {
       <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', flexShrink: 1, minWidth: 0, flexWrap: 'wrap' }}>
         {isAuthenticated && user && user.role !== 'guest' && actions.handleGenerate && (
           <>
-            {/* Bouton Options */}
             <button
               onClick={() => {
                 setOptionsModalInitialTab('general')
@@ -214,96 +215,97 @@ export function Header() {
             >
               Options
             </button>
-            
-            {/* Dropdown Actions */}
-            <div
-              ref={actionsDropdownRef}
+
+            {/* Reset direct : évite un menu Actions à une seule entrée */}
+            <button
+              type="button"
+              data-testid="header-reset-button"
+              onClick={() => {
+                if (actions.handleReset) {
+                  actions.handleReset()
+                }
+              }}
+              disabled={actions.isLoading || isGraphGenerating || !actions.handleReset}
+              title="Nouveau dialogue (réinitialiser)"
               style={{
-                position: 'relative',
-                display: 'inline-block',
+                padding: '0.35rem 0.75rem',
+                fontSize: remSize('body'),
+                backgroundColor: theme.button.default.background,
+                color: (actions.isLoading || isGraphGenerating || !actions.handleReset)
+                  ? theme.text.secondary
+                  : theme.button.default.color,
+                border: `1px solid ${theme.border.primary}`,
+                borderRadius: '4px',
+                cursor: (actions.isLoading || isGraphGenerating || !actions.handleReset)
+                  ? 'not-allowed'
+                  : 'pointer',
+                whiteSpace: 'nowrap',
+                minWidth: TOUCH_TARGET_MIN_PX,
+                minHeight: TOUCH_TARGET_MIN_PX,
+                boxSizing: 'border-box',
+                opacity: (actions.isLoading || isGraphGenerating || !actions.handleReset) ? 0.6 : 1,
               }}
             >
-              <button
-                data-testid="header-actions-dropdown"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setIsActionsDropdownOpen(!isActionsDropdownOpen)
-                }}
+              Reset
+            </button>
+
+            {/* Actions uniquement s'il y a des exports batch à proposer */}
+            {unityBatchExportMenu && (
+              <div
+                ref={actionsDropdownRef}
                 style={{
-                  padding: '0.35rem 0.75rem',
-                  fontSize: remSize('body'),
-                  backgroundColor: theme.button.default.background,
-                  color: theme.button.default.color,
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                  whiteSpace: 'nowrap',
-                  minWidth: TOUCH_TARGET_MIN_PX,
-                  minHeight: TOUCH_TARGET_MIN_PX,
-                  boxSizing: 'border-box',
+                  position: 'relative',
+                  display: 'inline-block',
                 }}
               >
-                Actions
-                <span style={{ fontSize: remSize('caption') }}>▼</span>
-              </button>
-              {isActionsDropdownOpen && (
-                <div
+                <button
+                  data-testid="header-actions-dropdown"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setIsActionsDropdownOpen(!isActionsDropdownOpen)
+                  }}
                   style={{
-                    position: 'absolute',
-                    top: 'calc(100% + 0.25rem)',
-                    right: 0,
-                    backgroundColor: theme.background.panel,
+                    padding: '0.35rem 0.75rem',
+                    fontSize: remSize('body'),
+                    backgroundColor: theme.button.default.background,
+                    color: theme.button.default.color,
                     border: `1px solid ${theme.border.primary}`,
                     borderRadius: '4px',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                    zIndex: 1000,
-                    minWidth: '220px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.25rem',
+                    whiteSpace: 'nowrap',
+                    minWidth: TOUCH_TARGET_MIN_PX,
+                    minHeight: TOUCH_TARGET_MIN_PX,
+                    boxSizing: 'border-box',
                   }}
                 >
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      if (actions.handleReset) {
-                        actions.handleReset()
-                      }
-                      setIsActionsDropdownOpen(false)
-                    }}
-                    disabled={actions.isLoading || isGraphGenerating}
+                  Actions
+                  <span style={{ fontSize: remSize('caption') }}>▼</span>
+                </button>
+                {isActionsDropdownOpen && (
+                  <div
                     style={{
-                      width: '100%',
-                      padding: '0.5rem 0.75rem',
-                      fontSize: remSize('accent'),
-                      backgroundColor: 'transparent',
-                      color: (actions.isLoading || isGraphGenerating) ? theme.text.secondary : theme.text.primary,
-                      border: 'none',
-                      textAlign: 'left',
-                      cursor: (actions.isLoading || isGraphGenerating) ? 'not-allowed' : 'pointer',
-                      opacity: (actions.isLoading || isGraphGenerating) ? 0.6 : 1,
-                      borderRadius: unityBatchExportMenu ? '4px 4px 0 0' : '4px',
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!actions.isLoading && !isGraphGenerating) {
-                        e.currentTarget.style.backgroundColor = theme.background.secondary
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
+                      position: 'absolute',
+                      top: 'calc(100% + 0.25rem)',
+                      right: 0,
+                      backgroundColor: theme.background.panel,
+                      border: `1px solid ${theme.border.primary}`,
+                      borderRadius: '4px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                      zIndex: 1000,
+                      minWidth: '220px',
                     }}
                   >
-                    Reset
-                  </button>
-                  {unityBatchExportMenu && (
                     <UnityBatchExportActionsMenuItems
                       batch={unityBatchExportMenu}
                       onClose={() => setIsActionsDropdownOpen(false)}
                     />
-                  )}
-                </div>
-              )}
-            </div>
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
         
@@ -431,6 +433,29 @@ export function Header() {
                   </>
                 )}
                 <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setIsUserMenuOpen(false)
+                    setIsChangePasswordOpen(true)
+                  }}
+                  style={{
+                    width: '100%',
+                    minHeight: TOUCH_TARGET_MIN_PX,
+                    marginBottom: '0.5rem',
+                    padding: '0.5rem 0.75rem',
+                    fontSize: remSize('body'),
+                    backgroundColor: theme.button.default.background,
+                    color: theme.button.default.color,
+                    border: `1px solid ${theme.border.primary}`,
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                >
+                  Changer mon mot de passe
+                </button>
+                <button
                   onClick={(e) => {
                     e.stopPropagation()
                     setIsUserMenuOpen(false)
@@ -487,6 +512,10 @@ export function Header() {
         isOpen={isOptionsModalOpen}
         onClose={() => setIsOptionsModalOpen(false)}
         initialTab={optionsModalInitialTab}
+      />
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
       />
     </header>
   )

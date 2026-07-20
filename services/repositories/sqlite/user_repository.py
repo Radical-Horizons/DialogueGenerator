@@ -78,6 +78,10 @@ class IUserRepository(Protocol):
         """Met à jour atomiquement le rôle et l'état d'un compte."""
         ...
 
+    def update_password(self, user_id: str, hashed_password: str) -> UserRecord | None:
+        """Met à jour le hash du mot de passe d'un compte."""
+        ...
+
 
 class UserRepository:
     """Accès partagé aux tables utilisateur, sans logique d'authentification."""
@@ -289,6 +293,44 @@ class UserRepository:
                 "updated_at": updated_at,
             }
             return updated, True
+
+    def update_password(self, user_id: str, hashed_password: str) -> UserRecord | None:
+        """Remplace le hash bcrypt du compte ciblé.
+
+        Args:
+            user_id: Identifiant du compte.
+            hashed_password: Nouveau hash bcrypt (jamais le clair).
+
+        Returns:
+            Enregistrement mis à jour, ou ``None`` si le compte est absent.
+        """
+        updated_at = datetime.now(timezone.utc).isoformat()
+        with self.database.transaction(immediate=True) as connection:
+            row = connection.execute(
+                """
+                SELECT id, username, email, hashed_password, role,
+                       is_active, created_at, updated_at
+                FROM users
+                WHERE id = ?
+                """,
+                (user_id,),
+            ).fetchone()
+            if row is None:
+                return None
+            connection.execute(
+                """
+                UPDATE users
+                SET hashed_password = ?, updated_at = ?
+                WHERE id = ?
+                """,
+                (hashed_password, updated_at, user_id),
+            )
+            current = self._row_to_record(tuple(row))
+            return {
+                **current,
+                "hashed_password": hashed_password,
+                "updated_at": updated_at,
+            }
 
     @staticmethod
     def _row_to_record(row: tuple[object, ...]) -> UserRecord:

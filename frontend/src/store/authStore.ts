@@ -243,19 +243,39 @@ export const useAuthStore = create<AuthState>()(
         initializePromise = (async () => {
           set({ isLoading: true })
           try {
+            const restoreSession = async (user: UserResponse): Promise<void> => {
+              if (epochAtStart !== authEpoch) return
+              set({ user, isAuthenticated: true, isLoading: false, bootError: null })
+              await syncUserSettingsNonBlocking(user)
+            }
+
+            /** Access expiré / absent : cookie refresh (7j) avant bascule guest. */
+            const restoreViaRefreshCookie = async (): Promise<boolean> => {
+              try {
+                await authAPI.refreshToken()
+                if (epochAtStart !== authEpoch) return true
+                const user = await authAPI.getCurrentUser()
+                await restoreSession(user)
+                return true
+              } catch {
+                clearStoredTokens()
+                resetUserSettingsSync()
+                return false
+              }
+            }
+
             const token = localStorage.getItem('access_token')
             if (token && !isTokenExpired(token)) {
               try {
                 const user = await authAPI.getCurrentUser()
-                if (epochAtStart !== authEpoch) return
-                set({ user, isAuthenticated: true, isLoading: false, bootError: null })
-                await syncUserSettingsNonBlocking(user)
+                await restoreSession(user)
                 return
               } catch (error: unknown) {
                 const status = (error as { response?: { status?: number } } | null)?.response?.status
                 if (status === 401) {
                   clearStoredTokens()
                   resetUserSettingsSync()
+                  if (await restoreViaRefreshCookie()) return
                 } else {
                   // Erreur transitoire : ne pas détruire une session potentiellement valide
                   console.error('Erreur lors de la récupération de l\'utilisateur:', error)
@@ -265,8 +285,9 @@ export const useAuthStore = create<AuthState>()(
                   return
                 }
               }
-            } else if (token) {
-              clearStoredTokens()
+            } else {
+              // Token expiré ou absent : tenter le refresh cookie avant guest
+              if (await restoreViaRefreshCookie()) return
             }
 
             if (get().isAuthenticated && !localStorage.getItem('access_token')) {

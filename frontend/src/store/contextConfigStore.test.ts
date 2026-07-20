@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useContextConfigStore } from './contextConfigStore'
+import { CONTEXT_TOKENS_LIMITS } from '../constants'
 import * as configAPI from '../api/config'
 
 vi.mock('../api/config', () => ({
@@ -33,7 +34,7 @@ describe('contextConfigStore', () => {
       suggestions: {},
       isLoading: false,
       error: null,
-      contextTokenBudgetMax: 50_000,
+      contextTokenBudgetMax: CONTEXT_TOKENS_LIMITS.DEFAULT,
       contextOptimizationPinnedKeys: [],
       contextOptimizationStrategy: 'conservative',
       contextOptimizationProxyThreshold: 50,
@@ -43,7 +44,7 @@ describe('contextConfigStore', () => {
   it('devrait initialiser avec des valeurs par défaut', () => {
     const store = useContextConfigStore.getState()
     
-    expect(store.contextTokenBudgetMax).toBe(50_000)
+    expect(store.contextTokenBudgetMax).toBe(CONTEXT_TOKENS_LIMITS.DEFAULT)
     expect(store.organization).toBe('default')
     expect(store.fieldConfigs).toEqual({
       character: [],

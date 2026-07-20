@@ -208,3 +208,88 @@ def test_malformed_access_subject_returns_401(seeded_auth_client: TestClient) ->
 
     assert response.status_code == 401
 
+
+def test_change_own_password_success(seeded_auth_client: TestClient) -> None:
+    """Un admin authentifié peut changer son mot de passe puis se reconnecter."""
+    login = seeded_auth_client.post(
+        "/api/v1/auth/login",
+        json={"username": "admin", "password": "admin123"},
+    )
+    assert login.status_code == 200
+    access = login.json()["access_token"]
+
+    change = seeded_auth_client.post(
+        "/api/v1/auth/me/password",
+        headers={"Authorization": f"Bearer {access}"},
+        json={
+            "current_password": "admin123",
+            "new_password": "admin123-updated",
+        },
+    )
+    assert change.status_code == 204
+
+    assert seeded_auth_client.post(
+        "/api/v1/auth/login",
+        json={"username": "admin", "password": "admin123"},
+    ).status_code == 401
+
+    relogin = seeded_auth_client.post(
+        "/api/v1/auth/login",
+        json={"username": "admin", "password": "admin123-updated"},
+    )
+    assert relogin.status_code == 200
+
+    # Restaure le mot de passe seed pour les autres tests de la session.
+    restore = seeded_auth_client.post(
+        "/api/v1/auth/me/password",
+        headers={"Authorization": f"Bearer {relogin.json()['access_token']}"},
+        json={
+            "current_password": "admin123-updated",
+            "new_password": "admin123",
+        },
+    )
+    assert restore.status_code == 204
+
+
+def test_change_own_password_rejects_wrong_current(
+    seeded_auth_client: TestClient,
+) -> None:
+    """Un mauvais mot de passe actuel est refusé sans mutation."""
+    login = seeded_auth_client.post(
+        "/api/v1/auth/login",
+        json={"username": "admin", "password": "admin123"},
+    )
+    access = login.json()["access_token"]
+
+    change = seeded_auth_client.post(
+        "/api/v1/auth/me/password",
+        headers={"Authorization": f"Bearer {access}"},
+        json={
+            "current_password": "wrong-password",
+            "new_password": "admin123-updated",
+        },
+    )
+    assert change.status_code == 401
+
+    assert seeded_auth_client.post(
+        "/api/v1/auth/login",
+        json={"username": "admin", "password": "admin123"},
+    ).status_code == 200
+
+
+def test_change_own_password_rejects_guest(seeded_auth_client: TestClient) -> None:
+    """Une session invité ne peut pas changer de mot de passe."""
+    guest = seeded_auth_client.post("/api/v1/auth/guest")
+    assert guest.status_code == 200
+    access = guest.json()["access_token"]
+
+    change = seeded_auth_client.post(
+        "/api/v1/auth/me/password",
+        headers={"Authorization": f"Bearer {access}"},
+        json={
+            "current_password": "anything",
+            "new_password": "new-password-12",
+        },
+    )
+    assert change.status_code == 403
+

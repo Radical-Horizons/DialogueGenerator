@@ -55,12 +55,7 @@ apiClient.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
 
-    // En développement, ignorer les erreurs 401 (auth désactivée)
-    if (import.meta.env.DEV) {
-      return Promise.reject(error)
-    }
-
-    // Si erreur 401 et pas déjà retenté
+    // Si erreur 401 et pas déjà retenté (y compris en DEV avec DISABLE_AUTH=false)
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
 

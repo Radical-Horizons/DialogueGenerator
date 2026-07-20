@@ -45,16 +45,23 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { user, initialize } = useAuthStore()
+  const { user, initialize, fetchCurrentUser } = useAuthStore()
   const [hasResolvedAuth, setHasResolvedAuth] = useState(false)
 
   useEffect(() => {
-    void initialize()
-      .catch((error) => {
-        console.error('[AdminRoute] Erreur lors de l’initialisation:', error)
-      })
-      .finally(() => setHasResolvedAuth(true))
-  }, [initialize])
+    // Revalide le rôle côté API : un admin stale en localStorage ne doit pas
+    // afficher la page admin si /me ne confirme plus le rôle.
+    void (async () => {
+      try {
+        await initialize()
+        await fetchCurrentUser()
+      } catch (error) {
+        console.error('[AdminRoute] Erreur lors de la revalidation admin:', error)
+      } finally {
+        setHasResolvedAuth(true)
+      }
+    })()
+  }, [initialize, fetchCurrentUser])
 
   if (!hasResolvedAuth) {
     return <div role="status">Chargement de la session…</div>

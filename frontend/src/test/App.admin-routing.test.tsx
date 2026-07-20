@@ -20,6 +20,7 @@ const mocks = vi.hoisted(() => ({
     isAuthenticated: true,
     isLoading: false,
     initialize: vi.fn().mockResolvedValue(undefined),
+    fetchCurrentUser: vi.fn().mockResolvedValue(undefined),
   },
 }))
 
@@ -42,6 +43,7 @@ describe('AdminRoute', () => {
       isAuthenticated: true,
       isLoading: false,
       initialize: vi.fn().mockResolvedValue(undefined),
+      fetchCurrentUser: vi.fn().mockResolvedValue(undefined),
     }
   })
 
@@ -63,6 +65,36 @@ describe('AdminRoute', () => {
 
     expect(await screen.findByText('Administration')).toBeInTheDocument()
     expect(mocks.authState.initialize).toHaveBeenCalledOnce()
+    expect(mocks.authState.fetchCurrentUser).toHaveBeenCalledOnce()
+  })
+
+  it('redirige si /me ne confirme plus le rôle admin', async () => {
+    mocks.authState.fetchCurrentUser = vi.fn().mockImplementation(async () => {
+      mocks.authState.user = {
+        id: 'writer-id',
+        username: 'writer',
+        role: 'writer',
+        is_active: true,
+      }
+    })
+    render(
+      <MemoryRouter initialEntries={['/admin/users']}>
+        <Routes>
+          <Route path="/" element={<div>Accueil</div>} />
+          <Route
+            path="/admin/users"
+            element={(
+              <AdminRoute>
+                <div>Administration</div>
+              </AdminRoute>
+            )}
+          />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('Accueil')).toBeInTheDocument()
+    expect(screen.queryByText('Administration')).not.toBeInTheDocument()
   })
 
   it('redirige un writer', async () => {
@@ -108,6 +140,7 @@ describe('AdminRoute', () => {
       user: null,
       isAuthenticated: false,
       initialize,
+      fetchCurrentUser: vi.fn().mockResolvedValue(undefined),
     }
 
     render(

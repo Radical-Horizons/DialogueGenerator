@@ -75,8 +75,8 @@ export const CONTEXT_TOKENS_LIMITS = {
   MAX: 300000,
   /** Pas du slider */
   STEP: 1000,
-  /** Valeur par défaut (50K) */
-  DEFAULT: 50000,
+  /** Valeur par défaut (150K) */
+  DEFAULT: 150000,
 } as const
 
 /** Optimisation auto du contexte (FR21) — POST /api/v1/context/optimize. */

@@ -37,12 +37,8 @@ export async function logout(): Promise<void> {
 }
 
 /**
- * Rafraîchir le token d'accès.
- * Note: Le refresh_token est maintenant dans un cookie httpOnly,
- * il n'est plus nécessaire de le passer en paramètre.
- * 
- * @deprecated Cette fonction n'est plus utilisée directement.
- * Le refresh est géré automatiquement par l'intercepteur axios.
+ * Rafraîchir le token d'accès via le cookie httpOnly ``refresh_token``.
+ * Utilisé au boot (access JWT expiré) et par l'intercepteur axios sur 401.
  */
 export async function refreshToken(): Promise<TokenResponse> {
   // Body vide, le cookie refresh_token est envoyé automatiquement avec withCredentials
@@ -60,5 +56,17 @@ export async function refreshToken(): Promise<TokenResponse> {
 export async function getCurrentUser(): Promise<UserResponse> {
   const response = await apiClient.get<UserResponse>('/api/v1/auth/me')
   return response.data
+}
+
+export interface ChangePasswordRequest {
+  current_password: string
+  new_password: string
+}
+
+/**
+ * Change le mot de passe du compte connecté (admin / writer).
+ */
+export async function changePassword(payload: ChangePasswordRequest): Promise<void> {
+  await apiClient.post('/api/v1/auth/me/password', payload)
 }
 

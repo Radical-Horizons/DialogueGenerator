@@ -1,5 +1,6 @@
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react'
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 import * as usersApi from '../../api/users'
 import type { UserResponse } from '../../types/api'
@@ -14,6 +15,14 @@ const fieldStyle: React.CSSProperties = {
   background: theme.input.background,
   border: `1px solid ${theme.input.border}`,
   borderRadius: 4,
+}
+
+const fieldHelperStyle: React.CSSProperties = {
+  display: 'block',
+  minHeight: '1.25em',
+  marginTop: '0.25rem',
+  lineHeight: 1.25,
+  fontSize: '0.8rem',
 }
 
 type UserField = 'username' | 'email' | 'password'
@@ -65,6 +74,7 @@ function mergeInitialUsers(
 }
 
 export function UserManagementPanel() {
+  const navigate = useNavigate()
   const { user: currentUser, fetchCurrentUser } = useAuthStore()
   const [users, setUsers] = useState<UserResponse[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -78,6 +88,15 @@ export function UserManagementPanel() {
   const [password, setPassword] = useState('')
   const passwordBytes = new TextEncoder().encode(password).length
 
+  const handleAdminForbidden = useCallback(async () => {
+    try {
+      await fetchCurrentUser()
+    } catch {
+      // fetchCurrentUser bascule déjà en guest si la session n'est plus admin.
+    }
+    navigate('/', { replace: true })
+  }, [fetchCurrentUser, navigate])
+
   const loadUsers = useCallback(async () => {
     setIsLoading(true)
     setError(null)
@@ -85,11 +104,17 @@ export function UserManagementPanel() {
       const loadedUsers = await usersApi.listUsers()
       setUsers((current) => mergeInitialUsers(loadedUsers, current))
     } catch (loadError) {
-      setError(apiErrorInfo(loadError).message)
+      const info = apiErrorInfo(loadError)
+      const status = axios.isAxiosError(loadError) ? loadError.response?.status : undefined
+      if (status === 403) {
+        await handleAdminForbidden()
+        return
+      }
+      setError(info.message)
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [handleAdminForbidden])
 
   useEffect(() => {
     void loadUsers()
@@ -114,6 +139,11 @@ export function UserManagementPanel() {
       setPassword('')
     } catch (createError) {
       const info = apiErrorInfo(createError)
+      const status = axios.isAxiosError(createError) ? createError.response?.status : undefined
+      if (status === 403) {
+        await handleAdminForbidden()
+        return
+      }
       setError(info.message)
       setFieldErrors(info.fieldErrors)
     } finally {
@@ -168,7 +198,13 @@ export function UserManagementPanel() {
         }
       }
     } catch (mutationError) {
-      setError(apiErrorInfo(mutationError).message)
+      const info = apiErrorInfo(mutationError)
+      const status = axios.isAxiosError(mutationError) ? mutationError.response?.status : undefined
+      if (status === 403) {
+        await handleAdminForbidden()
+        return
+      }
+      setError(info.message)
     } finally {
       mutatingUserIdsRef.current.delete(userId)
       setMutatingUserIds((current) => {
@@ -194,7 +230,7 @@ export function UserManagementPanel() {
       <h2 id="user-management-title">Gestion des utilisateurs</h2>
 
       <form
-        aria-label="Créer un writer"
+        aria-label="Créer un compte"
         onSubmit={handleCreate}
         style={{
           display: 'grid',
@@ -222,7 +258,15 @@ export function UserManagementPanel() {
             }}
             style={{ ...fieldStyle, width: '100%', display: 'block' }}
           />
-          {fieldErrors.username && <small id="username-error">{fieldErrors.username}</small>}
+          <small
+            id={fieldErrors.username ? 'username-error' : undefined}
+            style={{
+              ...fieldHelperStyle,
+              color: fieldErrors.username ? theme.state.error.color : theme.text.secondary,
+            }}
+          >
+            {fieldErrors.username ?? '\u00a0'}
+          </small>
         </label>
         <label>
           Email
@@ -238,7 +282,15 @@ export function UserManagementPanel() {
             }}
             style={{ ...fieldStyle, width: '100%', display: 'block' }}
           />
-          {fieldErrors.email && <small id="email-error">{fieldErrors.email}</small>}
+          <small
+            id={fieldErrors.email ? 'email-error' : undefined}
+            style={{
+              ...fieldHelperStyle,
+              color: fieldErrors.email ? theme.state.error.color : theme.text.secondary,
+            }}
+          >
+            {fieldErrors.email ?? '\u00a0'}
+          </small>
         </label>
         <label>
           Mot de passe initial
@@ -259,6 +311,7 @@ export function UserManagementPanel() {
           <small
             id="password-byte-feedback"
             style={{
+              ...fieldHelperStyle,
               color: passwordBytes > 72 || fieldErrors.password
                 ? theme.state.error.color
                 : theme.text.secondary,
@@ -267,18 +320,27 @@ export function UserManagementPanel() {
             {fieldErrors.password ?? `${passwordBytes}/72 octets UTF-8`}
           </small>
         </label>
-        <button
-          type="submit"
-          disabled={isCreating || isLoading}
-          style={{
-            ...fieldStyle,
-            cursor: isCreating || isLoading ? 'wait' : 'pointer',
-            background: theme.button.primary.background,
-            color: theme.button.primary.color,
-          }}
-        >
-          {isCreating ? 'Création…' : 'Créer le writer'}
-        </button>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span aria-hidden="true" style={{ visibility: 'hidden', userSelect: 'none' }}>
+            Créer
+          </span>
+          <button
+            type="submit"
+            disabled={isCreating || isLoading}
+            style={{
+              ...fieldStyle,
+              width: '100%',
+              cursor: isCreating || isLoading ? 'wait' : 'pointer',
+              background: theme.button.primary.background,
+              color: theme.button.primary.color,
+            }}
+          >
+            {isCreating ? 'Création…' : 'Créer le compte'}
+          </button>
+          <small style={{ ...fieldHelperStyle, color: theme.text.secondary }} aria-hidden="true">
+            {'\u00a0'}
+          </small>
+        </div>
       </form>
 
       {error && (

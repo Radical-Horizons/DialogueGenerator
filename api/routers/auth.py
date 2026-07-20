@@ -9,14 +9,15 @@ from api.schemas.auth import (
     LoginRequest,
     TokenResponse,
     UserResponse,
-    RefreshTokenRequest
+    RefreshTokenRequest,
+    ChangePasswordRequest,
 )
 from api.services.auth_service import AuthService
-from api.exceptions import AuthenticationException
+from api.exceptions import AuthenticationException, AuthorizationException, ValidationException
 from api.dependencies import get_auth_service, get_request_id
 from api.config.security_config import get_security_config
 from api.middleware.rate_limiter import get_limiter, get_rate_limit_string
-
+from api.utils.password_policy import PasswordPolicyError
 logger = logging.getLogger(__name__)
 
 # Configuration cookies (utilise SecurityConfig)
@@ -375,6 +376,58 @@ async def get_current_user_info(
         role=current_user["role"],
         is_active=bool(current_user["is_active"]),
     )
+
+
+@router.post("/me/password", status_code=status.HTTP_204_NO_CONTENT)
+@apply_rate_limit
+async def change_own_password(
+    payload: ChangePasswordRequest,
+    request: Request,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
+) -> None:
+    """Change le mot de passe du compte authentifié (admin / writer).
+
+    Args:
+        payload: Mot de passe actuel et nouveau.
+        request: Requête HTTP (request_id).
+        current_user: Principal JWT résolu.
+        auth_service: Service d'authentification injecté.
+    """
+    request_id = getattr(request.state, "request_id", "unknown")
+    if current_user.get("role") == "guest":
+        raise AuthorizationException(
+            message="Les invités ne peuvent pas changer de mot de passe.",
+            request_id=request_id,
+        )
+    user_id = current_user.get("id")
+    if not isinstance(user_id, str) or not user_id:
+        raise AuthenticationException(
+            message="Session invalide",
+            request_id=request_id,
+        )
+    try:
+        auth_service.change_password(
+            user_id,
+            current_password=payload.current_password,
+            new_password=payload.new_password,
+            actor=current_user,
+        )
+    except PermissionError as exc:
+        raise AuthenticationException(
+            message=str(exc),
+            request_id=request_id,
+        ) from exc
+    except LookupError as exc:
+        raise AuthenticationException(
+            message=str(exc),
+            request_id=request_id,
+        ) from exc
+    except PasswordPolicyError as exc:
+        raise ValidationException(
+            message=str(exc),
+            request_id=request_id,
+        ) from exc
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)

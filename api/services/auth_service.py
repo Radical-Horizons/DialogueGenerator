@@ -170,6 +170,60 @@ class AuthService:
                 )
         return updated
 
+    def change_password(
+        self,
+        user_id: str,
+        *,
+        current_password: str,
+        new_password: str,
+        actor: dict[str, object] | None = None,
+    ) -> UserRecord:
+        """Change le mot de passe d'un compte SQLite après vérification de l'actuel.
+
+        Args:
+            user_id: Identifiant du compte (jamais un principal guest).
+            current_password: Mot de passe actuel en clair.
+            new_password: Nouveau mot de passe en clair (validé en amont).
+            actor: Principal à l'origine du changement (audit).
+
+        Returns:
+            Enregistrement utilisateur après mise à jour.
+
+        Raises:
+            RuntimeError: Si le repository n'est pas injecté.
+            LookupError: Si le compte est introuvable.
+            PermissionError: Si le mot de passe actuel est incorrect.
+        """
+        if self._user_repository is None:
+            raise RuntimeError("UserRepository requis pour changer un mot de passe.")
+        user = self._user_repository.find_by_id(user_id)
+        if user is None or not user["is_active"]:
+            raise LookupError("Compte utilisateur introuvable ou inactif.")
+        if not self.verify_password(current_password, user["hashed_password"]):
+            raise PermissionError("Mot de passe actuel incorrect.")
+        hashed = self.hash_password(new_password)
+        updated = self._user_repository.update_password(user_id, hashed)
+        if updated is None:
+            raise LookupError("Compte utilisateur introuvable.")
+        logger.info(
+            "Mot de passe utilisateur modifié",
+            extra={
+                "actor_id": actor.get("id") if actor else None,
+                "actor_username": actor.get("username") if actor else None,
+                "target_user_id": user_id,
+                "action": "user.password.changed",
+            },
+        )
+        if self._audit_log_service is not None:
+            self._audit_log_service.log_action(
+                action="user.password.changed",
+                target_type="user",
+                target_id=user_id,
+                actor=actor,
+                metadata={"username": updated["username"]},
+            )
+        return updated
+
     def seed_admin_if_needed(self, admin_password: str | None) -> None:
         """Sème le compte administrateur si la base n'en contient aucun.
 

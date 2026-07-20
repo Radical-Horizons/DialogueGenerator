@@ -169,14 +169,17 @@ describe('FR119 touch targets — chrome', () => {
     } as ReturnType<typeof useGenerationActionsStore>)
   })
 
-  it('Header : Options, Actions et menu utilisateur ≥ 44px (styles inline)', () => {
+  it('Header : Options, Reset et menu utilisateur ≥ 44px (styles inline)', () => {
     render(
-      <QueryClientProvider client={queryClient}>
-        <Header />
-      </QueryClientProvider>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <Header />
+        </QueryClientProvider>
+      </BrowserRouter>
     )
     expectInlineMinTouch(screen.getByRole('button', { name: /^options$/i }) as HTMLElement, 'header Options')
-    expectInlineMinTouch(screen.getByRole('button', { name: /^actions/i }) as HTMLElement, 'header Actions')
+    expectInlineMinTouch(screen.getByTestId('header-reset-button') as HTMLElement, 'header Reset')
+    expect(screen.queryByRole('button', { name: /^actions/i })).not.toBeInTheDocument()
     const userBtn = screen.getByRole('button', { name: /menu utilisateur testuser/i }) as HTMLElement
     expect(userBtn.style.width).toBe(`${TOUCH_TARGET_MIN_PX}px`)
     expect(userBtn.style.height).toBe(`${TOUCH_TARGET_MIN_PX}px`)

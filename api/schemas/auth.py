@@ -1,6 +1,8 @@
 """Schémas Pydantic pour l'authentification."""
 from typing import Literal, Optional
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, field_validator, model_validator
+
+from api.utils.password_policy import PasswordPolicyError, validate_password
 
 
 class LoginRequest(BaseModel):
@@ -12,6 +14,30 @@ class LoginRequest(BaseModel):
     """
     username: str = Field(..., min_length=1, description="Nom d'utilisateur ou email")
     password: str = Field(..., min_length=1, description="Mot de passe")
+
+
+class ChangePasswordRequest(BaseModel):
+    """Changement de mot de passe pour le compte authentifié."""
+
+    current_password: str = Field(..., min_length=1, description="Mot de passe actuel")
+    new_password: str = Field(..., min_length=8, description="Nouveau mot de passe")
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, value: str) -> str:
+        """Applique la politique de mot de passe au nouveau secret."""
+        try:
+            validate_password(value)
+        except PasswordPolicyError as exc:
+            raise ValueError(str(exc)) from exc
+        return value
+
+    @model_validator(mode="after")
+    def reject_unchanged_password(self) -> "ChangePasswordRequest":
+        """Refuse un changement qui laisse le mot de passe identique."""
+        if self.current_password == self.new_password:
+            raise ValueError("Le nouveau mot de passe doit être différent de l'actuel.")
+        return self
 
 
 class TokenResponse(BaseModel):

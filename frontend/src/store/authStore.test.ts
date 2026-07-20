@@ -49,6 +49,7 @@ describe('authStore guest-first', () => {
       access_token: 'guest-token',
       token_type: 'bearer',
     })
+    mockedAuth.refreshToken.mockRejectedValue({ response: { status: 401 } })
     mockedAuth.getCurrentUser.mockResolvedValue(guestUser)
     mockedAuth.logout.mockResolvedValue(undefined)
   })
@@ -119,5 +120,33 @@ describe('authStore guest-first', () => {
 
     expect(useAuthStore.getState().user).toMatchObject({ role: 'guest' })
     expect(useAuthStore.getState().bootError).toBeNull()
+  })
+
+  it('initialize avec access expiré restaure via refresh cookie', async () => {
+    const expiredHeader = btoa(JSON.stringify({ alg: 'none' }))
+    const expiredPayload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) - 60 }))
+    localStorage.setItem('access_token', `${expiredHeader}.${expiredPayload}.sig`)
+    mockedAuth.refreshToken.mockResolvedValue({
+      access_token: makeValidToken(),
+      token_type: 'bearer',
+      expires_in: 900,
+    })
+    mockedAuth.getCurrentUser.mockResolvedValue(writerUser)
+
+    await useAuthStore.getState().initialize()
+
+    expect(mockedAuth.refreshToken).toHaveBeenCalledOnce()
+    expect(mockedAuth.loginAsGuest).not.toHaveBeenCalled()
+    expect(useAuthStore.getState().user).toMatchObject({ role: 'writer', username: 'writer' })
+  })
+
+  it('initialize sans token tente refresh avant guest', async () => {
+    mockedAuth.refreshToken.mockRejectedValueOnce({ response: { status: 401 } })
+
+    await useAuthStore.getState().initialize()
+
+    expect(mockedAuth.refreshToken).toHaveBeenCalledOnce()
+    expect(mockedAuth.loginAsGuest).toHaveBeenCalledOnce()
+    expect(useAuthStore.getState().user).toMatchObject({ role: 'guest' })
   })
 })

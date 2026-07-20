@@ -1,9 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import axios from 'axios'
 
 import { UserManagementPanel } from './UserManagementPanel'
 import * as usersApi from '../../api/users'
+
+const navigateMock = vi.fn()
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+  }
+})
 
 vi.mock('../../api/users')
 const authMocks = vi.hoisted(() => ({
@@ -39,6 +49,7 @@ const writer = {
 describe('UserManagementPanel', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    navigateMock.mockReset()
     authMocks.state.user = {
       id: 'admin-id',
       username: 'admin',
@@ -63,7 +74,7 @@ describe('UserManagementPanel', () => {
     await interaction.type(screen.getByLabelText('Nom d’utilisateur'), 'new-writer')
     await interaction.type(screen.getByLabelText('Email'), 'new@example.com')
     await interaction.type(screen.getByLabelText('Mot de passe initial'), 'strong-pass-123')
-    await interaction.click(screen.getByRole('button', { name: 'Créer le writer' }))
+    await interaction.click(screen.getByRole('button', { name: 'Créer le compte' }))
 
     await waitFor(() => {
       expect(usersApi.createUser).toHaveBeenCalledWith({
@@ -111,6 +122,28 @@ describe('UserManagementPanel', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Une erreur est survenue. Réessayez.',
     )
+  })
+
+  it('redirige hors de la page admin sur 403', async () => {
+    const forbidden = new axios.AxiosError(
+      'Admin role required',
+      'ERR_BAD_REQUEST',
+      undefined,
+      undefined,
+      {
+        status: 403,
+        statusText: 'Forbidden',
+        headers: {},
+        config: {} as never,
+        data: { detail: 'Admin role required' },
+      },
+    )
+    vi.mocked(usersApi.listUsers).mockRejectedValueOnce(forbidden)
+    render(<UserManagementPanel />)
+    await waitFor(() => {
+      expect(authMocks.state.fetchCurrentUser).toHaveBeenCalled()
+      expect(navigateMock).toHaveBeenCalledWith('/', { replace: true })
+    })
   })
 
   it('annule promotion et désactivation sans appeler l’API', async () => {
@@ -166,14 +199,14 @@ describe('UserManagementPanel', () => {
     })
     render(<UserManagementPanel />)
 
-    expect(screen.getByRole('button', { name: 'Créer le writer' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Créer le compte' })).toBeDisabled()
     resolveList?.([{ ...writer, username: 'Zulu' }])
     await screen.findByText('Zulu')
 
     await interaction.type(screen.getByLabelText('Nom d’utilisateur'), 'Alpha')
     await interaction.type(screen.getByLabelText('Email'), 'alpha@example.com')
     await interaction.type(screen.getByLabelText('Mot de passe initial'), 'strong-pass-123')
-    await interaction.click(screen.getByRole('button', { name: 'Créer le writer' }))
+    await interaction.click(screen.getByRole('button', { name: 'Créer le compte' }))
 
     const list = screen.getByLabelText('Comptes utilisateurs')
     const names = [...list.querySelectorAll('strong')]
@@ -203,7 +236,7 @@ describe('UserManagementPanel', () => {
     await interaction.type(screen.getByLabelText('Nom d’utilisateur'), 'bad')
     await interaction.type(screen.getByLabelText('Email'), 'bad@example.com')
     await interaction.type(screen.getByLabelText('Mot de passe initial'), 'strong-pass-123')
-    await interaction.click(screen.getByRole('button', { name: 'Créer le writer' }))
+    await interaction.click(screen.getByRole('button', { name: 'Créer le compte' }))
 
     expect(await screen.findByText('Username invalide')).toBeInTheDocument()
     expect(screen.getByText('Email invalide')).toBeInTheDocument()
@@ -211,7 +244,7 @@ describe('UserManagementPanel', () => {
 
     await interaction.clear(screen.getByLabelText('Mot de passe initial'))
     await interaction.type(screen.getByLabelText('Mot de passe initial'), 'é'.repeat(40))
-    await interaction.click(screen.getByRole('button', { name: 'Créer le writer' }))
+    await interaction.click(screen.getByRole('button', { name: 'Créer le compte' }))
     expect(screen.getByText(/dépasse la limite de 72 octets/)).toBeInTheDocument()
     expect(usersApi.createUser).toHaveBeenCalledTimes(1)
   })
