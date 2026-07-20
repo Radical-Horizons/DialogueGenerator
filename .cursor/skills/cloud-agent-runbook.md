@@ -18,9 +18,10 @@ Use this skill when you need to **run the app**, **log in**, **toggle dev behavi
 
 ## Auth and login (UI)
 
-- **Default dev credentials** (documented in `AGENTS.md`): username `admin`, password `admin123`.
-- **JWT vs no JWT**: With `DISABLE_AUTH=true` (default in `.env.example`), the API uses a mock user; the UI still may show a login screen for flows that exercise auth — use the defaults above when the app expects credentials.
-- **Strict JWT locally**: Set `DISABLE_AUTH=false` in `.env`, restart API, then obtain a token via `/login` as documented in API docs (`README_API.md`). Playwright’s default `webServer` env forces `DISABLE_AUTH=true` for stable E2E; see `playwright.config.ts` comments if you need auth-strict E2E.
+- **Guest-first (default `DISABLE_AUTH=false`)** : sans JWT, l'UI appelle `POST /api/v1/auth/guest` (lecture seule). Bouton **Connexion** pour `admin` / `writer`.
+- **Compte admin seed** : définir `ADMIN_PASSWORD` dans `.env` avant le premier boot API ; login `admin` + ce mot de passe. En dev courant : `admin` / `admin123` si `ADMIN_PASSWORD=admin123`.
+- **`DISABLE_AUTH=true`** : bypass JWT + mock admin — **défaut pytest/Playwright**, pas le défaut `.env.example`. Interdit en production.
+- **E2E** : `playwright.config.ts` force souvent `DISABLE_AUTH=true` pour la stabilité ; voir commentaires du fichier pour des specs auth-strict.
 
 ## Start the application
 
@@ -41,7 +42,9 @@ There is no separate feature-flag service; behavior is controlled by **environme
 | Variable | Role |
 |----------|------|
 | `ENVIRONMENT` | `development` vs `production` (stricter config validation in prod). |
-| `DISABLE_AUTH` | `true` = JWT bypass + mock user for local/dev and default tests. **`true` is forbidden when `ENVIRONMENT=production`.** |
+| `DISABLE_AUTH` | `false` (défaut `.env.example`) = JWT + guest UI. `true` = bypass mock admin (pytest/Playwright). **Interdit** si `ENVIRONMENT=production`. |
+| `ADMIN_PASSWORD` | Seed du compte `admin` au premier boot SQLite. |
+| `APP_DATABASE` | Chemin SQLite (défaut `data/app.db` ; override tests). |
 | `AUTH_RATE_LIMIT_ENABLED` | Rate limit on auth routes; Playwright and `tests/conftest.py` disable this for stability. |
 | `OPENAI_API_KEY` | Real LLM; omit or dummy → mock client for basic dev/tests. |
 | `SKIP_STARTUP_CONTEXT_VALIDATION` / `SKIP_STARTUP_LOG_CLEANUP` | Faster startup (also triggered by `npm run dev:fast`). |

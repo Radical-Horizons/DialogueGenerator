@@ -40,6 +40,9 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 | `AUTH_RATE_LIMIT_REQUESTS` | Nombre de requêtes par fenêtre | Non | `5` |
 | `AUTH_RATE_LIMIT_WINDOW` | Fenêtre en secondes | Non | `60` |
 | `CORS_ORIGINS` | Origines CORS autorisées (CSV) | Oui (si prod) | `*` (dev) |
+| `DISABLE_AUTH` | Bypass JWT (mock admin) — **interdit** si `ENVIRONMENT=production` | Non | `false` |
+| `ADMIN_PASSWORD` | Mot de passe du compte seed `admin` au premier démarrage (bcrypt en SQLite) | Recommandé (prod) | — |
+| `APP_DATABASE` | Chemin SQLite applicatif (override tests) | Non | `data/app.db` |
 
 ## Rate Limiting
 
@@ -102,9 +105,38 @@ L'API utilise JWT (JSON Web Tokens) pour l'authentification :
 
 ### Rotation des tokens
 
-Les refresh tokens peuvent être utilisés pour obtenir de nouveaux access tokens via `POST /api/v1/auth/refresh`.
+Les refresh tokens peuvent être utilisés pour obtenir de nouveaux access tokens via `POST /api/v1/auth/refresh`. Le cookie `refresh_token` est limité au path `/api/v1/auth`, httpOnly, Secure en production.
 
-**Note** : En production, on pourrait implémenter une blacklist de tokens pour invalider les refresh tokens lors de la déconnexion.
+`POST /api/v1/auth/logout` efface toujours le cookie refresh (même si l'access token est expiré). Il n'existe pas encore de blacklist serveur : un access token reste valide jusqu'à expiration (~15 min).
+
+### Rôles et session invité (Epic 7)
+
+| Rôle | Compte SQLite | Refresh cookie | Capacités |
+|------|---------------|----------------|-----------|
+| `admin` | Oui | Oui | Gestion utilisateurs, audit, paramètres app, CRUD dialogues (tous) |
+| `writer` | Oui | Oui | Édition dialogues (propriétaire ou partagé), préférences serveur |
+| `guest` | Non | Non | Lecture seule (démo) ; `403` sur mutations |
+
+**Entrée UI (défaut `DISABLE_AUTH=false`)** : sans JWT valide, le frontend appelle `POST /api/v1/auth/guest` et obtient un access token `role=guest` (TTL 8 h). Connexion explicite via `/login` pour `admin` / `writer`.
+
+**`DISABLE_AUTH=true`** (pytest, Playwright E2E) : mock admin sans JWT — réservé au développement ; refusé au démarrage si `ENVIRONMENT=production`.
+
+### Comptes et base SQLite
+
+Les utilisateurs persistés vivent dans `data/app.db` (override `APP_DATABASE`). Migrations versionnées au démarrage (`services/repositories/sqlite/migrations/`, tables `users`, `user_settings`, `app_settings`, `dialogues_index`, `dialogue_shares`, `audit_logs`).
+
+- **Seed admin** : au premier boot, si `ADMIN_PASSWORD` est défini et qu'aucun `admin` n'existe, le compte `admin` est créé (mot de passe hashé bcrypt). Sans `ADMIN_PASSWORD` : warning au démarrage, pas de seed automatique.
+- **Provisioning** : `POST /api/v1/users` (admin only) crée des comptes `writer`.
+- **Changement de mot de passe** : `POST /api/v1/auth/me/password` (admin/writer ; `403` pour guest).
+
+Contrats détaillés : [`docs/api/api-contracts-api.md`](../api/api-contracts-api.md) (sections Authentication, Administration, Dialogue Shares).
+
+### Journal d'audit (FR71)
+
+Les mutations sensibles (création/utilisateur, sauvegarde/suppression dialogue, partages) sont journalisées en append-only dans SQLite. Consultation admin :
+
+- `GET /api/v1/audit-logs` — pagination, filtres `user_id`, `action`, dates
+- `GET /api/v1/audit-logs/export` — export JSON/CSV (plafond 10 000 lignes)
 
 ## Configuration Production
 
@@ -153,15 +185,16 @@ Veuillez définir une clé secrète sécurisée dans .env ou les variables d'env
 
 ### Authentification
 
-1. **Mots de passe forts** : Implémenter des règles de complexité (à faire pour utilisateurs réels)
-2. **Expiration des tokens** : Les tokens actuels expirent automatiquement
-3. **Révoquer les tokens** : En production, implémenter une blacklist pour révoquer les tokens
+1. **Mots de passe** : politique validée côté API (`api/utils/password_policy.py`) à la création et au changement
+2. **Expiration des tokens** : access ~15 min ; refresh cookie 7 jours ; guest 8 h sans refresh
+3. **Déconnexion** : efface le cookie refresh ; l'access token court reste utilisable jusqu'à expiration
+4. **Production** : `DISABLE_AUTH=false` obligatoire ; définir `ADMIN_PASSWORD` avant le premier déploiement
 
 ## Limitations actuelles
 
-- **Utilisateurs en dur** : Actuellement, les utilisateurs sont stockés en dur dans le code (TODO: base de données)
-- **Pas de blacklist** : Les tokens ne peuvent pas être révoqués avant expiration
-- **Pas de gestion de sessions** : Pas de suivi des sessions actives
+- **Pas de blacklist JWT** : un access token reste valide jusqu'à expiration après logout
+- **Pas de suivi de sessions actives** : pas de révocation centralisée des refresh tokens côté serveur
+- **Invité** : pas de compte ni de refresh ; reconnexion guest requise après expiration du token
 
 ## Limites anti-DoS (Epic 9)
 
@@ -202,9 +235,8 @@ En développement, les détails restent visibles pour le diagnostic. Voir aussi 
 
 ## Évolutions futures
 
-- Migration vers une base de données pour les utilisateurs
-- Implémentation d'une blacklist de tokens
-- Support de l'authentification multi-facteurs (2FA)
+- Blacklist ou rotation serveur des refresh tokens
+- Authentification multi-facteurs (2FA)
 - Gestion des sessions avec suivi des connexions actives
 
 

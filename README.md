@@ -144,7 +144,7 @@ cd ..
         *   `OPENAI_API_KEY` : Clé API OpenAI (requis pour la génération de dialogues)
         *   `JWT_SECRET_KEY` : Clé secrète pour JWT (valeur par défaut acceptée en dev, **doit être changée en production**)
         *   `ENVIRONMENT` : Environnement (`development` ou `production`)
-    *   Pour plus de détails, voir [README_API.md](README_API.md) et [docs/SECURITY.md](docs/SECURITY.md).
+    *   Pour plus de détails, voir [README_API.md](README_API.md) et [docs/guides/SECURITY.md](docs/guides/SECURITY.md).
 
 ### Vérifier l'Installation
 
