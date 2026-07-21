@@ -54,3 +54,10 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-guest-first-auth-entry.md`
   summary: Exercer le parcours guest-first en Playwright (DISABLE_AUTH=false + storageState) au lieu de forcer true dans webServer.env.
   evidence: Exception Ask First volontaire ; l'entrée guest + Connexion n'est pas couverte E2E aujourd'hui.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-silent-unity-model-migration.md`
+  summary: Ajouter un test d'intégration boot draft gpt-5.4 + store sol sans bandeau.
+  evidence: Revue Quick Dev — seuls des unitaires isolés couvrent detect/store ; le parcours loadDraft+sync n'est pas exercé bout-en-bout.
+- source_spec: `_bmad-output/implementation-artifacts/spec-silent-unity-model-migration.md`
+  summary: Couvrir tous les littéraux LEGACY_MODEL_ID_MAP (pas seulement gpt-5.4) dans les tests.
+  evidence: Revue — la map a 7 entrées ; un seul littéral est asserté.

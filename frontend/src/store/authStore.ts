@@ -171,8 +171,6 @@ export const useAuthStore = create<AuthState>()(
           if (epoch !== authEpoch) return
           set({ user, isAuthenticated: true })
           await syncUserSettingsNonBlocking(user)
-        } catch (error) {
-          throw error
         } finally {
           // Toujours libérer le bouton même si un login concurrent a incrémenté authEpoch
           if (epoch === authEpoch) {

@@ -3,6 +3,7 @@
  */
 import { create } from 'zustand'
 import { listLLMModels } from '../api/config'
+import { normalizeModelId } from '../constants'
 
 interface LLMModel {
   api_identifier: string;
@@ -24,10 +25,16 @@ interface LLMStore {
   loadModels: () => Promise<void>;
 }
 
+const rawStoredModel = localStorage.getItem('llm-model') || 'gpt-5.6-terra'
+const initialModel = normalizeModelId(rawStoredModel)
+if (initialModel !== rawStoredModel) {
+  localStorage.setItem('llm-model', initialModel)
+}
+
 export const useLLMStore = create<LLMStore>((set) => ({
   // État initial
   provider: (localStorage.getItem('llm-provider') as 'openai' | 'mistral') || 'openai',
-    model: localStorage.getItem('llm-model') || 'gpt-5.6-terra',
+  model: initialModel,
   availableModels: [],
 
   // Actions
@@ -37,8 +44,9 @@ export const useLLMStore = create<LLMStore>((set) => ({
   },
 
   setModel: (model) => {
-    localStorage.setItem('llm-model', model);
-    set({ model });
+    const normalized = normalizeModelId(model)
+    localStorage.setItem('llm-model', normalized)
+    set({ model: normalized })
   },
 
   setAvailableModels: (models) => {

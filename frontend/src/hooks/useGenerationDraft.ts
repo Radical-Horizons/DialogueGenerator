@@ -7,8 +7,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { useGenerationStore } from '../store/generationStore'
 import { useContextStore } from '../store/contextStore'
 import type { ContextSelection } from '../types/api'
-import { CONTEXT_TOKENS_LIMITS } from '../constants'
+import { CONTEXT_TOKENS_LIMITS, normalizeModelId } from '../constants'
 import { normalizeMaxCompletionTokensForUi } from '../utils/generationConfigNormalization'
+import { useLLMStore } from '../store/llmStore'
 import type { SaveStatus } from '../components/shared/SaveStatusIndicator'
 import {
   queueUserSettingUpdate,
@@ -154,6 +155,11 @@ export function useGenerationDraft(
 
   const saveDraft = useCallback(() => {
     setSaveStatus('saving')
+    const normalizedLlmModel = normalizeModelId(llmModel)
+    if (normalizedLlmModel !== llmModel) {
+      setLlmModel(normalizedLlmModel)
+      useLLMStore.getState().setModel(normalizedLlmModel)
+    }
     const draft: DraftData = {
       userInstructions,
       authorProfile: null, // Sera chargé depuis useAuthorProfile
@@ -162,7 +168,7 @@ export function useGenerationDraft(
       sceneSelection,
       maxContextTokens,
       maxCompletionTokens,
-      llmModel,
+      llmModel: normalizedLlmModel,
       reasoningEffort,
       topP,
       maxChoices,
@@ -191,6 +197,7 @@ export function useGenerationDraft(
     maxContextTokens,
     maxCompletionTokens,
     llmModel,
+    setLlmModel,
     reasoningEffort,
     topP,
     maxChoices,
@@ -233,8 +240,20 @@ export function useGenerationDraft(
         if (draft.maxCompletionTokens !== undefined && draft.maxCompletionTokens !== null) {
           setMaxCompletionTokens(normalizeMaxCompletionTokensForUi(draft.maxCompletionTokens))
         }
-        if (draft.llmModel !== undefined && draft.llmModel !== 'unknown') {
-          setLlmModel(draft.llmModel)
+        if (typeof draft.llmModel === 'string' && draft.llmModel !== 'unknown') {
+          const normalizedLlmModel = normalizeModelId(draft.llmModel)
+          setLlmModel(normalizedLlmModel)
+          useLLMStore.getState().setModel(normalizedLlmModel)
+          if (normalizedLlmModel !== draft.llmModel) {
+            const migratedDraft: DraftData = {
+              ...draft,
+              llmModel: normalizedLlmModel,
+              timestamp: Date.now(),
+            }
+            localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(migratedDraft))
+            queueUserSettingUpdate('generation', 'draft', migratedDraft)
+            setDraftLastSavedAt(migratedDraft.timestamp)
+          }
         }
         if (draft.reasoningEffort !== undefined) {
           setReasoningEffort(draft.reasoningEffort)

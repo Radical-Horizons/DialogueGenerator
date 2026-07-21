@@ -35,6 +35,25 @@ export const MODEL_NAMES = {
   GPT_5_NANO: 'gpt-5.6-luna',
 } as const
 
+/**
+ * Anciens slugs API → famille GPT-5.6 (presets, localStorage, draft).
+ * Doit correspondre à ``ModelNames.LEGACY_MODEL_ID_MAP`` dans constants.py.
+ */
+export const LEGACY_MODEL_ID_MAP: Readonly<Record<string, string>> = {
+  'gpt-5.4': MODEL_NAMES.GPT_5_6_SOL,
+  'gpt-5.2': MODEL_NAMES.GPT_5_6_TERRA,
+  'gpt-5.2-pro': MODEL_NAMES.GPT_5_6_SOL,
+  'gpt-5.2-thinking': MODEL_NAMES.GPT_5_6_SOL,
+  'gpt-5-mini': MODEL_NAMES.GPT_5_6_LUNA,
+  'gpt-5-nano': MODEL_NAMES.GPT_5_6_LUNA,
+  'gpt-5.6': MODEL_NAMES.GPT_5_6_SOL,
+}
+
+/** Mappe un identifiant legacy vers le slug GPT-5.6 courant (miroir Python). */
+export function normalizeModelId(modelId: string): string {
+  return LEGACY_MODEL_ID_MAP[modelId] ?? modelId
+}
+
 /** Modèles avec sélecteur reasoning.effort dans le panneau génération. */
 export const REASONING_EFFORT_MODELS = [
   MODEL_NAMES.GPT_5_6_SOL,
