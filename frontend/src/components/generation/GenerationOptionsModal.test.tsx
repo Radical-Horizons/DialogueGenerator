@@ -17,6 +17,21 @@ vi.mock('../../api/gddNotionSync', () => ({
   getGddFullSyncCheckpoint: vi.fn(),
 }))
 
+vi.mock('../../api/costs', () => ({
+  getBudget: vi.fn().mockResolvedValue({
+    quota: 100,
+    amount: 0,
+    remaining: 100,
+    percentage: 0,
+  }),
+  updateBudget: vi.fn().mockResolvedValue({
+    quota: 100,
+    amount: 0,
+    remaining: 100,
+    percentage: 0,
+  }),
+}))
+
 const mockGetGddCheckpoint = vi.mocked(getGddFullSyncCheckpoint)
 
 const defaultCheckpointResponse = {
@@ -169,11 +184,47 @@ describe('GenerationOptionsModal', () => {
       />
     )
     
-    const applyButton = screen.getByText(/appliquer/i)
+    const applyButton = screen.getByRole('button', { name: /^Appliquer$/i })
     await user.click(applyButton)
     
-    expect(mockOnApply).toHaveBeenCalled()
-    expect(mockOnClose).toHaveBeenCalled()
+    await waitFor(() => {
+      expect(mockOnApply).toHaveBeenCalled()
+      expect(mockOnClose).toHaveBeenCalled()
+    })
+  })
+
+  it('persiste le quota mensuel via Appliquer (pas de bouton Sauvegarder)', async () => {
+    const user = userEvent.setup()
+    const { updateBudget } = await import('../../api/costs')
+    const mockUpdateBudget = vi.mocked(updateBudget)
+    mockUpdateBudget.mockResolvedValue({
+      quota: 250,
+      amount: 0,
+      remaining: 250,
+      percentage: 0,
+    })
+
+    renderWithQueryClient(
+      <GenerationOptionsModal
+        isOpen={true}
+        onClose={mockOnClose}
+        onApply={mockOnApply}
+      />
+    )
+
+    expect(screen.queryByRole('button', { name: /Sauvegarder/i })).not.toBeInTheDocument()
+
+    const quotaInput = await screen.findByLabelText(/Quota mensuel/i)
+    await user.clear(quotaInput)
+    await user.type(quotaInput, '250')
+
+    await user.click(screen.getByRole('button', { name: /^Appliquer$/i }))
+
+    await waitFor(() => {
+      expect(mockUpdateBudget).toHaveBeenCalledWith(250)
+      expect(mockOnApply).toHaveBeenCalled()
+      expect(mockOnClose).toHaveBeenCalled()
+    })
   })
 
   it('devrait réinitialiser et fermer quand on clique sur Réinitialiser', async () => {

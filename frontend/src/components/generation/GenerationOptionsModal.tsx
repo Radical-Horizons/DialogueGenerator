@@ -1,7 +1,7 @@
 /**
  * Modal pour configurer les options de génération (contexte, vocabulaire, prompts, budget, sync GDD, suivi).
  */
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef, type Ref } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useContextConfigStore } from '../../store/contextConfigStore'
 import { useContextStore } from '../../store/contextStore'
@@ -10,7 +10,7 @@ import { VocabularyGuidesTab } from './VocabularyGuidesTab'
 import { GddNotionSyncSection } from './GddNotionSyncSection'
 import { PromptsTab } from './PromptsTab'
 import { ErrorBoundary } from '../shared/ErrorBoundary'
-import { BudgetSettings } from '../settings/BudgetSettings'
+import { BudgetSettings, type BudgetSettingsHandle } from '../settings/BudgetSettings'
 import { UsageDashboard } from '../usage/UsageDashboard'
 import { GenerationLogsPanel } from '../usage/GenerationLogsPanel'
 import { theme } from '../../theme'
@@ -79,6 +79,7 @@ export function GenerationOptionsModal({
   const [previewText, setPreviewText] = useState<string>('')
   const [previewTokens, setPreviewTokens] = useState<number>(0)
   const [isLoadingPreview, setIsLoadingPreview] = useState(false)
+  const budgetSettingsRef = useRef<BudgetSettingsHandle>(null)
 
   const {
     organization,
@@ -375,7 +376,8 @@ export function GenerationOptionsModal({
             <PromptsTab />
           )}
 
-          {activeTab === 'general' && (
+          {/* Toujours monté pour conserver le draft quota et permettre apply via Appliquer. */}
+          <div style={{ display: activeTab === 'general' ? 'block' : 'none' }}>
             <GeneralTab
               organization={organization}
               setOrganization={setOrganization}
@@ -383,11 +385,12 @@ export function GenerationOptionsModal({
               previewTokens={previewTokens}
               isLoadingPreview={isLoadingPreview}
               onPreview={handlePreview}
+              budgetSettingsRef={budgetSettingsRef}
               onBudgetUpdated={() => {
                 // Optionnel: recharger les données si nécessaire
               }}
             />
-          )}
+          </div>
 
           {activeTab === 'gdd_notion' && (
             <ErrorBoundary
@@ -461,8 +464,15 @@ export function GenerationOptionsModal({
           </button>
           <button
             onClick={() => {
-              onApply?.()
-              onClose()
+              void (async () => {
+                const applied = await budgetSettingsRef.current?.apply()
+                if (applied === false) {
+                  setActiveTab('general')
+                  return
+                }
+                onApply?.()
+                onClose()
+              })()
             }}
             style={{
               padding: '0.5rem 1rem',
@@ -647,6 +657,7 @@ function GeneralTab({
   previewTokens,
   isLoadingPreview,
   onPreview,
+  budgetSettingsRef,
   onBudgetUpdated,
 }: {
   organization: 'default' | 'narrative' | 'minimal'
@@ -655,13 +666,14 @@ function GeneralTab({
   previewTokens: number
   isLoadingPreview: boolean
   onPreview: () => void
+  budgetSettingsRef: Ref<BudgetSettingsHandle>
   onBudgetUpdated?: (budget: BudgetResponse) => void
 }) {
   return (
     <div>
       {/* Section Budget LLM */}
       <div style={{ marginBottom: '2rem' }}>
-        <BudgetSettings onBudgetUpdated={onBudgetUpdated} />
+        <BudgetSettings ref={budgetSettingsRef} onBudgetUpdated={onBudgetUpdated} />
       </div>
 
       {/* Section Organisation */}
