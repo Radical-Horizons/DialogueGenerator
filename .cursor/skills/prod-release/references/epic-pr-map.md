@@ -14,7 +14,7 @@
 | `v1.7.1` | 1.7.1 | — | patch main post–Epic 5 | `2dcf3a24` | 2026-06-26 |
 | `v1.7.2` | 1.7.2 | — | patch main (playthrough + GDD sync) | `60c779ec` | 2026-07-06 |
 | `v1.8.0` | 1.8.0 | Epic 7 | Epic 7 — Collaboration / RBAC | `1ccce9d2` | 2026-07-20 |
-| `v1.8.1` | 1.8.1 | — | patch main (login /login isLoading) | pending | 2026-07-21 |
+| `v1.8.1` | 1.8.1 | — | patch main (login /login isLoading) | `8ed1fcbe` | 2026-07-21 |
 
 Baseline : `v1.0.0` → `fe9c3374`. Doc complète : `docs/releases/semver-and-tags.md`.
 
