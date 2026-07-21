@@ -12,9 +12,11 @@ vi.mock('../store/authStore')
 describe('LoginForm', () => {
   it('affiche le formulaire de connexion', () => {
     const mockLogin = vi.fn()
+    const mockInitialize = vi.fn().mockResolvedValue(undefined)
     vi.mocked(useAuthStore).mockReturnValue({
       login: mockLogin,
       loginAsGuest: vi.fn(),
+      initialize: mockInitialize,
       isLoading: false,
       isAuthenticated: false,
       user: null,
@@ -33,6 +35,7 @@ describe('LoginForm', () => {
     expect(screen.getByLabelText(/mot de passe/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /se connecter/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /continuer en invité/i })).toBeInTheDocument()
+    expect(mockInitialize).toHaveBeenCalled()
   })
 
   it('appelle login avec les bonnes données au submit', async () => {
@@ -42,6 +45,7 @@ describe('LoginForm', () => {
     vi.mocked(useAuthStore).mockReturnValue({
       login: mockLogin,
       loginAsGuest: vi.fn(),
+      initialize: vi.fn().mockResolvedValue(undefined),
       isLoading: false,
       isAuthenticated: false,
       user: null,
@@ -75,6 +79,7 @@ describe('LoginForm', () => {
     vi.mocked(useAuthStore).mockReturnValue({
       login: vi.fn(),
       loginAsGuest: mockGuest,
+      initialize: vi.fn().mockResolvedValue(undefined),
       isLoading: false,
       isAuthenticated: false,
       user: null,
@@ -93,6 +98,28 @@ describe('LoginForm', () => {
     await waitFor(() => {
       expect(mockGuest).toHaveBeenCalled()
     })
+  })
+
+  it('affiche Connexion... et désactive les boutons pendant isLoading', () => {
+    vi.mocked(useAuthStore).mockReturnValue({
+      login: vi.fn(),
+      loginAsGuest: vi.fn(),
+      initialize: vi.fn().mockResolvedValue(undefined),
+      isLoading: true,
+      isAuthenticated: false,
+      user: null,
+      bootError: null,
+      clearBootError: vi.fn(),
+    } as Partial<AuthState>)
+
+    render(
+      <BrowserRouter>
+        <LoginForm />
+      </BrowserRouter>
+    )
+
+    expect(screen.getByRole('button', { name: /connexion\.\.\./i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /continuer en invité/i })).toBeDisabled()
   })
 })
 

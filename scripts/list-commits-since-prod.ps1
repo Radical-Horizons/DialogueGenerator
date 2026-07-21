@@ -9,10 +9,31 @@ $ErrorActionPreference = "Stop"
 Set-Location (Split-Path $PSScriptRoot -Parent)
 
 function Get-LatestProdTag {
+    # Aligner sur le major de package.json (évite des tags parasites type v6.* hors ligne produit).
+    $pkgMajor = $null
+    try {
+        $pkg = Get-Content -Path "package.json" -Raw -Encoding UTF8 | ConvertFrom-Json
+        if ($pkg.version -match '^(\d+)\.') {
+            $pkgMajor = $Matches[1]
+        }
+    } catch {
+        $pkgMajor = $null
+    }
+
     $tags = git tag -l "v*" --sort=-v:refname 2>$null
     if (-not $tags) {
         return $null
     }
+    foreach ($t in $tags) {
+        if ($t -notmatch '^v(\d+)\.(\d+)\.(\d+)$') {
+            continue
+        }
+        if ($null -ne $pkgMajor -and $Matches[1] -ne $pkgMajor) {
+            continue
+        }
+        return $t
+    }
+    # Repli : premier tag semver vX.Y.Z si aucun n'aligne le major package.json
     foreach ($t in $tags) {
         if ($t -match '^v\d+\.\d+\.\d+$') {
             return $t

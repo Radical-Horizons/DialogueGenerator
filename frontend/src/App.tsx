@@ -213,7 +213,10 @@ const queryClient = new QueryClient()
 
 function App() {
   useEffect(() => {
-    // Initialiser le système de logging au démarrage
+    // Boot auth même sur /login (hors ProtectedRoute) — sinon isLoading reste true.
+    void useAuthStore.getState().initialize().catch((error) => {
+      console.error('[App] Erreur lors de l\'initialisation auth:', error)
+    })
     initLogging()
   }, [])
 

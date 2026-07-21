@@ -11,8 +11,24 @@ export function LoginForm() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const { login, loginAsGuest, isLoading, isAuthenticated, user, bootError, clearBootError } = useAuthStore()
+  const {
+    login,
+    loginAsGuest,
+    isLoading,
+    isAuthenticated,
+    user,
+    bootError,
+    clearBootError,
+    initialize,
+  } = useAuthStore()
   const navigate = useNavigate()
+
+  // /login est hors ProtectedRoute : garantir le boot guest / clear isLoading
+  useEffect(() => {
+    void initialize().catch((err) => {
+      console.error('[LoginForm] Erreur initialisation auth:', err)
+    })
+  }, [initialize])
 
   // Rediriger seulement si compte writer/admin (guest doit pouvoir ouvrir /login)
   useEffect(() => {

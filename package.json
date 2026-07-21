@@ -1,6 +1,6 @@
 {
   "name": "dialogue-generator",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "DialogueGenerator - API REST FastAPI + Frontend React",
   "scripts": {
     "setup": "powershell -ExecutionPolicy Bypass -File scripts/setup-venv.ps1",

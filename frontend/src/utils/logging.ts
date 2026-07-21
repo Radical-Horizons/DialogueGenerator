@@ -24,6 +24,11 @@ async function sendLogToBackend(
   message: string,
   options: LogOptions = {}
 ): Promise<void> {
+  // Endpoint protégé : sans JWT (boot /login) un POST ne ferait que du bruit 401
+  if (!localStorage.getItem('access_token')) {
+    return
+  }
+
   try {
     const errorData = options.error
       ? {

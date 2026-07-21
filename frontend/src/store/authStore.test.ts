@@ -149,4 +149,28 @@ describe('authStore guest-first', () => {
     expect(mockedAuth.loginAsGuest).toHaveBeenCalledOnce()
     expect(useAuthStore.getState().user).toMatchObject({ role: 'guest' })
   })
+
+  it('login libère isLoading après succès', async () => {
+    mockedAuth.login.mockResolvedValue({
+      access_token: makeValidToken(),
+      token_type: 'bearer',
+      expires_in: 900,
+    })
+    mockedAuth.getCurrentUser.mockResolvedValue(writerUser)
+
+    useAuthStore.setState({ isLoading: true })
+    await useAuthStore.getState().login('writer', 'secret')
+
+    expect(useAuthStore.getState().isLoading).toBe(false)
+    expect(useAuthStore.getState().user).toMatchObject({ role: 'writer' })
+  })
+
+  it('login libère isLoading après échec', async () => {
+    mockedAuth.login.mockRejectedValue(new Error('bad credentials'))
+
+    useAuthStore.setState({ isLoading: true })
+    await expect(useAuthStore.getState().login('x', 'y')).rejects.toThrow('bad credentials')
+
+    expect(useAuthStore.getState().isLoading).toBe(false)
+  })
 })
