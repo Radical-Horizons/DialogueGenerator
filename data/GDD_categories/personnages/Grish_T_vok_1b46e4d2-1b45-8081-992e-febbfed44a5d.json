@@ -11,7 +11,7 @@
     "Date de création": "2025-03-12T18:40:00.000Z",
     "Date de naissance": "3343",
     "Date vérification": "2026-04-14",
-    "Dernière modification": "2026-06-01T13:58:00.000Z",
+    "Dernière modification": "2026-07-21T17:11:00.000Z",
     "Défauts liés": "9726af3e-8924-45b8-8d3e-80e52c21f378, d8d39c3c-3ee2-48a2-8202-2796b1822ff4",
     "Espèce": "1a16e4d2-1b45-8062-aaa7-f39bb07d72f8",
     "Feuilles de perso": "874d0b62-ac6a-47a7-a6d2-7b30b503b326",
@@ -27,7 +27,7 @@
     "Qualité": "7",
     "Qualités liées": "2012d4af-810b-4e71-a4b4-706eff8b76ff, 892fdf2c-0ceb-44d4-8192-062c0f482adb",
     "Réponse au problème moral": "Résister au système? Pfff! Les grands mots pour petits esprits, ça! Tu veux vraiment résister? Alors sois utile. Absorbe ce qui ne marche pas, recycle-le, transforme-le. Un système qui te définit ne peut pas comprendre une chose qui se redéfinit constamment. Aujourd'hui je répare ta charrue, demain je suis ta charrue. Ils n'ont pas de case pour ça dans leurs registres!",
-    "Résumé IA": "Grish T’vok, alias le Forgeron Vivant, est un PNJ secondaire de type Moribandon itinérant, mentor et artisan mobile qui répare les objets en les absorbant et les transformant. Âgé de 47 ans, il parcourt les villages avec sa caravane‑atelier, possède une apparence changeante et une philosophie de réparation axée sur la transformation plutôt que la simple restauration, cherchant reconnaissance et à créer une communauté d’artisans.",
+    "Résumé IA": "Grish T’vok, alias le Forgeron Vivant, est un PNJ secondaire de type mentor‑gourou, âgé de 47 ans, qui parcourt les villages en tant que forge itinérante capable de réparer et transformer les objets grâce à son corps hybride organique‑synthetique. Il cherche reconnaissance auprès des élites, désire créer une communauté d’artisans et utilise sa caravane‑atelier comme extension vivante, mêlant pragmatisme, philosophie de transformation et désir d’être utile tout en restant méfiant envers les institutions.",
     "Slug": "grish_t_vok",
     "Type": "PNJ secondaire",
     "Âge ou Nuées depuis la naissance": "47",
@@ -37,7 +37,7 @@
   "sections": {
     "re_sume__de_la_fiche": "Grish T'vok est un Moribandon itinérant qui utilise son corps hybride organique-synthétique comme atelier de réparation mobile. Voyageant de village en village dans une caravane qui est une extension de lui-même, il répare les objets brisés en incorporant parfois sa propre matière. Sa capacité unique à absorber et intégrer divers matériaux, combinée à son pragmatisme et à sa philosophie de transformation, lui a valu le respect des communautés rurales malgré son apparence changeante.",
     "guides": "<pdf src=\"file://%7B%22source%22%3A%22attachment%3A19780154-7185-49c1-b487-0821464f5b27%3AGrish_Tvok_Guide.pdf%22%2C%22permissionRecord%22%3A%7B%22table%22%3A%22block%22%2C%22id%22%3A%223656e4d2-1b45-813b-bf2e-ed3043e9a586%22%2C%22spaceId%22%3A%221d8d06fb-9245-45c9-8cb0-4cd4d302ed0d%22%7D%7D\"></pdf>",
-    "corps_et_morphologie": "- Corps massif et asymétrique (3m90, 680kg), composé d'un amalgame de chair, métal, bois et pierre.\n\t- Torse évoquant un four de forge, avec des ouvertures d'où s'échappent occasionnellement des étincelles.\n\t- Visage grossièrement humanoïde, yeux lumineux orange-forge, bouche au sourire métallique.\n\t- Déplacement rampant et roulant ; il n’a ni bras ni jambes.\n\t- Texture et couleur de peau variables selon les matériaux récemment absorbés, le plus souvent dans les tons rouille, cuivre et bronze.",
+    "corps_et_morphologie": "- Corps horizontal, massif et asymétrique (3m90, 680kg), composé d'un amalgame de chair, métal, bois et pierre.\n\t- Partie intermédiaire évoquant un four de forge, avec des ouvertures d'où s'échappent occasionnellement des étincelles.\n\t- Visage à peine humanoïde, déformé, émergeant de sa propre masse, yeux lumineux orange-forge\n\t- Déplacement rampant et roulant ; il n’a ni bras ni jambes.\n\t- Texture et couleur de peau variables selon les matériaux récemment absorbés, le plus souvent dans les tons rouille, cuivre et bronze.",
     "signes_d_appartenance": "- Sa caravane-atelier constitue une extension physique de son propre corps et le signe le plus visible de sa pratique.\n\t- Il chante spontanément des « chansons de matériaux » pendant son travail.\n\t- Son odeur varie selon les matières récemment intégrées : métallique, terreuse, résineuse ou chimique.\n\t- Son apparence changeante et composite le fait immédiatement identifier comme artisan marginal aux méthodes peu orthodoxes.\n\t- **Genre moribandon** : sa composition dominante ferreux-cuivrée lui confère un « Genre Cuivré » parmi les siens - catégorie sociale liée au matériau dominant, sans rapport avec les genres binaires humanoïdes. Les communautés non-moribandons de sa route lui assignent « il/lui » par convention ; il ne corrige pas, par pragmatisme plus que par adhésion.",
     "voix_et_pre_sence": "Pragmatique et direct, Grish parle comme un artisan qui pense à voix haute, en ramenant volontiers les idées et les émotions à des problèmes de matière, d’assemblage et de transformation.",
     "de_sir_ou_motivation": "Grish veut être reconnu pour son art unique, notamment par les élites de la Vieille Ville qui l’ont rejeté. Il cherche aussi à découvrir d’autres Moribandons créatifs et à fonder une communauté ou une école d’artisans ouverte à diverses espèces.",
@@ -62,7 +62,7 @@
     "alias": "Le Forgeron Vivant, L'Atelier Ambulant, L'Amalgame Réparateur, Le Moribandon Itinérant",
     "occupation": "Forge itinérante",
     "re_ponse_au_proble_me_moral": "Résister au système? Pfff! Les grands mots pour petits esprits, ça! Tu veux vraiment résister? Alors sois utile. Absorbe ce qui ne marche pas, recycle-le, transforme-le. Un système qui te définit ne peut pas comprendre une chose qui se redéfinit constamment. Aujourd'hui je répare ta charrue, demain je suis ta charrue. Ils n'ont pas de case pour ça dans leurs registres!",
-    "re_sume__ia": "Grish T’vok, alias le Forgeron Vivant, est un PNJ secondaire de type Moribandon itinérant, mentor et artisan mobile qui répare les objets en les absorbant et les transformant. Âgé de 47 ans, il parcourt les villages avec sa caravane‑atelier, possède une apparence changeante et une philosophie de réparation axée sur la transformation plutôt que la simple restauration, cherchant reconnaissance et à créer une communauté d’artisans.",
+    "re_sume__ia": "Grish T’vok, alias le Forgeron Vivant, est un PNJ secondaire de type mentor‑gourou, âgé de 47 ans, qui parcourt les villages en tant que forge itinérante capable de réparer et transformer les objets grâce à son corps hybride organique‑synthetique. Il cherche reconnaissance auprès des élites, désire créer une communauté d’artisans et utilise sa caravane‑atelier comme extension vivante, mêlant pragmatisme, philosophie de transformation et désir d’être utile tout en restant méfiant envers les institutions.",
     "e_pithe_te": "La Forge ambulante"
   },
   "section_titles": {
