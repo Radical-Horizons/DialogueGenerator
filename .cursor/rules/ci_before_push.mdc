@@ -14,14 +14,15 @@ Exécuter **dans l'ordre**, corriger jusqu'à vert, **puis** commit/push :
 
 1. **Backend** : `npm run test:backend:full` (équivalent `python -m pytest tests/ -v --tb=short`)
 2. **Frontend** : `cd frontend && set VITEST_FULL=1&& npx vitest run --max-workers=2` (Linux/macOS : `VITEST_FULL=1 npx vitest run --max-workers=2`)
-3. **PWA** : `npm run test:e2e:pwa` (build frontend inclus localement via la config Playwright ; en CI le build est une étape workflow dédiée)
+3. **Auth E2E** : `npm run test:e2e:auth` (`e2e/auth.spec.ts` — cold `/login`, login admin ; gate guest-first)
+4. **PWA** : `npm run test:e2e:pwa` (build frontend inclus localement via la config Playwright ; en CI le build est une étape workflow dédiée)
 
-Alternative racine si disponible et documentée : `npm run test:ci:local` (doit couvrir les trois jobs ci-dessus).
+Alternative racine si disponible et documentée : `npm run test:ci:local` (doit couvrir les jobs ci-dessus).
 
 ## En cas d'échec
 
 - Corriger, relancer la/les suite(s) en échec.
-- **Ne pas push** tant que les trois jobs ne sont pas verts.
+- **Ne pas push** tant que les **quatre** jobs ne sont pas verts.
 - Citer la sortie terminal (pass/fail) dans le résumé agent.
 
 ## PR vs push direct

@@ -141,7 +141,7 @@ def test_perform_health_checks_basic():
         assert result["status"] == "healthy"
         assert len(result["checks"]) == 3
         assert result["timestamp"] is None  # Sera ajouté par l'endpoint
-        assert "app_version" not in result
+        assert result["app_version"] == APP_VERSION
 
 
 def test_perform_health_checks_detailed():

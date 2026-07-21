@@ -4,6 +4,7 @@
     "Besoins humains": "Découverte, Maîtrise",
     "Catégorie": "Infrastructure",
     "Complexité": "Moyen",
+    "Produit pour": "b8aa04b3-e843-416a-961c-9f33ee1232f5",
     "Résumé IA": "Sous-système optionnel du système Connaissances. Le Codex est une couche de consultation à définir : miroir du registre de connaissances, il affiche uniquement ce que le joueur a appris, selon les niveaux Perçu / Identifié / Compris, avec des entrées courtes et actionnables. Il vise à clarifier les conséquences gameplay des connaissances sans devenir un wiki décoratif.",
     "Statut": "À définir (candidat)",
     "Systèmes parent": "dda13b50-2e96-491e-8e21-008865221005",

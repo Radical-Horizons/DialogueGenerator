@@ -21,6 +21,34 @@ def generate_stable_node_id() -> str:
     return f"node-{uuid.uuid4().hex}"
 
 
+def resolve_generated_display_name(
+    content: UnityDialogueGenerationResponse,
+    start_id: str,
+    *,
+    fallback_title: Optional[str] = None,
+) -> str:
+    """Résout le ``displayName`` FR36 pour un nœud généré.
+
+    Priorité : ``fallback_title`` (ex. label résultat de test) → ``node.displayName``
+    (LLM) → ``content.title`` → première ligne de ``line`` → ``start_id``.
+    """
+    node = content.node
+    candidates = (
+        (fallback_title or "").strip(),
+        (node.displayName or "").strip(),
+        (content.title or "").strip(),
+    )
+    for value in candidates:
+        if value:
+            return value
+    line = (node.line or "").strip()
+    if line:
+        first_line = line.split("\n", 1)[0].strip()
+        if first_line:
+            return first_line
+    return start_id
+
+
 class UnityDialogueGenerationService:
     """Service pour générer des dialogues au format Unity JSON.
     
@@ -366,9 +394,8 @@ Instructions pour la suite:
             enriched = self.enrich_with_ids(
                 content=response,
                 start_id=node_id,
+                display_name_override=result_context["label"],
             )
-            if enriched:
-                enriched[0]["title"] = result_context["label"]
             return node_id, enriched or []
 
         results = await asyncio.gather(
@@ -401,14 +428,16 @@ Instructions pour la suite:
         self,
         content: UnityDialogueGenerationResponse,
         start_id: str = "START",
-        test_result_node_ids: Optional[Dict[str, str]] = None
+        test_result_node_ids: Optional[Dict[str, str]] = None,
+        display_name_override: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Ajoute les IDs techniques et gère la navigation.
         
         Pour le nœud unique :
         1. Génère un ID unique (START par défaut)
         2. Ajoute targetNode: "END" pour chaque choix (champ technique géré par l'application)
-        3. Convertit en dict pour UnityJsonRenderer
+        3. Garantit un ``displayName`` (LLM, override, title, line, ou id)
+        4. Convertit en dict pour UnityJsonRenderer
         
         Note: Les champs techniques (targetNode, nextNode, successNode, etc.) ne sont jamais
         générés par l'IA. Ils sont gérés uniquement par l'application.
@@ -430,6 +459,8 @@ Instructions pour la suite:
         Args:
             content: Réponse de génération contenant un nœud sans ID.
             start_id: ID à utiliser pour le nœud (par défaut "START").
+            test_result_node_ids: Mapping optionnel des 4 résultats de test.
+            display_name_override: Libellé forcé (ex. label d'un résultat de test).
             
         Returns:
             Liste avec un seul dictionnaire représentant le nœud Unity avec ID :
@@ -441,7 +472,12 @@ Instructions pour la suite:
         
         # Convertir le nœud en dict
         node_dict: Dict[str, Any] = {
-            "id": start_id
+            "id": start_id,
+            "displayName": resolve_generated_display_name(
+                content,
+                start_id,
+                fallback_title=display_name_override,
+            ),
         }
         
         # Ajouter les champs du contenu

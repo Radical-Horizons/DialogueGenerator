@@ -411,9 +411,8 @@ def perform_health_checks(detailed: bool = False) -> Dict[str, Any]:
     result: Dict[str, Any] = {
         "status": overall_status,
         "checks": checks_dict,
-        "timestamp": None  # Sera ajouté par l'endpoint
+        "timestamp": None,  # Sera ajouté par l'endpoint
+        "app_version": APP_VERSION,
     }
-    if detailed:
-        result["app_version"] = APP_VERSION
     return result
 

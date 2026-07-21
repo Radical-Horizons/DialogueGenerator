@@ -91,6 +91,75 @@ async def test_enrich_with_ids_single_node(unity_service: UnityDialogueGeneratio
     assert start_node["choices"][0]["text"] == "Choice 1"
     assert start_node["choices"][0]["targetNode"] == "END"  # "END" est un marqueur de fin, pas un vrai nœud
     assert start_node["choices"][0]["choiceId"] == "choice_START_0"
+    # displayName LLM absent → fallback sur content.title
+    assert start_node["displayName"] == "Test Dialogue"
+
+
+def test_enrich_with_ids_uses_llm_display_name(
+    unity_service: UnityDialogueGenerationService,
+):
+    """Le displayName fourni par le LLM est conservé tel quel."""
+    response = UnityDialogueGenerationResponse(
+        title="Titre dialogue (ignoré si displayName présent)",
+        node=UnityDialogueNodeContent(
+            displayName="Accueil tavernier",
+            speaker="TEST_NPC",
+            line="« Bienvenue. »",
+        ),
+    )
+    enriched = unity_service.enrich_with_ids(response, start_id="node-abc")
+    assert enriched[0]["displayName"] == "Accueil tavernier"
+
+
+def test_enrich_with_ids_display_name_fallback_to_line_then_id(
+    unity_service: UnityDialogueGenerationService,
+):
+    """Sans displayName ni title utilisable → première ligne, sinon id."""
+    response = UnityDialogueGenerationResponse(
+        title="   ",
+        node=UnityDialogueNodeContent(
+            line="Première ligne\nSuite",
+        ),
+    )
+    enriched = unity_service.enrich_with_ids(response, start_id="node-fallback")
+    assert enriched[0]["displayName"] == "Première ligne"
+
+    empty = UnityDialogueGenerationResponse(
+        title="",
+        node=UnityDialogueNodeContent(),
+    )
+    enriched_empty = unity_service.enrich_with_ids(empty, start_id="node-only-id")
+    assert enriched_empty[0]["displayName"] == "node-only-id"
+
+
+def test_enrich_with_ids_display_name_override(
+    unity_service: UnityDialogueGenerationService,
+):
+    """Override (résultats de test) prime sur displayName LLM et title."""
+    with_llm = UnityDialogueGenerationResponse(
+        title="Titre",
+        node=UnityDialogueNodeContent(
+            displayName="Nom LLM",
+            line="ligne",
+        ),
+    )
+    enriched = unity_service.enrich_with_ids(
+        with_llm,
+        start_id="n1",
+        display_name_override="Échec critique",
+    )
+    assert enriched[0]["displayName"] == "Échec critique"
+
+    without_llm = UnityDialogueGenerationResponse(
+        title="Titre",
+        node=UnityDialogueNodeContent(line="ligne"),
+    )
+    enriched_ov = unity_service.enrich_with_ids(
+        without_llm,
+        start_id="n2",
+        display_name_override="Échec critique",
+    )
+    assert enriched_ov[0]["displayName"] == "Échec critique"
 
 
 def test_enrich_with_ids_normalizes_llm_consequences_flag(

@@ -96,6 +96,7 @@ class DummyLLMClient(ILLMClient):
                     dummy_data = {
                         "title": "Dialogue de test généré par DummyLLMClient",
                         "node": {
+                            "displayName": "Nœud de test DummyLLM",
                             "line": "Texte de test généré par DummyLLMClient pour Unity JSON.",
                             "choices": [
                                 {

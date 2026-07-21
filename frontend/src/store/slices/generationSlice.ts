@@ -18,6 +18,10 @@ import {
   siblingBranchOffset,
 } from '../../utils/graphNodeLayout'
 import { calculateDagreLayout, getLayoutNodeHeight } from '../../utils/dagreLayout'
+import {
+  deriveAutoDisplayName,
+  nodeHasStructuralDisplayName,
+} from '../../utils/nodeTargetLabel'
 
 /** Hash simple pour contexte GDD (Story 1.10 AC#5 - stockage). */
 function simpleHash(s: string): string {
@@ -353,6 +357,20 @@ export const createGenerationSlice: StateCreator<
             ? response.context_gdd_content_fingerprint
             : undefined
         const nodeStatus = totalToAdd === 1 ? ('pending' as const) : ('accepted' as const)
+        const nodeData: Record<string, unknown> = {
+          ...generatedNode,
+          status: nodeStatus,
+          lastGenerationInstructions: instructions,
+          ...(contextGddHash !== undefined && { contextGddHash }),
+          ...(apiFp !== undefined && { contextGddContentFingerprint: apiFp }),
+          ...(gddSnapshot !== undefined && { gddContextSelectionsSnapshot: gddSnapshot }),
+        }
+        if (!nodeHasStructuralDisplayName(nodeData)) {
+          nodeData.displayName = deriveAutoDisplayName({
+            id: generatedNode.id,
+            data: nodeData,
+          })
+        }
         const newNode: Node = {
           id: generatedNode.id,
           type: 'dialogueNode',
@@ -363,14 +381,7 @@ export const createGenerationSlice: StateCreator<
               parentHeight,
             }) + branchOffset.dy,
           },
-          data: {
-            ...generatedNode,
-            status: nodeStatus,
-            lastGenerationInstructions: instructions,
-            ...(contextGddHash !== undefined && { contextGddHash }),
-            ...(apiFp !== undefined && { contextGddContentFingerprint: apiFp }),
-            ...(gddSnapshot !== undefined && { gddContextSelectionsSnapshot: gddSnapshot }),
-          },
+          data: nodeData,
         }
         nodesToAddBatch.push(newNode)
         generatedNodeIds.push(generatedNode.id)

@@ -5,12 +5,12 @@
     "Catégorie": "Core loop",
     "Complexité": "Simple",
     "Fréquence": "Universel",
-    "Lieux": "1b36e4d2-1b45-807e-8342-d1b4cd0cdade, 2d96e4d2-1b45-806d-8b7c-f84efee399ee, 1b46e4d2-1b45-8071-88b9-da69653d4987, 1b46e4d2-1b45-801a-ada0-f6ec210d2fa0, 1b46e4d2-1b45-8091-b2ca-da5a4bef6aa3, 26e08862-0f92-4e6a-8366-dc7091966fdb, 166982c7-3cf0-4947-85c5-0a6df03ff80d",
+    "Lieux": "1b36e4d2-1b45-807e-8342-d1b4cd0cdade, 2d96e4d2-1b45-806d-8b7c-f84efee399ee, 1b46e4d2-1b45-8071-88b9-da69653d4987, 1b46e4d2-1b45-801a-ada0-f6ec210d2fa0, 1b46e4d2-1b45-8091-b2ca-da5a4bef6aa3, 26e08862-0f92-4e6a-8366-dc7091966fdb, 166982c7-3cf0-4947-85c5-0a6df03ff80d, 31ee8035-8e36-4941-a229-f6742e8954e1",
     "Produit pour": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 7d4905b5-1967-4488-b28f-6c69f6abc262, de0651bb-e1ce-4677-9b31-b04cf17193ca, ed986ac3-3600-4d29-b4fb-8fac7d61857c",
     "Récompenses": "5c973e14-17fc-4820-97bf-153efba7b133, 9c73d1ad-8fd6-4baf-87b5-b827887c13b5",
     "Résumé IA": "Déplacement 2D en 8 directions (4 cardinales + 4 diagonales) avec détection de collisions et transitions entre zones. Vitesse de base : 5 unités Unity/s, latence input ≤ 100ms, transition ≤ 1s. Le déplacement ne coûte pas d'Effort. États : Inactif / En déplacement / Bloqué / Transition / Désactivé (dialogue ou cutscene actifs). Même vitesse pour les 3 PJ (Uresaïr, Vethraak, Eonundé). Système autonome fondamental : fournit la proximité physique nécessaire aux Dialogues et le positionnement pour les futurs systèmes de combat et d'exploration.",
     "Statut": "Validé",
-    "Systèmes enfants": "7d4905b5-1967-4488-b28f-6c69f6abc262, 2c5c3ae2-8d3d-4234-a431-a0581dda4c4c",
+    "Systèmes enfants": "7d4905b5-1967-4488-b28f-6c69f6abc262",
     "Type": "Système"
   },
   "sections": {

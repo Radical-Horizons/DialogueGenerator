@@ -104,7 +104,8 @@ Obligatoire avant push/deploy sur `main` — [`.cursor/rules/ci_before_push.mdc`
 
 1. `npm run test:backend:full`
 2. `cd frontend && set VITEST_FULL=1&& npx vitest run --max-workers=2`
-3. `npm run test:e2e:pwa`
+3. `npm run test:e2e:auth`
+4. `npm run test:e2e:pwa`
 
 Alternative : `npm run test:ci:local` si documenté et vert.
 
@@ -140,8 +141,9 @@ Variantes : `deploy:skip-build`, `deploy:skip-restart` — voir `deployment.mdc`
 Health après deploy :
 
 ```powershell
-Invoke-WebRequest -Uri "https://demo.auto-diffusion.net/health" | ConvertFrom-Json
-# version attendue ≈ APP_VERSION / package.json
+(Invoke-WebRequest -Uri "https://demo.auto-diffusion.net/health").Content | ConvertFrom-Json
+# champ app_version attendu ≈ package.json / api/app_version.py
+# /health/detailed : réservé admin (Bearer JWT) — utile pour ops, pas pour le check release
 ```
 
 ---

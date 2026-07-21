@@ -3,10 +3,11 @@
   "values": {
     "Contenu par": "166982c7-3cf0-4947-85c5-0a6df03ff80d",
     "Date de création de la fiche": "2026-05-31T14:03:00.000Z",
-    "Dernière modification": "2026-05-31T14:03:00.000Z",
+    "Dernière modification": "2026-07-17T17:10:00.000Z",
     "Monnaie locale": "Seuil-7 nominal au criage ; en pratique troc et parts de récolte.",
     "Niveau de danger": "Modéré",
     "Niveau d’IA": "co-écrit",
+    "Résumé IA": "Place commerciale majeure sous une vaste charpente où le criage des Maîtres‑Crieurs ouvre et ferme le négoce chaque matin, réunissant les six districts pour approvisionner la ville ; cœur stratégique de la « grève du ventre » avec échanges de marchandises, troc et parts de récolte, accessible depuis le faubourg des Lots et les quais, et contrôlé par les Maîtres‑Crieurs et les courtiers fantômes.",
     "Rôle": "Lieu commercial",
     "Seuil économique": "7",
     "Taille": "Site",
@@ -14,15 +15,16 @@
     "État": "Brouillon IA"
   },
   "sections": {
-    "re_sume__de_la_fiche": "Sous une charpente immense, le marché matinal où les six districts viennent s'approvisionner : le garde-manger officieux de la Vieille Ville, ouvert chaque aube par le criage des Maîtres-Crieurs.",
+    "re_sume__de_la_fiche": "Sous une charpente immense, le marché matinal où les six districts viennent s'approvisionner : le garde-manger officieux de la Vieille Ville, ouvert chaque aube par le criage des Maîtres-Crieurs, et l’un des lieux où la Couronne des Lots tente de tenir les flux face aux intérêts marchands de halle.",
     "histoire_du_lieu": "- **Les premières halles (vers 2102 AG)** — avec la densification du district, le commerce épars des Lots se fixe en halles permanentes le long de la Voie de Vivarcade.\n\t- **L'institution du criage** — les Maîtres-Crieurs formalisent l'ouverture à la voix : on n'entre dans le négoce qu'au cri, jamais par registre écrit.\n\t- **Garde-manger reconnu (3156 AG à 3390 AG)** — depuis la dernière Pulsation, presque toute la nourriture du centre transite ici ; la Halle devient l'organe le plus stratégique, et le plus jalousé, des Jardins.",
     "apparence___ambiance": "Une nef de bois et de fonte, basse et large, où pendent les lanternes de criage. À l'aube, la cohue : étals de légumes lourds, paniers d'anguilles de la Dormante, odeurs de limon et de fermentation. Le criage domine tout — une voix qui ouvre le commerce, une voix qui le ferme.",
-    "forces_en_pre_sence": "- **Les Maîtres-Crieurs** — ouvrent la halle et prêtent leur criage aux re-criées des Diseurs ; voix publique du district.\n\t- **Les courtiers fantômes** — écoulent en marge des Marques sans inscription et des promesses de récolte que nul Diseur ne tient.",
+    "forces_en_pre_sence": "- **Les Maîtres-Crieurs** — ouvrent la halle et prêtent leur criage aux re-criées des Diseurs ; voix publique de la satrapie de Halle et du district.\n\t- **Les courtiers fantômes** — écoulent en marge des Marques sans inscription et des promesses de récolte que nul Diseur ne tient.",
     "ge_ographie": "Au débouché de la Voie de Vivarcade, à la jointure du faubourg des Lots et des quais : on y monte les récoltes par la terre et l'on charge vers le centre par l'eau.",
     "voies_d_acce_s___transitions": "Ouverte sur le faubourg des Lots et sur les quais de la Voie ; c'est d'ici que les chalands remontent vers la Bibliothèque Sympathique et le centre.",
     "me_moire_syste_me": "*À formaliser en Flags lors de l'écriture des actes : ouverture / fermeture du criage, accès au négoce, état de la « grève du ventre ».*",
     "remarques_de_conception": "Sous-lieu des <mention-page url=\"https://app.notion.com/p/166982c73cf0494785c50a6df03ff80d\"/>. Levier central de l'enjeu « grève du ventre » : c'est ici qu'on affame ou qu'on nourrit la cité.",
-    "monnaie_locale": "Seuil-7 nominal au criage ; en pratique troc et parts de récolte."
+    "monnaie_locale": "Seuil-7 nominal au criage ; en pratique troc et parts de récolte.",
+    "re_sume__ia": "Place commerciale majeure sous une vaste charpente où le criage des Maîtres‑Crieurs ouvre et ferme le négoce chaque matin, réunissant les six districts pour approvisionner la ville ; cœur stratégique de la « grève du ventre » avec échanges de marchandises, troc et parts de récolte, accessible depuis le faubourg des Lots et les quais, et contrôlé par les Maîtres‑Crieurs et les courtiers fantômes."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",
@@ -33,7 +35,8 @@
     "voies_d_acce_s___transitions": "Voies d'accès & Transitions",
     "me_moire_syste_me": "Mémoire système",
     "remarques_de_conception": "Remarques de conception",
-    "monnaie_locale": "Monnaie locale"
+    "monnaie_locale": "Monnaie locale",
+    "re_sume__ia": "Résumé IA"
   },
   "notion_page_id": "942831dc-6998-4975-b424-8b27b5c785f2"
 }

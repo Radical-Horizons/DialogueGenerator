@@ -3,6 +3,18 @@ import { test, expect } from '@playwright/test'
 import { E2E_MS } from './timeouts'
 
 test.describe('Authentification', { tag: '@smoke' }, () => {
+  test('cold /login : bouton Se connecter actif (pas coincé sur Connexion...)', async ({ page }) => {
+    await page.goto('/login')
+
+    await expect(page.getByRole('heading', { name: 'Connexion' })).toBeVisible()
+    // Régression prod : isLoading restait true si initialize() n'était pas appelé hors ProtectedRoute
+    await expect(page.getByRole('button', { name: /se connecter/i })).toBeEnabled({
+      timeout: E2E_MS.ui,
+    })
+    await expect(page.getByRole('button', { name: /connexion\.\.\./i })).toHaveCount(0)
+    await expect(page.getByTestId('continue-as-guest')).toBeEnabled()
+  })
+
   test('doit afficher le formulaire de connexion', async ({ page }) => {
     await page.goto('/login')
 
@@ -14,7 +26,9 @@ test.describe('Authentification', { tag: '@smoke' }, () => {
 
   test('doit se connecter avec les bonnes credentials', async ({ page }) => {
     await page.goto('/login')
-    await expect(page.getByRole('button', { name: /se connecter/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /se connecter/i })).toBeEnabled({
+      timeout: E2E_MS.ui,
+    })
 
     await page.getByLabel(/nom d'utilisateur/i).fill('admin')
     await page.getByLabel(/mot de passe/i).fill('admin123')
@@ -30,6 +44,9 @@ test.describe('Authentification', { tag: '@smoke' }, () => {
 
   test('doit afficher une erreur avec de mauvaises credentials', async ({ page }) => {
     await page.goto('/login')
+    await expect(page.getByRole('button', { name: /se connecter/i })).toBeEnabled({
+      timeout: E2E_MS.ui,
+    })
     await page.getByLabel(/nom d'utilisateur/i).fill('wrong')
     await page.getByLabel(/mot de passe/i).fill('wrong')
     await page.getByRole('button', { name: /se connecter/i }).click()

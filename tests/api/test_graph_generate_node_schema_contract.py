@@ -100,6 +100,7 @@ class TestGraphGenerateNodeSchemaContract:
 
             assert node["id"].startswith("node-")
             assert len(node["id"]) == 37
+            assert node["displayName"] == "Rencontre"
             choice = node["choices"][0]
             assert choice["choiceId"] == f"choice_{node['id']}_0"
             assert choice["targetNode"] == "END"

@@ -96,7 +96,7 @@ async def test_generate_nodes_for_choice_with_test_creates_4_nodes(unity_service
     assert len(set(node_ids)) == 4
     for node_id in node_ids:
         assert node_id.startswith("node-") and len(node_id) == 37
-    titles = [node.get("title") for node in result["nodes"]]
+    titles = [node.get("displayName") for node in result["nodes"]]
     assert "Échec critique" in titles
     assert "Échec" in titles
     assert "Réussite" in titles

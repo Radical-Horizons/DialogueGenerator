@@ -15,6 +15,7 @@ from models.dialogue_structure.unity_dialogue_node import (
 
 RAW_POST_GENERATION_NODE: Dict[str, Any] = {
     "id": "START",
+    "displayName": "Rencontre",
     "speaker": "PNJ",
     "line": "Bonjour voyageur",
     "consequences": {
@@ -64,6 +65,7 @@ def llm_generation_response() -> UnityDialogueGenerationResponse:
     return UnityDialogueGenerationResponse(
         title="Rencontre",
         node=UnityDialogueNodeContent(
+            displayName=str(node.get("displayName") or "Rencontre"),
             speaker=str(node.get("speaker", "")),
             line=str(node.get("line", "")),
             consequences=UnityDialogueConsequencesContent(

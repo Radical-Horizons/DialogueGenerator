@@ -1,0 +1,29 @@
+{
+  "Nom": "Menu principal",
+  "values": {
+    "Catégorie": "Infrastructure",
+    "Complexité": "Simple",
+    "Fréquence": "Ponctuel",
+    "Résumé IA": "Le menu principal, en tant que sous‑système simple d’infrastructure, gère le premier et le dernier contact du joueur avec le jeu : écran titre, reprise de session, options et sortie. Il ne montre qu’une seule sauvegarde visible (la plus récente) sans sélecteur, intègre les options accessibles en jeu et assure la continuité via Steam Cloud. Le succès se mesure par un temps de reprise ≤ 10 s, la compréhension de la logique de sauvegarde unique et l’impact immédiat de l’ambiance visuelle et sonore.",
+    "Statut": "En design",
+    "Systèmes parent": "b8aa04b3-e843-416a-961c-9f33ee1232f5",
+    "Type": "Sous-système"
+  },
+  "sections": {
+    "1__but_du_sous-syste_me": "Gérer le **premier et le dernier contact** du joueur avec le jeu : écran titre, reprise de session, options. Le menu principal donne le ton (direction artistique, ambiance sonore) et garantit une reprise de jeu sans friction.\n**Système parent :** <mention-page url=\"https://app.notion.com/p/b8aa04b3e843416a961c9f33ee1232f5\"/>",
+    "2__re_gles": "- **Continuer** charge la sauvegarde la plus récente. C'est la seule visible : les 5 saves tournantes (FIFO) restent en coulisse. Cohérent avec la règle anti-rollback de la doc Boucle : jamais de rechargement après défaite, le jeu continue avec ses conséquences.\n- Entrées : Continuer / Nouvelle partie / Options / Quitter. Pas de sélecteur de saves.\n- Les options (audio, affichage, accessibilité, vitesse du typewriter des dialogues) sont aussi accessibles en jeu depuis le système Menus.\n- Steam Cloud actif : la continuité de session est garantie entre machines.",
+    "3__inte_grations": "**Requiert :**\n- Sauvegarde (infrastructure technique, traitée comme contrat de qualité, pas de fiche) : le menu principal est la seule surface où elle devient visible pour le joueur.\n**Consomme / Produit :** rien — le menu principal est hors boucle de jeu et hors économie.",
+    "4__crite_res_de_succe_s": "- Temps entre lancement du jeu et reprise effective ≤ 10 s.\n- Aucun testeur ne cherche une liste de sauvegardes : la logique « une seule save visible » est comprise sans explication.\n- Le premier lancement installe l'ambiance (musique, visuel) : au moins un testeur le mentionne spontanément.",
+    "5__questions_ouvertes": "- Contenu exact de l'écran Options pour le First Playable (accessibilité minimale : taille de police, vitesse du texte, remapping).\n- Visuel du titre : statique ou vivant (Léviathan en fond, cycle des Veilles) ?",
+    "re_sume__ia": "Le menu principal, en tant que sous‑système simple d’infrastructure, gère le premier et le dernier contact du joueur avec le jeu : écran titre, reprise de session, options et sortie. Il ne montre qu’une seule sauvegarde visible (la plus récente) sans sélecteur, intègre les options accessibles en jeu et assure la continuité via Steam Cloud. Le succès se mesure par un temps de reprise ≤ 10 s, la compréhension de la logique de sauvegarde unique et l’impact immédiat de l’ambiance visuelle et sonore."
+  },
+  "section_titles": {
+    "1__but_du_sous-syste_me": "1. But du sous-système",
+    "2__re_gles": "2. Règles",
+    "3__inte_grations": "3. Intégrations",
+    "4__crite_res_de_succe_s": "4. Critères de succès",
+    "5__questions_ouvertes": "5. Questions ouvertes",
+    "re_sume__ia": "Résumé IA"
+  },
+  "notion_page_id": "5485809e-7ce9-43ff-8da8-aaee863169a4"
+}

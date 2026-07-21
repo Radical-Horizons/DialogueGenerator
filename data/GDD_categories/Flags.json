@@ -1617,7 +1617,7 @@
     "Nom": "Flag_lieu_jardins_passage_dailon",
     "values": {
       "Actes liés": "69d4bd00-1234-4ec3-b0ae-e405d3b26ccd, 31a6e4d2-1b45-8000-9248-d0b7535ac586",
-      "Description narrative": "État du passage vers la Citadelle de Daïlon via les Jardins (Promenade Primordiale dissoute, Point mou, Pont des Incompréhensions). BLOQUÉ = route inconnue ou inaccessible. INDICE_OBTENU = un Diseur ou un habitant a mentionné l'existence du passage. PRATICABLE = le Décrochage a été compris et le passage est franchissable. Ce flag est conditionné par l'arbitrage ouvert sur la route de Daïlon.",
+      "Description narrative": "État du passage vers la Citadelle de Daïlon via les Jardins (Promenade Primordiale dissoute, Point mou, Pont des Incompréhensions). BLOQUÉ = route inconnue ou inaccessible. INDICE_OBTENU = un satrape, un Diseur royal ou un habitant a mentionné l’existence du passage. PRATICABLE = le Décrochage a été compris et le passage est franchissable. Ce flag est conditionné par l’arbitrage ouvert sur la route de Daïlon et par la capacité du district 6 à faire valoir sa propre compétence de seuil.",
       "ID": "FLAG1085",
       "Lieu lié": "166982c7-3cf0-4947-85c5-0a6df03ff80d",
       "Portée": "Lieu",
@@ -1668,7 +1668,7 @@
     "Nom": "Flag_lieu_jardins_siege_conclave",
     "values": {
       "Actes liés": "69d4bd00-1234-4ec3-b0ae-e405d3b26ccd, 31a6e4d2-1b45-8000-9248-d0b7535ac586",
-      "Description narrative": "État du siège des Jardins au Conclave des Six. VACANT = situation par défaut, siège vide. PROVISOIRE = un Diseur accepte de parler en nom du district pour une session. REVENDIQUÉ = mouvement politique actif réclamant un siège permanent (tension Diseurs intransigeants vs pragmatiques). TRANCHÉ = le mode de représentation a été fixé (dans un sens ou l'autre, potentiellement via le Tribut Convoqué).",
+      "Description narrative": "État du siège des Jardins au Conclave des Six. VACANT = vacance réelle du trône ou absence de souverain·e confirmé·e par le Signe de la Dormante. PROVISOIRE = la Couronne parle au nom du district, mais sur une base temporaire, incomplète ou contestée. REVENDIQUÉ = lutte politique active entre Couronne, États des Jardins, satrapies et Chambre des Avals sur la voix légitime du district 6. TRANCHÉ = le mode de représentation a été stabilisé, dans un sens ou dans l’autre, potentiellement via le Tribut Convoqué.",
       "ID": "FLAG1081",
       "Lieu lié": "166982c7-3cf0-4947-85c5-0a6df03ff80d",
       "Portée": "Lieu",
@@ -2129,7 +2129,7 @@
     "Nom": "Flag_lieu_vieille_ville_tribut_daïlon",
     "values": {
       "Actes liés": "31a6e4d2-1b45-8000-9248-d0b7535ac586",
-      "Description narrative": "État du tribut fiscal et politique réclamé par la Vieille Ville à Daïlon suite à l'émissaire de l'Acte 4. NON_RECLAME : avant la convocation, aucune exigence formelle. EN_NEGOCIATION : l'émissaire a posé ses conditions, les héroïnes ou les parties négocient. PAYE : Daïlon s'est acquitté du tribut — relation stabilisée mais déséquilibrée. NEGOCIE : un accord alternatif a été trouvé qui contourne le tribut initial (compromis politique, contre-service, dette symbolique). REFUSE_RUPTURE : le tribut a été refusé ou la négociation a échoué, provoquant une tension diplomatique entre Daïlon et la Vieille Ville aux Actes suivants. Conditionne la réputation des héroïnes auprès du Conclave, les accès à certains districts, et les dialogues des factions politiques de la ville.",
+      "Description narrative": "État du tribut fiscal et politique réclamé à Daïlon à l’Acte 4, à l’intérieur même de la Vieille Ville, avec possible médiation, captation ou redéfinition par les Jardins intermédiaires et la Couronne des Lots. NON_RECLAME : avant la convocation, aucune exigence formelle. EN_NEGOCIATION : l’émissaire a posé ses conditions, les héroïnes ou les parties négocient. PAYE : Daïlon s’est acquitté du tribut — relation stabilisée mais déséquilibrée. NEGOCIE : un accord alternatif a été trouvé qui contourne le tribut initial, y compris via un rattachement districtuel, un compromis politique ou un contre-service. REFUSE_RUPTURE : le tribut a été refusé ou la négociation a échoué, provoquant une tension diplomatique entre Daïlon et les instances de la Vieille Ville aux Actes suivants. Conditionne la réputation des héroïnes auprès du Conclave, les accès à certains districts, et les dialogues des factions politiques de la ville.",
       "ID": "FLAG1053",
       "Lieu lié": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
       "Portée": "Lieu",
@@ -6657,7 +6657,7 @@
   {
     "Nom": "Flag_lieu_oeil_treve_etat",
     "values": {
-      "Description narrative": "État de la trêve tacite entre les trois factions de l'Œil de Mirimance (Greffeurs, Courtiers, Contemplatifs). Valeurs possibles : INTACT (protocole de rotation respecté, aucun incident) | TENDUE (sabotages mutuels, accusations, mais aucune violence ouverte — état de départ en 3390 AG) | ROMPUE (conflit ouvert, le protocole de rotation est abandonné). Valeur par défaut : TENDUE.",
+      "Description narrative": "État de la trêve entre les deux puissances de surface de l’Œil de Mirimance, Greffeurs et Courtiers, et de leur rapport à l’autorité contemplative sur les profondeurs. Valeurs possibles : INTACT (protocole de rotation respecté, accès au Palimpseste négociés) | TENDUE (sabotages, rétention de relevés et contestation des fermetures décidées par les Contemplatifs — état de départ en 3390 AG) | ROMPUE (conflit ouvert, protocole de rotation abandonné et accès profonds forcés). Valeur par défaut : TENDUE.",
       "ID": "FLAG717",
       "Lieu lié": "1b46e4d2-1b45-8081-854b-e222c4c6aaaf",
       "Portée": "Lieu",
@@ -15474,5 +15474,119 @@
     },
     "sections": {},
     "notion_page_id": "5ef4c83a-d82b-41a9-ba9c-e95c20fe16f2"
+  },
+  {
+    "Nom": "Compteur_Nexianisme_MeridianaLivres",
+    "values": {
+      "Communauté liée": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Description narrative": "Nombre de livraisons de méridiana effectuées pour le compte des passeurs racinaires. Paliers : 1 = première livraison ; 2 = filière d'extraction comprise ; 3 = complicité établie avec les passeurs racinaires.",
+      "ID": "FLAG1208",
+      "Max": "3",
+      "Min": "0",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "compteur"
+    },
+    "sections": {},
+    "notion_page_id": "e68cf2f0-3d37-47ef-b5da-093e24b49f09"
+  },
+  {
+    "Nom": "Compteur_Nexianisme_CensVerses",
+    "values": {
+      "Communauté liée": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Description narrative": "Nombre de Cens de Veille versés par la joueuse (redevance annuelle du foyer consacré). Paliers : 1 = premier Cens versé ; 2 = Nuée complète honorée ; 3 = foyer cité aux registres ; 4 = générosité remarquée à la Becquée.",
+      "ID": "FLAG1210",
+      "Max": "4",
+      "Min": "0",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "compteur"
+    },
+    "sections": {},
+    "notion_page_id": "11b3c661-3311-4d84-ad33-ebbf31b6bf0d"
+  },
+  {
+    "Nom": "Flag_Nexianisme_CommissionDementi",
+    "values": {
+      "Communauté liée": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Description narrative": "Relation de la joueuse avec la Commission du Démenti, organe pontifical qui documente les témoignages d'après-vie athée avec une minutie proche de la peur. Conditionne le hook Le Démenti.",
+      "ID": "FLAG1207",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "Inconnue\nContactée\nEngagée\nRompue"
+    },
+    "sections": {},
+    "notion_page_id": "1ba0f5ba-9a54-4e55-95b5-cf80dea6f6c7"
+  },
+  {
+    "Nom": "Flag_Nexianisme_Etouffoir",
+    "values": {
+      "Communauté liée": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Description narrative": "Statut de la joueuse vis-à-vis de l'Étouffoir nexian (excommunication par noyade de la flamme : mort sociale, crédit nul, Indivis gelé, tombe interdite). Menacé = procédure ouverte ; Prononcé = irréversible sauf rendue de mèche solennelle.",
+      "ID": "FLAG1206",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "Aucun\nMenacé\nPrononcé"
+    },
+    "sections": {},
+    "notion_page_id": "c76036e9-b5c1-4918-a3c0-b553dc93c1cc"
+  },
+  {
+    "Nom": "Flag_Nexianisme_RiteRacines",
+    "values": {
+      "Communauté liée": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Description narrative": "Degré d'exposition au rite secret des Racines (conduire un mourant vers les racines du Mont vêtu de méridiana). Ignoré = n'en a jamais entendu parler ; Entendu = rumeur ; Témoin = a vu sans participer ; Participé = a accompagné ou guidé un mourant.",
+      "ID": "FLAG1204",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "Ignoré\nEntendu\nTémoin\nParticipé"
+    },
+    "sections": {},
+    "notion_page_id": "15708ab8-ae8e-4ef9-a3c3-037d353d9bc2"
+  },
+  {
+    "Nom": "Flag_Nexianisme_ApresVieAthee",
+    "values": {
+      "Communauté liée": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Description narrative": "Exposition au phénomène d'après-vie athée : un au-delà sans dieu ni Mont ni Porte, dont personne ne connaît l'origine. Conditionne la Commission du Démenti et le hook Le Démenti.",
+      "ID": "FLAG1205",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "Ignorée\nRumeur\nTémoignage direct"
+    },
+    "sections": {},
+    "notion_page_id": "6bff5bbd-3a31-48cb-b96e-a9575437ecee"
+  },
+  {
+    "Nom": "Flag_Nexianisme_ParenteDeMeche",
+    "values": {
+      "Communauté liée": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Description narrative": "Position de la joueuse dans le réseau de parenté de mèche nexiane : aucune, débitrice (elle a emprunté la flamme et doit une Nuée d'allégeance) ou créancière (elle a prêté et peut réclamer). Conditionne le hook Dette de mèche et les notaires de l'Indivis.",
+      "ID": "FLAG1209",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "Aucune\nDébitrice\nCréancière"
+    },
+    "sections": {},
+    "notion_page_id": "003c34bf-a7b6-477f-9df2-492b834622d2"
+  },
+  {
+    "Nom": "Flag_Nexianisme_ConnaissanceLeurre",
+    "values": {
+      "Communauté liée": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Description narrative": "Degré de connaissance du leurre du Nexion (la Porte visible n'est pas la Porte vraie, entretenu par les Pontifes). Conditionne les dialogues pontificaux, l'accès au rite des Racines et le hook Mirvel doute.",
+      "ID": "FLAG1203",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "Aucune\nSoupçon\nIndice\nCertitude"
+    },
+    "sections": {},
+    "notion_page_id": "73f1a84d-5779-4d21-a572-6b1b5773ce5a"
   }
 ]

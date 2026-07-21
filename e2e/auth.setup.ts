@@ -12,7 +12,10 @@ const AUTH_FILE = 'e2e/.auth/user.json'
 
 setup('authenticate', async ({ page }) => {
   await page.goto('/login')
-  await expect(page.getByRole('button', { name: /se connecter/i })).toBeVisible({ timeout: E2E_MS.ui })
+  // Guest-first : attendre la fin de initialize (pas « Connexion... », pas redirect admin)
+  await expect(page.getByRole('button', { name: /se connecter/i })).toBeEnabled({
+    timeout: E2E_MS.ui,
+  })
   await page.getByLabel(/nom d'utilisateur/i).fill('admin')
   await page.getByLabel(/mot de passe/i).fill('admin123')
   await page.getByRole('button', { name: /se connecter/i }).click()

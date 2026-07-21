@@ -58,7 +58,8 @@ For **sync GDD**, **context**, **documents**, **graph**, or any backend action: 
 - **mistralai SDK version**: The codebase uses `from mistralai import Mistral` which requires mistralai v1.x (tested with 1.12.4). The v2.x SDK reorganizes exports and breaks this import. Pin to `mistralai>=1.10.0,<2.0.0` until the codebase is updated.
 - **Vitest full suite is slow**: Running the entire Vitest suite can take 10+ minutes on constrained VMs. Prefer targeted runs (`npx vitest run src/__tests__/specific.test.ts`) or `npm run test:frontend:quick` for changed files only.
 - **Git — commit** : sauf périmètre explicite (« uniquement ces fichiers », liste de chemins), **`git add .`** puis commit (push si demandé). Ne pas déduire un staging partiel depuis l’UI Cursor. Détail : `.cursor/rules/git_commit.mdc`.
-- **Git — push `main`** : suite CI T3 **obligatoire** avant push (backend full + Vitest `VITEST_FULL=1` + PWA). Ne jamais pousser sur `main` avec CI locale rouge ou non exécutée. Détail : `.cursor/rules/ci_before_push.mdc` · commande `/commit`.
+- **Git — push `main`** : suite CI T3 **obligatoire** avant push (backend full + Vitest `VITEST_FULL=1` + **auth E2E** + PWA). Ne jamais pousser sur `main` avec CI locale rouge ou non exécutée. Détail : `.cursor/rules/ci_before_push.mdc` · commande `/commit`.
+- **Auth guest-first** : `/login` hors `ProtectedRoute` doit quand même appeler `initialize()` — rule `.cursor/rules/guest_first_auth.mdc` · `npm run test:e2e:auth`.
 - **Notion — corps de page complet** : toute lecture du texte d’une page pour sync GDD ou import doit passer par `NotionAPIClient.get_page_content` (markdown API prioritaire, repli blocs). Ne pas dupliquer un export « full body » basé uniquement sur `blocks/.../children`. Propriétés + corps : `notion_page_to_gdd_record_merge_body_and_properties`. Détail : `.cursor/rules/notion_gdd_content_fetch.mdc`, `docs/notion_public_api_block_gap.md`.
 
 ### Subagents (`.cursor/agents/`)
