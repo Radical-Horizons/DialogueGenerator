@@ -198,8 +198,8 @@ describe('DialogueCombobox', () => {
 
     await waitFor(() => {
       expect(trigger).toHaveAttribute('aria-expanded', 'false')
+      expect(trigger).toHaveFocus()
     })
-    expect(trigger).toHaveFocus()
   })
 
   it("le raccourci `/` global focuse l'input de recherche quand le panneau est ouvert", async () => {

@@ -64,7 +64,7 @@ pip install -r requirements.txt
    python -c "import secrets; print(secrets.token_urlsafe(32))"
    ```
 
-Pour plus de détails sur la sécurité, voir [docs/SECURITY.md](docs/SECURITY.md).
+Pour plus de détails sur la sécurité, voir [docs/guides/SECURITY.md](docs/guides/SECURITY.md).
 
 ### Lancer l'API
 
@@ -99,12 +99,20 @@ L'API sera accessible sur (exemple port **4243**) :
 
 ## Endpoints principaux
 
-### Authentification
+### Authentification et administration (Epic 7)
 
-- `POST /api/v1/auth/login` - Connexion
-- `GET /api/v1/auth/me` - Utilisateur courant
-- `POST /api/v1/auth/logout` - Déconnexion
-- `POST /api/v1/auth/refresh` - Rafraîchir token
+- `POST /api/v1/auth/guest` - Session invité lecture seule (JWT `role=guest`, TTL 8 h, sans refresh)
+- `POST /api/v1/auth/login` - Connexion admin/writer (access token + cookie refresh httpOnly)
+- `POST /api/v1/auth/refresh` - Rafraîchir l'access token (cookie refresh)
+- `GET /api/v1/auth/me` - Utilisateur courant (`admin` | `writer` | `guest`)
+- `POST /api/v1/auth/logout` - Déconnexion (efface le cookie refresh)
+- `POST /api/v1/auth/me/password` - Changer son mot de passe (admin/writer)
+- `GET/PUT /api/v1/users/me/settings` — Préférences serveur (`context`, `generation`)
+- `POST/GET/PATCH /api/v1/users` - Gestion des comptes (admin only)
+- `GET /api/v1/audit-logs` - Journal d'audit (admin only)
+- `GET/POST/DELETE /api/v1/dialogues/{id}/shares` - Partage co-édition writer (propriétaire/admin)
+
+Contrats complets : [`docs/api/api-contracts-api.md`](docs/api/api-contracts-api.md).
 
 ### Génération de dialogues
 
@@ -345,17 +353,34 @@ Sécurité écriture : `safe_export_filename`, `safe_document_id`, `_resolve_exp
 
 ## Authentification
 
-L'API utilise JWT (JSON Web Tokens) pour l'authentification.
+L'API utilise JWT (JSON Web Tokens). Défaut applicatif : **`DISABLE_AUTH=false`** (voir `.env.example`).
 
-1. Se connecter via `POST /api/v1/auth/login` avec `username` et `password`
-2. Récupérer le `access_token` dans la réponse
-3. Inclure le token dans les requêtes suivantes : `Authorization: Bearer <token>`
+### Flux développeur
 
-**Note**: Pour le développement, un utilisateur par défaut existe :
-- Username: `admin`
-- Password: `admin123`
+1. **Invité (démo)** : `POST /api/v1/auth/guest` → access token lecture seule (l'UI l'appelle automatiquement sans JWT).
+2. **Écriture** : `POST /api/v1/auth/login` avec `username` / `password` → `access_token` dans le body, refresh dans un cookie httpOnly.
+3. Requêtes suivantes : `Authorization: Bearer <access_token>`.
+4. Rafraîchissement : `POST /api/v1/auth/refresh` (cookie) ou intercepteur Axios côté frontend.
 
-⚠️ **À changer en production !**
+### Compte admin initial
+
+Au premier démarrage, définir `ADMIN_PASSWORD` dans `.env` pour créer le compte seed `admin` (hash bcrypt en SQLite). Exemple dev :
+
+```bash
+ADMIN_PASSWORD=admin123
+```
+
+Puis connexion : username `admin`, mot de passe = valeur de `ADMIN_PASSWORD`.
+
+Sans `ADMIN_PASSWORD`, aucun compte n'est seedé (warning au démarrage) ; l'accès invité reste disponible.
+
+### Bypass tests (`DISABLE_AUTH=true`)
+
+Réservé à pytest et Playwright : JWT ignoré, principal mock admin. **Interdit** si `ENVIRONMENT=production`. Voir [`docs/guides/SECURITY.md`](docs/guides/SECURITY.md).
+
+### Données applicatives SQLite
+
+Comptes, index propriétaire des dialogues, partages et audit : `data/app.db` (migrations automatiques au boot). Override tests : `APP_DATABASE`. Les JSON Unity restent la source de vérité des dialogues.
 
 ## Documentation
 
