@@ -86,10 +86,11 @@ export const DialogueCombobox = forwardRef<DialogueComboboxRef, DialogueCombobox
 
     useImperativeHandle(ref, () => ({ refresh }), [refresh])
 
+    const wasOpenRef = useRef(false)
+
     const close = useCallback(() => {
       setIsOpen(false)
       setActiveOptionIndex(null)
-      requestAnimationFrame(() => triggerRef.current?.focus())
     }, [])
 
     const handleItemClick = useCallback(
@@ -167,6 +168,18 @@ export const DialogueCombobox = forwardRef<DialogueComboboxRef, DialogueCombobox
         setActiveOptionIndex(null)
         requestAnimationFrame(() => searchInputRef.current?.focus())
       }
+    }, [isOpen])
+
+    // Restore trigger focus after close in layout (not rAF): panel unmount moves
+    // focus to body; sync restore avoids CI flakes where rAF lags the assertion.
+    useLayoutEffect(() => {
+      if (isOpen) {
+        wasOpenRef.current = true
+        return
+      }
+      if (!wasOpenRef.current) return
+      wasOpenRef.current = false
+      triggerRef.current?.focus()
     }, [isOpen])
 
     const filteredListSignature = useMemo(
