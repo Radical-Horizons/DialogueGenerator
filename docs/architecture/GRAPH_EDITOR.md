@@ -70,7 +70,7 @@ Mesure : hook `useGraphToolbarLayoutMode` (`frontend/src/hooks/useGraphToolbarLa
 - **Titre** : Libellé optionnel (affichage carte / listes / jump-to ; distinct de l’id stable)
 - **Speaker** : Personnage qui parle
 - **Dialogue** : Texte de la réplique
-- **Test** : Test d'attribut (format: `Attribut+Compétence:DD`)
+- **Test** : Test d'attribut (format: `Attribut+Compétence:DD`) — éditeur structuré `AttributeSkillTestEditor` avec autocomplétion catalogue (`GET /mechanics/systems/skill-check-catalog`)
 - **Choix** : Texte, conditions, etc. ; **cibles** (nœud suivant au choix, branches test) via **combobox** branché sur le graphe (pas saisie libre d’id seule)
 - **Nœud suivant** : Combobox lorsqu’il n’y a **pas** de choix (flux `nextNode`)
 - **Actions** : Enregistrer, Supprimer
@@ -136,6 +136,62 @@ Mesure : hook `useGraphToolbarLayoutMode` (`frontend/src/hooks/useGraphToolbarLa
 1. Sélectionner un nœud
 2. Cliquer sur 🗑️ dans le panel
 3. Confirmer
+
+## Preview scénario (mode Visual Novel)
+
+Simule le parcours joueur dans un overlay plein écran, sans persister le document.
+
+### Accès
+
+- Toolbar graphe → menu **Actions** → **👁 Preview scénario**
+- Raccourci disponible via la toolbar (bouton playthrough dans `GraphToolbarToolsRow` quand le dialogue est actif)
+
+### Interface
+
+```
++--------------------------------------------------+
+| TopBar (titre, couverture, dev, graphe, reset)   |
++--------------------------------------------------+
+| Stage (speaker + réplique / écran fin)           |
+| Choices (boutons choix ou Continuer)             |
++--------------------------------------------------+
+| [Dev drawer optionnel] stats FR94 + flags        |
++--------------------------------------------------+
+```
+
+- **Stage** : affiche speaker et ligne du nœud courant ; écran de fin avec statistiques de couverture.
+- **Choices** : choix accessibles selon visibilité, effort et skill checks ; numéros clavier `1–4`.
+- **Dev drawer** (`D`) : réglage `previewGameSystemsState`, forçage issue skill check, compteurs flags.
+- **Graph peek** (`G`) : canvas visible derrière l'overlay avec focus sur le nœud courant ; bouton « Retour au jeu ».
+
+### Moteur et état
+
+| Couche | Fichiers |
+|--------|----------|
+| UI overlay | `frontend/src/components/graph/playthrough/ScenarioPlaythroughOverlay.tsx` |
+| Navigation | `frontend/src/hooks/useScenarioPlaythrough.ts` |
+| Logique pure | `frontend/src/utils/scenarioPlaythroughEngine.ts` |
+| Store | `graphViewStore.scenarioPlaythrough` + `previewGameSystemsState` |
+
+Au démarrage, `enterScenarioPlaythrough` hydrate `visibilityEvalState` depuis `dialogueFlagBindings` et les clés présentes dans le graphe, puis positionne le nœud `START` (ou racine).
+
+### Raccourcis (overlay actif)
+
+| Touche | Action |
+|--------|--------|
+| `1`–`4` | Sélectionner un choix |
+| `Entrée` | Continuer (flux linéaire `nextNode`) |
+| `Retour arrière` | Revenir au nœud précédent |
+| `R` | Reset session |
+| `D` | Tiroir dev |
+| `G` | Aperçu graphe |
+| `J` | Jump vers un nœud |
+| `?` | Aide raccourcis |
+| `Échap` | Quitter le mode preview |
+
+### Intégration systèmes de jeu
+
+Le playthrough réutilise les mêmes évaluateurs que la preview document (`skillChecks`, `effortPreview`, `visibilityConditions`, `choiceEffects`). Détail FR94 : [`docs/guides/game-systems-integration.md`](../guides/game-systems-integration.md).
 
 ## Raccourcis Clavier
 
