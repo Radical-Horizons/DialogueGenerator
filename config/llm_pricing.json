@@ -49,8 +49,13 @@
       "input_price_per_1M": 3.00,
       "output_price_per_1M": 9.00,
       "description": "Mistral Large - Modèle haute performance"
+    },
+    "aion-labs/aion-2.0": {
+      "input_price_per_1M": 0.80,
+      "output_price_per_1M": 1.60,
+      "description": "AionLabs Aion-2.0 via OpenRouter (roleplay / storytelling)"
     }
   },
-  "last_updated": "2026-07-17",
-  "note": "Les prix sont en USD par million de tokens. Taux de conversion USD→EUR : 0.92 (constante dans graph.py, à mettre à jour périodiquement). Sources : developers.openai.com/api/docs/models/gpt-5.6-{sol,terra,luna}."
+  "last_updated": "2026-07-23",
+  "note": "Les prix sont en USD par million de tokens. Taux de conversion USD→EUR : 0.92 (constante dans graph.py, à mettre à jour périodiquement). Sources : developers.openai.com/api/docs/models/gpt-5.6-{sol,terra,luna} ; openrouter.ai/aion-labs/aion-2.0."
 }

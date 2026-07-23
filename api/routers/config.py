@@ -4,15 +4,17 @@ import os
 from typing import Annotated, Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, status, Query
 
-from api.routers.auth import get_current_user
+from api.routers.auth import get_current_user, get_current_user_or_none
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from api.dependencies import (
     get_config_service,
     get_context_builder,
     get_request_id,
+    get_llm_pricing_service,
+    require_admin,
 )
-from api.exceptions import InternalServerException, ValidationException
+from api.exceptions import InternalServerException, ValidationException, NotFoundException
 from api.schemas.config import (
     FieldInfo,
     ContextFieldsResponse,
@@ -33,10 +35,21 @@ from services.field_suggestion_service import FieldSuggestionService
 from services.context_organizer import ContextOrganizer
 from api.utils.context_field_cache import get_context_field_cache
 from core.context.context_builder import ContextBuilder
+from services.llm_pricing_service import LLMPricingService
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
+
+
+async def _require_admin_user(
+    current_user: Annotated[
+        Optional[dict[str, object]],
+        Depends(get_current_user_or_none),
+    ],
+) -> dict[str, object]:
+    """Résout et vérifie l'administrateur de la requête."""
+    return require_admin(current_user)
 
 
 class LLMConfigResponse(BaseModel):
@@ -72,6 +85,30 @@ class LLMModelsListResponse(BaseModel):
     """
     models: list[LLMModelResponse]
     total: int
+
+
+class LLMModelUpsertRequest(BaseModel):
+    """Création / mise à jour d'un modèle LLM (admin)."""
+
+    api_identifier: str = Field(..., min_length=1, description="Slug API (ex. aion-labs/aion-2.0)")
+    display_name: str = Field(..., min_length=1)
+    client_type: str = Field(default="openrouter")
+    max_tokens: int = Field(default=32000, ge=256, le=1000000)
+    default_temperature: float = Field(default=0.7, ge=0.0, le=2.0)
+    input_price_per_1M: Optional[float] = Field(default=None, ge=0.0)
+    output_price_per_1M: Optional[float] = Field(default=None, ge=0.0)
+    pricing_description: Optional[str] = None
+
+
+class LLMModelPatchRequest(BaseModel):
+    """Patch partiel d'un modèle LLM (admin)."""
+
+    display_name: Optional[str] = Field(default=None, min_length=1)
+    max_tokens: Optional[int] = Field(default=None, ge=256, le=1000000)
+    default_temperature: Optional[float] = Field(default=None, ge=0.0, le=2.0)
+    input_price_per_1M: Optional[float] = Field(default=None, ge=0.0)
+    output_price_per_1M: Optional[float] = Field(default=None, ge=0.0)
+    pricing_description: Optional[str] = None
 
 
 class ContextConfigResponse(BaseModel):
@@ -211,12 +248,17 @@ async def list_llm_models(
                 logger.warning(f"Modèle sans identifiant trouvé: {model.get('display_name', 'Unknown')}. Utilisation du display_name comme identifiant.")
                 identifier = model.get("display_name", "unknown").lower().replace(" ", "-").replace("(", "").replace(")", "")
             
+            params = model.get("parameters") if isinstance(model.get("parameters"), dict) else {}
+            max_tokens = model.get("max_tokens")
+            if max_tokens is None:
+                max_tokens = params.get("max_tokens")
+            
             model_responses.append(
                 LLMModelResponse(
                     model_identifier=identifier,
                     display_name=model.get("display_name", identifier),
                     client_type=model.get("client_type", "openai"),  # Par défaut openai pour les modèles de la config
-                    max_tokens=model.get("max_tokens", 4096)
+                    max_tokens=_safe_max_tokens(max_tokens),
                 )
             )
         
@@ -231,6 +273,247 @@ async def list_llm_models(
             details={"error": str(e)},
             request_id=request_id
         )
+
+
+def _safe_max_tokens(raw: Any, default: int = 4096) -> int:
+    """Convertit une valeur max_tokens en int, avec repli sûr."""
+    if raw is None or raw == "":
+        return default
+    try:
+        return int(raw)
+    except (TypeError, ValueError):
+        return default
+
+
+def _model_to_response(model: Dict[str, Any]) -> LLMModelResponse:
+    """Convertit une entrée llm_config en LLMModelResponse."""
+    identifier = model.get("api_identifier") or model.get("model_identifier") or "unknown"
+    params = model.get("parameters") if isinstance(model.get("parameters"), dict) else {}
+    max_tokens = model.get("max_tokens")
+    if max_tokens is None:
+        max_tokens = params.get("max_tokens")
+    return LLMModelResponse(
+        model_identifier=str(identifier),
+        display_name=str(model.get("display_name", identifier)),
+        client_type=str(model.get("client_type", "openai")),
+        max_tokens=_safe_max_tokens(max_tokens),
+    )
+
+
+@router.post(
+    "/llm/models",
+    response_model=LLMModelResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_llm_model(
+    body: LLMModelUpsertRequest,
+    _admin: Annotated[dict[str, object], Depends(_require_admin_user)],
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    pricing_service: Annotated[LLMPricingService, Depends(get_llm_pricing_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> LLMModelResponse:
+    """Ajoute (ou remplace) un modèle LLM dans le catalogue (admin)."""
+    if body.client_type != "openrouter":
+        raise ValidationException(
+            message="L'admin ne peut créer que des modèles client_type=openrouter.",
+            details={"client_type": body.client_type},
+            request_id=request_id,
+        )
+    entry = {
+        "api_identifier": body.api_identifier.strip(),
+        "display_name": body.display_name.strip(),
+        "client_type": body.client_type,
+        "parameters": {
+            "default_temperature": body.default_temperature,
+            "max_tokens": body.max_tokens,
+        },
+    }
+    try:
+        # Refuser d'écraser un modèle openai/mistral existant
+        existing_models = config_service.get_available_llm_models()
+        conflict = next(
+            (
+                m
+                for m in existing_models
+                if (m.get("api_identifier") or m.get("model_identifier"))
+                == body.api_identifier.strip()
+                and m.get("client_type") != "openrouter"
+            ),
+            None,
+        )
+        if conflict is not None:
+            raise ValidationException(
+                message="Impossible d'écraser un modèle OpenAI/Mistral existant.",
+                details={"api_identifier": body.api_identifier},
+                request_id=request_id,
+            )
+        if (body.input_price_per_1M is None) != (body.output_price_per_1M is None):
+            raise ValidationException(
+                message="input_price_per_1M et output_price_per_1M doivent être fournis ensemble.",
+                details={
+                    "input_price_per_1M": body.input_price_per_1M,
+                    "output_price_per_1M": body.output_price_per_1M,
+                },
+                request_id=request_id,
+            )
+        saved = config_service.upsert_llm_model(entry)
+        if body.input_price_per_1M is not None and body.output_price_per_1M is not None:
+            try:
+                pricing_service.upsert_model_pricing(
+                    model_name=body.api_identifier.strip(),
+                    input_price_per_1M=body.input_price_per_1M,
+                    output_price_per_1M=body.output_price_per_1M,
+                    description=body.pricing_description or body.display_name,
+                )
+            except OSError as pricing_exc:
+                config_service.remove_llm_model(body.api_identifier.strip())
+                raise InternalServerException(
+                    message="Échec de la sauvegarde du tarif LLM (modèle annulé).",
+                    details={"error": str(pricing_exc)},
+                    request_id=request_id,
+                ) from pricing_exc
+        return _model_to_response(saved)
+    except ValidationException:
+        raise
+    except ValueError as exc:
+        raise ValidationException(
+            message=str(exc),
+            details={"error": str(exc)},
+            request_id=request_id,
+        ) from exc
+    except OSError as exc:
+        raise InternalServerException(
+            message="Échec de la sauvegarde du modèle LLM",
+            details={"error": str(exc)},
+            request_id=request_id,
+        ) from exc
+
+
+@router.patch(
+    "/llm/models/{api_identifier:path}",
+    response_model=LLMModelResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def patch_llm_model(
+    api_identifier: str,
+    body: LLMModelPatchRequest,
+    _admin: Annotated[dict[str, object], Depends(_require_admin_user)],
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    pricing_service: Annotated[LLMPricingService, Depends(get_llm_pricing_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> LLMModelResponse:
+    """Met à jour partiellement un modèle LLM (admin)."""
+    models = config_service.get_available_llm_models()
+    existing = next(
+        (
+            m
+            for m in models
+            if (m.get("api_identifier") or m.get("model_identifier")) == api_identifier
+        ),
+        None,
+    )
+    if existing is None:
+        raise NotFoundException(
+            resource_type="Modèle LLM",
+            resource_id=api_identifier,
+            request_id=request_id,
+        )
+    params = dict(existing.get("parameters") or {}) if isinstance(existing.get("parameters"), dict) else {}
+    if body.display_name is not None:
+        stripped_name = body.display_name.strip()
+        if not stripped_name:
+            raise ValidationException(
+                message="display_name ne peut pas être vide.",
+                details={"display_name": body.display_name},
+                request_id=request_id,
+            )
+        existing["display_name"] = stripped_name
+    if body.max_tokens is not None:
+        params["max_tokens"] = body.max_tokens
+    if body.default_temperature is not None:
+        params["default_temperature"] = body.default_temperature
+    # Ne pas écraser client_type openai/mistral via patch admin
+    existing["parameters"] = params
+    existing["api_identifier"] = api_identifier
+    if (body.input_price_per_1M is None) != (body.output_price_per_1M is None):
+        raise ValidationException(
+            message="input_price_per_1M et output_price_per_1M doivent être fournis ensemble.",
+            details={
+                "input_price_per_1M": body.input_price_per_1M,
+                "output_price_per_1M": body.output_price_per_1M,
+            },
+            request_id=request_id,
+        )
+    try:
+        saved = config_service.upsert_llm_model(existing)
+        if (
+            existing.get("client_type") == "openrouter"
+            and body.input_price_per_1M is not None
+            and body.output_price_per_1M is not None
+        ):
+            pricing_service.upsert_model_pricing(
+                model_name=api_identifier,
+                input_price_per_1M=body.input_price_per_1M,
+                output_price_per_1M=body.output_price_per_1M,
+                description=body.pricing_description or saved.get("display_name"),
+            )
+        return _model_to_response(saved)
+    except OSError as exc:
+        raise InternalServerException(
+            message="Échec de la mise à jour du modèle LLM",
+            details={"error": str(exc)},
+            request_id=request_id,
+        ) from exc
+
+
+@router.delete(
+    "/llm/models/{api_identifier:path}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_llm_model(
+    api_identifier: str,
+    _admin: Annotated[dict[str, object], Depends(_require_admin_user)],
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    pricing_service: Annotated[LLMPricingService, Depends(get_llm_pricing_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> None:
+    """Supprime un modèle LLM du catalogue (admin)."""
+    models = config_service.get_available_llm_models()
+    existing = next(
+        (
+            m
+            for m in models
+            if (m.get("api_identifier") or m.get("model_identifier")) == api_identifier
+        ),
+        None,
+    )
+    if existing is None:
+        raise NotFoundException(
+            resource_type="Modèle LLM",
+            resource_id=api_identifier,
+            request_id=request_id,
+        )
+    if existing.get("client_type") != "openrouter":
+        raise ValidationException(
+            message="Seuls les modèles OpenRouter peuvent être supprimés via l'admin.",
+            details={"api_identifier": api_identifier, "client_type": existing.get("client_type")},
+            request_id=request_id,
+        )
+    try:
+        removed = config_service.remove_llm_model(api_identifier)
+    except OSError as exc:
+        raise InternalServerException(
+            message="Échec de la suppression du modèle LLM",
+            details={"error": str(exc)},
+            request_id=request_id,
+        ) from exc
+    if not removed:
+        raise NotFoundException(
+            resource_type="Modèle LLM",
+            resource_id=api_identifier,
+            request_id=request_id,
+        )
+    pricing_service.remove_model_pricing(api_identifier)
 
 
 @router.get(

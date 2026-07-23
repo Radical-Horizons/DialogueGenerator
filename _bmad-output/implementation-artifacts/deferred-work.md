@@ -61,3 +61,10 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-silent-unity-model-migration.md`
   summary: Couvrir tous les littéraux LEGACY_MODEL_ID_MAP (pas seulement gpt-5.4) dans les tests.
   evidence: Revue — la map a 7 entrées ; un seul littéral est asserté.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-openrouter-aion-models.md`
+  summary: Rollback transactionnel complet create/patch/delete entre llm_config et llm_pricing (pricing OSError après delete catalogue).
+  evidence: Edge Case Hunter — états partiels possibles hors chemin create déjà rollbacké ; rare en single-process file I/O.
+- source_spec: `_bmad-output/implementation-artifacts/spec-openrouter-aion-models.md`
+  summary: Validation stricte du provider localStorage et message explicite si bascule modèle Unity silencieuse.
+  evidence: Edge Case Hunter — pattern de fallback déjà utilisé pour GPT-5.6 ; hors scope MVP OpenRouter.

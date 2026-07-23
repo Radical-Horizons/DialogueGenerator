@@ -8,7 +8,7 @@ import { normalizeModelId } from '../constants'
 interface LLMModel {
   api_identifier: string;
   display_name: string;
-  client_type: 'openai' | 'mistral';
+  client_type: 'openai' | 'mistral' | 'openrouter';
   parameters: {
     default_temperature: number;
     max_tokens: number;
@@ -16,10 +16,10 @@ interface LLMModel {
 }
 
 interface LLMStore {
-  provider: 'openai' | 'mistral';
+  provider: 'openai' | 'mistral' | 'openrouter';
   model: string;
   availableModels: LLMModel[];
-  setProvider: (provider: 'openai' | 'mistral') => void;
+  setProvider: (provider: 'openai' | 'mistral' | 'openrouter') => void;
   setModel: (model: string) => void;
   setAvailableModels: (models: LLMModel[]) => void;
   loadModels: () => Promise<void>;
@@ -33,7 +33,7 @@ if (initialModel !== rawStoredModel) {
 
 export const useLLMStore = create<LLMStore>((set) => ({
   // État initial
-  provider: (localStorage.getItem('llm-provider') as 'openai' | 'mistral') || 'openai',
+  provider: (localStorage.getItem('llm-provider') as 'openai' | 'mistral' | 'openrouter') || 'openai',
   model: initialModel,
   availableModels: [],
 
@@ -60,7 +60,7 @@ export const useLLMStore = create<LLMStore>((set) => ({
       const models = apiModels.map((m) => ({
         api_identifier: m.model_identifier,
         display_name: m.display_name,
-        client_type: m.client_type as 'openai' | 'mistral',
+        client_type: m.client_type as 'openai' | 'mistral' | 'openrouter',
         parameters: {
           default_temperature: 0.7,
           max_tokens: m.max_tokens || 4096,

@@ -56,6 +56,7 @@ describe('Header admin navigation', () => {
 
     await interaction.click(screen.getByRole('button', { name: 'Menu utilisateur admin' }))
     expect(screen.getByRole('button', { name: 'Gérer les utilisateurs' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Modèles LLM' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Changer mon mot de passe' })).toBeInTheDocument()
     await interaction.click(screen.getByRole('button', { name: 'Menu utilisateur admin' }))
 

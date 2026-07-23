@@ -425,6 +425,28 @@ export function Header() {
                     onClick={(event) => {
                       event.stopPropagation()
                       setIsUserMenuOpen(false)
+                      navigate('/admin/llm-models')
+                    }}
+                    style={{
+                      width: '100%',
+                      minHeight: TOUCH_TARGET_MIN_PX,
+                      marginBottom: '0.5rem',
+                      padding: '0.5rem 0.75rem',
+                      fontSize: remSize('body'),
+                      backgroundColor: theme.button.default.background,
+                      color: theme.button.default.color,
+                      border: `1px solid ${theme.border.primary}`,
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    Modèles LLM
+                  </button>
+                  <button
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      setIsUserMenuOpen(false)
                       navigate('/admin/audit-logs')
                     }}
                     style={{

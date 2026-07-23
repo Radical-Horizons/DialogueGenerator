@@ -77,16 +77,26 @@ export function resolveModelForUnityGeneration(
 ): string {
   const normalizedModel = normalizeModelId(model)
   const availableIds = availableModels.map((m) => m.model_identifier)
-  if (
+  const openrouterIds = availableModels
+    .filter((m) => m.client_type === 'openrouter')
+    .map((m) => m.model_identifier)
+  const isAllowed =
     (UNITY_STRUCTURED_OUTPUT_MODELS as readonly string[]).includes(normalizedModel)
-    && availableIds.includes(normalizedModel)
-  ) {
+    || openrouterIds.includes(normalizedModel)
+
+  if (isAllowed && availableIds.includes(normalizedModel)) {
     return normalizedModel
   }
   for (const allowed of UNITY_STRUCTURED_OUTPUT_MODELS) {
     if (availableIds.includes(allowed)) {
       return allowed
     }
+  }
+  const openrouterFallback = availableModels.find(
+    (m) => m.client_type === 'openrouter' && m.model_identifier && m.model_identifier !== 'unknown',
+  )?.model_identifier
+  if (openrouterFallback) {
+    return openrouterFallback
   }
   const fallback = availableModels.find(
     (m) => m.model_identifier && m.model_identifier !== 'unknown',

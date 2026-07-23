@@ -9,6 +9,7 @@ import { UsageDashboard } from './components/usage/UsageDashboard'
 import { GraphEditorPage } from './pages/GraphEditorPage'
 import { UserManagementPanel } from './components/admin/UserManagementPanel'
 import { AuditLogsPanel } from './components/admin/AuditLogsPanel'
+import { LlmModelsPanel } from './components/admin/LlmModelsPanel'
 import { useAuthStore } from './store/authStore'
 import { ToastContainer } from './components/shared'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
@@ -199,6 +200,16 @@ function AppRoutes() {
             <AdminRoute>
               <MainLayout>
                 <AuditLogsPanel />
+              </MainLayout>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/llm-models"
+          element={
+            <AdminRoute>
+              <MainLayout>
+                <LlmModelsPanel />
               </MainLayout>
             </AdminRoute>
           }

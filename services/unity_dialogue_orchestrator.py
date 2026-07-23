@@ -263,25 +263,35 @@ class UnityDialogueOrchestrator:
             fallback_chain = self.config_service.get_llm_fallback_chain()
             if not isinstance(fallback_chain, list):
                 fallback_chain = []
-            if len(fallback_chain) >= 2 and fallback_chain[0] == request_data.llm_model_identifier:
-                llm_client = LLMClientFactory.create_client_with_fallback(
-                    primary_model_id=request_data.llm_model_identifier,
-                    fallback_model_ids=fallback_chain[1:],
-                    config=self.config_service.get_llm_config(),
-                    available_models=self.config_service.get_available_llm_models(),
-                    usage_service=self.usage_service,
-                    request_id=self.request_id,
-                    endpoint="generate/unity-dialogue",
+            try:
+                if len(fallback_chain) >= 2 and fallback_chain[0] == request_data.llm_model_identifier:
+                    llm_client = LLMClientFactory.create_client_with_fallback(
+                        primary_model_id=request_data.llm_model_identifier,
+                        fallback_model_ids=fallback_chain[1:],
+                        config=self.config_service.get_llm_config(),
+                        available_models=self.config_service.get_available_llm_models(),
+                        usage_service=self.usage_service,
+                        request_id=self.request_id,
+                        endpoint="generate/unity-dialogue",
+                    )
+                else:
+                    llm_client = LLMClientFactory.create_client(
+                        model_id=request_data.llm_model_identifier,
+                        config=self.config_service.get_llm_config(),
+                        available_models=self.config_service.get_available_llm_models(),
+                        usage_service=self.usage_service,
+                        request_id=self.request_id,
+                        endpoint="generate/unity-dialogue",
+                    )
+            except ValueError as client_error:
+                yield GenerationEvent(
+                    type='error',
+                    data={
+                        'message': str(client_error),
+                        'code': 'llm_client_unavailable',
+                    },
                 )
-            else:
-                llm_client = LLMClientFactory.create_client(
-                    model_id=request_data.llm_model_identifier,
-                    config=self.config_service.get_llm_config(),
-                    available_models=self.config_service.get_available_llm_models(),
-                    usage_service=self.usage_service,
-                    request_id=self.request_id,
-                    endpoint="generate/unity-dialogue",
-                )
+                return
             
             # Configurer max_tokens : utiliser la valeur fournie ou la valeur par défaut
             from constants import Defaults

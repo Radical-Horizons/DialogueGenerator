@@ -1,6 +1,7 @@
 {
   "api_key_env_var": "OPENAI_API_KEY",
   "mistral_api_key_env_var": "MISTRAL_API_KEY",
+  "openrouter_api_key_env_var": "OPENROUTER_API_KEY",
   "default_model": "gpt-5.6-terra",
   "temperature": 0.7,
   "max_tokens": 32000,
@@ -38,6 +39,15 @@
       "api_identifier": "labs-mistral-small-creative",
       "display_name": "Mistral Small Creative",
       "client_type": "mistral",
+      "parameters": {
+        "default_temperature": 0.7,
+        "max_tokens": 32000
+      }
+    },
+    {
+      "api_identifier": "aion-labs/aion-2.0",
+      "display_name": "Aion 2.0 (OpenRouter)",
+      "client_type": "openrouter",
       "parameters": {
         "default_temperature": 0.7,
         "max_tokens": 32000
