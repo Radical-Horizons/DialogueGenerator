@@ -33,6 +33,7 @@ describe('LoginForm', () => {
     expect(screen.getByText('Connexion')).toBeInTheDocument()
     expect(screen.getByLabelText(/nom d'utilisateur/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/mot de passe/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /afficher en clair/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /se connecter/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /continuer en invité/i })).toBeInTheDocument()
     expect(mockInitialize).toHaveBeenCalled()

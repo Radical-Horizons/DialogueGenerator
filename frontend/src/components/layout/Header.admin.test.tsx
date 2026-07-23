@@ -104,4 +104,21 @@ describe('Header admin navigation', () => {
     expect(screen.getByTestId('guest-mode-banner')).toBeInTheDocument()
     expect(screen.queryByText('Non connecté')).not.toBeInTheDocument()
   })
+
+  it('lie le titre DialogueGenerator vers la page d’accueil', () => {
+    mockedUseAuthStore.mockReturnValue({
+      user: null,
+      isAuthenticated: false,
+      logout: vi.fn(),
+    } as ReturnType<typeof useAuthStore>)
+    render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>,
+    )
+
+    const homeLink = screen.getByTestId('header-home-link')
+    expect(homeLink).toHaveAttribute('href', '/')
+    expect(homeLink).toHaveTextContent('DialogueGenerator')
+  })
 })

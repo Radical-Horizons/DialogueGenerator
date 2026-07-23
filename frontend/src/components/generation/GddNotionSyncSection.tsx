@@ -35,6 +35,7 @@ import {
   GDD_NOTION_SYNC_SECONDARY_DATABASE_FILES,
   isGddNotionSyncSecondaryDatabase,
 } from '../../constants/gddNotionSyncSecondaryDatabases'
+import { PasswordInput } from '../shared/PasswordInput'
 
 function categoryFileMatchesIncluded(categoryFile: string, includedCategories: string[]): boolean {
   const normalized = new Set(
@@ -918,13 +919,14 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
             </div>
             <label style={labelStyle}>
               <span>Nouveau token Notion (laisser vide pour ne pas changer)</span>
-              <input
-                type="password"
+              <PasswordInput
                 autoComplete="off"
                 disabled={!config || saving || busy}
                 value={tokenInput}
                 onChange={(e) => setTokenInput(e.target.value)}
                 placeholder="secret…"
+                showLabel="Afficher le token"
+                hideLabel="Masquer le token"
                 style={inputStyle}
               />
             </label>

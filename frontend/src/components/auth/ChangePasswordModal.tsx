@@ -8,6 +8,7 @@ import * as authAPI from '../../api/auth'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import { TOUCH_TARGET_MIN_PX } from '../../constants'
+import { PasswordInput } from '../shared/PasswordInput'
 
 export interface ChangePasswordModalProps {
   isOpen: boolean
@@ -83,12 +84,15 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
     width: '100%',
     boxSizing: 'border-box',
     minHeight: TOUCH_TARGET_MIN_PX,
-    marginTop: '0.35rem',
     padding: '0.55rem 0.7rem',
     color: theme.input.color,
     background: theme.input.background,
     border: `1px solid ${theme.input.border}`,
     borderRadius: 4,
+  }
+
+  const passwordContainerStyle: CSSProperties = {
+    marginTop: '0.35rem',
   }
 
   return (
@@ -153,25 +157,29 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
           <form onSubmit={(event) => void handleSubmit(event)}>
             <label style={{ display: 'block', marginBottom: '0.75rem' }}>
               Mot de passe actuel
-              <input
+              <PasswordInput
                 required
-                type="password"
                 autoComplete="current-password"
                 value={currentPassword}
                 onChange={(event) => setCurrentPassword(event.target.value)}
+                containerStyle={passwordContainerStyle}
                 style={fieldStyle}
+                showLabel="Afficher le mot de passe actuel"
+                hideLabel="Masquer le mot de passe actuel"
               />
             </label>
             <label style={{ display: 'block', marginBottom: '0.75rem' }}>
               Nouveau mot de passe
-              <input
+              <PasswordInput
                 required
-                type="password"
                 autoComplete="new-password"
                 minLength={8}
                 value={newPassword}
                 onChange={(event) => setNewPassword(event.target.value)}
+                containerStyle={passwordContainerStyle}
                 style={fieldStyle}
+                showLabel="Afficher le nouveau mot de passe"
+                hideLabel="Masquer le nouveau mot de passe"
               />
               <small
                 style={{
@@ -188,14 +196,16 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
             </label>
             <label style={{ display: 'block', marginBottom: '1rem' }}>
               Confirmer le nouveau mot de passe
-              <input
+              <PasswordInput
                 required
-                type="password"
                 autoComplete="new-password"
                 minLength={8}
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
+                containerStyle={passwordContainerStyle}
                 style={fieldStyle}
+                showLabel="Afficher la confirmation"
+                hideLabel="Masquer la confirmation"
               />
             </label>
 

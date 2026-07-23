@@ -6,6 +6,7 @@ import * as usersApi from '../../api/users'
 import type { UserResponse } from '../../types/api'
 import { useAuthStore } from '../../store/authStore'
 import { theme } from '../../theme'
+import { PasswordInput } from '../shared/PasswordInput'
 
 const fieldStyle: React.CSSProperties = {
   minHeight: 44,
@@ -294,9 +295,8 @@ export function UserManagementPanel() {
         </label>
         <label>
           Mot de passe initial
-          <input
+          <PasswordInput
             required
-            type="password"
             aria-label="Mot de passe initial"
             minLength={8}
             value={password}

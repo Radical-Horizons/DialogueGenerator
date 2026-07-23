@@ -2,7 +2,7 @@
  * Composant Header avec authentification et barre de recherche.
  */
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { useCommandPalette } from '../../hooks/useCommandPalette'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
@@ -105,7 +105,20 @@ export function Header() {
     }}>
       {/* Section gauche : Titre */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-        <h1 style={{ margin: 0, color: theme.text.primary, fontSize: remSize('title'), fontWeight: 600, whiteSpace: 'nowrap' }}>DialogueGenerator</h1>
+        <h1 style={{ margin: 0, fontSize: remSize('title'), fontWeight: 600, whiteSpace: 'nowrap' }}>
+          <Link
+            to="/"
+            data-testid="header-home-link"
+            aria-label="Accueil DialogueGenerator"
+            style={{
+              color: theme.text.primary,
+              textDecoration: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            DialogueGenerator
+          </Link>
+        </h1>
         {user?.role === 'guest' && (
           <span
             data-testid="guest-mode-banner"
