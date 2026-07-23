@@ -49,10 +49,10 @@ describe('AdminRoute', () => {
 
   it('autorise un admin actif après initialisation', async () => {
     render(
-      <MemoryRouter initialEntries={['/admin/users']}>
+      <MemoryRouter initialEntries={['/admin']}>
         <Routes>
           <Route
-            path="/admin/users"
+            path="/admin"
             element={(
               <AdminRoute>
                 <div>Administration</div>
@@ -78,11 +78,11 @@ describe('AdminRoute', () => {
       }
     })
     render(
-      <MemoryRouter initialEntries={['/admin/users']}>
+      <MemoryRouter initialEntries={['/admin']}>
         <Routes>
           <Route path="/" element={<div>Accueil</div>} />
           <Route
-            path="/admin/users"
+            path="/admin"
             element={(
               <AdminRoute>
                 <div>Administration</div>
@@ -106,11 +106,11 @@ describe('AdminRoute', () => {
       user: { ...mocks.authState.user, role: 'writer' },
     }
     render(
-      <MemoryRouter initialEntries={['/admin/users']}>
+      <MemoryRouter initialEntries={['/admin']}>
         <Routes>
           <Route path="/" element={<div>Accueil</div>} />
           <Route
-            path="/admin/users"
+            path="/admin"
             element={(
               <AdminRoute>
                 <div>Administration</div>
@@ -144,10 +144,10 @@ describe('AdminRoute', () => {
     }
 
     render(
-      <MemoryRouter initialEntries={['/admin/users']}>
+      <MemoryRouter initialEntries={['/admin']}>
         <Routes>
           <Route
-            path="/admin/users"
+            path="/admin"
             element={(
               <AdminRoute>
                 <div>Administration</div>
@@ -173,11 +173,11 @@ describe('AdminRoute', () => {
     }
 
     render(
-      <MemoryRouter initialEntries={['/admin/users']}>
+      <MemoryRouter initialEntries={['/admin']}>
         <Routes>
           <Route path="/" element={<div>Accueil</div>} />
           <Route
-            path="/admin/users"
+            path="/admin"
             element={(
               <AdminRoute>
                 <div>Administration</div>

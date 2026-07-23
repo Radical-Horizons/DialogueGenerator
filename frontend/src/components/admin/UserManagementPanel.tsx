@@ -220,15 +220,13 @@ export function UserManagementPanel() {
     <section
       aria-labelledby="user-management-title"
       style={{
-        height: '100%',
-        overflowY: 'auto',
         boxSizing: 'border-box',
-        padding: 'clamp(1rem, 3vw, 2rem)',
         color: theme.text.primary,
-        background: theme.background.primary,
       }}
     >
-      <h2 id="user-management-title">Gestion des utilisateurs</h2>
+      <h2 id="user-management-title" style={{ marginTop: 0, fontSize: '1.15rem' }}>
+        Gestion des utilisateurs
+      </h2>
 
       <form
         aria-label="Créer un compte"

@@ -141,10 +141,10 @@ export function LlmModelsPanel() {
   }
 
   return (
-    <div style={{ padding: '1.5rem', maxWidth: 960, margin: '0 auto' }}>
-      <h1 style={{ color: theme.text.primary, marginBottom: '0.5rem' }}>
+    <div style={{ maxWidth: 960, margin: '0 auto' }}>
+      <h2 style={{ color: theme.text.primary, margin: '0 0 0.5rem', fontSize: '1.15rem' }}>
         Modèles LLM
-      </h1>
+      </h2>
       <p style={{ color: theme.text.secondary, marginBottom: '1.5rem' }}>
         Ajoutez ou modifiez des modèles OpenRouter (ex. Aion 2.0) pour la génération de dialogues.
       </p>

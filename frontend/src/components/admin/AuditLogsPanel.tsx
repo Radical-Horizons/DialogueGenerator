@@ -162,13 +162,13 @@ export function AuditLogsPanel() {
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
 
   return (
-    <section aria-labelledby="audit-logs-title" style={{ padding: '1rem' }}>
-      <h1
+    <section aria-labelledby="audit-logs-title">
+      <h2
         id="audit-logs-title"
-        style={{ color: theme.text.primary, marginBottom: '1rem' }}
+        style={{ color: theme.text.primary, margin: '0 0 1rem', fontSize: '1.15rem' }}
       >
         Journaux d’audit
-      </h1>
+      </h2>
 
       <form
         onSubmit={handleFilterSubmit}

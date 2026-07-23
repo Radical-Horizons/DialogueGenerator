@@ -55,8 +55,8 @@ describe('Header admin navigation', () => {
     )
 
     await interaction.click(screen.getByRole('button', { name: 'Menu utilisateur admin' }))
-    expect(screen.getByRole('button', { name: 'Gérer les utilisateurs' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Modèles LLM' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Administration' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Gérer les utilisateurs' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Changer mon mot de passe' })).toBeInTheDocument()
     await interaction.click(screen.getByRole('button', { name: 'Menu utilisateur admin' }))
 
@@ -80,7 +80,7 @@ describe('Header admin navigation', () => {
     expect(writerMenuButton).toHaveAttribute('aria-expanded', 'true')
     expect(screen.getByText('Connecté en tant que')).toBeInTheDocument()
     expect(screen.getByText('writer')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Gérer les utilisateurs' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Administration' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Changer mon mot de passe' })).toBeInTheDocument()
   })
 
