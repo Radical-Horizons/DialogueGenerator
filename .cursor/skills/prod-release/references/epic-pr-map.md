@@ -15,10 +15,11 @@
 | `v1.7.2` | 1.7.2 | — | patch main (playthrough + GDD sync) | `60c779ec` | 2026-07-06 |
 | `v1.8.0` | 1.8.0 | Epic 7 | Epic 7 — Collaboration / RBAC | `1ccce9d2` | 2026-07-20 |
 | `v1.8.1` | 1.8.1 | — | patch main (login /login isLoading) | `8ed1fcbe` | 2026-07-21 |
+| `v1.8.2` | 1.8.2 | — | patch main (silent model migrate + budget quota) | `7732ec87` | 2026-07-23 |
 
 Baseline : `v1.0.0` → `fe9c3374`. Doc complète : `docs/releases/semver-and-tags.md`.
 
-Prochaine epic mergée → **1.9.0**. Patches main entre deux epics → **1.8.2**, **1.8.3**, …
+Prochaine epic mergée → **1.9.0**. Patches main entre deux epics → **1.8.3**, **1.8.4**, …
 
 ```powershell
 git log --oneline --merges --grep="Epic" -20
