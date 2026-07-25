@@ -1,11 +1,11 @@
 {
-  "last_started_at": "2026-07-21T22:44:43.444198+00:00",
-  "last_finished_at": "2026-07-21T22:45:44.398407+00:00",
+  "last_started_at": "2026-07-25T15:26:32.797890+00:00",
+  "last_finished_at": "2026-07-25T15:26:35.845733+00:00",
   "last_success": true,
-  "message": "28 entité(s) mise(s) à jour — miroir appliqué (archive : .archive/20260721T224447Z_2b6557e6)",
-  "updated_entities": 28,
+  "message": "Miroir appliqué avec reliquats : les bases sans artefact dans le staging n'ont pas été modifiées sur disque. Vérifiez les erreurs du dernier run dans le statut ou les logs.",
+  "updated_entities": 2994,
   "partial_errors": [],
-  "last_archive_relative": ".archive/20260721T224447Z_2b6557e6",
+  "last_archive_relative": ".archive/20260725T134954Z_127305b4",
   "last_mirror_rebuild_used": true,
   "mirror_promotion_pending": false
 }
