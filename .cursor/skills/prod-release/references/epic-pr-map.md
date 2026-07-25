@@ -17,7 +17,7 @@
 | `v1.8.1` | 1.8.1 | — | patch main (login /login isLoading) | `8ed1fcbe` | 2026-07-21 |
 | `v1.8.2` | 1.8.2 | — | patch main (silent model migrate + budget quota) | `7732ec87` | 2026-07-23 |
 | `v1.8.3` | 1.8.3 | — | patch main (OpenRouter + admin unifié) | `ecfa11ae` | 2026-07-23 |
-| `v1.8.4` | 1.8.4 | — | patch main (recherche GDD inter-onglets + sync) | `PENDING` | 2026-07-25 |
+| `v1.8.4` | 1.8.4 | — | patch main (recherche GDD inter-onglets + sync) | `4f23d9e1` | 2026-07-25 |
 
 Baseline : `v1.0.0` → `fe9c3374`. Doc complète : `docs/releases/semver-and-tags.md`.
 
