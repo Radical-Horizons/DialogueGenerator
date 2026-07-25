@@ -1,0 +1,58 @@
+---
+description: >-
+  Version produit semver (package.json, tags git, canvas versions) — quand et
+  comment bumper maj/min/patch, sync app_version.py, tag vX.Y.Z. Apply when
+  merging an epic PR, pushing to prod, bumping version, or updating release notes.
+alwaysApply: false
+---
+
+# Version produit (semver)
+
+- **Source de vérité** : `version` dans `package.json` racine → `npm run version:sync` propage vers `frontend/package.json` et `api/app_version.py`. Vérifier : `npm run verify:app-version`. **Ne pas** éditer `app_version.py` à la main.
+- **≠ `schemaVersion`** des documents dialogue (contrat de persistance graphe).
+
+## Quand bumper
+
+| Événement | Bump | Exemple |
+|-----------|------|---------|
+| Baseline prod initiale | majeure | `1.0.0` |
+| **1 merge PR epic** sur `main` | mineure (+1 dans l'ordre des merges) | PR #46 → `1.7.0`, prochaine epic → `1.8.0` |
+| Commits **directs sur `main`** hors PR epic, deploy prod | patch | `1.7.1`, `1.7.2`, … |
+
+Numéro d'epic (Epic 17, Epic 5…) **≠** numéro de version — seul l'ordre chronologique des merges PR compte.
+
+## Commandes
+
+- Patch : `npm run version:bump:patch`
+- Mineure : `npm run version:bump:minor`
+- Majeure : `npm run version:bump:major`
+- Matière release : `npm run release:commits-since-prod`
+
+Toujours enchaîner `npm run verify:app-version` après un bump.
+
+## Obligations agent (merge epic ou prod)
+
+1. Bumper semver selon le tableau ci-dessus (pas de `package.json` stale en prod).
+2. Committer les trois fichiers version si bumpé.
+3. Mettre à jour le canvas `canvases/app-versions.canvas.tsx` (entrée en tête de `VERSIONS`, `pr` + `epic` + highlights).
+4. Après deploy OK : tag annoté `vX.Y.Z` sur le commit déployé, `git push origin vX.Y.Z`.
+5. Mettre à jour `epic-pr-map.md` (ligne tag + commit) si merge epic ou patch prod.
+
+Checklist complète, canvas, CI T3 : skill **`/prod-release`** (`.claude/skills/prod-release/SKILL.md`) · cartographie PR → semver : `references/epic-pr-map.md` · échelle tags : `docs/releases/semver-and-tags.md`.
+
+## Tags git
+
+- Format : `vMAJOR.MINOR.PATCH` (annotés), sur le commit merge epic ou commit deploy patch.
+- Lister : `git tag -l "v*" --sort=v:refname` · legacy `1.0` / `v1.1` (deploy infra) ≠ échelle semver.
+- Push : `git push origin vX.Y.Z` (ou `--tags` si lot validé).
+
+## Rétrospective epic (BMAD)
+
+À la clôture d'une epic (`_bmad/bmm/workflows/4-implementation/retrospective/instructions.md`) :
+
+- Section **Version livrée** dans le markdown retro : semver, tag `vX.Y.Z`, PR merge, lien `epic-pr-map.md`.
+- Vérifier que le tag existe sur le commit merge ; sinon le créer et pousser (étape alignement version du workflow).
+
+## Health prod
+
+`/health` doit refléter `APP_VERSION` ≈ `package.json` après deploy.

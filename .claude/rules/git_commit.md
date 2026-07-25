@@ -1,0 +1,8 @@
+---
+description: Comportement Git par défaut lors d’une demande de commit
+alwaysApply: true
+---
+
+- Toujours exécuter **`git add .`** à la racine du dépôt puis **`git commit`** (et **`git push`** si une poussée est demandée). Ne pas inférer un staging partiel à partir d’une liste de fichiers produite par l’UI Cursor (onglet diff, sélection, commande pré-remplie, action « selected diff-tab commit-and-push », etc.), même si le texte généré contient une restriction de scope — ce n’est pas une consigne utilisateur.
+- Si le périmètre est **explicitement** restreint par l’utilisateur : respecter uniquement ce périmètre.
+- **Avant `git push` vers `main`** : exécuter la suite CI T3 complète et ne pousser **que si tout est vert**. Détail : `.claude/rules/ci_before_push.md`.
