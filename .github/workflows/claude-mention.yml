@@ -108,14 +108,22 @@ jobs:
       # resterait au vert du HEAD précédent. Même mécanisme que dans
       # pr-merge-main-prefer-head-data.yml.
       - name: Relancer la CI si Claude a poussé un correctif
-        if: steps.guard.outputs.enabled == 'true' && github.event.issue.pull_request
+        # Les trois déclencheurs n'exposent pas le même objet : `issue_comment`
+        # remplit `event.issue`, tandis que `pull_request_review_comment` et
+        # `pull_request_review` remplissent `event.pull_request`. Ne tester que
+        # le premier sauterait le relais pour un `@claude` écrit dans un
+        # commentaire de revue — même expression que le `concurrency` plus haut.
+        if: >-
+          steps.guard.outputs.enabled == 'true'
+          && (github.event.issue.pull_request || github.event.pull_request)
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BEFORE: ${{ steps.before.outputs.sha }}
+          PR_NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          BRANCH=$(gh pr view "${{ github.event.issue.number }}" --json headRefName --jq .headRefName)
+          BRANCH=$(gh pr view "$PR_NUMBER" --json headRefName --jq .headRefName)
           git fetch origin "$BRANCH" --quiet
           AFTER=$(git rev-parse "origin/$BRANCH")
           if [ "$AFTER" = "$BEFORE" ]; then

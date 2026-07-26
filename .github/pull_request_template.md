@@ -5,7 +5,7 @@
 ## Preuve
 
 <!--
-Tier exécuté (grille : .cursor/commands/test-tiers.md). Attendu avant PR : T2.
+Tier exécuté (grille : .claude/commands/test-tiers.md). Attendu avant PR : T2.
 Coller la sortie qui prouve le vert, pas seulement le nom de la commande.
 -->
 

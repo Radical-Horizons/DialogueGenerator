@@ -21,6 +21,7 @@ jobs:
   fix:
     if: >-
       github.event.workflow_run.conclusion == 'failure'
+      && github.event.workflow_run.head_repository.full_name == github.repository
       && github.event.workflow_run.head_branch != 'main'
       && github.event.workflow_run.head_branch != 'dev'
     runs-on: ubuntu-latest
@@ -62,15 +63,23 @@ jobs:
           BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
           set -euo pipefail
-          LAST_AUTHOR=$(git log -1 --pretty=%an)
+          # `--no-merges` est essentiel : pr-merge-main-prefer-head-data pousse un
+          # commit de merge en `github-actions[bot]` à chaque push d'une PR vers
+          # main. Le compter comme « tentative du bot » neutraliserait la
+          # réparation en permanence. On regarde donc le dernier commit *réel*.
+          #
+          # Suffixe `[bot]` plutôt qu'un nom exact : claude-code-action commite
+          # en `claude[bot]`, et dépendre de ce libellé exact rendrait la garde
+          # silencieusement inopérante s'il change — c'est-à-dire une boucle.
+          LAST_AUTHOR=$(git log -1 --no-merges --pretty=%an)
           PR=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
 
           if [ -z "$PR" ]; then
             echo "go=false" >> "$GITHUB_OUTPUT"
             echo "Aucune PR ouverte pour $BRANCH — abandon."
-          elif [ "$LAST_AUTHOR" = "github-actions[bot]" ]; then
+          elif case "$LAST_AUTHOR" in *"[bot]") true ;; *) false ;; esac; then
             echo "go=false" >> "$GITHUB_OUTPUT"
-            echo "Dernier commit déjà du bot — tentative automatique déjà consommée."
+            echo "Dernier commit non-merge signé $LAST_AUTHOR — tentative automatique déjà consommée."
             gh pr comment "$PR" --body \
               "⚠️ La CI échoue encore après un correctif automatique. Intervention humaine nécessaire — je ne retente pas pour éviter une boucle."
           else
