@@ -90,6 +90,26 @@ Specialized reviewers — invoke with `/name` or naturally. See `.cursor/rules/s
 
 **Cursor session files on disk** : only relevant when you are explicitly mining *past chats* for patterns. Use whatever works (`Task` + subagent, `scripts/peek_cursor_transcript.py`, or targeted grep). Goal is to improve **this agent’s behavior in the repo**, not to maintain a history *of* subagents.
 
+### Automatisation GitHub (PR)
+
+Tout se règle **sur la PR**, sans repasser par un chat local. Les quatre workflows Claude sont inertes (job vert, aucun blocage) si le secret `ANTHROPIC_API_KEY` disparaît.
+
+| Déclencheur | Workflow | Effet |
+|---|---|---|
+| Ouverture de PR (ou passage en *ready*) | `claude-review.yml` | Revue par les reviewers spécialisés touchés par le diff. Lecture seule : commente, ne pousse rien. |
+| `@claude …` en commentaire | `claude-mention.yml` | Répond, **peut modifier le code et pousser** un correctif sur la branche. |
+| CI en échec sur une branche de PR | `claude-ci-fix.yml` | Diagnostique, reproduit en local, **pousse un correctif** si la cause est mécanique — sinon commente et rend la main. |
+| Push sur une PR | `pr-merge-main-prefer-head-data.yml` | Merge `main`, arbitre `data/` en faveur de la PR. |
+
+**Deux invariants à connaître avant de toucher à ces fichiers :**
+
+1. **Un push fait avec `GITHUB_TOKEN` ne déclenche aucun workflow.** Tout workflow qui pousse doit donc relancer la CI explicitement via `gh workflow run ci.yml --ref <branche>` (`workflow_dispatch` est l'un des rares événements exemptés). Trois workflows le font déjà ; ne pas le retirer.
+2. **La revue ne se déclenche pas sur `synchronize`**, volontairement — re-reviewer à chaque push noierait la PR. Pour relancer : `@claude relance la revue`, ou repasser la PR en brouillon puis en *ready*.
+
+**Garde anti-boucle de `claude-ci-fix`** : si le dernier commit de la branche vient déjà de `github-actions[bot]`, il ne retente pas et demande une intervention humaine. Une tentative automatique par commit humain.
+
+**`.claude/` est restauré depuis la branche de base** par `claude-code-action` (le contenu d'une PR ne doit pas pouvoir redéfinir les agents qui la relisent). Conséquence : une PR qui modifie les agents est toujours relue avec la version de `dev`, jamais la sienne.
+
 ### Commands reference
 
 **Niveaux T0–T3** (pytest, Vitest, Playwright, scripts npm) : **`.cursor/commands/test-tiers.md`**. Obligations agents et protocole Vitest : **`.cursor/rules/workflow.mdc`**.

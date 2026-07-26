@@ -9,11 +9,17 @@ on:
     # Une PR qui ne touche QUE de la doc ou des données GDD synchronisées depuis
     # Notion n'a rien à faire tourner. `paths-ignore` déclenche dès qu'un seul
     # fichier sort de cette liste : une PR mixte code+GDD lance bien la CI.
+    #
+    # `*.md` et NON `**/*.md` : dans les filtres GitHub, `**` traverse les `/`,
+    # donc `**/*.md` matcherait `.cursor/agents/*.md` et `.claude/commands/*.md`.
+    # Une PR ne touchant que des prompts d'agents — le cas nominal ici — ne
+    # déclencherait alors aucun run, donc jamais le `harness:check` du job lint,
+    # neutralisant le garde-fou anti-dérive précisément quand il sert.
     paths-ignore:
       - "data/GDD_categories/**"
       - "data/Vision.json"
       - "docs/**"
-      - "**/*.md"
+      - "*.md"
   push:
     branches: [main]
   # Rattrape le trou laissé par pr-merge-main-prefer-head-data.yml : un push fait

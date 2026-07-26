@@ -81,8 +81,19 @@ function convertAgent(text, basename) {
   const { fm, body } = splitFrontmatter(text);
   const name = readKey(fm, 'name') || basename;
   const description = readKey(fm, 'description') || '';
-  const model = MODEL_MAP[readKey(fm, 'model')] || 'sonnet';
   const readonly = readKey(fm, 'readonly') === 'true';
+
+  // Rabattre silencieusement un `model:` inconnu sur sonnet ferait passer une
+  // faute de frappe (ou un futur tier Cursor) pour une conversion réussie, avec
+  // un `--check` vert. Mieux vaut refuser et forcer la mise à jour du mapping.
+  const rawModel = readKey(fm, 'model');
+  if (rawModel !== null && !(rawModel in MODEL_MAP)) {
+    throw new Error(
+      `${basename} : model "${rawModel}" inconnu. Valeurs acceptées : ` +
+        `${Object.keys(MODEL_MAP).join(', ')}. Étendre MODEL_MAP si Cursor a ajouté un tier.`
+    );
+  }
+  const model = rawModel === null ? 'sonnet' : MODEL_MAP[rawModel];
 
   const out = [
     '---',
@@ -119,8 +130,31 @@ function convertCommand(text, basename) {
 function sync(srcDir, dstDir, convert, skip) {
   const src = path.join(ROOT, srcDir);
   const dst = path.join(ROOT, dstDir);
-  if (!fs.existsSync(src)) return { written: [], stale: [] };
-  fs.mkdirSync(dst, { recursive: true });
+
+  // Source disparue : ne pas sortir en silence — les fichiers déjà générés sous
+  // `dst` sont alors tous orphelins, et un `--check` qui répondrait « synchronisé »
+  // laisserait passer la suppression accidentelle d'un dossier `.cursor/`.
+  if (!fs.existsSync(src)) {
+    if (!fs.existsSync(dst)) return { written: [], stale: [] };
+    const orphans = fs
+      .readdirSync(dst)
+      .filter((f) => f.endsWith('.md'))
+      .filter((f) => fs.readFileSync(path.join(dst, f), 'utf8').includes(BANNER));
+    if (!orphans.length) return { written: [], stale: [] };
+    if (CHECK) return { written: [], stale: orphans.map((f) => `${dstDir}/${f} (source ${srcDir} absente)`) };
+    orphans.forEach((f) => fs.unlinkSync(path.join(dst, f)));
+    return { written: orphans.map((f) => `${dstDir}/${f} (supprimé)`), stale: [] };
+  }
+
+  // `--check` doit être inerte : ne rien créer sur le disque.
+  if (!CHECK) fs.mkdirSync(dst, { recursive: true });
+  if (!fs.existsSync(dst)) {
+    const expectedNames = fs
+      .readdirSync(src)
+      .filter((f) => f.endsWith('.md'))
+      .filter((f) => !(skip && skip(path.basename(f, '.md'))));
+    return { written: [], stale: expectedNames.map((f) => `${dstDir}/${f} (manquant)`) };
+  }
 
   const written = [];
   const stale = [];
@@ -158,10 +192,18 @@ function sync(srcDir, dstDir, convert, skip) {
   return { written, stale };
 }
 
-const results = [
-  sync('.cursor/agents', '.claude/agents', convertAgent, null),
-  sync('.cursor/commands', '.claude/commands', convertCommand, (b) => skillNames.has(b)),
-];
+let results;
+try {
+  results = [
+    sync('.cursor/agents', '.claude/agents', convertAgent, null),
+    sync('.cursor/commands', '.claude/commands', convertCommand, (b) => skillNames.has(b)),
+  ];
+} catch (err) {
+  // Erreur de conversion attendue (frontmatter invalide) : message lisible en CI
+  // plutôt qu'une stack trace Node.
+  console.error(`Conversion impossible — ${err.message}`);
+  process.exit(1);
+}
 
 const written = results.flatMap((r) => r.written);
 const stale = results.flatMap((r) => r.stale);
