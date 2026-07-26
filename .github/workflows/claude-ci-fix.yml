@@ -68,10 +68,18 @@ jobs:
           # main. Le compter comme « tentative du bot » neutraliserait la
           # réparation en permanence. On regarde donc le dernier commit *réel*.
           #
+          # `--first-parent` l'est tout autant : sans lui, `git log` traverse les
+          # DEUX parents du commit de merge et rend le commit non-merge le plus
+          # récent par date, toutes branches confondues. Dès que `main` porte un
+          # commit humain plus récent que le correctif de Claude, la garde lit
+          # l'auteur de CE commit — un humain — et relance la réparation alors
+          # que la tentative a déjà été consommée. `--first-parent` restreint la
+          # lecture à l'historique propre de la branche de PR.
+          #
           # Suffixe `[bot]` plutôt qu'un nom exact : claude-code-action commite
           # en `claude[bot]`, et dépendre de ce libellé exact rendrait la garde
           # silencieusement inopérante s'il change — c'est-à-dire une boucle.
-          LAST_AUTHOR=$(git log -1 --no-merges --pretty=%an)
+          LAST_AUTHOR=$(git log -1 --no-merges --first-parent --pretty=%an)
           PR=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
 
           if [ -z "$PR" ]; then
