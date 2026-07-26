@@ -5,6 +5,8 @@
   "scripts": {
     "setup": "powershell -ExecutionPolicy Bypass -File scripts/setup-venv.ps1",
     "verify:venv": "powershell -ExecutionPolicy Bypass -File scripts/verify-venv.ps1",
+    "harness:sync": "node scripts/sync-cursor-harness.cjs",
+    "harness:check": "node scripts/sync-cursor-harness.cjs --check",
     "dev": "node scripts/dev.js",
     "dev:timing": "node scripts/dev.js --timing",
     "dev:fast": "node scripts/dev.js --fast",

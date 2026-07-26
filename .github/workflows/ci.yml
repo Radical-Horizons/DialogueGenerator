@@ -6,10 +6,58 @@ name: CI
 on:
   pull_request:
     branches: [main, dev]
+    # Une PR qui ne touche QUE de la doc ou des données GDD synchronisées depuis
+    # Notion n'a rien à faire tourner. `paths-ignore` déclenche dès qu'un seul
+    # fichier sort de cette liste : une PR mixte code+GDD lance bien la CI.
+    paths-ignore:
+      - "data/GDD_categories/**"
+      - "data/Vision.json"
+      - "docs/**"
+      - "**/*.md"
   push:
     branches: [main]
+  # Rattrape le trou laissé par pr-merge-main-prefer-head-data.yml : un push fait
+  # avec GITHUB_TOKEN ne crée pas de nouveau run, donc le commit de merge réel
+  # ne serait jamais testé. Ce workflow le relance explicitement (tier T2).
+  workflow_dispatch:
+
+concurrency:
+  # Sur PR, seul le dernier push compte. Sur main, on ne coupe rien : la suite T3
+  # est la porte de release (`.cursor/rules/ci_before_push.mdc`).
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  lint:
+    name: Frontend lint (ESLint)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      # `.claude/agents` et `.claude/commands` sont générés depuis `.cursor/`.
+      # Sans ce garde-fou, une édition côté Cursor laisse le harnais Claude en
+      # arrière sans que rien ne le signale.
+      - name: Vérifier la synchro du harnais (.cursor → .claude)
+        run: npm run harness:check
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend
+
+      # Baseline documentée : zéro erreur (AGENTS.md). Jusqu'ici la règle
+      # n'existait que dans les prompts d'agents, sans vérification en CI.
+      - name: ESLint
+        run: npm run lint
+        working-directory: frontend
+
   backend:
     name: Backend (pytest)
     runs-on: ubuntu-latest
@@ -28,8 +76,8 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Run tests (PR — hors slow, tier T2)
-        if: github.event_name == 'pull_request'
+      - name: Run tests (PR / dispatch — hors slow, tier T2)
+        if: github.event_name != 'push'
         env:
           ENVIRONMENT: development
           JWT_SECRET_KEY: ci-dummy-secret
@@ -64,8 +112,8 @@ jobs:
         run: npm ci
         working-directory: frontend
 
-      - name: Run Vitest (PR — suite rapide, tier T2)
-        if: github.event_name == 'pull_request'
+      - name: Run Vitest (PR / dispatch — suite rapide, tier T2)
+        if: github.event_name != 'push'
         run: npx vitest run --max-workers=2
         working-directory: frontend
 

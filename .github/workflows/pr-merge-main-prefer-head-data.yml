@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v6
@@ -27,11 +28,13 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Merge main into PR branch (résoudre data/ pour la PR)
+        id: merge
         env:
           BASE_REF: main
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           set -euo pipefail
+          BEFORE=$(git rev-parse HEAD)
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
@@ -76,3 +79,30 @@ jobs:
           fi
 
           git push origin "HEAD:${HEAD_REF}"
+
+          if [ "$(git rev-parse HEAD)" != "$BEFORE" ]; then
+            echo "merged=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "merged=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Un push effectué avec GITHUB_TOKEN ne déclenche aucun workflow : sans ce
+      # relais, la CI resterait verte sur le HEAD d'AVANT le merge et le commit
+      # réellement mergé ne serait jamais testé. `workflow_dispatch` fait partie
+      # des rares événements exemptés de cette restriction.
+      #
+      # Limite connue : le run déclenché ainsi apparaît dans l'onglet Actions,
+      # PAS dans la liste de checks de la PR. Pour un check attaché à la PR il
+      # faudrait pousser avec un PAT au lieu de GITHUB_TOKEN.
+      #
+      # Non bloquant : le dispatch échoue tant que la version de `ci.yml` portant
+      # `workflow_dispatch` n'est pas sur `main` (prérequis GitHub).
+      - name: Relancer la CI sur le commit de merge
+        if: steps.merge.outputs.merged == 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          gh workflow run ci.yml --ref "$HEAD_REF" \
+            || echo "::warning::Dispatch CI impossible — vérifier que ci.yml (avec workflow_dispatch) est sur main."

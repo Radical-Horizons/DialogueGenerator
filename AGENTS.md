@@ -65,6 +65,8 @@ For **sync GDD**, **context**, **documents**, **graph**, or any backend action: 
 
 Specialized reviewers — invoke with `/name` or naturally. See `.cursor/rules/subagents.mdc` for the full reference.
 
+**Source unique, deux harnais** : `.cursor/agents/` et `.cursor/commands/` sont la source de vérité ; `.claude/agents/` et `.claude/commands/` en sont **générés** par `npm run harness:sync` (traduction du frontmatter : `model: fast` → `sonnet`, `readonly: true` → liste blanche d'outils sans écriture). Ne jamais éditer un fichier sous `.claude/` portant la bannière « Généré par » — l'édition sera écrasée. La CI vérifie la synchro via `npm run harness:check` (job *Frontend lint*).
+
 | Subagent | Model | Purpose |
 |----------|-------|---------|
 | `api-operator` | fast | Execute REST API calls (sync, context, health) — see api-runbook skill |
@@ -83,6 +85,8 @@ Specialized reviewers — invoke with `/name` or naturally. See `.cursor/rules/s
 **Preuve suite E2E complète (agents / CI locale)** : `npm run test:e2e:verify` (`CI=true` + `reuseExistingServer: false`) évite les `ERR_CONNECTION_REFUSED` si un Vite externe sur `:3000` a été réutilisé puis s’est arrêté pendant la suite. **PWA (Story 17.5)** : le smoke manifest + SW utilise `vite build` + `preview` — commande dédiée **`npm run test:e2e:pwa`** (non incluse dans `test:e2e:verify`).
 
 **Full-repo review (no separate orchestrator agent)** : run **Composer** with seven specialist reviewers in parallel, or the parent sends **seven `Task` calls in one turn** (`api-contracts-reviewer`, `graph-editor-reviewer`, `llm-pipeline-reviewer`, `context-gdd-reviewer`, `security-reviewer`, `backend-services-reviewer`, `test-coverage-reviewer`). Then synthesize. A single `Task` that “does all seven” in one child run is **not** equivalent to seven isolates.
+
+**Review du diff seul (`/pr-review`)** : version ciblée de `/full-review` — ne réveille que les reviewers dont les chemins sont touchés, table de routage dans `.cursor/commands/pr-review.md`. C'est le même prompt que la revue automatique de PR (`.github/workflows/claude-review.yml`), pour que local et CI donnent le même verdict.
 
 **Cursor session files on disk** : only relevant when you are explicitly mining *past chats* for patterns. Use whatever works (`Task` + subagent, `scripts/peek_cursor_transcript.py`, or targeted grep). Goal is to improve **this agent’s behavior in the repo**, not to maintain a history *of* subagents.
 
