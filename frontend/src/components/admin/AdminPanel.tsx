@@ -3,24 +3,10 @@ import { useSearchParams } from 'react-router-dom'
 
 import { theme } from '../../theme'
 import { Tabs, type Tab } from '../shared/Tabs'
+import { DEFAULT_ADMIN_TAB, resolveAdminTabId } from './adminTabs'
 import { AuditLogsPanel } from './AuditLogsPanel'
 import { LlmModelsPanel } from './LlmModelsPanel'
 import { UserManagementPanel } from './UserManagementPanel'
-
-export const ADMIN_TAB_IDS = ['users', 'llm-models', 'audit-logs'] as const
-export type AdminTabId = (typeof ADMIN_TAB_IDS)[number]
-
-const DEFAULT_TAB: AdminTabId = 'users'
-
-/**
- * Normalise le paramètre d'URL `tab` vers un onglet admin valide.
- */
-export function resolveAdminTabId(raw: string | null): AdminTabId {
-  if (raw && (ADMIN_TAB_IDS as readonly string[]).includes(raw)) {
-    return raw as AdminTabId
-  }
-  return DEFAULT_TAB
-}
 
 /**
  * Panneau d'administration unifié (utilisateurs, modèles LLM, journaux d'audit).
@@ -51,7 +37,7 @@ export function AdminPanel() {
   )
 
   const handleTabChange = (tabId: string) => {
-    setSearchParams(tabId === DEFAULT_TAB ? {} : { tab: tabId }, { replace: true })
+    setSearchParams(tabId === DEFAULT_ADMIN_TAB ? {} : { tab: tabId }, { replace: true })
   }
 
   return (

@@ -3,7 +3,8 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 
-import { AdminPanel, resolveAdminTabId } from './AdminPanel'
+import { AdminPanel } from './AdminPanel'
+import { resolveAdminTabId } from './adminTabs'
 
 vi.mock('./UserManagementPanel', () => ({
   UserManagementPanel: () => <div>Panel utilisateurs</div>,

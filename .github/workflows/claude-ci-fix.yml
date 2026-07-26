@@ -1,0 +1,202 @@
+# Quand la CI échoue sur une branche de PR, Claude lit les logs, diagnostique, et
+# pousse un correctif s'il est sûr — sinon il commente le diagnostic. Objectif :
+# ne pas avoir à suivre chaque PR à la main pour des échecs mécaniques.
+#
+# `workflow_run` s'exécute avec le fichier de la branche par défaut, pas celui de
+# la PR : ce workflow doit être sur `main` pour se déclencher.
+#
+# Prérequis : secret de dépôt ANTHROPIC_API_KEY. Sans lui, job vert sans effet.
+name: Claude — réparation CI
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+concurrency:
+  group: claude-ci-fix-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    if: >-
+      github.event.workflow_run.conclusion == 'failure'
+      && github.event.workflow_run.head_branch != 'main'
+      && github.event.workflow_run.head_branch != 'dev'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - name: Vérifier la présence de la clé API
+        id: guard
+        env:
+          KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$KEY" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::ANTHROPIC_API_KEY absent — réparation CI désactivée."
+          fi
+
+      - uses: actions/checkout@v6
+        if: steps.guard.outputs.enabled == 'true'
+        with:
+          # workflow_run checkout la branche par défaut : il faut viser la PR.
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+
+      # Garde anti-boucle. Si le dernier commit vient déjà du bot, c'est que
+      # Claude a déjà tenté un correctif sur cet échec : on s'arrête. Une seule
+      # tentative automatique par commit humain, pas de ping-pong fix→échec→fix.
+      # Vérifie aussi qu'une PR ouverte existe — inutile de réparer une branche
+      # poussée sans PR.
+      - name: Décider s'il faut intervenir
+        id: decide
+        if: steps.guard.outputs.enabled == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -euo pipefail
+          LAST_AUTHOR=$(git log -1 --pretty=%an)
+          PR=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+
+          if [ -z "$PR" ]; then
+            echo "go=false" >> "$GITHUB_OUTPUT"
+            echo "Aucune PR ouverte pour $BRANCH — abandon."
+          elif [ "$LAST_AUTHOR" = "github-actions[bot]" ]; then
+            echo "go=false" >> "$GITHUB_OUTPUT"
+            echo "Dernier commit déjà du bot — tentative automatique déjà consommée."
+            gh pr comment "$PR" --body \
+              "⚠️ La CI échoue encore après un correctif automatique. Intervention humaine nécessaire — je ne retente pas pour éviter une boucle."
+          else
+            echo "go=true" >> "$GITHUB_OUTPUT"
+            echo "pr=$PR" >> "$GITHUB_OUTPUT"
+            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Node.js
+        if: steps.decide.outputs.go == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        if: steps.decide.outputs.go == 'true'
+        run: npm ci
+        working-directory: frontend
+
+      - name: Set up Python
+        if: steps.decide.outputs.go == 'true'
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+
+      - name: Install backend dependencies
+        if: steps.decide.outputs.go == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - uses: anthropics/claude-code-action@v1
+        if: steps.decide.outputs.go == 'true'
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ steps.decide.outputs.pr }}
+            BRANCHE: ${{ github.event.workflow_run.head_branch }}
+            RUN CI EN ÉCHEC: ${{ github.event.workflow_run.id }}
+
+            La CI vient d'échouer sur cette branche, déjà checkoutée dans le
+            répertoire courant. Node et Python sont installés, dépendances
+            comprises. Réponds en français.
+
+            ## 1. Diagnostiquer
+
+            `gh run view ${{ github.event.workflow_run.id }} --log-failed` pour
+            les logs de l'échec. Identifie la cause réelle. Ne devine pas depuis
+            le code seul : la sortie de la commande est la preuve.
+
+            ## 2. Reproduire en local
+
+            Rejoue la commande qui a échoué, en ciblé. Grille des tiers :
+            `.claude/commands/test-tiers.md`. Exemples :
+            - pytest : `python -m pytest tests/chemin/test_x.py -v`
+            - Vitest : `npx vitest run src/chemin/X.test.ts --reporter=dot`
+              (depuis `frontend/`)
+            - ESLint : `npm --prefix frontend run lint`
+
+            Si tu ne reproduis pas l'échec en local, dis-le et arrête-toi là :
+            un correctif à l'aveugle sur un échec non reproduit est pire que pas
+            de correctif.
+
+            ## 3. Décider — corriger ou rendre la main
+
+            **Corrige et pousse** si la cause est mécanique et le correctif
+            évident : import manquant, assertion à mettre à jour après un
+            changement volontaire, erreur de typage, règle ESLint, chemin cassé,
+            fichier renommé sans mise à jour de ses références.
+
+            **Ne corrige pas, commente seulement** si :
+            - le correctif exige un arbitrage produit ou une décision d'archi ;
+            - le test échoue parce qu'une fonctionnalité a été retirée — vérifie
+              d'abord si le retrait est volontaire (`.claude/rules/tests.md` : ne pas déclarer
+              un test obsolète sans ça) ;
+            - il faut toucher plus de ~3 fichiers, ou du code hors du périmètre
+              de la PR ;
+            - tu hésites. Rendre la main est le comportement par défaut.
+
+            ## 4. Si tu corriges
+
+            - Reste dans le périmètre : répare l'échec, ne refactore pas.
+            - Reprouve en relançant la même commande ciblée. Pas de push sans
+              sortie verte.
+            - Respecte les conventions du dépôt (`CLAUDE.md` + la règle `.claude/rules/`
+              du domaine touché) : logique métier
+              dans `services/`, pas de nouveau `eslint-disable`, test de
+              régression pour tout fix de bug non trivial.
+            - Commit en français, style du dépôt (`fix(scope): …`), expliquant
+              la cause et non l'inventaire des fichiers.
+            - Pousse sur `${{ github.event.workflow_run.head_branch }}`.
+
+            ## 5. Dans tous les cas
+
+            Commente la PR via `gh pr comment` : cause identifiée, preuve
+            (commande + sortie), et ce que tu as fait ou pourquoi tu rends la
+            main. Sois bref — pas de récit d'exploration.
+
+          claude_args: |
+            --model claude-opus-5
+            --max-turns 60
+            --allowedTools "Read,Grep,Glob,Edit,Write,Bash(git:*),Bash(gh run view:*),Bash(gh pr comment:*),Bash(gh pr view:*),Bash(npm:*),Bash(npx vitest run:*),Bash(python -m pytest:*),Bash(node scripts/:*)"
+
+      # Le push de Claude est fait avec GITHUB_TOKEN et ne déclenche donc aucun
+      # workflow : sans ce relais, son correctif ne serait jamais testé.
+      - name: Relancer la CI sur le correctif
+        if: steps.decide.outputs.go == 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          BEFORE: ${{ steps.decide.outputs.sha }}
+        run: |
+          set -euo pipefail
+          git fetch origin "$BRANCH" --quiet
+          AFTER=$(git rev-parse "origin/$BRANCH")
+          if [ "$AFTER" = "$BEFORE" ]; then
+            echo "Claude n'a rien poussé — pas de relance."
+            exit 0
+          fi
+          echo "Correctif poussé ($BEFORE -> $AFTER) — relance de la CI."
+          gh workflow run ci.yml --ref "$BRANCH" \
+            || echo "::warning::Dispatch CI impossible — vérifier que ci.yml (avec workflow_dispatch) est sur main."
