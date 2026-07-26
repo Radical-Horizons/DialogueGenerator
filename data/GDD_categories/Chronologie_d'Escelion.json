@@ -3301,5 +3301,36 @@
     },
     "sections": {},
     "notion_page_id": "22c6e4d2-1b45-80b3-b406-e1d3822be339"
+  },
+  {
+    "Nom": "Désignation de Sorav-Mekh comme Témoin de la Spirale",
+    "values": {
+      "Communautés": "1b96e4d2-1b45-80fe-ba1e-f65c0e1e3a3c, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Date de début": "3372",
+      "Description": "Akthar-Neth désigne Sorav-Mekh, un Van'Doei de six Nuées issu des galeries de forge, comme Témoin fixe de la Spirale d'Observation dans la Krypte Ésothrope. Le choix se fonde sur une régularité de trait inhabituelle pour son âge dans la gravure des marques d'identification sur les conduits de Gedroth. Sorav-Mekh n'entre pas dans le Paradigme par foi mais par besoin : on a besoin d'un guetteur capable de rester posté, de lire les changements d'état et d'alerter sans intervenir directement. La désignation coïncide avec la naissance du sujet 56.",
+      "Espèces": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Importance": "Notable",
+      "Lieux": "ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
+      "Personnages": "eb2168a8-5bf3-4348-85c4-64bb0a1df94d, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Type d'événement": "Evénement personnel",
+      "Ère": "Âge anentropique"
+    },
+    "sections": {},
+    "notion_page_id": "0f40c098-3172-477f-9217-7e5e7d598fc6"
+  },
+  {
+    "Nom": "Crise de conversion du Seuil-6",
+    "values": {
+      "Communautés": "142b6271-3a66-4c9c-a091-bf6e2fb8811c",
+      "Date de début": "2894",
+      "Date de fin": "2894",
+      "Description": "La Lisière modifie sans préavis les taux de conversion du Seuil-6 : en une seule Veille, la solde, les pensions et les stocks des greniers publics de Taluo perdent une part de leur valeur. Les caisses coopératives de Weiyun répliquent par la « Fermeture des guichets », deux Souffles de grève de la conversion pendant lesquels circulent leurs propres lettres de crédit. La République des Ateliers sort de la crise en créant l'Intendance de la conversion, délégation permanente auprès des institutions de la Vieille Ville chargée de négocier les taux en bloc — aveu institutionnel que la monnaie nationale se décide ailleurs.",
+      "Importance": "Notable",
+      "Lieux": "31ee8035-8e36-4941-a229-f6742e8954e1",
+      "Type d'événement": "Autre",
+      "Ère": "Âge des Singularités"
+    },
+    "sections": {},
+    "notion_page_id": "1823db55-9902-44b8-a0b2-4b060c8ff6d9"
   }
 ]

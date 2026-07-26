@@ -1,4 +1,41 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git ls-files:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(npm test)",
+      "Bash(npm run test:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run verify:*)",
+      "Bash(npm run start:api)",
+      "Bash(npm run api:invoke:*)",
+      "Bash(npm run version:sync)",
+      "Bash(npm run release:commits-since-prod)",
+      "Bash(npm --prefix frontend run lint)",
+      "Bash(npm --prefix frontend test)",
+      "Bash(npx vitest run:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(node scripts/getPythonPath.js:*)",
+      "Bash(node scripts/pytest-tier.cjs:*)",
+      "Bash(node scripts/dev-status.js)",
+      "Bash(node scripts/dev-check.js)",
+      "Bash(bmad-loop validate:*)",
+      "Bash(bmad-loop mux:*)",
+      "Bash(bmad-loop diagnose:*)",
+      "Bash(bmad-loop --version)"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Read(./.env)"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {

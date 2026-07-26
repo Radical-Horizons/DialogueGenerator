@@ -263,10 +263,11 @@
     "Nom": "Tarrivka",
     "values": {
       "Catégorie": "Nom personnel",
-      "Porteurs attestés": "8fefb411-8033-4e06-afdd-9d186937ee2a"
+      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Notes": "Registre lunaire."
     },
     "sections": {},
-    "notion_page_id": "b4bb6cf4-17d0-4915-975f-70b1cec9e752"
+    "notion_page_id": "00b37310-763a-4230-acc7-49b46dd69bcb"
   },
   {
     "Nom": "Tarrivka",
@@ -757,14 +758,13 @@
   {
     "Nom": "Neth",
     "values": {
-      "Catégorie": "Nom personnel",
-      "Notes": "Cas particulier : homonyme de la marque de foyer Neth. Pris en l’honneur du foyer de Akthar-Neth Amatru.",
-      "Porteurs attestés": "1c36e4d2-1b45-8095-8449-d7d1749e69ad",
-      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
-      "Signification": "Utilisé comme prénom personnel, homophone de la marque de foyer Neth."
+      "Catégorie": "Marque de foyer",
+      "Notes": "Aussi utilisé comme prénom personnel (Neth'Varu, Neth-Vorthul, Neth-Arun), ce qui crée des ambiguïtés. Les Van'Doei partageant cette marque ne sont pas nécessairement frères de foyer.",
+      "Porteurs attestés": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Signification": "Nom de forge — l'un des plus répandus du Quartier des Forges. Plusieurs forges distinctes ont porté ce nom au fil des siècles."
     },
     "sections": {},
-    "notion_page_id": "6410b2b2-7c1d-44e8-bbd5-7159cd649ff6"
+    "notion_page_id": "b95836c4-43ee-42b1-acab-1f6029befeb6"
   },
   {
     "Nom": "Akthar",

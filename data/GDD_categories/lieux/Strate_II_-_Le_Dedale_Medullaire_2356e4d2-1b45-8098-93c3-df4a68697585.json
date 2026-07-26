@@ -5,7 +5,7 @@
     "Actes prévus": "2e0acee9-5107-4256-9e41-3c36344d59b6",
     "Chapitres": "1ee6e4d2-1b45-8042-896e-c3bacf823a9b, bd974188-a0b8-4359-a291-7a419f045c49, dfd1763c-7dd2-454f-87d4-aef87f9e25a3, 32f6a673-5ddb-4493-a6d0-9654b4e57e96, b6b646b9-3dc4-4db6-a521-dd32763be781",
     "Communautés présentes": "1a56e4d2-1b45-8044-a472-d674f194c57a, 2906e4d2-1b45-80ba-a2e5-d4bd8ad155ac",
-    "Concepts liés": "79efe315-8e67-4cf4-803a-5df3eb11a233, 80242553-b987-4b6e-8f23-887dd185089f, 0e003e2b-e803-462b-bc24-ea61543c1782, 07b190d5-afc8-4bc6-ad8a-363ee355c73a, e791a6eb-e96d-4a92-bc5c-891ec330bb56, 706926d6-7dc4-43d6-a66b-6b8b4ac4e020",
+    "Concepts liés": "79efe315-8e67-4cf4-803a-5df3eb11a233, 80242553-b987-4b6e-8f23-887dd185089f, 07b190d5-afc8-4bc6-ad8a-363ee355c73a, e791a6eb-e96d-4a92-bc5c-891ec330bb56, 706926d6-7dc4-43d6-a66b-6b8b4ac4e020",
     "Contenu par": "1886e4d2-1b45-8150-a894-cfe31d31abd4, 1b36e4d2-1b45-802c-910a-fb74729b22f8",
     "Date de création de la fiche": "2025-07-19T20:57:00.000Z",
     "Date vérification": "2026-05-02",
@@ -15,6 +15,7 @@
     "Niveau de danger": "Dangereux",
     "Niveau d’IA": "co-écrit",
     "Objets présents": "93bb12e4-a17e-4d62-947c-fd181961fd62",
+    "Patterns": "7e84e27b-2e29-4ddb-a0cf-f6b2d23480f9, 9cc2ccb0-9f43-4363-acc2-cbd570a27df5",
     "Personnages liés": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd, 1c36e4d2-1b45-80f2-8124-e9ddf8d9359e, 1c36e4d2-1b45-8095-8449-d7d1749e69ad; 1c36e4d2-1b45-80f2-8124-e9ddf8d9359e, 1996e4d2-1b45-80c4-9c73-ddac6322e9bd; 1c36e4d2-1b45-80f2-8124-e9ddf8d9359e, 1c36e4d2-1b45-8095-8449-d7d1749e69ad; 1d95df62-504c-4349-b8ec-63893118af51, 3236e4d2-1b45-808b-9b5c-e761e396c416; 1996e4d2-1b45-80c4-9c73-ddac6322e9bd, 1b76e4d2-1b45-8076-8f2c-dc910ac92b7a, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1c36e4d2-1b45-80f2-8124-e9ddf8d9359e, 1c36e4d2-1b45-8095-8449-d7d1749e69ad, 1bc6e4d2-1b45-8013-831b-e5a42c40dd2f, 1a16e4d2-1b45-8015-b262-cb7e5d0f01a8, 3236e4d2-1b45-808b-9b5c-e761e396c416",
     "Personnages travaillant ici": "1ae6e4d2-1b45-80ef-84e8-fb114d0136ed, 1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
     "Personnages vivant ici": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
@@ -27,7 +28,7 @@
     "Seuil économique": "9",
     "Taille": "Secteur",
     "Type": "Lieu principal",
-    "Zones limitrophes": "2356e4d2-1b45-8015-a428-cd71c19309dd, 2356e4d2-1b45-80b8-854c-fd70ad9bfc4e",
+    "Zones limitrophes": "2356e4d2-1b45-8015-a428-cd71c19309dd, 2356e4d2-1b45-80b8-854c-fd70ad9bfc4e, ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
     "État": "À relire"
   },
   "sections": {
