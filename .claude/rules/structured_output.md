@@ -16,4 +16,4 @@ alwaysApply: false
   - Contexte dynamique (qui est le speaker, qui est le joueur)
   - Qualité du contenu créatif
 - **Prompt** : Ne JAMAIS inclure d'instructions redondantes avec le schéma (ex: "ne génère pas d'IDs", "utilise nextNode") car ces champs n'existent pas dans le schéma. Inclure uniquement la logique métier et les formats spécifiques.
-- **Référence** : Voir `docs/STRUCTURED_OUTPUT_EXPLANATION.md` pour détails et exemples.
+- **Référence** : Voir `docs/prompts/STRUCTURED_OUTPUT_EXPLANATION.md` pour détails et exemples.

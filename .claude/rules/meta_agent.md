@@ -16,7 +16,7 @@ Ce protocole impose une rigueur de diagnostic et d'auto-amélioration basée sur
 
 AVANT de proposer un correctif pour un bug ou un échec de test :
 - **Logs Bruts** : Lire les logs JSON récents dans `data/logs/logs_YYYY-MM-DD.json`. Ne pas se fier uniquement au résumé de la console.
-- **État du Terminal** : Lire les fichiers dans `terminals/*.txt` pour voir l'état exact du shell, les variables d'environnement et les sorties tronquées.
+- **État du Terminal** : Réexécuter la commande incriminée dans le terminal intégré pour voir la sortie réelle (état du shell, variables d'environnement, sortie complète). Ne pas se contenter d'un résumé de sortie tronquée.
 - **Traces d'Exécution** : Si le bug est intermittent ou complexe, ajouter des logs temporaires (`logger.debug`) pour tracer l'état interne avant de tenter une correction définitive.
 
 ## 2. Analyse de Contre-factualité (Counterfactual)

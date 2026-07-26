@@ -34,7 +34,7 @@ Toujours enchaîner `npm run verify:app-version` après un bump.
 
 1. Bumper semver selon le tableau ci-dessus (pas de `package.json` stale en prod).
 2. Committer les trois fichiers version si bumpé.
-3. Mettre à jour le canvas `canvases/app-versions.canvas.tsx` (entrée en tête de `VERSIONS`, `pr` + `epic` + highlights).
+3. Mettre à jour le canvas `app-versions.canvas.tsx` — **hors dépôt**, sous le dossier projet Cursor (`%USERPROFILE%\.cursor\projects\f-Projets-Notion-Scrapper-DialogueGenerator\canvases\`) : entrée en tête de `VERSIONS`, `pr` + `epic` + highlights.
 4. Après deploy OK : tag annoté `vX.Y.Z` sur le commit déployé, `git push origin vX.Y.Z`.
 5. Mettre à jour `epic-pr-map.md` (ligne tag + commit) si merge epic ou patch prod.
 
@@ -48,7 +48,7 @@ Checklist complète, canvas, CI T3 : skill **`/prod-release`** (`.claude/skills/
 
 ## Rétrospective epic (BMAD)
 
-À la clôture d'une epic (`_bmad/bmm/workflows/4-implementation/retrospective/instructions.md`) :
+À la clôture d'une epic (skill `/bmad-retrospective`) :
 
 - Section **Version livrée** dans le markdown retro : semver, tag `vX.Y.Z`, PR merge, lien `epic-pr-map.md`.
 - Vérifier que le tag existe sur le commit merge ; sinon le créer et pousser (étape alignement version du workflow).

@@ -38,7 +38,6 @@ Cursor attachait ces règles automatiquement par glob. Claude Code n'a pas ce m�
 | `tests/**/*.py` | `.claude/rules/tests.md` + `.claude/rules/tests_patterns.md` |
 | `tests/**/*integration*.py`, `test_*_real*.py` | `.claude/rules/tests_integration.md` |
 | Tests frontend (Vitest, RTL, Playwright), tout bug UI | `.claude/rules/frontend_testing.md` |
-| `_bmad/tea/**`, `_bmad-output/test-artifacts/**` | `.claude/rules/tea_automate_brownfield.md` |
 | Appeler l'API au lieu de réimplémenter | `.claude/rules/api_usage.md` + skill `api-runbook` |
 | Déployer, nginx, systemd, `.env` prod | `.claude/rules/deployment.md` |
 | Bump de version, tag, canvas versions | `.claude/rules/app_versioning.md` + skill `prod-release` |
@@ -107,7 +106,9 @@ BMAD est installé pour Claude Code (`_bmad/_config/manifest.yaml` → `ides: [c
 
 Boucle de dev non supervisée : **bmad-loop** (`bmad-loop run`, `bmad-loop tui`). Config : `.bmad-loop/policy.toml`. Prérequis installés : `psmux` (multiplexeur Windows) et le CLI `claude`. Le worktree doit être **propre** avant `bmad-loop run`.
 
-⚠️ Ne jamais écrire à la main sous `_bmad/` : l'installeur BMAD en est propriétaire et régénère tout. Les surcharges durables vont dans `_bmad/custom/`.
+⚠️ Ne jamais écrire à la main sous `_bmad/` : l'installeur BMAD en est propriétaire et régénère tout. Les surcharges durables vont dans `_bmad/custom/` (un fichier `<nom-du-skill>.toml` par skill surchargé).
+
+**Brownfield** : le dépôt a déjà ~259 fichiers pytest, ~231 Vitest et 20 specs Playwright. La contrainte « ne pas regénérer de tests déjà couverts » est injectée via `_bmad/custom/bmad-testarch-automate.toml` (`persistent_facts`) — elle remplace l'ancienne règle `tea_automate_brownfield.md`, devenue caduque quand les workflows TEA sont passés en skills.
 
 ## Caveats non évidents
 

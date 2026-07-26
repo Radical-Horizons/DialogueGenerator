@@ -16,7 +16,7 @@ alwaysApply: false
 - **Tests**: Tests unitaires composants (React Testing Library), tests hooks, mocks pour API client.
 - **Build**: Vite pour dev/build, proxy API en dev (`vite.config.ts`), build production dans `dist/`.
 - **Commande dev**: `npm run dev` (depuis racine, lance tout) ou `cd frontend && npm run dev` (frontend seul).
-- **Rafraîchissement**: HMR configuré explicitement, cache désactivé en dev, headers anti-cache automatiques. Si changements non visibles : `npm run dev:clean` (nettoie cache Vite). Voir `docs/DEVELOPMENT.md` pour diagnostic.
+- **Rafraîchissement**: HMR configuré explicitement, cache désactivé en dev, headers anti-cache automatiques. Si changements non visibles : `npm run dev:clean` (nettoie cache Vite). Voir `docs/guides/DEVELOPMENT.md` pour diagnostic.
 - **Positions graphe**: Source de vérité unique = backend layout (`GET/PUT layout`, API documents). Ne pas persister ni lire les positions depuis localStorage.
 - **Responsive (obligatoire)** : skill `.claude/skills/dialogue-frontend/SKILL.md` + règle `.claude/rules/responsive_frontend.md` (Epic 17, tokens, tests, preuve UI).
 - **Références**: Voir `README_API.md` pour contrats API.
