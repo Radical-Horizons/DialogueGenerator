@@ -1,11 +1,13 @@
 {
-  "last_started_at": "2026-07-25T15:26:32.797890+00:00",
-  "last_finished_at": "2026-07-25T15:26:35.845733+00:00",
+  "last_started_at": "2026-07-26T14:00:47.016099+00:00",
+  "last_finished_at": "2026-07-26T14:27:00.575966+00:00",
   "last_success": true,
-  "message": "Miroir appliqué avec reliquats : les bases sans artefact dans le staging n'ont pas été modifiées sur disque. Vérifiez les erreurs du dernier run dans le statut ou les logs.",
+  "message": "2994 entité(s) mise(s) à jour — 1 avertissement(s)",
   "updated_entities": 2994,
-  "partial_errors": [],
-  "last_archive_relative": ".archive/20260725T134954Z_127305b4",
-  "last_mirror_rebuild_used": true,
+  "partial_errors": [
+    "Valeurs_de_Flag.json: fetch — HTTP 404 — Notion API: object_not_found — Could not find database with ID: 09204171-5d4d-40e8-9237-d7bac6a5c1a0. Make sure the relevant pages and databases are shared with your integration \"Alteir\". — Client error '404 Not Found' for url 'https://api.notion.com/v1/databases/09204171-5d4d-40e8-9237-d7bac6a5c1a0/query'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+  ],
+  "last_archive_relative": null,
+  "last_mirror_rebuild_used": false,
   "mirror_promotion_pending": false
 }

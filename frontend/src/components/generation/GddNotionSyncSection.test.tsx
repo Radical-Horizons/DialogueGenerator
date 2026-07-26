@@ -405,6 +405,88 @@ describe('GddNotionSyncSection', () => {
     expect(useContextStore.getState().gddDataRevision).toBe(1)
   })
 
+  it('sync incrémentale : envoie les bases cochées du périmètre sauvegardé', async () => {
+    const user = userEvent.setup()
+    mockGetConfig.mockResolvedValue({
+      config: {
+        schema_version: 1,
+        sync_interval_minutes: 60,
+        auto_sync_enabled: false,
+        sources: [
+          { notion_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', kind: 'database', category_file: 'Alpha.json' },
+          { notion_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', kind: 'database', category_file: 'Beta.json' },
+          { notion_id: 'cccccccc-cccc-cccc-cccc-cccccccccccc', kind: 'page', category_file: 'Fiche.json' },
+        ],
+        included_categories: ['Alpha.json'],
+        mirror_rebuild_on_full_sync: false,
+        archive_retention_count: 10,
+        token_configured: true,
+      },
+    })
+    mockPostSync.mockResolvedValue({
+      success: true,
+      message: 'ok',
+      updated_entities: 1,
+      partial_errors: [],
+    })
+    render(<GddNotionSyncSection />)
+    expect((await screen.findAllByText(/1 base\(s\) cochée\(s\)/i)).length).toBeGreaterThan(0)
+    await user.click(screen.getByRole('button', { name: /Synchroniser \(incrémental\)/i }))
+    await waitFor(() => {
+      expect(mockPostSync).toHaveBeenCalledWith(
+        false,
+        expect.objectContaining({ includedCategories: ['Alpha.json'] }),
+      )
+    })
+  })
+
+  it('périmètre non chargé : boutons de sync désactivés (pas de run sur toutes les sources)', async () => {
+    const configGate: { resolve: (v: unknown) => void } = { resolve: () => {} }
+    mockGetConfig.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          configGate.resolve = resolve
+        }),
+    )
+    render(<GddNotionSyncSection />)
+    const incremental = await screen.findByRole('button', { name: /Synchroniser \(incrémental\)/i })
+    expect(incremental).toBeDisabled()
+    expect(screen.getByRole('button', { name: /Sync complète/i })).toBeDisabled()
+    expect(screen.getAllByText(/chargement du périmètre/i).length).toBeGreaterThan(0)
+    expect(mockPostSync).not.toHaveBeenCalled()
+    configGate.resolve({
+      config: {
+        schema_version: 1,
+        sync_interval_minutes: 60,
+        auto_sync_enabled: false,
+        sources: [
+          { notion_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', kind: 'database', category_file: 'Alpha.json' },
+          { notion_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', kind: 'database', category_file: 'Beta.json' },
+        ],
+        included_categories: ['Beta.json'],
+        mirror_rebuild_on_full_sync: false,
+        archive_retention_count: 10,
+        token_configured: true,
+      },
+    })
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Synchroniser \(incrémental\)/i })).toBeEnabled()
+    })
+  })
+
+  it('affiche l’aide périmètre dans un tooltip (dépliable au clic)', async () => {
+    const user = userEvent.setup()
+    render(<GddNotionSyncSection />)
+    const help = await screen.findByRole('button', {
+      name: /Aide sur le périmètre des bases/i,
+    })
+    expect(help).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryAllByText(/pas de filtre \(toutes les bases/i)).toHaveLength(0)
+    await user.click(help)
+    expect(help).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getAllByText(/pas de filtre \(toutes les bases/i).length).toBeGreaterThan(0)
+  })
+
   it('affiche erreur lisible si la sync échoue', async () => {
     const user = userEvent.setup()
     mockPostSync.mockResolvedValue({

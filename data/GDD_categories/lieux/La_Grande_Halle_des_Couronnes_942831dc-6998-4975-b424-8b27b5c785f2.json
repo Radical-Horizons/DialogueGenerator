@@ -3,13 +3,13 @@
   "values": {
     "Contenu par": "166982c7-3cf0-4947-85c5-0a6df03ff80d",
     "Date de création de la fiche": "2026-05-31T14:03:00.000Z",
-    "Dernière modification": "2026-07-17T17:10:00.000Z",
-    "Monnaie locale": "Seuil-7 nominal au criage ; en pratique troc et parts de récolte.",
+    "Dernière modification": "2026-07-25T16:59:00.000Z",
+    "Monnaie locale": "Seuil-5 nominal au criage ; en pratique troc et parts de récolte.",
     "Niveau de danger": "Modéré",
     "Niveau d’IA": "co-écrit",
     "Résumé IA": "Place commerciale majeure sous une vaste charpente où le criage des Maîtres‑Crieurs ouvre et ferme le négoce chaque matin, réunissant les six districts pour approvisionner la ville ; cœur stratégique de la « grève du ventre » avec échanges de marchandises, troc et parts de récolte, accessible depuis le faubourg des Lots et les quais, et contrôlé par les Maîtres‑Crieurs et les courtiers fantômes.",
     "Rôle": "Lieu commercial",
-    "Seuil économique": "7",
+    "Seuil économique": "5",
     "Taille": "Site",
     "Type": "Lieu secondaire",
     "État": "Brouillon IA"
@@ -23,7 +23,7 @@
     "voies_d_acce_s___transitions": "Ouverte sur le faubourg des Lots et sur les quais de la Voie ; c'est d'ici que les chalands remontent vers la Bibliothèque Sympathique et le centre.",
     "me_moire_syste_me": "*À formaliser en Flags lors de l'écriture des actes : ouverture / fermeture du criage, accès au négoce, état de la « grève du ventre ».*",
     "remarques_de_conception": "Sous-lieu des <mention-page url=\"https://app.notion.com/p/166982c73cf0494785c50a6df03ff80d\"/>. Levier central de l'enjeu « grève du ventre » : c'est ici qu'on affame ou qu'on nourrit la cité.",
-    "monnaie_locale": "Seuil-7 nominal au criage ; en pratique troc et parts de récolte.",
+    "monnaie_locale": "Seuil-5 nominal au criage ; en pratique troc et parts de récolte.",
     "re_sume__ia": "Place commerciale majeure sous une vaste charpente où le criage des Maîtres‑Crieurs ouvre et ferme le négoce chaque matin, réunissant les six districts pour approvisionner la ville ; cœur stratégique de la « grève du ventre » avec échanges de marchandises, troc et parts de récolte, accessible depuis le faubourg des Lots et les quais, et contrôlé par les Maîtres‑Crieurs et les courtiers fantômes."
   },
   "section_titles": {

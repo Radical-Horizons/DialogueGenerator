@@ -21,6 +21,13 @@ globs:
 - **API historique** : `GET .../archives?limit=N` liste les snapshots valides ; `POST .../archives/{id}/restore` rétablit un snapshot (option `backup_current` pour archiver l’état actuel avant).
 - **Après restauration** : le manifeste Notion (`data/.gdd_snapshot/manifest.json`) est réinitialisé pour éviter un décalage avec le disque.
 
+## Filtre de bases (périmètre du run)
+
+- **Deux filtres distincts** : `included_categories` **persisté** dans `settings.json` (utilisé par défaut, `included_filter=persisted`) et le filtre **éphémère** de l’UI (`included_filter=ui` + `included_category` répété).
+- **`[]` signifie « aucun filtre »** côté service (`_collect_eligible_sources`) : toutes les bases **et** toutes les fiches `page` deviennent éligibles. Un filtre non vide restreint aux bases listées et **ignore** les sources `page`.
+- **Piège UI** : ne jamais envoyer `included_filter=ui` avec une liste vide quand l’état des cases n’est pas encore connu (config `GET /config` en vol). `GddNotionSyncSection` renvoie `undefined` tant que `config` est `null` (retombe sur le périmètre persisté) et désactive les boutons de sync — sinon un clic pendant le chargement lance un run sur **toutes** les sources (116 en juillet 2026 : 40 bases + 76 fiches).
+- **Diagnostic** : dans `data/logs/logs_YYYY-MM-DD.json`, un run filtré émet `… exclu du périmètre (included_categories)` / `… ignoré (périmètre restreint aux bases listées)` avec le `request_id` du run ; leur absence = filtre vide. `sources_total` du modal de progression = nombre de sources éligibles.
+
 ## Reprise sync complète, zéro, pause
 
 - **Checkpoint** : pendant une sync complète, état sous `data/gdd_notion_sync/full_sync_checkpoint.json` + `full_sync_checkpoint.manifest.json` (manifeste de run jusqu’à promotion) ; mis à jour après chaque source terminée.

@@ -435,7 +435,7 @@
   {
     "Nom": "inventory_seuil",
     "values": {
-      "Contexte narratif": "Grish T'vok porte une réserve de Seuil-8 (environ 30 dc) destinée à ses transactions dans les Couronnes intermédiaires. Le joueur peut en obtenir en échange d'un service ou via un test de Négociation (Sociabilité + Négociation, DD 7).",
+      "Contexte narratif": "Grish T'vok porte une réserve de Seuil-6 (environ 30 dc) destinée à ses transactions dans les Couronnes intermédiaires. Le joueur peut en obtenir en échange d'un service ou via un test de Négociation (Sociabilité + Négociation, DD 7).",
       "ID": "INV93",
       "Objet": "2dc6e4d2-1b45-80b7-9ff4-c39401c42ccf",
       "Personnage": "1b46e4d2-1b45-8081-992e-febbfed44a5d",

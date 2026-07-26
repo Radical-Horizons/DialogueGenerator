@@ -2,10 +2,14 @@
   {
     "Nom": "Révolutionnaire terroriste",
     "values": {
-      "Dernière modification": "2026-07-08T00:08:00.000Z",
+      "Dernière modification": "2026-07-25T22:50:00.000Z",
+      "Lieux": "36e6e4d2-1b45-807a-ac6c-ec253f792406, 1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
+      "Nb Lieux": "2",
+      "Nb Personnages": "3",
+      "Occurrences": "5",
+      "Personnages": "892f2fd2-fbe3-4878-a05d-8d608b01e6bf, 1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41, 1996e4d2-1b45-80fa-97db-fe99255e6c0c",
       "Résumé IA": "Le « Révolutionnaire terroriste » décrit un cliché de fiction où un individu animé d’un idéal libérateur progresse logiquement vers une violence de masse indiscriminée, un schéma absent de tout cas réel; il évalue l’originalité de ce pattern (6/10 en fantasy, 3/10 en SF, 2/10 en désirabilité) et propose plusieurs tropes associés, en soulignant que seuls les tropes institutionnels comme « Knight Templar » reflètent des mécanismes réels de désignation du terrorisme, tandis que les variantes individuelles doivent être rejetées ou réorientées vers des analyses ancrées dans la réalité.",
       "Statut": "A surveiller",
-      "Total": "3",
       "Type": "Cliché"
     },
     "sections": {
@@ -37,10 +41,12 @@
   {
     "Nom": "Monnaie-frontière",
     "values": {
-      "Dernière modification": "2026-06-13T00:10:00.000Z",
+      "Dernière modification": "2026-07-25T22:46:00.000Z",
+      "Lieux": "b475d40b-597c-40a8-8b11-3561d774f459, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 2f06e4d2-1b45-8048-8244-d40ef72873cd, 1b46e4d2-1b45-809b-b6ba-ea6dffbf49b5, 36e6e4d2-1b45-807a-ac6c-ec253f792406",
+      "Nb Lieux": "5",
+      "Occurrences": "5",
       "Résumé IA": "Monnaie-frontière est un fonds de trois entrées à surveiller, analysé comme un pattern où la valeur d’une devise dépend physiquement d’un territoire et se dégrade hors de celui‑ci. Le texte évalue son originalité en fantasy (8/10) et en SF (7/10), sa désirabilité (6/10) et le classe globalement neutre‑favorable (6/10). Il décrit le type proposé (Fond), le statut recommandé (À surveiller) et propose des tropes connexes (Fictional Currency, Global Currency Exception, Worthless Currency, Energy Economy). Plusieurs occurrences exemplaires sont détaillées, ainsi que des stratégies de mitigation, des interdits et des critères de validation pour de nouvelles occurrences.",
       "Statut": "A surveiller",
-      "Total": "3",
       "Type": "Fond"
     },
     "sections": {
@@ -80,10 +86,12 @@
   {
     "Nom": "Beauté instrumentale",
     "values": {
-      "Dernière modification": "2026-06-04T22:50:00.000Z",
+      "Dernière modification": "2026-07-25T22:41:00.000Z",
+      "Lieux": "36e6e4d2-1b45-807a-ac6c-ec253f792406",
+      "Nb Lieux": "1",
+      "Occurrences": "1",
       "Résumé IA": "Pattern 'Beauté instrumentale' : 0 occurrence validée à ce stade. Les candidats initiaux étaient tous invalides : Vaideccans (morphologie non-humanoïde), Valkazer (corps imposé mais beauté canonique non établie), Vol Reitar (autorité esthétique, pas beauté canonique), Navarre K'ssh (Van'Doï — beauté troublante/menaçante, relève de P1). Le pattern est théoriquement solide mais ne trouve pas encore d'ancrage textuel dans le corpus. Chercher des personnages explicitement décrits comme beaux selon les codes dominants de leur communauté, et dont cette beauté est activement instrumentalisée. Fond / À renforcer.",
       "Statut": "A renforcer",
-      "Total": "1",
       "Type": "Fond"
     },
     "sections": {
@@ -115,10 +123,14 @@
   {
     "Nom": "Beauté du monde",
     "values": {
-      "Dernière modification": "2026-07-02T08:06:00.000Z",
+      "Dernière modification": "2026-07-25T23:11:00.000Z",
+      "Espèces": "1b36e4d2-1b45-8098-b2fd-c97f8ae14369, 1ba6e4d2-1b45-8086-b247-d253799b8241",
+      "Lieux": "1cb6e4d2-1b45-80d5-9374-d87f759801be, 1886e4d2-1b45-8150-a894-cfe31d31abd4, 1b46e4d2-1b45-8001-ad3d-f3a293347dc1, b475d40b-597c-40a8-8b11-3561d774f459, 166982c7-3cf0-4947-85c5-0a6df03ff80d, 36e6e4d2-1b45-807a-ac6c-ec253f792406",
+      "Nb Espèces": "2",
+      "Nb Lieux": "6",
+      "Occurrences": "8",
       "Résumé IA": "Le pattern « Beauté du monde » décrit une esthétique non‑humaine, non‑conventionnelle et dépourvue de trouble, valorisant des paysages, créatures et architectures alien dont la beauté provient de leur logique interne; il évalue l’originalité en fantasy (5/10) et en science‑fiction (8/10), la désirabilité (7/10), et fournit des exemples, critères, interdits et stratégies de gestion pour intégrer cette beauté pure dans le récit sans mimétisme terrestre ni menace.",
       "Statut": "A renforcer",
-      "Total": "9",
       "Type": "Fond"
     },
     "sections": {
@@ -150,10 +162,16 @@
   {
     "Nom": "Beauté troublante",
     "values": {
-      "Dernière modification": "2026-07-02T08:06:00.000Z",
+      "Dernière modification": "2026-07-25T23:11:00.000Z",
+      "Espèces": "1a16e4d2-1b45-8099-be36-db66acb76390, 1a16e4d2-1b45-8062-aaa7-f39bb07d72f8, 2546e4d2-1b45-8003-b2cf-fba0a267df74, 1a16e4d2-1b45-8089-bfc0-c5e513847d8b, 1ba6e4d2-1b45-8086-b247-d253799b8241",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4, 1b46e4d2-1b45-8028-a2e5-f06744044aa4, 36e6e4d2-1b45-807a-ac6c-ec253f792406",
+      "Nb Espèces": "5",
+      "Nb Lieux": "3",
+      "Nb Personnages": "7",
+      "Occurrences": "15",
+      "Personnages": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31, 1c76e4d2-1b45-805a-b457-e64ae338d6f9, 1996e4d2-1b45-80c4-9c73-ddac6322e9bd, 892f2fd2-fbe3-4878-a05d-8d608b01e6bf, 1d56e4d2-1b45-80e1-a1a9-e96243eb1712, 1996e4d2-1b45-8043-9847-ef675478f485, a1e588d2-8d0b-4c46-bd2c-52d990dc6d4a",
       "Résumé IA": "Analyse le concept de « beauté troublante » comme tension simultanée d’émerveillement et d’inconfort, en distinguant les patterns (Creepy Cute, Beauty Is Relative, Impossibly Cool Clothes, Scenery Porn, One’s Freakiness Another’s Beauty) et leurs justifications, puis propose des stratégies de mitigation : ancrer chaque occurrence dans des détails matériels, maintenir la tension non résolue, expliciter les oppressions normatives, éviter les arcs honte→révélation non nommés et les descriptions vagues, tout en offrant une checklist pour valider de nouvelles occurrences.",
       "Statut": "A renforcer",
-      "Total": "15",
       "Type": "Central"
     },
     "sections": {
@@ -183,10 +201,14 @@
   {
     "Nom": "Domination corporelle",
     "values": {
-      "Dernière modification": "2026-06-01T21:56:00.000Z",
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Dernière modification": "2026-07-25T22:43:00.000Z",
+      "Nb Communautés": "1",
+      "Nb Personnages": "8",
+      "Occurrences": "9",
+      "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1d56e4d2-1b45-80e1-a1a9-e96243eb1712, 1996e4d2-1b45-80fa-97db-fe99255e6c0c, 1bc6e4d2-1b45-8013-831b-e5a42c40dd2f, 1a16e4d2-1b45-8015-b262-cb7e5d0f01a8, 1886e4d2-1b45-80bb-b913-d5392af85620, 1a96e4d2-1b45-8077-b534-dae9777c6a12",
       "Résumé IA": "Domination corporelle décrit comment des asymétries structurelles de pouvoir – statutaires, hiérarchiques ou institutionnelles – permettent des violences physiques ou sexuelles, en combinant accès, consentement contraint et impunité. Le texte analyse plusieurs tropes (extorsion sexuelle, droit du seigneur, esclavage sexuel, abuser fétichisé), propose des subversions et distingue les couches mythiques des réalités, tout en établissant des stratégies de mitigation, des interdits narratifs et des critères de création d’occurrences cohérentes avec le pattern.",
       "Statut": "A renforcer",
-      "Total": "3",
       "Type": "Fond"
     },
     "sections": {
@@ -220,10 +242,18 @@
   {
     "Nom": "Queerness",
     "values": {
-      "Dernière modification": "2026-06-17T12:03:00.000Z",
+      "Communautés": "46d868f6-f4d1-49da-83c3-c30e44d01358, 31c6e4d2-1b45-80fa-9680-ed7000fa9b65",
+      "Dernière modification": "2026-07-25T23:17:00.000Z",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8, 1a16e4d2-1b45-80e9-8a7a-d5c626184d83, 1a16e4d2-1b45-8086-a5db-d3408b941f1d, 1a16e4d2-1b45-8006-a568-d4688d3b154b, 1a16e4d2-1b45-8089-bfc0-c5e513847d8b, 1a16e4d2-1b45-8051-88d9-d744a1bbc095, 1a16e4d2-1b45-8099-be36-db66acb76390, 1a16e4d2-1b45-805e-841e-d699f81d67a9",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4, 2356e4d2-1b45-8098-93c3-df4a68697585, 1b46e4d2-1b45-8071-88b9-da69653d4987",
+      "Nb Communautés": "2",
+      "Nb Espèces": "8",
+      "Nb Lieux": "3",
+      "Nb Personnages": "6",
+      "Occurrences": "19",
+      "Personnages": "1996e4d2-1b45-80a5-a7ae-e9d43372323f, 1a16e4d2-1b45-8093-89ad-eae2e28f9b31, 1d95df62-504c-4349-b8ec-63893118af51, dfe78783-9d63-424a-ad5c-aa7726bf6394, 1c36e4d2-1b45-80f2-8124-e9ddf8d9359e, 2286e4d2-1b45-8094-94b7-c021f47fc005",
       "Résumé IA": "Le pattern « Queerness » est présenté comme un élément central du monde, couvrant les identités, désirs et configurations relationnelles qui s’écartent de la norme cis‑hétéro‑binaire, et doit être intégré comme texture culturelle et identitaire plutôt que comme ornement. Le texte analyse son origine, ses frontières avec d’autres patterns, propose une évaluation avec notes et justifications, décrit plusieurs tropes (ex. Cast Full of Gay, Has Two Mommies, Heteronormative Crusader, Bury Your Gays, Queer Romance) en détaillant leur intérêt, subversion et cohérence, et fournit des stratégies de mitigation, leviers, interdictions et une checklist pour garantir que chaque occurrence enrichisse le monde sans tomber dans les clichés ou la violence discriminatoire.",
       "Statut": "A renforcer",
-      "Total": "13",
       "Type": "Central"
     },
     "sections": {
@@ -255,10 +285,18 @@
   {
     "Nom": "Spécialisation environnementale",
     "values": {
-      "Dernière modification": "2026-06-23T11:03:00.000Z",
-      "Résumé IA": "Spécialisation environnementale décrit comment l’efficacité d’objets, de véhicules ou de pratiques dépend du milieu, en introduisant les notions de compatibilité au lieu, d’avantages territoriaux et de contraintes matérielles. Le texte évalue le pattern, propose des tropes comme Home Field Advantage et Field Power Effect, et détaille de nombreuses occurrences où des compétences, outils ou organismes sont strictement liés à un environnement spécifique, créant des marchés fermés et des dépendances locales. Il fournit ensuite des stratégies de mitigation, des leviers et des interdits pour intégrer ce pattern de façon cohérente, ainsi qu’une checklist pour vérifier que chaque nouvelle occurrence respecte les critères de spécialisation environnementale.",
+      "Communautés": "31c6e4d2-1b45-80fa-9680-ed7000fa9b65, 1a56e4d2-1b45-8044-a472-d674f194c57a, 1886e4d2-1b45-81b8-ad16-dcfa990112f1, 1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Dernière modification": "2026-07-25T23:19:00.000Z",
+      "Espèces": "1a56e4d2-1b45-805b-af5c-e589453aed6f, fcf36f8b-b272-405e-a1c2-f687f643dc6a, 816ee0a2-452b-45bc-bff2-7eb6b376c5fb, 1c06e4d2-1b45-80a5-8163-dbdb7f0116b9, 1a16e4d2-1b45-80d7-a920-c3f40e49246b, 1c26e4d2-1b45-8072-be2b-fb1e7698e9b1, 80dae34f-19a3-483a-8d7c-40221f7d8baf, 1a16e4d2-1b45-8051-88d9-d744a1bbc095, 1a16e4d2-1b45-80e9-8a7a-d5c626184d83",
+      "Lieux": "1a96e4d2-1b45-8049-b21b-ee91c108b551, 1b46e4d2-1b45-8001-ad3d-f3a293347dc1, 1b46e4d2-1b45-801a-ada0-f6ec210d2fa0, b475d40b-597c-40a8-8b11-3561d774f459, 1886e4d2-1b45-8150-a894-cfe31d31abd4, 1b36e4d2-1b45-802c-910a-fb74729b22f8, 1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d, 1b46e4d2-1b45-8071-88b9-da69653d4987, 1b46e4d2-1b45-80c6-ba2c-e2512a9a56da, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 26e08862-0f92-4e6a-8366-dc7091966fdb",
+      "Nb Communautés": "4",
+      "Nb Espèces": "9",
+      "Nb Lieux": "11",
+      "Nb Personnages": "1",
+      "Occurrences": "25",
+      "Personnages": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
+      "Résumé IA": "Le pattern de spécialisation environnementale montre comment l’efficacité d’un corps, d’un outil ou d’une pratique dépend du lieu, en insistant sur la compatibilité au territoire plutôt que sur des bonus magiques généraux ; il est évalué comme original en fantasy (7/10) et en SF (6/10) et très désirable (8/10). Le texte décrit plusieurs tropes (Home Field Advantage, Field Power Effect, Adaptive Armor, Artificial Gill) et de nombreuses occurrences où des espèces, objets ou systèmes ne fonctionnent que dans des environnements spécifiques, créant des marchés fermés et des dépendances locales. Des stratégies de mitigation proposent d’introduire ces contraintes comme moteurs narratifs, de privilégier des compatibilités partielles et asymétriques, et d’éviter les solutions universelles parfaites, tout en suivant une checklist garantissant que chaque occurrence affecte plusieurs dimensions d’usage et engendre des conséquences sociales.",
       "Statut": "A surveiller",
-      "Total": "27",
       "Type": "Fond"
     },
     "sections": {
@@ -266,13 +304,13 @@
       "e_valuation_du_pattern": "<table header-row=\"true\">\n<colgroup>\n<col width=\"184.982666015625\">\n<col width=\"143.9943084716797\">\n<col width=\"334.81597900390625\">\n</colgroup>\n<tr>\n<td>Intérêt du pattern</td>\n<td>Note sur 10</td>\n<td>Justification (1 phrase)</td>\n</tr>\n<tr>\n<td>Originalité en Fantasy</td>\n<td>7/10</td>\n<td>La fantasy utilise souvent des lieux dangereux ou magiques, mais beaucoup plus rarement une logique systémique où la performance matérielle varie selon la compatibilité locale plutôt que selon un simple bonus ou malus magique.</td>\n</tr>\n<tr>\n<td>Originalité en SF</td>\n<td>6/10</td>\n<td>La SF connaît bien l’adaptation environnementale, les véhicules spécialisés et les combinaisons de milieu, mais le motif reste souvent technique plutôt que social, corporel ou politique.</td>\n</tr>\n<tr>\n<td>Désirabilité pour la <mention-page url=\"https://app.notion.com/p/1886e4d21b45811188d5edb08cafe956\"/></td>\n<td>8/10</td>\n<td>Le pattern rend le monde matériellement situé : aucune capacité n’est abstraitement universelle, tout dépend des conditions locales, ce qui sert fortement l’étrangeté, la diversité et les conséquences systémiques.</td>\n</tr>\n</table>",
       "notes_me_thodologiques": "- **Test de charge — Fantasy** : exemples structurants relativement peu nombreux si on exige que la compatibilité au lieu soit un système central, et pas seulement un décor hostile ou une zone magique ponctuelle.\n- **Test de charge — SF** : exemples plus nombreux via planètes hostiles, exosuits, écologies extraterrestres et véhicules spécialisés, mais souvent traités comme contrainte d’équipement plutôt que comme grammaire profonde du monde.\n- **Lecture Vision — Diversité d’abord** : soutient fortement le pattern, car la compatibilité au lieu favorise des morphologies, outils et pratiques non interchangeables.\n- **Lecture Vision — Conséquences des axiomes** : soutient fortement le pattern, car si les lieux ont des lois locales ou des conditions propres, leurs effets doivent changer les usages.\n- **Lecture Vision — Voyage au cœur de l’étrange** : soutient le pattern si l’étrangeté locale produit des pratiques concrètes, pas seulement du décor.\n- **Lecture Vision — Matérialisme** : soutient le pattern comme contrainte qualitative : la compatibilité doit venir de conditions matérielles lisibles, pas d’une essence mystique du lieu.\n- **Lecture Vision — Révolutionnaire par essence** : neutre directement, mais fertile si la compatibilité au lieu empêche les centres de pouvoir d’imposer une technologie ou une norme universelle.\n- **Type retenu** : Fond.\n- **Statut retenu** : À renforcer.",
       "tropes": "- Home Field Advantage\n\t- Description : avantage narratif ou tactique obtenu parce qu’une personne, faction ou créature agit dans un terrain qu’elle connaît, contrôle ou habite.\n\t- Intérêt ou subversion : intéressant si l’avantage ne vient pas d’un héroïsme supérieur mais d’une relation matérielle au milieu ; subversion osée : faire du « terrain natal » non pas une propriété identitaire ou militaire, mais une compétence collective d’entretien, de réparation et de traduction locale.\n\t- Exemples (en général) : *Dune* — les Fremen survivent et combattent mieux sur Arrakis parce que leur culture est structurée par le désert ; *Avatar* — les Na’vi exploitent la connaissance de Pandora contre une force technologiquement supérieure ; *Vampire: The Masquerade* — les vampires deviennent beaucoup plus dangereux dans les territoires où leurs refuges, réseaux et habitudes sont établis.\n\t- Cohérence : le trope est cohérent avec un monde où les territoires ne sont pas de simples fonds de carte mais des milieux qui modifient réellement les pratiques.\n\t\t- Exemple (cohérence Alteir) : *Dune* — l’environnement désertique impose des rythmes, technologies, croyances et tactiques situées plutôt qu’un simple décor exotique.\n\t- Analyse Mythe / Réalité :\n\t\t- Couche Mythe : le « chez-soi » donne souvent un avantage presque moral, comme si appartenir au lieu rendait naturellement meilleur.\n\t\t- Couche Réalité : l’avantage territorial vient d’informations, d’habitudes corporelles, de logistique, de maintenance, de routes connues, d’acclimatation et d’infrastructures locales.\n\t\t- Décision Escelion : ancrer dans la Réalité malgré la note Vision élevée ; le mythe du sol natal est trop essentialisant, alors que l’intérêt du pattern vient de la matérialité située.\n- Field Power Effect\n\t- Description : condition de terrain ou champ environnemental qui renforce, affaiblit ou modifie les capacités des personnages et des outils.\n\t- Intérêt ou subversion : utile comme grammaire lisible de variations locales ; subversion osée : remplacer le bonus spectaculaire par des changements modestes mais omniprésents qui réorganisent métiers, commerce, mobilité et prestige social.\n\t- Exemples (en général) : *Pokémon* — les terrains de combat modifient certains effets et stratégies ; *Final Fantasy Tactics* — la hauteur, le terrain et les effets de zone changent l’efficacité des actions ; *Magic: The Gathering* — les terrains et environnements déterminent quelles ressources et couleurs deviennent disponibles.\n\t- Cohérence : le trope fait sens s’il reste matériel et systémique, pas s’il devient une simple couche de buffs arbitraires.\n\t\t- Exemple (cohérence Alteir) : *Made in Abyss* — la verticalité, la pression et les effets de l’Abysse transforment l’exploration en problème corporel et logistique.\n\t- Analyse Mythe / Réalité :\n\t\t- Couche Mythe : le lieu émet une aura mécanique qui applique des bonus/malus comme une règle de jeu visible.\n\t\t- Couche Réalité : tout milieu affecte déjà les performances par température, pression, humidité, relief, friction, visibilité, acoustique, chimie, disponibilité énergétique et fatigue.\n\t\t- Décision Escelion : hybrider, avec une préférence Réalité ; les lois locales peuvent être étranges, mais doivent produire des conséquences physiques et sociales suivies jusqu’au bout.\n- Adaptive Armor\n\t- Description : équipement protecteur ou augmenté capable de s’ajuster à son porteur, à ses faiblesses ou à la menace rencontrée.\n\t- Intérêt ou subversion : pertinent si l’adaptation a un coût, une inertie ou une dépendance au milieu ; subversion osée : l’armure n’est pas « meilleure partout », elle devient excellente dans un lieu et médiocre ailleurs, créant des corps-outils provinciaux plutôt que des super-soldats universels.\n\t- Exemples (en général) : *Iron Man* — les armures spécialisées répondent à des milieux ou menaces distinctes ; *Metroid* — les combinaisons ouvrent ou sécurisent certains environnements ; *Guyver* — la bio-armure amplifie le porteur en brouillant la frontière corps/outil.\n\t- Cohérence : le trope devient très fertile si l’adaptation est contrainte par une écologie locale, une maintenance ou une incompatibilité hors-milieu.\n\t\t- Exemple (cohérence Alteir) : *Metroid* — l’équipement transforme progressivement la relation aux environnements, sans rendre tous les lieux équivalents.\n\t- Analyse Mythe / Réalité :\n\t\t- Couche Mythe : l’armure intelligente s’adapte parfaitement et rapidement à tout, jusqu’à annuler la vulnérabilité.\n\t\t- Couche Réalité : tout système adaptatif implique des capteurs, énergie, latence, usure, matériaux, compromis et risques d’erreur.\n\t\t- Décision Escelion : ancrer dans la Réalité ; une adaptation trop parfaite tuerait le pattern, car la compatibilité au lieu exige des limites locales.\n- Artificial Gill\n\t- Description : dispositif permettant à une personne non aquatique de respirer ou d’agir durablement sous l’eau.\n\t- Intérêt ou subversion : trope intéressant comme cas spécialisé de compatibilité importée ; subversion osée : l’outil ne permet pas de conquérir le milieu, il rend seulement possible une présence partielle, dépendante, lente et socialement encadrée.\n\t- Exemples (en général) : *Star Wars: Episode I — The Phantom Menace* — les respirateurs aquatiques permettent la traversée de Naboo ; *Harry Potter and the Goblet of Fire* — la branchiflore transforme temporairement le corps pour le lac ; *The Abyss* — la respiration liquide sert l’exploration extrême.\n\t- Cohérence : le trope est compatible s’il ne neutralise pas le milieu aquatique ; il doit déplacer les contraintes plutôt que les supprimer.\n\t\t- Exemple (cohérence Alteir) : *The Abyss* — la technologie ouvre un milieu hostile tout en conservant malaise, dépendance technique et vulnérabilité.\n\t- Analyse Mythe / Réalité :\n\t\t- Couche Mythe : respirer sous l’eau devient un passeport simple vers un monde aquatique immédiatement praticable.\n\t\t- Couche Réalité : respirer n’est qu’une contrainte parmi d’autres : pression, froid, flottabilité, communication, vision, infections, orientation, alimentation et panique restent déterminantes.\n\t\t- Décision Escelion : ancrer dans la Réalité ; le dispositif doit produire une compatibilité partielle, jamais l’équivalence entre milieux.",
-      "occurrences": "- **Fracturation régionale d’Escelion** : les fractures entre domaines ralentissent les déplacements selon l’incompatibilité entre voyageur, véhicule et territoire ; un véhicule moderne peut traverser certaines régions aussi lentement qu’une caravane si sa nature technologique entre en dissonance avec le domaine traversé. <mention-page url=\"https://app.notion.com/p/1cc6e4d21b45800eaea8c8aa83ca1832\"/>\n- **Fragmentation opérationnelle de la Lisière** : technologie de contournement des fractures par désintégration/reconstruction, efficace précisément parce qu’elle ne traverse pas normalement le milieu incompatible, mais au prix d’un inconfort extrême et d’une dépendance technique lourde. <mention-page url=\"https://app.notion.com/p/1cc6e4d21b45800eaea8c8aa83ca1832\"/>\n- **Arpenteurs de Lisière / Corpus des Lisières** : confrérie spécialisée dans la mesure des zones de fracturation ; chaque entrée du Corpus documente les modes de transport testés, leur compatibilité, leur pénalité estimée et la péremption de la donnée. <mention-page url=\"https://app.notion.com/p/d02a2f4b6fa84b3f9e63d263e57438ac\"/>\n- **Panmorphes libres** : organismes à répertoire morphologique ouvert, endémiques des zones d’instabilité physique ; leur plasticité les rend dominants dans les frontières de domaines, mais un Panmorphe transplanté en milieu stable s’épuise en reconfigurations inutiles et meurt. <mention-page url=\"https://app.notion.com/p/34d8827653eb4bfea3dbe6f846697de8\"/>\n- **Dimorphes réversibles** : Rétiflexes à deux configurations corporelles viables, chacune optimisée pour un contexte environnemental précis ; ils dominent les milieux cycliquement alternants mais sont moins compétitifs en milieu stable ou trop imprévisible. <mention-page url=\"https://app.notion.com/p/9ae41fee978b461eb214041ce2aa9601\"/>\n- **Aérovores** : Chordoformes dont l’écologie dépend de colonnes d’air exploitables, courants inter-domaines, Deimos basses, Puits Célestes et atmosphères locales ; leurs capacités deviennent fragiles dans les zones à atmosphère instable, canopée rase ou espace urbain dense. <mention-page url=\"https://app.notion.com/p/0b70dca13cde4e589350624ccb735faa\"/>\n- **Neamhar Vrek-Yolan** : son corps et sa pédagogie sont devenus indissociables des Bains parkourétiques ; membres allongés, ventouses microscopiques, proprioception recâblée et refus du sol font de l’Échafaudage un milieu d’excellence, mais aussi une dépendance physiologique qui l’empêche d’exister normalement ailleurs. <mention-page url=\"https://app.notion.com/p/31d6e4d21b4580c7a993c76e1bdfbbca\"/>\n- **Transformateurs de frontières** : règne spécialisé dans la transformation de matière et d’énergie, concentré dans les zones transitionnelles ou hostiles où il viabilise des milieux, médie les domaines de Rêveurs antagonistes et crée ses propres niches écologiques. <mention-page url=\"https://app.notion.com/p/e608ef9b06cd4792bdd46ee3fcab84d5\"/>\n- **Désert des Échos Perdus** : les conditions environnementales du désert (sable d'obsidienne, interférences du Zhakâd, chimie minérale du Khôryn, marées sablonneuses cycliques) créent des spécialisations irréductibles : guides formés province par province, Reliquaires d'Obsidienne efficaces uniquement grâce aux propriétés d'absorption locales, techniques agricoles calibrées pour la chimie des cavités du Khôryn inapplicables ailleurs, Cartographes Quantiques dont l'expertise en cartogrammes de sable n'a aucun équivalent hors de la région. Véhicules modernes quasi inutiles, technologies frémissantes anciennes partiellement fonctionnelles — la fracturation régionale produit un marché du travail fermé et des outils non transférables. Revue Léviathan (personnage) : ajout du paragraphe « Incompatibilité inter-provinces » détaillant la non-transférabilité des compétences, outils et acclimatations entre Nashîr, Khôryn, Vash-Sûl et Zhakâd, avec conséquences concrètes (marché de guidage fermé par province, dépendance aux réseaux locaux, expiration de l'expertise hors zone). <mention-page url=\"https://app.notion.com/p/1a96e4d21b458049b21bee91c108b551\"/>\n- **Prosôpon (Masques Van'Doei)** : la régulation thermique des masques cultuels du Léviathan Pétrifié constitue un cas exemplaire de spécialisation environnementale à l'échelle de l'objet. Chaque type de masque est calibré pour un milieu spécifique (galeries du Léviathan, ateliers du Quartier des Forges, désert, Périphéries côtières) et perd en efficacité hors de son contexte d'origine. Cette incompatibilité inter-régionale produit des conséquences concrètes : spécialisation des artisans-sculpteurs par région, coût de migration (refabrication obligatoire), stratégies adaptatives des nomades (couches amovibles). Le Prosôpon relie la compatibilité au lieu à l'identité cultuelle du Léviathan — le récit gravé sur le masque est perdu lors du remplacement, créant un frein émotionnel en plus du frein matériel. <mention-page url=\"https://app.notion.com/p/2e76e4d21b45809bb621c488ad4c0a36\"/>\n- **Frémissants** : cas exemplaire de spécialisation environnementale au niveau d'une espèce entière. Leur réseau computationnel cristallin, leur alimentation par photosynthèse cristalline, leur locomotion par contraction dans le sable meuble et leur communication piézoélectrique dépendent tous du substrat géologique spécifique du Désert des Échos Perdus. Hors du désert, un Frémissant devenait cognitivement diminué et physiquement inadapté — expliquant leur non-colonisation au-delà de leur territoire natal. <mention-page url=\"https://app.notion.com/p/1a56e4d21b45805baf5ce589453aed6f\"/>\n- **Système de Transport** : le game design interdit le transport générique universel ; chaque zone possède ses moyens locaux, conducteurs, coûts, risques et ambiances, avec une règle explicite d'adaptation au lieu. <mention-page url=\"https://app.notion.com/p/de0651bbe1ce46779b31b04cf17193ca\"/>\n- **<mention-page url=\"https://app.notion.com/p/1c36e4d21b4580f28124e9ddf8d9359e\"/>** — Van'Doei cartographe dont le corps, les outils et les savoirs sont devenus indissociables des Plis d'ossements après 17 Nuées d'immersion : bras de triangulation organique remodelé par le contact avec les structures osseuses instables (les filaments se rétractent et les articulations deviennent douloureuses en géométrie euclidienne stable), encre de moelle calibrée pour les variations de pression des Plis (inerte sur surface ordinaire), notations fractales différentielles conçues pour des espaces non-fixés (illisibles en cartographie conventionnelle), « angles de Voknir » comme micro-poches de stabilité créées involontairement dans le Dédale. Hors des Plis, Voknir n'est pas affaibli : iel est incompatible — un instrument désaccordé dont la spécialisation est devenue une dépendance biologique irréversible. <mention-page url=\"https://app.notion.com/p/1c36e4d21b4580f28124e9ddf8d9359e\"/>\n- **Filandres** : filtreurs passifs des zones de suintement actif, entièrement dépendants d'une humidité permanente portant des microparticules organiques. Leur enveloppe mucilagineuse, leur tube digestif distribué, leur torpeur en milieu sec et leur reproduction par fragmentation sont calibrés pour un seul type de milieu : les parois de suintement souterrain. La teinte de base (rose à violet) dit l'espèce ; la nuance d'iridescence dit l'habitat (bactéries ferreuses → carmin, soufre → pourpre métallique). Cette dépendance crée un monopole informationnel pour les Murmurateurs, seuls observateurs systématiques : ils lisent l'état structurel du Léviathan à travers la densité, la couleur et les formes d'agrégation des rideaux de Filandres — savoir non transférable, construit sur des centaines de Veilles in situ dans des zones que le Culte juge impures. <mention-page url=\"https://app.notion.com/p/fcf36f8bb272405ea1c2f687f643dc6a\"/>\n- **Forêts de Corail** : les routes internes sont cartographiées par phase plutôt que par distance, les outils de navigation extérieurs échouent face aux nappes de Brouillignon, et les professions clés (Gardiens de phase, Dérôleurs, Collecteurs de laitance, Tisserands Aériens) reposent sur des compétences non transférables hors du récif inversé. L'alimentation locale (Bouillon fade, Tartare de Réminiscence), l'architecture des Stations de Phase, le système judiciaire des Tribunaux différés et les formes adaptatives des Vohars de Phase témoignent d'une spécialisation totale au milieu, produisant un marché du guidage fermé et une vulnérabilité structurelle pour tout visiteur sans contacts locaux. <mention-page url=\"https://app.notion.com/p/1b46e4d21b458001ad3df3a293347dc1\"/>\n- **Artisans transmutateurs** : la transmutation inter-paradigmes est directement conditionnée par le paradigme dominant local — les substrats kharosthi répondent mieux en zone lisièroise sous l'influence résiduelle du Souffle Hakutō-Ah, les composants biotelluriques en zone hermogénienne, et le terrain neutre des Couronnes intermédiaires ralentit le processus faute d'amplification. Le savoir de recalibration des cuves zone par zone, non codifiable et acquis par des années de compagnonnage, renforce le monopole artisanal contre l'algorithmisation et crée une dépendance territoriale irréductible du métier. <mention-page url=\"https://app.notion.com/p/1dd6e4d21b4580749a3bc0eca157003c\"/>\n- **Spectrins des Échos** : quatre morphes écologiques (oasis, léviathanique, condensation, troglodyte) si étroitement dépendants de leur micro-habitat respectif qu'un individu transplanté meurt en quelques Veilles — dégradation branchiale hors lumière pour le morphe d'oasis, carence nutritive en eau pure pour le léviathanique, intoxication minérale pour les morphes non-condensation, atrophie photique irréversible pour le troglodyte. Cette spécialisation produit des monopoles d'expertise de lecture non transférables entre zones : guides du Khôryn, Croyants du Tunnel vertébral et experts du Puits céleste ne partagent aucun savoir applicable aux morphes des autres habitats. <mention-page url=\"https://app.notion.com/p/816ee0a2452b45bcbff27eb6b376c5fb\"/>\n- **Champignosquelettes** : organismes fongiques ostéomorphes absolument dépendants du Léviathan pétrifié — toutes les tentatives de transplantation hors du colosse ont échoué (perte de minéralisation des hyphes en moins de deux Veilles). La triple dépendance (substrat osseux vivant-pétrifié, boucle trophique fermée Kh'resh→gaz→champignosquelettes→compost→Kh'resh, microfluctuations temporelles des Plis d'ossements) rend toute exportation alimentaire impossible et transforme le Culte de l'Anentropie en prisonnier écologique du titan : quitter le Léviathan, c'est perdre sa source de nourriture. <mention-page url=\"https://app.notion.com/p/1c06e4d21b4580a58163dbdb7f0116b9\"/>\n- **Plaines de l'Exuvie** : écosystème entièrement structuré par la chitine de Deimos — lichens chitinophages, Mange-sable, espèces spécialisées, cartographes larvaires dont le savoir expire après chaque passage de la Machine Pérégrine, Gardiens des Citernes à expertise hydraulique calibrée sur les citernes biomagnétiques, caravaniers aldravinds à compétences de navigation non transférables. Ajout du paragraphe « Incompatibilité environnementale » : corrosion des outils métalliques par chitine acide, outres standard inadaptées, navigation par repères fixes obsolète, monopole d'expertise local rendant tout visiteur dépendant des réseaux de guidage existants. <mention-page url=\"https://app.notion.com/p/1b46e4d21b45801aada0f6ec210d2fa0\"/>\n- **Humains d'Escelion** : l'espèce est désormais cadrée non comme survivante d'un continent hostile, mais comme ensemble de compatibilités situées. Quatre profils structurent l'occurrence : urbanité de Vieille Ville, péri-urbain/rural des Couronnes, nomadisme entre Couronnes et Périphéries, et métiers spécialisés de milieux difficiles. La spécialisation doit rester sociale, textile, alimentaire, respiratoire et professionnelle avant d'être spectaculaire : un masque, une robe de halle, un tablier de mine, une coiffe de logeur ou un carnet de Lots sont des adaptations aussi importantes qu'un équipement de survie. <mention-page url=\"https://app.notion.com/p/1a16e4d21b4580d7a920c3f40e49246b\"/>\n- **<mention-page url=\"https://app.notion.com/p/378ce7afb23e4adaaac1040dfcedb61f\"/>** : neuf siècles d'adaptation aux jardins mutés de la Citadelle de Daïlon ont produit une expertise irréductiblement locale — chasse aux kheydarrs (couloirs de migration par clan, signes précurseurs d'attaque de groupe, zones de nidification saisonnière), cueillette de plantes mutées (stades de maturité invisibles pour un botaniste extérieur, variations de toxicité selon la proximité du portail), et spécialisation écologique par clan devenue irréductible (Illicht : résistance partielle aux spores psychoactives du jardin est et pistage par courants d'air du portail ; Kravash : expertise botanique la plus développée et contrôle hydraulique vital ; Doreneg : cartographie mentale des passages structurels, zones de danger et catacombes). Ce savoir est oral, non codifiable, et totalement inutile hors des jardins. La division écologique rend chaque clan partiellement indispensable aux deux autres tout en empêchant la réunification. Paradoxe central : la libération des Sraden — leur objectif existentiel — rendrait obsolètes les compétences qui les maintiennent en vie. <mention-page url=\"https://app.notion.com/p/378ce7afb23e4adaaac1040dfcedb61f\"/>\n- **Kurgarrû** : guilde de récupérateurs dont l'ensemble des compétences-clés — navigation nocturne par cartographie mentale, diagnostic olfactif de résidus algorithmiques post-Silenciation, résistance électrolytique via Pâte de Lichen Galvanotrope, photophobie acquise après des années en Somme Éternelle — sont calibrées exclusivement pour la Steppe des Éteignoirs et ses conditions uniques (obscurité absolue permanente, sol ferreux conducteur, cycles d'exécution imprévisibles). Hors de la Steppe, leur expertise se dégrade : la cartographie mentale est inapplicable, les Nez ne reconnaissent pas les signatures non-algorithmiques, la vision nocturne devient un handicap en milieu éclairé. Leur tentative d'expansion vers le Tombeau des Lueurs Dissidentes exige un réapprentissage coûteux et partiel qui ne bénéficie pas du réseau de transmission oral steppique. <mention-page url=\"https://app.notion.com/p/31c6e4d21b4580fa9680ed7000fa9b65\"/>\n- **Parasites tachycardiques** : espèce entièrement dépendante des conditions thermiques du Léviathan pétrifié (30–50 °C, mortalité 100 % hors zone en deux Veilles). La tachycardine requiert 42 °C minimum pour rester active, les organes thermogènes s'emballent en milieu froid, et le coût de transition entre phases devient prohibitif hors habitat. L'expertise acoustique des corvéables du Culte est non transférable entre strates (fréquences modulées par densité osseuse, humidité et température locales, recalibrage de 2–3 Veilles par transfert), ce qui produit des hiérarchies informelles, des coûts de rotation et des monopoles de compétence zonale exploités politiquement au sein de la corvée. <mention-page url=\"https://app.notion.com/p/1c26e4d21b458072be2bfb1e7698e9b1\"/>\n- **Drav-Ossivane** : enfant de 3 Nuées dont l'intégralité du savoir — cartographie des conduits de maintenance basse, horaires de Récapitulation, comportement des Gedroths, itinéraires non documentés — est calibrée pour la zone de maintenance inférieure du Léviathan pétrifié. Hors de ces conduits, Drav perd tout repère : iel n'a jamais vu l'extérieur du colosse, ne connaît ni les galeries cérémonielles ni les appartements des Accomplis. La thermosensibilité permanente (25 °C max) restreint encore le périmètre d'action aux zones chauffées par les conduits d'air ou par la présence de Gedroths. Compétence entièrement sédimentée par accumulation locale, non transférable. <mention-page url=\"https://app.notion.com/p/aab147faca9345eb84629747f3601298\"/>\n-\n- **Obeloi-Tatlu / Marché des Obeloi** : monnaie locale des Chaudières Démiurgiques dont la propriété physique singulière — rouiller dès qu'elle franchit la frontière du district — produit un marché monétaire fermé, un métier de changeur non transférable (expertise tactile et olfactive calibrée sur les signatures de coulée) et un circuit économique captif. La contrainte physique du métal engendre directement l'infrastructure sociale : le Marché existe parce que la monnaie ne voyage pas, et les changeurs existent parce que la conversion exige un savoir situé. <mention-page url=\"https://app.notion.com/p/91bf63ee92614c3082b2c32dfa8b50e3\"/>\n- **Mâche-pierre des Failles** : lithovore souterrain à quatre morphes géographiques (nominal des failles profondes, Lithophage domestique d’Hermogène, morphe du Léviathan, morphe d’obsidienne désertique) dont chacun abrite une flore intestinale calibrée sur la composition chimique de son substrat natal. Un morphe transplanté hors de sa zone dépérit en quelques Nuées : l’animal broie toujours, mais ne se nourrit plus. L’expertise de lecture des traces (stries, granulés, régneaux d’ancrage) est elle-même localisée — un cartographe du Léviathan ne sait pas dater un passage du morphe désertique. Cette double dépendance (biologique et épistémique) produit un prisonnier de sa zone natale et renforce le monopole des guides régionaux. <mention-page url=\"https://app.notion.com/p/80dae34f19a3483a8d7c40221f7d8baf\"/>",
+      "occurrences": "- **Fracturation régionale d’Escelion** : les fractures entre domaines ralentissent les déplacements selon l’incompatibilité entre voyageur, véhicule et territoire ; un véhicule moderne peut traverser certaines régions aussi lentement qu’une caravane si sa nature technologique entre en dissonance avec le domaine traversé. <mention-page url=\"https://app.notion.com/p/1cc6e4d21b45800eaea8c8aa83ca1832\"/>\n- **Fragmentation opérationnelle de la Lisière** : technologie de contournement des fractures par désintégration/reconstruction, efficace précisément parce qu’elle ne traverse pas normalement le milieu incompatible, mais au prix d’un inconfort extrême et d’une dépendance technique lourde. <mention-page url=\"https://app.notion.com/p/1cc6e4d21b45800eaea8c8aa83ca1832\"/>\n- **Arpenteurs de Lisière / Corpus des Lisières** : confrérie spécialisée dans la mesure des zones de fracturation ; chaque entrée du Corpus documente les modes de transport testés, leur compatibilité, leur pénalité estimée et la péremption de la donnée. <mention-page url=\"https://app.notion.com/p/d02a2f4b6fa84b3f9e63d263e57438ac\"/>\n- **Panmorphes libres** : organismes à répertoire morphologique ouvert, endémiques des zones d’instabilité physique ; leur plasticité les rend dominants dans les frontières de domaines, mais un Panmorphe transplanté en milieu stable s’épuise en reconfigurations inutiles et meurt. <mention-page url=\"https://app.notion.com/p/34d8827653eb4bfea3dbe6f846697de8\"/>\n- **Dimorphes réversibles** : Rétiflexes à deux configurations corporelles viables, chacune optimisée pour un contexte environnemental précis ; ils dominent les milieux cycliquement alternants mais sont moins compétitifs en milieu stable ou trop imprévisible. <mention-page url=\"https://app.notion.com/p/9ae41fee978b461eb214041ce2aa9601\"/>\n- **Aérovores** : Chordoformes dont l’écologie dépend de colonnes d’air exploitables, courants inter-domaines, Deimos basses, Puits Célestes et atmosphères locales ; leurs capacités deviennent fragiles dans les zones à atmosphère instable, canopée rase ou espace urbain dense. <mention-page url=\"https://app.notion.com/p/0b70dca13cde4e589350624ccb735faa\"/>\n- **Neamhar Vrek-Yolan** : son corps et sa pédagogie sont devenus indissociables des Bains parkourétiques ; membres allongés, ventouses microscopiques, proprioception recâblée et refus du sol font de l’Échafaudage un milieu d’excellence, mais aussi une dépendance physiologique qui l’empêche d’exister normalement ailleurs. <mention-page url=\"https://app.notion.com/p/31d6e4d21b4580c7a993c76e1bdfbbca\"/>\n- **Transformateurs de frontières** : règne spécialisé dans la transformation de matière et d’énergie, concentré dans les zones transitionnelles ou hostiles où il viabilise des milieux, médie les domaines de Rêveurs antagonistes et crée ses propres niches écologiques. <mention-page url=\"https://app.notion.com/p/e608ef9b06cd4792bdd46ee3fcab84d5\"/>\n- **Désert des Échos Perdus** : les conditions environnementales du désert (sable d'obsidienne, interférences du Zhakâd, chimie minérale du Khôryn, marées sablonneuses cycliques) créent des spécialisations irréductibles : guides formés province par province, Reliquaires d'Obsidienne efficaces uniquement grâce aux propriétés d'absorption locales, techniques agricoles calibrées pour la chimie des cavités du Khôryn inapplicables ailleurs, Cartographes Quantiques dont l'expertise en cartogrammes de sable n'a aucun équivalent hors de la région. Véhicules modernes quasi inutiles, technologies frémissantes anciennes partiellement fonctionnelles — la fracturation régionale produit un marché du travail fermé et des outils non transférables. Revue Léviathan (personnage) : ajout du paragraphe « Incompatibilité inter-provinces » détaillant la non-transférabilité des compétences, outils et acclimatations entre Nashîr, Khôryn, Vash-Sûl et Zhakâd, avec conséquences concrètes (marché de guidage fermé par province, dépendance aux réseaux locaux, expiration de l'expertise hors zone). <mention-page url=\"https://app.notion.com/p/1a96e4d21b458049b21bee91c108b551\"/>\n- **Prosôpon (Masques Van'Doei)** : la régulation thermique des masques cultuels du Léviathan Pétrifié constitue un cas exemplaire de spécialisation environnementale à l'échelle de l'objet. Chaque type de masque est calibré pour un milieu spécifique (galeries du Léviathan, ateliers du Quartier des Forges, désert, Périphéries côtières) et perd en efficacité hors de son contexte d'origine. Cette incompatibilité inter-régionale produit des conséquences concrètes : spécialisation des artisans-sculpteurs par région, coût de migration (refabrication obligatoire), stratégies adaptatives des nomades (couches amovibles). Le Prosôpon relie la compatibilité au lieu à l'identité cultuelle du Léviathan — le récit gravé sur le masque est perdu lors du remplacement, créant un frein émotionnel en plus du frein matériel. <mention-page url=\"https://app.notion.com/p/2e76e4d21b45809bb621c488ad4c0a36\"/>\n- **Frémissants** : cas exemplaire de spécialisation environnementale au niveau d'une espèce entière. Leur réseau computationnel cristallin, leur alimentation par photosynthèse cristalline, leur locomotion par contraction dans le sable meuble et leur communication piézoélectrique dépendent tous du substrat géologique spécifique du Désert des Échos Perdus. Hors du désert, un Frémissant devenait cognitivement diminué et physiquement inadapté — expliquant leur non-colonisation au-delà de leur territoire natal. <mention-page url=\"https://app.notion.com/p/1a56e4d21b45805baf5ce589453aed6f\"/>\n- **Système de Transport** : le game design interdit le transport générique universel ; chaque zone possède ses moyens locaux, conducteurs, coûts, risques et ambiances, avec une règle explicite d'adaptation au lieu. <mention-page url=\"https://app.notion.com/p/de0651bbe1ce46779b31b04cf17193ca\"/>\n- **<mention-page url=\"https://app.notion.com/p/1c36e4d21b4580f28124e9ddf8d9359e\"/>** — Van'Doei cartographe dont le corps, les outils et les savoirs sont devenus indissociables des Plis d'ossements après 17 Nuées d'immersion : bras de triangulation organique remodelé par le contact avec les structures osseuses instables (les filaments se rétractent et les articulations deviennent douloureuses en géométrie euclidienne stable), encre de moelle calibrée pour les variations de pression des Plis (inerte sur surface ordinaire), notations fractales différentielles conçues pour des espaces non-fixés (illisibles en cartographie conventionnelle), « angles de Voknir » comme micro-poches de stabilité créées involontairement dans le Dédale. Hors des Plis, Voknir n'est pas affaibli : iel est incompatible — un instrument désaccordé dont la spécialisation est devenue une dépendance biologique irréversible. <mention-page url=\"https://app.notion.com/p/1c36e4d21b4580f28124e9ddf8d9359e\"/>\n- **Filandres** : filtreurs passifs des zones de suintement actif, entièrement dépendants d'une humidité permanente portant des microparticules organiques. Leur enveloppe mucilagineuse, leur tube digestif distribué, leur torpeur en milieu sec et leur reproduction par fragmentation sont calibrés pour un seul type de milieu : les parois de suintement souterrain. La teinte de base (rose à violet) dit l'espèce ; la nuance d'iridescence dit l'habitat (bactéries ferreuses → carmin, soufre → pourpre métallique). Cette dépendance crée un monopole informationnel pour les Murmurateurs, seuls observateurs systématiques des zones de suintement — savoir non transférable, construit sur des centaines de Veilles in situ dans des zones que le Culte juge impures. <mention-page url=\"https://app.notion.com/p/fcf36f8bb272405ea1c2f687f643dc6a\"/>\n- **Forêts de Corail** : les routes internes sont cartographiées par phase plutôt que par distance, les outils de navigation extérieurs échouent face aux nappes de Brouillignon, et les professions clés (Gardiens de phase, Dérôleurs, Collecteurs de laitance, Tisserands Aériens) reposent sur des compétences non transférables hors du récif inversé. L'alimentation locale (Bouillon fade, Tartare de Réminiscence), l'architecture des Stations de Phase, le système judiciaire des Tribunaux différés et les formes adaptatives des Vohars de Phase témoignent d'une spécialisation totale au milieu, produisant un marché du guidage fermé et une vulnérabilité structurelle pour tout visiteur sans contacts locaux. <mention-page url=\"https://app.notion.com/p/1b46e4d21b458001ad3df3a293347dc1\"/>\n- **Artisans transmutateurs** : la transmutation inter-paradigmes est directement conditionnée par le paradigme dominant local — les substrats kharosthi répondent mieux en zone lisièroise sous l'influence résiduelle du Souffle Hakutō-Ah, les composants biotelluriques en zone hermogénienne, et le terrain neutre des Couronnes intermédiaires ralentit le processus faute d'amplification. Le savoir de recalibration des cuves zone par zone, non codifiable et acquis par des années de compagnonnage, renforce le monopole artisanal contre l'algorithmisation et crée une dépendance territoriale irréductible du métier. <mention-page url=\"https://app.notion.com/p/1dd6e4d21b4580749a3bc0eca157003c\"/>\n- **Spectrins des Échos** : quatre morphes écologiques (oasis, léviathanique, condensation, troglodyte) si étroitement dépendants de leur micro-habitat respectif qu'un individu transplanté meurt en quelques Veilles — dégradation branchiale hors lumière pour le morphe d'oasis, carence nutritive en eau pure pour le léviathanique, intoxication minérale pour les morphes non-condensation, atrophie photique irréversible pour le troglodyte. Cette spécialisation produit des monopoles d'expertise de lecture non transférables entre zones : guides du Khôryn, Croyants du Tunnel vertébral et experts du Puits céleste ne partagent aucun savoir applicable aux morphes des autres habitats. <mention-page url=\"https://app.notion.com/p/816ee0a2452b45bcbff27eb6b376c5fb\"/>\n- **Champignosquelettes** : organismes fongiques ostéomorphes absolument dépendants du Léviathan pétrifié — toutes les tentatives de transplantation hors du colosse ont échoué (perte de minéralisation des hyphes en moins de deux Veilles). La triple dépendance (substrat osseux vivant-pétrifié, boucle trophique fermée Kh'resh→gaz→champignosquelettes→compost→Kh'resh, microfluctuations temporelles des Plis d'ossements) rend toute exportation alimentaire impossible et transforme le Culte de l'Anentropie en prisonnier écologique du titan : quitter le Léviathan, c'est perdre sa source de nourriture. <mention-page url=\"https://app.notion.com/p/1c06e4d21b4580a58163dbdb7f0116b9\"/>\n- **Plaines de l'Exuvie** : écosystème entièrement structuré par la chitine de Deimos — lichens chitinophages, Mange-sable, espèces spécialisées, cartographes larvaires dont le savoir expire après chaque passage de la Machine Pérégrine, Gardiens des Citernes à expertise hydraulique calibrée sur les citernes biomagnétiques, caravaniers aldravinds à compétences de navigation non transférables. Ajout du paragraphe « Incompatibilité environnementale » : corrosion des outils métalliques par chitine acide, outres standard inadaptées, navigation par repères fixes obsolète, monopole d'expertise local rendant tout visiteur dépendant des réseaux de guidage existants. <mention-page url=\"https://app.notion.com/p/1b46e4d21b45801aada0f6ec210d2fa0\"/>\n- **Humains d'Escelion** : l'espèce est désormais cadrée non comme survivante d'un continent hostile, mais comme ensemble de compatibilités situées. Quatre profils structurent l'occurrence : urbanité de Vieille Ville, péri-urbain/rural des Couronnes, nomadisme entre Couronnes et Périphéries, et métiers spécialisés de milieux difficiles. La spécialisation doit rester sociale, textile, alimentaire, respiratoire et professionnelle avant d'être spectaculaire : un masque, une robe de halle, un tablier de mine, une coiffe de logeur ou un carnet de Lots sont des adaptations aussi importantes qu'un équipement de survie. <mention-page url=\"https://app.notion.com/p/1a16e4d21b4580d7a920c3f40e49246b\"/>\n- **<mention-page url=\"https://app.notion.com/p/378ce7afb23e4adaaac1040dfcedb61f\"/>** : neuf siècles d'adaptation aux jardins mutés de la Citadelle de Daïlon ont produit une expertise irréductiblement locale — chasse aux kheydarrs (couloirs de migration par clan, signes précurseurs d'attaque de groupe, zones de nidification saisonnière), cueillette de plantes mutées (stades de maturité invisibles pour un botaniste extérieur, variations de toxicité selon la proximité du portail), et spécialisation écologique par clan devenue irréductible (Illicht : résistance partielle aux spores psychoactives du jardin est et pistage par courants d'air du portail ; Kravash : expertise botanique la plus développée et contrôle hydraulique vital ; Doreneg : cartographie mentale des passages structurels, zones de danger et catacombes). Ce savoir est oral, non codifiable, et totalement inutile hors des jardins. La division écologique rend chaque clan partiellement indispensable aux deux autres tout en empêchant la réunification. Paradoxe central : la libération des Sraden — leur objectif existentiel — rendrait obsolètes les compétences qui les maintiennent en vie. <mention-page url=\"https://app.notion.com/p/378ce7afb23e4adaaac1040dfcedb61f\"/>\n- **Kurgarrû** : guilde de récupérateurs dont l'ensemble des compétences-clés — navigation nocturne par cartographie mentale, diagnostic olfactif de résidus algorithmiques post-Silenciation, résistance électrolytique via Pâte de Lichen Galvanotrope, photophobie acquise après des années en Somme Éternelle — sont calibrées exclusivement pour la Steppe des Éteignoirs et ses conditions uniques (obscurité absolue permanente, sol ferreux conducteur, cycles d'exécution imprévisibles). Hors de la Steppe, leur expertise se dégrade : la cartographie mentale est inapplicable, les Nez ne reconnaissent pas les signatures non-algorithmiques, la vision nocturne devient un handicap en milieu éclairé. Leur tentative d'expansion vers le Tombeau des Lueurs Dissidentes exige un réapprentissage coûteux et partiel qui ne bénéficie pas du réseau de transmission oral steppique. <mention-page url=\"https://app.notion.com/p/31c6e4d21b4580fa9680ed7000fa9b65\"/>\n- **Parasites tachycardiques** : espèce entièrement dépendante des conditions thermiques du Léviathan pétrifié (30–50 °C, mortalité 100 % hors zone en deux Veilles). La tachycardine requiert 42 °C minimum pour rester active, les organes thermogènes s'emballent en milieu froid, et le coût de transition entre phases devient prohibitif hors habitat. L'expertise acoustique des corvéables du Culte est non transférable entre strates (fréquences modulées par densité osseuse, humidité et température locales, recalibrage de 2–3 Veilles par transfert), ce qui produit des hiérarchies informelles, des coûts de rotation et des monopoles de compétence zonale exploités politiquement au sein de la corvée. <mention-page url=\"https://app.notion.com/p/1c26e4d21b458072be2bfb1e7698e9b1\"/>\n- **Drav-Ossivane** : enfant de 3 Nuées dont l'intégralité du savoir — cartographie des conduits de maintenance basse, horaires de Récapitulation, comportement des Gedroths, itinéraires non documentés — est calibrée pour la zone de maintenance inférieure du Léviathan pétrifié. Hors de ces conduits, Drav perd tout repère : iel n'a jamais vu l'extérieur du colosse, ne connaît ni les galeries cérémonielles ni les appartements des Accomplis. La thermosensibilité permanente (25 °C max) restreint encore le périmètre d'action aux zones chauffées par les conduits d'air ou par la présence de Gedroths. Compétence entièrement sédimentée par accumulation locale, non transférable. <mention-page url=\"https://app.notion.com/p/aab147faca9345eb84629747f3601298\"/>\n-\n- **Obeloi-Tatlu / Marché des Obeloi** : monnaie locale des Chaudières Démiurgiques dont la propriété physique singulière — rouiller dès qu'elle franchit la frontière du district — produit un marché monétaire fermé, un métier de changeur non transférable (expertise tactile et olfactive calibrée sur les signatures de coulée) et un circuit économique captif. La contrainte physique du métal engendre directement l'infrastructure sociale : le Marché existe parce que la monnaie ne voyage pas, et les changeurs existent parce que la conversion exige un savoir situé. <mention-page url=\"https://app.notion.com/p/91bf63ee92614c3082b2c32dfa8b50e3\"/>\n- **Mâche-pierre des Failles** : lithovore souterrain à quatre morphes géographiques (nominal des failles profondes, Lithophage domestique d’Hermogène, morphe du Léviathan, morphe d’obsidienne désertique) dont chacun abrite une flore intestinale calibrée sur la composition chimique de son substrat natal. Un morphe transplanté hors de sa zone dépérit en quelques Nuées : l’animal broie toujours, mais ne se nourrit plus. L’expertise de lecture des traces (stries, granulés, régneaux d’ancrage) est elle-même localisée — un cartographe du Léviathan ne sait pas dater un passage du morphe désertique. Cette double dépendance (biologique et épistémique) produit un prisonnier de sa zone natale et renforce le monopole des guides régionaux. <mention-page url=\"https://app.notion.com/p/80dae34f19a3483a8d7c40221f7d8baf\"/>",
       "gestion_narrative": "- **Séquençage temporel** : introduire d'abord la spécialisation comme évidence quotidienne (le joueur découvre qu'un véhicule ne fonctionne pas ici, qu'un guide local est indispensable), puis révéler la profondeur systémique (les fractures régionales structurent l'économie entière), puis questionner les conséquences politiques (qui profite de l'incompatibilité ?).\n- **Stratification par couche** : la spécialisation comme fait physique (couche matérielle — atmosphère, relief, lois locales), comme savoir situé (couche épistémique — les Arpenteurs de Lisière qui documentent les compatibilités), comme outil de pouvoir (couche politique — les marchés fermés du Désert, les métiers non transférables).\n- **Dialectique inter-patterns** : en écho avec « Hybridité » (les hybrides entre milieux occupent les zones de transition). En tension avec « Surveillance systémique » (contrôler l'accès aux savoirs locaux est une forme de surveillance). En écho avec « Forme humanoïde » (la morphologie spécialisée contredit l'universalité de la bipédie).\n- **Concentration assumée** : les fractures régionales et le système de transport forment le cœur structurel. Les espèces spécialisées (Panmorphes, Dimorphes, Aérovores) sont des illustrations biologiques. Les personnages (Neamhar) sont des cas micro. Chaque échelle a son rôle narratif distinct.\n- **Échelle de lecture** : Fracturation régionale/Système de transport = macro (structure du monde). Désert des Échos, Lisière = méso (écosystèmes régionaux). Neamhar, Panmorphes = micro (individus et espèces). Les micro illustrent le macro, ils ne le remplacent pas.",
       "leviers": "- Faire de la compatibilité au lieu une **contrainte productive** : elle doit créer des métiers, des routes, des transbordements, des outils spécialisés, des vulnérabilités et des expertises locales.\n- Préférer les compatibilités **partielles et asymétriques** : un outil excellent dans un lieu doit devenir coûteux, lent, fragile ou socialement inadapté ailleurs.\n- Relier chaque compatibilité à une cause lisible : atmosphère, relief, lois physiques locales, pression sociale, maintenance, langage, ressources disponibles, infrastructures, cycles ou habitudes corporelles.\n- Utiliser le pattern pour empêcher l’universalisation paresseuse : pas de véhicule, d’arme, de corps ou de pratique qui reste optimal partout sans prix clair.\n- Valoriser les zones de transition : frontières, seuils, ports, relais, ateliers de conversion et lieux de transbordement sont souvent plus riches que les lieux « purs ».",
       "interdits": "- Pas de compatibilité au lieu sans conséquence matérielle concrète sur au moins deux dimensions : déplacement, coût, maintenance, apprentissage, danger, statut social ou dépendance logistique.\n- Interdit de présenter un lieu comme « incompatible » de façon abstraite : préciser toujours ce qui échoue, ralentit, se dérègle ou devient dangereux.\n- Pas d’équipement adaptatif parfait qui annule toutes les contraintes locales.\n- Pas de hiérarchie essentialiste où les natifs d’un lieu seraient naturellement supérieurs ; l’avantage doit venir d’acclimatation, de culture matérielle, d’infrastructures ou de savoirs situés.\n- Pas de simple habillage RPG du type « +10 % dans la forêt » sans effet sur le monde vécu.",
       "re_orientations": "- Si une occurrence ressemble à un bonus/malus de jeu, la réorienter vers une **chaîne d’usage** : qui fabrique, répare, transporte, apprend, détourne ou vend cette compatibilité ?\n- Si une occurrence devient trop spectaculaire, la ramener vers le quotidien : gestes de travail, fatigue, vêtements, rythme de marche, erreurs de débutant, maintenance.\n- Si une occurrence essentialise une espèce ou un peuple, déplacer l’explication vers le lieu, l’apprentissage, l’histoire technique ou les infrastructures.\n- Si une technologie semble universelle, créer au moins une zone où elle devient médiocre et une pratique locale qui la surclasse.",
       "checklist_avant_nouvelle_occurrence": "- [ ] L’occurrence modifie-t-elle concrètement au moins deux dimensions d’usage : déplacement, coût, maintenance, apprentissage, danger, statut social ou dépendance logistique ?\n- [ ] La cause de la compatibilité est-elle matérielle ou institutionnelle, plutôt qu’une essence vague du lieu ?\n- [ ] L’avantage local vient-il d’un savoir, d’un corps entraîné, d’une infrastructure ou d’un outil situé, plutôt que d’une supériorité naturelle des natifs ?\n- [ ] L’occurrence crée-t-elle une limite hors-lieu claire : lenteur, panne, coût, fragilité, illisibilité, épuisement biologique ou dépendance technique ?\n- [ ] L’occurrence produit-elle au moins une conséquence sociale : métier, commerce, frontière, privilège, exclusion, apprentissage ou conflit ?\n- [ ] L’occurrence se rattache-t-elle à un cluster existant — fractures, lisières, morphologies situées, transports locaux — ou justifie-t-elle clairement un nouveau cluster ?\n- [ ] L’occurrence évite-t-elle l’équipement adaptatif parfait qui rend tous les lieux équivalents ?\n- [ ] L’occurrence enrichit-elle une zone de transition, un transbordement ou une pratique quotidienne plutôt qu’un simple effet spectaculaire ?",
-      "re_sume__ia": "Spécialisation environnementale décrit comment l’efficacité d’objets, de véhicules ou de pratiques dépend du milieu, en introduisant les notions de compatibilité au lieu, d’avantages territoriaux et de contraintes matérielles. Le texte évalue le pattern, propose des tropes comme Home Field Advantage et Field Power Effect, et détaille de nombreuses occurrences où des compétences, outils ou organismes sont strictement liés à un environnement spécifique, créant des marchés fermés et des dépendances locales. Il fournit ensuite des stratégies de mitigation, des leviers et des interdits pour intégrer ce pattern de façon cohérente, ainsi qu’une checklist pour vérifier que chaque nouvelle occurrence respecte les critères de spécialisation environnementale."
+      "re_sume__ia": "Le pattern de spécialisation environnementale montre comment l’efficacité d’un corps, d’un outil ou d’une pratique dépend du lieu, en insistant sur la compatibilité au territoire plutôt que sur des bonus magiques généraux ; il est évalué comme original en fantasy (7/10) et en SF (6/10) et très désirable (8/10). Le texte décrit plusieurs tropes (Home Field Advantage, Field Power Effect, Adaptive Armor, Artificial Gill) et de nombreuses occurrences où des espèces, objets ou systèmes ne fonctionnent que dans des environnements spécifiques, créant des marchés fermés et des dépendances locales. Des stratégies de mitigation proposent d’introduire ces contraintes comme moteurs narratifs, de privilégier des compatibilités partielles et asymétriques, et d’éviter les solutions universelles parfaites, tout en suivant une checklist garantissant que chaque occurrence affecte plusieurs dimensions d’usage et engendre des conséquences sociales."
     },
     "section_titles": {
       "analyse_du_pattern": "Analyse du pattern",
@@ -292,10 +330,18 @@
   {
     "Nom": "Quotidien du monstre",
     "values": {
-      "Dernière modification": "2026-06-01T09:18:00.000Z",
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Dernière modification": "2026-07-25T23:17:00.000Z",
+      "Espèces": "1a16e4d2-1b45-8062-aaa7-f39bb07d72f8, 25ed5491-631f-427f-9463-741c837201ff, 1ba6e4d2-1b45-8086-b247-d253799b8241, 1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 2f06e4d2-1b45-8048-8244-d40ef72873cd, b8ac3bad-baef-4c92-aceb-ac7ae389629b, 1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
+      "Nb Communautés": "1",
+      "Nb Espèces": "4",
+      "Nb Lieux": "5",
+      "Nb Personnages": "7",
+      "Occurrences": "17",
+      "Personnages": "892f2fd2-fbe3-4878-a05d-8d608b01e6bf, 1a16e4d2-1b45-8093-89ad-eae2e28f9b31, 1a16e4d2-1b45-8015-b262-cb7e5d0f01a8, 1c76e4d2-1b45-80af-8225-ecdd35b8e367, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1996e4d2-1b45-80fa-97db-fe99255e6c0c, 1d56e4d2-1b45-80e1-a1a9-e96243eb1712",
       "Résumé IA": "Le « Quotidien du monstre » est un pattern fondamental à renforcer, décrivant comment les créatures monstrueuses sont présentées dans des gestes intimes et domestiques sans les humaniser, afin de souligner leur étrangeté matérielle tout en conservant leurs dangers réels ; il est illustré par dix occurrences majeures (Affamés, Moribandons, Grish T’vok, Druce, Deimos, Valkazer, Perpétuants, Violon‑vagabond, Trois‑Dos, Aïrossa) chacune détaillant des routines quotidiennes (manger, dormir, réparer, etc.) et des contraintes physiques, et s’appuie sur plusieurs tropes (Monster Roommate, Benevolent Monsters, etc.) avec des stratégies de narration, de mitigation et des interdictions visant à éviter les gags, l’humanisation ou les allégories d’oppression.",
-      "Statut": "A renforcer",
-      "Total": "13",
+      "Statut": "Sous contrôle",
       "Type": "Fond"
     },
     "sections": {
@@ -373,10 +419,18 @@
   {
     "Nom": "Révolte",
     "values": {
-      "Dernière modification": "2026-06-05T10:51:00.000Z",
+      "Communautés": "1a56e4d2-1b45-8044-a472-d674f194c57a, 46d868f6-f4d1-49da-83c3-c30e44d01358, 1996e4d2-1b45-804c-89d5-c935e604f865, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Dernière modification": "2026-07-25T23:18:00.000Z",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8, 1a16e4d2-1b45-8064-b82f-f2369406c52d",
+      "Lieux": "1b46e4d2-1b45-8091-b2ca-da5a4bef6aa3, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 1b46e4d2-1b45-809b-b6ba-ea6dffbf49b5, b475d40b-597c-40a8-8b11-3561d774f459, 1b46e4d2-1b45-8071-88b9-da69653d4987, 1b46e4d2-1b45-80c6-ba2c-e2512a9a56da",
+      "Nb Communautés": "4",
+      "Nb Espèces": "2",
+      "Nb Lieux": "6",
+      "Nb Personnages": "10",
+      "Occurrences": "22",
+      "Personnages": "892f2fd2-fbe3-4878-a05d-8d608b01e6bf, 1886e4d2-1b45-80bb-b913-d5392af85620, 1d95df62-504c-4349-b8ec-63893118af51, 1a16e4d2-1b45-8093-89ad-eae2e28f9b31, 1ae6e4d2-1b45-8032-b738-f27c2d471393, 1996e4d2-1b45-80fa-97db-fe99255e6c0c, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1d56e4d2-1b45-80e1-a1a9-e96243eb1712, 1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41, eb2168a8-5bf3-4348-85c4-64bb0a1df94d",
       "Résumé IA": "Le pattern « Révolte » décrit un acte de refus concret, local et parfois coûteux contre une autorité ou un ordre établi, sans viser nécessairement à renverser le régime ; il se manifeste par des gestes variés (désobéissance, sabotage, fuite, silence, etc.) qui ouvrent une brèche, créent des précédents ou des solidarités, tout en soulignant la nécessité de coûts, de réactions du système et d’éviter l’esthétique du « rebelle cool ».",
       "Statut": "A surveiller",
-      "Total": "17",
       "Type": "Fond"
     },
     "sections": {
@@ -410,10 +464,14 @@
   {
     "Nom": "Anormalement petit",
     "values": {
-      "Dernière modification": "2026-04-29T13:40:00.000Z",
+      "Dernière modification": "2026-07-25T23:11:00.000Z",
+      "Espèces": "1b36e4d2-1b45-806e-afc2-cdbf864e5212, 8abb3b12-44f7-4ebe-bee7-59eca6ff1c1c, 1a56e4d2-1b45-805b-af5c-e589453aed6f",
+      "Nb Espèces": "3",
+      "Nb Personnages": "3",
+      "Occurrences": "6",
+      "Personnages": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41, 1996e4d2-1b45-80c4-9c73-ddac6322e9bd, d79db510-a670-43d6-96aa-f8b600f3b356",
       "Résumé IA": "Le pattern « Anormalement petit » explore comment la taille extrêmement réduite d’une entité, d’un lieu ou d’un phénomène crée un microcosme révélateur de vulnérabilité, de délicatesse ou de vertige inversé, en évaluant son originalité en fantasy et en SF, sa désirabilité pour le surréalisme vivant, et en proposant des tropes comme l’« Incredible Shrinking Man », les Lilliputiens ou les miniatures modifiant la réalité, tout en définissant des stratégies de mitigation, des interdits et une checklist pour garantir que la petitesse génère des conséquences matérielles et narratives fortes plutôt que d’être simplement décorative ou mignonne.",
       "Statut": "A renforcer",
-      "Total": "6",
       "Type": "Choc"
     },
     "sections": {
@@ -453,10 +511,16 @@
   {
     "Nom": "Anormalement grand",
     "values": {
-      "Dernière modification": "2026-04-29T13:40:00.000Z",
+      "Dernière modification": "2026-07-25T23:11:00.000Z",
+      "Espèces": "1ba6e4d2-1b45-8086-b247-d253799b8241, 2246e4d2-1b45-803e-999e-faf696719f3b",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4, 1b46e4d2-1b45-801a-ada0-f6ec210d2fa0, 1b46e4d2-1b45-8091-b2ca-da5a4bef6aa3, 1cc6e4d2-1b45-80fb-b0ec-f0cfe9539620",
+      "Nb Espèces": "2",
+      "Nb Lieux": "4",
+      "Nb Personnages": "1",
+      "Occurrences": "7",
+      "Personnages": "f0105182-324b-4626-86c3-a78edbb3d2b6",
       "Résumé IA": "Le pattern « Anormalement grand » décrit comment des entités, lieux ou phénomènes dépassant l’échelle humaine créent un effet de sublime et de décentrement, en évaluant son originalité en fantasy (5/10) et en SF (6/10) ainsi que sa désirabilité (8/10). Il explore divers tropes liés au gigantisme, propose des stratégies de mitigation comme réserver le gigantisme aux impacts concrets et éviter les créatures géantes sans justification matérielle, et fournit une checklist pour garantir que chaque occurrence modifie réellement les déplacements, les outils ou l’organisation sociale.",
       "Statut": "A surveiller",
-      "Total": "7",
       "Type": "Choc"
     },
     "sections": {
@@ -494,10 +558,16 @@
   {
     "Nom": "Boussole magique",
     "values": {
-      "Dernière modification": "2026-06-01T21:57:00.000Z",
+      "Dernière modification": "2026-07-25T22:42:00.000Z",
+      "Lieux": "1b36e4d2-1b45-802c-910a-fb74729b22f8, 1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Nb Lieux": "2",
+      "Nb Objets": "3",
+      "Nb Personnages": "2",
+      "Objets": "26f6e4d2-1b45-809a-b346-d20068dae6bd, 1ed6e4d2-1b45-800b-a6ab-c51160ac3895, 1ed6e4d2-1b45-80c5-84ec-db6cc31c0a7c",
+      "Occurrences": "7",
+      "Personnages": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
       "Résumé IA": "Le pattern \"Boussole magique\" décrit un artefact guidant vers des cibles inaccessibles à l’orientation ordinaire, avec trois occurrences principales : le Nœud de convergence, le Cadran des Sept Fractures et le Gantelet du Serment Brisé. Il doit être limité à des zones où la lisibilité spatiale est réellement défaillante, imposer un coût à chaque utilisation et rester rare pour éviter un GPS narratif simpliste. Le texte fournit des critères de cohérence, des exemples de tropes liés, des stratégies de mitigation, des interdits et une checklist pour valider de nouvelles occurrences.",
       "Statut": "Sous contrôle",
-      "Total": "3",
       "Type": "Choc"
     },
     "sections": {
@@ -529,23 +599,31 @@
   {
     "Nom": "Hyper-rationalité et comptage compulsif",
     "values": {
-      "Dernière modification": "2026-05-28T09:06:00.000Z",
-      "Résumé IA": "Le texte analyse le pattern de l’hyper‑rationalité et du comptage compulsif comme un cliché narratif, en évaluant son originalité (faible en fantasy et SF) et sa désirabilité (faible), puis décrit divers tropes associés (Spock, Spock Speak, Number Obsession) et propose des stratégies de mitigation, des interdictions et des réorientations pour ancrer ce comportement dans des causes psychologiques, biologiques ou culturelles, tout en intégrant des moments où la rationalité échoue.",
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1, 8ac6015e-f5bb-4861-adb7-e23133e485cd, 46d868f6-f4d1-49da-83c3-c30e44d01358, 1ed6e4d2-1b45-80d8-a3be-c4c7910fd5ad",
+      "Dernière modification": "2026-07-25T23:14:00.000Z",
+      "Espèces": "1be6e4d2-1b45-8094-8b25-d887930a521e",
+      "Lieux": "1b36e4d2-1b45-802c-910a-fb74729b22f8, 1b46e4d2-1b45-8028-a2e5-f06744044aa4",
+      "Nb Communautés": "4",
+      "Nb Espèces": "1",
+      "Nb Lieux": "2",
+      "Nb Personnages": "11",
+      "Occurrences": "18",
+      "Personnages": "1bc6e4d2-1b45-8013-831b-e5a42c40dd2f, 1c36e4d2-1b45-80f2-8124-e9ddf8d9359e, 1a16e4d2-1b45-8015-b262-cb7e5d0f01a8, c59d928f-a26b-47cd-8806-343e0dff8b28, 1ae6e4d2-1b45-8032-b738-f27c2d471393, ec7da632-19b5-4d59-bd18-20a5bd5805d9, 3256e4d2-1b45-80f4-9eeb-de67c6d8955b, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 2cc6e4d2-1b45-8062-9d49-f252d825bc90, 1996e4d2-1b45-80a5-a7ae-e9d43372323f, 892f2fd2-fbe3-4878-a05d-8d608b01e6bf",
+      "Résumé IA": "Analyse du pattern d’hyper‑rationalité et de comptage compulsif : le personnage se définit par des comportements de calcul, de notation et de classification qui remplacent l’intériorité, mais ces tics doivent toujours être ancrés dans une cause psychologique, biologique ou culturelle explicite. Le document décrit les origines, les sous‑trope (Spock, Spock Speak, Number Obsession), propose des critères de subversion et de cohérence, liste de nombreuses occurrences illustrant comment le comptage sert de mécanisme de survie, de contrôle ou de traumatisme, et fournit des stratégies de mitigation narrative ainsi qu’une checklist pour garantir que chaque nouvelle occurrence respecte les interdictions et intègre des moments où la rationalité échoue.",
       "Statut": "A réduire",
-      "Total": "8",
       "Type": "Cliché"
     },
     "sections": {
       "analyse_du_pattern": "Un personnage est caractérisé exclusivement ou principalement par des comportements de rationalisation ostensible — compter, noter, classer, calculer — ces gestes tenant lieu de personnalité plutôt qu'en révélant une : la méthode remplace l'intériorité.",
       "e_valuation_du_pattern": "*L'évaluation porte sur le pattern lui-même, pas sur ses occurrences dans Alteir. Pour l’originalité, un score élevé est justifié si le pattern est sous-exploré ou si des oeuvres récentes ont montré un usage impactant (avec le pattern LUI-MEME pas avec une inversion). Pour la Vision, évaluer si le pattern est souhaitable en lui-même, même sans être subverti.*\n<table header-row=\"true\">\n<colgroup>\n<col width=\"184.982666015625\">\n<col width=\"143.9943084716797\">\n<col width=\"334.81597900390625\">\n</colgroup>\n<tr>\n<td>Intérêt du pattern</td>\n<td>Note sur 10</td>\n<td>Justification (1 phrase)</td>\n</tr>\n<tr>\n<td>Originalité en Fantasy</td>\n<td>2/10</td>\n<td>Très commun : le mage qui consigne tout, l'érudit qui quantifie la magie, le sage archiviste — archétype récurrent dans tout RPG heroic fantasy et toute fantasy livresque.</td>\n</tr>\n<tr>\n<td>Originalité en SF</td>\n<td>1/10</td>\n<td>Archétype IA/androïde/vulcain absolu : Spock, Data, HAL, 0 — le personnage hyper-rationnel qui prend des notes EST le cliché fondateur de la SF depuis ses origines.</td>\n</tr>\n<tr>\n<td>Désirabilité pour la <mention-page url=\"https://app.notion.com/p/1886e4d21b45811188d5edb08cafe956\"/></td>\n<td>2/10</td>\n<td>La Vision veut des conflits de conscience sans solution idéale et des personnages définis par leurs liens et leurs choix — un personnage réduit à ses tics comportementaux est l'exact opposé de cette exigence.</td>\n</tr>\n</table>",
       "tropes": "- **The Spock**\n\t- Description : archétype de personnage qui applique systématiquement la raison et les règles à toutes ses décisions, au détriment de l'empathie ou de l'intuition — la rationalité tient lieu de boussole morale et de personnalité.\n\t- Intérêt ou subversion : intéressant uniquement quand le personnage est confronté à une situation que sa rationalité ne peut pas résoudre (dilemme moral sans solution logique) ; banal quand la rationalité est juste un trait exotique servant de repoussoir à un personnage émotionnel.\n\t- Exemples (en général) : Spock (*Star Trek: TOS*) — le Vulcain logique par culture et biologie ; L (*Death Note*) — le détective dont toute l'existence est organisée autour de la déduction ; Sheldon Cooper (*The Big Bang Theory*) — la rationalité exhibée réduite à un ressort comique.\n\t- Cohérence : le trope suppose que la rationalité est une essence stable — ce que le matérialisme d'Escelion conteste (la rationalité est un outil social et cognitif, pas une nature). Pas d'incompatibilité ontologique, mais le trope brut est anti-Vision.\n\t\t- Exemple (cohérence Alteir) : L dans *Death Note* — sa rationalité exhibée est aussi une performance sociale délibérée, une protection, un masque ; ce qui en fait autre chose qu'un simple trait de caractère.\n\t- Analyse Mythe / Réalité :\n\t\t- Couche Mythe : certains êtres sont \"naturellement\" rationnels, leur rationalité est une essence stable qui n'a pas besoin de motivation ou d'histoire.\n\t\t- Couche Réalité : la rationalité est un outil toujours situé — les comportements rationnels (compter, noter, classer) sont le symptôme d'une intériorité : anxiété, besoin de contrôle, curiosité, survie. La rationalité pure sans motivation est un artefact de conception.\n\t\t- Décision Escelion : note Vision 2/10 → ancrer dans la Réalité. Les comportements rationnels doivent révéler une intériorité, pas la remplacer.\n- **Spock Speak**\n\t- Description : façon de parler déspassionnée, précise et technique qui signale la distance du personnage vis-à-vis de la société — la forme linguistique tient lieu de caractérisation, signifiant l'altérité sans la construire.\n\t- Intérêt ou subversion : subversif si le Spock Speak est une performance consciente que le personnage choisit d'abandonner dans des moments clés, révélant que le registre était un choix, pas une nature.\n\t- Exemples (en général) : Teal'c (*Stargate SG-1*) — formalisme issu d'une culture militaire précise ; Data (*Star Trek: TNG*) — androïde qui parle techniquement faute de comprendre le langage émotionnel ; 7 de 9 (*Star Trek: Voyager*) — ex-Borg dont le Spock Speak est une trace de déshumanisation.\n\t- Cohérence : le trope suppose une distance naturelle avec la société — or Escelion est un monde de liens d'acier et de structures sociales ; un personnage qui parle de façon déspassionnée n'est pas alien par nature, mais par histoire, position sociale ou choix.\n\t\t- Exemple (cohérence Alteir) : Teal'c dans *Stargate* — son formalisme vient d'une culture militaire spécifique (les Jaffa), pas d'une essence.\n\t- Analyse Mythe / Réalité :\n\t\t- Couche Mythe : certains êtres parlent naturellement de façon déspassionnée parce qu'ils \"sont\" rationnels — le registre est une essence.\n\t\t- Couche Réalité : le registre de langage est toujours socialement situé — une façon de parler formelle et technique est apprise, imposée ou choisie pour des raisons qui ont une histoire et un coût.\n\t\t- Décision Escelion : ancrer dans la Réalité — le Spock Speak doit avoir une origine sociale ou biographique nommée.\n- **Number Obsession** ([tvtropes.org/Main/NumberObsession](http://tvtropes.org/Main/NumberObsession))\n\t- Description : un personnage est défini par son obsession pour les chiffres — il compte tout, donne des statistiques, quantifie l'intime — et ce comportement est présenté comme un trait de caractère suffisant en lui-même.\n\t- Intérêt ou subversion : souvent utilisé pour signifier la \"bizarrerie\" de façon superficielle ; devient intéressant si le comptage révèle une stratégie de survie, un rapport traumatique au monde ou un besoin de contrôle face à l'imprévisible.\n\t- Exemples (en général) : Raymond Babbitt (*Rain Man*) — compte les cure-dents comme réponse à un monde incompréhensible ; Adrian Monk (*Monk*) — compte et classe comme rituel anxieux face au chaos ; Harold Crick (*Stranger Than Fiction*) — compte parce que toute sa vie est régie par une narration extérieure.\n\t- Cohérence : compatible avec Escelion à condition d'être ancré dans une cause matérielle (neurologie, trauma, culture de mesure) plutôt que dans une \"bizarrerie\" décorative.\n\t\t- Exemple (cohérence Alteir) : Harold Crick dans *Stranger Than Fiction* — le comptage est une réponse à une pression structurelle explicite, pas une essence.\n\t- Analyse Mythe / Réalité :\n\t\t- Couche Mythe : certains personnages comptent parce qu'ils \"sont\" comme ça — c'est leur nature, un trait exotique qui les distingue sans explication.\n\t\t- Couche Réalité : l'obsession pour les chiffres est toujours causée — neurologie atypique, anxiété chronique, culture de mesure, traumatisme de perte de contrôle.\n\t\t- Décision Escelion : ancrer dans la Réalité — le comptage doit être le symptôme d'une cause nommée, jamais un trait flottant.",
-      "occurrences": "- **Avili de l'Éternel Retour** — Lexicorphe vohar qui formalise, quantifie et traduit instinctivement tout ce qu'il perçoit, y compris les émotions, les silences et les regards ; la cause est explicite et double (trait prédispositionnel amplifié en stratégie de survie par la dispersion de sa communauté) — occurrence bien subvertie, la frontière entre le trait inné et le mécanisme acquis est elle-même un enjeu narratif.\n- **Thalas Tarrivka-Ven** — Perfusionniste Van'Doei qui indexe compulsivement les organoïdes par contact tactile, construisant un double sensoriel des archives entières dans les craquelures de sa propre peau ; cause explicite : l'indexation compense l'absence totale de séquence dans sa propre existence (née sans forge, sans histoire) — occurrence bien subvertie, la rationalité est un geste de survie identitaire.\n- **Miroir-Encré** — Qadul'Doei Dévot qui prend des notes sur tout en permanence, y compris dans les conversations, et réécrit plusieurs fois les passages qui le troublent ; cause partielle : mission d'agent officieux combinée à une physiologie archivistique et à une incapacité à décider — occurrence partiellement subvertie, la notation est motivée mais la cause reste floue.\n- **Yrthas Keth-Vareth** — Van'Doei murmurateur qui ne pose jamais de question dont iel ne connaît pas déjà la réponse et formule les obligations comme des constats comptables neutres (\"je note\", \"la dette n'est pas un poids, c'est une direction\") ; cause explicite : la rigueur comptable est un outil de contrôle social délibéré, ancré dans une idéologie du pouvoir par la dette — occurrence bien subvertie, la rationalité exhibée est une performance de domination.\n- **Duq'Sha Dhorra** — Van'Doei infiltré dans les Bibliothèques Veineuses dont la graphomanie corrective est le tic central : incapable de lire un texte sans y apposer mentalement une annotation, iel incise des glyphes correcteurs sur son avant-bras quand le texte est inaltérable ; cause explicite et bien anchée : hallucination scripturale à 7 ans (« les archives ne préservent pas, elles transforment ») transformée en mécanisme de survie cognitive — occurrence bien subvertie.\n- **Zaehria Neth'Varu** — Van'Doei archiviste fusionnée aux Plis d'ossements, dont l'incapacité à oublier ce qu'elle a fait prend la forme d'une accumulation sensorielle plutôt que comptable : elle porte chaque trahison avec une précision de texture, d'odeur et de goût, sans la réduire à un décompte. Le geste de toucher les encoches de ses sept doigts calcifiés avant chaque réponse moralement engageante (ancrage corporel) remplace tout protocole numérique. Ce qui la ronge est qualitatif : l'impossibilité de classer moralement certaines omissions, notamment la plus récente qu'elle ne peut nommer ni protection ni trahison. La rationalité est mise en défaut par l'accumulation elle-même, irréductible à toute nomenclature archivistique — occurrence subvertie, le pattern a été retravaillé pour retirer le comptage quantitatif au profit d'une mémoire sensorielle qualitative.\n- **Panthéons et Cultes Déimosiques** — institution sacerdotale dont les titres (Grand Calculateur, Chronocrate, Calculateur d'Ombres) définissent la caste par la mesure. Occurrence institutionnelle corrigée : le calcul est désormais ancré dans la nécessité de survie (erreur = famine), les limites du modèle prédictif sont explicites, et la tyrannie du Grand Calculateur naît de la responsabilité, pas d'une essence hyper-rationnelle — occurrence reframée.\n- **<mention-page url=\"https://app.notion.com/p/1c36e4d21b4580f28124e9ddf8d9359e\"/>** — Van'Doei cartographe exilé dans les Plis d'ossements, qui marmonne des coordonnées, trace frénétiquement des motifs géométriques et entrelace ses phrases d'équations spatiales ; causes explicites et multiples : la cartographie compulsive répond au trauma de Thyra (la méthode comme preuve que la profanation n'était pas vaine), au bannissement (contrôle spatial comme substitut au contrôle social perdu) et à la disparition de Yul. La rationalité est mise en défaut par les « angles de Voknir » (micro-poches stables créées sans le savoir) et par les moments de silence total quand un souvenir affleure — occurrence bien subvertie.\n- **Zhira** — occurrence retirée du pattern : l'apprentie ne doit plus être caractérisée par un carnet, une prise de notes ou une rétention consciente d'information face à Kha'Vareth. Sa version corrigée déplace le motif vers la maintenance subalterne : elle touche, cale, goûte la poussière, reprend les joints et compense localement la fissure sans comprendre que son efficacité masque le danger. Ce n'est plus une hyper-rationalité de carnet, mais une docilité technique qui produit un effet systémique.",
+      "occurrences": "- **Avili de l'Éternel Retour** — Lexicorphe vohar qui formalise, quantifie et traduit instinctivement tout ce qu'il perçoit, y compris les émotions, les silences et les regards ; la cause est explicite et double (trait prédispositionnel amplifié en stratégie de survie par la dispersion de sa communauté) — occurrence bien subvertie, la frontière entre le trait inné et le mécanisme acquis est elle-même un enjeu narratif.\n- **Thalas Tarrivka-Ven** — Perfusionniste Van'Doei qui indexe compulsivement les organoïdes par contact tactile, construisant un double sensoriel des archives entières dans les craquelures de sa propre peau ; cause explicite : l'indexation compense l'absence totale de séquence dans sa propre existence (née sans forge, sans histoire) — occurrence bien subvertie, la rationalité est un geste de survie identitaire.\n- **Miroir-Encré** — Qadul'Doei Dévot qui prend des notes sur tout en permanence, y compris dans les conversations, et réécrit plusieurs fois les passages qui le troublent ; cause partielle : mission d'agent officieux combinée à une physiologie archivistique et à une incapacité à décider — occurrence partiellement subvertie, la notation est motivée mais la cause reste floue.\n- **Yrthas Keth-Vareth** — Van'Doei murmurateur qui ne pose jamais de question dont iel ne connaît pas déjà la réponse et formule les obligations comme des constats comptables neutres (\"je note\", \"la dette n'est pas un poids, c'est une direction\") ; cause explicite : la rigueur comptable est un outil de contrôle social délibéré, ancré dans une idéologie du pouvoir par la dette — occurrence bien subvertie, la rationalité exhibée est une performance de domination.\n- **Duq'Sha Dhorra** — Van'Doei infiltré dans les Bibliothèques Veineuses dont la graphomanie corrective est le tic central : incapable de lire un texte sans y apposer mentalement une annotation, iel incise des glyphes correcteurs sur son avant-bras quand le texte est inaltérable ; cause explicite et bien anchée : hallucination scripturale à 7 ans (« les archives ne préservent pas, elles transforment ») transformée en mécanisme de survie cognitive — occurrence bien subvertie.\n- **Zaehria Neth'Varu** — Van'Doei archiviste fusionnée aux Plis d'ossements, dont l'incapacité à oublier ce qu'elle a fait prend la forme d'une accumulation sensorielle plutôt que comptable : elle porte chaque trahison avec une précision de texture, d'odeur et de goût, sans la réduire à un décompte. Le geste de toucher les encoches de ses sept doigts calcifiés avant chaque réponse moralement engageante (ancrage corporel) remplace tout protocole numérique. Ce qui la ronge est qualitatif : l'impossibilité de classer moralement certaines omissions, notamment la plus récente qu'elle ne peut nommer ni protection ni trahison. La rationalité est mise en défaut par l'accumulation elle-même, irréductible à toute nomenclature archivistique — occurrence subvertie, le pattern a été retravaillé pour retirer le comptage quantitatif au profit d'une mémoire sensorielle qualitative.\n- **Panthéons et Cultes Déimosiques** — institution sacerdotale dont les titres (Grand Calculateur, Chronocrate, Calculateur d'Ombres) définissent la caste par la mesure. Occurrence institutionnelle corrigée : le calcul est désormais ancré dans la nécessité de survie (erreur = famine), les limites du modèle prédictif sont explicites, et la tyrannie du Grand Calculateur naît de la responsabilité, pas d'une essence hyper-rationnelle — occurrence reframée.\n- **<mention-page url=\"https://app.notion.com/p/1c36e4d21b4580f28124e9ddf8d9359e\"/>** — Van'Doei cartographe exilé dans les Plis d'ossements, qui marmonne des coordonnées, trace frénétiquement des motifs géométriques et entrelace ses phrases d'équations spatiales ; causes explicites et multiples : la cartographie compulsive répond au trauma de Thyra (la méthode comme preuve que la profanation n'était pas vaine), au bannissement (contrôle spatial comme substitut au contrôle social perdu) et à la disparition de Yul. La rationalité est mise en défaut par les « angles de Voknir » (micro-poches stables créées sans le savoir) et par les moments de silence total quand un souvenir affleure — occurrence bien subvertie.\n- **<mention-page url=\"https://app.notion.com/p/1a16e4d21b458015b262cb7e5d0f01a8\"/>** — Van'Doei prophétesse du Paradigme Ésothrope qui ne peut s'empêcher de voir et de compter les futurs possibles autour de chaque être vivant, qu'elle doit dénombrer, cataloguer et évaluer ; cause explicite : calibrage collectif et hybridation génétique optimisant la Préhension des Conduits temporels. La rationalité est mise en défaut par les intervalles où elle reçoit sans calculer (écoute des silences, jeux d'ossements) et par son désir secret d'une Veille sans visions — occurrence bien subvertie, mais note de conception : « volontairement caricaturale ».\n- **<mention-page url=\"https://app.notion.com/p/c59d928fa26b47cd8806343e0dff8b28\"/>** — Imuin acolyte-indexeur du culte d'Ilyena, alias Le Décompteur ; répond par un chiffre avant d'expliquer, compte les absences et les silences comme d'autres comptent les rations. Cause explicite : formatage comme module de stockage par Ilyena, puis système personnel de décompte développé pour organiser son espace mental. La rationalité est mise en défaut par l'incident du registre muet : compter juste l'oblige à admettre qu'une ligne effacée peut être plus vraie que le registre officiel — occurrence partiellement subvertie, une Revue a déjà flagué le pattern comme à limiter.\n- **<mention-page url=\"https://app.notion.com/p/1ae6e4d21b458032b738f27c2d471393\"/>** — Van'Doei Maître-Flagellant du Culte de l'Anentropie dont la cartographie compulsive (mémorisation des harmoniques des cloisons osseuses) et la taxinomie spontanée de la souffrance (classement instinctif de toute blessure en catégories liturgiques) sont des tics révélateurs. Cause explicite : besoin compulsif de donner un sens à chaque souffrance, ancré dans deux abandons fondateurs. La rationalité est mise en défaut quand iel tente de classer la mort de ses disciples dans sa taxinomie et que les deux colonnes restent vides — occurrence bien subvertie.\n- **<mention-page url=\"https://app.notion.com/p/ec7da63219b54d59bd1820a5bd5805d9\"/>** — Van'Doei officiante du Culte de l'Anentropie, alias L'Archiviste blanche, dont la pratique centrale est la documentation compulsive des durées de cicatrisation et le registre exact des passages dans les Bains. Cause explicite : occupation d'un vide statutaire pendant six Nuées en comptant, devenu pratique identitaire. La rationalité est mise en défaut par le mutisme délibéré sur sa propre expérience corporelle (elle archive la durée, pas la sensation) et par le moment à venir où elle devra tracer sur sa peau la forme d'un novice mort d'une encre qu'elle avait observée sans intervenir — occurrence bien subvertie.\n- **<mention-page url=\"https://app.notion.com/p/3256e4d21b4580f49eebde67c6d8955b\"/>** — Vaideccane prêtresse-archiviste dirigeant les Tenants du Gradient ; a passé dix-huit Nuées à cataloguer, classer, copier et mémoriser les archives de Vol Reitar. Cause explicite : ritualisme compensatoire masquant une terreur permanente du chaos ancrée dans le départ d'Eonundé. La rationalité est mise en défaut par sa cécité à reproduire les structures de contrôle qu'elle a fuies — occurrence partiellement subvertie, l'archivage comme ancrage identitaire face à la terreur.\n- **<mention-page url=\"https://app.notion.com/p/2cc6e4d21b4580629d49f252d825bc90\"/>** — Van'Doei Conductus des Rivières Vertébrales (duo symbiotique avec Siphon Argenté) dont la compulsion est de mémoriser et archiver tout dans l'ordre exact : séquence, contexte thermique, présences, ordre des événements. Cause explicite : transmission de Kel'Thara par geste et silence, cristallisée en survie après la marginalisation. Tient le Registre des Passagers Perdus avec une rigueur qui dépasse sa fonction. La rationalité est mise en défaut par la fusion avec Siphon qui menace d'effacer précisément la mémoire séquentielle — occurrence bien subvertie.\n- **<mention-page url=\"https://app.notion.com/p/1996e4d21b4580a5a7aee9d43372323f\"/>** — PJ possédée par l'Éthérée dont le comptage est un symptôme à révéler progressivement, déjà mentionné dans les stratégies de mitigation du pattern (introduire d'abord par les relations et désirs, puis révéler le comptage). Occurrence à documenter plus en détail dans la fiche source.\n- **<mention-page url=\"https://app.notion.com/p/892f2fd2fbe34878a05d8d608b01e6bf\"/>** — Antagoniste principal, hybride aldravind-vaideccan, qui tient une comptabilité mentale obsessionnelle du pourcentage de Vol restant dans son corps (« % Vol / % non-Vol », décroissant mois après mois) et une comptabilité des morts et des échecs par nom et date. Cause explicite : effacement compulsif du père biologique morceau par morceau, chaque greffe étant un acte de punition et de révolte corporelle. La rationalité est mise en défaut par le fait qu'à 0% de Vol dans le corps, il reste fondamentalement l'œuvre de son père — aucun remplacement n'efface une conception — occurrence bien subvertie, la comptabilité obsessionnelle est un symptôme de l'effacement, pas l'effacement lui-même.\n- **<mention-page url=\"https://app.notion.com/p/1be6e4d21b4580948b25d887930a521e\"/>** — Super-organisme conceptomorphe du Marché automaton dont la biologie entière est indissociable des flux transactionnels : les Kephrasites perçoivent les transactions comme un registre sensoriel direct, le Code Algorithmique est en partie une formalisation de leur langage chimico-lumineux (Kheprais), et les Calculateurs tiennent des registres formels de pertes, Dividendes Nataux et Liquidations. Occurrence institutionnelle : leur système de valeurs n'a pas de case prévue pour ce qui résiste au comptage. La rationalité est mise en défaut par les phases du Carnavalier, variable hors-Code qu'ils mesurent et cartographient sans pouvoir l'influencer — occurrence reframée, le comptage est constitutif de l'espèce, pas un trait individuel.\n- **<mention-page url=\"https://app.notion.com/p/46d868f6f4d149da83c3c30e44d01358\"/>** (Arithmétique des Âmes) — Corps armé du Culte de l'Anentropie pratiquant une comptabilité morale informelle : registre des neutralisations et de leurs résultats, chaque mort accidentelle portée par le membre responsable comme dette spirituelle récitée à voix basse avant l'entraînement matinal. Occurrence institutionnelle : le comptage tient lieu de jugement, la récitation tient lieu de sanction. La rationalité est mise en défaut par le fait que les Entailleurs eux-mêmes tiennent l'Arithmétique pour preuve que « compter ne sauve pas toujours ce qui aurait dû l'être », et que chaque exception absorbée sans intervention extérieure élargit imperceptiblement la définition de ce qui est supportable — occurrence bien subvertie, la comptabilité morale est une catharsis institutionnelle, pas une justice.\n- **<mention-page url=\"https://app.notion.com/p/1ed6e4d21b4580d8a3bec4c7910fd5ad\"/>** — Institution dédiée à la mesure des conséquences temporelles des décisions d'Uresaïr, fondée sur le principe « Précision avant tout. Une mesure approximative est pire qu'une absence de mesure. » Archivage circulaire dans les Registres selon un système non-linéaire. Occurrence institutionnelle frontière : la mesure y est un substitut à l'action (tabou de non-intervention), pas une compulsion classique de comptage. La rationalité est mise en défaut par le fait que mesurer n'empêche pas — les Chronographes observent, mesurent, archivent, mais ne corrigent pas. Slogan : « Le temps ne ment qu'à ceux qui refusent de le mesurer. »\n- **Zhira** — occurrence retirée du pattern : l'apprentie ne doit plus être caractérisée par un carnet, une prise de notes ou une rétention consciente d'information face à Kha'Vareth. Sa version corrigée déplace le motif vers la maintenance subalterne : elle touche, cale, goûte la poussière, reprend les joints et compense localement la fissure sans comprendre que son efficacité masque le danger. Ce n'est plus une hyper-rationalité de carnet, mais une docilité technique qui produit un effet systémique.",
       "usages_critiques": "- **Satire** : un Entailleur Van'Doei qui tient un registre de ses propres tics comportementaux — « 14h : ai compté mes pas. 14h03 : ai compté le nombre de fois où j'ai compté mes pas. 14h07 : ai noté que la récursion est elle-même un pattern ». L'hyper-rationalité qui se dévore elle-même.\n- **Retournement** : un personnage présenté comme chaotique et intuitif s'avère tenir un registre secret plus méticuleux que tous les « rationnels » du cast — la rationalité n'est pas là où on la signale. Ou inversement : le compteur compulsif le plus rigoureux prend sa décision la plus importante sur une intuition qu'il ne peut pas formaliser.\n- **Cliché assumé** : Avili qui sait parfaitement qu'il formalise tout comme mécanisme de survie — et qui le formalise aussi (« je sais que je traduis mes émotions en catégories pour les rendre gérables, ce qui est lui-même un comportement de catégorisation »). La lucidité récursive comme piège, pas comme solution.\n- **Caricature productive** : les Panthéons Déimosiques dont les titres (Grand Calculateur, Chronocrate) sont si littéralement rationnels qu'ils en deviennent absurdes — et pourtant fonctionnels. Le cliché poussé jusqu'au bout révèle que toute institution est un système de comptage déguisé.",
-      "gestion_narrative": "- **Séquençage temporel** : introduire d'abord les personnages par leurs relations et désirs (ex. Vethraak par sa peur de perdre Esthir), puis révéler progressivement que le comptage est un symptôme — pas une présentation.\n- **Stratification par couche** : le comptage comme fait neurologique/comportemental (couche matérielle — structures cognitives, tics moteurs), comme récit identitaire (couche épistémique — « je suis quelqu'un de rationnel »), comme outil de pouvoir (couche politique — Yrthas qui utilise la comptabilité comme domination sociale).\n- **Dialectique inter-patterns** : en écho avec « Traumatisme fondateur » (la rationalité compulsive comme réponse au trauma — Avili, Vethraak). En tension avec « Opacité systémique » (la rationalité exhibée peut masquer un système opaque). En écho avec « Philosophie de l'exploitation » (la rationalité comme doctrine — Panthéons Déimosiques).\n- **Concentration assumée** : la majorité des occurrences sont portées par des personnages Van'Doei. Ce n'est pas un trait d'espèce — les Van'Doei ne sont pas « culturellement » hyper-rationnels au sens monolithique ; on trouve des Van'Doei émotifs, intuitifs, pragmatiques, dans toutes les couches d'Escelion. La concentration reflète plutôt la présence des personnages dans des **contextes institutionnels** qui valorisent et entraînent la rationalité compulsive (Culte de l'Anentropie et ses Bureaux, Bibliothèques Veineuses, Murmurateurs lettrés, Perfusionnistes). L'assumer comme effet de corpus lié à ces institutions, pas comme essence d'espèce.\n- **Échelle de lecture** : Panthéons Déimosiques = macro (institution structurante). Yrthas, Zaehria = méso (dynamiques sociales). Duq'Sha = micro (trajectoire individuelle). Ne pas traiter les micro avec le même poids narratif que les macro.\n- **Subalternes de grands personnages** : un apprenti, serviteur, assistant ou technicien placé sous l'autorité d'une figure écrasante ne doit pas devenir artificiellement résistant par simple rétention d'information. La tension doit venir de sa marge d'action réelle : compenser, déplacer, obéir trop bien, mal interpréter une consigne, protéger son poste, ou produire un signe matériel que le joueur peut lire.",
+      "gestion_narrative": "- **Séquençage temporel** : introduire d'abord les personnages par leurs relations et désirs (ex. Vethraak par sa peur de perdre Esthir), puis révéler progressivement que le comptage est un symptôme — pas une présentation.\n- **Stratification par couche** : le comptage comme fait neurologique/comportemental (couche matérielle — structures cognitives, tics moteurs), comme récit identitaire (couche épistémique — « je suis quelqu'un de rationnel »), comme outil de pouvoir (couche politique — Yrthas qui utilise la comptabilité comme domination sociale).\n- **Dialectique inter-patterns** : en écho avec « Traumatisme fondateur » (la rationalité compulsive comme réponse au trauma — Avili, Vethraak). En tension avec « Opacité systémique » (la rationalité exhibée peut masquer un système opaque). En écho avec « Philosophie de l'exploitation » (la rationalité comme doctrine — Panthéons Déimosiques).\n- **Concentration assumée** : la majorité des occurrences sont portées par des personnages Van'Doei. Ce n'est pas un trait d'espèce — les Van'Doei ne sont pas « culturellement » hyper-rationnels au sens monolithique ; on trouve des Van'Doei émotifs, intuitifs, pragmatiques, dans toutes les couches d'Escelion. La concentration reflète plutôt la présence des personnages dans des **contextes institutionnels** qui valorisent et entraînent la rationalité compulsive (Culte de l'Anentropie et ses Bureaux, Bibliothèques Veineuses, Murmurateurs lettrés, Perfusionnistes, Paradigme Ésothrope, Tenants du Gradient, Garde Sanguine, Marché automaton, Chronographes d'Iodan-liaqar). L'assumer comme effet de corpus lié à ces institutions, pas comme essence d'espèce.\n- **Échelle de lecture** : Panthéons Déimosiques, Kephrasites, Chronographes = macro (institutions structurantes). Garde Sanguine, Yrthas, Zaehria = méso (dynamiques sociales). Duq'Sha = micro (trajectoire individuelle). Ne pas traiter les micro avec le même poids narratif que les macro.\n- **Subalternes de grands personnages** : un apprenti, serviteur, assistant ou technicien placé sous l'autorité d'une figure écrasante ne doit pas devenir artificiellement résistant par simple rétention d'information. La tension doit venir de sa marge d'action réelle : compenser, déplacer, obéir trop bien, mal interpréter une consigne, protéger son poste, ou produire un signe matériel que le joueur peut lire.",
       "interdits": "- Pas de personnage dont le comptage, la notation ou la classification est présenté comme un trait de caractère suffisant sans cause psychologique, biologique ou culturelle nommée.\n- Pas de « personnage au carnet » ajouté par réflexe pour signaler l'intelligence, la prudence ou l'étrangeté. Le carnet est interdit comme tic de caractérisation si le personnage peut révéler la même information par un geste matériel, une relation, un corps au travail ou une conséquence visible.\n- Pas de Spock Speak sans origine sociale ou biographique identifiable dans la fiche du personnage.\n- Pas de rationalité présentée comme une \"essence\" stable (\"il est comme ça\") — formuler toujours en termes de comportement situé et de cause.\n- Pas de personnage dont l'intériorité se réduit à ses tics comportementaux : tout personnage qui quantifie doit avoir des désirs, des peurs ou des liens distincts de cette compulsion.",
       "re_orientations": "- Si un personnage quantifie, ancrer le comportement dans ce qu'il révèle de son rapport au monde : anxiété, besoin de contrôle, deuil d'un ordre perdu, stratégie de survie, culture de mesure imposée par son milieu.\n- Préférer une rationalité situationnelle (le personnage l'active dans certains contextes, la perd dans d'autres) plutôt qu'une rationalité permanente et monolithique.\n- Créer des moments où la méthode est mise en défaut — où compter ne suffit pas, où la grille de lecture rationnelle échoue face à une situation irréductible.\n- Patterns voisins : **Traumatisme fondateur** (si la rationalité est une réponse à un trauma) ; **Opacité systémique** (si la rationalité est une façade idéologique entretenant un système) ; **Philosophie de l'exploitation** (si la rationalité est rationalisée en doctrine).",
       "checklist_avant_nouvelle_occurrence": "- [ ] Le comportement rationnel de ce personnage (comptage, notation, classement) a-t-il une cause psychologique, biologique ou culturelle nommée dans sa fiche ?\n- [ ] Le personnage a-t-il une intériorité distincte de ses tics comportementaux (désirs, peurs, liens affectifs) ?\n- [ ] La rationalité est-elle présentée comme un outil situationnel ou comme une essence permanente ?\n- [ ] Y a-t-il au moins un moment dans son arc où la rationalité est mise en défaut par une situation que la méthode ne peut pas résoudre ?\n- [ ] Si le personnage parle de façon formelle ou déspassionnée, cette façon de parler a-t-elle une origine sociale ou biographique identifiable ?",
-      "re_sume__ia": "Le texte analyse le pattern de l’hyper‑rationalité et du comptage compulsif comme un cliché narratif, en évaluant son originalité (faible en fantasy et SF) et sa désirabilité (faible), puis décrit divers tropes associés (Spock, Spock Speak, Number Obsession) et propose des stratégies de mitigation, des interdictions et des réorientations pour ancrer ce comportement dans des causes psychologiques, biologiques ou culturelles, tout en intégrant des moments où la rationalité échoue."
+      "re_sume__ia": "Analyse du pattern d’hyper‑rationalité et de comptage compulsif : le personnage se définit par des comportements de calcul, de notation et de classification qui remplacent l’intériorité, mais ces tics doivent toujours être ancrés dans une cause psychologique, biologique ou culturelle explicite. Le document décrit les origines, les sous‑trope (Spock, Spock Speak, Number Obsession), propose des critères de subversion et de cohérence, liste de nombreuses occurrences illustrant comment le comptage sert de mécanisme de survie, de contrôle ou de traumatisme, et fournit des stratégies de mitigation narrative ainsi qu’une checklist pour garantir que chaque nouvelle occurrence respecte les interdictions et intègre des moments où la rationalité échoue."
     },
     "section_titles": {
       "analyse_du_pattern": "Analyse du pattern",
@@ -564,10 +642,18 @@
   {
     "Nom": "Démographie plate (tous des vieux)",
     "values": {
-      "Dernière modification": "2026-06-23T11:03:00.000Z",
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Dernière modification": "2026-07-25T23:14:00.000Z",
+      "Espèces": "1a16e4d2-1b45-80d7-a920-c3f40e49246b, 1a16e4d2-1b45-8064-b82f-f2369406c52d, 1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+      "Lieux": "1cb6e4d2-1b45-80d5-9374-d87f759801be, 1a96e4d2-1b45-8090-89eb-cd5168580e06",
+      "Nb Communautés": "1",
+      "Nb Espèces": "3",
+      "Nb Lieux": "2",
+      "Nb Personnages": "3",
+      "Occurrences": "9",
+      "Personnages": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1bc6e4d2-1b45-8013-831b-e5a42c40dd2f, 1d56e4d2-1b45-80e1-a1a9-e96243eb1712",
       "Résumé IA": "Résumé IA : Le pattern « démographie plate » décrit des groupes fictifs où tous les membres visibles sont âgés, souvent utilisés comme cliché sans justification démographique. Le texte évalue l’originalité et la désirabilité de ce trope en fantasy et en SF, propose des sous‑tropes (Dying Race, Elder Race, Old Masters Community) et analyse leur cohérence narrative, puis suggère des stratégies pour gérer ou subvertir le pattern, incluant des exigences de cause explicite, de renouvellement générationnel et d’enjeux narratifs.",
       "Statut": "A limiter",
-      "Total": "3",
       "Type": "Cliché"
     },
     "sections": {
@@ -599,10 +685,18 @@
   {
     "Nom": "Révolution",
     "values": {
-      "Dernière modification": "2026-07-20T20:59:00.000Z",
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Dernière modification": "2026-07-25T23:18:00.000Z",
+      "Espèces": "1a16e4d2-1b45-805e-841e-d699f81d67a9",
+      "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d, 1b46e4d2-1b45-805c-a426-e1eb48b627a5, 26e08862-0f92-4e6a-8366-dc7091966fdb, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Nb Communautés": "1",
+      "Nb Espèces": "1",
+      "Nb Lieux": "4",
+      "Nb Personnages": "5",
+      "Occurrences": "11",
+      "Personnages": "892f2fd2-fbe3-4878-a05d-8d608b01e6bf, 1996e4d2-1b45-80fa-97db-fe99255e6c0c, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
       "Résumé IA": "Le texte analyse le pattern de la Révolution, définissant son renversement systémique d’un ordre établi et distinguant ce concept de la rébellion ou de la contre‑révolution. Il propose une évaluation du pattern à travers plusieurs critères d’originalité et de désirabilité, puis détaille divers tropes (Full‑Circle Revolution, The Revolution Will Not Be Vilified, etc.) en les illustrant avec des œuvres de fantasy, SF et littérature classique, tout en soulignant les exigences du monde d’Escelion : programme positif explicite, gestion post‑révolutionnaire, absence de héros unique et traitement systémique des dérives. Enfin, il fournit des stratégies de mitigation, des directives de narration et une checklist pour créer de nouvelles occurrences qui respectent ces principes.",
       "Statut": "A renforcer",
-      "Total": "7",
       "Type": "Central"
     },
     "sections": {
@@ -632,10 +726,18 @@
   {
     "Nom": "Résistance interne au système",
     "values": {
-      "Dernière modification": "2026-04-29T13:22:00.000Z",
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1, 1a56e4d2-1b45-8044-a472-d674f194c57a",
+      "Dernière modification": "2026-07-25T23:17:00.000Z",
+      "Espèces": "1cd6e4d2-1b45-80fd-85ec-e1d624fffb64",
+      "Lieux": "1b46e4d2-1b45-80c6-ba2c-e2512a9a56da, 1b46e4d2-1b45-8028-a2e5-f06744044aa4, 1b36e4d2-1b45-802c-910a-fb74729b22f8",
+      "Nb Communautés": "2",
+      "Nb Espèces": "1",
+      "Nb Lieux": "3",
+      "Nb Personnages": "5",
+      "Occurrences": "11",
+      "Personnages": "892f2fd2-fbe3-4878-a05d-8d608b01e6bf, 3236e4d2-1b45-808b-9b5c-e761e396c416, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41, eb2168a8-5bf3-4348-85c4-64bb0a1df94d",
       "Résumé IA": "Cliché SF/Fantasy majeur (2/10 originalité) représentant la subversion d'un système depuis l'intérieur. Sociologiquement : génère de la friction, rarement de la rupture ; la cooptation est le destin le plus probable. 10 occurrences dans Alteir (Valkazer, Lumières Dissidentes, Déconnectés, Soulèvement des Profondeurs, Opéra Gwi-shin, Navarre K'ssh, Veth-Solan Qalamtû, Taborie, Svayambhu Construit-442, Darren Koss). À surveiller : diversifié mais dense. Interdits : agent interne décisif seul, victoire sans coût. Réorientation prioritaire : Resistance as Planned pour les institutions opaques (Jast, Chaebol, Culte).",
       "Statut": "A surveiller",
-      "Total": "11",
       "Type": "Cliché"
     },
     "sections": {
@@ -667,10 +769,18 @@
   {
     "Nom": "Philosophie de l'exploitation",
     "values": {
-      "Dernière modification": "2026-06-02T12:23:00.000Z",
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Dernière modification": "2026-07-25T23:16:00.000Z",
+      "Espèces": "22e6e4d2-1b45-80db-8065-d98d26821c2c, 1a16e4d2-1b45-8051-88d9-d744a1bbc095, 1a16e4d2-1b45-8099-be36-db66acb76390, b242c08c-13a3-48ce-a880-b807094ca0b8",
+      "Lieux": "1b46e4d2-1b45-80c6-ba2c-e2512a9a56da, 1b46e4d2-1b45-8028-a2e5-f06744044aa4",
+      "Nb Communautés": "1",
+      "Nb Espèces": "4",
+      "Nb Lieux": "2",
+      "Nb Personnages": "5",
+      "Occurrences": "12",
+      "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1a96e4d2-1b45-8077-b534-dae9777c6a12, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1d56e4d2-1b45-80e1-a1a9-e96243eb1712, 1996e4d2-1b45-80fa-97db-fe99255e6c0c",
       "Résumé IA": "La philosophie de l'exploitation justifie l'exploitation sous diverses formes, en la naturalisant, en la moralisant ou en l'inversant en service rendu. Elle est évaluée selon son originalité et sa désirabilité, avec des tropes comme le Darwinisme social et l'oppression bienveillante. Les occurrences incluent des idéologies corporatives et des justifications d'exploitation, tandis que des stratégies de mitigation et des interdits sont proposés pour éviter des rationalisations explicites. La sincérité de l'exploiteur et la structure intégrée de la philosophie sont essentielles pour une occurrence efficace.",
       "Statut": "A surveiller",
-      "Total": "10",
       "Type": "Fond"
     },
     "sections": {
@@ -702,10 +812,18 @@
   {
     "Nom": "Opacité systémique",
     "values": {
-      "Dernière modification": "2026-07-17T17:10:00.000Z",
+      "Communautés": "8ac6015e-f5bb-4861-adb7-e23133e485cd, 1886e4d2-1b45-81b8-ad16-dcfa990112f1, 1ed6e4d2-1b45-80d8-a3be-c4c7910fd5ad, fa888402-6833-418f-b016-2e70af52abff, 29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Dernière modification": "2026-07-25T23:17:00.000Z",
+      "Espèces": "22e6e4d2-1b45-80db-8065-d98d26821c2c, 1a16e4d2-1b45-8051-88d9-d744a1bbc095, b242c08c-13a3-48ce-a880-b807094ca0b8",
+      "Lieux": "1b46e4d2-1b45-8028-a2e5-f06744044aa4, b8ac3bad-baef-4c92-aceb-ac7ae389629b, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 1b46e4d2-1b45-805c-a426-e1eb48b627a5, 1886e4d2-1b45-8150-a894-cfe31d31abd4, 1b46e4d2-1b45-801a-ada0-f6ec210d2fa0, 166982c7-3cf0-4947-85c5-0a6df03ff80d, 2f06e4d2-1b45-8048-8244-d40ef72873cd",
+      "Nb Communautés": "5",
+      "Nb Espèces": "3",
+      "Nb Lieux": "8",
+      "Nb Personnages": "5",
+      "Occurrences": "21",
+      "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1a16e4d2-1b45-8015-b262-cb7e5d0f01a8, 1886e4d2-1b45-80bb-b913-d5392af85620, 3256e4d2-1b45-80f4-9eeb-de67c6d8955b, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
       "Résumé IA": "Analyse du pattern d’opacité systémique, avec son évaluation, ses tropes associés et de nombreuses occurrences illustrant comment des mécanismes matériels (biochimiques, algorithmiques, bureaucratiques, etc.) restent invisibles aux acteurs du système, créant des tensions morales et narratives ; le texte propose aussi des stratégies de mitigation, des leviers narratifs, des interdictions et une checklist pour créer de nouvelles occurrences cohérentes.",
-      "Statut": "A limiter",
-      "Total": "21",
+      "Statut": "A réduire",
       "Type": "Central"
     },
     "sections": {
@@ -737,10 +855,18 @@
   {
     "Nom": "Conscience collective",
     "values": {
-      "Dernière modification": "2026-04-29T13:40:00.000Z",
+      "Communautés": "1a56e4d2-1b45-8044-a472-d674f194c57a, 2906e4d2-1b45-80ba-a2e5-d4bd8ad155ac",
+      "Dernière modification": "2026-07-25T23:16:00.000Z",
+      "Espèces": "1be6e4d2-1b45-8094-8b25-d887930a521e, 22e6e4d2-1b45-803e-aa21-c54ea00e2c27, 1cd6e4d2-1b45-80fd-85ec-e1d624fffb64, 1a16e4d2-1b45-8086-a5db-d3408b941f1d, 1a16e4d2-1b45-8099-be36-db66acb76390, 2546e4d2-1b45-8003-b2cf-fba0a267df74",
+      "Lieux": "1b46e4d2-1b45-8071-88b9-da69653d4987, 1cb6e4d2-1b45-80d5-9374-d87f759801be",
+      "Nb Communautés": "2",
+      "Nb Espèces": "6",
+      "Nb Lieux": "2",
+      "Nb Personnages": "2",
+      "Occurrences": "12",
+      "Personnages": "1996e4d2-1b45-8043-9847-ef675478f485, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
       "Résumé IA": "Le phénomène de conscience collective permet à des consciences individuelles de communiquer et de fusionner partiellement, créant un espace cognitif partagé. Il est évalué selon son originalité en fantasy et science-fiction, avec des exemples de tropes comme la \"Hive Mind\" et l'assimilation. Des occurrences spécifiques et des stratégies de mitigation sont discutées, soulignant l'importance d'un mécanisme physique nommé et de la distinction entre différents types de conscience collective pour préserver l'impact narratif.",
-      "Statut": "A surveiller",
-      "Total": "8",
+      "Statut": "A limiter",
       "Type": "Choc"
     },
     "sections": {
@@ -774,10 +900,18 @@
   {
     "Nom": "Civilisation disparue comme substrat",
     "values": {
-      "Dernière modification": "2026-06-09T15:46:00.000Z",
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1, 8ac6015e-f5bb-4861-adb7-e23133e485cd, 1ed6e4d2-1b45-80d8-a3be-c4c7910fd5ad, 1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Dernière modification": "2026-07-25T23:12:00.000Z",
+      "Espèces": "1a56e4d2-1b45-805b-af5c-e589453aed6f, 1a96e4d2-1b45-80cb-9f1d-ec3c1b4593f7, 22e6e4d2-1b45-80db-8065-d98d26821c2c, 22e6e4d2-1b45-803e-aa21-c54ea00e2c27, 22e6e4d2-1b45-803b-82ce-ed4b01fe01c4",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4, 1a96e4d2-1b45-8090-89eb-cd5168580e06, 1b46e4d2-1b45-8091-b2ca-da5a4bef6aa3, 1a96e4d2-1b45-8049-b21b-ee91c108b551, 1b46e4d2-1b45-8081-854b-e222c4c6aaaf, 1b36e4d2-1b45-8069-9c90-fc298e905409, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, b8ac3bad-baef-4c92-aceb-ac7ae389629b, 1b46e4d2-1b45-805c-a426-e1eb48b627a5, 1b46e4d2-1b45-801a-ada0-f6ec210d2fa0",
+      "Nb Communautés": "4",
+      "Nb Espèces": "5",
+      "Nb Lieux": "10",
+      "Nb Personnages": "2",
+      "Occurrences": "21",
+      "Personnages": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 892f2fd2-fbe3-4878-a05d-8d608b01e6bf",
       "Résumé IA": "Le pattern « civilisation disparue comme substrat » décrit comment les vestiges matériels d’une civilisation éteinte – ruines, artefacts, infrastructures ou même consciences – servent de base physique, économique ou cosmologique à une société actuelle, souvent sans que celle‑ci en comprenne pleinement la logique ou la dette. Il évalue l’originalité du concept dans la fantasy et la SF, détaille des tropes associés (Précursors, Acropolis ancienne, technologie perdue, etc.) et propose des stratégies de mitigation : interdire les ruines sans logique interne, les technologies héritées sans coût documenté, et la nostalgie d’un âge d’or, tout en encourageant des occurrences où le substrat reste actif, hybride ou constitue une infrastructure de pouvoir actuelle. Un checklist assure que chaque nouvelle occurrence apporte une nuance nouvelle, reste lisible, et évite les clichés.",
       "Statut": "A limiter",
-      "Total": "10",
       "Type": "Cliché"
     },
     "sections": {
@@ -809,10 +943,18 @@
   {
     "Nom": "Modification corporelle",
     "values": {
-      "Dernière modification": "2026-05-15T14:33:00.000Z",
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Dernière modification": "2026-07-25T23:17:00.000Z",
+      "Espèces": "1a16e4d2-1b45-8006-a568-d4688d3b154b, 1a16e4d2-1b45-8062-aaa7-f39bb07d72f8, 1a16e4d2-1b45-8051-88d9-d744a1bbc095, 1a16e4d2-1b45-8099-be36-db66acb76390, 1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+      "Lieux": "1b46e4d2-1b45-8081-854b-e222c4c6aaaf, 1b46e4d2-1b45-80c6-ba2c-e2512a9a56da, 26e08862-0f92-4e6a-8366-dc7091966fdb, 1886e4d2-1b45-8150-a894-cfe31d31abd4, 1b36e4d2-1b45-802c-910a-fb74729b22f8",
+      "Nb Communautés": "1",
+      "Nb Espèces": "5",
+      "Nb Lieux": "5",
+      "Nb Personnages": "5",
+      "Occurrences": "16",
+      "Personnages": "892f2fd2-fbe3-4878-a05d-8d608b01e6bf, 1c36e4d2-1b45-80f2-8124-e9ddf8d9359e, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, ec7da632-19b5-4d59-bd18-20a5bd5805d9, 1a96e4d2-1b45-8077-b534-dae9777c6a12",
       "Résumé IA": "Pattern central \"Modification corporelle\" décrit la transformation volontaire du corps via techniques, biologie ou rituels, incluant l’augmentation, et analyse ses tropes (Cybernetics Eat Your Soul, Body Horror, Bio‑Augmentation, No Transhumanism Allowed) en évaluant originalité, désirabilité et cohérence. Le texte propose des occurrences concrètes de modifications, des stratégies de mitigation (consentement, coûts systémiques, subversions) et une checklist pour créer de nouvelles occurrences, insistant sur le rôle politique, économique et social des modifications corporelles.",
       "Statut": "A surveiller",
-      "Total": "15",
       "Type": "Central"
     },
     "sections": {
@@ -844,10 +986,14 @@
   {
     "Nom": "Hybridité",
     "values": {
-      "Dernière modification": "2026-04-29T13:31:00.000Z",
+      "Dernière modification": "2026-07-25T23:14:00.000Z",
+      "Espèces": "1c06e4d2-1b45-80a5-8163-dbdb7f0116b9, 1a16e4d2-1b45-8062-aaa7-f39bb07d72f8, 1a56e4d2-1b45-805b-af5c-e589453aed6f, 1a16e4d2-1b45-80e9-8a7a-d5c626184d83",
+      "Lieux": "1cb6e4d2-1b45-80d5-9374-d87f759801be, 1886e4d2-1b45-8150-a894-cfe31d31abd4, 1b46e4d2-1b45-8081-854b-e222c4c6aaaf",
+      "Nb Espèces": "4",
+      "Nb Lieux": "3",
+      "Occurrences": "7",
       "Résumé IA": "L'hybridité est définie comme l'union de substrats ontologiquement distincts, créant une entité irréductible. Ce concept couvre l'hybridité ontologique et morphologique, en excluant le métissage social. L'évaluation du pattern révèle une originalité limitée en fantasy, mais un potentiel en science-fiction. Des tropes comme les créatures mixtes et les cyborgs sont explorés, avec des exemples de mythologie et de médias contemporains. Des stratégies de mitigation sont proposées pour intégrer l'hybridité de manière cohérente, en évitant les représentations négatives et en favorisant des interactions fonctionnelles normales.",
       "Statut": "A surveiller",
-      "Total": "13",
       "Type": "Fond"
     },
     "sections": {
@@ -879,10 +1025,18 @@
   {
     "Nom": "Fusion",
     "values": {
-      "Dernière modification": "2026-04-30T18:12:00.000Z",
+      "Communautés": "1996e4d2-1b45-804c-89d5-c935e604f865, 1a56e4d2-1b45-8044-a472-d674f194c57a",
+      "Dernière modification": "2026-07-25T23:14:00.000Z",
+      "Espèces": "22e6e4d2-1b45-803e-aa21-c54ea00e2c27, 1a16e4d2-1b45-8062-aaa7-f39bb07d72f8, 1cd6e4d2-1b45-80fd-85ec-e1d624fffb64, 1a16e4d2-1b45-8086-a5db-d3408b941f1d, 1a16e4d2-1b45-8083-9e41-c12db0ba67d8, 1a16e4d2-1b45-8099-be36-db66acb76390",
+      "Lieux": "1cb6e4d2-1b45-80d5-9374-d87f759801be, 1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Nb Communautés": "2",
+      "Nb Espèces": "6",
+      "Nb Lieux": "2",
+      "Nb Personnages": "1",
+      "Occurrences": "11",
+      "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
       "Résumé IA": "Analyse du pattern de fusion, évaluant son originalité en fantasy (2/10) et en SF (3/10), sa désirabilité (4/10) et détaillant plusieurs tropes (Fusion Dance, Merging Mistake, Fusion Dissonance) avec exemples et cohérence, puis décrivant de nombreuses occurrences de fusions variées et proposant des stratégies de mitigation, interdits et réorientations, ainsi qu’une checklist pour valider de nouvelles occurrences.",
       "Statut": "A réduire",
-      "Total": "13",
       "Type": "Cliché"
     },
     "sections": {
@@ -916,10 +1070,12 @@
   {
     "Nom": "Architecture vivante / mouvante",
     "values": {
-      "Dernière modification": "2026-04-29T13:20:00.000Z",
+      "Dernière modification": "2026-07-25T22:56:00.000Z",
+      "Lieux": "1b36e4d2-1b45-802c-910a-fb74729b22f8, 2356e4d2-1b45-8098-93c3-df4a68697585, 1cb6e4d2-1b45-80d5-9374-d87f759801be",
+      "Nb Lieux": "3",
+      "Occurrences": "3",
       "Résumé IA": "L'architecture vivante/mouvante est un concept où l'espace bâti agit comme un organisme, influençant la circulation et les usages. Il est essentiel de maintenir une distinction claire entre une architecture réellement vivante et des effets superficiels. Le pattern présente des risques de saturation et nécessite des stratégies de mitigation, comme l'interdiction de nouvelles occurrences isolées et la nécessité d'ancrer chaque lieu dans des clusters biologiques existants. Des fonctions administratives et agricoles peuvent également être intégrées pour enrichir ce concept.",
-      "Statut": "A surveiller",
-      "Total": "11",
+      "Statut": "Sous contrôle",
       "Type": "Central"
     },
     "sections": {
@@ -953,10 +1109,14 @@
   {
     "Nom": "Vocabulaire cosmopolite",
     "values": {
-      "Dernière modification": "2026-07-14T19:09:00.000Z",
+      "Dernière modification": "2026-07-25T23:10:00.000Z",
+      "Espèces": "1a16e4d2-1b45-8064-b82f-f2369406c52d",
+      "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb, b475d40b-597c-40a8-8b11-3561d774f459, 1b46e4d2-1b45-801a-ada0-f6ec210d2fa0, 1cb6e4d2-1b45-80d5-9374-d87f759801be, 1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d, 1b46e4d2-1b45-8028-a2e5-f06744044aa4, 1b46e4d2-1b45-8071-88b9-da69653d4987, 1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Nb Espèces": "1",
+      "Nb Lieux": "8",
+      "Occurrences": "9",
       "Résumé IA": "Le vocabulaire cosmopolite repose sur l’emprunt de mots précis issus de langues non‑européennes pour enrichir la narration, favorisant une diversité linguistique qui apporte profondeur sémantique et authenticité culturelle tout en évitant les néologismes excessifs, avec des directives d’évaluation, de gestion narrative et de contrôle de la répartition des langues sources.",
       "Statut": "Sous contrôle",
-      "Total": "9",
       "Type": "Fond"
     },
     "sections": {
@@ -988,10 +1148,16 @@
   {
     "Nom": "Emprunt religieux/culturel direct",
     "values": {
-      "Dernière modification": "2026-06-08T11:47:00.000Z",
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1, 1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Dernière modification": "2026-07-25T22:43:00.000Z",
+      "Lieux": "b8ac3bad-baef-4c92-aceb-ac7ae389629b",
+      "Nb Communautés": "2",
+      "Nb Lieux": "1",
+      "Nb Personnages": "1",
+      "Occurrences": "4",
+      "Personnages": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
       "Résumé IA": "Analyse du pattern d’emprunt religieux/culturel direct, montrant comment la transposition structurelle copie des cadres théologiques, institutionnels et cosmiques réels (zoroastrisme, Bayt al‑hikma, mythologie nordique, catharisme) dans le monde d’Alteir, en évaluant leur intérêt, les risques de cohérence et proposant des stratégies de mitigation pour justifier ou adapter ces importations afin de préserver la cohérence interne du monde.",
       "Statut": "Sous contrôle",
-      "Total": "5",
       "Type": "Fond"
     },
     "sections": {
@@ -1017,10 +1183,18 @@
   {
     "Nom": "Traumatisme fondateur",
     "values": {
-      "Dernière modification": "2026-07-25T12:45:00.000Z",
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Dernière modification": "2026-07-25T23:10:00.000Z",
+      "Espèces": "1a16e4d2-1b45-80e9-8a7a-d5c626184d83, 1a16e4d2-1b45-8083-9e41-c12db0ba67d8, 1c06e4d2-1b45-80a5-8163-dbdb7f0116b9",
+      "Lieux": "1b36e4d2-1b45-802c-910a-fb74729b22f8, 1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
+      "Nb Communautés": "1",
+      "Nb Espèces": "3",
+      "Nb Lieux": "2",
+      "Nb Personnages": "9",
+      "Occurrences": "15",
+      "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 892f2fd2-fbe3-4878-a05d-8d608b01e6bf, 1996e4d2-1b45-80fa-97db-fe99255e6c0c, 1ae6e4d2-1b45-8032-b738-f27c2d471393, 1996e4d2-1b45-80a5-a7ae-e9d43372323f, 1c36e4d2-1b45-80f2-8124-e9ddf8d9359e, 3236e4d2-1b45-808b-9b5c-e761e396c416, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
       "Résumé IA": "Le « Traumatisme fondateur » est un pattern cliché où un événement traumatique passé façonne la trajectoire et les comportements des personnages, souvent utilisé pour justifier leurs actions dans la fantasy et la science‑fiction, mais jugé réducteur et trop individuel dans l’univers d’Alteir où l’agentivité collective prime. Le texte analyse ce pattern à travers plusieurs archétypes (Freudian Excuse, Dark and Troubled Past, etc.), présente de nombreux exemples de personnages et de communautés affectés, identifie les risques de saturation et propose des stratégies de mitigation : diversifier les causes, montrer des réactions divergentes, ancrer les personnages dans leurs choix présents et éviter de faire du traumatisme la cause unique de leurs comportements.",
       "Statut": "A réduire",
-      "Total": "10",
       "Type": "Cliché"
     },
     "sections": {
@@ -1054,10 +1228,14 @@
   {
     "Nom": "Jeune prodige / Génie juvénil",
     "values": {
-      "Dernière modification": "2026-04-29T13:44:00.000Z",
+      "Communautés": "1a56e4d2-1b45-8044-a472-d674f194c57a",
+      "Dernière modification": "2026-07-25T22:44:00.000Z",
+      "Nb Communautés": "1",
+      "Nb Personnages": "4",
+      "Occurrences": "5",
+      "Personnages": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8, 1996e4d2-1b45-80a5-a7ae-e9d43372323f, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 3236e4d2-1b45-808b-9b5c-e761e396c416",
       "Résumé IA": "Analyse du pattern « Jeune prodige / Génie juvénil » : le trope du prodige précoce est largement surexploité et contradictoire avec les principes d’Alteir, où les compétences résultent de la nécessité collective plutôt que d’un don inné. Le texte évalue ce trope dans divers contextes (fantasy, science‑fiction), décrit ses sous‑tropes, présente des exemples de personnages, identifie le risque de saturation et propose des stratégies de mitigation, subversion et gestion narrative pour éviter que la précocité devienne un cliché valorisant.",
       "Statut": "A réduire",
-      "Total": "5",
       "Type": "Cliché"
     },
     "sections": {
@@ -1091,10 +1269,14 @@
   {
     "Nom": "Forme humanoïde/bipède gratuite",
     "values": {
-      "Dernière modification": "2026-04-29T13:31:00.000Z",
+      "Dernière modification": "2026-07-25T23:13:00.000Z",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8, 1a16e4d2-1b45-80e9-8a7a-d5c626184d83, 1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+      "Lieux": "1b46e4d2-1b45-8091-b2ca-da5a4bef6aa3",
+      "Nb Espèces": "3",
+      "Nb Lieux": "1",
+      "Occurrences": "4",
       "Résumé IA": "Le pattern « forme humanoïde/bipède gratuite » est classé comme un cliché à limiter ; il décrit la tendance à attribuer des morphologies bipèdes humanoïdes à des espèces sans justification biologique, ce qui est fréquent en fantasy et en SF. Le texte propose des stratégies de mitigation : justifications évolutives ou narratives, exploration d’alternatives non‑humanoïdes, briefs visuels explicites et check‑list de questions à se poser avant d’ajouter une nouvelle occurrence afin d’assurer cohérence et originalité.",
       "Statut": "A limiter",
-      "Total": "5",
       "Type": "Cliché"
     },
     "sections": {
@@ -1128,10 +1310,16 @@
   {
     "Nom": "Résonnance / vibration pseudo-scientifique",
     "values": {
-      "Dernière modification": "2026-06-02T12:23:00.000Z",
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1, 1996e4d2-1b45-804c-89d5-c935e604f865, 1a56e4d2-1b45-8044-a472-d674f194c57a",
+      "Dernière modification": "2026-07-25T23:17:00.000Z",
+      "Espèces": "1a56e4d2-1b45-805b-af5c-e589453aed6f, 1a16e4d2-1b45-8099-be36-db66acb76390",
+      "Lieux": "1b46e4d2-1b45-8028-a2e5-f06744044aa4, 1a96e4d2-1b45-8049-b21b-ee91c108b551, 1b46e4d2-1b45-8091-b2ca-da5a4bef6aa3, 1b46e4d2-1b45-801a-ada0-f6ec210d2fa0, 1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Nb Communautés": "3",
+      "Nb Espèces": "2",
+      "Nb Lieux": "5",
+      "Occurrences": "10",
       "Résumé IA": "Analyse du pattern « résonance / vibration » comme cliché narratif : décrit les tropes fréquents (technobabble, résonance comme magie, guérison sonique, téléchargement de données), évalue leur intérêt et cohérence, identifie les risques de saturation et propose des stratégies de mitigation (localisation, bruit, coûts, contre‑mesures, dé‑mystification). Inclut une checklist pour valider de nouvelles occurrences afin d’éviter les solutions universelles et renforcer la crédibilité.",
       "Statut": "A limiter",
-      "Total": "16",
       "Type": "Cliché"
     },
     "sections": {
@@ -1167,10 +1355,12 @@
   {
     "Nom": "Chant fonctionnel",
     "values": {
-      "Dernière modification": "2026-04-29T13:26:00.000Z",
+      "Dernière modification": "2026-07-25T22:42:00.000Z",
+      "Lieux": "1b46e4d2-1b45-8028-a2e5-f06744044aa4, 1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Nb Lieux": "2",
+      "Occurrences": "2",
       "Résumé IA": "Le chant fonctionnel est défini comme une émission vocale structurée avec une finalité instrumentale, excluant les chants esthétiques. Il inclut des tropes comme l'arme sonore et le chant hypnotique, et présente des applications dans divers contextes. Les risques de saturation tels que l'incantation déguisée et la déresponsabilisation sont identifiés, avec des stratégies de mitigation recommandées, comme la spécialisation fonctionnelle et l'ambiguïté des effets. Une checklist est fournie pour évaluer les nouvelles occurrences de ce pattern.",
       "Statut": "A surveiller",
-      "Total": "6",
       "Type": "Cliché"
     },
     "sections": {
@@ -1202,10 +1392,20 @@
   {
     "Nom": "Nombres récurrents (numérologie)",
     "values": {
-      "Dernière modification": "2026-04-29T13:29:00.000Z",
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Dernière modification": "2026-07-25T23:16:00.000Z",
+      "Espèces": "1a16e4d2-1b45-8006-a568-d4688d3b154b, 1a16e4d2-1b45-8083-9e41-c12db0ba67d8, 1a16e4d2-1b45-8086-a5db-d3408b941f1d, 1a16e4d2-1b45-805e-841e-d699f81d67a9, 22e6e4d2-1b45-80db-8065-d98d26821c2c, 22e6e4d2-1b45-803e-aa21-c54ea00e2c27, 22e6e4d2-1b45-803b-82ce-ed4b01fe01c4",
+      "Lieux": "1b46e4d2-1b45-801a-ada0-f6ec210d2fa0, 1b46e4d2-1b45-8081-854b-e222c4c6aaaf, 1b46e4d2-1b45-80c6-ba2c-e2512a9a56da, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 26e08862-0f92-4e6a-8366-dc7091966fdb, 1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Nb Communautés": "1",
+      "Nb Espèces": "7",
+      "Nb Lieux": "6",
+      "Nb Objets": "1",
+      "Nb Personnages": "3",
+      "Objets": "1ed6e4d2-1b45-800b-a6ab-c51160ac3895",
+      "Occurrences": "18",
+      "Personnages": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd, 1c36e4d2-1b45-80f2-8124-e9ddf8d9359e, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
       "Résumé IA": "Analyse des nombres récurrents en numérologie, évaluant leur utilisation dans la fiction. Les motifs comme l'Arc Number et le Mystical Seven sont discutés, avec des conseils pour éviter les clichés et justifier les occurrences par des contraintes matérielles ou narratives. Un focus particulier est mis sur la réduction des occurrences du nombre 3, jugé excessif et souvent arbitraire, avec des stratégies pour maintenir la cohérence narrative sans mysticisme.",
       "Statut": "A réduire",
-      "Total": "5",
       "Type": "Cliché"
     },
     "sections": {
@@ -1239,10 +1439,16 @@
   {
     "Nom": "Marchandisation de l'intime",
     "values": {
-      "Dernière modification": "2026-05-15T14:33:00.000Z",
+      "Dernière modification": "2026-07-25T23:14:00.000Z",
+      "Espèces": "1a16e4d2-1b45-8099-be36-db66acb76390",
+      "Lieux": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1, 1b46e4d2-1b45-8028-a2e5-f06744044aa4, 1cc6e4d2-1b45-80fb-b0ec-f0cfe9539620",
+      "Nb Espèces": "1",
+      "Nb Lieux": "3",
+      "Nb Personnages": "1",
+      "Occurrences": "5",
+      "Personnages": "1a96e4d2-1b45-8077-b534-dae9777c6a12",
       "Résumé IA": "Le pattern de marchandisation de l'intime suit la conversion de souvenirs, émotions, traces identitaires ou pensées en biens échangeables. Les Forêts de Corail sont réorientées vers les résidus de phase : non des souvenirs fiables à vendre, mais des traces d'identités temporaires vécues sous Brouillignon. Le dilemme spécifique devient l'exploitation d'une intimité produite sous influence.",
       "Statut": "A limiter",
-      "Total": "5",
       "Type": "Choc"
     },
     "sections": {
@@ -1276,10 +1482,16 @@
   {
     "Nom": "Systèmes reproductifs alternatifs",
     "values": {
-      "Dernière modification": "2026-04-29T13:41:00.000Z",
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Dernière modification": "2026-07-25T23:20:00.000Z",
+      "Espèces": "1a16e4d2-1b45-8006-a568-d4688d3b154b, 1a16e4d2-1b45-8086-a5db-d3408b941f1d, 1be6e4d2-1b45-8094-8b25-d887930a521e, 1a16e4d2-1b45-8083-9e41-c12db0ba67d8, 7f98c96c-103e-4904-9f2b-f3e26860cf90",
+      "Lieux": "1cb6e4d2-1b45-80d5-9374-d87f759801be, 1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Nb Communautés": "1",
+      "Nb Espèces": "5",
+      "Nb Lieux": "2",
+      "Occurrences": "8",
       "Résumé IA": "Analyse des systèmes reproductifs alternatifs, présentant cinq occurrences (Imuins, Aedres, Kephrasites, Umcuts, Photophores) avec leurs mécanismes biologiques uniques, leurs impacts sociaux, économiques et politiques, ainsi que les risques de saturation et des stratégies de mitigation comme l’étalement narratif, la diversité de registres émotionnels, la visibilité calibrée et la variation sensorielle.",
-      "Statut": "Sous contrôle",
-      "Total": "5",
+      "Statut": "A renforcer",
       "Type": "Choc"
     },
     "sections": {
@@ -1309,10 +1521,16 @@
   {
     "Nom": "Cristaux technologiques",
     "values": {
-      "Dernière modification": "2026-05-28T08:57:00.000Z",
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Dernière modification": "2026-07-25T23:13:00.000Z",
+      "Espèces": "1a56e4d2-1b45-805b-af5c-e589453aed6f, 1a16e4d2-1b45-8062-aaa7-f39bb07d72f8",
+      "Lieux": "b475d40b-597c-40a8-8b11-3561d774f459, 1b46e4d2-1b45-8081-854b-e222c4c6aaaf, 1b46e4d2-1b45-8091-b2ca-da5a4bef6aa3, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Nb Communautés": "1",
+      "Nb Espèces": "2",
+      "Nb Lieux": "4",
+      "Occurrences": "7",
       "Résumé IA": "Analyse des cristaux technologiques, incluant des tropes comme le Cristal de Pouvoir et la Technologie Perdue, avec des évaluations de leur originalité. Les risques de saturation et des stratégies de mitigation sont discutés, soulignant l'importance de la différenciation fonctionnelle et de l'exploration d'autres vecteurs technologiques pour éviter la redondance et la prévisibilité dans la narration.",
       "Statut": "A réduire",
-      "Total": "10",
       "Type": "Cliché"
     },
     "sections": {
@@ -1350,10 +1568,14 @@
   {
     "Nom": "Symbiose",
     "values": {
-      "Dernière modification": "2026-06-05T12:13:00.000Z",
+      "Dernière modification": "2026-07-25T23:19:00.000Z",
+      "Espèces": "7f98c96c-103e-4904-9f2b-f3e26860cf90, 1b36e4d2-1b45-8098-b2fd-c97f8ae14369, 1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+      "Lieux": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1, 1b46e4d2-1b45-8081-854b-e222c4c6aaaf, 1886e4d2-1b45-8150-a894-cfe31d31abd4, 1cb6e4d2-1b45-80d5-9374-d87f759801be",
+      "Nb Espèces": "3",
+      "Nb Lieux": "4",
+      "Occurrences": "7",
       "Résumé IA": "La symbiose est une association durable entre organismes de natures différentes, englobant mutualisme, commensalisme et parasitisme. Elle est évaluée selon son originalité en fantasy et science-fiction, et sa désirabilité est élevée pour sa représentation de la diversité biologique. Les tropes associés incluent le symbiote, la possession symbiotique et le parasite manipulateur, chacun explorant les dynamiques de coopération et de conflit. Les occurrences doivent respecter des règles strictes concernant les coûts et les types de symbiose, tout en évitant les clichés narratifs. Des stratégies de mitigation et des axes de différenciation sont proposés pour enrichir les relations symbiotiques dans l'univers d'Escelion.",
-      "Statut": "Sous contrôle",
-      "Total": "6",
+      "Statut": "A renforcer",
       "Type": "Central"
     },
     "sections": {
@@ -1393,10 +1615,16 @@
   {
     "Nom": "Absorption/assimilation",
     "values": {
-      "Dernière modification": "2026-05-30T18:20:00.000Z",
+      "Dernière modification": "2026-07-25T23:11:00.000Z",
+      "Espèces": "1a16e4d2-1b45-807b-8a9a-ef07675d08ba, 1a16e4d2-1b45-8062-aaa7-f39bb07d72f8, 1a16e4d2-1b45-8006-a568-d4688d3b154b, 1be6e4d2-1b45-8094-8b25-d887930a521e, 7f98c96c-103e-4904-9f2b-f3e26860cf90, 1a16e4d2-1b45-8089-bfc0-c5e513847d8b",
+      "Lieux": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1, 1b46e4d2-1b45-809b-b6ba-ea6dffbf49b5, b8ac3bad-baef-4c92-aceb-ac7ae389629b",
+      "Nb Espèces": "6",
+      "Nb Lieux": "3",
+      "Nb Personnages": "1",
+      "Occurrences": "10",
+      "Personnages": "1c76e4d2-1b45-80af-8225-ecdd35b8e367",
       "Résumé IA": "Le pattern d'absorption/assimilation implique l'incorporation d'éléments externes dans un organisme, entraînant sa transformation. Les occurrences incluent des créatures comme les Aberrations Bouffies et les Moribandons, qui recyclent et absorbent des compétences et des ressources. Les tropes associés, tels que l'absorption d'énergie et la création d'une conscience collective, sont souvent considérés comme clichés. Des stratégies de mitigation sont proposées pour éviter la saturation du concept, en favorisant des mécanismes matérialistes clairs et en introduisant des coûts significatifs pour l'absorption.",
       "Statut": "A limiter",
-      "Total": "10",
       "Type": "Cliché"
     },
     "sections": {
@@ -1430,10 +1658,14 @@
   {
     "Nom": "Hiérarchies basées sur la forme",
     "values": {
-      "Dernière modification": "2026-05-30T12:20:00.000Z",
+      "Dernière modification": "2026-07-25T23:14:00.000Z",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d, 1a16e4d2-1b45-8051-88d9-d744a1bbc095, 1a16e4d2-1b45-8099-be36-db66acb76390, 1a16e4d2-1b45-805e-841e-d699f81d67a9, 1be6e4d2-1b45-8094-8b25-d887930a521e, 1a16e4d2-1b45-807b-8a9a-ef07675d08ba, 1a16e4d2-1b45-8062-aaa7-f39bb07d72f8",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Nb Espèces": "7",
+      "Nb Lieux": "1",
+      "Occurrences": "8",
       "Résumé IA": "Systèmes sociaux, politiques ou biologiques dans lesquels le rang, le statut ou les droits d'un individu sont déterminés par ses caractéristiques morphologiques ou sa forme corporelle.",
       "Statut": "A limiter",
-      "Total": "9",
       "Type": "Cliché"
     },
     "sections": {
@@ -1467,10 +1699,18 @@
   {
     "Nom": "Suspension préservatrice",
     "values": {
-      "Dernière modification": "2026-05-31T12:47:00.000Z",
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Dernière modification": "2026-07-25T23:19:00.000Z",
+      "Espèces": "1a56e4d2-1b45-805b-af5c-e589453aed6f, 1a16e4d2-1b45-8051-88d9-d744a1bbc095, 1a16e4d2-1b45-8083-9e41-c12db0ba67d8, 1a16e4d2-1b45-8099-be36-db66acb76390",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4, 1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Nb Communautés": "1",
+      "Nb Espèces": "4",
+      "Nb Lieux": "2",
+      "Nb Personnages": "4",
+      "Occurrences": "11",
+      "Personnages": "1996e4d2-1b45-80a5-a7ae-e9d43372323f, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1a96e4d2-1b45-8077-b534-dae9777c6a12, 1996e4d2-1b45-80fa-97db-fe99255e6c0c",
       "Résumé IA": "Le pattern de suspension préservatrice implique un état d'arrêt des processus vitaux, permettant une intégrité structurelle ou fonctionnelle indéfinie. Son originalité est limitée dans les genres fantasy et science-fiction, avec des tropes comme la pétrification et la cryogénie souvent utilisés. Les occurrences incluent des exemples de préservation réussie mais non réversible, et des stratégies de mitigation soulignent l'importance d'un axiome de préservation explicite pour éviter des conséquences narratives neutres ou messianiques. Des orientations vers la transformation et la préservation partielle sont également proposées.",
       "Statut": "A limiter",
-      "Total": "7",
       "Type": "Choc"
     },
     "sections": {
@@ -1498,10 +1738,18 @@
   {
     "Nom": "Sacrifice fondateur",
     "values": {
-      "Dernière modification": "2026-05-28T09:06:00.000Z",
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1, 1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Dernière modification": "2026-07-25T23:19:00.000Z",
+      "Espèces": "1a16e4d2-1b45-80d7-a920-c3f40e49246b, 22e6e4d2-1b45-80db-8065-d98d26821c2c, 1a56e4d2-1b45-805b-af5c-e589453aed6f, 22e6e4d2-1b45-803e-aa21-c54ea00e2c27, 1a16e4d2-1b45-8051-88d9-d744a1bbc095, 1a16e4d2-1b45-8099-be36-db66acb76390, b242c08c-13a3-48ce-a880-b807094ca0b8",
+      "Lieux": "1b36e4d2-1b45-8069-9c90-fc298e905409, 1886e4d2-1b45-8150-a894-cfe31d31abd4, 1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Nb Communautés": "2",
+      "Nb Espèces": "7",
+      "Nb Lieux": "3",
+      "Nb Personnages": "2",
+      "Occurrences": "14",
+      "Personnages": "1886e4d2-1b45-80bb-b913-d5392af85620, 1a16e4d2-1b45-8015-b262-cb7e5d0f01a8",
       "Résumé IA": "Le sacrifice fondateur est un motif où un individu ou un groupe se sacrifie pour permettre l'émergence d'un nouvel ordre. Ce motif est évalué comme problématique dans la fantasy et la science-fiction, car il légitime souvent des structures existantes sans questionner leur nécessité. Des occurrences notables incluent des sacrifices pour stabiliser Escelion et créer des mythes fondateurs. Des stratégies de mitigation sont proposées pour éviter les glorifications non questionnées et encourager des récits où le sacrifice n'est pas consenti, tout en explorant les conséquences de sacrifices ratés ou contestés.",
       "Statut": "A limiter",
-      "Total": "8",
       "Type": "Cliché"
     },
     "sections": {
@@ -1533,10 +1781,18 @@
   {
     "Nom": "Transformations psycho-émotionnelles",
     "values": {
-      "Dernière modification": "2026-07-01T14:47:00.000Z",
+      "Dernière modification": "2026-07-25T23:10:00.000Z",
+      "Espèces": "1a16e4d2-1b45-8089-bfc0-c5e513847d8b, 22e6e4d2-1b45-80db-8065-d98d26821c2c, 22e6e4d2-1b45-803e-aa21-c54ea00e2c27, 22e6e4d2-1b45-803b-82ce-ed4b01fe01c4, 1a16e4d2-1b45-8099-be36-db66acb76390, 1a16e4d2-1b45-8006-a568-d4688d3b154b, 1c06e4d2-1b45-80a5-8163-dbdb7f0116b9",
+      "Lieux": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1, 1cc6e4d2-1b45-80fb-b0ec-f0cfe9539620",
+      "Nb Espèces": "7",
+      "Nb Lieux": "2",
+      "Nb Objets": "1",
+      "Nb Personnages": "7",
+      "Objets": "1ed6e4d2-1b45-80c5-84ec-db6cc31c0a7c",
+      "Occurrences": "17",
+      "Personnages": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd, 1996e4d2-1b45-80fa-97db-fe99255e6c0c, 1886e4d2-1b45-80bb-b913-d5392af85620, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1a96e4d2-1b45-8077-b534-dae9777c6a12, 1996e4d2-1b45-8043-9847-ef675478f485, 1c76e4d2-1b45-80af-8225-ecdd35b8e367",
       "Résumé IA": "Le pattern « Cliché » de transformations psycho‑émotionnelles compte 13 occurrences, dépassant largement le seuil tolérable, et doit être réduit d’urgence en ciblant les cas les moins justifiables (absence de vecteur matériel, gratuité esthétique ou redondance). La priorité est de supprimer ou requalifier les éléments les plus faibles, comme le microclimat émotionnel du Xyriad ou la palette d’humeur du Vernissage, tout en conservant les occurrences bien ancrées (coût biologique, mécanismes de jeu ou enjeux narratifs). La checklist proposée impose de vérifier que toute nouvelle occurrence soit fonctionnelle, biomécanique, non redondante et apporte un conflit ou une mécanique de jeu, afin d’éviter tout nouvel empilement pseudo‑magique.",
       "Statut": "A réduire",
-      "Total": "12",
       "Type": "Cliché"
     },
     "sections": {
@@ -1570,10 +1826,16 @@
   {
     "Nom": "Transformation cyclique",
     "values": {
-      "Dernière modification": "2026-06-01T21:27:00.000Z",
+      "Dernière modification": "2026-07-25T23:10:00.000Z",
+      "Espèces": "1a16e4d2-1b45-8006-a568-d4688d3b154b, 1a16e4d2-1b45-8083-9e41-c12db0ba67d8, 1a16e4d2-1b45-8062-aaa7-f39bb07d72f8, 1a16e4d2-1b45-807b-8a9a-ef07675d08ba, 22e6e4d2-1b45-80db-8065-d98d26821c2c, 22e6e4d2-1b45-803e-aa21-c54ea00e2c27, 22e6e4d2-1b45-803b-82ce-ed4b01fe01c4, 1ba6e4d2-1b45-8086-b247-d253799b8241, 2246e4d2-1b45-803e-999e-faf696719f3b, 1a16e4d2-1b45-8099-be36-db66acb76390",
+      "Lieux": "1b46e4d2-1b45-8028-a2e5-f06744044aa4, 1886e4d2-1b45-8150-a894-cfe31d31abd4, 1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Nb Espèces": "10",
+      "Nb Lieux": "3",
+      "Nb Personnages": "4",
+      "Occurrences": "17",
+      "Personnages": "1996e4d2-1b45-80a5-a7ae-e9d43372323f, 1996e4d2-1b45-80c4-9c73-ddac6322e9bd, 1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41, f0105182-324b-4626-86c3-a78edbb3d2b6",
       "Résumé IA": "Le pattern de transformation cyclique décrit un processus récurrent où un être ou un système traverse des phases de mort et de renaissance, avec des implications philosophiques sur l'identité et la continuité. Il évalue l'originalité en fantasy et science-fiction, et explore divers tropes comme l'immortalité résurrective, le phénix, et la réincarnation malveillante. Les occurrences incluent des espèces et entités avec des transformations cycliques, et des stratégies de mitigation sont proposées pour garantir une cohérence thématique et éviter les doublons. Chaque occurrence doit poser une question philosophique distincte sur la cyclicité.",
       "Statut": "A surveiller",
-      "Total": "13",
       "Type": "Central"
     },
     "sections": {
@@ -1621,10 +1883,18 @@
   {
     "Nom": "Surveillance systémique",
     "values": {
-      "Dernière modification": "2026-07-17T17:10:00.000Z",
+      "Communautés": "29781d00-f5d0-4b1b-ab1d-ef41828910d0, fa888402-6833-418f-b016-2e70af52abff, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Dernière modification": "2026-07-25T23:19:00.000Z",
+      "Espèces": "22e6e4d2-1b45-80db-8065-d98d26821c2c, 1a16e4d2-1b45-8099-be36-db66acb76390",
+      "Lieux": "b8ac3bad-baef-4c92-aceb-ac7ae389629b, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 26e08862-0f92-4e6a-8366-dc7091966fdb, 2f06e4d2-1b45-8048-8244-d40ef72873cd, 1b46e4d2-1b45-8028-a2e5-f06744044aa4, b475d40b-597c-40a8-8b11-3561d774f459, 166982c7-3cf0-4947-85c5-0a6df03ff80d",
+      "Nb Communautés": "3",
+      "Nb Espèces": "2",
+      "Nb Lieux": "7",
+      "Nb Personnages": "3",
+      "Occurrences": "15",
+      "Personnages": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
       "Résumé IA": "Surveillance systémique, pattern central de 15 occurrences classées comme à surveiller, analyse le rôle de la surveillance comme mécanisme d’oppression matériel dans divers contextes (fantasy, SF, tropes comme Big Brother, Panopticon, etc.), décrit de nombreuses implémentations (Jast, jardins‑oracles, Nunchi, Métafor, Observautomatons, etc.) et propose des stratégies pour maintenir diversité, zones de silence et résistances, tout en imposant des interdictions (pas de nouveaux scores sociaux, pas de magie) et des critères de création d’occurrences.",
       "Statut": "A surveiller",
-      "Total": "15",
       "Type": "Central"
     },
     "sections": {
@@ -1662,10 +1932,16 @@
   {
     "Nom": "Transmission de mémoire non conventionnelle",
     "values": {
-      "Dernière modification": "2026-05-28T20:06:00.000Z",
+      "Dernière modification": "2026-07-25T23:10:00.000Z",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8, 1be6e4d2-1b45-8094-8b25-d887930a521e, 1cd6e4d2-1b45-80fd-85ec-e1d624fffb64",
+      "Lieux": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, b8ac3bad-baef-4c92-aceb-ac7ae389629b, 1b46e4d2-1b45-8091-b2ca-da5a4bef6aa3",
+      "Nb Espèces": "3",
+      "Nb Lieux": "4",
+      "Nb Personnages": "1",
+      "Occurrences": "8",
+      "Personnages": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
       "Résumé IA": "Le pattern de transmission de mémoire non conventionnelle couvre les mécanismes qui transmettent des souvenirs hors langage, écriture ou support technique classique. Il reste un cliché à réduire. Le Brouillignon des Forêts de Corail y demeure comme exception contrôlée : laitance neurocorallienne matérialisée, involontaire, invasive, non fiable et non exploitable comme lecture utile de mémoire.",
       "Statut": "A réduire",
-      "Total": "10",
       "Type": "Cliché"
     },
     "sections": {
@@ -1703,10 +1979,16 @@
   {
     "Nom": "Mathématisation du vivant",
     "values": {
-      "Dernière modification": "2026-04-29T13:40:00.000Z",
+      "Dernière modification": "2026-07-25T23:14:00.000Z",
+      "Espèces": "1a96e4d2-1b45-80cb-9f1d-ec3c1b4593f7, 1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Lieux": "1b46e4d2-1b45-8028-a2e5-f06744044aa4, 1cc6e4d2-1b45-80fb-b0ec-f0cfe9539620, 26e08862-0f92-4e6a-8366-dc7091966fdb, 1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Nb Espèces": "2",
+      "Nb Lieux": "4",
+      "Nb Personnages": "1",
+      "Occurrences": "7",
+      "Personnages": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8",
       "Résumé IA": "Motif récurrent où des processus biologiques, sociaux ou spirituels sont encodés, régis ou exprimés par des structures mathématiques formelles (algorithmes, géométrie, fractals, équations). Le vivant n'utilise pas la mathématique comme outil ; il est mathématique, ou le devient par contrainte systémique.",
       "Statut": "A surveiller",
-      "Total": "5",
       "Type": "Choc"
     },
     "sections": {
@@ -1736,10 +2018,16 @@
   {
     "Nom": "Économie du don et du service",
     "values": {
-      "Dernière modification": "2026-05-31T09:19:00.000Z",
+      "Communautés": "1996e4d2-1b45-804c-89d5-c935e604f865, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Dernière modification": "2026-07-25T22:55:00.000Z",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4, 1b46e4d2-1b45-805c-a426-e1eb48b627a5",
+      "Nb Communautés": "2",
+      "Nb Lieux": "2",
+      "Nb Personnages": "2",
+      "Occurrences": "6",
+      "Personnages": "1996e4d2-1b45-80a5-a7ae-e9d43372323f, 1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
       "Résumé IA": "L'économie du don et du service repose sur la circulation de la valeur à travers des dons et des obligations de réciprocité, remplaçant l'échange marchand par des liens symboliques. L'évaluation du pattern montre une originalité élevée dans la fantasy et une représentation significative dans la science-fiction. Les tropes associés, tels que \"You Owe Me\" et \"I Owe You My Life\", explorent les dynamiques de pouvoir et les obligations sociales. Les stratégies de mitigation soulignent l'importance de la tension entre lien et contrainte, ainsi que la nécessité d'un mécanisme de pouvoir visible dans toute économie du don.",
       "Statut": "Sous contrôle",
-      "Total": "9",
       "Type": "Fond"
     },
     "sections": {
@@ -1767,5 +2055,48 @@
       "re_sume__ia": "Résumé IA"
     },
     "notion_page_id": "f4754565-215c-4e56-9a46-9346a1952056"
+  },
+  {
+    "Nom": "Bio-indicateur",
+    "values": {
+      "Communautés": "1a56e4d2-1b45-8044-a472-d674f194c57a, 1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Dernière modification": "2026-07-26T11:16:00.000Z",
+      "Espèces": "6c055503-6e2d-4743-a201-34af3357b317, f5ec9a38-e4dd-43be-b3a7-a7e3274c0999, 6966d7e4-ccdf-4055-9d71-4420c096e279, 1b36e4d2-1b45-80b5-a3f6-ceb43f5bff1a, b242c08c-13a3-48ce-a880-b807094ca0b8, b51a0d5c-9d64-4f2d-b19a-a035e129e8a3, fcf36f8b-b272-405e-a1c2-f687f643dc6a, 5df47057-53dd-48eb-8b83-be0c32861cab, d4cb9575-da11-4e75-a875-cb052ca60509, 5b61c1b1-831e-4c51-a1ee-794cb499f6d1, 8c5b687f-11d4-4950-adaa-3cac6af7c539, 1b36e4d2-1b45-8096-9390-e449a9639c11, 414c174a-614d-4cf9-aa43-bc2e7998ac1f, d9be110b-c331-4dd6-b598-9069fe05246e",
+      "Lieux": "15f02d22-65fb-4afb-b80e-68925f6f0f3b, 267194b8-ae98-4406-97c3-c8ab16b0b7e1, 1b36e4d2-1b45-8091-99ac-f5ae099e8d22",
+      "Nb Communautés": "2",
+      "Nb Espèces": "14",
+      "Nb Lieux": "3",
+      "Occurrences": "19",
+      "Résumé IA": "Le texte analyse le pattern du « bio‑indicateur » en soulignant que les espèces sont souvent réduites à des outils d’alerte pour les habitants, ce qui simplifie à l’excès leur rôle écologique réel ; il propose de séparer la fonction matérielle (écologie, niche) de l’interprétation culturelle, d’éviter de les définir uniquement comme indicateurs, et de limiter leur mention à une phrase contextuelle tout en encourageant le développement d’instruments de détection autonomes.",
+      "Statut": "A limiter",
+      "Type": "Cliché"
+    },
+    "sections": {
+      "analyse_du_pattern": "Tendance à décrire une espèce (faune ou flore) principalement par sa fonction informative pour les habitants — indicateur, alarme, signal, détecteur — plutôt que par son rôle écologique propre (prédateur, ingénieur d'écosystème, compétiteur, mutualiste, proie) ou par d’autres types de domestication. L'espèce perd sa complexité et devient un instrument de lecture, un “augure” au service des habitants (qui sont eux-mêmes réduits à des individus en quête perpétuelle de prévision tout en étant incapables de développer leurs propres moyens).",
+      "e_valuation_du_pattern": "<table header-row=\"true\">\n<colgroup>\n<col width=\"184.982666015625\">\n<col width=\"143.9943084716797\">\n<col width=\"334.81597900390625\">\n</colgroup>\n<tr>\n<td>Intérêt du pattern</td>\n<td>Note sur 10</td>\n<td>Justification (1 phrase)</td>\n</tr>\n<tr>\n<td>Originalité en Fantasy</td>\n<td>3</td>\n<td>Ubiquitaire comme geste ; rarement interrogé comme système. Banalisation pop-culturelle massive.</td>\n</tr>\n<tr>\n<td>Originalité en SF</td>\n<td>5</td>\n<td>Moins banalisé ; la SF traite les bioindicateurs comme un outil scientifique parmi d'autres, pas comme la définition d'une espèce.</td>\n</tr>\n<tr>\n<td>Désirabilité pour la <mention-page url=\"https://app.notion.com/p/1886e4d21b45811188d5edb08cafe956\"/></td>\n<td>3</td>\n<td>Réduit le vivant à un instrument passif ET les habitants à des augures impuissants, en quête perpétuelle de prévision — contrevient au principe « Aucun élément de worldbuilding ne peut être introduit comme simple décor » et à l'exigence d'agentivité des communautés.</td>\n</tr>\n</table>",
+      "tropes": "**1. Canary in a Coal Mine** ([tvtropes.org](https://tvtropes.org/pmwiki/pmwiki.php/Main/CanaryInACoalMine))\n- Description : Une créature est utilisée comme système d'alerte précoce pour détecter un danger avant qu'il n'affecte les habitants.\n- Intérêt ou subversion : Intéressant dans sa forme historique (les mineurs utilisaient réellement des canaris), cliché quand systématisé. Subversion : la créature n'est pas un détecteur passif — elle réagit au danger pour sa propre survie, et les habitants apprennent à lire son comportement de l'extérieur, sans qu'elle ne soit « pour » eux.\n- Exemples (en général) : *Goblin Slayer* — un canary détecte les gaz toxiques des goblins. — *Bird Box* — des perruches détectent la présence des entités. — *Silent Hill* — un canary en cage détecte les transitions vers l'Otherworld.\n- Cohérence : Le trope en lui-même (utiliser une créature pour détecter un danger matériel) est compatible avec le matérialisme d'Escelion. Le problème n'est pas le trope, mais sa systématisation — quand chaque espèce est réduite à cette fonction.\n\t- Exemple (cohérence Alteir) : *Dune* (Frank Herbert) — les sandworms réagissent aux vibrations, et les Fremen lisent leur comportement. Mais les sandworms ne sont pas définis par cette fonction : prédateur, ingénieur d'écosystème et ressource économique. Le comportement-indicateur est un trait parmi d'autres.\n- Analyse Mythe / Réalité :\n\t- Couche Mythe : La créature est un détecteur passif, placée là pour les habitants ; sa réaction est un signal, pas un acte de survie.\n\t- Couche Réalité : Les bioindicateurs réels sont des organismes avec leur propre écologie, dont la sensibilité aux polluants est une propriété biologique exploitée par les humains. L'organisme ne « signale » rien — il subit ou meurt.\n\t- Décision Escelion : Vision ≤ 5 → ancrer dans la Réalité. La créature doit d'abord être décrite comme un organisme avec sa propre écologie ; la fonction d'indicateur est une utilisation secondaire par les habitants, pas sa définition.\n**2. Mysterious Animal Senses** ([tvtropes.org](https://tvtropes.org/pmwiki/pmwiki.php/Main/MysteriousAnimalSenses))\n- Description : Les animaux perçoivent leur environnement différemment des humains (Umwelt), avec des sens que les humains n'ont pas — rendant leur comportement « illisible » ou « prophétique » du point de vue humain.\n- Intérêt ou subversion : Scientifiquement fondé (l'Umwelt est un concept réel) mais devient cliché quand la différence sensorielle est systématiquement interprétée comme un don de prédiction. Subversion : les habitants projettent du sens sur le comportement animal alors que l'animal réagit à un stimulus matériel que les humains ne perçoivent pas — et les habitants se trompent parfois sur la cause réelle.\n- Exemples (en général) : *Dune* — les sandworms et les vibrations. — *Predator* — vision infrarouge. — *Stranger Things* — les animaux sensing l'Upside Down.\n- Cohérence : Compatible avec le matérialisme d'Escelion — les sens animaux sont des adaptations biologiques, pas des dons surnaturels. Le problème est quand la différence sensorielle est réduite à une fonction d'alarme.\n\t- Exemple (cohérence Alteir) : *Children of Time* (Adrian Tchaikovsky) — les araignées évoluées perçoivent le monde par vibrations et phéromones. Leurs sens ne sont pas « mystérieux » ni utilisés comme indicateurs — ils sont le fondement de leur propre monde perceptif.\n- Analyse Mythe / Réalité :\n\t- Couche Mythe : Les sens animaux sont un mystère conférant un rôle prophétique ou d'alarme.\n\t- Couche Réalité : Les sens animaux sont des adaptations évolutives matérielles à des niches spécifiques. Le comportement est explicable et prédictif, pas mystérieux.\n\t- Décision Escelion : Vision ≤ 5 → ancrer dans la Réalité. Les sens doivent être décrits comme des adaptations matérielles. L'interprétation par les habitants (couche épistémique) peut être erronée.",
+      "filtre_d_exclusion_ontologique": "- **Evil-Detecting Dog** — Non applicable. Présupposé incompatible : le mal comme force métaphysique détectable, absent d'Escelion (matérialisme, athéisme). La forme matérielle est couverte par Canary in a Coal Mine.\n- **Detect Evil** — Non applicable. Même présupposé.",
+      "occurrences": "**Occurrences principales (instrumentalisation centrale)**\n- <mention-page url=\"https://app.notion.com/p/6c0555036e2d4743a20134af3357b317\"/> — « détecteur de frontière », « indicateur de dégradation », « alarme » des lisières ; la fonction indicatrice structure une partie majeure de la fiche.\n- <mention-page url=\"https://app.notion.com/p/f5ec9a38e4dd43beb3a7a7e3274c0999\"/> — « bio-indicateur » de l'état des frontières, « signal chimique involontaire », capturé et utilisé comme « détecteur de frontières ».\n- <mention-page url=\"https://app.notion.com/p/6966d7e4ccdf40559d714420c096e279\"/> — « Indicateur environnemental passif », « réseau d'alarme » distribué via exocortex mués ; l'espèce est explicitement définie par sa fonction d'alerte.\n- <mention-page url=\"https://app.notion.com/p/1b36e4d21b4580b5a3f6ceb43f5bff1a\"/> — « Indicateur de dégradation progressive » du désert, « signal indirect de la santé géochimique » ; l'espèce est qualifiée de réseau matériel avant d'être un organisme.\n- <mention-page url=\"https://app.notion.com/p/b242c08c13a348cea880b807094ca0b8\"/> — « Indicateur respiratoire du Léviathan », « indicateur météorologique biologique » ; la santé des colonies « reflète directement » les Insufflations.\n- <mention-page url=\"https://app.notion.com/p/b51a0d5c9d644f2db19aa035e129e8a3\"/> — « Bio-indicateur », « calendrier vivant » des Marches ; la fonction de calendrier est le premier trait culturel mentionné.\n- <mention-page url=\"https://app.notion.com/p/fcf36f8bb272405ea1c2f687f643dc6a\"/> — « Bio-indicateurs structurels » lus par les Murmurateurs. *Aussi dans Spécialisation environnementale.*\n- <mention-page url=\"https://app.notion.com/p/5df4705753dd48eb8b83be0c32861cab\"/> — « signal d'alerte » de crue, « indicateur de potabilité » ; la rétraction précoce du voile est lue comme signal par les aldravinds.\n- <mention-page url=\"https://app.notion.com/p/d4cb9575da114e75a875cb052ca60509\"/> — « indicateur de santé forestière » ; mentionné comme rôle écologique clé.\n- <mention-page url=\"https://app.notion.com/p/5b61c1b1831e4c51a1ee794cb499f6d1\"/> — « indicateur » et « carte sensorielle » de la Tanière ; les joueurs les utilisent comme boussole vivante.\n**Occurrences secondaires (mention incidentelle)**\n- <mention-page url=\"https://app.notion.com/p/8c5b687f11d44950adaa3cac6af7c539\"/> — « signal d'alarme intradiégétique », « indicateur des éleveurs » ; mais la fiche définit d'abord l'espèce comme brouteur-filtreur et transfert de biomasse.\n- <mention-page url=\"https://app.notion.com/p/1b36e4d21b4580969390e449a9639c11\"/> — État des grappes lu par les caravanes (sol saturé / oasis mourante) ; mais l'espèce est d'abord une plante à dispersion explosive.\n- <mention-page url=\"https://app.notion.com/p/414c174a614d4cf9aa43bc2e7998ac1f\"/> — Code chromatique lu comme indicateur de qualité d'air ; mais l'espèce est d'abord un filtreur.\n**Occurrence résolue**\n- <mention-page url=\"https://app.notion.com/p/d9be110bc3314dd6b5989069fe05246e\"/> — Pattern note déjà présente : « les Pruines ne sont pas des indicateurs, les Lampistes ont un savoir pratique, pas une lecture de signes ». Transmutation déjà opérée.\n**Mentions agrégées (fiches de lieu)**\n- <mention-page url=\"https://app.notion.com/p/15f02d2265fb4afbb80e68925f6f0f3b\"/> — mention explicite de « bio-indicateurs vivants (filandres, clispes) » comme outils de lecture des Veilles.\n- <mention-page url=\"https://app.notion.com/p/267194b8ae98440697c3c8ab16b0b7e1\"/> — Lithorins décrits comme « indicateur de danger lu par les éleveurs et les Lecteurs d'Argile ».\n- <mention-page url=\"https://app.notion.com/p/1b36e4d21b45809199acf5ae099e8d22\"/> — Espèces locales comme « baromètre de praticabilité » et « code chromatique signalant la toxicité de l'air ».",
+      "usages_critiques": "- **Satire** : Une communauté instrumentalise systématiquement une espèce comme « alarme naturelle » — mais l'espèce, stressée par cette exploitation, modifie son comportement, produit de faux signaux, et finit par disparaître de la zone. Les habitants se retrouvent sans alarme ET sans l'espèce qu'ils auraient dû protéger.\n- **Mise en abyme** : Des naturalistes ou érudits d'Escelion critiquent explicitement la tendance de leurs contemporains à réduire les espèces à des « outils de lecture ». Un personnage refuse de décrire une espèce uniquement par son utilité informative et insiste sur son rôle écologique — créant un débat in-world sur l'instrumentalisation du vivant.",
+      "gestion_narrative": "- **Stratification par couche de lecture** : Le pattern est légitime à la couche épistémique (les habitants croient que l'animal est un « indicateur » — leur interprétation culturelle) mais toxique à la couche matérielle (la fiche décrit l'espèce uniquement par cette fonction). Séparer systématiquement : ce que l'espèce fait matériellement ≠ ce que les habitants croient qu'elle fait.\n- **Concours de circonstance** : Quand une espèce réagit à un danger avant les habitants, le mentionner comme un concours de circonstance — l'animal, par sa biologie, perçoit quelque chose que les humains ne perçoivent pas, et réagit pour sa propre survie. Ce n'est pas sa fonction ni son rôle : c'est un incident. Le chien chasse, le cheval transporte — accessoirement, ils peuvent réagir à un danger avant l'humain. L'occurrence se limite à une phrase, pas à une section.\n- **Outils propres** : Les habitants ne doivent pas être réduits à lire le comportement animal faute de mieux. Ils développent leurs propres instruments de détection (baromètres, sondeurs, tests chimiques, réseaux d'observation). La lecture du comportement animal est un savoir pratique informel, pas un substitut à l'outillage.\n- **Concentration assumée** : Si une communauté utilise vraiment une espèce comme bio-indicateur de manière centrale, concentrer cet usage dans cette communauté plutôt que de le diluer partout. L'usage devient un trait culturel local, pas un cliché worldbuilding.\n- **Transmutation** : Réécrire les occurrences existantes pour qu'elles servent d'autres patterns : transformer un « animal-indicateur » en occurrence de *Spécialisation environnementale* ou de *Symbiose*.\n- **Échelle de lecture** : Gérer l'échelle à laquelle le joueur perçoit chaque occurrence — du détail d'ambiance (les oiseaux se taisent au passage) à l'enjeu central (une espèce dont le comportement erratique signale un changement cosmologique).",
+      "interdits": "- Pas de description d'espèce dont le seul rôle est « indicateur ». Toute espèce mentionnée comme réagissant à un danger doit d'abord être définie par sa niche écologique (prédateur, proie, ingénieur, compétiteur, mutualiste).\n- Pas de mention de « système d'alarme naturel » ou « détecteur de seuils » comme caractéristique définissante. La réaction à un danger est un concours de circonstance, pas un trait identitaire de l'espèce.\n- Pas plus d'une espèce par fiche de lieu dont la réaction au danger est mentionnée — et cette mention ne dépasse pas une phrase.\n- Pas de communauté réduite à lire le vivant faute d'outils propres. Les habitants développent leurs propres instruments de détection ; la lecture du comportement animal est un complément informel, pas un substitut.",
+      "re_orientations": "- Vers **Spécialisation environnementale** (Fond, À surveiller) : décrire l'espèce par son adaptation à un milieu, dont le comportement reflète les conditions — pas comme un « signal » pour les habitants.\n- Vers **Symbiose** (Central, Sous contrôle) : décrire la relation comme mutualiste ou parasitoïde, pas comme instrumentale.\n- Vers **Quotidien du monstre** (Fond, À renforcer) : décrire l'espèce dans ses gestes quotidiens (manger, dormir, chasser) sans la réduire à une fonction pour les habitants.",
+      "checklist_avant_nouvelle_occurrence": "- [ ] L'espèce est-elle d'abord définie par sa niche écologique (prédateur, proie, ingénieur, compétiteur, mutualiste) avant toute mention de fonction indicatrice ?\n- [ ] La fonction d'indicateur est-elle mentionnée comme un concours de circonstance (une phrase) et non comme une caractéristique définissante (une section) ?\n- [ ] L'espèce est-elle décrite comme un organisme qui réagit pour sa propre survie, plutôt que comme un détecteur passif placé pour les habitants ?\n- [ ] La fiche sépare-t-elle la couche matérielle (ce que l'espèce fait) de la couche épistémique (ce que les habitants croient qu'elle fait) ?\n- [ ] L'occurrence respecte-t-elle le plafond d'une espèce-indicateur par fiche de lieu — et les habitants disposent-ils de leurs propres outils de détection ?\n- [ ] L'espèce est-elle déjà listée dans un autre pattern (Spécialisation environnementale, Symbiose, Quotidien du monstre) comme occurrence principale — et si oui, la fonction indicatrice est-elle secondaire ?\n- [ ] L'interprétation des habitants peut-elle être erronée (faux signaux, projection culturelle, superstition) ?\n- [ ] La disparition ou le stress de l'espèce a-t-elle des conséquences écologiques au-delà de la perte de la fonction d'indicateur ?",
+      "re_sume__ia": "Le texte analyse le pattern du « bio‑indicateur » en soulignant que les espèces sont souvent réduites à des outils d’alerte pour les habitants, ce qui simplifie à l’excès leur rôle écologique réel ; il propose de séparer la fonction matérielle (écologie, niche) de l’interprétation culturelle, d’éviter de les définir uniquement comme indicateurs, et de limiter leur mention à une phrase contextuelle tout en encourageant le développement d’instruments de détection autonomes."
+    },
+    "section_titles": {
+      "analyse_du_pattern": "Analyse du pattern",
+      "e_valuation_du_pattern": "Évaluation du pattern",
+      "tropes": "Tropes",
+      "filtre_d_exclusion_ontologique": "Filtre d'exclusion ontologique",
+      "occurrences": "Occurrences",
+      "usages_critiques": "Usages critiques",
+      "gestion_narrative": "Gestion narrative",
+      "interdits": "Interdits",
+      "re_orientations": "Réorientations",
+      "checklist_avant_nouvelle_occurrence": "Checklist avant nouvelle occurrence",
+      "re_sume__ia": "Résumé IA"
+    },
+    "notion_page_id": "f854e110-f51c-49fa-9c77-30353691b945"
   }
 ]
