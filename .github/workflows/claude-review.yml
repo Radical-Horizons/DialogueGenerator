@@ -58,6 +58,12 @@ jobs:
         if: steps.guard.outputs.enabled == 'true'
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Sans `github_token`, l'action échange un jeton OIDC contre un token
+          # d'App et exige que l'App GitHub Claude soit installée sur le dépôt
+          # (sinon : 401 « Claude Code is not installed on this repository »).
+          # Le GITHUB_TOKEN du workflow suffit et évite cette installation.
+          # Contrepartie : les commentaires sont signés github-actions[bot].
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}

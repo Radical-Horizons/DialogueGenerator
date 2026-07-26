@@ -56,6 +56,12 @@ jobs:
         if: steps.guard.outputs.enabled == 'true'
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Voir claude-review.yml : évite d'exiger l'App GitHub Claude.
+          # Attention ici : un commit poussé par Claude avec GITHUB_TOKEN ne
+          # déclenchera aucun workflow, donc pas de CI sur son correctif. Avec
+          # l'App installée (https://github.com/apps/claude), retirer cette
+          # ligne — les pushs faits sous l'identité de l'App déclenchent la CI.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           trigger_phrase: "@claude"
           track_progress: true
           claude_args: |
