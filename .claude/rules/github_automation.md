@@ -1,7 +1,7 @@
 # Automatisation GitHub (PR)
 
-Trois workflows, tous déterministes. **Aucun agent IA ne tourne en CI** — voir la note en
-fin de fichier.
+Trois workflows, tous déterministes. **Aucune clé API payante en CI** — voir la note en fin
+de fichier.
 
 | Déclencheur | Workflow | Effet |
 |---|---|---|
@@ -50,12 +50,20 @@ ce test, une PR de fork ferait résoudre `head.ref` **dans le dépôt de base**,
 collision de nom de branche enverrait le job écrire sur la mauvaise branche. Tout nouveau
 workflow en écriture déclenché par une PR doit porter le même garde.
 
-## Pas d'agent IA en CI — décision assumée
+## Pas de clé API en CI
 
-Un dispositif de revue / `@claude` / réparation CI automatique a été prototypé (PR #54, #55)
-puis **retiré** : le coût en crédits était sans rapport avec la valeur rendue (~40 $ en une
-journée). Ne pas le réintroduire sans un plafond de dépense explicite et une mesure du coût
-par PR.
+**Aucun workflow ne consomme d'API payante.** Pas de `ANTHROPIC_API_KEY` ni d'équivalent dans
+les secrets du dépôt : un job qui appelle une API facturée dépense sans plafond et sans
+signal — le coût n'apparaît nulle part dans l'onglet Actions.
+
+Les `OPENAI_API_KEY: sk-dummy` de `ci.yml` sont des **littéraux factices**, pas des secrets :
+le backend retombe sur `DummyLLMClient` sans clé valide. Un `grep API_KEY` sur les workflows
+les remonte — ils ne consomment rien.
+
+Un dispositif de revue / `@claude` / réparation CI automatique a été prototypé sur ce principe
+(PR #54, #55) puis **retiré** : ~40 $ de crédits en une journée, sans rapport avec la valeur
+rendue. La clé a été révoquée. Ne pas réintroduire de workflow appelant une API payante sans
+plafond de dépense explicite et mesure du coût par PR.
 
 Deux pièges découverts alors, à connaître avant toute nouvelle tentative :
 
