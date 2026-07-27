@@ -1,94 +1,39 @@
 /**
  * Panneau sync des catégories GDD depuis Notion (FR18).
+ *
+ * La logique vit dans les hooks `useGddNotionSync*` ; ce composant compose leur état
+ * et rend le panneau.
  */
-import type { CSSProperties } from 'react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback } from 'react'
 import {
   deleteGddFullSyncCheckpoint,
-  getGddFullSyncCheckpoint,
-  getGddNotebooklmExportZip,
-  getGddNotionArchives,
-  getGddNotionSyncConfig,
-  getGddNotionSyncProgress,
-  getGddNotionSyncStatus,
   postGddFullSyncCancel,
   postGddFullSyncPause,
   postGddFullSyncUnpause,
-  postGddNotionArchiveRestore,
-  postGddNotionPreviewDatabaseRow,
-  postGddNotionSync,
   postGddNotionTestConnection,
-  putGddNotionSyncConfig,
-  type GddArchiveEntry,
-  type GddFullSyncCheckpointResponse,
-  type GddNotionPreviewDatabaseResponse,
-  type GddNotionSyncConfigPublic,
-  type GddNotionSyncProgressResponse,
-  type GddNotionSyncStatusResponse,
-  type PostGddNotionSyncOptions,
 } from '../../api/gddNotionSync'
 import { GddNotionSyncProgressModal } from './GddNotionSyncProgressModal'
-import { useGddNotionSyncUi, type GddNotionSyncOutcomeTone } from '../../hooks/useGddNotionSyncUi'
-import { useContextStore } from '../../store/contextStore'
-import { theme } from '../../theme'
+import { GddNotionSyncPreviewModal } from './GddNotionSyncPreviewModal'
+import { GddNotionSyncRestoreModal } from './GddNotionSyncRestoreModal'
+import { DatabasePerimeterHelp } from './GddNotionSyncPerimeterHelp'
 import {
-  GDD_NOTION_SYNC_SECONDARY_DATABASE_FILES,
-  isGddNotionSyncSecondaryDatabase,
-} from '../../constants/gddNotionSyncSecondaryDatabases'
+  buttonStyle,
+  formatArchiveLabel,
+  formatArchiveSizeBytes,
+  inputStyle,
+  labelStyle,
+} from './gddNotionSyncStyles'
+import { useGddNotionSyncUi, type GddNotionSyncOutcomeTone } from '../../hooks/useGddNotionSyncUi'
+import { useGddNotionSyncConfig } from '../../hooks/useGddNotionSyncConfig'
+import { useGddNotionSyncPerimeter } from '../../hooks/useGddNotionSyncPerimeter'
+import { useGddNotionSyncCheckpoint } from '../../hooks/useGddNotionSyncCheckpoint'
+import { useGddNotionSyncArchives } from '../../hooks/useGddNotionSyncArchives'
+import { useGddNotionSyncPreview } from '../../hooks/useGddNotionSyncPreview'
+import { useGddNotebooklmExport } from '../../hooks/useGddNotebooklmExport'
+import { useGddNotionSyncRun } from '../../hooks/useGddNotionSyncRun'
+import { theme } from '../../theme'
+import { isGddNotionSyncSecondaryDatabase } from '../../constants/gddNotionSyncSecondaryDatabases'
 import { PasswordInput } from '../shared/PasswordInput'
-import { Tooltip } from '../shared/Tooltip'
-
-function categoryFileMatchesIncluded(categoryFile: string, includedCategories: string[]): boolean {
-  const normalized = new Set(
-    includedCategories.map((x) => x.trim().toLowerCase()).filter(Boolean),
-  )
-  if (normalized.size === 0) {
-    return true
-  }
-  const raw = (categoryFile || '').trim().toLowerCase()
-  const stem = raw.endsWith('.json') ? raw.slice(0, -5) : raw
-  for (const f of normalized) {
-    if (f === raw || f === stem) {
-      return true
-    }
-  }
-  return false
-}
-
-function deriveIncludedDbFilesFromConfig(c: GddNotionSyncConfigPublic): string[] {
-  const inc = c.included_categories || []
-  const dbs = (c.sources || []).filter((s) => s.kind === 'database')
-  if (inc.length === 0) {
-    return dbs.map((s) => s.category_file)
-  }
-  return dbs
-    .filter((s) => categoryFileMatchesIncluded(s.category_file, inc))
-    .map((s) => s.category_file)
-}
-
-function computeIncludedCategoriesPayloadFromSelection(
-  sources: GddNotionSyncConfigPublic['sources'],
-  selectedFiles: string[],
-): string[] {
-  const dbs = (sources ?? []).filter((s) => s.kind === 'database')
-  const allDbFiles = dbs.map((s) => s.category_file).sort()
-  const sortedSel = [...selectedFiles].sort()
-  const allSelected =
-    dbs.length > 0 &&
-    sortedSel.length === allDbFiles.length &&
-    sortedSel.every((f, i) => f === allDbFiles[i])
-  if (dbs.length === 0 || sortedSel.length === 0 || allSelected) {
-    return []
-  }
-  return sortedSel
-}
-
-/** Listes contexte + cache scène : recharger après changement des fichiers GDD sur disque. */
-function refreshContextAfterGddDiskChange(): void {
-  const st = useContextStore.getState()
-  st.invalidateCache()
-  st.bumpGddDataRevision()
-}
 
 function gddSyncOutcomeBannerPalette(tone: GddNotionSyncOutcomeTone): {
   border: string
@@ -127,349 +72,97 @@ export interface GddNotionSyncSectionProps {
 
 export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncSectionProps) {
   const { phase, userMessage, outcomeTone, run, resetMessage } = useGddNotionSyncUi()
-  const [serverStatus, setServerStatus] = useState<GddNotionSyncStatusResponse | null>(null)
-  const [statusLoadError, setStatusLoadError] = useState<string | null>(null)
 
-  const [config, setConfig] = useState<GddNotionSyncConfigPublic | null>(null)
-  const [configLoadError, setConfigLoadError] = useState<string | null>(null)
-  const [intervalMin, setIntervalMin] = useState(60)
-  const [autoSync, setAutoSync] = useState(false)
-  /** Noms ``category_file`` des bases cochées ; vide = toutes les bases (équiv. ``included_categories`` []). */
-  const [includedDbFiles, setIncludedDbFiles] = useState<string[]>([])
-  const [tokenInput, setTokenInput] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [perimeterSaving, setPerimeterSaving] = useState(false)
-  const [saveMessage, setSaveMessage] = useState<string | null>(null)
-  const [saveError, setSaveError] = useState<string | null>(null)
+  const {
+    config,
+    configLoadError,
+    serverStatus,
+    statusLoadError,
+    intervalMin,
+    setIntervalMin,
+    autoSync,
+    setAutoSync,
+    tokenInput,
+    setTokenInput,
+    archiveRetentionSetting,
+    setArchiveRetentionSetting,
+    includedDbFiles,
+    setIncludedDbFiles,
+    saving,
+    perimeterSaving,
+    saveMessage,
+    saveError,
+    loadConfig,
+    refreshStatus,
+    handleSaveSettings: saveSettings,
+    persistIncludedPerimeter,
+  } = useGddNotionSyncConfig(phase)
 
-  const [progressOpen, setProgressOpen] = useState(false)
-  const [progressSnapshot, setProgressSnapshot] = useState<GddNotionSyncProgressResponse | null>(null)
-  const [syncStartedAt, setSyncStartedAt] = useState<number | null>(null)
-  const [syncModeFull, setSyncModeFull] = useState(false)
-  const [archiveRetentionSetting, setArchiveRetentionSetting] = useState(10)
-  const [elapsedTick, setElapsedTick] = useState(0)
+  const {
+    sources,
+    databaseSources,
+    dbCount,
+    pageCount,
+    runScopeDbCount,
+    toggleDbInclusion,
+    checkAllDatabaseSources,
+    uncheckAllDatabaseSources,
+    checkEssentialDatabaseSources,
+    runIncludedCategories,
+  } = useGddNotionSyncPerimeter({
+    config,
+    includedDbFiles,
+    setIncludedDbFiles,
+    persistIncludedPerimeter,
+  })
 
-  const [archives, setArchives] = useState<GddArchiveEntry[]>([])
-  const [archivesLoadError, setArchivesLoadError] = useState<string | null>(null)
-  const [restoreTargetId, setRestoreTargetId] = useState<string | null>(null)
-  const [restoreBackupCurrent, setRestoreBackupCurrent] = useState(true)
-  const [checkpoint, setCheckpoint] = useState<GddFullSyncCheckpointResponse | null>(null)
-  const [checkpointBannerError, setCheckpointBannerError] = useState<string | null>(null)
+  const {
+    checkpoint,
+    checkpointBannerError,
+    setCheckpointBannerError,
+    refreshCheckpoint,
+  } = useGddNotionSyncCheckpoint()
 
-  const [previewOpen, setPreviewOpen] = useState(false)
-  const [previewForFile, setPreviewForFile] = useState<string | null>(null)
-  const [previewLoading, setPreviewLoading] = useState(false)
-  const [previewError, setPreviewError] = useState<string | null>(null)
-  const [previewData, setPreviewData] = useState<GddNotionPreviewDatabaseResponse | null>(null)
+  const {
+    archives,
+    archivesLoadError,
+    restoreTargetId,
+    setRestoreTargetId,
+    restoreBackupCurrent,
+    setRestoreBackupCurrent,
+    refreshArchives,
+  } = useGddNotionSyncArchives(archiveRetentionSetting)
 
-  const [notebooklmExporting, setNotebooklmExporting] = useState(false)
-  const [notebooklmExportError, setNotebooklmExportError] = useState<string | null>(null)
+  const {
+    previewOpen,
+    previewForFile,
+    previewLoading,
+    previewError,
+    previewData,
+    runPreviewOneRow,
+    closePreview,
+  } = useGddNotionSyncPreview()
 
-  const refreshCheckpoint = useCallback(async () => {
-    setCheckpointBannerError(null)
-    try {
-      const c = await getGddFullSyncCheckpoint()
-      setCheckpoint(c)
-    } catch (e) {
-      setCheckpoint(null)
-      setCheckpointBannerError(
-        e instanceof Error ? e.message : 'Impossible de lire le checkpoint de sync complète',
-      )
-    }
-  }, [])
+  const { notebooklmExporting, notebooklmExportError, handleNotebooklmExport } =
+    useGddNotebooklmExport()
 
-  const refreshStatus = useCallback(async () => {
-    setStatusLoadError(null)
-    try {
-      const s = await getGddNotionSyncStatus()
-      setServerStatus(s)
-    } catch (e) {
-      setServerStatus(null)
-      setStatusLoadError(
-        e instanceof Error ? e.message : 'Impossible de charger le statut de synchronisation',
-      )
-    }
-  }, [])
-
-  const refreshArchives = useCallback(async () => {
-    setArchivesLoadError(null)
-    try {
-      const cap = Math.max(1, archiveRetentionSetting || 10)
-      const r = await getGddNotionArchives(Math.min(100, cap + 5))
-      setArchives(r.archives ?? [])
-    } catch (e) {
-      setArchives([])
-      setArchivesLoadError(
-        e instanceof Error ? e.message : 'Impossible de charger l’historique des sauvegardes',
-      )
-    }
-  }, [archiveRetentionSetting])
-
-  const loadConfig = useCallback(async () => {
-    setConfigLoadError(null)
-    try {
-      const r = await getGddNotionSyncConfig()
-      setConfig(r.config)
-      setIntervalMin(Math.max(1, r.config.sync_interval_minutes || 60))
-      setAutoSync(r.config.auto_sync_enabled)
-      setIncludedDbFiles(deriveIncludedDbFilesFromConfig(r.config))
-      setArchiveRetentionSetting(Math.max(1, r.config.archive_retention_count ?? 10))
-      setTokenInput('')
-    } catch (e) {
-      setConfig(null)
-      setConfigLoadError(
-        e instanceof Error ? e.message : 'Impossible de charger la configuration Notion sync',
-      )
-    }
-  }, [])
-
-  useEffect(() => {
-    void loadConfig()
-  }, [loadConfig])
-
-  useEffect(() => {
-    void refreshCheckpoint()
-  }, [refreshCheckpoint])
-
-  useEffect(() => {
-    void refreshStatus()
-  }, [refreshStatus, phase])
-
-  useEffect(() => {
-    void refreshArchives()
-  }, [refreshArchives])
-
-  useEffect(() => {
-    if (!progressOpen) {
-      return
-    }
-    const t = window.setInterval(() => {
-      setElapsedTick((n) => n + 1)
-    }, 250)
-    return () => window.clearInterval(t)
-  }, [progressOpen])
-
-  const busy = phase === 'loading' || perimeterSaving
-  const elapsedSec =
-    progressOpen && syncStartedAt !== null ? (Date.now() - syncStartedAt) / 1000 : 0
-  void elapsedTick
-
-  const sources = useMemo(() => config?.sources ?? [], [config])
-  const databaseSources = useMemo(
-    () =>
-      [...sources.filter((s) => s.kind === 'database')].sort((a, b) =>
-        a.category_file.localeCompare(b.category_file, 'fr', { sensitivity: 'base' }),
-      ),
-    [sources],
-  )
-
-  const toggleDbInclusion = useCallback((categoryFile: string, checked: boolean) => {
-    setIncludedDbFiles((prev) => {
-      if (checked) {
-        return prev.includes(categoryFile) ? prev : [...prev, categoryFile]
-      }
-      return prev.filter((f) => f !== categoryFile)
-    })
-  }, [])
-
-  const persistIncludedPerimeter = useCallback(
-    async (files: string[]) => {
-      if (!config) {
-        return
-      }
-      const payload = computeIncludedCategoriesPayloadFromSelection(config.sources ?? [], files)
-      setPerimeterSaving(true)
-      setSaveError(null)
-      try {
-        const r = await putGddNotionSyncConfig({ included_categories: payload })
-        setConfig(r.config)
-        setIncludedDbFiles(deriveIncludedDbFilesFromConfig(r.config))
-        setSaveMessage('Périmètre des bases enregistré.')
-      } catch (e) {
-        const text = e instanceof Error ? e.message : 'Échec enregistrement du périmètre'
-        setSaveError(text)
-      } finally {
-        setPerimeterSaving(false)
-      }
-    },
-    [config],
-  )
-
-  const checkAllDatabaseSources = useCallback(() => {
-    const files = databaseSources.map((s) => s.category_file)
-    setIncludedDbFiles(files)
-    void persistIncludedPerimeter(files)
-  }, [databaseSources, persistIncludedPerimeter])
-
-  const uncheckAllDatabaseSources = useCallback(() => {
-    setIncludedDbFiles([])
-  }, [])
-
-  /** Bases listées comme secondaires dans le dépôt : non cochées par ce raccourci. */
-  const checkEssentialDatabaseSources = useCallback(() => {
-    const secondary = new Set(GDD_NOTION_SYNC_SECONDARY_DATABASE_FILES)
-    const files = databaseSources
-      .map((s) => s.category_file)
-      .filter((f) => !secondary.has(f))
-    setIncludedDbFiles(files)
-    void persistIncludedPerimeter(files)
-  }, [databaseSources, persistIncludedPerimeter])
-
-  const computeIncludedCategoriesPayload = useCallback((): string[] => {
-    return computeIncludedCategoriesPayloadFromSelection(config?.sources ?? [], includedDbFiles)
-  }, [config?.sources, includedDbFiles])
-
-  /**
-   * Filtre éphémère envoyé au run. ``undefined`` tant que la config n'est pas chargée :
-   * les cases ne reflètent pas encore le périmètre serveur, envoyer ``[]`` reviendrait à
-   * lever le filtre et à parcourir toutes les sources (bases + fiches page).
-   */
-  const runIncludedCategories = useCallback((): string[] | undefined => {
-    if (!config) {
-      return undefined
-    }
-    return computeIncludedCategoriesPayload()
-  }, [config, computeIncludedCategoriesPayload])
-
-  const runPreviewOneRow = useCallback(
-    async (categoryFile: string) => {
-      setPreviewForFile(categoryFile)
-      setPreviewOpen(true)
-      setPreviewLoading(true)
-      setPreviewError(null)
-      setPreviewData(null)
-      try {
-        const r = await postGddNotionPreviewDatabaseRow(categoryFile)
-        setPreviewData(r)
-        if (!r.ok) {
-          setPreviewError(r.message || 'Échec du test')
-        }
-      } catch (e) {
-        setPreviewError(e instanceof Error ? e.message : 'Requête échouée')
-      } finally {
-        setPreviewLoading(false)
-      }
-    },
-    [],
-  )
-
-  const runGddSync = useCallback(
-    (full: boolean, syncOpts?: PostGddNotionSyncOptions) => {
-      setSyncModeFull(full)
-      setProgressOpen(true)
-      setProgressSnapshot(null)
-      setSyncStartedAt(Date.now())
-      void run(async () => {
-        const poll = window.setInterval(async () => {
-          try {
-            const prog = await getGddNotionSyncProgress()
-            setProgressSnapshot(prog)
-          } catch {
-            /* polling best-effort */
-          }
-        }, 400)
-        try {
-          const r = await postGddNotionSync(full, {
-            ...syncOpts,
-            includedCategories: runIncludedCategories(),
-          })
-          await refreshStatus()
-          if (full) {
-            await refreshArchives()
-          }
-          await refreshCheckpoint()
-          onCheckpointDiskChanged?.()
-          if (r.success) {
-            refreshContextAfterGddDiskChange()
-          }
-          return {
-            success: r.success,
-            message: r.message,
-            softFailure: !r.success && Boolean(r.mirror_promotion_pending),
-          }
-        } finally {
-          window.clearInterval(poll)
-          setProgressOpen(false)
-          setSyncStartedAt(null)
-          setProgressSnapshot(null)
-        }
-      })
-    },
-    [
+  const { progressOpen, progressSnapshot, syncModeFull, elapsedSec, runGddSync } =
+    useGddNotionSyncRun({
       run,
       refreshStatus,
       refreshArchives,
       refreshCheckpoint,
-      onCheckpointDiskChanged,
       runIncludedCategories,
-    ],
-  )
+      onCheckpointDiskChanged,
+    })
 
-  const handleSaveSettings = async () => {
-    setSaveError(null)
-    setSaveMessage(null)
-    setSaving(true)
-    try {
-      const includedPayload = computeIncludedCategoriesPayload()
-      const body: Parameters<typeof putGddNotionSyncConfig>[0] = {
-        sync_interval_minutes: Math.max(1, Math.floor(Number(intervalMin)) || 60),
-        auto_sync_enabled: autoSync,
-        included_categories: includedPayload,
-        archive_retention_count: Math.max(1, Math.floor(Number(archiveRetentionSetting)) || 10),
-      }
-      if (tokenInput.trim()) {
-        body.notion_token = tokenInput.trim()
-      }
-      const r = await putGddNotionSyncConfig(body)
-      setConfig(r.config)
-      setIncludedDbFiles(deriveIncludedDbFilesFromConfig(r.config))
-      setTokenInput('')
-      setSaveMessage('Réglages sauvegardés sur le serveur.')
-      void refreshArchives()
-    } catch (e) {
-      const text = e instanceof Error ? e.message : 'Échec de l’enregistrement'
-      setSaveError(text)
-    } finally {
-      setSaving(false)
-    }
-  }
+  /** Un enregistrement de réglages peut changer la rétention : relire l'historique. */
+  const handleSaveSettings = useCallback(async () => {
+    await saveSettings()
+    void refreshArchives()
+  }, [saveSettings, refreshArchives])
 
-  const dbCount = databaseSources.length
-  const pageCount = sources.filter((s) => s.kind === 'page').length
-  /** Nombre de bases traitées par le prochain run ; ``null`` = pas de filtre (tout). */
-  const runScopeDbCount = useMemo(() => {
-    const payload = computeIncludedCategoriesPayloadFromSelection(
-      config?.sources ?? [],
-      includedDbFiles,
-    )
-    return payload.length === 0 ? null : payload.length
-  }, [config?.sources, includedDbFiles])
-
-  const handleNotebooklmExport = useCallback(async (scope: 'disk' | 'sync' = 'disk') => {
-    setNotebooklmExportError(null)
-    setNotebooklmExporting(true)
-    try {
-      const blob = await getGddNotebooklmExportZip(64, scope)
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      const d = new Date().toISOString().slice(0, 10)
-      const suffix = scope === 'sync' ? '-perimetre-sync' : ''
-      a.download = `gdd-notebooklm-export${suffix}-${d}.zip`
-      a.rel = 'noopener'
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      URL.revokeObjectURL(url)
-    } catch (e) {
-      setNotebooklmExportError(
-        e instanceof Error ? e.message : 'Échec du téléchargement de l’export NotebookLM',
-      )
-    } finally {
-      setNotebooklmExporting(false)
-    }
-  }, [])
-
+  const busy = phase === 'loading' || perimeterSaving
   return (
     <div
       style={{
@@ -1439,369 +1132,27 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
       />
 
       {previewOpen ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="gdd-preview-title"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 2150,
-            backgroundColor: 'rgba(0,0,0,0.65)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-          }}
-        >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: 'min(920px, 100vw - 2rem)',
-              maxHeight: 'min(85vh, 720px)',
-              borderRadius: '10px',
-              padding: '1.25rem 1.5rem',
-              backgroundColor: theme.background.panel,
-              border: `1px solid ${theme.border.primary}`,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.75rem',
-            }}
-          >
-            <h3 id="gdd-preview-title" style={{ margin: 0, color: theme.text.primary }}>
-              Test Notion — {previewForFile ?? 'base'}
-            </h3>
-            <p style={{ margin: 0, color: theme.text.secondary, fontSize: '0.88rem' }}>
-              Première ligne de la base, même pipeline que la sync (query → get_page → mapping). Aucune écriture sur
-              le GDD.
-            </p>
-            {previewLoading && (
-              <p style={{ margin: 0, color: theme.text.secondary }}>Chargement…</p>
-            )}
-            {previewError && (
-              <p style={{ margin: 0, color: theme.state.error.color, fontSize: '0.9rem' }}>{previewError}</p>
-            )}
-            {previewData && !previewLoading && (
-              <>
-                <ul
-                  style={{
-                    margin: 0,
-                    paddingLeft: '1.2rem',
-                    color: theme.text.secondary,
-                    fontSize: '0.82rem',
-                    lineHeight: 1.5,
-                  }}
-                >
-                  <li>
-                    Data sources (API 2025-09-03) : <strong>{previewData.data_sources_count}</strong>
-                  </li>
-                  <li>Lignes retournées par query : {previewData.query_total_rows}</li>
-                  <li>Clés propriétés (ligne query / get_page) : {previewData.property_keys_from_query_row.length} /{' '}
-                    {previewData.property_keys_from_get_page.length}</li>
-                  <li>
-                    Colonnes dans <code style={{ fontSize: '0.85em' }}>values</code> (hors titre) :{' '}
-                    {previewData.mapped_record &&
-                    typeof previewData.mapped_record === 'object' &&
-                    previewData.mapped_record !== null &&
-                    'values' in previewData.mapped_record &&
-                    typeof previewData.mapped_record.values === 'object' &&
-                    previewData.mapped_record.values !== null
-                      ? Object.keys(previewData.mapped_record.values as object).length
-                      : 0}
-                  </li>
-                  <li>Mode compact table : {previewData.compact_table ? 'oui' : 'non'}</li>
-                </ul>
-                <pre
-                  style={{
-                    margin: 0,
-                    flex: 1,
-                    minHeight: '200px',
-                    overflow: 'auto',
-                    padding: '0.65rem',
-                    fontSize: '0.75rem',
-                    lineHeight: 1.35,
-                    backgroundColor: theme.background.secondary,
-                    borderRadius: '6px',
-                    border: `1px solid ${theme.border.primary}`,
-                    color: theme.text.primary,
-                  }}
-                >
-                  {JSON.stringify(previewData.mapped_record ?? previewData, null, 2)}
-                </pre>
-              </>
-            )}
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                disabled={previewLoading}
-                onClick={() => {
-                  setPreviewOpen(false)
-                  setPreviewForFile(null)
-                  setPreviewData(null)
-                  setPreviewError(null)
-                }}
-                style={buttonStyle(previewLoading)}
-              >
-                Fermer
-              </button>
-            </div>
-          </div>
-        </div>
+        <GddNotionSyncPreviewModal
+          previewForFile={previewForFile}
+          previewLoading={previewLoading}
+          previewError={previewError}
+          previewData={previewData}
+          onClose={closePreview}
+        />
       ) : null}
 
       {restoreTargetId ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="gdd-restore-title"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 2100,
-            backgroundColor: 'rgba(0,0,0,0.65)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-          }}
-        >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '420px',
-              borderRadius: '10px',
-              padding: '1.25rem 1.5rem',
-              backgroundColor: theme.background.panel,
-              border: `1px solid ${theme.border.primary}`,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
-            }}
-          >
-            <h3 id="gdd-restore-title" style={{ margin: '0 0 0.75rem 0', color: theme.text.primary }}>
-              Restaurer cette sauvegarde ?
-            </h3>
-            <p style={{ margin: '0 0 0.75rem 0', color: theme.text.secondary, fontSize: '0.9rem' }}>
-              Le contenu actuel de <code style={{ fontSize: '0.85em' }}>GDD_categories</code> sera
-              remplacé par le snapshot{' '}
-              <code style={{ fontSize: '0.8em', wordBreak: 'break-all' }}>{restoreTargetId}</code>.
-              Le manifeste Notion sera réinitialisé (prochaine sync incrémentale rechargera depuis
-              Notion).
-            </p>
-            <label
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'flex-start',
-                gap: '0.5rem',
-                marginBottom: '1rem',
-                color: theme.text.secondary,
-                fontSize: '0.88rem',
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={restoreBackupCurrent}
-                onChange={(e) => setRestoreBackupCurrent(e.target.checked)}
-              />
-              <span>Sauvegarder l’état actuel dans .archive/ avant restauration</span>
-            </label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => setRestoreTargetId(null)}
-                style={buttonStyle(busy)}
-              >
-                Annuler
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => {
-                  const id = restoreTargetId
-                  if (!id) return
-                  void run(async () => {
-                    try {
-                      const r = await postGddNotionArchiveRestore(id, {
-                        backup_current: restoreBackupCurrent,
-                      })
-                      setRestoreTargetId(null)
-                      await refreshArchives()
-                      await refreshStatus()
-                      if (r.ok) {
-                        refreshContextAfterGddDiskChange()
-                      }
-                      return { ok: r.ok, message: r.message }
-                    } catch (e) {
-                      return { ok: false, message: apiErrorDetail(e) }
-                    }
-                  })
-                }}
-                style={buttonStyle(busy, true)}
-              >
-                Confirmer la restauration
-              </button>
-            </div>
-          </div>
-        </div>
+        <GddNotionSyncRestoreModal
+          restoreTargetId={restoreTargetId}
+          restoreBackupCurrent={restoreBackupCurrent}
+          setRestoreBackupCurrent={setRestoreBackupCurrent}
+          setRestoreTargetId={setRestoreTargetId}
+          busy={busy}
+          run={run}
+          refreshArchives={refreshArchives}
+          refreshStatus={refreshStatus}
+        />
       ) : null}
     </div>
   )
-}
-
-/** Explication du filtre de bases : identique en tooltip (survol) et en dépliage (tactile / clavier). */
-function DatabasePerimeterHelpText() {
-  const em: CSSProperties = { color: theme.text.primary }
-  return (
-    <span style={{ display: 'block', fontSize: '0.82rem', lineHeight: 1.45 }}>
-      Cochez les bases Notion à inclure. <strong style={em}>Aucune case</strong> ou{' '}
-      <strong style={em}>toutes les cases</strong> cochées = pas de filtre (toutes les bases + toutes
-      les fiches page). Si vous restreignez les bases, chaque sync ne traite{' '}
-      <strong style={em}>que</strong> ces bases — les fiches (sources page) sont alors ignorées sur ce
-      run (évite de parcourir tout le hub). Retirez le filtre pour tout resynchroniser.
-      <br />
-      <strong style={em}>Cocher essentiels</strong> : coche toutes les bases sauf celles marquées
-      « secondaire » et <strong style={em}>enregistre</strong> immédiatement le périmètre sur le
-      serveur.
-      <br />
-      <strong style={em}>Sync complète (bouton global) avec filtre :</strong> les fichiers (ou
-      dossiers shards) des bases <em>non</em> cochées sont <strong>retirés</strong> du dossier GDD
-      local après promotion du miroir (les fiches page déjà sur disque ne sont pas effacées). Utilisez
-      le bouton <strong>Sync cette base</strong> sur une ligne pour une sync complète{' '}
-      <em>uniquement</em> sur cette base sans toucher aux autres.
-      <br />
-      <strong style={em}>Sync normale ou complète :</strong> les cases cochées s’appliquent à ce run
-      uniquement (filtre éphémère). Le périmètre <strong>sauvegardé</strong> (Cocher essentiels,
-      Appliquer le périmètre ou Sauver sans sync) détermine quelles bases sont retirées du disque lors
-      d’une sync complète globale.
-    </span>
-  )
-}
-
-function DatabasePerimeterHelp() {
-  const [expanded, setExpanded] = useState(false)
-  return (
-    <>
-      <Tooltip content={<DatabasePerimeterHelpText />} position="bottom" maxWidth="520px">
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          aria-expanded={expanded}
-          aria-label="Aide sur le périmètre des bases à synchroniser"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.25rem',
-            minHeight: '28px',
-            padding: '0.1rem 0.5rem',
-            borderRadius: '999px',
-            border: `1px solid ${theme.border.primary}`,
-            backgroundColor: theme.background.secondary,
-            color: theme.text.secondary,
-            fontSize: '0.78rem',
-            cursor: 'help',
-          }}
-        >
-          <span aria-hidden>ⓘ</span> Aide
-        </button>
-      </Tooltip>
-      {expanded ? (
-        <div
-          style={{
-            flexBasis: '100%',
-            padding: '0.6rem 0.7rem',
-            borderRadius: '6px',
-            border: `1px solid ${theme.border.primary}`,
-            backgroundColor: theme.background.secondary,
-            color: theme.text.secondary,
-          }}
-        >
-          <DatabasePerimeterHelpText />
-        </div>
-      ) : null}
-    </>
-  )
-}
-
-function formatArchiveLabel(iso: string): string {
-  try {
-    const d = new Date(iso)
-    if (Number.isNaN(d.getTime())) {
-      return iso
-    }
-    return d.toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })
-  } catch {
-    return iso
-  }
-}
-
-function formatArchiveSizeBytes(n: number): string {
-  if (!Number.isFinite(n) || n < 0) {
-    return '—'
-  }
-  if (n === 0) {
-    return '0 o'
-  }
-  const units = ['o', 'Ko', 'Mo', 'Go'] as const
-  let i = 0
-  let x = n
-  while (x >= 1024 && i < units.length - 1) {
-    x /= 1024
-    i += 1
-  }
-  const rounded = i === 0 || x >= 10 ? Math.round(x) : Math.round(x * 10) / 10
-  return `${rounded} ${units[i]}`
-}
-
-function apiErrorDetail(e: unknown): string {
-  if (e && typeof e === 'object' && 'response' in e) {
-    const data = (e as { response?: { data?: { detail?: unknown } } }).response?.data
-    const d = data?.detail
-    if (typeof d === 'string') {
-      return d
-    }
-    if (Array.isArray(d)) {
-      const first = d[0] as { msg?: string } | undefined
-      if (first && typeof first.msg === 'string') {
-        return first.msg
-      }
-    }
-  }
-  if (e instanceof Error) {
-    return e.message
-  }
-  return 'Erreur lors de la restauration'
-}
-
-const labelStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.35rem',
-  color: theme.text.secondary,
-  fontSize: '0.88rem',
-}
-
-const inputStyle: CSSProperties = {
-  padding: '0.45rem 0.6rem',
-  borderRadius: '4px',
-  border: `1px solid ${theme.border.primary}`,
-  backgroundColor: theme.background.secondary,
-  color: theme.text.primary,
-}
-
-function buttonStyle(disabled: boolean, primary = false): CSSProperties {
-  return {
-    padding: '0.5rem 1rem',
-    border: 'none',
-    borderRadius: '4px',
-    backgroundColor: disabled
-      ? theme.button.default.background
-      : primary
-        ? theme.button.primary.background
-        : theme.button.default.background,
-    color: primary ? theme.button.primary.color : theme.text.primary,
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    opacity: disabled ? 0.6 : 1,
-    fontWeight: primary ? 'bold' : 'normal',
-  }
 }
