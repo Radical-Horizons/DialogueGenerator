@@ -663,7 +663,12 @@ from api.routers import (
     audit_logs,
     auth,
     config,
-    context,
+    context_build,
+    context_entities,
+    context_locations,
+    context_rules,
+    context_staleness,
+    context_suggestions,
     costs,
     dialogue_shares,
     dialogues,
@@ -699,7 +704,6 @@ app.include_router(dialogue_shares.router, prefix="/api/v1/dialogues", tags=["Di
 app.include_router(streaming.router, prefix="/api/v1/dialogues", tags=["Dialogues"])  # SSE streaming (Story 0.2)
 app.include_router(unity_dialogues.router, prefix="/api/v1/unity-dialogues", tags=["Unity Dialogues"])
 app.include_router(documents.router, prefix="/api/v1/documents", tags=["Documents"])
-app.include_router(context.router, prefix="/api/v1/context", tags=["Context"])
 app.include_router(config.router, prefix="/api/v1/config", tags=["Configuration"])
 app.include_router(llm_usage.router, prefix="/api/v1/llm-usage", tags=["LLM Usage"])
 app.include_router(exports.router, prefix="/api/v1/exports", tags=["Exports"])
@@ -732,6 +736,25 @@ for _graph_mod in _GRAPH_ROUTER_MODULES:
         prefix="/api/v1/unity-dialogues/graph",
         tags=["Graph Editor"],
         dependencies=[Depends(get_current_user)],
+    )
+
+# Routers contexte GDD (split api/routers/context.py).
+# ``context_locations`` en tête : il porte à la fois les chemins statiques
+# ``/locations/regions``, ``/locations/scene/...`` et le paramétré ``/locations/{name}``,
+# dont l'ordre relatif conditionne la résolution FastAPI.
+_CONTEXT_ROUTER_MODULES = (
+    context_locations,
+    context_entities,
+    context_build,
+    context_suggestions,
+    context_rules,
+    context_staleness,
+)
+for _context_mod in _CONTEXT_ROUTER_MODULES:
+    app.include_router(
+        _context_mod.router,
+        prefix="/api/v1/context",
+        tags=["Context"],
     )
 
 # Router pour les règles de validation (Story 4.10) — persistance disque : même auth que le graphe
