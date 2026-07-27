@@ -123,12 +123,15 @@ Located in `[features/](./features/)`
 - [Graph — livraison cibles de connexion (suivi)](./features/graph-connection-targets-delivery.md) - Synthèse livraison 2026-03 (dropdowns, merge, E2E) ; lien ADR
 - [Current UI Structure](./features/current-ui-structure.md) - Current UI structure documentation (3-column layout, existing components)
 - [V1.0 UX Specs](./features/v1.0-ux-specs.md) - UX specifications for V1.0 features (Progress Feedback, Presets)
-- [V1.5 Unified Context Search](./features/v1.5-unified-context-search.md) - Unified context search specifications for V1.5
+- [Context GDD inter-tab search (v1.8.4)](./features/context-gdd-inter-tab-search.md) - Recherche catalogue au-dessus des onglets, priorisation onglet actif
+- [V1.5 Unified Context Search](./features/v1.5-unified-context-search.md) - Spécification future (FTS serveur, filtres métadonnées) — distinct du livré v1.8.4
 - [Screenshots](./features/screenshots/) - UI screenshots
 
 ### Deployment Configuration
 
 Located in `[deployment/](./deployment/)`
+
+- [CI (GitHub Actions)](./deployment/CI.md) - Jobs, tiers T2/T3, ESLint, concurrence, relais workflow_dispatch
 
 - **[Production (OVH VPS) — référence](./deployment/PRODUCTION.md)** : hébergement réel du DialogueGenerator (IP, SSH, Nginx, `demo.auto-diffusion.net`). À lire avant les guides génériques.
 - [Gunicorn — exemple](./deployment/gunicorn.conf.example) — modèle à copier vers `gunicorn.conf.py`
