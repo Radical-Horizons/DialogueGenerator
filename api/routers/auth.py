@@ -104,8 +104,10 @@ async def get_current_user(
 ) -> dict[str, object]:
     """Dépendance pour obtenir l'utilisateur courant depuis le token JWT.
 
-    Si ``DISABLE_AUTH=true`` et environnement non-production : utilisateur mock admin
-    (pytest / outillage). Sinon : Bearer JWT obligatoire (y compris guest).
+    Si ``DISABLE_AUTH=true`` et environnement non-production : sans Bearer valide,
+    utilisateur mock admin (pytest / seeds). Un Bearer JWT valide (guest ou compte)
+    est honoré pour permettre le chemin guest-first et le login E2E.
+    Sinon (auth stricte) : Bearer JWT obligatoire (y compris guest).
 
     Args:
         credentials: Credentials HTTP (token). Optionnel si DISABLE_AUTH.
@@ -120,8 +122,23 @@ async def get_current_user(
     # Toujours via get_security_config() (évite singleton stale après reset tests).
     live_security = get_security_config()
     if live_security.is_development and live_security.disable_auth:
+        # Honorer un Bearer valide (guest / login réel) pour que Playwright guest-first
+        # et /login restent testables malgré le mock admin sans token.
+        if credentials is not None:
+            payload = auth_service.verify_token(
+                credentials.credentials,
+                token_type="access",
+            )
+            if payload is not None:
+                username = payload.get("sub")
+                if payload.get("role") == "guest" and username == "guest":
+                    return auth_service.guest_principal()
+                if isinstance(username, str) and username:
+                    user = auth_service.get_user_by_username(username)
+                    if user is not None:
+                        return user
         logger.debug(
-            "DISABLE_AUTH=true: JWT ignoré, utilisateur mock (développement uniquement)"
+            "DISABLE_AUTH=true: JWT absent ou non résolu, utilisateur mock (développement uniquement)"
         )
         return {
             "id": "1",

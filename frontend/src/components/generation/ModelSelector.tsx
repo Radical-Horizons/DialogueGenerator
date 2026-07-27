@@ -60,7 +60,18 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ style }) => {
       }}
     >
       {Object.entries(modelsByProvider).map(([providerType, models]) => (
-        <optgroup key={providerType} label={providerType === 'openai' ? 'OpenAI' : 'Mistral'}>
+        <optgroup
+          key={providerType}
+          label={
+            providerType === 'openai'
+              ? 'OpenAI'
+              : providerType === 'mistral'
+                ? 'Mistral'
+                : providerType === 'openrouter'
+                  ? 'OpenRouter'
+                  : providerType.charAt(0).toUpperCase() + providerType.slice(1)
+          }
+        >
           {models.map((m) => (
             <option key={m.api_identifier} value={m.api_identifier}>
               {m.display_name}

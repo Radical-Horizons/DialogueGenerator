@@ -382,6 +382,44 @@ def test_competences_not_excluded(tmp_path: Path) -> None:
     assert "Compétences.json" in eligible_disk_category_files(settings, gdd)
 
 
+def test_regnes_bucketed_with_especes(tmp_path: Path) -> None:
+    """Règnes_et_classes / Règnes_et_espèces → bucket personnages-cultures (pas 08-autres)."""
+    from services.gdd_notebooklm_export import _bucket_index_for_stem, _fold_stem
+
+    assert _bucket_index_for_stem(_fold_stem("Règnes_et_classes")) == 1
+    assert _bucket_index_for_stem(_fold_stem("Règnes_et_espèces")) == 1
+    assert _bucket_index_for_stem(_fold_stem("especes")) == 1
+
+    gdd = tmp_path / "GDD_categories"
+    gdd.mkdir(parents=True)
+    (gdd / "Règnes_et_classes.json").write_text(
+        json.dumps([{"Nom": "Panmorphes", "sections": {"x": "taxonomie"}}], ensure_ascii=False),
+        encoding="utf-8",
+    )
+    settings = {
+        "sources": [
+            {
+                "kind": "database",
+                "category_file": "Règnes_et_classes.json",
+                "notion_id": _nid(),
+            }
+        ],
+        "included_categories": [],
+    }
+    parts = build_notebooklm_markdown_parts(
+        gdd_root=gdd,
+        project_root=tmp_path,
+        settings=settings,
+        max_files=64,
+    )
+    names = [n for n, _ in parts]
+    assert any("personnages-cultures" in n for n in names), names
+    assert not any("production-et-autres" in n for n in names), names
+    body = "\n".join(t for _, t in parts)
+    assert "Panmorphes" in body
+    assert "# Base : Règnes_et_classes" in body
+
+
 def test_oversized_bucket_emits_part_files_without_truncation(tmp_path: Path) -> None:
     """Catégorie monolithique (``Pitch.json``) : pas de dossier shard ``personnages/``."""
     gdd = tmp_path / "GDD_categories"

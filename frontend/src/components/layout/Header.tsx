@@ -2,7 +2,7 @@
  * Composant Header avec authentification et barre de recherche.
  */
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { useCommandPalette } from '../../hooks/useCommandPalette'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
@@ -105,7 +105,20 @@ export function Header() {
     }}>
       {/* Section gauche : Titre */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-        <h1 style={{ margin: 0, color: theme.text.primary, fontSize: remSize('title'), fontWeight: 600, whiteSpace: 'nowrap' }}>DialogueGenerator</h1>
+        <h1 style={{ margin: 0, fontSize: remSize('title'), fontWeight: 600, whiteSpace: 'nowrap' }}>
+          <Link
+            to="/"
+            data-testid="header-home-link"
+            aria-label="Accueil DialogueGenerator"
+            style={{
+              color: theme.text.primary,
+              textDecoration: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            DialogueGenerator
+          </Link>
+        </h1>
         {user?.role === 'guest' && (
           <span
             data-testid="guest-mode-banner"
@@ -385,12 +398,11 @@ export function Header() {
                   </div>
                 </div>
                 {user.role === 'admin' && user.is_active && (
-                  <>
                   <button
                     onClick={(event) => {
                       event.stopPropagation()
                       setIsUserMenuOpen(false)
-                      navigate('/admin/users')
+                      navigate('/admin')
                     }}
                     style={{
                       width: '100%',
@@ -406,31 +418,8 @@ export function Header() {
                       textAlign: 'left',
                     }}
                   >
-                    Gérer les utilisateurs
+                    Administration
                   </button>
-                  <button
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      setIsUserMenuOpen(false)
-                      navigate('/admin/audit-logs')
-                    }}
-                    style={{
-                      width: '100%',
-                      minHeight: TOUCH_TARGET_MIN_PX,
-                      marginBottom: '0.5rem',
-                      padding: '0.5rem 0.75rem',
-                      fontSize: remSize('body'),
-                      backgroundColor: theme.button.default.background,
-                      color: theme.button.default.color,
-                      border: `1px solid ${theme.border.primary}`,
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                    }}
-                  >
-                    Journaux d’audit
-                  </button>
-                  </>
                 )}
                 <button
                   type="button"

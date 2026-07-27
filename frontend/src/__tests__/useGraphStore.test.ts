@@ -1180,6 +1180,81 @@ describe('useGraphStore - Pending save state', () => {
       expect(choice0?.testSuccessNode).toBe('NODE_S')
       expect(choice0?.testCriticalSuccessNode).toBe('NODE_CS')
     })
+
+    it('fills displayName placeholder when API omits it (from line)', async () => {
+      const { addNode, generateFromNode } = useGraphStore.getState()
+      addNode({
+        id: 'parent-dn',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: {
+          speaker: 'PNJ',
+          line: 'Parent',
+          choices: [{ text: 'Suite', targetNode: null }],
+        },
+      })
+      const graphAPI = await import('../api/graph')
+      vi.mocked(graphAPI.generateNode).mockResolvedValueOnce({
+        node: {
+          id: 'generated-no-dn',
+          type: 'dialogueNode',
+          speaker: 'PNJ',
+          line: 'Première réplique\nSuite',
+        },
+        suggested_connections: [
+          {
+            from: 'parent-dn',
+            to: 'generated-no-dn',
+            via_choice_index: 0,
+            connection_type: 'choice',
+          },
+        ],
+        parent_node_id: 'parent-dn',
+      })
+
+      await generateFromNode('parent-dn', 'Instructions', { target_choice_index: 0 })
+
+      const generated = useGraphStore.getState().nodes.find((n) => n.id === 'generated-no-dn')
+      expect(generated?.data?.displayName).toBe('Première réplique')
+    })
+
+    it('keeps API displayName when provided', async () => {
+      const { addNode, generateFromNode } = useGraphStore.getState()
+      addNode({
+        id: 'parent-dn-keep',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: {
+          speaker: 'PNJ',
+          line: 'Parent',
+          choices: [{ text: 'Suite', targetNode: null }],
+        },
+      })
+      const graphAPI = await import('../api/graph')
+      vi.mocked(graphAPI.generateNode).mockResolvedValueOnce({
+        node: {
+          id: 'generated-with-dn',
+          type: 'dialogueNode',
+          displayName: 'Accueil tavernier',
+          speaker: 'PNJ',
+          line: '« Bienvenue. »',
+        },
+        suggested_connections: [
+          {
+            from: 'parent-dn-keep',
+            to: 'generated-with-dn',
+            via_choice_index: 0,
+            connection_type: 'choice',
+          },
+        ],
+        parent_node_id: 'parent-dn-keep',
+      })
+
+      await generateFromNode('parent-dn-keep', 'Instructions', { target_choice_index: 0 })
+
+      const generated = useGraphStore.getState().nodes.find((n) => n.id === 'generated-with-dn')
+      expect(generated?.data?.displayName).toBe('Accueil tavernier')
+    })
   })
 
   describe('saveDialogue FR37 post-validation', () => {

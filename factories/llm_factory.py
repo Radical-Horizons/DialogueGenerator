@@ -7,6 +7,7 @@ from typing import Optional, Any, List
 from core.llm.llm_client import ILLMClient, DummyLLMClient
 from core.llm.openai.client import OpenAIClient
 from core.llm.mistral_client import MistralClient
+from core.llm.openrouter_client import OpenRouterClient
 from core.llm.fallback_client import FallbackLLMClient
 from constants import ModelNames
 
@@ -163,11 +164,40 @@ class LLMClientFactory:
             except Exception as e:
                 logger.error(f"Erreur lors de la création de MistralClient pour '{model_id}': {e}. Utilisation de DummyLLMClient.")
                 return DummyLLMClient()
-        
-        # Ajouter d'autres types de clients ici si nécessaire (ex: Anthropic, Cohere)
-        # elif client_type == "anthropic":
-        #     # ... logique pour Anthropic ...
-        #     pass
+
+        elif client_type == "openrouter":
+            openrouter_env = config.get("openrouter_api_key_env_var") or "OPENROUTER_API_KEY"
+            api_key = os.getenv(openrouter_env)
+            if _is_placeholder_llm_api_key(api_key):
+                raise ValueError(
+                    f"OPENROUTER_API_KEY manquante (variable: {openrouter_env}). "
+                    "Impossible d'utiliser un modèle OpenRouter."
+                )
+            model_identifier = (
+                model_config.get("api_identifier")
+                or model_config.get("model_identifier")
+                or model_id
+            )
+            client_config = config.copy()
+            client_config["default_model"] = model_identifier
+            params = model_config.get("parameters")
+            if isinstance(params, dict):
+                if "default_temperature" in params:
+                    client_config["temperature"] = params["default_temperature"]
+                if "max_tokens" in params:
+                    client_config["max_tokens"] = params["max_tokens"]
+            logger.info(
+                "Création d'un OpenRouterClient pour model_id: %s (default_model: %s)",
+                model_id,
+                model_identifier,
+            )
+            return OpenRouterClient(
+                api_key=api_key,
+                config=client_config,
+                usage_service=usage_service,
+                request_id=request_id,
+                endpoint=endpoint,
+            )
 
         logger.warning(f"Type de client LLM inconnu ou non supporté: '{client_type}' pour model_id '{model_id}'. Utilisation de DummyLLMClient.")
         return DummyLLMClient()

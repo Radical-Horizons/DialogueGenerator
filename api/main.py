@@ -9,7 +9,7 @@ import sys
 import asyncio
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
+from typing import Annotated, AsyncIterator, Optional
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware as FastAPICORSMiddleware
@@ -23,8 +23,9 @@ from api.middleware import (
 from api.middleware.billable_user_context import BillableUserContextMiddleware
 from api.middleware.cost_governance import CostGovernanceMiddleware
 from api.exceptions import APIException, ValidationException
-from api.dependencies import get_request_id
+from api.dependencies import get_request_id, require_admin
 from api.config.security_config import get_security_config
+from api.routers.auth import get_current_user_or_none
 from api.config.cors_resolution import resolve_production_cors_origins
 from api.middleware.rate_limiter import get_limiter, rate_limit_exception_handler
 from api.app_version import APP_VERSION
@@ -614,28 +615,45 @@ async def health_check() -> JSONResponse:
     )
 
 
-@app.get("/health/detailed", tags=["Health"])
-async def health_check_detailed() -> JSONResponse:
-    """Endpoint de vérification de santé détaillé avec toutes les dépendances.
-    
-    Returns:
-        Statut de santé détaillé avec vérification de toutes les dépendances (200 si healthy, 503 si unhealthy).
-    """
-    if os.getenv("ENVIRONMENT", "development") == "production":
-        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "Not found"})
+async def _require_admin_for_detailed_health(
+    current_user: Annotated[
+        Optional[dict[str, object]],
+        Depends(get_current_user_or_none),
+    ],
+) -> dict[str, object]:
+    """Restreint le health détaillé aux administrateurs (y compris en production)."""
+    return require_admin(current_user)
 
+
+@app.get("/health/detailed", tags=["Health"])
+async def health_check_detailed(
+    _admin: Annotated[dict[str, object], Depends(_require_admin_for_detailed_health)],
+) -> JSONResponse:
+    """Endpoint de vérification de santé détaillé avec toutes les dépendances.
+
+    Accès réservé aux administrateurs (JWT admin). Le health public ``/health``
+    reste anonyme et expose uniquement le statut basique + ``app_version``.
+
+    Returns:
+        Statut de santé détaillé avec vérification de toutes les dépendances
+        (200 si healthy, 503 si unhealthy).
+    """
     from api.utils.health_check import perform_health_checks
-    
+
     health_result = perform_health_checks(detailed=True)
     health_result["timestamp"] = datetime.now(timezone.utc).isoformat() + "Z"
     health_result["service"] = "DialogueGenerator API"
-    
+
     # Retourner 503 si unhealthy, 200 même si degraded (l'app fonctionne mais avec limitations)
-    status_code = status.HTTP_503_SERVICE_UNAVAILABLE if health_result["status"] == "unhealthy" else status.HTTP_200_OK
-    
+    status_code = (
+        status.HTTP_503_SERVICE_UNAVAILABLE
+        if health_result["status"] == "unhealthy"
+        else status.HTTP_200_OK
+    )
+
     return JSONResponse(
         status_code=status_code,
-        content=health_result
+        content=health_result,
     )
 
 

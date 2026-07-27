@@ -1,5 +1,229 @@
 [
   {
+    "Nom": "Flag_perso_premier_arc_outcome",
+    "values": {
+      "Actes liés": "31a6e4d2-1b45-8026-bf52-e0bdd107d332, 31a6e4d2-1b45-80ca-adcd-e7088d726397, 31a6e4d2-1b45-8066-ba09-e36a4c05b78a, 31a6e4d2-1b45-8050-ae28-e0515e103d8e, 31a6e4d2-1b45-8083-b448-d3bbe78d25d3",
+      "Description narrative": "Résolution de l'arc du Rêveur du Mont des Réincarnés. Encode le destin du régime kandarite et du Premier : statu quo, contestation, ou réintégration partielle/totale du Premier dans son ancien corps via le projet de Laios.",
+      "ID": "FLAG1018",
+      "Personnage lié": "a4fdfc35-1930-415d-a8f6-fd4ce87d99e3",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "4d860678-49ac-4702-aa66-8f29abf53db9, 2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "enum",
+      "Valeurs enum": "EN_COURS\nSTATUT_QUO\nKANDAR_CONTESTE\nLIBERATION_PARTIELLE\nCORPS_REINTEGRE"
+    },
+    "sections": {},
+    "notion_page_id": "22f21356-2c91-4fb4-99f2-69bf2c9a2c06"
+  },
+  {
+    "Nom": "Flag_lieu_necropole_fragment_zero",
+    "values": {
+      "Actes liés": "31a6e4d2-1b45-8000-9248-d0b7535ac586",
+      "Chapitres liés": "ed9e8d3d-0163-43de-9e6c-acf8e1e31af4",
+      "Chapitres prévus": "ed9e8d3d-0163-43de-9e6c-acf8e1e31af4",
+      "Description narrative": "État du fragment résiduel de l'IA primordiale (la Partition) logé dans le Pylône Zéro après la dernière Silenciation Majeure. Déclencheur : Silenciation Majeure ayant produit un fragment résiduel. RECUPERE → Reliquaire actif chez les Kurgarrû, Zone Centrale fermée temporairement. DETRUIT → Zone Centrale accessible, Flag_lieu_steppe_kurgarru_passage → REFUSE. PERSISTANT → Flag_lieu_steppe_contamination_xyriad → CRITIQUE, deux factions hostiles. Résolu par la quête La Partition Zéro.",
+      "ID": "FLAG1211",
+      "Lieu lié": "d3f47c29-9694-4740-8a04-51b0e6cfb102",
+      "Portée": "Lieu",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8016-a220-cf44d02c111f, 2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Systèmes producteurs": "4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Type de valeur": "enum",
+      "Valeurs enum": "ABSENT\nRECUPERE\nDETRUIT\nPERSISTANT"
+    },
+    "sections": {},
+    "notion_page_id": "461e1e0d-7954-465a-bd8f-84466367768a"
+  },
+  {
+    "Nom": "Compteur_Nexianisme_MeridianaLivres",
+    "values": {
+      "Communauté liée": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Description narrative": "Nombre de livraisons de méridiana effectuées pour le compte des passeurs racinaires. Paliers : 1 = première livraison ; 2 = filière d'extraction comprise ; 3 = complicité établie avec les passeurs racinaires.",
+      "ID": "FLAG1208",
+      "Max": "3",
+      "Min": "0",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "compteur"
+    },
+    "sections": {},
+    "notion_page_id": "e68cf2f0-3d37-47ef-b5da-093e24b49f09"
+  },
+  {
+    "Nom": "Compteur_Nexianisme_CensVerses",
+    "values": {
+      "Communauté liée": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Description narrative": "Nombre de Cens de Veille versés par la joueuse (redevance annuelle du foyer consacré). Paliers : 1 = premier Cens versé ; 2 = Nuée complète honorée ; 3 = foyer cité aux registres ; 4 = générosité remarquée à la Becquée.",
+      "ID": "FLAG1210",
+      "Max": "4",
+      "Min": "0",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "compteur"
+    },
+    "sections": {},
+    "notion_page_id": "11b3c661-3311-4d84-ad33-ebbf31b6bf0d"
+  },
+  {
+    "Nom": "Flag_Nexianisme_CommissionDementi",
+    "values": {
+      "Communauté liée": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Description narrative": "Relation de la joueuse avec la Commission du Démenti, organe pontifical qui documente les témoignages d'après-vie athée avec une minutie proche de la peur. Conditionne le hook Le Démenti.",
+      "ID": "FLAG1207",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "Inconnue\nContactée\nEngagée\nRompue"
+    },
+    "sections": {},
+    "notion_page_id": "1ba0f5ba-9a54-4e55-95b5-cf80dea6f6c7"
+  },
+  {
+    "Nom": "Flag_Nexianisme_Etouffoir",
+    "values": {
+      "Communauté liée": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Description narrative": "Statut de la joueuse vis-à-vis de l'Étouffoir nexian (excommunication par noyade de la flamme : mort sociale, crédit nul, Indivis gelé, tombe interdite). Menacé = procédure ouverte ; Prononcé = irréversible sauf rendue de mèche solennelle.",
+      "ID": "FLAG1206",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "Aucun\nMenacé\nPrononcé"
+    },
+    "sections": {},
+    "notion_page_id": "c76036e9-b5c1-4918-a3c0-b553dc93c1cc"
+  },
+  {
+    "Nom": "Flag_Nexianisme_RiteRacines",
+    "values": {
+      "Communauté liée": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Description narrative": "Degré d'exposition au rite secret des Racines (conduire un mourant vers les racines du Mont vêtu de méridiana). Ignoré = n'en a jamais entendu parler ; Entendu = rumeur ; Témoin = a vu sans participer ; Participé = a accompagné ou guidé un mourant.",
+      "ID": "FLAG1204",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "Ignoré\nEntendu\nTémoin\nParticipé"
+    },
+    "sections": {},
+    "notion_page_id": "15708ab8-ae8e-4ef9-a3c3-037d353d9bc2"
+  },
+  {
+    "Nom": "Flag_Nexianisme_ApresVieAthee",
+    "values": {
+      "Communauté liée": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Description narrative": "Exposition au phénomène d'après-vie athée : un au-delà sans dieu ni Mont ni Porte, dont personne ne connaît l'origine. Conditionne la Commission du Démenti et le hook Le Démenti.",
+      "ID": "FLAG1205",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "Ignorée\nRumeur\nTémoignage direct"
+    },
+    "sections": {},
+    "notion_page_id": "6bff5bbd-3a31-48cb-b96e-a9575437ecee"
+  },
+  {
+    "Nom": "Flag_Nexianisme_ParenteDeMeche",
+    "values": {
+      "Communauté liée": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Description narrative": "Position de la joueuse dans le réseau de parenté de mèche nexiane : aucune, débitrice (elle a emprunté la flamme et doit une Nuée d'allégeance) ou créancière (elle a prêté et peut réclamer). Conditionne le hook Dette de mèche et les notaires de l'Indivis.",
+      "ID": "FLAG1209",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "Aucune\nDébitrice\nCréancière"
+    },
+    "sections": {},
+    "notion_page_id": "003c34bf-a7b6-477f-9df2-492b834622d2"
+  },
+  {
+    "Nom": "Flag_Nexianisme_ConnaissanceLeurre",
+    "values": {
+      "Communauté liée": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Description narrative": "Degré de connaissance du leurre du Nexion (la Porte visible n'est pas la Porte vraie, entretenu par les Pontifes). Conditionne les dialogues pontificaux, l'accès au rite des Racines et le hook Mirvel doute.",
+      "ID": "FLAG1203",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "Aucune\nSoupçon\nIndice\nCertitude"
+    },
+    "sections": {},
+    "notion_page_id": "73f1a84d-5779-4d21-a572-6b1b5773ce5a"
+  },
+  {
+    "Nom": "Flag_lieu_forets_corail_temps_veille",
+    "values": {
+      "Description narrative": "Temps du Cycle de Veille (rythme court, à l'échelle d'une Veille) qui module l'amplitude du Tableau actif dans les Forêts de Corail : Montée (l'émotion enfle), Apogée (intensité maximale), Retombée (l'émotion reflue), Étale (le Tableau retombe, moment calme où chacun redevient un peu soi-même). Se combine avec Flag_lieu_forets_corail_tableau_carnavalier, qui porte le Tableau émotionnel.",
+      "ID": "FLAG1202",
+      "Lieu lié": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1",
+      "Portée": "Lieu",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "ETALE\nMONTEE\nAPOGEE\nRETOMBEE"
+    },
+    "sections": {},
+    "notion_page_id": "f6f4d65b-68c6-4520-8edb-46e4f837452e"
+  },
+  {
+    "Nom": "Flag_perso_murmol_genka",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "État du fil Murmöl–Genka, le père adoptif et l'enfant qui a refusé sa succession, réunis par les hasards du convoi au Léviathan. NON_ABORDE : le joueur n'a pas touché à leur lien. EVOQUE : le joueur a appris ou relayé quelque chose de leur brouille. RAPPROCHEMENT : le joueur a amorcé un geste entre eux avant le départ (sans garantir de réconciliation).",
+      "ID": "FLAG1199",
+      "Personnage lié": "6868f847-5748-481f-aae8-961764cb18ee",
+      "Portée": "Personnage",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeurs enum": "NON_ABORDE\nEVOQUE\nRAPPROCHEMENT"
+    },
+    "sections": {},
+    "notion_page_id": "ca5317fd-cd3f-4701-9f84-601594ac37a0"
+  },
+  {
+    "Nom": "Flag_perso_murmol_rencontre",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Où en est le contact du joueur avec Murmöl au Léviathan. NON_RENCONTRE : jamais vu. CROISE : aperçu à l'arrivée du convoi (Narthex) ou dans le sillage de Vethraak, sans interaction. ABORDE : le joueur a parlé ou marchandé à son étal de colporteur.",
+      "ID": "FLAG1201",
+      "Personnage lié": "6868f847-5748-481f-aae8-961764cb18ee",
+      "Portée": "Personnage",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeurs enum": "NON_RENCONTRE\nCROISE\nABORDE"
+    },
+    "sections": {},
+    "notion_page_id": "dd8cace2-c886-4a1a-a520-7200a629e475"
+  },
+  {
+    "Nom": "Flag_perso_murmol_saturation",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Ce que le joueur a perçu du véritable enjeu de Murmöl : la Saturation qui approche (le seuil de renaissance umcut) et sa cale aux invendables. IGNORE : rien. PERCU : indices captés (l'odeur sucrée du retour, ses allusions au coffre qu'il n'ouvre plus). REVELE : Murmöl s'est confié, tard, sur le choix qu'il fuit (rentrer renaître en perdant Genka, ou rester sur les routes et mourir intact).",
+      "ID": "FLAG1200",
+      "Personnage lié": "6868f847-5748-481f-aae8-961764cb18ee",
+      "Portée": "Personnage",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeurs enum": "IGNORE\nPERCU\nREVELE"
+    },
+    "sections": {},
+    "notion_page_id": "119d094a-dfed-4f43-b232-ac96cabb7448"
+  },
+  {
+    "Nom": "Flag_perso_murmol_depart",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Organisation du départ avec Murmöl (ou un autre membre du convoi qui attend au Narthex). NON_PLANIFIE : le joueur n'a pas abordé la question du passage. PLANIFIE : un départ sur le convoi a été convenu. EMBARQUE : le joueur quitte effectivement le Léviathan avec le convoi de Murmöl, vers la Traversée du Désert des Échos (Acte 2).",
+      "ID": "FLAG1198",
+      "Personnage lié": "6868f847-5748-481f-aae8-961764cb18ee",
+      "Portée": "Personnage",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeurs enum": "NON_PLANIFIE\nPLANIFIE\nEMBARQUE"
+    },
+    "sections": {},
+    "notion_page_id": "24c5a359-6f04-45d9-9424-e057cbde5b70"
+  },
+  {
     "Nom": "Flag_espece_railleurs_caricature_disparue",
     "values": {
       "Description narrative": "Suit la rencontre avec une caricature d'espèce disparue : un Railleur dont la forme ne correspond à aucune espèce vivante connue d'Escelion. Ultra-rare, recherchée par l'Essaim du Manifold.",
@@ -1617,7 +1841,7 @@
     "Nom": "Flag_lieu_jardins_passage_dailon",
     "values": {
       "Actes liés": "69d4bd00-1234-4ec3-b0ae-e405d3b26ccd, 31a6e4d2-1b45-8000-9248-d0b7535ac586",
-      "Description narrative": "État du passage vers la Citadelle de Daïlon via les Jardins (Promenade Primordiale dissoute, Point mou, Pont des Incompréhensions). BLOQUÉ = route inconnue ou inaccessible. INDICE_OBTENU = un Diseur ou un habitant a mentionné l'existence du passage. PRATICABLE = le Décrochage a été compris et le passage est franchissable. Ce flag est conditionné par l'arbitrage ouvert sur la route de Daïlon.",
+      "Description narrative": "État du passage vers la Citadelle de Daïlon via les Jardins (Promenade Primordiale dissoute, Point mou, Pont des Incompréhensions). BLOQUÉ = route inconnue ou inaccessible. INDICE_OBTENU = un satrape, un Diseur royal ou un habitant a mentionné l’existence du passage. PRATICABLE = le Décrochage a été compris et le passage est franchissable. Ce flag est conditionné par l’arbitrage ouvert sur la route de Daïlon et par la capacité du district 6 à faire valoir sa propre compétence de seuil.",
       "ID": "FLAG1085",
       "Lieu lié": "166982c7-3cf0-4947-85c5-0a6df03ff80d",
       "Portée": "Lieu",
@@ -1668,7 +1892,7 @@
     "Nom": "Flag_lieu_jardins_siege_conclave",
     "values": {
       "Actes liés": "69d4bd00-1234-4ec3-b0ae-e405d3b26ccd, 31a6e4d2-1b45-8000-9248-d0b7535ac586",
-      "Description narrative": "État du siège des Jardins au Conclave des Six. VACANT = situation par défaut, siège vide. PROVISOIRE = un Diseur accepte de parler en nom du district pour une session. REVENDIQUÉ = mouvement politique actif réclamant un siège permanent (tension Diseurs intransigeants vs pragmatiques). TRANCHÉ = le mode de représentation a été fixé (dans un sens ou l'autre, potentiellement via le Tribut Convoqué).",
+      "Description narrative": "État du siège des Jardins au Conclave des Six. VACANT = vacance réelle du trône ou absence de souverain·e confirmé·e par le Signe de la Dormante. PROVISOIRE = la Couronne parle au nom du district, mais sur une base temporaire, incomplète ou contestée. REVENDIQUÉ = lutte politique active entre Couronne, États des Jardins, satrapies et Chambre des Avals sur la voix légitime du district 6. TRANCHÉ = le mode de représentation a été stabilisé, dans un sens ou dans l’autre, potentiellement via le Tribut Convoqué.",
       "ID": "FLAG1081",
       "Lieu lié": "166982c7-3cf0-4947-85c5-0a6df03ff80d",
       "Portée": "Lieu",
@@ -2129,7 +2353,7 @@
     "Nom": "Flag_lieu_vieille_ville_tribut_daïlon",
     "values": {
       "Actes liés": "31a6e4d2-1b45-8000-9248-d0b7535ac586",
-      "Description narrative": "État du tribut fiscal et politique réclamé par la Vieille Ville à Daïlon suite à l'émissaire de l'Acte 4. NON_RECLAME : avant la convocation, aucune exigence formelle. EN_NEGOCIATION : l'émissaire a posé ses conditions, les héroïnes ou les parties négocient. PAYE : Daïlon s'est acquitté du tribut — relation stabilisée mais déséquilibrée. NEGOCIE : un accord alternatif a été trouvé qui contourne le tribut initial (compromis politique, contre-service, dette symbolique). REFUSE_RUPTURE : le tribut a été refusé ou la négociation a échoué, provoquant une tension diplomatique entre Daïlon et la Vieille Ville aux Actes suivants. Conditionne la réputation des héroïnes auprès du Conclave, les accès à certains districts, et les dialogues des factions politiques de la ville.",
+      "Description narrative": "État du tribut fiscal et politique réclamé à Daïlon à l’Acte 4, à l’intérieur même de la Vieille Ville, avec possible médiation, captation ou redéfinition par les Jardins intermédiaires et la Couronne des Lots. NON_RECLAME : avant la convocation, aucune exigence formelle. EN_NEGOCIATION : l’émissaire a posé ses conditions, les héroïnes ou les parties négocient. PAYE : Daïlon s’est acquitté du tribut — relation stabilisée mais déséquilibrée. NEGOCIE : un accord alternatif a été trouvé qui contourne le tribut initial, y compris via un rattachement districtuel, un compromis politique ou un contre-service. REFUSE_RUPTURE : le tribut a été refusé ou la négociation a échoué, provoquant une tension diplomatique entre Daïlon et les instances de la Vieille Ville aux Actes suivants. Conditionne la réputation des héroïnes auprès du Conclave, les accès à certains districts, et les dialogues des factions politiques de la ville.",
       "ID": "FLAG1053",
       "Lieu lié": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
       "Portée": "Lieu",
@@ -2981,7 +3205,7 @@
     "values": {
       "Chapitres liés": "79c497cc-af03-41ca-9b38-0d2b89af68c1, 6985dc4c-f3e6-492d-90da-6f3d57d37d7e, 4115f8f7-b2f4-483e-a9d8-03b8fc204635, 85f967ff-cab7-40a1-8ec6-6d8becd2d0bf",
       "Communauté liée": "1b96e4d2-1b45-80fe-ba1e-f65c0e1e3a3c",
-      "Description narrative": "État des carnets personnels de Sorav-Mekh (Témoin du Paradigme Ésothrope) qui transcrivent les dernières paroles intelligibles des sujets avant leur dissolution. Preuve physique non censurée du programme, dissimulée dans une alcôve de la Spirale d'Observation. Détermine la disponibilité d'une preuve écrite circulable contre le Paradigme (révélation publique, négociation avec les Murmurateurs, leverage contre Akthar-Neth) et conditionne l'arc personnel de Sorav-Mekh. État irréversible une fois UTILISÉS ou DÉTRUITS.",
+      "Description narrative": "État des grilles de Veille de Sorav-Mekh (Témoin fixe de la Spirale d'Observation) où iel grave les observations et dernières paroles intelligibles des sujets avant leur dissolution. Preuve gravée non censurée du programme, inscrite sur les marches de la Spirale. Détermine la disponibilité d'une preuve circulable contre le Paradigme (révélation publique, négociation avec les Murmurateurs, leverage contre Akthar-Neth) et conditionne l'arc personnel de Sorav-Mekh. État irréversible une fois UTILISÉS ou DÉTRUITS.",
       "ID": "FLAG995",
       "Portée": "Faction",
       "Statut": "Défini",
@@ -3445,7 +3669,7 @@
     "values": {
       "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
       "Chapitres liés": "4115f8f7-b2f4-483e-a9d8-03b8fc204635",
-      "Description narrative": "Décision de la Cinquante-Sixième concernant l'entrée restée ouverte dans les carnets de Sorav-Mekh. VIDE = sujet jamais abordé avec la joueuse ; ACCEPTEE = elle consent à laisser une trace écrite dans les carnets (Option A de L'Entrée ouverte) ; REFUSEE = elle refuse explicitement que sa survie soit transformée en sens, maintenant le vide (Option B) ; DETOURNEE = elle détourne l'usage de l'entrée par une note minimale ou un refus actif hors du cadre rituel (Option C).",
+      "Description narrative": "Décision de la Cinquante-Sixième concernant la place gardée par Sorav-Mekh sur la Spirale. VIDE = sujet jamais abordé avec la joueuse ; ACCEPTEE = elle consent à occuper la place gardée (Option A de L'Entrée ouverte) ; REFUSEE = elle refuse explicitement que sa survie soit transformée en sens, maintenant le vide (Option B) ; DETOURNEE = elle occupe la place autrement que comme sujet attendu — un geste, un refus, ou une présence qui déplace le poste hors de sa fonction rituelle (Option C).",
       "ID": "FLAG965",
       "Personnage lié": "77656046-f125-43f4-8167-7a69dae08cf7",
       "Portée": "Personnage",
@@ -3694,6 +3918,22 @@
     "notion_page_id": "a02b9e72-a650-4a99-8fa6-e4491b766d5d"
   },
   {
+    "Nom": "Flag_perso_rhylos_arc_lettre",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Chapitres prévus": "527e021d-21a8-4c4d-ab43-851abcedc508, 95d90916-29db-433f-b664-3bd6e861ed15",
+      "Description narrative": "Arc de la lettre laissée par Rhylos Vesh-Akhor à Zaehria Neth'Varu peu avant sa disparition (~3219 AG). La lettre est personnelle, non doctrinale — son existence est ignorée des Murmurateurs. Accessible uniquement via l'arc Zaehria dans les quêtes liées à La Dissolution Verticale ou L'Archive Interdite. IGNORÉE = la joueuse ne sait pas que la lettre existe ; ÉVOQUÉE = la joueuse a appris qu'une lettre a été envoyée ; DÉCOUVERTE = la joueuse a accès au contenu de la lettre.",
+      "ID": "FLAG949",
+      "Personnage lié": "1b36e4d2-1b45-8081-ab37-c4b33c4f51b1",
+      "Portée": "Personnage",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeurs enum": "IGNORÉE\nÉVOQUÉE\nDÉCOUVERTE"
+    },
+    "sections": {},
+    "notion_page_id": "2fb255e3-3fcc-450a-8f48-f4aafe606c77"
+  },
+  {
     "Nom": "Flag_perso_zhira_couverture",
     "values": {
       "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
@@ -3884,6 +4124,22 @@
     "notion_page_id": "e086e12d-242a-472f-a632-92625f58f8e9"
   },
   {
+    "Nom": "Flag_perso_glossaire_indexeurs",
+    "values": {
+      "Actes liés": "31a6e4d2-1b45-8026-bf52-e0bdd107d332",
+      "Description narrative": "Relation d'Uresaïr avec les courants d'Indexeurs de la Cité Labiale. IGNORÉ : Uresaïr n'a pas encore rencontré les factions internes. DÉCOUVERT : Uresaïr sait qu'il existe deux courants (Asymptotiques / Orphelins du Folio) mais n'a pas pris position. COLLABORATION : Uresaïr a travaillé avec les Asymptotiques (voie A) — accès à leurs canaux d'information dans la Cité. MÉFIANCE : Uresaïr a refusé les Asymptotiques ou agi contre leur objectif (voie B ou C) — les Asymptotiques l'ignorent ou lui ferment leurs ressources.",
+      "ID": "FLAG936",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2be6e4d2-1b45-800d-b7df-c3af800db40b",
+      "Systèmes producteurs": "50b3b923-0349-4180-87f6-821d69893949",
+      "Type de valeur": "enum",
+      "Valeurs enum": "IGNORÉ\nDÉCOUVERT\nCOLLABORATION\nMÉFIANCE"
+    },
+    "sections": {},
+    "notion_page_id": "e9acaee8-ba60-4cdd-a0ea-a1d1ec1f026b"
+  },
+  {
     "Nom": "Flag_quete_paradoxe_terminal_faction_alliee",
     "values": {
       "Actes liés": "31a6e4d2-1b45-8026-bf52-e0bdd107d332",
@@ -3930,6 +4186,21 @@
     },
     "sections": {},
     "notion_page_id": "fb85116f-9ed6-4b95-8d9f-dbca97a5069a"
+  },
+  {
+    "Nom": "Flag_perso_glossaire_effacement",
+    "values": {
+      "Actes liés": "31a6e4d2-1b45-8026-bf52-e0bdd107d332",
+      "Description narrative": "Niveau d'observation des traces d'Effacement du Glossaire par Uresaïr dans la Cité Labiale. IGNORÉ : Uresaïr n'a pas remarqué les zones blanches nécrosées du Codex Viscéral. OBSERVÉ : Uresaïr a vu les zones blanches et secteurs effacés — condition nécessaire pour déclencher la quête Le Paradoxe Terminal. COMPRIS : Uresaïr a compris le mécanisme de l'Effacement (boucle récursive du Grand Index) et ses conséquences structurelles pour la Cité. ⚠️ Ce flag est un PRÉ-REQUIS CONSOMMÉ par Le Paradoxe Terminal — il doit être produit par la quête ou le chapitre d'exploration précédent dans la Cité Labiale (à assigner).",
+      "ID": "FLAG932",
+      "Portée": "Personnage",
+      "Statut": "À définir",
+      "Systèmes consommateurs": "50b3b923-0349-4180-87f6-821d69893949",
+      "Type de valeur": "enum",
+      "Valeurs enum": "IGNORÉ\nOBSERVÉ\nCOMPRIS"
+    },
+    "sections": {},
+    "notion_page_id": "c31e2c65-b1ca-4087-8671-956ae4c893b8"
   },
   {
     "Nom": "Flag_quete_paradoxe_terminal_arc_outcome",
@@ -4006,6 +4277,32 @@
     },
     "sections": {},
     "notion_page_id": "5607cfb7-466a-4ef9-91b9-a94387ca020e"
+  },
+  {
+    "Nom": "Flag_perso_glossaire_connaissance",
+    "values": {
+      "Description narrative": "Niveau d'exposition d'Uresaïr aux propriétés du Glossaire. ABSENT : pas encore entrée dans la Cité Labiale. DOMAINE_ENTRÉ : a traversé au moins un Seuil Lexical et ressent la clarté ontologique imposée (seuil de déclenchement de la quête Les Textes Effacés). FAMILIER : a observé ou interagi avec le Folio Blanc ou des Indexeurs. COMPRIS : a acquis la Connaissance Folio Blanc au niveau Compris (après Option A ou exploration approfondie).",
+      "ID": "FLAG925",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "ABSENT\nDOMAINE_ENTRÉ\nFAMILIER\nCOMPRIS"
+    },
+    "sections": {},
+    "notion_page_id": "931ab97b-6b17-4c9c-9c53-193fa2204e0f"
+  },
+  {
+    "Nom": "Flag_quete_glossaire_arc_outcome",
+    "values": {
+      "Description narrative": "Issue de la quête Les Textes Effacés. NON_DÉPART : quête non encore commencée ou Uresaïr n'a pas encore fait de choix. TRANSMIS_ASYMPTOTIQUE : fragment remis à Sérine-Sept pour archivage (Option A). TRANSMIS_TERMINAL : fragment remis à Omin Sèche-Encre pour accélération de l'Effacement (Option B — maillon involontaire vers la Dévoration par Valkazer). REFUS : Uresaïr a gardé ou laissé s'effacer le fragment sans le transmettre (Option C).",
+      "ID": "FLAG926",
+      "Portée": "Quête",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "NON_DÉPART\nTRANSMIS_ASYMPTOTIQUE\nTRANSMIS_TERMINAL\nREFUS"
+    },
+    "sections": {},
+    "notion_page_id": "d1a2e1e6-5ce8-45fb-bc3e-c452e8070216"
   },
   {
     "Nom": "Flag_perso_vemrash_12_nuees",
@@ -4810,6 +5107,36 @@
     },
     "sections": {},
     "notion_page_id": "b636feda-af2e-45a0-9700-0633cae54a17"
+  },
+  {
+    "Nom": "Flag_perso_veth_kadur_temoignage",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Progression du témoignage de Veth-Kadur sur Kha'Vareth Ardakh et son propre départ sans prévenir Ossian. IGNORÉ = sujet jamais abordé (défaut) ; ÉVOQUÉ = Ossian a été mentionné dans le dialogue, Veth-Kadur a reconnu connaître l'Atelier ; CONFIÉ = Veth-Kadur a explicitement reconnu ne pas avoir prévenu Ossian et partagé son doute moral.",
+      "ID": "FLAG867",
+      "Personnage lié": "5bade1fc-762e-4b57-92ef-3ab0ef05bfea",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "IGNORÉ\nÉVOQUÉ\nCONFIÉ"
+    },
+    "sections": {},
+    "notion_page_id": "109482e9-7a22-4964-9f56-b8483e9dc918"
+  },
+  {
+    "Nom": "Flag_perso_veth_kadur_archives_etat",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "État d'accès aux archives personnelles de Veth-Kadur (empreintes maculaires pré-3385). FERMÉES = Veth-Kadur n'a pas proposé l'accès (défaut) ; ENTROUVERTS = la joueuse a présenté une empreinte anormale reconnue par Veth-Kadur ; ACCESSIBLES = accès plein aux archives accordé.",
+      "ID": "FLAG866",
+      "Personnage lié": "5bade1fc-762e-4b57-92ef-3ab0ef05bfea",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "FERMÉES\nENTROUVERTES\nACCESSIBLES"
+    },
+    "sections": {},
+    "notion_page_id": "f6adfce7-c353-4672-8ee5-8c6b563513e3"
   },
   {
     "Nom": "Flag_perso_rhylos_sept_voix",
@@ -6657,7 +6984,7 @@
   {
     "Nom": "Flag_lieu_oeil_treve_etat",
     "values": {
-      "Description narrative": "État de la trêve tacite entre les trois factions de l'Œil de Mirimance (Greffeurs, Courtiers, Contemplatifs). Valeurs possibles : INTACT (protocole de rotation respecté, aucun incident) | TENDUE (sabotages mutuels, accusations, mais aucune violence ouverte — état de départ en 3390 AG) | ROMPUE (conflit ouvert, le protocole de rotation est abandonné). Valeur par défaut : TENDUE.",
+      "Description narrative": "État de la trêve entre les deux puissances de surface de l’Œil de Mirimance, Greffeurs et Courtiers, et de leur rapport à l’autorité contemplative sur les profondeurs. Valeurs possibles : INTACT (protocole de rotation respecté, accès au Palimpseste négociés) | TENDUE (sabotages, rétention de relevés et contestation des fermetures décidées par les Contemplatifs — état de départ en 3390 AG) | ROMPUE (conflit ouvert, protocole de rotation abandonné et accès profonds forcés). Valeur par défaut : TENDUE.",
       "ID": "FLAG717",
       "Lieu lié": "1b46e4d2-1b45-8081-854b-e222c4c6aaaf",
       "Portée": "Lieu",
@@ -7895,6 +8222,42 @@
     "notion_page_id": "27246f9a-56cf-4111-87be-5adb21bb7121"
   },
   {
+    "Nom": "Flag_perso_rhylos_arc_lettre",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "La lettre personnelle laissée par Rhylos à Zaehria Neth'Varu (Uresaïr) avant sa disparition dans les Plis. Non doctrinale. Son existence est ignorée des Murmurateurs — la joueuse peut choisir de le leur révéler ou non.",
+      "ID": "FLAG634",
+      "Personnage lié": "1b36e4d2-1b45-8081-ab37-c4b33c4f51b1",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Type de valeur": "enum",
+      "Valeurs enum": "IGNORÉE\nDÉCOUVERTE\nLUE\nRÉSOLUE"
+    },
+    "sections": {},
+    "notion_page_id": "a02b9e72-a650-4a99-8fa6-e4491b766d5d"
+  },
+  {
+    "Nom": "Flag_perso_rhylos_sept_voix",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Chapitres liés": "32f6a673-5ddb-4493-a6d0-9654b4e57e96",
+      "Description narrative": "Nombre de fragments de la doctrine authentique de l'Entrelacs reconstitués parmi les Sept Voix. Maximum 4 : les trois fragments restants sont considérés perdus à jamais. Chaque palier (1→2→3→4) correspond à une Voix retrouvée auprès d'un descendant de la Taborie fondatrice.",
+      "ID": "FLAG633",
+      "Max": "4",
+      "Min": "0",
+      "Personnage lié": "1b36e4d2-1b45-8081-ab37-c4b33c4f51b1",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Type de valeur": "compteur"
+    },
+    "sections": {},
+    "notion_page_id": "a31aef91-b2c0-450f-82f1-0a90551238a0"
+  },
+  {
     "Nom": "Flag_perso_rhylos_journal_contestation",
     "values": {
       "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
@@ -8065,6 +8428,22 @@
     },
     "sections": {},
     "notion_page_id": "b5553c70-5fb1-4df4-946f-4dc66021a0e2"
+  },
+  {
+    "Nom": "Flag_quete_autre_soeur_issue",
+    "values": {
+      "Actes liés": "31a6e4d2-1b45-8000-9248-d0b7535ac586",
+      "Chapitres liés": "63314831-abbb-4c2e-8857-2a918d119065",
+      "Description narrative": "Issue de la quête 'L'Autre Sœur' : résolution de la rencontre avec Ilyena dans les souterrains de la Bibliothèque Sympathique. Valeurs : NON_RESOLUE (quête en cours ou non déclenchée), ACCORD_PARTIEL (accord avec Ilyena — accès aux archives conditionnels, Ilyena contact froid mais fonctionnel), NEUTRAL (non-agression — porte non fermée mais archives inaccessibles pour l'instant), RUPTURE (confrontation ouverte — Ilyena expulse le groupe, archives fermées durablement, Réputation district 6 impactée).",
+      "ID": "FLAG620",
+      "Personnage lié": "3256e4d2-1b45-80f4-9eeb-de67c6d8955b",
+      "Portée": "Quête",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "NON_RESOLUE\nACCORD_PARTIEL\nNEUTRAL\nRUPTURE"
+    },
+    "sections": {},
+    "notion_page_id": "30c72f1a-5cc8-46f2-bf14-200c7a850ebc"
   },
   {
     "Nom": "Flag_perso_ilyena_revelation_identite",
@@ -8382,6 +8761,22 @@
     "notion_page_id": "67e6433a-34c8-4c9a-a126-6363532474e0"
   },
   {
+    "Nom": "Flag_perso_enlumineur_oeuvres_examinees",
+    "values": {
+      "Actes liés": "d4f4728f-0bbe-447d-a307-83ad1eec7418",
+      "Description narrative": "Nombre d'œuvres vivantes de la galerie que l'Éthérée a examinées en profondeur (0–4). Chaque palier débloque une ligne de dialogue unique avec L'Enlumineur sur sa philosophie. Palier 0 : dialogue standard. Palier 1 : L'Enlumineur reconnaît un regard attentif, registre plus technique. Palier 2 : il commence à tester ses arguments philosophiques les plus élaborés. Palier 3 : il révèle l'identité du sujet de sa prochaine œuvre prévue. Palier 4 : il propose directement à l'Éthérée de devenir une œuvre permanente.",
+      "ID": "FLAG595",
+      "Max": "4",
+      "Min": "0",
+      "Personnage lié": "1a96e4d2-1b45-8077-b534-dae9777c6a12",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "compteur"
+    },
+    "sections": {},
+    "notion_page_id": "dd7e04ad-d837-4938-86d7-112f00ec05c7"
+  },
+  {
     "Nom": "Flag_perso_enlumineur_resolution_arc",
     "values": {
       "Actes liés": "d4f4728f-0bbe-447d-a307-83ad1eec7418",
@@ -8395,6 +8790,36 @@
     },
     "sections": {},
     "notion_page_id": "93e46bff-5bc8-4e95-b441-9164b45cde6a"
+  },
+  {
+    "Nom": "Flag_perso_enlumineur_situation_eonunde",
+    "values": {
+      "Actes liés": "d4f4728f-0bbe-447d-a307-83ad1eec7418",
+      "Description narrative": "État d'Eonundé dans la galerie au moment de la rencontre. INCONNUE : défaut, état ignoré au début. LOCALISEE : les protagonistes savent où elle se trouve sans l'avoir atteinte. CONTACTEE : Eonundé a pu communiquer avec le groupe depuis la galerie. PARTIELLEMENT_CONSOLIDEE : consolidation avancée mais non irréversible — une extraction reste possible. LIBEREE : Eonundé extraite de la galerie. CONSOLIDEE : issue irréversible, Eonundé est perdue comme œuvre permanente.",
+      "ID": "FLAG594",
+      "Personnage lié": "1a96e4d2-1b45-8077-b534-dae9777c6a12",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "INCONNUE\nLOCALISEE\nCONTACTEE\nPARTIELLEMENT_CONSOLIDEE\nLIBEREE\nCONSOLIDEE"
+    },
+    "sections": {},
+    "notion_page_id": "b4f48048-c1d8-4804-b004-bd87c38e4c74"
+  },
+  {
+    "Nom": "Flag_perso_enlumineur_reaction_art",
+    "values": {
+      "Actes liés": "d4f4728f-0bbe-447d-a307-83ad1eec7418",
+      "Description narrative": "Posture de l'Éthérée face à l'esthétique de L'Enlumineur au fil des visites au Vernissage. Conditionne les options de dialogue disponibles sur le consentement et la philosophie artistique. INDIFFERENTE : aucune interaction approfondie avec les œuvres (défaut). CURIEUSE : œuvres examinées sans prise de position morale explicite. CONDAMNANTE : refus moral explicite exprimé lors d'un dialogue. AMBIVALENTE : reconnaissance d'une forme de beauté sans validation de la méthode.",
+      "ID": "FLAG591",
+      "Personnage lié": "1a96e4d2-1b45-8077-b534-dae9777c6a12",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "INDIFFERENTE\nCURIEUSE\nCONDAMNANTE\nAMBIVALENTE"
+    },
+    "sections": {},
+    "notion_page_id": "2a9da2f2-b5ff-4403-ab86-12ff318279d1"
   },
   {
     "Nom": "Flag_perso_enlumineur_statut_rencontre",
@@ -9204,9 +9629,9 @@
     "notion_page_id": "d11b3c91-6364-4c03-a6f2-f39d84b151a0"
   },
   {
-    "Nom": "Flag_lieu_forets_corail_phase_carnavalier",
+    "Nom": "Flag_lieu_forets_corail_tableau_carnavalier",
     "values": {
-      "Description narrative": "État de la phase émotionnelle active dans les Forêts de Corail, gouvernée par les cycles du Carnavalier. Détermine la nature des nappes de Brouillignon actives, les routes accessibles et les comportements sociaux de la région. Change indépendamment des actions du joueur selon les cycles du Rêveur.",
+      "Description narrative": "État du Tableau émotionnel actif dans les Forêts de Corail (Cycle de Nuée du Carnavalier) : Grand Bal (liesse), Sérénade (tendresse), Charivari (colère), Pilori (dégoût), Cortège (tristesse), Sabbat (effroi). Détermine la teinte du corail et du Brouillignon, les routes accessibles et les comportements sociaux de la région ; l'eau du Rasa-Dhatu reste toujours argentée. Change indépendamment des actions de la joueuse selon les cycles du Rêveur. Se combine avec Flag_lieu_forets_corail_temps_veille pour l'amplitude.",
       "ID": "FLAG529",
       "Lieu lié": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1",
       "Portée": "Lieu",
@@ -9214,7 +9639,7 @@
       "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9, 7d4905b5-1967-4488-b28f-6c69f6abc262",
       "Systèmes producteurs": "50b3b923-0349-4180-87f6-821d69893949",
       "Type de valeur": "enum",
-      "Valeurs enum": "PHASE_INCONNUE\nEUPHORIE_SPUMEUSE\nCRESCENDO_DORE\nEXTASE_CULMINANTE\nREFLUX_NOSTALGIQUE\nMELANCOLIE_ABYSSALE\nCONTEMPLATION_CENDREE"
+      "Valeurs enum": "TABLEAU_INCONNU\nGRAND_BAL\nSERENADE\nCHARIVARI\nPILORI\nCORTEGE\nSABBAT"
     },
     "sections": {},
     "notion_page_id": "5ef4c83a-d82b-41a9-ba9c-e95c20fe16f2"
@@ -9562,6 +9987,34 @@
     "notion_page_id": "328ddcfc-9857-491e-a721-9fbd4ef02d0e"
   },
   {
+    "Nom": "Flag_faction_dragovitsa_siege_symbolique",
+    "values": {
+      "Communauté liée": "3186e4d2-1b45-8033-9182-cac2953ed2f7",
+      "Description narrative": "État de la proposition du sixième siège symbolique lors d'une session de la Dragovitsa. Conditionne le hook 'Le Siège Vacant'. Valeurs : NON_OFFERT | OFFERT | ACCEPTÉ | REFUSÉ",
+      "ID": "FLAG492",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "NON_OFFERT\nOFFERT\nACCEPTÉ\nREFUSÉ"
+    },
+    "sections": {},
+    "notion_page_id": "c01e3a8d-f102-4468-844a-568d56c7b6b2"
+  },
+  {
+    "Nom": "Flag_faction_dragovitsa_vote_critique",
+    "values": {
+      "Communauté liée": "3186e4d2-1b45-8033-9182-cac2953ed2f7",
+      "Description narrative": "Résultat d'un vote décisionnel critique au sein de la Dragovitsa. NON_PRIS = aucun vote critique n'a encore engagé la faction ; ORTHODOXE = le vote renforce la ligne stasiarchique d'Akthar-Neth ; REFORMISTE = le vote valide une inflexion perpétuatiste ou cultivatiste ; HERETIQUE = le vote bascule vers une solution jugée doctrinalement inacceptable par l'orthodoxie du Culte.",
+      "ID": "FLAG493",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "NON_PRIS\nORTHODOXE\nREFORMISTE\nHERETIQUE"
+    },
+    "sections": {},
+    "notion_page_id": "d21dcad5-9bcb-4db1-a3f5-19ed51d4649e"
+  },
+  {
     "Nom": "Flag_quete_ancres_stele",
     "values": {
       "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
@@ -9838,7 +10291,7 @@
     "values": {
       "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
       "Chapitres liés": "2b86e4d2-1b45-8087-ac50-cb4035a318db, c4d55b28-8c3a-477e-8d15-2c36c2e26650",
-      "Description narrative": "Degré de révélation du rôle de Raki-Biro dans l'orchestration de l'exil d'Uresaïr via ses Prophéties Fractionnées. Elle a manipulé les fils causaux en déguisant son intervention en prophétie protectrice. Ce flag conditionne les dialogues ultérieurs et la relation entre Uresaïr et l'Oracle.",
+      "Description narrative": "Degré de révélation du rôle de Raki-Biro dans l'orchestration de l'exil d'Uresaïr via l'unique Prophétie Fractionnée de 3382. Elle a manipulé les fils causaux en déguisant son intervention en prophétie protectrice. Ce flag conditionne les dialogues ultérieurs et la relation entre Uresaïr et l'Oracle.",
       "ID": "FLAG464",
       "Personnage lié": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8",
       "Portée": "Personnage",
@@ -9912,6 +10365,57 @@
     },
     "sections": {},
     "notion_page_id": "86f6d46c-25d7-4762-94cf-9e9fa2a96ec4"
+  },
+  {
+    "Nom": "Flag_perso_vokh_taleth_outils",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Les outils de taille de Vokh-Taleth retrouvés dans les Plis d'Ossements, disposés en arc de cercle. Leur état et leur analyse peuvent révéler des indices sur la disparition.",
+      "ID": "FLAG463",
+      "Personnage lié": "f38a4a8a-2a9b-4349-9d9a-3669e7863321",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "7d4905b5-1967-4488-b28f-6c69f6abc262, ed986ac3-3600-4d29-b4fb-8fac7d61857c",
+      "Type de valeur": "enum",
+      "Valeurs enum": "INCONNUS\nLOCALISÉS\nANALYSÉS"
+    },
+    "sections": {},
+    "notion_page_id": "a2599e92-772a-48f1-bf11-b367c79705f3"
+  },
+  {
+    "Nom": "Flag_perso_vokh_taleth_projet_secret",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Le projet jamais nommé de Vokh-Taleth — le vek-rash'qadul — pour lequel iel cherchait un substrat osseux capable de croissance autonome dans les Plis. Nature exacte inconnue.",
+      "ID": "FLAG462",
+      "Personnage lié": "f38a4a8a-2a9b-4349-9d9a-3669e7863321",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "enum",
+      "Valeurs enum": "IGNORÉ\nÉVOQUÉ\nFRAGMENTÉ\nCOMPRIS"
+    },
+    "sections": {},
+    "notion_page_id": "3274916e-b793-4ea1-ad08-db343ab00fc8"
+  },
+  {
+    "Nom": "Flag_perso_vokh_taleth_connaissance",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Ce que le joueur sait de Vokh-Taleth Slennokh et de son œuvre. Commence ignoré ; progresse au fil des découvertes dans le Léviathan.",
+      "ID": "FLAG461",
+      "Personnage lié": "f38a4a8a-2a9b-4349-9d9a-3669e7863321",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "7d4905b5-1967-4488-b28f-6c69f6abc262, ed986ac3-3600-4d29-b4fb-8fac7d61857c",
+      "Type de valeur": "enum",
+      "Valeurs enum": "IGNORÉ\nENTENDU\nINVESTIGUÉ"
+    },
+    "sections": {},
+    "notion_page_id": "c0d9503c-78f6-49f6-8b21-1f01fbb29068"
   },
   {
     "Nom": "Flag_perso_drav_revelation_keth",
@@ -10280,6 +10784,22 @@
     "notion_page_id": "289744d2-b444-4bb7-91bd-394658878f7f"
   },
   {
+    "Nom": "Flag_perso_ilyena_archives_acces",
+    "values": {
+      "Actes liés": "31a6e4d2-1b45-8000-9248-d0b7535ac586",
+      "Chapitres liés": "63314831-abbb-4c2e-8857-2a918d119065",
+      "Description narrative": "Niveau d'accès accordé par Ilyena aux archives de Vol Reitar. AUCUN : défaut. PARTIEL : accord obtenu (informations sur la création d'Eonundé et les expériences de Vol). COMPLET : test Sociabilité+Diplomatie DD 8 réussi avec succès critique (section 7-B déverrouillée).",
+      "ID": "FLAG424",
+      "Personnage lié": "3256e4d2-1b45-80f4-9eeb-de67c6d8955b",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "INDICES\nPARTIELLEMENT_DÉCOUVERTS\nCOLLECTION_COMPLÈTE"
+    },
+    "sections": {},
+    "notion_page_id": "64a51cd1-0c82-4354-bd61-74d9f28e3c19"
+  },
+  {
     "Nom": "Flag_perso_ilyena_stance_eonunde",
     "values": {
       "Actes liés": "31a6e4d2-1b45-8000-9248-d0b7535ac586",
@@ -10310,6 +10830,22 @@
     },
     "sections": {},
     "notion_page_id": "0ae5b828-11d3-4dac-89d4-e5d0f382b946"
+  },
+  {
+    "Nom": "Flag_perso_ilyena_revele",
+    "values": {
+      "Actes liés": "31a6e4d2-1b45-8000-9248-d0b7535ac586",
+      "Chapitres liés": "63314831-abbb-4c2e-8857-2a918d119065",
+      "Description narrative": "Le groupe sait-il qu'Ilyena existe et qui elle est vraiment (la sœur-création d'Eonundé) ? Démarre à IGNOREE. Passe à DECOUVERTE dès l'entrée dans les souterrains. Passe à IDENTIFIEE_COMME_SOEUR lors de la reconnaissance par Eonundé.",
+      "ID": "FLAG419",
+      "Personnage lié": "3256e4d2-1b45-80f4-9eeb-de67c6d8955b",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "IGNOREE\nDECOUVERTE\nIDENTIFIEE_COMME_SOEUR"
+    },
+    "sections": {},
+    "notion_page_id": "d6f1c61d-c38e-459c-b5e7-45ba6b2ea473"
   },
   {
     "Nom": "Flag_perso_kha_vareth_vision_miroir",
@@ -10534,6 +11070,54 @@
     "notion_page_id": "484a029e-e685-412f-b112-f55a5ba39cd9"
   },
   {
+    "Nom": "Flag_quete_cendoei_noeud_justice",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6, d4f4728f-0bbe-447d-a307-83ad1eec7418, 69d4bd00-1234-4ec3-b0ae-e405d3b26ccd, 31a6e4d2-1b45-8000-9248-d0b7535ac586",
+      "Description narrative": "État de la relation de la joueuse avec le mécanisme des Nœuds de Justice Cen'Doei. Un Nœud de Justice est un Cen'Doei qui interpelle la joueuse comme témoin potentiel du meurtre à l'origine de sa naissance. Ce flag global trace l'issue la plus avancée atteinte.",
+      "ID": "FLAG402",
+      "Portée": "Quête",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2be6e4d2-1b45-800d-b7df-c3af800db40b",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "enum",
+      "Valeurs enum": "INCONNU\nDÉCOUVERT\nTÉMOIGNAGE_RENDU\nTÉMOIGNAGE_REFUSÉ\nCIBLE_DÉSIGNÉE"
+    },
+    "sections": {},
+    "notion_page_id": "ad8e8093-28b4-4fee-8cc0-dba5aae40122"
+  },
+  {
+    "Nom": "Flag_quete_cendoei_vengeance_arc",
+    "values": {
+      "Actes liés": "d4f4728f-0bbe-447d-a307-83ad1eec7418, 69d4bd00-1234-4ec3-b0ae-e405d3b26ccd",
+      "Description narrative": "Issue de l'arc L'Empreinte du Sanctio : un Cen'Doei approche du 7e cycle sans avoir accompli sa vengeance. La joueuse peut l'aider, abandonner, ou tenter de l'éliminer. Conditionne les conséquences sur la zone traversée (contamination ou non).",
+      "ID": "FLAG404",
+      "Portée": "Quête",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2bf6e4d2-1b45-80dd-a7f6-d625952fee4a, 2be6e4d2-1b45-800d-b7df-c3af800db40b",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "enum",
+      "Valeurs enum": "NON_LANCÉE\nEN_COURS\nVENGEANCE_ACCOMPLIE\nDÉLITEMENT_SANCTIO\nCONFLIT_ABANDONNÉ"
+    },
+    "sections": {},
+    "notion_page_id": "94e44284-baa0-46cc-9589-58e637cd0b1e"
+  },
+  {
+    "Nom": "Flag_quete_cendoei_sanctio_expo",
+    "values": {
+      "Actes liés": "d4f4728f-0bbe-447d-a307-83ad1eec7418, 69d4bd00-1234-4ec3-b0ae-e405d3b26ccd",
+      "Description narrative": "Exposition de la joueuse au sanctio, le liquide toxique issu du délitement d'un Cen'Doei qui n'a pas accompli sa vengeance avant le 7e cycle. Trace si la joueuse en a observé, collecté ou utilisé.",
+      "ID": "FLAG401",
+      "Portée": "Quête",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "a5320c3c-58e9-42e2-bbee-d9c1f2f6db4d, ed986ac3-3600-4d29-b4fb-8fac7d61857c",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2be6e4d2-1b45-8007-b2a7-cfcab1bf4400",
+      "Type de valeur": "enum",
+      "Valeurs enum": "JAMAIS\nOBSERVÉE\nCOLLECTÉ\nUTILISÉ"
+    },
+    "sections": {},
+    "notion_page_id": "f02e2d14-3007-4b2f-9c24-9e6416ab8355"
+  },
+  {
     "Nom": "Flag_perso_ossian_passages_reveles",
     "values": {
       "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
@@ -10713,7 +11297,8 @@
     "values": {
       "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
       "Chapitres liés": "2b86e4d2-1b45-8087-ac50-cb4035a318db",
-      "Description narrative": "Compteur du nombre de miroirs consultés en immersion profonde malgré une résistance explicite d’Uresaïr dans Les Quatre Regards. À 2 : méfiance croissante. À 4 : accès maximal aux révélations dangereuses, mais relation endommagée.",
+      "Chapitres prévus": "2b86e4d2-1b45-8087-ac50-cb4035a318db",
+      "Description narrative": "Compteur persistant du nombre de Miroirs dont la limite annoncée par Uresaïr ou l’avertissement de source a été franchi, à raison d’un point maximum par Miroir. Réfraction défensive et renoncement n’ajoutent aucun point. À 1 : premiers signes de retrait. À 2 : Uresaïr cesse d’aider à interpréter les visions, sans bloquer les Miroirs. À 4 : quatre limites ont été franchies, sans garantie de quatre révélations complètes ; la relation bascule durablement vers un état d’intrusion mémorisé par les dialogues futurs.",
       "ID": "FLAG386",
       "Lieu lié": "2356e4d2-1b45-8015-a428-cd71c19309dd",
       "Max": "4",
@@ -10733,7 +11318,8 @@
     "values": {
       "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
       "Chapitres liés": "2b86e4d2-1b45-8087-ac50-cb4035a318db",
-      "Description narrative": "Trace la consultation du Tesson de l'Enfant-Foudre dans Les Quatre Regards. INTACT = non consulté ; CONSULTE_SURFACE = vision superficielle d’Ori-Bikar ; IMMERSION_PROFONDE = révélation de sa tentative de libérer Uresaïr par effondrement des Plis.",
+      "Chapitres prévus": "2b86e4d2-1b45-8087-ac50-cb4035a318db",
+      "Description narrative": "Trace le résultat du test du Tesson. REFRACTION_DEFENSIVE = expulsion de l’Éthérée et répétition corporelle involontaire du geste d’Ori-Bikar ; CONFUSION_CRITIQUE = inversion erronée des responsabilités dans l’effondrement, source signalée instable ; IMMERSION_PARTIELLE = danger de la tentative perçu ; IMMERSION_COMPLETE = séquence et conséquences comprises intégralement.",
       "ID": "FLAG388",
       "Lieu lié": "2356e4d2-1b45-8015-a428-cd71c19309dd",
       "Objets liés": "2ab6e4d2-1b45-80c7-bd1e-c43984460a93",
@@ -10742,7 +11328,7 @@
       "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, dda13b50-2e96-491e-8e21-008865221005",
       "Systèmes producteurs": "ed986ac3-3600-4d29-b4fb-8fac7d61857c, 2ef6e4d2-1b45-8073-a456-d45d695154b9",
       "Type de valeur": "enum",
-      "Valeurs enum": "INTACT\nCONSULTE_SURFACE\nIMMERSION_PROFONDE"
+      "Valeurs enum": "INTACT\nCONSULTE_SURFACE\nREFRACTION_DEFENSIVE\nCONFUSION_CRITIQUE\nIMMERSION_PARTIELLE\nIMMERSION_COMPLETE"
     },
     "sections": {},
     "notion_page_id": "4badd716-5f9e-4c9d-8181-5ac9330adb1c"
@@ -10753,7 +11339,7 @@
       "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
       "Chapitres liés": "2b86e4d2-1b45-8087-ac50-cb4035a318db",
       "Chapitres prévus": "2b86e4d2-1b45-8087-ac50-cb4035a318db",
-      "Description narrative": "Trace la consultation de l'Urne du Forgeron d'Éternité dans Les Quatre Regards. INTACT = non consulté ; CONSULTE_SURFACE = vision superficielle de Kha’Vareth ; IMMERSION_PROFONDE = révélation du Sodoir Primordial.",
+      "Description narrative": "Trace le résultat du test de l’Urne. REFRACTION_DEFENSIVE = carte corporelle des prélèvements soupçonnés par Uresaïr sans confirmation du projet de Kha’Vareth ; CONFUSION_CRITIQUE = scénario erroné d’enfermement dans un Sodoir, source signalée instable ; IMMERSION_PARTIELLE = logique d’instrumentalisation perçue ; IMMERSION_COMPLETE = projet d’immortalité divine interprété.",
       "ID": "FLAG389",
       "Lieu lié": "2356e4d2-1b45-8015-a428-cd71c19309dd",
       "Objets liés": "2ab6e4d2-1b45-80c7-bd1e-c43984460a93",
@@ -10762,7 +11348,7 @@
       "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, dda13b50-2e96-491e-8e21-008865221005",
       "Systèmes producteurs": "ed986ac3-3600-4d29-b4fb-8fac7d61857c, 2ef6e4d2-1b45-8073-a456-d45d695154b9",
       "Type de valeur": "enum",
-      "Valeurs enum": "INTACT\nCONSULTE_SURFACE\nIMMERSION_PROFONDE"
+      "Valeurs enum": "INTACT\nCONSULTE_SURFACE\nREFRACTION_DEFENSIVE\nCONFUSION_CRITIQUE\nIMMERSION_PARTIELLE\nIMMERSION_COMPLETE"
     },
     "sections": {},
     "notion_page_id": "8047ec2e-8f24-40a7-a30b-cb00d7c2b308"
@@ -10772,7 +11358,8 @@
     "values": {
       "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
       "Chapitres liés": "2b86e4d2-1b45-8087-ac50-cb4035a318db",
-      "Description narrative": "Trace la consultation du Vitrage de l'Archiviste Fusionnée dans Les Quatre Regards. INTACT = non consulté ; CONSULTE_SURFACE = vision superficielle de Zaehria ; IMMERSION_PROFONDE = accès à une compréhension anticipée de L’Ensevelie et du regard de Zaehria sur Uresaïr.",
+      "Chapitres prévus": "2b86e4d2-1b45-8087-ac50-cb4035a318db",
+      "Description narrative": "Trace le résultat du test du Vitrage. REFRACTION_DEFENSIVE = répétition du paiement anticipé révélant le refus d’Uresaïr de recevoir sans maîtriser la dette ; CONFUSION_CRITIQUE = extraction forcée faussement attribuée à Zaehria et Akthar-Neth, source signalée instable ; IMMERSION_PARTIELLE = lecture fragmentaire ; IMMERSION_COMPLETE = compréhension complète du geste et de ses implications.",
       "ID": "FLAG387",
       "Lieu lié": "2356e4d2-1b45-8015-a428-cd71c19309dd",
       "Objets liés": "2ab6e4d2-1b45-80c7-bd1e-c43984460a93",
@@ -10781,7 +11368,7 @@
       "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, dda13b50-2e96-491e-8e21-008865221005",
       "Systèmes producteurs": "ed986ac3-3600-4d29-b4fb-8fac7d61857c, 2ef6e4d2-1b45-8073-a456-d45d695154b9",
       "Type de valeur": "enum",
-      "Valeurs enum": "INTACT\nCONSULTE_SURFACE\nIMMERSION_PROFONDE"
+      "Valeurs enum": "INTACT\nCONSULTE_SURFACE\nREFRACTION_DEFENSIVE\nCONFUSION_CRITIQUE\nIMMERSION_PARTIELLE\nIMMERSION_COMPLETE"
     },
     "sections": {},
     "notion_page_id": "4f2f44fc-1217-4d98-b97f-71c24dea05c8"
@@ -10791,7 +11378,8 @@
     "values": {
       "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
       "Chapitres liés": "2b86e4d2-1b45-8087-ac50-cb4035a318db",
-      "Description narrative": "Trace la consultation du Sablier de l'Enfant-Prophète dans Les Quatre Regards. INTACT = non consulté ; CONSULTE_SURFACE = vision superficielle vue ; IMMERSION_PROFONDE = connaissance complète sur la manipulation causale de l’exil d’Uresaïr par Raki-Biro 58.",
+      "Chapitres prévus": "2b86e4d2-1b45-8087-ac50-cb4035a318db",
+      "Description narrative": "Trace le résultat du test du Sablier. REFRACTION_DEFENSIVE = Uresaïr remplace le calcul de Raki-Biro par sa lecture défensive de l’exil ; CONFUSION_CRITIQUE = les 47 vies sont faussement attribuées à des copies d’Uresaïr et la source est signalée instable ; IMMERSION_PARTIELLE = architecture causale fragmentaire ; IMMERSION_COMPLETE = compréhension complète de la manipulation de l’exil.",
       "ID": "FLAG385",
       "Lieu lié": "2356e4d2-1b45-8015-a428-cd71c19309dd",
       "Objets liés": "2ab6e4d2-1b45-80c7-bd1e-c43984460a93",
@@ -10800,7 +11388,7 @@
       "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, dda13b50-2e96-491e-8e21-008865221005",
       "Systèmes producteurs": "ed986ac3-3600-4d29-b4fb-8fac7d61857c, 2ef6e4d2-1b45-8073-a456-d45d695154b9",
       "Type de valeur": "enum",
-      "Valeurs enum": "INTACT\nCONSULTE_SURFACE\nIMMERSION_PROFONDE"
+      "Valeurs enum": "INTACT\nCONSULTE_SURFACE\nREFRACTION_DEFENSIVE\nCONFUSION_CRITIQUE\nIMMERSION_PARTIELLE\nIMMERSION_COMPLETE"
     },
     "sections": {},
     "notion_page_id": "82642b21-1f15-4e63-9ff4-b07928f2ddeb"
@@ -11495,6 +12083,51 @@
     },
     "sections": {},
     "notion_page_id": "df806c5f-a654-4730-a1ad-7c7679ab4b2d"
+  },
+  {
+    "Nom": "Flag_faction_dragovitsa_statut",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Communauté liée": "3186e4d2-1b45-8033-9182-cac2953ed2f7",
+      "Description narrative": "Niveau d'intégration formelle de la PJ dans la Dragovitsa. INCONNUE = aucun contact formel établi avec le conseil ; TOLÉRÉE = présence admise en zones communes sous réserve de bonne conduite ; OBSERVÉE = la Dragovitsa suit activement les actions de la PJ avec intérêt stratégique ; INITIÉE = la PJ est reconnue formellement par au moins un Parfait et peut accéder aux débats doctrinaux.",
+      "ID": "FLAG331",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "INCONNUE\nTOLÉRÉE\nOBSERVÉE\nINITIÉE"
+    },
+    "sections": {},
+    "notion_page_id": "ff8e4c13-a1f9-431a-a33e-3cc2e4797741"
+  },
+  {
+    "Nom": "Flag_faction_dragovitsa_acces_profondeurs",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Communauté liée": "3186e4d2-1b45-8033-9182-cac2953ed2f7",
+      "Description narrative": "Autorise ou non l'accès aux strates profondes du Léviathan via la Dragovitsa. Conditionne l'accès aux zones liées au pacte avec l'Ensevelie (archives interdites, strates inférieures).",
+      "ID": "FLAG329",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "INTERDIT\nACCORDÉ\nRÉVOQUÉ"
+    },
+    "sections": {},
+    "notion_page_id": "25095af6-5977-474d-9f41-332693db4d86"
+  },
+  {
+    "Nom": "Flag_faction_dragovitsa_schisme",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Communauté liée": "3186e4d2-1b45-8033-9182-cac2953ed2f7",
+      "Description narrative": "État interne du conseil de la Dragovitsa. STABLE = cohésion maintenue malgré les tensions ; TENDU = fractures visibles, Parfaits en désaccord ouvert ; FRACTURÉ = blocage formel, la PJ peut jouer un rôle de pivot décisif ; DISSOUS = fin du conseil en tant qu'entité unifiée.",
+      "ID": "FLAG330",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "STABLE\nTENDU\nFRACTURÉ\nDISSOUS"
+    },
+    "sections": {},
+    "notion_page_id": "1d7e54c8-b5df-4839-b363-07901cbbf901"
   },
   {
     "Nom": "Flag_lieu_echos_collectes",
@@ -13819,6 +14452,66 @@
     "notion_page_id": "1ad11410-a739-4359-9595-9a159d3aead2"
   },
   {
+    "Nom": "Flag_perso_duqsha_archive_fantome",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "[ARCHIVÉ — doublon d'ID 945, conserver la version 945 (Chapitres prévus renseignés, enums sans diacritiques pour export Unity).]\n\nConnaissance et état de l'Archive Fantôme — la copie illicite des Textes Absolus altérés que Duq'Sha dissimule hors du réseau officiel du Culte.",
+      "ID": "FLAG154",
+      "Personnage lié": "1c06e4d2-1b45-80d6-bafd-eeb1a8395c2f",
+      "Portée": "Personnage",
+      "Statut": "Archivé",
+      "Type de valeur": "enum",
+      "Valeurs enum": "SECRÈTE\nLOCALISÉE\nCOMPROMISE\nRÉVÉLÉE\nDÉTRUITE"
+    },
+    "sections": {},
+    "notion_page_id": "6cd144c3-ef7c-4283-aa78-ee45942b6aa5"
+  },
+  {
+    "Nom": "Flag_perso_duqsha_dette_yrthas",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "[ARCHIVÉ — doublon d'ID 942, conserver la version 942 (Chapitres prévus renseignés, scope correct : statut de la dette entre Duq'Sha et Yrthas, pas connaissance du PJ).]\n\nConnaissance du PJ concernant la dette d'initiation que Duq'Sha doit à Yrthas — un levier narratif qui pèse sur les motivations et la liberté d'action du personnage.",
+      "ID": "FLAG155",
+      "Personnage lié": "1c06e4d2-1b45-80d6-bafd-eeb1a8395c2f",
+      "Portée": "Personnage",
+      "Statut": "Archivé",
+      "Type de valeur": "enum",
+      "Valeurs enum": "IGNORÉE\nPRESSENTIE\nRECONNUE\nSOLDÉE"
+    },
+    "sections": {},
+    "notion_page_id": "3def946b-7bae-4e41-8cf0-05b99e6e5fb8"
+  },
+  {
+    "Nom": "Flag_perso_duqsha_grande_discordance",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "[ARCHIVÉ — doublon d'ID 944, conserver la version 944 (Chapitres prévus renseignés, état initial INOCULEE conforme au début du jeu en 3390 AG post-inoculation).]\n\nÉtat d'avancement du projet de la Grande Discordance — l'opération hérétique à long terme que Duq'Sha prépare pour introduire des corruptions irréversibles dans les Textes Absolus.",
+      "ID": "FLAG149",
+      "Personnage lié": "1c06e4d2-1b45-80d6-bafd-eeb1a8395c2f",
+      "Portée": "Personnage",
+      "Statut": "Archivé",
+      "Type de valeur": "enum",
+      "Valeurs enum": "DORMANTE\nPRÉPARÉE\nDÉCLENCHÉE\nAVORTÉE"
+    },
+    "sections": {},
+    "notion_page_id": "1d4de91e-8f49-438f-b50d-8184df45df6f"
+  },
+  {
+    "Nom": "Flag_perso_duqsha_couverture",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "[ARCHIVÉ — doublon d'ID 943, conserver la version 943 (Chapitres prévus renseignés, état BRULEE plus précis qu'EXPOSÉE).]\n\nÉtat de la couverture d'archiviste de Duq'Sha au sein des Bibliothèques Veineuses du Culte. Détermine la liberté de mouvement du personnage et les options narratives disponibles.",
+      "ID": "FLAG148",
+      "Personnage lié": "1c06e4d2-1b45-80d6-bafd-eeb1a8395c2f",
+      "Portée": "Personnage",
+      "Statut": "Archivé",
+      "Type de valeur": "enum",
+      "Valeurs enum": "INTACT\nSUSPECTÉ\nPERCÉE\nEXPOSÉE"
+    },
+    "sections": {},
+    "notion_page_id": "ec07d6b7-2d06-4396-94a2-7b4948caf10a"
+  },
+  {
     "Nom": "Flag_perso_kha_vareth_anomalies_decouvertes",
     "values": {
       "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
@@ -15386,93 +16079,159 @@
     "notion_page_id": "5bdaa4cf-9447-4dd2-b30b-b37144d44627"
   },
   {
-    "Nom": "Flag_lieu_forets_corail_temps_veille",
+    "Nom": "Flag_lieu_krypte_iterations_observées",
     "values": {
-      "Description narrative": "Temps du Cycle de Veille (rythme court, à l'échelle d'une Veille) qui module l'amplitude du Tableau actif dans les Forêts de Corail : Montée (l'émotion enfle), Apogée (intensité maximale), Retombée (l'émotion reflue), Étale (le Tableau retombe, moment calme où chacun redevient un peu soi-même). Se combine avec Flag_lieu_forets_corail_tableau_carnavalier, qui porte le Tableau émotionnel.",
-      "ID": "FLAG1202",
-      "Lieu lié": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1",
+      "Description narrative": "Nombre de sujets distincts observés directement par le groupe dans ou autour de la Krypte. Les trois sujets principaux sont 56, 57 et 58. 0 = aucun sujet observé. 1 = un sujet observé. 2 = deux sujets observés. 3 = trois sujets observés.",
+      "ID": "FLAG1222",
+      "Lieu lié": "ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
+      "Max": "3",
+      "Min": "0",
+      "Portée": "Lieu",
+      "Statut": "À définir",
+      "Type de valeur": "compteur"
+    },
+    "sections": {},
+    "notion_page_id": "5bddabf1-a22f-4e68-8e04-64702af0e26f"
+  },
+  {
+    "Nom": "Flag_lieu_krypte_revelation_culte",
+    "values": {
+      "Description narrative": "État de la découverte de la Krypte par le Culte de l'Anentropie. INCONNU (défaut) : le Culte ignore l'existence de la Krypte. SOUPÇONS : des incohérences ont été remarquées. EN_ENQUÊTE : le Culte enquête activement. RÉVÉLÉ : la Krypte est révélée au Culte, bascule politique majeure.",
+      "ID": "FLAG1220",
+      "Lieu lié": "ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
+      "Portée": "Lieu",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeurs enum": "INCONNU\nSOUPÇONS\nEN_ENQUÊTE\nRÉVÉLÉ"
+    },
+    "sections": {},
+    "notion_page_id": "84ddf0ed-f1cf-4d57-bec5-fc3521428b45"
+  },
+  {
+    "Nom": "Flag_lieu_krypte_deimos",
+    "values": {
+      "Description narrative": "État des Deimos juvéniles captifs dans les bocaux d'acide fossilisé. ACTIFS (défaut) : fluorescence normale. DOSE_RÉDUITE : bocaux voilés, éclairage atténué. SABOTÉS : bocaux brisés, éclairage dégradé. RÉCUPÉRÉS : Deimos remplacés par le cycle d'élevage.",
+      "ID": "FLAG1218",
+      "Lieu lié": "ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
+      "Portée": "Lieu",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeurs enum": "ACTIFS\nDOSE_RÉDUITE\nSABOTÉS\nRÉCUPÉRÉS"
+    },
+    "sections": {},
+    "notion_page_id": "9bd2651a-4f26-4c6f-92af-b9f382b1bce5"
+  },
+  {
+    "Nom": "Flag_lieu_krypte_etat56",
+    "values": {
+      "Description narrative": "État de la Cinquante-Sixième dans la Krypte. VIVANTE (défaut) : 56 vivante, alcôve ouverte. OBSERVÉE_PAR_GROUPE : le groupe a rencontré 56. EN_CRISE : filaments nerveux en mutation, situation instable. SCELLÉE : 56 décédée, alcôve scellée. PARTIE : 56 a quitté la Krypte par ses propres moyens.",
+      "ID": "FLAG1219",
+      "Lieu lié": "ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
+      "Portée": "Lieu",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeurs enum": "VIVANTE\nOBSERVÉE_PAR_GROUPE\nEN_CRISE\nSCELLÉE\nPARTIE"
+    },
+    "sections": {},
+    "notion_page_id": "b5d995dd-1c7e-4f7a-89ff-52ddd20097b1"
+  },
+  {
+    "Nom": "Flag_lieu_krypte_acces",
+    "values": {
+      "Description narrative": "État de la séquence d'accès à la Krypte via la bascule du sarcophage. SCELLÉ (défaut) : accès inconnu. SÉQUENCE_PARTIELLE : pressions partiellement reconstituées. SÉQUENCE_ACQUISE : séquence complète maîtrisée. VERROUILLÉ_TEMPORAIRE : échecs cumulatifs ont verrouillé l'accès temporairement.",
+      "ID": "FLAG1223",
+      "Lieu lié": "ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
+      "Portée": "Lieu",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeurs enum": "SCELLÉ\nSÉQUENCE_PARTIELLE\nSÉQUENCE_ACQUISE\nVERROUILLÉ_TEMPORAIRE"
+    },
+    "sections": {},
+    "notion_page_id": "45cf8757-ae58-4cc6-88e7-6296e6efddf0"
+  },
+  {
+    "Nom": "Flag_lieu_krypte_decouverte",
+    "values": {
+      "Description narrative": "Niveau de découverte de la Krypte Ésothrope par le groupe. IGNORÉE (défaut) : aucune connaissance du lieu. RUMEUR : bruits indirects. INCOHÉRENCE_COMPTABLE_ID : identification de l'anomalie comptable des Cendres Primordiales. ENTRÉE_LOCALISÉE : niche d'accès repérée. PÉNÉTRÉE : Krypte visitée physiquement.",
+      "ID": "FLAG1217",
+      "Lieu lié": "ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
+      "Portée": "Lieu",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeurs enum": "IGNORÉE\nRUMEUR\nINCOHÉRENCE_COMPTABLE_ID\nENTRÉE_LOCALISÉE\nPÉNÉTRÉE"
+    },
+    "sections": {},
+    "notion_page_id": "9a5bb09e-2255-46e4-9359-b0980042e6e6"
+  },
+  {
+    "Nom": "Flag_lieu_krypte_cilia",
+    "values": {
+      "Description narrative": "État des cilia auditives gravées dans les parois de la Krypte. ENTRETENUES (défaut) : absorption normale du bruit. DÉGRADÉES : cilia durcies, absorption partielle. ARRACHÉES_LOCAL : cilia arrachées localement, bruit non absorbé par zone. ARRACHÉES_GLOBAL : toutes cilia arrachées, silence rompu.",
+      "ID": "FLAG1221",
+      "Lieu lié": "ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
+      "Portée": "Lieu",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeurs enum": "ENTRETENUES\nDÉGRADÉES\nARRACHÉES_LOCAL\nARRACHÉES_GLOBAL"
+    },
+    "sections": {},
+    "notion_page_id": "3d5e3b0f-3dae-4426-8bd7-fdce4204c331"
+  },
+  {
+    "Nom": "Flag_lieu_kivane_lisiere_pilier",
+    "values": {
+      "Description narrative": "Praticabilité de la Lisière du Pilier, reflet direct de la phase olfactive du Rêveur du Puits Céleste : ouverte (Grande Absorption, passage bref possible), instable (transition de phase, risque élevé), fermée (Dévoration, infranchissable).",
+      "ID": "FLAG1215",
+      "Lieu lié": "10c38a81-8f71-4953-ae5b-f99d11adfa14",
       "Portée": "Lieu",
       "Statut": "Défini",
       "Type de valeur": "enum",
-      "Valeurs enum": "ETALE\nMONTEE\nAPOGEE\nRETOMBEE"
+      "Valeurs enum": "OUVERTE\nINSTABLE\nFERMEE"
     },
     "sections": {},
-    "notion_page_id": "f6f4d65b-68c6-4520-8edb-46e4f837452e"
+    "notion_page_id": "6834b5b1-2a1c-4f68-8932-8e24a00707cc"
   },
   {
-    "Nom": "Flag_perso_murmol_genka",
+    "Nom": "Flag_lieu_kivane_foyers_engloutis",
     "values": {
-      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
-      "Description narrative": "État du fil Murmöl–Genka, le père adoptif et l'enfant qui a refusé sa succession, réunis par les hasards du convoi au Léviathan. NON_ABORDE : le joueur n'a pas touché à leur lien. EVOQUE : le joueur a appris ou relayé quelque chose de leur brouille. RAPPROCHEMENT : le joueur a amorcé un geste entre eux avant le départ (sans garantir de réconciliation).",
-      "ID": "FLAG1199",
-      "Personnage lié": "6868f847-5748-481f-aae8-961764cb18ee",
-      "Portée": "Personnage",
-      "Statut": "À définir",
-      "Type de valeur": "enum",
-      "Valeurs enum": "NON_ABORDE\nEVOQUE\nRAPPROCHEMENT"
-    },
-    "sections": {},
-    "notion_page_id": "ca5317fd-cd3f-4701-9f84-601594ac37a0"
-  },
-  {
-    "Nom": "Flag_perso_murmol_rencontre",
-    "values": {
-      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
-      "Description narrative": "Où en est le contact du joueur avec Murmöl au Léviathan. NON_RENCONTRE : jamais vu. CROISE : aperçu à l'arrivée du convoi (Narthex) ou dans le sillage de Vethraak, sans interaction. ABORDE : le joueur a parlé ou marchandé à son étal de colporteur.",
-      "ID": "FLAG1201",
-      "Personnage lié": "6868f847-5748-481f-aae8-961764cb18ee",
-      "Portée": "Personnage",
-      "Statut": "À définir",
-      "Type de valeur": "enum",
-      "Valeurs enum": "NON_RENCONTRE\nCROISE\nABORDE"
-    },
-    "sections": {},
-    "notion_page_id": "dd8cace2-c886-4a1a-a520-7200a629e475"
-  },
-  {
-    "Nom": "Flag_perso_murmol_saturation",
-    "values": {
-      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
-      "Description narrative": "Ce que le joueur a perçu du véritable enjeu de Murmöl : la Saturation qui approche (le seuil de renaissance umcut) et sa cale aux invendables. IGNORE : rien. PERCU : indices captés (l'odeur sucrée du retour, ses allusions au coffre qu'il n'ouvre plus). REVELE : Murmöl s'est confié, tard, sur le choix qu'il fuit (rentrer renaître en perdant Genka, ou rester sur les routes et mourir intact).",
-      "ID": "FLAG1200",
-      "Personnage lié": "6868f847-5748-481f-aae8-961764cb18ee",
-      "Portée": "Personnage",
-      "Statut": "À définir",
-      "Type de valeur": "enum",
-      "Valeurs enum": "IGNORE\nPERCU\nREVELE"
-    },
-    "sections": {},
-    "notion_page_id": "119d094a-dfed-4f43-b232-ac96cabb7448"
-  },
-  {
-    "Nom": "Flag_perso_murmol_depart",
-    "values": {
-      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
-      "Description narrative": "Organisation du départ avec Murmöl (ou un autre membre du convoi qui attend au Narthex). NON_PLANIFIE : le joueur n'a pas abordé la question du passage. PLANIFIE : un départ sur le convoi a été convenu. EMBARQUE : le joueur quitte effectivement le Léviathan avec le convoi de Murmöl, vers la Traversée du Désert des Échos (Acte 2).",
-      "ID": "FLAG1198",
-      "Personnage lié": "6868f847-5748-481f-aae8-961764cb18ee",
-      "Portée": "Personnage",
-      "Statut": "À définir",
-      "Type de valeur": "enum",
-      "Valeurs enum": "NON_PLANIFIE\nPLANIFIE\nEMBARQUE"
-    },
-    "sections": {},
-    "notion_page_id": "24c5a359-6f04-45d9-9424-e057cbde5b70"
-  },
-  {
-    "Nom": "Flag_lieu_forets_corail_tableau_carnavalier",
-    "values": {
-      "Description narrative": "État du Tableau émotionnel actif dans les Forêts de Corail (Cycle de Nuée du Carnavalier) : Grand Bal (liesse), Sérénade (tendresse), Charivari (colère), Pilori (dégoût), Cortège (tristesse), Sabbat (effroi). Détermine la teinte du corail et du Brouillignon, les routes accessibles et les comportements sociaux de la région ; l'eau du Rasa-Dhatu reste toujours argentée. Change indépendamment des actions de la joueuse selon les cycles du Rêveur. Se combine avec Flag_lieu_forets_corail_temps_veille pour l'amplitude.",
-      "ID": "FLAG529",
-      "Lieu lié": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1",
+      "Description narrative": "Nombre de banquises (foyers flottants) englouties par la coulée depuis le début de la partie. Chaque palier marque un deuil collectif (rite des Englouties) et pousse un peu plus la migration des foyers vers l'aval.",
+      "ID": "FLAG1214",
+      "Lieu lié": "10c38a81-8f71-4953-ae5b-f99d11adfa14",
+      "Max": "12",
+      "Min": "0",
       "Portée": "Lieu",
       "Statut": "Défini",
-      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9, 7d4905b5-1967-4488-b28f-6c69f6abc262",
-      "Systèmes producteurs": "50b3b923-0349-4180-87f6-821d69893949",
-      "Type de valeur": "enum",
-      "Valeurs enum": "TABLEAU_INCONNU\nGRAND_BAL\nSERENADE\nCHARIVARI\nPILORI\nCORTEGE\nSABBAT"
+      "Type de valeur": "compteur"
     },
     "sections": {},
-    "notion_page_id": "5ef4c83a-d82b-41a9-ba9c-e95c20fe16f2"
+    "notion_page_id": "5fee8c16-8f33-4acb-a6d5-cc607c262b86"
+  },
+  {
+    "Nom": "Flag_lieu_kivane_registre_fleuve",
+    "values": {
+      "Description narrative": "État de la tentative des Chaudières Démiurgiques d'étendre l'Interdit de Quitter et le registre de Jast sur la coulée : absent (le fleuve reste infiscal), tentative (postes d'amont, comptage des radeaux en cours d'installation), imposé (le registre a fini par mordre sur la Kivane).",
+      "ID": "FLAG1216",
+      "Lieu lié": "10c38a81-8f71-4953-ae5b-f99d11adfa14",
+      "Portée": "Lieu",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "ABSENT\nTENTATIVE\nIMPOSE"
+    },
+    "sections": {},
+    "notion_page_id": "00852551-d677-44cd-b40d-9ace7af27429"
+  },
+  {
+    "Nom": "Flag_lieu_kivane_ancrage",
+    "values": {
+      "Description narrative": "Statut d'un hôte auprès des foyers flottants de la Kivane : inconnu des radeaux, toléré sur une banquise, parrainé par un foyer (accès aux routes de halage et de vapeur), ou membre à part entière d'un foyer (droit de vote sur les ré-ancrages).",
+      "ID": "FLAG1213",
+      "Lieu lié": "10c38a81-8f71-4953-ae5b-f99d11adfa14",
+      "Portée": "Lieu",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs enum": "INCONNU\nTOLERE\nPARRAINE\nFOYER"
+    },
+    "sections": {},
+    "notion_page_id": "b41abfc5-ccfa-49d4-b69d-5fb3999cb1c0"
   }
 ]

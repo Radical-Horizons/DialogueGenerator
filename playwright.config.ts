@@ -49,6 +49,9 @@ export default defineConfig({
         HEALTH_CHECK_LLM_PING: 'true',
         RELOAD: 'false',
         DISABLE_AUTH: 'true',
+        // Seed admin pour auth.setup / auth.spec (login réel après guest-first).
+        ADMIN_PASSWORD: 'admin123',
+        JWT_SECRET_KEY: process.env.JWT_SECRET_KEY || 'playwright-e2e-jwt-secret',
         // Évite les timeouts sur auth.spec / setup quand la suite déclenche plusieurs POST /login.
         AUTH_RATE_LIMIT_ENABLED: 'false',
       },

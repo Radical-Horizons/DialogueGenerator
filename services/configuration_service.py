@@ -158,7 +158,66 @@ class ConfigurationService:
 
     def get_available_llm_models(self) -> List[Dict[str, Any]]:
         """Retrieves the list of available LLM models from the LLM config."""
-        return self.llm_config.get("available_models", [])
+        models = self.llm_config.get("available_models", [])
+        if not isinstance(models, list):
+            return []
+        return [dict(m) if isinstance(m, dict) else m for m in models]
+
+    def upsert_llm_model(self, model_entry: Dict[str, Any]) -> Dict[str, Any]:
+        """Ajoute ou remplace un modèle dans ``available_models``.
+
+        Args:
+            model_entry: Entrée modèle (api_identifier, display_name, client_type, parameters).
+
+        Returns:
+            L'entrée persistée.
+
+        Raises:
+            ValueError: Si api_identifier manque.
+        """
+        api_id = model_entry.get("api_identifier")
+        if not isinstance(api_id, str) or not api_id.strip():
+            raise ValueError("api_identifier requis")
+        api_id = api_id.strip()
+        models = list(self.llm_config.get("available_models", []))
+        replaced = False
+        for index, existing in enumerate(models):
+            existing_id = existing.get("api_identifier") or existing.get("model_identifier")
+            if existing_id == api_id:
+                models[index] = model_entry
+                replaced = True
+                break
+        if not replaced:
+            models.append(model_entry)
+        self.llm_config["available_models"] = models
+        if not self._save_json_file(LLM_CONFIG_FILE_PATH, self.llm_config):
+            raise OSError("Échec de la sauvegarde de llm_config.json")
+        return model_entry
+
+    def remove_llm_model(self, api_identifier: str) -> bool:
+        """Supprime un modèle du catalogue par ``api_identifier``.
+
+        Args:
+            api_identifier: Identifiant API du modèle.
+
+        Returns:
+            True si un modèle a été retiré.
+        """
+        api_identifier = str(api_identifier or "").strip()
+        models = list(self.llm_config.get("available_models", []))
+        filtered = [
+            m
+            for m in models
+            if isinstance(m, dict)
+            and str(m.get("api_identifier") or m.get("model_identifier") or "").strip()
+            != api_identifier
+        ]
+        if len(filtered) == len(models):
+            return False
+        self.llm_config["available_models"] = filtered
+        if not self._save_json_file(LLM_CONFIG_FILE_PATH, self.llm_config):
+            raise OSError("Échec de la sauvegarde de llm_config.json")
+        return True
 
     def get_llm_fallback_chain(self) -> List[str]:
         """Returns the ordered list of api_identifiers for LLM fallback (primary first).

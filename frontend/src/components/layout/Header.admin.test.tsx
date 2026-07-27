@@ -55,7 +55,8 @@ describe('Header admin navigation', () => {
     )
 
     await interaction.click(screen.getByRole('button', { name: 'Menu utilisateur admin' }))
-    expect(screen.getByRole('button', { name: 'Gérer les utilisateurs' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Administration' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Gérer les utilisateurs' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Changer mon mot de passe' })).toBeInTheDocument()
     await interaction.click(screen.getByRole('button', { name: 'Menu utilisateur admin' }))
 
@@ -79,7 +80,7 @@ describe('Header admin navigation', () => {
     expect(writerMenuButton).toHaveAttribute('aria-expanded', 'true')
     expect(screen.getByText('Connecté en tant que')).toBeInTheDocument()
     expect(screen.getByText('writer')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Gérer les utilisateurs' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Administration' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Changer mon mot de passe' })).toBeInTheDocument()
   })
 
@@ -103,5 +104,22 @@ describe('Header admin navigation', () => {
     expect(screen.getByTestId('header-login-button')).toHaveTextContent('Connexion')
     expect(screen.getByTestId('guest-mode-banner')).toBeInTheDocument()
     expect(screen.queryByText('Non connecté')).not.toBeInTheDocument()
+  })
+
+  it('lie le titre DialogueGenerator vers la page d’accueil', () => {
+    mockedUseAuthStore.mockReturnValue({
+      user: null,
+      isAuthenticated: false,
+      logout: vi.fn(),
+    } as ReturnType<typeof useAuthStore>)
+    render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>,
+    )
+
+    const homeLink = screen.getByTestId('header-home-link')
+    expect(homeLink).toHaveAttribute('href', '/')
+    expect(homeLink).toHaveTextContent('DialogueGenerator')
   })
 })

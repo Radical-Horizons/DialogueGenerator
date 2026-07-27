@@ -11,6 +11,7 @@ import {
   CONTEXT_TOKENS_LIMITS,
   DEFAULT_MODEL,
   MODEL_NAMES,
+  normalizeModelId,
 } from '../constants'
 import type { LLMModelResponse } from '../types/api'
 
@@ -74,17 +75,28 @@ export function resolveModelForUnityGeneration(
   model: string,
   availableModels: LLMModelResponse[],
 ): string {
+  const normalizedModel = normalizeModelId(model)
   const availableIds = availableModels.map((m) => m.model_identifier)
-  if (
-    (UNITY_STRUCTURED_OUTPUT_MODELS as readonly string[]).includes(model)
-    && availableIds.includes(model)
-  ) {
-    return model
+  const openrouterIds = availableModels
+    .filter((m) => m.client_type === 'openrouter')
+    .map((m) => m.model_identifier)
+  const isAllowed =
+    (UNITY_STRUCTURED_OUTPUT_MODELS as readonly string[]).includes(normalizedModel)
+    || openrouterIds.includes(normalizedModel)
+
+  if (isAllowed && availableIds.includes(normalizedModel)) {
+    return normalizedModel
   }
   for (const allowed of UNITY_STRUCTURED_OUTPUT_MODELS) {
     if (availableIds.includes(allowed)) {
       return allowed
     }
+  }
+  const openrouterFallback = availableModels.find(
+    (m) => m.client_type === 'openrouter' && m.model_identifier && m.model_identifier !== 'unknown',
+  )?.model_identifier
+  if (openrouterFallback) {
+    return openrouterFallback
   }
   const fallback = availableModels.find(
     (m) => m.model_identifier && m.model_identifier !== 'unknown',
@@ -122,13 +134,14 @@ export function detectGenerationConfigFixes(
     })
   }
 
-  const normalizedModel = resolveModelForUnityGeneration(config.llmModel, availableModels)
-  if (normalizedModel !== config.llmModel) {
+  const normalizedInput = normalizeModelId(config.llmModel)
+  const resolvedModel = resolveModelForUnityGeneration(config.llmModel, availableModels)
+  if (resolvedModel !== normalizedInput) {
     fixes.push({
       field: 'llmModel',
-      message: `Le modèle « ${config.llmModel} » n'est pas supporté pour la génération Unity ; bascule vers « ${normalizedModel} ».`,
+      message: `Le modèle « ${config.llmModel} » n'est pas supporté pour la génération Unity ; bascule vers « ${resolvedModel} ».`,
       currentValue: config.llmModel,
-      normalizedValue: normalizedModel,
+      normalizedValue: resolvedModel,
     })
   }
 
@@ -192,13 +205,14 @@ export function fixesFromApiValidationDetails(
 
   const modelMsg = details.llm_model_identifier
   if (typeof modelMsg === 'string') {
-    const normalized = resolveModelForUnityGeneration(config.llmModel, availableModels)
-    if (normalized !== config.llmModel) {
+    const normalizedInput = normalizeModelId(config.llmModel)
+    const resolvedModel = resolveModelForUnityGeneration(config.llmModel, availableModels)
+    if (resolvedModel !== normalizedInput) {
       fixes.push({
         field: 'llmModel',
         message: modelMsg,
         currentValue: config.llmModel,
-        normalizedValue: normalized,
+        normalizedValue: resolvedModel,
       })
     }
   }

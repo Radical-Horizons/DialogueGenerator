@@ -51,13 +51,29 @@ describe('ContextList', () => {
     expect(screen.getByText('Bob')).toBeInTheDocument()
 
     fireEvent.change(screen.getByPlaceholderText(/rechercher/i), { target: { value: 'Ali' } })
-    act(() => {
-      vi.advanceTimersByTime(300)
-    })
     const aliceMatches = screen.getAllByText((_, el) => el?.textContent?.trim() === 'Alice')
     expect(aliceMatches.length).toBeGreaterThanOrEqual(1)
     expect(screen.queryAllByText((_, el) => el?.textContent?.trim() === 'Bob')).toHaveLength(0)
     expect(screen.queryAllByText((_, el) => el?.textContent?.trim() === 'Charlie')).toHaveLength(0)
+  })
+
+  it('priorise les résultats de priorityEntityTab pendant une recherche', () => {
+    render(
+      <ContextList
+        {...defaultProps}
+        items={[
+          { name: 'Taluo', entityTab: 'locations', entityTypeLabel: 'Lieu', data: {} },
+          { name: 'Taluan', entityTab: 'characters', entityTypeLabel: 'Personnage', data: {} },
+        ]}
+        priorityEntityTab="characters"
+      />
+    )
+
+    fireEvent.change(screen.getByPlaceholderText(/rechercher/i), { target: { value: 'Tal' } })
+
+    const badges = screen.getAllByText(/^(Personnage|Lieu)$/)
+    expect(badges[0]).toHaveTextContent('Personnage')
+    expect(badges[1]).toHaveTextContent('Lieu')
   })
 
   it('affiche le badge type d\'entité quand entityTypeLabel est fourni', () => {
@@ -95,10 +111,61 @@ describe('ContextList', () => {
     render(<ContextList {...defaultProps} />)
 
     fireEvent.change(screen.getByPlaceholderText(/rechercher/i), { target: { value: 'XyZ inexistant' } })
+
+    expect(screen.getByText(/aucun résultat/i)).toBeInTheDocument()
+  })
+
+  it('charge les pages suivantes si la recherche ne matche pas le buffer local', () => {
+    const onScrollToBottom = vi.fn()
+    const { rerender } = render(
+      <ContextList
+        {...defaultProps}
+        items={[{ name: 'Oeil de Mirimance', data: {} }]}
+        onScrollToBottom={onScrollToBottom}
+        hasMore
+      />
+    )
+
+    fireEvent.change(screen.getByPlaceholderText(/rechercher/i), { target: { value: 'Taluo' } })
     act(() => {
       vi.advanceTimersByTime(300)
     })
 
+    expect(onScrollToBottom).toHaveBeenCalled()
+    expect(screen.getByText(/recherche dans le catalogue/i)).toBeInTheDocument()
+
+    rerender(
+      <ContextList
+        {...defaultProps}
+        items={[
+          { name: 'Oeil de Mirimance', data: {} },
+          { name: 'Taluo', data: {} },
+        ]}
+        onScrollToBottom={onScrollToBottom}
+        hasMore={false}
+      />
+    )
+
+    expect(screen.getByText('Taluo')).toBeInTheDocument()
+    expect(screen.queryByText(/aucun résultat/i)).not.toBeInTheDocument()
+  })
+
+  it('n\'appelle pas onScrollToBottom en boucle si hasMore est false', () => {
+    const onScrollToBottom = vi.fn()
+    render(
+      <ContextList
+        {...defaultProps}
+        onScrollToBottom={onScrollToBottom}
+        hasMore={false}
+      />
+    )
+
+    fireEvent.change(screen.getByPlaceholderText(/rechercher/i), { target: { value: 'XyZ' } })
+    act(() => {
+      vi.advanceTimersByTime(300)
+    })
+
+    expect(onScrollToBottom).not.toHaveBeenCalled()
     expect(screen.getByText(/aucun résultat/i)).toBeInTheDocument()
   })
 
@@ -108,6 +175,6 @@ describe('ContextList', () => {
 
     fireEvent.click(screen.getByText('Alice'))
 
-    expect(onItemClick).toHaveBeenCalledWith('Alice')
+    expect(onItemClick).toHaveBeenCalledWith('Alice', undefined)
   })
 })

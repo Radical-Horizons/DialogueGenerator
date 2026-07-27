@@ -1,0 +1,27 @@
+---
+description: Python (global) — conventions, qualité, Windows-first, migration web
+globs: []
+alwaysApply: true
+---
+- Architecture : modules core dans `core/` (context, prompt, llm), services réutilisables dans `services/`, API dans `api/`
+- Imports : Préférer `from core.context.context_builder import ContextBuilder` aux anciens imports racine (dépréciés)
+- Configuration : Utiliser `services.configuration_service.ConfigurationService` uniquement (pas `config_manager.py` racine)
+- Injection de dépendances : Via `api/container.py` (ServiceContainer), pas de singletons globaux
+- Conserver l’architecture existante (répertoires `core/`, `domain/`, `services/`, `ui/`, `models/`) et réutiliser les services plutôt que dupliquer la logique.
+- Windows-first: utiliser `pathlib.Path`, encodage `utf-8`, éviter les hypothèses POSIX (chemins, commandes, signaux).
+- Pour tout code Python modifié/ajouté: annotations de types complètes + docstrings PEP257 (fonctions, méthodes, classes). Ne pas supprimer les commentaires existants.
+- Erreurs: messages utiles + logging contextualisé; pas de `except Exception` silencieux. Le système de logs archive automatiquement dans `data/logs/` (voir `.claude/rules/logging.md`).
+- Config/secrets: aucun secret en dur; passer par variables d'environnement et config existante (ex: `OPENAI_API_KEY`, `config/*.json`).
+- Chemins GDD: utiliser `data/GDD_categories/` (lien symbolique). Voir `.claude/rules/gdd_paths.md`.
+- Classification champs: métadonnées (avant "Introduction") vs contexte narratif, champs essentiels (MINIMAL_FIELDS). Voir `.claude/rules/field_classification.md`.
+
+- Migration web terminée (API REST FastAPI + Frontend React):
+  - Frontend React (`frontend/`) ↔ API REST FastAPI (`api/`) ↔ Services existants (`services/`) ↔ LLM/GDD/Storage
+  - L'UI desktop et le frontend web sont tous deux des clients de l'API. La logique métier reste dans `services/` (réutilisable).
+  - Voir `.claude/rules/backend_api.md`, `.claude/rules/api_usage.md`, `.claude/skills/api-runbook/SKILL.md` ; contrats → `docs/api/api-contracts-api.md` ; quickstart partiel → `README_API.md`.
+
+- Outils: avant d’inférer, localiser la source réelle (recherche sémantique + grep). Si une API “récente” est incertaine (Cursor rules, OpenAI SDK, Qt), valider via navigateur/web.
+
+- **Tests (agents)** : après changement Python, **exécuter** pytest ciblé ou `npm test` ; ne pas affirmer le succès sans preuve d’exécution. Détail et frontend : `.claude/rules/workflow.md` (obligation agents).
+
+

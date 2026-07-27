@@ -113,6 +113,17 @@ describe('useLLMStore', () => {
     expect(localStorage.getItem('llm-model')).toBe('labs-mistral-small-creative');
   });
 
+  it('should normalize legacy gpt-5.4 to gpt-5.6-sol on setModel', () => {
+    const { result } = renderHook(() => useLLMStore());
+
+    act(() => {
+      result.current.setModel('gpt-5.4');
+    });
+
+    expect(result.current.model).toBe('gpt-5.6-sol');
+    expect(localStorage.getItem('llm-model')).toBe('gpt-5.6-sol');
+  });
+
   it('should persist and retrieve provider from localStorage', () => {
     const { result } = renderHook(() => useLLMStore());
 

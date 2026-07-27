@@ -2,7 +2,7 @@
  * Composant principal de sélection de contexte (panneau Contexte GDD) avec onglets par type d'entité.
  * AC FR11 : Personnages, Lieux (contexte), Objets, Espèces, Communautés.
  */
-import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo } from 'react'
 import type { CSSProperties } from 'react'
 import * as contextAPI from '../../api/context'
 import type { 
@@ -14,7 +14,8 @@ import type {
   NarrativeContextResponse,
 } from '../../types/api'
 import { ContextList } from './ContextList'
-import type { ContextListItem } from './ContextList'
+import type { ContextEntityTab, ContextListItem } from './ContextList'
+import { ContextSearchControls, type ContextSortType } from './ContextSearchControls'
 import {
   resolveCharacterCanonicalName,
   resolveGddCanonicalName,
@@ -182,6 +183,8 @@ interface ContextSelectorProps {
 export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSelectorProps = {}) {
   const [activeTab, setActiveTab] = useState<TabType>('characters')
   const [showRulesEditor, setShowRulesEditor] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortType, setSortType] = useState<ContextSortType>('name-asc')
   const [characters, setCharacters] = useState<CharacterResponse[]>([])
   const [locations, setLocations] = useState<LocationResponse[]>([])
   const [items, setItems] = useState<ItemResponse[]>([])
@@ -192,6 +195,7 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const tabBarRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const tabBarDensity = useContextGddTabBarDensity(tabBarRef)
   const tabChromeTier = contextGddTabChrome[tabBarDensity]
   const [charactersPage, setCharactersPage] = useState(1)
@@ -310,6 +314,68 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
     communitiesTotalPages,
   ])
 
+  /** Pendant une recherche inter-onglets, avance toutes les pages encore incomplètes. */
+  const loadMoreForSearch = useCallback(async () => {
+    if (loadingMore) return
+    const canCharacters = charactersPage < charactersTotalPages
+    const canLocations = locationsPage < locationsTotalPages
+    const canItems = itemsPage < itemsTotalPages
+    const canCommunities = communitiesPage < communitiesTotalPages
+    if (!canCharacters && !canLocations && !canItems && !canCommunities) return
+
+    setLoadingMore(true)
+    try {
+      const tasks: Promise<void>[] = []
+      if (canCharacters) {
+        tasks.push(
+          contextAPI.listCharacters({ page: charactersPage + 1, page_size: PAGE_SIZE }).then((res) => {
+            setCharacters((prev) => [...prev, ...res.characters])
+            setCharactersPage((p) => p + 1)
+          }),
+        )
+      }
+      if (canLocations) {
+        tasks.push(
+          contextAPI.listLocations({ page: locationsPage + 1, page_size: PAGE_SIZE }).then((res) => {
+            setLocations((prev) => [...prev, ...res.locations])
+            setLocationsPage((p) => p + 1)
+          }),
+        )
+      }
+      if (canItems) {
+        tasks.push(
+          contextAPI.listItems({ page: itemsPage + 1, page_size: PAGE_SIZE }).then((res) => {
+            setItems((prev) => [...prev, ...res.items])
+            setItemsPage((p) => p + 1)
+          }),
+        )
+      }
+      if (canCommunities) {
+        tasks.push(
+          contextAPI.listCommunities({ page: communitiesPage + 1, page_size: PAGE_SIZE }).then((res) => {
+            setCommunities((prev) => [...prev, ...res.communities])
+            setCommunitiesPage((p) => p + 1)
+          }),
+        )
+      }
+      await Promise.all(tasks)
+    } catch (err) {
+      setError(getErrorMessage(err))
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [
+    loadingMore,
+    charactersPage,
+    charactersTotalPages,
+    locationsPage,
+    locationsTotalPages,
+    itemsPage,
+    itemsTotalPages,
+    communitiesPage,
+    communitiesTotalPages,
+  ])
+
   useEffect(() => {
     void loadData()
   }, [loadData, gddDataRevision])
@@ -324,22 +390,42 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
     })
   }, [error, isLoading, loadData, onLoadStateChange])
 
-  const handleItemClick = async (name: string) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return
+      }
+      if (e.key === '/') {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+        searchInputRef.current?.select()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  const handleItemClick = async (name: string, entityTab?: ContextEntityTab) => {
+    const tab = (entityTab ?? activeTab) as TabType
+    if (tab !== activeTab) {
+      setActiveTab(tab)
+    }
     try {
       let item: ContextItem | { name: string; data: Record<string, unknown> } | null = null
-      if (activeTab === 'characters') {
+      if (tab === 'characters') {
         item = await contextAPI.getCharacter(name)
-      } else if (activeTab === 'locations') {
+      } else if (tab === 'locations') {
         item = await contextAPI.getLocation(name)
-      } else if (activeTab === 'items') {
+      } else if (tab === 'items') {
         item = await contextAPI.getItem(name)
-      } else if (activeTab === 'species') {
+      } else if (tab === 'species') {
         item = await contextAPI.getSpecies(name)
-      } else if (activeTab === 'communities') {
+      } else if (tab === 'communities') {
         item = await contextAPI.getCommunity(name)
       }
 
-      const stem = HISTORY_CATEGORY_BY_TAB[activeTab]
+      const stem = HISTORY_CATEGORY_BY_TAB[tab]
       if (item && selectedDetail === name) {
         setSelectedDetail(null)
         onItemSelected?.(item as ContextItem, stem)
@@ -352,19 +438,23 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
     }
   }
 
-  const handleItemToggle = (name: string) => {
-    const storeKey = STORE_TYPE_MAP[activeTab]
+  const handleItemToggle = (name: string, entityTab?: ContextEntityTab) => {
+    const tab = (entityTab ?? activeTab) as TabType
+    if (tab !== activeTab) {
+      setActiveTab(tab)
+    }
+    const storeKey = STORE_TYPE_MAP[tab]
     const wasSelected = storeKey ? isElementSelected(storeKey, name) : false
 
-    if (activeTab === 'characters') {
+    if (tab === 'characters') {
       toggleCharacter(name)
-    } else if (activeTab === 'locations') {
+    } else if (tab === 'locations') {
       toggleLocation(name)
-    } else if (activeTab === 'items') {
+    } else if (tab === 'items') {
       toggleItem(name)
-    } else if (activeTab === 'species') {
+    } else if (tab === 'species') {
       toggleSpecies(name)
-    } else if (activeTab === 'communities') {
+    } else if (tab === 'communities') {
       toggleCommunity(name)
     }
     if (selectedDetail === name) {
@@ -373,7 +463,7 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
     }
 
     if (!wasSelected) {
-      const triggerType = TRIGGER_TYPE_MAP[activeTab]
+      const triggerType = TRIGGER_TYPE_MAP[tab]
       if (triggerType) {
         refreshSuggestionsForTrigger(triggerType, name, selectedDialogueType)
       }
@@ -382,36 +472,44 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
     }
   }
 
-  const getCurrentItems = (): ContextListItem[] => {
-    if (activeTab === 'characters') {
+  const tagCatalogItems = useCallback((catalog: ContextListItem[], tab: TabType): ContextListItem[] => {
+    return catalog.map((item) => ({
+      ...item,
+      entityTab: tab,
+      entityTypeLabel: ENTITY_TYPE_LABELS[tab],
+    }))
+  }, [])
+
+  const getItemsForTab = useCallback((tab: TabType): ContextListItem[] => {
+    if (tab === 'characters') {
       return mergeListWithSelectedNames(
         characters,
         [...(selections.characters_full ?? []), ...(selections.characters_excerpt ?? [])],
         (n) => resolveCharacterCanonicalName(n, characters),
       )
     }
-    if (activeTab === 'locations') {
+    if (tab === 'locations') {
       return mergeListWithSelectedNames(
         locations,
         [...(selections.locations_full ?? []), ...(selections.locations_excerpt ?? [])],
         (n) => resolveLocationCanonicalName(n, locations),
       )
     }
-    if (activeTab === 'items') {
+    if (tab === 'items') {
       return mergeListWithSelectedNames(
         items,
         [...(selections.items_full ?? []), ...(selections.items_excerpt ?? [])],
         (n) => resolveGddCanonicalName(n, items),
       )
     }
-    if (activeTab === 'species') {
+    if (tab === 'species') {
       return mergeListWithSelectedNames(
         species,
         [...(selections.species_full ?? []), ...(selections.species_excerpt ?? [])],
         (n) => resolveGddCanonicalName(n, species),
       )
     }
-    if (activeTab === 'communities') {
+    if (tab === 'communities') {
       return mergeListWithSelectedNames(
         communities,
         [...(selections.communities_full ?? []), ...(selections.communities_excerpt ?? [])],
@@ -419,7 +517,32 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
       )
     }
     return []
-  }
+  }, [characters, locations, items, species, communities, selections])
+
+  const isSearching = searchQuery.trim().length > 0
+
+  const displayItems = useMemo(() => {
+    if (!isSearching) {
+      return tagCatalogItems(getItemsForTab(activeTab), activeTab)
+    }
+    return (Object.keys(ENTITY_TYPE_LABELS) as TabType[]).flatMap((tab) =>
+      tagCatalogItems(getItemsForTab(tab), tab),
+    )
+  }, [isSearching, activeTab, getItemsForTab, tagCatalogItems])
+
+  const hasMoreForActiveTab = (() => {
+    if (activeTab === 'characters') return charactersPage < charactersTotalPages
+    if (activeTab === 'locations') return locationsPage < locationsTotalPages
+    if (activeTab === 'items') return itemsPage < itemsTotalPages
+    if (activeTab === 'communities') return communitiesPage < communitiesTotalPages
+    return false
+  })()
+
+  const hasMoreAny =
+    charactersPage < charactersTotalPages ||
+    locationsPage < locationsTotalPages ||
+    itemsPage < itemsTotalPages ||
+    communitiesPage < communitiesTotalPages
 
   const getSelectedItems = (): string[] => {
     if (activeTab === 'characters') {
@@ -455,16 +578,21 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
     return []
   }
 
-  const handleModeChange = (name: string, mode: 'full' | 'excerpt') => {
-    if (activeTab === 'characters') {
+  const handleModeChange = (
+    name: string,
+    mode: 'full' | 'excerpt',
+    entityTab?: ContextEntityTab,
+  ) => {
+    const tab = (entityTab ?? activeTab) as TabType
+    if (tab === 'characters') {
       setElementMode('characters', name, mode)
-    } else if (activeTab === 'locations') {
+    } else if (tab === 'locations') {
       setElementMode('locations', name, mode)
-    } else if (activeTab === 'items') {
+    } else if (tab === 'items') {
       setElementMode('items', name, mode)
-    } else if (activeTab === 'species') {
+    } else if (tab === 'species') {
       setElementMode('species', name, mode)
-    } else if (activeTab === 'communities') {
+    } else if (tab === 'communities') {
       setElementMode('communities', name, mode)
     }
   }
@@ -493,14 +621,24 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
     { narrative_structures: [], chapters: [], scenes: [] },
   )
 
-  const getElementModeForList = (name: string): 'full' | 'excerpt' | null => {
-    if (activeTab === 'characters') return getElementMode('characters', name)
-    if (activeTab === 'locations') return getElementMode('locations', name)
-    if (activeTab === 'items') return getElementMode('items', name)
-    if (activeTab === 'species') return getElementMode('species', name)
-    if (activeTab === 'communities') return getElementMode('communities', name)
+  const getElementModeForList = (name: string, entityTab?: ContextEntityTab): 'full' | 'excerpt' | null => {
+    const tab = (entityTab ?? activeTab) as TabType
+    if (tab === 'characters') return getElementMode('characters', name)
+    if (tab === 'locations') return getElementMode('locations', name)
+    if (tab === 'items') return getElementMode('items', name)
+    if (tab === 'species') return getElementMode('species', name)
+    if (tab === 'communities') return getElementMode('communities', name)
     return null
   }
+
+  const resolveIsItemSelected = useCallback(
+    (name: string, entityTab?: ContextEntityTab): boolean => {
+      const tab = (entityTab ?? activeTab) as TabType
+      const storeKey = STORE_TYPE_MAP[tab]
+      return storeKey ? isElementSelected(storeKey, name) : false
+    },
+    [activeTab, isElementSelected],
+  )
 
   return (
     <div
@@ -517,6 +655,14 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
         paddingBottom: 4,
       }}
     >
+      <ContextSearchControls
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
+        sortType={sortType}
+        onSortTypeChange={setSortType}
+        inputRef={searchInputRef}
+      />
+
       {/* Barre d'onglets compacte : 5 onglets + ⚙ sur une ligne (repli caption si débordement) */}
       <div
         ref={tabBarRef}
@@ -603,7 +749,7 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
 
       <div style={{ flex: '1 1 0', overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
         <ContextList
-          items={getCurrentItems()}
+          items={displayItems}
           selectedItems={getSelectedItems()}
           onItemClick={handleItemClick}
           onItemToggle={handleItemToggle}
@@ -612,11 +758,18 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
           isLoading={isLoading}
           getElementMode={getElementModeForList}
           onModeChange={handleModeChange}
-          tabId={activeTab}
+          isItemSelected={resolveIsItemSelected}
+          tabId={isSearching ? 'search-all' : activeTab}
           showCheckboxes
-          entityTypeLabel={ENTITY_TYPE_LABELS[activeTab]}
-          onScrollToBottom={loadMore}
+          priorityEntityTab={activeTab}
+          showSearchBar={false}
+          searchQuery={searchQuery}
+          onSearchQueryChange={setSearchQuery}
+          sortType={sortType}
+          onSortTypeChange={setSortType}
+          onScrollToBottom={isSearching ? loadMoreForSearch : loadMore}
           loadingMore={loadingMore}
+          hasMore={isSearching ? hasMoreAny : hasMoreForActiveTab}
         />
       </div>
 

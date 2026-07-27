@@ -1,0 +1,18 @@
+# Surcharge projet DialogueGenerator pour le skill bmad-testarch-automate.
+#
+# Le dépôt est en brownfield : la suite existe déjà (259 fichiers pytest,
+# 231 fichiers Vitest, 20 specs Playwright). Sans cette contrainte, le skill
+# regénère des tests déjà couverts.
+#
+# Remplace l'ancienne règle .claude/rules/tea_automate_brownfield.md, qui
+# pilotait un `brownfield: true` dans _bmad/tea/workflows/testarch/automate/
+# — chemin disparu lors du passage des workflows TEA aux skills.
+
+[workflow]
+
+persistent_facts = [
+  "Ce dépôt est en BROWNFIELD : une suite de tests substantielle existe déjà (~259 fichiers pytest sous tests/, ~231 fichiers Vitest sous frontend/src/, 20 specs Playwright sous e2e/). Ne jamais générer un test pour une cible déjà couverte.",
+  "Avant de proposer la moindre cible : inventorier les tests existants (tests/, frontend/src/**/*.test.ts*, e2e/*.spec.ts), inférer la couverture réelle (routes, modules, composants), et ne retenir que les ÉCARTS (cibles - déjà couvert). Présenter cet inventaire avant le plan.",
+  "Tout test généré qui est lent ou fait de l'intégration lourde doit porter les marqueurs pytest `slow` et/ou `integration`, et être classé dans la grille T0-T3 (voir .claude/commands/test-tiers.md). Un smoke Playwright porte le tag @smoke.",
+  "Conventions de test du dépôt : pytest uniquement (pas unittest), structure de tests/ en miroir du code, aucun test hardcodé sur une entité GDD nommée (personnage, lieu). Voir .claude/rules/tests.md et .claude/rules/tests_patterns.md.",
+]

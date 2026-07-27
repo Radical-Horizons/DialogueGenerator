@@ -112,6 +112,10 @@ describe('ContextSelector', () => {
       page_size: 50,
       total_pages: 1,
     })
+    vi.mocked(contextAPI.listNarrativeContexts).mockResolvedValue({
+      items: [],
+      total: 0,
+    })
   })
 
   // --- Tests d'intégration Story 3.3 : suggestions automatiques ---
@@ -229,6 +233,57 @@ describe('ContextSelector', () => {
 
     await waitFor(() => {
       expect(screen.getByPlaceholderText(/rechercher/i)).toBeInTheDocument()
+    })
+  })
+
+  it('place la recherche au-dessus des onglets et trouve un lieu depuis Personnages', async () => {
+    const user = userEvent.setup()
+    render(<ContextSelector />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Character')).toBeInTheDocument()
+    })
+
+    const search = screen.getByPlaceholderText(/rechercher dans tout le gdd/i)
+    const personnagesTab = screen.getByRole('button', { name: /^personnages$/i })
+    expect(search.compareDocumentPosition(personnagesTab) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+
+    await user.type(search, 'Test Location')
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Location')).toBeInTheDocument()
+      expect(screen.getByText('Lieu')).toBeInTheDocument()
+    })
+  })
+
+  it('priorise l’onglet actif dans les résultats inter-onglets', async () => {
+    const user = userEvent.setup()
+    vi.mocked(contextAPI.listCharacters).mockResolvedValue({
+      characters: [{ name: 'Alpha Place', data: {} }],
+      total: 1,
+      page: 1,
+      page_size: 50,
+      total_pages: 1,
+    })
+    vi.mocked(contextAPI.listLocations).mockResolvedValue({
+      locations: [{ name: 'Alpha Spot', data: {} }],
+      total: 1,
+      page: 1,
+      page_size: 50,
+      total_pages: 1,
+    })
+
+    render(<ContextSelector />)
+    await waitFor(() => expect(screen.getByText('Alpha Place')).toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: /^lieux$/i }))
+    await waitFor(() => expect(screen.getByText('Alpha Spot')).toBeInTheDocument())
+
+    await user.type(screen.getByPlaceholderText(/rechercher dans tout le gdd/i), 'Alpha')
+
+    await waitFor(() => {
+      const badges = screen.getAllByText(/^(Lieu|Personnage)$/)
+      expect(badges[0]).toHaveTextContent('Lieu')
     })
   })
 

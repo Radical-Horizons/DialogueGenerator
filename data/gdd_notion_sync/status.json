@@ -1,9 +1,9 @@
 {
-  "last_started_at": "2026-07-09T21:47:33.813425+00:00",
-  "last_finished_at": "2026-07-09T22:06:10.756957+00:00",
+  "last_started_at": "2026-07-26T14:00:47.016099+00:00",
+  "last_finished_at": "2026-07-26T14:27:00.575966+00:00",
   "last_success": true,
-  "message": "2932 entité(s) mise(s) à jour — 1 avertissement(s)",
-  "updated_entities": 2932,
+  "message": "2994 entité(s) mise(s) à jour — 1 avertissement(s)",
+  "updated_entities": 2994,
   "partial_errors": [
     "Valeurs_de_Flag.json: fetch — HTTP 404 — Notion API: object_not_found — Could not find database with ID: 09204171-5d4d-40e8-9237-d7bac6a5c1a0. Make sure the relevant pages and databases are shared with your integration \"Alteir\". — Client error '404 Not Found' for url 'https://api.notion.com/v1/databases/09204171-5d4d-40e8-9237-d7bac6a5c1a0/query'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
   ],

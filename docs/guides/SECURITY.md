@@ -37,7 +37,7 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 | `OPENAI_API_KEY` | Clé API OpenAI | ✅ Oui | - |
 | `ENVIRONMENT` | Environnement (development/production) | Non | `development` |
 | `AUTH_RATE_LIMIT_ENABLED` | Activer le rate limiting | Non | `true` |
-| `AUTH_RATE_LIMIT_REQUESTS` | Nombre de requêtes par fenêtre | Non | `5` |
+| `AUTH_RATE_LIMIT_REQUESTS` | Nombre de requêtes par fenêtre | Non | `20` |
 | `AUTH_RATE_LIMIT_WINDOW` | Fenêtre en secondes | Non | `60` |
 | `CORS_ORIGINS` | Origines CORS autorisées (CSV) | Oui (si prod) | `*` (dev) |
 | `DISABLE_AUTH` | Bypass JWT (mock admin) — **interdit** si `ENVIRONMENT=production` | Non | `false` |
@@ -57,7 +57,7 @@ Les endpoints d'authentification suivants sont protégés par rate limiting :
 
 Le rate limiting est configuré via les variables d'environnement :
 
-- **Par défaut** : 5 requêtes par minute (60 secondes) par adresse IP
+- **Par défaut** : 20 requêtes par minute (60 secondes) par adresse IP
 - **Désactivable** : `AUTH_RATE_LIMIT_ENABLED=false` (utile pour les tests)
 
 ### Réponse en cas de dépassement
@@ -77,7 +77,7 @@ Si la limite est dépassée, l'API retourne :
 {
   "error": {
     "code": "RATE_LIMIT_EXCEEDED",
-    "message": "Trop de requêtes. Limite: 5 requêtes par 60 secondes.",
+    "message": "Trop de requêtes. Limite: 20 requêtes par 60 secondes.",
     "details": {
       "limit": 5,
       "window_seconds": 60,

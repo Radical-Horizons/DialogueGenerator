@@ -397,16 +397,18 @@ def _bucket_index_for_stem(folded: str) -> int:
         "inspirations",
     }:
         return 0
-    # 1 personnages & cultures
+    # 1 personnages & cultures (taxonomie biologique = règnes / classes / espèces)
     if folded in {
         "personnages",
         "personnages_(stats)",
         "personas",
         "communautes",
         "especes",
+        "regnes_et_classes",
+        "regnes_et_especes",
         "memoires_des_personas",
         "evaluation_des_aspects_culturels___etudes",
-    }:
+    } or folded.startswith("regnes"):
         return 1
     # 2 monde & lieux
     if folded in {
@@ -475,7 +477,12 @@ class _Bucket:
 
 _BUCKETS: Tuple[_Bucket, ...] = (
     _Bucket(0, "01-univers-narratif", "Univers & narration", "Bible, chapitres, chronologie, structure…"),
-    _Bucket(1, "02-personnages-cultures", "Personnages & cultures", "PNJ, personas, espèces, communautés…"),
+    _Bucket(
+        1,
+        "02-personnages-cultures",
+        "Personnages & cultures",
+        "PNJ, personas, espèces, règnes / classes taxonomiques, communautés…",
+    ),
     _Bucket(2, "03-monde-lieux", "Monde, lieux & objets", "Lieux, cartes, langues, objets…"),
     _Bucket(3, "04-systemes-gameplay", "Systèmes & gameplay", "Règles, compétences, flags, fiches perso…"),
     _Bucket(4, "05-dialogues-scenes", "Dialogues & scènes", "Lignes de dialogue et scènes"),

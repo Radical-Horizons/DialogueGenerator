@@ -62,7 +62,7 @@ class SecurityConfig(BaseSettings):
     
     # Rate Limiting Configuration
     auth_rate_limit_enabled: bool = True
-    auth_rate_limit_requests: int = 5
+    auth_rate_limit_requests: int = 20
     auth_rate_limit_window: int = 60  # en secondes
     
     # Environment

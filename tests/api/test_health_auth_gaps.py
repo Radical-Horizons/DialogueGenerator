@@ -1,12 +1,62 @@
 """Tests API pour les routes non couvertes (gaps brownfield): healthcheck, health/detailed, auth/refresh, auth/logout."""
+from typing import Iterator
+
 import pytest
 from fastapi.testclient import TestClient
+
+from api.config.security_config import get_security_config
+from api.main import app
+from api.routers.auth import get_current_user_or_none
 
 
 @pytest.fixture
 def client() -> TestClient:
     from api.main import app
     return TestClient(app)
+
+
+def _admin_user() -> dict[str, object]:
+    """Utilisateur admin pour overrides de dépendance."""
+    return {
+        "id": "admin-id",
+        "username": "admin",
+        "role": "admin",
+        "is_active": True,
+    }
+
+
+def _writer_user() -> dict[str, object]:
+    """Utilisateur writer pour overrides de dépendance."""
+    return {
+        "id": "writer-id",
+        "username": "writer",
+        "role": "writer",
+        "is_active": True,
+    }
+
+
+@pytest.fixture
+def admin_client(client: TestClient) -> Iterator[TestClient]:
+    """Client authentifié admin (sans s'appuyer sur DISABLE_AUTH)."""
+    app.dependency_overrides[get_current_user_or_none] = _admin_user
+    yield client
+    app.dependency_overrides.pop(get_current_user_or_none, None)
+
+
+@pytest.fixture
+def writer_client(client: TestClient) -> Iterator[TestClient]:
+    """Client authentifié writer."""
+    app.dependency_overrides[get_current_user_or_none] = _writer_user
+    yield client
+    app.dependency_overrides.pop(get_current_user_or_none, None)
+
+
+@pytest.fixture
+def unauthenticated_client(client: TestClient) -> Iterator[TestClient]:
+    """Client sans utilisateur authentifié."""
+    app.dependency_overrides[get_current_user_or_none] = lambda: None
+    yield client
+    app.dependency_overrides.pop(get_current_user_or_none, None)
 
 
 class TestHealthGaps:
@@ -19,15 +69,47 @@ class TestHealthGaps:
         data = response.json()
         assert data.get("status") == "healthy"
         assert "service" in data
+        assert "app_version" in data
 
     def test_get_health_detailed_returns_200(self, client: TestClient) -> None:
-        """GET /health/detailed retourne 200 avec détails des dépendances."""
+        """GET /health/detailed retourne 200 avec détails (bypass DISABLE_AUTH en pytest)."""
         response = client.get("/health/detailed")
         assert response.status_code == 200
         data = response.json()
         assert "status" in data
         assert "timestamp" in data
         assert "app_version" in data
+
+    def test_get_health_detailed_as_admin_returns_200(
+        self,
+        admin_client: TestClient,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """GET /health/detailed avec JWT admin retourne 200 même si DISABLE_AUTH est off."""
+        monkeypatch.setattr(get_security_config(), "disable_auth", False)
+        response = admin_client.get("/health/detailed")
+        assert response.status_code == 200
+        assert "app_version" in response.json()
+
+    def test_get_health_detailed_as_writer_returns_403(
+        self,
+        writer_client: TestClient,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """GET /health/detailed refuse les writers."""
+        monkeypatch.setattr(get_security_config(), "disable_auth", False)
+        response = writer_client.get("/health/detailed")
+        assert response.status_code == 403
+
+    def test_get_health_detailed_unauthenticated_returns_403(
+        self,
+        unauthenticated_client: TestClient,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """GET /health/detailed refuse les requêtes anonymes hors bypass DISABLE_AUTH."""
+        monkeypatch.setattr(get_security_config(), "disable_auth", False)
+        response = unauthenticated_client.get("/health/detailed")
+        assert response.status_code == 403
 
 
 class TestAuthGaps:

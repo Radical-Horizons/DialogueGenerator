@@ -12,6 +12,7 @@ if str(_root_dir) not in sys.path:
 from constants import Defaults, ModelNames
 from api.schemas.dialogue_access import DialogueCapabilitiesResponse
 from services.token_estimation_service import DEFAULT_COMPLETION_TOKENS_PER_NODE
+from core.llm.unity_allowed_models import get_unity_structured_output_allowed_models
 
 
 class ContextSelection(BaseModel):
@@ -472,11 +473,7 @@ class GenerateUnityDialogueRequest(BasePromptRequest):
         modèles validés en prod. D'autres modèles peuvent être proposés ailleurs dans
         l'app (tests/coûts), mais cette route doit rester robuste.
         """
-        allowed = {
-            ModelNames.GPT_5_6_SOL,
-            ModelNames.GPT_5_6_TERRA,
-            ModelNames.GPT_5_6_LUNA,
-        }
+        allowed = get_unity_structured_output_allowed_models()
         normalized = ModelNames.normalize_model_id(v)
         if normalized not in allowed:
             raise ValueError(

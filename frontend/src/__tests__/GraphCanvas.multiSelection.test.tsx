@@ -190,6 +190,52 @@ describe('GraphCanvas multi-selection (Story 2.10)', () => {
     expect(state.nodes.find((n) => n.id === 'c')?.position).toEqual({ x: 100, y: 0 })
   })
 
+  it('dragging a TestNode (4 handles) moves only that node, not its result children', async () => {
+    const testNodeId = 'test-node-START-choice-0'
+    useGraphStore.setState({
+      nodes: [
+        {
+          id: testNodeId,
+          type: 'testNode',
+          position: { x: 0, y: 0 },
+          data: { id: testNodeId, test: 'Raison+Diplomatie:8' },
+        },
+        { id: 'node-cf', type: 'dialogueNode', position: { x: -150, y: 120 }, data: { id: 'node-cf' } },
+        { id: 'node-f', type: 'dialogueNode', position: { x: -50, y: 120 }, data: { id: 'node-f' } },
+        { id: 'node-s', type: 'dialogueNode', position: { x: 50, y: 120 }, data: { id: 'node-s' } },
+        { id: 'node-cs', type: 'dialogueNode', position: { x: 150, y: 120 }, data: { id: 'node-cs' } },
+      ],
+      edges: [
+        { id: 'e-cf', source: testNodeId, target: 'node-cf', sourceHandle: 'critical-failure', type: 'smoothstep' },
+        { id: 'e-f', source: testNodeId, target: 'node-f', sourceHandle: 'failure', type: 'smoothstep' },
+        { id: 'e-s', source: testNodeId, target: 'node-s', sourceHandle: 'success', type: 'smoothstep' },
+        { id: 'e-cs', source: testNodeId, target: 'node-cs', sourceHandle: 'critical-success', type: 'smoothstep' },
+      ],
+      selectedNodeIds: [testNodeId],
+      selectedNodeId: testNodeId,
+    })
+
+    render(React.createElement(GraphCanvas))
+
+    await act(async () => {
+      const onNodeDragStart = capturedReactFlowProps?.onNodeDragStart as
+        | ((event: { ctrlKey?: boolean }, node: { id: string; type?: string }) => void)
+        | undefined
+      const onNodeDragStop = capturedReactFlowProps?.onNodeDragStop as
+        | ((event: unknown, node: { id: string; position: { x: number; y: number } }) => void)
+        | undefined
+      onNodeDragStart?.({}, { id: testNodeId, type: 'testNode' })
+      onNodeDragStop?.({}, { id: testNodeId, position: { x: 80, y: 60 } })
+    })
+
+    const state = useGraphStore.getState()
+    expect(state.nodes.find((n) => n.id === testNodeId)?.position).toEqual({ x: 80, y: 60 })
+    expect(state.nodes.find((n) => n.id === 'node-cf')?.position).toEqual({ x: -150, y: 120 })
+    expect(state.nodes.find((n) => n.id === 'node-f')?.position).toEqual({ x: -50, y: 120 })
+    expect(state.nodes.find((n) => n.id === 'node-s')?.position).toEqual({ x: 50, y: 120 })
+    expect(state.nodes.find((n) => n.id === 'node-cs')?.position).toEqual({ x: 150, y: 120 })
+  })
+
   it('normalise en mémoire la couleur des edges legacy selon le handle source parent', async () => {
     useGraphStore.setState({
       nodes: [

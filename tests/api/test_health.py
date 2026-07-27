@@ -1,6 +1,7 @@
 """Tests pour le health check."""
 import pytest
 from fastapi.testclient import TestClient
+from api.app_version import APP_VERSION
 from api.main import app
 
 
@@ -18,4 +19,5 @@ def test_health_check(client: TestClient):
     assert data["status"] == "healthy"
     assert "timestamp" in data
     assert "service" in data
+    assert data["app_version"] == APP_VERSION
 

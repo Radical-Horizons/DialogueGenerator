@@ -7,8 +7,7 @@ import { Dashboard } from './components/layout/Dashboard'
 import { UnityDialoguesPage } from './components/unityDialogues/UnityDialoguesPage'
 import { UsageDashboard } from './components/usage/UsageDashboard'
 import { GraphEditorPage } from './pages/GraphEditorPage'
-import { UserManagementPanel } from './components/admin/UserManagementPanel'
-import { AuditLogsPanel } from './components/admin/AuditLogsPanel'
+import { AdminPanel } from './components/admin/AdminPanel'
 import { useAuthStore } from './store/authStore'
 import { ToastContainer } from './components/shared'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
@@ -184,25 +183,18 @@ function AppRoutes() {
           }
         />
         <Route
-          path="/admin/users"
+          path="/admin"
           element={
             <AdminRoute>
               <MainLayout>
-                <UserManagementPanel />
+                <AdminPanel />
               </MainLayout>
             </AdminRoute>
           }
         />
-        <Route
-          path="/admin/audit-logs"
-          element={
-            <AdminRoute>
-              <MainLayout>
-                <AuditLogsPanel />
-              </MainLayout>
-            </AdminRoute>
-          }
-        />
+        <Route path="/admin/users" element={<Navigate to="/admin?tab=users" replace />} />
+        <Route path="/admin/llm-models" element={<Navigate to="/admin?tab=llm-models" replace />} />
+        <Route path="/admin/audit-logs" element={<Navigate to="/admin?tab=audit-logs" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
@@ -213,7 +205,10 @@ const queryClient = new QueryClient()
 
 function App() {
   useEffect(() => {
-    // Initialiser le système de logging au démarrage
+    // Boot auth même sur /login (hors ProtectedRoute) — sinon isLoading reste true.
+    void useAuthStore.getState().initialize().catch((error) => {
+      console.error('[App] Erreur lors de l\'initialisation auth:', error)
+    })
     initLogging()
   }, [])
 

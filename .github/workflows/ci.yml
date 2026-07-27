@@ -6,13 +6,66 @@ name: CI
 on:
   pull_request:
     branches: [main, dev]
+    # Une PR qui ne touche QUE de la doc ou des données GDD synchronisées depuis
+    # Notion n'a rien à faire tourner. `paths-ignore` déclenche dès qu'un seul
+    # fichier sort de cette liste : une PR mixte code+GDD lance bien la CI.
+    #
+    # `*.md` et NON `**/*.md` : dans les filtres GitHub, `**` traverse les `/`,
+    # donc `**/*.md` matcherait tout le harnais `.claude/` (agents, commandes,
+    # règles), qui est intégralement en markdown. Une PR ne touchant que des
+    # prompts d'agents ne déclencherait alors aucun run.
+    paths-ignore:
+      - "data/GDD_categories/**"
+      - "data/Vision.json"
+      - "docs/**"
+      - "*.md"
   push:
     branches: [main]
+  # Rattrape le trou laissé par pr-merge-main-prefer-head-data.yml et les
+  # workflows Claude : un push fait avec GITHUB_TOKEN ne crée pas de nouveau
+  # run, donc le commit poussé ne serait jamais testé. Ils relancent la CI
+  # explicitement via ce déclencheur (tier T2).
+  workflow_dispatch:
+
+concurrency:
+  # Sur PR, seul le dernier push compte. Sur main, on ne coupe rien : la suite T3
+  # est la porte de release (`.claude/rules/ci_before_push.md`).
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  lint:
+    name: Frontend lint (ESLint)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend
+
+      # Baseline documentée : zéro erreur (CLAUDE.md, `.claude/rules/frontend.md`).
+      # Jusqu'ici la règle n'existait que dans les prompts d'agents, sans
+      # vérification en CI — toute régression passait donc inaperçue.
+      - name: ESLint
+        run: npm run lint
+        working-directory: frontend
+
   backend:
     name: Backend (pytest)
     runs-on: ubuntu-latest
+    # Durées observées sur PR : 34 et 36 min. 90 min laisse une marge large
+    # si la suite s'alourdit, tout en évitant qu'un job bloqué occupe un
+    # runner jusqu'à la limite par défaut de 6 h.
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v6
 
@@ -28,8 +81,8 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Run tests (PR — hors slow, tier T2)
-        if: github.event_name == 'pull_request'
+      - name: Run tests (PR / dispatch — hors slow, tier T2)
+        if: github.event_name != 'push'
         env:
           ENVIRONMENT: development
           JWT_SECRET_KEY: ci-dummy-secret
@@ -64,8 +117,8 @@ jobs:
         run: npm ci
         working-directory: frontend
 
-      - name: Run Vitest (PR — suite rapide, tier T2)
-        if: github.event_name == 'pull_request'
+      - name: Run Vitest (PR / dispatch — suite rapide, tier T2)
+        if: github.event_name != 'push'
         run: npx vitest run --max-workers=2
         working-directory: frontend
 
@@ -135,3 +188,61 @@ jobs:
           JWT_SECRET_KEY: ci-dummy-secret
           OPENAI_API_KEY: sk-dummy
         run: npm run test:e2e:pwa
+
+  e2e-auth:
+    name: Auth E2E (guest-first /login)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('package-lock.json', 'frontend/package-lock.json') }}
+          restore-keys: |
+            playwright-chromium-${{ runner.os }}-
+
+      - name: Install Playwright browser
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 25
+        run: npx playwright install --with-deps chromium
+
+      - name: Run auth Playwright smoke
+        env:
+          ENVIRONMENT: development
+          JWT_SECRET_KEY: ci-dummy-secret
+          ADMIN_PASSWORD: admin123
+          OPENAI_API_KEY: sk-dummy
+          CI: "true"
+        run: npm run test:e2e:auth

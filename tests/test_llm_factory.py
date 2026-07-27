@@ -337,26 +337,69 @@ class TestLLMClientFactory:
     def test_create_mistral_client_exception_falls_back_to_dummy(self, mock_mistral_client_class):
         """Test qu'une exception lors de la création de MistralClient retourne DummyLLMClient."""
         mock_mistral_client_class.side_effect = ValueError("Test error")
-        
+
         config = {"mistral_api_key_env_var": "MISTRAL_API_KEY"}
         available_models = [
             {
                 "api_identifier": "labs-mistral-small-creative",
                 "display_name": "Mistral Small Creative",
-                "client_type": "mistral"
+                "client_type": "mistral",
             }
         ]
-        
+
         with patch.dict(os.environ, {"MISTRAL_API_KEY": "test-key"}):
             client = LLMClientFactory.create_client(
                 model_id="labs-mistral-small-creative",
                 config=config,
-                available_models=available_models
+                available_models=available_models,
             )
-        
+
         assert isinstance(client, DummyLLMClient)
 
+    @patch('factories.llm_factory.OpenRouterClient')
+    def test_create_openrouter_client_success(self, mock_or_class):
+        """Test la création réussie d'un OpenRouterClient."""
+        mock_or_class.return_value = MagicMock()
+        config = {
+            "openrouter_api_key_env_var": "OPENROUTER_API_KEY",
+            "temperature": 0.7,
+        }
+        available_models = [
+            {
+                "api_identifier": "aion-labs/aion-2.0",
+                "display_name": "Aion 2.0 (OpenRouter)",
+                "client_type": "openrouter",
+                "parameters": {"default_temperature": 0.8, "max_tokens": 16000},
+            }
+        ]
+        with patch.dict(os.environ, {"OPENROUTER_API_KEY": "or-test-key"}):
+            LLMClientFactory.create_client(
+                model_id="aion-labs/aion-2.0",
+                config=config,
+                available_models=available_models,
+            )
+        mock_or_class.assert_called_once()
+        call_kwargs = mock_or_class.call_args[1]
+        assert call_kwargs["api_key"] == "or-test-key"
+        assert call_kwargs["config"]["default_model"] == "aion-labs/aion-2.0"
+        assert call_kwargs["config"]["temperature"] == 0.8
+        assert call_kwargs["config"]["max_tokens"] == 16000
 
-
-
+    def test_create_openrouter_client_missing_key_raises(self):
+        """Test qu'une clé OpenRouter absente lève ValueError (pas Dummy)."""
+        config = {"openrouter_api_key_env_var": "OPENROUTER_API_KEY"}
+        available_models = [
+            {
+                "api_identifier": "aion-labs/aion-2.0",
+                "display_name": "Aion 2.0 (OpenRouter)",
+                "client_type": "openrouter",
+            }
+        ]
+        with patch.dict(os.environ, {}, clear=True):
+            with pytest.raises(ValueError, match="OPENROUTER_API_KEY"):
+                LLMClientFactory.create_client(
+                    model_id="aion-labs/aion-2.0",
+                    config=config,
+                    available_models=available_models,
+                )
 

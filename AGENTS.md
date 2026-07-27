@@ -1,131 +1,16 @@
 # AGENTS.md
 
-## Cursor Cloud specific instructions
+**Les instructions de ce dépôt vivent dans [`CLAUDE.md`](CLAUDE.md).** Lis-le en premier — il est canonique.
 
-### Overview
+Ce fichier n'est qu'un pointeur, conservé pour les outils qui cherchent `AGENTS.md` par convention (agents cloud, Codex, etc.).
 
-DialogueGenerator is a React + FastAPI app for generating RPG dialogues via LLMs. No database or Docker required — all data is file-based (JSON in `data/`).
+Ce que tu y trouveras :
 
-### Services
-
-| Service | Port | Start command |
-|---------|------|---------------|
-| FastAPI backend | 4243 | `.venv/bin/python -m api.main` (with `API_PORT=4243 RELOAD=true`) |
-| Vite frontend | 3000 | `cd frontend && npx vite --host 0.0.0.0 --port 3000` |
-
-Both can be started together with `npm run dev` (uses `node scripts/dev.js`).
-
-### Calling the API (agents)
-
-For **sync GDD**, **context**, **documents**, **graph**, or any backend action: **call the REST API**, do not reimplement logic in one-off scripts.
-
-1. **Cookbook first** : `.cursor/skills/api-runbook/references/cookbook.md` — if the task matches, **run the command immediately** (no code search, no curl, no reading `Invoke-DialogueApi.ps1`).
-2. Invoke : `npm run api:invoke -- -Method … -Path …` (single invocation path).
-3. Sync personnages (Uresaïr, Valkazer, etc.) : health → `POST /api/v1/gdd-notion-sync/sync?category_file=Personnages.json` → `GET …/status` — **3 commands max**.
-4. Rule / skill / command : `api_usage.mdc` · `api-runbook/SKILL.md` · `api-runbook.md` · subagent **`api-operator`**.
-5. Long contracts : `docs/api/api-contracts-api.md` · live schema : `/api/openapi.json` (only when **not** in cookbook).
-
-### Mandat d'agentivité
-
-- **Priorité** : meilleur résultat produit et respect des processus du repo — pas l'auto-limitation sur tokens, nombre de subagents ou « scope minimal » au détriment d'une revue ou d'un diagnostic complets.
-- **Budget** : l'utilisateur arbitre coût et durée ; l'agent ne raccourcit pas un flux documenté (ex. revue holistique) pour « économiser » sans instruction explicite.
-- **Règle Cursor** : `.cursor/rules/agentivity.mdc` (`alwaysApply`) — à lire en cas de tension entre consignes.
-- **Revues globales** : synonymes (*full review*, *entire codebase*, *holistic*) → **7 reviewers** en parallèle + synthèse ; voir section Subagents et la commande `.cursor/commands/full-review.md`.
-
-### Meta-Agent Protocol (Inspiration: Meta-Harness)
-
-- **Diagnostic over Speculation**: Always run `.\scripts\meta-diagnostic.ps1` or read raw logs in `data/logs/*.json` before proposing a fix.
-- **Rules Evolution**: If a task fails or a pattern is discovered, update or create a `.cursor/rules/*.mdc` file immediately.
-- **Transcript Mining**: Use `python scripts/peek_cursor_transcript.py search "pattern"` to retrieve solutions from past sessions (10M+ tokens of diagnostic history).
-
-### Scaffolding (default behavior)
-
-- Prefer **tools over guessing**: search the repo, read callers, open MCP tool descriptors before calling, run commands that **prove** the change (pytest/Vitest ciblé, lint). « Plus petit test utile » = preuve, pas excuse pour éviter une étape de processus requise.
-- **UI / flux utilisateur** : une preuve complète exige aussi **`npm run dev` + vérification dans le navigateur** (pas seulement les tests). Voir `.cursor/rules/workflow.mdc` (section **Preuve UI**).
-- **Run tests, do not only suggest them**: in Agent mode, **execute** the relevant pytest/Vitest/lint commands and report outcomes; do not claim “done” or “green” without command output. When the user asks to **fix a test** (including a CI failure), **re-run that test after the fix** and show pass/fail proof before concluding. Full policy: `.cursor/rules/workflow.mdc` (obligation agents — exécution réelle des tests, section « Correction de tests »). **Which command (T0–T3)** : `.cursor/commands/test-tiers.md` and `.cursor/skills/test-runbook.md`.
-- **Real environment**: you can execute shell commands and network fetches; use them instead of dumping long “you should run…” lists when the task is to verify or fix.
-
-### Non-obvious caveats
-
-- **`python` symlink required on Linux**: The dev scripts (`scripts/dev.js`) check for `python` in PATH. On Linux, create a symlink: `sudo ln -sf /usr/bin/python3 /usr/local/bin/python`.
-- **`python3-venv` system package required**: On Ubuntu/Debian, install `python3.12-venv` before creating the venv.
-- **`.env` file**: Copy from `.env.example`. Required for JWT auth and config. Default dev credentials: `admin` / `admin123`.
-- **Local auth (guest-first)** : l’UI démarre en session **guest** (`POST /api/v1/auth/guest`) s’il n’y a pas de JWT valide ; bouton **Connexion** (Header → `/login`) pour writer/admin. **Pas** de bypass Vite (`ProtectedRoute` / mock admin). Défaut applicatif : `DISABLE_AUTH=false` (`SecurityConfig`, `.env.example`). Mettre `DISABLE_AUTH=false` dans ton `.env` local. Pytest garde `DISABLE_AUTH=true` via `tests/conftest.py` ; Playwright peut encore forcer `true` pour les seeds request. Production : `ENVIRONMENT=production` + `SecurityConfig.validate_config()` refuse `disable_auth`. Credentials seed : `admin` / `admin123` (ou `ADMIN_PASSWORD`).
-- **No real LLM key needed for basic dev**: Without `OPENAI_API_KEY`, the backend uses `DummyLLMClient` (mock responses). Set a real key for actual dialogue generation.
-- **Frontend ESLint**: `npm --prefix frontend run lint` is green. Treat any new lint error as a regression to fix, not as accepted baseline debt.
-- **Frontend Vitest (agents)** : protocole détaillé, PowerShell et sortie fichier → **`.cursor/rules/workflow.mdc`** (section Vitest + Frontend tests Windows). Si un test échoue, vérifier qu'une feature n'a pas été silencieusement retirée avant de le considérer obsolète.
-- **Windows-first codebase**: Many npm scripts use PowerShell (`scripts/*.ps1`). On Linux, use the Node.js equivalents directly (e.g., `node scripts/dev.js`, `node scripts/getPythonPath.js -m pytest tests/`).
-- **mistralai SDK version**: The codebase uses `from mistralai import Mistral` which requires mistralai v1.x (tested with 1.12.4). The v2.x SDK reorganizes exports and breaks this import. Pin to `mistralai>=1.10.0,<2.0.0` until the codebase is updated.
-- **Vitest full suite is slow**: Running the entire Vitest suite can take 10+ minutes on constrained VMs. Prefer targeted runs (`npx vitest run src/__tests__/specific.test.ts`) or `npm run test:frontend:quick` for changed files only.
-- **Git — commit** : sauf périmètre explicite (« uniquement ces fichiers », liste de chemins), **`git add .`** puis commit (push si demandé). Ne pas déduire un staging partiel depuis l’UI Cursor. Détail : `.cursor/rules/git_commit.mdc`.
-- **Git — push `main`** : suite CI T3 **obligatoire** avant push (backend full + Vitest `VITEST_FULL=1` + PWA). Ne jamais pousser sur `main` avec CI locale rouge ou non exécutée. Détail : `.cursor/rules/ci_before_push.mdc` · commande `/commit`.
-- **Notion — corps de page complet** : toute lecture du texte d’une page pour sync GDD ou import doit passer par `NotionAPIClient.get_page_content` (markdown API prioritaire, repli blocs). Ne pas dupliquer un export « full body » basé uniquement sur `blocks/.../children`. Propriétés + corps : `notion_page_to_gdd_record_merge_body_and_properties`. Détail : `.cursor/rules/notion_gdd_content_fetch.mdc`, `docs/notion_public_api_block_gap.md`.
-
-### Subagents (`.cursor/agents/`)
-
-Specialized reviewers — invoke with `/name` or naturally. See `.cursor/rules/subagents.mdc` for the full reference.
-
-| Subagent | Model | Purpose |
-|----------|-------|---------|
-| `api-operator` | fast | Execute REST API calls (sync, context, health) — see api-runbook skill |
-| `api-contracts-reviewer` | fast | Schema/router/client drift |
-| `graph-editor-reviewer` | inherit | Zustand slices, React Flow, stale closures |
-| `llm-pipeline-reviewer` | fast | Streaming SSE, cost governance, LLM clients |
-| `context-gdd-reviewer` | fast | GDD cache, context pipeline, token budget |
-| `security-reviewer` | fast | Auth, JWT, secrets, CORS |
-| `backend-services-reviewer` | fast | services/ layer, Notion sync, Unity export |
-| `test-coverage-reviewer` | fast | pytest + Vitest coverage gaps |
-| `transcript-history-researcher` | fast | Optional helper to grep/mining past Cursor session JSONL on disk (e.g. rules/process retros) |
-| `playwright-e2e-specialist` | fast | Run/fix Playwright `e2e/` — voir `.cursor/agents/playwright-e2e-specialist.md` |
-
-**Playwright + `Task` (important)** : l’enum **`subagent_type`** **ne liste pas** `playwright-e2e-specialist`. Pour paralléliser : **plusieurs `Task`** en `generalPurpose`, prompt avec **commande Playwright incluant des chemins explicites** (`npx playwright test e2e/foo.spec.ts …`). **Ne pas** donner à chaque enfant la suite entière sans arguments — chaque enfant = 1 spec ou un petit lot ; la **full liste** reste une passe **unique** du parent ou de la CI après les lots. Voir `.cursor/commands/playwright-e2e-parallel.md`.
-
-**Preuve suite E2E complète (agents / CI locale)** : `npm run test:e2e:verify` (`CI=true` + `reuseExistingServer: false`) évite les `ERR_CONNECTION_REFUSED` si un Vite externe sur `:3000` a été réutilisé puis s’est arrêté pendant la suite. **PWA (Story 17.5)** : le smoke manifest + SW utilise `vite build` + `preview` — commande dédiée **`npm run test:e2e:pwa`** (non incluse dans `test:e2e:verify`).
-
-**Full-repo review (no separate orchestrator agent)** : run **Composer** with seven specialist reviewers in parallel, or the parent sends **seven `Task` calls in one turn** (`api-contracts-reviewer`, `graph-editor-reviewer`, `llm-pipeline-reviewer`, `context-gdd-reviewer`, `security-reviewer`, `backend-services-reviewer`, `test-coverage-reviewer`). Then synthesize. A single `Task` that “does all seven” in one child run is **not** equivalent to seven isolates.
-
-**Cursor session files on disk** : only relevant when you are explicitly mining *past chats* for patterns. Use whatever works (`Task` + subagent, `scripts/peek_cursor_transcript.py`, or targeted grep). Goal is to improve **this agent’s behavior in the repo**, not to maintain a history *of* subagents.
-
-### Commands reference
-
-**Niveaux T0–T3** (pytest, Vitest, Playwright, scripts npm) : **`.cursor/commands/test-tiers.md`**. Obligations agents et protocole Vitest : **`.cursor/rules/workflow.mdc`**.
-
-- **Backend T0 / T2 / T3** : `npm run test:backend:smoke` · `npm run test:backend:fast` · `npm run test:backend:full` (ou `npm test`)
-- **Agrégat T0** : `npm run test:smoke` (pytest smoke + Vitest `--bail=1`)
-- **Pré-merge T2** : `npm run test:premerge`
-- **E2E fumée** : `npm run test:e2e:smoke` ; **E2E complet** : `npm run test:e2e:verify` ou suite entière
-- **Frontend lint** : `npm --prefix frontend run lint`
-- **Frontend tests (T1)** : `cd frontend && npx vitest run src/chemin/Fichier.test.ts --reporter=dot` ou `npm run test:quick` ; **T3** : `VITEST_FULL=1` + `npm run test:full` / `test:ci` selon `workflow.mdc`
-- **Start dev**: `npm run dev` or start backend/frontend separately as shown above
-- **Call API (agents)**: `.cursor/commands/api-runbook.md` · `npm run api:invoke -- -Method GET -Path /health`
-- **Passe en prod (semver + canvas versions)**: `.cursor/commands/prod-release.md` · `.cursor/rules/app_versioning.mdc` · `docs/releases/semver-and-tags.md` · tags git `vX.Y.Z` · rétro epic = section **Version livrée** · `npm run release:commits-since-prod`
-
-## Learned User Preferences
-
-- Never delegate deterministic frontend behavior to the API or LLM; if the user has selected a choice and triggers AI generation, the parent→node connection is the front-end's responsibility, not an API suggestion.
-- Require runtime log evidence before proposing bug fixes; never speculate from code alone.
-- Prefer small, targeted SOLID/KISS fixes over accumulating defensive guards from multiple hypotheses; revert rejected-hypothesis code before pursuing new ones.
-- Create regression unit tests for any non-trivial bug fix, especially in state management code.
-- Do not add comments that narrate what code does; comments must explain non-obvious intent or constraints only.
-- When a pre-existing test fails, verify whether the tested feature was silently removed before dismissing the test as obsolete; restore the feature if it still belongs in the UI.
-- Large component refactors need two passes: first extract logic into hooks, then extract JSX blocks into dedicated child components.
-- Do not require manual UI validation after every user story; lot / end-of-epic validation is enough unless the user asks otherwise.
-- Final E2E proof is UI journeys (screens, clicks, labels); API tests are a safety net, not product “done”.
-- Pre-implementation Ask First questions: plain French, concrete options; keep technical jargon in a short appendix if needed.
-- After Epic 7: prioritize graph-editor stability bugs from user testing over feature epics (e.g. Epic 8) until stability recovers.
-
-## Learned Workspace Facts
-
-- Graph invariants (flush, `graphViewStore`, API) → **`.cursor/rules/graph_editor.mdc`**. `mergeNodeFormIntoStoreData()` / `mergeDialogueNodeFormIntoStoreData()` / `targetNode` below stay the short reminder.
-- Use `mergeNodeFormIntoStoreData()` (dialogue: `mergeDialogueNodeFormIntoStoreData()`) instead of spread (`{ ...nodeData, ...formValues }`) when flushing `NodeEditorPanel` form state on selection change; the spread overwrites `choices[N].targetNode` written by `connectNodes`, breaking the edge connection.
-- Node generation connection flow: API response → `connectNodes(parentId, newId, targetChoiceIndex, 'choice')` in `generationSlice` → `choices[N].targetNode` set in `edgeSlice` → `NodeEditorPanel` selection-change flush must preserve this field via `mergeDialogueNodeFormIntoStoreData` / `mergeNodeFormIntoStoreData`.
-- Frontend lint baseline is zero error: `npm --prefix frontend run lint` must stay green, and stale `eslint-disable` directives should be removed instead of normalized.
-- GraphEditor JSX is split into dedicated components in `frontend/src/components/graph/`: `GraphEditorHeader` (toolbar), `GraphValidationPanel` (overlay), `DialogueCostModal`, `GraphExportFormatDialog`. `GraphEditorHeader` calls `useGraphStore()` internally to avoid prop drilling.
-- The `exportToUnity` store action (in `persistenceSlice`) serializes graph nodes to Unity JSON format; its trigger button lives in `GraphEditorHeader` and downloads a `.json` file named after `dialogueMetadata.filename`.
-- The `continual-learning` skill uses **in-context conversation history only** — it never reads from `agent-transcripts/` files on disk (that folder does not exist on this system).
-- **Stale closure React** : dans un `useCallback`, ne jamais capturer des valeurs de store qui changent entre renders. Utiliser `useRef(value)` (mis à jour à chaque render via `ref.current = value`) pour lire la valeur COURANTE au moment de l'appel, sans re-créer le callback. Exemple : `selectionsRef.current` dans `fetchAndSetSuggestions` de `ContextSelector`.
-- Inter-component communication in the graph editor uses `useGraphViewStore` (typed Zustand store), NOT global `window` events. All `CustomEvent` dispatches/listeners have been migrated. See `.cursor/rules/graph_editor.mdc` for the full protocol.
-- Graph mutations in `nodeSlice` and `edgeSlice` use `runGraphTransaction()` helper for consistent undo/sync/dirty handling. `layoutSlice` keeps its own custom sync logic.
-- **GPT-5.6 sampling** : never send `temperature` / `top_p` for Sol/Terra/Luna (API 400). Gate in `OpenAIParameterBuilder` + `ModelNames.MODELS_WITHOUT_CUSTOM_TEMPERATURE`. Omitting `reasoning.effort` defaults to `medium`. See `.cursor/rules/llm.mdc`.
-- **UI responsive (frontend)** : skill `.cursor/skills/dialogue-frontend/SKILL.md` (workflow complet) + règle `.cursor/rules/responsive_frontend.mdc` — tokens `responsiveChrome.ts`, tests + preuve narrow (`npm run dev`). Détail Epic 17 : `references/responsive-epic17.md` dans le skill.
-- **Game systems FR94** : logique déterministe dans `services/game_systems_{integration,skill_checks,effort,reputation,social_diagnostics}.py` + miroirs `frontend/src/utils/{skillChecks,effortPreview,reputationFr94,socialDiagnostics,previewSimulationLimits}.ts` ; UI `GameSystemsIntegrationPanel`, preview via `graphViewStore.previewGameSystemsState` et `POST /documents/{id}/preview`. Règle `.cursor/rules/game_systems_integration.mdc`. Tests : `pytest tests/api/test_mechanics_systems_integration.py tests/api/test_documents_preview_game_systems.py tests/services/test_game_systems_*.py` ; Vitest `GameSystemsIntegrationPanel.test.tsx` + utils FR94. Doc : `docs/guides/game-systems-integration.md`. **Reste à faire** : connexion runtime Unity live (`runtime_source.connected`).
+- Le rôle de l'application et les commandes de démarrage des services.
+- Les règles toujours actives (importées) et la **table de routage** des règles conditionnelles — à consulter avant de toucher à un fichier.
+- La grille de tests T0–T3 et l'obligation d'exécuter les tests plutôt que de les suggérer.
+- Le protocole d'appel de l'API REST (ne pas réimplémenter la logique backend dans des scripts).
+- Les subagents disponibles et le protocole de revue globale.
+- BMAD et la boucle `bmad-loop`.
+- Les caveats non évidents (`.env`, auth guest-first, Windows-first, SDK mistralai…).
+- Les préférences utilisateur et faits techniques appris sur le projet.

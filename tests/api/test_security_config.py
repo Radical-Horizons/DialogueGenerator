@@ -16,7 +16,7 @@ def test_security_config_default_values():
         
         assert config.jwt_secret_key == DEFAULT_JWT_SECRET_KEY
         assert config.auth_rate_limit_enabled is True
-        assert config.auth_rate_limit_requests == 5
+        assert config.auth_rate_limit_requests == 20
         assert config.auth_rate_limit_window == 60
         assert config.environment == "development"
         assert config.is_development is True

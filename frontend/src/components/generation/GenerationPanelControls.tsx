@@ -8,13 +8,15 @@ import { generationPanelChrome } from '../../theme/responsiveChrome'
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
 
 const TOKEN_SLIDER_INPUT_STYLE: CSSProperties = {
-  height: '6px',
+  height: '24px',
   borderRadius: '3px',
   outline: 'none',
   WebkitAppearance: 'none',
   appearance: 'none',
   padding: 0,
   margin: 0,
+  background: 'transparent',
+  cursor: 'pointer',
 }
 
 interface TokenSliderRowProps {
@@ -320,10 +322,11 @@ export function GenerationPanelControls({
             border: 2px solid ${theme.background.panel};
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
             margin-top: -6px;
+            /* Pas de transform: scale — déforme la piste sous Chromium/WebKit. */
           }
           .token-slider::-webkit-slider-thumb:hover {
             background: ${theme.button.primary.background};
-            transform: scale(1.1);
+            box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.35), 0 2px 4px rgba(0, 0, 0, 0.3);
           }
           .token-slider::-moz-range-track {
             height: 6px;
@@ -341,7 +344,7 @@ export function GenerationPanelControls({
           }
           .token-slider::-moz-range-thumb:hover {
             background: ${theme.button.primary.background};
-            transform: scale(1.1);
+            box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.35), 0 2px 4px rgba(0, 0, 0, 0.3);
           }
           .token-slider::-ms-track {
             height: 6px;
@@ -361,7 +364,7 @@ export function GenerationPanelControls({
           }
           .token-slider::-ms-thumb:hover {
             background: ${theme.button.primary.background};
-            transform: scale(1.1);
+            box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.35), 0 2px 4px rgba(0, 0, 0, 0.3);
           }
         `}</style>
       </div>

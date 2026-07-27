@@ -70,6 +70,9 @@ class ModelNames:
     # Modèle de test
     DUMMY = "dummy"
 
+    # OpenRouter — seed Aion 2.0
+    AION_2_0 = "aion-labs/aion-2.0"
+
     # Anciens slugs API → famille 5.6 (presets, localStorage, tests)
     LEGACY_MODEL_ID_MAP: dict[str, str] = {
         "gpt-5.4": GPT_5_6_SOL,

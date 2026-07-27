@@ -9,6 +9,7 @@ import {
   type UserSettingsMap,
   type UserSettingsNamespace,
 } from '../api/userSettings'
+import { normalizeModelId } from '../constants'
 
 export const USER_SETTING_STORAGE_KEYS = {
   context: 'context_config_store',
@@ -97,7 +98,7 @@ function readLocalSetting(
   return undefined
 }
 
-function cacheServerSettings(settings: AllUserSettings): void {
+function cacheServerSettings(settings: AllUserSettings): Record<string, unknown> | null {
   const contextConfig = settings.context?.config
   if (contextConfig !== undefined) {
     if (contextAdapter) {
@@ -111,8 +112,20 @@ function cacheServerSettings(settings: AllUserSettings): void {
     localStorage.setItem(USER_SETTING_STORAGE_KEYS.authorProfile, authorProfile)
   }
   const draft = settings.generation?.draft
+  let migratedDraft: Record<string, unknown> | null = null
   if (isPlainObject(draft)) {
-    localStorage.setItem(USER_SETTING_STORAGE_KEYS.draft, JSON.stringify(draft))
+    const rawModel = draft.llmModel
+    if (typeof rawModel === 'string' && rawModel !== 'unknown') {
+      const normalizedModel = normalizeModelId(rawModel)
+      if (normalizedModel !== rawModel) {
+        migratedDraft = { ...draft, llmModel: normalizedModel, timestamp: Date.now() }
+        localStorage.setItem(USER_SETTING_STORAGE_KEYS.draft, JSON.stringify(migratedDraft))
+      } else {
+        localStorage.setItem(USER_SETTING_STORAGE_KEYS.draft, JSON.stringify(draft))
+      }
+    } else {
+      localStorage.setItem(USER_SETTING_STORAGE_KEYS.draft, JSON.stringify(draft))
+    }
   }
   const slopDetection = settings.generation?.slop_detection
   if (isPlainObject(slopDetection)) {
@@ -121,6 +134,7 @@ function cacheServerSettings(settings: AllUserSettings): void {
       JSON.stringify(slopDetection),
     )
   }
+  return migratedDraft
 }
 
 function canMigrateLocalSettings(userId: string): boolean {
@@ -189,6 +203,7 @@ export async function synchronizeUserSettings(user: UserResponse): Promise<void>
   const generation = ++syncGeneration
   activeAccountId = user.id
   hydrationInProgress = true
+  let migratedDraft: Record<string, unknown> | null = null
   try {
     if (contextAdapter?.waitForLocalRehydrate) {
       await contextAdapter.waitForLocalRehydrate()
@@ -197,7 +212,7 @@ export async function synchronizeUserSettings(user: UserResponse): Promise<void>
     clearForeignAccountLocalCaches(user.id)
     const server = await getAllUserSettings()
     if (generation !== syncGeneration || activeAccountId !== user.id) return
-    cacheServerSettings(server)
+    migratedDraft = cacheServerSettings(server)
     for (const listener of listeners) listener(server)
     await migrateMissingSettings(user.id, server)
     if (generation !== syncGeneration || activeAccountId !== user.id) return
@@ -211,6 +226,13 @@ export async function synchronizeUserSettings(user: UserResponse): Promise<void>
     if (generation === syncGeneration) {
       hydrationInProgress = false
     }
+  }
+  if (
+    migratedDraft
+    && generation === syncGeneration
+    && activeAccountId === user.id
+  ) {
+    queueUserSettingUpdate('generation', 'draft', migratedDraft)
   }
 }
 

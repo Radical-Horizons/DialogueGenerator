@@ -62,6 +62,14 @@ class UnityDialogueNodeContent(BaseModel):
     
     L'ID sera généré automatiquement par le système.
     """
+    displayName: Optional[str] = Field(
+        None,
+        description=(
+            "Libellé court du nœud pour l'éditeur de graphe (2–6 mots). "
+            "Ex: 'Accueil du tavernier', 'Menace voilée'. Obligatoire côté produit : "
+            "toujours le fournir ; le système complète seulement en secours."
+        ),
+    )
     speaker: Optional[str] = Field(None, description="ID du personnage qui parle (contrôlé par l'auteur)")
     line: Optional[str] = Field(
         None,

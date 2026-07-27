@@ -45,10 +45,11 @@ pip install -r requirements.txt
 
 2. **Modifier `.env`** et définir les variables d'environnement :
    - `OPENAI_API_KEY`: Clé API OpenAI (requis)
+   - `OPENROUTER_API_KEY`: Clé OpenRouter (optionnel — modèles finetuned / Aion)
    - `JWT_SECRET_KEY`: Clé secrète pour JWT (requis en production, valeur par défaut acceptée en dev)
    - `ENVIRONMENT`: Environnement (`development` ou `production`)
    - `AUTH_RATE_LIMIT_ENABLED`: Activer le rate limiting (par défaut: `true`)
-   - `AUTH_RATE_LIMIT_REQUESTS`: Nombre de requêtes par fenêtre (par défaut: `5`)
+   - `AUTH_RATE_LIMIT_REQUESTS`: Nombre de requêtes par fenêtre (par défaut: `20`)
    - `AUTH_RATE_LIMIT_WINDOW`: Fenêtre en secondes (par défaut: `60`)
    - `LOG_FILE_ENABLED`: Activer l'archivage des logs dans des fichiers (par défaut: `true`)
    - `LOG_RETENTION_DAYS`: Durée de rétention des logs en jours (par défaut: `30`)

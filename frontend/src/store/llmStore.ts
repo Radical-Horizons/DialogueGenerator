@@ -3,11 +3,12 @@
  */
 import { create } from 'zustand'
 import { listLLMModels } from '../api/config'
+import { normalizeModelId } from '../constants'
 
 interface LLMModel {
   api_identifier: string;
   display_name: string;
-  client_type: 'openai' | 'mistral';
+  client_type: 'openai' | 'mistral' | 'openrouter';
   parameters: {
     default_temperature: number;
     max_tokens: number;
@@ -15,19 +16,25 @@ interface LLMModel {
 }
 
 interface LLMStore {
-  provider: 'openai' | 'mistral';
+  provider: 'openai' | 'mistral' | 'openrouter';
   model: string;
   availableModels: LLMModel[];
-  setProvider: (provider: 'openai' | 'mistral') => void;
+  setProvider: (provider: 'openai' | 'mistral' | 'openrouter') => void;
   setModel: (model: string) => void;
   setAvailableModels: (models: LLMModel[]) => void;
   loadModels: () => Promise<void>;
 }
 
+const rawStoredModel = localStorage.getItem('llm-model') || 'gpt-5.6-terra'
+const initialModel = normalizeModelId(rawStoredModel)
+if (initialModel !== rawStoredModel) {
+  localStorage.setItem('llm-model', initialModel)
+}
+
 export const useLLMStore = create<LLMStore>((set) => ({
   // État initial
-  provider: (localStorage.getItem('llm-provider') as 'openai' | 'mistral') || 'openai',
-    model: localStorage.getItem('llm-model') || 'gpt-5.6-terra',
+  provider: (localStorage.getItem('llm-provider') as 'openai' | 'mistral' | 'openrouter') || 'openai',
+  model: initialModel,
   availableModels: [],
 
   // Actions
@@ -37,8 +44,9 @@ export const useLLMStore = create<LLMStore>((set) => ({
   },
 
   setModel: (model) => {
-    localStorage.setItem('llm-model', model);
-    set({ model });
+    const normalized = normalizeModelId(model)
+    localStorage.setItem('llm-model', normalized)
+    set({ model: normalized })
   },
 
   setAvailableModels: (models) => {
@@ -52,7 +60,7 @@ export const useLLMStore = create<LLMStore>((set) => ({
       const models = apiModels.map((m) => ({
         api_identifier: m.model_identifier,
         display_name: m.display_name,
-        client_type: m.client_type as 'openai' | 'mistral',
+        client_type: m.client_type as 'openai' | 'mistral' | 'openrouter',
         parameters: {
           default_temperature: 0.7,
           max_tokens: m.max_tokens || 4096,

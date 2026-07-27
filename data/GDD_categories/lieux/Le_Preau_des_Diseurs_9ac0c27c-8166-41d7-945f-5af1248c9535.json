@@ -3,10 +3,11 @@
   "values": {
     "Contenu par": "166982c7-3cf0-4947-85c5-0a6df03ff80d",
     "Date de création de la fiche": "2026-05-31T14:03:00.000Z",
-    "Dernière modification": "2026-05-31T14:03:00.000Z",
+    "Dernière modification": "2026-07-17T17:10:00.000Z",
     "Monnaie locale": "Aucune : on n'y paie pas, on y récite. Parole donnée.",
     "Niveau de danger": "Sûr",
     "Niveau d’IA": "co-écrit",
+    "Résumé IA": "Le Préau des Diseurs est un lieu diplomatique ouvert où les Diseurs de Lots mémorisent et récitent accords, dettes et concessions du district, fonctionnant comme un tribunal sans archives ; il accueille aussi des baru‑hackers qui contre‑archivent, et constitue un espace sûr et non magique dédié à la transmission orale de la mémoire juridique.",
     "Rôle": "Lieu diplomatique",
     "Seuil économique": "7",
     "Taille": "Site",
@@ -14,14 +15,15 @@
     "État": "Brouillon IA"
   },
   "sections": {
-    "re_sume__de_la_fiche": "L'abri ouvert où les Diseurs de Lots récitent et tiennent de mémoire les concessions, les dettes et les accords du district. Le tribunal sans archive d'un district qui refuse l'écrit.",
-    "histoire_du_lieu": "- **Le refus de l'écrit** — parce que l'archive du centre réécrit le passé (Interprétation Rétroactive), les Lots confient leur mémoire à des témoins vivants plutôt qu'à des tablettes.\n\t- **L'institution des re-criées** — calquées sur le criage des Maîtres-Crieurs, elles font passer les accords d'une mémoire à l'autre avant qu'une mémoire ne s'éteigne.",
+    "re_sume__de_la_fiche": "L'abri ouvert où les Diseurs de Lots récitent et tiennent de mémoire les concessions, les dettes et les accords du district. Le tribunal sans archive d’un district régi par la Couronne des Lots mais toujours défiant envers l’écrit.",
+    "histoire_du_lieu": "- **Le refus de l'écrit** — parce que l'archive du centre réécrit le passé (Interprétation Rétroactive), les Lots confient leur mémoire à des témoins vivants plutôt qu'à des tablettes ; la Couronne n’a pas supprimé cette logique, elle l’a seulement enchâssée dans ses propres offices.\n\t- **L'institution des re-criées** — calquées sur le criage des Maîtres-Crieurs, elles font passer les accords d'une mémoire à l'autre avant qu'une mémoire ne s'éteigne.",
     "apparence___ambiance": "Un préau couvert mais sans murs, ouvert à tous : bancs, estrade basse, et le brouhaha des récitations. On n'y signe rien ; on y parle haut, et l'on écoute mieux encore.",
     "forces_en_pre_sence": "- **Les Diseurs de Lots** — garants mortels qui portent les accords dans leur tête. Règles d'airain : la doublure (jamais un accord sans deux Diseurs) et la re-criée.\n\t- **Les baru-hackers** — distincts des Diseurs : ils contre-archivent en secret, là où les Diseurs refusent l'archive tout court.",
     "voies_d_acce_s___transitions": "Au cœur du faubourg, à portée de la Grande Halle dont il emprunte le criage les jours de re-criée.",
     "me_moire_syste_me": "*À formaliser en Flags : parole donnée par le joueur, accord contesté, Diseur protégé ou réduit au silence, faction alliée (Diseurs).*",
     "remarques_de_conception": "Sous-lieu des <mention-page url=\"https://app.notion.com/p/166982c73cf0494785c50a6df03ff80d\"/>. Théâtre de toute intrigue juridique menée sans un seul document ; les Diseurs sont strictement non magiques (de simples témoins mortels).",
-    "monnaie_locale": "Aucune : on n'y paie pas, on y récite. Parole donnée."
+    "monnaie_locale": "Aucune : on n'y paie pas, on y récite. Parole donnée.",
+    "re_sume__ia": "Le Préau des Diseurs est un lieu diplomatique ouvert où les Diseurs de Lots mémorisent et récitent accords, dettes et concessions du district, fonctionnant comme un tribunal sans archives ; il accueille aussi des baru‑hackers qui contre‑archivent, et constitue un espace sûr et non magique dédié à la transmission orale de la mémoire juridique."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",
@@ -31,7 +33,8 @@
     "voies_d_acce_s___transitions": "Voies d'accès & Transitions",
     "me_moire_syste_me": "Mémoire système",
     "remarques_de_conception": "Remarques de conception",
-    "monnaie_locale": "Monnaie locale"
+    "monnaie_locale": "Monnaie locale",
+    "re_sume__ia": "Résumé IA"
   },
   "notion_page_id": "9ac0c27c-8166-41d7-945f-5af1248c9535"
 }

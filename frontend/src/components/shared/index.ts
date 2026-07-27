@@ -15,5 +15,5 @@ export { SaveStatusIndicator } from './SaveStatusIndicator'
 export { Badge, type BadgeProps } from './Badge'
 export { ResizablePanels } from './ResizablePanels'
 export { ConfirmDialog, type ConfirmDialogProps } from './ConfirmDialog'
-export { WarningBanner, type WarningBannerProps } from './WarningBanner'
+export { PasswordInput, type PasswordInputProps } from './PasswordInput'
 

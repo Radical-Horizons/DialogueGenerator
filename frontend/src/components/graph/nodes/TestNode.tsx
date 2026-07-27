@@ -7,7 +7,7 @@ import { theme } from '../../../theme'
 import { useGraphStore } from '../../../store/graphStore'
 import { useGraphViewStore } from '../../../store/graphViewStore'
 import { PromptViewerModal } from '../PromptViewerModal'
-import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
+import { TEST_NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
 import { TEST_RESULT_EDGE_CONFIG } from '../../../utils/graphEdgeBuilders'
 import { reconstructNodePromptFromGraph } from '../../../utils/graphPromptPreview'
 import type { NodePromptResponse } from '../../../types/graph'
@@ -147,7 +147,7 @@ export const TestNode = memo(function TestNode({
     <div
       data-testid="graph-node-content"
       data-node-type="test"
-      title={NODE_DRAG_TOOLTIP}
+      title={TEST_NODE_DRAG_TOOLTIP}
       style={{
         width: 200,
         height: 44, // Hauteur réduite mais suffisante pour les cercles complets

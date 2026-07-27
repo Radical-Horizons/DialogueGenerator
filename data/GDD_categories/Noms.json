@@ -1,5 +1,101 @@
 [
   {
+    "Nom": "Kandar",
+    "values": {
+      "Catégorie": "Nom de clan",
+      "Communauté d'usage": "88c9a34c-362f-4df3-b4e0-db89f170e8a3",
+      "Notes": "Réservé à la famille-État ; l'Édit d'expurgation retire l'usage du nom, ce qui vaut mort civile au Domaine.",
+      "Porteurs attestés": "f1365719-cfda-4d75-82e1-df6129d02041",
+      "Région d'usage": "0013aaa5-daee-424c-a8c9-a4a5855926a3",
+      "Signification": "Nom de la maison impériale du Mont des Réincarnés ; a donné l'adjectif « kandarite » (doctrine kandarite, Prise kandarite). Comme Laios, sans origine attestée : le clan commence avec son fondateur."
+    },
+    "sections": {},
+    "notion_page_id": "8b5935eb-e973-44bc-905b-ccf9e0fbd8da"
+  },
+  {
+    "Nom": "Sin",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "88c9a34c-362f-4df3-b4e0-db89f170e8a3",
+      "Notes": "Dernier rang nommé de la lignée ; au-delà, les descendants ne portent plus que Kandar, signe d'une dilution voulue du sang impérial.",
+      "Région d'usage": "0013aaa5-daee-424c-a8c9-a4a5855926a3",
+      "Signification": "Marque de rang de la lignée kandarite : troisième génération, les petits-enfants de l'empereur. Exemples attestés : Rayes Sin Kandar, Danzel Sin Kandar, Mad Sin Kandar."
+    },
+    "sections": {},
+    "notion_page_id": "d7dc28f9-3c37-4c47-92bd-d012a1a9a989"
+  },
+  {
+    "Nom": "Sil",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "88c9a34c-362f-4df3-b4e0-db89f170e8a3",
+      "Notes": "Le rang Sil emporte l'accès au premier étage du secret dynastique ; il ne se transmet pas, chaque génération descend d'un cran (Sil → Sin).",
+      "Région d'usage": "0013aaa5-daee-424c-a8c9-a4a5855926a3",
+      "Signification": "Marque de rang de la lignée kandarite : deuxième génération, les fils de l'empereur (Lecteurs primordiaux). Exemples attestés : Devoir Sil Kandar, Saigon Sil Kandar, Pouvoir Sil Kandar."
+    },
+    "sections": {},
+    "notion_page_id": "01e1d41e-ad94-42c0-9075-8a9314f193cb"
+  },
+  {
+    "Nom": "Sul",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "88c9a34c-362f-4df3-b4e0-db89f170e8a3",
+      "Notes": "Structure du nom kandarite : personnel + rang de lignée (Sul / Sil / Sin) + Kandar. Sul n'a qu'un porteur possible par définition.",
+      "Porteurs attestés": "f1365719-cfda-4d75-82e1-df6129d02041",
+      "Région d'usage": "0013aaa5-daee-424c-a8c9-a4a5855926a3",
+      "Signification": "Marque de rang de la lignée kandarite : désigne la première génération, c'est-à-dire le fondateur seul. Se place entre le nom personnel et le nom de clan (Laios Sul Kandar)."
+    },
+    "sections": {},
+    "notion_page_id": "3afbb6b0-4587-4f8e-aa99-e4d026e1b282"
+  },
+  {
+    "Nom": "Laios",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Communauté d'usage": "88c9a34c-362f-4df3-b4e0-db89f170e8a3",
+      "Notes": "Porté par une seule personne en 850 Nuées ML ; le donner à un enfant du Domaine est un interdit tacite, jamais écrit.",
+      "Porteurs attestés": "f1365719-cfda-4d75-82e1-df6129d02041",
+      "Région d'usage": "0013aaa5-daee-424c-a8c9-a4a5855926a3",
+      "Signification": "Nom personnel sans généalogie que s'est donné l'empereur du Mont des Réincarnés à son avènement ; aucun affleurement, aucune lignée ne le réclame. Sonorité douce en ouverture, chute longue : un nom fait pour être prononcé lentement."
+    },
+    "sections": {},
+    "notion_page_id": "71374a17-a781-4d3b-892d-571e42c11c89"
+  },
+  {
+    "Nom": "Oda-Khem",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Communauté d'usage": "31c6e4d2-1b45-80fa-9680-ed7000fa9b65",
+      "Notes": "Nom porté par un Nez kurgarrû senior de la Zone Intermédiaire de la Nécropole des Éteignoirs (interlocuteur de la quête La Partition Zéro). Porteur sans fiche à ce jour ; proposition de fiche PNJ en attente de validation.",
+      "Région d'usage": "d3f47c29-9694-4740-8a04-51b0e6cfb102"
+    },
+    "sections": {},
+    "notion_page_id": "1ca9124e-9e43-4c52-8125-4d05fad71dee"
+  },
+  {
+    "Nom": "Khelvort",
+    "values": {
+      "Catégorie": "Autre",
+      "Communauté d'usage": "22d6e4d2-1b45-80d4-8cb8-ed6cf202f42a",
+      "Notes": "Usage canonique : Khelvort = adjectif et nom de la religion (Symbiotisme Khelvort) ; Khelvortim = nom du peuple (les Khelvortim). Canonisé le 20 juillet 2026 après audit exhaustif du workspace — aucune source antérieure n'en documentait l'origine.",
+      "Signification": "Contraction de Kel(mar) + Vort(hak) — les deux Symbiotes de la Complémentarité et de la Réunification. Le suffixe -im (Khelvortim) désigne le peuple collectif."
+    },
+    "sections": {},
+    "notion_page_id": "976af3a6-8973-4ef9-9710-8c9c31f87f75"
+  },
+  {
+    "Nom": "Regnbrunnr (la Rendue)",
+    "values": {
+      "Catégorie": "Autre",
+      "Notes": "Toponyme du lieu-frontière encore sans fiche dédiée entre Marches Couchées et Jungle Vivarcade (sphère hors domaine, ville dans l'eau). Nom savant forgé sur le cluster norrois déjà établi pour le cycle Hvergique (Auðumla, Hvergelmir, Mímir, Nornir) ; nom vécu porté par ses habitants imuins et vaideccans.",
+      "Région d'usage": "15f02d22-65fb-4afb-b80e-68925f6f0f3b",
+      "Signification": "Nom savant norrois : « le puits qui pleut », écho inversé de Mímisbrunnr — le lieu renvoie de l'eau vers le Ciel de Roche plutôt que d'en recevoir. Nom vécu local, « la Rendue » : l'eau rendue au ciel, et le foyer rendu à une diaspora exilée."
+    },
+    "sections": {},
+    "notion_page_id": "a494e7b8-b000-406d-8424-6816fa7d2c9b"
+  },
+  {
     "Nom": "Borath",
     "values": {
       "Catégorie": "Marque de foyer",
@@ -162,6 +258,16 @@
     },
     "sections": {},
     "notion_page_id": "2339f1da-1154-43d1-9354-6c6679864a9f"
+  },
+  {
+    "Nom": "Tarrivka",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Notes": "Registre lunaire."
+    },
+    "sections": {},
+    "notion_page_id": "00b37310-763a-4230-acc7-49b46dd69bcb"
   },
   {
     "Nom": "Tarrivka",
@@ -983,6 +1089,17 @@
     "notion_page_id": "b0e41c65-35f3-42de-88bf-aaf2935f86f9"
   },
   {
+    "Nom": "Neth",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Notes": "Aussi utilisé comme prénom personnel (Neth'Varu, Neth-Vorthul, Neth-Arun), ce qui crée des ambiguïtés. Les Van'Doei partageant cette marque ne sont pas nécessairement frères de foyer.",
+      "Porteurs attestés": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Signification": "Nom de forge — l'un des plus répandus du Quartier des Forges. Plusieurs forges distinctes ont porté ce nom au fil des siècles."
+    },
+    "sections": {},
+    "notion_page_id": "b95836c4-43ee-42b1-acab-1f6029befeb6"
+  },
+  {
     "Nom": "Kharr",
     "values": {
       "Catégorie": "Marque de foyer",
@@ -1166,16 +1283,5 @@
     },
     "sections": {},
     "notion_page_id": "fdeafeba-95f9-439f-9d63-863a34ec8337"
-  },
-  {
-    "Nom": "Regnbrunnr (la Rendue)",
-    "values": {
-      "Catégorie": "Autre",
-      "Notes": "Toponyme du lieu-frontière encore sans fiche dédiée entre Marches Couchées et Jungle Vivarcade (sphère hors domaine, ville dans l'eau). Nom savant forgé sur le cluster norrois déjà établi pour le cycle Hvergique (Auðumla, Hvergelmir, Mímir, Nornir) ; nom vécu porté par ses habitants imuins et vaideccans.",
-      "Région d'usage": "15f02d22-65fb-4afb-b80e-68925f6f0f3b",
-      "Signification": "Nom savant norrois : « le puits qui pleut », écho inversé de Mímisbrunnr — le lieu renvoie de l'eau vers le Ciel de Roche plutôt que d'en recevoir. Nom vécu local, « la Rendue » : l'eau rendue au ciel, et le foyer rendu à une diaspora exilée."
-    },
-    "sections": {},
-    "notion_page_id": "a494e7b8-b000-406d-8424-6816fa7d2c9b"
   }
 ]

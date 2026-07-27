@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MODEL_NAMES } from '../constants'
+import { MODEL_NAMES, normalizeModelId } from '../constants'
 import {
   detectGenerationConfigFixes,
   normalizeMaxCompletionTokensForApi,
@@ -9,6 +9,18 @@ import {
 describe('generationConfigNormalization', () => {
   it('accepte 60K tokens génération (cas utilisateur prod)', () => {
     expect(normalizeMaxCompletionTokensForApi(60_000)).toBe(60_000)
+  })
+
+  it('normalise gpt-5.4 legacy vers gpt-5.6-sol', () => {
+    expect(normalizeModelId('gpt-5.4')).toBe(MODEL_NAMES.GPT_5_6_SOL)
+  })
+
+  it('ne propose pas de correctif pour le littéral gpt-5.4 si sol est disponible', () => {
+    const fixes = detectGenerationConfigFixes(
+      { maxContextTokens: 300_000, maxCompletionTokens: 60_000, llmModel: 'gpt-5.4' },
+      [{ model_identifier: MODEL_NAMES.GPT_5_6_SOL, display_name: 'GPT-5.6 Sol', client_type: 'openai', max_tokens: 128_000 }],
+    )
+    expect(fixes.filter((f) => f.field === 'llmModel')).toHaveLength(0)
   })
 
   it('ne propose pas de correctif pour 60K + gpt-5.6-terra', () => {

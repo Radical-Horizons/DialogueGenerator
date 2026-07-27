@@ -47,6 +47,22 @@ def test_get_current_user_without_auth(client: TestClient) -> None:
         assert response.status_code == 401  # HTTPBearer retourne 401 si pas de token
 
 
+def test_disable_auth_honors_guest_bearer(client: TestClient) -> None:
+    """DISABLE_AUTH=true : un JWT guest est honoré (chemin E2E /login guest-first)."""
+    assert get_security_config().disable_auth is True
+    guest = client.post("/api/v1/auth/guest")
+    assert guest.status_code == 200
+    token = guest.json()["access_token"]
+    response = client.get(
+        "/api/v1/auth/me",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["role"] == "guest"
+    assert data["username"] == "guest"
+
+
 def test_get_current_user_without_auth_when_auth_enabled(
     client: TestClient,
     monkeypatch: pytest.MonkeyPatch,

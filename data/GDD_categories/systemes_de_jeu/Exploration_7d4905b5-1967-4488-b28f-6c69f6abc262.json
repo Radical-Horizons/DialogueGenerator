@@ -11,6 +11,7 @@
     "Récompenses": "5c973e14-17fc-4820-97bf-153efba7b133, b7f81429-dbf2-4d64-a894-01c4e32cb3ea, 84c75d2d-f2f9-4758-92d1-6a261e30fd48, 9c73d1ad-8fd6-4baf-87b5-b827887c13b5",
     "Résumé IA": "Le sous‑système Exploration transforme chaque panneau du monde en un espace dense de découvertes, guidant le joueur silencieusement grâce à des indices visuels, sonores et de PNJ intégrés à l’art. Il ajoute la motivation « pourquoi se déplacer » aux déplacements de base, encourageant la curiosité sans cartes ni check‑lists, et utilise des séquences narratives ponctuelles pour les découvertes majeures. Les POI sont classés (détails, passages, PNJ, objets, phénomènes) et doivent être signalés par au moins deux canaux. Le système consomme les locomotions, interactions et compétences, produit des connaissances, des flags événementiels et des améliorations de réputation, et suit la progression zone par zone avec des indicateurs qualitatifs.",
     "Statut": "Validé",
+    "Systèmes enfants": "2c5c3ae2-8d3d-4234-a431-a0581dda4c4c",
     "Systèmes parent": "2ef6e4d2-1b45-8016-a220-cf44d02c111f",
     "Type": "Sous-système"
   },

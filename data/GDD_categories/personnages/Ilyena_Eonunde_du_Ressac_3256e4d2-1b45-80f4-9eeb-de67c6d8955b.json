@@ -1,7 +1,6 @@
 {
   "Nom": "Ilyena Eonundé du Ressac",
   "values": {
-    "Actes effectifs": "31a6e4d2-1b45-8000-9248-d0b7535ac586",
     "Actes prévus": "31a6e4d2-1b45-8000-9248-d0b7535ac586",
     "Alias": "La Voix de Vol, La Sœur Fidèle, La Gardienne",
     "Archétype littéraire": "Mentor / Gourou",
@@ -25,6 +24,7 @@
     "Niveau d’IA": "auto",
     "Objets détenus": "; ",
     "Occupation": "Prêtresse-archiviste, cheffe de culte",
+    "Patterns": "47594253-445a-4aae-aa50-893f39c91846, c10f7c71-d2f1-42f0-aed5-b171a1080d01",
     "Pronoms (pour dialogues)": "elle/la",
     "Présence dans les chapitres": "63314831-abbb-4c2e-8857-2a918d119065",
     "Qualité": "7",

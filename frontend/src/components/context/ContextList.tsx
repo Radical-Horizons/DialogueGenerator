@@ -1,29 +1,61 @@
 /**
- * Composant pour afficher une liste d'éléments de contexte (personnages, lieux, objets).
- * Recherche avec debounce 300ms, badge type d'entité, chargement progressif (scroll).
+ * Liste d'éléments de contexte GDD : filtre, tri, badge type, scroll infini.
+ * La barre de recherche peut être intégrée ou fournie par le parent (recherche inter-onglets).
  */
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
-import type { CharacterResponse, LocationResponse, ItemResponse, SpeciesResponse, CommunityResponse, ElementMode } from '../../types/api'
+import type { RefObject } from 'react'
+import type {
+  CharacterResponse,
+  LocationResponse,
+  ItemResponse,
+  SpeciesResponse,
+  CommunityResponse,
+  ElementMode,
+} from '../../types/api'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import { listItemSelectionStyle } from '../../theme/selectionTokens'
 import { highlightText } from '../../utils/textHighlight'
 import { getGddEntitySummary } from '../../utils/gddSummary'
 import { useDebounce } from '../../hooks/useDebounce'
-import { StyledSelect } from '../shared/StyledSelect'
+import {
+  ContextSearchControls,
+  type ContextSortType,
+} from './ContextSearchControls'
 
-export type ContextListItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse | { name: string; data?: Record<string, unknown> }
+export type ContextEntityTab =
+  | 'characters'
+  | 'locations'
+  | 'items'
+  | 'species'
+  | 'communities'
+
+export type ContextListItem = (
+  | CharacterResponse
+  | LocationResponse
+  | ItemResponse
+  | SpeciesResponse
+  | CommunityResponse
+  | { name: string; data?: Record<string, unknown> }
+) & {
+  /** Onglet d'origine (recherche inter-onglets). */
+  entityTab?: ContextEntityTab
+  /** Badge type d'entité (prioritaire sur `entityTypeLabel` global). */
+  entityTypeLabel?: string
+}
 
 interface ContextListProps {
   items: ContextListItem[]
   selectedItems: string[]
-  onItemClick: (name: string) => void
-  onItemToggle: (name: string) => void
+  onItemClick: (name: string, entityTab?: ContextEntityTab) => void
+  onItemToggle: (name: string, entityTab?: ContextEntityTab) => void
   selectedDetail: string | null
   onSelectDetail: (name: string | null) => void
   isLoading?: boolean
-  getElementMode?: (name: string) => ElementMode | null
-  onModeChange?: (name: string, mode: ElementMode) => void
+  getElementMode?: (name: string, entityTab?: ContextEntityTab) => ElementMode | null
+  onModeChange?: (name: string, mode: ElementMode, entityTab?: ContextEntityTab) => void
+  /** Sélection typée (évite collisions de noms inter-onglets). */
+  isItemSelected?: (name: string, entityTab?: ContextEntityTab) => boolean
   /** Afficher les cases à cocher (false pour listes lecture seule si besoin). */
   showCheckboxes?: boolean
   /** Label du type d'entité pour le badge (ex. "Personnage", "Lieu"). */
@@ -32,16 +64,58 @@ interface ContextListProps {
   onScrollToBottom?: () => void
   /** Afficher un indicateur de chargement en bas (suite de pages). */
   loadingMore?: boolean
+  /**
+   * Indique qu'il reste des pages non chargées côté parent.
+   * Requis pour que la recherche puisse demander le chargement des pages suivantes
+   * quand le match n'est pas encore dans le buffer local.
+   */
+  hasMore?: boolean
+  /**
+   * Onglet actif : en recherche, ses résultats sont listés en premier.
+   */
+  priorityEntityTab?: ContextEntityTab
+  /** Masquer la barre recherche/tri (fournie au-dessus des onglets). */
+  showSearchBar?: boolean
+  /** Recherche contrôlée par le parent (sinon état local). */
+  searchQuery?: string
+  onSearchQueryChange?: (value: string) => void
+  sortType?: ContextSortType
+  onSortTypeChange?: (value: ContextSortType) => void
+  searchInputRef?: RefObject<HTMLInputElement | null>
 }
 
-type SortType = 'name-asc' | 'name-desc' | 'selected-first'
-
-interface ContextListPropsWithTab extends ContextListProps {
+type ContextListPropsWithTab = ContextListProps & {
   tabId?: string
 }
 
 function hasData(item: ContextListItem): item is ContextListItem & { data: Record<string, unknown> } {
   return 'data' in item && item.data != null && typeof item.data === 'object'
+}
+
+function itemKey(item: ContextListItem): string {
+  return item.entityTab ? `${item.entityTab}:${item.name}` : item.name
+}
+
+function compareBySort(
+  a: ContextListItem,
+  b: ContextListItem,
+  sortType: ContextSortType,
+  isSelected: (item: ContextListItem) => boolean,
+): number {
+  switch (sortType) {
+    case 'selected-first': {
+      const aSelected = isSelected(a)
+      const bSelected = isSelected(b)
+      if (aSelected && !bSelected) return -1
+      if (!aSelected && bSelected) return 1
+      return a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
+    }
+    case 'name-desc':
+      return b.name.localeCompare(a.name, 'fr', { sensitivity: 'base' })
+    case 'name-asc':
+    default:
+      return a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
+  }
 }
 
 export function ContextList({
@@ -54,45 +128,58 @@ export function ContextList({
   isLoading = false,
   getElementMode,
   onModeChange,
+  isItemSelected,
   tabId,
   showCheckboxes = true,
   entityTypeLabel,
   onScrollToBottom,
   loadingMore = false,
+  hasMore = false,
+  priorityEntityTab,
+  showSearchBar = true,
+  searchQuery: searchQueryControlled,
+  onSearchQueryChange,
+  sortType: sortTypeControlled,
+  onSortTypeChange,
+  searchInputRef: searchInputRefExternal,
 }: ContextListPropsWithTab) {
-  const [searchQueryRaw, setSearchQueryRaw] = useState('')
+  const [searchQueryLocal, setSearchQueryLocal] = useState('')
+  const [sortTypeLocal, setSortTypeLocal] = useState<ContextSortType>('name-asc')
+  const isSearchControlled = searchQueryControlled !== undefined
+  const isSortControlled = sortTypeControlled !== undefined
+  const searchQueryRaw = isSearchControlled ? searchQueryControlled : searchQueryLocal
+  const sortType = isSortControlled ? sortTypeControlled : sortTypeLocal
   const debouncedSearch = useDebounce(searchQueryRaw, 300)
-  const [sortType, setSortType] = useState<SortType>('name-asc')
-  const searchInputRef = useRef<HTMLInputElement>(null)
+  const searchInputRefInternal = useRef<HTMLInputElement>(null)
+  const searchInputRef = searchInputRefExternal ?? searchInputRefInternal
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const storageKey = tabId ? `context-list-scroll-${tabId}` : null
 
-  const filteredItems = useMemo(() => {
-    let result = items.filter((item) =>
-      item.name.toLowerCase().includes(debouncedSearch.toLowerCase())
-    )
-
-    // Appliquer le tri
-    result = [...result].sort((a, b) => {
-      const aSelected = selectedItems.includes(a.name)
-      const bSelected = selectedItems.includes(b.name)
-      
-      switch (sortType) {
-        case 'selected-first':
-          if (aSelected && !bSelected) return -1
-          if (!aSelected && bSelected) return 1
-          // Si même statut de sélection, trier par nom
-          return a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
-        case 'name-desc':
-          return b.name.localeCompare(a.name, 'fr', { sensitivity: 'base' })
-        case 'name-asc':
-        default:
-          return a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
+  const resolveSelected = useCallback(
+    (item: ContextListItem): boolean => {
+      if (isItemSelected) {
+        return isItemSelected(item.name, item.entityTab)
       }
+      return selectedItems.includes(item.name)
+    },
+    [isItemSelected, selectedItems],
+  )
+
+  const filteredItems = useMemo(() => {
+    const query = searchQueryRaw.toLowerCase()
+    let result = items.filter((item) => item.name.toLowerCase().includes(query))
+
+    result = [...result].sort((a, b) => {
+      if (query && priorityEntityTab) {
+        const aPriority = a.entityTab === priorityEntityTab ? 0 : 1
+        const bPriority = b.entityTab === priorityEntityTab ? 0 : 1
+        if (aPriority !== bPriority) return aPriority - bPriority
+      }
+      return compareBySort(a, b, sortType, resolveSelected)
     })
-    
+
     return result
-  }, [items, debouncedSearch, selectedItems, sortType])
+  }, [items, searchQueryRaw, sortType, priorityEntityTab, resolveSelected])
 
   const handleScroll = useCallback(() => {
     const el = scrollContainerRef.current
@@ -103,15 +190,30 @@ export function ContextList({
     }
   }, [onScrollToBottom])
 
-  // Raccourci clavier pour focus sur la recherche (/)
+  // Recherche client-side sur buffer paginé : si aucun match local mais d'autres pages
+  // existent, charger la suite (sinon "Aucun résultat" bloque le scroll infini).
   useEffect(() => {
+    if (!debouncedSearch.trim()) return
+    if (filteredItems.length > 0) return
+    if (!hasMore || loadingMore || !onScrollToBottom) return
+    onScrollToBottom()
+  }, [
+    debouncedSearch,
+    filteredItems.length,
+    hasMore,
+    loadingMore,
+    onScrollToBottom,
+    items.length,
+  ])
+
+  useEffect(() => {
+    if (!showSearchBar) return
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ne pas intercepter si on est déjà dans un input/textarea ou si c'est la command palette
       const target = e.target as HTMLElement
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
         return
       }
-      
+
       if (e.key === '/') {
         e.preventDefault()
         searchInputRef.current?.focus()
@@ -121,9 +223,8 @@ export function ContextList({
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  }, [searchInputRef, showSearchBar])
 
-  // Restaurer la position de scroll
   useEffect(() => {
     if (storageKey && scrollContainerRef.current) {
       const savedScroll = sessionStorage.getItem(storageKey)
@@ -133,18 +234,33 @@ export function ContextList({
     }
   }, [storageKey])
 
-  // Sauvegarder la position de scroll
   useEffect(() => {
     const container = scrollContainerRef.current
     if (!container || !storageKey) return
 
-    const handleScroll = () => {
+    const handleScrollSave = () => {
       sessionStorage.setItem(storageKey, container.scrollTop.toString())
     }
 
-    container.addEventListener('scroll', handleScroll, { passive: true })
-    return () => container.removeEventListener('scroll', handleScroll)
+    container.addEventListener('scroll', handleScrollSave, { passive: true })
+    return () => container.removeEventListener('scroll', handleScrollSave)
   }, [storageKey])
+
+  const setSearchQuery = (value: string) => {
+    if (onSearchQueryChange) {
+      onSearchQueryChange(value)
+      return
+    }
+    setSearchQueryLocal(value)
+  }
+
+  const setSortType = (value: ContextSortType) => {
+    if (onSortTypeChange) {
+      onSortTypeChange(value)
+      return
+    }
+    setSortTypeLocal(value)
+  }
 
   if (isLoading) {
     return (
@@ -156,50 +272,16 @@ export function ContextList({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
-      <div
-        style={{
-          flexShrink: 0,
-          padding: '0.65rem 0.75rem',
-          borderBottom: `1px solid ${theme.border.primary}`,
-          backgroundColor: theme.background.tertiary,
-        }}
-      >
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-          <input
-            ref={searchInputRef}
-            type="text"
-            placeholder="Rechercher... (/)"
-            value={searchQueryRaw}
-            onChange={(e) => setSearchQueryRaw(e.target.value)}
-            style={{
-              flex: 1,
-              padding: '0.5rem',
-              border: `1px solid ${theme.input.border}`,
-              borderRadius: '4px',
-              backgroundColor: theme.input.background,
-              color: theme.input.color,
-            }}
-          />
-          <StyledSelect
-            value={sortType}
-            onChange={(e) => setSortType(e.target.value as SortType)}
-            style={{
-              padding: '0.5rem',
-              border: `1px solid ${theme.input.border}`,
-              borderRadius: '4px',
-              backgroundColor: theme.input.background,
-              color: theme.input.color,
-              fontSize: remSize('accent'),
-            }}
-            wrapperStyle={{ width: 'auto' }}
-            title="Trier les résultats"
-          >
-            <option value="name-asc">Nom (A-Z)</option>
-            <option value="name-desc">Nom (Z-A)</option>
-            <option value="selected-first">Sélectionnés en premier</option>
-          </StyledSelect>
-        </div>
-      </div>
+      {showSearchBar && (
+        <ContextSearchControls
+          searchQuery={searchQueryRaw}
+          onSearchQueryChange={setSearchQuery}
+          sortType={sortType}
+          onSortTypeChange={setSortType}
+          inputRef={searchInputRef}
+          placeholder="Rechercher... (/)"
+        />
+      )}
       <div
         ref={scrollContainerRef}
         data-testid="context-list-scroll"
@@ -208,147 +290,166 @@ export function ContextList({
       >
         {filteredItems.length === 0 ? (
           <div style={{ padding: '1rem', textAlign: 'center', color: theme.text.secondary }}>
-            {debouncedSearch ? 'Aucun résultat' : 'Aucun élément'}
+            {searchQueryRaw.trim()
+              ? hasMore || loadingMore
+                ? 'Recherche dans le catalogue…'
+                : 'Aucun résultat'
+              : 'Aucun élément'}
           </div>
         ) : (
           <>
-          {filteredItems.map((item) => {
-            const isSelected = selectedItems.includes(item.name)
-            const isDetailSelected = selectedDetail === item.name
-            const currentMode = getElementMode ? getElementMode(item.name) : null
-            const selectionStyle = listItemSelectionStyle(isSelected)
+            {filteredItems.map((item) => {
+              const isSelected = resolveSelected(item)
+              const isDetailSelected = selectedDetail === item.name
+              const currentMode = getElementMode
+                ? getElementMode(item.name, item.entityTab)
+                : null
+              const selectionStyle = listItemSelectionStyle(isSelected)
+              const badgeLabel = item.entityTypeLabel ?? entityTypeLabel
 
-            const handleModeClick = (e: React.MouseEvent) => {
-              e.stopPropagation()
-              if (onModeChange && isSelected && currentMode) {
-                const newMode: ElementMode = currentMode === 'full' ? 'excerpt' : 'full'
-                onModeChange(item.name, newMode)
+              const handleModeClick = (e: React.MouseEvent) => {
+                e.stopPropagation()
+                if (onModeChange && isSelected && currentMode) {
+                  const newMode: ElementMode = currentMode === 'full' ? 'excerpt' : 'full'
+                  onModeChange(item.name, newMode, item.entityTab)
+                }
               }
-            }
 
-            return (
-              <div
-                key={item.name}
-                style={{
-                  padding: '0.65rem 0.75rem',
-                  marginBottom: '0.5rem',
-                  borderTop: isSelected
-                    ? `1px solid ${currentMode === 'excerpt' ? theme.border.primary : theme.button.primary.background}`
-                    : `1px solid rgba(255, 255, 255, 0.06)`,
-                  borderRight: isSelected
-                    ? `1px solid ${currentMode === 'excerpt' ? theme.border.primary : theme.button.primary.background}`
-                    : `1px solid rgba(255, 255, 255, 0.06)`,
-                  borderBottom: isSelected
-                    ? `1px solid ${currentMode === 'excerpt' ? theme.border.primary : theme.button.primary.background}`
-                    : `1px solid rgba(255, 255, 255, 0.06)`,
-                  borderRadius: '10px',
-                  ...selectionStyle,
-                  backgroundColor: isSelected
-                    ? theme.state.selected.background
-                    : isDetailSelected
-                      ? theme.background.panel
-                      : theme.background.tertiary,
-                  boxShadow: isSelected ? theme.shadow.card : '0 1px 4px rgba(0, 0, 0, 0.25)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  transition: 'background-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease',
-                }}
-                onClick={() => onItemClick(item.name)}
-                onMouseEnter={(e) => {
-                  if (!isSelected && !isDetailSelected) {
-                    e.currentTarget.style.backgroundColor = theme.background.panel
-                    e.currentTarget.style.boxShadow = theme.shadow.card
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected && !isDetailSelected) {
-                    e.currentTarget.style.backgroundColor = theme.background.tertiary
-                    e.currentTarget.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.25)'
-                  }
-                }}
-              >
-                {showCheckboxes && (
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={(e) => {
-                      e.stopPropagation()
-                      onItemToggle(item.name)
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                )}
-                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: isSelected ? 'bold' : 'normal' }}>
-                      {highlightText(item.name, debouncedSearch)}
+              return (
+                <div
+                  key={itemKey(item)}
+                  style={{
+                    padding: '0.65rem 0.75rem',
+                    marginBottom: '0.5rem',
+                    borderTop: isSelected
+                      ? `1px solid ${currentMode === 'excerpt' ? theme.border.primary : theme.button.primary.background}`
+                      : `1px solid rgba(255, 255, 255, 0.06)`,
+                    borderRight: isSelected
+                      ? `1px solid ${currentMode === 'excerpt' ? theme.border.primary : theme.button.primary.background}`
+                      : `1px solid rgba(255, 255, 255, 0.06)`,
+                    borderBottom: isSelected
+                      ? `1px solid ${currentMode === 'excerpt' ? theme.border.primary : theme.button.primary.background}`
+                      : `1px solid rgba(255, 255, 255, 0.06)`,
+                    borderRadius: '10px',
+                    ...selectionStyle,
+                    backgroundColor: isSelected
+                      ? theme.state.selected.background
+                      : isDetailSelected
+                        ? theme.background.panel
+                        : theme.background.tertiary,
+                    boxShadow: isSelected ? theme.shadow.card : '0 1px 4px rgba(0, 0, 0, 0.25)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    transition: 'background-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease',
+                  }}
+                  onClick={() => onItemClick(item.name, item.entityTab)}
+                  onMouseEnter={(e) => {
+                    if (!isSelected && !isDetailSelected) {
+                      e.currentTarget.style.backgroundColor = theme.background.panel
+                      e.currentTarget.style.boxShadow = theme.shadow.card
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected && !isDetailSelected) {
+                      e.currentTarget.style.backgroundColor = theme.background.tertiary
+                      e.currentTarget.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.25)'
+                    }
+                  }}
+                >
+                  {showCheckboxes && (
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={(e) => {
+                        e.stopPropagation()
+                        onItemToggle(item.name, item.entityTab)
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  )}
+                  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <span style={{ fontWeight: isSelected ? 'bold' : 'normal' }}>
+                        {highlightText(item.name, searchQueryRaw)}
+                      </span>
+                      {badgeLabel && (
+                        <span
+                          style={{
+                            fontSize: remSize('caption'),
+                            padding: '0.15rem 0.4rem',
+                            borderRadius: '4px',
+                            backgroundColor: theme.background.tertiary,
+                            color: theme.text.secondary,
+                            fontWeight: 500,
+                          }}
+                        >
+                          {badgeLabel}
+                        </span>
+                      )}
                     </span>
-                    {entityTypeLabel && (
-                      <span
-                        style={{
-                          fontSize: remSize('caption'),
-                          padding: '0.15rem 0.4rem',
-                          borderRadius: '4px',
-                          backgroundColor: theme.background.tertiary,
-                          color: theme.text.secondary,
-                          fontWeight: 500,
-                        }}
-                      >
-                        {entityTypeLabel}
+                    {hasData(item) && getGddEntitySummary(item.data) && (
+                      <span style={{ fontSize: remSize('body'), color: theme.text.secondary, lineHeight: 1.2 }}>
+                        {getGddEntitySummary(item.data)}
                       </span>
                     )}
-                  </span>
-                  {hasData(item) && getGddEntitySummary(item.data) && (
-                    <span style={{ fontSize: remSize('body'), color: theme.text.secondary, lineHeight: 1.2 }}>
-                      {getGddEntitySummary(item.data)}
-                    </span>
+                  </div>
+                  {isSelected && currentMode && onModeChange && (
+                    <button
+                      type="button"
+                      onClick={handleModeClick}
+                      title={
+                        currentMode === 'full'
+                          ? 'Complet - Cliquer pour passer en Extrait'
+                          : 'Extrait - Cliquer pour passer en Complet'
+                      }
+                      style={{
+                        padding: '0.25rem 0.5rem',
+                        border: `1px solid ${theme.border.primary}`,
+                        borderRadius: '4px',
+                        backgroundColor:
+                          currentMode === 'excerpt'
+                            ? theme.state.warning.background || theme.background.secondary
+                            : theme.background.secondary,
+                        color:
+                          currentMode === 'excerpt'
+                            ? theme.state.warning.color || theme.text.secondary
+                            : theme.text.secondary,
+                        cursor: 'pointer',
+                        fontSize: remSize('small'),
+                        fontWeight: 'bold',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                        minWidth: '60px',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {currentMode === 'full' ? '📄' : '✂️'}
+                      <span style={{ fontSize: remSize('caption') }}>
+                        {currentMode === 'full' ? 'Complet' : 'Extrait'}
+                      </span>
+                    </button>
                   )}
                 </div>
-                {isSelected && currentMode && onModeChange && (
-                  <button
-                    type="button"
-                    onClick={handleModeClick}
-                    title={currentMode === 'full' ? 'Complet - Cliquer pour passer en Extrait' : 'Extrait - Cliquer pour passer en Complet'}
-                    style={{
-                      padding: '0.25rem 0.5rem',
-                      border: `1px solid ${theme.border.primary}`,
-                      borderRadius: '4px',
-                      backgroundColor: currentMode === 'excerpt' 
-                        ? theme.state.warning.background || theme.background.secondary
-                        : theme.background.secondary,
-                      color: currentMode === 'excerpt' 
-                        ? theme.state.warning.color || theme.text.secondary
-                        : theme.text.secondary,
-                      cursor: 'pointer',
-                      fontSize: remSize('small'),
-                      fontWeight: 'bold',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.25rem',
-                      minWidth: '60px',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    {currentMode === 'full' ? '📄' : '✂️'}
-                    <span style={{ fontSize: remSize('caption') }}>
-                      {currentMode === 'full' ? 'Complet' : 'Extrait'}
-                    </span>
-                  </button>
-                )}
+              )
+            })}
+            {loadingMore && (
+              <div
+                style={{
+                  padding: '0.75rem',
+                  textAlign: 'center',
+                  color: theme.text.secondary,
+                  fontSize: remSize('body'),
+                }}
+              >
+                Chargement…
               </div>
-            )
-          })}
-          {loadingMore && (
-            <div style={{ padding: '0.75rem', textAlign: 'center', color: theme.text.secondary, fontSize: remSize('body') }}>
-              Chargement…
-            </div>
-          )}
+            )}
           </>
         )}
       </div>
     </div>
   )
 }
-

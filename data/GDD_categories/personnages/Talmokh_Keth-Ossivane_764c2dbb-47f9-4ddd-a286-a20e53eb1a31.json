@@ -10,7 +10,7 @@
     "Date de création": "2026-05-04T09:52:00.000Z",
     "Date de naissance": "3390",
     "Date vérification": "2026-05-26",
-    "Dernière modification": "2026-07-05T23:25:00.000Z",
+    "Dernière modification": "2026-07-22T08:25:00.000Z",
     "Espèce": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
     "Feuilles de perso": "f0baeec4-7ab8-440d-9b20-28489e342387",
     "Genre": "Non Binaire",
@@ -30,8 +30,9 @@
     "État": "A relire"
   },
   "sections": {
+    "guides": "<pdf src=\"file://%7B%22source%22%3A%22attachment%3A3f01c007-a0ba-4454-ab97-f51901233322%3ATalmokh_Keth_Ossivane_Guide.pdf%22%2C%22permissionRecord%22%3A%7B%22table%22%3A%22block%22%2C%22id%22%3A%223a56e4d2-1b45-811e-8aa9-d0a2b7dca2e2%22%2C%22spaceId%22%3A%221d8d06fb-9245-45c9-8cb0-4cd4d302ed0d%22%7D%7D\"></pdf>",
     "re_sume__de_la_fiche": "Talmokh Keth-Ossivane est un·e Croyant·e laïque de maintenance basse du <mention-page url=\"https://app.notion.com/p/1886e4d21b458150a894cfe31d31abd4\"/>, chargé·e des Gedroths et tuteur·ice de <mention-page url=\"https://app.notion.com/p/aab147faca9345eb84629747f3601298\"/>. Son nom d’état, Talmokh, renvoie à la territorialisation : transformer des conduits, horaires et enclos à Gedroths en espace habitable, chaud, discret et défendable. Iel protège Drav sans jamais nommer cette protection : en déplaçant des horaires, en inventant des contraintes techniques plausibles, en faisant passer le soin pour de la maintenance.",
-    "guides": "<empty-block/>\n<pdf src=\"file://%7B%22source%22%3A%22attachment%3A9d1c6492-ed58-4956-b812-b951db73bb33%3ATalmokh_Keth_Ossivane_Guide.pdf%22%2C%22permissionRecord%22%3A%7B%22table%22%3A%22block%22%2C%22id%22%3A%223716e4d2-1b45-819a-a3fb-f5bd45203de4%22%2C%22spaceId%22%3A%221d8d06fb-9245-45c9-8cb0-4cd4d302ed0d%22%7D%7D\"></pdf>\n\t# Caractérisation\n\t## \\[Surface\\]",
+    "guides_2": "<empty-block/>\n<pdf src=\"file://%7B%22source%22%3A%22attachment%3A9d1c6492-ed58-4956-b812-b951db73bb33%3ATalmokh_Keth_Ossivane_Guide.pdf%22%2C%22permissionRecord%22%3A%7B%22table%22%3A%22block%22%2C%22id%22%3A%223716e4d2-1b45-819a-a3fb-f5bd45203de4%22%2C%22spaceId%22%3A%221d8d06fb-9245-45c9-8cb0-4cd4d302ed0d%22%7D%7D\"></pdf>\n\t# Caractérisation\n\t## \\[Surface\\]",
     "corps_et_morphologie": "- Van’Doei de la maintenance basse : peau cendrée assombrie par les dépôts de conduits, craquelures fines aux poignets et aux clavicules, odeur persistante de carapace tiède et de cendre humide.\n\t\t- Un bras de maintenance : assez puissant pour déplacer une caisse de membrane et maintenir un Gedroth agité, marqué par les brûlures d'entretien.\n\t\t- Gestes lents, économes, précis. Keth touche rarement les surfaces sans vérifier leur température : iel a pris l'habitude d'anticiper les réactions thermiques de Drav.",
     "signes_d_appartenance": "- Masque de Croyant·e usé, souvent déplacé sur le côté pendant les soins aux Gedroths ; les lentilles portent des traces de résidu phosphorescent.\n\t\t- Tablier de maintenance renforcé par des morceaux de carapaces mortes, poches remplies de fil, de joints, de fragments de membrane et de petites rations de cendres.\n\t\t- Nom d'état **Talmokh**, porté comme désignation de fonction intime, étrangère au titre liturgique : Keth territorialise les marges basses du Léviathan en zones de chaleur, de détour et de protection.\n\t\t- Marque Ossivane conservée comme marque de foyer et de responsabilité domestique. Chez Keth, elle désigne moins une lignée qu’un poste de Veille : celles et ceux qui restent quand les autres passent.",
     "voix_et_pre_sence": "Keth parle bas, avec des phrases techniques qui sonnent comme des constats définitifs : si une porte doit rester fermée, iel explique le joint, la pression, l’horaire du nourrissage — jamais la peur.",
@@ -61,8 +62,9 @@
     "e_pithe_te": "Le Tuteur des Gedroths"
   },
   "section_titles": {
-    "re_sume__de_la_fiche": "Résumé de la fiche",
     "guides": "Guides",
+    "re_sume__de_la_fiche": "Résumé de la fiche",
+    "guides_2": "Guides",
     "corps_et_morphologie": "Corps et morphologie",
     "signes_d_appartenance": "Signes d'appartenance",
     "voix_et_pre_sence": "Voix et présence",

@@ -360,7 +360,13 @@ export function useReactFlowHandlers(
         return
       }
 
-      if (event.ctrlKey) {
+      // Ctrl = nœud seul. TestNode (4 handles) = nœud seul aussi : ses
+      // « enfants » sont des résultats de test, pas une suite narrative à emporter.
+      const isTestNode =
+        node.type === 'testNode' ||
+        node.id.startsWith('test-node-') ||
+        node.id.startsWith('test:')
+      if (event.ctrlKey || isTestNode) {
         dragStartPositionsRef.current = null
         dragGroupModeRef.current = null
         return
