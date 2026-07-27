@@ -46,7 +46,7 @@ Cursor attachait ces règles automatiquement par glob. Claude Code n'a pas ce m�
 | Commandes, tests, venv — workflow transverse | `.claude/rules/workflow.md` |
 | Déléguer à un subagent, revue multi-agents | `.claude/rules/subagents.md` |
 | Écrire une règle / skill / commande / subagent | `.claude/rules/claude_harness_authoring.md` |
-| `.github/workflows/**` — CI, revue Claude, réparation auto | `.claude/rules/github_automation.md` |
+| `.github/workflows/**` — CI, merge `data/`, relais `workflow_dispatch` | `.claude/rules/github_automation.md` |
 | `ui/**/*.py`, `main_app.py` | `.claude/rules/ui.md` — ⚠️ **déprécié** (PySide6) |
 
 ## Services

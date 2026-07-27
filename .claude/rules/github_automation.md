@@ -1,23 +1,13 @@
----
-description: >-
-  Automatisation GitHub des PR — revue Claude, @mention, réparation CI, merge auto.
-  Invariants à connaître avant de modifier un workflow sous .github/workflows/.
-globs:
-  - ".github/workflows/**"
-alwaysApply: false
----
-
 # Automatisation GitHub (PR)
 
-Tout se règle **sur la PR**, sans repasser par une session locale. Les trois workflows
-Claude sont inertes — job vert, aucun blocage — si le secret `ANTHROPIC_API_KEY` disparaît.
+Trois workflows, tous déterministes. **Aucun agent IA ne tourne en CI** — voir la note en
+fin de fichier.
 
 | Déclencheur | Workflow | Effet |
 |---|---|---|
-| Ouverture de PR (ou passage en *ready*) | `claude-review.yml` | Revue par les subagents touchés par le diff, routés via `.claude/commands/pr-review.md`. **Lecture seule** : commente, ne pousse rien. |
-| `@claude …` en commentaire | `claude-mention.yml` | Répond, **peut modifier le code et pousser** sur la branche. |
-| CI en échec sur une branche de PR | `claude-ci-fix.yml` | Diagnostique, reproduit en local, **pousse un correctif** si la cause est mécanique — sinon commente et rend la main. |
+| PR vers `main`, push sur `main`, `workflow_dispatch` | `ci.yml` | Backend pytest, Vitest, ESLint. T2 sur PR, T3 sur push `main`. |
 | Push sur une PR vers `main` | `pr-merge-main-prefer-head-data.yml` | Merge `main`, arbitre les conflits `data/` en faveur de la PR. |
+| Ouverture / push d'une PR | `pr-diff-gdd-split.yml` | Commente le diff séparé GDD vs code. |
 
 ## Trois invariants
 
@@ -28,40 +18,52 @@ pousse doit donc relancer la CI explicitement :
 gh workflow run ci.yml --ref <branche>
 ```
 
-`workflow_dispatch` est l'un des rares événements exemptés de cette restriction. Trois
-workflows s'appuient dessus ; ne pas retirer le déclencheur `workflow_dispatch` de `ci.yml`,
-et ne pas retirer ces étapes de relais. Corollaire : les steps de test de `ci.yml` sont
-conditionnés par `github.event_name != 'push'` pour le tier T2, pas par
-`== 'pull_request'` — sinon un run relancé n'exécuterait rien.
+`workflow_dispatch` est l'un des rares événements exemptés de cette restriction.
+`pr-merge-main-prefer-head-data.yml` s'appuie dessus : sans ce relais, la CI resterait verte
+sur le HEAD d'**avant** le merge et le commit réellement mergé ne serait jamais testé. Ne pas
+retirer le déclencheur `workflow_dispatch` de `ci.yml`, ni l'étape de relais. Corollaire :
+les steps de test de `ci.yml` sont conditionnés par `github.event_name != 'push'` pour le
+tier T2, pas par `== 'pull_request'` — sinon un run relancé n'exécuterait rien.
 
-**2. Les déclencheurs non liés à une branche s'exécutent depuis la branche par défaut.**
-`issue_comment`, `workflow_run`, `schedule` lisent toujours le fichier de workflow présent
-sur `main`, jamais celui de la PR. Conséquence : `@claude` et la réparation CI ne peuvent
-pas être testés depuis une PR — ils ne s'activent qu'une fois mergés. Seul
-`claude-review.yml` (`pull_request`) s'exécute depuis la branche de la PR.
+**2. La famille `pull_request` s'exécute depuis la branche de la PR.** `pull_request`,
+`pull_request_review` et `pull_request_review_comment` lisent le fichier de workflow présent
+sur la branche de la PR, pas sur `main` : un workflow de cette famille est **actif dès qu'il
+est poussé**, avant tout merge. À l'inverse `issue_comment`, `workflow_run` et `schedule`
+lisent toujours la branche par défaut. Cette asymétrie décide de ce qui est testable depuis
+une PR — et de ce qui peut consommer des ressources avant qu'on l'ait validé.
 
-**3. `.claude/` est restauré depuis la branche de base** par `claude-code-action`, avec
-`CLAUDE.md`, `.mcp.json` et `.husky` (« PR head is untrusted »). C'est une protection
-anti-injection : le contenu d'une PR ne doit pas pouvoir redéfinir les agents qui la
-relisent. Conséquence : une PR qui modifie le harnais est toujours relue avec la version de
-`main`, jamais la sienne — et une PR qui *introduit* un agent ne peut pas l'utiliser.
+**3. `paths-ignore` utilise `*.md` et non `**/*.md`.** Dans les filtres GitHub, `**`
+traverse les `/`, donc `**/*.md` exclurait tout `.claude/` (agents, commandes, règles), qui
+est intégralement en markdown — une PR ne touchant que des prompts ne déclencherait aucun
+run.
 
-## Garde anti-boucle
+⚠️ **Corollaire à vérifier en protection de branche** : une PR qui ne touche que `docs/**` ou
+un `*.md` racine ne produit **aucun** run. Si `Backend (pytest)` / `Frontend (Vitest)` /
+`Frontend lint (ESLint)` sont des checks requis, ces PR restent bloquées en « Waiting for
+status ».
 
-`claude-ci-fix.yml` ne retente pas si le dernier commit de la branche vient déjà de
-`github-actions[bot]` : une tentative automatique par commit humain, jamais de ping-pong
-correctif → échec → correctif. Il commente alors pour demander une intervention.
+## Garde fork
 
-## Filtres de chemins
+`pr-merge-main-prefer-head-data.yml` tourne en `contents: write` et pousse sur la branche de
+la PR. Il exige `github.event.pull_request.head.repo.full_name == github.repository` : sans
+ce test, une PR de fork ferait résoudre `head.ref` **dans le dépôt de base**, et une
+collision de nom de branche enverrait le job écrire sur la mauvaise branche. Tout nouveau
+workflow en écriture déclenché par une PR doit porter le même garde.
 
-`paths-ignore` utilise `*.md` et **non** `**/*.md` : dans les filtres GitHub, `**` traverse
-les `/`, donc `**/*.md` exclurait tout `.claude/` (agents, commandes, règles), qui est
-intégralement en markdown — une PR ne touchant que des prompts ne déclencherait aucun run.
+## Pas d'agent IA en CI — décision assumée
 
-## Authentification
+Un dispositif de revue / `@claude` / réparation CI automatique a été prototypé (PR #54, #55)
+puis **retiré** : le coût en crédits était sans rapport avec la valeur rendue (~40 $ en une
+journée). Ne pas le réintroduire sans un plafond de dépense explicite et une mesure du coût
+par PR.
 
-Les workflows passent `github_token: ${{ secrets.GITHUB_TOKEN }}` à `claude-code-action`.
-Sans cette entrée, l'action échange un jeton OIDC contre un token d'App et exige que l'App
-GitHub Claude soit installée sur le dépôt (`401 — Claude Code is not installed on this
-repository`). Contrepartie du choix actuel : les commentaires sont signés
-`github-actions[bot]`, et les pushs ne déclenchent pas la CI — d'où l'invariant 1.
+Deux pièges découverts alors, à connaître avant toute nouvelle tentative :
+
+- **L'anti-récursion `GITHUB_TOKEN` ne couvre que ce que postent les workflows.** Une session
+  d'agent qui commente sous un compte utilisateur (PAT) est un utilisateur normal aux yeux de
+  GitHub et réveille les workflows. Mesuré sur #55 : 0 run déclenché par les commentaires du
+  bot, 8 par ceux d'une session postant sous le compte du mainteneur.
+- **Une garde anti-boucle qui lit `git log` doit utiliser `--no-merges --first-parent`.**
+  Sans `--first-parent`, `git log` traverse les deux parents d'un commit de merge et rend le
+  commit non-merge le plus récent *toutes branches confondues* : un commit venu de `main`
+  suffit à rouvrir la boucle.
