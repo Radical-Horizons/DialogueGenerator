@@ -208,6 +208,49 @@ class GddNotionSyncResult:
     mirror_promotion_pending: bool = False
 
 
+@dataclass
+class _SyncRunScope:
+    """Périmètre résolu d'un run de synchronisation.
+
+    Figé une fois pour toutes en début de run : quelles sources Notion sont éligibles,
+    sous quel filtre, et avec quelle empreinte. ``partial`` est la seule zone mutable —
+    les avertissements s'y accumulent au fil des sources.
+    """
+
+    settings: Dict[str, Any]
+    sources: List[Any]
+    included_list: List[str]
+    persisted_included_list: List[str]
+    eligible: List[Tuple[str, str, str, Optional[List[str]]]]
+    eligible_cf: List[str]
+    scope_set: Optional[Set[str]]
+    fingerprint: str
+    partial: List[str] = field(default_factory=list)
+
+
+@dataclass
+class _SyncRunState:
+    """État mutable partagé entre les phases d'un run de synchronisation.
+
+    Porte ce que la boucle par source fait progresser (compteurs, manifeste, checkpoint)
+    afin que chaque phase reste une méthode nommée plutôt qu'un bloc dans une fonction
+    de plusieurs centaines de lignes.
+    """
+
+    manifest: GddNotionManifest
+    out_root: Path
+    mirror_ok: bool = False
+    defer_manifest_persist: bool = False
+    cp_state: Optional[FullSyncCheckpointState] = None
+    staging_run: Optional[Path] = None
+    archive_rel: Optional[str] = None
+    sync_targets: Set[Path] = field(default_factory=set)
+    completed_membership: Set[str] = field(default_factory=set)
+    updated: int = 0
+    pages_total_known: int = 0
+    pages_processed_count: int = 0
+
+
 class GddNotionSyncService:
     """Service principal : config, manifeste, écriture atomique vers GDD_categories."""
 
@@ -1421,10 +1464,116 @@ class GddNotionSyncService:
         apply_staging_despite_errors: bool = False,
         run_included_categories: Optional[List[str]] = None,
     ) -> GddNotionSyncResult:
+        scope, abort = self._resolve_run_scope(
+            request_id=request_id,
+            run_scope_category_files=run_scope_category_files,
+            run_included_categories=run_included_categories,
+        )
+        if abort is not None:
+            return abort
+        assert scope is not None
+
+        if apply_staging_despite_errors:
+            return await self._apply_staging_despite_errors(
+                sources=scope.sources,
+                included_list=scope.included_list,
+                persisted_included_list=scope.persisted_included_list,
+                eligible_cf=scope.eligible_cf,
+                fingerprint=scope.fingerprint,
+                force_full=force_full,
+                run_scope_category_files=run_scope_category_files,
+                resume=resume,
+                fresh=fresh,
+                request_id=request_id,
+            )
+
+        if mirror_rebuild:
+            logger.debug(
+                "Paramètre mirror_rebuild déprécié : ignoré (sync complète = miroir automatique)."
+            )
+
+        # Le client est créé avant la préparation du staging : une factory qui échoue
+        # ne doit pas laisser derrière elle une archive et un dossier de staging.
+        client = self._client_factory(token)
+
+        state, abort = self._prepare_full_sync_run(
+            scope,
+            force_full=force_full,
+            resume=resume,
+            fresh=fresh,
+            request_id=request_id,
+        )
+        if abort is not None:
+            return abort
+        assert state is not None
+
+        self._sync_progress_update(
+            active=True,
+            started_at=datetime.now(timezone.utc).isoformat(),
+            force_full=force_full,
+            mirror_rebuild=state.mirror_ok,
+            phase="running",
+            sources_total=len(scope.eligible),
+            sources_completed=0,
+            current_source_index=0,
+            current_category_file="",
+            pages_total_known=0,
+            pages_processed=0,
+            pages_in_current_source=0,
+            current_page_in_source=0,
+            current_page_id_short="",
+            message="Synchronisation en cours…",
+            paused=False,
+        )
+
+        for i, source in enumerate(scope.eligible, start=1):
+            await self._sync_one_source(
+                client,
+                index=i,
+                source=source,
+                scope=scope,
+                state=state,
+                force_full=force_full,
+                retry_policy=retry_policy,
+                request_id=request_id,
+            )
+
+        self._sync_progress_update(
+            phase="finalizing",
+            message="Finalisation (cache GDD, manifeste)…",
+            sources_completed=len(scope.eligible),
+        )
+
+        return self._promote_and_finalize(
+            scope,
+            state,
+            force_full=force_full,
+            request_id=request_id,
+        )
+
+    def _resolve_run_scope(
+        self,
+        *,
+        request_id: Optional[str],
+        run_scope_category_files: Optional[Tuple[str, ...]],
+        run_included_categories: Optional[List[str]],
+    ) -> Tuple[Optional[_SyncRunScope], Optional[GddNotionSyncResult]]:
+        """Résout le périmètre du run : sources configurées, filtre appliqué, éligibles.
+
+        Args:
+            request_id: ID de requête pour la corrélation des logs de sync.
+            run_scope_category_files: Restriction éphémère à des ``category_file`` de bases.
+            run_included_categories: Filtre éphémère de l'UI ; ``None`` retombe sur le
+                filtre persisté dans ``settings.json``.
+
+        Returns:
+            ``(scope, None)`` si le run peut démarrer, ``(None, résultat d'abandon)``
+            sinon — périmètre vide, ``category_file`` inconnu ou filtre sans correspondance.
+        """
         settings = self._store.load_settings()
         sources = settings.get("sources") or []
         if not sources:
-            return GddNotionSyncResult(
+            return None, GddNotionSyncResult(
                 success=False,
                 message="Aucune source Notion configurée (sources[] vide).",
             )
@@ -1468,7 +1617,7 @@ class GddNotionSyncService:
                 known_db = set(database_category_files)
                 unknown = sorted(scope_set - known_db)
                 if unknown:
-                    return GddNotionSyncResult(
+                    return None, GddNotionSyncResult(
                         success=False,
                         message=(
                             "category_file inconnu ou absent des sources database : "
@@ -1484,7 +1633,7 @@ class GddNotionSyncService:
                 category_file_matches_included(cf, included_list)
                 for cf in database_category_files
             ):
-                return GddNotionSyncResult(
+                return None, GddNotionSyncResult(
                     success=False,
                     message=(
                         "included_categories ne correspond à aucune base (database) "
@@ -1503,7 +1652,7 @@ class GddNotionSyncService:
         )
         eligible_cf = [e[2] for e in eligible]
         if not eligible:
-            return GddNotionSyncResult(
+            return None, GddNotionSyncResult(
                 success=False,
                 message=(
                     "Aucune source Notion éligible pour ce run "
@@ -1516,379 +1665,446 @@ class GddNotionSyncService:
                 request_id=request_id,
             )
 
-        if apply_staging_despite_errors:
-            return await self._apply_staging_despite_errors(
+        return (
+            _SyncRunScope(
+                settings=settings,
                 sources=sources,
                 included_list=included_list,
                 persisted_included_list=persisted_included_list,
+                eligible=eligible,
                 eligible_cf=eligible_cf,
+                scope_set=scope_set,
                 fingerprint=fingerprint,
-                force_full=force_full,
-                run_scope_category_files=run_scope_category_files,
-                resume=resume,
-                fresh=fresh,
-                request_id=request_id,
-            )
+                partial=partial,
+            ),
+            None,
+        )
 
-        mirror_ok = bool(force_full) and len(eligible) > 0
+    def _prepare_full_sync_run(
+        self,
+        scope: _SyncRunScope,
+        *,
+        force_full: bool,
+        resume: bool,
+        fresh: bool,
+        request_id: Optional[str],
+    ) -> Tuple[Optional[_SyncRunState], Optional[GddNotionSyncResult]]:
+        """Prépare l'état du run : manifeste, archive, staging et checkpoint.
+
+        Une sync complète écrit dans un dossier ``.staging/<run>`` promu à la fin ; une
+        sync incrémentale écrit directement dans le live. En reprise, l'état est relu
+        depuis le checkpoint au lieu d'être recréé.
+
+        Args:
+            scope: Périmètre résolu du run.
+            force_full: True pour une sync complète (miroir + archive + staging).
+            resume: True pour reprendre un checkpoint existant.
+            fresh: True pour abandonner tout checkpoint et repartir de zéro.
+            request_id: ID de requête pour la corrélation des logs de sync.
+
+        Returns:
+            ``(state, None)`` si le run peut démarrer, ``(None, résultat d'abandon)``
+            si une reprise demandée est impossible (checkpoint ou staging manquant).
+        """
+        mirror_ok = bool(force_full) and len(scope.eligible) > 0
         want_resume = bool(resume) and mirror_ok
         want_fresh = bool(fresh) and mirror_ok
         if want_fresh:
             want_resume = False
 
-        if mirror_rebuild:
-            logger.debug(
-                "Paramètre mirror_rebuild déprécié : ignoré (sync complète = miroir automatique)."
+        if not mirror_ok:
+            return (
+                _SyncRunState(
+                    manifest=load_manifest(self._manifest_path),
+                    out_root=self._gdd_categories_path,
+                    mirror_ok=False,
+                    defer_manifest_persist=False,
+                ),
+                None,
             )
 
-        client = self._client_factory(token)
-        updated = 0
-        manifest: GddNotionManifest
-        cp_state: Optional[FullSyncCheckpointState] = None
-        out_root = self._gdd_categories_path
-        staging_run: Optional[Path] = None
-        archive_rel: Optional[str] = None
-        sync_targets: Set[Path] = set()
-        defer_manifest_persist = mirror_ok
+        if want_fresh or not want_resume:
+            abandon_checkpoint_on_disk(
+                self._gdd_categories_path, self._sync_checkpoint_dir
+            )
 
-        if mirror_ok:
-            if want_fresh or not want_resume:
-                abandon_checkpoint_on_disk(
-                    self._gdd_categories_path, self._sync_checkpoint_dir
+        if want_resume:
+            ok_resume, vmsg = validate_checkpoint_for_resume(
+                self._gdd_categories_path,
+                self._sync_checkpoint_dir,
+                eligible_category_files=scope.eligible_cf,
+                sources_fingerprint=scope.fingerprint,
+            )
+            if not ok_resume:
+                return None, GddNotionSyncResult(
+                    success=False,
+                    message=f"Reprise impossible — {vmsg}",
+                    partial_errors=scope.partial,
                 )
-            if want_resume:
-                ok_resume, vmsg = validate_checkpoint_for_resume(
-                    self._gdd_categories_path,
-                    self._sync_checkpoint_dir,
-                    eligible_category_files=eligible_cf,
-                    sources_fingerprint=fingerprint,
+            st_chk = load_checkpoint_state(self._sync_checkpoint_dir)
+            if st_chk is None:
+                return None, GddNotionSyncResult(
+                    success=False,
+                    message="Reprise impossible — checkpoint introuvable.",
+                    partial_errors=scope.partial,
                 )
-                if not ok_resume:
-                    return GddNotionSyncResult(
-                        success=False,
-                        message=f"Reprise impossible — {vmsg}",
-                        partial_errors=partial,
-                    )
-                st_chk = load_checkpoint_state(self._sync_checkpoint_dir)
-                if st_chk is None:
-                    return GddNotionSyncResult(
-                        success=False,
-                        message="Reprise impossible — checkpoint introuvable.",
-                        partial_errors=partial,
-                    )
-                _, manifest_sidecar = checkpoint_paths(self._sync_checkpoint_dir)
-                manifest = load_run_manifest(manifest_sidecar)
-                staging_run = staging_run_path(
-                    self._gdd_categories_path, st_chk.staging_run_name
+            _, manifest_sidecar = checkpoint_paths(self._sync_checkpoint_dir)
+            manifest = load_run_manifest(manifest_sidecar)
+            staging_run = staging_run_path(
+                self._gdd_categories_path, st_chk.staging_run_name
+            )
+            if not staging_run.is_dir():
+                return None, GddNotionSyncResult(
+                    success=False,
+                    message="Reprise impossible — dossier staging introuvable.",
+                    partial_errors=scope.partial,
                 )
-                if not staging_run.is_dir():
-                    return GddNotionSyncResult(
-                        success=False,
-                        message="Reprise impossible — dossier staging introuvable.",
-                        partial_errors=partial,
-                    )
-                prune_staging_runs_keep_only(
-                    self._gdd_categories_path, st_chk.staging_run_name
-                )
-                self._active_mirror_staging = staging_run
-                out_root = staging_run
-                archive_rel = st_chk.archive_rel
-                sync_targets = collect_sync_targets(
-                    self._gdd_categories_path, eligible_cf
-                )
-                updated = st_chk.updated_entities
-                cp_state = st_chk
-                log_sync_event(
-                    (
-                        "Reprise sync complète "
-                        f"({len(st_chk.completed_category_files)}/{len(eligible_cf)} sources)"
+            prune_staging_runs_keep_only(
+                self._gdd_categories_path, st_chk.staging_run_name
+            )
+            self._active_mirror_staging = staging_run
+            log_sync_event(
+                (
+                    "Reprise sync complète "
+                    f"({len(st_chk.completed_category_files)}/{len(scope.eligible_cf)} sources)"
+                ),
+                request_id=request_id,
+            )
+            return (
+                _SyncRunState(
+                    manifest=manifest,
+                    out_root=staging_run,
+                    mirror_ok=True,
+                    defer_manifest_persist=True,
+                    cp_state=st_chk,
+                    staging_run=staging_run,
+                    archive_rel=st_chk.archive_rel,
+                    sync_targets=collect_sync_targets(
+                        self._gdd_categories_path, scope.eligible_cf
                     ),
-                    request_id=request_id,
-                )
-            else:
-                manifest = load_manifest(self._manifest_path)
-                self._sync_progress_update(
-                    phase="archiving",
-                    message="Archivage de l'état GDD actuel…",
-                )
-                arch_decision = archive_gdd_snapshot_if_delta(self._gdd_categories_path)
-                archive_rel = arch_decision.archive_rel
-                retention = int(settings.get("archive_retention_count") or 10)
-                if arch_decision.created_new:
-                    prune_archives(self._gdd_categories_path, max(1, retention))
-                staging_run = create_staging_run_dir(self._gdd_categories_path)
-                self._active_mirror_staging = staging_run
-                out_root = staging_run
-                sync_targets = collect_sync_targets(
-                    self._gdd_categories_path, eligible_cf
-                )
-                cp_state = FullSyncCheckpointState(
-                    staging_run_name=staging_run.name,
-                    archive_rel=archive_rel,
-                    eligible_category_files=list(eligible_cf),
-                    completed_category_files=[],
-                    sources_fingerprint=fingerprint,
-                    updated_entities=0,
-                    mirror_promotion_pending=False,
-                )
-                save_checkpoint(self._sync_checkpoint_dir, cp_state, manifest)
-        else:
-            manifest = load_manifest(self._manifest_path)
+                    completed_membership=set(st_chk.completed_category_files),
+                    updated=st_chk.updated_entities,
+                ),
+                None,
+            )
 
-        started_progress = datetime.now(timezone.utc).isoformat()
+        manifest = load_manifest(self._manifest_path)
         self._sync_progress_update(
-            active=True,
-            started_at=started_progress,
-            force_full=force_full,
-            mirror_rebuild=mirror_ok,
-            phase="running",
-            sources_total=len(eligible),
-            sources_completed=0,
-            current_source_index=0,
-            current_category_file="",
-            pages_total_known=0,
-            pages_processed=0,
-            pages_in_current_source=0,
-            current_page_in_source=0,
-            current_page_id_short="",
-            message="Synchronisation en cours…",
-            paused=False,
+            phase="archiving",
+            message="Archivage de l'état GDD actuel…",
+        )
+        arch_decision = archive_gdd_snapshot_if_delta(self._gdd_categories_path)
+        archive_rel = arch_decision.archive_rel
+        retention = int(scope.settings.get("archive_retention_count") or 10)
+        if arch_decision.created_new:
+            prune_archives(self._gdd_categories_path, max(1, retention))
+        staging_run = create_staging_run_dir(self._gdd_categories_path)
+        self._active_mirror_staging = staging_run
+        cp_state = FullSyncCheckpointState(
+            staging_run_name=staging_run.name,
+            archive_rel=archive_rel,
+            eligible_category_files=list(scope.eligible_cf),
+            completed_category_files=[],
+            sources_fingerprint=scope.fingerprint,
+            updated_entities=0,
+            mirror_promotion_pending=False,
+        )
+        save_checkpoint(self._sync_checkpoint_dir, cp_state, manifest)
+        return (
+            _SyncRunState(
+                manifest=manifest,
+                out_root=staging_run,
+                mirror_ok=True,
+                defer_manifest_persist=True,
+                cp_state=cp_state,
+                staging_run=staging_run,
+                archive_rel=archive_rel,
+                sync_targets=collect_sync_targets(
+                    self._gdd_categories_path, scope.eligible_cf
+                ),
+            ),
+            None,
         )
 
-        pages_total_known = 0
-        pages_processed_count = 0
+    def _save_checkpoint_after_source(self, cat_done: str, state: _SyncRunState) -> None:
+        """Persiste le checkpoint après qu'une source a été entièrement traitée.
 
-        def _checkpoint_save_after_source(cat_done: str) -> None:
-            if not mirror_ok or cp_state is None:
-                return
-            if (
-                cat_done
-                and cat_done not in cp_state.completed_category_files
-            ):
-                cp_state.completed_category_files.append(cat_done)
-            cp_state.updated_entities = updated
-            save_checkpoint(self._sync_checkpoint_dir, cp_state, manifest)
+        C'est ce point de sauvegarde qui rend ``POST .../sync?full=true&resume=true``
+        capable de repartir de la source suivante plutôt que du début.
+        """
+        if not state.mirror_ok or state.cp_state is None:
+            return
+        if cat_done and cat_done not in state.cp_state.completed_category_files:
+            state.cp_state.completed_category_files.append(cat_done)
+        state.cp_state.updated_entities = state.updated
+        save_checkpoint(self._sync_checkpoint_dir, state.cp_state, state.manifest)
 
-        completed_membership: Set[str] = set()
-        if cp_state is not None:
-            completed_membership = set(cp_state.completed_category_files)
+    async def _sync_one_source(
+        self,
+        client: NotionAPIClient,
+        *,
+        index: int,
+        source: Tuple[str, str, str, Optional[List[str]]],
+        scope: _SyncRunScope,
+        state: _SyncRunState,
+        force_full: bool,
+        retry_policy: SyncBackoffPolicy,
+        request_id: Optional[str],
+    ) -> None:
+        """Synchronise une source Notion (base ou fiche) vers le disque.
 
-        for i, (kind, nid, cat_file, ds_ids) in enumerate(eligible, start=1):
+        Les erreurs récupérables sont accumulées dans ``scope.partial`` et n'interrompent
+        pas le run : la source est abandonnée et la suivante est traitée. Toute sortie
+        anticipée passe par le même point de sauvegarde de checkpoint que le cas nominal
+        quand la source est réellement terminée.
+
+        Args:
+            client: Client Notion du run.
+            index: Rang 1-indexé de la source dans le périmètre (pour la progression).
+            source: Tuple ``(kind, notion_id, category_file, data_source_ids)``.
+            scope: Périmètre du run (accumule les avertissements).
+            state: État mutable du run (compteurs, manifeste, checkpoint).
+            force_full: True si sync complète (ignore le manifeste pour la péremption).
+            retry_policy: Politique de backoff des lectures Notion.
+            request_id: ID de requête pour la corrélation des logs de sync.
+        """
+        kind, nid, cat_file, ds_ids = source
+        total = len(scope.eligible)
+
+        await self._cooperative_sync_point()
+        self._sync_progress_update(
+            current_source_index=index,
+            current_category_file=cat_file,
+            sources_completed=index - 1,
+            message=f"Source {index}/{total} — {cat_file}",
+        )
+        if cat_file in state.completed_membership:
+            log_sync_event(
+                f"Reprise: source déjà traitée — {cat_file}",
+                request_id=request_id,
+            )
+            self._sync_progress_update(sources_completed=index)
+            return
+        try:
+
+            async def _load_pages() -> List[Mapping[str, Any]]:
+                return await self._fetch_pages(client, kind, nid, ds_ids)
+
+            pages = await self._notion_read_with_retries(
+                _load_pages, retry_policy=retry_policy
+            )
+        except _SYNC_RECOVERABLE as exc:
+            scope.partial.append(f"{cat_file}: fetch — {_format_partial_error_detail(exc)}")
+            self._sync_progress_update(sources_completed=index)
+            return
+
+        await self._cooperative_sync_point()
+        _, stale_pages = filter_stale_page_ids(
+            list(pages), state.manifest, force_full=force_full
+        )
+        if not stale_pages:
+            log_sync_event(
+                f"Rien à mettre à jour pour {cat_file} (manifest à jour)",
+                request_id=request_id,
+            )
+            self._sync_progress_update(sources_completed=index)
+            self._save_checkpoint_after_source(cat_file, state)
+            return
+
+        state.pages_total_known += len(stale_pages)
+        self._sync_progress_update(
+            pages_total_known=state.pages_total_known,
+            pages_in_current_source=len(stale_pages),
+            current_page_in_source=0,
+            current_page_id_short="",
+            message=f"Pages — {cat_file} ({len(stale_pages)} à traiter)",
+        )
+
+        shard_list_key = category_stem_to_list_category_key(Path(cat_file).stem)
+        use_shards = shard_list_key is not None
+        try:
+            norm_source_id = normalize_notion_id(nid)
+        except ValueError:
+            norm_source_id = ""
+        compact_table = (
+            kind == "database"
+            and bool(norm_source_id)
+            and database_id_is_compact_table_export(norm_source_id)
+        )
+        out_path: Optional[Path] = None
+        existing: List[Dict[str, Any]] = []
+        if not use_shards:
+            out_path = state.out_root / cat_file
+            if not (compact_table and force_full):
+                existing_raw = read_json_file(out_path, default=[])
+                existing = (
+                    existing_raw if isinstance(existing_raw, list) else []
+                )
+
+        body_cache: Dict[str, str] = {}
+        probe_sample_all_empty = False
+        if (
+            not compact_table
+            and str(kind or "").strip().lower() == "database"
+            and stale_pages
+        ):
+            body_cache, probe_sample_all_empty = await self._probe_database_body_sample(
+                client,
+                list(pages),
+                category_file=cat_file,
+                retry_policy=retry_policy,
+                request_id=request_id,
+            )
+            if probe_sample_all_empty:
+                logger.debug(
+                    "%s : échantillon Notion (%s premières lignes) sans corps ; "
+                    "les autres lignes sont quand même lues si absentes du cache.",
+                    cat_file,
+                    NOTION_DATABASE_BODY_PROBE_ROW_COUNT,
+                )
+
+        written_page_records: List[Tuple[str, Dict[str, Any]]] = []
+        manifest_touched = False
+        for page_num, p in enumerate(stale_pages, start=1):
             await self._cooperative_sync_point()
+            pid = p.get("id")
             self._sync_progress_update(
-                current_source_index=i,
-                current_category_file=cat_file,
-                sources_completed=i - 1,
-                message=f"Source {i}/{len(eligible)} — {cat_file}",
+                current_page_in_source=page_num,
+                current_page_id_short=self._notion_id_short(pid),
             )
-            if cat_file in completed_membership:
-                log_sync_event(
-                    f"Reprise: source déjà traitée — {cat_file}",
-                    request_id=request_id,
-                )
-                self._sync_progress_update(sources_completed=i)
-                continue
             try:
-
-                async def _load_pages() -> List[Mapping[str, Any]]:
-                    return await self._fetch_pages(client, kind, nid, ds_ids)
-
-                pages = await self._notion_read_with_retries(
-                    _load_pages, retry_policy=retry_policy
-                )
-            except _SYNC_RECOVERABLE as exc:
-                partial.append(f"{cat_file}: fetch — {_format_partial_error_detail(exc)}")
-                self._sync_progress_update(sources_completed=i)
-                continue
-
-            await self._cooperative_sync_point()
-            _, stale_pages = filter_stale_page_ids(
-                list(pages), manifest, force_full=force_full
-            )
-            if not stale_pages:
-                log_sync_event(
-                    f"Rien à mettre à jour pour {cat_file} (manifest à jour)",
-                    request_id=request_id,
-                )
-                self._sync_progress_update(sources_completed=i)
-                _checkpoint_save_after_source(cat_file)
-                continue
-
-            pages_total_known += len(stale_pages)
-            self._sync_progress_update(
-                pages_total_known=pages_total_known,
-                pages_in_current_source=len(stale_pages),
-                current_page_in_source=0,
-                current_page_id_short="",
-                message=f"Pages — {cat_file} ({len(stale_pages)} à traiter)",
-            )
-
-            shard_list_key = category_stem_to_list_category_key(Path(cat_file).stem)
-            use_shards = shard_list_key is not None
-            try:
-                norm_source_id = normalize_notion_id(nid)
-            except ValueError:
-                norm_source_id = ""
-            compact_table = (
-                kind == "database"
-                and bool(norm_source_id)
-                and database_id_is_compact_table_export(norm_source_id)
-            )
-            out_path: Optional[Path] = None
-            existing: List[Dict[str, Any]] = []
-            if not use_shards:
-                out_path = out_root / cat_file
-                if not (compact_table and force_full):
-                    existing_raw = read_json_file(out_path, default=[])
-                    existing = (
-                        existing_raw if isinstance(existing_raw, list) else []
-                    )
-
-            body_cache: Dict[str, str] = {}
-            probe_sample_all_empty = False
-            if (
-                not compact_table
-                and str(kind or "").strip().lower() == "database"
-                and stale_pages
-            ):
-                body_cache, probe_sample_all_empty = await self._probe_database_body_sample(
-                    client,
-                    list(pages),
-                    category_file=cat_file,
-                    retry_policy=retry_policy,
-                    request_id=request_id,
-                )
-                if probe_sample_all_empty:
-                    logger.debug(
-                        "%s : échantillon Notion (%s premières lignes) sans corps ; "
-                        "les autres lignes sont quand même lues si absentes du cache.",
-                        cat_file,
-                        NOTION_DATABASE_BODY_PROBE_ROW_COUNT,
-                    )
-
-            written_page_records: List[Tuple[str, Dict[str, Any]]] = []
-            manifest_touched = False
-            for page_num, p in enumerate(stale_pages, start=1):
-                await self._cooperative_sync_point()
-                pid = p.get("id")
-                self._sync_progress_update(
-                    current_page_in_source=page_num,
-                    current_page_id_short=self._notion_id_short(pid),
-                )
-                try:
-                    if compact_table:
-                        page_for_record: Mapping[str, Any] = p
-                        if not notion_query_row_has_properties(p):
-                            async def _read_meta() -> Dict[str, Any]:
-                                return await client.get_page(pid)
-
-                            page_for_record = await self._notion_read_with_retries(
-                                _read_meta, retry_policy=retry_policy
-                            )
-                        rec = notion_page_to_compact_row_record(page_for_record)
-                    else:
+                if compact_table:
+                    page_for_record: Mapping[str, Any] = p
+                    if not notion_query_row_has_properties(p):
                         async def _read_meta() -> Dict[str, Any]:
                             return await client.get_page(pid)
 
-                        full_page = await self._notion_read_with_retries(
+                        page_for_record = await self._notion_read_with_retries(
                             _read_meta, retry_policy=retry_policy
                         )
-                        pid_key = str(pid or "").strip()
-
-                        async def _read_body() -> str:
-                            return await client.get_page_content(pid_key)
-
-                        if pid_key in body_cache:
-                            body = body_cache[pid_key]
-                        else:
-                            body = await self._notion_read_with_retries(
-                                _read_body, retry_policy=retry_policy
-                            )
-                        rec = notion_page_to_gdd_record_merge_body_and_properties(
-                            full_page, body
-                        )
-                    edited = p.get("last_edited_time") or ""
-                    if is_record_empty_for_sync(rec):
-                        if edited:
-                            manifest.set_edited(pid, edited)
-                            manifest_touched = True
-                        partial.append(
-                            f"{cat_file} page {pid}: ignorée (corps et colonnes vides)"
-                        )
-                    else:
-                        rec_out = dict(rec)
-                        pid_str = str(pid or "").strip()
-                        if pid_str:
-                            try:
-                                nid_norm = normalize_notion_id(pid_str)
-                                rec_out["notion_page_id"] = nid_norm
-                            except ValueError:
-                                rec_out["notion_page_id"] = pid_str
-                        written_page_records.append((pid_str, rec_out))
-                        if edited:
-                            manifest.set_edited(pid, edited)
-                            manifest_touched = True
-                        updated += 1
-                except _SYNC_RECOVERABLE as exc:
-                    partial.append(
-                        f"{cat_file} page {pid}: {_format_partial_error_detail(exc)}"
-                    )
-                finally:
-                    pages_processed_count += 1
-                    self._sync_progress_update(pages_processed=pages_processed_count)
-
-            if manifest_touched and not defer_manifest_persist:
-                save_manifest(self._manifest_path, manifest)
-            if not written_page_records:
-                self._sync_progress_update(sources_completed=i)
-                _checkpoint_save_after_source(cat_file)
-                continue
-
-            try:
-                if use_shards and shard_list_key is not None:
-                    shard_dir = out_root / shard_list_key
-                    shard_dir.mkdir(parents=True, exist_ok=True)
-                    for pid_str, rec_out in written_page_records:
-                        write_gdd_shard_atomic(shard_dir, rec_out, pid_str)
+                    rec = notion_page_to_compact_row_record(page_for_record)
                 else:
-                    if out_path is None:
-                        partial.append(f"{cat_file}: écriture — chemin monolithe indéfini")
-                        self._sync_progress_update(sources_completed=i)
-                        continue
-                    new_recs_only = [r for _pid, r in written_page_records]
-                    if compact_table and force_full:
-                        write_json_atomic(out_path, new_recs_only)
+                    async def _read_meta() -> Dict[str, Any]:
+                        return await client.get_page(pid)
+
+                    full_page = await self._notion_read_with_retries(
+                        _read_meta, retry_policy=retry_policy
+                    )
+                    pid_key = str(pid or "").strip()
+
+                    async def _read_body() -> str:
+                        return await client.get_page_content(pid_key)
+
+                    if pid_key in body_cache:
+                        body = body_cache[pid_key]
                     else:
-                        merged = merge_records_by_nom(existing, new_recs_only)
-                        write_json_atomic(out_path, merged)
-                self._append_entity_history(
-                    cat_file, shard_list_key, use_shards, written_page_records
-                )
+                        body = await self._notion_read_with_retries(
+                            _read_body, retry_policy=retry_policy
+                        )
+                    rec = notion_page_to_gdd_record_merge_body_and_properties(
+                        full_page, body
+                    )
+                edited = p.get("last_edited_time") or ""
+                if is_record_empty_for_sync(rec):
+                    if edited:
+                        state.manifest.set_edited(pid, edited)
+                        manifest_touched = True
+                    scope.partial.append(
+                        f"{cat_file} page {pid}: ignorée (corps et colonnes vides)"
+                    )
+                else:
+                    rec_out = dict(rec)
+                    pid_str = str(pid or "").strip()
+                    if pid_str:
+                        try:
+                            nid_norm = normalize_notion_id(pid_str)
+                            rec_out["notion_page_id"] = nid_norm
+                        except ValueError:
+                            rec_out["notion_page_id"] = pid_str
+                    written_page_records.append((pid_str, rec_out))
+                    if edited:
+                        state.manifest.set_edited(pid, edited)
+                        manifest_touched = True
+                    state.updated += 1
             except _SYNC_RECOVERABLE as exc:
-                partial.append(f"{cat_file}: écriture — {_format_partial_error_detail(exc)}")
-                self._sync_progress_update(sources_completed=i)
-                continue
+                scope.partial.append(
+                    f"{cat_file} page {pid}: {_format_partial_error_detail(exc)}"
+                )
+            finally:
+                state.pages_processed_count += 1
+                self._sync_progress_update(pages_processed=state.pages_processed_count)
 
-            if not defer_manifest_persist:
-                save_manifest(self._manifest_path, manifest)
-            log_sync_event(
-                f"Écrit {cat_file}: {len(written_page_records)} entité(s) traitée(s)",
-                request_id=request_id,
+        if manifest_touched and not state.defer_manifest_persist:
+            save_manifest(self._manifest_path, state.manifest)
+        if not written_page_records:
+            self._sync_progress_update(sources_completed=index)
+            self._save_checkpoint_after_source(cat_file, state)
+            return
+
+        try:
+            if use_shards and shard_list_key is not None:
+                shard_dir = state.out_root / shard_list_key
+                shard_dir.mkdir(parents=True, exist_ok=True)
+                for pid_str, rec_out in written_page_records:
+                    write_gdd_shard_atomic(shard_dir, rec_out, pid_str)
+            else:
+                if out_path is None:
+                    scope.partial.append(f"{cat_file}: écriture — chemin monolithe indéfini")
+                    self._sync_progress_update(sources_completed=index)
+                    return
+                new_recs_only = [r for _pid, r in written_page_records]
+                if compact_table and force_full:
+                    write_json_atomic(out_path, new_recs_only)
+                else:
+                    merged = merge_records_by_nom(existing, new_recs_only)
+                    write_json_atomic(out_path, merged)
+            self._append_entity_history(
+                cat_file, shard_list_key, use_shards, written_page_records
             )
-            self._sync_progress_update(sources_completed=i)
-            _checkpoint_save_after_source(cat_file)
+        except _SYNC_RECOVERABLE as exc:
+            scope.partial.append(f"{cat_file}: écriture — {_format_partial_error_detail(exc)}")
+            self._sync_progress_update(sources_completed=index)
+            return
 
-        self._sync_progress_update(
-            phase="finalizing",
-            message="Finalisation (cache GDD, manifeste)…",
-            sources_completed=len(eligible),
+        if not state.defer_manifest_persist:
+            save_manifest(self._manifest_path, state.manifest)
+        log_sync_event(
+            f"Écrit {cat_file}: {len(written_page_records)} entité(s) traitée(s)",
+            request_id=request_id,
         )
+        self._sync_progress_update(sources_completed=index)
+        self._save_checkpoint_after_source(cat_file, state)
 
-        if mirror_ok and staging_run is not None:
-            if partial_errors_block_mirror_promote(partial):
-                if cp_state is not None:
-                    cp_state.mirror_promotion_pending = True
-                    save_checkpoint(self._sync_checkpoint_dir, cp_state, manifest)
+    def _promote_and_finalize(
+        self,
+        scope: _SyncRunScope,
+        state: _SyncRunState,
+        *,
+        force_full: bool,
+        request_id: Optional[str],
+    ) -> GddNotionSyncResult:
+        """Promeut le staging vers le live si le run le permet, puis compose le résultat.
+
+        Des erreurs partielles bloquantes suspendent la promotion : le staging et le
+        checkpoint sont conservés pour que l'utilisateur puisse reprendre ou forcer
+        l'application.
+
+        Args:
+            scope: Périmètre du run (avertissements accumulés).
+            state: État final du run.
+            force_full: True si sync complète (horodate ``last_full_sync_at``).
+            request_id: ID de requête pour la corrélation des logs de sync.
+
+        Returns:
+            Le résultat agrégé du run.
+        """
+        if state.mirror_ok and state.staging_run is not None:
+            if partial_errors_block_mirror_promote(scope.partial):
+                if state.cp_state is not None:
+                    state.cp_state.mirror_promotion_pending = True
+                    save_checkpoint(
+                        self._sync_checkpoint_dir, state.cp_state, state.manifest
+                    )
                 log_sync_event(
                     "Miroir non promu (erreurs partielles bloquantes) — staging et "
                     "checkpoint conservés. Relancez avec apply_staging_despite_errors=true "
@@ -1897,9 +2113,9 @@ class GddNotionSyncService:
                     request_id=request_id,
                 )
                 msg = (
-                    f"Miroir non appliqué automatiquement : {len(partial)} erreur(s) "
+                    f"Miroir non appliqué automatiquement : {len(scope.partial)} erreur(s) "
                     f"partielle(s). Le disque live GDD n'a pas été modifié. "
-                    f"Snapshot : {archive_rel or '?'}. "
+                    f"Snapshot : {state.archive_rel or '?'}. "
                     "Vous pouvez appliquer le miroir malgré tout (bases absentes du staging "
                     "restent inchangées), ou reprendre pour retenter Notion."
                 )
@@ -1908,9 +2124,9 @@ class GddNotionSyncService:
                 return GddNotionSyncResult(
                     success=False,
                     message=msg,
-                    updated_entities=updated,
-                    partial_errors=partial,
-                    last_archive_relative=archive_rel,
+                    updated_entities=state.updated,
+                    partial_errors=scope.partial,
+                    last_archive_relative=state.archive_rel,
                     mirror_rebuild_used=True,
                     mirror_promotion_pending=True,
                 )
@@ -1919,18 +2135,20 @@ class GddNotionSyncService:
                 message="Promotion du miroir vers GDD_categories…",
             )
             if force_full:
-                manifest.last_full_sync_at = datetime.now(timezone.utc).isoformat()
-            save_manifest(self._manifest_path, manifest)
+                state.manifest.last_full_sync_at = datetime.now(timezone.utc).isoformat()
+            save_manifest(self._manifest_path, state.manifest)
             promote_staging_to_live(
                 self._gdd_categories_path,
-                staging_run,
-                sync_targets,
+                state.staging_run,
+                state.sync_targets,
                 allow_missing_staged=False,
             )
-            prune_included: List[str] = [] if scope_set else list(persisted_included_list)
+            prune_included: List[str] = (
+                [] if scope.scope_set else list(scope.persisted_included_list)
+            )
             removed_live = remove_excluded_database_sources_from_live(
                 self._gdd_categories_path,
-                sources,
+                scope.sources,
                 prune_included,
             )
             for rel in removed_live:
@@ -1939,32 +2157,32 @@ class GddNotionSyncService:
                     request_id=request_id,
                 )
             clear_checkpoint_files(self._sync_checkpoint_dir)
-            staging_run = None
+            state.staging_run = None
             self._active_mirror_staging = None
         else:
             if force_full:
-                manifest.last_full_sync_at = datetime.now(timezone.utc).isoformat()
-                save_manifest(self._manifest_path, manifest)
+                state.manifest.last_full_sync_at = datetime.now(timezone.utc).isoformat()
+                save_manifest(self._manifest_path, state.manifest)
 
         self._clear_gdd_file_cache_and_notify_context()
 
-        success = updated > 0 or not partial
+        success = state.updated > 0 or not scope.partial
         msg = (
-            f"{updated} entité(s) mise(s) à jour"
-            if updated
+            f"{state.updated} entité(s) mise(s) à jour"
+            if state.updated
             else "Aucune mise à jour"
         )
-        if partial:
-            msg += f" — {len(partial)} avertissement(s)"
-        if mirror_ok and success:
-            msg += f" — miroir appliqué (archive : {archive_rel})"
+        if scope.partial:
+            msg += f" — {len(scope.partial)} avertissement(s)"
+        if state.mirror_ok and success:
+            msg += f" — miroir appliqué (archive : {state.archive_rel})"
         return GddNotionSyncResult(
             success=success,
             message=msg,
-            updated_entities=updated,
-            partial_errors=partial,
-            last_archive_relative=archive_rel if mirror_ok else None,
-            mirror_rebuild_used=mirror_ok,
+            updated_entities=state.updated,
+            partial_errors=scope.partial,
+            last_archive_relative=state.archive_rel if state.mirror_ok else None,
+            mirror_rebuild_used=state.mirror_ok,
             mirror_promotion_pending=False,
         )
 
