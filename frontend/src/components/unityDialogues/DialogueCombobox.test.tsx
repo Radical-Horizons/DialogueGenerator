@@ -199,7 +199,12 @@ describe('DialogueCombobox', () => {
     await waitFor(() => {
       expect(trigger).toHaveAttribute('aria-expanded', 'false')
     })
-    expect(trigger).toHaveFocus()
+    // Le composant restaure le focus dans un `requestAnimationFrame` (ligne 92),
+    // alors qu'`aria-expanded` bascule dès le rendu : asserter le focus hors
+    // `waitFor` fait la course avec la frame et échoue sur runner chargé.
+    await waitFor(() => {
+      expect(trigger).toHaveFocus()
+    })
   })
 
   it("le raccourci `/` global focuse l'input de recherche quand le panneau est ouvert", async () => {
