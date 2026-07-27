@@ -4,17 +4,25 @@
  * La logique vit dans les hooks `useGddNotionSync*` ; ce composant compose leur état
  * et rend le panneau.
  */
-import type { CSSProperties } from 'react'
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import {
   deleteGddFullSyncCheckpoint,
   postGddFullSyncCancel,
   postGddFullSyncPause,
   postGddFullSyncUnpause,
-  postGddNotionArchiveRestore,
   postGddNotionTestConnection,
 } from '../../api/gddNotionSync'
 import { GddNotionSyncProgressModal } from './GddNotionSyncProgressModal'
+import { GddNotionSyncPreviewModal } from './GddNotionSyncPreviewModal'
+import { GddNotionSyncRestoreModal } from './GddNotionSyncRestoreModal'
+import { DatabasePerimeterHelp } from './GddNotionSyncPerimeterHelp'
+import {
+  buttonStyle,
+  formatArchiveLabel,
+  formatArchiveSizeBytes,
+  inputStyle,
+  labelStyle,
+} from './gddNotionSyncStyles'
 import { useGddNotionSyncUi, type GddNotionSyncOutcomeTone } from '../../hooks/useGddNotionSyncUi'
 import { useGddNotionSyncConfig } from '../../hooks/useGddNotionSyncConfig'
 import { useGddNotionSyncPerimeter } from '../../hooks/useGddNotionSyncPerimeter'
@@ -22,14 +30,10 @@ import { useGddNotionSyncCheckpoint } from '../../hooks/useGddNotionSyncCheckpoi
 import { useGddNotionSyncArchives } from '../../hooks/useGddNotionSyncArchives'
 import { useGddNotionSyncPreview } from '../../hooks/useGddNotionSyncPreview'
 import { useGddNotebooklmExport } from '../../hooks/useGddNotebooklmExport'
-import {
-  refreshContextAfterGddDiskChange,
-  useGddNotionSyncRun,
-} from '../../hooks/useGddNotionSyncRun'
+import { useGddNotionSyncRun } from '../../hooks/useGddNotionSyncRun'
 import { theme } from '../../theme'
 import { isGddNotionSyncSecondaryDatabase } from '../../constants/gddNotionSyncSecondaryDatabases'
 import { PasswordInput } from '../shared/PasswordInput'
-import { Tooltip } from '../shared/Tooltip'
 
 function gddSyncOutcomeBannerPalette(tone: GddNotionSyncOutcomeTone): {
   border: string
@@ -1128,364 +1132,27 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
       />
 
       {previewOpen ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="gdd-preview-title"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 2150,
-            backgroundColor: 'rgba(0,0,0,0.65)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-          }}
-        >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: 'min(920px, 100vw - 2rem)',
-              maxHeight: 'min(85vh, 720px)',
-              borderRadius: '10px',
-              padding: '1.25rem 1.5rem',
-              backgroundColor: theme.background.panel,
-              border: `1px solid ${theme.border.primary}`,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.75rem',
-            }}
-          >
-            <h3 id="gdd-preview-title" style={{ margin: 0, color: theme.text.primary }}>
-              Test Notion — {previewForFile ?? 'base'}
-            </h3>
-            <p style={{ margin: 0, color: theme.text.secondary, fontSize: '0.88rem' }}>
-              Première ligne de la base, même pipeline que la sync (query → get_page → mapping). Aucune écriture sur
-              le GDD.
-            </p>
-            {previewLoading && (
-              <p style={{ margin: 0, color: theme.text.secondary }}>Chargement…</p>
-            )}
-            {previewError && (
-              <p style={{ margin: 0, color: theme.state.error.color, fontSize: '0.9rem' }}>{previewError}</p>
-            )}
-            {previewData && !previewLoading && (
-              <>
-                <ul
-                  style={{
-                    margin: 0,
-                    paddingLeft: '1.2rem',
-                    color: theme.text.secondary,
-                    fontSize: '0.82rem',
-                    lineHeight: 1.5,
-                  }}
-                >
-                  <li>
-                    Data sources (API 2025-09-03) : <strong>{previewData.data_sources_count}</strong>
-                  </li>
-                  <li>Lignes retournées par query : {previewData.query_total_rows}</li>
-                  <li>Clés propriétés (ligne query / get_page) : {previewData.property_keys_from_query_row.length} /{' '}
-                    {previewData.property_keys_from_get_page.length}</li>
-                  <li>
-                    Colonnes dans <code style={{ fontSize: '0.85em' }}>values</code> (hors titre) :{' '}
-                    {previewData.mapped_record &&
-                    typeof previewData.mapped_record === 'object' &&
-                    previewData.mapped_record !== null &&
-                    'values' in previewData.mapped_record &&
-                    typeof previewData.mapped_record.values === 'object' &&
-                    previewData.mapped_record.values !== null
-                      ? Object.keys(previewData.mapped_record.values as object).length
-                      : 0}
-                  </li>
-                  <li>Mode compact table : {previewData.compact_table ? 'oui' : 'non'}</li>
-                </ul>
-                <pre
-                  style={{
-                    margin: 0,
-                    flex: 1,
-                    minHeight: '200px',
-                    overflow: 'auto',
-                    padding: '0.65rem',
-                    fontSize: '0.75rem',
-                    lineHeight: 1.35,
-                    backgroundColor: theme.background.secondary,
-                    borderRadius: '6px',
-                    border: `1px solid ${theme.border.primary}`,
-                    color: theme.text.primary,
-                  }}
-                >
-                  {JSON.stringify(previewData.mapped_record ?? previewData, null, 2)}
-                </pre>
-              </>
-            )}
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                disabled={previewLoading}
-                onClick={closePreview}
-                style={buttonStyle(previewLoading)}
-              >
-                Fermer
-              </button>
-            </div>
-          </div>
-        </div>
+        <GddNotionSyncPreviewModal
+          previewForFile={previewForFile}
+          previewLoading={previewLoading}
+          previewError={previewError}
+          previewData={previewData}
+          onClose={closePreview}
+        />
       ) : null}
 
       {restoreTargetId ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="gdd-restore-title"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 2100,
-            backgroundColor: 'rgba(0,0,0,0.65)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-          }}
-        >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '420px',
-              borderRadius: '10px',
-              padding: '1.25rem 1.5rem',
-              backgroundColor: theme.background.panel,
-              border: `1px solid ${theme.border.primary}`,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
-            }}
-          >
-            <h3 id="gdd-restore-title" style={{ margin: '0 0 0.75rem 0', color: theme.text.primary }}>
-              Restaurer cette sauvegarde ?
-            </h3>
-            <p style={{ margin: '0 0 0.75rem 0', color: theme.text.secondary, fontSize: '0.9rem' }}>
-              Le contenu actuel de <code style={{ fontSize: '0.85em' }}>GDD_categories</code> sera
-              remplacé par le snapshot{' '}
-              <code style={{ fontSize: '0.8em', wordBreak: 'break-all' }}>{restoreTargetId}</code>.
-              Le manifeste Notion sera réinitialisé (prochaine sync incrémentale rechargera depuis
-              Notion).
-            </p>
-            <label
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'flex-start',
-                gap: '0.5rem',
-                marginBottom: '1rem',
-                color: theme.text.secondary,
-                fontSize: '0.88rem',
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={restoreBackupCurrent}
-                onChange={(e) => setRestoreBackupCurrent(e.target.checked)}
-              />
-              <span>Sauvegarder l’état actuel dans .archive/ avant restauration</span>
-            </label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => setRestoreTargetId(null)}
-                style={buttonStyle(busy)}
-              >
-                Annuler
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => {
-                  const id = restoreTargetId
-                  if (!id) return
-                  void run(async () => {
-                    try {
-                      const r = await postGddNotionArchiveRestore(id, {
-                        backup_current: restoreBackupCurrent,
-                      })
-                      setRestoreTargetId(null)
-                      await refreshArchives()
-                      await refreshStatus()
-                      if (r.ok) {
-                        refreshContextAfterGddDiskChange()
-                      }
-                      return { ok: r.ok, message: r.message }
-                    } catch (e) {
-                      return { ok: false, message: apiErrorDetail(e) }
-                    }
-                  })
-                }}
-                style={buttonStyle(busy, true)}
-              >
-                Confirmer la restauration
-              </button>
-            </div>
-          </div>
-        </div>
+        <GddNotionSyncRestoreModal
+          restoreTargetId={restoreTargetId}
+          restoreBackupCurrent={restoreBackupCurrent}
+          setRestoreBackupCurrent={setRestoreBackupCurrent}
+          setRestoreTargetId={setRestoreTargetId}
+          busy={busy}
+          run={run}
+          refreshArchives={refreshArchives}
+          refreshStatus={refreshStatus}
+        />
       ) : null}
     </div>
   )
-}
-
-/** Explication du filtre de bases : identique en tooltip (survol) et en dépliage (tactile / clavier). */
-function DatabasePerimeterHelpText() {
-  const em: CSSProperties = { color: theme.text.primary }
-  return (
-    <span style={{ display: 'block', fontSize: '0.82rem', lineHeight: 1.45 }}>
-      Cochez les bases Notion à inclure. <strong style={em}>Aucune case</strong> ou{' '}
-      <strong style={em}>toutes les cases</strong> cochées = pas de filtre (toutes les bases + toutes
-      les fiches page). Si vous restreignez les bases, chaque sync ne traite{' '}
-      <strong style={em}>que</strong> ces bases — les fiches (sources page) sont alors ignorées sur ce
-      run (évite de parcourir tout le hub). Retirez le filtre pour tout resynchroniser.
-      <br />
-      <strong style={em}>Cocher essentiels</strong> : coche toutes les bases sauf celles marquées
-      « secondaire » et <strong style={em}>enregistre</strong> immédiatement le périmètre sur le
-      serveur.
-      <br />
-      <strong style={em}>Sync complète (bouton global) avec filtre :</strong> les fichiers (ou
-      dossiers shards) des bases <em>non</em> cochées sont <strong>retirés</strong> du dossier GDD
-      local après promotion du miroir (les fiches page déjà sur disque ne sont pas effacées). Utilisez
-      le bouton <strong>Sync cette base</strong> sur une ligne pour une sync complète{' '}
-      <em>uniquement</em> sur cette base sans toucher aux autres.
-      <br />
-      <strong style={em}>Sync normale ou complète :</strong> les cases cochées s’appliquent à ce run
-      uniquement (filtre éphémère). Le périmètre <strong>sauvegardé</strong> (Cocher essentiels,
-      Appliquer le périmètre ou Sauver sans sync) détermine quelles bases sont retirées du disque lors
-      d’une sync complète globale.
-    </span>
-  )
-}
-
-function DatabasePerimeterHelp() {
-  const [expanded, setExpanded] = useState(false)
-  return (
-    <>
-      <Tooltip content={<DatabasePerimeterHelpText />} position="bottom" maxWidth="520px">
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          aria-expanded={expanded}
-          aria-label="Aide sur le périmètre des bases à synchroniser"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.25rem',
-            minHeight: '28px',
-            padding: '0.1rem 0.5rem',
-            borderRadius: '999px',
-            border: `1px solid ${theme.border.primary}`,
-            backgroundColor: theme.background.secondary,
-            color: theme.text.secondary,
-            fontSize: '0.78rem',
-            cursor: 'help',
-          }}
-        >
-          <span aria-hidden>ⓘ</span> Aide
-        </button>
-      </Tooltip>
-      {expanded ? (
-        <div
-          style={{
-            flexBasis: '100%',
-            padding: '0.6rem 0.7rem',
-            borderRadius: '6px',
-            border: `1px solid ${theme.border.primary}`,
-            backgroundColor: theme.background.secondary,
-            color: theme.text.secondary,
-          }}
-        >
-          <DatabasePerimeterHelpText />
-        </div>
-      ) : null}
-    </>
-  )
-}
-
-function formatArchiveLabel(iso: string): string {
-  try {
-    const d = new Date(iso)
-    if (Number.isNaN(d.getTime())) {
-      return iso
-    }
-    return d.toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })
-  } catch {
-    return iso
-  }
-}
-
-function formatArchiveSizeBytes(n: number): string {
-  if (!Number.isFinite(n) || n < 0) {
-    return '—'
-  }
-  if (n === 0) {
-    return '0 o'
-  }
-  const units = ['o', 'Ko', 'Mo', 'Go'] as const
-  let i = 0
-  let x = n
-  while (x >= 1024 && i < units.length - 1) {
-    x /= 1024
-    i += 1
-  }
-  const rounded = i === 0 || x >= 10 ? Math.round(x) : Math.round(x * 10) / 10
-  return `${rounded} ${units[i]}`
-}
-
-function apiErrorDetail(e: unknown): string {
-  if (e && typeof e === 'object' && 'response' in e) {
-    const data = (e as { response?: { data?: { detail?: unknown } } }).response?.data
-    const d = data?.detail
-    if (typeof d === 'string') {
-      return d
-    }
-    if (Array.isArray(d)) {
-      const first = d[0] as { msg?: string } | undefined
-      if (first && typeof first.msg === 'string') {
-        return first.msg
-      }
-    }
-  }
-  if (e instanceof Error) {
-    return e.message
-  }
-  return 'Erreur lors de la restauration'
-}
-
-const labelStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.35rem',
-  color: theme.text.secondary,
-  fontSize: '0.88rem',
-}
-
-const inputStyle: CSSProperties = {
-  padding: '0.45rem 0.6rem',
-  borderRadius: '4px',
-  border: `1px solid ${theme.border.primary}`,
-  backgroundColor: theme.background.secondary,
-  color: theme.text.primary,
-}
-
-function buttonStyle(disabled: boolean, primary = false): CSSProperties {
-  return {
-    padding: '0.5rem 1rem',
-    border: 'none',
-    borderRadius: '4px',
-    backgroundColor: disabled
-      ? theme.button.default.background
-      : primary
-        ? theme.button.primary.background
-        : theme.button.default.background,
-    color: primary ? theme.button.primary.color : theme.text.primary,
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    opacity: disabled ? 0.6 : 1,
-    fontWeight: primary ? 'bold' : 'normal',
-  }
 }
