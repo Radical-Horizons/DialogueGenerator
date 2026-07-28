@@ -56,11 +56,27 @@ Toute règle `alwaysApply: true` doit être **importée** dans `CLAUDE.md` via `
 - Créer une règle sans l'ajouter à la table de routage — elle ne sera jamais lue.
 - Un skill dont la `description` décrit le domaine au lieu du déclencheur.
 - Écrire sous `_bmad/` : propriété de l'installeur BMAD, régénéré à chaque install. Les surcharges vont dans `_bmad/custom/`.
-- Laisser un chemin `.cursor/…` dans un fichier : le dossier n'existe plus.
+- Faire pointer une **règle, commande ou skill** vers `.cursor/` : Claude Code ne lit rien sous ce dossier, le mécanisme d'auto-attachement `.mdc` a disparu avec la migration.
 
 ## Checklist avant de conclure
 
 1. Le fichier est au bon endroit pour son mode de chargement.
 2. Une règle nouvelle est **soit** importée dans `CLAUDE.md` (toujours active), **soit** dans la table de routage (conditionnelle).
-3. Aucun chemin `.cursor/` ni extension `.mdc` résiduels.
+3. Aucune extension `.mdc` résiduelle, et aucun `.cursor/` utilisé comme **source de harnais** (voir ci-dessous).
 4. Les chemins cités existent réellement.
+
+## `.cursor/` : archive externe, pas source de harnais
+
+⚠️ Le dossier `%USERPROFILE%\.cursor\` **existe toujours** et reste vivant. Ne pas le purger.
+
+| Usage | Statut |
+|---|---|
+| Règles / commandes / agents chargés depuis `.cursor/` | **Interdit** — jamais lu par Claude Code |
+| `%USERPROFILE%\.cursor\projects\…` en **archive externe, lecture seule** | **Légitime** |
+
+Trois artefacts du harnais en dépendent réellement — les casser supprimerait le workflow de release et l'essentiel de l'historique diagnostic :
+
+- `.claude/agents/transcript-history-researcher.md` → `…\.cursor\projects\f-Projets-DialogueGenerator\agent-transcripts\`
+- `.claude/rules/app_versioning.md` (étape 3) et `.claude/skills/prod-release/` → canvas `…\.cursor\projects\f-Projets-Notion-Scrapper-DialogueGenerator\canvases\app-versions.canvas.tsx`
+
+Avant de « nettoyer » un chemin `.cursor/`, vérifier de quel usage il relève.

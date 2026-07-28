@@ -21,9 +21,14 @@ alwaysApply: false
 
 **Revue complète du repo** : pas d'agent orchestrateur dédié — **7 appels `Agent` dans le même message** (les 7 reviewers, hors `api-operator`, `playwright-e2e-specialist` et `transcript-history-researcher`). Le parent synthétise ensuite. Un seul appel multi-rôles ≠ 7 contextes isolés. Commande : `/full-review`.
 
-**Déclencheurs implicites** : toute demande de revue **globale** / **complète** / **holistique** du codebase (y compris en anglais) = ce protocole 7×, **sans** demander confirmation pour « économiser » — sauf si l'utilisateur précise un périmètre réduit ou un seul domaine.
+**Seuil d'engagement** (`.claude/rules/agentivity.md`) :
 
-**Coût** : ne pas substituer une passe unique « généraliste » aux sept reviewers ; voir `.claude/rules/agentivity.md`.
+- **≤ 3 subagents** → autonomie complète, initiative encouragée, aucune confirmation.
+- **> 3 subagents** → annoncer le périmètre et demander une confirmation courte avant de lancer.
+
+**Déclencheurs implicites** : une demande de revue **globale** / **complète** / **holistique** du codebase (y compris en anglais) appelle ce protocole 7× — donc au-dessus du seuil : proposer et attendre le feu vert. **`/full-review` tapé par l'utilisateur vaut confirmation** : partir directement. Si l'utilisateur précise un périmètre réduit ou un seul domaine, rester sous le seuil et agir seul.
+
+**Coût** : une fois le feu vert obtenu, ne pas substituer une passe unique « généraliste » aux sept reviewers — la confirmation porte sur le **volume**, jamais sur la profondeur.
 
 ## Invocation
 

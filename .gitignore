@@ -147,3 +147,6 @@ tmp/
 .bmad-loop/runs/
 .bmad-loop/cache/
 .bmad-loop/policy.toml
+
+# Sortie regenerée par l'installeur BMAD — git_commit.md impose `git add .`
+_bmad/render/

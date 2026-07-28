@@ -8,6 +8,7 @@ DialogueGenerator est une app React + FastAPI de génération de dialogues RPG v
 
 @.claude/rules/application_role.md
 @.claude/rules/agentivity.md
+@.claude/rules/shell_discipline.md
 @.claude/rules/meta_agent.md
 @.claude/rules/python.md
 @.claude/rules/env.md
@@ -97,7 +98,9 @@ Spécialistes dans `.claude/agents/`. Invocables via l'outil `Agent` avec leur `
 | `playwright-e2e-specialist` | Lance et corrige les specs `e2e/` |
 | `transcript-history-researcher` | Fouille les sessions passées (Claude + archive Cursor) |
 
-**Revue globale** (« full review », « holistic », « tout le codebase ») → **7 reviewers en parallèle** dans un seul message, puis synthèse : commande **`/full-review`**. Un seul agent qui « fait les sept » n'est pas équivalent.
+**Seuil** : **≤ 3 subagents** → autonomie, aucune confirmation. **> 3** → annoncer et demander un feu vert court avant de lancer.
+
+**Revue globale** (« full review », « holistic », « tout le codebase ») → **7 reviewers en parallèle** dans un seul message, puis synthèse : commande **`/full-review`**. Au-dessus du seuil, donc : proposer la commande et attendre — sauf si l'utilisateur a tapé `/full-review` lui-même, ce qui vaut confirmation. Un seul agent qui « fait les sept » n'est pas équivalent.
 
 **E2E en parallèle** → `/playwright-e2e-parallel`. Chaque enfant reçoit des **chemins de specs explicites** ; jamais `npx playwright test` nu.
 
