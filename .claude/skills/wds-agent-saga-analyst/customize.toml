@@ -62,7 +62,7 @@ skill = "bmad-brainstorming"
 [[agent.menu]]
 code = "RS"
 description = "Research: Conduct market, domain, competitive, or technical research"
-skill = "bmad-market-research"
+skill = "bmad-deep-recon"
 
 [[agent.menu]]
 code = "DP"
