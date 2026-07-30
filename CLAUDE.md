@@ -8,6 +8,7 @@ DialogueGenerator est une app React + FastAPI de génération de dialogues RPG v
 
 @.claude/rules/application_role.md
 @.claude/rules/agentivity.md
+@.claude/rules/interaction_style.md
 @.claude/rules/shell_discipline.md
 @.claude/rules/meta_agent.md
 @.claude/rules/python.md
