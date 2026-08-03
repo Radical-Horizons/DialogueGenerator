@@ -531,6 +531,20 @@ export interface BatchExportPreviewResponse {
 }
 
 // Unity Dialogues Library
+export interface DialogueMetadataResponse {
+  document_id: string
+  name: string
+  owner_id?: string | null
+  owner_username?: string | null
+  last_modified_by?: string | null
+  last_modified_by_username?: string | null
+  created_at: string
+  updated_at: string
+  node_count: number
+  total_cost_eur: number
+  cost_per_node_eur: number
+}
+
 export interface UnityDialogueMetadata {
   filename: string
   file_path: string
@@ -547,6 +561,12 @@ export interface UnityDialogueMetadata {
   owner_id?: string
   /** Username du propriétaire résolu, si indexé. */
   owner_username?: string
+  /** Coût LLM agrégé en euros ; absent si aucun usage connu. */
+  total_cost_eur?: number | null
+  /** Identifiant du dernier éditeur indexé. */
+  last_modified_by?: string
+  /** Username du dernier éditeur indexé. */
+  last_modified_by_username?: string
   share_count?: number
   /** Présent côté UI / listes enrichies ; optionnel selon l’endpoint. */
   node_count?: number

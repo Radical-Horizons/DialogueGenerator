@@ -26,6 +26,7 @@ from api.schemas.dialogue import (
     BatchExportPreviewRequest,
     BatchExportPreviewResponse,
     BatchExportPreviewItemResponse,
+    DialogueMetadataResponse,
 )
 from pydantic import BaseModel, Field
 from api.dependencies import (
@@ -39,6 +40,7 @@ from api.dependencies import (
     get_unity_dialogue_orchestrator,
     get_export_log_service,
     get_document_persistence_service,
+    get_dialogue_metadata_service,
     get_llm_usage_service,
     require_non_guest,
 )
@@ -69,6 +71,10 @@ from services.export_log_recorder import (
 )
 from services.export_log_service import ExportLogService
 from services.llm_usage_service import LLMUsageService
+from services.dialogue_metadata_service import (
+    DialogueMetadataNotFoundError,
+    DialogueMetadataService,
+)
 from services.unity_export_validation_service import validate_persisted_document
 from services.unity_dialogue_download_service import (
     build_batch_download_zip,
@@ -119,6 +125,64 @@ def _require_dialogue_access(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": "dialogue_access_denied"},
+        ) from exc
+
+
+@router.get(
+    "/{document_id}/metadata",
+    response_model=DialogueMetadataResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_dialogue_metadata(
+    document_id: str,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    metadata_service: Annotated[
+        DialogueMetadataService,
+        Depends(get_dialogue_metadata_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> DialogueMetadataResponse:
+    """Retourne les métadonnées FR86 sans divulguer les dialogues inaccessibles."""
+    try:
+        resolved_id = validate_document_id(document_id)
+        configured_path = config_service.get_unity_dialogues_path()
+        persistence_service.require_access(
+            resolved_id,
+            current_user,
+            (
+                Path(configured_path) / f"{resolved_id}.json"
+                if configured_path
+                else None
+            ),
+        )
+        metadata = metadata_service.get_dialogue_metadata(resolved_id)
+        return DialogueMetadataResponse(
+            document_id=metadata.document_id,
+            name=metadata.name,
+            owner_id=metadata.owner_id,
+            owner_username=metadata.owner_username,
+            last_modified_by=metadata.last_modified_by,
+            last_modified_by_username=metadata.last_modified_by_username,
+            created_at=metadata.created_at,
+            updated_at=metadata.updated_at,
+            node_count=metadata.node_count,
+            total_cost_eur=metadata.total_cost_eur,
+            cost_per_node_eur=metadata.cost_per_node_eur,
+        )
+    except (
+        DialogueAccessDeniedError,
+        DialogueMetadataNotFoundError,
+        ValueError,
+    ) as exc:
+        raise NotFoundException(
+            resource_type="Dialogue",
+            resource_id=document_id,
+            request_id=request_id,
         ) from exc
 
 

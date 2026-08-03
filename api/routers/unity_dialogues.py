@@ -18,6 +18,7 @@ from api.schemas.dialogue import (
 )
 from api.exceptions import NotFoundException, ValidationException, InternalServerException
 from services.unity_dialogue_search_fields import (
+    SEARCH_TEXT_MAX_CHARS as SEARCH_TEXT_MAX_CHARS,
     count_nodes as _count_nodes,
     extract_speakers_and_text as _extract_speakers_and_text,
     extract_title_from_nodes as _extract_title_from_json,
@@ -29,6 +30,7 @@ from services.document_persistence_service import (
     DocumentPersistenceService,
 )
 from services.dialogue_index_service import DialogueIndexService
+from services.dialogue_metadata_service import DialogueMetadataService
 from services.dialogue_sharing_service import DialogueSharingService
 from services.repositories.sqlite import UserRepository
 from api.utils.pagination import PaginationParams, paginate_list
@@ -36,6 +38,7 @@ from api.utils.unity_schema_validator import load_unity_schema, schema_exists
 from api.dependencies import (
     get_config_service,
     get_dialogue_index_service,
+    get_dialogue_metadata_service,
     get_dialogue_sharing_service,
     get_document_persistence_service,
     get_request_id,
@@ -129,6 +132,10 @@ async def list_unity_dialogues(
         Depends(get_dialogue_sharing_service),
     ],
     user_repository: Annotated[UserRepository, Depends(get_user_repository)],
+    metadata_service: Annotated[
+        DialogueMetadataService,
+        Depends(get_dialogue_metadata_service),
+    ],
     current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)],
     page: Annotated[
@@ -197,6 +204,7 @@ async def list_unity_dialogues(
         # Cache username pour éviter N lectures users sur le même owner_id.
         owner_username_cache: dict[str, Optional[str]] = {}
         metadata_list = []
+        visible_document_ids: list[str] = []
         
         for json_file in json_files:
             try:
@@ -207,6 +215,7 @@ async def list_unity_dialogues(
                     json_file,
                 ):
                     continue
+                visible_document_ids.append(document_id)
                 stat = json_file.stat()
 
                 # Parser une seule fois pour titre + nombre de nœuds. Un JSON
@@ -302,6 +311,25 @@ async def list_unity_dialogues(
             except (OSError, IOError) as e:
                 logger.warning(f"Erreur lors de la lecture des métadonnées de {json_file}: {e}")
                 continue
+
+        listing_metadata = metadata_service.get_listing_metadata(visible_document_ids)
+        enriched_list: list[UnityDialogueMetadata] = []
+        for item in metadata_list:
+            document_id = Path(item.filename).stem
+            extra = listing_metadata.get(document_id)
+            if extra is None:
+                enriched_list.append(item)
+                continue
+            enriched_list.append(
+                item.model_copy(
+                    update={
+                        "total_cost_eur": extra.total_cost_eur,
+                        "last_modified_by": extra.last_modified_by,
+                        "last_modified_by_username": extra.last_modified_by_username,
+                    }
+                )
+            )
+        metadata_list = enriched_list
         
         # Trier par date de modification décroissante, avec le filename comme
         # clé de départage : sans elle, deux dialogues de même `modified_time`

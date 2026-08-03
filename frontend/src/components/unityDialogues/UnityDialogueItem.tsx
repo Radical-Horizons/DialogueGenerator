@@ -1,13 +1,23 @@
 /**
  * Composant pour afficher un item de dialogue Unity dans la liste.
  */
-import { forwardRef, memo, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react'
+import {
+  forwardRef,
+  memo,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+  type MouseEvent,
+} from 'react'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import { listItemSelectionStyle } from '../../theme/selectionTokens'
 import type { UnityDialogueMetadata } from '../../types/api'
 import { highlightText } from '../../utils/textHighlight'
 import { getDialogueDisplayTitle } from '../../utils/formatDialogueTitle'
+import { formatCostEur, formatRelativeTime } from '../../utils/dialogueMetadataFormat'
 
 export interface UnityDialogueItemProps {
   dialogue: UnityDialogueMetadata
@@ -72,7 +82,16 @@ export const UnityDialogueItem = memo(
       ref
     ) {
       const [isHovered, setIsHovered] = useState(false)
+      const [showMetadataTooltip, setShowMetadataTooltip] = useState(false)
+      const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
       const showFilename = isSelected || isHovered
+
+      useEffect(
+        () => () => {
+          if (tooltipTimer.current) clearTimeout(tooltipTimer.current)
+        },
+        []
+      )
 
       const formatSize = (bytes: number): string => {
         if (bytes < 1024) return `${bytes} B`
@@ -95,6 +114,18 @@ export const UnityDialogueItem = memo(
       const shareCount = Math.max(0, dialogue.share_count ?? 0)
       const sharingLabel =
         shareCount === 0 ? 'Privé' : `Co-édité (${shareCount})`
+      const relativeModifiedTime = formatRelativeTime(dialogue.modified_time)
+      const metadataTooltip = `${dialogue.node_count ?? 0} nœud${
+        dialogue.node_count === 1 ? '' : 's'
+      }${
+        dialogue.total_cost_eur != null && dialogue.total_cost_eur > 0
+          ? `, ${formatCostEur(dialogue.total_cost_eur)}`
+          : ''
+      }, modifié ${relativeModifiedTime}${
+        dialogue.last_modified_by_username
+          ? ` par ${dialogue.last_modified_by_username}`
+          : ''
+      }`
 
       const selectionStyle = listItemSelectionStyle(isSelected)
 
@@ -149,6 +180,14 @@ export const UnityDialogueItem = memo(
                 </span>
               </>
             )}
+            {dialogue.total_cost_eur != null && dialogue.total_cost_eur > 0 && (
+              <>
+                <span aria-hidden>•</span>
+                <span data-testid="unity-dialogue-item-cost">
+                  {formatCostEur(dialogue.total_cost_eur)}
+                </span>
+              </>
+            )}
             {dialogue.speakers && dialogue.speakers.length > 0 && (
               <>
                 <span aria-hidden>•</span>
@@ -177,7 +216,7 @@ export const UnityDialogueItem = memo(
               </>
             )}
             <span aria-hidden>•</span>
-            <span title="Dernière modification">{formatDate(dialogue.modified_time)}</span>
+            <span title="Dernière modification">{relativeModifiedTime}</span>
             {dialogue.created_at && (
               <>
                 <span aria-hidden>•</span>
@@ -226,6 +265,29 @@ export const UnityDialogueItem = memo(
               </button>
             ))}
           </div>
+          {showMetadataTooltip && (
+            <div
+              role="tooltip"
+              data-testid="unity-dialogue-metadata-tooltip"
+              style={{
+                position: 'absolute',
+                zIndex: 20,
+                left: '0.5rem',
+                right: '0.5rem',
+                bottom: 'calc(100% - 0.25rem)',
+                padding: '0.45rem 0.6rem',
+                borderRadius: 6,
+                border: `1px solid ${theme.border.primary}`,
+                backgroundColor: theme.background.secondary,
+                color: theme.text.primary,
+                boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
+                fontSize: '0.72rem',
+                pointerEvents: 'none',
+              }}
+            >
+              {metadataTooltip}
+            </div>
+          )}
         </>
       )
 
@@ -245,21 +307,36 @@ export const UnityDialogueItem = memo(
         ...selectionStyle,
         flex: batchMode ? 1 : undefined,
         minWidth: 0,
+        position: 'relative' as const,
       }
 
       const hoverHandlers = {
         onMouseEnter: (e: MouseEvent<HTMLElement>) => {
           setIsHovered(true)
+          setShowMetadataTooltip(true)
+          if (tooltipTimer.current) clearTimeout(tooltipTimer.current)
+          tooltipTimer.current = setTimeout(
+            () => setShowMetadataTooltip(false),
+            3000
+          )
           if (!isSelected) {
             e.currentTarget.style.backgroundColor = theme.state.hover.background
           }
         },
         onMouseLeave: (e: MouseEvent<HTMLElement>) => {
           setIsHovered(false)
+          setShowMetadataTooltip(false)
+          if (tooltipTimer.current) clearTimeout(tooltipTimer.current)
           if (!isSelected) {
             e.currentTarget.style.backgroundColor = 'transparent'
           }
         },
+      }
+
+      const handleClick = () => {
+        setShowMetadataTooltip(false)
+        if (tooltipTimer.current) clearTimeout(tooltipTimer.current)
+        onClick()
       }
 
       if (asListboxOption) {
@@ -271,8 +348,8 @@ export const UnityDialogueItem = memo(
             aria-selected={isSelected}
             tabIndex={isActiveOption ? 0 : -1}
             data-testid="unity-dialogue-item"
-            title={titleText}
-            onClick={onClick}
+            aria-label={titleText}
+            onClick={handleClick}
             onContextMenu={onContextMenu}
             onKeyDown={onOptionKeyDown}
             style={{
@@ -292,7 +369,7 @@ export const UnityDialogueItem = memo(
         return (
           <div
             data-testid="unity-dialogue-item"
-            title={titleText}
+            aria-label={titleText}
             aria-pressed={isSelected}
             onContextMenu={onContextMenu}
             style={{
@@ -302,15 +379,14 @@ export const UnityDialogueItem = memo(
               borderBottom: `1px solid ${theme.border.primary}`,
               ...selectionStyle,
             }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            {...hoverHandlers}
           >
             {batchCheckbox}
             <button
               ref={ref as React.Ref<HTMLButtonElement>}
               type="button"
               aria-pressed={isSelected}
-              onClick={onClick}
+              onClick={handleClick}
               onContextMenu={onContextMenu}
               style={{
                 ...interactiveStyle,
@@ -330,8 +406,8 @@ export const UnityDialogueItem = memo(
           type="button"
           data-testid="unity-dialogue-item"
           aria-pressed={isSelected}
-          title={titleText}
-          onClick={onClick}
+          aria-label={titleText}
+          onClick={handleClick}
           onContextMenu={onContextMenu}
           style={interactiveStyle}
           {...hoverHandlers}

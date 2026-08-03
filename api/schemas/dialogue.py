@@ -675,6 +675,38 @@ class BatchExportPreviewResponse(BaseModel):
 
 
 # Schemas pour la bibliothèque Unity Dialogues
+class DialogueMetadataResponse(BaseModel):
+    """Métadonnées détaillées d'un dialogue accessibles selon le RBAC."""
+
+    document_id: str = Field(..., description="Identifiant stable du dialogue")
+    name: str = Field(..., description="Titre extrait ou nom du fichier")
+    owner_id: Optional[str] = Field(None, description="Identifiant du propriétaire")
+    owner_username: Optional[str] = Field(None, description="Nom du propriétaire")
+    last_modified_by: Optional[str] = Field(
+        None,
+        description="Identifiant du dernier éditeur",
+    )
+    last_modified_by_username: Optional[str] = Field(
+        None,
+        description="Nom du dernier éditeur",
+    )
+    created_at: str = Field(
+        ...,
+        description="Date de création indexée (ISO-8601 UTC)",
+    )
+    updated_at: str = Field(
+        ...,
+        description="Date de dernière modification indexée (ISO-8601 UTC)",
+    )
+    node_count: int = Field(..., ge=0, description="Nombre de nœuds du document")
+    total_cost_eur: float = Field(..., ge=0, description="Coût LLM total en euros")
+    cost_per_node_eur: float = Field(
+        ...,
+        ge=0,
+        description="Coût LLM total divisé par le nombre de nœuds du document",
+    )
+
+
 class UnityDialogueMetadata(BaseModel):
     """Métadonnées d'un fichier de dialogue Unity JSON.
     
@@ -733,6 +765,19 @@ class UnityDialogueMetadata(BaseModel):
             "Nom d'utilisateur du propriétaire, résolu depuis users. None si "
             "non indexé ou si le compte est introuvable."
         ),
+    )
+    total_cost_eur: Optional[float] = Field(
+        default=None,
+        ge=0,
+        description="Coût LLM total en euros ; 0 si aucun usage connu.",
+    )
+    last_modified_by: Optional[str] = Field(
+        default=None,
+        description="Identifiant du dernier éditeur indexé.",
+    )
+    last_modified_by_username: Optional[str] = Field(
+        default=None,
+        description="Nom du dernier éditeur indexé.",
     )
     share_count: int = Field(
         default=0,

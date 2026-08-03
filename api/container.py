@@ -45,6 +45,7 @@ from services.repositories.sqlite import (
 from services.audit_log_service import AuditLogService
 from services.collection_service import CollectionService
 from services.dialogue_index_service import DialogueIndexService
+from services.dialogue_metadata_service import DialogueMetadataService
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
 from api.services.auth_service import AuthService
@@ -106,6 +107,7 @@ class ServiceContainer:
         self._collection_service: Optional[CollectionService] = None
         self._dialogues_search_repository: Optional[DialoguesSearchRepository] = None
         self._dialogue_index_service: Optional[DialogueIndexService] = None
+        self._dialogue_metadata_service: Optional[DialogueMetadataService] = None
         self._audit_logs_repository: Optional[AuditLogsRepository] = None
         self._audit_log_service: Optional[AuditLogService] = None
         self._document_persistence_service: Optional[DocumentPersistenceService] = None
@@ -218,6 +220,19 @@ class ServiceContainer:
                 )
                 logger.info("DialogueIndexService initialisé dans le container.")
             return self._dialogue_index_service
+
+    def get_dialogue_metadata_service(self) -> DialogueMetadataService:
+        """Retourne le service d'agrégation des métadonnées dialogue."""
+        with self._database_lock:
+            if self._dialogue_metadata_service is None:
+                self._dialogue_metadata_service = DialogueMetadataService(
+                    dialogues_index_repository=self.get_dialogues_index_repository(),
+                    user_repository=self.get_user_repository(),
+                    llm_usage_service=self.get_llm_usage_service(),
+                    config_service=self.get_config_service(),
+                )
+                logger.info("DialogueMetadataService initialisé dans le container.")
+            return self._dialogue_metadata_service
 
     def get_audit_logs_repository(self) -> AuditLogsRepository:
         """Retourne le repository append-only des journaux d'audit."""
@@ -668,6 +683,7 @@ class ServiceContainer:
             self._collection_service = None
             self._dialogues_search_repository = None
             self._dialogue_index_service = None
+            self._dialogue_metadata_service = None
             self._audit_logs_repository = None
             self._audit_log_service = None
             self._document_persistence_service = None
@@ -690,6 +706,7 @@ class ServiceContainer:
         self._preset_service = None
         self._dialogue_generation_service = None
         self._llm_usage_service = None
+        self._dialogue_metadata_service = None
         self._unity_generation_service = None
         self._graph_node_orchestrator = None
         self._dialogue_tree_expansion_service = None
