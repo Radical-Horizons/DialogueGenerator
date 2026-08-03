@@ -70,6 +70,14 @@ class PersistedLayout:
     revision: int
 
 
+@dataclass(frozen=True)
+class DialogueListingIndexFields:
+    """Champs d'index utiles au listing bibliothèque (Story 8.1 / 8.3)."""
+
+    created_at: str | None
+    owner_id: str | None
+
+
 class DocumentPersistenceService:
     """Centralise RBAC, révisions, fichiers et index SQLite."""
 
@@ -232,6 +240,24 @@ class DocumentPersistenceService:
             document_path,
         ).can_read
 
+    def get_listing_index_fields(self, document_id: str) -> DialogueListingIndexFields:
+        """Retourne created_at et owner_id indexés en une seule lecture.
+
+        Args:
+            document_id: Identifiant du document (stem du fichier).
+
+        Returns:
+            Champs d'index ; ``created_at`` / ``owner_id`` à ``None`` si le
+            document n'est pas indexé (fichier historique).
+        """
+        entry = self._repository.find_by_document_id(document_id)
+        if entry is None:
+            return DialogueListingIndexFields(created_at=None, owner_id=None)
+        return DialogueListingIndexFields(
+            created_at=entry.created_at,
+            owner_id=entry.owner_id,
+        )
+
     def get_created_at(self, document_id: str) -> str | None:
         """Retourne la date de création indexée d'un document, si disponible.
 
@@ -242,8 +268,7 @@ class DocumentPersistenceService:
             La date de création ISO issue de ``dialogues_index`` si le document
             est indexé, sinon ``None`` (fichier historique non indexé).
         """
-        entry = self._repository.find_by_document_id(document_id)
-        return entry.created_at if entry is not None else None
+        return self.get_listing_index_fields(document_id).created_at
 
     @staticmethod
     def _read_revision(path: Path) -> int:

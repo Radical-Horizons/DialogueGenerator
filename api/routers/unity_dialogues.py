@@ -20,7 +20,8 @@ from api.dependencies import (
     get_config_service,
     get_dialogue_sharing_service,
     get_document_persistence_service,
-    get_request_id
+    get_request_id,
+    get_user_repository,
 )
 from api.exceptions import NotFoundException, ValidationException, InternalServerException
 from services.configuration_service import ConfigurationService
@@ -30,6 +31,7 @@ from services.document_persistence_service import (
     DocumentPersistenceService,
 )
 from services.dialogue_sharing_service import DialogueSharingService
+from services.repositories.sqlite import UserRepository
 from api.utils.pagination import PaginationParams, paginate_list
 from api.utils.unity_schema_validator import load_unity_schema, schema_exists
 
@@ -142,41 +144,59 @@ def _extract_speakers_and_text(
     return speakers, search_text
 
 
-def _normalize_iso(value: str) -> str:
+def _normalize_iso(value: str, *, assume_utc: bool = False) -> str:
     """Normalise un horodatage en ISO-8601 parsable par ``new Date`` côté JS.
 
     L'index SQLite stocke ``datetime('now')`` au format ``YYYY-MM-DD HH:MM:SS``
-    (séparateur espace), non reconnu de façon fiable par tous les moteurs JS.
-    On remplace l'espace par ``T`` sans changer le fuseau (cohérent avec
-    ``modified_time`` qui est déjà un ISO naïf).
+    (UTC, séparateur espace). On remplace l'espace par ``T`` et, quand
+    ``assume_utc`` est vrai, on suffixe ``Z`` pour que JS ne l'interprète pas
+    en heure locale (critique pour les filtres de période FR82).
 
     Args:
         value: Horodatage brut, potentiellement séparé par un espace.
+        assume_utc: Si True, force un suffixe ``Z`` quand aucun fuseau n'est
+            déjà présent (cas index SQLite).
 
     Returns:
-        Horodatage ISO-8601 (séparateur ``T``).
+        Horodatage ISO-8601 (séparateur ``T``, fuseau explicite si demandé).
     """
-    return value.replace(" ", "T", 1) if " " in value else value
+    normalized = value.replace(" ", "T", 1) if " " in value else value
+    if assume_utc and not _has_explicit_timezone(normalized):
+        return f"{normalized}Z"
+    return normalized
+
+
+def _has_explicit_timezone(value: str) -> bool:
+    """Indique si un ISO porte déjà un fuseau (``Z`` ou offset ``±HH:MM``)."""
+    if value.endswith(("Z", "z")):
+        return True
+    # Offset en fin de chaîne (ex. +02:00).
+    if len(value) >= 6 and value[-6] in "+-":
+        return True
+    return False
 
 
 def _file_creation_time(stat_result: object) -> str:
-    """Retourne une date de création fichier ISO, repli quand non indexé.
+    """Retourne une date de création fichier ISO UTC, repli quand non indexé.
 
     Utilise ``st_birthtime`` quand la plateforme l'expose (macOS, certains
     Linux/Windows) ; sinon retombe sur le plus ancien de ``st_ctime`` /
     ``st_mtime`` — ``st_ctime`` n'étant pas la date de création sous Linux.
+    Toujours sérialisé en UTC avec offset pour un parsing JS cohérent.
 
     Args:
         stat_result: Résultat de ``Path.stat()``.
 
     Returns:
-        Date de création approximative au format ISO-8601.
+        Date de création approximative au format ISO-8601 UTC.
     """
+    from datetime import timezone
+
     birthtime = getattr(stat_result, "st_birthtime", None)
     ctime = getattr(stat_result, "st_ctime", 0.0)
     mtime = getattr(stat_result, "st_mtime", ctime)
     timestamp = birthtime if birthtime is not None else min(ctime, mtime)
-    return datetime.fromtimestamp(timestamp).isoformat()
+    return datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()
 
 
 @router.get(
@@ -195,6 +215,7 @@ async def list_unity_dialogues(
         DialogueSharingService,
         Depends(get_dialogue_sharing_service),
     ],
+    user_repository: Annotated[UserRepository, Depends(get_user_repository)],
     current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)],
     page: Annotated[
@@ -212,13 +233,13 @@ async def list_unity_dialogues(
         ),
     ] = None,
 ) -> UnityDialogueListResponse:
-    """Liste les dialogues Unity JSON visibles par l'utilisateur (FR80).
+    """Liste les dialogues Unity JSON visibles par l'utilisateur (FR80/FR82).
 
     Le tri par défaut est la date de modification décroissante et le filtrage
     RBAC (``can_list``) est appliqué avant toute pagination. La pagination est
     optionnelle et rétrocompatible : sans ``page``, la réponse contient la
     liste complète (comportement historique). Chaque item est enrichi du
-    nombre de nœuds et de la date de création.
+    nombre de nœuds, de la date de création et du propriétaire (filtre auteur).
 
     Args:
         request: La requête HTTP.
@@ -260,6 +281,8 @@ async def list_unity_dialogues(
         share_counts = sharing_service.count_shares_by_document_ids(
             [path.stem for path in json_files]
         )
+        # Cache username pour éviter N lectures users sur le même owner_id.
+        owner_username_cache: dict[str, Optional[str]] = {}
         metadata_list = []
         
         for json_file in json_files:
@@ -303,23 +326,43 @@ async def list_unity_dialogues(
                         parse_error,
                     )
 
-                # created_at: index SQLite si indexé, sinon repli horodatage
-                # fichier. Une erreur d'accès index ne doit pas casser tout le
-                # listing (comme pour un JSON illisible) → repli fichier.
+                # Index : created_at + owner_id en une lecture. Erreur index →
+                # repli fichier pour la date, owner None (filtre auteur exclus).
                 indexed_created_at = None
+                owner_id = None
+                owner_username = None
                 try:
-                    indexed_created_at = persistence_service.get_created_at(document_id)
+                    index_fields = persistence_service.get_listing_index_fields(
+                        document_id
+                    )
+                    indexed_created_at = index_fields.created_at
+                    owner_id = index_fields.owner_id
                 except Exception as index_error:  # noqa: BLE001 - repli résilient
                     logger.warning(
-                        "Index created_at indisponible pour %s: %s",
+                        "Index listing indisponible pour %s: %s",
                         document_id,
                         index_error,
                     )
                 created_at = (
-                    _normalize_iso(indexed_created_at)
+                    _normalize_iso(indexed_created_at, assume_utc=True)
                     if indexed_created_at
                     else _file_creation_time(stat)
                 )
+                if owner_id:
+                    if owner_id not in owner_username_cache:
+                        try:
+                            record = user_repository.find_by_id(owner_id)
+                            owner_username_cache[owner_id] = (
+                                record["username"] if record else None
+                            )
+                        except Exception as user_error:  # noqa: BLE001
+                            logger.warning(
+                                "Username owner indisponible pour %s: %s",
+                                owner_id,
+                                user_error,
+                            )
+                            owner_username_cache[owner_id] = None
+                    owner_username = owner_username_cache[owner_id]
 
                 metadata = UnityDialogueMetadata(
                     filename=json_file.name,
@@ -331,6 +374,8 @@ async def list_unity_dialogues(
                     title=title,
                     speakers=speakers,
                     search_text=search_text,
+                    owner_id=owner_id,
+                    owner_username=owner_username,
                     share_count=share_counts.get(document_id, 0),
                     capabilities=_capabilities_payload(
                         persistence_service.capabilities(

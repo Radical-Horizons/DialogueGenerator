@@ -21,7 +21,7 @@ import {
   normalizeDialogueFilenameKey,
   titleToDocumentId,
 } from '../../utils/formatDialogueTitle'
-import { useToast } from '../shared'
+import { useToast, Badge } from '../shared'
 import { useBatchUnityExport, toDocumentId } from '../../hooks/useBatchUnityExport'
 import { useRegisterUnityBatchExportMenu } from '../../hooks/useRegisterUnityBatchExportMenu'
 import { useDocumentSchemaValidation } from '../../hooks/useDocumentSchemaValidation'
@@ -37,6 +37,10 @@ import {
   saveDownloadExportOptions,
   type DownloadExportOptions,
 } from '../../utils/downloadExportOptions'
+import {
+  DIALOGUE_DATE_PERIOD_LABELS,
+  type DialogueDatePeriod,
+} from '../../utils/dialogueListFilters'
 import { downloadAllExportedFiles, downloadPersistedUnityDialogue } from '../../utils/unityExportDownload'
 import { useGraphStore } from '../../store/graphStore'
 import { getDialogueDisplayTitle } from '../../utils/formatDialogueTitle'
@@ -77,6 +81,13 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
     filteredCount,
     searchQuery,
     setSearchQuery,
+    datePeriod,
+    setDatePeriod,
+    authorId,
+    setAuthorId,
+    availableAuthors,
+    hasActiveFilters,
+    resetFilters,
     sortType,
     setSortType,
     page,
@@ -411,11 +422,118 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
             <option value="name-asc">Nom (A-Z)</option>
             <option value="name-desc">Nom (Z-A)</option>
           </StyledSelect>
+          <StyledSelect
+            data-testid="unity-dialogue-filter-period"
+            value={datePeriod}
+            onChange={(e) =>
+              setDatePeriod(e.target.value as DialogueDatePeriod)
+            }
+            style={{
+              padding: '0.45rem 0.5rem',
+              border: `1px solid ${theme.input.border}`,
+              borderRadius: '6px',
+              backgroundColor: theme.input.background,
+              color: theme.input.color,
+              fontSize: remSize('small'),
+              flexShrink: 0,
+            }}
+            wrapperStyle={{ width: 'auto', flexShrink: 0 }}
+            title="Filtrer par date de création"
+          >
+            {(Object.keys(DIALOGUE_DATE_PERIOD_LABELS) as DialogueDatePeriod[]).map(
+              (key) => (
+                <option key={key} value={key}>
+                  {DIALOGUE_DATE_PERIOD_LABELS[key]}
+                </option>
+              )
+            )}
+          </StyledSelect>
+          <StyledSelect
+            data-testid="unity-dialogue-filter-author"
+            value={authorId ?? ''}
+            onChange={(e) => setAuthorId(e.target.value || null)}
+            style={{
+              padding: '0.45rem 0.5rem',
+              border: `1px solid ${theme.input.border}`,
+              borderRadius: '6px',
+              backgroundColor: theme.input.background,
+              color: theme.input.color,
+              fontSize: remSize('small'),
+              flexShrink: 0,
+            }}
+            wrapperStyle={{ width: 'auto', flexShrink: 0 }}
+            title="Filtrer par auteur"
+          >
+            <option value="">Tous les auteurs</option>
+            {availableAuthors.map((author) => (
+              <option key={author.id} value={author.id}>
+                {author.username}
+              </option>
+            ))}
+          </StyledSelect>
         </div>
+
+        {(hasActiveFilters || searchQuery.trim()) && (
+          <div
+            data-testid="unity-dialogue-active-filters"
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '0.35rem',
+              alignItems: 'center',
+              marginBottom: '0.35rem',
+            }}
+          >
+            {datePeriod !== 'all' && (
+              <Badge
+                data-testid="unity-dialogue-filter-badge-period"
+                variant="info"
+                size="sm"
+                onClick={() => setDatePeriod('all')}
+                title="Retirer le filtre date"
+              >
+                {DIALOGUE_DATE_PERIOD_LABELS[datePeriod]} ×
+              </Badge>
+            )}
+            {authorId && (
+              <Badge
+                data-testid="unity-dialogue-filter-badge-author"
+                variant="info"
+                size="sm"
+                onClick={() => setAuthorId(null)}
+                title="Retirer le filtre auteur"
+              >
+                {(
+                  availableAuthors.find((a) => a.id === authorId)?.username ??
+                  authorId
+                )}{' '}
+                ×
+              </Badge>
+            )}
+            {hasActiveFilters && (
+              <button
+                type="button"
+                data-testid="unity-dialogue-filters-reset"
+                onClick={resetFilters}
+                style={{
+                  padding: '0.15rem 0.45rem',
+                  border: 'none',
+                  background: 'transparent',
+                  color: theme.text.secondary,
+                  cursor: 'pointer',
+                  fontSize: remSize('small'),
+                  textDecoration: 'underline',
+                }}
+              >
+                Réinitialiser
+              </button>
+            )}
+          </div>
+        )}
 
         <div style={{ fontSize: remSize('small'), color: theme.text.secondary }}>
           {filteredCount} dialogue{filteredCount !== 1 ? 's' : ''}
-          {searchQuery && ` (sur ${total} total)`}
+          {(searchQuery || hasActiveFilters) && ` (sur ${total} total)`}
         </div>
       </div>
 
@@ -436,7 +554,9 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '0.5rem', minHeight: 0 }}>
         {filteredDialogues.length === 0 ? (
           <div style={{ padding: '0.75rem', textAlign: 'center', fontSize: remSize('body'), color: theme.text.secondary }}>
-            {searchQuery ? 'Aucun dialogue trouvé' : 'Aucun dialogue Unity'}
+            {searchQuery.trim() || hasActiveFilters
+              ? 'Aucun dialogue trouvé'
+              : 'Aucun dialogue Unity'}
           </div>
         ) : (
           paginatedDialogues.map((dialogue) => {

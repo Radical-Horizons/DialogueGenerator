@@ -159,6 +159,17 @@ export const UnityDialogueItem = memo(
                 </span>
               </>
             )}
+            {(dialogue.owner_username || dialogue.owner_id) && (
+              <>
+                <span aria-hidden>•</span>
+                <span
+                  data-testid="unity-dialogue-item-author"
+                  title="Auteur"
+                >
+                  {dialogue.owner_username || 'Auteur inconnu'}
+                </span>
+              </>
+            )}
             <span aria-hidden>•</span>
             <span title="Dernière modification">{formatDate(dialogue.modified_time)}</span>
             {dialogue.created_at && (

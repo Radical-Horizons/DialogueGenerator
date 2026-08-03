@@ -106,6 +106,138 @@ describe('useDialogueListData', () => {
     expect(result.current.total).toBe(3)
   })
 
+  it('filtre par période et auteur (ET) et expose availableAuthors / reset (FR82)', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    vi.setSystemTime(new Date(2026, 5, 15, 12, 0, 0))
+
+    mockList.mockResolvedValueOnce({
+      dialogues: [
+        {
+          filename: 'recent_marc.json',
+          file_path: '/data/recent_marc.json',
+          size_bytes: 10,
+          modified_time: '2026-06-14T08:00:00.000Z',
+          created_at: '2026-06-14T08:00:00.000Z',
+          title: 'Récent Marc',
+          owner_id: 'u-marc',
+          owner_username: 'marc',
+        },
+        {
+          filename: 'old_marc.json',
+          file_path: '/data/old_marc.json',
+          size_bytes: 10,
+          modified_time: '2026-01-01T08:00:00.000Z',
+          created_at: '2026-01-01T08:00:00.000Z',
+          title: 'Ancien Marc',
+          owner_id: 'u-marc',
+          owner_username: 'marc',
+        },
+        {
+          filename: 'recent_luna.json',
+          file_path: '/data/recent_luna.json',
+          size_bytes: 10,
+          modified_time: '2026-06-13T08:00:00.000Z',
+          created_at: '2026-06-13T08:00:00.000Z',
+          title: 'Récent Luna',
+          owner_id: 'u-luna',
+          owner_username: 'luna',
+        },
+      ],
+      total: 3,
+    })
+
+    const { result } = renderHook(() => useDialogueListData())
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    expect(result.current.availableAuthors.map((a) => a.username)).toEqual([
+      'luna',
+      'marc',
+    ])
+
+    act(() => {
+      result.current.setDatePeriod('week')
+    })
+    expect(result.current.filteredDialogues.map((d) => d.filename)).toEqual([
+      'recent_marc.json',
+      'recent_luna.json',
+    ])
+
+    act(() => {
+      result.current.setAuthorId('u-marc')
+    })
+    expect(result.current.filteredDialogues.map((d) => d.filename)).toEqual([
+      'recent_marc.json',
+    ])
+    expect(result.current.hasActiveFilters).toBe(true)
+
+    // Combinaison ET avec la recherche.
+    act(() => {
+      result.current.setSearchQuery('récent')
+    })
+    expect(result.current.filteredDialogues.map((d) => d.filename)).toEqual([
+      'recent_marc.json',
+    ])
+    act(() => {
+      result.current.setSearchQuery('luna')
+    })
+    expect(result.current.filteredDialogues).toHaveLength(0)
+
+    act(() => {
+      result.current.setSearchQuery('')
+      result.current.setDatePeriod('year')
+      result.current.setAuthorId(null)
+    })
+    // Année civile 2026 : les trois fixtures (janvier + juin) restent.
+    expect(result.current.filteredCount).toBe(3)
+
+    act(() => {
+      result.current.resetFilters()
+    })
+    expect(result.current.datePeriod).toBe('all')
+    expect(result.current.authorId).toBeNull()
+    expect(result.current.filteredCount).toBe(3)
+
+    vi.useRealTimers()
+  })
+
+  it('exclut les items sans owner_id d’un filtre auteur précis', async () => {
+    mockList.mockResolvedValueOnce({
+      dialogues: [
+        {
+          filename: 'owned.json',
+          file_path: '/data/owned.json',
+          size_bytes: 1,
+          modified_time: '2026-06-01T00:00:00.000Z',
+          created_at: '2026-06-01T00:00:00.000Z',
+          owner_id: 'u1',
+          owner_username: 'marc',
+          title: 'Owned',
+        },
+        {
+          filename: 'orphan.json',
+          file_path: '/data/orphan.json',
+          size_bytes: 1,
+          modified_time: '2026-06-02T00:00:00.000Z',
+          created_at: '2026-06-02T00:00:00.000Z',
+          title: 'Orphan',
+        },
+      ],
+      total: 2,
+    })
+    const { result } = renderHook(() => useDialogueListData())
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    act(() => {
+      result.current.setAuthorId('u1')
+    })
+    expect(result.current.filteredDialogues.map((d) => d.filename)).toEqual([
+      'owned.json',
+    ])
+  })
+
   it('filtre par personnage (speakers) insensible à la casse (FR81)', async () => {
     mockList.mockResolvedValueOnce({
       dialogues: [

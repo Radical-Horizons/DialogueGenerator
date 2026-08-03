@@ -210,6 +210,76 @@ describe('UnityDialogueList', () => {
     expect(screen.getByTestId('unity-dialogue-item-title')).toHaveTextContent('Rencontre')
   })
 
+  it('filtre par auteur via le select et retire le badge (FR82)', async () => {
+    const user = userEvent.setup()
+    mockList.mockResolvedValueOnce({
+      dialogues: [
+        {
+          filename: 'a.json',
+          file_path: '/data/a.json',
+          modified_time: '2026-04-08T12:00:00.000Z',
+          created_at: '2026-04-08T12:00:00.000Z',
+          size_bytes: 1024,
+          title: 'De Marc',
+          owner_id: 'u-marc',
+          owner_username: 'marc',
+          share_count: 0,
+        },
+        {
+          filename: 'b.json',
+          file_path: '/data/b.json',
+          modified_time: '2026-04-07T12:00:00.000Z',
+          created_at: '2026-04-07T12:00:00.000Z',
+          size_bytes: 1024,
+          title: 'De Luna',
+          owner_id: 'u-luna',
+          owner_username: 'luna',
+          share_count: 0,
+        },
+      ],
+      total: 2,
+    })
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+
+    expect(
+      (await screen.findAllByTestId('unity-dialogue-item-author')).map((el) =>
+        el.textContent
+      )
+    ).toEqual(['marc', 'luna'])
+    expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(2)
+
+    await user.selectOptions(
+      screen.getByTestId('unity-dialogue-filter-author'),
+      'u-marc'
+    )
+    await user.selectOptions(
+      screen.getByTestId('unity-dialogue-filter-period'),
+      'year'
+    )
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(1)
+    })
+    expect(screen.getByTestId('unity-dialogue-item-title')).toHaveTextContent('De Marc')
+    expect(screen.getByTestId('unity-dialogue-filter-badge-author')).toBeInTheDocument()
+    expect(screen.getByTestId('unity-dialogue-filter-badge-period')).toBeInTheDocument()
+
+    // X sur le badge auteur seul : la période reste active.
+    await user.click(screen.getByTestId('unity-dialogue-filter-badge-author'))
+    await waitFor(() => {
+      expect(screen.queryByTestId('unity-dialogue-filter-badge-author')).toBeNull()
+    })
+    expect(screen.getByTestId('unity-dialogue-filter-badge-period')).toBeInTheDocument()
+    expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(2)
+
+    await user.click(screen.getByTestId('unity-dialogue-filters-reset'))
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('unity-dialogue-active-filters')).toBeNull()
+    })
+    expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(2)
+  })
+
   it('ne rend pas le bloc personnages quand le dialogue n’en a pas', async () => {
     // La fixture par défaut (beforeEach) n'a pas de `speakers`.
     render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)

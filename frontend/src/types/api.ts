@@ -543,6 +543,10 @@ export interface UnityDialogueMetadata {
   speakers?: string[]
   /** Texte cherchable minuscule (répliques concaténées, borné) pour FR81. */
   search_text?: string
+  /** Identifiant propriétaire (index SQLite) — filtre auteur FR82. */
+  owner_id?: string
+  /** Username du propriétaire résolu, si indexé. */
+  owner_username?: string
   share_count?: number
   /** Présent côté UI / listes enrichies ; optionnel selon l’endpoint. */
   node_count?: number

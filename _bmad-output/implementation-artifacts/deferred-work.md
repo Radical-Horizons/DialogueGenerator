@@ -75,3 +75,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-8-2-rechercher-dialogues-fr81.md`
   summary: Afficher un extrait surligné de la réplique quand un dialogue matche uniquement via son contenu (search_text), pas via nom/personnage.
   evidence: Revue adversarial — un résultat de recherche par réplique s'affiche sans indice visible de la raison du match ; lisibilité de la recherche, proche du panneau métadonnées 8.7.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-8-3-filtrer-dialogues-date-auteur-fr82.md`
+  summary: Modéliser et exposer un statut éditorial de dialogue (Validé / En cours / Brouillon) pour le filtre FR82.
+  evidence: Story 8.3 MVP — aucune source persistée (ni dialogues_index, ni JSON Unity, ni API) ; tags nœud et validationMode ne conviennent pas. Nécessite schéma + UI d'édition avant le filtre statut.

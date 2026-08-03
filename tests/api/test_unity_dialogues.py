@@ -477,6 +477,93 @@ class TestListUnityDialoguesSearchFields:
         assert item["search_text"] is None
 
 
+class TestListUnityDialoguesOwnerFields:
+    """Enrichissement auteur pour filtre FR82 (Story 8.3)."""
+
+    def test_list_item_enriched_with_owner(
+        self, client, mock_config_service, tmp_path
+    ):
+        """owner_id + owner_username exposés quand l'index et users résolvent."""
+        from api.dependencies import (
+            get_document_persistence_service,
+            get_user_repository,
+        )
+        from services.document_persistence_service import (
+            DialogueCapabilities,
+            DialogueListingIndexFields,
+        )
+
+        target = tmp_path / "owned_listing"
+        target.mkdir(parents=True, exist_ok=True)
+        (target / "scene.json").write_text(
+            json.dumps([{"id": "START", "line": "Hi"}]), encoding="utf-8"
+        )
+        mock_config_service.get_unity_dialogues_path.return_value = str(target)
+
+        persistence = MagicMock()
+        persistence.can_list.return_value = True
+        persistence.get_listing_index_fields.return_value = DialogueListingIndexFields(
+            created_at="2026-06-01 10:00:00",
+            owner_id="owner-1",
+        )
+        persistence.capabilities.return_value = DialogueCapabilities(
+            can_read=True,
+            can_edit=True,
+            can_delete=True,
+            is_owner=True,
+        )
+        users = MagicMock()
+        users.find_by_id.return_value = {
+            "id": "owner-1",
+            "username": "marc",
+            "email": "marc@example.com",
+            "hashed_password": "x",
+            "role": "writer",
+            "is_active": True,
+            "created_at": "2026-01-01",
+            "updated_at": "2026-01-01",
+        }
+        app.dependency_overrides[get_document_persistence_service] = (
+            lambda: persistence
+        )
+        app.dependency_overrides[get_user_repository] = lambda: users
+        try:
+            response = client.get("/api/v1/unity-dialogues")
+            assert response.status_code == 200
+            item = next(
+                d
+                for d in response.json()["dialogues"]
+                if d["filename"] == "scene.json"
+            )
+            assert item["owner_id"] == "owner-1"
+            assert item["owner_username"] == "marc"
+            assert item["created_at"] == "2026-06-01T10:00:00Z"
+        finally:
+            app.dependency_overrides.pop(get_document_persistence_service, None)
+            app.dependency_overrides.pop(get_user_repository, None)
+
+    def test_unindexed_dialogue_has_null_owner(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Sans entrée index, owner_id/username restent None (date via fichier)."""
+        target = tmp_path / "unindexed"
+        target.mkdir(parents=True, exist_ok=True)
+        (target / "orphan.json").write_text(
+            json.dumps([{"id": "START", "line": "X"}]), encoding="utf-8"
+        )
+        mock_config_service.get_unity_dialogues_path.return_value = str(target)
+
+        response = client.get("/api/v1/unity-dialogues")
+        item = next(
+            d
+            for d in response.json()["dialogues"]
+            if d["filename"] == "orphan.json"
+        )
+        assert item["owner_id"] is None
+        assert item["owner_username"] is None
+        assert item["created_at"] is not None
+
+
 class TestReadUnityDialogue:
     """Tests pour l'endpoint GET /api/v1/unity-dialogues/{filename}."""
     

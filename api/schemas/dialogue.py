@@ -720,6 +720,20 @@ class UnityDialogueMetadata(BaseModel):
             "(FR81). None si le JSON est illisible."
         ),
     )
+    owner_id: Optional[str] = Field(
+        default=None,
+        description=(
+            "Identifiant du propriétaire (dialogues_index.owner_id). None si le "
+            "dialogue n'est pas indexé. Alimente le filtre auteur (FR82)."
+        ),
+    )
+    owner_username: Optional[str] = Field(
+        default=None,
+        description=(
+            "Nom d'utilisateur du propriétaire, résolu depuis users. None si "
+            "non indexé ou si le compte est introuvable."
+        ),
+    )
     share_count: int = Field(
         default=0,
         ge=0,
