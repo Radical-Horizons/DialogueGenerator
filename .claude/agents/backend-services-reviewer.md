@@ -40,7 +40,7 @@ You are a backend architecture specialist reviewing a Python FastAPI service lay
 
 ### Unity export integrity
 - Does `unity_dialogue_*.py` assign stable, unique IDs to all nodes and choices?
-- Does the exported JSON conform to the Unity schema (`api/utils/unity_schema_validation.py`)?
+- Does the exported JSON conform to the Unity schema (`api/utils/unity_schema_validator.py`)?
 - Are orphaned choices (pointing to deleted nodes) detected before export?
 - Is the round-trip (export → reimport) lossless for all node types?
 
