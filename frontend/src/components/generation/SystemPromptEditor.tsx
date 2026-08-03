@@ -21,6 +21,7 @@ import {
 } from '../../utils/localNamedTemplates'
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
 import { StyledSelect } from '../shared/StyledSelect'
+import { redesignReadingColumn } from '../../theme/redesignTokens'
 
 export interface SystemPromptEditorProps {
   userInstructions: string
@@ -545,7 +546,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
             </div>
           </div>
           <FormField label="" htmlFor="user-instructions-textarea" style={{ marginBottom: 0 }}>
-            <div>
+            <div style={{ maxWidth: isNarrow ? undefined : redesignReadingColumn.default }}>
               <textarea
                 id="user-instructions-textarea"
                 value={userInstructions}
@@ -561,9 +562,9 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                   color: theme.input.color,
                   borderRadius: '6px',
                   fontFamily: 'inherit',
-                  fontSize: `${genChrome.textareaFontRem}rem`,
+                  fontSize: isNarrow ? `${genChrome.textareaFontRem}rem` : '0.97rem',
                   resize: 'vertical',
-                  lineHeight: 1.55,
+                  lineHeight: isNarrow ? 1.55 : 1.72,
                 }}
               />
               <div

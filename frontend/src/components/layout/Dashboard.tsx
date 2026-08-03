@@ -45,6 +45,7 @@ import { remSize } from '../../theme/uiTypography'
 import { NarrowOverlayDrawer } from './NarrowOverlayDrawer'
 import type { CharacterResponse, LocationResponse, ItemResponse, SpeciesResponse, CommunityResponse, UnityDialogueMetadata } from '../../types/api'
 import { theme } from '../../theme'
+import { redesignAccent, redesignFont } from '../../theme/redesignTokens'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
 type ContextLoadState = {
@@ -281,6 +282,7 @@ export function Dashboard() {
   const generationState = useGenerationStore((state) => ({
     isEstimating: state.isEstimating,
     unityDialogueResponse: state.unityDialogueResponse,
+    tokenCount: state.tokenCount,
   }))
   const { actions } = useGenerationActionsStore()
 
@@ -936,42 +938,60 @@ export function Dashboard() {
             </button>
           </div>
         ) : effectiveRightPanelTab === 'dialogue' || effectiveRightPanelTab === 'prompt' ? (
-          <button
-            onClick={handlePrimaryGenerateAction}
-            disabled={isPrimaryGenerateDisabled}
-            style={{
-              width: '100%',
-              padding: '0.55rem 0.75rem',
-              fontSize: remSize('section'),
-              fontWeight: 'bold',
-              backgroundColor: theme.button.primary.background,
-              color: theme.button.primary.color,
-              border: 'none',
-              borderRadius: '6px',
-              cursor: isPrimaryGenerateDisabled ? 'not-allowed' : 'pointer',
-              opacity: isPrimaryGenerateDisabled ? 0.6 : 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              transition: 'all 0.2s',
-              boxSizing: 'border-box',
-            }}
-            title={primaryActionTitle}
-          >
-            <span>{primaryActionLabel}</span>
-            {!hasContextLoadError && (
-              <span
+          <>
+            <button
+              onClick={handlePrimaryGenerateAction}
+              disabled={isPrimaryGenerateDisabled}
+              style={{
+                width: '100%',
+                height: '46px',
+                padding: '0 0.75rem',
+                fontSize: remSize('section'),
+                fontWeight: 'bold',
+                backgroundColor: redesignAccent.base,
+                color: theme.button.primary.color,
+                border: 'none',
+                borderRadius: '6px',
+                cursor: isPrimaryGenerateDisabled ? 'not-allowed' : 'pointer',
+                opacity: isPrimaryGenerateDisabled ? 0.6 : 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                transition: 'all 0.2s',
+                boxSizing: 'border-box',
+              }}
+              title={primaryActionTitle}
+            >
+              <span>{primaryActionLabel}</span>
+              {!hasContextLoadError && (
+                <span
+                  style={{
+                    fontFamily: redesignFont.mono,
+                    fontSize: remSize('caption'),
+                    opacity: 0.8,
+                    fontWeight: 'normal',
+                  }}
+                >
+                  CTRL+&#9166;
+                </span>
+              )}
+            </button>
+            {!hasContextLoadError && generationState.tokenCount != null && (
+              <div
                 style={{
+                  marginTop: '0.35rem',
+                  textAlign: 'center',
+                  fontFamily: redesignFont.mono,
                   fontSize: remSize('caption'),
-                  opacity: 0.8,
-                  fontWeight: 'normal',
+                  color: theme.text.tertiary,
+                  letterSpacing: '0.03em',
                 }}
               >
-                Ctrl+Enter
-              </span>
+                {generationState.tokenCount.toLocaleString('fr-FR')} TOKENS
+              </div>
             )}
-          </button>
+          </>
         ) : null}
       </div>
     )

@@ -39,6 +39,22 @@ import { GenerationPanelModals } from './GenerationPanelModals'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { PANEL_COMFORT_MIN_WIDTH_PX, generationPanelChrome } from '../../theme/responsiveChrome'
 import { GenerationPanelNarrowProvider } from './GenerationPanelNarrowContext'
+import { redesignFont } from '../../theme/redesignTokens'
+import { remSize } from '../../theme/uiTypography'
+
+const REASONING_EFFORT_SHORT_LABELS: Record<string, string> = {
+  none: 'aucun',
+  minimal: 'minimal',
+  low: 'faible',
+  medium: 'moyen',
+  high: 'élevé',
+  xhigh: 'xhigh',
+  max: 'max',
+}
+
+function formatTokensShort(value: number): string {
+  return value >= 1000 ? `${Math.round(value / 1000)}K` : String(value)
+}
 
 export function GenerationPanel() {
   // Stores
@@ -87,6 +103,7 @@ export function GenerationPanel() {
   const [narrativeTags, setNarrativeTags] = useState<string[]>([])
   const [previousDialoguePreview] = useState<string | null>(null)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [showModelSettings, setShowModelSettings] = useState(false)
   const toast = useToast()
   
   const availableNarrativeTags = ['tension', 'humour', 'dramatique', 'intime', 'révélation']
@@ -392,6 +409,13 @@ export function GenerationPanel() {
   )
   const genChrome = isGenerationNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
 
+  const modelSettingsSummary = [
+    llmModel,
+    REASONING_EFFORT_SHORT_LABELS[reasoningEffort ?? 'none'],
+    `${formatTokensShort(maxContextTokens)}/${formatTokensShort(maxCompletionTokens ?? COMPLETION_TOKENS_LIMITS.DEFAULT)}`,
+    maxChoices === null ? 'libre' : `≤ ${maxChoices}`,
+  ].join(' · ')
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: theme.background.panel }}>
       <GenerationPanelNarrowProvider value={isGenerationNarrow}>
@@ -433,6 +457,38 @@ export function GenerationPanel() {
 
       <DialogueFlagsPanel />
 
+      {/* Réglages du modèle : résumés en une ligne cliquable (refonte UI), détail dépliable. */}
+      <div style={{ marginBottom: '1rem' }}>
+        <button
+          type="button"
+          onClick={() => setShowModelSettings((v) => !v)}
+          data-testid="model-settings-summary-toggle"
+          aria-expanded={showModelSettings}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            padding: '0.4rem 0',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            color: theme.text.secondary,
+            fontFamily: redesignFont.mono,
+            fontSize: remSize('small'),
+            width: '100%',
+            textAlign: 'left',
+          }}
+        >
+          <span style={{ color: theme.text.tertiary }}>Réglages du modèle</span>
+          <span style={{ color: theme.text.primary }}>{modelSettingsSummary}</span>
+          <span aria-hidden style={{ marginLeft: 'auto', color: theme.text.tertiary }}>
+            {showModelSettings ? '▴' : '▾'}
+          </span>
+        </button>
+      </div>
+
+      {showModelSettings && (
+      <>
       {/* Sélecteur de modèle LLM (Story 0.3) */}
       <div style={{ marginBottom: '1rem' }}>
         <div
@@ -697,6 +753,8 @@ export function GenerationPanel() {
         }}
         onDirty={draft.markDirty}
       />
+      </>
+      )}
 
       {error && (
         <div style={{ 
