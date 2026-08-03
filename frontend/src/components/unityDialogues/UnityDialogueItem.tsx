@@ -29,6 +29,8 @@ export interface UnityDialogueItemProps {
   onCheckChange?: (checked: boolean) => void
 }
 
+const MAX_DISPLAYED_SPEAKERS = 8
+
 const itemInteractiveStyle: CSSProperties = {
   width: '100%',
   padding: '0.5rem',
@@ -138,6 +140,22 @@ export const UnityDialogueItem = memo(
                 <span aria-hidden>•</span>
                 <span data-testid="unity-dialogue-item-node-count">
                   {dialogue.node_count} nœud{dialogue.node_count > 1 ? 's' : ''}
+                </span>
+              </>
+            )}
+            {dialogue.speakers && dialogue.speakers.length > 0 && (
+              <>
+                <span aria-hidden>•</span>
+                <span
+                  data-testid="unity-dialogue-item-speakers"
+                  title={dialogue.speakers.join(', ')}
+                >
+                  {highlightText(
+                    dialogue.speakers.slice(0, MAX_DISPLAYED_SPEAKERS).join(', '),
+                    searchQuery
+                  )}
+                  {dialogue.speakers.length > MAX_DISPLAYED_SPEAKERS &&
+                    ` +${dialogue.speakers.length - MAX_DISPLAYED_SPEAKERS}`}
                 </span>
               </>
             )}

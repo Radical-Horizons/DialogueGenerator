@@ -355,6 +355,128 @@ class TestListUnityDialoguesPagination:
         assert by_name["valid.json"]["node_count"] == 1
 
 
+class TestListUnityDialoguesSearchFields:
+    """Enrichissement recherche : speakers + search_text (Story 8.2 / FR81)."""
+
+    @staticmethod
+    def _write(directory: Path, name: str, payload: object) -> None:
+        directory.mkdir(parents=True, exist_ok=True)
+        (directory / name).write_text(json.dumps(payload), encoding="utf-8")
+
+    def _item(self, client, name: str) -> dict:
+        response = client.get("/api/v1/unity-dialogues")
+        assert response.status_code == 200
+        return next(
+            d for d in response.json()["dialogues"] if d["filename"] == name
+        )
+
+    def test_speakers_unique_in_order_legacy(
+        self, client, mock_config_service, tmp_path
+    ):
+        """speakers = valeurs `speaker` distinctes, dans l'ordre d'apparition."""
+        target = tmp_path / "speakers_legacy"
+        self._write(
+            target,
+            "s.json",
+            [
+                {"id": "START", "speaker": "Uresaïr", "line": "A"},
+                {"id": "n1", "speaker": "Uresaïr", "line": "B"},
+                {"id": "n2", "speaker": "Voknir", "line": "C"},
+            ],
+        )
+        mock_config_service.get_unity_dialogues_path.return_value = str(target)
+
+        item = self._item(client, "s.json")
+        assert item["speakers"] == ["Uresaïr", "Voknir"]
+
+    def test_speakers_supports_document_format(
+        self, client, mock_config_service, tmp_path
+    ):
+        """speakers gère le format document ``{schemaVersion, nodes}``."""
+        target = tmp_path / "speakers_doc"
+        self._write(
+            target,
+            "d.json",
+            {
+                "schemaVersion": "1.2.0",
+                "nodes": [
+                    {"id": "START", "speaker": "Luna", "line": "Salut"},
+                    {"id": "n1", "speaker": "Sol", "line": "Bonjour"},
+                ],
+            },
+        )
+        mock_config_service.get_unity_dialogues_path.return_value = str(target)
+
+        item = self._item(client, "d.json")
+        assert item["speakers"] == ["Luna", "Sol"]
+
+    def test_search_text_lowercased_from_lines(
+        self, client, mock_config_service, tmp_path
+    ):
+        """search_text concatène les répliques en minuscules."""
+        target = tmp_path / "text"
+        self._write(
+            target,
+            "t.json",
+            [{"id": "START", "speaker": "X", "line": "Les FISSURES du mur"}],
+        )
+        mock_config_service.get_unity_dialogues_path.return_value = str(target)
+
+        item = self._item(client, "t.json")
+        assert item["search_text"] is not None
+        assert "fissures" in item["search_text"]
+        assert item["search_text"] == item["search_text"].lower()
+
+    def test_search_text_bounded_to_max_chars(
+        self, client, mock_config_service, tmp_path
+    ):
+        """search_text est borné à SEARCH_TEXT_MAX_CHARS (2000)."""
+        from api.routers.unity_dialogues import SEARCH_TEXT_MAX_CHARS
+
+        target = tmp_path / "long"
+        long_line = "mot " * 1000  # ~4000 caractères
+        self._write(
+            target,
+            "l.json",
+            [{"id": "START", "speaker": "X", "line": long_line}],
+        )
+        mock_config_service.get_unity_dialogues_path.return_value = str(target)
+
+        item = self._item(client, "l.json")
+        assert item["search_text"] is not None
+        assert len(item["search_text"]) <= SEARCH_TEXT_MAX_CHARS
+
+    def test_no_speaker_yields_empty_list_and_text_present(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Sans `speaker`, speakers=[] mais search_text reste alimenté."""
+        target = tmp_path / "nospeaker"
+        self._write(
+            target,
+            "n.json",
+            [{"id": "START", "line": "Une réplique sans personnage"}],
+        )
+        mock_config_service.get_unity_dialogues_path.return_value = str(target)
+
+        item = self._item(client, "n.json")
+        assert item["speakers"] == []
+        assert item["search_text"] is not None
+        assert "réplique" in item["search_text"]
+
+    def test_corrupt_json_yields_null_search_fields(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Un JSON illisible → speakers/search_text None, item conservé."""
+        target = tmp_path / "corrupt_search"
+        target.mkdir(parents=True, exist_ok=True)
+        (target / "broken.json").write_text("not valid json", encoding="utf-8")
+        mock_config_service.get_unity_dialogues_path.return_value = str(target)
+
+        item = self._item(client, "broken.json")
+        assert item["speakers"] is None
+        assert item["search_text"] is None
+
+
 class TestReadUnityDialogue:
     """Tests pour l'endpoint GET /api/v1/unity-dialogues/{filename}."""
     

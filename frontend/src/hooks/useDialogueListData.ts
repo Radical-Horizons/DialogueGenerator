@@ -91,11 +91,19 @@ export function useDialogueListData(): UseDialogueListDataReturn {
     let result = dialogues
 
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase()
+      // Recherche FR81 : nom (filename/title), personnage (speakers) et texte
+      // des répliques (search_text, déjà en minuscules côté serveur). Un seul
+      // terme libre, insensible à la casse. `trim` cohérent avec le garde
+      // ci-dessus : sans lui, un espace parasite casserait tous les matches.
+      const query = searchQuery.trim().toLowerCase()
       result = result.filter(
         (dialogue) =>
           dialogue.filename.toLowerCase().includes(query) ||
-          (dialogue.title && dialogue.title.toLowerCase().includes(query))
+          (dialogue.title?.toLowerCase().includes(query) ?? false) ||
+          (dialogue.speakers?.some((speaker) =>
+            speaker.toLowerCase().includes(query)
+          ) ?? false) ||
+          (dialogue.search_text?.includes(query) ?? false)
       )
     }
 

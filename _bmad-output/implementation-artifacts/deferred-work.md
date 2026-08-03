@@ -68,3 +68,10 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-openrouter-aion-models.md`
   summary: Validation stricte du provider localStorage et message explicite si bascule modèle Unity silencieuse.
   evidence: Edge Case Hunter — pattern de fallback déjà utilisé pour GPT-5.6 ; hors scope MVP OpenRouter.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-8-2-rechercher-dialogues-fr81.md`
+  summary: Recherche de dialogues insensible aux accents (« uresair » → « Uresaïr ») en normalisant les diacritiques côté filtre.
+  evidence: Revues adversarial + edge-case — pour un jeu FR à noms accentués, l'utilisateur tape sans accents ; la spec 8.2 ne couvre que l'insensibilité à la casse. Valeur réelle, mais au-delà du périmètre MVP figé.
+- source_spec: `_bmad-output/implementation-artifacts/spec-8-2-rechercher-dialogues-fr81.md`
+  summary: Afficher un extrait surligné de la réplique quand un dialogue matche uniquement via son contenu (search_text), pas via nom/personnage.
+  evidence: Revue adversarial — un résultat de recherche par réplique s'affiche sans indice visible de la raison du match ; lisibilité de la recherche, proche du panneau métadonnées 8.7.

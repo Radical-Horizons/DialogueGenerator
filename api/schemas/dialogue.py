@@ -704,6 +704,22 @@ class UnityDialogueMetadata(BaseModel):
         ),
     )
     title: Optional[str] = Field(None, description="Titre extrait du dialogue")
+    speakers: Optional[List[str]] = Field(
+        default=None,
+        description=(
+            "Personnages (valeurs `speaker`) uniques du dialogue, dans l'ordre "
+            "d'apparition. Liste vide si aucun nœud n'a de `speaker` ; None si "
+            "le JSON est illisible. Alimente la recherche par personnage (FR81)."
+        ),
+    )
+    search_text: Optional[str] = Field(
+        default=None,
+        description=(
+            "Texte cherchable en minuscules : concaténation bornée des répliques "
+            "(`line`) du dialogue, pour la recherche plein-texte côté client "
+            "(FR81). None si le JSON est illisible."
+        ),
+    )
     share_count: int = Field(
         default=0,
         ge=0,

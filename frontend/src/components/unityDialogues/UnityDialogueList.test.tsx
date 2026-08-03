@@ -169,6 +169,55 @@ describe('UnityDialogueList', () => {
     expect(screen.getByTestId('unity-dialogue-item-created')).toHaveTextContent('créé')
   })
 
+  it('affiche les personnages et filtre par personnage (FR81)', async () => {
+    const user = userEvent.setup()
+    mockList.mockResolvedValueOnce({
+      dialogues: [
+        {
+          filename: 'uresair.json',
+          file_path: '/data/uresair.json',
+          modified_time: '2026-04-08T12:00:00.000Z',
+          size_bytes: 1024,
+          title: 'Rencontre',
+          speakers: ['Uresaïr', 'Voknir'],
+          search_text: 'bonjour',
+          share_count: 0,
+        },
+        {
+          filename: 'luna.json',
+          file_path: '/data/luna.json',
+          modified_time: '2026-04-07T12:00:00.000Z',
+          size_bytes: 1024,
+          title: 'Autre',
+          speakers: ['Luna'],
+          search_text: 'salut',
+          share_count: 0,
+        },
+      ],
+      total: 2,
+    })
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+
+    const speakers = await screen.findAllByTestId('unity-dialogue-item-speakers')
+    expect(speakers[0]).toHaveTextContent('Uresaïr, Voknir')
+    expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(2)
+
+    await user.type(screen.getByPlaceholderText('Rechercher… (/)'), 'voknir')
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(1)
+    })
+    expect(screen.getByTestId('unity-dialogue-item-title')).toHaveTextContent('Rencontre')
+  })
+
+  it('ne rend pas le bloc personnages quand le dialogue n’en a pas', async () => {
+    // La fixture par défaut (beforeEach) n'a pas de `speakers`.
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+
+    await screen.findByTestId('unity-dialogue-item')
+    expect(screen.queryByTestId('unity-dialogue-item-speakers')).toBeNull()
+  })
+
   it('pagine la liste à 50/page avec indicateur et navigation', async () => {
     const user = userEvent.setup()
     const many = Array.from({ length: 60 }, (_, index) => ({

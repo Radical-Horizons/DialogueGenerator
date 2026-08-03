@@ -539,6 +539,10 @@ export interface UnityDialogueMetadata {
   /** Date de création (ISO) : index SQLite si indexé, sinon repli fichier. */
   created_at?: string
   title?: string
+  /** Personnages (`speaker`) uniques du dialogue, pour la recherche (FR81). */
+  speakers?: string[]
+  /** Texte cherchable minuscule (répliques concaténées, borné) pour FR81. */
+  search_text?: string
   share_count?: number
   /** Présent côté UI / listes enrichies ; optionnel selon l’endpoint. */
   node_count?: number

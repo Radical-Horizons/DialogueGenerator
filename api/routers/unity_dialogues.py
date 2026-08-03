@@ -100,6 +100,48 @@ def _count_nodes(json_data: object) -> Optional[int]:
     return None
 
 
+SEARCH_TEXT_MAX_CHARS = 2000
+
+
+def _extract_speakers_and_text(
+    nodes: list,
+) -> tuple[Optional[list[str]], Optional[str]]:
+    """Extrait les personnages uniques et un texte cherchable des répliques.
+
+    Parcourt les nœuds une seule fois (réutilise la liste déjà parsée du
+    listing) pour collecter les valeurs ``speaker`` distinctes dans l'ordre
+    d'apparition et concaténer les ``line`` en minuscules. Le texte est borné
+    à ``SEARCH_TEXT_MAX_CHARS`` pour limiter la charge utile embarquée dans le
+    listing (recherche plein-texte MVP côté client, FR81 ; l'index serveur
+    reste la Story 8.6).
+
+    Args:
+        nodes: Liste de nœuds Unity (dicts).
+
+    Returns:
+        Tuple ``(speakers, search_text)`` : ``speakers`` une liste éventuellement
+        vide de noms distincts ; ``search_text`` la concaténation minuscule
+        bornée des répliques, ou ``None`` si aucune réplique exploitable.
+    """
+    speakers: list[str] = []
+    seen: set[str] = set()
+    lines: list[str] = []
+    for node in nodes:
+        if not isinstance(node, dict):
+            continue
+        speaker = node.get("speaker")
+        if isinstance(speaker, str):
+            normalized = speaker.strip()
+            if normalized and normalized not in seen:
+                seen.add(normalized)
+                speakers.append(normalized)
+        line = node.get("line")
+        if isinstance(line, str) and line.strip():
+            lines.append(line.strip())
+    search_text = " ".join(lines).lower()[:SEARCH_TEXT_MAX_CHARS] if lines else None
+    return speakers, search_text
+
+
 def _normalize_iso(value: str) -> str:
     """Normalise un horodatage en ISO-8601 parsable par ``new Date`` côté JS.
 
@@ -236,6 +278,8 @@ async def list_unity_dialogues(
                 # node_count restent None dans ce cas.
                 title = None
                 node_count = None
+                speakers = None
+                search_text = None
                 try:
                     with open(json_file, 'r', encoding='utf-8') as f:
                         json_data = json.load(f)
@@ -249,6 +293,9 @@ async def list_unity_dialogues(
                     )
                     if isinstance(nodes_for_title, list):
                         title = _extract_title_from_json(nodes_for_title)
+                        speakers, search_text = _extract_speakers_and_text(
+                            nodes_for_title
+                        )
                 except (json.JSONDecodeError, IOError) as parse_error:
                     logger.warning(
                         "JSON Unity illisible lors du listing (%s): %s",
@@ -282,6 +329,8 @@ async def list_unity_dialogues(
                     created_at=created_at,
                     node_count=node_count,
                     title=title,
+                    speakers=speakers,
+                    search_text=search_text,
                     share_count=share_counts.get(document_id, 0),
                     capabilities=_capabilities_payload(
                         persistence_service.capabilities(
