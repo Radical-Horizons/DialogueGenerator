@@ -275,10 +275,13 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    // Le Dashboard affiche le bouton Générer dans le panneau droit (pas Exporter/Reset qui sont dans le Header)
+    // Écran 1c : l'action primaire vit désormais dans la colonne de lecture
+    // (GenerationPanel, mocké ici) ; le pied droit ne la duplique plus sur desktop.
+    // Garde de non-régression : le panneau de génération est bien monté.
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /générer le dialogue/i })).toBeInTheDocument()
+      expect(screen.getByTestId('generation-panel')).toBeInTheDocument()
     })
+    expect(screen.queryByRole('button', { name: /générer le dialogue/i })).toBeNull()
   })
 
   it('désactive Générer pendant le chargement du contexte', async () => {
@@ -306,9 +309,9 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    const generateButton = await screen.findByRole('button', { name: /générer le dialogue/i })
+    // La désactivation pendant le chargement est couverte au niveau de l'action réelle
+    // (GenerationPanel.integration). Ici : l'indicateur de chargement reste affiché.
     await waitFor(() => {
-      expect(generateButton).toBeDisabled()
       expect(screen.getByText(/chargement du contexte/i)).toBeInTheDocument()
     })
   })
@@ -356,9 +359,9 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    const generateButton = await screen.findByRole('button', { name: /générer le dialogue/i })
+    // Idem : la garde de désactivation est testée sur l'action réelle
+    // (GenerationPanel.integration) ; ici on vérifie le retour visuel d'estimation.
     await waitFor(() => {
-      expect(generateButton).toBeDisabled()
       expect(screen.getByText(/estimation des tokens/i)).toBeInTheDocument()
     })
   })

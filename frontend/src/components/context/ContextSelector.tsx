@@ -236,6 +236,7 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
     setSuggestions,
     refreshSuggestionsForTrigger,
     gddDataRevision,
+    setGddCatalogLoading,
   } = useContextStore()
   const selectedDialogueType = useContextRulesStore((s) => s.selectedDialogueType)
   const contextTokenCount = useGenerationStore((s) => s.tokenCount)
@@ -402,7 +403,11 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
         void loadData()
       },
     })
-  }, [error, isLoading, loadData, onLoadStateChange])
+    // Publié dans le store : le bouton Générer (colonne de lecture) doit rester
+    // désactivé tant que le catalogue GDD n'est pas chargé.
+    // Appel optionnel : les mocks de store des tests n'exposent pas tous ce setter.
+    setGddCatalogLoading?.(isLoading)
+  }, [error, isLoading, loadData, onLoadStateChange, setGddCatalogLoading])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -713,6 +718,7 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
             marginBottom: `${redesignSpacing.sm}px`,
           }}
         >
+          {/* Le titre de section vit dans l'en-tête du panneau : ici, seul le compteur. */}
           <span
             style={{
               fontFamily: redesignFont.mono,
@@ -723,7 +729,7 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
               whiteSpace: 'nowrap',
             }}
           >
-            Contexte — {selectedChipNames.length} fiche{selectedChipNames.length > 1 ? 's' : ''}
+            {selectedChipNames.length} fiche{selectedChipNames.length > 1 ? 's' : ''}
           </span>
           {selectedChipNames.length > 0 && (
             <button

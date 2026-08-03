@@ -8,6 +8,7 @@ import * as configAPI from '../../api/config'
 import * as dialoguesAPI from '../../api/dialogues'
 import { useGenerationStore } from '../../store/generationStore'
 import { useContextConfigStore } from '../../store/contextConfigStore'
+import { useContextStore } from '../../store/contextStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useLLMStore } from '../../store/llmStore'
 import { useAuthorProfile } from '../../hooks/useAuthorProfile'
@@ -105,6 +106,9 @@ export function GenerationPanel() {
   const [previousDialoguePreview] = useState<string | null>(null)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [showModelSettings, setShowModelSettings] = useState(false)
+  // `=== true` : certains mocks de test renvoient l'objet store entier au lieu du champ
+  // sélectionné ; sans cette coercition le bouton serait désactivé à tort.
+  const gddCatalogLoading = useContextStore((s) => s.gddCatalogLoading) === true
   const toast = useToast()
   
   const availableNarrativeTags = ['tension', 'humour', 'dramatique', 'intime', 'révélation']
@@ -474,6 +478,10 @@ export function GenerationPanel() {
     setIsLoading(false)
   }, [closeEventSource, resetStreamingState])
 
+  /** Même garde que l'ancien bouton du pied : génération, estimation, catalogue GDD. */
+  const isGeneratePrimaryDisabled =
+    isLoading || orchestrator.isEstimating || gddCatalogLoading
+
   const modelSettingsSummary = [
     llmModel,
     REASONING_EFFORT_SHORT_LABELS[reasoningEffort ?? 'none'],
@@ -589,7 +597,24 @@ export function GenerationPanel() {
         }}
       />
 
-      <DialogueFlagsPanel />
+      {/* 1c : les flags sont un lien secondaire sous le brief, pas une section pleine. */}
+      <details style={{ marginBottom: 22 }}>
+        <summary
+          style={{
+            cursor: 'pointer',
+            fontFamily: redesignFont.mono,
+            fontSize: '10px',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            color: redesignText.label,
+          }}
+        >
+          Variables et flags
+        </summary>
+        <div style={{ marginTop: 14 }}>
+          <DialogueFlagsPanel />
+        </div>
+      </details>
 
       {/* Réglages du modèle : résumés en une ligne cliquable (refonte UI), détail dépliable. */}
       <div style={{ marginBottom: '1rem' }}>
@@ -905,7 +930,7 @@ export function GenerationPanel() {
         <button
           type="button"
           onClick={() => void orchestrator.handleGenerate()}
-          disabled={isLoading || orchestrator.isEstimating}
+          disabled={isGeneratePrimaryDisabled}
           style={{
             height: 46,
             borderRadius: 6,
@@ -916,8 +941,8 @@ export function GenerationPanel() {
             alignItems: 'center',
             justifyContent: 'center',
             gap: 11,
-            cursor: isLoading || orchestrator.isEstimating ? 'not-allowed' : 'pointer',
-            opacity: isLoading || orchestrator.isEstimating ? 0.6 : 1,
+            cursor: isGeneratePrimaryDisabled ? 'not-allowed' : 'pointer',
+            opacity: isGeneratePrimaryDisabled ? 0.6 : 1,
             width: '100%',
           }}
         >

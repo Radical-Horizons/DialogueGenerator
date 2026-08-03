@@ -487,9 +487,35 @@ describe('GenerationPanel - Tests Baseline', () => {
       await waitForPanelReady()
 
       const block = screen.getByTestId('generation-streaming-inline')
-      // Le bloc vit dans le même conteneur défilant que le formulaire (plus de modale détachée).
-      expect(block.closest('[data-testid="preset-selector"]')).toBeNull()
-      expect(screen.getByTestId('preset-selector').parentElement).toBe(block.parentElement)
+      // Le bloc vit dans le flux du panneau (plus de modale détachée) : il partage le
+      // conteneur défilant avec l'éditeur de brief et l'action primaire.
+      expect(block.parentElement).toBe(
+        screen.getByTestId('system-prompt-editor').parentElement,
+      )
+      expect(block.parentElement).toBe(
+        screen.getByTestId('generation-primary-action').parentElement,
+      )
+    })
+
+    // L'action primaire a migré du pied du panneau droit vers la colonne de lecture
+    // (écran 1c) : les gardes de désactivation doivent suivre, pas disparaître.
+    it("désactive l'action primaire pendant le chargement du catalogue GDD", async () => {
+      mockUseContextStore.mockImplementation(((selector?: (s: unknown) => unknown) => {
+        const state = { ...buildMockContextStoreState(), gddCatalogLoading: true }
+        return typeof selector === 'function' ? selector(state) : state
+      }) as unknown as typeof useContextStore)
+      try {
+        render(<GenerationPanel />)
+        await waitForPanelReady()
+        const action = within(screen.getByTestId('generation-primary-action')).getByRole('button')
+        expect(action).toBeDisabled()
+      } finally {
+        // Sans restauration, l'implémentation fuit sur les tests suivants.
+        mockUseContextStore.mockReset()
+        mockUseContextStore.mockReturnValue(
+          buildMockContextStoreState() as unknown as ReturnType<typeof useContextStore>
+        )
+      }
     })
 
     it('devrait charger les modèles au montage (prérequis génération / SSE)', async () => {

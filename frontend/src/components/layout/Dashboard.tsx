@@ -908,21 +908,20 @@ export function Dashboard() {
       contextLoadState.isLoading ||
       generationState.isEstimating
     const isRefreshActionDisabled = contextLoadState.isLoading || !contextRefresh
-    // Libellé long : fidèle au design et distinct de l'onglet « Générer » (nom accessible unique).
     const primaryActionLabel = hasContextLoadError ? 'Rafraîchir le contexte' : 'Générer le dialogue'
     const primaryActionTitle = hasContextLoadError
       ? 'Rafraîchir le contexte GDD'
-      : contextLoadState.isLoading
-        ? 'Chargement du contexte GDD en cours'
-        : generationState.isEstimating
-          ? 'Estimation du contexte en cours'
-          : 'Générer (Ctrl+Enter)'
+      : 'Générer (Ctrl+Enter)'
     const handlePrimaryGenerateAction = hasContextLoadError
       ? contextRefresh ?? undefined
       : actions.handleGenerate
     const isPrimaryGenerateDisabled = hasContextLoadError
       ? isRefreshActionDisabled
       : isGenerateActionBlocked
+    // Écran 1c : l'action primaire vit en bas de la colonne de lecture. On ne garde ce
+    // bouton que là où cette colonne n'est pas visible (tiroir narrow) ou quand il porte
+    // le repli « Rafraîchir le contexte » après un échec de chargement GDD.
+    const showFooterPrimaryAction = useNarrowSidePanels || hasContextLoadError
 
     return (
       <div
@@ -995,28 +994,27 @@ export function Dashboard() {
           </>
         )}
         {/* Le résultat généré porte lui-même son action « Garder et continuer » (onglet Dialogue généré). */}
-        {effectiveRightPanelTab === 'dialogue' || effectiveRightPanelTab === 'prompt' ? (
+        {showFooterPrimaryAction ? (
           <>
             <button
               onClick={handlePrimaryGenerateAction}
               disabled={isPrimaryGenerateDisabled}
               style={{
                 width: '100%',
-                height: '46px',
+                height: 46,
                 padding: '0 0.75rem',
                 fontSize: remSize('section'),
                 fontWeight: 'bold',
                 backgroundColor: redesignAccent.base,
                 color: theme.button.primary.color,
                 border: 'none',
-                borderRadius: '6px',
+                borderRadius: 6,
                 cursor: isPrimaryGenerateDisabled ? 'not-allowed' : 'pointer',
                 opacity: isPrimaryGenerateDisabled ? 0.6 : 1,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.5rem',
-                transition: 'all 0.2s',
                 boxSizing: 'border-box',
               }}
               title={primaryActionTitle}
@@ -1035,20 +1033,6 @@ export function Dashboard() {
                 </span>
               )}
             </button>
-            {!hasContextLoadError && generationState.tokenCount != null && (
-              <div
-                style={{
-                  marginTop: '0.35rem',
-                  textAlign: 'center',
-                  fontFamily: redesignFont.mono,
-                  fontSize: remSize('caption'),
-                  color: theme.text.tertiary,
-                  letterSpacing: '0.03em',
-                }}
-              >
-                {generationState.tokenCount.toLocaleString('fr-FR')} TOKENS
-              </div>
-            )}
           </>
         ) : null}
       </div>
