@@ -56,6 +56,7 @@ import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import { contextGddTabChrome, type ContextGddTabDensity } from '../../theme/responsiveChrome'
 import type { UiFontRemKey } from '../../theme/uiTypography'
+import { redesignFont } from '../../theme/redesignTokens'
 
 type TabType = 'characters' | 'locations' | 'items' | 'species' | 'communities'
 
@@ -194,6 +195,7 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
   const [selectedDetail, setSelectedDetail] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [hoveredTab, setHoveredTab] = useState<TabType | null>(null)
   const tabBarRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const tabBarDensity = useContextGddTabBarDensity(tabBarRef)
@@ -640,6 +642,14 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
     [activeTab, isElementSelected],
   )
 
+  const tabItemCounts: Record<TabType, number> = {
+    characters: characters.length,
+    locations: locations.length,
+    items: items.length,
+    species: species.length,
+    communities: communities.length,
+  }
+
   return (
     <div
       data-testid="context-selector"
@@ -680,25 +690,45 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
           overflow: 'hidden',
         }}
       >
-        {TAB_DEFS.map(({ key, label }) => (
-          <button
-            key={key}
-            type="button"
-            className="context-gdd-tab"
-            onClick={() => {
-              setActiveTab(key)
-              setSelectedDetail(null)
-              onItemSelected?.(null, null)
-            }}
-            style={contextGddTabButtonStyle(
-              activeTab === key,
-              tabChromeTier,
-              tabChromeTier.tabFontKey,
-            )}
-          >
-            {label}
-          </button>
-        ))}
+        {TAB_DEFS.map(({ key, label }) => {
+          const isActive = activeTab === key
+          const showCount = isActive || hoveredTab === key
+          const count = tabItemCounts[key]
+          return (
+            <button
+              key={key}
+              type="button"
+              className="context-gdd-tab"
+              onClick={() => {
+                setActiveTab(key)
+                setSelectedDetail(null)
+                onItemSelected?.(null, null)
+              }}
+              onMouseEnter={() => setHoveredTab(key)}
+              onMouseLeave={() => setHoveredTab(null)}
+              style={contextGddTabButtonStyle(
+                isActive,
+                tabChromeTier,
+                tabChromeTier.tabFontKey,
+              )}
+            >
+              {label}
+              {showCount && (
+                <span
+                  aria-hidden="true"
+                  style={{
+                    marginLeft: '0.4em',
+                    fontFamily: redesignFont.mono,
+                    fontSize: '0.85em',
+                    color: isActive ? theme.text.secondary : theme.text.tertiary,
+                  }}
+                >
+                  {count}
+                </span>
+              )}
+            </button>
+          )
+        })}
 
         <button
           type="button"

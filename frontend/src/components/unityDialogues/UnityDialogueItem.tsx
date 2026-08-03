@@ -4,7 +4,7 @@
 import { forwardRef, memo, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
-import { listItemSelectionStyle } from '../../theme/selectionTokens'
+import { listItemSelectionStyle, listRowHairlineBorder, listRowHoverBackground } from '../../theme/selectionTokens'
 import type { UnityDialogueMetadata } from '../../types/api'
 import { highlightText } from '../../utils/textHighlight'
 import { getDialogueDisplayTitle } from '../../utils/formatDialogueTitle'
@@ -32,7 +32,7 @@ export interface UnityDialogueItemProps {
 const itemInteractiveStyle: CSSProperties = {
   width: '100%',
   padding: '0.5rem',
-  borderBottom: `1px solid ${theme.border.primary}`,
+  borderBottom: listRowHairlineBorder,
   borderTop: 'none',
   borderLeft: 'none',
   borderRight: 'none',
@@ -173,7 +173,7 @@ export const UnityDialogueItem = memo(
         onMouseEnter: (e: MouseEvent<HTMLElement>) => {
           setIsHovered(true)
           if (!isSelected) {
-            e.currentTarget.style.backgroundColor = theme.state.hover.background
+            e.currentTarget.style.backgroundColor = listRowHoverBackground
           }
         },
         onMouseLeave: (e: MouseEvent<HTMLElement>) => {
@@ -221,7 +221,7 @@ export const UnityDialogueItem = memo(
               display: 'flex',
               alignItems: 'flex-start',
               width: '100%',
-              borderBottom: `1px solid ${theme.border.primary}`,
+              borderBottom: listRowHairlineBorder,
               ...selectionStyle,
             }}
             onMouseEnter={() => setIsHovered(true)}
