@@ -28,6 +28,7 @@ const mockValidateDocumentSchema = vi.mocked(dialoguesAPI.validateDocumentSchema
 describe('UnityDialogueList', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    localStorage.clear()
     mockList.mockResolvedValue({
       dialogues: [
         {

@@ -402,6 +402,8 @@ export const DialogueCombobox = forwardRef<DialogueComboboxRef, DialogueCombobox
                   <option value="date-asc">Date (ancien)</option>
                   <option value="name-asc">Nom (A-Z)</option>
                   <option value="name-desc">Nom (Z-A)</option>
+                  <option value="size-desc">Taille (grand)</option>
+                  <option value="size-asc">Taille (petit)</option>
                 </StyledSelect>
               </div>
 

@@ -174,7 +174,7 @@ development_status:
   8-1-lister-tous-les-dialogues-du-système-fr80: done
   8-2-rechercher-des-dialogues-nom-personnage-lieu-thème-fr81: done
   8-3-filtrer-les-dialogues-par-métadonnées-date-auteur-statut-fr82: done
-  8-4-trier-les-dialogues-alpha-date-taille-fr83: backlog
+  8-4-trier-les-dialogues-alpha-date-taille-fr83: done
   8-5-créer-des-collections-dossiers-de-dialogues-fr84: backlog
   8-6-indexer-les-dialogues-pour-recherche-rapide-1000-fr85: backlog
   8-7-afficher-les-métadonnées-dun-dialogue-nodes-coût-last-edited-fr86: backlog

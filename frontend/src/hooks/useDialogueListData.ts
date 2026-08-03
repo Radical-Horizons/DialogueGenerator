@@ -15,12 +15,14 @@ import {
   matchesDialogueDatePeriod,
   type DialogueDatePeriod,
 } from '../utils/dialogueListFilters'
+import {
+  loadDialogueListSort,
+  saveDialogueListSort,
+  isDialogueListSortType,
+  type PersistedDialogueListSortType,
+} from '../utils/dialogueListSort'
 
-export type DialogueListSortType =
-  | 'name-asc'
-  | 'name-desc'
-  | 'date-desc'
-  | 'date-asc'
+export type DialogueListSortType = PersistedDialogueListSortType
 
 export type { DialogueDatePeriod }
 
@@ -90,7 +92,9 @@ export function useDialogueListData(): UseDialogueListDataReturn {
   const [searchQuery, setSearchQuery] = useState('')
   const [datePeriod, setDatePeriod] = useState<DialogueDatePeriod>('all')
   const [authorId, setAuthorId] = useState<string | null>(null)
-  const [sortType, setSortType] = useState<DialogueListSortType>('date-desc')
+  const [sortType, setSortTypeState] = useState<DialogueListSortType>(() =>
+    loadDialogueListSort()
+  )
   const [page, setPage] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -193,6 +197,24 @@ export function useDialogueListData(): UseDialogueListDataReturn {
             new Date(a.modified_time).getTime() -
             new Date(b.modified_time).getTime()
           )
+        case 'size-desc':
+        case 'size-asc': {
+          // Nulls / absents en fin de liste ; départage stable par filename.
+          const aCount = a.node_count
+          const bCount = b.node_count
+          const aMissing = aCount == null
+          const bMissing = bCount == null
+          if (aMissing && bMissing) {
+            return a.filename.localeCompare(b.filename, 'fr')
+          }
+          if (aMissing) return 1
+          if (bMissing) return -1
+          const delta =
+            sortType === 'size-desc' ? bCount - aCount : aCount - bCount
+          return delta !== 0
+            ? delta
+            : a.filename.localeCompare(b.filename, 'fr')
+        }
         case 'date-desc':
         default:
           return (
@@ -231,6 +253,14 @@ export function useDialogueListData(): UseDialogueListDataReturn {
     // corrompre l'état de page.
     if (!Number.isFinite(next)) return
     setPage(Math.max(1, Math.floor(next)))
+  }, [])
+
+  const setSortType = useCallback((next: DialogueListSortType) => {
+    // Le <select> caste la value en string : ignorer toute valeur hors whitelist
+    // pour ne pas polluer le state ni localStorage.
+    if (!isDialogueListSortType(next)) return
+    setSortTypeState(next)
+    saveDialogueListSort(next)
   }, [])
 
   const hasActiveFilters = datePeriod !== 'all' || authorId !== null

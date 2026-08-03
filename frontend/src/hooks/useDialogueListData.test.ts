@@ -42,11 +42,13 @@ const FIXTURE = [
 describe('useDialogueListData', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    localStorage.clear()
     mockList.mockResolvedValue({ dialogues: [...FIXTURE], total: FIXTURE.length })
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
+    localStorage.clear()
   })
 
   it('charge la liste au montage et expose total/filteredCount', async () => {
@@ -104,6 +106,113 @@ describe('useDialogueListData', () => {
     expect(result.current.filteredDialogues[0]?.filename).toBe('alpha.json')
     expect(result.current.filteredCount).toBe(1)
     expect(result.current.total).toBe(3)
+  })
+
+  it('trie par taille (node_count) et place les nulls en fin (FR83)', async () => {
+    mockList.mockResolvedValueOnce({
+      dialogues: [
+        {
+          filename: 'big.json',
+          file_path: '/data/big.json',
+          size_bytes: 1,
+          modified_time: '2026-01-01T00:00:00.000Z',
+          node_count: 45,
+          title: 'Big',
+        },
+        {
+          filename: 'small.json',
+          file_path: '/data/small.json',
+          size_bytes: 1,
+          modified_time: '2026-01-02T00:00:00.000Z',
+          node_count: 10,
+          title: 'Small',
+        },
+        {
+          filename: 'unknown.json',
+          file_path: '/data/unknown.json',
+          size_bytes: 1,
+          modified_time: '2026-01-03T00:00:00.000Z',
+          title: 'Unknown',
+        },
+      ],
+      total: 3,
+    })
+    const { result } = renderHook(() => useDialogueListData())
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    act(() => {
+      result.current.setSortType('size-desc')
+    })
+    expect(result.current.filteredDialogues.map((d) => d.filename)).toEqual([
+      'big.json',
+      'small.json',
+      'unknown.json',
+    ])
+
+    act(() => {
+      result.current.setSortType('size-asc')
+    })
+    expect(result.current.filteredDialogues.map((d) => d.filename)).toEqual([
+      'small.json',
+      'big.json',
+      'unknown.json',
+    ])
+  })
+
+  it('départage les node_count égaux par filename (FR83)', async () => {
+    mockList.mockResolvedValueOnce({
+      dialogues: [
+        {
+          filename: 'zeta.json',
+          file_path: '/data/zeta.json',
+          size_bytes: 1,
+          modified_time: '2026-01-01T00:00:00.000Z',
+          node_count: 20,
+          title: 'Z',
+        },
+        {
+          filename: 'alpha.json',
+          file_path: '/data/alpha.json',
+          size_bytes: 1,
+          modified_time: '2026-01-02T00:00:00.000Z',
+          node_count: 20,
+          title: 'A',
+        },
+      ],
+      total: 2,
+    })
+    const { result } = renderHook(() => useDialogueListData())
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    act(() => {
+      result.current.setSortType('size-desc')
+    })
+    expect(result.current.filteredDialogues.map((d) => d.filename)).toEqual([
+      'alpha.json',
+      'zeta.json',
+    ])
+  })
+
+  it('persiste le tri dans localStorage (FR83)', async () => {
+    localStorage.clear()
+    const { result } = renderHook(() => useDialogueListData())
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    act(() => {
+      result.current.setSortType('size-desc')
+    })
+    expect(localStorage.getItem('dialogueGenerator.dialogueListSort')).toBe(
+      'size-desc'
+    )
+  })
+
+  it('hydrate le tri depuis localStorage au montage (FR83)', async () => {
+    localStorage.setItem('dialogueGenerator.dialogueListSort', 'name-asc')
+    const { result } = renderHook(() => useDialogueListData())
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    expect(result.current.sortType).toBe('name-asc')
+    const ordered = result.current.filteredDialogues.map((d) => d.filename)
+    expect(ordered).toEqual(['alpha.json', 'bravo.json', 'charlie.json'])
   })
 
   it('filtre par période et auteur (ET) et expose availableAuthors / reset (FR82)', async () => {
