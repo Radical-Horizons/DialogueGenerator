@@ -8,7 +8,7 @@ import { useGenerationStore } from '../../store/generationStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useContextStore } from '../../store/contextStore'
 import { GDD_CONTEXT_PANEL_TITLE } from '../context/constants'
-import { panelHeaderTitleTypography } from '../../theme/responsiveChrome'
+import { panelHeaderMonoLabel } from '../../theme/responsiveChrome'
 
 const mockContextRefresh = vi.hoisted(() => vi.fn())
 const mockContextSelectorState = vi.hoisted(() => ({
@@ -703,7 +703,7 @@ describe('Dashboard', () => {
 
     const titleComfortable = screen.getByText(GDD_CONTEXT_PANEL_TITLE)
     expect(titleComfortable).toHaveStyle({
-      fontSize: `${panelHeaderTitleTypography.comfortableFontRem}rem`,
+      fontSize: `${panelHeaderMonoLabel.comfortableFontPx}px`,
     })
     unmount()
 
@@ -719,7 +719,7 @@ describe('Dashboard', () => {
     await waitFor(() => {
       const titleNarrow = screen.getByText(GDD_CONTEXT_PANEL_TITLE)
       expect(titleNarrow).toHaveStyle({
-        fontSize: `${panelHeaderTitleTypography.narrowFontRem}rem`,
+        fontSize: `${panelHeaderMonoLabel.narrowFontPx}px`,
       })
     })
   })

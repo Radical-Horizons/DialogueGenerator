@@ -7,6 +7,7 @@ import { usePromptPreview } from '../../hooks/usePromptPreview'
 import { useLazyPromptPreview } from '../../hooks/useLazyPromptPreview'
 import { StructuredPromptView } from './StructuredPromptView'
 import { theme } from '../../theme'
+import { redesignFont, redesignHairline, redesignText } from '../../theme/redesignTokens'
 import { useToast } from '../shared'
 import { useGenerationStore } from '../../store/generationStore'
 import type { RawPrompt } from '../../types/api'
@@ -42,6 +43,10 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
 
   const { sections } = usePromptPreview(raw_prompt, structuredPrompt)
   const hasStructuredPrompt = Boolean(structuredPrompt && sections.length > 0)
+  /** Total réellement additionné depuis les sections — jamais une valeur inventée. */
+  const promptTotalTokens = sections.some((s) => s.tokenCount !== undefined)
+    ? sections.reduce((sum, s) => sum + (s.tokenCount ?? 0), 0)
+    : null
   const hasPromptPreview = Boolean(raw_prompt || hasStructuredPrompt)
 
   const handleCopyPrompt = useCallback(() => {
@@ -255,15 +260,47 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
               </div>
             )
           ) : (
-            <StructuredPromptView
-              prompt={raw_prompt ?? ''}
-              structuredPrompt={structuredPrompt}
-              sections={sections}
-              onToggleStateChange={(expanded, toggleFn) => {
-                setAllExpanded(expanded)
-                setToggleAllFn(() => toggleFn)
-              }}
-            />
+            <>
+              <StructuredPromptView
+                prompt={raw_prompt ?? ''}
+                structuredPrompt={structuredPrompt}
+                sections={sections}
+                onToggleStateChange={(expanded, toggleFn) => {
+                  setAllExpanded(expanded)
+                  setToggleAllFn(() => toggleFn)
+                }}
+              />
+              {promptTotalTokens !== null && (
+                <div
+                  data-testid="prompt-total-row"
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'baseline',
+                    gap: '0.75rem',
+                    padding: '9px 0',
+                    borderTop: `1px solid ${redesignHairline.strong}`,
+                    fontFamily: redesignFont.mono,
+                    fontSize: '10.5px',
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    color: redesignText.label,
+                  }}
+                >
+                  <span>Total</span>
+                  <span
+                    style={{
+                      fontSize: '13px',
+                      letterSpacing: 0,
+                      color: theme.text.primary,
+                      fontVariantNumeric: 'tabular-nums',
+                    }}
+                  >
+                    {promptTotalTokens.toLocaleString('fr-FR')}
+                  </span>
+                </div>
+              )}
+            </>
           )
         ) : (
           <div

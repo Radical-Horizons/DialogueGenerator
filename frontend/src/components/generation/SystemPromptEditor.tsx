@@ -21,7 +21,7 @@ import {
 } from '../../utils/localNamedTemplates'
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
 import { StyledSelect } from '../shared/StyledSelect'
-import { redesignReadingColumn } from '../../theme/redesignTokens'
+import { redesignFont, redesignReadingColumn, redesignText } from '../../theme/redesignTokens'
 
 export interface SystemPromptEditorProps {
   userInstructions: string
@@ -502,13 +502,15 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
             <label
               htmlFor="user-instructions-textarea"
               style={{
-                color: theme.text.primary,
-                fontSize: `${genChrome.labelFontRem}rem`,
-                fontWeight: 500,
+                fontFamily: redesignFont.mono,
+                fontSize: '10.5px',
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: redesignText.label,
                 flex: isNarrow ? '1 1 100%' : undefined,
               }}
             >
-              Brief de scène:
+              Brief du premier nœud
             </label>
             <div style={{ display: 'flex', gap: `${genChrome.controlGapRem}rem`, flexWrap: 'wrap' }}>
               <button
@@ -1183,14 +1185,14 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
   return (
     <div
       style={{
-        marginBottom: '1rem',
-        border: `1px solid ${theme.border.primary}`,
-        borderRadius: '8px',
-        backgroundColor: theme.background.tertiary,
+        marginBottom: '1.5rem',
+        border: 'none',
+        borderRadius: 0,
+        backgroundColor: 'transparent',
       }}
     >
       <Tabs
-        variant="segmented"
+        variant="nav"
         tabs={tabs}
         activeTabId={activeTabId}
         onTabChange={setActiveTabId}

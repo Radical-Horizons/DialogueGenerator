@@ -61,6 +61,15 @@ export const panelHeaderTitleTypography = {
 } as const
 
 /**
+ * Étiquette mono d'en-tête de panneau (refonte UI) — remplace le titre en gras.
+ * Conserve la densité adaptive de FR118 17.6 : plus compacte en colonne étroite.
+ */
+export const panelHeaderMonoLabel = {
+  comfortableFontPx: 10,
+  narrowFontPx: 9,
+} as const
+
+/**
  * Libellé vertical des `PanelExpandButton` (rails GDD / Détails) — variante « caption »
  * AC1 : plancher lisibilité ≥ ~12px (`0.75rem` si root 16px).
  */

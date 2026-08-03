@@ -7,7 +7,13 @@ import { useSceneSelection } from '../../hooks/useSceneSelection'
 import { useGenerationStore } from '../../store/generationStore'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { theme } from '../../theme'
-import { redesignControl, redesignFont, redesignRadius, redesignText } from '../../theme/redesignTokens'
+import {
+  redesignControl,
+  redesignFont,
+  redesignRadius,
+  redesignSpacing,
+  redesignText,
+} from '../../theme/redesignTokens'
 import { generationPanelChrome } from '../../theme/responsiveChrome'
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
 import {
@@ -128,6 +134,15 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
 
   const hasContext = selection.characterA || selection.characterB || selection.sceneRegion
 
+  /** Sur-titre et titre de scène dérivés de la sélection courante (pas de données inventées). */
+  const sceneOverline = [selection.sceneRegion, selection.subLocation]
+    .filter(Boolean)
+    .join(' · ') || 'Scène sans lieu'
+  const sceneTitle =
+    selection.characterA && selection.characterB
+      ? `${selection.characterA} & ${selection.characterB}`
+      : selection.characterA || selection.characterB || 'Nouvelle scène'
+
   if (!hasContext && !isLoading) {
     return (
       <div
@@ -153,25 +168,53 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
   return (
     <div
       style={{
-        padding: chrome.cardPadding,
-        border: `1px solid ${theme.border.primary}`,
-        borderRadius: '8px',
-        backgroundColor: theme.background.tertiary,
-        marginBottom: '1rem',
+        padding: 0,
+        border: 'none',
+        borderRadius: 0,
+        backgroundColor: 'transparent',
+        marginBottom: `${redesignSpacing.xl}px`,
         minWidth: 0,
       }}
     >
-      <h3
+      {/* Titre de scène : sur-titre mono + titre serif (écran 1c). */}
+      <div
+        style={{
+          fontFamily: redesignFont.mono,
+          fontSize: '10.5px',
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          color: redesignText.label,
+          marginBottom: `${redesignSpacing.sm}px`,
+        }}
+      >
+        {sceneOverline}
+      </div>
+      <h1
         style={{
           marginTop: 0,
-          marginBottom: '0.5rem',
-          fontSize: `${chrome.sectionTitleFontRem}rem`,
-          fontWeight: 'bold',
+          marginBottom: `${redesignSpacing.lg}px`,
+          fontFamily: redesignFont.serif,
+          fontSize: isNarrow ? '24px' : '33px',
+          fontWeight: 400,
+          lineHeight: 1.15,
+          letterSpacing: '-0.01em',
           color: theme.text.primary,
         }}
       >
-        Scène Principale
-      </h3>
+        {sceneTitle}
+      </h1>
+      <div
+        style={{
+          fontFamily: redesignFont.mono,
+          fontSize: '10px',
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          color: redesignText.label,
+          marginBottom: `${redesignSpacing.sm}px`,
+        }}
+      >
+        Scène
+      </div>
 
       {/* Ligne 1: Personnages */}
       <div

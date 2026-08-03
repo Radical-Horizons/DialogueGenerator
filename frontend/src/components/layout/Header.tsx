@@ -125,30 +125,29 @@ export function Header() {
             data-testid="guest-mode-banner"
             role="status"
             style={{
-              color: theme.text.primary,
-              fontSize: remSize('small'),
-              fontWeight: 600,
-              padding: '0.25rem 0.55rem',
-              borderRadius: '4px',
-              border: `1px solid ${theme.border.primary}`,
-              backgroundColor: theme.background.tertiary,
+              fontFamily: redesignFont.mono,
+              fontSize: '10px',
+              letterSpacing: '0.09em',
+              textTransform: 'uppercase',
+              color: redesignText.label,
               whiteSpace: 'nowrap',
             }}
           >
-            Mode invité — lecture seule
+            Invité — lecture seule
           </span>
         )}
-        <span 
-          title={`Date de compilation: ${new Date(__BUILD_DATE__).toLocaleString('fr-FR')}`}
-          style={{ 
-            color: theme.text.secondary, 
-            fontSize: remSize('small'),
-            whiteSpace: 'nowrap',
-            fontFamily: 'monospace',
+        {/* Horodatage de build : en info-bulle seulement, il n'a pas sa place dans le chrome. */}
+        <span
+          title={`Date de compilation : ${new Date(__BUILD_DATE__).toLocaleString('fr-FR')}`}
+          aria-hidden
+          style={{
+            width: 4,
+            height: 4,
+            borderRadius: '50%',
+            backgroundColor: redesignText.label,
+            flexShrink: 0,
           }}
-        >
-          Build: {new Date(__BUILD_DATE__).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-        </span>
+        />
       </div>
       
       {/* Section centrale : Barre de recherche */}

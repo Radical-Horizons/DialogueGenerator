@@ -313,15 +313,18 @@ describe('FR119 touch targets — chrome', () => {
       expect(screen.getByRole('button', { name: /déplier le panneau gauche/i })).toBeInTheDocument()
     })
     // Les rails ont été réduits de moitié intentionnellement — l'essentiel est
-    // que les onglets segmentés principaux restent ≥ 44px FR119 (hauteur chrome +50 %).
+    // que les onglets de navigation principaux restent ≥ 44px FR119.
+    // (Refonte UI : variante `nav` allégée ; la contrainte tactile est inchangée.)
     const centerTab = screen.getByRole('button', {
       name: /^Générer$/i,
     }) as HTMLElement
-    expect(centerTab.style.minHeight, 'center segmented tab minHeight').toBe(
-      `${segmentedTabTypography.narrow.tabMinHeightPx}px`,
-    )
-    expect(centerTab.style.minWidth, 'center segmented tab minWidth').toBe(
-      `${TOUCH_TARGET_MIN_PX}px`,
-    )
+    expect(
+      parseInt(centerTab.style.minHeight, 10),
+      'center nav tab minHeight',
+    ).toBeGreaterThanOrEqual(TOUCH_TARGET_MIN_PX)
+    expect(
+      parseInt(centerTab.style.minWidth, 10),
+      'center nav tab minWidth',
+    ).toBeGreaterThanOrEqual(TOUCH_TARGET_MIN_PX)
   })
 })

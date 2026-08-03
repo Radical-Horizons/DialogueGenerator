@@ -38,14 +38,14 @@ import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import {
   SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX,
   panelCollapseButtonChrome,
-  panelHeaderTitleTypography,
+  panelHeaderMonoLabel,
   panelSideHeaderChrome,
 } from '../../theme/responsiveChrome'
 import { remSize } from '../../theme/uiTypography'
 import { NarrowOverlayDrawer } from './NarrowOverlayDrawer'
 import type { CharacterResponse, LocationResponse, ItemResponse, SpeciesResponse, CommunityResponse, UnityDialogueMetadata } from '../../types/api'
 import { theme } from '../../theme'
-import { redesignAccent, redesignFont, redesignHairline } from '../../theme/redesignTokens'
+import { redesignAccent, redesignFont, redesignHairline, redesignText } from '../../theme/redesignTokens'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
 type ContextLoadState = {
@@ -340,9 +340,10 @@ export function Dashboard() {
     SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX,
     { measureParentClientWidth: true }
   )
-  const panelTitleFontRem = isNarrowCenterColumn
-    ? panelHeaderTitleTypography.narrowFontRem
-    : panelHeaderTitleTypography.comfortableFontRem
+  /** Densité adaptive conservée (FR118 17.6), transposée à l'étiquette mono. */
+  const panelHeaderMonoLabelPx = isNarrowCenterColumn
+    ? panelHeaderMonoLabel.narrowFontPx
+    : panelHeaderMonoLabel.comfortableFontPx
   const panelSideHeaderPadding = isNarrowCenterColumn
     ? panelSideHeaderChrome.narrow.padding
     : panelSideHeaderChrome.comfortable.padding
@@ -1116,7 +1117,18 @@ export function Dashboard() {
                 flexShrink: 0,
               }}
             >
-              <div style={{ fontSize: `${panelTitleFontRem}rem`, fontWeight: 700, color: theme.text.primary }}>
+              <div
+                style={{
+                  fontFamily: redesignFont.mono,
+                  fontSize: `${panelHeaderMonoLabelPx}px`,
+                  letterSpacing: '0.09em',
+                  textTransform: 'uppercase',
+                  color: redesignText.label,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
                 {GDD_CONTEXT_PANEL_TITLE}
               </div>
               <PanelCollapseButton
@@ -1168,7 +1180,7 @@ export function Dashboard() {
           />
         )}
           <Tabs
-            variant="segmented"
+            variant="nav"
             tabs={[
               {
                 id: 'generation',
@@ -1253,13 +1265,18 @@ export function Dashboard() {
             style={{
               flex: 1,
               minWidth: 0,
-              textAlign: 'center',
-              fontSize: `${panelTitleFontRem}rem`,
-              fontWeight: 700,
-              color: theme.text.primary,
+              textAlign: 'left',
+              fontFamily: redesignFont.mono,
+              fontSize: '10px',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: redesignText.label,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
             }}
           >
-            Détails
+            Ce qui part au modèle
           </div>
           {actions.handleGenerate ? (
             <SaveStatusIndicator
@@ -1289,8 +1306,7 @@ export function Dashboard() {
             visible={centerPanelTab === 'generation' || centerPanelTab === 'edition'}
           />
           <Tabs
-            variant="segmented"
-            segmentedSize="drawer-aligned"
+            variant="nav"
             tabs={visibleRightPanelTabs}
             activeTabId={effectiveRightPanelTab}
             onTabChange={(tabId) => setRightPanelTab(tabId as 'prompt' | 'dialogue' | 'node' | 'details')}
@@ -1353,8 +1369,7 @@ export function Dashboard() {
             visible={centerPanelTab === 'generation' || centerPanelTab === 'edition'}
           />
           <Tabs
-            variant="segmented"
-            segmentedSize="drawer-aligned"
+            variant="nav"
             tabs={visibleRightPanelTabs}
             activeTabId={effectiveRightPanelTab}
             onTabChange={(tabId) => setRightPanelTab(tabId as 'prompt' | 'dialogue' | 'node' | 'details')}

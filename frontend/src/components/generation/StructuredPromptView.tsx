@@ -6,6 +6,7 @@ import { parsePromptSections, parsePromptFromJson, type PromptSection } from '..
 import { renderMarkdown } from '../../utils/markdownRenderer'
 import { prettifyJsonInText } from '../../utils/jsonPrettifier'
 import { theme } from '../../theme'
+import { redesignFont, redesignHairline, redesignText } from '../../theme/redesignTokens'
 import type { PromptStructure } from '../../types/prompt'
 
 /**
@@ -102,13 +103,10 @@ function AccordionSection({
   return (
     <div
       style={{
-        border: `1px solid ${theme.border.primary}`,
-        borderRadius: '10px',
-        marginBottom: level > 0 ? '0.75rem' : '0.65rem',
+        borderBottom: `1px solid ${redesignHairline.standard}`,
         marginLeft: level > 0 ? `${level * 0.75}rem` : '0',
         overflow: 'hidden',
-        boxShadow: theme.shadow.card,
-        backgroundColor: theme.background.tertiary,
+        backgroundColor: 'transparent',
       }}
     >
       <button
@@ -116,63 +114,68 @@ function AccordionSection({
         onClick={handleToggle}
         style={{
           width: '100%',
-          padding: '0.75rem 1rem',
-          backgroundColor: isExpanded ? theme.background.secondary : theme.background.tertiary,
+          padding: '7px 0',
+          backgroundColor: 'transparent',
           border: 'none',
-          borderBottom: isExpanded ? `1px solid ${theme.border.primary}` : 'none',
-          color: theme.text.primary,
+          color: theme.text.secondary,
           textAlign: 'left',
           cursor: 'pointer',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center',
-          fontSize: '0.9rem',
-          fontWeight: '500',
-          transition: 'background-color 0.2s',
+          alignItems: 'baseline',
+          gap: '0.75rem',
+          fontSize: '12.5px',
+          transition: 'color 0.15s',
         }}
         onMouseEnter={(e) => {
-          if (!isExpanded) {
-            e.currentTarget.style.backgroundColor = theme.background.secondary
-          }
+          e.currentTarget.style.color = theme.text.primary
         }}
         onMouseLeave={(e) => {
-          if (!isExpanded) {
-            e.currentTarget.style.backgroundColor = theme.background.tertiary
-          }
+          e.currentTarget.style.color = theme.text.secondary
         }}
       >
-        <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span>{cleanSectionTitle(section.title)}</span>
-          {section.tokenCount !== undefined && (
-            <span
-              style={{
-                fontSize: '0.75rem',
-                color: theme.text.secondary,
-                fontWeight: 'normal',
-              }}
-            >
-              ({section.tokenCount.toLocaleString()} tokens)
-            </span>
-          )}
-        </span>
         <span
           style={{
-            fontSize: '0.75rem',
-            color: theme.text.secondary,
-            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            minWidth: 0,
+            flex: 1,
+          }}
+        >
+          {cleanSectionTitle(section.title)}
+        </span>
+        {section.tokenCount !== undefined && (
+          <span
+            style={{
+              fontFamily: redesignFont.mono,
+              fontSize: '11px',
+              color: theme.text.primary,
+              flexShrink: 0,
+              fontVariantNumeric: 'tabular-nums',
+            }}
+          >
+            {section.tokenCount.toLocaleString('fr-FR')}
+          </span>
+        )}
+        <span
+          aria-hidden
+          style={{
+            fontSize: '9px',
+            color: redesignText.label,
+            flexShrink: 0,
             display: 'inline-block',
           }}
         >
-          ▼
+          {isExpanded ? '▴' : '▾'}
         </span>
       </button>
-      
+
       {isExpanded && (
         <div
           style={{
-            padding: '1rem',
-            backgroundColor: theme.background.secondary,
+            padding: '0.5rem 0 0.9rem',
+            backgroundColor: 'transparent',
             color: theme.text.primary,
             fontSize: '0.85rem',
             lineHeight: '1.7',
