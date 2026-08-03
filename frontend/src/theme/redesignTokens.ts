@@ -34,9 +34,20 @@ export const redesignControl = {
   border: '#2e2e36',
 } as const
 
+/** Valeurs relevées telles quelles dans la maquette 1c (bloc `#1c` du handoff HTML). */
 export const redesignText = {
+  /** Corps du brief (15,5px / 1.72). */
   body: '#dcdce4',
+  /** Étiquettes mono capitales, chevrons. */
   label: '#63636c',
+  /** Texte secondaire : « vider », liens sous le brief, résumé de fiche. */
+  secondary: '#9a9aa4',
+  /** Libellé de rangée (panneau droit), nom de fiche non sélectionnée. */
+  row: '#d5d5dd',
+  /** Valeurs mono en rangée, texte tertiaire. */
+  muted: '#7c7c86',
+  /** Texte principal sur fond sombre. */
+  strong: '#f2f2f5',
 } as const
 
 /** Échelle unique d'espacement. Rien entre ces valeurs. */
@@ -62,8 +73,8 @@ export const redesignRadius = {
  * si le self-hosting est validé plus tard.
  */
 export const redesignFont = {
-  serif: 'Georgia, "Times New Roman", serif',
-  sans: 'Inter, system-ui, Avenir, Helvetica, Arial, sans-serif',
+  serif: '"Instrument Serif", Georgia, "Times New Roman", serif',
+  sans: '"Instrument Sans", system-ui, Avenir, Helvetica, Arial, sans-serif',
   mono: '"IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace',
 } as const
 

@@ -39,7 +39,7 @@ import { GenerationPanelModals } from './GenerationPanelModals'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { PANEL_COMFORT_MIN_WIDTH_PX, generationPanelChrome } from '../../theme/responsiveChrome'
 import { GenerationPanelNarrowProvider } from './GenerationPanelNarrowContext'
-import { redesignFont } from '../../theme/redesignTokens'
+import { redesignAccent, redesignFont, redesignHairline, redesignReadingColumn, redesignText } from '../../theme/redesignTokens'
 import { remSize } from '../../theme/uiTypography'
 
 const REASONING_EFFORT_SHORT_LABELS: Record<string, string> = {
@@ -486,7 +486,18 @@ export function GenerationPanel() {
       <GenerationPanelNarrowProvider value={isGenerationNarrow}>
       <div
         ref={generationScrollRef}
-        style={{ padding: genChrome.containerPadding, flex: 1, overflowY: 'auto', minWidth: 0 }}
+        style={{
+          padding: genChrome.containerPadding,
+          flex: 1,
+          overflowY: 'auto',
+          minWidth: 0,
+          // Colonne de lecture 660px centrée (écran 1c) ; pleine largeur en narrow.
+          width: '100%',
+          maxWidth: isGenerationNarrow ? undefined : redesignReadingColumn.default,
+          marginLeft: isGenerationNarrow ? undefined : 'auto',
+          marginRight: isGenerationNarrow ? undefined : 'auto',
+          boxSizing: 'border-box',
+        }}
       >
         {/* Progression du streaming : dans le flux de l'écran, plus de modale (Story 0.2 → refonte UI) */}
         <GenerationStreamingInline
@@ -509,14 +520,51 @@ export function GenerationPanel() {
           onClose={handleCloseStreaming}
         />
 
-        {/* PresetSelector (Task 6) */}
-        <PresetSelector
-          onPresetLoaded={presets.handlePresetLoaded}
-          getCurrentConfiguration={presets.getCurrentConfiguration}
-          saveStatus={draft.saveStatus}
-        />
+        {/* 1c ne montre pas la barre de preset : elle vit avec les réglages du modèle. */}
+        <div style={{ display: showModelSettings ? 'block' : 'none' }}>
+          <PresetSelector
+            onPresetLoaded={presets.handlePresetLoaded}
+            getCurrentConfiguration={presets.getCurrentConfiguration}
+            saveStatus={draft.saveStatus}
+          />
+        </div>
 
             <SceneSelectionWidget />
+
+      {/* Chips de ton (écran 1c) — juste sous le titre de scène. */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 22 }}>
+        {availableNarrativeTags.map((tag) => {
+          const active = narrativeTags.includes(tag)
+          return (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => {
+                setNarrativeTags(
+                  active ? narrativeTags.filter((t) => t !== tag) : [...narrativeTags, tag],
+                )
+                draft.markDirty()
+              }}
+              style={{
+                height: 25,
+                padding: '0 10px',
+                borderRadius: 99,
+                border: active
+                  ? '1px solid rgba(79,127,255,0.4)'
+                  : '1px solid rgba(255,255,255,0.12)',
+                backgroundColor: active ? 'rgba(79,127,255,0.1)' : 'transparent',
+                color: active ? '#a9c3ff' : '#7c7c86',
+                fontSize: '11.5px',
+                display: 'flex',
+                alignItems: 'center',
+                cursor: 'pointer',
+              }}
+            >
+              {tag}
+            </button>
+          )
+        })}
+      </div>
 
       <SystemPromptEditor
         userInstructions={userInstructions}
@@ -841,6 +889,64 @@ export function GenerationPanel() {
       />
       </>
       )}
+
+      {/* Barre d'action bas de colonne de lecture (écran 1c) : réglages résumés, bouton, coût. */}
+      <div
+        data-testid="generation-primary-action"
+        style={{
+          borderTop: `1px solid ${redesignHairline.strong}`,
+          paddingTop: 13,
+          marginTop: 22,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 9,
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => void orchestrator.handleGenerate()}
+          disabled={isLoading || orchestrator.isEstimating}
+          style={{
+            height: 46,
+            borderRadius: 6,
+            border: 'none',
+            backgroundColor: redesignAccent.base,
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 11,
+            cursor: isLoading || orchestrator.isEstimating ? 'not-allowed' : 'pointer',
+            opacity: isLoading || orchestrator.isEstimating ? 0.6 : 1,
+            width: '100%',
+          }}
+        >
+          <span style={{ fontSize: '14.5px', fontWeight: 600 }}>Générer le premier nœud</span>
+          <span
+            style={{
+              fontFamily: redesignFont.mono,
+              fontSize: '11px',
+              color: 'rgba(255,255,255,0.6)',
+            }}
+          >
+            CTRL+↵
+          </span>
+        </button>
+        {orchestrator.tokenCount != null && (
+          <div
+            style={{
+              textAlign: 'center',
+              fontFamily: redesignFont.mono,
+              fontSize: '10.5px',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              color: redesignText.label,
+            }}
+          >
+            {orchestrator.tokenCount.toLocaleString('fr-FR')} tokens · {llmModel}
+          </div>
+        )}
+      </div>
 
       {error && (
         <div style={{ 

@@ -55,8 +55,16 @@ import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import { contextGddTabChrome, type ContextGddTabDensity } from '../../theme/responsiveChrome'
-import type { UiFontRemKey } from '../../theme/uiTypography'
-import { redesignFont } from '../../theme/redesignTokens'
+import {
+  redesignAccent,
+  redesignFont,
+  redesignHairline,
+  redesignRadius,
+  redesignSpacing,
+  redesignText,
+} from '../../theme/redesignTokens'
+import { useGenerationStore } from '../../store/generationStore'
+import { useContextConfigStore } from '../../store/contextConfigStore'
 
 type TabType = 'characters' | 'locations' | 'items' | 'species' | 'communities'
 
@@ -144,24 +152,26 @@ function useContextGddTabBarDensity(tabBarRef: React.RefObject<HTMLDivElement | 
 
 function contextGddTabButtonStyle(
   isActive: boolean,
-  tier: (typeof contextGddTabChrome)['balanced'],
-  tabFontKey: UiFontRemKey,
+  tier: (typeof contextGddTabChrome)[ContextGddTabDensity],
 ): CSSProperties {
   return {
-    flex: '1 1 auto',
+    flex: '0 1 auto',
     minWidth: 0,
     minHeight: tier.tabMinHeightPx,
-    padding: tier.tabPadding,
+    padding: `${tier.tabPadding} 0`,
     border: 'none',
-    borderRadius: tier.borderRadiusPx,
+    borderRadius: 0,
     borderBottom: isActive
-      ? `2px solid ${theme.button.primary.background}`
-      : '2px solid transparent',
-    backgroundColor: isActive ? theme.background.tertiary : 'transparent',
-    color: theme.text.primary,
+      ? `1px solid ${redesignAccent.base}`
+      : '1px solid transparent',
+    backgroundColor: 'transparent',
+    color: isActive ? theme.text.primary : redesignText.label,
     cursor: 'pointer',
-    fontWeight: isActive ? 600 : 400,
-    fontSize: remSize(tabFontKey),
+    fontFamily: redesignFont.mono,
+    fontWeight: 400,
+    fontSize: '9.5px',
+    letterSpacing: '0.09em',
+    textTransform: 'uppercase',
     lineHeight: 1.2,
     whiteSpace: 'nowrap',
     overflow: 'hidden',
@@ -228,6 +238,8 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
     gddDataRevision,
   } = useContextStore()
   const selectedDialogueType = useContextRulesStore((s) => s.selectedDialogueType)
+  const contextTokenCount = useGenerationStore((s) => s.tokenCount)
+  const contextTokenBudgetMax = useContextConfigStore((s) => s.contextTokenBudgetMax)
 
   const loadData = useCallback(async () => {
     setIsLoading(true)
@@ -642,6 +654,24 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
     [activeTab, isElementSelected],
   )
 
+  /** Fiches sélectionnées, toutes catégories — source des chips (données réelles du store). */
+  const selectedChipNames = useMemo(() => {
+    const keys: (keyof typeof selections)[] = [
+      'characters_full', 'characters_excerpt',
+      'locations_full', 'locations_excerpt',
+      'items_full', 'items_excerpt',
+      'species_full', 'species_excerpt',
+      'communities_full', 'communities_excerpt',
+    ]
+    return keys.flatMap((k) => (Array.isArray(selections[k]) ? (selections[k] as string[]) : []))
+  }, [selections])
+
+  /** Budget contexte : null tant qu'aucune estimation n'est disponible (jamais de valeur inventée). */
+  const budgetPercent = useMemo(() => {
+    if (!contextTokenCount || !contextTokenBudgetMax) return null
+    return Math.round((contextTokenCount / contextTokenBudgetMax) * 100)
+  }, [contextTokenCount, contextTokenBudgetMax])
+
   const tabItemCounts: Record<TabType, number> = {
     characters: characters.length,
     locations: locations.length,
@@ -665,6 +695,115 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
         paddingBottom: 4,
       }}
     >
+      {/* Écran 1c : fiches sélectionnées en chips + jauge de budget, au-dessus de la recherche. */}
+      <div
+        data-testid="context-selection-header"
+        style={{
+          flexShrink: 0,
+          padding: `${redesignSpacing.md}px ${redesignSpacing.md}px ${redesignSpacing.sm}px`,
+          borderBottom: `1px solid ${redesignHairline.standard}`,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            gap: '0.5rem',
+            marginBottom: `${redesignSpacing.sm}px`,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: redesignFont.mono,
+              fontSize: '10px',
+              letterSpacing: '0.09em',
+              textTransform: 'uppercase',
+              color: redesignText.label,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Contexte — {selectedChipNames.length} fiche{selectedChipNames.length > 1 ? 's' : ''}
+          </span>
+          {selectedChipNames.length > 0 && (
+            <button
+              type="button"
+              onClick={clearSelections}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                color: redesignText.label,
+                fontSize: remSize('caption'),
+              }}
+            >
+              vider
+            </button>
+          )}
+        </div>
+        {selectedChipNames.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: `${redesignSpacing.xs}px`, marginBottom: `${redesignSpacing.sm}px` }}>
+            {selectedChipNames.slice(0, 5).map((name) => (
+              <span
+                key={name}
+                style={{
+                  height: 22,
+                  padding: '0 8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  borderRadius: `${redesignRadius.chip}px`,
+                  border: '1px solid rgba(79,127,255,0.4)',
+                  backgroundColor: 'rgba(79,127,255,0.1)',
+                  color: redesignAccent.light,
+                  fontSize: '11px',
+                  whiteSpace: 'nowrap',
+                  maxWidth: 130,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {name}
+              </span>
+            ))}
+            {selectedChipNames.length > 5 && (
+              <span style={{ color: redesignText.label, fontSize: remSize('caption'), alignSelf: 'center' }}>
+                +{selectedChipNames.length - 5}
+              </span>
+            )}
+          </div>
+        )}
+        {budgetPercent !== null && (
+          <>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'baseline',
+                fontFamily: redesignFont.mono,
+                fontSize: '9.5px',
+                letterSpacing: '0.09em',
+                textTransform: 'uppercase',
+                color: redesignText.label,
+                marginBottom: 4,
+              }}
+            >
+              <span>Budget</span>
+              <span style={{ color: redesignAccent.base }}>{budgetPercent} %</span>
+            </div>
+            <div style={{ height: 2, backgroundColor: redesignHairline.strong, overflow: 'hidden' }}>
+              <div
+                style={{
+                  width: `${Math.min(100, budgetPercent)}%`,
+                  height: '100%',
+                  backgroundColor: redesignAccent.base,
+                }}
+              />
+            </div>
+          </>
+        )}
+      </div>
+
       <ContextSearchControls
         searchQuery={searchQuery}
         onSearchQueryChange={setSearchQuery}
@@ -680,11 +819,11 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
         style={{
           flexShrink: 0,
           display: 'flex',
-          flexWrap: 'nowrap',
+          flexWrap: 'wrap',
           alignItems: 'stretch',
-          gap: tabChromeTier.barGap,
-          padding: tabChromeTier.barPadding,
-          borderBottom: `1px solid ${theme.border.primary}`,
+          gap: `${redesignSpacing.md}px`,
+          padding: `0 ${redesignSpacing.md}px`,
+          borderBottom: `1px solid ${redesignHairline.standard}`,
           position: 'relative',
           boxSizing: 'border-box',
           overflow: 'hidden',
@@ -706,11 +845,7 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
               }}
               onMouseEnter={() => setHoveredTab(key)}
               onMouseLeave={() => setHoveredTab(null)}
-              style={contextGddTabButtonStyle(
-                isActive,
-                tabChromeTier,
-                tabChromeTier.tabFontKey,
-              )}
+              style={contextGddTabButtonStyle(isActive, tabChromeTier)}
             >
               {label}
               {showCount && (

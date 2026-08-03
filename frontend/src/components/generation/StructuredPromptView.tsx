@@ -114,16 +114,16 @@ function AccordionSection({
         onClick={handleToggle}
         style={{
           width: '100%',
-          padding: '7px 0',
+          padding: '10px 0',
           backgroundColor: 'transparent',
           border: 'none',
-          color: theme.text.secondary,
+          color: redesignText.row,
           textAlign: 'left',
           cursor: 'pointer',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'baseline',
-          gap: '0.75rem',
+          gap: '10px',
           fontSize: '12.5px',
           transition: 'color 0.15s',
         }}
@@ -131,7 +131,7 @@ function AccordionSection({
           e.currentTarget.style.color = theme.text.primary
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.color = theme.text.secondary
+          e.currentTarget.style.color = redesignText.row
         }}
       >
         <span
@@ -150,7 +150,7 @@ function AccordionSection({
             style={{
               fontFamily: redesignFont.mono,
               fontSize: '11px',
-              color: theme.text.primary,
+              color: redesignText.muted,
               flexShrink: 0,
               fontVariantNumeric: 'tabular-nums',
             }}

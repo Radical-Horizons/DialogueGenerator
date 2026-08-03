@@ -320,8 +320,8 @@ export function ContextList({
                 <div
                   key={itemKey(item)}
                   style={{
-                    padding: '0.65rem 0.75rem',
-                    borderBottom: listRowHairlineBorder,
+                    padding: '11px 20px',
+                    borderTop: listRowHairlineBorder,
                     borderRadius: 0,
                     ...selectionStyle,
                     backgroundColor: isSelected
@@ -331,8 +331,9 @@ export function ContextList({
                         : 'transparent',
                     cursor: 'pointer',
                     display: 'flex',
-                    alignItems: 'center',
+                    alignItems: 'flex-start',
                     gap: '0.5rem',
+                    position: 'relative',
                     transition: 'background-color 0.15s ease, opacity 0.15s ease',
                   }}
                   onClick={() => onItemClick(item.name, item.entityTab)}
@@ -348,19 +349,37 @@ export function ContextList({
                   }}
                 >
                   {showCheckboxes && (
+                    // La maquette 1c n'affiche pas de case, mais le clic sur la rangée ouvre le
+                    // détail : sans elle, plus aucun moyen de sélectionner. On garde donc la case,
+                    // au format discret de 1a/1b (13px, accent quand cochée).
                     <input
                       type="checkbox"
                       checked={isSelected}
+                      aria-label={`Sélectionner ${item.name}`}
                       onChange={(e) => {
                         e.stopPropagation()
                         onItemToggle(item.name, item.entityTab)
                       }}
                       onClick={(e) => e.stopPropagation()}
+                      style={{
+                        width: 13,
+                        height: 13,
+                        marginTop: 2,
+                        flexShrink: 0,
+                        accentColor: redesignAccent.base,
+                        cursor: 'pointer',
+                      }}
                     />
                   )}
                   <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                      <span style={{ fontWeight: isSelected ? 'bold' : 'normal' }}>
+                      <span
+                        style={{
+                          fontSize: '13.5px',
+                          fontWeight: isSelected ? 500 : 400,
+                          color: isSelected ? redesignText.strong : redesignText.row,
+                        }}
+                      >
                         {highlightText(item.name, searchQueryRaw)}
                       </span>
                       {badgeLabel && (
@@ -378,7 +397,13 @@ export function ContextList({
                       )}
                     </span>
                     {hasData(item) && getGddEntitySummary(item.data) && (
-                      <span style={{ fontSize: remSize('body'), color: theme.text.secondary, lineHeight: 1.2 }}>
+                      <span
+                        style={{
+                          fontSize: '12px',
+                          color: isSelected ? redesignText.secondary : redesignText.muted,
+                          lineHeight: 1.4,
+                        }}
+                      >
                         {getGddEntitySummary(item.data)}
                       </span>
                     )}
@@ -399,11 +424,11 @@ export function ContextList({
                         backgroundColor: 'transparent',
                         color:
                           currentMode === 'excerpt'
-                            ? theme.text.tertiary
-                            : redesignAccent.light,
+                            ? redesignText.muted
+                            : redesignAccent.base,
                         cursor: 'pointer',
                         fontFamily: redesignFont.mono,
-                        fontSize: remSize('caption'),
+                        fontSize: '9.5px',
                         letterSpacing: '0.08em',
                         display: 'flex',
                         alignItems: 'center',

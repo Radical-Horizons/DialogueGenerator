@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ContextSelector } from './ContextSelector'
 import * as contextAPI from '../../api/context'
@@ -124,7 +124,7 @@ describe('ContextSelector', () => {
     const user = userEvent.setup()
 
     render(<ContextSelector />)
-    await waitFor(() => expect(screen.getByText('Test Character')).toBeInTheDocument())
+    await waitFor(() => expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument())
 
     const checkbox = screen.getByRole('checkbox')
     await user.click(checkbox)
@@ -140,7 +140,7 @@ describe('ContextSelector', () => {
     })
 
     render(<ContextSelector />)
-    await waitFor(() => expect(screen.getByText('Test Character')).toBeInTheDocument())
+    await waitFor(() => expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument())
 
     const checkbox = screen.getByRole('checkbox')
     await user.click(checkbox)
@@ -172,7 +172,7 @@ describe('ContextSelector', () => {
     } as ReturnType<typeof useContextStore>)
 
     render(<ContextSelector />)
-    await waitFor(() => expect(screen.getByText('Test Character')).toBeInTheDocument())
+    await waitFor(() => expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument())
 
     const checkbox = screen.getByRole('checkbox')
     await user.click(checkbox)
@@ -241,7 +241,7 @@ describe('ContextSelector', () => {
     render(<ContextSelector />)
 
     await waitFor(() => {
-      expect(screen.getByText('Test Character')).toBeInTheDocument()
+      expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument()
     })
 
     const search = screen.getByPlaceholderText(/rechercher dans tout le gdd/i)
@@ -311,10 +311,10 @@ describe('ContextSelector', () => {
     render(<ContextSelector onItemSelected={mockOnItemSelected} />)
 
     await waitFor(() => {
-      expect(screen.getByText('Test Character')).toBeInTheDocument()
+      expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument()
     })
 
-    const characterItem = screen.getByText('Test Character')
+    const characterItem = within(screen.getByTestId('context-list-scroll')).getByText('Test Character')
     await user.click(characterItem)
 
     await waitFor(() => {
@@ -328,10 +328,10 @@ describe('ContextSelector', () => {
     render(<ContextSelector />)
 
     await waitFor(() => {
-      expect(screen.getByText('Test Character')).toBeInTheDocument()
+      expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument()
     })
 
-    const characterItem = screen.getByText('Test Character').closest('div')
+    const characterItem = within(screen.getByTestId('context-list-scroll')).getByText('Test Character').closest('div')
     if (characterItem) {
       const checkbox = characterItem.querySelector('input[type="checkbox"]')
       if (checkbox) {
@@ -410,7 +410,7 @@ describe('ContextSelector', () => {
 
     await waitFor(() => {
       // Le résumé doit afficher le personnage sélectionné
-      expect(screen.getByText(/test character/i)).toBeInTheDocument()
+      expect(within(screen.getByTestId('context-list-scroll')).getByText(/test character/i)).toBeInTheDocument()
     })
   })
 
@@ -497,7 +497,7 @@ describe('ContextSelector', () => {
     render(<ContextSelector />)
 
     await waitFor(() => {
-      expect(screen.getByText('Test Character')).toBeInTheDocument()
+      expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument()
     })
     expect(screen.getByText(/Un héros du récit\./)).toBeInTheDocument()
     expect(screen.getByText('Personnage')).toBeInTheDocument()
@@ -512,11 +512,11 @@ describe('ContextSelector', () => {
     render(<ContextSelector onItemSelected={mockOnItemSelected} />)
 
     await waitFor(() => {
-      expect(screen.getByText('Test Character')).toBeInTheDocument()
+      expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument()
     })
 
     // Sélectionner un personnage
-    const characterItem = screen.getByText('Test Character')
+    const characterItem = within(screen.getByTestId('context-list-scroll')).getByText('Test Character')
     await user.click(characterItem)
 
     await waitFor(() => {

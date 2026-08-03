@@ -132,6 +132,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
     opacity: 1,
   }
 
+  const [showSceneFields, setShowSceneFields] = useState(false)
   const hasContext = selection.characterA || selection.characterB || selection.sceneRegion
 
   /** Sur-titre et titre de scène dérivés de la sélection courante (pas de données inventées). */
@@ -189,22 +190,43 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
       >
         {sceneOverline}
       </div>
-      <h1
-        style={{
-          marginTop: 0,
-          marginBottom: `${redesignSpacing.lg}px`,
-          fontFamily: redesignFont.serif,
-          fontSize: isNarrow ? '24px' : '33px',
-          fontWeight: 400,
-          lineHeight: 1.15,
-          letterSpacing: '-0.01em',
-          color: theme.text.primary,
-        }}
-      >
-        {sceneTitle}
-      </h1>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: `${redesignSpacing.md}px` }}>
+        <h1
+          style={{
+            marginTop: 0,
+            marginBottom: `${redesignSpacing.sm}px`,
+            fontFamily: redesignFont.serif,
+            fontSize: isNarrow ? '24px' : '33px',
+            fontWeight: 400,
+            lineHeight: 1.12,
+            letterSpacing: '0.005em',
+            color: '#ffffff',
+          }}
+        >
+          {sceneTitle}
+        </h1>
+        {/* 1c n'affiche que le titre : les sélecteurs restent accessibles ici. */}
+        <button
+          type="button"
+          onClick={() => setShowSceneFields((v) => !v)}
+          aria-expanded={showSceneFields}
+          data-testid="scene-fields-toggle"
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            cursor: 'pointer',
+            color: redesignText.secondary,
+            fontSize: '11.5px',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {showSceneFields ? 'masquer' : 'modifier'}
+        </button>
+      </div>
       <div
         style={{
+          display: showSceneFields ? 'block' : 'none',
           fontFamily: redesignFont.mono,
           fontSize: '10px',
           letterSpacing: '0.1em',
@@ -216,6 +238,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
         Scène
       </div>
 
+      <div style={{ display: showSceneFields ? 'block' : 'none' }}>
       {/* Ligne 1: Personnages */}
       <div
         style={{
@@ -418,6 +441,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
             ALÉA
           </button>
         </div>
+      </div>
       </div>
     </div>
   )

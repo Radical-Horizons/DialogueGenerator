@@ -14,7 +14,7 @@ import { UnityBatchExportActionsMenuItems } from '../unityDialogues/UnityBatchEx
 import { useUnityBatchExportMenuStore } from '../../store/unityBatchExportMenuStore'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
-import { redesignControl, redesignFont, redesignRadius, redesignText } from '../../theme/redesignTokens'
+import { redesignAccent, redesignFont, redesignText } from '../../theme/redesignTokens'
 import { TOUCH_TARGET_MIN_PX } from '../../constants'
 
 export function Header() {
@@ -106,7 +106,16 @@ export function Header() {
     }}>
       {/* Section gauche : Titre */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-        <h1 style={{ margin: 0, fontSize: remSize('title'), fontWeight: 600, whiteSpace: 'nowrap' }}>
+        <h1
+          style={{
+            margin: 0,
+            fontFamily: redesignFont.serif,
+            fontSize: '19px',
+            fontWeight: 400,
+            whiteSpace: 'nowrap',
+            letterSpacing: '-0.01em',
+          }}
+        >
           <Link
             to="/"
             data-testid="header-home-link"
@@ -117,7 +126,8 @@ export function Header() {
               cursor: 'pointer',
             }}
           >
-            DialogueGenerator
+            Dialogue
+            <span style={{ color: redesignAccent.base, fontStyle: 'italic' }}>Generator</span>
           </Link>
         </h1>
         {user?.role === 'guest' && (
@@ -150,56 +160,41 @@ export function Header() {
         />
       </div>
       
-      {/* Section centrale : Barre de recherche */}
+      {/* Recherche : alignée à droite avec Réglages / avatar (écran 1c). */}
       {isAuthenticated && (
-        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', maxWidth: '600px', margin: '0 auto', minWidth: 0 }}>
-          <div
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', minWidth: 0 }}>
+          {/* Écran 1c : la recherche est un libellé mono, pas un champ. */}
+          <button
+            type="button"
             onClick={handleSearchClick}
+            aria-label="Rechercher une action, un personnage, un lieu"
             style={{
-              width: '100%',
-              maxWidth: '500px',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
+              gap: '0.45rem',
               minHeight: TOUCH_TARGET_MIN_PX,
               boxSizing: 'border-box',
-              padding: '0.5rem 0.75rem',
-              backgroundColor: theme.input.background,
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: '4px',
-              cursor: 'text',
-              transition: 'border-color 0.2s',
+              padding: '0 0.25rem',
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontFamily: redesignFont.mono,
+              fontSize: '10.5px',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: redesignText.label,
+              whiteSpace: 'nowrap',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = theme.border.focus
+              e.currentTarget.style.color = theme.text.secondary
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = theme.border.primary
+              e.currentTarget.style.color = redesignText.label
             }}
           >
-            <span style={{
-              flex: 1,
-              color: theme.text.tertiary,
-              fontSize: remSize('body'),
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}>
-              Rechercher une action, un personnage, un lieu…
-            </span>
-            <kbd style={{
-              padding: '0.125rem 0.375rem',
-              fontSize: remSize('caption'),
-              backgroundColor: 'transparent',
-              border: `1px solid ${redesignControl.border}`,
-              borderRadius: `${redesignRadius.control}px`,
-              color: redesignText.label,
-              fontFamily: redesignFont.mono,
-              letterSpacing: '0.05em',
-            }}>
-              CTRL+K
-            </kbd>
-          </div>
+            <span aria-hidden>⌘K</span>
+            <span>Rechercher</span>
+          </button>
         </div>
       )}
       

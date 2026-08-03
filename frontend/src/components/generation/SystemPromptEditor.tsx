@@ -259,7 +259,21 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
       label: 'Instructions de Scène',
       content: (
         <div style={{ padding: genChrome.tabInnerPadding, minWidth: 0 }}>
-          {/* Templates de scène */}
+          {/* 1c : le brief occupe la colonne ; templates et briefs locaux passent en repli. */}
+          <details style={{ marginBottom: '1rem' }}>
+            <summary
+              style={{
+                cursor: 'pointer',
+                fontFamily: redesignFont.mono,
+                fontSize: '10px',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: redesignText.label,
+                marginBottom: '0.6rem',
+              }}
+            >
+              Templates et briefs enregistrés
+            </summary>
           <div style={{ marginBottom: '1rem' }}>
             {isLoadingTemplates ? (
               <div style={{ color: theme.text.secondary, fontSize: '0.85rem' }}>
@@ -489,6 +503,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
             </div>
           </div>
 
+          </details>
           <div
             style={{
               display: 'flex',
@@ -557,16 +572,19 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 placeholder="Ex: Bob doit annoncer à Alice qu'il part à l'aventure. Ton désiré: Héroïque. Inclure une condition sur la compétence 'Charisme' de Bob."
                 style={{
                   width: '100%',
-                  padding: '0.65rem 0.75rem',
+                  // 1c : surface d'écriture, pas un champ de formulaire — filet haut, pas de cadre.
+                  padding: '15px 0 0',
                   boxSizing: 'border-box',
-                  backgroundColor: theme.input.background,
-                  border: `1px solid ${theme.input.border}`,
-                  color: theme.input.color,
-                  borderRadius: '6px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  borderTop: '1px solid rgba(255,255,255,0.09)',
+                  color: redesignText.body,
+                  borderRadius: 0,
                   fontFamily: 'inherit',
-                  fontSize: isNarrow ? `${genChrome.textareaFontRem}rem` : '0.97rem',
+                  fontSize: isNarrow ? `${genChrome.textareaFontRem}rem` : '15.5px',
                   resize: 'vertical',
                   lineHeight: isNarrow ? 1.55 : 1.72,
+                  outline: 'none',
                 }}
               />
               <div

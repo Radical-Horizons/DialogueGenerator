@@ -7,7 +7,7 @@ import { usePromptPreview } from '../../hooks/usePromptPreview'
 import { useLazyPromptPreview } from '../../hooks/useLazyPromptPreview'
 import { StructuredPromptView } from './StructuredPromptView'
 import { theme } from '../../theme'
-import { redesignFont, redesignHairline, redesignText } from '../../theme/redesignTokens'
+import { redesignAccent, redesignFont, redesignHairline, redesignText } from '../../theme/redesignTokens'
 import { useToast } from '../shared'
 import { useGenerationStore } from '../../store/generationStore'
 import type { RawPrompt } from '../../types/api'
@@ -277,12 +277,12 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'baseline',
-                    gap: '0.75rem',
-                    padding: '9px 0',
-                    borderTop: `1px solid ${redesignHairline.strong}`,
+                    gap: '10px',
+                    padding: '10px 0',
+                    borderTop: `1px solid ${redesignHairline.standard}`,
                     fontFamily: redesignFont.mono,
-                    fontSize: '10.5px',
-                    letterSpacing: '0.12em',
+                    fontSize: '10px',
+                    letterSpacing: '0.1em',
                     textTransform: 'uppercase',
                     color: redesignText.label,
                   }}
@@ -290,9 +290,9 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
                   <span>Total</span>
                   <span
                     style={{
-                      fontSize: '13px',
+                      fontSize: '12px',
                       letterSpacing: 0,
-                      color: theme.text.primary,
+                      color: redesignAccent.base,
                       fontVariantNumeric: 'tabular-nums',
                     }}
                   >
