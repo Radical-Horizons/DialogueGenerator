@@ -689,6 +689,20 @@ class UnityDialogueMetadata(BaseModel):
     file_path: str = Field(..., description="Chemin absolu du fichier")
     size_bytes: int = Field(..., description="Taille en octets")
     modified_time: str = Field(..., description="Date de modification (ISO format)")
+    created_at: Optional[str] = Field(
+        None,
+        description=(
+            "Date de création (ISO). Issue de l'index SQLite si le dialogue est "
+            "indexé, sinon repli sur l'horodatage du fichier."
+        ),
+    )
+    node_count: Optional[int] = Field(
+        None,
+        ge=0,
+        description=(
+            "Nombre de nœuds du dialogue Unity. None si le JSON est illisible."
+        ),
+    )
     title: Optional[str] = Field(None, description="Titre extrait du dialogue")
     share_count: int = Field(
         default=0,
@@ -705,11 +719,23 @@ class UnityDialogueListResponse(BaseModel):
     """Réponse pour la liste des dialogues Unity.
     
     Attributes:
-        dialogues: Liste des métadonnées des fichiers.
-        total: Nombre total de fichiers.
+        dialogues: Liste des métadonnées des fichiers (page courante si paginé).
+        total: Nombre total de dialogues visibles (après filtrage RBAC).
+        page: Numéro de page courante (1-indexé) si la pagination est active.
+        page_size: Taille de page appliquée si la pagination est active.
+        total_pages: Nombre total de pages si la pagination est active.
     """
     dialogues: List[UnityDialogueMetadata] = Field(..., description="Liste des métadonnées")
-    total: int = Field(..., description="Nombre total de fichiers")
+    total: int = Field(..., description="Nombre total de dialogues visibles")
+    page: Optional[int] = Field(
+        None, description="Numéro de page courante (1-indexé), None si non paginé"
+    )
+    page_size: Optional[int] = Field(
+        None, description="Taille de page appliquée, None si non paginé"
+    )
+    total_pages: Optional[int] = Field(
+        None, description="Nombre total de pages, None si non paginé"
+    )
 
 
 class UnitySchemaSectionSummary(BaseModel):

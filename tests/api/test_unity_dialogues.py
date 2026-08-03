@@ -167,6 +167,194 @@ class TestListUnityDialogues:
         assert data["total"] >= 1
 
 
+class TestListUnityDialoguesPagination:
+    """Tests pagination + enrichissement du listing (Story 8.1 / FR80)."""
+
+    @staticmethod
+    def _make_dialogues(directory: Path, count: int) -> None:
+        """Crée ``count`` dialogues legacy (liste de nœuds) dans ``directory``."""
+        directory.mkdir(parents=True, exist_ok=True)
+        for index in range(count):
+            payload = [{"id": "START", "line": f"Dialogue {index}"}]
+            (directory / f"dialogue_{index:03d}.json").write_text(
+                json.dumps(payload), encoding="utf-8"
+            )
+
+    def test_list_backward_compat_without_page(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Sans `page`, la réponse reste complète et non paginée (rétrocompat)."""
+        target = tmp_path / "no_pagination"
+        self._make_dialogues(target, 3)
+        mock_config_service.get_unity_dialogues_path.return_value = str(target)
+
+        response = client.get("/api/v1/unity-dialogues")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] == 3
+        assert len(data["dialogues"]) == 3
+        assert data["page"] is None
+        assert data["page_size"] is None
+        assert data["total_pages"] is None
+
+    def test_list_paginated_page_two(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Avec `page`, la réponse est découpée et expose les métadonnées."""
+        target = tmp_path / "paginated"
+        self._make_dialogues(target, 3)
+        mock_config_service.get_unity_dialogues_path.return_value = str(target)
+
+        response = client.get("/api/v1/unity-dialogues?page=2&page_size=2")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] == 3
+        assert data["page"] == 2
+        assert data["page_size"] == 2
+        assert data["total_pages"] == 2
+        assert len(data["dialogues"]) == 1
+
+    def test_pagination_uses_default_page_size_of_50(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Sans `page_size`, la pagination active applique 50 par défaut."""
+        target = tmp_path / "default_size"
+        self._make_dialogues(target, 3)
+        mock_config_service.get_unity_dialogues_path.return_value = str(target)
+
+        response = client.get("/api/v1/unity-dialogues?page=1")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["page"] == 1
+        assert data["page_size"] == 50
+        assert data["total_pages"] == 1
+        assert len(data["dialogues"]) == 3
+
+    def test_pagination_preserves_global_order_across_pages(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Les pages découpent l'ordre global trié (pagination APRÈS tri)."""
+        target = tmp_path / "ordered"
+        self._make_dialogues(target, 5)
+        mock_config_service.get_unity_dialogues_path.return_value = str(target)
+
+        full = client.get("/api/v1/unity-dialogues").json()["dialogues"]
+        expected_order = [d["filename"] for d in full]
+
+        page1 = client.get("/api/v1/unity-dialogues?page=1&page_size=2").json()
+        page2 = client.get("/api/v1/unity-dialogues?page=2&page_size=2").json()
+        page3 = client.get("/api/v1/unity-dialogues?page=3&page_size=2").json()
+
+        names1 = [d["filename"] for d in page1["dialogues"]]
+        names2 = [d["filename"] for d in page2["dialogues"]]
+        names3 = [d["filename"] for d in page3["dialogues"]]
+
+        # Pages disjointes, réunion == ordre global, dans le même ordre.
+        assert names1 + names2 + names3 == expected_order
+        assert len(set(names1) | set(names2) | set(names3)) == 5
+
+    def test_pagination_empty_set_reports_one_page(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Sur un ensemble vide paginé, `total_pages` vaut 1 (pas 0)."""
+        target = tmp_path / "empty_paginated"
+        target.mkdir(parents=True, exist_ok=True)
+        mock_config_service.get_unity_dialogues_path.return_value = str(target)
+
+        response = client.get("/api/v1/unity-dialogues?page=1&page_size=50")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] == 0
+        assert data["total_pages"] == 1
+        assert data["dialogues"] == []
+
+    def test_list_page_out_of_bounds_returns_empty(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Une page au-delà des bornes renvoie une liste vide sans erreur."""
+        target = tmp_path / "out_of_bounds"
+        self._make_dialogues(target, 3)
+        mock_config_service.get_unity_dialogues_path.return_value = str(target)
+
+        response = client.get("/api/v1/unity-dialogues?page=99&page_size=2")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] == 3
+        assert data["total_pages"] == 2
+        assert data["page"] == 99
+        assert data["dialogues"] == []
+
+    def test_list_item_enriched_with_node_count_and_created_at(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Chaque item expose node_count (parse JSON) et created_at (repli fichier)."""
+        target = tmp_path / "enriched"
+        target.mkdir(parents=True, exist_ok=True)
+        payload = [
+            {"id": "START", "line": "A"},
+            {"id": "n1", "line": "B"},
+            {"id": "n2", "line": "C"},
+        ]
+        (target / "enriched.json").write_text(
+            json.dumps(payload), encoding="utf-8"
+        )
+        mock_config_service.get_unity_dialogues_path.return_value = str(target)
+
+        response = client.get("/api/v1/unity-dialogues")
+
+        assert response.status_code == 200
+        item = next(
+            d for d in response.json()["dialogues"] if d["filename"] == "enriched.json"
+        )
+        assert item["node_count"] == 3
+        assert item["created_at"] is not None
+
+    def test_list_node_count_supports_document_format(
+        self, client, mock_config_service, tmp_path
+    ):
+        """node_count gère le format document canonique ``{schemaVersion, nodes}``."""
+        target = tmp_path / "doc_format"
+        target.mkdir(parents=True, exist_ok=True)
+        document = {
+            "schemaVersion": "1.2.0",
+            "nodes": [{"id": "START"}, {"id": "n1"}],
+        }
+        (target / "doc.json").write_text(json.dumps(document), encoding="utf-8")
+        mock_config_service.get_unity_dialogues_path.return_value = str(target)
+
+        response = client.get("/api/v1/unity-dialogues")
+
+        item = next(
+            d for d in response.json()["dialogues"] if d["filename"] == "doc.json"
+        )
+        assert item["node_count"] == 2
+
+    def test_list_corrupt_json_listed_with_null_node_count(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Un JSON illisible reste listé avec node_count=None (liste non cassée)."""
+        target = tmp_path / "corrupt"
+        target.mkdir(parents=True, exist_ok=True)
+        (target / "valid.json").write_text(
+            json.dumps([{"id": "START"}]), encoding="utf-8"
+        )
+        (target / "broken.json").write_text("not valid json", encoding="utf-8")
+        mock_config_service.get_unity_dialogues_path.return_value = str(target)
+
+        response = client.get("/api/v1/unity-dialogues")
+
+        assert response.status_code == 200
+        by_name = {d["filename"]: d for d in response.json()["dialogues"]}
+        assert "broken.json" in by_name
+        assert by_name["broken.json"]["node_count"] is None
+        assert by_name["valid.json"]["node_count"] == 1
+
+
 class TestReadUnityDialogue:
     """Tests pour l'endpoint GET /api/v1/unity-dialogues/{filename}."""
     

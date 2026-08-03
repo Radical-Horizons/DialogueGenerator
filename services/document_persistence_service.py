@@ -232,6 +232,19 @@ class DocumentPersistenceService:
             document_path,
         ).can_read
 
+    def get_created_at(self, document_id: str) -> str | None:
+        """Retourne la date de création indexée d'un document, si disponible.
+
+        Args:
+            document_id: Identifiant du document (stem du fichier).
+
+        Returns:
+            La date de création ISO issue de ``dialogues_index`` si le document
+            est indexé, sinon ``None`` (fichier historique non indexé).
+        """
+        entry = self._repository.find_by_document_id(document_id)
+        return entry.created_at if entry is not None else None
+
     @staticmethod
     def _read_revision(path: Path) -> int:
         """Lit une révision sidecar, avec repli historique à 1."""

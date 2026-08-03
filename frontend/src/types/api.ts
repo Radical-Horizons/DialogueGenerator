@@ -536,6 +536,8 @@ export interface UnityDialogueMetadata {
   file_path: string
   size_bytes: number
   modified_time: string
+  /** Date de création (ISO) : index SQLite si indexé, sinon repli fichier. */
+  created_at?: string
   title?: string
   share_count?: number
   /** Présent côté UI / listes enrichies ; optionnel selon l’endpoint. */
@@ -552,6 +554,12 @@ export interface UnityDialogueMetadata {
 export interface UnityDialogueListResponse {
   dialogues: UnityDialogueMetadata[]
   total: number
+  /** Numéro de page courante (1-indexé) si la pagination serveur est active. */
+  page?: number | null
+  /** Taille de page appliquée si la pagination serveur est active. */
+  page_size?: number | null
+  /** Nombre total de pages si la pagination serveur est active. */
+  total_pages?: number | null
 }
 
 export interface UnityDialogueReadResponse {

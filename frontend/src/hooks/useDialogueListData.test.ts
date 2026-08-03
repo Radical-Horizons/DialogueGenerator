@@ -137,6 +137,64 @@ describe('useDialogueListData', () => {
     expect(result.current.total).toBe(4)
   })
 
+  it('pagine la liste filtrée à 50/page et borne la page demandée', async () => {
+    const many = Array.from({ length: 60 }, (_, index) => ({
+      filename: `d_${String(index).padStart(3, '0')}.json`,
+      file_path: `/data/d_${index}.json`,
+      size_bytes: 1,
+      modified_time: new Date(2026, 0, 1, 0, 0, 60 - index).toISOString(),
+      title: `D ${index}`,
+    }))
+    mockList.mockResolvedValueOnce({ dialogues: many, total: 60 })
+    const { result } = renderHook(() => useDialogueListData())
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    expect(result.current.totalPages).toBe(2)
+    expect(result.current.page).toBe(1)
+    expect(result.current.paginatedDialogues).toHaveLength(50)
+
+    act(() => {
+      result.current.setPage(2)
+    })
+    expect(result.current.page).toBe(2)
+    expect(result.current.paginatedDialogues).toHaveLength(10)
+
+    // Une page au-delà des bornes est ramenée à la dernière page valide.
+    act(() => {
+      result.current.setPage(99)
+    })
+    expect(result.current.page).toBe(2)
+  })
+
+  it('revient à la page 1 quand la recherche change', async () => {
+    const many = Array.from({ length: 60 }, (_, index) => ({
+      filename: `item_${String(index).padStart(3, '0')}.json`,
+      file_path: `/data/item_${index}.json`,
+      size_bytes: 1,
+      modified_time: new Date(2026, 0, 1, 0, 0, 60 - index).toISOString(),
+      title: `Item ${index}`,
+    }))
+    mockList.mockResolvedValueOnce({ dialogues: many, total: 60 })
+    const { result } = renderHook(() => useDialogueListData())
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    act(() => {
+      result.current.setPage(2)
+    })
+    expect(result.current.page).toBe(2)
+
+    act(() => {
+      result.current.setSearchQuery('item_0')
+    })
+    expect(result.current.page).toBe(1)
+  })
+
   it('expose un message d\'erreur si l\'API échoue', async () => {
     mockList.mockRejectedValueOnce(new Error('boom'))
 

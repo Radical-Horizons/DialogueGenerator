@@ -133,8 +133,27 @@ export const UnityDialogueItem = memo(
             }}
           >
             <span>{formatSize(dialogue.size_bytes)}</span>
+            {dialogue.node_count != null && (
+              <>
+                <span aria-hidden>•</span>
+                <span data-testid="unity-dialogue-item-node-count">
+                  {dialogue.node_count} nœud{dialogue.node_count > 1 ? 's' : ''}
+                </span>
+              </>
+            )}
             <span aria-hidden>•</span>
-            <span>{formatDate(dialogue.modified_time)}</span>
+            <span title="Dernière modification">{formatDate(dialogue.modified_time)}</span>
+            {dialogue.created_at && (
+              <>
+                <span aria-hidden>•</span>
+                <span
+                  data-testid="unity-dialogue-item-created"
+                  title="Date de création"
+                >
+                  créé {formatDate(dialogue.created_at)}
+                </span>
+              </>
+            )}
             <span
               data-testid="unity-dialogue-sharing-badge"
               title={sharingLabel}

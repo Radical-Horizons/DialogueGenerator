@@ -72,12 +72,16 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
   const openFilename = useGraphStore((s) => s.dialogueMetadata.filename)
   const {
     filteredDialogues,
+    paginatedDialogues,
     total,
     filteredCount,
     searchQuery,
     setSearchQuery,
     sortType,
     setSortType,
+    page,
+    totalPages,
+    setPage,
     isLoading,
     error,
     refresh,
@@ -435,7 +439,7 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
             {searchQuery ? 'Aucun dialogue trouvé' : 'Aucun dialogue Unity'}
           </div>
         ) : (
-          filteredDialogues.map((dialogue) => {
+          paginatedDialogues.map((dialogue) => {
             const docId = toDocumentId(dialogue.filename)
             return (
             <UnityDialogueItem
@@ -461,6 +465,62 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
           })
         )}
       </div>
+      {totalPages > 1 && (
+        <div
+          data-testid="unity-dialogue-pagination"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '0.5rem',
+            padding: '0.5rem',
+            borderTop: `1px solid ${theme.border.primary}`,
+            backgroundColor: theme.background.panelHeader,
+            flexShrink: 0,
+          }}
+        >
+          <button
+            type="button"
+            data-testid="unity-dialogue-pagination-prev"
+            disabled={page <= 1}
+            onClick={() => setPage(page - 1)}
+            style={{
+              padding: '0.35rem 0.6rem',
+              border: `1px solid ${theme.border.primary}`,
+              borderRadius: '6px',
+              backgroundColor: theme.button.default.background,
+              color: theme.button.default.color,
+              cursor: page <= 1 ? 'not-allowed' : 'pointer',
+              opacity: page <= 1 ? 0.5 : 1,
+            }}
+          >
+            Précédent
+          </button>
+          <span
+            data-testid="unity-dialogue-pagination-indicator"
+            style={{ fontSize: remSize('small'), color: theme.text.secondary }}
+          >
+            Page {page} sur {totalPages} — Total : {filteredCount}
+          </span>
+          <button
+            type="button"
+            data-testid="unity-dialogue-pagination-next"
+            disabled={page >= totalPages}
+            onClick={() => setPage(page + 1)}
+            style={{
+              padding: '0.35rem 0.6rem',
+              border: `1px solid ${theme.border.primary}`,
+              borderRadius: '6px',
+              backgroundColor: theme.button.default.background,
+              color: theme.button.default.color,
+              cursor: page >= totalPages ? 'not-allowed' : 'pointer',
+              opacity: page >= totalPages ? 0.5 : 1,
+            }}
+          >
+            Suivant
+          </button>
+        </div>
+      )}
       {contextMenu && (
         <DialogueListContextMenu
           state={contextMenu}

@@ -146,6 +146,68 @@ describe('UnityDialogueList', () => {
     expect(onSelect).toHaveBeenCalledWith(null)
   })
 
+  it('affiche le nombre de nœuds dans un item enrichi', async () => {
+    mockList.mockResolvedValueOnce({
+      dialogues: [
+        {
+          filename: 'enrichi.json',
+          file_path: '/data/enrichi.json',
+          modified_time: '2026-04-08T12:00:00.000Z',
+          created_at: '2026-04-01T09:00:00.000Z',
+          size_bytes: 2048,
+          node_count: 3,
+          title: 'Enrichi',
+          share_count: 0,
+        },
+      ],
+      total: 1,
+    })
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+
+    const nodeCount = await screen.findByTestId('unity-dialogue-item-node-count')
+    expect(nodeCount).toHaveTextContent('3 nœuds')
+    expect(screen.getByTestId('unity-dialogue-item-created')).toHaveTextContent('créé')
+  })
+
+  it('pagine la liste à 50/page avec indicateur et navigation', async () => {
+    const user = userEvent.setup()
+    const many = Array.from({ length: 60 }, (_, index) => ({
+      filename: `dialogue_${String(index).padStart(3, '0')}.json`,
+      file_path: `/data/dialogue_${index}.json`,
+      // Ordre décroissant pour un tri date-desc déterministe.
+      modified_time: new Date(2026, 0, 1, 0, 0, 60 - index).toISOString(),
+      size_bytes: 1024,
+      node_count: index,
+      share_count: 0,
+    }))
+    mockList.mockResolvedValueOnce({ dialogues: many, total: 60 })
+
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('unity-dialogue-pagination')).toBeInTheDocument()
+    })
+    expect(screen.getByTestId('unity-dialogue-pagination-indicator')).toHaveTextContent(
+      'Page 1 sur 2 — Total : 60',
+    )
+    // Première page : 50 items.
+    expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(50)
+
+    const prev = screen.getByTestId('unity-dialogue-pagination-prev')
+    expect(prev).toBeDisabled()
+
+    await user.click(screen.getByTestId('unity-dialogue-pagination-next'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('unity-dialogue-pagination-indicator')).toHaveTextContent(
+        'Page 2 sur 2 — Total : 60',
+      )
+    })
+    // Deuxième page : les 10 restants.
+    expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(10)
+    expect(screen.getByTestId('unity-dialogue-pagination-next')).toBeDisabled()
+  })
+
   it('crée un dialogue vide sans appel LLM et le sélectionne', async () => {
     const user = userEvent.setup()
     const onSelect = vi.fn()

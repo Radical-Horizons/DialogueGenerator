@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Annotated, Optional
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 from api.routers.auth import get_current_user
 from api.schemas.dialogue import (
@@ -30,6 +30,7 @@ from services.document_persistence_service import (
     DocumentPersistenceService,
 )
 from services.dialogue_sharing_service import DialogueSharingService
+from api.utils.pagination import PaginationParams, paginate_list
 from api.utils.unity_schema_validator import load_unity_schema, schema_exists
 
 logger = logging.getLogger(__name__)
@@ -76,6 +77,66 @@ def _extract_title_from_json(json_data: list) -> Optional[str]:
     return None
 
 
+def _count_nodes(json_data: object) -> Optional[int]:
+    """Compte les nœuds d'un dialogue Unity, tolérant les deux formats.
+
+    Ne comptabilise que les entrées qui sont des objets (nœuds) : une liste
+    legacy peut contenir des éléments parasites (en-tête, séparateur) qui ne
+    doivent pas gonfler le compte.
+
+    Args:
+        json_data: Contenu JSON parsé — liste de nœuds (legacy) ou document
+            canonique ``{schemaVersion, nodes}`` (Story 16.2).
+
+    Returns:
+        Le nombre de nœuds, ou None si la structure est inattendue.
+    """
+    if isinstance(json_data, list):
+        return sum(1 for node in json_data if isinstance(node, dict))
+    if isinstance(json_data, dict):
+        nodes = json_data.get("nodes")
+        if isinstance(nodes, list):
+            return sum(1 for node in nodes if isinstance(node, dict))
+    return None
+
+
+def _normalize_iso(value: str) -> str:
+    """Normalise un horodatage en ISO-8601 parsable par ``new Date`` côté JS.
+
+    L'index SQLite stocke ``datetime('now')`` au format ``YYYY-MM-DD HH:MM:SS``
+    (séparateur espace), non reconnu de façon fiable par tous les moteurs JS.
+    On remplace l'espace par ``T`` sans changer le fuseau (cohérent avec
+    ``modified_time`` qui est déjà un ISO naïf).
+
+    Args:
+        value: Horodatage brut, potentiellement séparé par un espace.
+
+    Returns:
+        Horodatage ISO-8601 (séparateur ``T``).
+    """
+    return value.replace(" ", "T", 1) if " " in value else value
+
+
+def _file_creation_time(stat_result: object) -> str:
+    """Retourne une date de création fichier ISO, repli quand non indexé.
+
+    Utilise ``st_birthtime`` quand la plateforme l'expose (macOS, certains
+    Linux/Windows) ; sinon retombe sur le plus ancien de ``st_ctime`` /
+    ``st_mtime`` — ``st_ctime`` n'étant pas la date de création sous Linux.
+
+    Args:
+        stat_result: Résultat de ``Path.stat()``.
+
+    Returns:
+        Date de création approximative au format ISO-8601.
+    """
+    birthtime = getattr(stat_result, "st_birthtime", None)
+    ctime = getattr(stat_result, "st_ctime", 0.0)
+    mtime = getattr(stat_result, "st_mtime", ctime)
+    timestamp = birthtime if birthtime is not None else min(ctime, mtime)
+    return datetime.fromtimestamp(timestamp).isoformat()
+
+
 @router.get(
     "",
     response_model=UnityDialogueListResponse,
@@ -93,18 +154,43 @@ async def list_unity_dialogues(
         Depends(get_dialogue_sharing_service),
     ],
     current_user: Annotated[dict[str, object], Depends(get_current_user)],
-    request_id: Annotated[str, Depends(get_request_id)]
+    request_id: Annotated[str, Depends(get_request_id)],
+    page: Annotated[
+        Optional[int],
+        Query(ge=1, description="Numéro de page (1-indexé). Omettre = liste complète."),
+    ] = None,
+    page_size: Annotated[
+        Optional[int],
+        Query(
+            ge=1,
+            description=(
+                "Taille de page (défaut 50). Plafonnée au maximum serveur "
+                "(PAGINATION_MAX_PAGE_SIZE, 100 par défaut) au-delà."
+            ),
+        ),
+    ] = None,
 ) -> UnityDialogueListResponse:
-    """Liste tous les fichiers de dialogues Unity JSON.
-    
+    """Liste les dialogues Unity JSON visibles par l'utilisateur (FR80).
+
+    Le tri par défaut est la date de modification décroissante et le filtrage
+    RBAC (``can_list``) est appliqué avant toute pagination. La pagination est
+    optionnelle et rétrocompatible : sans ``page``, la réponse contient la
+    liste complète (comportement historique). Chaque item est enrichi du
+    nombre de nœuds et de la date de création.
+
     Args:
         request: La requête HTTP.
         config_service: Service de configuration injecté.
+        persistence_service: Service RBAC/index des documents.
+        sharing_service: Service de partages (comptage co-éditeurs).
+        current_user: Utilisateur courant (RBAC).
         request_id: ID de la requête.
-        
+        page: Numéro de page 1-indexé ; ``None`` désactive la pagination.
+        page_size: Taille de page ; défaut 50 quand la pagination est active.
+
     Returns:
-        Liste des métadonnées des fichiers Unity JSON.
-        
+        Liste (paginée si ``page`` fourni) des métadonnées des dialogues Unity.
+
     Raises:
         ValidationException: Si le chemin Unity n'est pas configuré.
         InternalServerException: Si la lecture du dossier échoue.
@@ -144,23 +230,57 @@ async def list_unity_dialogues(
                 ):
                     continue
                 stat = json_file.stat()
-                
-                # Optionnel: extraire un titre depuis le contenu JSON (peut être coûteux si beaucoup de fichiers)
+
+                # Parser une seule fois pour titre + nombre de nœuds. Un JSON
+                # illisible ne doit pas faire échouer tout le listing : titre et
+                # node_count restent None dans ce cas.
                 title = None
+                node_count = None
                 try:
                     with open(json_file, 'r', encoding='utf-8') as f:
                         json_data = json.load(f)
-                        if isinstance(json_data, list):
-                            title = _extract_title_from_json(json_data)
-                except (json.JSONDecodeError, IOError):
-                    # Ignorer les erreurs de parsing pour le listing (juste ne pas avoir de titre)
-                    pass
-                
+                    node_count = _count_nodes(json_data)
+                    nodes_for_title = (
+                        json_data
+                        if isinstance(json_data, list)
+                        else json_data.get("nodes")
+                        if isinstance(json_data, dict)
+                        else None
+                    )
+                    if isinstance(nodes_for_title, list):
+                        title = _extract_title_from_json(nodes_for_title)
+                except (json.JSONDecodeError, IOError) as parse_error:
+                    logger.warning(
+                        "JSON Unity illisible lors du listing (%s): %s",
+                        json_file.name,
+                        parse_error,
+                    )
+
+                # created_at: index SQLite si indexé, sinon repli horodatage
+                # fichier. Une erreur d'accès index ne doit pas casser tout le
+                # listing (comme pour un JSON illisible) → repli fichier.
+                indexed_created_at = None
+                try:
+                    indexed_created_at = persistence_service.get_created_at(document_id)
+                except Exception as index_error:  # noqa: BLE001 - repli résilient
+                    logger.warning(
+                        "Index created_at indisponible pour %s: %s",
+                        document_id,
+                        index_error,
+                    )
+                created_at = (
+                    _normalize_iso(indexed_created_at)
+                    if indexed_created_at
+                    else _file_creation_time(stat)
+                )
+
                 metadata = UnityDialogueMetadata(
                     filename=json_file.name,
                     file_path=str(json_file.absolute()),
                     size_bytes=stat.st_size,
                     modified_time=datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                    created_at=created_at,
+                    node_count=node_count,
                     title=title,
                     share_count=share_counts.get(document_id, 0),
                     capabilities=_capabilities_payload(
@@ -176,14 +296,44 @@ async def list_unity_dialogues(
                 logger.warning(f"Erreur lors de la lecture des métadonnées de {json_file}: {e}")
                 continue
         
-        # Trier par date de modification (plus récent en premier)
-        metadata_list.sort(key=lambda x: x.modified_time, reverse=True)
-        
-        logger.info(f"Liste Unity dialogues: {len(metadata_list)} fichier(s) trouvé(s) (request_id: {request_id})")
-        
+        # Trier par date de modification décroissante, avec le filename comme
+        # clé de départage : sans elle, deux dialogues de même `modified_time`
+        # auraient un ordre non déterministe et des frontières de pages
+        # instables d'une requête à l'autre.
+        metadata_list.sort(key=lambda x: (x.modified_time, x.filename), reverse=True)
+
+        total = len(metadata_list)
+
+        # Pagination optionnelle APRÈS filtrage RBAC + tri, pour que la page N
+        # reflète l'ordre global. Sans `page`, comportement historique conservé.
+        pagination = PaginationParams(page=page, page_size=page_size)
+        page_items = paginate_list(metadata_list, pagination)
+        if pagination.is_enabled:
+            # Toujours au moins une page en mode paginé, y compris sur un
+            # ensemble vide (page 1/1 vide plutôt que 0 page incohérente).
+            total_pages = max(1, (total + pagination.page_size - 1) // pagination.page_size)
+            response_page: Optional[int] = pagination.page
+            response_page_size: Optional[int] = pagination.page_size
+            response_total_pages: Optional[int] = total_pages
+        else:
+            response_page = None
+            response_page_size = None
+            response_total_pages = None
+
+        logger.info(
+            "Liste Unity dialogues: %d visible(s), %d retourné(s) (page=%s, request_id: %s)",
+            total,
+            len(page_items),
+            page,
+            request_id,
+        )
+
         return UnityDialogueListResponse(
-            dialogues=metadata_list,
-            total=len(metadata_list)
+            dialogues=page_items,
+            total=total,
+            page=response_page,
+            page_size=response_page_size,
+            total_pages=response_total_pages,
         )
         
     except ValidationException:

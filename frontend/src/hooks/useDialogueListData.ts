@@ -17,11 +17,21 @@ export type DialogueListSortType =
   | 'date-desc'
   | 'date-asc'
 
+/**
+ * Taille de page par défaut de la bibliothèque de dialogues (Story 8.1 / FR80).
+ */
+export const DIALOGUE_LIST_PAGE_SIZE = 50
+
 export interface UseDialogueListDataReturn {
   /** Dialogues bruts retournés par l'API (avant filtre / tri). */
   dialogues: UnityDialogueMetadata[]
   /** Liste filtrée par `searchQuery` puis triée par `sortType`. */
   filteredDialogues: UnityDialogueMetadata[]
+  /**
+   * Sous-ensemble de `filteredDialogues` correspondant à la page courante
+   * (Story 8.1). La pagination est appliquée après recherche et tri.
+   */
+  paginatedDialogues: UnityDialogueMetadata[]
   /** Nombre total de dialogues retournés par l'API. */
   total: number
   /** Nombre de dialogues après application du filtre de recherche. */
@@ -30,6 +40,14 @@ export interface UseDialogueListDataReturn {
   setSearchQuery: (query: string) => void
   sortType: DialogueListSortType
   setSortType: (sort: DialogueListSortType) => void
+  /** Page courante (1-indexé), bornée à `[1, totalPages]`. */
+  page: number
+  /** Nombre total de pages pour la liste filtrée (>= 1). */
+  totalPages: number
+  /** Taille de page appliquée. */
+  pageSize: number
+  /** Change la page demandée (le hook la borne à `[1, totalPages]`). */
+  setPage: (page: number) => void
   isLoading: boolean
   error: string | null
   /** Re-fetch la liste depuis l'API ; les filtres / tri restent inchangés. */
@@ -47,6 +65,7 @@ export function useDialogueListData(): UseDialogueListDataReturn {
   const [total, setTotal] = useState(0)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortType, setSortType] = useState<DialogueListSortType>('date-desc')
+  const [page, setPage] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -109,15 +128,50 @@ export function useDialogueListData(): UseDialogueListDataReturn {
     })
   }, [dialogues, searchQuery, sortType])
 
+  // Revenir à la première page quand le filtre ou le tri change : la page
+  // courante n'a plus de sens sur un ensemble filtré différent.
+  useEffect(() => {
+    setPage(1)
+  }, [searchQuery, sortType])
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredDialogues.length / DIALOGUE_LIST_PAGE_SIZE)
+  )
+  // Borne la page demandée : après une suppression, `page` peut dépasser le
+  // nouveau nombre de pages.
+  const safePage = Math.min(Math.max(page, 1), totalPages)
+
+  const paginatedDialogues = useMemo(
+    () =>
+      filteredDialogues.slice(
+        (safePage - 1) * DIALOGUE_LIST_PAGE_SIZE,
+        safePage * DIALOGUE_LIST_PAGE_SIZE
+      ),
+    [filteredDialogues, safePage]
+  )
+
+  const setPageClamped = useCallback((next: number) => {
+    // Ignorer les valeurs non finies (NaN via un calcul amont) plutôt que de
+    // corrompre l'état de page.
+    if (!Number.isFinite(next)) return
+    setPage(Math.max(1, Math.floor(next)))
+  }, [])
+
   return {
     dialogues,
     filteredDialogues,
+    paginatedDialogues,
     total,
     filteredCount: filteredDialogues.length,
     searchQuery,
     setSearchQuery,
     sortType,
     setSortType,
+    page: safePage,
+    totalPages,
+    pageSize: DIALOGUE_LIST_PAGE_SIZE,
+    setPage: setPageClamped,
     isLoading,
     error,
     refresh,
