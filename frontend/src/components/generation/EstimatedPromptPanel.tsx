@@ -89,10 +89,12 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
         overflow: 'hidden',
       }}
     >
+      {/* 1c : la colonne s'ouvre sur les rangées ; les bascules d'affichage restent
+          disponibles mais discrètes, sous le titre. */}
       <div
         style={{
-          padding: '0.65rem 0.75rem',
-          borderBottom: `1px solid ${theme.border.primary}`,
+          padding: '0 20px 10px',
+          borderBottom: 'none',
           flexShrink: 0,
           display: 'flex',
           flexDirection: 'column',

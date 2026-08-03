@@ -580,8 +580,9 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    // Cliquer sur l'onglet "Dialogue généré"
-    const dialogueTab = screen.getByText(/dialogue généré/i)
+    // Cliquer sur l'onglet "Dialogue généré" — le bloc « Dernier résultat » du pied
+    // mentionne aussi ce libellé, d'où le ciblage par rôle onglet.
+    const dialogueTab = screen.getByRole('button', { name: /dialogue généré/i })
     await user.click(dialogueTab)
 
     await waitFor(() => {

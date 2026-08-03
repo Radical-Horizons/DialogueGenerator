@@ -892,6 +892,60 @@ export function Dashboard() {
       />
     ) : null
 
+  /**
+   * Bloc « Dernier résultat » en pied de colonne droite (écran 1c).
+   * Il ne remplace pas l'onglet « Dialogue généré » : il en est le point d'entrée
+   * permanent, avec la phrase d'état vide exigée par le handoff.
+   */
+  const renderLastResultBlock = (): ReactNode => (
+    <div
+      data-testid="last-result-block"
+      style={{
+        flexShrink: 0,
+        borderTop: `1px solid ${redesignHairline.standard}`,
+        padding: '15px 20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+      }}
+    >
+      <span
+        style={{
+          fontFamily: redesignFont.mono,
+          fontSize: '10px',
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          color: redesignText.label,
+        }}
+      >
+        Dernier résultat
+      </span>
+      {unityDialogueResponse ? (
+        <button
+          type="button"
+          onClick={() => setRightPanelTab('dialogue')}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            textAlign: 'left',
+            cursor: 'pointer',
+            fontSize: '12.5px',
+            lineHeight: 1.5,
+            color: redesignAccent.light,
+          }}
+        >
+          {unityDialogueResponse.title ?? 'Dialogue généré'} — ouvrir
+        </button>
+      ) : (
+        <span style={{ fontSize: '12.5px', lineHeight: 1.5, color: redesignText.muted }}>
+          Rien pour cette scène. Le dialogue généré s&apos;ouvre ici, éditable, avec sa trace de
+          raisonnement.
+        </span>
+      )}
+    </div>
+  )
+
   /** Barre d’actions bas du panneau droit (Prompt / Dialogue) — desktop et drawer narrow. */
   const renderRightActionsFooter = (): ReactNode => {
     if (
@@ -1300,6 +1354,7 @@ export function Dashboard() {
             contentStyle={{ overflow: 'hidden', scrollbarGutter: 'stable' }}
           />
         </div>
+        {renderLastResultBlock()}
         {renderRightActionsFooter()}
           </>
         )}
