@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 
 from api.main import app
 
-EXPECTED_MIGRATION_VERSIONS = [("001",), ("002",), ("003",), ("004",), ("005",)]
+EXPECTED_MIGRATION_VERSIONS = [("001",), ("002",), ("003",), ("004",), ("005",), ("006",)]
 
 
 def test_lifespan_creates_and_reuses_application_database(tmp_path: Path) -> None:
@@ -50,6 +50,8 @@ def test_lifespan_creates_and_reuses_application_database(tmp_path: Path) -> Non
                 "dialogues_index",
                 "dialogue_shares",
                 "audit_logs",
+                "collections",
+                "collection_dialogues",
             } <= tables
             assert migration_versions == EXPECTED_MIGRATION_VERSIONS
             assert dialogue_foreign_keys == {

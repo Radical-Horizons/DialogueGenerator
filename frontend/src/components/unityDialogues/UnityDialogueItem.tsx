@@ -27,6 +27,10 @@ export interface UnityDialogueItemProps {
   batchMode?: boolean
   isChecked?: boolean
   onCheckChange?: (checked: boolean) => void
+  /** Collections contenant ce dialogue (FR84). */
+  collections?: Array<{ id: string; name: string; icon?: string | null }>
+  /** Clic sur un badge collection → active le filtre. */
+  onCollectionClick?: (collectionId: string) => void
 }
 
 const MAX_DISPLAYED_SPEAKERS = 8
@@ -62,6 +66,8 @@ export const UnityDialogueItem = memo(
         batchMode = false,
         isChecked = false,
         onCheckChange,
+        collections = [],
+        onCollectionClick,
       },
       ref
     ) {
@@ -195,6 +201,30 @@ export const UnityDialogueItem = memo(
             >
               {sharingLabel}
             </span>
+            {collections.map((collection) => (
+              <button
+                key={collection.id}
+                type="button"
+                data-testid={`unity-dialogue-collection-badge-${collection.id}`}
+                title={`Ouvrir la collection ${collection.name}`}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onCollectionClick?.(collection.id)
+                }}
+                style={{
+                  padding: '0.05rem 0.3rem',
+                  borderRadius: '999px',
+                  border: `1px solid ${theme.border.primary}`,
+                  backgroundColor: 'transparent',
+                  color: theme.text.secondary,
+                  cursor: onCollectionClick ? 'pointer' : 'default',
+                  fontSize: 'inherit',
+                }}
+              >
+                {collection.icon ? `${collection.icon} ` : ''}
+                {collection.name}
+              </button>
+            ))}
           </div>
         </>
       )

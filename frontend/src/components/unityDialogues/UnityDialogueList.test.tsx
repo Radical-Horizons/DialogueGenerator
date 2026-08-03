@@ -22,6 +22,16 @@ vi.mock('../../api/documents', () => ({
   putDocument: vi.fn(),
 }))
 
+vi.mock('../../api/collections', () => ({
+  listCollections: vi.fn().mockResolvedValue([]),
+  createCollection: vi.fn(),
+  updateCollection: vi.fn(),
+  deleteCollection: vi.fn(),
+  addDialoguesToCollection: vi.fn(),
+  removeDialoguesFromCollection: vi.fn(),
+  buildDocumentCollectionMap: () => new Map(),
+}))
+
 const mockList = vi.mocked(unityDialoguesAPI.listUnityDialogues)
 const mockValidateDocumentSchema = vi.mocked(dialoguesAPI.validateDocumentSchema)
 

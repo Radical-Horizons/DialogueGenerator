@@ -670,6 +670,7 @@ from api.routers import (
     context_staleness,
     context_suggestions,
     costs,
+    collections,
     dialogue_shares,
     dialogues,
     documents,
@@ -700,6 +701,7 @@ app.include_router(user_settings.router, prefix="/api/v1", tags=["User Settings"
 app.include_router(audit_logs.router, prefix="/api/v1", tags=["Audit Logs"])
 app.include_router(admin.router, prefix="/api/v1", tags=["Admin Settings"])
 app.include_router(dialogues.router, prefix="/api/v1/dialogues", tags=["Dialogues"])
+app.include_router(collections.router, prefix="/api/v1/collections", tags=["Collections"])
 app.include_router(dialogue_shares.router, prefix="/api/v1/dialogues", tags=["Dialogue Shares"])
 app.include_router(streaming.router, prefix="/api/v1/dialogues", tags=["Dialogues"])  # SSE streaming (Story 0.2)
 app.include_router(unity_dialogues.router, prefix="/api/v1/unity-dialogues", tags=["Unity Dialogues"])

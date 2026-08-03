@@ -28,6 +28,10 @@ import { useDocumentSchemaValidation } from '../../hooks/useDocumentSchemaValida
 import { useUnityExportPreview } from '../../hooks/useUnityExportPreview'
 import { BatchExportToolbar } from './BatchExportToolbar'
 import { BatchExportSummaryBanner } from './BatchExportSummaryBanner'
+import { CollectionManager } from './CollectionManager'
+import * as collectionsAPI from '../../api/collections'
+import type { DialogueCollection } from '../../api/collections'
+import { getErrorMessage } from '../../types/errors'
 import { ExportPreviewModal } from './ExportPreviewModal'
 import { ExportLogsPanel } from './ExportLogsPanel'
 import { DownloadExportOptionsPanel } from './DownloadExportOptionsPanel'
@@ -45,7 +49,6 @@ import { downloadAllExportedFiles, downloadPersistedUnityDialogue } from '../../
 import { useGraphStore } from '../../store/graphStore'
 import { getDialogueDisplayTitle } from '../../utils/formatDialogueTitle'
 import * as documentsAPI from '../../api/documents'
-import { getErrorMessage } from '../../types/errors'
 
 const BATCH_UNSAVED_WARNING =
   'Le dialogue ouvert a des modifications non sauvegardées. Sauvegardez avant de l’inclure dans l’export batch.'
@@ -88,6 +91,8 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
     availableAuthors,
     hasActiveFilters,
     resetFilters,
+    activeCollectionId,
+    setActiveCollectionFilter,
     sortType,
     setSortType,
     page,
@@ -100,6 +105,10 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [contextMenu, setContextMenu] = useState<DialogueListContextMenuState | null>(null)
   const [isCreating, setIsCreating] = useState(false)
+  const [collections, setCollections] = useState<DialogueCollection[]>([])
+  const [collectionsLoading, setCollectionsLoading] = useState(false)
+  const [addToCollectionId, setAddToCollectionId] = useState('')
+  const [isAddingToCollection, setIsAddingToCollection] = useState(false)
   const batchPreview = useUnityExportPreview(
     toast,
     {
@@ -148,6 +157,136 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
   useImperativeHandle(ref, () => ({
     refresh,
   }), [refresh])
+
+  const refreshCollections = useCallback(async () => {
+    setCollectionsLoading(true)
+    try {
+      const next = await collectionsAPI.listCollections()
+      setCollections(next)
+    } catch (err) {
+      toast(getErrorMessage(err), 'error')
+    } finally {
+      setCollectionsLoading(false)
+    }
+  }, [toast])
+
+  useEffect(() => {
+    void refreshCollections()
+  }, [refreshCollections])
+
+  // Resynchroniser les membres du filtre actif après un refresh collections.
+  useEffect(() => {
+    if (!activeCollectionId) return
+    if (collectionsLoading) return
+    const current = collections.find((item) => item.id === activeCollectionId)
+    if (current) {
+      setActiveCollectionFilter(current.id, current.dialogue_ids)
+    } else {
+      setActiveCollectionFilter(null)
+    }
+  }, [
+    activeCollectionId,
+    collections,
+    collectionsLoading,
+    setActiveCollectionFilter,
+  ])
+
+  const collectionsByDocumentId = useMemo(
+    () => collectionsAPI.buildDocumentCollectionMap(collections),
+    [collections]
+  )
+
+  const handleSelectCollection = useCallback(
+    (collection: DialogueCollection | null) => {
+      if (!collection) {
+        setActiveCollectionFilter(null)
+        return
+      }
+      setActiveCollectionFilter(collection.id, collection.dialogue_ids)
+    },
+    [setActiveCollectionFilter]
+  )
+
+  const handleCollectionBadgeClick = useCallback(
+    (collectionId: string) => {
+      const collection = collections.find((item) => item.id === collectionId)
+      if (!collection) return
+      setActiveCollectionFilter(collection.id, collection.dialogue_ids)
+    },
+    [collections, setActiveCollectionFilter]
+  )
+
+  const handleCreateCollection = useCallback(
+    async (payload: {
+      name: string
+      description: string | null
+      icon: string | null
+    }) => {
+      await collectionsAPI.createCollection(payload)
+      await refreshCollections()
+      toast('Collection créée', 'success')
+    },
+    [refreshCollections, toast]
+  )
+
+  const handleUpdateCollection = useCallback(
+    async (
+      collectionId: string,
+      payload: {
+        name: string
+        description: string | null
+        icon: string | null
+      }
+    ) => {
+      await collectionsAPI.updateCollection(collectionId, payload)
+      await refreshCollections()
+      toast('Collection mise à jour', 'success')
+    },
+    [refreshCollections, toast]
+  )
+
+  const handleDeleteCollection = useCallback(
+    async (collection: DialogueCollection) => {
+      const result = await collectionsAPI.deleteCollection(collection.id)
+      if (activeCollectionId === collection.id) {
+        setActiveCollectionFilter(null)
+      }
+      await refreshCollections()
+      toast(
+        `Collection « ${collection.name} » supprimée — ${result.removed_dialogue_count} dialogue${result.removed_dialogue_count !== 1 ? 's' : ''} retiré${result.removed_dialogue_count !== 1 ? 's' : ''}`,
+        'success'
+      )
+    },
+    [
+      activeCollectionId,
+      refreshCollections,
+      setActiveCollectionFilter,
+      toast,
+    ]
+  )
+
+  const handleAddCheckedToCollection = useCallback(async () => {
+    if (!addToCollectionId || batch.checkedDocumentIds.size === 0) return
+    setIsAddingToCollection(true)
+    try {
+      await collectionsAPI.addDialoguesToCollection(
+        addToCollectionId,
+        Array.from(batch.checkedDocumentIds)
+      )
+      await refreshCollections()
+      toast('Dialogues ajoutés à la collection', 'success')
+      setAddToCollectionId('')
+    } catch (err) {
+      toast(getErrorMessage(err), 'error')
+    } finally {
+      setIsAddingToCollection(false)
+    }
+  }, [
+    addToCollectionId,
+    batch.checkedDocumentIds,
+    refreshCollections,
+    toast,
+  ])
 
   const handleItemClick = (dialogue: UnityDialogueMetadata) => {
     if (
@@ -348,7 +487,18 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
   }
 
   return (
-    <div data-testid="unity-dialogue-list" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div data-testid="unity-dialogue-list" style={{ display: 'flex', flexDirection: 'row', height: '100%' }}>
+      <CollectionManager
+        collections={collections}
+        activeCollectionId={activeCollectionId}
+        isGuest={isGuest}
+        isLoading={collectionsLoading}
+        onSelect={handleSelectCollection}
+        onCreate={handleCreateCollection}
+        onUpdate={handleUpdateCollection}
+        onDelete={handleDeleteCollection}
+      />
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', flex: 1, minWidth: 0 }}>
       <div
         style={{
           padding: '0.5rem',
@@ -512,6 +662,21 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
                 ×
               </Badge>
             )}
+            {activeCollectionId && (
+              <Badge
+                data-testid="unity-dialogue-filter-badge-collection"
+                variant="info"
+                size="sm"
+                onClick={() => setActiveCollectionFilter(null)}
+                title="Retirer le filtre collection"
+              >
+                {(
+                  collections.find((c) => c.id === activeCollectionId)?.name ??
+                  'Collection'
+                )}{' '}
+                ×
+              </Badge>
+            )}
             {hasActiveFilters && (
               <button
                 type="button"
@@ -537,6 +702,65 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
           {filteredCount} dialogue{filteredCount !== 1 ? 's' : ''}
           {(searchQuery || hasActiveFilters) && ` (sur ${total} total)`}
         </div>
+
+        {!isGuest && batch.checkedDocumentIds.size > 0 && collections.length > 0 && (
+          <div
+            data-testid="unity-dialogue-add-to-collection"
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '0.35rem',
+              alignItems: 'center',
+              marginTop: '0.4rem',
+            }}
+          >
+            <StyledSelect
+              data-testid="unity-dialogue-add-to-collection-select"
+              value={addToCollectionId}
+              onChange={(e) => setAddToCollectionId(e.target.value)}
+              style={{
+                padding: '0.35rem 0.45rem',
+                border: `1px solid ${theme.input.border}`,
+                borderRadius: '6px',
+                backgroundColor: theme.input.background,
+                color: theme.input.color,
+                fontSize: remSize('small'),
+              }}
+              wrapperStyle={{ width: 'auto', flex: '1 1 140px' }}
+              title="Ajouter la sélection à une collection"
+            >
+              <option value="">Ajouter à une collection…</option>
+              {collections.map((collection) => (
+                <option key={collection.id} value={collection.id}>
+                  {collection.icon ? `${collection.icon} ` : ''}
+                  {collection.name}
+                </option>
+              ))}
+            </StyledSelect>
+            <button
+              type="button"
+              data-testid="unity-dialogue-add-to-collection-submit"
+              disabled={!addToCollectionId || isAddingToCollection}
+              onClick={() => {
+                void handleAddCheckedToCollection()
+              }}
+              style={{
+                padding: '0.35rem 0.6rem',
+                border: `1px solid ${theme.button.primary.background}`,
+                borderRadius: '6px',
+                backgroundColor: theme.button.primary.background,
+                color: theme.button.primary.color,
+                cursor:
+                  !addToCollectionId || isAddingToCollection
+                    ? 'not-allowed'
+                    : 'pointer',
+                fontSize: remSize('small'),
+              }}
+            >
+              {isAddingToCollection ? 'Ajout…' : 'Ajouter'}
+            </button>
+          </div>
+        )}
       </div>
 
       {batch.batchSummary && (
@@ -582,6 +806,12 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
                   batch.toggleDocumentCheck(docId)
                 }
               }}
+              collections={collectionsByDocumentId.get(docId)?.map((c) => ({
+                id: c.id,
+                name: c.name,
+                icon: c.icon,
+              }))}
+              onCollectionClick={handleCollectionBadgeClick}
             />
             )
           })
@@ -795,7 +1025,7 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
           </div>
         </div>
       )}
+      </div>
     </div>
   )
-  }
-)
+})

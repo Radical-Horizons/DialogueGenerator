@@ -49,6 +49,7 @@ from services.repositories.sqlite import (
 )
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
+from services.collection_service import CollectionService
 from services.audit_log_service import AuditLogService
 from constants import FilePaths, Defaults
 
@@ -113,6 +114,11 @@ def get_document_persistence_service(request: Request) -> DocumentPersistenceSer
 def get_dialogue_sharing_service(request: Request) -> DialogueSharingService:
     """Retourne le service de partage co-édition des dialogues."""
     return get_service_container(request).get_dialogue_sharing_service()
+
+
+def get_collection_service(request: Request) -> CollectionService:
+    """Retourne le service des collections de dialogues."""
+    return get_service_container(request).get_collection_service()
 
 
 def get_audit_log_service(request: Request) -> AuditLogService:

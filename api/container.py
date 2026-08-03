@@ -34,6 +34,7 @@ from services.repositories.sqlite.bootstrap import resolve_database_path
 from services.repositories.sqlite import (
     AppSettingsRepository,
     AuditLogsRepository,
+    CollectionsRepository,
     DatabaseConnection,
     DialogueSharesRepository,
     DialoguesIndexRepository,
@@ -41,6 +42,7 @@ from services.repositories.sqlite import (
     UserSettingsRepository,
 )
 from services.audit_log_service import AuditLogService
+from services.collection_service import CollectionService
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
 from api.services.auth_service import AuthService
@@ -98,6 +100,8 @@ class ServiceContainer:
         self._app_settings_repository: Optional[AppSettingsRepository] = None
         self._dialogues_index_repository: Optional[DialoguesIndexRepository] = None
         self._dialogue_shares_repository: Optional[DialogueSharesRepository] = None
+        self._collections_repository: Optional[CollectionsRepository] = None
+        self._collection_service: Optional[CollectionService] = None
         self._audit_logs_repository: Optional[AuditLogsRepository] = None
         self._audit_log_service: Optional[AuditLogService] = None
         self._document_persistence_service: Optional[DocumentPersistenceService] = None
@@ -169,6 +173,27 @@ class ServiceContainer:
                 )
                 logger.info("DialogueSharesRepository initialisé dans le container.")
             return self._dialogue_shares_repository
+
+    def get_collections_repository(self) -> CollectionsRepository:
+        """Retourne le repository des collections de dialogues."""
+        with self._database_lock:
+            if self._collections_repository is None:
+                self._collections_repository = CollectionsRepository(
+                    self.get_database_connection()
+                )
+                logger.info("CollectionsRepository initialisé dans le container.")
+            return self._collections_repository
+
+    def get_collection_service(self) -> CollectionService:
+        """Retourne le service métier des collections de dialogues."""
+        with self._database_lock:
+            if self._collection_service is None:
+                self._collection_service = CollectionService(
+                    collections_repository=self.get_collections_repository(),
+                    dialogues_index_repository=self.get_dialogues_index_repository(),
+                )
+                logger.info("CollectionService initialisé dans le container.")
+            return self._collection_service
 
     def get_audit_logs_repository(self) -> AuditLogsRepository:
         """Retourne le repository append-only des journaux d'audit."""
@@ -614,6 +639,8 @@ class ServiceContainer:
             self._app_settings_repository = None
             self._dialogues_index_repository = None
             self._dialogue_shares_repository = None
+            self._collections_repository = None
+            self._collection_service = None
             self._audit_logs_repository = None
             self._audit_log_service = None
             self._document_persistence_service = None

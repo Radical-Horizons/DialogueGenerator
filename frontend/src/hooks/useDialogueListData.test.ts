@@ -606,4 +606,29 @@ describe('useDialogueListData', () => {
     expect(result.current.error).toContain('boom')
     expect(result.current.dialogues).toHaveLength(0)
   })
+
+  it('filtre par collection active (document_id) et resetFilters la retire', async () => {
+    const { result } = renderHook(() => useDialogueListData())
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    act(() => {
+      result.current.setActiveCollectionFilter('c1', ['alpha', 'charlie'])
+    })
+
+    expect(result.current.activeCollectionId).toBe('c1')
+    expect(result.current.hasActiveFilters).toBe(true)
+    expect(result.current.filteredDialogues.map((d) => d.filename)).toEqual([
+      'alpha.json',
+      'charlie.json',
+    ])
+
+    act(() => {
+      result.current.resetFilters()
+    })
+    expect(result.current.activeCollectionId).toBeNull()
+    expect(result.current.filteredCount).toBe(3)
+  })
 })

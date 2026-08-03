@@ -21,6 +21,7 @@ import {
   isDialogueListSortType,
   type PersistedDialogueListSortType,
 } from '../utils/dialogueListSort'
+import { normalizeDialogueFilenameKey } from '../utils/formatDialogueTitle'
 
 export type DialogueListSortType = PersistedDialogueListSortType
 
@@ -60,10 +61,20 @@ export interface UseDialogueListDataReturn {
   setAuthorId: (id: string | null) => void
   /** Auteurs distincts dérivés des dialogues déjà visibles (post-RBAC). */
   availableAuthors: DialogueListAuthorOption[]
-  /** True si période ≠ all ou auteur sélectionné. */
+  /** True si période ≠ all, auteur sélectionné, ou collection active. */
   hasActiveFilters: boolean
-  /** Remet période=all et auteur=tous (ne touche pas à la recherche). */
+  /** Remet période=all, auteur=tous et collection (ne touche pas à la recherche). */
   resetFilters: () => void
+  /** Collection active pour filtrer la liste (FR84), ou null. */
+  activeCollectionId: string | null
+  /**
+   * Active un filtre collection avec ses `document_id` membres.
+   * Passer `null` pour désactiver.
+   */
+  setActiveCollectionFilter: (
+    collectionId: string | null,
+    documentIds?: readonly string[]
+  ) => void
   sortType: DialogueListSortType
   setSortType: (sort: DialogueListSortType) => void
   /** Page courante (1-indexé), bornée à `[1, totalPages]`. */
@@ -92,6 +103,11 @@ export function useDialogueListData(): UseDialogueListDataReturn {
   const [searchQuery, setSearchQuery] = useState('')
   const [datePeriod, setDatePeriod] = useState<DialogueDatePeriod>('all')
   const [authorId, setAuthorId] = useState<string | null>(null)
+  const [activeCollectionId, setActiveCollectionId] = useState<string | null>(
+    null
+  )
+  const [activeCollectionDocumentIds, setActiveCollectionDocumentIds] =
+    useState<ReadonlySet<string> | null>(null)
   const [sortType, setSortTypeState] = useState<DialogueListSortType>(() =>
     loadDialogueListSort()
   )
@@ -178,6 +194,14 @@ export function useDialogueListData(): UseDialogueListDataReturn {
       result = result.filter((dialogue) => dialogue.owner_id === authorId)
     }
 
+    // Filtre collection FR84 (ET avec search / date / auteur).
+    if (activeCollectionId && activeCollectionDocumentIds) {
+      const memberIds = activeCollectionDocumentIds
+      result = result.filter((dialogue) =>
+        memberIds.has(normalizeDialogueFilenameKey(dialogue.filename))
+      )
+    }
+
     return [...result].sort((a, b) => {
       switch (sortType) {
         case 'name-asc':
@@ -223,13 +247,28 @@ export function useDialogueListData(): UseDialogueListDataReturn {
           )
       }
     })
-  }, [dialogues, searchQuery, datePeriod, authorId, sortType])
+  }, [
+    dialogues,
+    searchQuery,
+    datePeriod,
+    authorId,
+    activeCollectionId,
+    activeCollectionDocumentIds,
+    sortType,
+  ])
 
   // Revenir à la première page quand le filtre ou le tri change : la page
   // courante n'a plus de sens sur un ensemble filtré différent.
   useEffect(() => {
     setPage(1)
-  }, [searchQuery, datePeriod, authorId, sortType])
+  }, [
+    searchQuery,
+    datePeriod,
+    authorId,
+    activeCollectionId,
+    activeCollectionDocumentIds,
+    sortType,
+  ])
 
   const totalPages = Math.max(
     1,
@@ -263,11 +302,31 @@ export function useDialogueListData(): UseDialogueListDataReturn {
     saveDialogueListSort(next)
   }, [])
 
-  const hasActiveFilters = datePeriod !== 'all' || authorId !== null
+  const hasActiveFilters =
+    datePeriod !== 'all' || authorId !== null || activeCollectionId !== null
+
+  const setActiveCollectionFilter = useCallback(
+    (collectionId: string | null, documentIds: readonly string[] = []) => {
+      if (!collectionId) {
+        setActiveCollectionId(null)
+        setActiveCollectionDocumentIds(null)
+        return
+      }
+      setActiveCollectionId(collectionId)
+      setActiveCollectionDocumentIds(
+        new Set(
+          documentIds.map((id) => id.replace(/\.json$/i, '').toLowerCase())
+        )
+      )
+    },
+    []
+  )
 
   const resetFilters = useCallback(() => {
     setDatePeriod('all')
     setAuthorId(null)
+    setActiveCollectionId(null)
+    setActiveCollectionDocumentIds(null)
   }, [])
 
   return {
@@ -285,6 +344,8 @@ export function useDialogueListData(): UseDialogueListDataReturn {
     availableAuthors,
     hasActiveFilters,
     resetFilters,
+    activeCollectionId,
+    setActiveCollectionFilter,
     sortType,
     setSortType,
     page: safePage,

@@ -79,3 +79,13 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-8-3-filtrer-dialogues-date-auteur-fr82.md`
   summary: ModÃ©liser et exposer un statut Ã©ditorial de dialogue (ValidÃ© / En cours / Brouillon) pour le filtre FR82.
   evidence: Story 8.3 MVP â€” aucune source persistÃ©e (ni dialogues_index, ni JSON Unity, ni API) ; tags nÅ“ud et validationMode ne conviennent pas. NÃ©cessite schÃ©ma + UI d'Ã©dition avant le filtre statut.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-8-5-creer-collections-dossiers-dialogues-fr84.md`
+  summary: Bornes / lots pour document_ids (limite paramètres SQLite) et transaction unique validation+insert membership.
+  evidence: Revues adversarial + edge-case — volumes MVP faibles ; IntegrityError concurrent non traduit.
+- source_spec: `_bmad-output/implementation-artifacts/spec-8-5-creer-collections-dossiers-dialogues-fr84.md`
+  summary: Éviter N+1 list_document_ids et séquencer listCollections (génération de requête) sous refresh concurrent.
+  evidence: Revue adversarial — perf / race UI hors MVP 8.5.
+- source_spec: `_bmad-output/implementation-artifacts/spec-8-5-creer-collections-dossiers-dialogues-fr84.md`
+  summary: Couverture RTL complète des AC UI (ajout batch?filtre, 2 badges+clic, rename/delete toast) et refresh collections après delete dialogue.
+  evidence: Verification-gap — couvert API + hook + manager create ; parcours liste intégrés reportés.
