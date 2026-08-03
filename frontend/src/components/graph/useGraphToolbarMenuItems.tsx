@@ -173,7 +173,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
             e.currentTarget.style.backgroundColor = 'transparent'
           }}
         >
-          🎯 Aller à un nœud (Ctrl+J)
+          Aller à un nœud (Ctrl+J)
         </button>
         <button
           type="button"

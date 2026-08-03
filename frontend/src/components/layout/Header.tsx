@@ -14,6 +14,7 @@ import { UnityBatchExportActionsMenuItems } from '../unityDialogues/UnityBatchEx
 import { useUnityBatchExportMenuStore } from '../../store/unityBatchExportMenuStore'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
+import { redesignControl, redesignFont, redesignRadius, redesignText } from '../../theme/redesignTokens'
 import { TOUCH_TARGET_MIN_PX } from '../../constants'
 
 export function Header() {
@@ -177,27 +178,27 @@ export function Header() {
               e.currentTarget.style.borderColor = theme.border.primary
             }}
           >
-            <span style={{ color: theme.text.secondary, fontSize: remSize('body') }}>🔍</span>
-            <span style={{ 
-              flex: 1, 
-              color: theme.text.secondary, 
+            <span style={{
+              flex: 1,
+              color: theme.text.tertiary,
               fontSize: remSize('body'),
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
             }}>
-              Rechercher des actions, personnages, lieux...
+              Rechercher une action, un personnage, un lieu…
             </span>
             <kbd style={{
               padding: '0.125rem 0.375rem',
               fontSize: remSize('caption'),
-              backgroundColor: theme.background.tertiary,
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: '3px',
-              color: theme.text.secondary,
-              fontFamily: 'monospace',
+              backgroundColor: 'transparent',
+              border: `1px solid ${redesignControl.border}`,
+              borderRadius: `${redesignRadius.control}px`,
+              color: redesignText.label,
+              fontFamily: redesignFont.mono,
+              letterSpacing: '0.05em',
             }}>
-              Ctrl+K
+              CTRL+K
             </kbd>
           </div>
         </div>

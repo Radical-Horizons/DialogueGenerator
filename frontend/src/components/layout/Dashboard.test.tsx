@@ -277,7 +277,7 @@ describe('Dashboard', () => {
 
     // Le Dashboard affiche le bouton Générer dans le panneau droit (pas Exporter/Reset qui sont dans le Header)
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /générer/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /générer le dialogue/i })).toBeInTheDocument()
     })
   })
 
@@ -306,7 +306,7 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    const generateButton = await screen.findByRole('button', { name: /générer/i })
+    const generateButton = await screen.findByRole('button', { name: /générer le dialogue/i })
     await waitFor(() => {
       expect(generateButton).toBeDisabled()
       expect(screen.getByText(/chargement du contexte/i)).toBeInTheDocument()
@@ -356,7 +356,7 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    const generateButton = await screen.findByRole('button', { name: /générer/i })
+    const generateButton = await screen.findByRole('button', { name: /générer le dialogue/i })
     await waitFor(() => {
       expect(generateButton).toBeDisabled()
       expect(screen.getByText(/estimation des tokens/i)).toBeInTheDocument()
@@ -740,8 +740,8 @@ describe('Dashboard', () => {
       expect(screen.getByTestId('context-selector')).toBeInTheDocument()
     })
 
-    const generationTab = screen.getByRole('button', { name: '💬 Génération de Dialogues' })
-    expect(generationTab).toHaveAttribute('title', '💬 Génération de Dialogues')
+    const generationTab = screen.getByRole('button', { name: 'Générer' })
+    expect(generationTab).toHaveAttribute('title', 'Générer')
 
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
       document.documentElement.clientWidth + 1
@@ -763,7 +763,7 @@ describe('Dashboard', () => {
       expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
     })
 
-    const graphTab = screen.getByRole('button', { name: /éditeur de graphe/i })
+    const graphTab = screen.getByRole('button', { name: /^Graphe$/i })
     await user.click(graphTab)
     expect(screen.getByTestId('graph-editor')).toBeInTheDocument()
   })
@@ -843,7 +843,7 @@ describe('Dashboard', () => {
       expect(screen.queryByTestId('narrow-drawer-backdrop')).not.toBeInTheDocument()
     })
 
-    const graphTab = screen.getByRole('button', { name: /éditeur de graphe/i })
+    const graphTab = screen.getByRole('button', { name: /^Graphe$/i })
     await user.click(graphTab)
     expect(screen.getByTestId('graph-editor')).toBeInTheDocument()
     expect(screen.queryByTestId('narrow-drawer-backdrop')).not.toBeInTheDocument()
@@ -1034,7 +1034,7 @@ describe('Dashboard', () => {
       expect(slot).toHaveStyle({ paddingBottom: '400px' })
     })
 
-    const gen = within(slot).getByRole('button', { name: /générer/i })
+    const gen = within(slot).getByRole('button', { name: /générer le dialogue/i })
     expect(gen).toBeEnabled()
   })
 })

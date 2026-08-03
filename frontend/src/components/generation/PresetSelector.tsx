@@ -174,7 +174,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
               boxSizing: 'border-box',
             }}
           >
-            <span>📋 Charger preset</span>
+            <span>Charger preset</span>
             <span>{isDropdownOpen ? '▲' : '▼'}</span>
           </button>
 

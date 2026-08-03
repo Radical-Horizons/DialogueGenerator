@@ -294,7 +294,7 @@ describe('FR119 touch targets — chrome', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
     })
-    await user.click(screen.getByRole('button', { name: /éditeur de graphe/i }))
+    await user.click(screen.getByRole('button', { name: /^Graphe$/i }))
     expect(screen.getByTestId('graph-editor')).toBeInTheDocument()
   })
 
@@ -315,7 +315,7 @@ describe('FR119 touch targets — chrome', () => {
     // Les rails ont été réduits de moitié intentionnellement — l'essentiel est
     // que les onglets segmentés principaux restent ≥ 44px FR119 (hauteur chrome +50 %).
     const centerTab = screen.getByRole('button', {
-      name: /génération de dialogues/i,
+      name: /^Générer$/i,
     }) as HTMLElement
     expect(centerTab.style.minHeight, 'center segmented tab minHeight').toBe(
       `${segmentedTabTypography.narrow.tabMinHeightPx}px`,

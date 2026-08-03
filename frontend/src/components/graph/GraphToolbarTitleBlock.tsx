@@ -117,7 +117,7 @@ export function GraphToolbarTitleBlock({
                 title="Rechercher dans le graphe (Ctrl+F)"
                 aria-label="Rechercher"
               >
-                🔍
+                Rech.
               </button>
           </div>
         </>

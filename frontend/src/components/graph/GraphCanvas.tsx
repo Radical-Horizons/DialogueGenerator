@@ -589,7 +589,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
     }),
     []
   )
-  const reactFlowStyle = useMemo(() => ({ backgroundColor: theme.background.panel }), [])
+  const reactFlowStyle = useMemo(() => ({ backgroundColor: '#101013' }), [])
   const minimapStyle = useMemo(
     () =>
       ({
@@ -656,7 +656,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
         defaultEdgeOptions={defaultEdgeOptions}
         style={reactFlowStyle}
       >
-        <Background color={theme.text.secondary} gap={15} size={1} style={{ opacity: 0.2 }} />
+        <Background color="rgba(255,255,255,0.055)" gap={22} size={1} />
         {!isNarrowCanvas && <Controls />}
         <div
           aria-label="Zoom level"

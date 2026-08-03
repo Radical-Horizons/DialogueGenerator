@@ -131,10 +131,10 @@ describe('Dashboard tab visibility', () => {
       </BrowserRouter>
     )
 
-    await user.click(screen.getByRole('button', { name: /éditeur de graphe/i }))
+    await user.click(screen.getByRole('button', { name: /^Graphe$/i }))
     expect(await screen.findByRole('button', { name: /édition de nœud/i })).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /édition de dialogues/i }))
+    await user.click(screen.getByRole('button', { name: /^Éditer$/i }))
 
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: /édition de nœud/i })).not.toBeInTheDocument()

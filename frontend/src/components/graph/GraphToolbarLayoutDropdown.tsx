@@ -44,7 +44,7 @@ export function GraphToolbarLayoutDropdown(props: GraphToolbarToolsRowProps) {
         title="Auto-layout (Dagre) — choisir la direction"
         aria-label="Auto-layout (Dagre) — choisir la direction"
       >
-        <span aria-hidden>📐</span>
+        
         {!isNarrowToolbar ? (
           <span style={{ textTransform: 'capitalize' }}>
             <Badge variant="neutral" size="sm">

@@ -129,7 +129,7 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
                   e.currentTarget.style.backgroundColor = theme.background.secondary
                 }}
               >
-                📋 Copier
+                Copier
               </button>
             )}
             {viewMode === 'structured' && toggleAllFn && (

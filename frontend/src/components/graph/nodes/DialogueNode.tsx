@@ -33,6 +33,16 @@ import {
 } from '../../../utils/graphStructuralValidation'
 import { reconstructNodePromptFromGraph } from '../../../utils/graphPromptPreview'
 import { Badge } from '../../shared'
+import {
+  redesignAccent,
+  redesignFont,
+  redesignHairline,
+  redesignRadius,
+  redesignSurface,
+  redesignText as redesignTextTokens,
+} from '../../../theme/redesignTokens'
+
+const redesignTextBody = redesignTextTokens.body
 
 interface ValidationError {
   type: string
@@ -315,6 +325,17 @@ export const DialogueNode = memo(function DialogueNode({
       ? topologyStyle.background
       : undefined
 
+  /** Libellé d'état en mono dans l'en-tête (remplace les pastilles colorées). */
+  const nodeStateLabel: { text: string; color: string } | null = selected
+    ? { text: 'Sélectionné', color: redesignAccent.light }
+    : validationHighlightKind === 'lore'
+      ? { text: 'Lore', color: theme.state.lore.color }
+      : isPending
+        ? { text: 'À valider', color: theme.state.pending.border }
+        : isAccepted
+          ? { text: 'Validé', color: theme.state.accepted.border }
+          : null
+
   const getChoiceHandleLeftPercent = (index: number): number => {
     // Répartition uniforme sur la largeur du node, sans coller aux bords
     return ((index + 1) / (choices.length + 1)) * 100
@@ -339,17 +360,17 @@ export const DialogueNode = memo(function DialogueNode({
         width: NODE_WIDTH,
         minHeight: 120,
         maxHeight: 500,
-        border: `2px ${borderStyle} ${borderColor}`,
-        borderRadius: 8,
+        border: `${selected ? 2 : 1}px ${borderStyle} ${selected ? redesignAccent.base : borderColor}`,
+        borderRadius: redesignRadius.node,
         backgroundColor:
           isHighlighted
             ? theme.state.selected.background
-            : (canvasBackground ?? theme.background.tertiary),
+            : (canvasBackground ?? redesignSurface.node),
         boxShadow: selected
-          ? '0 4px 12px rgba(0, 0, 0, 0.3)'
+          ? `0 0 0 3px ${redesignAccent.ring}`
           : isHighlighted
           ? '0 0 0 3px rgba(116, 192, 252, 0.5)'
-          : '0 2px 6px rgba(0, 0, 0, 0.2)',
+          : theme.shadow.card,
         overflow: 'visible',
         position: 'relative',
         transition: 'all 0.2s ease',
@@ -535,9 +556,9 @@ export const DialogueNode = memo(function DialogueNode({
       {/* En-tête : titre en avant-plan, speaker en second plan */}
       <div
         style={{
-          padding: '8px 12px',
-          backgroundColor: speakerColor,
-          borderBottom: `1px solid ${theme.border.primary}`,
+          padding: '7px 11px',
+          backgroundColor: redesignSurface.nodeHeader,
+          borderBottom: `1px solid ${redesignHairline.standard}`,
           display: 'flex',
           alignItems: 'center',
           gap: 8,
@@ -545,51 +566,44 @@ export const DialogueNode = memo(function DialogueNode({
       >
         <div
           style={{
-            width: 8,
-            height: 8,
+            width: 6,
+            height: 6,
             borderRadius: '50%',
-            backgroundColor: 'white',
+            backgroundColor: speakerColor,
+            flexShrink: 0,
           }}
         />
-        <div
+        <span
           style={{
-            display: 'flex',
-            flexDirection: 'column',
-            minWidth: 0,
+            fontFamily: redesignFont.mono,
+            fontSize: '9.5px',
+            letterSpacing: '0.09em',
+            textTransform: 'uppercase',
+            color: theme.text.secondary,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
             flex: 1,
-            gap: 2,
+            minWidth: 0,
           }}
+          title={title ? `${title} (${speaker})` : speaker}
         >
+          {speaker}
+        </span>
+        {nodeStateLabel && (
           <span
             style={{
-              fontSize: '0.9rem',
-              fontWeight: 'bold',
-              color: 'white',
-              textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
+              fontFamily: redesignFont.mono,
+              fontSize: '9.5px',
+              letterSpacing: '0.09em',
+              textTransform: 'uppercase',
+              color: nodeStateLabel.color,
+              flexShrink: 0,
             }}
-            title={title ? `${title} (${speaker})` : speaker}
           >
-            {title ? title : speaker}
+            {nodeStateLabel.text}
           </span>
-          {title ? (
-            <span
-              style={{
-                fontSize: '0.72rem',
-                fontWeight: 'normal',
-                color: 'rgba(255,255,255,0.9)',
-                textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              ({speaker})
-            </span>
-          ) : null}
-        </div>
+        )}
       </div>
       
       {/* Contenu (dialogue) — padding bas réservé pour handles + "Voir le prompt" */}
@@ -601,9 +615,10 @@ export const DialogueNode = memo(function DialogueNode({
               ? CONTENT_PADDING_TOP_WHEN_PENDING
               : 12,
           paddingBottom: hasChoices ? BOTTOM_RESERVED_WITH_CHOICES : BOTTOM_RESERVED_SINGLE,
-          fontSize: '0.9rem',
-          lineHeight: 1.4,
-          color: theme.text.primary,
+          fontFamily: redesignFont.serif,
+          fontSize: '12.5px',
+          lineHeight: 1.45,
+          color: redesignTextBody,
           whiteSpace: 'pre-wrap',
           wordWrap: 'break-word',
           flex: '1 1 auto',

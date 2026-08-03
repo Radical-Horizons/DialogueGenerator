@@ -44,7 +44,7 @@ export function GraphToolbarPlaythroughButton({
       }}
       title="Jouer le dialogue — preview scénario (P)"
     >
-      <span aria-hidden>▶</span>
+      
       {!isNarrowToolbar && <span>Jouer</span>}
     </button>
   )

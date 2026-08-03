@@ -3,8 +3,9 @@
  */
 import type { ReactNode } from 'react'
 import type { Edge, Node } from '@xyflow/react'
-import { Badge, SaveStatusIndicator } from '../shared'
+import { SaveStatusIndicator } from '../shared'
 import { theme } from '../../theme'
+import { redesignFont } from '../../theme/redesignTokens'
 import { BatchOperationsMenu } from './BatchOperationsMenu'
 import {
   formatGraphWarningBadgeLabel,
@@ -91,21 +92,43 @@ function GraphHealthBadge({
       ? `${errors.length} erreur${errors.length > 1 ? 's' : ''}`
       : warningLabel
 
-  const variant = isValid ? 'success' : hasErrors ? 'error' : 'warning'
-  const size = isNarrowToolbar ? 'sm' : 'md'
-  const icon = isValid ? '✓' : hasErrors ? '✗' : '⚠'
+  // Refonte UI : point + libellé mono, plus de pastille à fond coloré.
+  const dotColor = isValid
+    ? theme.state.accepted.border
+    : hasErrors
+      ? theme.state.error.color
+      : theme.state.pending.border
 
   return (
-    <Badge
+    <span
       data-testid="graph-health-badge"
-      variant={variant}
-      size={size}
-      icon={icon}
       title={title}
       onClick={canToggle ? () => setShowValidationPanel((v) => !v) : undefined}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        cursor: canToggle ? 'pointer' : 'default',
+        fontFamily: redesignFont.mono,
+        fontSize: '10.5px',
+        letterSpacing: '0.05em',
+        textTransform: 'uppercase',
+        color: theme.text.secondary,
+        whiteSpace: 'nowrap',
+      }}
     >
+      <span
+        aria-hidden
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: '50%',
+          backgroundColor: dotColor,
+          flexShrink: 0,
+        }}
+      />
       {label}
-    </Badge>
+    </span>
   )
 }
 

@@ -178,7 +178,7 @@ export function GraphToolbarToolsRow(props: GraphToolbarToolsRowProps) {
             title="Rechercher dans le graphe (Ctrl+F)"
             aria-label="Rechercher"
           >
-            <span aria-hidden>🔍</span>
+            
             Recherche
           </button>
         )}

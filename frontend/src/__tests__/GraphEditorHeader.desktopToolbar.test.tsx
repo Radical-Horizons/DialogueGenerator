@@ -69,7 +69,6 @@ describe('GraphEditorHeader - Desktop toolbar density', () => {
     expect(screen.getByRole('button', { name: 'Refaire' })).not.toHaveTextContent('Redo')
 
     const autoLayout = screen.getByRole('button', { name: /auto-layout/i })
-    expect(autoLayout).toHaveTextContent('📐')
     expect(autoLayout).toHaveTextContent('normal')
     expect(autoLayout).not.toHaveTextContent('Auto-layout')
 

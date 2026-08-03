@@ -15,6 +15,7 @@ import type {
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import { listItemSelectionStyle, listRowHairlineBorder, listRowHoverBackground } from '../../theme/selectionTokens'
+import { redesignAccent, redesignFont, redesignText } from '../../theme/redesignTokens'
 import { highlightText } from '../../utils/textHighlight'
 import { getGddEntitySummary } from '../../utils/gddSummary'
 import { useDebounce } from '../../hooks/useDebounce'
@@ -365,12 +366,11 @@ export function ContextList({
                       {badgeLabel && (
                         <span
                           style={{
+                            fontFamily: redesignFont.mono,
                             fontSize: remSize('caption'),
-                            padding: '0.15rem 0.4rem',
-                            borderRadius: '4px',
-                            backgroundColor: theme.background.tertiary,
-                            color: theme.text.secondary,
-                            fontWeight: 500,
+                            letterSpacing: '0.09em',
+                            textTransform: 'uppercase',
+                            color: redesignText.label,
                           }}
                         >
                           {badgeLabel}
@@ -393,31 +393,25 @@ export function ContextList({
                           : 'Extrait - Cliquer pour passer en Complet'
                       }
                       style={{
-                        padding: '0.25rem 0.5rem',
-                        border: `1px solid ${theme.border.primary}`,
-                        borderRadius: '4px',
-                        backgroundColor:
-                          currentMode === 'excerpt'
-                            ? theme.state.warning.background || theme.background.secondary
-                            : theme.background.secondary,
+                        padding: '0.15rem 0.45rem',
+                        border: 'none',
+                        borderRadius: 0,
+                        backgroundColor: 'transparent',
                         color:
                           currentMode === 'excerpt'
-                            ? theme.state.warning.color || theme.text.secondary
-                            : theme.text.secondary,
+                            ? theme.text.tertiary
+                            : redesignAccent.light,
                         cursor: 'pointer',
-                        fontSize: remSize('small'),
-                        fontWeight: 'bold',
+                        fontFamily: redesignFont.mono,
+                        fontSize: remSize('caption'),
+                        letterSpacing: '0.08em',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.25rem',
-                        minWidth: '60px',
-                        justifyContent: 'center',
+                        justifyContent: 'flex-end',
+                        flexShrink: 0,
                       }}
                     >
-                      {currentMode === 'full' ? '📄' : '✂️'}
-                      <span style={{ fontSize: remSize('caption') }}>
-                        {currentMode === 'full' ? 'Complet' : 'Extrait'}
-                      </span>
+                      {currentMode === 'full' ? 'COMPLET' : 'EXTRAIT'}
                     </button>
                   )}
                 </div>

@@ -120,7 +120,7 @@ describe('Dashboard — 17.7 sélecteur de dialogue dans toolbar', () => {
       </Wrapper>
     )
 
-    const editionTab = await screen.findByRole('button', { name: /édition de dialogues/i })
+    const editionTab = await screen.findByRole('button', { name: /^Éditer$/i })
     await user.click(editionTab)
 
     await waitFor(() => {
@@ -140,7 +140,7 @@ describe('Dashboard — 17.7 sélecteur de dialogue dans toolbar', () => {
       </Wrapper>
     )
 
-    const editionTab = await screen.findByRole('button', { name: /édition de dialogues/i })
+    const editionTab = await screen.findByRole('button', { name: /^Éditer$/i })
     await user.click(editionTab)
 
     await waitFor(() => {

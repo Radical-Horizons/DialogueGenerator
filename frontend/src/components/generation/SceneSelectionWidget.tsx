@@ -7,6 +7,7 @@ import { useSceneSelection } from '../../hooks/useSceneSelection'
 import { useGenerationStore } from '../../store/generationStore'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { theme } from '../../theme'
+import { redesignControl, redesignFont, redesignRadius, redesignText } from '../../theme/redesignTokens'
 import { generationPanelChrome } from '../../theme/responsiveChrome'
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
 import {
@@ -110,12 +111,14 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
     minWidth: `${iconActionSize}px`,
     minHeight: `${iconActionSize}px`,
     padding: 0,
-    border: `1px solid ${theme.border.primary}`,
-    borderRadius: '6px',
-    backgroundColor: theme.button.default.background,
-    color: theme.button.default.color,
+    border: `1px solid ${redesignControl.border}`,
+    borderRadius: `${redesignRadius.control}px`,
+    backgroundColor: 'transparent',
+    color: redesignText.label,
     cursor: 'pointer',
-    fontSize: '0.9rem',
+    fontFamily: redesignFont.mono,
+    fontSize: '9.5px',
+    letterSpacing: '0.06em',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -211,7 +214,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
               opacity: isLoading || playerCharacterOptions.length === 0 ? 0.5 : 1,
             }}
           >
-            🎲
+            ALÉA
           </button>
         </div>
 
@@ -279,7 +282,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
               opacity: isLoading || npcCharacterOptions.length === 0 ? 0.5 : 1,
             }}
           >
-            🎲
+            ALÉA
           </button>
         </div>
       </div>
@@ -324,7 +327,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
               opacity: isLoading || data.regions.length === 0 ? 0.5 : 1,
             }}
           >
-            🎲
+            ALÉA
           </button>
         </div>
 
@@ -369,7 +372,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
               opacity: isLoading || !selection.sceneRegion || data.subLocations.length === 0 ? 0.5 : 1,
             }}
           >
-            🎲
+            ALÉA
           </button>
         </div>
       </div>

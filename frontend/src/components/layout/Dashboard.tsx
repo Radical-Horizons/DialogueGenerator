@@ -907,7 +907,8 @@ export function Dashboard() {
       contextLoadState.isLoading ||
       generationState.isEstimating
     const isRefreshActionDisabled = contextLoadState.isLoading || !contextRefresh
-    const primaryActionLabel = hasContextLoadError ? 'Rafraîchir le contexte' : 'Générer'
+    // Libellé long : fidèle au design et distinct de l'onglet « Générer » (nom accessible unique).
+    const primaryActionLabel = hasContextLoadError ? 'Rafraîchir le contexte' : 'Générer le dialogue'
     const primaryActionTitle = hasContextLoadError
       ? 'Rafraîchir le contexte GDD'
       : contextLoadState.isLoading
@@ -1171,7 +1172,7 @@ export function Dashboard() {
             tabs={[
               {
                 id: 'generation',
-              label: '💬 Génération de Dialogues',
+              label: 'Générer',
               content: (
                 <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
                   <GenerationPanel />
@@ -1180,7 +1181,7 @@ export function Dashboard() {
             },
             {
               id: 'edition',
-              label: '✏️ Édition de Dialogues',
+              label: 'Éditer',
               content: (
                 <DialogueEditionTabContent
                   selectedDialogue={selectedDialogue}
@@ -1194,7 +1195,7 @@ export function Dashboard() {
             },
             {
               id: 'graph',
-              label: '📊 Éditeur de Graphe',
+              label: 'Graphe',
               content: (
                 <GraphEditor />
               ),
