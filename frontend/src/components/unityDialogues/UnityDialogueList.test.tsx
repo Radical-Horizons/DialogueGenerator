@@ -32,6 +32,15 @@ vi.mock('../../api/collections', () => ({
   buildDocumentCollectionMap: () => new Map(),
 }))
 
+vi.mock('../../api/dialogueSearch', () => ({
+  searchUnityDialogues: vi.fn().mockResolvedValue({
+    query: '',
+    elapsed_ms: 0,
+    document_ids: [],
+    total: 0,
+  }),
+}))
+
 const mockList = vi.mocked(unityDialoguesAPI.listUnityDialogues)
 const mockValidateDocumentSchema = vi.mocked(dialoguesAPI.validateDocumentSchema)
 

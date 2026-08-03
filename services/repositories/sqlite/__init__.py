@@ -11,6 +11,10 @@ from services.repositories.sqlite.collections_repository import (
     CollectionEntry,
     CollectionsRepository,
 )
+from services.repositories.sqlite.dialogues_search_repository import (
+    DialogueSearchStats,
+    DialoguesSearchRepository,
+)
 from services.repositories.sqlite.dialogue_shares_repository import (
     DialogueShareEntry,
     DialogueSharesRepository,
@@ -29,6 +33,8 @@ __all__ = [
     "AuditLogsRepository",
     "CollectionEntry",
     "CollectionsRepository",
+    "DialogueSearchStats",
+    "DialoguesSearchRepository",
     "DatabaseConnection",
     "DialogueIndexEntry",
     "DialogueShareEntry",

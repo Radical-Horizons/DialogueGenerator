@@ -89,3 +89,10 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-8-5-creer-collections-dossiers-dialogues-fr84.md`
   summary: Couverture RTL complète des AC UI (ajout batch?filtre, 2 badges+clic, rename/delete toast) et refresh collections après delete dialogue.
   evidence: Verification-gap — couvert API + hook + manager create ; parcours liste intégrés reportés.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-8-6-indexer-dialogues-recherche-rapide-fr85.md`
+  summary: Rebuild FTS shadow/swap + reset statut running stale au boot + backfill auto corpus existant.
+  evidence: Revues 8.6 — clear_all pendant rebuild vide l'index ; crash laisse running ; pas de reindex au startup.
+- source_spec: `_bmad-output/implementation-artifacts/spec-8-6-indexer-dialogues-recherche-rapide-fr85.md`
+  summary: Sur-fetch RBAC multi-pages et lock multi-workers reindex ; enrichir réponse search de métadonnées légères.
+  evidence: LIMIT FTS avant filtre accès ; garde app.state mono-processus.

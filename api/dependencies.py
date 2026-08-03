@@ -50,6 +50,7 @@ from services.repositories.sqlite import (
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
 from services.collection_service import CollectionService
+from services.dialogue_index_service import DialogueIndexService
 from services.audit_log_service import AuditLogService
 from constants import FilePaths, Defaults
 
@@ -119,6 +120,11 @@ def get_dialogue_sharing_service(request: Request) -> DialogueSharingService:
 def get_collection_service(request: Request) -> CollectionService:
     """Retourne le service des collections de dialogues."""
     return get_service_container(request).get_collection_service()
+
+
+def get_dialogue_index_service(request: Request) -> DialogueIndexService:
+    """Retourne le service d'indexation / recherche FTS des dialogues."""
+    return get_service_container(request).get_dialogue_index_service()
 
 
 def get_audit_log_service(request: Request) -> AuditLogService:

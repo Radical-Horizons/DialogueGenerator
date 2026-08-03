@@ -22,6 +22,7 @@ from services.repositories.sqlite.dialogues_index_repository import (
 
 if TYPE_CHECKING:
     from services.audit_log_service import AuditLogService
+    from services.dialogue_index_service import DialogueIndexService
 
 logger = logging.getLogger(__name__)
 
@@ -86,11 +87,13 @@ class DocumentPersistenceService:
         repository: DialoguesIndexRepository,
         shares_repository: DialogueSharesRepository | None = None,
         audit_log_service: "AuditLogService | None" = None,
+        dialogue_index_service: "DialogueIndexService | None" = None,
     ) -> None:
         """Initialise le service avec l'index et les partages injectés."""
         self._repository = repository
         self._shares_repository = shares_repository
         self._audit_log_service = audit_log_service
+        self._dialogue_index_service = dialogue_index_service
         self._lock = threading.RLock()
 
     @staticmethod
@@ -480,6 +483,14 @@ class DocumentPersistenceService:
                     document_id,
                 )
                 raise
+            if self._dialogue_index_service is not None:
+                try:
+                    self._dialogue_index_service.index_document(document_id, document)
+                except Exception:
+                    logger.exception(
+                        "Échec d'indexation FTS après écriture de %s",
+                        document_id,
+                    )
             if self._audit_log_service is not None:
                 self._audit_log_service.log_action(
                     action="dialogue.saved",
@@ -613,6 +624,14 @@ class DocumentPersistenceService:
                     document_id,
                 )
                 raise
+            if self._dialogue_index_service is not None:
+                try:
+                    self._dialogue_index_service.remove_document(document_id)
+                except Exception:
+                    logger.exception(
+                        "Échec de retrait FTS après suppression de %s",
+                        document_id,
+                    )
             if self._audit_log_service is not None:
                 self._audit_log_service.log_action(
                     action="dialogue.deleted",

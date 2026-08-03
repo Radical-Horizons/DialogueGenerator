@@ -38,11 +38,13 @@ from services.repositories.sqlite import (
     DatabaseConnection,
     DialogueSharesRepository,
     DialoguesIndexRepository,
+    DialoguesSearchRepository,
     UserRepository,
     UserSettingsRepository,
 )
 from services.audit_log_service import AuditLogService
 from services.collection_service import CollectionService
+from services.dialogue_index_service import DialogueIndexService
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
 from api.services.auth_service import AuthService
@@ -102,6 +104,8 @@ class ServiceContainer:
         self._dialogue_shares_repository: Optional[DialogueSharesRepository] = None
         self._collections_repository: Optional[CollectionsRepository] = None
         self._collection_service: Optional[CollectionService] = None
+        self._dialogues_search_repository: Optional[DialoguesSearchRepository] = None
+        self._dialogue_index_service: Optional[DialogueIndexService] = None
         self._audit_logs_repository: Optional[AuditLogsRepository] = None
         self._audit_log_service: Optional[AuditLogService] = None
         self._document_persistence_service: Optional[DocumentPersistenceService] = None
@@ -195,6 +199,26 @@ class ServiceContainer:
                 logger.info("CollectionService initialisé dans le container.")
             return self._collection_service
 
+    def get_dialogues_search_repository(self) -> DialoguesSearchRepository:
+        """Retourne le repository FTS5 de recherche dialogues."""
+        with self._database_lock:
+            if self._dialogues_search_repository is None:
+                self._dialogues_search_repository = DialoguesSearchRepository(
+                    self.get_database_connection()
+                )
+                logger.info("DialoguesSearchRepository initialisé dans le container.")
+            return self._dialogues_search_repository
+
+    def get_dialogue_index_service(self) -> DialogueIndexService:
+        """Retourne le service d'indexation / recherche FTS."""
+        with self._database_lock:
+            if self._dialogue_index_service is None:
+                self._dialogue_index_service = DialogueIndexService(
+                    self.get_dialogues_search_repository()
+                )
+                logger.info("DialogueIndexService initialisé dans le container.")
+            return self._dialogue_index_service
+
     def get_audit_logs_repository(self) -> AuditLogsRepository:
         """Retourne le repository append-only des journaux d'audit."""
         with self._database_lock:
@@ -223,6 +247,7 @@ class ServiceContainer:
                     self.get_dialogues_index_repository(),
                     self.get_dialogue_shares_repository(),
                     audit_log_service=self.get_audit_log_service(),
+                    dialogue_index_service=self.get_dialogue_index_service(),
                 )
                 logger.info("DocumentPersistenceService initialisé dans le container.")
             return self._document_persistence_service
@@ -641,6 +666,8 @@ class ServiceContainer:
             self._dialogue_shares_repository = None
             self._collections_repository = None
             self._collection_service = None
+            self._dialogues_search_repository = None
+            self._dialogue_index_service = None
             self._audit_logs_repository = None
             self._audit_log_service = None
             self._document_persistence_service = None

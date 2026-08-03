@@ -16,24 +16,31 @@ from api.schemas.dialogue import (
     UnitySchemaReferenceResponse,
     UnitySchemaSectionSummary,
 )
-from api.dependencies import (
-    get_config_service,
-    get_dialogue_sharing_service,
-    get_document_persistence_service,
-    get_request_id,
-    get_user_repository,
-)
 from api.exceptions import NotFoundException, ValidationException, InternalServerException
+from services.unity_dialogue_search_fields import (
+    count_nodes as _count_nodes,
+    extract_speakers_and_text as _extract_speakers_and_text,
+    extract_title_from_nodes as _extract_title_from_json,
+)
 from services.configuration_service import ConfigurationService
 from services.document_persistence_service import (
     DialogueAccessDeniedError,
     DialogueNotFoundError,
     DocumentPersistenceService,
 )
+from services.dialogue_index_service import DialogueIndexService
 from services.dialogue_sharing_service import DialogueSharingService
 from services.repositories.sqlite import UserRepository
 from api.utils.pagination import PaginationParams, paginate_list
 from api.utils.unity_schema_validator import load_unity_schema, schema_exists
+from api.dependencies import (
+    get_config_service,
+    get_dialogue_index_service,
+    get_dialogue_sharing_service,
+    get_document_persistence_service,
+    get_request_id,
+    get_user_repository,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -48,100 +55,6 @@ def _capabilities_payload(capabilities: object) -> dict[str, bool]:
         "can_delete": bool(getattr(capabilities, "can_delete")),
         "is_owner": bool(getattr(capabilities, "is_owner")),
     }
-
-
-def _extract_title_from_json(json_data: list) -> Optional[str]:
-    """Extrait un titre potentiel depuis le JSON Unity (premier nœud avec line, ou id START).
-    
-    Args:
-        json_data: Liste de nœuds Unity.
-        
-    Returns:
-        Titre extrait ou None.
-    """
-    if not json_data or not isinstance(json_data, list):
-        return None
-    
-    # Chercher un nœud START avec un line comme titre potentiel
-    for node in json_data:
-        if isinstance(node, dict):
-            node_id = node.get("id", "")
-            line = node.get("line", "")
-            if node_id == "START" and line:
-                # Prendre les 50 premiers caractères comme titre
-                return line[:50].strip()
-    
-    # Sinon, prendre le line du premier nœud qui en a un
-    for node in json_data:
-        if isinstance(node, dict) and node.get("line"):
-            return node.get("line", "")[:50].strip()
-    
-    return None
-
-
-def _count_nodes(json_data: object) -> Optional[int]:
-    """Compte les nœuds d'un dialogue Unity, tolérant les deux formats.
-
-    Ne comptabilise que les entrées qui sont des objets (nœuds) : une liste
-    legacy peut contenir des éléments parasites (en-tête, séparateur) qui ne
-    doivent pas gonfler le compte.
-
-    Args:
-        json_data: Contenu JSON parsé — liste de nœuds (legacy) ou document
-            canonique ``{schemaVersion, nodes}`` (Story 16.2).
-
-    Returns:
-        Le nombre de nœuds, ou None si la structure est inattendue.
-    """
-    if isinstance(json_data, list):
-        return sum(1 for node in json_data if isinstance(node, dict))
-    if isinstance(json_data, dict):
-        nodes = json_data.get("nodes")
-        if isinstance(nodes, list):
-            return sum(1 for node in nodes if isinstance(node, dict))
-    return None
-
-
-SEARCH_TEXT_MAX_CHARS = 2000
-
-
-def _extract_speakers_and_text(
-    nodes: list,
-) -> tuple[Optional[list[str]], Optional[str]]:
-    """Extrait les personnages uniques et un texte cherchable des répliques.
-
-    Parcourt les nœuds une seule fois (réutilise la liste déjà parsée du
-    listing) pour collecter les valeurs ``speaker`` distinctes dans l'ordre
-    d'apparition et concaténer les ``line`` en minuscules. Le texte est borné
-    à ``SEARCH_TEXT_MAX_CHARS`` pour limiter la charge utile embarquée dans le
-    listing (recherche plein-texte MVP côté client, FR81 ; l'index serveur
-    reste la Story 8.6).
-
-    Args:
-        nodes: Liste de nœuds Unity (dicts).
-
-    Returns:
-        Tuple ``(speakers, search_text)`` : ``speakers`` une liste éventuellement
-        vide de noms distincts ; ``search_text`` la concaténation minuscule
-        bornée des répliques, ou ``None`` si aucune réplique exploitable.
-    """
-    speakers: list[str] = []
-    seen: set[str] = set()
-    lines: list[str] = []
-    for node in nodes:
-        if not isinstance(node, dict):
-            continue
-        speaker = node.get("speaker")
-        if isinstance(speaker, str):
-            normalized = speaker.strip()
-            if normalized and normalized not in seen:
-                seen.add(normalized)
-                speakers.append(normalized)
-        line = node.get("line")
-        if isinstance(line, str) and line.strip():
-            lines.append(line.strip())
-    search_text = " ".join(lines).lower()[:SEARCH_TEXT_MAX_CHARS] if lines else None
-    return speakers, search_text
 
 
 def _normalize_iso(value: str, *, assume_utc: bool = False) -> str:
@@ -439,6 +352,48 @@ async def list_unity_dialogues(
             details={"error": str(e)},
             request_id=request_id
         )
+
+
+@router.get("/search")
+async def search_unity_dialogues(
+    q: Annotated[str, Query(min_length=1, max_length=200)],
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    index_service: Annotated[DialogueIndexService, Depends(get_dialogue_index_service)],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> dict[str, object]:
+    """Recherche FTS5 des dialogues visibles (Story 8.6 / FR85)."""
+    unity_path = config_service.get_unity_dialogues_path()
+    if not unity_path:
+        raise ValidationException(
+            message="Le chemin Unity dialogues n'est pas configuré.",
+            details={"field": "unity_dialogues_path"},
+            request_id=request_id,
+        )
+    unity_dir = Path(unity_path)
+    try:
+        result = index_service.search(q)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(exc),
+        ) from exc
+    visible = index_service.filter_accessible_hits(
+        result.hits,
+        current_user=current_user,
+        unity_dir=unity_dir,
+        can_list=persistence_service.can_list,
+    )
+    return {
+        "query": result.query,
+        "elapsed_ms": result.elapsed_ms,
+        "document_ids": [hit.document_id for hit in visible],
+        "total": len(visible),
+    }
 
 
 _SCHEMA_SOURCE = "docs/resources/dialogue-format.schema.json"

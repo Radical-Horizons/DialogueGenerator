@@ -9,6 +9,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import * as unityDialoguesAPI from '../api/unityDialogues'
+import * as dialogueSearchAPI from '../api/dialogueSearch'
 import type { UnityDialogueMetadata } from '../types/api'
 import { getErrorMessage } from '../types/errors'
 import {
@@ -114,6 +115,10 @@ export function useDialogueListData(): UseDialogueListDataReturn {
   const [page, setPage] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
+  const [serverSearchIds, setServerSearchIds] = useState<ReadonlySet<
+    string
+  > | null>(null)
 
   const refresh = useCallback(async () => {
     setIsLoading(true)
@@ -132,6 +137,44 @@ export function useDialogueListData(): UseDialogueListDataReturn {
   useEffect(() => {
     void refresh()
   }, [refresh])
+
+  // Debounce FR85 : n'appeler le FTS serveur qu'après pause de frappe.
+  useEffect(() => {
+    const handle = window.setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery.trim())
+    }, 300)
+    return () => window.clearTimeout(handle)
+  }, [searchQuery])
+
+  useEffect(() => {
+    if (!debouncedSearchQuery) {
+      setServerSearchIds(null)
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      try {
+        const response =
+          await dialogueSearchAPI.searchUnityDialogues(debouncedSearchQuery)
+        if (cancelled) return
+        setServerSearchIds(
+          new Set(
+            response.document_ids.map((id) =>
+              id.replace(/\.json$/i, '').toLowerCase()
+            )
+          )
+        )
+      } catch {
+        if (!cancelled) {
+          // Repli client si l'API search est indisponible.
+          setServerSearchIds(null)
+        }
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [debouncedSearchQuery])
 
   const availableAuthors = useMemo(() => {
     const byId = new Map<string, string>()
@@ -165,20 +208,28 @@ export function useDialogueListData(): UseDialogueListDataReturn {
     let result = dialogues
 
     if (searchQuery.trim()) {
-      // Recherche FR81 : nom (filename/title), personnage (speakers) et texte
-      // des répliques (search_text, déjà en minuscules côté serveur). Un seul
-      // terme libre, insensible à la casse. `trim` cohérent avec le garde
-      // ci-dessus : sans lui, un espace parasite casserait tous les matches.
-      const query = searchQuery.trim().toLowerCase()
-      result = result.filter(
-        (dialogue) =>
-          dialogue.filename.toLowerCase().includes(query) ||
-          (dialogue.title?.toLowerCase().includes(query) ?? false) ||
-          (dialogue.speakers?.some((speaker) =>
-            speaker.toLowerCase().includes(query)
-          ) ?? false) ||
-          (dialogue.search_text?.includes(query) ?? false)
-      )
+      const trimmed = searchQuery.trim()
+      const serverReady =
+        serverSearchIds != null && trimmed === debouncedSearchQuery
+      if (serverReady) {
+        // FR85 : résultats FTS serveur (document_id), uniquement si debounce aligné.
+        result = result.filter((dialogue) =>
+          serverSearchIds.has(normalizeDialogueFilenameKey(dialogue.filename))
+        )
+      } else {
+        // Pendant le debounce / repli : filtre client FR81.
+        const query = trimmed.toLowerCase()
+        result = result.filter(
+          (dialogue) =>
+            dialogue.filename.toLowerCase().includes(query) ||
+            (dialogue.title?.toLowerCase().includes(query) ?? false) ||
+            (dialogue.speakers?.some((speaker) =>
+              speaker.toLowerCase().includes(query)
+            ) ??
+              false) ||
+            (dialogue.search_text?.includes(query) ?? false)
+        )
+      }
     }
 
     // Filtres métadonnées FR82 (ET avec la recherche).
@@ -250,6 +301,8 @@ export function useDialogueListData(): UseDialogueListDataReturn {
   }, [
     dialogues,
     searchQuery,
+    debouncedSearchQuery,
+    serverSearchIds,
     datePeriod,
     authorId,
     activeCollectionId,
