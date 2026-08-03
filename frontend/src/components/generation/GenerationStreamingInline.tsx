@@ -1,0 +1,804 @@
+/**
+ * Bloc de progression de génération LLM (streaming SSE), rendu **dans le flux** de l'écran.
+ *
+ * Issu de l'ancienne `GenerationProgressModal` : même logique de parsing du JSON partiel,
+ * même barre d'étapes, mêmes actions (interrompre / fermer). Seul le chrome change —
+ * plus de backdrop ni de conteneur `position: fixed` pour l'état déployé.
+ */
+import { useEffect, useMemo } from 'react'
+import { theme } from '../../theme'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { modalTypography } from '../../theme/responsiveChrome'
+import { remSize } from '../../theme/uiTypography'
+import {
+  redesignAccent,
+  redesignFont,
+  redesignHairline,
+  redesignMonoLabelStyle,
+  redesignRadius,
+  redesignSpacing,
+} from '../../theme/redesignTokens'
+import { ReasoningTraceViewer } from './ReasoningTraceViewer'
+import type { ReasoningTrace } from '../../types/api'
+
+/** Nom de l'animation du curseur de streaming (déclarée localement, pas de CSS global). */
+const STREAMING_CURSOR_ANIMATION = 'generation-streaming-blink'
+
+/**
+ * Extrait une valeur de chaîne JSON partielle en gérant les échappements.
+ *
+ * Parse caractère par caractère pour gérer correctement \n, \", \\, etc.
+ * Accepte les chaînes non fermées (texte partiel).
+ *
+ * @param content - Contenu JSON partiel
+ * @param fieldName - Nom du champ à extraire (ex: "title", "line", "speaker")
+ * @param contextAfter - Chaîne qui doit apparaître avant le champ (pour vérifier le contexte)
+ * @returns Valeur extraite ou null si non trouvée
+ */
+function extractPartialStringValue(
+  content: string,
+  fieldName: string,
+  contextAfter?: string
+): string | null {
+  // Chercher le champ dans le bon contexte
+  let searchStart = 0
+  if (contextAfter) {
+    const contextIndex = content.indexOf(contextAfter)
+    if (contextIndex === -1) return null
+    searchStart = contextIndex + contextAfter.length
+  }
+
+  const fieldPattern = `"${fieldName}"\\s*:\\s*"`
+  const fieldRegex = new RegExp(fieldPattern, 'g')
+  fieldRegex.lastIndex = searchStart
+
+  const match = fieldRegex.exec(content)
+  if (!match) return null
+
+  // Position après le guillemet d'ouverture
+  let i = match.index + match[0].length
+  let text = ''
+  let escaped = false
+
+  // Parser caractère par caractère jusqu'à la fin ou un guillemet non échappé
+  while (i < content.length) {
+    const char = content[i]
+
+    if (escaped) {
+      // Gérer les séquences d'échappement
+      if (char === 'n') {
+        text += '\n'
+      } else if (char === '\\') {
+        text += '\\'
+      } else if (char === '"') {
+        text += '"'
+      } else if (char === 't') {
+        text += '\t'
+      } else if (char === 'r') {
+        text += '\r'
+      } else {
+        // Autre séquence d'échappement (u pour unicode, etc.) - garder tel quel pour l'instant
+        text += char
+      }
+      escaped = false
+    } else if (char === '\\') {
+      // Backslash trouvé - prochain caractère est échappé
+      escaped = true
+    } else if (char === '"') {
+      // Guillemet fermant trouvé - chaîne complète
+      break
+    } else {
+      // Caractère normal
+      text += char
+    }
+    i++
+  }
+
+  // Si on arrive à la fin sans guillemet fermant, c'est du texte partiel (OK)
+  // Si le texte se termine par un backslash isolé, l'enlever (échappement incomplet)
+  if (text.endsWith('\\') && !text.endsWith('\\\\')) {
+    text = text.slice(0, -1)
+  }
+
+  return text || null
+}
+
+/**
+ * Parse le JSON partiel et formate l'affichage pour le streaming.
+ *
+ * Utilise un mini-parser qui vérifie le contexte et gère les échappements
+ * pour extraire les valeurs même si le JSON n'est pas complet.
+ */
+function formatStreamingContent(rawContent: string): {
+  title?: string
+  speaker?: string
+  line?: string
+  choices?: Array<{ text: string; test?: string }>
+  rawJson: string
+} {
+  if (!rawContent || !rawContent.trim()) {
+    return { rawJson: rawContent }
+  }
+
+  // Essayer d'abord de parser le JSON complet (plus rapide si disponible)
+  try {
+    let jsonStr = rawContent.trim()
+
+    // Compter les accolades pour compléter si nécessaire
+    const openBraces = (jsonStr.match(/{/g) || []).length
+    const closeBraces = (jsonStr.match(/}/g) || []).length
+    const openBrackets = (jsonStr.match(/\[/g) || []).length
+    const closeBrackets = (jsonStr.match(/\]/g) || []).length
+
+    // Compléter le JSON partiel si nécessaire (seulement si on a assez de contenu)
+    if (openBraces > closeBraces && jsonStr.length > 50) {
+      jsonStr += '}'.repeat(openBraces - closeBraces)
+    }
+    if (openBrackets > closeBrackets && jsonStr.length > 50) {
+      jsonStr += ']'.repeat(openBrackets - closeBrackets)
+    }
+
+    const data = JSON.parse(jsonStr)
+
+    return {
+      title: data.title,
+      speaker: data.node?.speaker,
+      line: data.node?.line,
+      choices: data.node?.choices,
+      rawJson: rawContent,
+    }
+  } catch (e) {
+    // Si le parsing échoue, utiliser le mini-parser pour extraire les valeurs partiellement
+
+    // 1. Extraire title (à la racine)
+    const title = extractPartialStringValue(rawContent, 'title')
+
+    // 2. Vérifier qu'on a un node avant d'extraire speaker et line
+    const nodeIndex = rawContent.indexOf('"node"')
+    let speaker: string | null = null
+    let line: string | null = null
+
+    if (nodeIndex !== -1) {
+      // Extraire speaker et line dans le contexte de node
+      const nodeContext = rawContent.substring(nodeIndex)
+      speaker = extractPartialStringValue(nodeContext, 'speaker')
+      line = extractPartialStringValue(nodeContext, 'line')
+    }
+
+    // 3. Extraire les choix (chercher "text" dans le contexte de "choices")
+    const choices: Array<{ text: string; test?: string }> = []
+    if (nodeIndex !== -1) {
+      const nodeContext = rawContent.substring(nodeIndex)
+      const choicesIndex = nodeContext.indexOf('"choices"')
+      if (choicesIndex !== -1) {
+        const choicesContext = nodeContext.substring(choicesIndex)
+
+        // Chercher toutes les occurrences de "text" dans le contexte des choix
+        // (chaque choix a un champ "text")
+        let searchIndex = 0
+        for (;;) {
+          const textValue = extractPartialStringValue(choicesContext.substring(searchIndex), 'text')
+          if (!textValue) break
+          const textFieldPos = choicesContext.indexOf(`"text"`, searchIndex)
+          if (textFieldPos === -1) break
+          const afterText = choicesContext.substring(textFieldPos)
+          const testValue = extractPartialStringValue(afterText, 'test')
+          choices.push({
+            text: textValue,
+            test: testValue || undefined,
+          })
+          searchIndex = textFieldPos + `"text"`.length + textValue.length + 10
+          if (searchIndex >= choicesContext.length) break
+        }
+      }
+    }
+
+    // Si on a extrait au moins un champ, retourner le résultat formaté
+    if (title || speaker || line || choices.length > 0) {
+      return {
+        title: title || undefined,
+        speaker: speaker || undefined,
+        line: line || undefined,
+        choices: choices.length > 0 ? choices : undefined,
+        rawJson: rawContent,
+      }
+    }
+
+    // Si tout échoue, retourner le contenu brut
+    return { rawJson: rawContent }
+  }
+}
+
+/**
+ * Interprète le markdown basique et les séquences d'échappement.
+ */
+function interpretMarkdown(text: string): string {
+  if (!text) return ''
+
+  // Remplacer \n par de vrais sauts de ligne
+  return text.replace(/\\n/g, '\n')
+}
+
+/**
+ * Échappe les caractères HTML dangereux avant un rendu via innerHTML.
+ */
+function escapeHtml(text: string): string {
+  return text.replace(/[&<>"']/g, (char) => {
+    switch (char) {
+      case '&':
+        return '&amp;'
+      case '<':
+        return '&lt;'
+      case '>':
+        return '&gt;'
+      case '"':
+        return '&quot;'
+      case '\'':
+        return '&#39;'
+      default:
+        return char
+    }
+  })
+}
+
+/**
+ * Convertit la ligne streamée en HTML sûr (markdown basique uniquement).
+ */
+function renderStreamingLineHtml(text: string): string {
+  const escaped = escapeHtml(interpretMarkdown(text))
+
+  return escaped
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/_([^_]+)_/g, '<em>$1</em>')
+    .replace(/\n/g, '<br/>')
+}
+
+export interface GenerationStreamingInlineProps {
+  /** Le bloc est-il monté dans le flux (génération en cours, terminée, en erreur ou interrompue) */
+  isActive: boolean
+  /** Contenu streamé du LLM (caractère par caractère) */
+  content: string
+  /** Étape actuelle : Prompting | Generating | Validating | Complete */
+  currentStep: 'Prompting' | 'Generating' | 'Validating' | 'Complete'
+  /** Affichage réduit (badge compact) */
+  isMinimized?: boolean
+  /** Message d'erreur si génération échouée */
+  error?: string | null
+  /** État d'interruption en cours (Task 4 - Story 0.8) */
+  isInterrupting?: boolean
+  /** Trace de raisonnement à afficher sous le contenu streamé (réutilise `ReasoningTraceViewer`) */
+  reasoningTrace?: ReasoningTrace | null
+  /** Callback pour interrompre la génération */
+  onInterrupt: () => void
+  /** Callback pour réduire/agrandir le bloc */
+  onMinimize: () => void
+  /** Callback pour fermer le bloc (après complétion) */
+  onClose: () => void
+}
+
+/**
+ * Une interruption n'est pas un échec : le texte déjà streamé doit rester lisible,
+ * contrairement à une vraie erreur de génération qui remplace le résultat.
+ */
+function isInterruptionNotice(message: string): boolean {
+  return message.includes('Interruption') || message.includes('interrompue')
+}
+
+/**
+ * Curseur de streaming : bloc accent clignotant, affiché tant que le texte arrive.
+ */
+function StreamingCursor() {
+  return (
+    <span
+      aria-hidden
+      data-testid="streaming-cursor"
+      style={{
+        display: 'inline-block',
+        width: '1.5px',
+        height: '18px',
+        marginLeft: '2px',
+        verticalAlign: 'text-bottom',
+        backgroundColor: redesignAccent.base,
+        animation: `${STREAMING_CURSOR_ANIMATION} 1s steps(1, end) infinite`,
+      }}
+    />
+  )
+}
+
+/**
+ * Texte partiel conservé lors d'une interruption (le travail déjà streamé n'est pas jeté).
+ */
+function StreamingPartialContent({ content }: { content: string }) {
+  return (
+    <pre
+      data-testid="streaming-partial-content"
+      style={{
+        margin: 0,
+        fontFamily: redesignFont.mono,
+        fontSize: remSize('small'),
+        color: theme.text.secondary,
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word',
+        opacity: 0.7,
+      }}
+    >
+      {content}
+    </pre>
+  )
+}
+
+/**
+ * Bloc de progression de génération rendu dans le flux de l'écran.
+ *
+ * États :
+ * - Déployé : filet accent + étapes + streaming visible, sans backdrop
+ * - Réduit : badge compact (comportement conservé à l'identique de la modale)
+ * - Terminé : bouton "Fermer" + auto-fermeture après 3s
+ */
+export function GenerationStreamingInline({
+  isActive,
+  content,
+  currentStep,
+  isMinimized = false,
+  error = null,
+  isInterrupting = false,  // Task 4 - Story 0.8
+  reasoningTrace = null,
+  onInterrupt,
+  onMinimize,
+  onClose,
+}: GenerationStreamingInlineProps) {
+  const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
+  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
+  // Auto-fermeture 3 secondes après complétion (si pas réduit)
+  useEffect(() => {
+    if (currentStep === 'Complete' && !isMinimized && !error) {
+      const timer = setTimeout(() => {
+        onClose()
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [currentStep, isMinimized, error, onClose])
+
+  // Parser et formater le contenu streaming (AVANT tout return conditionnel pour respecter les règles des hooks)
+  const formattedContent = useMemo(() => {
+    if (!content || content.trim().length === 0) {
+      return null
+    }
+
+    // Tenter de parser le JSON partiel
+    const parsed = formatStreamingContent(content)
+
+    // Si on a réussi à extraire des champs structurés, afficher formaté
+    if (parsed.title || parsed.speaker || parsed.line || parsed.choices) {
+      return parsed
+    }
+
+    // Sinon, retourner null pour afficher le contenu brut (fallback)
+    return null
+  }, [content])
+
+  // Mapping des étapes pour la barre de progression
+  const steps = ['Prompting', 'Generating', 'Validating', 'Complete']
+  const currentStepIndex = steps.indexOf(currentStep)
+  const progressPercentage = ((currentStepIndex + 1) / steps.length) * 100
+  // Le curseur ne clignote que tant que du texte peut encore arriver.
+  const isStreamingText = currentStep !== 'Complete' && !error && !isInterrupting
+
+  if (!isActive) return null
+
+  // Badge réduit (comportement inchangé depuis la modale : coin écran, clic pour ré-agrandir)
+  if (isMinimized) {
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          bottom: '1rem',
+          right: '1rem',
+          backgroundColor: theme.background.panel,
+          borderRadius: '8px',
+          padding: '1rem',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+          zIndex: 1000,
+          minWidth: '200px',
+          border: `1px solid ${theme.border.primary}`,
+        }}
+        onClick={onMinimize} // Clic sur le badge agrandit le bloc
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div
+            style={{
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              backgroundColor: error ? theme.state.error.color : redesignAccent.base,
+              animation: error ? 'none' : 'pulse 1.5s ease-in-out infinite',
+            }}
+          />
+          <span style={{ color: theme.text.primary, fontSize: `${modalTypography.comfortable.bodyFontRem}rem` }}>
+            {error ? 'Erreur' : currentStep}
+          </span>
+        </div>
+        <style>{`
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+          }
+        `}</style>
+      </div>
+    )
+  }
+
+  // Bloc déployé, dans le flux (pas d'overlay, pas de position fixed)
+  return (
+    <section
+      ref={panelRef}
+      data-testid="generation-streaming-inline"
+      aria-live="polite"
+      style={{
+        marginBottom: `${redesignSpacing.md}px`,
+        borderLeft: `2px solid ${redesignAccent.base}`,
+        borderTop: `1px solid ${redesignHairline.standard}`,
+        borderBottom: `1px solid ${redesignHairline.standard}`,
+        borderRight: `1px solid ${redesignHairline.standard}`,
+        borderRadius: `0 ${redesignRadius.frame}px ${redesignRadius.frame}px 0`,
+        backgroundColor: redesignAccent.selectedBgStrong,
+        display: 'flex',
+        flexDirection: 'column',
+        minWidth: 0,
+      }}
+    >
+      <style>{`
+        @keyframes ${STREAMING_CURSOR_ANIMATION} {
+          50% { opacity: 0; }
+        }
+      `}</style>
+
+      {/* Header */}
+      <div
+        style={{
+          padding: isNarrow ? `${redesignSpacing.sm}px ${redesignSpacing.md}px` : `${redesignSpacing.md}px ${redesignSpacing.lg}px`,
+          borderBottom: `1px solid ${redesignHairline.standard}`,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: `${redesignSpacing.sm}px`,
+          flexShrink: 0,
+        }}
+      >
+        <h2
+          style={{
+            margin: 0,
+            color: theme.text.primary,
+            fontSize: `${typo.titleFontRem}rem`,
+            fontFamily: redesignFont.sans,
+            fontWeight: 600,
+          }}
+        >
+          {isInterrupting
+            ? 'Interruption en cours...'
+            : currentStep === 'Complete'
+              ? 'Génération terminée'
+              : 'Génération en cours...'}
+        </h2>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {currentStep !== 'Complete' && (
+            <button
+              type="button"
+              onClick={onMinimize}
+              aria-label="Réduire"
+              style={{
+                background: 'none',
+                border: 'none',
+                color: theme.text.secondary,
+                fontSize: `${typo.titleFontRem}rem`,
+                cursor: 'pointer',
+                padding: '0.25rem 0.5rem',
+              }}
+              title="Réduire"
+            >
+              –
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Progress Bar */}
+      {currentStep !== 'Complete' && !error && (
+        <div
+          style={{
+            padding: isNarrow
+              ? `${redesignSpacing.sm}px ${redesignSpacing.md}px`
+              : `${redesignSpacing.md}px ${redesignSpacing.lg}px`,
+            borderBottom: `1px solid ${redesignHairline.standard}`,
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', gap: '0.35rem' }}>
+            {steps.map((step, index) => (
+              <span
+                key={step}
+                style={{
+                  ...redesignMonoLabelStyle,
+                  fontSize: `${typo.subtitleFontRem}rem`,
+                  color: index <= currentStepIndex ? theme.text.primary : theme.text.tertiary,
+                  fontWeight: index === currentStepIndex ? 700 : 400,
+                }}
+              >
+                {step}
+              </span>
+            ))}
+          </div>
+          <div
+            style={{
+              width: '100%',
+              height: '2px',
+              backgroundColor: redesignHairline.strong,
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                width: `${progressPercentage}%`,
+                height: '100%',
+                backgroundColor: redesignAccent.base,
+                transition: 'width 0.3s ease',
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Content - Streaming Text + Reasoning Trace */}
+      <div
+        style={{
+          overflow: 'auto',
+          maxHeight: '46vh',
+          padding: isNarrow
+            ? `${redesignSpacing.md}px`
+            : `${redesignSpacing.md}px ${redesignSpacing.lg}px`,
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+        }}
+      >
+        {error ? (
+          <>
+            <div
+              style={{
+                padding: '1rem',
+                backgroundColor: isInterruptionNotice(error)
+                  ? (theme.state.warning?.background || theme.input.background)
+                  : theme.state.error.background,
+                color: isInterruptionNotice(error)
+                  ? (theme.state.warning?.color || theme.text.primary)
+                  : theme.state.error.color,
+                borderRadius: '4px',
+                textAlign: 'center',
+              }}
+            >
+              {error}
+            </div>
+            {/* Interruption : le texte déjà écrit est conservé. Vraie erreur : elle remplace le résultat. */}
+            {isInterruptionNotice(error) && content ? <StreamingPartialContent content={content} /> : null}
+          </>
+        ) : isInterrupting ? (
+          <>
+            <div
+              style={{
+                padding: '1rem',
+                backgroundColor: theme.state.warning?.background || theme.input.background,
+                color: theme.state.warning?.color || theme.text.primary,
+                borderRadius: '4px',
+                textAlign: 'center',
+              }}
+            >
+              Interruption en cours...
+            </div>
+            {content ? <StreamingPartialContent content={content} /> : null}
+          </>
+        ) : (
+          <>
+            {/* Streaming Content - Formaté si JSON valide, sinon brut */}
+            {formattedContent ? (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1.5rem',
+                  fontFamily: redesignFont.sans,
+                  fontSize: remSize('section'),
+                  lineHeight: '1.6',
+                  color: theme.text.primary,
+                }}
+              >
+                {/* Titre */}
+                {formattedContent.title && (
+                  <div>
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontSize: remSize('title'),
+                        fontFamily: redesignFont.serif,
+                        fontWeight: 'bold',
+                        color: theme.text.primary,
+                        borderBottom: `1px solid ${redesignHairline.strong}`,
+                        paddingBottom: '0.5rem',
+                      }}
+                    >
+                      {formattedContent.title}
+                    </h3>
+                  </div>
+                )}
+
+                {/* Dialogue (Speaker + Line) */}
+                {(formattedContent.speaker || formattedContent.line) && (
+                  <div
+                    style={{
+                      paddingLeft: `${redesignSpacing.md}px`,
+                      borderLeft: `1px solid ${redesignHairline.strong}`,
+                    }}
+                  >
+                    {formattedContent.speaker && (
+                      <div
+                        style={{
+                          ...redesignMonoLabelStyle,
+                          color: redesignAccent.base,
+                          marginBottom: '0.5rem',
+                          fontSize: remSize('small'),
+                        }}
+                      >
+                        {formattedContent.speaker}
+                      </div>
+                    )}
+                    {formattedContent.line && (
+                      <div>
+                        <div
+                          data-testid="streaming-line"
+                          style={{
+                            display: 'inline',
+                            whiteSpace: 'pre-wrap',
+                            wordBreak: 'break-word',
+                            fontFamily: redesignFont.serif,
+                            color: theme.text.primary,
+                          }}
+                          dangerouslySetInnerHTML={{
+                            __html: renderStreamingLineHtml(formattedContent.line),
+                          }}
+                        />
+                        {isStreamingText && <StreamingCursor />}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Choix */}
+                {formattedContent.choices && formattedContent.choices.length > 0 && (
+                  <div>
+                    <div
+                      style={{
+                        ...redesignMonoLabelStyle,
+                        fontSize: remSize('small'),
+                        color: theme.text.tertiary,
+                        marginBottom: '0.75rem',
+                      }}
+                    >
+                      Choix du joueur :
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}
+                    >
+                      {formattedContent.choices.map((choice, index) => (
+                        <div
+                          key={index}
+                          style={{
+                            padding: `${redesignSpacing.sm}px 0`,
+                            borderBottom: `1px solid ${redesignHairline.standard}`,
+                          }}
+                        >
+                          <div
+                            style={{
+                              color: theme.text.primary,
+                              marginBottom: choice.test ? '0.5rem' : 0,
+                            }}
+                          >
+                            {choice.text}
+                          </div>
+                          {choice.test && (
+                            <div
+                              style={{
+                                ...redesignMonoLabelStyle,
+                                fontSize: remSize('small'),
+                                color: theme.text.tertiary,
+                                marginTop: '0.5rem',
+                              }}
+                            >
+                              Test: {choice.test}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              // Fallback : afficher le contenu brut (JSON partiel ou autre)
+              <div>
+                <pre
+                  style={{
+                    margin: 0,
+                    display: 'inline',
+                    fontFamily: redesignFont.mono,
+                    fontSize: remSize('small'),
+                    color: theme.text.secondary,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    opacity: 0.7,
+                  }}
+                >
+                  {content || 'Préparation...'}
+                </pre>
+                {isStreamingText && <StreamingCursor />}
+              </div>
+            )}
+
+            {/* Trace de raisonnement (composant réutilisé tel quel) */}
+            <ReasoningTraceViewer
+              reasoningTrace={reasoningTrace}
+              isGenerating={currentStep !== 'Complete'}
+            />
+          </>
+        )}
+      </div>
+
+      {/* Footer - Actions */}
+      <div
+        style={{
+          padding: `${redesignSpacing.sm}px ${redesignSpacing.lg}px`,
+          borderTop: `1px solid ${redesignHairline.standard}`,
+          display: 'flex',
+          justifyContent: 'flex-end',
+          gap: '0.5rem',
+          flexShrink: 0,
+        }}
+      >
+        {currentStep === 'Complete' ? (
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              padding: '0.5rem 1rem',
+              border: 'none',
+              borderRadius: `${redesignRadius.control}px`,
+              backgroundColor: redesignAccent.base,
+              color: '#ffffff',
+              cursor: 'pointer',
+            }}
+          >
+            Fermer
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onInterrupt}
+            style={{
+              padding: '0.5rem 1rem',
+              border: `1px solid ${redesignHairline.strong}`,
+              borderRadius: `${redesignRadius.control}px`,
+              backgroundColor: 'transparent',
+              color: theme.text.primary,
+              cursor: 'pointer',
+            }}
+          >
+            Interrompre
+          </button>
+        )}
+      </div>
+    </section>
+  )
+}

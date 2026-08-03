@@ -45,7 +45,7 @@ import { remSize } from '../../theme/uiTypography'
 import { NarrowOverlayDrawer } from './NarrowOverlayDrawer'
 import type { CharacterResponse, LocationResponse, ItemResponse, SpeciesResponse, CommunityResponse, UnityDialogueMetadata } from '../../types/api'
 import { theme } from '../../theme'
-import { redesignAccent, redesignFont } from '../../theme/redesignTokens'
+import { redesignAccent, redesignFont, redesignHairline } from '../../theme/redesignTokens'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
 type ContextLoadState = {
@@ -347,6 +347,36 @@ export function Dashboard() {
     ? panelSideHeaderChrome.narrow.padding
     : panelSideHeaderChrome.comfortable.padding
   const panelCollapseDensity = isNarrowCenterColumn ? 'narrow' : 'comfortable'
+  const { ref: generatedResultRef, isNarrow: isNarrowGeneratedResult } = useNarrowInlineSize(420)
+
+  /**
+   * Diagnostic du dialogue généré : uniquement des valeurs réellement présentes dans la réponse
+   * (compteurs dérivés du JSON, tokens estimés, effort de raisonnement). Rien d'inféré.
+   */
+  const generatedDialogueDiagnostic = useMemo((): Array<{ label: string; value: string }> => {
+    if (!unityDialogueResponse) return []
+    const rows: Array<{ label: string; value: string }> = []
+    try {
+      const parsed: unknown = JSON.parse(unityDialogueResponse.json_content)
+      if (Array.isArray(parsed)) {
+        rows.push({ label: 'Nœuds', value: String(parsed.length) })
+        const choiceCount = parsed.reduce<number>((total, node) => {
+          const nodeChoices = (node as { choices?: unknown }).choices
+          return total + (Array.isArray(nodeChoices) ? nodeChoices.length : 0)
+        }, 0)
+        rows.push({ label: 'Choix', value: String(choiceCount) })
+      }
+    } catch {
+      // json_content non parsable : on n'affiche simplement pas les compteurs.
+    }
+    if (typeof unityDialogueResponse.estimated_tokens === 'number') {
+      rows.push({ label: 'Tokens', value: unityDialogueResponse.estimated_tokens.toLocaleString('fr-FR') })
+    }
+    if (unityDialogueResponse.reasoning_trace?.effort) {
+      rows.push({ label: 'Effort', value: String(unityDialogueResponse.reasoning_trace.effort) })
+    }
+    return rows
+  }, [unityDialogueResponse])
   const showCollapsedLeftAffordance = isLeftPanelCollapsed
   const showCollapsedRightAffordance = isRightPanelCollapsed
   const lastViewportModeRef = useRef(viewportMode)
@@ -473,47 +503,169 @@ export function Dashboard() {
       label: 'Dialogue généré',
       content: (
         <div style={{ flex: 1, minHeight: 0, maxHeight: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' }}>
-          {/* Reasoning Trace (dépliable en haut) */}
-          {unityDialogueResponse?.reasoning_trace && (
-            <div style={{ flexShrink: 0, borderBottom: `1px solid ${theme.border.primary}` }}>
-              <ReasoningTraceViewer
-                reasoningTrace={unityDialogueResponse.reasoning_trace}
-                isGenerating={false}
-              />
-            </div>
-          )}
-          
-          {/* Contenu du dialogue */}
-          <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-            {unityDialogueResponse ? (
-              <UnityDialogueEditor
-                ref={unityDialogueEditorRef}
-                json_content={unityDialogueResponse.json_content}
-                title={unityDialogueResponse.title}
-                hideHeaderSaveButton={true}
-                onContentChange={handleGeneratedDialogueContentChange}
-                onSaveStateChange={setGeneratedEditorSaveState}
-                onSave={() => {
-                  dialogueListRef.current?.refresh()
-                  setUnityDialogueResponse(null)
-                }}
-              />
-            ) : (
-              <div style={{ 
-                padding: '2rem', 
-                textAlign: 'center', 
-                color: theme.text.secondary,
+          {unityDialogueResponse ? (
+            <div
+              ref={generatedResultRef}
+              data-testid="generated-dialogue-result"
+              style={{
+                flex: 1,
+                minHeight: 0,
                 height: '100%',
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                {actions.isLoading || generationState.isEstimating || isGraphGenerating
-                  ? 'Génération en cours...'
-                  : 'Aucun dialogue Unity généré'}
+                flexDirection: 'column',
+                overflow: 'hidden',
+                borderLeft: `2px solid ${redesignAccent.base}`,
+                backgroundColor: redesignAccent.selectedBgStrong,
+              }}
+            >
+              <div
+                style={{
+                  flex: 1,
+                  minHeight: 0,
+                  display: 'flex',
+                  flexDirection: isNarrowGeneratedResult ? 'column' : 'row',
+                  overflow: 'hidden',
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                  {/* Reasoning Trace (dépliable en haut) */}
+                  {unityDialogueResponse.reasoning_trace && (
+                    <div style={{ flexShrink: 0, borderBottom: `1px solid ${redesignHairline.standard}` }}>
+                      <ReasoningTraceViewer
+                        reasoningTrace={unityDialogueResponse.reasoning_trace}
+                        isGenerating={false}
+                      />
+                    </div>
+                  )}
+
+                  {/* Contenu du dialogue */}
+                  <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                    <UnityDialogueEditor
+                      ref={unityDialogueEditorRef}
+                      json_content={unityDialogueResponse.json_content}
+                      title={unityDialogueResponse.title}
+                      hideHeaderSaveButton={true}
+                      onContentChange={handleGeneratedDialogueContentChange}
+                      onSaveStateChange={setGeneratedEditorSaveState}
+                      onSave={() => {
+                        dialogueListRef.current?.refresh()
+                        setUnityDialogueResponse(null)
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Diagnostic : seulement ce que la réponse contient déjà */}
+                {generatedDialogueDiagnostic.length > 0 && (
+                  <aside
+                    data-testid="generated-dialogue-diagnostic"
+                    style={{
+                      flexShrink: 0,
+                      width: isNarrowGeneratedResult ? 'auto' : '132px',
+                      display: 'flex',
+                      flexDirection: isNarrowGeneratedResult ? 'row' : 'column',
+                      flexWrap: isNarrowGeneratedResult ? 'wrap' : 'nowrap',
+                      gap: isNarrowGeneratedResult ? '0.9rem' : '0.65rem',
+                      padding: '0.65rem 0.75rem',
+                      borderLeft: isNarrowGeneratedResult ? 'none' : `1px solid ${redesignHairline.standard}`,
+                      borderTop: isNarrowGeneratedResult ? `1px solid ${redesignHairline.standard}` : 'none',
+                      overflowY: isNarrowGeneratedResult ? 'visible' : 'auto',
+                    }}
+                  >
+                    {generatedDialogueDiagnostic.map((row) => (
+                      <div key={row.label} style={{ minWidth: 0 }}>
+                        <div
+                          style={{
+                            fontFamily: redesignFont.mono,
+                            fontSize: remSize('caption'),
+                            letterSpacing: '0.08em',
+                            textTransform: 'uppercase',
+                            color: theme.text.tertiary,
+                          }}
+                        >
+                          {row.label}
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: redesignFont.mono,
+                            fontSize: remSize('body'),
+                            color: theme.text.primary,
+                          }}
+                        >
+                          {row.value}
+                        </div>
+                      </div>
+                    ))}
+                  </aside>
+                )}
               </div>
-            )}
-          </div>
+
+              {/* Action unique du résultat */}
+              <div
+                style={{
+                  flexShrink: 0,
+                  padding: '0.6rem 0.75rem',
+                  borderTop: `1px solid ${redesignHairline.standard}`,
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    void unityDialogueEditorRef.current?.handleSave()
+                  }}
+                  disabled={
+                    !generatedEditorSaveState.isValid ||
+                    generatedEditorSaveState.isSaving ||
+                    actions.isLoading ||
+                    isGraphGenerating
+                  }
+                  style={{
+                    width: '100%',
+                    minHeight: '44px',
+                    padding: '0.5rem 0.75rem',
+                    fontSize: remSize('body'),
+                    fontWeight: 700,
+                    backgroundColor: redesignAccent.base,
+                    color: theme.button.primary.color,
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor:
+                      generatedEditorSaveState.isValid &&
+                      !generatedEditorSaveState.isSaving &&
+                      !actions.isLoading &&
+                      !isGraphGenerating
+                        ? 'pointer'
+                        : 'not-allowed',
+                    opacity:
+                      generatedEditorSaveState.isValid &&
+                      !generatedEditorSaveState.isSaving &&
+                      !actions.isLoading &&
+                      !isGraphGenerating
+                        ? 1
+                        : 0.6,
+                    boxSizing: 'border-box',
+                  }}
+                  title="Garder et continuer (Ctrl+S)"
+                >
+                  {generatedEditorSaveState.isSaving ? 'Sauvegarde...' : 'Garder et continuer'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{
+              padding: '2rem',
+              textAlign: 'center',
+              color: theme.text.secondary,
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              {actions.isLoading || generationState.isEstimating || isGraphGenerating
+                ? 'Génération en cours...'
+                : 'Aucun dialogue Unity généré'}
+            </div>
+          )}
         </div>
       ),
     },
@@ -562,7 +714,7 @@ export function Dashboard() {
         </div>
       ),
     },
-  ], [unityDialogueResponse, rawPrompt, isEstimating, rightPanelTab, centerPanelTab, selectedContextItem, selectedContextHistoryStem, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse, handleGeneratedDialogueContentChange])
+  ], [unityDialogueResponse, rawPrompt, isEstimating, rightPanelTab, centerPanelTab, selectedContextItem, selectedContextHistoryStem, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse, handleGeneratedDialogueContentChange, generatedDialogueDiagnostic, generatedEditorSaveState, generatedResultRef, isNarrowGeneratedResult])
 
   // En mode éditeur de graphe : masquer "Prompt". Hors graphe : masquer "Édition de nœud".
   const visibleRightPanelTabs = useMemo(() => {
@@ -840,104 +992,8 @@ export function Dashboard() {
                 `}</style>
           </>
         )}
-        {rightPanelTab === 'dialogue' && unityDialogueResponse ? (
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <button
-              type="button"
-              onClick={() => {
-                void unityDialogueEditorRef.current?.handleSave()
-              }}
-              disabled={
-                !generatedEditorSaveState.isValid ||
-                generatedEditorSaveState.isSaving ||
-                actions.isLoading ||
-                isGraphGenerating
-              }
-              style={{
-                flex: 1,
-                padding: '0.5rem 0.75rem',
-                fontSize: remSize('body'),
-                fontWeight: 700,
-                backgroundColor: theme.button.primary.background,
-                color: theme.button.primary.color,
-                border: 'none',
-                borderRadius: '6px',
-                cursor:
-                  generatedEditorSaveState.isValid &&
-                  !generatedEditorSaveState.isSaving &&
-                  !actions.isLoading &&
-                  !isGraphGenerating
-                    ? 'pointer'
-                    : 'not-allowed',
-                opacity:
-                  generatedEditorSaveState.isValid &&
-                  !generatedEditorSaveState.isSaving &&
-                  !actions.isLoading &&
-                  !isGraphGenerating
-                    ? 1
-                    : 0.6,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.2s',
-                boxSizing: 'border-box',
-              }}
-              title="Sauvegarder (Ctrl+S)"
-            >
-              {generatedEditorSaveState.isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
-            </button>
-            <button
-              onClick={handlePrimaryGenerateAction}
-              disabled={isPrimaryGenerateDisabled}
-              style={{
-                padding: '0.5rem',
-                fontSize: remSize('body'),
-                backgroundColor: theme.button.default.background,
-                color: theme.button.default.color,
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '6px',
-                cursor: isPrimaryGenerateDisabled ? 'not-allowed' : 'pointer',
-                opacity: isPrimaryGenerateDisabled ? 0.6 : 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '44px',
-                height: '44px',
-                transition: 'all 0.2s',
-                boxSizing: 'border-box',
-              }}
-              title={hasContextLoadError ? 'Rafraîchir le contexte GDD' : primaryActionTitle}
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{
-                  animation:
-                    actions.isLoading ||
-                    isGraphGenerating ||
-                    contextLoadState.isLoading ||
-                    generationState.isEstimating
-                      ? 'spin 1s linear infinite'
-                      : 'none',
-                }}
-              >
-                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
-              </svg>
-              <style>{`
-                    @keyframes spin {
-                      from { transform: rotate(0deg); }
-                      to { transform: rotate(360deg); }
-                    }
-                  `}</style>
-            </button>
-          </div>
-        ) : effectiveRightPanelTab === 'dialogue' || effectiveRightPanelTab === 'prompt' ? (
+        {/* Le résultat généré porte lui-même son action « Garder et continuer » (onglet Dialogue généré). */}
+        {effectiveRightPanelTab === 'dialogue' || effectiveRightPanelTab === 'prompt' ? (
           <>
             <button
               onClick={handlePrimaryGenerateAction}

@@ -512,6 +512,63 @@ describe('Dashboard', () => {
     expect(screen.getByText('Test Dialogue')).toBeInTheDocument()
   })
 
+  // Matrice I/O, ligne 3 : résultat prêt → filet accent, diagnostic, bouton « Garder » unique.
+  it('restyle le résultat généré : filet accent, diagnostic et bouton Garder unique', async () => {
+    const mockUnityResponse = {
+      json_content: JSON.stringify([
+        { id: 'START', speaker: 'NPC', line: 'Hello', choices: [{ text: 'A' }, { text: 'B' }] },
+        { id: 'NODE_2', speaker: 'NPC', line: 'Suite' },
+      ]),
+      title: 'Test Dialogue',
+      estimated_tokens: 100,
+    }
+
+    mockUseGenerationStore.mockReturnValue({
+      rawPrompt: '',
+      tokenCount: 0,
+      promptHash: null,
+      isEstimating: false,
+      unityDialogueResponse: mockUnityResponse,
+      sceneSelection: {
+        characterA: null,
+        characterB: null,
+        sceneRegion: null,
+        subLocation: null,
+      },
+      dialogueStructure: ['', '', '', '', '', ''] as [string, string, string, string, string, string],
+      systemPromptOverride: null,
+      setDialogueStructure: vi.fn(),
+      setSystemPromptOverride: vi.fn(),
+      setRawPrompt: vi.fn(),
+      setSceneSelection: vi.fn(),
+      setUnityDialogueResponse: vi.fn(),
+      tokensUsed: null,
+      setTokensUsed: vi.fn(),
+      clearGenerationResults: vi.fn(),
+    } as ReturnType<typeof useGenerationStore>)
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    const resultFrame = await screen.findByTestId('generated-dialogue-result')
+    expect(resultFrame.style.borderLeftWidth).toBe('2px')
+    expect(resultFrame.style.borderLeftColor).toBe('rgb(79, 127, 255)')
+
+    const diagnostic = screen.getByTestId('generated-dialogue-diagnostic')
+    const diagnosticValue = (label: string) =>
+      within(diagnostic).getByText(label).nextElementSibling?.textContent
+    expect(diagnosticValue('Nœuds')).toBe('2')
+    expect(diagnosticValue('Choix')).toBe('2')
+    expect(diagnosticValue('Tokens')).toBe('100')
+
+    const keepButtons = screen.getAllByRole('button', { name: /garder et continuer/i })
+    expect(keepButtons).toHaveLength(1)
+    expect(screen.queryByRole('button', { name: /^sauvegarder$/i })).not.toBeInTheDocument()
+  })
+
   it('affiche un message quand aucun dialogue Unity n\'est généré', async () => {
     const user = userEvent.setup()
     render(

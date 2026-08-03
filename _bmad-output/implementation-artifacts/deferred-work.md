@@ -68,3 +68,17 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-openrouter-aion-models.md`
   summary: Validation stricte du provider localStorage et message explicite si bascule modèle Unity silencieuse.
   evidence: Edge Case Hunter — pattern de fallback déjà utilisé pour GPT-5.6 ; hors scope MVP OpenRouter.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
+  summary: Éditeur de graphe — remplacer les 7 panneaux flottants (validation/schéma/quality-llm/ai-slop/coût) par un inspecteur à onglets fixe 300px piloté par un seul state `inspectorTab`, en gardant `FlowSimulationPanel`/`GraphContextDroppingPanel`/`GameSystemsIntegrationPanel` en modales.
+  evidence: Split au checkpoint spec (2883 tokens, >1600) — le doc de design le qualifie lui-même de "plus gros PR — à faire seul" ; ≥15 fichiers de test référencent les 5 booléens actuels (`showValidationPanel` etc.) et devront être mis à jour.
+- source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
+  summary: Toolbar de l'éditeur de graphe — collapser 3 rangées (`GraphToolbarStatusRow` ×2 + `GraphToolbarToolsRow`) en une seule, badges couleur → point + libellé mono.
+  evidence: Split au checkpoint spec — dépend structurellement du goal inspecteur (même zone, même PR logique côté doc de design).
+- source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
+  summary: Restyle visuel `DialogueNode`/`EndNode`/`TestNode` (bordures par état, typo mono/serif) via la fonction de précédence de validation déjà partagée (`getValidationHighlightKind`).
+  evidence: Split au checkpoint spec — cohérent à traiter avec l'inspecteur de graphe (même famille de composants) plutôt que dans le même spec que le streaming inline.
+- source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
+  summary: États responsive — mode écriture (`⌘\`/`ctrl+\`, deux colonnes en rail 52px), tiroir bas plafonné 60vh à ≤1024px (nouvelle variante `side: 'bottom'` sur `NarrowOverlayDrawer`), nouveau store `uiLayoutStore`.
+  evidence: Split au checkpoint spec — touche à la fois l'écran de génération et l'éditeur de graphe ; mieux traité une fois les deux zones stabilisées visuellement.
+  evidence: Edge Case Hunter — pattern de fallback déjà utilisé pour GPT-5.6 ; hors scope MVP OpenRouter.

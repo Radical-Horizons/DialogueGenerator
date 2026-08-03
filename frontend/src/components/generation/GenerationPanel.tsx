@@ -16,7 +16,7 @@ import type { LLMModelResponse } from '../../types/api'
 import { SystemPromptEditor } from './SystemPromptEditor'
 import { SceneSelectionWidget } from './SceneSelectionWidget'
 import { DialogueFlagsPanel } from './DialogueFlagsPanel'
-import { GenerationProgressModal } from './GenerationProgressModal'
+import { GenerationStreamingInline } from './GenerationStreamingInline'
 import { ModelSelector } from './ModelSelector'
 import { PresetSelector } from './PresetSelector'
 import { useToast } from '../shared'
@@ -71,6 +71,7 @@ export function GenerationPanel() {
     error: streamingError,
     currentJobId,
     isInterrupting,
+    unityDialogueResponse,
     interrupt,
     minimize,
     resetStreamingState,
@@ -409,6 +410,70 @@ export function GenerationPanel() {
   )
   const genChrome = isGenerationNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
 
+  /**
+   * Interruption de la génération en cours : annulation du job puis remise à zéro de l'état SSE.
+   * Comportement inchangé depuis la modale de progression (Story 0.8).
+   */
+  const handleInterruptGeneration = useCallback(async () => {
+    // Afficher "Interruption en cours..."
+    setInterrupting(true)
+
+    // Appeler l'API de cancel avec le job_id avec timeout de 10s
+    if (currentJobId) {
+      try {
+        const cancelPromise = dialoguesAPI.cancelGenerationJob(currentJobId).catch((err) => {
+          console.warn('Erreur lors de l\'annulation du job:', err)
+          return 'error' as const
+        })
+        const timeoutPromise = new Promise<'timeout'>((resolve) =>
+          setTimeout(() => resolve('timeout'), API_TIMEOUTS.CANCEL_JOB)
+        )
+
+        const result = await Promise.race([cancelPromise, timeoutPromise])
+
+        // Si timeout atteint ou erreur, force close EventSource
+        if (result === 'timeout' || result === 'error') {
+          closeEventSource()
+          setStreamingError('Interruption terminée')
+        } else {
+          // Interruption réussie
+          closeEventSource()
+          setStreamingError('Génération interrompue')
+        }
+      } catch (err) {
+        console.warn('Erreur lors de l\'annulation du job:', err)
+        closeEventSource()
+        setStreamingError('Interruption terminée')
+      }
+    } else {
+      closeEventSource()
+      setStreamingError('Génération interrompue')
+    }
+
+    // `interrupt()` remet à zéro streamingContent et error : l'appeler ici effacerait
+    // l'avis d'interruption et le texte déjà écrit avant tout rendu. On laisse donc le
+    // bloc afficher « Génération interrompue » + le partiel, puis on nettoie au timeout.
+    setTimeout(() => {
+      setInterrupting(false)
+      interrupt()
+      resetStreamingState()
+      setIsLoading(false)
+    }, 2000)
+  }, [
+    currentJobId,
+    closeEventSource,
+    interrupt,
+    resetStreamingState,
+    setInterrupting,
+    setStreamingError,
+  ])
+
+  const handleCloseStreaming = useCallback(() => {
+    closeEventSource()
+    resetStreamingState()
+    setIsLoading(false)
+  }, [closeEventSource, resetStreamingState])
+
   const modelSettingsSummary = [
     llmModel,
     REASONING_EFFORT_SHORT_LABELS[reasoningEffort ?? 'none'],
@@ -423,6 +488,27 @@ export function GenerationPanel() {
         ref={generationScrollRef}
         style={{ padding: genChrome.containerPadding, flex: 1, overflowY: 'auto', minWidth: 0 }}
       >
+        {/* Progression du streaming : dans le flux de l'écran, plus de modale (Story 0.2 → refonte UI) */}
+        <GenerationStreamingInline
+          isActive={
+            isGenerating ||
+            currentStep === 'Complete' ||
+            Boolean(streamingError) ||
+            isInterrupting
+          }
+          content={streamingContent}
+          currentStep={currentStep}
+          isMinimized={isMinimized}
+          error={streamingError}
+          isInterrupting={isInterrupting}
+          reasoningTrace={unityDialogueResponse?.reasoning_trace ?? null}
+          onInterrupt={() => {
+            void handleInterruptGeneration()
+          }}
+          onMinimize={minimize}
+          onClose={handleCloseStreaming}
+        />
+
         {/* PresetSelector (Task 6) */}
         <PresetSelector
           onPresetLoaded={presets.handlePresetLoaded}
@@ -769,73 +855,6 @@ export function GenerationPanel() {
       )}
       </div>
       </GenerationPanelNarrowProvider>
-      
-      {/* Modal de progression streaming (Story 0.2) */}
-      <GenerationProgressModal
-        isOpen={
-          isGenerating ||
-          currentStep === 'Complete' ||
-          Boolean(streamingError) ||
-          isInterrupting
-        }
-        content={streamingContent}
-        currentStep={currentStep}
-        isMinimized={isMinimized}
-        error={streamingError}
-        isInterrupting={isInterrupting}
-        onInterrupt={async () => {
-          // Afficher "Interruption en cours..."
-          setInterrupting(true)
-          
-          // Appeler l'API de cancel avec le job_id avec timeout de 10s
-          if (currentJobId) {
-            try {
-              const cancelPromise = dialoguesAPI.cancelGenerationJob(currentJobId).catch((err) => {
-                console.warn('Erreur lors de l\'annulation du job:', err)
-                return 'error' as const
-              })
-              const timeoutPromise = new Promise<'timeout'>((resolve) => 
-                setTimeout(() => resolve('timeout'), API_TIMEOUTS.CANCEL_JOB)
-              )
-              
-              const result = await Promise.race([cancelPromise, timeoutPromise])
-              
-              // Si timeout atteint ou erreur, force close EventSource
-              if (result === 'timeout' || result === 'error') {
-                closeEventSource()
-                setStreamingError('Interruption terminée')
-              } else {
-                // Interruption réussie
-                closeEventSource()
-                setStreamingError('Génération interrompue')
-              }
-            } catch (err) {
-              console.warn('Erreur lors de l\'annulation du job:', err)
-              closeEventSource()
-              setStreamingError('Interruption terminée')
-            }
-          } else {
-            closeEventSource()
-            setStreamingError('Génération interrompue')
-          }
-          
-          // Réinitialiser l'état
-          interrupt()
-          
-          // Réinitialiser l'état d'interruption après un court délai
-          setTimeout(() => {
-            setInterrupting(false)
-            resetStreamingState()
-            setIsLoading(false)
-          }, 2000)
-        }}
-        onMinimize={minimize}
-        onClose={() => {
-          closeEventSource()
-          resetStreamingState()
-          setIsLoading(false)
-        }}
-      />
       
       {/* Modals (reset confirm, preset validation, budget block) */}
       <GenerationPanelModals

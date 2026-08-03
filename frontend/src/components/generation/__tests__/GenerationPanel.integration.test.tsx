@@ -6,7 +6,7 @@
  * dépendre de l'implémentation interne.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { GenerationPanel } from '../GenerationPanel'
 import { useGenerationStore } from '../../../store/generationStore'
@@ -150,8 +150,23 @@ vi.mock('../DialogueFlagsPanel', () => ({
   DialogueFlagsPanel: () => <div data-testid="dialogue-flags-panel">Dialogue Flags</div>,
 }))
 
-vi.mock('../GenerationProgressModal', () => ({
-  GenerationProgressModal: () => null,
+vi.mock('../GenerationStreamingInline', () => ({
+  GenerationStreamingInline: ({
+    isActive,
+    onInterrupt,
+  }: {
+    isActive: boolean
+    onInterrupt: () => void
+  }) =>
+    isActive ? (
+      <div data-testid="generation-streaming-inline">
+        Streaming inline
+        {/* Expose l'action réelle du panneau pour tester la séquence d'interruption. */}
+        <button type="button" onClick={onInterrupt}>
+          Interrompre
+        </button>
+      </div>
+    ) : null,
 }))
 
 vi.mock('../ModelSelector', () => ({
@@ -454,11 +469,67 @@ describe('GenerationPanel - Tests Baseline', () => {
       expect(job.stream_url).toContain('job-123')
     })
 
+    it('ne monte pas le bloc de streaming tant qu\'aucune génération n\'est active', async () => {
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+      expect(screen.queryByTestId('generation-streaming-inline')).not.toBeInTheDocument()
+    })
+
+    it('monte le bloc de streaming dans le flux du panneau quand la génération démarre', async () => {
+      mockUseGenerationStore.mockReturnValue({
+        ...buildMockGenerationStoreState(),
+        isGenerating: true,
+        currentStep: 'Generating',
+        streamingContent: '{"title":"Test"',
+      } as unknown as ReturnType<typeof useGenerationStore>)
+
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+
+      const block = screen.getByTestId('generation-streaming-inline')
+      // Le bloc vit dans le même conteneur défilant que le formulaire (plus de modale détachée).
+      expect(block.closest('[data-testid="preset-selector"]')).toBeNull()
+      expect(screen.getByTestId('preset-selector').parentElement).toBe(block.parentElement)
+    })
+
     it('devrait charger les modèles au montage (prérequis génération / SSE)', async () => {
       render(<GenerationPanel />)
       await waitFor(() => {
         expect(mockConfigAPI.listLLMModels).toHaveBeenCalled()
       })
+    })
+
+    // Matrice I/O ligne 1 : `interrupt()` remet streamingContent et error à zéro. S'il est
+    // appelé dans la foulée de setStreamingError, l'avis « Génération interrompue » et le
+    // texte déjà écrit disparaissent avant d'être rendus. Il doit rester différé au timeout.
+    it("ne remet pas l'état à zéro avant d'avoir affiché l'avis d'interruption", async () => {
+      const user = userEvent.setup()
+      const storeState: Record<string, unknown> = {
+        ...buildMockGenerationStoreState(),
+        isGenerating: true,
+        currentStep: 'Generating',
+        streamingContent: '{"title":"Partiel"',
+        currentJobId: 'job-123',
+      }
+      mockUseGenerationStore.mockReturnValue(
+        storeState as unknown as ReturnType<typeof useGenerationStore>
+      )
+      mockDialoguesAPI.cancelGenerationJob = vi.fn().mockResolvedValue({ status: 'cancelled' })
+
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+
+      const block = screen.getByTestId('generation-streaming-inline')
+      await user.click(within(block).getByText('Interrompre'))
+
+      await waitFor(() => {
+        expect(storeState.setError).toHaveBeenCalledWith('Génération interrompue')
+      })
+      // Le nettoyage ne doit pas avoir eu lieu dans la foulée du message d'interruption.
+      expect(storeState.interrupt).not.toHaveBeenCalled()
+
+      // Il intervient au timeout, une fois l'avis affiché.
+      await waitFor(() => expect(storeState.interrupt).toHaveBeenCalled(), { timeout: 4000 })
     })
   })
 
