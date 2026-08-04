@@ -82,3 +82,8 @@
   summary: États responsive — mode écriture (`⌘\`/`ctrl+\`, deux colonnes en rail 52px), tiroir bas plafonné 60vh à ≤1024px (nouvelle variante `side: 'bottom'` sur `NarrowOverlayDrawer`), nouveau store `uiLayoutStore`.
   evidence: Split au checkpoint spec — touche à la fois l'écran de génération et l'éditeur de graphe ; mieux traité une fois les deux zones stabilisées visuellement.
   evidence: Edge Case Hunter — pattern de fallback déjà utilisé pour GPT-5.6 ; hors scope MVP OpenRouter.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
+  summary: Écran 2b — le bouton « Variante » par option n'est PAS une fonctionnalité neuve : il correspond à la Story 1.10 (FR10, régénérer avec instructions ajustées), déjà implémentée via `RegenerateNodeModal`. À recâbler sur la nouvelle UI, pas à réécrire. Idem « Éditer » (Story 1.4, accepter/rejeter inline).
+  evidence: Relevé dans `_bmad-output/planning-artifacts/epics/epic-01.md` (Story 1.7 duplication FR7, Story 1.10 régénération FR10). Seule la génération de N options SIMULTANÉES reste sans support backend (`GenerateUnityDialogueResponse` est one-shot) — c'est le seul point qui coûterait N appels LLM.
+

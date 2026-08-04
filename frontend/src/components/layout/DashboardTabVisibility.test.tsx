@@ -123,7 +123,9 @@ describe('Dashboard tab visibility', () => {
     } as ReturnType<typeof useGenerationActionsStore>)
   })
 
-  it('hides the node editing tab in dialogue edition view', async () => {
+  // Écran 2e : l'édition de nœud a quitté le panneau droit du Dashboard pour l'onglet
+  // NŒUD de l'inspecteur de graphe. Elle ne doit apparaître ni ici ni en vue Édition.
+  it("n'expose pas d'onglet d'édition de nœud dans le panneau droit du Dashboard", async () => {
     const user = userEvent.setup()
     render(
       <BrowserRouter>
@@ -132,7 +134,9 @@ describe('Dashboard tab visibility', () => {
     )
 
     await user.click(screen.getByRole('button', { name: /^Graphe$/i }))
-    expect(await screen.findByRole('button', { name: /édition de nœud/i })).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /édition de nœud/i })).not.toBeInTheDocument()
+    })
 
     await user.click(screen.getByRole('button', { name: /^Éditer$/i }))
 

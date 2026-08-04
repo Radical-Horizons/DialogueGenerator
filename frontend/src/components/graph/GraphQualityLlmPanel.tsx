@@ -18,7 +18,9 @@ import { GraphQualityLlmCriteriaList } from './GraphQualityLlmCriteriaList'
 import { GraphToolFloatingShell } from './GraphToolFloatingShell'
 
 interface GraphQualityLlmPanelProps {
-  onClose: () => void
+  /** `inspector` : rendu nu dans l'inspecteur de graphe (écran 2e), sans chrome flottant. */
+  variant?: 'floating' | 'inspector'
+  onClose?: () => void
 }
 
 interface HistoryEntry {
@@ -29,7 +31,7 @@ interface HistoryEntry {
 /**
  * Overlay graphe : lance l’évaluation, affiche le rapport et l’historique session.
  */
-export function GraphQualityLlmPanel({ onClose }: GraphQualityLlmPanelProps) {
+export function GraphQualityLlmPanel({ variant = 'floating', onClose }: GraphQualityLlmPanelProps) {
   const nodes = useGraphStore((s) => s.nodes)
   const edges = useGraphStore((s) => s.edges)
 
@@ -79,6 +81,7 @@ export function GraphQualityLlmPanel({ onClose }: GraphQualityLlmPanelProps) {
 
   return (
     <GraphToolFloatingShell
+      variant={variant}
       title={<strong>Qualité LLM</strong>}
       onClose={onClose}
       dataTestId="graph-quality-llm-panel"

@@ -6,6 +6,7 @@ import type { Edge, Node } from '@xyflow/react'
 import { SaveStatusIndicator } from '../shared'
 import { theme } from '../../theme'
 import { redesignFont } from '../../theme/redesignTokens'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { BatchOperationsMenu } from './BatchOperationsMenu'
 import {
   formatGraphWarningBadgeLabel,
@@ -99,15 +100,31 @@ function GraphHealthBadge({
       ? theme.state.error.color
       : theme.state.pending.border
 
+  // Cliquable ⇒ vrai bouton : le point + libellé mono ne doit pas coûter l'accès clavier.
+  const Tag = (canToggle ? 'button' : 'span') as 'button' | 'span'
+
   return (
-    <span
+    <Tag
+      {...(canToggle ? { type: 'button' as const } : {})}
       data-testid="graph-health-badge"
       title={title}
-      onClick={canToggle ? () => setShowValidationPanel((v) => !v) : undefined}
+      onClick={
+        canToggle
+          ? () => {
+              // Écran 2e : le badge santé ouvre l'onglet SANTÉ de l'inspecteur.
+              // Le booléen historique reste piloté pour la variante narrow (overlay).
+              useUiLayoutStore.getState().toggleInspectorTab('health')
+              setShowValidationPanel((v) => !v)
+            }
+          : undefined
+      }
       style={{
         display: 'inline-flex',
         alignItems: 'center',
         gap: 6,
+        border: 'none',
+        background: 'none',
+        padding: 0,
         cursor: canToggle ? 'pointer' : 'default',
         fontFamily: redesignFont.mono,
         fontSize: '10.5px',
@@ -128,7 +145,7 @@ function GraphHealthBadge({
         }}
       />
       {label}
-    </span>
+    </Tag>
   )
 }
 

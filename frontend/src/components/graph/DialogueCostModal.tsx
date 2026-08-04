@@ -10,12 +10,24 @@ import { GRAPH_TOOL_FLOATING_PANEL_Z_INDEX } from './graphToolbarConstants'
 
 interface DialogueCostModalProps {
   filename: string
-  onClose: () => void
+  /** `inspector` : rendu nu dans l'inspecteur de graphe (écran 2e), sans chrome flottant. */
+  variant?: 'floating' | 'inspector'
+  onClose?: () => void
 }
 
-export function DialogueCostModal({ filename, onClose }: DialogueCostModalProps) {
+export function DialogueCostModal({ filename, variant = 'floating', onClose }: DialogueCostModalProps) {
   const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
   const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
+
+  // Variante inspecteur (écran 2e) : le breakdown seul, sans fond ni cadre de modale.
+  if (variant === 'inspector') {
+    return (
+      <div data-testid="dialogue-cost-inspector" style={{ padding: '0 18px 12px' }}>
+        <DialogueCostBreakdown dialogueId={filename} />
+      </div>
+    )
+  }
+
   return (
     <div
       role="dialog"
@@ -33,7 +45,7 @@ export function DialogueCostModal({ filename, onClose }: DialogueCostModalProps)
         padding: '1rem',
       }}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
+        if (e.target === e.currentTarget) onClose?.()
       }}
     >
       <div

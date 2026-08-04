@@ -720,7 +720,9 @@ export function Dashboard() {
   // En mode éditeur de graphe : masquer "Prompt". Hors graphe : masquer "Édition de nœud".
   const visibleRightPanelTabs = useMemo(() => {
     if (centerPanelTab === 'graph') {
-      return rightPanelTabs.filter((t) => t.id !== 'prompt')
+      // Écran 2e : la colonne droite du graphe, c'est l'inspecteur de GraphEditor.
+      // L'édition de nœud y a migré (onglet NŒUD) — ne pas la dupliquer ici.
+      return rightPanelTabs.filter((t) => t.id !== 'prompt' && t.id !== 'node')
     }
     if (centerPanelTab === 'generation' || centerPanelTab === 'edition') {
       return rightPanelTabs.filter((t) => t.id !== 'node')
