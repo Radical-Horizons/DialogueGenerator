@@ -249,6 +249,8 @@ export function GraphEditorHeader({
         showSearchBar={showSearchBar}
         setShowSearchBar={setShowSearchBar}
         setHighlightedNodes={setHighlightedNodes}
+        nodeCount={nodes.length}
+        edgeCount={edges.length}
       />
       <div
         data-testid="graph-editor-toolbar-tools"
@@ -259,7 +261,7 @@ export function GraphEditorHeader({
           minWidth: 0,
           display: 'flex',
           flexDirection: 'row',
-          gap: `${chrome.groupGapRem}rem`,
+          gap: isNarrowToolbar ? `${chrome.groupGapRem}rem` : 14,
           alignItems: 'center',
           flexWrap: isNarrowToolbar ? 'wrap' : 'nowrap',
           justifyContent: 'flex-start',
@@ -280,6 +282,8 @@ export function GraphEditorHeader({
             {isStandalone && onBack && <GraphToolbarStandaloneBackButton onBack={onBack} />}
             <GraphToolbarStatusRow {...statusRowProps} segments={['batch']} />
             <GraphToolbarToolsRow {...toolsRowProps} mode="comfort-tools" />
+            {/* Écran 2e : santé + save calés à droite de la rangée. */}
+            <div aria-hidden style={{ flex: 1, minWidth: 0 }} />
             <GraphToolbarStatusRow {...statusRowProps} segments={['health', 'save']} />
           </>
         )}

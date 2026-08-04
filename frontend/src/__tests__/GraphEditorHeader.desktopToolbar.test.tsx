@@ -63,13 +63,14 @@ describe('GraphEditorHeader - Desktop toolbar density', () => {
     expect(screen.queryByTestId('graph-toolbar-row-status')).toBeNull()
     expect(screen.queryByTestId('graph-toolbar-row-tools')).toBeNull()
 
-    expect(screen.getByRole('button', { name: 'Annuler' })).toHaveTextContent('↩')
+    // Écran 2e : glyphes nus ↶/↷, entrées texte « Disposer » / « Jouer ».
+    expect(screen.getByRole('button', { name: 'Annuler' })).toHaveTextContent('↶')
     expect(screen.getByRole('button', { name: 'Annuler' })).not.toHaveTextContent('Undo')
-    expect(screen.getByRole('button', { name: 'Refaire' })).toHaveTextContent('↪')
+    expect(screen.getByRole('button', { name: 'Refaire' })).toHaveTextContent('↷')
     expect(screen.getByRole('button', { name: 'Refaire' })).not.toHaveTextContent('Redo')
 
     const autoLayout = screen.getByRole('button', { name: /auto-layout/i })
-    expect(autoLayout).toHaveTextContent('normal')
+    expect(autoLayout).toHaveTextContent('Disposer')
     expect(autoLayout).not.toHaveTextContent('Auto-layout')
 
     expect(screen.getByTestId('btn-actions-dropdown')).toHaveTextContent('Actions')

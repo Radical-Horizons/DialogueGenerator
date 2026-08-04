@@ -9,6 +9,7 @@ import { GraphToolbarFocusNodeButton } from './GraphToolbarFocusNodeButton'
 import { GraphToolbarShortcutsButton } from './GraphToolbarShortcutsButton'
 import { GraphToolbarLayoutDropdown } from './GraphToolbarLayoutDropdown'
 import { GraphToolbarQualityDropdown } from './GraphToolbarQualityDropdown'
+import { graphToolbarTextEntryStyle } from './graphToolbarTextEntry'
 import type { GraphToolbarToolsRowProps } from './graphToolbarTypes'
 
 export type { GraphToolbarToolsRowProps } from './graphToolbarTypes'
@@ -20,6 +21,10 @@ export function GraphToolbarToolsGroup(props: GraphToolbarToolsRowProps) {
     chrome,
     chromeStyles,
     canEditGraph,
+    hasActiveDialogue,
+    showSearchBar,
+    setShowSearchBar,
+    setHighlightedNodes,
     showActionsDropdown,
     setShowActionsDropdown,
     actionsDropdownRef,
@@ -28,26 +33,26 @@ export function GraphToolbarToolsGroup(props: GraphToolbarToolsRowProps) {
     showShortcutsTooltip,
     setShowShortcutsTooltip,
     selectedNodeId,
-    hasActiveDialogue,
   } = props
   const { graphChromeTouch, effectiveButtonPadding, effectiveButtonFontSizeRem } = chromeStyles
   const actionsMenuEnabled = props.canOpenGraphActions ?? canEditGraph
 
+  // Ordre maquette 2e : Nœud · Disposer · Jouer · Actions ▾ · Qualités ▾ · Rech. · ?
   return (
     <>
+      <GraphToolbarFocusNodeButton
+        isNarrowToolbar={isNarrowToolbar}
+        chromeStyles={chromeStyles}
+        selectedNodeId={selectedNodeId}
+        hasActiveDialogue={hasActiveDialogue}
+      />
+      <GraphToolbarLayoutDropdown {...props} />
       <GraphToolbarPlaythroughButton
         isNarrowToolbar={isNarrowToolbar}
         chromeStyles={chromeStyles}
         hasActiveDialogue={hasActiveDialogue}
         active={Boolean(props.scenarioPlaythroughActive)}
         onToggle={props.onToggleScenarioPlaythrough}
-      />
-      <GraphToolbarLayoutDropdown {...props} />
-      <GraphToolbarFocusNodeButton
-        isNarrowToolbar={isNarrowToolbar}
-        chromeStyles={chromeStyles}
-        selectedNodeId={selectedNodeId}
-        hasActiveDialogue={hasActiveDialogue}
       />
       {!isNarrowToolbar && (
         <GraphActionsDropdown
@@ -63,9 +68,33 @@ export function GraphToolbarToolsGroup(props: GraphToolbarToolsRowProps) {
           showActionsDropdown={showActionsDropdown}
           setShowActionsDropdown={setShowActionsDropdown}
           renderMenuItems={renderActionsMenuItems}
+          triggerVariant="text"
         />
       )}
       {!isNarrowToolbar && <GraphToolbarQualityDropdown {...props} />}
+      {!isNarrowToolbar && (
+        <button
+          type="button"
+          data-testid="btn-search-graph"
+          onClick={() =>
+            setShowSearchBar((v) => {
+              if (v) setHighlightedNodes([])
+              return !v
+            })
+          }
+          disabled={!hasActiveDialogue}
+          style={graphToolbarTextEntryStyle({
+            touch: graphChromeTouch,
+            disabled: !hasActiveDialogue,
+            active: showSearchBar,
+            muted: true,
+          })}
+          title="Rechercher dans le graphe (Ctrl+F)"
+          aria-label="Rechercher"
+        >
+          Rech.
+        </button>
+      )}
       <GraphToolbarShortcutsButton
         isNarrowToolbar={isNarrowToolbar}
         chrome={chrome}

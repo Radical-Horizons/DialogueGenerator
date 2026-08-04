@@ -23,10 +23,12 @@ describe('GraphEditorHeader - SaveStatusIndicator mount count (17.11)', () => {
     })
   })
 
-  it('comfort-single-save-indicator: monte SaveStatusIndicator une seule fois avec dialogue actif', () => {
+  it('comfort-single-save-indicator: monte l’indicateur mono (2e) une seule fois avec dialogue actif', () => {
     mockNarrowToolbar(false)
     renderGraphEditorHeader({ activeDialogueFilename: 'test.json' })
-    expect(saveStatusMountCount).toBe(1)
+    // Écran 2e : le confort rend le libellé mono `ENREGISTRÉ · HH:MM`, pas le composant partagé.
+    expect(document.querySelectorAll('[data-testid="graph-save-status-mono"]').length).toBe(1)
+    expect(saveStatusMountCount).toBe(0)
   })
 
   it('narrow-single-save-indicator: monte SaveStatusIndicator une seule fois avec dialogue actif', () => {
@@ -40,6 +42,7 @@ describe('GraphEditorHeader - SaveStatusIndicator mount count (17.11)', () => {
     mockNarrowToolbar(false)
     renderGraphEditorHeader({ activeDialogueFilename: null, hasActiveDialogue: false })
     expect(saveStatusMountCount).toBe(0)
+    expect(document.querySelector('[data-testid="graph-save-status-mono"]')).toBeNull()
 
     cleanup()
     vi.restoreAllMocks()

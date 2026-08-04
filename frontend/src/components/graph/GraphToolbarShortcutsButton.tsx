@@ -96,16 +96,19 @@ export function GraphToolbarShortcutsButton({
                 padding: chrome.buttonPadding,
                 borderRadius: '6px',
                 fontSize: `${chrome.buttonFontSizeRem}rem`,
+                border: `1px solid ${theme.border.primary}`,
+                backgroundColor: theme.button.default.background,
               }
             : {
+                // Écran 2e : « ? » nu, sans cercle bordé — zone tactile conservée.
                 width: chrome.touchMinPx,
                 height: chrome.touchMinPx,
                 padding: 0,
                 borderRadius: '50%',
-                fontSize: '0.95rem',
+                fontSize: '12.5px',
+                border: 'none',
+                backgroundColor: 'transparent',
               }),
-          border: `1px solid ${theme.border.primary}`,
-          backgroundColor: theme.button.default.background,
           color: theme.text.secondary,
           cursor: 'pointer',
           fontWeight: 600,

@@ -210,7 +210,7 @@ describe('FR119 touch targets — chrome', () => {
   it('GraphEditorHeader : confortable (large) min 44px', () => {
     const toolbar = makeMockToolbar()
     render(
-      <div style={{ width: '900px' }}>
+      <div style={{ width: '1200px' }}>
         <GraphEditorHeader
           toolbar={toolbar}
 

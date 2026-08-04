@@ -1,7 +1,10 @@
 /**
  * Zone titre / retour / sélecteur dialogue du header graphe (Story 17.9).
+ * Confort (écran 2e) : sélecteur + compteurs mono `N NŒUDS · M LIENS`,
+ * séparateur vertical, undo/redo nus. La recherche vit dans la rangée outils.
  */
 import { theme } from '../../theme'
+import { redesignFont, redesignHairline, redesignText } from '../../theme/redesignTokens'
 import type { GraphToolbarTitleBlockProps } from './graphToolbarTypes'
 import { GraphToolbarUndoRedoButtons } from './GraphToolbarUndoRedoButtons'
 
@@ -19,12 +22,10 @@ export function GraphToolbarTitleBlock({
   canRedoNow,
   undo,
   redo,
-  hasActiveDialogue,
-  showSearchBar,
-  setShowSearchBar,
-  setHighlightedNodes,
+  nodeCount,
+  edgeCount,
 }: GraphToolbarTitleBlockProps) {
-  const { effectiveButtonPadding, effectiveButtonFontSizeRem } = chromeStyles
+  const hasCounts = typeof nodeCount === 'number' && typeof edgeCount === 'number'
 
   return (
     <div
@@ -34,8 +35,8 @@ export function GraphToolbarTitleBlock({
         display: 'flex',
         flexDirection: isNarrowToolbar ? 'column' : 'row',
         alignItems: isNarrowToolbar ? 'stretch' : 'center',
-        justifyContent: isNarrowToolbar ? 'flex-start' : 'space-between',
-        gap: `${chrome.groupGapRem}rem`,
+        justifyContent: 'flex-start',
+        gap: isNarrowToolbar ? `${chrome.groupGapRem}rem` : 14,
         minWidth: 0,
       }}
     >
@@ -49,8 +50,16 @@ export function GraphToolbarTitleBlock({
         </>
       ) : (
         <>
-          {((isStandalone && onBack) || headerSelector) && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+          {((isStandalone && onBack) || headerSelector || hasCounts) && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                minWidth: 0,
+                flexShrink: 0,
+              }}
+            >
               {isStandalone && onBack && (
                 <button
                   type="button"
@@ -74,11 +83,36 @@ export function GraphToolbarTitleBlock({
                   {headerSelector}
                 </div>
               )}
+              {hasCounts && (
+                <span
+                  data-testid="graph-toolbar-counts"
+                  style={{
+                    fontFamily: redesignFont.mono,
+                    fontSize: '10.5px',
+                    color: redesignText.label,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {nodeCount} {nodeCount === 1 ? 'NŒUD' : 'NŒUDS'} · {edgeCount}{' '}
+                  {edgeCount === 1 ? 'LIEN' : 'LIENS'}
+                </span>
+              )}
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: `${chrome.groupGapRem}rem`, alignItems: 'center' }}>
-            {canEditGraph && (
+          {/* Séparateur vertical de la maquette 2e. */}
+          <span
+            aria-hidden
+            style={{
+              width: 1,
+              height: 20,
+              background: redesignHairline.strong,
+              flexShrink: 0,
+            }}
+          />
+
+          {canEditGraph && (
+            <div style={{ display: 'flex', gap: 2, alignItems: 'center', flexShrink: 0 }}>
               <GraphToolbarUndoRedoButtons
                 variant="comfort-icon"
                 chrome={chrome}
@@ -88,38 +122,8 @@ export function GraphToolbarTitleBlock({
                 undo={undo}
                 redo={redo}
               />
-            )}
-            <button
-                type="button"
-                data-testid="btn-search-graph"
-                onClick={() =>
-                  setShowSearchBar((v) => {
-                    if (v) setHighlightedNodes([])
-                    return !v
-                  })
-                }
-                disabled={!hasActiveDialogue}
-                style={{
-                  ...chromeStyles.graphChromeTouch,
-                  padding: effectiveButtonPadding,
-                  border: `1px solid ${
-                    showSearchBar ? theme.button.primary.background : theme.border.primary
-                  }`,
-                  borderRadius: '6px',
-                  backgroundColor: showSearchBar
-                    ? theme.button.primary.background
-                    : theme.button.default.background,
-                  color: showSearchBar ? theme.button.primary.color : theme.button.default.color,
-                  cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
-                  opacity: !hasActiveDialogue ? 0.6 : 1,
-                  fontSize: `${effectiveButtonFontSizeRem}rem`,
-                }}
-                title="Rechercher dans le graphe (Ctrl+F)"
-                aria-label="Rechercher"
-              >
-                Rech.
-              </button>
-          </div>
+            </div>
+          )}
         </>
       )}
     </div>

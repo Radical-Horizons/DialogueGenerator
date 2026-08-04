@@ -31,6 +31,7 @@ export function GraphToolbarQualityDropdown(props: GraphToolbarToolsRowProps) {
       dropdownLabel="Qualités"
       dropdownTestId="btn-quality-dropdown"
       dropdownTitle="Outils qualité et validation du dialogue"
+      triggerVariant={isNarrow ? 'default' : 'text'}
     />
   )
 }

@@ -84,6 +84,13 @@ export const panelExpandRailCaptionTypography = {
  */
 export const GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX = 640
 
+/**
+ * Rangée unique 46px de l'écran 2e : titre + compteurs + undo/redo + entrées texte
+ * + santé + save calés à droite. Largeur intrinsèque mesurée ≈ 980px (août 2026) —
+ * en dessous, la toolbar bascule sur le layout narrow empilé (aucune action perdue).
+ */
+export const GRAPH_TOOLBAR_SINGLE_ROW_MIN_WIDTH_PX = 980
+
 /** Même seuil conteneur pour panneau Génération, graphe, etc. */
 export const PANEL_COMFORT_MIN_WIDTH_PX = GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX
 

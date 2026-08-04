@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
 import type { Edge, Node } from '@xyflow/react'
 import { SaveStatusIndicator } from '../shared'
 import { theme } from '../../theme'
-import { redesignFont } from '../../theme/redesignTokens'
+import { redesignFont, redesignText } from '../../theme/redesignTokens'
 import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { BatchOperationsMenu } from './BatchOperationsMenu'
 import {
@@ -149,7 +149,22 @@ function GraphHealthBadge({
   )
 }
 
+/** Libellés mono capitales de la rangée 2e (`ENREGISTRÉ · 11:24`). */
+const MONO_SAVE_LABELS: Record<'saved' | 'saving' | 'unsaved' | 'error', string> = {
+  saved: 'ENREGISTRÉ',
+  saving: 'SAUVEGARDE…',
+  unsaved: 'NON ENREGISTRÉ',
+  error: 'ERREUR SAVE',
+}
+
+function formatSaveClock(timestamp: number | string): string | null {
+  const date = new Date(timestamp)
+  if (Number.isNaN(date.getTime())) return null
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+}
+
 function GraphSaveStatusIndicator({
+  isNarrowToolbar,
   activeDialogueFilename,
   lastSaveError,
   isGraphSaving,
@@ -159,6 +174,7 @@ function GraphSaveStatusIndicator({
   lastAckSeq,
 }: Pick<
   GraphToolbarStatusRowProps,
+  | 'isNarrowToolbar'
   | 'activeDialogueFilename'
   | 'lastSaveError'
   | 'isGraphSaving'
@@ -182,15 +198,54 @@ function GraphSaveStatusIndicator({
 
   if (!activeDialogueFilename) return null
 
+  if (isNarrowToolbar) {
+    return (
+      <SaveStatusIndicator
+        status={status}
+        lastSavedAt={lastSavedAt}
+        errorMessage={lastSaveError}
+        ackSeq={lastAckSeq}
+        pendingCount={pendingCount}
+        syncStatusDisplay={syncStatusDisplay}
+      />
+    )
+  }
+
+  // Écran 2e : texte mono `ENREGISTRÉ · 11:24`. Le détail sync (seq / offline) reste en title.
+  const clock = status === 'saved' && lastSavedAt != null ? formatSaveClock(lastSavedAt) : null
+  const label = clock ? `${MONO_SAVE_LABELS[status]} · ${clock}` : MONO_SAVE_LABELS[status]
+  const detail =
+    syncStatusDisplay === 'offline'
+      ? pendingCount > 0
+        ? `Hors ligne — ${pendingCount} changement(s) en attente`
+        : 'Hors ligne'
+      : status === 'error' && lastSaveError
+        ? lastSaveError
+        : lastAckSeq != null
+          ? `Synchronisé (seq ${lastAckSeq})`
+          : label
+  const color =
+    status === 'error'
+      ? theme.state.error.color
+      : status === 'unsaved' || syncStatusDisplay === 'offline'
+        ? theme.state.pending.border
+        : redesignText.label
+
   return (
-    <SaveStatusIndicator
-      status={status}
-      lastSavedAt={lastSavedAt}
-      errorMessage={lastSaveError}
-      ackSeq={lastAckSeq}
-      pendingCount={pendingCount}
-      syncStatusDisplay={syncStatusDisplay}
-    />
+    <span
+      data-testid="graph-save-status-mono"
+      title={detail}
+      style={{
+        fontFamily: redesignFont.mono,
+        fontSize: '10.5px',
+        letterSpacing: '0.05em',
+        color,
+        whiteSpace: 'nowrap',
+        flexShrink: 0,
+      }}
+    >
+      {label}
+    </span>
   )
 }
 
@@ -243,6 +298,7 @@ export function GraphToolbarStatusRow({
 
   const saveIndicator = (
     <GraphSaveStatusIndicator
+      isNarrowToolbar={isNarrowToolbar}
       activeDialogueFilename={activeDialogueFilename}
       lastSaveError={lastSaveError}
       isGraphSaving={isGraphSaving}
