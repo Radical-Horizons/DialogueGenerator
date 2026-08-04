@@ -34,6 +34,15 @@ export const redesignControl = {
   border: '#2e2e36',
 } as const
 
+/** Bordures des nœuds du graphe (écran 2e) : neutre par défaut, renforcée si validé. */
+export const redesignNodeBorder = {
+  default: '#3d3d46',
+  strong: '#4a4a54',
+} as const
+
+/** Ombre portée des nœuds mis en avant (validé / sélectionné) — valeur maquette 2e. */
+export const redesignNodeShadow = '0 2px 10px rgba(0, 0, 0, 0.4)'
+
 /** Valeurs relevées telles quelles dans la maquette 1c (bloc `#1c` du handoff HTML). */
 export const redesignText = {
   /** Corps du brief (15,5px / 1.72). */

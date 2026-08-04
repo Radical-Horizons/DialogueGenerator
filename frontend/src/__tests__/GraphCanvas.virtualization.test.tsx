@@ -246,7 +246,8 @@ describe('Node type colors (AC #2) - dialogue=bleu, test=orange, end=gris', () =
     isConnectable: true,
   })
 
-  it('DialogueNode uses blue border (#4A90E2) when not selected', () => {
+  // Refonte 2e : bordure neutre #3d3d46 (rgb(61, 61, 70)) par défaut sur les trois types.
+  it('DialogueNode uses neutral redesign border (#3d3d46) when not selected', () => {
     render(
       React.createElement(
         ReactFlowProvider,
@@ -255,11 +256,10 @@ describe('Node type colors (AC #2) - dialogue=bleu, test=orange, end=gris', () =
       )
     )
     const node = screen.getByTestId('graph-node-content')
-    // DOM may serialize as rgb(74, 144, 226)
-    expect(node.getAttribute('style')).toMatch(/74,\s*144,\s*226|4A90E2/i)
+    expect(node.getAttribute('style')).toMatch(/61,\s*61,\s*70|3d3d46/i)
   })
 
-  it('TestNode uses orange border (#F5A623) when not selected', () => {
+  it('TestNode uses neutral redesign border (#3d3d46) when not selected', () => {
     render(
       React.createElement(
         ReactFlowProvider,
@@ -268,10 +268,10 @@ describe('Node type colors (AC #2) - dialogue=bleu, test=orange, end=gris', () =
       )
     )
     const node = screen.getByTestId('graph-node-content')
-    expect(node.getAttribute('style')).toMatch(/245,\s*166,\s*35|F5A623/i)
+    expect(node.getAttribute('style')).toMatch(/61,\s*61,\s*70|3d3d46/i)
   })
 
-  it('EndNode uses grey border (#B8B8B8) when not selected', () => {
+  it('EndNode uses neutral redesign border (#3d3d46) when not selected', () => {
     render(
       React.createElement(
         ReactFlowProvider,
@@ -280,6 +280,6 @@ describe('Node type colors (AC #2) - dialogue=bleu, test=orange, end=gris', () =
       )
     )
     const node = screen.getByTestId('graph-node-content')
-    expect(node.getAttribute('style')).toMatch(/184,\s*184,\s*184|B8B8B8/i)
+    expect(node.getAttribute('style')).toMatch(/61,\s*61,\s*70|3d3d46/i)
   })
 })

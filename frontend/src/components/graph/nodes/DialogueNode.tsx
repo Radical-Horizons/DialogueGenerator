@@ -37,6 +37,8 @@ import {
   redesignAccent,
   redesignFont,
   redesignHairline,
+  redesignNodeBorder,
+  redesignNodeShadow,
   redesignRadius,
   redesignSurface,
   redesignText as redesignTextTokens,
@@ -294,10 +296,11 @@ export const DialogueNode = memo(function DialogueNode({
   // Utiliser l'ID du nœud plutôt que le speaker pour avoir une couleur stable
   const speakerColor = getSpeakerColor(data.id)
   
-  // Déterminer la couleur et le style de la bordure selon le statut et les erreurs
-  let borderColor = selected ? '#27AE60' : '#4A90E2'
-  let borderStyle: 'solid' | 'dashed' = 'solid'
-  
+  // Écran 2e : bordure neutre par défaut — l'état (validé / à valider) vit dans l'en-tête mono.
+  // Les couleurs de validation (erreur / warning / lore) restent des signaux fonctionnels.
+  let borderColor: string = redesignNodeBorder.default
+  const borderStyle: 'solid' | 'dashed' = 'solid'
+
   const validationHighlightKind = getValidationHighlightKind(errors.map((e) => e.type))
   const topologyKind = getGraphTopologyWarningKind(warnings.map((w) => w.type))
   const topologyStyle = topologyKind ? GRAPH_TOPOLOGY_WARNING_STYLES[topologyKind] : null
@@ -312,12 +315,8 @@ export const DialogueNode = memo(function DialogueNode({
     borderColor = theme.state.error.border
   } else if (hasWarnings) {
     borderColor = topologyStyle?.border ?? theme.state.warning.color
-  } else if (isPending) {
-    borderColor = theme.state.pending.border
-    borderStyle = 'dashed'
   } else if (isAccepted) {
-    borderColor = theme.state.accepted.border
-    borderStyle = 'solid'
+    borderColor = redesignNodeBorder.strong
   }
 
   const canvasBackground =
@@ -367,10 +366,12 @@ export const DialogueNode = memo(function DialogueNode({
             ? theme.state.selected.background
             : (canvasBackground ?? redesignSurface.node),
         boxShadow: selected
-          ? `0 0 0 3px ${redesignAccent.ring}`
+          ? `0 0 0 3px ${redesignAccent.ring}, ${redesignNodeShadow}`
           : isHighlighted
           ? '0 0 0 3px rgba(116, 192, 252, 0.5)'
-          : theme.shadow.card,
+          : isAccepted
+            ? redesignNodeShadow
+            : theme.shadow.card,
         overflow: 'visible',
         position: 'relative',
         transition: 'all 0.2s ease',
@@ -383,30 +384,7 @@ export const DialogueNode = memo(function DialogueNode({
       onMouseLeave={() => setIsHovered(false)}
       onContextMenu={handleContextMenu}
     >
-      {/* Story 9.2 — indicateur conditions sur le nœud */}
-      {hasNodeCond && (
-        <div
-          role="img"
-          aria-label="Ce nœud a des conditions de visibilité"
-          title={nodeCondSummary || 'Conditions de visibilité'}
-          style={{
-            position: 'absolute',
-            top: tag ? 26 : 4,
-            left: tag ? 4 : undefined,
-            right: tag ? undefined : hasErrors || hasWarnings ? 56 : 28,
-            padding: '2px 5px',
-            borderRadius: 4,
-            fontSize: '0.65rem',
-            fontWeight: 700,
-            backgroundColor: theme.background.secondary,
-            color: theme.text.secondary,
-            border: `1px solid ${theme.border.primary}`,
-            zIndex: 11,
-          }}
-        >
-          ◆
-        </div>
-      )}
+      {/* Story 9.2 — l'indicateur conditions vit dans le pied mono (COND.), plus de badge flottant. */}
 
       {/* Badge tag (Story 2.11 FR32) */}
       {tag && (
@@ -614,7 +592,7 @@ export const DialogueNode = memo(function DialogueNode({
             isPending && (isHovered || selected)
               ? CONTENT_PADDING_TOP_WHEN_PENDING
               : 12,
-          paddingBottom: hasChoices ? BOTTOM_RESERVED_WITH_CHOICES : BOTTOM_RESERVED_SINGLE,
+          paddingBottom: 8,
           fontFamily: redesignFont.serif,
           fontSize: '12.5px',
           lineHeight: 1.45,
@@ -625,9 +603,33 @@ export const DialogueNode = memo(function DialogueNode({
           minHeight: 0,
         }}
       >
-        {line ? truncatedLine : null}
+        {line ? (truncatedLine.startsWith('«') ? truncatedLine : `« ${truncatedLine} »`) : null}
       </div>
-      
+
+      {/* Pied maquette 2e : compteur de réponses mono — au-dessus de la zone handles/lien. */}
+      <div
+        style={{
+          padding: '0 12px',
+          paddingBottom: hasChoices ? BOTTOM_RESERVED_WITH_CHOICES : BOTTOM_RESERVED_SINGLE,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontFamily: redesignFont.mono,
+          fontSize: '9.5px',
+          color: redesignTextTokens.label,
+          letterSpacing: '0.04em',
+        }}
+      >
+        <span>
+          {hasChoices
+            ? `${choices.length} ${choices.length === 1 ? 'RÉPONSE' : 'RÉPONSES'}`
+            : data.nextNode
+              ? 'SUITE →'
+              : ''}
+        </span>
+        {hasNodeCond && <span title={nodeCondSummary || 'Conditions de visibilité'}>COND.</span>}
+      </div>
+
       {/* Tooltip au survol d'un rond orange (réponse associée) — au-dessus du lien "Voir le prompt" */}
       {hasChoices && hoveredChoiceIndex !== null && choices[hoveredChoiceIndex] && (
         <div
