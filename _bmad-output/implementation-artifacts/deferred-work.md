@@ -72,16 +72,23 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
   summary: Éditeur de graphe — remplacer les 7 panneaux flottants (validation/schéma/quality-llm/ai-slop/coût) par un inspecteur à onglets fixe 300px piloté par un seul state `inspectorTab`, en gardant `FlowSimulationPanel`/`GraphContextDroppingPanel`/`GameSystemsIntegrationPanel` en modales.
   evidence: Split au checkpoint spec (2883 tokens, >1600) — le doc de design le qualifie lui-même de "plus gros PR — à faire seul" ; ≥15 fichiers de test référencent les 5 booléens actuels (`showValidationPanel` etc.) et devront être mis à jour.
+  status: done (commit ef62e00af — inspecteur 300px `uiLayoutStore.inspectorTab`)
 - source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
   summary: Toolbar de l'éditeur de graphe — collapser 3 rangées (`GraphToolbarStatusRow` ×2 + `GraphToolbarToolsRow`) en une seule, badges couleur → point + libellé mono.
   evidence: Split au checkpoint spec — dépend structurellement du goal inspecteur (même zone, même PR logique côté doc de design).
+  status: done (commit 3723d78d7 — rangée 46px, seuil dédié 980px, fix ResizeObserver StrictMode)
 - source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
   summary: Restyle visuel `DialogueNode`/`EndNode`/`TestNode` (bordures par état, typo mono/serif) via la fonction de précédence de validation déjà partagée (`getValidationHighlightKind`).
   evidence: Split au checkpoint spec — cohérent à traiter avec l'inspecteur de graphe (même famille de composants) plutôt que dans le même spec que le streaming inline.
+  status: done (commit ae62d5008 — bordures neutres, pieds mono, plaques FIN/TEST)
 - source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
   summary: États responsive — mode écriture (`⌘\`/`ctrl+\`, deux colonnes en rail 52px), tiroir bas plafonné 60vh à ≤1024px (nouvelle variante `side: 'bottom'` sur `NarrowOverlayDrawer`), nouveau store `uiLayoutStore`.
   evidence: Split au checkpoint spec — touche à la fois l'écran de génération et l'éditeur de graphe ; mieux traité une fois les deux zones stabilisées visuellement.
-  evidence: Edge Case Hunter — pattern de fallback déjà utilisé pour GPT-5.6 ; hors scope MVP OpenRouter.
+  status: partiel — mode écriture Ctrl+\ livré (`uiLayoutStore.writingMode`, colonne 760px, brief 17px, rails restaurés à la sortie). Reste le tiroir bas ≤1024px (voir entrée dédiée ci-dessous).
+
+- source_spec: `docs/design/refonte-ui-2026/etats-2a-2e.dc.html` (bloc 2d)
+  summary: À ≤1024px, transformer le panneau droit « Ce qui part au modèle » en barre repliable au-dessus de la barre d'action (variante `side: 'bottom'` de `NarrowOverlayDrawer`, plafond 60vh).
+  evidence: Vérifié navigateur (août 2026) : à 1024px l'app garde déjà 3 colonnes conformes (GDD ~212px, colonne 600px, panneau droit avec TOTAL visible) — l'essentiel de 2d (« le total reste toujours visible ») est satisfait ; la barre basse est un raffinement, à faire avec les tests FR119/FR120 des drawers.
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
   summary: Écran 2b — le bouton « Variante » par option n'est PAS une fonctionnalité neuve : il correspond à la Story 1.10 (FR10, régénérer avec instructions ajustées), déjà implémentée via `RegenerateNodeModal`. À recâbler sur la nouvelle UI, pas à réécrire. Idem « Éditer » (Story 1.4, accepter/rejeter inline).

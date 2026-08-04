@@ -71,9 +71,20 @@ fonctionnalité a disparu (cf. `.claude/rules/tests.md`), avant de corriger l'as
 ## État d'avancement
 
 Branche `refonte-ui-2026`. Fait : tokens et polices, purge des emoji, rangées en filets,
-écran 1c (header, colonne gauche, colonne de lecture 660 px, colonne droite + TOTAL + DERNIER
-RÉSULTAT), dissolution de la modale de progression. Reste : **2e** (inspecteur à onglets — le plus
-gros), toolbar graphe une rangée, `EndNode`/`TestNode`, **2a** finition, **2b**, **2c**, **2d**.
+écran 1c (header, colonnes, lecture 660 px, TOTAL + DERNIER RÉSULTAT), dissolution de la
+modale de progression, **2e complet** (inspecteur à onglets `uiLayoutStore.inspectorTab`,
+toolbar une rangée 46 px avec seuil dédié 980 px, nœuds restylés — bordures neutres, pieds
+mono, plaques FIN/TEST), **2a** finition (étapes mono FR, ÉCHAP câblé, compteur tokens),
+**2c** mode écriture (Ctrl+\, colonne 760 px, brief 17 px, rails restaurés à la sortie).
+**2d** : conforme à ~90 % (3 colonnes tiennent à 1024 px, TOTAL visible) — barre basse
+repliable différée. Reste : recâblage 2b (Garder/Éditer/Variante sur Stories 1.4/1.10),
+comparaison 4 options en suspens (décision utilisateur, backend one-shot) — voir
+`_bmad-output/implementation-artifacts/deferred-work.md`.
+
+Piège corrigé au passage (août 2026) : `useNarrowInlineSize` créait son `ResizeObserver`
+dans la callback ref ; sous `React.StrictMode` le cleanup le déconnectait sans jamais le
+recréer — hook aveugle après le premier paint. Le RO vit désormais dans un effet keyé sur
+le nœud en state. Ne pas revenir au pattern callback-ref-crée-le-RO.
 
 La comparaison **4 options** de 2b est en suspens : le backend est one-shot
 (`GenerateUnityDialogueResponse` n'a pas de champ variantes), la faire coûterait N appels LLM par
