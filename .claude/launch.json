@@ -6,6 +6,12 @@
       "runtimeExecutable": "node",
       "runtimeArgs": ["scripts/dev.js"],
       "port": 3000
+    },
+    {
+      "name": "design-refs",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8972", "--directory", "docs/design/refonte-ui-2026"],
+      "port": 8972
     }
   ]
 }

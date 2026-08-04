@@ -25,6 +25,7 @@ Cursor attachait ces règles automatiquement par glob. Claude Code n'a pas ce m�
 | `api/**/*.py` (routers, schemas) | `.claude/rules/backend_api.md` |
 | `api/schemas/**`, validation Unity, erreurs inline graphe | `.claude/rules/api_validation_errors.md` |
 | `frontend/**` (général) | `.claude/rules/frontend.md` |
+| **Refonte UI 2026** — tout écran de la maquette (1c, 2a–2e), branche `refonte-ui-2026` | `.claude/rules/ui_redesign_2026.md` — ⚠️ **lire le HTML de `docs/design/refonte-ui-2026/` avant de coder** |
 | `frontend/**/*.{ts,tsx,css}` — layout, mobile, tactile | `.claude/rules/responsive_frontend.md` + skill `dialogue-frontend` |
 | `frontend/src/components/graph/**`, `graphStore.ts`, `*Slice.ts` | `.claude/rules/graph_editor.md` |
 | `testNodeSync.ts`, `TestNode.tsx` | `.claude/rules/testnode_sync.md` |
