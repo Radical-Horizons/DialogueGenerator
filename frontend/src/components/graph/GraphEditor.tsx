@@ -45,6 +45,8 @@ import { useGraphToolbar } from '../../hooks/useGraphToolbar'
 import { useDialoguePreview } from '../../hooks/useDialoguePreview'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { useBatchOperations } from '../../hooks/useBatchOperations'
+import { useBatchGenerateFromNodes } from '../../hooks/useBatchGenerateFromNodes'
+import { BatchGenerateFromNodesModal } from './BatchGenerateFromNodesModal'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import {
   GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX,
@@ -187,6 +189,18 @@ export function GraphEditor({
     setShowValidationReportForSelection,
   } = useBatchOperations(toast)
 
+  const {
+    isGenerating: isBatchGenerating,
+    progress: batchGenerateProgress,
+    report: batchGenerateReport,
+    showModal: showBatchGenerateModal,
+    setShowModal: setShowBatchGenerateModal,
+    dismissReport: dismissBatchGenerateReport,
+    startBatchGenerate,
+    cancelBatchGenerate,
+    retryFailedParents,
+  } = useBatchGenerateFromNodes(toast)
+
   /** Lore explicite peut n’ajouter aucune entrée dans validationErrors (graphe OK) : afficher quand même le résumé. */
   const showValidationOverlay =
     showValidationPanel &&
@@ -243,6 +257,7 @@ export function GraphEditor({
           handleSave={handleSave}
           onBatchTagApply={handleBatchTagSelection}
           handleBatchValidateSelection={handleBatchValidateSelection}
+          handleBatchGenerateSelection={() => void startBatchGenerate()}
           handleBatchDeleteSelection={handleBatchDeleteSelection}
           canEditGraph={canEditGraph}
           canOpenGraphActions={canOpenGraphActions}
@@ -506,6 +521,18 @@ export function GraphEditor({
         onClose={() => setShowValidationReportForSelection(false)}
         validationErrors={graphValidationErrors}
         selectedNodeIds={selectedNodeIds}
+      />
+      <BatchGenerateFromNodesModal
+        open={showBatchGenerateModal}
+        isGenerating={isBatchGenerating}
+        progress={batchGenerateProgress}
+        report={batchGenerateReport}
+        onClose={() => {
+          setShowBatchGenerateModal(false)
+          dismissBatchGenerateReport()
+        }}
+        onCancel={cancelBatchGenerate}
+        onRetryFailed={() => void retryFailedParents()}
       />
       {scenarioPlaythroughActive ? (
         <ScenarioPlaythroughOverlay

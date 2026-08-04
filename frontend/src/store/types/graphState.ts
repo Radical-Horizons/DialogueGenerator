@@ -207,6 +207,41 @@ export interface GraphState {
     }
   }>
 
+  /**
+   * Applique une réponse generate-node / batch-job (nœuds + suggested_connections)
+   * via connectNodes côté front (Story 8.9).
+   */
+  applyGenerateNodeResponse: (
+    parentNodeId: string,
+    response: {
+      nodes?: Array<{ id: string; [key: string]: unknown }> | null
+      node?: { id: string; [key: string]: unknown } | null
+      suggested_connections?: Array<{
+        from?: string
+        to?: string
+        from_node?: string
+        to_node?: string
+        via_choice_index?: number
+        connection_type?: string
+      }>
+      generated_choices_count?: number | null
+      connected_choices_count?: number | null
+      failed_choices_count?: number | null
+      total_choices_count?: number | null
+      batch_count?: number | null
+      context_gdd_content_fingerprint?: string | null
+    },
+    options?: Record<string, unknown>
+  ) => Promise<{
+    nodeId: string | null
+    batchInfo?: {
+      generatedChoices: number
+      connectedChoices: number
+      failedChoices: number
+      totalChoices: number
+    }
+  }>
+
   // Accept/Reject nodes (Story 1.4)
   acceptNode: (nodeId: string) => Promise<void>
   rejectNode: (nodeId: string) => Promise<void>

@@ -40,6 +40,8 @@ from services.context_dropping_rules_service import ContextDroppingRulesService
 from services.prompt_enricher import PromptEnricher
 from services.skill_catalog_service import SkillCatalogService
 from api.services.batch_validation_job_manager import BatchValidationJobManager
+from api.services.batch_node_generation_job_manager import BatchNodeGenerationJobManager
+from services.batch_node_generation_service import BatchNodeGenerationService
 from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
 from services.repositories.sqlite import (
@@ -143,6 +145,18 @@ def get_batch_validation_service(request: Request) -> BatchValidationService:
 def get_batch_validation_job_manager(request: Request) -> BatchValidationJobManager:
     """Retourne le gestionnaire de jobs de validation batch."""
     return get_service_container(request).get_batch_validation_job_manager()
+
+
+def get_batch_node_generation_service(request: Request) -> BatchNodeGenerationService:
+    """Retourne le service de génération batch multi-parents FR88."""
+    return get_service_container(request).get_batch_node_generation_service()
+
+
+def get_batch_node_generation_job_manager(
+    request: Request,
+) -> BatchNodeGenerationJobManager:
+    """Retourne le gestionnaire de jobs de génération batch FR88."""
+    return get_service_container(request).get_batch_node_generation_job_manager()
 
 
 def get_audit_log_service(request: Request) -> AuditLogService:

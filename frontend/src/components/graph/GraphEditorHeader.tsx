@@ -22,6 +22,7 @@ interface GraphEditorHeaderProps {
   handleSave: () => Promise<void>
   onBatchTagApply: (tag: string) => void
   handleBatchValidateSelection: () => void
+  handleBatchGenerateSelection?: () => void
   handleBatchDeleteSelection: () => void
   canEditGraph: boolean
   /** Ouverture menu Actions (export) même en lecture seule invité. */
@@ -42,6 +43,7 @@ export function GraphEditorHeader({
   activeDialogueFilename,
   onBatchTagApply,
   handleBatchValidateSelection,
+  handleBatchGenerateSelection,
   handleBatchDeleteSelection,
   canEditGraph,
   canOpenGraphActions,
@@ -211,6 +213,7 @@ export function GraphEditorHeader({
     onBatchDeleteClick: handleBatchDeleteSelection,
     onBatchTagApply,
     onBatchValidateClick: handleBatchValidateSelection,
+    onBatchGenerateClick: handleBatchGenerateSelection,
     nodes,
     edges,
     graphValidationErrors,

@@ -21,6 +21,7 @@ GENERATION_ENDPOINTS = [
     "/api/v1/dialogues/generate/unity-dialogue",
     "/api/v1/dialogues/generate/variants",
     "/api/v1/unity-dialogues/graph/generate-node",
+    "/api/v1/unity-dialogues/graph/batch-generate-from-nodes/jobs",
     "/api/v1/dialogues/generate/jobs",  # Streaming generation
 ]
 

@@ -18,6 +18,7 @@ export interface BatchOperationsMenuProps {
   onBatchDeleteClick: () => void
   onBatchTagApply: (tag: string) => void
   onBatchValidateClick: () => void
+  onBatchGenerateClick?: () => void
 }
 
 export function BatchOperationsMenu({
@@ -26,6 +27,7 @@ export function BatchOperationsMenu({
   onBatchDeleteClick,
   onBatchTagApply,
   onBatchValidateClick,
+  onBatchGenerateClick,
 }: BatchOperationsMenuProps) {
   const [tagDropdownOpen, setTagDropdownOpen] = useState(false)
   const tagDropdownRef = useRef<HTMLDivElement>(null)
@@ -158,6 +160,28 @@ export function BatchOperationsMenu({
         >
           Valider sélection
         </button>
+        {onBatchGenerateClick && (
+          <button
+            type="button"
+            data-testid="batch-generate-from-selection"
+            onClick={() => void onBatchGenerateClick()}
+            disabled={!canEditGraph || selectedNodeIds.length < 2}
+            style={{
+              padding: '0.35rem 0.7rem',
+              border: `1px solid ${theme.border.primary}`,
+              borderRadius: '6px',
+              backgroundColor: theme.button.default.background,
+              color: theme.button.default.color,
+              cursor:
+                canEditGraph && selectedNodeIds.length >= 2 ? 'pointer' : 'not-allowed',
+              opacity: canEditGraph && selectedNodeIds.length >= 2 ? 1 : 0.6,
+              fontSize: '0.8rem',
+            }}
+            title="Générer les choix libres depuis les nœuds sélectionnés"
+          >
+            Générer batch depuis sélection
+          </button>
+        )}
         <button
           type="button"
           onClick={onBatchDeleteClick}

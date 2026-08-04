@@ -51,6 +51,8 @@ from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
 from api.services.auth_service import AuthService
 from api.services.batch_validation_job_manager import BatchValidationJobManager
+from api.services.batch_node_generation_job_manager import BatchNodeGenerationJobManager
+from services.batch_node_generation_service import BatchNodeGenerationService
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +114,10 @@ class ServiceContainer:
         self._dialogue_metadata_service: Optional[DialogueMetadataService] = None
         self._batch_validation_service: Optional[BatchValidationService] = None
         self._batch_validation_job_manager: Optional[BatchValidationJobManager] = None
+        self._batch_node_generation_service: Optional[BatchNodeGenerationService] = None
+        self._batch_node_generation_job_manager: Optional[
+            BatchNodeGenerationJobManager
+        ] = None
         self._audit_logs_repository: Optional[AuditLogsRepository] = None
         self._audit_log_service: Optional[AuditLogService] = None
         self._document_persistence_service: Optional[DocumentPersistenceService] = None
@@ -255,6 +261,26 @@ class ServiceContainer:
                 self._batch_validation_job_manager = BatchValidationJobManager()
                 logger.info("BatchValidationJobManager initialisé dans le container.")
             return self._batch_validation_job_manager
+
+    def get_batch_node_generation_service(self) -> BatchNodeGenerationService:
+        """Retourne le service de génération batch multi-parents FR88."""
+        with self._database_lock:
+            if self._batch_node_generation_service is None:
+                self._batch_node_generation_service = BatchNodeGenerationService(
+                    orchestrator=self.get_graph_node_orchestrator(),
+                )
+                logger.info("BatchNodeGenerationService initialisé dans le container.")
+            return self._batch_node_generation_service
+
+    def get_batch_node_generation_job_manager(self) -> BatchNodeGenerationJobManager:
+        """Retourne le gestionnaire de jobs de génération batch FR88."""
+        with self._database_lock:
+            if self._batch_node_generation_job_manager is None:
+                self._batch_node_generation_job_manager = BatchNodeGenerationJobManager()
+                logger.info(
+                    "BatchNodeGenerationJobManager initialisé dans le container."
+                )
+            return self._batch_node_generation_job_manager
 
     def get_audit_logs_repository(self) -> AuditLogsRepository:
         """Retourne le repository append-only des journaux d'audit."""
@@ -708,6 +734,8 @@ class ServiceContainer:
             self._dialogue_metadata_service = None
             self._batch_validation_service = None
             self._batch_validation_job_manager = None
+            self._batch_node_generation_service = None
+            self._batch_node_generation_job_manager = None
             self._audit_logs_repository = None
             self._audit_log_service = None
             self._document_persistence_service = None

@@ -25,6 +25,7 @@ export interface GraphToolbarStatusRowProps {
   onBatchDeleteClick: () => void
   onBatchTagApply: (tag: string) => void
   onBatchValidateClick: () => void
+  onBatchGenerateClick?: () => void
   nodes: Node[]
   edges: Edge[]
   graphValidationErrors: ValidationErrorDetail[]
@@ -165,6 +166,7 @@ export function GraphToolbarStatusRow({
   onBatchDeleteClick,
   onBatchTagApply,
   onBatchValidateClick,
+  onBatchGenerateClick,
   nodes,
   edges,
   graphValidationErrors,
@@ -186,6 +188,7 @@ export function GraphToolbarStatusRow({
       onBatchDeleteClick={onBatchDeleteClick}
       onBatchTagApply={onBatchTagApply}
       onBatchValidateClick={onBatchValidateClick}
+      onBatchGenerateClick={onBatchGenerateClick}
     />
   )
 
