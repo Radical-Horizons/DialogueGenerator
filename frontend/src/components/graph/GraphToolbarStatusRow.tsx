@@ -99,9 +99,12 @@ function GraphHealthBadge({
       ? theme.state.error.color
       : theme.state.pending.border
 
+  const Tag = canToggle ? 'button' : 'span'
+
   return (
-    <span
+    <Tag
       data-testid="graph-health-badge"
+      type={canToggle ? 'button' : undefined}
       title={title}
       onClick={canToggle ? () => setShowValidationPanel((v) => !v) : undefined}
       style={{
@@ -115,6 +118,10 @@ function GraphHealthBadge({
         textTransform: 'uppercase',
         color: theme.text.secondary,
         whiteSpace: 'nowrap',
+        background: 'none',
+        border: 'none',
+        padding: 0,
+        margin: 0,
       }}
     >
       <span
@@ -128,7 +135,7 @@ function GraphHealthBadge({
         }}
       />
       {label}
-    </span>
+    </Tag>
   )
 }
 
