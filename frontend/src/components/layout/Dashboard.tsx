@@ -46,6 +46,7 @@ import { NarrowOverlayDrawer } from './NarrowOverlayDrawer'
 import type { CharacterResponse, LocationResponse, ItemResponse, SpeciesResponse, CommunityResponse, UnityDialogueMetadata } from '../../types/api'
 import { theme } from '../../theme'
 import { redesignAccent, redesignFont, redesignHairline, redesignText } from '../../theme/redesignTokens'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
 type ContextLoadState = {
@@ -866,6 +867,43 @@ export function Dashboard() {
       applyCollapsedLayout(isLeftPanelCollapsed, next)
     }
   }, [applyCollapsedLayout, isLeftPanelCollapsed, isRightPanelCollapsed, viewportMode])
+
+  // ── Mode écriture (écran 2c) ──────────────────────────────────────────────
+  // Ctrl+\ (ou ⌘\) bascule : les deux panneaux se replient, la colonne passe à 760px.
+  // Rien n'est supprimé : les rails restent cliquables, sortir restaure l'état d'avant.
+  const writingMode = useUiLayoutStore((s) => s.writingMode)
+  const panelsBeforeWritingRef = useRef<{ left: boolean; right: boolean } | null>(null)
+  const collapsedStateRef = useRef({ left: isLeftPanelCollapsed, right: isRightPanelCollapsed })
+  collapsedStateRef.current = { left: isLeftPanelCollapsed, right: isRightPanelCollapsed }
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === '\\' || e.code === 'Backslash')) {
+        e.preventDefault()
+        useUiLayoutStore.getState().toggleWritingMode()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
+  useEffect(() => {
+    if (writingMode) {
+      panelsBeforeWritingRef.current = { ...collapsedStateRef.current }
+      if (!expandedSizesRef.current && panelsRef.current) {
+        expandedSizesRef.current = panelsRef.current.getSizes()
+      }
+      setIsLeftPanelCollapsed(true)
+      setIsRightPanelCollapsed(true)
+      applyCollapsedLayout(true, true)
+    } else if (panelsBeforeWritingRef.current) {
+      const prev = panelsBeforeWritingRef.current
+      panelsBeforeWritingRef.current = null
+      setIsLeftPanelCollapsed(prev.left)
+      setIsRightPanelCollapsed(prev.right)
+      applyCollapsedLayout(prev.left, prev.right)
+    }
+  }, [writingMode, applyCollapsedLayout])
 
 
 

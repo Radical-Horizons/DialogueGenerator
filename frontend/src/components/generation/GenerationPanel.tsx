@@ -11,6 +11,7 @@ import { useContextConfigStore } from '../../store/contextConfigStore'
 import { useContextStore } from '../../store/contextStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useLLMStore } from '../../store/llmStore'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { useAuthorProfile } from '../../hooks/useAuthorProfile'
 import { theme } from '../../theme'
 import type { LLMModelResponse } from '../../types/api'
@@ -413,6 +414,7 @@ export function GenerationPanel() {
     PANEL_COMFORT_MIN_WIDTH_PX
   )
   const genChrome = isGenerationNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
+  const writingMode = useUiLayoutStore((s) => s.writingMode)
 
   /**
    * Interruption de la génération en cours : annulation du job puis remise à zéro de l'état SSE.
@@ -499,14 +501,41 @@ export function GenerationPanel() {
           flex: 1,
           overflowY: 'auto',
           minWidth: 0,
-          // Colonne de lecture 660px centrée (écran 1c) ; pleine largeur en narrow.
+          // Colonne de lecture 660px centrée (écran 1c) — 760px en mode écriture (2c).
           width: '100%',
-          maxWidth: isGenerationNarrow ? undefined : redesignReadingColumn.default,
+          maxWidth: isGenerationNarrow
+            ? undefined
+            : writingMode
+              ? redesignReadingColumn.writingMode
+              : redesignReadingColumn.default,
           marginLeft: isGenerationNarrow ? undefined : 'auto',
           marginRight: isGenerationNarrow ? undefined : 'auto',
           boxSizing: 'border-box',
         }}
       >
+        {/* Écran 2c : rappel du mode + sortie cliquable (le raccourci est écrit à côté). */}
+        {writingMode && (
+          <button
+            type="button"
+            data-testid="writing-mode-badge"
+            onClick={() => useUiLayoutStore.getState().setWritingMode(false)}
+            title="Quitter le mode écriture"
+            style={{
+              display: 'block',
+              margin: '0 auto 20px',
+              padding: '4px 10px',
+              border: 'none',
+              background: 'none',
+              cursor: 'pointer',
+              fontFamily: redesignFont.mono,
+              fontSize: '10px',
+              letterSpacing: '0.06em',
+              color: redesignText.label,
+            }}
+          >
+            MODE ÉCRITURE · CTRL+\ POUR SORTIR
+          </button>
+        )}
         {/* Progression du streaming : dans le flux de l'écran, plus de modale (Story 0.2 → refonte UI) */}
         <GenerationStreamingInline
           isActive={

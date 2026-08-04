@@ -350,6 +350,20 @@ export function GenerationStreamingInline({
 }: GenerationStreamingInlineProps) {
   const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
   const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
+
+  // Écran 2a : ÉCHAP interrompt — le raccourci est écrit sur le bouton, pas dans une aide.
+  const canInterrupt = isActive && !isMinimized && currentStep !== 'Complete' && !error && !isInterrupting
+  useEffect(() => {
+    if (!canInterrupt) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onInterrupt()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [canInterrupt, onInterrupt])
   // Auto-fermeture 3 secondes après complétion (si pas réduit)
   useEffect(() => {
     if (currentStep === 'Complete' && !isMinimized && !error) {
@@ -378,8 +392,14 @@ export function GenerationStreamingInline({
     return null
   }, [content])
 
-  // Mapping des étapes pour la barre de progression
+  // Mapping des étapes pour la barre de progression — libellés mono FR (écran 2a)
   const steps = ['Prompting', 'Generating', 'Validating', 'Complete']
+  const stepLabels: Record<string, string> = {
+    Prompting: 'PROMPT',
+    Generating: 'ÉCRITURE',
+    Validating: 'VALIDATION',
+    Complete: 'TERMINÉ',
+  }
   const currentStepIndex = steps.indexOf(currentStep)
   const progressPercentage = ((currentStepIndex + 1) / steps.length) * 100
   // Le curseur ne clignote que tant que du texte peut encore arriver.
@@ -525,7 +545,7 @@ export function GenerationStreamingInline({
                   fontWeight: index === currentStepIndex ? 700 : 400,
                 }}
               >
-                {step}
+                {stepLabels[step] ?? step}
               </span>
             ))}
           </div>
@@ -756,14 +776,14 @@ export function GenerationStreamingInline({
         )}
       </div>
 
-      {/* Footer - Actions */}
+      {/* Footer - Actions + compteur mono (écran 2a : ce qui est déjà dépensé, pas une estimation) */}
       <div
         style={{
           padding: `${redesignSpacing.sm}px ${redesignSpacing.lg}px`,
           borderTop: `1px solid ${redesignHairline.standard}`,
           display: 'flex',
-          justifyContent: 'flex-end',
-          gap: '0.5rem',
+          flexDirection: 'column',
+          gap: `${redesignSpacing.sm}px`,
           flexShrink: 0,
         }}
       >
@@ -772,6 +792,7 @@ export function GenerationStreamingInline({
             type="button"
             onClick={onClose}
             style={{
+              alignSelf: 'flex-end',
               padding: '0.5rem 1rem',
               border: 'none',
               borderRadius: `${redesignRadius.control}px`,
@@ -787,16 +808,46 @@ export function GenerationStreamingInline({
             type="button"
             onClick={onInterrupt}
             style={{
-              padding: '0.5rem 1rem',
-              border: `1px solid ${redesignHairline.strong}`,
+              width: '100%',
+              height: 42,
+              border: '1px solid #2e2e36',
               borderRadius: `${redesignRadius.control}px`,
-              backgroundColor: 'transparent',
+              backgroundColor: '#1a1a1f',
               color: theme.text.primary,
               cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 10,
+              fontSize: '13.5px',
+              fontWeight: 500,
             }}
           >
             Interrompre
+            <span
+              style={{
+                fontFamily: redesignFont.mono,
+                fontSize: '10.5px',
+                color: '#7c7c86',
+              }}
+            >
+              ÉCHAP
+            </span>
           </button>
+        )}
+        {content.length > 0 && currentStep !== 'Complete' && (
+          <div
+            data-testid="streaming-token-counter"
+            style={{
+              textAlign: 'center',
+              fontFamily: redesignFont.mono,
+              fontSize: '10.5px',
+              letterSpacing: '0.06em',
+              color: '#63636c',
+            }}
+          >
+            ≈ {Math.max(1, Math.round(content.length / 4)).toLocaleString('fr-FR')} TOKENS REÇUS
+          </div>
         )}
       </div>
     </section>

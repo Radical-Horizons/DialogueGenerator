@@ -31,6 +31,26 @@ describe('GenerationStreamingInline', () => {
     mockOnClose.mockClear()
   })
 
+  it('ÉCHAP interrompt la génération en cours (écran 2a)', () => {
+    render(
+      <GenerationStreamingInline
+        {...createDefaultProps({ onInterrupt: mockOnInterrupt })}
+      />
+    )
+    fireEvent.keyDown(window, { key: 'Escape' })
+    expect(mockOnInterrupt).toHaveBeenCalledTimes(1)
+  })
+
+  it('ÉCHAP est inerte une fois la génération terminée', () => {
+    render(
+      <GenerationStreamingInline
+        {...createDefaultProps({ currentStep: 'Complete', onInterrupt: mockOnInterrupt })}
+      />
+    )
+    fireEvent.keyDown(window, { key: 'Escape' })
+    expect(mockOnInterrupt).not.toHaveBeenCalled()
+  })
+
   it('neutralizes dangerous inline HTML while preserving markdown rendering', () => {
     const streamedContent = JSON.stringify({
       title: 'Titre',
@@ -165,7 +185,8 @@ describe('GenerationStreamingInline', () => {
         })}
       />
     )
-    expect(screen.getByText(/Validating/i)).toBeInTheDocument()
+    // Écran 2a : libellés mono FR — l'étape `Validating` s'affiche `VALIDATION`.
+    expect(screen.getByText(/VALIDATION/)).toBeInTheDocument()
   })
 
   // Matrice I/O, ligne 4 : le mode réduit est repris **tel quel** depuis la modale

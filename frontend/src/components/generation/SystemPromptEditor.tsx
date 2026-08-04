@@ -22,6 +22,7 @@ import {
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
 import { StyledSelect } from '../shared/StyledSelect'
 import { redesignFont, redesignReadingColumn, redesignText } from '../../theme/redesignTokens'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
 
 export interface SystemPromptEditorProps {
   userInstructions: string
@@ -251,6 +252,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
   }, [sceneSaveAsName, userInstructions, refreshLocalSceneTemplates, toast])
 
   const isNarrow = useGenerationPanelNarrow()
+  const writingMode = useUiLayoutStore((s) => s.writingMode)
   const genChrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
 
   const tabs: Tab[] = [
@@ -563,7 +565,15 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
             </div>
           </div>
           <FormField label="" htmlFor="user-instructions-textarea" style={{ marginBottom: 0 }}>
-            <div style={{ maxWidth: isNarrow ? undefined : redesignReadingColumn.default }}>
+            <div
+              style={{
+                maxWidth: isNarrow
+                  ? undefined
+                  : writingMode
+                    ? redesignReadingColumn.writingMode
+                    : redesignReadingColumn.default,
+              }}
+            >
               <textarea
                 id="user-instructions-textarea"
                 value={userInstructions}
@@ -581,7 +591,12 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                   color: redesignText.body,
                   borderRadius: 0,
                   fontFamily: 'inherit',
-                  fontSize: isNarrow ? `${genChrome.textareaFontRem}rem` : '15.5px',
+                  // 2c : le brief passe à 17px en mode écriture.
+                  fontSize: isNarrow
+                    ? `${genChrome.textareaFontRem}rem`
+                    : writingMode
+                      ? '17px'
+                      : '15.5px',
                   resize: 'vertical',
                   lineHeight: isNarrow ? 1.55 : 1.72,
                   outline: 'none',

@@ -19,6 +19,14 @@ interface UiLayoutState {
   setInspectorTab: (tab: InspectorTab | null) => void
   /** Bascule un onglet : re-cliquer l'onglet actif replie l'inspecteur. */
   toggleInspectorTab: (tab: InspectorTab) => void
+  /**
+   * Mode écriture (écran 2c) : `Ctrl+\` replie les deux panneaux latéraux et passe
+   * la colonne de lecture à 760px / brief 17px. Rien n'est supprimé — les rails
+   * gardent leurs compteurs et un clic ramène chaque panneau.
+   */
+  writingMode: boolean
+  setWritingMode: (on: boolean) => void
+  toggleWritingMode: () => void
 }
 
 export const useUiLayoutStore = create<UiLayoutState>()((set) => ({
@@ -28,4 +36,8 @@ export const useUiLayoutStore = create<UiLayoutState>()((set) => ({
 
   toggleInspectorTab: (tab) =>
     set((state) => ({ inspectorTab: state.inspectorTab === tab ? null : tab })),
+
+  writingMode: false,
+  setWritingMode: (on) => set({ writingMode: on }),
+  toggleWritingMode: () => set((state) => ({ writingMode: !state.writingMode })),
 }))
