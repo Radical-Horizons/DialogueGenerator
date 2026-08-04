@@ -46,9 +46,11 @@ from services.audit_log_service import AuditLogService
 from services.collection_service import CollectionService
 from services.dialogue_index_service import DialogueIndexService
 from services.dialogue_metadata_service import DialogueMetadataService
+from services.batch_validation_service import BatchValidationService
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
 from api.services.auth_service import AuthService
+from api.services.batch_validation_job_manager import BatchValidationJobManager
 
 logger = logging.getLogger(__name__)
 
@@ -108,6 +110,8 @@ class ServiceContainer:
         self._dialogues_search_repository: Optional[DialoguesSearchRepository] = None
         self._dialogue_index_service: Optional[DialogueIndexService] = None
         self._dialogue_metadata_service: Optional[DialogueMetadataService] = None
+        self._batch_validation_service: Optional[BatchValidationService] = None
+        self._batch_validation_job_manager: Optional[BatchValidationJobManager] = None
         self._audit_logs_repository: Optional[AuditLogsRepository] = None
         self._audit_log_service: Optional[AuditLogService] = None
         self._document_persistence_service: Optional[DocumentPersistenceService] = None
@@ -233,6 +237,24 @@ class ServiceContainer:
                 )
                 logger.info("DialogueMetadataService initialisé dans le container.")
             return self._dialogue_metadata_service
+
+    def get_batch_validation_service(self) -> BatchValidationService:
+        """Retourne le service de validation batch FR87."""
+        with self._database_lock:
+            if self._batch_validation_service is None:
+                self._batch_validation_service = BatchValidationService(
+                    config_service=self.get_config_service(),
+                )
+                logger.info("BatchValidationService initialisé dans le container.")
+            return self._batch_validation_service
+
+    def get_batch_validation_job_manager(self) -> BatchValidationJobManager:
+        """Retourne le gestionnaire de jobs de validation batch."""
+        with self._database_lock:
+            if self._batch_validation_job_manager is None:
+                self._batch_validation_job_manager = BatchValidationJobManager()
+                logger.info("BatchValidationJobManager initialisé dans le container.")
+            return self._batch_validation_job_manager
 
     def get_audit_logs_repository(self) -> AuditLogsRepository:
         """Retourne le repository append-only des journaux d'audit."""
@@ -684,6 +706,8 @@ class ServiceContainer:
             self._dialogues_search_repository = None
             self._dialogue_index_service = None
             self._dialogue_metadata_service = None
+            self._batch_validation_service = None
+            self._batch_validation_job_manager = None
             self._audit_logs_repository = None
             self._audit_log_service = None
             self._document_persistence_service = None

@@ -9,6 +9,7 @@ import { DialogueEditionNarrowProvider } from './DialogueEditionNarrowContext'
 import { UnityDialogueDetails } from './UnityDialogueDetails'
 import { theme } from '../../theme'
 import type { UnityDialogueMetadata } from '../../types/api'
+import { setPendingValidationFocus } from '../../utils/pendingValidationFocus'
 
 export function UnityDialoguesPage() {
   const [selectedDialogue, setSelectedDialogue] = useState<UnityDialogueMetadata | null>(null)
@@ -20,6 +21,16 @@ export function UnityDialoguesPage() {
 
   const handleDialogueDeleted = async () => {
     await dialogueListRef.current?.refresh()
+  }
+
+  const handleOpenValidatedDialogue = (documentId: string, focusNodeId?: string) => {
+    setPendingValidationFocus(focusNodeId)
+    setSelectedDialogue({
+      filename: `${documentId}.json`,
+      file_path: '',
+      size_bytes: 0,
+      modified_time: new Date().toISOString(),
+    })
   }
 
   return (
@@ -38,6 +49,7 @@ export function UnityDialoguesPage() {
           ref={dialogueListRef}
           onSelectDialogue={setSelectedDialogue}
           selectedFilename={selectedDialogue?.filename || null}
+          onOpenValidatedDialogue={handleOpenValidatedDialogue}
         />
       </div>
       <div

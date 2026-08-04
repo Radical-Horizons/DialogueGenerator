@@ -23,11 +23,13 @@ import {
 } from '../../utils/formatDialogueTitle'
 import { useToast, Badge } from '../shared'
 import { useBatchUnityExport, toDocumentId } from '../../hooks/useBatchUnityExport'
+import { useBatchDialogueValidation } from '../../hooks/useBatchDialogueValidation'
 import { useRegisterUnityBatchExportMenu } from '../../hooks/useRegisterUnityBatchExportMenu'
 import { useDocumentSchemaValidation } from '../../hooks/useDocumentSchemaValidation'
 import { useUnityExportPreview } from '../../hooks/useUnityExportPreview'
 import { BatchExportToolbar } from './BatchExportToolbar'
 import { BatchExportSummaryBanner } from './BatchExportSummaryBanner'
+import { BatchValidationModal } from './BatchValidationModal'
 import { CollectionManager } from './CollectionManager'
 import * as collectionsAPI from '../../api/collections'
 import type { DialogueCollection } from '../../api/collections'
@@ -56,6 +58,8 @@ const BATCH_UNSAVED_WARNING =
 interface UnityDialogueListProps {
   onSelectDialogue: (dialogue: UnityDialogueMetadata | null) => void
   selectedFilename: string | null
+  /** Ouverture depuis le rapport de validation batch (focus nœud optionnel). */
+  onOpenValidatedDialogue?: (documentId: string, focusNodeId?: string) => void
 }
 
 export interface UnityDialogueListRef {
@@ -63,10 +67,15 @@ export interface UnityDialogueListRef {
 }
 
 export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueListProps>(
-  function UnityDialogueList({ onSelectDialogue, selectedFilename }, ref) {
+  function UnityDialogueList(
+    { onSelectDialogue, selectedFilename, onOpenValidatedDialogue },
+    ref
+  ) {
   const toast = useToast()
   const isGuest = useAuthStore((s) => s.user?.role === 'guest')
   const batch = useBatchUnityExport(toast)
+  const batchValidation = useBatchDialogueValidation(toast)
+  const [showBatchValidationModal, setShowBatchValidationModal] = useState(false)
   const [downloadOptions, setDownloadOptionsState] = useState<DownloadExportOptions>(() =>
     loadDownloadExportOptions(),
   )
@@ -374,6 +383,35 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
     openFilename,
     toast,
   ])
+
+  const handleStartBatchValidate = useCallback(() => {
+    const ids = Array.from(batch.checkedDocumentIds)
+    if (ids.length === 0) return
+    setShowBatchValidationModal(true)
+    void batchValidation.startBatchValidation(ids)
+  }, [batch.checkedDocumentIds, batchValidation])
+
+  const handleOpenFromValidationReport = useCallback(
+    (documentId: string, focusNodeId?: string) => {
+      if (onOpenValidatedDialogue) {
+        onOpenValidatedDialogue(documentId, focusNodeId)
+        return
+      }
+      const match = filteredDialogues.find(
+        (d) => toDocumentId(d.filename) === documentId
+      )
+      if (match) onSelectDialogue(match)
+      else {
+        onSelectDialogue({
+          filename: `${documentId}.json`,
+          file_path: '',
+          size_bytes: 0,
+          modified_time: new Date().toISOString(),
+        })
+      }
+    },
+    [filteredDialogues, onOpenValidatedDialogue, onSelectDialogue]
+  )
 
   const setDownloadOptions = useCallback((options: DownloadExportOptions) => {
     setDownloadOptionsState(options)
@@ -703,6 +741,36 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
           {(searchQuery || hasActiveFilters) && ` (sur ${total} total)`}
         </div>
 
+        {!isGuest && batch.checkedDocumentIds.size > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '0.35rem',
+              alignItems: 'center',
+              marginTop: '0.4rem',
+            }}
+          >
+            <button
+              type="button"
+              data-testid="batch-validate-start"
+              disabled={batchValidation.isValidating || batch.isBatchExporting}
+              onClick={handleStartBatchValidate}
+              style={{
+                padding: '0.35rem 0.6rem',
+                border: `1px solid ${theme.border.primary}`,
+                borderRadius: '6px',
+                backgroundColor: theme.button.secondary.background,
+                color: theme.button.secondary.color,
+                cursor: 'pointer',
+                fontSize: remSize('small'),
+              }}
+            >
+              Valider en batch ({batch.checkedDocumentIds.size})
+            </button>
+          </div>
+        )}
+
         {!isGuest && batch.checkedDocumentIds.size > 0 && collections.length > 0 && (
           <div
             data-testid="unity-dialogue-add-to-collection"
@@ -940,10 +1008,12 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
               batchOptions={batch.batchOptions}
               onToggleSelectAll={batchMenuActions.onToggleSelectAll}
               onStartExport={handleStartBatchExport}
+              onStartValidate={handleStartBatchValidate}
               onStartPreview={() => void handleStartBatchPreview()}
               onCancelExport={batch.cancelBatchExport}
               onToggleOptions={() => batch.setShowOptionsPanel(false)}
               onOptionsChange={batch.setBatchOptions}
+              isBatchValidating={batchValidation.isValidating}
             />
           </div>
         </div>
@@ -990,10 +1060,26 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
           batchOptions={batch.batchOptions}
           onToggleSelectAll={batchMenuActions.onToggleSelectAll}
           onStartExport={handleStartBatchExport}
+          onStartValidate={handleStartBatchValidate}
           onStartPreview={() => void handleStartBatchPreview()}
           onCancelExport={batch.cancelBatchExport}
           onToggleOptions={() => batch.setShowOptionsPanel(true)}
           onOptionsChange={batch.setBatchOptions}
+          isBatchValidating={batchValidation.isValidating}
+        />
+      )}
+      {(batchValidation.isValidating || batchValidation.report) && (
+        <BatchValidationModal
+          open={showBatchValidationModal || batchValidation.isValidating || Boolean(batchValidation.report)}
+          isValidating={batchValidation.isValidating}
+          progress={batchValidation.progress}
+          report={batchValidation.report}
+          onCancel={batchValidation.cancelBatchValidation}
+          onClose={() => {
+            setShowBatchValidationModal(false)
+            batchValidation.dismissReport()
+          }}
+          onOpenDialogue={handleOpenFromValidationReport}
         />
       )}
       {showExportLogsPanel && (

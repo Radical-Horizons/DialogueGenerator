@@ -13,6 +13,7 @@ import type { UnityDialogueMetadata } from '../types/api'
 import type { UnityDialogueListRef } from '../components/unityDialogues/UnityDialogueList'
 import type { UseToastFn } from '../components/shared'
 import { normalizeDialogueFilenameKey } from '../utils/formatDialogueTitle'
+import { consumePendingValidationFocus } from '../utils/pendingValidationFocus'
 
 interface RouteTarget {
   normalizedDialogueId: string
@@ -195,6 +196,10 @@ export function useDialogueLoader(
           await validateGraph()
         } catch (err) {
           console.error('Erreur lors de la validation automatique au chargement:', err)
+        }
+        const focusNodeId = consumePendingValidationFocus()
+        if (focusNodeId) {
+          useGraphStore.getState().jumpToNode(focusNodeId)
         }
         loadInFlightRef.current = false
         setIsLoadingDialogue(false)

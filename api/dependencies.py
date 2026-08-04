@@ -21,6 +21,7 @@ from core.llm.llm_client import ILLMClient
 from services.configuration_service import ConfigurationService
 # InteractionService supprimé - système obsolète
 from services.dialogue_generation_service import DialogueGenerationService
+from services.batch_validation_service import BatchValidationService
 from services.linked_selector import LinkedSelectorService
 # FileInteractionRepository supprimé - système obsolète
 from services.repositories.llm_usage_repository import FileLLMUsageRepository
@@ -38,6 +39,7 @@ from services.context_rule_service import ContextRuleService
 from services.context_dropping_rules_service import ContextDroppingRulesService
 from services.prompt_enricher import PromptEnricher
 from services.skill_catalog_service import SkillCatalogService
+from api.services.batch_validation_job_manager import BatchValidationJobManager
 from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
 from services.repositories.sqlite import (
@@ -131,6 +133,16 @@ def get_dialogue_index_service(request: Request) -> DialogueIndexService:
 def get_dialogue_metadata_service(request: Request) -> DialogueMetadataService:
     """Retourne le service d'agrégation des métadonnées dialogue."""
     return get_service_container(request).get_dialogue_metadata_service()
+
+
+def get_batch_validation_service(request: Request) -> BatchValidationService:
+    """Retourne le service de validation batch FR87."""
+    return get_service_container(request).get_batch_validation_service()
+
+
+def get_batch_validation_job_manager(request: Request) -> BatchValidationJobManager:
+    """Retourne le gestionnaire de jobs de validation batch."""
+    return get_service_container(request).get_batch_validation_job_manager()
 
 
 def get_audit_log_service(request: Request) -> AuditLogService:
