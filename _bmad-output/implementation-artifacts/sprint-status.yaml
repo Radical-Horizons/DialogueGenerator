@@ -170,15 +170,15 @@ development_status:
   7-8-système-track-actions-utilisateurs-pour-audit-logs-v15-fr71: done
   7-9-préférences-utilisateur-synchronisées-serveur: done
   epic-7-retrospective: done
-  epic-8: in-progress
+  epic-8: done
   8-1-lister-tous-les-dialogues-du-système-fr80: done
   8-2-rechercher-des-dialogues-nom-personnage-lieu-thème-fr81: done
   8-3-filtrer-les-dialogues-par-métadonnées-date-auteur-statut-fr82: done
   8-4-trier-les-dialogues-alpha-date-taille-fr83: done
-  8-5-créer-des-collections-dossiers-de-dialogues-fr84: review
-  8-6-indexer-les-dialogues-pour-recherche-rapide-1000-fr85: review
-  8-7-afficher-les-métadonnées-dun-dialogue-nodes-coût-last-edited-fr86: review
-  8-8-valider-en-batch-plusieurs-dialogues-fr87: review
+  8-5-créer-des-collections-dossiers-de-dialogues-fr84: done
+  8-6-indexer-les-dialogues-pour-recherche-rapide-1000-fr85: done
+  8-7-afficher-les-métadonnées-dun-dialogue-nodes-coût-last-edited-fr86: done
+  8-8-valider-en-batch-plusieurs-dialogues-fr87: done
   8-9-générer-en-batch-depuis-plusieurs-nœuds-de-départ-fr88: done
   epic-8-retrospective: optional
   epic-9: done
