@@ -77,9 +77,12 @@ toolbar une rangée 46 px avec seuil dédié 980 px, nœuds restylés — bordur
 mono, plaques FIN/TEST), **2a** finition (étapes mono FR, ÉCHAP câblé, compteur tokens),
 **2c** mode écriture (Ctrl+\, colonne 760 px, brief 17 px, rails restaurés à la sortie).
 **2d** : conforme à ~90 % (3 colonnes tiennent à 1024 px, TOTAL visible) — barre basse
-repliable différée. Reste : recâblage 2b (Garder/Éditer/Variante sur Stories 1.4/1.10),
-comparaison 4 options en suspens (décision utilisateur, backend one-shot) — voir
-`_bmad-output/implementation-artifacts/deferred-work.md`.
+repliable différée. **2b multi-options : fait** (décision utilisateur 2026-08-04 — appels
+parallèles autorisés, plafond 4) : `generationOptionsStore` + `GenerationOptionsComparison`,
+sélecteur ×N dans la barre d'action, Garder/Variante/Réessayer par option, interruption
+qui annule aussi les jobs d'arrière-plan. ⚠️ Le backend n'exécute un job que quand son
+stream SSE est réclamé (`try_claim_stream_job`) : toute option d'arrière-plan doit ouvrir
+son EventSource — un simple polling de statut resterait `queued` pour toujours.
 
 Piège corrigé au passage (août 2026) : `useNarrowInlineSize` créait son `ResizeObserver`
 dans la callback ref ; sous `React.StrictMode` le cleanup le déconnectait sans jamais le

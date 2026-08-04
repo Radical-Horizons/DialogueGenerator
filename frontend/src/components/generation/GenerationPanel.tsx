@@ -12,6 +12,12 @@ import { useContextStore } from '../../store/contextStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useLLMStore } from '../../store/llmStore'
 import { useUiLayoutStore } from '../../store/uiLayoutStore'
+import {
+  MAX_GENERATION_OPTIONS,
+  cancelBackgroundOptions,
+  useGenerationOptionsStore,
+} from '../../store/generationOptionsStore'
+import { GenerationOptionsComparison } from './GenerationOptionsComparison'
 import { useAuthorProfile } from '../../hooks/useAuthorProfile'
 import { theme } from '../../theme'
 import type { LLMModelResponse } from '../../types/api'
@@ -415,6 +421,23 @@ export function GenerationPanel() {
   )
   const genChrome = isGenerationNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
   const writingMode = useUiLayoutStore((s) => s.writingMode)
+  const optionCount = useGenerationOptionsStore((s) => s.optionCount)
+  const optionSlots = useGenerationOptionsStore((s) => s.slots)
+
+  // Multi-options : l'option 1 est le stream principal — quand il aboutit (ou échoue),
+  // refléter son état dans le slot 0 de la comparaison.
+  useEffect(() => {
+    if (optionSlots.length < 2) return
+    const slot0 = optionSlots.find((s) => s.index === 0)
+    if (!slot0 || slot0.status !== 'running') return
+    if (unityDialogueResponse) {
+      useGenerationOptionsStore
+        .getState()
+        .updateSlot(0, { status: 'completed', result: unityDialogueResponse })
+    } else if (streamingError) {
+      useGenerationOptionsStore.getState().updateSlot(0, { status: 'error', error: streamingError })
+    }
+  }, [optionSlots, unityDialogueResponse, streamingError])
 
   /**
    * Interruption de la génération en cours : annulation du job puis remise à zéro de l'état SSE.
@@ -423,6 +446,9 @@ export function GenerationPanel() {
   const handleInterruptGeneration = useCallback(async () => {
     // Afficher "Interruption en cours..."
     setInterrupting(true)
+
+    // Multi-options : annuler aussi les jobs d'arrière-plan (2b).
+    cancelBackgroundOptions()
 
     // Appeler l'API de cancel avec le job_id avec timeout de 10s
     if (currentJobId) {
@@ -556,6 +582,9 @@ export function GenerationPanel() {
           onMinimize={minimize}
           onClose={handleCloseStreaming}
         />
+
+        {/* Comparaison des options (écran 2b) — rendue dès qu'un run multi-options existe. */}
+        <GenerationOptionsComparison />
 
         {/* 1c ne montre pas la barre de preset : elle vit avec les réglages du modèle. */}
         <div style={{ display: showModelSettings ? 'block' : 'none' }}>
@@ -956,36 +985,69 @@ export function GenerationPanel() {
           gap: 9,
         }}
       >
-        <button
-          type="button"
-          onClick={() => void orchestrator.handleGenerate()}
-          disabled={isGeneratePrimaryDisabled}
-          style={{
-            height: 46,
-            borderRadius: 6,
-            border: 'none',
-            backgroundColor: redesignAccent.base,
-            color: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 11,
-            cursor: isGeneratePrimaryDisabled ? 'not-allowed' : 'pointer',
-            opacity: isGeneratePrimaryDisabled ? 0.6 : 1,
-            width: '100%',
-          }}
-        >
-          <span style={{ fontSize: '14.5px', fontWeight: 600 }}>Générer le premier nœud</span>
-          <span
+        <div style={{ display: 'flex', gap: 9 }}>
+          <button
+            type="button"
+            onClick={() => void orchestrator.handleGenerate()}
+            disabled={isGeneratePrimaryDisabled}
             style={{
-              fontFamily: redesignFont.mono,
-              fontSize: '11px',
-              color: 'rgba(255,255,255,0.6)',
+              height: 46,
+              borderRadius: 6,
+              border: 'none',
+              backgroundColor: redesignAccent.base,
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 11,
+              cursor: isGeneratePrimaryDisabled ? 'not-allowed' : 'pointer',
+              opacity: isGeneratePrimaryDisabled ? 0.6 : 1,
+              flex: 1,
+              minWidth: 0,
             }}
           >
-            CTRL+↵
-          </span>
-        </button>
+            <span style={{ fontSize: '14.5px', fontWeight: 600 }}>
+              {optionCount > 1 ? `Générer ${optionCount} options` : 'Générer le premier nœud'}
+            </span>
+            <span
+              style={{
+                fontFamily: redesignFont.mono,
+                fontSize: '11px',
+                color: 'rgba(255,255,255,0.6)',
+              }}
+            >
+              CTRL+↵
+            </span>
+          </button>
+          {/* 2b : nombre d'options par génération — N appels LLM parallèles, plafonnés. */}
+          <button
+            type="button"
+            data-testid="generation-option-count"
+            onClick={() =>
+              useGenerationOptionsStore
+                .getState()
+                .setOptionCount(optionCount >= MAX_GENERATION_OPTIONS ? 1 : optionCount + 1)
+            }
+            disabled={isGeneratePrimaryDisabled}
+            title={`Nombre d'options générées en parallèle (coût ×${optionCount}). Cliquer pour changer — max ${MAX_GENERATION_OPTIONS}.`}
+            style={{
+              height: 46,
+              padding: '0 14px',
+              borderRadius: 6,
+              border: '1px solid #2e2e36',
+              backgroundColor: 'transparent',
+              color: optionCount > 1 ? redesignAccent.light : redesignText.secondary,
+              fontFamily: redesignFont.mono,
+              fontSize: '11px',
+              letterSpacing: '0.05em',
+              cursor: isGeneratePrimaryDisabled ? 'not-allowed' : 'pointer',
+              opacity: isGeneratePrimaryDisabled ? 0.6 : 1,
+              flexShrink: 0,
+            }}
+          >
+            × {optionCount}
+          </button>
+        </div>
         {orchestrator.tokenCount != null && (
           <div
             style={{

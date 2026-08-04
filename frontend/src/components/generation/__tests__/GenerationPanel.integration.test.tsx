@@ -507,8 +507,12 @@ describe('GenerationPanel - Tests Baseline', () => {
       try {
         render(<GenerationPanel />)
         await waitForPanelReady()
-        const action = within(screen.getByTestId('generation-primary-action')).getByRole('button')
+        // La barre porte désormais deux boutons (Générer + ×N options) : cibler le primaire.
+        const action = within(screen.getByTestId('generation-primary-action')).getByRole('button', {
+          name: /Générer/,
+        })
         expect(action).toBeDisabled()
+        expect(screen.getByTestId('generation-option-count')).toBeDisabled()
       } finally {
         // Sans restauration, l'implémentation fuit sur les tests suivants.
         mockUseContextStore.mockReset()
