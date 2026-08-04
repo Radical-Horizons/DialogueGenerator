@@ -114,8 +114,9 @@
   summary: Clarifier en UI cout/noeud document vs avg cout/generation du breakdown 1.12.
   evidence: Adversarial — deux semantiques cote a cote ; FR86 calcule sur count_nodes JSON.
 
-- source_spec: `_bmad-output/implementation-artifacts/spec-8-8-valider-batch-dialogues-fr87.md`
-  summary: Persister le polling job batch-validate hors page bibliotheque pour toast de fin apres navigation.
-  evidence: Revue 8.8 — hook monte dans UnityDialogueList ; demontage coupe le poll.
+# RESOLVED 2026-08-04 — store app-level ``batchValidationJobStore`` + toastManager
+# - source_spec: `_bmad-output/implementation-artifacts/spec-8-8-valider-batch-dialogues-fr87.md`
+#   summary: Persister le polling job batch-validate hors page bibliotheque pour toast de fin apres navigation.
+#   evidence: Revue 8.8 — hook monte dans UnityDialogueList ; demontage coupe le poll.
 # RESOLVED 2026-08-04 — guest JWT ``sid`` + job_owner_key(`guest:{sid}`) ; tests IDOR
 # - source_spec: spec-8-8 … Owner job guest base sur session UUID

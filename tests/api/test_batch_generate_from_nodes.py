@@ -192,6 +192,45 @@ async def test_service_partial_failure_and_skip() -> None:
     assert report.total_nodes_generated == 1
 
 
+@pytest.mark.asyncio
+async def test_service_progress_detail_includes_choice_counters() -> None:
+    """Progress detail FR88 : « Nœud i/N — j/k » pendant la génération des choix."""
+    orchestrator = MagicMock()
+
+    async def _gen(**kwargs: Any) -> GenerationResult:
+        cb = kwargs.get("progress_callback")
+        assert cb is not None
+        cb(1, 2)
+        return GenerationResult(
+            nodes=[{"id": "c1", "line": "ok"}],
+            suggested_connections=[],
+            parent_node_id=kwargs["parent_node_id"],
+            batch_count=1,
+        )
+
+    orchestrator.generate = AsyncMock(side_effect=_gen)
+    from services.batch_node_generation_service import (
+        BatchNodeGenerationService,
+        BatchParentInput,
+    )
+
+    details: list[str] = []
+    service = BatchNodeGenerationService(orchestrator=orchestrator)
+    await service.generate_batch(
+        [
+            BatchParentInput(
+                "p1",
+                {"choices": [{"text": "a"}, {"text": "b"}]},
+                {},
+            ),
+        ],
+        llm_client=MagicMock(),
+        on_progress=lambda _c, _t, detail: details.append(detail),
+    )
+    assert any(d == "Nœud 1/1 — 0/2" for d in details)
+    assert any(d == "Nœud 1/1 — 1/2" for d in details)
+
+
 def test_batch_generate_job_idor_cross_user(
     batch_gen_client: tuple[TestClient, MagicMock, BatchNodeGenerationJobManager],
 ) -> None:

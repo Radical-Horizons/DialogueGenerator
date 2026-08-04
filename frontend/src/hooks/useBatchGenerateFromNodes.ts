@@ -209,10 +209,11 @@ export function useBatchGenerateFromNodes(
         }
 
         const parentId = parentIds[index]
+        const nParents = parentIds.length
         setProgress({
           current: index,
-          total: parentIds.length,
-          detail: `Nœud ${index + 1}/${parentIds.length}`,
+          total: nParents,
+          detail: `Nœud ${index + 1}/${nParents}`,
         })
 
         const node = useGraphStore.getState().nodes.find((n) => n.id === parentId)
@@ -243,6 +244,13 @@ export function useBatchGenerateFromNodes(
             context_selections: contextSelections,
             generate_all_choices: true,
             choices_mode: 'capped',
+            onBatchProgress: (j: number, k: number) => {
+              setProgress({
+                current: index,
+                total: nParents,
+                detail: `Nœud ${index + 1}/${nParents} — ${j}/${k}`,
+              })
+            },
           })
           const nodesAfter = useGraphStore.getState().nodes
           const parentAfter = nodesAfter.find((n) => n.id === parentId)
@@ -285,8 +293,8 @@ export function useBatchGenerateFromNodes(
 
         setProgress({
           current: index + 1,
-          total: parentIds.length,
-          detail: `Nœud ${index + 1}/${parentIds.length} terminé`,
+          total: nParents,
+          detail: `Nœud ${index + 1}/${nParents} terminé`,
         })
       }
 

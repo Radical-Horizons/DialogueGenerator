@@ -1,18 +1,18 @@
 /**
  * Hook validation batch dialogues (Story 8.8 / FR87).
- * N < 20 : boucle sync séquentielle + AbortController ; N ≥ 20 : job serveur + polling.
+ * N < 20 : boucle sync séquentielle + AbortController ;
+ * N ≥ 20 : job serveur + polling app-level (toast fin hors page).
  */
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   BATCH_VALIDATE_JOB_MIN,
   batchValidateSync,
-  cancelBatchValidateJob,
-  getBatchValidateJob,
   startBatchValidateJob,
   type BatchValidateReport,
   type BatchValidationItem,
 } from '../api/batchValidation'
 import type { UseToastFn } from '../components/shared'
+import { useBatchValidationJobStore } from '../store/batchValidationJobStore'
 import { getErrorMessage } from '../types/errors'
 
 export interface BatchValidationProgress {
@@ -27,23 +27,6 @@ export interface UseBatchDialogueValidationResult {
   dismissReport: () => void
   startBatchValidation: (documentIds: string[]) => Promise<void>
   cancelBatchValidation: () => void
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-function emptyReport(partial: Partial<BatchValidateReport> = {}): BatchValidateReport {
-  return {
-    items: [],
-    cancelled: false,
-    started_at: new Date().toISOString(),
-    finished_at: new Date().toISOString(),
-    valid_count: 0,
-    invalid_count: 0,
-    skipped_count: 0,
-    ...partial,
-  }
 }
 
 function summarize(items: BatchValidationItem[], cancelled: boolean): BatchValidateReport {
@@ -63,23 +46,37 @@ function summarize(items: BatchValidationItem[], cancelled: boolean): BatchValid
 export function useBatchDialogueValidation(
   toast: UseToastFn
 ): UseBatchDialogueValidationResult {
-  const [isValidating, setIsValidating] = useState(false)
-  const [progress, setProgress] = useState<BatchValidationProgress | null>(null)
-  const [report, setReport] = useState<BatchValidateReport | null>(null)
+  const [isValidatingLocal, setIsValidatingLocal] = useState(false)
+  const [progressLocal, setProgressLocal] = useState<BatchValidationProgress | null>(
+    null
+  )
+  const [reportLocal, setReportLocal] = useState<BatchValidateReport | null>(null)
   const abortRef = useRef<AbortController | null>(null)
-  const jobIdRef = useRef<string | null>(null)
   const cancelledRef = useRef(false)
 
-  const dismissReport = useCallback(() => setReport(null), [])
+  const jobIsPolling = useBatchValidationJobStore((s) => s.isPolling)
+  const jobCurrent = useBatchValidationJobStore((s) => s.current)
+  const jobTotal = useBatchValidationJobStore((s) => s.total)
+  const jobReport = useBatchValidationJobStore((s) => s.report)
+  const startPolling = useBatchValidationJobStore((s) => s.startPolling)
+  const cancelActiveJob = useBatchValidationJobStore((s) => s.cancelActiveJob)
+  const dismissJobReport = useBatchValidationJobStore((s) => s.dismissReport)
+
+  useEffect(() => {
+    if (!jobReport || jobIsPolling) return
+    setReportLocal(jobReport)
+  }, [jobReport, jobIsPolling])
+
+  const dismissReport = useCallback(() => {
+    setReportLocal(null)
+    dismissJobReport()
+  }, [dismissJobReport])
 
   const cancelBatchValidation = useCallback(() => {
     cancelledRef.current = true
     abortRef.current?.abort()
-    const jobId = jobIdRef.current
-    if (jobId) {
-      void cancelBatchValidateJob(jobId).catch(() => undefined)
-    }
-  }, [])
+    cancelActiveJob()
+  }, [cancelActiveJob])
 
   const startBatchValidation = useCallback(
     async (documentIds: string[]) => {
@@ -90,12 +87,13 @@ export function useBatchDialogueValidation(
       }
 
       cancelledRef.current = false
-      setIsValidating(true)
-      setReport(null)
-      setProgress({ current: 0, total: ids.length })
+      setReportLocal(null)
+      dismissJobReport()
+      setProgressLocal({ current: 0, total: ids.length })
 
       try {
         if (ids.length < BATCH_VALIDATE_JOB_MIN) {
+          setIsValidatingLocal(true)
           abortRef.current = new AbortController()
           const collected: BatchValidationItem[] = []
           for (let index = 0; index < ids.length; index += 1) {
@@ -115,10 +113,10 @@ export function useBatchDialogueValidation(
               abortRef.current.signal
             )
             collected.push(...one.items)
-            setProgress({ current: index + 1, total: ids.length })
+            setProgressLocal({ current: index + 1, total: ids.length })
           }
           const result = summarize(collected, cancelledRef.current)
-          setReport(result)
+          setReportLocal(result)
           toast(
             cancelledRef.current
               ? 'Validation batch annulée'
@@ -129,37 +127,9 @@ export function useBatchDialogueValidation(
         }
 
         const created = await startBatchValidateJob(ids)
-        jobIdRef.current = created.job_id
-        setProgress({ current: 0, total: created.total })
-
-        let done = false
-        while (!done) {
-          const status = await getBatchValidateJob(created.job_id)
-          setProgress({ current: status.current, total: status.total })
-          if (
-            status.status === 'completed' ||
-            status.status === 'cancelled' ||
-            status.status === 'error'
-          ) {
-            if (status.report) setReport(status.report)
-            else if (status.status === 'cancelled') {
-              setReport(emptyReport({ cancelled: true }))
-            }
-            if (status.status === 'error') {
-              toast(status.error || 'Erreur validation batch', 'error')
-            } else if (status.status === 'cancelled') {
-              toast('Validation batch annulée', 'warning')
-            } else if (status.report) {
-              toast(
-                `Validation : ${status.report.valid_count} OK, ${status.report.invalid_count} erreur(s)`,
-                status.report.invalid_count > 0 ? 'warning' : 'success'
-              )
-            }
-            done = true
-            break
-          }
-          await sleep(cancelledRef.current ? 400 : 800)
-        }
+        setProgressLocal({ current: 0, total: created.total })
+        startPolling(created.job_id)
+        toast('Validation batch lancée en arrière-plan', 'info', 3000)
       } catch (err) {
         if ((err as { code?: string; name?: string })?.name === 'CanceledError') {
           toast('Validation batch annulée', 'warning')
@@ -167,18 +137,22 @@ export function useBatchDialogueValidation(
           toast(getErrorMessage(err), 'error')
         }
       } finally {
-        setIsValidating(false)
+        setIsValidatingLocal(false)
         abortRef.current = null
-        jobIdRef.current = null
       }
     },
-    [toast]
+    [toast, startPolling, dismissJobReport]
   )
+
+  const isValidating = isValidatingLocal || jobIsPolling
+  const progress: BatchValidationProgress | null = jobIsPolling
+    ? { current: jobCurrent, total: jobTotal }
+    : progressLocal
 
   return {
     isValidating,
     progress,
-    report,
+    report: reportLocal ?? jobReport,
     dismissReport,
     startBatchValidation,
     cancelBatchValidation,

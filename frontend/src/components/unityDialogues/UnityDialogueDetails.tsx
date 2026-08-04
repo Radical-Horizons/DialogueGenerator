@@ -14,6 +14,7 @@ import { DialogueMetadataPanel } from './DialogueMetadataPanel'
 import { DialogueSharingModal } from './DialogueSharingModal'
 import { useAuthStore } from '../../store/authStore'
 import { formatDialogueTitle } from '../../utils/formatDialogueTitle'
+import { consumePendingValidationFocus } from '../../utils/pendingValidationFocus'
 
 interface UnityDialogueDetailsProps {
   filename: string
@@ -51,12 +52,14 @@ export function UnityDialogueDetails({
   const [permissionsPanelOpen, setPermissionsPanelOpen] = useState(false)
   const [metadataPanelOpen, setMetadataPanelOpen] = useState(false)
   const [shareModalOpen, setShareModalOpen] = useState(false)
+  const [focusNodeId, setFocusNodeId] = useState<string | undefined>()
   const canManageShares = isOwner || userRole === 'admin'
   const canViewPermissions = Boolean(authUser && userRole !== 'guest')
 
   const loadDialogue = useCallback(async (propagateError = false) => {
     setIsLoading(true)
     setError(null)
+    setFocusNodeId(undefined)
     try {
       const documentId = filename.replace(/\.json$/i, '')
       const response = await documentsAPI.getDocument(documentId)
@@ -74,6 +77,8 @@ export function UnityDialogueDetails({
           ? response.document.title
           : formatDialogueTitle(filename)
       )
+      // Story 8.8 : consommer le focus différé après load (parcours bibliothèque).
+      setFocusNodeId(consumePendingValidationFocus())
     } catch (err) {
       setError(getErrorMessage(err))
       if (propagateError) {
@@ -189,6 +194,7 @@ export function UnityDialogueDetails({
         onSave={handleSave}
         onCancel={onClose}
         headerSelector={headerSelector}
+        focusNodeId={focusNodeId}
         extraActions={
           <>
             <div style={{ width: isNarrow ? '100%' : undefined }}>

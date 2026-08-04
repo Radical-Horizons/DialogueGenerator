@@ -131,6 +131,56 @@ describe('useBatchGenerateFromNodes', () => {
     expect(generateFromNode).toHaveBeenCalledTimes(2)
     expect(result.current.report?.ok_count).toBe(2)
     expect(result.current.report?.skipped_count).toBe(1)
+    const firstCallOpts = generateFromNode.mock.calls[0][2]
+    expect(typeof firstCallOpts.onBatchProgress).toBe('function')
+  })
+
+  it('met à jour le detail Nœud i/N — j/k via onBatchProgress', async () => {
+    let releaseFirst!: (value: {
+      nodeId: string
+      batchInfo: Record<string, number>
+    }) => void
+    const firstDone = new Promise<{
+      nodeId: string
+      batchInfo: Record<string, number>
+    }>((resolve) => {
+      releaseFirst = resolve
+    })
+
+    generateFromNode.mockImplementationOnce(
+      async (
+        _id: string,
+        _instr: string,
+        options: { onBatchProgress?: (j: number, k: number) => void }
+      ) => {
+        options.onBatchProgress?.(1, 2)
+        return firstDone
+      }
+    )
+
+    const { result } = renderHook(() => useBatchGenerateFromNodes(toast))
+
+    let runPromise: Promise<void>
+    act(() => {
+      runPromise = result.current.startBatchGenerate(['a', 'c'])
+    })
+
+    await waitFor(() => {
+      expect(result.current.progress?.detail).toMatch(/Nœud 1\/2 — 1\/2/)
+    })
+
+    await act(async () => {
+      releaseFirst({
+        nodeId: 'new-1',
+        batchInfo: {
+          generatedChoices: 1,
+          connectedChoices: 0,
+          failedChoices: 0,
+          totalChoices: 2,
+        },
+      })
+      await runPromise!
+    })
   })
 
   it('starts server job when N >= 10', async () => {

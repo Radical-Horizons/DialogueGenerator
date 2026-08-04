@@ -23,6 +23,19 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+def _count_free_choices(parent_node_content: Dict[str, Any]) -> int:
+    """Nombre de choix sans cible (ou END) — base du compteur j/k."""
+    choices = parent_node_content.get("choices") or []
+    count = 0
+    for choice in choices:
+        if not isinstance(choice, dict):
+            continue
+        target = choice.get("targetNode")
+        if not target or target == "END":
+            count += 1
+    return count
+
+
 @dataclass
 class BatchParentInput:
     """Spécification d'un parent à traiter."""
@@ -194,9 +207,22 @@ class BatchNodeGenerationService:
                     )
                 break
 
-            detail = f"Nœud {index + 1}/{total}"
+            free_choices = _count_free_choices(parent.parent_node_content)
+            detail = (
+                f"Nœud {index + 1}/{total} — 0/{free_choices}"
+                if free_choices > 0
+                else f"Nœud {index + 1}/{total}"
+            )
             if on_progress:
                 on_progress(index, total, detail)
+
+            def _choice_progress(completed: int, choice_total: int) -> None:
+                if on_progress:
+                    on_progress(
+                        index,
+                        total,
+                        f"Nœud {index + 1}/{total} — {completed}/{choice_total}",
+                    )
 
             try:
                 raw_ctx = dict(parent.context_selections or {})
@@ -215,6 +241,7 @@ class BatchNodeGenerationService:
                     dialogue_nodes=dialogue_nodes,
                     player_character_id=parent.player_character_id,
                     choices_mode=choices_mode,  # type: ignore[arg-type]
+                    progress_callback=_choice_progress if on_progress else None,
                 )
                 fp = fingerprint_for(enriched) if fingerprint_for else None
                 items.append(
