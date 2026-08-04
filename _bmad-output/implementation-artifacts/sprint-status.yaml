@@ -180,7 +180,7 @@ development_status:
   8-7-afficher-les-métadonnées-dun-dialogue-nodes-coût-last-edited-fr86: done
   8-8-valider-en-batch-plusieurs-dialogues-fr87: done
   8-9-générer-en-batch-depuis-plusieurs-nœuds-de-départ-fr88: done
-  epic-8-retrospective: optional
+  epic-8-retrospective: done
   epic-9: done
   9-1-définir-variables-et-flags-dans-dialogues-v10-fr89: done
   9-2-définir-conditions-de-visibilité-sur-nœuds-si-variable-x-y-afficher-nœud-fr90: done
