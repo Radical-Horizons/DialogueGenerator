@@ -132,7 +132,7 @@ async def get_current_user(
             if payload is not None:
                 username = payload.get("sub")
                 if payload.get("role") == "guest" and username == "guest":
-                    return auth_service.guest_principal()
+                    return auth_service.guest_principal_from_payload(payload)
                 if isinstance(username, str) and username:
                     user = auth_service.get_user_by_username(username)
                     if user is not None:
@@ -174,7 +174,7 @@ async def get_current_user(
         )
 
     if payload.get("role") == "guest" and username == "guest":
-        return auth_service.guest_principal()
+        return auth_service.guest_principal_from_payload(payload)
 
     user = auth_service.get_user_by_username(username)
     if user is None:

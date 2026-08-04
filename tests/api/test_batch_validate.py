@@ -310,3 +310,79 @@ def test_rbac_denied_via_access_callback(
     assert response.status_code == 200
     statuses = {i["document_id"]: i["status"] for i in response.json()["items"]}
     assert statuses["secret"] == "denied"
+
+
+def test_batch_validate_job_idor_cross_user(
+    batch_client: tuple[TestClient, MagicMock, MagicMock],
+) -> None:
+    """Un autre utilisateur ne peut pas lire/annuler le job (404)."""
+    from api.main import app
+    from api.routers.auth import get_current_user
+
+    client, _, batch_service = batch_client
+    batch_service.validate_batch.return_value = _report(
+        [
+            BatchValidationItem(document_id=f"d{i}", status="valid", validated_at="t")
+            for i in range(20)
+        ]
+    )
+    created = client.post(
+        "/api/v1/dialogues/batch-validate/jobs",
+        json={"document_ids": [f"d{i}" for i in range(20)]},
+    )
+    assert created.status_code == 202
+    job_id = created.json()["job_id"]
+
+    app.dependency_overrides[get_current_user] = lambda: _user("writer-2")
+    try:
+        status = client.get(f"/api/v1/dialogues/batch-validate/jobs/{job_id}")
+        assert status.status_code == 404
+        cancel = client.post(f"/api/v1/dialogues/batch-validate/jobs/{job_id}/cancel")
+        assert cancel.status_code == 404
+    finally:
+        app.dependency_overrides[get_current_user] = lambda: _user("writer-1")
+
+
+def test_batch_validate_job_idor_guest_sessions(
+    batch_client: tuple[TestClient, MagicMock, MagicMock],
+) -> None:
+    """Deux sessions guest avec sid distincts ne partagent pas les jobs."""
+    from api.main import app
+    from api.routers.auth import get_current_user
+
+    client, _, batch_service = batch_client
+    batch_service.validate_batch.return_value = _report(
+        [
+            BatchValidationItem(document_id=f"d{i}", status="valid", validated_at="t")
+            for i in range(20)
+        ]
+    )
+
+    guest_a = {
+        "id": "guest",
+        "username": "guest",
+        "role": "guest",
+        "is_active": True,
+        "session_id": "session-aaa",
+    }
+    guest_b = {
+        "id": "guest",
+        "username": "guest",
+        "role": "guest",
+        "is_active": True,
+        "session_id": "session-bbb",
+    }
+    app.dependency_overrides[get_current_user] = lambda: guest_a
+    created = client.post(
+        "/api/v1/dialogues/batch-validate/jobs",
+        json={"document_ids": [f"d{i}" for i in range(20)]},
+    )
+    assert created.status_code == 202
+    job_id = created.json()["job_id"]
+
+    app.dependency_overrides[get_current_user] = lambda: guest_b
+    try:
+        status = client.get(f"/api/v1/dialogues/batch-validate/jobs/{job_id}")
+        assert status.status_code == 404
+    finally:
+        app.dependency_overrides[get_current_user] = lambda: _user()

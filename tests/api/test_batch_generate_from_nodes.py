@@ -190,3 +190,37 @@ async def test_service_partial_failure_and_skip() -> None:
     assert report.items[1].status == "skipped"
     assert report.items[2].status == "error"
     assert report.total_nodes_generated == 1
+
+
+def test_batch_generate_job_idor_cross_user(
+    batch_gen_client: tuple[TestClient, MagicMock, BatchNodeGenerationJobManager],
+) -> None:
+    """Un autre writer ne peut pas lire/annuler le job generate (404)."""
+    from api.main import app
+    from api.routers.auth import get_current_user
+
+    client, batch_service, _ = batch_gen_client
+    batch_service.generate_batch = AsyncMock(
+        return_value=BatchNodeGenerationReport(
+            items=[], started_at="t0", finished_at="t1"
+        )
+    )
+    created = client.post(
+        "/api/v1/unity-dialogues/graph/batch-generate-from-nodes/jobs",
+        json={"parents": [_parent_spec(f"n{i}") for i in range(10)]},
+    )
+    assert created.status_code == 202
+    job_id = created.json()["job_id"]
+
+    app.dependency_overrides[get_current_user] = lambda: _user("writer-2")
+    try:
+        status = client.get(
+            f"/api/v1/unity-dialogues/graph/batch-generate-from-nodes/jobs/{job_id}"
+        )
+        assert status.status_code == 404
+        cancel = client.post(
+            f"/api/v1/unity-dialogues/graph/batch-generate-from-nodes/jobs/{job_id}/cancel"
+        )
+        assert cancel.status_code == 404
+    finally:
+        app.dependency_overrides[get_current_user] = lambda: _user()

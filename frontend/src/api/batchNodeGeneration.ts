@@ -72,12 +72,16 @@ export type StartBatchGenerateJobRequest = {
 export async function startBatchGenerateFromNodesJob(
   body: StartBatchGenerateJobRequest
 ): Promise<{ job_id: string; status: string; total: number }> {
+  const parentCount = body.parents?.length ?? 0
   const response = await apiClient.post<{
     job_id: string
     status: string
     total: number
   }>('/api/v1/unity-dialogues/graph/batch-generate-from-nodes/jobs', body, {
     timeout: 60000,
+    headers: {
+      'X-Batch-Parent-Count': String(Math.max(parentCount, 1)),
+    },
   })
   return response.data
 }

@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import Response
 
 from api.routers.auth import get_current_user
+from api.utils.job_ownership import job_owner_key
 from starlette.requests import Request
 from api.schemas.dialogue import (
     EstimateTokensRequest,
@@ -963,7 +964,7 @@ async def start_batch_validate_job(
     """Lance un job async de validation batch (N ≥ 20)."""
     import asyncio
 
-    owner = str(current_user.get("username") or current_user.get("id") or "unknown")
+    owner = job_owner_key(current_user)
     job_id = job_manager.create_job(request_data.document_ids, owner)
 
     def _run() -> None:
@@ -1023,7 +1024,7 @@ async def get_batch_validate_job(
             resource_id=job_id,
             request_id=request_id,
         )
-    owner = str(current_user.get("username") or current_user.get("id") or "")
+    owner = job_owner_key(current_user)
     if job.get("owner_username") != owner and current_user.get("role") != "admin":
         raise NotFoundException(
             resource_type="BatchValidateJob",
@@ -1068,7 +1069,7 @@ async def cancel_batch_validate_job(
             resource_id=job_id,
             request_id=request_id,
         )
-    owner = str(current_user.get("username") or current_user.get("id") or "")
+    owner = job_owner_key(current_user)
     if job.get("owner_username") != owner and current_user.get("role") != "admin":
         raise NotFoundException(
             resource_type="BatchValidateJob",

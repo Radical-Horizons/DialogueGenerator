@@ -37,6 +37,7 @@ from api.schemas.batch_node_generation import (
 )
 from api.schemas.graph import GenerateNodeRequest, GenerateNodeResponse, SuggestedConnection
 from api.services.batch_node_generation_job_manager import BatchNodeGenerationJobManager
+from api.utils.job_ownership import job_owner_key
 from core.context.context_builder import ContextBuilder
 from services.batch_node_generation_service import (
     BATCH_GENERATE_HARD_MAX,
@@ -63,7 +64,7 @@ def _reject_guest_user(
 
 def _owner_key(current_user: dict[str, object]) -> str:
     """Identifiant propriétaire pour les jobs en mémoire."""
-    return str(current_user.get("username") or current_user.get("id") or "unknown")
+    return job_owner_key(current_user)
 
 
 def _report_to_response(report: BatchNodeGenerationReport) -> BatchGenerateFromNodesReport:
