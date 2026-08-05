@@ -31,10 +31,19 @@ from api.schemas.benchmark_judging import (
     JudgePassConfig,
     JudgePassProgress,
     JudgePassState,
+    PairwisePassConfig,
+    PairwisePassProgress,
+    PairwisePassState,
+    PairwiseVerdict,
     RubricVerdict,
 )
 from services.benchmark_criteria_store import BenchmarkCriteriaStore
 from services.benchmark_judge_service import BenchmarkJudgeService
+from services.benchmark_pair_builder import (
+    PairAssignment,
+    build_pairs,
+    count_unpairable_cases,
+)
 from services.benchmark_pass_control import CooperativePassControl, PassCancelled
 from services.benchmark_run_service import (
     BENCHMARK_BILLABLE_USER_ID,
@@ -423,6 +432,10 @@ class BenchmarkJudgePassService:
             )
 
         self._assert_judge_is_usable(config.judge_model)
+        # La dépense est relevée AVANT la purge : les verdicts en erreur ont coûté,
+        # et les supprimer d'abord ferait repartir chaque relance d'une ardoise
+        # vierge — le plafond deviendrait rejouable à volonté.
+        already_spent = self._spent_for(run_id, config.judge_model)
         # Un `judge_error` traduit un problème d'environnement (juge injoignable,
         # dérive de format), pas une propriété de la génération : le conserver
         # ferait sauter la cellule au relancement, alors que la cause a été corrigée.
@@ -434,7 +447,6 @@ class BenchmarkJudgePassService:
         # sinon chaque relance réautoriserait un plafond entier. La garde de lancement
         # doit donc comparer au même total, faute de quoi elle laisserait partir une
         # passe que la boucle arrêterait aussitôt.
-        already_spent = self._spent_for(run_id, config.judge_model)
         estimated_max = self.estimate_max_cost(config.judge_model, len(remaining))
         if already_spent + estimated_max > config.budget_cap_usd:
             raise JudgePassConflictError(
@@ -458,7 +470,7 @@ class BenchmarkJudgePassService:
 
         self._control.claim(f"{run_id}:{config.judge_model}")
         self._control.task = asyncio.create_task(
-            self._execute(state, grid, records, config.budget_cap_usd)
+            self._execute(state, grid, records, config.budget_cap_usd, already_spent)
         )
         return state
 
@@ -523,6 +535,7 @@ class BenchmarkJudgePassService:
         grid: CriteriaGrid,
         records: List[BenchmarkGenerationRecord],
         budget_cap_usd: float,
+        already_spent: float,
     ) -> None:
         """Boucle principale de la passe.
 
@@ -535,7 +548,9 @@ class BenchmarkJudgePassService:
         async with self._control.lock:
             billable_token = push_billable_user_id(BENCHMARK_BILLABLE_USER_ID)
             verdict_dir = self._verdicts_dir(state.run_id, state.judge_model)
-            spent = self._spent_for(state.run_id, state.judge_model)
+            # Reprend le cumul relevé avant la purge des verdicts en erreur :
+            # le recalculer ici oublierait ce que ces appels ont coûté.
+            spent = already_spent
             completed = 0
             status: str = "failed"
             message = "Passe interrompue avant la fin (arrêt du processus ?)"
@@ -575,7 +590,11 @@ class BenchmarkJudgePassService:
                         llm_client=llm_client,
                         judge_model=state.judge_model,
                     )
-                    write_json_atomic(path, verdict.model_dump(mode="json"))
+                    try:
+                        write_json_atomic(path, verdict.model_dump(mode="json"))
+                    except OSError as exc:
+                        # Une cellule non écrivable ne doit pas abandonner les suivantes.
+                        logger.warning("Verdict non persisté (%s) : %s", path.name, exc)
                     spent += verdict.cost_usd
                     completed += 1
                     self._progress = self._progress.model_copy(
@@ -656,4 +675,518 @@ class BenchmarkJudgePassService:
                 except Exception:
                     logger.exception(
                         "Finalisation de la passe de jugement %s impossible", state.run_id
+                    )
+
+
+class BenchmarkPairwisePassService:
+    """Orchestre la comparaison par paires des générations d'un run.
+
+    Même patron coopératif et mêmes refus de lancement que la passe rubrique ;
+    ce qui change est l'unité de travail — un duel, deux appels de juge — et le
+    dénombrement, qui croît en carré du nombre de modèles.
+    """
+
+    def __init__(
+        self,
+        *,
+        run_service: BenchmarkRunService,
+        criteria_store: BenchmarkCriteriaStore,
+        judge_service: Any,
+        pricing_service: Any,
+        llm_client_factory: Callable[[str], Any],
+    ) -> None:
+        """Initialise la passe.
+
+        Args:
+            run_service: Moteur de run — source des générations et des chemins.
+            criteria_store: Magasin des grilles.
+            judge_service: `BenchmarkPairwiseJudgeService`.
+            pricing_service: `LLMPricingService`.
+            llm_client_factory: Fabrique de client LLM pour le juge.
+        """
+        self._run_service = run_service
+        self._criteria_store = criteria_store
+        self._judge_service = judge_service
+        self._pricing_service = pricing_service
+        self._llm_client_factory = llm_client_factory
+
+        self._control = CooperativePassControl()
+        self._progress = PairwisePassProgress()
+
+    @property
+    def run_service(self) -> BenchmarkRunService:
+        """Moteur de run associé — permet au routeur de valider l'existence d'un run."""
+        return self._run_service
+
+    @property
+    def background_task(self) -> Optional[asyncio.Task]:
+        """Tâche de fond de la passe en cours — introspection et tests."""
+        return self._control.task
+
+    def read_progress(self) -> PairwisePassProgress:
+        """Retourne une copie de la progression en mémoire."""
+        return self._progress.model_copy(deep=True)
+
+    # ------------------------------------------------------------------
+    # Chemins
+    # ------------------------------------------------------------------
+
+    def _duels_dir(self, run_id: str, judge_model: str) -> Path:
+        """Répertoire des duels d'un juge pour un run."""
+        digest = hashlib.sha256(judge_model.encode("utf-8")).hexdigest()[:8]
+        directory = f"{slug_for_filename(judge_model)}__{digest}"
+        return self._run_service.run_dir(run_id) / "verdicts" / "pairwise" / directory
+
+    def _duel_path(self, duels_dir: Path, pair: PairAssignment) -> Path:
+        """Chemin d'un duel.
+
+        Les modèles sont triés dans le nom : une paire a un seul fichier quel que
+        soit l'ordre d'énumération ou l'attribution des étiquettes.
+        """
+        first, second = pair.models_sorted
+        digest = hashlib.sha256(
+            f"{pair.case_id}|{first}|{second}".encode("utf-8")
+        ).hexdigest()[:8]
+        name = (
+            f"{slug_for_filename(pair.case_id)}__{slug_for_filename(first)}"
+            f"_vs_{slug_for_filename(second)}__{digest}__{pair.repetition}.json"
+        )
+        return duels_dir / name
+
+    def _pass_state_path(self, run_id: str, judge_model: str) -> Path:
+        """Chemin de l'état persisté d'une passe de comparaison."""
+        return self._duels_dir(run_id, judge_model) / _PASS_STATE_NAME
+
+    # ------------------------------------------------------------------
+    # Lecture
+    # ------------------------------------------------------------------
+
+    def _duel_is_usable(self, path: Path, grid: Optional[CriteriaGrid] = None) -> bool:
+        """Indique si un duel déjà présent peut être considéré comme produit.
+
+        La grille fait partie de l'identité du duel : relancer après avoir édité un
+        critère doit rejuger, sinon la passe se déclarerait terminée sur la nouvelle
+        version alors que tous les duels sur disque portent l'ancienne.
+
+        Args:
+            path: Chemin du duel.
+            grid: Grille de la passe courante, si l'appelant veut vérifier la version.
+
+        Returns:
+            ``True`` si le fichier existe, se valide, et relève de la même grille.
+        """
+        if not path.exists():
+            return False
+        raw = read_json_file(path, None)
+        if raw is None:
+            return False
+        try:
+            verdict = PairwiseVerdict.model_validate(raw)
+        except ValidationError as exc:
+            logger.warning("Duel de benchmark invalide, rejugement (%s) : %s", path.name, exc)
+            return False
+        if grid is not None and (
+            verdict.grid_id != grid.grid_id or verdict.grid_version != grid.version
+        ):
+            logger.info(
+                "Duel produit sur %s v%s, grille courante %s v%s — rejugement (%s)",
+                verdict.grid_id,
+                verdict.grid_version,
+                grid.grid_id,
+                grid.version,
+                path.name,
+            )
+            return False
+        return True
+
+    def list_verdicts(self, run_id: str) -> List[PairwiseVerdict]:
+        """Liste tous les duels d'un run, tous juges confondus.
+
+        Args:
+            run_id: Run concerné.
+
+        Returns:
+            Duels triés par juge, cas, modèles puis répétition.
+        """
+        root = self._run_service.run_dir(run_id) / "verdicts" / "pairwise"
+        if not root.exists():
+            return []
+        verdicts: List[PairwiseVerdict] = []
+        for path in sorted(root.glob("*/*.json")):
+            if path.name == _PASS_STATE_NAME:
+                continue
+            raw = read_json_file(path, None)
+            if raw is None:
+                continue
+            try:
+                verdicts.append(PairwiseVerdict.model_validate(raw))
+            except ValidationError as exc:
+                logger.warning("Duel de benchmark invalide ignoré (%s) : %s", path.name, exc)
+        verdicts.sort(key=lambda v: (v.judge_model, v.case_id, v.model_a, v.model_b, v.repetition))
+        return verdicts
+
+    def get_pass_state(self, run_id: str, judge_model: str) -> PairwisePassState:
+        """Charge l'état persisté d'une passe de comparaison.
+
+        Raises:
+            JudgePassNotFoundError: Si aucune passe n'a été lancée pour ce juge.
+        """
+        raw = read_json_file(self._pass_state_path(run_id, judge_model), None)
+        if raw is None:
+            raise JudgePassNotFoundError(
+                f"Aucune passe de comparaison pour le run '{run_id}' et le juge '{judge_model}'"
+            )
+        try:
+            return PairwisePassState.model_validate(raw)
+        except ValidationError as exc:
+            raise JudgePassNotFoundError(f"État de passe illisible : {exc}") from exc
+
+    def _spent_for(self, run_id: str, judge_model: str) -> float:
+        """Dépense déjà engagée par ce juge sur ce run, recalculée depuis les duels."""
+        return round(
+            sum(
+                verdict.cost_usd
+                for verdict in self.list_verdicts(run_id)
+                if verdict.judge_model == judge_model
+            ),
+            6,
+        )
+
+    def estimate_max_cost(self, judge_model: str, duel_count: int) -> float:
+        """Estime le coût maximal d'une passe de comparaison.
+
+        Chaque duel coûte **deux** appels — c'est le prix du contrôle du biais de
+        position, et l'estimation doit le refléter.
+
+        Raises:
+            JudgePassConflictError: Si le tarif du juge est inconnu.
+        """
+        pricing = None
+        try:
+            pricing = self._pricing_service.get_model_pricing(judge_model)
+        except Exception as exc:
+            logger.warning("Tarif indisponible pour le juge '%s' : %s", judge_model, exc)
+        if not pricing:
+            raise JudgePassConflictError(
+                f"Tarif inconnu pour le juge '{judge_model}' : le plafond budgétaire ne "
+                "pourrait pas se déclencher. Renseigner config/llm_pricing.json avant de lancer."
+            )
+        try:
+            unit = self._pricing_service.calculate_cost(
+                judge_model,
+                DEFAULT_JUDGE_PROMPT_TOKENS_ESTIMATE * 2,
+                DEFAULT_JUDGE_COMPLETION_TOKENS_ESTIMATE,
+            )
+        except Exception as exc:
+            raise JudgePassConflictError(
+                f"Tarif inconnu pour le juge '{judge_model}' ({exc}) : le plafond "
+                "budgétaire ne pourrait pas se déclencher."
+            ) from exc
+        return round(unit * duel_count * 2, 6)
+
+    # ------------------------------------------------------------------
+    # Lancement
+    # ------------------------------------------------------------------
+
+    def _discard_judge_error_duels(self, run_id: str, judge_model: str) -> None:
+        """Supprime les duels en erreur avant un relancement.
+
+        Args:
+            run_id: Run concerné.
+            judge_model: Juge concerné.
+        """
+        directory = self._duels_dir(run_id, judge_model)
+        if not directory.exists():
+            return
+        for path in directory.glob("*.json"):
+            if path.name == _PASS_STATE_NAME:
+                continue
+            raw = read_json_file(path, None)
+            if isinstance(raw, dict) and raw.get("status") == "judge_error":
+                try:
+                    path.unlink()
+                except OSError as exc:
+                    logger.warning("Duel judge_error non supprimé (%s) : %s", path.name, exc)
+
+    async def start_pass(
+        self, run_id: str, config: PairwisePassConfig
+    ) -> PairwisePassState:
+        """Lance une passe de comparaison en tâche de fond.
+
+        Args:
+            run_id: Run à comparer.
+            config: Paramètres de la passe.
+
+        Returns:
+            L'état initial de la passe.
+
+        Raises:
+            JudgePassConflictError: Passe déjà en cours, run encore en génération,
+                juge inutilisable, tarif inconnu, plafond insuffisant, ou moins de
+                deux modèles appariables.
+            BenchmarkRunNotFoundError: Si le run n'existe pas.
+            CriteriaGridNotFoundError: Si la grille n'existe pas.
+        """
+        if self._control.active_id is not None:
+            raise JudgePassConflictError(
+                f"Une passe de comparaison est déjà en cours ({self._control.active_id})"
+            )
+
+        run = self._run_service.get_run(run_id)
+        if run.status == "running":
+            raise JudgePassConflictError(
+                f"Le run '{run_id}' génère encore : attendre sa fin avant de le comparer"
+            )
+        grid = self._criteria_store.get_grid(config.grid_id, version=config.grid_version)
+
+        records = self._run_service.list_generations(run_id)
+        pairs = build_pairs(records, run_id=run_id)
+        unpairable = count_unpairable_cases(records)
+        if not pairs:
+            raise JudgePassConflictError(
+                f"Le run '{run_id}' n'offre aucune paire comparable : il faut au moins "
+                "deux modèles ayant produit une génération valide sur un même cas."
+            )
+
+        if config.judge_model == "dummy":
+            raise JudgePassConflictError(
+                "Juge 'dummy' interdit : il produirait des duels factices présentés comme réels"
+            )
+        diagnostics = self._run_service.diagnose_models([config.judge_model])
+        if not diagnostics or not diagnostics[0].usable:
+            reason = diagnostics[0].reason if diagnostics else "diagnostic indisponible"
+            raise JudgePassConflictError(
+                f"Juge '{config.judge_model}' inutilisable : {reason}"
+            )
+
+        # Relevée AVANT la purge : les duels en erreur ont coûté deux appels chacun,
+        # et les supprimer d'abord ferait repartir chaque relance d'une ardoise vierge.
+        already_spent = self._spent_for(run_id, config.judge_model)
+        self._discard_judge_error_duels(run_id, config.judge_model)
+        duels_dir = self._duels_dir(run_id, config.judge_model)
+        remaining = [
+            pair
+            for pair in pairs
+            if not self._duel_is_usable(self._duel_path(duels_dir, pair), grid)
+        ]
+
+        estimated_max = self.estimate_max_cost(config.judge_model, len(remaining))
+        if already_spent + estimated_max > config.budget_cap_usd:
+            raise JudgePassConflictError(
+                f"Plafond ({config.budget_cap_usd:.4f} USD) insuffisant : "
+                f"{already_spent:.4f} USD déjà dépensés et {estimated_max:.4f} USD estimés "
+                f"pour les {len(remaining)} duels restants (deux appels de juge chacun)."
+            )
+
+        state = PairwisePassState(
+            run_id=run_id,
+            judge_model=config.judge_model,
+            grid_id=grid.grid_id,
+            grid_version=grid.version,
+            status="running",
+            duels_total=len(pairs),
+            unpairable_slots=unpairable,
+            # Autorisé par la spécification, mais signalé : le biais d'auto-préférence
+            # est cohérent dans les deux sens, donc invisible au contrôle de position.
+            judge_is_candidate=config.judge_model in set(run.config.models),
+            estimated_max_usd=estimated_max,
+            budget_cap_usd=config.budget_cap_usd,
+            message="Passe de comparaison démarrée",
+            created_at=_now_iso(),
+        )
+        self._persist_state(state)
+
+        self._control.claim(f"{run_id}:{config.judge_model}")
+        self._control.task = asyncio.create_task(
+            self._execute(state, grid, pairs, config.budget_cap_usd, already_spent)
+        )
+        return state
+
+    # ------------------------------------------------------------------
+    # Contrôle
+    # ------------------------------------------------------------------
+
+    def _is_active_for(self, run_id: Optional[str]) -> bool:
+        """Indique si une commande visant ``run_id`` peut s'appliquer."""
+        active = self._control.active_id
+        if active is None:
+            return False
+        return run_id is None or active.split(":", 1)[0] == run_id
+
+    def request_pause(self, run_id: Optional[str] = None) -> bool:
+        """Demande une pause coopérative de la passe en cours."""
+        if not self._is_active_for(run_id):
+            return False
+        self._control.pause()
+        self._progress = self._progress.model_copy(
+            update={"paused": True, "status": "paused", "message": "Pause demandée"}
+        )
+        return True
+
+    def request_unpause(self, run_id: Optional[str] = None) -> bool:
+        """Relance une passe suspendue."""
+        if not self._is_active_for(run_id):
+            return False
+        self._control.unpause()
+        self._progress = self._progress.model_copy(
+            update={"paused": False, "status": "running", "message": "Reprise"}
+        )
+        return True
+
+    def request_cancel(self, run_id: Optional[str] = None) -> bool:
+        """Annule la passe en cours ; les duels déjà produits sont conservés."""
+        if not self._is_active_for(run_id):
+            return False
+        self._control.cancel()
+        self._progress = self._progress.model_copy(update={"message": "Annulation demandée"})
+        return True
+
+    # ------------------------------------------------------------------
+    # Exécution
+    # ------------------------------------------------------------------
+
+    def _persist_state(self, state: PairwisePassState) -> None:
+        """Écrit l'état de la passe de façon atomique."""
+        stamped = state.model_copy(update={"updated_at": _now_iso()})
+        write_json_atomic(
+            self._pass_state_path(state.run_id, state.judge_model),
+            stamped.model_dump(mode="json"),
+        )
+
+    async def _execute(
+        self,
+        state: PairwisePassState,
+        grid: CriteriaGrid,
+        pairs: List[PairAssignment],
+        budget_cap_usd: float,
+        already_spent: float,
+    ) -> None:
+        """Boucle principale de la passe de comparaison.
+
+        Args:
+            state: État initial.
+            grid: Grille employée.
+            pairs: Paires à juger.
+            budget_cap_usd: Plafond dur.
+        """
+        async with self._control.lock:
+            billable_token = push_billable_user_id(BENCHMARK_BILLABLE_USER_ID)
+            duels_dir = self._duels_dir(state.run_id, state.judge_model)
+            # Cumul relevé avant la purge des duels en erreur.
+            spent = already_spent
+            completed = 0
+            status: str = "failed"
+            message = "Passe interrompue avant la fin (arrêt du processus ?)"
+
+            self._progress = PairwisePassProgress(
+                active=True,
+                run_id=state.run_id,
+                judge_model=state.judge_model,
+                status="running",
+                duels_total=state.duels_total,
+                spent_usd=spent,
+                budget_cap_usd=budget_cap_usd,
+                message="Passe de comparaison démarrée",
+            )
+
+            try:
+                llm_client = self._llm_client_factory(state.judge_model)
+                for pair in pairs:
+                    await self._control.checkpoint()
+
+                    path = self._duel_path(duels_dir, pair)
+                    if self._duel_is_usable(path, grid):
+                        completed += 1
+                        continue
+
+                    if spent >= budget_cap_usd:
+                        status = "interrupted_budget"
+                        message = (
+                            f"Plafond budgétaire atteint ({spent:.4f} USD "
+                            f"≥ {budget_cap_usd:.4f} USD) — duels déjà produits conservés"
+                        )
+                        raise _BudgetExhausted()
+
+                    verdict = await self._judge_service.judge_pair(
+                        run_id=state.run_id,
+                        pair=pair,
+                        grid=grid,
+                        llm_client=llm_client,
+                        judge_model=state.judge_model,
+                    )
+                    try:
+                        write_json_atomic(path, verdict.model_dump(mode="json"))
+                    except OSError as exc:
+                        logger.warning("Duel non persisté (%s) : %s", path.name, exc)
+                    spent += verdict.cost_usd
+                    completed += 1
+                    self._progress = self._progress.model_copy(
+                        update={
+                            "duels_completed": completed,
+                            "spent_usd": round(spent, 6),
+                            "current_case": pair.case_id,
+                        }
+                    )
+
+                status = "completed"
+                message = "Passe de comparaison terminée"
+
+            except _BudgetExhausted:
+                logger.info("Passe de comparaison %s interrompue par le plafond", state.run_id)
+            except PassCancelled:
+                status = "cancelled"
+                message = "Passe annulée — duels déjà produits conservés"
+                logger.info("Passe de comparaison %s annulée à la demande", state.run_id)
+            except asyncio.CancelledError:
+                status = "cancelled"
+                message = "Passe interrompue par l'arrêt du processus"
+                logger.warning("Passe de comparaison %s annulée par l'ordonnanceur", state.run_id)
+                raise
+            except Exception as exc:
+                status = "failed"
+                message = f"Passe interrompue par une erreur : {exc}"
+                logger.exception("Passe de comparaison %s en échec", state.run_id)
+            finally:
+                self._control.release()
+                self._progress = self._progress.model_copy(update={"active": False})
+                reset_billable_user_id(billable_token)
+                try:
+                    produced = [
+                        verdict
+                        for verdict in self.list_verdicts(state.run_id)
+                        if verdict.judge_model == state.judge_model
+                    ]
+                    decided = [v for v in produced if v.status == "decided"]
+                    if status == "completed" and produced and not decided:
+                        status = "failed"
+                        message = (
+                            f"Aucun duel exploitable : {len(produced)} réponses du juge "
+                            "non conformes à la grille"
+                        )
+                    final = state.model_copy(
+                        update={
+                            "status": status,
+                            "message": message,
+                            "duels_completed": len(produced),
+                            "judge_errors": sum(
+                                1 for v in produced if v.status == "judge_error"
+                            ),
+                            "spent_usd": round(sum(v.cost_usd for v in produced), 6),
+                        }
+                    )
+                    self._persist_state(final)
+                    self._progress = PairwisePassProgress(
+                        active=False,
+                        run_id=state.run_id,
+                        judge_model=state.judge_model,
+                        status=final.status,
+                        duels_total=state.duels_total,
+                        duels_completed=final.duels_completed,
+                        spent_usd=final.spent_usd,
+                        budget_cap_usd=budget_cap_usd,
+                        message=message,
+                    )
+                except Exception:
+                    logger.exception(
+                        "Finalisation de la passe de comparaison %s impossible", state.run_id
                     )

@@ -272,6 +272,7 @@ class RubricVerdictListResponse(BaseModel):
     """Réponse de listage des verdicts rubrique d'un run."""
 
     run_id: str
+    total: int = Field(0, description="Nombre de verdicts après filtre, avant pagination")
     judge_models: List[str] = Field(
         default_factory=list,
         description="Juges présents dans le lot — plus d'un signifie qu'aucune agrégation directe n'est licite",
@@ -285,3 +286,172 @@ class JudgePassControlResponse(BaseModel):
     run_id: str
     applied: bool
     message: str
+
+
+PairwiseVerdictStatus = Literal["decided", "judge_error"]
+"""Issue d'un duel. ``judge_error`` couvre une réponse non conforme à la grille."""
+
+
+class PairwiseCriterionOutcome(BaseModel):
+    """Résultat agrégé d'un critère, après lecture des deux sens.
+
+    Attributes:
+        criterion_id: Critère concerné, apparié par identifiant stable.
+        winner_model_id: Modèle gagnant, ou ``None`` en cas d'égalité.
+        margin: Ampleur moyenne de l'écart quand les deux sens concordent, 0 sinon.
+        direction_disagreement: ``True`` si les deux sens ont désigné des gagnants
+            différents. Le duel est alors compté nul : c'est la trace d'un juge
+            sensible à la position, et cette information doit survivre au calcul.
+    """
+
+    criterion_id: str
+    winner_model_id: Optional[str] = None
+    margin: float = 0.0
+    direction_disagreement: bool = False
+
+
+class PairwiseVerdict(BaseModel):
+    """Comparaison de deux générations d'un même cas, jugée dans les deux sens.
+
+    Attributes:
+        run_id: Run d'où viennent les deux générations.
+        case_id: Cas commun.
+        repetition: Index de répétition commun — donc même prompt.
+        model_a: Modèle présenté sous l'étiquette ``A`` au premier passage.
+        model_b: Modèle présenté sous l'étiquette ``B`` au premier passage.
+        judge_model: Juge — enregistré sur chaque verdict, deux juges ne s'agrègent pas.
+        grid_id: Grille employée.
+        grid_version: Version de la grille employée.
+        criteria_snapshot: Critères tels qu'ils étaient au moment du duel.
+        status: ``decided`` ou ``judge_error``.
+        outcomes: Résultat agrégé par critère.
+        reasoning_forward: Raisonnement du sens direct — audit seul, jamais analysé.
+        reasoning_reverse: Raisonnement du sens inverse — audit seul.
+        length_a: Longueur réelle du texte de ``A``, avant troncature.
+        length_b: Longueur réelle du texte de ``B``, avant troncature.
+        truncated: ``True`` si les textes ont été coupés à la limite commune.
+        cost_usd: Coût cumulé des deux appels de juge.
+        error_message: Détail quand ``status`` vaut ``judge_error``.
+        created_at: Horodatage ISO-8601.
+    """
+
+    run_id: str
+    case_id: str
+    repetition: int = Field(..., ge=0)
+    model_a: str
+    model_b: str
+    judge_model: str
+    grid_id: str
+    grid_version: int
+    criteria_snapshot: List[CriterionDefinition] = Field(default_factory=list)
+    status: PairwiseVerdictStatus
+    outcomes: List[PairwiseCriterionOutcome] = Field(default_factory=list)
+    reasoning_forward: str = ""
+    reasoning_reverse: str = ""
+    length_a: int = 0
+    length_b: int = 0
+    truncated: bool = False
+    cost_usd: float = 0.0
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    error_message: Optional[str] = None
+    created_at: Optional[str] = None
+
+
+class PairwisePassConfig(BaseModel):
+    """Paramètres d'une passe de comparaison par paires."""
+
+    grid_id: str = Field(..., min_length=1)
+    grid_version: Optional[int] = Field(None, ge=1)
+    judge_model: str = Field(..., min_length=1)
+    budget_cap_usd: float = Field(..., gt=0)
+
+
+class PairwisePassState(BaseModel):
+    """État persisté d'une passe de comparaison.
+
+    Attributes:
+        duels_total: Duels à produire.
+        duels_completed: Duels persistés.
+        judge_errors: Duels dont la réponse du juge était non conforme.
+        unpairable_slots: Couples (cas, répétition) à un seul modèle valide —
+            comptés pour que le rapport ne présente pas un classement fondé sur
+            trois duels comme s'il en avait couvert cent.
+    """
+
+    run_id: str
+    judge_model: str
+    grid_id: str
+    grid_version: int
+    status: JudgePassStatus
+    duels_total: int = 0
+    duels_completed: int = 0
+    judge_errors: int = 0
+    unpairable_slots: int = 0
+    judge_is_candidate: bool = Field(
+        False,
+        description=(
+            "Le juge figure parmi les modèles comparés. Autorisé, mais le biais "
+            "d'auto-préférence est cohérent dans les deux sens de lecture : il échappe "
+            "donc au contrôle de position et doit être signalé en évidence dans le rapport."
+        ),
+    )
+    estimated_max_usd: float = Field(
+        0.0,
+        description="Coût estimé des duels restants au lancement, calculé avant de dépenser",
+    )
+    spent_usd: float = 0.0
+    budget_cap_usd: float = 0.0
+    message: str = ""
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+
+class PairwisePassProgress(BaseModel):
+    """Progression in-memory d'une passe de comparaison."""
+
+    active: bool = False
+    run_id: Optional[str] = None
+    judge_model: Optional[str] = None
+    status: Optional[JudgePassStatus] = None
+    duels_total: int = 0
+    duels_completed: int = 0
+    current_case: Optional[str] = None
+    spent_usd: float = 0.0
+    budget_cap_usd: float = 0.0
+    paused: bool = False
+    message: str = ""
+
+
+class PairwisePassLaunchResponse(BaseModel):
+    """Réponse de lancement d'une passe de comparaison."""
+
+    run_id: str
+    judge_model: str
+    status: JudgePassStatus
+    duels_total: int
+    unpairable_slots: int
+    estimated_max_usd: float
+    judge_is_candidate: bool = Field(
+        False,
+        description=(
+            "Le juge figure parmi les modèles comparés. Autorisé, mais le biais "
+            "d'auto-préférence est cohérent dans les deux sens de lecture : il échappe "
+            "donc au contrôle de position et doit être signalé en évidence dans le rapport."
+        ),
+    )
+
+
+class PairwiseVerdictListResponse(BaseModel):
+    """Réponse de listage des duels d'un run."""
+
+    run_id: str
+    judge_models: List[str] = Field(default_factory=list)
+    total: int = Field(
+        0,
+        description=(
+            "Nombre de duels après filtre, avant pagination : sans lui, un client "
+            "pourrait publier un classement sur la première page en la croyant complète."
+        ),
+    )
+    verdicts: List[PairwiseVerdict] = Field(default_factory=list)

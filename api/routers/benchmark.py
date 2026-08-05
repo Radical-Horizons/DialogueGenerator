@@ -16,6 +16,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from api.dependencies import (
     get_benchmark_criteria_store,
     get_benchmark_judge_pass_service,
+    get_benchmark_pairwise_pass_service,
     get_benchmark_run_service,
     get_benchmark_suite_store,
     require_admin,
@@ -31,6 +32,11 @@ from api.schemas.benchmark_judging import (
     JudgePassLaunchResponse,
     JudgePassProgress,
     JudgePassState,
+    PairwisePassConfig,
+    PairwisePassLaunchResponse,
+    PairwisePassProgress,
+    PairwisePassState,
+    PairwiseVerdictListResponse,
     RubricVerdictListResponse,
 )
 from services.benchmark_criteria_store import (
@@ -40,6 +46,7 @@ from services.benchmark_criteria_store import (
 )
 from services.benchmark_judge_pass_service import (
     BenchmarkJudgePassService,
+    BenchmarkPairwisePassService,
     JudgePassConflictError,
     JudgePassNotFoundError,
 )
@@ -472,15 +479,19 @@ async def list_run_verdicts(
         service.run_service.get_run(run_id)
     except BenchmarkRunNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
-    verdicts = service.list_verdicts(run_id)
-    if judge_model is not None:
-        verdicts = [verdict for verdict in verdicts if verdict.judge_model == judge_model]
-    # Les juges présents sont calculés sur le lot complet, avant pagination :
-    # une page ne doit pas laisser croire à l'unicité du juge.
-    judges = sorted({verdict.judge_model for verdict in verdicts})
+    all_verdicts = service.list_verdicts(run_id)
+    # Calculés AVANT le filtre : filtrer par juge ne doit pas éteindre le signal
+    # « plusieurs juges présents », qui est précisément ce qui interdit d'agréger.
+    judges = sorted({verdict.judge_model for verdict in all_verdicts})
+    verdicts = (
+        all_verdicts
+        if judge_model is None
+        else [verdict for verdict in all_verdicts if verdict.judge_model == judge_model]
+    )
     return RubricVerdictListResponse(
         run_id=run_id,
         judge_models=judges,
+        total=len(verdicts),
         verdicts=verdicts[offset : offset + limit],
     )
 
@@ -551,6 +562,169 @@ async def cancel_judge_pass(
     _admin: Annotated[Dict[str, object], Depends(_require_admin_user)],
 ) -> JudgePassControlResponse:
     """Annule la passe de jugement de ce run ; les verdicts produits sont conservés."""
+    applied = service.request_cancel(run_id)
+    return JudgePassControlResponse(
+        run_id=run_id,
+        applied=applied,
+        message="Annulation demandée" if applied else "Aucune passe active pour ce run",
+    )
+
+
+# ----------------------------------------------------------------------
+# Comparaison par paires
+# ----------------------------------------------------------------------
+
+
+@router.post("/runs/{run_id}/judge/pairwise", response_model=PairwisePassLaunchResponse)
+async def start_pairwise_pass(
+    run_id: str,
+    body: PairwisePassConfig,
+    service: Annotated[
+        BenchmarkPairwisePassService, Depends(get_benchmark_pairwise_pass_service)
+    ],
+    _admin: Annotated[Dict[str, object], Depends(_require_admin_user)],
+) -> PairwisePassLaunchResponse:
+    """Lance la comparaison par paires des générations valides d'un run.
+
+    Chaque duel coûte **deux** appels de juge — le sens direct et le sens inverse —
+    et le nombre de duels croît en carré du nombre de modèles : l'estimation
+    retournée ici est le garde-fou avant de dépenser.
+    """
+    try:
+        state = await service.start_pass(run_id, body)
+    except (BenchmarkRunNotFoundError, CriteriaGridNotFoundError) as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except CriteriaGridInvalidError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    except JudgePassConflictError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    return PairwisePassLaunchResponse(
+        run_id=state.run_id,
+        judge_model=state.judge_model,
+        status=state.status,
+        duels_total=state.duels_total,
+        unpairable_slots=state.unpairable_slots,
+        judge_is_candidate=state.judge_is_candidate,
+        # Estimation portée par l'état : calculée sur les duels RESTANTS avant le
+        # lancement. La recalculer ici, après création de la tâche, afficherait le
+        # coût de la totalité sur une reprise — et une levée laisserait une passe
+        # orpheline en train de dépenser.
+        estimated_max_usd=state.estimated_max_usd,
+    )
+
+
+@router.get("/runs/{run_id}/pairwise", response_model=PairwiseVerdictListResponse)
+async def list_run_pairwise_verdicts(
+    run_id: str,
+    service: Annotated[
+        BenchmarkPairwisePassService, Depends(get_benchmark_pairwise_pass_service)
+    ],
+    _admin: Annotated[Dict[str, object], Depends(_require_admin_user)],
+    judge_model: Annotated[Optional[str], Query()] = None,
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+    offset: Annotated[int, Query(ge=0)] = 0,
+) -> PairwiseVerdictListResponse:
+    """Liste les duels d'un run.
+
+    `judge_models` recense les juges présents dans le lot complet, avant pagination :
+    plus d'un signifie qu'aucune agrégation directe n'est licite.
+    """
+    try:
+        service.run_service.get_run(run_id)
+    except BenchmarkRunNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    all_verdicts = service.list_verdicts(run_id)
+    judges = sorted({verdict.judge_model for verdict in all_verdicts})
+    verdicts = (
+        all_verdicts
+        if judge_model is None
+        else [verdict for verdict in all_verdicts if verdict.judge_model == judge_model]
+    )
+    return PairwiseVerdictListResponse(
+        run_id=run_id,
+        judge_models=judges,
+        total=len(verdicts),
+        verdicts=verdicts[offset : offset + limit],
+    )
+
+
+@router.get(
+    "/runs/{run_id}/pairwise/{judge_model:path}/state", response_model=PairwisePassState
+)
+async def get_pairwise_pass_state(
+    run_id: str,
+    judge_model: str,
+    service: Annotated[
+        BenchmarkPairwisePassService, Depends(get_benchmark_pairwise_pass_service)
+    ],
+    _admin: Annotated[Dict[str, object], Depends(_require_admin_user)],
+) -> PairwisePassState:
+    """Retourne l'état persisté d'une passe de comparaison.
+
+    Porte notamment `unpairable_slots` : un run largement invalide produit peu de
+    duels, et le rapport ne doit pas présenter ce classement comme s'il en avait
+    couvert beaucoup.
+    """
+    try:
+        return service.get_pass_state(run_id, judge_model)
+    except (JudgePassNotFoundError, BenchmarkRunNotFoundError) as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+
+
+@router.get("/pairwise/progress", response_model=PairwisePassProgress)
+async def get_pairwise_pass_progress(
+    service: Annotated[
+        BenchmarkPairwisePassService, Depends(get_benchmark_pairwise_pass_service)
+    ],
+    _admin: Annotated[Dict[str, object], Depends(_require_admin_user)],
+) -> PairwisePassProgress:
+    """Retourne la progression de la passe de comparaison en cours."""
+    return service.read_progress()
+
+
+@router.post("/runs/{run_id}/pairwise/pause", response_model=JudgePassControlResponse)
+async def pause_pairwise_pass(
+    run_id: str,
+    service: Annotated[
+        BenchmarkPairwisePassService, Depends(get_benchmark_pairwise_pass_service)
+    ],
+    _admin: Annotated[Dict[str, object], Depends(_require_admin_user)],
+) -> JudgePassControlResponse:
+    """Suspend la passe de comparaison de ce run."""
+    applied = service.request_pause(run_id)
+    return JudgePassControlResponse(
+        run_id=run_id,
+        applied=applied,
+        message="Pause demandée" if applied else "Aucune passe active pour ce run",
+    )
+
+
+@router.post("/runs/{run_id}/pairwise/unpause", response_model=JudgePassControlResponse)
+async def unpause_pairwise_pass(
+    run_id: str,
+    service: Annotated[
+        BenchmarkPairwisePassService, Depends(get_benchmark_pairwise_pass_service)
+    ],
+    _admin: Annotated[Dict[str, object], Depends(_require_admin_user)],
+) -> JudgePassControlResponse:
+    """Relance la passe de comparaison suspendue de ce run."""
+    applied = service.request_unpause(run_id)
+    return JudgePassControlResponse(
+        run_id=run_id,
+        applied=applied,
+        message="Reprise demandée" if applied else "Aucune passe active pour ce run",
+    )
+
+
+@router.post("/runs/{run_id}/pairwise/cancel", response_model=JudgePassControlResponse)
+async def cancel_pairwise_pass(
+    run_id: str,
+    service: Annotated[
+        BenchmarkPairwisePassService, Depends(get_benchmark_pairwise_pass_service)
+    ],
+    _admin: Annotated[Dict[str, object], Depends(_require_admin_user)],
+) -> JudgePassControlResponse:
+    """Annule la passe de comparaison ; les duels déjà produits sont conservés."""
     applied = service.request_cancel(run_id)
     return JudgePassControlResponse(
         run_id=run_id,

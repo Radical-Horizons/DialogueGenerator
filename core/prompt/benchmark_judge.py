@@ -86,3 +86,69 @@ def build_rubric_judge_user_prompt(grid: "CriteriaGrid", unity_json: str) -> str
         "DIALOGUE À NOTER\n```json\n"
         f"{unity_json}\n```"
     )
+
+
+BENCHMARK_PAIRWISE_JUDGE_SYSTEM_PROMPT = (
+    "Tu es juge de dialogues de jeu de rôle écrits en français. On te soumet deux "
+    "propositions, A et B, écrites à partir de la MÊME consigne et du MÊME contexte.\n"
+    "Pour chaque critère de la grille, tu désignes la proposition la meilleure, ou "
+    "« tie » si elles se valent, et tu indiques l'ampleur de l'écart.\n"
+    "Tu ignores qui a écrit chaque proposition, et cela n'a aucune importance.\n"
+    "Ne préfère pas une proposition parce qu'elle est plus longue ou plus fournie : "
+    "à qualité égale, la plus concise vaut mieux.\n"
+    "Juge chaque critère indépendamment : une proposition peut gagner sur l'un et "
+    "perdre sur l'autre."
+)
+
+
+def build_pairwise_judge_user_prompt(
+    grid: "CriteriaGrid", text_a: str, text_b: str, *, truncated: bool
+) -> str:
+    """Construit le message utilisateur d'une comparaison par paires.
+
+    Args:
+        grid: Grille de critères employée.
+        text_a: Proposition A, déjà tronquée à la limite commune.
+        text_b: Proposition B, déjà tronquée à la limite commune.
+        truncated: ``True`` si au moins un des deux textes a été coupé.
+
+    Returns:
+        Texte du prompt utilisateur.
+    """
+    blocks: List[str] = [
+        _format_criterion(
+            index,
+            criterion.criterion_id,
+            criterion.label,
+            criterion.description,
+            criterion.direction,
+        )
+        for index, criterion in enumerate(grid.criteria, start=1)
+    ]
+    expected_ids = ", ".join(f"`{cid}`" for cid in grid.criterion_ids())
+    # La mention n'apparaît QUE si une coupure a réellement eu lieu : l'envoyer
+    # systématiquement apprendrait au juge à excuser toute fin abrupte, y compris
+    # une génération réellement tronquée par le modèle — soit exactement le défaut
+    # qu'un benchmark de dialogue doit détecter.
+    truncation_note = (
+        "\nAu moins une des propositions a été coupée à une limite de longueur "
+        "imposée par l'outil, et porte alors une marque explicite en fin de texte. "
+        "Cette coupure-là est un artefact de présentation : ne la pénalise pas. "
+        "En revanche, une réplique qui s'interrompt sans cette marque est bien un "
+        "défaut du texte.\n"
+        if truncated
+        else ""
+    )
+    return (
+        "Compare les deux propositions ci-dessous sur chacun des critères suivants.\n\n"
+        "CRITÈRES\n\n" + "\n\n".join(blocks) + "\n\n"
+        "Pour les critères marqués SENS INVERSÉ, la meilleure proposition est celle "
+        "où le défaut décrit est le MOINS présent.\n\n"
+        f"Rends une entrée pour chacun de ces identifiants, sans en omettre ni en "
+        f"ajouter : {expected_ids}.\n"
+        f"{truncation_note}\n"
+        "PROPOSITION A\n```json\n"
+        f"{text_a}\n```\n\n"
+        "PROPOSITION B\n```json\n"
+        f"{text_b}\n```"
+    )

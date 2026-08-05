@@ -337,8 +337,11 @@ def test_verdicts_expose_judge_plurality(
     assert len(body["judge_models"]) == 2
 
     filtered = client.get(f"{BASE}/runs/{run_id}/verdicts", params={"judge_model": JUDGE}).json()
-    assert filtered["judge_models"] == [JUDGE]
     assert len(filtered["verdicts"]) == 1
+    assert filtered["total"] == 1
+    # `judge_models` recense le lot complet, pas la sélection : filtrer par juge ne
+    # doit pas éteindre le signal qui interdit précisément d'agréger deux juges.
+    assert len(filtered["judge_models"]) == 2
 
 
 def test_judge_pass_on_unknown_run_returns_404(

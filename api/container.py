@@ -12,7 +12,10 @@ from typing import Dict, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from services.benchmark_criteria_store import BenchmarkCriteriaStore
     from services.benchmark_gate_service import BenchmarkGateService
-    from services.benchmark_judge_pass_service import BenchmarkJudgePassService
+    from services.benchmark_judge_pass_service import (
+        BenchmarkJudgePassService,
+        BenchmarkPairwisePassService,
+    )
     from services.benchmark_run_service import BenchmarkRunService
     from services.benchmark_suite_store import BenchmarkSuiteStore
     from services.dialogue_preview_service import DialoguePreviewService
@@ -100,6 +103,7 @@ class ServiceContainer:
         self._benchmark_run_service: Optional["BenchmarkRunService"] = None
         self._benchmark_criteria_store: Optional["BenchmarkCriteriaStore"] = None
         self._benchmark_judge_pass_service: Optional["BenchmarkJudgePassService"] = None
+        self._benchmark_pairwise_pass_service: Optional["BenchmarkPairwisePassService"] = None
         self._dialogue_preview_service: Optional["DialoguePreviewService"] = None
         self._global_relation_index: Optional[Dict[str, str]] = None
         self._database_connection: Optional[DatabaseConnection] = database_connection
@@ -692,6 +696,43 @@ class ServiceContainer:
             )
             logger.info("BenchmarkJudgePassService initialisé dans le container.")
         return self._benchmark_judge_pass_service
+
+    def get_benchmark_pairwise_pass_service(self) -> "BenchmarkPairwisePassService":
+        """Retourne la passe de comparaison par paires (singleton : une passe à la fois).
+
+        Returns:
+            Passe câblée sur le moteur de run, la grille et la fabrique de client juge.
+        """
+        if self._benchmark_pairwise_pass_service is None:
+            from services.benchmark_judge_pass_service import BenchmarkPairwisePassService
+            from services.benchmark_judge_service import BenchmarkPairwiseJudgeService
+            from services.llm_pricing_service import LLMPricingService
+            from factories.llm_factory import LLMClientFactory
+
+            config_service = self.get_config_service()
+            usage_service = self.get_llm_usage_service()
+            pricing_service = LLMPricingService()
+
+            def _judge_client(model_id: str):
+                """Crée le client du juge, tracé comme un appel de comparaison benchmark."""
+                return LLMClientFactory.create_client(
+                    model_id=model_id,
+                    config=config_service.get_llm_config(),
+                    available_models=config_service.get_available_llm_models(),
+                    usage_service=usage_service,
+                    endpoint="benchmark/pairwise",
+                )
+
+            criteria_store = self.get_benchmark_criteria_store()
+            self._benchmark_pairwise_pass_service = BenchmarkPairwisePassService(
+                run_service=self.get_benchmark_run_service(),
+                criteria_store=criteria_store,
+                judge_service=BenchmarkPairwiseJudgeService(pricing_service=pricing_service),
+                pricing_service=pricing_service,
+                llm_client_factory=_judge_client,
+            )
+            logger.info("BenchmarkPairwisePassService initialisé dans le container.")
+        return self._benchmark_pairwise_pass_service
 
     def _resolve_gdd_categories_path(self) -> Path:
         """Répertoire des catégories GDD (helper partagé ``services.gdd_paths``)."""

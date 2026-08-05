@@ -133,3 +133,31 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-judging.md`
   summary: Le diagnostic du juge emprunte `diagnose_models`, qui impose la whitelist de génération Unity — sans rapport avec le schéma d'un juge, et qui contraint le juge à être aussi un candidat.
   evidence: Edge-case hunter — un juge parfaitement valable hors whitelist est refusé ; un diagnostic dédié (client réel + non-Dummy, sans filtre structured output Unity) serait plus juste.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-pairwise.md`
+  summary: Coût imputé à un sens de lecture en échec lu sur les compteurs du client partagé, encore porteurs des valeurs du dernier appel réussi.
+  evidence: Revue adversariale — un duel dont le sens direct réussit et l'inverse échoue est facturé deux fois le premier appel. Le correctif propre demande de mémoriser les compteurs avant chaque appel, ou que le client retourne son coût.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-pairwise.md`
+  summary: `_duel_is_usable` et `_verdict_is_usable` ne vérifient pas que le fichier correspond bien à la paire dont le chemin a été calculé (cas, répétition, modèles).
+  evidence: Revue adversariale — toute divergence future entre nommage et appariement serait acceptée en silence, et le classement agrégerait des comparaisons qui n'ont jamais eu lieu.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-pairwise.md`
+  summary: Distinguer « accord partiel » (un sens tranche, l'autre dit égalité) de « désaccord de position » (les deux sens désignent des modèles opposés).
+  evidence: Edge-case hunter — les deux sont aujourd'hui comptés `direction_disagreement`, ce qui gonfle la métrique de biais avec de simples hésitations du juge.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-pairwise.md`
+  summary: Passe rubrique et passe pairwise peuvent tourner simultanément sur le même run, chacune avec son plafond — dépense doublée sous la même identité de facturation.
+  evidence: Revue adversariale + edge-case hunter — deux singletons, deux `CooperativePassControl`. Correctif : verrou et plafond portés par le run, pas par la passe.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-pairwise.md`
+  summary: `start_pass` et `GET /pairwise` lisent tous les duels en synchrone dans le handler HTTP ; à 3000 duels, la boucle d'événements est bloquée.
+  evidence: Edge-case hunter — pagination appliquée après chargement complet, et `_duel_is_usable` par paire dans la coroutine du endpoint. Correctif : pagination à la source, ou `asyncio.to_thread`.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-pairwise.md`
+  summary: Aucune borne sur le nombre de duels (cas × C(modèles,2) × répétitions, deux appels chacun) ni échantillonnage possible.
+  evidence: Edge-case hunter — 8 modèles × 40 cas × K=3 donnent 6720 appels séquentiels. Le budget est le seul frein, et il est saisi à la main. Correspond au point « Ask First » de la spec, resté non tranché.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-pairwise.md`
+  summary: La troncature coupe au caractère un JSON ré-indenté inséré dans un fence ```json — le texte tronqué est syntaxiquement invalide, l'autre non.
+  evidence: Revue adversariale + edge-case hunter — sur un critère de forme, le juge pénalise une malformation produite par l'outil. Correctif : tronquer au nœud complet et re-sérialiser.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-pairwise.md`
+  summary: L'appariement ne compare pas les `prompt_hash` des deux générations, alors que le champ existe et que la garantie « même prompt » repose sur une déduction (même cas + même répétition).
+  evidence: Edge-case hunter — la donnée qui permettrait de vérifier l'invariant est à portée de main et n'est pas lue.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-pairwise.md`
+  summary: État de passe jamais persisté en cours de route — un arrêt brutal laisse `_pass.json` figé sur `running`, `duels_completed: 0`.
+  evidence: Revue adversariale + edge-case hunter — vaut aussi pour la passe rubrique. Correctif : persister toutes les N unités, et requalifier un `running` orphelin au démarrage.
