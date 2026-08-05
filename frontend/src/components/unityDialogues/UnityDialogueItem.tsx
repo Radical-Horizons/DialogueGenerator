@@ -3,6 +3,7 @@
  */
 import { forwardRef, memo, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react'
 import { theme } from '../../theme'
+import { redesignFont, redesignText } from '../../theme/redesignTokens'
 import { remSize } from '../../theme/uiTypography'
 import { listItemSelectionStyle, listRowHairlineBorder, listRowHoverBackground } from '../../theme/selectionTokens'
 import type { UnityDialogueMetadata } from '../../types/api'
@@ -84,6 +85,21 @@ export const UnityDialogueItem = memo(
       }
 
       const titleText = getDialogueDisplayTitle(dialogue)
+      const nodeCount = dialogue.node_count
+      const edgeCount = dialogue.edge_count
+      /**
+       * « RÉPLIQUES » et non « NŒUDS » : l'API compte les nœuds *écrits* du fichier,
+       * là où la toolbar du graphe compte les sommets du canvas — test et fin
+       * dérivés compris. Deux mesures différentes, deux mots différents.
+       */
+      const structureLabel =
+        typeof nodeCount === 'number'
+          ? `${nodeCount} ${nodeCount === 1 ? 'RÉPLIQUE' : 'RÉPLIQUES'}${
+              typeof edgeCount === 'number'
+                ? ` · ${edgeCount} ${edgeCount === 1 ? 'LIEN' : 'LIENS'}`
+                : ''
+            }`
+          : null
       const shareCount = Math.max(0, dialogue.share_count ?? 0)
       const sharingLabel =
         shareCount === 0 ? 'Privé' : `Co-édité (${shareCount})`
@@ -129,10 +145,27 @@ export const UnityDialogueItem = memo(
               color: theme.text.tertiary,
               display: 'flex',
               flexWrap: 'wrap',
+              alignItems: 'center',
               gap: '0.3rem',
             }}
           >
-            <span>{formatSize(dialogue.size_bytes)}</span>
+            {/* 2e : la ligne dit la forme du dialogue, pas le poids du fichier.
+                `node_count` n'est pas garanti par tous les endpoints — on retombe
+                alors sur la taille, qui reste la seule mesure disponible. */}
+            {structureLabel ? (
+              <span
+                data-testid="unity-dialogue-structure"
+                style={{
+                  fontFamily: redesignFont.mono,
+                  letterSpacing: '0.06em',
+                  color: redesignText.label,
+                }}
+              >
+                {structureLabel}
+              </span>
+            ) : (
+              <span>{formatSize(dialogue.size_bytes)}</span>
+            )}
             <span aria-hidden>•</span>
             <span>{formatDate(dialogue.modified_time)}</span>
             <span

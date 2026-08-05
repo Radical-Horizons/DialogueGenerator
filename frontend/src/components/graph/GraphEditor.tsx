@@ -3,7 +3,7 @@
  * Orchestrateur léger : délègue la logique aux hooks et les blocs JSX aux composants dédiés.
  * Structure : Liste de dialogues à gauche, graphe à droite.
  */
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ReactFlowProvider } from 'reactflow'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '../../store/authStore'
@@ -27,9 +27,10 @@ import {
   GraphInspectorEmpty,
   GraphInspectorNodeHeading,
   GraphInspectorPrimaryAction,
-  GraphInspectorRow,
   type GraphInspectorTabDef,
 } from './GraphInspector'
+import { GraphInspectorNodeSummary } from './GraphInspectorNodeSummary'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { GraphQualityLlmPanel } from './GraphQualityLlmPanel'
 import { GraphAiSlopPanel } from './GraphAiSlopPanel'
 import { GraphContextDroppingPanel } from './GraphContextDroppingPanel'
@@ -103,6 +104,15 @@ export function GraphEditor({
   } = useGraphStore()
 
   const loreDialogueScopeKey = activeDialogueFilename ?? graphDocumentId ?? 'untitled'
+
+  /**
+   * 2e : l'onglet NŒUD s'ouvre en lecture ; « éditer » bascule sur le formulaire.
+   * Changer de nœud ramène la lecture — on regarde d'abord, on modifie ensuite.
+   */
+  const [nodeInspectorEditing, setNodeInspectorEditing] = useState(false)
+  useEffect(() => {
+    setNodeInspectorEditing(false)
+  }, [selectedNodeId])
 
   const toolbar = useGraphToolbar(toast, activeDialogueFilename, handleSave, isLoadingDialogue)
   const { ref: workspaceRef, isNarrow: isWorkspaceNarrow } = useNarrowInlineSize(
@@ -215,6 +225,15 @@ export function GraphEditor({
   const healthIssueCount =
     graphValidationErrors.length + (schemaValidationErrorCount ?? 0)
 
+  const selectedNodeErrorCount = selectedNodeId
+    ? graphValidationErrors.filter((e) => e.node_id === selectedNodeId && e.severity === 'error')
+        .length
+    : 0
+  const selectedNodeWarningCount = selectedNodeId
+    ? graphValidationErrors.filter((e) => e.node_id === selectedNodeId && e.severity !== 'error')
+        .length
+    : 0
+
   const inspectorTabs: GraphInspectorTabDef[] = [
     {
       id: 'node',
@@ -227,13 +246,19 @@ export function GraphEditor({
             }`}
             line={selectedNodeData?.line}
           />
-          <GraphInspectorRow label="Réponses">
-            {Array.isArray(selectedNodeData?.choices)
-              ? `${selectedNodeData.choices.length}`
-              : '0'}
-          </GraphInspectorRow>
-          {/* L'édition complète vit ici : une seule colonne droite pour le graphe. */}
-          <NodeEditorPanel />
+          {/* 2e : vue lecture par défaut ; « éditer » ouvre le formulaire complet,
+              qui reste la seule surface d'édition du graphe. */}
+          {nodeInspectorEditing ? (
+            <NodeEditorPanel />
+          ) : (
+            <GraphInspectorNodeSummary
+              node={selectedGraphNode}
+              errorCount={selectedNodeErrorCount}
+              warningCount={selectedNodeWarningCount}
+              onEdit={() => setNodeInspectorEditing(true)}
+              onShowHealth={() => useUiLayoutStore.getState().setInspectorTab('health')}
+            />
+          )}
         </>
       ) : (
         <GraphInspectorEmpty>
