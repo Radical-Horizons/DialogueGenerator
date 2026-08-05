@@ -84,14 +84,23 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
   summary: États responsive — mode écriture (`⌘\`/`ctrl+\`, deux colonnes en rail 52px), tiroir bas plafonné 60vh à ≤1024px (nouvelle variante `side: 'bottom'` sur `NarrowOverlayDrawer`), nouveau store `uiLayoutStore`.
   evidence: Split au checkpoint spec — touche à la fois l'écran de génération et l'éditeur de graphe ; mieux traité une fois les deux zones stabilisées visuellement.
-  status: partiel — mode écriture Ctrl+\ livré (`uiLayoutStore.writingMode`, colonne 760px, brief 17px, rails restaurés à la sortie). Reste le tiroir bas ≤1024px (voir entrée dédiée ci-dessous).
+  status: done — 2c complet (header minimal, rails 52px à puces, barre de pied unique) et 2d complet (barre basse `PromptBudgetBottomDrawer` entre 1024 et 1200px, colonne droite repliée pour éviter le doublon).
 
 - source_spec: `docs/design/refonte-ui-2026/etats-2a-2e.dc.html` (bloc 2d)
   summary: À ≤1024px, transformer le panneau droit « Ce qui part au modèle » en barre repliable au-dessus de la barre d'action (variante `side: 'bottom'` de `NarrowOverlayDrawer`, plafond 60vh).
   evidence: Vérifié navigateur (août 2026) : à 1024px l'app garde déjà 3 colonnes conformes (GDD ~212px, colonne 600px, panneau droit avec TOTAL visible) — l'essentiel de 2d (« le total reste toujours visible ») est satisfait ; la barre basse est un raffinement, à faire avec les tests FR119/FR120 des drawers.
+  status: done — livré le 2026-08-05, vérifié à 1100px (total visible replié, détail sous le plafond 60vh, colonne droite absente) et à 1400px (retour à la colonne).
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
   summary: Écran 2b — le bouton « Variante » par option n'est PAS une fonctionnalité neuve : il correspond à la Story 1.10 (FR10, régénérer avec instructions ajustées), déjà implémentée via `RegenerateNodeModal`. À recâbler sur la nouvelle UI, pas à réécrire. Idem « Éditer » (Story 1.4, accepter/rejeter inline).
   evidence: Relevé dans `_bmad-output/planning-artifacts/epics/epic-01.md` (Story 1.7 duplication FR7, Story 1.10 régénération FR10). Seule la génération de N options SIMULTANÉES reste sans support backend (`GenerateUnityDialogueResponse` est one-shot) — c'est le seul point qui coûterait N appels LLM.
   status: done — décision utilisateur (2026-08-04) : appels multiples autorisés, parallèles, plafonnés. Implémenté frontend-only : `generationOptionsStore` (plafond `MAX_GENERATION_OPTIONS=4`, N-1 jobs `createGenerationJob` supplémentaires chacun avec son EventSource — le backend n'exécute un job que quand son stream est réclamé), comparaison `GenerationOptionsComparison` (Garder / Variante / Réessayer), sélecteur ×N dans la barre d'action, interruption qui annule aussi les jobs d'arrière-plan. Vérifié en live : 2 appels parallèles réels, 2 OPTIONS SUR 2 — À COMPARER, Garder pousse le résultat.
 
+
+- source_spec: `docs/design/refonte-ui-2026/etats-2a-2e.dc.html` (bloc 2b)
+  summary: Vue « côte à côte » des options (le lien existe dans la maquette à côté de « tout replier »).
+  evidence: La comparaison verticale — une option ouverte, les autres en une ligne — répond déjà au besoin « comparer, c'est lire N premières phrases ». La vue côte à côte est une seconde disposition, à décider après usage réel du multi-options.
+
+- source_spec: `docs/design/refonte-ui-2026/etats-2a-2e.dc.html` (bloc 2b, colonne Diagnostic)
+  summary: Lignes de diagnostic qualitatives (« ton demandé : tenu », « mensonge possible », « répétition détectée ») — exigent un second appel LLM par option.
+  evidence: Les lignes calculables sont livrées (longueur vs cible, réponses mécaniques, flags, fiches citées / envoyées inutilement). Les jugements demandent une évaluation par modèle : coût N× supplémentaire, décision produit à prendre séparément.

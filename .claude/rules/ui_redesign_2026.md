@@ -70,25 +70,45 @@ fonctionnalité a disparu (cf. `.claude/rules/tests.md`), avant de corriger l'as
 
 ## État d'avancement
 
-Branche `refonte-ui-2026`. Fait : tokens et polices, purge des emoji, rangées en filets,
-écran 1c (header, colonnes, lecture 660 px, TOTAL + DERNIER RÉSULTAT), dissolution de la
-modale de progression, **2e complet** (inspecteur à onglets `uiLayoutStore.inspectorTab`,
-toolbar une rangée 46 px avec seuil dédié 980 px, nœuds restylés — bordures neutres, pieds
-mono, plaques FIN/TEST), **2a** finition (étapes mono FR, ÉCHAP câblé, compteur tokens),
-**2c** mode écriture (Ctrl+\, colonne 760 px, brief 17 px, rails restaurés à la sortie).
-**2d** : conforme à ~90 % (3 colonnes tiennent à 1024 px, TOTAL visible) — barre basse
-repliable différée. **2b multi-options : fait** (décision utilisateur 2026-08-04 — appels
-parallèles autorisés, plafond 4) : `generationOptionsStore` + `GenerationOptionsComparison`,
-sélecteur ×N dans la barre d'action, Garder/Variante/Réessayer par option, interruption
-qui annule aussi les jobs d'arrière-plan. ⚠️ Le backend n'exécute un job que quand son
-stream SSE est réclamé (`try_claim_stream_job`) : toute option d'arrière-plan doit ouvrir
-son EventSource — un simple polling de statut resterait `queued` pour toujours.
+Branche `refonte-ui-2026`. **Les cinq écrans de la maquette sont implémentés** : 1c, 2a,
+2b, 2c, 2d, 2e. Reste ouvert seulement ce qui est listé dans
+`_bmad-output/implementation-artifacts/deferred-work.md`.
 
-Piège corrigé au passage (août 2026) : `useNarrowInlineSize` créait son `ResizeObserver`
-dans la callback ref ; sous `React.StrictMode` le cleanup le déconnectait sans jamais le
-recréer — hook aveugle après le premier paint. Le RO vit désormais dans un effet keyé sur
-le nœud en state. Ne pas revenir au pattern callback-ref-crée-le-RO.
+Correspondance écran → code (point d'entrée) :
 
-La comparaison **4 options** de 2b est en suspens : le backend est one-shot
-(`GenerateUnityDialogueResponse` n'a pas de champ variantes), la faire coûterait N appels LLM par
-génération. Décision utilisateur requise — voir `_bmad-output/implementation-artifacts/deferred-work.md`.
+| Écran | Où ça vit |
+|---|---|
+| **1c** repos | `GenerationPanel`, `SceneSelectionWidget`, `Dashboard` (3 colonnes) |
+| **2a** génération | `useGenerationRunState` + `GenerationStreamingInline` + `GenerationTracePanel` |
+| **2b** comparaison | `generationOptionsStore`, `GenerationOptionsComparison`, `generationOptionDiagnostics` |
+| **2c** écriture | `uiLayoutStore.writingMode`, `WritingModeRail`, `Tabs hideTabList` |
+| **2d** 1024–1200px | `PromptBudgetBottomDrawer` + `useMediaQuery` |
+| **2e** graphe | `uiLayoutStore.inspectorTab`, `GraphInspector`, `GraphInspectorNodeSummary` |
+
+## Pièges rencontrés — ne pas les refaire
+
+- **Deux formes de JSON Unity coexistent.** La génération renvoie un **tableau nu**
+  de nœuds (`render_unity_nodes` → `json.dumps(nodes)`) ; les fichiers persistés sont
+  des documents `{schemaVersion, nodes: [...]}`. Supposer une seule forme casse
+  silencieusement : côté front l'aperçu des options restait vide, côté back le `title`
+  du listing était `null` pour tous les dialogues du disque. Voir `firstUnityNode`
+  (front) et `_nodes_of` (`api/routers/unity_dialogues.py`).
+- **`hidden` ne masque pas un élément qui porte un `display` inline.** La règle UA
+  `[hidden] { display: none }` perd en spécificité. Calculer le `display`.
+- **`useNarrowInlineSize` : le `ResizeObserver` vit dans un effet**, pas dans la
+  callback ref. Sous `React.StrictMode` le cleanup le déconnecterait sans jamais le
+  recréer — hook aveugle après le premier paint.
+- **Mocks de store et sélecteurs.** Plusieurs suites remplacent `useGenerationStore`
+  par un `mockReturnValue` qui ignore le sélecteur et renvoie l'objet entier. Un
+  composant qui lit déjà le store sans sélecteur doit se servir de ses propres
+  valeurs (cf. `GenerationPanel`), et les hooks partagés coercent avec `=== true`.
+- **« NŒUDS » de la toolbar ≠ « RÉPLIQUES » de la liste.** Le canvas compte aussi les
+  nœuds de test et de fin dérivés ; le fichier compte les nœuds écrits. Deux mesures,
+  deux mots — ne pas les uniformiser sans changer la logique.
+
+## Diagnostic : uniquement du calculable
+
+La colonne Diagnostic de 2b n'affiche que ce qui se dérive du JSON produit et du
+contexte envoyé (longueur, réponses, flags, fiches citées). Les jugements de la
+maquette — « ton demandé : tenu », « mensonge possible : oui » — exigeraient un
+second appel LLM. Ne pas les simuler par heuristique.
