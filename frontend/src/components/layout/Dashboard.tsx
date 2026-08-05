@@ -27,6 +27,7 @@ import { GraphEditor } from '../graph/GraphEditor'
 import { NodeEditorPanel } from '../graph/NodeEditorPanel'
 import { KeyboardShortcutsHelp } from '../shared/KeyboardShortcutsHelp'
 import { useGenerationStore } from '../../store/generationStore'
+import { useContextStore } from '../../store/contextStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useContextConfigStore } from '../../store/contextConfigStore'
 import { useGraphStore } from '../../store/graphStore'
@@ -49,6 +50,7 @@ import { redesignAccent, redesignFont, redesignHairline, redesignText } from '..
 import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { useGenerationRunActive } from '../../hooks/useGenerationRunState'
 import { GenerationTracePanel } from '../generation/GenerationTracePanel'
+import { WritingModeRail } from './WritingModeRail'
 import { useGenerationOptionsStore } from '../../store/generationOptionsStore'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
@@ -323,6 +325,20 @@ export function Dashboard() {
   /** 2a : un run en cours verrouille le contexte GDD et bascule la colonne droite sur TRACE. */
   const generationRunActive = useGenerationRunActive()
   const [traceHidden, setTraceHidden] = useState(false)
+  /** Rails 2c : noms des fiches sélectionnées et total de tokens du prompt. */
+  const contextSelections = useContextStore((s) => s.selections)
+  const selectedEntityNames = useMemo(() => {
+    const sel = contextSelections as unknown as Record<string, unknown> | undefined
+    if (!sel) return []
+    const names: string[] = []
+    for (const value of Object.values(sel)) {
+      if (Array.isArray(value)) {
+        names.push(...value.filter((v): v is string => typeof v === 'string'))
+      }
+    }
+    return Array.from(new Set(names))
+  }, [contextSelections])
+  const generationTokenCount = useGenerationStore((s) => s.tokenCount)
   const optionRunSize = useGenerationOptionsStore((s) => s.slots.length)
   /** FR120 : &lt; 1024px — panneaux latéraux en overlay drawer, pas en colonnes compressées */
   const useNarrowSidePanels = viewportMode !== 'desktop'
@@ -1299,7 +1315,25 @@ export function Dashboard() {
         {/* Rails latéraux — visibles quand un panneau est replié.
             Transparence "très auto" : quasi invisible au repos (17%), pleinement
             visible au hover/focus. Centrés verticalement dans les deux modes. */}
-        {showCollapsedLeftAffordance && (
+        {/* 2c : en mode écriture les pilules deviennent de vrais rails — compteur de
+            fiches, initiales, total de tokens. Rien n'est perdu, tout reste cliquable. */}
+        {writingMode && showCollapsedLeftAffordance && (
+          <WritingModeRail
+            side="left"
+            onExpand={toggleLeftPanel}
+            ariaLabel="Déplier le panneau gauche"
+            entityNames={selectedEntityNames}
+          />
+        )}
+        {writingMode && showCollapsedRightAffordance && (
+          <WritingModeRail
+            side="right"
+            onExpand={toggleRightPanel}
+            ariaLabel="Déplier le panneau droit"
+            tokenCount={generationTokenCount}
+          />
+        )}
+        {!writingMode && showCollapsedLeftAffordance && (
           <PanelExpandButton
             side="left"
             label="GDD"
@@ -1307,7 +1341,7 @@ export function Dashboard() {
             ariaLabel="Déplier le panneau gauche"
           />
         )}
-        {showCollapsedRightAffordance && (
+        {!writingMode && showCollapsedRightAffordance && (
           <PanelExpandButton
             side="right"
             label="Détails"
@@ -1317,6 +1351,8 @@ export function Dashboard() {
         )}
           <Tabs
             variant="nav"
+            // 2c : la navigation applicative s'efface aussi — on écrit, on ne navigue pas.
+            hideTabList={writingMode}
             tabs={[
               {
                 id: 'generation',

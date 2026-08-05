@@ -59,6 +59,11 @@ export interface TabsProps {
    * Évite les démontages/remontages coûteux pour les onglets avec état DOM lourd.
    */
   keepAliveTabIds?: string[]
+  /**
+   * Masque la barre d'onglets tout en gardant le contenu actif.
+   * Écran 2c (mode écriture) : un seul onglet reste utile, sa barre devient du bruit.
+   */
+  hideTabList?: boolean
 }
 
 /** Libellé tronqué dans le rail segmenté ; le libellé complet reste sur `title` du bouton parent. */
@@ -88,6 +93,7 @@ export function Tabs({
   style,
   contentStyle,
   keepAliveTabIds,
+  hideTabList = false,
 }: TabsProps) {
   const activeTab = tabs.find((tab) => tab.id === activeTabId)
   const keepAliveSet = new Set(keepAliveTabIds ?? [])
@@ -128,7 +134,7 @@ export function Tabs({
     >
       <div
         style={{
-          display: 'flex',
+          display: hideTabList ? 'none' : 'flex',
           alignItems: 'center',
           flexShrink: 0,
           width: '100%',

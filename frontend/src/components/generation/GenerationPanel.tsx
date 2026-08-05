@@ -430,6 +430,8 @@ export function GenerationPanel() {
   const runActive = isGenerating || isInterrupting
   const [briefExpandedDuringRun, setBriefExpandedDuringRun] = useState(false)
   const showGenerationForm = !runActive || briefExpandedDuringRun
+  /** 2c : chips de ton, flags et réglages se condensent dans la barre de pied. */
+  const showFormExtras = showGenerationForm && !writingMode
   useEffect(() => {
     if (!runActive) setBriefExpandedDuringRun(false)
   }, [runActive])
@@ -571,29 +573,6 @@ export function GenerationPanel() {
           boxSizing: 'border-box',
         }}
       >
-        {/* Écran 2c : rappel du mode + sortie cliquable (le raccourci est écrit à côté). */}
-        {writingMode && (
-          <button
-            type="button"
-            data-testid="writing-mode-badge"
-            onClick={() => useUiLayoutStore.getState().setWritingMode(false)}
-            title="Quitter le mode écriture"
-            style={{
-              display: 'block',
-              margin: '0 auto 20px',
-              padding: '4px 10px',
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-              fontFamily: redesignFont.mono,
-              fontSize: '10px',
-              letterSpacing: '0.06em',
-              color: redesignText.label,
-            }}
-          >
-            MODE ÉCRITURE · CTRL+\ POUR SORTIR
-          </button>
-        )}
         {/* Progression du streaming : dans le flux de l'écran, plus de modale (Story 0.2 → refonte UI) */}
         <GenerationStreamingInline
           isActive={
@@ -668,7 +647,7 @@ export function GenerationPanel() {
       {/* Chips de ton (écran 1c) — juste sous le titre de scène. */}
       <div
         style={{
-          display: showGenerationForm ? 'flex' : 'none',
+          display: showFormExtras ? 'flex' : 'none',
           flexWrap: 'wrap',
           gap: 7,
           marginBottom: 22,
@@ -733,7 +712,7 @@ export function GenerationPanel() {
       </div>
 
       {/* 1c : les flags sont un lien secondaire sous le brief, pas une section pleine. */}
-      <details style={{ marginBottom: 22, display: showGenerationForm ? 'block' : 'none' }}>
+      <details style={{ marginBottom: 22, display: showFormExtras ? 'block' : 'none' }}>
         <summary
           style={{
             cursor: 'pointer',
@@ -752,7 +731,7 @@ export function GenerationPanel() {
       </details>
 
       {/* Réglages du modèle : résumés en une ligne cliquable (refonte UI), détail dépliable. */}
-      <div style={{ marginBottom: '1rem', display: showGenerationForm ? 'block' : 'none' }}>
+      <div style={{ marginBottom: '1rem', display: showFormExtras ? 'block' : 'none' }}>
         <button
           type="button"
           onClick={() => setShowModelSettings((v) => !v)}
@@ -781,7 +760,7 @@ export function GenerationPanel() {
         </button>
       </div>
 
-      {showModelSettings && showGenerationForm && (
+      {showModelSettings && showFormExtras && (
       <>
       {/* Sélecteur de modèle LLM (Story 0.3) */}
       <div style={{ marginBottom: '1rem' }}>
@@ -1051,28 +1030,68 @@ export function GenerationPanel() {
       )}
 
       {/* Barre d'action bas de colonne de lecture (écran 1c) : réglages résumés, bouton, coût.
-          2a : masquée pendant le run — les deux sorties vivent dans le bloc de streaming. */}
+          2a : masquée pendant le run — les deux sorties vivent dans le bloc de streaming.
+          2c : une seule rangée — mots · tokens · coût à gauche, réglages + Générer à droite. */}
       <div
         data-testid="generation-primary-action"
         hidden={runActive}
         style={{
           borderTop: `1px solid ${redesignHairline.strong}`,
-          paddingTop: 13,
+          paddingTop: writingMode ? 16 : 13,
           marginTop: 22,
+          paddingBottom: writingMode ? 40 : 0,
           // `display` explicite : un `display` inline l'emporte sur la règle UA
           // `[hidden] { display: none }`, donc l'attribut seul ne masquerait rien.
           display: runActive ? 'none' : 'flex',
-          flexDirection: 'column',
-          gap: 9,
+          flexDirection: writingMode ? 'row' : 'column',
+          alignItems: writingMode ? 'center' : undefined,
+          justifyContent: writingMode ? 'space-between' : undefined,
+          gap: writingMode ? 22 : 9,
+          flexWrap: 'wrap',
         }}
       >
-        <div style={{ display: 'flex', gap: 9 }}>
+        {writingMode && (
+          <span
+            data-testid="writing-mode-metrics"
+            style={{
+              display: 'flex',
+              gap: 22,
+              fontFamily: redesignFont.mono,
+              fontSize: '10.5px',
+              letterSpacing: '0.05em',
+              color: redesignText.label,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <span>
+              {userInstructions.trim() ? userInstructions.trim().split(/\s+/).length : 0} MOTS
+            </span>
+            {orchestrator.tokenCount != null && (
+              <span>{orchestrator.tokenCount.toLocaleString('fr-FR')} TOKENS</span>
+            )}
+          </span>
+        )}
+        {writingMode && (
+          <span
+            style={{
+              fontFamily: redesignFont.mono,
+              fontSize: '11px',
+              color: redesignText.muted,
+              whiteSpace: 'nowrap',
+              marginLeft: 'auto',
+            }}
+          >
+            {modelSettingsSummary}
+          </span>
+        )}
+        <div style={{ display: 'flex', gap: 9, flexShrink: 0 }}>
           <button
             type="button"
             onClick={() => void orchestrator.handleGenerate()}
             disabled={isGeneratePrimaryDisabled}
             style={{
-              height: 46,
+              height: writingMode ? 38 : 46,
+              padding: writingMode ? '0 20px' : undefined,
               borderRadius: 6,
               border: 'none',
               backgroundColor: redesignAccent.base,
@@ -1087,8 +1106,12 @@ export function GenerationPanel() {
               minWidth: 0,
             }}
           >
-            <span style={{ fontSize: '14.5px', fontWeight: 600 }}>
-              {optionCount > 1 ? `Générer ${optionCount} options` : 'Générer le premier nœud'}
+            <span style={{ fontSize: writingMode ? '13.5px' : '14.5px', fontWeight: 600 }}>
+              {optionCount > 1
+                ? `Générer ${optionCount} options`
+                : writingMode
+                  ? 'Générer'
+                  : 'Générer le premier nœud'}
             </span>
             <span
               style={{
@@ -1129,7 +1152,7 @@ export function GenerationPanel() {
             × {optionCount}
           </button>
         </div>
-        {orchestrator.tokenCount != null && (
+        {orchestrator.tokenCount != null && !writingMode && (
           <div
             style={{
               textAlign: 'center',

@@ -16,6 +16,7 @@ import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import { redesignAccent, redesignFont, redesignText } from '../../theme/redesignTokens'
 import { useGenerationElapsed } from '../../hooks/useGenerationRunState'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { TOUCH_TARGET_MIN_PX } from '../../constants'
 
 /** Nom de l'animation du point de génération (déclarée localement, pas de CSS global). */
@@ -23,6 +24,7 @@ const HEADER_BLINK_ANIMATION = 'header-generation-blink'
 
 export function Header() {
   const generationElapsed = useGenerationElapsed()
+  const writingMode = useUiLayoutStore((s) => s.writingMode)
   const { user, isAuthenticated, logout } = useAuthStore()
   const navigate = useNavigate()
   const commandPalette = useCommandPalette()
@@ -166,7 +168,7 @@ export function Header() {
       </div>
       
       {/* Recherche : alignée à droite avec Réglages / avatar (écran 1c). */}
-      {isAuthenticated && (
+      {isAuthenticated && !writingMode && (
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', minWidth: 0 }}>
           {/* Écran 1c : la recherche est un libellé mono, pas un champ. */}
           <button
@@ -203,8 +205,42 @@ export function Header() {
         </div>
       )}
       
+      {/* 2c : le chrome applicatif s'efface — il ne reste que le repère de scène
+          et le rappel du mode, cliquable pour en sortir. */}
+      {writingMode && (
+        <div
+          data-testid="header-writing-mode"
+          style={{
+            marginLeft: 'auto',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.9rem',
+            minWidth: 0,
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => useUiLayoutStore.getState().setWritingMode(false)}
+            title="Quitter le mode écriture"
+            style={{
+              border: 'none',
+              background: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              fontFamily: redesignFont.mono,
+              fontSize: '10px',
+              letterSpacing: '0.06em',
+              color: redesignText.label,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            MODE ÉCRITURE · CTRL+\ POUR SORTIR
+          </button>
+        </div>
+      )}
+
       {/* Section droite : Options, Actions, Utilisateur */}
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', flexShrink: 1, minWidth: 0, flexWrap: 'wrap' }}>
+      <div style={{ flex: 1, display: writingMode ? 'none' : 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', flexShrink: 1, minWidth: 0, flexWrap: 'wrap' }}>
         {/* Écran 2a : point clignotant + compteur du run — l'attente a une durée visible. */}
         {generationElapsed && (
           <span

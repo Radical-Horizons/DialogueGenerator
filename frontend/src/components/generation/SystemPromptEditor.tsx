@@ -261,8 +261,9 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
       label: 'Instructions de Scène',
       content: (
         <div style={{ padding: genChrome.tabInnerPadding, minWidth: 0 }}>
-          {/* 1c : le brief occupe la colonne ; templates et briefs locaux passent en repli. */}
-          <details style={{ marginBottom: '1rem' }}>
+          {/* 1c : le brief occupe la colonne ; templates et briefs locaux passent en repli.
+              2c : en mode écriture, même ce repli disparaît — il ne reste que le texte. */}
+          <details style={{ marginBottom: '1rem', display: writingMode ? 'none' : 'block' }}>
             <summary
               style={{
                 cursor: 'pointer',
@@ -529,7 +530,15 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
             >
               Brief du premier nœud
             </label>
-            <div style={{ display: 'flex', gap: `${genChrome.controlGapRem}rem`, flexWrap: 'wrap' }}>
+            {/* 2c : la sauvegarde explicite du brief sort de l'écran d'écriture — le
+                brouillon est déjà sauvegardé en continu. */}
+            <div
+              style={{
+                display: writingMode ? 'none' : 'flex',
+                gap: `${genChrome.controlGapRem}rem`,
+                flexWrap: 'wrap',
+              }}
+            >
               <button
                 onClick={handleSaveSceneInstructions}
                 style={{
@@ -1217,6 +1226,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
 
   return (
     <div
+      data-testid="system-prompt-editor-root"
       style={{
         marginBottom: '1.5rem',
         border: 'none',
@@ -1224,12 +1234,15 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
         backgroundColor: 'transparent',
       }}
     >
+      {/* 2c : en mode écriture il ne reste que le brief — auteur, règles du jeu et
+          prompt système restent joignables en sortant du mode (⌘\). */}
       <Tabs
         variant="nav"
-        tabs={tabs}
-        activeTabId={activeTabId}
+        tabs={writingMode ? tabs.slice(0, 1) : tabs}
+        activeTabId={writingMode ? tabs[0].id : activeTabId}
         onTabChange={setActiveTabId}
         style={{ flex: 'none' }}
+        hideTabList={writingMode}
       />
     </div>
   )
