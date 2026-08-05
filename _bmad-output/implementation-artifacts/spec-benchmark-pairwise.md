@@ -46,7 +46,7 @@ baseline_commit: '58cadd83b'
 | Aucune régénération | passe sur un run terminé | zéro appel à l'orchestrateur de génération | N/A |
 | Double sens concordant | le juge désigne le même modèle dans les deux sens | ce modèle gagne le critère, marge = moyenne des deux marges | N/A |
 | Double sens discordant | le juge désigne un modèle différent selon l'ordre | égalité sur ce critère, désaccord enregistré | N/A |
-| Étiquette hors champ | le juge répond autre chose que `A` ou `B` | verdict `judge_error` nommant le critère fautif | N/A |
+| Étiquette hors champ | le juge répond autre chose que `A`, `B` ou `tie` | le domaine fermé de `winner` empêche la valeur d'atteindre le service : la réponse est rejetée au schéma, et le duel devient `judge_error` portant l'erreur de validation, qui nomme le critère et la valeur fautive | N/A |
 | Raisonnement contaminant | le raisonnement annonce l'autre gagnant | le champ structuré seul fait foi | N/A |
 | Appariement impossible | un seul modèle a des générations valides sur le cas | le cas est ignoré, et le rapport de passe le compte | N/A |
 | Générations de longueurs très inégales | un texte fait le double de l'autre | les deux sont tronqués à la même limite, longueurs réelles conservées | N/A |

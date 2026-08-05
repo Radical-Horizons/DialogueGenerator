@@ -239,20 +239,42 @@ async def test_unreachable_judge_does_not_raise() -> None:
 
 
 @pytest.mark.asyncio
-async def test_unstructured_response_yields_judge_error() -> None:
-    """Une réponse hors schéma ne devient jamais un duel tranché.
+async def test_out_of_domain_label_is_rejected_and_diagnosed() -> None:
+    """Une étiquette hors domaine ne devient jamais un duel tranché — et se diagnostique.
 
-    C'est aussi ce qui arrive quand le juge invente une étiquette : `winner` est
-    contraint à `A`/`B`/`tie` par le schéma, donc une valeur hors champ est
-    rejetée en amont et parvient ici sous forme de réponse non structurée.
+    `winner` est contraint à `A`/`B`/`tie` : la valeur invalide est rejetée par le
+    schéma avant d'atteindre le service. Les clients du dépôt n'échouent pas en
+    levant, ils rangent l'erreur Pydantic dans une chaîne à la place de l'objet
+    attendu — chaîne qui nomme le champ et la valeur fautive. Le verdict doit la
+    conserver, sans quoi le diagnostic serait perdu au profit d'un « reçu str ».
     """
-    judge = _ScriptedJudge(["ceci n'est pas un modèle", None])
+    pydantic_error = (
+        "Erreur: Validation error: 1 validation error for BenchmarkPairwiseJudgeResult\n"
+        "criteria.0.winner\n  Input should be 'A', 'B' or 'tie' "
+        "[type=literal_error, input_value='Proposition A']"
+    )
+    judge = _ScriptedJudge([pydantic_error, None])
     verdict = await BenchmarkPairwiseJudgeService().judge_pair(
         run_id="run-1", pair=_pair(), grid=_grid(), llm_client=judge, judge_model=JUDGE_MODEL
     )
     assert verdict.status == "judge_error"
-    assert "non structurée" in (verdict.error_message or "")
     assert verdict.outcomes == []
+    message = verdict.error_message or ""
+    assert "non conforme au schéma" in message
+    assert "criteria.0.winner" in message, "le critère fautif doit rester lisible"
+    assert "Proposition A" in message, "la valeur refusée doit rester lisible"
+
+
+@pytest.mark.asyncio
+async def test_oversized_raw_response_is_truncated_in_the_error() -> None:
+    """Une réponse brute énorme ne doit pas gonfler le verdict persisté."""
+    judge = _ScriptedJudge(["x" * 5000, None])
+    verdict = await BenchmarkPairwiseJudgeService().judge_pair(
+        run_id="run-1", pair=_pair(), grid=_grid(), llm_client=judge, judge_model=JUDGE_MODEL
+    )
+    assert verdict.status == "judge_error"
+    assert len(verdict.error_message or "") < 1000
+    assert "…" in (verdict.error_message or "")
 
 
 @pytest.mark.asyncio

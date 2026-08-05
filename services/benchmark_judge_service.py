@@ -265,10 +265,12 @@ class BenchmarkJudgeService:
             )
         first = variants[0]
         if not isinstance(first, BenchmarkRubricJudgeResult):
-            kind = type(first).__name__ if isinstance(first, BaseModel) else type(first).__name__
             return RubricVerdict(
                 status="judge_error",
-                error_message=f"Réponse du juge non structurée (reçu {kind}).",
+                error_message=(
+                    "Réponse du juge non conforme au schéma — "
+                    f"{describe_unusable_variant(first)}"
+                ),
                 **base,
             )
 
@@ -318,6 +320,33 @@ def _pairwise_conformity_problem(
     if duplicates:
         problems.append(f"critères jugés deux fois : {', '.join(duplicates)}")
     return " ; ".join(problems) if problems else None
+
+
+MAX_RAW_RESPONSE_IN_ERROR = 400
+"""Longueur retenue de la réponse brute dans un message d'erreur de juge."""
+
+
+def describe_unusable_variant(variant: Any) -> str:
+    """Décrit une réponse de juge inexploitable, en conservant son contenu.
+
+    Les clients LLM du dépôt n'échouent pas en levant : ils rangent le message
+    d'erreur — y compris l'erreur Pydantic complète, qui **nomme le champ et la
+    valeur fautive** — dans une chaîne à la place de l'objet attendu. Se contenter
+    du nom du type jetterait précisément le diagnostic utile : « le juge a répondu
+    "Proposition A" là où seules A, B ou tie sont admises ».
+
+    Args:
+        variant: Ce que le client a retourné à la place du modèle attendu.
+
+    Returns:
+        Description exploitable pour le champ d'erreur du verdict.
+    """
+    if isinstance(variant, str):
+        text = variant.strip()
+        if len(text) > MAX_RAW_RESPONSE_IN_ERROR:
+            text = text[:MAX_RAW_RESPONSE_IN_ERROR] + "…"
+        return f"réponse brute : {text}"
+    return f"reçu {type(variant).__name__}"
 
 
 def _label_to_model(label: str, first: str, second: str) -> Optional[str]:
@@ -472,7 +501,8 @@ class BenchmarkPairwiseJudgeService(BenchmarkJudgeService):
                 cost,
                 prompt_tokens,
                 completion_tokens,
-                f"Réponse du juge non structurée (reçu {type(first).__name__}).",
+                "Réponse du juge non conforme au schéma — "
+                f"{describe_unusable_variant(first)}",
             )
         problem = _pairwise_conformity_problem(first, grid)
         if problem is not None:
