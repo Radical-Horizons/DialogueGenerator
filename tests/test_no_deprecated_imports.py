@@ -86,8 +86,9 @@ def _collect_python_files() -> list[Path]:
     ``os.walk`` et non ``rglob`` : ``rglob`` **descend** dans les répertoires exclus
     avant de filtrer. Sur ce dépôt cela signifiait parcourir ``.venv`` (4 300 .py) et
     ``.claude/worktrees`` (7 300 .py répartis sur trois copies complètes du dépôt,
-    chacune avec son propre venv et ses node_modules) — le test dépassait dix minutes
-    et bloquait la gate T2. Élaguer ``dirnames`` en place empêche la descente.
+    chacune avec son propre venv et ses node_modules) — mesuré à **2 h 09 min pour ce
+    seul test**, rendant la gate T2 inutilisable. Élaguer ``dirnames`` en place empêche
+    la descente : 0,43 s.
     """
     collected: list[Path] = []
     for dirpath, dirnames, filenames in os.walk(PROJECT_ROOT):

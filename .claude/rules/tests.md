@@ -88,9 +88,10 @@ for dirpath, dirnames, filenames in os.walk(PROJECT_ROOT):
     dirnames[:] = [d for d in dirnames if d not in EXCLUDED_DIRS]  # coupe la descente
 ```
 
-Vécu en août 2026 : `test_no_deprecated_imports` dépassait **10 minutes** et bloquait
-`npm run test:backend:fast` — la gate T2 du dépôt ne pouvait jamais aboutir. Après
-élagage : **0,43 s**.
+Vécu en août 2026, mesuré : `test_no_deprecated_imports` prenait **2 h 09 min à lui
+seul** — sur 2 h 13 de suite T2 complète, les 2 054 autres tests tenant en ~4 minutes.
+Après élagage : **0,43 s**, suite complète en 3 min 14. La suite finissait donc, mais
+`npm run test:backend:fast` était inutilisable comme gate de pré-merge.
 
 Corollaire : **exclure par chemin, pas par nom de fichier**. L'exclusion des wrappers
 racine (`context_builder.py`…) matchait le basename et masquait donc aussi
