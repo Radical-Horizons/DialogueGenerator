@@ -51,6 +51,9 @@ import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { useGenerationRunActive } from '../../hooks/useGenerationRunState'
 import { GenerationTracePanel } from '../generation/GenerationTracePanel'
 import { WritingModeRail } from './WritingModeRail'
+import { PromptBudgetBottomDrawer } from './PromptBudgetBottomDrawer'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
+import { PROMPT_DRAWER_MAX_WIDTH_PX, VIEWPORT_DESKTOP_MIN_PX } from '../../theme/responsiveChrome'
 import { useGenerationOptionsStore } from '../../store/generationOptionsStore'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
@@ -912,10 +915,51 @@ export function Dashboard() {
     if (!comparisonActive) lastForcedRailRunRef.current = 0
   }, [comparisonActive])
 
+
   // ── Mode écriture (écran 2c) ──────────────────────────────────────────────
   // Ctrl+\ (ou ⌘\) bascule : les deux panneaux se replient, la colonne passe à 760px.
   // Rien n'est supprimé : les rails restent cliquables, sortir restaure l'état d'avant.
   const writingMode = useUiLayoutStore((s) => s.writingMode)
+  /**
+   * 2d : entre 1024 et 1200px, la troisième colonne rogne la lecture sans rien
+   * apporter — le décompte passe en barre repliée sous la colonne centrale.
+   * Sous 1024px les drawers FR120 prennent déjà le relais ; en mode écriture,
+   * la barre de pied unique de 2c suffit.
+   */
+  const isIntermediateWidth = useMediaQuery(
+    `(min-width: ${VIEWPORT_DESKTOP_MIN_PX}px) and (max-width: ${PROMPT_DRAWER_MAX_WIDTH_PX}px)`
+  )
+  const showPromptBottomDrawer =
+    isIntermediateWidth &&
+    !writingMode &&
+    (centerPanelTab === 'generation' || centerPanelTab === 'edition')
+
+  /**
+   * 2d : le décompte ne doit pas s'afficher deux fois. Quand il passe en barre
+   * basse, la colonne droite se replie ; on restaure l'état d'avant en sortant
+   * de la plage de largeur.
+   */
+  const rightPanelBeforeDrawerRef = useRef<boolean | null>(null)
+  useEffect(() => {
+    if (showPromptBottomDrawer) {
+      if (rightPanelBeforeDrawerRef.current === null) {
+        rightPanelBeforeDrawerRef.current = isRightPanelCollapsed
+      }
+      if (!isRightPanelCollapsed) {
+        if (!expandedSizesRef.current && panelsRef.current) {
+          expandedSizesRef.current = panelsRef.current.getSizes()
+        }
+        setIsRightPanelCollapsed(true)
+        applyCollapsedLayout(isLeftPanelCollapsed, true)
+      }
+    } else if (rightPanelBeforeDrawerRef.current !== null) {
+      const previous = rightPanelBeforeDrawerRef.current
+      rightPanelBeforeDrawerRef.current = null
+      setIsRightPanelCollapsed(previous)
+      applyCollapsedLayout(isLeftPanelCollapsed, previous)
+    }
+  }, [showPromptBottomDrawer, applyCollapsedLayout, isRightPanelCollapsed, isLeftPanelCollapsed])
+
   const panelsBeforeWritingRef = useRef<{ left: boolean; right: boolean } | null>(null)
   const collapsedStateRef = useRef({ left: isLeftPanelCollapsed, right: isRightPanelCollapsed })
   collapsedStateRef.current = { left: isLeftPanelCollapsed, right: isRightPanelCollapsed }
@@ -1349,6 +1393,8 @@ export function Dashboard() {
             ariaLabel="Déplier le panneau droit"
           />
         )}
+          {/* 2d : sous 1200px, « ce qui part au modèle » quitte la colonne droite et
+              devient une barre repliée au-dessus de la barre d'action. */}
           <Tabs
             variant="nav"
             // 2c : la navigation applicative s'efface aussi — on écrit, on ne navigue pas.
@@ -1391,6 +1437,17 @@ export function Dashboard() {
           style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
           contentStyle={centerPanelTab === 'graph' ? { overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column' } : undefined}
         />
+        {showPromptBottomDrawer && (
+          <PromptBudgetBottomDrawer totalTokens={generationTokenCount}>
+            <div style={{ height: 'min(46vh, 420px)', display: 'flex', flexDirection: 'column' }}>
+              <EstimatedPromptPanel
+                raw_prompt={rawPrompt}
+                isEstimating={isEstimating}
+                isActive
+              />
+            </div>
+          </PromptBudgetBottomDrawer>
+        )}
       </div>
 
       {/* Panneau droit: Prompt Estimé / Détails */}

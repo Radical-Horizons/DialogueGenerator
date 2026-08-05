@@ -84,6 +84,16 @@ export const panelExpandRailCaptionTypography = {
  */
 export const GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX = 640
 
+/** Frontière basse du mode desktop (`useViewportMode`) — sous ce seuil, drawers FR120. */
+export const VIEWPORT_DESKTOP_MIN_PX = 1024
+
+/**
+ * Écran 2d : au-dessus de cette largeur, « ce qui part au modèle » garde sa colonne.
+ * En dessous (et au-dessus de 1024px), il devient une barre repliée sous la colonne
+ * centrale — une troisième colonne rognerait la lecture sans rien apporter.
+ */
+export const PROMPT_DRAWER_MAX_WIDTH_PX = 1200
+
 /**
  * Rangée unique 46px de l'écran 2e : titre + compteurs + undo/redo + entrées texte
  * + santé + save calés à droite. Largeur intrinsèque mesurée ≈ 980px (août 2026) —
