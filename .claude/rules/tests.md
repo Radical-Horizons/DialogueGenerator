@@ -74,6 +74,30 @@ description: Structure et bonnes pratiques pour les tests pytest
 - **PR (GitHub Actions)** : backend et frontend en **T2** (`not slow`, Vitest sans `VITEST_FULL`). **Push sur `main`** : **T3** (pytest complet, `VITEST_FULL=1`). Détail : `.github/workflows/ci.yml`.
 - **Orchestration agent / humain** : tableau unique **T0–T3** — `.claude/commands/test-tiers.md` + `.claude/rules/workflow.md`.
 
+### Un test qui parcourt l'arborescence doit élaguer, pas filtrer
+
+`Path.rglob("*.py")` **descend** dans un répertoire avant qu'on puisse l'écarter :
+filtrer le résultat ne coûte pas moins cher, ça coûte tout le parcours. Sur ce dépôt
+le piège est massif — `.venv` (~4 300 `.py`), `.claude/worktrees` (3 copies complètes
+du dépôt, ~7 300 `.py`, chacune avec son venv et ses `node_modules`).
+
+Utiliser `os.walk` et élaguer **en place** :
+
+```python
+for dirpath, dirnames, filenames in os.walk(PROJECT_ROOT):
+    dirnames[:] = [d for d in dirnames if d not in EXCLUDED_DIRS]  # coupe la descente
+```
+
+Vécu en août 2026 : `test_no_deprecated_imports` dépassait **10 minutes** et bloquait
+`npm run test:backend:fast` — la gate T2 du dépôt ne pouvait jamais aboutir. Après
+élagage : **0,43 s**.
+
+Corollaire : **exclure par chemin, pas par nom de fichier**. L'exclusion des wrappers
+racine (`context_builder.py`…) matchait le basename et masquait donc aussi
+`core/context/context_builder.py` — le vrai module. Un scan rapide ne doit pas être un
+scan vide : accompagner tout filtre d'un test qui vérifie que le vrai code est
+toujours couvert.
+
 ## Quand tester
 
 - **Après modification backend** : ciblé T1 → fichier ou `-k` ; large → `npm run test:backend:fast` ; complet → `pytest tests/` (T3)
