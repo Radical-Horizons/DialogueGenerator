@@ -435,6 +435,7 @@ export function GenerationPanel() {
   }, [runActive])
   const optionCount = useGenerationOptionsStore((s) => s.optionCount)
   const optionSlots = useGenerationOptionsStore((s) => s.slots)
+  const comparisonActive = optionSlots.length >= 2
 
   // Multi-options : l'option 1 est le stream principal — quand il aboutit (ou échoue),
   // refléter son état dans le slot 0 de la comparaison.
@@ -557,8 +558,10 @@ export function GenerationPanel() {
           overflowY: 'auto',
           minWidth: 0,
           // Colonne de lecture 660px centrée (écran 1c) — 760px en mode écriture (2c).
+          // 2b : la comparaison n'est pas une lecture, elle prend toute la largeur
+          // (option ouverte + colonne diagnostic ne tiennent pas dans 660px).
           width: '100%',
-          maxWidth: isGenerationNarrow
+          maxWidth: isGenerationNarrow || comparisonActive
             ? undefined
             : writingMode
               ? redesignReadingColumn.writingMode

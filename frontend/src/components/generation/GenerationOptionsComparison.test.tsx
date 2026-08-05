@@ -1,5 +1,6 @@
 /**
- * Comparaison multi-options (2b) : progression, Garder, Variante.
+ * Comparaison multi-options (écran 2b) : une seule option ouverte, diagnostic,
+ * Garder / Variante / Déplier / Régénérer le lot.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
@@ -20,6 +21,12 @@ vi.mock('../../store/generationStore', () => ({
     selector({ setUnityDialogueResponse }),
 }))
 
+let mockSelections: Record<string, string[]> = { characters: [], locations: [] }
+vi.mock('../../store/contextStore', () => ({
+  useContextStore: (selector: (s: Record<string, unknown>) => unknown) =>
+    selector({ selections: mockSelections }),
+}))
+
 import { useGenerationOptionsStore } from '../../store/generationOptionsStore'
 import { GenerationOptionsComparison } from './GenerationOptionsComparison'
 
@@ -27,10 +34,15 @@ const REQUEST = { user_instructions: 'x' } as GenerateUnityDialogueRequest
 
 function makeResult(line: string, choices = 2): GenerateUnityDialogueResponse {
   return {
-    // Forme one-shot réelle : `node` singulier (cf. extractPreview).
-    json_content: JSON.stringify({
-      node: { id: 'START', speaker: 'PNJ', line, choices: Array(choices).fill({ text: 'c' }) },
-    }),
+    // Forme réelle de la génération : tableau nu de nœuds (`render_unity_nodes`).
+    json_content: JSON.stringify([
+      {
+        id: 'START',
+        speaker: 'PNJ',
+        line,
+        choices: Array.from({ length: choices }, (_, i) => ({ text: `choix ${i}` })),
+      },
+    ]),
     raw_prompt: '' as unknown as GenerateUnityDialogueResponse['raw_prompt'],
     prompt_hash: 'h',
     estimated_tokens: 10,
@@ -45,10 +57,21 @@ class NoopEventSource {
   close() {}
 }
 
+function startTwoReadyOptions() {
+  useGenerationOptionsStore.getState().startRun(2, REQUEST)
+  useGenerationOptionsStore
+    .getState()
+    .updateSlot(0, { status: 'completed', result: makeResult('Première réplique.') })
+  useGenerationOptionsStore
+    .getState()
+    .updateSlot(1, { status: 'completed', result: makeResult('Seconde réplique.') })
+}
+
 describe('GenerationOptionsComparison', () => {
   beforeEach(() => {
     vi.stubGlobal('EventSource', NoopEventSource as unknown as typeof EventSource)
     setUnityDialogueResponse.mockClear()
+    mockSelections = { characters: [], locations: [] }
     useGenerationOptionsStore.setState({
       optionCount: 2,
       slots: [],
@@ -70,54 +93,94 @@ describe('GenerationOptionsComparison', () => {
       'OPTION 1 SUR 2 — EN ÉCRITURE'
     )
 
-    useGenerationOptionsStore
-      .getState()
-      .updateSlot(0, { status: 'completed', result: makeResult('a') })
-    useGenerationOptionsStore
-      .getState()
-      .updateSlot(1, { status: 'completed', result: makeResult('b') })
+    startTwoReadyOptions()
     rerender(<GenerationOptionsComparison />)
     expect(screen.getByTestId('options-progress-label')).toHaveTextContent(
       '2 OPTIONS SUR 2 — À COMPARER'
     )
   })
 
-  it('Garder pousse le résultat de l’option dans le store de génération', () => {
-    useGenerationOptionsStore.getState().startRun(2, REQUEST)
-    const result = makeResult('« Réplique gardée »')
-    useGenerationOptionsStore.getState().updateSlot(0, { status: 'completed', result: makeResult('a') })
-    useGenerationOptionsStore.getState().updateSlot(1, { status: 'completed', result })
+  it('n’ouvre qu’une option à la fois : les autres portent « Déplier »', () => {
+    startTwoReadyOptions()
     render(<GenerationOptionsComparison />)
 
-    fireEvent.click(screen.getByTestId('option-keep-1'))
-    expect(setUnityDialogueResponse).toHaveBeenCalledWith(result)
-    expect(useGenerationOptionsStore.getState().keptIndex).toBe(1)
+    expect(screen.getByTestId('generation-option-0')).toHaveAttribute('data-open', 'true')
+    expect(screen.getByTestId('generation-option-1')).toHaveAttribute('data-open', 'false')
+    // Les actions primaires n'existent que sur l'option ouverte.
+    expect(screen.getByTestId('option-keep-0')).toBeInTheDocument()
+    expect(screen.queryByTestId('option-keep-1')).toBeNull()
+    expect(screen.getByTestId('option-expand-1')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('option-expand-1'))
+    expect(screen.getByTestId('generation-option-1')).toHaveAttribute('data-open', 'true')
+    expect(screen.getByTestId('generation-option-0')).toHaveAttribute('data-open', 'false')
+    expect(screen.getByTestId('option-keep-1')).toBeInTheDocument()
   })
 
-  it('Variante relance uniquement cette option (slot repasse pending/running)', async () => {
-    useGenerationOptionsStore.getState().startRun(2, REQUEST)
-    useGenerationOptionsStore.getState().updateSlot(0, { status: 'completed', result: makeResult('a') })
-    useGenerationOptionsStore.getState().updateSlot(1, { status: 'completed', result: makeResult('b') })
+  it('« tout replier » ferme l’option ouverte et masque le diagnostic', () => {
+    startTwoReadyOptions()
+    render(<GenerationOptionsComparison />)
+    expect(screen.getByTestId('option-diagnostic-column')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('options-collapse-all'))
+    expect(screen.getByTestId('generation-option-0')).toHaveAttribute('data-open', 'false')
+    expect(screen.queryByTestId('option-diagnostic-column')).toBeNull()
+  })
+
+  it('Garder pousse le résultat de l’option ouverte dans le store de génération', () => {
+    startTwoReadyOptions()
     render(<GenerationOptionsComparison />)
 
-    fireEvent.click(screen.getByTestId('option-variant-1'))
-    // Slot 1 repart (pending immédiatement, running après création du job).
-    expect(['pending', 'running']).toContain(useGenerationOptionsStore.getState().slots[1].status)
-    // Slot 0 intact.
-    expect(useGenerationOptionsStore.getState().slots[0].status).toBe('completed')
+    fireEvent.click(screen.getByTestId('option-keep-0'))
+    expect(setUnityDialogueResponse).toHaveBeenCalledTimes(1)
+    expect(useGenerationOptionsStore.getState().keptIndex).toBe(0)
   })
 
-  it('affiche l’aperçu serif de la réplique et le compteur de réponses', () => {
+  it('Variante relance uniquement cette option', () => {
+    startTwoReadyOptions()
+    render(<GenerationOptionsComparison />)
+
+    fireEvent.click(screen.getByTestId('option-variant-0'))
+    expect(['pending', 'running']).toContain(useGenerationOptionsStore.getState().slots[0].status)
+    // L'autre option n'est pas touchée.
+    expect(useGenerationOptionsStore.getState().slots[1].status).toBe('completed')
+  })
+
+  it('« Régénérer les N » relance tout le lot', () => {
+    startTwoReadyOptions()
+    render(<GenerationOptionsComparison />)
+
+    fireEvent.click(screen.getByTestId('options-regenerate-all'))
+    const slots = useGenerationOptionsStore.getState().slots
+    expect(slots.every((s) => s.status === 'pending' || s.status === 'running')).toBe(true)
+  })
+
+  it('le diagnostic ne compte que les fiches réellement citées', () => {
+    mockSelections = { characters: ['Vessine Dhalgo', 'Orsenne Kaladh'], locations: [] }
     useGenerationOptionsStore.getState().startRun(2, REQUEST)
     useGenerationOptionsStore
       .getState()
-      .updateSlot(0, { status: 'completed', result: makeResult('Bonjour voyageur', 3) })
+      .updateSlot(0, { status: 'completed', result: makeResult('Vessine Dhalgo entre.') })
+    useGenerationOptionsStore
+      .getState()
+      .updateSlot(1, { status: 'completed', result: makeResult('Rien de nommé.') })
+    render(<GenerationOptionsComparison />)
+
+    expect(screen.getByText('Vessine Dhalgo')).toBeInTheDocument()
+    // La seconde fiche envoyée n'apparaît pas dans le texte : signalée comme inutile.
+    expect(screen.getByTestId('diagnostic-uncited')).toHaveTextContent('1 fiche envoyée')
+  })
+
+  it('une option en erreur propose Réessayer sans bloquer les autres', () => {
+    useGenerationOptionsStore.getState().startRun(2, REQUEST)
+    useGenerationOptionsStore
+      .getState()
+      .updateSlot(0, { status: 'completed', result: makeResult('Ça marche.') })
     useGenerationOptionsStore.getState().updateSlot(1, { status: 'error', error: 'boom' })
     render(<GenerationOptionsComparison />)
 
-    expect(screen.getByText(/« Bonjour voyageur »/)).toBeInTheDocument()
-    expect(screen.getByText('3 RÉPONSES')).toBeInTheDocument()
     expect(screen.getByText('boom')).toBeInTheDocument()
     expect(screen.getByTestId('option-retry-1')).toBeInTheDocument()
+    expect(screen.getByTestId('option-keep-0')).toBeInTheDocument()
   })
 })

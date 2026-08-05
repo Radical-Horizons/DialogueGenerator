@@ -49,6 +49,7 @@ import { redesignAccent, redesignFont, redesignHairline, redesignText } from '..
 import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { useGenerationRunActive } from '../../hooks/useGenerationRunState'
 import { GenerationTracePanel } from '../generation/GenerationTracePanel'
+import { useGenerationOptionsStore } from '../../store/generationOptionsStore'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
 type ContextLoadState = {
@@ -322,6 +323,7 @@ export function Dashboard() {
   /** 2a : un run en cours verrouille le contexte GDD et bascule la colonne droite sur TRACE. */
   const generationRunActive = useGenerationRunActive()
   const [traceHidden, setTraceHidden] = useState(false)
+  const optionRunSize = useGenerationOptionsStore((s) => s.slots.length)
   /** FR120 : &lt; 1024px — panneaux latéraux en overlay drawer, pas en colonnes compressées */
   const useNarrowSidePanels = viewportMode !== 'desktop'
   const { bottomInsetPx: keyboardBottomInsetPx } = useMobileShellKeyboardComfort(useNarrowSidePanels)
@@ -872,6 +874,27 @@ export function Dashboard() {
       applyCollapsedLayout(isLeftPanelCollapsed, next)
     }
   }, [applyCollapsedLayout, isLeftPanelCollapsed, isRightPanelCollapsed, viewportMode])
+
+  /**
+   * 2b : dès qu'un lot d'options est là, la colonne GDD se replie en rail — elle a
+   * fait son travail, la place va à la comparaison. L'utilisateur peut la ramener,
+   * et on ne force le repli qu'une fois par lot pour ne pas contrarier ce choix.
+   */
+  const comparisonActive = optionRunSize >= 2
+  const lastForcedRailRunRef = useRef<number>(0)
+  useEffect(() => {
+    if (!comparisonActive || viewportMode !== 'desktop') return
+    if (lastForcedRailRunRef.current === optionRunSize) return
+    lastForcedRailRunRef.current = optionRunSize
+    if (!expandedSizesRef.current && panelsRef.current) {
+      expandedSizesRef.current = panelsRef.current.getSizes()
+    }
+    setIsLeftPanelCollapsed(true)
+    applyCollapsedLayout(true, isRightPanelCollapsed)
+  }, [comparisonActive, optionRunSize, viewportMode, applyCollapsedLayout, isRightPanelCollapsed])
+  useEffect(() => {
+    if (!comparisonActive) lastForcedRailRunRef.current = 0
+  }, [comparisonActive])
 
   // ── Mode écriture (écran 2c) ──────────────────────────────────────────────
   // Ctrl+\ (ou ⌘\) bascule : les deux panneaux se replient, la colonne passe à 760px.
