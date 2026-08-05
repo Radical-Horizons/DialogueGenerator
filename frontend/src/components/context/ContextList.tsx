@@ -401,10 +401,18 @@ export function ContextList({
                     </span>
                     {hasData(item) && getGddEntitySummary(item.data) && (
                       <span
+                        // 1c : le sous-titre tient sur une ligne. Un résumé de fiche
+                        // fait plusieurs phrases : le laisser s'enrouler triple la
+                        // hauteur de rangée et la liste ne montre plus que 5 fiches.
+                        // Le texte complet reste lisible dans le détail.
+                        title={getGddEntitySummary(item.data)}
                         style={{
                           fontSize: '12px',
                           color: isSelected ? redesignText.secondary : redesignText.muted,
                           lineHeight: 1.4,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
                         }}
                       >
                         {getGddEntitySummary(item.data)}

@@ -42,6 +42,12 @@ import { useGraphStore } from '../../store/graphStore'
 import { getDialogueDisplayTitle } from '../../utils/formatDialogueTitle'
 import * as documentsAPI from '../../api/documents'
 import { getErrorMessage } from '../../types/errors'
+import {
+  redesignFont,
+  redesignHairline,
+  redesignSpacing,
+  redesignText,
+} from '../../theme/redesignTokens'
 
 const BATCH_UNSAVED_WARNING =
   'Le dialogue ouvert a des modifications non sauvegardées. Sauvegardez avant de l’inclure dans l’export batch.'
@@ -334,22 +340,37 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
 
   return (
     <div data-testid="unity-dialogue-list" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* Ecran 2e : « DIALOGUES — N ... nouveau », puis une ligne de recherche nue.
+          Le seul bouton plein de l'ecran est « Generer la suite » (inspecteur) :
+          la creation redevient un lien, sans rien perdre de sa fonction. */}
       <div
         style={{
-          padding: '0.5rem',
-          borderBottom: `1px solid ${theme.border.primary}`,
-          backgroundColor: theme.background.panelHeader,
+          padding: `${redesignSpacing.md}px ${redesignSpacing.md}px ${redesignSpacing.sm}px`,
+          borderBottom: `1px solid ${redesignHairline.standard}`,
         }}
       >
         <div
           style={{
             display: 'flex',
-            flexWrap: 'wrap',
-            gap: '0.4rem',
-            marginBottom: '0.45rem',
-            alignItems: 'center',
+            gap: '0.6rem',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            marginBottom: `${redesignSpacing.sm}px`,
           }}
         >
+          <span
+            style={{
+              fontFamily: redesignFont.mono,
+              fontSize: '10px',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: redesignText.label,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Dialogues — {filteredCount}
+            {searchQuery ? ` / ${total}` : ''}
+          </span>
           <button
             type="button"
             data-testid="create-dialogue-button"
@@ -357,61 +378,60 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
             hidden={isGuest}
             onClick={() => void handleCreateDialogue()}
             style={{
-              padding: '0.45rem 0.65rem',
-              border: `1px solid ${theme.button.primary.background}`,
-              borderRadius: '6px',
-              backgroundColor: theme.button.primary.background,
-              color: theme.button.primary.color,
+              border: 'none',
+              background: 'none',
+              padding: 0,
+              fontSize: remSize('caption'),
+              color: redesignText.label,
               cursor: isCreating || isGuest ? 'not-allowed' : 'pointer',
               flexShrink: 0,
               display: isGuest ? 'none' : undefined,
             }}
           >
-            {isCreating ? 'Création…' : 'Nouveau'}
+            {isCreating ? 'création…' : 'nouveau'}
           </button>
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Rechercher… (/)"
+            placeholder="Chercher un dialogue…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
-              flex: '1 1 120px',
+              flex: '1 1 auto',
               minWidth: 0,
-              padding: '0.45rem 0.55rem',
-              fontSize: remSize('body'),
-              border: `1px solid ${theme.input.border}`,
-              borderRadius: '6px',
-              boxSizing: 'border-box',
-              backgroundColor: theme.input.background,
-              color: theme.input.color,
+              padding: 0,
+              fontSize: '13.5px',
+              border: 'none',
+              outline: 'none',
+              backgroundColor: 'transparent',
+              color: theme.text.primary,
             }}
           />
           <StyledSelect
             value={sortType}
             onChange={(e) => setSortType(e.target.value as typeof sortType)}
             style={{
-              padding: '0.45rem 0.5rem',
-              border: `1px solid ${theme.input.border}`,
-              borderRadius: '6px',
-              backgroundColor: theme.input.background,
-              color: theme.input.color,
-              fontSize: remSize('small'),
+              padding: 0,
+              border: 'none',
+              backgroundColor: 'transparent',
+              color: redesignText.label,
+              fontFamily: redesignFont.mono,
+              fontSize: '10px',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
               flexShrink: 0,
             }}
             wrapperStyle={{ width: 'auto', flexShrink: 0 }}
             title="Trier les dialogues"
           >
-            <option value="date-desc">Date (récent)</option>
-            <option value="date-asc">Date (ancien)</option>
-            <option value="name-asc">Nom (A-Z)</option>
-            <option value="name-desc">Nom (Z-A)</option>
+            <option value="date-desc">Récents</option>
+            <option value="date-asc">Anciens</option>
+            <option value="name-asc">Nom A-Z</option>
+            <option value="name-desc">Nom Z-A</option>
           </StyledSelect>
-        </div>
-
-        <div style={{ fontSize: remSize('small'), color: theme.text.secondary }}>
-          {filteredCount} dialogue{filteredCount !== 1 ? 's' : ''}
-          {searchQuery && ` (sur ${total} total)`}
         </div>
       </div>
 

@@ -4,10 +4,16 @@
  * Les handlers événementiels sont délégués à useReactFlowHandlers.
  */
 import { memo, useMemo, useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react'
+import type { CSSProperties } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import {
+  redesignFont,
+  redesignHairline,
+  redesignRadius,
+  redesignText,
+} from '../../theme/redesignTokens'
 import ReactFlow, {
   Background,
-  Controls,
   MiniMap,
   useReactFlow,
   type ReactFlowInstance,
@@ -139,6 +145,21 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
 })
 
 const DEFAULT_VIEWPORT: Viewport = { x: 0, y: 120, zoom: 1 }
+/** Bouton de la barrette de zoom (ecran 2e) : carre, sans contour propre. */
+const graphZoomBarButtonStyle: CSSProperties = {
+  width: 28,
+  height: '100%',
+  border: 'none',
+  background: 'none',
+  color: redesignText.secondary,
+  cursor: 'pointer',
+  fontSize: '13px',
+  lineHeight: 1,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}
+
 const SNAP_GRID: [number, number] = [15, 15]
 
 export const GraphCanvas = memo(function GraphCanvas() {
@@ -657,23 +678,83 @@ export const GraphCanvas = memo(function GraphCanvas() {
         style={reactFlowStyle}
       >
         <Background color="rgba(255,255,255,0.055)" gap={22} size={1} />
-        {!isNarrowCanvas && <Controls />}
+        {/* Écran 2e : « − 72 % + AJUSTER » sur une seule barrette, au lieu de la
+            pile de quatre pastilles de React Flow doublée d'un badge de zoom.
+            Mêmes actions, un seul objet à l'écran. En canvas étroit la barrette
+            garde son compteur mais perd ses boutons : 28 px n'est pas une cible
+            tactile (FR119), et le pincement fait le travail. */}
         <div
-          aria-label="Zoom level"
-          style={{
-            position: 'absolute',
-            bottom: 48,
-            left: 12,
-            fontSize: 12,
-            color: theme.text.secondary,
-            backgroundColor: theme.background.secondary,
-            padding: '2px 6px',
-            borderRadius: 4,
-            border: `1px solid ${theme.border.primary}`,
-          }}
-        >
-          {Math.round(viewport.zoom * 100)}%
-        </div>
+            data-testid="graph-zoom-bar"
+            aria-label="Zoom"
+            style={{
+              position: 'absolute',
+              bottom: 12,
+              left: 12,
+              zIndex: 5,
+              display: 'flex',
+              alignItems: 'center',
+              height: 30,
+              borderRadius: redesignRadius.control,
+              border: `1px solid ${theme.button.default.border}`,
+              backgroundColor: theme.background.primary,
+              overflow: 'hidden',
+            }}
+          >
+            {!isNarrowCanvas && (
+              <button
+                type="button"
+                aria-label="Dézoomer"
+                onClick={() => reactFlowInstanceRef.current?.zoomOut()}
+                style={graphZoomBarButtonStyle}
+              >
+                −
+              </button>
+            )}
+            <span
+              data-testid="graph-zoom-level"
+              style={{
+                fontFamily: redesignFont.mono,
+                fontSize: '10.5px',
+                letterSpacing: '0.06em',
+                color: redesignText.secondary,
+                padding: '0 6px',
+                minWidth: 44,
+                textAlign: 'center',
+              }}
+            >
+              {Math.round(viewport.zoom * 100)} %
+            </span>
+            {!isNarrowCanvas && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Zoomer"
+                  onClick={() => reactFlowInstanceRef.current?.zoomIn()}
+                  style={graphZoomBarButtonStyle}
+                >
+                  +
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    reactFlowInstanceRef.current?.fitView({ padding: 0.2, duration: 220 })
+                  }
+                  style={{
+                    ...graphZoomBarButtonStyle,
+                    width: 'auto',
+                    padding: '0 10px',
+                    borderLeft: `1px solid ${redesignHairline.standard}`,
+                    fontFamily: redesignFont.mono,
+                    fontSize: '10px',
+                    letterSpacing: '0.09em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Ajuster
+                </button>
+              </>
+            )}
+          </div>
         <MiniMap
           nodeColor={(node) => {
             switch (node.type) {

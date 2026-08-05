@@ -13,7 +13,17 @@ import { create } from 'zustand'
 /** Onglets de l'inspecteur droit de l'éditeur de graphe. */
 export type InspectorTab = 'node' | 'health' | 'quality' | 'cost'
 
+/** Sections applicatives, présentées dans la barre supérieure (écran 1c). */
+export type CenterPanelTab = 'generation' | 'edition' | 'graph'
+
 interface UiLayoutState {
+  /**
+   * Section active. Dans la maquette la navigation vit dans la barre supérieure,
+   * à côté du logo — pas au-dessus de la colonne de lecture. L'état est donc
+   * partagé entre `Header` (qui l'affiche) et `Dashboard` (qui rend le contenu).
+   */
+  centerPanelTab: CenterPanelTab
+  setCenterPanelTab: (tab: CenterPanelTab) => void
   /** Onglet actif de l'inspecteur ; `null` = inspecteur replié. */
   inspectorTab: InspectorTab | null
   setInspectorTab: (tab: InspectorTab | null) => void
@@ -30,6 +40,9 @@ interface UiLayoutState {
 }
 
 export const useUiLayoutStore = create<UiLayoutState>()((set) => ({
+  centerPanelTab: 'generation',
+  setCenterPanelTab: (tab) => set({ centerPanelTab: tab }),
+
   inspectorTab: 'node',
 
   setInspectorTab: (tab) => set({ inspectorTab: tab }),

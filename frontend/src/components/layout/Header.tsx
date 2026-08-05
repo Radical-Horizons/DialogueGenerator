@@ -2,6 +2,7 @@
  * Composant Header avec authentification et barre de recherche.
  */
 import { useState, useEffect, useRef } from 'react'
+import type { CSSProperties } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { useCommandPalette } from '../../hooks/useCommandPalette'
@@ -17,14 +18,49 @@ import { remSize } from '../../theme/uiTypography'
 import { redesignAccent, redesignFont, redesignText } from '../../theme/redesignTokens'
 import { useGenerationElapsed } from '../../hooks/useGenerationRunState'
 import { useUiLayoutStore } from '../../store/uiLayoutStore'
+import type { CenterPanelTab } from '../../store/uiLayoutStore'
 import { TOUCH_TARGET_MIN_PX } from '../../constants'
 
 /** Nom de l'animation du point de génération (déclarée localement, pas de CSS global). */
 const HEADER_BLINK_ANIMATION = 'header-generation-blink'
 
+/** Sections de la barre supérieure, dans l'ordre de la maquette. */
+const SECTION_NAV_ITEMS: ReadonlyArray<{ id: CenterPanelTab; label: string }> = [
+  { id: 'generation', label: 'Générer' },
+  { id: 'edition', label: 'Éditer' },
+  { id: 'graph', label: 'Graphe' },
+]
+
+/**
+ * Libellé de la barre supérieure (écran 1c) : mono, capitales, sans contour.
+ * La cible de touche reste à `TOUCH_TARGET_MIN_PX` via le padding vertical,
+ * sans que le contrôle se voie pour autant.
+ */
+const headerMonoLinkStyle: CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  // FR119 : le libellé est discret, la cible reste tactile.
+  minHeight: TOUCH_TARGET_MIN_PX,
+  minWidth: TOUCH_TARGET_MIN_PX,
+  boxSizing: 'border-box',
+  padding: '0 0.25rem',
+  backgroundColor: 'transparent',
+  border: 'none',
+  cursor: 'pointer',
+  fontFamily: redesignFont.mono,
+  fontSize: '10.5px',
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  color: redesignText.label,
+  whiteSpace: 'nowrap',
+}
+
 export function Header() {
   const generationElapsed = useGenerationElapsed()
   const writingMode = useUiLayoutStore((s) => s.writingMode)
+  const centerPanelTab = useUiLayoutStore((s) => s.centerPanelTab)
+  const setCenterPanelTab = useUiLayoutStore((s) => s.setCenterPanelTab)
   const { user, isAuthenticated, logout } = useAuthStore()
   const navigate = useNavigate()
   const commandPalette = useCommandPalette()
@@ -165,6 +201,46 @@ export function Header() {
             flexShrink: 0,
           }}
         />
+
+        {/* Écran 1c : la navigation applicative suit le logo dans la barre
+            supérieure. La section active est soulignée à l'accent, pas encadrée.
+            2c : elle s'efface avec le reste du chrome — on écrit, on ne navigue pas. */}
+        {isAuthenticated && !writingMode && (
+          <nav
+            data-testid="header-section-nav"
+            aria-label="Sections"
+            style={{ display: 'flex', gap: 20, flexShrink: 0, marginLeft: 4 }}
+          >
+            {SECTION_NAV_ITEMS.map((item) => {
+              const active = centerPanelTab === item.id
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  data-testid={`header-section-${item.id}`}
+                  aria-current={active ? 'page' : undefined}
+                  onClick={() => setCenterPanelTab(item.id)}
+                  style={{
+                    border: 'none',
+                    background: 'none',
+                    padding: '0 0 2px',
+                    // FR119 : cible tactile conservée malgré le libellé nu.
+                    minHeight: TOUCH_TARGET_MIN_PX,
+                    minWidth: TOUCH_TARGET_MIN_PX,
+                    boxSizing: 'border-box',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    color: active ? theme.text.primary : redesignText.secondary,
+                    boxShadow: active ? `inset 0 -1px 0 ${redesignAccent.base}` : 'none',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {item.label}
+                </button>
+              )
+            })}
+          </nav>
+        )}
       </div>
       
       {/* Recherche : alignée à droite avec Réglages / avatar (écran 1c). */}
@@ -273,26 +349,24 @@ export function Header() {
         )}
         {isAuthenticated && user && user.role !== 'guest' && actions.handleGenerate && (
           <>
+            {/* Écran 1c : la barre supérieure ne porte aucun bouton encadré —
+                seulement des libellés mono. « Réinitialiser » n'est pas dans la
+                maquette mais reste la seule sortie vers un dialogue vierge :
+                il prend le même format discret plutôt que de disparaître. */}
             <button
               onClick={() => {
                 setOptionsModalInitialTab('general')
                 setIsOptionsModalOpen(true)
               }}
-              style={{
-                padding: '0.35rem 0.75rem',
-                fontSize: remSize('body'),
-                backgroundColor: theme.button.default.background,
-                color: theme.button.default.color,
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '4px',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                minWidth: TOUCH_TARGET_MIN_PX,
-                minHeight: TOUCH_TARGET_MIN_PX,
-                boxSizing: 'border-box',
+              style={{ ...headerMonoLinkStyle }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = theme.text.secondary
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = redesignText.label
               }}
             >
-              Options
+              Réglages
             </button>
 
             {/* Reset direct : évite un menu Actions à une seule entrée */}
@@ -307,25 +381,20 @@ export function Header() {
               disabled={actions.isLoading || isGraphGenerating || !actions.handleReset}
               title="Nouveau dialogue (réinitialiser)"
               style={{
-                padding: '0.35rem 0.75rem',
-                fontSize: remSize('body'),
-                backgroundColor: theme.button.default.background,
-                color: (actions.isLoading || isGraphGenerating || !actions.handleReset)
-                  ? theme.text.secondary
-                  : theme.button.default.color,
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '4px',
+                ...headerMonoLinkStyle,
                 cursor: (actions.isLoading || isGraphGenerating || !actions.handleReset)
                   ? 'not-allowed'
                   : 'pointer',
-                whiteSpace: 'nowrap',
-                minWidth: TOUCH_TARGET_MIN_PX,
-                minHeight: TOUCH_TARGET_MIN_PX,
-                boxSizing: 'border-box',
-                opacity: (actions.isLoading || isGraphGenerating || !actions.handleReset) ? 0.6 : 1,
+                opacity: (actions.isLoading || isGraphGenerating || !actions.handleReset) ? 0.5 : 1,
+              }}
+              onMouseEnter={(e) => {
+                if (!e.currentTarget.disabled) e.currentTarget.style.color = theme.text.secondary
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = redesignText.label
               }}
             >
-              Reset
+              Réinitialiser
             </button>
 
             {/* Actions uniquement s'il y a des exports batch à proposer */}
@@ -343,25 +412,16 @@ export function Header() {
                     e.stopPropagation()
                     setIsActionsDropdownOpen(!isActionsDropdownOpen)
                   }}
-                  style={{
-                    padding: '0.35rem 0.75rem',
-                    fontSize: remSize('body'),
-                    backgroundColor: theme.button.default.background,
-                    color: theme.button.default.color,
-                    border: `1px solid ${theme.border.primary}`,
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.25rem',
-                    whiteSpace: 'nowrap',
-                    minWidth: TOUCH_TARGET_MIN_PX,
-                    minHeight: TOUCH_TARGET_MIN_PX,
-                    boxSizing: 'border-box',
+                  style={{ ...headerMonoLinkStyle, gap: '0.3rem' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = theme.text.secondary
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = redesignText.label
                   }}
                 >
                   Actions
-                  <span style={{ fontSize: remSize('caption') }}>▼</span>
+                  <span aria-hidden style={{ fontSize: '8px' }}>▼</span>
                 </button>
                 {isActionsDropdownOpen && (
                   <div
@@ -405,29 +465,28 @@ export function Header() {
               aria-expanded={isUserMenuOpen}
               aria-haspopup="menu"
               style={{
+                // Écran 1c : pastille cerclée, initiale à l'accent — le seul
+                // aplat bleu de l'écran reste le bouton Générer.
                 width: TOUCH_TARGET_MIN_PX,
                 height: TOUCH_TARGET_MIN_PX,
                 borderRadius: '50%',
-                backgroundColor: theme.button.primary.background,
-                color: theme.button.primary.color,
-                border: `2px solid ${theme.border.primary}`,
+                backgroundColor: 'transparent',
+                color: redesignAccent.base,
+                border: `1px solid ${theme.button.default.border}`,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: remSize('body'),
-                fontWeight: 'bold',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                boxShadow: isUserMenuOpen ? '0 2px 8px rgba(0, 0, 0, 0.3)' : 'none',
+                fontSize: '11.5px',
+                fontWeight: 600,
+                transition: 'border-color 0.2s',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.05)'
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)'
+                e.currentTarget.style.borderColor = redesignAccent.base
               }}
               onMouseLeave={(e) => {
                 if (!isUserMenuOpen) {
-                  e.currentTarget.style.transform = 'scale(1)'
-                  e.currentTarget.style.boxShadow = 'none'
+                  e.currentTarget.style.borderColor = theme.button.default.border
                 }
               }}
               title={user.username}

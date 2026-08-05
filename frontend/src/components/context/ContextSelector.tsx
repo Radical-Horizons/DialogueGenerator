@@ -3,7 +3,7 @@
  * AC FR11 : Personnages, Lieux (contexte), Objets, Espèces, Communautés.
  */
 import { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo } from 'react'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import * as contextAPI from '../../api/context'
 import type { 
   CharacterResponse, 
@@ -189,9 +189,16 @@ interface ContextSelectorProps {
     error: string | null
     refresh: () => void
   }) => void
+  /**
+   * Contrôles du conteneur, rendus en fin de la ligne « CONTEXTE — N FICHES ».
+   * La maquette 1c ne donne pas de barre de titre à cette colonne : ce qui devait
+   * y vivre (repli du panneau, verrou de run) se glisse ici plutôt que d'ouvrir
+   * une bande vide au-dessus de la liste.
+   */
+  headerEnd?: ReactNode
 }
 
-export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSelectorProps = {}) {
+export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }: ContextSelectorProps = {}) {
   const [activeTab, setActiveTab] = useState<TabType>('characters')
   const [showRulesEditor, setShowRulesEditor] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -720,18 +727,19 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
             marginBottom: `${redesignSpacing.sm}px`,
           }}
         >
-          {/* Le titre de section vit dans l'en-tête du panneau : ici, seul le compteur. */}
+          {/* 1c : une seule ligne « CONTEXTE — N FICHES … vider ». Le panneau n'a
+              pas de barre de titre séparée : ce libellé en tient lieu. */}
           <span
             style={{
               fontFamily: redesignFont.mono,
               fontSize: '10px',
-              letterSpacing: '0.09em',
+              letterSpacing: '0.12em',
               textTransform: 'uppercase',
               color: redesignText.label,
               whiteSpace: 'nowrap',
             }}
           >
-            {selectedChipNames.length} fiche{selectedChipNames.length > 1 ? 's' : ''}
+            Contexte — {selectedChipNames.length} fiche{selectedChipNames.length > 1 ? 's' : ''}
           </span>
           {selectedChipNames.length > 0 && (
             <button
@@ -749,6 +757,7 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
               vider
             </button>
           )}
+          {headerEnd}
         </div>
         {selectedChipNames.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: `${redesignSpacing.xs}px`, marginBottom: `${redesignSpacing.sm}px` }}>
@@ -818,6 +827,9 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
         sortType={sortType}
         onSortTypeChange={setSortType}
         inputRef={searchInputRef}
+        // 1c : « Chercher une fiche… » — le libellé de la maquette, plus court
+        // que l'ancien, donc lisible même à 212 px (écran 2d).
+        placeholder="Chercher une fiche…"
       />
 
       {/* Barre d'onglets compacte : 5 onglets + ⚙ sur une ligne (repli caption si débordement) */}

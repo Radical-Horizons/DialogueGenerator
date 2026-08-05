@@ -36,7 +36,18 @@ export function ContextSearchControls({
         backgroundColor: 'transparent',
       }}
     >
-      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+      {/* Le tri passe sous le champ quand la colonne se resserre : c'est le
+          libellé de saisie qui doit rester lisible, pas l'inverse (vu à 212 px
+          sur l'écran 2d, où il ne restait que « R »). */}
+      <div
+        style={{
+          display: 'flex',
+          gap: '0.5rem',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          rowGap: 6,
+        }}
+      >
         {/* 1c : un simple libellé de saisie, pas un champ encadré. */}
         <input
           ref={inputRef}
@@ -46,7 +57,9 @@ export function ContextSearchControls({
           onChange={(e) => onSearchQueryChange(e.target.value)}
           aria-label="Rechercher dans le GDD"
           style={{
-            flex: 1,
+            // Base large : le tri déborde et passe à la ligne avant que le
+            // placeholder ne se tronque.
+            flex: '1 1 150px',
             minWidth: 0,
             padding: 0,
             border: 'none',

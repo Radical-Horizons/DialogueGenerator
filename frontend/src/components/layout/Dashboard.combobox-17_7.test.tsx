@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { useGenerationStore } from '../../store/generationStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useContextStore } from '../../store/contextStore'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
 
 vi.mock('../../store/generationStore')
 vi.mock('../../store/generationActionsStore')
@@ -47,10 +47,23 @@ function Wrapper({ children }: { children: ReactNode }) {
   return <BrowserRouter>{children}</BrowserRouter>
 }
 
+/**
+ * Écran 1c : la navigation de sections vit dans `Header`, pas dans `Dashboard`.
+ * Cette suite rend `Dashboard` seul : elle change donc de section par le store
+ * partagé. Le clic sur les libellés est couvert par `Header.section-nav.test.tsx`.
+ */
+async function goToSection(tab: 'generation' | 'edition' | 'graph') {
+  await act(async () => {
+    useUiLayoutStore.getState().setCenterPanelTab(tab)
+  })
+}
+
 describe('Dashboard — 17.7 sélecteur de dialogue dans toolbar', () => {
   let Dashboard: typeof import('./Dashboard').Dashboard
 
   beforeEach(async () => {
+    // La section active est un etat de store partage : chaque test repart de 1c.
+    useUiLayoutStore.getState().setCenterPanelTab('generation')
     vi.clearAllMocks()
     Dashboard = (await import('./Dashboard')).Dashboard
 
@@ -110,7 +123,6 @@ describe('Dashboard — 17.7 sélecteur de dialogue dans toolbar', () => {
   })
 
   it('narrow: onglet Édition de Dialogues — colonne liste absente, combobox présent', async () => {
-    const user = userEvent.setup()
 
     render(
       <Wrapper>
@@ -120,8 +132,7 @@ describe('Dashboard — 17.7 sélecteur de dialogue dans toolbar', () => {
       </Wrapper>
     )
 
-    const editionTab = await screen.findByRole('button', { name: /^Éditer$/i })
-    await user.click(editionTab)
+    await goToSection('edition')
 
     await waitFor(() => {
       expect(screen.getByTestId('dialogue-combobox-trigger')).toBeInTheDocument()
@@ -130,7 +141,6 @@ describe('Dashboard — 17.7 sélecteur de dialogue dans toolbar', () => {
   })
 
   it('desktop: onglet Édition de Dialogues — colonne liste présente, combobox absent', async () => {
-    const user = userEvent.setup()
 
     render(
       <Wrapper>
@@ -140,8 +150,7 @@ describe('Dashboard — 17.7 sélecteur de dialogue dans toolbar', () => {
       </Wrapper>
     )
 
-    const editionTab = await screen.findByRole('button', { name: /^Éditer$/i })
-    await user.click(editionTab)
+    await goToSection('edition')
 
     await waitFor(() => {
       expect(screen.getByTestId('unity-dialogue-list')).toBeInTheDocument()

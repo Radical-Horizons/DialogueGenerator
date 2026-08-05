@@ -111,10 +111,13 @@ function PanelCollapseButton({
   const chevronSide = chevronPosition ?? direction
   const translateX = hovered ? (direction === 'left' ? -2 : 2) : 0
 
-  const scale = pressed ? 0.93 : hovered ? 1.04 : 1
-  const bg = hovered ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.03)'
-  const borderColor = hovered ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.09)'
-  const textColor = hovered ? theme.text.primary : theme.text.tertiary
+  // 1c : la maquette n'a aucune pastille cerclée dans les colonnes. Le repli
+  // reste une affordance nécessaire (FR119) : il devient un chevron nu, qui ne
+  // se dessine qu'au survol. Cible tactile conservée par `collapseChrome`.
+  const scale = pressed ? 0.93 : 1
+  const bg = hovered ? 'rgba(255,255,255,0.05)' : 'transparent'
+  const borderColor = 'transparent'
+  const textColor = hovered ? theme.text.primary : redesignText.label
 
   const chevron = (
     <span style={{ transform: `translateX(${translateX}px)`, transition: 'transform 0.18s ease', display: 'flex' }}>
@@ -139,7 +142,7 @@ function PanelCollapseButton({
         minHeight: collapseChrome.minHeightPx,
         minWidth: collapseChrome.minWidthPx,
         boxSizing: 'border-box',
-        borderRadius: 99,
+        borderRadius: 6,
         border: `1px solid ${borderColor}`,
         backgroundColor: bg,
         color: textColor,
@@ -148,7 +151,6 @@ function PanelCollapseButton({
         justifyContent: 'center',
         transform: `scale(${scale})`,
         transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
-        boxShadow: hovered ? '0 2px 8px rgba(0,0,0,0.3)' : 'none',
       }}
     >
       {chevronSide === 'left' && chevron}
@@ -279,7 +281,10 @@ export function Dashboard() {
   })
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false)
   const [rightPanelTab, setRightPanelTab] = useState<'prompt' | 'dialogue' | 'node' | 'details'>('prompt')
-  const [centerPanelTab, setCenterPanelTab] = useState<'generation' | 'edition' | 'graph'>('generation')
+  // La navigation applicative est rendue par `Header` (barre supérieure de la
+  // maquette) ; l'état vit donc dans le store, pas dans ce composant.
+  const centerPanelTab = useUiLayoutStore((s) => s.centerPanelTab)
+  const setCenterPanelTab = useUiLayoutStore((s) => s.setCenterPanelTab)
   const [selectedDialogue, setSelectedDialogue] = useState<UnityDialogueMetadata | null>(null)
   const dialogueListRef = useRef<UnityDialogueListRef>(null)
   const unityDialogueEditorRef = useRef<UnityDialogueEditorHandle>(null)
@@ -343,6 +348,10 @@ export function Dashboard() {
   }, [contextSelections])
   const generationTokenCount = useGenerationStore((s) => s.tokenCount)
   const optionRunSize = useGenerationOptionsStore((s) => s.slots.length)
+  /** Le lot est tranché quand plus aucune option n'est en vol. */
+  const optionRunSettled = useGenerationOptionsStore((s) =>
+    s.slots.length > 0 && s.slots.every((slot) => slot.status !== 'pending' && slot.status !== 'running')
+  )
   const optionRunId = useGenerationOptionsStore((s) => s.runId)
   /** FR120 : &lt; 1024px — panneaux latéraux en overlay drawer, pas en colonnes compressées */
   const useNarrowSidePanels = viewportMode !== 'desktop'
@@ -896,16 +905,19 @@ export function Dashboard() {
   }, [applyCollapsedLayout, isLeftPanelCollapsed, isRightPanelCollapsed, viewportMode])
 
   /**
-   * 2b : dès qu'un lot d'options est là, la colonne GDD se replie en rail — elle a
+   * 2b : une fois le lot **tranché**, la colonne GDD se replie en rail — elle a
    * fait son travail, la place va à la comparaison. L'utilisateur peut la ramener,
    * et on ne force le repli qu'une fois par lot pour ne pas contrarier ce choix.
+   * Pendant la génération (2a) elle reste ouverte, verrouillée.
    */
   const comparisonActive = optionRunSize >= 2
   // Clé = identité du lot, pas sa taille : deux lots de 2 options à la suite doivent
   // replier le rail chacun leur tour. `slots.length` ne distingue pas ces deux runs.
   const lastForcedRailRunRef = useRef<number>(0)
   useEffect(() => {
-    if (!comparisonActive || viewportMode !== 'desktop') return
+    // 2a garde la colonne ouverte, verrouillée à 55 % : c'est seulement une fois
+    // le lot tranché (2b) que la place revient à la comparaison.
+    if (!comparisonActive || !optionRunSettled || viewportMode !== 'desktop') return
     if (lastForcedRailRunRef.current === optionRunId) return
     lastForcedRailRunRef.current = optionRunId
     if (!expandedSizesRef.current && panelsRef.current) {
@@ -913,7 +925,14 @@ export function Dashboard() {
     }
     setIsLeftPanelCollapsed(true)
     applyCollapsedLayout(true, isRightPanelCollapsed)
-  }, [comparisonActive, optionRunId, viewportMode, applyCollapsedLayout, isRightPanelCollapsed])
+  }, [
+    comparisonActive,
+    optionRunSettled,
+    optionRunId,
+    viewportMode,
+    applyCollapsedLayout,
+    isRightPanelCollapsed,
+  ])
 
 
   // ── Mode écriture (écran 2c) ──────────────────────────────────────────────
@@ -1311,55 +1330,6 @@ export function Dashboard() {
         {!useNarrowSidePanels && !isLeftPanelCollapsed && (
           <>
             <div
-              style={{
-                padding: panelSideHeaderPadding,
-                borderBottom: `1px solid ${theme.border.primary}`,
-                backgroundColor: theme.background.panelHeader,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '0.5rem',
-                flexShrink: 0,
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: redesignFont.mono,
-                  fontSize: `${panelHeaderMonoLabelPx}px`,
-                  letterSpacing: '0.09em',
-                  textTransform: 'uppercase',
-                  color: redesignText.label,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {GDD_CONTEXT_PANEL_TITLE}
-              </div>
-              {/* 2a : le contexte est déjà parti au modèle — le dire plutôt que laisser
-                  croire qu'une coche de plus serait prise en compte. */}
-              {generationRunActive && (
-                <span
-                  data-testid="gdd-locked-badge"
-                  style={{
-                    fontFamily: redesignFont.mono,
-                    fontSize: '9.5px',
-                    letterSpacing: '0.08em',
-                    color: redesignText.label,
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  VERROUILLÉ
-                </span>
-              )}
-              <PanelCollapseButton
-                direction="left"
-                onClick={toggleLeftPanel}
-                ariaLabel="Replier le panneau gauche"
-                density={panelCollapseDensity}
-              />
-            </div>
-            <div
               data-testid="gdd-context-lockable"
               aria-disabled={generationRunActive || undefined}
               style={{
@@ -1375,6 +1345,35 @@ export function Dashboard() {
               <ContextSelector
                 onItemSelected={onContextItemSelected}
                 onLoadStateChange={onContextLoadStateChange}
+                // 1c : la colonne n'a pas de barre de titre — ces deux
+                // affordances se rangent au bout de « CONTEXTE — N FICHES »
+                // plutôt que d'ouvrir une bande vide au-dessus de la liste.
+                headerEnd={
+                  <>
+                    {/* 2a : le contexte est déjà parti au modèle — le dire plutôt que
+                        laisser croire qu'une coche de plus serait prise en compte. */}
+                    {generationRunActive && (
+                      <span
+                        data-testid="gdd-locked-badge"
+                        style={{
+                          fontFamily: redesignFont.mono,
+                          fontSize: '9.5px',
+                          letterSpacing: '0.08em',
+                          color: redesignText.label,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        VERROUILLÉ
+                      </span>
+                    )}
+                    <PanelCollapseButton
+                      direction="left"
+                      onClick={toggleLeftPanel}
+                      ariaLabel="Replier le panneau gauche"
+                      density={panelCollapseDensity}
+                    />
+                  </>
+                }
               />
             </div>
           </>
@@ -1436,8 +1435,9 @@ export function Dashboard() {
               devient une barre repliée au-dessus de la barre d'action. */}
           <Tabs
             variant="nav"
-            // 2c : la navigation applicative s'efface aussi — on écrit, on ne navigue pas.
-            hideTabList={writingMode}
+            // 1c : la navigation vit dans la barre supérieure, à côté du logo.
+            // `Tabs` ne sert plus qu'à rendre le contenu de la section active.
+            hideTabList
             tabs={[
               {
                 id: 'generation',
@@ -1474,7 +1474,13 @@ export function Dashboard() {
           onTabChange={(tabId) => setCenterPanelTab(tabId as 'generation' | 'edition' | 'graph')}
           keepAliveTabIds={['graph']}
           style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
-          contentStyle={centerPanelTab === 'graph' ? { overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column' } : undefined}
+          // 2c : la colonne doit occuper toute la hauteur pour que la barre de pied
+          // se colle au bas ; sinon elle suit le brief et flotte au milieu de l'écran.
+          contentStyle={
+            centerPanelTab === 'graph' || writingMode
+              ? { overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column' }
+              : undefined
+          }
         />
         {showPromptBottomDrawer && (
           <PromptBudgetBottomDrawer totalTokens={generationTokenCount}>
@@ -1530,12 +1536,17 @@ export function Dashboard() {
             density={panelCollapseDensity}
           />
           <div
+            data-testid="right-panel-header-label"
             style={{
-              flex: 1,
-              minWidth: 0,
+              // Le titre du panneau ne se tronque pas : c'est l'indicateur de
+              // sauvegarde, redondant avec le pied de colonne, qui cède la place.
+              flex: '0 0 auto',
               textAlign: 'left',
               fontFamily: redesignFont.mono,
-              fontSize: '10px',
+              // FR118 (17.6) : densité adaptive de l'étiquette d'en-tête de panneau.
+              // La colonne GDD n'a plus de barre de titre ; le panneau droit reste
+              // le seul en-tête latéral, et hérite donc de ce réglage.
+              fontSize: `${panelHeaderMonoLabelPx}px`,
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
               color: redesignText.label,
@@ -1544,10 +1555,14 @@ export function Dashboard() {
               textOverflow: 'ellipsis',
             }}
           >
+            {/* 1c : la vue Prompt s'annonce par ce qu'elle montre — le décompte de
+                ce qui part au modèle — pas par le nom technique de l'onglet. */}
             {generationRunActive && !traceHidden
               ? 'Trace'
-              : (visibleRightPanelTabs.find((t) => t.id === effectiveRightPanelTab)?.label ??
-                 'Ce qui part au modèle')}
+              : effectiveRightPanelTab === 'prompt'
+                ? 'Ce qui part au modèle'
+                : (visibleRightPanelTabs.find((t) => t.id === effectiveRightPanelTab)?.label ??
+                   'Ce qui part au modèle')}
           </div>
 
           {actions.handleGenerate ? (
@@ -1555,10 +1570,10 @@ export function Dashboard() {
               appearance="discreet"
               status={actions.saveStatus}
               lastSavedAt={actions.draftLastSavedAt}
-              style={{ flexShrink: 0, maxWidth: 'min(200px, 38vw)' }}
+              style={{ flex: '1 1 auto', minWidth: 0, textAlign: 'right' }}
             />
           ) : (
-            <span style={{ width: 'min(200px, 38vw)', flexShrink: 0 }} aria-hidden />
+            <span style={{ flex: '1 1 auto', minWidth: 0 }} aria-hidden />
           )}
         </div>
         {/* Zone de contenu avec scroll (prend l'espace restant, mais laisse toujours de la place pour le bouton) */}

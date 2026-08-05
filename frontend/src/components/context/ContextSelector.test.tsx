@@ -232,7 +232,9 @@ describe('ContextSelector', () => {
     render(<ContextSelector />)
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText(/rechercher/i)).toBeInTheDocument()
+      // 1c : le libellé de saisie est « Chercher une fiche… » ; le champ reste
+      // identifié par son aria-label, stable quelle que soit la formulation.
+      expect(screen.getByLabelText(/rechercher dans le gdd/i)).toBeInTheDocument()
     })
   })
 
@@ -244,7 +246,7 @@ describe('ContextSelector', () => {
       expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument()
     })
 
-    const search = screen.getByPlaceholderText(/rechercher dans tout le gdd/i)
+    const search = screen.getByLabelText(/rechercher dans le gdd/i)
     const personnagesTab = screen.getByRole('button', { name: /^personnages$/i })
     expect(search.compareDocumentPosition(personnagesTab) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
 
@@ -279,7 +281,7 @@ describe('ContextSelector', () => {
     await user.click(screen.getByRole('button', { name: /^lieux$/i }))
     await waitFor(() => expect(screen.getByText('Alpha Spot')).toBeInTheDocument())
 
-    await user.type(screen.getByPlaceholderText(/rechercher dans tout le gdd/i), 'Alpha')
+    await user.type(screen.getByLabelText(/rechercher dans le gdd/i), 'Alpha')
 
     await waitFor(() => {
       const badges = screen.getAllByText(/^(Lieu|Personnage)$/)

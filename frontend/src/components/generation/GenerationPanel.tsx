@@ -431,15 +431,21 @@ export function GenerationPanel() {
   // rendraient un sélecteur inopérant ici (cf. `useGenerationRunActive`).
   const runActive = isGenerating || isInterrupting
   const [briefExpandedDuringRun, setBriefExpandedDuringRun] = useState(false)
-  const showGenerationForm = !runActive || briefExpandedDuringRun
-  /** 2c : chips de ton, flags et réglages se condensent dans la barre de pied. */
-  const showFormExtras = showGenerationForm && !writingMode
-  useEffect(() => {
-    if (!runActive) setBriefExpandedDuringRun(false)
-  }, [runActive])
   const optionCount = useGenerationOptionsStore((s) => s.optionCount)
   const optionSlots = useGenerationOptionsStore((s) => s.slots)
   const comparisonActive = optionSlots.length >= 2
+  /**
+   * Le brief se range dès qu'autre chose occupe la colonne : le texte qui arrive
+   * (2a) ou les options à trancher (2b). Il reste rappelable d'un lien — c'est un
+   * repli, pas une suppression.
+   */
+  const briefCollapsedByContext = runActive || comparisonActive
+  const showGenerationForm = !briefCollapsedByContext || briefExpandedDuringRun
+  useEffect(() => {
+    if (!briefCollapsedByContext) setBriefExpandedDuringRun(false)
+  }, [briefCollapsedByContext])
+  /** 2c : chips de ton, flags et réglages se condensent dans la barre de pied. */
+  const showFormExtras = showGenerationForm && !writingMode
 
   // Multi-options : l'option 1 est le stream principal — quand il aboutit (ou échoue),
   // refléter son état dans le slot 0 de la comparaison.
@@ -561,6 +567,12 @@ export function GenerationPanel() {
           flex: 1,
           overflowY: 'auto',
           minWidth: 0,
+          // 2c : colonne en flux vertical pour que la barre de pied puisse se
+          // coller au bas (`marginTop: auto`). Hors mode écriture, la mise en
+          // page reste un flux de blocs — ne rien changer.
+          ...(writingMode
+            ? { display: 'flex', flexDirection: 'column', minHeight: '100%' }
+            : {}),
           // Colonne de lecture 660px centrée (écran 1c) — 760px en mode écriture (2c).
           // 2b : la comparaison n'est pas une lecture, elle prend toute la largeur
           // (option ouverte + colonne diagnostic ne tiennent pas dans 660px).
@@ -613,6 +625,8 @@ export function GenerationPanel() {
             // d'édition du dialogue généré.
             useGenerationActionsStore.getState().actions?.handlePreview?.()
           }}
+          briefExpanded={briefExpandedDuringRun}
+          onEditBrief={() => setBriefExpandedDuringRun((v) => !v)}
         />
 
         {/* 1c ne montre pas la barre de preset : elle vit avec les réglages du modèle. */}
@@ -1041,15 +1055,21 @@ export function GenerationPanel() {
           2c : une seule rangée — mots · tokens · coût à gauche, réglages + Générer à droite. */}
       <div
         data-testid="generation-primary-action"
-        hidden={runActive}
+        // 2a : les deux sorties vivent dans le bloc de streaming. 2b : l'action
+        // primaire est « Garder et continuer », et relancer passe par
+        // « Régénérer les N ». Dans les deux cas la barre revient dès que
+        // l'utilisateur redéploie le brief.
+        hidden={!showGenerationForm}
         style={{
           borderTop: `1px solid ${redesignHairline.strong}`,
           paddingTop: writingMode ? 16 : 13,
-          marginTop: 22,
+          // 2c : « une seule barre de pied » — elle se colle au bas de la colonne
+          // au lieu de suivre le brief, quelle que soit la longueur du texte.
+          marginTop: writingMode ? 'auto' : 22,
           paddingBottom: writingMode ? 40 : 0,
           // `display` explicite : un `display` inline l'emporte sur la règle UA
           // `[hidden] { display: none }`, donc l'attribut seul ne masquerait rien.
-          display: runActive ? 'none' : 'flex',
+          display: showGenerationForm ? 'flex' : 'none',
           flexDirection: writingMode ? 'row' : 'column',
           alignItems: writingMode ? 'center' : undefined,
           justifyContent: writingMode ? 'space-between' : undefined,

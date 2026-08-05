@@ -176,7 +176,10 @@ describe('GraphCanvas virtualization (Story 2.1)', () => {
 
   it('displays zoom level in UI (Story 2.3 AC #1 - controls/indicator)', () => {
     renderGraphCanvas()
-    expect(screen.getByText(/100%/)).toBeInTheDocument()
+    // Ecran 2e : une barrette « - N % + AJUSTER » remplace la pile React Flow
+    // doublee d un badge de zoom. En canvas etroit (cas jsdom) elle garde son
+    // compteur et perd ses boutons.
+    expect(screen.getByTestId('graph-zoom-level')).toHaveTextContent('100 %')
   })
 
   it('double-click on node triggers focusNode via graphViewStore (Story 2.3 AC #3)', () => {

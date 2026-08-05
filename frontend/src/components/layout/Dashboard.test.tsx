@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useShellKeyboardFocusScroller } from '../../hooks/useShellKeyboardFocusScroller'
 import { BrowserRouter } from 'react-router-dom'
 import { useGenerationStore } from '../../store/generationStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useContextStore } from '../../store/contextStore'
-import { GDD_CONTEXT_PANEL_TITLE } from '../context/constants'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { panelHeaderMonoLabel } from '../../theme/responsiveChrome'
 
 const mockContextRefresh = vi.hoisted(() => vi.fn())
@@ -101,6 +101,17 @@ function TestShellKeyboardFocus({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
 
+/**
+ * Écran 1c : la navigation de sections vit dans `Header`, pas dans `Dashboard`.
+ * Cette suite rend `Dashboard` seul : elle change donc de section par le store
+ * partagé. Le clic sur les libellés est couvert par `Header.section-nav.test.tsx`.
+ */
+async function goToSection(tab: 'generation' | 'edition' | 'graph') {
+  await act(async () => {
+    useUiLayoutStore.getState().setCenterPanelTab(tab)
+  })
+}
+
 describe('Dashboard', () => {
   let Dashboard: typeof import('./Dashboard').Dashboard
 
@@ -112,6 +123,8 @@ describe('Dashboard', () => {
   })
 
   beforeEach(async () => {
+    // La section active est un etat de store partage : chaque test repart de 1c.
+    useUiLayoutStore.getState().setCenterPanelTab('generation')
     vi.clearAllMocks()
     mockContextSelectorState.loadState = {
       isLoading: false,
@@ -715,7 +728,10 @@ describe('Dashboard', () => {
       expect(screen.getByTestId('context-selector')).toBeInTheDocument()
     })
 
-    const titleComfortable = screen.getByText(GDD_CONTEXT_PANEL_TITLE)
+    // Écran 1c : la colonne GDD n'a plus de barre de titre (le libellé
+    // « CONTEXTE — N FICHES » de ContextSelector en tient lieu). Le panneau droit
+    // est le dernier en-tête latéral : c'est lui qui porte la densité adaptive.
+    const titleComfortable = screen.getByTestId('right-panel-header-label')
     expect(titleComfortable).toHaveStyle({
       fontSize: `${panelHeaderMonoLabel.comfortableFontPx}px`,
     })
@@ -731,7 +747,7 @@ describe('Dashboard', () => {
     )
 
     await waitFor(() => {
-      const titleNarrow = screen.getByText(GDD_CONTEXT_PANEL_TITLE)
+      const titleNarrow = screen.getByTestId('right-panel-header-label')
       expect(titleNarrow).toHaveStyle({
         fontSize: `${panelHeaderMonoLabel.narrowFontPx}px`,
       })
@@ -754,16 +770,15 @@ describe('Dashboard', () => {
       expect(screen.getByTestId('context-selector')).toBeInTheDocument()
     })
 
-    const generationTab = screen.getByRole('button', { name: 'Générer' })
-    expect(generationTab).toHaveAttribute('title', 'Générer')
-
+    // La navigation de sections est passée dans la barre supérieure (écran 1c) :
+    // ses libellés sont vérifiés par `Header.section-nav.test.tsx`. Ce qui reste
+    // ici, c'est l'invariant de largeur — aucun débordement horizontal à 720px.
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
       document.documentElement.clientWidth + 1
     )
   })
 
   it('mobile: accès à l’onglet Éditeur de Graphe (FR118 zones critiques)', async () => {
-    const user = userEvent.setup()
     Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 320 })
     window.dispatchEvent(new Event('resize'))
 
@@ -777,8 +792,7 @@ describe('Dashboard', () => {
       expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
     })
 
-    const graphTab = screen.getByRole('button', { name: /^Graphe$/i })
-    await user.click(graphTab)
+    await goToSection('graph')
     expect(screen.getByTestId('graph-editor')).toBeInTheDocument()
   })
 
@@ -857,8 +871,7 @@ describe('Dashboard', () => {
       expect(screen.queryByTestId('narrow-drawer-backdrop')).not.toBeInTheDocument()
     })
 
-    const graphTab = screen.getByRole('button', { name: /^Graphe$/i })
-    await user.click(graphTab)
+    await goToSection('graph')
     expect(screen.getByTestId('graph-editor')).toBeInTheDocument()
     expect(screen.queryByTestId('narrow-drawer-backdrop')).not.toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()

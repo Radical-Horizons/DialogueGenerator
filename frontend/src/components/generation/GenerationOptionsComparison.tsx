@@ -311,9 +311,20 @@ function OptionDiagnosticColumn({
 export interface GenerationOptionsComparisonProps {
   /** Ouvre l'option gardée dans l'éditeur (action « Éditer » de la maquette). */
   onEditKept?: () => void
+  /**
+   * Redéploie le brief, rangé tant qu'on compare (écran 2b). Absent = le
+   * conteneur ne gère pas ce repli et l'action n'est pas proposée.
+   */
+  onEditBrief?: () => void
+  /** État courant du repli, pour libeller l'action. */
+  briefExpanded?: boolean
 }
 
-export function GenerationOptionsComparison({ onEditKept }: GenerationOptionsComparisonProps = {}) {
+export function GenerationOptionsComparison({
+  onEditKept,
+  onEditBrief,
+  briefExpanded = false,
+}: GenerationOptionsComparisonProps = {}) {
   const slots = useGenerationOptionsStore((s) => s.slots)
   const keptIndex = useGenerationOptionsStore((s) => s.keptIndex)
   const lastRequest = useGenerationOptionsStore((s) => s.lastRequest)
@@ -427,6 +438,23 @@ export function GenerationOptionsComparison({ onEditKept }: GenerationOptionsCom
             >
               Régénérer les {slots.length}
             </button>
+            {onEditBrief && (
+              <button
+                type="button"
+                data-testid="options-edit-brief"
+                onClick={onEditBrief}
+                style={{
+                  border: 'none',
+                  background: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
+                  fontSize: '11.5px',
+                  color: redesignText.secondary,
+                }}
+              >
+                {briefExpanded ? 'ranger le brief' : 'modifier le brief'}
+              </button>
+            )}
             <button
               type="button"
               data-testid="options-collapse-all"

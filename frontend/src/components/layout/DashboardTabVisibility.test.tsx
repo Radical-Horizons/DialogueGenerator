@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { useGenerationStore } from '../../store/generationStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useContextStore } from '../../store/contextStore'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
 
 vi.mock('../../store/generationStore')
 vi.mock('../../store/generationActionsStore')
@@ -126,20 +126,24 @@ describe('Dashboard tab visibility', () => {
   // Écran 2e : l'édition de nœud a quitté le panneau droit du Dashboard pour l'onglet
   // NŒUD de l'inspecteur de graphe. Elle ne doit apparaître ni ici ni en vue Édition.
   it("n'expose pas d'onglet d'édition de nœud dans le panneau droit du Dashboard", async () => {
-    const user = userEvent.setup()
     render(
       <BrowserRouter>
         <Dashboard />
       </BrowserRouter>
     )
 
-    await user.click(screen.getByRole('button', { name: /^Graphe$/i }))
+    // Écran 1c : la navigation de sections vit dans `Header` — cette suite rend
+    // `Dashboard` seul et pilote donc la section par le store partagé.
+    await act(async () => {
+      useUiLayoutStore.getState().setCenterPanelTab('graph')
+    })
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: /édition de nœud/i })).not.toBeInTheDocument()
     })
 
-    await user.click(screen.getByRole('button', { name: /^Éditer$/i }))
-
+    await act(async () => {
+      useUiLayoutStore.getState().setCenterPanelTab('edition')
+    })
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: /édition de nœud/i })).not.toBeInTheDocument()
     })
