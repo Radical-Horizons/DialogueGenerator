@@ -92,6 +92,9 @@ data/app.db-wal
 data/app.db-shm
 data/llm_usage/
 data/notion_cache/
+# Résultats de runs benchmark : volumineux, et chaque génération embarque le prompt
+# complet (donc des extraits de GDD). Les suites, elles, ont vocation à être versionnées.
+data/benchmarks/runs/
 data/gdd_notion_sync/notion_token.secret
 # État / cache sync Notion (régénérable). settings.json / status.json versionnés si l’équipe les suit.
 data/gdd_notion_sync/notion_search_snapshot.json

@@ -773,6 +773,10 @@ from api.routers import gdd_notion_sync
 
 app.include_router(gdd_notion_sync.router)
 
+from api.routers import benchmark
+
+app.include_router(benchmark.router)
+
 # Debug endpoint (dev only): inspect PromptEngine code loaded by server
 @app.get("/debug/prompt-engine", tags=["Debug"])
 async def debug_prompt_engine() -> JSONResponse:

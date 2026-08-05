@@ -68,3 +68,45 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-openrouter-aion-models.md`
   summary: Validation stricte du provider localStorage et message explicite si bascule modèle Unity silencieuse.
   evidence: Edge Case Hunter — pattern de fallback déjà utilisé pour GPT-5.6 ; hors scope MVP OpenRouter.
+
+- source_spec: none
+  summary: CLI benchmark (run, reprise, re-jugement, export de rapport) sur les mêmes services/endpoints que l'API.
+  evidence: Découpage de l'intent « mode Benchmark » (spec EQ-Bench) — dépend du noyau backend+API traité en premier.
+- source_spec: none
+  summary: UI benchmark — 3 écrans (configuration avec estimation de coût, suivi de run, rapport) + comparateurs existants en vue détaillée.
+  evidence: Découpage de l'intent « mode Benchmark » — dépend du noyau backend+API et de ses endpoints asynchrones.
+- source_spec: none
+  summary: Capture depuis l'usage réel — bouton « ajouter au jeu de test » sur une génération dans l'app.
+  evidence: Découpage de l'intent « mode Benchmark » — nécessite le modèle de données des suites livré par le noyau.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-core-engine.md`
+  summary: Jugement benchmark (rubrique + pairwise, grille de critères en donnée, contrôles anti-biais, re-jugement sans régénération) — `services/benchmark_judge_service.py`, `services/benchmark_criteria_store.py`.
+  evidence: Spec noyau (3392 tokens) au-dessus du plafond 1600 — découpage en specs séparées ; dépend du moteur de run et de ses `BenchmarkGenerationRecord`.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-core-engine.md`
+  summary: Classement (solveur Elo/Bradley-Terry avec incertitude) et rapport benchmark (agrégats, mesures déterministes, export) — `services/benchmark_ranking_service.py`, `services/benchmark_report_service.py`, endpoints `/report`, `/rejudge`.
+  evidence: Spec noyau (3392 tokens) au-dessus du plafond 1600 — découpage en specs séparées ; dépend des verdicts du jugement.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-core-engine.md`
+  summary: Porte `flags` du benchmark sémantiquement fausse — `analyze_dialogue_flag_references` cherche les déclarations dans `dialogueFlags` à la racine du document, absent d'un fragment généré.
+  evidence: Revue adversariale, reproduit à l'exécution — une génération portant une `visibilityConditions` valide ressortirait `invalid`. Inerte aujourd'hui (le schéma exposé au LLM n'a aucun champ de condition), bloquante à tort dès que les conditions seront générables.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-core-engine.md`
+  summary: Coût non comptabilisé quand une génération échoue après le retour du LLM (l'orchestrateur n'émet `metadata` que sur le chemin nominal).
+  evidence: Edge-case hunter — l'appel est facturé mais le record porte 0 USD ; le cumul du run sous-estime la dépense réelle. Correction au niveau de l'orchestrateur, hors périmètre de cette spec.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-core-engine.md`
+  summary: Figer une copie de la suite dans le répertoire du run pour qu'une édition concurrente ne rende pas la reprise impossible.
+  evidence: Edge-case hunter — un `PUT` ou `DELETE` sur la suite pendant un run coûteux rend ses résultats partiels définitivement non reprenables (409/404).
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-core-engine.md`
+  summary: `save_suite` fait un read-modify-write non verrouillé sur la version ; deux écritures concurrentes perdent une mise à jour.
+  evidence: Edge-case hunter — deux contenus différents peuvent porter le même numéro de version. Faible probabilité (usage admin), mais perte définitive.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-core-engine.md`
+  summary: Collision d'identifiants de suite insensible à la casse sous Windows (`Suite-A` écrase `suite-a`).
+  evidence: Edge-case hunter — le garde-fou du routeur compare les identifiants en respectant la casse et ne voit pas la collision.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-core-engine.md`
+  summary: Un échec d'écriture disque d'un record fait basculer tout le run en `failed` au lieu d'isoler la cellule.
+  evidence: Edge-case hunter — `write_json_atomic` peut lever (disque plein, verrou antivirus) ; une seule cellule non écrivable abandonne toutes les suivantes.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-core-engine.md`
+  summary: Porte de langue — une sortie courte (< 40 caractères) est acceptée sans examen, y compris en anglais.
+  evidence: Edge-case hunter — « Hello there, what do you want? » passe via le détecteur `too_short`. Abaisser le seuil produirait des faux positifs : arbitrage à instruire.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-core-engine.md`
+  summary: `require_admin` fabrique un admin factice quand `DISABLE_AUTH=true` en développement — il garde désormais des endpoints qui dépensent du budget LLM réel.
+  evidence: Revue adversariale — préexistant, mais l'enjeu change : sur un poste servant sur `0.0.0.0:4243`, n'importe quoi sur le réseau local peut lancer un run facturé.

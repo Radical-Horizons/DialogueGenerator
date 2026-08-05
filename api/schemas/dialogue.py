@@ -463,6 +463,15 @@ class GenerateUnityDialogueRequest(BasePromptRequest):
     )
     reasoning_summary: Optional[Literal["auto"]] = Field(None, description="Format du résumé de reasoning (thinking summary). Uniquement 'auto' disponible (les résumés 'detailed' nécessitent une organisation OpenAI vérifiée Tier 2/3, non disponible actuellement). Si None, 'auto' est utilisé par défaut.")
     top_p: Optional[float] = Field(None, ge=0.0, le=1.0, description="Nucleus sampling (0.0-1.0). Alternative/complément à temperature. 0.0=focalisé, 1.0=diversifié.")
+    context_seed: Optional[int] = Field(
+        None,
+        description=(
+            "Graine du tirage de fiches personnage additionnelles (excerpt aléatoire). "
+            "None = tirage aléatoire, comportement historique. Une graine fixée rend le "
+            "prompt reproductible : indispensable au mode benchmark, où deux modèles "
+            "doivent recevoir strictement le même prompt pour être comparables."
+        ),
+    )
 
     @field_validator("llm_model_identifier", mode="before")
     @classmethod

@@ -597,6 +597,30 @@ def get_gdd_notion_sync_service(request: Request):
     return svc
 
 
+def get_benchmark_suite_store(request: Request):
+    """Retourne le magasin de suites de benchmark.
+
+    Args:
+        request: Requête HTTP courante.
+
+    Returns:
+        Instance de BenchmarkSuiteStore depuis le ServiceContainer.
+    """
+    return get_service_container(request).get_benchmark_suite_store()
+
+
+def get_benchmark_run_service(request: Request):
+    """Retourne le moteur de run du benchmark.
+
+    Args:
+        request: Requête HTTP courante.
+
+    Returns:
+        Instance de BenchmarkRunService depuis le ServiceContainer.
+    """
+    return get_service_container(request).get_benchmark_run_service()
+
+
 def get_dialogue_flags_service():
     """Fabrique un service validation des liaisons flags ↔ document (Story 9.1).
 

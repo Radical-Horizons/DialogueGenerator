@@ -28,3 +28,4 @@ pybreaker>=1.0.0
 sentry-sdk[fastapi]>=1.32.0
 cachetools>=5.3.0
 jsonschema>=4.0.0  # Validation JSON Schema pour Unity dialogue format
+langdetect>=1.0.9  # Porte de langue du mode benchmark (repli lexical si absent)

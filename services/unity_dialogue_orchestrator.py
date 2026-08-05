@@ -6,6 +6,7 @@ permettant de l'utiliser à la fois pour l'endpoint REST et le streaming SSE.
 import logging
 import asyncio
 import numbers
+import random
 from typing import AsyncGenerator, Callable, Dict, Any, Optional
 from dataclasses import dataclass
 
@@ -159,11 +160,13 @@ class UnityDialogueOrchestrator:
                 context_selections=request_data.context_selections.model_dump(),
                 character_catalog=character_catalog,
             )
+            context_seed = getattr(request_data, "context_seed", None)
             enriched_context = enrich_context_selections_for_scene(
                 request_data.context_selections,
                 dramatis,
                 character_catalog=character_catalog,
                 random_excerpt_count=1,
+                rng=random.Random(context_seed) if context_seed is not None else None,
                 context_builder=context_builder,
             )
             context_selections_dict = enriched_context.to_service_dict()

@@ -38,6 +38,9 @@ class FilePaths:
         GDD_NOTION_SYNC_DIR / "full_sync_checkpoint.manifest.json"
     )
     LOGS_DIR = DATA_DIR / "logs"
+    BENCHMARKS_DIR = DATA_DIR / "benchmarks"
+    BENCHMARK_SUITES_DIR = BENCHMARKS_DIR / "suites"
+    BENCHMARK_RUNS_DIR = BENCHMARKS_DIR / "runs"
     LLM_CONFIG = "llm_config.json"
 
 class ModelNames:

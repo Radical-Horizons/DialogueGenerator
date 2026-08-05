@@ -10,6 +10,9 @@ from pathlib import Path
 from typing import Dict, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from services.benchmark_gate_service import BenchmarkGateService
+    from services.benchmark_run_service import BenchmarkRunService
+    from services.benchmark_suite_store import BenchmarkSuiteStore
     from services.dialogue_preview_service import DialoguePreviewService
     from services.gdd_notion_sync_service import GddNotionSyncService
 from core.context.context_builder import ContextBuilder
@@ -90,6 +93,9 @@ class ServiceContainer:
         self._context_rule_service: Optional[ContextRuleService] = None
         self._cd_rules_service: Optional[ContextDroppingRulesService] = None
         self._gdd_notion_sync_service: Optional["GddNotionSyncService"] = None
+        self._benchmark_suite_store: Optional["BenchmarkSuiteStore"] = None
+        self._benchmark_gate_service: Optional["BenchmarkGateService"] = None
+        self._benchmark_run_service: Optional["BenchmarkRunService"] = None
         self._dialogue_preview_service: Optional["DialoguePreviewService"] = None
         self._global_relation_index: Optional[Dict[str, str]] = None
         self._database_connection: Optional[DatabaseConnection] = database_connection
@@ -556,6 +562,73 @@ class ServiceContainer:
             )
             logger.info("GddNotionSyncService initialisé dans le container.")
         return self._gdd_notion_sync_service
+
+    def get_benchmark_suite_store(self) -> "BenchmarkSuiteStore":
+        """Retourne le magasin de suites de benchmark.
+
+        Returns:
+            Magasin pointant sur ``data/benchmarks/suites/`` (jamais de chemin en dur).
+        """
+        if self._benchmark_suite_store is None:
+            from constants import FilePaths
+            from services.benchmark_suite_store import BenchmarkSuiteStore
+
+            root = Path(__file__).resolve().parent.parent
+            self._benchmark_suite_store = BenchmarkSuiteStore(
+                suites_dir=root / FilePaths.BENCHMARK_SUITES_DIR
+            )
+            logger.info("BenchmarkSuiteStore initialisé dans le container.")
+        return self._benchmark_suite_store
+
+    def get_benchmark_gate_service(self) -> "BenchmarkGateService":
+        """Retourne le service de portes structurelles du benchmark.
+
+        Returns:
+            Service composant les validateurs Unity et de flags existants.
+        """
+        if self._benchmark_gate_service is None:
+            from services.benchmark_gate_service import BenchmarkGateService
+            from services.dialogue_flag_reference_validation_service import (
+                DialogueFlagReferenceValidationService,
+            )
+            from services.flag_catalog_service import FlagCatalogService
+
+            flag_service = None
+            try:
+                flag_service = DialogueFlagReferenceValidationService(FlagCatalogService())
+            except Exception as exc:
+                logger.warning(
+                    "Catalogue de flags indisponible : porte 'flags' neutre pour le benchmark (%s)",
+                    exc,
+                )
+            self._benchmark_gate_service = BenchmarkGateService(
+                flag_validation_service=flag_service
+            )
+            logger.info("BenchmarkGateService initialisé dans le container.")
+        return self._benchmark_gate_service
+
+    def get_benchmark_run_service(self) -> "BenchmarkRunService":
+        """Retourne le moteur de run du benchmark (singleton : un run à la fois).
+
+        Returns:
+            Moteur configuré sur ``data/benchmarks/runs/``.
+        """
+        if self._benchmark_run_service is None:
+            from constants import FilePaths
+            from services.benchmark_run_service import BenchmarkRunService
+            from services.llm_pricing_service import LLMPricingService
+
+            root = Path(__file__).resolve().parent.parent
+            self._benchmark_run_service = BenchmarkRunService(
+                suite_store=self.get_benchmark_suite_store(),
+                gate_service=self.get_benchmark_gate_service(),
+                pricing_service=LLMPricingService(),
+                config_service=self.get_config_service(),
+                orchestrator_factory=self.get_unity_dialogue_orchestrator,
+                runs_dir=root / FilePaths.BENCHMARK_RUNS_DIR,
+            )
+            logger.info("BenchmarkRunService initialisé dans le container.")
+        return self._benchmark_run_service
 
     def _resolve_gdd_categories_path(self) -> Path:
         """Répertoire des catégories GDD (helper partagé ``services.gdd_paths``)."""
