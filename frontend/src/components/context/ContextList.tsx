@@ -306,7 +306,10 @@ export function ContextList({
                 ? getElementMode(item.name, item.entityTab)
                 : null
               const selectionStyle = listItemSelectionStyle(isSelected)
-              const badgeLabel = item.entityTypeLabel ?? entityTypeLabel
+              // 1c : la liste est déjà filtrée par onglet, le type y est redondant —
+              // la maquette n'affiche que le nom et sa description. On le garde en
+              // recherche, où les résultats traversent les catégories.
+              const badgeLabel = searchQueryRaw ? (item.entityTypeLabel ?? entityTypeLabel) : null
 
               const handleModeClick = (e: React.MouseEvent) => {
                 e.stopPropagation()

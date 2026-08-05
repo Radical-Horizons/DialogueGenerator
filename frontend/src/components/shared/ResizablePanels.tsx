@@ -218,24 +218,30 @@ export const ResizablePanels = forwardRef<ResizablePanelsRef, ResizablePanelsPro
           style={{
             [isHorizontal ? 'width' : 'height']: '6px',
             [isHorizontal ? 'height' : 'width']: '100%',
-            backgroundColor: isDragging === index
-              ? theme.button.primary.background
-              : theme.border.primary,
+            // Refonte : la séparation visible est un **filet d'1px**, pas une bande de 6px.
+            // Les 6px restent la zone de préhension ; seule la bordure se voit, et elle
+            // ne s'accentue qu'au survol ou pendant le glissement.
+            backgroundColor: 'transparent',
+            [isHorizontal ? 'borderLeft' : 'borderTop']: `1px solid ${
+              isDragging === index ? theme.button.primary.background : theme.border.primary
+            }`,
             cursor: isHorizontal ? 'col-resize' : 'row-resize',
             position: 'relative',
             zIndex: 10,
             flexShrink: 0,
             flexGrow: 0,
-            transition: isDragging === index ? 'none' : 'background-color 0.2s',
+            transition: isDragging === index ? 'none' : 'border-color 0.2s',
           }}
           onMouseEnter={(e) => {
             if (isDragging !== index) {
-              e.currentTarget.style.backgroundColor = theme.button.primary.background
+              e.currentTarget.style[isHorizontal ? 'borderLeftColor' : 'borderTopColor'] =
+                theme.button.primary.background
             }
           }}
           onMouseLeave={(e) => {
             if (isDragging !== index) {
-              e.currentTarget.style.backgroundColor = theme.border.primary
+              e.currentTarget.style[isHorizontal ? 'borderLeftColor' : 'borderTopColor'] =
+                theme.border.primary
             }
           }}
         >

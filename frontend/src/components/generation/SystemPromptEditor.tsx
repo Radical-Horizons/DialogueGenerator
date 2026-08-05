@@ -2,7 +2,7 @@
  * Éditeur pour les instructions de scène, le profil d'auteur et le system prompt.
  */
 import React, { memo, useCallback, useState, useEffect, useRef } from 'react'
-import { Tabs, type Tab } from '../shared/Tabs'
+import { type Tab } from '../shared/Tabs'
 import { FormField } from '../shared/FormField'
 import { useSystemPrompt } from '../../hooks/useSystemPrompt'
 import { useAuthorProfile } from '../../hooks/useAuthorProfile'
@@ -33,6 +33,29 @@ export interface SystemPromptEditorProps {
   onAuthorProfileChange: (profile: string) => void
   onGameRulesChange: (rules: string) => void
   onSystemPromptChange: (prompt: string | null) => void
+  /** Écran 1c : le panneau flags est ouvert ? (lien du bandeau de brief) */
+  flagsPanelOpen?: boolean
+  /** Bascule du panneau flags ; sans ce callback, le lien n'est pas rendu. */
+  onToggleFlagsPanel?: () => void
+}
+
+/** Libellés courts des liens secondaires (écran 1c). */
+const SECONDARY_TAB_LINK_LABELS: Record<string, string> = {
+  'author-profile': "profil d'auteur",
+  'game-rules': 'règles du jeu',
+  'system-prompt': 'prompt système',
+}
+
+/** Lien discret du bandeau de brief : texte seul, plus clair quand il est actif. */
+function briefLinkStyle(active: boolean): React.CSSProperties {
+  return {
+    border: 'none',
+    background: 'none',
+    padding: 0,
+    cursor: 'pointer',
+    fontSize: '11.5px',
+    color: active ? redesignText.strong : redesignText.secondary,
+  }
 }
 
 export const SystemPromptEditor = memo(function SystemPromptEditor({
@@ -44,6 +67,8 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
   onAuthorProfileChange,
   onGameRulesChange,
   onSystemPromptChange,
+  flagsPanelOpen,
+  onToggleFlagsPanel,
 }: SystemPromptEditorProps) {
   const {
     systemPrompt,
@@ -253,6 +278,12 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
 
   const isNarrow = useGenerationPanelNarrow()
   const writingMode = useUiLayoutStore((s) => s.writingMode)
+  /**
+   * 1c ne montre ni les templates ni les boutons de sauvegarde explicite du brief :
+   * le brouillon est déjà sauvegardé en continu. La fonctionnalité n'est pas retirée,
+   * elle passe derrière le lien « templates » du bandeau de section.
+   */
+  const [showTemplates, setShowTemplates] = useState(false)
   const genChrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
 
   const tabs: Tab[] = [
@@ -263,7 +294,10 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
         <div style={{ padding: genChrome.tabInnerPadding, minWidth: 0 }}>
           {/* 1c : le brief occupe la colonne ; templates et briefs locaux passent en repli.
               2c : en mode écriture, même ce repli disparaît — il ne reste que le texte. */}
-          <details style={{ marginBottom: '1rem', display: writingMode ? 'none' : 'block' }}>
+          <details
+            data-testid="brief-templates"
+            style={{ marginBottom: '1rem', display: showTemplates ? 'block' : 'none' }}
+          >
             <summary
               style={{
                 cursor: 'pointer',
@@ -517,24 +551,14 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               marginBottom: '0.5rem',
             }}
           >
-            <label
-              htmlFor="user-instructions-textarea"
-              style={{
-                fontFamily: redesignFont.mono,
-                fontSize: '10.5px',
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                color: redesignText.label,
-                flex: isNarrow ? '1 1 100%' : undefined,
-              }}
-            >
-              Brief du premier nœud
-            </label>
+            {/* L'étiquette « Brief du premier nœud » vit dans le bandeau de section
+                (écran 1c) : la répéter ici ferait doublon. */}
+            <span aria-hidden />
             {/* 2c : la sauvegarde explicite du brief sort de l'écran d'écriture — le
                 brouillon est déjà sauvegardé en continu. */}
             <div
               style={{
-                display: writingMode ? 'none' : 'flex',
+                display: showTemplates ? 'flex' : 'none',
                 gap: `${genChrome.controlGapRem}rem`,
                 flexWrap: 'wrap',
               }}
@@ -1223,6 +1247,13 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
   ]
 
   const [activeTabId, setActiveTabId] = useState(tabs[0].id)
+  const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0]
+
+  /**
+   * Écran 1c : les alternatives au brief sont des **liens discrets** à droite de son
+   * étiquette, pas une barre d'onglets. Un lien actif est simplement plus clair.
+   */
+  const secondaryTabs = tabs.slice(1)
 
   return (
     <div
@@ -1235,15 +1266,74 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
       }}
     >
       {/* 2c : en mode écriture il ne reste que le brief — auteur, règles du jeu et
-          prompt système restent joignables en sortant du mode (⌘\). */}
-      <Tabs
-        variant="nav"
-        tabs={writingMode ? tabs.slice(0, 1) : tabs}
-        activeTabId={writingMode ? tabs[0].id : activeTabId}
-        onTabChange={setActiveTabId}
-        style={{ flex: 'none' }}
-        hideTabList={writingMode}
-      />
+          prompt système restent joignables en sortant du mode (Ctrl+\). */}
+      {!writingMode && (
+        <div
+          data-testid="brief-section-header"
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 12,
+            marginBottom: 11,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: redesignFont.mono,
+              fontSize: '10px',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: redesignText.label,
+            }}
+          >
+            {activeTab.id === 'user-instructions' ? 'Brief du premier nœud' : activeTab.label}
+          </span>
+          <span style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            {activeTabId !== tabs[0].id && (
+              <button
+                type="button"
+                data-testid="brief-link-back"
+                onClick={() => setActiveTabId(tabs[0].id)}
+                style={briefLinkStyle(false)}
+              >
+                brief
+              </button>
+            )}
+            {onToggleFlagsPanel && (
+              <button
+                type="button"
+                data-testid="brief-link-flags"
+                onClick={onToggleFlagsPanel}
+                style={briefLinkStyle(Boolean(flagsPanelOpen))}
+              >
+                variables et flags
+              </button>
+            )}
+            <button
+              type="button"
+              data-testid="brief-link-templates"
+              onClick={() => setShowTemplates((v) => !v)}
+              style={briefLinkStyle(showTemplates)}
+            >
+              templates
+            </button>
+            {secondaryTabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                data-testid={`brief-link-${tab.id}`}
+                onClick={() => setActiveTabId(activeTabId === tab.id ? tabs[0].id : tab.id)}
+                style={briefLinkStyle(activeTabId === tab.id)}
+              >
+                {SECONDARY_TAB_LINK_LABELS[tab.id] ?? tab.label.toLowerCase()}
+              </button>
+            ))}
+          </span>
+        </div>
+      )}
+      <div data-testid="brief-active-panel">{activeTab.content}</div>
     </div>
   )
 })

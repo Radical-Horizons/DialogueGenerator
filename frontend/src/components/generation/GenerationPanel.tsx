@@ -114,6 +114,8 @@ export function GenerationPanel() {
   const [previousDialoguePreview] = useState<string | null>(null)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [showModelSettings, setShowModelSettings] = useState(false)
+  /** 1c : les variables et flags passent derrière un lien du bandeau de brief. */
+  const [showFlagsPanel, setShowFlagsPanel] = useState(false)
   // `=== true` : certains mocks de test renvoient l'objet store entier au lieu du champ
   // sélectionné ; sans cette coercition le bouton serait désactivé à tort.
   const gddCatalogLoading = useContextStore((s) => s.gddCatalogLoading) === true
@@ -573,13 +575,20 @@ export function GenerationPanel() {
           boxSizing: 'border-box',
         }}
       >
+        {/* Le titre de scène ouvre la colonne sur tous les états (1c, 2a, 2b) : c'est
+            le repère qui ne bouge pas pendant que le reste se transforme. */}
+        <SceneSelectionWidget />
+
         {/* Progression du streaming : dans le flux de l'écran, plus de modale (Story 0.2 → refonte UI) */}
         <GenerationStreamingInline
           isActive={
-            isGenerating ||
-            currentStep === 'Complete' ||
-            Boolean(streamingError) ||
-            isInterrupting
+            // 2b : dès qu'un lot d'options est là, la comparaison porte le résultat —
+            // laisser le bloc de streaming au-dessus ferait un doublon vide.
+            !comparisonActive &&
+            (isGenerating ||
+              currentStep === 'Complete' ||
+              Boolean(streamingError) ||
+              isInterrupting)
           }
           content={streamingContent}
           currentStep={currentStep}
@@ -598,7 +607,13 @@ export function GenerationPanel() {
         />
 
         {/* Comparaison des options (écran 2b) — rendue dès qu'un run multi-options existe. */}
-        <GenerationOptionsComparison />
+        <GenerationOptionsComparison
+          onEditKept={() => {
+            // « Éditer » garde l'option puis ouvre l'onglet Édition, seule surface
+            // d'édition du dialogue généré.
+            useGenerationActionsStore.getState().actions?.handlePreview?.()
+          }}
+        />
 
         {/* 1c ne montre pas la barre de preset : elle vit avec les réglages du modèle. */}
         <div style={{ display: showModelSettings && showGenerationForm ? 'block' : 'none' }}>
@@ -608,8 +623,6 @@ export function GenerationPanel() {
             saveStatus={draft.saveStatus}
           />
         </div>
-
-            <SceneSelectionWidget />
 
       {/* 2a : pendant le run, le brief se replie en une ligne avec son coût. */}
       {runActive && !briefExpandedDuringRun && (
@@ -688,6 +701,8 @@ export function GenerationPanel() {
 
       <div style={{ display: showGenerationForm ? 'block' : 'none' }}>
       <SystemPromptEditor
+        flagsPanelOpen={showFlagsPanel}
+        onToggleFlagsPanel={() => setShowFlagsPanel((v) => !v)}
         userInstructions={userInstructions}
         authorProfile={authorProfile}
         gameRules={gameRules}
@@ -711,24 +726,16 @@ export function GenerationPanel() {
       />
       </div>
 
-      {/* 1c : les flags sont un lien secondaire sous le brief, pas une section pleine. */}
-      <details style={{ marginBottom: 22, display: showFormExtras ? 'block' : 'none' }}>
-        <summary
-          style={{
-            cursor: 'pointer',
-            fontFamily: redesignFont.mono,
-            fontSize: '10px',
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            color: redesignText.label,
-          }}
-        >
-          Variables et flags
-        </summary>
-        <div style={{ marginTop: 14 }}>
-          <DialogueFlagsPanel />
-        </div>
-      </details>
+      {/* 1c : les flags sont un lien du bandeau de brief, pas une section pleine.
+          Le panneau ne se monte que sur demande. */}
+      <div
+        style={{
+          marginBottom: 22,
+          display: showFormExtras && showFlagsPanel ? 'block' : 'none',
+        }}
+      >
+        <DialogueFlagsPanel />
+      </div>
 
       {/* Réglages du modèle : résumés en une ligne cliquable (refonte UI), détail dépliable. */}
       <div style={{ marginBottom: '1rem', display: showFormExtras ? 'block' : 'none' }}>

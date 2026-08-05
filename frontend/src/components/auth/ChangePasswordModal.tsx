@@ -118,7 +118,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
         style={{
           width: 'min(420px, 100%)',
           padding: '1.25rem',
-          background: theme.background.panel,
+          background: theme.background.elevated,
           border: `1px solid ${theme.border.primary}`,
           borderRadius: 8,
           color: theme.text.primary,

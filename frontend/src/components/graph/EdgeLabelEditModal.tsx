@@ -93,7 +93,7 @@ export const EdgeLabelEditModal = memo(function EdgeLabelEditModal({
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
         style={{
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.elevated,
           padding: isNarrow ? '0.9rem' : '1.25rem',
           borderRadius: '8px',
           minWidth: isNarrow ? 'unset' : '320px',

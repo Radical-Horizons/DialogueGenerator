@@ -939,6 +939,45 @@ export function Dashboard() {
    * basse, la colonne droite se replie ; on restaure l'état d'avant en sortant
    * de la plage de largeur.
    */
+  /**
+   * 2e : l'écran graphe n'a que trois zones — liste de dialogues, canvas, inspecteur.
+   * Le contexte GDD et le panneau droit applicatif y feraient une quatrième et une
+   * cinquième colonne, réduisant le canvas au quart de la place prévue. Ils se
+   * replient à l'entrée sur l'onglet et l'état d'avant est restauré à la sortie.
+   */
+  const graphPanelsBeforeRef = useRef<{ left: boolean; right: boolean } | null>(null)
+  useEffect(() => {
+    if (viewportMode !== 'desktop') return
+    if (centerPanelTab === 'graph') {
+      if (graphPanelsBeforeRef.current === null) {
+        graphPanelsBeforeRef.current = {
+          left: isLeftPanelCollapsed,
+          right: isRightPanelCollapsed,
+        }
+        if (!expandedSizesRef.current && panelsRef.current) {
+          expandedSizesRef.current = panelsRef.current.getSizes()
+        }
+      }
+      if (!isLeftPanelCollapsed || !isRightPanelCollapsed) {
+        setIsLeftPanelCollapsed(true)
+        setIsRightPanelCollapsed(true)
+        applyCollapsedLayout(true, true)
+      }
+    } else if (graphPanelsBeforeRef.current !== null) {
+      const previous = graphPanelsBeforeRef.current
+      graphPanelsBeforeRef.current = null
+      setIsLeftPanelCollapsed(previous.left)
+      setIsRightPanelCollapsed(previous.right)
+      applyCollapsedLayout(previous.left, previous.right)
+    }
+  }, [
+    centerPanelTab,
+    viewportMode,
+    applyCollapsedLayout,
+    isLeftPanelCollapsed,
+    isRightPanelCollapsed,
+  ])
+
   const rightPanelBeforeDrawerRef = useRef<boolean | null>(null)
   useEffect(() => {
     if (showPromptBottomDrawer) {
@@ -1361,7 +1400,7 @@ export function Dashboard() {
             visible au hover/focus. Centrés verticalement dans les deux modes. */}
         {/* 2c : en mode écriture les pilules deviennent de vrais rails — compteur de
             fiches, initiales, total de tokens. Rien n'est perdu, tout reste cliquable. */}
-        {writingMode && showCollapsedLeftAffordance && (
+        {(writingMode || comparisonActive) && showCollapsedLeftAffordance && (
           <WritingModeRail
             side="left"
             onExpand={toggleLeftPanel}
@@ -1377,7 +1416,7 @@ export function Dashboard() {
             tokenCount={generationTokenCount}
           />
         )}
-        {!writingMode && showCollapsedLeftAffordance && (
+        {!writingMode && !comparisonActive && showCollapsedLeftAffordance && (
           <PanelExpandButton
             side="left"
             label="GDD"
@@ -1505,8 +1544,12 @@ export function Dashboard() {
               textOverflow: 'ellipsis',
             }}
           >
-            {generationRunActive && !traceHidden ? 'Trace' : 'Ce qui part au modèle'}
+            {generationRunActive && !traceHidden
+              ? 'Trace'
+              : (visibleRightPanelTabs.find((t) => t.id === effectiveRightPanelTab)?.label ??
+                 'Ce qui part au modèle')}
           </div>
+
           {actions.handleGenerate ? (
             <SaveStatusIndicator
               appearance="discreet"
@@ -1536,15 +1579,55 @@ export function Dashboard() {
             <GenerationTracePanel onHide={() => setTraceHidden(true)} />
           ) : (
             <>
-              <ContextSelectionBudgetBar
-                visible={centerPanelTab === 'generation' || centerPanelTab === 'edition'}
-              />
+              {/* 1c : l'en-tête du panneau ne porte qu'un titre. Les autres vues sont
+                  des liens sur leur propre ligne, avec les contrôles du contenu. */}
+              {!generationRunActive && (
+                <span
+                  data-testid="right-panel-view-links"
+                  style={{
+                    display: 'flex',
+                    gap: 14,
+                    flexShrink: 0,
+                    padding: '0 20px 10px',
+                    justifyContent: 'flex-end',
+                  }}
+                >
+                  {visibleRightPanelTabs
+                    .filter((t) => t.id !== effectiveRightPanelTab)
+                    .map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        data-testid={`right-panel-link-${tab.id}`}
+                        onClick={() =>
+                          setRightPanelTab(tab.id as 'prompt' | 'dialogue' | 'node' | 'details')
+                        }
+                        style={{
+                          border: 'none',
+                          background: 'none',
+                          padding: 0,
+                          cursor: 'pointer',
+                          fontSize: '11.5px',
+                          color: redesignText.secondary,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {tab.label.toLowerCase()}
+                      </button>
+                    ))}
+                </span>
+              )}
+              {/* 1c : la jauge de budget vit dans la colonne GDD — la répéter ici
+                  ferait doublon. */}
               <Tabs
                 variant="nav"
                 tabs={visibleRightPanelTabs}
                 activeTabId={effectiveRightPanelTab}
                 onTabChange={(tabId) => setRightPanelTab(tabId as 'prompt' | 'dialogue' | 'node' | 'details')}
                 style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
+                // 1c : les vues du panneau droit sont des liens dans son en-tête, pas
+                // une barre d'onglets ; le contenu actif reste rendu par `Tabs`.
+                hideTabList
                 // Important: overflow: 'hidden' pour éviter le double scroll, mais scrollbar-gutter réserve l'espace
                 // Le contenu enfant gère son propre scroll avec scrollbar-gutter: stable
                 contentStyle={{ overflow: 'hidden', scrollbarGutter: 'stable' }}

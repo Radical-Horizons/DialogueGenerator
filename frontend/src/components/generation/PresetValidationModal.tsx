@@ -63,7 +63,7 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.elevated,
           padding: isNarrow ? '0.9rem' : '2rem',
           borderRadius: '8px',
           minWidth: isNarrow ? 'unset' : '400px',

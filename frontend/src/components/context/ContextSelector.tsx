@@ -195,6 +195,8 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
   const [activeTab, setActiveTab] = useState<TabType>('characters')
   const [showRulesEditor, setShowRulesEditor] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  /** 1c : outils du contexte repliés par défaut — la liste de fiches prime. */
+  const [showContextTools, setShowContextTools] = useState(false)
   const [sortType, setSortType] = useState<ContextSortType>('name-asc')
   const [characters, setCharacters] = useState<CharacterResponse[]>([])
   const [locations, setLocations] = useState<LocationResponse[]>([])
@@ -944,6 +946,32 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
         />
       </div>
 
+      {/* 1c : la liste de fiches court sur toute la hauteur. Suggestions, contexte
+          narratif, sélections et diagnostic ne disparaissent pas — ils passent derrière
+          un lien discret en pied de colonne. */}
+      <button
+        type="button"
+        data-testid="context-tools-toggle"
+        onClick={() => setShowContextTools((v) => !v)}
+        style={{
+          flexShrink: 0,
+          border: 'none',
+          background: 'none',
+          padding: '10px 14px',
+          cursor: 'pointer',
+          textAlign: 'left',
+          fontFamily: redesignFont.mono,
+          fontSize: '10px',
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          color: redesignText.label,
+          borderTop: `1px solid ${redesignHairline.standard}`,
+        }}
+      >
+        {showContextTools ? '▾ Outils du contexte' : '▸ Outils du contexte'}
+      </button>
+
+      <div style={{ display: showContextTools ? 'block' : 'none' }}>
       <ContextPanelAccordionGroup>
         <ContextSuggestionsPanel />
 
@@ -1002,6 +1030,7 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
           <ContextUsagePanel />
         </ContextPanelAccordionSection>
       </ContextPanelAccordionGroup>
+      </div>
     </div>
   )
 }

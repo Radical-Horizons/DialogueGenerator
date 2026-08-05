@@ -60,7 +60,12 @@ vi.mock('../context/ContextSelector', async () => {
         }
       }, [onLoadStateChange])
 
-      return <div data-testid="context-selector">Context Selector</div>
+      return (
+        <div data-testid="context-selector">
+          Context Selector
+          <input type="search" placeholder="Rechercher..." aria-label="Rechercher" />
+        </div>
+      )
     },
   }
 })
@@ -182,11 +187,13 @@ describe('Dashboard', () => {
     expect(screen.getByTestId('context-selector')).toBeInTheDocument()
     expect(screen.getByTestId('generation-panel')).toBeInTheDocument()
     // Les onglets du panneau droit (Prompt, Dialogue généré, Détails)
+    // Ecran 1c : les vues du panneau droit sont des liens discrets, et la vue
+    // active n'expose pas de lien vers elle-meme (« prompt » est active au repos).
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /prompt/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /dialogue généré/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /détails/i })).toBeInTheDocument()
+      expect(screen.getByTestId('right-panel-link-dialogue')).toBeInTheDocument()
     })
+    expect(screen.getByTestId('right-panel-link-details')).toBeInTheDocument()
+    expect(screen.queryByTestId('right-panel-link-prompt')).toBeNull()
   })
 
   it('affiche le panneau de sélection de contexte à gauche', () => {
@@ -218,11 +225,13 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
+    // Ecran 1c : les vues du panneau droit sont des liens discrets, et la vue
+    // active n'expose pas de lien vers elle-meme (« prompt » est active au repos).
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /prompt/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /dialogue généré/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /détails/i })).toBeInTheDocument()
+      expect(screen.getByTestId('right-panel-link-dialogue')).toBeInTheDocument()
     })
+    expect(screen.getByTestId('right-panel-link-details')).toBeInTheDocument()
+    expect(screen.queryByTestId('right-panel-link-prompt')).toBeNull()
   })
 
   it('affiche le message par défaut dans l\'onglet Détails', async () => {
@@ -249,10 +258,14 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    const detailsTab = await screen.findByRole('button', { name: /détails/i })
-    await user.click(detailsTab)
+    // La vue active n'expose pas de lien vers elle-meme : la bascule se lit
+    // a l'inversion des deux liens.
+    await user.click(await screen.findByTestId('right-panel-link-details'))
 
-    expect(detailsTab).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByTestId('right-panel-link-prompt')).toBeInTheDocument()
+    })
+    expect(screen.queryByTestId('right-panel-link-details')).toBeNull()
   })
 
   it('affiche les boutons d\'action quand handleGenerate est disponible', async () => {
@@ -458,15 +471,10 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    // Aller explicitement sur l'onglet "Prompt" (pas forcément actif par défaut)
-    const promptTab = screen.getByText(/^prompt$/i)
-    await userEvent.setup().click(promptTab)
-
-    // Basculer en vue brute pour afficher le texte tel quel
-    const viewToggle = screen.getByRole('checkbox')
-    if (viewToggle instanceof HTMLInputElement && viewToggle.checked) {
-      await userEvent.setup().click(viewToggle)
-    }
+    // Ecran 1c : « Prompt » est la vue active au repos, et la bascule brut/structure
+    // est devenue deux liens discrets.
+    expect(screen.queryByTestId('right-panel-link-prompt')).toBeNull()
+    await userEvent.setup().click(screen.getByTestId('prompt-view-raw'))
 
     // Le EstimatedPromptPanel devrait afficher le prompt (vue brute)
     await waitFor(() => {
@@ -650,6 +658,8 @@ describe('Dashboard', () => {
     await user.click(getOpenRightPanelButton())
     await waitFor(() => {
       expect(screen.getByRole('dialog', { name: /^détails$/i })).toHaveAttribute('aria-modal', 'true')
+      // En narrow le drawer conserve sa barre d'onglets : pas de place pour un
+      // en-tete + une rangee de liens comme sur le panneau desktop.
       expect(screen.getByRole('button', { name: /prompt/i })).toBeInTheDocument()
     })
   })
@@ -905,7 +915,7 @@ describe('Dashboard', () => {
     })
   })
 
-  it('17.4 narrow: focus champ dans drawer détails appelle scrollIntoView', async () => {
+  it('17.4 narrow: focus champ dans un drawer appelle scrollIntoView', async () => {
     const user = userEvent.setup()
     const scrollIntoViewMock = vi.fn()
     const desc = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollIntoView')
@@ -969,17 +979,16 @@ describe('Dashboard', () => {
         expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
       })
 
-      await user.click(getOpenRightPanelButton())
+      // Le panneau Prompt n'a plus de champ focusable depuis 1c (la bascule
+      // brut/structure est un lien). Le champ de recherche du drawer contexte GDD
+      // couvre le meme invariant : un champ focalise dans un drawer se ramene a l'ecran.
+      await user.click(getOpenLeftPanelButton())
       await waitFor(() => {
-        expect(screen.getByTestId('narrow-drawer-right')).toBeInTheDocument()
+        expect(screen.getByRole('dialog', { name: /contexte gdd/i })).toBeInTheDocument()
       })
 
-      const promptTab = screen.getByRole('button', { name: /^prompt$/i })
-      await user.click(promptTab)
-
-      const checkbox = await screen.findByRole('checkbox')
-      expect(checkbox).toBeTruthy()
-      checkbox.focus()
+      const searchField = await screen.findByPlaceholderText(/rechercher/i)
+      searchField.focus()
       expect(scrollIntoViewMock).toHaveBeenCalled()
     } finally {
       if (desc) {

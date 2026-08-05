@@ -17,6 +17,7 @@ import {
   redesignMonoLabelStyle,
   redesignRadius,
   redesignSpacing,
+  redesignText,
 } from '../../theme/redesignTokens'
 import { ReasoningTraceViewer } from './ReasoningTraceViewer'
 import type { ReasoningTrace } from '../../types/api'
@@ -354,8 +355,7 @@ export function GenerationStreamingInline({
   onMinimize,
   onClose,
 }: GenerationStreamingInlineProps) {
-  const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
-  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
+  const { ref: panelRef } = useNarrowInlineSize(520)
 
   // Écran 2a : ÉCHAP interrompt — le raccourci est écrit sur le bouton, pas dans une aide.
   const canInterrupt = isActive && !isMinimized && currentStep !== 'Complete' && !error && !isInterrupting
@@ -399,15 +399,12 @@ export function GenerationStreamingInline({
   }, [content])
 
   // Mapping des étapes pour la barre de progression — libellés mono FR (écran 2a)
-  const steps = ['Prompting', 'Generating', 'Validating', 'Complete']
   const stepLabels: Record<string, string> = {
     Prompting: 'PROMPT',
     Generating: 'ÉCRITURE',
     Validating: 'VALIDATION',
     Complete: 'TERMINÉ',
   }
-  const currentStepIndex = steps.indexOf(currentStep)
-  const progressPercentage = ((currentStepIndex + 1) / steps.length) * 100
   // Le curseur ne clignote que tant que du texte peut encore arriver.
   const isStreamingText = currentStep !== 'Complete' && !error && !isInterrupting
 
@@ -462,13 +459,10 @@ export function GenerationStreamingInline({
       data-testid="generation-streaming-inline"
       aria-live="polite"
       style={{
-        marginBottom: `${redesignSpacing.md}px`,
-        borderLeft: `2px solid ${redesignAccent.base}`,
-        borderTop: `1px solid ${redesignHairline.standard}`,
-        borderBottom: `1px solid ${redesignHairline.standard}`,
-        borderRight: `1px solid ${redesignHairline.standard}`,
-        borderRadius: `0 ${redesignRadius.frame}px ${redesignRadius.frame}px 0`,
-        backgroundColor: redesignAccent.selectedBgStrong,
+        // Écran 2a : le texte qui arrive **est** le contenu de la colonne — ni cadre,
+        // ni fond, ni titre. L'état « génération en cours » est porté par le compteur
+        // du header et la colonne TRACE, pas par le chrome d'une carte.
+        marginBottom: `${redesignSpacing.lg}px`,
         display: 'flex',
         flexDirection: 'column',
         minWidth: 0,
@@ -480,109 +474,59 @@ export function GenerationStreamingInline({
         }
       `}</style>
 
-      {/* Header */}
+      {/* 2a : ni titre ni barre d'étapes — l'étape courante se lit dans la colonne
+          TRACE et le compteur du header. Une seule ligne mono suffit ici : elle nomme
+          ce qui se passe et porte l'affordance « réduire », qui n'a pas d'autre accès. */}
       <div
         style={{
-          padding: isNarrow ? `${redesignSpacing.sm}px ${redesignSpacing.md}px` : `${redesignSpacing.md}px ${redesignSpacing.lg}px`,
-          borderBottom: `1px solid ${redesignHairline.standard}`,
           display: 'flex',
+          alignItems: 'baseline',
           justifyContent: 'space-between',
-          alignItems: 'center',
           gap: `${redesignSpacing.sm}px`,
+          marginBottom: `${redesignSpacing.md}px`,
           flexShrink: 0,
         }}
       >
-        <h2
+        <span
+          data-testid="streaming-step-label"
           style={{
-            margin: 0,
-            color: theme.text.primary,
-            fontSize: `${typo.titleFontRem}rem`,
-            fontFamily: redesignFont.sans,
-            fontWeight: 600,
+            ...redesignMonoLabelStyle,
+            fontSize: '10px',
+            letterSpacing: '0.12em',
+            color: currentStep === 'Complete' ? redesignText.label : '#8fb0ff',
           }}
         >
           {isInterrupting
-            ? 'Interruption en cours...'
+            ? 'INTERRUPTION…'
             : currentStep === 'Complete'
-              ? 'Génération terminée'
-              : 'Génération en cours...'}
-        </h2>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {currentStep !== 'Complete' && (
-            <button
-              type="button"
-              onClick={onMinimize}
-              aria-label="Réduire"
-              style={{
-                background: 'none',
-                border: 'none',
-                color: theme.text.secondary,
-                fontSize: `${typo.titleFontRem}rem`,
-                cursor: 'pointer',
-                padding: '0.25rem 0.5rem',
-              }}
-              title="Réduire"
-            >
-              –
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Progress Bar */}
-      {currentStep !== 'Complete' && !error && (
-        <div
-          style={{
-            padding: isNarrow
-              ? `${redesignSpacing.sm}px ${redesignSpacing.md}px`
-              : `${redesignSpacing.md}px ${redesignSpacing.lg}px`,
-            borderBottom: `1px solid ${redesignHairline.standard}`,
-            flexShrink: 0,
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', gap: '0.35rem' }}>
-            {steps.map((step, index) => (
-              <span
-                key={step}
-                style={{
-                  ...redesignMonoLabelStyle,
-                  fontSize: `${typo.subtitleFontRem}rem`,
-                  color: index <= currentStepIndex ? theme.text.primary : theme.text.tertiary,
-                  fontWeight: index === currentStepIndex ? 700 : 400,
-                }}
-              >
-                {stepLabels[step] ?? step}
-              </span>
-            ))}
-          </div>
-          <div
+              ? 'TERMINÉ'
+              : `${stepLabels[currentStep] ?? currentStep}…`}
+        </span>
+        {currentStep !== 'Complete' && (
+          <button
+            type="button"
+            onClick={onMinimize}
+            aria-label="Réduire"
+            title="Réduire"
             style={{
-              width: '100%',
-              height: '2px',
-              backgroundColor: redesignHairline.strong,
-              overflow: 'hidden',
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              fontSize: '11.5px',
+              color: redesignText.secondary,
             }}
           >
-            <div
-              style={{
-                width: `${progressPercentage}%`,
-                height: '100%',
-                backgroundColor: redesignAccent.base,
-                transition: 'width 0.3s ease',
-              }}
-            />
-          </div>
-        </div>
-      )}
+            réduire
+          </button>
+        )}
+      </div>
 
       {/* Content - Streaming Text + Reasoning Trace */}
       <div
         style={{
           overflow: 'auto',
-          maxHeight: '46vh',
-          padding: isNarrow
-            ? `${redesignSpacing.md}px`
-            : `${redesignSpacing.md}px ${redesignSpacing.lg}px`,
+          maxHeight: '52vh',
           minHeight: 0,
           display: 'flex',
           flexDirection: 'column',
@@ -785,8 +729,9 @@ export function GenerationStreamingInline({
       {/* Footer - Actions + compteur mono (écran 2a : ce qui est déjà dépensé, pas une estimation) */}
       <div
         style={{
-          padding: `${redesignSpacing.sm}px ${redesignSpacing.lg}px`,
-          borderTop: `1px solid ${redesignHairline.standard}`,
+          paddingTop: `${redesignSpacing.md}px`,
+          marginTop: `${redesignSpacing.md}px`,
+          borderTop: `1px solid ${redesignHairline.strong}`,
           display: 'flex',
           flexDirection: 'column',
           gap: `${redesignSpacing.sm}px`,

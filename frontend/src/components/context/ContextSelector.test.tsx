@@ -447,6 +447,7 @@ describe('ContextSelector', () => {
 
     render(<ContextSelector />)
 
+    await user.click(await screen.findByTestId('context-tools-toggle'))
     await user.click(await screen.findByTestId('selected-context-summary-toggle'))
     await user.click(await screen.findByRole('button', { name: /retirer test character/i }))
 
@@ -493,14 +494,16 @@ describe('ContextSelector', () => {
     expect(mockSetElementMode).toHaveBeenCalledWith('characters', 'Test Character', 'excerpt')
   })
 
-  it('affiche nom, aperçu (résumé) et badge type d\'entité', async () => {
+  it('affiche nom et aperçu (résumé) ; le badge de type est réservé à la recherche', async () => {
     render(<ContextSelector />)
 
     await waitFor(() => {
       expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument()
     })
     expect(screen.getByText(/Un héros du récit\./)).toBeInTheDocument()
-    expect(screen.getByText('Personnage')).toBeInTheDocument()
+    // Ecran 1c : la liste est deja filtree par onglet, le badge y serait redondant.
+    // Son affichage en recherche est couvert par ContextList.test.tsx.
+    expect(within(screen.getByTestId('context-list-scroll')).queryByText('Personnage')).toBeNull()
   })
 
   it('réinitialise la sélection quand on change d\'onglet', async () => {

@@ -420,7 +420,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
     >
       <div
         style={{
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.elevated,
           borderRadius: '8px',
           width: '90%',
           maxWidth: '1000px',

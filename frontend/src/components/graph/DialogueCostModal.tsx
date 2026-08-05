@@ -57,7 +57,7 @@ export function DialogueCostModal({ filename, variant = 'floating', onClose }: D
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.elevated,
           border: `1px solid ${theme.border.primary}`,
           borderRadius: '10px',
           boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)',

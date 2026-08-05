@@ -117,7 +117,8 @@ describe('GenerationStreamingInline', () => {
         })}
       />
     )
-    expect(screen.getByText('Génération en cours...')).toBeInTheDocument()
+    // 2a : plus de titre de carte — l'étape se lit en étiquette mono.
+    expect(screen.getByTestId('streaming-step-label')).toHaveTextContent('ÉCRITURE')
     expect(screen.getByText('Test content streaming')).toBeInTheDocument()
   })
 
@@ -255,7 +256,7 @@ describe('GenerationStreamingInline', () => {
         })}
       />
     )
-    expect(screen.getByText('Génération terminée')).toBeInTheDocument()
+    expect(screen.getByTestId('streaming-step-label')).toHaveTextContent('TERMINÉ')
     expect(screen.getByText('Fermer')).toBeInTheDocument()
   })
 

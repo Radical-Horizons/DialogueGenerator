@@ -308,7 +308,12 @@ function OptionDiagnosticColumn({
   )
 }
 
-export function GenerationOptionsComparison() {
+export interface GenerationOptionsComparisonProps {
+  /** Ouvre l'option gardée dans l'éditeur (action « Éditer » de la maquette). */
+  onEditKept?: () => void
+}
+
+export function GenerationOptionsComparison({ onEditKept }: GenerationOptionsComparisonProps = {}) {
   const slots = useGenerationOptionsStore((s) => s.slots)
   const keptIndex = useGenerationOptionsStore((s) => s.keptIndex)
   const lastRequest = useGenerationOptionsStore((s) => s.lastRequest)
@@ -519,6 +524,18 @@ export function GenerationOptionsComparison() {
                           }}
                         >
                           {kept ? 'Gardée' : 'Garder'}
+                        </button>
+                        <button
+                          type="button"
+                          data-testid={`option-edit-${slot.index}`}
+                          onClick={() => {
+                            handleKeep(slot)
+                            onEditKept?.()
+                          }}
+                          title="Garder cette option et l'ouvrir dans l'éditeur"
+                          style={{ ...ghostButtonStyle, color: redesignText.body }}
+                        >
+                          Éditer
                         </button>
                         <button
                           type="button"

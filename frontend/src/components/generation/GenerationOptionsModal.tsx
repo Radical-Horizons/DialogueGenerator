@@ -208,7 +208,7 @@ export function GenerationOptionsModal({
     >
       <div
         style={{
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.elevated,
           borderRadius: '8px',
           width: '90%',
           maxWidth: '1200px',
@@ -314,7 +314,7 @@ export function GenerationOptionsModal({
                 borderRadius: '6px',
                 border: `1px solid ${theme.border.focus}`,
                 backgroundColor: theme.border.focus,
-                color: theme.background.panel,
+                color: theme.background.elevated,
                 cursor: 'pointer',
                 fontWeight: 600,
                 fontSize: remSize('small'),

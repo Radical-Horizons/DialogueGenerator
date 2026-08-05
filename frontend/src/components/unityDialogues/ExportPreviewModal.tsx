@@ -26,7 +26,7 @@ const modalStyle: React.CSSProperties = {
 }
 
 const panelStyle: React.CSSProperties = {
-  backgroundColor: theme.background.panel,
+  backgroundColor: theme.background.elevated,
   padding: '1.5rem',
   borderRadius: '8px',
   minWidth: '420px',
