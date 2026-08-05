@@ -47,6 +47,7 @@ from core.llm.llm_client import DummyLLMClient
 from core.llm.unity_allowed_models import get_unity_structured_output_allowed_models
 from factories.llm_factory import LLMClientFactory
 from services.benchmark_gate_service import BenchmarkGateService
+from services.benchmark_pass_control import CooperativePassControl, PassCancelled
 from services.benchmark_suite_store import BenchmarkSuiteStore, suite_fingerprint
 from services.gdd_notion_atomic_io import read_json_file, write_json_atomic
 
@@ -70,8 +71,8 @@ _RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]*$")
 """Alphabet des ``run_id`` : pas de point, donc aucune traversée par ``..``."""
 
 
-class BenchmarkRunCancelled(Exception):
-    """Annulation coopérative demandée pendant un run."""
+BenchmarkRunCancelled = PassCancelled
+"""Annulation coopérative d'un run (alias du signal partagé des passes de fond)."""
 
 
 class _BudgetExhausted(Exception):
@@ -86,7 +87,7 @@ class BenchmarkRunNotFoundError(LookupError):
     """Le run demandé n'existe pas sur disque."""
 
 
-def _slug(value: str) -> str:
+def slug_for_filename(value: str) -> str:
     """Rend un identifiant sûr comme composant de nom de fichier.
 
     Les identifiants de modèle contiennent des séparateurs de chemin
@@ -162,12 +163,7 @@ class BenchmarkRunService:
         self._orchestrator_factory = orchestrator_factory
         self._runs_dir = Path(runs_dir)
 
-        self._run_lock = asyncio.Lock()
-        self._unpaused = asyncio.Event()
-        self._unpaused.set()
-        self._cancel_requested = False
-        self._active_run_id: Optional[str] = None
-        self._task: Optional[asyncio.Task] = None
+        self._control = CooperativePassControl()
         self._progress = BenchmarkRunProgress()
 
     # ------------------------------------------------------------------
@@ -178,7 +174,12 @@ class BenchmarkRunService:
         """Retourne une copie de la progression en mémoire."""
         return self._progress.model_copy(deep=True)
 
-    def _run_dir(self, run_id: str) -> Path:
+    @property
+    def background_task(self) -> Optional[asyncio.Task]:
+        """Tâche de fond du run en cours, ou ``None`` — introspection et tests."""
+        return self._control.task
+
+    def run_dir(self, run_id: str) -> Path:
         """Répertoire d'un run, après validation de son identifiant.
 
         ``_slug`` conserve le point : il ne suffit pas à empêcher ``..``. Le
@@ -209,7 +210,7 @@ class BenchmarkRunService:
         Raises:
             BenchmarkRunNotFoundError: Si ``run.json`` est absent ou illisible.
         """
-        raw = read_json_file(self._run_dir(run_id) / "run.json", None)
+        raw = read_json_file(self.run_dir(run_id) / "run.json", None)
         if raw is None:
             raise BenchmarkRunNotFoundError(f"Run de benchmark introuvable : {run_id}")
         try:
@@ -242,7 +243,7 @@ class BenchmarkRunService:
         Returns:
             Générations triées par cas, modèle puis répétition.
         """
-        directory = self._run_dir(run_id) / "generations"
+        directory = self.run_dir(run_id) / "generations"
         if not directory.exists():
             return []
         records: List[BenchmarkGenerationRecord] = []
@@ -401,12 +402,12 @@ class BenchmarkRunService:
             BenchmarkSuiteNotFoundError: Si la suite n'existe pas.
             BenchmarkSuiteInvalidError: Si la suite est invalide ou d'une autre version.
         """
-        # `_run_lock` n'est pris que dans la tâche de fond : le tester ici laisserait
+        # Le verrou n'est pris que dans la tâche de fond : le tester ici laisserait
         # passer deux lancements concurrents, donc deux fois le plafond budgétaire.
-        # `_active_run_id` est posé synchroniquement par `_spawn`.
-        if self._active_run_id is not None:
+        # `control.active_id` est posé synchroniquement par `_spawn`.
+        if self._control.active_id is not None:
             raise BenchmarkRunConflictError(
-                f"Un run de benchmark est déjà en cours ({self._active_run_id})"
+                f"Un run de benchmark est déjà en cours ({self._control.active_id})"
             )
 
         suite = self._suite_store.get_suite(config.suite_id, version=config.suite_version)
@@ -451,9 +452,9 @@ class BenchmarkRunService:
                 terminé, ou si la suite a changé depuis (empreinte différente).
             BenchmarkRunNotFoundError: Si le run n'existe pas.
         """
-        if self._active_run_id is not None:
+        if self._control.active_id is not None:
             raise BenchmarkRunConflictError(
-                f"Un run de benchmark est déjà en cours ({self._active_run_id})"
+                f"Un run de benchmark est déjà en cours ({self._control.active_id})"
             )
         run = self.get_run(run_id)
         if run.status == "completed":
@@ -543,7 +544,7 @@ class BenchmarkRunService:
         Args:
             run_id: Run à nettoyer.
         """
-        directory = self._run_dir(run_id) / "generations"
+        directory = self.run_dir(run_id) / "generations"
         if not directory.exists():
             return
         for path in directory.glob("*.json"):
@@ -556,10 +557,8 @@ class BenchmarkRunService:
 
     def _spawn(self, run: BenchmarkRun, suite: BenchmarkSuite) -> None:
         """Lance l'exécution en tâche de fond et retourne immédiatement."""
-        self._cancel_requested = False
-        self._unpaused.set()
-        self._active_run_id = run.run_id
-        self._task = asyncio.create_task(self._execute(run, suite))
+        self._control.claim(run.run_id)
+        self._control.task = asyncio.create_task(self._execute(run, suite))
 
     def _is_active(self, run_id: Optional[str]) -> bool:
         """Indique si ``run_id`` désigne le run actif de ce processus.
@@ -574,9 +573,7 @@ class BenchmarkRunService:
         Returns:
             ``True`` si la commande peut s'appliquer.
         """
-        if self._active_run_id is None:
-            return False
-        return run_id is None or run_id == self._active_run_id
+        return self._control.is_active(run_id)
 
     def _persist_status(self, run_id: str, status: str, message: str) -> None:
         """Reflète un changement d'état dans ``run.json``.
@@ -606,11 +603,11 @@ class BenchmarkRunService:
         """
         if not self._is_active(run_id):
             return False
-        self._unpaused.clear()
+        self._control.pause()
         self._progress = self._progress.model_copy(
             update={"paused": True, "status": "paused", "message": "Pause demandée"}
         )
-        self._persist_status(str(self._active_run_id), "paused", "Run en pause")
+        self._persist_status(str(self._control.active_id), "paused", "Run en pause")
         return True
 
     def request_unpause(self, run_id: Optional[str] = None) -> bool:
@@ -624,11 +621,11 @@ class BenchmarkRunService:
         """
         if not self._is_active(run_id):
             return False
-        self._unpaused.set()
+        self._control.unpause()
         self._progress = self._progress.model_copy(
             update={"paused": False, "status": "running", "message": "Reprise"}
         )
-        self._persist_status(str(self._active_run_id), "running", "Run repris après pause")
+        self._persist_status(str(self._control.active_id), "running", "Run repris après pause")
         return True
 
     def request_cancel(self, run_id: Optional[str] = None) -> bool:
@@ -644,8 +641,7 @@ class BenchmarkRunService:
         """
         if not self._is_active(run_id):
             return False
-        self._cancel_requested = True
-        self._unpaused.set()
+        self._control.cancel()
         self._progress = self._progress.model_copy(update={"message": "Annulation demandée"})
         return True
 
@@ -655,11 +651,7 @@ class BenchmarkRunService:
         Raises:
             BenchmarkRunCancelled: Si une annulation a été demandée.
         """
-        if self._cancel_requested:
-            raise BenchmarkRunCancelled()
-        await self._unpaused.wait()
-        if self._cancel_requested:
-            raise BenchmarkRunCancelled()
+        await self._control.checkpoint()
 
     # ------------------------------------------------------------------
     # Exécution
@@ -668,7 +660,7 @@ class BenchmarkRunService:
     def _persist_run(self, run: BenchmarkRun) -> None:
         """Écrit ``run.json`` de façon atomique."""
         stamped = run.model_copy(update={"updated_at": _now_iso()})
-        write_json_atomic(self._run_dir(run.run_id) / "run.json", stamped.model_dump(mode="json"))
+        write_json_atomic(self.run_dir(run.run_id) / "run.json", stamped.model_dump(mode="json"))
 
     def _record_path(self, run_id: str, model_id: str, case_id: str, repetition: int) -> Path:
         """Chemin du fichier d'une génération.
@@ -678,8 +670,8 @@ class BenchmarkRunService:
         écraserait un autre et la reprise sauterait une génération jamais faite.
         """
         digest = hashlib.sha256(f"{model_id}|{case_id}".encode("utf-8")).hexdigest()[:8]
-        name = f"{_slug(model_id)}__{_slug(case_id)}__{digest}__{repetition}.json"
-        return self._run_dir(run_id) / "generations" / name
+        name = f"{slug_for_filename(model_id)}__{slug_for_filename(case_id)}__{digest}__{repetition}.json"
+        return self.run_dir(run_id) / "generations" / name
 
     def _record_is_usable(self, path: Path) -> bool:
         """Indique si un record déjà présent peut être considéré comme fait.
@@ -726,7 +718,7 @@ class BenchmarkRunService:
             run: État initial du run.
             suite: Suite rejouée.
         """
-        async with self._run_lock:
+        async with self._control.lock:
             billable_token = push_billable_user_id(BENCHMARK_BILLABLE_USER_ID)
             # Recalculé depuis les records, jamais lu dans `run.json` : un run tué
             # brutalement n'a pas eu le temps d'y écrire son cumul, et la reprise
@@ -827,10 +819,10 @@ class BenchmarkRunService:
                 message = f"Run interrompu par une erreur : {exc}"
                 logger.exception("Run de benchmark %s en échec", run.run_id)
             finally:
-                # `_active_run_id` est libéré en premier : une exception dans la
+                # La passe est libérée en premier : une exception dans la
                 # finalisation (disque plein, record illisible) laisserait sinon le
                 # service bloqué sur un run mort, insensible à pause et annulation.
-                self._active_run_id = None
+                self._control.release()
                 reset_billable_user_id(billable_token)
                 try:
                     records = self.list_generations(run.run_id)
@@ -944,7 +936,7 @@ class BenchmarkRunService:
             dernier pour un problème de protocole.
         """
         request = self._build_request(case, model_id)
-        request_id = f"benchmark-{run.run_id}-{_slug(model_id)}-{_slug(case.case_id)}-{repetition}"
+        request_id = f"benchmark-{run.run_id}-{slug_for_filename(model_id)}-{slug_for_filename(case.case_id)}-{repetition}"
         started = time.monotonic()
 
         json_content: Optional[str] = None

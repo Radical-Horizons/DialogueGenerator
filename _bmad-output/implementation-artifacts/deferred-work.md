@@ -110,3 +110,26 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-core-engine.md`
   summary: `require_admin` fabrique un admin factice quand `DISABLE_AUTH=true` en développement — il garde désormais des endpoints qui dépensent du budget LLM réel.
   evidence: Revue adversariale — préexistant, mais l'enjeu change : sur un poste servant sur `0.0.0.0:4243`, n'importe quoi sur le réseau local peut lancer un run facturé.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-judging.md`
+  summary: Jambe pairwise du jugement — comparaison de deux générations d'un même cas, jugée dans les deux sens sous étiquettes opaques tournantes, avec troncature commune annoncée au juge et agrégation des deux verdicts.
+  evidence: Spec jugement à 3245 tokens (plafond 1600) — découpée ; la jambe pairwise se greffe sur la grille, le prompt de juge et la passe reprenable livrés par la rubrique, sans les modifier. Son consommateur (le classement Elo/Bradley-Terry) est lui-même déjà différé.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-judging.md`
+  summary: Rétention des versions de grille de critères — `save_grid` écrase le fichier, et une grille supprimée puis recréée repart en version 1, si bien que `(grid_id, version)` n'identifie pas une définition dans le temps.
+  evidence: Revue adversariale + edge-case hunter. Conséquence neutralisée à court terme par le `criteria_snapshot` figé dans chaque verdict, mais l'identité de grille reste ambiguë pour toute comparaison inter-runs.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-judging.md`
+  summary: Contrôle de concurrence optimiste sur l'écriture des grilles et des suites (`If-Match` / `expected_version`) — deux éditions concurrentes perdent silencieusement la première.
+  evidence: Revue adversariale — read-modify-write non verrouillé dans `save_grid` et `save_suite`. Faible probabilité en usage admin mono-utilisateur, perte définitive si elle survient.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-judging.md`
+  summary: Normalisation tolérante des identifiants de critères renvoyés par le juge (casse, espaces, accents) avant appariement strict.
+  evidence: Edge-case hunter — un juge qui répond `Voice_Fidelity` fait échouer chaque verdict en `judge_error` ; la passe entière est payée sans produire de mesure. Arbitrage à instruire : tolérer risque de masquer une vraie dérive.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-judging.md`
+  summary: Disjoncteur sur erreurs de juge consécutives — interrompre la passe après N échecs d'affilée au lieu de payer la totalité.
+  evidence: Edge-case hunter — un juge en panne de format consomme le budget entier ; le statut `failed` final signale le problème mais après dépense complète.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-judging.md`
+  summary: `read_json_file` n'attrape pas `UnicodeDecodeError` — un fichier non décodable fait remonter l'exception jusqu'à la finalisation ou l'API.
+  evidence: Edge-case hunter — `services/gdd_notion_atomic_io.py` ne couvre que `JSONDecodeError` et `OSError`. Touche aussi le moteur de run et la sync GDD : correctif transverse, hors périmètre de cette spec.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-judging.md`
+  summary: Le diagnostic du juge emprunte `diagnose_models`, qui impose la whitelist de génération Unity — sans rapport avec le schéma d'un juge, et qui contraint le juge à être aussi un candidat.
+  evidence: Edge-case hunter — un juge parfaitement valable hors whitelist est refusé ; un diagnostic dédié (client réel + non-Dummy, sans filtre structured output Unity) serait plus juste.

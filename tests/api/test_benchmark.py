@@ -164,7 +164,7 @@ def _wait_for_run(client: TestClient, service: BenchmarkRunService) -> None:
         client: Client de test (porteur du portail).
         service: Moteur de run dont on attend la tâche.
     """
-    task = service._task
+    task = service.background_task
     assert task is not None
 
     async def _await_task() -> None:

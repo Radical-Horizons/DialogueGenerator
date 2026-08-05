@@ -41,6 +41,7 @@ class FilePaths:
     BENCHMARKS_DIR = DATA_DIR / "benchmarks"
     BENCHMARK_SUITES_DIR = BENCHMARKS_DIR / "suites"
     BENCHMARK_RUNS_DIR = BENCHMARKS_DIR / "runs"
+    BENCHMARK_CRITERIA_DIR = BENCHMARKS_DIR / "criteria"
     LLM_CONFIG = "llm_config.json"
 
 class ModelNames:

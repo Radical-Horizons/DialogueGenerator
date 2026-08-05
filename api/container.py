@@ -10,7 +10,9 @@ from pathlib import Path
 from typing import Dict, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from services.benchmark_criteria_store import BenchmarkCriteriaStore
     from services.benchmark_gate_service import BenchmarkGateService
+    from services.benchmark_judge_pass_service import BenchmarkJudgePassService
     from services.benchmark_run_service import BenchmarkRunService
     from services.benchmark_suite_store import BenchmarkSuiteStore
     from services.dialogue_preview_service import DialoguePreviewService
@@ -96,6 +98,8 @@ class ServiceContainer:
         self._benchmark_suite_store: Optional["BenchmarkSuiteStore"] = None
         self._benchmark_gate_service: Optional["BenchmarkGateService"] = None
         self._benchmark_run_service: Optional["BenchmarkRunService"] = None
+        self._benchmark_criteria_store: Optional["BenchmarkCriteriaStore"] = None
+        self._benchmark_judge_pass_service: Optional["BenchmarkJudgePassService"] = None
         self._dialogue_preview_service: Optional["DialoguePreviewService"] = None
         self._global_relation_index: Optional[Dict[str, str]] = None
         self._database_connection: Optional[DatabaseConnection] = database_connection
@@ -629,6 +633,65 @@ class ServiceContainer:
             )
             logger.info("BenchmarkRunService initialisé dans le container.")
         return self._benchmark_run_service
+
+    def get_benchmark_criteria_store(self) -> "BenchmarkCriteriaStore":
+        """Retourne le magasin des grilles de critères du benchmark.
+
+        Returns:
+            Magasin pointant sur ``data/benchmarks/criteria/``.
+        """
+        if self._benchmark_criteria_store is None:
+            from constants import FilePaths
+            from services.benchmark_criteria_store import BenchmarkCriteriaStore
+
+            root = Path(__file__).resolve().parent.parent
+            self._benchmark_criteria_store = BenchmarkCriteriaStore(
+                criteria_dir=root / FilePaths.BENCHMARK_CRITERIA_DIR
+            )
+            # Amorçage ici, jamais depuis un chemin de lecture : un GET ne doit pas
+            # provoquer d'écriture disque, a fortiori depuis un endpoint ouvert.
+            self._benchmark_criteria_store.ensure_seeded()
+            logger.info("BenchmarkCriteriaStore initialisé dans le container.")
+        return self._benchmark_criteria_store
+
+    def get_benchmark_judge_pass_service(self) -> "BenchmarkJudgePassService":
+        """Retourne la passe de jugement du benchmark (singleton : une passe à la fois).
+
+        Returns:
+            Passe câblée sur le moteur de run, la grille et la fabrique de client juge.
+        """
+        if self._benchmark_judge_pass_service is None:
+            from services.benchmark_judge_pass_service import BenchmarkJudgePassService
+            from services.benchmark_judge_service import BenchmarkJudgeService
+            from services.llm_pricing_service import LLMPricingService
+            from factories.llm_factory import LLMClientFactory
+
+            config_service = self.get_config_service()
+            usage_service = self.get_llm_usage_service()
+            pricing_service = LLMPricingService()
+
+            def _judge_client(model_id: str):
+                """Crée le client du juge, en traçant son usage comme un appel benchmark."""
+                return LLMClientFactory.create_client(
+                    model_id=model_id,
+                    config=config_service.get_llm_config(),
+                    available_models=config_service.get_available_llm_models(),
+                    usage_service=usage_service,
+                    endpoint="benchmark/judge",
+                )
+
+            criteria_store = self.get_benchmark_criteria_store()
+            criteria_store.ensure_seeded()
+            self._benchmark_judge_pass_service = BenchmarkJudgePassService(
+                run_service=self.get_benchmark_run_service(),
+                criteria_store=criteria_store,
+                judge_service=BenchmarkJudgeService(pricing_service=pricing_service),
+                pricing_service=pricing_service,
+                config_service=config_service,
+                llm_client_factory=_judge_client,
+            )
+            logger.info("BenchmarkJudgePassService initialisé dans le container.")
+        return self._benchmark_judge_pass_service
 
     def _resolve_gdd_categories_path(self) -> Path:
         """Répertoire des catégories GDD (helper partagé ``services.gdd_paths``)."""

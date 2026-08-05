@@ -200,7 +200,7 @@ def _config(suite: BenchmarkSuite, **overrides: Any) -> BenchmarkRunConfig:
 
 async def _drain(service: BenchmarkRunService) -> None:
     """Attend la fin de la tâche de fond."""
-    task = service._task
+    task = service.background_task
     assert task is not None
     await task
 
@@ -302,10 +302,10 @@ async def test_scheduler_cancellation_is_not_reported_as_completed(tmp_path: Pat
     run, _ = await service.start_run(_config(suite))
 
     await asyncio.sleep(0.02)
-    assert service._task is not None
-    service._task.cancel()
+    assert service.background_task is not None
+    service.background_task.cancel()
     with pytest.raises(asyncio.CancelledError):
-        await service._task
+        await service.background_task
 
     final = service.get_run(run.run_id)
     assert final.status == "cancelled"
@@ -413,7 +413,7 @@ async def test_start_run_returns_before_the_run_finishes(tmp_path: Path) -> None
 
     run, _ = await service.start_run(_config(suite))
     assert run.status == "running"
-    assert service._task is not None and not service._task.done()
+    assert service.background_task is not None and not service.background_task.done()
 
     gate.set()
     await _drain(service)
@@ -442,7 +442,7 @@ async def test_corrupt_record_is_regenerated_not_counted_as_done(tmp_path: Path)
     await _drain(service)
     assert len(calls) == 2
 
-    victim = sorted((service._run_dir(run.run_id) / "generations").glob("*.json"))[0]
+    victim = sorted((service.run_dir(run.run_id) / "generations").glob("*.json"))[0]
     victim.write_text('{"run_id": "tronq', encoding="utf-8")
 
     service._persist_run(service.get_run(run.run_id).model_copy(update={"status": "failed"}))

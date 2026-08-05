@@ -207,7 +207,7 @@ def _service(
 
 async def _drain(service: BenchmarkRunService) -> None:
     """Attend la fin de la tâche de fond du run."""
-    task = service._task
+    task = service.background_task
     assert task is not None
     await task
 
