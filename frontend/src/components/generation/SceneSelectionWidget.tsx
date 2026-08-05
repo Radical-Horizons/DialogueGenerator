@@ -16,6 +16,7 @@ import {
 } from '../../theme/redesignTokens'
 import { generationPanelChrome } from '../../theme/responsiveChrome'
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
+import { useGenerationRunActive } from '../../hooks/useGenerationRunState'
 import {
   filterNpcCharacterOptions,
   filterPlayableCharacterOptions,
@@ -24,6 +25,7 @@ import {
 
 export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
   const isNarrow = useGenerationPanelNarrow()
+  const runActive = useGenerationRunActive()
   const chrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
   const { data, selection, updateSelection, swapCharacters, randomizeField, isLoading } =
     useSceneSelection()
@@ -196,7 +198,8 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
             marginTop: 0,
             marginBottom: `${redesignSpacing.sm}px`,
             fontFamily: redesignFont.serif,
-            fontSize: isNarrow ? '24px' : '33px',
+            // 2a : pendant la génération le titre se range à 24px pour libérer la colonne.
+            fontSize: isNarrow || runActive ? '24px' : '33px',
             fontWeight: 400,
             lineHeight: 1.12,
             letterSpacing: '0.005em',
@@ -208,6 +211,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
         {/* 1c n'affiche que le titre : les sélecteurs restent accessibles ici. */}
         <button
           type="button"
+          hidden={runActive}
           onClick={() => setShowSceneFields((v) => !v)}
           aria-expanded={showSceneFields}
           data-testid="scene-fields-toggle"

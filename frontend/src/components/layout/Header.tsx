@@ -15,9 +15,14 @@ import { useUnityBatchExportMenuStore } from '../../store/unityBatchExportMenuSt
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import { redesignAccent, redesignFont, redesignText } from '../../theme/redesignTokens'
+import { useGenerationElapsed } from '../../hooks/useGenerationRunState'
 import { TOUCH_TARGET_MIN_PX } from '../../constants'
 
+/** Nom de l'animation du point de génération (déclarée localement, pas de CSS global). */
+const HEADER_BLINK_ANIMATION = 'header-generation-blink'
+
 export function Header() {
+  const generationElapsed = useGenerationElapsed()
   const { user, isAuthenticated, logout } = useAuthStore()
   const navigate = useNavigate()
   const commandPalette = useCommandPalette()
@@ -200,6 +205,36 @@ export function Header() {
       
       {/* Section droite : Options, Actions, Utilisateur */}
       <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', flexShrink: 1, minWidth: 0, flexWrap: 'wrap' }}>
+        {/* Écran 2a : point clignotant + compteur du run — l'attente a une durée visible. */}
+        {generationElapsed && (
+          <span
+            data-testid="header-generation-timer"
+            style={{ display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0 }}
+          >
+            <span
+              aria-hidden
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                backgroundColor: redesignAccent.base,
+                animation: `${HEADER_BLINK_ANIMATION} 1.1s steps(1, end) infinite`,
+              }}
+            />
+            <span
+              style={{
+                fontFamily: redesignFont.mono,
+                fontSize: '10.5px',
+                letterSpacing: '0.06em',
+                color: '#8fb0ff',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              GÉNÉRATION · {generationElapsed}
+            </span>
+            <style>{`@keyframes ${HEADER_BLINK_ANIMATION} { 50% { opacity: 0; } }`}</style>
+          </span>
+        )}
         {isAuthenticated && user && user.role !== 'guest' && actions.handleGenerate && (
           <>
             <button

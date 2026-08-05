@@ -488,13 +488,36 @@ describe('GenerationPanel - Tests Baseline', () => {
 
       const block = screen.getByTestId('generation-streaming-inline')
       // Le bloc vit dans le flux du panneau (plus de modale détachée) : il partage le
-      // conteneur défilant avec l'éditeur de brief et l'action primaire.
-      expect(block.parentElement).toBe(
-        screen.getByTestId('system-prompt-editor').parentElement,
-      )
-      expect(block.parentElement).toBe(
-        screen.getByTestId('generation-primary-action').parentElement,
-      )
+      // conteneur défilant avec l'éditeur de brief et l'action primaire. Depuis l'écran
+      // 2a le brief est enveloppé dans un conteneur repliable, donc on vérifie
+      // l'ascendance commune plutôt que l'égalité stricte des parents.
+      const scroller = block.parentElement as HTMLElement
+      expect(scroller).toBeTruthy()
+      expect(scroller.contains(screen.getByTestId('system-prompt-editor'))).toBe(true)
+      expect(scroller.contains(screen.getByTestId('generation-primary-action'))).toBe(true)
+      // Aucun chrome de modale : pas de position fixed sur le bloc.
+      expect(block.style.position).not.toBe('fixed')
+    })
+
+    it('2a : pendant le run, le brief se replie et l’action primaire cède la place', async () => {
+      mockUseGenerationStore.mockReturnValue({
+        ...buildMockGenerationStoreState(),
+        isGenerating: true,
+        currentStep: 'Generating',
+        streamingContent: '{"title":"Test"',
+      } as unknown as ReturnType<typeof useGenerationStore>)
+
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+
+      // Le brief est réduit à une ligne avec son coût, la barre d'action est retirée
+      // de l'arbre accessible (les deux sorties vivent dans le bloc de streaming).
+      expect(screen.getByTestId('brief-collapsed-line')).toBeInTheDocument()
+      expect(screen.getByTestId('generation-primary-action')).toHaveAttribute('hidden')
+
+      // « voir » redéploie le brief sans interrompre la génération.
+      await userEvent.click(screen.getByTestId('brief-reveal'))
+      expect(screen.queryByTestId('brief-collapsed-line')).toBeNull()
     })
 
     // L'action primaire a migré du pied du panneau droit vers la colonne de lecture

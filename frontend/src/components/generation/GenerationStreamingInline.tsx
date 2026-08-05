@@ -271,6 +271,11 @@ export interface GenerationStreamingInlineProps {
   reasoningTrace?: ReasoningTrace | null
   /** Callback pour interrompre la génération */
   onInterrupt: () => void
+  /**
+   * Écran 2a — seconde sortie : couper l'appel mais **garder** le texte déjà streamé
+   * au lieu de le jeter. Sans ce callback, le bouton n'est pas rendu.
+   */
+  onKeepPartial?: () => void
   /** Callback pour réduire/agrandir le bloc */
   onMinimize: () => void
   /** Callback pour fermer le bloc (après complétion) */
@@ -345,6 +350,7 @@ export function GenerationStreamingInline({
   isInterrupting = false,  // Task 4 - Story 0.8
   reasoningTrace = null,
   onInterrupt,
+  onKeepPartial,
   onMinimize,
   onClose,
 }: GenerationStreamingInlineProps) {
@@ -804,36 +810,63 @@ export function GenerationStreamingInline({
             Fermer
           </button>
         ) : (
-          <button
-            type="button"
-            onClick={onInterrupt}
-            style={{
-              width: '100%',
-              height: 42,
-              border: '1px solid #2e2e36',
-              borderRadius: `${redesignRadius.control}px`,
-              backgroundColor: '#1a1a1f',
-              color: theme.text.primary,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 10,
-              fontSize: '13.5px',
-              fontWeight: 500,
-            }}
-          >
-            Interrompre
-            <span
+          // 2a : deux sorties — couper net, ou garder ce qui est déjà écrit.
+          <div style={{ display: 'flex', gap: 9 }}>
+            <button
+              type="button"
+              data-testid="streaming-interrupt"
+              onClick={onInterrupt}
               style={{
-                fontFamily: redesignFont.mono,
-                fontSize: '10.5px',
-                color: '#7c7c86',
+                flex: 1,
+                minWidth: 0,
+                height: 42,
+                border: '1px solid #2e2e36',
+                borderRadius: `${redesignRadius.control}px`,
+                backgroundColor: '#1a1a1f',
+                color: theme.text.primary,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 10,
+                fontSize: '13.5px',
+                fontWeight: 500,
               }}
             >
-              ÉCHAP
-            </span>
-          </button>
+              Interrompre
+              <span
+                style={{
+                  fontFamily: redesignFont.mono,
+                  fontSize: '10.5px',
+                  color: '#7c7c86',
+                }}
+              >
+                ÉCHAP
+              </span>
+            </button>
+            {onKeepPartial && content.length > 0 && (
+              <button
+                type="button"
+                data-testid="streaming-keep-partial"
+                onClick={onKeepPartial}
+                title="Couper la génération mais conserver le texte déjà écrit"
+                style={{
+                  height: 42,
+                  padding: '0 16px',
+                  border: '1px solid #2e2e36',
+                  borderRadius: `${redesignRadius.control}px`,
+                  backgroundColor: 'transparent',
+                  color: theme.text.secondary,
+                  cursor: 'pointer',
+                  fontSize: '13.5px',
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Garder ce qui est écrit
+              </button>
+            )}
+          </div>
         )}
         {content.length > 0 && currentStep !== 'Complete' && (
           <div

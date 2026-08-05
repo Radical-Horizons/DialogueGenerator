@@ -66,6 +66,8 @@ interface GenerationState {
   error: string | null
   currentJobId: string | null
   isInterrupting: boolean  // Task 4 - Story 0.8
+  /** Horodatage du début du run (écran 2a : compteur `GÉNÉRATION · MM:SS` du header). */
+  generationStartedAt: number | null
   chunkBuffer: Map<number, string>  // Buffer pour réordonner les chunks avec séquence
   lastProcessedSequence: number  // Dernière séquence traitée (pour réordonnancement)
   
@@ -193,6 +195,7 @@ export const useGenerationStore = create<GenerationState>((set) => ({
   error: null,
   currentJobId: null,
   isInterrupting: false,  // Task 4 - Story 0.8
+  generationStartedAt: null,
   chunkBuffer: new Map<number, string>(),
   lastProcessedSequence: -1,  // Dernière séquence traitée
 
@@ -441,6 +444,7 @@ export const useGenerationStore = create<GenerationState>((set) => ({
       isMinimized: false,
       error: null,
       currentJobId: jobId,
+      generationStartedAt: Date.now(),
       chunkBuffer: new Map<number, string>(),
       lastProcessedSequence: -1,
     }),
@@ -504,6 +508,7 @@ export const useGenerationStore = create<GenerationState>((set) => ({
       error: null,
       currentJobId: null,
       isInterrupting: false,  // Fix: Réinitialiser isInterrupting (Issue #4)
+      generationStartedAt: null,
     }),
 
   minimize: () =>
@@ -534,6 +539,7 @@ export const useGenerationStore = create<GenerationState>((set) => ({
       error: null,
       currentJobId: null,
       isInterrupting: false,
+      generationStartedAt: null,
       chunkBuffer: new Map<number, string>(),
       lastProcessedSequence: -1,
     }),

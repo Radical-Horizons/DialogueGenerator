@@ -47,6 +47,8 @@ import type { CharacterResponse, LocationResponse, ItemResponse, SpeciesResponse
 import { theme } from '../../theme'
 import { redesignAccent, redesignFont, redesignHairline, redesignText } from '../../theme/redesignTokens'
 import { useUiLayoutStore } from '../../store/uiLayoutStore'
+import { useGenerationRunActive } from '../../hooks/useGenerationRunState'
+import { GenerationTracePanel } from '../generation/GenerationTracePanel'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
 type ContextLoadState = {
@@ -317,6 +319,9 @@ export function Dashboard() {
   const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false)
   const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false)
   const viewportMode = useViewportMode()
+  /** 2a : un run en cours verrouille le contexte GDD et bascule la colonne droite sur TRACE. */
+  const generationRunActive = useGenerationRunActive()
+  const [traceHidden, setTraceHidden] = useState(false)
   /** FR120 : &lt; 1024px — panneaux latéraux en overlay drawer, pas en colonnes compressées */
   const useNarrowSidePanels = viewportMode !== 'desktop'
   const { bottomInsetPx: keyboardBottomInsetPx } = useMobileShellKeyboardComfort(useNarrowSidePanels)
@@ -1209,6 +1214,22 @@ export function Dashboard() {
               >
                 {GDD_CONTEXT_PANEL_TITLE}
               </div>
+              {/* 2a : le contexte est déjà parti au modèle — le dire plutôt que laisser
+                  croire qu'une coche de plus serait prise en compte. */}
+              {generationRunActive && (
+                <span
+                  data-testid="gdd-locked-badge"
+                  style={{
+                    fontFamily: redesignFont.mono,
+                    fontSize: '9.5px',
+                    letterSpacing: '0.08em',
+                    color: redesignText.label,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  VERROUILLÉ
+                </span>
+              )}
               <PanelCollapseButton
                 direction="left"
                 onClick={toggleLeftPanel}
@@ -1216,10 +1237,24 @@ export function Dashboard() {
                 density={panelCollapseDensity}
               />
             </div>
-            <ContextSelector
-              onItemSelected={onContextItemSelected}
-              onLoadStateChange={onContextLoadStateChange}
-            />
+            <div
+              data-testid="gdd-context-lockable"
+              aria-disabled={generationRunActive || undefined}
+              style={{
+                flex: 1,
+                minHeight: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                opacity: generationRunActive ? 0.55 : 1,
+                pointerEvents: generationRunActive ? 'none' : undefined,
+                transition: 'opacity 160ms ease',
+              }}
+            >
+              <ContextSelector
+                onItemSelected={onContextItemSelected}
+                onLoadStateChange={onContextLoadStateChange}
+              />
+            </div>
           </>
         )}
       </div>
@@ -1354,7 +1389,7 @@ export function Dashboard() {
               textOverflow: 'ellipsis',
             }}
           >
-            Ce qui part au modèle
+            {generationRunActive && !traceHidden ? 'Trace' : 'Ce qui part au modèle'}
           </div>
           {actions.handleGenerate ? (
             <SaveStatusIndicator
@@ -1380,19 +1415,26 @@ export function Dashboard() {
             ...shellKeyboardInsetStyle,
           }}
         >
-          <ContextSelectionBudgetBar
-            visible={centerPanelTab === 'generation' || centerPanelTab === 'edition'}
-          />
-          <Tabs
-            variant="nav"
-            tabs={visibleRightPanelTabs}
-            activeTabId={effectiveRightPanelTab}
-            onTabChange={(tabId) => setRightPanelTab(tabId as 'prompt' | 'dialogue' | 'node' | 'details')}
-            style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
-            // Important: overflow: 'hidden' pour éviter le double scroll, mais scrollbar-gutter réserve l'espace
-            // Le contenu enfant gère son propre scroll avec scrollbar-gutter: stable
-            contentStyle={{ overflow: 'hidden', scrollbarGutter: 'stable' }}
-          />
+          {/* 2a : pendant un run, la trace remplace le décompte — il est déjà parti. */}
+          {generationRunActive && !traceHidden ? (
+            <GenerationTracePanel onHide={() => setTraceHidden(true)} />
+          ) : (
+            <>
+              <ContextSelectionBudgetBar
+                visible={centerPanelTab === 'generation' || centerPanelTab === 'edition'}
+              />
+              <Tabs
+                variant="nav"
+                tabs={visibleRightPanelTabs}
+                activeTabId={effectiveRightPanelTab}
+                onTabChange={(tabId) => setRightPanelTab(tabId as 'prompt' | 'dialogue' | 'node' | 'details')}
+                style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
+                // Important: overflow: 'hidden' pour éviter le double scroll, mais scrollbar-gutter réserve l'espace
+                // Le contenu enfant gère son propre scroll avec scrollbar-gutter: stable
+                contentStyle={{ overflow: 'hidden', scrollbarGutter: 'stable' }}
+              />
+            </>
+          )}
         </div>
         {renderLastResultBlock()}
         {renderRightActionsFooter()}

@@ -41,6 +41,37 @@ describe('GenerationStreamingInline', () => {
     expect(mockOnInterrupt).toHaveBeenCalledTimes(1)
   })
 
+  it('2a : « Garder ce qui est écrit » n’apparaît que s’il y a du texte à garder', () => {
+    const onKeepPartial = vi.fn()
+    const { rerender } = render(
+      <GenerationStreamingInline {...createDefaultProps({ content: '', onKeepPartial })} />
+    )
+    // Rien de streamé : la seconde sortie n'a pas d'objet.
+    expect(screen.queryByTestId('streaming-keep-partial')).toBeNull()
+
+    rerender(
+      <GenerationStreamingInline
+        {...createDefaultProps({ content: '{"title":"Déjà écrit"', onKeepPartial })}
+      />
+    )
+    fireEvent.click(screen.getByTestId('streaming-keep-partial'))
+    expect(onKeepPartial).toHaveBeenCalledTimes(1)
+  })
+
+  it('2a : les deux sorties disparaissent une fois la génération terminée', () => {
+    render(
+      <GenerationStreamingInline
+        {...createDefaultProps({
+          content: '{"title":"Fini"}',
+          currentStep: 'Complete',
+          onKeepPartial: vi.fn(),
+        })}
+      />
+    )
+    expect(screen.queryByTestId('streaming-interrupt')).toBeNull()
+    expect(screen.queryByTestId('streaming-keep-partial')).toBeNull()
+  })
+
   it('ÉCHAP est inerte une fois la génération terminée', () => {
     render(
       <GenerationStreamingInline

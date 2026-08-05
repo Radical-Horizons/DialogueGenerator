@@ -12,6 +12,7 @@ import { useContextStore } from '../../store/contextStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useLLMStore } from '../../store/llmStore'
 import { useUiLayoutStore } from '../../store/uiLayoutStore'
+
 import {
   MAX_GENERATION_OPTIONS,
   cancelBackgroundOptions,
@@ -421,6 +422,17 @@ export function GenerationPanel() {
   )
   const genChrome = isGenerationNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
   const writingMode = useUiLayoutStore((s) => s.writingMode)
+  // 2a : pendant le run, le brief se range et le formulaire cède la colonne au texte
+  // qui arrive. « voir » le redéploie sans interrompre la génération.
+  // Valeurs déjà déstructurées du store plus haut : pas de seconde souscription, et
+  // surtout pas de sélecteur — les mocks de test qui renvoient le store entier
+  // rendraient un sélecteur inopérant ici (cf. `useGenerationRunActive`).
+  const runActive = isGenerating || isInterrupting
+  const [briefExpandedDuringRun, setBriefExpandedDuringRun] = useState(false)
+  const showGenerationForm = !runActive || briefExpandedDuringRun
+  useEffect(() => {
+    if (!runActive) setBriefExpandedDuringRun(false)
+  }, [runActive])
   const optionCount = useGenerationOptionsStore((s) => s.optionCount)
   const optionSlots = useGenerationOptionsStore((s) => s.slots)
 
@@ -499,6 +511,23 @@ export function GenerationPanel() {
     setInterrupting,
     setStreamingError,
   ])
+
+  /**
+   * Seconde sortie de l'écran 2a : couper l'appel **sans** jeter le texte déjà streamé.
+   * Contrairement à `handleInterruptGeneration`, on ne remet pas l'état à zéro : le bloc
+   * reste affiché avec son partiel, l'utilisateur le ferme quand il l'a récupéré.
+   */
+  const handleKeepPartialGeneration = useCallback(async () => {
+    cancelBackgroundOptions()
+    if (currentJobId) {
+      await dialoguesAPI.cancelGenerationJob(currentJobId).catch((err) => {
+        console.warn('Erreur lors de l\'annulation du job:', err)
+      })
+    }
+    closeEventSource()
+    setStreamingError('Génération interrompue — texte conservé')
+    setIsLoading(false)
+  }, [currentJobId, closeEventSource, setStreamingError])
 
   const handleCloseStreaming = useCallback(() => {
     closeEventSource()
@@ -579,6 +608,9 @@ export function GenerationPanel() {
           onInterrupt={() => {
             void handleInterruptGeneration()
           }}
+          onKeepPartial={() => {
+            void handleKeepPartialGeneration()
+          }}
           onMinimize={minimize}
           onClose={handleCloseStreaming}
         />
@@ -587,7 +619,7 @@ export function GenerationPanel() {
         <GenerationOptionsComparison />
 
         {/* 1c ne montre pas la barre de preset : elle vit avec les réglages du modèle. */}
-        <div style={{ display: showModelSettings ? 'block' : 'none' }}>
+        <div style={{ display: showModelSettings && showGenerationForm ? 'block' : 'none' }}>
           <PresetSelector
             onPresetLoaded={presets.handlePresetLoaded}
             getCurrentConfiguration={presets.getCurrentConfiguration}
@@ -597,8 +629,48 @@ export function GenerationPanel() {
 
             <SceneSelectionWidget />
 
+      {/* 2a : pendant le run, le brief se replie en une ligne avec son coût. */}
+      {runActive && !briefExpandedDuringRun && (
+        <div
+          data-testid="brief-collapsed-line"
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'flex-end',
+            gap: 6,
+            marginBottom: 22,
+            fontSize: '12px',
+            color: redesignText.muted,
+          }}
+        >
+          <span>brief · {Math.max(1, Math.ceil(userInstructions.length / 4))} tok ·</span>
+          <button
+            type="button"
+            data-testid="brief-reveal"
+            onClick={() => setBriefExpandedDuringRun(true)}
+            style={{
+              border: 'none',
+              background: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              color: redesignText.secondary,
+              fontSize: '12px',
+            }}
+          >
+            voir
+          </button>
+        </div>
+      )}
+
       {/* Chips de ton (écran 1c) — juste sous le titre de scène. */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 22 }}>
+      <div
+        style={{
+          display: showGenerationForm ? 'flex' : 'none',
+          flexWrap: 'wrap',
+          gap: 7,
+          marginBottom: 22,
+        }}
+      >
         {availableNarrativeTags.map((tag) => {
           const active = narrativeTags.includes(tag)
           return (
@@ -632,6 +704,7 @@ export function GenerationPanel() {
         })}
       </div>
 
+      <div style={{ display: showGenerationForm ? 'block' : 'none' }}>
       <SystemPromptEditor
         userInstructions={userInstructions}
         authorProfile={authorProfile}
@@ -654,9 +727,10 @@ export function GenerationPanel() {
           draft.markDirty()
         }}
       />
+      </div>
 
       {/* 1c : les flags sont un lien secondaire sous le brief, pas une section pleine. */}
-      <details style={{ marginBottom: 22 }}>
+      <details style={{ marginBottom: 22, display: showGenerationForm ? 'block' : 'none' }}>
         <summary
           style={{
             cursor: 'pointer',
@@ -675,7 +749,7 @@ export function GenerationPanel() {
       </details>
 
       {/* Réglages du modèle : résumés en une ligne cliquable (refonte UI), détail dépliable. */}
-      <div style={{ marginBottom: '1rem' }}>
+      <div style={{ marginBottom: '1rem', display: showGenerationForm ? 'block' : 'none' }}>
         <button
           type="button"
           onClick={() => setShowModelSettings((v) => !v)}
@@ -704,7 +778,7 @@ export function GenerationPanel() {
         </button>
       </div>
 
-      {showModelSettings && (
+      {showModelSettings && showGenerationForm && (
       <>
       {/* Sélecteur de modèle LLM (Story 0.3) */}
       <div style={{ marginBottom: '1rem' }}>
@@ -973,14 +1047,18 @@ export function GenerationPanel() {
       </>
       )}
 
-      {/* Barre d'action bas de colonne de lecture (écran 1c) : réglages résumés, bouton, coût. */}
+      {/* Barre d'action bas de colonne de lecture (écran 1c) : réglages résumés, bouton, coût.
+          2a : masquée pendant le run — les deux sorties vivent dans le bloc de streaming. */}
       <div
         data-testid="generation-primary-action"
+        hidden={runActive}
         style={{
           borderTop: `1px solid ${redesignHairline.strong}`,
           paddingTop: 13,
           marginTop: 22,
-          display: 'flex',
+          // `display` explicite : un `display` inline l'emporte sur la règle UA
+          // `[hidden] { display: none }`, donc l'attribut seul ne masquerait rien.
+          display: runActive ? 'none' : 'flex',
           flexDirection: 'column',
           gap: 9,
         }}
