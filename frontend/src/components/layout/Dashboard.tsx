@@ -343,6 +343,7 @@ export function Dashboard() {
   }, [contextSelections])
   const generationTokenCount = useGenerationStore((s) => s.tokenCount)
   const optionRunSize = useGenerationOptionsStore((s) => s.slots.length)
+  const optionRunId = useGenerationOptionsStore((s) => s.runId)
   /** FR120 : &lt; 1024px — panneaux latéraux en overlay drawer, pas en colonnes compressées */
   const useNarrowSidePanels = viewportMode !== 'desktop'
   const { bottomInsetPx: keyboardBottomInsetPx } = useMobileShellKeyboardComfort(useNarrowSidePanels)
@@ -900,20 +901,19 @@ export function Dashboard() {
    * et on ne force le repli qu'une fois par lot pour ne pas contrarier ce choix.
    */
   const comparisonActive = optionRunSize >= 2
+  // Clé = identité du lot, pas sa taille : deux lots de 2 options à la suite doivent
+  // replier le rail chacun leur tour. `slots.length` ne distingue pas ces deux runs.
   const lastForcedRailRunRef = useRef<number>(0)
   useEffect(() => {
     if (!comparisonActive || viewportMode !== 'desktop') return
-    if (lastForcedRailRunRef.current === optionRunSize) return
-    lastForcedRailRunRef.current = optionRunSize
+    if (lastForcedRailRunRef.current === optionRunId) return
+    lastForcedRailRunRef.current = optionRunId
     if (!expandedSizesRef.current && panelsRef.current) {
       expandedSizesRef.current = panelsRef.current.getSizes()
     }
     setIsLeftPanelCollapsed(true)
     applyCollapsedLayout(true, isRightPanelCollapsed)
-  }, [comparisonActive, optionRunSize, viewportMode, applyCollapsedLayout, isRightPanelCollapsed])
-  useEffect(() => {
-    if (!comparisonActive) lastForcedRailRunRef.current = 0
-  }, [comparisonActive])
+  }, [comparisonActive, optionRunId, viewportMode, applyCollapsedLayout, isRightPanelCollapsed])
 
 
   // ── Mode écriture (écran 2c) ──────────────────────────────────────────────

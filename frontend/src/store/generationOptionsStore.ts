@@ -31,6 +31,12 @@ export interface GenerationOptionSlot {
 interface GenerationOptionsState {
   /** Réglage utilisateur : nombre d'options par génération (1 = comportement historique). */
   optionCount: number
+  /**
+   * Identité du lot courant, incrémentée à chaque `startRun`.
+   * Deux lots successifs peuvent avoir la même taille : c'est ce compteur, et non
+   * `slots.length`, qui permet de réagir « une fois par lot » (repli du rail GDD).
+   */
+  runId: number
   /** Slots du run en cours ; `[]` hors run multi-options. */
   slots: GenerationOptionSlot[]
   /** Dernière requête envoyée — sert aux « Variante » (relance d'une seule option). */
@@ -47,6 +53,7 @@ interface GenerationOptionsState {
 
 export const useGenerationOptionsStore = create<GenerationOptionsState>()((set) => ({
   optionCount: 1,
+  runId: 0,
   slots: [],
   lastRequest: null,
   keptIndex: null,
@@ -55,7 +62,8 @@ export const useGenerationOptionsStore = create<GenerationOptionsState>()((set) 
     set({ optionCount: Math.min(MAX_GENERATION_OPTIONS, Math.max(1, Math.round(n))) }),
 
   startRun: (count, request) =>
-    set({
+    set((state) => ({
+      runId: state.runId + 1,
       slots: Array.from({ length: count }, (_, index) => ({
         index,
         jobId: null,
@@ -65,7 +73,7 @@ export const useGenerationOptionsStore = create<GenerationOptionsState>()((set) 
       })),
       lastRequest: request,
       keptIndex: null,
-    }),
+    })),
 
   updateSlot: (index, patch) =>
     set((state) => ({

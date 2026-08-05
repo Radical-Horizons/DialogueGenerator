@@ -57,3 +57,18 @@ describe('étanchéité des états d’écran', () => {
     expect(useGenerationOptionsStore.getState().slots.length).toBeLessThan(2)
   })
 })
+
+describe('identité du lot (repli du rail 2b)', () => {
+  it('deux lots de même taille ont des runId distincts', () => {
+    const request = { user_instructions: 'x' } as GenerateUnityDialogueRequest
+    useGenerationOptionsStore.getState().startRun(2, request)
+    const first = useGenerationOptionsStore.getState().runId
+
+    useGenerationOptionsStore.getState().startRun(2, request)
+    const second = useGenerationOptionsStore.getState().runId
+
+    // `slots.length` vaut 2 dans les deux cas : sans runId, le rail ne se replierait
+    // qu'au premier lot.
+    expect(second).toBe(first + 1)
+  })
+})
