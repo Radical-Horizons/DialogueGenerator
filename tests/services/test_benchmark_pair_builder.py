@@ -200,3 +200,30 @@ def test_pairs_are_ordered_deterministically() -> None:
     ]
     keys = [(p.case_id, p.repetition, p.models_sorted) for p in build_pairs(records, run_id=RUN_ID)]
     assert keys == sorted(keys)
+
+
+def test_shared_prompt_becomes_the_duel_context() -> None:
+    """Deux propositions d'un même cas transmettent leur prompt commun au juge."""
+    records = [
+        _record("modele-a").model_copy(update={"raw_prompt": "FICHE : Voknir."}),
+        _record("modele-b").model_copy(update={"raw_prompt": "FICHE : Voknir."}),
+    ]
+    pairs = build_pairs(records, run_id=RUN_ID)
+    assert len(pairs) == 1
+    assert pairs[0].context == "FICHE : Voknir."
+
+
+def test_divergent_prompts_strip_the_duel_context() -> None:
+    """Un contexte qui diffère entre les deux propositions est retiré.
+
+    Il désignerait implicitement laquelle est laquelle, et le duel se jouerait
+    sur autre chose que le texte — exactement le biais d'identité que le
+    protocole doit neutraliser.
+    """
+    records = [
+        _record("modele-a").model_copy(update={"raw_prompt": "FICHE : Voknir, variante A."}),
+        _record("modele-b").model_copy(update={"raw_prompt": "FICHE : Voknir, variante B."}),
+    ]
+    pairs = build_pairs(records, run_id=RUN_ID)
+    assert len(pairs) == 1
+    assert pairs[0].context is None

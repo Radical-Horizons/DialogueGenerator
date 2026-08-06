@@ -56,6 +56,9 @@ class PairAssignment:
         length_a: Longueur réelle du texte de ``A``, avant troncature.
         length_b: Longueur réelle du texte de ``B``, avant troncature.
         truncated: ``True`` si au moins un des deux textes a été coupé.
+        context: Prompt commun aux deux propositions. Les deux générations
+            viennent du même cas, donc du même contexte : un seul bloc suffit,
+            et il ne peut pas trahir laquelle est laquelle.
     """
 
     case_id: str
@@ -67,6 +70,7 @@ class PairAssignment:
     length_a: int
     length_b: int
     truncated: bool
+    context: Optional[str] = None
 
     @property
     def models_sorted(self) -> Tuple[str, str]:
@@ -181,6 +185,19 @@ def build_pairs(
             text_first, cut_first = truncate_for_pairwise(raw_first, truncation_limit)
             text_second, cut_second = truncate_for_pairwise(raw_second, truncation_limit)
 
+            # Le contexte n'est transmis que si les deux propositions ont reçu
+            # strictement le même prompt. S'il diffère, il désignerait implicitement
+            # l'une des deux — et le duel se jouerait sur autre chose que le texte.
+            context = record_first.raw_prompt
+            if context != record_second.raw_prompt:
+                logger.warning(
+                    "Prompts divergents sur %s / %s : contexte retiré du duel pour "
+                    "ne pas trahir l'identité des propositions.",
+                    case_id,
+                    repetition,
+                )
+                context = None
+
             pairs.append(
                 PairAssignment(
                     case_id=case_id,
@@ -192,6 +209,7 @@ def build_pairs(
                     length_a=len(raw_first),
                     length_b=len(raw_second),
                     truncated=cut_first or cut_second,
+                    context=context,
                 )
             )
     return pairs

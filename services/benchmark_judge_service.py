@@ -221,7 +221,9 @@ class BenchmarkJudgeService:
                 **base,
             )
 
-        prompt = build_rubric_judge_user_prompt(grid, record.json_content or "")
+        prompt = build_rubric_judge_user_prompt(
+            grid, record.json_content or "", context=record.raw_prompt
+        )
         try:
             variants = await llm_client.generate_variants(
                 prompt,
@@ -449,6 +451,7 @@ class BenchmarkPairwiseJudgeService(BenchmarkJudgeService):
         text_first: str,
         text_second: str,
         truncated: bool,
+        context: Optional[str],
         llm_client: ILLMClient,
         judge_model: str,
     ) -> Tuple[Optional[BenchmarkPairwiseJudgeResult], float, int, int, Optional[str]]:
@@ -459,6 +462,7 @@ class BenchmarkPairwiseJudgeService(BenchmarkJudgeService):
             text_first: Texte présenté en position ``A``.
             text_second: Texte présenté en position ``B``.
             truncated: ``True`` si les textes ont été coupés.
+            context: Prompt commun aux deux propositions, ou ``None``.
             llm_client: Client du juge.
             judge_model: Modèle juge.
 
@@ -466,7 +470,7 @@ class BenchmarkPairwiseJudgeService(BenchmarkJudgeService):
             Quintuplet ``(résultat, coût, tokens_entrée, tokens_sortie, erreur)``.
         """
         prompt = build_pairwise_judge_user_prompt(
-            grid, text_first, text_second, truncated=truncated
+            grid, text_first, text_second, truncated=truncated, context=context
         )
         try:
             variants = await llm_client.generate_variants(
@@ -557,6 +561,7 @@ class BenchmarkPairwiseJudgeService(BenchmarkJudgeService):
             text_first=pair.text_a,
             text_second=pair.text_b,
             truncated=pair.truncated,
+            context=pair.context,
             llm_client=llm_client,
             judge_model=judge_model,
         )
@@ -566,6 +571,7 @@ class BenchmarkPairwiseJudgeService(BenchmarkJudgeService):
             text_first=pair.text_b,
             text_second=pair.text_a,
             truncated=pair.truncated,
+            context=pair.context,
             llm_client=llm_client,
             judge_model=judge_model,
         )
