@@ -98,9 +98,41 @@
 
 
 - source_spec: `docs/design/refonte-ui-2026/etats-2a-2e.dc.html` (bloc 2b)
-  summary: Vue « côte à côte » des options (le lien existe dans la maquette à côté de « tout replier »).
-  evidence: La comparaison verticale — une option ouverte, les autres en une ligne — répond déjà au besoin « comparer, c'est lire N premières phrases ». La vue côte à côte est une seconde disposition, à décider après usage réel du multi-options.
+  summary: **Proposition produit à évaluer — « comparer des variantes », pas seulement les afficher.** Trois briques, dans cet ordre de dépendance : (1) une variante par **modèle** au lieu de N tirages du même ; (2) **évaluation automatique** de chaque variante ; (3) disposition **côte à côte**. La 3 est de l'UI, mais elle n'a d'intérêt que si 1 et/ou 2 existent : lire en parallèle N sorties du même modèle avec les mêmes réglages n'apprend rien de plus que les lire l'une après l'autre.
+  evidence: |
+    Origine : lien « vue côte à côte » présent dans la maquette 2b, dont l'écran n'a
+    jamais été dessiné — la maquette le liste elle-même en « À TRANCHER »
+    (`etats-2a-2e.dc.html`, bloc de notes). Discussion utilisateur 2026-08-06 : la
+    disposition seule n'est pas le sujet, la comparaison de modèles + l'évaluation
+    auto le sont. Reconnu comme **conception applicative**, pas travail d'UI.
+
+    Ce qui existe déjà et ne serait pas à réécrire :
+    - Génération de N variantes en parallèle : `generationOptionsStore`
+      (`MAX_GENERATION_OPTIONS=4`, un job + un EventSource par variante).
+      **Limite** : toutes les variantes rejouent le même `lastRequest` — même
+      modèle, mêmes réglages ; seul l'échantillonnage LLM les distingue.
+    - Juge LLM **déjà implémenté** (Story 4.7 / FR42) : `LLMQualityJudgeService`,
+      `POST /api/v1/graph/evaluate-dialogue-quality`, panneau `GraphQualityLlmPanel`
+      (onglet QUALITÉ de l'inspecteur 2e). L'endpoint prend `nodes`/`edges` **et un
+      `llm_model_identifier` optionnel** — il est sans état, donc utilisable sur une
+      variante fraîchement générée sans travail backend.
+    - Diagnostic déterministe par variante : `generationOptionDiagnostics`
+      (longueur vs cible, réponses portant test/flag/coût, flags posés, fiches
+      citées vs envoyées).
+
+    Ce qui manque réellement : un `request` **par variante** au lieu d'un par lot
+    (aujourd'hui `startRun(count, request)` en stocke un seul), le choix du modèle
+    par variante côté UI, et le câblage variante → juge (+ affichage du score dans
+    la colonne Diagnostic).
+
+    À vérifier avant de planifier : l'utilisateur développe un **mode benchmark sur
+    une autre branche** (mentionné le 2026-08-06). Recouvrement probable avec la
+    brique 1 — ne pas concevoir en double, partir de ce qui y est déjà décidé.
+  related: Epic 4 Story 4.7 (juge LLM, livré) · Epic 1 Story 1.10 (régénérer une
+    variante, livré et recâblé sur le bouton « Variante » de 2b).
+  status: proposal — à évaluer, non planifié. Ne pas traiter comme un écart
+    d'implémentation de la refonte UI : la maquette ne définit pas cet écran.
 
 - source_spec: `docs/design/refonte-ui-2026/etats-2a-2e.dc.html` (bloc 2b, colonne Diagnostic)
-  summary: Lignes de diagnostic qualitatives (« ton demandé : tenu », « mensonge possible », « répétition détectée ») — exigent un second appel LLM par option.
-  evidence: Les lignes calculables sont livrées (longueur vs cible, réponses mécaniques, flags, fiches citées / envoyées inutilement). Les jugements demandent une évaluation par modèle : coût N× supplémentaire, décision produit à prendre séparément.
+  summary: Lignes de diagnostic qualitatives (« ton demandé : tenu », « mensonge possible », « répétition détectée ») — voir la proposition ci-dessus, dont elles sont la brique 2.
+  evidence: Les lignes calculables sont livrées (longueur vs cible, réponses mécaniques, flags, fiches citées / envoyées inutilement). Les jugements demandent une évaluation par modèle — le service existe (`LLMQualityJudgeService`), il n'est simplement pas branché sur les variantes de génération. Coût N× à arbitrer, et vocabulaire à trancher : « variante » est aujourd'hui le libellé d'une **action** (relancer une option seule), pas de l'objet.
