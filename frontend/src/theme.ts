@@ -15,18 +15,25 @@ export const theme = {
    * restent distincts par leur *nom* pour ne pas casser les 600+ usages et pour
    * garder la possibilité de réintroduire une élévation là où elle a du sens.
    *
+   * **Écart assumé à la maquette** (décision produit, 2026-08-06) : l'échelle est
+   * remontée d'un cran — fond `#17171b` au lieu du `#121214` de la maquette, qui
+   * rendait l'app uniformément trop sombre à l'usage. Les quatre surfaces gardent
+   * leurs écarts relatifs : remonter le seul fond l'aurait fait entrer en
+   * collision avec les champs de saisie (`input.background`, exactement `#17171b`)
+   * et les modales auraient cessé de se détacher.
+   *
    * `tertiary` reste **en relief** : c'est la surface des menus, des en-têtes de
-   * nœud et des îlots qui doivent se détacher (valeur de la maquette : #25252c).
-   * `elevated` sert aux modales, qui ont besoin de contraste sur leur voile.
+   * nœud et des îlots qui doivent se détacher. `elevated` sert aux modales, qui
+   * ont besoin de contraste sur leur voile.
    */
   background: {
-    primary: '#121214',
-    secondary: '#121214',
-    tertiary: '#25252c',
-    panel: '#121214',
-    panelHeader: '#121214',
+    primary: '#17171b',
+    secondary: '#17171b',
+    tertiary: '#2a2a33',
+    panel: '#17171b',
+    panelHeader: '#17171b',
     /** Surface des modales — au-dessus du voile, pas dans le flux de la page. */
-    elevated: '#1a1a1f',
+    elevated: '#1f1f26',
   },
   /**
    * Bordures : la refonte ne connaît que des **filets**. `primary` vaut le filet
@@ -79,7 +86,8 @@ export const theme = {
   },
   // Couleurs d'input
   input: {
-    background: '#17171b',
+    // Un cran au-dessus du fond de page, sinon le champ disparaît dedans.
+    background: '#1c1c22',
     border: '#2e2e36',
     color: 'rgba(255, 255, 255, 0.87)',
     focus: {

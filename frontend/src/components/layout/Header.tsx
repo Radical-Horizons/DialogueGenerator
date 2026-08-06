@@ -20,6 +20,7 @@ import { useGenerationElapsed } from '../../hooks/useGenerationRunState'
 import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import type { CenterPanelTab } from '../../store/uiLayoutStore'
 import { TOUCH_TARGET_MIN_PX } from '../../constants'
+import { formatShortcut } from '../../utils/platformShortcut'
 
 /** Nom de l'animation du point de génération (déclarée localement, pas de CSS global). */
 const HEADER_BLINK_ANIMATION = 'header-generation-blink'
@@ -147,8 +148,22 @@ export function Header() {
       width: '100%',
       boxSizing: 'border-box',
     }}>
-      {/* Section gauche : Titre */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+      {/* Section gauche : Titre + navigation.
+          `flex: 1` valait `flex: 1 1 0%` : l'espace se repartissait 50/50 avec le
+          bloc droit sans regarder le contenu, et la navigation debordait sur la
+          recherche. Base `auto` + `wrap` : elle prend ce qu'il lui faut, et passe
+          a la ligne plutot que de chevaucher. */}
+      <div
+        style={{
+          flex: '0 1 auto',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          rowGap: '0.35rem',
+          flexWrap: 'wrap',
+          minWidth: 0,
+        }}
+      >
         <h1
           style={{
             margin: 0,
@@ -245,7 +260,7 @@ export function Header() {
       
       {/* Recherche : alignée à droite avec Réglages / avatar (écran 1c). */}
       {isAuthenticated && !writingMode && (
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', minWidth: 0 }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
           {/* Écran 1c : la recherche est un libellé mono, pas un champ. */}
           <button
             type="button"
@@ -275,7 +290,7 @@ export function Header() {
               e.currentTarget.style.color = redesignText.label
             }}
           >
-            <span aria-hidden>⌘K</span>
+            <span aria-hidden>{formatShortcut('ctrl+k')}</span>
             <span>Rechercher</span>
           </button>
         </div>
@@ -315,8 +330,10 @@ export function Header() {
         </div>
       )}
 
-      {/* Section droite : Options, Actions, Utilisateur */}
-      <div style={{ flex: 1, display: writingMode ? 'none' : 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', flexShrink: 1, minWidth: 0, flexWrap: 'wrap' }}>
+      {/* Section droite : Reglages, Actions, Utilisateur.
+          Meme correctif que le bloc gauche : base `auto`, sinon le contenu deborde
+          par-dessus la navigation en dessous de ~400 px. */}
+      <div style={{ flex: '1 1 auto', display: writingMode ? 'none' : 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', minWidth: 0, flexWrap: 'wrap' }}>
         {/* Écran 2a : point clignotant + compteur du run — l'attente a une durée visible. */}
         {generationElapsed && (
           <span

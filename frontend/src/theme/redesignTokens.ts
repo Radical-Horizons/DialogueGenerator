@@ -24,10 +24,10 @@ export const redesignHairline = {
 } as const
 
 export const redesignSurface = {
-  base: '#121214',
-  panel: '#17171b',
-  node: '#1a1a1f',
-  nodeHeader: '#25252c',
+  base: '#17171b',
+  panel: '#1c1c22',
+  node: '#1f1f26',
+  nodeHeader: '#2a2a33',
 } as const
 
 export const redesignControl = {
@@ -47,14 +47,20 @@ export const redesignNodeShadow = '0 2px 10px rgba(0, 0, 0, 0.4)'
 export const redesignText = {
   /** Corps du brief (15,5px / 1.72). */
   body: '#dcdce4',
-  /** Étiquettes mono capitales, chevrons. */
-  label: '#63636c',
+  /**
+   * Étiquettes mono capitales, chevrons.
+   *
+   * La maquette donne `#63636c` — soit **3,15:1** sur le fond de l'app, sous le
+   * minimum WCAG AA (4,5:1) pour ces libellés de 9,5–10,5 px. Remonté à la
+   * première valeur conforme qui garde la teinte froide : **4,79:1**.
+   */
+  label: '#84848f',
   /** Texte secondaire : « vider », liens sous le brief, résumé de fiche. */
   secondary: '#9a9aa4',
   /** Libellé de rangée (panneau droit), nom de fiche non sélectionnée. */
   row: '#d5d5dd',
-  /** Valeurs mono en rangée, texte tertiaire. */
-  muted: '#7c7c86',
+  /** Valeurs mono en rangée, texte tertiaire. `#7c7c86` valait 4,17:1 — sous AA. */
+  muted: '#8a8a95',
   /** Texte principal sur fond sombre. */
   strong: '#f2f2f5',
 } as const

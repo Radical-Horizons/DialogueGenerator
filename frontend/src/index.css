@@ -5,7 +5,7 @@
 
   color-scheme: dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #121214;
+  background-color: #17171b;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -51,7 +51,7 @@ body {
   padding: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #121214;
+  background-color: #17171b;
   color: rgba(255, 255, 255, 0.87);
   line-height: 1.55;
 }
