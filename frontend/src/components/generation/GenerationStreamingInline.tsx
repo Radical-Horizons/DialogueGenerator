@@ -711,7 +711,10 @@ export function GenerationStreamingInline({
                     opacity: 0.7,
                   }}
                 >
-                  {content || 'Préparation...'}
+                  {/* « Préparation… » n'a de sens qu'avant le premier octet. Une fois
+                      le run terminé, le contenu a été repris par le résultat : afficher
+                      ce libellé sous une étiquette « TERMINÉ » ne décrivait plus rien. */}
+                  {content || (currentStep === 'Complete' ? '' : 'Préparation...')}
                 </pre>
                 {isStreamingText && <StreamingCursor />}
               </div>
