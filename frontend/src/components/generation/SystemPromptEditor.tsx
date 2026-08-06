@@ -6,6 +6,8 @@ import { type Tab } from '../shared/Tabs'
 import { FormField } from '../shared/FormField'
 import { useSystemPrompt } from '../../hooks/useSystemPrompt'
 import { useAuthorProfile } from '../../hooks/useAuthorProfile'
+import { useAutoGrowTextarea } from '../../hooks/useAutoGrowTextarea'
+import { useViewportFraction } from '../../hooks/useViewportFraction'
 import { useToast } from '../shared'
 import { theme } from '../../theme'
 import { generationPanelChrome } from '../../theme/responsiveChrome'
@@ -285,6 +287,20 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
    */
   const [showTemplates, setShowTemplates] = useState(false)
   const genChrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
+
+  /**
+   * Le brief prend la hauteur de son texte plutôt qu'un nombre de lignes fixe.
+   * Plafond en `vh` : au-delà, c'est la zone qui défile, pas l'écran entier.
+   */
+  const briefRef = useRef<HTMLTextAreaElement>(null)
+  const briefMaxHeightPx = useViewportFraction(writingMode ? 0.58 : 0.46, {
+    min: 200,
+    max: writingMode ? 760 : 560,
+  })
+  useAutoGrowTextarea(briefRef, userInstructions, {
+    minHeightPx: isNarrow ? 140 : 176,
+    maxHeightPx: briefMaxHeightPx,
+  })
 
   const tabs: Tab[] = [
     {
@@ -600,18 +616,18 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
           <FormField label="" htmlFor="user-instructions-textarea" style={{ marginBottom: 0 }}>
             <div
               style={{
-                maxWidth: isNarrow
-                  ? undefined
-                  : writingMode
-                    ? redesignReadingColumn.writingMode
-                    : redesignReadingColumn.default,
+                // La largeur de lecture est gérée par la colonne (marges flexibles
+                // plafonnées) : un `maxWidth` ici bridait le brief à 660 px alors
+                // que la colonne lui en offrait 920.
+                maxWidth: writingMode ? redesignReadingColumn.writingMode : undefined,
               }}
             >
               <textarea
+                ref={briefRef}
+                className="dg-scroll-slim"
                 id="user-instructions-textarea"
                 value={userInstructions}
                 onChange={(e) => onUserInstructionsChange(e.target.value)}
-                rows={8}
                 placeholder="Ex: Bob doit annoncer à Alice qu'il part à l'aventure. Ton désiré: Héroïque. Inclure une condition sur la compétence 'Charisme' de Bob."
                 style={{
                   width: '100%',
@@ -630,7 +646,9 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                     : writingMode
                       ? '17px'
                       : '15.5px',
-                  resize: 'vertical',
+                  // La hauteur suit le texte (`useAutoGrowTextarea`) : une poignée
+                  // de redimensionnement se battrait avec elle à chaque frappe.
+                  resize: 'none',
                   lineHeight: isNarrow ? 1.55 : 1.72,
                   outline: 'none',
                 }}
@@ -639,7 +657,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 style={{
                   display: 'flex',
                   justifyContent: 'flex-end',
-                  marginTop: '0.25rem',
+                  marginTop: '0.6rem',
                   fontSize: `${isNarrow ? 0.7 : 0.75}rem`,
                   color: theme.text.secondary,
                 }}

@@ -567,21 +567,32 @@ export function GenerationPanel() {
           flex: 1,
           overflowY: 'auto',
           minWidth: 0,
-          // 2c : colonne en flux vertical pour que la barre de pied puisse se
-          // coller au bas (`marginTop: auto`). Hors mode écriture, la mise en
-          // page reste un flux de blocs — ne rien changer.
-          ...(writingMode
-            ? { display: 'flex', flexDirection: 'column', minHeight: '100%' }
-            : {}),
+          // La colonne est un flux vertical pleine hauteur : c'est ce qui permet à
+          // la barre d'action de se coller en bas (`marginTop: auto`) au lieu de
+          // suivre le brief et de flotter au milieu de l'écran.
+          ...(isGenerationNarrow || comparisonActive
+            ? {}
+            : { display: 'flex', flexDirection: 'column', minHeight: '100%' }),
           // Colonne de lecture 660px centrée (écran 1c) — 760px en mode écriture (2c).
           // 2b : la comparaison n'est pas une lecture, elle prend toute la largeur
           // (option ouverte + colonne diagnostic ne tiennent pas dans 660px).
           width: '100%',
+          // Mode écriture : largeur fixe de la maquette. Sinon : marges flexibles
+          // plafonnées, la colonne prend le reste — sur un écran large, une largeur
+          // fixe rejetterait le texte au milieu d'un vide qui grandit sans fin.
           maxWidth: isGenerationNarrow || comparisonActive
             ? undefined
             : writingMode
               ? redesignReadingColumn.writingMode
-              : redesignReadingColumn.default,
+              : undefined,
+          paddingLeft:
+            isGenerationNarrow || comparisonActive || writingMode
+              ? undefined
+              : redesignReadingColumn.sideGutter,
+          paddingRight:
+            isGenerationNarrow || comparisonActive || writingMode
+              ? undefined
+              : redesignReadingColumn.sideGutter,
           marginLeft: isGenerationNarrow ? undefined : 'auto',
           marginRight: isGenerationNarrow ? undefined : 'auto',
           boxSizing: 'border-box',
@@ -1063,9 +1074,9 @@ export function GenerationPanel() {
         style={{
           borderTop: `1px solid ${redesignHairline.strong}`,
           paddingTop: writingMode ? 16 : 13,
-          // 2c : « une seule barre de pied » — elle se colle au bas de la colonne
-          // au lieu de suivre le brief, quelle que soit la longueur du texte.
-          marginTop: writingMode ? 'auto' : 22,
+          // « Une seule barre de pied », collée au bas de la colonne plutôt que
+          // suivant le brief — quelle que soit la longueur du texte.
+          marginTop: isGenerationNarrow || comparisonActive ? 22 : 'auto',
           paddingBottom: writingMode ? 40 : 0,
           // `display` explicite : un `display` inline l'emporte sur la règle UA
           // `[hidden] { display: none }`, donc l'attribut seul ne masquerait rien.

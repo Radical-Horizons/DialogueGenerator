@@ -161,9 +161,9 @@ function contextGddTabButtonStyle(
     padding: `${tier.tabPadding} 0`,
     border: 'none',
     borderRadius: 0,
-    borderBottom: isActive
-      ? `1px solid ${redesignAccent.base}`
-      : '1px solid transparent',
+    // Le filet de l'onglet actif vit sur le libellé (`contextGddTabLabelStyle`),
+    // pas ici : posé sur une boîte de `tabMinHeightPx`, il se dessinait bien en
+    // dessous du texte au lieu de le souligner.
     backgroundColor: 'transparent',
     color: isActive ? theme.text.primary : redesignText.label,
     cursor: 'pointer',
@@ -179,6 +179,16 @@ function contextGddTabButtonStyle(
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
+  }
+}
+
+/** Filet de l'onglet actif — au ras du libellé, comme la maquette (2px). */
+function contextGddTabLabelStyle(isActive: boolean): CSSProperties {
+  return {
+    display: 'inline-flex',
+    alignItems: 'baseline',
+    paddingBottom: 2,
+    boxShadow: isActive ? `inset 0 -1px 0 ${redesignAccent.base}` : 'none',
   }
 }
 
@@ -867,20 +877,22 @@ export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }
               onMouseLeave={() => setHoveredTab(null)}
               style={contextGddTabButtonStyle(isActive, tabChromeTier)}
             >
-              {label}
-              {showCount && (
-                <span
-                  aria-hidden="true"
-                  style={{
-                    marginLeft: '0.4em',
-                    fontFamily: redesignFont.mono,
-                    fontSize: '0.85em',
-                    color: isActive ? theme.text.secondary : theme.text.tertiary,
-                  }}
-                >
-                  {count}
-                </span>
-              )}
+              <span style={contextGddTabLabelStyle(isActive)}>
+                {label}
+                {showCount && (
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      marginLeft: '0.4em',
+                      fontFamily: redesignFont.mono,
+                      fontSize: '0.85em',
+                      color: isActive ? theme.text.secondary : theme.text.tertiary,
+                    }}
+                  >
+                    {count}
+                  </span>
+                )}
+              </span>
             </button>
           )
         })}

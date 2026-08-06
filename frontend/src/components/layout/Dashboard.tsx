@@ -1474,13 +1474,14 @@ export function Dashboard() {
           onTabChange={(tabId) => setCenterPanelTab(tabId as 'generation' | 'edition' | 'graph')}
           keepAliveTabIds={['graph']}
           style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
-          // 2c : la colonne doit occuper toute la hauteur pour que la barre de pied
-          // se colle au bas ; sinon elle suit le brief et flotte au milieu de l'écran.
-          contentStyle={
-            centerPanelTab === 'graph' || writingMode
-              ? { overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column' }
-              : undefined
-          }
+          // La colonne doit occuper toute la hauteur pour que la barre d'action se
+          // colle au bas ; sinon elle suit le brief et flotte au milieu de l'écran.
+          contentStyle={{
+            overflow: 'hidden',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
         />
         {showPromptBottomDrawer && (
           <PromptBudgetBottomDrawer totalTokens={generationTokenCount}>

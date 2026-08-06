@@ -96,6 +96,14 @@ export const redesignFont = {
 /** Colonne de lecture centrale (écran 1c / 2a / 2b). 760px en mode écriture, 600px à 1024px. */
 export const redesignReadingColumn = {
   default: 660,
+  /**
+   * Marges latérales de la colonne de lecture, hors mode écriture.
+   *
+   * Les colonnes du Dashboard sont en pourcentages : une largeur de lecture **fixe**
+   * laisse donc le vide grandir avec l'écran (88 px de marge à 1440, 218 px à 1890,
+   * 412 px à 2560). C'est la marge qu'il faut borner — la colonne absorbe le reste.
+   */
+  sideGutter: 'clamp(20px, 8%, 120px)',
   writingMode: 760,
   tablet: 600,
 } as const

@@ -238,19 +238,31 @@ export function Header() {
                   style={{
                     border: 'none',
                     background: 'none',
-                    padding: '0 0 2px',
+                    padding: 0,
                     // FR119 : cible tactile conservée malgré le libellé nu.
                     minHeight: TOUCH_TARGET_MIN_PX,
                     minWidth: TOUCH_TARGET_MIN_PX,
                     boxSizing: 'border-box',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     cursor: 'pointer',
                     fontSize: '13px',
                     color: active ? theme.text.primary : redesignText.secondary,
-                    boxShadow: active ? `inset 0 -1px 0 ${redesignAccent.base}` : 'none',
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {item.label}
+                  {/* Le filet appartient au mot, pas à la cible tactile : posé sur
+                      le bouton (44 px de haut), il se dessinait bien en dessous du
+                      texte et débordait de chaque côté. */}
+                  <span
+                    style={{
+                      paddingBottom: 2,
+                      boxShadow: active ? `inset 0 -1px 0 ${redesignAccent.base}` : 'none',
+                    }}
+                  >
+                    {item.label}
+                  </span>
                 </button>
               )
             })}

@@ -269,3 +269,34 @@ button.context-gdd-tab:focus-visible {
   border: 2px dashed rgba(255, 255, 255, 0.9) !important;
 }
 
+/**
+ * Barre de défilement discrète (refonte 2026).
+ *
+ * La barre native de Windows est large et opaque : dans une zone d'écriture posée
+ * sur un simple filet, elle écrase tout. Réservée aux surfaces où le défilement
+ * est normal (brief long, listes), via `.dg-scroll-slim`.
+ */
+.dg-scroll-slim {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+.dg-scroll-slim::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.dg-scroll-slim::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dg-scroll-slim::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.16);
+  border-radius: 99px;
+  /* Une bordure transparente amincit le pouce sans reduire la zone de clic. */
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.dg-scroll-slim::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.28);
+}
+.dg-scroll-slim::-webkit-scrollbar-corner {
+  background: transparent;
+}
