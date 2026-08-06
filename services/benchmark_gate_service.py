@@ -165,6 +165,7 @@ class BenchmarkGateService:
                 BenchmarkGateFailure(gate="non_empty", message="Aucun nœud généré")
             )
 
+        failures.extend(self._connectivity_failures(nodes))
         failures.extend(self._schema_failures(parsed))
         failures.extend(self._choice_id_failures(nodes))
         failures.extend(self._flag_failures(parsed, nodes))
@@ -305,6 +306,16 @@ class BenchmarkGateService:
                     ),
                 )
             )
+        if expectations.min_panels is not None and len(nodes) < expectations.min_panels:
+            failures.append(
+                BenchmarkGateFailure(
+                    gate="non_empty",
+                    message=(
+                        f"{len(nodes)} panneau(x) généré(s), {expectations.min_panels} "
+                        f"attendus au minimum"
+                    ),
+                )
+            )
         if expectations.max_words is not None:
             longest = _longest_line_word_count(nodes)
             if longest > expectations.max_words:
@@ -327,6 +338,77 @@ class BenchmarkGateService:
                         message=f"Flags attendus absents de la génération : {', '.join(missing)}",
                     )
                 )
+        return failures
+
+    @staticmethod
+    def _connectivity_failures(nodes: List[Dict[str, Any]]) -> List[BenchmarkGateFailure]:
+        """Vérifie que le fragment se tient comme un graphe.
+
+        Un fragment n'est pas une collection de panneaux : c'est une ouverture et
+        des suites qu'on atteint. Un choix qui mène nulle part, un panneau que rien
+        ne désigne ou deux panneaux au même identifiant produisent un dialogue
+        injouable — que le juge, lui, noterait comme une œuvre.
+
+        Args:
+            nodes: Nœuds Unity de la génération.
+
+        Returns:
+            Les portes ``connectivity`` en échec.
+        """
+        if not nodes:
+            return []
+        failures: List[BenchmarkGateFailure] = []
+        ids = [node.get("id") for node in nodes if isinstance(node.get("id"), str)]
+        duplicates = sorted({node_id for node_id in ids if ids.count(node_id) > 1})
+        if duplicates:
+            failures.append(
+                BenchmarkGateFailure(
+                    gate="connectivity",
+                    message=f"Panneaux au même identifiant : {', '.join(duplicates)}",
+                )
+            )
+
+        known = set(ids)
+        targeted: set[str] = set()
+        dangling: List[str] = []
+        for node in nodes:
+            for choice in node.get("choices") or []:
+                if not isinstance(choice, dict):
+                    continue
+                target = choice.get("targetNode")
+                if not isinstance(target, str) or not target:
+                    continue
+                # `END` est un marqueur de fin de branche reconnu par Unity, pas un nœud.
+                if target == "END":
+                    continue
+                targeted.add(target)
+                if target not in known:
+                    dangling.append(target)
+        if dangling:
+            failures.append(
+                BenchmarkGateFailure(
+                    gate="connectivity",
+                    message=(
+                        "Choix menant vers un panneau inexistant : "
+                        f"{', '.join(sorted(set(dangling)))}"
+                    ),
+                )
+            )
+
+        # Le premier nœud est l'ouverture : rien n'a à le désigner.
+        unreachable = [
+            node_id for node_id in ids[1:] if node_id not in targeted
+        ]
+        if unreachable:
+            failures.append(
+                BenchmarkGateFailure(
+                    gate="connectivity",
+                    message=(
+                        "Panneaux inatteignables, aucun choix n'y mène : "
+                        f"{', '.join(sorted(set(unreachable)))}"
+                    ),
+                )
+            )
         return failures
 
     @staticmethod

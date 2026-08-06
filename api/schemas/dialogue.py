@@ -137,6 +137,14 @@ class BasePromptRequest(BaseModel):
         le=Defaults.MAX_CONTEXT_TOKENS,
         description="Nombre maximum de tokens pour le contexte",
     )
+    fragment_mode: bool = Field(
+        default=False,
+        description=(
+            "Génère un fragment complet — panneau d'ouverture, options, et le panneau "
+            "qui suit chacune d'elles avec ses propres options — en un seul appel. "
+            "Par défaut la génération reste mono-nœud."
+        ),
+    )
     system_prompt_override: Optional[str] = Field(None, description="Surcharge du system prompt")
     author_profile: Optional[str] = Field(None, description="Profil d'auteur global (style réutilisable entre scènes)")
     game_rules: Optional[str] = Field(None, description="Règles du jeu spécifiques à appliquer au dialogue")

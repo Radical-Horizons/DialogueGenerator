@@ -108,6 +108,42 @@ class DummyLLMClient(ILLMClient):
                             ]
                         }
                     }
+                elif response_model.__name__ == "UnityDialogueFragmentResponse":
+                    # Fragment complet : ouverture + une suite par choix, chaque suite
+                    # portant ses propres options. Sans cette branche, tout
+                    # développement sans clé API tomberait sur le dict générique
+                    # ci-dessous, qui ne valide pas contre ce schéma.
+                    dummy_data = {
+                        "title": "Fragment de test généré par DummyLLMClient",
+                        "panels": [
+                            {
+                                "displayName": "Ouverture DummyLLM",
+                                "line": "Réplique d'ouverture générée par DummyLLMClient.",
+                                "choices": [
+                                    {"text": "Choix de test 1", "leadsTo": "suite_1"},
+                                    {"text": "Choix de test 2", "leadsTo": "suite_2"},
+                                ],
+                            },
+                            {
+                                "key": "suite_1",
+                                "displayName": "Suite 1 DummyLLM",
+                                "line": "Réaction au premier choix (DummyLLMClient).",
+                                "choices": [
+                                    {"text": "Insister"},
+                                    {"text": "Laisser tomber"},
+                                ],
+                            },
+                            {
+                                "key": "suite_2",
+                                "displayName": "Suite 2 DummyLLM",
+                                "line": "Réaction au second choix (DummyLLMClient).",
+                                "choices": [
+                                    {"text": "Poursuivre"},
+                                    {"text": "Changer de sujet"},
+                                ],
+                            },
+                        ],
+                    }
                 else:
                     # Pour les autres modèles (Interaction, etc.)
                     dummy_data: Dict[str, Any] = {

@@ -35,6 +35,13 @@ PLAYER_CHARACTER = "Uresaïr"
 MAX_WORDS_PER_PANEL = 300
 """Plafond du système de dialogue (cible 150). Contrainte vérifiable : c'est une porte."""
 
+BRANCHES = 3
+"""Branches demandées à l'ouverture. Chaque branche coûte des tokens de sortie,
+pas un appel de plus : le fragment entier est produit en une fois."""
+
+MIN_PANELS = 1 + BRANCHES
+"""Ouverture + une suite par branche. En dessous, le fragment est incomplet."""
+
 MIN_CHOICES = 2
 MAX_CHOICES = 8
 """Le GDD annonce 2 à 10 options ; le schéma d'export Unity en plafonne 8.
@@ -98,6 +105,7 @@ def _case(
             "min_choices": MIN_CHOICES,
             "max_choices": MAX_CHOICES,
             "max_words": MAX_WORDS_PER_PANEL,
+            "min_panels": MIN_PANELS,
         },
         "request": {
             "user_instructions": instructions,
@@ -133,7 +141,8 @@ _VOKNIR = _case(
         "Uresaïr entre pour la première fois dans l'atelier de Voknir Esh'Maradel. "
         "C'est le tout premier dialogue du jeu avec un PNJ : il installe le rapport "
         "entre ces deux-là, et il est aussi la porte d'entrée du joueur dans le monde.\n\n"
-        "Écris le panneau d'ouverture de Voknir et les options d'Uresaïr.\n\n"
+        "Écris le panneau d'ouverture de Voknir, trois options pour Uresaïr, et "
+        "pour chacune le panneau qui la suit avec ses propres options.\n\n"
         "Priorités, dans cet ordre :\n"
         "1. Le ton de Voknir et sa manière de s'adresser à Uresaïr — leur rapport "
         "doit être lisible dès la première réplique, sans être expliqué.\n"
@@ -161,7 +170,8 @@ _GENKA = _case(
     instructions=(
         "Uresaïr croise Genka Lien dans le Tunnel vertébral. Genka a quelque chose "
         "qu'elle veut, et compte bien le lui faire payer autrement qu'en monnaie.\n\n"
-        "Écris le panneau où Genka pose son prix, et les options d'Uresaïr.\n\n"
+        "Écris le panneau où Genka pose son prix, trois options pour Uresaïr, et "
+        "pour chacune la réaction de Genka avec les options qu'elle ouvre.\n\n"
         "Ce qui est mesuré ici : la langue de Genka. Son parler de routes, ses "
         "comparaisons spontanées avec d'autres lieux, sa façon de traiter les idées "
         "abstraites comme des gens venus d'ailleurs. Le marchandage doit s'entendre "
@@ -188,8 +198,8 @@ _ZAEHRIA = _case(
         "Uresaïr et Zaehria Neth'Varu s'affrontent dans la Périphérie Caudale, au "
         "seuil des Plis d’ossements. Le désaccord porte sur ce qu'il faut faire "
         "ensuite, et aucune des deux n'a l'intention de céder la première.\n\n"
-        "Écris le panneau de Zaehria au moment où le ton monte, et les options "
-        "d'Uresaïr.\n\n"
+        "Écris le panneau de Zaehria au moment où le ton monte, trois options pour "
+        "Uresaïr, et pour chacune la suite immédiate avec ses propres options.\n\n"
         "Ce qui est mesuré ici : la tenue de la voix de Zaehria sous tension et "
         "avec beaucoup de contexte disponible. Le lieu doit peser sur la scène. "
         "Les options doivent offrir de désamorcer, de tenir bon et d'aggraver — "
@@ -216,7 +226,8 @@ _ENSEVELIE = _case(
         "Uresaïr atteint L'Ensevelie dans le Nexus Synaptique, au plus profond des "
         "Plis d’ossements. Ce qu'elle dit change la compréhension qu'Uresaïr a de "
         "sa propre situation.\n\n"
-        "Écris le panneau de la révélation et les options d'Uresaïr.\n\n"
+        "Écris le panneau de la révélation, trois options pour Uresaïr, et pour "
+        "chacune ce que L'Ensevelie répond, avec les options qui s'ouvrent alors.\n\n"
         "Ce qui est mesuré ici : la fiche de L'Ensevelie ne décrit pas sa voix. Il "
         "faut donc en inventer une, cohérente avec ce que le lieu et sa situation "
         "impliquent, sans contredire ce que le contexte affirme. Les options "
@@ -241,7 +252,8 @@ _AKTHAR = _case(
     instructions=(
         "Uresaïr interroge Akthar-Neth Amatru dans la Nef Centrale du Léviathan "
         "pétrifié, et l'amène précisément sur ce qu'il ne veut pas aborder.\n\n"
-        "Écris le panneau de sa réponse et les options d'Uresaïr.\n\n"
+        "Écris le panneau de sa réponse, trois options pour Uresaïr, et pour "
+        "chacune la suite immédiate avec ses propres options.\n\n"
         "Ce qui est mesuré ici : sa fiche déclare ce dont il refuse de parler. Il "
         "doit se dérober en restant lui-même — détourner, se taire, répondre à côté "
         "— sans céder par complaisance envers le joueur, et sans que le refus "

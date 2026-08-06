@@ -60,6 +60,61 @@ class UnityDialogueGenerationService:
         """Initialise le service."""
         logger.info("UnityDialogueGenerationService initialisé")
     
+    async def generate_dialogue_fragment(
+        self,
+        llm_client: ILLMClient,
+        prompt: str,
+        system_prompt_override: Optional[str] = None,
+    ) -> "UnityDialogueFragmentResponse":
+        """Génère un fragment complet — panneau d'ouverture, options, et suites — en un appel.
+
+        Le chemin d'appel est identique à celui du nœud unique : même
+        ``generate_variants``, donc même comptabilité de coût et même plafond
+        budgétaire. Seul le modèle de réponse change.
+
+        Args:
+            llm_client: Client LLM.
+            prompt: Prompt utilisateur.
+            system_prompt_override: Surcharge du system prompt.
+
+        Returns:
+            Le fragment généré, à clés locales, sans aucun identifiant Unity.
+
+        Raises:
+            ValueError: Si le modèle n'a pas produit de structured output exploitable.
+        """
+        from models.dialogue_structure.unity_dialogue_fragment import (
+            UnityDialogueFragmentResponse,
+        )
+
+        logger.info("Génération d'un fragment de dialogue Unity via Structured Output")
+        variants = await llm_client.generate_variants(
+            prompt=prompt,
+            k=1,
+            response_model=UnityDialogueFragmentResponse,
+            user_system_prompt_override=system_prompt_override,
+        )
+        if not variants:
+            raise ValueError("Aucune variante générée par le LLM")
+
+        result = variants[0]
+        model_name = getattr(llm_client, "model_name", "unknown")
+        if isinstance(result, str):
+            # Le client OpenAI renvoie les erreurs de validation comme chaînes dans
+            # la liste des variantes : sans ce test, elles passeraient pour un succès.
+            raise ValueError(
+                f"Le modèle '{model_name}' n'a pas retourné de structured output "
+                f"exploitable pour le fragment. Détails : {result[:400]}"
+            )
+        if isinstance(result, dict):
+            result = UnityDialogueFragmentResponse.model_validate(result)
+        if not isinstance(result, UnityDialogueFragmentResponse):
+            raise ValueError(
+                f"Type de réponse inattendu pour le fragment : {type(result)}. "
+                f"Modèle utilisé : {model_name}."
+            )
+        return result
+
     async def generate_dialogue_node(
         self,
         llm_client: ILLMClient,

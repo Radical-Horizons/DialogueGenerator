@@ -3,6 +3,7 @@
 Ce service encapsule toute la logique de génération Unity Dialogue,
 permettant de l'utiliser à la fois pour l'endpoint REST et le streaming SSE.
 """
+import json
 import logging
 import asyncio
 import numbers
@@ -331,6 +332,13 @@ class UnityDialogueOrchestrator:
                 and (inspect.isasyncgenfunction(streaming_attr) or asyncio.iscoroutinefunction(streaming_attr))
             )
             
+            # Le mode fragment emprunte la voie non-streamée : le streaming natif est
+            # câblé sur le modèle mono-nœud (normalisation, enrichissement). Le forcer
+            # ici évite d'y toucher, donc toute régression sur le chemin de production.
+            fragment_mode = bool(getattr(request_data, "fragment_mode", False))
+            if fragment_mode:
+                has_streaming = False
+
             if has_streaming:
                 # Utiliser le streaming natif
                 logger.info("Utilisation du streaming natif Responses API")
@@ -413,6 +421,13 @@ class UnityDialogueOrchestrator:
                     generation_response,
                     max_choices=_llm_max_choices_for_request(request_data),
                 )
+            elif fragment_mode:
+                logger.info("Génération d'un fragment complet (un seul appel)")
+                generation_response = await unity_service.generate_dialogue_fragment(
+                    llm_client=llm_client,
+                    prompt=prompt,
+                    system_prompt_override=request_data.system_prompt_override,
+                )
             else:
                 # Fallback vers méthode non-streaming (pour DummyLLMClient, MistralClient, etc.)
                 logger.info("Client ne supporte pas le streaming natif, utilisation de la méthode standard")
@@ -430,9 +445,25 @@ class UnityDialogueOrchestrator:
             # 8. Enrichir et normaliser
             # FIX: Envoyer 'Validating' APRÈS l'enrichissement pour que l'utilisateur voie la validation en cours
             # (Les opérations synchrones peuvent bloquer le générateur async, donc on envoie l'événement après)
-            enriched_nodes = unity_service.enrich_with_ids(content=generation_response, start_id="START")
-            renderer = UnityJsonRenderer()
-            json_content = renderer.render_unity_nodes(nodes=enriched_nodes, normalize=True)
+            if fragment_mode:
+                from services.unity_dialogue_fragment_resolver import resolve_fragment
+
+                resolution = resolve_fragment(
+                    generation_response, speaker_fallback=request_data.npc_speaker_id
+                )
+                if resolution.reference_errors:
+                    # Non bloquant : les clés non résolues restent dans le document et
+                    # la porte de connexité les qualifiera. Écraser ici priverait le
+                    # benchmark d'un verdict `invalid` motivé.
+                    logger.warning(
+                        "Fragment aux références incohérentes : %s",
+                        " ; ".join(resolution.reference_errors),
+                    )
+                json_content = json.dumps(resolution.document, ensure_ascii=False, indent=2)
+            else:
+                enriched_nodes = unity_service.enrich_with_ids(content=generation_response, start_id="START")
+                renderer = UnityJsonRenderer()
+                json_content = renderer.render_unity_nodes(nodes=enriched_nodes, normalize=True)
             
             # Étape 3: Validating (après enrichissement pour garantir l'ordre d'envoi)
             yield GenerationEvent(type='step', data={'step': 'Validating'})

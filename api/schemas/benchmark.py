@@ -24,7 +24,14 @@ BenchmarkGenerationStatus = Literal["valid", "invalid", "config_error"]
 """
 
 BenchmarkGateId = Literal[
-    "parsable", "schema", "choice_ids", "flags", "language", "non_empty", "length"
+    "parsable",
+    "schema",
+    "choice_ids",
+    "flags",
+    "language",
+    "non_empty",
+    "length",
+    "connectivity",
 ]
 """Identifiant stable d'une porte structurelle."""
 
@@ -54,6 +61,7 @@ class BenchmarkCaseExpectations(BaseModel):
         min_choices: Nombre minimal de choix attendu sur le nœud généré.
         max_choices: Nombre maximal de choix attendu sur le nœud généré.
         max_words: Plafond de mots du texte créatif d'un panneau.
+        min_panels: Nombre minimal de panneaux attendu dans le fragment.
         expected_flag_ids: Flags dont la présence est attendue dans la génération.
     """
 
@@ -66,6 +74,15 @@ class BenchmarkCaseExpectations(BaseModel):
             "Plafond de mots de la réplique d'un panneau. Le système de dialogue du "
             "GDD vise 150 mots et plafonne à 300 : c'est une contrainte objectivement "
             "vérifiable, qui relève d'une porte et non d'un retrait de points par le juge."
+        ),
+    )
+    min_panels: Optional[int] = Field(
+        None,
+        ge=1,
+        description=(
+            "Nombre minimal de panneaux du fragment. L'unité mesurée est un panneau, "
+            "ses options et la suite de chacune : un cas qui n'en obtient qu'un seul "
+            "ne mesure ni la conséquence perceptible ni la cohérence des embranchements."
         ),
     )
     expected_flag_ids: List[str] = Field(

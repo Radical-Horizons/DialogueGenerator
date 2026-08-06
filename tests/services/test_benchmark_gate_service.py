@@ -220,3 +220,91 @@ def test_length_gate_measures_the_longest_panel_not_the_sum(
         expectations=BenchmarkCaseExpectations(max_words=60),
     )
     assert [failure for failure in failures if failure.gate == "length"] == []
+
+
+def _fragment_document(*, dangling: bool = False, unreachable: bool = False,
+                       duplicate: bool = False) -> Dict[str, Any]:
+    """Document Unity à plusieurs panneaux, altérable pour exercer la connexité."""
+    root_targets = ["suite-a", "suite-b"]
+    if dangling:
+        root_targets = ["suite-a", "panneau-absent"]
+    nodes: List[Dict[str, Any]] = [
+        {
+            "id": "START",
+            "displayName": "Ouverture",
+            "speaker": "Uresaïr",
+            "line": FRENCH_LINE,
+            "choices": [
+                {"choiceId": f"choice_START_{index}", "text": f"Option {index}", "targetNode": target}
+                for index, target in enumerate(root_targets)
+            ],
+        }
+    ]
+    for suffix in ("a", "b"):
+        node_id = "suite-a" if duplicate else f"suite-{suffix}"
+        nodes.append(
+            {
+                "id": node_id,
+                "displayName": f"Suite {suffix}",
+                "speaker": "Uresaïr",
+                "line": FRENCH_LINE,
+                "choices": [
+                    {"choiceId": f"choice_{node_id}_{suffix}_0", "text": "Poursuivre", "targetNode": "END"},
+                    {"choiceId": f"choice_{node_id}_{suffix}_1", "text": "Renoncer", "targetNode": "END"},
+                ],
+            }
+        )
+    if unreachable:
+        nodes.append(
+            {
+                "id": "orpheline",
+                "displayName": "Orpheline",
+                "speaker": "Uresaïr",
+                "line": FRENCH_LINE,
+                "choices": [
+                    {"choiceId": "choice_orpheline_0", "text": "A", "targetNode": "END"},
+                    {"choiceId": "choice_orpheline_1", "text": "B", "targetNode": "END"},
+                ],
+            }
+        )
+    return {"schemaVersion": "1.1.0", "nodes": nodes}
+
+
+def test_coherent_fragment_passes_connectivity(gate: BenchmarkGateService) -> None:
+    """Un fragment dont chaque branche aboutit franchit la porte."""
+    failures = gate.evaluate(json.dumps(_fragment_document(), ensure_ascii=False))
+    assert [f for f in failures if f.gate == "connectivity"] == []
+
+
+def test_dangling_target_fails_connectivity(gate: BenchmarkGateService) -> None:
+    """Un choix menant vers un panneau absent rend la génération invalide."""
+    failures = gate.evaluate(json.dumps(_fragment_document(dangling=True), ensure_ascii=False))
+    connectivity = [f for f in failures if f.gate == "connectivity"]
+    assert connectivity and "panneau-absent" in connectivity[0].message
+
+
+def test_unreachable_panel_fails_connectivity(gate: BenchmarkGateService) -> None:
+    """Un panneau que rien ne désigne est du texte mort, pas une œuvre."""
+    failures = gate.evaluate(json.dumps(_fragment_document(unreachable=True), ensure_ascii=False))
+    assert any(f.gate == "connectivity" and "inatteignable" in f.message for f in failures)
+
+
+def test_duplicate_node_id_fails_connectivity(gate: BenchmarkGateService) -> None:
+    """Deux panneaux au même identifiant rendent l'enchaînement ambigu."""
+    failures = gate.evaluate(json.dumps(_fragment_document(duplicate=True), ensure_ascii=False))
+    assert any(f.gate == "connectivity" for f in failures)
+
+
+def test_single_node_generation_still_passes_connectivity(gate: BenchmarkGateService) -> None:
+    """Non-régression : une génération mono-nœud aux choix END reste valide."""
+    failures = gate.evaluate(json.dumps(_document(), ensure_ascii=False))
+    assert [f for f in failures if f.gate == "connectivity"] == []
+
+
+def test_fragment_below_min_panels_is_invalid(gate: BenchmarkGateService) -> None:
+    """Un cas qui attend un fragment ne se satisfait pas d'un panneau isolé."""
+    failures = gate.evaluate(
+        json.dumps(_document(), ensure_ascii=False),
+        expectations=BenchmarkCaseExpectations(min_panels=4),
+    )
+    assert any("panneau" in f.message for f in failures)

@@ -952,6 +952,10 @@ class BenchmarkRunService:
         update: dict[str, Any] = {
             "llm_model_identifier": model_id,
             "context_seed": seed,
+            # L'unité mesurée est un fragment complet : panneau d'ouverture, options,
+            # et la suite de chacune avec ses propres options. Sur un nœud isolé,
+            # « conséquence perceptible » et « cohérence des embranchements » notent le vide.
+            "fragment_mode": True,
             "user_instructions": (
                 f"{case.request.user_instructions.rstrip()}\n\n"
                 f"{NARRATION_MODE_DIRECTIVES[narration_mode]}"
