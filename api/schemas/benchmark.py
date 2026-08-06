@@ -23,8 +23,18 @@ BenchmarkGenerationStatus = Literal["valid", "invalid", "config_error"]
   de configuration (clé absente, paramètre refusé) — ni noté, ni classé.
 """
 
-BenchmarkGateId = Literal["parsable", "schema", "choice_ids", "flags", "language", "non_empty"]
+BenchmarkGateId = Literal[
+    "parsable", "schema", "choice_ids", "flags", "language", "non_empty", "length"
+]
 """Identifiant stable d'une porte structurelle."""
+
+BenchmarkNarrationMode = Literal["avec", "sans"]
+"""Présence de didascalies de narration dans le dialogue demandé.
+
+C'est un **mode de run**, pas une propriété de cas : la question ne dépend ni du
+personnage ni du lieu, et la porter par cas doublerait le coût de la suite pour
+un axe qui s'observe très bien en comparant deux runs.
+"""
 
 BenchmarkRunStatus = Literal[
     "running",
@@ -43,11 +53,21 @@ class BenchmarkCaseExpectations(BaseModel):
     Attributes:
         min_choices: Nombre minimal de choix attendu sur le nœud généré.
         max_choices: Nombre maximal de choix attendu sur le nœud généré.
+        max_words: Plafond de mots du texte créatif d'un panneau.
         expected_flag_ids: Flags dont la présence est attendue dans la génération.
     """
 
     min_choices: Optional[int] = Field(None, ge=0, description="Nombre minimal de choix attendu")
     max_choices: Optional[int] = Field(None, ge=0, description="Nombre maximal de choix attendu")
+    max_words: Optional[int] = Field(
+        None,
+        gt=0,
+        description=(
+            "Plafond de mots de la réplique d'un panneau. Le système de dialogue du "
+            "GDD vise 150 mots et plafonne à 300 : c'est une contrainte objectivement "
+            "vérifiable, qui relève d'une porte et non d'un retrait de points par le juge."
+        ),
+    )
     expected_flag_ids: List[str] = Field(
         default_factory=list, description="Flags attendus dans la génération"
     )
@@ -168,6 +188,7 @@ class BenchmarkRunConfig(BaseModel):
         models: Modèles candidats (au moins un).
         repetitions: Nombre de générations par cas et par modèle.
         budget_cap_usd: Plafond dur du run, en USD.
+        narration_mode: Didascalies de narration demandées ou non, pour tout le run.
     """
 
     suite_id: str = Field(..., min_length=1, description="Suite à rejouer")
@@ -175,6 +196,13 @@ class BenchmarkRunConfig(BaseModel):
     models: List[str] = Field(..., min_length=1, description="Modèles candidats")
     repetitions: int = Field(3, ge=1, le=20, description="Générations par cas et par modèle")
     budget_cap_usd: float = Field(..., gt=0, description="Plafond dur du run en USD")
+    narration_mode: BenchmarkNarrationMode = Field(
+        "sans",
+        description=(
+            "Didascalies de narration : appliqué uniformément à tous les cas du run. "
+            "Pour trancher la question produit, lancer deux runs et comparer."
+        ),
+    )
 
     @field_validator("models")
     @classmethod
@@ -288,6 +316,13 @@ class BenchmarkRunIdentity(BaseModel):
     suite_fingerprint: str = Field(..., description="Empreinte du contenu de la suite")
     models: List[str]
     repetitions: int
+    narration_mode: BenchmarkNarrationMode = Field(
+        "sans",
+        description=(
+            "Mode de narration du run. Deux runs de modes différents ne demandent pas "
+            "la même chose au modèle : les agréger mélangerait deux mesures."
+        ),
+    )
 
 
 class BenchmarkRun(BaseModel):

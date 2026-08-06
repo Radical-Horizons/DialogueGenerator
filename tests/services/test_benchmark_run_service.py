@@ -596,3 +596,71 @@ def test_cost_estimate_reports_unpriced_models(tmp_path: Path) -> None:
     assert estimate.generations == 12
     assert estimate.unpriced_models == [MODEL_B]
     assert estimate.estimated_min_usd < estimate.estimated_max_usd
+
+
+def test_narration_mode_reaches_the_case_instructions(tmp_path: Path) -> None:
+    """Le mode du run s'ajoute à la consigne, sans effacer celle du cas.
+
+    Le mode déplace la cible commune à tous les modèles ; il n'avantage personne
+    tant qu'il s'applique identiquement, mais il doit effectivement arriver au
+    modèle, sinon les deux runs mesurent la même chose.
+    """
+    service = _service(tmp_path, orchestrator_factory=lambda request_id: None)
+    case = _suite(service._suite_store, case_count=1).cases[0]
+
+    sans = service._build_request(case, MODEL_A, "sans")
+    avec = service._build_request(case, MODEL_A, "avec")
+
+    assert case.request.user_instructions in sans.user_instructions
+    assert case.request.user_instructions in avec.user_instructions
+    assert "SANS didascalies" in sans.user_instructions
+    assert "AVEC didascalies" in avec.user_instructions
+    assert sans.user_instructions != avec.user_instructions
+
+
+def test_narration_mode_does_not_vary_between_models(tmp_path: Path) -> None:
+    """Deux modèles d'un même run reçoivent exactement la même consigne."""
+    service = _service(tmp_path, orchestrator_factory=lambda request_id: None)
+    case = _suite(service._suite_store, case_count=1).cases[0]
+
+    first = service._build_request(case, MODEL_A, "avec")
+    second = service._build_request(case, MODEL_B, "avec")
+
+    assert first.user_instructions == second.user_instructions
+    assert first.context_seed == second.context_seed
+
+
+@pytest.mark.asyncio
+async def test_narration_mode_enters_the_run_identity(tmp_path: Path) -> None:
+    """L'identité du run porte le mode : deux modes ne s'agrègent pas.
+
+    Sans cette trace, un rapport moyennerait des générations qui ne répondaient
+    pas à la même demande.
+    """
+    service = _service(
+        tmp_path,
+        orchestrator_factory=lambda request_id: _FakeOrchestrator(
+            [], cost=0.001, json_content=_unity_document()
+        ),
+    )
+    suite = _suite(service._suite_store, case_count=1)
+
+    run, _ = await service.start_run(
+        BenchmarkRunConfig(
+            suite_id=suite.suite_id,
+            models=[MODEL_A],
+            repetitions=1,
+            budget_cap_usd=1.0,
+            narration_mode="avec",
+        )
+    )
+    await _drain(service)
+
+    assert run.identity.narration_mode == "avec"
+    assert service.get_run(run.run_id).identity.narration_mode == "avec"
+
+
+def test_default_narration_mode_is_without_didascalies() -> None:
+    """Le défaut suit le cas privilégié du produit : dialogue sans didascalies."""
+    config = BenchmarkRunConfig(suite_id="s", models=[MODEL_A], budget_cap_usd=1.0)
+    assert config.narration_mode == "sans"

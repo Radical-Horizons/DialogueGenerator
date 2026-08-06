@@ -161,3 +161,13 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-pairwise.md`
   summary: État de passe jamais persisté en cours de route — un arrêt brutal laisse `_pass.json` figé sur `running`, `duels_completed: 0`.
   evidence: Revue adversariale + edge-case hunter — vaut aussi pour la passe rubrique. Correctif : persister toutes les N unités, et requalifier un `running` orphelin au démarrage.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-seed-suite.md`
+  summary: Fiches Connaissances comme véritable unité de contexte des cas de benchmark, injectées **filtrées par le niveau de connaissance des personnages présents**.
+  evidence: Base Notion « Connaissances Alteir » — 506 entrées, trois descriptions graduées (Perçu ~200 car. / Identifié ~280 / Compris ~550, ~300 tokens pièce), champ `Injection DG par défaut`, `Slug` alimentant les clés runtime `etat:{slug_perso}:{slug_concept}`. Non synchronisées localement à ce jour. **Le système sert à guider, pas à piéger** : si tous les personnages présents sont au niveau Perçu, le modèle ne reçoit que le niveau Perçu. Prérequis : import Notion de la base, puis remplacement du contexte « fiche personnage complète » par une sélection de Connaissances filtrée.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-seed-suite.md`
+  summary: Arbitrer la divergence entre le nombre d'options annoncé par le GDD (2 à 10) et le plafond du schéma d'export Unity (8).
+  evidence: `data/GDD_categories/systemes_de_jeu/Dialogues_*.json` annonce 2 à 10 options par nœud ; `docs/resources/dialogue-format.schema.json` plafonne `choices` à 8 (4 en `cutsceneMode`). Les attentes des cas de benchmark sont calées sur 8 — le schéma est ce qui recale effectivement une génération. À trancher : relever le schéma, ou corriger la fiche GDD.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-seed-suite.md`
+  summary: Résoudre les lieux parents depuis les relations Notion plutôt qu'à la main.
+  evidence: Les fiches lieu stockent leurs relations en UUID Notion non résolus sur disque (`Communautés présentes`, `Espèces présentes`…). Les lieux parents des cas de benchmark ont été renseignés manuellement ; l'Atelier des Matrices Ossifiées et le Tunnel vertébral n'en ont aucun faute d'information fiable.

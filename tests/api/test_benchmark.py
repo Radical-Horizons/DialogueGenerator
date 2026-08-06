@@ -473,3 +473,31 @@ def test_guest_can_still_read_suites(
         assert client.get(f"{BASE}/suites/smoke").status_code == 200
     finally:
         app.dependency_overrides.pop(get_current_user_or_none, None)
+
+
+def test_seeded_store_serves_the_starter_suites(tmp_path: Path) -> None:
+    """Un magasin neuf sert les suites de départ sans configuration préalable.
+
+    C'est la condition pour qu'un poste neuf puisse mesurer quelque chose : un
+    benchmark embarque son jeu de test, il ne le réclame pas à l'utilisateur.
+    """
+    from services.benchmark_suite_seed import SMOKE_SUITE_ID, STANDARD_SUITE_ID
+
+    store = BenchmarkSuiteStore(suites_dir=tmp_path / "suites")
+    store.ensure_seeded()
+
+    app.dependency_overrides[get_benchmark_suite_store] = lambda: store
+    try:
+        with TestClient(app) as client:
+            listed = client.get(f"{BASE}/suites")
+            assert listed.status_code == 200
+            served = {summary["suite_id"] for summary in listed.json()["suites"]}
+            assert served == {SMOKE_SUITE_ID, STANDARD_SUITE_ID}
+
+            detail = client.get(f"{BASE}/suites/{STANDARD_SUITE_ID}")
+            assert detail.status_code == 200
+            cases = detail.json()["suite"]["cases"]
+            assert len(cases) == 5
+            assert all(case["request"]["context_selections"]["characters_full"] for case in cases)
+    finally:
+        app.dependency_overrides.pop(get_benchmark_suite_store, None)

@@ -19,11 +19,15 @@ from typing import List, Optional
 from pydantic import ValidationError
 
 from api.schemas.benchmark import BenchmarkSuite, BenchmarkSuiteSummary
+from services.benchmark_suite_seed import default_suites
 from services.gdd_notion_atomic_io import read_json_file, write_json_atomic
 
 logger = logging.getLogger(__name__)
 
 _SUITE_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+
+_SEED_MARKER_NAME = ".seeded"
+"""Marqueur d'amorçage : l'absence de suite ne suffit pas à décider de semer."""
 
 _WINDOWS_RESERVED_NAMES = frozenset(
     {"CON", "PRN", "AUX", "NUL"}
@@ -103,6 +107,40 @@ class BenchmarkSuiteStore:
                 f"suite_id réservé par Windows : '{suite_id}' — les écritures seraient perdues"
             )
         return self._suites_dir / f"{suite_id}.json"
+
+    def ensure_seeded(self) -> None:
+        """Sème les suites de départ, une seule fois dans la vie du magasin.
+
+        Un benchmark embarque son jeu de test : sans ce semis, un poste neuf ne
+        peut rien mesurer avant que quelqu'un ait rédigé du JSON à la main.
+
+        Le marqueur sur disque, et non la vacuité du répertoire, décide de
+        l'amorçage : sinon supprimer la dernière suite la ferait renaître au
+        contenu d'usine, ce qui contredirait l'intention de la suppression.
+
+        Cette méthode **écrit** : elle est appelée à la construction du service,
+        jamais depuis un chemin de lecture — un ``GET`` ne doit pas provoquer
+        d'écriture.
+        """
+        marker = self._suites_dir / _SEED_MARKER_NAME
+        if marker.exists():
+            return
+        if self._suites_dir.exists() and any(self._suites_dir.glob("*.json")):
+            self._write_seed_marker(marker)
+            return
+        for suite in default_suites():
+            self.save_suite(suite, bump_version=False)
+            logger.info("Suite de benchmark de départ semée : %s", suite.suite_id)
+        self._write_seed_marker(marker)
+
+    @staticmethod
+    def _write_seed_marker(marker: Path) -> None:
+        """Pose le marqueur d'amorçage, sans faire échouer le service s'il résiste."""
+        try:
+            marker.parent.mkdir(parents=True, exist_ok=True)
+            marker.write_text("seeded", encoding="utf-8")
+        except OSError as exc:
+            logger.warning("Marqueur d'amorçage des suites non écrit : %s", exc)
 
     def list_suites(self) -> List[BenchmarkSuiteSummary]:
         """Liste les suites lisibles du répertoire.

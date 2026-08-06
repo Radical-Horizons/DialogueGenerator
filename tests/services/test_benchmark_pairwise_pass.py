@@ -107,10 +107,16 @@ class _CountingOrchestrator:
         """Émet une génération valide, ou non française selon le modèle ou le créneau."""
         _CountingOrchestrator.calls.append(request.llm_model_identifier)
         document = _unity_document()
-        slot = (request.llm_model_identifier, request.user_instructions)
+        # Le moteur ajoute la directive de mode de narration à la consigne du cas :
+        # le créneau se reconnaît au préfixe, pas à l'égalité stricte.
+        matched_slot = any(
+            model_id == request.llm_model_identifier
+            and request.user_instructions.startswith(instructions)
+            for model_id, instructions in self._invalid_slots
+        )
         if (
             self._invalid_for and request.llm_model_identifier == self._invalid_for
-        ) or slot in self._invalid_slots:
+        ) or matched_slot:
             document = json.dumps(
                 {
                     "schemaVersion": "1.1.0",

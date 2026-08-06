@@ -55,6 +55,27 @@ def _collect_text(nodes: List[Dict[str, Any]]) -> str:
     return "\n".join(part for part in parts if part.strip())
 
 
+def _longest_line_word_count(nodes: List[Dict[str, Any]]) -> int:
+    """Compte les mots de la réplique la plus longue.
+
+    Le plafond du GDD porte sur **un panneau**, pas sur la génération entière :
+    une arborescence de six nœuds courts ne doit pas être recalée parce que la
+    somme dépasse, et un seul nœud-fleuve doit l'être même si les autres sont brefs.
+
+    Args:
+        nodes: Nœuds Unity de la génération.
+
+    Returns:
+        Nombre de mots de la réplique la plus longue ; 0 si aucune réplique.
+    """
+    counts = [
+        len(node["line"].split())
+        for node in nodes
+        if isinstance(node, dict) and isinstance(node.get("line"), str)
+    ]
+    return max(counts) if counts else 0
+
+
 def _duplicate_choice_ids(nodes: List[Dict[str, Any]]) -> List[str]:
     """Relève les ``choiceId`` dupliqués au sein d'un même nœud.
 
@@ -284,6 +305,18 @@ class BenchmarkGateService:
                     ),
                 )
             )
+        if expectations.max_words is not None:
+            longest = _longest_line_word_count(nodes)
+            if longest > expectations.max_words:
+                failures.append(
+                    BenchmarkGateFailure(
+                        gate="length",
+                        message=(
+                            f"Panneau de {longest} mots, plafond du cas à "
+                            f"{expectations.max_words}"
+                        ),
+                    )
+                )
         if expectations.expected_flag_ids:
             blob = json.dumps(nodes, ensure_ascii=False)
             missing = [flag for flag in expectations.expected_flag_ids if flag not in blob]

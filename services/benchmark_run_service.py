@@ -35,6 +35,7 @@ from api.schemas.benchmark import (
     BenchmarkGateFailure,
     BenchmarkGenerationRecord,
     BenchmarkModelDiagnostic,
+    BenchmarkNarrationMode,
     BenchmarkRun,
     BenchmarkRunConfig,
     BenchmarkRunIdentity,
@@ -42,7 +43,7 @@ from api.schemas.benchmark import (
     BenchmarkSuite,
 )
 from api.schemas.dialogue import GenerateUnityDialogueRequest
-from constants import ModelNames
+from constants import Defaults, ModelNames
 from core.llm.llm_client import DummyLLMClient
 from core.llm.unity_allowed_models import get_unity_structured_output_allowed_models
 from factories.llm_factory import LLMClientFactory
@@ -56,8 +57,40 @@ logger = logging.getLogger(__name__)
 BENCHMARK_BILLABLE_USER_ID = "benchmark"
 """Identité de facturation dédiée : le coût des runs n'entame jamais le quota d'un humain."""
 
-DEFAULT_PROMPT_TOKENS_ESTIMATE = 5000
-"""Estimation d'entrée quand le cas ne déclare pas de budget de contexte."""
+DEFAULT_PROMPT_TOKENS_ESTIMATE = Defaults.CONTEXT_TOKENS
+"""Estimation d'entrée quand le cas ne déclare aucun budget de contexte.
+
+Alignée sur le défaut applicatif : une valeur inventée plus basse ferait passer
+le plafond de budget pour tenable alors que l'entrée domine le coût ici — le GDD
+fournit des milliers de tokens de contexte pour quelques centaines de mots écrits.
+"""
+
+PROMPT_OVERHEAD_TOKENS_ESTIMATE = 1500
+"""Ce que le prompt coûte hors contexte GDD : system prompt, guides, consigne.
+
+``max_context_tokens`` ne plafonne que la part GDD. Sans cet ajout, l'estimation
+serait systématiquement optimiste — et un plafond de budget calé dessus sauterait
+avant la fin du run.
+"""
+
+NARRATION_MODE_DIRECTIVES: dict[str, str] = {
+    "sans": (
+        "Mode de narration : SANS didascalies. Écris uniquement les répliques "
+        "parlées et les libellés de choix. N'ajoute ni description d'action, ni "
+        "indication de jeu, ni incise narrative."
+    ),
+    "avec": (
+        "Mode de narration : AVEC didascalies. Accompagne les répliques de brèves "
+        "indications d'action, de regard ou d'attitude, intégrées au texte du "
+        "panneau. Elles restent au service de la réplique, jamais un récit autonome."
+    ),
+}
+"""Directive ajoutée à la consigne de chaque cas selon le mode du run.
+
+Le mode est une propriété du run et non du cas : la question « didascalies ou
+non » ne dépend ni du personnage ni du lieu, et la porter par cas doublerait le
+coût de la suite pour un axe qui s'observe en comparant deux runs.
+"""
 
 DEFAULT_COMPLETION_TOKENS_ESTIMATE = 1000
 """Estimation de sortie quand le cas ne déclare pas de plafond de complétion."""
@@ -293,7 +326,9 @@ class BenchmarkRunService:
                 unpriced.append(model_id)
                 continue
             for case in suite.cases:
-                prompt_tokens = case.request.max_context_tokens or DEFAULT_PROMPT_TOKENS_ESTIMATE
+                prompt_tokens = (
+                    case.request.max_context_tokens or DEFAULT_PROMPT_TOKENS_ESTIMATE
+                ) + PROMPT_OVERHEAD_TOKENS_ESTIMATE
                 completion_tokens = (
                     case.request.max_completion_tokens or DEFAULT_COMPLETION_TOKENS_ESTIMATE
                 )
@@ -425,6 +460,7 @@ class BenchmarkRunService:
                 suite_fingerprint=suite_fingerprint(suite),
                 models=list(config.models),
                 repetitions=config.repetitions,
+                narration_mode=config.narration_mode,
             ),
             status="running",
             generations_total=len(suite.cases) * len(config.models) * config.repetitions,
@@ -880,13 +916,19 @@ class BenchmarkRunService:
         )
 
     def _build_request(
-        self, case: BenchmarkCase, model_id: str
+        self,
+        case: BenchmarkCase,
+        model_id: str,
+        narration_mode: BenchmarkNarrationMode = "sans",
     ) -> GenerateUnityDialogueRequest:
         """Construit la requête d'un cas pour un modèle donné.
 
         La graine de contexte est dérivée du cas : tous les modèles et toutes les
         répétitions d'un même cas reçoivent alors strictement le même prompt, ce
         qui est la condition d'une comparaison honnête.
+
+        Le mode de narration s'ajoute à la consigne du cas, identiquement pour tous
+        les modèles du run — il déplace la cible commune, il n'avantage personne.
 
         Les paramètres d'échantillonnage que le modèle n'accepte pas sont retirés :
         un cas capturé avec ``top_p`` ferait répondre 400 aux tiers GPT-5.6, et le
@@ -896,6 +938,7 @@ class BenchmarkRunService:
         Args:
             case: Cas rejoué.
             model_id: Modèle candidat.
+            narration_mode: Mode de narration du run.
 
         Returns:
             La requête à passer à l'orchestrateur.
@@ -909,6 +952,10 @@ class BenchmarkRunService:
         update: dict[str, Any] = {
             "llm_model_identifier": model_id,
             "context_seed": seed,
+            "user_instructions": (
+                f"{case.request.user_instructions.rstrip()}\n\n"
+                f"{NARRATION_MODE_DIRECTIVES[narration_mode]}"
+            ),
         }
         if ModelNames.normalize_model_id(model_id) in ModelNames.MODELS_WITHOUT_CUSTOM_TEMPERATURE:
             update["top_p"] = None
@@ -935,7 +982,7 @@ class BenchmarkRunService:
             ``config_error`` — jamais un score nul, qui classerait à tort le modèle
             dernier pour un problème de protocole.
         """
-        request = self._build_request(case, model_id)
+        request = self._build_request(case, model_id, run.config.narration_mode)
         request_id = f"benchmark-{run.run_id}-{slug_for_filename(model_id)}-{slug_for_filename(case.case_id)}-{repetition}"
         started = time.monotonic()
 

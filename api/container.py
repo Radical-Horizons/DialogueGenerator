@@ -585,6 +585,10 @@ class ServiceContainer:
             self._benchmark_suite_store = BenchmarkSuiteStore(
                 suites_dir=root / FilePaths.BENCHMARK_SUITES_DIR
             )
+            # Amorçage ici, jamais depuis un chemin de lecture : un GET ne doit pas
+            # provoquer d'écriture disque. Un benchmark embarque son jeu de test —
+            # sans ce semis, un poste neuf ne peut rien mesurer.
+            self._benchmark_suite_store.ensure_seeded()
             logger.info("BenchmarkSuiteStore initialisé dans le container.")
         return self._benchmark_suite_store
 

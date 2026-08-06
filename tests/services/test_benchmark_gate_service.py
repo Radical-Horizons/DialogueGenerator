@@ -11,6 +11,7 @@ from typing import Any, Dict, List
 
 import pytest
 
+from api.schemas.benchmark import BenchmarkCaseExpectations
 from services.benchmark_gate_service import BenchmarkGateService
 
 FRENCH_LINE = (
@@ -155,3 +156,67 @@ def test_flag_service_failure_does_not_block() -> None:
 
     gate = BenchmarkGateService(flag_validation_service=_BrokenFlagService())
     assert gate.evaluate(json.dumps(_document(), ensure_ascii=False)) == []
+
+
+def test_overlong_panel_fails_the_length_gate(gate: BenchmarkGateService) -> None:
+    """Un panneau au-delà du plafond du cas est recalé par la porte `length`.
+
+    Le système de dialogue vise 150 mots et plafonne à 300 : c'est une contrainte
+    objectivement vérifiable, qui n'a pas à passer par le jugement d'un LLM.
+    """
+    long_line = " ".join([FRENCH_LINE] * 20)
+    failures = gate.evaluate(
+        json.dumps(_document(line=long_line), ensure_ascii=False),
+        expectations=BenchmarkCaseExpectations(max_words=300),
+    )
+    length_failures = [failure for failure in failures if failure.gate == "length"]
+    assert len(length_failures) == 1
+    assert "300" in length_failures[0].message
+
+
+def test_panel_within_the_word_ceiling_passes(gate: BenchmarkGateService) -> None:
+    """Un panneau sous le plafond ne déclenche pas la porte."""
+    failures = gate.evaluate(
+        json.dumps(_document(), ensure_ascii=False),
+        expectations=BenchmarkCaseExpectations(max_words=300),
+    )
+    assert [failure for failure in failures if failure.gate == "length"] == []
+
+
+def test_length_gate_is_inert_without_max_words(gate: BenchmarkGateService) -> None:
+    """Sans plafond déclaré, la longueur ne recale rien.
+
+    Le plafond est une donnée du cas : un cas qui n'en pose pas ne doit pas hériter
+    d'une limite implicite.
+    """
+    long_line = " ".join([FRENCH_LINE] * 20)
+    failures = gate.evaluate(
+        json.dumps(_document(line=long_line), ensure_ascii=False),
+        expectations=BenchmarkCaseExpectations(min_choices=2),
+    )
+    assert [failure for failure in failures if failure.gate == "length"] == []
+
+
+def test_length_gate_measures_the_longest_panel_not_the_sum(
+    gate: BenchmarkGateService,
+) -> None:
+    """Le plafond porte sur un panneau, pas sur la génération entière.
+
+    Une arborescence de nœuds courts ne doit pas être recalée parce que la somme
+    de ses répliques dépasse le plafond d'un seul panneau.
+    """
+    document = _document()
+    document["nodes"] = [
+        {**document["nodes"][0], "id": f"node-{index}", "line": FRENCH_LINE}
+        for index in range(1, 6)
+    ]
+    for index, node in enumerate(document["nodes"]):
+        node["choices"] = [
+            {**choice, "choiceId": f"choice_node-{index + 1}_{position}"}
+            for position, choice in enumerate(node["choices"])
+        ]
+    failures = gate.evaluate(
+        json.dumps(document, ensure_ascii=False),
+        expectations=BenchmarkCaseExpectations(max_words=60),
+    )
+    assert [failure for failure in failures if failure.gate == "length"] == []
