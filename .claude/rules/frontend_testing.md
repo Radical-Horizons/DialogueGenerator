@@ -1,6 +1,11 @@
 ---
 description: Tests Frontend — Vitest, React Testing Library, Playwright, workflow de test automatique, tout bug ou problème lié à l'interface, aux boutons, aux écrans, aux formulaires, etc.
-alwaysApply: false
+paths:
+  - "frontend/**/*.test.{ts,tsx}"
+  - "frontend/src/test/**"
+  - "e2e/**/*.ts"
+  - "playwright.config.ts"
+  - "frontend/vitest.config.ts"
 ---
 - Tu es autonome pour les tests frontend via l'outil browser. Tu peux te connecter avec le login admin et le mot de passe admin123.
 - **Tests unitaires**: Vitest + React Testing Library dans `frontend/src/test/` et `frontend/src/**/*.test.ts`. Tests rapides, isolation complète, mocks pour API. Tests de parsing dans `frontend/src/hooks/usePromptPreview.test.ts`.

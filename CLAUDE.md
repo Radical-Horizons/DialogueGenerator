@@ -6,22 +6,30 @@ DialogueGenerator est une app React + FastAPI de génération de dialogues RPG v
 
 ## Règles toujours actives
 
+Ces dix-là n'ont **pas** de `paths:` : elles se déclenchent sur une **action** — pousser,
+ouvrir une PR, déléguer, répondre — et aucun chemin de fichier ne les ferait apparaître au
+bon moment. Les imports ci-dessous ne font que fixer leur ordre de priorité ; le chargement
+lui-même vient de `.claude/rules/`.
+
 @.claude/rules/application_role.md
 @.claude/rules/agentivity.md
 @.claude/rules/interaction_style.md
 @.claude/rules/shell_discipline.md
 @.claude/rules/meta_agent.md
-@.claude/rules/python.md
 @.claude/rules/env.md
 @.claude/rules/branching.md
 @.claude/rules/git_commit.md
 @.claude/rules/ci_before_push.md
+@.claude/rules/workflow.md
 
 ## Routage des règles conditionnelles
 
-Cursor attachait ces règles automatiquement par glob. Claude Code n'a pas ce mécanisme : **lis la règle correspondante avant de toucher aux fichiers listés**.
+Ces règles portent un `paths:` et **se chargent toutes seules** quand un fichier
+correspondant est lu — c'est le mécanisme natif de `.claude/rules/`. Le tableau reste un
+index de lecture pour l'humain, et un moyen d'aller chercher une règle **avant** d'ouvrir le
+premier fichier. Voir `.claude/rules/claude_harness_authoring.md`.
 
-| Tu touches à… | Lis d'abord |
+| Tu touches à… | Règle chargée |
 |---|---|
 | `api/**/*.py` (routers, schemas) | `.claude/rules/backend_api.md` |
 | `api/schemas/**`, validation Unity, erreurs inline graphe | `.claude/rules/api_validation_errors.md` |
@@ -47,11 +55,10 @@ Cursor attachait ces règles automatiquement par glob. Claude Code n'a pas ce m�
 | Bump de version, tag, canvas versions | `.claude/rules/app_versioning.md` + skill `prod-release` |
 | Logs, archivage, rotation, consultation API | `.claude/rules/logging.md` |
 | Flags de verbosité, diagnostic | `.claude/rules/debugging.md` |
-| Commandes, tests, venv — workflow transverse | `.claude/rules/workflow.md` |
-| Déléguer à un subagent, revue multi-agents | `.claude/rules/subagents.md` |
-| Écrire une règle / skill / commande / subagent | `.claude/rules/claude_harness_authoring.md` |
+| N'importe quel `**/*.py` — imports, types, architecture | `.claude/rules/python.md` |
+| `.claude/agents/**` — déléguer, revue multi-agents | `.claude/rules/subagents.md` |
+| `.claude/**/*.md` — écrire une règle / skill / commande | `.claude/rules/claude_harness_authoring.md` |
 | `.github/workflows/**` — CI, merge `data/`, relais `workflow_dispatch` | `.claude/rules/github_automation.md` |
-| `ui/**/*.py`, `main_app.py` | `.claude/rules/ui.md` — ⚠️ **déprécié** (PySide6) |
 
 ## Services
 

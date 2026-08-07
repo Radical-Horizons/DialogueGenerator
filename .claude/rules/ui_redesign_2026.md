@@ -1,9 +1,9 @@
 ---
 description: Refonte UI 2026 — prototypes HTML de référence, où les lire et comment s'en servir
-globs: ["frontend/src/**", "docs/design/refonte-ui-2026/**"]
-alwaysApply: false
+paths:
+  - "frontend/src/**"
+  - "docs/design/refonte-ui-2026/**"
 ---
-
 # Refonte UI 2026 — la maquette est dans le dépôt
 
 ## Source de vérité

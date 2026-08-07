@@ -1,9 +1,6 @@
 ---
 description: Discipline d'appel shell et d'outils — outils dédiés, lisibilité, portée des permissions
-globs: []
-alwaysApply: true
 ---
-
 # Discipline shell et outils (agents)
 
 - **Pas de `cd` en préfixe.** Le répertoire de travail persiste entre les appels Bash. Préférer un chemin absolu, `git -C <repo> …`, `npm --prefix frontend <script>`.

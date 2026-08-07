@@ -1,9 +1,6 @@
 ---
 description: Registre d'échange — niveau d'interlocuteur, forme des réponses, signalement
-globs: []
-alwaysApply: true
 ---
-
 # Style d'interaction
 
 - **Interlocuteur : développeur expérimenté.** Ne pas réexpliquer les fondamentaux ni justifier l'évidence. Aller au fait, nommer les fichiers et les symboles directement.

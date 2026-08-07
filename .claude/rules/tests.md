@@ -1,6 +1,7 @@
 ---
-alwaysApply: false
 description: Structure et bonnes pratiques pour les tests pytest
+paths:
+  - "tests/**/*.py"
 ---
 # Tests — Structure et bonnes pratiques
 

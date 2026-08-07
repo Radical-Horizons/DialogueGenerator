@@ -1,9 +1,6 @@
 ---
 description: Flux de branches — `dev` est la cible de toute PR, `main` est protégée
-globs: []
-alwaysApply: true
 ---
-
 # Flux de branches
 
 ## La règle en une ligne

@@ -1,20 +1,9 @@
 ---
 description: Récupération complète fiches Notion (corps + propriétés) — sync GDD et imports
-alwaysApply: false
-globs:
-  - services/notion_api_client.py
-  - services/gdd_notion_sync*.py
-  - services/notion_import_service.py
-  - services/gdd_notion_sync_mapper.py
-  - services/gdd_sections_split.py
-  - api/routers/gdd_notion_sync.py
-  - api/schemas/gdd_notion_sync.py
-  - tests/services/test_notion*.py
-  - tests/services/test_gdd_notion*.py
-  - tests/api/test_gdd_notion*.py
-  - scripts/test_notion_extraction.py
+paths:
+  - "services/notion_api_client.py"
+  - "services/notion_import_service.py"
 ---
-
 - **Corps de page (besoin central)** : utiliser uniquement `NotionAPIClient.get_page_content` pour obtenir tout le texte du corps (markdown enrichi `GET /v1/pages/{id}/markdown`, `Notion-Version: 2026-03-11`, puis repli arbre blocs). Ne pas ajouter de parcours « racine = seulement `blocks/.../children` » pour un export complet de page.
 - **Fiche base de données → enregistrement GDD** : `get_page` + `get_page_content` + `notion_page_to_gdd_record_merge_body_and_properties` ; ne pas omettre le mapper si des colonnes `rich_text` doivent alimenter les sections.
 - **Sync bases sans corps** : `GddNotionSyncService` peut omettre `get_page_content` sur le reste des lignes si les 3 premières (ordre query) n’ont pas de corps ; `get_page` et colonnes restent synchronisés. Voir `docs/guides/GDD_NOTION_SYNC.md`.

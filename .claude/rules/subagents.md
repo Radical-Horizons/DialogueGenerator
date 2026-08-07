@@ -1,9 +1,8 @@
 ---
 description: Subagents — liste, usage et bonnes pratiques pour ce repo
-globs: [".claude/agents/**"]
-alwaysApply: false
+paths:
+  - ".claude/agents/**"
 ---
-
 ## Subagents disponibles (`.claude/agents/`)
 
 | Nom | Modèle | Scope principal | Quand l'utiliser |

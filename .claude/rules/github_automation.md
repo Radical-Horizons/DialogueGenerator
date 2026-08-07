@@ -1,3 +1,7 @@
+---
+paths:
+  - ".github/workflows/**"
+---
 # Automatisation GitHub (PR)
 
 Trois workflows, tous déterministes. **Aucune clé API payante en CI** — voir la note en fin

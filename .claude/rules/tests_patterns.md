@@ -1,7 +1,7 @@
 ---
-alwaysApply: false
 description: Patterns de mock et fixtures pour tests pytest
-globs: ["tests/**/*.py"]
+paths:
+  - "tests/**/*.py"
 ---
 # Tests — Patterns de mock et fixtures
 

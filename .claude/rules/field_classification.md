@@ -4,9 +4,11 @@ description: >-
   champs essentiels ESSENTIAL_* / MINIMAL_FIELDS. Apply when editing context_field_detector,
   context_organizer, context_construction_service, ContextFieldSelector, contextConfigStore,
   or config API/schemas for GDD field tabs and essential-field UI.
-alwaysApply: false
+paths:
+  - "core/context/**"
+  - "services/context_*.py"
+  - "frontend/src/components/context/**"
 ---
-
 # Classification des champs GDD
 
 ## Deux critères distincts

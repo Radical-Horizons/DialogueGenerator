@@ -1,8 +1,6 @@
 ---
 description: Protocole Meta-Agent — Diagnostic par preuves, analyse contre-factuelle et évolution des règles (inspiré de Meta-Harness)
-alwaysApply: true
 ---
-
 # Protocole Meta-Agent
 
 Ce protocole impose une rigueur de diagnostic et d'auto-amélioration basée sur les preuves réelles du système (logs, terminaux, historique), plutôt que sur des suppositions.
