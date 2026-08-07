@@ -13,9 +13,25 @@ alwaysApply: false
 
 Ce dépôt a migré de Cursor vers Claude Code. Les mécanismes ont changé — ne pas transposer les réflexes `.mdc`.
 
-## Ce qui a disparu
+## L'auto-attachement existe — seul le nom du champ a changé
 
-- **`alwaysApply` / `globs` d'auto-attachement.** Claude Code ne charge pas une règle parce qu'un glob correspond. Le frontmatter conservé dans `.claude/rules/*.md` est **documentaire** : il dit l'intention d'origine, il ne déclenche rien.
+| Cursor (`.mdc`) | Claude Code (`.md`) | Effet |
+|---|---|---|
+| `globs: [...]` | **`paths: [...]`** | limite la règle aux fichiers correspondants |
+| `alwaysApply: true` | *(absence de `paths`)* | chargement à chaque session |
+
+Une règle **sans** `paths:` est chargée au lancement, au même niveau que `CLAUDE.md`. Une règle **avec** `paths:` se déclenche quand Claude lit un fichier correspondant — pas à chaque appel d'outil.
+
+⚠️ Un frontmatter `globs:` hérité de Cursor ne restreint donc **rien** : le champ est ignoré et la règle est chargée **en permanence**. Le risque n'est pas qu'une règle soit oubliée, c'est que **tout** soit chargé et gonfle le contexte.
+
+Corollaire : la table de routage de `CLAUDE.md` n'est **pas** le mécanisme de chargement. C'est un index humain, utile pour aller chercher une règle avant d'ouvrir le premier fichier, et pour les règles qu'aucun chemin ne déclenche (« pousser sur main », « lancer un bench »).
+
+Motifs acceptés : `**/*.ts`, `src/**/*`, `*.md` (racine seulement), expansion `{ts,tsx}`. `[` ouvre une classe de caractères — pour un crochet littéral, échapper (`photos \[2024/**`) ; un motif invalide ne matche rien.
+
+⚠️ **Une `description` contenant `: ` non quoté rend tout le frontmatter inanalysable** — le `paths:` est perdu et la règle redevient permanente sans aucun signal. Quoter dès qu'il y a un deux-points.
+
+Source : documentation officielle Claude Code, section « Organize rules with `.claude/rules/` » (page *memory*). Vérifiée en août 2026 sur CLI 2.1.220.
+
 - **`.mdc`.** Tout est `.md`.
 
 ## Les quatre supports, et quand choisir lequel
