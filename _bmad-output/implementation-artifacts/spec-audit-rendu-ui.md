@@ -85,3 +85,34 @@ Le contraste du couple blanc-sur-accent est **plafonné par la teinte de fond** 
 - `cd frontend && npx tsc --noEmit` -- attendu : 119 erreurs (baseline inchangée)
 - `cd frontend && npm run lint` -- attendu : 0 problème
 - `cd frontend && VITEST_FULL=1 npx vitest run --max-workers=2` -- attendu : 242 fichiers / 1420+ tests verts
+
+## Suggested Review Order
+
+**Le défaut bloquant — action primaire inutilisable**
+
+- Entrée : la barre sort du conteneur défilant, d'où elle passait sous le tiroir.
+  [`GenerationPanel.tsx:1077`](../../frontend/src/components/generation/GenerationPanel.tsx#L1077)
+
+- La régression qui garde l'invariant : aucun ancêtre défilant.
+  [`GenerationPanel.integration.test.tsx:679`](../../frontend/src/components/generation/__tests__/GenerationPanel.integration.test.tsx#L679)
+
+**Débordements — largeur des panneaux**
+
+- Le pourcentage ignore les poignées ; `flexShrink` résorbe le surplus.
+  [`ResizablePanels.tsx:215`](../../frontend/src/components/shared/ResizablePanels.tsx#L215)
+
+- Les rails en overlay se posaient sur le texte : leur largeur est réservée.
+  [`Dashboard.tsx:163`](../../frontend/src/components/layout/Dashboard.tsx#L163)
+
+**Contraste et chrome d'onglet**
+
+- Le filet actif passe sur le libellé, comme dans la barre supérieure.
+  [`Tabs.tsx:89`](../../frontend/src/components/shared/Tabs.tsx#L89)
+
+- Le cadre bleu venait de `button:focus` à l'ancien accent, pas d'un style d'onglet.
+  [`index.css:133`](../../frontend/src/index.css#L133)
+
+**Outil de vérification**
+
+- L'auditeur rejouable, avec ses deux garde-fous anti-faux-positifs.
+  [`audit-rendu-ui.mjs:1`](../../scripts/audit/audit-rendu-ui.mjs#L1)
