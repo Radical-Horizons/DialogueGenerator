@@ -5,6 +5,16 @@
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import { getBudget, updateBudget, type BudgetResponse } from '../../api/costs'
 import { getErrorMessage } from '../../types/errors'
+import {
+  redesignControl,
+  redesignFont,
+  redesignHairline,
+  redesignMonoLabelStyle,
+  redesignRadius,
+  redesignSpacing,
+  redesignSurface,
+  redesignText,
+} from '../../theme/redesignTokens'
 
 export interface BudgetSettingsHandle {
   /** Valide et persiste le quota draft. Retourne false si validation/API échoue. */
@@ -100,57 +110,94 @@ export const BudgetSettings = forwardRef<BudgetSettingsHandle, BudgetSettingsPro
     }
 
     if (loading) {
-      return <div style={{ padding: '1rem', color: 'rgba(255, 255, 255, 0.75)' }}>Chargement du budget...</div>
+      return <div style={{ color: redesignText.label }}>Chargement du budget…</div>
     }
 
     return (
-      <div style={{ padding: '1.5rem' }}>
-        <h2 style={{ marginTop: 0, marginBottom: '1.5rem', color: 'rgba(255, 255, 255, 0.95)' }}>
-          Configuration du Budget LLM
-        </h2>
+      <div>
+        <h3
+          style={{
+            marginTop: 0,
+            marginBottom: redesignSpacing.md,
+            fontFamily: redesignFont.serif,
+            fontWeight: 400,
+            color: redesignText.strong,
+          }}
+        >
+          Budget LLM
+        </h3>
 
         {error && (
           <div style={{
-            padding: '0.75rem',
-            marginBottom: '1rem',
-            backgroundColor: '#3a1a1a',
-            border: '1px solid #ff4444',
-            borderRadius: '4px',
-            color: '#ff6b6b'
+            padding: redesignSpacing.sm,
+            marginBottom: redesignSpacing.md,
+            backgroundColor: 'rgba(255, 68, 68, 0.08)',
+            border: '1px solid rgba(255, 68, 68, 0.4)',
+            borderRadius: redesignRadius.control,
+            color: '#ff8a8a',
           }}>
-            Erreur: {error}
+            Erreur : {error}
           </div>
         )}
 
         {budget && (
           <>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <div style={{
-                padding: '1rem',
-                backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                borderRadius: '4px',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
-              }}>
-                <div style={{ marginBottom: '0.5rem' }}>
-                  <strong>Budget actuel:</strong> {formatCost(budget.quota)}
+            {/* Filets + valeurs mono : aucun chiffre en sans-serif (invariant refonte). */}
+            <dl
+              style={{
+                margin: 0,
+                marginBottom: redesignSpacing.lg,
+                borderTop: `1px solid ${redesignHairline.standard}`,
+              }}
+            >
+              {[
+                { label: 'Budget mensuel', value: formatCost(budget.quota) },
+                {
+                  label: 'Dépensé',
+                  value: `${formatCost(budget.amount)} · ${budget.percentage.toFixed(1)} %`,
+                },
+                { label: 'Restant', value: formatCost(budget.remaining) },
+              ].map((row) => (
+                <div
+                  key={row.label}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'baseline',
+                    gap: redesignSpacing.md,
+                    padding: `${redesignSpacing.sm}px 0`,
+                    borderBottom: `1px solid ${redesignHairline.standard}`,
+                  }}
+                >
+                  <dt style={{ ...redesignMonoLabelStyle, fontSize: '10px', color: redesignText.label }}>
+                    {row.label}
+                  </dt>
+                  <dd
+                    style={{
+                      margin: 0,
+                      fontFamily: redesignFont.mono,
+                      fontSize: '12px',
+                      color: redesignText.strong,
+                    }}
+                  >
+                    {row.value}
+                  </dd>
                 </div>
-                <div style={{ marginBottom: '0.5rem' }}>
-                  <strong>Montant dépensé:</strong> {formatCost(budget.amount)} ({budget.percentage.toFixed(1)}%)
-                </div>
-                <div>
-                  <strong>Montant restant:</strong> {formatCost(budget.remaining)}
-                </div>
-              </div>
-            </div>
+              ))}
+            </dl>
 
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label htmlFor="quota" style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                color: 'rgba(255, 255, 255, 0.87)',
-                fontWeight: 500
-              }}>
-                Quota mensuel (USD):
+            <div style={{ marginBottom: redesignSpacing.lg }}>
+              <label
+                htmlFor="quota"
+                style={{
+                  display: 'block',
+                  marginBottom: redesignSpacing.sm,
+                  ...redesignMonoLabelStyle,
+                  fontSize: '10px',
+                  color: redesignText.label,
+                }}
+              >
+                Quota mensuel (USD)
               </label>
               <input
                 id="quota"
@@ -162,21 +209,22 @@ export const BudgetSettings = forwardRef<BudgetSettingsHandle, BudgetSettingsPro
                 placeholder="100.00"
                 style={{
                   width: '100%',
-                  padding: '0.75rem',
-                  fontSize: '1rem',
-                  border: '1px solid #404040',
-                  borderRadius: '4px',
-                  backgroundColor: '#2a2a2a',
-                  color: 'rgba(255, 255, 255, 0.87)',
-                  boxSizing: 'border-box'
+                  padding: `${redesignSpacing.sm}px ${redesignSpacing.md}px`,
+                  fontFamily: redesignFont.mono,
+                  fontSize: '13px',
+                  border: `1px solid ${redesignControl.border}`,
+                  borderRadius: redesignRadius.control,
+                  backgroundColor: redesignSurface.base,
+                  color: redesignText.strong,
+                  boxSizing: 'border-box',
                 }}
               />
               <div style={{
-                marginTop: '0.25rem',
-                fontSize: '0.875rem',
-                color: 'rgba(255, 255, 255, 0.6)'
+                marginTop: redesignSpacing.xs,
+                fontSize: '12px',
+                color: redesignText.muted,
               }}>
-                Définissez votre budget mensuel maximum pour les appels LLM.
+                Plafond mensuel des appels LLM.
               </div>
             </div>
           </>

@@ -7,6 +7,9 @@ import { theme } from '../../theme'
  * - Indicateur de liste remplacé par un ▼ triangle plein, visuellement distinct
  *   des chevrons ‹ › utilisés dans les rails latéraux du Dashboard.
  */
+/** Gouttière réservée au ▼ : `right: 0.45rem` + la glyphe + une respiration. */
+const ARROW_GUTTER = '1.6rem'
+
 export function StyledSelect({
   style,
   wrapperStyle,
@@ -21,9 +24,12 @@ export function StyledSelect({
           appearance: 'none',
           WebkitAppearance: 'none',
           MozAppearance: 'none',
-          paddingRight: '1.6rem',
           width: '100%',
           ...style,
+          // Après le spread, sinon un `padding: 0` de l'appelant écrase la gouttière
+          // et le ▼ se pose sur le texte (vu sur le tri « RÉCENTS » de la liste de
+          // dialogues). Un `paddingRight` explicite de l'appelant reste prioritaire.
+          paddingRight: style?.paddingRight ?? ARROW_GUTTER,
         }}
       >
         {children}

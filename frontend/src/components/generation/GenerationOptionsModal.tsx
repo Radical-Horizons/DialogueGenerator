@@ -27,6 +27,50 @@ import { InfoIcon } from '../shared/Tooltip'
 import { remSize } from '../../theme/uiTypography'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { modalTypography } from '../../theme/responsiveChrome'
+import {
+  redesignAccent,
+  redesignControl,
+  redesignFont,
+  redesignHairline,
+  redesignMonoLabelStyle,
+  redesignRadius,
+  redesignSpacing,
+  redesignSurface,
+  redesignText,
+} from '../../theme/redesignTokens'
+
+/**
+ * Contrôle bordé, fond transparent — le défaut de la refonte. Le seul bouton plein
+ * `redesignAccent.base` de cet écran est « Appliquer » (invariant : une action
+ * primaire par écran).
+ */
+const outlineButtonStyle: React.CSSProperties = {
+  padding: `${redesignSpacing.sm}px ${redesignSpacing.md}px`,
+  border: `1px solid ${redesignControl.border}`,
+  borderRadius: redesignRadius.control,
+  backgroundColor: 'transparent',
+  color: redesignText.row,
+  cursor: 'pointer',
+}
+
+/** Champ de saisie / select de la modale. */
+const fieldStyle: React.CSSProperties = {
+  width: '100%',
+  padding: `${redesignSpacing.sm}px ${redesignSpacing.md}px`,
+  border: `1px solid ${redesignControl.border}`,
+  borderRadius: redesignRadius.control,
+  backgroundColor: redesignSurface.base,
+  color: redesignText.strong,
+}
+
+/** Titre de section : serif, comme les titres de scène et de nœud. */
+const sectionTitleStyle: React.CSSProperties = {
+  margin: 0,
+  marginBottom: redesignSpacing.md,
+  fontFamily: redesignFont.serif,
+  fontWeight: 400,
+  color: redesignText.strong,
+}
 
 export interface GenerationOptionsModalProps {
   isOpen: boolean
@@ -208,14 +252,15 @@ export function GenerationOptionsModal({
     >
       <div
         style={{
-          backgroundColor: theme.background.elevated,
-          borderRadius: '8px',
+          backgroundColor: redesignSurface.panel,
+          border: `1px solid ${redesignControl.border}`,
+          borderRadius: redesignRadius.frame,
           width: '90%',
           maxWidth: '1200px',
           maxHeight: 'min(90vh, calc(100vh - 10vh))',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.4)',
           overflow: 'hidden',
         }}
         onClick={(e) => e.stopPropagation()}
@@ -224,24 +269,39 @@ export function GenerationOptionsModal({
         {/* Header */}
         <div
           style={{
-            padding: isNarrow ? '0.9rem' : '1.5rem',
-            borderBottom: `1px solid ${theme.border.primary}`,
+            padding: isNarrow
+              ? `${redesignSpacing.md}px`
+              : `${redesignSpacing.lg}px ${redesignSpacing.xl}px`,
+            borderBottom: `1px solid ${redesignHairline.standard}`,
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             flexShrink: 0,
           }}
         >
-          <h2 style={{ margin: 0, color: theme.text.primary, fontSize: `${typo.titleFontRem}rem` }}>Options</h2>
+          <h2
+            style={{
+              margin: 0,
+              fontFamily: redesignFont.serif,
+              fontWeight: 400,
+              color: redesignText.strong,
+              fontSize: `${typo.titleFontRem}rem`,
+            }}
+          >
+            Options
+          </h2>
           <button
             onClick={onClose}
+            aria-label="Fermer les options"
             style={{
               background: 'none',
               border: 'none',
-              color: theme.text.secondary,
+              color: redesignText.label,
+              fontFamily: redesignFont.mono,
               fontSize: `${typo.titleFontRem}rem`,
+              lineHeight: 1,
               cursor: 'pointer',
-              padding: '0.25rem 0.5rem',
+              padding: `${redesignSpacing.xs}px ${redesignSpacing.sm}px`,
             }}
           >
             ×
@@ -252,30 +312,45 @@ export function GenerationOptionsModal({
         <div
           style={{
             display: 'flex',
-            borderBottom: `1px solid ${theme.border.primary}`,
-            backgroundColor: theme.background.secondary,
+            borderBottom: `1px solid ${redesignHairline.standard}`,
+            backgroundColor: 'transparent',
             flexShrink: 0,
+            overflowX: 'auto',
           }}
         >
           {tabs.map((tab) => {
             const tabLabel =
               tab.id === 'gdd_notion' && notionResumeAvailable ? 'Notion · reprise' : tab.label
+            const isActive = activeTab === tab.id
             return (
               <button
                 key={tab.id}
+                data-options-tab
                 onClick={() => setActiveTab(tab.id)}
                 style={{
-                  padding: isNarrow ? '0.75rem 0.85rem' : '1rem 1.5rem',
+                  padding: isNarrow
+                    ? `${redesignSpacing.sm}px ${redesignSpacing.md}px`
+                    : `${redesignSpacing.md}px ${redesignSpacing.lg}px`,
                   border: 'none',
-                  borderBottom: activeTab === tab.id ? `3px solid ${theme.border.focus}` : '3px solid transparent',
                   backgroundColor: 'transparent',
-                  color: activeTab === tab.id ? theme.text.primary : theme.text.secondary,
+                  color: isActive ? redesignText.strong : redesignText.label,
                   cursor: 'pointer',
-                  fontWeight: activeTab === tab.id ? 'bold' : 'normal',
-                  fontSize: `${typo.bodyFontRem}rem`,
+                  whiteSpace: 'nowrap',
+                  fontSize: '10.5px',
+                  ...redesignMonoLabelStyle,
                 }}
               >
-                {tabLabel}
+                {/* Le filet actif appartient au libellé, pas à la cible cliquable :
+                    posé sur le bouton, il se dessine sous le padding et se confond
+                    avec le filet du conteneur. Même idiome que `navTabLabelStyle`. */}
+                <span
+                  style={{
+                    paddingBottom: redesignSpacing.xs,
+                    boxShadow: isActive ? `inset 0 -1px 0 ${redesignAccent.base}` : 'none',
+                  }}
+                >
+                  {tabLabel}
+                </span>
               </button>
             )
           })}
@@ -284,19 +359,20 @@ export function GenerationOptionsModal({
         {notionResumeAvailable && activeTab !== 'gdd_notion' ? (
           <div
             style={{
-              padding: '0.65rem 1.25rem',
-              backgroundColor: theme.background.secondary,
-              borderBottom: `1px solid ${theme.border.focus}`,
+              padding: `${redesignSpacing.sm}px ${redesignSpacing.lg}px`,
+              backgroundColor: redesignAccent.selectedBg,
+              borderBottom: `1px solid ${redesignHairline.standard}`,
+              boxShadow: `inset 2px 0 0 ${redesignAccent.base}`,
               display: 'flex',
               flexWrap: 'wrap',
               alignItems: 'center',
-              gap: '0.75rem',
+              gap: redesignSpacing.md,
               flexShrink: 0,
             }}
           >
             <span
               style={{
-                color: theme.text.primary,
+                color: redesignText.body,
                 fontSize: remSize('body'),
                 lineHeight: 1.45,
                 flex: '1 1 220px',
@@ -309,16 +385,7 @@ export function GenerationOptionsModal({
             <button
               type="button"
               onClick={() => setActiveTab('gdd_notion')}
-              style={{
-                padding: '0.45rem 0.9rem',
-                borderRadius: '6px',
-                border: `1px solid ${theme.border.focus}`,
-                backgroundColor: theme.border.focus,
-                color: theme.background.elevated,
-                cursor: 'pointer',
-                fontWeight: 600,
-                fontSize: remSize('small'),
-              }}
+              style={{ ...outlineButtonStyle, fontSize: remSize('small'), flexShrink: 0 }}
             >
               Aller à Notion
             </button>
@@ -331,7 +398,9 @@ export function GenerationOptionsModal({
             flex: 1,
             overflow: 'auto',
             minHeight: 0,
-            padding: isNarrow ? '0.9rem' : '1.5rem',
+            padding: isNarrow
+              ? `${redesignSpacing.md}px`
+              : `${redesignSpacing.lg}px ${redesignSpacing.xl}px`,
           }}
         >
           {activeTab === 'context' && (
@@ -353,14 +422,14 @@ export function GenerationOptionsModal({
               fallback={
                 <div
                   style={{
-                    padding: '2rem',
-                    color: theme.text.primary,
-                    backgroundColor: theme.background.secondary,
-                    borderRadius: '8px',
-                    border: `1px solid ${theme.border.primary}`,
+                    padding: redesignSpacing.xl,
+                    color: redesignText.body,
+                    backgroundColor: redesignSurface.base,
+                    borderRadius: redesignRadius.control,
+                    border: `1px solid ${redesignControl.border}`,
                   }}
                 >
-                  <h3 style={{ marginTop: 0 }}>Erreur lors du chargement</h3>
+                  <h3 style={sectionTitleStyle}>Erreur lors du chargement</h3>
                   <p>
                     Une erreur s'est produite lors du chargement de l'onglet
                     Vocabulaire & Guides. Veuillez réessayer.
@@ -397,14 +466,14 @@ export function GenerationOptionsModal({
               fallback={
                 <div
                   style={{
-                    padding: '2rem',
-                    color: theme.text.primary,
-                    backgroundColor: theme.background.secondary,
-                    borderRadius: '8px',
-                    border: `1px solid ${theme.border.primary}`,
+                    padding: redesignSpacing.xl,
+                    color: redesignText.body,
+                    backgroundColor: redesignSurface.base,
+                    borderRadius: redesignRadius.control,
+                    border: `1px solid ${redesignControl.border}`,
                   }}
                 >
-                  <h3 style={{ marginTop: 0 }}>Erreur lors du chargement</h3>
+                  <h3 style={sectionTitleStyle}>Erreur lors du chargement</h3>
                   <p>
                     Une erreur s&apos;est produite lors du chargement de la synchronisation GDD
                     Notion. Veuillez réessayer.
@@ -438,11 +507,11 @@ export function GenerationOptionsModal({
         {/* Footer */}
         <div
           style={{
-            padding: '1rem 1.5rem',
-            borderTop: `1px solid ${theme.border.primary}`,
+            padding: `${redesignSpacing.md}px ${redesignSpacing.lg}px`,
+            borderTop: `1px solid ${redesignHairline.standard}`,
             display: 'flex',
             justifyContent: 'flex-end',
-            gap: '0.5rem',
+            gap: redesignSpacing.sm,
             flexShrink: 0,
           }}
         >
@@ -451,14 +520,7 @@ export function GenerationOptionsModal({
               resetToDefault()
               onClose()
             }}
-            style={{
-              padding: '0.5rem 1rem',
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: '4px',
-              backgroundColor: theme.button.default.background,
-              color: theme.button.default.color,
-              cursor: 'pointer',
-            }}
+            style={outlineButtonStyle}
           >
             Réinitialiser
           </button>
@@ -475,11 +537,12 @@ export function GenerationOptionsModal({
               })()
             }}
             style={{
-              padding: '0.5rem 1rem',
-              border: 'none',
-              borderRadius: '4px',
-              backgroundColor: theme.button.primary.background,
-              color: theme.button.primary.color,
+              padding: `${redesignSpacing.sm}px ${redesignSpacing.lg}px`,
+              border: `1px solid ${redesignAccent.base}`,
+              borderRadius: redesignRadius.control,
+              backgroundColor: redesignAccent.base,
+              color: '#ffffff',
+              fontWeight: 600,
               cursor: 'pointer',
             }}
           >
@@ -672,18 +735,25 @@ function GeneralTab({
   return (
     <div>
       {/* Section Budget LLM */}
-      <div style={{ marginBottom: '2rem' }}>
+      <div style={{ marginBottom: redesignSpacing.xl }}>
         <BudgetSettings ref={budgetSettingsRef} onBudgetUpdated={onBudgetUpdated} />
       </div>
 
       {/* Section Organisation */}
       <div>
-        <h3 style={{ marginTop: 0, color: theme.text.primary }}>Organisation du Prompt</h3>
+        <h3 style={sectionTitleStyle}>Organisation du prompt</h3>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <label style={{ color: theme.text.primary }}>
-              Mode d'organisation:
+        <div style={{ marginBottom: redesignSpacing.lg }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: redesignSpacing.xs,
+              marginBottom: redesignSpacing.sm,
+            }}
+          >
+            <label style={{ ...redesignMonoLabelStyle, fontSize: '10px', color: redesignText.label }}>
+              Mode d&apos;organisation
             </label>
             <InfoIcon
               content={
@@ -705,14 +775,7 @@ function GeneralTab({
           <StyledSelect
             value={organization}
             onChange={(e) => setOrganization(e.target.value as 'default' | 'narrative' | 'minimal')}
-            style={{
-              width: '100%',
-              padding: '0.5rem',
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: '4px',
-              backgroundColor: theme.input.background,
-              color: theme.input.color,
-            }}
+            style={fieldStyle}
           >
             <option value="default">Par défaut (ordre de la config)</option>
             <option value="narrative">Narratif (groupé par pertinence)</option>
@@ -720,16 +783,19 @@ function GeneralTab({
           </StyledSelect>
         </div>
 
-        <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div
+          style={{
+            marginBottom: redesignSpacing.lg,
+            display: 'flex',
+            alignItems: 'center',
+            gap: redesignSpacing.sm,
+          }}
+        >
           <button
             onClick={onPreview}
             disabled={isLoadingPreview}
             style={{
-              padding: '0.5rem 1rem',
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: '4px',
-              backgroundColor: theme.button.default.background,
-              color: theme.button.default.color,
+              ...outlineButtonStyle,
               cursor: isLoadingPreview ? 'not-allowed' : 'pointer',
               opacity: isLoadingPreview ? 0.6 : 1,
             }}
@@ -753,19 +819,27 @@ function GeneralTab({
 
         {previewText && (
           <div>
-              <div style={{ marginBottom: '0.5rem', color: theme.text.secondary, fontSize: remSize('body') }}>
-              Tokens estimés: {previewTokens}
+            <div
+              style={{
+                marginBottom: redesignSpacing.sm,
+                color: redesignText.label,
+                fontSize: '10px',
+                ...redesignMonoLabelStyle,
+              }}
+            >
+              Tokens estimés {previewTokens}
             </div>
             <pre
               style={{
-                padding: '1rem',
-                backgroundColor: theme.background.secondary,
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '4px',
+                padding: redesignSpacing.md,
+                backgroundColor: redesignSurface.base,
+                border: `1px solid ${redesignControl.border}`,
+                borderRadius: redesignRadius.control,
                 overflow: 'auto',
                 maxHeight: '400px',
+                fontFamily: redesignFont.mono,
                 fontSize: remSize('small'),
-                color: theme.text.primary,
+                color: redesignText.body,
                 whiteSpace: 'pre-wrap',
               }}
             >

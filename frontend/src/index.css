@@ -139,6 +139,40 @@ a:focus-visible,
 }
 
 /**
+ * Rangees de liste de dialogues (listbox ou bouton, selon le mode d'affichage).
+ *
+ * La selection est deja dite par l'accent lateral de `listItemSelectionStyle`.
+ * Par-dessus se posait un second surlignement : l'anneau par defaut du navigateur
+ * sur `[role=option]`, et sur `<button>` la regle `:focus-visible` ci-dessus avec
+ * son `border-radius: 3px` et son `outline-offset: 2px` — d'ou un cadre ARRONDI
+ * autour d'une rangee, au milieu d'une refonte qui a aplati toutes les surfaces.
+ * Un seul indicateur suffit : l'accent lateral. Le focus reste signale au clavier,
+ * mais a plat et a l'interieur de la rangee.
+ */
+[role='option']:focus,
+button[data-list-row]:focus {
+  outline: none;
+}
+
+[role='option']:focus-visible,
+button[data-list-row]:focus-visible {
+  outline: 2px solid rgba(79, 127, 255, 0.75);
+  outline-offset: -2px;
+  border-radius: 0;
+}
+
+/**
+ * Onglets de la modale Options : leur rangee defile en `overflow-x: auto`, ce qui
+ * rognait l'anneau `button:focus-visible` (offset 2px, rayon 3px) en un arc bleu
+ * flottant sous le libelle. Pose a l'interieur, il reste entier et a plat.
+ */
+button[data-options-tab]:focus-visible {
+  outline: 2px solid rgba(79, 127, 255, 0.75);
+  outline-offset: -2px;
+  border-radius: 0;
+}
+
+/**
  * Édition de dialogues (UnityDialogueEditor) — toolbar responsive :
  * en mode narrow, on force une grille 2×2 full-width et des labels centrés.
  */

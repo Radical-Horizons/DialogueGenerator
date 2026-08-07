@@ -264,12 +264,23 @@ export const UnityDialogueItem = memo(
             <button
               ref={ref as React.Ref<HTMLButtonElement>}
               type="button"
+              data-list-row
               aria-pressed={isSelected}
               onClick={onClick}
               onContextMenu={onContextMenu}
               style={{
-                ...interactiveStyle,
+                // Le motif de sélection appartient au conteneur ci-dessus. Le
+                // reprendre ici le dessinait une seconde fois — et sur un bouton,
+                // donc avec le `border-radius: 8px` global : un cadre arrondi par
+                // dessus l'accent latéral plat, deux surlignements pour une
+                // sélection. Le bouton ne porte plus que la zone cliquable.
+                ...itemInteractiveStyle,
+                flex: 1,
+                minWidth: 0,
                 borderBottom: 'none',
+                borderRadius: 0,
+                backgroundColor: 'transparent',
+                color: 'inherit',
                 display: 'block',
               }}
             >
@@ -284,6 +295,7 @@ export const UnityDialogueItem = memo(
           ref={ref as React.Ref<HTMLButtonElement>}
           type="button"
           data-testid="unity-dialogue-item"
+          data-list-row
           aria-pressed={isSelected}
           title={titleText}
           onClick={onClick}
