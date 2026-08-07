@@ -125,6 +125,7 @@ function GraphHealthBadge({
         border: 'none',
         background: 'none',
         padding: 0,
+        margin: 0,
         cursor: canToggle ? 'pointer' : 'default',
         fontFamily: redesignFont.mono,
         fontSize: '10.5px',
