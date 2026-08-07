@@ -29,6 +29,7 @@ import { GenerationStreamingInline } from './GenerationStreamingInline'
 import { ModelSelector } from './ModelSelector'
 import { PresetSelector } from './PresetSelector'
 import { useToast } from '../shared'
+import { SaveStatusIndicator } from '../shared/SaveStatusIndicator'
 import { StyledSelect } from '../shared/StyledSelect'
 import {
   CONTEXT_TOKENS_LIMITS,
@@ -1205,7 +1206,11 @@ export function GenerationPanel() {
             × {optionCount}
           </button>
         </div>
-        {orchestrator.tokenCount != null && !writingMode && (
+        {/* L'état du brouillon ne dépend pas d'une estimation : conditionner toute
+            la ligne au décompte de tokens le faisait disparaître tant qu'aucune
+            estimation n'avait eu lieu — alors qu'il était toujours visible du temps
+            où il vivait dans l'en-tête du panneau droit. */}
+        {(orchestrator.tokenCount != null || draft.saveStatus) && !writingMode && (
           <div
             style={{
               textAlign: 'center',
@@ -1216,7 +1221,22 @@ export function GenerationPanel() {
               color: redesignText.label,
             }}
           >
-            {orchestrator.tokenCount.toLocaleString('fr-FR')} tokens · {llmModel}
+            {orchestrator.tokenCount != null
+              ? `${orchestrator.tokenCount.toLocaleString('fr-FR')} tokens · ${llmModel}`
+              : llmModel}
+            {/* L'état du brouillon se lit là où l'on écrit — il vient de l'en-tête du
+                panneau droit, où il rognait la place des onglets. */}
+            {draft.saveStatus ? (
+              <>
+                {' · '}
+                <SaveStatusIndicator
+                  appearance="discreet"
+                  status={draft.saveStatus}
+                  lastSavedAt={draft.draftLastSavedAt}
+                  style={{ display: 'inline-flex', verticalAlign: 'baseline' }}
+                />
+              </>
+            ) : null}
           </div>
         )}
       </div>

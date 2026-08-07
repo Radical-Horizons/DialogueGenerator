@@ -159,6 +159,20 @@ function PanelCollapseButton({
   )
 }
 
+/**
+ * Libellés courts des vues du panneau droit.
+ *
+ * Les libellés complets (« Dialogue généré », « Édition de nœud ») sont ceux des
+ * onglets `Tabs` et restent utilisés ailleurs ; dans une colonne de 300 px, ils
+ * chassent les autres vues de la barre ou la font passer sur trois lignes.
+ */
+const RIGHT_PANEL_TAB_SHORT_LABELS: Record<string, string> = {
+  prompt: 'Prompt',
+  dialogue: 'Dialogue',
+  node: 'Nœud',
+  details: 'Détails',
+}
+
 /** Largeur réservée aux rails de repli en overlay : écart 4 + rail 24 + respiration 4. */
 const RAIL_GUTTER_PX = 32
 
@@ -1555,46 +1569,82 @@ export function Dashboard() {
             ariaLabel="Replier le panneau droit"
             density={panelCollapseDensity}
           />
-          <div
-            data-testid="right-panel-header-label"
-            style={{
-              // Le titre du panneau ne se tronque pas : c'est l'indicateur de
-              // sauvegarde, redondant avec le pied de colonne, qui cède la place.
-              flex: '0 0 auto',
-              textAlign: 'left',
-              fontFamily: redesignFont.mono,
-              // FR118 (17.6) : densité adaptive de l'étiquette d'en-tête de panneau.
-              // La colonne GDD n'a plus de barre de titre ; le panneau droit reste
-              // le seul en-tête latéral, et hérite donc de ce réglage.
-              fontSize: `${panelHeaderMonoLabelPx}px`,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color: redesignText.label,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {/* 1c : la vue Prompt s'annonce par ce qu'elle montre — le décompte de
-                ce qui part au modèle — pas par le nom technique de l'onglet. */}
-            {generationRunActive && !traceHidden
-              ? 'Trace'
-              : effectiveRightPanelTab === 'prompt'
-                ? 'Ce qui part au modèle'
-                : (visibleRightPanelTabs.find((t) => t.id === effectiveRightPanelTab)?.label ??
-                   'Ce qui part au modèle')}
-          </div>
-
-          {actions.handleGenerate ? (
-            <SaveStatusIndicator
-              appearance="discreet"
-              status={actions.saveStatus}
-              lastSavedAt={actions.draftLastSavedAt}
-              style={{ flex: '1 1 auto', minWidth: 0, textAlign: 'right' }}
-            />
+          {/* Les vues du panneau sont des onglets, pas des liens : toutes visibles,
+              l'active soulignée d'un filet accent. Même motif que la barre supérieure
+              et que l'inspecteur du graphe — et l'onglet actif tient lieu de titre,
+              ce qui évite une rangée de plus. Pendant un run, la trace occupe le
+              panneau : on affiche son nom, il n'y a rien à choisir. */}
+          {generationRunActive && !traceHidden ? (
+            <div
+              data-testid="right-panel-header-label"
+              style={{
+                flex: '0 0 auto',
+                fontFamily: redesignFont.mono,
+                fontSize: `${panelHeaderMonoLabelPx}px`,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: redesignText.label,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Trace
+            </div>
           ) : (
-            <span style={{ flex: '1 1 auto', minWidth: 0 }} aria-hidden />
+            <div
+              role="tablist"
+              aria-label="Vues du panneau"
+              data-testid="right-panel-tablist"
+              // `wrap` : la barre passe à la ligne plutôt que de tronquer un onglet
+              // — à 300 px de colonne, trois libellés ne tiennent pas toujours.
+              style={{ flex: '0 0 auto', display: 'flex', gap: 14, flexWrap: 'wrap' }}
+            >
+              {visibleRightPanelTabs.map((tab) => {
+                const actif = tab.id === effectiveRightPanelTab
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={actif}
+                    data-testid={`right-panel-tab-${tab.id}`}
+                    onClick={() =>
+                      setRightPanelTab(tab.id as 'prompt' | 'dialogue' | 'node' | 'details')
+                    }
+                    style={{
+                      border: 'none',
+                      background: 'none',
+                      padding: 0,
+                      cursor: 'pointer',
+                      fontFamily: redesignFont.mono,
+                      // FR118 (17.6) : densité adaptive de l'étiquette d'en-tête.
+                      fontSize: `${panelHeaderMonoLabelPx}px`,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      color: actif ? redesignText.strong : redesignText.label,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {/* Le filet appartient au libellé, pas à la boîte du bouton. */}
+                    <span
+                      style={{
+                        paddingBottom: 2,
+                        boxShadow: actif ? `inset 0 -1px 0 ${redesignAccent.base}` : 'none',
+                      }}
+                    >
+                      {/* Libellés courts, comme l'inspecteur du graphe : « Ce qui part
+                          au modèle » à lui seul chassait les deux autres onglets de la
+                          barre. Le sens reste porté par le contenu de la vue. */}
+                      {RIGHT_PANEL_TAB_SHORT_LABELS[tab.id] ?? tab.label}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
           )}
+
+          {/* L'état du brouillon a rejoint le pied de la colonne centrale, où vit
+              le brouillon : ici il disputait la largeur aux onglets et se réduisait
+              à « Modific… ». L'en-tête ne porte plus que la navigation. */}
         </div>
         {/* Zone de contenu avec scroll (prend l'espace restant, mais laisse toujours de la place pour le bouton) */}
         <div
@@ -1614,44 +1664,6 @@ export function Dashboard() {
             <GenerationTracePanel onHide={() => setTraceHidden(true)} />
           ) : (
             <>
-              {/* 1c : l'en-tête du panneau ne porte qu'un titre. Les autres vues sont
-                  des liens sur leur propre ligne, avec les contrôles du contenu. */}
-              {!generationRunActive && (
-                <span
-                  data-testid="right-panel-view-links"
-                  style={{
-                    display: 'flex',
-                    gap: 14,
-                    flexShrink: 0,
-                    padding: '0 20px 10px',
-                    justifyContent: 'flex-end',
-                  }}
-                >
-                  {visibleRightPanelTabs
-                    .filter((t) => t.id !== effectiveRightPanelTab)
-                    .map((tab) => (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        data-testid={`right-panel-link-${tab.id}`}
-                        onClick={() =>
-                          setRightPanelTab(tab.id as 'prompt' | 'dialogue' | 'node' | 'details')
-                        }
-                        style={{
-                          border: 'none',
-                          background: 'none',
-                          padding: 0,
-                          cursor: 'pointer',
-                          fontSize: '11.5px',
-                          color: redesignText.secondary,
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {tab.label.toLowerCase()}
-                      </button>
-                    ))}
-                </span>
-              )}
               {/* 1c : la jauge de budget vit dans la colonne GDD — la répéter ici
                   ferait doublon. */}
               <Tabs

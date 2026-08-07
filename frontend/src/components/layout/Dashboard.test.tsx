@@ -200,13 +200,13 @@ describe('Dashboard', () => {
     expect(screen.getByTestId('context-selector')).toBeInTheDocument()
     expect(screen.getByTestId('generation-panel')).toBeInTheDocument()
     // Les onglets du panneau droit (Prompt, Dialogue généré, Détails)
-    // Ecran 1c : les vues du panneau droit sont des liens discrets, et la vue
-    // active n'expose pas de lien vers elle-meme (« prompt » est active au repos).
+    // Les vues du panneau droit sont des onglets : toutes visibles, l'active
+    // marquée par `aria-selected` (« prompt » est active au repos).
     await waitFor(() => {
-      expect(screen.getByTestId('right-panel-link-dialogue')).toBeInTheDocument()
+      expect(screen.getByTestId('right-panel-tab-dialogue')).toBeInTheDocument()
     })
-    expect(screen.getByTestId('right-panel-link-details')).toBeInTheDocument()
-    expect(screen.queryByTestId('right-panel-link-prompt')).toBeNull()
+    expect(screen.getByTestId('right-panel-tab-details')).toBeInTheDocument()
+    expect(screen.getByTestId('right-panel-tab-prompt')).toHaveAttribute('aria-selected', 'true')
   })
 
   it('affiche le panneau de sélection de contexte à gauche', () => {
@@ -238,13 +238,13 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    // Ecran 1c : les vues du panneau droit sont des liens discrets, et la vue
-    // active n'expose pas de lien vers elle-meme (« prompt » est active au repos).
+    // Les vues du panneau droit sont des onglets : toutes visibles, l'active
+    // marquée par `aria-selected` (« prompt » est active au repos).
     await waitFor(() => {
-      expect(screen.getByTestId('right-panel-link-dialogue')).toBeInTheDocument()
+      expect(screen.getByTestId('right-panel-tab-dialogue')).toBeInTheDocument()
     })
-    expect(screen.getByTestId('right-panel-link-details')).toBeInTheDocument()
-    expect(screen.queryByTestId('right-panel-link-prompt')).toBeNull()
+    expect(screen.getByTestId('right-panel-tab-details')).toBeInTheDocument()
+    expect(screen.getByTestId('right-panel-tab-prompt')).toHaveAttribute('aria-selected', 'true')
   })
 
   it('affiche le message par défaut dans l\'onglet Détails', async () => {
@@ -255,7 +255,7 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    const detailsTab = await screen.findByRole('button', { name: /détails/i })
+    const detailsTab = await screen.findByRole('tab', { name: /détails/i })
     await user.click(detailsTab)
 
     await waitFor(() => {
@@ -271,14 +271,13 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    // La vue active n'expose pas de lien vers elle-meme : la bascule se lit
-    // a l'inversion des deux liens.
-    await user.click(await screen.findByTestId('right-panel-link-details'))
+    // Les deux onglets restent visibles : la bascule se lit sur `aria-selected`.
+    await user.click(await screen.findByTestId('right-panel-tab-details'))
 
     await waitFor(() => {
-      expect(screen.getByTestId('right-panel-link-prompt')).toBeInTheDocument()
+      expect(screen.getByTestId('right-panel-tab-details')).toHaveAttribute('aria-selected', 'true')
     })
-    expect(screen.queryByTestId('right-panel-link-details')).toBeNull()
+    expect(screen.getByTestId('right-panel-tab-prompt')).toHaveAttribute('aria-selected', 'false')
   })
 
   it('affiche les boutons d\'action quand handleGenerate est disponible', async () => {
@@ -426,31 +425,9 @@ describe('Dashboard', () => {
     expect(handleGenerate).not.toHaveBeenCalled()
   })
 
-  it('affiche le statut brouillon discret quand le brouillon n’est pas synchronisé', async () => {
-    mockUseGenerationActionsStore.mockReturnValue({
-      actions: {
-        handleGenerate: vi.fn(),
-        handlePreview: vi.fn(),
-        handleExportUnity: vi.fn(),
-        handleReset: vi.fn(),
-        isLoading: false,
-        isDirty: true,
-        saveStatus: 'unsaved',
-        draftLastSavedAt: null,
-      },
-    } as ReturnType<typeof useGenerationActionsStore>)
-
-    render(
-      <BrowserRouter>
-        <Dashboard />
-      </BrowserRouter>
-    )
-
-    await waitFor(() => {
-      expect(screen.getByText(/modifications non enregistrées/i)).toBeInTheDocument()
-    })
-  })
-
+  // L'état du brouillon a rejoint le pied de la colonne centrale, là où vit le
+  // brouillon — il rognait la place des onglets dans l'en-tête du panneau droit.
+  // Sa couverture a suivi : voir `GenerationPanel.integration.test.tsx`.
   it('affiche le prompt estimé dans l\'onglet Prompt', async () => {
     const testPrompt = 'Test prompt content'
     mockUseGenerationStore.mockReturnValue({
@@ -486,7 +463,7 @@ describe('Dashboard', () => {
 
     // Ecran 1c : « Prompt » est la vue active au repos, et la bascule brut/structure
     // est devenue deux liens discrets.
-    expect(screen.queryByTestId('right-panel-link-prompt')).toBeNull()
+    expect(screen.getByTestId('right-panel-tab-prompt')).toHaveAttribute('aria-selected', 'true')
     await userEvent.setup().click(screen.getByTestId('prompt-view-raw'))
 
     // Le EstimatedPromptPanel devrait afficher le prompt (vue brute)
@@ -603,7 +580,7 @@ describe('Dashboard', () => {
 
     // Cliquer sur l'onglet "Dialogue généré" — le bloc « Dernier résultat » du pied
     // mentionne aussi ce libellé, d'où le ciblage par rôle onglet.
-    const dialogueTab = screen.getByRole('button', { name: /dialogue généré/i })
+    const dialogueTab = screen.getByRole('tab', { name: /dialogue/i })
     await user.click(dialogueTab)
 
     await waitFor(() => {
@@ -731,7 +708,7 @@ describe('Dashboard', () => {
     // Écran 1c : la colonne GDD n'a plus de barre de titre (le libellé
     // « CONTEXTE — N FICHES » de ContextSelector en tient lieu). Le panneau droit
     // est le dernier en-tête latéral : c'est lui qui porte la densité adaptive.
-    const titleComfortable = screen.getByTestId('right-panel-header-label')
+    const titleComfortable = screen.getByTestId('right-panel-tab-prompt')
     expect(titleComfortable).toHaveStyle({
       fontSize: `${panelHeaderMonoLabel.comfortableFontPx}px`,
     })
@@ -747,7 +724,7 @@ describe('Dashboard', () => {
     )
 
     await waitFor(() => {
-      const titleNarrow = screen.getByTestId('right-panel-header-label')
+      const titleNarrow = screen.getByTestId('right-panel-tab-prompt')
       expect(titleNarrow).toHaveStyle({
         fontSize: `${panelHeaderMonoLabel.narrowFontPx}px`,
       })

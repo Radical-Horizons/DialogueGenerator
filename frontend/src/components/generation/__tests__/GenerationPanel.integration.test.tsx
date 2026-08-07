@@ -695,4 +695,25 @@ describe('GenerationPanel - Tests Baseline', () => {
       expect(ancetresDefilants).toEqual([])
     }, 10000)
   })
+
+  /**
+   * L'état du brouillon se lit au pied de la colonne d'écriture, avec le décompte
+   * de tokens et le modèle. Il vivait dans l'en-tête du panneau droit, où il
+   * disputait la largeur aux onglets et se réduisait à « Modific… ».
+   */
+  describe('État du brouillon', () => {
+    it('affiche l’état du brouillon au pied de la colonne', async () => {
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+
+      // Ce qui compte est l'emplacement, pas l'état affiché : au montage le
+      // brouillon est propre (« Brouillon sauvegardé »), il devient « Modifications
+      // non enregistrées » à la première frappe.
+      // L'état ne dépend pas d'une estimation de tokens : il doit être là même
+      // avant tout calcul, comme il l'était dans l'en-tête du panneau droit.
+      expect(
+        screen.getByText(/brouillon sauvegardé|modifications non enregistrées/i)
+      ).toBeInTheDocument()
+    }, 10000)
+  })
 })
