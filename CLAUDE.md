@@ -32,6 +32,7 @@ Cursor attachait ces règles automatiquement par glob. Claude Code n'a pas ce m�
 | `authStore.ts`, `components/auth/**`, `App.tsx`, `e2e/auth*` | `.claude/rules/guest_first_auth.md` |
 | `core/llm/**`, `constants.py`, `llm_config.json`, `factories/**` | `.claude/rules/llm.md` + skill `llm-model-update` |
 | `models/dialogue_structure/**`, `unity_dialogue_generation_service.py` | `.claude/rules/unity_dialogue_generation.md` + `.claude/rules/structured_output.md` |
+| `services/benchmark_*.py`, `api/routers/benchmark.py`, lancer un bench | `docs/benchmark/runbook.md` (procédure, coûts, pièges) + `docs/benchmark/eq-bench-reference.md` (protocole) |
 | GDD sur disque, loaders, shards, cache, fingerprints | `.claude/rules/gdd_paths.md` |
 | `context_field_detector`, `context_organizer`, `ContextFieldSelector` | `.claude/rules/field_classification.md` |
 | `services/notion_api_client.py`, `notion_import_service.py` | `.claude/rules/notion_gdd_content_fetch.md` |

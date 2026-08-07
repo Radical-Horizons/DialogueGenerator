@@ -190,3 +190,42 @@ async def test_dummy_client_produces_a_resolvable_fragment() -> None:
     resolution = resolve_fragment(variants[0])
     assert resolution.reference_errors == []
     assert resolution.panel_count >= 3
+
+
+def test_flag_names_are_normalized_not_penalized() -> None:
+    """Un nom de flag accentué ou en minuscules est corrigé par l'application.
+
+    Observé sur run réel : les deux modèles produisaient
+    ``URESAIR_DEFIÉ_VOKNIR_AU_SEUIL`` et ``VOKNIR_A_EPROUVE_URESair``, que le
+    schéma Unity (``^[A-Z][A-Z0-9_]*$``) refuse. C'est une forme à normaliser,
+    pas une faute d'écriture : les recaler ferait chuter le taux de validité
+    pour une raison sans rapport avec la qualité du dialogue.
+    """
+    fragment = UnityDialogueFragmentResponse.model_validate(
+        {
+            "title": "Fragment de test",
+            "panels": [
+                {
+                    "line": "Ouverture.",
+                    "consequences": {"flag": "URESAIR_DEFIÉ_VOKNIR_AU_SEUIL"},
+                    "choices": [{"text": "A", "leadsTo": "suite"}, {"text": "B"}],
+                },
+                {
+                    "key": "suite",
+                    "line": "Suite.",
+                    "consequences": {"flag": "VOKNIR_A_EPROUVE_URESair"},
+                    "choices": [{"text": "X"}, {"text": "Y"}],
+                },
+            ],
+        }
+    )
+    import re
+
+    pattern = re.compile(r"^[A-Z][A-Z0-9_]*$")
+    flags = [
+        node["consequences"]["flag"]
+        for node in resolve_fragment(fragment).document["nodes"]
+        if node.get("consequences")
+    ]
+    assert len(flags) == 2
+    assert all(pattern.match(flag) for flag in flags), flags

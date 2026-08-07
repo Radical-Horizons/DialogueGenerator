@@ -171,3 +171,16 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-seed-suite.md`
   summary: Résoudre les lieux parents depuis les relations Notion plutôt qu'à la main.
   evidence: Les fiches lieu stockent leurs relations en UUID Notion non résolus sur disque (`Communautés présentes`, `Espèces présentes`…). Les lieux parents des cas de benchmark ont été renseignés manuellement ; l'Atelier des Matrices Ossifiées et le Tunnel vertébral n'en ont aucun faute d'information fiable.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-dialogue-fragment-single-call.md`
+  summary: CLI de benchmark — une commande qui enchaîne générations, notation rubrique, duels et rapport.
+  evidence: Le mode benchmark n'a ni UI ni CLI : il ne s'utilise qu'en REST (`docs/benchmark/runbook.md`). La spécification fonctionnelle d'origine exige que tout ce qui est faisable en UI le soit en CLI. C'est aujourd'hui le principal frein à un usage autonome par l'utilisateur.
+- source_spec: `_bmad-output/implementation-artifacts/spec-dialogue-fragment-single-call.md`
+  summary: Streaming du mode fragment.
+  evidence: `fragment_mode` force la voie non-streamée — le streaming natif est câblé sur le modèle mono-nœud (normalisation, `enrich_with_ids`). Choix délibéré pour exclure toute régression sur le chemin de production ; le fragment ne bénéficie donc d'aucun retour de progression pendant la génération.
+- source_spec: `_bmad-output/implementation-artifacts/spec-dialogue-fragment-single-call.md`
+  summary: `UnityDialogueChoiceContent` expose `testSuccessNode` / `testFailureNode` / `testCriticalSuccessNode` / `testCriticalFailureNode` au LLM.
+  evidence: `.claude/rules/unity_dialogue_generation.md` interdit d'exposer ces champs techniques au modèle. Écart préexistant, relevé pendant l'implémentation du fragment (qui, lui, ne les reprend pas). Corriger l'existant touche la génération mono-nœud de production.
+- source_spec: `_bmad-output/implementation-artifacts/spec-dialogue-fragment-single-call.md`
+  summary: Trois clients LLM aiguillent sur le nom de classe du modèle de réponse.
+  evidence: `core/llm/llm_client.py`, `core/llm/openai/response_parser.py`, `core/llm/mistral_client.py`, `core/llm/openrouter_client.py` comparent `response_model.__name__` à `"UnityDialogueGenerationResponse"`. Tout nouveau modèle de réponse doit être ajouté à la main dans `DummyLLMClient`, sans quoi le développement sans clé API casse silencieusement. Un registre explicite vaudrait mieux qu'une chaîne de `elif`.

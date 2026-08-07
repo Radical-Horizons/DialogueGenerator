@@ -20,6 +20,7 @@ from typing import Any, Dict, List, Optional
 from models.dialogue_structure.unity_dialogue_fragment import (
     UnityDialogueFragmentResponse,
 )
+from services.unity_export_normalizer import normalize_unity_export_document
 
 START_NODE_ID = "START"
 """Identifiant du panneau d'ouverture, aligné sur ``enrich_with_ids``."""
@@ -188,8 +189,16 @@ def resolve_fragment(
         if key and key not in referenced:
             errors.append(f"Panneau '{key}' inatteignable : aucun choix n'y mène")
 
+    # Normalisation applicative avant restitution : un nom de flag accentué ou en
+    # minuscules est une forme à corriger, pas une faute d'écriture. Le pénaliser
+    # ferait chuter le taux de validité d'un modèle pour une raison sans rapport
+    # avec la qualité du dialogue.
+    document = normalize_unity_export_document(
+        {"schemaVersion": SCHEMA_VERSION, "nodes": nodes}
+    )
+
     return FragmentResolution(
-        document={"schemaVersion": SCHEMA_VERSION, "nodes": nodes},
+        document=document,
         title=response.title,
         reference_errors=errors,
         panel_count=len(nodes),
