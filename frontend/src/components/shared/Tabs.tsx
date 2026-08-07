@@ -9,6 +9,7 @@
  * évitant de rendre dans un conteneur de dimensions nulles (ex : warnings React Flow).
  */
 import { ReactNode, useState, useEffect } from 'react'
+import type { CSSProperties } from 'react'
 import { theme } from '../../theme'
 import {
   redesignAccent,
@@ -82,6 +83,14 @@ function SegmentedTabLabelText({ text }: { text: string }) {
       {text}
     </span>
   )
+}
+
+/** Filet de l'onglet `nav` actif — au ras du libellé, comme la maquette (2px). */
+function navTabLabelStyle(isActive: boolean): CSSProperties {
+  return {
+    paddingBottom: redesignSpacing.xs,
+    boxShadow: isActive ? `inset 0 -1px 0 ${redesignAccent.base}` : 'none',
+  }
 }
 
 export function Tabs({
@@ -242,12 +251,14 @@ export function Tabs({
                     minHeight: TOUCH_TARGET_MIN_PX,
                     minWidth: TOUCH_TARGET_MIN_PX,
                     boxSizing: 'border-box',
-                    padding: `0 0 ${redesignSpacing.xs}px`,
+                    padding: 0,
                     border: 'none',
-                    borderBottom:
-                      tab.id === activeTabId
-                        ? `1px solid ${redesignAccent.base}`
-                        : '1px solid transparent',
+                    // Le filet de l'onglet actif appartient au libellé, pas à la
+                    // cible tactile : posé ici, il se dessinait 15px sous le texte
+                    // et sur toute la largeur du bouton (voir `navTabLabelStyle`).
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     backgroundColor: 'transparent',
                     color: tab.id === activeTabId ? theme.text.primary : redesignText.label,
                     fontWeight: tab.id === activeTabId ? 600 : 400,
@@ -299,6 +310,8 @@ export function Tabs({
           >
             {variant === 'segmented' ? (
               <SegmentedTabLabelText text={tab.label} />
+            ) : variant === 'nav' ? (
+              <span style={navTabLabelStyle(tab.id === activeTabId)}>{tab.label}</span>
             ) : (
               tab.label
             )}

@@ -159,6 +159,9 @@ function PanelCollapseButton({
   )
 }
 
+/** Largeur réservée aux rails de repli en overlay : écart 4 + rail 24 + respiration 4. */
+const RAIL_GUTTER_PX = 32
+
 /**
  * Bouton flottant sur le bord du panneau central pour ré-ouvrir un panneau replié.
  * Pill vertical avec une ligne de texte rotée et halo coloré au hover.
@@ -1391,6 +1394,22 @@ export function Dashboard() {
           height: '100%',
           position: 'relative',
           minWidth: 0,
+          // Les rails de repli sont en overlay (`position: absolute`, z-50). En
+          // desktop les marges de la colonne de lecture leur laissent la place ;
+          // en narrow il n'y en a aucune et ils se posaient sur le texte du brief
+          // (mesuré à 380 px : rail 10-34, texte à partir de 14). On leur réserve
+          // leur largeur — 4 px d'écart + 24 px de rail + 4 px de respiration.
+          // Même réserve sur l'écran graphe : sa liste de dialogues touche le bord
+          // gauche du panneau, donc le rail s'y posait sur les cases de sélection.
+          paddingLeft:
+            showCollapsedLeftAffordance && (useNarrowSidePanels || centerPanelTab === 'graph')
+              ? RAIL_GUTTER_PX
+              : undefined,
+          paddingRight:
+            showCollapsedRightAffordance && (useNarrowSidePanels || centerPanelTab === 'graph')
+              ? RAIL_GUTTER_PX
+              : undefined,
+          boxSizing: 'border-box',
           ...centerColumnKeyboardStyle,
         }}
       >

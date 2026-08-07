@@ -136,3 +136,7 @@
 - source_spec: `docs/design/refonte-ui-2026/etats-2a-2e.dc.html` (bloc 2b, colonne Diagnostic)
   summary: Lignes de diagnostic qualitatives (« ton demandé : tenu », « mensonge possible », « répétition détectée ») — voir la proposition ci-dessus, dont elles sont la brique 2.
   evidence: Les lignes calculables sont livrées (longueur vs cible, réponses mécaniques, flags, fiches citées / envoyées inutilement). Les jugements demandent une évaluation par modèle — le service existe (`LLMQualityJudgeService`), il n'est simplement pas branché sur les variantes de génération. Coût N× à arbitrer, et vocabulaire à trancher : « variante » est aujourd'hui le libellé d'une **action** (relancer une option seule), pas de l'objet.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-audit-rendu-ui.md`
+  summary: Le test de régression d'ancrage de la barre d'action lit `parent.style.overflow` — le style **inline**. Il deviendrait muet si le défilement passait un jour en classe CSS.
+  evidence: Relevé en revue (angle verification-gap). Acceptable aujourd'hui car `GenerationPanel` style tout en inline, mais la garantie est liée à ce choix d'implémentation plutôt qu'au comportement. `getComputedStyle` serait plus robuste ; il retourne des valeurs peu fiables en jsdom, d'où le compromis actuel. À revoir si le panneau migre vers des classes.

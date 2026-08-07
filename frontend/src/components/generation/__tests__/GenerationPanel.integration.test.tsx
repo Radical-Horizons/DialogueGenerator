@@ -488,13 +488,18 @@ describe('GenerationPanel - Tests Baseline', () => {
 
       const block = screen.getByTestId('generation-streaming-inline')
       // Le bloc vit dans le flux du panneau (plus de modale détachée) : il partage le
-      // conteneur défilant avec l'éditeur de brief et l'action primaire. Depuis l'écran
-      // 2a le brief est enveloppé dans un conteneur repliable, donc on vérifie
-      // l'ascendance commune plutôt que l'égalité stricte des parents.
+      // conteneur défilant avec l'éditeur de brief. Depuis l'écran 2a le brief est
+      // enveloppé dans un conteneur repliable, donc on vérifie l'ascendance commune
+      // plutôt que l'égalité stricte des parents.
       const scroller = block.parentElement as HTMLElement
       expect(scroller).toBeTruthy()
       expect(scroller.contains(screen.getByTestId('system-prompt-editor'))).toBe(true)
-      expect(scroller.contains(screen.getByTestId('generation-primary-action'))).toBe(true)
+      // L'action primaire, elle, est ancrée **hors** du conteneur défilant depuis
+      // qu'elle passait sous le tiroir bas à 1024 px : elle reste dans le panneau,
+      // mais plus dans le flux qui défile (cf. régression en fin de fichier).
+      const panneau = scroller.parentElement as HTMLElement
+      expect(scroller.contains(screen.getByTestId('generation-primary-action'))).toBe(false)
+      expect(panneau.contains(screen.getByTestId('generation-primary-action'))).toBe(true)
       // Aucun chrome de modale : pas de position fixed sur le bloc.
       expect(block.style.position).not.toBe('fixed')
     })
@@ -657,6 +662,37 @@ describe('GenerationPanel - Tests Baseline', () => {
       const instructionsInput = screen.getByTestId('user-instructions-input')
       await user.type(instructionsInput, 'Instructions à réinitialiser')
       expect(instructionsInput).toBeInTheDocument()
+    }, 10000)
+  })
+
+  /**
+   * Regression : a 1024 px, la barre d'action se retrouvait **dans** le conteneur
+   * defilant. Collee au bas du contenu par `marginTop: auto`, elle partait donc
+   * sous le tiroir « Ce qui part au modele » des que le contenu debordait —
+   * `elementFromPoint` au centre du bouton renvoyait le tiroir, et l'action
+   * primaire de l'ecran devenait inutilisable.
+   *
+   * jsdom ne met pas en page : on verifie l'invariant **structurel** qui avait ete
+   * viole, et qui garantit le comportement — la barre n'est descendante d'aucun
+   * conteneur defilant.
+   */
+  describe('Ancrage de la barre d’action (regression 1024 px)', () => {
+    it('la barre d’action n’est pas dans un conteneur defilant', async () => {
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+
+      const barre = screen.getByTestId('generation-primary-action')
+      const ancetresDefilants: string[] = []
+      let parent = barre.parentElement
+      while (parent && parent !== document.body) {
+        const overflow = `${parent.style.overflow}${parent.style.overflowY}`
+        if (/auto|scroll/.test(overflow)) {
+          ancetresDefilants.push(parent.className || parent.tagName)
+        }
+        parent = parent.parentElement
+      }
+
+      expect(ancetresDefilants).toEqual([])
     }, 10000)
   })
 })

@@ -786,7 +786,7 @@ export function GenerationStreamingInline({
                 style={{
                   fontFamily: redesignFont.mono,
                   fontSize: '10.5px',
-                  color: '#7c7c86',
+                  color: redesignText.muted,
                 }}
               >
                 ÉCHAP

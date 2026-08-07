@@ -567,12 +567,8 @@ export function GenerationPanel() {
           flex: 1,
           overflowY: 'auto',
           minWidth: 0,
-          // La colonne est un flux vertical pleine hauteur : c'est ce qui permet à
-          // la barre d'action de se coller en bas (`marginTop: auto`) au lieu de
-          // suivre le brief et de flotter au milieu de l'écran.
-          ...(isGenerationNarrow || comparisonActive
-            ? {}
-            : { display: 'flex', flexDirection: 'column', minHeight: '100%' }),
+          // Le contenu défile ; la barre d'action est ancrée en dehors (voir plus
+          // bas), donc plus besoin de forcer un flux vertical pleine hauteur ici.
           // Colonne de lecture 660px centrée (écran 1c) — 760px en mode écriture (2c).
           // 2b : la comparaison n'est pas une lecture, elle prend toute la largeur
           // (option ouverte + colonne diagnostic ne tiennent pas dans 660px).
@@ -711,7 +707,7 @@ export function GenerationPanel() {
                   ? '1px solid rgba(79,127,255,0.4)'
                   : '1px solid rgba(255,255,255,0.12)',
                 backgroundColor: active ? 'rgba(79,127,255,0.1)' : 'transparent',
-                color: active ? '#a9c3ff' : '#7c7c86',
+                color: active ? '#a9c3ff' : redesignText.muted,
                 fontSize: '11.5px',
                 display: 'flex',
                 alignItems: 'center',
@@ -1061,6 +1057,19 @@ export function GenerationPanel() {
       </>
       )}
 
+      {error && (
+        <div style={{ 
+          color: theme.state.error.color, 
+          marginTop: '1rem', 
+          padding: '0.5rem', 
+          backgroundColor: theme.state.error.background, 
+          borderRadius: '4px' 
+        }}>
+          {error}
+        </div>
+      )}
+      </div>
+
       {/* Barre d'action bas de colonne de lecture (écran 1c) : réglages résumés, bouton, coût.
           2a : masquée pendant le run — les deux sorties vivent dans le bloc de streaming.
           2c : une seule rangée — mots · tokens · coût à gauche, réglages + Générer à droite. */}
@@ -1074,9 +1083,12 @@ export function GenerationPanel() {
         style={{
           borderTop: `1px solid ${redesignHairline.strong}`,
           paddingTop: writingMode ? 16 : 13,
-          // « Une seule barre de pied », collée au bas de la colonne plutôt que
-          // suivant le brief — quelle que soit la longueur du texte.
-          marginTop: isGenerationNarrow || comparisonActive ? 22 : 'auto',
+          // Ancrée par la structure (sœur du conteneur défilant), plus par une
+          // marge : `marginTop: auto` la collait au bas du *contenu*, donc elle
+          // partait sous le tiroir bas dès que le contenu débordait (mesuré à
+          // 1024x800 : barre en 739-824, colonne défilante arrêtée à 764).
+          marginTop: 0,
+          flexShrink: 0,
           paddingBottom: writingMode ? 40 : 0,
           // `display` explicite : un `display` inline l'emporte sur la règle UA
           // `[hidden] { display: none }`, donc l'attribut seul ne masquerait rien.
@@ -1155,7 +1167,10 @@ export function GenerationPanel() {
               style={{
                 fontFamily: redesignFont.mono,
                 fontSize: '11px',
-                color: 'rgba(255,255,255,0.6)',
+                // Sur l'accent, le blanc pur plafonne à 3,61:1 : on prend ce maximum
+                // plutôt que 2,26:1. AA reste hors d'atteinte sans changer l'accent,
+                // ce que la décision produit interdit (voir spec-audit-rendu-ui).
+                color: theme.button.primary.color,
               }}
             >
               CTRL+↵
@@ -1204,19 +1219,6 @@ export function GenerationPanel() {
             {orchestrator.tokenCount.toLocaleString('fr-FR')} tokens · {llmModel}
           </div>
         )}
-      </div>
-
-      {error && (
-        <div style={{ 
-          color: theme.state.error.color, 
-          marginTop: '1rem', 
-          padding: '0.5rem', 
-          backgroundColor: theme.state.error.background, 
-          borderRadius: '4px' 
-        }}>
-          {error}
-        </div>
-      )}
       </div>
       </GenerationPanelNarrowProvider>
       

@@ -65,7 +65,8 @@
     "start:debug": "powershell -ExecutionPolicy Bypass -File scripts/start-debug.ps1",
     "start:api": "powershell -ExecutionPolicy Bypass -Command \"$env:API_PORT='4243'; node scripts/getPythonPath.js -m api.main\"",
     "api:invoke": "powershell -ExecutionPolicy Bypass -File scripts/Invoke-DialogueApi.ps1",
-    "generate:dialogue-tree": "node scripts/getPythonPath.js scripts/generate_dialogue_tree.py"
+    "generate:dialogue-tree": "node scripts/getPythonPath.js scripts/generate_dialogue_tree.py",
+    "audit:ui": "node scripts/audit/audit-rendu-ui.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",

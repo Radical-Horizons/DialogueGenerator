@@ -198,12 +198,24 @@ export const ResizablePanels = forwardRef<ResizablePanelsRef, ResizablePanelsPro
       <div
         key={`panel-${index}`}
         style={{
+          // Le pourcentage se calcule sur la largeur **totale** du conteneur,
+          // poignées comprises : la somme des panneaux la dépassait donc de 6 px par
+          // poignée (mesuré à 1024 px : 211 + 819 = 1030), ce qui poussait le tiroir
+          // bas et le sélecteur d'options hors de l'écran. `flexShrink: 1` laisse
+          // flexbox résorber ce surplus proportionnellement.
+          //
+          // La largeur reste exprimée en pourcentage — et non en `flex-grow`, qui
+          // serait plus direct — parce que `useNarrowInlineSize` retombe sur
+          // `style.width` quand jsdom ne calcule pas de layout : sans elle, la
+          // densité adaptive FR118 n'est plus mesurable en test.
           width: isHorizontal ? `${sizes[index]}%` : '100%',
           height: isHorizontal ? '100%' : `${sizes[index]}%`,
+          minWidth: 0,
+          minHeight: 0,
+          flexShrink: 1,
+          flexGrow: 0,
           overflow: 'hidden',
           position: 'relative',
-          flexShrink: 0,
-          flexGrow: 0,
         }}
       >
         {child}
