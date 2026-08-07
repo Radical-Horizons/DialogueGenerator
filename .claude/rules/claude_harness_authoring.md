@@ -13,9 +13,29 @@ alwaysApply: false
 
 Ce dépôt a migré de Cursor vers Claude Code. Les mécanismes ont changé — ne pas transposer les réflexes `.mdc`.
 
-## Ce qui a disparu
+## Ce qui a changé en migrant depuis Cursor
 
-- **`alwaysApply` / `globs` d'auto-attachement.** Claude Code ne charge pas une règle parce qu'un glob correspond. Le frontmatter conservé dans `.claude/rules/*.md` est **documentaire** : il dit l'intention d'origine, il ne déclenche rien.
+`.claude/rules/` **est** une convention Claude Code, avec découverte récursive. Le
+mécanisme d'attachement conditionnel existe donc toujours — mais **le champ a changé
+de nom** :
+
+| Cursor (`.mdc`) | Claude Code (`.md`) | Effet |
+|---|---|---|
+| `globs: [...]` | `paths: [...]` | limite la règle à des fichiers |
+| `alwaysApply: true` | *(absence de `paths`)* | chargement au lancement |
+
+⚠️ **Une règle sans `paths` est chargée à chaque session**, au même niveau que
+`CLAUDE.md`. Donc un frontmatter `globs:` hérité de Cursor ne restreint rien : le
+champ est ignoré, et la règle est chargée **inconditionnellement**.
+
+C'est l'inverse du piège qu'on redoutait. Le risque n'est pas qu'une règle soit
+oubliée — c'est que **tout** soit chargé en permanence et gonfle le contexte. Mesure
+d'août 2026 : 41 règles, 119 Ko, dont 26 portaient encore `globs:`.
+
+Corollaire : la table de routage de `CLAUDE.md` n'est **pas** ce qui rend une règle
+lisible — elle est un index de lecture pour l'humain et un rappel d'intention. Ne
+pas s'en servir pour justifier qu'une règle « sera lue » : elle l'est de toute façon.
+
 - **`.mdc`.** Tout est `.md`.
 
 ## Les quatre supports, et quand choisir lequel
@@ -42,7 +62,11 @@ alwaysApply: false
 ---
 ```
 
-Toute règle `alwaysApply: true` doit être **importée** dans `CLAUDE.md` via `@.claude/rules/nom.md` — sinon elle ne s'applique jamais. Toute règle conditionnelle doit avoir **une ligne dans la table de routage** de `CLAUDE.md` — sinon elle est invisible.
+⚠️ `alwaysApply` et `globs` sont des champs **Cursor** : Claude Code les ignore. Une
+règle est toujours active **par défaut** (absence de `paths`) ; pour la rendre
+conditionnelle, lui donner `paths: ["chemins/**"]`. L'import `@.claude/rules/nom.md`
+dans `CLAUDE.md` n'est pas nécessaire au chargement — il ne sert qu'à fixer l'ordre
+de priorité.
 
 **Skill** — `name` + `description` uniquement. La `description` est le **seul** déclencheur : y mettre les mots que l'utilisateur emploierait, pas une définition abstraite. Ne pas y remettre de clé `paths:` (héritage Cursor, ignorée et cassante).
 
@@ -61,7 +85,7 @@ Toute règle `alwaysApply: true` doit être **importée** dans `CLAUDE.md` via `
 ## Checklist avant de conclure
 
 1. Le fichier est au bon endroit pour son mode de chargement.
-2. Une règle nouvelle est **soit** importée dans `CLAUDE.md` (toujours active), **soit** dans la table de routage (conditionnelle).
+2. Une règle **conditionnelle** porte `paths:` (pas `globs:`, inerte). Une règle sans `paths` sera chargée à chaque session — s'en assurer délibérément, c'est du contexte payé en permanence.
 3. Aucune extension `.mdc` résiduelle, et aucun `.cursor/` utilisé comme **source de harnais** (voir ci-dessous).
 4. Les chemins cités existent réellement.
 
