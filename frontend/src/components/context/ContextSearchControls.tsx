@@ -13,7 +13,7 @@ interface ContextSearchControlsProps {
   onSearchQueryChange: (value: string) => void
   sortType: ContextSortType
   onSortTypeChange: (value: ContextSortType) => void
-  inputRef?: RefObject<HTMLInputElement | null>
+  inputRef?: RefObject<HTMLInputElement>
   /** Placeholder du champ recherche. */
   placeholder?: string
 }

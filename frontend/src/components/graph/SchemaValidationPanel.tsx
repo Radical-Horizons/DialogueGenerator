@@ -153,7 +153,7 @@ export function SchemaValidationPanel({
               style={{
                 marginTop: 12,
                 background: 'transparent',
-                border: `1px solid ${theme.border.default}`,
+                border: `1px solid ${theme.border.primary}`,
                 borderRadius: 4,
                 padding: '4px 8px',
                 fontSize: '0.78rem',

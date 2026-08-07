@@ -15,7 +15,8 @@ export interface LoadGraphRequest {
 
 export interface GraphNodePayload {
   id: string
-  type: string
+  /** Optionnel : React Flow autorise un nœud sans `type` (rendu par défaut). */
+  type?: string
   position?: { x: number; y: number }
   data?: Record<string, unknown>
   [key: string]: unknown

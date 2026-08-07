@@ -22,7 +22,7 @@ const TOKEN_SLIDER_INPUT_STYLE: CSSProperties = {
 interface TokenSliderRowProps {
   isNarrow: boolean
   controlGapRem: number
-  sliderRef: RefObject<HTMLInputElement | null>
+  sliderRef: RefObject<HTMLInputElement>
   min: number
   max: number
   step: number

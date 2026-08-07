@@ -77,6 +77,7 @@ Grille complète : **`/test-tiers`**. Obligations agents et protocole Vitest : `
 - **Agrégat T0** : `npm run test:smoke` · **Pré-merge T2** : `npm run test:premerge`
 - **E2E** : `npm run test:e2e:smoke` (fumée) · `npm run test:e2e:verify` (complet) · `npm run test:e2e:pwa` (PWA, non inclus dans verify)
 - **Lint frontend** : `npm --prefix frontend run lint` — baseline **zéro erreur**
+- **Typecheck frontend** : `npm --prefix frontend run typecheck` (`tsc --noEmit`) — baseline **zéro erreur**, tests inclus. Ni `vite build` (esbuild, transpile seul) ni Vitest ne vérifient les types : c'est le seul garde-fou. Même job CI que l'ESLint.
 
 **Exécuter les tests, pas seulement les suggérer.** Ne jamais annoncer « vert » sans sortie de commande. Quand on te demande de corriger un test, **relance-le après le correctif** et montre la preuve.
 

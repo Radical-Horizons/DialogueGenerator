@@ -2,7 +2,7 @@
  * Cache tokens par fiche GDD — soustraction locale au retrait (sans POST estimate-tokens).
  */
 import type { ContextSelection, ElementMode } from '../types/api'
-import type { PromptStructure } from '../types/prompt'
+import type { ContextItem, PromptStructure } from '../types/prompt'
 
 export type EntityType = 'characters' | 'locations' | 'items' | 'species' | 'communities'
 

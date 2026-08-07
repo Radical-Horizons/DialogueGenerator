@@ -82,7 +82,7 @@ interface ContextListProps {
   onSearchQueryChange?: (value: string) => void
   sortType?: ContextSortType
   onSortTypeChange?: (value: ContextSortType) => void
-  searchInputRef?: RefObject<HTMLInputElement | null>
+  searchInputRef?: RefObject<HTMLInputElement>
 }
 
 type ContextListPropsWithTab = ContextListProps & {

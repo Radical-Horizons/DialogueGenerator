@@ -11,7 +11,8 @@ import { useSSEStreaming } from './useSSEStreaming'
 import { useGenerationHandlers } from './useGenerationHandlers'
 import { useGraphStore } from '../store/graphStore'
 import { titleToDocumentId } from '../utils/formatDialogueTitle'
-import type { ContextSelection, LLMModelResponse } from '../types/api'
+import type { ContextSelection, LLMModelResponse, ReasoningEffort } from '../types/api'
+import type { UseToastFn } from '../components/shared/Toast'
 import type { UseGenerationRequestReturn } from './useGenerationRequest'
 
 export interface UseGenerationOrchestratorOptions {
@@ -24,7 +25,7 @@ export interface UseGenerationOrchestratorOptions {
   /** Modèle LLM sélectionné */
   llmModel: string
   /** Reasoning effort */
-  reasoningEffort: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  reasoningEffort: ReasoningEffort | null
   /** Top_p (nucleus sampling) */
   topP: number | null
   /** Nombre max de choix */
@@ -57,8 +58,8 @@ export interface UseGenerationOrchestratorOptions {
   setMaxChoices: (choices: number | null) => void
   /** Setter pour narrativeTags */
   setNarrativeTags: (tags: string[]) => void
-  /** Toast function */
-  toast: (message: string, type?: 'success' | 'error' | 'info' | 'warning', duration?: number) => void
+  /** Toast function — signature canonique (`actions` requis par les toasts correctifs). */
+  toast: UseToastFn
 }
 
 export interface UseGenerationOrchestratorReturn {

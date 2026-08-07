@@ -10,6 +10,7 @@
     "prebuild": "node ./scripts/generate-pwa-icons.mjs",
     "build": "vite build",
     "build:check": "tsc && vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "test": "vitest run",

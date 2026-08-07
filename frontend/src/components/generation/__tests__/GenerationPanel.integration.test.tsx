@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event'
 import { GenerationPanel } from '../GenerationPanel'
 import { useGenerationStore } from '../../../store/generationStore'
 import { useContextStore } from '../../../store/contextStore'
-import { useGraphStore } from '../../../store/graphStore'
+import { useGraphStore, type GraphState } from '../../../store/graphStore'
 import { useLLMStore } from '../../../store/llmStore'
 import { useAuthorProfile } from '../../../hooks/useAuthorProfile'
 import { useCostGovernance } from '../../../hooks/useCostGovernance'
@@ -385,7 +385,7 @@ describe('GenerationPanel - Tests Baseline', () => {
 
     const graphStoreState = {
       loadDialogue: vi.fn().mockResolvedValue(undefined),
-      dialogueFlagBindings: [] as ReturnType<typeof useGraphStore>['dialogueFlagBindings'],
+      dialogueFlagBindings: [] as GraphState['dialogueFlagBindings'],
       upsertDialogueFlagBinding: vi.fn(),
       removeDialogueFlagBinding: vi.fn(),
     }

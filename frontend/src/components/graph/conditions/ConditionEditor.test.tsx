@@ -37,7 +37,7 @@ function TestWrap({ variant, choiceIndex }: { variant: 'node' | 'choice'; choice
 
 describe('ConditionEditor', () => {
   beforeEach(() => {
-    vi.mocked(flagsAPI.listFlags).mockResolvedValue({ flags: [] })
+    vi.mocked(flagsAPI.listFlags).mockResolvedValue({ flags: [], total: 0 })
     vi.mocked(contextAPI.listCommunities).mockResolvedValue({
       communities: [{ name: 'Guilde des Cartographes', data: {} }],
       total: 1,

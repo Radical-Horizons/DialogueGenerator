@@ -15,7 +15,7 @@ import { useGenerationActionsStore } from '../store/generationActionsStore'
 import { useContextStore } from '../store/contextStore'
 import { useGraphStore } from '../store/graphStore'
 import { useUiLayoutStore } from '../store/uiLayoutStore'
-import type { UseGraphToolbarReturn } from '../hooks/useGraphToolbar'
+import { makeMockGraphToolbar } from '../testFixtures/graphToolbar'
 
 function expectInlineMinTouchPx(el: HTMLElement, label: string, px: number) {
   const h = el.style.minHeight
@@ -68,47 +68,6 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
 })
 
-function makeMockToolbar(overrides: Partial<UseGraphToolbarReturn> = {}): UseGraphToolbarReturn {
-  return {
-    showAutoLayoutDropdown: false,
-    setShowAutoLayoutDropdown: () => {},
-    showActionsDropdown: false,
-    setShowActionsDropdown: () => {},
-    showAIGenerationPanel: false,
-    setShowAIGenerationPanel: () => {},
-    showExportFormatDialog: false,
-    setShowExportFormatDialog: () => {},
-    showValidationPanel: false,
-    setShowValidationPanel: () => {},
-    showCostBreakdown: false,
-    setShowCostBreakdown: () => {},
-    showShortcutsTooltip: false,
-    setShowShortcutsTooltip: () => {},
-    showSearchBar: false,
-    setShowSearchBar: () => {},
-    showJumpToNodeModal: false,
-    setShowJumpToNodeModal: () => {},
-    showFiltersPanel: false,
-    setShowFiltersPanel: () => {},
-    layoutDirection: 'TB',
-    layoutSpacingMode: 'normal',
-    setLayoutSpacingMode: () => {},
-    autoLayoutDropdownRef: { current: null },
-    actionsDropdownRef: { current: null },
-    actionsDropdownBtnRef: { current: null },
-    canvasWrapperRef: { current: null },
-    reactFlowInstance: null,
-    handleAutoLayout: async () => {},
-    handleOpenExportDialog: () => {},
-    handleExportPNG: async () => {},
-    handleExportSVG: async () => {},
-    undo: () => {},
-    redo: () => {},
-    canUndoNow: false,
-    canRedoNow: false,
-    ...overrides,
-  }
-}
 
 describe('FR119 touch targets — chrome', () => {
   beforeEach(() => {
@@ -214,7 +173,7 @@ describe('FR119 touch targets — chrome', () => {
   })
 
   it('GraphEditorHeader : confortable (large) min 44px', () => {
-    const toolbar = makeMockToolbar()
+    const toolbar = makeMockGraphToolbar()
     render(
       <div style={{ width: '1200px' }}>
         <GraphEditorHeader
@@ -241,7 +200,7 @@ describe('FR119 touch targets — chrome', () => {
   })
 
   it('GraphEditorHeader : narrow (écran réduit) cible tactile réduite', () => {
-    const toolbar = makeMockToolbar()
+    const toolbar = makeMockGraphToolbar()
     render(
       <div style={{ width: '320px' }}>
         <GraphEditorHeader

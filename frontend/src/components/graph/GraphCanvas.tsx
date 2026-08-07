@@ -634,10 +634,8 @@ export const GraphCanvas = memo(function GraphCanvas() {
         edges={edges}
         fitView={false}
         defaultViewport={DEFAULT_VIEWPORT}
-        minZoom={0.1}
-        maxZoom={2}
         connectionRadius={48}
-        panActivationKeyCode="Space"
+        // minZoom, maxZoom et panActivationKeyCode proviennent de ce spread.
         {...GRAPH_VIEWPORT_INTERACTION_OPTIONS}
         onlyRenderVisibleElements={true}
         onMove={onMove}

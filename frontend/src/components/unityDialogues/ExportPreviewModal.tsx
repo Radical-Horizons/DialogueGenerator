@@ -308,7 +308,7 @@ export const ExportPreviewModal = memo(function ExportPreviewModal({
                 borderRadius: '4px',
                 border: 'none',
                 background: theme.button.primary.background,
-                color: theme.button.primary.text,
+                color: theme.button.primary.color,
                 cursor: isExporting ? 'wait' : 'pointer',
               }}
             >

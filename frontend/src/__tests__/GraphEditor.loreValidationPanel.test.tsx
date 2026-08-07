@@ -8,7 +8,6 @@ import React from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { GraphEditor } from '../components/graph/GraphEditor'
 import { useGraphStore } from '../store/graphStore'
-import type { UseGraphToolbarReturn } from '../hooks/useGraphToolbar'
 
 vi.mock('../components/graph/GraphCanvas', () => ({
   GraphCanvas: () => React.createElement('div', { 'data-testid': 'graph-canvas' }),
@@ -45,71 +44,11 @@ vi.mock('../components/unityDialogues/UnityDialogueList', () => ({
   }),
 }))
 
-const mockToolbar = vi.hoisted((): UseGraphToolbarReturn => {
-  const nullRef = { current: null }
-  return {
-    showAutoLayoutDropdown: false,
-    setShowAutoLayoutDropdown: () => {},
-    showActionsDropdown: false,
-    setShowActionsDropdown: () => {},
-    showValidationToolsDropdown: false,
-    setShowValidationToolsDropdown: () => {},
-    showAIGenerationPanel: false,
-    setShowAIGenerationPanel: () => {},
-    showExportFormatDialog: false,
-    setShowExportFormatDialog: () => {},
-    showValidationPanel: true,
-    setShowValidationPanel: () => {},
-    showQualityLlmPanel: false,
-    setShowQualityLlmPanel: () => {},
-    showAiSlopPanel: false,
-    setShowAiSlopPanel: () => {},
-    showContextDroppingPanel: false,
-    setShowContextDroppingPanel: () => {},
-    showFlowSimulationPanel: false,
-    setShowFlowSimulationPanel: () => {},
-    showDialoguePreviewPanel: false,
-    setShowDialoguePreviewPanel: () => {},
-    showSchemaValidationPanel: false,
-    schemaValidationLoading: false,
-    schemaValidationIsValid: true,
-    schemaValidationErrors: [],
-    schemaValidationErrorCount: 0,
-    handleToggleSchemaValidation: () => {},
-    handleSchemaErrorClick: () => {},
-    showCostBreakdown: false,
-    setShowCostBreakdown: () => {},
-    showShortcutsTooltip: false,
-    setShowShortcutsTooltip: () => {},
-    showSearchBar: false,
-    setShowSearchBar: () => {},
-    showJumpToNodeModal: false,
-    setShowJumpToNodeModal: () => {},
-    showFiltersPanel: false,
-    setShowFiltersPanel: () => {},
-    layoutDirection: 'TB',
-    layoutSpacingMode: 'normal',
-    setLayoutSpacingMode: () => {},
-    autoLayoutDropdownRef: nullRef,
-    actionsDropdownRef: nullRef,
-    actionsDropdownBtnRef: nullRef,
-    validationToolsDropdownRef: nullRef,
-    canvasWrapperRef: nullRef,
-    reactFlowInstance: null,
-    handleAutoLayout: async () => {},
-    handleOpenExportDialog: () => {},
-    handleExportPNG: async () => {},
-    handleExportSVG: async () => {},
-    undo: () => {},
-    redo: () => {},
-    canUndoNow: false,
-    canRedoNow: false,
-  }
+vi.mock('../hooks/useGraphToolbar', async () => {
+  const { makeMockGraphToolbar } = await import('../testFixtures/graphToolbar')
+  const toolbar = makeMockGraphToolbar({ showValidationPanel: true })
+  return { useGraphToolbar: () => toolbar }
 })
-
-vi.mock('../hooks/useGraphToolbar', () => ({
-  useGraphToolbar: () => mockToolbar,
-}))
 
 vi.mock('../hooks/useDialogueLoader', () => ({
   useDialogueLoader: () => ({

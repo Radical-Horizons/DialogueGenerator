@@ -32,7 +32,7 @@ export interface FuzzyPickerInputProps {
   placeholder?: string
   disabled?: boolean
   hasError?: boolean
-  inputRef?: RefObject<HTMLInputElement | null>
+  inputRef?: RefObject<HTMLInputElement>
   'data-testid'?: string
 }
 

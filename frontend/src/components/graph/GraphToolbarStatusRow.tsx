@@ -2,7 +2,7 @@
  * Badge santé graphe, indicateur sauvegarde et menu batch (Story 17.9).
  */
 import type { ReactNode } from 'react'
-import type { Edge, Node } from '@xyflow/react'
+import type { Edge, Node } from 'reactflow'
 import { SaveStatusIndicator } from '../shared'
 import { theme } from '../../theme'
 import { redesignFont, redesignText } from '../../theme/redesignTokens'
@@ -37,7 +37,8 @@ export interface GraphToolbarStatusRowProps {
   lastSaveError: string | null
   isGraphSaving: boolean
   hasUnsavedChanges: boolean
-  lastSavedAt: string | null
+  /** Timestamp ms — aligné sur `GraphState.lastSavedAt` et `SaveStatusIndicator`. */
+  lastSavedAt: number | null
   syncStatus: 'synced' | 'offline' | 'error'
   lastAckSeq: number | null
 }

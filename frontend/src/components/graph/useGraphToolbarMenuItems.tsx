@@ -2,8 +2,7 @@
  * Items des menus Actions et Qualités de la toolbar graphe (Story 17.9).
  */
 import { useCallback, type CSSProperties } from 'react'
-import type { Node } from '@xyflow/react'
-import type { ReactFlowInstance } from '@xyflow/react'
+import type { Node, ReactFlowInstance } from 'reactflow'
 import { theme } from '../../theme'
 import {
   MANUAL_NODE_OFFSET_X,

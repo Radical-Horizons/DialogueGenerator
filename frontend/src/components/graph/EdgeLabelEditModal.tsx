@@ -23,7 +23,7 @@ export const EdgeLabelEditModal = memo(function EdgeLabelEditModal({
   onCancel,
 }: EdgeLabelEditModalProps) {
   const [value, setValue] = useState(initialValue)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
   const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
   const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
 

@@ -117,7 +117,7 @@ const TRIGGER_TYPE_MAP: Partial<Record<TabType, string>> = {
 }
 
 /** Bascule `balanced` → `tight` si la barre déborde (proposition 3). */
-function useContextGddTabBarDensity(tabBarRef: React.RefObject<HTMLDivElement | null>) {
+function useContextGddTabBarDensity(tabBarRef: React.RefObject<HTMLDivElement>) {
   const [density, setDensity] = useState<ContextGddTabDensity>('balanced')
 
   const measure = useCallback(() => {

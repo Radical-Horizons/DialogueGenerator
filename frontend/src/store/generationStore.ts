@@ -369,7 +369,7 @@ export const useGenerationStore = create<GenerationState>((set) => ({
     useGenerationStore.getState().syncIncrementalContextFromCache(selections)
   },
 
-  applyBootstrapFromPrecomputed: (selections, payload) => {
+  applyBootstrapFromPrecomputed: (_selections, payload) => {
     const entityTokenByKey: Record<string, number> = {}
     const entityContextItemsByKey: Record<string, ContextItem> = {}
     const entries = payload.entities

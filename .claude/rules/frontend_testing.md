@@ -15,10 +15,11 @@ paths:
 - **Formulaires (react-hook-form) + Playwright** : `page.fill()` met à jour le DOM mais RHF peut ne pas mettre à jour son store interne (il écoute le `change` natif). Pour vérifier la persistance après save : soit blur explicite (Tab ou clic canvas) avant de déclencher la sauvegarde, soit asserter via API (GET du fichier sauvegardé) plutôt que via reload de la page.
 - **Seed E2E (PUT document)** : en cas de 409 (optimistic locking), réessayer le PUT avec la `revision` renvoyée dans le corps de la réponse jusqu'à succès. Convention utilisée dans `e2e/documents-layout-adr008.spec.ts`.
 - **Vérifications automatiques après modification frontend**:
-  1. Build check : `cd frontend && npm run build` (détecte erreurs TypeScript)
+  1. Typecheck : `cd frontend && npm run typecheck` (`tsc --noEmit`, fichiers de test inclus) — **le seul** contrôle de types du dépôt. ⚠️ `npm run build` = `vite build` : esbuild transpile sans vérifier les types, il ne détecte **aucune** erreur TS ; Vitest non plus. C'est ainsi que 119 erreurs se sont accumulées avant l'ajout du job CI.
   2. Lint check : `cd frontend && npm run lint` (détecte erreurs de code)
-  3. Tests unitaires : commandes et contraintes agent → **`workflow.md`**. En local humain : `cd frontend && npm test` ou rapports JSON selon scripts du `package.json`.
-  4. Tests E2E : `npm run test:e2e` (si serveurs lancés, tests critiques)
+  3. Build check : `cd frontend && npm run build` (bundling, assets, PWA — **pas** les types)
+  4. Tests unitaires : commandes et contraintes agent → **`workflow.md`**. En local humain : `cd frontend && npm test` ou rapports JSON selon scripts du `package.json`.
+  5. Tests E2E : `npm run test:e2e` (si serveurs lancés, tests critiques)
 - **Script automatisé**: `.\scripts\test-frontend.ps1` (build + lint + tests unitaires), `.\scripts\test-frontend.ps1 -E2E` (inclut E2E).
 - **MCP Browser** (si disponible): Pour inspection visuelle, vérifier console logs, network requests, après avoir lancé `npm run dev`.
 - **Quand tester**:

@@ -40,6 +40,7 @@ describe('LoginForm cold boot (store réel)', () => {
     mockedAuth.loginAsGuest.mockResolvedValue({
       access_token: 'guest-token',
       token_type: 'bearer',
+      expires_in: 900,
     })
     mockedAuth.refreshToken.mockRejectedValue({ response: { status: 401 } })
     mockedAuth.getCurrentUser.mockResolvedValue(guestUser)

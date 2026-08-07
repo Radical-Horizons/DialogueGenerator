@@ -7,6 +7,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useContextStore } from './contextStore'
 import type { ContextSelection } from '../types/api'
+import { makeContextSelection } from '../testFixtures/contextSelection'
 
 describe('contextStore', () => {
   beforeEach(() => {
@@ -151,7 +152,7 @@ describe('contextStore', () => {
     it('devrait restaurer les sélections avec les deux listes', () => {
       let store = useContextStore.getState()
       
-      const selectionsToRestore: ContextSelection = {
+      const selectionsToRestore = makeContextSelection({
         characters_full: ['Personnage 1'],
         characters_excerpt: ['Personnage 2'],
         locations_full: ['Lieu 1'],
@@ -163,7 +164,7 @@ describe('contextStore', () => {
         communities_full: [],
         communities_excerpt: [],
         dialogues_examples: [],
-      }
+      })
       
       store.restoreState(selectionsToRestore, null, [])
       store = useContextStore.getState()
@@ -213,7 +214,7 @@ describe('contextStore', () => {
       store.toggleLocation('Lieu Initial')
       
       // Remplacer avec de nouvelles sélections
-      const newSelections: ContextSelection = {
+      const newSelections = makeContextSelection({
         characters_full: ['Nouveau Personnage'],
         characters_excerpt: [],
         locations_full: ['Nouveau Lieu'],
@@ -225,7 +226,7 @@ describe('contextStore', () => {
         communities_full: [],
         communities_excerpt: [],
         dialogues_examples: [],
-      }
+      })
       
       store.setSelections(newSelections)
       store = useContextStore.getState()

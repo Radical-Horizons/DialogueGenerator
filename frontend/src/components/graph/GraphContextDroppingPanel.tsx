@@ -13,6 +13,7 @@ import { GraphContextDroppingSummary } from './GraphContextDroppingSummary'
 import { ContextDroppingRulesEditor } from './ContextDroppingRulesEditor'
 import { GraphToolFloatingShell } from './GraphToolFloatingShell'
 import { buildContextDroppingInputLines } from './contextDroppingInputSummary'
+import { toGraphNodePayloads, toGraphEdgePayloads } from '../../utils/graphPayload'
 
 interface GraphContextDroppingPanelProps {
   onClose: () => void
@@ -30,7 +31,7 @@ export function GraphContextDroppingPanel({ onClose }: GraphContextDroppingPanel
   const [showRulesEditor, setShowRulesEditor] = useState(false)
 
   const inputLines = useMemo(
-    () => buildContextDroppingInputLines(contextSelections as Record<string, unknown>),
+    () => buildContextDroppingInputLines({ ...contextSelections }),
     [contextSelections]
   )
 
@@ -39,21 +40,9 @@ export function GraphContextDroppingPanel({ onClose }: GraphContextDroppingPanel
     setError(null)
     try {
       const res = await graphAPI.detectContextDropping({
-        nodes: nodes.map((n) => ({
-          id: n.id,
-          type: n.type,
-          position: n.position,
-          data: n.data,
-        })),
-        edges: edges.map((e) => ({
-          id: e.id,
-          source: e.source,
-          target: e.target,
-          type: e.type,
-          label: e.label,
-          data: e.data,
-        })),
-        context_selections: contextSelections as Record<string, unknown>,
+        nodes: toGraphNodePayloads(nodes),
+        edges: toGraphEdgePayloads(edges),
+        context_selections: { ...contextSelections },
         scene_instruction: '',
       })
       setLast(res)

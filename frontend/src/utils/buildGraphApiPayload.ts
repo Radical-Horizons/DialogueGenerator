@@ -5,14 +5,19 @@ import type { Edge, Node } from 'reactflow'
 import type { DialogueFlagBinding } from '../types/dialogueFlags'
 import { applyBindingsToDocument } from './dialogueFlagBindings'
 
-export interface GraphApiNodePayload {
+/*
+ * Alias de type et non `interface` : seuls les alias reçoivent une signature d'index
+ * implicite, nécessaire pour rester assignables à `GraphNodePayload` / `GraphEdgePayload`
+ * (`types/graph.ts`), qui déclarent `[key: string]: unknown`.
+ */
+export type GraphApiNodePayload = {
   id: string
   type: string
   position: { x: number; y: number }
   data: Record<string, unknown>
 }
 
-export interface GraphApiEdgePayload {
+export type GraphApiEdgePayload = {
   id: string
   source: string
   target: string

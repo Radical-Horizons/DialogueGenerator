@@ -21,14 +21,14 @@ import {
   fixesFromApiValidationDetails,
   type GenerationConfigFix,
 } from '../utils/generationConfigNormalization'
-import type { LLMModelResponse } from '../types/api'
+import type { LLMModelResponse, ReasoningEffort } from '../types/api'
 
 export interface UseGenerationHandlersOptions {
   userInstructions: string
   maxContextTokens: number
   maxCompletionTokens: number | null
   llmModel: string
-  reasoningEffort: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  reasoningEffort: ReasoningEffort | null
   topP: number | null
   maxChoices: number | null
   choicesMode: 'free' | 'capped'
@@ -230,7 +230,7 @@ export function useGenerationHandlers(
         toast(errorMsg, 'error', 12_000, [
           {
             label: 'Corriger les paramètres',
-            onClick: () => {
+            action: () => {
               applyPatchToState(patch, {
                 setMaxContextTokens,
                 setMaxCompletionTokens,

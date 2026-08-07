@@ -51,6 +51,7 @@ import { PANEL_COMFORT_MIN_WIDTH_PX, generationPanelChrome } from '../../theme/r
 import { GenerationPanelNarrowProvider } from './GenerationPanelNarrowContext'
 import { redesignAccent, redesignFont, redesignHairline, redesignReadingColumn, redesignText } from '../../theme/redesignTokens'
 import { remSize } from '../../theme/uiTypography'
+import type { ReasoningEffort } from '../../types/api'
 
 const REASONING_EFFORT_SHORT_LABELS: Record<string, string> = {
   none: 'aucun',
@@ -103,7 +104,7 @@ export function GenerationPanel() {
   const [maxCompletionTokens, setMaxCompletionTokens] = useState<number | null>(null)
   const [llmModel, setLlmModel] = useState<string>(DEFAULT_MODEL)
   const [reasoningEffort, setReasoningEffort] = useState<
-    'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | 'max' | null
+    ReasoningEffort | null
   >(null)
   const [topP, setTopP] = useState<number | null>(null)
   const [maxChoices, setMaxChoices] = useState<number | null>(null)
@@ -883,7 +884,7 @@ export function GenerationPanel() {
                 id="reasoning-effort-select"
                 value={reasoningEffort || 'none'}
                 onChange={(e) => {
-                  const newValue = e.target.value as 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | 'max'
+                  const newValue = e.target.value as ReasoningEffort
                   setReasoningEffort(newValue === 'none' ? null : newValue)
                   draft.markDirty()
                 }}

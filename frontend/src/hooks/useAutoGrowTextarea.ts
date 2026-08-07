@@ -44,7 +44,7 @@ function arrondirAuxLignes(hauteur: number, el: HTMLTextAreaElement, minimum: nu
  * à sa taille maximale historique.
  */
 export function useAutoGrowTextarea(
-  ref: RefObject<HTMLTextAreaElement | null>,
+  ref: RefObject<HTMLTextAreaElement>,
   value: string,
   { minHeightPx, maxHeightPx }: AutoGrowOptions
 ): void {
