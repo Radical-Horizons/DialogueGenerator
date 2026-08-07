@@ -82,7 +82,12 @@ export const useGenerationOptionsStore = create<GenerationOptionsState>()((set) 
 
   setKeptIndex: (index) => set({ keptIndex: index }),
 
-  clearRun: () => set({ slots: [], keptIndex: null }),
+  clearRun: () => {
+    // Vider les slots sans fermer les flux laisserait des EventSource écrire dans
+    // le vide : `updateSlot` deviendrait muet, mais la connexion resterait ouverte.
+    closeAllBackgroundSources()
+    set({ slots: [], keptIndex: null })
+  },
 }))
 
 /** EventSources des options d'arrière-plan, par index — pour l'annulation. */
@@ -96,6 +101,12 @@ function closeBackgroundSource(index: number): void {
   }
 }
 
+/** Ferme tous les flux d'arrière-plan encore ouverts, quel que soit leur lot. */
+export function closeAllBackgroundSources(): void {
+  for (const es of backgroundSources.values()) es.close()
+  backgroundSources.clear()
+}
+
 /**
  * Lance (ou relance) une option d'arrière-plan : crée le job puis consomme son
  * stream SSE en n'exploitant que les événements terminaux.
@@ -105,7 +116,14 @@ export async function launchBackgroundOption(
   request: GenerateUnityDialogueRequest,
   costEstimate?: { promptTokens?: number; completionTokens?: number; llmModelIdentifier?: string }
 ): Promise<void> {
-  const { updateSlot } = useGenerationOptionsStore.getState()
+  const { updateSlot, runId } = useGenerationOptionsStore.getState()
+  // `createGenerationJob` est asynchrone : un nouveau lot peut démarrer pendant
+  // l'attente. Sans cette garde, la promesse périmée écrit son `jobId` dans le slot
+  // du lot suivant et ouvre une EventSource qui écrase l'entrée de `backgroundSources`
+  // — une des deux connexions devient alors orpheline et injoignable.
+  const launchRunId = runId
+  const isStale = (): boolean => useGenerationOptionsStore.getState().runId !== launchRunId
+
   closeBackgroundSource(index)
   updateSlot(index, { status: 'pending', result: null, error: null, jobId: null })
 
@@ -113,10 +131,18 @@ export async function launchBackgroundOption(
   try {
     job = await dialoguesAPI.createGenerationJob(request, costEstimate)
   } catch (err) {
+    if (isStale()) return
     updateSlot(index, {
       status: 'error',
       error: err instanceof Error ? err.message : 'Création du job impossible',
     })
+    return
+  }
+
+  if (isStale()) {
+    // Le lot a changé pendant la création : annuler le job côté serveur plutôt que
+    // de le laisser consommer du budget pour un résultat que personne n'affichera.
+    void dialoguesAPI.cancelGenerationJob(job.job_id).catch(() => {})
     return
   }
 
@@ -126,6 +152,10 @@ export async function launchBackgroundOption(
   backgroundSources.set(index, es)
 
   es.onmessage = (event) => {
+    if (isStale()) {
+      closeBackgroundSource(index)
+      return
+    }
     try {
       const data = JSON.parse(event.data) as {
         type?: string
@@ -150,6 +180,10 @@ export async function launchBackgroundOption(
   }
 
   es.onerror = () => {
+    if (isStale()) {
+      closeBackgroundSource(index)
+      return
+    }
     // Une fermeture serveur après `complete` déclenche onerror : ne signaler que si
     // le slot n'est pas déjà terminal.
     const slot = useGenerationOptionsStore.getState().slots.find((s) => s.index === index)

@@ -135,4 +135,44 @@ describe('generationOptionsStore', () => {
     expect(dialoguesAPI.cancelGenerationJob).toHaveBeenCalledWith('job-bg')
     expect(dialoguesAPI.cancelGenerationJob).not.toHaveBeenCalledWith('job-main')
   })
+
+  it('un lot démarré pendant la création du job ne reçoit pas le résultat du lot périmé', async () => {
+    // La création reste en vol le temps qu'un second `startRun` survienne : sans garde
+    // sur `runId`, la promesse périmée écrivait son jobId dans le slot du nouveau lot
+    // et sa source écrasait l'entrée de `backgroundSources` (connexion orpheline).
+    let resolveJob: (v: { job_id: string; stream_url: string; status: string }) => void = () => {}
+    vi.mocked(dialoguesAPI.createGenerationJob).mockReturnValue(
+      new Promise((resolve) => {
+        resolveJob = resolve
+      }) as ReturnType<typeof dialoguesAPI.createGenerationJob>
+    )
+
+    useGenerationOptionsStore.getState().startRun(2, REQUEST)
+    const pending = launchBackgroundOption(1, REQUEST)
+
+    useGenerationOptionsStore.getState().startRun(2, REQUEST) // nouveau lot
+    resolveJob({ job_id: 'job-perime', stream_url: '/stream-perime', status: 'queued' })
+    await pending
+
+    const slot = useGenerationOptionsStore.getState().slots[1]
+    expect(slot.jobId).toBeNull()
+    expect(slot.status).toBe('pending')
+    expect(FakeEventSource.instances).toHaveLength(0)
+    expect(dialoguesAPI.cancelGenerationJob).toHaveBeenCalledWith('job-perime')
+  })
+
+  it('clearRun ferme les flux d’arrière-plan encore ouverts', async () => {
+    vi.mocked(dialoguesAPI.createGenerationJob).mockResolvedValue({
+      job_id: 'job-bg',
+      stream_url: '/stream',
+      status: 'queued',
+    })
+    useGenerationOptionsStore.getState().startRun(2, REQUEST)
+    await launchBackgroundOption(1, REQUEST)
+    expect(FakeEventSource.instances[0].readyState).not.toBe(2)
+
+    useGenerationOptionsStore.getState().clearRun()
+
+    expect(FakeEventSource.instances[0].readyState).toBe(2)
+  })
 })

@@ -83,12 +83,12 @@ const fn = useCallback(() => {
 `useNarrowInlineSize` mesure un nœud via `ResizeObserver` + `readLayoutWidthPx` (parent walker `style.width`). En jsdom :
 
 1. **`offsetWidth` / `clientWidth` valent souvent 0** — le hook retombe sur `style.width` en px (ou % remontée aux parents).
-2. **Depuis Story 17.8** : la ref exposée est une **callback ref** — le `ResizeObserver` se rattache dès que le nœud existe, y compris après un **montage tardif** (onglet, drawer). Le bug « `isNarrow` figé à `false` » (ref `null` au 1er `useEffect`) est corrigé ; cf. `frontend/src/hooks/useNarrowInlineSize.test.tsx`.
+2. **Le `ResizeObserver` vit dans un effet**, pas dans la callback ref (refonte UI 2026). La callback ref ne fait que poser le nœud en state ; c'est un `useLayoutEffect` qui branche l'observateur. Sous `React.StrictMode`, un RO créé dans la callback ref serait déconnecté par le cleanup du démontage simulé et **jamais recréé** — les callback refs ne sont pas ré-invoquées — laissant le hook aveugle après le premier paint. Le montage tardif (onglet, drawer) reste couvert. Cf. `frontend/src/hooks/useNarrowInlineSize.test.tsx` et `.claude/rules/ui_redesign_2026.md`.
 3. **`waitFor` long** : si un test attend encore un élément narrow sans que le nœud mesuré ne soit jamais monté ou sans largeur explicite en `style`, vérifier le wiring du test avant de suspecter le hook.
 
 **Patterns de test** :
 
-- **Vrai hook + wrapper dimensionné** : utile pour intégration (ex. `Dashboard.combobox-17_7.test.tsx` — conteneur `width: 480` / `1440` après clic sur l’onglet, le workspace se monte et la callback ref mesure).
+- **Vrai hook + wrapper dimensionné** : utile pour intégration (ex. `Dashboard.combobox-17_7.test.tsx` — conteneur `width: 480` / `1440` après clic sur l’onglet, le workspace se monte et l’effet mesure).
 - **Mock du hook** : reste valide pour **accélérer** les suites lourdes ou isoler un composant qui n’a pas besoin de la chaîne Dashboard complète ; utiliser `vi.mock('../../hooks/useNarrowInlineSize', …)` avec des seuils cohérents (`PANEL_COMFORT_MIN_WIDTH_PX`, etc.).
 - **Provider** : `<DialogueEditionNarrowProvider value={true}>` dans `UnityDialogueEditor.narrow.test.tsx` quand le composant sous test consomme déjà ce contexte.
 

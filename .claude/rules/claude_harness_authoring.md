@@ -92,6 +92,10 @@ règle est toujours active **par défaut** (absence de `paths`) ; pour la rendre
 conditionnelle, lui donner `paths:`. L'import `@.claude/rules/nom.md` dans `CLAUDE.md`
 n'est pas nécessaire au chargement — il ne sert qu'à fixer l'ordre de priorité.
 
+Ces imports **ne coûtent pas un double chargement** : vérifié en inspectant le contexte
+d'ouverture d'une session (août 2026), chaque règle apparaît une seule fois, qu'elle soit
+importée ou seulement découverte. Les garder est donc gratuit.
+
 Les règles personnelles vont dans `~/.claude/rules/` (chargées avant celles du projet,
 donc de priorité plus faible). `.claude/rules/` accepte les liens symboliques, fichier
 ou répertoire.
