@@ -20,6 +20,8 @@ DialogueGenerator est une app React + FastAPI de génération de dialogues RPG v
 
 Cursor attachait ces règles automatiquement par glob. Claude Code n'a pas ce mécanisme : **lis la règle correspondante avant de toucher aux fichiers listés**.
 
+**Un domaine qui acquiert des invariants doit acquérir une règle** — c'est le seul artefact que cette table sait router. Un document sous `docs/` qu'aucune règle n'atteint est lettre morte : personne ne le trouvera, et le travail qu'il décrit sera refait ou cassé. Le partage est constant : la **règle** porte les invariants (ce qu'on ne doit jamais casser, et pourquoi) et reste courte ; la **doc** porte la procédure, les commandes et les détails ; **c'est la règle qui renvoie à la doc**. Ne jamais faire pointer cette table directement vers `docs/`. Écrire une règle, un skill ou une commande : `.claude/rules/claude_harness_authoring.md`.
+
 | Tu touches à… | Lis d'abord |
 |---|---|
 | `api/**/*.py` (routers, schemas) | `.claude/rules/backend_api.md` |
@@ -32,7 +34,7 @@ Cursor attachait ces règles automatiquement par glob. Claude Code n'a pas ce m�
 | `authStore.ts`, `components/auth/**`, `App.tsx`, `e2e/auth*` | `.claude/rules/guest_first_auth.md` |
 | `core/llm/**`, `constants.py`, `llm_config.json`, `factories/**` | `.claude/rules/llm.md` + skill `llm-model-update` |
 | `models/dialogue_structure/**`, `unity_dialogue_generation_service.py` | `.claude/rules/unity_dialogue_generation.md` + `.claude/rules/structured_output.md` |
-| `services/benchmark_*.py`, `api/routers/benchmark.py`, lancer un bench | `docs/benchmark/runbook.md` (procédure, coûts, pièges) + `docs/benchmark/eq-bench-reference.md` (protocole) |
+| `services/benchmark_*.py`, `api/routers/benchmark.py`, `unity_dialogue_fragment*`, lancer un bench | `.claude/rules/benchmark.md` (invariants ; renvoie au runbook et au protocole) |
 | GDD sur disque, loaders, shards, cache, fingerprints | `.claude/rules/gdd_paths.md` |
 | `context_field_detector`, `context_organizer`, `ContextFieldSelector` | `.claude/rules/field_classification.md` |
 | `services/notion_api_client.py`, `notion_import_service.py` | `.claude/rules/notion_gdd_content_fetch.md` |
