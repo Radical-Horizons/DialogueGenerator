@@ -18,9 +18,11 @@ DialogueGenerator est une app React + FastAPI de génération de dialogues RPG v
 
 ## Routage des règles conditionnelles
 
-Cursor attachait ces règles automatiquement par glob. Claude Code n'a pas ce mécanisme : **lis la règle correspondante avant de toucher aux fichiers listés**.
+Claude Code charge une règle **automatiquement** : son frontmatter `paths:` la déclenche à la lecture d'un fichier correspondant, et une règle **sans** `paths:` est chargée à chaque session. Cette table n'est donc pas le mécanisme de chargement — c'est un **index humain**, utile pour aller chercher une règle avant d'ouvrir le premier fichier, et pour les règles que nul chemin ne déclenche (« lancer un bench », « pousser sur main »).
 
-**Un domaine qui acquiert des invariants doit acquérir une règle** — c'est le seul artefact que cette table sait router. Un document sous `docs/` qu'aucune règle n'atteint est lettre morte : personne ne le trouvera, et le travail qu'il décrit sera refait ou cassé. Le partage est constant : la **règle** porte les invariants (ce qu'on ne doit jamais casser, et pourquoi) et reste courte ; la **doc** porte la procédure, les commandes et les détails ; **c'est la règle qui renvoie à la doc**. Ne jamais faire pointer cette table directement vers `docs/`. Écrire une règle, un skill ou une commande : `.claude/rules/claude_harness_authoring.md`.
+**Un domaine qui acquiert des invariants doit acquérir une règle.** Un document sous `docs/` qu'aucune règle n'atteint est lettre morte : personne ne le trouvera, et le travail qu'il décrit sera refait ou cassé. Le partage est constant : la **règle** porte les invariants (ce qu'on ne doit jamais casser, et pourquoi) et reste courte ; la **doc** porte la procédure, les commandes et les détails ; **c'est la règle qui renvoie à la doc**. Ne jamais faire pointer cette table directement vers `docs/`. Écrire une règle, un skill ou une commande : `.claude/rules/claude_harness_authoring.md`.
+
+⚠️ `globs:` et `alwaysApply:` sont des champs **Cursor**, inertes ici : une règle qui n'a que `globs:` est chargée en permanence. La migration vers `paths:` est en cours sur la branche `refonte-ui-2026` — ne pas la refaire ailleurs.
 
 | Tu touches à… | Lis d'abord |
 |---|---|

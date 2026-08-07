@@ -1,7 +1,13 @@
 ---
-description: Invariants du mode Benchmark — portes structurelles, contrôles de biais du juge, unité de mesure, gouvernance du coût
-globs: ["services/benchmark_*.py", "api/routers/benchmark.py", "api/schemas/benchmark*.py", "core/prompt/benchmark_judge.py", "models/dialogue_structure/unity_dialogue_fragment.py", "services/unity_dialogue_fragment_resolver.py"]
-alwaysApply: false
+description: "Invariants du mode Benchmark : portes structurelles, contrôles de biais du juge, unité de mesure, gouvernance du coût"
+paths:
+  - "services/benchmark_*.py"
+  - "services/unity_dialogue_fragment_resolver.py"
+  - "api/routers/benchmark.py"
+  - "api/schemas/benchmark*.py"
+  - "core/prompt/benchmark_judge.py"
+  - "models/dialogue_structure/unity_dialogue_fragment.py"
+  - "tests/services/test_benchmark_*.py"
 ---
 
 # Mode Benchmark — invariants
