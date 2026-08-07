@@ -2,7 +2,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Any, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
@@ -76,6 +76,68 @@ def _extract_title_from_json(json_data: list) -> Optional[str]:
     return None
 
 
+def _nodes_of(json_data: Any) -> list:
+    """Extrait la liste de nœuds, quelle que soit la forme du JSON Unity.
+
+    Deux formes circulent : la génération renvoie un **tableau nu** de nœuds
+    (``render_unity_nodes``), les fichiers persistés un document
+    ``{"schemaVersion": ..., "nodes": [...]}``.
+
+    Args:
+        json_data: Contenu JSON déjà parsé.
+
+    Returns:
+        Liste de nœuds, vide si la forme est inattendue.
+    """
+    if isinstance(json_data, list):
+        return json_data
+    if isinstance(json_data, dict):
+        nodes = json_data.get("nodes")
+        if isinstance(nodes, list):
+            return nodes
+    return []
+
+
+def _count_nodes_and_edges(json_data: Any) -> tuple[int, int]:
+    """Compte les nœuds et les liens sortants d'un dialogue Unity.
+
+    Un lien = un choix pointant vers un nœud (``targetNode``), une branche de test
+    (``test*Node``) ou un enchaînement direct (``nextNode``). Les cibles ``END``
+    comptent : c'est une arête réelle du graphe, elle mène au nœud de fin.
+
+    Args:
+        json_data: Contenu JSON parsé (tableau de nœuds ou document complet).
+
+    Returns:
+        Couple (nombre de nœuds, nombre de liens).
+    """
+    json_data = _nodes_of(json_data)
+
+    edge_fields = (
+        "targetNode",
+        "nextNode",
+        "testSuccessNode",
+        "testFailureNode",
+        "testCriticalSuccessNode",
+        "testCriticalFailureNode",
+    )
+
+    node_count = 0
+    edge_count = 0
+    for node in json_data:
+        if not isinstance(node, dict):
+            continue
+        node_count += 1
+        if node.get("nextNode"):
+            edge_count += 1
+        for choice in node.get("choices") or []:
+            if not isinstance(choice, dict):
+                continue
+            edge_count += sum(1 for field in edge_fields if choice.get(field))
+
+    return node_count, edge_count
+
+
 @router.get(
     "",
     response_model=UnityDialogueListResponse,
@@ -146,12 +208,18 @@ async def list_unity_dialogues(
                 stat = json_file.stat()
                 
                 # Optionnel: extraire un titre depuis le contenu JSON (peut être coûteux si beaucoup de fichiers)
+                # Le JSON étant déjà parsé ici, compter nœuds et liens ne coûte qu'un parcours
+                # mémoire — la liste montre la forme du dialogue plutôt que le poids du fichier.
                 title = None
+                node_count = None
+                edge_count = None
                 try:
                     with open(json_file, 'r', encoding='utf-8') as f:
                         json_data = json.load(f)
-                        if isinstance(json_data, list):
-                            title = _extract_title_from_json(json_data)
+                        nodes = _nodes_of(json_data)
+                        if nodes:
+                            title = _extract_title_from_json(nodes)
+                            node_count, edge_count = _count_nodes_and_edges(nodes)
                 except (json.JSONDecodeError, IOError):
                     # Ignorer les erreurs de parsing pour le listing (juste ne pas avoir de titre)
                     pass
@@ -162,6 +230,8 @@ async def list_unity_dialogues(
                     size_bytes=stat.st_size,
                     modified_time=datetime.fromtimestamp(stat.st_mtime).isoformat(),
                     title=title,
+                    node_count=node_count,
+                    edge_count=edge_count,
                     share_count=share_counts.get(document_id, 0),
                     capabilities=_capabilities_payload(
                         persistence_service.capabilities(

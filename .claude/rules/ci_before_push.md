@@ -1,8 +1,6 @@
 ---
 description: Gate obligatoire — suite CI complète avant tout push vers main
-alwaysApply: true
 ---
-
 # CI avant push `main`
 
 - **Interdit** : `git push` vers `main` (ou commande `/commit` avec push) sans avoir exécuté et **validé** la suite équivalente à `.github/workflows/ci.yml` pour un **push** sur `main`.

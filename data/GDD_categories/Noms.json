@@ -31,7 +31,7 @@
       "Communauté d'usage": "88c9a34c-362f-4df3-b4e0-db89f170e8a3",
       "Notes": "Le rang Sil emporte l'accès au premier étage du secret dynastique ; il ne se transmet pas, chaque génération descend d'un cran (Sil → Sin).",
       "Région d'usage": "0013aaa5-daee-424c-a8c9-a4a5855926a3",
-      "Signification": "Marque de rang de la lignée kandarite : deuxième génération, les fils de l'empereur (Lecteurs primordiaux). Exemples attestés : Devoir Sil Kandar, Saigon Sil Kandar, Pouvoir Sil Kandar."
+      "Signification": "Marque de rang de la lignée kandarite : deuxième génération, les fils et filles de l'empereur (Lecteurs primordiaux). Exemples attestés : Sorain Sil Kandar, Elais Sil Kandar, Saigon Sil Kandar."
     },
     "sections": {},
     "notion_page_id": "01e1d41e-ad94-42c0-9075-8a9314f193cb"
@@ -263,11 +263,10 @@
     "Nom": "Tarrivka",
     "values": {
       "Catégorie": "Nom personnel",
-      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
-      "Notes": "Registre lunaire."
+      "Porteurs attestés": "8fefb411-8033-4e06-afdd-9d186937ee2a"
     },
     "sections": {},
-    "notion_page_id": "00b37310-763a-4230-acc7-49b46dd69bcb"
+    "notion_page_id": "b4bb6cf4-17d0-4915-975f-70b1cec9e752"
   },
   {
     "Nom": "Tarrivka",
@@ -758,13 +757,14 @@
   {
     "Nom": "Neth",
     "values": {
-      "Catégorie": "Marque de foyer",
-      "Notes": "Aussi utilisé comme prénom personnel (Neth'Varu, Neth-Vorthul, Neth-Arun), ce qui crée des ambiguïtés. Les Van'Doei partageant cette marque ne sont pas nécessairement frères de foyer.",
-      "Porteurs attestés": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
-      "Signification": "Nom de forge — l'un des plus répandus du Quartier des Forges. Plusieurs forges distinctes ont porté ce nom au fil des siècles."
+      "Catégorie": "Nom personnel",
+      "Notes": "Cas particulier : homonyme de la marque de foyer Neth. Pris en l’honneur du foyer de Akthar-Neth Amatru.",
+      "Porteurs attestés": "1c36e4d2-1b45-8095-8449-d7d1749e69ad",
+      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Signification": "Utilisé comme prénom personnel, homophone de la marque de foyer Neth."
     },
     "sections": {},
-    "notion_page_id": "b95836c4-43ee-42b1-acab-1f6029befeb6"
+    "notion_page_id": "6410b2b2-7c1d-44e8-bbd5-7159cd649ff6"
   },
   {
     "Nom": "Akthar",

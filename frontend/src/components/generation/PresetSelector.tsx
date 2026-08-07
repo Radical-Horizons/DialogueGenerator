@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { usePresetStore } from '../../store/presetStore';
 import type { Preset, PresetConfiguration } from '../../types/preset';
 import { theme } from '../../theme';
+import { redesignControl, redesignRadius } from '../../theme/redesignTokens';
 import { generationPanelChrome } from '../../theme/responsiveChrome';
 import { useToast, SaveStatusIndicator } from '../shared';
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext';
@@ -174,7 +175,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
               boxSizing: 'border-box',
             }}
           >
-            <span>📋 Charger preset</span>
+            <span>Charger preset</span>
             <span>{isDropdownOpen ? '▲' : '▼'}</span>
           </button>
 
@@ -274,11 +275,12 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           title={selectedPreset ? `Enregistrer "${selectedPreset.name}"` : 'Chargez un preset pour l’enregistrer'}
           style={{
             padding: '0.5rem 1rem',
-            backgroundColor: theme.button.primary.background,
-            border: 'none',
-            borderRadius: '6px',
-            color: theme.button.primary.color,
-            fontWeight: 600,
+            // Un seul bouton plein bleu par écran : l'action primaire est « Générer ».
+            backgroundColor: 'transparent',
+            border: `1px solid ${redesignControl.border}`,
+            borderRadius: `${redesignRadius.control}px`,
+            color: theme.text.secondary,
+            fontWeight: 500,
             cursor: selectedPreset && (currentConfiguration || getCurrentConfiguration) && !isUpdatingPreset ? 'pointer' : 'not-allowed',
             opacity: selectedPreset && (currentConfiguration || getCurrentConfiguration) && !isUpdatingPreset ? 1 : 0.5,
             whiteSpace: 'nowrap',

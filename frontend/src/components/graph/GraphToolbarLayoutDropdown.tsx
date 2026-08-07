@@ -1,7 +1,7 @@
 /** Menu déroulant auto-layout : espacement et direction Dagre (Story 17.9). */
-import { Badge } from '../shared'
 import { theme } from '../../theme'
 import { GRAPH_TOOLBAR_DROPDOWN_Z_INDEX } from './graphToolbarConstants'
+import { graphToolbarChevronStyle, graphToolbarTextEntryStyle } from './graphToolbarTextEntry'
 import type { GraphToolbarToolsRowProps } from './graphToolbarTypes'
 
 export function GraphToolbarLayoutDropdown(props: GraphToolbarToolsRowProps) {
@@ -26,35 +26,40 @@ export function GraphToolbarLayoutDropdown(props: GraphToolbarToolsRowProps) {
       <button
         onClick={() => canEditGraph && setShowAutoLayoutDropdown((v) => !v)}
         disabled={!canEditGraph}
-        style={{
-          ...(isNarrowToolbar ? graphChromeTouchNarrow : graphChromeTouch),
-          padding: effectiveButtonPadding,
-          border: `1px solid ${theme.border.primary}`,
-          borderRadius: '6px',
-          backgroundColor: theme.button.default.background,
-          color: theme.button.default.color,
-          cursor: canEditGraph ? 'pointer' : 'not-allowed',
-          opacity: canEditGraph ? 1 : 0.6,
-          fontSize: `${effectiveButtonFontSizeRem}rem`,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.35rem',
-          fontWeight: 600,
-        }}
+        style={
+          isNarrowToolbar
+            ? {
+                ...graphChromeTouchNarrow,
+                padding: effectiveButtonPadding,
+                border: `1px solid ${theme.border.primary}`,
+                borderRadius: '6px',
+                backgroundColor: theme.button.default.background,
+                color: theme.button.default.color,
+                cursor: canEditGraph ? 'pointer' : 'not-allowed',
+                opacity: canEditGraph ? 1 : 0.6,
+                fontSize: `${effectiveButtonFontSizeRem}rem`,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                fontWeight: 600,
+              }
+            : graphToolbarTextEntryStyle({
+                touch: graphChromeTouch,
+                disabled: !canEditGraph,
+                active: showAutoLayoutDropdown,
+              })
+        }
         title="Auto-layout (Dagre) — choisir la direction"
         aria-label="Auto-layout (Dagre) — choisir la direction"
       >
-        <span aria-hidden>📐</span>
         {!isNarrowToolbar ? (
-          <span style={{ textTransform: 'capitalize' }}>
-            <Badge variant="neutral" size="sm">
-              {layoutSpacingMode}
-            </Badge>
-          </span>
+          <span>Disposer</span>
         ) : (
           <span style={{ textTransform: 'capitalize' }}>{layoutSpacingMode}</span>
         )}
-        <span style={{ fontSize: '0.7em', opacity: 0.9 }}>▼</span>
+        <span style={isNarrowToolbar ? { fontSize: '0.7em', opacity: 0.9 } : graphToolbarChevronStyle}>
+          ▾
+        </span>
       </button>
       {showAutoLayoutDropdown && (
         <div

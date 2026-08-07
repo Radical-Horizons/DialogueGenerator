@@ -14,7 +14,8 @@ import type {
 } from '../../types/api'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
-import { listItemSelectionStyle } from '../../theme/selectionTokens'
+import { listItemSelectionStyle, listRowHairlineBorder, listRowHoverBackground } from '../../theme/selectionTokens'
+import { redesignAccent, redesignFont, redesignText } from '../../theme/redesignTokens'
 import { highlightText } from '../../utils/textHighlight'
 import { getGddEntitySummary } from '../../utils/gddSummary'
 import { useDebounce } from '../../hooks/useDebounce'
@@ -305,7 +306,10 @@ export function ContextList({
                 ? getElementMode(item.name, item.entityTab)
                 : null
               const selectionStyle = listItemSelectionStyle(isSelected)
-              const badgeLabel = item.entityTypeLabel ?? entityTypeLabel
+              // 1c : la liste est déjà filtrée par onglet, le type y est redondant —
+              // la maquette n'affiche que le nom et sa description. On le garde en
+              // recherche, où les résultats traversent les catégories.
+              const badgeLabel = searchQueryRaw ? (item.entityTypeLabel ?? entityTypeLabel) : null
 
               const handleModeClick = (e: React.MouseEvent) => {
                 e.stopPropagation()
@@ -319,70 +323,76 @@ export function ContextList({
                 <div
                   key={itemKey(item)}
                   style={{
-                    padding: '0.65rem 0.75rem',
-                    marginBottom: '0.5rem',
-                    borderTop: isSelected
-                      ? `1px solid ${currentMode === 'excerpt' ? theme.border.primary : theme.button.primary.background}`
-                      : `1px solid rgba(255, 255, 255, 0.06)`,
-                    borderRight: isSelected
-                      ? `1px solid ${currentMode === 'excerpt' ? theme.border.primary : theme.button.primary.background}`
-                      : `1px solid rgba(255, 255, 255, 0.06)`,
-                    borderBottom: isSelected
-                      ? `1px solid ${currentMode === 'excerpt' ? theme.border.primary : theme.button.primary.background}`
-                      : `1px solid rgba(255, 255, 255, 0.06)`,
-                    borderRadius: '10px',
+                    padding: '11px 20px',
+                    borderTop: listRowHairlineBorder,
+                    borderRadius: 0,
                     ...selectionStyle,
                     backgroundColor: isSelected
-                      ? theme.state.selected.background
+                      ? selectionStyle.backgroundColor
                       : isDetailSelected
-                        ? theme.background.panel
-                        : theme.background.tertiary,
-                    boxShadow: isSelected ? theme.shadow.card : '0 1px 4px rgba(0, 0, 0, 0.25)',
+                        ? listRowHoverBackground
+                        : 'transparent',
                     cursor: 'pointer',
                     display: 'flex',
-                    alignItems: 'center',
+                    alignItems: 'flex-start',
                     gap: '0.5rem',
-                    transition: 'background-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease',
+                    position: 'relative',
+                    transition: 'background-color 0.15s ease, opacity 0.15s ease',
                   }}
                   onClick={() => onItemClick(item.name, item.entityTab)}
                   onMouseEnter={(e) => {
                     if (!isSelected && !isDetailSelected) {
-                      e.currentTarget.style.backgroundColor = theme.background.panel
-                      e.currentTarget.style.boxShadow = theme.shadow.card
+                      e.currentTarget.style.backgroundColor = listRowHoverBackground
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!isSelected && !isDetailSelected) {
-                      e.currentTarget.style.backgroundColor = theme.background.tertiary
-                      e.currentTarget.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.25)'
+                      e.currentTarget.style.backgroundColor = 'transparent'
                     }
                   }}
                 >
                   {showCheckboxes && (
+                    // La maquette 1c n'affiche pas de case, mais le clic sur la rangée ouvre le
+                    // détail : sans elle, plus aucun moyen de sélectionner. On garde donc la case,
+                    // au format discret de 1a/1b (13px, accent quand cochée).
                     <input
                       type="checkbox"
                       checked={isSelected}
+                      aria-label={`Sélectionner ${item.name}`}
                       onChange={(e) => {
                         e.stopPropagation()
                         onItemToggle(item.name, item.entityTab)
                       }}
                       onClick={(e) => e.stopPropagation()}
+                      style={{
+                        width: 13,
+                        height: 13,
+                        marginTop: 2,
+                        flexShrink: 0,
+                        accentColor: redesignAccent.base,
+                        cursor: 'pointer',
+                      }}
                     />
                   )}
                   <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                      <span style={{ fontWeight: isSelected ? 'bold' : 'normal' }}>
+                      <span
+                        style={{
+                          fontSize: '13.5px',
+                          fontWeight: isSelected ? 500 : 400,
+                          color: isSelected ? redesignText.strong : redesignText.row,
+                        }}
+                      >
                         {highlightText(item.name, searchQueryRaw)}
                       </span>
                       {badgeLabel && (
                         <span
                           style={{
+                            fontFamily: redesignFont.mono,
                             fontSize: remSize('caption'),
-                            padding: '0.15rem 0.4rem',
-                            borderRadius: '4px',
-                            backgroundColor: theme.background.tertiary,
-                            color: theme.text.secondary,
-                            fontWeight: 500,
+                            letterSpacing: '0.09em',
+                            textTransform: 'uppercase',
+                            color: redesignText.label,
                           }}
                         >
                           {badgeLabel}
@@ -390,7 +400,21 @@ export function ContextList({
                       )}
                     </span>
                     {hasData(item) && getGddEntitySummary(item.data) && (
-                      <span style={{ fontSize: remSize('body'), color: theme.text.secondary, lineHeight: 1.2 }}>
+                      <span
+                        // 1c : le sous-titre tient sur une ligne. Un résumé de fiche
+                        // fait plusieurs phrases : le laisser s'enrouler triple la
+                        // hauteur de rangée et la liste ne montre plus que 5 fiches.
+                        // Le texte complet reste lisible dans le détail.
+                        title={getGddEntitySummary(item.data)}
+                        style={{
+                          fontSize: '12px',
+                          color: isSelected ? redesignText.secondary : redesignText.muted,
+                          lineHeight: 1.4,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
                         {getGddEntitySummary(item.data)}
                       </span>
                     )}
@@ -405,31 +429,25 @@ export function ContextList({
                           : 'Extrait - Cliquer pour passer en Complet'
                       }
                       style={{
-                        padding: '0.25rem 0.5rem',
-                        border: `1px solid ${theme.border.primary}`,
-                        borderRadius: '4px',
-                        backgroundColor:
-                          currentMode === 'excerpt'
-                            ? theme.state.warning.background || theme.background.secondary
-                            : theme.background.secondary,
+                        padding: '0.15rem 0.45rem',
+                        border: 'none',
+                        borderRadius: 0,
+                        backgroundColor: 'transparent',
                         color:
                           currentMode === 'excerpt'
-                            ? theme.state.warning.color || theme.text.secondary
-                            : theme.text.secondary,
+                            ? redesignText.muted
+                            : redesignAccent.base,
                         cursor: 'pointer',
-                        fontSize: remSize('small'),
-                        fontWeight: 'bold',
+                        fontFamily: redesignFont.mono,
+                        fontSize: '9.5px',
+                        letterSpacing: '0.08em',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.25rem',
-                        minWidth: '60px',
-                        justifyContent: 'center',
+                        justifyContent: 'flex-end',
+                        flexShrink: 0,
                       }}
                     >
-                      {currentMode === 'full' ? '📄' : '✂️'}
-                      <span style={{ fontSize: remSize('caption') }}>
-                        {currentMode === 'full' ? 'Complet' : 'Extrait'}
-                      </span>
+                      {currentMode === 'full' ? 'COMPLET' : 'EXTRAIT'}
                     </button>
                   )}
                 </div>

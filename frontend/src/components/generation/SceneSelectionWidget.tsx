@@ -7,8 +7,16 @@ import { useSceneSelection } from '../../hooks/useSceneSelection'
 import { useGenerationStore } from '../../store/generationStore'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { theme } from '../../theme'
+import {
+  redesignControl,
+  redesignFont,
+  redesignRadius,
+  redesignSpacing,
+  redesignText,
+} from '../../theme/redesignTokens'
 import { generationPanelChrome } from '../../theme/responsiveChrome'
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
+import { useGenerationRunActive } from '../../hooks/useGenerationRunState'
 import {
   filterNpcCharacterOptions,
   filterPlayableCharacterOptions,
@@ -17,6 +25,7 @@ import {
 
 export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
   const isNarrow = useGenerationPanelNarrow()
+  const runActive = useGenerationRunActive()
   const chrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
   const { data, selection, updateSelection, swapCharacters, randomizeField, isLoading } =
     useSceneSelection()
@@ -110,12 +119,14 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
     minWidth: `${iconActionSize}px`,
     minHeight: `${iconActionSize}px`,
     padding: 0,
-    border: `1px solid ${theme.border.primary}`,
-    borderRadius: '6px',
-    backgroundColor: theme.button.default.background,
-    color: theme.button.default.color,
+    border: `1px solid ${redesignControl.border}`,
+    borderRadius: `${redesignRadius.control}px`,
+    backgroundColor: 'transparent',
+    color: redesignText.label,
     cursor: 'pointer',
-    fontSize: '0.9rem',
+    fontFamily: redesignFont.mono,
+    fontSize: '9.5px',
+    letterSpacing: '0.06em',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -123,7 +134,17 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
     opacity: 1,
   }
 
+  const [showSceneFields, setShowSceneFields] = useState(false)
   const hasContext = selection.characterA || selection.characterB || selection.sceneRegion
+
+  /** Sur-titre et titre de scène dérivés de la sélection courante (pas de données inventées). */
+  const sceneOverline = [selection.sceneRegion, selection.subLocation]
+    .filter(Boolean)
+    .join(' · ') || 'Scène sans lieu'
+  const sceneTitle =
+    selection.characterA && selection.characterB
+      ? `${selection.characterA} & ${selection.characterB}`
+      : selection.characterA || selection.characterB || 'Nouvelle scène'
 
   if (!hasContext && !isLoading) {
     return (
@@ -150,26 +171,78 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
   return (
     <div
       style={{
-        padding: chrome.cardPadding,
-        border: `1px solid ${theme.border.primary}`,
-        borderRadius: '8px',
-        backgroundColor: theme.background.tertiary,
-        marginBottom: '1rem',
+        padding: 0,
+        border: 'none',
+        borderRadius: 0,
+        backgroundColor: 'transparent',
+        marginBottom: `${redesignSpacing.xl}px`,
         minWidth: 0,
       }}
     >
-      <h3
+      {/* Titre de scène : sur-titre mono + titre serif (écran 1c). */}
+      <div
         style={{
-          marginTop: 0,
-          marginBottom: '0.5rem',
-          fontSize: `${chrome.sectionTitleFontRem}rem`,
-          fontWeight: 'bold',
-          color: theme.text.primary,
+          fontFamily: redesignFont.mono,
+          fontSize: '10.5px',
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          color: redesignText.label,
+          marginBottom: `${redesignSpacing.sm}px`,
         }}
       >
-        Scène Principale
-      </h3>
+        {sceneOverline}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: `${redesignSpacing.md}px` }}>
+        <h1
+          style={{
+            marginTop: 0,
+            marginBottom: `${redesignSpacing.sm}px`,
+            fontFamily: redesignFont.serif,
+            // 2a : pendant la génération le titre se range à 24px pour libérer la colonne.
+            fontSize: isNarrow || runActive ? '24px' : '33px',
+            fontWeight: 400,
+            lineHeight: 1.12,
+            letterSpacing: '0.005em',
+            color: '#ffffff',
+          }}
+        >
+          {sceneTitle}
+        </h1>
+        {/* 1c n'affiche que le titre : les sélecteurs restent accessibles ici. */}
+        <button
+          type="button"
+          hidden={runActive}
+          onClick={() => setShowSceneFields((v) => !v)}
+          aria-expanded={showSceneFields}
+          data-testid="scene-fields-toggle"
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            cursor: 'pointer',
+            color: redesignText.secondary,
+            fontSize: '11.5px',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {showSceneFields ? 'masquer' : 'modifier'}
+        </button>
+      </div>
+      <div
+        style={{
+          display: showSceneFields ? 'block' : 'none',
+          fontFamily: redesignFont.mono,
+          fontSize: '10px',
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          color: redesignText.label,
+          marginBottom: `${redesignSpacing.sm}px`,
+        }}
+      >
+        Scène
+      </div>
 
+      <div style={{ display: showSceneFields ? 'block' : 'none' }}>
       {/* Ligne 1: Personnages */}
       <div
         style={{
@@ -211,7 +284,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
               opacity: isLoading || playerCharacterOptions.length === 0 ? 0.5 : 1,
             }}
           >
-            🎲
+            ALÉA
           </button>
         </div>
 
@@ -279,7 +352,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
               opacity: isLoading || npcCharacterOptions.length === 0 ? 0.5 : 1,
             }}
           >
-            🎲
+            ALÉA
           </button>
         </div>
       </div>
@@ -324,7 +397,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
               opacity: isLoading || data.regions.length === 0 ? 0.5 : 1,
             }}
           >
-            🎲
+            ALÉA
           </button>
         </div>
 
@@ -369,9 +442,10 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
               opacity: isLoading || !selection.sceneRegion || data.subLocations.length === 0 ? 0.5 : 1,
             }}
           >
-            🎲
+            ALÉA
           </button>
         </div>
+      </div>
       </div>
     </div>
   )

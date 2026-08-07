@@ -2,8 +2,7 @@
  * Story 17.2 FR119 — cibles tactiles ≥ 44px (chrome shell + toolbar graphe).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TOUCH_TARGET_MIN_PX } from '../constants'
@@ -15,6 +14,7 @@ import { useGenerationStore } from '../store/generationStore'
 import { useGenerationActionsStore } from '../store/generationActionsStore'
 import { useContextStore } from '../store/contextStore'
 import { useGraphStore } from '../store/graphStore'
+import { useUiLayoutStore } from '../store/uiLayoutStore'
 import type { UseGraphToolbarReturn } from '../hooks/useGraphToolbar'
 
 function expectInlineMinTouchPx(el: HTMLElement, label: string, px: number) {
@@ -177,8 +177,14 @@ describe('FR119 touch targets — chrome', () => {
         </QueryClientProvider>
       </BrowserRouter>
     )
-    expectInlineMinTouch(screen.getByRole('button', { name: /^options$/i }) as HTMLElement, 'header Options')
-    expectInlineMinTouch(screen.getByTestId('header-reset-button') as HTMLElement, 'header Reset')
+    // Écran 1c : plus de bouton encadré dans la barre supérieure — « Options »
+    // est devenu le libellé mono « Réglages ». La cible tactile est inchangée.
+    expectInlineMinTouch(screen.getByRole('button', { name: /^réglages$/i }) as HTMLElement, 'header Réglages')
+    expectInlineMinTouch(screen.getByTestId('header-reset-button') as HTMLElement, 'header Réinitialiser')
+    expectInlineMinTouch(
+      screen.getByTestId('header-section-generation') as HTMLElement,
+      'header nav Générer',
+    )
     expect(screen.queryByRole('button', { name: /^actions/i })).not.toBeInTheDocument()
     const userBtn = screen.getByRole('button', { name: /menu utilisateur testuser/i }) as HTMLElement
     expect(userBtn.style.width).toBe(`${TOUCH_TARGET_MIN_PX}px`)
@@ -210,7 +216,7 @@ describe('FR119 touch targets — chrome', () => {
   it('GraphEditorHeader : confortable (large) min 44px', () => {
     const toolbar = makeMockToolbar()
     render(
-      <div style={{ width: '900px' }}>
+      <div style={{ width: '1200px' }}>
         <GraphEditorHeader
           toolbar={toolbar}
 
@@ -280,7 +286,6 @@ describe('FR119 touch targets — chrome', () => {
   })
 
   it('Dashboard mobile : onglet Éditeur de graphe actif (chemin utilisateur FR119)', async () => {
-    const user = userEvent.setup()
     const { Dashboard } = await import('../components/layout/Dashboard')
     Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 320 })
     window.dispatchEvent(new Event('resize'))
@@ -294,7 +299,11 @@ describe('FR119 touch targets — chrome', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
     })
-    await user.click(screen.getByRole('button', { name: /éditeur de graphe/i }))
+    // La navigation vit dans `Header` (écran 1c) et ce test rend `Dashboard` seul :
+    // on pilote la section par le store. Le clic est couvert par Header.section-nav.
+    await act(async () => {
+      useUiLayoutStore.getState().setCenterPanelTab('graph')
+    })
     expect(screen.getByTestId('graph-editor')).toBeInTheDocument()
   })
 
@@ -305,7 +314,10 @@ describe('FR119 touch targets — chrome', () => {
 
     render(
       <BrowserRouter>
-        <Dashboard />
+        <QueryClientProvider client={queryClient}>
+          <Header />
+          <Dashboard />
+        </QueryClientProvider>
       </BrowserRouter>
     )
 
@@ -313,15 +325,17 @@ describe('FR119 touch targets — chrome', () => {
       expect(screen.getByRole('button', { name: /déplier le panneau gauche/i })).toBeInTheDocument()
     })
     // Les rails ont été réduits de moitié intentionnellement — l'essentiel est
-    // que les onglets segmentés principaux restent ≥ 44px FR119 (hauteur chrome +50 %).
-    const centerTab = screen.getByRole('button', {
-      name: /génération de dialogues/i,
-    }) as HTMLElement
-    expect(centerTab.style.minHeight, 'center segmented tab minHeight').toBe(
-      `${segmentedTabTypography.narrow.tabMinHeightPx}px`,
-    )
-    expect(centerTab.style.minWidth, 'center segmented tab minWidth').toBe(
-      `${TOUCH_TARGET_MIN_PX}px`,
-    )
+    // que les onglets de navigation principaux restent ≥ 44px FR119.
+    // (Refonte UI : la navigation a migré dans la barre supérieure ; la contrainte
+    // tactile, elle, ne bouge pas — vérifiée sur le Header monté à côté.)
+    const centerTab = screen.getByTestId('header-section-generation') as HTMLElement
+    expect(
+      parseInt(centerTab.style.minHeight, 10),
+      'center nav tab minHeight',
+    ).toBeGreaterThanOrEqual(TOUCH_TARGET_MIN_PX)
+    expect(
+      parseInt(centerTab.style.minWidth, 10),
+      'center nav tab minWidth',
+    ).toBeGreaterThanOrEqual(TOUCH_TARGET_MIN_PX)
   })
 })

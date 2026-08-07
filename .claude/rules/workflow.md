@@ -1,8 +1,6 @@
 ---
 description: Workflow — commandes essentielles, tests, déploiement, venv
-alwaysApply: false
 ---
-
 - **Agentivité vs garde-fous techniques** : les limites ci-dessous (ex. Vitest sans filtre) sont des contraintes **techniques** (temps, workers, fiabilité du terminal Windows) — pas une consigne de « réduire les coûts ». Si l’utilisateur demande explicitement la suite complète, l’exécuter. Voir `.claude/rules/agentivity.md`.
 
 - **Environnement virtuel Python** :

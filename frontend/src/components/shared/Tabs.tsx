@@ -9,7 +9,14 @@
  * évitant de rendre dans un conteneur de dimensions nulles (ex : warnings React Flow).
  */
 import { ReactNode, useState, useEffect } from 'react'
+import type { CSSProperties } from 'react'
 import { theme } from '../../theme'
+import {
+  redesignAccent,
+  redesignHairline,
+  redesignSpacing,
+  redesignText,
+} from '../../theme/redesignTokens'
 import { TOUCH_TARGET_MIN_PX } from '../../constants'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { remSize } from '../../theme/uiTypography'
@@ -26,7 +33,7 @@ export interface Tab {
   disabled?: boolean
 }
 
-export type TabsVariant = 'underline' | 'segmented'
+export type TabsVariant = 'underline' | 'segmented' | 'nav'
 
 /**
  * `touch` : FR119 (min 44px) — rail segmenté par défaut.
@@ -53,6 +60,11 @@ export interface TabsProps {
    * Évite les démontages/remontages coûteux pour les onglets avec état DOM lourd.
    */
   keepAliveTabIds?: string[]
+  /**
+   * Masque la barre d'onglets tout en gardant le contenu actif.
+   * Écran 2c (mode écriture) : un seul onglet reste utile, sa barre devient du bruit.
+   */
+  hideTabList?: boolean
 }
 
 /** Libellé tronqué dans le rail segmenté ; le libellé complet reste sur `title` du bouton parent. */
@@ -73,6 +85,14 @@ function SegmentedTabLabelText({ text }: { text: string }) {
   )
 }
 
+/** Filet de l'onglet `nav` actif — au ras du libellé, comme la maquette (2px). */
+function navTabLabelStyle(isActive: boolean): CSSProperties {
+  return {
+    paddingBottom: redesignSpacing.xs,
+    boxShadow: isActive ? `inset 0 -1px 0 ${redesignAccent.base}` : 'none',
+  }
+}
+
 export function Tabs({
   tabs,
   activeTabId,
@@ -82,6 +102,7 @@ export function Tabs({
   style,
   contentStyle,
   keepAliveTabIds,
+  hideTabList = false,
 }: TabsProps) {
   const activeTab = tabs.find((tab) => tab.id === activeTabId)
   const keepAliveSet = new Set(keepAliveTabIds ?? [])
@@ -122,7 +143,7 @@ export function Tabs({
     >
       <div
         style={{
-          display: 'flex',
+          display: hideTabList ? 'none' : 'flex',
           alignItems: 'center',
           flexShrink: 0,
           width: '100%',
@@ -148,6 +169,14 @@ export function Tabs({
                   overflowX: 'auto',
                   containerType: 'inline-size',
                 }
+            : variant === 'nav'
+            ? {
+                gap: `${redesignSpacing.lg}px`,
+                padding: `0 ${redesignSpacing.lg}px`,
+                borderBottom: `1px solid ${redesignHairline.standard}`,
+                backgroundColor: 'transparent',
+                flexWrap: 'nowrap',
+              }
             : {
                 borderBottom: `2px solid ${theme.border.primary}`,
                 backgroundColor: theme.background.secondary,
@@ -216,6 +245,25 @@ export function Tabs({
                       alignItems: 'center',
                       justifyContent: 'center',
                     }
+                : variant === 'nav'
+                ? {
+                    // FR119 : la cible tactile reste ≥ 44px malgré l'allègement visuel.
+                    minHeight: TOUCH_TARGET_MIN_PX,
+                    minWidth: TOUCH_TARGET_MIN_PX,
+                    boxSizing: 'border-box',
+                    padding: 0,
+                    border: 'none',
+                    // Le filet de l'onglet actif appartient au libellé, pas à la
+                    // cible tactile : posé ici, il se dessinait 15px sous le texte
+                    // et sur toute la largeur du bouton (voir `navTabLabelStyle`).
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'transparent',
+                    color: tab.id === activeTabId ? theme.text.primary : redesignText.label,
+                    fontWeight: tab.id === activeTabId ? 600 : 400,
+                    fontSize: '13.5px',
+                  }
                 : {
                     minHeight: TOUCH_TARGET_MIN_PX,
                     minWidth: TOUCH_TARGET_MIN_PX,
@@ -262,6 +310,8 @@ export function Tabs({
           >
             {variant === 'segmented' ? (
               <SegmentedTabLabelText text={tab.label} />
+            ) : variant === 'nav' ? (
+              <span style={navTabLabelStyle(tab.id === activeTabId)}>{tab.label}</span>
             ) : (
               tab.label
             )}

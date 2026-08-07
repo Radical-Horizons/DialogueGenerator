@@ -1,6 +1,6 @@
-/** Bouton de recentrage sur le nœud sélectionné (Story 17.9). */
-import { theme } from '../../theme'
+/** Bouton de recentrage sur le nœud sélectionné (Story 17.9) — entrée texte « Nœud » en confort (2e). */
 import { useGraphViewStore } from '../../store/graphViewStore'
+import { graphToolbarTextEntryStyle } from './graphToolbarTextEntry'
 import type { GraphToolbarToolsRowProps } from './graphToolbarTypes'
 
 export function GraphToolbarFocusNodeButton({
@@ -12,8 +12,7 @@ export function GraphToolbarFocusNodeButton({
   GraphToolbarToolsRowProps,
   'isNarrowToolbar' | 'chromeStyles' | 'selectedNodeId' | 'hasActiveDialogue'
 >) {
-  const { graphChromeTouch, graphChromeTouchNarrow, effectiveButtonPadding, effectiveButtonFontSizeRem } =
-    chromeStyles
+  const { graphChromeTouch, graphChromeTouchNarrow } = chromeStyles
   const disabled = !selectedNodeId || !hasActiveDialogue
 
   return (
@@ -26,27 +25,14 @@ export function GraphToolbarFocusNodeButton({
           useGraphViewStore.getState().focusNode(selectedNodeId)
         }
       }}
-      style={{
-        ...(isNarrowToolbar ? graphChromeTouchNarrow : graphChromeTouch),
-        padding: effectiveButtonPadding,
-        border: `1px solid ${theme.border.primary}`,
-        borderRadius: '6px',
-        backgroundColor: theme.button.default.background,
-        color: theme.button.default.color,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.55 : 1,
-        fontSize: `${effectiveButtonFontSizeRem}rem`,
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '0.35rem',
-        fontWeight: 600,
-        whiteSpace: 'nowrap',
-      }}
+      style={graphToolbarTextEntryStyle({
+        touch: isNarrowToolbar ? graphChromeTouchNarrow : graphChromeTouch,
+        disabled,
+      })}
       title="Recentrer sur le nœud sélectionné (double-clic sur un nœud)"
       aria-label="Recentrer sur le nœud sélectionné"
     >
-      <span aria-hidden>◎</span>
-      {!isNarrowToolbar && <span>Nœud</span>}
+      {isNarrowToolbar ? <span aria-hidden>◎</span> : <span>Nœud</span>}
     </button>
   )
 }

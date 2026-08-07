@@ -6,7 +6,7 @@
  * dépendre de l'implémentation interne.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { GenerationPanel } from '../GenerationPanel'
 import { useGenerationStore } from '../../../store/generationStore'
@@ -150,8 +150,23 @@ vi.mock('../DialogueFlagsPanel', () => ({
   DialogueFlagsPanel: () => <div data-testid="dialogue-flags-panel">Dialogue Flags</div>,
 }))
 
-vi.mock('../GenerationProgressModal', () => ({
-  GenerationProgressModal: () => null,
+vi.mock('../GenerationStreamingInline', () => ({
+  GenerationStreamingInline: ({
+    isActive,
+    onInterrupt,
+  }: {
+    isActive: boolean
+    onInterrupt: () => void
+  }) =>
+    isActive ? (
+      <div data-testid="generation-streaming-inline">
+        Streaming inline
+        {/* Expose l'action réelle du panneau pour tester la séquence d'interruption. */}
+        <button type="button" onClick={onInterrupt}>
+          Interrompre
+        </button>
+      </div>
+    ) : null,
 }))
 
 vi.mock('../ModelSelector', () => ({
@@ -454,11 +469,125 @@ describe('GenerationPanel - Tests Baseline', () => {
       expect(job.stream_url).toContain('job-123')
     })
 
+    it('ne monte pas le bloc de streaming tant qu\'aucune génération n\'est active', async () => {
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+      expect(screen.queryByTestId('generation-streaming-inline')).not.toBeInTheDocument()
+    })
+
+    it('monte le bloc de streaming dans le flux du panneau quand la génération démarre', async () => {
+      mockUseGenerationStore.mockReturnValue({
+        ...buildMockGenerationStoreState(),
+        isGenerating: true,
+        currentStep: 'Generating',
+        streamingContent: '{"title":"Test"',
+      } as unknown as ReturnType<typeof useGenerationStore>)
+
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+
+      const block = screen.getByTestId('generation-streaming-inline')
+      // Le bloc vit dans le flux du panneau (plus de modale détachée) : il partage le
+      // conteneur défilant avec l'éditeur de brief. Depuis l'écran 2a le brief est
+      // enveloppé dans un conteneur repliable, donc on vérifie l'ascendance commune
+      // plutôt que l'égalité stricte des parents.
+      const scroller = block.parentElement as HTMLElement
+      expect(scroller).toBeTruthy()
+      expect(scroller.contains(screen.getByTestId('system-prompt-editor'))).toBe(true)
+      // L'action primaire, elle, est ancrée **hors** du conteneur défilant depuis
+      // qu'elle passait sous le tiroir bas à 1024 px : elle reste dans le panneau,
+      // mais plus dans le flux qui défile (cf. régression en fin de fichier).
+      const panneau = scroller.parentElement as HTMLElement
+      expect(scroller.contains(screen.getByTestId('generation-primary-action'))).toBe(false)
+      expect(panneau.contains(screen.getByTestId('generation-primary-action'))).toBe(true)
+      // Aucun chrome de modale : pas de position fixed sur le bloc.
+      expect(block.style.position).not.toBe('fixed')
+    })
+
+    it('2a : pendant le run, le brief se replie et l’action primaire cède la place', async () => {
+      mockUseGenerationStore.mockReturnValue({
+        ...buildMockGenerationStoreState(),
+        isGenerating: true,
+        currentStep: 'Generating',
+        streamingContent: '{"title":"Test"',
+      } as unknown as ReturnType<typeof useGenerationStore>)
+
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+
+      // Le brief est réduit à une ligne avec son coût, la barre d'action est retirée
+      // de l'arbre accessible (les deux sorties vivent dans le bloc de streaming).
+      expect(screen.getByTestId('brief-collapsed-line')).toBeInTheDocument()
+      expect(screen.getByTestId('generation-primary-action')).toHaveAttribute('hidden')
+
+      // « voir » redéploie le brief sans interrompre la génération.
+      await userEvent.click(screen.getByTestId('brief-reveal'))
+      expect(screen.queryByTestId('brief-collapsed-line')).toBeNull()
+    })
+
+    // L'action primaire a migré du pied du panneau droit vers la colonne de lecture
+    // (écran 1c) : les gardes de désactivation doivent suivre, pas disparaître.
+    it("désactive l'action primaire pendant le chargement du catalogue GDD", async () => {
+      mockUseContextStore.mockImplementation(((selector?: (s: unknown) => unknown) => {
+        const state = { ...buildMockContextStoreState(), gddCatalogLoading: true }
+        return typeof selector === 'function' ? selector(state) : state
+      }) as unknown as typeof useContextStore)
+      try {
+        render(<GenerationPanel />)
+        await waitForPanelReady()
+        // La barre porte désormais deux boutons (Générer + ×N options) : cibler le primaire.
+        const action = within(screen.getByTestId('generation-primary-action')).getByRole('button', {
+          name: /Générer/,
+        })
+        expect(action).toBeDisabled()
+        expect(screen.getByTestId('generation-option-count')).toBeDisabled()
+      } finally {
+        // Sans restauration, l'implémentation fuit sur les tests suivants.
+        mockUseContextStore.mockReset()
+        mockUseContextStore.mockReturnValue(
+          buildMockContextStoreState() as unknown as ReturnType<typeof useContextStore>
+        )
+      }
+    })
+
     it('devrait charger les modèles au montage (prérequis génération / SSE)', async () => {
       render(<GenerationPanel />)
       await waitFor(() => {
         expect(mockConfigAPI.listLLMModels).toHaveBeenCalled()
       })
+    })
+
+    // Matrice I/O ligne 1 : `interrupt()` remet streamingContent et error à zéro. S'il est
+    // appelé dans la foulée de setStreamingError, l'avis « Génération interrompue » et le
+    // texte déjà écrit disparaissent avant d'être rendus. Il doit rester différé au timeout.
+    it("ne remet pas l'état à zéro avant d'avoir affiché l'avis d'interruption", async () => {
+      const user = userEvent.setup()
+      const storeState: Record<string, unknown> = {
+        ...buildMockGenerationStoreState(),
+        isGenerating: true,
+        currentStep: 'Generating',
+        streamingContent: '{"title":"Partiel"',
+        currentJobId: 'job-123',
+      }
+      mockUseGenerationStore.mockReturnValue(
+        storeState as unknown as ReturnType<typeof useGenerationStore>
+      )
+      mockDialoguesAPI.cancelGenerationJob = vi.fn().mockResolvedValue({ status: 'cancelled' })
+
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+
+      const block = screen.getByTestId('generation-streaming-inline')
+      await user.click(within(block).getByText('Interrompre'))
+
+      await waitFor(() => {
+        expect(storeState.setError).toHaveBeenCalledWith('Génération interrompue')
+      })
+      // Le nettoyage ne doit pas avoir eu lieu dans la foulée du message d'interruption.
+      expect(storeState.interrupt).not.toHaveBeenCalled()
+
+      // Il intervient au timeout, une fois l'avis affiché.
+      await waitFor(() => expect(storeState.interrupt).toHaveBeenCalled(), { timeout: 4000 })
     })
   })
 
@@ -533,6 +662,58 @@ describe('GenerationPanel - Tests Baseline', () => {
       const instructionsInput = screen.getByTestId('user-instructions-input')
       await user.type(instructionsInput, 'Instructions à réinitialiser')
       expect(instructionsInput).toBeInTheDocument()
+    }, 10000)
+  })
+
+  /**
+   * Regression : a 1024 px, la barre d'action se retrouvait **dans** le conteneur
+   * defilant. Collee au bas du contenu par `marginTop: auto`, elle partait donc
+   * sous le tiroir « Ce qui part au modele » des que le contenu debordait —
+   * `elementFromPoint` au centre du bouton renvoyait le tiroir, et l'action
+   * primaire de l'ecran devenait inutilisable.
+   *
+   * jsdom ne met pas en page : on verifie l'invariant **structurel** qui avait ete
+   * viole, et qui garantit le comportement — la barre n'est descendante d'aucun
+   * conteneur defilant.
+   */
+  describe('Ancrage de la barre d’action (regression 1024 px)', () => {
+    it('la barre d’action n’est pas dans un conteneur defilant', async () => {
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+
+      const barre = screen.getByTestId('generation-primary-action')
+      const ancetresDefilants: string[] = []
+      let parent = barre.parentElement
+      while (parent && parent !== document.body) {
+        const overflow = `${parent.style.overflow}${parent.style.overflowY}`
+        if (/auto|scroll/.test(overflow)) {
+          ancetresDefilants.push(parent.className || parent.tagName)
+        }
+        parent = parent.parentElement
+      }
+
+      expect(ancetresDefilants).toEqual([])
+    }, 10000)
+  })
+
+  /**
+   * L'état du brouillon se lit au pied de la colonne d'écriture, avec le décompte
+   * de tokens et le modèle. Il vivait dans l'en-tête du panneau droit, où il
+   * disputait la largeur aux onglets et se réduisait à « Modific… ».
+   */
+  describe('État du brouillon', () => {
+    it('affiche l’état du brouillon au pied de la colonne', async () => {
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+
+      // Ce qui compte est l'emplacement, pas l'état affiché : au montage le
+      // brouillon est propre (« Brouillon sauvegardé »), il devient « Modifications
+      // non enregistrées » à la première frappe.
+      // L'état ne dépend pas d'une estimation de tokens : il doit être là même
+      // avant tout calcul, comme il l'était dans l'en-tête du panneau droit.
+      expect(
+        screen.getByText(/brouillon sauvegardé|modifications non enregistrées/i)
+      ).toBeInTheDocument()
     }, 10000)
   })
 })

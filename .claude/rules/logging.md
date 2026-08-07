@@ -1,6 +1,10 @@
 ---
 description: Système de logs complet — archivage, rotation, consultation API, intégration frontend, debug, erreur
-alwaysApply: false
+paths:
+  - "api/utils/log*.py"
+  - "api/services/log_service.py"
+  - "api/routers/logs.py"
+  - "frontend/src/utils/logging.ts"
 ---
 - **Architecture**: Logging structuré avec archivage persistant (fichiers JSON par date), rotation automatique, API de consultation, intégration frontend.
 - **Handler fichier**: `DateRotatingFileHandler` (`api/utils/log_file_handler.py`) — écriture dans `data/logs/logs_YYYY-MM-DD.json`, rotation quotidienne + intra-jour si > 100MB, gestion erreurs avec fallback console.

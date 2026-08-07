@@ -3,7 +3,7 @@
  * Orchestrateur léger : délègue la logique aux hooks et les blocs JSX aux composants dédiés.
  * Structure : Liste de dialogues à gauche, graphe à droite.
  */
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ReactFlowProvider } from 'reactflow'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '../../store/authStore'
@@ -20,7 +20,17 @@ import { GraphContextBreadcrumb } from './GraphContextBreadcrumb'
 import { ExportDownloadBanner } from '../unityDialogues/ExportDownloadBanner'
 import { BatchExportProgressBanner } from '../unityDialogues/BatchExportProgressBanner'
 import { ExportPreviewModal } from '../unityDialogues/ExportPreviewModal'
+import { NodeEditorPanel } from './NodeEditorPanel'
 import { GraphValidationPanel } from './GraphValidationPanel'
+import {
+  GraphInspector,
+  GraphInspectorEmpty,
+  GraphInspectorNodeHeading,
+  GraphInspectorPrimaryAction,
+  type GraphInspectorTabDef,
+} from './GraphInspector'
+import { GraphInspectorNodeSummary } from './GraphInspectorNodeSummary'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { GraphQualityLlmPanel } from './GraphQualityLlmPanel'
 import { GraphAiSlopPanel } from './GraphAiSlopPanel'
 import { GraphContextDroppingPanel } from './GraphContextDroppingPanel'
@@ -94,6 +104,15 @@ export function GraphEditor({
   } = useGraphStore()
 
   const loreDialogueScopeKey = activeDialogueFilename ?? graphDocumentId ?? 'untitled'
+
+  /**
+   * 2e : l'onglet NŒUD s'ouvre en lecture ; « éditer » bascule sur le formulaire.
+   * Changer de nœud ramène la lecture — on regarde d'abord, on modifie ensuite.
+   */
+  const [nodeInspectorEditing, setNodeInspectorEditing] = useState(false)
+  useEffect(() => {
+    setNodeInspectorEditing(false)
+  }, [selectedNodeId])
 
   const toolbar = useGraphToolbar(toast, activeDialogueFilename, handleSave, isLoadingDialogue)
   const { ref: workspaceRef, isNarrow: isWorkspaceNarrow } = useNarrowInlineSize(
@@ -191,6 +210,106 @@ export function GraphEditor({
   const showValidationOverlay =
     showValidationPanel &&
     (graphValidationErrors.length > 0 || Boolean(loreExplicitValidationSummary))
+
+  /**
+   * Onglets de l'inspecteur (écran 2e). Le contenu réutilise les panneaux existants :
+   * seul leur contenant change (colonne fixe au lieu d'overlay empilable).
+   */
+  const selectedGraphNode = selectedNodeId
+    ? nodes.find((n) => n.id === selectedNodeId) ?? null
+    : null
+  const selectedNodeData = (selectedGraphNode?.data ?? null) as
+    | { speaker?: string; line?: string; choices?: unknown[] }
+    | null
+
+  const healthIssueCount =
+    graphValidationErrors.length + (schemaValidationErrorCount ?? 0)
+
+  const selectedNodeErrorCount = selectedNodeId
+    ? graphValidationErrors.filter((e) => e.node_id === selectedNodeId && e.severity === 'error')
+        .length
+    : 0
+  const selectedNodeWarningCount = selectedNodeId
+    ? graphValidationErrors.filter((e) => e.node_id === selectedNodeId && e.severity !== 'error')
+        .length
+    : 0
+
+  const inspectorTabs: GraphInspectorTabDef[] = [
+    {
+      id: 'node',
+      label: 'Nœud',
+      content: selectedGraphNode ? (
+        <>
+          <GraphInspectorNodeHeading
+            nodeLabel={`Nœud ${selectedGraphNode.id}${
+              selectedNodeData?.speaker ? ` · ${selectedNodeData.speaker}` : ''
+            }`}
+            line={selectedNodeData?.line}
+          />
+          {/* 2e : vue lecture par défaut ; « éditer » ouvre le formulaire complet,
+              qui reste la seule surface d'édition du graphe. */}
+          {nodeInspectorEditing ? (
+            <NodeEditorPanel />
+          ) : (
+            <GraphInspectorNodeSummary
+              node={selectedGraphNode}
+              errorCount={selectedNodeErrorCount}
+              warningCount={selectedNodeWarningCount}
+              onEdit={() => setNodeInspectorEditing(true)}
+              onShowHealth={() => useUiLayoutStore.getState().setInspectorTab('health')}
+            />
+          )}
+        </>
+      ) : (
+        <GraphInspectorEmpty>
+          Aucun nœud sélectionné. Clique un nœud du graphe pour voir sa réplique, ses réponses
+          et son origine.
+        </GraphInspectorEmpty>
+      ),
+    },
+    {
+      id: 'health',
+      label: 'Santé',
+      count: healthIssueCount,
+      content:
+        graphValidationErrors.length > 0 || loreExplicitValidationSummary ? (
+          <GraphValidationPanel
+            validationErrors={graphValidationErrors}
+            loreExplicitSummary={loreExplicitValidationSummary}
+            loreDialogueScopeKey={loreDialogueScopeKey}
+            variant="inspector"
+          />
+        ) : (
+          <GraphInspectorEmpty>
+            Aucune erreur ni contradiction détectée sur ce dialogue.
+          </GraphInspectorEmpty>
+        ),
+    },
+    {
+      id: 'quality',
+      label: 'Qualité',
+      content: <GraphQualityLlmPanel variant="inspector" />,
+    },
+    {
+      id: 'cost',
+      label: 'Coût',
+      content: activeDialogueFilename ? (
+        <DialogueCostModal filename={activeDialogueFilename} variant="inspector" />
+      ) : (
+        <GraphInspectorEmpty>
+          Ouvre un dialogue pour voir son coût de génération.
+        </GraphInspectorEmpty>
+      ),
+    },
+  ]
+
+  const inspectorFooter = selectedGraphNode ? (
+    <GraphInspectorPrimaryAction
+      label="Générer la suite"
+      shortcut="CTRL+↵"
+      onClick={() => setShowAIGenerationPanel(true)}
+    />
+  ) : null
 
   const handleSelectDialogue = useCallback(
     (dialogue: UnityDialogueMetadata | null) => {
@@ -339,11 +458,15 @@ export function GraphEditor({
               </div>
             ) : (
               <>
+                {/* Écran 2e : le canvas partage la rangée avec l'inspecteur fixe ;
+                    plus aucun panneau consultatif ne recouvre le graphe. */}
+                <div style={{ flex: 1, minHeight: 0, display: 'flex', minWidth: 0 }}>
                 <div
                   data-testid="graph-canvas"
                   style={{
                     flex: 1,
                     minHeight: 0,
+                    minWidth: 0,
                     overflow: 'hidden',
                     position: 'relative',
                     visibility:
@@ -361,6 +484,8 @@ export function GraphEditor({
                     <GraphCanvas />
                   </ReactFlowProvider>
                 </div>
+                {!isGraphEditorNarrow && <GraphInspector tabs={inspectorTabs} footer={inspectorFooter} />}
+                </div>
                   {showGameSystemsIntegrationPanel ? (
                     <GameSystemsIntegrationPanel
                       onClose={() => setShowGameSystemsIntegrationPanel(false)}
@@ -368,7 +493,10 @@ export function GraphEditor({
                   ) : null}
               </>
             )}
-            {showValidationOverlay && (
+            {/* Validation, qualité, slop et coût vivent désormais dans l'inspecteur
+                (onglets SANTÉ / QUALITÉ / COÛT) — voir `inspectorTabs` plus haut.
+                En colonne étroite, l'inspecteur n'a pas la place : ils restent en overlay. */}
+            {isGraphEditorNarrow && showValidationOverlay && (
               <GraphValidationPanel
                 validationErrors={graphValidationErrors}
                 loreExplicitSummary={loreExplicitValidationSummary}
@@ -376,12 +504,12 @@ export function GraphEditor({
                 onClose={() => toolbar.setShowValidationPanel(false)}
               />
             )}
-            {showQualityLlmPanel && (
+            {isGraphEditorNarrow && showQualityLlmPanel && (
               <GraphQualityLlmPanel
                 onClose={() => toolbar.setShowQualityLlmPanel(false)}
               />
             )}
-            {showAiSlopPanel && (
+            {isGraphEditorNarrow && showAiSlopPanel && (
               <GraphAiSlopPanel onClose={() => toolbar.setShowAiSlopPanel(false)} />
             )}
             {showContextDroppingPanel && (
@@ -395,7 +523,7 @@ export function GraphEditor({
               />
             )}
             <SchemaValidationPanel
-              isOpen={showSchemaValidationPanel}
+              isOpen={isGraphEditorNarrow && showSchemaValidationPanel}
               isLoading={schemaValidationLoading}
               isValid={schemaValidationIsValid}
               errors={schemaValidationErrors}
@@ -405,7 +533,7 @@ export function GraphEditor({
               onClose={handleToggleSchemaValidation}
               onIssueClick={handleSchemaIssueClick}
             />
-            {showCostBreakdown && activeDialogueFilename && (
+            {isGraphEditorNarrow && showCostBreakdown && activeDialogueFilename && (
               <DialogueCostModal
                 filename={activeDialogueFilename}
                 onClose={() => setShowCostBreakdown(false)}

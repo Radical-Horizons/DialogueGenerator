@@ -198,12 +198,24 @@ export const ResizablePanels = forwardRef<ResizablePanelsRef, ResizablePanelsPro
       <div
         key={`panel-${index}`}
         style={{
+          // Le pourcentage se calcule sur la largeur **totale** du conteneur,
+          // poignées comprises : la somme des panneaux la dépassait donc de 6 px par
+          // poignée (mesuré à 1024 px : 211 + 819 = 1030), ce qui poussait le tiroir
+          // bas et le sélecteur d'options hors de l'écran. `flexShrink: 1` laisse
+          // flexbox résorber ce surplus proportionnellement.
+          //
+          // La largeur reste exprimée en pourcentage — et non en `flex-grow`, qui
+          // serait plus direct — parce que `useNarrowInlineSize` retombe sur
+          // `style.width` quand jsdom ne calcule pas de layout : sans elle, la
+          // densité adaptive FR118 n'est plus mesurable en test.
           width: isHorizontal ? `${sizes[index]}%` : '100%',
           height: isHorizontal ? '100%' : `${sizes[index]}%`,
+          minWidth: 0,
+          minHeight: 0,
+          flexShrink: 1,
+          flexGrow: 0,
           overflow: 'hidden',
           position: 'relative',
-          flexShrink: 0,
-          flexGrow: 0,
         }}
       >
         {child}
@@ -218,24 +230,30 @@ export const ResizablePanels = forwardRef<ResizablePanelsRef, ResizablePanelsPro
           style={{
             [isHorizontal ? 'width' : 'height']: '6px',
             [isHorizontal ? 'height' : 'width']: '100%',
-            backgroundColor: isDragging === index
-              ? theme.button.primary.background
-              : theme.border.primary,
+            // Refonte : la séparation visible est un **filet d'1px**, pas une bande de 6px.
+            // Les 6px restent la zone de préhension ; seule la bordure se voit, et elle
+            // ne s'accentue qu'au survol ou pendant le glissement.
+            backgroundColor: 'transparent',
+            [isHorizontal ? 'borderLeft' : 'borderTop']: `1px solid ${
+              isDragging === index ? theme.button.primary.background : theme.border.primary
+            }`,
             cursor: isHorizontal ? 'col-resize' : 'row-resize',
             position: 'relative',
             zIndex: 10,
             flexShrink: 0,
             flexGrow: 0,
-            transition: isDragging === index ? 'none' : 'background-color 0.2s',
+            transition: isDragging === index ? 'none' : 'border-color 0.2s',
           }}
           onMouseEnter={(e) => {
             if (isDragging !== index) {
-              e.currentTarget.style.backgroundColor = theme.button.primary.background
+              e.currentTarget.style[isHorizontal ? 'borderLeftColor' : 'borderTopColor'] =
+                theme.button.primary.background
             }
           }}
           onMouseLeave={(e) => {
             if (isDragging !== index) {
-              e.currentTarget.style.backgroundColor = theme.border.primary
+              e.currentTarget.style[isHorizontal ? 'borderLeftColor' : 'borderTopColor'] =
+                theme.border.primary
             }
           }}
         >

@@ -1,8 +1,6 @@
 import {
   useCallback,
-  useEffect,
   useLayoutEffect,
-  useRef,
   useState,
   type RefCallback,
 } from 'react'
@@ -53,66 +51,57 @@ export function useNarrowInlineSize(
   isNarrow: boolean
 } {
   const measureParent = options?.measureParentClientWidth === true
-  const observedNodeRef = useRef<HTMLDivElement | null>(null)
-  const observedMeasureTargetRef = useRef<HTMLElement | null>(null)
-  const resizeObserverRef = useRef<ResizeObserver | null>(null)
+  // Nœud en state (pas en ref) : le cycle de vie du ResizeObserver vit dans un effet.
+  // Sous React.StrictMode, le démontage simulé exécute le cleanup (disconnect) puis
+  // RE-JOUE l'effet — un RO créé dans la callback ref, lui, ne serait jamais recréé
+  // (les callback refs ne sont pas ré-invoquées) et le hook resterait aveugle après
+  // le premier paint. Bug observé en dev : toolbar figée en narrow après resize.
+  const [observedNode, setObservedNode] = useState<HTMLDivElement | null>(null)
   const [isNarrow, setIsNarrow] = useState(false)
 
-  const measure = useCallback(() => {
-    const target = observedMeasureTargetRef.current ?? observedNodeRef.current
-    if (!target) return
-    const w = readLayoutWidthPx(target)
-    setIsNarrow(w < thresholdPx)
-  }, [thresholdPx])
-
-  const attachToNode = useCallback(
-    (node: HTMLDivElement | null) => {
-      resizeObserverRef.current?.disconnect()
-      resizeObserverRef.current = null
-
-      if (!node) {
-        observedNodeRef.current = null
-        observedMeasureTargetRef.current = null
-        setIsNarrow(false)
-        return
-      }
-
-      observedNodeRef.current = node
-      const measureTarget = (measureParent ? node.parentElement : node) as HTMLElement | null
-      observedMeasureTargetRef.current = measureTarget ?? node
-
-      measure()
-      // ~2 frames : laisser le layout se stabiliser après attache ref (AC Story 17.8).
-      requestAnimationFrame(() => {
-        measure()
-        requestAnimationFrame(() => {
-          measure()
-        })
-      })
-
-      const ro = new ResizeObserver(() => {
-        measure()
-      })
-      // IMPORTANT: si on mesure le parent, on doit observer le parent (sinon un resize du parent
-      // peut ne pas redimensionner le nœud immédiatement, et on rate la transition narrow → desktop).
-      ro.observe(observedMeasureTargetRef.current ?? node)
-      resizeObserverRef.current = ro
-    },
-    [measure, measureParent]
-  )
+  const attachToNode = useCallback((node: HTMLDivElement | null) => {
+    setObservedNode(node)
+  }, [])
 
   useLayoutEffect(() => {
-    measure()
-  }, [measure])
-
-  useEffect(() => {
-    return () => {
-      resizeObserverRef.current?.disconnect()
-      resizeObserverRef.current = null
-      observedNodeRef.current = null
-      observedMeasureTargetRef.current = null
+    if (!observedNode) {
+      setIsNarrow(false)
+      return
     }
-  }, [])
+
+    // IMPORTANT: si on mesure le parent, on doit observer le parent (sinon un resize du parent
+    // peut ne pas redimensionner le nœud immédiatement, et on rate la transition narrow → desktop).
+    const target = ((measureParent ? observedNode.parentElement : observedNode) ??
+      observedNode) as HTMLElement
+
+    // Garde anti-course : le rAF imbriqué ne peut pas être annulé par son id parent —
+    // sans ce flag, une mesure périmée peut réécrire isNarrow après démontage.
+    let cancelled = false
+    const measure = () => {
+      if (cancelled) return
+      setIsNarrow(readLayoutWidthPx(target) < thresholdPx)
+    }
+
+    measure()
+    // ~2 frames : laisser le layout se stabiliser après attache ref (AC Story 17.8).
+    const raf1 = requestAnimationFrame(() => {
+      measure()
+      requestAnimationFrame(() => {
+        measure()
+      })
+    })
+
+    const ro = new ResizeObserver(() => {
+      measure()
+    })
+    ro.observe(target)
+
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(raf1)
+      ro.disconnect()
+    }
+  }, [observedNode, thresholdPx, measureParent])
 
   return { ref: attachToNode, isNarrow }
 }

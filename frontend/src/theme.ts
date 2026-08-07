@@ -6,19 +6,45 @@
  */
 
 export const theme = {
-  // Couleurs de base (primary = chrome, secondary = colonnes latérales, panel = zone centrale)
+  /**
+   * Surfaces (refonte 2026).
+   *
+   * La maquette n'a **qu'un seul fond** pour tout l'écran : les colonnes ne sont
+   * séparées que par un filet à 6 % d'opacité, jamais par un changement de teinte.
+   * `secondary`, `panel` et `panelHeader` sont donc alignés sur `primary` ; ils
+   * restent distincts par leur *nom* pour ne pas casser les 600+ usages et pour
+   * garder la possibilité de réintroduire une élévation là où elle a du sens.
+   *
+   * **Écart assumé à la maquette** (décision produit, 2026-08-06) : l'échelle est
+   * remontée d'un cran — fond `#17171b` au lieu du `#121214` de la maquette, qui
+   * rendait l'app uniformément trop sombre à l'usage. Les quatre surfaces gardent
+   * leurs écarts relatifs : remonter le seul fond l'aurait fait entrer en
+   * collision avec les champs de saisie (`input.background`, exactement `#17171b`)
+   * et les modales auraient cessé de se détacher.
+   *
+   * `tertiary` reste **en relief** : c'est la surface des menus, des en-têtes de
+   * nœud et des îlots qui doivent se détacher. `elevated` sert aux modales, qui
+   * ont besoin de contraste sur leur voile.
+   */
   background: {
-    primary: '#121214',
-    secondary: '#1a1a1f',
-    tertiary: '#25252c',
-    panel: '#212126',
-    panelHeader: '#2a2a32',
+    primary: '#17171b',
+    secondary: '#17171b',
+    tertiary: '#2a2a33',
+    panel: '#17171b',
+    panelHeader: '#17171b',
+    /** Surface des modales — au-dessus du voile, pas dans le flux de la page. */
+    elevated: '#1f1f26',
   },
-  // Couleurs de bordure
+  /**
+   * Bordures : la refonte ne connaît que des **filets**. `primary` vaut le filet
+   * standard de la maquette (6 %), `secondary` le filet renforcé (9 %) des
+   * séparations structurantes. Les contours de contrôle vivent dans `input.border`
+   * et `button.*.border` (#2e2e36), pas ici.
+   */
   border: {
-    primary: '#3d3d46',
-    secondary: '#4a4a54',
-    focus: '#646cff',
+    primary: 'rgba(255, 255, 255, 0.06)',
+    secondary: 'rgba(255, 255, 255, 0.09)',
+    focus: '#4f7fff',
   },
   // Couleurs de texte
   text: {
@@ -30,40 +56,43 @@ export const theme = {
   // Couleurs de bouton
   button: {
     default: {
-      background: '#2e2e34',
+      // Contrôle secondaire de la maquette : fond transparent, contour #2e2e36.
+      background: 'transparent',
       color: 'rgba(255, 255, 255, 0.87)',
-      border: '#3d3d46',
+      border: '#2e2e36',
       hover: {
-        background: '#3a3a3a',
-        border: '#646cff',
+        background: 'rgba(255, 255, 255, 0.03)',
+        border: '#3d3d46',
       },
     },
     primary: {
-      background: '#007bff',
+      // Accent unique de la refonte — un seul bouton plein par écran.
+      background: '#4f7fff',
       color: '#ffffff',
       hover: {
-        background: '#0056b3',
+        background: '#3d6ae8',
       },
     },
     secondary: {
-      background: '#36363e',
+      background: 'transparent',
       color: 'rgba(255, 255, 255, 0.87)',
-      border: '#4a4a54',
+      border: '#2e2e36',
     },
     selected: {
       background: '#1a3a5a',
       color: '#ffffff',
-      border: '#007bff',
+      border: '#4f7fff',
     },
   },
   // Couleurs d'input
   input: {
-    background: '#26262c',
-    border: '#3d3d46',
+    // Un cran au-dessus du fond de page, sinon le champ disparaît dedans.
+    background: '#1c1c22',
+    border: '#2e2e36',
     color: 'rgba(255, 255, 255, 0.87)',
     focus: {
-      border: '#646cff',
-      outline: 'rgba(100, 108, 255, 0.3)',
+      border: '#4f7fff',
+      outline: 'rgba(79, 127, 255, 0.25)',
     },
   },
   // Couleurs d'état

@@ -690,6 +690,16 @@ class UnityDialogueMetadata(BaseModel):
     size_bytes: int = Field(..., description="Taille en octets")
     modified_time: str = Field(..., description="Date de modification (ISO format)")
     title: Optional[str] = Field(None, description="Titre extrait du dialogue")
+    node_count: Optional[int] = Field(
+        default=None,
+        ge=0,
+        description="Nombre de nœuds du dialogue ; None si le JSON est illisible.",
+    )
+    edge_count: Optional[int] = Field(
+        default=None,
+        ge=0,
+        description="Nombre de liens sortants (choix ciblés + enchaînements directs).",
+    )
     share_count: int = Field(
         default=0,
         ge=0,

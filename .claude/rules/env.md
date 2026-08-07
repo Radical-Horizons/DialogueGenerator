@@ -1,9 +1,6 @@
 ---
 description: Environnement virtuel Python — configuration et utilisation, plus .env
-globs: []
-alwaysApply: true
 ---
-
 - **Environnement virtuel** : Le projet utilise un venv Python (`.venv/`) pour isoler les dépendances
 - **Utilisation automatique** : Tous les scripts npm utilisent automatiquement le venv (pas d'activation manuelle nécessaire)
 - **Installation initiale** : `npm run setup` (créer venv + installer toutes les dépendances)

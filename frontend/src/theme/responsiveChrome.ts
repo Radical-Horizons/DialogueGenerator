@@ -61,6 +61,15 @@ export const panelHeaderTitleTypography = {
 } as const
 
 /**
+ * Étiquette mono d'en-tête de panneau (refonte UI) — remplace le titre en gras.
+ * Conserve la densité adaptive de FR118 17.6 : plus compacte en colonne étroite.
+ */
+export const panelHeaderMonoLabel = {
+  comfortableFontPx: 10,
+  narrowFontPx: 9,
+} as const
+
+/**
  * Libellé vertical des `PanelExpandButton` (rails GDD / Détails) — variante « caption »
  * AC1 : plancher lisibilité ≥ ~12px (`0.75rem` si root 16px).
  */
@@ -74,6 +83,23 @@ export const panelExpandRailCaptionTypography = {
  * Se base sur une mesure de largeur du conteneur (pas le viewport).
  */
 export const GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX = 640
+
+/** Frontière basse du mode desktop (`useViewportMode`) — sous ce seuil, drawers FR120. */
+export const VIEWPORT_DESKTOP_MIN_PX = 1024
+
+/**
+ * Écran 2d : au-dessus de cette largeur, « ce qui part au modèle » garde sa colonne.
+ * En dessous (et au-dessus de 1024px), il devient une barre repliée sous la colonne
+ * centrale — une troisième colonne rognerait la lecture sans rien apporter.
+ */
+export const PROMPT_DRAWER_MAX_WIDTH_PX = 1200
+
+/**
+ * Rangée unique 46px de l'écran 2e : titre + compteurs + undo/redo + entrées texte
+ * + santé + save calés à droite. Largeur intrinsèque mesurée ≈ 980px (août 2026) —
+ * en dessous, la toolbar bascule sur le layout narrow empilé (aucune action perdue).
+ */
+export const GRAPH_TOOLBAR_SINGLE_ROW_MIN_WIDTH_PX = 980
 
 /** Même seuil conteneur pour panneau Génération, graphe, etc. */
 export const PANEL_COMFORT_MIN_WIDTH_PX = GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX

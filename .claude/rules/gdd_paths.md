@@ -4,9 +4,10 @@ description: >-
   gdd_loader, gdd_paths, gdd_disk_cache, context_builder, split_gdd_category_to_shards,
   sync Notion .archive/.staging). Apply when changing GDD layout on disk, loaders,
   fingerprints, or DATA_MAINTENANCE.
-alwaysApply: false
+paths:
+  - "services/gdd_*.py"
+  - "core/context/**"
 ---
-
 # Chemins GDD
 
 - **Catégories GDD** : `data/GDD_categories/` (relatif à la racine du dépôt ; alimenter via sync Notion / copie ; voir `docs/deployment/DATA_MAINTENANCE.md`). Les dossiers `.archive/` et `.staging/` sont gitignored (backups sync), pas nécessairement tout le répertoire.
@@ -17,5 +18,8 @@ alwaysApply: false
 - **Cache disque** : `data/.gdd_snapshot/` (gitignored) — pickle du `GDDData` si l’empreinte source est inchangée ; l’empreinte inclut **shards** (`especes/*.json`, etc.) et monolithes (`services/gdd_disk_cache.compute_gdd_fingerprint`) ; `GDD_DISK_CACHE=false` pour désactiver
 
 ⚠️ **Note** : `data/GDD_categories/` peut être versionné (fiches) ; `.archive/` et `.staging/` restent ignorés. Les tests « vraies données » exigent des fiches présentes (shards ou monolithe temporaire).
+
+⚠️ **Churn git** : ces fichiers sont de la donnée secondaire, ils bougent tout seuls au gré des
+syncs. Ne jamais s'arrêter dessus ni interroger l'utilisateur — règle : `.claude/rules/git_commit.md`.
 
 - **Même changement que le code** : toute évolution de stratégie de chemins, shards ou chargeur GDD dans le code doit mettre à jour **ce fichier** dans le même lot (évite dérive doc ↔ runtime).

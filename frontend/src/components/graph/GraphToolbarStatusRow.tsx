@@ -3,8 +3,10 @@
  */
 import type { ReactNode } from 'react'
 import type { Edge, Node } from '@xyflow/react'
-import { Badge, SaveStatusIndicator } from '../shared'
+import { SaveStatusIndicator } from '../shared'
 import { theme } from '../../theme'
+import { redesignFont, redesignText } from '../../theme/redesignTokens'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { BatchOperationsMenu } from './BatchOperationsMenu'
 import {
   formatGraphWarningBadgeLabel,
@@ -91,25 +93,79 @@ function GraphHealthBadge({
       ? `${errors.length} erreur${errors.length > 1 ? 's' : ''}`
       : warningLabel
 
-  const variant = isValid ? 'success' : hasErrors ? 'error' : 'warning'
-  const size = isNarrowToolbar ? 'sm' : 'md'
-  const icon = isValid ? '✓' : hasErrors ? '✗' : '⚠'
+  // Refonte UI : point + libellé mono, plus de pastille à fond coloré.
+  const dotColor = isValid
+    ? theme.state.accepted.border
+    : hasErrors
+      ? theme.state.error.color
+      : theme.state.pending.border
+
+  // Cliquable ⇒ vrai bouton : le point + libellé mono ne doit pas coûter l'accès clavier.
+  const Tag = (canToggle ? 'button' : 'span') as 'button' | 'span'
 
   return (
-    <Badge
+    <Tag
+      {...(canToggle ? { type: 'button' as const } : {})}
       data-testid="graph-health-badge"
-      variant={variant}
-      size={size}
-      icon={icon}
       title={title}
-      onClick={canToggle ? () => setShowValidationPanel((v) => !v) : undefined}
+      onClick={
+        canToggle
+          ? () => {
+              // Écran 2e : le badge santé ouvre l'onglet SANTÉ de l'inspecteur.
+              // Le booléen historique reste piloté pour la variante narrow (overlay).
+              useUiLayoutStore.getState().toggleInspectorTab('health')
+              setShowValidationPanel((v) => !v)
+            }
+          : undefined
+      }
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        border: 'none',
+        background: 'none',
+        padding: 0,
+        margin: 0,
+        cursor: canToggle ? 'pointer' : 'default',
+        fontFamily: redesignFont.mono,
+        fontSize: '10.5px',
+        letterSpacing: '0.05em',
+        textTransform: 'uppercase',
+        color: theme.text.secondary,
+        whiteSpace: 'nowrap',
+      }}
     >
+      <span
+        aria-hidden
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: '50%',
+          backgroundColor: dotColor,
+          flexShrink: 0,
+        }}
+      />
       {label}
-    </Badge>
+    </Tag>
   )
 }
 
+/** Libellés mono capitales de la rangée 2e (`ENREGISTRÉ · 11:24`). */
+const MONO_SAVE_LABELS: Record<'saved' | 'saving' | 'unsaved' | 'error', string> = {
+  saved: 'ENREGISTRÉ',
+  saving: 'SAUVEGARDE…',
+  unsaved: 'NON ENREGISTRÉ',
+  error: 'ERREUR SAVE',
+}
+
+function formatSaveClock(timestamp: number | string): string | null {
+  const date = new Date(timestamp)
+  if (Number.isNaN(date.getTime())) return null
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+}
+
 function GraphSaveStatusIndicator({
+  isNarrowToolbar,
   activeDialogueFilename,
   lastSaveError,
   isGraphSaving,
@@ -119,6 +175,7 @@ function GraphSaveStatusIndicator({
   lastAckSeq,
 }: Pick<
   GraphToolbarStatusRowProps,
+  | 'isNarrowToolbar'
   | 'activeDialogueFilename'
   | 'lastSaveError'
   | 'isGraphSaving'
@@ -142,15 +199,54 @@ function GraphSaveStatusIndicator({
 
   if (!activeDialogueFilename) return null
 
+  if (isNarrowToolbar) {
+    return (
+      <SaveStatusIndicator
+        status={status}
+        lastSavedAt={lastSavedAt}
+        errorMessage={lastSaveError}
+        ackSeq={lastAckSeq}
+        pendingCount={pendingCount}
+        syncStatusDisplay={syncStatusDisplay}
+      />
+    )
+  }
+
+  // Écran 2e : texte mono `ENREGISTRÉ · 11:24`. Le détail sync (seq / offline) reste en title.
+  const clock = status === 'saved' && lastSavedAt != null ? formatSaveClock(lastSavedAt) : null
+  const label = clock ? `${MONO_SAVE_LABELS[status]} · ${clock}` : MONO_SAVE_LABELS[status]
+  const detail =
+    syncStatusDisplay === 'offline'
+      ? pendingCount > 0
+        ? `Hors ligne — ${pendingCount} changement(s) en attente`
+        : 'Hors ligne'
+      : status === 'error' && lastSaveError
+        ? lastSaveError
+        : lastAckSeq != null
+          ? `Synchronisé (seq ${lastAckSeq})`
+          : label
+  const color =
+    status === 'error'
+      ? theme.state.error.color
+      : status === 'unsaved' || syncStatusDisplay === 'offline'
+        ? theme.state.pending.border
+        : redesignText.label
+
   return (
-    <SaveStatusIndicator
-      status={status}
-      lastSavedAt={lastSavedAt}
-      errorMessage={lastSaveError}
-      ackSeq={lastAckSeq}
-      pendingCount={pendingCount}
-      syncStatusDisplay={syncStatusDisplay}
-    />
+    <span
+      data-testid="graph-save-status-mono"
+      title={detail}
+      style={{
+        fontFamily: redesignFont.mono,
+        fontSize: '10.5px',
+        letterSpacing: '0.05em',
+        color,
+        whiteSpace: 'nowrap',
+        flexShrink: 0,
+      }}
+    >
+      {label}
+    </span>
   )
 }
 
@@ -203,6 +299,7 @@ export function GraphToolbarStatusRow({
 
   const saveIndicator = (
     <GraphSaveStatusIndicator
+      isNarrowToolbar={isNarrowToolbar}
       activeDialogueFilename={activeDialogueFilename}
       lastSaveError={lastSaveError}
       isGraphSaving={isGraphSaving}

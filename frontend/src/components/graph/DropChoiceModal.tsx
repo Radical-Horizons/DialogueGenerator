@@ -48,7 +48,7 @@ export const DropChoiceModal = memo(function DropChoiceModal({
     >
       <div
         style={{
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.elevated,
           borderRadius: 8,
           padding: isNarrow ? '0.9rem 1rem' : '1.25rem 1.5rem',
           maxWidth: 360,

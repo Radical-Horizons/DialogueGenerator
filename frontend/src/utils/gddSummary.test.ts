@@ -105,4 +105,52 @@ describe('gddSummary', () => {
       expect(getGddEntitySummary(data as Record<string, unknown>)).toContain('épée')
     })
   })
+
+  // Forme reellement servie par l'API pour les fiches synchronisees depuis Notion :
+  // cles de `sections` slugifiees et resume sous `values['Résumé IA']`. Aucune des
+  // deux n'etait trouvee - d'ou des listes GDD sans aucun sous-titre a l'ecran.
+  describe('shards Notion (clés slugifiées)', () => {
+    it('lit un résumé dans une section slugifiée', () => {
+      const data = {
+        Nom: 'Aïrossa',
+        sections: {
+          re_sume__de_la_fiche: 'Survivante du projet Ysellor, mémoire des Bassins Fendus.',
+          signes_visibles_imme_diats: 'Peau hydrocalcaire mate.',
+        },
+      }
+      expect(getGddEntitySummary(data as Record<string, unknown>)).toContain(
+        'Survivante du projet Ysellor'
+      )
+    })
+
+    it('retombe sur values[« Résumé IA »] quand aucune section ne convient', () => {
+      const data = {
+        Nom: 'Aïrossa',
+        values: { 'Résumé IA': 'Ancienne servante devenue mémoire vivante.' },
+      }
+      expect(getGddEntitySummary(data as Record<string, unknown>)).toContain('Ancienne servante')
+    })
+
+    it('préfère un résumé rédigé au résumé généré', () => {
+      const data = {
+        Nom: 'Aïrossa',
+        values: { 'Résumé': 'Rédigé à la main.', 'Résumé IA': 'Généré.' },
+      }
+      expect(getGddEntitySummary(data as Record<string, unknown>)).toBe('Rédigé à la main.')
+    })
+
+    it('retire les balises Notion résiduelles de l’aperçu', () => {
+      const data = {
+        Nom: 'Aïrossa',
+        sections: {
+          re_sume__de_la_fiche:
+            'Reléguée par <mention-page url="https://app.notion.com/p/1a16"/> au rang de servante.',
+        },
+      }
+      const summary = getGddEntitySummary(data as Record<string, unknown>)
+      expect(summary).not.toContain('mention-page')
+      expect(summary).not.toContain('notion.com')
+      expect(summary).toContain('au rang de servante')
+    })
+  })
 })

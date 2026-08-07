@@ -97,7 +97,7 @@ export function ContextSectionUsageModal({
         aria-labelledby="context-section-usage-modal-title"
         tabIndex={-1}
         style={{
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.elevated,
           color: theme.text.primary,
           maxWidth: 'min(640px, 100%)',
           maxHeight: '85vh',

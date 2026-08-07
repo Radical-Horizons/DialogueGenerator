@@ -3,9 +3,11 @@ description: >-
   Invoquer l'API REST FastAPI DialogueGenerator (sync Notion/GDD, contexte, documents,
   graphe, dialogues, coûts). Apply when the user asks to call an endpoint, sync GDD,
   précalcul tokens, curl the API, or run a backend action without reimplementing it in scripts.
-alwaysApply: false
+paths:
+  - "api/routers/**"
+  - "scripts/Invoke-DialogueApi.ps1"
+  - ".claude/skills/api-runbook/**"
 ---
-
 # Invocation API (agents)
 
 - **Runbook** : skill `.claude/skills/api-runbook/SKILL.md` — **lire le cookbook en premier**, pas le code.

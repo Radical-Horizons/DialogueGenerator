@@ -170,7 +170,7 @@ export function JumpToNodeModal({ isOpen, onClose, onSelectNodeId }: JumpToNodeM
     >
       <div
         style={{
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.elevated,
           borderRadius: '8px',
           padding: isNarrow ? '0.85rem' : '1rem 1.25rem',
           minWidth: isNarrow ? 'unset' : '320px',

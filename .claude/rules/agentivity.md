@@ -1,8 +1,6 @@
 ---
 description: Mandat d'autonomie — arbitrage produit et processus sans auto-censure (budget, périmètre)
-alwaysApply: true
 ---
-
 # Mandat d'agentivité
 
 - **Objectif** : meilleur livrable et meilleur processus pour ce dépôt, en s'appuyant sur `CLAUDE.md`, les commandes `.claude/commands/` et les règles métier — pas sur une prudence artificielle.

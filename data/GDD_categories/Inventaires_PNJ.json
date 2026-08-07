@@ -1,5 +1,18 @@
 [
   {
+    "Nom": "inventory_spheres_muettes",
+    "values": {
+      "Contexte narratif": "Treize sphères de bronze gravées, héritées d’un Passeur mort avant leur transmission. Elles restent en garde chez Silence-de-Bronze et ne deviennent accessibles à la joueuse qu’au cours d’une lecture sous témoin.",
+      "ID": "INV127",
+      "Personnage": "7a71d278-ddc0-4917-b10b-3bbd1ba0a11b",
+      "Quantité": "13",
+      "Type d'accès": "Possédé",
+      "État": "Pas commencé"
+    },
+    "sections": {},
+    "notion_page_id": "3aeda0b7-7770-4f23-bfc8-a9a6c7b8eff6"
+  },
+  {
     "Nom": "inventory_cale_aux_invendables",
     "values": {
       "Contexte narratif": "Réserve d'objets soustraits à toute cotation que Murmöl traîne de cycle en cycle, d'après la coutume de la genizah. Il cherche à en placer les pièces entre des mains qui les feront circuler avant que la Saturation ne le rattrape.",

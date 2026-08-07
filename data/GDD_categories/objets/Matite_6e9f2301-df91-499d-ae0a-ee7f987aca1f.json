@@ -1,0 +1,40 @@
+{
+  "Nom": "Matite",
+  "values": {
+    "Connaissances Alteir": "9a15858c-93b7-498d-97ff-092444148d37, 80f070fe-8589-44f2-873f-767093460254",
+    "Créé par (communauté)": "669f1f5e-5bcf-4ba1-89b9-638668d1d9c1",
+    "Date de création": "2026-07-26T22:12:00.000Z",
+    "Dernière modification": "2026-07-27T13:30:00.000Z",
+    "Lieux de présence": "10c38a81-8f71-4953-ae5b-f99d11adfa14, 26e08862-0f92-4e6a-8366-dc7091966fdb, 36e6e4d2-1b45-807a-ac6c-ec253f792406",
+    "Niveau d’IA": "auto",
+    "Poids": "Lourd",
+    "Rareté": "Commun",
+    "Stackable": "oui",
+    "Taille": "Moyen",
+    "Type": "Matériau",
+    "État": "Brouillon IA"
+  },
+  "sections": {
+    "re_sume": "La matite est une céramique manufacturée, distillée du liquide-terre élémentaire, qui ne transmet ni chaleur ni rayonnement. Elle est le contenant de masse de l’enfûtage : sans elle, le pyrole ne voyage pas.",
+    "nature_mate_rielle": "- **Description visuelle :** Grès dense, gris-brun, d’un mat absolu — la surface n’accroche aucun reflet, d’où le nom. Un fût de matite plein de feu vif reste tiède au toucher et sombre dans une cave obscure. Le brut coulé, avant cuisson, se dit « terre sourde » sur les chantiers.\n\t- **Sous-type :** Manufacturé (distillat minéral du liquide-terre).\n\t- **Rareté & volume :** Commun aux abords des coulées et nappes de liquide-terre ; production de masse, mais lourd, et cassant au transport à vide.",
+    "origine___exploitation": "- **Origine :** Distillation du liquide-terre élémentaire : on évapore la coulée (opération bien plus coûteuse que l’évaporation de l’eau), on recueille le brumium qui s’en dégage, et le résidu pâteux, coulé en moules puis cuit, donne la matite. La distillation délibérée est industrialisée en 2800 AG par les pôles de la victoire technoféodale. La matière est plus vieille que son industrie : des croûtes d’évaporation naturelle se ramassent depuis toujours aux berges des coulées de liquide-terre ; braseros et tuiles de foyer en « terre sourde » sont attestés dès 408 AG, et des briques sourdes chemisent les organes de chaleur des Chaudières à partir de 1461 AG. La distillation produit à volonté ce que les berges donnaient par caprice.\n\t- **Créé par / communauté liée :** Les pôles des couronnes intermédiaires et de la périphérie, le long de la Kivane et des berges de l’océan igné. La Grande Radiale détient la technologie d’exploitation d’origine ; les Quartiers de la Lanterne une version dégradée. \\[Fiches communautés : passe 2\\]\n\t- **Zone(s) de production :** Berges des coulées de liquide-terre, pôles de la Kivane, rivages de l’océan igné.",
+    "valeur___de_bouche_s": "- **Usage principal :** Fûts et chemises d’enfûtage du pyrole ; revêtements de fours, conduits, cloisons coupe-feu.\n\t- **Valeur en Dc :** Basse au poids, stable ; c’est le contenu qui vaut.\n\t- **Zone(s) de demande :** Tout district industriel — Chaudières Démiurgiques, Quartiers de la Lanterne, ateliers des couronnes intermédiaires.",
+    "conditions___limites": "- **Stackable :** Oui.\n\t- **Périssabilité / stockage :** Fatigue thermique : une matite trop cyclée « désourdit » et laisse filtrer la chaleur. Les fûts réformés s’entassent en décharges tièdes qui rougeoient la nuit.\n\t- **Usage direct :** Aucun ; matériau de contenant.",
+    "re_compenses_lie_es": "*Créer une ligne si ce matériau est donné comme récompense. Remplir surtout Situation, Chapitre, Récompenses, Quantité et 🏁Flags si nécessaire.*\n\t<database url=\"https://app.notion.com/p/3a96e4d21b4581c988e8e2ffebf0e6e2\" inline=\"true\">Récompenses liées</database>",
+    "inventaires_pnj": "*Créer une ligne si un PNJ possède, stocke ou échange ce matériau. Remplir surtout Personnage, Type d'accès, Quantité et Contexte narratif.*\n\t<database url=\"https://app.notion.com/p/3a96e4d21b4581dd8039d7ec1a93e55a\" inline=\"true\">Données liées</database>",
+    "flags_lie_s": "*Créer une ligne si le matériau doit être suivi comme état, stock critique ou déclencheur. Remplir surtout Identifiant, Type de valeur, Portée = **`Objet`** et Objets liés.*\n\t<database url=\"https://app.notion.com/p/3a96e4d21b45813c92fee86ee6864c74\" inline=\"true\">Flags liés</database>",
+    "remarques_de_conception": "- Nommage : de « mat / matité », suffixe minéral -ite (précédent canon : Nexite). Doublet populaire « terre sourde » conservé pour le brut de chantier, sur le modèle houille / charbon de bois. Historiquement, « terre sourde » désignait d’abord les croûtes naturelles des berges (usages attestés dès 408 AG) ; le nom a glissé au brut industriel quand la distillation de masse, industrialisée en 2800 AG, a remplacé la cueillette.\n\t- Rôle arbitré (passe 1, filière énergétique) : contenant de masse du trio matite / sel de fond (adjuvant de façonnage) / creusite (isolant premium).\n\t- L’industrialisation de la matite (2800 AG) rend l’enfûtage possible ; avant elle, le feu vif ne s’exploitait qu’à la source. Le transport reste ralenti par la fracturation régionale, mais devient suffisant pour une industrie à grande échelle.\n\t- Dérèglement lié : la matite est le vecteur matériel du dérèglement igné — sans elle, le pyrole ne voyage pas, et sans le pyrole industrialisé, l'exploitation de masse du feu vif n'aurait pas atteint l'échelle suffisante pour perturber les Deimos Raciers. Documenté dans la fiche Escelion (Enjeux actuels — Le Dérèglement igné)."
+  },
+  "section_titles": {
+    "re_sume": "Résumé",
+    "nature_mate_rielle": "Nature matérielle",
+    "origine___exploitation": "Origine & exploitation",
+    "valeur___de_bouche_s": "Valeur & débouchés",
+    "conditions___limites": "Conditions & limites",
+    "re_compenses_lie_es": "Récompenses liées",
+    "inventaires_pnj": "Inventaires PNJ",
+    "flags_lie_s": "Flags liés",
+    "remarques_de_conception": "Remarques de conception"
+  },
+  "notion_page_id": "6e9f2301-df91-499d-ae0a-ee7f987aca1f"
+}

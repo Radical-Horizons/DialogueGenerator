@@ -2,10 +2,12 @@
  * Éditeur pour les instructions de scène, le profil d'auteur et le system prompt.
  */
 import React, { memo, useCallback, useState, useEffect, useRef } from 'react'
-import { Tabs, type Tab } from '../shared/Tabs'
+import { type Tab } from '../shared/Tabs'
 import { FormField } from '../shared/FormField'
 import { useSystemPrompt } from '../../hooks/useSystemPrompt'
 import { useAuthorProfile } from '../../hooks/useAuthorProfile'
+import { useAutoGrowTextarea } from '../../hooks/useAutoGrowTextarea'
+import { useViewportFraction } from '../../hooks/useViewportFraction'
 import { useToast } from '../shared'
 import { theme } from '../../theme'
 import { generationPanelChrome } from '../../theme/responsiveChrome'
@@ -21,6 +23,8 @@ import {
 } from '../../utils/localNamedTemplates'
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
 import { StyledSelect } from '../shared/StyledSelect'
+import { redesignFont, redesignReadingColumn, redesignText } from '../../theme/redesignTokens'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
 
 export interface SystemPromptEditorProps {
   userInstructions: string
@@ -31,6 +35,29 @@ export interface SystemPromptEditorProps {
   onAuthorProfileChange: (profile: string) => void
   onGameRulesChange: (rules: string) => void
   onSystemPromptChange: (prompt: string | null) => void
+  /** Écran 1c : le panneau flags est ouvert ? (lien du bandeau de brief) */
+  flagsPanelOpen?: boolean
+  /** Bascule du panneau flags ; sans ce callback, le lien n'est pas rendu. */
+  onToggleFlagsPanel?: () => void
+}
+
+/** Libellés courts des liens secondaires (écran 1c). */
+const SECONDARY_TAB_LINK_LABELS: Record<string, string> = {
+  'author-profile': "profil d'auteur",
+  'game-rules': 'règles du jeu',
+  'system-prompt': 'prompt système',
+}
+
+/** Lien discret du bandeau de brief : texte seul, plus clair quand il est actif. */
+function briefLinkStyle(active: boolean): React.CSSProperties {
+  return {
+    border: 'none',
+    background: 'none',
+    padding: 0,
+    cursor: 'pointer',
+    fontSize: '11.5px',
+    color: active ? redesignText.strong : redesignText.secondary,
+  }
 }
 
 export const SystemPromptEditor = memo(function SystemPromptEditor({
@@ -42,6 +69,8 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
   onAuthorProfileChange,
   onGameRulesChange,
   onSystemPromptChange,
+  flagsPanelOpen,
+  onToggleFlagsPanel,
 }: SystemPromptEditorProps) {
   const {
     systemPrompt,
@@ -250,7 +279,28 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
   }, [sceneSaveAsName, userInstructions, refreshLocalSceneTemplates, toast])
 
   const isNarrow = useGenerationPanelNarrow()
+  const writingMode = useUiLayoutStore((s) => s.writingMode)
+  /**
+   * 1c ne montre ni les templates ni les boutons de sauvegarde explicite du brief :
+   * le brouillon est déjà sauvegardé en continu. La fonctionnalité n'est pas retirée,
+   * elle passe derrière le lien « templates » du bandeau de section.
+   */
+  const [showTemplates, setShowTemplates] = useState(false)
   const genChrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
+
+  /**
+   * Le brief prend la hauteur de son texte plutôt qu'un nombre de lignes fixe.
+   * Plafond en `vh` : au-delà, c'est la zone qui défile, pas l'écran entier.
+   */
+  const briefRef = useRef<HTMLTextAreaElement>(null)
+  const briefMaxHeightPx = useViewportFraction(writingMode ? 0.58 : 0.46, {
+    min: 200,
+    max: writingMode ? 760 : 560,
+  })
+  useAutoGrowTextarea(briefRef, userInstructions, {
+    minHeightPx: isNarrow ? 140 : 176,
+    maxHeightPx: briefMaxHeightPx,
+  })
 
   const tabs: Tab[] = [
     {
@@ -258,7 +308,25 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
       label: 'Instructions de Scène',
       content: (
         <div style={{ padding: genChrome.tabInnerPadding, minWidth: 0 }}>
-          {/* Templates de scène */}
+          {/* 1c : le brief occupe la colonne ; templates et briefs locaux passent en repli.
+              2c : en mode écriture, même ce repli disparaît — il ne reste que le texte. */}
+          <details
+            data-testid="brief-templates"
+            style={{ marginBottom: '1rem', display: showTemplates ? 'block' : 'none' }}
+          >
+            <summary
+              style={{
+                cursor: 'pointer',
+                fontFamily: redesignFont.mono,
+                fontSize: '10px',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: redesignText.label,
+                marginBottom: '0.6rem',
+              }}
+            >
+              Templates et briefs enregistrés
+            </summary>
           <div style={{ marginBottom: '1rem' }}>
             {isLoadingTemplates ? (
               <div style={{ color: theme.text.secondary, fontSize: '0.85rem' }}>
@@ -488,6 +556,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
             </div>
           </div>
 
+          </details>
           <div
             style={{
               display: 'flex',
@@ -498,18 +567,18 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               marginBottom: '0.5rem',
             }}
           >
-            <label
-              htmlFor="user-instructions-textarea"
+            {/* L'étiquette « Brief du premier nœud » vit dans le bandeau de section
+                (écran 1c) : la répéter ici ferait doublon. */}
+            <span aria-hidden />
+            {/* 2c : la sauvegarde explicite du brief sort de l'écran d'écriture — le
+                brouillon est déjà sauvegardé en continu. */}
+            <div
               style={{
-                color: theme.text.primary,
-                fontSize: `${genChrome.labelFontRem}rem`,
-                fontWeight: 500,
-                flex: isNarrow ? '1 1 100%' : undefined,
+                display: showTemplates ? 'flex' : 'none',
+                gap: `${genChrome.controlGapRem}rem`,
+                flexWrap: 'wrap',
               }}
             >
-              Brief de scène:
-            </label>
-            <div style={{ display: 'flex', gap: `${genChrome.controlGapRem}rem`, flexWrap: 'wrap' }}>
               <button
                 onClick={handleSaveSceneInstructions}
                 style={{
@@ -545,32 +614,50 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
             </div>
           </div>
           <FormField label="" htmlFor="user-instructions-textarea" style={{ marginBottom: 0 }}>
-            <div>
+            <div
+              style={{
+                // La largeur de lecture est gérée par la colonne (marges flexibles
+                // plafonnées) : un `maxWidth` ici bridait le brief à 660 px alors
+                // que la colonne lui en offrait 920.
+                maxWidth: writingMode ? redesignReadingColumn.writingMode : undefined,
+              }}
+            >
               <textarea
+                ref={briefRef}
+                className="dg-scroll-slim"
                 id="user-instructions-textarea"
                 value={userInstructions}
                 onChange={(e) => onUserInstructionsChange(e.target.value)}
-                rows={8}
                 placeholder="Ex: Bob doit annoncer à Alice qu'il part à l'aventure. Ton désiré: Héroïque. Inclure une condition sur la compétence 'Charisme' de Bob."
                 style={{
                   width: '100%',
-                  padding: '0.65rem 0.75rem',
+                  // 1c : surface d'écriture, pas un champ de formulaire — filet haut, pas de cadre.
+                  padding: '15px 0 0',
                   boxSizing: 'border-box',
-                  backgroundColor: theme.input.background,
-                  border: `1px solid ${theme.input.border}`,
-                  color: theme.input.color,
-                  borderRadius: '6px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  borderTop: '1px solid rgba(255,255,255,0.09)',
+                  color: redesignText.body,
+                  borderRadius: 0,
                   fontFamily: 'inherit',
-                  fontSize: `${genChrome.textareaFontRem}rem`,
-                  resize: 'vertical',
-                  lineHeight: 1.55,
+                  // 2c : le brief passe à 17px en mode écriture.
+                  fontSize: isNarrow
+                    ? `${genChrome.textareaFontRem}rem`
+                    : writingMode
+                      ? '17px'
+                      : '15.5px',
+                  // La hauteur suit le texte (`useAutoGrowTextarea`) : une poignée
+                  // de redimensionnement se battrait avec elle à chaque frappe.
+                  resize: 'none',
+                  lineHeight: isNarrow ? 1.55 : 1.72,
+                  outline: 'none',
                 }}
               />
               <div
                 style={{
                   display: 'flex',
                   justifyContent: 'flex-end',
-                  marginTop: '0.25rem',
+                  marginTop: '0.6rem',
                   fontSize: `${isNarrow ? 0.7 : 0.75}rem`,
                   color: theme.text.secondary,
                 }}
@@ -1178,23 +1265,93 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
   ]
 
   const [activeTabId, setActiveTabId] = useState(tabs[0].id)
+  const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0]
+
+  /**
+   * Écran 1c : les alternatives au brief sont des **liens discrets** à droite de son
+   * étiquette, pas une barre d'onglets. Un lien actif est simplement plus clair.
+   */
+  const secondaryTabs = tabs.slice(1)
 
   return (
     <div
+      data-testid="system-prompt-editor-root"
       style={{
-        marginBottom: '1rem',
-        border: `1px solid ${theme.border.primary}`,
-        borderRadius: '8px',
-        backgroundColor: theme.background.tertiary,
+        marginBottom: '1.5rem',
+        border: 'none',
+        borderRadius: 0,
+        backgroundColor: 'transparent',
       }}
     >
-      <Tabs
-        variant="segmented"
-        tabs={tabs}
-        activeTabId={activeTabId}
-        onTabChange={setActiveTabId}
-        style={{ flex: 'none' }}
-      />
+      {/* 2c : en mode écriture il ne reste que le brief — auteur, règles du jeu et
+          prompt système restent joignables en sortant du mode (Ctrl+\). */}
+      {!writingMode && (
+        <div
+          data-testid="brief-section-header"
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 12,
+            marginBottom: 11,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: redesignFont.mono,
+              fontSize: '10px',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: redesignText.label,
+            }}
+          >
+            {activeTab.id === 'user-instructions' ? 'Brief du premier nœud' : activeTab.label}
+          </span>
+          <span style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            {activeTabId !== tabs[0].id && (
+              <button
+                type="button"
+                data-testid="brief-link-back"
+                onClick={() => setActiveTabId(tabs[0].id)}
+                style={briefLinkStyle(false)}
+              >
+                brief
+              </button>
+            )}
+            {onToggleFlagsPanel && (
+              <button
+                type="button"
+                data-testid="brief-link-flags"
+                onClick={onToggleFlagsPanel}
+                style={briefLinkStyle(Boolean(flagsPanelOpen))}
+              >
+                variables et flags
+              </button>
+            )}
+            <button
+              type="button"
+              data-testid="brief-link-templates"
+              onClick={() => setShowTemplates((v) => !v)}
+              style={briefLinkStyle(showTemplates)}
+            >
+              templates
+            </button>
+            {secondaryTabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                data-testid={`brief-link-${tab.id}`}
+                onClick={() => setActiveTabId(activeTabId === tab.id ? tabs[0].id : tab.id)}
+                style={briefLinkStyle(activeTabId === tab.id)}
+              >
+                {SECONDARY_TAB_LINK_LABELS[tab.id] ?? tab.label.toLowerCase()}
+              </button>
+            ))}
+          </span>
+        </div>
+      )}
+      <div data-testid="brief-active-panel">{activeTab.content}</div>
     </div>
   )
 })

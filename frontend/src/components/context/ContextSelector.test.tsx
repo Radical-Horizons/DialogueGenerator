@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ContextSelector } from './ContextSelector'
 import * as contextAPI from '../../api/context'
@@ -124,7 +124,7 @@ describe('ContextSelector', () => {
     const user = userEvent.setup()
 
     render(<ContextSelector />)
-    await waitFor(() => expect(screen.getByText('Test Character')).toBeInTheDocument())
+    await waitFor(() => expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument())
 
     const checkbox = screen.getByRole('checkbox')
     await user.click(checkbox)
@@ -140,7 +140,7 @@ describe('ContextSelector', () => {
     })
 
     render(<ContextSelector />)
-    await waitFor(() => expect(screen.getByText('Test Character')).toBeInTheDocument())
+    await waitFor(() => expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument())
 
     const checkbox = screen.getByRole('checkbox')
     await user.click(checkbox)
@@ -172,7 +172,7 @@ describe('ContextSelector', () => {
     } as ReturnType<typeof useContextStore>)
 
     render(<ContextSelector />)
-    await waitFor(() => expect(screen.getByText('Test Character')).toBeInTheDocument())
+    await waitFor(() => expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument())
 
     const checkbox = screen.getByRole('checkbox')
     await user.click(checkbox)
@@ -232,7 +232,9 @@ describe('ContextSelector', () => {
     render(<ContextSelector />)
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText(/rechercher/i)).toBeInTheDocument()
+      // 1c : le libellé de saisie est « Chercher une fiche… » ; le champ reste
+      // identifié par son aria-label, stable quelle que soit la formulation.
+      expect(screen.getByLabelText(/rechercher dans le gdd/i)).toBeInTheDocument()
     })
   })
 
@@ -241,10 +243,10 @@ describe('ContextSelector', () => {
     render(<ContextSelector />)
 
     await waitFor(() => {
-      expect(screen.getByText('Test Character')).toBeInTheDocument()
+      expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument()
     })
 
-    const search = screen.getByPlaceholderText(/rechercher dans tout le gdd/i)
+    const search = screen.getByLabelText(/rechercher dans le gdd/i)
     const personnagesTab = screen.getByRole('button', { name: /^personnages$/i })
     expect(search.compareDocumentPosition(personnagesTab) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
 
@@ -279,7 +281,7 @@ describe('ContextSelector', () => {
     await user.click(screen.getByRole('button', { name: /^lieux$/i }))
     await waitFor(() => expect(screen.getByText('Alpha Spot')).toBeInTheDocument())
 
-    await user.type(screen.getByPlaceholderText(/rechercher dans tout le gdd/i), 'Alpha')
+    await user.type(screen.getByLabelText(/rechercher dans le gdd/i), 'Alpha')
 
     await waitFor(() => {
       const badges = screen.getAllByText(/^(Lieu|Personnage)$/)
@@ -311,10 +313,10 @@ describe('ContextSelector', () => {
     render(<ContextSelector onItemSelected={mockOnItemSelected} />)
 
     await waitFor(() => {
-      expect(screen.getByText('Test Character')).toBeInTheDocument()
+      expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument()
     })
 
-    const characterItem = screen.getByText('Test Character')
+    const characterItem = within(screen.getByTestId('context-list-scroll')).getByText('Test Character')
     await user.click(characterItem)
 
     await waitFor(() => {
@@ -328,10 +330,10 @@ describe('ContextSelector', () => {
     render(<ContextSelector />)
 
     await waitFor(() => {
-      expect(screen.getByText('Test Character')).toBeInTheDocument()
+      expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument()
     })
 
-    const characterItem = screen.getByText('Test Character').closest('div')
+    const characterItem = within(screen.getByTestId('context-list-scroll')).getByText('Test Character').closest('div')
     if (characterItem) {
       const checkbox = characterItem.querySelector('input[type="checkbox"]')
       if (checkbox) {
@@ -410,7 +412,7 @@ describe('ContextSelector', () => {
 
     await waitFor(() => {
       // Le résumé doit afficher le personnage sélectionné
-      expect(screen.getByText(/test character/i)).toBeInTheDocument()
+      expect(within(screen.getByTestId('context-list-scroll')).getByText(/test character/i)).toBeInTheDocument()
     })
   })
 
@@ -447,6 +449,7 @@ describe('ContextSelector', () => {
 
     render(<ContextSelector />)
 
+    await user.click(await screen.findByTestId('context-tools-toggle'))
     await user.click(await screen.findByTestId('selected-context-summary-toggle'))
     await user.click(await screen.findByRole('button', { name: /retirer test character/i }))
 
@@ -493,14 +496,16 @@ describe('ContextSelector', () => {
     expect(mockSetElementMode).toHaveBeenCalledWith('characters', 'Test Character', 'excerpt')
   })
 
-  it('affiche nom, aperçu (résumé) et badge type d\'entité', async () => {
+  it('affiche nom et aperçu (résumé) ; le badge de type est réservé à la recherche', async () => {
     render(<ContextSelector />)
 
     await waitFor(() => {
-      expect(screen.getByText('Test Character')).toBeInTheDocument()
+      expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument()
     })
     expect(screen.getByText(/Un héros du récit\./)).toBeInTheDocument()
-    expect(screen.getByText('Personnage')).toBeInTheDocument()
+    // Ecran 1c : la liste est deja filtree par onglet, le badge y serait redondant.
+    // Son affichage en recherche est couvert par ContextList.test.tsx.
+    expect(within(screen.getByTestId('context-list-scroll')).queryByText('Personnage')).toBeNull()
   })
 
   it('réinitialise la sélection quand on change d\'onglet', async () => {
@@ -512,11 +517,11 @@ describe('ContextSelector', () => {
     render(<ContextSelector onItemSelected={mockOnItemSelected} />)
 
     await waitFor(() => {
-      expect(screen.getByText('Test Character')).toBeInTheDocument()
+      expect(within(screen.getByTestId('context-list-scroll')).getByText('Test Character')).toBeInTheDocument()
     })
 
     // Sélectionner un personnage
-    const characterItem = screen.getByText('Test Character')
+    const characterItem = within(screen.getByTestId('context-list-scroll')).getByText('Test Character')
     await user.click(characterItem)
 
     await waitFor(() => {

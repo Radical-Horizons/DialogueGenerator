@@ -63,7 +63,14 @@ function clampToViewport(
 export interface GraphToolFloatingShellProps {
   /** Titre affiché dans la barre déplaçable (à gauche). */
   title: React.ReactNode
-  onClose: () => void
+  /**
+   * `floating` (défaut) : fenêtre déplaçable en portail, comportement historique.
+   * `inspector` : contenu nu, rendu dans le flux de l'inspecteur de graphe (écran 2e).
+   * En variante inspecteur, le panneau n'a ni titre propre, ni bouton fermer, ni drag :
+   * c'est l'onglet qui porte ces rôles.
+   */
+  variant?: 'floating' | 'inspector'
+  onClose?: () => void
   children: React.ReactNode
   /** data-testid sur le conteneur principal. */
   dataTestId?: string
@@ -93,6 +100,7 @@ export interface GraphToolFloatingShellProps {
  */
 export function GraphToolFloatingShell({
   title,
+  variant = 'floating',
   onClose,
   children,
   dataTestId,
@@ -197,6 +205,12 @@ export function GraphToolFloatingShell({
     [storageKey]
   )
 
+  // Variante inspecteur : pas de portail, pas de position fixed, pas de chrome —
+  // l'inspecteur fournit déjà le cadre et l'onglet fournit le titre.
+  if (variant === 'inspector') {
+    return <div data-testid={dataTestId}>{children}</div>
+  }
+
   if (typeof document === 'undefined' || !document.body) {
     return null
   }
@@ -267,7 +281,7 @@ export function GraphToolFloatingShell({
             type="button"
             data-testid={closeButtonTestId}
             aria-label={closeAriaLabel}
-            onClick={onClose}
+            onClick={() => onClose?.()}
             style={{
               border: `1px solid ${theme.border.primary}`,
               borderRadius: 6,
