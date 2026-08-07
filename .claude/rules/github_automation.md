@@ -11,7 +11,7 @@ de fichier.
 |---|---|---|
 | PR vers `main`, push sur `main`, `workflow_dispatch` | `ci.yml` | Backend pytest, Vitest, ESLint. T2 sur PR, T3 sur push `main`. |
 | Push sur une PR vers `main` | `pr-merge-main-prefer-head-data.yml` | Merge `main`, arbitre les conflits `data/` en faveur de la PR. |
-| Ouverture / push d'une PR | `pr-diff-gdd-split.yml` | Commente le diff séparé GDD vs code. |
+| Ouverture / push d'une PR | `pr-diff-gdd-split.yml` | Commente le diff séparé GDD vs code. **Informatif** : ni correctif ni réponse attendus — lire la colonne « hors GDD », ignorer l'autre (`.claude/rules/git_commit.md`). |
 
 ## Trois invariants
 

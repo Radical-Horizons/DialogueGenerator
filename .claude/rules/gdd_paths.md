@@ -19,4 +19,7 @@ paths:
 
 ⚠️ **Note** : `data/GDD_categories/` peut être versionné (fiches) ; `.archive/` et `.staging/` restent ignorés. Les tests « vraies données » exigent des fiches présentes (shards ou monolithe temporaire).
 
+⚠️ **Churn git** : ces fichiers sont de la donnée secondaire, ils bougent tout seuls au gré des
+syncs. Ne jamais s'arrêter dessus ni interroger l'utilisateur — règle : `.claude/rules/git_commit.md`.
+
 - **Même changement que le code** : toute évolution de stratégie de chemins, shards ou chargeur GDD dans le code doit mettre à jour **ce fichier** dans le même lot (évite dérive doc ↔ runtime).
