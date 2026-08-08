@@ -51,6 +51,7 @@ from services.benchmark_gate_service import BenchmarkGateService
 from services.benchmark_pass_control import CooperativePassControl, PassCancelled
 from services.benchmark_suite_store import BenchmarkSuiteStore, suite_fingerprint
 from services.gdd_notion_atomic_io import read_json_file, write_json_atomic
+from services.unity_dialogue_generation_service import UnityStructuredOutputError
 
 logger = logging.getLogger(__name__)
 
@@ -998,6 +999,7 @@ class BenchmarkRunService:
         prompt_tokens = 0
         completion_tokens = 0
         error_message: Optional[str] = None
+        error_kind = "runtime"
 
         try:
             orchestrator = self._orchestrator_factory(request_id)
@@ -1015,6 +1017,13 @@ class BenchmarkRunService:
                     prompt_hash = result.get("prompt_hash")
                 elif event.type == "error":
                     error_message = str(event.data.get("message", "Erreur de génération"))
+                    error_kind = str(event.data.get("error_kind") or "runtime")
+        except UnityStructuredOutputError as exc:
+            error_message = str(exc)
+            error_kind = "model_output"
+            logger.warning(
+                "Sortie non conforme (%s / %s) : %s", model_id, case.case_id, exc
+            )
         except Exception as exc:
             error_message = f"{type(exc).__name__}: {exc}"
             logger.warning(
@@ -1024,12 +1033,22 @@ class BenchmarkRunService:
         duration_ms = int((time.monotonic() - started) * 1000)
 
         if error_message is not None or json_content is None:
+            # Une sortie non conforme est un échec **du modèle** : elle compte
+            # comme `invalid` et pèse dans son taux de validité. La ranger en
+            # `config_error` l'en sortirait et le flatterait — mesuré sur le run
+            # du 8 août, un modèle manquant 2 cas sur 3 affichait « 100 % ».
+            model_at_fault = error_kind == "model_output"
             return BenchmarkGenerationRecord(
                 run_id=run.run_id,
                 case_id=case.case_id,
                 model_id=model_id,
                 repetition=repetition,
-                status="config_error",
+                status="invalid" if model_at_fault else "config_error",
+                gate_failures=(
+                    [BenchmarkGateFailure(gate="schema", message=error_message or "")]
+                    if model_at_fault
+                    else []
+                ),
                 raw_prompt=raw_prompt,
                 prompt_hash=prompt_hash,
                 cost_usd=cost,

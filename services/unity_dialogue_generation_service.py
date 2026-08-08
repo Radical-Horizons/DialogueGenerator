@@ -1,6 +1,8 @@
 """Service pour générer des dialogues au format Unity JSON."""
 import asyncio
 import logging
+
+from pydantic import ValidationError as PydanticValidationError
 import uuid
 from typing import List, Dict, Any, Optional
 
@@ -49,6 +51,17 @@ def resolve_generated_display_name(
     return start_id
 
 
+class UnityStructuredOutputError(ValueError):
+    """Le modèle a répondu, mais sa sortie ne respecte pas le schéma demandé.
+
+    À distinguer d'une panne d'environnement (clé absente, API injoignable,
+    budget épuisé). Ici le modèle **a été mesuré** : il a produit quelque chose
+    d'inexploitable. Confondre les deux sort ses échecs du taux de validité et
+    le flatte — mesuré sur un run réel, un modèle qui manquait 2 cas sur 3
+    affichait « 100 % ».
+    """
+
+
 class UnityDialogueGenerationService:
     """Service pour générer des dialogues au format Unity JSON.
     
@@ -94,22 +107,32 @@ class UnityDialogueGenerationService:
             response_model=UnityDialogueFragmentResponse,
             user_system_prompt_override=system_prompt_override,
         )
+        model_name = getattr(llm_client, "model_name", "unknown")
         if not variants:
-            raise ValueError("Aucune variante générée par le LLM")
+            raise UnityStructuredOutputError(
+                f"Le modèle '{model_name}' n'a retourné aucune variante pour le fragment."
+            )
 
         result = variants[0]
-        model_name = getattr(llm_client, "model_name", "unknown")
         if isinstance(result, str):
             # Le client OpenAI renvoie les erreurs de validation comme chaînes dans
             # la liste des variantes : sans ce test, elles passeraient pour un succès.
-            raise ValueError(
+            raise UnityStructuredOutputError(
                 f"Le modèle '{model_name}' n'a pas retourné de structured output "
                 f"exploitable pour le fragment. Détails : {result[:400]}"
             )
         if isinstance(result, dict):
-            result = UnityDialogueFragmentResponse.model_validate(result)
+            try:
+                result = UnityDialogueFragmentResponse.model_validate(result)
+            except PydanticValidationError as exc:
+                # Bornes `minItems` / `maxItems` non honorées par le fournisseur :
+                # OpenAI les applique côté serveur, pas tous les relais OpenRouter.
+                raise UnityStructuredOutputError(
+                    f"Le modèle '{model_name}' a produit un fragment non conforme "
+                    f"au schéma. Détails : {exc}"
+                ) from exc
         if not isinstance(result, UnityDialogueFragmentResponse):
-            raise ValueError(
+            raise UnityStructuredOutputError(
                 f"Type de réponse inattendu pour le fragment : {type(result)}. "
                 f"Modèle utilisé : {model_name}."
             )

@@ -12,7 +12,7 @@ from typing import AsyncGenerator, Callable, Dict, Any, Optional
 from dataclasses import dataclass
 
 from services.dialogue_generation_service import DialogueGenerationService
-from services.unity_dialogue_generation_service import UnityDialogueGenerationService
+from services.unity_dialogue_generation_service import UnityStructuredOutputError, UnityDialogueGenerationService
 from core.prompt.prompt_engine import PromptEngine, PromptInput, BuiltPrompt
 from services.skill_catalog_service import SkillCatalogService
 from services.prompt_catalog_loader import load_prompt_catalogs
@@ -525,7 +525,16 @@ class UnityDialogueOrchestrator:
             raise
         except Exception as e:
             logger.exception(f"Erreur génération Unity (request_id: {self.request_id}): {e}")
-            yield GenerationEvent(type='error', data={'message': str(e)})
+            # `error_kind` distingue « le modèle a mal répondu » (mesurable, donc
+            # imputable au modèle) d'une panne d'environnement. Sans lui, le
+            # benchmark range les deux en `config_error` et sort les échecs du
+            # modèle de son taux de validité — ce qui le flatte.
+            kind = (
+                'model_output'
+                if isinstance(e, UnityStructuredOutputError)
+                else 'runtime'
+            )
+            yield GenerationEvent(type='error', data={'message': str(e), 'error_kind': kind})
     
     async def generate(
         self,

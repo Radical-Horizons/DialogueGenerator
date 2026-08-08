@@ -89,6 +89,16 @@ mesure sans en être une** — le mode de défaillance propre à ce genre d'outi
 - **`config_error` n'entre pas au dénominateur du taux de validité.** Clé absente,
   budget épuisé : c'est une panne d'environnement, pas une propriété du modèle.
   L'y compter ferait lire « ce modèle écrit mal » là où il n'a rien écrit.
+- **Corollaire, et le piège le plus coûteux du lot : une sortie non conforme est
+  `invalid`, jamais `config_error`.** Le critère est « le modèle a-t-il été
+  mesuré ? ». S'il a répondu quelque chose d'inexploitable — JSON sous la borne
+  `minItems`, réponse vide, type inattendu — il a été mesuré, et son échec doit
+  peser sur son taux. Ranger cela en `config_error` l'**exclut** du dénominateur
+  et le flatte : au bench du 2026-08-08, un modèle qui manquait 2 cas sur 3
+  affichait « 100 % de validité, 1 tentative », et un modèle incapable de
+  produire la structure affichait « aucune tentative » au lieu de 0 %.
+  Mécanique : `UnityStructuredOutputError` → `error_kind: model_output` porté par
+  l'événement d'erreur → `invalid` + porte `schema`.
 - **Facturation sur une identité dédiée** (`BENCHMARK_BILLABLE_USER_ID`) : le
   coût des runs n'entame pas le quota d'un humain.
 - **Aucun repli LLM pendant un run** (`_NoFallbackConfigService`) : sinon un échec
