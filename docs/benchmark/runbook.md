@@ -147,6 +147,20 @@ Suivre : `GET /judge/progress`.
 modèle, notes et duels par juge). Le détail brut reste sur
 `GET /runs/<RUN_ID>/generations`, `/verdicts?judge_model=…`, `/pairwise?judge_model=…`.
 
+## Runs produits avant le correctif de classification
+
+Les runs antérieurs au 2026-08-09 rangeaient toute erreur en `config_error`, y
+compris les sorties non conformes — donc **hors** du taux de validité, ce qui
+flattait les modèles fautifs. Pour rétablir la vérité d'un run existant :
+
+```bash
+python scripts/reclassify_benchmark_records.py --apply
+```
+
+Aperçu par défaut, idempotent, et narrow : seuls les échecs portant la signature
+d'une sortie inexploitable changent d'étiquette. Une panne d'environnement reste
+`config_error`, et le message d'origine est conservé.
+
 ## Lire les résultats sans se tromper
 
 - **Le taux de validité est une mesure de premier ordre**, pas un détail
