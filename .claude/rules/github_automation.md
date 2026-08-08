@@ -9,7 +9,7 @@ de fichier.
 
 | Déclencheur | Workflow | Effet |
 |---|---|---|
-| PR vers `main`, push sur `main`, `workflow_dispatch` | `ci.yml` | Backend pytest, Vitest, ESLint. T2 sur PR, T3 sur push `main`. |
+| PR vers `main`/`dev`, push sur `main`/`dev`, `workflow_dispatch` | `ci.yml` | Backend pytest, Vitest, ESLint, `tsc --noEmit`. **T3 uniquement sur push `main`** ; tout le reste en T2. |
 | Push sur une PR vers `main` | `pr-merge-main-prefer-head-data.yml` | Merge `main`, arbitre les conflits `data/` en faveur de la PR. |
 | Ouverture / push d'une PR | `pr-diff-gdd-split.yml` | Commente le diff séparé GDD vs code. **Informatif** : ni correctif ni réponse attendus — lire la colonne « hors GDD », ignorer l'autre (`.claude/rules/git_commit.md`). |
 
@@ -25,9 +25,14 @@ gh workflow run ci.yml --ref <branche>
 `workflow_dispatch` est l'un des rares événements exemptés de cette restriction.
 `pr-merge-main-prefer-head-data.yml` s'appuie dessus : sans ce relais, la CI resterait verte
 sur le HEAD d'**avant** le merge et le commit réellement mergé ne serait jamais testé. Ne pas
-retirer le déclencheur `workflow_dispatch` de `ci.yml`, ni l'étape de relais. Corollaire :
-les steps de test de `ci.yml` sont conditionnés par `github.event_name != 'push'` pour le
-tier T2, pas par `== 'pull_request'` — sinon un run relancé n'exécuterait rien.
+retirer le déclencheur `workflow_dispatch` de `ci.yml`, ni l'étape de relais.
+
+Corollaire sur le choix du tier : la condition T2 s'écrit
+`github.event_name != 'push' || github.ref != 'refs/heads/main'`, et T3 son exact
+complément. **Ni `== 'pull_request'`** — un run relancé par dispatch n'exécuterait rien —
+**ni `!= 'push'` seul** : depuis que `push` couvre aussi `dev`, cette forme enverrait chaque
+push `dev` dans la suite T3 (pytest complet, `VITEST_FULL`), soit ~45 min pour une branche
+d'intégration. Le tier se décide sur la **ref**, pas sur l'événement.
 
 **2. La famille `pull_request` s'exécute depuis la branche de la PR.** `pull_request`,
 `pull_request_review` et `pull_request_review_comment` lisent le fichier de workflow présent
