@@ -7,7 +7,7 @@ import logging
 import os
 import threading
 from pathlib import Path
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import Any, Dict, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from services.benchmark_criteria_store import BenchmarkCriteriaStore
@@ -640,9 +640,46 @@ class ServiceContainer:
                 config_service=self.get_config_service(),
                 orchestrator_factory=self.get_unity_dialogue_orchestrator,
                 runs_dir=root / FilePaths.BENCHMARK_RUNS_DIR,
+                auto_judge_hook=self._run_auto_judge,
             )
             logger.info("BenchmarkRunService initialisé dans le container.")
         return self._benchmark_run_service
+
+    async def _run_auto_judge(self, run_id: str, auto_judge: Any) -> None:
+        """Enchaîne la notation d'un run qui vient de se terminer.
+
+        Résolu ici plutôt que dans le moteur de run : les passes de jugement
+        dépendent déjà de lui, et l'inverse fermerait un cycle d'import. Les deux
+        jambes partagent la même grille et le même juge — un duel arbitré par un
+        autre juge que la rubrique ne serait comparable à rien.
+
+        Args:
+            run_id: Run à noter.
+            auto_judge: ``BenchmarkAutoJudgeConfig`` porté par la configuration du run.
+        """
+        import asyncio
+
+        from api.schemas.benchmark_judging import JudgePassConfig, PairwisePassConfig
+
+        common = {
+            "grid_id": auto_judge.grid_id,
+            "grid_version": auto_judge.grid_version,
+            "judge_model": auto_judge.judge_model,
+            "budget_cap_usd": auto_judge.budget_cap_usd,
+        }
+        judge_service = self.get_benchmark_judge_pass_service()
+        await judge_service.start_pass(run_id, JudgePassConfig(**common))
+        if not auto_judge.with_duels:
+            return
+        # `start_pass` rend la main aussitôt : la rubrique tourne encore. Lancer
+        # les duels tout de suite se heurterait à son verrou — on attend la fin de
+        # sa tâche de fond, sans jamais laisser son échec empêcher les duels.
+        task = judge_service.background_task
+        if task is not None:
+            await asyncio.gather(task, return_exceptions=True)
+        await self.get_benchmark_pairwise_pass_service().start_pass(
+            run_id, PairwisePassConfig(**common)
+        )
 
     def get_benchmark_criteria_store(self) -> "BenchmarkCriteriaStore":
         """Retourne le magasin des grilles de critères du benchmark.

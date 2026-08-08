@@ -34,6 +34,7 @@ import { Tabs, type Tab } from '../shared/Tabs'
 
 const POLL_INTERVAL_MS = 3000
 const MAX_POLL_FAILURES = 3
+const DEFAULT_JUDGE_MODEL = 'gpt-5.6-luna'
 
 const fieldStyle: React.CSSProperties = {
   minHeight: 44,
@@ -149,8 +150,11 @@ export function BenchmarkPanel() {
         if (gridList.grids.length > 0) {
           setGridId((current) => current || gridList.grids[0].grid_id)
         }
-        if ((modelList.models ?? []).length > 0) {
-          setJudgeModel((current) => current || modelList.models[0].model_identifier)
+        const available = modelList.models ?? []
+        if (available.length > 0) {
+          // Luna par défaut : tier volume/coût, la notation multiplie les appels.
+          const luna = available.find((m) => m.model_identifier === DEFAULT_JUDGE_MODEL)
+          setJudgeModel((current) => current || (luna ?? available[0]).model_identifier)
         }
       } catch (err) {
         setError(apiErrorMessage(err))
@@ -231,16 +235,19 @@ export function BenchmarkPanel() {
         models: selectedModels,
         repetitions,
         narration_mode: narrationMode,
+        judge_model: judgeModel || null,
+        with_duels: withDuels,
       })
       setPreview(result)
       setBudgetCap(Math.max(Number((result.estimate.estimated_max_usd * 1.2).toFixed(2)), 0.01))
+      setJudgeCap(Math.max(Number((result.judging_max_usd * 1.2).toFixed(2)), 0.01))
     } catch (err) {
       setPreview(null)
       setError(apiErrorMessage(err))
     } finally {
       setBusy(false)
     }
-  }, [suiteId, selectedModels, repetitions, narrationMode])
+  }, [suiteId, selectedModels, repetitions, narrationMode, judgeModel, withDuels])
 
   const handleLaunch = useCallback(async () => {
     setBusy(true)
@@ -255,6 +262,16 @@ export function BenchmarkPanel() {
         repetitions,
         narration_mode: narrationMode,
         budget_cap_usd: budgetCap,
+        // La notation part seule à la fin de la génération, côté API : fermer
+        // l'onglet n'interrompt pas la chaîne.
+        auto_judge: gridId && judgeModel
+          ? {
+              grid_id: gridId,
+              judge_model: judgeModel,
+              budget_cap_usd: judgeCap,
+              with_duels: withDuels,
+            }
+          : null,
       })
       // Le run tourne déjà et dépense : basculer sur le suivi avant tout autre
       // appel, sinon un échec du sondage afficherait « erreur » sur un
@@ -271,7 +288,7 @@ export function BenchmarkPanel() {
     } finally {
       setBusy(false)
     }
-  }, [suiteId, preview, selectedModels, repetitions, narrationMode, budgetCap])
+  }, [suiteId, preview, selectedModels, repetitions, narrationMode, budgetCap, gridId, judgeModel, judgeCap, withDuels])
 
   const handleControl = useCallback(
     async (action: 'pause' | 'unpause' | 'cancel') => {
@@ -523,6 +540,67 @@ export function BenchmarkPanel() {
         </small>
       </label>
 
+      <fieldset style={{ border: `1px solid ${theme.border.primary}`, borderRadius: 4, padding: '0.75rem' }}>
+        <legend>Notation (enchaînée automatiquement)</legend>
+        <small style={{ color: theme.text.secondary, display: 'block', marginBottom: '0.5rem' }}>
+          Générer sans noter ne répond à aucune question : la notation démarre seule à
+          la fin de la génération, côté serveur. Fermer l’onglet ne l’interrompt pas.
+        </small>
+        <label style={{ display: 'grid', gap: '0.35rem', marginBottom: '0.5rem' }}>
+          <span>Grille de critères</span>
+          <select
+            aria-label="Grille de critères du lancement"
+            value={gridId}
+            onChange={(event) => {
+              setGridId(event.target.value)
+              setPreview(null)
+            }}
+            style={fieldStyle}
+          >
+            {grids.map((grid) => (
+              <option key={grid.grid_id} value={grid.grid_id}>
+                {grid.name || grid.grid_id} — {grid.criterion_count} critères (v{grid.version})
+              </option>
+            ))}
+          </select>
+        </label>
+        <label style={{ display: 'grid', gap: '0.35rem', marginBottom: '0.5rem' }}>
+          <span>Modèle juge</span>
+          <select
+            aria-label="Modèle juge du lancement"
+            value={judgeModel}
+            onChange={(event) => {
+              setJudgeModel(event.target.value)
+              setPreview(null)
+            }}
+            style={fieldStyle}
+          >
+            {models.map((model) => (
+              <option key={model.model_identifier} value={model.model_identifier}>
+                {model.display_name || model.model_identifier}
+              </option>
+            ))}
+          </select>
+        </label>
+        {selectedModels.includes(judgeModel) && (
+          <p style={{ color: theme.state.warning.color, margin: '0 0 0.5rem' }}>
+            Ce juge est aussi candidat de ce run : il notera ses propres générations
+            et celles de ses concurrents.
+          </p>
+        )}
+        <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', minHeight: 44 }}>
+          <input
+            type="checkbox"
+            checked={withDuels}
+            onChange={(event) => {
+              setWithDuels(event.target.checked)
+              setPreview(null)
+            }}
+          />
+          <span>Enchaîner aussi les duels (jambe relative)</span>
+        </label>
+      </fieldset>
+
       <button
         type="button"
         onClick={() => void handlePreview()}
@@ -555,9 +633,21 @@ export function BenchmarkPanel() {
             {preview.estimate.generations} générations
           </span>
           <span>
-            Coût estimé : {formatUsd(preview.estimate.estimated_min_usd)} à{' '}
+            Génération : {formatUsd(preview.estimate.estimated_min_usd)} à{' '}
             {formatUsd(preview.estimate.estimated_max_usd)}
           </span>
+          {preview.judging_max_usd > 0 && (
+            <span>
+              Notation : jusqu’à {formatUsd(preview.judging_max_usd)}
+              {preview.duels_max_usd > 0
+                ? ` (dont ${formatUsd(preview.duels_max_usd)} de duels)`
+                : ''}
+            </span>
+          )}
+          <strong>
+            Total au pire :{' '}
+            {formatUsd(preview.estimate.estimated_max_usd + preview.judging_max_usd)}
+          </strong>
           <ul style={{ margin: 0, paddingLeft: '1.2rem' }}>
             {preview.model_diagnostics.map((diagnostic) => (
               <li key={diagnostic.model_id}>
@@ -590,13 +680,27 @@ export function BenchmarkPanel() {
               : le run serait refusé.
             </p>
           )}
+          {preview.judging_max_usd > 0 && (
+            <label style={{ display: 'grid', gap: '0.35rem' }}>
+              <span>Plafond budgétaire de la notation (USD)</span>
+              <input
+                type="number"
+                aria-label="Plafond budgétaire de la notation au lancement (USD)"
+                min={0.01}
+                step={0.01}
+                value={judgeCap}
+                onChange={(event) => setJudgeCap(Number(event.target.value))}
+                style={fieldStyle}
+              />
+            </label>
+          )}
           <button
             type="button"
             onClick={() => void handleLaunch()}
             disabled={busy || !preview.launchable || !capIsUsable}
             style={{ ...fieldStyle, cursor: 'pointer' }}
           >
-            Lancer le run (dépense réelle)
+            Lancer : générer puis noter (dépense réelle)
           </button>
         </div>
       )}

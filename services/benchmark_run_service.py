@@ -179,6 +179,7 @@ class BenchmarkRunService:
         config_service: Any,
         orchestrator_factory: Callable[[str], Any],
         runs_dir: Path,
+        auto_judge_hook: Optional[Callable[[str, Any], Any]] = None,
     ) -> None:
         """Initialise le moteur.
 
@@ -189,6 +190,10 @@ class BenchmarkRunService:
             config_service: ``ConfigurationService`` (modèles disponibles, config LLM).
             orchestrator_factory: Fabrique d'orchestrateur, indexée par ``request_id``.
             runs_dir: Répertoire des runs (résolu depuis ``FilePaths``).
+            auto_judge_hook: Coroutine ``(run_id, auto_judge) -> None`` appelée à la
+                fin d'un run qui porte une notation enchaînée. Injectée plutôt
+                qu'importée : les passes de jugement dépendent déjà de ce service,
+                et l'inverse créerait un cycle.
         """
         self._suite_store = suite_store
         self._gate_service = gate_service
@@ -196,6 +201,7 @@ class BenchmarkRunService:
         self._config_service = config_service
         self._orchestrator_factory = orchestrator_factory
         self._runs_dir = Path(runs_dir)
+        self._auto_judge_hook = auto_judge_hook
 
         self._control = CooperativePassControl()
         self._progress = BenchmarkRunProgress()
@@ -595,7 +601,37 @@ class BenchmarkRunService:
     def _spawn(self, run: BenchmarkRun, suite: BenchmarkSuite) -> None:
         """Lance l'exécution en tâche de fond et retourne immédiatement."""
         self._control.claim(run.run_id)
-        self._control.task = asyncio.create_task(self._execute(run, suite))
+        self._control.task = asyncio.create_task(self._execute_then_judge(run, suite))
+
+    async def _execute_then_judge(self, run: BenchmarkRun, suite: BenchmarkSuite) -> None:
+        """Génère, puis enchaîne la notation si le run en porte une.
+
+        Le chaînage vit ici et non dans le ``finally`` de ``_execute`` : la passe
+        de jugement refuse un run encore ``running``, et une erreur de notation ne
+        doit pas pouvoir masquer le statut réel de la génération.
+
+        Args:
+            run: Run à exécuter.
+            suite: Suite rejouée.
+        """
+        await self._execute(run, suite)
+        if self._auto_judge_hook is None or run.config.auto_judge is None:
+            return
+        try:
+            final = self.get_run(run.run_id)
+        except BenchmarkRunNotFoundError:
+            return
+        if final.status in {"cancelled", "failed"}:
+            # Un run annulé ou en échec n'a rien de stable à noter, et la
+            # notation coûte : ne pas dépenser sur des résultats qu'on jette.
+            logger.info(
+                "Notation enchaînée ignorée : run %s en statut '%s'", run.run_id, final.status
+            )
+            return
+        try:
+            await self._auto_judge_hook(run.run_id, run.config.auto_judge)
+        except Exception as exc:  # noqa: BLE001 — tracé, jamais silencieux
+            logger.error("Notation enchaînée du run %s en échec : %s", run.run_id, exc)
 
     def _is_active(self, run_id: Optional[str]) -> bool:
         """Indique si ``run_id`` désigne le run actif de ce processus.

@@ -116,6 +116,26 @@ mesure sans en être une** — le mode de défaillance propre à ce genre d'outi
   silencieusement le contexte, et le run entier mesure du vide. Test dédié :
   `tests/services/test_benchmark_suite_seed.py`.
 
+## Enchaînement
+
+- **Générer sans noter ne répond à aucune question.** La notation fait partie du
+  lancement (`BenchmarkRunConfig.auto_judge`), pas d'un second geste qu'on peut
+  oublier — l'oublier a déjà produit un run payé et muet.
+- **Le plafond de notation se saisit au lancement**, avec l'estimation des deux
+  étapes affichée d'un coup. Déclencher la notation plus tard engagerait une
+  dépense que personne n'a chiffrée. L'estimation suppose **toutes les
+  générations valides** : un plafond calé sur une hypothèse moyenne laisserait un
+  run à moitié noté, le pire des deux mondes.
+- **Le chaînage vit dans le processus API**, pas dans l'onglet : fermer le
+  navigateur n'interrompt rien. Il est déclenché après `_execute`, jamais dans
+  son `finally` — la passe de jugement refuse un run encore `running`, et une
+  erreur de notation ne doit pas masquer le statut de la génération.
+- **Un run `cancelled` ou `failed` n'est pas noté.** Annuler doit arrêter la
+  dépense, pas en déclencher une seconde. Un run `interrupted_budget`, lui, a
+  produit des mesures réelles : il est noté.
+- **Les deux jambes partagent grille et juge.** Un duel arbitré par un autre juge
+  que la rubrique ne serait comparable à rien.
+
 ## Interdits
 
 - Réintroduire une génération multi-appels pour produire un fragment (coût ×N,

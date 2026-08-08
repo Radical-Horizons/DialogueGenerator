@@ -10,27 +10,31 @@ facturé : tout ce qui suit a été exécuté, rien n'est supposé.
 
 Trois vues, dans l'ordre de la boucle :
 
-1. **Lancer** — suite, modèles, répétitions, mode de narration, puis
-   **Estimer le coût**. L'estimation ne crée aucun run et ne dépense rien ; elle
-   affiche la fourchette, le nombre de générations et l'utilisabilité réelle de
-   chaque modèle. Le plafond budgétaire se saisit ensuite, pré-rempli à 120 % de
-   l'estimation haute. Le bouton de lancement reste inerte si un modèle n'a pas
-   de tarif, si **aucun** modèle n'est utilisable, ou si le plafond est sous
+1. **Lancer** — suite, modèles, répétitions, mode de narration, puis **grille et
+   modèle juge** (Luna par défaut) et duels ou non : la notation s'enchaîne
+   automatiquement à la fin de la génération, **côté API** — fermer l'onglet ne
+   l'interrompt pas.
+
+   **Estimer le coût** ne crée aucun run et ne dépense rien. L'aperçu affiche la
+   fourchette de génération, la borne haute de notation et le **total au pire**,
+   le nombre de générations et l'utilisabilité réelle de chaque modèle. Les deux
+   plafonds se saisissent ensuite, pré-remplis à 120 % de leur estimation.
+
+   Le lancement reste inerte si un modèle ou le juge n'a pas de tarif, si
+   **aucun** modèle n'est utilisable, ou si le plafond de génération est sous
    l'estimation basse. En revanche **un** modèle inutilisable parmi d'autres ne
    bloque pas : le run mesure les autres et produit des `config_error` pour
-   celui-là — le rapport les compte à part, hors du taux de validité.
+   celui-là — comptés à part, hors du taux de validité. Si le juge choisi est
+   aussi candidat, l'écran le dit : il notera ses propres générations.
 2. **Suivi** — progression, dépense courante face au plafond, cas et modèle en
    cours, et les trois contrôles : suspendre, reprendre, **annuler**. Le sondage
    s'arrête de lui-même à la fin du run.
-3. **Rapport** — choisir le run, puis **Noter ce run** : grille, modèle juge,
-   duels ou non, plafond budgétaire de la notation. Générer ne suffit pas — sans
-   passe de jugement, le rapport n'a aucune note à montrer. La rubrique note
-   chaque génération seule ; les duels comparent les modèles deux à deux dans les
-   deux sens. Les deux passes ont leur progression et leurs contrôles.
-   Puis **Afficher le rapport** : validité et coût par modèle, puis un bloc **par
+3. **Rapport** — **Afficher le rapport** : validité et coût par modèle, puis un bloc **par
    juge et par version de grille** (note pondérée sur 10, verdicts, échecs du
    juge, bilan des duels). Les agrégats viennent de `GET /runs/{id}/report` :
-   l'écran n'en calcule aucun.
+   l'écran n'en calcule aucun. La section **Noter ce run** y reste disponible
+   pour rattraper un run lancé sans notation enchaînée, ou pour le faire rejuger
+   par un second juge.
 
 ## Ce que ça coûte
 
@@ -126,7 +130,9 @@ curl -s -X POST http://127.0.0.1:4243/api/v1/benchmark/runs -H "Content-Type: ap
 
 Suivre : `GET /runs/progress` jusqu'à `"active": false`.
 
-**3. Noter (jambe absolue).**
+**3. Noter (jambe absolue).** En passant `auto_judge` dans le corps de `POST /runs`,
+les deux étapes suivantes s'enchaînent seules — c'est ce que fait l'interface.
+Pour noter séparément :
 
 ```bash
 curl -s -X POST http://127.0.0.1:4243/api/v1/benchmark/runs/<RUN_ID>/judge -H "Content-Type: application/json" -d '{"grid_id":"grille-dialogue-fr","judge_model":"gpt-5.6-sol","budget_cap_usd":0.60}'

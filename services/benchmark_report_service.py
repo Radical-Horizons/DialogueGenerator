@@ -113,6 +113,15 @@ class BenchmarkReportService:
         except BenchmarkRunConflictError as exc:
             blocking.append(str(exc))
 
+        judging_max, duels_max, judging_unpriced = self._judging_estimate(
+            request, cases=len(suite.cases), generations=estimate.generations
+        )
+        if judging_unpriced and request.judge_model:
+            blocking.append(
+                f"Tarif inconnu pour le juge '{request.judge_model}' : le plafond de "
+                "notation ne pourrait pas se déclencher."
+            )
+
         return BenchmarkRunPreview(
             suite_id=suite.suite_id,
             suite_version=suite.version,
@@ -121,7 +130,48 @@ class BenchmarkReportService:
             model_diagnostics=diagnostics,
             launchable=not blocking,
             blocking_reasons=blocking,
+            judging_max_usd=round(judging_max, 6),
+            duels_max_usd=round(duels_max, 6),
+            judging_unpriced=judging_unpriced,
         )
+
+    def _judging_estimate(
+        self, request: BenchmarkRunPreviewRequest, *, cases: int, generations: int
+    ) -> Tuple[float, float, bool]:
+        """Borne haute de la notation enchaînée.
+
+        Hypothèse volontairement pessimiste : **toutes** les générations valides.
+        Un plafond calé sur une hypothèse moyenne sauterait en cours de notation
+        et laisserait un run à moitié noté — le pire des deux mondes, puisqu'on
+        aurait payé la génération sans obtenir la mesure.
+
+        Args:
+            request: Paramètres du run envisagé.
+            cases: Nombre de cas de la suite.
+            generations: Générations prévues.
+
+        Returns:
+            Coût total de notation, part des duels, et drapeau « juge sans tarif ».
+        """
+        if not request.judge_model:
+            return 0.0, 0.0, False
+        model_count = len(request.models)
+        # Un duel oppose deux modèles sur un même cas et une même répétition.
+        pairs_per_slot = model_count * (model_count - 1) // 2
+        duel_count = cases * request.repetitions * pairs_per_slot if request.with_duels else 0
+        try:
+            rubric = self._judge_pass_service.estimate_max_cost(
+                request.judge_model, generations
+            )
+            duels = (
+                self._pairwise_pass_service.estimate_max_cost(request.judge_model, duel_count)
+                if duel_count
+                else 0.0
+            )
+        except Exception as exc:  # noqa: BLE001 — tarif inconnu, signalé au lancement
+            logger.info("Estimation de notation impossible pour '%s' : %s", request.judge_model, exc)
+            return 0.0, 0.0, True
+        return rubric + duels, duels, False
 
     # ------------------------------------------------------------------
     # Rapport

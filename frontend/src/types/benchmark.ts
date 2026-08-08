@@ -48,6 +48,18 @@ export interface BenchmarkRunPreviewRequest {
   models: string[]
   repetitions: number
   narration_mode: BenchmarkNarrationMode
+  /** Juge de la notation enchaînée ; `null` ne chiffre que la génération. */
+  judge_model?: string | null
+  with_duels?: boolean
+}
+
+/** Notation enchaînée à la génération : le plafond se décide au lancement. */
+export interface BenchmarkAutoJudgeConfig {
+  grid_id: string
+  grid_version?: number | null
+  judge_model: string
+  budget_cap_usd: number
+  with_duels: boolean
 }
 
 export interface BenchmarkRunPreview {
@@ -58,10 +70,15 @@ export interface BenchmarkRunPreview {
   model_diagnostics: BenchmarkModelDiagnostic[]
   launchable: boolean
   blocking_reasons: string[]
+  /** Borne haute de la notation enchaînée — hypothèse « toutes valides ». */
+  judging_max_usd: number
+  duels_max_usd: number
+  judging_unpriced: boolean
 }
 
 export interface BenchmarkRunConfig extends BenchmarkRunPreviewRequest {
   budget_cap_usd: number
+  auto_judge?: BenchmarkAutoJudgeConfig | null
 }
 
 export interface BenchmarkRunLaunchResponse {

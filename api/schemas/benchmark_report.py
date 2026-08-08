@@ -50,6 +50,18 @@ class BenchmarkRunPreview(BaseModel):
     model_diagnostics: List[BenchmarkModelDiagnostic] = Field(default_factory=list)
     launchable: bool = True
     blocking_reasons: List[str] = Field(default_factory=list)
+    judging_max_usd: float = Field(
+        0.0,
+        description=(
+            "Borne haute de la notation enchaînée, 0 si aucune n'est demandée. "
+            "Calculée sur l'hypothèse pessimiste où toutes les générations sont "
+            "valides — c'est ce que le plafond doit couvrir."
+        ),
+    )
+    duels_max_usd: float = Field(0.0, description="Part des duels dans la borne ci-dessus.")
+    judging_unpriced: bool = Field(
+        False, description="Le juge n'a pas de tarif connu : son plafond ne pourrait pas agir."
+    )
 
 
 class BenchmarkModelValidity(BaseModel):
@@ -214,6 +226,8 @@ class BenchmarkRunPreviewRequest(BaseModel):
         models: Modèles candidats (au moins un).
         repetitions: Générations par cas et par modèle.
         narration_mode: Mode de narration du run envisagé.
+        judge_model: Juge de la notation enchaînée ; ``None`` ne chiffre que la génération.
+        with_duels: Inclure les duels dans le chiffrage.
     """
 
     suite_id: str = Field(..., min_length=1)
@@ -221,6 +235,14 @@ class BenchmarkRunPreviewRequest(BaseModel):
     models: List[str] = Field(..., min_length=1)
     repetitions: int = Field(3, ge=1, le=20)
     narration_mode: BenchmarkNarrationMode = "sans"
+    judge_model: Optional[str] = Field(
+        None,
+        description=(
+            "Juge de la notation enchaînée. Chiffrer la génération seule "
+            "sous-estimerait ce que coûte réellement « lancer un benchmark »."
+        ),
+    )
+    with_duels: bool = True
 
     _validate_models = field_validator("models")(reject_duplicate_models)
 

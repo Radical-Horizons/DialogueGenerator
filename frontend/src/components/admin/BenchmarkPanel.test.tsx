@@ -47,6 +47,9 @@ function preview(overrides: Partial<BenchmarkRunPreview> = {}): BenchmarkRunPrev
     model_diagnostics: [{ model_id: MODEL_A, usable: true, reason: null }],
     launchable: true,
     blocking_reasons: [],
+    judging_max_usd: 0.4,
+    duels_max_usd: 0.15,
+    judging_unpriced: false,
     ...overrides,
   }
 }
@@ -170,7 +173,7 @@ async function selectModelAndPreview(interaction: ReturnType<typeof userEvent.se
 /** Lance le run et fait répondre l'API comme pour un run réellement actif. */
 async function launchRun(interaction: ReturnType<typeof userEvent.setup>) {
   vi.mocked(api.getBenchmarkRunProgress).mockResolvedValue(progress())
-  await interaction.click(await screen.findByRole('button', { name: /Lancer le run/ }))
+  await interaction.click(await screen.findByRole('button', { name: /Lancer : générer puis noter/ }))
   await waitFor(() => expect(api.startBenchmarkRun).toHaveBeenCalled())
 }
 
@@ -207,7 +210,7 @@ describe('BenchmarkPanel — aperçu', () => {
     await selectModelAndPreview(interaction)
 
     expect(await screen.findByText(/Tarif inconnu/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Lancer le run/ })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /Lancer : générer puis noter/ })).toBeDisabled()
   })
 
   it('refuse le lancement quand le plafond est sous l’estimation basse', async () => {
@@ -222,7 +225,7 @@ describe('BenchmarkPanel — aperçu', () => {
     await interaction.type(cap, '0.05')
 
     expect(screen.getByText(/Plafond inférieur à l’estimation basse/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Lancer le run/ })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /Lancer : générer puis noter/ })).toBeDisabled()
     expect(api.startBenchmarkRun).not.toHaveBeenCalled()
   })
 
@@ -234,7 +237,7 @@ describe('BenchmarkPanel — aperçu', () => {
     await selectModelAndPreview(interaction)
 
     await interaction.clear(await screen.findByLabelText('Plafond budgétaire dur (USD)'))
-    expect(screen.getByRole('button', { name: /Lancer le run/ })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /Lancer : générer puis noter/ })).toBeDisabled()
   })
 
   it('affiche le motif exact d’un 409 au lieu du verrou par défaut', async () => {
@@ -247,7 +250,7 @@ describe('BenchmarkPanel — aperçu', () => {
     const interaction = userEvent.setup()
     render(<BenchmarkPanel />)
     await selectModelAndPreview(interaction)
-    await interaction.click(await screen.findByRole('button', { name: /Lancer le run/ }))
+    await interaction.click(await screen.findByRole('button', { name: /Lancer : générer puis noter/ }))
 
     expect(await screen.findByText('Tarif inconnu pour gpt-5.6-luna')).toBeInTheDocument()
   })
@@ -266,6 +269,37 @@ describe('BenchmarkPanel — aperçu', () => {
     expect(await screen.findByText(/inutilisable : Clé API absente/)).toBeInTheDocument()
   })
 })
+
+  it('chiffre génération et notation, et lance les deux d’un coup', async () => {
+    // « Générer et ne pas noter n'a aucun intérêt » : le total engagé doit être
+    // visible avant le clic, et la notation partir sans second geste.
+    const interaction = userEvent.setup()
+    render(<BenchmarkPanel />)
+    await selectModelAndPreview(interaction)
+
+    expect(await screen.findByText(/Notation : jusqu’à 0\.4000 \$/)).toBeInTheDocument()
+    expect(screen.getByText(/Total au pire : 0\.6500 \$/)).toBeInTheDocument()
+
+    await launchRun(interaction)
+    const sent = vi.mocked(api.startBenchmarkRun).mock.calls[0][0]
+    expect(sent.auto_judge).toEqual({
+      grid_id: 'grille-dialogue-fr',
+      judge_model: MODEL_A,
+      budget_cap_usd: expect.any(Number),
+      with_duels: true,
+    })
+  })
+
+  it('avertit quand le juge choisi concourt aussi', async () => {
+    // Luna est juge par défaut et candidat courant : l'auto-notation est assumée,
+    // mais elle doit rester visible.
+    const interaction = userEvent.setup()
+    render(<BenchmarkPanel />)
+    await screen.findByRole('checkbox', { name: 'Luna' })
+    await interaction.click(screen.getByRole('checkbox', { name: 'Luna' }))
+
+    expect(screen.getByText(/Ce juge est aussi candidat de ce run/)).toBeInTheDocument()
+  })
 
 describe('BenchmarkPanel — suivi', () => {
   it('arrête de sonder la progression au démontage', async () => {

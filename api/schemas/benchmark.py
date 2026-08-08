@@ -217,6 +217,29 @@ class BenchmarkSuiteUpsertRequest(BaseModel):
         return cases
 
 
+class BenchmarkAutoJudgeConfig(BaseModel):
+    """Notation à enchaîner automatiquement à la fin de la génération.
+
+    Générer sans noter ne répond à aucune question : la notation fait partie du
+    lancement, pas d'un second geste qu'on peut oublier. Le plafond est saisi ici,
+    au moment où l'humain consent à la dépense — le déclencher plus tard
+    engagerait un coût que personne n'a chiffré.
+
+    Attributes:
+        grid_id: Grille de critères employée.
+        grid_version: Version attendue ; ``None`` prend la version courante.
+        judge_model: Modèle juge. Enregistré avec chaque note.
+        budget_cap_usd: Plafond dur de la notation, distinct de celui du run.
+        with_duels: Enchaîner aussi la comparaison par paires.
+    """
+
+    grid_id: str = Field(..., min_length=1)
+    grid_version: Optional[int] = Field(None, ge=1)
+    judge_model: str = Field(..., min_length=1)
+    budget_cap_usd: float = Field(..., gt=0)
+    with_duels: bool = True
+
+
 class BenchmarkRunConfig(BaseModel):
     """Paramètres d'un run.
 
@@ -227,6 +250,7 @@ class BenchmarkRunConfig(BaseModel):
         repetitions: Nombre de générations par cas et par modèle.
         budget_cap_usd: Plafond dur du run, en USD.
         narration_mode: Didascalies de narration demandées ou non, pour tout le run.
+        auto_judge: Notation enchaînée ; ``None`` laisse le run non noté.
     """
 
     suite_id: str = Field(..., min_length=1, description="Suite à rejouer")
@@ -239,6 +263,13 @@ class BenchmarkRunConfig(BaseModel):
         description=(
             "Didascalies de narration : appliqué uniformément à tous les cas du run. "
             "Pour trancher la question produit, lancer deux runs et comparer."
+        ),
+    )
+    auto_judge: Optional[BenchmarkAutoJudgeConfig] = Field(
+        None,
+        description=(
+            "Notation enchaînée à la fin de la génération. Persistée avec le run : "
+            "le chaînage survit à la fermeture de l'onglet qui l'a lancé."
         ),
     )
 
