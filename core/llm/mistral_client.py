@@ -55,7 +55,10 @@ class MistralClient(ILLMClient):
         self.client = Mistral(api_key=api_key)
 
         self.llm_config = config if config is not None else {}
-        self.model_name = self.llm_config.get("default_model", "labs-mistral-small-creative")
+        # Défaut aligné sur un modèle réellement présent au catalogue Mistral :
+        # l'ancien `labs-mistral-small-creative` n'y a jamais figuré, et un
+        # appel sans `default_model` échouait donc côté API.
+        self.model_name = self.llm_config.get("default_model", "mistral-small-latest")
         self.temperature = self.llm_config.get("temperature", 0.7)
         self.max_tokens = self.llm_config.get("max_tokens", 32000)
 

@@ -55,12 +55,12 @@
       "output_price_per_1M": 1.6,
       "description": "Aion 2.0 (OpenRouter)"
     },
-    "labs-mistral-small-creative": {
-      "input_price_per_1M": 0.15,
-      "output_price_per_1M": 0.6,
-      "description": "Mistral Small Creative — tarif aligné sur Mistral Small 4 (doc Mistral). ⚠️ Cet identifiant n'existe pas au catalogue de l'API Mistral (53 modèles, vérifié le 2026-08-08) : le tarif débloque l'estimation, il ne rend pas le modèle appelable. Voir travail différé."
+    "mistralai/mistral-medium-3-5": {
+      "input_price_per_1M": 1.5,
+      "output_price_per_1M": 7.5,
+      "description": "Mistral Medium 3.5 via OpenRouter — structured outputs, temperature/top_p acceptes, contexte 262k"
     }
   },
   "last_updated": "2026-08-08",
-  "note": "Les prix sont en USD par million de tokens. Taux de conversion USD→EUR : 0.92 (constante dans graph.py, à mettre à jour périodiquement). Sources : developers.openai.com/api/docs/models/gpt-5.6-{sol,terra,luna} ; mistral.ai/pricing/api ; openrouter.ai/aion-labs/aion-2.0."
+  "note": "Les prix sont en USD par million de tokens. Taux de conversion USD→EUR : 0.92 (constante dans graph.py, à mettre à jour périodiquement). Sources : developers.openai.com/api/docs/models/gpt-5.6-{sol,terra,luna} ; mistral.ai/pricing/api ; openrouter.ai/api/v1/models pour les slugs OpenRouter (aion-labs/aion-2.0, mistralai/mistral-medium-3-5) — la tarification y est par token, ×1e6 ici."
 }

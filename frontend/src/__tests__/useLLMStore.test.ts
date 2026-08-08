@@ -62,10 +62,10 @@ describe('useLLMStore', () => {
     const { result } = renderHook(() => useLLMStore());
 
     act(() => {
-      result.current.setModel('labs-mistral-small-creative');
+      result.current.setModel('mistralai/mistral-medium-3-5');
     });
 
-    expect(result.current.model).toBe('labs-mistral-small-creative');
+    expect(result.current.model).toBe('mistralai/mistral-medium-3-5');
   });
 
   it('should set available models', () => {
@@ -79,7 +79,7 @@ describe('useLLMStore', () => {
         parameters: { default_temperature: 0.7, max_tokens: 4096 },
       },
       {
-        api_identifier: 'labs-mistral-small-creative',
+        api_identifier: 'mistralai/mistral-medium-3-5',
         display_name: 'Mistral Small Creative',
         client_type: 'mistral' as const,
         parameters: { default_temperature: 0.7, max_tokens: 32000 },
@@ -107,10 +107,10 @@ describe('useLLMStore', () => {
     const { result } = renderHook(() => useLLMStore());
 
     act(() => {
-      result.current.setModel('labs-mistral-small-creative');
+      result.current.setModel('mistralai/mistral-medium-3-5');
     });
 
-    expect(localStorage.getItem('llm-model')).toBe('labs-mistral-small-creative');
+    expect(localStorage.getItem('llm-model')).toBe('mistralai/mistral-medium-3-5');
   });
 
   it('should normalize legacy gpt-5.4 to gpt-5.6-sol on setModel', () => {
@@ -143,13 +143,13 @@ describe('useLLMStore', () => {
 
     // Définir un modèle
     act(() => {
-      result.current.setModel('labs-mistral-small-creative');
+      result.current.setModel('mistralai/mistral-medium-3-5');
     });
 
     // Vérifier que le localStorage a été mis à jour
-    expect(localStorage.getItem('llm-model')).toBe('labs-mistral-small-creative');
+    expect(localStorage.getItem('llm-model')).toBe('mistralai/mistral-medium-3-5');
     // Vérifier que l'état a été mis à jour
-    expect(result.current.model).toBe('labs-mistral-small-creative');
+    expect(result.current.model).toBe('mistralai/mistral-medium-3-5');
   });
 
   it('should load models from API', async () => {
@@ -163,7 +163,7 @@ describe('useLLMStore', () => {
           max_tokens: 4096,
         },
         {
-          model_identifier: 'labs-mistral-small-creative',
+          model_identifier: 'mistralai/mistral-medium-3-5',
           display_name: 'Mistral Small Creative',
           client_type: 'mistral',
           max_tokens: 32000,
@@ -180,7 +180,7 @@ describe('useLLMStore', () => {
         parameters: { default_temperature: 0.7, max_tokens: 4096 },
       },
       {
-        api_identifier: 'labs-mistral-small-creative',
+        api_identifier: 'mistralai/mistral-medium-3-5',
         display_name: 'Mistral Small Creative',
         client_type: 'mistral' as const,
         parameters: { default_temperature: 0.7, max_tokens: 32000 },

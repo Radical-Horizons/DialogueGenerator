@@ -31,7 +31,7 @@ def create_client_fn(mock_primary_client, mock_fallback_client):
     def _create(model_id: str, **kwargs: object) -> ILLMClient:
         if model_id == "gpt-5.6-terra":
             return mock_primary_client
-        if model_id == "labs-mistral-small-creative":
+        if model_id == "mistralai/mistral-medium-3-5":
             return mock_fallback_client
         return MagicMock(spec=ILLMClient)
     return _create
@@ -41,7 +41,7 @@ def create_client_fn(mock_primary_client, mock_fallback_client):
 async def test_primary_success_no_fallback_call(create_client_fn, mock_primary_client, mock_fallback_client):
     """Client principal réussit → pas d'appel au fallback."""
     client = FallbackLLMClient(
-        model_ids=["gpt-5.6-terra", "labs-mistral-small-creative"],
+        model_ids=["gpt-5.6-terra", "mistralai/mistral-medium-3-5"],
         create_client_fn=create_client_fn,
         create_client_kwargs={"config": {}, "available_models": []},
         usage_service=MagicMock(),
@@ -57,7 +57,7 @@ async def test_primary_fails_fallback_succeeds(create_client_fn, mock_primary_cl
     """Client principal échoue 3 fois → fallback utilisé."""
     mock_primary_client.generate_variants = AsyncMock(side_effect=Exception("Timeout"))
     client = FallbackLLMClient(
-        model_ids=["gpt-5.6-terra", "labs-mistral-small-creative"],
+        model_ids=["gpt-5.6-terra", "mistralai/mistral-medium-3-5"],
         create_client_fn=create_client_fn,
         create_client_kwargs={"config": {}, "available_models": []},
         usage_service=MagicMock(),
@@ -73,7 +73,7 @@ async def test_all_clients_fail_raises_all_unavailable(create_client_fn, mock_pr
     mock_primary_client.generate_variants = AsyncMock(side_effect=Exception("500"))
     mock_fallback_client.generate_variants = AsyncMock(side_effect=Exception("503"))
     client = FallbackLLMClient(
-        model_ids=["gpt-5.6-terra", "labs-mistral-small-creative"],
+        model_ids=["gpt-5.6-terra", "mistralai/mistral-medium-3-5"],
         create_client_fn=create_client_fn,
         create_client_kwargs={"config": {}, "available_models": []},
         usage_service=MagicMock(),
@@ -98,7 +98,7 @@ def test_get_max_tokens_returns_primary_max_tokens(create_client_fn, mock_primar
     """get_max_tokens retourne celui du premier client."""
     mock_primary_client.get_max_tokens.return_value = 16000
     client = FallbackLLMClient(
-        model_ids=["gpt-5.6-terra", "labs-mistral-small-creative"],
+        model_ids=["gpt-5.6-terra", "mistralai/mistral-medium-3-5"],
         create_client_fn=create_client_fn,
         create_client_kwargs={"config": {}, "available_models": []},
         usage_service=MagicMock(),
@@ -120,7 +120,7 @@ async def test_fallback_success_calls_track_usage_with_fallback_from_reason():
         if usage_svc:
             usage_svc.track_usage(
                 request_id="req1",
-                model_name="labs-mistral-small-creative",
+                model_name="mistralai/mistral-medium-3-5",
                 prompt_tokens=10,
                 completion_tokens=5,
                 total_tokens=15,
@@ -136,7 +136,7 @@ async def test_fallback_success_calls_track_usage_with_fallback_from_reason():
         nonlocal captured_usage_service
         if model_id == "gpt-5.6-terra":
             return primary_client
-        if model_id == "labs-mistral-small-creative":
+        if model_id == "mistralai/mistral-medium-3-5":
             captured_usage_service = kwargs.get("usage_service")
             fallback_client = MagicMock(spec=ILLMClient)
             fallback_client.generate_variants = fallback_gen_var
@@ -145,7 +145,7 @@ async def test_fallback_success_calls_track_usage_with_fallback_from_reason():
         return MagicMock(spec=ILLMClient)
 
     client = FallbackLLMClient(
-        model_ids=["gpt-5.6-terra", "labs-mistral-small-creative"],
+        model_ids=["gpt-5.6-terra", "mistralai/mistral-medium-3-5"],
         create_client_fn=create_fn,
         create_client_kwargs={"config": {}, "available_models": []},
         usage_service=mock_usage,

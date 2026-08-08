@@ -84,7 +84,7 @@ def test_track_usage_with_fallback_from_reason(usage_service, mock_repository):
     """Story 1.16: track_usage accepte fallback_from et fallback_reason et les enregistre."""
     usage_service.track_usage(
         request_id="req_fallback",
-        model_name="labs-mistral-small-creative",
+        model_name="mistralai/mistral-medium-3-5",
         prompt_tokens=100,
         completion_tokens=50,
         total_tokens=150,

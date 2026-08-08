@@ -41,16 +41,16 @@ describe('generationConfigNormalization', () => {
 
   it('propose un correctif modèle si Mistral sélectionné pour Unity', () => {
     const fixes = detectGenerationConfigFixes(
-      { maxContextTokens: 50_000, maxCompletionTokens: null, llmModel: 'labs-mistral-small-creative' },
+      { maxContextTokens: 50_000, maxCompletionTokens: null, llmModel: 'mistralai/mistral-medium-3-5' },
       [
         { model_identifier: 'gpt-5.6-terra', display_name: 'GPT-5.6 Terra', client_type: 'openai', max_tokens: 128_000 },
-        { model_identifier: 'labs-mistral-small-creative', display_name: 'Mistral', client_type: 'mistral', max_tokens: 32_000 },
+        { model_identifier: 'mistralai/mistral-medium-3-5', display_name: 'Mistral', client_type: 'mistral', max_tokens: 32_000 },
       ],
     )
     expect(fixes.some((f) => f.field === 'llmModel')).toBe(true)
-    expect(resolveModelForUnityGeneration('labs-mistral-small-creative', [
+    expect(resolveModelForUnityGeneration('mistralai/mistral-medium-3-5', [
       { model_identifier: 'gpt-5.6-terra', display_name: 'GPT-5.6 Terra', client_type: 'openai', max_tokens: 128_000 },
-      { model_identifier: 'labs-mistral-small-creative', display_name: 'Mistral', client_type: 'mistral', max_tokens: 32_000 },
+      { model_identifier: 'mistralai/mistral-medium-3-5', display_name: 'Mistral', client_type: 'mistral', max_tokens: 32_000 },
     ])).toBe(MODEL_NAMES.GPT_5_2)
   })
 })

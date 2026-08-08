@@ -19,7 +19,7 @@ class TestMistralClient:
     def mock_mistral_config(self):
         """Configuration mock pour les tests."""
         return {
-            "default_model": "labs-mistral-small-creative",
+            "default_model": "mistralai/mistral-medium-3-5",
             "temperature": 0.7,
             "max_tokens": 32000,
             "system_prompt_template": "Tu es un assistant expert."
@@ -46,7 +46,7 @@ class TestMistralClient:
     def test_mistral_client_initialization(self):
         """Test l'initialisation de MistralClient."""
         config = {
-            "default_model": "labs-mistral-small-creative",
+            "default_model": "mistralai/mistral-medium-3-5",
             "temperature": 0.7,
             "max_tokens": 32000
         }
@@ -57,7 +57,7 @@ class TestMistralClient:
             
             client = MistralClient(api_key="test-key", config=config)
             
-            assert client.model_name == "labs-mistral-small-creative"
+            assert client.model_name == "mistralai/mistral-medium-3-5"
             assert client.temperature == 0.7
             assert client.max_tokens == 32000
             mock_mistral_class.assert_called_once_with(api_key="test-key")

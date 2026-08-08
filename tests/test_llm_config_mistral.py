@@ -29,7 +29,7 @@ class TestLLMConfigMistral:
                     }
                 },
                 {
-                    "api_identifier": "labs-mistral-small-creative",
+                    "api_identifier": "mistral-small-latest",
                     "display_name": "Mistral Small Creative",
                     "client_type": "mistral",
                     "parameters": {
@@ -53,7 +53,7 @@ class TestLLMConfigMistral:
         assert len(mistral_models) > 0, "Aucun modèle Mistral trouvé dans available_models"
         
         mistral_model = mistral_models[0]
-        assert mistral_model["api_identifier"] == "labs-mistral-small-creative"
+        assert mistral_model["api_identifier"] == "mistral-small-latest"
         assert mistral_model["display_name"] == "Mistral Small Creative"
         assert mistral_model["client_type"] == "mistral"
 
@@ -77,7 +77,7 @@ class TestLLMConfigMistral:
             # Vérifier que available_models contient des modèles Mistral
             mistral_models = [m for m in available_models if m.get("client_type") == "mistral"]
             assert len(mistral_models) > 0
-            assert mistral_models[0]["api_identifier"] == "labs-mistral-small-creative"
+            assert mistral_models[0]["api_identifier"] == "mistral-small-latest"
 
     def test_llm_config_structure_compatibility(self, mock_llm_config_with_mistral):
         """Test que la structure de configuration est compatible avec l'existant."""

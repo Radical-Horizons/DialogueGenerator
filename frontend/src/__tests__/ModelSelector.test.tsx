@@ -30,7 +30,7 @@ describe('ModelSelector', () => {
       parameters: { default_temperature: 0.7, max_tokens: 4096 },
     },
     {
-      api_identifier: 'labs-mistral-small-creative',
+      api_identifier: 'mistralai/mistral-medium-3-5',
       display_name: 'Mistral Small Creative',
       client_type: 'mistral',
       parameters: { default_temperature: 0.7, max_tokens: 32000 },
@@ -89,11 +89,11 @@ describe('ModelSelector', () => {
     render(<ModelSelector />);
 
     const select = screen.getByRole('combobox');
-    fireEvent.change(select, { target: { value: 'labs-mistral-small-creative' } });
+    fireEvent.change(select, { target: { value: 'mistralai/mistral-medium-3-5' } });
 
     await waitFor(() => {
       expect(mockSetProvider).toHaveBeenCalledWith('mistral');
-      expect(mockSetModel).toHaveBeenCalledWith('labs-mistral-small-creative');
+      expect(mockSetModel).toHaveBeenCalledWith('mistralai/mistral-medium-3-5');
     });
   });
 
@@ -124,7 +124,7 @@ describe('ModelSelector', () => {
   it('should display correct provider for Mistral model', () => {
     mockUseLLMStore.mockReturnValue({
       provider: 'mistral',
-      model: 'labs-mistral-small-creative',
+      model: 'mistralai/mistral-medium-3-5',
       availableModels: mockAvailableModels,
       setProvider: mockSetProvider,
       setModel: mockSetModel,

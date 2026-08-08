@@ -33,6 +33,8 @@ export const MODEL_NAMES = {
   GPT_5_MINI: 'gpt-5.6-luna',
   /** @deprecated Alias → Luna */
   GPT_5_NANO: 'gpt-5.6-luna',
+  /** Mistral Medium 3.5 via OpenRouter — structured outputs, contexte 262k */
+  MISTRAL_MEDIUM_3_5: 'mistralai/mistral-medium-3-5',
 } as const
 
 /**
@@ -47,6 +49,9 @@ export const LEGACY_MODEL_ID_MAP: Readonly<Record<string, string>> = {
   'gpt-5-mini': MODEL_NAMES.GPT_5_6_LUNA,
   'gpt-5-nano': MODEL_NAMES.GPT_5_6_LUNA,
   'gpt-5.6': MODEL_NAMES.GPT_5_6_SOL,
+  // Slug jamais présent au catalogue Mistral : les presets et le localStorage
+  // qui le portent encore migrent vers le modèle retenu.
+  'labs-mistral-small-creative': MODEL_NAMES.MISTRAL_MEDIUM_3_5,
 }
 
 /** Mappe un identifiant legacy vers le slug GPT-5.6 courant (miroir Python). */

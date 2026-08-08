@@ -19,7 +19,10 @@ from services.benchmark_run_service import BenchmarkRunService
 from services.benchmark_suite_store import BenchmarkSuiteStore
 
 WHITELISTED_MODEL = "gpt-5.6-luna"
-OFF_WHITELIST_MODEL = "labs-mistral-small-creative"
+# Doit rester **hors** whitelist Unity : `get_unity_structured_output_allowed_models`
+# y admet d'office tout `client_type=openrouter` de `llm_config.json`. Un slug
+# OpenRouter viderait donc ce test de son objet.
+OFF_WHITELIST_MODEL = "mistral-small-latest"
 
 
 class _RealClient:

@@ -76,6 +76,9 @@ class ModelNames:
 
     # OpenRouter — seed Aion 2.0
     AION_2_0 = "aion-labs/aion-2.0"
+    # OpenRouter — Mistral Medium 3.5 (structured outputs, temperature acceptée,
+    # contexte 262k ; catalogue OpenRouter relevé le 2026-08-08)
+    MISTRAL_MEDIUM_3_5 = "mistralai/mistral-medium-3-5"
 
     # Anciens slugs API → famille 5.6 (presets, localStorage, tests)
     LEGACY_MODEL_ID_MAP: dict[str, str] = {
@@ -86,6 +89,10 @@ class ModelNames:
         "gpt-5-mini": GPT_5_6_LUNA,
         "gpt-5-nano": GPT_5_6_LUNA,
         "gpt-5.6": GPT_5_6_SOL,
+        # `labs-mistral-small-creative` n'a jamais existé au catalogue Mistral
+        # (53 modèles listés le 2026-08-08, aucun ne porte ce nom). Les presets et
+        # le localStorage qui le portent encore migrent vers le modèle retenu.
+        "labs-mistral-small-creative": MISTRAL_MEDIUM_3_5,
     }
 
     @classmethod

@@ -33,9 +33,9 @@
             }
         },
         {
-            "api_identifier": "labs-mistral-small-creative",
-            "display_name": "Mistral Small Creative",
-            "client_type": "mistral",
+            "api_identifier": "mistralai/mistral-medium-3-5",
+            "display_name": "Mistral Medium 3.5 (OpenRouter)",
+            "client_type": "openrouter",
             "parameters": {
                 "default_temperature": 0.7,
                 "max_tokens": 32000

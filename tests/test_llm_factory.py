@@ -240,7 +240,7 @@ class TestLLMClientFactory:
         }
         available_models = [
             {
-                "api_identifier": "labs-mistral-small-creative",
+                "api_identifier": "mistral-small-latest",
                 "display_name": "Mistral Small Creative",
                 "client_type": "mistral"
             }
@@ -248,7 +248,7 @@ class TestLLMClientFactory:
         
         with patch.dict(os.environ, {"MISTRAL_API_KEY": "test-mistral-key"}):
             client = LLMClientFactory.create_client(
-                model_id="labs-mistral-small-creative",
+                model_id="mistral-small-latest",
                 config=config,
                 available_models=available_models
             )
@@ -257,7 +257,7 @@ class TestLLMClientFactory:
         mock_mistral_client_class.assert_called_once()
         call_kwargs = mock_mistral_client_class.call_args[1]
         assert call_kwargs["api_key"] == "test-mistral-key"
-        assert call_kwargs["config"]["default_model"] == "labs-mistral-small-creative"
+        assert call_kwargs["config"]["default_model"] == "mistral-small-latest"
 
     @patch('factories.llm_factory.MistralClient')
     def test_create_mistral_client_with_model_parameters(self, mock_mistral_client_class):
@@ -272,7 +272,7 @@ class TestLLMClientFactory:
         }
         available_models = [
             {
-                "api_identifier": "labs-mistral-small-creative",
+                "api_identifier": "mistral-small-latest",
                 "display_name": "Mistral Small Creative",
                 "client_type": "mistral",
                 "parameters": {
@@ -284,13 +284,13 @@ class TestLLMClientFactory:
         
         with patch.dict(os.environ, {"MISTRAL_API_KEY": "test-mistral-key-456"}):
             client = LLMClientFactory.create_client(
-                model_id="labs-mistral-small-creative",
+                model_id="mistral-small-latest",
                 config=config,
                 available_models=available_models
             )
         
         call_kwargs = mock_mistral_client_class.call_args[1]
-        assert call_kwargs["config"]["default_model"] == "labs-mistral-small-creative"
+        assert call_kwargs["config"]["default_model"] == "mistral-small-latest"
         assert call_kwargs["config"]["temperature"] == 0.7  # Du paramètre du modèle
         assert call_kwargs["config"]["max_tokens"] == 32000  # Du paramètre du modèle
 
@@ -299,7 +299,7 @@ class TestLLMClientFactory:
         config = {}  # Pas de mistral_api_key_env_var
         available_models = [
             {
-                "api_identifier": "labs-mistral-small-creative",
+                "api_identifier": "mistral-small-latest",
                 "display_name": "Mistral Small Creative",
                 "client_type": "mistral"
             }
@@ -318,7 +318,7 @@ class TestLLMClientFactory:
         config = {"mistral_api_key_env_var": "MISTRAL_API_KEY"}
         available_models = [
             {
-                "api_identifier": "labs-mistral-small-creative",
+                "api_identifier": "mistral-small-latest",
                 "display_name": "Mistral Small Creative",
                 "client_type": "mistral"
             }
@@ -326,7 +326,7 @@ class TestLLMClientFactory:
         
         with patch.dict(os.environ, {}, clear=True):
             client = LLMClientFactory.create_client(
-                model_id="labs-mistral-small-creative",
+                model_id="mistral-small-latest",
                 config=config,
                 available_models=available_models
             )
@@ -341,7 +341,7 @@ class TestLLMClientFactory:
         config = {"mistral_api_key_env_var": "MISTRAL_API_KEY"}
         available_models = [
             {
-                "api_identifier": "labs-mistral-small-creative",
+                "api_identifier": "mistral-small-latest",
                 "display_name": "Mistral Small Creative",
                 "client_type": "mistral",
             }
@@ -349,7 +349,7 @@ class TestLLMClientFactory:
 
         with patch.dict(os.environ, {"MISTRAL_API_KEY": "test-key"}):
             client = LLMClientFactory.create_client(
-                model_id="labs-mistral-small-creative",
+                model_id="mistral-small-latest",
                 config=config,
                 available_models=available_models,
             )
