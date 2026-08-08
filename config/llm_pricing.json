@@ -36,26 +36,31 @@
       "description": "GPT-3.5 Turbo — legacy"
     },
     "mistral-small-latest": {
-      "input_price_per_1M": 0.1,
-      "output_price_per_1M": 0.3,
-      "description": "Mistral Small - Modèle économique et rapide"
+      "input_price_per_1M": 0.15,
+      "output_price_per_1M": 0.6,
+      "description": "Mistral Small 4 — doc Mistral 2026-08"
     },
     "mistral-medium": {
-      "input_price_per_1M": 2.7,
-      "output_price_per_1M": 8.1,
-      "description": "Mistral Medium - Bon équilibre performance/coût"
+      "input_price_per_1M": 1.5,
+      "output_price_per_1M": 7.5,
+      "description": "Mistral Medium 3.5 — doc Mistral 2026-08"
     },
     "mistral-large-latest": {
-      "input_price_per_1M": 3.0,
-      "output_price_per_1M": 9.0,
-      "description": "Mistral Large - Modèle haute performance"
+      "input_price_per_1M": 0.5,
+      "output_price_per_1M": 1.5,
+      "description": "Mistral Large 3 — doc Mistral 2026-08"
     },
     "aion-labs/aion-2.0": {
       "input_price_per_1M": 0.8,
       "output_price_per_1M": 1.6,
       "description": "Aion 2.0 (OpenRouter)"
+    },
+    "labs-mistral-small-creative": {
+      "input_price_per_1M": 0.15,
+      "output_price_per_1M": 0.6,
+      "description": "Mistral Small Creative — tarif aligné sur Mistral Small 4 (doc Mistral). ⚠️ Cet identifiant n'existe pas au catalogue de l'API Mistral (53 modèles, vérifié le 2026-08-08) : le tarif débloque l'estimation, il ne rend pas le modèle appelable. Voir travail différé."
     }
   },
-  "last_updated": "2026-07-23",
-  "note": "Les prix sont en USD par million de tokens. Taux de conversion USD→EUR : 0.92 (constante dans graph.py, à mettre à jour périodiquement). Sources : developers.openai.com/api/docs/models/gpt-5.6-{sol,terra,luna} ; openrouter.ai/aion-labs/aion-2.0."
+  "last_updated": "2026-08-08",
+  "note": "Les prix sont en USD par million de tokens. Taux de conversion USD→EUR : 0.92 (constante dans graph.py, à mettre à jour périodiquement). Sources : developers.openai.com/api/docs/models/gpt-5.6-{sol,terra,luna} ; mistral.ai/pricing/api ; openrouter.ai/aion-labs/aion-2.0."
 }

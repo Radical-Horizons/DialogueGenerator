@@ -201,3 +201,6 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-admin-ui.md`
   summary: Afficher `error.details` par champ sur les 422 du panneau benchmark, comme le prescrit `.claude/rules/api_validation_errors.md`.
   evidence: Revue — `apiErrorMessage` retombe sur un message générique ; dette transverse au frontend, pas propre à ce lot.
+- source_spec: none
+  summary: "`labs-mistral-small-creative` n'existe pas au catalogue Mistral : corriger l'identifiant du modèle (probablement `mistral-small-latest`) dans `config/llm_config.json`, `app_config.json`, le défaut de `core/llm/mistral_client.py` et la chaîne de repli."
+  evidence: "Catalogue de l'API Mistral listé le 2026-08-08 avec la clé du projet : 53 modèles, aucun ne porte ce nom (les Labs sont `labs-leanstral-1-5*`). Un run benchmark avec ce modèle produirait des `config_error`, pas des mesures. Le tarif a été renseigné pour débloquer l'estimation ; l'identifiant reste faux. Touche aussi `e2e/multi-provider-llm.spec.ts` et plusieurs tests — relève du skill `/llm-model-update`."
