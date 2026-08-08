@@ -22,13 +22,15 @@ Trois vues, dans l'ordre de la boucle :
 2. **Suivi** — progression, dépense courante face au plafond, cas et modèle en
    cours, et les trois contrôles : suspendre, reprendre, **annuler**. Le sondage
    s'arrête de lui-même à la fin du run.
-3. **Rapport** — validité et coût par modèle, puis un bloc **par juge** (note
-   pondérée sur 10, verdicts, échecs du juge, bilan des duels). Les agrégats
-   viennent de `GET /runs/{id}/report` : l'écran n'en calcule aucun.
-
-La notation (`POST /runs/{id}/judge`) et les duels (`.../judge/pairwise`) restent
-des appels REST — l'UI lit les verdicts, elle ne déclenche pas encore les passes
-de jugement.
+3. **Rapport** — choisir le run, puis **Noter ce run** : grille, modèle juge,
+   duels ou non, plafond budgétaire de la notation. Générer ne suffit pas — sans
+   passe de jugement, le rapport n'a aucune note à montrer. La rubrique note
+   chaque génération seule ; les duels comparent les modèles deux à deux dans les
+   deux sens. Les deux passes ont leur progression et leurs contrôles.
+   Puis **Afficher le rapport** : validité et coût par modèle, puis un bloc **par
+   juge et par version de grille** (note pondérée sur 10, verdicts, échecs du
+   juge, bilan des duels). Les agrégats viennent de `GET /runs/{id}/report` :
+   l'écran n'en calcule aucun.
 
 ## Ce que ça coûte
 
@@ -46,8 +48,7 @@ utilisez-le.
 
 ## Par l'API
 
-Utile en headless, en reprise après incident, ou pour déclencher une passe de
-jugement — l'UI lit les verdicts mais ne lance pas encore le jugement.
+Utile en headless, en reprise après incident, ou pour scripter une campagne.
 
 ### Prérequis et pièges
 

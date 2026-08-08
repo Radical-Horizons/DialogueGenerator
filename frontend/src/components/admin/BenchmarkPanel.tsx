@@ -4,12 +4,18 @@ import axios from 'axios'
 import { listLLMModels } from '../../api/config'
 import {
   controlBenchmarkRun,
+  controlJudgePass,
   getBenchmarkRunProgress,
   getBenchmarkRunReport,
+  getJudgePassProgress,
+  getPairwisePassProgress,
   listBenchmarkRuns,
   listBenchmarkSuites,
+  listCriteriaGrids,
   previewBenchmarkRun,
   startBenchmarkRun,
+  startJudgePass,
+  startPairwisePass,
 } from '../../api/benchmark'
 import type { LLMModelResponse } from '../../types/api'
 import type {
@@ -19,6 +25,9 @@ import type {
   BenchmarkRunReport,
   BenchmarkSuiteSummary,
   BenchmarkNarrationMode,
+  CriteriaGridSummary,
+  JudgePassProgress,
+  PairwisePassProgress,
 } from '../../types/benchmark'
 import { theme } from '../../theme'
 import { Tabs, type Tab } from '../shared/Tabs'
@@ -114,17 +123,34 @@ export function BenchmarkPanel() {
   const [reportRunId, setReportRunId] = useState('')
   const [report, setReport] = useState<BenchmarkRunReport | null>(null)
 
+  const [grids, setGrids] = useState<CriteriaGridSummary[]>([])
+  const [gridId, setGridId] = useState('')
+  const [judgeModel, setJudgeModel] = useState('')
+  const [judgeCap, setJudgeCap] = useState(1)
+  const [withDuels, setWithDuels] = useState(true)
+  const [judgeProgress, setJudgeProgress] = useState<JudgePassProgress | null>(null)
+  const [duelProgress, setDuelProgress] = useState<PairwisePassProgress | null>(null)
+  const [judgeNotice, setJudgeNotice] = useState<string | null>(null)
+
   useEffect(() => {
     void (async () => {
       try {
-        const [suiteList, modelList] = await Promise.all([
+        const [suiteList, modelList, gridList] = await Promise.all([
           listBenchmarkSuites(),
           listLLMModels(),
+          listCriteriaGrids(),
         ])
         setSuites(suiteList.suites)
         setModels(modelList.models ?? [])
+        setGrids(gridList.grids)
         if (suiteList.suites.length > 0) {
           setSuiteId((current) => current || suiteList.suites[0].suite_id)
+        }
+        if (gridList.grids.length > 0) {
+          setGridId((current) => current || gridList.grids[0].grid_id)
+        }
+        if ((modelList.models ?? []).length > 0) {
+          setJudgeModel((current) => current || modelList.models[0].model_identifier)
         }
       } catch (err) {
         setError(apiErrorMessage(err))
@@ -278,6 +304,117 @@ export function BenchmarkPanel() {
       setError(apiErrorMessage(err))
     }
   }, [])
+
+  // La notation vit dans le processus API comme le run : sans hydratation, une
+  // passe en cours serait invisible après un rafraîchissement, contrôles compris.
+  useEffect(() => {
+    void (async () => {
+      try {
+        const [judge, duels] = await Promise.all([
+          getJudgePassProgress(),
+          getPairwisePassProgress(),
+        ])
+        if (judge.active) {
+          setJudgeProgress(judge)
+        }
+        if (duels.active) {
+          setDuelProgress(duels)
+        }
+        if (judge.active || duels.active) {
+          setTabId('report')
+        }
+      } catch (err) {
+        setError(apiErrorMessage(err))
+      }
+    })()
+  }, [])
+
+  useEffect(() => {
+    if (!judgeProgress?.active && !duelProgress?.active) {
+      return undefined
+    }
+    let cancelled = false
+    const timer = window.setInterval(() => {
+      void (async () => {
+        try {
+          const [judge, duels] = await Promise.all([
+            getJudgePassProgress(),
+            getPairwisePassProgress(),
+          ])
+          if (cancelled) {
+            return
+          }
+          setJudgeProgress(judge)
+          setDuelProgress(duels)
+        } catch (err) {
+          if (!cancelled) {
+            setError(apiErrorMessage(err))
+          }
+        }
+      })()
+    }, POLL_INTERVAL_MS)
+    return () => {
+      cancelled = true
+      window.clearInterval(timer)
+    }
+  }, [judgeProgress?.active, duelProgress?.active])
+
+  const handleJudge = useCallback(async () => {
+    if (!reportRunId) {
+      return
+    }
+    setBusy(true)
+    setError(null)
+    setJudgeNotice(null)
+    const config = { grid_id: gridId, judge_model: judgeModel, budget_cap_usd: judgeCap }
+    try {
+      const rubric = await startJudgePass(reportRunId, config)
+      setJudgeProgress(await getJudgePassProgress())
+      const notices = [
+        `${rubric.verdicts_total} verdict(s) à produire, ${formatUsd(rubric.estimated_max_usd)} au plus.`,
+      ]
+      if (withDuels) {
+        const duels = await startPairwisePass(reportRunId, config)
+        setDuelProgress(await getPairwisePassProgress())
+        notices.push(
+          `${duels.duels_total} duel(s), ${formatUsd(duels.estimated_max_usd)} au plus.`,
+        )
+        if (duels.unpairable_slots > 0) {
+          notices.push(
+            `${duels.unpairable_slots} slot(s) sans vis-à-vis valide : non appariés.`,
+          )
+        }
+        if (duels.judge_is_candidate) {
+          notices.push(
+            '⚠️ Le juge est aussi candidat de ce run : il se note lui-même.',
+          )
+        }
+      }
+      setJudgeNotice(notices.join(' '))
+    } catch (err) {
+      setError(apiErrorMessage(err))
+    } finally {
+      setBusy(false)
+    }
+  }, [reportRunId, gridId, judgeModel, judgeCap, withDuels])
+
+  const handleJudgeControl = useCallback(
+    async (leg: 'judge' | 'pairwise', action: 'pause' | 'unpause' | 'cancel') => {
+      const target = leg === 'judge' ? judgeProgress?.run_id : duelProgress?.run_id
+      if (!target) {
+        return
+      }
+      setError(null)
+      try {
+        await controlJudgePass(target, leg, action)
+        setJudgeProgress(await getJudgePassProgress())
+        setDuelProgress(await getPairwisePassProgress())
+      } catch (err) {
+        setError(apiErrorMessage(err))
+      }
+    },
+    [judgeProgress?.run_id, duelProgress?.run_id],
+  )
 
   const handleReport = useCallback(async () => {
     if (!reportRunId) {
@@ -549,6 +686,153 @@ export function BenchmarkPanel() {
         </button>
       </div>
 
+      <section
+        style={{
+          border: `1px solid ${theme.border.primary}`,
+          borderRadius: 4,
+          padding: '0.75rem',
+          display: 'grid',
+          gap: '0.6rem',
+          maxWidth: 720,
+        }}
+      >
+        <strong>Noter ce run</strong>
+        <small style={{ color: theme.text.secondary }}>
+          Générer ne suffit pas : sans passe de notation, le rapport n’a aucune note à
+          montrer. La rubrique note chaque génération seule ; les duels comparent les
+          modèles deux à deux, dans les deux sens.
+        </small>
+        <label style={{ display: 'grid', gap: '0.35rem' }}>
+          <span>Grille de critères</span>
+          <select
+            aria-label="Grille de critères"
+            value={gridId}
+            onChange={(event) => setGridId(event.target.value)}
+            style={fieldStyle}
+          >
+            {grids.map((grid) => (
+              <option key={grid.grid_id} value={grid.grid_id}>
+                {grid.name || grid.grid_id} — {grid.criterion_count} critères (v{grid.version})
+              </option>
+            ))}
+          </select>
+        </label>
+        <label style={{ display: 'grid', gap: '0.35rem' }}>
+          <span>Modèle juge</span>
+          <select
+            aria-label="Modèle juge"
+            value={judgeModel}
+            onChange={(event) => setJudgeModel(event.target.value)}
+            style={fieldStyle}
+          >
+            {models.map((model) => (
+              <option key={model.model_identifier} value={model.model_identifier}>
+                {model.display_name || model.model_identifier}
+              </option>
+            ))}
+          </select>
+          <small style={{ color: theme.text.secondary }}>
+            Le juge est enregistré avec chaque note : deux juges ne s’agrègent jamais.
+          </small>
+        </label>
+        <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', minHeight: 44 }}>
+          <input
+            type="checkbox"
+            checked={withDuels}
+            onChange={(event) => setWithDuels(event.target.checked)}
+          />
+          <span>Lancer aussi les duels (jambe relative)</span>
+        </label>
+        <label style={{ display: 'grid', gap: '0.35rem' }}>
+          <span>Plafond budgétaire de la notation (USD)</span>
+          <input
+            type="number"
+            aria-label="Plafond budgétaire de la notation (USD)"
+            min={0.01}
+            step={0.01}
+            value={judgeCap}
+            onChange={(event) => setJudgeCap(Number(event.target.value))}
+            style={fieldStyle}
+          />
+        </label>
+        <button
+          type="button"
+          onClick={() => void handleJudge()}
+          disabled={
+            busy
+            || !reportRunId
+            || !gridId
+            || !judgeModel
+            || !Number.isFinite(judgeCap)
+            || judgeCap <= 0
+            || Boolean(judgeProgress?.active)
+            || Boolean(duelProgress?.active)
+          }
+          style={{ ...fieldStyle, cursor: 'pointer' }}
+        >
+          Noter le run (dépense réelle)
+        </button>
+        {judgeNotice && <span>{judgeNotice}</span>}
+
+        {judgeProgress && (
+          <div style={{ display: 'grid', gap: '0.3rem' }}>
+            <span>
+              Rubrique — {judgeProgress.status ?? 'inconnu'} ·{' '}
+              {judgeProgress.verdicts_completed} / {judgeProgress.verdicts_total} verdicts ·{' '}
+              {formatUsd(judgeProgress.spent_usd)} sur {formatUsd(judgeProgress.budget_cap_usd)}
+            </span>
+            <progress
+              aria-label="Progression de la notation"
+              value={judgeProgress.verdicts_completed}
+              max={Math.max(judgeProgress.verdicts_total, 1)}
+            />
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() =>
+                  void handleJudgeControl('judge', judgeProgress.paused ? 'unpause' : 'pause')
+                }
+                disabled={!judgeProgress.active}
+                style={{ ...fieldStyle, width: 'auto', cursor: 'pointer' }}
+              >
+                {judgeProgress.paused ? 'Reprendre la notation' : 'Suspendre la notation'}
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleJudgeControl('judge', 'cancel')}
+                disabled={!judgeProgress.active}
+                style={{ ...fieldStyle, width: 'auto', cursor: 'pointer' }}
+              >
+                Annuler la notation
+              </button>
+            </div>
+          </div>
+        )}
+
+        {duelProgress && (
+          <div style={{ display: 'grid', gap: '0.3rem' }}>
+            <span>
+              Duels — {duelProgress.status ?? 'inconnu'} · {duelProgress.duels_completed} /{' '}
+              {duelProgress.duels_total} · {formatUsd(duelProgress.spent_usd)} sur{' '}
+              {formatUsd(duelProgress.budget_cap_usd)}
+            </span>
+            <progress
+              aria-label="Progression des duels"
+              value={duelProgress.duels_completed}
+              max={Math.max(duelProgress.duels_total, 1)}
+            />
+            <button
+              type="button"
+              onClick={() => void handleJudgeControl('pairwise', 'cancel')}
+              disabled={!duelProgress.active}
+              style={{ ...fieldStyle, width: 'auto', cursor: 'pointer' }}
+            >
+              Annuler les duels
+            </button>
+          </div>
+        )}
+      </section>
+
       {report && (
         <div style={{ display: 'grid', gap: '1.25rem' }}>
           <span>
@@ -609,7 +893,11 @@ export function BenchmarkPanel() {
           </section>
 
           {report.judges.length === 0 && (
-            <p>Ce run n’a pas encore été noté : aucune note à afficher.</p>
+            <p>
+              Ce run n’a pas encore été noté. Les notes viennent d’une passe de
+              jugement distincte de la génération : lancez-la avec « Noter le run »
+              ci-dessus, puis réaffichez le rapport.
+            </p>
           )}
 
           {report.judges.map((judge) => {

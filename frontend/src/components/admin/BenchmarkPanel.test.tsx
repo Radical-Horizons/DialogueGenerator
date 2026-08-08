@@ -22,6 +22,12 @@ vi.mock('../../api/benchmark', () => ({
   listBenchmarkRuns: vi.fn(),
   controlBenchmarkRun: vi.fn(),
   getBenchmarkRunReport: vi.fn(),
+  listCriteriaGrids: vi.fn(),
+  startJudgePass: vi.fn(),
+  startPairwisePass: vi.fn(),
+  getJudgePassProgress: vi.fn(),
+  getPairwisePassProgress: vi.fn(),
+  controlJudgePass: vi.fn(),
 }))
 
 const api = await import('../../api/benchmark')
@@ -94,6 +100,60 @@ beforeEach(() => {
     model_diagnostics: [],
   })
   vi.mocked(api.listBenchmarkRuns).mockResolvedValue({ runs: [] })
+  vi.mocked(api.listCriteriaGrids).mockResolvedValue({
+    grids: [
+      {
+        grid_id: 'grille-dialogue-fr',
+        version: 1,
+        name: 'Grille dialogue FR',
+        description: '',
+        criterion_count: 6,
+      },
+    ],
+  })
+  vi.mocked(api.getJudgePassProgress).mockResolvedValue({
+    active: false,
+    run_id: null,
+    judge_model: null,
+    status: null,
+    verdicts_total: 0,
+    verdicts_completed: 0,
+    current_model: null,
+    current_case: null,
+    spent_usd: 0,
+    budget_cap_usd: 0,
+    paused: false,
+    message: '',
+  })
+  vi.mocked(api.getPairwisePassProgress).mockResolvedValue({
+    active: false,
+    run_id: null,
+    judge_model: null,
+    status: null,
+    duels_total: 0,
+    duels_completed: 0,
+    current_case: null,
+    spent_usd: 0,
+    budget_cap_usd: 0,
+    paused: false,
+    message: '',
+  })
+  vi.mocked(api.startJudgePass).mockResolvedValue({
+    run_id: 'run-1',
+    judge_model: 'gpt-5.6-luna',
+    status: 'running',
+    verdicts_total: 4,
+    estimated_max_usd: 0.32,
+  })
+  vi.mocked(api.startPairwisePass).mockResolvedValue({
+    run_id: 'run-1',
+    judge_model: 'gpt-5.6-luna',
+    status: 'running',
+    duels_total: 3,
+    unpairable_slots: 1,
+    estimated_max_usd: 0.3,
+    judge_is_candidate: true,
+  })
 })
 
 afterEach(() => {
@@ -456,6 +516,76 @@ describe('BenchmarkPanel — rapport', () => {
 
     // « 0 % » ferait lire « ce modèle écrit mal » là où il n'a rien écrit.
     expect(await screen.findByText('aucune tentative')).toBeInTheDocument()
+  })
+
+  it('lance la notation et les duels depuis l’écran', async () => {
+    // Générer sans noter n'a aucun intérêt : le rapport n'a alors rien à montrer.
+    vi.mocked(api.getBenchmarkRunReport).mockResolvedValue(report())
+    const interaction = userEvent.setup()
+    render(<BenchmarkPanel />)
+
+    await interaction.click(await screen.findByRole('button', { name: 'Rapport' }))
+    await interaction.click(await screen.findByRole('button', { name: /Noter le run/ }))
+
+    await waitFor(() => expect(api.startJudgePass).toHaveBeenCalled())
+    expect(api.startJudgePass).toHaveBeenCalledWith('run-1', {
+      grid_id: 'grille-dialogue-fr',
+      judge_model: MODEL_A,
+      budget_cap_usd: 1,
+    })
+    expect(api.startPairwisePass).toHaveBeenCalled()
+    expect(await screen.findByText(/4 verdict\(s\) à produire/)).toBeInTheDocument()
+    // Un juge qui est aussi candidat se note lui-même : ça doit se voir.
+    expect(screen.getByText(/se note lui-même/)).toBeInTheDocument()
+  })
+
+  it('n’envoie pas les duels quand ils sont décochés', async () => {
+    vi.mocked(api.getBenchmarkRunReport).mockResolvedValue(report())
+    const interaction = userEvent.setup()
+    render(<BenchmarkPanel />)
+
+    await interaction.click(await screen.findByRole('button', { name: 'Rapport' }))
+    await interaction.click(
+      await screen.findByRole('checkbox', { name: /Lancer aussi les duels/ }),
+    )
+    await interaction.click(screen.getByRole('button', { name: /Noter le run/ }))
+
+    await waitFor(() => expect(api.startJudgePass).toHaveBeenCalled())
+    expect(api.startPairwisePass).not.toHaveBeenCalled()
+  })
+
+  it('récupère une notation déjà en cours au montage', async () => {
+    vi.mocked(api.getJudgePassProgress).mockResolvedValue({
+      active: true,
+      run_id: 'run-en-cours',
+      judge_model: MODEL_A,
+      status: 'running',
+      verdicts_total: 4,
+      verdicts_completed: 1,
+      current_model: MODEL_A,
+      current_case: 'voknir',
+      spent_usd: 0.08,
+      budget_cap_usd: 1,
+      paused: false,
+      message: '',
+    })
+    render(<BenchmarkPanel />)
+
+    const cancel = await screen.findByRole('button', { name: 'Annuler la notation' })
+    expect(cancel).toBeEnabled()
+    await userEvent.setup().click(cancel)
+    expect(api.controlJudgePass).toHaveBeenCalledWith('run-en-cours', 'judge', 'cancel')
+  })
+
+  it('dit quoi faire quand le run n’est pas encore noté', async () => {
+    vi.mocked(api.getBenchmarkRunReport).mockResolvedValue(report())
+    const interaction = userEvent.setup()
+    render(<BenchmarkPanel />)
+
+    await interaction.click(await screen.findByRole('button', { name: 'Rapport' }))
+    await interaction.click(await screen.findByRole('button', { name: 'Afficher le rapport' }))
+
+    expect(await screen.findByText(/Noter le run » ci-dessus/)).toBeInTheDocument()
   })
 
   it('sépare les blocs de deux juges au lieu de les fondre', async () => {

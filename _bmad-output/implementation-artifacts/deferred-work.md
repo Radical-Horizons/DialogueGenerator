@@ -80,6 +80,8 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-admin-ui.md`
   summary: Déclencher les passes de jugement (rubrique et duels) depuis l'UI benchmark, au lieu de curl.
   evidence: Le lot UI couvre générer/suivre/lire ; noter reste un appel REST, ce qui coupe la boucle en deux pour l'utilisateur.
+  status: done
+  resolution: "Section « Noter ce run » livrée le 2026-08-09 — le différé était une erreur de découpage : « générer et ne pas noter n'a aucun intérêt » (utilisateur).
 - source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-admin-ui.md`
   summary: Comparateur détaillé de duels — raisonnements des deux sens côte à côte pour un cas donné.
   evidence: Le rapport agrège les duels en bilan G/N/P ; l'audit d'un duel précis passe encore par `GET /runs/{id}/pairwise`.

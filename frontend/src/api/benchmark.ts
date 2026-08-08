@@ -16,6 +16,12 @@ import type {
   BenchmarkRunProgress,
   BenchmarkRunReport,
   BenchmarkSuiteListResponse,
+  CriteriaGridListResponse,
+  JudgePassConfig,
+  JudgePassLaunchResponse,
+  JudgePassProgress,
+  PairwisePassLaunchResponse,
+  PairwisePassProgress,
 } from '../types/benchmark'
 
 const BASE = '/api/v1/benchmark'
@@ -97,6 +103,75 @@ export async function controlBenchmarkRun(
 export async function getBenchmarkRunReport(runId: string): Promise<BenchmarkRunReport> {
   const response = await apiClient.get<BenchmarkRunReport>(
     `${BASE}/runs/${encodeURIComponent(runId)}/report`,
+  )
+  return response.data
+}
+
+/**
+ * Liste les grilles de critères disponibles.
+ */
+export async function listCriteriaGrids(): Promise<CriteriaGridListResponse> {
+  const response = await apiClient.get<CriteriaGridListResponse>(`${BASE}/criteria`)
+  return response.data
+}
+
+/**
+ * Lance la notation rubrique d'un run (jambe absolue). Dépense réelle.
+ */
+export async function startJudgePass(
+  runId: string,
+  config: JudgePassConfig,
+): Promise<JudgePassLaunchResponse> {
+  const response = await apiClient.post<JudgePassLaunchResponse>(
+    `${BASE}/runs/${encodeURIComponent(runId)}/judge`,
+    config,
+  )
+  return response.data
+}
+
+/**
+ * Lance la comparaison par paires d'un run (jambe relative). Dépense réelle.
+ */
+export async function startPairwisePass(
+  runId: string,
+  config: JudgePassConfig,
+): Promise<PairwisePassLaunchResponse> {
+  const response = await apiClient.post<PairwisePassLaunchResponse>(
+    `${BASE}/runs/${encodeURIComponent(runId)}/judge/pairwise`,
+    config,
+  )
+  return response.data
+}
+
+/**
+ * Progression de la passe de notation rubrique en cours.
+ */
+export async function getJudgePassProgress(): Promise<JudgePassProgress> {
+  const response = await apiClient.get<JudgePassProgress>(`${BASE}/judge/progress`)
+  return response.data
+}
+
+/**
+ * Progression de la passe de duels en cours.
+ */
+export async function getPairwisePassProgress(): Promise<PairwisePassProgress> {
+  const response = await apiClient.get<PairwisePassProgress>(`${BASE}/pairwise/progress`)
+  return response.data
+}
+
+/**
+ * Suspend, reprend ou annule une passe de jugement.
+ *
+ * `leg` choisit la jambe : notation absolue ou duels.
+ */
+export async function controlJudgePass(
+  runId: string,
+  leg: 'judge' | 'pairwise',
+  action: 'pause' | 'unpause' | 'cancel',
+): Promise<{ run_id: string; applied: boolean; message: string }> {
+  const path = leg === 'judge' ? 'judge' : 'pairwise'
+  const response = await apiClient.post<{ run_id: string; applied: boolean; message: string }>(
+    `${BASE}/runs/${encodeURIComponent(runId)}/${path}/${action}`,
   )
   return response.data
 }

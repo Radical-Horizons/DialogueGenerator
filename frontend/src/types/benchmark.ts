@@ -180,3 +180,83 @@ export interface BenchmarkRunReport {
   /** Des verdicts existent mais sont illisibles : le rapport est incomplet. */
   verdicts_unreadable: boolean
 }
+
+// ---------------------------------------------------------------------------
+// Notation — rubrique (jambe absolue) et duels (jambe relative)
+// ---------------------------------------------------------------------------
+
+export interface CriteriaGridSummary {
+  grid_id: string
+  version: number
+  name: string
+  description: string
+  criterion_count: number
+  updated_at?: string | null
+}
+
+export interface CriteriaGridListResponse {
+  grids: CriteriaGridSummary[]
+}
+
+export type JudgePassStatus =
+  | 'running'
+  | 'paused'
+  | 'completed'
+  | 'interrupted_budget'
+  | 'cancelled'
+  | 'failed'
+
+export interface JudgePassConfig {
+  grid_id: string
+  grid_version?: number | null
+  judge_model: string
+  budget_cap_usd: number
+}
+
+export interface JudgePassLaunchResponse {
+  run_id: string
+  judge_model: string
+  status: JudgePassStatus
+  verdicts_total: number
+  estimated_max_usd: number
+}
+
+export interface PairwisePassLaunchResponse {
+  run_id: string
+  judge_model: string
+  status: JudgePassStatus
+  duels_total: number
+  unpairable_slots: number
+  estimated_max_usd: number
+  /** Le juge est aussi candidat du run : conflit d'intérêt, à signaler. */
+  judge_is_candidate: boolean
+}
+
+export interface JudgePassProgress {
+  active: boolean
+  run_id?: string | null
+  judge_model?: string | null
+  status?: JudgePassStatus | null
+  verdicts_total: number
+  verdicts_completed: number
+  current_model?: string | null
+  current_case?: string | null
+  spent_usd: number
+  budget_cap_usd: number
+  paused: boolean
+  message: string
+}
+
+export interface PairwisePassProgress {
+  active: boolean
+  run_id?: string | null
+  judge_model?: string | null
+  status?: JudgePassStatus | null
+  duels_total: number
+  duels_completed: number
+  current_case?: string | null
+  spent_usd: number
+  budget_cap_usd: number
+  paused: boolean
+  message: string
+}
