@@ -15,18 +15,22 @@ vi.mock('./LlmModelsPanel', () => ({
 vi.mock('./AuditLogsPanel', () => ({
   AuditLogsPanel: () => <div>Panel audit</div>,
 }))
+vi.mock('./BenchmarkPanel', () => ({
+  BenchmarkPanel: () => <div>Panel benchmark</div>,
+}))
 
 describe('resolveAdminTabId', () => {
   it('accepte les onglets connus et bascule sinon sur users', () => {
     expect(resolveAdminTabId('llm-models')).toBe('llm-models')
     expect(resolveAdminTabId('audit-logs')).toBe('audit-logs')
+    expect(resolveAdminTabId('benchmark')).toBe('benchmark')
     expect(resolveAdminTabId('unknown')).toBe('users')
     expect(resolveAdminTabId(null)).toBe('users')
   })
 })
 
 describe('AdminPanel', () => {
-  it('affiche trois onglets et bascule le contenu', async () => {
+  it('affiche quatre onglets et bascule le contenu', async () => {
     const interaction = userEvent.setup()
     render(
       <MemoryRouter initialEntries={['/admin']}>
@@ -45,5 +49,8 @@ describe('AdminPanel', () => {
 
     await interaction.click(screen.getByRole('button', { name: 'Journaux d’audit' }))
     expect(screen.getByText('Panel audit')).toBeInTheDocument()
+
+    await interaction.click(screen.getByRole('button', { name: 'Benchmark' }))
+    expect(screen.getByText('Panel benchmark')).toBeInTheDocument()
   })
 })

@@ -2,9 +2,13 @@
 description: "Invariants du mode Benchmark : portes structurelles, contrôles de biais du juge, unité de mesure, gouvernance du coût"
 paths:
   - "services/benchmark_*.py"
+  - "frontend/src/components/admin/BenchmarkPanel.tsx"
+  - "frontend/src/api/benchmark.ts"
+  - "frontend/src/types/benchmark.ts"
   - "services/unity_dialogue_fragment_resolver.py"
   - "api/routers/benchmark.py"
   - "api/schemas/benchmark*.py"
+  - "tests/api/test_benchmark*.py"
   - "core/prompt/benchmark_judge.py"
   - "models/dialogue_structure/unity_dialogue_fragment.py"
   - "tests/services/test_benchmark_*.py"
@@ -31,7 +35,13 @@ mesure sans en être une** — le mode de défaillance propre à ce genre d'outi
   qui suit chacune d'elles avec ses propres options — produit en **un seul appel**
   (`fragment_mode`). Sur un nœud isolé dont les choix pointent vers `END`,
   « conséquence perceptible » et « cohérence des embranchements » notent le vide
-  (mesuré : 1,3/20 avant la bascule, 8–9/20 après).
+  (mesuré sur l'échelle 0–10 : 1,3 avant la bascule, 8–9 après).
+- **L'échelle est 0–10**, et un critère `lower_is_better` s'y lit à l'envers (0 =
+  le défaut est absent). Toute moyenne pondérée doit donc **normaliser** avant
+  d'additionner, sinon elle mélange deux sens opposés.
+- **L'agrégation vit dans `benchmark_report_service.py`**, jamais dans l'UI.
+  Réécrite en TypeScript, elle deviendrait une seconde implémentation du
+  protocole, hors de portée de pytest, qui divergerait sans que rien ne le dise.
 - **Ce qui est objectivement vérifiable relève d'une porte, pas du juge** :
   longueur, bornes de choix, connexité, langue, conformité au schéma. Faire
   arbitrer un fait par un LLM ajoute du bruit là où il n'y a rien à interpréter.
@@ -68,6 +78,17 @@ mesure sans en être une** — le mode de défaillance propre à ce genre d'outi
 - **Plafond budgétaire dur, estimation avant lancement, coût réel enregistré.**
   Un modèle sans tarif connu fait refuser le lancement : sans prix, le plafond ne
   se déclencherait jamais.
+- **Le coût s'affiche avant d'être engagé.** `POST /runs` estime *et* démarre ;
+  `POST /runs/preview` chiffre sans rien créer. Deux routes distinctes plutôt
+  qu'un drapeau : un booléen mal sérialisé lancerait un run facturé. La garde de
+  lançabilité est **la même fonction** (`assert_measurable`) des deux côtés — la
+  dupliquer laisserait l'aperçu promettre ce que le lancement refuse. Une seule
+  de ses trois branches échappe à l'aperçu : **le plafond**, qui n'existe pas
+  encore quand on chiffre. C'est donc à l'UI de refuser un plafond sous
+  l'estimation basse — sinon le serveur oppose un 409 après coup.
+- **`config_error` n'entre pas au dénominateur du taux de validité.** Clé absente,
+  budget épuisé : c'est une panne d'environnement, pas une propriété du modèle.
+  L'y compter ferait lire « ce modèle écrit mal » là où il n'a rien écrit.
 - **Facturation sur une identité dédiée** (`BENCHMARK_BILLABLE_USER_ID`) : le
   coût des runs n'entame pas le quota d'un humain.
 - **Aucun repli LLM pendant un run** (`_NoFallbackConfigService`) : sinon un échec

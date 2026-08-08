@@ -5,7 +5,7 @@
  * des constantes casse le Fast Refresh de Vite (`react-refresh/only-export-components`).
  */
 
-export const ADMIN_TAB_IDS = ['users', 'llm-models', 'audit-logs'] as const
+export const ADMIN_TAB_IDS = ['users', 'llm-models', 'audit-logs', 'benchmark'] as const
 export type AdminTabId = (typeof ADMIN_TAB_IDS)[number]
 
 export const DEFAULT_ADMIN_TAB: AdminTabId = 'users'

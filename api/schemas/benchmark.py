@@ -43,6 +43,27 @@ personnage ni du lieu, et la porter par cas doublerait le coût de la suite pour
 un axe qui s'observe très bien en comparant deux runs.
 """
 
+def reject_duplicate_models(models: List[str]) -> List[str]:
+    """Refuse un modèle listé deux fois.
+
+    Partagé par la configuration de run et par l'aperçu : un doublon fausserait
+    le nombre de générations, donc l'estimation *et* la dépense. Deux copies de
+    cette règle divergeraient à la première évolution.
+
+    Args:
+        models: Modèles candidats.
+
+    Returns:
+        La liste inchangée.
+
+    Raises:
+        ValueError: Si un modèle apparaît plusieurs fois.
+    """
+    if len(set(models)) != len(models):
+        raise ValueError("Un modèle ne peut être listé qu'une fois")
+    return models
+
+
 BenchmarkRunStatus = Literal[
     "running",
     "paused",
@@ -221,13 +242,7 @@ class BenchmarkRunConfig(BaseModel):
         ),
     )
 
-    @field_validator("models")
-    @classmethod
-    def _reject_duplicate_models(cls, models: List[str]) -> List[str]:
-        """Refuse un modèle listé deux fois (fausserait le nombre de générations)."""
-        if len(set(models)) != len(models):
-            raise ValueError("Un modèle ne peut être listé qu'une fois")
-        return models
+    _validate_models = field_validator("models")(reject_duplicate_models)
 
 
 class BenchmarkGateFailure(BaseModel):

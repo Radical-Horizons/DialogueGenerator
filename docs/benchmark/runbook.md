@@ -3,8 +3,32 @@
 Comment lancer une mesure réelle, de bout en bout. Écrit après le premier run
 facturé : tout ce qui suit a été exécuté, rien n'est supposé.
 
-> **Il n'y a ni UI ni CLI à ce jour.** Le mode benchmark s'utilise par appels REST.
-> Une CLI et trois écrans figurent au travail différé.
+## Par l'interface (chemin normal)
+
+`npm run dev`, connexion en **admin**, menu déroulant en haut à droite →
+**Administration** → onglet **Benchmark** (`/admin?tab=benchmark`).
+
+Trois vues, dans l'ordre de la boucle :
+
+1. **Lancer** — suite, modèles, répétitions, mode de narration, puis
+   **Estimer le coût**. L'estimation ne crée aucun run et ne dépense rien ; elle
+   affiche la fourchette, le nombre de générations et l'utilisabilité réelle de
+   chaque modèle. Le plafond budgétaire se saisit ensuite, pré-rempli à 120 % de
+   l'estimation haute. Le bouton de lancement reste inerte si un modèle n'a pas
+   de tarif, si **aucun** modèle n'est utilisable, ou si le plafond est sous
+   l'estimation basse. En revanche **un** modèle inutilisable parmi d'autres ne
+   bloque pas : le run mesure les autres et produit des `config_error` pour
+   celui-là — le rapport les compte à part, hors du taux de validité.
+2. **Suivi** — progression, dépense courante face au plafond, cas et modèle en
+   cours, et les trois contrôles : suspendre, reprendre, **annuler**. Le sondage
+   s'arrête de lui-même à la fin du run.
+3. **Rapport** — validité et coût par modèle, puis un bloc **par juge** (note
+   pondérée sur 10, verdicts, échecs du juge, bilan des duels). Les agrégats
+   viennent de `GET /runs/{id}/report` : l'écran n'en calcule aucun.
+
+La notation (`POST /runs/{id}/judge`) et les duels (`.../judge/pairwise`) restent
+des appels REST — l'UI lit les verdicts, elle ne déclenche pas encore les passes
+de jugement.
 
 ## Ce que ça coûte
 
@@ -20,20 +44,33 @@ Un smoke complet revient à **moins d'un dollar**. `alteir-standard` avec 3 mod�
 et K=3 est de l'ordre de **4 à 8 $** — le plafond budgétaire du run est dur,
 utilisez-le.
 
-## Prérequis, et les deux pièges
+## Par l'API
+
+Utile en headless, en reprise après incident, ou pour déclencher une passe de
+jugement — l'UI lit les verdicts mais ne lance pas encore le jugement.
+
+### Prérequis et pièges
 
 1. **`OPENAI_API_KEY`** doit être chargée. Sans elle le backend bascule
    silencieusement sur `DummyLLMClient` : le run « réussit » et ne mesure rien.
    Le diagnostic de modèles renvoyé au lancement (`model_diagnostics`) le dit —
    le lire.
-2. **Depuis un worktree git**, deux pièges :
+2. **Depuis un worktree git**, quatre pièges :
    - `.env` n'est **pas** recopié par `git worktree add`. Charger celui du dépôt
      principal dans l'environnement du processus plutôt que dupliquer un fichier
      de secrets.
    - `node scripts/getPythonPath.js` résout le **Python global**, pas le venv.
      Utiliser directement `<dépôt principal>/.venv/Scripts/python.exe`.
+   - `frontend/node_modules` est absent : `npm ci` dans `frontend/` avant tout
+     Vitest, lint ou Vite.
+   - `data/app.db` est **recréé vide** par les migrations au premier démarrage, et
+     `ADMIN_PASSWORD` n'étant pas dans `.env`, **aucun admin n'est semé** : le
+     login échoue en restant sur `/login`, et `/admin` redirige. Copier le
+     `data/app.db` du dépôt principal — **API arrêtée**, sinon le verrou Windows
+     fait échouer la copie en silence (`cp` renvoie 0 et le fichier ne change pas ;
+     vérifier la taille).
 
-## Démarrer l'API
+### Démarrer l'API
 
 ```bash
 npm run start:api
@@ -48,7 +85,7 @@ Les endpoints de run et de verdicts sont **réservés à l'admin**. En local,
 `DISABLE_AUTH=true` évite la manipulation de credentials ; sinon, obtenir un JWT
 (`admin` / `admin123` en dev).
 
-## La séquence
+### La séquence
 
 Base : `/api/v1/benchmark`. Les suites et la grille sont **semées au démarrage**,
 il n'y a rien à créer.
@@ -66,8 +103,21 @@ curl -s http://127.0.0.1:4243/api/v1/benchmark/criteria
 La grille s'appelle **`grille-dialogue-fr`**. Ce n'est pas `default` — une erreur
 faite au premier run.
 
-**1. Lancer les générations.** Il n'existe pas d'endpoint d'estimation séparé :
-`POST /runs` renvoie l'estimation *et* démarre le run, sous plafond budgétaire dur.
+**1. Chiffrer sans dépenser.** `POST /runs/preview` estime et diagnostique les
+modèles **sans créer de run**. Le plafond n'est pas demandé : c'est justement ce
+que l'aperçu sert à décider.
+
+```bash
+curl -s -X POST http://127.0.0.1:4243/api/v1/benchmark/runs/preview -H "Content-Type: application/json" -d '{"suite_id":"alteir-smoke","models":["gpt-5.6-luna","gpt-5.6-terra"],"repetitions":1,"narration_mode":"sans"}'
+```
+
+`launchable: false` porte le motif exact que `POST /runs` opposerait : c'est la
+même fonction (`assert_measurable`) des deux côtés. Seule exception, le **plafond**
+— il n'existe pas encore au moment de l'aperçu, donc un plafond sous
+`estimated_min_usd` passera l'aperçu et sera refusé au lancement.
+
+**2. Lancer les générations.** `POST /runs` renvoie l'estimation *et* démarre le
+run, sous plafond budgétaire dur.
 
 ```bash
 curl -s -X POST http://127.0.0.1:4243/api/v1/benchmark/runs -H "Content-Type: application/json" -d '{"suite_id":"alteir-smoke","models":["gpt-5.6-luna","gpt-5.6-terra"],"repetitions":1,"budget_cap_usd":0.80,"narration_mode":"sans"}'
@@ -75,7 +125,7 @@ curl -s -X POST http://127.0.0.1:4243/api/v1/benchmark/runs -H "Content-Type: ap
 
 Suivre : `GET /runs/progress` jusqu'à `"active": false`.
 
-**2. Noter (jambe absolue).**
+**3. Noter (jambe absolue).**
 
 ```bash
 curl -s -X POST http://127.0.0.1:4243/api/v1/benchmark/runs/<RUN_ID>/judge -H "Content-Type: application/json" -d '{"grid_id":"grille-dialogue-fr","judge_model":"gpt-5.6-sol","budget_cap_usd":0.60}'
@@ -83,11 +133,12 @@ curl -s -X POST http://127.0.0.1:4243/api/v1/benchmark/runs/<RUN_ID>/judge -H "C
 
 Suivre : `GET /judge/progress`.
 
-**3. Comparer (jambe relative).** Même corps, sur `/judge/pairwise` ; suivre via
+**4. Comparer (jambe relative).** Même corps, sur `/judge/pairwise` ; suivre via
 `GET /pairwise/progress`.
 
-**4. Lire.** `GET /runs/<RUN_ID>/generations`, `/verdicts?judge_model=…`,
-`/pairwise?judge_model=…`.
+**5. Lire.** `GET /runs/<RUN_ID>/report` donne le rapport agrégé (validité par
+modèle, notes et duels par juge). Le détail brut reste sur
+`GET /runs/<RUN_ID>/generations`, `/verdicts?judge_model=…`, `/pairwise?judge_model=…`.
 
 ## Lire les résultats sans se tromper
 
@@ -117,5 +168,5 @@ Suivre : `GET /judge/progress`.
   reprend d'EQ-Bench et ce qu'on en écarte.
 - `_bmad-output/implementation-artifacts/spec-benchmark-*.md`,
   `spec-dialogue-fragment-single-call.md` — décisions et invariants.
-- `_bmad-output/implementation-artifacts/deferred-work.md` — CLI, UI, classement
-  Elo, Connaissances.
+- `_bmad-output/implementation-artifacts/deferred-work.md` — CLI, édition de
+  suites depuis l'UI, classement Elo, Connaissances.

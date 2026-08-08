@@ -75,6 +75,14 @@
 - source_spec: none
   summary: UI benchmark — 3 écrans (configuration avec estimation de coût, suivi de run, rapport) + comparateurs existants en vue détaillée.
   evidence: Découpage de l'intent « mode Benchmark » — dépend du noyau backend+API et de ses endpoints asynchrones.
+  status: done
+  resolution: "Livré par `spec-benchmark-admin-ui.md` — onglet Benchmark de /admin. Le comparateur détaillé de duels (raisonnements des deux sens) reste hors périmètre."
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-admin-ui.md`
+  summary: Déclencher les passes de jugement (rubrique et duels) depuis l'UI benchmark, au lieu de curl.
+  evidence: Le lot UI couvre générer/suivre/lire ; noter reste un appel REST, ce qui coupe la boucle en deux pour l'utilisateur.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-admin-ui.md`
+  summary: Comparateur détaillé de duels — raisonnements des deux sens côte à côte pour un cas donné.
+  evidence: Le rapport agrège les duels en bilan G/N/P ; l'audit d'un duel précis passe encore par `GET /runs/{id}/pairwise`.
 - source_spec: none
   summary: Capture depuis l'usage réel — bouton « ajouter au jeu de test » sur une génération dans l'app.
   evidence: Découpage de l'intent « mode Benchmark » — nécessite le modèle de données des suites livré par le noyau.
@@ -184,3 +192,12 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-dialogue-fragment-single-call.md`
   summary: Trois clients LLM aiguillent sur le nom de classe du modèle de réponse.
   evidence: `core/llm/llm_client.py`, `core/llm/openai/response_parser.py`, `core/llm/mistral_client.py`, `core/llm/openrouter_client.py` comparent `response_model.__name__` à `"UnityDialogueGenerationResponse"`. Tout nouveau modèle de réponse doit être ajouté à la main dans `DummyLLMClient`, sans quoi le développement sans clé API casse silencieusement. Un registre explicite vaudrait mieux qu'une chaîne de `elif`.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-admin-ui.md`
+  summary: Pondérer la moyenne rubrique par le nombre de verdicts de chaque critère, pas seulement par son poids de grille.
+  evidence: Revue — `_weighted_mean` moyenne des moyennes ; un critère noté 1 fois pèse autant qu'un critère noté 50 fois. Décision de protocole, pas correctif.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-admin-ui.md`
+  summary: Signaler la couverture de rubrique quand un juge n'a noté qu'une partie des critères (moyenne renormalisée en silence).
+  evidence: Revue — `weight_total` ne somme que les critères notés ; 60 % du poids peut manquer sans que le rapport le dise.
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-admin-ui.md`
+  summary: Afficher `error.details` par champ sur les 422 du panneau benchmark, comme le prescrit `.claude/rules/api_validation_errors.md`.
+  evidence: Revue — `apiErrorMessage` retombe sur un message générique ; dette transverse au frontend, pas propre à ce lot.

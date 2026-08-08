@@ -44,16 +44,24 @@ def _format_criterion(index: int, criterion_id: str, label: str, description: st
     if direction == "lower_is_better":
         sense = (
             "SENS INVERSÉ — 0 = le défaut est absent (c'est le mieux), "
-            "10 = le défaut est massif (c'est le pire)."
+            f"{SCORE_MAX} = le défaut est massif (c'est le pire)."
         )
     else:
-        sense = "0 = très mauvais, 10 = excellent."
+        sense = f"0 = très mauvais, {SCORE_MAX} = excellent."
     return (
         f"{index}. `{criterion_id}` — {label}\n"
         f"   {description}\n"
         f"   {sense}"
     )
 
+
+SCORE_MAX = 10
+"""Borne haute de l'échelle de notation, telle qu'annoncée au juge.
+
+Les agrégats (`benchmark_report_service`) importent cette valeur : un barème
+changé ici sans elle rendrait la normalisation `lower_is_better` fausse d'un
+facteur, sous un en-tête qui continuerait d'afficher « /10 ».
+"""
 
 JUDGE_CONTEXT_MAX_CHARS = 24000
 """Plafond du contexte transmis au juge.

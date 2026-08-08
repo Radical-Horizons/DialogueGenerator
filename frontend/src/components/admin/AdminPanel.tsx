@@ -5,11 +5,13 @@ import { theme } from '../../theme'
 import { Tabs, type Tab } from '../shared/Tabs'
 import { DEFAULT_ADMIN_TAB, resolveAdminTabId } from './adminTabs'
 import { AuditLogsPanel } from './AuditLogsPanel'
+import { BenchmarkPanel } from './BenchmarkPanel'
 import { LlmModelsPanel } from './LlmModelsPanel'
 import { UserManagementPanel } from './UserManagementPanel'
 
 /**
- * Panneau d'administration unifié (utilisateurs, modèles LLM, journaux d'audit).
+ * Panneau d'administration unifié (utilisateurs, modèles LLM, journaux d'audit,
+ * benchmark).
  */
 export function AdminPanel() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -31,6 +33,11 @@ export function AdminPanel() {
         id: 'audit-logs',
         label: 'Journaux d’audit',
         content: <AuditLogsPanel />,
+      },
+      {
+        id: 'benchmark',
+        label: 'Benchmark',
+        content: <BenchmarkPanel />,
       },
     ],
     [],

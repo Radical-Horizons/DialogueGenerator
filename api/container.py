@@ -16,6 +16,7 @@ if TYPE_CHECKING:
         BenchmarkJudgePassService,
         BenchmarkPairwisePassService,
     )
+    from services.benchmark_report_service import BenchmarkReportService
     from services.benchmark_run_service import BenchmarkRunService
     from services.benchmark_suite_store import BenchmarkSuiteStore
     from services.dialogue_preview_service import DialoguePreviewService
@@ -104,6 +105,7 @@ class ServiceContainer:
         self._benchmark_criteria_store: Optional["BenchmarkCriteriaStore"] = None
         self._benchmark_judge_pass_service: Optional["BenchmarkJudgePassService"] = None
         self._benchmark_pairwise_pass_service: Optional["BenchmarkPairwisePassService"] = None
+        self._benchmark_report_service: Optional["BenchmarkReportService"] = None
         self._dialogue_preview_service: Optional["DialoguePreviewService"] = None
         self._global_relation_index: Optional[Dict[str, str]] = None
         self._database_connection: Optional[DatabaseConnection] = database_connection
@@ -737,6 +739,25 @@ class ServiceContainer:
             )
             logger.info("BenchmarkPairwisePassService initialisé dans le container.")
         return self._benchmark_pairwise_pass_service
+
+    def get_benchmark_report_service(self) -> "BenchmarkReportService":
+        """Retourne le service d'agrégation et d'aperçu du benchmark.
+
+        Returns:
+            Service câblé sur le moteur de run, les deux passes de jugement et le
+            magasin de suites.
+        """
+        if self._benchmark_report_service is None:
+            from services.benchmark_report_service import BenchmarkReportService
+
+            self._benchmark_report_service = BenchmarkReportService(
+                run_service=self.get_benchmark_run_service(),
+                judge_pass_service=self.get_benchmark_judge_pass_service(),
+                pairwise_pass_service=self.get_benchmark_pairwise_pass_service(),
+                suite_store=self.get_benchmark_suite_store(),
+            )
+            logger.info("BenchmarkReportService initialisé dans le container.")
+        return self._benchmark_report_service
 
     def _resolve_gdd_categories_path(self) -> Path:
         """Répertoire des catégories GDD (helper partagé ``services.gdd_paths``)."""

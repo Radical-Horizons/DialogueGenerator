@@ -448,7 +448,7 @@ class BenchmarkRunService:
         suite = self._suite_store.get_suite(config.suite_id, version=config.suite_version)
         estimate = self.estimate_cost(suite, config)
         diagnostics = self.diagnose_models(config.models)
-        self._reject_unmeasurable_run(estimate, diagnostics, config)
+        self.assert_measurable(estimate, diagnostics, config)
 
         run_id = f"{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:8]}"
         run = BenchmarkRun(
@@ -511,7 +511,7 @@ class BenchmarkRunService:
         # est une clé API absente, que l'admin corrige précisément avant de reprendre.
         diagnostics = self.diagnose_models(run.config.models)
         estimate = self.estimate_cost(suite, run.config)
-        self._reject_unmeasurable_run(estimate, diagnostics, run.config)
+        self.assert_measurable(estimate, diagnostics, run.config)
         self._discard_config_error_records(run.run_id)
 
         run = run.model_copy(
@@ -525,7 +525,7 @@ class BenchmarkRunService:
         self._spawn(run, suite)
         return run, estimate
 
-    def _reject_unmeasurable_run(
+    def assert_measurable(
         self,
         estimate: BenchmarkCostEstimate,
         diagnostics: List[BenchmarkModelDiagnostic],

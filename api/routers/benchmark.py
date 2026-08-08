@@ -17,6 +17,7 @@ from api.dependencies import (
     get_benchmark_criteria_store,
     get_benchmark_judge_pass_service,
     get_benchmark_pairwise_pass_service,
+    get_benchmark_report_service,
     get_benchmark_run_service,
     get_benchmark_suite_store,
     require_admin,
@@ -63,6 +64,12 @@ from api.schemas.benchmark import (
     BenchmarkSuiteResponse,
     BenchmarkSuiteUpsertRequest,
 )
+from api.schemas.benchmark_report import (
+    BenchmarkRunPreview,
+    BenchmarkRunPreviewRequest,
+    BenchmarkRunReport,
+)
+from services.benchmark_report_service import BenchmarkReportService
 from services.benchmark_run_service import (
     BenchmarkRunConflictError,
     BenchmarkRunNotFoundError,
@@ -200,6 +207,27 @@ async def import_benchmark_suite(
 # ----------------------------------------------------------------------
 
 
+@router.post("/runs/preview", response_model=BenchmarkRunPreview)
+async def preview_benchmark_run(
+    body: BenchmarkRunPreviewRequest,
+    service: Annotated[BenchmarkReportService, Depends(get_benchmark_report_service)],
+    _admin: Annotated[Dict[str, object], Depends(_require_admin_user)],
+) -> BenchmarkRunPreview:
+    """Chiffre un run **sans le créer ni dépenser**.
+
+    `POST /runs` estime et démarre dans le même appel : une interface qui doit
+    faire consentir un humain à une dépense ne peut pas afficher le prix après
+    l'avoir engagée. Route distincte plutôt que drapeau sur `POST /runs` — un
+    booléen mal sérialisé lancerait un run facturé.
+    """
+    try:
+        return service.preview(body)
+    except BenchmarkSuiteNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except BenchmarkSuiteInvalidError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+
 @router.post("/runs", response_model=BenchmarkRunLaunchResponse)
 async def start_benchmark_run(
     body: BenchmarkRunConfig,
@@ -286,6 +314,25 @@ async def list_benchmark_run_generations(
             for record in records
         ]
     return BenchmarkGenerationListResponse(run_id=run_id, generations=records)
+
+
+@router.get("/runs/{run_id}/report", response_model=BenchmarkRunReport)
+async def get_benchmark_run_report(
+    run_id: str,
+    service: Annotated[BenchmarkReportService, Depends(get_benchmark_report_service)],
+    _admin: Annotated[Dict[str, object], Depends(_require_admin_user)],
+) -> BenchmarkRunReport:
+    """Agrège un run : validité et coût par modèle, puis notes et duels par juge.
+
+    L'agrégation est faite ici et non côté client parce que ses règles sont celles
+    du protocole (`invalid` jamais noté zéro, juges jamais fusionnés, critères
+    appariés par identifiant) : les réécrire ailleurs en produirait une seconde
+    version, hors de portée des tests.
+    """
+    try:
+        return service.build_report(run_id)
+    except BenchmarkRunNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
 
 @router.post("/runs/{run_id}/resume", response_model=BenchmarkRunLaunchResponse)

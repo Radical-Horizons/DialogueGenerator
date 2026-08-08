@@ -657,6 +657,18 @@ def get_benchmark_pairwise_pass_service(request: Request):
     return get_service_container(request).get_benchmark_pairwise_pass_service()
 
 
+def get_benchmark_report_service(request: Request):
+    """Retourne le service d'aperçu et de rapport du benchmark.
+
+    Args:
+        request: Requête HTTP courante.
+
+    Returns:
+        Instance de BenchmarkReportService depuis le ServiceContainer.
+    """
+    return get_service_container(request).get_benchmark_report_service()
+
+
 def get_dialogue_flags_service():
     """Fabrique un service validation des liaisons flags ↔ document (Story 9.1).
 
