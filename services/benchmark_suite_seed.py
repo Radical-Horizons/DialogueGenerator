@@ -61,11 +61,20 @@ dessous, et c'est de toute façon le plancher utile quand une fiche de personnag
 complète occupe déjà l'essentiel du budget.
 """
 
-COMPLETION_TOKENS = 2000
-"""De quoi écrire un panneau et ses options sans jamais tronquer.
+COMPLETION_TOKENS = 6000
+"""De quoi écrire un fragment entier — ouverture + branches — sans jamais tronquer.
 
 Un plafond serré produirait des générations coupées, que les portes recaleraient :
 on mesurerait la limite qu'on a posée, pas le modèle.
+
+⚠️ Valeur relevée le 2026-08-09. Elle valait 2000 depuis l'époque où l'unité
+mesurée était **un** panneau ; la bascule en `fragment_mode` a quadruplé la
+sortie attendue sans que le plafond suive. Au bench du 8 août, la meilleure
+génération consommait 1718 tokens sur 2000 — 86 % du plafond — et deux
+générations ont rendu un panneau isolé dont les choix pointaient vers des
+panneaux jamais écrits. Le budget doit couvrir MAX_WORDS_PER_PANEL × MIN_PANELS
+en français, plus les options et la structure JSON, avec de la marge pour les
+modèles qui raisonnent avant de répondre.
 """
 
 

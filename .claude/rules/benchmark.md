@@ -136,6 +136,21 @@ mesure sans en être une** — le mode de défaillance propre à ce genre d'outi
 - **Les deux jambes partagent grille et juge.** Un duel arbitré par un autre juge
   que la rubrique ne serait comparable à rien.
 
+## Diagnosticabilité
+
+- **Un échec doit être imputable.** Tant que le harnais n'enregistre ni coût, ni
+  tokens, ni raison d'arrêt sur une génération ratée, on ne peut pas distinguer
+  « le modèle a mal répondu » de « on l'a coupé » — et toute conclusion sur le
+  modèle est une opinion. Constaté le 2026-08-09 : cinq échecs à « 0 token,
+  0 $ », dont deux fragments d'un seul panneau **dont les choix pointaient vers
+  des panneaux jamais écrits**.
+- **Un appel en échec a coûté.** L'usage est relevé sur le client jusque dans le
+  chemin d'erreur : sinon le plafond budgétaire sous-compte la dépense réelle.
+- **Le plafond de complétion se dimensionne sur l'unité mesurée.** Il valait 2000
+  depuis l'ère du panneau unique ; la bascule en fragment a quadruplé la sortie
+  attendue sans que personne ne le suive. La meilleure génération consommait 86 %
+  du plafond — mesurer si près du plafond, c'est mesurer le plafond.
+
 ## Interdits
 
 - Réintroduire une génération multi-appels pour produire un fragment (coût ×N,

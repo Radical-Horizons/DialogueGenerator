@@ -534,7 +534,24 @@ class UnityDialogueOrchestrator:
                 if isinstance(e, UnityStructuredOutputError)
                 else 'runtime'
             )
-            yield GenerationEvent(type='error', data={'message': str(e), 'error_kind': kind})
+            # L'usage est relevé sur le client même en échec : ces appels ont été
+            # facturés. Sans cela, le benchmark affiche « 0 token, 0 $ » sur une
+            # génération payée, et son plafond budgétaire sous-compte la dépense.
+            spent = locals().get('llm_client')
+            yield GenerationEvent(
+                type='error',
+                data={
+                    'message': str(e),
+                    'error_kind': kind,
+                    'cost_usd': _safe_float_cost(getattr(spent, 'last_call_cost', 0.0), 0.0),
+                    'usage_prompt_tokens': _safe_int_usage(
+                        getattr(spent, 'last_usage_prompt_tokens', 0), 0
+                    ),
+                    'usage_completion_tokens': _safe_int_usage(
+                        getattr(spent, 'last_usage_completion_tokens', 0), 0
+                    ),
+                },
+            )
     
     async def generate(
         self,

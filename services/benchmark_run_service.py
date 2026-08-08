@@ -1054,6 +1054,17 @@ class BenchmarkRunService:
                 elif event.type == "error":
                     error_message = str(event.data.get("message", "Erreur de génération"))
                     error_kind = str(event.data.get("error_kind") or "runtime")
+                    # Un appel en échec a coûté : ne pas l'enregistrer ferait
+                    # sous-compter la dépense réelle, et le plafond budgétaire
+                    # laisserait passer plus que ce qu'on croit autoriser.
+                    if not cost:
+                        cost = float(event.data.get("cost_usd", 0.0) or 0.0)
+                    if not prompt_tokens:
+                        prompt_tokens = int(event.data.get("usage_prompt_tokens", 0) or 0)
+                    if not completion_tokens:
+                        completion_tokens = int(
+                            event.data.get("usage_completion_tokens", 0) or 0
+                        )
         except UnityStructuredOutputError as exc:
             error_message = str(exc)
             error_kind = "model_output"
