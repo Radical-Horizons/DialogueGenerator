@@ -160,16 +160,26 @@ def test_speaker_fallback_applies_to_panels_without_speaker() -> None:
     assert all(node["speaker"] == "Voknir Esh'Maradel" for node in resolution.document["nodes"])
 
 
-@pytest.mark.parametrize("panel_count", [1, 11])
-def test_schema_bounds_reject_degenerate_fragments(panel_count: int) -> None:
-    """Les bornes du schéma refusent un fragment vide de sens ou démesuré.
-
-    Les Structured Outputs honorent `minItems` / `maxItems` : la forme est garantie
-    structurellement, elle n'a pas à être quémandée au prompt.
-    """
-    panels = [_panel(f"p{index}", "Ligne.", [{"text": "A"}, {"text": "B"}]) for index in range(panel_count)]
+def test_oversized_fragment_is_refused() -> None:
+    """La borne haute reste : au-delà, ce n'est plus un fragment mais un dialogue."""
+    panels = [_panel(f"p{index}", "Ligne.", [{"text": "A"}, {"text": "B"}]) for index in range(11)]
     with pytest.raises(Exception):
         _fragment(panels)
+
+
+def test_single_panel_fragment_is_accepted() -> None:
+    """Un panneau isolé est incomplet, pas illisible — il doit être jugeable.
+
+    La borne valait 2, et Pydantic rejetait donc en bloc un fragment d'un seul
+    panneau, **texte compris**. Deux mesures ont été perdues ainsi au bench du
+    8 août. Le compte de panneaux attendu est désormais une observation portée
+    par les portes, pas une condition d'existence.
+    """
+    fragment = _fragment([_panel(None, "Réplique d'ouverture.", [{"text": "Insister"}])])
+    resolution = resolve_fragment(fragment)
+
+    assert resolution.panel_count == 1
+    assert resolution.document["nodes"][0]["line"] == "Réplique d'ouverture."
 
 
 @pytest.mark.asyncio

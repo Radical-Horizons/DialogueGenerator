@@ -137,7 +137,7 @@ class BenchmarkGateService:
         """
         if not json_content or not json_content.strip():
             return [
-                BenchmarkGateFailure(gate="non_empty", message="Génération vide")
+                BenchmarkGateFailure(gate="non_empty", message="Génération vide", severity="blocking")
             ]
 
         try:
@@ -147,6 +147,7 @@ class BenchmarkGateService:
                 BenchmarkGateFailure(
                     gate="parsable",
                     message=f"JSON non parsable : {exc}",
+                    severity="blocking",
                 )
             ]
 
@@ -156,13 +157,14 @@ class BenchmarkGateService:
                 BenchmarkGateFailure(
                     gate="parsable",
                     message="Structure inattendue : ni document Unity ni liste de nœuds",
+                    severity="blocking",
                 )
             ]
 
         failures: List[BenchmarkGateFailure] = []
         if not nodes:
             failures.append(
-                BenchmarkGateFailure(gate="non_empty", message="Aucun nœud généré")
+                BenchmarkGateFailure(gate="non_empty", message="Aucun nœud généré", severity="blocking")
             )
 
         failures.extend(self._connectivity_failures(nodes))
@@ -177,6 +179,7 @@ class BenchmarkGateService:
                 BenchmarkGateFailure(
                     gate="non_empty",
                     message="Nœuds sans texte de réplique ni libellé de choix",
+                    severity="blocking",
                 )
             )
         else:
@@ -186,6 +189,14 @@ class BenchmarkGateService:
                     BenchmarkGateFailure(
                         gate="language",
                         message=f"Sortie non française ({verdict.detector}) : {verdict.reason}",
+                        # Seule exception au principe « une valeur technique ne
+                        # disqualifie pas » : la langue n'est pas une borne, c'est
+                        # ce qui rend la grille applicable. « Justesse de la voix »
+                        # et « tenue du français » ne se notent pas sur un texte
+                        # anglais — la note existerait sans rien mesurer. Défaut
+                        # très corrigeable au prompt, donc à relire si le besoin
+                        # produit change.
+                        severity="blocking",
                     )
                 )
 
@@ -309,7 +320,7 @@ class BenchmarkGateService:
         if expectations.min_panels is not None and len(nodes) < expectations.min_panels:
             failures.append(
                 BenchmarkGateFailure(
-                    gate="non_empty",
+                    gate="panel_count",
                     message=(
                         f"{len(nodes)} panneau(x) généré(s), {expectations.min_panels} "
                         f"attendus au minimum"

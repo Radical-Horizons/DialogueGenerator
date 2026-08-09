@@ -26,7 +26,24 @@ mesure sans en être une** — le mode de défaillance propre à ce genre d'outi
 
 ## Mesure
 
-- **Une génération recalée par une porte est `invalid`, jamais notée zéro.** Elle
+- **Une valeur technique ne disqualifie jamais une réponse.** Panneau trop long,
+  options en trop ou en moins, cible pendante, flag manquant, panneaux en nombre
+  insuffisant : ce sont des **observations**, pas des recalages. Le texte reste
+  jugeable, et ces défauts se corrigent au prompt — les écarter retirerait de la
+  mesure le matériau même qu'on cherche à évaluer, et ferait chuter un taux de
+  validité pour des raisons sans rapport avec la qualité d'écriture.
+  Mécanique : `BenchmarkGateFailure.severity` (`blocking` | `observation`), et
+  `BLOCKING_GATES` tient dans une ligne.
+- **Ne bloque que ce qui rend le texte illisible** : rien à parser (`parsable`),
+  rien à lire (`non_empty`). Plus la **langue**, seule exception assumée — la
+  grille note « justesse de la voix » et « tenue du français » : sur un texte
+  anglais, la note existerait sans rien mesurer.
+- **Corollaire sur le schéma de sortie** : les bornes Pydantic du fragment sont
+  volontairement larges (1 panneau, 1 choix). Elles valaient 2 et 2, et un
+  fragment d'un seul panneau était rejeté **texte compris**. Le schéma ne garde
+  que ce sans quoi il n'y a rien à lire ; le compte attendu par un cas est une
+  attente de porte, en observation.
+- **Une génération réellement recalée est `invalid`, jamais notée zéro.** Elle
   sort des moyennes. Un zéro écraserait la moyenne d'un modèle par ailleurs bon
   et transformerait un défaut de forme en jugement de qualité.
 - **Le taux de validité par modèle est une mesure de premier ordre**, à publier

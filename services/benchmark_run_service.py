@@ -137,6 +137,18 @@ def slug_for_filename(value: str) -> str:
     return _SLUG_RE.sub("-", value).strip("-") or "unknown"
 
 
+def _has_blocking(failures: List[BenchmarkGateFailure]) -> bool:
+    """Indique si une génération est réellement injugeable.
+
+    Args:
+        failures: Portes en échec relevées sur la génération.
+
+    Returns:
+        ``True`` si au moins une porte bloquante a échoué.
+    """
+    return any(failure.severity == "blocking" for failure in failures)
+
+
 def _now_iso() -> str:
     """Horodatage ISO-8601 en UTC."""
     return datetime.now(timezone.utc).isoformat()
@@ -1084,6 +1096,9 @@ class BenchmarkRunService:
             # comme `invalid` et pèse dans son taux de validité. La ranger en
             # `config_error` l'en sortirait et le flatterait — mesuré sur le run
             # du 8 août, un modèle manquant 2 cas sur 3 affichait « 100 % ».
+            # Même ici, on ne disqualifie que si rien n'est exploitable : une
+            # sortie hors bornes est une observation, pas une raison d'écarter
+            # le texte de la mesure.
             model_at_fault = error_kind == "model_output"
             return BenchmarkGenerationRecord(
                 run_id=run.run_id,
@@ -1092,7 +1107,13 @@ class BenchmarkRunService:
                 repetition=repetition,
                 status="invalid" if model_at_fault else "config_error",
                 gate_failures=(
-                    [BenchmarkGateFailure(gate="schema", message=error_message or "")]
+                    [
+                        BenchmarkGateFailure(
+                            gate="schema",
+                            message=error_message or "",
+                            severity="blocking",
+                        )
+                    ]
                     if model_at_fault
                     else []
                 ),
@@ -1121,6 +1142,7 @@ class BenchmarkRunService:
                 BenchmarkGateFailure(
                     gate="parsable",
                     message=f"Évaluation des portes impossible : {type(exc).__name__}: {exc}",
+                    severity="blocking",
                 )
             ]
         return BenchmarkGenerationRecord(
@@ -1128,7 +1150,12 @@ class BenchmarkRunService:
             case_id=case.case_id,
             model_id=model_id,
             repetition=repetition,
-            status="valid" if not failures else "invalid",
+            # Seul ce qui rend le texte illisible disqualifie. Un panneau trop
+            # long, une cible pendante ou un flag manquant sont des observations :
+            # le texte reste jugeable, et ces défauts se corrigent au prompt.
+            # Les compter comme des recalages retirerait de la mesure le matériau
+            # même qu'on cherche à évaluer.
+            status="invalid" if _has_blocking(failures) else "valid",
             gate_failures=failures,
             json_content=json_content,
             title=title,

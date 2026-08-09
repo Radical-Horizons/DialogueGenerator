@@ -590,7 +590,12 @@ async def test_language_detector_is_recorded(tmp_path: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_case_expectations_are_enforced(tmp_path: Path) -> None:
-    """Une attente déclarée doit contraindre la mesure, pas rester décorative."""
+    """Une attente déclarée est **relevée**, sans disqualifier le texte.
+
+    Elle contraint la lecture du résultat, pas l'admission de la génération : un
+    fragment aux options en nombre inattendu reste parfaitement jugeable, et
+    l'écarter retirerait de la mesure le matériau qu'on cherche à évaluer.
+    """
     service = _service(
         tmp_path,
         orchestrator_factory=lambda rid: _FakeOrchestrator(document=_unity_document(1)),
@@ -604,8 +609,10 @@ async def test_case_expectations_are_enforced(tmp_path: Path) -> None:
     await _drain(service)
 
     record = service.list_generations(run.run_id)[0]
-    assert record.status == "invalid"
-    assert any("3 attendus au minimum" in failure.message for failure in record.gate_failures)
+    assert record.status == "valid"
+    shortfall = [f for f in record.gate_failures if "3 attendus au minimum" in f.message]
+    assert shortfall, "l'écart doit rester visible dans le rapport"
+    assert shortfall[0].severity == "observation"
 
 
 @pytest.mark.asyncio

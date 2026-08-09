@@ -32,8 +32,23 @@ BenchmarkGateId = Literal[
     "non_empty",
     "length",
     "connectivity",
+    "panel_count",
 ]
 """Identifiant stable d'une porte structurelle."""
+
+BenchmarkGateSeverity = Literal["blocking", "observation"]
+"""Une porte disqualifie-t-elle la génération, ou la décrit-elle seulement ?
+
+**Seul ce qui rend la génération illisible bloque** : rien à parser, rien à lire.
+Tout le reste — panneau trop long, options en trop ou en moins, cible pendante,
+flag manquant, langue — est une *observation* : le texte reste jugeable, et ces
+défauts se corrigent au prompt. Les traiter en disqualification retirerait de la
+mesure le matériau qu'on cherche justement à évaluer, et ferait chuter un taux de
+validité pour des raisons sans rapport avec la qualité d'écriture.
+"""
+
+BLOCKING_GATES: frozenset[str] = frozenset({"parsable", "non_empty"})
+"""Portes qui rendent une génération injugeable. Volontairement minuscule."""
 
 BenchmarkNarrationMode = Literal["avec", "sans"]
 """Présence de didascalies de narration dans le dialogue demandé.
@@ -286,6 +301,7 @@ class BenchmarkGateFailure(BaseModel):
 
     gate: BenchmarkGateId
     message: str
+    severity: BenchmarkGateSeverity = "observation"
 
 
 class BenchmarkGenerationRecord(BaseModel):

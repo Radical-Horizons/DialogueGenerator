@@ -30,13 +30,25 @@ from models.dialogue_structure.unity_dialogue_node import (
     UnityDialogueTraitRequirementContent,
 )
 
-MIN_PANELS = 2
+MIN_PANELS = 1
 MAX_PANELS = 10
 """Bornes du fragment. Portées par le schéma : les Structured Outputs honorent
 ``minItems`` / ``maxItems``, la forme n'a donc pas à être quémandée au prompt."""
 
-MIN_CHOICES = 2
+MIN_CHOICES = 1
 MAX_CHOICES = 6
+
+# Bornes volontairement **larges**, relevées le 2026-08-09.
+#
+# Elles valaient 2 panneaux et 2 choix minimum, et Pydantic rejetait donc en bloc
+# un fragment d'un seul panneau — texte compris. Or ce texte est jugeable : la
+# justesse de la voix, la tenue de la langue et l'intérêt des options s'y lisent
+# très bien. Le refuser retirait de la mesure le matériau même qu'on cherche à
+# évaluer, pour un défaut de structure que le prompting corrige.
+#
+# La règle : le schéma ne garde que ce sans quoi il n'y a **rien** à lire. Le
+# compte de panneaux et d'options attendu par un cas de benchmark est une
+# *observation* portée par les portes, pas une condition d'existence.
 """Bornes des options d'un panneau. Le plafond reste sous les 8 du schéma d'export
 Unity — une génération plus large serait recalée en aval sans rien mesurer de plus."""
 
