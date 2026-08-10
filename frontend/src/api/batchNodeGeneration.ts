@@ -1,5 +1,5 @@
 /** Client API génération batch multi-parents FR88. */
-import { apiClient } from './client'
+import apiClient from './client'
 
 export const BATCH_GENERATE_JOB_MIN = 10
 

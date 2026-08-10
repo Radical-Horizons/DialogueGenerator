@@ -1,11 +1,13 @@
 /**
- * Sidebar + modal CRUD des collections de dialogues (Story 8.5 / FR84).
+ * Filtre Collections intégré à la barre de la liste Unity (Story 8.5 / FR84).
+ * Un seul volet avec la liste : plus de rail latéral dédié.
  */
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState, type CSSProperties, type FormEvent } from 'react'
 import type { DialogueCollection } from '../../api/collections'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
+import { StyledSelect } from '../shared/StyledSelect'
 
 export interface CollectionManagerProps {
   collections: DialogueCollection[]
@@ -41,8 +43,20 @@ const EMPTY_FORM: CollectionFormState = {
   icon: '📁',
 }
 
+const iconButtonStyle: CSSProperties = {
+  border: `1px solid ${theme.border.primary}`,
+  borderRadius: '6px',
+  backgroundColor: theme.button.default.background,
+  color: theme.text.secondary,
+  cursor: 'pointer',
+  padding: '0.35rem 0.5rem',
+  fontSize: remSize('small'),
+  flexShrink: 0,
+  minHeight: 36,
+}
+
 /**
- * Affiche la liste des collections et gère création / édition / suppression.
+ * Sélecteur de collection + CRUD modal, destiné à la toolbar de la liste.
  */
 export function CollectionManager({
   collections,
@@ -64,6 +78,11 @@ export function CollectionManager({
   )
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  const activeCollection =
+    activeCollectionId == null
+      ? null
+      : collections.find((c) => c.id === activeCollectionId) ?? null
 
   useEffect(() => {
     if (!modalMode) return
@@ -140,177 +159,126 @@ export function CollectionManager({
   }
 
   return (
-    <aside
+    <div
       data-testid="collection-manager"
       style={{
-        width: '11.5rem',
-        flexShrink: 0,
-        borderRight: `1px solid ${theme.border.primary}`,
-        backgroundColor: theme.background.panelHeader,
         display: 'flex',
-        flexDirection: 'column',
-        minHeight: 0,
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: '0.35rem',
+        width: '100%',
+        minWidth: 0,
       }}
     >
-      <div
+      <label
         style={{
-          padding: '0.45rem',
-          borderBottom: `1px solid ${theme.border.primary}`,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '0.25rem',
+          gap: '0.35rem',
+          flex: '1 1 10rem',
+          minWidth: 0,
+          fontSize: remSize('small'),
+          color: theme.text.secondary,
         }}
       >
+        <span style={{ flexShrink: 0, fontWeight: 600 }}>Collection</span>
+        <StyledSelect
+          data-testid="collection-filter-select"
+          aria-label="Filtrer par collection"
+          disabled={isLoading}
+          value={activeCollectionId ?? ''}
+          onChange={(e) => {
+            const value = e.target.value
+            if (!value) {
+              onSelect(null)
+              return
+            }
+            const next = collections.find((c) => c.id === value) ?? null
+            onSelect(next)
+          }}
+          style={{
+            width: '100%',
+            padding: '0.4rem 0.5rem',
+            border: `1px solid ${theme.input.border}`,
+            borderRadius: '6px',
+            backgroundColor: theme.input.background,
+            color: theme.input.color,
+            fontSize: remSize('small'),
+          }}
+          wrapperStyle={{ flex: 1, minWidth: 0 }}
+        >
+          <option data-testid="collection-filter-all" value="">
+            Tous les dialogues
+          </option>
+          {collections.map((collection) => (
+            <option
+              key={collection.id}
+              data-testid={`collection-select-${collection.id}`}
+              value={collection.id}
+            >
+              {(collection.icon || '📁') + ' '}
+              {collection.name} ({collection.dialogue_ids.length})
+            </option>
+          ))}
+        </StyledSelect>
+      </label>
+
+      {!isGuest && (
+        <button
+          type="button"
+          data-testid="collection-create-button"
+          onClick={openCreate}
+          title="Nouvelle collection"
+          aria-label="Nouvelle collection"
+          style={{
+            ...iconButtonStyle,
+            borderColor: theme.button.primary.background,
+            backgroundColor: theme.button.primary.background,
+            color: theme.button.primary.color,
+          }}
+        >
+          +
+        </button>
+      )}
+
+      {!isGuest && activeCollection && (
+        <>
+          <button
+            type="button"
+            data-testid={`collection-edit-${activeCollection.id}`}
+            aria-label={`Modifier ${activeCollection.name}`}
+            title={`Modifier ${activeCollection.name}`}
+            onClick={() => openEdit(activeCollection)}
+            style={iconButtonStyle}
+          >
+            ✎
+          </button>
+          <button
+            type="button"
+            data-testid={`collection-delete-${activeCollection.id}`}
+            aria-label={`Supprimer ${activeCollection.name}`}
+            title={`Supprimer ${activeCollection.name}`}
+            onClick={() => {
+              setDeleteError(null)
+              setPendingDelete(activeCollection)
+            }}
+            style={iconButtonStyle}
+          >
+            ×
+          </button>
+        </>
+      )}
+
+      {isLoading && (
         <span
           style={{
             fontSize: remSize('small'),
-            fontWeight: 600,
-            color: theme.text.secondary,
+            color: theme.text.tertiary,
           }}
         >
-          Collections
+          Chargement…
         </span>
-        {!isGuest && (
-          <button
-            type="button"
-            data-testid="collection-create-button"
-            onClick={openCreate}
-            title="Nouvelle collection"
-            style={{
-              padding: '0.15rem 0.4rem',
-              border: `1px solid ${theme.button.primary.background}`,
-              borderRadius: '4px',
-              backgroundColor: theme.button.primary.background,
-              color: theme.button.primary.color,
-              cursor: 'pointer',
-              fontSize: remSize('small'),
-            }}
-          >
-            +
-          </button>
-        )}
-      </div>
-
-      <div style={{ flex: 1, overflowY: 'auto', padding: '0.35rem' }}>
-        <button
-          type="button"
-          data-testid="collection-filter-all"
-          onClick={() => onSelect(null)}
-          style={{
-            width: '100%',
-            textAlign: 'left',
-            padding: '0.35rem 0.4rem',
-            marginBottom: '0.25rem',
-            border: 'none',
-            borderRadius: '4px',
-            backgroundColor:
-              activeCollectionId == null
-                ? theme.button.selected.background
-                : 'transparent',
-            color: theme.text.primary,
-            cursor: 'pointer',
-            fontSize: remSize('small'),
-          }}
-        >
-          Tous les dialogues
-        </button>
-        {isLoading && (
-          <div
-            style={{
-              padding: '0.35rem',
-              fontSize: remSize('small'),
-              color: theme.text.tertiary,
-            }}
-          >
-            Chargement…
-          </div>
-        )}
-        {collections.map((collection) => {
-          const isActive = collection.id === activeCollectionId
-          return (
-            <div
-              key={collection.id}
-              data-testid={`collection-item-${collection.id}`}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.15rem',
-                marginBottom: '0.2rem',
-              }}
-            >
-              <button
-                type="button"
-                data-testid={`collection-select-${collection.id}`}
-                onClick={() => onSelect(collection)}
-                style={{
-                  flex: 1,
-                  minWidth: 0,
-                  textAlign: 'left',
-                  padding: '0.35rem 0.4rem',
-                  border: 'none',
-                  borderRadius: '4px',
-                  backgroundColor: isActive
-                    ? theme.button.selected.background
-                    : 'transparent',
-                  color: theme.text.primary,
-                  cursor: 'pointer',
-                  fontSize: remSize('small'),
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-                title={collection.description ?? collection.name}
-              >
-                <span aria-hidden>{collection.icon || '📁'} </span>
-                {collection.name}
-                <span
-                  style={{ color: theme.text.tertiary, marginLeft: '0.25rem' }}
-                >
-                  ({collection.dialogue_ids.length})
-                </span>
-              </button>
-              {!isGuest && (
-                <>
-                  <button
-                    type="button"
-                    data-testid={`collection-edit-${collection.id}`}
-                    aria-label={`Modifier ${collection.name}`}
-                    onClick={() => openEdit(collection)}
-                    style={{
-                      border: 'none',
-                      background: 'transparent',
-                      color: theme.text.secondary,
-                      cursor: 'pointer',
-                      padding: '0.15rem',
-                    }}
-                  >
-                    ✎
-                  </button>
-                  <button
-                    type="button"
-                    data-testid={`collection-delete-${collection.id}`}
-                    aria-label={`Supprimer ${collection.name}`}
-                    onClick={() => {
-                      setDeleteError(null)
-                      setPendingDelete(collection)
-                    }}
-                    style={{
-                      border: 'none',
-                      background: 'transparent',
-                      color: theme.text.secondary,
-                      cursor: 'pointer',
-                      padding: '0.15rem',
-                    }}
-                  >
-                    ×
-                  </button>
-                </>
-              )}
-            </div>
-          )
-        })}
-      </div>
+      )}
 
       {modalMode && (
         <div
@@ -480,7 +448,7 @@ export function CollectionManager({
         <div
           data-testid="collection-delete-error"
           style={{
-            padding: '0.35rem 0.45rem',
+            width: '100%',
             color: theme.state.error.color,
             fontSize: remSize('small'),
           }}
@@ -507,6 +475,6 @@ export function CollectionManager({
           setDeleteError(null)
         }}
       />
-    </aside>
+    </div>
   )
 }

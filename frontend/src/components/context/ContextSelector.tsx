@@ -147,7 +147,9 @@ function contextGddTabButtonStyle(
   tabFontKey: UiFontRemKey,
 ): CSSProperties {
   return {
-    flex: '1 1 auto',
+    // Basis 0 % : partage égal de la largeur utile ; évite que le min-content
+    // des libellés longs (Personnages / Communautés) fasse déborder / se chevaucher.
+    flex: '1 1 0%',
     minWidth: 0,
     minHeight: tier.tabMinHeightPx,
     padding: tier.tabPadding,
@@ -162,13 +164,22 @@ function contextGddTabButtonStyle(
     fontWeight: isActive ? 600 : 400,
     fontSize: remSize(tabFontKey),
     lineHeight: 1.2,
-    whiteSpace: 'nowrap',
     overflow: 'hidden',
     boxSizing: 'border-box',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
   }
+}
+
+const contextGddTabLabelStyle: CSSProperties = {
+  display: 'block',
+  minWidth: 0,
+  maxWidth: '100%',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  textAlign: 'center',
 }
 
 interface ContextSelectorProps {
@@ -685,6 +696,7 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
             key={key}
             type="button"
             className="context-gdd-tab"
+            title={label}
             onClick={() => {
               setActiveTab(key)
               setSelectedDetail(null)
@@ -696,7 +708,9 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
               tabChromeTier.tabFontKey,
             )}
           >
-            {label}
+            <span data-testid="context-gdd-tab-label" style={contextGddTabLabelStyle}>
+              {label}
+            </span>
           </button>
         ))}
 

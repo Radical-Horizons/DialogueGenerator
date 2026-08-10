@@ -1,5 +1,5 @@
 /** Client API validation batch FR87. */
-import { apiClient } from './client'
+import apiClient from './client'
 
 export type BatchValidationIssue = {
   type: string

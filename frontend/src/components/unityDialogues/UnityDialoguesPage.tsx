@@ -4,6 +4,10 @@
 import { useState, useRef } from 'react'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { PANEL_COMFORT_MIN_WIDTH_PX } from '../../theme/responsiveChrome'
+import {
+  unityDialogueListColumnStyle,
+  unityDialogueWorkspaceColumnStyle,
+} from '../../theme/unityDialogueListShell'
 import { UnityDialogueList, type UnityDialogueListRef } from './UnityDialogueList'
 import { DialogueEditionNarrowProvider } from './DialogueEditionNarrowContext'
 import { UnityDialogueDetails } from './UnityDialogueDetails'
@@ -37,12 +41,17 @@ export function UnityDialoguesPage() {
     <div ref={pageRef} style={{ display: 'flex', height: '100%', minWidth: 0 }}>
       <div
         style={{
-          width: isPageNarrow ? '100%' : 'clamp(260px, 22vw, 340px)',
-          minWidth: isPageNarrow ? 0 : '240px',
-          borderRight: `1px solid ${theme.border.primary}`,
-          overflow: 'hidden',
-          backgroundColor: theme.background.panel,
-          display: isPageNarrow && selectedDialogue ? 'none' : 'block',
+          ...(isPageNarrow
+            ? {
+                width: '100%',
+                minWidth: 0,
+                borderRight: `1px solid ${theme.border.primary}`,
+                overflow: 'hidden' as const,
+                backgroundColor: theme.background.panel,
+              }
+            : unityDialogueListColumnStyle),
+          display: isPageNarrow && selectedDialogue ? 'none' : 'flex',
+          height: '100%',
         }}
       >
         <UnityDialogueList
@@ -55,10 +64,7 @@ export function UnityDialoguesPage() {
       <div
         ref={editionWorkspaceRef}
         style={{
-          flex: 1,
-          overflow: 'hidden',
-          backgroundColor: theme.background.panel,
-          minWidth: 0,
+          ...unityDialogueWorkspaceColumnStyle,
           display: isPageNarrow && !selectedDialogue ? 'none' : 'block',
         }}
       >

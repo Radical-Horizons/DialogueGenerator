@@ -525,18 +525,10 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
   }
 
   return (
-    <div data-testid="unity-dialogue-list" style={{ display: 'flex', flexDirection: 'row', height: '100%' }}>
-      <CollectionManager
-        collections={collections}
-        activeCollectionId={activeCollectionId}
-        isGuest={isGuest}
-        isLoading={collectionsLoading}
-        onSelect={handleSelectCollection}
-        onCreate={handleCreateCollection}
-        onUpdate={handleUpdateCollection}
-        onDelete={handleDeleteCollection}
-      />
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', flex: 1, minWidth: 0 }}>
+    <div
+      data-testid="unity-dialogue-list"
+      style={{ display: 'flex', flexDirection: 'column', height: '100%', minWidth: 0 }}
+    >
       <div
         style={{
           padding: '0.5rem',
@@ -544,6 +536,18 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
           backgroundColor: theme.background.panelHeader,
         }}
       >
+        <div style={{ marginBottom: '0.45rem' }}>
+          <CollectionManager
+            collections={collections}
+            activeCollectionId={activeCollectionId}
+            isGuest={isGuest}
+            isLoading={collectionsLoading}
+            onSelect={handleSelectCollection}
+            onCreate={handleCreateCollection}
+            onUpdate={handleUpdateCollection}
+            onDelete={handleDeleteCollection}
+          />
+        </div>
         <div
           style={{
             display: 'flex',
@@ -1111,7 +1115,6 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
           </div>
         </div>
       )}
-      </div>
     </div>
   )
 })

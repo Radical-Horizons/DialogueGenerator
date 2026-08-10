@@ -1,5 +1,5 @@
 /**
- * Tests CollectionManager (Story 8.5 / FR84).
+ * Tests CollectionManager (Story 8.5 / FR84) — variante toolbar intégrée.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
@@ -18,7 +18,7 @@ const SAMPLE: DialogueCollection = {
 }
 
 describe('CollectionManager', () => {
-  it('sélectionne une collection et ouvre la création', async () => {
+  it('sélectionne une collection via le select et ouvre la création', async () => {
     const onSelect = vi.fn()
     const onCreate = vi.fn().mockResolvedValue(undefined)
     render(
@@ -29,10 +29,12 @@ describe('CollectionManager', () => {
         onCreate={onCreate}
         onUpdate={vi.fn()}
         onDelete={vi.fn()}
-      />
+      />,
     )
 
-    fireEvent.click(screen.getByTestId('collection-select-c1'))
+    fireEvent.change(screen.getByTestId('collection-filter-select'), {
+      target: { value: 'c1' },
+    })
     expect(onSelect).toHaveBeenCalledWith(SAMPLE)
 
     fireEvent.click(screen.getByTestId('collection-create-button'))
@@ -48,5 +50,21 @@ describe('CollectionManager', () => {
         icon: '📁',
       })
     })
+  })
+
+  it('expose modifier / supprimer quand une collection est active', () => {
+    render(
+      <CollectionManager
+        collections={[SAMPLE]}
+        activeCollectionId="c1"
+        onSelect={vi.fn()}
+        onCreate={vi.fn()}
+        onUpdate={vi.fn()}
+        onDelete={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByTestId('collection-edit-c1')).toBeInTheDocument()
+    expect(screen.getByTestId('collection-delete-c1')).toBeInTheDocument()
   })
 })

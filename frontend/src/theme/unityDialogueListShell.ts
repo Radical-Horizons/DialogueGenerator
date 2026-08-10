@@ -1,18 +1,20 @@
 /**
  * Layout liste Unity + zone d’édition / graphe (colonne centrale).
- * Priorité produit : le volet droit garde ~75 % de la largeur utile ; la liste ≤ 25 % (plafond px sur grands écrans).
+ *
+ * Collections est intégré dans la toolbar de la liste (un seul volet) :
+ * les bornes ciblent uniquement la largeur utile de la bibliothèque.
  */
 import type { CSSProperties } from 'react'
 import { theme } from '../theme'
 
+/** Plancher lisibilité liste (recherche + filtres + cartes). */
+export const UNITY_DIALOGUE_LIST_MIN_WIDTH_PX = 240
+
+/** Plafond absolu sur très grands écrans. */
+export const UNITY_DIALOGUE_LIST_MAX_WIDTH_CAP_PX = 340
+
 /** Part max de la rangée pour la liste (le reste pour l’éditeur / graphe). */
-export const UNITY_DIALOGUE_LIST_MAX_FRACTION = 0.25
-
-/** Plancher lisibilité liste (peut réduire légèrement la part du droit sur colonnes très étroites). */
-export const UNITY_DIALOGUE_LIST_MIN_WIDTH_PX = 120
-
-/** Plafond absolu sur très grands écrans (évite une liste trop large si 25 % est énorme). */
-export const UNITY_DIALOGUE_LIST_MAX_WIDTH_CAP_PX = 280
+export const UNITY_DIALOGUE_LIST_MAX_FRACTION = 0.28
 
 /** Colonne liste : flex-shrink prioritaire, largeur bornée par % du parent. */
 export const unityDialogueListColumnStyle: CSSProperties = {
@@ -28,7 +30,7 @@ export const unityDialogueListColumnStyle: CSSProperties = {
   flexDirection: 'column',
 }
 
-/** Colonne éditeur / graphe : absorbe l’espace restant (cible ~75 % quand la liste est à 25 %). */
+/** Colonne éditeur / graphe : absorbe l’espace restant. */
 export const unityDialogueWorkspaceColumnStyle: CSSProperties = {
   boxSizing: 'border-box',
   flex: 1,

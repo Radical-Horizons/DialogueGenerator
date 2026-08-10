@@ -1,0 +1,11 @@
+Label Positif,Label Négatif,Axe,Sphère
+Courage,Lâcheté,Courage_Lâcheté,Caractère
+Empathie,Cruauté,Empathie_Cruauté,Caractère
+Prudence,Imprudence,Prudence_Imprudence,Caractère
+Discrétion,Indiscrétion,Discrétion_Indiscrétion,Caractère
+Stabilité,Instabilité,Stabilité_Instabilité,Caractère
+Diplomate,Provocateur,Diplomate_Provocateur,Social
+Loyal,Traître,Loyal_Traître,Moral
+Honnête,Menteur,Honnête_Menteur,Moral
+Généreux,Avare,Généreux_Avare,Moral
+Patient,Impulsif,Patient_Impulsif,Caractère

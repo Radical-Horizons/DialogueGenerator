@@ -66,6 +66,8 @@ class GddNameResolver:
                         continue
                     labels.append((token, canonical))
                     labels.append((f"{token} {canonical}".strip(), canonical))
+                    # Forme historique d'affichage / presets : « Nom, alias »
+                    labels.append((f"{canonical}, {token}".strip(), canonical))
 
         self._label_cache[category] = labels
         return labels

@@ -109,9 +109,11 @@ data/GDD_entity_history/
 data/GDD_categories/.archive/
 data/GDD_categories/.staging/
 data/interactions/
-# UnityData : tout ignorer sauf le catalogue flags versionné pour FR89 / pipeline mécaniques.
+# UnityData : tout ignorer sauf les catalogues CSV versionnés (flags / skills / traits).
 data/UnityData/*
 !data/UnityData/FlagCatalog.csv
+!data/UnityData/SkillCatalog.csv
+!data/UnityData/TraitCatalog.csv
 
 # Dialogue JSON (générés / sortie Unity)
 Assets/Dialogue/*.json

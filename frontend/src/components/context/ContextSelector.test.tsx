@@ -216,6 +216,31 @@ describe('ContextSelector', () => {
     })
   })
 
+  it('tronque les libellés d’onglets (ellipsis + flex 1 1 0%) pour éviter le chevauchement en panneau étroit', async () => {
+    render(
+      <div style={{ width: 280 }}>
+        <ContextSelector />
+      </div>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /^personnages$/i })).toBeInTheDocument()
+    })
+
+    const personnages = screen.getByRole('button', { name: /^personnages$/i })
+    const communautes = screen.getByRole('button', { name: /^communautés$/i })
+
+    expect(personnages.style.flex).toMatch(/1\s+1\s+0%?/)
+    expect(personnages.style.minWidth).toMatch(/^0(px)?$/)
+    expect(personnages).toHaveAttribute('title', 'Personnages')
+    expect(communautes).toHaveAttribute('title', 'Communautés')
+
+    const label = personnages.querySelector('[data-testid="context-gdd-tab-label"]')
+    expect(label).toBeTruthy()
+    expect((label as HTMLElement).style.textOverflow).toBe('ellipsis')
+    expect((label as HTMLElement).style.overflow).toBe('hidden')
+  })
+
   it('charge les données au montage (première page paginée)', async () => {
     render(<ContextSelector />)
 
