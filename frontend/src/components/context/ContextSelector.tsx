@@ -223,7 +223,6 @@ export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }
   const [selectedDetail, setSelectedDetail] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [hoveredTab, setHoveredTab] = useState<TabType | null>(null)
   const tabBarRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const tabBarDensity = useContextGddTabBarDensity(tabBarRef)
@@ -860,7 +859,7 @@ export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }
       >
         {TAB_DEFS.map(({ key, label }) => {
           const isActive = activeTab === key
-          const showCount = isActive || hoveredTab === key
+          const showCount = isActive
           const count = tabItemCounts[key]
           return (
             <button
@@ -873,8 +872,6 @@ export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }
                 setSelectedDetail(null)
                 onItemSelected?.(null, null)
               }}
-              onMouseEnter={() => setHoveredTab(key)}
-              onMouseLeave={() => setHoveredTab(null)}
               style={contextGddTabButtonStyle(isActive, tabChromeTier)}
             >
               <span style={contextGddTabLabelStyle(isActive)}>

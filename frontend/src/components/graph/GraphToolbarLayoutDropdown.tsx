@@ -57,7 +57,7 @@ export function GraphToolbarLayoutDropdown(props: GraphToolbarToolsRowProps) {
         ) : (
           <span style={{ textTransform: 'capitalize' }}>{layoutSpacingMode}</span>
         )}
-        <span style={isNarrowToolbar ? { fontSize: '0.7em', opacity: 0.9 } : graphToolbarChevronStyle}>
+        <span style={isNarrowToolbar ? { fontSize: '1.4em', opacity: 0.9 } : graphToolbarChevronStyle}>
           ▾
         </span>
       </button>

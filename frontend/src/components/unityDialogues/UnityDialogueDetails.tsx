@@ -205,7 +205,7 @@ export function UnityDialogueDetails({
                 style={{
                   padding: tb.toolbarButtonPadding,
                   minHeight: `${tb.toolbarButtonMinHeightPx}px`,
-                  border: `1px solid ${theme.border.primary}`,
+                  border: `1px solid ${theme.button.secondary.border}`,
                   borderRadius: '6px',
                   backgroundColor: theme.button.secondary.background,
                   color: theme.button.secondary.color,
@@ -233,7 +233,7 @@ export function UnityDialogueDetails({
                   style={{
                     padding: tb.toolbarButtonPadding,
                     minHeight: `${tb.toolbarButtonMinHeightPx}px`,
-                    border: `1px solid ${theme.border.primary}`,
+                    border: `1px solid ${theme.button.secondary.border}`,
                     borderRadius: '6px',
                     backgroundColor: theme.button.secondary.background,
                     color: theme.button.secondary.color,
@@ -262,7 +262,7 @@ export function UnityDialogueDetails({
                   style={{
                     padding: tb.toolbarButtonPadding,
                     minHeight: `${tb.toolbarButtonMinHeightPx}px`,
-                    border: `1px solid ${theme.border.primary}`,
+                    border: `1px solid ${theme.button.secondary.border}`,
                     borderRadius: '6px',
                     backgroundColor: theme.button.secondary.background,
                     color: theme.button.secondary.color,
@@ -289,10 +289,10 @@ export function UnityDialogueDetails({
                   style={{
                     padding: tb.toolbarButtonPadding,
                     minHeight: `${tb.toolbarButtonMinHeightPx}px`,
-                    border: `1px solid ${theme.border.primary}`,
+                    border: `1px solid ${theme.button.secondary.border}`,
                     borderRadius: '6px',
-                    backgroundColor: theme.button.primary.background,
-                    color: theme.button.primary.color,
+                    backgroundColor: theme.button.secondary.background,
+                    color: theme.button.secondary.color,
                     cursor: 'pointer',
                     fontSize: `${tb.toolbarButtonFontRem}rem`,
                     fontWeight: tb.toolbarButtonFontWeight,
@@ -317,7 +317,7 @@ export function UnityDialogueDetails({
                 style={{
                   padding: tb.toolbarButtonPadding,
                   minHeight: `${tb.toolbarButtonMinHeightPx}px`,
-                  border: `1px solid ${theme.border.primary}`,
+                  border: `1px solid ${theme.button.secondary.border}`,
                   borderRadius: '6px',
                   backgroundColor: '#dc3545',
                   color: '#ffffff',

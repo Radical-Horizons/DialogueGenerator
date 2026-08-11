@@ -8,7 +8,7 @@ import { theme } from '../../theme'
  *   des chevrons ‹ › utilisés dans les rails latéraux du Dashboard.
  */
 /** Gouttière réservée au ▼ : `right: 0.45rem` + la glyphe + une respiration. */
-const ARROW_GUTTER = '1.6rem'
+const ARROW_GUTTER = '1rem'
 
 export function StyledSelect({
   style,
@@ -42,7 +42,7 @@ export function StyledSelect({
           top: '50%',
           transform: 'translateY(-50%)',
           pointerEvents: 'none',
-          fontSize: '0.5rem',
+          fontSize: '0.54rem',
           lineHeight: 1,
           color: theme.text.secondary,
           userSelect: 'none',
