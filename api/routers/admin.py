@@ -1,17 +1,26 @@
 """Routes administratives des réglages applicatifs non secrets."""
 
 import logging
+import asyncio
+from pathlib import Path
 from typing import Annotated, NoReturn, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
 from api.dependencies import (
     get_app_settings_repository,
+    get_config_service,
+    get_dialogue_index_service,
     get_user_repository,
     require_admin,
 )
 from api.routers.auth import get_current_user_or_none
 from api.schemas.users import AppSettingResponse, AppSettingUpdate
+from services.configuration_service import ConfigurationService
+from services.dialogue_index_service import (
+    DialogueIndexService,
+    DialogueReindexConflictError,
+)
 from services.repositories.sqlite.app_settings_repository import (
     AppSettingsRepository,
     UnsupportedAppSettingError,
@@ -141,3 +150,72 @@ async def delete_app_setting(
         },
     )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/search-stats")
+async def get_search_stats(
+    _admin: Annotated[dict[str, object], Depends(_require_admin_user)],
+    index_service: Annotated[
+        DialogueIndexService, Depends(get_dialogue_index_service)
+    ],
+) -> dict[str, object]:
+    """Statistiques de l'index FTS des dialogues (Story 8.6)."""
+    stats = index_service.get_stats()
+    return {
+        "indexed_count": stats.indexed_count,
+        "last_rebuild_at": stats.last_rebuild_at,
+        "last_search_ms": stats.last_search_ms,
+        "rebuild_status": stats.rebuild_status,
+        "rebuild_error": stats.rebuild_error,
+        "index_bytes": stats.index_bytes,
+    }
+
+
+@router.post("/reindex", status_code=status.HTTP_202_ACCEPTED)
+async def start_dialogue_reindex(
+    request: Request,
+    admin: Annotated[dict[str, object], Depends(_require_admin_user)],
+    index_service: Annotated[
+        DialogueIndexService, Depends(get_dialogue_index_service)
+    ],
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+) -> dict[str, object]:
+    """Lance une réindexation FTS en arrière-plan (admin)."""
+    existing = getattr(request.app.state, "_dialogue_reindex_task", None)
+    if existing is not None and not existing.done():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Réindexation déjà en cours",
+        )
+    try:
+        index_service.begin_rebuild()
+    except DialogueReindexConflictError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
+
+    unity_path = config_service.get_unity_dialogues_path()
+    unity_dir = Path(unity_path) if unity_path else Path(".")
+
+    async def _run() -> None:
+        try:
+            await asyncio.to_thread(
+                index_service.rebuild_from_directory,
+                unity_dir,
+            )
+        except Exception as exc:
+            logger.exception("Échec réindexation dialogues")
+            index_service.fail_rebuild(str(exc))
+
+    task = asyncio.create_task(_run())
+    request.app.state._dialogue_reindex_task = task
+    logger.info(
+        "Réindexation dialogues démarrée",
+        extra={
+            "actor_id": admin.get("id"),
+            "actor_username": admin.get("username"),
+            "action": "dialogues.reindex",
+        },
+    )
+    return {"status": "running", "message": "Réindexation démarrée"}

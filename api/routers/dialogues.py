@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import Response
 
 from api.routers.auth import get_current_user
+from api.utils.job_ownership import job_owner_key
 from starlette.requests import Request
 from api.schemas.dialogue import (
     EstimateTokensRequest,
@@ -26,8 +27,18 @@ from api.schemas.dialogue import (
     BatchExportPreviewRequest,
     BatchExportPreviewResponse,
     BatchExportPreviewItemResponse,
+    DialogueMetadataResponse,
 )
 from pydantic import BaseModel, Field
+from api.schemas.batch_validation import (
+    BatchValidateJobCreateResponse,
+    BatchValidateJobRequest,
+    BatchValidateJobStatusResponse,
+    BatchValidateRequest,
+    BatchValidateResponse,
+    BatchValidationIssueResponse,
+    BatchValidationItemResponse,
+)
 from api.dependencies import (
     get_dialogue_generation_service,
     get_request_id,
@@ -39,6 +50,9 @@ from api.dependencies import (
     get_unity_dialogue_orchestrator,
     get_export_log_service,
     get_document_persistence_service,
+    get_dialogue_metadata_service,
+    get_batch_validation_service,
+    get_batch_validation_job_manager,
     get_llm_usage_service,
     require_non_guest,
 )
@@ -62,6 +76,12 @@ from services.document_persistence_service import (
 from services.document_id_validation import validate_document_id
 from services.unity_export_validation_service import validate_unity_export_document
 from services.batch_export_service import batch_export_documents
+from services.batch_validation_service import (
+    BATCH_VALIDATE_JOB_MIN,
+    BatchValidationReport,
+    BatchValidationService,
+)
+from api.services.batch_validation_job_manager import BatchValidationJobManager
 from services.export_log_recorder import (
     extract_validation_errors,
     record_unity_export_failure,
@@ -69,6 +89,10 @@ from services.export_log_recorder import (
 )
 from services.export_log_service import ExportLogService
 from services.llm_usage_service import LLMUsageService
+from services.dialogue_metadata_service import (
+    DialogueMetadataNotFoundError,
+    DialogueMetadataService,
+)
 from services.unity_export_validation_service import validate_persisted_document
 from services.unity_dialogue_download_service import (
     build_batch_download_zip,
@@ -119,6 +143,64 @@ def _require_dialogue_access(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": "dialogue_access_denied"},
+        ) from exc
+
+
+@router.get(
+    "/{document_id}/metadata",
+    response_model=DialogueMetadataResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_dialogue_metadata(
+    document_id: str,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    metadata_service: Annotated[
+        DialogueMetadataService,
+        Depends(get_dialogue_metadata_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> DialogueMetadataResponse:
+    """Retourne les métadonnées FR86 sans divulguer les dialogues inaccessibles."""
+    try:
+        resolved_id = validate_document_id(document_id)
+        configured_path = config_service.get_unity_dialogues_path()
+        persistence_service.require_access(
+            resolved_id,
+            current_user,
+            (
+                Path(configured_path) / f"{resolved_id}.json"
+                if configured_path
+                else None
+            ),
+        )
+        metadata = metadata_service.get_dialogue_metadata(resolved_id)
+        return DialogueMetadataResponse(
+            document_id=metadata.document_id,
+            name=metadata.name,
+            owner_id=metadata.owner_id,
+            owner_username=metadata.owner_username,
+            last_modified_by=metadata.last_modified_by,
+            last_modified_by_username=metadata.last_modified_by_username,
+            created_at=metadata.created_at,
+            updated_at=metadata.updated_at,
+            node_count=metadata.node_count,
+            total_cost_eur=metadata.total_cost_eur,
+            cost_per_node_eur=metadata.cost_per_node_eur,
+        )
+    except (
+        DialogueAccessDeniedError,
+        DialogueMetadataNotFoundError,
+        ValueError,
+    ) as exc:
+        raise NotFoundException(
+            resource_type="Dialogue",
+            resource_id=document_id,
+            request_id=request_id,
         ) from exc
 
 
@@ -753,6 +835,251 @@ async def batch_export_unity_dialogues(
             message="Erreur lors de l'export batch Unity JSON",
             request_id=request_id,
         )
+
+
+def _batch_report_to_response(report: BatchValidationReport) -> BatchValidateResponse:
+    """Convertit le rapport métier en schéma HTTP."""
+    return BatchValidateResponse(
+        items=[
+            BatchValidationItemResponse(
+                document_id=item.document_id,
+                status=item.status,
+                issues=[
+                    BatchValidationIssueResponse(
+                        type=issue.type,
+                        message=issue.message,
+                        severity=issue.severity,
+                        source=issue.source,
+                        node_id=issue.node_id,
+                    )
+                    for issue in item.issues
+                ],
+                validated_at=item.validated_at,
+            )
+            for item in report.items
+        ],
+        cancelled=report.cancelled,
+        started_at=report.started_at,
+        finished_at=report.finished_at,
+        valid_count=report.valid_count,
+        invalid_count=report.invalid_count,
+        skipped_count=report.skipped_count,
+    )
+
+
+def _can_access_document(
+    document_id: str,
+    persistence_service: DocumentPersistenceService,
+    current_user: dict[str, object],
+    config_service: ConfigurationService,
+) -> bool:
+    """Indique si l'utilisateur peut lire le dialogue (sans lever 403).
+
+    Les IDs invalides ne sont pas traités comme un refus RBAC : le service
+    les classera en ``skipped``.
+    """
+    try:
+        resolved_id = validate_document_id(document_id)
+    except ValueError:
+        return True
+    try:
+        configured_path = config_service.get_unity_dialogues_path()
+        persistence_service.require_access(
+            resolved_id,
+            current_user,
+            (
+                Path(configured_path) / f"{resolved_id}.json"
+                if configured_path
+                else None
+            ),
+        )
+        return True
+    except DialogueAccessDeniedError:
+        return False
+
+
+@router.post(
+    "/batch-validate",
+    response_model=BatchValidateResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def batch_validate_dialogues(
+    request_data: BatchValidateRequest,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    batch_service: Annotated[
+        BatchValidationService,
+        Depends(get_batch_validation_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> BatchValidateResponse:
+    """Valide synchrone un petit lot (N < 20) — Story 8.8 / FR87."""
+    if len(request_data.document_ids) >= BATCH_VALIDATE_JOB_MIN:
+        raise ValidationException(
+            message=(
+                f"Utilisez POST /batch-validate/jobs pour N ≥ {BATCH_VALIDATE_JOB_MIN}"
+            ),
+            details={"count": len(request_data.document_ids)},
+            request_id=request_id,
+        )
+    report = batch_service.validate_batch(
+        request_data.document_ids,
+        can_access=lambda doc_id: _can_access_document(
+            doc_id,
+            persistence_service,
+            current_user,
+            config_service,
+        ),
+    )
+    return _batch_report_to_response(report)
+
+
+@router.post(
+    "/batch-validate/jobs",
+    response_model=BatchValidateJobCreateResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def start_batch_validate_job(
+    request_data: BatchValidateJobRequest,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    batch_service: Annotated[
+        BatchValidationService,
+        Depends(get_batch_validation_service),
+    ],
+    job_manager: Annotated[
+        BatchValidationJobManager,
+        Depends(get_batch_validation_job_manager),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> BatchValidateJobCreateResponse:
+    """Lance un job async de validation batch (N ≥ 20)."""
+    import asyncio
+
+    owner = job_owner_key(current_user)
+    job_id = job_manager.create_job(request_data.document_ids, owner)
+
+    def _run() -> None:
+        try:
+            report = batch_service.validate_batch(
+                request_data.document_ids,
+                can_access=lambda doc_id: _can_access_document(
+                    doc_id,
+                    persistence_service,
+                    current_user,
+                    config_service,
+                ),
+                should_cancel=lambda: job_manager.is_cancelled(job_id),
+                on_progress=lambda current, _total, _item: job_manager.set_progress(
+                    job_id, current
+                ),
+            )
+            payload = _batch_report_to_response(report).model_dump()
+            final_status = "cancelled" if report.cancelled else "completed"
+            job_manager.complete(job_id, status=final_status, report=payload)
+        except Exception as exc:  # noqa: BLE001
+            logger.exception(
+                "Job batch-validate %s échoué (request_id: %s)", job_id, request_id
+            )
+            job_manager.complete(job_id, status="error", error=str(exc))
+
+    async def _runner() -> None:
+        await asyncio.to_thread(_run)
+
+    task = asyncio.create_task(_runner())
+    job_manager.register_task(job_id, task)
+    return BatchValidateJobCreateResponse(
+        job_id=job_id,
+        status="queued",
+        total=len(request_data.document_ids),
+    )
+
+
+@router.get(
+    "/batch-validate/jobs/{job_id}",
+    response_model=BatchValidateJobStatusResponse,
+)
+async def get_batch_validate_job(
+    job_id: str,
+    job_manager: Annotated[
+        BatchValidationJobManager,
+        Depends(get_batch_validation_job_manager),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> BatchValidateJobStatusResponse:
+    """Retourne l'état / le rapport d'un job de validation batch."""
+    job = job_manager.get_job(job_id)
+    if job is None:
+        raise NotFoundException(
+            resource_type="BatchValidateJob",
+            resource_id=job_id,
+            request_id=request_id,
+        )
+    owner = job_owner_key(current_user)
+    if job.get("owner_username") != owner and current_user.get("role") != "admin":
+        raise NotFoundException(
+            resource_type="BatchValidateJob",
+            resource_id=job_id,
+            request_id=request_id,
+        )
+    report_payload = job.get("report")
+    report = (
+        BatchValidateResponse(**report_payload)
+        if isinstance(report_payload, dict)
+        else None
+    )
+    return BatchValidateJobStatusResponse(
+        job_id=job_id,
+        status=job["status"],
+        current=int(job.get("current") or 0),
+        total=int(job.get("total") or 0),
+        cancelled=bool(job.get("cancelled")),
+        error=job.get("error"),
+        report=report,
+    )
+
+
+@router.post(
+    "/batch-validate/jobs/{job_id}/cancel",
+    response_model=BatchValidateJobStatusResponse,
+)
+async def cancel_batch_validate_job(
+    job_id: str,
+    job_manager: Annotated[
+        BatchValidationJobManager,
+        Depends(get_batch_validation_job_manager),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> BatchValidateJobStatusResponse:
+    """Annule un job de validation batch en cours."""
+    job = job_manager.get_job(job_id)
+    if job is None:
+        raise NotFoundException(
+            resource_type="BatchValidateJob",
+            resource_id=job_id,
+            request_id=request_id,
+        )
+    owner = job_owner_key(current_user)
+    if job.get("owner_username") != owner and current_user.get("role") != "admin":
+        raise NotFoundException(
+            resource_type="BatchValidateJob",
+            resource_id=job_id,
+            request_id=request_id,
+        )
+    job_manager.cancel_job(job_id)
+    return await get_batch_validate_job(
+        job_id, job_manager, current_user, request_id
+    )
 
 
 @router.get("/{document_id}/preview-export", response_model=ExportPreviewResponse)

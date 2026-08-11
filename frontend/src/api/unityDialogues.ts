@@ -12,10 +12,30 @@ import type {
 import type { UnitySchemaReferenceResponse } from '../types/graph'
 
 /**
- * Liste tous les fichiers de dialogues Unity JSON.
+ * Options de pagination serveur (opt-in). Omettre `page` conserve le
+ * comportement historique : la réponse contient la liste complète.
  */
-export async function listUnityDialogues(): Promise<UnityDialogueListResponse> {
-  const response = await apiClient.get<UnityDialogueListResponse>('/api/v1/unity-dialogues')
+export interface ListUnityDialoguesParams {
+  page?: number
+  pageSize?: number
+}
+
+/**
+ * Liste les fichiers de dialogues Unity JSON visibles par l'utilisateur.
+ *
+ * Sans `page`, l'API renvoie la liste complète (rétrocompatible). Avec `page`,
+ * la réponse est paginée (`page`, `page_size`, `total_pages` renseignés).
+ */
+export async function listUnityDialogues(
+  params?: ListUnityDialoguesParams
+): Promise<UnityDialogueListResponse> {
+  const query: Record<string, number> = {}
+  if (params?.page != null) query.page = params.page
+  if (params?.pageSize != null) query.page_size = params.pageSize
+  const response = await apiClient.get<UnityDialogueListResponse>(
+    '/api/v1/unity-dialogues',
+    Object.keys(query).length > 0 ? { params: query } : undefined
+  )
   return response.data
 }
 

@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from core.llm.llm_client import ILLMClient
 from models.dialogue_structure.unity_dialogue_node import UnityDialogueChoiceContent
@@ -170,6 +170,7 @@ class GraphNodeOrchestrator:
         player_character_id: Optional[str] = None,
         max_depth: Optional[int] = None,
         choices_mode: Optional[ChoicesMode] = None,
+        progress_callback: Optional[Callable[[int, int], None]] = None,
     ) -> GenerationResult:
         """Point d'entrée unique – dispatche vers le bon mode de génération.
 
@@ -201,6 +202,7 @@ class GraphNodeOrchestrator:
                 dialogue_nodes=dialogue_nodes,
                 player_choice_label=choice_label,
                 choices_mode=effective_choices_mode,
+                progress_callback=progress_callback,
             )
 
         parent_speaker = parent_node_content.get("speaker", "PNJ")
@@ -275,6 +277,7 @@ class GraphNodeOrchestrator:
         dialogue_nodes: Optional[List[Dict[str, Any]]] = None,
         player_choice_label: str = DEFAULT_PLAYER_CHARACTER,
         choices_mode: ChoicesMode = "capped",
+        progress_callback: Optional[Callable[[int, int], None]] = None,
     ) -> GenerationResult:
         if not parent_choices:
             raise ValueError("Aucun choix disponible pour la génération batch.")
@@ -288,7 +291,7 @@ class GraphNodeOrchestrator:
             llm_client=llm_client,
             system_prompt_override=system_prompt_override,
             max_choices=max_choices,
-            progress_callback=None,
+            progress_callback=progress_callback,
             dialogue_nodes=dialogue_nodes,
             player_choice_label=player_choice_label,
             choices_mode=choices_mode,

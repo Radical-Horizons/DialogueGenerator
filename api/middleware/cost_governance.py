@@ -21,6 +21,7 @@ GENERATION_ENDPOINTS = [
     "/api/v1/dialogues/generate/unity-dialogue",
     "/api/v1/dialogues/generate/variants",
     "/api/v1/unity-dialogues/graph/generate-node",
+    "/api/v1/unity-dialogues/graph/batch-generate-from-nodes/jobs",
     "/api/v1/dialogues/generate/jobs",  # Streaming generation
 ]
 
@@ -30,10 +31,13 @@ DEFAULT_COMPLETION_TOKENS = 1000  # Estimation conservatrice
 
 # Plafond anti-abus pour les en-têtes d'estimation client (POST body illisible en middleware)
 _MAX_HEADER_TOKEN_ESTIMATE = 2_000_000
+_MAX_BATCH_PARENT_COUNT = 100
+_DEFAULT_BATCH_PARENT_COUNT = 10  # seuil job FR88
 
 _HEADER_PROMPT = "x-estimated-prompt-tokens"
 _HEADER_COMPLETION = "x-estimated-completion-tokens"
 _HEADER_LLM_MODEL = "x-llm-model"
+_HEADER_BATCH_PARENT_COUNT = "x-batch-parent-count"
 
 
 def _parse_positive_int_header(request: Request, header_name: str) -> Optional[int]:
@@ -44,12 +48,46 @@ def _parse_positive_int_header(request: Request, header_name: str) -> Optional[i
     try:
         value = int(str(raw).strip())
     except (TypeError, ValueError):
-        logger.debug("En-tête %s ignoré (valeur non entière): %r", header_name, raw)
         return None
-    if value < 0 or value > _MAX_HEADER_TOKEN_ESTIMATE:
-        logger.debug("En-tête %s ignoré (hors plage): %s", header_name, value)
+    if value <= 0 or value > _MAX_HEADER_TOKEN_ESTIMATE:
         return None
     return value
+
+
+def _is_cost_governed_generation_path(path: str) -> bool:
+    """True si le POST doit passer le contrôle budget (exclut /cancel)."""
+    normalized = path.rstrip("/") or path
+    if normalized.endswith("/cancel"):
+        return False
+    return any(
+        normalized == endpoint.rstrip("/") or normalized.startswith(endpoint)
+        for endpoint in GENERATION_ENDPOINTS
+    )
+
+
+def _batch_parent_count_for_estimate(request: Request) -> int:
+    """Nombre de parents pour multiplier l'estimation batch-generate.
+
+    ⚠️ Best-effort seulement : le body POST n'est pas lisible en middleware
+    (stream à consommation unique), donc ce compte vient d'un header client
+    auto-déclaré et non vérifié. Ce n'est PAS le contrôle budgétaire qui fait
+    autorité pour ``/batch-generate-from-nodes/jobs`` — celui-ci vit dans le
+    router (``_check_batch_budget_or_raise`` dans
+    ``api/routers/graph_generation.py``), qui utilise le N réel du body
+    désérialisé. Ce pré-check middleware n'est qu'un filtre rapide.
+    """
+    raw = request.headers.get(_HEADER_BATCH_PARENT_COUNT)
+    if raw is not None:
+        try:
+            value = int(str(raw).strip())
+        except (TypeError, ValueError):
+            value = _DEFAULT_BATCH_PARENT_COUNT
+        else:
+            if value <= 0:
+                value = _DEFAULT_BATCH_PARENT_COUNT
+            value = min(value, _MAX_BATCH_PARENT_COUNT)
+            return value
+    return _DEFAULT_BATCH_PARENT_COUNT
 
 
 class CostGovernanceMiddleware(BaseHTTPMiddleware):
@@ -85,7 +123,7 @@ class CostGovernanceMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
         
         path = request.url.path
-        if not any(path.startswith(endpoint) for endpoint in GENERATION_ENDPOINTS):
+        if not _is_cost_governed_generation_path(path):
             return await call_next(request)
         
         try:
@@ -216,6 +254,11 @@ class CostGovernanceMiddleware(BaseHTTPMiddleware):
             # Génération de variantes: tokens plus élevés (multiples réponses)
             prompt_tokens = DEFAULT_PROMPT_TOKENS
             completion_tokens = DEFAULT_COMPLETION_TOKENS * 2  # Estimation conservatrice pour variantes
+        elif "/batch-generate-from-nodes/jobs" in path:
+            # Multi-parents FR88 : multiplier par N (header X-Batch-Parent-Count)
+            batch_count = _batch_parent_count_for_estimate(request)
+            prompt_tokens = DEFAULT_PROMPT_TOKENS * batch_count
+            completion_tokens = DEFAULT_COMPLETION_TOKENS * batch_count
         elif "/generate/jobs" in path:
             # Streaming generation: tokens similaires mais traitement spécial
             prompt_tokens = DEFAULT_PROMPT_TOKENS
@@ -225,6 +268,7 @@ class CostGovernanceMiddleware(BaseHTTPMiddleware):
             prompt_tokens = DEFAULT_PROMPT_TOKENS
             completion_tokens = DEFAULT_COMPLETION_TOKENS
 
+        # Headers d'estimation client : remplacent le total (agrégé côté client si batch).
         hdr_pt = _parse_positive_int_header(request, _HEADER_PROMPT)
         hdr_ct = _parse_positive_int_header(request, _HEADER_COMPLETION)
         if hdr_pt is not None:

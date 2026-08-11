@@ -1,7 +1,16 @@
 /**
  * Composant pour afficher un item de dialogue Unity dans la liste.
  */
-import { forwardRef, memo, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react'
+import {
+  forwardRef,
+  memo,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+  type MouseEvent,
+} from 'react'
 import { theme } from '../../theme'
 import { redesignFont, redesignText } from '../../theme/redesignTokens'
 import { remSize } from '../../theme/uiTypography'
@@ -9,6 +18,7 @@ import { listItemSelectionStyle, listRowHairlineBorder, listRowHoverBackground }
 import type { UnityDialogueMetadata } from '../../types/api'
 import { highlightText } from '../../utils/textHighlight'
 import { getDialogueDisplayTitle } from '../../utils/formatDialogueTitle'
+import { formatCostEur, formatRelativeTime } from '../../utils/dialogueMetadataFormat'
 
 export interface UnityDialogueItemProps {
   dialogue: UnityDialogueMetadata
@@ -28,7 +38,13 @@ export interface UnityDialogueItemProps {
   batchMode?: boolean
   isChecked?: boolean
   onCheckChange?: (checked: boolean) => void
+  /** Collections contenant ce dialogue (FR84). */
+  collections?: Array<{ id: string; name: string; icon?: string | null }>
+  /** Clic sur un badge collection → active le filtre. */
+  onCollectionClick?: (collectionId: string) => void
 }
+
+const MAX_DISPLAYED_SPEAKERS = 8
 
 const itemInteractiveStyle: CSSProperties = {
   width: '100%',
@@ -61,11 +77,22 @@ export const UnityDialogueItem = memo(
         batchMode = false,
         isChecked = false,
         onCheckChange,
+        collections = [],
+        onCollectionClick,
       },
       ref
     ) {
       const [isHovered, setIsHovered] = useState(false)
+      const [showMetadataTooltip, setShowMetadataTooltip] = useState(false)
+      const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
       const showFilename = isSelected || isHovered
+
+      useEffect(
+        () => () => {
+          if (tooltipTimer.current) clearTimeout(tooltipTimer.current)
+        },
+        []
+      )
 
       const formatSize = (bytes: number): string => {
         if (bytes < 1024) return `${bytes} B`
@@ -103,6 +130,18 @@ export const UnityDialogueItem = memo(
       const shareCount = Math.max(0, dialogue.share_count ?? 0)
       const sharingLabel =
         shareCount === 0 ? 'Privé' : `Co-édité (${shareCount})`
+      const relativeModifiedTime = formatRelativeTime(dialogue.modified_time)
+      const metadataTooltip = `${dialogue.node_count ?? 0} nœud${
+        dialogue.node_count === 1 ? '' : 's'
+      }${
+        dialogue.total_cost_eur != null && dialogue.total_cost_eur > 0
+          ? `, ${formatCostEur(dialogue.total_cost_eur)}`
+          : ''
+      }, modifié ${relativeModifiedTime}${
+        dialogue.last_modified_by_username
+          ? ` par ${dialogue.last_modified_by_username}`
+          : ''
+      }`
 
       const selectionStyle = listItemSelectionStyle(isSelected)
 
@@ -166,8 +205,54 @@ export const UnityDialogueItem = memo(
             ) : (
               <span>{formatSize(dialogue.size_bytes)}</span>
             )}
+            {dialogue.total_cost_eur != null && dialogue.total_cost_eur > 0 && (
+              <>
+                <span aria-hidden>•</span>
+                <span data-testid="unity-dialogue-item-cost">
+                  {formatCostEur(dialogue.total_cost_eur)}
+                </span>
+              </>
+            )}
+            {dialogue.speakers && dialogue.speakers.length > 0 && (
+              <>
+                <span aria-hidden>•</span>
+                <span
+                  data-testid="unity-dialogue-item-speakers"
+                  title={dialogue.speakers.join(', ')}
+                >
+                  {highlightText(
+                    dialogue.speakers.slice(0, MAX_DISPLAYED_SPEAKERS).join(', '),
+                    searchQuery
+                  )}
+                  {dialogue.speakers.length > MAX_DISPLAYED_SPEAKERS &&
+                    ` +${dialogue.speakers.length - MAX_DISPLAYED_SPEAKERS}`}
+                </span>
+              </>
+            )}
+            {(dialogue.owner_username || dialogue.owner_id) && (
+              <>
+                <span aria-hidden>•</span>
+                <span
+                  data-testid="unity-dialogue-item-author"
+                  title="Auteur"
+                >
+                  {dialogue.owner_username || 'Auteur inconnu'}
+                </span>
+              </>
+            )}
             <span aria-hidden>•</span>
-            <span>{formatDate(dialogue.modified_time)}</span>
+            <span title="Dernière modification">{relativeModifiedTime}</span>
+            {dialogue.created_at && (
+              <>
+                <span aria-hidden>•</span>
+                <span
+                  data-testid="unity-dialogue-item-created"
+                  title="Date de création"
+                >
+                  créé {formatDate(dialogue.created_at)}
+                </span>
+              </>
+            )}
             <span
               data-testid="unity-dialogue-sharing-badge"
               title={sharingLabel}
@@ -180,7 +265,54 @@ export const UnityDialogueItem = memo(
             >
               {sharingLabel}
             </span>
+            {collections.map((collection) => (
+              <button
+                key={collection.id}
+                type="button"
+                data-testid={`unity-dialogue-collection-badge-${collection.id}`}
+                title={`Ouvrir la collection ${collection.name}`}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onCollectionClick?.(collection.id)
+                }}
+                style={{
+                  padding: '0.05rem 0.3rem',
+                  borderRadius: '999px',
+                  border: `1px solid ${theme.border.primary}`,
+                  backgroundColor: 'transparent',
+                  color: theme.text.secondary,
+                  cursor: onCollectionClick ? 'pointer' : 'default',
+                  fontSize: 'inherit',
+                }}
+              >
+                {collection.icon ? `${collection.icon} ` : ''}
+                {collection.name}
+              </button>
+            ))}
           </div>
+          {showMetadataTooltip && (
+            <div
+              role="tooltip"
+              data-testid="unity-dialogue-metadata-tooltip"
+              style={{
+                position: 'absolute',
+                zIndex: 20,
+                left: '0.5rem',
+                right: '0.5rem',
+                bottom: 'calc(100% - 0.25rem)',
+                padding: '0.45rem 0.6rem',
+                borderRadius: 6,
+                border: `1px solid ${theme.border.primary}`,
+                backgroundColor: theme.background.secondary,
+                color: theme.text.primary,
+                boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
+                fontSize: '0.72rem',
+                pointerEvents: 'none',
+              }}
+            >
+              {metadataTooltip}
+            </div>
+          )}
         </>
       )
 
@@ -200,21 +332,36 @@ export const UnityDialogueItem = memo(
         ...selectionStyle,
         flex: batchMode ? 1 : undefined,
         minWidth: 0,
+        position: 'relative' as const,
       }
 
       const hoverHandlers = {
         onMouseEnter: (e: MouseEvent<HTMLElement>) => {
           setIsHovered(true)
+          setShowMetadataTooltip(true)
+          if (tooltipTimer.current) clearTimeout(tooltipTimer.current)
+          tooltipTimer.current = setTimeout(
+            () => setShowMetadataTooltip(false),
+            3000
+          )
           if (!isSelected) {
             e.currentTarget.style.backgroundColor = listRowHoverBackground
           }
         },
         onMouseLeave: (e: MouseEvent<HTMLElement>) => {
           setIsHovered(false)
+          setShowMetadataTooltip(false)
+          if (tooltipTimer.current) clearTimeout(tooltipTimer.current)
           if (!isSelected) {
             e.currentTarget.style.backgroundColor = 'transparent'
           }
         },
+      }
+
+      const handleClick = () => {
+        setShowMetadataTooltip(false)
+        if (tooltipTimer.current) clearTimeout(tooltipTimer.current)
+        onClick()
       }
 
       if (asListboxOption) {
@@ -226,8 +373,8 @@ export const UnityDialogueItem = memo(
             aria-selected={isSelected}
             tabIndex={isActiveOption ? 0 : -1}
             data-testid="unity-dialogue-item"
-            title={titleText}
-            onClick={onClick}
+            aria-label={titleText}
+            onClick={handleClick}
             onContextMenu={onContextMenu}
             onKeyDown={onOptionKeyDown}
             style={{
@@ -247,7 +394,7 @@ export const UnityDialogueItem = memo(
         return (
           <div
             data-testid="unity-dialogue-item"
-            title={titleText}
+            aria-label={titleText}
             aria-pressed={isSelected}
             onContextMenu={onContextMenu}
             style={{
@@ -257,8 +404,7 @@ export const UnityDialogueItem = memo(
               borderBottom: listRowHairlineBorder,
               ...selectionStyle,
             }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            {...hoverHandlers}
           >
             {batchCheckbox}
             <button
@@ -266,7 +412,7 @@ export const UnityDialogueItem = memo(
               type="button"
               data-list-row
               aria-pressed={isSelected}
-              onClick={onClick}
+              onClick={handleClick}
               onContextMenu={onContextMenu}
               style={{
                 // Le motif de sélection appartient au conteneur ci-dessus. Le
@@ -297,8 +443,8 @@ export const UnityDialogueItem = memo(
           data-testid="unity-dialogue-item"
           data-list-row
           aria-pressed={isSelected}
-          title={titleText}
-          onClick={onClick}
+          aria-label={titleText}
+          onClick={handleClick}
           onContextMenu={onContextMenu}
           style={interactiveStyle}
           {...hoverHandlers}

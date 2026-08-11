@@ -111,7 +111,7 @@ function normalizeParentContentForGeneration(content: Record<string, unknown>): 
 
 export type GenerationSlice = Pick<
   GraphState,
-  'generateFromNode' | 'acceptNode' | 'rejectNode' | 'regenerateNode'
+  'generateFromNode' | 'applyGenerateNodeResponse' | 'acceptNode' | 'rejectNode' | 'regenerateNode'
 >
 
 export const createGenerationSlice: StateCreator<
@@ -225,6 +225,54 @@ export const createGenerationSlice: StateCreator<
         { llmModelIdentifier: llmModelIdentifier ?? undefined }
       )
 
+      return await get().applyGenerateNodeResponse(parentNodeId, response, {
+        ...options,
+        context_selections: contextSelections,
+        instructions,
+        generate_all_choices: generateAllChoices,
+        target_choice_index: targetChoiceIndex,
+        onBatchProgress,
+        _generationSeq: generationSeq,
+      })
+    } catch (error: unknown) {
+      console.error('Erreur lors de la génération de nœud:', error)
+      set({ isGenerating: false })
+      throw error
+    }
+  },
+
+  applyGenerateNodeResponse: async (parentNodeId, response, options = {}) => {
+    const generationSeq =
+      typeof options._generationSeq === 'number'
+        ? (options._generationSeq as number)
+        : get().activeLoadSeq
+    const skipGeneratingFlag = options._generationSeq != null
+    if (!skipGeneratingFlag) {
+      set({ isGenerating: true })
+    }
+    try {
+      const state = get()
+      const parentNode = state.nodes.find((n) => n.id === parentNodeId)
+      if (!parentNode) {
+        throw new Error(`Nœud parent ${parentNodeId} introuvable`)
+      }
+
+      const contextSelections =
+        typeof options.context_selections === 'object' && options.context_selections != null
+          ? (options.context_selections as Record<string, unknown>)
+          : {}
+      const instructions =
+        typeof options.instructions === 'string' ? options.instructions : ''
+      const targetChoiceIndex =
+        typeof options.target_choice_index === 'number'
+          ? options.target_choice_index
+          : null
+      const generateAllChoices = options.generate_all_choices !== false
+      const onBatchProgress =
+        typeof options.onBatchProgress === 'function'
+          ? (options.onBatchProgress as (current: number, total: number) => void)
+          : undefined
+
       const isTestNode =
         parentNode.type === 'testNode' ||
         parentNodeId.startsWith('test-node-') ||
@@ -296,7 +344,6 @@ export const createGenerationSlice: StateCreator<
           }
         }
       } else if (isBatch && generatedNodes.length > 0) {
-        // Batch API : inclure tous les nœuds (choix avec test = 4 nœuds + connexions test-*).
         nodesToAdd = generatedNodes.map((node, index) => ({
           node,
           choiceIndex: index,
@@ -423,7 +470,6 @@ export const createGenerationSlice: StateCreator<
               ? conn.connection_type
               : undefined
 
-        // Une connexion de choix sans index est ambiguë : on la remplace par le fallback frontend plus bas.
         if (conn.connection_type === 'choice' && conn.via_choice_index === undefined && !sourceHandle) {
           continue
         }
@@ -557,7 +603,7 @@ export const createGenerationSlice: StateCreator<
 
       return { nodeId: firstNodeId ?? null, batchInfo }
     } catch (error: unknown) {
-      console.error('Erreur lors de la génération de nœud:', error)
+      console.error('Erreur lors de l\'application de la génération:', error)
       set({ isGenerating: false })
       throw error
     }

@@ -41,11 +41,13 @@ const FIXTURE = [
 describe('DialogueCombobox', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    localStorage.clear()
     mockList.mockResolvedValue({ dialogues: [...FIXTURE], total: FIXTURE.length })
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
+    localStorage.clear()
   })
 
   it('rend un déclencheur ARIA combobox fermé par défaut', async () => {

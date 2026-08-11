@@ -675,6 +675,38 @@ class BatchExportPreviewResponse(BaseModel):
 
 
 # Schemas pour la bibliothèque Unity Dialogues
+class DialogueMetadataResponse(BaseModel):
+    """Métadonnées détaillées d'un dialogue accessibles selon le RBAC."""
+
+    document_id: str = Field(..., description="Identifiant stable du dialogue")
+    name: str = Field(..., description="Titre extrait ou nom du fichier")
+    owner_id: Optional[str] = Field(None, description="Identifiant du propriétaire")
+    owner_username: Optional[str] = Field(None, description="Nom du propriétaire")
+    last_modified_by: Optional[str] = Field(
+        None,
+        description="Identifiant du dernier éditeur",
+    )
+    last_modified_by_username: Optional[str] = Field(
+        None,
+        description="Nom du dernier éditeur",
+    )
+    created_at: str = Field(
+        ...,
+        description="Date de création indexée (ISO-8601 UTC)",
+    )
+    updated_at: str = Field(
+        ...,
+        description="Date de dernière modification indexée (ISO-8601 UTC)",
+    )
+    node_count: int = Field(..., ge=0, description="Nombre de nœuds du document")
+    total_cost_eur: float = Field(..., ge=0, description="Coût LLM total en euros")
+    cost_per_node_eur: float = Field(
+        ...,
+        ge=0,
+        description="Coût LLM total divisé par le nombre de nœuds du document",
+    )
+
+
 class UnityDialogueMetadata(BaseModel):
     """Métadonnées d'un fichier de dialogue Unity JSON.
     
@@ -689,16 +721,68 @@ class UnityDialogueMetadata(BaseModel):
     file_path: str = Field(..., description="Chemin absolu du fichier")
     size_bytes: int = Field(..., description="Taille en octets")
     modified_time: str = Field(..., description="Date de modification (ISO format)")
-    title: Optional[str] = Field(None, description="Titre extrait du dialogue")
-    node_count: Optional[int] = Field(
-        default=None,
-        ge=0,
-        description="Nombre de nœuds du dialogue ; None si le JSON est illisible.",
+    created_at: Optional[str] = Field(
+        None,
+        description=(
+            "Date de création (ISO). Issue de l'index SQLite si le dialogue est "
+            "indexé, sinon repli sur l'horodatage du fichier."
+        ),
     )
+    node_count: Optional[int] = Field(
+        None,
+        ge=0,
+        description=(
+            "Nombre de nœuds du dialogue Unity. None si le JSON est illisible."
+        ),
+    )
+    title: Optional[str] = Field(None, description="Titre extrait du dialogue")
     edge_count: Optional[int] = Field(
         default=None,
         ge=0,
         description="Nombre de liens sortants (choix ciblés + enchaînements directs).",
+    )
+    speakers: Optional[List[str]] = Field(
+        default=None,
+        description=(
+            "Personnages (valeurs `speaker`) uniques du dialogue, dans l'ordre "
+            "d'apparition. Liste vide si aucun nœud n'a de `speaker` ; None si "
+            "le JSON est illisible. Alimente la recherche par personnage (FR81)."
+        ),
+    )
+    search_text: Optional[str] = Field(
+        default=None,
+        description=(
+            "Texte cherchable en minuscules : concaténation bornée des répliques "
+            "(`line`) du dialogue, pour la recherche plein-texte côté client "
+            "(FR81). None si le JSON est illisible."
+        ),
+    )
+    owner_id: Optional[str] = Field(
+        default=None,
+        description=(
+            "Identifiant du propriétaire (dialogues_index.owner_id). None si le "
+            "dialogue n'est pas indexé. Alimente le filtre auteur (FR82)."
+        ),
+    )
+    owner_username: Optional[str] = Field(
+        default=None,
+        description=(
+            "Nom d'utilisateur du propriétaire, résolu depuis users. None si "
+            "non indexé ou si le compte est introuvable."
+        ),
+    )
+    total_cost_eur: Optional[float] = Field(
+        default=None,
+        ge=0,
+        description="Coût LLM total en euros ; 0 si aucun usage connu.",
+    )
+    last_modified_by: Optional[str] = Field(
+        default=None,
+        description="Identifiant du dernier éditeur indexé.",
+    )
+    last_modified_by_username: Optional[str] = Field(
+        default=None,
+        description="Nom du dernier éditeur indexé.",
     )
     share_count: int = Field(
         default=0,
@@ -715,11 +799,23 @@ class UnityDialogueListResponse(BaseModel):
     """Réponse pour la liste des dialogues Unity.
     
     Attributes:
-        dialogues: Liste des métadonnées des fichiers.
-        total: Nombre total de fichiers.
+        dialogues: Liste des métadonnées des fichiers (page courante si paginé).
+        total: Nombre total de dialogues visibles (après filtrage RBAC).
+        page: Numéro de page courante (1-indexé) si la pagination est active.
+        page_size: Taille de page appliquée si la pagination est active.
+        total_pages: Nombre total de pages si la pagination est active.
     """
     dialogues: List[UnityDialogueMetadata] = Field(..., description="Liste des métadonnées")
-    total: int = Field(..., description="Nombre total de fichiers")
+    total: int = Field(..., description="Nombre total de dialogues visibles")
+    page: Optional[int] = Field(
+        None, description="Numéro de page courante (1-indexé), None si non paginé"
+    )
+    page_size: Optional[int] = Field(
+        None, description="Taille de page appliquée, None si non paginé"
+    )
+    total_pages: Optional[int] = Field(
+        None, description="Nombre total de pages, None si non paginé"
+    )
 
 
 class UnitySchemaSectionSummary(BaseModel):

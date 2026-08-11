@@ -22,12 +22,32 @@ vi.mock('../../api/documents', () => ({
   putDocument: vi.fn(),
 }))
 
+vi.mock('../../api/collections', () => ({
+  listCollections: vi.fn().mockResolvedValue([]),
+  createCollection: vi.fn(),
+  updateCollection: vi.fn(),
+  deleteCollection: vi.fn(),
+  addDialoguesToCollection: vi.fn(),
+  removeDialoguesFromCollection: vi.fn(),
+  buildDocumentCollectionMap: () => new Map(),
+}))
+
+vi.mock('../../api/dialogueSearch', () => ({
+  searchUnityDialogues: vi.fn().mockResolvedValue({
+    query: '',
+    elapsed_ms: 0,
+    document_ids: [],
+    total: 0,
+  }),
+}))
+
 const mockList = vi.mocked(unityDialoguesAPI.listUnityDialogues)
 const mockValidateDocumentSchema = vi.mocked(dialoguesAPI.validateDocumentSchema)
 
 describe('UnityDialogueList', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    localStorage.clear()
     mockList.mockResolvedValue({
       dialogues: [
         {
@@ -144,6 +164,187 @@ describe('UnityDialogueList', () => {
 
     await user.click(item.querySelector('button') ?? item)
     expect(onSelect).toHaveBeenCalledWith(null)
+  })
+
+  it('affiche le nombre de nœuds dans un item enrichi', async () => {
+    mockList.mockResolvedValueOnce({
+      dialogues: [
+        {
+          filename: 'enrichi.json',
+          file_path: '/data/enrichi.json',
+          modified_time: '2026-04-08T12:00:00.000Z',
+          created_at: '2026-04-01T09:00:00.000Z',
+          size_bytes: 2048,
+          node_count: 3,
+          title: 'Enrichi',
+          share_count: 0,
+        },
+      ],
+      total: 1,
+    })
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+
+    const nodeCount = await screen.findByTestId('unity-dialogue-structure')
+    expect(nodeCount).toHaveTextContent('3 RÉPLIQUES')
+    expect(screen.getByTestId('unity-dialogue-item-created')).toHaveTextContent('créé')
+  })
+
+  it('affiche les personnages et filtre par personnage (FR81)', async () => {
+    const user = userEvent.setup()
+    mockList.mockResolvedValueOnce({
+      dialogues: [
+        {
+          filename: 'uresair.json',
+          file_path: '/data/uresair.json',
+          modified_time: '2026-04-08T12:00:00.000Z',
+          size_bytes: 1024,
+          title: 'Rencontre',
+          speakers: ['Uresaïr', 'Voknir'],
+          search_text: 'bonjour',
+          share_count: 0,
+        },
+        {
+          filename: 'luna.json',
+          file_path: '/data/luna.json',
+          modified_time: '2026-04-07T12:00:00.000Z',
+          size_bytes: 1024,
+          title: 'Autre',
+          speakers: ['Luna'],
+          search_text: 'salut',
+          share_count: 0,
+        },
+      ],
+      total: 2,
+    })
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+
+    const speakers = await screen.findAllByTestId('unity-dialogue-item-speakers')
+    expect(speakers[0]).toHaveTextContent('Uresaïr, Voknir')
+    expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(2)
+
+    await user.type(screen.getByPlaceholderText('Chercher un dialogue…'), 'voknir')
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(1)
+    })
+    expect(screen.getByTestId('unity-dialogue-item-title')).toHaveTextContent('Rencontre')
+  })
+
+  it('filtre par auteur via le select et retire le badge (FR82)', async () => {
+    const user = userEvent.setup()
+    mockList.mockResolvedValueOnce({
+      dialogues: [
+        {
+          filename: 'a.json',
+          file_path: '/data/a.json',
+          modified_time: '2026-04-08T12:00:00.000Z',
+          created_at: '2026-04-08T12:00:00.000Z',
+          size_bytes: 1024,
+          title: 'De Marc',
+          owner_id: 'u-marc',
+          owner_username: 'marc',
+          share_count: 0,
+        },
+        {
+          filename: 'b.json',
+          file_path: '/data/b.json',
+          modified_time: '2026-04-07T12:00:00.000Z',
+          created_at: '2026-04-07T12:00:00.000Z',
+          size_bytes: 1024,
+          title: 'De Luna',
+          owner_id: 'u-luna',
+          owner_username: 'luna',
+          share_count: 0,
+        },
+      ],
+      total: 2,
+    })
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+
+    expect(
+      (await screen.findAllByTestId('unity-dialogue-item-author')).map((el) =>
+        el.textContent
+      )
+    ).toEqual(['marc', 'luna'])
+    expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(2)
+
+    await user.selectOptions(
+      screen.getByTestId('unity-dialogue-filter-author'),
+      'u-marc'
+    )
+    await user.selectOptions(
+      screen.getByTestId('unity-dialogue-filter-period'),
+      'year'
+    )
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(1)
+    })
+    expect(screen.getByTestId('unity-dialogue-item-title')).toHaveTextContent('De Marc')
+    expect(screen.getByTestId('unity-dialogue-filter-badge-author')).toBeInTheDocument()
+    expect(screen.getByTestId('unity-dialogue-filter-badge-period')).toBeInTheDocument()
+
+    // X sur le badge auteur seul : la période reste active.
+    await user.click(screen.getByTestId('unity-dialogue-filter-badge-author'))
+    await waitFor(() => {
+      expect(screen.queryByTestId('unity-dialogue-filter-badge-author')).toBeNull()
+    })
+    expect(screen.getByTestId('unity-dialogue-filter-badge-period')).toBeInTheDocument()
+    expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(2)
+
+    await user.click(screen.getByTestId('unity-dialogue-filters-reset'))
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('unity-dialogue-active-filters')).toBeNull()
+    })
+    expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(2)
+  })
+
+  it('ne rend pas le bloc personnages quand le dialogue n’en a pas', async () => {
+    // La fixture par défaut (beforeEach) n'a pas de `speakers`.
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+
+    await screen.findByTestId('unity-dialogue-item')
+    expect(screen.queryByTestId('unity-dialogue-item-speakers')).toBeNull()
+  })
+
+  it('pagine la liste à 50/page avec indicateur et navigation', async () => {
+    const user = userEvent.setup()
+    const many = Array.from({ length: 60 }, (_, index) => ({
+      filename: `dialogue_${String(index).padStart(3, '0')}.json`,
+      file_path: `/data/dialogue_${index}.json`,
+      // Ordre décroissant pour un tri date-desc déterministe.
+      modified_time: new Date(2026, 0, 1, 0, 0, 60 - index).toISOString(),
+      size_bytes: 1024,
+      node_count: index,
+      share_count: 0,
+    }))
+    mockList.mockResolvedValueOnce({ dialogues: many, total: 60 })
+
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('unity-dialogue-pagination')).toBeInTheDocument()
+    })
+    expect(screen.getByTestId('unity-dialogue-pagination-indicator')).toHaveTextContent(
+      'Page 1 sur 2 — Total : 60',
+    )
+    // Première page : 50 items.
+    expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(50)
+
+    const prev = screen.getByTestId('unity-dialogue-pagination-prev')
+    expect(prev).toBeDisabled()
+
+    await user.click(screen.getByTestId('unity-dialogue-pagination-next'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('unity-dialogue-pagination-indicator')).toHaveTextContent(
+        'Page 2 sur 2 — Total : 60',
+      )
+    })
+    // Deuxième page : les 10 restants.
+    expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(10)
+    expect(screen.getByTestId('unity-dialogue-pagination-next')).toBeDisabled()
   })
 
   it('crée un dialogue vide sans appel LLM et le sélectionne', async () => {

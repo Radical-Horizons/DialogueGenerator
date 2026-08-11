@@ -6,6 +6,7 @@ import { Tabs, type Tab } from '../shared/Tabs'
 import { DEFAULT_ADMIN_TAB, resolveAdminTabId } from './adminTabs'
 import { AuditLogsPanel } from './AuditLogsPanel'
 import { LlmModelsPanel } from './LlmModelsPanel'
+import { SearchIndexPanel } from './SearchIndexPanel'
 import { UserManagementPanel } from './UserManagementPanel'
 
 /**
@@ -31,6 +32,11 @@ export function AdminPanel() {
         id: 'audit-logs',
         label: 'Journaux d’audit',
         content: <AuditLogsPanel />,
+      },
+      {
+        id: 'search-index',
+        label: 'Index recherche',
+        content: <SearchIndexPanel />,
       },
     ],
     [],
