@@ -878,6 +878,9 @@ All routes require JWT (`Authorization: Bearer <token>`). Schémas : `api/schema
 - `mirror_rebuild` (bool) — **déprécié, sans effet**.
 - `resume` (bool) — reprendre une sync complète (`full=true` obligatoire ; mutuellement exclusif avec `fresh`).
 - `fresh` (bool) — abandon checkpoint + nouveau run complet (`full=true` obligatoire).
+- `category_file` (string[], répétable) — limite le run à une ou plusieurs bases (incompatible avec `resume=true`).
+- `included_filter` (`persisted` | `ui`, default `persisted`) — `persisted` : filtre `included_categories` sauvegardé ; `ui` : filtre éphémère via `included_category`.
+- `included_category` (string[], répétable) — avec `included_filter=ui` : bases cochées pour ce run uniquement. Absent ou liste vide = toutes les bases et fiches page éligibles.
 
 **Response:** `GddNotionSyncRunResponse` (`success`, `message`, `updated_entities`, `partial_errors`).
 
