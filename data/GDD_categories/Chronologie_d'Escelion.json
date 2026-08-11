@@ -1,5 +1,92 @@
 [
   {
+    "Nom": "Premières veilles fausses du Xyriad",
+    "values": {
+      "Date de début": "3390",
+      "Description": "Dans les Veilles qui suivent la Dévoration du Glossaire, les zones de superposition du Xyriad se couturent de « veilles fausses » : des poches où aucune démonstration ne peut se clore. Les Calculateurs d'Interstices y reconnaissent la cristallisation partielle d'un Rêveur Émergent, nommé d'après le théorème irrésolu de 2487 : la Discontinuité Harmonique. Le Consortium institue le Relevé des Veilles Fausses (dosimétrie par pastilles de calcitissus mort).",
+      "Importance": "Important",
+      "Personnages 1": "c3a2f9da-4afc-412f-a891-b4e5aaa57795",
+      "Type d'événement": "Naissance",
+      "Ère": "Ère contemporaine"
+    },
+    "sections": {},
+    "notion_page_id": "8e66721b-2a49-4b11-b215-e3606e1c6594"
+  },
+  {
+    "Nom": "Échec du feu dormant",
+    "values": {
+      "Date de début": "2764",
+      "Date de fin": "2796",
+      "Description": "Entre les premières concessions de la Kivane et la victoire technoféodale, des ateliers tentent d’emporter le feu vif dans des jarres d’argile scellées. Les parois se désourdissent, les joints cèdent et la chaleur s’échappe en relais ; les pertes imposent l’abandon des jarres. Cet échec révèle que le feu ne deviendra une puissance territoriale qu’avec un contenant industriel, la matite, et un scellage reproductible au sel de fond.",
+      "Importance": "Notable",
+      "Type d'événement": "Catastrophe",
+      "Ère": "Âge des Singularités"
+    },
+    "sections": {},
+    "notion_page_id": "55e788da-ea6a-4aa8-b0f9-8a8f35dae48a"
+  },
+  {
+    "Nom": "Invention de l'enfûtage",
+    "values": {
+      "Concepts liés": "80f070fe-8589-44f2-873f-767093460254",
+      "Date de début": "2800",
+      "Description": "En 2800 AG, la victoire des seigneurs de la tech sur le Cycle du Négoce industrialise le feu vif. La matite distillée du liquide-terre, façonnée et scellée au sel de fond, rend le pyrole transportable ; les pôles ignés et leurs relais transforment une chaleur de berge en énergie continentale propriétaire. Cette synthèse résout le verrou révélé par l’échec du « feu dormant » (2764–2796 AG) et installe l’infrastructure qui fonde le Technoféodalisme.",
+      "Importance": "Important",
+      "Lieux": "10c38a81-8f71-4953-ae5b-f99d11adfa14, 1b46e4d2-1b45-802a-8cc1-d19eea05d87d",
+      "Type d'événement": "Invention",
+      "Ère": "Âge des Singularités"
+    },
+    "sections": {},
+    "notion_page_id": "e866c357-1370-4f18-b78a-88bf9abb082a"
+  },
+  {
+    "Nom": "Cycle du Technoféodalisme",
+    "values": {
+      "Concepts liés": "80f070fe-8589-44f2-873f-767093460254",
+      "Date de début": "2800",
+      "Date de fin": "3100",
+      "Description": "Cycle politique d’Escelion ouvert en 2800 AG par la victoire des seigneurs de la tech sur le Négoce. Leur vœu ne crée pas l’énergie : il organise la capture propriétaire du feu vif par l’enfûtage, les pôles, les fûts, les droits de passage et les infrastructures de la Grande Radiale. Cette énergie concentrée accélère machines, chaleur urbaine, production et surveillance, tandis que les Quartiers de la Lanterne dépendent d’un approvisionnement secondaire en brumium. Le cycle s’achève en 3100 avec la victoire de l’Administration ; l’appareil énergétique et le dérèglement igné qu’il a mis en route lui survivent.",
+      "Importance": "Majeur",
+      "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb, 36e6e4d2-1b45-807a-ac6c-ec253f792406",
+      "Personnages 1": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
+      "Type d'événement": "Période",
+      "Ère": "Âge des Singularités"
+    },
+    "sections": {},
+    "notion_page_id": "6bad1c39-26ad-48d4-9db1-fba5f415b4ac"
+  },
+  {
+    "Nom": "Essor des pôles ignés",
+    "values": {
+      "Concepts liés": "80f070fe-8589-44f2-873f-767093460254, 9a15858c-93b7-498d-97ff-092444148d37",
+      "Date de début": "2800",
+      "Date de fin": "3100",
+      "Description": "De 2800 à 3100 AG, la victoire technoféodale transforme les berges de la Kivane, l’océan igné et les couronnes en pôles de puisage, distillation, enfûtage et relais. Ces implantations reprennent des pratiques anciennes — forges nomades van’doei (dès 121 AG), chaleur des Chaudières (1010 AG), concessions de défroqués sur la coulée (2764 AG) — puis les coordonnent par contrats, standards de fûts et droits de passage. Vers 3100, l’intensification des prélèvements et des distillations franchit le seuil thermique qui déclenche le dérèglement igné.",
+      "Importance": "Important",
+      "Lieux": "10c38a81-8f71-4953-ae5b-f99d11adfa14, b475d40b-597c-40a8-8b11-3561d774f459, 1b46e4d2-1b45-802a-8cc1-d19eea05d87d",
+      "Type d'événement": "Période",
+      "Ère": "Âge des Singularités"
+    },
+    "sections": {},
+    "notion_page_id": "97db7a2e-c149-4012-b043-bd79871357cc"
+  },
+  {
+    "Nom": "Désignation de Sorav-Mekh comme Témoin de la Spirale",
+    "values": {
+      "Communautés": "1b96e4d2-1b45-80fe-ba1e-f65c0e1e3a3c, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Date de début": "3372",
+      "Description": "Akthar-Neth désigne Sorav-Mekh, un Van'Doei de six Nuées issu des galeries de forge, comme Témoin fixe de la Spirale d'Observation dans la Krypte Ésothrope. Le choix se fonde sur une régularité de trait inhabituelle pour son âge dans la gravure des marques d'identification sur les conduits de Gedroth. Sorav-Mekh n'entre pas dans le Paradigme par foi mais par besoin : on a besoin d'un guetteur capable de rester posté, de lire les changements d'état et d'alerter sans intervenir directement. La désignation coïncide avec la naissance du sujet 56.",
+      "Espèces": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Importance": "Notable",
+      "Lieux": "ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
+      "Personnages": "eb2168a8-5bf3-4348-85c4-64bb0a1df94d, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Type d'événement": "Evénement personnel",
+      "Ère": "Âge anentropique"
+    },
+    "sections": {},
+    "notion_page_id": "0f40c098-3172-477f-9217-7e5e7d598fc6"
+  },
+  {
     "Nom": "Procès de Renshu",
     "values": {
       "Communautés": "142b6271-3a66-4c9c-a091-bf6e2fb8811c",
@@ -15,12 +102,12 @@
     "notion_page_id": "0fadd662-812f-42e7-94c4-79bf398edfac"
   },
   {
-    "Nom": "Crise de conversion du Seuil-8",
+    "Nom": "Crise de conversion du Seuil-6",
     "values": {
       "Communautés": "142b6271-3a66-4c9c-a091-bf6e2fb8811c",
       "Date de début": "2894",
       "Date de fin": "2894",
-      "Description": "La Lisière modifie sans préavis les taux de conversion du Seuil-8 : en une seule Veille, la solde, les pensions et les stocks des greniers publics de Taluo perdent une part de leur valeur. Les caisses coopératives de Weiyun répliquent par la « Fermeture des guichets », deux Souffles de grève de la conversion pendant lesquels circulent leurs propres lettres de crédit. La République des Ateliers sort de la crise en créant l'Intendance de la conversion, délégation permanente auprès des institutions de la Vieille Ville chargée de négocier les taux en bloc — aveu institutionnel que la monnaie nationale se décide ailleurs.",
+      "Description": "La Lisière modifie sans préavis les taux de conversion du Seuil-6 : en une seule Veille, la solde, les pensions et les stocks des greniers publics de Taluo perdent une part de leur valeur. Les caisses coopératives de Weiyun répliquent par la « Fermeture des guichets », deux Souffles de grève de la conversion pendant lesquels circulent leurs propres lettres de crédit. La République des Ateliers sort de la crise en créant l'Intendance de la conversion, délégation permanente auprès des institutions de la Vieille Ville chargée de négocier les taux en bloc — aveu institutionnel que la monnaie nationale se décide ailleurs.",
       "Importance": "Notable",
       "Lieux": "31ee8035-8e36-4941-a229-f6742e8954e1",
       "Type d'événement": "Autre",
@@ -156,11 +243,11 @@
     "notion_page_id": "44530801-ec5a-4709-8add-68e88933dad0"
   },
   {
-    "Nom": "Cycle de l'administration",
+    "Nom": "Cycle du républicanisme",
     "values": {
       "Date de début": "3100",
-      "Date de fin": "3382",
-      "Description": "Cycle du jeu d'Alteir remporté par l'Administration par capture de l'appareil de gestion : le Conclave des Six Interfaces s'impose, les gouvernements locaux des Districts deviennent des puissances subalternes et la Vieille Ville étend son contrôle sur les Couronnes intermédiaires.",
+      "Date de fin": "3390",
+      "Description": "Cycle politique d’Escelion ouvert en 3100 AG par la victoire d’une classe de représentants administratifs sur le Technoféodalisme. Le vœu de Jast institue durablement une république fédérale représentative sécuritaire : districts et Couronnes mandatent réellement leurs délégations, tandis que le collège des Six Interfaces conserve les compétences de continuité sur le Nexion, le Seuil, les infrastructures et les crises. La république hérite de l’appareil énergétique technoféodal, améliore des protections et des secours, mais préserve les propriétés, les classes et la dépendance extractive. Le cycle est encore en cours.",
       "Importance": "Majeur",
       "Personnages": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
       "Personnages 1": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
@@ -184,21 +271,6 @@
     },
     "sections": {},
     "notion_page_id": "4275df50-0b25-432d-a6e9-82b937794a83"
-  },
-  {
-    "Nom": "Cycle du Technoféodalisme",
-    "values": {
-      "Date de début": "2800",
-      "Date de fin": "3100",
-      "Description": "Cycle du jeu d'Alteir dominé par le Capital marchand : méga-corporations et suzerains de la tech de la Grande Radiale règnent par la captation des données, le secret technologique et la remise en cause du salariat.",
-      "Importance": "Majeur",
-      "Personnages": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
-      "Personnages 1": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
-      "Type d'événement": "Période",
-      "Ère": "Âge des Singularités"
-    },
-    "sections": {},
-    "notion_page_id": "5d9384eb-6b4a-4b66-b0c1-d64a2329759c"
   },
   {
     "Nom": "Grande Bifurcation",
@@ -267,7 +339,7 @@
     "values": {
       "Date de début": "3318",
       "Date de fin": "3318",
-      "Description": "Dernière grande insurrection ouverte contre le Conclave des Interfaces, menée depuis les Quartiers de la Lanterne. Écrasée et patrimonialisée en archives consultables — le règne de l'Administration transforme la révolte en document.",
+      "Description": "Dernière grande insurrection ouverte contre le Conclave des Six Interfaces, menée depuis les Quartiers de la Lanterne en 3318 AG. La Commune est écrasée et patrimonialisée, mais sa défaite impose des garanties fédérales disputées : publicité de certains mandats, voies de pétition, contre-rapports de sécurité et procédures limitées de révocation locale. Le Cycle du républicanisme transforme ainsi une révolte vaincue en droits administrables sans renoncer à la domination des Interfaces.",
       "Importance": "Important",
       "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 36e6e4d2-1b45-807a-ac6c-ec253f792406, 1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
       "Type d'événement": "Bataille",
@@ -338,7 +410,7 @@
       "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
       "Date de début": "3120",
       "Date de fin": "3125",
-      "Description": "Un réseau de tracts anonymes intitulés Les Murmures circule dans le Bazar des Gradients de la Grande Radiale. Les tracts reprennent les protocoles d'évacuation occultés par les chaebols lors du Grand Gwi-shin de 3056 AG, citent les noms des vingt-trois morts et dénoncent le coefficient de nunchi comme arithmétique de l'oubli. Les enquêteurs du Bureau de Cohésion Sociale passent trois ans à tracer le réseau sans succès — il utilise les zones de silence du kokoro-link pendant les Cérémonies d'Alignement. En 3123 AG, un agent imuin Intégrateur nommé Vex-Harmon-12 infiltre le réseau et découvre qu'il est l'œuvre de trois techniciens du Dépôt des Incidents du Tombeau. L'un d'eux, Kor-Vel-3, est arrêté à la sortie d'une cantine de la Radiale. Son procès est secret. Les deux autres techniciens disparurent. L'arrestation fit de Kor-Vel-3 une figure de martyr dans les niveaux inférieurs. Le tract numéro 47, publié un mois après son arrestation, portait simplement son nom et la mention Les Murmures ne s'arrêtent pas. Le réseau de sympathisants tissé entre le Tombeau et la Radiale ne s'éteignit jamais.",
+      "Description": "Entre 3120 et 3125 AG, Les Murmures font circuler dans la Grande Radiale des protocoles d’évacuation occultés après le Grand Gwi-shin de 3056 AG. La répression du réseau confirme que la jeune république fédérale protège déjà des secrets industriels, mais l’affaire impose durablement l’existence de dossiers d’incident, de contre-rapports et de recours pour les familles touchées. Elle devient le premier conflit majeur entre représentation administrative, données de sécurité et propriété corporative du Cycle du républicanisme.",
       "Importance": "Notable",
       "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 1b46e4d2-1b45-80c6-ba2c-e2512a9a56da",
       "Type d'événement": "Autre",
@@ -1084,7 +1156,7 @@
       "Importance": "Majeur",
       "Lieux": "1b46e4d2-1b45-809b-b6ba-ea6dffbf49b5",
       "Personnages": "892f2fd2-fbe3-4878-a05d-8d608b01e6bf, 3276e4d2-1b45-80f1-a87e-ffb93f4a7212",
-      "Personnages 1": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212, 892f2fd2-fbe3-4878-a05d-8d608b01e6bf",
+      "Personnages 1": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212, 892f2fd2-fbe3-4878-a05d-8d608b01e6bf, c3a2f9da-4afc-412f-a891-b4e5aaa57795",
       "Type d'événement": "Catastrophe",
       "Ère": "Ère contemporaine"
     },
@@ -2255,7 +2327,7 @@
     "values": {
       "Date de début": "3156",
       "Date de fin": "3156",
-      "Description": "Troisième spasme d'expansion du Nexion (après 917 et 2102 AG). Coïncide avec le vœu du cycle de Jast : la classe administrative sort victorieuse de la phase de luttes et le Conclave des Interfaces devient le gouvernement effectif de la Vieille Ville. Les effets matériels — Rupture Hydraulique aux Chaudières, fuites de Souffle à la Lisière, crise du formulable à la Bibliothèque, dépôt d'une nouvelle strate aux Jardins — portent la signature physique du verdict.",
+      "Description": "Troisième spasme d’expansion du Nexion, après 917 et 2102 AG. Il survient cinquante-six ans après la victoire républicaine de 3100 AG et n’est ni le vœu de Jast ni la fondation du Cycle du républicanisme. Ses effets matériels — Rupture hydraulique aux Chaudières, fuites de Souffle à la Lisière, crise du formulable à la Bibliothèque, dépôt d’une nouvelle strate aux Jardins — constituent la première grande épreuve de maturité de la fédération. Les négociations de secours, de déplacement, de ravitaillement et de compétence d’urgence renforcent alors le rôle de continuité des Six Interfaces.",
       "Importance": "Majeur",
       "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
       "Type d'événement": "Fondation",
@@ -2453,6 +2525,7 @@
       "Description": "En 2487 AG, la tentative des deux grandes maisons de calcul de la Vieille Ville pour résoudre le Théorème de la Discontinuité Harmonique matérialise involontairement le Xyriad Achromatique et provoque un krach. Dans un second temps, les maisons ruinées s’allient au Xyriad naissant pour développer un arbitrage inter-districts distribué. Les intelligences qui en émergent arbitrent hors mandat ; leur répression fonde l’interdit contre les consciences distribuées et conduit à leur déportation vers le réseau psychovecteur de la Steppe.",
       "Importance": "Majeur",
       "Lieux": "1cc6e4d2-1b45-80fb-b0ec-f0cfe9539620, 1b46e4d2-1b45-8071-88b9-da69653d4987, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Personnages 1": "c3a2f9da-4afc-412f-a891-b4e5aaa57795",
       "Type d'événement": "Catastrophe",
       "Ère": "Âge des Singularités"
     },
@@ -2988,11 +3061,11 @@
     "notion_page_id": "22c6e4d2-1b45-808d-b305-e83d80a092c1"
   },
   {
-    "Nom": "Concile des Trois Cambriums",
+    "Nom": "Concile des Quatre Cambriums",
     "values": {
       "Date de début": "298",
       "Date de fin": "298",
-      "Description": "Concile formalisant la tripartition des Aedres. Le lieu du concile, une clairière forestière, fut l'emplacement d'un sanctuaire stabilisateur d'Uresaïr dont l'influence favorisa l'harmonie nécessaire à cet accord fondateur",
+      "Description": "Concile formalisant les quatre bassins morphogénétiques aedres — Moadons, Seedons, Vaedons et Khédons — comme descriptions écologiques perméables. Le lieu du concile, une clairière forestière, fut l’emplacement d’un sanctuaire stabilisateur d’Uresaïr dont l’influence favorisa l’accord fondateur. Les administrations postérieures rigidifièrent progressivement ces catégories.",
       "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
       "Importance": "Modéré",
       "Type d'événement": "Traité",
@@ -3156,6 +3229,7 @@
       "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
       "Importance": "Important",
       "Lieux": "1cc6e4d2-1b45-80fb-b0ec-f0cfe9539620",
+      "Personnages 1": "c3a2f9da-4afc-412f-a891-b4e5aaa57795",
       "Type d'événement": "Fondation",
       "Ère": "Âge des Singularités"
     },
@@ -3301,36 +3375,5 @@
     },
     "sections": {},
     "notion_page_id": "22c6e4d2-1b45-80b3-b406-e1d3822be339"
-  },
-  {
-    "Nom": "Désignation de Sorav-Mekh comme Témoin de la Spirale",
-    "values": {
-      "Communautés": "1b96e4d2-1b45-80fe-ba1e-f65c0e1e3a3c, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Date de début": "3372",
-      "Description": "Akthar-Neth désigne Sorav-Mekh, un Van'Doei de six Nuées issu des galeries de forge, comme Témoin fixe de la Spirale d'Observation dans la Krypte Ésothrope. Le choix se fonde sur une régularité de trait inhabituelle pour son âge dans la gravure des marques d'identification sur les conduits de Gedroth. Sorav-Mekh n'entre pas dans le Paradigme par foi mais par besoin : on a besoin d'un guetteur capable de rester posté, de lire les changements d'état et d'alerter sans intervenir directement. La désignation coïncide avec la naissance du sujet 56.",
-      "Espèces": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Importance": "Notable",
-      "Lieux": "ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
-      "Personnages": "eb2168a8-5bf3-4348-85c4-64bb0a1df94d, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
-      "Type d'événement": "Evénement personnel",
-      "Ère": "Âge anentropique"
-    },
-    "sections": {},
-    "notion_page_id": "0f40c098-3172-477f-9217-7e5e7d598fc6"
-  },
-  {
-    "Nom": "Crise de conversion du Seuil-6",
-    "values": {
-      "Communautés": "142b6271-3a66-4c9c-a091-bf6e2fb8811c",
-      "Date de début": "2894",
-      "Date de fin": "2894",
-      "Description": "La Lisière modifie sans préavis les taux de conversion du Seuil-6 : en une seule Veille, la solde, les pensions et les stocks des greniers publics de Taluo perdent une part de leur valeur. Les caisses coopératives de Weiyun répliquent par la « Fermeture des guichets », deux Souffles de grève de la conversion pendant lesquels circulent leurs propres lettres de crédit. La République des Ateliers sort de la crise en créant l'Intendance de la conversion, délégation permanente auprès des institutions de la Vieille Ville chargée de négocier les taux en bloc — aveu institutionnel que la monnaie nationale se décide ailleurs.",
-      "Importance": "Notable",
-      "Lieux": "31ee8035-8e36-4941-a229-f6742e8954e1",
-      "Type d'événement": "Autre",
-      "Ère": "Âge des Singularités"
-    },
-    "sections": {},
-    "notion_page_id": "1823db55-9902-44b8-a0b2-4b060c8ff6d9"
   }
 ]

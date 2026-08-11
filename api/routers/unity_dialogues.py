@@ -2,7 +2,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Any, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
@@ -19,6 +19,7 @@ from api.schemas.dialogue import (
 from api.exceptions import NotFoundException, ValidationException, InternalServerException
 from services.unity_dialogue_search_fields import (
     SEARCH_TEXT_MAX_CHARS as SEARCH_TEXT_MAX_CHARS,
+    count_edges as _count_edges,
     count_nodes as _count_nodes,
     extract_speakers_and_text as _extract_speakers_and_text,
     extract_title_from_nodes as _extract_title_from_json,
@@ -113,6 +114,68 @@ def _file_creation_time(stat_result: object) -> str:
     mtime = getattr(stat_result, "st_mtime", ctime)
     timestamp = birthtime if birthtime is not None else min(ctime, mtime)
     return datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()
+
+
+def _nodes_of(json_data: Any) -> list:
+    """Extrait la liste de nœuds, quelle que soit la forme du JSON Unity.
+
+    Deux formes circulent : la génération renvoie un **tableau nu** de nœuds
+    (``render_unity_nodes``), les fichiers persistés un document
+    ``{"schemaVersion": ..., "nodes": [...]}``.
+
+    Args:
+        json_data: Contenu JSON déjà parsé.
+
+    Returns:
+        Liste de nœuds, vide si la forme est inattendue.
+    """
+    if isinstance(json_data, list):
+        return json_data
+    if isinstance(json_data, dict):
+        nodes = json_data.get("nodes")
+        if isinstance(nodes, list):
+            return nodes
+    return []
+
+
+def _count_nodes_and_edges(json_data: Any) -> tuple[int, int]:
+    """Compte les nœuds et les liens sortants d'un dialogue Unity.
+
+    Un lien = un choix pointant vers un nœud (``targetNode``), une branche de test
+    (``test*Node``) ou un enchaînement direct (``nextNode``). Les cibles ``END``
+    comptent : c'est une arête réelle du graphe, elle mène au nœud de fin.
+
+    Args:
+        json_data: Contenu JSON parsé (tableau de nœuds ou document complet).
+
+    Returns:
+        Couple (nombre de nœuds, nombre de liens).
+    """
+    json_data = _nodes_of(json_data)
+
+    edge_fields = (
+        "targetNode",
+        "nextNode",
+        "testSuccessNode",
+        "testFailureNode",
+        "testCriticalSuccessNode",
+        "testCriticalFailureNode",
+    )
+
+    node_count = 0
+    edge_count = 0
+    for node in json_data:
+        if not isinstance(node, dict):
+            continue
+        node_count += 1
+        if node.get("nextNode"):
+            edge_count += 1
+        for choice in node.get("choices") or []:
+            if not isinstance(choice, dict):
+                continue
+            edge_count += sum(1 for field in edge_fields if choice.get(field))
+
+    return node_count, edge_count
 
 
 @router.get(
@@ -218,11 +281,12 @@ async def list_unity_dialogues(
                 visible_document_ids.append(document_id)
                 stat = json_file.stat()
 
-                # Parser une seule fois pour titre + nombre de nœuds. Un JSON
-                # illisible ne doit pas faire échouer tout le listing : titre et
-                # node_count restent None dans ce cas.
+                # Parser une seule fois pour titre + nombre de nœuds/liens. Un
+                # JSON illisible ne doit pas faire échouer tout le listing :
+                # titre, node_count et edge_count restent None dans ce cas.
                 title = None
                 node_count = None
+                edge_count = None
                 speakers = None
                 search_text = None
                 try:
@@ -241,6 +305,7 @@ async def list_unity_dialogues(
                         speakers, search_text = _extract_speakers_and_text(
                             nodes_for_title
                         )
+                        edge_count = _count_edges(nodes_for_title)
                 except (json.JSONDecodeError, IOError) as parse_error:
                     logger.warning(
                         "JSON Unity illisible lors du listing (%s): %s",
@@ -293,6 +358,7 @@ async def list_unity_dialogues(
                     modified_time=datetime.fromtimestamp(stat.st_mtime).isoformat(),
                     created_at=created_at,
                     node_count=node_count,
+                    edge_count=edge_count,
                     title=title,
                     speakers=speakers,
                     search_text=search_text,

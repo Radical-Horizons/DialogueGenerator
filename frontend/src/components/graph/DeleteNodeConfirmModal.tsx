@@ -51,7 +51,7 @@ export const DeleteNodeConfirmModal = memo(function DeleteNodeConfirmModal() {
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.elevated,
           padding: isNarrow ? '0.9rem' : '2rem',
           borderRadius: '8px',
           minWidth: isNarrow ? 'unset' : '350px',

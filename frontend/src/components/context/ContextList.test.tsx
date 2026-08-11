@@ -76,9 +76,13 @@ describe('ContextList', () => {
     expect(badges[1]).toHaveTextContent('Lieu')
   })
 
-  it('affiche le badge type d\'entité quand entityTypeLabel est fourni', () => {
-    render(<ContextList {...defaultProps} entityTypeLabel="Personnage" />)
+  it('affiche le badge type en recherche, et le masque dans la liste filtrée', () => {
+    // Ecran 1c : la liste est deja filtree par onglet, le type y serait redondant.
+    // En recherche, les resultats traversent les categories : le type redevient utile.
+    const { rerender } = render(<ContextList {...defaultProps} entityTypeLabel="Personnage" />)
+    expect(screen.queryByText('Personnage')).toBeNull()
 
+    rerender(<ContextList {...defaultProps} entityTypeLabel="Personnage" searchQuery="Ali" />)
     expect(screen.getAllByText('Personnage').length).toBeGreaterThanOrEqual(1)
   })
 

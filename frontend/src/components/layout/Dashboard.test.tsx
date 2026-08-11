@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useShellKeyboardFocusScroller } from '../../hooks/useShellKeyboardFocusScroller'
 import { BrowserRouter } from 'react-router-dom'
 import { useGenerationStore } from '../../store/generationStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useContextStore } from '../../store/contextStore'
-import { GDD_CONTEXT_PANEL_TITLE } from '../context/constants'
-import { panelHeaderTitleTypography } from '../../theme/responsiveChrome'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
+import { panelHeaderMonoLabel } from '../../theme/responsiveChrome'
 
 const mockContextRefresh = vi.hoisted(() => vi.fn())
 const mockContextSelectorState = vi.hoisted(() => ({
@@ -60,7 +60,12 @@ vi.mock('../context/ContextSelector', async () => {
         }
       }, [onLoadStateChange])
 
-      return <div data-testid="context-selector">Context Selector</div>
+      return (
+        <div data-testid="context-selector">
+          Context Selector
+          <input type="search" placeholder="Rechercher..." aria-label="Rechercher" />
+        </div>
+      )
     },
   }
 })
@@ -96,6 +101,17 @@ function TestShellKeyboardFocus({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
 
+/**
+ * Écran 1c : la navigation de sections vit dans `Header`, pas dans `Dashboard`.
+ * Cette suite rend `Dashboard` seul : elle change donc de section par le store
+ * partagé. Le clic sur les libellés est couvert par `Header.section-nav.test.tsx`.
+ */
+async function goToSection(tab: 'generation' | 'edition' | 'graph') {
+  await act(async () => {
+    useUiLayoutStore.getState().setCenterPanelTab(tab)
+  })
+}
+
 describe('Dashboard', () => {
   let Dashboard: typeof import('./Dashboard').Dashboard
 
@@ -107,6 +123,8 @@ describe('Dashboard', () => {
   })
 
   beforeEach(async () => {
+    // La section active est un etat de store partage : chaque test repart de 1c.
+    useUiLayoutStore.getState().setCenterPanelTab('generation')
     vi.clearAllMocks()
     mockContextSelectorState.loadState = {
       isLoading: false,
@@ -182,11 +200,13 @@ describe('Dashboard', () => {
     expect(screen.getByTestId('context-selector')).toBeInTheDocument()
     expect(screen.getByTestId('generation-panel')).toBeInTheDocument()
     // Les onglets du panneau droit (Prompt, Dialogue généré, Détails)
+    // Les vues du panneau droit sont des onglets : toutes visibles, l'active
+    // marquée par `aria-selected` (« prompt » est active au repos).
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /prompt/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /dialogue généré/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /détails/i })).toBeInTheDocument()
+      expect(screen.getByTestId('right-panel-tab-dialogue')).toBeInTheDocument()
     })
+    expect(screen.getByTestId('right-panel-tab-details')).toBeInTheDocument()
+    expect(screen.getByTestId('right-panel-tab-prompt')).toHaveAttribute('aria-selected', 'true')
   })
 
   it('affiche le panneau de sélection de contexte à gauche', () => {
@@ -218,11 +238,13 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
+    // Les vues du panneau droit sont des onglets : toutes visibles, l'active
+    // marquée par `aria-selected` (« prompt » est active au repos).
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /prompt/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /dialogue généré/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /détails/i })).toBeInTheDocument()
+      expect(screen.getByTestId('right-panel-tab-dialogue')).toBeInTheDocument()
     })
+    expect(screen.getByTestId('right-panel-tab-details')).toBeInTheDocument()
+    expect(screen.getByTestId('right-panel-tab-prompt')).toHaveAttribute('aria-selected', 'true')
   })
 
   it('affiche le message par défaut dans l\'onglet Détails', async () => {
@@ -233,7 +255,7 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    const detailsTab = await screen.findByRole('button', { name: /détails/i })
+    const detailsTab = await screen.findByRole('tab', { name: /détails/i })
     await user.click(detailsTab)
 
     await waitFor(() => {
@@ -249,10 +271,13 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    const detailsTab = await screen.findByRole('button', { name: /détails/i })
-    await user.click(detailsTab)
+    // Les deux onglets restent visibles : la bascule se lit sur `aria-selected`.
+    await user.click(await screen.findByTestId('right-panel-tab-details'))
 
-    expect(detailsTab).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByTestId('right-panel-tab-details')).toHaveAttribute('aria-selected', 'true')
+    })
+    expect(screen.getByTestId('right-panel-tab-prompt')).toHaveAttribute('aria-selected', 'false')
   })
 
   it('affiche les boutons d\'action quand handleGenerate est disponible', async () => {
@@ -275,10 +300,13 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    // Le Dashboard affiche le bouton Générer dans le panneau droit (pas Exporter/Reset qui sont dans le Header)
+    // Écran 1c : l'action primaire vit désormais dans la colonne de lecture
+    // (GenerationPanel, mocké ici) ; le pied droit ne la duplique plus sur desktop.
+    // Garde de non-régression : le panneau de génération est bien monté.
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /générer/i })).toBeInTheDocument()
+      expect(screen.getByTestId('generation-panel')).toBeInTheDocument()
     })
+    expect(screen.queryByRole('button', { name: /générer le dialogue/i })).toBeNull()
   })
 
   it('désactive Générer pendant le chargement du contexte', async () => {
@@ -306,9 +334,9 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    const generateButton = await screen.findByRole('button', { name: /générer/i })
+    // La désactivation pendant le chargement est couverte au niveau de l'action réelle
+    // (GenerationPanel.integration). Ici : l'indicateur de chargement reste affiché.
     await waitFor(() => {
-      expect(generateButton).toBeDisabled()
       expect(screen.getByText(/chargement du contexte/i)).toBeInTheDocument()
     })
   })
@@ -356,9 +384,9 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    const generateButton = await screen.findByRole('button', { name: /générer/i })
+    // Idem : la garde de désactivation est testée sur l'action réelle
+    // (GenerationPanel.integration) ; ici on vérifie le retour visuel d'estimation.
     await waitFor(() => {
-      expect(generateButton).toBeDisabled()
       expect(screen.getByText(/estimation des tokens/i)).toBeInTheDocument()
     })
   })
@@ -397,31 +425,9 @@ describe('Dashboard', () => {
     expect(handleGenerate).not.toHaveBeenCalled()
   })
 
-  it('affiche le statut brouillon discret quand le brouillon n’est pas synchronisé', async () => {
-    mockUseGenerationActionsStore.mockReturnValue({
-      actions: {
-        handleGenerate: vi.fn(),
-        handlePreview: vi.fn(),
-        handleExportUnity: vi.fn(),
-        handleReset: vi.fn(),
-        isLoading: false,
-        isDirty: true,
-        saveStatus: 'unsaved',
-        draftLastSavedAt: null,
-      },
-    } as ReturnType<typeof useGenerationActionsStore>)
-
-    render(
-      <BrowserRouter>
-        <Dashboard />
-      </BrowserRouter>
-    )
-
-    await waitFor(() => {
-      expect(screen.getByText(/modifications non enregistrées/i)).toBeInTheDocument()
-    })
-  })
-
+  // L'état du brouillon a rejoint le pied de la colonne centrale, là où vit le
+  // brouillon — il rognait la place des onglets dans l'en-tête du panneau droit.
+  // Sa couverture a suivi : voir `GenerationPanel.integration.test.tsx`.
   it('affiche le prompt estimé dans l\'onglet Prompt', async () => {
     const testPrompt = 'Test prompt content'
     mockUseGenerationStore.mockReturnValue({
@@ -455,15 +461,10 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    // Aller explicitement sur l'onglet "Prompt" (pas forcément actif par défaut)
-    const promptTab = screen.getByText(/^prompt$/i)
-    await userEvent.setup().click(promptTab)
-
-    // Basculer en vue brute pour afficher le texte tel quel
-    const viewToggle = screen.getByRole('checkbox')
-    if (viewToggle instanceof HTMLInputElement && viewToggle.checked) {
-      await userEvent.setup().click(viewToggle)
-    }
+    // Ecran 1c : « Prompt » est la vue active au repos, et la bascule brut/structure
+    // est devenue deux liens discrets.
+    expect(screen.getByTestId('right-panel-tab-prompt')).toHaveAttribute('aria-selected', 'true')
+    await userEvent.setup().click(screen.getByTestId('prompt-view-raw'))
 
     // Le EstimatedPromptPanel devrait afficher le prompt (vue brute)
     await waitFor(() => {
@@ -512,6 +513,63 @@ describe('Dashboard', () => {
     expect(screen.getByText('Test Dialogue')).toBeInTheDocument()
   })
 
+  // Matrice I/O, ligne 3 : résultat prêt → filet accent, diagnostic, bouton « Garder » unique.
+  it('restyle le résultat généré : filet accent, diagnostic et bouton Garder unique', async () => {
+    const mockUnityResponse = {
+      json_content: JSON.stringify([
+        { id: 'START', speaker: 'NPC', line: 'Hello', choices: [{ text: 'A' }, { text: 'B' }] },
+        { id: 'NODE_2', speaker: 'NPC', line: 'Suite' },
+      ]),
+      title: 'Test Dialogue',
+      estimated_tokens: 100,
+    }
+
+    mockUseGenerationStore.mockReturnValue({
+      rawPrompt: '',
+      tokenCount: 0,
+      promptHash: null,
+      isEstimating: false,
+      unityDialogueResponse: mockUnityResponse,
+      sceneSelection: {
+        characterA: null,
+        characterB: null,
+        sceneRegion: null,
+        subLocation: null,
+      },
+      dialogueStructure: ['', '', '', '', '', ''] as [string, string, string, string, string, string],
+      systemPromptOverride: null,
+      setDialogueStructure: vi.fn(),
+      setSystemPromptOverride: vi.fn(),
+      setRawPrompt: vi.fn(),
+      setSceneSelection: vi.fn(),
+      setUnityDialogueResponse: vi.fn(),
+      tokensUsed: null,
+      setTokensUsed: vi.fn(),
+      clearGenerationResults: vi.fn(),
+    } as ReturnType<typeof useGenerationStore>)
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    const resultFrame = await screen.findByTestId('generated-dialogue-result')
+    expect(resultFrame.style.borderLeftWidth).toBe('2px')
+    expect(resultFrame.style.borderLeftColor).toBe('rgb(79, 127, 255)')
+
+    const diagnostic = screen.getByTestId('generated-dialogue-diagnostic')
+    const diagnosticValue = (label: string) =>
+      within(diagnostic).getByText(label).nextElementSibling?.textContent
+    expect(diagnosticValue('Nœuds')).toBe('2')
+    expect(diagnosticValue('Choix')).toBe('2')
+    expect(diagnosticValue('Tokens')).toBe('100')
+
+    const keepButtons = screen.getAllByRole('button', { name: /garder et continuer/i })
+    expect(keepButtons).toHaveLength(1)
+    expect(screen.queryByRole('button', { name: /^sauvegarder$/i })).not.toBeInTheDocument()
+  })
+
   it('affiche un message quand aucun dialogue Unity n\'est généré', async () => {
     const user = userEvent.setup()
     render(
@@ -520,8 +578,9 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    // Cliquer sur l'onglet "Dialogue généré"
-    const dialogueTab = screen.getByText(/dialogue généré/i)
+    // Cliquer sur l'onglet "Dialogue généré" — le bloc « Dernier résultat » du pied
+    // mentionne aussi ce libellé, d'où le ciblage par rôle onglet.
+    const dialogueTab = screen.getByRole('tab', { name: /dialogue/i })
     await user.click(dialogueTab)
 
     await waitFor(() => {
@@ -589,6 +648,8 @@ describe('Dashboard', () => {
     await user.click(getOpenRightPanelButton())
     await waitFor(() => {
       expect(screen.getByRole('dialog', { name: /^détails$/i })).toHaveAttribute('aria-modal', 'true')
+      // En narrow le drawer conserve sa barre d'onglets : pas de place pour un
+      // en-tete + une rangee de liens comme sur le panneau desktop.
       expect(screen.getByRole('button', { name: /prompt/i })).toBeInTheDocument()
     })
   })
@@ -644,9 +705,12 @@ describe('Dashboard', () => {
       expect(screen.getByTestId('context-selector')).toBeInTheDocument()
     })
 
-    const titleComfortable = screen.getByText(GDD_CONTEXT_PANEL_TITLE)
+    // Écran 1c : la colonne GDD n'a plus de barre de titre (le libellé
+    // « CONTEXTE — N FICHES » de ContextSelector en tient lieu). Le panneau droit
+    // est le dernier en-tête latéral : c'est lui qui porte la densité adaptive.
+    const titleComfortable = screen.getByTestId('right-panel-tab-prompt')
     expect(titleComfortable).toHaveStyle({
-      fontSize: `${panelHeaderTitleTypography.comfortableFontRem}rem`,
+      fontSize: `${panelHeaderMonoLabel.comfortableFontPx}px`,
     })
     unmount()
 
@@ -660,9 +724,9 @@ describe('Dashboard', () => {
     )
 
     await waitFor(() => {
-      const titleNarrow = screen.getByText(GDD_CONTEXT_PANEL_TITLE)
+      const titleNarrow = screen.getByTestId('right-panel-tab-prompt')
       expect(titleNarrow).toHaveStyle({
-        fontSize: `${panelHeaderTitleTypography.narrowFontRem}rem`,
+        fontSize: `${panelHeaderMonoLabel.narrowFontPx}px`,
       })
     })
   })
@@ -683,16 +747,15 @@ describe('Dashboard', () => {
       expect(screen.getByTestId('context-selector')).toBeInTheDocument()
     })
 
-    const generationTab = screen.getByRole('button', { name: '💬 Génération de Dialogues' })
-    expect(generationTab).toHaveAttribute('title', '💬 Génération de Dialogues')
-
+    // La navigation de sections est passée dans la barre supérieure (écran 1c) :
+    // ses libellés sont vérifiés par `Header.section-nav.test.tsx`. Ce qui reste
+    // ici, c'est l'invariant de largeur — aucun débordement horizontal à 720px.
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
       document.documentElement.clientWidth + 1
     )
   })
 
   it('mobile: accès à l’onglet Éditeur de Graphe (FR118 zones critiques)', async () => {
-    const user = userEvent.setup()
     Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 320 })
     window.dispatchEvent(new Event('resize'))
 
@@ -706,8 +769,7 @@ describe('Dashboard', () => {
       expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
     })
 
-    const graphTab = screen.getByRole('button', { name: /éditeur de graphe/i })
-    await user.click(graphTab)
+    await goToSection('graph')
     expect(screen.getByTestId('graph-editor')).toBeInTheDocument()
   })
 
@@ -786,8 +848,7 @@ describe('Dashboard', () => {
       expect(screen.queryByTestId('narrow-drawer-backdrop')).not.toBeInTheDocument()
     })
 
-    const graphTab = screen.getByRole('button', { name: /éditeur de graphe/i })
-    await user.click(graphTab)
+    await goToSection('graph')
     expect(screen.getByTestId('graph-editor')).toBeInTheDocument()
     expect(screen.queryByTestId('narrow-drawer-backdrop')).not.toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -844,7 +905,7 @@ describe('Dashboard', () => {
     })
   })
 
-  it('17.4 narrow: focus champ dans drawer détails appelle scrollIntoView', async () => {
+  it('17.4 narrow: focus champ dans un drawer appelle scrollIntoView', async () => {
     const user = userEvent.setup()
     const scrollIntoViewMock = vi.fn()
     const desc = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollIntoView')
@@ -908,17 +969,16 @@ describe('Dashboard', () => {
         expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
       })
 
-      await user.click(getOpenRightPanelButton())
+      // Le panneau Prompt n'a plus de champ focusable depuis 1c (la bascule
+      // brut/structure est un lien). Le champ de recherche du drawer contexte GDD
+      // couvre le meme invariant : un champ focalise dans un drawer se ramene a l'ecran.
+      await user.click(getOpenLeftPanelButton())
       await waitFor(() => {
-        expect(screen.getByTestId('narrow-drawer-right')).toBeInTheDocument()
+        expect(screen.getByRole('dialog', { name: /contexte gdd/i })).toBeInTheDocument()
       })
 
-      const promptTab = screen.getByRole('button', { name: /^prompt$/i })
-      await user.click(promptTab)
-
-      const checkbox = await screen.findByRole('checkbox')
-      expect(checkbox).toBeTruthy()
-      checkbox.focus()
+      const searchField = await screen.findByPlaceholderText(/rechercher/i)
+      searchField.focus()
       expect(scrollIntoViewMock).toHaveBeenCalled()
     } finally {
       if (desc) {
@@ -977,7 +1037,7 @@ describe('Dashboard', () => {
       expect(slot).toHaveStyle({ paddingBottom: '400px' })
     })
 
-    const gen = within(slot).getByRole('button', { name: /générer/i })
+    const gen = within(slot).getByRole('button', { name: /générer le dialogue/i })
     expect(gen).toBeEnabled()
   })
 })

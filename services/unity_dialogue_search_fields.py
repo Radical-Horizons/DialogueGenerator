@@ -53,6 +53,35 @@ def count_nodes(document: Any) -> int | None:
     return sum(1 for node in nodes if isinstance(node, dict))
 
 
+_EDGE_TARGET_FIELDS = (
+    "targetNode",
+    "nextNode",
+    "testSuccessNode",
+    "testFailureNode",
+    "testCriticalSuccessNode",
+    "testCriticalFailureNode",
+)
+
+
+def count_edges(nodes: list[Any]) -> int:
+    """Compte les liens sortants (choix ciblés + enchaînements directs).
+
+    Une cible ``END`` compte : c'est une arête réelle du graphe, elle mène
+    au nœud de fin.
+    """
+    edge_count = 0
+    for node in nodes:
+        if not isinstance(node, dict):
+            continue
+        if node.get("nextNode"):
+            edge_count += 1
+        for choice in node.get("choices") or []:
+            if not isinstance(choice, dict):
+                continue
+            edge_count += sum(1 for field in _EDGE_TARGET_FIELDS if choice.get(field))
+    return edge_count
+
+
 def extract_speakers_and_text(
     nodes: list[Any],
 ) -> tuple[list[str], str | None]:

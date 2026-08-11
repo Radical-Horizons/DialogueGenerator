@@ -198,7 +198,7 @@ export interface EstimateTokensResponse {
   total_estimated_tokens?: number | null
   raw_prompt: RawPrompt
   prompt_hash: string
-  structured_prompt?: import('./prompt').PromptStructure
+  structured_prompt?: import('./prompt').PromptStructure | null
   completion_tokens?: number
   estimated_cost_eur?: number | null
 }
@@ -246,7 +246,7 @@ export interface PreviewPromptRequest extends BasePromptRequest {
 export interface PreviewPromptResponse {
   raw_prompt: RawPrompt
   prompt_hash: string
-  structured_prompt?: import('./prompt').PromptStructure
+  structured_prompt?: import('./prompt').PromptStructure | null
 }
 
 // Context
@@ -441,10 +441,16 @@ export interface UnityDialoguesPathResponse {
 // InteractionContextPathResponse supprimé - système obsolète
 
 // Unity Dialogue
+/**
+ * Effort de raisonnement GPT-5.6 — miroir du Literal backend défini dans
+ * `api/schemas/dialogue.py`. Inclut `max`, que le sélecteur de GenerationPanel propose.
+ */
+export type ReasoningEffort = 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | 'max'
+
 export interface GenerateUnityDialogueRequest extends BasePromptRequest {
   llm_model_identifier: string
   max_completion_tokens?: number | null
-  reasoning_effort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  reasoning_effort?: ReasoningEffort | null
   top_p?: number | null
   field_configs?: Record<string, string[]>
   organization_mode?: string
@@ -467,7 +473,7 @@ export interface GenerateUnityDialogueResponse {
   prompt_hash: string
   estimated_tokens: number
   warning?: string
-  structured_prompt?: import('./prompt').PromptStructure
+  structured_prompt?: import('./prompt').PromptStructure | null
 }
 
 /** GET /api/v1/dialogues/generate/jobs/{job_id} — aligné sur ``GenerationJobStatus`` OpenAPI. */

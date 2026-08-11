@@ -3,28 +3,29 @@
   "values": {
     "Contenu par": "166982c7-3cf0-4947-85c5-0a6df03ff80d",
     "Date de création de la fiche": "2026-05-31T14:03:00.000Z",
-    "Dernière modification": "2026-07-25T16:59:00.000Z",
+    "Dernière modification": "2026-07-30T19:38:00.000Z",
     "Monnaie locale": "Seuil-5 nominal au criage ; en pratique troc et parts de récolte.",
     "Niveau de danger": "Modéré",
     "Niveau d’IA": "co-écrit",
-    "Résumé IA": "Place commerciale majeure sous une vaste charpente où le criage des Maîtres‑Crieurs ouvre et ferme le négoce chaque matin, réunissant les six districts pour approvisionner la ville ; cœur stratégique de la « grève du ventre » avec échanges de marchandises, troc et parts de récolte, accessible depuis le faubourg des Lots et les quais, et contrôlé par les Maîtres‑Crieurs et les courtiers fantômes.",
+    "Résumé IA": "La Grande Halle des Couronnes est un lieu commercial secondaire, sous forme de vaste hall en bois et fonte où se concentre le marché matinal des six districts, garantissant l’approvisionnement alimentaire de la cité grâce au système de criage des Maîtres‑Cri­eurs ; elle héberge aussi des courtiers fantômes et deux intermédiaires du négoce illégal de sporanges, faisant d’elle le pivot stratégique de la « grève du ventre » avec un niveau de danger modéré et un seuil économique de 5.",
     "Rôle": "Lieu commercial",
     "Seuil économique": "5",
     "Taille": "Site",
     "Type": "Lieu secondaire",
+    "Zones limitrophes": "af82e765-59e6-4f88-a494-560fd9fe7caf",
     "État": "Brouillon IA"
   },
   "sections": {
     "re_sume__de_la_fiche": "Sous une charpente immense, le marché matinal où les six districts viennent s'approvisionner : le garde-manger officieux de la Vieille Ville, ouvert chaque aube par le criage des Maîtres-Crieurs, et l’un des lieux où la Couronne des Lots tente de tenir les flux face aux intérêts marchands de halle.",
     "histoire_du_lieu": "- **Les premières halles (vers 2102 AG)** — avec la densification du district, le commerce épars des Lots se fixe en halles permanentes le long de la Voie de Vivarcade.\n\t- **L'institution du criage** — les Maîtres-Crieurs formalisent l'ouverture à la voix : on n'entre dans le négoce qu'au cri, jamais par registre écrit.\n\t- **Garde-manger reconnu (3156 AG à 3390 AG)** — depuis la dernière Pulsation, presque toute la nourriture du centre transite ici ; la Halle devient l'organe le plus stratégique, et le plus jalousé, des Jardins.",
-    "apparence___ambiance": "Une nef de bois et de fonte, basse et large, où pendent les lanternes de criage. À l'aube, la cohue : étals de légumes lourds, paniers d'anguilles de la Dormante, odeurs de limon et de fermentation. Le criage domine tout — une voix qui ouvre le commerce, une voix qui le ferme.",
-    "forces_en_pre_sence": "- **Les Maîtres-Crieurs** — ouvrent la halle et prêtent leur criage aux re-criées des Diseurs ; voix publique de la satrapie de Halle et du district.\n\t- **Les courtiers fantômes** — écoulent en marge des Marques sans inscription et des promesses de récolte que nul Diseur ne tient.",
+    "apparence___ambiance": "Une nef de bois et de fonte, basse et large, où pendent les lanternes de criage. À l'aube, la cohue : étals de légumes lourds, paniers d'anguilles de la Dormante, odeurs de limon et de fermentation. En saison, quelques étals discrets présentent des sporanges de Fluines encore tièdes, vendus à la pièce et jamais criés à voix haute. Le criage domine tout — une voix qui ouvre le commerce, une voix qui le ferme.",
+    "forces_en_pre_sence": "- **Les Maîtres-Crieurs** — ouvrent la halle et prêtent leur criage aux re-criées des Diseurs ; voix publique de la satrapie de Halle et du district.\n\t- **Les courtiers fantômes** — écoulent en marge des Marques sans inscription et des promesses de récolte que nul Diseur ne tient.\n\t- **Les deux intermédiaires des sporanges** : ils achètent aux récolteurs de <mention-page url=\"https://app.notion.com/p/af82e76559e64f88a494560fd9fe7caf\"/> les sporanges de Fluines et les revendent aux Harmonistes des pressions des Marais des Étalonnages, qui s'en servent de baromètres vivants. Le négoce est illégal au regard du droit de regard des Veilleuses de la Voie sur la faune, mais leur plainte de 3370 AG a été classée sans suite et jamais rouverte. Les deux hommes ont avancé de l'argent sur la récolte de 3390 AG, dans un lac où la surface greffée a reculé de quarante pour cent depuis la saison intensive de 3385 AG : ils sont donc les premiers intéressés à ce que la Veille du Silence se passe comme prévu, et les premiers à perdre gros si quelqu'un fait arrêter la récolte.",
     "ge_ographie": "Au débouché de la Voie de Vivarcade, à la jointure du faubourg des Lots et des quais : on y monte les récoltes par la terre et l'on charge vers le centre par l'eau.",
     "voies_d_acce_s___transitions": "Ouverte sur le faubourg des Lots et sur les quais de la Voie ; c'est d'ici que les chalands remontent vers la Bibliothèque Sympathique et le centre.",
-    "me_moire_syste_me": "*À formaliser en Flags lors de l'écriture des actes : ouverture / fermeture du criage, accès au négoce, état de la « grève du ventre ».*",
+    "me_moire_syste_me": "*À formaliser en Flags lors de l'écriture des actes : ouverture / fermeture du criage, accès au négoce, état de la « grève du ventre ».*\n\tLe flag `Flag_lieu_dormante_recolte_fluines` (portée Lieu, rattaché à <mention-page url=\"https://app.notion.com/p/af82e76559e64f88a494560fd9fe7caf\"/>) détermine directement la situation des deux intermédiaires de la Halle : récolte poursuivie, suspendue ou effondrée.",
     "remarques_de_conception": "Sous-lieu des <mention-page url=\"https://app.notion.com/p/166982c73cf0494785c50a6df03ff80d\"/>. Levier central de l'enjeu « grève du ventre » : c'est ici qu'on affame ou qu'on nourrit la cité.",
     "monnaie_locale": "Seuil-5 nominal au criage ; en pratique troc et parts de récolte.",
-    "re_sume__ia": "Place commerciale majeure sous une vaste charpente où le criage des Maîtres‑Crieurs ouvre et ferme le négoce chaque matin, réunissant les six districts pour approvisionner la ville ; cœur stratégique de la « grève du ventre » avec échanges de marchandises, troc et parts de récolte, accessible depuis le faubourg des Lots et les quais, et contrôlé par les Maîtres‑Crieurs et les courtiers fantômes."
+    "re_sume__ia": "La Grande Halle des Couronnes est un lieu commercial secondaire, sous forme de vaste hall en bois et fonte où se concentre le marché matinal des six districts, garantissant l’approvisionnement alimentaire de la cité grâce au système de criage des Maîtres‑Cri­eurs ; elle héberge aussi des courtiers fantômes et deux intermédiaires du négoce illégal de sporanges, faisant d’elle le pivot stratégique de la « grève du ventre » avec un niveau de danger modéré et un seuil économique de 5."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

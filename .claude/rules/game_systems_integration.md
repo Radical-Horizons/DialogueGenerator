@@ -1,19 +1,13 @@
 ---
 description: FR94 game systems — skill checks, Effort, Réputation, preview, diagnostics
-globs:
+paths:
   - "services/game_systems_*.py"
-  - "api/routers/mechanics_systems.py"
-  - "api/schemas/game_systems.py"
-  - "api/schemas/dialogue_preview.py"
-  - "frontend/src/**/systems/**"
   - "frontend/src/utils/skillChecks.ts"
   - "frontend/src/utils/effortPreview.ts"
   - "frontend/src/utils/reputationFr94.ts"
   - "frontend/src/utils/socialDiagnostics.ts"
-  - "frontend/src/utils/previewSimulationLimits.ts"
-alwaysApply: false
+  - "frontend/src/components/**/GameSystemsIntegrationPanel.tsx"
 ---
-
 - **Source de vérité** : logique dans `services/game_systems_*.py` + miroirs `frontend/src/utils/*` — pas le LLM, pas de heuristique non testée.
 - **Parité BE/FE** : toute règle d'évaluation (skill check, effort, réputation, diagnostics) doit rester alignée entre service Python et utilitaire TS ; ajouter/mettre à jour les tests des deux côtés.
 - **Clés réputation FR94** : `fr94::{heroineId}::{targetKind}::{targetId}::{axis}::{readMode}` — voir `ReputationCondition.state_key()` dans `game_systems_reputation.py`.

@@ -1,12 +1,9 @@
 ---
 description: Parsing et affichage du prompt structuré — sections imbriquées, hiérarchie, tests
-globs:
+paths:
   - "frontend/src/hooks/usePromptPreview.ts"
-  - "frontend/src/hooks/usePromptPreview.test.ts"
   - "frontend/src/components/generation/StructuredPromptView.tsx"
-alwaysApply: false
 ---
-
 - **Parsing** : `usePromptPreview.ts::parsePromptSections()` parse le prompt en sections hiérarchiques (### SECTION X → --- TITRE ---).
 - **Structure** : Sections principales (### SECTION X), catégories (--- CHARACTERS ---), sections d'éléments (--- IDENTITÉ ---), éléments individuels (CHARACTER 1, CHARACTER 2).
 - **Règles de parsing** :

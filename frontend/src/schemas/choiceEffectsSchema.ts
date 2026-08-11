@@ -39,3 +39,12 @@ export const choiceEffectAtomSchema = z.discriminatedUnion('kind', [
 ])
 
 export const choiceEffectsListSchema = z.array(choiceEffectAtomSchema)
+
+/**
+ * Effets réellement éditables dans le formulaire de nœud.
+ *
+ * Sous-ensemble de `ChoiceEffect` (`types/choiceEffects.ts`) : ce dernier porte en plus
+ * `reputation_delta_fr94`, consommé à l'exécution (simulation, preview) mais que ni ce
+ * schéma ni l'éditeur ne savent produire.
+ */
+export type ChoiceEffectAtom = z.infer<typeof choiceEffectAtomSchema>

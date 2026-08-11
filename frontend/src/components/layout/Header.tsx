@@ -2,6 +2,7 @@
  * Composant Header avec authentification et barre de recherche.
  */
 import { useState, useEffect, useRef } from 'react'
+import type { CSSProperties } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { useCommandPalette } from '../../hooks/useCommandPalette'
@@ -14,9 +15,53 @@ import { UnityBatchExportActionsMenuItems } from '../unityDialogues/UnityBatchEx
 import { useUnityBatchExportMenuStore } from '../../store/unityBatchExportMenuStore'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
+import { redesignAccent, redesignFont, redesignText } from '../../theme/redesignTokens'
+import { useGenerationElapsed } from '../../hooks/useGenerationRunState'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
+import type { CenterPanelTab } from '../../store/uiLayoutStore'
 import { TOUCH_TARGET_MIN_PX } from '../../constants'
+import { formatShortcut } from '../../utils/platformShortcut'
+
+/** Nom de l'animation du point de génération (déclarée localement, pas de CSS global). */
+const HEADER_BLINK_ANIMATION = 'header-generation-blink'
+
+/** Sections de la barre supérieure, dans l'ordre de la maquette. */
+const SECTION_NAV_ITEMS: ReadonlyArray<{ id: CenterPanelTab; label: string }> = [
+  { id: 'generation', label: 'Générer' },
+  { id: 'edition', label: 'Éditer' },
+  { id: 'graph', label: 'Graphe' },
+]
+
+/**
+ * Libellé de la barre supérieure (écran 1c) : mono, capitales, sans contour.
+ * La cible de touche reste à `TOUCH_TARGET_MIN_PX` via le padding vertical,
+ * sans que le contrôle se voie pour autant.
+ */
+const headerMonoLinkStyle: CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  // FR119 : le libellé est discret, la cible reste tactile.
+  minHeight: TOUCH_TARGET_MIN_PX,
+  minWidth: TOUCH_TARGET_MIN_PX,
+  boxSizing: 'border-box',
+  padding: '0 0.25rem',
+  backgroundColor: 'transparent',
+  border: 'none',
+  cursor: 'pointer',
+  fontFamily: redesignFont.mono,
+  fontSize: '10.5px',
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  color: redesignText.label,
+  whiteSpace: 'nowrap',
+}
 
 export function Header() {
+  const generationElapsed = useGenerationElapsed()
+  const writingMode = useUiLayoutStore((s) => s.writingMode)
+  const centerPanelTab = useUiLayoutStore((s) => s.centerPanelTab)
+  const setCenterPanelTab = useUiLayoutStore((s) => s.setCenterPanelTab)
   const { user, isAuthenticated, logout } = useAuthStore()
   const navigate = useNavigate()
   const commandPalette = useCommandPalette()
@@ -103,9 +148,32 @@ export function Header() {
       width: '100%',
       boxSizing: 'border-box',
     }}>
-      {/* Section gauche : Titre */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-        <h1 style={{ margin: 0, fontSize: remSize('title'), fontWeight: 600, whiteSpace: 'nowrap' }}>
+      {/* Section gauche : Titre + navigation.
+          `flex: 1` valait `flex: 1 1 0%` : l'espace se repartissait 50/50 avec le
+          bloc droit sans regarder le contenu, et la navigation debordait sur la
+          recherche. Base `auto` + `wrap` : elle prend ce qu'il lui faut, et passe
+          a la ligne plutot que de chevaucher. */}
+      <div
+        style={{
+          flex: '0 1 auto',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          rowGap: '0.35rem',
+          flexWrap: 'wrap',
+          minWidth: 0,
+        }}
+      >
+        <h1
+          style={{
+            margin: 0,
+            fontFamily: redesignFont.serif,
+            fontSize: '19px',
+            fontWeight: 400,
+            whiteSpace: 'nowrap',
+            letterSpacing: '-0.01em',
+          }}
+        >
           <Link
             to="/"
             data-testid="header-home-link"
@@ -116,7 +184,8 @@ export function Header() {
               cursor: 'pointer',
             }}
           >
-            DialogueGenerator
+            Dialogue
+            <span style={{ color: redesignAccent.base, fontStyle: 'italic' }}>Generator</span>
           </Link>
         </h1>
         {user?.role === 'guest' && (
@@ -124,109 +193,209 @@ export function Header() {
             data-testid="guest-mode-banner"
             role="status"
             style={{
-              color: theme.text.primary,
-              fontSize: remSize('small'),
-              fontWeight: 600,
-              padding: '0.25rem 0.55rem',
-              borderRadius: '4px',
-              border: `1px solid ${theme.border.primary}`,
-              backgroundColor: theme.background.tertiary,
+              fontFamily: redesignFont.mono,
+              fontSize: '10px',
+              letterSpacing: '0.09em',
+              textTransform: 'uppercase',
+              color: redesignText.label,
               whiteSpace: 'nowrap',
             }}
           >
-            Mode invité — lecture seule
+            Invité — lecture seule
           </span>
         )}
-        <span 
-          title={`Date de compilation: ${new Date(__BUILD_DATE__).toLocaleString('fr-FR')}`}
-          style={{ 
-            color: theme.text.secondary, 
-            fontSize: remSize('small'),
-            whiteSpace: 'nowrap',
-            fontFamily: 'monospace',
+        {/* Horodatage de build : en info-bulle seulement, il n'a pas sa place dans le chrome. */}
+        <span
+          title={`Date de compilation : ${new Date(__BUILD_DATE__).toLocaleString('fr-FR')}`}
+          aria-hidden
+          style={{
+            width: 4,
+            height: 4,
+            borderRadius: '50%',
+            backgroundColor: redesignText.label,
+            flexShrink: 0,
           }}
-        >
-          Build: {new Date(__BUILD_DATE__).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-        </span>
+        />
+
+        {/* Écran 1c : la navigation applicative suit le logo dans la barre
+            supérieure. La section active est soulignée à l'accent, pas encadrée.
+            2c : elle s'efface avec le reste du chrome — on écrit, on ne navigue pas. */}
+        {isAuthenticated && !writingMode && (
+          <nav
+            data-testid="header-section-nav"
+            aria-label="Sections"
+            style={{ display: 'flex', gap: 20, flexShrink: 0, marginLeft: 4 }}
+          >
+            {SECTION_NAV_ITEMS.map((item) => {
+              const active = centerPanelTab === item.id
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  data-testid={`header-section-${item.id}`}
+                  aria-current={active ? 'page' : undefined}
+                  onClick={() => setCenterPanelTab(item.id)}
+                  style={{
+                    border: 'none',
+                    background: 'none',
+                    padding: 0,
+                    // FR119 : cible tactile conservée malgré le libellé nu.
+                    minHeight: TOUCH_TARGET_MIN_PX,
+                    minWidth: TOUCH_TARGET_MIN_PX,
+                    boxSizing: 'border-box',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    color: active ? theme.text.primary : redesignText.secondary,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {/* Le filet appartient au mot, pas à la cible tactile : posé sur
+                      le bouton (44 px de haut), il se dessinait bien en dessous du
+                      texte et débordait de chaque côté. */}
+                  <span
+                    style={{
+                      paddingBottom: 2,
+                      boxShadow: active ? `inset 0 -1px 0 ${redesignAccent.base}` : 'none',
+                    }}
+                  >
+                    {item.label}
+                  </span>
+                </button>
+              )
+            })}
+          </nav>
+        )}
       </div>
       
-      {/* Section centrale : Barre de recherche */}
-      {isAuthenticated && (
-        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', maxWidth: '600px', margin: '0 auto', minWidth: 0 }}>
-          <div
+      {/* Recherche : alignée à droite avec Réglages / avatar (écran 1c). */}
+      {isAuthenticated && !writingMode && (
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+          {/* Écran 1c : la recherche est un libellé mono, pas un champ. */}
+          <button
+            type="button"
             onClick={handleSearchClick}
+            aria-label="Rechercher une action, un personnage, un lieu"
             style={{
-              width: '100%',
-              maxWidth: '500px',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
+              gap: '0.45rem',
               minHeight: TOUCH_TARGET_MIN_PX,
               boxSizing: 'border-box',
-              padding: '0.5rem 0.75rem',
-              backgroundColor: theme.input.background,
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: '4px',
-              cursor: 'text',
-              transition: 'border-color 0.2s',
+              padding: '0 0.25rem',
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontFamily: redesignFont.mono,
+              fontSize: '10.5px',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: redesignText.label,
+              whiteSpace: 'nowrap',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = theme.border.focus
+              e.currentTarget.style.color = theme.text.secondary
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = theme.border.primary
+              e.currentTarget.style.color = redesignText.label
             }}
           >
-            <span style={{ color: theme.text.secondary, fontSize: remSize('body') }}>🔍</span>
-            <span style={{ 
-              flex: 1, 
-              color: theme.text.secondary, 
-              fontSize: remSize('body'),
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}>
-              Rechercher des actions, personnages, lieux...
-            </span>
-            <kbd style={{
-              padding: '0.125rem 0.375rem',
-              fontSize: remSize('caption'),
-              backgroundColor: theme.background.tertiary,
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: '3px',
-              color: theme.text.secondary,
-              fontFamily: 'monospace',
-            }}>
-              Ctrl+K
-            </kbd>
-          </div>
+            <span aria-hidden>{formatShortcut('ctrl+k')}</span>
+            <span>Rechercher</span>
+          </button>
         </div>
       )}
       
-      {/* Section droite : Options, Actions, Utilisateur */}
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', flexShrink: 1, minWidth: 0, flexWrap: 'wrap' }}>
+      {/* 2c : le chrome applicatif s'efface — il ne reste que le repère de scène
+          et le rappel du mode, cliquable pour en sortir. */}
+      {writingMode && (
+        <div
+          data-testid="header-writing-mode"
+          style={{
+            marginLeft: 'auto',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.9rem',
+            minWidth: 0,
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => useUiLayoutStore.getState().setWritingMode(false)}
+            title="Quitter le mode écriture"
+            style={{
+              border: 'none',
+              background: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              fontFamily: redesignFont.mono,
+              fontSize: '10px',
+              letterSpacing: '0.06em',
+              color: redesignText.label,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            MODE ÉCRITURE · CTRL+\ POUR SORTIR
+          </button>
+        </div>
+      )}
+
+      {/* Section droite : Reglages, Actions, Utilisateur.
+          Meme correctif que le bloc gauche : base `auto`, sinon le contenu deborde
+          par-dessus la navigation en dessous de ~400 px. */}
+      <div style={{ flex: '1 1 auto', display: writingMode ? 'none' : 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', minWidth: 0, flexWrap: 'wrap' }}>
+        {/* Écran 2a : point clignotant + compteur du run — l'attente a une durée visible. */}
+        {generationElapsed && (
+          <span
+            data-testid="header-generation-timer"
+            style={{ display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0 }}
+          >
+            <span
+              aria-hidden
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                backgroundColor: redesignAccent.base,
+                animation: `${HEADER_BLINK_ANIMATION} 1.1s steps(1, end) infinite`,
+              }}
+            />
+            <span
+              style={{
+                fontFamily: redesignFont.mono,
+                fontSize: '10.5px',
+                letterSpacing: '0.06em',
+                color: '#8fb0ff',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              GÉNÉRATION · {generationElapsed}
+            </span>
+            <style>{`@keyframes ${HEADER_BLINK_ANIMATION} { 50% { opacity: 0; } }`}</style>
+          </span>
+        )}
         {isAuthenticated && user && user.role !== 'guest' && actions.handleGenerate && (
           <>
+            {/* Écran 1c : la barre supérieure ne porte aucun bouton encadré —
+                seulement des libellés mono. « Réinitialiser » n'est pas dans la
+                maquette mais reste la seule sortie vers un dialogue vierge :
+                il prend le même format discret plutôt que de disparaître. */}
             <button
               onClick={() => {
                 setOptionsModalInitialTab('general')
                 setIsOptionsModalOpen(true)
               }}
-              style={{
-                padding: '0.35rem 0.75rem',
-                fontSize: remSize('body'),
-                backgroundColor: theme.button.default.background,
-                color: theme.button.default.color,
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '4px',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                minWidth: TOUCH_TARGET_MIN_PX,
-                minHeight: TOUCH_TARGET_MIN_PX,
-                boxSizing: 'border-box',
+              style={{ ...headerMonoLinkStyle }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = theme.text.secondary
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = redesignText.label
               }}
             >
-              Options
+              Réglages
             </button>
 
             {/* Reset direct : évite un menu Actions à une seule entrée */}
@@ -241,25 +410,20 @@ export function Header() {
               disabled={actions.isLoading || isGraphGenerating || !actions.handleReset}
               title="Nouveau dialogue (réinitialiser)"
               style={{
-                padding: '0.35rem 0.75rem',
-                fontSize: remSize('body'),
-                backgroundColor: theme.button.default.background,
-                color: (actions.isLoading || isGraphGenerating || !actions.handleReset)
-                  ? theme.text.secondary
-                  : theme.button.default.color,
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '4px',
+                ...headerMonoLinkStyle,
                 cursor: (actions.isLoading || isGraphGenerating || !actions.handleReset)
                   ? 'not-allowed'
                   : 'pointer',
-                whiteSpace: 'nowrap',
-                minWidth: TOUCH_TARGET_MIN_PX,
-                minHeight: TOUCH_TARGET_MIN_PX,
-                boxSizing: 'border-box',
-                opacity: (actions.isLoading || isGraphGenerating || !actions.handleReset) ? 0.6 : 1,
+                opacity: (actions.isLoading || isGraphGenerating || !actions.handleReset) ? 0.5 : 1,
+              }}
+              onMouseEnter={(e) => {
+                if (!e.currentTarget.disabled) e.currentTarget.style.color = theme.text.secondary
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = redesignText.label
               }}
             >
-              Reset
+              Réinitialiser
             </button>
 
             {/* Actions uniquement s'il y a des exports batch à proposer */}
@@ -277,25 +441,16 @@ export function Header() {
                     e.stopPropagation()
                     setIsActionsDropdownOpen(!isActionsDropdownOpen)
                   }}
-                  style={{
-                    padding: '0.35rem 0.75rem',
-                    fontSize: remSize('body'),
-                    backgroundColor: theme.button.default.background,
-                    color: theme.button.default.color,
-                    border: `1px solid ${theme.border.primary}`,
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.25rem',
-                    whiteSpace: 'nowrap',
-                    minWidth: TOUCH_TARGET_MIN_PX,
-                    minHeight: TOUCH_TARGET_MIN_PX,
-                    boxSizing: 'border-box',
+                  style={{ ...headerMonoLinkStyle, gap: '0.3rem' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = theme.text.secondary
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = redesignText.label
                   }}
                 >
                   Actions
-                  <span style={{ fontSize: remSize('caption') }}>▼</span>
+                  <span aria-hidden style={{ fontSize: '8px' }}>▼</span>
                 </button>
                 {isActionsDropdownOpen && (
                   <div
@@ -339,29 +494,28 @@ export function Header() {
               aria-expanded={isUserMenuOpen}
               aria-haspopup="menu"
               style={{
+                // Écran 1c : pastille cerclée, initiale à l'accent — le seul
+                // aplat bleu de l'écran reste le bouton Générer.
                 width: TOUCH_TARGET_MIN_PX,
                 height: TOUCH_TARGET_MIN_PX,
                 borderRadius: '50%',
-                backgroundColor: theme.button.primary.background,
-                color: theme.button.primary.color,
-                border: `2px solid ${theme.border.primary}`,
+                backgroundColor: 'transparent',
+                color: redesignAccent.base,
+                border: `1px solid ${theme.button.default.border}`,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: remSize('body'),
-                fontWeight: 'bold',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                boxShadow: isUserMenuOpen ? '0 2px 8px rgba(0, 0, 0, 0.3)' : 'none',
+                fontSize: '11.5px',
+                fontWeight: 600,
+                transition: 'border-color 0.2s',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.05)'
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)'
+                e.currentTarget.style.borderColor = redesignAccent.base
               }}
               onMouseLeave={(e) => {
                 if (!isUserMenuOpen) {
-                  e.currentTarget.style.transform = 'scale(1)'
-                  e.currentTarget.style.boxShadow = 'none'
+                  e.currentTarget.style.borderColor = theme.button.default.border
                 }
               }}
               title={user.username}

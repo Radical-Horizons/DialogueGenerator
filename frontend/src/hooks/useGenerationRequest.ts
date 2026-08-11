@@ -18,7 +18,7 @@ import {
   resolveModelForUnityGeneration,
 } from '../utils/generationConfigNormalization'
 import type { ContextSelection, GenerateUnityDialogueRequest } from '../types/api'
-import type { LLMModelResponse } from '../types/api'
+import type { LLMModelResponse, ReasoningEffort } from '../types/api'
 
 export interface UseGenerationRequestReturn {
   /** Construit les sélections de contexte à partir des stores */
@@ -29,7 +29,7 @@ export interface UseGenerationRequestReturn {
     maxContextTokens: number
     maxCompletionTokens: number | null
     llmModel: string
-    reasoningEffort: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+    reasoningEffort: ReasoningEffort | null
     topP: number | null
     maxChoices: number | null
     choicesMode: 'free' | 'capped'
@@ -113,7 +113,7 @@ export function useGenerationRequest(): UseGenerationRequestReturn {
       maxContextTokens: number
       maxCompletionTokens: number | null
       llmModel: string
-      reasoningEffort: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+      reasoningEffort: ReasoningEffort | null
       topP: number | null
       maxChoices: number | null
       choicesMode: 'free' | 'capped'

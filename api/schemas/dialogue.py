@@ -736,6 +736,11 @@ class UnityDialogueMetadata(BaseModel):
         ),
     )
     title: Optional[str] = Field(None, description="Titre extrait du dialogue")
+    edge_count: Optional[int] = Field(
+        default=None,
+        ge=0,
+        description="Nombre de liens sortants (choix ciblés + enchaînements directs).",
+    )
     speakers: Optional[List[str]] = Field(
         default=None,
         description=(

@@ -7,7 +7,7 @@ import * as flagsAPI from '../../../api/flags'
 import * as contextAPI from '../../../api/context'
 import { theme } from '../../../theme'
 import type { DialogueNodeData } from '../../../schemas/nodeEditorSchema'
-import type { ChoiceEffect } from '../../../types/choiceEffects'
+import type { ChoiceEffectAtom } from '../../../schemas/choiceEffectsSchema'
 import type { FlagDefinition } from '../../../types/flags'
 import type { CommunityResponse } from '../../../types/api'
 import {
@@ -22,7 +22,7 @@ export interface EffectEditorProps {
 
 const REPUTATION_AXES = ['Admiration', 'Prestige', 'Crainte'] as const
 
-function defaultEffect(kind: ChoiceEffect['kind']): ChoiceEffect {
+function defaultEffect(kind: ChoiceEffectAtom['kind']): ChoiceEffectAtom {
   switch (kind) {
     case 'set_bool':
       return { kind: 'set_bool', flagId: '', value: true }
@@ -46,7 +46,7 @@ export const EffectEditor = memo(function EffectEditor({ choiceIndex }: EffectEd
     name: base,
   })
 
-  const watchEffects = watch(base) as ChoiceEffect[] | undefined
+  const watchEffects = watch(base) as ChoiceEffectAtom[] | undefined
   const summary = useMemo(() => formatChoiceEffectsSummary(watchEffects), [watchEffects])
 
   const [catalogById, setCatalogById] = useState<Record<string, FlagDefinition>>({})
@@ -115,7 +115,7 @@ export const EffectEditor = memo(function EffectEditor({ choiceIndex }: EffectEd
           aria-label="Ajouter un effet"
           defaultValue=""
           onChange={(e) => {
-            const k = e.target.value as ChoiceEffect['kind'] | ''
+            const k = e.target.value as ChoiceEffectAtom['kind'] | ''
             e.target.value = ''
             if (!k) return
             append(defaultEffect(k))
@@ -186,7 +186,7 @@ export const EffectEditor = memo(function EffectEditor({ choiceIndex }: EffectEd
                   Retirer
                 </button>
               </div>
-              {kind === 'set_bool' && eff.kind === 'set_bool' && (
+              {eff?.kind === 'set_bool' && (
                 <div style={{ marginTop: 6, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   <select
                     value={eff.flagId}
@@ -214,7 +214,7 @@ export const EffectEditor = memo(function EffectEditor({ choiceIndex }: EffectEd
                   </label>
                 </div>
               )}
-              {kind === 'adjust_counter' && eff.kind === 'adjust_counter' && (
+              {eff?.kind === 'adjust_counter' && (
                 <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   <select
                     value={eff.flagId}
@@ -235,7 +235,7 @@ export const EffectEditor = memo(function EffectEditor({ choiceIndex }: EffectEd
                     onChange={(e) =>
                       update(idx, {
                         ...eff,
-                        operator: e.target.value as ChoiceEffect & { kind: 'adjust_counter' }['operator'],
+                        operator: e.target.value as (ChoiceEffectAtom & { kind: 'adjust_counter' })['operator'],
                       })
                     }
                   >
@@ -253,7 +253,7 @@ export const EffectEditor = memo(function EffectEditor({ choiceIndex }: EffectEd
                   />
                 </div>
               )}
-              {kind === 'set_enum' && eff.kind === 'set_enum' && (
+              {eff?.kind === 'set_enum' && (
                 <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   <select
                     value={eff.flagId}
@@ -286,7 +286,7 @@ export const EffectEditor = memo(function EffectEditor({ choiceIndex }: EffectEd
                   </select>
                 </div>
               )}
-              {kind === 'reputation_delta' && eff.kind === 'reputation_delta' && (
+              {eff?.kind === 'reputation_delta' && (
                 <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   <select
                     aria-label="Axe réputation effet"

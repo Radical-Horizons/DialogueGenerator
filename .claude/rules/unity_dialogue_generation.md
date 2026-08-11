@@ -1,9 +1,9 @@
 ---
 description: Génération dialogues Unity — modèles Pydantic, champs techniques, structured output
-globs: ["models/dialogue_structure/**/*.py", "services/unity_dialogue_generation_service.py", "prompt_engine.py"]
-alwaysApply: false
+paths:
+  - "models/dialogue_structure/**"
+  - "services/unity_dialogue_generation_service.py"
 ---
-
 - **Modèles Pydantic** (`models/dialogue_structure/unity_dialogue_node.py`) : Ne jamais exposer les champs techniques à l'IA. L'IA génère uniquement le contenu créatif (displayName, text, speaker, line, test, traitRequirements, condition, etc.).
 - **displayName** : champ créatif obligatoire côté produit ; le LLM doit le fournir. `enrich_with_ids()` / `resolve_generated_display_name()` complètent en secours (title → première ligne de `line` → id).
 - **Champs techniques exclus** : `targetNode`, `nextNode`, `successNode`, `failureNode`, `testSuccessNode`, `testFailureNode` ne doivent PAS être dans les modèles Pydantic exposés à l'IA.

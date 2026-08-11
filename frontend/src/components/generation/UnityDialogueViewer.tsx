@@ -519,7 +519,7 @@ export const UnityDialogueViewer = memo(function UnityDialogueViewer({
       </div>
 
       {/* Footer avec infos */}
-      {(response.prompt_used || response.estimated_tokens || response.warning) && (
+      {(response.estimated_tokens || response.warning) && (
         <div
           style={{
             padding: '0.75rem 1rem',

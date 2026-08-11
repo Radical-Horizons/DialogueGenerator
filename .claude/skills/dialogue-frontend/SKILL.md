@@ -23,6 +23,10 @@ Ce skill couvre :
 
 **Règles complémentaires (lire si besoin)** : `.claude/rules/frontend.md`, `.claude/rules/responsive_frontend.md`, `.claude/rules/frontend_testing.md`, `.claude/rules/graph_editor.md`, `.claude/rules/workflow.md`
 
+⚠️ **Refonte UI 2026** — si la tâche touche un écran de la maquette (1c, 2a–2e) : lire d'abord
+`.claude/rules/ui_redesign_2026.md` et **relever les valeurs dans le HTML** de
+`docs/design/refonte-ui-2026/` (`npm run design:refs`). Ne pas approximer depuis une capture.
+
 ---
 
 ## Garde-fous architecture

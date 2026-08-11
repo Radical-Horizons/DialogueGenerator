@@ -12,8 +12,9 @@ import {
   type MouseEvent,
 } from 'react'
 import { theme } from '../../theme'
+import { redesignFont, redesignText } from '../../theme/redesignTokens'
 import { remSize } from '../../theme/uiTypography'
-import { listItemSelectionStyle } from '../../theme/selectionTokens'
+import { listItemSelectionStyle, listRowHairlineBorder, listRowHoverBackground } from '../../theme/selectionTokens'
 import type { UnityDialogueMetadata } from '../../types/api'
 import { highlightText } from '../../utils/textHighlight'
 import { getDialogueDisplayTitle } from '../../utils/formatDialogueTitle'
@@ -48,7 +49,7 @@ const MAX_DISPLAYED_SPEAKERS = 8
 const itemInteractiveStyle: CSSProperties = {
   width: '100%',
   padding: '0.5rem',
-  borderBottom: `1px solid ${theme.border.primary}`,
+  borderBottom: listRowHairlineBorder,
   borderTop: 'none',
   borderLeft: 'none',
   borderRight: 'none',
@@ -111,6 +112,21 @@ export const UnityDialogueItem = memo(
       }
 
       const titleText = getDialogueDisplayTitle(dialogue)
+      const nodeCount = dialogue.node_count
+      const edgeCount = dialogue.edge_count
+      /**
+       * « RÉPLIQUES » et non « NŒUDS » : l'API compte les nœuds *écrits* du fichier,
+       * là où la toolbar du graphe compte les sommets du canvas — test et fin
+       * dérivés compris. Deux mesures différentes, deux mots différents.
+       */
+      const structureLabel =
+        typeof nodeCount === 'number'
+          ? `${nodeCount} ${nodeCount === 1 ? 'RÉPLIQUE' : 'RÉPLIQUES'}${
+              typeof edgeCount === 'number'
+                ? ` · ${edgeCount} ${edgeCount === 1 ? 'LIEN' : 'LIENS'}`
+                : ''
+            }`
+          : null
       const shareCount = Math.max(0, dialogue.share_count ?? 0)
       const sharingLabel =
         shareCount === 0 ? 'Privé' : `Co-édité (${shareCount})`
@@ -168,17 +184,26 @@ export const UnityDialogueItem = memo(
               color: theme.text.tertiary,
               display: 'flex',
               flexWrap: 'wrap',
+              alignItems: 'center',
               gap: '0.3rem',
             }}
           >
-            <span>{formatSize(dialogue.size_bytes)}</span>
-            {dialogue.node_count != null && (
-              <>
-                <span aria-hidden>•</span>
-                <span data-testid="unity-dialogue-item-node-count">
-                  {dialogue.node_count} nœud{dialogue.node_count > 1 ? 's' : ''}
-                </span>
-              </>
+            {/* 2e : la ligne dit la forme du dialogue, pas le poids du fichier.
+                `node_count` n'est pas garanti par tous les endpoints — on retombe
+                alors sur la taille, qui reste la seule mesure disponible. */}
+            {structureLabel ? (
+              <span
+                data-testid="unity-dialogue-structure"
+                style={{
+                  fontFamily: redesignFont.mono,
+                  letterSpacing: '0.06em',
+                  color: redesignText.label,
+                }}
+              >
+                {structureLabel}
+              </span>
+            ) : (
+              <span>{formatSize(dialogue.size_bytes)}</span>
             )}
             {dialogue.total_cost_eur != null && dialogue.total_cost_eur > 0 && (
               <>
@@ -320,7 +345,7 @@ export const UnityDialogueItem = memo(
             3000
           )
           if (!isSelected) {
-            e.currentTarget.style.backgroundColor = theme.state.hover.background
+            e.currentTarget.style.backgroundColor = listRowHoverBackground
           }
         },
         onMouseLeave: (e: MouseEvent<HTMLElement>) => {
@@ -376,7 +401,7 @@ export const UnityDialogueItem = memo(
               display: 'flex',
               alignItems: 'flex-start',
               width: '100%',
-              borderBottom: `1px solid ${theme.border.primary}`,
+              borderBottom: listRowHairlineBorder,
               ...selectionStyle,
             }}
             {...hoverHandlers}
@@ -385,12 +410,23 @@ export const UnityDialogueItem = memo(
             <button
               ref={ref as React.Ref<HTMLButtonElement>}
               type="button"
+              data-list-row
               aria-pressed={isSelected}
               onClick={handleClick}
               onContextMenu={onContextMenu}
               style={{
-                ...interactiveStyle,
+                // Le motif de sélection appartient au conteneur ci-dessus. Le
+                // reprendre ici le dessinait une seconde fois — et sur un bouton,
+                // donc avec le `border-radius: 8px` global : un cadre arrondi par
+                // dessus l'accent latéral plat, deux surlignements pour une
+                // sélection. Le bouton ne porte plus que la zone cliquable.
+                ...itemInteractiveStyle,
+                flex: 1,
+                minWidth: 0,
                 borderBottom: 'none',
+                borderRadius: 0,
+                backgroundColor: 'transparent',
+                color: 'inherit',
                 display: 'block',
               }}
             >
@@ -405,6 +441,7 @@ export const UnityDialogueItem = memo(
           ref={ref as React.Ref<HTMLButtonElement>}
           type="button"
           data-testid="unity-dialogue-item"
+          data-list-row
           aria-pressed={isSelected}
           aria-label={titleText}
           onClick={handleClick}

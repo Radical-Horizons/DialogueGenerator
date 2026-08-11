@@ -3,7 +3,7 @@
  * AC FR11 : Personnages, Lieux (contexte), Objets, Espèces, Communautés.
  */
 import { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo } from 'react'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import * as contextAPI from '../../api/context'
 import type { 
   CharacterResponse, 
@@ -55,7 +55,16 @@ import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import { contextGddTabChrome, type ContextGddTabDensity } from '../../theme/responsiveChrome'
-import type { UiFontRemKey } from '../../theme/uiTypography'
+import {
+  redesignAccent,
+  redesignFont,
+  redesignHairline,
+  redesignRadius,
+  redesignSpacing,
+  redesignText,
+} from '../../theme/redesignTokens'
+import { useGenerationStore } from '../../store/generationStore'
+import { useContextConfigStore } from '../../store/contextConfigStore'
 
 type TabType = 'characters' | 'locations' | 'items' | 'species' | 'communities'
 
@@ -108,7 +117,7 @@ const TRIGGER_TYPE_MAP: Partial<Record<TabType, string>> = {
 }
 
 /** Bascule `balanced` → `tight` si la barre déborde (proposition 3). */
-function useContextGddTabBarDensity(tabBarRef: React.RefObject<HTMLDivElement | null>) {
+function useContextGddTabBarDensity(tabBarRef: React.RefObject<HTMLDivElement>) {
   const [density, setDensity] = useState<ContextGddTabDensity>('balanced')
 
   const measure = useCallback(() => {
@@ -143,26 +152,26 @@ function useContextGddTabBarDensity(tabBarRef: React.RefObject<HTMLDivElement | 
 
 function contextGddTabButtonStyle(
   isActive: boolean,
-  tier: (typeof contextGddTabChrome)['balanced'],
-  tabFontKey: UiFontRemKey,
+  tier: (typeof contextGddTabChrome)[ContextGddTabDensity],
 ): CSSProperties {
   return {
-    // Basis 0 % : partage égal de la largeur utile ; évite que le min-content
-    // des libellés longs (Personnages / Communautés) fasse déborder / se chevaucher.
-    flex: '1 1 0%',
+    flex: '0 1 auto',
     minWidth: 0,
     minHeight: tier.tabMinHeightPx,
-    padding: tier.tabPadding,
+    padding: `${tier.tabPadding} 0`,
     border: 'none',
-    borderRadius: tier.borderRadiusPx,
-    borderBottom: isActive
-      ? `2px solid ${theme.button.primary.background}`
-      : '2px solid transparent',
-    backgroundColor: isActive ? theme.background.tertiary : 'transparent',
-    color: theme.text.primary,
+    borderRadius: 0,
+    // Le filet de l'onglet actif vit sur le libellé (`contextGddTabLabelStyle`),
+    // pas ici : posé sur une boîte de `tabMinHeightPx`, il se dessinait bien en
+    // dessous du texte au lieu de le souligner.
+    backgroundColor: 'transparent',
+    color: isActive ? theme.text.primary : redesignText.label,
     cursor: 'pointer',
-    fontWeight: isActive ? 600 : 400,
-    fontSize: remSize(tabFontKey),
+    fontFamily: redesignFont.mono,
+    fontWeight: 400,
+    fontSize: '9.5px',
+    letterSpacing: '0.09em',
+    textTransform: 'uppercase',
     lineHeight: 1.2,
     overflow: 'hidden',
     boxSizing: 'border-box',
@@ -172,14 +181,14 @@ function contextGddTabButtonStyle(
   }
 }
 
-const contextGddTabLabelStyle: CSSProperties = {
-  display: 'block',
-  minWidth: 0,
-  maxWidth: '100%',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-  textAlign: 'center',
+/** Filet de l'onglet actif — au ras du libellé, comme la maquette (2px). */
+function contextGddTabLabelStyle(isActive: boolean): CSSProperties {
+  return {
+    display: 'inline-flex',
+    alignItems: 'baseline',
+    paddingBottom: 2,
+    boxShadow: isActive ? `inset 0 -1px 0 ${redesignAccent.base}` : 'none',
+  }
 }
 
 interface ContextSelectorProps {
@@ -189,12 +198,21 @@ interface ContextSelectorProps {
     error: string | null
     refresh: () => void
   }) => void
+  /**
+   * Contrôles du conteneur, rendus en fin de la ligne « CONTEXTE — N FICHES ».
+   * La maquette 1c ne donne pas de barre de titre à cette colonne : ce qui devait
+   * y vivre (repli du panneau, verrou de run) se glisse ici plutôt que d'ouvrir
+   * une bande vide au-dessus de la liste.
+   */
+  headerEnd?: ReactNode
 }
 
-export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSelectorProps = {}) {
+export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }: ContextSelectorProps = {}) {
   const [activeTab, setActiveTab] = useState<TabType>('characters')
   const [showRulesEditor, setShowRulesEditor] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  /** 1c : outils du contexte repliés par défaut — la liste de fiches prime. */
+  const [showContextTools, setShowContextTools] = useState(false)
   const [sortType, setSortType] = useState<ContextSortType>('name-asc')
   const [characters, setCharacters] = useState<CharacterResponse[]>([])
   const [locations, setLocations] = useState<LocationResponse[]>([])
@@ -205,6 +223,7 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
   const [selectedDetail, setSelectedDetail] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [hoveredTab, setHoveredTab] = useState<TabType | null>(null)
   const tabBarRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const tabBarDensity = useContextGddTabBarDensity(tabBarRef)
@@ -235,8 +254,11 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
     setSuggestions,
     refreshSuggestionsForTrigger,
     gddDataRevision,
+    setGddCatalogLoading,
   } = useContextStore()
   const selectedDialogueType = useContextRulesStore((s) => s.selectedDialogueType)
+  const contextTokenCount = useGenerationStore((s) => s.tokenCount)
+  const contextTokenBudgetMax = useContextConfigStore((s) => s.contextTokenBudgetMax)
 
   const loadData = useCallback(async () => {
     setIsLoading(true)
@@ -399,7 +421,11 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
         void loadData()
       },
     })
-  }, [error, isLoading, loadData, onLoadStateChange])
+    // Publié dans le store : le bouton Générer (colonne de lecture) doit rester
+    // désactivé tant que le catalogue GDD n'est pas chargé.
+    // Appel optionnel : les mocks de store des tests n'exposent pas tous ce setter.
+    setGddCatalogLoading?.(isLoading)
+  }, [error, isLoading, loadData, onLoadStateChange, setGddCatalogLoading])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -651,6 +677,32 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
     [activeTab, isElementSelected],
   )
 
+  /** Fiches sélectionnées, toutes catégories — source des chips (données réelles du store). */
+  const selectedChipNames = useMemo(() => {
+    const keys: (keyof typeof selections)[] = [
+      'characters_full', 'characters_excerpt',
+      'locations_full', 'locations_excerpt',
+      'items_full', 'items_excerpt',
+      'species_full', 'species_excerpt',
+      'communities_full', 'communities_excerpt',
+    ]
+    return keys.flatMap((k) => (Array.isArray(selections[k]) ? (selections[k] as string[]) : []))
+  }, [selections])
+
+  /** Budget contexte : null tant qu'aucune estimation n'est disponible (jamais de valeur inventée). */
+  const budgetPercent = useMemo(() => {
+    if (!contextTokenCount || !contextTokenBudgetMax) return null
+    return Math.round((contextTokenCount / contextTokenBudgetMax) * 100)
+  }, [contextTokenCount, contextTokenBudgetMax])
+
+  const tabItemCounts: Record<TabType, number> = {
+    characters: characters.length,
+    locations: locations.length,
+    items: items.length,
+    species: species.length,
+    communities: communities.length,
+  }
+
   return (
     <div
       data-testid="context-selector"
@@ -666,12 +718,127 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
         paddingBottom: 4,
       }}
     >
+      {/* Écran 1c : fiches sélectionnées en chips + jauge de budget, au-dessus de la recherche. */}
+      <div
+        data-testid="context-selection-header"
+        style={{
+          flexShrink: 0,
+          padding: `${redesignSpacing.md}px ${redesignSpacing.md}px ${redesignSpacing.sm}px`,
+          borderBottom: `1px solid ${redesignHairline.standard}`,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            gap: '0.5rem',
+            marginBottom: `${redesignSpacing.sm}px`,
+          }}
+        >
+          {/* 1c : une seule ligne « CONTEXTE — N FICHES … vider ». Le panneau n'a
+              pas de barre de titre séparée : ce libellé en tient lieu. */}
+          <span
+            style={{
+              fontFamily: redesignFont.mono,
+              fontSize: '10px',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: redesignText.label,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Contexte — {selectedChipNames.length} fiche{selectedChipNames.length > 1 ? 's' : ''}
+          </span>
+          {selectedChipNames.length > 0 && (
+            <button
+              type="button"
+              onClick={clearSelections}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                color: redesignText.label,
+                fontSize: remSize('caption'),
+              }}
+            >
+              vider
+            </button>
+          )}
+          {headerEnd}
+        </div>
+        {selectedChipNames.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: `${redesignSpacing.xs}px`, marginBottom: `${redesignSpacing.sm}px` }}>
+            {selectedChipNames.slice(0, 5).map((name) => (
+              <span
+                key={name}
+                style={{
+                  height: 22,
+                  padding: '0 8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  borderRadius: `${redesignRadius.chip}px`,
+                  border: '1px solid rgba(79,127,255,0.4)',
+                  backgroundColor: 'rgba(79,127,255,0.1)',
+                  color: redesignAccent.light,
+                  fontSize: '11px',
+                  whiteSpace: 'nowrap',
+                  maxWidth: 130,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {name}
+              </span>
+            ))}
+            {selectedChipNames.length > 5 && (
+              <span style={{ color: redesignText.label, fontSize: remSize('caption'), alignSelf: 'center' }}>
+                +{selectedChipNames.length - 5}
+              </span>
+            )}
+          </div>
+        )}
+        {budgetPercent !== null && (
+          <>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'baseline',
+                fontFamily: redesignFont.mono,
+                fontSize: '9.5px',
+                letterSpacing: '0.09em',
+                textTransform: 'uppercase',
+                color: redesignText.label,
+                marginBottom: 4,
+              }}
+            >
+              <span>Budget</span>
+              <span style={{ color: redesignAccent.base }}>{budgetPercent} %</span>
+            </div>
+            <div style={{ height: 2, backgroundColor: redesignHairline.strong, overflow: 'hidden' }}>
+              <div
+                style={{
+                  width: `${Math.min(100, budgetPercent)}%`,
+                  height: '100%',
+                  backgroundColor: redesignAccent.base,
+                }}
+              />
+            </div>
+          </>
+        )}
+      </div>
+
       <ContextSearchControls
         searchQuery={searchQuery}
         onSearchQueryChange={setSearchQuery}
         sortType={sortType}
         onSortTypeChange={setSortType}
         inputRef={searchInputRef}
+        // 1c : « Chercher une fiche… » — le libellé de la maquette, plus court
+        // que l'ancien, donc lisible même à 212 px (écran 2d).
+        placeholder="Chercher une fiche…"
       />
 
       {/* Barre d'onglets compacte : 5 onglets + ⚙ sur une ligne (repli caption si débordement) */}
@@ -681,38 +848,53 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
         style={{
           flexShrink: 0,
           display: 'flex',
-          flexWrap: 'nowrap',
+          flexWrap: 'wrap',
           alignItems: 'stretch',
-          gap: tabChromeTier.barGap,
-          padding: tabChromeTier.barPadding,
-          borderBottom: `1px solid ${theme.border.primary}`,
+          gap: `${redesignSpacing.md}px`,
+          padding: `0 ${redesignSpacing.md}px`,
+          borderBottom: `1px solid ${redesignHairline.standard}`,
           position: 'relative',
           boxSizing: 'border-box',
           overflow: 'hidden',
         }}
       >
-        {TAB_DEFS.map(({ key, label }) => (
-          <button
-            key={key}
-            type="button"
-            className="context-gdd-tab"
-            title={label}
-            onClick={() => {
-              setActiveTab(key)
-              setSelectedDetail(null)
-              onItemSelected?.(null, null)
-            }}
-            style={contextGddTabButtonStyle(
-              activeTab === key,
-              tabChromeTier,
-              tabChromeTier.tabFontKey,
-            )}
-          >
-            <span data-testid="context-gdd-tab-label" style={contextGddTabLabelStyle}>
-              {label}
-            </span>
-          </button>
-        ))}
+        {TAB_DEFS.map(({ key, label }) => {
+          const isActive = activeTab === key
+          const showCount = isActive || hoveredTab === key
+          const count = tabItemCounts[key]
+          return (
+            <button
+              key={key}
+              type="button"
+              className="context-gdd-tab"
+              onClick={() => {
+                setActiveTab(key)
+                setSelectedDetail(null)
+                onItemSelected?.(null, null)
+              }}
+              onMouseEnter={() => setHoveredTab(key)}
+              onMouseLeave={() => setHoveredTab(null)}
+              style={contextGddTabButtonStyle(isActive, tabChromeTier)}
+            >
+              <span style={contextGddTabLabelStyle(isActive)}>
+                {label}
+                {showCount && (
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      marginLeft: '0.4em',
+                      fontFamily: redesignFont.mono,
+                      fontSize: '0.85em',
+                      color: isActive ? theme.text.secondary : theme.text.tertiary,
+                    }}
+                  >
+                    {count}
+                  </span>
+                )}
+              </span>
+            </button>
+          )
+        })}
 
         <button
           type="button"
@@ -787,6 +969,32 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
         />
       </div>
 
+      {/* 1c : la liste de fiches court sur toute la hauteur. Suggestions, contexte
+          narratif, sélections et diagnostic ne disparaissent pas — ils passent derrière
+          un lien discret en pied de colonne. */}
+      <button
+        type="button"
+        data-testid="context-tools-toggle"
+        onClick={() => setShowContextTools((v) => !v)}
+        style={{
+          flexShrink: 0,
+          border: 'none',
+          background: 'none',
+          padding: '10px 14px',
+          cursor: 'pointer',
+          textAlign: 'left',
+          fontFamily: redesignFont.mono,
+          fontSize: '10px',
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          color: redesignText.label,
+          borderTop: `1px solid ${redesignHairline.standard}`,
+        }}
+      >
+        {showContextTools ? '▾ Outils du contexte' : '▸ Outils du contexte'}
+      </button>
+
+      <div style={{ display: showContextTools ? 'block' : 'none' }}>
       <ContextPanelAccordionGroup>
         <ContextSuggestionsPanel />
 
@@ -845,6 +1053,7 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
           <ContextUsagePanel />
         </ContextPanelAccordionSection>
       </ContextPanelAccordionGroup>
+      </div>
     </div>
   )
 }

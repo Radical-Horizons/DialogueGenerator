@@ -2,10 +2,12 @@
 description: >-
   Auth guest-first frontend — initialize hors ProtectedRoute, isLoading, /login.
   Apply when editing authStore, LoginForm, App routes, auth E2E, or DISABLE_AUTH UX.
-globs: frontend/src/store/authStore.ts, frontend/src/components/auth/**, frontend/src/App.tsx, frontend/src/api/auth.ts, frontend/src/api/client.ts, frontend/src/utils/logging.ts, e2e/auth*.ts, frontend/src/test/LoginForm*.tsx, frontend/src/test/App.auth*.tsx
-alwaysApply: false
+paths:
+  - "frontend/src/store/authStore.ts"
+  - "frontend/src/components/auth/**"
+  - "frontend/src/App.tsx"
+  - "e2e/auth*.ts"
 ---
-
 # Auth guest-first (frontend)
 
 - **Boot** : `isLoading` démarre à `true` jusqu’au premier `initialize()`. Toute route hors `ProtectedRoute` (surtout `/login`) **doit** appeler `initialize()` (App et/ou `LoginForm`) — sinon le bouton reste sur « Connexion... ».

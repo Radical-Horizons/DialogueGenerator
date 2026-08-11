@@ -1,15 +1,10 @@
 ---
 description: GDD Notion sync — régénérer settings depuis l’API quand le flux ou le script change
-alwaysApply: false
-globs:
-  - scripts/build_gdd_notion_settings_from_notion.py
-  - data/gdd_notion_sync/settings.json
-  - services/gdd_notion_sync*.py
-  - services/gdd_notion_full_sync_checkpoint.py
-  - api/routers/gdd_notion_sync.py
-  - api/schemas/gdd_notion_sync.py
+paths:
+  - "services/gdd_notion_sync*.py"
+  - "data/gdd_notion_sync/settings.json"
+  - "scripts/build_gdd_notion_settings_from_notion.py"
 ---
-
 - Après modification du script de construction des sources ou d’une logique qui impose un `settings.json` aligné sur le workspace Notion (filtres page/database, compact tables, etc.) : exécuter **sans attendre** une demande explicite :  
   `node scripts/getPythonPath.js -m scripts.build_gdd_notion_settings_from_notion`  
   (`.env` avec `NOTION_API_KEY`).

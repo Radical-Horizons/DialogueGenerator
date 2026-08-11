@@ -7,6 +7,7 @@ import { usePromptPreview } from '../../hooks/usePromptPreview'
 import { useLazyPromptPreview } from '../../hooks/useLazyPromptPreview'
 import { StructuredPromptView } from './StructuredPromptView'
 import { theme } from '../../theme'
+import { redesignAccent, redesignFont, redesignHairline, redesignText } from '../../theme/redesignTokens'
 import { useToast } from '../shared'
 import { useGenerationStore } from '../../store/generationStore'
 import type { RawPrompt } from '../../types/api'
@@ -42,6 +43,10 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
 
   const { sections } = usePromptPreview(raw_prompt, structuredPrompt)
   const hasStructuredPrompt = Boolean(structuredPrompt && sections.length > 0)
+  /** Total réellement additionné depuis les sections — jamais une valeur inventée. */
+  const promptTotalTokens = sections.some((s) => s.tokenCount !== undefined)
+    ? sections.reduce((sum, s) => sum + (s.tokenCount ?? 0), 0)
+    : null
   const hasPromptPreview = Boolean(raw_prompt || hasStructuredPrompt)
 
   const handleCopyPrompt = useCallback(() => {
@@ -84,10 +89,12 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
         overflow: 'hidden',
       }}
     >
+      {/* 1c : la colonne s'ouvre sur les rangées ; les bascules d'affichage restent
+          disponibles mais discrètes, sous le titre. */}
       <div
         style={{
-          padding: '0.65rem 0.75rem',
-          borderBottom: `1px solid ${theme.border.primary}`,
+          padding: '0 20px 10px',
+          borderBottom: 'none',
           flexShrink: 0,
           display: 'flex',
           flexDirection: 'column',
@@ -129,7 +136,7 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
                   e.currentTarget.style.backgroundColor = theme.background.secondary
                 }}
               >
-                📋 Copier
+                Copier
               </button>
             )}
             {viewMode === 'structured' && toggleAllFn && (
@@ -137,77 +144,50 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
                 type="button"
                 onClick={toggleAllFn}
                 style={{
-                  padding: '0.4rem 0.75rem',
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
-                  backgroundColor: theme.background.secondary,
-                  color: theme.text.primary,
-                  cursor: 'pointer',
-                  fontSize: '0.78rem',
-                  transition: 'background-color 0.2s',
+                  border: 'none',
+                  background: 'none',
+                  padding: 0,
                   marginRight: '0.75rem',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = theme.background.panel
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = theme.background.secondary
+                  cursor: 'pointer',
+                  fontSize: '11.5px',
+                  color: theme.text.secondary,
                 }}
               >
-                {allExpanded ? 'Tout replier' : 'Tout déplier'}
+                {allExpanded ? 'tout replier' : 'tout déplier'}
               </button>
             )}
-            <span style={{ color: viewMode === 'raw' ? theme.text.primary : theme.text.secondary }}>
-              Brut
-            </span>
-            <label
+            {/* 1c : deux liens, pas un interrupteur — le seul élément accentué de
+                l'écran est le bouton Générer. */}
+            <button
+              type="button"
+              data-testid="prompt-view-raw"
+              onClick={() => handleViewModeChange('raw')}
               style={{
-                position: 'relative',
-                display: 'inline-block',
-                width: '44px',
-                height: '24px',
+                border: 'none',
+                background: 'none',
+                padding: 0,
                 cursor: 'pointer',
+                fontSize: '11.5px',
+                color: viewMode === 'raw' ? theme.text.primary : theme.text.secondary,
               }}
             >
-              <input
-                type="checkbox"
-                checked={viewMode === 'structured'}
-                onChange={(e) => handleViewModeChange(e.target.checked ? 'structured' : 'raw')}
-                style={{
-                  opacity: 0,
-                  width: 0,
-                  height: 0,
-                }}
-              />
-              <span
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: viewMode === 'structured' ? theme.border.focus : theme.input.border,
-                  borderRadius: '12px',
-                  transition: 'background-color 0.2s',
-                }}
-              />
-              <span
-                style={{
-                  position: 'absolute',
-                  top: '2px',
-                  left: viewMode === 'structured' ? '22px' : '2px',
-                  width: '20px',
-                  height: '20px',
-                  borderRadius: '50%',
-                  backgroundColor: 'white',
-                  transition: 'left 0.2s',
-                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-                }}
-              />
-            </label>
-            <span style={{ color: viewMode === 'structured' ? theme.text.primary : theme.text.secondary }}>
-              Structuré
-            </span>
+              brut
+            </button>
+            <button
+              type="button"
+              data-testid="prompt-view-structured"
+              onClick={() => handleViewModeChange('structured')}
+              style={{
+                border: 'none',
+                background: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                fontSize: '11.5px',
+                color: viewMode === 'structured' ? theme.text.primary : theme.text.secondary,
+              }}
+            >
+              structuré
+            </button>
           </div>
         )}
       </div>
@@ -255,15 +235,47 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
               </div>
             )
           ) : (
-            <StructuredPromptView
-              prompt={raw_prompt ?? ''}
-              structuredPrompt={structuredPrompt}
-              sections={sections}
-              onToggleStateChange={(expanded, toggleFn) => {
-                setAllExpanded(expanded)
-                setToggleAllFn(() => toggleFn)
-              }}
-            />
+            <>
+              <StructuredPromptView
+                prompt={raw_prompt ?? ''}
+                structuredPrompt={structuredPrompt}
+                sections={sections}
+                onToggleStateChange={(expanded, toggleFn) => {
+                  setAllExpanded(expanded)
+                  setToggleAllFn(() => toggleFn)
+                }}
+              />
+              {promptTotalTokens !== null && (
+                <div
+                  data-testid="prompt-total-row"
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'baseline',
+                    gap: '10px',
+                    padding: '10px 0',
+                    borderTop: `1px solid ${redesignHairline.standard}`,
+                    fontFamily: redesignFont.mono,
+                    fontSize: '10px',
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    color: redesignText.label,
+                  }}
+                >
+                  <span>Total</span>
+                  <span
+                    style={{
+                      fontSize: '12px',
+                      letterSpacing: 0,
+                      color: redesignAccent.base,
+                      fontVariantNumeric: 'tabular-nums',
+                    }}
+                  >
+                    {promptTotalTokens.toLocaleString('fr-FR')}
+                  </span>
+                </div>
+              )}
+            </>
           )
         ) : (
           <div

@@ -10,6 +10,7 @@ import { useContextStore } from '../store/contextStore'
 import { preparePresetForApply } from '../utils/presetUtils'
 import { getErrorMessage } from '../types/errors'
 import type { Preset, PresetConfiguration, PresetValidationResult } from '../types/preset'
+import type { ReasoningEffort } from '../types/api'
 
 export interface UsePresetManagementReturn {
   /** Charger un preset avec validation */
@@ -48,10 +49,10 @@ export interface UsePresetManagementOptions {
   /** Setter pour topP - optionnel */
   setTopP?: (value: number | null) => void
   /** Reasoning effort - optionnel */
-  reasoningEffort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  reasoningEffort?: ReasoningEffort | null
   /** Setter pour reasoningEffort - optionnel */
   setReasoningEffort?: (
-    value: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+    value: ReasoningEffort | null
   ) => void
   /** Max completion tokens - optionnel */
   maxCompletionTokens?: number | null

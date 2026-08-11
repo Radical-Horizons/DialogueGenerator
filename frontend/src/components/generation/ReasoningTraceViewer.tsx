@@ -128,7 +128,7 @@ export const ReasoningTraceViewer = memo(function ReasoningTraceViewer({
               e.currentTarget.style.backgroundColor = theme.background.panel
             }}
           >
-            📋 Copier
+            Copier
           </button>
         )}
       </div>

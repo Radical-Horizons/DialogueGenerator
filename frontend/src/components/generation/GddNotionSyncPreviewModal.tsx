@@ -43,7 +43,7 @@ export function GddNotionSyncPreviewModal({
           maxHeight: 'min(85vh, 720px)',
           borderRadius: '10px',
           padding: '1.25rem 1.5rem',
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.elevated,
           border: `1px solid ${theme.border.primary}`,
           boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
           display: 'flex',

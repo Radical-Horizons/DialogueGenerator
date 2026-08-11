@@ -16,9 +16,12 @@ import {
 import { GraphQualityLlmHistorySparkline } from './GraphQualityLlmHistorySparkline'
 import { GraphQualityLlmCriteriaList } from './GraphQualityLlmCriteriaList'
 import { GraphToolFloatingShell } from './GraphToolFloatingShell'
+import { toGraphNodePayloads, toGraphEdgePayloads } from '../../utils/graphPayload'
 
 interface GraphQualityLlmPanelProps {
-  onClose: () => void
+  /** `inspector` : rendu nu dans l'inspecteur de graphe (écran 2e), sans chrome flottant. */
+  variant?: 'floating' | 'inspector'
+  onClose?: () => void
 }
 
 interface HistoryEntry {
@@ -29,7 +32,7 @@ interface HistoryEntry {
 /**
  * Overlay graphe : lance l’évaluation, affiche le rapport et l’historique session.
  */
-export function GraphQualityLlmPanel({ onClose }: GraphQualityLlmPanelProps) {
+export function GraphQualityLlmPanel({ variant = 'floating', onClose }: GraphQualityLlmPanelProps) {
   const nodes = useGraphStore((s) => s.nodes)
   const edges = useGraphStore((s) => s.edges)
 
@@ -43,20 +46,8 @@ export function GraphQualityLlmPanel({ onClose }: GraphQualityLlmPanelProps) {
     setError(null)
     try {
       const res = await graphAPI.evaluateDialogueQuality({
-        nodes: nodes.map((n) => ({
-          id: n.id,
-          type: n.type,
-          position: n.position,
-          data: n.data,
-        })),
-        edges: edges.map((e) => ({
-          id: e.id,
-          source: e.source,
-          target: e.target,
-          type: e.type,
-          label: e.label,
-          data: e.data,
-        })),
+        nodes: toGraphNodePayloads(nodes),
+        edges: toGraphEdgePayloads(edges),
       })
       setLast(res)
       setHistory((h) => [...h, { at: Date.now(), score: res.overall_score }])
@@ -79,6 +70,7 @@ export function GraphQualityLlmPanel({ onClose }: GraphQualityLlmPanelProps) {
 
   return (
     <GraphToolFloatingShell
+      variant={variant}
       title={<strong>Qualité LLM</strong>}
       onClose={onClose}
       dataTestId="graph-quality-llm-panel"

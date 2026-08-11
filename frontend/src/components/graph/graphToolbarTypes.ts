@@ -31,6 +31,9 @@ export interface GraphToolbarTitleBlockProps {
   showSearchBar: boolean
   setShowSearchBar: React.Dispatch<React.SetStateAction<boolean>>
   setHighlightedNodes: (ids: string[]) => void
+  /** Compteurs mono `N NŒUDS · M LIENS` de la rangée 2e (confort uniquement). */
+  nodeCount?: number
+  edgeCount?: number
 }
 
 /**

@@ -32,6 +32,14 @@ export const conditionAtomSchema = z.discriminatedUnion('kind', [
   }),
 ])
 
+/**
+ * Conditions réellement éditables dans le formulaire de nœud.
+ *
+ * Sous-ensemble de `ConditionAtom` (`types/visibilityConditions.ts`), qui porte en plus
+ * `reputation_fr94` et `faction_title` — évalués à l'exécution mais non produits ici.
+ */
+export type ConditionAtomForm = z.infer<typeof conditionAtomSchema>
+
 export const visibilityConditionsBlockSchema = z.object({
   combinator: z.enum(['AND', 'OR']),
   items: z.array(conditionAtomSchema).min(1),

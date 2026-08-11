@@ -308,7 +308,9 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
               name: row.name,
               mode: row.mode as 'full' | 'excerpt',
               token_count: row.token_count,
-              context_item: row.context_item as import('../types/prompt').ContextItem,
+              // `context_item` est un Dict[str, Any] côté backend (api/schemas/dialogue.py) :
+              // le filtre ci-dessus garantit sa présence, sa forme reste non typée à la frontière.
+              context_item: row.context_item as unknown as import('../types/prompt').ContextItem,
             })),
           selections,
         )

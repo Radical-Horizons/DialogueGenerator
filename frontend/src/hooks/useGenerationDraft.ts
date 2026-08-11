@@ -6,7 +6,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useGenerationStore } from '../store/generationStore'
 import { useContextStore } from '../store/contextStore'
-import type { ContextSelection } from '../types/api'
+import type { ContextSelection, ReasoningEffort } from '../types/api'
 import { CONTEXT_TOKENS_LIMITS, normalizeModelId } from '../constants'
 import { normalizeMaxCompletionTokensForUi } from '../utils/generationConfigNormalization'
 import { useLLMStore } from '../store/llmStore'
@@ -32,7 +32,7 @@ interface DraftData {
   maxContextTokens: number
   maxCompletionTokens: number | null
   llmModel: string
-  reasoningEffort: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  reasoningEffort: ReasoningEffort | null
   topP: number | null
   maxChoices: number | null
   choicesMode: 'free' | 'capped'
@@ -70,7 +70,7 @@ export interface UseGenerationDraftOptions {
   /** Modèle LLM */
   llmModel: string
   /** Reasoning effort */
-  reasoningEffort: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  reasoningEffort: ReasoningEffort | null
   /** Top_p (nucleus sampling) */
   topP: number | null
   /** Nombre max de choix */
@@ -89,7 +89,7 @@ export interface UseGenerationDraftOptions {
   setLlmModel: (value: string) => void
   /** Callback pour mettre à jour reasoningEffort */
   setReasoningEffort: (
-    value: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+    value: ReasoningEffort | null
   ) => void
   /** Callback pour mettre à jour topP */
   setTopP: (value: number | null) => void

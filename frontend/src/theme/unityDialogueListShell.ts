@@ -6,6 +6,7 @@
  */
 import type { CSSProperties } from 'react'
 import { theme } from '../theme'
+import { redesignHairline } from './redesignTokens'
 
 /** Plancher lisibilité liste (recherche + filtres + cartes). */
 export const UNITY_DIALOGUE_LIST_MIN_WIDTH_PX = 240
@@ -22,7 +23,7 @@ export const unityDialogueListColumnStyle: CSSProperties = {
   flex: `0 1 ${UNITY_DIALOGUE_LIST_MAX_FRACTION * 100}%`,
   maxWidth: `min(${UNITY_DIALOGUE_LIST_MAX_FRACTION * 100}%, ${UNITY_DIALOGUE_LIST_MAX_WIDTH_CAP_PX}px)`,
   minWidth: UNITY_DIALOGUE_LIST_MIN_WIDTH_PX,
-  borderRight: `2px solid ${theme.border.secondary}`,
+  borderRight: `1px solid ${redesignHairline.standard}`,
   overflow: 'hidden',
   backgroundColor: theme.background.panel,
   minHeight: 0,

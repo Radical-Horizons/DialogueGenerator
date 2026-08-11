@@ -120,7 +120,8 @@ export interface GraphViewState {
   scenarioPlaythrough: ScenarioPlaythroughState
 
   // --- Actions : instance ---
-  registerReactFlowInstance: (instance: ReactFlowInstance) => void
+  /** `null` réinitialise la référence — l'état la porte déjà comme valeur initiale. */
+  registerReactFlowInstance: (instance: ReactFlowInstance | null) => void
 
   // --- Actions : focus / fitView ---
   focusNode: (nodeId: string) => void

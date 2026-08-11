@@ -1,9 +1,11 @@
 ---
 description: Erreurs de validation API explicites — jamais de 422 opaque pour un réglage UI valide ; erreurs save Unity → champs inline graphe.
-globs: api/schemas/**/*.py, api/utils/unity_schema_validator.py, services/unity_export_validation_service.py, services/unity_schema_error_formatter.py, frontend/src/hooks/useGeneration*.ts, frontend/src/utils/generationConfigNormalization.ts, frontend/src/utils/documentValidationFieldErrors.ts, frontend/src/store/slices/persistenceSlice.ts, frontend/src/types/errors.ts
-alwaysApply: false
+paths:
+  - "api/schemas/**/*.py"
+  - "api/utils/unity_schema_validator.py"
+  - "services/unity_export_validation_service.py"
+  - "frontend/src/utils/documentValidationFieldErrors.ts"
 ---
-
 # Validation API explicite
 
 - Les plafonds Pydantic (`Field(ge/le)`) doivent rester **≥ toute valeur que le frontend peut envoyer** pour ce champ, ou le frontend doit normaliser **avant** l'appel (voir `generationConfigNormalization.ts`).

@@ -120,3 +120,75 @@
 #   evidence: Revue 8.8 — hook monte dans UnityDialogueList ; demontage coupe le poll.
 # RESOLVED 2026-08-04 — guest JWT ``sid`` + job_owner_key(`guest:{sid}`) ; tests IDOR
 # - source_spec: spec-8-8 … Owner job guest base sur session UUID
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
+  summary: Éditeur de graphe — remplacer les 7 panneaux flottants (validation/schéma/quality-llm/ai-slop/coût) par un inspecteur à onglets fixe 300px piloté par un seul state `inspectorTab`, en gardant `FlowSimulationPanel`/`GraphContextDroppingPanel`/`GameSystemsIntegrationPanel` en modales.
+  evidence: Split au checkpoint spec (2883 tokens, >1600) — le doc de design le qualifie lui-même de "plus gros PR — à faire seul" ; ≥15 fichiers de test référencent les 5 booléens actuels (`showValidationPanel` etc.) et devront être mis à jour.
+  status: done (commit ef62e00af — inspecteur 300px `uiLayoutStore.inspectorTab`)
+- source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
+  summary: Toolbar de l'éditeur de graphe — collapser 3 rangées (`GraphToolbarStatusRow` ×2 + `GraphToolbarToolsRow`) en une seule, badges couleur → point + libellé mono.
+  evidence: Split au checkpoint spec — dépend structurellement du goal inspecteur (même zone, même PR logique côté doc de design).
+  status: done (commit 3723d78d7 — rangée 46px, seuil dédié 980px, fix ResizeObserver StrictMode)
+- source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
+  summary: Restyle visuel `DialogueNode`/`EndNode`/`TestNode` (bordures par état, typo mono/serif) via la fonction de précédence de validation déjà partagée (`getValidationHighlightKind`).
+  evidence: Split au checkpoint spec — cohérent à traiter avec l'inspecteur de graphe (même famille de composants) plutôt que dans le même spec que le streaming inline.
+  status: done (commit ae62d5008 — bordures neutres, pieds mono, plaques FIN/TEST)
+- source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
+  summary: États responsive — mode écriture (`⌘\`/`ctrl+\`, deux colonnes en rail 52px), tiroir bas plafonné 60vh à ≤1024px (nouvelle variante `side: 'bottom'` sur `NarrowOverlayDrawer`), nouveau store `uiLayoutStore`.
+  evidence: Split au checkpoint spec — touche à la fois l'écran de génération et l'éditeur de graphe ; mieux traité une fois les deux zones stabilisées visuellement.
+  status: done — 2c complet (header minimal, rails 52px à puces, barre de pied unique) et 2d complet (barre basse `PromptBudgetBottomDrawer` entre 1024 et 1200px, colonne droite repliée pour éviter le doublon).
+
+- source_spec: `docs/design/refonte-ui-2026/etats-2a-2e.dc.html` (bloc 2d)
+  summary: À ≤1024px, transformer le panneau droit « Ce qui part au modèle » en barre repliable au-dessus de la barre d'action (variante `side: 'bottom'` de `NarrowOverlayDrawer`, plafond 60vh).
+  evidence: Vérifié navigateur (août 2026) : à 1024px l'app garde déjà 3 colonnes conformes (GDD ~212px, colonne 600px, panneau droit avec TOTAL visible) — l'essentiel de 2d (« le total reste toujours visible ») est satisfait ; la barre basse est un raffinement, à faire avec les tests FR119/FR120 des drawers.
+  status: done — livré le 2026-08-05, vérifié à 1100px (total visible replié, détail sous le plafond 60vh, colonne droite absente) et à 1400px (retour à la colonne).
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
+  summary: Écran 2b — le bouton « Variante » par option n'est PAS une fonctionnalité neuve : il correspond à la Story 1.10 (FR10, régénérer avec instructions ajustées), déjà implémentée via `RegenerateNodeModal`. À recâbler sur la nouvelle UI, pas à réécrire. Idem « Éditer » (Story 1.4, accepter/rejeter inline).
+  evidence: Relevé dans `_bmad-output/planning-artifacts/epics/epic-01.md` (Story 1.7 duplication FR7, Story 1.10 régénération FR10). Seule la génération de N options SIMULTANÉES reste sans support backend (`GenerateUnityDialogueResponse` est one-shot) — c'est le seul point qui coûterait N appels LLM.
+  status: done — décision utilisateur (2026-08-04) : appels multiples autorisés, parallèles, plafonnés. Implémenté frontend-only : `generationOptionsStore` (plafond `MAX_GENERATION_OPTIONS=4`, N-1 jobs `createGenerationJob` supplémentaires chacun avec son EventSource — le backend n'exécute un job que quand son stream est réclamé), comparaison `GenerationOptionsComparison` (Garder / Variante / Réessayer), sélecteur ×N dans la barre d'action, interruption qui annule aussi les jobs d'arrière-plan. Vérifié en live : 2 appels parallèles réels, 2 OPTIONS SUR 2 — À COMPARER, Garder pousse le résultat.
+
+
+- source_spec: `docs/design/refonte-ui-2026/etats-2a-2e.dc.html` (bloc 2b)
+  summary: **Proposition produit à évaluer — « comparer des variantes », pas seulement les afficher.** Trois briques, dans cet ordre de dépendance : (1) une variante par **modèle** au lieu de N tirages du même ; (2) **évaluation automatique** de chaque variante ; (3) disposition **côte à côte**. La 3 est de l'UI, mais elle n'a d'intérêt que si 1 et/ou 2 existent : lire en parallèle N sorties du même modèle avec les mêmes réglages n'apprend rien de plus que les lire l'une après l'autre.
+  evidence: |
+    Origine : lien « vue côte à côte » présent dans la maquette 2b, dont l'écran n'a
+    jamais été dessiné — la maquette le liste elle-même en « À TRANCHER »
+    (`etats-2a-2e.dc.html`, bloc de notes). Discussion utilisateur 2026-08-06 : la
+    disposition seule n'est pas le sujet, la comparaison de modèles + l'évaluation
+    auto le sont. Reconnu comme **conception applicative**, pas travail d'UI.
+
+    Ce qui existe déjà et ne serait pas à réécrire :
+    - Génération de N variantes en parallèle : `generationOptionsStore`
+      (`MAX_GENERATION_OPTIONS=4`, un job + un EventSource par variante).
+      **Limite** : toutes les variantes rejouent le même `lastRequest` — même
+      modèle, mêmes réglages ; seul l'échantillonnage LLM les distingue.
+    - Juge LLM **déjà implémenté** (Story 4.7 / FR42) : `LLMQualityJudgeService`,
+      `POST /api/v1/graph/evaluate-dialogue-quality`, panneau `GraphQualityLlmPanel`
+      (onglet QUALITÉ de l'inspecteur 2e). L'endpoint prend `nodes`/`edges` **et un
+      `llm_model_identifier` optionnel** — il est sans état, donc utilisable sur une
+      variante fraîchement générée sans travail backend.
+    - Diagnostic déterministe par variante : `generationOptionDiagnostics`
+      (longueur vs cible, réponses portant test/flag/coût, flags posés, fiches
+      citées vs envoyées).
+
+    Ce qui manque réellement : un `request` **par variante** au lieu d'un par lot
+    (aujourd'hui `startRun(count, request)` en stocke un seul), le choix du modèle
+    par variante côté UI, et le câblage variante → juge (+ affichage du score dans
+    la colonne Diagnostic).
+
+    À vérifier avant de planifier : l'utilisateur développe un **mode benchmark sur
+    une autre branche** (mentionné le 2026-08-06). Recouvrement probable avec la
+    brique 1 — ne pas concevoir en double, partir de ce qui y est déjà décidé.
+  related: Epic 4 Story 4.7 (juge LLM, livré) · Epic 1 Story 1.10 (régénérer une
+    variante, livré et recâblé sur le bouton « Variante » de 2b).
+  status: proposal — à évaluer, non planifié. Ne pas traiter comme un écart
+    d'implémentation de la refonte UI : la maquette ne définit pas cet écran.
+
+- source_spec: `docs/design/refonte-ui-2026/etats-2a-2e.dc.html` (bloc 2b, colonne Diagnostic)
+  summary: Lignes de diagnostic qualitatives (« ton demandé : tenu », « mensonge possible », « répétition détectée ») — voir la proposition ci-dessus, dont elles sont la brique 2.
+  evidence: Les lignes calculables sont livrées (longueur vs cible, réponses mécaniques, flags, fiches citées / envoyées inutilement). Les jugements demandent une évaluation par modèle — le service existe (`LLMQualityJudgeService`), il n'est simplement pas branché sur les variantes de génération. Coût N× à arbitrer, et vocabulaire à trancher : « variante » est aujourd'hui le libellé d'une **action** (relancer une option seule), pas de l'objet.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-audit-rendu-ui.md`
+  summary: Le test de régression d'ancrage de la barre d'action lit `parent.style.overflow` — le style **inline**. Il deviendrait muet si le défilement passait un jour en classe CSS.
+  evidence: Relevé en revue (angle verification-gap). Acceptable aujourd'hui car `GenerationPanel` style tout en inline, mais la garantie est liée à ce choix d'implémentation plutôt qu'au comportement. `getComputedStyle` serait plus robuste ; il retourne des valeurs peu fiables en jsdom, d'où le compromis actuel. À revoir si le panneau migre vers des classes.

@@ -15,6 +15,7 @@ import {
 } from '../../utils/slopDetectionSettings'
 import { GraphToolFloatingShell } from './GraphToolFloatingShell'
 import { subscribeUserSettingsHydration } from '../../hooks/useUserSettingsSync'
+import { toGraphNodePayloads, toGraphEdgePayloads } from '../../utils/graphPayload'
 
 interface GraphAiSlopPanelProps {
   onClose: () => void
@@ -70,20 +71,8 @@ export function GraphAiSlopPanel({ onClose }: GraphAiSlopPanelProps) {
     setError(null)
     try {
       const res = await graphAPI.detectAiSlop({
-        nodes: nodes.map((n) => ({
-          id: n.id,
-          type: n.type,
-          position: n.position,
-          data: n.data,
-        })),
-        edges: edges.map((e) => ({
-          id: e.id,
-          source: e.source,
-          target: e.target,
-          type: e.type,
-          label: e.label,
-          data: e.data,
-        })),
+        nodes: toGraphNodePayloads(nodes),
+        edges: toGraphEdgePayloads(edges),
         options: opts,
       })
       setLast(res)
@@ -167,7 +156,7 @@ export function GraphAiSlopPanel({ onClose }: GraphAiSlopPanelProps) {
             fontSize: '0.8rem',
             borderRadius: 4,
             border: `1px solid ${theme.border.primary}`,
-            background: theme.background.default,
+            background: theme.background.tertiary,
             color: theme.text.primary,
           }}
         />

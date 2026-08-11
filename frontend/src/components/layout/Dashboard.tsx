@@ -27,6 +27,7 @@ import { GraphEditor } from '../graph/GraphEditor'
 import { NodeEditorPanel } from '../graph/NodeEditorPanel'
 import { KeyboardShortcutsHelp } from '../shared/KeyboardShortcutsHelp'
 import { useGenerationStore } from '../../store/generationStore'
+import { useContextStore } from '../../store/contextStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useContextConfigStore } from '../../store/contextConfigStore'
 import { useGraphStore } from '../../store/graphStore'
@@ -38,13 +39,22 @@ import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import {
   SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX,
   panelCollapseButtonChrome,
-  panelHeaderTitleTypography,
+  panelHeaderMonoLabel,
   panelSideHeaderChrome,
 } from '../../theme/responsiveChrome'
 import { remSize } from '../../theme/uiTypography'
 import { NarrowOverlayDrawer } from './NarrowOverlayDrawer'
 import type { CharacterResponse, LocationResponse, ItemResponse, SpeciesResponse, CommunityResponse, UnityDialogueMetadata } from '../../types/api'
 import { theme } from '../../theme'
+import { redesignAccent, redesignFont, redesignHairline, redesignText } from '../../theme/redesignTokens'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
+import { useGenerationRunActive } from '../../hooks/useGenerationRunState'
+import { GenerationTracePanel } from '../generation/GenerationTracePanel'
+import { WritingModeRail } from './WritingModeRail'
+import { PromptBudgetBottomDrawer } from './PromptBudgetBottomDrawer'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
+import { PROMPT_DRAWER_MAX_WIDTH_PX, VIEWPORT_DESKTOP_MIN_PX } from '../../theme/responsiveChrome'
+import { useGenerationOptionsStore } from '../../store/generationOptionsStore'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
 type ContextLoadState = {
@@ -101,10 +111,13 @@ function PanelCollapseButton({
   const chevronSide = chevronPosition ?? direction
   const translateX = hovered ? (direction === 'left' ? -2 : 2) : 0
 
-  const scale = pressed ? 0.93 : hovered ? 1.04 : 1
-  const bg = hovered ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.03)'
-  const borderColor = hovered ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.09)'
-  const textColor = hovered ? theme.text.primary : theme.text.tertiary
+  // 1c : la maquette n'a aucune pastille cerclée dans les colonnes. Le repli
+  // reste une affordance nécessaire (FR119) : il devient un chevron nu, qui ne
+  // se dessine qu'au survol. Cible tactile conservée par `collapseChrome`.
+  const scale = pressed ? 0.93 : 1
+  const bg = hovered ? 'rgba(255,255,255,0.05)' : 'transparent'
+  const borderColor = 'transparent'
+  const textColor = hovered ? theme.text.primary : redesignText.label
 
   const chevron = (
     <span style={{ transform: `translateX(${translateX}px)`, transition: 'transform 0.18s ease', display: 'flex' }}>
@@ -129,7 +142,7 @@ function PanelCollapseButton({
         minHeight: collapseChrome.minHeightPx,
         minWidth: collapseChrome.minWidthPx,
         boxSizing: 'border-box',
-        borderRadius: 99,
+        borderRadius: 6,
         border: `1px solid ${borderColor}`,
         backgroundColor: bg,
         color: textColor,
@@ -138,7 +151,6 @@ function PanelCollapseButton({
         justifyContent: 'center',
         transform: `scale(${scale})`,
         transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
-        boxShadow: hovered ? '0 2px 8px rgba(0,0,0,0.3)' : 'none',
       }}
     >
       {chevronSide === 'left' && chevron}
@@ -146,6 +158,23 @@ function PanelCollapseButton({
     </button>
   )
 }
+
+/**
+ * Libellés courts des vues du panneau droit.
+ *
+ * Les libellés complets (« Dialogue généré », « Édition de nœud ») sont ceux des
+ * onglets `Tabs` et restent utilisés ailleurs ; dans une colonne de 300 px, ils
+ * chassent les autres vues de la barre ou la font passer sur trois lignes.
+ */
+const RIGHT_PANEL_TAB_SHORT_LABELS: Record<string, string> = {
+  prompt: 'Prompt',
+  dialogue: 'Dialogue',
+  node: 'Nœud',
+  details: 'Détails',
+}
+
+/** Largeur réservée aux rails de repli en overlay : écart 4 + rail 24 + respiration 4. */
+const RAIL_GUTTER_PX = 32
 
 /**
  * Bouton flottant sur le bord du panneau central pour ré-ouvrir un panneau replié.
@@ -269,7 +298,10 @@ export function Dashboard() {
   })
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false)
   const [rightPanelTab, setRightPanelTab] = useState<'prompt' | 'dialogue' | 'node' | 'details'>('prompt')
-  const [centerPanelTab, setCenterPanelTab] = useState<'generation' | 'edition' | 'graph'>('generation')
+  // La navigation applicative est rendue par `Header` (barre supérieure de la
+  // maquette) ; l'état vit donc dans le store, pas dans ce composant.
+  const centerPanelTab = useUiLayoutStore((s) => s.centerPanelTab)
+  const setCenterPanelTab = useUiLayoutStore((s) => s.setCenterPanelTab)
   const [selectedDialogue, setSelectedDialogue] = useState<UnityDialogueMetadata | null>(null)
   const dialogueListRef = useRef<UnityDialogueListRef>(null)
   const unityDialogueEditorRef = useRef<UnityDialogueEditorHandle>(null)
@@ -281,6 +313,7 @@ export function Dashboard() {
   const generationState = useGenerationStore((state) => ({
     isEstimating: state.isEstimating,
     unityDialogueResponse: state.unityDialogueResponse,
+    tokenCount: state.tokenCount,
   }))
   const { actions } = useGenerationActionsStore()
 
@@ -314,6 +347,29 @@ export function Dashboard() {
   const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false)
   const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false)
   const viewportMode = useViewportMode()
+  /** 2a : un run en cours verrouille le contexte GDD et bascule la colonne droite sur TRACE. */
+  const generationRunActive = useGenerationRunActive()
+  const [traceHidden, setTraceHidden] = useState(false)
+  /** Rails 2c : noms des fiches sélectionnées et total de tokens du prompt. */
+  const contextSelections = useContextStore((s) => s.selections)
+  const selectedEntityNames = useMemo(() => {
+    const sel = contextSelections as unknown as Record<string, unknown> | undefined
+    if (!sel) return []
+    const names: string[] = []
+    for (const value of Object.values(sel)) {
+      if (Array.isArray(value)) {
+        names.push(...value.filter((v): v is string => typeof v === 'string'))
+      }
+    }
+    return Array.from(new Set(names))
+  }, [contextSelections])
+  const generationTokenCount = useGenerationStore((s) => s.tokenCount)
+  const optionRunSize = useGenerationOptionsStore((s) => s.slots.length)
+  /** Le lot est tranché quand plus aucune option n'est en vol. */
+  const optionRunSettled = useGenerationOptionsStore((s) =>
+    s.slots.length > 0 && s.slots.every((slot) => slot.status !== 'pending' && slot.status !== 'running')
+  )
+  const optionRunId = useGenerationOptionsStore((s) => s.runId)
   /** FR120 : &lt; 1024px — panneaux latéraux en overlay drawer, pas en colonnes compressées */
   const useNarrowSidePanels = viewportMode !== 'desktop'
   const { bottomInsetPx: keyboardBottomInsetPx } = useMobileShellKeyboardComfort(useNarrowSidePanels)
@@ -338,13 +394,44 @@ export function Dashboard() {
     SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX,
     { measureParentClientWidth: true }
   )
-  const panelTitleFontRem = isNarrowCenterColumn
-    ? panelHeaderTitleTypography.narrowFontRem
-    : panelHeaderTitleTypography.comfortableFontRem
+  /** Densité adaptive conservée (FR118 17.6), transposée à l'étiquette mono. */
+  const panelHeaderMonoLabelPx = isNarrowCenterColumn
+    ? panelHeaderMonoLabel.narrowFontPx
+    : panelHeaderMonoLabel.comfortableFontPx
   const panelSideHeaderPadding = isNarrowCenterColumn
     ? panelSideHeaderChrome.narrow.padding
     : panelSideHeaderChrome.comfortable.padding
   const panelCollapseDensity = isNarrowCenterColumn ? 'narrow' : 'comfortable'
+  const { ref: generatedResultRef, isNarrow: isNarrowGeneratedResult } = useNarrowInlineSize(420)
+
+  /**
+   * Diagnostic du dialogue généré : uniquement des valeurs réellement présentes dans la réponse
+   * (compteurs dérivés du JSON, tokens estimés, effort de raisonnement). Rien d'inféré.
+   */
+  const generatedDialogueDiagnostic = useMemo((): Array<{ label: string; value: string }> => {
+    if (!unityDialogueResponse) return []
+    const rows: Array<{ label: string; value: string }> = []
+    try {
+      const parsed: unknown = JSON.parse(unityDialogueResponse.json_content)
+      if (Array.isArray(parsed)) {
+        rows.push({ label: 'Nœuds', value: String(parsed.length) })
+        const choiceCount = parsed.reduce<number>((total, node) => {
+          const nodeChoices = (node as { choices?: unknown }).choices
+          return total + (Array.isArray(nodeChoices) ? nodeChoices.length : 0)
+        }, 0)
+        rows.push({ label: 'Choix', value: String(choiceCount) })
+      }
+    } catch {
+      // json_content non parsable : on n'affiche simplement pas les compteurs.
+    }
+    if (typeof unityDialogueResponse.estimated_tokens === 'number') {
+      rows.push({ label: 'Tokens', value: unityDialogueResponse.estimated_tokens.toLocaleString('fr-FR') })
+    }
+    if (unityDialogueResponse.reasoning_trace?.effort) {
+      rows.push({ label: 'Effort', value: String(unityDialogueResponse.reasoning_trace.effort) })
+    }
+    return rows
+  }, [unityDialogueResponse])
   const showCollapsedLeftAffordance = isLeftPanelCollapsed
   const showCollapsedRightAffordance = isRightPanelCollapsed
   const lastViewportModeRef = useRef(viewportMode)
@@ -471,47 +558,169 @@ export function Dashboard() {
       label: 'Dialogue généré',
       content: (
         <div style={{ flex: 1, minHeight: 0, maxHeight: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' }}>
-          {/* Reasoning Trace (dépliable en haut) */}
-          {unityDialogueResponse?.reasoning_trace && (
-            <div style={{ flexShrink: 0, borderBottom: `1px solid ${theme.border.primary}` }}>
-              <ReasoningTraceViewer
-                reasoningTrace={unityDialogueResponse.reasoning_trace}
-                isGenerating={false}
-              />
-            </div>
-          )}
-          
-          {/* Contenu du dialogue */}
-          <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-            {unityDialogueResponse ? (
-              <UnityDialogueEditor
-                ref={unityDialogueEditorRef}
-                json_content={unityDialogueResponse.json_content}
-                title={unityDialogueResponse.title}
-                hideHeaderSaveButton={true}
-                onContentChange={handleGeneratedDialogueContentChange}
-                onSaveStateChange={setGeneratedEditorSaveState}
-                onSave={() => {
-                  dialogueListRef.current?.refresh()
-                  setUnityDialogueResponse(null)
-                }}
-              />
-            ) : (
-              <div style={{ 
-                padding: '2rem', 
-                textAlign: 'center', 
-                color: theme.text.secondary,
+          {unityDialogueResponse ? (
+            <div
+              ref={generatedResultRef}
+              data-testid="generated-dialogue-result"
+              style={{
+                flex: 1,
+                minHeight: 0,
                 height: '100%',
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                {actions.isLoading || generationState.isEstimating || isGraphGenerating
-                  ? 'Génération en cours...'
-                  : 'Aucun dialogue Unity généré'}
+                flexDirection: 'column',
+                overflow: 'hidden',
+                borderLeft: `2px solid ${redesignAccent.base}`,
+                backgroundColor: redesignAccent.selectedBgStrong,
+              }}
+            >
+              <div
+                style={{
+                  flex: 1,
+                  minHeight: 0,
+                  display: 'flex',
+                  flexDirection: isNarrowGeneratedResult ? 'column' : 'row',
+                  overflow: 'hidden',
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                  {/* Reasoning Trace (dépliable en haut) */}
+                  {unityDialogueResponse.reasoning_trace && (
+                    <div style={{ flexShrink: 0, borderBottom: `1px solid ${redesignHairline.standard}` }}>
+                      <ReasoningTraceViewer
+                        reasoningTrace={unityDialogueResponse.reasoning_trace}
+                        isGenerating={false}
+                      />
+                    </div>
+                  )}
+
+                  {/* Contenu du dialogue */}
+                  <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                    <UnityDialogueEditor
+                      ref={unityDialogueEditorRef}
+                      json_content={unityDialogueResponse.json_content}
+                      title={unityDialogueResponse.title}
+                      hideHeaderSaveButton={true}
+                      onContentChange={handleGeneratedDialogueContentChange}
+                      onSaveStateChange={setGeneratedEditorSaveState}
+                      onSave={() => {
+                        dialogueListRef.current?.refresh()
+                        setUnityDialogueResponse(null)
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Diagnostic : seulement ce que la réponse contient déjà */}
+                {generatedDialogueDiagnostic.length > 0 && (
+                  <aside
+                    data-testid="generated-dialogue-diagnostic"
+                    style={{
+                      flexShrink: 0,
+                      width: isNarrowGeneratedResult ? 'auto' : '132px',
+                      display: 'flex',
+                      flexDirection: isNarrowGeneratedResult ? 'row' : 'column',
+                      flexWrap: isNarrowGeneratedResult ? 'wrap' : 'nowrap',
+                      gap: isNarrowGeneratedResult ? '0.9rem' : '0.65rem',
+                      padding: '0.65rem 0.75rem',
+                      borderLeft: isNarrowGeneratedResult ? 'none' : `1px solid ${redesignHairline.standard}`,
+                      borderTop: isNarrowGeneratedResult ? `1px solid ${redesignHairline.standard}` : 'none',
+                      overflowY: isNarrowGeneratedResult ? 'visible' : 'auto',
+                    }}
+                  >
+                    {generatedDialogueDiagnostic.map((row) => (
+                      <div key={row.label} style={{ minWidth: 0 }}>
+                        <div
+                          style={{
+                            fontFamily: redesignFont.mono,
+                            fontSize: remSize('caption'),
+                            letterSpacing: '0.08em',
+                            textTransform: 'uppercase',
+                            color: theme.text.tertiary,
+                          }}
+                        >
+                          {row.label}
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: redesignFont.mono,
+                            fontSize: remSize('body'),
+                            color: theme.text.primary,
+                          }}
+                        >
+                          {row.value}
+                        </div>
+                      </div>
+                    ))}
+                  </aside>
+                )}
               </div>
-            )}
-          </div>
+
+              {/* Action unique du résultat */}
+              <div
+                style={{
+                  flexShrink: 0,
+                  padding: '0.6rem 0.75rem',
+                  borderTop: `1px solid ${redesignHairline.standard}`,
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    void unityDialogueEditorRef.current?.handleSave()
+                  }}
+                  disabled={
+                    !generatedEditorSaveState.isValid ||
+                    generatedEditorSaveState.isSaving ||
+                    actions.isLoading ||
+                    isGraphGenerating
+                  }
+                  style={{
+                    width: '100%',
+                    minHeight: '44px',
+                    padding: '0.5rem 0.75rem',
+                    fontSize: remSize('body'),
+                    fontWeight: 700,
+                    backgroundColor: redesignAccent.base,
+                    color: theme.button.primary.color,
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor:
+                      generatedEditorSaveState.isValid &&
+                      !generatedEditorSaveState.isSaving &&
+                      !actions.isLoading &&
+                      !isGraphGenerating
+                        ? 'pointer'
+                        : 'not-allowed',
+                    opacity:
+                      generatedEditorSaveState.isValid &&
+                      !generatedEditorSaveState.isSaving &&
+                      !actions.isLoading &&
+                      !isGraphGenerating
+                        ? 1
+                        : 0.6,
+                    boxSizing: 'border-box',
+                  }}
+                  title="Garder et continuer (Ctrl+S)"
+                >
+                  {generatedEditorSaveState.isSaving ? 'Sauvegarde...' : 'Garder et continuer'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{
+              padding: '2rem',
+              textAlign: 'center',
+              color: theme.text.secondary,
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              {actions.isLoading || generationState.isEstimating || isGraphGenerating
+                ? 'Génération en cours...'
+                : 'Aucun dialogue Unity généré'}
+            </div>
+          )}
         </div>
       ),
     },
@@ -560,12 +769,14 @@ export function Dashboard() {
         </div>
       ),
     },
-  ], [unityDialogueResponse, rawPrompt, isEstimating, rightPanelTab, centerPanelTab, selectedContextItem, selectedContextHistoryStem, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse, handleGeneratedDialogueContentChange])
+  ], [unityDialogueResponse, rawPrompt, isEstimating, rightPanelTab, centerPanelTab, selectedContextItem, selectedContextHistoryStem, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse, handleGeneratedDialogueContentChange, generatedDialogueDiagnostic, generatedEditorSaveState, generatedResultRef, isNarrowGeneratedResult])
 
   // En mode éditeur de graphe : masquer "Prompt". Hors graphe : masquer "Édition de nœud".
   const visibleRightPanelTabs = useMemo(() => {
     if (centerPanelTab === 'graph') {
-      return rightPanelTabs.filter((t) => t.id !== 'prompt')
+      // Écran 2e : la colonne droite du graphe, c'est l'inspecteur de GraphEditor.
+      // L'édition de nœud y a migré (onglet NŒUD) — ne pas la dupliquer ici.
+      return rightPanelTabs.filter((t) => t.id !== 'prompt' && t.id !== 'node')
     }
     if (centerPanelTab === 'generation' || centerPanelTab === 'edition') {
       return rightPanelTabs.filter((t) => t.id !== 'node')
@@ -710,6 +921,153 @@ export function Dashboard() {
     }
   }, [applyCollapsedLayout, isLeftPanelCollapsed, isRightPanelCollapsed, viewportMode])
 
+  /**
+   * 2b : une fois le lot **tranché**, la colonne GDD se replie en rail — elle a
+   * fait son travail, la place va à la comparaison. L'utilisateur peut la ramener,
+   * et on ne force le repli qu'une fois par lot pour ne pas contrarier ce choix.
+   * Pendant la génération (2a) elle reste ouverte, verrouillée.
+   */
+  const comparisonActive = optionRunSize >= 2
+  // Clé = identité du lot, pas sa taille : deux lots de 2 options à la suite doivent
+  // replier le rail chacun leur tour. `slots.length` ne distingue pas ces deux runs.
+  const lastForcedRailRunRef = useRef<number>(0)
+  useEffect(() => {
+    // 2a garde la colonne ouverte, verrouillée à 55 % : c'est seulement une fois
+    // le lot tranché (2b) que la place revient à la comparaison.
+    if (!comparisonActive || !optionRunSettled || viewportMode !== 'desktop') return
+    if (lastForcedRailRunRef.current === optionRunId) return
+    lastForcedRailRunRef.current = optionRunId
+    if (!expandedSizesRef.current && panelsRef.current) {
+      expandedSizesRef.current = panelsRef.current.getSizes()
+    }
+    setIsLeftPanelCollapsed(true)
+    applyCollapsedLayout(true, isRightPanelCollapsed)
+  }, [
+    comparisonActive,
+    optionRunSettled,
+    optionRunId,
+    viewportMode,
+    applyCollapsedLayout,
+    isRightPanelCollapsed,
+  ])
+
+
+  // ── Mode écriture (écran 2c) ──────────────────────────────────────────────
+  // Ctrl+\ (ou ⌘\) bascule : les deux panneaux se replient, la colonne passe à 760px.
+  // Rien n'est supprimé : les rails restent cliquables, sortir restaure l'état d'avant.
+  const writingMode = useUiLayoutStore((s) => s.writingMode)
+  /**
+   * 2d : entre 1024 et 1200px, la troisième colonne rogne la lecture sans rien
+   * apporter — le décompte passe en barre repliée sous la colonne centrale.
+   * Sous 1024px les drawers FR120 prennent déjà le relais ; en mode écriture,
+   * la barre de pied unique de 2c suffit.
+   */
+  const isIntermediateWidth = useMediaQuery(
+    `(min-width: ${VIEWPORT_DESKTOP_MIN_PX}px) and (max-width: ${PROMPT_DRAWER_MAX_WIDTH_PX}px)`
+  )
+  const showPromptBottomDrawer =
+    isIntermediateWidth &&
+    !writingMode &&
+    (centerPanelTab === 'generation' || centerPanelTab === 'edition')
+
+  /**
+   * 2d : le décompte ne doit pas s'afficher deux fois. Quand il passe en barre
+   * basse, la colonne droite se replie ; on restaure l'état d'avant en sortant
+   * de la plage de largeur.
+   */
+  /**
+   * 2e : l'écran graphe n'a que trois zones — liste de dialogues, canvas, inspecteur.
+   * Le contexte GDD et le panneau droit applicatif y feraient une quatrième et une
+   * cinquième colonne, réduisant le canvas au quart de la place prévue. Ils se
+   * replient à l'entrée sur l'onglet et l'état d'avant est restauré à la sortie.
+   */
+  const graphPanelsBeforeRef = useRef<{ left: boolean; right: boolean } | null>(null)
+  useEffect(() => {
+    if (viewportMode !== 'desktop') return
+    if (centerPanelTab === 'graph') {
+      if (graphPanelsBeforeRef.current === null) {
+        graphPanelsBeforeRef.current = {
+          left: isLeftPanelCollapsed,
+          right: isRightPanelCollapsed,
+        }
+        if (!expandedSizesRef.current && panelsRef.current) {
+          expandedSizesRef.current = panelsRef.current.getSizes()
+        }
+      }
+      if (!isLeftPanelCollapsed || !isRightPanelCollapsed) {
+        setIsLeftPanelCollapsed(true)
+        setIsRightPanelCollapsed(true)
+        applyCollapsedLayout(true, true)
+      }
+    } else if (graphPanelsBeforeRef.current !== null) {
+      const previous = graphPanelsBeforeRef.current
+      graphPanelsBeforeRef.current = null
+      setIsLeftPanelCollapsed(previous.left)
+      setIsRightPanelCollapsed(previous.right)
+      applyCollapsedLayout(previous.left, previous.right)
+    }
+  }, [
+    centerPanelTab,
+    viewportMode,
+    applyCollapsedLayout,
+    isLeftPanelCollapsed,
+    isRightPanelCollapsed,
+  ])
+
+  const rightPanelBeforeDrawerRef = useRef<boolean | null>(null)
+  useEffect(() => {
+    if (showPromptBottomDrawer) {
+      if (rightPanelBeforeDrawerRef.current === null) {
+        rightPanelBeforeDrawerRef.current = isRightPanelCollapsed
+      }
+      if (!isRightPanelCollapsed) {
+        if (!expandedSizesRef.current && panelsRef.current) {
+          expandedSizesRef.current = panelsRef.current.getSizes()
+        }
+        setIsRightPanelCollapsed(true)
+        applyCollapsedLayout(isLeftPanelCollapsed, true)
+      }
+    } else if (rightPanelBeforeDrawerRef.current !== null) {
+      const previous = rightPanelBeforeDrawerRef.current
+      rightPanelBeforeDrawerRef.current = null
+      setIsRightPanelCollapsed(previous)
+      applyCollapsedLayout(isLeftPanelCollapsed, previous)
+    }
+  }, [showPromptBottomDrawer, applyCollapsedLayout, isRightPanelCollapsed, isLeftPanelCollapsed])
+
+  const panelsBeforeWritingRef = useRef<{ left: boolean; right: boolean } | null>(null)
+  const collapsedStateRef = useRef({ left: isLeftPanelCollapsed, right: isRightPanelCollapsed })
+  collapsedStateRef.current = { left: isLeftPanelCollapsed, right: isRightPanelCollapsed }
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === '\\' || e.code === 'Backslash')) {
+        e.preventDefault()
+        useUiLayoutStore.getState().toggleWritingMode()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
+  useEffect(() => {
+    if (writingMode) {
+      panelsBeforeWritingRef.current = { ...collapsedStateRef.current }
+      if (!expandedSizesRef.current && panelsRef.current) {
+        expandedSizesRef.current = panelsRef.current.getSizes()
+      }
+      setIsLeftPanelCollapsed(true)
+      setIsRightPanelCollapsed(true)
+      applyCollapsedLayout(true, true)
+    } else if (panelsBeforeWritingRef.current) {
+      const prev = panelsBeforeWritingRef.current
+      panelsBeforeWritingRef.current = null
+      setIsLeftPanelCollapsed(prev.left)
+      setIsRightPanelCollapsed(prev.right)
+      applyCollapsedLayout(prev.left, prev.right)
+    }
+  }, [writingMode, applyCollapsedLayout])
+
 
 
   const onContextItemSelected = useCallback(
@@ -737,6 +1095,60 @@ export function Dashboard() {
       />
     ) : null
 
+  /**
+   * Bloc « Dernier résultat » en pied de colonne droite (écran 1c).
+   * Il ne remplace pas l'onglet « Dialogue généré » : il en est le point d'entrée
+   * permanent, avec la phrase d'état vide exigée par le handoff.
+   */
+  const renderLastResultBlock = (): ReactNode => (
+    <div
+      data-testid="last-result-block"
+      style={{
+        flexShrink: 0,
+        borderTop: `1px solid ${redesignHairline.standard}`,
+        padding: '15px 20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+      }}
+    >
+      <span
+        style={{
+          fontFamily: redesignFont.mono,
+          fontSize: '10px',
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          color: redesignText.label,
+        }}
+      >
+        Dernier résultat
+      </span>
+      {unityDialogueResponse ? (
+        <button
+          type="button"
+          onClick={() => setRightPanelTab('dialogue')}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            textAlign: 'left',
+            cursor: 'pointer',
+            fontSize: '12.5px',
+            lineHeight: 1.5,
+            color: redesignAccent.light,
+          }}
+        >
+          {unityDialogueResponse.title ?? 'Dialogue généré'} — ouvrir
+        </button>
+      ) : (
+        <span style={{ fontSize: '12.5px', lineHeight: 1.5, color: redesignText.muted }}>
+          Rien pour cette scène. Le dialogue généré s&apos;ouvre ici, éditable, avec sa trace de
+          raisonnement.
+        </span>
+      )}
+    </div>
+  )
+
   /** Barre d’actions bas du panneau droit (Prompt / Dialogue) — desktop et drawer narrow. */
   const renderRightActionsFooter = (): ReactNode => {
     if (
@@ -753,20 +1165,20 @@ export function Dashboard() {
       contextLoadState.isLoading ||
       generationState.isEstimating
     const isRefreshActionDisabled = contextLoadState.isLoading || !contextRefresh
-    const primaryActionLabel = hasContextLoadError ? 'Rafraîchir le contexte' : 'Générer'
+    const primaryActionLabel = hasContextLoadError ? 'Rafraîchir le contexte' : 'Générer le dialogue'
     const primaryActionTitle = hasContextLoadError
       ? 'Rafraîchir le contexte GDD'
-      : contextLoadState.isLoading
-        ? 'Chargement du contexte GDD en cours'
-        : generationState.isEstimating
-          ? 'Estimation du contexte en cours'
-          : 'Générer (Ctrl+Enter)'
+      : 'Générer (Ctrl+Enter)'
     const handlePrimaryGenerateAction = hasContextLoadError
       ? contextRefresh ?? undefined
       : actions.handleGenerate
     const isPrimaryGenerateDisabled = hasContextLoadError
       ? isRefreshActionDisabled
       : isGenerateActionBlocked
+    // Écran 1c : l'action primaire vit en bas de la colonne de lecture. On ne garde ce
+    // bouton que là où cette colonne n'est pas visible (tiroir narrow) ou quand il porte
+    // le repli « Rafraîchir le contexte » après un échec de chargement GDD.
+    const showFooterPrimaryAction = useNarrowSidePanels || hasContextLoadError
 
     return (
       <div
@@ -838,140 +1250,47 @@ export function Dashboard() {
                 `}</style>
           </>
         )}
-        {rightPanelTab === 'dialogue' && unityDialogueResponse ? (
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <button
-              type="button"
-              onClick={() => {
-                void unityDialogueEditorRef.current?.handleSave()
-              }}
-              disabled={
-                !generatedEditorSaveState.isValid ||
-                generatedEditorSaveState.isSaving ||
-                actions.isLoading ||
-                isGraphGenerating
-              }
-              style={{
-                flex: 1,
-                padding: '0.5rem 0.75rem',
-                fontSize: remSize('body'),
-                fontWeight: 700,
-                backgroundColor: theme.button.primary.background,
-                color: theme.button.primary.color,
-                border: 'none',
-                borderRadius: '6px',
-                cursor:
-                  generatedEditorSaveState.isValid &&
-                  !generatedEditorSaveState.isSaving &&
-                  !actions.isLoading &&
-                  !isGraphGenerating
-                    ? 'pointer'
-                    : 'not-allowed',
-                opacity:
-                  generatedEditorSaveState.isValid &&
-                  !generatedEditorSaveState.isSaving &&
-                  !actions.isLoading &&
-                  !isGraphGenerating
-                    ? 1
-                    : 0.6,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.2s',
-                boxSizing: 'border-box',
-              }}
-              title="Sauvegarder (Ctrl+S)"
-            >
-              {generatedEditorSaveState.isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
-            </button>
+        {/* Le résultat généré porte lui-même son action « Garder et continuer » (onglet Dialogue généré). */}
+        {showFooterPrimaryAction ? (
+          <>
             <button
               onClick={handlePrimaryGenerateAction}
               disabled={isPrimaryGenerateDisabled}
               style={{
-                padding: '0.5rem',
-                fontSize: remSize('body'),
-                backgroundColor: theme.button.default.background,
-                color: theme.button.default.color,
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '6px',
+                width: '100%',
+                height: 46,
+                padding: '0 0.75rem',
+                fontSize: remSize('section'),
+                fontWeight: 'bold',
+                backgroundColor: redesignAccent.base,
+                color: theme.button.primary.color,
+                border: 'none',
+                borderRadius: 6,
                 cursor: isPrimaryGenerateDisabled ? 'not-allowed' : 'pointer',
                 opacity: isPrimaryGenerateDisabled ? 0.6 : 1,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '44px',
-                height: '44px',
-                transition: 'all 0.2s',
+                gap: '0.5rem',
                 boxSizing: 'border-box',
               }}
-              title={hasContextLoadError ? 'Rafraîchir le contexte GDD' : primaryActionTitle}
+              title={primaryActionTitle}
             >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{
-                  animation:
-                    actions.isLoading ||
-                    isGraphGenerating ||
-                    contextLoadState.isLoading ||
-                    generationState.isEstimating
-                      ? 'spin 1s linear infinite'
-                      : 'none',
-                }}
-              >
-                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
-              </svg>
-              <style>{`
-                    @keyframes spin {
-                      from { transform: rotate(0deg); }
-                      to { transform: rotate(360deg); }
-                    }
-                  `}</style>
+              <span>{primaryActionLabel}</span>
+              {!hasContextLoadError && (
+                <span
+                  style={{
+                    fontFamily: redesignFont.mono,
+                    fontSize: remSize('caption'),
+                    opacity: 0.8,
+                    fontWeight: 'normal',
+                  }}
+                >
+                  CTRL+&#9166;
+                </span>
+              )}
             </button>
-          </div>
-        ) : effectiveRightPanelTab === 'dialogue' || effectiveRightPanelTab === 'prompt' ? (
-          <button
-            onClick={handlePrimaryGenerateAction}
-            disabled={isPrimaryGenerateDisabled}
-            style={{
-              width: '100%',
-              padding: '0.55rem 0.75rem',
-              fontSize: remSize('section'),
-              fontWeight: 'bold',
-              backgroundColor: theme.button.primary.background,
-              color: theme.button.primary.color,
-              border: 'none',
-              borderRadius: '6px',
-              cursor: isPrimaryGenerateDisabled ? 'not-allowed' : 'pointer',
-              opacity: isPrimaryGenerateDisabled ? 0.6 : 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              transition: 'all 0.2s',
-              boxSizing: 'border-box',
-            }}
-            title={primaryActionTitle}
-          >
-            <span>{primaryActionLabel}</span>
-            {!hasContextLoadError && (
-              <span
-                style={{
-                  fontSize: remSize('caption'),
-                  opacity: 0.8,
-                  fontWeight: 'normal',
-                }}
-              >
-                Ctrl+Enter
-              </span>
-            )}
-          </button>
+          </>
         ) : null}
       </div>
     )
@@ -1028,31 +1347,52 @@ export function Dashboard() {
         {!useNarrowSidePanels && !isLeftPanelCollapsed && (
           <>
             <div
+              data-testid="gdd-context-lockable"
+              aria-disabled={generationRunActive || undefined}
               style={{
-                padding: panelSideHeaderPadding,
-                borderBottom: `1px solid ${theme.border.primary}`,
-                backgroundColor: theme.background.panelHeader,
+                flex: 1,
+                minHeight: 0,
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '0.5rem',
-                flexShrink: 0,
+                flexDirection: 'column',
+                opacity: generationRunActive ? 0.55 : 1,
+                pointerEvents: generationRunActive ? 'none' : undefined,
+                transition: 'opacity 160ms ease',
               }}
             >
-              <div style={{ fontSize: `${panelTitleFontRem}rem`, fontWeight: 700, color: theme.text.primary }}>
-                {GDD_CONTEXT_PANEL_TITLE}
-              </div>
-              <PanelCollapseButton
-                direction="left"
-                onClick={toggleLeftPanel}
-                ariaLabel="Replier le panneau gauche"
-                density={panelCollapseDensity}
+              <ContextSelector
+                onItemSelected={onContextItemSelected}
+                onLoadStateChange={onContextLoadStateChange}
+                // 1c : la colonne n'a pas de barre de titre — ces deux
+                // affordances se rangent au bout de « CONTEXTE — N FICHES »
+                // plutôt que d'ouvrir une bande vide au-dessus de la liste.
+                headerEnd={
+                  <>
+                    {/* 2a : le contexte est déjà parti au modèle — le dire plutôt que
+                        laisser croire qu'une coche de plus serait prise en compte. */}
+                    {generationRunActive && (
+                      <span
+                        data-testid="gdd-locked-badge"
+                        style={{
+                          fontFamily: redesignFont.mono,
+                          fontSize: '9.5px',
+                          letterSpacing: '0.08em',
+                          color: redesignText.label,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        VERROUILLÉ
+                      </span>
+                    )}
+                    <PanelCollapseButton
+                      direction="left"
+                      onClick={toggleLeftPanel}
+                      ariaLabel="Replier le panneau gauche"
+                      density={panelCollapseDensity}
+                    />
+                  </>
+                }
               />
             </div>
-            <ContextSelector
-              onItemSelected={onContextItemSelected}
-              onLoadStateChange={onContextLoadStateChange}
-            />
           </>
         )}
       </div>
@@ -1068,13 +1408,47 @@ export function Dashboard() {
           height: '100%',
           position: 'relative',
           minWidth: 0,
+          // Les rails de repli sont en overlay (`position: absolute`, z-50). En
+          // desktop les marges de la colonne de lecture leur laissent la place ;
+          // en narrow il n'y en a aucune et ils se posaient sur le texte du brief
+          // (mesuré à 380 px : rail 10-34, texte à partir de 14). On leur réserve
+          // leur largeur — 4 px d'écart + 24 px de rail + 4 px de respiration.
+          // Même réserve sur l'écran graphe : sa liste de dialogues touche le bord
+          // gauche du panneau, donc le rail s'y posait sur les cases de sélection.
+          paddingLeft:
+            showCollapsedLeftAffordance && (useNarrowSidePanels || centerPanelTab === 'graph')
+              ? RAIL_GUTTER_PX
+              : undefined,
+          paddingRight:
+            showCollapsedRightAffordance && (useNarrowSidePanels || centerPanelTab === 'graph')
+              ? RAIL_GUTTER_PX
+              : undefined,
+          boxSizing: 'border-box',
           ...centerColumnKeyboardStyle,
         }}
       >
         {/* Rails latéraux — visibles quand un panneau est replié.
             Transparence "très auto" : quasi invisible au repos (17%), pleinement
             visible au hover/focus. Centrés verticalement dans les deux modes. */}
-        {showCollapsedLeftAffordance && (
+        {/* 2c : en mode écriture les pilules deviennent de vrais rails — compteur de
+            fiches, initiales, total de tokens. Rien n'est perdu, tout reste cliquable. */}
+        {(writingMode || comparisonActive) && showCollapsedLeftAffordance && (
+          <WritingModeRail
+            side="left"
+            onExpand={toggleLeftPanel}
+            ariaLabel="Déplier le panneau gauche"
+            entityNames={selectedEntityNames}
+          />
+        )}
+        {writingMode && showCollapsedRightAffordance && (
+          <WritingModeRail
+            side="right"
+            onExpand={toggleRightPanel}
+            ariaLabel="Déplier le panneau droit"
+            tokenCount={generationTokenCount}
+          />
+        )}
+        {!writingMode && !comparisonActive && showCollapsedLeftAffordance && (
           <PanelExpandButton
             side="left"
             label="GDD"
@@ -1082,7 +1456,7 @@ export function Dashboard() {
             ariaLabel="Déplier le panneau gauche"
           />
         )}
-        {showCollapsedRightAffordance && (
+        {!writingMode && showCollapsedRightAffordance && (
           <PanelExpandButton
             side="right"
             label="Détails"
@@ -1090,12 +1464,17 @@ export function Dashboard() {
             ariaLabel="Déplier le panneau droit"
           />
         )}
+          {/* 2d : sous 1200px, « ce qui part au modèle » quitte la colonne droite et
+              devient une barre repliée au-dessus de la barre d'action. */}
           <Tabs
-            variant="segmented"
+            variant="nav"
+            // 1c : la navigation vit dans la barre supérieure, à côté du logo.
+            // `Tabs` ne sert plus qu'à rendre le contenu de la section active.
+            hideTabList
             tabs={[
               {
                 id: 'generation',
-              label: '💬 Génération de Dialogues',
+              label: 'Générer',
               content: (
                 <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
                   <GenerationPanel />
@@ -1104,7 +1483,7 @@ export function Dashboard() {
             },
             {
               id: 'edition',
-              label: '✏️ Édition de Dialogues',
+              label: 'Éditer',
               content: (
                 <DialogueEditionTabContent
                   selectedDialogue={selectedDialogue}
@@ -1118,7 +1497,7 @@ export function Dashboard() {
             },
             {
               id: 'graph',
-              label: '📊 Éditeur de Graphe',
+              label: 'Graphe',
               content: (
                 <GraphEditor />
               ),
@@ -1128,8 +1507,26 @@ export function Dashboard() {
           onTabChange={(tabId) => setCenterPanelTab(tabId as 'generation' | 'edition' | 'graph')}
           keepAliveTabIds={['graph']}
           style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
-          contentStyle={centerPanelTab === 'graph' ? { overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column' } : undefined}
+          // La colonne doit occuper toute la hauteur pour que la barre d'action se
+          // colle au bas ; sinon elle suit le brief et flotte au milieu de l'écran.
+          contentStyle={{
+            overflow: 'hidden',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
         />
+        {showPromptBottomDrawer && (
+          <PromptBudgetBottomDrawer totalTokens={generationTokenCount}>
+            <div style={{ height: 'min(46vh, 420px)', display: 'flex', flexDirection: 'column' }}>
+              <EstimatedPromptPanel
+                raw_prompt={rawPrompt}
+                isEstimating={isEstimating}
+                isActive
+              />
+            </div>
+          </PromptBudgetBottomDrawer>
+        )}
       </div>
 
       {/* Panneau droit: Prompt Estimé / Détails */}
@@ -1172,28 +1569,82 @@ export function Dashboard() {
             ariaLabel="Replier le panneau droit"
             density={panelCollapseDensity}
           />
-          <div
-            style={{
-              flex: 1,
-              minWidth: 0,
-              textAlign: 'center',
-              fontSize: `${panelTitleFontRem}rem`,
-              fontWeight: 700,
-              color: theme.text.primary,
-            }}
-          >
-            Détails
-          </div>
-          {actions.handleGenerate ? (
-            <SaveStatusIndicator
-              appearance="discreet"
-              status={actions.saveStatus}
-              lastSavedAt={actions.draftLastSavedAt}
-              style={{ flexShrink: 0, maxWidth: 'min(200px, 38vw)' }}
-            />
+          {/* Les vues du panneau sont des onglets, pas des liens : toutes visibles,
+              l'active soulignée d'un filet accent. Même motif que la barre supérieure
+              et que l'inspecteur du graphe — et l'onglet actif tient lieu de titre,
+              ce qui évite une rangée de plus. Pendant un run, la trace occupe le
+              panneau : on affiche son nom, il n'y a rien à choisir. */}
+          {generationRunActive && !traceHidden ? (
+            <div
+              data-testid="right-panel-header-label"
+              style={{
+                flex: '0 0 auto',
+                fontFamily: redesignFont.mono,
+                fontSize: `${panelHeaderMonoLabelPx}px`,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: redesignText.label,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Trace
+            </div>
           ) : (
-            <span style={{ width: 'min(200px, 38vw)', flexShrink: 0 }} aria-hidden />
+            <div
+              role="tablist"
+              aria-label="Vues du panneau"
+              data-testid="right-panel-tablist"
+              // `wrap` : la barre passe à la ligne plutôt que de tronquer un onglet
+              // — à 300 px de colonne, trois libellés ne tiennent pas toujours.
+              style={{ flex: '0 0 auto', display: 'flex', gap: 14, flexWrap: 'wrap' }}
+            >
+              {visibleRightPanelTabs.map((tab) => {
+                const actif = tab.id === effectiveRightPanelTab
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={actif}
+                    data-testid={`right-panel-tab-${tab.id}`}
+                    onClick={() =>
+                      setRightPanelTab(tab.id as 'prompt' | 'dialogue' | 'node' | 'details')
+                    }
+                    style={{
+                      border: 'none',
+                      background: 'none',
+                      padding: 0,
+                      cursor: 'pointer',
+                      fontFamily: redesignFont.mono,
+                      // FR118 (17.6) : densité adaptive de l'étiquette d'en-tête.
+                      fontSize: `${panelHeaderMonoLabelPx}px`,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      color: actif ? redesignText.strong : redesignText.label,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {/* Le filet appartient au libellé, pas à la boîte du bouton. */}
+                    <span
+                      style={{
+                        paddingBottom: 2,
+                        boxShadow: actif ? `inset 0 -1px 0 ${redesignAccent.base}` : 'none',
+                      }}
+                    >
+                      {/* Libellés courts, comme l'inspecteur du graphe : « Ce qui part
+                          au modèle » à lui seul chassait les deux autres onglets de la
+                          barre. Le sens reste porté par le contenu de la vue. */}
+                      {RIGHT_PANEL_TAB_SHORT_LABELS[tab.id] ?? tab.label}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
           )}
+
+          {/* L'état du brouillon a rejoint le pied de la colonne centrale, où vit
+              le brouillon : ici il disputait la largeur aux onglets et se réduisait
+              à « Modific… ». L'en-tête ne porte plus que la navigation. */}
         </div>
         {/* Zone de contenu avec scroll (prend l'espace restant, mais laisse toujours de la place pour le bouton) */}
         <div
@@ -1208,21 +1659,30 @@ export function Dashboard() {
             ...shellKeyboardInsetStyle,
           }}
         >
-          <ContextSelectionBudgetBar
-            visible={centerPanelTab === 'generation' || centerPanelTab === 'edition'}
-          />
-          <Tabs
-            variant="segmented"
-            segmentedSize="drawer-aligned"
-            tabs={visibleRightPanelTabs}
-            activeTabId={effectiveRightPanelTab}
-            onTabChange={(tabId) => setRightPanelTab(tabId as 'prompt' | 'dialogue' | 'node' | 'details')}
-            style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
-            // Important: overflow: 'hidden' pour éviter le double scroll, mais scrollbar-gutter réserve l'espace
-            // Le contenu enfant gère son propre scroll avec scrollbar-gutter: stable
-            contentStyle={{ overflow: 'hidden', scrollbarGutter: 'stable' }}
-          />
+          {/* 2a : pendant un run, la trace remplace le décompte — il est déjà parti. */}
+          {generationRunActive && !traceHidden ? (
+            <GenerationTracePanel onHide={() => setTraceHidden(true)} />
+          ) : (
+            <>
+              {/* 1c : la jauge de budget vit dans la colonne GDD — la répéter ici
+                  ferait doublon. */}
+              <Tabs
+                variant="nav"
+                tabs={visibleRightPanelTabs}
+                activeTabId={effectiveRightPanelTab}
+                onTabChange={(tabId) => setRightPanelTab(tabId as 'prompt' | 'dialogue' | 'node' | 'details')}
+                style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
+                // 1c : les vues du panneau droit sont des liens dans son en-tête, pas
+                // une barre d'onglets ; le contenu actif reste rendu par `Tabs`.
+                hideTabList
+                // Important: overflow: 'hidden' pour éviter le double scroll, mais scrollbar-gutter réserve l'espace
+                // Le contenu enfant gère son propre scroll avec scrollbar-gutter: stable
+                contentStyle={{ overflow: 'hidden', scrollbarGutter: 'stable' }}
+              />
+            </>
+          )}
         </div>
+        {renderLastResultBlock()}
         {renderRightActionsFooter()}
           </>
         )}
@@ -1276,8 +1736,7 @@ export function Dashboard() {
             visible={centerPanelTab === 'generation' || centerPanelTab === 'edition'}
           />
           <Tabs
-            variant="segmented"
-            segmentedSize="drawer-aligned"
+            variant="nav"
             tabs={visibleRightPanelTabs}
             activeTabId={effectiveRightPanelTab}
             onTabChange={(tabId) => setRightPanelTab(tabId as 'prompt' | 'dialogue' | 'node' | 'details')}

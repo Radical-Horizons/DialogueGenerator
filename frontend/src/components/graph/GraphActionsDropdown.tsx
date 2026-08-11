@@ -4,6 +4,7 @@ import {
   GRAPH_TOOLBAR_DROPDOWN_MAX_HEIGHT,
   GRAPH_TOOLBAR_DROPDOWN_Z_INDEX,
 } from './graphToolbarConstants'
+import { graphToolbarChevronStyle, graphToolbarTextEntryStyle } from './graphToolbarTextEntry'
 
 export interface GraphActionsDropdownProps {
   canEditGraph: boolean
@@ -26,6 +27,8 @@ export interface GraphActionsDropdownProps {
   dropdownTestId?: string
   /** title / aria-label du déclencheur. */
   dropdownTitle?: string
+  /** `text` : entrée texte de la rangée 2e (sans bordure, zone tactile conservée). */
+  triggerVariant?: 'default' | 'text'
 }
 
 export const GraphActionsDropdown = memo(function GraphActionsDropdown({
@@ -43,8 +46,30 @@ export const GraphActionsDropdown = memo(function GraphActionsDropdown({
   dropdownLabel = 'Actions',
   dropdownTestId = 'btn-actions-dropdown',
   dropdownTitle = 'Actions sur le graphe',
+  triggerVariant = 'default',
 }: GraphActionsDropdownProps) {
   const isMenuEnabled = menuEnabled ?? canEditGraph
+  const triggerStyle =
+    triggerVariant === 'text'
+      ? graphToolbarTextEntryStyle({
+          touch: graphChromeTouch,
+          disabled: !isMenuEnabled,
+          active: showActionsDropdown,
+        })
+      : {
+          ...graphChromeTouch,
+          padding: buttonPadding,
+          border: `1px solid ${theme.border.primary}`,
+          borderRadius: '6px',
+          backgroundColor: theme.button.default.background,
+          color: theme.button.default.color,
+          cursor: isMenuEnabled ? ('pointer' as const) : ('not-allowed' as const),
+          opacity: isMenuEnabled ? 1 : 0.6,
+          fontSize: `${buttonFontSizeRem}rem`,
+          display: 'inline-flex' as const,
+          alignItems: 'center' as const,
+          gap: '0.35rem',
+        }
   return (
     <div
       ref={actionsDropdownRef}
@@ -63,24 +88,15 @@ export const GraphActionsDropdown = memo(function GraphActionsDropdown({
         aria-expanded={showActionsDropdown}
         onClick={() => isMenuEnabled && setShowActionsDropdown((v) => !v)}
         disabled={!isMenuEnabled}
-        style={{
-          ...graphChromeTouch,
-          padding: buttonPadding,
-          border: `1px solid ${theme.border.primary}`,
-          borderRadius: '6px',
-          backgroundColor: theme.button.default.background,
-          color: theme.button.default.color,
-          cursor: isMenuEnabled ? 'pointer' : 'not-allowed',
-          opacity: isMenuEnabled ? 1 : 0.6,
-          fontSize: `${buttonFontSizeRem}rem`,
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.35rem',
-        }}
+        style={triggerStyle}
         title={dropdownTitle}
       >
         {isNarrow ? '⋯' : dropdownLabel}
-        {!isNarrow && <span style={{ fontSize: '0.7rem' }}>▼</span>}
+        {!isNarrow && (
+          <span style={triggerVariant === 'text' ? graphToolbarChevronStyle : { fontSize: '0.7rem' }}>
+            ▾
+          </span>
+        )}
       </button>
 
       {showActionsDropdown && (

@@ -1,3 +1,7 @@
+---
+paths:
+  - ".github/workflows/**"
+---
 # Automatisation GitHub (PR)
 
 Trois workflows, tous déterministes. **Aucune clé API payante en CI** — voir la note en fin
@@ -5,9 +9,24 @@ de fichier.
 
 | Déclencheur | Workflow | Effet |
 |---|---|---|
-| PR vers `main`, push sur `main`, `workflow_dispatch` | `ci.yml` | Backend pytest, Vitest, ESLint. T2 sur PR, T3 sur push `main`. |
+| PR vers `main`/`dev`, push sur `main`, `workflow_dispatch` | `ci.yml` | Backend pytest, Vitest, ESLint, `tsc --noEmit`. T2 sur PR, T3 sur push `main`. |
 | Push sur une PR vers `main` | `pr-merge-main-prefer-head-data.yml` | Merge `main`, arbitre les conflits `data/` en faveur de la PR. |
-| Ouverture / push d'une PR | `pr-diff-gdd-split.yml` | Commente le diff séparé GDD vs code. |
+| Ouverture / push d'une PR | `pr-diff-gdd-split.yml` | Commente le diff séparé GDD vs code. **Informatif** : ni correctif ni réponse attendus — lire la colonne « hors GDD », ignorer l'autre (`.claude/rules/git_commit.md`). |
+
+## ⚠️ Un push direct sur `dev` ne déclenche AUCUNE CI — c'est voulu
+
+`push:` s'arrête à `main`. Les commits poussés directement sur `dev` ne voient donc
+aucun run, et **ce n'est pas un oubli à réparer** : `dev` est une branche
+d'intégration où atterrissent de petits correctifs, et son propriétaire ne veut pas
+attendre un run à chaque poussée. La CI se paie sur les PR et à la porte `main`.
+
+Le piège est réel et a déjà été activé (août 2026) : un agent a relevé « trois
+commits arrivés sur `dev` sans CI », l'a traité comme un défaut, et a ajouté
+`push: branches: [main, dev]`. Commit **revert**. Ne pas le refaire — constater
+l'absence de run sur `dev` n'est pas un diagnostic, c'est le comportement attendu.
+
+Corollaire pour les agents : quand on pousse sur `dev`, la preuve est **locale**
+(`.claude/rules/workflow.md`), et elle vaut. Ne pas la présenter comme un manque.
 
 ## Trois invariants
 

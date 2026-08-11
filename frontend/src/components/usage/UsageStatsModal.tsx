@@ -34,7 +34,7 @@ export function UsageStatsModal({ isOpen, onClose }: UsageStatsModalProps) {
     >
       <div
         style={{
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.elevated,
           borderRadius: '8px',
           width: '90%',
           maxWidth: '1400px',
