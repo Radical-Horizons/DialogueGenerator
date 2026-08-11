@@ -53,6 +53,13 @@ export function useBatchDialogueValidation(
   const [reportLocal, setReportLocal] = useState<BatchValidateReport | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const cancelledRef = useRef(false)
+  /**
+   * Verrou synchrone anti double-clic : pour N ≥ 20 (branche job),
+   * `isValidatingLocal` ne devenait vrai qu'après l'appel réseau de
+   * création de job, laissant une fenêtre où un second clic relance un
+   * job de validation concurrent sur la même sélection.
+   */
+  const submittingRef = useRef(false)
 
   const jobIsPolling = useBatchValidationJobStore((s) => s.isPolling)
   const jobCurrent = useBatchValidationJobStore((s) => s.current)
@@ -80,6 +87,7 @@ export function useBatchDialogueValidation(
 
   const startBatchValidation = useCallback(
     async (documentIds: string[]) => {
+      if (submittingRef.current || isValidatingLocal || jobIsPolling) return
       const ids = documentIds.map((id) => id.trim()).filter(Boolean)
       if (ids.length === 0) {
         toast('Sélectionnez au moins un dialogue à valider', 'warning')
@@ -90,10 +98,11 @@ export function useBatchDialogueValidation(
       setReportLocal(null)
       dismissJobReport()
       setProgressLocal({ current: 0, total: ids.length })
+      submittingRef.current = true
+      setIsValidatingLocal(true)
 
       try {
         if (ids.length < BATCH_VALIDATE_JOB_MIN) {
-          setIsValidatingLocal(true)
           abortRef.current = new AbortController()
           const collected: BatchValidationItem[] = []
           for (let index = 0; index < ids.length; index += 1) {
@@ -138,10 +147,11 @@ export function useBatchDialogueValidation(
         }
       } finally {
         setIsValidatingLocal(false)
+        submittingRef.current = false
         abortRef.current = null
       }
     },
-    [toast, startPolling, dismissJobReport]
+    [toast, startPolling, dismissJobReport, isValidatingLocal, jobIsPolling]
   )
 
   const isValidating = isValidatingLocal || jobIsPolling

@@ -184,8 +184,8 @@ describe('UnityDialogueList', () => {
     })
     render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
 
-    const nodeCount = await screen.findByTestId('unity-dialogue-item-node-count')
-    expect(nodeCount).toHaveTextContent('3 nœuds')
+    const nodeCount = await screen.findByTestId('unity-dialogue-structure')
+    expect(nodeCount).toHaveTextContent('3 RÉPLIQUES')
     expect(screen.getByTestId('unity-dialogue-item-created')).toHaveTextContent('créé')
   })
 
@@ -222,7 +222,7 @@ describe('UnityDialogueList', () => {
     expect(speakers[0]).toHaveTextContent('Uresaïr, Voknir')
     expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(2)
 
-    await user.type(screen.getByPlaceholderText('Rechercher… (/)'), 'voknir')
+    await user.type(screen.getByPlaceholderText('Chercher un dialogue…'), 'voknir')
 
     await waitFor(() => {
       expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(1)

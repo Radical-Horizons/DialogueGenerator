@@ -1,5 +1,6 @@
 /** Client API génération batch multi-parents FR88. */
 import apiClient from './client'
+import type { GenerateNodeRequest } from '../types/graph'
 
 export const BATCH_GENERATE_JOB_MIN = 10
 
@@ -62,7 +63,7 @@ export type BatchGenerateParentSpec = {
 export type StartBatchGenerateJobRequest = {
   document_id?: string
   parents: BatchGenerateParentSpec[]
-  dialogue_nodes?: Array<Record<string, unknown>>
+  dialogue_nodes?: GenerateNodeRequest['dialogue_nodes']
   llm_model_identifier?: string
   system_prompt_override?: string
   max_choices?: number | null

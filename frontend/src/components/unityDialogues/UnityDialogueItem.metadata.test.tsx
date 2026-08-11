@@ -33,8 +33,8 @@ describe('UnityDialogueItem métadonnées compactes', () => {
         isSelected={false}
       />
     )
-    expect(screen.getByTestId('unity-dialogue-item-node-count')).toHaveTextContent(
-      '45 nœuds'
+    expect(screen.getByTestId('unity-dialogue-structure')).toHaveTextContent(
+      '45 RÉPLIQUES'
     )
     expect(screen.getByTestId('unity-dialogue-item-cost')).toHaveTextContent('8.20€')
     expect(screen.getByTitle('Dernière modification')).toHaveTextContent('il y a 2h')

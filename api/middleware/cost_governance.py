@@ -66,7 +66,16 @@ def _is_cost_governed_generation_path(path: str) -> bool:
 
 
 def _batch_parent_count_for_estimate(request: Request) -> int:
-    """Nombre de parents pour multiplier l'estimation batch-generate."""
+    """Nombre de parents pour multiplier l'estimation batch-generate.
+
+    ⚠️ Best-effort seulement : le body POST n'est pas lisible en middleware
+    (stream à consommation unique), donc ce compte vient d'un header client
+    auto-déclaré et non vérifié. Ce n'est PAS le contrôle budgétaire qui fait
+    autorité pour ``/batch-generate-from-nodes/jobs`` — celui-ci vit dans le
+    router (``_check_batch_budget_or_raise`` dans
+    ``api/routers/graph_generation.py``), qui utilise le N réel du body
+    désérialisé. Ce pré-check middleware n'est qu'un filtre rapide.
+    """
     raw = request.headers.get(_HEADER_BATCH_PARENT_COUNT)
     if raw is not None:
         try:

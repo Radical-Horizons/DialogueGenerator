@@ -91,8 +91,14 @@
   evidence: Verification-gap — couvert API + hook + manager create ; parcours liste intégrés reportés.
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-8-6-indexer-dialogues-recherche-rapide-fr85.md`
-  summary: Rebuild FTS shadow/swap + reset statut running stale au boot + backfill auto corpus existant.
-  evidence: Revues 8.6 — clear_all pendant rebuild vide l'index ; crash laisse running ; pas de reindex au startup.
+  summary: Rebuild FTS shadow/swap + backfill auto corpus existant.
+  evidence: Revues 8.6 — clear_all pendant rebuild vide l'index ; pas de reindex auto au startup pour peupler un corpus jamais indexé.
+# RESOLVED 2026-08-11 — reset statut running stale au boot
+# - source_spec: spec-8-6 … crash laissait rebuild_status='running' en base (CAS durable),
+#   bloquant tout futur POST /reindex en 409 permanent jusqu'à intervention manuelle.
+#   Fix : services/repositories/sqlite/bootstrap.py::_reset_stale_dialogue_search_rebuild,
+#   appelé depuis initialize_database() juste après les migrations. Tests :
+#   tests/services/repositories/sqlite/test_bootstrap.py.
 - source_spec: `_bmad-output/implementation-artifacts/spec-8-6-indexer-dialogues-recherche-rapide-fr85.md`
   summary: Sur-fetch RBAC multi-pages et lock multi-workers reindex ; enrichir réponse search de métadonnées légères.
   evidence: LIMIT FTS avant filtre accès ; garde app.state mono-processus.
@@ -120,6 +126,43 @@
 #   evidence: Revue 8.8 — hook monte dans UnityDialogueList ; demontage coupe le poll.
 # RESOLVED 2026-08-04 — guest JWT ``sid`` + job_owner_key(`guest:{sid}`) ; tests IDOR
 # - source_spec: spec-8-8 … Owner job guest base sur session UUID
+# RESOLVED 2026-08-11 — revue PR #68 avant merge (voir aussi RESOLVED 8-6 ci-dessus) :
+#   cost gate ×N recalculé server-side sur N réel (api/routers/graph_generation.py
+#   ::_check_batch_budget_or_raise) au lieu du header client X-Batch-Parent-Count ;
+#   double-soumission UI corrigée (submittingRef + disabled bouton) dans
+#   useBatchGenerateFromNodes.ts/useBatchDialogueValidation.ts ; cleanup périodique
+#   des jobs batch expirés (api/services/in_memory_batch_job_manager.py, base
+#   commune factorisée entre BatchValidationJobManager et
+#   BatchNodeGenerationJobManager — résout aussi la duplication job-manager
+#   signalée en revue).
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-8-9-generer-batch-noeuds-depart-fr88.md`
+  summary: Persistance/reprise des jobs batch (validation FR87 + génération FR88) — actuellement en mémoire process pur.
+  evidence: |
+    Revue sécurité PR #68 (2026-08-11) — un redémarrage serveur en cours de job
+    (validation ou génération) fait disparaître silencieusement l'entrée : le
+    client qui poll reçoit un 404 nu, sans distinction avec un job inexistant,
+    et sans indication qu'un lot de 10-500 items a été interrompu à mi-parcours.
+    Sans risque de perte de données pour la validation (idempotente, lecture
+    seule), mais la génération mute l'état du graphe par parent sans
+    checkpoint de ce qui a déjà réussi — un retry naïf après crash peut
+    dupliquer des nœuds déjà générés pour les parents traités avant le crash.
+    Nécessite un store durable (SQLite) + reprise/reconciliation au niveau
+    service, hors scope d'un correctif ciblé pré-merge.
+- source_spec: `_bmad-output/implementation-artifacts/spec-8-1-lister-tous-les-dialogues-fr80.md`
+  summary: Extraire `list_unity_dialogues` (api/routers/unity_dialogues.py) vers un service de listing dédié.
+  evidence: |
+    Revue backend PR #68 (2026-08-11) — le handler fait le glob fichier, le
+    parsing JSON par item, le cache owner_username et l'orchestration
+    tri/pagination directement dans le router (~230 lignes), contrairement à
+    la convention `backend_api.md` ("Routers = routes uniquement"). Fonctionnel
+    et testé (voir `tests/api/test_unity_dialogues_list_counts.py`), mais un
+    refactor vers `dialogue_metadata_service.py` (ou un nouveau
+    `dialogue_listing_service.py`) est plus sûr en isolation, avec sa propre
+    passe de tests, qu'inséré dans un correctif de revue déjà large.
+- source_spec: `_bmad-output/implementation-artifacts/spec-8-9-generer-batch-noeuds-depart-fr88.md`
+  summary: Factoriser la boucle séquentielle "should_cancel → remplir le reste en cancelled" dupliquée entre `batch_node_generation_service.py::generate_batch` et `batch_validation_service.py::validate_batch`.
+  evidence: Revue backend PR #68 (2026-08-11) — même pattern d'annulation/progression sur deux services aux items et rapports différents ; à factoriser avec précaution (pas de comportement partagé pour le moment, juste la structure de boucle).
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-refonte-ui-phases-4-8.md`
   summary: Éditeur de graphe — remplacer les 7 panneaux flottants (validation/schéma/quality-llm/ai-slop/coût) par un inspecteur à onglets fixe 300px piloté par un seul state `inspectorTab`, en gardant `FlowSimulationPanel`/`GraphContextDroppingPanel`/`GameSystemsIntegrationPanel` en modales.

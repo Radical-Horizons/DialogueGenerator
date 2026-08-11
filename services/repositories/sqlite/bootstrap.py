@@ -27,6 +27,39 @@ def resolve_database_path(project_root: Path | None = None) -> Path:
     return root / FilePaths.APP_DATABASE
 
 
+def _reset_stale_dialogue_search_rebuild(database: DatabaseConnection) -> None:
+    """Réinitialise un reindex FTS resté ``running`` après un crash serveur.
+
+    ``rebuild_status`` est un CAS durable en base (voir
+    ``DialoguesSearchRepository.try_begin_rebuild``) : si le process meurt en
+    plein rebuild, l'état survit au redémarrage et bloque tout futur reindex
+    (409 permanent). Un process qui démarre ne peut pas avoir de rebuild
+    légitimement en cours — un ``running`` trouvé ici vient forcément d'un
+    process précédent qui n'a pas pu finaliser.
+    """
+    try:
+        with database.transaction(immediate=True) as connection:
+            cursor = connection.execute(
+                """
+                UPDATE dialogues_search_meta
+                SET rebuild_status = 'error',
+                    rebuild_error = 'Rebuild interrompu par un redémarrage serveur'
+                WHERE id = 1 AND rebuild_status = 'running'
+                """
+            )
+            if cursor.rowcount > 0:
+                logger.warning(
+                    "Reindex FTS 'running' réinitialisé au démarrage "
+                    "(interrompu par un arrêt/crash précédent)."
+                )
+    except Exception:
+        # Fail-open : ne jamais bloquer le boot pour ce nettoyage best-effort.
+        logger.warning(
+            "Réinitialisation du statut de reindex FTS échouée au démarrage",
+            exc_info=True,
+        )
+
+
 def initialize_database(database_path: Path | None = None) -> DatabaseConnection | None:
     """Crée la connexion, applique les migrations et met à jour l'état global.
 
@@ -39,6 +72,7 @@ def initialize_database(database_path: Path | None = None) -> DatabaseConnection
         database = DatabaseConnection(resolved_path)
         runner = MigrationRunner(database)
         applied_versions = runner.run_pending()
+        _reset_stale_dialogue_search_rebuild(database)
         mark_database_ready(resolved_path)
         logger.info(
             "Base SQLite prête: %s (migrations appliquées: %s)",

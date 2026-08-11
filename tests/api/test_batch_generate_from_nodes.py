@@ -13,6 +13,8 @@ from api.dependencies import (
     get_batch_node_generation_service,
     get_config_service,
     get_context_builder,
+    get_cost_governance_service,
+    get_llm_pricing_service,
     get_llm_usage_service,
 )
 from api.main import app
@@ -56,12 +58,22 @@ def batch_gen_client() -> Iterator[tuple[TestClient, MagicMock, BatchNodeGenerat
     usage = MagicMock()
     context_builder = MagicMock()
     context_builder.get_characters_names.return_value = []
+    pricing_service = MagicMock()
+    pricing_service.calculate_cost.return_value = 0.01
+    cost_service = MagicMock()
+    cost_service.check_budget.return_value = {
+        "allowed": True,
+        "percentage": 0.0,
+        "warning": None,
+    }
 
     app.dependency_overrides[get_config_service] = lambda: config
     app.dependency_overrides[get_llm_usage_service] = lambda: usage
     app.dependency_overrides[get_context_builder] = lambda: context_builder
     app.dependency_overrides[get_batch_node_generation_service] = lambda: batch_service
     app.dependency_overrides[get_batch_node_generation_job_manager] = lambda: job_manager
+    app.dependency_overrides[get_llm_pricing_service] = lambda: pricing_service
+    app.dependency_overrides[get_cost_governance_service] = lambda: cost_service
     app.dependency_overrides[get_current_user] = lambda: _user()
     try:
         yield TestClient(app), batch_service, job_manager
@@ -116,6 +128,54 @@ def test_job_large_batch_returns_202(
     body = response.json()
     assert "job_id" in body
     assert body["total"] == 10
+
+
+def test_job_budget_check_uses_real_parent_count_not_spoofed_header(
+    batch_gen_client: tuple[TestClient, MagicMock, BatchNodeGenerationJobManager],
+) -> None:
+    """Le contrôle budget doit se baser sur len(parents) du body, pas sur
+    l'en-tête X-Batch-Parent-Count auto-déclaré par le client (régression :
+    ce header ne peut plus, à lui seul, sous-estimer le coût réel)."""
+    client, batch_service, _ = batch_gen_client
+    batch_service.generate_batch = AsyncMock(
+        return_value=BatchNodeGenerationReport(items=[], started_at="t0", finished_at="t1")
+    )
+    pricing_service = client.app.dependency_overrides[get_llm_pricing_service]()
+
+    real_parent_count = 42
+    response = client.post(
+        "/api/v1/unity-dialogues/graph/batch-generate-from-nodes/jobs",
+        json={"parents": [_parent_spec(f"n{i}") for i in range(real_parent_count)]},
+        headers={"X-Batch-Parent-Count": "1"},
+    )
+    assert response.status_code == 202
+
+    assert pricing_service.calculate_cost.called
+    _, kwargs = pricing_service.calculate_cost.call_args
+    assert kwargs["prompt_tokens"] == 5000 * real_parent_count
+    assert kwargs["completion_tokens"] == 1000 * real_parent_count
+
+
+def test_job_blocked_when_budget_exceeded(
+    batch_gen_client: tuple[TestClient, MagicMock, BatchNodeGenerationJobManager],
+) -> None:
+    """Budget dépassé → 429 QUOTA_EXCEEDED, job jamais créé."""
+    client, batch_service, _ = batch_gen_client
+    cost_service = client.app.dependency_overrides[get_cost_governance_service]()
+    cost_service.check_budget.return_value = {
+        "allowed": False,
+        "percentage": 104.2,
+        "warning": "Monthly quota reached",
+    }
+
+    response = client.post(
+        "/api/v1/unity-dialogues/graph/batch-generate-from-nodes/jobs",
+        json={"parents": [_parent_spec(f"n{i}") for i in range(10)]},
+    )
+
+    assert response.status_code == 429
+    assert response.json()["error"]["code"] == "QUOTA_EXCEEDED"
+    assert not batch_service.generate_batch.called
 
 
 def test_job_status_and_cancel(

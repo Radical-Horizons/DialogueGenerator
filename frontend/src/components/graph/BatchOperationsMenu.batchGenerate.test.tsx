@@ -35,4 +35,23 @@ describe('BatchOperationsMenu generate CTA', () => {
     )
     expect(screen.queryByTestId('batch-generate-from-selection')).toBeNull()
   })
+
+  it('disables the button and skips the handler while a batch job is running (anti double-clic)', () => {
+    const onGenerate = vi.fn()
+    render(
+      <BatchOperationsMenu
+        selectedNodeIds={['a', 'b']}
+        canEditGraph
+        onBatchDeleteClick={vi.fn()}
+        onBatchTagApply={vi.fn()}
+        onBatchValidateClick={vi.fn()}
+        onBatchGenerateClick={onGenerate}
+        isBatchGenerating
+      />
+    )
+    const btn = screen.getByTestId('batch-generate-from-selection')
+    expect(btn).toBeDisabled()
+    fireEvent.click(btn)
+    expect(onGenerate).not.toHaveBeenCalled()
+  })
 })

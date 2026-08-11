@@ -112,6 +112,13 @@ export function useBatchGenerateFromNodes(
   const [showModal, setShowModal] = useState(false)
   const abortRef = useRef(false)
   const lastParentIdsRef = useRef<string[]>([])
+  /**
+   * Verrou synchrone anti double-clic : `isGeneratingLocal` ne devient `true`
+   * qu'après le premier `await` de `runJob` (appel réseau de création de
+   * job), laissant une fenêtre où un second clic relance un job concurrent
+   * sur les mêmes parents (coût LLM ×2, double application des nœuds).
+   */
+  const submittingRef = useRef(false)
 
   const jobIsPolling = useBatchNodeGenerationJobStore((s) => s.isPolling)
   const jobCurrent = useBatchNodeGenerationJobStore((s) => s.current)
@@ -322,6 +329,7 @@ export function useBatchGenerateFromNodes(
       }
       if (specs.length < 2) {
         toast('Moins de 2 parents sélectionnés', 'warning')
+        setIsGeneratingLocal(false)
         return
       }
       // Si après filtre introuvables on est sous le seuil job, basculer en séquentiel
@@ -341,6 +349,10 @@ export function useBatchGenerateFromNodes(
       })
       setProgress({ current: 0, total: created.total, detail: 'Job démarré' })
       startPolling(created.job_id)
+      // Relais vers `jobIsPolling` : ce hook n'est plus "local" une fois le
+      // job accepté par le serveur — évite que `isGenerating` reste bloqué
+      // à `true` une fois le job (et le polling) terminés.
+      setIsGeneratingLocal(false)
       toast('Génération batch lancée en arrière-plan', 'info', 3000)
     },
     [startPolling, runSequential, toast]
@@ -348,6 +360,7 @@ export function useBatchGenerateFromNodes(
 
   const startBatchGenerate = useCallback(
     async (parentIds?: string[]) => {
+      if (submittingRef.current || isGeneratingLocal || jobIsPolling) return
       const ids =
         parentIds && parentIds.length > 0
           ? [...parentIds]
@@ -357,6 +370,8 @@ export function useBatchGenerateFromNodes(
         return
       }
       lastParentIdsRef.current = ids
+      submittingRef.current = true
+      setIsGeneratingLocal(true)
       try {
         if (ids.length < BATCH_GENERATE_JOB_MIN) {
           await runSequential(ids)
@@ -366,9 +381,11 @@ export function useBatchGenerateFromNodes(
       } catch (err) {
         toast(getErrorMessage(err), 'error')
         setIsGeneratingLocal(false)
+      } finally {
+        submittingRef.current = false
       }
     },
-    [runJob, runSequential, toast]
+    [runJob, runSequential, toast, isGeneratingLocal, jobIsPolling]
   )
 
   const retryFailedParents = useCallback(async () => {

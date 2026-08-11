@@ -56,7 +56,7 @@ export function SearchIndexPanel() {
 
   return (
     <div data-testid="search-index-panel" style={{ padding: '1rem' }}>
-      <h2 style={{ color: theme.text.primary, fontSize: remSize('heading') }}>
+      <h2 style={{ color: theme.text.primary, fontSize: remSize('title') }}>
         Index de recherche
       </h2>
       <p style={{ color: theme.text.secondary, fontSize: remSize('body') }}>

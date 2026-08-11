@@ -221,7 +221,7 @@ export interface GraphState {
         to?: string
         from_node?: string
         to_node?: string
-        via_choice_index?: number
+        via_choice_index?: number | null
         connection_type?: string
       }>
       generated_choices_count?: number | null

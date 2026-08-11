@@ -261,6 +261,17 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning(f"Erreur lors du démarrage de la cleanup task: {e}")
 
+        # Cleanup périodique des jobs batch validation/génération (Epic 8) :
+        # sans ce sweep, un job jamais re-pollé (onglet fermé) fuit en mémoire.
+        try:
+            batch_container = getattr(app.state, "container", None)
+            if batch_container is not None:
+                await batch_container.get_batch_validation_job_manager().start_cleanup_task()
+                await batch_container.get_batch_node_generation_job_manager().start_cleanup_task()
+                logger.info("Cleanup tasks des jobs batch (validation/génération) démarrées")
+        except Exception as e:
+            logger.warning(f"Erreur lors du démarrage des cleanup tasks batch: {e}")
+
         async def gdd_notion_scheduler() -> None:
             """Sync GDD Notion périodique si activée (FR18, pas de cron OS)."""
             await asyncio.sleep(20)
@@ -315,6 +326,15 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             logger.info("Cleanup task des jobs de génération arrêtée")
         except Exception as e:
             logger.warning(f"Erreur lors de l'arrêt de la cleanup task: {e}")
+
+        try:
+            batch_container = getattr(app.state, "container", None)
+            if batch_container is not None:
+                await batch_container.get_batch_validation_job_manager().stop_cleanup_task()
+                await batch_container.get_batch_node_generation_job_manager().stop_cleanup_task()
+                logger.info("Cleanup tasks des jobs batch (validation/génération) arrêtées")
+        except Exception as e:
+            logger.warning(f"Erreur lors de l'arrêt des cleanup tasks batch: {e}")
 
         sched_task = getattr(app.state, "_gdd_notion_scheduler_task", None)
         if sched_task is not None:

@@ -216,7 +216,7 @@ describe('ContextSelector', () => {
     })
   })
 
-  it('tronque les libellés d’onglets (ellipsis + flex 1 1 0%) pour éviter le chevauchement en panneau étroit', async () => {
+  it('tronque les libellés d’onglets (ellipsis + title tooltip) pour éviter le chevauchement en panneau étroit', async () => {
     render(
       <div style={{ width: 280 }}>
         <ContextSelector />
@@ -230,7 +230,7 @@ describe('ContextSelector', () => {
     const personnages = screen.getByRole('button', { name: /^personnages$/i })
     const communautes = screen.getByRole('button', { name: /^communautés$/i })
 
-    expect(personnages.style.flex).toMatch(/1\s+1\s+0%?/)
+    expect(personnages.style.flex).toBe('0 1 auto')
     expect(personnages.style.minWidth).toMatch(/^0(px)?$/)
     expect(personnages).toHaveAttribute('title', 'Personnages')
     expect(communautes).toHaveAttribute('title', 'Communautés')

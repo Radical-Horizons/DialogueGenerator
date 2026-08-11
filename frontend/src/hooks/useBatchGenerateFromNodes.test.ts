@@ -208,4 +208,42 @@ describe('useBatchGenerateFromNodes', () => {
     expect(startPolling).toHaveBeenCalledWith('job-1')
     expect(generateFromNode).not.toHaveBeenCalled()
   })
+
+  it('ignores a second startBatchGenerate call fired while the first job creation is in flight (anti double-clic)', async () => {
+    const ids = Array.from({ length: 10 }, (_, i) => `n${i}`)
+    graphState.selectedNodeIds = ids
+    graphState.nodes = ids.map((id) => ({
+      id,
+      type: 'dialogueNode',
+      position: { x: 0, y: 0 },
+      data: { choices: [{ text: '1' }] },
+    }))
+    graphState.dialogueMetadata = { filename: 'big.json', node_count: 10, edge_count: 0 }
+
+    let resolveCreate!: (value: { job_id: string; status: string; total: number }) => void
+    const createPromise = new Promise<{ job_id: string; status: string; total: number }>(
+      (resolve) => {
+        resolveCreate = resolve
+      }
+    )
+    vi.mocked(batchApi.startBatchGenerateFromNodesJob).mockReturnValue(createPromise)
+
+    const { result } = renderHook(() => useBatchGenerateFromNodes(toast))
+
+    let firstCall!: Promise<void>
+    let secondCall!: Promise<void>
+    act(() => {
+      firstCall = result.current.startBatchGenerate(ids)
+      // Simule un second clic avant que la création de job (réseau) ne résolve.
+      secondCall = result.current.startBatchGenerate(ids)
+    })
+
+    await act(async () => {
+      resolveCreate({ job_id: 'job-1', status: 'queued', total: 10 })
+      await firstCall
+      await secondCall
+    })
+
+    expect(batchApi.startBatchGenerateFromNodesJob).toHaveBeenCalledTimes(1)
+  })
 })

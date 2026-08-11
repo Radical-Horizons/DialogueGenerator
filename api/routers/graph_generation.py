@@ -13,17 +13,22 @@ from api.dependencies import (
     get_batch_node_generation_service,
     get_config_service,
     get_context_builder,
+    get_cost_governance_service,
     get_graph_node_orchestrator,
+    get_llm_pricing_service,
     get_llm_usage_service,
     get_request_id,
     require_non_guest,
 )
 from api.exceptions import (
     AllLLMProvidersUnavailableError,
+    APIException,
     InternalServerException,
     NotFoundException,
     ValidationException,
 )
+from api.middleware.billable_user_context import get_billable_user_id
+from api.middleware.cost_governance import DEFAULT_COMPLETION_TOKENS, DEFAULT_PROMPT_TOKENS
 from api.routers.auth import get_current_user
 from api.routers.graph_cost import fingerprint_for_selections_safe, try_compute_context_relevance
 from api.routers.graph_router_helpers import create_llm_client_for_router, resolve_and_enrich_graph_context
@@ -38,6 +43,7 @@ from api.schemas.batch_node_generation import (
 from api.schemas.graph import GenerateNodeRequest, GenerateNodeResponse, SuggestedConnection
 from api.services.batch_node_generation_job_manager import BatchNodeGenerationJobManager
 from api.utils.job_ownership import job_owner_key
+from constants import Defaults
 from core.context.context_builder import ContextBuilder
 from services.batch_node_generation_service import (
     BATCH_GENERATE_HARD_MAX,
@@ -47,7 +53,9 @@ from services.batch_node_generation_service import (
     BatchParentInput,
 )
 from services.configuration_service import ConfigurationService
+from services.cost_governance_service import CostGovernanceService
 from services.graph_node_orchestrator import GraphNodeOrchestrator
+from services.llm_pricing_service import LLMPricingService
 from services.llm_usage_service import LLMUsageService
 
 logger = logging.getLogger(__name__)
@@ -65,6 +73,46 @@ def _reject_guest_user(
 def _owner_key(current_user: dict[str, object]) -> str:
     """Identifiant propriétaire pour les jobs en mémoire."""
     return job_owner_key(current_user)
+
+
+def _check_batch_budget_or_raise(
+    parent_count: int,
+    model_id: Optional[str],
+    pricing_service: LLMPricingService,
+    cost_service: CostGovernanceService,
+    request_id: str,
+) -> None:
+    """Vérifie le budget avec le N réel (post-parsing du body).
+
+    Le pré-check du middleware (``CostGovernanceMiddleware``) estime le coût
+    ×N depuis un header client (``X-Batch-Parent-Count``) que le body n'a pas
+    encore été lu à ce stade — un client peut y mentir sans conséquence. Ce
+    contrôle-ci utilise ``len(request_data.parents)``, la valeur réelle que le
+    job va traiter, et fait autorité : c'est lui qui bloque, pas le header.
+    """
+    prompt_tokens = DEFAULT_PROMPT_TOKENS * parent_count
+    completion_tokens = DEFAULT_COMPLETION_TOKENS * parent_count
+    estimated_cost = pricing_service.calculate_cost(
+        model_name=model_id or Defaults.MODEL_ID,
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens,
+    )
+    budget_check = cost_service.check_budget(
+        user_id=get_billable_user_id(),
+        estimated_cost=estimated_cost,
+    )
+    if not budget_check["allowed"]:
+        raise APIException(
+            status_code=429,
+            code="QUOTA_EXCEEDED",
+            message=budget_check.get("warning", "Monthly quota reached"),
+            details={
+                "percentage": budget_check["percentage"],
+                "estimated_cost": estimated_cost,
+                "parent_count": parent_count,
+            },
+            request_id=request_id,
+        )
 
 
 def _report_to_response(report: BatchNodeGenerationReport) -> BatchGenerateFromNodesReport:
@@ -256,6 +304,8 @@ async def start_batch_generate_from_nodes_job(
     ],
     usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
     context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    pricing_service: Annotated[LLMPricingService, Depends(get_llm_pricing_service)],
+    cost_service: Annotated[CostGovernanceService, Depends(get_cost_governance_service)],
     current_user: Annotated[dict[str, object], Depends(get_current_user)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> BatchGenerateJobCreateResponse:
@@ -275,6 +325,13 @@ async def start_batch_generate_from_nodes_job(
             details={"count": parent_count},
             request_id=request_id,
         )
+    _check_batch_budget_or_raise(
+        parent_count,
+        request_data.llm_model_identifier,
+        pricing_service,
+        cost_service,
+        request_id,
+    )
 
     parent_ids = [p.parent_node_id for p in request_data.parents]
     job_id = job_manager.create_job(parent_ids, _owner_key(current_user))

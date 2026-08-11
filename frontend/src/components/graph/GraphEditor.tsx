@@ -377,6 +377,7 @@ export function GraphEditor({
           onBatchTagApply={handleBatchTagSelection}
           handleBatchValidateSelection={handleBatchValidateSelection}
           handleBatchGenerateSelection={() => void startBatchGenerate()}
+          isBatchGenerating={isBatchGenerating}
           handleBatchDeleteSelection={handleBatchDeleteSelection}
           canEditGraph={canEditGraph}
           canOpenGraphActions={canOpenGraphActions}

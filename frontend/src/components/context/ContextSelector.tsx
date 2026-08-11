@@ -867,6 +867,7 @@ export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }
               key={key}
               type="button"
               className="context-gdd-tab"
+              title={label}
               onClick={() => {
                 setActiveTab(key)
                 setSelectedDetail(null)
@@ -877,7 +878,19 @@ export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }
               style={contextGddTabButtonStyle(isActive, tabChromeTier)}
             >
               <span style={contextGddTabLabelStyle(isActive)}>
-                {label}
+                <span
+                  data-testid="context-gdd-tab-label"
+                  style={{
+                    display: 'block',
+                    minWidth: 0,
+                    maxWidth: '100%',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {label}
+                </span>
                 {showCount && (
                   <span
                     aria-hidden="true"

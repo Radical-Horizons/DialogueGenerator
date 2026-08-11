@@ -83,6 +83,23 @@ def _normalize_iso(value: str, *, assume_utc: bool = False) -> str:
     return normalized
 
 
+def _count_nodes_and_edges(document: Any) -> tuple[int, int]:
+    """Compte nœuds + liens en un seul appel (écran 2e, tests dédiés).
+
+    Délègue à ``services.unity_dialogue_search_fields`` : ``count_nodes``
+    gère les deux formes de document (tableau nu / ``{nodes}``),
+    ``count_edges`` attend une liste de nœuds déjà normalisée.
+    """
+    nodes = (
+        document
+        if isinstance(document, list)
+        else document.get("nodes")
+        if isinstance(document, dict)
+        else None
+    )
+    return _count_nodes(document), _count_edges(nodes if isinstance(nodes, list) else [])
+
+
 def _has_explicit_timezone(value: str) -> bool:
     """Indique si un ISO porte déjà un fuseau (``Z`` ou offset ``±HH:MM``)."""
     if value.endswith(("Z", "z")):

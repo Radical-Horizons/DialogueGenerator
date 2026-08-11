@@ -19,6 +19,7 @@ export interface BatchOperationsMenuProps {
   onBatchTagApply: (tag: string) => void
   onBatchValidateClick: () => void
   onBatchGenerateClick?: () => void
+  isBatchGenerating?: boolean
 }
 
 export function BatchOperationsMenu({
@@ -28,6 +29,7 @@ export function BatchOperationsMenu({
   onBatchTagApply,
   onBatchValidateClick,
   onBatchGenerateClick,
+  isBatchGenerating = false,
 }: BatchOperationsMenuProps) {
   const [tagDropdownOpen, setTagDropdownOpen] = useState(false)
   const tagDropdownRef = useRef<HTMLDivElement>(null)
@@ -165,7 +167,7 @@ export function BatchOperationsMenu({
             type="button"
             data-testid="batch-generate-from-selection"
             onClick={() => void onBatchGenerateClick()}
-            disabled={!canEditGraph || selectedNodeIds.length < 2}
+            disabled={!canEditGraph || selectedNodeIds.length < 2 || isBatchGenerating}
             style={{
               padding: '0.35rem 0.7rem',
               border: `1px solid ${theme.border.primary}`,
@@ -173,13 +175,15 @@ export function BatchOperationsMenu({
               backgroundColor: theme.button.default.background,
               color: theme.button.default.color,
               cursor:
-                canEditGraph && selectedNodeIds.length >= 2 ? 'pointer' : 'not-allowed',
-              opacity: canEditGraph && selectedNodeIds.length >= 2 ? 1 : 0.6,
+                canEditGraph && selectedNodeIds.length >= 2 && !isBatchGenerating
+                  ? 'pointer'
+                  : 'not-allowed',
+              opacity: canEditGraph && selectedNodeIds.length >= 2 && !isBatchGenerating ? 1 : 0.6,
               fontSize: '0.8rem',
             }}
             title="Générer les choix libres depuis les nœuds sélectionnés"
           >
-            Générer batch depuis sélection
+            {isBatchGenerating ? 'Génération…' : 'Générer batch depuis sélection'}
           </button>
         )}
         <button
