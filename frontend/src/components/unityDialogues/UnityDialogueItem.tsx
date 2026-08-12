@@ -82,10 +82,12 @@ export const UnityDialogueItem = memo(
       },
       ref
     ) {
-      const [isHovered, setIsHovered] = useState(false)
       const [showMetadataTooltip, setShowMetadataTooltip] = useState(false)
       const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-      const showFilename = isSelected || isHovered
+      // Le nom de fichier ne s'affiche qu'à l'ouverture du dialogue (isSelected),
+      // pas au survol : montré/caché en boucle au passage de la souris, c'était
+      // plus perturbant qu'utile dans une liste qu'on parcourt au clavier/scroll.
+      const showFilename = isSelected
 
       useEffect(
         () => () => {
@@ -337,7 +339,6 @@ export const UnityDialogueItem = memo(
 
       const hoverHandlers = {
         onMouseEnter: (e: MouseEvent<HTMLElement>) => {
-          setIsHovered(true)
           setShowMetadataTooltip(true)
           if (tooltipTimer.current) clearTimeout(tooltipTimer.current)
           tooltipTimer.current = setTimeout(
@@ -349,7 +350,6 @@ export const UnityDialogueItem = memo(
           }
         },
         onMouseLeave: (e: MouseEvent<HTMLElement>) => {
-          setIsHovered(false)
           setShowMetadataTooltip(false)
           if (tooltipTimer.current) clearTimeout(tooltipTimer.current)
           if (!isSelected) {
