@@ -46,20 +46,30 @@ function providerLabel(clientType: string): string {
   return PROVIDER_LABELS[clientType] ?? clientType.charAt(0).toUpperCase() + clientType.slice(1)
 }
 
+/**
+ * Gouttière reprise telle quelle du bouton « × N » voisin : les deux encadrent
+ * l'action primaire, un écart de quelques pixels s'y verrait.
+ */
+const PILL_PADDING_X = 14
+
 export interface ModelEffortPickerProps {
   reasoningEffort: ReasoningEffort | null
   onReasoningEffortChange: (value: ReasoningEffort | null) => void
   /** Vrai pendant une génération : on n'édite pas les réglages du run en cours. */
   disabled?: boolean
-  /** Mode écriture (2c) : hauteur alignée sur le bouton « Générer » compact. */
-  compact?: boolean
+  /**
+   * Hauteur de la rangée d'action, imposée par l'appelant : la pastille est
+   * encadrée par « Générer » et « × N » et doit rester à leur exacte hauteur,
+   * y compris en mode écriture où la rangée se tasse.
+   */
+  height: number
 }
 
 export function ModelEffortPicker({
   reasoningEffort,
   onReasoningEffortChange,
   disabled = false,
-  compact = false,
+  height,
 }: ModelEffortPickerProps) {
   const model = useLLMStore((s) => s.model)
   const availableModels = useLLMStore((s) => s.availableModels)
@@ -435,19 +445,22 @@ export function ModelEffortPicker({
           setIsOpen((v) => !v)
         }}
         style={{
-          height: compact ? 38 : 46,
+          height,
           display: 'flex',
           alignItems: 'center',
           gap: 7,
-          padding: '0 11px',
+          padding: `0 ${PILL_PADDING_X}px`,
           borderRadius: redesignRadius.control,
           border: `1px solid ${redesignControl.border}`,
           backgroundColor: 'transparent',
           color: redesignText.row,
           cursor: disabled ? 'not-allowed' : 'pointer',
           opacity: disabled ? 0.6 : 1,
+          // Rétrécit avant le bouton primaire (le libellé s'ellipse), mais ne
+          // grandit jamais : la place revient à « Générer ».
           minWidth: 0,
           flexShrink: 1,
+          flexGrow: 0,
         }}
       >
         <span

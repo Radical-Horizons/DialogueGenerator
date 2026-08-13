@@ -31,6 +31,7 @@ function renderPicker(
     <ModelEffortPicker
       reasoningEffort={null}
       onReasoningEffortChange={onReasoningEffortChange}
+      height={46}
       {...overrides}
     />
   )
@@ -55,6 +56,14 @@ describe('ModelEffortPicker', () => {
     const pill = screen.getByTestId('model-effort-pill')
     await waitFor(() => expect(pill).toHaveTextContent('GPT-5.6 Terra'))
     expect(screen.getByTestId('model-effort-pill-effort')).toHaveTextContent('élevé')
+  })
+
+  it("adopte la hauteur de rangée imposée par l'appelant", () => {
+    // La pastille est encadrée par « Générer » et « × N » : en mode écriture la
+    // rangée tombe à 38px et les trois doivent descendre ensemble.
+    renderPicker({ height: 38 })
+
+    expect(screen.getByTestId('model-effort-pill')).toHaveStyle({ height: '38px' })
   })
 
   it('liste les modèles avec leur description et coche le courant', async () => {

@@ -552,6 +552,13 @@ export function GenerationPanel() {
     maxChoices === null ? 'libre' : `≤ ${maxChoices}`,
   ].join(' · ')
 
+  /**
+   * Hauteur commune de la rangée d'action : « Générer », la pastille de réglages
+   * et le compteur « × N » se touchent, ils se mesurent donc au même trait.
+   * Le compteur était figé à 46 et dépassait le bouton en mode écriture.
+   */
+  const actionRowHeight = writingMode ? 38 : 46
+
   // 2c : modèle et raisonnement sont déjà lisibles sur la pastille voisine — la
   // ligne de métriques ne répète que ce qu'elle seule porte.
   const advancedSettingsSummary = [
@@ -1143,28 +1150,26 @@ export function GenerationPanel() {
             {advancedSettingsSummary}
           </span>
         )}
-        {/* `wrap` + le `minWidth` du bouton ci-dessous : sous ~470px la pastille
-            prend sa propre ligne au lieu d'écraser « Générer » (mesuré à 320px :
-            libellé cassé sur trois lignes et compteur d'options hors cadre). */}
-        <div style={{ display: 'flex', gap: 9, flexShrink: 0, minWidth: 0, flexWrap: 'wrap' }}>
-          <ModelEffortPicker
-            reasoningEffort={reasoningEffort}
-            onReasoningEffortChange={(value) => {
-              setReasoningEffort(value)
-              draft.markDirty()
-            }}
-            // Volontairement pas `isGeneratePrimaryDisabled` : ce prédicat couvre
-            // aussi le chargement du catalogue GDD et l'estimation, pendant lesquels
-            // choisir son modèle reste légitime. Seul un run en vol fige le réglage.
-            disabled={isLoading}
-            compact={writingMode}
-          />
+        {/* `wrap` + le `minWidth` du bouton primaire : sous ~470px les réglages
+            passent à la ligne au lieu d'écraser « Générer » (mesuré à 320px :
+            libellé cassé sur trois lignes et compteur d'options hors cadre).
+            `alignItems: center` garde pastille et « × N » alignés sur le bouton. */}
+        <div
+          style={{
+            display: 'flex',
+            gap: 9,
+            flexShrink: 0,
+            minWidth: 0,
+            flexWrap: 'wrap',
+            alignItems: 'center',
+          }}
+        >
           <button
             type="button"
             onClick={() => void orchestrator.handleGenerate()}
             disabled={isGeneratePrimaryDisabled}
             style={{
-              height: writingMode ? 38 : 46,
+              height: actionRowHeight,
               padding: writingMode ? '0 20px' : undefined,
               borderRadius: 6,
               border: 'none',
@@ -1202,6 +1207,18 @@ export function GenerationPanel() {
               CTRL+↵
             </span>
           </button>
+          <ModelEffortPicker
+            reasoningEffort={reasoningEffort}
+            onReasoningEffortChange={(value) => {
+              setReasoningEffort(value)
+              draft.markDirty()
+            }}
+            // Volontairement pas `isGeneratePrimaryDisabled` : ce prédicat couvre
+            // aussi le chargement du catalogue GDD et l'estimation, pendant lesquels
+            // choisir son modèle reste légitime. Seul un run en vol fige le réglage.
+            disabled={isLoading}
+            height={actionRowHeight}
+          />
           {/* 2b : nombre d'options par génération — N appels LLM parallèles, plafonnés. */}
           <button
             type="button"
@@ -1214,7 +1231,7 @@ export function GenerationPanel() {
             disabled={isGeneratePrimaryDisabled}
             title={`Nombre d'options générées en parallèle (coût ×${optionCount}). Cliquer pour changer — max ${MAX_GENERATION_OPTIONS}.`}
             style={{
-              height: 46,
+              height: actionRowHeight,
               padding: '0 14px',
               borderRadius: 6,
               border: '1px solid #2e2e36',
