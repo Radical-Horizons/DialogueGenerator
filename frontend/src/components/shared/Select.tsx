@@ -3,6 +3,7 @@
  */
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { theme } from '../../theme'
+import { redesignDisclosureArrow } from '../../theme/redesignTokens'
 import { generationPanelChrome } from '../../theme/responsiveChrome'
 
 export interface SelectOption {
@@ -157,7 +158,8 @@ export function Select({
           )}
           <span
             style={{
-              fontSize: '0.75rem',
+              fontSize: redesignDisclosureArrow.solid,
+              lineHeight: 1,
               color: theme.text.secondary,
               transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
               transition: 'transform 0.2s',

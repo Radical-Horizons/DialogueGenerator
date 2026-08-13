@@ -26,6 +26,7 @@ import { SystemPromptEditor } from './SystemPromptEditor'
 import { SceneSelectionWidget } from './SceneSelectionWidget'
 import { DialogueFlagsPanel } from './DialogueFlagsPanel'
 import { GenerationStreamingInline } from './GenerationStreamingInline'
+import { ModelEffortPicker } from './ModelEffortPicker'
 import { ModelSelector } from './ModelSelector'
 import { PresetSelector } from './PresetSelector'
 import { useToast } from '../shared'
@@ -37,6 +38,8 @@ import {
   DEFAULT_MODEL,
   API_TIMEOUTS,
   REASONING_EFFORT_MODELS,
+  REASONING_EFFORT_OPTIONS,
+  REASONING_EFFORT_SHORT_LABELS,
 } from '../../constants'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 // Hooks métier extraits
@@ -49,19 +52,9 @@ import { GenerationPanelModals } from './GenerationPanelModals'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { PANEL_COMFORT_MIN_WIDTH_PX, generationPanelChrome } from '../../theme/responsiveChrome'
 import { GenerationPanelNarrowProvider } from './GenerationPanelNarrowContext'
-import { redesignAccent, redesignFont, redesignHairline, redesignReadingColumn, redesignText } from '../../theme/redesignTokens'
+import { redesignAccent, redesignDisclosureArrow, redesignFont, redesignHairline, redesignReadingColumn, redesignText } from '../../theme/redesignTokens'
 import { remSize } from '../../theme/uiTypography'
 import type { ReasoningEffort } from '../../types/api'
-
-const REASONING_EFFORT_SHORT_LABELS: Record<string, string> = {
-  none: 'aucun',
-  minimal: 'minimal',
-  low: 'faible',
-  medium: 'moyen',
-  high: 'élevé',
-  xhigh: 'xhigh',
-  max: 'max',
-}
 
 function formatTokensShort(value: number): string {
   return value >= 1000 ? `${Math.round(value / 1000)}K` : String(value)
@@ -559,6 +552,20 @@ export function GenerationPanel() {
     maxChoices === null ? 'libre' : `≤ ${maxChoices}`,
   ].join(' · ')
 
+  /**
+   * Hauteur commune de la rangée d'action : « Générer », la pastille de réglages
+   * et le compteur « × N » se touchent, ils se mesurent donc au même trait.
+   * Le compteur était figé à 46 et dépassait le bouton en mode écriture.
+   */
+  const actionRowHeight = writingMode ? 38 : 46
+
+  // 2c : modèle et raisonnement sont déjà lisibles sur la pastille voisine — la
+  // ligne de métriques ne répète que ce qu'elle seule porte.
+  const advancedSettingsSummary = [
+    `${formatTokensShort(maxContextTokens)}/${formatTokensShort(maxCompletionTokens ?? COMPLETION_TOKENS_LIMITS.DEFAULT)}`,
+    maxChoices === null ? 'libre' : `≤ ${maxChoices}`,
+  ].join(' · ')
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: theme.background.panel }}>
       <GenerationPanelNarrowProvider value={isGenerationNarrow}>
@@ -784,7 +791,15 @@ export function GenerationPanel() {
         >
           <span style={{ color: theme.text.tertiary }}>Réglages du modèle</span>
           <span style={{ color: theme.text.primary }}>{modelSettingsSummary}</span>
-          <span aria-hidden style={{ marginLeft: 'auto', color: theme.text.tertiary }}>
+          <span
+            aria-hidden
+            style={{
+              marginLeft: 'auto',
+              color: theme.text.tertiary,
+              fontSize: redesignDisclosureArrow.small,
+              lineHeight: 1,
+            }}
+          >
             {showModelSettings ? '▴' : '▾'}
           </span>
         </button>
@@ -900,12 +915,11 @@ export function GenerationPanel() {
                 }}
               >
                 <>
-                  <option value="none">Aucun (rapide, latence minimale)</option>
-                  <option value="low">Faible</option>
-                  <option value="medium">Moyen (équilibré, recommandé)</option>
-                  <option value="high">Élevé</option>
-                  <option value="xhigh">Très élevé (xhigh)</option>
-                  <option value="max">Maximum (qualité d'abord)</option>
+                  {REASONING_EFFORT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.hint ? `${option.label} (${option.hint.toLowerCase()})` : option.label}
+                    </option>
+                  ))}
                 </>
               </StyledSelect>
             </div>
@@ -1133,16 +1147,29 @@ export function GenerationPanel() {
               marginLeft: 'auto',
             }}
           >
-            {modelSettingsSummary}
+            {advancedSettingsSummary}
           </span>
         )}
-        <div style={{ display: 'flex', gap: 9, flexShrink: 0 }}>
+        {/* `wrap` + le `minWidth` du bouton primaire : sous ~470px les réglages
+            passent à la ligne au lieu d'écraser « Générer » (mesuré à 320px :
+            libellé cassé sur trois lignes et compteur d'options hors cadre).
+            `alignItems: center` garde pastille et « × N » alignés sur le bouton. */}
+        <div
+          style={{
+            display: 'flex',
+            gap: 9,
+            flexShrink: 0,
+            minWidth: 0,
+            flexWrap: 'wrap',
+            alignItems: 'center',
+          }}
+        >
           <button
             type="button"
             onClick={() => void orchestrator.handleGenerate()}
             disabled={isGeneratePrimaryDisabled}
             style={{
-              height: writingMode ? 38 : 46,
+              height: actionRowHeight,
               padding: writingMode ? '0 20px' : undefined,
               borderRadius: 6,
               border: 'none',
@@ -1155,7 +1182,9 @@ export function GenerationPanel() {
               cursor: isGeneratePrimaryDisabled ? 'not-allowed' : 'pointer',
               opacity: isGeneratePrimaryDisabled ? 0.6 : 1,
               flex: 1,
-              minWidth: 0,
+              // Plancher de lisibilité du libellé : c'est lui qui déclenche le
+              // passage à la ligne du conteneur plutôt que l'écrasement.
+              minWidth: 200,
             }}
           >
             <span style={{ fontSize: writingMode ? '13.5px' : '14.5px', fontWeight: 600 }}>
@@ -1178,6 +1207,18 @@ export function GenerationPanel() {
               CTRL+↵
             </span>
           </button>
+          <ModelEffortPicker
+            reasoningEffort={reasoningEffort}
+            onReasoningEffortChange={(value) => {
+              setReasoningEffort(value)
+              draft.markDirty()
+            }}
+            // Volontairement pas `isGeneratePrimaryDisabled` : ce prédicat couvre
+            // aussi le chargement du catalogue GDD et l'estimation, pendant lesquels
+            // choisir son modèle reste légitime. Seul un run en vol fige le réglage.
+            disabled={isLoading}
+            height={actionRowHeight}
+          />
           {/* 2b : nombre d'options par génération — N appels LLM parallèles, plafonnés. */}
           <button
             type="button"
@@ -1190,7 +1231,7 @@ export function GenerationPanel() {
             disabled={isGeneratePrimaryDisabled}
             title={`Nombre d'options générées en parallèle (coût ×${optionCount}). Cliquer pour changer — max ${MAX_GENERATION_OPTIONS}.`}
             style={{
-              height: 46,
+              height: actionRowHeight,
               padding: '0 14px',
               borderRadius: 6,
               border: '1px solid #2e2e36',

@@ -93,7 +93,7 @@ export const GraphActionsDropdown = memo(function GraphActionsDropdown({
       >
         {isNarrow ? '⋯' : dropdownLabel}
         {!isNarrow && (
-          <span style={triggerVariant === 'text' ? graphToolbarChevronStyle : { fontSize: '0.7rem' }}>
+          <span style={triggerVariant === 'text' ? graphToolbarChevronStyle : { fontSize: '1.4rem' }}>
             ▾
           </span>
         )}

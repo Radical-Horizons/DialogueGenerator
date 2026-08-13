@@ -48,6 +48,6 @@ export function graphToolbarTextEntryStyle({
 
 /** Chevron ▾ des déclencheurs de menu (couleur étiquette, comme la maquette). */
 export const graphToolbarChevronStyle: CSSProperties = {
-  fontSize: '0.7em',
+  fontSize: '1.4em',
   color: redesignText.label,
 }

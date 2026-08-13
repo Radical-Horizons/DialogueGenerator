@@ -7,6 +7,7 @@ import userEvent from '@testing-library/user-event'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
 import * as dialoguesAPI from '../../api/dialogues'
 import * as documentsAPI from '../../api/documents'
+import * as collectionsAPI from '../../api/collections'
 import { UnityDialogueList } from './UnityDialogueList'
 
 vi.mock('../../api/unityDialogues', () => ({
@@ -268,6 +269,7 @@ describe('UnityDialogueList', () => {
     ).toEqual(['marc', 'luna'])
     expect(screen.getAllByTestId('unity-dialogue-item')).toHaveLength(2)
 
+    await user.click(screen.getByTestId('unity-dialogue-filters-toggle'))
     await user.selectOptions(
       screen.getByTestId('unity-dialogue-filter-author'),
       'u-marc'
@@ -370,5 +372,34 @@ describe('UnityDialogueList', () => {
     expect(onSelect).toHaveBeenCalledWith(
       expect.objectContaining({ filename: 'nouvelle_scene.json' })
     )
+  })
+
+  it('seede la nouvelle collection avec les dialogues cochés (FR84)', async () => {
+    const user = userEvent.setup()
+    vi.mocked(collectionsAPI.createCollection).mockResolvedValueOnce({
+      id: 'col-1',
+      name: 'Ma collection',
+      description: null,
+      icon: null,
+      owner_id: 'admin',
+      created_at: '2026-04-08T12:00:00.000Z',
+      updated_at: '2026-04-08T12:00:00.000Z',
+      dialogue_ids: [],
+    })
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+
+    const checkbox = await screen.findByTestId('unity-dialogue-item-checkbox')
+    await user.click(checkbox)
+
+    await user.click(screen.getByTestId('collection-create-button'))
+    await user.type(screen.getByTestId('collection-form-name'), 'Ma collection')
+    await user.click(screen.getByTestId('collection-form-submit'))
+
+    await waitFor(() => {
+      expect(collectionsAPI.addDialoguesToCollection).toHaveBeenCalledWith(
+        'col-1',
+        ['test_dialogue']
+      )
+    })
   })
 })

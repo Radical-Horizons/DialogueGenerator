@@ -15,7 +15,12 @@ import { UnityBatchExportActionsMenuItems } from '../unityDialogues/UnityBatchEx
 import { useUnityBatchExportMenuStore } from '../../store/unityBatchExportMenuStore'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
-import { redesignAccent, redesignFont, redesignText } from '../../theme/redesignTokens'
+import {
+  redesignAccent,
+  redesignDisclosureArrow,
+  redesignFont,
+  redesignText,
+} from '../../theme/redesignTokens'
 import { useGenerationElapsed } from '../../hooks/useGenerationRunState'
 import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import type { CenterPanelTab } from '../../store/uiLayoutStore'
@@ -450,7 +455,12 @@ export function Header() {
                   }}
                 >
                   Actions
-                  <span aria-hidden style={{ fontSize: '8px' }}>▼</span>
+                  <span
+                    aria-hidden
+                    style={{ fontSize: redesignDisclosureArrow.solid, lineHeight: 1 }}
+                  >
+                    ▼
+                  </span>
                 </button>
                 {isActionsDropdownOpen && (
                   <div

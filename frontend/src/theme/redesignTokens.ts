@@ -82,6 +82,22 @@ export const redesignRadius = {
 } as const
 
 /**
+ * Flèches de dépliage (« Réglages du modèle », « Outils du contexte », sections de prompt,
+ * « Filtres », menus non-`<select>`).
+ *
+ * Deux familles de glyphes cohabitent et ne se mesurent **pas** pareil à `font-size` égale :
+ * `▴ ▾ ▸` (U+25B4/BE/B8, variantes *small*) ne posent que ~3 px d'encre à 10 px, contre ~6 px
+ * pour `▲ ▼ ▶`. Chaque appelant avait improvisé sa valeur entre 7,5 et 11 px — d'où des flèches
+ * illisibles, surtout dans la famille *small*. Une taille par famille, pas au jugé.
+ */
+export const redesignDisclosureArrow = {
+  /** Glyphes *small* `▴ ▾ ▸` — il leur faut ~1,3× la taille des pleins pour la même encre. */
+  small: '20px',
+  /** Glyphes pleins `▲ ▼ ▶`. */
+  solid: '16px',
+} as const
+
+/**
  * Piles de police du prototype. Décision retenue : fallback système (pas de self-host) —
  * mêmes rôles (serif titres/répliques, sans interface, mono chiffres/étiquettes) sans fichier
  * de police ajouté au repo. À remplacer par Instrument Serif / Instrument Sans / IBM Plex Mono

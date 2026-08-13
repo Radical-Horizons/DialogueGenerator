@@ -149,6 +149,7 @@ Boucle de dev non supervisée : **bmad-loop** (`bmad-loop run`, `bmad-loop tui`)
 - Ne pas exiger une validation UI manuelle après chaque user story ; une validation par lot / fin d'epic suffit sauf demande contraire.
 - La preuve E2E finale, ce sont les parcours UI (écrans, clics, libellés) ; les tests API sont un filet de sécurité, pas le « done » produit.
 - Questions pré-implémentation : français simple, options concrètes ; jargon technique en annexe courte si nécessaire.
+- Captures d'écran proactives (sans qu'on demande) à la clôture de la dernière US d'une epic et après correctifs d'une revue de code externe de PR — protocole dans `.claude/rules/workflow.md` (Preuve UI) et le skill personnel `milestone-screenshots`.
 
 ## Faits techniques appris
 

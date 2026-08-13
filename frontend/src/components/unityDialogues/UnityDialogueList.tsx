@@ -15,7 +15,7 @@ import {
   DialogueListContextMenu,
   type DialogueListContextMenuState,
 } from './DialogueListContextMenu'
-import { StyledSelect } from '../shared/StyledSelect'
+import { SELECT_ARROW_FONT_SIZE, StyledSelect } from '../shared/StyledSelect'
 import { useDialogueListData } from '../../hooks/useDialogueListData'
 import {
   normalizeDialogueFilenameKey,
@@ -52,6 +52,7 @@ import { useGraphStore } from '../../store/graphStore'
 import { getDialogueDisplayTitle } from '../../utils/formatDialogueTitle'
 import * as documentsAPI from '../../api/documents'
 import {
+  redesignAccent,
   redesignFont,
   redesignHairline,
   redesignSpacing,
@@ -120,6 +121,8 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [contextMenu, setContextMenu] = useState<DialogueListContextMenuState | null>(null)
   const [isCreating, setIsCreating] = useState(false)
+  /** Repli date/auteur (disclosure) : évite que 4 contrôles se battent pour la largeur d'un rail étroit. */
+  const [showFilters, setShowFilters] = useState(false)
   const [collections, setCollections] = useState<DialogueCollection[]>([])
   const [collectionsLoading, setCollectionsLoading] = useState(false)
   const [addToCollectionId, setAddToCollectionId] = useState('')
@@ -237,11 +240,23 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
       description: string | null
       icon: string | null
     }) => {
-      await collectionsAPI.createCollection(payload)
+      const created = await collectionsAPI.createCollection(payload)
+      // Seed avec la sélection batch courante, si elle existe : « + » depuis
+      // une sélection de dialogues cochés crée la collection ET les y ajoute
+      // en un geste, plutôt que d'exiger un second passage par le menu batch.
+      const checkedIds = Array.from(batch.checkedDocumentIds)
+      if (checkedIds.length > 0) {
+        await collectionsAPI.addDialoguesToCollection(created.id, checkedIds)
+      }
       await refreshCollections()
-      toast('Collection créée', 'success')
+      toast(
+        checkedIds.length > 0
+          ? `Collection créée avec ${checkedIds.length} dialogue${checkedIds.length > 1 ? 's' : ''}`
+          : 'Collection créée',
+        'success'
+      )
     },
-    [refreshCollections, toast]
+    [batch.checkedDocumentIds, refreshCollections, toast]
   )
 
   const handleUpdateCollection = useCallback(
@@ -550,6 +565,7 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
             activeCollectionId={activeCollectionId}
             isGuest={isGuest}
             isLoading={collectionsLoading}
+            checkedCount={batch.checkedDocumentIds.size}
             onSelect={handleSelectCollection}
             onCreate={handleCreateCollection}
             onUpdate={handleUpdateCollection}
@@ -641,56 +657,89 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
             <option value="size-desc">Taille (grand)</option>
             <option value="size-asc">Taille (petit)</option>
           </StyledSelect>
-          <StyledSelect
-            data-testid="unity-dialogue-filter-period"
-            value={datePeriod}
-            onChange={(e) =>
-              setDatePeriod(e.target.value as DialogueDatePeriod)
-            }
+          <button
+            type="button"
+            data-testid="unity-dialogue-filters-toggle"
+            onClick={() => setShowFilters((v) => !v)}
+            title="Filtrer par date de création ou par auteur"
             style={{
-              padding: '0.45rem 0.5rem',
-              border: `1px solid ${theme.input.border}`,
-              borderRadius: '6px',
-              backgroundColor: theme.input.background,
-              color: theme.input.color,
-              fontSize: remSize('small'),
               flexShrink: 0,
+              border: 'none',
+              background: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              fontFamily: redesignFont.mono,
+              fontSize: '10px',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color:
+                showFilters || datePeriod !== 'all' || authorId
+                  ? redesignAccent.base
+                  : redesignText.label,
+              whiteSpace: 'nowrap',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3em',
             }}
-            wrapperStyle={{ width: 'auto', flexShrink: 0 }}
-            title="Filtrer par date de création"
           >
-            {(Object.keys(DIALOGUE_DATE_PERIOD_LABELS) as DialogueDatePeriod[]).map(
-              (key) => (
-                <option key={key} value={key}>
-                  {DIALOGUE_DATE_PERIOD_LABELS[key]}
-                </option>
-              )
-            )}
-          </StyledSelect>
-          <StyledSelect
-            data-testid="unity-dialogue-filter-author"
-            value={authorId ?? ''}
-            onChange={(e) => setAuthorId(e.target.value || null)}
-            style={{
-              padding: '0.45rem 0.5rem',
-              border: `1px solid ${theme.input.border}`,
-              borderRadius: '6px',
-              backgroundColor: theme.input.background,
-              color: theme.input.color,
-              fontSize: remSize('small'),
-              flexShrink: 0,
-            }}
-            wrapperStyle={{ width: 'auto', flexShrink: 0 }}
-            title="Filtrer par auteur"
-          >
-            <option value="">Tous les auteurs</option>
-            {availableAuthors.map((author) => (
-              <option key={author.id} value={author.id}>
-                {author.username}
-              </option>
-            ))}
-          </StyledSelect>
+            Filtres
+            <span aria-hidden="true" style={{ fontSize: SELECT_ARROW_FONT_SIZE, lineHeight: 1 }}>
+              {showFilters ? '▼' : '▶'}
+            </span>
+          </button>
         </div>
+
+        {showFilters && (
+          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+            <StyledSelect
+              data-testid="unity-dialogue-filter-period"
+              value={datePeriod}
+              onChange={(e) =>
+                setDatePeriod(e.target.value as DialogueDatePeriod)
+              }
+              style={{
+                padding: '0.4rem 0.5rem',
+                border: `1px solid ${theme.input.border}`,
+                borderRadius: '6px',
+                backgroundColor: theme.input.background,
+                color: theme.input.color,
+                fontSize: remSize('small'),
+              }}
+              wrapperStyle={{ flex: '1 1 0%', minWidth: 0 }}
+              title="Filtrer par date de création"
+            >
+              {(Object.keys(DIALOGUE_DATE_PERIOD_LABELS) as DialogueDatePeriod[]).map(
+                (key) => (
+                  <option key={key} value={key}>
+                    {DIALOGUE_DATE_PERIOD_LABELS[key]}
+                  </option>
+                )
+              )}
+            </StyledSelect>
+            <StyledSelect
+              data-testid="unity-dialogue-filter-author"
+              value={authorId ?? ''}
+              onChange={(e) => setAuthorId(e.target.value || null)}
+              style={{
+                padding: '0.4rem 0.5rem',
+                border: `1px solid ${theme.input.border}`,
+                borderRadius: '6px',
+                backgroundColor: theme.input.background,
+                color: theme.input.color,
+                fontSize: remSize('small'),
+              }}
+              wrapperStyle={{ flex: '1 1 0%', minWidth: 0 }}
+              title="Filtrer par auteur"
+            >
+              <option value="">Tous les auteurs</option>
+              {availableAuthors.map((author) => (
+                <option key={author.id} value={author.id}>
+                  {author.username}
+                </option>
+              ))}
+            </StyledSelect>
+          </div>
+        )}
 
         {(hasActiveFilters || searchQuery.trim()) && (
           <div

@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { usePresetStore } from '../../store/presetStore';
 import type { Preset, PresetConfiguration } from '../../types/preset';
 import { theme } from '../../theme';
-import { redesignControl, redesignRadius } from '../../theme/redesignTokens';
+import { redesignControl, redesignDisclosureArrow, redesignRadius } from '../../theme/redesignTokens';
 import { generationPanelChrome } from '../../theme/responsiveChrome';
 import { useToast, SaveStatusIndicator } from '../shared';
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext';
@@ -176,7 +176,12 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
             }}
           >
             <span>Charger preset</span>
-            <span>{isDropdownOpen ? '▲' : '▼'}</span>
+            <span
+              aria-hidden
+              style={{ fontSize: redesignDisclosureArrow.solid, lineHeight: 1 }}
+            >
+              {isDropdownOpen ? '▲' : '▼'}
+            </span>
           </button>
 
           {/* Dropdown menu */}

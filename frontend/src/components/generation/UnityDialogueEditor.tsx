@@ -653,7 +653,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  border: `1px solid ${theme.border.primary}`,
+                  border: `1px solid ${theme.button.default.border}`,
                   borderRadius: '6px',
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,

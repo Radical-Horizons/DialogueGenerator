@@ -1,11 +1,14 @@
 {
-  "last_started_at": "2026-08-02T17:23:06.571752+00:00",
-  "last_finished_at": "2026-08-02T17:23:09.501771+00:00",
-  "last_success": true,
-  "message": "Miroir appliqué avec reliquats : les bases sans artefact dans le staging n'ont pas été modifiées sur disque. Vérifiez les erreurs du dernier run dans le statut ou les logs.",
-  "updated_entities": 3042,
-  "partial_errors": [],
-  "last_archive_relative": ".archive/20260802T162157Z_db5be8de",
+  "last_started_at": "2026-08-13T08:32:56.725867+00:00",
+  "last_finished_at": "2026-08-13T08:53:05.587812+00:00",
+  "last_success": false,
+  "message": "Miroir non appliqué automatiquement : 2 erreur(s) partielle(s). Le disque live GDD n'a pas été modifié. Snapshot : .archive/20260813T083258Z_851bbf19. Vous pouvez appliquer le miroir malgré tout (bases absentes du staging restent inchangées), ou reprendre pour retenter Notion.",
+  "updated_entities": 3067,
+  "partial_errors": [
+    "Dialogues.json: fetch — HTTP 404 — Notion API: object_not_found — Could not find data_source with ID: 1886e4d2-1b45-815b-b768-000bd34750ab. Make sure the relevant pages and databases are shared with your integration \"Alteir\". — Client error '404 Not Found' for url 'https://api.notion.com/v1/data_sources/1886e4d2-1b45-815b-b768-000bd34750ab/query'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404",
+    "Valeurs_de_Flag.json: fetch — HTTP 404 — Notion API: object_not_found — Could not find database with ID: 09204171-5d4d-40e8-9237-d7bac6a5c1a0. Make sure the relevant pages and databases are shared with your integration \"Alteir\". — Client error '404 Not Found' for url 'https://api.notion.com/v1/databases/09204171-5d4d-40e8-9237-d7bac6a5c1a0/query'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+  ],
+  "last_archive_relative": ".archive/20260813T083258Z_851bbf19",
   "last_mirror_rebuild_used": true,
-  "mirror_promotion_pending": false
+  "mirror_promotion_pending": true
 }

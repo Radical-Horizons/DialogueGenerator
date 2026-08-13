@@ -14,6 +14,8 @@ export interface CollectionManagerProps {
   activeCollectionId: string | null
   isGuest?: boolean
   isLoading?: boolean
+  /** Dialogues cochés dans la liste (sélection batch) : seedent la collection à sa création. */
+  checkedCount?: number
   onSelect: (collection: DialogueCollection | null) => void
   onCreate: (payload: {
     name: string
@@ -43,16 +45,32 @@ const EMPTY_FORM: CollectionFormState = {
   icon: '📁',
 }
 
+/**
+ * Hauteur explicite partagée par le `<select>` de filtre collection et le
+ * bouton « + » voisin. Un `<select>` et un `<button>` ne convergent jamais
+ * pile au pixel près en ne s'accordant que sur padding/bordure/line-height —
+ * vécu : plusieurs tentatives ont laissé un écart ~7.5px résiduel malgré des
+ * valeurs identiques sur les deux. Fixer la même hauteur explicite aux deux
+ * évite de dépendre de ce mystère de rendu, quel que soit l'écran/la largeur.
+ */
+const SELECT_ROW_HEIGHT = '2.02rem'
+
 const iconButtonStyle: CSSProperties = {
+  appearance: 'none',
+  WebkitAppearance: 'none',
   border: `1px solid ${theme.border.primary}`,
   borderRadius: '6px',
   backgroundColor: theme.button.default.background,
   color: theme.text.secondary,
   cursor: 'pointer',
-  padding: '0.35rem 0.5rem',
+  padding: '0 0.5rem',
   fontSize: remSize('small'),
+  height: SELECT_ROW_HEIGHT,
+  boxSizing: 'border-box',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   flexShrink: 0,
-  minHeight: 36,
 }
 
 /**
@@ -63,6 +81,7 @@ export function CollectionManager({
   activeCollectionId,
   isGuest = false,
   isLoading = false,
+  checkedCount = 0,
   onSelect,
   onCreate,
   onUpdate,
@@ -164,7 +183,14 @@ export function CollectionManager({
       style={{
         display: 'flex',
         flexWrap: 'wrap',
-        alignItems: 'center',
+        // `flex-start`, pas `center` : le select et le bouton ont maintenant
+        // la même hauteur explicite (SELECT_ROW_HEIGHT), mais `center` les
+        // centrait quand même différemment l'un de l'autre (constaté : 3.75px
+        // d'écart vertical malgré des hauteurs identiques — un <label> et un
+        // <button> flex ne partagent pas le même calcul de hauteur
+        // hypothétique pré-alignement). Aligner les deux au même bord haut
+        // élimine le problème sans dépendre de ce calcul.
+        alignItems: 'flex-start',
         gap: '0.35rem',
         width: '100%',
         minWidth: 0,
@@ -198,17 +224,23 @@ export function CollectionManager({
           }}
           style={{
             width: '100%',
-            padding: '0.4rem 0.5rem',
+            padding: '0 0.5rem',
             border: `1px solid ${theme.input.border}`,
             borderRadius: '6px',
             backgroundColor: theme.input.background,
             color: theme.input.color,
             fontSize: remSize('small'),
+            // Hauteur explicite partagée avec le bouton « + » (SELECT_ROW_HEIGHT) :
+            // ne pas laisser chacun dériver sa propre hauteur de son propre
+            // padding/line-height, qui ne convergent jamais pile au pixel près
+            // entre un <select> et un <button> (voir le commentaire de la constante).
+            height: SELECT_ROW_HEIGHT,
+            boxSizing: 'border-box',
           }}
           wrapperStyle={{ flex: 1, minWidth: 0 }}
         >
           <option data-testid="collection-filter-all" value="">
-            Tous les dialogues
+            Tous
           </option>
           {collections.map((collection) => (
             <option
@@ -223,23 +255,31 @@ export function CollectionManager({
         </StyledSelect>
       </label>
 
-      {!isGuest && (
-        <button
-          type="button"
-          data-testid="collection-create-button"
-          onClick={openCreate}
-          title="Nouvelle collection"
-          aria-label="Nouvelle collection"
-          style={{
-            ...iconButtonStyle,
-            borderColor: theme.button.primary.background,
-            backgroundColor: theme.button.primary.background,
-            color: theme.button.primary.color,
-          }}
-        >
-          +
-        </button>
-      )}
+      <button
+        type="button"
+        data-testid="collection-create-button"
+        onClick={openCreate}
+        disabled={isGuest}
+        title={
+          isGuest
+            ? 'Connectez-vous pour créer une collection'
+            : checkedCount > 0
+              ? `Créer une collection avec ${checkedCount} dialogue${checkedCount > 1 ? 's' : ''} sélectionné${checkedCount > 1 ? 's' : ''}`
+              : 'Nouvelle collection'
+        }
+        aria-label="Nouvelle collection"
+        style={{
+          // Action secondaire (créer une collection) : jamais le bleu plein
+          // réservé à l'action primaire de l'écran — juste l'état
+          // désactivé/actif du style par défaut, comme les autres boutons
+          // de la toolbar (Métadonnées, Annuler…).
+          ...iconButtonStyle,
+          cursor: isGuest ? 'not-allowed' : 'pointer',
+          opacity: isGuest ? 0.5 : 1,
+        }}
+      >
+        +
+      </button>
 
       {!isGuest && activeCollection && (
         <>
