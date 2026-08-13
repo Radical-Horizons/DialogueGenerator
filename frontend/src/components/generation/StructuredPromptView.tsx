@@ -6,7 +6,12 @@ import { parsePromptSections, parsePromptFromJson, type PromptSection } from '..
 import { renderMarkdown } from '../../utils/markdownRenderer'
 import { prettifyJsonInText } from '../../utils/jsonPrettifier'
 import { theme } from '../../theme'
-import { redesignFont, redesignHairline, redesignText } from '../../theme/redesignTokens'
+import {
+  redesignDisclosureArrow,
+  redesignFont,
+  redesignHairline,
+  redesignText,
+} from '../../theme/redesignTokens'
 import type { PromptStructure } from '../../types/prompt'
 
 /**
@@ -161,7 +166,8 @@ function AccordionSection({
         <span
           aria-hidden
           style={{
-            fontSize: '9px',
+            fontSize: redesignDisclosureArrow.small,
+            lineHeight: 1,
             color: redesignText.label,
             flexShrink: 0,
             display: 'inline-block',

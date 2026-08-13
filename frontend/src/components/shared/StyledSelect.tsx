@@ -1,5 +1,6 @@
 import React from 'react'
 import { theme } from '../../theme'
+import { redesignDisclosureArrow } from '../../theme/redesignTokens'
 
 /**
  * Remplace le `<select>` natif du navigateur par un select stylisé :
@@ -7,15 +8,19 @@ import { theme } from '../../theme'
  * - Indicateur de liste remplacé par un ▼ triangle plein, visuellement distinct
  *   des chevrons ‹ › utilisés dans les rails latéraux du Dashboard.
  */
-/** Gouttière réservée au ▼ : `right: 0.45rem` + la glyphe + une respiration. */
-const ARROW_GUTTER = '1rem'
+/**
+ * Gouttière réservée au ▼ : `right: 0.45rem` + la glyphe + une respiration.
+ * Se dimensionne sur `redesignDisclosureArrow.solid` — un ▼ de 16 px pose ~14 px
+ * d'encre, qui déborderaient sur le texte de l'option avec l'ancien `1rem`.
+ */
+const ARROW_GUTTER = '1.85rem'
 
 /**
  * Taille de la flèche ▼, exportée pour que les triggers non-`<select>`
  * (ex. le disclosure « Filtres ▾ » de la liste de dialogues) affichent une
  * flèche de la même taille plutôt que d'improviser leur propre valeur.
  */
-export const SELECT_ARROW_FONT_SIZE = '0.54rem'
+export const SELECT_ARROW_FONT_SIZE = redesignDisclosureArrow.solid
 
 export function StyledSelect({
   style,

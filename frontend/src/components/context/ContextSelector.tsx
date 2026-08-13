@@ -58,6 +58,7 @@ import { contextGddTabChrome, type ContextGddTabDensity } from '../../theme/resp
 import {
   redesignAccent,
   redesignFont,
+  redesignDisclosureArrow,
   redesignHairline,
   redesignRadius,
   redesignSpacing,
@@ -999,9 +1000,18 @@ export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }
           textTransform: 'uppercase',
           color: redesignText.label,
           borderTop: `1px solid ${redesignHairline.standard}`,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5em',
         }}
       >
-        {showContextTools ? '▾ Outils du contexte' : '▸ Outils du contexte'}
+        <span
+          aria-hidden
+          style={{ fontSize: redesignDisclosureArrow.small, lineHeight: 1, flexShrink: 0 }}
+        >
+          {showContextTools ? '▾' : '▸'}
+        </span>
+        Outils du contexte
       </button>
 
       <div style={{ display: showContextTools ? 'block' : 'none' }}>

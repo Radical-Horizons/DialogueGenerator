@@ -4,6 +4,7 @@
 import { useState, useMemo, useRef, useEffect, useLayoutEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { theme } from '../../theme'
+import { redesignDisclosureArrow } from '../../theme/redesignTokens'
 
 export interface ComboboxOption {
   value: string
@@ -297,7 +298,8 @@ export function Combobox({
           )}
           <span
             style={{
-              fontSize: '0.75rem',
+              fontSize: redesignDisclosureArrow.solid,
+              lineHeight: 1,
               color: theme.text.secondary,
               transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
               transition: 'transform 0.2s',

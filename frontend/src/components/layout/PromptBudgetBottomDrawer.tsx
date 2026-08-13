@@ -7,7 +7,13 @@
  * détail se déplie — plafonné à 60 % de la hauteur pour ne jamais manger l'écran.
  */
 import { useState, type ReactNode } from 'react'
-import { redesignFont, redesignHairline, redesignSurface, redesignText } from '../../theme/redesignTokens'
+import {
+  redesignDisclosureArrow,
+  redesignFont,
+  redesignHairline,
+  redesignSurface,
+  redesignText,
+} from '../../theme/redesignTokens'
 
 /** Le détail ne dépasse jamais cette part de la hauteur visible (annotation 2d). */
 export const PROMPT_DRAWER_MAX_HEIGHT = '60vh'
@@ -57,7 +63,14 @@ export function PromptBudgetBottomDrawer({
         }}
       >
         <span style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
-          <span aria-hidden style={{ fontSize: 11, color: redesignText.label }}>
+          <span
+            aria-hidden
+            style={{
+              fontSize: redesignDisclosureArrow.small,
+              lineHeight: 1,
+              color: redesignText.label,
+            }}
+          >
             {open ? '▾' : '▴'}
           </span>
           <span style={{ fontSize: '12.5px', color: redesignText.body, whiteSpace: 'nowrap' }}>

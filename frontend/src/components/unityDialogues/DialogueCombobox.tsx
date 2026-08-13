@@ -23,6 +23,7 @@ import {
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
+import { redesignDisclosureArrow } from '../../theme/redesignTokens'
 import type { UnityDialogueMetadata } from '../../types/api'
 import { useDialogueListData } from '../../hooks/useDialogueListData'
 import { StyledSelect } from '../shared/StyledSelect'
@@ -305,7 +306,14 @@ export const DialogueCombobox = forwardRef<DialogueComboboxRef, DialogueCombobox
           >
             {triggerLabel}
           </span>
-          <span aria-hidden="true" style={{ fontSize: '0.65rem', opacity: 0.8 }}>
+          <span
+            aria-hidden="true"
+            style={{
+              fontSize: redesignDisclosureArrow.solid,
+              lineHeight: 1,
+              opacity: 0.8,
+            }}
+          >
             ▼
           </span>
         </button>

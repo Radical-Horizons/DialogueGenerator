@@ -49,7 +49,7 @@ import { GenerationPanelModals } from './GenerationPanelModals'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { PANEL_COMFORT_MIN_WIDTH_PX, generationPanelChrome } from '../../theme/responsiveChrome'
 import { GenerationPanelNarrowProvider } from './GenerationPanelNarrowContext'
-import { redesignAccent, redesignFont, redesignHairline, redesignReadingColumn, redesignText } from '../../theme/redesignTokens'
+import { redesignAccent, redesignDisclosureArrow, redesignFont, redesignHairline, redesignReadingColumn, redesignText } from '../../theme/redesignTokens'
 import { remSize } from '../../theme/uiTypography'
 import type { ReasoningEffort } from '../../types/api'
 
@@ -784,7 +784,15 @@ export function GenerationPanel() {
         >
           <span style={{ color: theme.text.tertiary }}>Réglages du modèle</span>
           <span style={{ color: theme.text.primary }}>{modelSettingsSummary}</span>
-          <span aria-hidden style={{ marginLeft: 'auto', color: theme.text.tertiary }}>
+          <span
+            aria-hidden
+            style={{
+              marginLeft: 'auto',
+              color: theme.text.tertiary,
+              fontSize: redesignDisclosureArrow.small,
+              lineHeight: 1,
+            }}
+          >
             {showModelSettings ? '▴' : '▾'}
           </span>
         </button>
