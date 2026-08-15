@@ -38,7 +38,7 @@ project: DialogueGenerator
 project_key: dialogue-generator
 tracking_system: file-system
 story_location: '{project-root}/_bmad-output/implementation-artifacts'
-last_updated: '2026-08-04'
+last_updated: '2026-08-16'
 development_status:
   # Flat list (not nested YAML): each epic block = epic → stories → retrospective, then the NEXT epic starts.
   # Order = delivery sequence (see epic-list.md): 0 → 16 → 1–3 → 17 → 4–15 — not strict epic ID sort.
@@ -147,8 +147,10 @@ development_status:
   5-5-prévisualiser-export-avant-téléchargement-structure-json-taille-fr53: done
   5-6-générer-logs-export-avec-métadonnées-date-génération-coût-statut-validation-fr54: done
   epic-5-retrospective: done
-  epic-6: backlog
+  epic-6: in-progress
   6-1-créer-templates-custom-dinstructions-pour-génération-dialogue-fr55: backlog
+  6-1-1-creer-templates-custom-generation-dialogue-fr55: review
+  6-1-2-filtrer-templates-nom-categorie-contexte-fr55: backlog
   6-2-sauvegarder-éditer-et-supprimer-templates-fr56: backlog
   6-3-appliquer-templates-à-génération-dialogue-fr57: backlog
   6-4-fournir-templates-pré-built-salutations-confrontation-révélation-fr58: backlog

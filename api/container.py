@@ -22,6 +22,7 @@ from services.prompt_builder import PromptBuilder
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
+from services.template_service import TemplateService
 from services.dialogue_generation_service import DialogueGenerationService
 from services.llm_usage_service import LLMUsageService
 from services.export_log_service import ExportLogService
@@ -88,6 +89,7 @@ class ServiceContainer:
         self._skill_catalog_service: Optional[SkillCatalogService] = None
         self._trait_catalog_service: Optional[TraitCatalogService] = None
         self._preset_service: Optional[PresetService] = None
+        self._template_service: Optional[TemplateService] = None
         self._dialogue_generation_service: Optional[DialogueGenerationService] = None
         self._llm_usage_service: Optional[LLMUsageService] = None
         self._export_log_service: Optional[ExportLogService] = None
@@ -500,6 +502,19 @@ class ServiceContainer:
             )
             logger.info("PresetService initialisé dans le container.")
         return self._preset_service
+
+    def get_template_service(self) -> TemplateService:
+        """Retourne le service de gestion des templates custom.
+
+        Returns:
+            Instance de TemplateService.
+        """
+        if self._template_service is None:
+            self._template_service = TemplateService(
+                preset_service=self.get_preset_service(),
+            )
+            logger.info("TemplateService initialisé dans le container.")
+        return self._template_service
     
     def get_dialogue_generation_service(self) -> DialogueGenerationService:
         """Retourne le service de génération de dialogues.
@@ -756,6 +771,7 @@ class ServiceContainer:
         self._skill_catalog_service = None
         self._trait_catalog_service = None
         self._preset_service = None
+        self._template_service = None
         self._dialogue_generation_service = None
         self._llm_usage_service = None
         self._dialogue_metadata_service = None

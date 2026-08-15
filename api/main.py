@@ -708,6 +708,7 @@ from api.routers import (
     mechanics_flags,
     mechanics_systems,
     presets,
+    templates,
     streaming,
     unity_dialogues,
     user_settings,
@@ -790,6 +791,9 @@ app.include_router(
 
 # Router pour les presets de génération
 app.include_router(presets.router, prefix="/api/v1/presets", tags=["Presets"])
+
+# Router pour les templates custom de génération (Story 6.1.1)
+app.include_router(templates.router, prefix="/api/v1/templates", tags=["Templates"])
 
 from api.routers import gdd_notion_sync
 

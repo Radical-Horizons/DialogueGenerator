@@ -8,12 +8,17 @@
  */
 import React, { useEffect, useState } from 'react';
 import { usePresetStore } from '../../store/presetStore';
+import { useTemplateStore } from '../../store/templateStore';
+import { useLLMStore } from '../../store/llmStore';
 import type { Preset, PresetConfiguration } from '../../types/preset';
+import type { Template, TemplateConfiguration } from '../../types/template';
 import { theme } from '../../theme';
 import { redesignControl, redesignDisclosureArrow, redesignRadius } from '../../theme/redesignTokens';
 import { generationPanelChrome } from '../../theme/responsiveChrome';
 import { useToast, SaveStatusIndicator } from '../shared';
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext';
+import { TemplateCreatorModal } from './TemplateCreatorModal';
+import { groupTemplatesByCategory } from '../../utils/templateGroups';
 import type { SaveStatus } from '../shared/SaveStatusIndicator';
 
 export interface PresetSelectorProps {
@@ -41,28 +46,24 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     isLoading,
     error,
     loadPresets,
-    createPreset,
     updatePreset,
     deletePreset,
     setSelectedPreset,
   } = usePresetStore();
+  const { templates, loadTemplates, error: templateError } = useTemplateStore();
   const toast = useToast();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [presetToDelete, setPresetToDelete] = useState<Preset | null>(null);
-  const [newPresetName, setNewPresetName] = useState('');
-  const [newPresetIcon, setNewPresetIcon] = useState('📋');
-  const [snapshotConfiguration, setSnapshotConfiguration] = useState<PresetConfiguration | null>(null);
-  /** Soumission création preset — ne pas réutiliser ``isLoading`` du store (chargement liste) pour le bouton Créer. */
-  const [isCreatingPreset, setIsCreatingPreset] = useState(false);
+  const [snapshotConfiguration, setSnapshotConfiguration] = useState<TemplateConfiguration | null>(null);
   const [isUpdatingPreset, setIsUpdatingPreset] = useState(false);
 
-  // Charger presets au montage
   useEffect(() => {
     loadPresets();
-  }, [loadPresets]);
+    void loadTemplates();
+  }, [loadPresets, loadTemplates]);
 
   const handlePresetSelect = (preset: Preset) => {
     setSelectedPreset(preset);
@@ -70,33 +71,18 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     setIsDropdownOpen(false);
   };
 
-  const handleCreatePreset = async () => {
-    const configToSave = snapshotConfiguration || currentConfiguration || getCurrentConfiguration?.() || null;
-    if (!newPresetName.trim() || !configToSave) return;
-
-    setIsCreatingPreset(true);
-    try {
-      const { cleanupMessage } = await createPreset({
-        name: newPresetName.trim(),
-        icon: newPresetIcon,
-        configuration: configToSave,
-      });
-
-      if (cleanupMessage) {
-        toast(cleanupMessage, 'warning');
-      } else {
-        toast('Preset créé avec succès', 'success');
-      }
-
-      setIsCreateModalOpen(false);
-      setNewPresetName('');
-      setNewPresetIcon('📋');
-      setSnapshotConfiguration(null);
-    } catch (error) {
-      // Error already handled by store
-    } finally {
-      setIsCreatingPreset(false);
+  const captureTemplateSnapshot = (): TemplateConfiguration | null => {
+    const cfg = currentConfiguration || getCurrentConfiguration?.() || null;
+    if (!cfg) {
+      return null;
     }
+    const llmState = useLLMStore.getState();
+    const snapshot: TemplateConfiguration = {
+      ...cfg,
+      llmProvider: llmState.provider,
+    };
+    delete snapshot.temperature;
+    return snapshot;
   };
 
   const handleUpdatePreset = async () => {
@@ -136,6 +122,14 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
       {error && (
         <div style={{ color: theme.state.error.color, marginBottom: '0.5rem', fontSize: '0.875rem' }}>
           {error}
+        </div>
+      )}
+      {templateError && (
+        <div
+          data-testid="mes-templates-error"
+          style={{ color: theme.state.error.color, marginBottom: '0.5rem', fontSize: '0.875rem' }}
+        >
+          {templateError}
         </div>
       )}
 
@@ -294,15 +288,12 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           {isUpdatingPreset ? 'Enregistrement…' : 'Enregistrer'}
         </button>
 
-        {/* Bouton "Enregistrer sous" */}
+        {/* Bouton « Sauvegarder comme template » */}
         <button
           type="button"
-          data-testid="preset-save-as-btn"
+          data-testid="template-save-as-btn"
           onClick={() => {
-            const cfg = currentConfiguration || getCurrentConfiguration?.() || null;
-            setSnapshotConfiguration(cfg);
-            setNewPresetName(selectedPreset ? `${selectedPreset.name} copie` : '');
-            setNewPresetIcon(selectedPreset?.icon || '📋');
+            setSnapshotConfiguration(captureTemplateSnapshot());
             setIsCreateModalOpen(true);
           }}
           disabled={!currentConfiguration && !getCurrentConfiguration}
@@ -310,7 +301,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
             padding: chrome.buttonPadding,
             backgroundColor: theme.button.default.background,
             border: `1px solid ${theme.border.secondary}`,
-            borderRadius: '6px',
+            borderRadius: `${redesignRadius.control}px`,
             color: theme.button.default.color,
             fontWeight: 600,
             cursor: currentConfiguration || getCurrentConfiguration ? 'pointer' : 'not-allowed',
@@ -320,7 +311,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
             flex: isNarrow ? '1 1 auto' : undefined,
           }}
         >
-          Enregistrer sous
+          Sauvegarder comme template
         </button>
 
         {/* Indicateur de statut de sauvegarde */}
@@ -331,159 +322,110 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         )}
       </div>
 
-      {/* Modal création preset */}
-      {isCreateModalOpen && (
-        <div
+      <TemplateCreatorModal
+        isOpen={isCreateModalOpen}
+        snapshot={snapshotConfiguration}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          setSnapshotConfiguration(null);
+        }}
+      />
+
+      <section
+        data-testid="mes-templates-list"
+        style={{
+          marginTop: `${chrome.controlGapRem}rem`,
+        }}
+      >
+        <h3
           style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 2000,
+            margin: `0 0 ${chrome.controlGapRem}rem`,
+            color: theme.text.primary,
+            fontSize: `${chrome.sectionTitleFontRem}rem`,
+            fontWeight: 600,
           }}
-          onClick={() => setIsCreateModalOpen(false)}
         >
+          Mes templates
+        </h3>
+        {templateError && templates.length === 0 ? null : templates.length === 0 ? (
           <div
-            onClick={(e) => e.stopPropagation()}
+            data-testid="mes-templates-empty"
             style={{
-              backgroundColor: theme.background.panel,
-              padding: '2rem',
-              borderRadius: '8px',
-              minWidth: '400px',
-              maxWidth: '500px',
-              border: `1px solid ${theme.border.primary}`,
+              fontSize: `${chrome.labelFontRem}rem`,
+              color: theme.text.secondary,
             }}
           >
-            <h3 style={{ marginTop: 0, color: theme.text.primary }}>Enregistrer sous</h3>
-
-            <div style={{ marginBottom: '1rem' }}>
-              <label
-                htmlFor="preset-name"
-                style={{ display: 'block', marginBottom: '0.5rem', color: theme.text.secondary }}
-              >
-                Nom
-              </label>
-              <input
-                id="preset-name"
-                type="text"
-                value={newPresetName}
-                onChange={(e) => setNewPresetName(e.target.value)}
-                placeholder="Ex: Confrontation Akthar-Neth"
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  backgroundColor: theme.background.secondary,
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
-                  color: theme.text.primary,
-                }}
-              />
-            </div>
-
-            <div style={{ marginBottom: '1rem' }}>
-              <label
-                htmlFor="preset-icon"
-                style={{ display: 'block', marginBottom: '0.5rem', color: theme.text.secondary }}
-              >
-                Icône (emoji)
-              </label>
-              <input
-                id="preset-icon"
-                type="text"
-                value={newPresetIcon}
-                onChange={(e) => setNewPresetIcon(e.target.value)}
-                maxLength={2}
-                style={{
-                  width: '60px',
-                  padding: '0.5rem',
-                  backgroundColor: theme.background.secondary,
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
-                  color: theme.text.primary,
-                  textAlign: 'center',
-                  fontSize: '1.5rem',
-                }}
-              />
-            </div>
-
-            {/* Aperçu configuration */}
-            {snapshotConfiguration && (
+            Aucun template sauvegardé
+          </div>
+        ) : (
+          groupTemplatesByCategory(templates).map(([category, items]) => (
+            <div
+              key={category}
+              data-testid="template-category-group"
+              data-category={category}
+              style={{ marginBottom: `${chrome.controlGapRem}rem` }}
+            >
               <div
                 style={{
-                  padding: '1rem',
-                  backgroundColor: theme.background.secondary,
-                  borderRadius: '4px',
-                  marginBottom: '1rem',
+                  fontSize: `${chrome.labelFontRem}rem`,
+                  color: theme.text.secondary,
+                  marginBottom: '0.35rem',
+                  fontWeight: 600,
                 }}
               >
-                <div style={{ fontSize: '0.875rem', color: theme.text.secondary, marginBottom: '0.5rem' }}>
-                  Aperçu configuration :
-                </div>
-                <div style={{ fontSize: '0.875rem', color: theme.text.primary }}>
-                  <div>Personnages : {snapshotConfiguration.characters.length}</div>
-                  <div>Lieux : {snapshotConfiguration.locations.length}</div>
-                  <div>Région : {snapshotConfiguration.region}</div>
-                  {snapshotConfiguration.subLocation && <div>Sous-lieu : {snapshotConfiguration.subLocation}</div>}
-                  <div>Scène : {snapshotConfiguration.sceneType}</div>
-                  {snapshotConfiguration.contextSelections && (
-                    <>
-                      <div>
-                        Objets : {new Set([...(snapshotConfiguration.contextSelections.items_full || []), ...(snapshotConfiguration.contextSelections.items_excerpt || [])]).size}
-                      </div>
-                      <div>
-                        Espèces : {new Set([...(snapshotConfiguration.contextSelections.species_full || []), ...(snapshotConfiguration.contextSelections.species_excerpt || [])]).size}
-                      </div>
-                      <div>
-                        Communautés : {new Set([...(snapshotConfiguration.contextSelections.communities_full || []), ...(snapshotConfiguration.contextSelections.communities_excerpt || [])]).size}
-                      </div>
-                    </>
-                  )}
-                </div>
+                {category}
               </div>
-            )}
-
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                disabled={isCreatingPreset}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: theme.background.secondary,
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
-                  color: theme.text.primary,
-                  cursor: isCreatingPreset ? 'not-allowed' : 'pointer',
-                  opacity: isCreatingPreset ? 0.6 : 1,
-                }}
-              >
-                Annuler
-              </button>
-              <button
-                type="button"
-                data-testid="preset-modal-create-btn"
-                onClick={handleCreatePreset}
-                disabled={!newPresetName.trim() || isCreatingPreset}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: theme.button.primary.background,
-                  border: 'none',
-                  borderRadius: '4px',
-                  color: 'white',
-                  cursor: !newPresetName.trim() || isCreatingPreset ? 'not-allowed' : 'pointer',
-                  opacity: !newPresetName.trim() || isCreatingPreset ? 0.6 : 1,
-                }}
-              >
-                {isCreatingPreset ? 'Sauvegarde…' : 'Créer'}
-              </button>
+              {items.map((template: Template) => (
+                <div
+                  key={template.id}
+                  data-testid="template-item"
+                  data-template-name={template.name}
+                  data-template-category={template.category}
+                  style={{
+                    padding: chrome.dropdownOptionPadding,
+                    border: `1px solid ${theme.border.secondary}`,
+                    borderRadius: `${redesignRadius.control}px`,
+                    marginBottom: '0.35rem',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '0.5rem',
+                  }}
+                >
+                  <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>{template.icon}</span>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontWeight: 600, color: theme.text.primary }}>
+                      {template.name}
+                    </div>
+                    {template.description && (
+                      <div
+                        style={{
+                          fontSize: `${chrome.labelFontRem}rem`,
+                          color: theme.text.secondary,
+                        }}
+                      >
+                        {template.description}
+                      </div>
+                    )}
+                    <div
+                      style={{
+                        fontSize: `${chrome.labelFontRem}rem`,
+                        color: theme.text.secondary,
+                      }}
+                    >
+                      {template.configuration.characters.length > 0
+                        ? `Contexte : ${template.configuration.characters.join(', ')}`
+                        : 'Contexte : —'}
+                      {template.configuration.locations.length > 0
+                        ? ` · ${template.configuration.locations.join(', ')}`
+                        : ''}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-        </div>
-      )}
+          ))
+        )}
+      </section>
 
       {/* Modal confirmation suppression */}
       {isDeleteConfirmOpen && presetToDelete && (

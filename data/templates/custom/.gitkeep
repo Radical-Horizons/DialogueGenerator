@@ -1,0 +1,5 @@
+# Templates custom de génération (Story 6.1.1)
+
+Ce dossier stocke les templates utilisateur en fichiers JSON UUID
+(ex. `a1b2c3d4-....json`). Les JSON sont locaux (comme `data/presets/`)
+et ignorés par git ; ce fichier garde le dossier versionné.

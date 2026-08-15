@@ -69,6 +69,18 @@ class PresetService:
                 remapped.append(canonical)
         return remapped
 
+    def apply_resolved_refs_to_preset(self, preset: Preset, resolved_refs: Dict[str, str]) -> Preset:
+        """Applique les noms canoniques GDD sur un preset (API publique).
+
+        Args:
+            preset: Preset dont les refs doivent être remappées.
+            resolved_refs: Ancien libellé → nom canonique.
+
+        Returns:
+            Preset avec les refs remappées (inchangé si ``resolved_refs`` est vide).
+        """
+        return self._apply_resolved_refs_to_preset(preset, resolved_refs)
+
     def _apply_resolved_refs_to_preset(self, preset: Preset, resolved_refs: Dict[str, str]) -> Preset:
         """Applique les noms canoniques sur la configuration d'un preset."""
         if not resolved_refs:

@@ -85,6 +85,10 @@ e2e/.auth/
 data/logs/
 *.log
 
+# Templates custom (JSON UUID locaux, comme data/presets/). Le dossier reste versionné via .gitkeep.
+data/templates/custom/*.json
+!data/templates/custom/.gitkeep
+
 # Data directories (generated/cache files)
 data/cost_budgets.json
 data/app.db

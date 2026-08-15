@@ -235,3 +235,36 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-audit-rendu-ui.md`
   summary: Le test de régression d'ancrage de la barre d'action lit `parent.style.overflow` — le style **inline**. Il deviendrait muet si le défilement passait un jour en classe CSS.
   evidence: Relevé en revue (angle verification-gap). Acceptable aujourd'hui car `GenerationPanel` style tout en inline, mais la garantie est liée à ce choix d'implémentation plutôt qu'au comportement. `getComputedStyle` serait plus robuste ; il retourne des valeurs peu fiables en jsdom, d'où le compromis actuel. À revoir si le panneau migre vers des classes.
+
+- source_spec: none
+  summary: Story 6.2 — Sauvegarder, éditer et supprimer les templates (FR56).
+  evidence: Split de l'épic 6 au kickoff quick-dev — 6.1 pose la création ; l'édition et la suppression sont un livrable CRUD distinct.
+- source_spec: none
+  summary: Story 6.3 — Appliquer un template à la génération (FR57).
+  evidence: Split de l'épic 6 — chargement snapshot + hydratation des champs de génération, indépendant de la création.
+- source_spec: none
+  summary: Story 6.4 — Fournir les templates pré-built Alteir (FR58).
+  evidence: Split de l'épic 6 — catalogue lecture seule, dépend du modèle et de l'application (6.1/6.3).
+- source_spec: none
+  summary: Story 6.5 — Configurer l'anti-context-dropping (explicite vs subtil) (FR59).
+  evidence: Split de l'épic 6 — règles de validation à la génération, distinctes de la sauvegarde d'un template custom.
+- source_spec: none
+  summary: Story 6.6 — Parcourir le marketplace de templates (V1.5+, FR60).
+  evidence: Split de l'épic 6 — phase V1.5+, hors noyau V1.
+- source_spec: none
+  summary: Story 6.7 — A/B tester les templates et scorer la qualité (V2.5+, FR61).
+  evidence: Split de l'épic 6 — phase V2.5+, hors noyau V1.
+- source_spec: none
+  summary: Story 6.8 — Partager les templates avec les membres de l'équipe (FR62).
+  evidence: Split de l'épic 6 — s'appuie sur les identités Epic 7 ; hors scope de la création locale.
+- source_spec: none
+  summary: Story 6.9 — Suggérer des templates selon le scénario (FR63).
+  evidence: Split de l'épic 6 — ranking contextuel, dépend de la liste et de l'application (6.1/6.3).
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-1-1-creer-templates-custom-generation-dialogue-fr55.md`
+  summary: Story 6.1.2 — Filtrer les templates custom par nom, catégorie ou contexte GDD (FR55).
+  evidence: Split token de 6.1 — la création + liste groupée est 6.1.1 ; le filtre est un livrable UI distinct (spec `spec-6-1-2-filtrer-templates-nom-categorie-contexte-fr55.md`).
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-1-1-creer-templates-custom-generation-dialogue-fr55.md`
+  summary: Le nettoyage lazy des refs GDD obsolètes ne filtre que `characters` et `locations`, pas `region` / `subLocation` / `contextSelections` (même limite que les presets).
+  evidence: Revue 6.1.1 (edge-case-hunter) — `template_service.py` copie le strip de `PresetService.create_preset` ; un ID obsolète hors ces deux listes reste dans le snapshot malgré les warnings. À traiter avec le même correctif presets, pas seulement templates.

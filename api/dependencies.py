@@ -44,6 +44,7 @@ from api.services.batch_node_generation_job_manager import BatchNodeGenerationJo
 from services.batch_node_generation_service import BatchNodeGenerationService
 from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
+from services.template_service import TemplateService
 from services.repositories.sqlite import (
     AppSettingsRepository,
     DatabaseConnection,
@@ -623,6 +624,24 @@ def get_preset_service(request: Request) -> PresetService:
     """
     container = get_service_container(request)
     return container.get_preset_service()
+
+
+def get_template_service(request: Request) -> TemplateService:
+    """Retourne le service de gestion des templates custom.
+
+    Utilise le ServiceContainer depuis app.state (système unifié).
+
+    Args:
+        request: La requête HTTP (injecté automatiquement par FastAPI).
+
+    Returns:
+        Instance de TemplateService.
+
+    Raises:
+        RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
+    """
+    container = get_service_container(request)
+    return container.get_template_service()
 
 
 def get_gdd_notion_sync_service(request: Request):
