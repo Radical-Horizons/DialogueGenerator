@@ -4,6 +4,7 @@
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { PresetSelector } from '../components/generation/PresetSelector';
+import { GenerationPanelNarrowProvider } from '../components/generation/GenerationPanelNarrowContext';
 import { usePresetStore } from '../store/presetStore';
 import { useTemplateStore } from '../store/templateStore';
 import type { Preset } from '../types/preset';
@@ -28,6 +29,7 @@ vi.mock('../theme', () => ({
       primary: '#000',
       secondary: '#111',
       panel: '#222',
+      panelHeader: '#1a1a1a',
     },
     text: {
       primary: '#fff',
@@ -248,6 +250,89 @@ describe('PresetSelector', () => {
 
       expect(mockOnPresetLoaded).not.toHaveBeenCalled();
       expect(mockSetSelectedPreset).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Template filters', () => {
+    it('filtre par nom (saisie partielle)', () => {
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+
+      fireEvent.change(screen.getByTestId('template-filter-name'), { target: { value: 'salut' } });
+
+      expect(screen.getByText('Salut A')).toBeInTheDocument();
+      expect(screen.getByText('Salut C')).toBeInTheDocument();
+      expect(screen.queryByText('Combat B')).not.toBeInTheDocument();
+      expect(screen.getAllByTestId('template-category-group')).toHaveLength(1);
+    });
+
+    it('filtre par catégorie → une section', () => {
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+
+      fireEvent.change(screen.getByTestId('template-filter-category'), {
+        target: { value: 'Confrontation' },
+      });
+
+      expect(screen.getByText('Combat B')).toBeInTheDocument();
+      expect(screen.queryByText('Salut A')).not.toBeInTheDocument();
+      const groups = screen.getAllByTestId('template-category-group');
+      expect(groups).toHaveLength(1);
+      expect(groups[0]).toHaveAttribute('data-category', 'Confrontation');
+    });
+
+    it('filtre par contexte GDD (ID personnage)', () => {
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+
+      fireEvent.change(screen.getByTestId('template-filter-context'), {
+        target: { value: 'char-alpha' },
+      });
+
+      expect(screen.getByText('Salut A')).toBeInTheDocument();
+      expect(screen.queryByText('Combat B')).not.toBeInTheDocument();
+      expect(screen.queryByText('Salut C')).not.toBeInTheDocument();
+    });
+
+    it('filtre par nom et contexte en ET', () => {
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+
+      fireEvent.change(screen.getByTestId('template-filter-name'), { target: { value: 'salut' } });
+      fireEvent.change(screen.getByTestId('template-filter-context'), {
+        target: { value: 'loc-beta' },
+      });
+
+      expect(screen.getByText('Salut C')).toBeInTheDocument();
+      expect(screen.queryByText('Salut A')).not.toBeInTheDocument();
+      expect(screen.queryByText('Combat B')).not.toBeInTheDocument();
+    });
+
+    it('aucun match → liste vide dédiée, pas « Aucun template sauvegardé »', () => {
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+
+      fireEvent.change(screen.getByTestId('template-filter-name'), {
+        target: { value: 'zzzz-inexistant' },
+      });
+
+      expect(screen.getByTestId('mes-templates-no-match')).toHaveTextContent('Aucun résultat');
+      expect(screen.getByTestId('mes-templates-filters')).toBeInTheDocument();
+      expect(screen.queryByTestId('mes-templates-empty')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('template-item')).not.toBeInTheDocument();
+    });
+
+    it('ouvre un drawer de filtres en narrow avec cible tactile 44px', () => {
+      render(
+        <GenerationPanelNarrowProvider value={true}>
+          <PresetSelector onPresetLoaded={mockOnPresetLoaded} />
+        </GenerationPanelNarrowProvider>
+      );
+
+      expect(screen.queryByTestId('mes-templates-filters')).not.toBeInTheDocument();
+      const openBtn = screen.getByTestId('template-filters-open-btn');
+      expect(openBtn).toHaveStyle({ minHeight: '44px' });
+      fireEvent.click(openBtn);
+
+      const filters = screen.getByTestId('mes-templates-filters');
+      expect(filters).toHaveStyle({ flexDirection: 'column' });
+      expect(screen.getByTestId('template-filter-name')).toHaveStyle({ minHeight: '44px' });
+      expect(screen.getByTestId('narrow-drawer-right')).toBeInTheDocument();
     });
   });
 

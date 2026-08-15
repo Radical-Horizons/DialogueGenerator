@@ -6,7 +6,7 @@
  * - Sauvegarder la configuration actuelle comme preset
  * - Supprimer un preset (menu contextuel)
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { usePresetStore } from '../../store/presetStore';
 import { useTemplateStore } from '../../store/templateStore';
 import { useLLMStore } from '../../store/llmStore';
@@ -15,10 +15,12 @@ import type { Template, TemplateConfiguration } from '../../types/template';
 import { theme } from '../../theme';
 import { redesignControl, redesignDisclosureArrow, redesignRadius } from '../../theme/redesignTokens';
 import { generationPanelChrome } from '../../theme/responsiveChrome';
+import { TOUCH_TARGET_MIN_PX } from '../../constants';
 import { useToast, SaveStatusIndicator } from '../shared';
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext';
 import { TemplateCreatorModal } from './TemplateCreatorModal';
-import { groupTemplatesByCategory } from '../../utils/templateGroups';
+import { NarrowOverlayDrawer } from '../layout/NarrowOverlayDrawer';
+import { filterTemplates, groupTemplatesByCategory } from '../../utils/templateGroups';
 import type { SaveStatus } from '../shared/SaveStatusIndicator';
 
 export interface PresetSelectorProps {
@@ -59,6 +61,42 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   const [presetToDelete, setPresetToDelete] = useState<Preset | null>(null);
   const [snapshotConfiguration, setSnapshotConfiguration] = useState<TemplateConfiguration | null>(null);
   const [isUpdatingPreset, setIsUpdatingPreset] = useState(false);
+  const [nameFilter, setNameFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [contextFilter, setContextFilter] = useState('');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const filteredTemplates = useMemo(
+    () =>
+      filterTemplates(templates, {
+        name: nameFilter,
+        category: categoryFilter,
+        context: contextFilter,
+      }),
+    [templates, nameFilter, categoryFilter, contextFilter],
+  );
+  const groupedTemplates = useMemo(
+    () => groupTemplatesByCategory(filteredTemplates),
+    [filteredTemplates],
+  );
+  const categoryOptions = useMemo(() => {
+    const keys = new Set(
+      templates.map((template) => template.category?.trim() || 'Sans catégorie'),
+    );
+    return Array.from(keys);
+  }, [templates]);
+
+  const filterInputStyle: React.CSSProperties = {
+    width: '100%',
+    minHeight: TOUCH_TARGET_MIN_PX,
+    boxSizing: 'border-box',
+    padding: chrome.selectTriggerPadding,
+    backgroundColor: theme.background.secondary,
+    border: `1px solid ${theme.border.primary}`,
+    borderRadius: `${redesignRadius.control}px`,
+    color: theme.text.primary,
+    fontSize: `${chrome.buttonFontRem}rem`,
+  };
 
   useEffect(() => {
     loadPresets();
@@ -115,6 +153,63 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     setPresetToDelete(preset);
     setIsDeleteConfirmOpen(true);
   };
+
+  const filterFields = (
+    <div
+      data-testid="mes-templates-filters"
+      style={{
+        display: 'flex',
+        flexDirection: isNarrow ? 'column' : 'row',
+        flexWrap: isNarrow ? 'nowrap' : 'wrap',
+        gap: `${chrome.controlGapRem}rem`,
+        marginBottom: isNarrow ? 0 : `${chrome.controlGapRem}rem`,
+        padding: isNarrow ? chrome.cardPadding : undefined,
+      }}
+    >
+      <label style={{ flex: '1 1 9rem', minWidth: isNarrow ? 0 : '9rem', color: theme.text.secondary, fontSize: `${chrome.labelFontRem}rem` }}>
+        Nom
+        <input
+          data-testid="template-filter-name"
+          type="search"
+          value={nameFilter}
+          onChange={(event) => setNameFilter(event.target.value)}
+          placeholder="Filtrer par nom"
+          aria-label="Filtrer par nom"
+          style={{ ...filterInputStyle, marginTop: '0.25rem' }}
+        />
+      </label>
+      <label style={{ flex: '1 1 9rem', minWidth: isNarrow ? 0 : '9rem', color: theme.text.secondary, fontSize: `${chrome.labelFontRem}rem` }}>
+        Catégorie
+        <input
+          data-testid="template-filter-category"
+          type="search"
+          list="template-filter-category-options"
+          value={categoryFilter}
+          onChange={(event) => setCategoryFilter(event.target.value)}
+          placeholder="Filtrer par catégorie"
+          aria-label="Filtrer par catégorie"
+          style={{ ...filterInputStyle, marginTop: '0.25rem' }}
+        />
+        <datalist id="template-filter-category-options">
+          {categoryOptions.map((option) => (
+            <option key={option} value={option} />
+          ))}
+        </datalist>
+      </label>
+      <label style={{ flex: '1 1 9rem', minWidth: isNarrow ? 0 : '9rem', color: theme.text.secondary, fontSize: `${chrome.labelFontRem}rem` }}>
+        Contexte
+        <input
+          data-testid="template-filter-context"
+          type="search"
+          value={contextFilter}
+          onChange={(event) => setContextFilter(event.target.value)}
+          placeholder="Filtrer par contexte GDD"
+          aria-label="Filtrer par contexte"
+          style={{ ...filterInputStyle, marginTop: '0.25rem' }}
+        />
+      </label>
+    </div>
+  );
 
   return (
     <div style={{ marginBottom: '1rem' }}>
@@ -347,6 +442,43 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         >
           Mes templates
         </h3>
+        {templates.length > 0 &&
+          (isNarrow ? (
+            <>
+              <button
+                type="button"
+                data-testid="template-filters-open-btn"
+                onClick={() => setFiltersOpen(true)}
+                style={{
+                  minHeight: TOUCH_TARGET_MIN_PX,
+                  marginBottom: `${chrome.controlGapRem}rem`,
+                  padding: chrome.buttonPadding,
+                  backgroundColor: theme.button.default.background,
+                  border: `1px solid ${theme.border.secondary}`,
+                  borderRadius: `${redesignRadius.control}px`,
+                  color: theme.button.default.color,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  fontSize: `${chrome.buttonFontRem}rem`,
+                  width: '100%',
+                }}
+              >
+                Filtrer
+              </button>
+              <NarrowOverlayDrawer
+                open={filtersOpen}
+                side="right"
+                titleId="mes-templates-filters-title"
+                title="Filtrer les templates"
+                closeLabel="Fermer les filtres"
+                onClose={() => setFiltersOpen(false)}
+              >
+                {filterFields}
+              </NarrowOverlayDrawer>
+            </>
+          ) : (
+            filterFields
+          ))}
         {templateError && templates.length === 0 ? null : templates.length === 0 ? (
           <div
             data-testid="mes-templates-empty"
@@ -357,8 +489,18 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           >
             Aucun template sauvegardé
           </div>
+        ) : filteredTemplates.length === 0 ? (
+          <div
+            data-testid="mes-templates-no-match"
+            style={{
+              fontSize: `${chrome.labelFontRem}rem`,
+              color: theme.text.secondary,
+            }}
+          >
+            Aucun résultat
+          </div>
         ) : (
-          groupTemplatesByCategory(templates).map(([category, items]) => (
+          groupedTemplates.map(([category, items]) => (
             <div
               key={category}
               data-testid="template-category-group"
