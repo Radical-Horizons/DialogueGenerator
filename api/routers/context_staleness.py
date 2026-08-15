@@ -1,5 +1,6 @@
 """Router contexte GDD — empreinte de contenu et historique des entités (détection de péremption).
 """
+import asyncio
 import logging
 from typing import Annotated, Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, status
@@ -33,7 +34,8 @@ async def post_gdd_content_fingerprint(
     from services.gdd_context_fingerprint import compute_gdd_content_fingerprint
 
     try:
-        fp = compute_gdd_content_fingerprint(
+        fp = await asyncio.to_thread(
+            compute_gdd_content_fingerprint,
             context_builder,
             request_data.context_selections,
             field_configs=request_data.field_configs,

@@ -1,7 +1,10 @@
 # DialogueGenerator/context_builder.py
 from pathlib import Path
+import asyncio
 import logging
 import os
+import sys
+import threading
 from typing import List, Optional, Dict, Any, TYPE_CHECKING
 import time
 
@@ -31,11 +34,78 @@ CONTEXT_BUILDER_DIR = Path(os.path.dirname(os.path.abspath(__file__))).parent.pa
 PROJECT_ROOT_DIR = CONTEXT_BUILDER_DIR
 DEFAULT_CONFIG_FILE = CONTEXT_BUILDER_DIR / "context_config.json"
 
+# Timeout d'acquisition du verrou de rechargement GDD côté lecture
+# (`build_context_json`). Court et volontaire : au-delà, la lecture se replie
+# sans verrou plutôt que d'attendre indéfiniment sur la boucle event asyncio.
+# Voir _bmad-output/implementation-artifacts/spec-fix-event-loop-blocking-context-endpoints.md
+_GDD_RELOAD_LOCK_READ_TIMEOUT_SECONDS = 0.2
+
+# Throttling du garde-fou runtime `_warn_if_running_on_event_loop` (une entrée
+# par nom d'opération, pour éviter le spam de logs en cas d'appels rapprochés).
+_EVENT_LOOP_WARNING_INTERVAL_SECONDS = 5.0
+_last_event_loop_warning_time: Dict[str, float] = {}
+
 from services.context_construction_service import (
     ElementBuildResult,
     CategoryBuildResult,
     ContextBuildResult
 )
+
+
+def _is_test_environment() -> bool:
+    """Détecte si le code s'exécute sous pytest.
+
+    Extraite en fonction séparée (plutôt qu'inlinée dans le garde-fou) pour
+    pouvoir être monkeypatchée depuis les tests dédiés du garde-fou lui-même.
+    Le pattern ``"pytest" in sys.modules`` est déjà utilisé dans
+    ``services/gdd_disk_cache.py``.
+
+    Returns:
+        True si le module ``pytest`` est chargé dans l'interpréteur courant.
+    """
+    return "pytest" in sys.modules
+
+
+def _warn_if_running_on_event_loop(operation: str) -> None:
+    """Alerte si une méthode bloquante de ``ContextBuilder`` tourne sur une boucle asyncio active.
+
+    Garde-fou runtime contre une régression silencieuse : ``load_gdd_files()``
+    et ``build_context_json()`` sont volontairement synchrones et potentiellement
+    coûteuses. Si un futur appelant les invoque directement depuis une coroutine
+    ``async def`` (sans passer par ``asyncio.to_thread``/``run_in_threadpool``),
+    la boucle event se bloque pendant toute la durée de l'appel. Ce garde ne
+    lève jamais d'exception ; il se contente de rendre le problème visible via
+    un log ERROR throttlé, plutôt que de laisser l'application geler en silence.
+
+    Silencieux sous pytest : de nombreux tests appellent ces méthodes en
+    synchrone direct, y compris depuis des ``async def test_*`` — les faire
+    échouer ou spammer les logs n'apporterait rien.
+
+    Args:
+        operation: Nom de l'opération appelante (ex. ``"load_gdd_files"``),
+            utilisé comme clé de throttling par site d'appel.
+    """
+    if _is_test_environment():
+        return
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        # Pas de boucle asyncio active sur ce thread : appel synchrone légitime
+        # (thread principal hors serveur ASGI, ou thread worker déporté via
+        # asyncio.to_thread — qui n'a justement pas de boucle active).
+        return
+    now = time.time()
+    last_time = _last_event_loop_warning_time.get(operation, 0.0)
+    if now - last_time <= _EVENT_LOOP_WARNING_INTERVAL_SECONDS:
+        return
+    _last_event_loop_warning_time[operation] = now
+    logger.error(
+        "ContextBuilder.%s() appelé de façon synchrone alors qu'une boucle "
+        "asyncio tourne sur ce thread : cet appel bloque la boucle event tant "
+        "qu'il s'exécute. Déportez-le via asyncio.to_thread().",
+        operation,
+        stack_info=True,
+    )
 
 
 class ContextBuilder:
@@ -87,6 +157,8 @@ class ContextBuilder:
     _no_config_log_interval: float = 5.0
     _last_info_log_time: dict = {}
     _info_log_interval: float = 5.0
+    _last_warning_log_time: dict = {}
+    _warning_log_interval: float = 5.0
 
     def __init__(
         self,
@@ -217,6 +289,27 @@ class ContextBuilder:
         # ContextConstructionService (sera créé après load_gdd_files)
         self._context_construction_service: Optional['ContextConstructionService'] = context_construction_service
 
+        # Verrou asymétrique protégeant le (re)chargement GDD : RLock plutôt que
+        # Lock pour de la defense-in-depth peu coûteuse contre un futur appel
+        # imbriqué sur le même thread (aucune ré-entrance actuelle vérifiée).
+        # `load_gdd_files()` (écriture) l'acquiert de façon strictement
+        # bloquante ; `build_context_json()` (lecture) l'acquiert avec un
+        # timeout court et se replie sans verrou en cas de contention. Voir
+        # _bmad-output/implementation-artifacts/spec-fix-event-loop-blocking-context-endpoints.md
+        self._reload_lock = threading.RLock()
+
+        # Verrou dédié protégeant le couple set_previous_dialogue_context() +
+        # build_context_json() : ce ContextBuilder est un singleton partagé, et
+        # `set_previous_dialogue_context` mute un état d'instance lu juste après
+        # par build_context_json(). Avant le déport de ces appels en thread réel
+        # (asyncio.to_thread), la boucle event mono-thread garantissait cette
+        # paire atomique par construction (aucun point de suspension entre les
+        # deux). Une fois déporté, deux threads concurrents peuvent entrelacer
+        # leurs paires set+build sur cette même instance sans ce verrou.
+        # Toujours acquis depuis un thread worker (jamais depuis la boucle
+        # event) — voir build_context_json_with_previous_dialogue().
+        self._previous_dialogue_lock = threading.Lock()
+
     def _count_tokens(self, text: str) -> int:
         """Compte le nombre de tokens dans un texte.
         
@@ -252,65 +345,75 @@ class ContextBuilder:
         ElementLinker aux données **courantes**. À chaque appel, le repository et la chaîne
         de résolution sont reconstruits pour suivre le nouvel objet ``GDDData`` renvoyé par
         ``load_all()`` (évite de servir un snapshot mémoire obsolète après sync disque).
+
+        Reste strictement bloquant sur ``_reload_lock`` (sans timeout) : cette méthode
+        mute l'état interne en plusieurs étapes non atomiques (réassignations et
+        mutations in-place de ``_gdd_data_accessor``/``_context_construction_service``) ;
+        un repli sans verrou produirait un état "tearing" durable plutôt qu'une simple
+        fenêtre de contention étroite. Tous les appelants connus de cette méthode sont
+        déportés via ``asyncio.to_thread`` (voir Code Map de la spec associée), donc un
+        blocage ici ne gèle qu'un thread worker, jamais la boucle event.
         """
-        # Charger via GDDLoader
-        self._gdd_data = self._gdd_loader.load_all()
+        _warn_if_running_on_event_loop('load_gdd_files')
+        with self._reload_lock:
+            # Charger via GDDLoader
+            self._gdd_data = self._gdd_loader.load_all()
 
-        from services.element_repository import ElementRepository
-        from services.element_resolver import ElementResolver
-        from services.element_linker import ElementLinker
+            from services.element_repository import ElementRepository
+            from services.element_resolver import ElementResolver
+            from services.element_linker import ElementLinker
 
-        self._element_repository = ElementRepository(self._gdd_data)
-        self._element_resolver = ElementResolver(self._element_repository)
+            self._element_repository = ElementRepository(self._gdd_data)
+            self._element_resolver = ElementResolver(self._element_repository)
 
-        # Initialiser ContextFieldManager si nécessaire (référence seulement ce builder)
-        if self._context_field_manager is None:
-            from services.context_field_manager import ContextFieldManager
+            # Initialiser ContextFieldManager si nécessaire (référence seulement ce builder)
+            if self._context_field_manager is None:
+                from services.context_field_manager import ContextFieldManager
 
-            self._context_field_manager = ContextFieldManager(self.context_config, self)
+                self._context_field_manager = ContextFieldManager(self.context_config, self)
 
-        self._element_linker = ElementLinker(
-            element_repository=self._element_repository,
-            element_resolver=self._element_resolver,
-        )
-        
-        # Initialiser ou mettre à jour GDDDataAccessor
-        if self._gdd_data_accessor is None:
-            from services.gdd_data_accessor import GDDDataAccessor
-            self._gdd_data_accessor = GDDDataAccessor(
-                gdd_data=self._gdd_data,
+            self._element_linker = ElementLinker(
+                element_repository=self._element_repository,
                 element_resolver=self._element_resolver,
-                element_linker=self._element_linker
             )
-        else:
-            # Mettre à jour les références si accessor existe déjà
-            self._gdd_data_accessor._gdd_data = self._gdd_data
-            self._gdd_data_accessor._element_resolver = self._element_resolver
-            self._gdd_data_accessor._element_linker = self._element_linker
-        
-        # Initialiser ContextConstructionService si nécessaire
-        if self._context_construction_service is None:
-            from services.context_construction_service import ContextConstructionService
-            self._context_construction_service = ContextConstructionService(
-                element_resolver=self._element_resolver,
-                context_field_manager=self._context_field_manager,
-                context_formatter=self._context_formatter,
-                context_truncator=self._context_truncator,
-                previous_dialogue_manager=self._previous_dialogue_manager,
-                context_config=self.context_config
-            )
-        else:
-            # Mettre à jour les références si service existe déjà
-            self._context_construction_service._element_resolver = self._element_resolver
-            self._context_construction_service._context_field_manager = self._context_field_manager
-            self._context_construction_service._context_formatter = self._context_formatter
-            self._context_construction_service._context_truncator = self._context_truncator
-            self._context_construction_service._previous_dialogue_manager = self._previous_dialogue_manager
-            self._context_construction_service._context_config = self.context_config
-        self._context_construction_service._context_builder = self
 
-        # Invalider les caches dérivés (les données GDD viennent d'être (re)chargées).
-        self._gdd_revision += 1
+            # Initialiser ou mettre à jour GDDDataAccessor
+            if self._gdd_data_accessor is None:
+                from services.gdd_data_accessor import GDDDataAccessor
+                self._gdd_data_accessor = GDDDataAccessor(
+                    gdd_data=self._gdd_data,
+                    element_resolver=self._element_resolver,
+                    element_linker=self._element_linker
+                )
+            else:
+                # Mettre à jour les références si accessor existe déjà
+                self._gdd_data_accessor._gdd_data = self._gdd_data
+                self._gdd_data_accessor._element_resolver = self._element_resolver
+                self._gdd_data_accessor._element_linker = self._element_linker
+
+            # Initialiser ContextConstructionService si nécessaire
+            if self._context_construction_service is None:
+                from services.context_construction_service import ContextConstructionService
+                self._context_construction_service = ContextConstructionService(
+                    element_resolver=self._element_resolver,
+                    context_field_manager=self._context_field_manager,
+                    context_formatter=self._context_formatter,
+                    context_truncator=self._context_truncator,
+                    previous_dialogue_manager=self._previous_dialogue_manager,
+                    context_config=self.context_config
+                )
+            else:
+                # Mettre à jour les références si service existe déjà
+                self._context_construction_service._element_resolver = self._element_resolver
+                self._context_construction_service._context_field_manager = self._context_field_manager
+                self._context_construction_service._context_formatter = self._context_formatter
+                self._context_construction_service._context_truncator = self._context_truncator
+                self._context_construction_service._previous_dialogue_manager = self._previous_dialogue_manager
+                self._context_construction_service._context_config = self.context_config
+            self._context_construction_service._context_builder = self
+
+            # Invalider les caches dérivés (les données GDD viennent d'être (re)chargées).
+            self._gdd_revision += 1
 
     @property
     def gdd_revision(self) -> int:
@@ -617,11 +720,78 @@ class ContextBuilder:
 
     def set_previous_dialogue_context(self, preview_text: Optional[str]) -> None:
         """Définit le contexte du dialogue précédent (texte formaté Unity JSON).
-        
+
         Args:
             preview_text: Texte formaté généré par preview_unity_dialogue_for_context, ou None pour réinitialiser.
         """
         self._previous_dialogue_manager.set_previous_dialogue_context(preview_text)
+
+    def set_previous_dialogue_context_locked(self, preview_text: Optional[str]) -> None:
+        """Pose le dialogue précédent sous ``self._previous_dialogue_lock``.
+
+        À utiliser quand l'écriture n'est pas immédiatement suivie d'un
+        ``build_context_json()`` dans la même fonction (sinon préférer
+        ``build_context_json_with_previous_dialogue``, qui protège les deux en
+        une seule section critique) : sérialise quand même cette écriture vis-à-vis
+        des autres threads qui posent/lisent le dialogue précédent sur ce
+        ``ContextBuilder`` partagé.
+
+        Args:
+            preview_text: Voir ``set_previous_dialogue_context``.
+        """
+        with self._previous_dialogue_lock:
+            self.set_previous_dialogue_context(preview_text)
+
+    def build_context_json_with_previous_dialogue(
+        self,
+        previous_dialogue_preview: Optional[str],
+        selected_elements: dict[str, list[str]],
+        scene_instruction: str,
+        field_configs: Optional[Dict[str, List[str]]] = None,
+        organization_mode: str = "default",
+        max_tokens: int = 70000,
+        include_dialogue_type: bool = True,
+        element_modes: Optional[Dict[str, Dict[str, str]]] = None
+    ) -> 'PromptStructure':  # type: ignore
+        """Pose le dialogue précédent puis construit le contexte, atomiquement.
+
+        À utiliser à la place de l'enchaînement manuel
+        ``set_previous_dialogue_context()`` + ``build_context_json()`` dès que ce
+        couple s'exécute dans un thread déporté (``asyncio.to_thread``) : ce
+        ``ContextBuilder`` est un singleton partagé entre requêtes, et sans
+        exclusion mutuelle, deux threads concurrents peuvent entrelacer leurs
+        paires set+build sur la même instance (la requête A verrait le dialogue
+        précédent de la requête B). Le couple est protégé par
+        ``self._previous_dialogue_lock``, distinct de ``self._reload_lock``.
+
+        Args:
+            previous_dialogue_preview: Texte du dialogue précédent, ou None/vide
+                pour ne rien poser avant de construire.
+            selected_elements: Voir ``build_context_json``.
+            scene_instruction: Voir ``build_context_json``.
+            field_configs: Voir ``build_context_json``.
+            organization_mode: Voir ``build_context_json``.
+            max_tokens: Voir ``build_context_json``.
+            include_dialogue_type: Voir ``build_context_json``.
+            element_modes: Voir ``build_context_json``.
+
+        Returns:
+            Le contexte structuré, identique à ce que retournerait
+            ``build_context_json()`` après un ``set_previous_dialogue_context()``
+            manuel.
+        """
+        with self._previous_dialogue_lock:
+            if previous_dialogue_preview:
+                self.set_previous_dialogue_context(previous_dialogue_preview)
+            return self.build_context_json(
+                selected_elements=selected_elements,
+                scene_instruction=scene_instruction,
+                field_configs=field_configs,
+                organization_mode=organization_mode,
+                max_tokens=max_tokens,
+                include_dialogue_type=include_dialogue_type,
+                element_modes=element_modes,
+            )
 
     def _format_previous_dialogue_for_context(self, max_tokens_for_history: int) -> str:
         """Formate le dialogue précédent stocké pour l'inclure dans le contexte LLM.
@@ -660,6 +830,23 @@ class ContextBuilder:
         if now - last_time > ContextBuilder._info_log_interval:
             logger.info(message)
             ContextBuilder._last_info_log_time[log_key] = now
+
+    def _throttled_warning_log(self, log_key: str, message: str) -> None:
+        """Enregistre un message de log WARNING avec limitation de fréquence.
+
+        Pendant de ``_throttled_info_log`` mais au niveau WARNING, utilisé pour
+        signaler une contention du verrou de rechargement GDD sans spammer les
+        logs en cas d'appels rapprochés.
+
+        Args:
+            log_key: Clé unique pour identifier le type de log (utilisée pour le throttling).
+            message: Message à enregistrer dans les logs.
+        """
+        now = time.time()
+        last_time = ContextBuilder._last_warning_log_time.get(log_key, 0)
+        if now - last_time > ContextBuilder._warning_log_interval:
+            logger.warning(message)
+            ContextBuilder._last_warning_log_time[log_key] = now
 
     def _build_context_core(
         self,
@@ -746,19 +933,42 @@ class ContextBuilder:
         include_dialogue_type: bool = True,
         element_modes: Optional[Dict[str, Dict[str, str]]] = None
     ) -> 'PromptStructure':  # type: ignore
-        """Construit un contexte structuré en JSON (délègue à ContextConstructionService)."""
+        """Construit un contexte structuré en JSON (délègue à ContextConstructionService).
+
+        Verrou en lecture asymétrique : tente d'acquérir ``_reload_lock`` avec un
+        timeout court (``_GDD_RELOAD_LOCK_READ_TIMEOUT_SECONDS``). Si le verrou est
+        contesté (un ``load_gdd_files()`` est en cours dans un autre thread), la
+        lecture se replie sans verrou plutôt que d'attendre indéfiniment — une
+        attente illimitée ici bloquerait la boucle event pour tout appelant qui
+        n'aurait pas déporté cet appel via ``asyncio.to_thread``. Risque résiduel
+        documenté (pas une régression) : fenêtre étroite de lecture d'un état GDD
+        partiellement rechargé en cas de contention réelle avec un rechargement en
+        cours — préexistant avant tout verrou, non aggravé par ce mécanisme.
+        """
+        _warn_if_running_on_event_loop('build_context_json')
         if self._context_construction_service is None:
             raise RuntimeError("ContextConstructionService n'est pas initialisé. Appelez load_gdd_files() d'abord.")
         self._throttled_info_log('start_build_json', f"Début de la construction du contexte JSON (mode: {organization_mode}).")
-        return self._context_construction_service.build_context_json(
-            selected_elements=selected_elements,
-            scene_instruction=scene_instruction,
-            field_configs=field_configs,
-            organization_mode=organization_mode,
-            max_tokens=max_tokens,
-            include_dialogue_type=include_dialogue_type,
-            element_modes=element_modes
-        )
+        acquired = self._reload_lock.acquire(timeout=_GDD_RELOAD_LOCK_READ_TIMEOUT_SECONDS)
+        if not acquired:
+            self._throttled_warning_log(
+                'build_context_json_lock_contended',
+                "build_context_json() : verrou de rechargement GDD contesté après "
+                f"{_GDD_RELOAD_LOCK_READ_TIMEOUT_SECONDS}s, repli en lecture sans verrou."
+            )
+        try:
+            return self._context_construction_service.build_context_json(
+                selected_elements=selected_elements,
+                scene_instruction=scene_instruction,
+                field_configs=field_configs,
+                organization_mode=organization_mode,
+                max_tokens=max_tokens,
+                include_dialogue_type=include_dialogue_type,
+                element_modes=element_modes
+            )
+        finally:
+            if acquired:
+                self._reload_lock.release()
     
 
 

@@ -7831,7 +7831,7 @@
     "Nom": "Flag_lieu_vivarcade_acces",
     "values": {
       "Actes liés": "31a6e4d2-1b45-8026-bf52-e0bdd107d332",
-      "Description narrative": "Comment le groupe de joueuses accède à Jungle Vivarcade. Détermine les options de dialogue disponibles aux Portes Lianescentes et la réaction initiale des Vigiles Chlorophylliens.",
+      "Description narrative": "Comment le groupe de joueuses accède à la cité de Vivarcade. Détermine les options de dialogue disponibles aux Portes Lianescentes et la réaction initiale des Vigiles Chlorophylliens.",
       "ID": "FLAG685",
       "Lieu lié": "1cb6e4d2-1b45-80d5-9374-d87f759801be",
       "Portée": "Lieu",

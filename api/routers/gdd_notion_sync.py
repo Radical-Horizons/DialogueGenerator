@@ -1,6 +1,7 @@
 """Endpoints REST sync GDD depuis Notion (FR18)."""
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Annotated, List, Literal, Optional
 
@@ -403,7 +404,8 @@ async def restore_gdd_notion_archive(
     """Restaure le GDD local depuis un snapshot ``.archive/<archive_id>``."""
     backup = True if body is None else body.backup_current
     try:
-        result = svc.restore_gdd_archive(
+        result = await asyncio.to_thread(
+            svc.restore_gdd_archive,
             archive_id,
             backup_current=backup,
             request_id=request_id,

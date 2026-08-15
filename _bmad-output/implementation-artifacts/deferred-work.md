@@ -235,3 +235,22 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-audit-rendu-ui.md`
   summary: Le test de régression d'ancrage de la barre d'action lit `parent.style.overflow` — le style **inline**. Il deviendrait muet si le défilement passait un jour en classe CSS.
   evidence: Relevé en revue (angle verification-gap). Acceptable aujourd'hui car `GenerationPanel` style tout en inline, mais la garantie est liée à ce choix d'implémentation plutôt qu'au comportement. `getComputedStyle` serait plus robuste ; il retourne des valeurs peu fiables en jsdom, d'où le compromis actuel. À revoir si le panneau migre vers des classes.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-fix-event-loop-blocking-context-endpoints.md`
+  summary: `GddNotionSyncService._sync_progress` (dict d'état muté par `_sync_progress_update`) est maintenant écrit depuis des threads workers (`_apply_staging_despite_errors`, l'écriture par source, `_promote_and_finalize`, tous déportés en v3) pendant que `read_sync_progress()` continue de le lire depuis la boucle event via le polling de statut — aucune synchronisation ajoutée alors que la docstring de la méthode suppose un seul thread.
+  evidence: Revue à 3 lentilles (edge-case-hunter) sur la spec v3. Risque borné : lecture partiellement incohérente d'un dict de progression affiché en UI, pas de donnée durable corrompue. Correctif proposé : `threading.Lock` autour de `_sync_progress_update`/`read_sync_progress`.
+- source_spec: `_bmad-output/implementation-artifacts/spec-fix-event-loop-blocking-context-endpoints.md`
+  summary: Sur les ~17-18 sites `asyncio.to_thread` de la spec v3, seuls 2 (`estimate_context_tokens`, `gdd-content-fingerprint`) ont un test dédié qui mesure réellement le non-blocage (requête légère concurrente à un mock bloquant). Les autres sont couverts par des tests fonctionnels ordinaires qui passeraient identiquement si le `to_thread` disparaissait par erreur dans un futur refactor.
+  evidence: Revue à 3 lentilles (verification-gap) sur la spec v3, cross-check exhaustif des 17-18 sites contre les tests existants.
+- source_spec: `_bmad-output/implementation-artifacts/spec-fix-event-loop-blocking-context-endpoints.md`
+  summary: `tests/test_context_builder_concurrency.py::test_build_context_json_falls_back_without_lock_on_contention` simule l'écriture concurrente via `with builder._reload_lock:` directement plutôt que par un vrai `load_gdd_files()` (patché pour bloquer sur un `threading.Event`) — le repli sans verrou n'est donc jamais prouvé contre la mutation multi-étapes réelle que `load_gdd_files()` documente.
+  evidence: Revue à 3 lentilles (verification-gap) sur la spec v3.
+- source_spec: `_bmad-output/implementation-artifacts/spec-fix-event-loop-blocking-context-endpoints.md`
+  summary: `api/routers/context_build.py::precomputed_entity_tokens` appelle `lookup_precomputed_entity_tokens` (chemin `_build_context_item`, pas `build_context_json`/`load_gdd_files`) en synchrone direct, non déporté — hors périmètre déclaré de la spec v3 (qui n'audite que les deux méthodes `ContextBuilder` nommées) mais un cache-miss froid après sync GDD pourrait bloquer la boucle event de façon comparable.
+  evidence: Revue à 3 lentilles (adversarial) sur la spec v3.
+- source_spec: `_bmad-output/implementation-artifacts/spec-fix-event-loop-blocking-context-endpoints.md`
+  summary: `api/routers/presets.py` (3 endpoints `def` non-async) et `api/container.py:get_context_builder` restent sûrs uniquement parce que Starlette auto-threadpoole les handlers non-async — mécanisme implicite jamais testé/documenté comme contrat. Un futur passage accidentel en `async def` réintroduirait un appel bloquant direct sans qu'aucun test ne le détecte.
+  evidence: Revue à 3 lentilles (adversarial) sur la spec v3. Correctif proposé : test de régression asserting ces endpoints restent `def`, ou lint AST dédié.
+- source_spec: `_bmad-output/implementation-artifacts/spec-fix-event-loop-blocking-context-endpoints.md`
+  summary: `services/dialogue_generation_service.py::_build_context_summary` appelle encore `build_context_json` en synchrone direct — code mort en production (aucun appelant réel, seulement 4 tests unitaires), non déporté ni supprimé.
+  evidence: Revue à 3 lentilles (adversarial) sur la spec v3. À trancher : supprimer (code mort) ou déporter si un futur appelant est prévu.

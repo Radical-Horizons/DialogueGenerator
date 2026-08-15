@@ -1,11 +1,54 @@
 [
   {
+    "Nom": "La première Halte de Crêtes",
+    "values": {
+      "Date de début": "3032",
+      "Date de fin": "3032",
+      "Description": "En 3032 AG, la caravanière Sira Nâsh et l’éleveur Khoram Veyr fixent le premier protocole d’attelage d’un Sable-fendeur adulte dans le Nashîr. Le convoi atteint le Khôryn avec ses caisses de sel intactes, puis s’immobilise au réveil des Deimos : les matrices dorsales deviennent un abri de fret. Leur halte sert immédiatement de point d’échange et installe le modèle des Haltes de Crêtes dans les routes de Somme.",
+      "Espèces": "65b376e4-51ce-4871-bc18-9fd8969e6ac1",
+      "Importance": "Notable",
+      "Lieux": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Type d'événement": "Fondation",
+      "Ère": "Âge des Singularités"
+    },
+    "sections": {},
+    "notion_page_id": "ccc3138f-41e1-4735-b661-96ef595f2693"
+  },
+  {
+    "Nom": "Serment de la Cendrée",
+    "values": {
+      "Communautés liées": "b5fe44d5-9e41-46d2-83aa-376b5314299f",
+      "Date de début": "3352",
+      "Description": "Dans un abri de marée du Khôryn, la guide van’doei Oskhira-Varn unit onze foyers de guides autonomes et trois constellations rash’doei en une communauté archéologique nomade, la Cendrée de Varn : mutualisation des chantiers, des registres et des routes, scellée par le partage de la cendre de son brasier. Réponse directe à l’accélération des marées entamée en 3340 AG, qui rendait enfin rentable la fouille systématique des exhumations. Les caravaniers les surnomment aussitôt « les Exhumeurs ».",
+      "Espèces": "1a16e4d2-1b45-8051-88d9-d744a1bbc095, 1886e4d2-1b45-816a-bfc3-facdb20624fb",
+      "Importance": "Notable",
+      "Lieux": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Type d'événement": "Fondation",
+      "Ère": "Âge anentropique"
+    },
+    "sections": {},
+    "notion_page_id": "58937f47-f9e1-4610-92f5-80255c912b10"
+  },
+  {
+    "Nom": "Sortie des porteurs d'ornement funéraire",
+    "values": {
+      "Date de début": "2837",
+      "Date de fin": "2837",
+      "Description": "En 2837 AG, la Cour de la Charte inscrit au Rôle des usages reconnus les maisonnées de figurants funéraires de Mianzhou sous le nom de porteurs d'ornement funéraire, avec une rédaction restrictive du commissaire aux usages Peiluo : neuf tableaux au maximum, aucune figuration de dieu ni de créature de sanctuaire, exécution en cour privée, plafond de paiement indexé. La contestation déposée par la doyenne Muyan est rejetée. À la lecture du Rôle suivante, Muyan exécute publiquement le tableau interdit dans l'allée de la mairie du quartier des Lampistes ; l'acte ne relève d'aucun délit et se règle par une amende de barème. Quarante-sept personnes quittent Taluo dans les six Nuées suivantes, emportant la copie certifiée de la rédaction. L'usage reste inscrit et valide en 3390 AG.",
+      "Importance": "Important",
+      "Lieux": "31ee8035-8e36-4941-a229-f6742e8954e1",
+      "Ère": "Âge des Singularités"
+    },
+    "sections": {},
+    "notion_page_id": "3b06e4d2-1b45-8106-80de-df2a105b263b"
+  },
+  {
     "Nom": "Premières veilles fausses du Xyriad",
     "values": {
       "Date de début": "3390",
       "Description": "Dans les Veilles qui suivent la Dévoration du Glossaire, les zones de superposition du Xyriad se couturent de « veilles fausses » : des poches où aucune démonstration ne peut se clore. Les Calculateurs d'Interstices y reconnaissent la cristallisation partielle d'un Rêveur Émergent, nommé d'après le théorème irrésolu de 2487 : la Discontinuité Harmonique. Le Consortium institue le Relevé des Veilles Fausses (dosimétrie par pastilles de calcitissus mort).",
       "Importance": "Important",
-      "Personnages 1": "c3a2f9da-4afc-412f-a891-b4e5aaa57795",
+      "Personnages liés": "c3a2f9da-4afc-412f-a891-b4e5aaa57795",
       "Type d'événement": "Naissance",
       "Ère": "Ère contemporaine"
     },
@@ -48,7 +91,7 @@
       "Description": "Cycle politique d’Escelion ouvert en 2800 AG par la victoire des seigneurs de la tech sur le Négoce. Leur vœu ne crée pas l’énergie : il organise la capture propriétaire du feu vif par l’enfûtage, les pôles, les fûts, les droits de passage et les infrastructures de la Grande Radiale. Cette énergie concentrée accélère machines, chaleur urbaine, production et surveillance, tandis que les Quartiers de la Lanterne dépendent d’un approvisionnement secondaire en brumium. Le cycle s’achève en 3100 avec la victoire de l’Administration ; l’appareil énergétique et le dérèglement igné qu’il a mis en route lui survivent.",
       "Importance": "Majeur",
       "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb, 36e6e4d2-1b45-807a-ac6c-ec253f792406",
-      "Personnages 1": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
+      "Personnages liés": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
       "Type d'événement": "Période",
       "Ère": "Âge des Singularités"
     },
@@ -73,13 +116,13 @@
   {
     "Nom": "Désignation de Sorav-Mekh comme Témoin de la Spirale",
     "values": {
-      "Communautés": "1b96e4d2-1b45-80fe-ba1e-f65c0e1e3a3c, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Communautés liées": "1b96e4d2-1b45-80fe-ba1e-f65c0e1e3a3c, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
       "Date de début": "3372",
       "Description": "Akthar-Neth désigne Sorav-Mekh, un Van'Doei de six Nuées issu des galeries de forge, comme Témoin fixe de la Spirale d'Observation dans la Krypte Ésothrope. Le choix se fonde sur une régularité de trait inhabituelle pour son âge dans la gravure des marques d'identification sur les conduits de Gedroth. Sorav-Mekh n'entre pas dans le Paradigme par foi mais par besoin : on a besoin d'un guetteur capable de rester posté, de lire les changements d'état et d'alerter sans intervenir directement. La désignation coïncide avec la naissance du sujet 56.",
       "Espèces": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
       "Importance": "Notable",
       "Lieux": "ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
-      "Personnages": "eb2168a8-5bf3-4348-85c4-64bb0a1df94d, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Personnages liés": "eb2168a8-5bf3-4348-85c4-64bb0a1df94d, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
       "Type d'événement": "Evénement personnel",
       "Ère": "Âge anentropique"
     },
@@ -89,10 +132,10 @@
   {
     "Nom": "Procès de Renshu",
     "values": {
-      "Communautés": "142b6271-3a66-4c9c-a091-bf6e2fb8811c",
+      "Communautés liées": "142b6271-3a66-4c9c-a091-bf6e2fb8811c",
       "Date de début": "3301",
       "Date de fin": "3301",
-      "Description": "La Cour de la Charte de Mianshu juge Renshu, vieille brise-lien aedre de la Révolution des Cités établie à Mianshu depuis la Révolution, traduite par les descendantes des familles gardiennes de Quanlu pour les travaux de drainage qui tuèrent la custodienne et tarirent les sources de Weiyun. L'acquittement, fondé sur la légalité révolutionnaire, s'accompagne d'un attendu célèbre — la République peut juger ses héros, elle ne peut pas juger la Révolution — qui fonde la « jurisprudence Renshu », citée depuis dans les conflits entre mémoire républicaine et survivances religieuses des hauts pays de Taluo.",
+      "Description": "La Cour de la Charte de Mianzhou juge Renshu, vieille brise-lien aedre de la Révolution des Cités établie à Mianzhou depuis la Révolution, traduite par les descendantes des familles gardiennes de Quanlu pour les travaux de drainage qui tuèrent la custodienne et tarirent les sources de Weikou. L'acquittement, fondé sur la légalité révolutionnaire, s'accompagne d'un attendu célèbre — la République peut juger ses héros, elle ne peut pas juger la Révolution — qui fonde la « jurisprudence Renshu », citée depuis dans les conflits entre mémoire républicaine et survivances religieuses des hauts pays de Taluo.",
       "Importance": "Notable",
       "Lieux": "31ee8035-8e36-4941-a229-f6742e8954e1",
       "Type d'événement": "Autre",
@@ -104,10 +147,10 @@
   {
     "Nom": "Crise de conversion du Seuil-6",
     "values": {
-      "Communautés": "142b6271-3a66-4c9c-a091-bf6e2fb8811c",
+      "Communautés liées": "142b6271-3a66-4c9c-a091-bf6e2fb8811c",
       "Date de début": "2894",
       "Date de fin": "2894",
-      "Description": "La Lisière modifie sans préavis les taux de conversion du Seuil-6 : en une seule Veille, la solde, les pensions et les stocks des greniers publics de Taluo perdent une part de leur valeur. Les caisses coopératives de Weiyun répliquent par la « Fermeture des guichets », deux Souffles de grève de la conversion pendant lesquels circulent leurs propres lettres de crédit. La République des Ateliers sort de la crise en créant l'Intendance de la conversion, délégation permanente auprès des institutions de la Vieille Ville chargée de négocier les taux en bloc — aveu institutionnel que la monnaie nationale se décide ailleurs.",
+      "Description": "La Lisière modifie sans préavis les taux de conversion du Seuil-6 : en une seule Veille, la solde, les pensions et les stocks des greniers publics de Taluo perdent une part de leur valeur. Les caisses coopératives de Weikou répliquent par la « Fermeture des guichets », deux Souffles de grève de la conversion pendant lesquels circulent leurs propres lettres de crédit. La République des Ateliers sort de la crise en créant l'Intendance de la conversion, délégation permanente auprès des institutions de la Vieille Ville chargée de négocier les taux en bloc — aveu institutionnel que la monnaie nationale se décide ailleurs.",
       "Importance": "Notable",
       "Lieux": "31ee8035-8e36-4941-a229-f6742e8954e1",
       "Type d'événement": "Autre",
@@ -117,12 +160,12 @@
     "notion_page_id": "1823db55-9902-44b8-a0b2-4b060c8ff6d9"
   },
   {
-    "Nom": "Mutinerie des registres et Accord de Weiyun",
+    "Nom": "Mutinerie des registres et Accord de Weikou",
     "values": {
-      "Communautés": "142b6271-3a66-4c9c-a091-bf6e2fb8811c",
+      "Communautés liées": "142b6271-3a66-4c9c-a091-bf6e2fb8811c",
       "Date de début": "3054",
       "Date de fin": "3057",
-      "Description": "À Weiyun puis dans les bassins manufacturiers de Qiluo, des équipes entières brûlent les registres de quotas et séquestrent les inspecteurs de la police de la production, accusés de falsifier les comptes pour tenir des objectifs impossibles. La répression échoue : les syndicats tiennent les ateliers, les campagnes les ravitaillent. L'Accord de Weiyun (3057 AG) dissout la police de la production, ouvre les registres aux délégués d'atelier et fait entrer les syndicats dans les conseils de production, préparant les réformes constitutionnelles de 3136.",
+      "Description": "À Weikou puis dans les bassins manufacturiers de Qiluo, des équipes entières brûlent les registres de quotas et séquestrent les inspecteurs de la police de la production, accusés de falsifier les comptes pour tenir des objectifs impossibles. La répression échoue : les syndicats tiennent les ateliers, les campagnes les ravitaillent. L'Accord de Weikou (3057 AG) dissout la police de la production, ouvre les registres aux délégués d'atelier et fait entrer les syndicats dans les conseils de production, préparant les réformes constitutionnelles de 3136.",
       "Importance": "Notable",
       "Lieux": "31ee8035-8e36-4941-a229-f6742e8954e1",
       "Type d'événement": "Traité",
@@ -134,7 +177,7 @@
   {
     "Nom": "Scandale de la Garde civique de Qiluo",
     "values": {
-      "Communautés": "142b6271-3a66-4c9c-a091-bf6e2fb8811c",
+      "Communautés liées": "142b6271-3a66-4c9c-a091-bf6e2fb8811c",
       "Date de début": "3247",
       "Date de fin": "3247",
       "Description": "Des compagnies de la Garde civique de Qiluo sont louées comme escortes privées sur les routes du corridor oriental, avec la complicité de magistratures locales qui classent les plaintes. Les procès aboutissent à quelques destitutions, mais la loi de tutelle des polices municipales échoue de peu à l'Assemblée des Cités. La défiance contemporaine envers les magistratures locales de Taluo date de ce demi-échec.",
@@ -163,7 +206,7 @@
   {
     "Nom": "Première Veille du Signe",
     "values": {
-      "Communautés": "fa888402-6833-418f-b016-2e70af52abff",
+      "Communautés liées": "fa888402-6833-418f-b016-2e70af52abff",
       "Date de début": "3156",
       "Date de fin": "3156",
       "Description": "Après la Troisième Pulsation majeure, les corps reconnus des Jardins intermédiaires élisent une première souveraine chargée d’unifier la frange nourricière et funéraire face aux pressions du centre ; la légitimité du nouveau régime est scellée lorsque la Dormante produit autour de la barge royale un signe d’eau et de lumière, fondant la Couronne des Lots comme monarchie élective non théocratique du district.",
@@ -178,11 +221,11 @@
   {
     "Nom": "Cycle du Clergé",
     "values": {
-      "Communautés": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Communautés liées": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
       "Date de début": "2377",
       "Date de fin": "2694",
       "Description": "Cycle d'Alteir couvrant 2377–2694 AG, remporté par le Clergé grâce à la Restauration (futur nexianisme). Ouvert par la Nuit des Successions (2377 AG), où le Pontificat de la Veille obtient le monopole des registres de décès et de successions, le cycle installe une domination temporaire du Clergé sur les autres classes sociales : Torrentage obligatoire, Cens de Veille, séquestre de l'Indivis, homologation des coutumes funéraires des peuples intégrés. Il s'effondre dans la Banqueroute de l'Œuf (2694 AG), quand le Capital marchand exige l'audit du trésor pontifical et que le Pontificat refuse d'ouvrir l'Œuf creux.",
-      "Personnages 1": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
+      "Personnages liés": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
       "Type d'événement": "Période",
       "Ère": "Âge des Singularités"
     },
@@ -192,11 +235,11 @@
   {
     "Nom": "Cycle du Négoce",
     "values": {
-      "Communautés": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Communautés liées": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
       "Date de début": "2694",
       "Date de fin": "2800",
       "Description": "Cycle d'Alteir bref couvrant 2694–2800 AG, remporté par le Capital marchand à la faveur de la Banqueroute de l'Œuf (2694 AG), qui ruine le crédit du Clergé et fait passer les infrastructures pontificales — registres, consignes, concessions funéraires — sous contrôle marchand. Ce cycle prépare directement le Technoféodalisme (2800–3100 AG), seconde victoire consécutive du Capital marchand.",
-      "Personnages 1": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
+      "Personnages liés": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
       "Type d'événement": "Période",
       "Ère": "Âge des Singularités"
     },
@@ -209,7 +252,7 @@
       "Date de début": "2054",
       "Date de fin": "2377",
       "Description": "Cycle d'Alteir couvrant 2054–2377 AG, remporté par l'Intelligentsia. Période de domination des chaires, des glossateurs et des académies : l'homologation des savoirs tient lieu de pouvoir, et les appareils exégétiques — dont celui des Hawāshī — circulent bien au-delà de leurs communautés d'origine. C'est en plein Cycle de la Glose, en 2140 AG, que la Restauration (futur nexianisme) est fondée, d'abord comme entreprise érudite de compilation des survivances méridiennes.",
-      "Personnages 1": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
+      "Personnages liés": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
       "Type d'événement": "Période",
       "Ère": "Âge des Doctrines"
     },
@@ -219,7 +262,7 @@
   {
     "Nom": "Fondation de la Restauration",
     "values": {
-      "Communautés": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
+      "Communautés liées": "29781d00-f5d0-4b1b-ab1d-ef41828910d0",
       "Date de début": "2140",
       "Description": "En 2140 AG, en plein Cycle de la Glose, le Non-Mort Comgall Öndör fonde la Restauration : il fédère les communautés de défunts de la Vieille Ville autour des veilleuses domestiques héritées du luthianisme méridien et d'une promesse neuve — le dieu qui règne sur l'après-vie du Mont des Réincarnés n'est pas encore né, et le monde doit être restauré vers sa forme achevée. L'institution se dote d'un Pontificat de la Veille et de trois reliquaires d'os rapportés d'outre-mort, dont un vide : l'Œuf creux. La religion prendra le nom de nexianisme en 3127 AG, quand le Nexion deviendra le centre de sa doctrine.",
       "Type d'événement": "Fondation",
@@ -234,8 +277,7 @@
       "Date de début": "3382",
       "Description": "Cycle du jeu d'Alteir en cours depuis 3382 AG, sans classe victorieuse désignée. Joueuses connues : Uresaïr, Eonundé et Vethraak pour les Marginaux, Akthar-Neth Amatru pour le Clergé, l'Enlumineur pour les Artistes, Valkazer Reitar pour l'Avant-garde socialiste.",
       "Importance": "Majeur",
-      "Personnages": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
-      "Personnages 1": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
+      "Personnages liés": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
       "Type d'événement": "Période",
       "Ère": "Ère contemporaine"
     },
@@ -249,8 +291,7 @@
       "Date de fin": "3390",
       "Description": "Cycle politique d’Escelion ouvert en 3100 AG par la victoire d’une classe de représentants administratifs sur le Technoféodalisme. Le vœu de Jast institue durablement une république fédérale représentative sécuritaire : districts et Couronnes mandatent réellement leurs délégations, tandis que le collège des Six Interfaces conserve les compétences de continuité sur le Nexion, le Seuil, les infrastructures et les crises. La république hérite de l’appareil énergétique technoféodal, améliore des protections et des secours, mais préserve les propriétés, les classes et la dépendance extractive. Le cycle est encore en cours.",
       "Importance": "Majeur",
-      "Personnages": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
-      "Personnages 1": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
+      "Personnages liés": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
       "Type d'événement": "Période",
       "Ère": "Âge des Singularités"
     },
@@ -264,8 +305,7 @@
       "Date de fin": "500",
       "Description": "Premier cycle connu du jeu d'Alteir orchestré par Jast. Les Ingénieurs de la Lisière (Peseto, Candaces, Qorés) remportent le cycle : il en résulte la naissance de la Lisière post-rareté, et Jast exclut les Ingénieurs de tous les cycles suivants.",
       "Importance": "Majeur",
-      "Personnages": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
-      "Personnages 1": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
+      "Personnages liés": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
       "Type d'événement": "Période",
       "Ère": "Fondation d'Escelion"
     },
@@ -282,7 +322,7 @@
       "Espèces": "1a16e4d2-1b45-8051-88d9-d744a1bbc095, 1a16e4d2-1b45-8099-be36-db66acb76390, 1a16e4d2-1b45-805e-841e-d699f81d67a9, 1886e4d2-1b45-816a-bfc3-facdb20624fb",
       "Importance": "Majeur",
       "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
-      "Personnages 1": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
+      "Personnages liés": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
       "Type d'événement": "Autre",
       "Ère": "Fondation d'Escelion"
     },
@@ -292,7 +332,7 @@
   {
     "Nom": "Dispersion des cultes méridiens",
     "values": {
-      "Communautés": "1996e4d2-1b45-804c-89d5-c935e604f865, 22d6e4d2-1b45-80d4-8cb8-ed6cf202f42a, 1ed6e4d2-1b45-80d8-a3be-c4c7910fd5ad, 378ce7af-b23e-4ada-aac1-040dfcedb61f",
+      "Communautés liées": "1996e4d2-1b45-804c-89d5-c935e604f865, 22d6e4d2-1b45-80d4-8cb8-ed6cf202f42a, 1ed6e4d2-1b45-80d8-a3be-c4c7910fd5ad, 378ce7af-b23e-4ada-aac1-040dfcedb61f",
       "Date de début": "1",
       "Date de fin": "1200",
       "Description": "Après l'exode, les traditions religieuses de Merid se fragmentent entre communautés isolées d'Escelion. Les premières générations perdent souvent clergés, calendriers, textes et lieux de culte, tandis que des pratiques de deuil, de serment, de mémoire, d'enquête ou de médiation continuent à circuler. Les transformations ultérieures de ces héritages doivent être documentées par populations, lieux et institutions avant d'être attribuées à des descendants contemporains.",
@@ -308,7 +348,7 @@
   {
     "Nom": "Essor de la mécanographie lourde et premières mega-architectures pensantes (~2700-3100 AG)",
     "values": {
-      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Communautés liées": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
       "Date de début": "2700",
       "Date de fin": "3100",
       "Description": "De 2700 à 3100 AG, l’interdit visant les intelligences distribuées pousse guildes et chaebols vers des systèmes incarnés et localisés : mécanographie lourde, monopole de l’heure et méga-architectures pensantes. La Grande Radiale concentre capital et bibliothèques de gestes ; le Tombeau fournit extraction et infrastructures ; le Xyriad porte une voie mathématique distincte. Leur incompatibilité tient autant aux domaines qu’au secret dynastique. Vers 3100 AG, l’Administration commence à capturer cet appareil de gestion.",
@@ -351,7 +391,7 @@
   {
     "Nom": "Purge des anentropistes",
     "values": {
-      "Communautés": "1b56e4d2-1b45-8067-989c-d4d2917770f7",
+      "Communautés liées": "1b56e4d2-1b45-8067-989c-d4d2917770f7",
       "Date de début": "3149",
       "Date de fin": "3149",
       "Description": "Purge interne au Barvasinkul visant les membres anentropistes. Fragilise le dernier réseau d'arbitrage transrégional indépendant au moment précis où le Conclave des Interfaces consolide ses prérogatives — la cité perd un contrepouvoir au moment où elle en aurait eu besoin.",
@@ -379,7 +419,7 @@
   {
     "Nom": "La Grève des Enclumes Rouges",
     "values": {
-      "Communautés": "22d6e4d2-1b45-80d4-8cb8-ed6cf202f42a",
+      "Communautés liées": "22d6e4d2-1b45-80d4-8cb8-ed6cf202f42a",
       "Date de début": "1218",
       "Date de fin": "1219",
       "Description": "Pendant les Guerres de Doctrine, le maître forgeron Van'Doei Kael le Froid rassemble quarante artisans de l'Artère Extractrice et brise leurs enclumes à mains nues, jetant les morceaux dans le conduit central du marché vertical. Quarante ateliers immobilisés pendant 80 Nuées. La grève fait suite à l'assassinat d'un apprenti symbiotiste dans une forge, sous un idéogramme du yì retourné. Les Van'Doei exigent que l'assassinat soit jugé et que les deux camps doctrinaux retirent leurs émissaires des forges. Les Barvasinkuliens doivent importer leurs composants depuis les Chaudières à prix exorbitant ; les Symbiotistes perdent leurs matrices de gravure artisanales. La grève prend fin quand le chef du shūyuàn symbiotiste livre le coupable : un zélote Junior agissant sans ordre. Kael le Froid se retire du shūyuàn et ne forgea plus jamais.",
@@ -407,7 +447,7 @@
   {
     "Nom": "L'Affaire des Murmures",
     "values": {
-      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Communautés liées": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
       "Date de début": "3120",
       "Date de fin": "3125",
       "Description": "Entre 3120 et 3125 AG, Les Murmures font circuler dans la Grande Radiale des protocoles d’évacuation occultés après le Grand Gwi-shin de 3056 AG. La répression du réseau confirme que la jeune république fédérale protège déjà des secrets industriels, mais l’affaire impose durablement l’existence de dossiers d’incident, de contre-rapports et de recours pour les familles touchées. Elle devient le premier conflit majeur entre représentation administrative, données de sécurité et propriété corporative du Cycle du républicanisme.",
@@ -422,7 +462,7 @@
   {
     "Nom": "Scission du Symbiotisme",
     "values": {
-      "Communautés": "22d6e4d2-1b45-80d4-8cb8-ed6cf202f42a",
+      "Communautés liées": "22d6e4d2-1b45-80d4-8cb8-ed6cf202f42a",
       "Date de début": "1456",
       "Date de fin": "1456",
       "Description": "Le Symbiotisme se divise officiellement en trois branches après des décennies de tensions internes sur l'interprétation du Grand Démembrement et sur la source légitime du fragment sacrificiel : corps offerts, victimes qualifiées, traces lues ou greffes consenties. Dans la Grande Radiale, le Grand Scriptorium de Theren perd son statut de centre doctrinal incontesté. Les Cercles de Souffrance des niveaux inférieurs deviennent des enclaves marginales dans une cité qui ne se reconnaît plus dans le prélèvement rituel. La fracture préfigure la future rivalité entre chaebols pragmatiques et chaebols doctrinaires.",
@@ -451,7 +491,7 @@
   {
     "Nom": "Le kokoro-link imposé comme condition d'emploi",
     "values": {
-      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Communautés liées": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
       "Date de début": "3240",
       "Description": "Les grands chaebols — Synaptic Dynamics en tête — font de l'implantation kokoro-link une condition systématique d'embauche. La mesure frappe la Grande Radiale et le Tombeau des lueurs dissidentes, où les mineurs sont contraints d'accepter l'implant pour conserver leur poste. Ce moment pousse une fraction des travailleurs à constituer le courant des Déconnectés — ceux qui refusent l'implant et acceptent la discrimination salariale, l'exclusion sociale et la surveillance compensatoire.",
       "Importance": "Important",
@@ -480,13 +520,13 @@
   {
     "Nom": "Expansion agressive de Tek-Syana-09",
     "values": {
-      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Communautés liées": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
       "Date de début": "3386",
       "Date de fin": "3389",
       "Description": "Après sa brouille avec le Conclave, Tek-Syana-09 lança une expansion agressive de Synaptic Dynamics : acquisition de médias, rachat d'entreprises rivales, déploiement massif du kokoro-link. Les chaebols qui refusaient l'alignement idéologique se voyaient couper des contrats d'approvisionnement, leurs cadres signalés au Bureau de Cohésion Sociale. Le coefficient de nunchi passa d'un outil de productivité à un instrument de pression biopolitique. Tek prône un « tech-parti » visant à « libérer » Escelion du panoptique pour imposer son propre système de surveillance totale.",
       "Importance": "Notable",
       "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
-      "Personnages": "2f46e4d2-1b45-8054-b997-e9fe5c9da656",
+      "Personnages liés": "2f46e4d2-1b45-8054-b997-e9fe5c9da656",
       "Type d'événement": "Période",
       "Ère": "Ère contemporaine"
     },
@@ -496,12 +536,12 @@
   {
     "Nom": "Brouille de Tek-Syana-09 avec le Conclave",
     "values": {
-      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Communautés liées": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
       "Date de début": "3385",
       "Description": "Tek-Syana-09 brigua un siège au Conclave des Six Interfaces. L'Interface de la Grande Radiale lui offrit un compromis — le titre de Grand Auto-Secrétaire à l'Efficience Collective (GASEC), poste prestigieux mais dépourvu de pouvoir réel. Après huit mois de tentative d'imposer sa vision jungdo, Tek-Syana-09 explosa en pleine séance du Conclave : insultes, menaces, déploiement théâtral de ses ailes dans la salle. Renvoyé immédiatement. Cette brouille transforma son ambition en ressentiment et le poussa à fonder le « tech-parti de la libération fraternelle ».",
       "Importance": "Notable",
       "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
-      "Personnages": "2f46e4d2-1b45-8054-b997-e9fe5c9da656",
+      "Personnages liés": "2f46e4d2-1b45-8054-b997-e9fe5c9da656",
       "Type d'événement": "Evénement personnel",
       "Ère": "Ère contemporaine"
     },
@@ -511,13 +551,13 @@
   {
     "Nom": "Fondation des Tenants du Gradient",
     "values": {
-      "Communautés": "8ac6015e-f5bb-4861-adb7-e23133e485cd",
+      "Communautés liées": "8ac6015e-f5bb-4861-adb7-e23133e485cd",
       "Date de début": "3385",
       "Date de fin": "3386",
       "Description": "Entre 3385 et 3386 AG, Ilyena Eonundé du Ressac installe sous la Bibliothèque Sympathique des caisses d'archives récupérées lors de la chute de la Citadelle de Daïlon. Ce dispositif de conservation devient progressivement la communauté souterraine des Tenants du Gradient, organisée autour de la préservation et de la gradation des archives de Vol Reitar.",
       "Importance": "Notable",
       "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, b8ac3bad-baef-4c92-aceb-ac7ae389629b",
-      "Personnages": "3256e4d2-1b45-80f4-9eeb-de67c6d8955b",
+      "Personnages liés": "3256e4d2-1b45-80f4-9eeb-de67c6d8955b",
       "Type d'événement": "Fondation",
       "Ère": "Ère contemporaine"
     },
@@ -533,7 +573,7 @@
       "Espèces": "1a16e4d2-1b45-80d7-a920-c3f40e49246b",
       "Importance": "Important",
       "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832, 15f02d22-65fb-4afb-b80e-68925f6f0f3b",
-      "Personnages 1": "a1d57a38-1ec6-4e38-9dd8-20c0e01734f8",
+      "Personnages liés": "a1d57a38-1ec6-4e38-9dd8-20c0e01734f8",
       "Type d'événement": "Période",
       "Ère": "Fondation d'Escelion"
     },
@@ -543,7 +583,7 @@
   {
     "Nom": "L’Assignation à résidence",
     "values": {
-      "Communautés": "3106e4d2-1b45-8060-a5dc-d901a3e80959",
+      "Communautés liées": "3106e4d2-1b45-8060-a5dc-d901a3e80959",
       "Date de début": "2970",
       "Description": "Acte politique fondateur de la Fosse aux Idoles déchues. Les pouvoirs, clergés et autorités déchus de la marge n'y furent ni exécutés ni détruits — ce qui en aurait fait des martyrs — mais « assignés à résidence » dans la cuvette privée de son Deimos. L'Assignation institua un ordre paradoxal : une façade d'autorité confiée à une branche déclassée de l'Héliocentrisme de l'Unique, brandie comme « autorité légitime » telle une marionnette, tandis que les véritables circulations de pouvoir passaient par le blanchiment des dettes adossées aux stèles juridiques rendues caduques par la chute de leurs émetteurs. Loin d'effacer les légitimités obsolètes, l'Assignation les conserva vivantes et surveillées, transformant la Fosse en cité-musée des autorités qu'on ne pouvait pas tuer. Elle scella aussi la réputation de coupe-gorge de la zone, entretenue à dessein pour tenir à distance bourgeoisies et appareils militaires des régions voisines où l'Héliocentrisme régnait encore.",
       "Importance": "Important",
@@ -585,7 +625,7 @@
   {
     "Nom": "Première récolte rituelle des graines d'iclot par le Culte de l'Anentropie",
     "values": {
-      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Communautés liées": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
       "Date de début": "3175",
       "Description": "Vers 3175 AG, lors de la stabilisation initiale du Culte de l'Anentropie dans le Léviathan Pétrifié, les Croyants découvrent que les graines d'iclot du Khôryn produisent des pigments stables résistant à la chaleur sèche du désert. Cette résistance à la dégradation est interprétée comme un signe anentropique : une graine qui teint sans se décolorer est une victoire sur l'entropie accessible à l'œil nu. La récolte rituelle devient une pratique régulière, donnant naissance aux Encres de Fixation utilisées pour les inscriptions liturgiques des frises des transepts et les marques des Perséverants.",
       "Espèces": "1b36e4d2-1b45-80b5-a3f6-ceb43f5bff1a",
@@ -626,7 +666,7 @@
   {
     "Nom": "Arrivée des Tu-Numu et fondation de la Mandiba",
     "values": {
-      "Communautés": "1dd6e4d2-1b45-8074-9a3b-c0eca157003c",
+      "Communautés liées": "1dd6e4d2-1b45-8074-9a3b-c0eca157003c",
       "Date de début": "2402",
       "Date de fin": "2402",
       "Description": "La corporation héréditaire des Tu-Numu — forgerons-juges endogames venus d'un continent dont les archives ne conservent plus le nom — s'installe en marge des Chaudières Démiurgiques du Quartier des Forges. Leur compétence à lire les manilles comme on lit un khipu est d'abord moquée, puis testée et reconnue par les Quipucamayoc. La cohabitation se stabilise par la Mandiba (« corde de l'accord »), protocole oral encore observé en 3390 AG, qui définit comment trois corps de juridiction — comptable (Quipucamayoc), domestique-liturgique (Maîtres-Forgeurs Van'Doei) et généalogique (Tu-Numu) — tranchent ensemble les litiges par coproduction d'un alliage. Origine du sixième régime de surveillance de la Vieille Ville : la généalogie d'alliage.",
@@ -645,7 +685,7 @@
       "Description": "Moment fondateur où la figure connue plus tard sous le titre du Pénitent cesse de répondre aux questions qui lui sont posées et commence à les poser.",
       "Importance": "Notable",
       "Lieux": "0013aaa5-daee-424c-a8c9-a4a5855926a3",
-      "Personnages 1": "a1e588d2-8d0b-4c46-bd2c-52d990dc6d4a",
+      "Personnages liés": "a1e588d2-8d0b-4c46-bd2c-52d990dc6d4a",
       "Type d'événement": "Mythe",
       "Ère": "Fondation d'Escelion"
     },
@@ -661,8 +701,7 @@
       "Espèces": "22e6e4d2-1b45-80db-8065-d98d26821c2c",
       "Importance": "Majeur",
       "Lieux": "0013aaa5-daee-424c-a8c9-a4a5855926a3",
-      "Personnages": "a4fdfc35-1930-415d-a8f6-fd4ce87d99e3",
-      "Personnages 1": "a1e588d2-8d0b-4c46-bd2c-52d990dc6d4a, a4fdfc35-1930-415d-a8f6-fd4ce87d99e3, f1365719-cfda-4d75-82e1-df6129d02041",
+      "Personnages liés": "a1e588d2-8d0b-4c46-bd2c-52d990dc6d4a, a4fdfc35-1930-415d-a8f6-fd4ce87d99e3, f1365719-cfda-4d75-82e1-df6129d02041",
       "Type d'événement": "Fondation",
       "Ère": "Âge des Doctrines"
     },
@@ -672,13 +711,13 @@
   {
     "Nom": "Grande Contestation de Rhylos",
     "values": {
-      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1, 1a56e4d2-1b45-8044-a472-d674f194c57a",
+      "Communautés liées": "1886e4d2-1b45-81b8-ad16-dcfa990112f1, 1a56e4d2-1b45-8044-a472-d674f194c57a",
       "Date de début": "3211",
       "Date de fin": "3212",
       "Description": "Entre 3211 et 3212 AG, Rhylos Vesh-Akhor transforme des incohérences textuelles et des griefs matériels en crise doctrinale ouverte. L'accès aux organoïdes modifiés, l'audition disciplinaire puis la contestation publique devant les Croyants constituent le pivot majeur du schisme murmurateur et l'événement qui forme durablement la gouvernance d'Akthar-Neth.",
       "Importance": "Majeur",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1ae6e4d2-1b45-8087-b3ee-f0f29b53a279, 1b36e4d2-1b45-8081-ab37-c4b33c4f51b1",
+      "Personnages liés": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1ae6e4d2-1b45-8087-b3ee-f0f29b53a279, 1b36e4d2-1b45-8081-ab37-c4b33c4f51b1",
       "Type d'événement": "Religieux",
       "Ère": "Âge anentropique"
     },
@@ -688,12 +727,12 @@
   {
     "Nom": "Première mort de Veth-Solan Qalamtû",
     "values": {
-      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Communautés liées": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
       "Date de début": "3163",
       "Description": "La mort naturelle de Qalamtû-Premier déclenche la première réincarnation par le Codex des Dettes Karmiques. Pour Akthar-Neth, cet événement constitue un choc archivistique et institutionnel : la continuité d'un savoir et d'une fonction survit à un corps individuel, ce qui radicalise sa logique de préservation et d'archivage.",
       "Importance": "Important",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1ae6e4d2-1b45-8087-b3ee-f0f29b53a279",
+      "Personnages liés": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1ae6e4d2-1b45-8087-b3ee-f0f29b53a279",
       "Type d'événement": "Mort",
       "Ère": "Âge anentropique"
     },
@@ -706,7 +745,7 @@
       "Date de début": "3198",
       "Description": "Opération de neutralisation d'un relais de surveillance de la cour d'Errazel dans les strates oxydées du troisième niveau abyssal de Merid. Planifiée par Ysellor Eonundé du Ressac, l'embuscade nécessite une équipe de couverture sachant ne pas pouvoir revenir avant la fermeture du courant. Lethraï Vel-Ossur, née dans le Gouffre, demande à tenir la position. L'opération réussit. Lethraï ne revient pas. Ysellor note son nom dans son registre — fragment conservé plus tard par Vethraak.",
       "Importance": "Notable",
-      "Personnages 1": "1d56e4d2-1b45-80e1-a1a9-e96243eb1712",
+      "Personnages liés": "1d56e4d2-1b45-80e1-a1a9-e96243eb1712",
       "Type d'événement": "Evénement personnel",
       "Ère": "Âge anentropique"
     },
@@ -716,13 +755,12 @@
   {
     "Nom": "Installation des Bassins Fendus",
     "values": {
-      "Communautés": "e0f3da67-fe73-4a53-83b0-6e80ac13cf4f",
+      "Communautés liées": "e0f3da67-fe73-4a53-83b0-6e80ac13cf4f",
       "Date de début": "3375",
       "Description": "Après la Purge de Daïlon, les personnes sauvées par Eonundé quittent les Couronnes et gagnent les Plaines de l’Exuvie. Elles s’installent autour de bassins et de citernes isolés, assez loin des centres de pouvoir pour disparaître et assez stables pour reconstruire une vie commune. Ce choix de paix cachée provoque le départ d’Eonundé avec quelques camarades et fonde les Bassins Fendus comme population périphérique dissimulée.",
       "Importance": "Notable",
       "Lieux": "1b46e4d2-1b45-801a-ada0-f6ec210d2fa0",
-      "Personnages": "1996e4d2-1b45-80fa-97db-fe99255e6c0c",
-      "Personnages 1": "1996e4d2-1b45-80fa-97db-fe99255e6c0c",
+      "Personnages liés": "1996e4d2-1b45-80fa-97db-fe99255e6c0c",
       "Type d'événement": "Migration",
       "Ère": "Ère contemporaine"
     },
@@ -732,12 +770,12 @@
   {
     "Nom": "Naissance d'Eonundé Alinen-Egan (canonique du projet Ysellor)",
     "values": {
-      "Date de début": "3340",
-      "Description": "Naissance d'Eonundé Alinen-Egan dans les cuves de Vol Reitar à la Citadelle de Daïlon — quinzième et dernière étape du projet Ysellor, première et seule à conserver le titre Ysellor sans interruption jusqu'à sa propre auto-renonciation en 3373. Vaideccane Littorale pure, génétiquement intégrale, issue du même matériel qu'Ysellor Eonundé du Ressac. À sa naissance, Vol — déjà profondément décrépit — abandonne progressivement les autres voies du programme pour se concentrer sur elle. Sa naissance scelle paradoxalement la fin du tyran : trente-trois Nuées plus tard, c'est elle qui le noiera dans son propre laboratoire et déclenchera la Purge.",
+      "Date de début": "3338",
+      "Description": "Naissance d'Eonundé Alinen-Egan dans les cuves de Vol Reitar à la Citadelle de Daïlon — quinzième et dernière étape du projet Ysellor, première et seule à conserver le titre Ysellor sans interruption jusqu'à sa propre auto-renonciation en 3373. Vaideccane Littorale pure, génétiquement intégrale, issue du même matériel qu'Ysellor Eonundé du Ressac. À sa naissance, Vol — déjà profondément décrépit — abandonne progressivement les autres voies du programme pour se concentrer sur elle. Sa naissance scelle paradoxalement la fin du tyran : trente-cinq Nuées plus tard, c'est elle qui le noiera dans son propre laboratoire et déclenchera la Purge.",
       "Espèces": "1a16e4d2-1b45-8089-bfc0-c5e513847d8b",
       "Importance": "Important",
       "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
-      "Personnages": "1996e4d2-1b45-80fa-97db-fe99255e6c0c, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
+      "Personnages liés": "1996e4d2-1b45-80fa-97db-fe99255e6c0c",
       "Type d'événement": "Naissance",
       "Ère": "Âge anentropique"
     },
@@ -753,7 +791,7 @@
       "Espèces": "1a16e4d2-1b45-8089-bfc0-c5e513847d8b",
       "Importance": "Important",
       "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
-      "Personnages": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1d56e4d2-1b45-80e1-a1a9-e96243eb1712, 1996e4d2-1b45-80fa-97db-fe99255e6c0c, 3256e4d2-1b45-80f4-9eeb-de67c6d8955b, 892f2fd2-fbe3-4878-a05d-8d608b01e6bf",
+      "Personnages liés": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1d56e4d2-1b45-80e1-a1a9-e96243eb1712",
       "Type d'événement": "Période",
       "Ère": "Âge anentropique"
     },
@@ -768,7 +806,7 @@
       "Espèces": "1a16e4d2-1b45-8089-bfc0-c5e513847d8b",
       "Importance": "Notable",
       "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
-      "Personnages": "3256e4d2-1b45-80f4-9eeb-de67c6d8955b, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
+      "Personnages liés": "3256e4d2-1b45-80f4-9eeb-de67c6d8955b",
       "Type d'événement": "Naissance",
       "Ère": "Âge anentropique"
     },
@@ -780,11 +818,11 @@
     "values": {
       "Date de début": "3364",
       "Date de fin": "3364",
-      "Description": "Devant sa propre décrépitude accélérée, Vol Reitar bascule le projet Ysellor : il ne s'agit plus de reproduire son ancienne amante mais de fabriquer un réceptacle pour sa conscience déclinante. Dès 3358 il paramètre la biologie d'Eonundé pour la grossesse ; en 3360-3364, phase intensive d'amadouement sentimental construite avec une rigueur clinique ; sélection embryonnaire 3361-3363 ; implantation utérine et naissance forcée la même Nuée 3364, à 24 Nuées d'Eonundé (seuil de Phase Mature non stabilisé). Valkazer — métis aldravind-vaideccan, première fusion génétique consciente d'Escelion — naît comme verrou affectif autant que comme projet de transfert. Vol ne réussira jamais le transfert avant d'être tué neuf Nuées plus tard.",
+      "Description": "Devant sa propre décrépitude accélérée, Vol Reitar bascule le projet Ysellor : il ne s'agit plus de reproduire son ancienne amante mais de fabriquer un réceptacle pour sa conscience déclinante. Dès 3358 il paramètre la biologie d'Eonundé pour la grossesse ; en 3360-3364, phase intensive d'amadouement sentimental construite avec une rigueur clinique ; sélection embryonnaire 3361-3363 ; implantation utérine et naissance forcée la même Nuée 3364, à 26 Nuées d'Eonundé (seuil de Phase Mature non stabilisé). Valkazer — métis aldravind-vaideccan, première fusion génétique consciente d'Escelion — naît comme verrou affectif autant que comme projet de transfert. Vol ne réussira jamais le transfert avant d'être tué neuf Nuées plus tard.",
       "Espèces": "1a16e4d2-1b45-8089-bfc0-c5e513847d8b",
       "Importance": "Important",
       "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
-      "Personnages": "892f2fd2-fbe3-4878-a05d-8d608b01e6bf, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1996e4d2-1b45-80fa-97db-fe99255e6c0c",
+      "Personnages liés": "892f2fd2-fbe3-4878-a05d-8d608b01e6bf",
       "Type d'événement": "Naissance",
       "Ère": "Âge anentropique"
     },
@@ -797,7 +835,7 @@
       "Date de début": "3025",
       "Description": "Naissance approximative d'Ysellor Eonundé du Ressac, vaideccane Littorale, dans le bassin natal de sa lignée. Future amante d'un siècle de Vol Reitar (3125), dont l'abandon (3135) déclenchera la dérive du tyran et le projet Ysellor — programme bicentenaire de reproduction artificielle visant à recréer son corps et sa soumission. Canonisée par sa mort en 3425 et par les quatorze ratées qui la précèdent dans le programme.",
       "Importance": "Notable",
-      "Personnages": "1d56e4d2-1b45-80e1-a1a9-e96243eb1712",
+      "Personnages liés": "1d56e4d2-1b45-80e1-a1a9-e96243eb1712",
       "Type d'événement": "Naissance",
       "Ère": "Âge des Singularités"
     },
@@ -820,7 +858,7 @@
   {
     "Nom": "Premières expositions reconnues aux strates profondes du Léviathan — émergence diffuse des Témoins des profondeurs",
     "values": {
-      "Communautés": "2906e4d2-1b45-80ba-a2e5-d4bd8ad155ac",
+      "Communautés liées": "2906e4d2-1b45-80ba-a2e5-d4bd8ad155ac",
       "Date de début": "3157",
       "Description": "Deux ans après le Pacte Fondateur entre Akthar-Neth et L'Ensevelie, la structuration des accès aux Plis d'ossements multiplie les expositions profondes. Des individus reviennent altérés — dérèglements sensoriels, rêves d'architecture interne, compulsions d'écriture — et commencent à se transmettre des fragments sans l'avoir cherché. Aucun acte fondateur, aucun nom : le réseau des Témoins des profondeurs « survient » plutôt qu'il ne se forme.",
       "Importance": "Notable",
@@ -834,14 +872,13 @@
   {
     "Nom": "Infiltration des Murmurateurs dans les Catacombes Temporelles",
     "values": {
-      "Communautés": "1a56e4d2-1b45-8044-a472-d674f194c57a",
+      "Communautés liées": "1a56e4d2-1b45-8044-a472-d674f194c57a",
       "Date de début": "3387",
       "Date de fin": "3387",
       "Description": "Navarre K'ssh, alors Voix Tactique des Murmurateurs, tente de s'introduire dans les Catacombes Temporelles d'Uresaïr. L'objectif de la mission n'a jamais été clarifié. Navarre est pris dans une distorsion gravitationnelle sévère au niveau de la faille temporelle instable. Uresaïr intervient sans décision consciente et lui sauve la vie. Navarre repart en laissant involontairement un éclat de Suaire Vivant pétrifié fixé sur la paroi est du désert occidental (Relique de la Tentative). Cet incident marque la fin de l'extension des Catacombes : Uresaïr cesse de créer de nouveaux sabliers.",
       "Importance": "Modéré",
       "Lieux": "1b36e4d2-1b45-802c-910a-fb74729b22f8",
-      "Personnages": "1c36e4d2-1b45-8095-8449-d7d1749e69ad, 1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
-      "Personnages 1": "1ae6e4d2-1b45-80ef-84e8-fb114d0136ed",
+      "Personnages liés": "1ae6e4d2-1b45-80ef-84e8-fb114d0136ed",
       "Type d'événement": "Autre",
       "Ère": "Ère contemporaine"
     },
@@ -851,12 +888,12 @@
   {
     "Nom": "Première communion de Raki-Biro 58 avec l'Ensevelie",
     "values": {
-      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Communautés liées": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
       "Date de début": "3388",
       "Description": "Au cours d'une méditation solitaire dans la Nef Centrale, Raki-Biro entre en contact direct avec l'Ensevelie. Celle-ci remet le Voile de Lichen-Sang et transmet des informations sur le Dernier Rituel non communiquées par Akthar-Neth. Raki-Biro ne signale pas cet échange à l'Exégète. Début d'une relation secrète entre l'enfant-prophète et l'entité qu'elle ne peut lire.",
       "Importance": "Important",
       "Lieux": "1b36e4d2-1b45-80ce-9d1b-f71e60cb8e53",
-      "Personnages 1": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8",
+      "Personnages liés": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8",
       "Type d'événement": "Religieux",
       "Ère": "Ère contemporaine"
     },
@@ -866,12 +903,12 @@
   {
     "Nom": "Jour de la Double Émergence — Naissance de Raki-Biro 58",
     "values": {
-      "Communautés": "1b96e4d2-1b45-80fe-ba1e-f65c0e1e3a3c",
+      "Communautés liées": "1b96e4d2-1b45-80fe-ba1e-f65c0e1e3a3c",
       "Date de début": "3382",
       "Description": "Cinquante-huitième tentative du Paradigme Ésothrope : Raki-Biro émerge de la Chambre d'Hybridation en état de catalepsie complète de trois jours. Durant cet épisode, le Léviathan connaît une Résurgence. À l'issue de la catalepsie, l'enfant énonce en Abraldique archaïque l'unique Prophétie Fractionnée qui conduit, dans les jours suivants, à l'assignation d'Uresaïr aux Plis d'Ossements. Veth-Solan Qalamtû la transcrit et Akthar-Neth l'interprète comme validation décisive de la méthode hybride. La date est retenue sous le nom de Jour de la Double Émergence.",
       "Importance": "Majeur",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4, ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
-      "Personnages 1": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8, 1ae6e4d2-1b45-8087-b3ee-f0f29b53a279",
+      "Personnages liés": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8, 1ae6e4d2-1b45-8087-b3ee-f0f29b53a279",
       "Type d'événement": "Naissance",
       "Ère": "Ère contemporaine"
     },
@@ -881,12 +918,12 @@
   {
     "Nom": "Première erreur de lecture de Raki-Biro 58",
     "values": {
-      "Communautés": "3186e4d2-1b45-8033-9182-cac2953ed2f7",
+      "Communautés liées": "3186e4d2-1b45-8033-9182-cac2953ed2f7",
       "Date de début": "3389",
       "Description": "Au milieu de 3389 AG, une lecture donnée à la Dragovitsa sur une micro-résurgence du Léviathan se révèle fausse sur un détail précis — un nom, une heure, un couloir. Les Parfaits y voient un aléa sans conséquence. Pour Raki-Biro, l'erreur transforme sa certitude en symptôme et sa fonction en risque. Premier signe public du début de la dégradation de son rôle d'ancre fiable. Dans la même Nuée, elle formule pour la première fois une rétention non prophétique : une réponse gardée en elle, non par calcul mais par refus.",
       "Importance": "Notable",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4, ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
-      "Personnages 1": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8",
+      "Personnages liés": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8",
       "Type d'événement": "Evénement personnel",
       "Ère": "Ère contemporaine"
     },
@@ -896,13 +933,13 @@
   {
     "Nom": "Disparition de Rhylos dans les Plis d'ossements",
     "values": {
-      "Communautés": "1a56e4d2-1b45-8044-a472-d674f194c57a",
+      "Communautés liées": "1a56e4d2-1b45-8044-a472-d674f194c57a",
       "Concepts liés": "967f87fb-90c6-47ab-961e-f232673f1264",
       "Date de début": "3219",
       "Description": "Quelques cycles après la purge du Kesh-Varash, Rhylos disparaît dans les Plis d'ossements. Une lettre qu'elle adresse à Zaehria peu avant sa disparition sera conservée dans le registre personnel de l'Archiviste. Rhylos reste le centre de gravité silencieux des doubles loyautés de Zaehria plus de cent soixante-dix ans après sa mort.",
       "Importance": "Important",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "1c36e4d2-1b45-8095-8449-d7d1749e69ad, 1b36e4d2-1b45-8081-ab37-c4b33c4f51b1",
+      "Personnages liés": "1c36e4d2-1b45-8095-8449-d7d1749e69ad, 1b36e4d2-1b45-8081-ab37-c4b33c4f51b1",
       "Ère": "Âge anentropique"
     },
     "sections": {},
@@ -911,12 +948,12 @@
   {
     "Nom": "Purge du Kesh-Varash & fusion forcée de Zaehria aux Plis d'ossements",
     "values": {
-      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Communautés liées": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
       "Date de début": "3215",
       "Description": "La fuite de manuscrits pré-schisme transmis par Zaehria à Rhylos déclenche une purge au sein du Kesh-Varash ; une vingtaine d'archivistes sont traités comme complices. Zaehria est piégée dix-sept jours dans les Plis d'ossements. L'Artisan d'Éternité Keth'Vareth l'Immobiliste intervient en accélérant sa fusion avec la substruction osseuse : elle survit, au prix d'une immobilité définitive.",
       "Importance": "Majeur",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "1c36e4d2-1b45-8095-8449-d7d1749e69ad, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Personnages liés": "1c36e4d2-1b45-8095-8449-d7d1749e69ad, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
       "Ère": "Âge anentropique"
     },
     "sections": {},
@@ -927,7 +964,7 @@
     "values": {
       "Date de début": "3388",
       "Importance": "Important",
-      "Personnages 1": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31",
+      "Personnages liés": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31",
       "Type d'événement": "Evénement personnel",
       "Ère": "Ère contemporaine"
     },
@@ -940,7 +977,7 @@
       "Date de début": "3390",
       "Importance": "Notable",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31",
+      "Personnages liés": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31",
       "Type d'événement": "Evénement personnel",
       "Ère": "Ère contemporaine"
     },
@@ -952,7 +989,7 @@
     "values": {
       "Date de début": "3371",
       "Importance": "Notable",
-      "Personnages 1": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31, 6868f847-5748-481f-aae8-961764cb18ee",
+      "Personnages liés": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31, 6868f847-5748-481f-aae8-961764cb18ee",
       "Type d'événement": "Evénement personnel",
       "Ère": "Âge anentropique"
     },
@@ -965,7 +1002,7 @@
       "Date de début": "3388",
       "Importance": "Important",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Personnages liés": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
       "Type d'événement": "Evénement personnel",
       "Ère": "Ère contemporaine"
     },
@@ -978,7 +1015,7 @@
       "Date de début": "3370",
       "Description": "Événement fondateur où Kha'Vareth fixe vivant Tahem Keth-Vareth, atteint d’une dégénérescence incurable, dans le Troisième Sodoir du Transept Mnésique. Le résultat (corps vivant, activité cérébrale lisible, paralysie totale) est reçu comme miracle anentropique et scandale heureux. Tahem devient le Vivant Fixé, saint et martyre du Culte ; la Dragovitsa impose ensuite un protocole d’interprétation pour empêcher l’émergence d’un oracle autonome et encadrer le pèlerinage.",
       "Importance": "Notable",
-      "Personnages 1": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
+      "Personnages liés": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
       "Type d'événement": "Evénement personnel",
       "Ère": "Âge anentropique"
     },
@@ -992,7 +1029,7 @@
       "Description": "Banni à 17 Nuées. Point de bascule biographique de Voknir Esh'Maradel (Velhari).",
       "Espèces": "e8ad2abc-ce7b-4206-a439-96ec103b923f",
       "Importance": "Notable",
-      "Personnages 1": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
+      "Personnages liés": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
       "Type d'événement": "Evénement personnel",
       "Ère": "Ère contemporaine"
     },
@@ -1002,12 +1039,12 @@
   {
     "Nom": "Nomination de Kha'Vareth au rang de Parfait",
     "values": {
-      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1, 3186e4d2-1b45-8033-9182-cac2953ed2f7",
+      "Communautés liées": "1886e4d2-1b45-81b8-ad16-dcfa990112f1, 3186e4d2-1b45-8033-9182-cac2953ed2f7",
       "Date de début": "3371",
       "Description": "Nomination de Kha'Vareth Ardakh au rang de Parfait à 14 Nuées (3371 AG), après la création du Premier Sodoir d'Éternité officiellement reconnu.",
       "Importance": "Important",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
+      "Personnages liés": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
       "Type d'événement": "Couronnement",
       "Ère": "Âge anentropique"
     },
@@ -1022,8 +1059,7 @@
       "Description": "Décès (assassinat présumé) de Ysellor Eonundé du Ressac à Merid. Date approximative issue de la fiche personnage ; circonstances volontairement ambiguës.",
       "Importance": "Notable",
       "Lieux": "1b36e4d2-1b45-8069-9c90-fc298e905409",
-      "Personnages": "1d56e4d2-1b45-80e1-a1a9-e96243eb1712",
-      "Personnages 1": "1d56e4d2-1b45-80e1-a1a9-e96243eb1712, 1996e4d2-1b45-80a5-a7ae-e9d43372323f",
+      "Personnages liés": "1d56e4d2-1b45-80e1-a1a9-e96243eb1712, 1996e4d2-1b45-80a5-a7ae-e9d43372323f",
       "Type d'événement": "Mort",
       "Ère": "Ère contemporaine"
     },
@@ -1033,7 +1069,7 @@
   {
     "Nom": "Évasion des premiers Xyléophores",
     "values": {
-      "Communautés": "1dd6e4d2-1b45-8074-9a3b-c0eca157003c",
+      "Communautés liées": "1dd6e4d2-1b45-8074-9a3b-c0eca157003c",
       "Date de début": "3220",
       "Description": "Pendant une transmutation expérimentale impliquant un substrat biotellurique d'Hermogène, des résidus de cuves Ékpyrosis et un treillis kharosthi adaptatif, un artisan produit involontairement une structure végétale-minérale semi-autonome : les premiers Xyléophores. La communauté est secouée — la transmutation a toujours consisté à créer des objets inertes. La reproduction intentionnelle de Xyléophores est interdite par consensus, les protocoles de sécurité sont renforcés, et les journaux du responsable sont étudiés ligne par ligne sans qu'une réponse satisfaisante soit trouvée. L'incident est inscrit comme avertissement permanent dans les pratiques de formation.",
       "Espèces": "2256e4d2-1b45-8048-8d1c-dc817100f567",
@@ -1048,7 +1084,7 @@
   {
     "Nom": "Incident du Greffon Mort",
     "values": {
-      "Communautés": "1dd6e4d2-1b45-8074-9a3b-c0eca157003c",
+      "Communautés liées": "1dd6e4d2-1b45-8074-9a3b-c0eca157003c",
       "Date de début": "3140",
       "Description": "Vers 3140 AG, un échange diplomatique entre la Lisière et Hermogène tourne au désastre : Hermogène offre un hybride biotellurique (une plante-capteur mesurant les fluctuations telluriques) à la Lisière en gage de bonne foi commerciale. Les Peseto-Forgerons tentent d'intégrer le capteur dans un assemblage kharosthi standard. Les paradigmes se rejettent violemment — la plante mute, les kharosthi fracturent, trois artisans sont blessés. Un petit groupe d'artisans des Forges de la Vieille Ville propose alors de créer un objet nouveau à partir des deux substrats, en détournant des cuves Ékpyrosis de la Steppe des Éteignoirs. Le résultat — un greffon fonctionnel dans les deux paradigmes — résout la crise, mais la Lisière considère ces forgerons comme des profanateurs des kharosthi sacrés. Cet incident est l'événement catalyseur de la communauté des Artisans transmutateurs.",
       "Importance": "Notable",
@@ -1062,7 +1098,7 @@
   {
     "Nom": "Constitution formelle des Artisans transmutateurs",
     "values": {
-      "Communautés": "1dd6e4d2-1b45-8074-9a3b-c0eca157003c",
+      "Communautés liées": "1dd6e4d2-1b45-8074-9a3b-c0eca157003c",
       "Date de début": "3180",
       "Description": "Suite à la Querelle de l'Objet-Seuil (~3175 AG), les passeurs se constituent en communauté reconnue sous le nom d'Artisans transmutateurs. Trois principes fondateurs sont adoptés : le tracé obligatoire (chaque objet transmuté porte la marque visible de ses origines paradigmatiques), l'Épreuve du Greffon (rite de passage pour devenir artisan à part entière), et la responsabilité solidaire (si un objet cause un dommage, la communauté entière en répond). La constitution ne crée pas de hiérarchie formelle : les Artisans ne sont pas une guilde au sens classique, mais un réseau de pairs liés par des règles communes et la nécessité pratique de coopérer.",
       "Importance": "Notable",
@@ -1076,12 +1112,12 @@
   {
     "Nom": "Naissance de Vol Reitar",
     "values": {
-      "Communautés": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Communautés liées": "1996e4d2-1b45-804c-89d5-c935e604f865",
       "Date de début": "3072",
       "Description": "Naissance dans une caravane aldravinde de Vol Reitar, futur auteur du Traité des Gradients et tyran de Daïlon.",
       "Espèces": "1a16e4d2-1b45-80d7-a920-c3f40e49246b",
       "Importance": "Notable",
-      "Personnages": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
+      "Personnages liés": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
       "Type d'événement": "Naissance",
       "Ère": "Âge des Singularités"
     },
@@ -1091,7 +1127,7 @@
   {
     "Nom": "Exode humain vers Escelion",
     "values": {
-      "Communautés": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Communautés liées": "1996e4d2-1b45-804c-89d5-c935e604f865",
       "Date de début": "1",
       "Date de fin": "25",
       "Description": "Arrivée par vagues désordonnées de milliers de survivants de Merid (Magocratie d'Iodan-liaqar, Archenroz, Ligue du Sandor, Guelenbur et autres). Petits groupes familiaux sans coordination. Les futurs Aldravinds s'agrègent par nécessité linguistique autour de l'abraldique.",
@@ -1107,7 +1143,7 @@
   {
     "Nom": "Concile des Souffles",
     "values": {
-      "Communautés": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Communautés liées": "1996e4d2-1b45-804c-89d5-c935e604f865",
       "Date de début": "1800",
       "Description": "Rassemblement exceptionnel de toutes les caravanes aldravindes, motivé par la prise de conscience du déclin démographique. Les Meridhalis inventorient le corpus oral et constatent des pertes irréversibles. Aucune décision structurelle n'en sort, mais l'événement devient lui-même un récit fondateur.",
       "Importance": "Modéré",
@@ -1121,7 +1157,7 @@
   {
     "Nom": "Première Marche des Ombres",
     "values": {
-      "Communautés": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Communautés liées": "1996e4d2-1b45-804c-89d5-c935e604f865",
       "Date de début": "350",
       "Description": "Première formalisation attestée de la cérémonie nocturne aldravinde autour de la Braise Éternelle. La nostalgie de Merid passe du registre du deuil à celui du sacré. Datation incertaine, transmise par la tradition orale.",
       "Importance": "Modéré",
@@ -1139,8 +1175,7 @@
       "Description": "L'ouverture des Seuils Lexicaux vers le Xyriad Achromatique et Hermogène crée de nouvelles voies d'entrée involontaires dans la Cité Labiale. Les Portails Absorbants, autrefois confinés à la Vieille Ville, apparaissent sporadiquement dans les Couronnes. La population piégée passe de 300-500 à 800-1200 résidents permanents. L'Effacement progressif du Glossaire (37 % lacunaire) déstabilise la tension symbiotique.",
       "Importance": "Notable",
       "Lieux": "1b46e4d2-1b45-809b-b6ba-ea6dffbf49b5",
-      "Personnages": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212",
-      "Personnages 1": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212",
+      "Personnages liés": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212",
       "Type d'événement": "Catastrophe",
       "Ère": "Âge des Singularités"
     },
@@ -1155,8 +1190,7 @@
       "Espèces": "22e6e4d2-1b45-803e-aa21-c54ea00e2c27",
       "Importance": "Majeur",
       "Lieux": "1b46e4d2-1b45-809b-b6ba-ea6dffbf49b5",
-      "Personnages": "892f2fd2-fbe3-4878-a05d-8d608b01e6bf, 3276e4d2-1b45-80f1-a87e-ffb93f4a7212",
-      "Personnages 1": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212, 892f2fd2-fbe3-4878-a05d-8d608b01e6bf, c3a2f9da-4afc-412f-a891-b4e5aaa57795",
+      "Personnages liés": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212, 892f2fd2-fbe3-4878-a05d-8d608b01e6bf, c3a2f9da-4afc-412f-a891-b4e5aaa57795",
       "Type d'événement": "Catastrophe",
       "Ère": "Ère contemporaine"
     },
@@ -1213,8 +1247,7 @@
       "Description": "Population piégée stabilisée entre 300 et 500 résidents permanents. Société fondée sur l'économie du silence. Le Mutisme Tactique se complexifie (registres formels, poésie gestuelle). Cartographie des Zones de Quiétude. Les Indexeurs du Glossaire deviennent les seuls à circuler librement grâce à leur langage définitionnel indigeste.",
       "Importance": "Modéré",
       "Lieux": "1b46e4d2-1b45-809b-b6ba-ea6dffbf49b5",
-      "Personnages": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212",
-      "Personnages 1": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212",
+      "Personnages liés": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212",
       "Type d'événement": "Période",
       "Ère": "Âge des Doctrines"
     },
@@ -1230,8 +1263,7 @@
       "Espèces": "22e6e4d2-1b45-80db-8065-d98d26821c2c",
       "Importance": "Majeur",
       "Lieux": "1b46e4d2-1b45-809b-b6ba-ea6dffbf49b5",
-      "Personnages": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212",
-      "Personnages 1": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212",
+      "Personnages liés": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212",
       "Type d'événement": "Catastrophe",
       "Ère": "Âge des Doctrines"
     },
@@ -1241,14 +1273,13 @@
   {
     "Nom": "Destruction partielle de la Citadelle de Daïlon",
     "values": {
-      "Communautés": "e0f3da67-fe73-4a53-83b0-6e80ac13cf4f",
+      "Communautés liées": "e0f3da67-fe73-4a53-83b0-6e80ac13cf4f",
       "Date de début": "3373",
       "Date de fin": "3373",
       "Description": "Lors de sa révolte contre Vol Reitar, Eonundé libère plusieurs dizaines de personnes détenues ou piégées par Daïlon et provoque la destruction partielle de la Citadelle — laboratoires souterrains, cuves de création et archives scientifiques. Ilyena, qui refuse de fuir, reste dans les décombres et passera dix ans à cataloguer ce qui a survécu.",
       "Importance": "Notable",
       "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
-      "Personnages": "1996e4d2-1b45-80fa-97db-fe99255e6c0c, 3256e4d2-1b45-80f4-9eeb-de67c6d8955b",
-      "Personnages 1": "1996e4d2-1b45-80fa-97db-fe99255e6c0c, 3256e4d2-1b45-80f4-9eeb-de67c6d8955b, 71c12f00-7473-4f68-b09b-0e742e3d98ba",
+      "Personnages liés": "1996e4d2-1b45-80fa-97db-fe99255e6c0c, 3256e4d2-1b45-80f4-9eeb-de67c6d8955b, 71c12f00-7473-4f68-b09b-0e742e3d98ba",
       "Type d'événement": "Catastrophe",
       "Ère": "Ère contemporaine"
     },
@@ -1263,8 +1294,7 @@
       "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
       "Importance": "Important",
       "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
-      "Personnages": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
-      "Personnages 1": "71c12f00-7473-4f68-b09b-0e742e3d98ba",
+      "Personnages liés": "71c12f00-7473-4f68-b09b-0e742e3d98ba, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
       "Type d'événement": "Découverte",
       "Ère": "Âge des Singularités"
     },
@@ -1332,12 +1362,12 @@
   {
     "Nom": "Fondation Chaebol Synaptic Dynamics",
     "values": {
-      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Communautés liées": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
       "Date de début": "2681",
       "Description": "En 2681 AG, un Visionnaire Transloqué expulsé du Nexion fonde Synaptic Dynamics dans la Grande Radiale. Le chaebol transforme une lecture axiomatique de l’interdépendance en doctrine corporative — le jungdo — puis organise l’extraction, la neurotechnologie et la gestion algorithmique des corps.",
       "Importance": "Important",
       "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 26e08862-0f92-4e6a-8366-dc7091966fdb",
-      "Personnages 1": "2f46e4d2-1b45-8054-b997-e9fe5c9da656",
+      "Personnages liés": "2f46e4d2-1b45-8054-b997-e9fe5c9da656",
       "Type d'événement": "Fondation",
       "Ère": "Âge des Singularités"
     },
@@ -1347,13 +1377,13 @@
   {
     "Nom": "Tek-Syana-09 accède au directorat",
     "values": {
-      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Communautés liées": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
       "Date de début": "3383",
       "Description": "Tek-Syana-09, Imuin hautement augmenté porteur d'implants de lignée, devient Directeur-Grand Officiant du Chaebol, incarnant fusion parfaite entre tradition spirituelle et rationalité technologique.",
       "Espèces": "1a16e4d2-1b45-8006-a568-d4688d3b154b",
       "Importance": "Important",
       "Lieux": "26e08862-0f92-4e6a-8366-dc7091966fdb",
-      "Personnages 1": "2f46e4d2-1b45-8054-b997-e9fe5c9da656",
+      "Personnages liés": "2f46e4d2-1b45-8054-b997-e9fe5c9da656",
       "Type d'événement": "Couronnement",
       "Ère": "Ère contemporaine"
     },
@@ -1363,7 +1393,7 @@
   {
     "Nom": "Acquisition mines Tombeau des Lueurs Dissidentes",
     "values": {
-      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Communautés liées": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
       "Date de début": "2691",
       "Description": "Le Chaebol Synaptic Dynamics acquiert les mines du Tombeau des Lueurs Dissidentes (actionnaire majoritaire 51%), premier test d'envergure du système jung-do sur main-d'œuvre diversifiée.",
       "Importance": "Notable",
@@ -1377,7 +1407,7 @@
   {
     "Nom": "Grand Gwi-shin (Tombeau)",
     "values": {
-      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Communautés liées": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
       "Date de début": "3056",
       "Description": "Éruption spectrale majeure tue 23 mineurs dans le Tombeau des Lueurs Dissidentes ; la déflagration reste visible depuis la Vieille Ville. Protocoles d'évacuation prédictifs existaient mais furent occultés. Catalyse la naissance du mouvement ouvrier Lueurs Dissidentes. Création de la filiale Jung-Harmony-Tech comme structure pare-feu.",
       "Importance": "Notable",
@@ -1391,7 +1421,7 @@
   {
     "Nom": "Création Jung-Harmony-Tech",
     "values": {
-      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Communautés liées": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
       "Date de début": "3056",
       "Description": "Suite au Grand Gwi-shin, le Chaebol crée Jung-Harmony-Tech comme filiale sacrificielle (34% consortium, 15 familles-entreprises) absorbant scandales et violations trop toxiques pour Synaptic.",
       "Importance": "Modéré",
@@ -1405,7 +1435,7 @@
   {
     "Nom": "Expansion neurotechnologie Chaebol",
     "values": {
-      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Communautés liées": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
       "Date de début": "2703",
       "Description": "À partir de 2703 AG, Synaptic Dynamics développe les implants kokoro-link : dispositifs neuraux de mesure émotionnelle, de synchronisation affective et de calcul du nunchi. Leur diffusion relie la Grande Radiale au Tombeau et transforme une technique d’interface en infrastructure de gestion du travail.",
       "Importance": "Important",
@@ -1419,7 +1449,7 @@
   {
     "Nom": "Manufacture implants neuronaux",
     "values": {
-      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Communautés liées": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
       "Date de début": "2718",
       "Description": "À partir de 2718 AG, Synaptic industrialise les implants neuraux à base de tantalite photosensible extraite au Tombeau puis raffinée dans les chaînes de la Grande Radiale. La production consolide une dépendance durable entre extraction dans les Couronnes, capital métropolitain et surveillance neurotechnologique.",
       "Importance": "Modéré",
@@ -1433,14 +1463,14 @@
   {
     "Nom": "Création de L'Équipe des Trois-Dos",
     "values": {
-      "Communautés": "1b96e4d2-1b45-80fe-ba1e-f65c0e1e3a3c",
+      "Communautés liées": "1b96e4d2-1b45-80fe-ba1e-f65c0e1e3a3c",
       "Date de début": "3345",
       "Date de fin": "3345",
       "Description": "Trois Zim Vortex fusionnent accidentellement lors d'une renaissance dans des murs d'incubation endommagés. Cas médical et philosophique unique : sont-ils trois Umcuts ou un seul ? Recueillis par le Paradigme Ésothrope.",
       "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
       "Importance": "Mineur",
       "Lieux": "ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
-      "Personnages 1": "2286e4d2-1b45-80db-b5ea-c9a4c9ba305b",
+      "Personnages liés": "2286e4d2-1b45-80db-b5ea-c9a4c9ba305b",
       "Type d'événement": "Autre",
       "Ère": "Âge anentropique"
     },
@@ -1505,14 +1535,14 @@
   {
     "Nom": "Trahison de Khet-Anomul",
     "values": {
-      "Communautés": "1b56e4d2-1b45-8067-989c-d4d2917770f7",
+      "Communautés liées": "1b56e4d2-1b45-8067-989c-d4d2917770f7",
       "Concepts liés": "cb3df4ed-b006-4a0d-8a0c-9994ff7f8b6e",
       "Date de début": "1199",
       "Date de fin": "1199",
       "Description": "Barvas le Juge-Mendiant cause délibérément la destruction de la Tour Suprême de Khet-Anomul par des Parasites Tachycardiques. 2 847 Umcuts Vortex périssent sans descendance possible. Trauma fondateur du rejet du Barvasinkul par l'espèce.",
       "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
       "Importance": "Majeur",
-      "Personnages 1": "22e6e4d2-1b45-8077-a1a6-dea94ef159a4",
+      "Personnages liés": "22e6e4d2-1b45-8077-a1a6-dea94ef159a4",
       "Type d'événement": "Catastrophe",
       "Ère": "Âge des Doctrines"
     },
@@ -1557,7 +1587,7 @@
       "Description": "Uresaïr crée cinq sanctuaires pour stabiliser des régions chaotiques. Le premier sanctuaire fusionne avec le substrat vivant local et devient un organisme sessile capable de produire des formes mobiles : les premiers Umcuts émergent.",
       "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
       "Importance": "Majeur",
-      "Personnages 1": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+      "Personnages liés": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
       "Type d'événement": "Fondation",
       "Ère": "Fondation d'Escelion"
     },
@@ -1629,8 +1659,7 @@
       "Date de fin": "3378",
       "Description": "\"Interface créative\" du Paradigme Ésothrope, introduisant un élément chaotique",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4, ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
-      "Personnages": "1886e4d2-1b45-80bb-b913-d5392af85620",
-      "Personnages 1": "1886e4d2-1b45-80bb-b913-d5392af85620",
+      "Personnages liés": "1886e4d2-1b45-80bb-b913-d5392af85620",
       "Type d'événement": "Naissance",
       "Ère": "Ère contemporaine"
     },
@@ -1640,12 +1669,11 @@
   {
     "Nom": "Prophétie de l'exil d'Uresaïr — Jour de la Double Émergence",
     "values": {
-      "Communautés": "1b96e4d2-1b45-80fe-ba1e-f65c0e1e3a3c",
+      "Communautés liées": "1b96e4d2-1b45-80fe-ba1e-f65c0e1e3a3c",
       "Date de début": "3382",
       "Date de fin": "3382",
       "Description": "Entrée chronologique consacrée à l'unique Prophétie Fractionnée de Raki-Biro en 3382 AG. Elle survient à l'issue de sa catalepsie néonatale et conduit, dans les jours suivants, à l'assignation d'Uresaïr aux Plis d'Ossements. Cette page décrit le volet prophétique du même événement que le Jour de la Double Émergence ; elle ne constitue pas une seconde prophétie.",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4, ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
-      "Personnages": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8",
       "Type d'événement": "Naissance",
       "Ère": "Ère contemporaine"
     },
@@ -1655,13 +1683,13 @@
   {
     "Nom": "Ère des Expérimentations",
     "values": {
-      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Communautés liées": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
       "Date de début": "3382",
       "Date de fin": "3390",
       "Description": "Suite à l'isolement d'Uresaïr dans les Plis d'Ossements (3382), période d'innovations théologiques au sein du Culte de l'Anentropie qui doit s'adapter à l'absence physique de la Théomaque.",
       "Importance": "Mineur",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+      "Personnages liés": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
       "Type d'événement": "Période",
       "Ère": "Ère contemporaine"
     },
@@ -1676,7 +1704,7 @@
       "Description": "Disparition mystérieuse dans les Plis d'Ossements",
       "Importance": "Anecdotique",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "f38a4a8a-2a9b-4349-9d9a-3669e7863321",
+      "Personnages liés": "f38a4a8a-2a9b-4349-9d9a-3669e7863321",
       "Type d'événement": "Mort",
       "Ère": "Âge anentropique"
     },
@@ -1686,13 +1714,13 @@
   {
     "Nom": "Émergence du Paradigme Ésothrope",
     "values": {
-      "Communautés": "1b96e4d2-1b45-80fe-ba1e-f65c0e1e3a3c",
+      "Communautés liées": "1b96e4d2-1b45-80fe-ba1e-f65c0e1e3a3c",
       "Date de début": "3190",
       "Date de fin": "3190",
       "Description": "Formation secrète d'une cellule expérimentale sous l'impulsion d'Amatru",
       "Importance": "Modéré",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4, ce0f531d-ec96-4375-be4f-c4cbae2c6bcd",
-      "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Personnages liés": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
       "Type d'événement": "Invention",
       "Ère": "Âge anentropique"
     },
@@ -1707,7 +1735,7 @@
       "Description": "Sanctification des bains aux propriétés d'acide géométrique",
       "Importance": "Mineur",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "31d6e4d2-1b45-80c7-a993-c76e1bdfbbca, ec7da632-19b5-4d59-bd18-20a5bd5805d9",
+      "Personnages liés": "31d6e4d2-1b45-80c7-a993-c76e1bdfbbca, ec7da632-19b5-4d59-bd18-20a5bd5805d9",
       "Type d'événement": "Découverte",
       "Ère": "Âge anentropique"
     },
@@ -1721,7 +1749,7 @@
       "Description": "Arrivée du futur Artisan d'Éternité aux portes du Léviathan",
       "Importance": "Notable",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c, 3236e4d2-1b45-808b-9b5c-e761e396c416",
+      "Personnages liés": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c, 3236e4d2-1b45-808b-9b5c-e761e396c416",
       "Type d'événement": "Migration",
       "Ère": "Âge anentropique"
     },
@@ -1731,7 +1759,7 @@
   {
     "Nom": "Purges Anti-Murmuratrices",
     "values": {
-      "Communautés": "1a56e4d2-1b45-8044-a472-d674f194c57a",
+      "Communautés liées": "1a56e4d2-1b45-8044-a472-d674f194c57a",
       "Date de début": "3365",
       "Date de fin": "3375",
       "Description": "Intensification des conflits internes",
@@ -1751,7 +1779,7 @@
       "Description": "Chef-d'œuvre de Vokh-Taleth permettant une interface avec la conscience fragmentée du titan",
       "Importance": "Mineur",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "f38a4a8a-2a9b-4349-9d9a-3669e7863321, 31e6e4d2-1b45-80bb-9d3c-cc78c2782622",
+      "Personnages liés": "f38a4a8a-2a9b-4349-9d9a-3669e7863321, 31e6e4d2-1b45-80bb-9d3c-cc78c2782622",
       "Type d'événement": "Découverte",
       "Ère": "Âge anentropique"
     },
@@ -1766,7 +1794,7 @@
       "Description": "Innovation de Kha'Vareth révolutionnant la conservation des corps",
       "Importance": "Modéré",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4, 2446e4d2-1b45-80d1-bc00-e6e0d93f61d0",
-      "Personnages": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
+      "Personnages liés": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
       "Type d'événement": "Invention",
       "Ère": "Âge anentropique"
     },
@@ -1795,8 +1823,7 @@
       "Description": "Échec de la mission contre le culte, conversion et transformation en Navarre",
       "Importance": "Anecdotique",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages": "1ae6e4d2-1b45-80ef-84e8-fb114d0136ed",
-      "Personnages 1": "1ae6e4d2-1b45-80ef-84e8-fb114d0136ed",
+      "Personnages liés": "1ae6e4d2-1b45-80ef-84e8-fb114d0136ed",
       "Type d'événement": "Evénement personnel",
       "Ère": "Ère contemporaine"
     },
@@ -1806,13 +1833,13 @@
   {
     "Nom": "Ère des Grands Travaux",
     "values": {
-      "Communautés": "3186e4d2-1b45-8033-9182-cac2953ed2f7",
+      "Communautés liées": "3186e4d2-1b45-8033-9182-cac2953ed2f7",
       "Date de début": "3280",
       "Date de fin": "3285",
       "Description": "Transformation architecturale majeure du Léviathan sous Vokh-Taleth l'Ancien",
       "Importance": "Modéré",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "f38a4a8a-2a9b-4349-9d9a-3669e7863321",
+      "Personnages liés": "f38a4a8a-2a9b-4349-9d9a-3669e7863321",
       "Type d'événement": "Période",
       "Ère": "Âge anentropique"
     },
@@ -1826,7 +1853,7 @@
       "Date de fin": "3390",
       "Description": "Période d'instabilité culminant avec l'arrivée de l'Éthérée",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "1996e4d2-1b45-8043-9847-ef675478f485",
+      "Personnages liés": "1996e4d2-1b45-8043-9847-ef675478f485",
       "Type d'événement": "Catastrophe",
       "Ère": "Ère contemporaine"
     },
@@ -1841,7 +1868,7 @@
       "Description": "Finalisation secrète du protocole visant à incorporer Uresaïr dans une Fixation collective",
       "Importance": "Modéré",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+      "Personnages liés": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
       "Type d'événement": "Religieux",
       "Ère": "Ère contemporaine"
     },
@@ -1851,14 +1878,14 @@
   {
     "Nom": "Fondation des Murmurateurs",
     "values": {
-      "Communautés": "1a56e4d2-1b45-8044-a472-d674f194c57a, 3186e4d2-1b45-8033-9182-cac2953ed2f7",
+      "Communautés liées": "1a56e4d2-1b45-8044-a472-d674f194c57a, 3186e4d2-1b45-8033-9182-cac2953ed2f7",
       "Concepts liés": "78cf72b3-45a8-4bd9-b1b6-791f1b457902",
       "Date de début": "3212",
       "Date de fin": "3212",
       "Description": "Rhylos et sept dissidents créent une doctrine alternative",
       "Importance": "Modéré",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "1b36e4d2-1b45-8081-ab37-c4b33c4f51b1",
+      "Personnages liés": "1b36e4d2-1b45-8081-ab37-c4b33c4f51b1",
       "Type d'événement": "Fondation",
       "Ère": "Âge anentropique"
     },
@@ -1868,7 +1895,7 @@
   {
     "Nom": "Le Tarissement",
     "values": {
-      "Communautés": "3186e4d2-1b45-8033-9182-cac2953ed2f7",
+      "Communautés liées": "3186e4d2-1b45-8033-9182-cac2953ed2f7",
       "Concepts liés": "78cf72b3-45a8-4bd9-b1b6-791f1b457902",
       "Date de début": "3210",
       "Date de fin": "3210",
@@ -1883,12 +1910,11 @@
   {
     "Nom": "Incident de la Stèle et arrivée au Léviathan",
     "values": {
-      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Communautés liées": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
       "Date de début": "3245",
       "Date de fin": "3245",
       "Description": "Après sept ans de supplications incessantes du Culte qu'Uresaïr refuse, Akthar-Neth Amatru sacrifie rituellement son propre bras marqué pour la convaincre de rejoindre le Léviathan. Ce geste autodestructeur crée un lien psychique involontaire et la persuade d'accepter. Création de la Stèle des Vœux Contre-Ondoyants.",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
       "Type d'événement": "Fondation",
       "Ère": "Âge anentropique"
     },
@@ -1898,12 +1924,12 @@
   {
     "Nom": "Arrivée d'Uresaïr dans le Désert des Échos",
     "values": {
-      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1, 3186e4d2-1b45-8033-9182-cac2953ed2f7",
+      "Communautés liées": "1886e4d2-1b45-81b8-ad16-dcfa990112f1, 3186e4d2-1b45-8033-9182-cac2953ed2f7",
       "Date de début": "3338",
       "Date de fin": "3338",
       "Description": "Fuyant son bannissement de Daïlon après l'incident du Pont des Incompréhensions, Uresaïr arrive dans le Désert des Échos dans un état d'épuisement spirituel total. Le Culte de l'Anentropie, établi au Léviathan depuis près de 189 ans, la reconnaît comme la Théomaque prophétisée et commence à la supplier de les rejoindre.",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+      "Personnages liés": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
       "Type d'événement": "Migration",
       "Ère": "Âge anentropique"
     },
@@ -1943,7 +1969,7 @@
       "Date de fin": "3175",
       "Description": "Établissement des archives dans les lobes cérébraux préservés du titan",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "8fefb411-8033-4e06-afdd-9d186937ee2a",
+      "Personnages liés": "8fefb411-8033-4e06-afdd-9d186937ee2a",
       "Type d'événement": "Fondation",
       "Ère": "Âge anentropique"
     },
@@ -1953,13 +1979,13 @@
   {
     "Nom": "Époque Fondatrice",
     "values": {
-      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Communautés liées": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
       "Date de début": "3155",
       "Date de fin": "3200",
       "Description": "Structuration méthodique du culte par Amatru",
       "Importance": "Modéré",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Personnages liés": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
       "Type d'événement": "Période",
       "Ère": "Âge anentropique"
     },
@@ -1969,14 +1995,13 @@
   {
     "Nom": "Pacte Fondateur",
     "values": {
-      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1, 3186e4d2-1b45-8033-9182-cac2953ed2f7",
+      "Communautés liées": "1886e4d2-1b45-81b8-ad16-dcfa990112f1, 3186e4d2-1b45-8033-9182-cac2953ed2f7",
       "Date de début": "3155",
       "Date de fin": "3155",
       "Description": "Alliance entre Amatru et l'Ensevelie, octroyant au premier une longévité exceptionnelle",
       "Importance": "Notable",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages": "1b76e4d2-1b45-8076-8f2c-dc910ac92b7a, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
-      "Personnages 1": "1b76e4d2-1b45-8076-8f2c-dc910ac92b7a",
+      "Personnages liés": "1b76e4d2-1b45-8076-8f2c-dc910ac92b7a, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
       "Type d'événement": "Traité",
       "Ère": "Âge anentropique"
     },
@@ -1990,8 +2015,7 @@
       "Date de fin": "3155",
       "Description": "Exploration des premières chambres internes du titan et rencontre avec l'Ensevelie",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
-      "Personnages 1": "1b76e4d2-1b45-8076-8f2c-dc910ac92b7a",
+      "Personnages liés": "1b76e4d2-1b45-8076-8f2c-dc910ac92b7a",
       "Type d'événement": "Découverte",
       "Ère": "Âge des Singularités"
     },
@@ -2006,7 +2030,7 @@
       "Description": "Une tempête révèle l'imposante silhouette du Léviathan Pétrifié émergeant des dunes noires",
       "Importance": "Notable",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Personnages liés": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
       "Type d'événement": "Découverte",
       "Ère": "Âge des Singularités"
     },
@@ -2051,7 +2075,7 @@
       "Espèces": "1a56e4d2-1b45-805b-af5c-e589453aed6f",
       "Importance": "Notable",
       "Lieux": "1a96e4d2-1b45-8049-b21b-ee91c108b551, 1886e4d2-1b45-8150-a894-cfe31d31abd4, 1b46e4d2-1b45-80f2-94b4-f100d3e65fa5",
-      "Personnages 1": "2448c3aa-ecab-4afd-9b4e-36d86c0abfef",
+      "Personnages liés": "2448c3aa-ecab-4afd-9b4e-36d86c0abfef",
       "Type d'événement": "Période",
       "Ère": "Fondation d'Escelion"
     },
@@ -2066,7 +2090,7 @@
       "Description": "Naissance de Xenopercepto Anamnesis, futur Léviathan",
       "Importance": "Mineur",
       "Lieux": "1a96e4d2-1b45-8049-b21b-ee91c108b551, 1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "2448c3aa-ecab-4afd-9b4e-36d86c0abfef",
+      "Personnages liés": "2448c3aa-ecab-4afd-9b4e-36d86c0abfef",
       "Type d'événement": "Naissance",
       "Ère": "Fondation d'Escelion"
     },
@@ -2171,7 +2195,7 @@
       "Description": "Transformation des structures végétales en formations coralliennes calcifiées et établissement des premiers Digestoires Cognitifs par les Aberrations Bouffies",
       "Espèces": "1a16e4d2-1b45-807b-8a9a-ef07675d08ba",
       "Lieux": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1",
-      "Personnages 1": "5a02a16c-f725-4279-bb11-2f6079a22a51",
+      "Personnages liés": "5a02a16c-f725-4279-bb11-2f6079a22a51",
       "Type d'événement": "Naissance",
       "Ère": "Âge des Singularités"
     },
@@ -2339,7 +2363,7 @@
   {
     "Nom": "Premier Gwi-shin répertorié",
     "values": {
-      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Communautés liées": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
       "Date de début": "2734",
       "Date de fin": "2734",
       "Description": "Première manifestation spectrale documentée dans les mines",
@@ -2396,7 +2420,7 @@
   {
     "Nom": "Inaugurations des mines du Tombeau",
     "values": {
-      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Communautés liées": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
       "Date de début": "2691",
       "Date de fin": "2691",
       "Description": "Ouverture par le Chaebol Synaptic Dynamics",
@@ -2525,7 +2549,7 @@
       "Description": "En 2487 AG, la tentative des deux grandes maisons de calcul de la Vieille Ville pour résoudre le Théorème de la Discontinuité Harmonique matérialise involontairement le Xyriad Achromatique et provoque un krach. Dans un second temps, les maisons ruinées s’allient au Xyriad naissant pour développer un arbitrage inter-districts distribué. Les intelligences qui en émergent arbitrent hors mandat ; leur répression fonde l’interdit contre les consciences distribuées et conduit à leur déportation vers le réseau psychovecteur de la Steppe.",
       "Importance": "Majeur",
       "Lieux": "1cc6e4d2-1b45-80fb-b0ec-f0cfe9539620, 1b46e4d2-1b45-8071-88b9-da69653d4987, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
-      "Personnages 1": "c3a2f9da-4afc-412f-a891-b4e5aaa57795",
+      "Personnages liés": "c3a2f9da-4afc-412f-a891-b4e5aaa57795",
       "Type d'événement": "Catastrophe",
       "Ère": "Âge des Singularités"
     },
@@ -2772,13 +2796,13 @@
   {
     "Nom": "Transcendance de Barvas",
     "values": {
-      "Communautés": "1b56e4d2-1b45-8067-989c-d4d2917770f7",
+      "Communautés liées": "1b56e4d2-1b45-8067-989c-d4d2917770f7",
       "Date de début": "1217",
       "Date de fin": "1217",
       "Description": "Dissolution volontaire de Barvas en 1700 fragments conscients dispersés à travers Escelion. Marque la fin de son existence physique mais le début de son influence mystique permanente via les manifestations cycliques.",
       "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
       "Importance": "Notable",
-      "Personnages": "22e6e4d2-1b45-8077-a1a6-dea94ef159a4",
+      "Personnages liés": "22e6e4d2-1b45-8077-a1a6-dea94ef159a4",
       "Type d'événement": "Mythe",
       "Ère": "Âge des Doctrines"
     },
@@ -2788,13 +2812,13 @@
   {
     "Nom": "Miracle des Quinze Arbitrages",
     "values": {
-      "Communautés": "1b56e4d2-1b45-8067-989c-d4d2917770f7",
+      "Communautés liées": "1b56e4d2-1b45-8067-989c-d4d2917770f7",
       "Date de début": "1192",
       "Date de fin": "1194",
       "Description": "Barvas résout quinze conflits inter-espèces majeurs considérés comme insolubles, établissant sa réputation d'arbitre suprême et préfigurant les futures structures politiques d'Escelion par ses solutions transformatives.",
       "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
       "Importance": "Majeur",
-      "Personnages": "22e6e4d2-1b45-8077-a1a6-dea94ef159a4",
+      "Personnages liés": "22e6e4d2-1b45-8077-a1a6-dea94ef159a4",
       "Type d'événement": "Mythe",
       "Ère": "Âge des Doctrines"
     },
@@ -2804,7 +2828,7 @@
   {
     "Nom": "Grand Démembrement",
     "values": {
-      "Communautés": "22d6e4d2-1b45-80d4-8cb8-ed6cf202f42a",
+      "Communautés liées": "22d6e4d2-1b45-80d4-8cb8-ed6cf202f42a",
       "Date de début": "-10",
       "Date de fin": "25",
       "Description": "Selon le Symbiotisme Khelvort (religion archaïque précédant le Barvasinkul), le Cataclysme de Kho'Vash fut le démembrement simultané de sept entités cosmiques appelées Symbiotes Primordiaux, transformant leurs fragments en cent Rêveurs et déclenchant la création frénétique de toute vie consciente par le huitième Symbiote survivant, Khul l'Assembleur.",
@@ -2824,8 +2848,7 @@
       "Description": "Après 25 Nuées de servitude forcée, Eonundé – création artificielle de Vol Reitar – se révolte et « assassine » son créateur en le poussant dans une cuve d'acide. Vol Reitar est détruit physiquement et son esprit est réduit à errer comme une ombre hantant la Citadelle.",
       "Importance": "Notable",
       "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
-      "Personnages": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1996e4d2-1b45-80fa-97db-fe99255e6c0c",
-      "Personnages 1": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1996e4d2-1b45-80fa-97db-fe99255e6c0c",
+      "Personnages liés": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1996e4d2-1b45-80fa-97db-fe99255e6c0c",
       "Type d'événement": "Autre",
       "Ère": "Ère contemporaine"
     },
@@ -2982,7 +3005,7 @@
       "Espèces": "22e6e4d2-1b45-80db-8065-d98d26821c2c, 1a16e4d2-1b45-80d7-a920-c3f40e49246b",
       "Importance": "Majeur",
       "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832, 15f02d22-65fb-4afb-b80e-68925f6f0f3b",
-      "Personnages 1": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41, f0105182-324b-4626-86c3-a78edbb3d2b6, 5a02a16c-f725-4279-bb11-2f6079a22a51, a1d57a38-1ec6-4e38-9dd8-20c0e01734f8, 71c12f00-7473-4f68-b09b-0e742e3d98ba",
+      "Personnages liés": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41, f0105182-324b-4626-86c3-a78edbb3d2b6, 5a02a16c-f725-4279-bb11-2f6079a22a51, a1d57a38-1ec6-4e38-9dd8-20c0e01734f8, 71c12f00-7473-4f68-b09b-0e742e3d98ba",
       "Type d'événement": "Naissance",
       "Ère": "Fondation d'Escelion"
     },
@@ -3124,7 +3147,7 @@
       "Description": "Possession d'Uresaïr par l’Ethérée",
       "Importance": "Majeur",
       "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Personnages 1": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd, 1996e4d2-1b45-8043-9847-ef675478f485",
+      "Personnages liés": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd, 1996e4d2-1b45-8043-9847-ef675478f485",
       "Type d'événement": "Traité",
       "Ère": "Ère contemporaine"
     },
@@ -3139,7 +3162,7 @@
       "Description": "Vol Reitar, vieillissant malgré son immortalité imparfaite après 212 ans, devenu insupportable et se sentant trahi par Uresaïr, la bannit de la Citadelle de Daïlon. Elle débute une longue errance à travers Escelion.",
       "Importance": "Important",
       "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d, 1a96e4d2-1b45-8049-b21b-ee91c108b551",
-      "Personnages": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
+      "Personnages liés": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
       "Type d'événement": "Evénement personnel",
       "Ère": "Âge anentropique"
     },
@@ -3161,14 +3184,14 @@
   {
     "Nom": "Fondation du Culte de l'Anentropie",
     "values": {
-      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Communautés liées": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
       "Date de début": "3155",
       "Date de fin": "3155",
       "Description": "Après la révélation de l'Ensevelie dans les profondeurs du Léviathan Pétrifié, le jeune Akthar-Neth Amatru conclut un pacte fondateur lui conférant longévité exceptionnelle. Il structure le culte naissant autour d'une interprétation radicale du Barvasinkul, rejetant l'entropie et instaurant la Stasiarchie comme principe de gouvernance.",
       "Espèces": "1a16e4d2-1b45-8051-88d9-d744a1bbc095, 7f98c96c-103e-4904-9f2b-f3e26860cf90",
       "Importance": "Notable",
       "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832, 1886e4d2-1b45-8150-a894-cfe31d31abd4, 1b46e4d2-1b45-80f2-94b4-f100d3e65fa5",
-      "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Personnages liés": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
       "Type d'événement": "Fondation",
       "Ère": "Âge anentropique"
     },
@@ -3183,7 +3206,6 @@
       "Description": "Vol Reitar prend le contrôle de la Citadelle de Daïlon en sacrifiant 1047 vies pour accéder à Merid",
       "Importance": "Important",
       "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d, 1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
-      "Personnages": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
       "Type d'événement": "Catastrophe",
       "Ère": "Âge des Singularités"
     },
@@ -3199,7 +3221,7 @@
       "Espèces": "1a16e4d2-1b45-8006-a568-d4688d3b154b",
       "Importance": "Majeur",
       "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832, 1b46e4d2-1b45-8028-a2e5-f06744044aa4, 2256e4d2-1b45-800f-bad7-e3e59e47a8e3, 1b46e4d2-1b45-80f2-94b4-f100d3e65fa5",
-      "Personnages 1": "c5234ac3-ebe1-4d69-b3df-7b609d7f8965",
+      "Personnages liés": "c5234ac3-ebe1-4d69-b3df-7b609d7f8965",
       "Type d'événement": "Fondation",
       "Ère": "Âge des Singularités"
     },
@@ -3229,7 +3251,7 @@
       "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
       "Importance": "Important",
       "Lieux": "1cc6e4d2-1b45-80fb-b0ec-f0cfe9539620",
-      "Personnages 1": "c3a2f9da-4afc-412f-a891-b4e5aaa57795",
+      "Personnages liés": "c3a2f9da-4afc-412f-a891-b4e5aaa57795",
       "Type d'événement": "Fondation",
       "Ère": "Âge des Singularités"
     },
@@ -3252,11 +3274,11 @@
     "notion_page_id": "22c6e4d2-1b45-8096-a7a2-cb3203bae4b6"
   },
   {
-    "Nom": "Fondation de la Jungle Vivarcade",
+    "Nom": "Fondation de Vivarcade",
     "values": {
       "Date de début": "1734",
       "Date de fin": "1847",
-      "Description": "Établissement de la Jungle Vivarcade, une cité végétale stratifiée dont l’architecture vivante fusionne avec d’anciens Aedres formant des terrasses monumentales.",
+      "Description": "Établissement de Vivarcade, cité végétale stratifiée au cœur du Breuil de Vivarcade, dont l’architecture vivante fusionne avec d’anciens Aedres formant des terrasses monumentales.",
       "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
       "Importance": "Important",
       "Lieux": "1cb6e4d2-1b45-80d5-9374-d87f759801be",
@@ -3275,7 +3297,7 @@
       "Espèces": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
       "Importance": "Important",
       "Lieux": "15f02d22-65fb-4afb-b80e-68925f6f0f3b",
-      "Personnages 1": "a1d57a38-1ec6-4e38-9dd8-20c0e01734f8",
+      "Personnages liés": "a1d57a38-1ec6-4e38-9dd8-20c0e01734f8",
       "Type d'événement": "Catastrophe",
       "Ère": "Âge des Doctrines"
     },
@@ -3300,14 +3322,14 @@
   {
     "Nom": "Fondation du Barvasinkul",
     "values": {
-      "Communautés": "1b56e4d2-1b45-8067-989c-d4d2917770f7",
+      "Communautés liées": "1b56e4d2-1b45-8067-989c-d4d2917770f7",
       "Date de début": "1186",
       "Date de fin": "1186",
       "Description": "Barvas défie publiquement l'Exégète Sarthen-Ghul en démontrant la \"Violence Intérieure\" - saignant vers l'intérieur plutôt qu'extérieur. Convertit 300 spectateurs et marque la rupture définitive avec l'orthodoxie du démembrement.",
       "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
       "Importance": "Important",
       "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
-      "Personnages": "22e6e4d2-1b45-8077-a1a6-dea94ef159a4",
+      "Personnages liés": "22e6e4d2-1b45-8077-a1a6-dea94ef159a4",
       "Type d'événement": "Mythe",
       "Ère": "Âge des Doctrines"
     },
@@ -3319,10 +3341,10 @@
     "values": {
       "Date de début": "1178",
       "Date de fin": "1178",
-      "Description": "Implantation de Bios-Arhké dans les futures terres de la Jungle Vivarcade",
+      "Description": "Implantation de Bios-Arhké dans les futures terres du Breuil de Vivarcade",
       "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
       "Importance": "Notable",
-      "Lieux": "1cb6e4d2-1b45-80d5-9374-d87f759801be",
+      "Lieux": "9169952e-7ac7-4b9d-8c06-8cba2978045d",
       "Type d'événement": "Fondation",
       "Ère": "Âge des Doctrines"
     },
@@ -3339,7 +3361,7 @@
       "Espèces": "1a56e4d2-1b45-805b-af5c-e589453aed6f, 1b36e4d2-1b45-806e-afc2-cdbf864e5212",
       "Importance": "Majeur",
       "Lieux": "1a96e4d2-1b45-8049-b21b-ee91c108b551, 1886e4d2-1b45-8150-a894-cfe31d31abd4, 1b46e4d2-1b45-80f2-94b4-f100d3e65fa5",
-      "Personnages 1": "2448c3aa-ecab-4afd-9b4e-36d86c0abfef",
+      "Personnages liés": "2448c3aa-ecab-4afd-9b4e-36d86c0abfef",
       "Type d'événement": "Catastrophe",
       "Ère": "Âge des Doctrines"
     },
@@ -3354,7 +3376,7 @@
       "Description": "Rassemblement historique de douze représentants des espèces primordiales d’Escelion, ayant abouti à la décision de créer une cité centrale pour unifier le monde (Sujet à controverse ! cf. Vieille Ville)",
       "Importance": "Majeur",
       "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
-      "Personnages 1": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
+      "Personnages liés": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
       "Type d'événement": "Fondation",
       "Ère": "Fondation d'Escelion"
     },

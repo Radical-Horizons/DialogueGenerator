@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -243,7 +244,11 @@ class BatchNodeGenerationService:
                     choices_mode=choices_mode,  # type: ignore[arg-type]
                     progress_callback=_choice_progress if on_progress else None,
                 )
-                fp = fingerprint_for(enriched) if fingerprint_for else None
+                fp = (
+                    await asyncio.to_thread(fingerprint_for, enriched)
+                    if fingerprint_for
+                    else None
+                )
                 items.append(
                     _result_from_generation(
                         parent.parent_node_id, result, fingerprint=fp

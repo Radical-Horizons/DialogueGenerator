@@ -7,7 +7,7 @@
     "Contenu par": "1b46e4d2-1b45-802a-8cc1-d19eea05d87d",
     "Date de création de la fiche": "2025-04-05T21:20:00.000Z",
     "Date vérification": "2026-04-30",
-    "Dernière modification": "2026-07-31T23:37:00.000Z",
+    "Dernière modification": "2026-08-03T16:55:00.000Z",
     "Espèces présentes": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8, 1a16e4d2-1b45-807b-8a9a-ef07675d08ba, 1a16e4d2-1b45-8006-a568-d4688d3b154b, 1a16e4d2-1b45-8099-be36-db66acb76390",
     "Evénements liés": "22c6e4d2-1b45-8086-b2ea-f4850ec0e09d, 2306e4d2-1b45-8021-9e44-f7908241fa85, 2306e4d2-1b45-808e-8d71-c584967f07ce, 2306e4d2-1b45-80fc-a91c-cd7acc2f4543, da62b697-3758-4e62-ab8c-6a9ebbff0f3b",
     "Monnaie locale": "Théorème (θ)",
@@ -20,9 +20,10 @@
     "Rêveur local": "c3a2f9da-4afc-412f-a891-b4e5aaa57795",
     "Rôle": "Zone urbaine",
     "Seuil économique": "8",
+    "Superficie (km²)": "5",
     "Taille": "District",
     "Type": "Région principale",
-    "Zones limitrophes": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 1b46e4d2-1b45-8071-88b9-da69653d4987, 1b46e4d2-1b45-8026-ac02-e1f3a2ba6faf, 166982c7-3cf0-4947-85c5-0a6df03ff80d",
+    "Zones limitrophes": "1b46e4d2-1b45-8071-88b9-da69653d4987, 166982c7-3cf0-4947-85c5-0a6df03ff80d, 1b46e4d2-1b45-8026-ac02-e1f3a2ba6faf, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
     "État": "À relire"
   },
   "sections": {

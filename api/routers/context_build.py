@@ -1,5 +1,6 @@
 """Router contexte GDD — construction du contexte et comptage de tokens.
 """
+import asyncio
 import hashlib
 import logging
 from datetime import datetime
@@ -185,10 +186,11 @@ async def build_context(
     Returns:
         Le contexte construit.
     """
-    try:
+    def _run() -> BuildContextResponse:
+        """Corps synchrone déporté sur un thread (ContextBuilder est bloquant)."""
         # Convertir ContextSelection en dict pour le service (avec préfixes underscore)
         context_selections_dict = request_data.context_selections.to_service_dict()
-        
+
         # Construire le contexte JSON (obligatoire, plus de fallback)
         structured_context = context_builder.build_context_json(
             selected_elements=context_selections_dict,
@@ -207,7 +209,9 @@ async def build_context(
             context=capped,
             token_count=token_count,
         )
-        
+
+    try:
+        return await asyncio.to_thread(_run)
     except Exception as e:
         logger.exception(f"Erreur lors de la construction du contexte (request_id: {request_id})")
         raise InternalServerException(
@@ -339,7 +343,8 @@ async def estimate_context_tokens(
         Estimation du nombre de tokens. Voir ``EstimateTokensResponse`` pour la distinction
         ``context_tokens`` (tronqué au budget requête) vs ``selection_tokens`` (mesure pleine).
     """
-    try:
+    def _run() -> EstimateTokensResponse:
+        """Corps synchrone déporté sur un thread (build contexte + breakdown, tout bloquant)."""
         service_dict = request_data.context_selections.to_service_dict()
         structured_context = context_builder.build_context_json(
             selected_elements=service_dict,
@@ -389,7 +394,9 @@ async def estimate_context_tokens(
             prompt_hash=context_only_hash,
             structured_prompt=structured_prompt.model_dump(),
         )
-        
+
+    try:
+        return await asyncio.to_thread(_run)
     except ValidationException:
         # Re-raise les ValidationException telles quelles
         raise
@@ -426,7 +433,8 @@ async def optimize_context(
     Returns:
         Sélection proposée, métriques et avertissements éventuels.
     """
-    try:
+    def _run() -> OptimizeContextResponse:
+        """Corps synchrone déporté sur un thread (passe par ContextBuilder, bloquant)."""
         return optimize_context_selection(
             context_builder,
             initial_selection=request_data.context_selections,
@@ -436,6 +444,9 @@ async def optimize_context(
             budget_tokens=request_data.max_context_tokens,
             rules=request_data.optimization_rules,
         )
+
+    try:
+        return await asyncio.to_thread(_run)
     except Exception as e:
         logger.exception(
             "Erreur lors de l'optimisation de contexte (request_id: %s)", request_id
