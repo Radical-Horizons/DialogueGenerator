@@ -45,6 +45,7 @@ from services.batch_node_generation_service import BatchNodeGenerationService
 from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
 from services.template_service import TemplateService
+from services.template_marketplace_service import TemplateMarketplaceService
 from services.repositories.sqlite import (
     AppSettingsRepository,
     DatabaseConnection,
@@ -642,6 +643,19 @@ def get_template_service(request: Request) -> TemplateService:
     """
     container = get_service_container(request)
     return container.get_template_service()
+
+
+def get_template_marketplace_service(request: Request) -> TemplateMarketplaceService:
+    """Retourne le service marketplace de templates.
+
+    Args:
+        request: La requête HTTP.
+
+    Returns:
+        Instance de TemplateMarketplaceService.
+    """
+    container = get_service_container(request)
+    return container.get_template_marketplace_service()
 
 
 def get_gdd_notion_sync_service(request: Request):

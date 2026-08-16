@@ -10,6 +10,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { usePresetStore } from '../../store/presetStore';
 import { useTemplateStore } from '../../store/templateStore';
 import { useLLMStore } from '../../store/llmStore';
+import { useAuthStore } from '../../store/authStore';
 import type { Preset, PresetConfiguration } from '../../types/preset';
 import type { Template, TemplateConfiguration, PrebuiltTemplate } from '../../types/template';
 import { theme } from '../../theme';
@@ -21,9 +22,11 @@ import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext';
 import { TemplateCreatorModal } from './TemplateCreatorModal';
 import { TemplateEditorModal } from './TemplateEditorModal';
 import { PrebuiltTemplateModal } from './PrebuiltTemplateModal';
+import { TemplateMarketplaceModal } from './TemplateMarketplaceModal';
 import { NarrowOverlayDrawer } from '../layout/NarrowOverlayDrawer';
 import { filterTemplates, groupTemplatesByCategory, TEMPLATE_UNCATEGORIZED_LABEL } from '../../utils/templateGroups';
 import { isPrebuiltNew } from '../../utils/templateApply';
+import { publishMarketplaceTemplateApi } from '../../api/templates';
 import type { SaveStatus } from '../shared/SaveStatusIndicator';
 
 function formatTemplateDate(isoString: string): string {
@@ -110,6 +113,8 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     deleteTemplate,
   } = useTemplateStore();
   const toast = useToast();
+  const currentUser = useAuthStore((state) => state.user);
+  const isGuest = currentUser?.role === 'guest';
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -127,6 +132,8 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   const deletingTemplateRef = useRef(false);
   const copyingPrebuiltRef = useRef(false);
   const [isCopyingPrebuilt, setIsCopyingPrebuilt] = useState(false);
+  const [isMarketplaceOpen, setIsMarketplaceOpen] = useState(false);
+  const publishingRef = useRef(false);
 
   const filteredTemplates = useMemo(
     () =>
@@ -215,6 +222,22 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     } finally {
       copyingPrebuiltRef.current = false;
       setIsCopyingPrebuilt(false);
+    }
+  };
+
+  const handlePublishTemplate = async (template: Template) => {
+    if (publishingRef.current || isGuest) {
+      return;
+    }
+    publishingRef.current = true;
+    try {
+      await publishMarketplaceTemplateApi(template.id);
+      toast(`« ${template.name} » publié sur le marketplace`, 'success');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Publication impossible';
+      toast(message, 'error');
+    } finally {
+      publishingRef.current = false;
     }
   };
 
@@ -527,6 +550,27 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           Sauvegarder comme template
         </button>
 
+        <button
+          type="button"
+          data-testid="marketplace-open-btn"
+          onClick={() => setIsMarketplaceOpen(true)}
+          style={{
+            padding: chrome.buttonPadding,
+            backgroundColor: theme.button.default.background,
+            border: `1px solid ${theme.border.secondary}`,
+            borderRadius: `${redesignRadius.control}px`,
+            color: theme.button.default.color,
+            fontWeight: 600,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            fontSize: `${chrome.buttonFontRem}rem`,
+            flex: isNarrow ? '1 1 auto' : undefined,
+            minHeight: TOUCH_TARGET_MIN_PX,
+          }}
+        >
+          Marketplace
+        </button>
+
         {/* Indicateur de statut de sauvegarde */}
         {saveStatus && (
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -571,6 +615,15 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           void handleCopyPrebuilt(prebuilt);
         }}
         copyDisabled={isCopyingPrebuilt}
+      />
+
+      <TemplateMarketplaceModal
+        isOpen={isMarketplaceOpen}
+        onClose={() => setIsMarketplaceOpen(false)}
+        currentUserId={currentUser?.id ?? null}
+        currentUserRole={currentUser?.role ?? null}
+        isGuest={Boolean(isGuest)}
+        onCopied={() => loadTemplates()}
       />
 
       <section
@@ -916,6 +969,28 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                       >
                         Supprimer
                       </button>
+                      {!isGuest && (
+                        <button
+                          type="button"
+                          data-testid="template-item-publish-btn"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void handlePublishTemplate(template);
+                          }}
+                          style={{
+                            minHeight: TOUCH_TARGET_MIN_PX,
+                            padding: chrome.buttonPadding,
+                            backgroundColor: theme.button.default.background,
+                            border: `1px solid ${theme.border.secondary}`,
+                            borderRadius: `${redesignRadius.control}px`,
+                            color: theme.button.default.color,
+                            cursor: 'pointer',
+                            fontSize: `${chrome.buttonFontRem}rem`,
+                          }}
+                        >
+                          Publier
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

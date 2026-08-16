@@ -19,6 +19,10 @@ from services.repositories.sqlite.dialogue_shares_repository import (
     DialogueShareEntry,
     DialogueSharesRepository,
 )
+from services.repositories.sqlite.shared_templates_repository import (
+    SharedTemplateRow,
+    SharedTemplatesRepository,
+)
 from services.repositories.sqlite.dialogues_index_repository import (
     DialogueIndexEntry,
     DialoguesIndexRepository,
@@ -39,6 +43,8 @@ __all__ = [
     "DialogueIndexEntry",
     "DialogueShareEntry",
     "DialogueSharesRepository",
+    "SharedTemplateRow",
+    "SharedTemplatesRepository",
     "DialoguesIndexRepository",
     "UserRepository",
     "UserSettingsRepository",

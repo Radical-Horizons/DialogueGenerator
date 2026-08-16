@@ -3,6 +3,8 @@
  */
 import apiClient from './client'
 import type {
+  MarketplaceListing,
+  MarketplaceRatingRequest,
   PrebuiltTemplate,
   Template,
   TemplateCreate,
@@ -98,4 +100,57 @@ export async function listPrebuiltTemplatesApi(): Promise<PrebuiltTemplate[]> {
 export async function getPrebuiltTemplateApi(slug: string): Promise<PrebuiltTemplate> {
   const { data } = await apiClient.get<PrebuiltTemplate>(`/api/v1/templates/prebuilt/${slug}`)
   return data
+}
+
+/**
+ * Liste les fiches marketplace.
+ */
+export async function listMarketplaceTemplatesApi(): Promise<MarketplaceListing[]> {
+  const { data } = await apiClient.get<MarketplaceListing[]>('/api/v1/templates/marketplace')
+  return data
+}
+
+/**
+ * Publie un template custom vers le marketplace.
+ */
+export async function publishMarketplaceTemplateApi(
+  templateId: string,
+): Promise<MarketplaceListing> {
+  const { data } = await apiClient.post<MarketplaceListing>('/api/v1/templates/marketplace', {
+    templateId,
+  })
+  return data
+}
+
+/**
+ * Copie une fiche marketplace vers Mes templates.
+ */
+export async function copyMarketplaceListingApi(
+  listingId: string,
+): Promise<TemplateWriteResponse> {
+  const { data } = await apiClient.post<TemplateWriteResponse>(
+    `/api/v1/templates/marketplace/${listingId}/use`,
+  )
+  return data
+}
+
+/**
+ * Note une fiche marketplace (1–5).
+ */
+export async function rateMarketplaceTemplateApi(
+  listingId: string,
+  body: MarketplaceRatingRequest,
+): Promise<MarketplaceListing> {
+  const { data } = await apiClient.put<MarketplaceListing>(
+    `/api/v1/templates/marketplace/${listingId}/rating`,
+    body,
+  )
+  return data
+}
+
+/**
+ * Retire une fiche marketplace (auteur ou admin).
+ */
+export async function unpublishMarketplaceListingApi(listingId: string): Promise<void> {
+  await apiClient.delete(`/api/v1/templates/marketplace/${listingId}`)
 }

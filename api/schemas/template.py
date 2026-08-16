@@ -206,3 +206,46 @@ class PrebuiltTemplate(BaseModel):
             raise ValueError(f"Invalid prebuilt slug: {v}")
         return v
 
+
+class MarketplaceListing(BaseModel):
+    """Fiche marketplace (snapshot publié + métadonnées auteur / notes)."""
+
+    id: str = Field(..., description="UUID de la fiche marketplace")
+    sourceTemplateId: str = Field(..., description="UUID du custom d'origine")
+    authorId: str = Field(..., description="users.id de l'auteur")
+    authorUsername: str = Field(..., description="Nom affiché de l'auteur")
+    name: str = Field(..., min_length=1)
+    description: str = Field(default="")
+    category: str = Field(default="Général")
+    icon: str = Field(default="📋")
+    configuration: TemplateConfiguration = Field(..., description="Snapshot figé")
+    createdAt: str = Field(..., description="Horodatage ISO de publication")
+    usageCount: int = Field(default=0, ge=0)
+    ratingAverage: Optional[float] = Field(
+        default=None,
+        description="Moyenne 1–5, None si aucune note",
+    )
+    ratingCount: int = Field(default=0, ge=0)
+
+
+class MarketplacePublishRequest(BaseModel):
+    """Publication d'un template custom vers le marketplace."""
+
+    templateId: str = Field(..., description="UUID du custom à publier")
+
+    @field_validator("templateId")
+    @classmethod
+    def validate_template_id(cls, v: str) -> str:
+        """Refuse un identifiant qui n'est pas un UUID."""
+        try:
+            UUID(v)
+        except ValueError as exc:
+            raise ValueError(f"Invalid UUID format: {v}") from exc
+        return v
+
+
+class MarketplaceRatingRequest(BaseModel):
+    """Note 1–5 sur une fiche marketplace."""
+
+    stars: int = Field(..., ge=1, le=5, description="Note entière de 1 à 5")
+

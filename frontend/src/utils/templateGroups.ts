@@ -1,7 +1,7 @@
 /**
  * Regroupement et filtrage des templates (affichage « Mes templates »).
  */
-import type { Template } from '../types/template'
+import type { MarketplaceListing, Template } from '../types/template'
 
 /** Aligné sur le défaut backend (`category` vide → « Général »). */
 export const TEMPLATE_UNCATEGORIZED_LABEL = 'Général'
@@ -112,4 +112,64 @@ export function groupTemplatesByCategory(templates: Template[]): Array<[string, 
     }
   }
   return Array.from(groups.entries())
+}
+
+/** Clé de tri marketplace (front, après GET). */
+export type MarketplaceSortKey = 'usage' | 'date' | 'rating'
+
+/**
+ * Adapte une fiche marketplace au shape ``Template`` pour ``filterTemplates``.
+ */
+export function marketplaceListingToTemplate(listing: MarketplaceListing): Template {
+  return {
+    id: listing.id,
+    name: listing.name,
+    description: listing.description,
+    category: listing.category,
+    icon: listing.icon,
+    metadata: { created: listing.createdAt, modified: listing.createdAt },
+    configuration: listing.configuration,
+  }
+}
+
+/**
+ * Filtre les fiches marketplace avec les critères 6.1.2 (AND, sous-chaîne).
+ */
+export function filterMarketplaceListings(
+  listings: MarketplaceListing[],
+  query: TemplateFilterQuery,
+): MarketplaceListing[] {
+  const allowed = new Set(
+    filterTemplates(listings.map(marketplaceListingToTemplate), query).map((item) => item.id),
+  )
+  return listings.filter((listing) => allowed.has(listing.id))
+}
+
+/**
+ * Trie les fiches : usage / date desc ; note moyenne desc, ``null`` en dernier.
+ */
+export function sortMarketplaceListings(
+  listings: MarketplaceListing[],
+  sort: MarketplaceSortKey,
+): MarketplaceListing[] {
+  return [...listings].sort((left, right) => {
+    if (sort === 'usage') {
+      return right.usageCount - left.usageCount
+    }
+    if (sort === 'date') {
+      return right.createdAt.localeCompare(left.createdAt)
+    }
+    const leftAvg = left.ratingAverage
+    const rightAvg = right.ratingAverage
+    if (leftAvg == null && rightAvg == null) {
+      return 0
+    }
+    if (leftAvg == null) {
+      return 1
+    }
+    if (rightAvg == null) {
+      return -1
+    }
+    return rightAvg - leftAvg
+  })
 }

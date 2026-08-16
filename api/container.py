@@ -23,6 +23,7 @@ from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
 from services.template_service import TemplateService
+from services.template_marketplace_service import TemplateMarketplaceService
 from services.dialogue_generation_service import DialogueGenerationService
 from services.llm_usage_service import LLMUsageService
 from services.export_log_service import ExportLogService
@@ -40,6 +41,7 @@ from services.repositories.sqlite import (
     DialogueSharesRepository,
     DialoguesIndexRepository,
     DialoguesSearchRepository,
+    SharedTemplatesRepository,
     UserRepository,
     UserSettingsRepository,
 )
@@ -90,6 +92,8 @@ class ServiceContainer:
         self._trait_catalog_service: Optional[TraitCatalogService] = None
         self._preset_service: Optional[PresetService] = None
         self._template_service: Optional[TemplateService] = None
+        self._template_marketplace_service: Optional[TemplateMarketplaceService] = None
+        self._shared_templates_repository: Optional[SharedTemplatesRepository] = None
         self._dialogue_generation_service: Optional[DialogueGenerationService] = None
         self._llm_usage_service: Optional[LLMUsageService] = None
         self._export_log_service: Optional[ExportLogService] = None
@@ -191,6 +195,27 @@ class ServiceContainer:
                 )
                 logger.info("DialogueSharesRepository initialisé dans le container.")
             return self._dialogue_shares_repository
+
+    def get_shared_templates_repository(self) -> SharedTemplatesRepository:
+        """Retourne le repository du marketplace de templates."""
+        with self._database_lock:
+            if self._shared_templates_repository is None:
+                self._shared_templates_repository = SharedTemplatesRepository(
+                    self.get_database_connection()
+                )
+                logger.info("SharedTemplatesRepository initialisé dans le container.")
+            return self._shared_templates_repository
+
+    def get_template_marketplace_service(self) -> TemplateMarketplaceService:
+        """Retourne le service marketplace de templates."""
+        with self._database_lock:
+            if self._template_marketplace_service is None:
+                self._template_marketplace_service = TemplateMarketplaceService(
+                    repository=self.get_shared_templates_repository(),
+                    template_service=self.get_template_service(),
+                )
+                logger.info("TemplateMarketplaceService initialisé dans le container.")
+            return self._template_marketplace_service
 
     def get_collections_repository(self) -> CollectionsRepository:
         """Retourne le repository des collections de dialogues."""

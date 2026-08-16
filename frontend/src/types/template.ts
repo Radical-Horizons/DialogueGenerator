@@ -69,3 +69,24 @@ export interface PrebuiltTemplate {
   addedAt: string
   configuration: TemplateConfiguration
 }
+
+/** Fiche marketplace (snapshot publié + notes / usages). */
+export interface MarketplaceListing {
+  id: string
+  sourceTemplateId: string
+  authorId: string
+  authorUsername: string
+  name: string
+  description: string
+  category: string
+  icon: string
+  configuration: TemplateConfiguration
+  createdAt: string
+  usageCount: number
+  ratingAverage: number | null
+  ratingCount: number
+}
+
+export interface MarketplaceRatingRequest {
+  stars: number
+}

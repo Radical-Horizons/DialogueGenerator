@@ -11,8 +11,26 @@ import { useGenerationStore } from '../store/generationStore';
 import type { Preset } from '../types/preset';
 import type { Template, PrebuiltTemplate } from '../types/template';
 
+const { authState, mockPublishMarketplace } = vi.hoisted(() => ({
+  authState: {
+    user: { id: 'writer-a', username: 'writer-a', role: 'writer' as string },
+  },
+  mockPublishMarketplace: vi.fn(),
+}));
+
 vi.mock('../store/presetStore');
 vi.mock('../store/templateStore');
+vi.mock('../store/authStore', () => ({
+  useAuthStore: (selector?: (state: typeof authState) => unknown) =>
+    typeof selector === 'function' ? selector(authState) : authState,
+}));
+vi.mock('../api/templates', () => ({
+  publishMarketplaceTemplateApi: (...args: unknown[]) => mockPublishMarketplace(...args),
+  listMarketplaceTemplatesApi: vi.fn().mockResolvedValue([]),
+  copyMarketplaceListingApi: vi.fn(),
+  unpublishMarketplaceListingApi: vi.fn(),
+  rateMarketplaceTemplateApi: vi.fn(),
+}));
 vi.mock('../api/graph', () => ({
   getContextDroppingRules: vi.fn().mockResolvedValue({
     rules_profile: 'strict',
@@ -181,6 +199,8 @@ describe('PresetSelector', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    authState.user = { id: 'writer-a', username: 'writer-a', role: 'writer' };
+    mockPublishMarketplace.mockResolvedValue({ id: 'listing-1' });
     useGenerationStore.getState().setContextDroppingRulesOverlay(null)
     mockCreateTemplate.mockResolvedValue({ warnings: [] });
     mockUpdateTemplate.mockResolvedValue({ warnings: [] });
@@ -1011,6 +1031,29 @@ describe('PresetSelector', () => {
       render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
 
       expect(screen.getByText(/failed to load presets/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('Marketplace', () => {
+    it('ouvre le modal marketplace', async () => {
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+
+      fireEvent.click(screen.getByTestId('marketplace-open-btn'));
+
+      expect(await screen.findByTestId('template-marketplace-modal')).toBeInTheDocument();
+    });
+
+    it('affiche Publier sur une carte writer', () => {
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+
+      expect(screen.getAllByTestId('template-item-publish-btn').length).toBeGreaterThan(0);
+    });
+
+    it('masque Publier pour un guest', () => {
+      authState.user = { id: 'guest', username: 'guest', role: 'guest' };
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+
+      expect(screen.queryByTestId('template-item-publish-btn')).not.toBeInTheDocument();
     });
   });
 });

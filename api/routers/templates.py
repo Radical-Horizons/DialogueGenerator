@@ -1,18 +1,30 @@
 """Router FastAPI pour les endpoints /api/v1/templates (CRUD)."""
 import logging
-from typing import List
+from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from api.dependencies import get_template_service
+from api.dependencies import (
+    get_template_marketplace_service,
+    get_template_service,
+    require_non_guest,
+)
 from api.routers.auth import get_current_user
 from api.schemas.preset import PresetValidationResult
 from api.schemas.template import (
+    MarketplaceListing,
+    MarketplacePublishRequest,
+    MarketplaceRatingRequest,
     PrebuiltTemplate,
     Template,
     TemplateCreate,
     TemplateCreateResponse,
     TemplateUpdate,
+)
+from services.template_marketplace_service import (
+    MarketplaceForbiddenError,
+    OwnListingRatingError,
+    TemplateMarketplaceService,
 )
 from services.template_service import TemplateService
 
@@ -139,6 +151,175 @@ def get_prebuilt_template(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error loading prebuilt template",
+        ) from exc
+
+
+@router.get("/marketplace", response_model=List[MarketplaceListing])
+def list_marketplace_templates(
+    marketplace_service: TemplateMarketplaceService = Depends(
+        get_template_marketplace_service
+    ),
+) -> List[MarketplaceListing]:
+    """Liste les fiches marketplace publiées."""
+    try:
+        return marketplace_service.browse_templates()
+    except Exception as exc:
+        logger.exception("Erreur liste marketplace")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error listing marketplace templates",
+        ) from exc
+
+
+@router.get("/marketplace/{listing_id}", response_model=MarketplaceListing)
+def get_marketplace_template(
+    listing_id: str,
+    marketplace_service: TemplateMarketplaceService = Depends(
+        get_template_marketplace_service
+    ),
+) -> MarketplaceListing:
+    """Charge une fiche marketplace."""
+    try:
+        return marketplace_service.get_listing(listing_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Marketplace listing not found",
+        ) from exc
+    except Exception as exc:
+        logger.exception("Erreur chargement marketplace")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error loading marketplace listing",
+        ) from exc
+
+
+@router.post(
+    "/marketplace",
+    response_model=MarketplaceListing,
+    status_code=status.HTTP_201_CREATED,
+)
+def publish_marketplace_template(
+    body: MarketplacePublishRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    marketplace_service: TemplateMarketplaceService = Depends(
+        get_template_marketplace_service
+    ),
+) -> MarketplaceListing:
+    """Publie un template custom (upsert si déjà publié par le même auteur)."""
+    require_non_guest(current_user)
+    try:
+        listing = marketplace_service.share_template(body.templateId, current_user)
+        logger.info("Template publié marketplace: %s", listing.id)
+        return listing
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Template not found",
+        ) from exc
+    except MarketplaceForbiddenError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Marketplace publish forbidden",
+        ) from exc
+    except Exception as exc:
+        logger.exception("Erreur publication marketplace")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error publishing marketplace template",
+        ) from exc
+
+
+@router.post(
+    "/marketplace/{listing_id}/use",
+    response_model=TemplateCreateResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def use_marketplace_template(
+    listing_id: str,
+    marketplace_service: TemplateMarketplaceService = Depends(
+        get_template_marketplace_service
+    ),
+) -> TemplateCreateResponse:
+    """Copie une fiche vers Mes templates et incrémente les usages."""
+    try:
+        return marketplace_service.use_listing(listing_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Marketplace listing not found",
+        ) from exc
+    except Exception as exc:
+        logger.exception("Erreur copie marketplace")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error using marketplace listing",
+        ) from exc
+
+
+@router.put("/marketplace/{listing_id}/rating", response_model=MarketplaceListing)
+def rate_marketplace_template(
+    listing_id: str,
+    body: MarketplaceRatingRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    marketplace_service: TemplateMarketplaceService = Depends(
+        get_template_marketplace_service
+    ),
+) -> MarketplaceListing:
+    """Note une fiche (1–5, pas soi-même)."""
+    require_non_guest(current_user)
+    try:
+        return marketplace_service.rate_listing(listing_id, body.stars, current_user)
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Marketplace listing not found",
+        ) from exc
+    except OwnListingRatingError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot rate own marketplace listing",
+        ) from exc
+    except MarketplaceForbiddenError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Marketplace rating forbidden",
+        ) from exc
+    except Exception as exc:
+        logger.exception("Erreur notation marketplace")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error rating marketplace listing",
+        ) from exc
+
+
+@router.delete("/marketplace/{listing_id}", status_code=status.HTTP_204_NO_CONTENT)
+def unpublish_marketplace_template(
+    listing_id: str,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    marketplace_service: TemplateMarketplaceService = Depends(
+        get_template_marketplace_service
+    ),
+) -> None:
+    """Retire une fiche (auteur ou admin)."""
+    require_non_guest(current_user)
+    try:
+        marketplace_service.unpublish_listing(listing_id, current_user)
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Marketplace listing not found",
+        ) from exc
+    except MarketplaceForbiddenError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Marketplace unpublish forbidden",
+        ) from exc
+    except Exception as exc:
+        logger.exception("Erreur retrait marketplace")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error unpublishing marketplace listing",
         ) from exc
 
 
