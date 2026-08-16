@@ -3,6 +3,10 @@
  */
 import apiClient from './client'
 import type {
+  ABTestCreateRequest,
+  ABTestCreateResponse,
+  ABTestHistoryItem,
+  ABTestResult,
   MarketplaceListing,
   MarketplaceRatingRequest,
   PrebuiltTemplate,
@@ -153,4 +157,52 @@ export async function rateMarketplaceTemplateApi(
  */
 export async function unpublishMarketplaceListingApi(listingId: string): Promise<void> {
   await apiClient.delete(`/api/v1/templates/marketplace/${listingId}`)
+}
+
+/**
+ * Lance un test A/B (job 202).
+ */
+export async function startAbTestApi(body: ABTestCreateRequest): Promise<ABTestCreateResponse> {
+  const { data } = await apiClient.post<ABTestCreateResponse>('/api/v1/templates/ab-test', body)
+  return data
+}
+
+/**
+ * Liste l'historique des tests A/B.
+ */
+export async function listAbTestsApi(): Promise<ABTestHistoryItem[]> {
+  const { data } = await apiClient.get<ABTestHistoryItem[]>('/api/v1/templates/ab-test')
+  return data
+}
+
+/**
+ * Charge un test A/B (statut + résultats).
+ */
+export async function getAbTestApi(testId: string): Promise<ABTestResult> {
+  const { data } = await apiClient.get<ABTestResult>(`/api/v1/templates/ab-test/${testId}`)
+  return data
+}
+
+/**
+ * Enregistre un pouce sur une génération.
+ */
+export async function patchAbTestFeedbackApi(
+  testId: string,
+  body: { generationId: string; thumb: 'up' | 'down' | 'none' },
+): Promise<ABTestResult> {
+  const { data } = await apiClient.patch<ABTestResult>(
+    `/api/v1/templates/ab-test/${testId}/feedback`,
+    body,
+  )
+  return data
+}
+
+/**
+ * Relance un test (nouveau run lié au parent).
+ */
+export async function rerunAbTestApi(testId: string): Promise<ABTestCreateResponse> {
+  const { data } = await apiClient.post<ABTestCreateResponse>(
+    `/api/v1/templates/ab-test/${testId}/rerun`,
+  )
+  return data
 }

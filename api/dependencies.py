@@ -46,6 +46,8 @@ from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
 from services.template_service import TemplateService
 from services.template_marketplace_service import TemplateMarketplaceService
+from services.template_ab_testing_service import TemplateABTestingService
+from api.services.template_ab_test_job_manager import TemplateABTestJobManager
 from services.repositories.sqlite import (
     AppSettingsRepository,
     DatabaseConnection,
@@ -656,6 +658,32 @@ def get_template_marketplace_service(request: Request) -> TemplateMarketplaceSer
     """
     container = get_service_container(request)
     return container.get_template_marketplace_service()
+
+
+def get_template_ab_testing_service(request: Request) -> TemplateABTestingService:
+    """Retourne le service A/B testing de templates.
+
+    Args:
+        request: La requête HTTP.
+
+    Returns:
+        Instance de TemplateABTestingService.
+    """
+    container = get_service_container(request)
+    return container.get_template_ab_testing_service()
+
+
+def get_template_ab_test_job_manager(request: Request) -> TemplateABTestJobManager:
+    """Retourne le gestionnaire de jobs A/B templates.
+
+    Args:
+        request: La requête HTTP.
+
+    Returns:
+        Instance de TemplateABTestJobManager.
+    """
+    container = get_service_container(request)
+    return container.get_template_ab_test_job_manager()
 
 
 def get_gdd_notion_sync_service(request: Request):

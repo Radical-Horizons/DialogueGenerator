@@ -90,3 +90,84 @@ export interface MarketplaceListing {
 export interface MarketplaceRatingRequest {
   stars: number
 }
+
+export type ABTestThumb = 'up' | 'down' | null
+
+export interface ABTestCriterionScore {
+  criterionId: string
+  label: string
+  score: number
+}
+
+export interface ABTestGeneration {
+  id: string
+  templateId: string
+  templateName: string
+  index: number
+  overallScore: number | null
+  criteria: ABTestCriterionScore[]
+  costEur: number
+  durationMs: number
+  thumb: ABTestThumb
+  error: string | null
+}
+
+export interface ABTestSideTotals {
+  meanOverall: number | null
+  scoredCount: number
+  totalCostEur: number
+  totalDurationMs: number
+  thumbsUp: number
+  thumbsDown: number
+}
+
+export interface ABTestResult {
+  testId: string
+  status: 'queued' | 'running' | 'completed' | 'failed' | string
+  current: number
+  total: number
+  createdAt: string
+  templateAId: string
+  templateBId: string
+  templateAName: string
+  templateBName: string
+  generationsPerTemplate: number
+  maxDepth: number
+  parentTestId: string | null
+  winnerTemplateId: string | null
+  scoreVarianceNote: string
+  generations: ABTestGeneration[]
+  totals: {
+    templateA: ABTestSideTotals
+    templateB: ABTestSideTotals
+  }
+  error: string | null
+}
+
+export interface ABTestHistoryItem {
+  testId: string
+  status: string
+  createdAt: string
+  templateAId: string
+  templateBId: string
+  templateAName: string
+  templateBName: string
+  winnerTemplateId: string | null
+  parentTestId: string | null
+  meanScoreA: number | null
+  meanScoreB: number | null
+}
+
+export interface ABTestCreateRequest {
+  templateAId: string
+  templateBId: string
+  generationsPerTemplate: number
+  maxDepth?: number
+}
+
+export interface ABTestCreateResponse {
+  testId: string
+  status: string
+  current: number
+  total: number
+}

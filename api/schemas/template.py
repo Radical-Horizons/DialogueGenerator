@@ -249,3 +249,28 @@ class MarketplaceRatingRequest(BaseModel):
 
     stars: int = Field(..., ge=1, le=5, description="Note entière de 1 à 5")
 
+
+class ABTestCreateRequest(BaseModel):
+    """Lancement d'un test A/B entre deux templates."""
+
+    templateAId: str = Field(..., min_length=1, description="UUID custom ou prebuilt:{slug}")
+    templateBId: str = Field(..., min_length=1, description="UUID custom ou prebuilt:{slug}")
+    generationsPerTemplate: int = Field(default=3, description="N générations par template (1–5)")
+    maxDepth: int = Field(default=2, description="Profondeur expand-tree (1–4)")
+
+
+class ABTestCreateResponse(BaseModel):
+    """Accusé 202 d'un job A/B."""
+
+    testId: str
+    status: str
+    current: int = 0
+    total: int = 0
+
+
+class ABTestFeedbackRequest(BaseModel):
+    """Pouce humain sur une génération (hors calcul du gagnant)."""
+
+    generationId: str = Field(..., min_length=1)
+    thumb: Literal["up", "down", "none"]
+

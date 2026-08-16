@@ -24,6 +24,8 @@ from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
 from services.template_service import TemplateService
 from services.template_marketplace_service import TemplateMarketplaceService
+from services.template_ab_testing_service import TemplateABTestingService
+from api.services.template_ab_test_job_manager import TemplateABTestJobManager
 from services.dialogue_generation_service import DialogueGenerationService
 from services.llm_usage_service import LLMUsageService
 from services.export_log_service import ExportLogService
@@ -93,6 +95,8 @@ class ServiceContainer:
         self._preset_service: Optional[PresetService] = None
         self._template_service: Optional[TemplateService] = None
         self._template_marketplace_service: Optional[TemplateMarketplaceService] = None
+        self._template_ab_testing_service: Optional[TemplateABTestingService] = None
+        self._template_ab_test_job_manager: Optional[TemplateABTestJobManager] = None
         self._shared_templates_repository: Optional[SharedTemplatesRepository] = None
         self._dialogue_generation_service: Optional[DialogueGenerationService] = None
         self._llm_usage_service: Optional[LLMUsageService] = None
@@ -216,6 +220,24 @@ class ServiceContainer:
                 )
                 logger.info("TemplateMarketplaceService initialisé dans le container.")
             return self._template_marketplace_service
+
+    def get_template_ab_testing_service(self) -> TemplateABTestingService:
+        """Retourne le service A/B testing de templates."""
+        with self._database_lock:
+            if self._template_ab_testing_service is None:
+                self._template_ab_testing_service = TemplateABTestingService(
+                    template_service=self.get_template_service(),
+                )
+                logger.info("TemplateABTestingService initialisé dans le container.")
+            return self._template_ab_testing_service
+
+    def get_template_ab_test_job_manager(self) -> TemplateABTestJobManager:
+        """Retourne le gestionnaire de jobs A/B templates."""
+        with self._database_lock:
+            if self._template_ab_test_job_manager is None:
+                self._template_ab_test_job_manager = TemplateABTestJobManager()
+                logger.info("TemplateABTestJobManager initialisé dans le container.")
+            return self._template_ab_test_job_manager
 
     def get_collections_repository(self) -> CollectionsRepository:
         """Retourne le repository des collections de dialogues."""

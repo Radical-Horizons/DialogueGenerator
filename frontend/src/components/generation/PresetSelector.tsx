@@ -23,6 +23,7 @@ import { TemplateCreatorModal } from './TemplateCreatorModal';
 import { TemplateEditorModal } from './TemplateEditorModal';
 import { PrebuiltTemplateModal } from './PrebuiltTemplateModal';
 import { TemplateMarketplaceModal } from './TemplateMarketplaceModal';
+import { TemplateABTestingModal } from './TemplateABTestingModal';
 import { NarrowOverlayDrawer } from '../layout/NarrowOverlayDrawer';
 import { filterTemplates, groupTemplatesByCategory, TEMPLATE_UNCATEGORIZED_LABEL } from '../../utils/templateGroups';
 import { isPrebuiltNew } from '../../utils/templateApply';
@@ -133,6 +134,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   const copyingPrebuiltRef = useRef(false);
   const [isCopyingPrebuilt, setIsCopyingPrebuilt] = useState(false);
   const [isMarketplaceOpen, setIsMarketplaceOpen] = useState(false);
+  const [isAbTestOpen, setIsAbTestOpen] = useState(false);
   const publishingRef = useRef(false);
 
   const filteredTemplates = useMemo(
@@ -571,6 +573,27 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           Marketplace
         </button>
 
+        <button
+          type="button"
+          data-testid="ab-test-open-btn"
+          onClick={() => setIsAbTestOpen(true)}
+          style={{
+            padding: chrome.buttonPadding,
+            backgroundColor: theme.button.default.background,
+            border: `1px solid ${theme.border.secondary}`,
+            borderRadius: `${redesignRadius.control}px`,
+            color: theme.button.default.color,
+            fontWeight: 600,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            fontSize: `${chrome.buttonFontRem}rem`,
+            flex: isNarrow ? '1 1 auto' : undefined,
+            minHeight: TOUCH_TARGET_MIN_PX,
+          }}
+        >
+          A/B tester
+        </button>
+
         {/* Indicateur de statut de sauvegarde */}
         {saveStatus && (
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -624,6 +647,13 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         currentUserRole={currentUser?.role ?? null}
         isGuest={Boolean(isGuest)}
         onCopied={() => loadTemplates()}
+      />
+
+      <TemplateABTestingModal
+        isOpen={isAbTestOpen}
+        onClose={() => setIsAbTestOpen(false)}
+        templates={templates}
+        prebuiltTemplates={prebuiltTemplates}
       />
 
       <section

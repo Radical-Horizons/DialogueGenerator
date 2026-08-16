@@ -30,6 +30,11 @@ vi.mock('../api/templates', () => ({
   copyMarketplaceListingApi: vi.fn(),
   unpublishMarketplaceListingApi: vi.fn(),
   rateMarketplaceTemplateApi: vi.fn(),
+  listAbTestsApi: vi.fn().mockResolvedValue([]),
+  startAbTestApi: vi.fn(),
+  getAbTestApi: vi.fn(),
+  patchAbTestFeedbackApi: vi.fn(),
+  rerunAbTestApi: vi.fn(),
 }));
 vi.mock('../api/graph', () => ({
   getContextDroppingRules: vi.fn().mockResolvedValue({
@@ -1054,6 +1059,14 @@ describe('PresetSelector', () => {
       render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
 
       expect(screen.queryByTestId('template-item-publish-btn')).not.toBeInTheDocument();
+    });
+
+    it('ouvre le modal A/B tester', async () => {
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+
+      fireEvent.click(screen.getByTestId('ab-test-open-btn'));
+
+      expect(await screen.findByTestId('template-ab-test-modal')).toBeInTheDocument();
     });
   });
 });

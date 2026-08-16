@@ -268,6 +268,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             if batch_container is not None:
                 await batch_container.get_batch_validation_job_manager().start_cleanup_task()
                 await batch_container.get_batch_node_generation_job_manager().start_cleanup_task()
+                await batch_container.get_template_ab_test_job_manager().start_cleanup_task()
                 logger.info("Cleanup tasks des jobs batch (validation/génération) démarrées")
         except Exception as e:
             logger.warning(f"Erreur lors du démarrage des cleanup tasks batch: {e}")
@@ -332,6 +333,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             if batch_container is not None:
                 await batch_container.get_batch_validation_job_manager().stop_cleanup_task()
                 await batch_container.get_batch_node_generation_job_manager().stop_cleanup_task()
+                await batch_container.get_template_ab_test_job_manager().stop_cleanup_task()
                 logger.info("Cleanup tasks des jobs batch (validation/génération) arrêtées")
         except Exception as e:
             logger.warning(f"Erreur lors de l'arrêt des cleanup tasks batch: {e}")

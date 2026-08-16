@@ -2,16 +2,28 @@
 import logging
 from typing import Any, Dict, List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 
 from api.dependencies import (
+    get_config_service,
+    get_dialogue_tree_expansion_service,
+    get_llm_quality_judge_service,
+    get_llm_usage_service,
+    get_request_id,
+    get_template_ab_test_job_manager,
+    get_template_ab_testing_service,
     get_template_marketplace_service,
     get_template_service,
+    get_unity_dialogue_orchestrator,
     require_non_guest,
 )
 from api.routers.auth import get_current_user
+from api.routers.graph_router_helpers import create_llm_client_for_router
 from api.schemas.preset import PresetValidationResult
 from api.schemas.template import (
+    ABTestCreateRequest,
+    ABTestCreateResponse,
+    ABTestFeedbackRequest,
     MarketplaceListing,
     MarketplacePublishRequest,
     MarketplaceRatingRequest,
@@ -21,12 +33,25 @@ from api.schemas.template import (
     TemplateCreateResponse,
     TemplateUpdate,
 )
+from api.services.template_ab_test_job_manager import TemplateABTestJobManager
+from constants import ModelNames
+from services.configuration_service import ConfigurationService
+from services.dialogue_tree_expansion_service import DialogueTreeExpansionService
+from services.llm_quality_judge_service import LLMQualityJudgeService
+from services.llm_usage_service import LLMUsageService
+from services.template_ab_testing_service import (
+    AB_TEST_USAGE_ENDPOINT,
+    TemplateABTestNotFoundError,
+    TemplateABTestValidationError,
+    TemplateABTestingService,
+)
 from services.template_marketplace_service import (
     MarketplaceForbiddenError,
     OwnListingRatingError,
     TemplateMarketplaceService,
 )
 from services.template_service import TemplateService
+from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
 logger = logging.getLogger(__name__)
@@ -320,6 +345,231 @@ def unpublish_marketplace_template(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error unpublishing marketplace listing",
+        ) from exc
+
+
+def _raise_ab_http(exc: Exception) -> None:
+    """Convertit les erreurs A/B métier en HTTP 400/404."""
+    if isinstance(exc, TemplateABTestValidationError):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    if isinstance(exc, TemplateABTestNotFoundError):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    if isinstance(exc, FileNotFoundError):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    raise exc
+
+
+def _schedule_ab_job(
+    *,
+    test_id: str,
+    total: int,
+    background_tasks: BackgroundTasks,
+    ab_service: TemplateABTestingService,
+    job_manager: TemplateABTestJobManager,
+    expansion_service: DialogueTreeExpansionService,
+    unity_orchestrator: UnityDialogueOrchestrator,
+    judge_service: LLMQualityJudgeService,
+    config_service: ConfigurationService,
+    usage_service: LLMUsageService,
+    request_id: str,
+) -> ABTestCreateResponse:
+    """Enregistre le job mémoire et planifie ``run_ab_test``."""
+    job_manager.create_job(test_id, total=total)
+    generation_client = create_llm_client_for_router(
+        ModelNames.GPT_5_6_LUNA,
+        config_service,
+        usage_service,
+        request_id,
+        endpoint=AB_TEST_USAGE_ENDPOINT,
+    )
+    judge_model = LLMQualityJudgeService.resolve_default_model_id(config_service)
+    judge_client = create_llm_client_for_router(
+        judge_model,
+        config_service,
+        usage_service,
+        request_id,
+        endpoint=AB_TEST_USAGE_ENDPOINT,
+    )
+
+    async def _runner() -> None:
+        try:
+
+            def on_progress(current: int, step_total: int, detail: str) -> None:
+                job_manager.set_progress(test_id, current, step_total, detail)
+
+            await ab_service.run_ab_test(
+                test_id,
+                expansion_service=expansion_service,
+                unity_orchestrator=unity_orchestrator,
+                generation_llm_client=generation_client,
+                judge_llm_client=judge_client,
+                judge_service=judge_service,
+                config_service=config_service,
+                usage_service=usage_service,
+                on_progress=on_progress,
+            )
+            job_manager.complete(test_id, status="completed")
+        except Exception as exc:  # noqa: BLE001
+            logger.exception("Job A/B %s échoué (request_id=%s)", test_id, request_id)
+            job_manager.complete(test_id, status="error", error=str(exc))
+
+    background_tasks.add_task(_runner)
+    return ABTestCreateResponse(
+        testId=test_id,
+        status="queued",
+        current=0,
+        total=total,
+    )
+
+
+@router.get("/ab-test")
+def list_ab_tests(
+    ab_service: TemplateABTestingService = Depends(get_template_ab_testing_service),
+) -> List[Dict[str, Any]]:
+    """Historique des tests A/B (fichiers ``data/ab-tests``)."""
+    return ab_service.list_tests()
+
+
+@router.post(
+    "/ab-test",
+    response_model=ABTestCreateResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def start_ab_test(
+    body: ABTestCreateRequest,
+    background_tasks: BackgroundTasks,
+    ab_service: TemplateABTestingService = Depends(get_template_ab_testing_service),
+    job_manager: TemplateABTestJobManager = Depends(get_template_ab_test_job_manager),
+    expansion_service: DialogueTreeExpansionService = Depends(
+        get_dialogue_tree_expansion_service
+    ),
+    unity_orchestrator: UnityDialogueOrchestrator = Depends(
+        get_unity_dialogue_orchestrator
+    ),
+    judge_service: LLMQualityJudgeService = Depends(get_llm_quality_judge_service),
+    config_service: ConfigurationService = Depends(get_config_service),
+    usage_service: LLMUsageService = Depends(get_llm_usage_service),
+    request_id: str = Depends(get_request_id),
+) -> ABTestCreateResponse:
+    """Lance un job A/B (guest autorisé, consomme du LLM)."""
+    try:
+        payload = ab_service.create_queued_test(
+            template_a_id=body.templateAId,
+            template_b_id=body.templateBId,
+            generations_per_template=body.generationsPerTemplate,
+            max_depth=body.maxDepth,
+        )
+    except (TemplateABTestValidationError, TemplateABTestNotFoundError, FileNotFoundError) as exc:
+        _raise_ab_http(exc)
+        raise
+    try:
+        return _schedule_ab_job(
+            test_id=str(payload["testId"]),
+            total=int(payload["total"]),
+            background_tasks=background_tasks,
+            ab_service=ab_service,
+            job_manager=job_manager,
+            expansion_service=expansion_service,
+            unity_orchestrator=unity_orchestrator,
+            judge_service=judge_service,
+            config_service=config_service,
+            usage_service=usage_service,
+            request_id=request_id,
+        )
+    except Exception as exc:
+        payload["error"] = str(exc)
+        ab_service.mark_failed(str(payload["testId"]), str(exc))
+        logger.exception("Impossible de démarrer le job A/B %s", payload["testId"])
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error starting A/B test job",
+        ) from exc
+
+
+@router.get("/ab-test/{test_id}")
+def get_ab_test(
+    test_id: str,
+    ab_service: TemplateABTestingService = Depends(get_template_ab_testing_service),
+    job_manager: TemplateABTestJobManager = Depends(get_template_ab_test_job_manager),
+) -> Dict[str, Any]:
+    """Statut et résultats d'un test A/B."""
+    try:
+        payload = ab_service.get_test(test_id)
+    except TemplateABTestNotFoundError as exc:
+        _raise_ab_http(exc)
+        raise
+    job = job_manager.get_job(test_id)
+    if job:
+        payload["current"] = job.get("current", payload.get("current"))
+        if job.get("status") == "running" and payload.get("status") == "queued":
+            payload["status"] = "running"
+        if job.get("status") == "error":
+            payload["status"] = "failed"
+            payload["error"] = job.get("error") or payload.get("error")
+    return payload
+
+
+@router.patch("/ab-test/{test_id}/feedback")
+def patch_ab_test_feedback(
+    test_id: str,
+    body: ABTestFeedbackRequest,
+    ab_service: TemplateABTestingService = Depends(get_template_ab_testing_service),
+) -> Dict[str, Any]:
+    """Pouce haut/bas/none sur une génération (ne change pas le gagnant)."""
+    try:
+        return ab_service.apply_feedback(test_id, body.generationId, body.thumb)
+    except (TemplateABTestValidationError, TemplateABTestNotFoundError) as exc:
+        _raise_ab_http(exc)
+        raise
+
+
+@router.post(
+    "/ab-test/{test_id}/rerun",
+    response_model=ABTestCreateResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def rerun_ab_test(
+    test_id: str,
+    background_tasks: BackgroundTasks,
+    ab_service: TemplateABTestingService = Depends(get_template_ab_testing_service),
+    job_manager: TemplateABTestJobManager = Depends(get_template_ab_test_job_manager),
+    expansion_service: DialogueTreeExpansionService = Depends(
+        get_dialogue_tree_expansion_service
+    ),
+    unity_orchestrator: UnityDialogueOrchestrator = Depends(
+        get_unity_dialogue_orchestrator
+    ),
+    judge_service: LLMQualityJudgeService = Depends(get_llm_quality_judge_service),
+    config_service: ConfigurationService = Depends(get_config_service),
+    usage_service: LLMUsageService = Depends(get_llm_usage_service),
+    request_id: str = Depends(get_request_id),
+) -> ABTestCreateResponse:
+    """Relance un test lié au parent (snapshots templates actuels)."""
+    try:
+        queued = ab_service.prepare_rerun(test_id)
+    except (TemplateABTestValidationError, TemplateABTestNotFoundError, FileNotFoundError) as exc:
+        _raise_ab_http(exc)
+        raise
+    try:
+        return _schedule_ab_job(
+            test_id=str(queued["testId"]),
+            total=int(queued["total"]),
+            background_tasks=background_tasks,
+            ab_service=ab_service,
+            job_manager=job_manager,
+            expansion_service=expansion_service,
+            unity_orchestrator=unity_orchestrator,
+            judge_service=judge_service,
+            config_service=config_service,
+            usage_service=usage_service,
+            request_id=request_id,
+        )
+    except Exception as exc:
+        ab_service.mark_failed(str(queued["testId"]), str(exc))
+        logger.exception("Impossible de relancer le job A/B %s", queued["testId"])
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error starting A/B test job",
         ) from exc
 
 

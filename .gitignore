@@ -89,6 +89,10 @@ data/logs/
 data/templates/custom/*.json
 !data/templates/custom/.gitkeep
 
+# Résultats A/B templates (Story 6.7) — JSON locaux, dossier versionné via .gitkeep.
+data/ab-tests/**
+!data/ab-tests/.gitkeep
+
 # Data directories (generated/cache files)
 data/cost_budgets.json
 data/app.db
