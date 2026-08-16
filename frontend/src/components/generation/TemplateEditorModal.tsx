@@ -2,14 +2,18 @@
  * Modal d'édition d'un template custom : métadonnées, instructions, snapshot, timeline.
  */
 import React, { useEffect, useRef, useState } from 'react'
+import { getContextDroppingRules } from '../../api/graph'
 import { theme } from '../../theme'
 import { generationPanelChrome, modalTypography } from '../../theme/responsiveChrome'
 import { redesignRadius } from '../../theme/redesignTokens'
 import { useToast } from '../shared'
+import { ContextDroppingRulesEditor } from '../graph/ContextDroppingRulesEditor'
 import { useTemplateStore } from '../../store/templateStore'
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
 import { TOUCH_TARGET_MIN_PX } from '../../constants'
+import type { ContextDroppingRules } from '../../types/graph'
 import type { Template, TemplateConfiguration } from '../../types/template'
+import { DEFAULT_CONTEXT_DROPPING_RULES } from '../../utils/contextDroppingOverlay'
 
 export interface TemplateEditorModalProps {
   isOpen: boolean
@@ -60,6 +64,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
   const [instructions, setInstructions] = useState('')
   const [configuration, setConfiguration] = useState<TemplateConfiguration | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [rulesLoading, setRulesLoading] = useState(false)
 
   useEffect(() => {
     if (isOpen && template) {
@@ -71,6 +76,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
       setConfiguration(template.configuration)
       setIsSaving(false)
       savingRef.current = false
+      setRulesLoading(false)
     }
   }, [isOpen, template])
 
@@ -99,24 +105,58 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
       toast('Aucune configuration actuelle à capturer', 'error')
       return
     }
-    setConfiguration(snapshot)
+    setConfiguration({
+      ...snapshot,
+      contextDroppingRules: configuration.contextDroppingRules,
+    })
     setInstructions(snapshot.instructions || '')
     toast('Configuration actuelle appliquée au template', 'info')
   }
 
+  const handleCustomizeRules = async () => {
+    if (rulesLoading) {
+      return
+    }
+    setRulesLoading(true)
+    try {
+      const fetched = await getContextDroppingRules()
+      setConfiguration((current) =>
+        current ? { ...current, contextDroppingRules: fetched } : current,
+      )
+    } catch {
+      setConfiguration((current) =>
+        current
+          ? { ...current, contextDroppingRules: DEFAULT_CONTEXT_DROPPING_RULES }
+          : current,
+      )
+    } finally {
+      setRulesLoading(false)
+    }
+  }
+
+  const handleRulesChange = (next: ContextDroppingRules) => {
+    setConfiguration((current) =>
+      current ? { ...current, contextDroppingRules: next } : current,
+    )
+  }
+
   const handleSubmit = async () => {
-    if (!name.trim() || savingRef.current) {
+    if (!name.trim() || savingRef.current || rulesLoading) {
       return
     }
     savingRef.current = true
     setIsSaving(true)
     try {
+      const nextConfiguration: TemplateConfiguration = { ...configuration, instructions }
+      if (nextConfiguration.contextDroppingRules == null) {
+        delete nextConfiguration.contextDroppingRules
+      }
       const { warnings } = await updateTemplate(template.id, {
         name: name.trim(),
         description: description.trim(),
         category: category.trim() || 'Général',
         icon: icon || '📋',
-        configuration: { ...configuration, instructions },
+        configuration: nextConfiguration,
       })
       if (warnings.length > 0) {
         toast(warnings.join(' · '), 'warning')
@@ -378,6 +418,70 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
           </button>
         </div>
 
+        {configuration.contextDroppingRules ? (
+          <div
+            data-testid="template-edit-context-dropping-rules"
+            style={{ marginBottom: `${chrome.controlGapRem}rem` }}
+          >
+            <div
+              style={{
+                fontSize: `${type.smallFontRem}rem`,
+                color: theme.text.secondary,
+                marginBottom: '0.5rem',
+              }}
+            >
+              Règles anti-context-dropping (copie locale, pas le fichier global)
+            </div>
+            <ContextDroppingRulesEditor
+              persist={false}
+              value={configuration.contextDroppingRules}
+              onChange={handleRulesChange}
+            />
+          </div>
+        ) : (
+          <div
+            data-testid="template-editor-rules-inherit"
+            style={{
+              marginBottom: `${chrome.controlGapRem}rem`,
+              padding: chrome.cardPadding,
+              backgroundColor: theme.background.secondary,
+              borderRadius: `${redesignRadius.control}px`,
+            }}
+          >
+            <div
+              style={{
+                fontSize: `${type.bodyFontRem}rem`,
+                color: theme.text.secondary,
+                marginBottom: `${chrome.controlGapRem}rem`,
+              }}
+            >
+              Hérite des règles anti-drop globales (4.10). Personnaliser enregistre une copie dans ce
+              template.
+            </div>
+            <button
+              type="button"
+              data-testid="template-editor-customize-rules-btn"
+              onClick={() => {
+                void handleCustomizeRules()
+              }}
+              disabled={isSaving || rulesLoading}
+              style={{
+                minHeight: TOUCH_TARGET_MIN_PX,
+                padding: chrome.buttonPadding,
+                backgroundColor: theme.button.default.background,
+                border: `1px solid ${theme.border.secondary}`,
+                borderRadius: `${redesignRadius.control}px`,
+                color: theme.button.default.color,
+                cursor: isSaving ? 'not-allowed' : 'pointer',
+                fontSize: `${chrome.buttonFontRem}rem`,
+                width: '100%',
+              }}
+            >
+              Personnaliser
+            </button>
+          </div>
+        )}
+
         <div
           data-testid="template-editor-history"
           style={{
@@ -432,15 +536,15 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
             onClick={() => {
               void handleSubmit()
             }}
-            disabled={!name.trim() || isSaving}
+            disabled={!name.trim() || isSaving || rulesLoading}
             style={{
               padding: chrome.buttonPadding,
               backgroundColor: theme.button.primary.background,
               border: 'none',
               borderRadius: `${redesignRadius.control}px`,
               color: 'white',
-              cursor: !name.trim() || isSaving ? 'not-allowed' : 'pointer',
-              opacity: !name.trim() || isSaving ? 0.6 : 1,
+              cursor: !name.trim() || isSaving || rulesLoading ? 'not-allowed' : 'pointer',
+              opacity: !name.trim() || isSaving || rulesLoading ? 0.6 : 1,
               fontSize: `${chrome.buttonFontRem}rem`,
               flex: isNarrow ? '1 1 auto' : undefined,
             }}

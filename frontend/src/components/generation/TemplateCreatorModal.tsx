@@ -2,13 +2,17 @@
  * Modal de création d'un template custom : 4 champs + aperçu lecture seule figé.
  */
 import React, { useEffect, useRef, useState } from 'react'
+import { getContextDroppingRules } from '../../api/graph'
 import { theme } from '../../theme'
 import { generationPanelChrome, modalTypography } from '../../theme/responsiveChrome'
 import { redesignRadius } from '../../theme/redesignTokens'
 import { useToast } from '../shared'
+import { ContextDroppingRulesEditor } from '../graph/ContextDroppingRulesEditor'
 import { useTemplateStore } from '../../store/templateStore'
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
+import type { ContextDroppingRules } from '../../types/graph'
 import type { TemplateConfiguration } from '../../types/template'
+import { DEFAULT_CONTEXT_DROPPING_RULES } from '../../utils/contextDroppingOverlay'
 
 export interface TemplateCreatorModalProps {
   /** Contrôle l'affichage du modal. */
@@ -43,6 +47,9 @@ export const TemplateCreatorModal: React.FC<TemplateCreatorModalProps> = ({
   const [category, setCategory] = useState('Général')
   const [icon, setIcon] = useState('📋')
   const [isCreating, setIsCreating] = useState(false)
+  const [rules, setRules] = useState<ContextDroppingRules>(DEFAULT_CONTEXT_DROPPING_RULES)
+  const [rulesReady, setRulesReady] = useState(false)
+  const rulesDirtyRef = useRef(false)
 
   useEffect(() => {
     if (isOpen) {
@@ -52,7 +59,39 @@ export const TemplateCreatorModal: React.FC<TemplateCreatorModalProps> = ({
       setIcon('📋')
       setIsCreating(false)
       creatingRef.current = false
+      rulesDirtyRef.current = false
+      const snapshotRules = snapshot?.contextDroppingRules
+      if (snapshotRules) {
+        setRules(snapshotRules)
+        setRulesReady(true)
+        return
+      }
+      setRules(DEFAULT_CONTEXT_DROPPING_RULES)
+      setRulesReady(false)
+      let cancelled = false
+      getContextDroppingRules()
+        .then((fetched) => {
+          if (!cancelled && !rulesDirtyRef.current) {
+            setRules(fetched)
+          }
+          if (!cancelled) {
+            setRulesReady(true)
+          }
+        })
+        .catch(() => {
+          if (!cancelled && !rulesDirtyRef.current) {
+            setRules(DEFAULT_CONTEXT_DROPPING_RULES)
+          }
+          if (!cancelled) {
+            setRulesReady(true)
+          }
+        })
+      return () => {
+        cancelled = true
+      }
     }
+    // Relancer uniquement à l'ouverture : un nouveau snapshot objet ne doit pas vider le formulaire.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
 
   useEffect(() => {
@@ -73,7 +112,7 @@ export const TemplateCreatorModal: React.FC<TemplateCreatorModalProps> = ({
   }
 
   const handleSubmit = async () => {
-    if (!name.trim() || !snapshot || creatingRef.current) {
+    if (!name.trim() || !snapshot || creatingRef.current || !rulesReady) {
       return
     }
     creatingRef.current = true
@@ -84,7 +123,7 @@ export const TemplateCreatorModal: React.FC<TemplateCreatorModalProps> = ({
         description: description.trim(),
         category: category.trim() || 'Général',
         icon: icon || '📋',
-        configuration: snapshot,
+        configuration: { ...snapshot, contextDroppingRules: rules },
       })
       if (warnings.length > 0) {
         toast(warnings.join(' · '), 'warning')
@@ -328,6 +367,29 @@ export const TemplateCreatorModal: React.FC<TemplateCreatorModalProps> = ({
         )}
 
         <div
+          data-testid="template-form-context-dropping-rules"
+          style={{ marginBottom: `${chrome.controlGapRem}rem` }}
+        >
+          <div
+            style={{
+              fontSize: `${type.smallFontRem}rem`,
+              color: theme.text.secondary,
+              marginBottom: '0.5rem',
+            }}
+          >
+            Règles anti-context-dropping (copie locale, pas le fichier global)
+          </div>
+          <ContextDroppingRulesEditor
+            persist={false}
+            value={rules}
+            onChange={(next) => {
+              rulesDirtyRef.current = true
+              setRules(next)
+            }}
+          />
+        </div>
+
+        <div
           style={{
             display: 'flex',
             flexWrap: 'wrap',
@@ -359,15 +421,15 @@ export const TemplateCreatorModal: React.FC<TemplateCreatorModalProps> = ({
             onClick={() => {
               void handleSubmit()
             }}
-            disabled={!name.trim() || !snapshot || isCreating}
+            disabled={!name.trim() || !snapshot || isCreating || !rulesReady}
             style={{
               padding: chrome.buttonPadding,
               backgroundColor: theme.button.primary.background,
               border: 'none',
               borderRadius: `${redesignRadius.control}px`,
               color: 'white',
-              cursor: !name.trim() || !snapshot || isCreating ? 'not-allowed' : 'pointer',
-              opacity: !name.trim() || !snapshot || isCreating ? 0.6 : 1,
+              cursor: !name.trim() || !snapshot || isCreating || !rulesReady ? 'not-allowed' : 'pointer',
+              opacity: !name.trim() || !snapshot || isCreating || !rulesReady ? 0.6 : 1,
               fontSize: `${chrome.buttonFontRem}rem`,
               flex: isNarrow ? '1 1 auto' : undefined,
             }}

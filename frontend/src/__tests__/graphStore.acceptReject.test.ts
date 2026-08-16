@@ -3,6 +3,7 @@
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useGraphStore } from '@/store/graphStore'
+import { useGenerationStore } from '@/store/generationStore'
 import * as graphAPI from '@/api/graph'
 import * as documentsAPI from '@/api/documents'
 import type { Node } from 'reactflow'
@@ -13,6 +14,7 @@ vi.mock('@/api/graph', () => ({
   saveGraph: vi.fn(),
   saveGraphAndWrite: vi.fn(),
   generateNode: vi.fn(),
+  detectContextDropping: vi.fn(),
   loadGraph: vi.fn(),
   validateGraph: vi.fn(),
   calculateLayout: vi.fn(),
@@ -39,6 +41,8 @@ vi.mock('@/components/shared/Toast', () => ({
 describe('graphStore - Accept/Reject Nodes (Story 1.4)', () => {
   beforeEach(() => {
     useGraphStore.getState().resetGraph()
+    useGenerationStore.getState().setContextDroppingRulesOverlay(null)
+    useGenerationStore.getState().setContextDroppingWarning(null)
     vi.clearAllMocks()
     useGraphStore.setState({
       documentId: 'test-dialogue.json',

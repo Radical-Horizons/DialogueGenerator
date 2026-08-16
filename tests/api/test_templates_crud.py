@@ -497,3 +497,61 @@ class TestTemplatesPrebuilt:
         assert response.status_code == 200
         assert len(response.json()) == 7
 
+
+class TestTemplatesContextDropping:
+    """Champ optionnel contextDroppingRules (Story 6.5)."""
+
+    def test_create_with_rules_persists_copy(self, client: TestClient) -> None:
+        """Given des règles 4.10, when POST, then 201 et copie persistée."""
+        payload = _sample_create_payload()
+        payload["configuration"]["contextDroppingRules"] = {
+            "rules_profile": "light",
+            "tolerance": None,
+            "mandatory_info": ["label-a"],
+            "dialogue_type_overrides": {},
+            "schema_version": "1.0",
+        }
+        response = client.post("/api/v1/templates", json=payload)
+        assert response.status_code == 201
+        rules = response.json()["configuration"]["contextDroppingRules"]
+        assert rules["rules_profile"] == "light"
+        assert rules["mandatory_info"] == ["label-a"]
+
+    def test_create_invalid_profile_422(self, client: TestClient) -> None:
+        """Given un profil inconnu, when POST, then 422."""
+        payload = _sample_create_payload()
+        payload["configuration"]["contextDroppingRules"] = {"rules_profile": "inexistant"}
+        response = client.post("/api/v1/templates", json=payload)
+        assert response.status_code == 422
+
+    def test_legacy_without_key_ok(self, client: TestClient) -> None:
+        """Given un template sans clé, when POST, then 201 et pas de règles imposées."""
+        response = client.post("/api/v1/templates", json=_sample_create_payload())
+        assert response.status_code == 201
+        assert response.json()["configuration"].get("contextDroppingRules") is None
+
+    def test_prebuilt_confrontation_strict_revelation_light(self, client: TestClient) -> None:
+        """Given le catalogue tamponné, when GET, then Confrontation strict et Révélation light."""
+        confrontation = client.get("/api/v1/templates/prebuilt/confrontation").json()
+        revelation = client.get("/api/v1/templates/prebuilt/revelation").json()
+        assert confrontation["configuration"]["contextDroppingRules"]["rules_profile"] == "strict"
+        assert revelation["configuration"]["contextDroppingRules"]["rules_profile"] == "light"
+
+    def test_copy_confrontation_keeps_strict(self, client: TestClient) -> None:
+        """Given Confrontation, when POST copie, then le custom garde strict."""
+        source = client.get("/api/v1/templates/prebuilt/confrontation").json()
+        response = client.post(
+            "/api/v1/templates",
+            json={
+                "name": "Confrontation (copie règles)",
+                "description": source["description"],
+                "category": source["category"],
+                "icon": source["icon"],
+                "configuration": source["configuration"],
+            },
+        )
+        assert response.status_code == 201
+        assert (
+            response.json()["configuration"]["contextDroppingRules"]["rules_profile"] == "strict"
+        )
+

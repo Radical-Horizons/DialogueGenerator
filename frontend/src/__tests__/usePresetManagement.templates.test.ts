@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   toggleCharacter: vi.fn(),
   setRegion: vi.fn(),
   toggleSubLocation: vi.fn(),
+  setContextDroppingRulesOverlay: vi.fn(),
 }))
 
 vi.mock('../api/templates', () => ({
@@ -23,15 +24,23 @@ vi.mock('../api/templates', () => ({
 }))
 
 vi.mock('../store/generationStore', () => ({
-  useGenerationStore: () => ({
-    sceneSelection: {
-      characterA: null,
-      characterB: null,
-      sceneRegion: null,
-      subLocation: null,
+  useGenerationStore: Object.assign(
+    () => ({
+      sceneSelection: {
+        characterA: null,
+        characterB: null,
+        sceneRegion: null,
+        subLocation: null,
+      },
+      setSceneSelection: mocks.setSceneSelection,
+    }),
+    {
+      getState: () => ({
+        setContextDroppingRulesOverlay: mocks.setContextDroppingRulesOverlay,
+        contextDroppingRulesOverlay: null,
+      }),
     },
-    setSceneSelection: mocks.setSceneSelection,
-  }),
+  ),
 }))
 
 vi.mock('../store/presetStore', () => ({
@@ -151,6 +160,7 @@ describe('usePresetManagement — templates [6.3]', () => {
     expect(setLlmModel).toHaveBeenCalledWith('gpt-5.6-terra')
     expect(mocks.setProvider).toHaveBeenCalledWith('mistral')
     expect(mocks.setModel).toHaveBeenCalledWith('gpt-5.6-terra')
+    expect(mocks.setContextDroppingRulesOverlay).toHaveBeenCalledWith(null)
     expect(toast).toHaveBeenCalledWith('Template chargé avec succès', 'success')
     expect(result.current.isValidationModalOpen).toBe(false)
   })
@@ -373,5 +383,65 @@ describe('usePresetManagement — templates [6.3]', () => {
 
     expect(setUserInstructions).toHaveBeenCalledWith('Brief pré-built confrontation')
     expect(setUserInstructions).not.toHaveBeenCalledWith('Brief snapshot')
+  })
+
+  it('pose l’overlay session si le template a des règles anti-drop', async () => {
+    const rules = {
+      rules_profile: 'strict' as const,
+      tolerance: null,
+      mandatory_info: [],
+      dialogue_type_overrides: {},
+      schema_version: '1.0',
+    }
+    const withRules = {
+      ...sampleTemplate,
+      configuration: { ...sampleTemplate.configuration, contextDroppingRules: rules },
+    }
+    mocks.getTemplateApi.mockResolvedValue(withRules)
+    const { result } = renderManagement()
+
+    await act(async () => {
+      await result.current.handleTemplateLoaded(withRules)
+    })
+
+    expect(mocks.setContextDroppingRulesOverlay).toHaveBeenCalledWith(rules)
+  })
+
+  it('handlePrebuiltLoaded pose l’overlay strict de Confrontation', () => {
+    const rules = {
+      rules_profile: 'strict' as const,
+      tolerance: null,
+      mandatory_info: [],
+      dialogue_type_overrides: {},
+      schema_version: '1.0',
+    }
+    const { result } = renderManagement()
+    const prebuilt = {
+      id: 'confrontation',
+      name: 'Confrontation',
+      description: '',
+      category: 'Confrontation',
+      icon: '⚔️',
+      gddSystem: 'Skill check',
+      sceneTypeHint: 'confrontation',
+      objectif: '',
+      casUsage: '',
+      examples: [],
+      addedAt: '2026-08-16T00:00:00Z',
+      configuration: {
+        characters: [],
+        locations: [],
+        region: '',
+        sceneType: 'Generic',
+        instructions: 'Brief pré-built confrontation',
+        contextDroppingRules: rules,
+      },
+    }
+
+    act(() => {
+      result.current.handlePrebuiltLoaded(prebuilt)
+    })
+
+    expect(mocks.setContextDroppingRulesOverlay).toHaveBeenCalledWith(rules)
   })
 })

@@ -279,6 +279,10 @@
   summary: Enregistrer le `template_id` dans les logs de génération (Story 1.15 / AC épic 6.3).
   evidence: Choix 3A au kickoff 6.3 — un livrable distinct (pipeline génération + UI logs) ; 6.3 se limite à hydrater le formulaire.
 
-- source_spec: `_bmad-output/implementation-artifacts/spec-6-4-fournir-templates-pre-built-alteir-fr58.md`
-  summary: Piège de focus / restauration focus pour PrebuiltTemplateModal (alignement des autres modales génération).
-  evidence: Revue 6.4 — `aria-modal` + Escape sans trap Tab ; même dette que TemplateCreatorModal / permissions 7.7.
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-5-configurer-templates-anti-context-dropping-subtilite-lore-vs-explicite-fr59.md`
+  summary: Overlay `tolerance: null` retombe sur le seuil du fichier 4.10 via le merge options existant.
+  evidence: Revue 6.5 — `_context_dropping_options_to_data` ne distingue pas « null explicite » d’« omit » ; la spec demande de réutiliser ce merge.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-5-configurer-templates-anti-context-dropping-subtilite-lore-vs-explicite-fr59.md`
+  summary: Toast GraphEditor du warning post-detect non couvert par un test de montage GraphEditor.
+  evidence: Revue 6.5 — le store et generationSlice sont testés ; monter GraphEditor pour l’effet toast est hors budget T1.

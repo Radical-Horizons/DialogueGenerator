@@ -7,6 +7,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from api.schemas.preset import PresetConfiguration, PresetMetadata
+from api.schemas.validation_rules import ContextDroppingRulesSchema
 
 TEMPLATE_NAME_MAX_LENGTH = 120
 TEMPLATE_DESCRIPTION_MAX_LENGTH = 2000
@@ -32,6 +33,10 @@ class TemplateConfiguration(PresetConfiguration):
     temperature: Optional[float] = Field(
         None,
         description="Température de sampling (optionnelle)",
+    )
+    contextDroppingRules: Optional[ContextDroppingRulesSchema] = Field(
+        None,
+        description="Copie des règles anti-drop 4.10 (None = hériter du fichier global)",
     )
 
 

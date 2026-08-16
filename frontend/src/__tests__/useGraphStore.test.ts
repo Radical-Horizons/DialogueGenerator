@@ -3,6 +3,7 @@
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useGraphStore } from '../store/graphStore'
+import { useGenerationStore } from '../store/generationStore'
 import type { Node } from 'reactflow'
 import * as graphAPI from '../api/graph'
 import * as documentsAPI from '../api/documents'
@@ -21,6 +22,7 @@ vi.mock('../api/graph', () => ({
   saveGraph: vi.fn(),
   saveGraphAndWrite: vi.fn(),
   generateNode: vi.fn(),
+  detectContextDropping: vi.fn(),
   validateGraph: vi.fn(),
   calculateLayout: vi.fn(),
 }))
@@ -35,6 +37,8 @@ vi.mock('../api/documents', () => ({
 describe('useGraphStore - Pending save state', () => {
   beforeEach(() => {
     useGraphStore.getState().resetGraph()
+    useGenerationStore.getState().setContextDroppingRulesOverlay(null)
+    useGenerationStore.getState().setContextDroppingWarning(null)
   })
 
   describe('Initial state', () => {

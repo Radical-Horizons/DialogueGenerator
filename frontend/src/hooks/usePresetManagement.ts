@@ -208,6 +208,9 @@ export function usePresetManagement(
     if (template.configuration.llmModel) {
       llmState.setModel(template.configuration.llmModel)
     }
+    useGenerationStore.getState().setContextDroppingRulesOverlay(
+      template.configuration.contextDroppingRules ?? null,
+    )
   }, [applyPreset])
 
   const handlePresetLoaded = useCallback(async (preset: Preset) => {
@@ -224,6 +227,7 @@ export function usePresetManagement(
       } else {
         clearValidationState()
         applyPreset(preparePresetForApply(preset, nextValidation))
+        useGenerationStore.getState().setContextDroppingRulesOverlay(null)
         notifyApplied('Preset', nextValidation, toast)
       }
     } catch (err) {
@@ -275,6 +279,7 @@ export function usePresetManagement(
       notifyApplied('Template', validationResult, toast)
     } else if (pendingPreset && validationResult) {
       applyPreset(preparePresetForApply(pendingPreset, validationResult))
+      useGenerationStore.getState().setContextDroppingRulesOverlay(null)
       notifyApplied('Preset', validationResult, toast)
     }
     clearValidationState()

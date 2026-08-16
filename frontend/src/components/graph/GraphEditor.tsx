@@ -43,6 +43,7 @@ import { DialogueCostModal } from './DialogueCostModal'
 import { GraphExportFormatDialog } from './GraphExportFormatDialog'
 import { useGraphStore } from '../../store/graphStore'
 import { useGraphViewStore } from '../../store/graphViewStore'
+import { useGenerationStore } from '../../store/generationStore'
 import { useToast, ConfirmDialog } from '../shared'
 import { theme } from '../../theme'
 import {
@@ -80,6 +81,16 @@ export function GraphEditor({
   const isStandalone = mode === 'standalone'
   const toast = useToast()
   const queryClient = useQueryClient()
+  const contextDroppingWarning = useGenerationStore((s) => s.contextDroppingWarning)
+  const setContextDroppingWarning = useGenerationStore((s) => s.setContextDroppingWarning)
+
+  useEffect(() => {
+    if (!contextDroppingWarning) {
+      return
+    }
+    toast(contextDroppingWarning, 'warning')
+    setContextDroppingWarning(null)
+  }, [contextDroppingWarning, toast, setContextDroppingWarning])
 
   const routeTarget = useMemo(
     () => resolveGraphRouteTarget(routeDialogueId),

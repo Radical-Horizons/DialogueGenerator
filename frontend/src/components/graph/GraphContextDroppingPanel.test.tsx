@@ -6,6 +6,8 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { GraphContextDroppingPanel } from './GraphContextDroppingPanel'
 import { useGraphStore } from '../../store/graphStore'
+import { useGenerationStore } from '../../store/generationStore'
+import { DEFAULT_CONTEXT_DROPPING_RULES, rulesToDetectOptions } from '../../utils/contextDroppingOverlay'
 import type { DetectContextDroppingResponse } from '../../types/graph'
 
 vi.mock('../../api/graph', () => ({
@@ -71,6 +73,7 @@ describe('GraphContextDroppingPanel', () => {
   beforeEach(() => {
     vi.mocked(graphAPI.detectContextDropping).mockReset()
     useGraphStore.setState({ nodes: [], edges: [] })
+    useGenerationStore.getState().setContextDroppingRulesOverlay(null)
   })
 
   it('affiche l’encadré entrant (sélections contexte) et le rapport après succès API', async () => {
@@ -100,5 +103,37 @@ describe('GraphContextDroppingPanel', () => {
     render(<GraphContextDroppingPanel onClose={() => undefined} />)
     await user.click(screen.getByTestId('graph-context-dropping-detect'))
     expect(await screen.findByTestId('graph-context-dropping-error')).toHaveTextContent('API down')
+  })
+
+  it('envoie options overlay si un template a posé des règles', async () => {
+    seedStoreOneDialogueNode()
+    useGenerationStore.getState().setContextDroppingRulesOverlay({
+      ...DEFAULT_CONTEXT_DROPPING_RULES,
+      rules_profile: 'light',
+    })
+    vi.mocked(graphAPI.detectContextDropping).mockResolvedValue(makeResponse())
+    const user = userEvent.setup()
+    render(<GraphContextDroppingPanel onClose={() => undefined} />)
+    await user.click(screen.getByTestId('graph-context-dropping-detect'))
+    await screen.findByTestId('graph-context-dropping-summary')
+    expect(graphAPI.detectContextDropping).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: rulesToDetectOptions({
+          ...DEFAULT_CONTEXT_DROPPING_RULES,
+          rules_profile: 'light',
+        }),
+      }),
+    )
+  })
+
+  it('n’envoie pas options si aucun overlay (héritage 4.10)', async () => {
+    seedStoreOneDialogueNode()
+    vi.mocked(graphAPI.detectContextDropping).mockResolvedValue(makeResponse())
+    const user = userEvent.setup()
+    render(<GraphContextDroppingPanel onClose={() => undefined} />)
+    await user.click(screen.getByTestId('graph-context-dropping-detect'))
+    await screen.findByTestId('graph-context-dropping-summary')
+    const payload = vi.mocked(graphAPI.detectContextDropping).mock.calls[0][0]
+    expect(payload.options).toBeUndefined()
   })
 })

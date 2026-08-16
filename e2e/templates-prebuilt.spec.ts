@@ -33,6 +33,30 @@ function deleteTemplateFilesByName(templateName: string): void {
   }
 }
 
+function readCopiedConfrontationRulesProfile(): string | undefined {
+  if (!fs.existsSync(TEMPLATES_DIR)) {
+    return undefined
+  }
+  for (const entry of fs.readdirSync(TEMPLATES_DIR)) {
+    if (!entry.endsWith('.json')) {
+      continue
+    }
+    const filePath = path.join(TEMPLATES_DIR, entry)
+    try {
+      const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8')) as {
+        name?: string
+        configuration?: { contextDroppingRules?: { rules_profile?: string } }
+      }
+      if (parsed.name === COPY_NAME) {
+        return parsed.configuration?.contextDroppingRules?.rules_profile
+      }
+    } catch {
+      // Fichier illisible — on ignore.
+    }
+  }
+  return undefined
+}
+
 function readConfrontationInstructions(): string {
   const raw = fs.readFileSync(PREBUILT_CATALOG, 'utf8')
   const parsed = JSON.parse(raw) as {
@@ -143,5 +167,6 @@ test.describe('Templates — pré-built [6.4]', () => {
     })
 
     expect(readConfrontationInstructions()).toBe(originalInstructions)
+    expect(readCopiedConfrontationRulesProfile()).toBe('strict')
   })
 })

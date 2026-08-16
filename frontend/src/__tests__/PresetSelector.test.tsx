@@ -7,11 +7,21 @@ import { PresetSelector } from '../components/generation/PresetSelector';
 import { GenerationPanelNarrowProvider } from '../components/generation/GenerationPanelNarrowContext';
 import { usePresetStore } from '../store/presetStore';
 import { useTemplateStore } from '../store/templateStore';
+import { useGenerationStore } from '../store/generationStore';
 import type { Preset } from '../types/preset';
 import type { Template, PrebuiltTemplate } from '../types/template';
 
 vi.mock('../store/presetStore');
 vi.mock('../store/templateStore');
+vi.mock('../api/graph', () => ({
+  getContextDroppingRules: vi.fn().mockResolvedValue({
+    rules_profile: 'strict',
+    tolerance: null,
+    mandatory_info: [],
+    dialogue_type_overrides: {},
+    schema_version: '1.0',
+  }),
+}));
 vi.mock('../store/llmStore', () => ({
   useLLMStore: {
     getState: () => ({
@@ -34,10 +44,15 @@ vi.mock('../theme', () => ({
     text: {
       primary: '#fff',
       secondary: '#ccc',
+      tertiary: '#888',
     },
     border: {
       primary: '#444',
       secondary: '#333',
+    },
+    input: {
+      background: '#111',
+      border: '#444',
     },
     button: {
       default: {
@@ -166,6 +181,7 @@ describe('PresetSelector', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    useGenerationStore.getState().setContextDroppingRulesOverlay(null)
     mockCreateTemplate.mockResolvedValue({ warnings: [] });
     mockUpdateTemplate.mockResolvedValue({ warnings: [] });
     mockDeleteTemplate.mockResolvedValue(undefined);
@@ -780,6 +796,9 @@ describe('PresetSelector', () => {
       fireEvent.change(screen.getByTestId('template-form-category'), {
         target: { value: 'Confrontation' },
       });
+      await waitFor(() => {
+        expect(screen.getByTestId('template-modal-create-btn')).not.toBeDisabled();
+      });
       fireEvent.click(screen.getByTestId('template-modal-create-btn'));
 
       await waitFor(() => {
@@ -827,6 +846,9 @@ describe('PresetSelector', () => {
       fireEvent.change(await screen.findByTestId('template-form-name'), {
         target: { value: 'Nouveau visible' },
       });
+      await waitFor(() => {
+        expect(screen.getByTestId('template-modal-create-btn')).not.toBeDisabled();
+      });
       fireEvent.click(screen.getByTestId('template-modal-create-btn'));
 
       await waitFor(() => {
@@ -863,6 +885,9 @@ describe('PresetSelector', () => {
 
       fireEvent.change(screen.getByTestId('template-form-name'), {
         target: { value: 'Via callback' },
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('template-modal-create-btn')).not.toBeDisabled();
       });
       fireEvent.click(screen.getByTestId('template-modal-create-btn'));
 

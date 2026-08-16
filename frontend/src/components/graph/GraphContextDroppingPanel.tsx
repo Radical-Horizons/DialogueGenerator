@@ -4,6 +4,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useGraphStore } from '../../store/graphStore'
 import { useContextStore } from '../../store/contextStore'
+import { useGenerationStore } from '../../store/generationStore'
 import { theme } from '../../theme'
 import * as graphAPI from '../../api/graph'
 import { getErrorMessage } from '../../types/errors'
@@ -14,6 +15,7 @@ import { ContextDroppingRulesEditor } from './ContextDroppingRulesEditor'
 import { GraphToolFloatingShell } from './GraphToolFloatingShell'
 import { buildContextDroppingInputLines } from './contextDroppingInputSummary'
 import { toGraphNodePayloads, toGraphEdgePayloads } from '../../utils/graphPayload'
+import { rulesToDetectOptions } from '../../utils/contextDroppingOverlay'
 
 interface GraphContextDroppingPanelProps {
   onClose: () => void
@@ -24,6 +26,7 @@ export function GraphContextDroppingPanel({ onClose }: GraphContextDroppingPanel
   const edges = useGraphStore((s) => s.edges)
   const jumpToNode = useGraphStore((s) => s.jumpToNode)
   const contextSelections = useContextStore((s) => s.selections)
+  const overlay = useGenerationStore((s) => s.contextDroppingRulesOverlay)
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -44,6 +47,7 @@ export function GraphContextDroppingPanel({ onClose }: GraphContextDroppingPanel
         edges: toGraphEdgePayloads(edges),
         context_selections: { ...contextSelections },
         scene_instruction: '',
+        ...(overlay ? { options: rulesToDetectOptions(overlay) } : {}),
       })
       setLast(res)
     } catch (err) {
@@ -51,7 +55,7 @@ export function GraphContextDroppingPanel({ onClose }: GraphContextDroppingPanel
     } finally {
       setLoading(false)
     }
-  }, [nodes, edges, contextSelections])
+  }, [nodes, edges, contextSelections, overlay])
 
   const onJump = (c: ContextDroppingCaseItem) => {
     if (c.node_id) jumpToNode(c.node_id)

@@ -6,8 +6,20 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { TemplateEditorModal } from '../components/generation/TemplateEditorModal'
 import { useTemplateStore } from '../store/templateStore'
 import type { Template } from '../types/template'
+import * as graphAPI from '../api/graph'
 
 vi.mock('../store/templateStore')
+
+const mockGetContextDroppingRules = vi.fn()
+
+vi.mock('../api/graph', () => ({
+  getContextDroppingRules: (...args: unknown[]) => mockGetContextDroppingRules(...args),
+  putContextDroppingRules: vi.fn(),
+}))
+
+vi.mock('../components/graph/ContextDroppingRulesEditor', () => ({
+  ContextDroppingRulesEditor: () => <div data-testid="context-dropping-rules-form" />,
+}))
 
 const mockToast = vi.fn()
 
@@ -63,6 +75,13 @@ describe('TemplateEditorModal', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockUpdateTemplate.mockResolvedValue({ warnings: [] })
+    mockGetContextDroppingRules.mockResolvedValue({
+      rules_profile: 'strict',
+      tolerance: null,
+      mandatory_info: [],
+      dialogue_type_overrides: {},
+      schema_version: '1.0',
+    })
     mockCaptureSnapshot.mockReturnValue({
       ...sampleTemplate.configuration,
       instructions: 'Nouveau brief',
@@ -187,5 +206,60 @@ describe('TemplateEditorModal', () => {
 
     fireEvent.keyDown(window, { key: 'Escape' })
     expect(mockOnClose).toHaveBeenCalled()
+  })
+
+  it('hérite 4.10 et n’ajoute pas la clé tant qu’on ne personnalise pas', async () => {
+    render(
+      <TemplateEditorModal
+        isOpen
+        template={sampleTemplate}
+        captureSnapshot={mockCaptureSnapshot}
+        onClose={mockOnClose}
+      />
+    )
+
+    expect(screen.getByTestId('template-editor-rules-inherit')).toBeInTheDocument()
+    expect(screen.queryByTestId('context-dropping-rules-form')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('template-editor-save-btn'))
+    await waitFor(() => {
+      expect(mockUpdateTemplate).toHaveBeenCalledWith(
+        'tpl-001',
+        expect.objectContaining({
+          configuration: expect.not.objectContaining({
+            contextDroppingRules: expect.anything(),
+          }),
+        }),
+      )
+    })
+    expect(mockGetContextDroppingRules).not.toHaveBeenCalled()
+    expect(graphAPI.putContextDroppingRules).not.toHaveBeenCalled()
+  })
+
+  it('Personnaliser charge une copie GET 4.10 sans PUT global', async () => {
+    render(
+      <TemplateEditorModal
+        isOpen
+        template={sampleTemplate}
+        captureSnapshot={mockCaptureSnapshot}
+        onClose={mockOnClose}
+      />
+    )
+
+    fireEvent.click(screen.getByTestId('template-editor-customize-rules-btn'))
+    expect(await screen.findByTestId('context-dropping-rules-form')).toBeInTheDocument()
+    expect(mockGetContextDroppingRules).toHaveBeenCalled()
+
+    fireEvent.click(screen.getByTestId('template-editor-save-btn'))
+    await waitFor(() => {
+      expect(mockUpdateTemplate).toHaveBeenCalledWith(
+        'tpl-001',
+        expect.objectContaining({
+          configuration: expect.objectContaining({
+            contextDroppingRules: expect.objectContaining({ rules_profile: 'strict' }),
+          }),
+        }),
+      )
+    })
   })
 })

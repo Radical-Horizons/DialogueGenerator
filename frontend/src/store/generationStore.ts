@@ -2,6 +2,7 @@
  * Store Zustand pour gérer l'état de génération.
  */
 import { create } from 'zustand'
+import type { ContextDroppingRules } from '../types/graph'
 import type { SceneSelection } from '../types/generation'
 import type { ContextSelection } from '../types/api'
 import type { ContextTokenBreakdownRow, GenerateUnityDialogueResponse, RawPrompt } from '../types/api'
@@ -54,7 +55,12 @@ interface GenerationState {
   unityDialogueResponse: GenerateUnityDialogueResponse | null
   tokensUsed: number | null
 
-  /** Instructions scène (panneau génération) — pour estimation budget contexte côté ContextSelector */
+  /** Overlay session anti-drop (template 6.5). null = hériter fichier 4.10. */
+  contextDroppingRulesOverlay: ContextDroppingRules | null
+  setContextDroppingRulesOverlay: (rules: ContextDroppingRules | null) => void
+  contextDroppingWarning: string | null
+  setContextDroppingWarning: (message: string | null) => void
+  /** Brief génération (textarea) — lu par preview/optimize sans le store graphe. */
   generationUserInstructions: string
   setGenerationUserInstructions: (value: string) => void
   
@@ -185,7 +191,11 @@ export const useGenerationStore = create<GenerationState>((set) => ({
   unityDialogueResponse: null,
   tokensUsed: null,
   generationUserInstructions: '',
-  setGenerationUserInstructions: (value) => set({ generationUserInstructions: value }),
+  setGenerationUserInstructions: (value: string) => set({ generationUserInstructions: value }),
+  contextDroppingRulesOverlay: null,
+  setContextDroppingRulesOverlay: (rules) => set({ contextDroppingRulesOverlay: rules }),
+  contextDroppingWarning: null,
+  setContextDroppingWarning: (message) => set({ contextDroppingWarning: message }),
 
   // État streaming initial (Task 2 - Story 0.2)
   isGenerating: false,

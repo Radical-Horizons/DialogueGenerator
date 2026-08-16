@@ -20,7 +20,14 @@
         "locations": [],
         "region": "",
         "sceneType": "Generic",
-        "instructions": "Ton adaptatif et engageant. Privilégie les répliques MESURÉES (1-3 phrases) qui établissent la relation et présentent le personnage. Les répliques courtes créent de la dynamique ; les plus longues révèlent personnalité, motivations ou contexte. Cette première rencontre doit marquer le joueur. Pose un flag bool de rencontre initiale (ex. Flag_perso_X_rencontre_initiale) et, si la scène le justifie, un petit delta d’Admiration. N’invente pas de valeurs numériques absentes du brief."
+        "instructions": "Ton adaptatif et engageant. Privilégie les répliques MESURÉES (1-3 phrases) qui établissent la relation et présentent le personnage. Les répliques courtes créent de la dynamique ; les plus longues révèlent personnalité, motivations ou contexte. Cette première rencontre doit marquer le joueur. Pose un flag bool de rencontre initiale (ex. Flag_perso_X_rencontre_initiale) et, si la scène le justifie, un petit delta d’Admiration. N’invente pas de valeurs numériques absentes du brief.",
+        "contextDroppingRules": {
+          "rules_profile": "light",
+          "tolerance": null,
+          "mandatory_info": [],
+          "dialogue_type_overrides": {},
+          "schema_version": "1.0"
+        }
       }
     },
     {
@@ -43,7 +50,14 @@
         "locations": [],
         "region": "",
         "sceneType": "Generic",
-        "instructions": "Ton tendu et conflictuel. Répliques PERCUTANTES (1-3 phrases) : courtes pour l’attaque, moyennes pour l’argument. Inclus un test de caractéristique (Puissance ou Sociabilité) avec DD explicite, un effet de réputation sur l’axe Crainte, et un flag bool de confrontation. Les valeurs numériques (DD, deltas) doivent figurer dans les choix/effets générés, pas seulement dans le lore."
+        "instructions": "Ton tendu et conflictuel. Répliques PERCUTANTES (1-3 phrases) : courtes pour l’attaque, moyennes pour l’argument. Inclus un test de caractéristique (Puissance ou Sociabilité) avec DD explicite, un effet de réputation sur l’axe Crainte, et un flag bool de confrontation. Les valeurs numériques (DD, deltas) doivent figurer dans les choix/effets générés, pas seulement dans le lore.",
+        "contextDroppingRules": {
+          "rules_profile": "strict",
+          "tolerance": null,
+          "mandatory_info": [],
+          "dialogue_type_overrides": {},
+          "schema_version": "1.0"
+        }
       }
     },
     {
@@ -66,7 +80,14 @@
         "locations": [],
         "region": "",
         "sceneType": "Generic",
-        "instructions": "Ton dramatique. Construis une PROGRESSION GRADUELLE : moyennes, puis courtes (tension), puis une réplique plus longue pour la révélation elle-même. Appuie-toi sur des flags de mémoire / souvenir (enum ou compteur) et une progression de Connaissance. Le lore peut rester implicite ; les flags posés doivent être nommés clairement dans les effets."
+        "instructions": "Ton dramatique. Construis une PROGRESSION GRADUELLE : moyennes, puis courtes (tension), puis une réplique plus longue pour la révélation elle-même. Appuie-toi sur des flags de mémoire / souvenir (enum ou compteur) et une progression de Connaissance. Le lore peut rester implicite ; les flags posés doivent être nommés clairement dans les effets.",
+        "contextDroppingRules": {
+          "rules_profile": "light",
+          "tolerance": null,
+          "mandatory_info": [],
+          "dialogue_type_overrides": {},
+          "schema_version": "1.0"
+        }
       }
     },
     {
@@ -89,7 +110,14 @@
         "locations": [],
         "region": "",
         "sceneType": "Generic",
-        "instructions": "Ton mesuré, presque commercial. Alterne propositions courtes et arguments développés. Inclus au moins une condition de seuil sur le Prestige et un delta Prestige explicite. Un choix coûteux peut consommer de l’Effort. Les chiffres (seuils, deltas, Effort) doivent apparaître dans les conditions/effets du JSON, pas seulement dans le texte dit."
+        "instructions": "Ton mesuré, presque commercial. Alterne propositions courtes et arguments développés. Inclus au moins une condition de seuil sur le Prestige et un delta Prestige explicite. Un choix coûteux peut consommer de l’Effort. Les chiffres (seuils, deltas, Effort) doivent apparaître dans les conditions/effets du JSON, pas seulement dans le texte dit.",
+        "contextDroppingRules": {
+          "rules_profile": "strict",
+          "tolerance": null,
+          "mandatory_info": [],
+          "dialogue_type_overrides": {},
+          "schema_version": "1.0"
+        }
       }
     },
     {
@@ -112,7 +140,14 @@
         "locations": [],
         "region": "",
         "sceneType": "Generic",
-        "instructions": "Ton personnel et engageant. Le PNJ pèse loyauté, risque et respect. Inclus un delta d’Influence/Respect et un flag de faction au moment de l’acceptation. Propose au moins un refus honorable (pas seulement un échec humiliant). Les effets d’influence et les flags doivent être explicites dans le JSON généré."
+        "instructions": "Ton personnel et engageant. Le PNJ pèse loyauté, risque et respect. Inclus un delta d’Influence/Respect et un flag de faction au moment de l’acceptation. Propose au moins un refus honorable (pas seulement un échec humiliant). Les effets d’influence et les flags doivent être explicites dans le JSON généré.",
+        "contextDroppingRules": {
+          "rules_profile": "light",
+          "tolerance": null,
+          "mandatory_info": [],
+          "dialogue_type_overrides": {},
+          "schema_version": "1.0"
+        }
       }
     },
     {
@@ -135,7 +170,14 @@
         "locations": [],
         "region": "",
         "sceneType": "Generic",
-        "instructions": "Génère une cut-scene : pas de choix joueur (ou un seul continue). Indique nodeType cutscene, un éventuel trigger_animation, et un flag système de progression. Le rythme est cinématographique (didascalies + répliques). N’ajoute pas de skill check ni de menu de réponses."
+        "instructions": "Génère une cut-scene : pas de choix joueur (ou un seul continue). Indique nodeType cutscene, un éventuel trigger_animation, et un flag système de progression. Le rythme est cinématographique (didascalies + répliques). N’ajoute pas de skill check ni de menu de réponses.",
+        "contextDroppingRules": {
+          "rules_profile": "light",
+          "tolerance": null,
+          "mandatory_info": [],
+          "dialogue_type_overrides": {},
+          "schema_version": "1.0"
+        }
       }
     },
     {
@@ -158,7 +200,14 @@
         "locations": [],
         "region": "",
         "sceneType": "Generic",
-        "instructions": "Centre la scène sur UN test de caractéristique (parmi les 8) avec un DD explicite. Branche succès, échec, et si pertinent un succès coûteux en Effort. Le skillCheckConfig doit être complet dans le JSON (caractéristique, DD). Le dialogue prépare le jet puis commente le résultat, sans noyer le test dans du lore implicite."
+        "instructions": "Centre la scène sur UN test de caractéristique (parmi les 8) avec un DD explicite. Branche succès, échec, et si pertinent un succès coûteux en Effort. Le skillCheckConfig doit être complet dans le JSON (caractéristique, DD). Le dialogue prépare le jet puis commente le résultat, sans noyer le test dans du lore implicite.",
+        "contextDroppingRules": {
+          "rules_profile": "strict",
+          "tolerance": null,
+          "mandatory_info": [],
+          "dialogue_type_overrides": {},
+          "schema_version": "1.0"
+        }
       }
     }
   ]
