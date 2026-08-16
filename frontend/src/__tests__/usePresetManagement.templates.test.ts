@@ -16,6 +16,8 @@ const mocks = vi.hoisted(() => ({
   setRegion: vi.fn(),
   toggleSubLocation: vi.fn(),
   setContextDroppingRulesOverlay: vi.fn(),
+  setAppliedTemplate: vi.fn(),
+  clearTemplateSession: vi.fn(),
 }))
 
 vi.mock('../api/templates', () => ({
@@ -37,6 +39,8 @@ vi.mock('../store/generationStore', () => ({
     {
       getState: () => ({
         setContextDroppingRulesOverlay: mocks.setContextDroppingRulesOverlay,
+        setAppliedTemplate: mocks.setAppliedTemplate,
+        clearTemplateSession: mocks.clearTemplateSession,
         contextDroppingRulesOverlay: null,
       }),
     },
@@ -161,6 +165,7 @@ describe('usePresetManagement — templates [6.3]', () => {
     expect(mocks.setProvider).toHaveBeenCalledWith('mistral')
     expect(mocks.setModel).toHaveBeenCalledWith('gpt-5.6-terra')
     expect(mocks.setContextDroppingRulesOverlay).toHaveBeenCalledWith(null)
+    expect(mocks.setAppliedTemplate).toHaveBeenCalledWith(sampleTemplate.id, sampleTemplate.name)
     expect(toast).toHaveBeenCalledWith('Template chargé avec succès', 'success')
     expect(result.current.isValidationModalOpen).toBe(false)
   })
@@ -385,6 +390,32 @@ describe('usePresetManagement — templates [6.3]', () => {
     expect(setUserInstructions).not.toHaveBeenCalledWith('Brief snapshot')
   })
 
+  it('applique la température snapshotée si le setter est fourni', async () => {
+    const setTemperature = vi.fn()
+    const withTemp = {
+      ...sampleTemplate,
+      configuration: { ...sampleTemplate.configuration, temperature: 0.4 },
+    }
+    mocks.getTemplateApi.mockResolvedValue(withTemp)
+    const { result } = renderHook(() =>
+      usePresetManagement({
+        userInstructions: 'Ancien brief',
+        setUserInstructions,
+        setIsDirty,
+        setSaveStatus,
+        toast,
+        setLlmModel,
+        setTemperature,
+      }),
+    )
+
+    await act(async () => {
+      await result.current.handleTemplateLoaded(withTemp)
+    })
+
+    expect(setTemperature).toHaveBeenCalledWith(0.4)
+  })
+
   it('pose l’overlay session si le template a des règles anti-drop', async () => {
     const rules = {
       rules_profile: 'strict' as const,
@@ -443,5 +474,6 @@ describe('usePresetManagement — templates [6.3]', () => {
     })
 
     expect(mocks.setContextDroppingRulesOverlay).toHaveBeenCalledWith(rules)
+    expect(mocks.setAppliedTemplate).toHaveBeenCalledWith('confrontation', 'Confrontation')
   })
 })

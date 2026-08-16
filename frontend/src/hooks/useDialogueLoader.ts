@@ -6,6 +6,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import type { RefObject } from 'react'
 import { useGraphStore } from '../store/graphStore'
 import { useGraphViewStore } from '../store/graphViewStore'
+import { useGenerationStore } from '../store/generationStore'
 import * as unityDialoguesAPI from '../api/unityDialogues'
 import { getErrorMessage } from '../types/errors'
 import { API_TIMEOUTS } from '../constants'
@@ -71,6 +72,11 @@ export function useDialogueLoader(
     incrementLoadSeq,
   } = useGraphStore()
 
+  const resetGraphAndTemplateSession = useCallback(() => {
+    resetGraph()
+    useGenerationStore.getState().clearTemplateSession()
+  }, [resetGraph])
+
   // Ne pas utiliser ?? seul : une chaîne vide sur selectedDialogue bloquait le repli documentId (E2E / liste).
   const activeDialogueFilename =
     selectedDialogue?.filename?.trim() ||
@@ -91,9 +97,9 @@ export function useDialogueLoader(
     dialogueListRef.current?.refresh()
     if (selectedDialogue?.filename === dialogueDeleted) {
       setSelectedDialogue(null)
-      resetGraph()
+      resetGraphAndTemplateSession()
     }
-  }, [dialogueDeleted, selectedDialogue?.filename, resetGraph])
+  }, [dialogueDeleted, selectedDialogue?.filename, resetGraphAndTemplateSession])
 
   useEffect(() => {
     if (!selectedDialogue) {
@@ -147,7 +153,7 @@ export function useDialogueLoader(
       }
 
       // Reset total de l'état avant de commencer un nouveau chargement
-      resetGraph()
+      resetGraphAndTemplateSession()
       const loadSeq = incrementLoadSeq()
 
       try {
@@ -237,7 +243,7 @@ export function useDialogueLoader(
     saveDialogue,
     validateGraph,
     toast,
-    resetGraph,
+    resetGraphAndTemplateSession,
     incrementLoadSeq,
   ])
 
@@ -302,7 +308,7 @@ export function useDialogueLoader(
       if (loadInFlightRef.current && activeDialogueFilenameRef.current?.replace(/\.json$/i, '') === routeTarget.normalizedDialogueId) {
         return
       }
-      resetGraph()
+      resetGraphAndTemplateSession()
       const loadSeq = incrementLoadSeq()
       loadInFlightRef.current = true
       setIsLoadingDialogue(true)
@@ -369,7 +375,7 @@ export function useDialogueLoader(
     loadDialogueFromRawJson,
     validateGraph,
     toast,
-    resetGraph,
+    resetGraphAndTemplateSession,
     incrementLoadSeq,
   ])
 

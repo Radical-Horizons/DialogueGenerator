@@ -14,6 +14,7 @@ describe('generationStore - Streaming Extensions', () => {
     }
     store.setContextDroppingRulesOverlay(null)
     store.setContextDroppingWarning(null)
+    store.clearTemplateSession()
   })
 
   it('should have initial streaming state as false', () => {
@@ -178,5 +179,23 @@ describe('generationStore - Streaming Extensions', () => {
     expect(useGenerationStore.getState().contextDroppingRulesOverlay).toEqual(rules)
     useGenerationStore.getState().setContextDroppingRulesOverlay(null)
     expect(useGenerationStore.getState().contextDroppingRulesOverlay).toBeNull()
+  })
+
+  it('clearTemplateSession retire overlay et template appliqué', () => {
+    const rules = {
+      rules_profile: 'light' as const,
+      tolerance: null,
+      mandatory_info: ['fait'],
+      dialogue_type_overrides: {},
+      schema_version: '1.0',
+    }
+    useGenerationStore.getState().setContextDroppingRulesOverlay(rules)
+    useGenerationStore.getState().setContextDroppingWarning('2 cas')
+    useGenerationStore.getState().setAppliedTemplate('confrontation', 'Confrontation')
+    useGenerationStore.getState().clearTemplateSession()
+    expect(useGenerationStore.getState().contextDroppingRulesOverlay).toBeNull()
+    expect(useGenerationStore.getState().contextDroppingWarning).toBeNull()
+    expect(useGenerationStore.getState().appliedTemplateId).toBeNull()
+    expect(useGenerationStore.getState().appliedTemplateName).toBeNull()
   })
 })

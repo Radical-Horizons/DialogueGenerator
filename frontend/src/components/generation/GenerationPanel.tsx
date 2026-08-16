@@ -100,6 +100,7 @@ export function GenerationPanel() {
     ReasoningEffort | null
   >(null)
   const [topP, setTopP] = useState<number | null>(null)
+  const [temperature, setTemperature] = useState<number | null>(null)
   const [maxChoices, setMaxChoices] = useState<number | null>(null)
   const choicesMode: 'free' | 'capped' = maxChoices !== null ? 'capped' : 'free'
   const [availableModels, setAvailableModels] = useState<LLMModelResponse[]>([])
@@ -175,6 +176,8 @@ export function GenerationPanel() {
     setMaxChoices,
     llmModel,
     setLlmModel,
+    temperature,
+    setTemperature,
   })
   
   // Synchroniser l'état local llmModel avec useLLMStore (Story 0.3)

@@ -22,7 +22,7 @@ import {
   deriveAutoDisplayName,
   nodeHasStructuralDisplayName,
 } from '../../utils/nodeTargetLabel'
-import { useGenerationStore } from '../generationStore'
+import { useGenerationStore, getAppliedTemplateLogFields } from '../generationStore'
 import { toGraphEdgePayloads, toGraphNodePayloads } from '../../utils/graphPayload'
 import {
   rulesToDetectOptions,
@@ -258,6 +258,7 @@ export const createGenerationSlice: StateCreator<
           choices_mode: choicesMode,
           dialogue_id: dialogueIdForCosts,
           dialogue_nodes: dialogueNodesForApi,
+          ...getAppliedTemplateLogFields(),
         },
         { llmModelIdentifier: llmModelIdentifier ?? undefined }
       )
@@ -757,6 +758,7 @@ export const createGenerationSlice: StateCreator<
         via_choice_index,
         player_character_id: regenPlayerId,
         dialogue_nodes: serializeDialogueNodesForApi(state.nodes),
+        ...getAppliedTemplateLogFields(),
       })
       const existingHistory = (existingData.regenerationHistory as Array<{ instructions: string; timestamp: string; generationId: string }>) ?? []
       const newEntry = {

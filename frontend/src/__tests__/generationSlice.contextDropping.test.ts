@@ -19,7 +19,7 @@ vi.mock('../api/graph', () => ({
 describe('generationSlice — overlay anti-drop [6.5]', () => {
   beforeEach(() => {
     useGraphStore.getState().resetGraph()
-    useGenerationStore.getState().setContextDroppingRulesOverlay(null)
+    useGenerationStore.getState().clearTemplateSession()
     useGenerationStore.getState().setContextDroppingWarning(null)
     vi.clearAllMocks()
   })
@@ -134,6 +134,37 @@ describe('generationSlice — overlay anti-drop [6.5]', () => {
       expect.any(Object),
     )
     expect(graphAPI.detectContextDropping).not.toHaveBeenCalled()
+  })
+
+  it('envoie template_id et template_name si un template est chargé', async () => {
+    const parentNode: Node = {
+      id: 'parent-1',
+      type: 'dialogueNode',
+      position: { x: 0, y: 0 },
+      data: { id: 'parent-1', speaker: 'PNJ', line: 'Parent' },
+    }
+    useGraphStore.getState().addNode(parentNode)
+    useGenerationStore.getState().setAppliedTemplate('confrontation', 'Confrontation')
+    vi.mocked(graphAPI.generateNode).mockResolvedValue({
+      node: {
+        id: 'generated-1',
+        type: 'dialogueNode',
+        speaker: 'PNJ',
+        line: 'Réponse',
+      },
+      suggested_connections: [],
+      parent_node_id: 'parent-1',
+    })
+
+    await useGraphStore.getState().generateFromNode('parent-1', 'Brief', {})
+
+    expect(graphAPI.generateNode).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template_id: 'confrontation',
+        template_name: 'Confrontation',
+      }),
+      expect.any(Object),
+    )
   })
 
   it('injecte la clause aussi sur regenerateNode', async () => {

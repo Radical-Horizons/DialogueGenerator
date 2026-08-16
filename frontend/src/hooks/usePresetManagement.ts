@@ -99,6 +99,9 @@ export interface UsePresetManagementOptions {
   llmModel?: string
   /** Setter pour llmModel - optionnel */
   setLlmModel?: (value: string) => void
+  /** Température snapshotée (non envoyée à GPT-5.6). */
+  temperature?: number | null
+  setTemperature?: (value: number | null) => void
 }
 
 /**
@@ -122,6 +125,7 @@ export function usePresetManagement(
     setMaxCompletionTokens,
     setMaxChoices,
     setLlmModel,
+    setTemperature,
   } = options
 
   const [isValidationModalOpen, setIsValidationModalOpen] = useState(false)
@@ -198,7 +202,7 @@ export function usePresetManagement(
     setSaveStatus('unsaved')
   }, [setSceneSelection, setUserInstructions, setIsDirty, setSaveStatus, setTopP, setReasoningEffort, setMaxCompletionTokens, setMaxChoices, setLlmModel])
 
-  const applyTemplateSnapshot = useCallback((template: Template, validation: PresetValidationResult) => {
+  const applyTemplateSnapshot = useCallback((template: Template, validation: PresetValidationResult, sourceId?: string) => {
     applyPreset(preparePresetForApply(templateToPreset(template), validation))
     const llmState = useLLMStore.getState()
     const provider = template.configuration.llmProvider
@@ -208,10 +212,16 @@ export function usePresetManagement(
     if (template.configuration.llmModel) {
       llmState.setModel(template.configuration.llmModel)
     }
-    useGenerationStore.getState().setContextDroppingRulesOverlay(
+    const temperature = template.configuration.temperature
+    if (typeof temperature === 'number' && Number.isFinite(temperature)) {
+      setTemperature?.(temperature)
+    }
+    const generation = useGenerationStore.getState()
+    generation.setContextDroppingRulesOverlay(
       template.configuration.contextDroppingRules ?? null,
     )
-  }, [applyPreset])
+    generation.setAppliedTemplate(sourceId ?? template.id, template.name)
+  }, [applyPreset, setTemperature])
 
   const handlePresetLoaded = useCallback(async (preset: Preset) => {
     try {
@@ -227,7 +237,7 @@ export function usePresetManagement(
       } else {
         clearValidationState()
         applyPreset(preparePresetForApply(preset, nextValidation))
-        useGenerationStore.getState().setContextDroppingRulesOverlay(null)
+        useGenerationStore.getState().clearTemplateSession()
         notifyApplied('Preset', nextValidation, toast)
       }
     } catch (err) {
@@ -269,7 +279,7 @@ export function usePresetManagement(
       obsoleteRefs: [],
     }
     clearValidationState()
-    applyTemplateSnapshot(prebuiltToTemplate(prebuilt), emptyValidation)
+    applyTemplateSnapshot(prebuiltToTemplate(prebuilt), emptyValidation, prebuilt.id)
     notifyApplied('Template', emptyValidation, toast)
   }, [applyTemplateSnapshot, toast, clearValidationState])
   
@@ -279,7 +289,7 @@ export function usePresetManagement(
       notifyApplied('Template', validationResult, toast)
     } else if (pendingPreset && validationResult) {
       applyPreset(preparePresetForApply(pendingPreset, validationResult))
-      useGenerationStore.getState().setContextDroppingRulesOverlay(null)
+      useGenerationStore.getState().clearTemplateSession()
       notifyApplied('Preset', validationResult, toast)
     }
     clearValidationState()
@@ -327,10 +337,11 @@ export function usePresetManagement(
       ...(options.maxCompletionTokens !== undefined && options.maxCompletionTokens !== null ? { maxCompletionTokens: options.maxCompletionTokens } : {}),
       ...(options.maxChoices !== undefined && options.maxChoices !== null ? { maxChoices: options.maxChoices } : {}),
       ...(options.llmModel !== undefined ? { llmModel: options.llmModel } : {}),
+      ...(options.temperature !== undefined && options.temperature !== null ? { temperature: options.temperature } : {}),
     }
     
     return config as PresetConfiguration
-  }, [sceneSelection, options.userInstructions, options.topP, options.reasoningEffort, options.maxCompletionTokens, options.maxChoices, options.llmModel])
+  }, [sceneSelection, options.userInstructions, options.topP, options.reasoningEffort, options.maxCompletionTokens, options.maxChoices, options.llmModel, options.temperature])
 
   return {
     handlePresetLoaded,

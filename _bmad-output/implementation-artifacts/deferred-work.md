@@ -277,7 +277,7 @@
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-6-3-appliquer-templates-a-generation-dialogue-fr57.md`
   summary: Enregistrer le `template_id` dans les logs de génération (Story 1.15 / AC épic 6.3).
-  evidence: Choix 3A au kickoff 6.3 — un livrable distinct (pipeline génération + UI logs) ; 6.3 se limite à hydrater le formulaire.
+  evidence: Livré en patch 2026-08-16 — `template_id` / `template_name` annotés à generate/regenerate, exposés dans GET generation-logs et le panneau Logs.
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-6-5-configurer-templates-anti-context-dropping-subtilite-lore-vs-explicite-fr59.md`
   summary: Overlay `tolerance: null` retombe sur le seuil du fichier 4.10 via le merge options existant.

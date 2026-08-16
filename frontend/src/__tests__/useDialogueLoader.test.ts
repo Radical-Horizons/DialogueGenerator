@@ -3,6 +3,7 @@ import { renderHook, act, waitFor } from '@testing-library/react'
 import { useDialogueLoader } from '../hooks/useDialogueLoader'
 import { useGraphStore } from '../store/graphStore'
 import { useGraphViewStore } from '../store/graphViewStore'
+import { useGenerationStore } from '../store/generationStore'
 import type { UnityDialogueMetadata } from '../types/api'
 
 const toastMock = vi.fn()
@@ -28,6 +29,7 @@ describe('useDialogueLoader', () => {
     toastMock.mockReset()
     getUnityDialogueMock.mockReset()
     useGraphStore.getState().resetGraph()
+    useGenerationStore.getState().clearTemplateSession()
   })
 
   afterEach(() => {
@@ -67,6 +69,43 @@ describe('useDialogueLoader', () => {
 
     expect(loadDialogueByDocumentIdMock).toHaveBeenCalledWith('test')
     expect(validateGraphMock).toHaveBeenCalled()
+  })
+
+  it('clears template session when switching dialogue', async () => {
+    useGenerationStore.getState().setAppliedTemplate('confrontation', 'Confrontation')
+    useGenerationStore.getState().setContextDroppingRulesOverlay({
+      rules_profile: 'strict',
+      tolerance: null,
+      mandatory_info: [],
+      dialogue_type_overrides: {},
+      schema_version: '1.0',
+    })
+    useGenerationStore.getState().setContextDroppingWarning('cas')
+
+    const loadDialogueByDocumentIdMock = vi.fn().mockResolvedValue(undefined)
+    const validateGraphMock = vi.fn().mockResolvedValue(undefined)
+    useGraphStore.setState({ loadDialogueByDocumentId: loadDialogueByDocumentIdMock, validateGraph: validateGraphMock })
+
+    const { result } = renderHook(() => useDialogueLoader(toastMock, null))
+
+    act(() => {
+      result.current.setSelectedDialogue(
+        unityDialogueFixture({
+          filename: 'other.json',
+          title: 'Other',
+          node_count: 0,
+          edge_count: 0,
+        })
+      )
+    })
+
+    await waitFor(() => {
+      expect(result.current.isLoadingDialogue).toBe(false)
+    })
+
+    expect(useGenerationStore.getState().appliedTemplateId).toBeNull()
+    expect(useGenerationStore.getState().contextDroppingRulesOverlay).toBeNull()
+    expect(useGenerationStore.getState().contextDroppingWarning).toBeNull()
   })
 
   it('shows error toast when load fails', async () => {
