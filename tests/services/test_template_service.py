@@ -391,3 +391,37 @@ class TestTemplateServiceGetUpdateDelete:
             template_service.validate_template_references(
                 "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
             )
+
+
+class TestTemplateServicePrebuilt:
+    """Catalogue pré-built lecture seule."""
+
+    def test_list_and_get_from_catalog_file(
+        self,
+        template_service: TemplateService,
+    ) -> None:
+        """Given le JSON versionné, when list/get, then 7 fiches et slug OK."""
+        listed = template_service.list_prebuilt_templates()
+        assert len(listed) == 7
+        loaded = template_service.get_prebuilt_template("confrontation")
+        assert loaded.name == "Confrontation"
+        assert loaded.configuration.characters == []
+
+    def test_get_unknown_raises(self, template_service: TemplateService) -> None:
+        """Given un slug absent, when get, then FileNotFoundError."""
+        with pytest.raises(FileNotFoundError):
+            template_service.get_prebuilt_template("inconnu")
+
+    def test_missing_file_returns_empty(
+        self,
+        tmp_path: Path,
+        preset_service: PresetService,
+    ) -> None:
+        """Given un chemin absent, when list, then []."""
+        service = TemplateService(
+            preset_service=preset_service,
+            templates_dir=tmp_path / "custom",
+            prebuilt_path=tmp_path / "missing.json",
+        )
+        assert service.list_prebuilt_templates() == []
+

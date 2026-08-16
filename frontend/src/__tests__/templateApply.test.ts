@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { isLlmProvider, templateToPreset } from '../utils/templateApply'
-import type { Template } from '../types/template'
+import { isLlmProvider, isPrebuiltNew, prebuiltToTemplate, templateToPreset } from '../utils/templateApply'
+import type { PrebuiltTemplate, Template } from '../types/template'
 
 const sampleTemplate: Template = {
   id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
@@ -55,5 +55,45 @@ describe('isLlmProvider', () => {
     expect(isLlmProvider(null)).toBe(false)
     expect(isLlmProvider(undefined)).toBe(false)
     expect(isLlmProvider('anthropic')).toBe(false)
+  })
+})
+
+describe('prebuilt helpers', () => {
+  const samplePrebuilt: PrebuiltTemplate = {
+    id: 'confrontation',
+    name: 'Confrontation',
+    description: 'Desc',
+    category: 'Confrontation',
+    icon: '⚔️',
+    gddSystem: 'Skill check',
+    sceneTypeHint: 'confrontation',
+    objectif: 'Obj',
+    casUsage: 'Cas',
+    examples: [],
+    addedAt: '2026-08-16T00:00:00Z',
+    configuration: {
+      characters: [],
+      locations: [],
+      region: '',
+      sceneType: 'Generic',
+      instructions: 'Brief pré-built',
+    },
+  }
+
+  it('prebuiltToTemplate copie configuration et métadonnées', () => {
+    const template = prebuiltToTemplate(samplePrebuilt)
+    expect(template.name).toBe('Confrontation')
+    expect(template.configuration.instructions).toBe('Brief pré-built')
+    expect(template.metadata.created).toBe(samplePrebuilt.addedAt)
+  })
+
+  it('isPrebuiltNew est vrai sous 30 jours', () => {
+    const added = Date.parse('2026-08-16T00:00:00Z')
+    expect(isPrebuiltNew('2026-08-16T00:00:00Z', added + 2 * 24 * 60 * 60 * 1000)).toBe(true)
+    expect(isPrebuiltNew('2026-08-16T00:00:00Z', added + 40 * 24 * 60 * 60 * 1000)).toBe(false)
+  })
+
+  it('isPrebuiltNew refuse une date invalide', () => {
+    expect(isPrebuiltNew('not-a-date')).toBe(false)
   })
 })

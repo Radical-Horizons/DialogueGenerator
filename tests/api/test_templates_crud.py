@@ -426,3 +426,74 @@ class TestTemplatesValidate:
         )
         assert response.status_code == 200
         assert response.json()["valid"] is True
+
+
+class TestTemplatesPrebuilt:
+    """GET /prebuilt — matrice I/O 6.4."""
+
+    def test_list_prebuilt_returns_seven(self, client: TestClient) -> None:
+        """Given le catalogue versionné, when GET /prebuilt, then 7 fiches."""
+        response = client.get("/api/v1/templates/prebuilt")
+        assert response.status_code == 200
+        body = response.json()
+        assert len(body) == 7
+        slugs = {item["id"] for item in body}
+        assert slugs == {
+            "salutation",
+            "confrontation",
+            "revelation",
+            "negociation",
+            "recrutement",
+            "cutscene",
+            "test-caracteristique",
+        }
+        confrontation = next(item for item in body if item["id"] == "confrontation")
+        assert confrontation["gddSystem"]
+        assert confrontation["configuration"]["characters"] == []
+
+    def test_get_prebuilt_by_slug(self, client: TestClient) -> None:
+        """Given un slug connu, when GET, then 200."""
+        response = client.get("/api/v1/templates/prebuilt/confrontation")
+        assert response.status_code == 200
+        assert response.json()["name"] == "Confrontation"
+
+    def test_get_prebuilt_unknown_404(self, client: TestClient) -> None:
+        """Given un slug absent, when GET, then 404."""
+        response = client.get("/api/v1/templates/prebuilt/inconnu")
+        assert response.status_code == 404
+
+    def test_put_delete_prebuilt_slug_404(self, client: TestClient) -> None:
+        """Given un slug pré-built, when PUT/DELETE sur /templates/{id}, then 404."""
+        updated = client.put(
+            "/api/v1/templates/confrontation",
+            json={"name": "Hack"},
+        )
+        assert updated.status_code == 404
+        deleted = client.delete("/api/v1/templates/confrontation")
+        assert deleted.status_code == 404
+
+    def test_copy_via_post_custom(self, client: TestClient) -> None:
+        """Given une fiche pré-built, when POST custom (copie), then 201."""
+        source = client.get("/api/v1/templates/prebuilt/confrontation").json()
+        response = client.post(
+            "/api/v1/templates",
+            json={
+                "name": "Confrontation (copie)",
+                "description": source["description"],
+                "category": source["category"],
+                "icon": source["icon"],
+                "configuration": source["configuration"],
+            },
+        )
+        assert response.status_code == 201
+        assert response.json()["name"] == "Confrontation (copie)"
+
+    def test_list_prebuilt_guest_jwt_ok(self, client: TestClient) -> None:
+        """Given un token guest, when GET /prebuilt, then 200."""
+        guest = client.post("/api/v1/auth/guest")
+        token = guest.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+        response = client.get("/api/v1/templates/prebuilt", headers=headers)
+        assert response.status_code == 200
+        assert len(response.json()) == 7
+

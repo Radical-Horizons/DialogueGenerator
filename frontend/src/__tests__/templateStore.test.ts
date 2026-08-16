@@ -7,7 +7,7 @@ import type { AxiosResponse } from 'axios'
 import { renderHook, act } from '@testing-library/react'
 import { useTemplateStore } from '../store/templateStore'
 import * as templatesApi from '../api/templates'
-import type { Template, TemplateCreateResponse } from '../types/template'
+import type { PrebuiltTemplate, Template, TemplateCreateResponse } from '../types/template'
 
 vi.mock('../api/templates')
 
@@ -247,5 +247,51 @@ describe('useTemplateStore', () => {
     })
 
     expect(result.current.templates).toEqual([])
+  })
+
+  it('charge le catalogue pré-built', async () => {
+    const samplePrebuilt: PrebuiltTemplate = {
+      id: 'confrontation',
+      name: 'Confrontation',
+      description: 'Desc',
+      category: 'Confrontation',
+      icon: '⚔️',
+      gddSystem: 'Skill check',
+      sceneTypeHint: 'confrontation',
+      objectif: 'Obj',
+      casUsage: 'Cas',
+      examples: [],
+      addedAt: '2026-08-16T00:00:00Z',
+      configuration: {
+        characters: [],
+        locations: [],
+        region: '',
+        sceneType: 'Generic',
+        instructions: 'Brief',
+      },
+    }
+    vi.mocked(templatesApi.listPrebuiltTemplatesApi).mockResolvedValueOnce([samplePrebuilt])
+    const { result } = renderHook(() => useTemplateStore())
+
+    await act(async () => {
+      await result.current.loadPrebuiltTemplates()
+    })
+
+    expect(result.current.prebuiltTemplates).toEqual([samplePrebuilt])
+    expect(result.current.prebuiltError).toBeNull()
+    expect(result.current.prebuiltLoading).toBe(false)
+  })
+
+  it('pose prebuiltError si le catalogue échoue', async () => {
+    vi.mocked(templatesApi.listPrebuiltTemplatesApi).mockRejectedValueOnce(axiosHttpError(500))
+    const { result } = renderHook(() => useTemplateStore())
+
+    await act(async () => {
+      await result.current.loadPrebuiltTemplates()
+    })
+
+    expect(result.current.prebuiltError).toContain('Échec du chargement des templates pré-built')
+    expect(result.current.prebuiltTemplates).toEqual([])
+    expect(result.current.prebuiltLoading).toBe(false)
   })
 })

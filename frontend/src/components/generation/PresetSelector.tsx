@@ -11,7 +11,7 @@ import { usePresetStore } from '../../store/presetStore';
 import { useTemplateStore } from '../../store/templateStore';
 import { useLLMStore } from '../../store/llmStore';
 import type { Preset, PresetConfiguration } from '../../types/preset';
-import type { Template, TemplateConfiguration } from '../../types/template';
+import type { Template, TemplateConfiguration, PrebuiltTemplate } from '../../types/template';
 import { theme } from '../../theme';
 import { redesignControl, redesignDisclosureArrow, redesignRadius } from '../../theme/redesignTokens';
 import { generationPanelChrome } from '../../theme/responsiveChrome';
@@ -20,8 +20,10 @@ import { useToast, SaveStatusIndicator, ConfirmDialog } from '../shared';
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext';
 import { TemplateCreatorModal } from './TemplateCreatorModal';
 import { TemplateEditorModal } from './TemplateEditorModal';
+import { PrebuiltTemplateModal } from './PrebuiltTemplateModal';
 import { NarrowOverlayDrawer } from '../layout/NarrowOverlayDrawer';
 import { filterTemplates, groupTemplatesByCategory, TEMPLATE_UNCATEGORIZED_LABEL } from '../../utils/templateGroups';
+import { isPrebuiltNew } from '../../utils/templateApply';
 import type { SaveStatus } from '../shared/SaveStatusIndicator';
 
 function formatTemplateDate(isoString: string): string {
@@ -66,6 +68,8 @@ export interface PresetSelectorProps {
   onPresetLoaded: (preset: Preset) => void;
   /** Callback appelé quand un template custom est appliqué (clic carte) */
   onTemplateLoaded?: (template: Template) => void;
+  /** Callback appelé quand une fiche pré-built est chargée (bouton Charger) */
+  onPrebuiltLoaded?: (prebuilt: PrebuiltTemplate) => void;
   /** Configuration actuelle pour sauvegarde */
   currentConfiguration?: PresetConfiguration;
   /** Getter lazy pour éviter recalculs coûteux à chaque render */
@@ -77,6 +81,7 @@ export interface PresetSelectorProps {
 export const PresetSelector: React.FC<PresetSelectorProps> = ({
   onPresetLoaded,
   onTemplateLoaded,
+  onPrebuiltLoaded,
   currentConfiguration,
   getCurrentConfiguration,
   saveStatus,
@@ -93,7 +98,17 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     deletePreset,
     setSelectedPreset,
   } = usePresetStore();
-  const { templates, loadTemplates, error: templateError, deleteTemplate } = useTemplateStore();
+  const {
+    templates,
+    prebuiltTemplates,
+    loadTemplates,
+    loadPrebuiltTemplates,
+    error: templateError,
+    prebuiltError,
+    prebuiltLoading,
+    createTemplate,
+    deleteTemplate,
+  } = useTemplateStore();
   const toast = useToast();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -103,12 +118,15 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   const [snapshotConfiguration, setSnapshotConfiguration] = useState<TemplateConfiguration | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
   const [deletingTemplate, setDeletingTemplate] = useState<Template | null>(null);
+  const [viewingPrebuilt, setViewingPrebuilt] = useState<PrebuiltTemplate | null>(null);
   const [isUpdatingPreset, setIsUpdatingPreset] = useState(false);
   const [nameFilter, setNameFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [contextFilter, setContextFilter] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const deletingTemplateRef = useRef(false);
+  const copyingPrebuiltRef = useRef(false);
+  const [isCopyingPrebuilt, setIsCopyingPrebuilt] = useState(false);
 
   const filteredTemplates = useMemo(
     () =>
@@ -149,7 +167,8 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   useEffect(() => {
     loadPresets();
     void loadTemplates();
-  }, [loadPresets, loadTemplates]);
+    void loadPrebuiltTemplates();
+  }, [loadPresets, loadTemplates, loadPrebuiltTemplates]);
 
   const handlePresetSelect = (preset: Preset) => {
     setSelectedPreset(preset);
@@ -169,6 +188,39 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     };
     delete snapshot.temperature;
     return snapshot;
+  };
+
+  const handleCopyPrebuilt = async (prebuilt: PrebuiltTemplate) => {
+    if (copyingPrebuiltRef.current) {
+      return;
+    }
+    copyingPrebuiltRef.current = true;
+    setIsCopyingPrebuilt(true);
+    try {
+      await createTemplate({
+        name: `${prebuilt.name} (copie)`.slice(0, 120),
+        description: prebuilt.description,
+        category: prebuilt.category,
+        icon: prebuilt.icon,
+        configuration: prebuilt.configuration,
+      });
+      setNameFilter('');
+      setCategoryFilter('');
+      setContextFilter('');
+      toast('Template copié dans Mes templates', 'success');
+      setViewingPrebuilt(null);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Copie impossible';
+      toast(message, 'error');
+    } finally {
+      copyingPrebuiltRef.current = false;
+      setIsCopyingPrebuilt(false);
+    }
+  };
+
+  const handleLoadPrebuilt = (prebuilt: PrebuiltTemplate) => {
+    onPrebuiltLoaded?.(prebuilt);
+    setViewingPrebuilt(null);
   };
 
   const handleUpdatePreset = async () => {
@@ -509,6 +561,148 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         }}
         onClose={() => setEditingTemplate(null)}
       />
+
+      <PrebuiltTemplateModal
+        isOpen={viewingPrebuilt != null}
+        template={viewingPrebuilt}
+        onClose={() => setViewingPrebuilt(null)}
+        onLoad={handleLoadPrebuilt}
+        onCopy={(prebuilt) => {
+          void handleCopyPrebuilt(prebuilt);
+        }}
+        copyDisabled={isCopyingPrebuilt}
+      />
+
+      <section
+        data-testid="prebuilt-templates-list"
+        style={{
+          marginTop: `${chrome.controlGapRem}rem`,
+        }}
+      >
+        <h3
+          style={{
+            margin: `0 0 ${chrome.controlGapRem}rem`,
+            color: theme.text.primary,
+            fontSize: `${chrome.sectionTitleFontRem}rem`,
+            fontWeight: 600,
+          }}
+        >
+          Templates pré-built
+        </h3>
+        {prebuiltError ? (
+          <div data-testid="prebuilt-templates-error" style={{ color: theme.state.error.color }}>
+            {prebuiltError}
+          </div>
+        ) : prebuiltLoading ? (
+          <div data-testid="prebuilt-templates-loading" style={{ color: theme.text.secondary }}>
+            Chargement…
+          </div>
+        ) : prebuiltTemplates.length === 0 ? (
+          <div data-testid="prebuilt-templates-empty" style={{ color: theme.text.secondary }}>
+            Aucun template pré-built
+          </div>
+        ) : (
+          prebuiltTemplates.map((prebuilt) => (
+            <div
+              key={prebuilt.id}
+              data-testid="prebuilt-template-item"
+              data-prebuilt-id={prebuilt.id}
+              data-prebuilt-name={prebuilt.name}
+              onClick={() => setViewingPrebuilt(prebuilt)}
+              style={{
+                padding: chrome.dropdownOptionPadding,
+                border: `1px solid ${theme.border.secondary}`,
+                borderRadius: `${redesignRadius.control}px`,
+                marginBottom: '0.35rem',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.5rem',
+                cursor: 'pointer',
+              }}
+            >
+              <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>{prebuilt.icon}</span>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontWeight: 600, color: theme.text.primary }}>
+                  {prebuilt.name}
+                  {isPrebuiltNew(prebuilt.addedAt) && (
+                    <span
+                      data-testid="prebuilt-new-badge"
+                      style={{
+                        marginLeft: '0.5rem',
+                        fontSize: `${chrome.labelFontRem}rem`,
+                        fontWeight: 600,
+                        color: theme.state.info?.color ?? theme.text.secondary,
+                      }}
+                    >
+                      Nouveau
+                    </span>
+                  )}
+                </div>
+                {prebuilt.description && (
+                  <div
+                    style={{
+                      fontSize: `${chrome.labelFontRem}rem`,
+                      color: theme.text.secondary,
+                    }}
+                  >
+                    {prebuilt.description}
+                  </div>
+                )}
+                <div
+                  data-testid="prebuilt-item-gdd-system"
+                  style={{
+                    fontSize: `${chrome.labelFontRem}rem`,
+                    color: theme.text.secondary,
+                  }}
+                >
+                  {prebuilt.gddSystem}
+                </div>
+                <div
+                  data-testid="prebuilt-item-scene-type"
+                  style={{
+                    fontSize: `${chrome.labelFontRem}rem`,
+                    color: theme.text.secondary,
+                  }}
+                >
+                  {prebuilt.sceneTypeHint}
+                </div>
+                <div
+                  data-testid="prebuilt-item-preview"
+                  style={{
+                    fontSize: `${chrome.labelFontRem}rem`,
+                    color: theme.text.secondary,
+                  }}
+                >
+                  {prebuilt.configuration.instructions.slice(0, 120)}
+                  {prebuilt.configuration.instructions.length > 120 ? '…' : ''}
+                </div>
+                <button
+                  type="button"
+                  data-testid="prebuilt-item-copy-btn"
+                  disabled={isCopyingPrebuilt}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void handleCopyPrebuilt(prebuilt);
+                  }}
+                  style={{
+                    minHeight: TOUCH_TARGET_MIN_PX,
+                    marginTop: '0.5rem',
+                    padding: chrome.buttonPadding,
+                    backgroundColor: theme.button.default.background,
+                    border: `1px solid ${theme.border.secondary}`,
+                    borderRadius: `${redesignRadius.control}px`,
+                    color: theme.button.default.color,
+                    cursor: 'pointer',
+                    fontSize: `${chrome.buttonFontRem}rem`,
+                  }}
+                >
+                  Copier vers mes templates
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </section>
 
       <section
         data-testid="mes-templates-list"

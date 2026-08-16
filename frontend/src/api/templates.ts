@@ -3,6 +3,7 @@
  */
 import apiClient from './client'
 import type {
+  PrebuiltTemplate,
   Template,
   TemplateCreate,
   TemplateUpdate,
@@ -76,5 +77,25 @@ export async function validateTemplateApi(id: string): Promise<PresetValidationR
   const { data } = await apiClient.get<PresetValidationResult>(
     `/api/v1/templates/${id}/validate`,
   )
+  return data
+}
+
+/**
+ * Liste les templates pré-built Alteir.
+ *
+ * @returns Catalogue lecture seule
+ */
+export async function listPrebuiltTemplatesApi(): Promise<PrebuiltTemplate[]> {
+  const { data } = await apiClient.get<PrebuiltTemplate[]>('/api/v1/templates/prebuilt')
+  return data
+}
+
+/**
+ * Charge une fiche pré-built par slug.
+ *
+ * @param slug - Identifiant kebab-case
+ */
+export async function getPrebuiltTemplateApi(slug: string): Promise<PrebuiltTemplate> {
+  const { data } = await apiClient.get<PrebuiltTemplate>(`/api/v1/templates/prebuilt/${slug}`)
   return data
 }

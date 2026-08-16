@@ -8,7 +8,7 @@ import { GenerationPanelNarrowProvider } from '../components/generation/Generati
 import { usePresetStore } from '../store/presetStore';
 import { useTemplateStore } from '../store/templateStore';
 import type { Preset } from '../types/preset';
-import type { Template } from '../types/template';
+import type { Template, PrebuiltTemplate } from '../types/template';
 
 vi.mock('../store/presetStore');
 vi.mock('../store/templateStore');
@@ -88,7 +88,9 @@ describe('PresetSelector', () => {
   const mockSetSelectedPreset = vi.fn();
   const mockOnPresetLoaded = vi.fn();
   const mockOnTemplateLoaded = vi.fn();
+  const mockOnPrebuiltLoaded = vi.fn();
   const mockLoadTemplates = vi.fn();
+  const mockLoadPrebuiltTemplates = vi.fn();
   const mockCreateTemplate = vi.fn();
   const mockUpdateTemplate = vi.fn();
   const mockDeleteTemplate = vi.fn();
@@ -144,9 +146,13 @@ describe('PresetSelector', () => {
   function mockTemplateStore(templates: Template[] = mockTemplates): void {
     const state = {
       templates,
+      prebuiltTemplates: [] as PrebuiltTemplate[],
       isLoading: false,
       error: null,
+      prebuiltError: null,
+      prebuiltLoading: false,
       loadTemplates: mockLoadTemplates,
+      loadPrebuiltTemplates: mockLoadPrebuiltTemplates,
       createTemplate: mockCreateTemplate,
       updateTemplate: mockUpdateTemplate,
       deleteTemplate: mockDeleteTemplate,
@@ -198,9 +204,13 @@ describe('PresetSelector', () => {
       mockTemplateStore([]);
       const state = {
         templates: [] as Template[],
+        prebuiltTemplates: [] as PrebuiltTemplate[],
         isLoading: false,
         error: 'Échec du chargement des templates : 500',
+        prebuiltError: null,
+        prebuiltLoading: false,
         loadTemplates: mockLoadTemplates,
+        loadPrebuiltTemplates: mockLoadPrebuiltTemplates,
         createTemplate: mockCreateTemplate,
         updateTemplate: vi.fn(),
         deleteTemplate: vi.fn(),
@@ -357,7 +367,212 @@ describe('PresetSelector', () => {
         resolveDelete?.();
       });
     });
+  });
 
+  describe('Pré-built', () => {
+    const samplePrebuilt: PrebuiltTemplate = {
+      id: 'confrontation',
+      name: 'Confrontation',
+      description: 'Conflit tendu',
+      category: 'Confrontation',
+      icon: '⚔️',
+      gddSystem: 'Skill check (Puissance/Sociabilité), Réputation Crainte',
+      sceneTypeHint: 'confrontation',
+      objectif: 'Exposer un conflit',
+      casUsage: 'Dispute',
+      examples: ['skillCheckConfig'],
+      addedAt: '2026-08-16T00:00:00Z',
+      configuration: {
+        characters: [],
+        locations: [],
+        region: '',
+        sceneType: 'Generic',
+        instructions: 'Ton tendu et conflictuel. Inclus un test de caractéristique.',
+      },
+    };
+
+    function mockPrebuiltStore(prebuilt: PrebuiltTemplate[] = [samplePrebuilt]): void {
+      const state = {
+        templates: mockTemplates,
+        prebuiltTemplates: prebuilt,
+        isLoading: false,
+        error: null,
+        prebuiltError: null,
+        prebuiltLoading: false,
+        loadTemplates: mockLoadTemplates,
+        loadPrebuiltTemplates: mockLoadPrebuiltTemplates,
+        createTemplate: mockCreateTemplate,
+        updateTemplate: mockUpdateTemplate,
+        deleteTemplate: mockDeleteTemplate,
+        reset: vi.fn(),
+      };
+      (useTemplateStore as unknown as Mock).mockImplementation(
+        (selector?: (store: typeof state) => unknown) =>
+          typeof selector === 'function' ? selector(state) : state,
+      );
+    }
+
+    it('liste les fiches avec système GDD et badge Nouveau', () => {
+      mockPrebuiltStore();
+      render(
+        <PresetSelector
+          onPresetLoaded={mockOnPresetLoaded}
+          onPrebuiltLoaded={mockOnPrebuiltLoaded}
+        />,
+      );
+
+      expect(screen.getByText('Templates pré-built')).toBeInTheDocument();
+      expect(screen.getByTestId('prebuilt-template-item')).toHaveAttribute(
+        'data-prebuilt-id',
+        'confrontation',
+      );
+      expect(screen.getByTestId('prebuilt-item-gdd-system')).toHaveTextContent(/Skill check/i);
+      expect(screen.getByTestId('prebuilt-item-scene-type')).toHaveTextContent('confrontation');
+      expect(screen.getByTestId('prebuilt-item-preview')).toHaveTextContent(/Ton tendu/i);
+      expect(screen.getByTestId('prebuilt-new-badge')).toHaveTextContent('Nouveau');
+    });
+
+    it('ouvre le modal au clic carte sans apply', () => {
+      mockPrebuiltStore();
+      render(
+        <PresetSelector
+          onPresetLoaded={mockOnPresetLoaded}
+          onPrebuiltLoaded={mockOnPrebuiltLoaded}
+        />,
+      );
+
+      fireEvent.click(screen.getByTestId('prebuilt-template-item'));
+
+      expect(screen.getByTestId('prebuilt-template-modal')).toBeInTheDocument();
+      expect(screen.getByText(/Exposer un conflit/i)).toBeInTheDocument();
+      expect(screen.getByText(/Dispute/i)).toBeInTheDocument();
+      expect(screen.getByTestId('prebuilt-modal-examples')).toHaveTextContent(/skillCheckConfig/i);
+      expect(screen.getByTestId('prebuilt-modal-instructions')).toHaveTextContent(/Ton tendu/i);
+      expect(mockOnPrebuiltLoaded).not.toHaveBeenCalled();
+    });
+
+    it('Charger appelle onPrebuiltLoaded', () => {
+      mockPrebuiltStore();
+      render(
+        <PresetSelector
+          onPresetLoaded={mockOnPresetLoaded}
+          onPrebuiltLoaded={mockOnPrebuiltLoaded}
+        />,
+      );
+
+      fireEvent.click(screen.getByTestId('prebuilt-template-item'));
+      fireEvent.click(screen.getByTestId('prebuilt-modal-load'));
+
+      expect(mockOnPrebuiltLoaded).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'confrontation' }),
+      );
+    });
+
+    it('Copier crée un custom sans apply', async () => {
+      mockPrebuiltStore();
+      render(
+        <PresetSelector
+          onPresetLoaded={mockOnPresetLoaded}
+          onPrebuiltLoaded={mockOnPrebuiltLoaded}
+        />,
+      );
+
+      fireEvent.change(screen.getByTestId('template-filter-name'), {
+        target: { value: 'Salut A' },
+      });
+      expect(screen.queryByText('Combat B')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('prebuilt-item-copy-btn'));
+
+      await waitFor(() => {
+        expect(mockCreateTemplate).toHaveBeenCalledWith(
+          expect.objectContaining({ name: 'Confrontation (copie)' }),
+        );
+      });
+      expect(mockOnPrebuiltLoaded).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('prebuilt-template-modal')).not.toBeInTheDocument();
+      expect(screen.getByText('Combat B')).toBeInTheDocument();
+    });
+
+    it('Copier depuis le modal crée un custom sans apply', async () => {
+      mockPrebuiltStore();
+      render(
+        <PresetSelector
+          onPresetLoaded={mockOnPresetLoaded}
+          onPrebuiltLoaded={mockOnPrebuiltLoaded}
+        />,
+      );
+
+      fireEvent.click(screen.getByTestId('prebuilt-template-item'));
+      fireEvent.click(screen.getByTestId('prebuilt-modal-copy'));
+
+      await waitFor(() => {
+        expect(mockCreateTemplate).toHaveBeenCalledWith(
+          expect.objectContaining({ name: 'Confrontation (copie)' }),
+        );
+      });
+      expect(mockOnPrebuiltLoaded).not.toHaveBeenCalled();
+    });
+
+    it('ignore un second Copier tant que le POST est en cours', async () => {
+      let resolveCreate: ((value: { warnings: string[] }) => void) | undefined;
+      mockCreateTemplate.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveCreate = resolve;
+          }),
+      );
+      mockPrebuiltStore();
+      render(
+        <PresetSelector
+          onPresetLoaded={mockOnPresetLoaded}
+          onPrebuiltLoaded={mockOnPrebuiltLoaded}
+        />,
+      );
+
+      fireEvent.click(screen.getByTestId('prebuilt-item-copy-btn'));
+      fireEvent.click(screen.getByTestId('prebuilt-item-copy-btn'));
+
+      expect(mockCreateTemplate).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        resolveCreate?.({ warnings: [] });
+      });
+    });
+
+    it('affiche Chargement… tant que le catalogue n’est pas arrivé', () => {
+      mockPrebuiltStore([]);
+      const state = {
+        templates: mockTemplates,
+        prebuiltTemplates: [] as PrebuiltTemplate[],
+        isLoading: false,
+        prebuiltLoading: true,
+        error: null,
+        prebuiltError: null,
+        loadTemplates: mockLoadTemplates,
+        loadPrebuiltTemplates: mockLoadPrebuiltTemplates,
+        createTemplate: mockCreateTemplate,
+        updateTemplate: mockUpdateTemplate,
+        deleteTemplate: mockDeleteTemplate,
+        reset: vi.fn(),
+      };
+      (useTemplateStore as unknown as Mock).mockImplementation(
+        (selector?: (store: typeof state) => unknown) =>
+          typeof selector === 'function' ? selector(state) : state,
+      );
+      render(
+        <PresetSelector
+          onPresetLoaded={mockOnPresetLoaded}
+          onPrebuiltLoaded={mockOnPrebuiltLoaded}
+        />,
+      );
+
+      expect(screen.getByTestId('prebuilt-templates-loading')).toHaveTextContent(/Chargement/i);
+      expect(screen.queryByTestId('prebuilt-templates-empty')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Mes templates suite', () => {
     it('reset les filtres après un enregistrement d’édition', async () => {
       render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
 

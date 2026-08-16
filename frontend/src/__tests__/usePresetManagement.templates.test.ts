@@ -296,4 +296,82 @@ describe('usePresetManagement — templates [6.3]', () => {
     expect(setUserInstructions).toHaveBeenCalledWith('Brief B')
     expect(setUserInstructions).not.toHaveBeenCalledWith('Brief A')
   })
+
+  it('handlePrebuiltLoaded hydrate le brief sans GET UUID', () => {
+    const { result } = renderManagement()
+    const prebuilt = {
+      id: 'confrontation',
+      name: 'Confrontation',
+      description: '',
+      category: 'Confrontation',
+      icon: '⚔️',
+      gddSystem: 'Skill check',
+      sceneTypeHint: 'confrontation',
+      objectif: '',
+      casUsage: '',
+      examples: [],
+      addedAt: '2026-08-16T00:00:00Z',
+      configuration: {
+        characters: [],
+        locations: [],
+        region: '',
+        sceneType: 'Generic',
+        instructions: 'Brief pré-built confrontation',
+      },
+    }
+
+    act(() => {
+      result.current.handlePrebuiltLoaded(prebuilt)
+    })
+
+    expect(mocks.getTemplateApi).not.toHaveBeenCalled()
+    expect(setUserInstructions).toHaveBeenCalledWith('Brief pré-built confrontation')
+    expect(toast).toHaveBeenCalledWith('Template chargé avec succès', 'success')
+  })
+
+  it('handlePrebuiltLoaded ignore un GET custom encore en vol', async () => {
+    let resolveCustom: ((value: Template) => void) | undefined
+    mocks.getTemplateApi.mockImplementationOnce(
+      () =>
+        new Promise<Template>((resolve) => {
+          resolveCustom = resolve
+        }),
+    )
+    const { result } = renderManagement()
+    const prebuilt = {
+      id: 'confrontation',
+      name: 'Confrontation',
+      description: '',
+      category: 'Confrontation',
+      icon: '⚔️',
+      gddSystem: 'Skill check',
+      sceneTypeHint: 'confrontation',
+      objectif: '',
+      casUsage: '',
+      examples: [],
+      addedAt: '2026-08-16T00:00:00Z',
+      configuration: {
+        characters: [],
+        locations: [],
+        region: '',
+        sceneType: 'Generic',
+        instructions: 'Brief pré-built confrontation',
+      },
+    }
+
+    let customClick: Promise<void> | undefined
+    act(() => {
+      customClick = result.current.handleTemplateLoaded(sampleTemplate)
+    })
+    act(() => {
+      result.current.handlePrebuiltLoaded(prebuilt)
+    })
+    await act(async () => {
+      resolveCustom?.(sampleTemplate)
+      await customClick
+    })
+
+    expect(setUserInstructions).toHaveBeenCalledWith('Brief pré-built confrontation')
+    expect(setUserInstructions).not.toHaveBeenCalledWith('Brief snapshot')
+  })
 })

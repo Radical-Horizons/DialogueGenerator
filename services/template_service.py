@@ -7,13 +7,20 @@ from typing import Any, Dict, List, Optional, Tuple
 from uuid import UUID, uuid4
 
 from api.schemas.preset import Preset, PresetConfiguration, PresetMetadata, PresetValidationResult
-from api.schemas.template import Template, TemplateConfiguration, TemplateHistoryEntry
+from api.schemas.template import (
+    PREBUILT_SLUG_PATTERN,
+    PrebuiltTemplate,
+    Template,
+    TemplateConfiguration,
+    TemplateHistoryEntry,
+)
 from services.preset_service import PresetService
 
 logger = logging.getLogger(__name__)
 
 DIALOGUE_GENERATOR_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_TEMPLATES_DIR = DIALOGUE_GENERATOR_DIR / "data" / "templates" / "custom"
+DEFAULT_PREBUILT_FILE = DIALOGUE_GENERATOR_DIR / "config" / "prebuilt_templates.json"
 
 
 class TemplateService:
@@ -28,16 +35,19 @@ class TemplateService:
         self,
         preset_service: PresetService,
         templates_dir: Optional[Path] = None,
+        prebuilt_path: Optional[Path] = None,
     ) -> None:
         """Initialise le TemplateService.
 
         Args:
             preset_service: PresetService pour la validation GDD lazy (helpers existants).
-            templates_dir: Dossier de stockage (défaut : data/templates/custom/).
+            templates_dir: Dossier de stockage custom (défaut : data/templates/custom/).
+            prebuilt_path: Catalogue pré-built JSON (défaut : config/prebuilt_templates.json).
         """
         self.preset_service = preset_service
         self.templates_dir = templates_dir or DEFAULT_TEMPLATES_DIR
         self.templates_dir.mkdir(parents=True, exist_ok=True)
+        self.prebuilt_path = prebuilt_path or DEFAULT_PREBUILT_FILE
         logger.info("TemplateService initialisé avec dossier: %s", self.templates_dir)
 
     def create_template(self, template_data: Dict[str, Any]) -> Tuple[Template, List[str]]:
@@ -196,6 +206,46 @@ class TemplateService:
         return self.preset_service.validate_preset_references(
             self._as_preset_for_validation(template)
         )
+
+    def list_prebuilt_templates(self) -> List[PrebuiltTemplate]:
+        """Charge le catalogue pré-built (lecture seule).
+
+        Returns:
+            Liste des fiches (vide si le fichier est absent).
+
+        Raises:
+            ValueError: JSON invalide ou entrée non conforme.
+        """
+        if not self.prebuilt_path.exists():
+            logger.warning("Catalogue pré-built absent: %s", self.prebuilt_path)
+            return []
+        with open(self.prebuilt_path, "r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+        raw_list = payload.get("templates") if isinstance(payload, dict) else None
+        if not isinstance(raw_list, list):
+            raise ValueError("Invalid prebuilt catalog")
+        templates = [PrebuiltTemplate(**item) for item in raw_list]
+        logger.debug("Liste pré-built chargée: %s fiches", len(templates))
+        return templates
+
+    def get_prebuilt_template(self, slug: str) -> PrebuiltTemplate:
+        """Charge une fiche pré-built par slug.
+
+        Args:
+            slug: Identifiant kebab-case.
+
+        Returns:
+            Fiche persistée dans le catalogue.
+
+        Raises:
+            FileNotFoundError: Slug invalide ou absent.
+        """
+        if not PREBUILT_SLUG_PATTERN.match(slug):
+            raise FileNotFoundError(f"Prebuilt {slug} not found")
+        for template in self.list_prebuilt_templates():
+            if template.id == slug:
+                return template
+        raise FileNotFoundError(f"Prebuilt {slug} not found")
 
     def _template_path(self, template_id: str) -> Path:
         """Résout le chemin JSON d'un UUID (refuse un id non-UUID)."""

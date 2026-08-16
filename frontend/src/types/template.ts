@@ -51,3 +51,19 @@ export interface TemplateUpdate {
   icon?: string
   configuration?: TemplateConfiguration
 }
+
+/** Fiche Alteir lecture seule (catalogue pré-built). */
+export interface PrebuiltTemplate {
+  id: string
+  name: string
+  description: string
+  category: string
+  icon: string
+  gddSystem: string
+  sceneTypeHint: string
+  objectif: string
+  casUsage: string
+  examples: string[]
+  addedAt: string
+  configuration: TemplateConfiguration
+}

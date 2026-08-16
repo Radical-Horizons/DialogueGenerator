@@ -650,6 +650,7 @@ export function GenerationPanel() {
           <PresetSelector
             onPresetLoaded={presets.handlePresetLoaded}
             onTemplateLoaded={presets.handleTemplateLoaded}
+            onPrebuiltLoaded={presets.handlePrebuiltLoaded}
             getCurrentConfiguration={presets.getCurrentConfiguration}
             saveStatus={draft.saveStatus}
           />

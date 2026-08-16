@@ -278,3 +278,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-6-3-appliquer-templates-a-generation-dialogue-fr57.md`
   summary: Enregistrer le `template_id` dans les logs de génération (Story 1.15 / AC épic 6.3).
   evidence: Choix 3A au kickoff 6.3 — un livrable distinct (pipeline génération + UI logs) ; 6.3 se limite à hydrater le formulaire.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-4-fournir-templates-pre-built-alteir-fr58.md`
+  summary: Piège de focus / restauration focus pour PrebuiltTemplateModal (alignement des autres modales génération).
+  evidence: Revue 6.4 — `aria-modal` + Escape sans trap Tab ; même dette que TemplateCreatorModal / permissions 7.7.

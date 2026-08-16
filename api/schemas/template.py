@@ -1,4 +1,5 @@
 """Schémas Pydantic pour les templates de génération custom."""
+import re
 from datetime import datetime
 from typing import Any, List, Literal, Optional
 from uuid import UUID
@@ -171,3 +172,32 @@ class TemplateUpdate(BaseModel):
         if v is None:
             return v
         return _strip_required_name(v)
+
+
+PREBUILT_SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+
+
+class PrebuiltTemplate(BaseModel):
+    """Fiche Alteir lecture seule (catalogue versionné, slug stable)."""
+
+    id: str = Field(..., description="Slug stable (pas un UUID)")
+    name: str = Field(..., min_length=1, max_length=TEMPLATE_NAME_MAX_LENGTH)
+    description: str = Field(default="", max_length=TEMPLATE_DESCRIPTION_MAX_LENGTH)
+    category: str = Field(default="Général", max_length=TEMPLATE_CATEGORY_MAX_LENGTH)
+    icon: str = Field(default="📋", max_length=TEMPLATE_ICON_MAX_LENGTH)
+    gddSystem: str = Field(..., description="Système GDD principal (affichage)")
+    sceneTypeHint: str = Field(..., description="Hint type_scene (Epic 15, non branché)")
+    objectif: str = Field(default="")
+    casUsage: str = Field(default="")
+    examples: List[str] = Field(default_factory=list)
+    addedAt: datetime = Field(..., description="Date d'ajout ISO 8601 (badge Nouveau)")
+    configuration: TemplateConfiguration = Field(..., description="Snapshot applicable")
+
+    @field_validator("id")
+    @classmethod
+    def validate_slug(cls, v: str) -> str:
+        """Refuse un id qui n'est pas un slug [a-z0-9-]."""
+        if not PREBUILT_SLUG_PATTERN.match(v):
+            raise ValueError(f"Invalid prebuilt slug: {v}")
+        return v
+

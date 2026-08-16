@@ -10,10 +10,10 @@ import { usePresetStore } from '../store/presetStore'
 import { useContextStore } from '../store/contextStore'
 import { useLLMStore } from '../store/llmStore'
 import { preparePresetForApply } from '../utils/presetUtils'
-import { isLlmProvider, templateToPreset } from '../utils/templateApply'
+import { isLlmProvider, prebuiltToTemplate, templateToPreset } from '../utils/templateApply'
 import { getErrorMessage } from '../types/errors'
 import type { Preset, PresetConfiguration, PresetValidationResult } from '../types/preset'
-import type { Template } from '../types/template'
+import type { PrebuiltTemplate, Template } from '../types/template'
 import type { ReasoningEffort } from '../types/api'
 
 export type ValidationEntityLabel = 'preset' | 'template'
@@ -44,6 +44,8 @@ export interface UsePresetManagementReturn {
   handlePresetLoaded: (preset: Preset) => Promise<void>
   /** Charger un template custom (validate + applyPreset + llmProvider) */
   handleTemplateLoaded: (template: Template) => Promise<void>
+  /** Charger une fiche pré-built (sans GET UUID custom) */
+  handlePrebuiltLoaded: (prebuilt: PrebuiltTemplate) => void
   /** Appliquer un preset directement */
   applyPreset: (preset: Preset) => void
   /** Obtenir la configuration actuelle pour sauvegarde */
@@ -254,6 +256,18 @@ export function usePresetManagement(
       toast(`Erreur lors du chargement du template: ${message}`, 'error')
     }
   }, [applyTemplateSnapshot, toast, clearValidationState])
+
+  const handlePrebuiltLoaded = useCallback((prebuilt: PrebuiltTemplate) => {
+    templateLoadSeqRef.current += 1
+    const emptyValidation: PresetValidationResult = {
+      valid: true,
+      warnings: [],
+      obsoleteRefs: [],
+    }
+    clearValidationState()
+    applyTemplateSnapshot(prebuiltToTemplate(prebuilt), emptyValidation)
+    notifyApplied('Template', emptyValidation, toast)
+  }, [applyTemplateSnapshot, toast, clearValidationState])
   
   const handleValidationConfirm = useCallback(() => {
     if (pendingTemplate && validationResult) {
@@ -316,6 +330,7 @@ export function usePresetManagement(
   return {
     handlePresetLoaded,
     handleTemplateLoaded,
+    handlePrebuiltLoaded,
     applyPreset,
     getCurrentConfiguration,
     isValidationModalOpen,

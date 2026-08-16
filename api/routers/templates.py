@@ -8,6 +8,7 @@ from api.dependencies import get_template_service
 from api.routers.auth import get_current_user
 from api.schemas.preset import PresetValidationResult
 from api.schemas.template import (
+    PrebuiltTemplate,
     Template,
     TemplateCreate,
     TemplateCreateResponse,
@@ -80,6 +81,64 @@ def create_template(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error creating template",
+        ) from exc
+
+
+@router.get("/prebuilt", response_model=List[PrebuiltTemplate])
+def list_prebuilt_templates(
+    template_service: TemplateService = Depends(get_template_service),
+) -> List[PrebuiltTemplate]:
+    """Liste les templates pré-built Alteir (lecture seule).
+
+    Returns:
+        Catalogue versionné (vide si fichier absent).
+    """
+    try:
+        templates = template_service.list_prebuilt_templates()
+        logger.info("Liste pré-built retournée: %s fiches", len(templates))
+        return templates
+    except ValueError as exc:
+        logger.exception("Catalogue pré-built invalide")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error listing prebuilt templates",
+        ) from exc
+    except Exception as exc:
+        logger.exception("Erreur liste pré-built")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error listing prebuilt templates",
+        ) from exc
+
+
+@router.get("/prebuilt/{slug}", response_model=PrebuiltTemplate)
+def get_prebuilt_template(
+    slug: str,
+    template_service: TemplateService = Depends(get_template_service),
+) -> PrebuiltTemplate:
+    """Charge une fiche pré-built par slug.
+
+    Raises:
+        404: Slug absent.
+    """
+    try:
+        return template_service.get_prebuilt_template(slug)
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Prebuilt template not found",
+        ) from exc
+    except ValueError as exc:
+        logger.exception("Catalogue pré-built invalide")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error loading prebuilt template",
+        ) from exc
+    except Exception as exc:
+        logger.exception("Erreur chargement pré-built")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error loading prebuilt template",
         ) from exc
 
 

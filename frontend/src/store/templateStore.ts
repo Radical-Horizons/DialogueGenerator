@@ -3,10 +3,11 @@
  */
 import { AxiosError } from 'axios'
 import { create } from 'zustand'
-import type { Template, TemplateCreate, TemplateUpdate } from '../types/template'
+import type { PrebuiltTemplate, Template, TemplateCreate, TemplateUpdate } from '../types/template'
 import {
   createTemplateApi,
   deleteTemplateApi,
+  listPrebuiltTemplatesApi,
   listTemplatesApi,
   updateTemplateApi,
 } from '../api/templates'
@@ -27,9 +28,13 @@ export interface TemplateWriteOutcome {
 
 interface TemplateStore {
   templates: Template[]
+  prebuiltTemplates: PrebuiltTemplate[]
   isLoading: boolean
+  prebuiltLoading: boolean
   error: string | null
+  prebuiltError: string | null
   loadTemplates: () => Promise<void>
+  loadPrebuiltTemplates: () => Promise<void>
   createTemplate: (templateData: TemplateCreate) => Promise<TemplateWriteOutcome>
   updateTemplate: (id: string, updateData: TemplateUpdate) => Promise<TemplateWriteOutcome>
   deleteTemplate: (id: string) => Promise<void>
@@ -38,6 +43,7 @@ interface TemplateStore {
 
 /** Invalide les GET liste concurrentes (load vs load / reset / delete). */
 let listRequestSeq = 0
+let prebuiltListSeq = 0
 
 function upsertTemplate(list: Template[], incoming: Template): Template[] {
   const index = list.findIndex((item) => item.id === incoming.id)
@@ -60,8 +66,11 @@ function mergeTemplateLists(server: Template[], local: Template[]): Template[] {
 
 export const useTemplateStore = create<TemplateStore>((set) => ({
   templates: [],
+  prebuiltTemplates: [],
   isLoading: false,
+  prebuiltLoading: false,
   error: null,
+  prebuiltError: null,
 
   loadTemplates: async () => {
     const seq = ++listRequestSeq
@@ -82,6 +91,26 @@ export const useTemplateStore = create<TemplateStore>((set) => ({
       set({
         error: formatTemplateRequestError('du chargement des templates', error),
         isLoading: false,
+      })
+    }
+  },
+
+  loadPrebuiltTemplates: async () => {
+    const seq = ++prebuiltListSeq
+    set({ prebuiltLoading: true, prebuiltError: null })
+    try {
+      const prebuiltTemplates = await listPrebuiltTemplatesApi()
+      if (seq !== prebuiltListSeq) {
+        return
+      }
+      set({ prebuiltTemplates, prebuiltError: null, prebuiltLoading: false })
+    } catch (error) {
+      if (seq !== prebuiltListSeq) {
+        return
+      }
+      set({
+        prebuiltError: formatTemplateRequestError('du chargement des templates pré-built', error),
+        prebuiltLoading: false,
       })
     }
   },
@@ -147,10 +176,14 @@ export const useTemplateStore = create<TemplateStore>((set) => ({
 
   reset: () => {
     listRequestSeq += 1
+    prebuiltListSeq += 1
     set({
       templates: [],
+      prebuiltTemplates: [],
       isLoading: false,
+      prebuiltLoading: false,
       error: null,
+      prebuiltError: null,
     })
   },
 }))
