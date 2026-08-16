@@ -183,6 +183,56 @@ describe('useTemplateStore', () => {
     expect(result.current.templates.map((item) => item.id).sort()).toEqual(['tpl-001', 'tpl-old'])
   })
 
+  it('retire un template partagé absent du GET liste (révocation)', async () => {
+    const shared: Template = {
+      ...sampleTemplate,
+      id: 'tpl-shared',
+      visibility: 'shared',
+      sharedByUsername: 'writer-a',
+    }
+    vi.mocked(templatesApi.listTemplatesApi)
+      .mockResolvedValueOnce([shared])
+      .mockResolvedValueOnce([])
+    const { result } = renderHook(() => useTemplateStore())
+
+    await act(async () => {
+      await result.current.loadTemplates()
+    })
+    expect(result.current.templates).toHaveLength(1)
+
+    await act(async () => {
+      await result.current.loadTemplates()
+    })
+    expect(result.current.templates).toHaveLength(0)
+  })
+
+  it('applique le GET serveur pour un partagé déjà en store (pointeur live)', async () => {
+    const shared: Template = {
+      ...sampleTemplate,
+      id: 'tpl-shared',
+      name: 'Ancien nom',
+      visibility: 'shared',
+      metadata: { created: '2026-08-16T10:00:00Z', modified: '2026-08-16T10:00:00Z' },
+    }
+    const updated: Template = {
+      ...shared,
+      name: 'Nom live',
+      metadata: { created: '2026-08-16T10:00:00Z', modified: '2026-08-16T12:00:00Z' },
+    }
+    vi.mocked(templatesApi.listTemplatesApi)
+      .mockResolvedValueOnce([shared])
+      .mockResolvedValueOnce([updated])
+    const { result } = renderHook(() => useTemplateStore())
+
+    await act(async () => {
+      await result.current.loadTemplates()
+    })
+    await act(async () => {
+      await result.current.loadTemplates()
+    })
+    expect(result.current.templates[0].name).toBe('Nom live')
+  })
+
   it('pose une erreur si la création échoue', async () => {
     vi.mocked(templatesApi.createTemplateApi).mockRejectedValueOnce(axiosHttpError(500))
     const { result } = renderHook(() => useTemplateStore())

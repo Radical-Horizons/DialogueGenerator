@@ -44,6 +44,7 @@ from services.repositories.sqlite import (
     DialoguesIndexRepository,
     DialoguesSearchRepository,
     SharedTemplatesRepository,
+    TemplateSharesRepository,
     UserRepository,
     UserSettingsRepository,
 )
@@ -54,6 +55,7 @@ from services.dialogue_metadata_service import DialogueMetadataService
 from services.batch_validation_service import BatchValidationService
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
+from services.template_sharing_service import TemplateSharingService
 from api.services.auth_service import AuthService
 from api.services.batch_validation_job_manager import BatchValidationJobManager
 from api.services.batch_node_generation_job_manager import BatchNodeGenerationJobManager
@@ -117,6 +119,7 @@ class ServiceContainer:
         self._app_settings_repository: Optional[AppSettingsRepository] = None
         self._dialogues_index_repository: Optional[DialoguesIndexRepository] = None
         self._dialogue_shares_repository: Optional[DialogueSharesRepository] = None
+        self._template_shares_repository: Optional[TemplateSharesRepository] = None
         self._collections_repository: Optional[CollectionsRepository] = None
         self._collection_service: Optional[CollectionService] = None
         self._dialogues_search_repository: Optional[DialoguesSearchRepository] = None
@@ -132,6 +135,7 @@ class ServiceContainer:
         self._audit_log_service: Optional[AuditLogService] = None
         self._document_persistence_service: Optional[DocumentPersistenceService] = None
         self._dialogue_sharing_service: Optional[DialogueSharingService] = None
+        self._template_sharing_service: Optional[TemplateSharingService] = None
         self._auth_service: Optional[AuthService] = None
         self._database_initialization_failed = database_initialization_failed
         self._database_lock = threading.RLock()
@@ -199,6 +203,16 @@ class ServiceContainer:
                 )
                 logger.info("DialogueSharesRepository initialisé dans le container.")
             return self._dialogue_shares_repository
+
+    def get_template_shares_repository(self) -> TemplateSharesRepository:
+        """Retourne le repository des partages d'équipe de templates."""
+        with self._database_lock:
+            if self._template_shares_repository is None:
+                self._template_shares_repository = TemplateSharesRepository(
+                    self.get_database_connection()
+                )
+                logger.info("TemplateSharesRepository initialisé dans le container.")
+            return self._template_shares_repository
 
     def get_shared_templates_repository(self) -> SharedTemplatesRepository:
         """Retourne le repository du marketplace de templates."""
@@ -377,6 +391,17 @@ class ServiceContainer:
                 )
                 logger.info("DialogueSharingService initialisé dans le container.")
             return self._dialogue_sharing_service
+
+    def get_template_sharing_service(self) -> TemplateSharingService:
+        """Retourne le service de partage d'équipe des templates custom."""
+        with self._database_lock:
+            if self._template_sharing_service is None:
+                self._template_sharing_service = TemplateSharingService(
+                    shares_repository=self.get_template_shares_repository(),
+                    user_repository=self.get_user_repository(),
+                )
+                logger.info("TemplateSharingService initialisé dans le container.")
+            return self._template_sharing_service
 
     def get_auth_service(self) -> AuthService:
         """Retourne le service d'authentification avec son repository injecté."""
@@ -789,6 +814,7 @@ class ServiceContainer:
             self._app_settings_repository = None
             self._dialogues_index_repository = None
             self._dialogue_shares_repository = None
+            self._template_shares_repository = None
             self._collections_repository = None
             self._collection_service = None
             self._dialogues_search_repository = None
@@ -802,6 +828,7 @@ class ServiceContainer:
             self._audit_log_service = None
             self._document_persistence_service = None
             self._dialogue_sharing_service = None
+            self._template_sharing_service = None
             self._auth_service = None
     
     def reset(self) -> None:

@@ -55,10 +55,17 @@ function upsertTemplate(list: Template[], incoming: Template): Template[] {
   return next
 }
 
-/** Conserve les items locaux absents de la réponse serveur (create en course). */
+/** Conserve les creates in-flight ; le serveur gagne pour les ids déjà listés. */
 function mergeTemplateLists(server: Template[], local: Template[]): Template[] {
+  const serverIds = new Set(server.map((item) => item.id))
   let next = [...server]
   for (const item of local) {
+    if (serverIds.has(item.id)) {
+      continue
+    }
+    if (item.visibility === 'shared') {
+      continue
+    }
     next = upsertTemplate(next, item)
   }
   return next

@@ -8,6 +8,8 @@ import { GenerationPanelNarrowProvider } from '../components/generation/Generati
 import { usePresetStore } from '../store/presetStore';
 import { useTemplateStore } from '../store/templateStore';
 import { useGenerationStore } from '../store/generationStore';
+import { toastManager } from '../components/shared';
+import * as templatesAPI from '../api/templates';
 import type { Preset } from '../types/preset';
 import type { Template, PrebuiltTemplate } from '../types/template';
 
@@ -35,6 +37,10 @@ vi.mock('../api/templates', () => ({
   getAbTestApi: vi.fn(),
   patchAbTestFeedbackApi: vi.fn(),
   rerunAbTestApi: vi.fn(),
+  copyTemplateApi: vi.fn().mockResolvedValue({ id: 'copy-1', warnings: [] }),
+  listTemplateSharesApi: vi.fn().mockResolvedValue([]),
+  createTemplateShareApi: vi.fn(),
+  deleteTemplateShareApi: vi.fn(),
 }));
 vi.mock('../api/graph', () => ({
   getContextDroppingRules: vi.fn().mockResolvedValue({
@@ -141,6 +147,7 @@ describe('PresetSelector', () => {
       category: 'Salutation',
       icon: '👋',
       metadata: { created: '2026-08-16T10:00:00Z', modified: '2026-08-16T10:00:00Z' },
+      visibility: 'owned' as const,
       configuration: {
         characters: ['char-alpha'],
         locations: ['loc-alpha'],
@@ -156,6 +163,7 @@ describe('PresetSelector', () => {
       category: 'Confrontation',
       icon: '⚔️',
       metadata: { created: '2026-08-16T10:00:00Z', modified: '2026-08-16T10:00:00Z' },
+      visibility: 'owned' as const,
       configuration: {
         characters: ['char-beta'],
         locations: [],
@@ -171,6 +179,7 @@ describe('PresetSelector', () => {
       category: 'Salutation',
       icon: '🙂',
       metadata: { created: '2026-08-16T10:00:00Z', modified: '2026-08-16T10:00:00Z' },
+      visibility: 'owned' as const,
       configuration: {
         characters: [],
         locations: ['loc-beta'],
@@ -1067,6 +1076,104 @@ describe('PresetSelector', () => {
       fireEvent.click(screen.getByTestId('ab-test-open-btn'));
 
       expect(await screen.findByTestId('template-ab-test-modal')).toBeInTheDocument();
+    });
+  });
+
+  describe('Partage équipe', () => {
+    it('affiche Partager sur une carte owned', () => {
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+      expect(screen.getAllByTestId('template-item-share-btn').length).toBeGreaterThan(0);
+    });
+
+    it('affiche Partager pour un guest owner', () => {
+      authState.user = { id: 'guest', username: 'guest', role: 'guest' };
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+      expect(screen.getAllByTestId('template-item-share-btn').length).toBeGreaterThan(0);
+    });
+
+    it('masque Partager sur un template legacy', () => {
+      mockTemplateStore([
+        {
+          ...mockTemplates[0],
+          visibility: 'legacy',
+        },
+      ]);
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+      expect(screen.queryByTestId('template-item-share-btn')).not.toBeInTheDocument();
+    });
+
+    it('affiche la section partagés avec badge, sans Éditer', async () => {
+      mockTemplateStore([
+        {
+          ...mockTemplates[0],
+          visibility: 'shared',
+          sharedByUsername: 'writer-a',
+          ownerUsername: 'writer-a',
+        },
+      ]);
+      render(
+        <PresetSelector
+          onPresetLoaded={mockOnPresetLoaded}
+          onTemplateLoaded={mockOnTemplateLoaded}
+        />,
+      );
+
+      expect(screen.getByTestId('shared-template-item')).toBeInTheDocument();
+      expect(screen.getByTestId('shared-template-badge')).toHaveTextContent(
+        'Partagé par writer-a',
+      );
+      expect(screen.queryByTestId('template-item-edit-btn')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('template-item-share-btn')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('shared-template-item'));
+      expect(mockOnTemplateLoaded).toHaveBeenCalled();
+    });
+
+    it('copie un template partagé vers mes templates', async () => {
+      mockTemplateStore([
+        {
+          ...mockTemplates[0],
+          visibility: 'shared',
+          sharedByUsername: 'writer-a',
+          ownerUsername: 'writer-a',
+        },
+      ]);
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+      fireEvent.click(screen.getByTestId('shared-template-copy-btn'));
+      await waitFor(() => {
+        expect(templatesAPI.copyTemplateApi).toHaveBeenCalledWith('tpl-1');
+      });
+    });
+
+    it('ouvre le modal Partager depuis une carte owned', async () => {
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+      fireEvent.click(screen.getAllByTestId('template-item-share-btn')[0]);
+      expect(await screen.findByTestId('template-sharing-modal')).toBeInTheDocument();
+    });
+
+    it('toast au reload si un template partagé a changé', () => {
+      const show = vi.spyOn(toastManager, 'show');
+      const shared: Template = {
+        ...mockTemplates[0],
+        visibility: 'shared',
+        sharedByUsername: 'writer-a',
+        metadata: { created: '2026-08-16T10:00:00Z', modified: '2026-08-16T10:00:00Z' },
+      };
+      mockTemplateStore([shared]);
+      const { rerender } = render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+      expect(show).not.toHaveBeenCalledWith(expect.stringContaining('mis à jour'), 'info');
+
+      mockTemplateStore([
+        {
+          ...shared,
+          metadata: { created: '2026-08-16T10:00:00Z', modified: '2026-08-16T12:00:00Z' },
+        },
+      ]);
+      rerender(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+      expect(show.mock.calls.some(
+        (call) => call[0] === '« Salut A » a été mis à jour' && call[1] === 'info',
+      )).toBe(true);
+      show.mockRestore();
     });
   });
 });

@@ -286,3 +286,11 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-6-5-configurer-templates-anti-context-dropping-subtilite-lore-vs-explicite-fr59.md`
   summary: Toast GraphEditor du warning post-detect non couvert par un test de montage GraphEditor.
   evidence: Revue 6.5 — le store et generationSlice sont testés ; monter GraphEditor pour l’effet toast est hors budget T1.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-8-partager-templates-avec-membres-équipe-fr62.md`
+  summary: Un writer désactivé avec un JWT encore valide continue de lire les templates partagés (list_template_ids ne joint pas users.is_active).
+  evidence: Revue 6.8 — grant refuse is_active=0, mais can_read ignore ce flag ; la spec ne dit la cible active qu’à l’invite.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-8-partager-templates-avec-membres-équipe-fr62.md`
+  summary: POST /ab-test résout encore les UUID custom sans ACL 6.8 (guest peut lancer un A/B sur le live d’un autre writer).
+  evidence: Revue 6.8 — brancher require_readable casse les tests 6.7 (guest A/B sur templates d’un autre compte, 400 N invalide avant 404 UUID). Ask First : scoping 6.6/6.7 par user. Never : ne pas casser 6.7.

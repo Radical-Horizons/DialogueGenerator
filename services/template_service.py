@@ -66,6 +66,8 @@ class TemplateService:
         template_id = str(uuid4())
         now = datetime.now(timezone.utc)
         category = (template_data.get("category") or "").strip() or "Général"
+        raw_owner = template_data.get("ownerId") or template_data.get("owner_id")
+        owner_id = str(raw_owner).strip() if raw_owner else None
 
         template = Template(
             id=template_id,
@@ -76,6 +78,7 @@ class TemplateService:
             metadata=PresetMetadata(created=now, modified=now),
             configuration=TemplateConfiguration(**template_data["configuration"]),
             history=[TemplateHistoryEntry(at=now, action="created")],
+            ownerId=owner_id or None,
         )
 
         template, warnings = self._apply_gdd_validation(template)
@@ -327,7 +330,12 @@ class TemplateService:
             OSError: Erreur d'écriture disque.
         """
         template_file = self.templates_dir / f"{template.id}.json"
-        payload = template.model_dump(mode="json")
+        payload = template.model_dump(
+            mode="json",
+            exclude={"visibility", "ownerUsername", "sharedByUsername"},
+        )
+        if not payload.get("ownerId"):
+            payload.pop("ownerId", None)
         tmp_file = self.templates_dir / f".{template.id}.json.tmp"
         try:
             with open(tmp_file, "w", encoding="utf-8") as handle:

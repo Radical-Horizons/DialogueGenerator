@@ -24,10 +24,11 @@ import { TemplateEditorModal } from './TemplateEditorModal';
 import { PrebuiltTemplateModal } from './PrebuiltTemplateModal';
 import { TemplateMarketplaceModal } from './TemplateMarketplaceModal';
 import { TemplateABTestingModal } from './TemplateABTestingModal';
+import { TemplateSharingModal } from './TemplateSharingModal';
 import { NarrowOverlayDrawer } from '../layout/NarrowOverlayDrawer';
 import { filterTemplates, groupTemplatesByCategory, TEMPLATE_UNCATEGORIZED_LABEL } from '../../utils/templateGroups';
 import { isPrebuiltNew } from '../../utils/templateApply';
-import { publishMarketplaceTemplateApi } from '../../api/templates';
+import { copyTemplateApi, publishMarketplaceTemplateApi } from '../../api/templates';
 import type { SaveStatus } from '../shared/SaveStatusIndicator';
 
 function formatTemplateDate(isoString: string): string {
@@ -65,6 +66,14 @@ function formatActiveTemplateFilters(
     parts.push(`contexte « ${contextFilter.trim()} »`);
   }
   return `Filtres : ${parts.join(' · ')}`;
+}
+
+function isSharedTemplate(template: Template): boolean {
+  return template.visibility === 'shared';
+}
+
+function canShareTemplate(template: Template): boolean {
+  return template.visibility === 'owned';
 }
 
 export interface PresetSelectorProps {
@@ -135,16 +144,30 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   const [isCopyingPrebuilt, setIsCopyingPrebuilt] = useState(false);
   const [isMarketplaceOpen, setIsMarketplaceOpen] = useState(false);
   const [isAbTestOpen, setIsAbTestOpen] = useState(false);
+  const [sharingTemplate, setSharingTemplate] = useState<Template | null>(null);
   const publishingRef = useRef(false);
+  const copyingSharedRef = useRef(false);
+  const [isCopyingShared, setIsCopyingShared] = useState(false);
+  const sharedModifiedRef = useRef<Map<string, string>>(new Map());
+  const sharedToastReadyRef = useRef(false);
+
+  const ownedTemplates = useMemo(
+    () => templates.filter((template) => !isSharedTemplate(template)),
+    [templates],
+  );
+  const sharedTemplates = useMemo(
+    () => templates.filter((template) => isSharedTemplate(template)),
+    [templates],
+  );
 
   const filteredTemplates = useMemo(
     () =>
-      filterTemplates(templates, {
+      filterTemplates(ownedTemplates, {
         name: nameFilter,
         category: categoryFilter,
         context: contextFilter,
       }),
-    [templates, nameFilter, categoryFilter, contextFilter],
+    [ownedTemplates, nameFilter, categoryFilter, contextFilter],
   );
   const groupedTemplates = useMemo(
     () => groupTemplatesByCategory(filteredTemplates),
@@ -178,6 +201,26 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     void loadTemplates();
     void loadPrebuiltTemplates();
   }, [loadPresets, loadTemplates, loadPrebuiltTemplates]);
+
+  useEffect(() => {
+    if (sharedToastReadyRef.current) {
+      for (const template of sharedTemplates) {
+        const previous = sharedModifiedRef.current.get(template.id);
+        const next = template.metadata.modified;
+        if (previous && next && previous !== next) {
+          toast(`« ${template.name} » a été mis à jour`, 'info');
+        }
+      }
+    }
+    sharedToastReadyRef.current = true;
+    const nextMap = new Map<string, string>();
+    for (const template of sharedTemplates) {
+      if (template.metadata.modified) {
+        nextMap.set(template.id, template.metadata.modified);
+      }
+    }
+    sharedModifiedRef.current = nextMap;
+  }, [sharedTemplates, toast]);
 
   const handlePresetSelect = (preset: Preset) => {
     setSelectedPreset(preset);
@@ -224,6 +267,25 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     } finally {
       copyingPrebuiltRef.current = false;
       setIsCopyingPrebuilt(false);
+    }
+  };
+
+  const handleCopyShared = async (template: Template) => {
+    if (copyingSharedRef.current) {
+      return;
+    }
+    copyingSharedRef.current = true;
+    setIsCopyingShared(true);
+    try {
+      await copyTemplateApi(template.id);
+      await loadTemplates();
+      toast('Template copié dans Mes templates', 'success');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Copie impossible';
+      toast(message, 'error');
+    } finally {
+      copyingSharedRef.current = false;
+      setIsCopyingShared(false);
     }
   };
 
@@ -803,7 +865,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         >
           Mes templates
         </h3>
-        {templates.length > 0 &&
+        {ownedTemplates.length > 0 &&
           (isNarrow ? (
             <>
               <button
@@ -840,7 +902,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           ) : (
             filterFields
           ))}
-        {templateError && templates.length === 0 ? null : templates.length === 0 ? (
+        {templateError && ownedTemplates.length === 0 ? null : ownedTemplates.length === 0 ? (
           <div
             data-testid="mes-templates-empty"
             style={{
@@ -1021,11 +1083,120 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                           Publier
                         </button>
                       )}
+                      {canShareTemplate(template) && (
+                        <button
+                          type="button"
+                          data-testid="template-item-share-btn"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setSharingTemplate(template);
+                          }}
+                          style={{
+                            minHeight: TOUCH_TARGET_MIN_PX,
+                            padding: chrome.buttonPadding,
+                            backgroundColor: theme.button.default.background,
+                            border: `1px solid ${theme.border.secondary}`,
+                            borderRadius: `${redesignRadius.control}px`,
+                            color: theme.button.default.color,
+                            cursor: 'pointer',
+                            fontSize: `${chrome.buttonFontRem}rem`,
+                          }}
+                        >
+                          Partager
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
                 )
               })}
+            </div>
+          ))
+        )}
+      </section>
+
+      <section
+        data-testid="templates-partages-list"
+        style={{
+          marginTop: `${chrome.controlGapRem}rem`,
+        }}
+      >
+        <h3
+          style={{
+            margin: `0 0 ${chrome.controlGapRem}rem`,
+            color: theme.text.primary,
+            fontSize: `${chrome.sectionTitleFontRem}rem`,
+            fontWeight: 600,
+          }}
+        >
+          Templates partagés
+        </h3>
+        {sharedTemplates.length === 0 ? (
+          <div
+            data-testid="templates-partages-empty"
+            style={{
+              fontSize: `${chrome.labelFontRem}rem`,
+              color: theme.text.secondary,
+            }}
+          >
+            Aucun template partagé
+          </div>
+        ) : (
+          sharedTemplates.map((template) => (
+            <div
+              key={template.id}
+              data-testid="shared-template-item"
+              data-template-name={template.name}
+              onClick={() => onTemplateLoaded?.(template)}
+              style={{
+                padding: chrome.dropdownOptionPadding,
+                border: `1px solid ${theme.border.secondary}`,
+                borderRadius: `${redesignRadius.control}px`,
+                marginBottom: '0.35rem',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.5rem',
+                cursor: 'pointer',
+              }}
+            >
+              <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>{template.icon}</span>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontWeight: 600, color: theme.text.primary }}>
+                  {template.name}
+                </div>
+                <div
+                  data-testid="shared-template-badge"
+                  style={{
+                    fontSize: `${chrome.labelFontRem}rem`,
+                    color: theme.text.secondary,
+                    marginTop: '0.2rem',
+                  }}
+                >
+                  Partagé par {template.sharedByUsername ?? template.ownerUsername ?? 'un membre'}
+                </div>
+                <button
+                  type="button"
+                  data-testid="shared-template-copy-btn"
+                  disabled={isCopyingShared}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void handleCopyShared(template);
+                  }}
+                  style={{
+                    minHeight: TOUCH_TARGET_MIN_PX,
+                    marginTop: '0.5rem',
+                    padding: chrome.buttonPadding,
+                    backgroundColor: theme.button.default.background,
+                    border: `1px solid ${theme.border.secondary}`,
+                    borderRadius: `${redesignRadius.control}px`,
+                    color: theme.button.default.color,
+                    cursor: 'pointer',
+                    fontSize: `${chrome.buttonFontRem}rem`,
+                  }}
+                >
+                  Copier vers mes templates
+                </button>
+              </div>
             </div>
           ))
         )}
@@ -1111,6 +1282,15 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         }}
         onCancel={() => setDeletingTemplate(null)}
       />
+
+      {sharingTemplate && (
+        <TemplateSharingModal
+          templateId={sharingTemplate.id}
+          templateName={sharingTemplate.name}
+          open
+          onClose={() => setSharingTemplate(null)}
+        />
+      )}
     </div>
   );
 };

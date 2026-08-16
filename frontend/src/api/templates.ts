@@ -12,6 +12,7 @@ import type {
   PrebuiltTemplate,
   Template,
   TemplateCreate,
+  TemplateShare,
   TemplateUpdate,
   TemplateWriteResponse,
 } from '../types/template'
@@ -71,6 +72,50 @@ export async function updateTemplateApi(
  */
 export async function deleteTemplateApi(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/templates/${id}`)
+}
+
+/**
+ * Liste les destinataires d'un template (owner/admin).
+ */
+export async function listTemplateSharesApi(templateId: string): Promise<TemplateShare[]> {
+  const { data } = await apiClient.get<TemplateShare[]>(
+    `/api/v1/templates/${templateId}/shares`,
+  )
+  return data
+}
+
+/**
+ * Invite un writer par username.
+ */
+export async function createTemplateShareApi(
+  templateId: string,
+  username: string,
+): Promise<TemplateShare> {
+  const { data } = await apiClient.post<TemplateShare>(
+    `/api/v1/templates/${templateId}/shares`,
+    { username },
+  )
+  return data
+}
+
+/**
+ * Révoque un destinataire.
+ */
+export async function deleteTemplateShareApi(
+  templateId: string,
+  userId: string,
+): Promise<void> {
+  await apiClient.delete(`/api/v1/templates/${templateId}/shares/${userId}`)
+}
+
+/**
+ * Clone un template visible en custom owned.
+ */
+export async function copyTemplateApi(templateId: string): Promise<TemplateWriteResponse> {
+  const { data } = await apiClient.post<TemplateWriteResponse>(
+    `/api/v1/templates/${templateId}/copy`,
+  )
+  return data
 }
 
 /**

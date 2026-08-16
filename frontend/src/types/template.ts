@@ -28,6 +28,10 @@ export interface Template {
   metadata: PresetMetadata
   configuration: TemplateConfiguration
   history?: TemplateHistoryEntry[]
+  ownerId?: string | null
+  visibility?: 'owned' | 'shared' | 'legacy' | null
+  ownerUsername?: string | null
+  sharedByUsername?: string | null
 }
 
 export interface TemplateCreate {
@@ -52,6 +56,14 @@ export interface TemplateUpdate {
   category?: string
   icon?: string
   configuration?: TemplateConfiguration
+}
+
+/** Partage d'équipe (pointeur live). */
+export interface TemplateShare {
+  template_id: string
+  user_id: string
+  username: string
+  created_at: string
 }
 
 /** Fiche Alteir lecture seule (catalogue pré-built). */

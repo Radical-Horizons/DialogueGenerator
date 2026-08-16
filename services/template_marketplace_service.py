@@ -6,7 +6,7 @@ import json
 import logging
 import sqlite3
 from datetime import datetime, timezone
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
 from pydantic import ValidationError
@@ -120,7 +120,11 @@ class TemplateMarketplaceService:
         logger.info("Marketplace listing créé: %s (auteur %s)", row.id, author_id)
         return self._to_listing(row)
 
-    def use_listing(self, listing_id: str) -> TemplateCreateResponse:
+    def use_listing(
+        self,
+        listing_id: str,
+        owner_id: Optional[str] = None,
+    ) -> TemplateCreateResponse:
         """Copie une fiche vers Mes templates et incrémente ``usage_count``.
 
         Raises:
@@ -134,6 +138,7 @@ class TemplateMarketplaceService:
                 "category": listing.category,
                 "icon": listing.icon,
                 "configuration": listing.configuration.model_dump(mode="json"),
+                "owner_id": owner_id,
             }
         )
         self._repository.increment_usage(listing_id)

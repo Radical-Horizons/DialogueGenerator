@@ -1,6 +1,6 @@
 """Router FastAPI pour les endpoints /api/v1/templates (CRUD)."""
 import logging
-from typing import Any, Dict, List
+from typing import Annotated, Any, Dict, List
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 
@@ -14,6 +14,7 @@ from api.dependencies import (
     get_template_ab_testing_service,
     get_template_marketplace_service,
     get_template_service,
+    get_template_sharing_service,
     get_unity_dialogue_orchestrator,
     require_non_guest,
 )
@@ -31,6 +32,8 @@ from api.schemas.template import (
     Template,
     TemplateCreate,
     TemplateCreateResponse,
+    TemplateShareCreateRequest,
+    TemplateShareResponse,
     TemplateUpdate,
 )
 from api.services.template_ab_test_job_manager import TemplateABTestJobManager
@@ -51,23 +54,65 @@ from services.template_marketplace_service import (
     TemplateMarketplaceService,
 )
 from services.template_service import TemplateService
+from services.template_sharing_service import (
+    TemplateShareConflictError,
+    TemplateShareForbiddenError,
+    TemplateShareNotFoundError,
+    TemplateShareSelfShareError,
+    TemplateShareValidationError,
+    TemplateShareView,
+    TemplateSharingService,
+)
 from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
 logger = logging.getLogger(__name__)
 
 
+def _share_to_response(share: TemplateShareView) -> TemplateShareResponse:
+    """Mappe une vue service vers le schéma API."""
+    return TemplateShareResponse(
+        template_id=share.template_id,
+        user_id=share.user_id,
+        username=share.username,
+        created_at=share.created_at,
+    )
+
+
+def _http_from_share_exc(exc: Exception) -> HTTPException:
+    """Traduit les erreurs de partage en HTTP."""
+    if isinstance(exc, TemplateShareValidationError):
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+    if isinstance(exc, TemplateShareSelfShareError):
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+    if isinstance(exc, TemplateShareConflictError):
+        return HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    if isinstance(exc, TemplateShareForbiddenError):
+        return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    if isinstance(exc, (TemplateShareNotFoundError, FileNotFoundError)):
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    return HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Error managing template share",
+    )
+
+
 @router.get("", response_model=List[Template])
 def list_templates(
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     template_service: TemplateService = Depends(get_template_service),
+    sharing_service: TemplateSharingService = Depends(get_template_sharing_service),
 ) -> List[Template]:
-    """Liste tous les templates custom.
+    """Liste les templates visibles pour l'acteur (owned, shared, legacy).
 
     Returns:
-        Liste des templates (vide si aucun).
+        Liste filtrée (vide si aucun).
     """
     try:
-        templates = template_service.list_templates()
+        templates = sharing_service.list_visible(
+            template_service.list_templates(),
+            current_user,
+        )
         logger.info("Liste templates retournée: %s templates", len(templates))
         return templates
     except Exception as exc:
@@ -81,9 +126,11 @@ def list_templates(
 @router.post("", response_model=TemplateCreateResponse, status_code=status.HTTP_201_CREATED)
 def create_template(
     template_data: TemplateCreate,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     template_service: TemplateService = Depends(get_template_service),
+    sharing_service: TemplateSharingService = Depends(get_template_sharing_service),
 ) -> TemplateCreateResponse:
-    """Crée un template custom.
+    """Crée un template custom owned par l'acteur.
 
     Args:
         template_data: Nom, description, catégorie, icône et configuration snapshotée.
@@ -95,10 +142,13 @@ def create_template(
         500: Erreur d'écriture disque ou permissions.
     """
     try:
-        template, warnings = template_service.create_template(template_data.model_dump())
+        payload = template_data.model_dump()
+        payload["owner_id"] = str(current_user.get("id") or "").strip() or None
+        template, warnings = template_service.create_template(payload)
+        annotated = sharing_service.annotate(template, current_user)
         logger.info("Template créé: %s (ID: %s)", template.name, template.id)
         return TemplateCreateResponse(
-            **template.model_dump(),
+            **annotated.model_dump(),
             warnings=warnings,
         )
     except PermissionError as exc:
@@ -227,6 +277,8 @@ def get_marketplace_template(
 def publish_marketplace_template(
     body: MarketplacePublishRequest,
     current_user: Dict[str, Any] = Depends(get_current_user),
+    template_service: TemplateService = Depends(get_template_service),
+    sharing_service: TemplateSharingService = Depends(get_template_sharing_service),
     marketplace_service: TemplateMarketplaceService = Depends(
         get_template_marketplace_service
     ),
@@ -234,13 +286,22 @@ def publish_marketplace_template(
     """Publie un template custom (upsert si déjà publié par le même auteur)."""
     require_non_guest(current_user)
     try:
+        sharing_service.require_writable(
+            template_service.get_template(body.templateId),
+            current_user,
+        )
         listing = marketplace_service.share_template(body.templateId, current_user)
         logger.info("Template publié marketplace: %s", listing.id)
         return listing
-    except FileNotFoundError as exc:
+    except (TemplateShareNotFoundError, FileNotFoundError) as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Template not found",
+        ) from exc
+    except TemplateShareForbiddenError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Marketplace publish forbidden",
         ) from exc
     except MarketplaceForbiddenError as exc:
         raise HTTPException(
@@ -262,13 +323,15 @@ def publish_marketplace_template(
 )
 def use_marketplace_template(
     listing_id: str,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     marketplace_service: TemplateMarketplaceService = Depends(
         get_template_marketplace_service
     ),
 ) -> TemplateCreateResponse:
     """Copie une fiche vers Mes templates et incrémente les usages."""
     try:
-        return marketplace_service.use_listing(listing_id)
+        owner_id = str(current_user.get("id") or "").strip() or None
+        return marketplace_service.use_listing(listing_id, owner_id=owner_id)
     except FileNotFoundError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -573,17 +636,153 @@ async def rerun_ab_test(
         ) from exc
 
 
+@router.get("/{template_id}/shares", response_model=List[TemplateShareResponse])
+def list_template_shares(
+    template_id: str,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    template_service: TemplateService = Depends(get_template_service),
+    sharing_service: TemplateSharingService = Depends(get_template_sharing_service),
+) -> List[TemplateShareResponse]:
+    """Liste les destinataires d'un template (owner/admin)."""
+    try:
+        shares = sharing_service.list_shares(template_service, template_id, current_user)
+    except (
+        TemplateShareValidationError,
+        TemplateShareForbiddenError,
+        TemplateShareNotFoundError,
+        FileNotFoundError,
+    ) as exc:
+        raise _http_from_share_exc(exc) from exc
+    return [_share_to_response(share) for share in shares]
+
+
+@router.post(
+    "/{template_id}/shares",
+    response_model=TemplateShareResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_template_share(
+    template_id: str,
+    body: TemplateShareCreateRequest,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    template_service: TemplateService = Depends(get_template_service),
+    sharing_service: TemplateSharingService = Depends(get_template_sharing_service),
+) -> TemplateShareResponse:
+    """Invite un writer actif par username (pointeur live)."""
+    try:
+        username = body.normalized_username()
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        ) from exc
+    try:
+        share = sharing_service.grant_share(
+            template_service,
+            template_id,
+            username,
+            current_user,
+        )
+    except (
+        TemplateShareValidationError,
+        TemplateShareSelfShareError,
+        TemplateShareConflictError,
+        TemplateShareForbiddenError,
+        TemplateShareNotFoundError,
+        FileNotFoundError,
+    ) as exc:
+        raise _http_from_share_exc(exc) from exc
+    logger.info("Template %s partagé avec %s", template_id, username)
+    return _share_to_response(share)
+
+
+@router.delete(
+    "/{template_id}/shares/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_template_share(
+    template_id: str,
+    user_id: str,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    template_service: TemplateService = Depends(get_template_service),
+    sharing_service: TemplateSharingService = Depends(get_template_sharing_service),
+) -> None:
+    """Révoque l'accès live d'un destinataire."""
+    try:
+        sharing_service.revoke_share(
+            template_service,
+            template_id,
+            user_id,
+            current_user,
+        )
+    except (
+        TemplateShareValidationError,
+        TemplateShareForbiddenError,
+        TemplateShareNotFoundError,
+        FileNotFoundError,
+    ) as exc:
+        raise _http_from_share_exc(exc) from exc
+    logger.info("Partage template %s révoqué pour %s", template_id, user_id)
+
+
+@router.post(
+    "/{template_id}/copy",
+    response_model=TemplateCreateResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def copy_template(
+    template_id: str,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    template_service: TemplateService = Depends(get_template_service),
+    sharing_service: TemplateSharingService = Depends(get_template_sharing_service),
+) -> TemplateCreateResponse:
+    """Clone un template visible en custom owned par l'acteur."""
+    try:
+        copied, warnings = sharing_service.copy_template(
+            template_service,
+            template_id,
+            current_user,
+        )
+    except (
+        TemplateShareValidationError,
+        TemplateShareForbiddenError,
+        TemplateShareNotFoundError,
+        FileNotFoundError,
+    ) as exc:
+        raise _http_from_share_exc(exc) from exc
+    except PermissionError as exc:
+        logger.exception("Permission denied copying template")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Permission denied",
+        ) from exc
+    except OSError as exc:
+        logger.exception("Disk error copying template")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Disk error",
+        ) from exc
+    logger.info("Template %s copié vers %s", template_id, copied.id)
+    return TemplateCreateResponse(**copied.model_dump(), warnings=warnings)
+
+
 @router.get("/{template_id}/validate", response_model=PresetValidationResult)
 def validate_template(
     template_id: str,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     template_service: TemplateService = Depends(get_template_service),
+    sharing_service: TemplateSharingService = Depends(get_template_sharing_service),
 ) -> PresetValidationResult:
     """Valide les références GDD d'un template (sans muter le JSON).
 
     Raises:
-        404: Template absent.
+        404: Template absent ou hors visibilité.
     """
     try:
+        sharing_service.require_readable(
+            template_service.get_template(template_id),
+            current_user,
+        )
         result = template_service.validate_template_references(template_id)
         if not result.valid:
             logger.warning(
@@ -592,7 +791,7 @@ def validate_template(
                 len(result.obsoleteRefs),
             )
         return result
-    except FileNotFoundError as exc:
+    except (TemplateShareNotFoundError, FileNotFoundError) as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Template not found",
@@ -608,16 +807,21 @@ def validate_template(
 @router.get("/{template_id}", response_model=Template)
 def get_template(
     template_id: str,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     template_service: TemplateService = Depends(get_template_service),
+    sharing_service: TemplateSharingService = Depends(get_template_sharing_service),
 ) -> Template:
-    """Charge un template par UUID.
+    """Charge un template par UUID s'il est visible.
 
     Raises:
-        404: Template absent.
+        404: Template absent ou hors visibilité.
     """
     try:
-        return template_service.get_template(template_id)
-    except FileNotFoundError as exc:
+        return sharing_service.require_readable(
+            template_service.get_template(template_id),
+            current_user,
+        )
+    except (TemplateShareNotFoundError, FileNotFoundError) as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Template not found",
@@ -634,28 +838,41 @@ def get_template(
 def update_template(
     template_id: str,
     update_data: TemplateUpdate,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     template_service: TemplateService = Depends(get_template_service),
+    sharing_service: TemplateSharingService = Depends(get_template_sharing_service),
 ) -> TemplateCreateResponse:
-    """Met à jour un template (même UUID).
+    """Met à jour un template (owner/admin, ou legacy).
 
     Returns:
         Template persisté avec ``warnings`` GDD.
 
     Raises:
-        404: Template absent.
+        404: Template absent ou hors visibilité.
+        403: Destinataire (lecture seule).
         500: Erreur disque.
     """
     try:
+        sharing_service.require_writable(
+            template_service.get_template(template_id),
+            current_user,
+        )
         template, warnings = template_service.update_template(
             template_id,
             update_data.model_dump(exclude_none=True),
         )
+        annotated = sharing_service.annotate(template, current_user)
         logger.info("Template mis à jour: %s (ID: %s)", template.name, template.id)
         return TemplateCreateResponse(
-            **template.model_dump(),
+            **annotated.model_dump(),
             warnings=warnings,
         )
-    except FileNotFoundError as exc:
+    except TemplateShareForbiddenError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(exc),
+        ) from exc
+    except (TemplateShareNotFoundError, FileNotFoundError) as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Template not found",
@@ -683,17 +900,30 @@ def update_template(
 @router.delete("/{template_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_template(
     template_id: str,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     template_service: TemplateService = Depends(get_template_service),
+    sharing_service: TemplateSharingService = Depends(get_template_sharing_service),
 ) -> None:
-    """Supprime un template.
+    """Supprime un template owned (cascade des partages).
 
     Raises:
-        404: Template absent.
+        404: Template absent ou hors visibilité.
+        403: Destinataire (lecture seule).
     """
     try:
+        sharing_service.require_writable(
+            template_service.get_template(template_id),
+            current_user,
+        )
         template_service.delete_template(template_id)
+        sharing_service.delete_shares_for_template(template_id)
         logger.info("Template supprimé: %s", template_id)
-    except FileNotFoundError as exc:
+    except TemplateShareForbiddenError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(exc),
+        ) from exc
+    except (TemplateShareNotFoundError, FileNotFoundError) as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Template not found",

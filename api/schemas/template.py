@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any, List, Literal, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from api.schemas.preset import PresetConfiguration, PresetMetadata
 from api.schemas.validation_rules import ContextDroppingRulesSchema
@@ -53,6 +53,8 @@ class TemplateHistoryEntry(BaseModel):
 class Template(BaseModel):
     """Modèle complet d'un template custom."""
 
+    model_config = ConfigDict(populate_by_name=True)
+
     id: str = Field(..., description="UUID du template (nom fichier)")
     name: str = Field(..., description="Nom du template", min_length=1)
     description: str = Field(default="", description="Description libre")
@@ -63,6 +65,23 @@ class Template(BaseModel):
     history: List[TemplateHistoryEntry] = Field(
         default_factory=list,
         description="Historique des dates (created / updated)",
+    )
+    ownerId: Optional[str] = Field(
+        default=None,
+        validation_alias=AliasChoices("ownerId", "owner_id"),
+        description="Identifiant JWT du propriétaire (absent = legacy public)",
+    )
+    visibility: Optional[Literal["owned", "shared", "legacy"]] = Field(
+        default=None,
+        description="Visibilité calculée pour l'acteur (non persistée)",
+    )
+    ownerUsername: Optional[str] = Field(
+        default=None,
+        description="Username du propriétaire (calculé, non persisté)",
+    )
+    sharedByUsername: Optional[str] = Field(
+        default=None,
+        description="Username affiché sur une carte partagée (calculé)",
     )
 
     @field_validator("id")
@@ -130,6 +149,28 @@ class TemplateCreate(BaseModel):
     def validate_name(cls, v: str) -> str:
         """Refuse un nom vide après strip."""
         return _strip_required_name(v)
+
+
+class TemplateShareCreateRequest(BaseModel):
+    """Invitation d'un writer existant par username."""
+
+    username: str = Field(..., min_length=1, max_length=64)
+
+    def normalized_username(self) -> str:
+        """Retourne le username trimé, ou lève si vide après trim."""
+        trimmed = self.username.strip()
+        if not trimmed:
+            raise ValueError("Le nom d'utilisateur est vide")
+        return trimmed
+
+
+class TemplateShareResponse(BaseModel):
+    """Partage d'équipe exposé à l'API."""
+
+    template_id: str
+    user_id: str
+    username: str
+    created_at: str
 
 
 class TemplateCreateResponse(Template):
