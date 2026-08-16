@@ -183,3 +183,38 @@ export interface ABTestCreateResponse {
   current: number
   total: number
 }
+
+export type TemplateSuggestionSource = 'custom' | 'prebuilt' | 'marketplace'
+
+export interface TemplateSuggestionRequest {
+  instructions: string
+  sceneType: string
+  characters: string[]
+  locations: string[]
+  rencontreInitialeByCharacter: Record<string, string>
+}
+
+export interface TemplateSuggestion {
+  source: TemplateSuggestionSource
+  id: string
+  name: string
+  description: string
+  category: string
+  icon: string
+  score: number
+  reasons: string[]
+  configuration: TemplateConfiguration
+  visibility?: 'owned' | 'shared' | 'legacy' | null
+  sceneTypeHint?: string | null
+  gddSystem?: string | null
+  objectif?: string | null
+  casUsage?: string | null
+  examples?: string[] | null
+  addedAt?: string | null
+}
+
+export interface TemplateSuggestionUsedResponse {
+  source: TemplateSuggestionSource
+  id: string
+  useCount: number
+}

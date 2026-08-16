@@ -15,6 +15,7 @@ from api.dependencies import (
     get_template_marketplace_service,
     get_template_service,
     get_template_sharing_service,
+    get_template_suggestion_service,
     get_unity_dialogue_orchestrator,
     require_non_guest,
 )
@@ -34,6 +35,10 @@ from api.schemas.template import (
     TemplateCreateResponse,
     TemplateShareCreateRequest,
     TemplateShareResponse,
+    TemplateSuggestionItem,
+    TemplateSuggestionRequest,
+    TemplateSuggestionUsedRequest,
+    TemplateSuggestionUsedResponse,
     TemplateUpdate,
 )
 from api.services.template_ab_test_job_manager import TemplateABTestJobManager
@@ -62,6 +67,10 @@ from services.template_sharing_service import (
     TemplateShareValidationError,
     TemplateShareView,
     TemplateSharingService,
+)
+from services.template_suggestion_service import (
+    TemplateSuggestionService,
+    TemplateSuggestionValidationError,
 )
 from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
 
@@ -168,6 +177,65 @@ def create_template(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error creating template",
+        ) from exc
+
+
+@router.post("/suggestions", response_model=List[TemplateSuggestionItem])
+def suggest_templates(
+    payload: TemplateSuggestionRequest,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    template_service: TemplateService = Depends(get_template_service),
+    suggestion_service: TemplateSuggestionService = Depends(
+        get_template_suggestion_service
+    ),
+) -> List[TemplateSuggestionItem]:
+    """Classe les templates lisibles selon le scénario (déterministe, sans LLM)."""
+    try:
+        return suggestion_service.suggest(
+            current_user=current_user,
+            template_service=template_service,
+            instructions=payload.instructions,
+            scene_type=payload.sceneType,
+            characters=payload.characters,
+            locations=payload.locations,
+            rencontre_initiale_by_character=payload.rencontreInitialeByCharacter,
+        )
+    except Exception as exc:
+        logger.exception("Erreur suggestions templates")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error suggesting templates",
+        ) from exc
+
+
+@router.post("/suggestions/used", response_model=TemplateSuggestionUsedResponse)
+def record_template_suggestion_used(
+    payload: TemplateSuggestionUsedRequest,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    suggestion_service: TemplateSuggestionService = Depends(
+        get_template_suggestion_service
+    ),
+) -> TemplateSuggestionUsedResponse:
+    """Incrémente le compteur perso après un Charger réussi."""
+    try:
+        count = suggestion_service.record_used(
+            current_user, payload.source, payload.id
+        )
+        return TemplateSuggestionUsedResponse(
+            source=payload.source,
+            id=payload.id,
+            useCount=count,
+        )
+    except TemplateSuggestionValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    except Exception as exc:
+        logger.exception("Erreur compteur suggestions templates")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error recording template usage",
         ) from exc
 
 

@@ -12,7 +12,7 @@ import { useTemplateStore } from '../../store/templateStore';
 import { useLLMStore } from '../../store/llmStore';
 import { useAuthStore } from '../../store/authStore';
 import type { Preset, PresetConfiguration } from '../../types/preset';
-import type { Template, TemplateConfiguration, PrebuiltTemplate } from '../../types/template';
+import type { Template, TemplateConfiguration, PrebuiltTemplate, TemplateSuggestion, TemplateSuggestionRequest } from '../../types/template';
 import { theme } from '../../theme';
 import { redesignControl, redesignDisclosureArrow, redesignRadius } from '../../theme/redesignTokens';
 import { generationPanelChrome } from '../../theme/responsiveChrome';
@@ -23,12 +23,16 @@ import { TemplateCreatorModal } from './TemplateCreatorModal';
 import { TemplateEditorModal } from './TemplateEditorModal';
 import { PrebuiltTemplateModal } from './PrebuiltTemplateModal';
 import { TemplateMarketplaceModal } from './TemplateMarketplaceModal';
+import { TemplateSuggestionsModal } from './TemplateSuggestionsModal';
 import { TemplateABTestingModal } from './TemplateABTestingModal';
 import { TemplateSharingModal } from './TemplateSharingModal';
 import { NarrowOverlayDrawer } from '../layout/NarrowOverlayDrawer';
 import { filterTemplates, groupTemplatesByCategory, TEMPLATE_UNCATEGORIZED_LABEL } from '../../utils/templateGroups';
 import { isPrebuiltNew } from '../../utils/templateApply';
 import { copyTemplateApi, publishMarketplaceTemplateApi } from '../../api/templates';
+import { useContextStore } from '../../store/contextStore';
+import { useGenerationStore } from '../../store/generationStore';
+import { rencontreInitialeBySelectedCharacters } from '../../utils/templateSuggestionScore';
 import type { SaveStatus } from '../shared/SaveStatusIndicator';
 
 function formatTemplateDate(isoString: string): string {
@@ -76,6 +80,43 @@ function canShareTemplate(template: Template): boolean {
   return template.visibility === 'owned';
 }
 
+function buildSuggestionRequest(
+  getCurrentConfiguration?: () => PresetConfiguration,
+  currentConfiguration?: PresetConfiguration,
+): TemplateSuggestionRequest {
+  const generation = useGenerationStore.getState();
+  const context = useContextStore.getState();
+  const config = getCurrentConfiguration?.() ?? currentConfiguration;
+  const uniq = <T,>(arr: T[]) => Array.from(new Set(arr));
+  const characters = uniq([
+    ...(Array.isArray(context.selections.characters_full) ? context.selections.characters_full : []),
+    ...(Array.isArray(context.selections.characters_excerpt)
+      ? context.selections.characters_excerpt
+      : []),
+  ]);
+  const locations = uniq([
+    ...(Array.isArray(context.selections.locations_full) ? context.selections.locations_full : []),
+    ...(Array.isArray(context.selections.locations_excerpt)
+      ? context.selections.locations_excerpt
+      : []),
+    ...(context.selectedRegion ? [context.selectedRegion] : []),
+    ...(Array.isArray(context.selectedSubLocations) ? context.selectedSubLocations : []),
+  ]);
+  return {
+    instructions: generation.generationUserInstructions || config?.instructions || '',
+    sceneType:
+      !config?.sceneType || config.sceneType.trim().toLowerCase() === 'generic'
+        ? ''
+        : config.sceneType,
+    characters,
+    locations,
+    rencontreInitialeByCharacter: rencontreInitialeBySelectedCharacters(
+      characters,
+      context.characters,
+    ),
+  };
+}
+
 export interface PresetSelectorProps {
   /** Callback appelé quand un preset est chargé */
   onPresetLoaded: (preset: Preset) => void;
@@ -83,6 +124,8 @@ export interface PresetSelectorProps {
   onTemplateLoaded?: (template: Template) => void;
   /** Callback appelé quand une fiche pré-built est chargée (bouton Charger) */
   onPrebuiltLoaded?: (prebuilt: PrebuiltTemplate) => void;
+  /** Callback appelé depuis le modal Suggestions */
+  onSuggestionLoaded?: (item: TemplateSuggestion) => void | Promise<void>;
   /** Configuration actuelle pour sauvegarde */
   currentConfiguration?: PresetConfiguration;
   /** Getter lazy pour éviter recalculs coûteux à chaque render */
@@ -95,6 +138,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   onPresetLoaded,
   onTemplateLoaded,
   onPrebuiltLoaded,
+  onSuggestionLoaded,
   currentConfiguration,
   getCurrentConfiguration,
   saveStatus,
@@ -143,6 +187,14 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   const copyingPrebuiltRef = useRef(false);
   const [isCopyingPrebuilt, setIsCopyingPrebuilt] = useState(false);
   const [isMarketplaceOpen, setIsMarketplaceOpen] = useState(false);
+  const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
+  const [suggestionRequest, setSuggestionRequest] = useState<TemplateSuggestionRequest>({
+    instructions: '',
+    sceneType: '',
+    characters: [],
+    locations: [],
+    rencontreInitialeByCharacter: {},
+  });
   const [isAbTestOpen, setIsAbTestOpen] = useState(false);
   const [sharingTemplate, setSharingTemplate] = useState<Template | null>(null);
   const publishingRef = useRef(false);
@@ -616,6 +668,32 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
 
         <button
           type="button"
+          data-testid="suggestions-open-btn"
+          onClick={() => {
+            setSuggestionRequest(
+              buildSuggestionRequest(getCurrentConfiguration, currentConfiguration),
+            );
+            setIsSuggestionsOpen(true);
+          }}
+          style={{
+            padding: chrome.buttonPadding,
+            backgroundColor: theme.button.default.background,
+            border: `1px solid ${theme.border.secondary}`,
+            borderRadius: `${redesignRadius.control}px`,
+            color: theme.button.default.color,
+            fontWeight: 600,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            fontSize: `${chrome.buttonFontRem}rem`,
+            flex: isNarrow ? '1 1 auto' : undefined,
+            minHeight: TOUCH_TARGET_MIN_PX,
+          }}
+        >
+          Suggestions
+        </button>
+
+        <button
+          type="button"
           data-testid="marketplace-open-btn"
           onClick={() => setIsMarketplaceOpen(true)}
           style={{
@@ -700,6 +778,15 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           void handleCopyPrebuilt(prebuilt);
         }}
         copyDisabled={isCopyingPrebuilt}
+      />
+
+      <TemplateSuggestionsModal
+        isOpen={isSuggestionsOpen}
+        onClose={() => setIsSuggestionsOpen(false)}
+        request={suggestionRequest}
+        onLoad={async (item) => {
+          await onSuggestionLoaded?.(item);
+        }}
       />
 
       <TemplateMarketplaceModal

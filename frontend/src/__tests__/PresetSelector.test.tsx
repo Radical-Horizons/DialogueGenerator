@@ -8,6 +8,7 @@ import { GenerationPanelNarrowProvider } from '../components/generation/Generati
 import { usePresetStore } from '../store/presetStore';
 import { useTemplateStore } from '../store/templateStore';
 import { useGenerationStore } from '../store/generationStore';
+import { useContextStore } from '../store/contextStore';
 import { toastManager } from '../components/shared';
 import * as templatesAPI from '../api/templates';
 import type { Preset } from '../types/preset';
@@ -41,6 +42,8 @@ vi.mock('../api/templates', () => ({
   listTemplateSharesApi: vi.fn().mockResolvedValue([]),
   createTemplateShareApi: vi.fn(),
   deleteTemplateShareApi: vi.fn(),
+  suggestTemplatesApi: vi.fn().mockResolvedValue([]),
+  recordSuggestionUsedApi: vi.fn().mockResolvedValue({ source: 'prebuilt', id: 'x', useCount: 1 }),
 }));
 vi.mock('../api/graph', () => ({
   getContextDroppingRules: vi.fn().mockResolvedValue({
@@ -216,6 +219,14 @@ describe('PresetSelector', () => {
     authState.user = { id: 'writer-a', username: 'writer-a', role: 'writer' };
     mockPublishMarketplace.mockResolvedValue({ id: 'listing-1' });
     useGenerationStore.getState().setContextDroppingRulesOverlay(null)
+    useContextStore.setState({
+      selections: {
+        ...useContextStore.getState().selections,
+        characters_full: [],
+        characters_excerpt: [],
+      },
+      characters: [],
+    })
     mockCreateTemplate.mockResolvedValue({ warnings: [] });
     mockUpdateTemplate.mockResolvedValue({ warnings: [] });
     mockDeleteTemplate.mockResolvedValue(undefined);
@@ -1076,6 +1087,38 @@ describe('PresetSelector', () => {
       fireEvent.click(screen.getByTestId('ab-test-open-btn'));
 
       expect(await screen.findByTestId('template-ab-test-modal')).toBeInTheDocument();
+    });
+
+    it('ouvre le modal Suggestions', async () => {
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+
+      fireEvent.click(screen.getByTestId('suggestions-open-btn'));
+
+      expect(await screen.findByTestId('template-suggestions-modal')).toBeInTheDocument();
+    });
+
+    it('envoie rencontreInitialeByCharacter depuis les fiches déjà en store', async () => {
+      useContextStore.setState({
+        selections: {
+          ...useContextStore.getState().selections,
+          characters_full: ['npc-alpha'],
+        },
+        characters: [
+          {
+            name: 'npc-alpha',
+            data: { sections: { rencontre_initiale: 'Bonjour voyageur.' } },
+          },
+        ],
+      })
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+      fireEvent.click(screen.getByTestId('suggestions-open-btn'));
+      await waitFor(() => {
+        expect(templatesAPI.suggestTemplatesApi).toHaveBeenCalledWith(
+          expect.objectContaining({
+            rencontreInitialeByCharacter: { 'npc-alpha': 'Bonjour voyageur.' },
+          }),
+        )
+      })
     });
   });
 

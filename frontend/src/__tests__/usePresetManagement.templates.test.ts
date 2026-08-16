@@ -7,6 +7,8 @@ import type { PresetValidationResult } from '../types/preset'
 const mocks = vi.hoisted(() => ({
   getTemplateApi: vi.fn(),
   validateTemplateApi: vi.fn(),
+  recordSuggestionUsedApi: vi.fn(),
+  copyMarketplaceListingApi: vi.fn(),
   setSceneSelection: vi.fn(),
   setProvider: vi.fn(),
   setModel: vi.fn(),
@@ -23,6 +25,8 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../api/templates', () => ({
   getTemplateApi: mocks.getTemplateApi,
   validateTemplateApi: mocks.validateTemplateApi,
+  recordSuggestionUsedApi: mocks.recordSuggestionUsedApi,
+  copyMarketplaceListingApi: mocks.copyMarketplaceListingApi,
 }))
 
 vi.mock('../store/generationStore', () => ({
@@ -136,6 +140,11 @@ describe('usePresetManagement — templates [6.3]', () => {
     vi.clearAllMocks()
     mocks.getTemplateApi.mockResolvedValue(sampleTemplate)
     mocks.validateTemplateApi.mockResolvedValue(validValidation)
+    mocks.recordSuggestionUsedApi.mockResolvedValue({
+      source: 'custom',
+      id: 'tpl-1',
+      useCount: 1,
+    })
   })
 
   function renderManagement() {
@@ -168,6 +177,7 @@ describe('usePresetManagement — templates [6.3]', () => {
     expect(mocks.setAppliedTemplate).toHaveBeenCalledWith(sampleTemplate.id, sampleTemplate.name)
     expect(toast).toHaveBeenCalledWith('Template chargé avec succès', 'success')
     expect(result.current.isValidationModalOpen).toBe(false)
+    expect(mocks.recordSuggestionUsedApi).toHaveBeenCalledWith('custom', sampleTemplate.id)
   })
 
   it('ouvre le modal et n’applique pas si GDD obsolète', async () => {
@@ -183,6 +193,7 @@ describe('usePresetManagement — templates [6.3]', () => {
     expect(result.current.isValidationModalOpen).toBe(true)
     expect(result.current.validationEntityLabel).toBe('template')
     expect(result.current.validationResult).toEqual(obsoleteValidation)
+    expect(mocks.recordSuggestionUsedApi).not.toHaveBeenCalled()
   })
 
   it('Annuler laisse le formulaire inchangé', async () => {
@@ -225,6 +236,7 @@ describe('usePresetManagement — templates [6.3]', () => {
       'Template chargé avec 1 référence(s) obsolète(s) ignorée(s)',
       'warning',
     )
+    expect(mocks.recordSuggestionUsedApi).toHaveBeenCalledWith('custom', sampleTemplate.id)
   })
 
   it('toast erreur si GET 404', async () => {
@@ -232,13 +244,16 @@ describe('usePresetManagement — templates [6.3]', () => {
       response: { data: { detail: 'Template not found' } },
     })
     const { result } = renderManagement()
+    let loaded = true
 
     await act(async () => {
-      await result.current.handleTemplateLoaded(sampleTemplate)
+      loaded = await result.current.handleTemplateLoaded(sampleTemplate)
     })
 
+    expect(loaded).toBe(false)
     expect(mocks.validateTemplateApi).not.toHaveBeenCalled()
     expect(setUserInstructions).not.toHaveBeenCalled()
+    expect(mocks.recordSuggestionUsedApi).not.toHaveBeenCalled()
     await waitFor(() => {
       expect(toast).toHaveBeenCalledWith(
         expect.stringMatching(/Erreur lors du chargement du template/),
@@ -287,7 +302,7 @@ describe('usePresetManagement — templates [6.3]', () => {
     })
     const { result } = renderManagement()
 
-    let firstClick: Promise<void> | undefined
+    let firstClick: Promise<boolean> | undefined
     act(() => {
       firstClick = result.current.handleTemplateLoaded({
         ...sampleTemplate,
@@ -374,7 +389,7 @@ describe('usePresetManagement — templates [6.3]', () => {
       },
     }
 
-    let customClick: Promise<void> | undefined
+    let customClick: Promise<boolean> | undefined
     act(() => {
       customClick = result.current.handleTemplateLoaded(sampleTemplate)
     })
@@ -475,5 +490,60 @@ describe('usePresetManagement — templates [6.3]', () => {
 
     expect(mocks.setContextDroppingRulesOverlay).toHaveBeenCalledWith(rules)
     expect(mocks.setAppliedTemplate).toHaveBeenCalledWith('confrontation', 'Confrontation')
+  })
+
+  it('handleSuggestionLoaded marketplace applique sans GET /use', async () => {
+    mocks.recordSuggestionUsedApi.mockResolvedValue({
+      source: 'marketplace',
+      id: 'listing-1',
+      useCount: 1,
+    })
+    const { result } = renderManagement()
+    await act(async () => {
+      await result.current.handleSuggestionLoaded({
+        source: 'marketplace',
+        id: 'listing-1',
+        name: 'Listing public',
+        description: '',
+        category: 'Confrontation',
+        icon: '⚔️',
+        score: 40,
+        reasons: ['Correspond aux mots-clés du brief'],
+        configuration: {
+          characters: ['char-alpha'],
+          locations: [],
+          region: '',
+          sceneType: 'Generic',
+          instructions: 'Brief listing',
+        },
+      })
+    })
+    expect(mocks.getTemplateApi).not.toHaveBeenCalled()
+    expect(mocks.setAppliedTemplate).toHaveBeenCalledWith('listing-1', 'Listing public')
+    expect(mocks.recordSuggestionUsedApi).toHaveBeenCalledWith('marketplace', 'listing-1')
+    expect(mocks.copyMarketplaceListingApi).not.toHaveBeenCalled()
+  })
+
+  it('handleSuggestionLoaded custom 404 relance l’erreur', async () => {
+    mocks.getTemplateApi.mockRejectedValue({
+      response: { data: { detail: 'Template not found' } },
+    })
+    const { result } = renderManagement()
+    await act(async () => {
+      await expect(
+        result.current.handleSuggestionLoaded({
+          source: 'custom',
+          id: sampleTemplate.id,
+          name: sampleTemplate.name,
+          description: '',
+          category: 'Salutation',
+          icon: '👋',
+          score: 20,
+          reasons: [],
+          configuration: sampleTemplate.configuration,
+        }),
+      ).rejects.toThrow('load-failed')
+    })
+    expect(mocks.recordSuggestionUsedApi).not.toHaveBeenCalled()
   })
 })

@@ -315,3 +315,53 @@ class ABTestFeedbackRequest(BaseModel):
     generationId: str = Field(..., min_length=1)
     thumb: Literal["up", "down", "none"]
 
+
+class TemplateSuggestionRequest(BaseModel):
+    """Contexte de génération pour classer les templates (Story 6.9)."""
+
+    instructions: str = Field(default="", description="Brief / instructions utilisateur")
+    sceneType: str = Field(default="", description="Type de scène du formulaire")
+    characters: List[str] = Field(default_factory=list)
+    locations: List[str] = Field(default_factory=list)
+    rencontreInitialeByCharacter: dict[str, str] = Field(
+        default_factory=dict,
+        description="Section rencontre_initiale des fiches déjà chargées",
+    )
+
+
+class TemplateSuggestionItem(BaseModel):
+    """Candidat classé (custom, pré-built ou marketplace)."""
+
+    source: Literal["custom", "prebuilt", "marketplace"]
+    id: str
+    name: str
+    description: str = ""
+    category: str = "Général"
+    icon: str = "📋"
+    score: int = Field(..., ge=0, le=100)
+    reasons: List[str] = Field(default_factory=list)
+    configuration: TemplateConfiguration
+    visibility: Optional[Literal["owned", "shared", "legacy"]] = None
+    sceneTypeHint: Optional[str] = None
+    gddSystem: Optional[str] = None
+    objectif: Optional[str] = None
+    casUsage: Optional[str] = None
+    examples: Optional[List[str]] = None
+    addedAt: Optional[datetime] = None
+
+
+class TemplateSuggestionUsedRequest(BaseModel):
+    """Incrément du compteur perso après un Charger réussi."""
+
+    source: Literal["custom", "prebuilt", "marketplace"]
+    id: str = Field(..., min_length=1)
+
+
+class TemplateSuggestionUsedResponse(BaseModel):
+    """Nouvelle valeur du compteur perso."""
+
+    source: str
+    id: str
+    useCount: int
+
+

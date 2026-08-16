@@ -23,6 +23,9 @@ from services.repositories.sqlite.template_shares_repository import (
     TemplateShareEntry,
     TemplateSharesRepository,
 )
+from services.repositories.sqlite.template_suggestion_usage_repository import (
+    TemplateSuggestionUsageRepository,
+)
 from services.repositories.sqlite.shared_templates_repository import (
     SharedTemplateRow,
     SharedTemplatesRepository,
@@ -49,6 +52,7 @@ __all__ = [
     "DialogueSharesRepository",
     "TemplateShareEntry",
     "TemplateSharesRepository",
+    "TemplateSuggestionUsageRepository",
     "SharedTemplateRow",
     "SharedTemplatesRepository",
     "DialoguesIndexRepository",

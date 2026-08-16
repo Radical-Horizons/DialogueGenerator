@@ -654,6 +654,7 @@ export function GenerationPanel() {
             onPresetLoaded={presets.handlePresetLoaded}
             onTemplateLoaded={presets.handleTemplateLoaded}
             onPrebuiltLoaded={presets.handlePrebuiltLoaded}
+            onSuggestionLoaded={presets.handleSuggestionLoaded}
             getCurrentConfiguration={presets.getCurrentConfiguration}
             saveStatus={draft.saveStatus}
           />

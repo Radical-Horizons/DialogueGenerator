@@ -48,6 +48,9 @@ from services.repositories.sqlite import (
     UserRepository,
     UserSettingsRepository,
 )
+from services.repositories.sqlite.template_suggestion_usage_repository import (
+    TemplateSuggestionUsageRepository,
+)
 from services.audit_log_service import AuditLogService
 from services.collection_service import CollectionService
 from services.dialogue_index_service import DialogueIndexService
@@ -56,6 +59,7 @@ from services.batch_validation_service import BatchValidationService
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
 from services.template_sharing_service import TemplateSharingService
+from services.template_suggestion_service import TemplateSuggestionService
 from api.services.auth_service import AuthService
 from api.services.batch_validation_job_manager import BatchValidationJobManager
 from api.services.batch_node_generation_job_manager import BatchNodeGenerationJobManager
@@ -136,6 +140,10 @@ class ServiceContainer:
         self._document_persistence_service: Optional[DocumentPersistenceService] = None
         self._dialogue_sharing_service: Optional[DialogueSharingService] = None
         self._template_sharing_service: Optional[TemplateSharingService] = None
+        self._template_suggestion_usage_repository: Optional[
+            TemplateSuggestionUsageRepository
+        ] = None
+        self._template_suggestion_service: Optional[TemplateSuggestionService] = None
         self._auth_service: Optional[AuthService] = None
         self._database_initialization_failed = database_initialization_failed
         self._database_lock = threading.RLock()
@@ -402,6 +410,32 @@ class ServiceContainer:
                 )
                 logger.info("TemplateSharingService initialisé dans le container.")
             return self._template_sharing_service
+
+    def get_template_suggestion_usage_repository(
+        self,
+    ) -> TemplateSuggestionUsageRepository:
+        """Retourne le repository des compteurs d'usage suggestions."""
+        with self._database_lock:
+            if self._template_suggestion_usage_repository is None:
+                self._template_suggestion_usage_repository = (
+                    TemplateSuggestionUsageRepository(self.get_database_connection())
+                )
+                logger.info(
+                    "TemplateSuggestionUsageRepository initialisé dans le container."
+                )
+            return self._template_suggestion_usage_repository
+
+    def get_template_suggestion_service(self) -> TemplateSuggestionService:
+        """Retourne le service de suggestions de templates."""
+        with self._database_lock:
+            if self._template_suggestion_service is None:
+                self._template_suggestion_service = TemplateSuggestionService(
+                    usage_repository=self.get_template_suggestion_usage_repository(),
+                    sharing_service=self.get_template_sharing_service(),
+                    marketplace_service=self.get_template_marketplace_service(),
+                )
+                logger.info("TemplateSuggestionService initialisé dans le container.")
+            return self._template_suggestion_service
 
     def get_auth_service(self) -> AuthService:
         """Retourne le service d'authentification avec son repository injecté."""

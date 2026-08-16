@@ -294,3 +294,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-6-8-partager-templates-avec-membres-équipe-fr62.md`
   summary: POST /ab-test résout encore les UUID custom sans ACL 6.8 (guest peut lancer un A/B sur le live d’un autre writer).
   evidence: Revue 6.8 — brancher require_readable casse les tests 6.7 (guest A/B sur templates d’un autre compte, 400 N invalide avant 404 UUID). Ask First : scoping 6.6/6.7 par user. Never : ne pas casser 6.7.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-9-suggérer-templates-basés-sur-scénario-dialogue-fr63.md`
+  summary: Pagination GDD page 1 / alias de noms — un PNJ hors de la première page n’a pas sa fiche dans `contextStore.characters` donc pas de `rencontre_initiale`.
+  evidence: Revue 6.9 — 3B = fiches déjà dans le store ; le trou est préexistant ContextSelector (`setElementLists`), pas un bug du scorer.

@@ -58,6 +58,7 @@ from services.repositories.sqlite import (
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
 from services.template_sharing_service import TemplateSharingService
+from services.template_suggestion_service import TemplateSuggestionService
 from services.collection_service import CollectionService
 from services.dialogue_index_service import DialogueIndexService
 from services.dialogue_metadata_service import DialogueMetadataService
@@ -130,6 +131,11 @@ def get_dialogue_sharing_service(request: Request) -> DialogueSharingService:
 def get_template_sharing_service(request: Request) -> TemplateSharingService:
     """Retourne le service de partage d'équipe des templates custom."""
     return get_service_container(request).get_template_sharing_service()
+
+
+def get_template_suggestion_service(request: Request) -> TemplateSuggestionService:
+    """Retourne le service de suggestions de templates (Story 6.9)."""
+    return get_service_container(request).get_template_suggestion_service()
 
 
 def get_collection_service(request: Request) -> CollectionService:

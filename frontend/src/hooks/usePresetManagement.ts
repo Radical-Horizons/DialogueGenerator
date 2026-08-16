@@ -4,7 +4,7 @@
  * Extrait la logique de gestion des presets depuis GenerationPanel.
  */
 import { useState, useCallback, useRef } from 'react'
-import { getTemplateApi, validateTemplateApi } from '../api/templates'
+import { getTemplateApi, validateTemplateApi, recordSuggestionUsedApi } from '../api/templates'
 import { useGenerationStore } from '../store/generationStore'
 import { usePresetStore } from '../store/presetStore'
 import { useContextStore } from '../store/contextStore'
@@ -13,8 +13,45 @@ import { preparePresetForApply } from '../utils/presetUtils'
 import { isLlmProvider, prebuiltToTemplate, templateToPreset } from '../utils/templateApply'
 import { getErrorMessage } from '../types/errors'
 import type { Preset, PresetConfiguration, PresetValidationResult } from '../types/preset'
-import type { PrebuiltTemplate, Template } from '../types/template'
+import type { PrebuiltTemplate, Template, TemplateSuggestion } from '../types/template'
 import type { ReasoningEffort } from '../types/api'
+
+function recordTemplateUsed(source: TemplateSuggestion['source'], id: string): void {
+  void Promise.resolve(recordSuggestionUsedApi(source, id)).then(
+    () => undefined,
+    () => undefined,
+  )
+}
+
+function suggestionToTemplate(item: TemplateSuggestion): Template {
+  return {
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    category: item.category,
+    icon: item.icon,
+    metadata: { created: '', modified: '' },
+    configuration: item.configuration,
+    visibility: item.visibility ?? null,
+  }
+}
+
+function suggestionToPrebuilt(item: TemplateSuggestion): PrebuiltTemplate {
+  return {
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    category: item.category,
+    icon: item.icon,
+    gddSystem: item.gddSystem ?? '',
+    sceneTypeHint: item.sceneTypeHint ?? '',
+    objectif: item.objectif ?? '',
+    casUsage: item.casUsage ?? '',
+    examples: item.examples ?? [],
+    addedAt: item.addedAt ?? new Date().toISOString(),
+    configuration: item.configuration,
+  }
+}
 
 export type ValidationEntityLabel = 'preset' | 'template'
 
@@ -43,9 +80,11 @@ export interface UsePresetManagementReturn {
   /** Charger un preset avec validation */
   handlePresetLoaded: (preset: Preset) => Promise<void>
   /** Charger un template custom (validate + applyPreset + llmProvider) */
-  handleTemplateLoaded: (template: Template) => Promise<void>
+  handleTemplateLoaded: (template: Template) => Promise<boolean>
   /** Charger une fiche pré-built (sans GET UUID custom) */
   handlePrebuiltLoaded: (prebuilt: PrebuiltTemplate) => void
+  /** Appliquer une suggestion (custom / pré-built / marketplace sans copie) */
+  handleSuggestionLoaded: (item: TemplateSuggestion) => Promise<void>
   /** Appliquer un preset directement */
   applyPreset: (preset: Preset) => void
   /** Obtenir la configuration actuelle pour sauvegarde */
@@ -246,13 +285,13 @@ export function usePresetManagement(
     }
   }, [applyPreset, toast, clearValidationState])
 
-  const handleTemplateLoaded = useCallback(async (template: Template) => {
+  const handleTemplateLoaded = useCallback(async (template: Template): Promise<boolean> => {
     const seq = ++templateLoadSeqRef.current
     try {
       const fresh = await getTemplateApi(template.id)
-      if (seq !== templateLoadSeqRef.current) return
+      if (seq !== templateLoadSeqRef.current) return false
       const nextValidation = await validateTemplateApi(fresh.id)
-      if (seq !== templateLoadSeqRef.current) return
+      if (seq !== templateLoadSeqRef.current) return false
 
       if (!nextValidation.valid) {
         setValidationResult(nextValidation)
@@ -262,12 +301,15 @@ export function usePresetManagement(
       } else {
         clearValidationState()
         applyTemplateSnapshot(fresh, nextValidation)
+        recordTemplateUsed('custom', fresh.id)
         notifyApplied('Template', nextValidation, toast)
       }
+      return true
     } catch (err) {
-      if (seq !== templateLoadSeqRef.current) return
+      if (seq !== templateLoadSeqRef.current) return false
       const message = getErrorMessage(err)
       toast(`Erreur lors du chargement du template: ${message}`, 'error')
+      return false
     }
   }, [applyTemplateSnapshot, toast, clearValidationState])
 
@@ -280,12 +322,38 @@ export function usePresetManagement(
     }
     clearValidationState()
     applyTemplateSnapshot(prebuiltToTemplate(prebuilt), emptyValidation, prebuilt.id)
+    recordTemplateUsed('prebuilt', prebuilt.id)
     notifyApplied('Template', emptyValidation, toast)
   }, [applyTemplateSnapshot, toast, clearValidationState])
+
+  const handleSuggestionLoaded = useCallback(async (item: TemplateSuggestion) => {
+    if (item.source === 'custom') {
+      const loaded = await handleTemplateLoaded(suggestionToTemplate(item))
+      if (!loaded) {
+        throw new Error('load-failed')
+      }
+      return
+    }
+    if (item.source === 'prebuilt') {
+      handlePrebuiltLoaded(suggestionToPrebuilt(item))
+      return
+    }
+    templateLoadSeqRef.current += 1
+    const emptyValidation: PresetValidationResult = {
+      valid: true,
+      warnings: [],
+      obsoleteRefs: [],
+    }
+    clearValidationState()
+    applyTemplateSnapshot(suggestionToTemplate(item), emptyValidation, item.id)
+    recordTemplateUsed('marketplace', item.id)
+    notifyApplied('Template', emptyValidation, toast)
+  }, [applyTemplateSnapshot, toast, clearValidationState, handleTemplateLoaded, handlePrebuiltLoaded])
   
   const handleValidationConfirm = useCallback(() => {
     if (pendingTemplate && validationResult) {
       applyTemplateSnapshot(pendingTemplate, validationResult)
+      recordTemplateUsed('custom', pendingTemplate.id)
       notifyApplied('Template', validationResult, toast)
     } else if (pendingPreset && validationResult) {
       applyPreset(preparePresetForApply(pendingPreset, validationResult))
@@ -347,6 +415,7 @@ export function usePresetManagement(
     handlePresetLoaded,
     handleTemplateLoaded,
     handlePrebuiltLoaded,
+    handleSuggestionLoaded,
     applyPreset,
     getCurrentConfiguration,
     isValidationModalOpen,

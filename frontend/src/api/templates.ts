@@ -13,6 +13,9 @@ import type {
   Template,
   TemplateCreate,
   TemplateShare,
+  TemplateSuggestion,
+  TemplateSuggestionRequest,
+  TemplateSuggestionUsedResponse,
   TemplateUpdate,
   TemplateWriteResponse,
 } from '../types/template'
@@ -248,6 +251,33 @@ export async function patchAbTestFeedbackApi(
 export async function rerunAbTestApi(testId: string): Promise<ABTestCreateResponse> {
   const { data } = await apiClient.post<ABTestCreateResponse>(
     `/api/v1/templates/ab-test/${testId}/rerun`,
+  )
+  return data
+}
+
+/**
+ * Classe les templates lisibles selon le scénario (déterministe).
+ */
+export async function suggestTemplatesApi(
+  body: TemplateSuggestionRequest,
+): Promise<TemplateSuggestion[]> {
+  const { data } = await apiClient.post<TemplateSuggestion[]>(
+    '/api/v1/templates/suggestions',
+    body,
+  )
+  return data
+}
+
+/**
+ * Incrémente le compteur perso après un Charger réussi.
+ */
+export async function recordSuggestionUsedApi(
+  source: TemplateSuggestion['source'],
+  id: string,
+): Promise<TemplateSuggestionUsedResponse> {
+  const { data } = await apiClient.post<TemplateSuggestionUsedResponse>(
+    '/api/v1/templates/suggestions/used',
+    { source, id },
   )
   return data
 }
