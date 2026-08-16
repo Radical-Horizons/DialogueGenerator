@@ -1,5 +1,60 @@
 [
   {
+    "Nom": "Lardre",
+    "values": {
+      "Catégorie": "Autre",
+      "Notes": "Nom hérité sans étymologie attestée : la masse pré-Agénèse précède les maisons qui l'ont nommée. Le registre emploie « Diadème de Lardre » ; le terrain dit « Lardre ». Forme courte, différente des toponymes descriptifs locaux ; aucun doublon exact trouvé dans la recherche de l'espace de travail.",
+      "Région d'usage": "15f02d22-65fb-4afb-b80e-68925f6f0f3b",
+      "Signification": "Toponyme opaque d'un diadème rocheux des Marches Couchées ; le registre emploie « Diadème de Lardre », le terrain « Lardre »."
+    },
+    "sections": {},
+    "notion_page_id": "8d7825b2-2ac2-4b3c-9751-9e4ca0cd943a"
+  },
+  {
+    "Nom": "Yuānjīng",
+    "values": {
+      "Catégorie": "Autre",
+      "Notes": "Nom propre du lithomorphe hydrogène de Quanlu. Épithète populaire : la Dévorante. Semi-érodé : le sens se devine mais la forme est déformée.",
+      "Région d'usage": "31ee8035-8e36-4941-a229-f6742e8954e1",
+      "Signification": "Semi-érodé : abîme-puits (渊井, déformé)"
+    },
+    "sections": {},
+    "notion_page_id": "68962f29-c050-4c7a-89d2-d8cb303b7062"
+  },
+  {
+    "Nom": "Xuǎnghuá",
+    "values": {
+      "Catégorie": "Autre",
+      "Notes": "Nom propre du lithomorphe luminescent de Mingze. Épithète populaire : l'Astre de Mingze. Semi-érodé : le sens se devine mais la forme est déformée.",
+      "Région d'usage": "31ee8035-8e36-4941-a229-f6742e8954e1",
+      "Signification": "Semi-érodé : éclat-splendeur (烜华, déformé)"
+    },
+    "sections": {},
+    "notion_page_id": "a5c050a0-54d9-4d93-8dc7-57581ac50dbf"
+  },
+  {
+    "Nom": "Kuīlún",
+    "values": {
+      "Catégorie": "Autre",
+      "Notes": "Nom propre du lithomorphe thermogène de Lutai. Épithète populaire : l'Ardeur infinie. Nom le plus ancien de l'ensemble, opaque par érosion.",
+      "Région d'usage": "31ee8035-8e36-4941-a229-f6742e8954e1",
+      "Signification": "Sens perdu (nom opaque, hérité d'une langue morte)"
+    },
+    "sections": {},
+    "notion_page_id": "54d63616-d141-4941-b8d6-8182f3e83b6b"
+  },
+  {
+    "Nom": "Pīshān",
+    "values": {
+      "Catégorie": "Autre",
+      "Notes": "Nom propre du lithomorphe traceur de Sheyan. Épithète populaire : la Broyeuse. Transparent assumé : nom donné par les premiers témoins qui virent la créature fendre la montagne.",
+      "Région d'usage": "31ee8035-8e36-4941-a229-f6742e8954e1",
+      "Signification": "Transparent assumé : fendre-la-montagne (劈山)"
+    },
+    "sections": {},
+    "notion_page_id": "2125a273-c1ae-4962-ab43-1483816a3cbb"
+  },
+  {
     "Nom": "Kandar",
     "values": {
       "Catégorie": "Nom de clan",

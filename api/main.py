@@ -142,7 +142,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                     raise
             _startup_timer.mark("service_container_created")
 
-            context_builder = container.get_context_builder()
+            # Déporté en thread : get_context_builder() charge le GDD depuis disque
+            # (load_gdd_files(), bloquant) au premier accès — ne doit pas s'exécuter
+            # directement sur la boucle event du lifespan ASGI (déclencherait le
+            # garde-fou runtime de ContextBuilder en plus de bloquer le démarrage).
+            context_builder = await asyncio.to_thread(container.get_context_builder)
             _startup_timer.mark("context_builder_gdd_loaded")
 
             config_service = container.get_config_service()

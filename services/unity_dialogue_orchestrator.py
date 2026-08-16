@@ -199,11 +199,15 @@ class UnityDialogueOrchestrator:
                 self.skill_service, self.trait_service
             )
             
-            # 3. Construire le contexte GDD (JSON obligatoire, plus de fallback)
-            if request_data.previous_dialogue_preview:
-                context_builder.set_previous_dialogue_context(request_data.previous_dialogue_preview)
-            
-            structured_context = context_builder.build_context_json(
+            # 3. Construire le contexte GDD (JSON obligatoire, plus de fallback).
+            # Set du dialogue précédent + build déportés ensemble dans le même
+            # thread worker (build_context_json_with_previous_dialogue) : poser
+            # set_previous_dialogue_context() ici sur la boucle event puis attendre
+            # le build en thread séparé laisserait une fenêtre où un autre thread
+            # concurrent pourrait écraser le dialogue précédent avant la lecture.
+            structured_context = await asyncio.to_thread(
+                context_builder.build_context_json_with_previous_dialogue,
+                previous_dialogue_preview=request_data.previous_dialogue_preview,
                 selected_elements=context_selections_dict,
                 scene_instruction=scene_instruction,
                 field_configs=None,

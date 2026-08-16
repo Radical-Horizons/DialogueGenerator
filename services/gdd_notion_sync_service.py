@@ -1079,33 +1079,37 @@ class GddNotionSyncService:
                 "last_edited_time": full_page.get("last_edited_time"),
             }
 
-        manifest = load_manifest(self._manifest_path)
-        edited = str(full_page.get("last_edited_time") or "")
-        if edited:
-            manifest.set_edited(page_id, edited)
-            save_manifest(self._manifest_path, manifest)
+        def _finalize() -> Dict[str, Any]:
+            """Manifeste + historique + rechargement GDD, déportés (bloquant via ContextBuilder.load_gdd_files)."""
+            manifest = load_manifest(self._manifest_path)
+            edited = str(full_page.get("last_edited_time") or "")
+            if edited:
+                manifest.set_edited(page_id, edited)
+                save_manifest(self._manifest_path, manifest)
 
-        self._append_entity_history(
-            cat_file,
-            shard_list_key,
-            use_shards,
-            [(pid_str, rec_out)],
-        )
-        self._clear_gdd_file_cache_and_notify_context()
-        canonical = str(rec_out.get("Nom") or resolution.resolved_name or query)
-        log_sync_event(
-            f"Sync entité {cat_file}: {canonical} ({page_id})",
-            request_id=request_id,
-        )
-        return {
-            "success": True,
-            "message": f"{canonical} synchronisé depuis Notion.",
-            "query_name": query,
-            "resolved_name": canonical,
-            "notion_page_id": page_id,
-            "gdd_relative_path": gdd_rel,
-            "last_edited_time": full_page.get("last_edited_time"),
-        }
+            self._append_entity_history(
+                cat_file,
+                shard_list_key,
+                use_shards,
+                [(pid_str, rec_out)],
+            )
+            self._clear_gdd_file_cache_and_notify_context()
+            canonical = str(rec_out.get("Nom") or resolution.resolved_name or query)
+            log_sync_event(
+                f"Sync entité {cat_file}: {canonical} ({page_id})",
+                request_id=request_id,
+            )
+            return {
+                "success": True,
+                "message": f"{canonical} synchronisé depuis Notion.",
+                "query_name": query,
+                "resolved_name": canonical,
+                "notion_page_id": page_id,
+                "gdd_relative_path": gdd_rel,
+                "last_edited_time": full_page.get("last_edited_time"),
+            }
+
+        return await asyncio.to_thread(_finalize)
 
     async def run_sync(
         self,
@@ -1335,120 +1339,125 @@ class GddNotionSyncService:
         request_id: Optional[str],
     ) -> GddNotionSyncResult:
         """Applique le staging conservé après erreurs partielles (confirmation utilisateur)."""
-        if not force_full:
-            return GddNotionSyncResult(
-                success=False,
-                message="apply_staging_despite_errors=true nécessite full=true (sync complète).",
+
+        def _run() -> GddNotionSyncResult:
+            """Corps synchrone déporté : promotion staging + I/O disque (aucun ``await`` d'origine)."""
+            if not force_full:
+                return GddNotionSyncResult(
+                    success=False,
+                    message="apply_staging_despite_errors=true nécessite full=true (sync complète).",
+                )
+            if run_scope_category_files:
+                return GddNotionSyncResult(
+                    success=False,
+                    message=(
+                        "apply_staging_despite_errors est incompatible avec le paramètre "
+                        "category_file (périmètre restreint)."
+                    ),
+                )
+            if resume or fresh:
+                return GddNotionSyncResult(
+                    success=False,
+                    message=(
+                        "apply_staging_despite_errors est incompatible avec resume et fresh."
+                    ),
+                )
+            ok_resume, vmsg = validate_checkpoint_for_resume(
+                self._gdd_categories_path,
+                self._sync_checkpoint_dir,
+                eligible_category_files=eligible_cf,
+                sources_fingerprint=fingerprint,
             )
-        if run_scope_category_files:
-            return GddNotionSyncResult(
-                success=False,
-                message=(
-                    "apply_staging_despite_errors est incompatible avec le paramètre "
-                    "category_file (périmètre restreint)."
-                ),
+            if not ok_resume:
+                return GddNotionSyncResult(
+                    success=False,
+                    message=f"Application du miroir impossible — {vmsg}",
+                )
+            st_chk = load_checkpoint_state(self._sync_checkpoint_dir)
+            if st_chk is None or not st_chk.mirror_promotion_pending:
+                return GddNotionSyncResult(
+                    success=False,
+                    message=(
+                        "Aucune promotion miroir en attente. Si une sync complète s'est arrêtée "
+                        "sur des erreurs, son checkpoint doit encore être valide ; sinon relancez "
+                        "une sync complète ou utilisez « Reprendre » pour une sync inachevée."
+                    ),
+                )
+            staging_apply = staging_run_path(
+                self._gdd_categories_path, st_chk.staging_run_name
             )
-        if resume or fresh:
-            return GddNotionSyncResult(
-                success=False,
-                message=(
-                    "apply_staging_despite_errors est incompatible avec resume et fresh."
-                ),
+            if not staging_apply.is_dir():
+                return GddNotionSyncResult(
+                    success=False,
+                    message="Application du miroir impossible — dossier staging introuvable.",
+                )
+            _, manifest_sidecar = checkpoint_paths(self._sync_checkpoint_dir)
+            manifest_run = load_run_manifest(manifest_sidecar)
+            sync_targets_apply = collect_sync_targets(
+                self._gdd_categories_path, eligible_cf
             )
-        ok_resume, vmsg = validate_checkpoint_for_resume(
-            self._gdd_categories_path,
-            self._sync_checkpoint_dir,
-            eligible_category_files=eligible_cf,
-            sources_fingerprint=fingerprint,
-        )
-        if not ok_resume:
-            return GddNotionSyncResult(
-                success=False,
-                message=f"Application du miroir impossible — {vmsg}",
+            self._sync_progress_update(
+                active=True,
+                started_at=datetime.now(timezone.utc).isoformat(),
+                force_full=True,
+                mirror_rebuild=True,
+                phase="promoting",
+                sources_total=len(eligible_cf),
+                sources_completed=len(eligible_cf),
+                current_source_index=len(eligible_cf),
+                current_category_file="",
+                pages_total_known=0,
+                pages_processed=0,
+                pages_in_current_source=0,
+                current_page_in_source=0,
+                current_page_id_short="",
+                message="Promotion du staging (confirmation erreurs partielles)…",
+                paused=False,
             )
-        st_chk = load_checkpoint_state(self._sync_checkpoint_dir)
-        if st_chk is None or not st_chk.mirror_promotion_pending:
-            return GddNotionSyncResult(
-                success=False,
-                message=(
-                    "Aucune promotion miroir en attente. Si une sync complète s'est arrêtée "
-                    "sur des erreurs, son checkpoint doit encore être valide ; sinon relancez "
-                    "une sync complète ou utilisez « Reprendre » pour une sync inachevée."
-                ),
+            manifest_run.last_full_sync_at = datetime.now(timezone.utc).isoformat()
+            save_manifest(self._manifest_path, manifest_run)
+            promote_staging_to_live(
+                self._gdd_categories_path,
+                staging_apply,
+                sync_targets_apply,
+                allow_missing_staged=True,
             )
-        staging_apply = staging_run_path(
-            self._gdd_categories_path, st_chk.staging_run_name
-        )
-        if not staging_apply.is_dir():
-            return GddNotionSyncResult(
-                success=False,
-                message="Application du miroir impossible — dossier staging introuvable.",
+            prune_included: List[str] = list(persisted_included_list)
+            removed_live = remove_excluded_database_sources_from_live(
+                self._gdd_categories_path,
+                sources,
+                prune_included,
             )
-        _, manifest_sidecar = checkpoint_paths(self._sync_checkpoint_dir)
-        manifest_run = load_run_manifest(manifest_sidecar)
-        sync_targets_apply = collect_sync_targets(
-            self._gdd_categories_path, eligible_cf
-        )
-        self._sync_progress_update(
-            active=True,
-            started_at=datetime.now(timezone.utc).isoformat(),
-            force_full=True,
-            mirror_rebuild=True,
-            phase="promoting",
-            sources_total=len(eligible_cf),
-            sources_completed=len(eligible_cf),
-            current_source_index=len(eligible_cf),
-            current_category_file="",
-            pages_total_known=0,
-            pages_processed=0,
-            pages_in_current_source=0,
-            current_page_in_source=0,
-            current_page_id_short="",
-            message="Promotion du staging (confirmation erreurs partielles)…",
-            paused=False,
-        )
-        manifest_run.last_full_sync_at = datetime.now(timezone.utc).isoformat()
-        save_manifest(self._manifest_path, manifest_run)
-        promote_staging_to_live(
-            self._gdd_categories_path,
-            staging_apply,
-            sync_targets_apply,
-            allow_missing_staged=True,
-        )
-        prune_included: List[str] = list(persisted_included_list)
-        removed_live = remove_excluded_database_sources_from_live(
-            self._gdd_categories_path,
-            sources,
-            prune_included,
-        )
-        for rel in removed_live:
+            for rel in removed_live:
+                log_sync_event(
+                    f"Périmètre restreint (sauvegardé) : supprimé du disque local — {rel}",
+                    request_id=request_id,
+                )
+            clear_checkpoint_files(self._sync_checkpoint_dir)
+            prune_staging_runs_keep_only(self._gdd_categories_path, None)
             log_sync_event(
-                f"Périmètre restreint (sauvegardé) : supprimé du disque local — {rel}",
+                "Miroir appliqué après confirmation utilisateur (reliquats ignorés).",
                 request_id=request_id,
             )
-        clear_checkpoint_files(self._sync_checkpoint_dir)
-        prune_staging_runs_keep_only(self._gdd_categories_path, None)
-        log_sync_event(
-            "Miroir appliqué après confirmation utilisateur (reliquats ignorés).",
-            request_id=request_id,
-        )
-        self._clear_gdd_file_cache_and_notify_context()
-        if self._after_gdd_disk_mutation is not None:
-            self._after_gdd_disk_mutation()
-        self._sync_progress_clear()
-        return GddNotionSyncResult(
-            success=True,
-            message=(
-                "Miroir appliqué avec reliquats : les bases sans artefact dans le staging "
-                "n'ont pas été modifiées sur disque. Vérifiez les erreurs du dernier run "
-                "dans le statut ou les logs."
-            ),
-            updated_entities=int(st_chk.updated_entities),
-            partial_errors=[],
-            last_archive_relative=st_chk.archive_rel or None,
-            mirror_rebuild_used=True,
-            mirror_promotion_pending=False,
-        )
+            self._clear_gdd_file_cache_and_notify_context()
+            if self._after_gdd_disk_mutation is not None:
+                self._after_gdd_disk_mutation()
+            self._sync_progress_clear()
+            return GddNotionSyncResult(
+                success=True,
+                message=(
+                    "Miroir appliqué avec reliquats : les bases sans artefact dans le staging "
+                    "n'ont pas été modifiées sur disque. Vérifiez les erreurs du dernier run "
+                    "dans le statut ou les logs."
+                ),
+                updated_entities=int(st_chk.updated_entities),
+                partial_errors=[],
+                last_archive_relative=st_chk.archive_rel or None,
+                mirror_rebuild_used=True,
+                mirror_promotion_pending=False,
+            )
+
+        return await asyncio.to_thread(_run)
 
     async def _sync_body(
         self,
@@ -1544,7 +1553,8 @@ class GddNotionSyncService:
             sources_completed=len(scope.eligible),
         )
 
-        return self._promote_and_finalize(
+        return await asyncio.to_thread(
+            self._promote_and_finalize,
             scope,
             state,
             force_full=force_full,
@@ -2034,46 +2044,50 @@ class GddNotionSyncService:
                 state.pages_processed_count += 1
                 self._sync_progress_update(pages_processed=state.pages_processed_count)
 
-        if manifest_touched and not state.defer_manifest_persist:
-            save_manifest(self._manifest_path, state.manifest)
-        if not written_page_records:
+        def _run() -> None:
+            """Écriture disque + historique entité, déportées (I/O bloquant, aucun ``await``)."""
+            if manifest_touched and not state.defer_manifest_persist:
+                save_manifest(self._manifest_path, state.manifest)
+            if not written_page_records:
+                self._sync_progress_update(sources_completed=index)
+                self._save_checkpoint_after_source(cat_file, state)
+                return
+
+            try:
+                if use_shards and shard_list_key is not None:
+                    shard_dir = state.out_root / shard_list_key
+                    shard_dir.mkdir(parents=True, exist_ok=True)
+                    for pid_str, rec_out in written_page_records:
+                        write_gdd_shard_atomic(shard_dir, rec_out, pid_str)
+                else:
+                    if out_path is None:
+                        scope.partial.append(f"{cat_file}: écriture — chemin monolithe indéfini")
+                        self._sync_progress_update(sources_completed=index)
+                        return
+                    new_recs_only = [r for _pid, r in written_page_records]
+                    if compact_table and force_full:
+                        write_json_atomic(out_path, new_recs_only)
+                    else:
+                        merged = merge_records_by_nom(existing, new_recs_only)
+                        write_json_atomic(out_path, merged)
+                self._append_entity_history(
+                    cat_file, shard_list_key, use_shards, written_page_records
+                )
+            except _SYNC_RECOVERABLE as exc:
+                scope.partial.append(f"{cat_file}: écriture — {_format_partial_error_detail(exc)}")
+                self._sync_progress_update(sources_completed=index)
+                return
+
+            if not state.defer_manifest_persist:
+                save_manifest(self._manifest_path, state.manifest)
+            log_sync_event(
+                f"Écrit {cat_file}: {len(written_page_records)} entité(s) traitée(s)",
+                request_id=request_id,
+            )
             self._sync_progress_update(sources_completed=index)
             self._save_checkpoint_after_source(cat_file, state)
-            return
 
-        try:
-            if use_shards and shard_list_key is not None:
-                shard_dir = state.out_root / shard_list_key
-                shard_dir.mkdir(parents=True, exist_ok=True)
-                for pid_str, rec_out in written_page_records:
-                    write_gdd_shard_atomic(shard_dir, rec_out, pid_str)
-            else:
-                if out_path is None:
-                    scope.partial.append(f"{cat_file}: écriture — chemin monolithe indéfini")
-                    self._sync_progress_update(sources_completed=index)
-                    return
-                new_recs_only = [r for _pid, r in written_page_records]
-                if compact_table and force_full:
-                    write_json_atomic(out_path, new_recs_only)
-                else:
-                    merged = merge_records_by_nom(existing, new_recs_only)
-                    write_json_atomic(out_path, merged)
-            self._append_entity_history(
-                cat_file, shard_list_key, use_shards, written_page_records
-            )
-        except _SYNC_RECOVERABLE as exc:
-            scope.partial.append(f"{cat_file}: écriture — {_format_partial_error_detail(exc)}")
-            self._sync_progress_update(sources_completed=index)
-            return
-
-        if not state.defer_manifest_persist:
-            save_manifest(self._manifest_path, state.manifest)
-        log_sync_event(
-            f"Écrit {cat_file}: {len(written_page_records)} entité(s) traitée(s)",
-            request_id=request_id,
-        )
-        self._sync_progress_update(sources_completed=index)
-        self._save_checkpoint_after_source(cat_file, state)
+        await asyncio.to_thread(_run)
 
     def _promote_and_finalize(
         self,
