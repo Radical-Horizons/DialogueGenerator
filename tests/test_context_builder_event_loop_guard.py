@@ -21,7 +21,7 @@ from typing import Iterator
 
 import pytest
 
-from core.context import context_builder as context_builder_module
+import core.context.context_builder as context_builder_module
 
 
 @pytest.fixture(autouse=True)
