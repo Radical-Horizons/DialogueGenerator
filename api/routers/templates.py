@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from api.dependencies import get_template_service
 from api.routers.auth import get_current_user
+from api.schemas.preset import PresetValidationResult
 from api.schemas.template import (
     Template,
     TemplateCreate,
@@ -79,6 +80,38 @@ def create_template(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error creating template",
+        ) from exc
+
+
+@router.get("/{template_id}/validate", response_model=PresetValidationResult)
+def validate_template(
+    template_id: str,
+    template_service: TemplateService = Depends(get_template_service),
+) -> PresetValidationResult:
+    """Valide les références GDD d'un template (sans muter le JSON).
+
+    Raises:
+        404: Template absent.
+    """
+    try:
+        result = template_service.validate_template_references(template_id)
+        if not result.valid:
+            logger.warning(
+                "Template %s has %s obsolete references",
+                template_id,
+                len(result.obsoleteRefs),
+            )
+        return result
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Template not found",
+        ) from exc
+    except Exception as exc:
+        logger.exception("Erreur validation template")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error validating template",
         ) from exc
 
 

@@ -88,22 +88,64 @@ export function preparePresetForApply(
   return prepared
 }
 
+function dropObsolete(values: string[], obsoleteRefs: string[]): string[] {
+  return values.filter((value) => !obsoleteRefs.includes(value))
+}
+
+function filterContextSelections(
+  selections: ContextSelection,
+  obsoleteRefs: string[],
+): ContextSelection {
+  const keys = [
+    'characters_full',
+    'characters_excerpt',
+    'locations_full',
+    'locations_excerpt',
+    'items_full',
+    'items_excerpt',
+    'species_full',
+    'species_excerpt',
+    'communities_full',
+    'communities_excerpt',
+  ] as const
+  const next = { ...selections }
+  for (const key of keys) {
+    const raw = next[key]
+    if (Array.isArray(raw)) {
+      next[key] = dropObsolete(raw, obsoleteRefs)
+    }
+  }
+  return next
+}
+
 /**
  * Filtre les références obsolètes d'un preset.
- * 
+ *
  * Supprime les personnages et lieux obsolètes de la configuration du preset
- * tout en préservant les autres champs (region, subLocation, instructions, etc.).
- * 
+ * (listes plates + snapshot ContextSelector) tout en préservant le reste.
+ *
  * @param preset - Preset à filtrer
  * @param obsoleteRefs - Liste des références obsolètes (noms de personnages/lieux)
  * @returns Preset filtré avec références obsolètes supprimées
  */
 export function filterObsoleteReferences(preset: Preset, obsoleteRefs: string[]): Preset {
-  const filteredPreset: Preset = { ...preset }
-  filteredPreset.configuration = {
-    ...preset.configuration,
-    characters: preset.configuration.characters.filter(c => !obsoleteRefs.includes(c)),
-    locations: preset.configuration.locations.filter(l => !obsoleteRefs.includes(l))
+  const config = { ...preset.configuration }
+  config.characters = dropObsolete(config.characters ?? [], obsoleteRefs)
+  config.locations = dropObsolete(config.locations ?? [], obsoleteRefs)
+  if (config.region && obsoleteRefs.includes(config.region)) {
+    config.region = ''
   }
-  return filteredPreset
+  if (config.subLocation && obsoleteRefs.includes(config.subLocation)) {
+    config.subLocation = undefined
+  }
+  if (config.selectedRegion && obsoleteRefs.includes(config.selectedRegion)) {
+    config.selectedRegion = null
+  }
+  if (config.selectedSubLocations) {
+    config.selectedSubLocations = dropObsolete(config.selectedSubLocations, obsoleteRefs)
+  }
+  if (config.contextSelections) {
+    config.contextSelections = filterContextSelections(config.contextSelections, obsoleteRefs)
+  }
+  return { ...preset, configuration: config }
 }

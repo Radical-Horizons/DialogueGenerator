@@ -26,6 +26,8 @@ export interface GenerationPanelModalsProps {
   onValidationClose: () => void
   /** Callback pour confirmer validation preset */
   onValidationConfirm: () => void
+  /** Libellé modal (preset par défaut) */
+  validationEntityLabel?: 'preset' | 'template'
 }
 
 /**
@@ -42,6 +44,7 @@ export function GenerationPanelModals({
   onBudgetBlockClose,
   onValidationClose,
   onValidationConfirm,
+  validationEntityLabel = 'preset',
 }: GenerationPanelModalsProps) {
   return (
     <>
@@ -64,6 +67,7 @@ export function GenerationPanelModals({
           validationResult={validationResult}
           onClose={onValidationClose}
           onConfirm={onValidationConfirm}
+          entityLabel={validationEntityLabel}
         />
       )}
       

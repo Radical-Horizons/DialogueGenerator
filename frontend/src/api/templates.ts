@@ -8,6 +8,7 @@ import type {
   TemplateUpdate,
   TemplateWriteResponse,
 } from '../types/template'
+import type { PresetValidationResult } from '../types/preset'
 
 /**
  * Liste tous les templates custom.
@@ -63,4 +64,17 @@ export async function updateTemplateApi(
  */
 export async function deleteTemplateApi(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/templates/${id}`)
+}
+
+/**
+ * Valide les références GDD d’un template (sans muter le JSON).
+ *
+ * @param id - UUID du template
+ * @returns Résultat de validation
+ */
+export async function validateTemplateApi(id: string): Promise<PresetValidationResult> {
+  const { data } = await apiClient.get<PresetValidationResult>(
+    `/api/v1/templates/${id}/validate`,
+  )
+  return data
 }

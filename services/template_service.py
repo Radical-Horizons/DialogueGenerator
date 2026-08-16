@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from uuid import UUID, uuid4
 
-from api.schemas.preset import Preset, PresetConfiguration, PresetMetadata
+from api.schemas.preset import Preset, PresetConfiguration, PresetMetadata, PresetValidationResult
 from api.schemas.template import Template, TemplateConfiguration, TemplateHistoryEntry
 from services.preset_service import PresetService
 
@@ -179,6 +179,23 @@ class TemplateService:
             raise FileNotFoundError(f"Template {template_id} not found")
         template_file.unlink()
         logger.info("Template supprimé: %s", template_id)
+
+    def validate_template_references(self, template_id: str) -> PresetValidationResult:
+        """Valide les références GDD d'un template sans muter le fichier.
+
+        Args:
+            template_id: UUID du template.
+
+        Returns:
+            Résultat de validation (warnings / refs obsolètes), jamais un 4xx métier.
+
+        Raises:
+            FileNotFoundError: Template absent ou UUID invalide.
+        """
+        template = self.get_template(template_id)
+        return self.preset_service.validate_preset_references(
+            self._as_preset_for_validation(template)
+        )
 
     def _template_path(self, template_id: str) -> Path:
         """Résout le chemin JSON d'un UUID (refuse un id non-UUID)."""

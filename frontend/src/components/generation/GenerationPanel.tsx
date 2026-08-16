@@ -649,6 +649,7 @@ export function GenerationPanel() {
         <div style={{ display: showModelSettings && showGenerationForm ? 'block' : 'none' }}>
           <PresetSelector
             onPresetLoaded={presets.handlePresetLoaded}
+            onTemplateLoaded={presets.handleTemplateLoaded}
             getCurrentConfiguration={presets.getCurrentConfiguration}
             saveStatus={draft.saveStatus}
           />
@@ -1303,6 +1304,7 @@ export function GenerationPanel() {
         onBudgetBlockClose={() => setShowBudgetBlockModal(false)}
         onValidationClose={presets.handleValidationClose}
         onValidationConfirm={presets.handleValidationConfirm}
+        validationEntityLabel={presets.validationEntityLabel}
       />
     </div>
   )

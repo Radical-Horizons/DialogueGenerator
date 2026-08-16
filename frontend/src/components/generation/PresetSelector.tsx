@@ -64,6 +64,8 @@ function formatActiveTemplateFilters(
 export interface PresetSelectorProps {
   /** Callback appelé quand un preset est chargé */
   onPresetLoaded: (preset: Preset) => void;
+  /** Callback appelé quand un template custom est appliqué (clic carte) */
+  onTemplateLoaded?: (template: Template) => void;
   /** Configuration actuelle pour sauvegarde */
   currentConfiguration?: PresetConfiguration;
   /** Getter lazy pour éviter recalculs coûteux à chaque render */
@@ -74,6 +76,7 @@ export interface PresetSelectorProps {
 
 export const PresetSelector: React.FC<PresetSelectorProps> = ({
   onPresetLoaded,
+  onTemplateLoaded,
   currentConfiguration,
   getCurrentConfiguration,
   saveStatus,
@@ -620,6 +623,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                   data-testid="template-item"
                   data-template-name={template.name}
                   data-template-category={template.category}
+                  onClick={() => onTemplateLoaded?.(template)}
                   style={{
                     padding: chrome.dropdownOptionPadding,
                     border: `1px solid ${theme.border.secondary}`,
@@ -628,6 +632,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                     display: 'flex',
                     alignItems: 'flex-start',
                     gap: '0.5rem',
+                    cursor: 'pointer',
                   }}
                 >
                   <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>{template.icon}</span>

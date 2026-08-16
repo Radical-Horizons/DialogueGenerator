@@ -23,6 +23,8 @@ export interface PresetValidationModalProps {
   onClose: () => void;
   /** Callback pour confirmer le chargement du preset */
   onConfirm: () => void;
+  /** Libellé (preset par défaut, template pour le flux 6.3) */
+  entityLabel?: 'preset' | 'template';
 }
 
 /**
@@ -37,12 +39,15 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
   validationResult,
   onClose,
   onConfirm,
+  entityLabel = 'preset',
 }) => {
   const { ref: panelRef, isNarrow } = useNarrowInlineSize(520);
   const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable;
   if (!isOpen) return null;
 
   const { valid, warnings, obsoleteRefs } = validationResult;
+  const entityWord = entityLabel === 'template' ? 'template' : 'preset';
+  const entityWordCap = entityLabel === 'template' ? 'Template' : 'Preset';
 
   return (
     <div
@@ -59,6 +64,7 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
         zIndex: 2000,
       }}
       onClick={onClose}
+      data-testid="preset-validation-modal"
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -74,7 +80,7 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
         }}
         ref={panelRef}
       >
-        <h3 style={{ marginTop: 0, color: theme.text.primary }}>Validation du preset</h3>
+        <h3 style={{ marginTop: 0, color: theme.text.primary }}>Validation du {entityWord}</h3>
 
         {/* État : Valide */}
         {valid && (
@@ -89,7 +95,7 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
               <span style={{ fontSize: remSize('title') }}>✅</span>
-              <strong style={{ color: theme.state.success.color }}>Preset valide</strong>
+              <strong style={{ color: theme.state.success.color }}>{entityWordCap} valide</strong>
             </div>
             <div style={{ fontSize: `${typo.bodyFontRem}rem`, color: theme.text.secondary }}>
               Toutes les références sont valides et existent dans le GDD actuel.
@@ -110,10 +116,10 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
               <span style={{ fontSize: remSize('title') }}>⚠️</span>
-              <strong style={{ color: theme.state.warning.color }}>Preset contient des références obsolètes</strong>
+              <strong style={{ color: theme.state.warning.color }}>{entityWordCap} contient des références obsolètes</strong>
             </div>
             <div style={{ fontSize: `${typo.bodyFontRem}rem`, color: theme.text.secondary, marginBottom: '1rem' }}>
-              {obsoleteRefs.length} référence(s) obsolète(s) détectée(s). Le preset peut être chargé, mais
+              {obsoleteRefs.length} référence(s) obsolète(s) détectée(s). Le {entityWord} peut être chargé, mais
               certaines entités peuvent manquer.
             </div>
 
@@ -152,6 +158,8 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
         {/* Boutons */}
         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
           <button
+            type="button"
+            data-testid="preset-validation-cancel"
             onClick={onClose}
             style={{
               padding: '0.5rem 1rem',
@@ -166,6 +174,8 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
             Annuler
           </button>
           <button
+            type="button"
+            data-testid="preset-validation-confirm"
             onClick={onConfirm}
             style={{
               padding: '0.5rem 1rem',

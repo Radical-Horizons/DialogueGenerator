@@ -351,3 +351,43 @@ class TestTemplateServiceGetUpdateDelete:
         """Given un UUID absent, when delete, then FileNotFoundError."""
         with pytest.raises(FileNotFoundError):
             template_service.delete_template("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
+
+    def test_validate_template_references_valid(
+        self,
+        template_service: TemplateService,
+        sample_template_data: Dict[str, Any],
+    ) -> None:
+        """Given un template GDD OK, when validate, then valid sans muter."""
+        created, _ = template_service.create_template(sample_template_data)
+        result = template_service.validate_template_references(created.id)
+        assert result.valid is True
+        assert result.obsoleteRefs == []
+
+    def test_validate_template_references_obsolete_does_not_mutate(
+        self,
+        template_service: TemplateService,
+        sample_template_data: Dict[str, Any],
+    ) -> None:
+        """Given des refs obsolètes sur disque, when validate, then invalide et JSON intact."""
+        created, _ = template_service.create_template(sample_template_data)
+        path = template_service.templates_dir / f"{created.id}.json"
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload["configuration"]["characters"] = ["char-ghost"]
+        path.write_text(json.dumps(payload), encoding="utf-8")
+
+        result = template_service.validate_template_references(created.id)
+        assert result.valid is False
+        assert "char-ghost" in result.obsoleteRefs
+
+        reloaded = json.loads(path.read_text(encoding="utf-8"))
+        assert reloaded["configuration"]["characters"] == ["char-ghost"]
+
+    def test_validate_template_references_missing_raises(
+        self,
+        template_service: TemplateService,
+    ) -> None:
+        """Given un UUID absent, when validate, then FileNotFoundError."""
+        with pytest.raises(FileNotFoundError):
+            template_service.validate_template_references(
+                "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+            )

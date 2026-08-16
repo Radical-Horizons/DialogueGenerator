@@ -326,4 +326,29 @@ describe('PresetValidationModal', () => {
       expect(screen.getByText(/3 référence\(s\) obsolète\(s\)/i)).toBeInTheDocument();
     });
   });
+
+  describe('Template label', () => {
+    it('affiche le libellé template quand entityLabel=template', () => {
+      const validationResult: PresetValidationResult = {
+        valid: false,
+        warnings: ['Personnage inconnu'],
+        obsoleteRefs: ['char-ghost'],
+      };
+
+      render(
+        <PresetValidationModal
+          isOpen={true}
+          validationResult={validationResult}
+          onClose={mockOnClose}
+          onConfirm={mockOnConfirm}
+          entityLabel="template"
+        />
+      );
+
+      expect(screen.getByTestId('preset-validation-modal')).toBeInTheDocument();
+      expect(screen.getByText(/validation du template/i)).toBeInTheDocument();
+      expect(screen.getByTestId('preset-validation-cancel')).toHaveTextContent('Annuler');
+      expect(screen.getByTestId('preset-validation-confirm')).toHaveTextContent('Charger quand même');
+    });
+  });
 });

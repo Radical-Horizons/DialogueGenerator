@@ -274,3 +274,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-6-1-1-creer-templates-custom-generation-dialogue-fr55.md`
   summary: Strip GDD lazy seulement `characters`/`locations` (pas region / subLocation / contextSelections) — confirmé en revue combinée 6.1.1+6.1.2 ; même limite presets.
   evidence: `services/template_service.py` ~L91 ; déjà au ledger après la revue 6.1.1.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-3-appliquer-templates-a-generation-dialogue-fr57.md`
+  summary: Enregistrer le `template_id` dans les logs de génération (Story 1.15 / AC épic 6.3).
+  evidence: Choix 3A au kickoff 6.3 — un livrable distinct (pipeline génération + UI logs) ; 6.3 se limite à hydrater le formulaire.

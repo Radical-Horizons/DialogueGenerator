@@ -87,6 +87,7 @@ describe('PresetSelector', () => {
   const mockDeletePreset = vi.fn();
   const mockSetSelectedPreset = vi.fn();
   const mockOnPresetLoaded = vi.fn();
+  const mockOnTemplateLoaded = vi.fn();
   const mockLoadTemplates = vi.fn();
   const mockCreateTemplate = vi.fn();
   const mockUpdateTemplate = vi.fn();
@@ -257,13 +258,50 @@ describe('PresetSelector', () => {
       expect(screen.getAllByTestId('template-item-modified')[0]).toHaveTextContent(/Modifié le/i);
     });
 
-    it('should not apply a template to the form when clicked', () => {
-      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+    it('applique le template au clic sur la carte', () => {
+      render(
+        <PresetSelector
+          onPresetLoaded={mockOnPresetLoaded}
+          onTemplateLoaded={mockOnTemplateLoaded}
+        />,
+      );
 
       fireEvent.click(screen.getByText('Salut A'));
 
+      expect(mockOnTemplateLoaded).toHaveBeenCalledTimes(1);
+      expect(mockOnTemplateLoaded).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'tpl-1', name: 'Salut A' }),
+      );
       expect(mockOnPresetLoaded).not.toHaveBeenCalled();
       expect(mockSetSelectedPreset).not.toHaveBeenCalled();
+    });
+
+    it('n’applique pas au clic Éditer', () => {
+      render(
+        <PresetSelector
+          onPresetLoaded={mockOnPresetLoaded}
+          onTemplateLoaded={mockOnTemplateLoaded}
+        />,
+      );
+
+      fireEvent.click(screen.getAllByTestId('template-item-edit-btn')[0]);
+
+      expect(mockOnTemplateLoaded).not.toHaveBeenCalled();
+      expect(screen.getByTestId('template-editor-modal')).toBeInTheDocument();
+    });
+
+    it('n’applique pas au clic Supprimer', () => {
+      render(
+        <PresetSelector
+          onPresetLoaded={mockOnPresetLoaded}
+          onTemplateLoaded={mockOnTemplateLoaded}
+        />,
+      );
+
+      fireEvent.click(screen.getAllByTestId('template-item-delete-btn')[0]);
+
+      expect(mockOnTemplateLoaded).not.toHaveBeenCalled();
+      expect(screen.getByTestId('confirm-dialog')).toBeInTheDocument();
     });
 
     it('ouvre l’éditeur prérempli au clic Éditer', () => {

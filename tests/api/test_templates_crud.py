@@ -1,4 +1,5 @@
 """Tests API GET/POST /api/v1/templates (Story 6.1.1 — matrice I/O)."""
+import json
 from pathlib import Path
 from typing import Any, Dict, Iterator
 from unittest.mock import Mock
@@ -367,3 +368,61 @@ class TestTemplatesGetPutDelete:
         assert updated.status_code == 200
         deleted = client.delete(f"/api/v1/templates/{created['id']}", headers=headers)
         assert deleted.status_code == 204
+
+
+class TestTemplatesValidate:
+    """GET /{id}/validate — matrice I/O 6.3."""
+
+    def test_validate_200(self, client: TestClient) -> None:
+        """Given un template GDD OK, when GET validate, then 200 valid."""
+        created = client.post("/api/v1/templates", json=_sample_create_payload()).json()
+        response = client.get(f"/api/v1/templates/{created['id']}/validate")
+        assert response.status_code == 200
+        body = response.json()
+        assert body["valid"] is True
+        assert body["obsoleteRefs"] == []
+
+    def test_validate_404(self, client: TestClient) -> None:
+        """Given un UUID absent, when GET validate, then 404."""
+        response = client.get(
+            "/api/v1/templates/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/validate"
+        )
+        assert response.status_code == 404
+
+    def test_validate_obsolete_200_does_not_mutate(
+        self,
+        client: TestClient,
+        template_service: TemplateService,
+    ) -> None:
+        """Given des IDs inconnus sur disque, when validate, then 200 invalide sans muter."""
+        created = client.post("/api/v1/templates", json=_sample_create_payload()).json()
+        path = template_service.templates_dir / f"{created['id']}.json"
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload["configuration"]["characters"] = ["char-ghost"]
+        path.write_text(json.dumps(payload), encoding="utf-8")
+
+        response = client.get(f"/api/v1/templates/{created['id']}/validate")
+        assert response.status_code == 200
+        body = response.json()
+        assert body["valid"] is False
+        assert "char-ghost" in body["obsoleteRefs"]
+
+        reloaded = json.loads(path.read_text(encoding="utf-8"))
+        assert reloaded["configuration"]["characters"] == ["char-ghost"]
+
+    def test_validate_guest_jwt_ok(self, client: TestClient) -> None:
+        """Given un token guest, when GET validate, then 200."""
+        guest = client.post("/api/v1/auth/guest")
+        token = guest.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+        created = client.post(
+            "/api/v1/templates",
+            json=_sample_create_payload(name="Guest validate"),
+            headers=headers,
+        ).json()
+        response = client.get(
+            f"/api/v1/templates/{created['id']}/validate",
+            headers=headers,
+        )
+        assert response.status_code == 200
+        assert response.json()["valid"] is True

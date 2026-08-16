@@ -3,18 +3,47 @@
  * 
  * Extrait la logique de gestion des presets depuis GenerationPanel.
  */
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
+import { getTemplateApi, validateTemplateApi } from '../api/templates'
 import { useGenerationStore } from '../store/generationStore'
 import { usePresetStore } from '../store/presetStore'
 import { useContextStore } from '../store/contextStore'
+import { useLLMStore } from '../store/llmStore'
 import { preparePresetForApply } from '../utils/presetUtils'
+import { isLlmProvider, templateToPreset } from '../utils/templateApply'
 import { getErrorMessage } from '../types/errors'
 import type { Preset, PresetConfiguration, PresetValidationResult } from '../types/preset'
+import type { Template } from '../types/template'
 import type { ReasoningEffort } from '../types/api'
+
+export type ValidationEntityLabel = 'preset' | 'template'
+
+function notifyApplied(
+  entity: 'Preset' | 'Template',
+  validation: PresetValidationResult,
+  toast: UsePresetManagementOptions['toast'],
+): void {
+  const obsoleteCount = validation.obsoleteRefs?.length || 0
+  const resolvedCount = Object.keys(validation.resolvedRefs ?? {}).length
+  if (obsoleteCount > 0 && resolvedCount > 0) {
+    toast(
+      `${entity} chargé : ${resolvedCount} nom(s) mis à jour, ${obsoleteCount} référence(s) ignorée(s)`,
+      'warning',
+    )
+  } else if (obsoleteCount > 0) {
+    toast(`${entity} chargé avec ${obsoleteCount} référence(s) obsolète(s) ignorée(s)`, 'warning')
+  } else if (resolvedCount > 0) {
+    toast(`${entity} chargé (${resolvedCount} nom(s) GDD mis à jour)`, 'info')
+  } else {
+    toast(`${entity} chargé avec succès`, 'success')
+  }
+}
 
 export interface UsePresetManagementReturn {
   /** Charger un preset avec validation */
   handlePresetLoaded: (preset: Preset) => Promise<void>
+  /** Charger un template custom (validate + applyPreset + llmProvider) */
+  handleTemplateLoaded: (template: Template) => Promise<void>
   /** Appliquer un preset directement */
   applyPreset: (preset: Preset) => void
   /** Obtenir la configuration actuelle pour sauvegarde */
@@ -25,6 +54,8 @@ export interface UsePresetManagementReturn {
   validationResult: PresetValidationResult | null
   /** Preset en attente d'application */
   pendingPreset: Preset | null
+  /** Libellé du modal (preset vs template) */
+  validationEntityLabel: ValidationEntityLabel
   /** Ouvrir/fermer le modal de validation */
   setValidationModalOpen: (open: boolean) => void
   /** Confirmer l'application du preset avec filtrage */
@@ -94,6 +125,15 @@ export function usePresetManagement(
   const [isValidationModalOpen, setIsValidationModalOpen] = useState(false)
   const [validationResult, setValidationResult] = useState<PresetValidationResult | null>(null)
   const [pendingPreset, setPendingPreset] = useState<Preset | null>(null)
+  const [pendingTemplate, setPendingTemplate] = useState<Template | null>(null)
+  const templateLoadSeqRef = useRef(0)
+
+  const clearValidationState = useCallback(() => {
+    setIsValidationModalOpen(false)
+    setPendingPreset(null)
+    setPendingTemplate(null)
+    setValidationResult(null)
+  }, [])
 
   const {
     sceneSelection,
@@ -156,61 +196,79 @@ export function usePresetManagement(
     setSaveStatus('unsaved')
   }, [setSceneSelection, setUserInstructions, setIsDirty, setSaveStatus, setTopP, setReasoningEffort, setMaxCompletionTokens, setMaxChoices, setLlmModel])
 
+  const applyTemplateSnapshot = useCallback((template: Template, validation: PresetValidationResult) => {
+    applyPreset(preparePresetForApply(templateToPreset(template), validation))
+    const llmState = useLLMStore.getState()
+    const provider = template.configuration.llmProvider
+    if (isLlmProvider(provider)) {
+      llmState.setProvider(provider)
+    }
+    if (template.configuration.llmModel) {
+      llmState.setModel(template.configuration.llmModel)
+    }
+  }, [applyPreset])
+
   const handlePresetLoaded = useCallback(async (preset: Preset) => {
     try {
-      const validationResult = await usePresetStore
+      const nextValidation = await usePresetStore
         .getState()
         .validatePreset(preset.id)
 
-      if (!validationResult.valid) {
-        // Afficher modal de validation si références obsolètes
-        setValidationResult(validationResult)
+      if (!nextValidation.valid) {
+        setValidationResult(nextValidation)
+        setPendingTemplate(null)
         setPendingPreset(preset)
         setIsValidationModalOpen(true)
       } else {
-        applyPreset(preparePresetForApply(preset, validationResult))
-        const resolvedCount = Object.keys(validationResult.resolvedRefs ?? {}).length
-        if (resolvedCount > 0) {
-          toast(`Preset chargé (${resolvedCount} nom(s) GDD mis à jour)`, 'info')
-        } else {
-          toast('Preset chargé avec succès', 'success')
-        }
+        clearValidationState()
+        applyPreset(preparePresetForApply(preset, nextValidation))
+        notifyApplied('Preset', nextValidation, toast)
       }
     } catch (err) {
       const message = getErrorMessage(err)
       toast(`Erreur lors de la validation du preset: ${message}`, 'error')
     }
-  }, [applyPreset, toast])
+  }, [applyPreset, toast, clearValidationState])
+
+  const handleTemplateLoaded = useCallback(async (template: Template) => {
+    const seq = ++templateLoadSeqRef.current
+    try {
+      const fresh = await getTemplateApi(template.id)
+      if (seq !== templateLoadSeqRef.current) return
+      const nextValidation = await validateTemplateApi(fresh.id)
+      if (seq !== templateLoadSeqRef.current) return
+
+      if (!nextValidation.valid) {
+        setValidationResult(nextValidation)
+        setPendingPreset(null)
+        setPendingTemplate(fresh)
+        setIsValidationModalOpen(true)
+      } else {
+        clearValidationState()
+        applyTemplateSnapshot(fresh, nextValidation)
+        notifyApplied('Template', nextValidation, toast)
+      }
+    } catch (err) {
+      if (seq !== templateLoadSeqRef.current) return
+      const message = getErrorMessage(err)
+      toast(`Erreur lors du chargement du template: ${message}`, 'error')
+    }
+  }, [applyTemplateSnapshot, toast, clearValidationState])
   
   const handleValidationConfirm = useCallback(() => {
-    if (pendingPreset && validationResult) {
+    if (pendingTemplate && validationResult) {
+      applyTemplateSnapshot(pendingTemplate, validationResult)
+      notifyApplied('Template', validationResult, toast)
+    } else if (pendingPreset && validationResult) {
       applyPreset(preparePresetForApply(pendingPreset, validationResult))
-
-      const obsoleteCount = validationResult.obsoleteRefs?.length || 0
-      const resolvedCount = Object.keys(validationResult.resolvedRefs ?? {}).length
-      if (obsoleteCount > 0 && resolvedCount > 0) {
-        toast(
-          `Preset chargé : ${resolvedCount} nom(s) mis à jour, ${obsoleteCount} référence(s) ignorée(s)`,
-          'warning',
-        )
-      } else if (obsoleteCount > 0) {
-        toast(`Preset chargé avec ${obsoleteCount} référence(s) obsolète(s) ignorée(s)`, 'warning')
-      } else if (resolvedCount > 0) {
-        toast(`Preset chargé (${resolvedCount} nom(s) GDD mis à jour)`, 'info')
-      } else {
-        toast('Preset chargé avec succès', 'success')
-      }
+      notifyApplied('Preset', validationResult, toast)
     }
-    setIsValidationModalOpen(false)
-    setPendingPreset(null)
-    setValidationResult(null)
-  }, [pendingPreset, validationResult, applyPreset, toast])
+    clearValidationState()
+  }, [pendingPreset, pendingTemplate, validationResult, applyPreset, applyTemplateSnapshot, toast, clearValidationState])
   
   const handleValidationClose = useCallback(() => {
-    setIsValidationModalOpen(false)
-    setPendingPreset(null)
-    setValidationResult(null)
-  }, [])
+    clearValidationState()
+  }, [clearValidationState])
 
   // Configuration actuelle pour sauvegarde preset
   const getCurrentConfiguration = useCallback(() => {
@@ -257,11 +315,13 @@ export function usePresetManagement(
 
   return {
     handlePresetLoaded,
+    handleTemplateLoaded,
     applyPreset,
     getCurrentConfiguration,
     isValidationModalOpen,
     validationResult,
     pendingPreset,
+    validationEntityLabel: pendingTemplate ? 'template' : 'preset',
     setValidationModalOpen: setIsValidationModalOpen,
     handleValidationConfirm,
     handleValidationClose,
