@@ -20,8 +20,45 @@ import { useToast, SaveStatusIndicator } from '../shared';
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext';
 import { TemplateCreatorModal } from './TemplateCreatorModal';
 import { NarrowOverlayDrawer } from '../layout/NarrowOverlayDrawer';
-import { filterTemplates, groupTemplatesByCategory } from '../../utils/templateGroups';
+import { filterTemplates, groupTemplatesByCategory, TEMPLATE_UNCATEGORIZED_LABEL } from '../../utils/templateGroups';
 import type { SaveStatus } from '../shared/SaveStatusIndicator';
+
+function formatTemplateDate(isoString: string): string {
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) {
+    return isoString;
+  }
+  return date.toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function templateLatestAt(template: Template): string | undefined {
+  const last = template.history?.at(-1)?.at;
+  return last ?? template.metadata.modified ?? template.metadata.created;
+}
+
+function formatActiveTemplateFilters(
+  nameFilter: string,
+  categoryFilter: string,
+  contextFilter: string,
+): string {
+  const parts: string[] = [];
+  if (nameFilter.trim()) {
+    parts.push(`nom « ${nameFilter.trim()} »`);
+  }
+  if (categoryFilter.trim()) {
+    parts.push(`catégorie « ${categoryFilter.trim()} »`);
+  }
+  if (contextFilter.trim()) {
+    parts.push(`contexte « ${contextFilter.trim()} »`);
+  }
+  return `Filtres : ${parts.join(' · ')}`;
+}
 
 export interface PresetSelectorProps {
   /** Callback appelé quand un preset est chargé */
@@ -81,10 +118,14 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   );
   const categoryOptions = useMemo(() => {
     const keys = new Set(
-      templates.map((template) => template.category?.trim() || 'Sans catégorie'),
+      templates.map((template) => template.category?.trim() || TEMPLATE_UNCATEGORIZED_LABEL),
     );
     return Array.from(keys);
   }, [templates]);
+
+  const hasActiveFilters = Boolean(
+    nameFilter.trim() || categoryFilter.trim() || contextFilter.trim(),
+  );
 
   const filterInputStyle: React.CSSProperties = {
     width: '100%',
@@ -420,6 +461,11 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
       <TemplateCreatorModal
         isOpen={isCreateModalOpen}
         snapshot={snapshotConfiguration}
+        onCreated={() => {
+          setNameFilter('');
+          setCategoryFilter('');
+          setContextFilter('');
+        }}
         onClose={() => {
           setIsCreateModalOpen(false);
           setSnapshotConfiguration(null);
@@ -490,15 +536,29 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
             Aucun template sauvegardé
           </div>
         ) : filteredTemplates.length === 0 ? (
-          <div
-            data-testid="mes-templates-no-match"
-            style={{
-              fontSize: `${chrome.labelFontRem}rem`,
-              color: theme.text.secondary,
-            }}
-          >
-            Aucun résultat
-          </div>
+          <>
+            <div
+              data-testid="mes-templates-no-match"
+              style={{
+                fontSize: `${chrome.labelFontRem}rem`,
+                color: theme.text.secondary,
+              }}
+            >
+              Aucun résultat
+            </div>
+            {hasActiveFilters && (
+              <div
+                data-testid="mes-templates-active-filters"
+                style={{
+                  fontSize: `${chrome.labelFontRem}rem`,
+                  color: theme.text.secondary,
+                  marginTop: '0.35rem',
+                }}
+              >
+                {formatActiveTemplateFilters(nameFilter, categoryFilter, contextFilter)}
+              </div>
+            )}
+          </>
         ) : (
           groupedTemplates.map(([category, items]) => (
             <div
@@ -517,7 +577,9 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
               >
                 {category}
               </div>
-              {items.map((template: Template) => (
+              {items.map((template: Template) => {
+                const modifiedAt = templateLatestAt(template)
+                return (
                 <div
                   key={template.id}
                   data-testid="template-item"
@@ -548,6 +610,17 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                         {template.description}
                       </div>
                     )}
+                    {modifiedAt && (
+                      <div
+                        data-testid="template-item-modified"
+                        style={{
+                          fontSize: `${chrome.labelFontRem}rem`,
+                          color: theme.text.secondary,
+                        }}
+                      >
+                        Modifié le {formatTemplateDate(modifiedAt)}
+                      </div>
+                    )}
                     <div
                       style={{
                         fontSize: `${chrome.labelFontRem}rem`,
@@ -563,7 +636,8 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                     </div>
                   </div>
                 </div>
-              ))}
+                )
+              })}
             </div>
           ))
         )}

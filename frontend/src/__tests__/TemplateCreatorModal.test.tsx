@@ -148,7 +148,7 @@ describe('TemplateCreatorModal', () => {
   })
 
   it('affiche un toast d’erreur et garde le modal ouvert si create échoue', async () => {
-    mockCreateTemplate.mockRejectedValueOnce(new Error('Failed to create template: 500'))
+    mockCreateTemplate.mockRejectedValueOnce(new Error('Échec de la création du template : 500'))
 
     render(
       <TemplateCreatorModal isOpen snapshot={snapshot} onClose={mockOnClose} />
@@ -160,10 +160,68 @@ describe('TemplateCreatorModal', () => {
     fireEvent.click(screen.getByTestId('template-modal-create-btn'))
 
     await waitFor(() => {
-      expect(mockToast).toHaveBeenCalledWith('Failed to create template: 500', 'error')
+      expect(mockToast).toHaveBeenCalledWith('Échec de la création du template : 500', 'error')
     })
     expect(mockOnClose).not.toHaveBeenCalled()
     expect(screen.getByTestId('template-creator-modal')).toBeInTheDocument()
+  })
+
+  it('affiche un toast warning si la création renvoie des warnings GDD', async () => {
+    mockCreateTemplate.mockResolvedValueOnce({
+      warnings: ["Character 'char-obsolete' not found in GDD"],
+    })
+
+    render(
+      <TemplateCreatorModal isOpen snapshot={snapshot} onClose={mockOnClose} />
+    )
+
+    fireEvent.change(screen.getByTestId('template-form-name'), {
+      target: { value: 'Avec warnings' },
+    })
+    fireEvent.click(screen.getByTestId('template-modal-create-btn'))
+
+    await waitFor(() => {
+      expect(mockToast).toHaveBeenCalledWith(
+        "Character 'char-obsolete' not found in GDD",
+        'warning',
+      )
+    })
+    expect(mockOnClose).toHaveBeenCalled()
+  })
+
+  it('n’envoie qu’un seul POST si on double-clique Créer', async () => {
+    let resolveCreate: ((value: { warnings: string[] }) => void) | undefined
+    mockCreateTemplate.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveCreate = resolve
+        })
+    )
+
+    render(
+      <TemplateCreatorModal isOpen snapshot={snapshot} onClose={mockOnClose} />
+    )
+
+    fireEvent.change(screen.getByTestId('template-form-name'), {
+      target: { value: 'Double clic' },
+    })
+    fireEvent.click(screen.getByTestId('template-modal-create-btn'))
+    fireEvent.click(screen.getByTestId('template-modal-create-btn'))
+
+    expect(mockCreateTemplate).toHaveBeenCalledTimes(1)
+
+    await act(async () => {
+      resolveCreate?.({ warnings: [] })
+    })
+  })
+
+  it('ferme le modal sur Escape', () => {
+    render(
+      <TemplateCreatorModal isOpen snapshot={snapshot} onClose={mockOnClose} />
+    )
+
+    fireEvent.keyDown(window, { key: 'Escape' })
+    expect(mockOnClose).toHaveBeenCalled()
   })
 
   it('ne rend rien quand le modal est fermé', () => {

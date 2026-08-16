@@ -1,10 +1,16 @@
 """Schémas Pydantic pour les templates de génération custom."""
-from typing import List, Optional
-
-from pydantic import BaseModel, Field, field_validator
+from datetime import datetime
+from typing import Any, List, Literal, Optional
 from uuid import UUID
 
+from pydantic import BaseModel, Field, field_validator, model_validator
+
 from api.schemas.preset import PresetConfiguration, PresetMetadata
+
+TEMPLATE_NAME_MAX_LENGTH = 120
+TEMPLATE_DESCRIPTION_MAX_LENGTH = 2000
+TEMPLATE_CATEGORY_MAX_LENGTH = 120
+TEMPLATE_ICON_MAX_LENGTH = 16
 
 
 def _strip_required_name(value: str) -> str:
@@ -28,6 +34,16 @@ class TemplateConfiguration(PresetConfiguration):
     )
 
 
+class TemplateHistoryEntry(BaseModel):
+    """Événement d'historique (création ou mise à jour)."""
+
+    at: datetime = Field(..., description="Horodatage ISO 8601")
+    action: Literal["created", "updated"] = Field(
+        ...,
+        description="Type d'événement",
+    )
+
+
 class Template(BaseModel):
     """Modèle complet d'un template custom."""
 
@@ -38,6 +54,10 @@ class Template(BaseModel):
     icon: str = Field(default="📋", description="Emoji icône")
     metadata: PresetMetadata = Field(..., description="Métadonnées de création / modification")
     configuration: TemplateConfiguration = Field(..., description="Snapshot de configuration")
+    history: List[TemplateHistoryEntry] = Field(
+        default_factory=list,
+        description="Historique des dates (created / updated)",
+    )
 
     @field_validator("id")
     @classmethod
@@ -55,14 +75,48 @@ class Template(BaseModel):
         """Refuse un nom vide après strip."""
         return _strip_required_name(v)
 
+    @model_validator(mode="before")
+    @classmethod
+    def hydrate_history_from_metadata(cls, data: Any) -> Any:
+        """Complète history[] depuis metadata si le JSON disque est antérieur au champ."""
+        if not isinstance(data, dict) or data.get("history"):
+            return data
+        metadata = data.get("metadata") or {}
+        created = metadata.get("created") if isinstance(metadata, dict) else None
+        if not created:
+            return data
+        entries: List[dict[str, Any]] = [{"at": created, "action": "created"}]
+        modified = metadata.get("modified") if isinstance(metadata, dict) else None
+        if modified and modified != created:
+            entries.append({"at": modified, "action": "updated"})
+        data["history"] = entries
+        return data
+
 
 class TemplateCreate(BaseModel):
     """Payload de création d'un template."""
 
-    name: str = Field(..., description="Nom du template", min_length=1)
-    description: str = Field(default="", description="Description libre")
-    category: str = Field(default="Général", description="Catégorie d'affichage")
-    icon: str = Field(default="📋", description="Emoji icône")
+    name: str = Field(
+        ...,
+        description="Nom du template",
+        min_length=1,
+        max_length=TEMPLATE_NAME_MAX_LENGTH,
+    )
+    description: str = Field(
+        default="",
+        description="Description libre",
+        max_length=TEMPLATE_DESCRIPTION_MAX_LENGTH,
+    )
+    category: str = Field(
+        default="Général",
+        description="Catégorie d'affichage",
+        max_length=TEMPLATE_CATEGORY_MAX_LENGTH,
+    )
+    icon: str = Field(
+        default="📋",
+        description="Emoji icône",
+        max_length=TEMPLATE_ICON_MAX_LENGTH,
+    )
     configuration: TemplateConfiguration = Field(..., description="Snapshot de configuration")
 
     @field_validator("name")

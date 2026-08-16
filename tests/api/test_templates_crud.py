@@ -11,6 +11,7 @@ from api.config.security_config import get_security_config
 from api.dependencies import get_template_service
 from api.main import app
 from api.schemas.preset import PresetValidationResult
+from api.schemas.template import TEMPLATE_NAME_MAX_LENGTH
 from services.preset_service import PresetService
 from services.template_service import TemplateService
 
@@ -96,6 +97,7 @@ class TestTemplatesCreateHappy:
         assert UUID(data["id"])
         assert data["configuration"]["characters"] == ["char-alpha"]
         assert data["configuration"]["llmModel"] == "gpt-5.6-terra"
+        assert data["history"][0]["action"] == "created"
 
         template_file = template_service.templates_dir / f"{data['id']}.json"
         assert template_file.exists()
@@ -118,6 +120,15 @@ class TestTemplatesValidation:
     def test_create_template_whitespace_name_422(self, client: TestClient) -> None:
         """Given name = espaces, when POST, then 422."""
         response = client.post("/api/v1/templates", json=_sample_create_payload(name="   "))
+
+        assert response.status_code == 422
+
+    def test_create_template_name_too_long_422(self, client: TestClient) -> None:
+        """Given un nom trop long, when POST, then 422."""
+        response = client.post(
+            "/api/v1/templates",
+            json=_sample_create_payload(name="x" * (TEMPLATE_NAME_MAX_LENGTH + 1)),
+        )
 
         assert response.status_code == 422
 

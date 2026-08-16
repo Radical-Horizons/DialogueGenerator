@@ -1,7 +1,7 @@
 /**
  * Modal de création d'un template custom : 4 champs + aperçu lecture seule figé.
  */
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { theme } from '../../theme'
 import { generationPanelChrome, modalTypography } from '../../theme/responsiveChrome'
 import { redesignRadius } from '../../theme/redesignTokens'
@@ -17,6 +17,8 @@ export interface TemplateCreatorModalProps {
   snapshot: TemplateConfiguration | null
   /** Fermeture (Annuler ou overlay). */
   onClose: () => void
+  /** Appelé après un POST 201, avant la fermeture (ex. reset des filtres). */
+  onCreated?: () => void
 }
 
 function uniqueCount(values: string[] | undefined): number {
@@ -27,12 +29,14 @@ export const TemplateCreatorModal: React.FC<TemplateCreatorModalProps> = ({
   isOpen,
   snapshot,
   onClose,
+  onCreated,
 }) => {
   const isNarrow = useGenerationPanelNarrow()
   const chrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
   const type = isNarrow ? modalTypography.narrow : modalTypography.comfortable
   const toast = useToast()
   const createTemplate = useTemplateStore((state) => state.createTemplate)
+  const creatingRef = useRef(false)
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -47,17 +51,32 @@ export const TemplateCreatorModal: React.FC<TemplateCreatorModalProps> = ({
       setCategory('Général')
       setIcon('📋')
       setIsCreating(false)
+      creatingRef.current = false
     }
   }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !creatingRef.current) {
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isOpen, onClose])
 
   if (!isOpen) {
     return null
   }
 
   const handleSubmit = async () => {
-    if (!name.trim() || !snapshot) {
+    if (!name.trim() || !snapshot || creatingRef.current) {
       return
     }
+    creatingRef.current = true
     setIsCreating(true)
     try {
       const { warnings } = await createTemplate({
@@ -72,6 +91,7 @@ export const TemplateCreatorModal: React.FC<TemplateCreatorModalProps> = ({
       } else {
         toast('Template créé avec succès', 'success')
       }
+      onCreated?.()
       onClose()
     } catch (error) {
       const message =
@@ -80,6 +100,7 @@ export const TemplateCreatorModal: React.FC<TemplateCreatorModalProps> = ({
           : 'Échec de la création du template'
       toast(message, 'error')
     } finally {
+      creatingRef.current = false
       setIsCreating(false)
     }
   }
@@ -159,6 +180,7 @@ export const TemplateCreatorModal: React.FC<TemplateCreatorModalProps> = ({
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="Ex: Confrontation première rencontre"
+            maxLength={120}
             style={inputStyle}
           />
         </div>
@@ -180,6 +202,7 @@ export const TemplateCreatorModal: React.FC<TemplateCreatorModalProps> = ({
             data-testid="template-form-description"
             value={description}
             onChange={(event) => setDescription(event.target.value)}
+            maxLength={2000}
             rows={3}
             style={{ ...inputStyle, resize: 'vertical' }}
           />
@@ -204,6 +227,7 @@ export const TemplateCreatorModal: React.FC<TemplateCreatorModalProps> = ({
             value={category}
             onChange={(event) => setCategory(event.target.value)}
             placeholder="Ex: Confrontation"
+            maxLength={120}
             style={inputStyle}
           />
         </div>
@@ -226,7 +250,7 @@ export const TemplateCreatorModal: React.FC<TemplateCreatorModalProps> = ({
             type="text"
             value={icon}
             onChange={(event) => setIcon(event.target.value)}
-            maxLength={4}
+            maxLength={16}
             style={{
               ...inputStyle,
               width: '4rem',

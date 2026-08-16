@@ -188,7 +188,7 @@ describe('PresetSelector', () => {
       const state = {
         templates: [] as Template[],
         isLoading: false,
-        error: 'Failed to load templates: 500',
+        error: 'Échec du chargement des templates : 500',
         loadTemplates: mockLoadTemplates,
         createTemplate: mockCreateTemplate,
         reset: vi.fn(),
@@ -201,7 +201,7 @@ describe('PresetSelector', () => {
       render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
 
       expect(screen.getByTestId('mes-templates-error')).toHaveTextContent(
-        'Failed to load templates: 500'
+        'Échec du chargement des templates : 500'
       );
       expect(screen.queryByTestId('mes-templates-empty')).not.toBeInTheDocument();
     });
@@ -241,6 +241,8 @@ describe('PresetSelector', () => {
       expect(screen.getByText('Combat B')).toBeInTheDocument();
       expect(screen.getByText('Salut C')).toBeInTheDocument();
       expect(screen.getByText(/Contexte : char-alpha/i)).toBeInTheDocument();
+      expect(screen.getAllByTestId('template-item-modified')).toHaveLength(3);
+      expect(screen.getAllByTestId('template-item-modified')[0]).toHaveTextContent(/Modifié le/i);
     });
 
     it('should not apply a template to the form when clicked', () => {
@@ -313,6 +315,9 @@ describe('PresetSelector', () => {
 
       expect(screen.getByTestId('mes-templates-no-match')).toHaveTextContent('Aucun résultat');
       expect(screen.getByTestId('mes-templates-filters')).toBeInTheDocument();
+      expect(screen.getByTestId('mes-templates-active-filters')).toHaveTextContent(
+        'Filtres : nom « zzzz-inexistant »',
+      );
       expect(screen.queryByTestId('mes-templates-empty')).not.toBeInTheDocument();
       expect(screen.queryByTestId('template-item')).not.toBeInTheDocument();
     });
@@ -333,6 +338,26 @@ describe('PresetSelector', () => {
       expect(filters).toHaveStyle({ flexDirection: 'column' });
       expect(screen.getByTestId('template-filter-name')).toHaveStyle({ minHeight: '44px' });
       expect(screen.getByTestId('narrow-drawer-right')).toBeInTheDocument();
+    });
+
+    it('narrow + drawer fermé : les critères actifs restent visibles si aucun match', () => {
+      render(
+        <GenerationPanelNarrowProvider value={true}>
+          <PresetSelector onPresetLoaded={mockOnPresetLoaded} />
+        </GenerationPanelNarrowProvider>
+      );
+
+      fireEvent.click(screen.getByTestId('template-filters-open-btn'));
+      fireEvent.change(screen.getByTestId('template-filter-name'), {
+        target: { value: 'zzzz-inexistant' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Fermer les filtres' }));
+
+      expect(screen.queryByTestId('mes-templates-filters')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mes-templates-no-match')).toHaveTextContent('Aucun résultat');
+      expect(screen.getByTestId('mes-templates-active-filters')).toHaveTextContent(
+        'Filtres : nom « zzzz-inexistant »',
+      );
     });
   });
 
@@ -439,6 +464,41 @@ describe('PresetSelector', () => {
         configuration: { temperature?: number }
       };
       expect(payload.configuration.temperature).toBeUndefined();
+    });
+
+    it('réinitialise les filtres après une création réussie', async () => {
+      const mockCurrentConfiguration = {
+        characters: ['char-001'],
+        locations: ['loc-001'],
+        region: 'Test Region',
+        sceneType: 'Première rencontre',
+        instructions: 'Test instructions',
+      };
+
+      render(
+        <PresetSelector
+          onPresetLoaded={mockOnPresetLoaded}
+          currentConfiguration={mockCurrentConfiguration}
+        />
+      );
+
+      fireEvent.change(screen.getByTestId('template-filter-name'), {
+        target: { value: 'zzzz-inexistant' },
+      });
+      expect(screen.getByTestId('mes-templates-no-match')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: /sauvegarder comme template/i }));
+      fireEvent.change(await screen.findByTestId('template-form-name'), {
+        target: { value: 'Nouveau visible' },
+      });
+      fireEvent.click(screen.getByTestId('template-modal-create-btn'));
+
+      await waitFor(() => {
+        expect(mockCreateTemplate).toHaveBeenCalled();
+      });
+      expect(screen.queryByTestId('mes-templates-no-match')).not.toBeInTheDocument();
+      expect(screen.getByTestId('template-filter-name')).toHaveValue('');
+      expect(screen.getByText('Salut A')).toBeInTheDocument();
     });
 
     it('snapshot via getCurrentConfiguration sans currentConfiguration', async () => {

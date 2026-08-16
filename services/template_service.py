@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from uuid import uuid4
 
 from api.schemas.preset import Preset, PresetConfiguration, PresetMetadata
-from api.schemas.template import Template, TemplateConfiguration
+from api.schemas.template import Template, TemplateConfiguration, TemplateHistoryEntry
 from services.preset_service import PresetService
 
 logger = logging.getLogger(__name__)
@@ -65,6 +65,7 @@ class TemplateService:
             icon=template_data.get("icon", "📋"),
             metadata=PresetMetadata(created=now, modified=now),
             configuration=TemplateConfiguration(**template_data["configuration"]),
+            history=[TemplateHistoryEntry(at=now, action="created")],
         )
 
         validation = self.preset_service.validate_preset_references(

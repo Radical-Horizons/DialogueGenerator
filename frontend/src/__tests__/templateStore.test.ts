@@ -105,7 +105,7 @@ describe('useTemplateStore', () => {
       await result.current.loadTemplates()
     })
 
-    expect(result.current.error).toContain('Failed to load templates')
+    expect(result.current.error).toContain('Échec du chargement des templates')
     expect(result.current.isLoading).toBe(false)
   })
 
@@ -145,6 +145,44 @@ describe('useTemplateStore', () => {
     expect(result.current.templates[0].id).toBe('tpl-001')
   })
 
+  it('fusionne un GET incomplet avec le template venant d’être créé', async () => {
+    const existing: Template = {
+      ...sampleTemplate,
+      id: 'tpl-old',
+      name: 'Ancien',
+    }
+    let resolveList: ((templates: Template[]) => void) | undefined
+    vi.mocked(templatesApi.listTemplatesApi).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveList = resolve
+        })
+    )
+    const created: TemplateCreateResponse = { ...sampleTemplate, warnings: [] }
+    vi.mocked(templatesApi.createTemplateApi).mockResolvedValueOnce(created)
+
+    const { result } = renderHook(() => useTemplateStore())
+
+    let loadPromise: Promise<void> = Promise.resolve()
+    act(() => {
+      loadPromise = result.current.loadTemplates()
+    })
+
+    await act(async () => {
+      await result.current.createTemplate({
+        name: 'Template test',
+        configuration: sampleTemplate.configuration,
+      })
+    })
+
+    await act(async () => {
+      resolveList?.([existing])
+      await loadPromise
+    })
+
+    expect(result.current.templates.map((item) => item.id).sort()).toEqual(['tpl-001', 'tpl-old'])
+  })
+
   it('pose une erreur si la création échoue', async () => {
     vi.mocked(templatesApi.createTemplateApi).mockRejectedValueOnce(axiosHttpError(500))
     const { result } = renderHook(() => useTemplateStore())
@@ -160,6 +198,6 @@ describe('useTemplateStore', () => {
       }
     })
 
-    expect(result.current.error).toContain('Failed to create template')
+    expect(result.current.error).toContain('Échec de la création du template')
   })
 })

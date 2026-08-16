@@ -78,9 +78,9 @@ describe('filterTemplates', () => {
     )
   })
 
-  it('filtre « Sans catégorie » sur la clé d’affichage du groupe', () => {
+  it('filtre « Général » sur la clé d’affichage du groupe (catégorie vide)', () => {
     const untitled = tpl('Sans nom', '  ')
-    expect(filterTemplates([untitled], { category: 'Sans catégorie' }).map((item) => item.name)).toEqual(
+    expect(filterTemplates([untitled], { category: 'Général' }).map((item) => item.name)).toEqual(
       ['Sans nom'],
     )
   })
@@ -118,5 +118,48 @@ describe('filterTemplates', () => {
     expect(filterTemplates(library, { context: 'Uresair' }).map((item) => item.name)).toEqual([
       'Salut A',
     ])
+  })
+
+  it('filtre le contexte par subLocation seul', () => {
+    const withSub = tpl('Sous-lieu', 'Divers', { subLocation: 'atelier-voknir' })
+    expect(filterTemplates([withSub, ...library], { context: 'atelier-voknir' }).map((item) => item.name)).toEqual(
+      ['Sous-lieu'],
+    )
+  })
+
+  it('filtre le contexte par selectedRegion seul', () => {
+    const withRegion = tpl('Région UI', 'Divers', { selectedRegion: 'Daïlon' })
+    expect(filterTemplates([withRegion, ...library], { context: 'Daïlon' }).map((item) => item.name)).toEqual(
+      ['Région UI'],
+    )
+  })
+
+  it('filtre le contexte via scene_protagonists / scene_location (records)', () => {
+    const withScene = tpl('Scène records', 'Divers', {
+      contextSelections: {
+        characters_full: [],
+        characters_excerpt: [],
+        locations_full: [],
+        locations_excerpt: [],
+        items_full: [],
+        items_excerpt: [],
+        species_full: [],
+        species_excerpt: [],
+        communities_full: [],
+        communities_excerpt: [],
+        dialogues_examples: [],
+        narrative_structures: [],
+        chapters: [],
+        scenes: [],
+        scene_protagonists: { personnage_a: 'Uresaïr', personnage_b: 'Valkazer' },
+        scene_location: { sous_lieu: 'Atelier de Voknir' },
+      },
+    })
+    expect(
+      filterTemplates([withScene, ...library], { context: 'Uresaïr' }).map((item) => item.name),
+    ).toEqual(['Scène records'])
+    expect(
+      filterTemplates([withScene, ...library], { context: 'Atelier' }).map((item) => item.name),
+    ).toEqual(['Scène records'])
   })
 })

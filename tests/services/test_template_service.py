@@ -117,6 +117,8 @@ class TestTemplateServiceCreate:
         assert saved["name"] == "Template test"
         assert saved["id"] == template.id
         assert saved["configuration"]["characters"] == ["char-alpha"]
+        assert saved["history"][0]["action"] == "created"
+        assert saved["history"][0]["at"]
         assert "char-alpha" in json.dumps(saved, ensure_ascii=False)
 
     def test_create_template_auto_creates_directory(
@@ -228,3 +230,52 @@ class TestTemplateServiceValidationReuse:
         service.create_template(sample_template_data)
 
         mock_preset.validate_preset_references.assert_called_once()
+
+    def test_create_resolved_refs_preserves_llm_provider(
+        self,
+        tmp_path: Path,
+        sample_template_data: Dict[str, Any],
+    ) -> None:
+        """Given un alias GDD résolu, when create, then remap + llmProvider conservé."""
+        from api.schemas.preset import Preset
+
+        sample_template_data["configuration"]["characters"] = ["char-alias"]
+        mock_preset = Mock(spec=PresetService)
+        mock_preset.validate_preset_references.return_value = PresetValidationResult(
+            valid=True,
+            warnings=["Alias résolu"],
+            obsoleteRefs=[],
+            resolvedRefs={"char-alias": "char-alpha"},
+        )
+
+        def apply_refs(preset: Preset, resolved_refs: Dict[str, str]) -> Preset:
+            config = preset.configuration.model_copy(deep=True)
+            config.characters = [
+                resolved_refs.get(name, name) for name in config.characters
+            ]
+            return preset.model_copy(update={"configuration": config})
+
+        mock_preset.apply_resolved_refs_to_preset.side_effect = apply_refs
+        service = TemplateService(mock_preset, tmp_path / "templates")
+
+        template, warnings = service.create_template(sample_template_data)
+
+        assert template.configuration.characters == ["char-alpha"]
+        assert template.configuration.llmProvider == "openai"
+        assert warnings == ["Alias résolu"]
+
+    def test_list_hydrates_history_from_metadata_when_missing(
+        self,
+        template_service: TemplateService,
+        sample_template_data: Dict[str, Any],
+    ) -> None:
+        """Given un JSON sans history, when list, then une entrée created est synthétisée."""
+        template, _ = template_service.create_template(sample_template_data)
+        template_file = template_service.templates_dir / f"{template.id}.json"
+        payload = json.loads(template_file.read_text(encoding="utf-8"))
+        payload.pop("history", None)
+        template_file.write_text(json.dumps(payload), encoding="utf-8")
+
+        listed = template_service.list_templates()
+        assert len(listed) == 1
+        assert listed[0].history[0].action == "created"

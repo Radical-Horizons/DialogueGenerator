@@ -10,6 +10,13 @@ export interface TemplateConfiguration extends PresetConfiguration {
   temperature?: number | null
 }
 
+export type TemplateHistoryAction = 'created' | 'updated'
+
+export interface TemplateHistoryEntry {
+  at: string
+  action: TemplateHistoryAction
+}
+
 export interface Template {
   id: string
   name: string
@@ -18,6 +25,7 @@ export interface Template {
   icon: string
   metadata: PresetMetadata
   configuration: TemplateConfiguration
+  history?: TemplateHistoryEntry[]
 }
 
 export interface TemplateCreate {

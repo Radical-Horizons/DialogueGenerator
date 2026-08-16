@@ -3,6 +3,9 @@
  */
 import type { Template } from '../types/template'
 
+/** Aligné sur le défaut backend (`category` vide → « Général »). */
+export const TEMPLATE_UNCATEGORIZED_LABEL = 'Général'
+
 /** Critères de filtre client (sous-chaîne, insensible à la casse). Champs vides = pas de contrainte. */
 export interface TemplateFilterQuery {
   name?: string
@@ -15,16 +18,25 @@ function includesInsensitive(haystack: string, needle: string): boolean {
 }
 
 function templateCategoryKey(template: Template): string {
-  return template.category?.trim() || 'Sans catégorie'
+  return template.category?.trim() || TEMPLATE_UNCATEGORIZED_LABEL
 }
 
-function collectStringLists(value: unknown, into: string[]): void {
-  if (!Array.isArray(value)) {
+function collectContextValue(value: unknown, into: string[]): void {
+  if (typeof value === 'string') {
+    if (value.trim()) {
+      into.push(value)
+    }
     return
   }
-  for (const item of value) {
-    if (typeof item === 'string' && item.trim()) {
-      into.push(item)
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      collectContextValue(item, into)
+    }
+    return
+  }
+  if (value && typeof value === 'object') {
+    for (const nested of Object.values(value as Record<string, unknown>)) {
+      collectContextValue(nested, into)
     }
   }
 }
@@ -43,7 +55,7 @@ function snapshotContextTokens(template: Template): string[] {
   const selections = cfg.contextSelections
   if (selections && typeof selections === 'object') {
     for (const value of Object.values(selections)) {
-      collectStringLists(value, tokens)
+      collectContextValue(value, tokens)
     }
   }
   return tokens

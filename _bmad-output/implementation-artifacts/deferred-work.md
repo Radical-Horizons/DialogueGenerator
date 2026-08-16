@@ -268,3 +268,9 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-6-1-1-creer-templates-custom-generation-dialogue-fr55.md`
   summary: Le nettoyage lazy des refs GDD obsolètes ne filtre que `characters` et `locations`, pas `region` / `subLocation` / `contextSelections` (même limite que les presets).
   evidence: Revue 6.1.1 (edge-case-hunter) — `template_service.py` copie le strip de `PresetService.create_preset` ; un ID obsolète hors ces deux listes reste dans le snapshot malgré les warnings. À traiter avec le même correctif presets, pas seulement templates.
+
+## Deferred from: code review of spec-6-1-1 + spec-6-1-2 (2026-08-16)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-1-1-creer-templates-custom-generation-dialogue-fr55.md`
+  summary: Strip GDD lazy seulement `characters`/`locations` (pas region / subLocation / contextSelections) — confirmé en revue combinée 6.1.1+6.1.2 ; même limite presets.
+  evidence: `services/template_service.py` ~L91 ; déjà au ledger après la revue 6.1.1.

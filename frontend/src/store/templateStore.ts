@@ -8,12 +8,12 @@ import { createTemplateApi, listTemplatesApi } from '../api/templates'
 
 function formatTemplateRequestError(actionLabel: string, error: unknown): string {
   if (error instanceof AxiosError && error.response?.status != null) {
-    return `Failed to ${actionLabel}: ${error.response.status}`
+    return `Échec ${actionLabel} : ${error.response.status}`
   }
   if (error instanceof Error) {
     return error.message
   }
-  return `Failed to ${actionLabel}`
+  return `Échec ${actionLabel}`
 }
 
 export interface TemplateCreateOutcome {
@@ -29,7 +29,7 @@ interface TemplateStore {
   reset: () => void
 }
 
-/** Invalide les GET liste périmés (course load vs create). */
+/** Invalide les GET liste concurrentes (load vs load / reset). */
 let listRequestSeq = 0
 
 function upsertTemplate(list: Template[], incoming: Template): Template[] {
@@ -39,6 +39,15 @@ function upsertTemplate(list: Template[], incoming: Template): Template[] {
   }
   const next = [...list]
   next[index] = incoming
+  return next
+}
+
+/** Conserve les items locaux absents de la réponse serveur (create en course). */
+function mergeTemplateLists(server: Template[], local: Template[]): Template[] {
+  let next = [...server]
+  for (const item of local) {
+    next = upsertTemplate(next, item)
+  }
   return next
 }
 
@@ -55,13 +64,16 @@ export const useTemplateStore = create<TemplateStore>((set) => ({
       if (seq !== listRequestSeq) {
         return
       }
-      set({ templates, isLoading: false })
+      set((state) => ({
+        templates: mergeTemplateLists(templates, state.templates),
+        isLoading: false,
+      }))
     } catch (error) {
       if (seq !== listRequestSeq) {
         return
       }
       set({
-        error: formatTemplateRequestError('load templates', error),
+        error: formatTemplateRequestError('du chargement des templates', error),
         isLoading: false,
       })
     }
@@ -72,18 +84,18 @@ export const useTemplateStore = create<TemplateStore>((set) => ({
     try {
       const created = await createTemplateApi(templateData)
       const { warnings, ...newTemplate } = created
-      listRequestSeq += 1
       set((state) => ({
         templates: upsertTemplate(state.templates, newTemplate),
         isLoading: false,
       }))
       return { warnings }
     } catch (error) {
+      const message = formatTemplateRequestError('de la création du template', error)
       set({
-        error: formatTemplateRequestError('create template', error),
+        error: message,
         isLoading: false,
       })
-      throw error
+      throw new Error(message)
     }
   },
 
