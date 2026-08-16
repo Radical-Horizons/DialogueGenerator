@@ -127,9 +127,47 @@ class TemplateCreate(BaseModel):
 
 
 class TemplateCreateResponse(Template):
-    """Réponse POST 201 : template persisté + warnings GDD (jamais bloquants)."""
+    """Réponse POST 201 / PUT 200 : template persisté + warnings GDD (jamais bloquants)."""
 
     warnings: List[str] = Field(
         default_factory=list,
         description="Avertissements de références GDD obsolètes ou résolues",
     )
+
+
+class TemplateUpdate(BaseModel):
+    """Payload PUT partiel d'un template."""
+
+    name: Optional[str] = Field(
+        None,
+        description="Nom du template",
+        min_length=1,
+        max_length=TEMPLATE_NAME_MAX_LENGTH,
+    )
+    description: Optional[str] = Field(
+        None,
+        description="Description libre",
+        max_length=TEMPLATE_DESCRIPTION_MAX_LENGTH,
+    )
+    category: Optional[str] = Field(
+        None,
+        description="Catégorie d'affichage",
+        max_length=TEMPLATE_CATEGORY_MAX_LENGTH,
+    )
+    icon: Optional[str] = Field(
+        None,
+        description="Emoji icône",
+        max_length=TEMPLATE_ICON_MAX_LENGTH,
+    )
+    configuration: Optional[TemplateConfiguration] = Field(
+        None,
+        description="Snapshot de configuration (remplacement complet si fourni)",
+    )
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: Optional[str]) -> Optional[str]:
+        """Refuse un nom vide après strip (si le champ est envoyé)."""
+        if v is None:
+            return v
+        return _strip_required_name(v)

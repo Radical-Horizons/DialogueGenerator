@@ -259,3 +259,111 @@ class TestTemplatesCreateWarningsFromService:
             ]
         finally:
             app.dependency_overrides.pop(get_template_service, None)
+
+
+class TestTemplatesGetPutDelete:
+    """GET/PUT/DELETE par id — matrice I/O 6.2."""
+
+    def test_get_template_200(self, client: TestClient) -> None:
+        """Given un UUID existant, when GET, then 200."""
+        created = client.post("/api/v1/templates", json=_sample_create_payload()).json()
+        response = client.get(f"/api/v1/templates/{created['id']}")
+        assert response.status_code == 200
+        assert response.json()["id"] == created["id"]
+        assert "warnings" not in response.json()
+
+    def test_get_template_404(self, client: TestClient) -> None:
+        """Given un UUID absent, when GET, then 404."""
+        response = client.get("/api/v1/templates/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
+        assert response.status_code == 404
+
+    def test_put_updates_same_id_and_appends_history(
+        self,
+        client: TestClient,
+        template_service: TemplateService,
+    ) -> None:
+        """Given un PUT nom+desc, when sauvegarde, then même UUID + history updated."""
+        created = client.post("/api/v1/templates", json=_sample_create_payload()).json()
+        response = client.put(
+            f"/api/v1/templates/{created['id']}",
+            json={"name": "Renommé", "description": "MAJ"},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["id"] == created["id"]
+        assert data["name"] == "Renommé"
+        assert data["description"] == "MAJ"
+        assert data["history"][-1]["action"] == "updated"
+        assert data["metadata"]["modified"] != created["metadata"]["created"]
+        assert data["warnings"] == []
+        assert (template_service.templates_dir / f"{created['id']}.json").exists()
+        files = list(template_service.templates_dir.glob("*.json"))
+        assert len(files) == 1
+
+    def test_put_template_404(self, client: TestClient) -> None:
+        """Given un UUID absent, when PUT, then 404."""
+        response = client.put(
+            "/api/v1/templates/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+            json={"name": "Fantôme"},
+        )
+        assert response.status_code == 404
+
+    def test_put_whitespace_name_422(self, client: TestClient) -> None:
+        """Given name = espaces, when PUT, then 422."""
+        created = client.post("/api/v1/templates", json=_sample_create_payload()).json()
+        response = client.put(
+            f"/api/v1/templates/{created['id']}",
+            json={"name": "   "},
+        )
+        assert response.status_code == 422
+
+    def test_put_obsolete_gdd_200_with_warnings(self, client: TestClient) -> None:
+        """Given des IDs GDD inconnus, when PUT, then 200 + warnings."""
+        created = client.post("/api/v1/templates", json=_sample_create_payload()).json()
+        config = created["configuration"]
+        config["characters"] = ["char-obsolete"]
+        config["locations"] = ["loc-obsolete"]
+        config["region"] = "loc-obsolete"
+        response = client.put(
+            f"/api/v1/templates/{created['id']}",
+            json={"configuration": config},
+        )
+        assert response.status_code == 200
+        assert len(response.json()["warnings"]) >= 1
+
+    def test_delete_204_and_gone_from_list(
+        self,
+        client: TestClient,
+        template_service: TemplateService,
+    ) -> None:
+        """Given un UUID existant, when DELETE, then 204 et plus dans GET."""
+        created = client.post("/api/v1/templates", json=_sample_create_payload()).json()
+        response = client.delete(f"/api/v1/templates/{created['id']}")
+        assert response.status_code == 204
+        assert not (template_service.templates_dir / f"{created['id']}.json").exists()
+        listed = client.get("/api/v1/templates")
+        assert listed.json() == []
+
+    def test_delete_404(self, client: TestClient) -> None:
+        """Given un UUID absent, when DELETE, then 404."""
+        response = client.delete("/api/v1/templates/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
+        assert response.status_code == 404
+
+    def test_put_delete_guest_jwt_ok(self, client: TestClient) -> None:
+        """Given un token guest, when PUT puis DELETE, then 200 puis 204."""
+        guest = client.post("/api/v1/auth/guest")
+        token = guest.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+        created = client.post(
+            "/api/v1/templates",
+            json=_sample_create_payload(name="Guest edit"),
+            headers=headers,
+        ).json()
+        updated = client.put(
+            f"/api/v1/templates/{created['id']}",
+            json={"name": "Guest renamed"},
+            headers=headers,
+        )
+        assert updated.status_code == 200
+        deleted = client.delete(f"/api/v1/templates/{created['id']}", headers=headers)
+        assert deleted.status_code == 204

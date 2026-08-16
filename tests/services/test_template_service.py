@@ -279,3 +279,75 @@ class TestTemplateServiceValidationReuse:
         listed = template_service.list_templates()
         assert len(listed) == 1
         assert listed[0].history[0].action == "created"
+
+
+class TestTemplateServiceGetUpdateDelete:
+    """Lecture, mise à jour et suppression."""
+
+    def test_get_template_returns_persisted(
+        self,
+        template_service: TemplateService,
+        sample_template_data: Dict[str, Any],
+    ) -> None:
+        """Given un UUID existant, when get, then le template est retourné."""
+        created, _ = template_service.create_template(sample_template_data)
+        loaded = template_service.get_template(created.id)
+        assert loaded.id == created.id
+        assert loaded.name == created.name
+
+    def test_get_template_missing_raises(
+        self,
+        template_service: TemplateService,
+    ) -> None:
+        """Given un UUID absent, when get, then FileNotFoundError."""
+        with pytest.raises(FileNotFoundError):
+            template_service.get_template("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
+
+    def test_update_keeps_same_id_and_appends_history(
+        self,
+        template_service: TemplateService,
+        sample_template_data: Dict[str, Any],
+    ) -> None:
+        """Given un PUT nom, when update, then même UUID + history updated."""
+        created, _ = template_service.create_template(sample_template_data)
+        updated, warnings = template_service.update_template(
+            created.id,
+            {"name": "Nouveau nom", "description": "Desc 2"},
+        )
+        assert warnings == []
+        assert updated.id == created.id
+        assert updated.name == "Nouveau nom"
+        assert updated.description == "Desc 2"
+        assert updated.history[-1].action == "updated"
+        assert (template_service.templates_dir / f"{created.id}.json").exists()
+        assert len(list(template_service.templates_dir.glob("*.json"))) == 1
+
+    def test_delete_removes_file(
+        self,
+        template_service: TemplateService,
+        sample_template_data: Dict[str, Any],
+    ) -> None:
+        """Given un UUID existant, when delete, then le fichier disparaît."""
+        created, _ = template_service.create_template(sample_template_data)
+        template_service.delete_template(created.id)
+        assert not (template_service.templates_dir / f"{created.id}.json").exists()
+        assert template_service.list_templates() == []
+
+    def test_update_missing_raises(
+        self,
+        template_service: TemplateService,
+    ) -> None:
+        """Given un UUID absent, when update, then FileNotFoundError."""
+        with pytest.raises(FileNotFoundError):
+            template_service.update_template(
+                "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+                {"name": "Fantôme"},
+            )
+
+    def test_delete_missing_raises(
+        self,
+        template_service: TemplateService,
+    ) -> None:
+        """Given un UUID absent, when delete, then FileNotFoundError."""
+        with pytest.raises(FileNotFoundError):
+            template_service.delete_template("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")

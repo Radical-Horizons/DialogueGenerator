@@ -1,4 +1,4 @@
-"""Router FastAPI pour les endpoints /api/v1/templates (GET liste + POST créer)."""
+"""Router FastAPI pour les endpoints /api/v1/templates (CRUD)."""
 import logging
 from typing import List
 
@@ -6,7 +6,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from api.dependencies import get_template_service
 from api.routers.auth import get_current_user
-from api.schemas.template import Template, TemplateCreate, TemplateCreateResponse
+from api.schemas.template import (
+    Template,
+    TemplateCreate,
+    TemplateCreateResponse,
+    TemplateUpdate,
+)
 from services.template_service import TemplateService
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
@@ -74,4 +79,105 @@ def create_template(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error creating template",
+        ) from exc
+
+
+@router.get("/{template_id}", response_model=Template)
+def get_template(
+    template_id: str,
+    template_service: TemplateService = Depends(get_template_service),
+) -> Template:
+    """Charge un template par UUID.
+
+    Raises:
+        404: Template absent.
+    """
+    try:
+        return template_service.get_template(template_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Template not found",
+        ) from exc
+    except Exception as exc:
+        logger.exception("Erreur chargement template")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error loading template",
+        ) from exc
+
+
+@router.put("/{template_id}", response_model=TemplateCreateResponse)
+def update_template(
+    template_id: str,
+    update_data: TemplateUpdate,
+    template_service: TemplateService = Depends(get_template_service),
+) -> TemplateCreateResponse:
+    """Met à jour un template (même UUID).
+
+    Returns:
+        Template persisté avec ``warnings`` GDD.
+
+    Raises:
+        404: Template absent.
+        500: Erreur disque.
+    """
+    try:
+        template, warnings = template_service.update_template(
+            template_id,
+            update_data.model_dump(exclude_none=True),
+        )
+        logger.info("Template mis à jour: %s (ID: %s)", template.name, template.id)
+        return TemplateCreateResponse(
+            **template.model_dump(),
+            warnings=warnings,
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Template not found",
+        ) from exc
+    except PermissionError as exc:
+        logger.exception("Permission denied updating template")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Permission denied",
+        ) from exc
+    except OSError as exc:
+        logger.exception("Disk error updating template")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Disk error",
+        ) from exc
+    except Exception as exc:
+        logger.exception("Erreur mise à jour template")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error updating template",
+        ) from exc
+
+
+@router.delete("/{template_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_template(
+    template_id: str,
+    template_service: TemplateService = Depends(get_template_service),
+) -> None:
+    """Supprime un template.
+
+    Raises:
+        404: Template absent.
+    """
+    try:
+        template_service.delete_template(template_id)
+        logger.info("Template supprimé: %s", template_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Template not found",
+        ) from exc
+    except Exception as exc:
+        logger.exception("Erreur suppression template")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error deleting template",
         ) from exc

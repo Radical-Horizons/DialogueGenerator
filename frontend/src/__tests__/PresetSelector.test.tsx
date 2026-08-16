@@ -2,7 +2,7 @@
  * Tests pour PresetSelector
  */
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { PresetSelector } from '../components/generation/PresetSelector';
 import { GenerationPanelNarrowProvider } from '../components/generation/GenerationPanelNarrowContext';
 import { usePresetStore } from '../store/presetStore';
@@ -50,7 +50,11 @@ vi.mock('../theme', () => ({
       },
     },
     state: {
-      error: { color: '#dc3545' },
+      error: {
+        color: '#dc3545',
+        background: '#3a1a1a',
+        border: '#ff4444',
+      },
       success: { color: '#28a745' },
       info: { color: '#17a2b8' },
       warning: { color: '#ffc107' },
@@ -85,6 +89,8 @@ describe('PresetSelector', () => {
   const mockOnPresetLoaded = vi.fn();
   const mockLoadTemplates = vi.fn();
   const mockCreateTemplate = vi.fn();
+  const mockUpdateTemplate = vi.fn();
+  const mockDeleteTemplate = vi.fn();
 
   const mockTemplates: Template[] = [
     {
@@ -141,6 +147,8 @@ describe('PresetSelector', () => {
       error: null,
       loadTemplates: mockLoadTemplates,
       createTemplate: mockCreateTemplate,
+      updateTemplate: mockUpdateTemplate,
+      deleteTemplate: mockDeleteTemplate,
       reset: vi.fn(),
     };
     (useTemplateStore as unknown as Mock).mockImplementation(
@@ -152,6 +160,8 @@ describe('PresetSelector', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCreateTemplate.mockResolvedValue({ warnings: [] });
+    mockUpdateTemplate.mockResolvedValue({ warnings: [] });
+    mockDeleteTemplate.mockResolvedValue(undefined);
 
     (usePresetStore as unknown as Mock).mockReturnValue({
       presets: [mockPreset],
@@ -191,6 +201,8 @@ describe('PresetSelector', () => {
         error: 'Échec du chargement des templates : 500',
         loadTemplates: mockLoadTemplates,
         createTemplate: mockCreateTemplate,
+        updateTemplate: vi.fn(),
+        deleteTemplate: vi.fn(),
         reset: vi.fn(),
       };
       (useTemplateStore as unknown as Mock).mockImplementation(
@@ -252,6 +264,77 @@ describe('PresetSelector', () => {
 
       expect(mockOnPresetLoaded).not.toHaveBeenCalled();
       expect(mockSetSelectedPreset).not.toHaveBeenCalled();
+    });
+
+    it('ouvre l’éditeur prérempli au clic Éditer', () => {
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+
+      fireEvent.click(screen.getAllByTestId('template-item-edit-btn')[0]);
+
+      expect(screen.getByTestId('template-editor-modal')).toBeInTheDocument();
+      expect(screen.getByTestId('template-edit-name')).toHaveValue('Salut A');
+      expect(screen.getByTestId('template-edit-instructions')).toHaveValue('Brief A');
+    });
+
+    it('annuler la suppression laisse l’item', () => {
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+
+      fireEvent.click(screen.getAllByTestId('template-item-delete-btn')[0]);
+      expect(screen.getByTestId('confirm-dialog')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('confirm-dialog-cancel'));
+
+      expect(mockDeleteTemplate).not.toHaveBeenCalled();
+      expect(screen.getByText('Salut A')).toBeInTheDocument();
+    });
+
+    it('confirmer la suppression appelle deleteTemplate', async () => {
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+
+      fireEvent.click(screen.getAllByTestId('template-item-delete-btn')[0]);
+      fireEvent.click(screen.getByTestId('confirm-dialog-confirm'));
+
+      await waitFor(() => {
+        expect(mockDeleteTemplate).toHaveBeenCalledWith('tpl-1');
+      });
+    });
+
+    it('n’envoie qu’un seul DELETE si on double-clique confirmer', async () => {
+      let resolveDelete: (() => void) | undefined;
+      mockDeleteTemplate.mockImplementation(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveDelete = resolve;
+          }),
+      );
+
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+
+      fireEvent.click(screen.getAllByTestId('template-item-delete-btn')[0]);
+      fireEvent.click(screen.getByTestId('confirm-dialog-confirm'));
+      fireEvent.click(screen.getByTestId('confirm-dialog-confirm'));
+
+      expect(mockDeleteTemplate).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        resolveDelete?.();
+      });
+    });
+
+    it('reset les filtres après un enregistrement d’édition', async () => {
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+
+      fireEvent.change(screen.getByTestId('template-filter-name'), {
+        target: { value: 'Salut A' },
+      });
+      expect(screen.queryByText('Combat B')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getAllByTestId('template-item-edit-btn')[0]);
+      fireEvent.click(screen.getByTestId('template-editor-save-btn'));
+
+      await waitFor(() => {
+        expect(mockUpdateTemplate).toHaveBeenCalled();
+      });
+      expect(screen.getByText('Combat B')).toBeInTheDocument();
     });
   });
 

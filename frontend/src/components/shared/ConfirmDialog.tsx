@@ -54,6 +54,7 @@ export function ConfirmDialog({
 
   return (
     <div
+      data-testid="confirm-dialog"
       style={{
         position: 'fixed',
         top: 0,
@@ -88,6 +89,8 @@ export function ConfirmDialog({
         </p>
         <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
           <button
+            type="button"
+            data-testid="confirm-dialog-cancel"
             onClick={onCancel}
             style={{
               padding: '0.5rem 1rem',
@@ -101,6 +104,8 @@ export function ConfirmDialog({
             {cancelLabel}
           </button>
           <button
+            type="button"
+            data-testid="confirm-dialog-confirm"
             onClick={onConfirm}
             style={{
               padding: '0.5rem 1rem',

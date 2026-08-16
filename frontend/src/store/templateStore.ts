@@ -1,10 +1,15 @@
 /**
- * Store Zustand pour la liste et la création des templates custom (Story 6.1.1).
+ * Store Zustand pour la liste et le CRUD des templates custom.
  */
 import { AxiosError } from 'axios'
 import { create } from 'zustand'
-import type { Template, TemplateCreate } from '../types/template'
-import { createTemplateApi, listTemplatesApi } from '../api/templates'
+import type { Template, TemplateCreate, TemplateUpdate } from '../types/template'
+import {
+  createTemplateApi,
+  deleteTemplateApi,
+  listTemplatesApi,
+  updateTemplateApi,
+} from '../api/templates'
 
 function formatTemplateRequestError(actionLabel: string, error: unknown): string {
   if (error instanceof AxiosError && error.response?.status != null) {
@@ -16,7 +21,7 @@ function formatTemplateRequestError(actionLabel: string, error: unknown): string
   return `Échec ${actionLabel}`
 }
 
-export interface TemplateCreateOutcome {
+export interface TemplateWriteOutcome {
   warnings: string[]
 }
 
@@ -25,11 +30,13 @@ interface TemplateStore {
   isLoading: boolean
   error: string | null
   loadTemplates: () => Promise<void>
-  createTemplate: (templateData: TemplateCreate) => Promise<TemplateCreateOutcome>
+  createTemplate: (templateData: TemplateCreate) => Promise<TemplateWriteOutcome>
+  updateTemplate: (id: string, updateData: TemplateUpdate) => Promise<TemplateWriteOutcome>
+  deleteTemplate: (id: string) => Promise<void>
   reset: () => void
 }
 
-/** Invalide les GET liste concurrentes (load vs load / reset). */
+/** Invalide les GET liste concurrentes (load vs load / reset / delete). */
 let listRequestSeq = 0
 
 function upsertTemplate(list: Template[], incoming: Template): Template[] {
@@ -91,6 +98,45 @@ export const useTemplateStore = create<TemplateStore>((set) => ({
       return { warnings }
     } catch (error) {
       const message = formatTemplateRequestError('de la création du template', error)
+      set({
+        error: message,
+        isLoading: false,
+      })
+      throw new Error(message)
+    }
+  },
+
+  updateTemplate: async (id, updateData) => {
+    set({ isLoading: true, error: null })
+    try {
+      const updated = await updateTemplateApi(id, updateData)
+      const { warnings, ...template } = updated
+      set((state) => ({
+        templates: upsertTemplate(state.templates, template),
+        isLoading: false,
+      }))
+      return { warnings }
+    } catch (error) {
+      const message = formatTemplateRequestError('de la mise à jour du template', error)
+      set({
+        error: message,
+        isLoading: false,
+      })
+      throw new Error(message)
+    }
+  },
+
+  deleteTemplate: async (id) => {
+    set({ isLoading: true, error: null })
+    try {
+      await deleteTemplateApi(id)
+      listRequestSeq += 1
+      set((state) => ({
+        templates: state.templates.filter((item) => item.id !== id),
+        isLoading: false,
+      }))
+    } catch (error) {
+      const message = formatTemplateRequestError('de la suppression du template', error)
       set({
         error: message,
         isLoading: false,

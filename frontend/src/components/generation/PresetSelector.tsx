@@ -6,7 +6,7 @@
  * - Sauvegarder la configuration actuelle comme preset
  * - Supprimer un preset (menu contextuel)
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { usePresetStore } from '../../store/presetStore';
 import { useTemplateStore } from '../../store/templateStore';
 import { useLLMStore } from '../../store/llmStore';
@@ -16,9 +16,10 @@ import { theme } from '../../theme';
 import { redesignControl, redesignDisclosureArrow, redesignRadius } from '../../theme/redesignTokens';
 import { generationPanelChrome } from '../../theme/responsiveChrome';
 import { TOUCH_TARGET_MIN_PX } from '../../constants';
-import { useToast, SaveStatusIndicator } from '../shared';
+import { useToast, SaveStatusIndicator, ConfirmDialog } from '../shared';
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext';
 import { TemplateCreatorModal } from './TemplateCreatorModal';
+import { TemplateEditorModal } from './TemplateEditorModal';
 import { NarrowOverlayDrawer } from '../layout/NarrowOverlayDrawer';
 import { filterTemplates, groupTemplatesByCategory, TEMPLATE_UNCATEGORIZED_LABEL } from '../../utils/templateGroups';
 import type { SaveStatus } from '../shared/SaveStatusIndicator';
@@ -89,7 +90,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     deletePreset,
     setSelectedPreset,
   } = usePresetStore();
-  const { templates, loadTemplates, error: templateError } = useTemplateStore();
+  const { templates, loadTemplates, error: templateError, deleteTemplate } = useTemplateStore();
   const toast = useToast();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -97,11 +98,14 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [presetToDelete, setPresetToDelete] = useState<Preset | null>(null);
   const [snapshotConfiguration, setSnapshotConfiguration] = useState<TemplateConfiguration | null>(null);
+  const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
+  const [deletingTemplate, setDeletingTemplate] = useState<Template | null>(null);
   const [isUpdatingPreset, setIsUpdatingPreset] = useState(false);
   const [nameFilter, setNameFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [contextFilter, setContextFilter] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const deletingTemplateRef = useRef(false);
 
   const filteredTemplates = useMemo(
     () =>
@@ -187,6 +191,24 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     await deletePreset(presetToDelete.id);
     setIsDeleteConfirmOpen(false);
     setPresetToDelete(null);
+  };
+
+  const handleDeleteTemplate = async () => {
+    if (!deletingTemplate || deletingTemplateRef.current) return;
+    deletingTemplateRef.current = true;
+    try {
+      await deleteTemplate(deletingTemplate.id);
+      toast('Template supprimé', 'success');
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : 'Échec de la suppression du template';
+      toast(message, 'error');
+    } finally {
+      deletingTemplateRef.current = false;
+      setDeletingTemplate(null);
+    }
   };
 
   const openDeleteConfirm = (preset: Preset, e: React.MouseEvent) => {
@@ -472,6 +494,19 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         }}
       />
 
+      <TemplateEditorModal
+        key={editingTemplate?.id ?? 'closed'}
+        isOpen={editingTemplate != null}
+        template={editingTemplate}
+        captureSnapshot={captureTemplateSnapshot}
+        onSaved={() => {
+          setNameFilter('');
+          setCategoryFilter('');
+          setContextFilter('');
+        }}
+        onClose={() => setEditingTemplate(null)}
+      />
+
       <section
         data-testid="mes-templates-list"
         style={{
@@ -634,6 +669,55 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                         ? ` · ${template.configuration.locations.join(', ')}`
                         : ''}
                     </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '0.35rem',
+                        marginTop: '0.5rem',
+                      }}
+                    >
+                      <button
+                        type="button"
+                        data-testid="template-item-edit-btn"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setEditingTemplate(template);
+                        }}
+                        style={{
+                          minHeight: TOUCH_TARGET_MIN_PX,
+                          padding: chrome.buttonPadding,
+                          backgroundColor: theme.button.default.background,
+                          border: `1px solid ${theme.border.secondary}`,
+                          borderRadius: `${redesignRadius.control}px`,
+                          color: theme.button.default.color,
+                          cursor: 'pointer',
+                          fontSize: `${chrome.buttonFontRem}rem`,
+                        }}
+                      >
+                        Éditer
+                      </button>
+                      <button
+                        type="button"
+                        data-testid="template-item-delete-btn"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setDeletingTemplate(template);
+                        }}
+                        style={{
+                          minHeight: TOUCH_TARGET_MIN_PX,
+                          padding: chrome.buttonPadding,
+                          backgroundColor: theme.button.default.background,
+                          border: `1px solid ${theme.border.secondary}`,
+                          borderRadius: `${redesignRadius.control}px`,
+                          color: theme.state.error.color,
+                          cursor: 'pointer',
+                          fontSize: `${chrome.buttonFontRem}rem`,
+                        }}
+                      >
+                        Supprimer
+                      </button>
+                    </div>
                   </div>
                 </div>
                 )
@@ -706,6 +790,23 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={deletingTemplate != null}
+        title="Supprimer ce template ?"
+        message={
+          deletingTemplate
+            ? `Le template « ${deletingTemplate.name} » sera retiré définitivement.`
+            : ''
+        }
+        confirmLabel="Supprimer"
+        cancelLabel="Annuler"
+        variant="danger"
+        onConfirm={() => {
+          void handleDeleteTemplate();
+        }}
+        onCancel={() => setDeletingTemplate(null)}
+      />
     </div>
   );
 };

@@ -4,7 +4,7 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from api.schemas.preset import Preset, PresetConfiguration, PresetMetadata
 from api.schemas.template import Template, TemplateConfiguration, TemplateHistoryEntry
@@ -17,7 +17,7 @@ DEFAULT_TEMPLATES_DIR = DIALOGUE_GENERATOR_DIR / "data" / "templates" / "custom"
 
 
 class TemplateService:
-    """CRUD minimal des templates custom (création + liste).
+    """CRUD des templates custom (création, liste, lecture, mise à jour, suppression).
 
     Stockage : fichiers JSON UUID sous ``data/templates/custom/``.
     La validation GDD est lazy : on réutilise ``PresetService.validate_preset_references``
@@ -68,6 +68,128 @@ class TemplateService:
             history=[TemplateHistoryEntry(at=now, action="created")],
         )
 
+        template, warnings = self._apply_gdd_validation(template)
+        self._save_template_to_disk(template)
+        logger.info("Template créé: %s (ID: %s)", template.name, template_id)
+        return template, warnings
+
+    def list_templates(self) -> List[Template]:
+        """Liste tous les templates custom.
+
+        Returns:
+            Liste des templates (vide si aucun fichier valide).
+        """
+        templates: List[Template] = []
+        if not self.templates_dir.exists():
+            return templates
+
+        for template_file in self.templates_dir.glob("*.json"):
+            try:
+                with open(template_file, "r", encoding="utf-8") as handle:
+                    payload = json.load(handle)
+                    templates.append(Template(**payload))
+            except (
+                json.JSONDecodeError,
+                ValueError,
+                TypeError,
+                OSError,
+                UnicodeDecodeError,
+            ) as exc:
+                logger.error("Erreur chargement template %s: %s", template_file.name, exc)
+                continue
+
+        logger.debug("Liste templates chargée: %s templates", len(templates))
+        return templates
+
+    def get_template(self, template_id: str) -> Template:
+        """Charge un template par UUID.
+
+        Args:
+            template_id: UUID du fichier.
+
+        Returns:
+            Template persisté.
+
+        Raises:
+            FileNotFoundError: Fichier absent ou UUID invalide.
+        """
+        template_file = self._template_path(template_id)
+        if not template_file.exists():
+            raise FileNotFoundError(f"Template {template_id} not found")
+        with open(template_file, "r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+        return Template(**payload)
+
+    def update_template(
+        self,
+        template_id: str,
+        update_data: Dict[str, Any],
+    ) -> Tuple[Template, List[str]]:
+        """Met à jour un template (même UUID), append ``history`` updated.
+
+        Args:
+            template_id: UUID existant.
+            update_data: Champs partiels (name, description, category, icon, configuration).
+
+        Returns:
+            Tuple (template persisté, warnings GDD).
+
+        Raises:
+            FileNotFoundError: Template absent.
+        """
+        template = self.get_template(template_id)
+        now = datetime.now(timezone.utc)
+        updates: Dict[str, Any] = {}
+        if "name" in update_data:
+            updates["name"] = update_data["name"]
+        if "description" in update_data:
+            updates["description"] = update_data["description"] or ""
+        if "category" in update_data:
+            updates["category"] = (update_data.get("category") or "").strip() or "Général"
+        if "icon" in update_data:
+            updates["icon"] = update_data.get("icon") or "📋"
+        if "configuration" in update_data and update_data["configuration"] is not None:
+            updates["configuration"] = TemplateConfiguration(**update_data["configuration"])
+
+        history = list(template.history)
+        history.append(TemplateHistoryEntry(at=now, action="updated"))
+        metadata = template.metadata.model_copy(update={"modified": now})
+        template = template.model_copy(
+            update={**updates, "history": history, "metadata": metadata}
+        )
+
+        template, warnings = self._apply_gdd_validation(template)
+        if not self._template_path(template_id).exists():
+            raise FileNotFoundError(f"Template {template_id} not found")
+        self._save_template_to_disk(template)
+        logger.info("Template mis à jour: %s (ID: %s)", template.name, template_id)
+        return template, warnings
+
+    def delete_template(self, template_id: str) -> None:
+        """Supprime le fichier UUID du template.
+
+        Args:
+            template_id: UUID du fichier.
+
+        Raises:
+            FileNotFoundError: Template absent.
+        """
+        template_file = self._template_path(template_id)
+        if not template_file.exists():
+            raise FileNotFoundError(f"Template {template_id} not found")
+        template_file.unlink()
+        logger.info("Template supprimé: %s", template_id)
+
+    def _template_path(self, template_id: str) -> Path:
+        """Résout le chemin JSON d'un UUID (refuse un id non-UUID)."""
+        try:
+            UUID(template_id)
+        except ValueError as exc:
+            raise FileNotFoundError(f"Template {template_id} not found") from exc
+        return self.templates_dir / f"{template_id}.json"
+
+    def _apply_gdd_validation(self, template: Template) -> Tuple[Template, List[str]]:
+        """Applique la validation GDD lazy (warnings, jamais d'échec)."""
         validation = self.preset_service.validate_preset_references(
             self._as_preset_for_validation(template)
         )
@@ -101,41 +223,11 @@ class TemplateService:
                 if loc not in validation.obsoleteRefs
             ]
             logger.info(
-                "Template créé avec %s référence(s) obsolète(s) (warnings, pas d'erreur)",
+                "Template avec %s référence(s) obsolète(s) (warnings, pas d'erreur)",
                 len(validation.obsoleteRefs),
             )
 
-        self._save_template_to_disk(template)
-        logger.info("Template créé: %s (ID: %s)", template.name, template_id)
         return template, list(validation.warnings)
-
-    def list_templates(self) -> List[Template]:
-        """Liste tous les templates custom.
-
-        Returns:
-            Liste des templates (vide si aucun fichier valide).
-        """
-        templates: List[Template] = []
-        if not self.templates_dir.exists():
-            return templates
-
-        for template_file in self.templates_dir.glob("*.json"):
-            try:
-                with open(template_file, "r", encoding="utf-8") as handle:
-                    payload = json.load(handle)
-                    templates.append(Template(**payload))
-            except (
-                json.JSONDecodeError,
-                ValueError,
-                TypeError,
-                OSError,
-                UnicodeDecodeError,
-            ) as exc:
-                logger.error("Erreur chargement template %s: %s", template_file.name, exc)
-                continue
-
-        logger.debug("Liste templates chargée: %s templates", len(templates))
-        return templates
 
     def _as_preset_for_validation(self, template: Template) -> Preset:
         """Construit un Preset temporaire pour réutiliser la validation GDD existante.

@@ -36,7 +36,18 @@ export interface TemplateCreate {
   configuration: TemplateConfiguration
 }
 
-/** Réponse POST 201 : template persisté + warnings GDD. */
-export interface TemplateCreateResponse extends Template {
+/** Réponse POST 201 / PUT 200 : template persisté + warnings GDD. */
+export interface TemplateWriteResponse extends Template {
   warnings: string[]
+}
+
+/** Alias historique (création). */
+export type TemplateCreateResponse = TemplateWriteResponse
+
+export interface TemplateUpdate {
+  name?: string
+  description?: string
+  category?: string
+  icon?: string
+  configuration?: TemplateConfiguration
 }

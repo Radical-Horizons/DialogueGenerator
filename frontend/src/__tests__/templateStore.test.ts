@@ -1,5 +1,5 @@
 /**
- * Tests du store templates (liste + création uniquement).
+ * Tests du store templates (liste + CRUD).
  */
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { AxiosError } from 'axios'
@@ -199,5 +199,53 @@ describe('useTemplateStore', () => {
     })
 
     expect(result.current.error).toContain('Échec de la création du template')
+  })
+
+  it('met à jour un template en place (même id)', async () => {
+    const created: TemplateCreateResponse = { ...sampleTemplate, warnings: [] }
+    vi.mocked(templatesApi.createTemplateApi).mockResolvedValueOnce(created)
+    vi.mocked(templatesApi.updateTemplateApi).mockResolvedValueOnce({
+      ...sampleTemplate,
+      name: 'Renommé',
+      warnings: [],
+      history: [
+        { at: '2026-08-16T10:00:00Z', action: 'created' },
+        { at: '2026-08-16T12:00:00Z', action: 'updated' },
+      ],
+    })
+    const { result } = renderHook(() => useTemplateStore())
+
+    await act(async () => {
+      await result.current.createTemplate({
+        name: 'Template test',
+        configuration: sampleTemplate.configuration,
+      })
+    })
+    await act(async () => {
+      await result.current.updateTemplate('tpl-001', { name: 'Renommé' })
+    })
+
+    expect(result.current.templates).toHaveLength(1)
+    expect(result.current.templates[0].name).toBe('Renommé')
+    expect(result.current.templates[0].id).toBe('tpl-001')
+  })
+
+  it('retire le template de la liste après delete', async () => {
+    const created: TemplateCreateResponse = { ...sampleTemplate, warnings: [] }
+    vi.mocked(templatesApi.createTemplateApi).mockResolvedValueOnce(created)
+    vi.mocked(templatesApi.deleteTemplateApi).mockResolvedValueOnce()
+    const { result } = renderHook(() => useTemplateStore())
+
+    await act(async () => {
+      await result.current.createTemplate({
+        name: 'Template test',
+        configuration: sampleTemplate.configuration,
+      })
+    })
+    await act(async () => {
+      await result.current.deleteTemplate('tpl-001')
+    })
+
+    expect(result.current.templates).toEqual([])
   })
 })
