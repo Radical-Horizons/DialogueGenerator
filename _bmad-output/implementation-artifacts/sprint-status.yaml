@@ -38,7 +38,7 @@ project: DialogueGenerator
 project_key: dialogue-generator
 tracking_system: file-system
 story_location: '{project-root}/_bmad-output/implementation-artifacts'
-last_updated: '2026-08-17'
+last_updated: '2026-08-17T23:50:00+02:00'
 development_status:
   # Flat list (not nested YAML): each epic block = epic → stories → retrospective, then the NEXT epic starts.
   # Order = delivery sequence (see epic-list.md): 0 → 16 → 1–3 → 17 → 4–15 — not strict epic ID sort.
@@ -147,18 +147,18 @@ development_status:
   5-5-prévisualiser-export-avant-téléchargement-structure-json-taille-fr53: done
   5-6-générer-logs-export-avec-métadonnées-date-génération-coût-statut-validation-fr54: done
   epic-5-retrospective: done
-  epic-6: in-progress
-  6-1-créer-templates-custom-dinstructions-pour-génération-dialogue-fr55: backlog
+  epic-6: done
+  6-1-créer-templates-custom-dinstructions-pour-génération-dialogue-fr55: done
   6-1-1-creer-templates-custom-generation-dialogue-fr55: done
   6-1-2-filtrer-templates-nom-categorie-contexte-fr55: done
-  6-2-sauvegarder-éditer-et-supprimer-templates-fr56: review
-  6-3-appliquer-templates-à-génération-dialogue-fr57: review
-  6-4-fournir-templates-pré-built-salutations-confrontation-révélation-fr58: review
-  6-5-configurer-templates-anti-context-dropping-subtilité-lore-vs-explicite-fr59: review
-  6-6-parcourir-marketplace-de-templates-v15-fr60: review
-  6-7-a-b-tester-templates-et-scorer-qualité-v25-fr61: review
-  6-8-partager-templates-avec-membres-équipe-fr62: review
-  6-9-suggérer-templates-basés-sur-scénario-dialogue-fr63: review
+  6-2-sauvegarder-éditer-et-supprimer-templates-fr56: done
+  6-3-appliquer-templates-à-génération-dialogue-fr57: done
+  6-4-fournir-templates-pré-built-salutations-confrontation-révélation-fr58: done
+  6-5-configurer-templates-anti-context-dropping-subtilité-lore-vs-explicite-fr59: done
+  6-6-parcourir-marketplace-de-templates-v15-fr60: done
+  6-7-a-b-tester-templates-et-scorer-qualité-v25-fr61: done
+  6-8-partager-templates-avec-membres-équipe-fr62: done
+  6-9-suggérer-templates-basés-sur-scénario-dialogue-fr63: done
   epic-6-retrospective: optional
   epic-7: done
   7-0-fondation-sqlite-application-data-app-db: done
