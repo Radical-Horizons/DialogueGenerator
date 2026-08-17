@@ -418,3 +418,53 @@ def test_admin_can_unpublish_other_listing(marketplace_client: TestClient) -> No
     app.dependency_overrides[get_current_user] = lambda: _user("admin-a", "admin")
     response = marketplace_client.delete(f"/api/v1/templates/marketplace/{listing_id}")
     assert response.status_code == 204
+
+
+def test_marketplace_anonymous_hides_username_for_others(
+    marketplace_client: TestClient,
+) -> None:
+    """Publication anonyme : les autres voient Anonyme."""
+    template_id = _create_custom(marketplace_client)
+    published = marketplace_client.post(
+        "/api/v1/templates/marketplace",
+        json={"templateId": template_id, "anonymous": True},
+    )
+    assert published.status_code == 201
+    listing_id = published.json()["id"]
+    assert published.json()["isAnonymous"] is True
+    app.dependency_overrides[get_current_user] = lambda: _user("writer-b")
+    loaded = marketplace_client.get(f"/api/v1/templates/marketplace/{listing_id}")
+    assert loaded.status_code == 200
+    assert loaded.json()["authorUsername"] == "Anonyme"
+    browsed = marketplace_client.get("/api/v1/templates/marketplace")
+    assert browsed.status_code == 200
+    listed = next(item for item in browsed.json() if item["id"] == listing_id)
+    assert listed["authorUsername"] == "Anonyme"
+
+
+def test_marketplace_comments_and_official(
+    marketplace_client: TestClient,
+) -> None:
+    """Commentaire writer + marquage officiel admin."""
+    template_id = _create_custom(marketplace_client)
+    listing_id = marketplace_client.post(
+        "/api/v1/templates/marketplace",
+        json={"templateId": template_id},
+    ).json()["id"]
+    commented = marketplace_client.post(
+        f"/api/v1/templates/marketplace/{listing_id}/comments",
+        json={"body": "Utile pour les tests."},
+    )
+    assert commented.status_code == 201
+    listed = marketplace_client.get(
+        f"/api/v1/templates/marketplace/{listing_id}/comments"
+    )
+    assert listed.status_code == 200
+    assert listed.json()[0]["body"] == "Utile pour les tests."
+    app.dependency_overrides[get_current_user] = lambda: _user("admin-a", "admin")
+    official = marketplace_client.patch(
+        f"/api/v1/templates/marketplace/{listing_id}/official",
+        json={"isOfficial": True},
+    )
+    assert official.status_code == 200
+    assert official.json()["isOfficial"] is True

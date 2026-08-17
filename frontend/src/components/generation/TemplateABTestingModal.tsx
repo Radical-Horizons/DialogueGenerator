@@ -18,24 +18,36 @@ import { useToast } from '../shared'
 import {
   getAbTestApi,
   listAbTestsApi,
+  listMarketplaceTemplatesApi,
   patchAbTestFeedbackApi,
   rerunAbTestApi,
   startAbTestApi,
 } from '../../api/templates'
-import type { ABTestHistoryItem, ABTestResult, PrebuiltTemplate, Template } from '../../types/template'
+import type {
+  ABTestHistoryItem,
+  ABTestResult,
+  ABTestWinnerMode,
+  MarketplaceListing,
+  PrebuiltTemplate,
+  Template,
+} from '../../types/template'
 import {
   costBarPercents,
+  marketplaceAbTestId,
   prebuiltAbTestId,
   scoreBarPercent,
   scoreHistorySeries,
   winnerLabel,
 } from '../../utils/abTestCharts'
+import { useGraphStore } from '../../store/graphStore'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
 
 export interface TemplateABTestingModalProps {
   isOpen: boolean
   onClose: () => void
   templates: Template[]
   prebuiltTemplates: PrebuiltTemplate[]
+  initialBId?: string
 }
 
 interface TemplateOption {
@@ -74,6 +86,7 @@ export function TemplateABTestingModal({
   onClose,
   templates,
   prebuiltTemplates,
+  initialBId = '',
 }: TemplateABTestingModalProps) {
   const isNarrow = useGenerationPanelNarrow()
   const chrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
@@ -83,6 +96,8 @@ export function TemplateABTestingModal({
   const [templateBId, setTemplateBId] = useState('')
   const [generations, setGenerations] = useState(3)
   const [maxDepth, setMaxDepth] = useState(2)
+  const [winnerMode, setWinnerMode] = useState<ABTestWinnerMode>('score')
+  const [listings, setListings] = useState<MarketplaceListing[]>([])
   const [history, setHistory] = useState<ABTestHistoryItem[]>([])
   const [result, setResult] = useState<ABTestResult | null>(null)
   const [parentResult, setParentResult] = useState<ABTestResult | null>(null)
@@ -99,8 +114,12 @@ export function TemplateABTestingModal({
         id: prebuiltAbTestId(item.id),
         name: `${item.name} (pré-built)`,
       })),
+      ...listings.map((item) => ({
+        id: marketplaceAbTestId(item.id),
+        name: `${item.name} (marketplace)`,
+      })),
     ],
-    [templates, prebuiltTemplates],
+    [templates, prebuiltTemplates, listings],
   )
 
   const stopPoll = () => {
@@ -147,7 +166,13 @@ export function TemplateABTestingModal({
       return
     }
     setError(null)
+    if (initialBId) {
+      setTemplateBId(initialBId)
+    }
     void loadHistory()
+    void listMarketplaceTemplatesApi()
+      .then((next) => setListings(next))
+      .catch(() => setListings([]))
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         onClose()
@@ -158,7 +183,7 @@ export function TemplateABTestingModal({
       window.removeEventListener('keydown', onKeyDown)
       stopPoll()
     }
-  }, [isOpen, onClose, loadHistory])
+  }, [isOpen, onClose, loadHistory, initialBId])
 
   const startPolling = (testId: string) => {
     stopPoll()
@@ -186,6 +211,7 @@ export function TemplateABTestingModal({
         templateBId,
         generationsPerTemplate: generations,
         maxDepth,
+        winnerMode,
       })
       await loadTest(created.testId)
       startPolling(created.testId)
@@ -213,6 +239,25 @@ export function TemplateABTestingModal({
       setResult(updated)
     } catch {
       toast('Impossible d’enregistrer le pouce', 'error')
+    }
+  }
+
+  const handleOpenGraph = async (generation: ABTestResult['generations'][number]) => {
+    if (!generation.document) {
+      toast('Aucun arbre à ouvrir pour cette génération', 'error')
+      return
+    }
+    try {
+      await useGraphStore
+        .getState()
+        .loadDialogueFromRawJson(
+          JSON.stringify(generation.document),
+          `ab-${result?.testId ?? 'test'}-${generation.id}`,
+        )
+      useUiLayoutStore.getState().setCenterPanelTab('graph')
+      onClose()
+    } catch {
+      toast('Impossible d’ouvrir l’arbre dans le graphe', 'error')
     }
   }
 
@@ -398,6 +443,23 @@ export function TemplateABTestingModal({
               onChange={(event) => setMaxDepth(Number(event.target.value))}
               style={fieldStyle}
             />
+            <label
+              htmlFor="ab-test-winner-mode"
+              style={{ display: 'block', marginTop: 12, marginBottom: 4 }}
+            >
+              Critère gagnant
+            </label>
+            <select
+              id="ab-test-winner-mode"
+              data-testid="ab-test-winner-mode"
+              value={winnerMode}
+              onChange={(event) => setWinnerMode(event.target.value as ABTestWinnerMode)}
+              style={fieldStyle}
+            >
+              <option value="score">Score juge</option>
+              <option value="score_thumbs">Pouces puis score</option>
+              <option value="score_cost">Coût puis score</option>
+            </select>
             <button
               type="button"
               data-testid="ab-test-launch-btn"
@@ -539,6 +601,16 @@ export function TemplateABTestingModal({
                         {generation.durationMs ? ` · ${generation.durationMs} ms` : ''}
                         {generation.error ? ` (${generation.error})` : ''}
                       </div>
+                      {generation.document ? (
+                        <button
+                          type="button"
+                          data-testid={`ab-test-open-graph-${generation.id}`}
+                          onClick={() => void handleOpenGraph(generation)}
+                          style={{ ...buttonStyle, marginTop: 8 }}
+                        >
+                          Ouvrir dans le graphe
+                        </button>
+                      ) : null}
                       {generation.criteria.length > 0 ? (
                         <ul data-testid={`ab-test-criteria-${generation.id}`}>
                           {generation.criteria.map((criterion) => (

@@ -9,6 +9,7 @@ import * as templatesAPI from '../../api/templates'
 
 vi.mock('../../api/templates', () => ({
   listTemplateSharesApi: vi.fn(),
+  listTemplateShareTargetsApi: vi.fn(),
   createTemplateShareApi: vi.fn(),
   deleteTemplateShareApi: vi.fn(),
 }))
@@ -17,6 +18,9 @@ describe('TemplateSharingModal', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(templatesAPI.listTemplateSharesApi).mockResolvedValue([])
+    vi.mocked(templatesAPI.listTemplateShareTargetsApi).mockResolvedValue([
+      { id: 'writer-b', username: 'writer-b' },
+    ])
   })
 
   it('charge la liste et invite un writer', async () => {
@@ -53,6 +57,7 @@ describe('TemplateSharingModal', () => {
       expect(templatesAPI.createTemplateShareApi).toHaveBeenCalledWith(
         'tpl-1',
         'writer-b',
+        false,
       )
     })
     expect(await screen.findByTestId('template-share-row-writer-b')).toBeInTheDocument()

@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass
-from typing import List, Mapping, Optional
+from pathlib import Path
+from typing import Callable, List, Mapping, Optional, Sequence
 
 from api.schemas.template import (
     MarketplaceListing,
@@ -12,6 +14,7 @@ from api.schemas.template import (
     Template,
     TemplateSuggestionItem,
 )
+from api.utils.job_ownership import template_owner_key
 from services.template_marketplace_service import TemplateMarketplaceService
 from services.template_service import TemplateService
 from services.template_sharing_service import TemplateSharingService
@@ -24,11 +27,45 @@ from services.template_suggestion_score import (
     SuggestionCandidateFeatures,
     SuggestionQuery,
     SuggestionScore,
+    has_first_meeting_flag,
     has_rencontre_initiale_text,
     score_candidate,
+    suggestion_context_key,
 )
 
 logger = logging.getLogger(__name__)
+_GDD_FLAGS_PATH = (
+    Path(__file__).resolve().parent.parent / "data" / "GDD_categories" / "Flags.json"
+)
+FlagNamesLoader = Callable[[], Sequence[str]]
+
+
+_FLAG_NOMS_CACHE: list[str] | None = None
+
+
+def load_gdd_flag_noms(path: Path | None = None) -> list[str]:
+    """Lit les ``Nom`` de ``Flags.json`` (catalogue GDD, pas le CSV Unity)."""
+    global _FLAG_NOMS_CACHE
+    if path is None and _FLAG_NOMS_CACHE is not None:
+        return _FLAG_NOMS_CACHE
+    flags_path = path or _GDD_FLAGS_PATH
+    try:
+        payload = json.loads(flags_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.warning("Flags.json illisible (%s): %s", flags_path, exc)
+        return []
+    if not isinstance(payload, list):
+        return []
+    names: list[str] = []
+    for item in payload:
+        if not isinstance(item, dict):
+            continue
+        nom = item.get("Nom")
+        if isinstance(nom, str) and nom.strip():
+            names.append(nom.strip())
+    if path is None:
+        _FLAG_NOMS_CACHE = names
+    return names
 
 
 def _normalize_scene_type(scene_type: str) -> str:
@@ -73,24 +110,29 @@ class TemplateSuggestionService:
         usage_repository: TemplateSuggestionUsageRepository,
         sharing_service: TemplateSharingService,
         marketplace_service: TemplateMarketplaceService,
+        flag_names_loader: FlagNamesLoader | None = None,
     ) -> None:
         """Injecte usage SQLite, ACL 6.8 et marketplace."""
         self._usage = usage_repository
         self._sharing = sharing_service
         self._marketplace = marketplace_service
+        self._flag_names_loader = flag_names_loader or load_gdd_flag_noms
 
     @staticmethod
     def _actor_id(current_user: Mapping[str, object]) -> str:
-        """Identifiant JWT (guest = ``guest``)."""
-        return str(current_user.get("id") or "").strip() or "guest"
+        """Identifiant owner (UUID writer, ``guest:{sid}`` pour un invité)."""
+        return template_owner_key(current_user)
 
     def record_used(
         self,
         current_user: Mapping[str, object],
         source: str,
         candidate_id: str,
+        *,
+        scene_type: str = "",
+        characters: Sequence[str] | None = None,
     ) -> int:
-        """Incrémente le compteur perso.
+        """Incrémente le compteur perso (et le compteur de scénario).
 
         Raises:
             TemplateSuggestionValidationError: Source inconnue ou id vide.
@@ -99,14 +141,22 @@ class TemplateSuggestionService:
         cleaned_id = (candidate_id or "").strip()
         if cleaned_source not in VALID_SOURCES or not cleaned_id:
             raise TemplateSuggestionValidationError("source ou id invalide")
+        actor = self._actor_id(current_user)
         count = self._usage.increment(
-            user_id=self._actor_id(current_user),
+            user_id=actor,
             source=cleaned_source,
             candidate_id=cleaned_id,
         )
+        context_key = suggestion_context_key(scene_type, characters or ())
+        self._usage.increment_context(
+            user_id=actor,
+            source=cleaned_source,
+            candidate_id=cleaned_id,
+            context_key=context_key,
+        )
         logger.info(
             "Suggestion usage ++: user=%s source=%s id=%s count=%s",
-            self._actor_id(current_user),
+            actor,
             cleaned_source,
             cleaned_id,
             count,
@@ -130,14 +180,18 @@ class TemplateSuggestionService:
             scene_type=_normalize_scene_type(scene_type),
             characters=tuple(characters or ()),
             locations=tuple(locations or ()),
-            has_rencontre_initiale=has_rencontre_initiale_text(
-                rencontre_initiale_by_character
+            has_rencontre_initiale=(
+                has_rencontre_initiale_text(rencontre_initiale_by_character)
+                or has_first_meeting_flag(characters or (), self._flag_names_loader())
             ),
         )
         if not _has_suggestion_signals(query):
             return []
         actor = self._actor_id(current_user)
         usage_map = self._usage.list_for_user(actor)
+        context_map = self._usage.list_context_for_user(
+            actor, suggestion_context_key(scene_type, characters or ())
+        )
         visible = self._sharing.list_visible(
             template_service.list_templates(),
             current_user,
@@ -158,6 +212,7 @@ class TemplateSuggestionService:
                 query,
                 usage_map.get(("custom", template.id), 0),
                 market_by_source.get(template.id, 0),
+                context_map.get(("custom", template.id), 0),
             )
             if ranked is not None:
                 pending.append(ranked)
@@ -167,6 +222,7 @@ class TemplateSuggestionService:
                 prebuilt,
                 query,
                 usage_map.get(("prebuilt", prebuilt.id), 0),
+                context_map.get(("prebuilt", prebuilt.id), 0),
             )
             if ranked is not None:
                 pending.append(ranked)
@@ -178,6 +234,7 @@ class TemplateSuggestionService:
                 listing,
                 query,
                 usage_map.get(("marketplace", listing.id), 0),
+                context_map.get(("marketplace", listing.id), 0),
             )
             if ranked is not None:
                 pending.append(ranked)
@@ -195,6 +252,7 @@ class TemplateSuggestionService:
         query: SuggestionQuery,
         use_count: int,
         market_usage: int,
+        context_use_count: int = 0,
     ) -> Optional[_RankedItem]:
         """Score un custom visible."""
         features = SuggestionCandidateFeatures(
@@ -208,6 +266,7 @@ class TemplateSuggestionService:
             locations=tuple(template.configuration.locations),
             use_count=use_count,
             market_usage_count=market_usage,
+            context_use_count=context_use_count,
         )
         scored = score_candidate(features, query)
         if scored.score <= 0:
@@ -231,6 +290,7 @@ class TemplateSuggestionService:
         prebuilt: PrebuiltTemplate,
         query: SuggestionQuery,
         use_count: int,
+        context_use_count: int = 0,
     ) -> Optional[_RankedItem]:
         """Score une fiche pré-built."""
         features = SuggestionCandidateFeatures(
@@ -244,6 +304,7 @@ class TemplateSuggestionService:
             locations=tuple(prebuilt.configuration.locations),
             use_count=use_count,
             market_usage_count=0,
+            context_use_count=context_use_count,
         )
         scored = score_candidate(features, query)
         if scored.score <= 0:
@@ -272,6 +333,7 @@ class TemplateSuggestionService:
         listing: MarketplaceListing,
         query: SuggestionQuery,
         use_count: int,
+        context_use_count: int = 0,
     ) -> Optional[_RankedItem]:
         """Score un listing marketplace (hors dédup live)."""
         features = SuggestionCandidateFeatures(
@@ -285,6 +347,7 @@ class TemplateSuggestionService:
             locations=tuple(listing.configuration.locations),
             use_count=use_count,
             market_usage_count=listing.usageCount,
+            context_use_count=context_use_count,
         )
         scored = score_candidate(features, query)
         if scored.score <= 0:

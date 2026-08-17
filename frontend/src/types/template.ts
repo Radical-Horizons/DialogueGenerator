@@ -12,7 +12,7 @@ export interface TemplateConfiguration extends PresetConfiguration {
   contextDroppingRules?: ContextDroppingRules | null
 }
 
-export type TemplateHistoryAction = 'created' | 'updated'
+export type TemplateHistoryAction = 'created' | 'updated' | 'restored'
 
 export interface TemplateHistoryEntry {
   at: string
@@ -64,6 +64,19 @@ export interface TemplateShare {
   user_id: string
   username: string
   created_at: string
+  can_edit?: boolean
+}
+
+export interface TemplateShareTarget {
+  id: string
+  username: string
+}
+
+export interface TemplateVersionSummary {
+  id: string
+  at: string
+  name: string
+  instructionsPreview: string
 }
 
 /** Fiche Alteir lecture seule (catalogue pré-built). */
@@ -97,6 +110,8 @@ export interface MarketplaceListing {
   usageCount: number
   ratingAverage: number | null
   ratingCount: number
+  isAnonymous?: boolean
+  isOfficial?: boolean
 }
 
 export interface MarketplaceRatingRequest {
@@ -122,6 +137,7 @@ export interface ABTestGeneration {
   durationMs: number
   thumb: ABTestThumb
   error: string | null
+  document?: unknown | null
 }
 
 export interface ABTestSideTotals {
@@ -170,11 +186,14 @@ export interface ABTestHistoryItem {
   meanScoreB: number | null
 }
 
+export type ABTestWinnerMode = 'score' | 'score_thumbs' | 'score_cost'
+
 export interface ABTestCreateRequest {
   templateAId: string
   templateBId: string
   generationsPerTemplate: number
   maxDepth?: number
+  winnerMode?: ABTestWinnerMode
 }
 
 export interface ABTestCreateResponse {
@@ -182,6 +201,14 @@ export interface ABTestCreateResponse {
   status: string
   current: number
   total: number
+}
+
+export interface MarketplaceComment {
+  id: string
+  listingId: string
+  authorUsername: string
+  body: string
+  createdAt: string
 }
 
 export type TemplateSuggestionSource = 'custom' | 'prebuilt' | 'marketplace'

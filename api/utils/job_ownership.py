@@ -26,3 +26,26 @@ def job_owner_key(user: Mapping[str, object]) -> str:
             return f"guest:{session_id.strip()}"
         return "guest"
     return username or user_id or "unknown"
+
+
+def template_owner_key(user: Mapping[str, object]) -> str:
+    """Clé propriétaire des templates / A/B / suggestions.
+
+    Les writers et admins sont identifiés par ``users.id`` (UUID persisté
+    dans ``owner_id``). Les guests isolent leurs JSON via ``guest:{sid}``.
+
+    Args:
+        user: Principal auth (id/role/username/session_id).
+
+    Returns:
+        Identifiant à écrire dans ``owner_id`` / ``ownerKey``.
+    """
+    role = str(user.get("role") or "")
+    username = str(user.get("username") or "")
+    user_id = str(user.get("id") or "").strip()
+    if role == "guest" or username == "guest" or user_id == "guest":
+        session_id = user.get("session_id")
+        if isinstance(session_id, str) and session_id.strip():
+            return f"guest:{session_id.strip()}"
+        return "guest"
+    return user_id or username or "unknown"

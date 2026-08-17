@@ -7,16 +7,19 @@ import type {
   ABTestCreateResponse,
   ABTestHistoryItem,
   ABTestResult,
+  MarketplaceComment,
   MarketplaceListing,
   MarketplaceRatingRequest,
   PrebuiltTemplate,
   Template,
   TemplateCreate,
   TemplateShare,
+  TemplateShareTarget,
   TemplateSuggestion,
   TemplateSuggestionRequest,
   TemplateSuggestionUsedResponse,
   TemplateUpdate,
+  TemplateVersionSummary,
   TemplateWriteResponse,
 } from '../types/template'
 import type { PresetValidationResult } from '../types/preset'
@@ -93,10 +96,21 @@ export async function listTemplateSharesApi(templateId: string): Promise<Templat
 export async function createTemplateShareApi(
   templateId: string,
   username: string,
+  canEdit = false,
 ): Promise<TemplateShare> {
   const { data } = await apiClient.post<TemplateShare>(
     `/api/v1/templates/${templateId}/shares`,
-    { username },
+    { username, canEdit },
+  )
+  return data
+}
+
+/**
+ * Writers actifs proposables comme destinataires.
+ */
+export async function listTemplateShareTargetsApi(): Promise<TemplateShareTarget[]> {
+  const { data } = await apiClient.get<TemplateShareTarget[]>(
+    '/api/v1/templates/share-targets',
   )
   return data
 }
@@ -167,9 +181,11 @@ export async function listMarketplaceTemplatesApi(): Promise<MarketplaceListing[
  */
 export async function publishMarketplaceTemplateApi(
   templateId: string,
+  anonymous = false,
 ): Promise<MarketplaceListing> {
   const { data } = await apiClient.post<MarketplaceListing>('/api/v1/templates/marketplace', {
     templateId,
+    anonymous,
   })
   return data
 }
@@ -205,6 +221,71 @@ export async function rateMarketplaceTemplateApi(
  */
 export async function unpublishMarketplaceListingApi(listingId: string): Promise<void> {
   await apiClient.delete(`/api/v1/templates/marketplace/${listingId}`)
+}
+
+/**
+ * Commentaires d'une fiche marketplace.
+ */
+export async function listMarketplaceCommentsApi(
+  listingId: string,
+): Promise<MarketplaceComment[]> {
+  const { data } = await apiClient.get<MarketplaceComment[]>(
+    `/api/v1/templates/marketplace/${listingId}/comments`,
+  )
+  return data
+}
+
+/**
+ * Ajoute un commentaire marketplace (writer).
+ */
+export async function createMarketplaceCommentApi(
+  listingId: string,
+  body: string,
+): Promise<MarketplaceComment> {
+  const { data } = await apiClient.post<MarketplaceComment>(
+    `/api/v1/templates/marketplace/${listingId}/comments`,
+    { body },
+  )
+  return data
+}
+
+/**
+ * Marque une fiche officielle (admin).
+ */
+export async function setMarketplaceOfficialApi(
+  listingId: string,
+  isOfficial: boolean,
+): Promise<MarketplaceListing> {
+  const { data } = await apiClient.patch<MarketplaceListing>(
+    `/api/v1/templates/marketplace/${listingId}/official`,
+    { isOfficial },
+  )
+  return data
+}
+
+/**
+ * Snapshots d'un template custom.
+ */
+export async function listTemplateVersionsApi(
+  templateId: string,
+): Promise<TemplateVersionSummary[]> {
+  const { data } = await apiClient.get<TemplateVersionSummary[]>(
+    `/api/v1/templates/${templateId}/versions`,
+  )
+  return data
+}
+
+/**
+ * Restaure un snapshot.
+ */
+export async function restoreTemplateVersionApi(
+  templateId: string,
+  versionId: string,
+): Promise<TemplateWriteResponse> {
+  const { data } = await apiClient.post<TemplateWriteResponse>(
+    `/api/v1/templates/${templateId}/versions/${versionId}/restore`,
+  )
+  return data
 }
 
 /**
@@ -274,10 +355,16 @@ export async function suggestTemplatesApi(
 export async function recordSuggestionUsedApi(
   source: TemplateSuggestion['source'],
   id: string,
+  context?: { sceneType?: string; characters?: string[] },
 ): Promise<TemplateSuggestionUsedResponse> {
   const { data } = await apiClient.post<TemplateSuggestionUsedResponse>(
     '/api/v1/templates/suggestions/used',
-    { source, id },
+    {
+      source,
+      id,
+      sceneType: context?.sceneType ?? '',
+      characters: context?.characters ?? [],
+    },
   )
   return data
 }

@@ -17,6 +17,11 @@ vi.mock('../api/graph', () => ({
   putContextDroppingRules: vi.fn(),
 }))
 
+vi.mock('../api/templates', () => ({
+  listTemplateVersionsApi: vi.fn().mockResolvedValue([]),
+  restoreTemplateVersionApi: vi.fn(),
+}))
+
 vi.mock('../components/graph/ContextDroppingRulesEditor', () => ({
   ContextDroppingRulesEditor: () => <div data-testid="context-dropping-rules-form" />,
 }))

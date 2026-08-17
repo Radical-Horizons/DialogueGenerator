@@ -344,6 +344,65 @@ def test_delete_cascades_shares(
     assert client.get(f"/api/v1/templates/{template_id}").status_code == 404
 
 
+def test_share_can_edit_allows_put_not_delete(
+    share_client: TestClient,
+) -> None:
+    """Share canEdit → PUT 200, DELETE 403."""
+    client = share_client
+    template_id = _create_owned(client)
+    granted = client.post(
+        f"/api/v1/templates/{template_id}/shares",
+        json={"username": "writer-b", "canEdit": True},
+    )
+    assert granted.status_code == 201
+    assert granted.json()["can_edit"] is True
+
+    app.dependency_overrides[get_current_user] = lambda: _user("writer-b")
+    updated = client.put(
+        f"/api/v1/templates/{template_id}",
+        json={"name": "Édité par B"},
+    )
+    assert updated.status_code == 200
+    assert updated.json()["name"] == "Édité par B"
+    denied = client.delete(f"/api/v1/templates/{template_id}")
+    assert denied.status_code == 403
+
+
+def test_share_targets_lists_other_writers(
+    share_client: TestClient,
+) -> None:
+    """Le picker n'expose que les writers actifs hors soi-même."""
+    listed = share_client.get("/api/v1/templates/share-targets")
+    assert listed.status_code == 200
+    names = {item["username"] for item in listed.json()}
+    assert "writer-b" in names
+    assert "writer-a" not in names
+    assert "writer-inactive" not in names
+    assert "admin-a" not in names
+
+
+def test_guest_sessions_do_not_share_templates(
+    share_client: TestClient,
+) -> None:
+    """Deux guests avec sid distincts ne voient pas Mes templates l'un de l'autre."""
+    client = share_client
+    app.dependency_overrides[get_current_user] = lambda: {
+        **_user("guest", role="guest"),
+        "session_id": "sid-a",
+    }
+    template_id = _create_owned(client, name="Guest A only")
+    listed_a = client.get("/api/v1/templates")
+    assert template_id in {item["id"] for item in listed_a.json()}
+
+    app.dependency_overrides[get_current_user] = lambda: {
+        **_user("guest", role="guest"),
+        "session_id": "sid-b",
+    }
+    listed_b = client.get("/api/v1/templates")
+    assert template_id not in {item["id"] for item in listed_b.json()}
+    assert client.get(f"/api/v1/templates/{template_id}").status_code == 404
+
+
 def test_list_does_not_dump_others_private_templates(
     share_client: TestClient,
 ) -> None:

@@ -10,6 +10,7 @@ const mockList = vi.fn()
 const mockUse = vi.fn()
 const mockRate = vi.fn()
 const mockUnpublish = vi.fn()
+const mockOfficial = vi.fn()
 const mockToast = vi.fn()
 
 vi.mock('../api/templates', () => ({
@@ -17,6 +18,9 @@ vi.mock('../api/templates', () => ({
   copyMarketplaceListingApi: (...args: unknown[]) => mockUse(...args),
   rateMarketplaceTemplateApi: (...args: unknown[]) => mockRate(...args),
   unpublishMarketplaceListingApi: (...args: unknown[]) => mockUnpublish(...args),
+  listMarketplaceCommentsApi: () => Promise.resolve([]),
+  createMarketplaceCommentApi: vi.fn(),
+  setMarketplaceOfficialApi: (...args: unknown[]) => mockOfficial(...args),
 }))
 
 vi.mock('../components/shared', () => ({
@@ -60,6 +64,7 @@ describe('TemplateMarketplaceModal', () => {
     })
     mockRate.mockResolvedValue(listing({ ratingAverage: 5, ratingCount: 1 }))
     mockUnpublish.mockResolvedValue(undefined)
+    mockOfficial.mockResolvedValue(listing({ isOfficial: true }))
   })
 
   it('affiche l’empty state sans fiche', async () => {
@@ -191,5 +196,22 @@ describe('TemplateMarketplaceModal', () => {
     await waitFor(() =>
       expect(mockRate).toHaveBeenCalledWith('listing-1', { stars: 5 }),
     )
+  })
+
+  it('permet à un admin de marquer une fiche officielle', async () => {
+    mockList.mockResolvedValue([listing()])
+    render(
+      <TemplateMarketplaceModal
+        isOpen
+        onClose={vi.fn()}
+        currentUserId="admin-a"
+        currentUserRole="admin"
+        isGuest={false}
+        onCopied={vi.fn()}
+      />,
+    )
+    fireEvent.click(await screen.findByTestId('marketplace-item'))
+    fireEvent.click(screen.getByTestId('marketplace-official-btn'))
+    await waitFor(() => expect(mockOfficial).toHaveBeenCalledWith('listing-1', true))
   })
 })

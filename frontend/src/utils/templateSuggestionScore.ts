@@ -4,9 +4,10 @@
 
 export const REASON_KW = 'Correspond aux mots-clés du brief'
 export const REASON_GDD = 'Même personnages ou lieux que votre contexte'
-export const REASON_RENCONTRE = 'Section rencontre initiale détectée'
+export const REASON_RENCONTRE = 'Première rencontre (fiche ou flag catalogue)'
 export const REASON_PERSO = 'Souvent chargé'
 export const REASON_MARKET = 'Populaire sur le marketplace'
+export const REASON_CONTEXT = 'Déjà choisi dans un scénario similaire'
 
 export const MAX_SUGGESTIONS = 10
 
@@ -29,6 +30,7 @@ export interface SuggestionCandidateFeatures {
   locations: string[]
   useCount: number
   marketUsageCount: number
+  contextUseCount?: number
 }
 
 export interface SuggestionScore {
@@ -114,6 +116,47 @@ export function isFirstMeeting(sceneTypeHint: string, name: string, category: st
   return tokens.has('premiere') && tokens.has('rencontre')
 }
 
+const FLAG_GENERIC_TOKENS = new Set([
+  'flag',
+  'perso',
+  'npc',
+  'char',
+  'character',
+  'personnage',
+  'rencontre',
+  'initiale',
+  'premiere',
+  'premier',
+  'first',
+  'meeting',
+])
+
+export function hasFirstMeetingFlag(characters: string[], flagNames: string[]): boolean {
+  const characterTokens = new Set<string>()
+  for (const name of characters) {
+    for (const token of normalizeTokens(name)) {
+      if (!FLAG_GENERIC_TOKENS.has(token)) {
+        characterTokens.add(token)
+      }
+    }
+  }
+  if (characterTokens.size === 0) {
+    return false
+  }
+  for (const raw of flagNames) {
+    const folded = fold(raw)
+    if (!folded.includes('rencontre') || !folded.includes('initiale')) {
+      continue
+    }
+    for (const token of normalizeTokens(raw)) {
+      if (characterTokens.has(token)) {
+        return true
+      }
+    }
+  }
+  return false
+}
+
 export function hasRencontreInitialeText(mapping: Record<string, string> | null | undefined): boolean {
   if (!mapping) {
     return false
@@ -183,7 +226,8 @@ export function scoreCandidate(
       : 0
   const perso = Math.min(Math.max(features.useCount, 0), 10) * 1.5
   const market = Math.min(Math.max(features.marketUsageCount, 0), 50) / 5
-  const total = kw + gdd + rencontre + perso + market
+  const context = Math.min(Math.max(features.contextUseCount ?? 0, 0), 10) * 2
+  const total = kw + gdd + rencontre + perso + market + context
   const score = Math.min(100, halfUp(total))
   const reasons: string[] = []
   if (kw > 0) {
@@ -200,6 +244,9 @@ export function scoreCandidate(
   }
   if (market > 0) {
     reasons.push(REASON_MARKET)
+  }
+  if (context > 0) {
+    reasons.push(REASON_CONTEXT)
   }
   return { score, reasons }
 }

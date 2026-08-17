@@ -261,10 +261,10 @@ def test_ab_test_launch_completes_with_winner(ab_client: TestClient) -> None:
 
 def test_ab_test_guest_can_post(ab_client: TestClient) -> None:
     """Guest POST /ab-test → 202, pas 403."""
-    id_a = _create_custom(ab_client, name="Guest A")
-    id_b = _create_custom(ab_client, name="Guest B")
     app.dependency_overrides[get_current_user] = lambda: _user("guest-1", role="guest")
     try:
+        id_a = _create_custom(ab_client, name="Guest A")
+        id_b = _create_custom(ab_client, name="Guest B")
         created = ab_client.post(
             "/api/v1/templates/ab-test",
             json={

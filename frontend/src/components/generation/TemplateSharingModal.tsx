@@ -6,9 +6,10 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import {
   createTemplateShareApi,
   deleteTemplateShareApi,
+  listTemplateShareTargetsApi,
   listTemplateSharesApi,
 } from '../../api/templates'
-import type { TemplateShare } from '../../types/template'
+import type { TemplateShare, TemplateShareTarget } from '../../types/template'
 import { theme } from '../../theme'
 import { getErrorMessage } from '../../types/errors'
 
@@ -26,7 +27,9 @@ export function TemplateSharingModal({
   onClose,
 }: TemplateSharingModalProps) {
   const [shares, setShares] = useState<TemplateShare[]>([])
+  const [targets, setTargets] = useState<TemplateShareTarget[]>([])
   const [username, setUsername] = useState('')
+  const [canEdit, setCanEdit] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [revokingIds, setRevokingIds] = useState<Set<string>>(() => new Set())
@@ -38,9 +41,13 @@ export function TemplateSharingModal({
     setIsLoading(true)
     setError(null)
     try {
-      const next = await listTemplateSharesApi(templateId)
+      const [next, nextTargets] = await Promise.all([
+        listTemplateSharesApi(templateId),
+        listTemplateShareTargetsApi().catch(() => [] as TemplateShareTarget[]),
+      ])
       if (requestId !== loadGeneration.current) return
       setShares(next)
+      setTargets(nextTargets)
     } catch (err) {
       if (requestId !== loadGeneration.current) return
       setShares([])
@@ -55,6 +62,7 @@ export function TemplateSharingModal({
   useEffect(() => {
     if (!open) return
     setUsername('')
+    setCanEdit(false)
     setError(null)
     setRevokingIds(new Set())
     void loadShares()
@@ -76,8 +84,9 @@ export function TemplateSharingModal({
     setIsSubmitting(true)
     setError(null)
     try {
-      await createTemplateShareApi(templateId, trimmed)
+      await createTemplateShareApi(templateId, trimmed, canEdit)
       setUsername('')
+      setCanEdit(false)
       await loadShares()
     } catch (err) {
       setError(getErrorMessage(err))
@@ -141,11 +150,42 @@ export function TemplateSharingModal({
           Partager « {templateName} »
         </h2>
         <p style={{ color: theme.text.secondary, fontSize: '0.9rem' }}>
-          Invitez un writer existant par nom d&apos;utilisateur. Il pourra
-          appliquer et copier ce template, pas l&apos;éditer.
+          Invitez un writer de l&apos;équipe. Lecture seule par défaut ;
+          cochez édition pour autoriser les PUT (pas la suppression).
         </p>
 
-        <form onSubmit={handleInvite} style={{ display: 'flex', gap: '0.5rem' }}>
+        {targets.length > 0 ? (
+          <div data-testid="template-share-targets" style={{ marginBottom: '0.75rem' }}>
+            {targets.map((target) => (
+              <button
+                key={target.id}
+                type="button"
+                data-testid={`template-share-target-${target.username}`}
+                onClick={() => setUsername(target.username)}
+                style={{
+                  marginRight: '0.35rem',
+                  marginBottom: '0.35rem',
+                  padding: '0.35rem 0.6rem',
+                  borderRadius: 4,
+                  border: `1px solid ${theme.border.primary}`,
+                  backgroundColor:
+                    username === target.username
+                      ? theme.button.primary.background
+                      : theme.button.default.background,
+                  color:
+                    username === target.username
+                      ? theme.button.primary.color
+                      : theme.button.default.color,
+                  cursor: 'pointer',
+                }}
+              >
+                {target.username}
+              </button>
+            ))}
+          </div>
+        ) : null}
+
+        <form onSubmit={handleInvite} style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
           <input
             aria-label="Nom d'utilisateur du destinataire"
             data-testid="template-share-username"
@@ -154,6 +194,7 @@ export function TemplateSharingModal({
             placeholder="username"
             style={{
               flex: 1,
+              minWidth: 140,
               padding: '0.5rem 0.75rem',
               borderRadius: 4,
               border: `1px solid ${theme.input.border}`,
@@ -161,6 +202,23 @@ export function TemplateSharingModal({
               color: theme.input.color,
             }}
           />
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: '0.85rem',
+              color: theme.text.secondary,
+            }}
+          >
+            <input
+              type="checkbox"
+              data-testid="template-share-can-edit"
+              checked={canEdit}
+              onChange={(event) => setCanEdit(event.target.checked)}
+            />
+            Édition
+          </label>
           <button
             type="submit"
             data-testid="template-share-invite"
@@ -205,7 +263,10 @@ export function TemplateSharingModal({
                     borderBottom: `1px solid ${theme.border.primary}`,
                   }}
                 >
-                  <span>{share.username}</span>
+                  <span>
+                    {share.username}
+                    {share.can_edit ? ' (édition)' : ' (lecture)'}
+                  </span>
                   <button
                     type="button"
                     onClick={() => void handleRevoke(share.user_id)}

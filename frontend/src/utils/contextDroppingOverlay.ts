@@ -32,7 +32,7 @@ export function buildAntiDropPromptClause(rules: ContextDroppingRules): string {
   const mode =
     rules.rules_profile === 'light'
       ? 'SUBTILES (lore implicite accepté ; ne signale que les informations entièrement absentes).'
-      : 'EXPLICITES (faits GDD du contexte doivent figurer clairement dans répliques et effets ; les références uniquement implicites seront signalées).'
+      : 'EXPLICITES (faits GDD du contexte doivent figurer clairement dans répliques et effets ; les références uniquement implicites seront signalées). Inclus un DD de test (ex. Raison+Rhétorique:8) et/ou des deltas de réputation numériques (influenceDelta / respectDelta) dans le JSON des choix.'
   const mandatory =
     rules.mandatory_info.length > 0
       ? ` Informations obligatoires : ${rules.mandatory_info.join(', ')}.`

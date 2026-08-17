@@ -19,6 +19,7 @@ vi.mock('../../api/templates', () => ({
   getAbTestApi: (...args: unknown[]) => mockGet(...args),
   patchAbTestFeedbackApi: (...args: unknown[]) => mockFeedback(...args),
   rerunAbTestApi: (...args: unknown[]) => mockRerun(...args),
+  listMarketplaceTemplatesApi: () => Promise.resolve([]),
 }))
 
 vi.mock('../shared', () => ({
@@ -151,6 +152,7 @@ describe('TemplateABTestingModal', () => {
         templateBId: 'tpl-b',
         generationsPerTemplate: 1,
         maxDepth: 2,
+        winnerMode: 'score',
       })
     })
     expect(await screen.findByTestId('ab-test-winner')).toHaveTextContent('Alpha')

@@ -16,6 +16,7 @@ class TemplateShareEntry:
     user_id: str
     created_at: str
     username: str | None = None
+    can_edit: bool = False
 
 
 class TemplateSharesRepository:
@@ -31,11 +32,13 @@ class TemplateSharesRepository:
         if row is None:
             return None
         username = str(row[3]) if len(row) > 3 and row[3] is not None else None
+        can_edit = bool(row[4]) if len(row) > 4 and row[4] else False
         return TemplateShareEntry(
             template_id=str(row[0]),
             user_id=str(row[1]),
             created_at=str(row[2]),
             username=username,
+            can_edit=can_edit,
         )
 
     def has_share(self, template_id: str, user_id: str) -> bool:
@@ -46,6 +49,19 @@ class TemplateSharesRepository:
                 SELECT 1
                 FROM template_shares
                 WHERE template_id = ? AND user_id = ?
+                """,
+                (template_id, user_id),
+            )
+        )
+
+    def has_edit_share(self, template_id: str, user_id: str) -> bool:
+        """Indique si ``user_id`` a un partage avec droit d'édition."""
+        return bool(
+            self._database.execute_scalar(
+                """
+                SELECT 1
+                FROM template_shares
+                WHERE template_id = ? AND user_id = ? AND can_edit = 1
                 """,
                 (template_id, user_id),
             )
@@ -67,7 +83,7 @@ class TemplateSharesRepository:
         """Liste les destinataires d'un template avec username."""
         rows = self._database.execute_fetchall(
             """
-            SELECT s.template_id, s.user_id, s.created_at, u.username
+            SELECT s.template_id, s.user_id, s.created_at, u.username, s.can_edit
             FROM template_shares AS s
             LEFT JOIN users AS u ON u.id = s.user_id
             WHERE s.template_id = ?
@@ -77,20 +93,24 @@ class TemplateSharesRepository:
         )
         return [entry for row in rows if (entry := self._from_row(row)) is not None]
 
-    def create(self, *, template_id: str, user_id: str) -> TemplateShareEntry:
+    def create(
+        self, *, template_id: str, user_id: str, can_edit: bool = False
+    ) -> TemplateShareEntry:
         """Crée un partage sans écraser une entrée existante."""
         try:
             with self._database.transaction(immediate=True) as connection:
                 connection.execute(
                     """
-                    INSERT INTO template_shares(template_id, user_id, created_at)
-                    VALUES (?, ?, datetime('now'))
+                    INSERT INTO template_shares(
+                        template_id, user_id, created_at, can_edit
+                    )
+                    VALUES (?, ?, datetime('now'), ?)
                     """,
-                    (template_id, user_id),
+                    (template_id, user_id, 1 if can_edit else 0),
                 )
                 row = connection.execute(
                     """
-                    SELECT s.template_id, s.user_id, s.created_at, u.username
+                    SELECT s.template_id, s.user_id, s.created_at, u.username, s.can_edit
                     FROM template_shares AS s
                     LEFT JOIN users AS u ON u.id = s.user_id
                     WHERE s.template_id = ? AND s.user_id = ?

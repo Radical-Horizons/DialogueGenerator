@@ -17,7 +17,21 @@ import type { PrebuiltTemplate, Template, TemplateSuggestion } from '../types/te
 import type { ReasoningEffort } from '../types/api'
 
 function recordTemplateUsed(source: TemplateSuggestion['source'], id: string): void {
-  void Promise.resolve(recordSuggestionUsedApi(source, id)).then(
+  const contextState = useContextStore.getState()
+  const characters = [
+    ...(Array.isArray(contextState.selections.characters_full)
+      ? contextState.selections.characters_full
+      : []),
+    ...(Array.isArray(contextState.selections.characters_excerpt)
+      ? contextState.selections.characters_excerpt
+      : []),
+  ]
+  void Promise.resolve(
+    recordSuggestionUsedApi(source, id, {
+      sceneType: 'Generic',
+      characters,
+    }),
+  ).then(
     () => undefined,
     () => undefined,
   )
@@ -237,6 +251,10 @@ export function usePresetManagement(
       setLlmModel(config.llmModel)
     }
 
+    const generation = useGenerationStore.getState()
+    generation.setAppliedTemplate(null)
+    generation.setContextDroppingRulesOverlay(config.contextDroppingRules ?? null)
+
     setIsDirty(true)
     setSaveStatus('unsaved')
   }, [setSceneSelection, setUserInstructions, setIsDirty, setSaveStatus, setTopP, setReasoningEffort, setMaxCompletionTokens, setMaxChoices, setLlmModel])
@@ -276,7 +294,6 @@ export function usePresetManagement(
       } else {
         clearValidationState()
         applyPreset(preparePresetForApply(preset, nextValidation))
-        useGenerationStore.getState().clearTemplateSession()
         notifyApplied('Preset', nextValidation, toast)
       }
     } catch (err) {
@@ -357,7 +374,6 @@ export function usePresetManagement(
       notifyApplied('Template', validationResult, toast)
     } else if (pendingPreset && validationResult) {
       applyPreset(preparePresetForApply(pendingPreset, validationResult))
-      useGenerationStore.getState().clearTemplateSession()
       notifyApplied('Preset', validationResult, toast)
     }
     clearValidationState()
@@ -406,6 +422,9 @@ export function usePresetManagement(
       ...(options.maxChoices !== undefined && options.maxChoices !== null ? { maxChoices: options.maxChoices } : {}),
       ...(options.llmModel !== undefined ? { llmModel: options.llmModel } : {}),
       ...(options.temperature !== undefined && options.temperature !== null ? { temperature: options.temperature } : {}),
+      ...(useGenerationStore.getState().contextDroppingRulesOverlay
+        ? { contextDroppingRules: useGenerationStore.getState().contextDroppingRulesOverlay }
+        : {}),
     }
     
     return config as PresetConfiguration

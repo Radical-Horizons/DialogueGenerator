@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import replace
 
 from services.template_suggestion_score import (
+    REASON_CONTEXT,
     REASON_GDD,
     REASON_KW,
     REASON_MARKET,
@@ -13,6 +14,7 @@ from services.template_suggestion_score import (
     SuggestionCandidateFeatures,
     SuggestionQuery,
     gdd_score,
+    has_first_meeting_flag,
     has_rencontre_initiale_text,
     is_first_meeting,
     keyword_score,
@@ -144,6 +146,12 @@ def test_personal_usage_and_market_boost() -> None:
     assert REASON_PERSO in used.reasons
     assert popular.score > unused.score
     assert REASON_MARKET in popular.reasons
+    contextual = score_candidate(
+        _features(characters=(), locations=(), context_use_count=3),
+        query,
+    )
+    assert contextual.score > unused.score
+    assert REASON_CONTEXT in contextual.reasons
 
 
 def test_rank_drops_zero_and_caps_ten() -> None:
@@ -176,3 +184,15 @@ def test_normalize_and_keyword_helpers() -> None:
     assert "revelation" in normalize_tokens("Révélation")
     assert keyword_score(frozenset(), frozenset({"a"})) == 0
     assert gdd_score([], [], ["a"], ["b"]) == 0
+
+
+def test_first_meeting_flag_matches_character_token() -> None:
+    """Flag catalogue *rencontre_initiale* + token perso → boost éligible."""
+    assert has_first_meeting_flag(
+        ["npc-alpha"],
+        ["Flag_perso_npc_alpha_rencontre_initiale"],
+    )
+    assert not has_first_meeting_flag(
+        ["npc-alpha"],
+        ["Flag_perso_npc_beta_rencontre_initiale"],
+    )

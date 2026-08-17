@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Mapping, Optional, Tuple
 from uuid import UUID
 
 from api.schemas.template import TEMPLATE_NAME_MAX_LENGTH, Template
+from api.utils.job_ownership import template_owner_key
 from services.repositories.sqlite.template_shares_repository import (
     TemplateShareEntry,
     TemplateSharesRepository,
@@ -54,6 +55,15 @@ class TemplateShareView:
     user_id: str
     username: str
     created_at: str
+    can_edit: bool = False
+
+
+@dataclass(frozen=True)
+class TemplateShareTarget:
+    """Writer actif proposable comme destinataire."""
+
+    id: str
+    username: str
 
 
 class TemplateSharingService:
@@ -71,8 +81,8 @@ class TemplateSharingService:
 
     @staticmethod
     def _actor_id(current_user: Mapping[str, object]) -> str:
-        """Identifiant JWT (guest = ``guest``)."""
-        return str(current_user.get("id") or "").strip()
+        """Identifiant owner (UUID writer, ``guest:{sid}`` pour un invité)."""
+        return template_owner_key(current_user)
 
     @staticmethod
     def _is_admin(current_user: Mapping[str, object]) -> bool:
@@ -90,7 +100,7 @@ class TemplateSharingService:
 
     def _username_for(self, user_id: str) -> str:
         """Résout un nom affiché (guest hors table users)."""
-        if user_id == GUEST_OWNER_ID:
+        if user_id == GUEST_OWNER_ID or user_id.startswith("guest:"):
             return GUEST_OWNER_ID
         record = self._users.find_by_id(user_id)
         if record is None:
@@ -129,13 +139,16 @@ class TemplateSharingService:
         return self.visibility(template, current_user, shared_ids) is not None
 
     def can_write(self, template: Template, current_user: Mapping[str, object]) -> bool:
-        """PUT/DELETE : owner, admin, ou legacy (comportement 6.1)."""
+        """PUT/DELETE : owner, admin, share ``can_edit``, ou legacy (6.1)."""
         if self._is_admin(current_user):
             return True
         owner = self._owner_id(template)
         if owner is None:
             return True
-        return owner == self._actor_id(current_user)
+        actor = self._actor_id(current_user)
+        if owner == actor:
+            return True
+        return bool(actor) and self._shares.has_edit_share(template.id, actor)
 
     def can_manage_shares(
         self, template: Template, current_user: Mapping[str, object]
@@ -208,6 +221,26 @@ class TemplateSharingService:
             )
         return template
 
+    def can_delete(self, template: Template, current_user: Mapping[str, object]) -> bool:
+        """DELETE JSON : owner, admin, ou legacy — pas un share ``can_edit``."""
+        if self._is_admin(current_user):
+            return True
+        owner = self._owner_id(template)
+        if owner is None:
+            return True
+        return owner == self._actor_id(current_user)
+
+    def require_deletable(
+        self, template: Template, current_user: Mapping[str, object]
+    ) -> Template:
+        """403 si suppression interdite."""
+        self.require_readable(template, current_user)
+        if not self.can_delete(template, current_user):
+            raise TemplateShareForbiddenError(
+                f"Suppression refusée pour {template.id}"
+            )
+        return template
+
     def _require_uuid(self, template_id: str) -> str:
         """Refuse un id non UUID (pré-built / slug)."""
         try:
@@ -240,12 +273,29 @@ class TemplateSharingService:
         self._require_share_manager(template, current_user)
         return [self._to_view(entry) for entry in self._shares.list_for_template(template.id)]
 
+    def list_share_targets(
+        self, current_user: Mapping[str, object]
+    ) -> List[TemplateShareTarget]:
+        """Writers actifs hors soi-même (picker d'équipe)."""
+        actor = self._actor_id(current_user)
+        targets: List[TemplateShareTarget] = []
+        for record in self._users.list_all():
+            if not record["is_active"] or record["role"] != "writer":
+                continue
+            if record["id"] == actor:
+                continue
+            targets.append(
+                TemplateShareTarget(id=record["id"], username=str(record["username"]))
+            )
+        return targets
+
     def grant_share(
         self,
         template_service: TemplateService,
         template_id: str,
         username: str,
         current_user: Mapping[str, object],
+        can_edit: bool = False,
     ) -> TemplateShareView:
         """Invite un writer actif par username."""
         template = self._load(template_service, template_id)
@@ -260,7 +310,11 @@ class TemplateSharingService:
                 "Impossible de partager un template avec son propriétaire"
             )
         try:
-            created = self._shares.create(template_id=template.id, user_id=target["id"])
+            created = self._shares.create(
+                template_id=template.id,
+                user_id=target["id"],
+                can_edit=can_edit,
+            )
         except LookupError as exc:
             raise TemplateShareNotFoundError(str(exc)) from exc
         except ValueError as exc:
@@ -340,4 +394,5 @@ class TemplateSharingService:
             user_id=entry.user_id,
             username=entry.username or entry.user_id,
             created_at=entry.created_at,
+            can_edit=entry.can_edit,
         )

@@ -40,10 +40,16 @@ vi.mock('../api/templates', () => ({
   rerunAbTestApi: vi.fn(),
   copyTemplateApi: vi.fn().mockResolvedValue({ id: 'copy-1', warnings: [] }),
   listTemplateSharesApi: vi.fn().mockResolvedValue([]),
+  listTemplateShareTargetsApi: vi.fn().mockResolvedValue([]),
   createTemplateShareApi: vi.fn(),
   deleteTemplateShareApi: vi.fn(),
   suggestTemplatesApi: vi.fn().mockResolvedValue([]),
   recordSuggestionUsedApi: vi.fn().mockResolvedValue({ source: 'prebuilt', id: 'x', useCount: 1 }),
+  listMarketplaceCommentsApi: vi.fn().mockResolvedValue([]),
+  createMarketplaceCommentApi: vi.fn(),
+  listTemplateVersionsApi: vi.fn().mockResolvedValue([]),
+  restoreTemplateVersionApi: vi.fn(),
+  setMarketplaceOfficialApi: vi.fn(),
 }));
 vi.mock('../api/graph', () => ({
   getContextDroppingRules: vi.fn().mockResolvedValue({

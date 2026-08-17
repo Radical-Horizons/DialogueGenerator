@@ -13,6 +13,7 @@ from pydantic import ValidationError
 
 from api.schemas.template import (
     TEMPLATE_NAME_MAX_LENGTH,
+    MarketplaceCommentResponse,
     MarketplaceListing,
     TemplateConfiguration,
     TemplateCreateResponse,
@@ -51,17 +52,23 @@ class TemplateMarketplaceService:
         self._repository = repository
         self._template_service = template_service
 
-    def browse_templates(self) -> List[MarketplaceListing]:
+    def browse_templates(
+        self, viewer: Optional[Dict[str, Any]] = None
+    ) -> List[MarketplaceListing]:
         """Liste les fiches publiées (ignore un snapshot JSON/schéma invalide)."""
         listings: List[MarketplaceListing] = []
         for row in self._repository.list_listings():
             try:
-                listings.append(self._to_listing(row))
+                listings.append(self._to_listing(row, viewer=viewer))
             except (json.JSONDecodeError, ValidationError, TypeError, ValueError):
                 logger.warning("Snapshot marketplace invalide ignoré: %s", row.id)
         return listings
 
-    def get_listing(self, listing_id: str) -> MarketplaceListing:
+    def get_listing(
+        self,
+        listing_id: str,
+        viewer: Optional[Dict[str, Any]] = None,
+    ) -> MarketplaceListing:
         """Charge une fiche.
 
         Raises:
@@ -70,12 +77,14 @@ class TemplateMarketplaceService:
         row = self._repository.get_by_id(listing_id)
         if row is None:
             raise FileNotFoundError(f"Marketplace listing {listing_id} not found")
-        return self._to_listing(row)
+        return self._to_listing(row, viewer=viewer)
 
     def share_template(
         self,
         template_id: str,
         current_user: Dict[str, Any],
+        *,
+        anonymous: bool = False,
     ) -> MarketplaceListing:
         """Publie un custom (upsert si déjà publié par le même auteur).
 
@@ -101,8 +110,11 @@ class TemplateMarketplaceService:
         existing = self._repository.get_by_source_and_author(template_id, author_id)
         if existing is not None:
             row = self._repository.update_snapshot(existing.id, snapshot, now)
+            row = self._repository.set_listing_flags(
+                row.id, is_anonymous=anonymous
+            )
             logger.info("Marketplace listing mis à jour: %s", row.id)
-            return self._to_listing(row)
+            return self._to_listing(row, viewer=current_user)
         try:
             row = self._repository.insert(
                 listing_id=str(uuid4()),
@@ -117,8 +129,9 @@ class TemplateMarketplaceService:
             if raced is None:
                 raise
             row = self._repository.update_snapshot(raced.id, snapshot, now)
+        row = self._repository.set_listing_flags(row.id, is_anonymous=anonymous)
         logger.info("Marketplace listing créé: %s (auteur %s)", row.id, author_id)
-        return self._to_listing(row)
+        return self._to_listing(row, viewer=current_user)
 
     def use_listing(
         self,
@@ -175,7 +188,7 @@ class TemplateMarketplaceService:
             )
         except sqlite3.IntegrityError as exc:
             raise FileNotFoundError(f"Marketplace listing {listing_id} not found") from exc
-        return self.get_listing(listing_id)
+        return self.get_listing(listing_id, viewer=current_user)
 
     def unpublish_listing(
         self,
@@ -198,6 +211,59 @@ class TemplateMarketplaceService:
             raise FileNotFoundError(f"Marketplace listing {listing_id} not found")
         logger.info("Marketplace listing retiré: %s", listing_id)
 
+    def set_official(
+        self,
+        listing_id: str,
+        current_user: Dict[str, Any],
+        is_official: bool,
+    ) -> MarketplaceListing:
+        """Marque une fiche officielle (admin seulement)."""
+        if str(current_user.get("role") or "") != "admin":
+            raise MarketplaceForbiddenError("Seul un admin peut marquer officiel")
+        listing = self.get_listing(listing_id)
+        row = self._repository.set_listing_flags(listing.id, is_official=is_official)
+        return self._to_listing(row, viewer=current_user)
+
+    def list_comments(self, listing_id: str) -> List[MarketplaceCommentResponse]:
+        """Liste les commentaires d'une fiche."""
+        self.get_listing(listing_id)
+        return [
+            MarketplaceCommentResponse(
+                id=row.id,
+                listingId=row.listing_id,
+                authorUsername=row.author_username,
+                body=row.body,
+                createdAt=row.created_at,
+            )
+            for row in self._repository.list_comments(listing_id)
+        ]
+
+    def add_comment(
+        self,
+        listing_id: str,
+        current_user: Dict[str, Any],
+        body: str,
+    ) -> MarketplaceCommentResponse:
+        """Ajoute un commentaire (writer en table users)."""
+        self.get_listing(listing_id)
+        user_id = str(current_user.get("id") or "")
+        if not self._repository.user_exists(user_id):
+            raise MarketplaceForbiddenError("Auteur introuvable dans users")
+        row = self._repository.insert_comment(
+            comment_id=str(uuid4()),
+            listing_id=listing_id,
+            user_id=user_id,
+            body=body,
+            created_at=datetime.now(timezone.utc).isoformat(),
+        )
+        return MarketplaceCommentResponse(
+            id=row.id,
+            listingId=row.listing_id,
+            authorUsername=row.author_username,
+            body=row.body,
+            createdAt=row.created_at,
+        )
+
     @staticmethod
     def _copy_name(name: str) -> str:
         """Suffixe `` (copie)`` sans dépasser ``TEMPLATE_NAME_MAX_LENGTH``."""
@@ -208,15 +274,24 @@ class TemplateMarketplaceService:
         return f"{trimmed}{suffix}"
 
     @staticmethod
-    def _to_listing(row: SharedTemplateRow) -> MarketplaceListing:
+    def _to_listing(
+        row: SharedTemplateRow,
+        viewer: Optional[Dict[str, Any]] = None,
+    ) -> MarketplaceListing:
         """Parse le snapshot JSON vers le DTO API."""
         payload = json.loads(row.snapshot)
         configuration = TemplateConfiguration(**payload.get("configuration") or {})
+        username = row.author_username
+        if row.is_anonymous:
+            viewer_id = str((viewer or {}).get("id") or "")
+            viewer_role = str((viewer or {}).get("role") or "")
+            if viewer_role != "admin" and viewer_id != row.author_id:
+                username = "Anonyme"
         return MarketplaceListing(
             id=row.id,
             sourceTemplateId=row.source_template_id,
             authorId=row.author_id,
-            authorUsername=row.author_username,
+            authorUsername=username,
             name=str(payload.get("name") or ""),
             description=str(payload.get("description") or ""),
             category=str(payload.get("category") or "Général"),
@@ -226,4 +301,6 @@ class TemplateMarketplaceService:
             usageCount=row.usage_count,
             ratingAverage=row.rating_average,
             ratingCount=row.rating_count,
+            isAnonymous=row.is_anonymous,
+            isOfficial=row.is_official,
         )

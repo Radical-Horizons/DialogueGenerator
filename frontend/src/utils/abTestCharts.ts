@@ -7,16 +7,16 @@ export function winnerLabel(result: ABTestResult): string {
   if (result.status !== 'completed') {
     return '—'
   }
-  const meanA = result.totals.templateA?.meanOverall ?? null
-  const meanB = result.totals.templateB?.meanOverall ?? null
-  if (meanA == null || meanB == null) {
-    return 'Pas de vainqueur'
-  }
   if (result.winnerTemplateId === result.templateAId) {
     return result.templateAName
   }
   if (result.winnerTemplateId === result.templateBId) {
     return result.templateBName
+  }
+  const meanA = result.totals.templateA?.meanOverall ?? null
+  const meanB = result.totals.templateB?.meanOverall ?? null
+  if (meanA == null || meanB == null) {
+    return 'Pas de vainqueur'
   }
   return 'Égalité'
 }
@@ -58,4 +58,8 @@ export function scoreHistorySeries(
 
 export function prebuiltAbTestId(slug: string): string {
   return `prebuilt:${slug}`
+}
+
+export function marketplaceAbTestId(listingId: string): string {
+  return `marketplace:${listingId}`
 }

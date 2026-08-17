@@ -5,8 +5,10 @@ import {
   REASON_MARKET,
   REASON_PERSO,
   REASON_RENCONTRE,
+  REASON_CONTEXT,
   extractRencontreInitiale,
   gddScore,
+  hasFirstMeetingFlag,
   hasRencontreInitialeText,
   isFirstMeeting,
   keywordScore,
@@ -150,6 +152,12 @@ describe('templateSuggestionScore', () => {
     expect(used.reasons).toContain(REASON_PERSO)
     expect(popular.score).toBeGreaterThan(unused.score)
     expect(popular.reasons).toContain(REASON_MARKET)
+    const contextual = scoreCandidate(
+      features({ characters: [], locations: [], contextUseCount: 3 }),
+      query,
+    )
+    expect(contextual.score).toBeGreaterThan(unused.score)
+    expect(contextual.reasons).toContain(REASON_CONTEXT)
   })
 
   it('drop score 0 et plafonne à 10', () => {
@@ -190,5 +198,20 @@ describe('templateSuggestionScore', () => {
     expect(normalizeTokens('Révélation').has('revelation')).toBe(true)
     expect(keywordScore(new Set(), new Set(['a']))).toBe(0)
     expect(gddScore([], [], ['a'], ['b'])).toBe(0)
+  })
+
+  it('matche un flag rencontre_initiale sur le token perso, pas npc générique', () => {
+    expect(
+      hasFirstMeetingFlag(
+        ['npc-alpha'],
+        ['Flag_perso_npc_alpha_rencontre_initiale'],
+      ),
+    ).toBe(true)
+    expect(
+      hasFirstMeetingFlag(
+        ['npc-alpha'],
+        ['Flag_perso_npc_beta_rencontre_initiale'],
+      ),
+    ).toBe(false)
   })
 })

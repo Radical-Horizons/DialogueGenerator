@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import unicodedata
 from dataclasses import dataclass
 import re
@@ -9,9 +10,10 @@ from typing import Iterable, Sequence
 
 REASON_KW = "Correspond aux mots-clés du brief"
 REASON_GDD = "Même personnages ou lieux que votre contexte"
-REASON_RENCONTRE = "Section rencontre initiale détectée"
+REASON_RENCONTRE = "Première rencontre (fiche ou flag catalogue)"
 REASON_PERSO = "Souvent chargé"
 REASON_MARKET = "Populaire sur le marketplace"
+REASON_CONTEXT = "Déjà choisi dans un scénario similaire"
 
 _TOKEN_RE = re.compile(r"[^a-z0-9]+")
 MAX_SUGGESTIONS = 10
@@ -42,6 +44,7 @@ class SuggestionCandidateFeatures:
     locations: tuple[str, ...]
     use_count: int
     market_usage_count: int
+    context_use_count: int = 0
 
 
 @dataclass(frozen=True)
@@ -124,6 +127,55 @@ def has_rencontre_initiale_text(mapping: dict[str, str] | None) -> bool:
     return any(str(value).strip() for value in mapping.values())
 
 
+_FLAG_GENERIC_TOKENS = frozenset(
+    {
+        "flag",
+        "perso",
+        "npc",
+        "char",
+        "character",
+        "personnage",
+        "rencontre",
+        "initiale",
+        "premiere",
+        "premier",
+        "first",
+        "meeting",
+    }
+)
+
+
+def has_first_meeting_flag(
+    characters: Sequence[str], flag_names: Sequence[str]
+) -> bool:
+    """True si un flag ``*rencontre_initiale*`` recouvre un perso sélectionné."""
+    character_tokens: set[str] = set()
+    for name in characters:
+        character_tokens |= set(normalize_tokens(name))
+    character_tokens -= _FLAG_GENERIC_TOKENS
+    if not character_tokens:
+        return False
+    for raw in flag_names:
+        folded = _fold(raw)
+        if "rencontre" not in folded or "initiale" not in folded:
+            continue
+        if character_tokens & set(normalize_tokens(raw)):
+            return True
+    return False
+
+
+def suggestion_context_key(scene_type: str, characters: Sequence[str]) -> str:
+    """Signature courte du scénario (sceneType + persos triés)."""
+    folded_scene = _fold(scene_type or "")
+    if folded_scene == "generic":
+        folded_scene = ""
+    parts = [folded_scene] + sorted(
+        _fold(item) for item in characters if str(item).strip()
+    )
+    raw = "|".join(parts)
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+
+
 def score_candidate(
     features: SuggestionCandidateFeatures,
     query: SuggestionQuery,
@@ -157,7 +209,8 @@ def score_candidate(
     )
     perso = min(max(features.use_count, 0), 10) * 1.5
     market = min(max(features.market_usage_count, 0), 50) / 5.0
-    total = kw + gdd + rencontre + perso + market
+    context = min(max(features.context_use_count, 0), 10) * 2
+    total = kw + gdd + rencontre + perso + market + context
     score = min(100, _half_up(total))
     reasons: list[str] = []
     if kw > 0:
@@ -170,6 +223,8 @@ def score_candidate(
         reasons.append(REASON_PERSO)
     if market > 0:
         reasons.append(REASON_MARKET)
+    if context > 0:
+        reasons.append(REASON_CONTEXT)
     return SuggestionScore(score=score, reasons=tuple(reasons))
 
 

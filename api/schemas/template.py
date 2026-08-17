@@ -7,7 +7,7 @@ from uuid import UUID
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from api.schemas.preset import PresetConfiguration, PresetMetadata
-from api.schemas.validation_rules import ContextDroppingRulesSchema
+
 
 TEMPLATE_NAME_MAX_LENGTH = 120
 TEMPLATE_DESCRIPTION_MAX_LENGTH = 2000
@@ -34,17 +34,13 @@ class TemplateConfiguration(PresetConfiguration):
         None,
         description="Température de sampling (optionnelle)",
     )
-    contextDroppingRules: Optional[ContextDroppingRulesSchema] = Field(
-        None,
-        description="Copie des règles anti-drop 4.10 (None = hériter du fichier global)",
-    )
 
 
 class TemplateHistoryEntry(BaseModel):
     """Événement d'historique (création ou mise à jour)."""
 
     at: datetime = Field(..., description="Horodatage ISO 8601")
-    action: Literal["created", "updated"] = Field(
+    action: Literal["created", "updated", "restored"] = Field(
         ...,
         description="Type d'événement",
     )
@@ -155,6 +151,7 @@ class TemplateShareCreateRequest(BaseModel):
     """Invitation d'un writer existant par username."""
 
     username: str = Field(..., min_length=1, max_length=64)
+    canEdit: bool = Field(default=False, description="Droit d'édition (PUT), pas DELETE")
 
     def normalized_username(self) -> str:
         """Retourne le username trimé, ou lève si vide après trim."""
@@ -164,6 +161,13 @@ class TemplateShareCreateRequest(BaseModel):
         return trimmed
 
 
+class TemplateShareTargetResponse(BaseModel):
+    """Writer actif proposable comme destinataire."""
+
+    id: str
+    username: str
+
+
 class TemplateShareResponse(BaseModel):
     """Partage d'équipe exposé à l'API."""
 
@@ -171,6 +175,7 @@ class TemplateShareResponse(BaseModel):
     user_id: str
     username: str
     created_at: str
+    can_edit: bool = False
 
 
 class TemplateCreateResponse(Template):
@@ -267,12 +272,15 @@ class MarketplaceListing(BaseModel):
         description="Moyenne 1–5, None si aucune note",
     )
     ratingCount: int = Field(default=0, ge=0)
+    isAnonymous: bool = Field(default=False)
+    isOfficial: bool = Field(default=False)
 
 
 class MarketplacePublishRequest(BaseModel):
     """Publication d'un template custom vers le marketplace."""
 
     templateId: str = Field(..., description="UUID du custom à publier")
+    anonymous: bool = Field(default=False, description="Masque le username auteur")
 
     @field_validator("templateId")
     @classmethod
@@ -291,13 +299,48 @@ class MarketplaceRatingRequest(BaseModel):
     stars: int = Field(..., ge=1, le=5, description="Note entière de 1 à 5")
 
 
+class MarketplaceOfficialRequest(BaseModel):
+    """Marquage catalogue officiel (admin)."""
+
+    isOfficial: bool = Field(..., description="Fiche officielle")
+
+
+class MarketplaceCommentCreateRequest(BaseModel):
+    """Commentaire marketplace (writer, pas guest)."""
+
+    body: str = Field(..., min_length=1, max_length=500)
+
+    @field_validator("body")
+    @classmethod
+    def strip_body(cls, v: str) -> str:
+        """Refuse un commentaire vide après trim."""
+        trimmed = v.strip()
+        if not trimmed:
+            raise ValueError("Le commentaire est vide")
+        return trimmed
+
+
+class MarketplaceCommentResponse(BaseModel):
+    """Commentaire d'une fiche marketplace."""
+
+    id: str
+    listingId: str
+    authorUsername: str
+    body: str
+    createdAt: str
+
+
 class ABTestCreateRequest(BaseModel):
     """Lancement d'un test A/B entre deux templates."""
 
-    templateAId: str = Field(..., min_length=1, description="UUID custom ou prebuilt:{slug}")
-    templateBId: str = Field(..., min_length=1, description="UUID custom ou prebuilt:{slug}")
+    templateAId: str = Field(..., min_length=1, description="UUID custom, prebuilt:{slug} ou marketplace:{id}")
+    templateBId: str = Field(..., min_length=1, description="UUID custom, prebuilt:{slug} ou marketplace:{id}")
     generationsPerTemplate: int = Field(default=3, description="N générations par template (1–5)")
     maxDepth: int = Field(default=2, description="Profondeur expand-tree (1–4)")
+    winnerMode: Literal["score", "score_thumbs", "score_cost"] = Field(
+        default="score",
+        description="Critère de gagnant (score juge, pouces, ou coût)",
+    )
 
 
 class ABTestCreateResponse(BaseModel):
@@ -355,6 +398,17 @@ class TemplateSuggestionUsedRequest(BaseModel):
 
     source: Literal["custom", "prebuilt", "marketplace"]
     id: str = Field(..., min_length=1)
+    sceneType: str = Field(default="", description="Type de scène au moment du Charger")
+    characters: List[str] = Field(default_factory=list)
+
+
+class TemplateVersionSummary(BaseModel):
+    """Snapshot d'historique (timeline éditeur)."""
+
+    id: str
+    at: str
+    name: str
+    instructionsPreview: str
 
 
 class TemplateSuggestionUsedResponse(BaseModel):

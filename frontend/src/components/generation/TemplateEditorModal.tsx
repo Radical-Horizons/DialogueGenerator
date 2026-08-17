@@ -3,6 +3,12 @@
  */
 import React, { useEffect, useRef, useState } from 'react'
 import { getContextDroppingRules } from '../../api/graph'
+import {
+  listTemplateVersionsApi,
+  restoreTemplateVersionApi,
+} from '../../api/templates'
+import type { ContextDroppingRules } from '../../types/graph'
+import type { Template, TemplateConfiguration, TemplateVersionSummary } from '../../types/template'
 import { theme } from '../../theme'
 import { generationPanelChrome, modalTypography } from '../../theme/responsiveChrome'
 import { redesignRadius } from '../../theme/redesignTokens'
@@ -11,8 +17,6 @@ import { ContextDroppingRulesEditor } from '../graph/ContextDroppingRulesEditor'
 import { useTemplateStore } from '../../store/templateStore'
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
 import { TOUCH_TARGET_MIN_PX } from '../../constants'
-import type { ContextDroppingRules } from '../../types/graph'
-import type { Template, TemplateConfiguration } from '../../types/template'
 import { DEFAULT_CONTEXT_DROPPING_RULES } from '../../utils/contextDroppingOverlay'
 
 export interface TemplateEditorModalProps {
@@ -65,6 +69,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
   const [configuration, setConfiguration] = useState<TemplateConfiguration | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [rulesLoading, setRulesLoading] = useState(false)
+  const [versions, setVersions] = useState<TemplateVersionSummary[]>([])
 
   useEffect(() => {
     if (isOpen && template) {
@@ -77,6 +82,9 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
       setIsSaving(false)
       savingRef.current = false
       setRulesLoading(false)
+      void listTemplateVersionsApi(template.id)
+        .then((next) => setVersions(next))
+        .catch(() => setVersions([]))
     }
   }, [isOpen, template])
 
@@ -498,10 +506,63 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
           ) : (
             (template.history ?? []).map((entry, index) => (
               <div key={`${entry.action}-${entry.at}-${index}`} data-testid="template-history-entry">
-                {entry.action === 'created' ? 'Créé' : 'Modifié'} le {formatHistoryDate(entry.at)}
+                {entry.action === 'created'
+                  ? 'Créé'
+                  : entry.action === 'restored'
+                    ? 'Restauré'
+                    : 'Modifié'}{' '}
+                le {formatHistoryDate(entry.at)}
               </div>
             ))
           )}
+          {versions.length > 0 ? (
+            <div data-testid="template-versions" style={{ marginTop: '0.75rem' }}>
+              <div style={{ fontWeight: 600, marginBottom: '0.35rem', color: theme.text.primary }}>
+                Versions
+              </div>
+              {versions.map((version) => (
+                <div
+                  key={version.id}
+                  data-testid={`template-version-${version.id}`}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: '0.5rem',
+                    marginBottom: '0.35rem',
+                  }}
+                >
+                  <span>
+                    {version.name} — {formatHistoryDate(version.at)}
+                  </span>
+                  <button
+                    type="button"
+                    data-testid={`template-version-restore-${version.id}`}
+                    disabled={isSaving}
+                    onClick={() => {
+                      if (!template || isSaving) return
+                      setIsSaving(true)
+                      void restoreTemplateVersionApi(template.id, version.id)
+                        .then(() => {
+                          toast('Version restaurée', 'success')
+                          onSaved?.()
+                          onClose()
+                        })
+                        .catch(() => toast('Restauration impossible', 'error'))
+                        .finally(() => setIsSaving(false))
+                    }}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      color: theme.button.primary.background,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Restaurer
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         <div

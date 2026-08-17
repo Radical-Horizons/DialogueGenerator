@@ -19,8 +19,11 @@ import {
   rateMarketplaceTemplateApi,
   copyMarketplaceListingApi,
   unpublishMarketplaceListingApi,
+  listMarketplaceCommentsApi,
+  createMarketplaceCommentApi,
+  setMarketplaceOfficialApi,
 } from '../../api/templates'
-import type { MarketplaceListing } from '../../types/template'
+import type { MarketplaceComment, MarketplaceListing } from '../../types/template'
 import {
   filterMarketplaceListings,
   sortMarketplaceListings,
@@ -34,6 +37,7 @@ export interface TemplateMarketplaceModalProps {
   currentUserRole: string | null
   isGuest: boolean
   onCopied: () => Promise<void> | void
+  onCompare?: (listingId: string) => void
 }
 
 function formatRating(listing: MarketplaceListing): string {
@@ -50,6 +54,7 @@ export function TemplateMarketplaceModal({
   currentUserRole,
   isGuest,
   onCopied,
+  onCompare,
 }: TemplateMarketplaceModalProps) {
   const isNarrow = useGenerationPanelNarrow()
   const chrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
@@ -62,8 +67,11 @@ export function TemplateMarketplaceModal({
   const [categoryFilter, setCategoryFilter] = useState('')
   const [contextFilter, setContextFilter] = useState('')
   const [sort, setSort] = useState<MarketplaceSortKey>('date')
+  const [officialOnly, setOfficialOnly] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [comments, setComments] = useState<MarketplaceComment[]>([])
+  const [commentBody, setCommentBody] = useState('')
   const loadSeq = useRef(0)
 
   const loadListings = useCallback(async () => {
@@ -108,6 +116,17 @@ export function TemplateMarketplaceModal({
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [isOpen, onClose])
 
+  useEffect(() => {
+    if (!isOpen || !selectedId) {
+      setComments([])
+      setCommentBody('')
+      return
+    }
+    void listMarketplaceCommentsApi(selectedId)
+      .then((next) => setComments(next))
+      .catch(() => setComments([]))
+  }, [isOpen, selectedId])
+
   const visibleListings = useMemo(
     () =>
       sortMarketplaceListings(
@@ -115,10 +134,10 @@ export function TemplateMarketplaceModal({
           name: nameFilter,
           category: categoryFilter,
           context: contextFilter,
-        }),
+        }).filter((item) => !officialOnly || item.isOfficial),
         sort,
       ),
-    [listings, nameFilter, categoryFilter, contextFilter, sort],
+    [listings, nameFilter, categoryFilter, contextFilter, sort, officialOnly],
   )
 
   const selected = visibleListings.find((item) => item.id === selectedId) ?? null
@@ -171,6 +190,20 @@ export function TemplateMarketplaceModal({
       toast(`« ${listing.name} » retiré du marketplace`, 'success')
     } catch {
       toast('Impossible de retirer cette fiche', 'error')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const handleOfficial = async (listing: MarketplaceListing, isOfficial: boolean) => {
+    setBusy(true)
+    try {
+      const updated = await setMarketplaceOfficialApi(listing.id, isOfficial)
+      setListings((current) =>
+        current.map((item) => (item.id === updated.id ? updated : item)),
+      )
+    } catch {
+      toast('Impossible de modifier le statut officiel', 'error')
     } finally {
       setBusy(false)
     }
@@ -310,6 +343,23 @@ export function TemplateMarketplaceModal({
             <option value="usage">Popularité</option>
             <option value="rating">Note</option>
           </select>
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              color: theme.text.secondary,
+              fontSize: `${chrome.labelFontRem}rem`,
+            }}
+          >
+            <input
+              type="checkbox"
+              data-testid="marketplace-filter-official"
+              checked={officialOnly}
+              onChange={(event) => setOfficialOnly(event.target.checked)}
+            />
+            Officiels
+          </label>
         </div>
 
         <div
@@ -401,6 +451,17 @@ export function TemplateMarketplaceModal({
                 >
                   Utiliser ce template
                 </button>
+                {onCompare ? (
+                  <button
+                    type="button"
+                    data-testid="marketplace-ab-btn"
+                    disabled={busy}
+                    onClick={() => onCompare(selected.id)}
+                    style={buttonStyle}
+                  >
+                    Comparer en A/B
+                  </button>
+                ) : null}
                 {canUnpublish ? (
                   <button
                     type="button"
@@ -410,6 +471,17 @@ export function TemplateMarketplaceModal({
                     style={buttonStyle}
                   >
                     Retirer
+                  </button>
+                ) : null}
+                {currentUserRole === 'admin' ? (
+                  <button
+                    type="button"
+                    data-testid="marketplace-official-btn"
+                    disabled={busy}
+                    onClick={() => void handleOfficial(selected, !selected.isOfficial)}
+                    style={buttonStyle}
+                  >
+                    {selected.isOfficial ? 'Retirer officiel' : 'Marquer officiel'}
                   </button>
                 ) : null}
                 {canRate
@@ -426,6 +498,51 @@ export function TemplateMarketplaceModal({
                       </button>
                     ))
                   : null}
+              </div>
+              <div data-testid="marketplace-comments" style={{ marginTop: '1rem' }}>
+                <h4 style={{ margin: '0 0 0.5rem', color: theme.text.primary }}>Commentaires</h4>
+                {comments.length === 0 ? (
+                  <p style={{ color: theme.text.secondary, fontSize: `${chrome.labelFontRem}rem` }}>
+                    Aucun commentaire.
+                  </p>
+                ) : (
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                    {comments.map((comment) => (
+                      <li key={comment.id} data-testid={`marketplace-comment-${comment.id}`}>
+                        <strong>{comment.authorUsername}</strong> — {comment.body}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {!isGuest ? (
+                  <form
+                    onSubmit={(event) => {
+                      event.preventDefault()
+                      const trimmed = commentBody.trim()
+                      if (!trimmed || busy) return
+                      setBusy(true)
+                      void createMarketplaceCommentApi(selected.id, trimmed)
+                        .then((created) => {
+                          setComments((current) => [...current, created])
+                          setCommentBody('')
+                        })
+                        .catch(() => toast('Impossible de commenter', 'error'))
+                        .finally(() => setBusy(false))
+                    }}
+                    style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}
+                  >
+                    <input
+                      data-testid="marketplace-comment-input"
+                      value={commentBody}
+                      onChange={(event) => setCommentBody(event.target.value)}
+                      placeholder="Votre commentaire"
+                      style={fieldStyle}
+                    />
+                    <button type="submit" data-testid="marketplace-comment-submit" style={buttonStyle}>
+                      Envoyer
+                    </button>
+                  </form>
+                ) : null}
               </div>
             </div>
           ) : null}

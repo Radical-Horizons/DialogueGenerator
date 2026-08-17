@@ -30,6 +30,7 @@ import { NarrowOverlayDrawer } from '../layout/NarrowOverlayDrawer';
 import { filterTemplates, groupTemplatesByCategory, TEMPLATE_UNCATEGORIZED_LABEL } from '../../utils/templateGroups';
 import { isPrebuiltNew } from '../../utils/templateApply';
 import { copyTemplateApi, publishMarketplaceTemplateApi } from '../../api/templates';
+import { marketplaceAbTestId } from '../../utils/abTestCharts';
 import { useContextStore } from '../../store/contextStore';
 import { useGenerationStore } from '../../store/generationStore';
 import { rencontreInitialeBySelectedCharacters } from '../../utils/templateSuggestionScore';
@@ -196,6 +197,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     rencontreInitialeByCharacter: {},
   });
   const [isAbTestOpen, setIsAbTestOpen] = useState(false);
+  const [abSeedBId, setAbSeedBId] = useState('');
   const [sharingTemplate, setSharingTemplate] = useState<Template | null>(null);
   const publishingRef = useRef(false);
   const copyingSharedRef = useRef(false);
@@ -341,14 +343,19 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     }
   };
 
-  const handlePublishTemplate = async (template: Template) => {
+  const handlePublishTemplate = async (template: Template, anonymous = false) => {
     if (publishingRef.current || isGuest) {
       return;
     }
     publishingRef.current = true;
     try {
-      await publishMarketplaceTemplateApi(template.id);
-      toast(`« ${template.name} » publié sur le marketplace`, 'success');
+      await publishMarketplaceTemplateApi(template.id, anonymous);
+      toast(
+        anonymous
+          ? `« ${template.name} » publié anonymement`
+          : `« ${template.name} » publié sur le marketplace`,
+        'success',
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Publication impossible';
       toast(message, 'error');
@@ -796,13 +803,22 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         currentUserRole={currentUser?.role ?? null}
         isGuest={Boolean(isGuest)}
         onCopied={() => loadTemplates()}
+        onCompare={(listingId) => {
+          setAbSeedBId(marketplaceAbTestId(listingId));
+          setIsMarketplaceOpen(false);
+          setIsAbTestOpen(true);
+        }}
       />
 
       <TemplateABTestingModal
         isOpen={isAbTestOpen}
-        onClose={() => setIsAbTestOpen(false)}
+        onClose={() => {
+          setIsAbTestOpen(false);
+          setAbSeedBId('');
+        }}
         templates={templates}
         prebuiltTemplates={prebuiltTemplates}
+        initialBId={abSeedBId}
       />
 
       <section
@@ -1168,6 +1184,28 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                           }}
                         >
                           Publier
+                        </button>
+                      )}
+                      {!isGuest && (
+                        <button
+                          type="button"
+                          data-testid="template-item-publish-anon-btn"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void handlePublishTemplate(template, true);
+                          }}
+                          style={{
+                            minHeight: TOUCH_TARGET_MIN_PX,
+                            padding: chrome.buttonPadding,
+                            backgroundColor: theme.button.default.background,
+                            border: `1px solid ${theme.border.secondary}`,
+                            borderRadius: `${redesignRadius.control}px`,
+                            color: theme.button.default.color,
+                            cursor: 'pointer',
+                            fontSize: `${chrome.buttonFontRem}rem`,
+                          }}
+                        >
+                          Publier anonymement
                         </button>
                       )}
                       {canShareTemplate(template) && (

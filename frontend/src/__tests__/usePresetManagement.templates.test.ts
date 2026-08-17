@@ -177,7 +177,10 @@ describe('usePresetManagement — templates [6.3]', () => {
     expect(mocks.setAppliedTemplate).toHaveBeenCalledWith(sampleTemplate.id, sampleTemplate.name)
     expect(toast).toHaveBeenCalledWith('Template chargé avec succès', 'success')
     expect(result.current.isValidationModalOpen).toBe(false)
-    expect(mocks.recordSuggestionUsedApi).toHaveBeenCalledWith('custom', sampleTemplate.id)
+    expect(mocks.recordSuggestionUsedApi).toHaveBeenCalledWith('custom', sampleTemplate.id, {
+      sceneType: 'Generic',
+      characters: [],
+    })
   })
 
   it('ouvre le modal et n’applique pas si GDD obsolète', async () => {
@@ -236,7 +239,10 @@ describe('usePresetManagement — templates [6.3]', () => {
       'Template chargé avec 1 référence(s) obsolète(s) ignorée(s)',
       'warning',
     )
-    expect(mocks.recordSuggestionUsedApi).toHaveBeenCalledWith('custom', sampleTemplate.id)
+    expect(mocks.recordSuggestionUsedApi).toHaveBeenCalledWith('custom', sampleTemplate.id, {
+      sceneType: 'Generic',
+      characters: [],
+    })
   })
 
   it('toast erreur si GET 404', async () => {
@@ -520,7 +526,10 @@ describe('usePresetManagement — templates [6.3]', () => {
     })
     expect(mocks.getTemplateApi).not.toHaveBeenCalled()
     expect(mocks.setAppliedTemplate).toHaveBeenCalledWith('listing-1', 'Listing public')
-    expect(mocks.recordSuggestionUsedApi).toHaveBeenCalledWith('marketplace', 'listing-1')
+    expect(mocks.recordSuggestionUsedApi).toHaveBeenCalledWith('marketplace', 'listing-1', {
+      sceneType: 'Generic',
+      characters: [],
+    })
     expect(mocks.copyMarketplaceListingApi).not.toHaveBeenCalled()
   })
 

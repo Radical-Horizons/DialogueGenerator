@@ -26,7 +26,10 @@ from api.schemas.template import (
     ABTestCreateRequest,
     ABTestCreateResponse,
     ABTestFeedbackRequest,
+    MarketplaceCommentCreateRequest,
+    MarketplaceCommentResponse,
     MarketplaceListing,
+    MarketplaceOfficialRequest,
     MarketplacePublishRequest,
     MarketplaceRatingRequest,
     PrebuiltTemplate,
@@ -35,13 +38,16 @@ from api.schemas.template import (
     TemplateCreateResponse,
     TemplateShareCreateRequest,
     TemplateShareResponse,
+    TemplateShareTargetResponse,
     TemplateSuggestionItem,
     TemplateSuggestionRequest,
     TemplateSuggestionUsedRequest,
     TemplateSuggestionUsedResponse,
     TemplateUpdate,
+    TemplateVersionSummary,
 )
 from api.services.template_ab_test_job_manager import TemplateABTestJobManager
+from api.utils.job_ownership import template_owner_key
 from constants import ModelNames
 from services.configuration_service import ConfigurationService
 from services.dialogue_tree_expansion_service import DialogueTreeExpansionService
@@ -49,6 +55,8 @@ from services.llm_quality_judge_service import LLMQualityJudgeService
 from services.llm_usage_service import LLMUsageService
 from services.template_ab_testing_service import (
     AB_TEST_USAGE_ENDPOINT,
+    MARKETPLACE_ID_PREFIX,
+    PREBUILT_ID_PREFIX,
     TemplateABTestNotFoundError,
     TemplateABTestValidationError,
     TemplateABTestingService,
@@ -85,6 +93,30 @@ def _share_to_response(share: TemplateShareView) -> TemplateShareResponse:
         user_id=share.user_id,
         username=share.username,
         created_at=share.created_at,
+        can_edit=share.can_edit,
+    )
+
+
+def _ab_is_admin(current_user: dict[str, object]) -> bool:
+    """Admin actif."""
+    return (
+        current_user.get("role") == "admin" and current_user.get("is_active") is True
+    )
+
+
+def _require_ab_side_readable(
+    template_id: str,
+    current_user: dict[str, object],
+    template_service: TemplateService,
+    sharing_service: TemplateSharingService,
+) -> None:
+    """Refuse un custom hors visibilité ; pré-built et marketplace sont publics."""
+    raw = (template_id or "").strip()
+    if raw.startswith(PREBUILT_ID_PREFIX) or raw.startswith(MARKETPLACE_ID_PREFIX):
+        return
+    sharing_service.require_readable(
+        template_service.get_template(raw),
+        current_user,
     )
 
 
@@ -152,7 +184,7 @@ def create_template(
     """
     try:
         payload = template_data.model_dump()
-        payload["owner_id"] = str(current_user.get("id") or "").strip() or None
+        payload["owner_id"] = template_owner_key(current_user) or None
         template, warnings = template_service.create_template(payload)
         annotated = sharing_service.annotate(template, current_user)
         logger.info("Template créé: %s (ID: %s)", template.name, template.id)
@@ -219,7 +251,11 @@ def record_template_suggestion_used(
     """Incrémente le compteur perso après un Charger réussi."""
     try:
         count = suggestion_service.record_used(
-            current_user, payload.source, payload.id
+            current_user,
+            payload.source,
+            payload.id,
+            scene_type=payload.sceneType,
+            characters=payload.characters,
         )
         return TemplateSuggestionUsedResponse(
             source=payload.source,
@@ -299,13 +335,14 @@ def get_prebuilt_template(
 
 @router.get("/marketplace", response_model=List[MarketplaceListing])
 def list_marketplace_templates(
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     marketplace_service: TemplateMarketplaceService = Depends(
         get_template_marketplace_service
     ),
 ) -> List[MarketplaceListing]:
     """Liste les fiches marketplace publiées."""
     try:
-        return marketplace_service.browse_templates()
+        return marketplace_service.browse_templates(viewer=current_user)
     except Exception as exc:
         logger.exception("Erreur liste marketplace")
         raise HTTPException(
@@ -317,13 +354,14 @@ def list_marketplace_templates(
 @router.get("/marketplace/{listing_id}", response_model=MarketplaceListing)
 def get_marketplace_template(
     listing_id: str,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     marketplace_service: TemplateMarketplaceService = Depends(
         get_template_marketplace_service
     ),
 ) -> MarketplaceListing:
     """Charge une fiche marketplace."""
     try:
-        return marketplace_service.get_listing(listing_id)
+        return marketplace_service.get_listing(listing_id, viewer=current_user)
     except FileNotFoundError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -358,7 +396,9 @@ def publish_marketplace_template(
             template_service.get_template(body.templateId),
             current_user,
         )
-        listing = marketplace_service.share_template(body.templateId, current_user)
+        listing = marketplace_service.share_template(
+            body.templateId, current_user, anonymous=body.anonymous
+        )
         logger.info("Template publié marketplace: %s", listing.id)
         return listing
     except (TemplateShareNotFoundError, FileNotFoundError) as exc:
@@ -398,7 +438,7 @@ def use_marketplace_template(
 ) -> TemplateCreateResponse:
     """Copie une fiche vers Mes templates et incrémente les usages."""
     try:
-        owner_id = str(current_user.get("id") or "").strip() or None
+        owner_id = template_owner_key(current_user) or None
         return marketplace_service.use_listing(listing_id, owner_id=owner_id)
     except FileNotFoundError as exc:
         raise HTTPException(
@@ -479,6 +519,85 @@ def unpublish_marketplace_template(
         ) from exc
 
 
+@router.get(
+    "/marketplace/{listing_id}/comments",
+    response_model=List[MarketplaceCommentResponse],
+)
+def list_marketplace_comments(
+    listing_id: str,
+    marketplace_service: TemplateMarketplaceService = Depends(
+        get_template_marketplace_service
+    ),
+) -> List[MarketplaceCommentResponse]:
+    """Liste les commentaires d'une fiche marketplace."""
+    try:
+        return marketplace_service.list_comments(listing_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Marketplace listing not found",
+        ) from exc
+
+
+@router.post(
+    "/marketplace/{listing_id}/comments",
+    response_model=MarketplaceCommentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_marketplace_comment(
+    listing_id: str,
+    body: MarketplaceCommentCreateRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    marketplace_service: TemplateMarketplaceService = Depends(
+        get_template_marketplace_service
+    ),
+) -> MarketplaceCommentResponse:
+    """Ajoute un commentaire (writer, pas guest)."""
+    require_non_guest(current_user)
+    try:
+        return marketplace_service.add_comment(listing_id, current_user, body.body)
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Marketplace listing not found",
+        ) from exc
+    except MarketplaceForbiddenError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Marketplace comment forbidden",
+        ) from exc
+
+
+@router.patch(
+    "/marketplace/{listing_id}/official",
+    response_model=MarketplaceListing,
+)
+def set_marketplace_official(
+    listing_id: str,
+    body: MarketplaceOfficialRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    marketplace_service: TemplateMarketplaceService = Depends(
+        get_template_marketplace_service
+    ),
+) -> MarketplaceListing:
+    """Marque une fiche officielle (admin)."""
+    require_non_guest(current_user)
+    try:
+        return marketplace_service.set_official(
+            listing_id, current_user, body.isOfficial
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Marketplace listing not found",
+        ) from exc
+    except MarketplaceForbiddenError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Marketplace official forbidden",
+        ) from exc
+
+
 def _raise_ab_http(exc: Exception) -> None:
     """Convertit les erreurs A/B métier en HTTP 400/404."""
     if isinstance(exc, TemplateABTestValidationError):
@@ -486,6 +605,8 @@ def _raise_ab_http(exc: Exception) -> None:
     if isinstance(exc, TemplateABTestNotFoundError):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     if isinstance(exc, FileNotFoundError):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    if isinstance(exc, TemplateShareNotFoundError):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     raise exc
 
@@ -555,10 +676,14 @@ def _schedule_ab_job(
 
 @router.get("/ab-test")
 def list_ab_tests(
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     ab_service: TemplateABTestingService = Depends(get_template_ab_testing_service),
 ) -> List[Dict[str, Any]]:
-    """Historique des tests A/B (fichiers ``data/ab-tests``)."""
-    return ab_service.list_tests()
+    """Historique des tests A/B de l'acteur (admin : tous)."""
+    return ab_service.list_tests(
+        owner_key=template_owner_key(current_user),
+        is_admin=_ab_is_admin(current_user),
+    )
 
 
 @router.post(
@@ -569,6 +694,7 @@ def list_ab_tests(
 async def start_ab_test(
     body: ABTestCreateRequest,
     background_tasks: BackgroundTasks,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     ab_service: TemplateABTestingService = Depends(get_template_ab_testing_service),
     job_manager: TemplateABTestJobManager = Depends(get_template_ab_test_job_manager),
     expansion_service: DialogueTreeExpansionService = Depends(
@@ -581,16 +707,37 @@ async def start_ab_test(
     config_service: ConfigurationService = Depends(get_config_service),
     usage_service: LLMUsageService = Depends(get_llm_usage_service),
     request_id: str = Depends(get_request_id),
+    template_service: TemplateService = Depends(get_template_service),
+    sharing_service: TemplateSharingService = Depends(get_template_sharing_service),
 ) -> ABTestCreateResponse:
     """Lance un job A/B (guest autorisé, consomme du LLM)."""
     try:
+        ab_service.validate_launch_params(
+            body.templateAId,
+            body.templateBId,
+            body.generationsPerTemplate,
+            body.maxDepth,
+        )
+        _require_ab_side_readable(
+            body.templateAId, current_user, template_service, sharing_service
+        )
+        _require_ab_side_readable(
+            body.templateBId, current_user, template_service, sharing_service
+        )
         payload = ab_service.create_queued_test(
             template_a_id=body.templateAId,
             template_b_id=body.templateBId,
             generations_per_template=body.generationsPerTemplate,
             max_depth=body.maxDepth,
+            owner_key=template_owner_key(current_user),
+            winner_mode=body.winnerMode,
         )
-    except (TemplateABTestValidationError, TemplateABTestNotFoundError, FileNotFoundError) as exc:
+    except (
+        TemplateABTestValidationError,
+        TemplateABTestNotFoundError,
+        FileNotFoundError,
+        TemplateShareNotFoundError,
+    ) as exc:
         _raise_ab_http(exc)
         raise
     try:
@@ -620,12 +767,18 @@ async def start_ab_test(
 @router.get("/ab-test/{test_id}")
 def get_ab_test(
     test_id: str,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     ab_service: TemplateABTestingService = Depends(get_template_ab_testing_service),
     job_manager: TemplateABTestJobManager = Depends(get_template_ab_test_job_manager),
 ) -> Dict[str, Any]:
     """Statut et résultats d'un test A/B."""
     try:
         payload = ab_service.get_test(test_id)
+        ab_service.assert_visible(
+            payload,
+            owner_key=template_owner_key(current_user),
+            is_admin=_ab_is_admin(current_user),
+        )
     except TemplateABTestNotFoundError as exc:
         _raise_ab_http(exc)
         raise
@@ -644,10 +797,17 @@ def get_ab_test(
 def patch_ab_test_feedback(
     test_id: str,
     body: ABTestFeedbackRequest,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     ab_service: TemplateABTestingService = Depends(get_template_ab_testing_service),
 ) -> Dict[str, Any]:
-    """Pouce haut/bas/none sur une génération (ne change pas le gagnant)."""
+    """Pouce haut/bas/none sur une génération."""
     try:
+        payload = ab_service.get_test(test_id)
+        ab_service.assert_visible(
+            payload,
+            owner_key=template_owner_key(current_user),
+            is_admin=_ab_is_admin(current_user),
+        )
         return ab_service.apply_feedback(test_id, body.generationId, body.thumb)
     except (TemplateABTestValidationError, TemplateABTestNotFoundError) as exc:
         _raise_ab_http(exc)
@@ -662,6 +822,7 @@ def patch_ab_test_feedback(
 async def rerun_ab_test(
     test_id: str,
     background_tasks: BackgroundTasks,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
     ab_service: TemplateABTestingService = Depends(get_template_ab_testing_service),
     job_manager: TemplateABTestJobManager = Depends(get_template_ab_test_job_manager),
     expansion_service: DialogueTreeExpansionService = Depends(
@@ -677,6 +838,12 @@ async def rerun_ab_test(
 ) -> ABTestCreateResponse:
     """Relance un test lié au parent (snapshots templates actuels)."""
     try:
+        parent = ab_service.get_test(test_id)
+        ab_service.assert_visible(
+            parent,
+            owner_key=template_owner_key(current_user),
+            is_admin=_ab_is_admin(current_user),
+        )
         queued = ab_service.prepare_rerun(test_id)
     except (TemplateABTestValidationError, TemplateABTestNotFoundError, FileNotFoundError) as exc:
         _raise_ab_http(exc)
@@ -702,6 +869,18 @@ async def rerun_ab_test(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error starting A/B test job",
         ) from exc
+
+
+@router.get("/share-targets", response_model=List[TemplateShareTargetResponse])
+def list_template_share_targets(
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    sharing_service: TemplateSharingService = Depends(get_template_sharing_service),
+) -> List[TemplateShareTargetResponse]:
+    """Writers actifs proposables comme destinataires (hors soi-même)."""
+    return [
+        TemplateShareTargetResponse(id=item.id, username=item.username)
+        for item in sharing_service.list_share_targets(current_user)
+    ]
 
 
 @router.get("/{template_id}/shares", response_model=List[TemplateShareResponse])
@@ -750,6 +929,7 @@ def create_template_share(
             template_id,
             username,
             current_user,
+            can_edit=body.canEdit,
         )
     except (
         TemplateShareValidationError,
@@ -832,6 +1012,59 @@ def copy_template(
         ) from exc
     logger.info("Template %s copié vers %s", template_id, copied.id)
     return TemplateCreateResponse(**copied.model_dump(), warnings=warnings)
+
+
+@router.get("/{template_id}/versions", response_model=List[TemplateVersionSummary])
+def list_template_versions(
+    template_id: str,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    template_service: TemplateService = Depends(get_template_service),
+    sharing_service: TemplateSharingService = Depends(get_template_sharing_service),
+) -> List[TemplateVersionSummary]:
+    """Snapshots d'un custom (lecture)."""
+    try:
+        sharing_service.require_readable(
+            template_service.get_template(template_id),
+            current_user,
+        )
+        return template_service.list_versions(template_id)
+    except (TemplateShareNotFoundError, FileNotFoundError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Template not found",
+        ) from exc
+
+
+@router.post(
+    "/{template_id}/versions/{version_id}/restore",
+    response_model=TemplateCreateResponse,
+)
+def restore_template_version(
+    template_id: str,
+    version_id: str,
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    template_service: TemplateService = Depends(get_template_service),
+    sharing_service: TemplateSharingService = Depends(get_template_sharing_service),
+) -> TemplateCreateResponse:
+    """Restaure un snapshot (owner / can_edit)."""
+    try:
+        sharing_service.require_writable(
+            template_service.get_template(template_id),
+            current_user,
+        )
+        template, warnings = template_service.restore_version(template_id, version_id)
+        annotated = sharing_service.annotate(template, current_user)
+        return TemplateCreateResponse(**annotated.model_dump(), warnings=warnings)
+    except TemplateShareForbiddenError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(exc),
+        ) from exc
+    except (TemplateShareNotFoundError, FileNotFoundError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Template not found",
+        ) from exc
 
 
 @router.get("/{template_id}/validate", response_model=PresetValidationResult)
@@ -979,7 +1212,7 @@ def delete_template(
         403: Destinataire (lecture seule).
     """
     try:
-        sharing_service.require_writable(
+        sharing_service.require_deletable(
             template_service.get_template(template_id),
             current_user,
         )

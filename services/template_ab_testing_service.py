@@ -23,12 +23,14 @@ from services.graph_conversion_service import GraphConversionService
 from services.llm_quality_judge_service import LLMQualityJudgeService
 from services.llm_usage_service import LLMUsageService
 from services.scene_dramatis import context_has_location
+from services.template_marketplace_service import TemplateMarketplaceService
 from services.template_service import TemplateService
 from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
 
 logger = logging.getLogger(__name__)
 
 PREBUILT_ID_PREFIX = "prebuilt:"
+MARKETPLACE_ID_PREFIX = "marketplace:"
 AB_TEST_USAGE_ENDPOINT = "templates_ab_test"
 DEFAULT_GENERATIONS = 3
 MIN_GENERATIONS = 1
@@ -38,6 +40,7 @@ MIN_MAX_DEPTH = 1
 MAX_MAX_DEPTH = 4
 DEFAULT_MAX_CHOICES = 3
 _USD_TO_EUR_RATE = 0.92
+WINNER_MODES = frozenset({"score", "score_thumbs", "score_cost"})
 
 DIALOGUE_GENERATOR_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_AB_TESTS_DIR = DIALOGUE_GENERATOR_DIR / "data" / "ab-tests"
@@ -60,14 +63,17 @@ class TemplateABTestingService:
         self,
         template_service: TemplateService,
         storage_dir: Optional[Path] = None,
+        marketplace_service: Optional[TemplateMarketplaceService] = None,
     ) -> None:
         """Initialise le service.
 
         Args:
             template_service: Résolution custom UUID et pré-built.
             storage_dir: Racine ``data/ab-tests`` (surcharge tests).
+            marketplace_service: Résolution ``marketplace:{listingId}``.
         """
         self._template_service = template_service
+        self._marketplace_service = marketplace_service
         self._storage_dir = storage_dir or DEFAULT_AB_TESTS_DIR
         self._storage_dir.mkdir(parents=True, exist_ok=True)
 
@@ -90,8 +96,39 @@ class TemplateABTestingService:
             slug = raw[len(PREBUILT_ID_PREFIX) :]
             prebuilt = self._template_service.get_prebuilt_template(slug)
             return f"{PREBUILT_ID_PREFIX}{prebuilt.id}", prebuilt.name, prebuilt.configuration
+        if raw.startswith(MARKETPLACE_ID_PREFIX):
+            listing_id = raw[len(MARKETPLACE_ID_PREFIX) :]
+            if self._marketplace_service is None:
+                raise FileNotFoundError(f"Marketplace listing {listing_id} not found")
+            listing = self._marketplace_service.get_listing(listing_id)
+            return (
+                f"{MARKETPLACE_ID_PREFIX}{listing.id}",
+                listing.name,
+                listing.configuration,
+            )
         template = self._template_service.get_template(raw)
         return template.id, template.name, template.configuration
+
+    def validate_launch_params(
+        self,
+        template_a_id: str,
+        template_b_id: str,
+        generations_per_template: int,
+        max_depth: int,
+    ) -> None:
+        """Valide IDs distincts, N et profondeur (sans I/O)."""
+        if (template_a_id or "").strip() == (template_b_id or "").strip():
+            raise TemplateABTestValidationError(
+                "Les deux templates doivent être distincts"
+            )
+        if not MIN_GENERATIONS <= generations_per_template <= MAX_GENERATIONS:
+            raise TemplateABTestValidationError(
+                f"generationsPerTemplate doit être entre {MIN_GENERATIONS} et {MAX_GENERATIONS}"
+            )
+        if not MIN_MAX_DEPTH <= max_depth <= MAX_MAX_DEPTH:
+            raise TemplateABTestValidationError(
+                f"maxDepth doit être entre {MIN_MAX_DEPTH} et {MAX_MAX_DEPTH}"
+            )
 
     def validate_launch(
         self,
@@ -118,18 +155,12 @@ class TemplateABTestingService:
             TemplateABTestValidationError: Paramètres métier invalides.
             FileNotFoundError: ID inconnu.
         """
-        if template_a_id.strip() == template_b_id.strip():
-            raise TemplateABTestValidationError(
-                "Les deux templates doivent être distincts"
-            )
-        if not MIN_GENERATIONS <= generations_per_template <= MAX_GENERATIONS:
-            raise TemplateABTestValidationError(
-                f"generationsPerTemplate doit être entre {MIN_GENERATIONS} et {MAX_GENERATIONS}"
-            )
-        if not MIN_MAX_DEPTH <= max_depth <= MAX_MAX_DEPTH:
-            raise TemplateABTestValidationError(
-                f"maxDepth doit être entre {MIN_MAX_DEPTH} et {MAX_MAX_DEPTH}"
-            )
+        self.validate_launch_params(
+            template_a_id,
+            template_b_id,
+            generations_per_template,
+            max_depth,
+        )
         resolved_a = self.resolve_template(template_a_id)
         resolved_b = self.resolve_template(template_b_id)
         for _tid, name, config in (resolved_a, resolved_b):
@@ -144,6 +175,8 @@ class TemplateABTestingService:
         generations_per_template: int,
         max_depth: int,
         parent_test_id: Optional[str] = None,
+        owner_key: Optional[str] = None,
+        winner_mode: str = "score",
     ) -> Dict[str, Any]:
         """Crée le fichier results.json en statut queued.
 
@@ -180,6 +213,8 @@ class TemplateABTestingService:
             "generationsPerTemplate": generations_per_template,
             "maxDepth": max_depth,
             "parentTestId": parent_test_id,
+            "ownerKey": owner_key,
+            "winnerMode": winner_mode if winner_mode in WINNER_MODES else "score",
             "winnerTemplateId": None,
             "scoreVarianceNote": (
                 "Variance attendue ±1 point sur le score global entre deux "
@@ -200,7 +235,9 @@ class TemplateABTestingService:
         self._write_results(test_id, payload)
         return payload
 
-    def list_tests(self) -> List[Dict[str, Any]]:
+    def list_tests(
+        self, *, owner_key: Optional[str] = None, is_admin: bool = False
+    ) -> List[Dict[str, Any]]:
         """Liste les tests (plus récent d'abord)."""
         items: List[Dict[str, Any]] = []
         if not self._storage_dir.exists():
@@ -217,6 +254,8 @@ class TemplateABTestingService:
                 logger.warning("A/B results.json illisible: %s", path)
                 continue
             if not isinstance(payload, dict) or not payload.get("testId"):
+                continue
+            if not self._is_visible(payload, owner_key=owner_key, is_admin=is_admin):
                 continue
             items.append(self._history_item(payload))
         items.sort(key=lambda row: str(row.get("createdAt") or ""), reverse=True)
@@ -235,6 +274,34 @@ class TemplateABTestingService:
             TemplateABTestNotFoundError: Absent.
         """
         return self._read_results(test_id)
+
+    def assert_visible(
+        self,
+        payload: Dict[str, Any],
+        *,
+        owner_key: Optional[str],
+        is_admin: bool,
+    ) -> None:
+        """404 si le test n'appartient pas à l'acteur (sauf admin)."""
+        if not self._is_visible(payload, owner_key=owner_key, is_admin=is_admin):
+            raise TemplateABTestNotFoundError(
+                f"Test {payload.get('testId')} introuvable"
+            )
+
+    @staticmethod
+    def _is_visible(
+        payload: Dict[str, Any],
+        *,
+        owner_key: Optional[str],
+        is_admin: bool,
+    ) -> bool:
+        """Admin ou liste non scopée : tout ; sinon ``ownerKey`` strict."""
+        if is_admin or owner_key is None:
+            return True
+        stored = payload.get("ownerKey")
+        if not stored:
+            return True
+        return stored == owner_key
 
     def apply_feedback(
         self,
@@ -272,6 +339,7 @@ class TemplateABTestingService:
         if not found:
             raise TemplateABTestNotFoundError(f"Génération {generation_id} introuvable")
         payload["totals"] = self._compute_totals(payload)
+        payload["winnerTemplateId"] = self._winner_id(payload)
         self._write_results(test_id, payload)
         return payload
 
@@ -294,6 +362,8 @@ class TemplateABTestingService:
             generations_per_template=int(parent.get("generationsPerTemplate") or DEFAULT_GENERATIONS),
             max_depth=int(parent.get("maxDepth") or DEFAULT_MAX_DEPTH),
             parent_test_id=parent_test_id,
+            owner_key=str(parent.get("ownerKey") or "") or None,
+            winner_mode=str(parent.get("winnerMode") or "score"),
         )
 
     async def run_ab_test(
@@ -414,6 +484,7 @@ class TemplateABTestingService:
             "durationMs": 0,
             "thumb": None,
             "error": None,
+            "document": None,
         }
         try:
             result: TreeExpansionResult = await expansion_service.expand(
@@ -453,6 +524,7 @@ class TemplateABTestingService:
                 }
                 for item in judged.criteria
             ]
+            row["document"] = result.document
         except Exception as exc:  # noqa: BLE001
             logger.warning(
                 "Génération A/B %s (%s #%s) en échec: %s",
@@ -591,10 +663,31 @@ class TemplateABTestingService:
         }
 
     def _winner_id(self, payload: Dict[str, Any]) -> Optional[str]:
-        """Gagnant = moyenne overall_score ; None si égalité ou un côté sans score."""
+        """Gagnant selon ``winnerMode`` (score, pouces, coût)."""
         totals = self._compute_totals(payload)
-        mean_a = totals["templateA"]["meanOverall"]
-        mean_b = totals["templateB"]["meanOverall"]
+        side_a = totals["templateA"]
+        side_b = totals["templateB"]
+        mean_a = side_a["meanOverall"]
+        mean_b = side_b["meanOverall"]
+        mode = str(payload.get("winnerMode") or "score")
+        if mode == "score_thumbs":
+            net_a = int(side_a["thumbsUp"]) - int(side_a["thumbsDown"])
+            net_b = int(side_b["thumbsUp"]) - int(side_b["thumbsDown"])
+            if net_a != net_b:
+                return (
+                    str(payload["templateAId"])
+                    if net_a > net_b
+                    else str(payload["templateBId"])
+                )
+        if mode == "score_cost":
+            cost_a = float(side_a["totalCostEur"] or 0)
+            cost_b = float(side_b["totalCostEur"] or 0)
+            if cost_a != cost_b:
+                return (
+                    str(payload["templateAId"])
+                    if cost_a < cost_b
+                    else str(payload["templateBId"])
+                )
         if mean_a is None or mean_b is None:
             return None
         if mean_a > mean_b:

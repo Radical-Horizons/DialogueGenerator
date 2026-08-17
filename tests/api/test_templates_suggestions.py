@@ -174,7 +174,7 @@ def test_rencontre_initiale_boosts_salutation(suggest_client: TestClient) -> Non
     assert response.status_code == 200
     items = response.json()
     greeting = next(item for item in items if item["id"] == "salutation")
-    assert "Section rencontre initiale détectée" in greeting["reasons"]
+    assert "Première rencontre (fiche ou flag catalogue)" in greeting["reasons"]
     assert greeting["score"] >= 20
 
 
@@ -324,6 +324,32 @@ def test_guest_suggestions_and_used_are_200(suggest_client: TestClient) -> None:
     )
     assert recorded.status_code == 200
     assert recorded.json()["useCount"] >= 1
+
+
+def test_contextual_usage_boosts_similar_scenario(suggest_client: TestClient) -> None:
+    """Used avec sceneType+persos → raison scénario similaire au suggest identique."""
+    for _ in range(2):
+        used = suggest_client.post(
+            "/api/v1/templates/suggestions/used",
+            json={
+                "source": "prebuilt",
+                "id": "confrontation",
+                "sceneType": "Négociation",
+                "characters": ["char-alpha"],
+            },
+        )
+        assert used.status_code == 200
+    response = suggest_client.post(
+        "/api/v1/templates/suggestions",
+        json=_suggest_body(
+            instructions="confrontation",
+            sceneType="Négociation",
+            characters=["char-alpha"],
+        ),
+    )
+    assert response.status_code == 200
+    match = next(item for item in response.json() if item["id"] == "confrontation")
+    assert "Déjà choisi dans un scénario similaire" in match["reasons"]
 
 
 def test_used_invalid_source_400(suggest_client: TestClient) -> None:

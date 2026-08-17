@@ -555,3 +555,25 @@ class TestTemplatesContextDropping:
             response.json()["configuration"]["contextDroppingRules"]["rules_profile"] == "strict"
         )
 
+
+def test_template_versions_archive_and_restore(client: TestClient) -> None:
+    """PUT archive un snapshot ; restore réécrit le nom."""
+    created = client.post("/api/v1/templates", json=_sample_create_payload(name="Avant"))
+    assert created.status_code == 201
+    template_id = created.json()["id"]
+    updated = client.put(
+        f"/api/v1/templates/{template_id}",
+        json={"name": "Après"},
+    )
+    assert updated.status_code == 200
+    versions = client.get(f"/api/v1/templates/{template_id}/versions")
+    assert versions.status_code == 200
+    items = versions.json()
+    assert len(items) >= 1
+    restored = client.post(
+        f"/api/v1/templates/{template_id}/versions/{items[0]['id']}/restore",
+    )
+    assert restored.status_code == 200
+    assert restored.json()["name"] == "Avant"
+    assert restored.json()["history"][-1]["action"] == "restored"
+

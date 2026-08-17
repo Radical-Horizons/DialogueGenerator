@@ -3,6 +3,7 @@
  */
 
 import type { ContextSelection, ReasoningEffort } from './api'
+import type { ContextDroppingRules } from './graph'
 
 export interface PresetMetadata {
   created: string; // ISO 8601
@@ -33,6 +34,8 @@ export interface PresetConfiguration {
   maxChoices?: number | null;
   /** LLM model identifier - optionnel */
   llmModel?: string;
+  /** Overlay anti-drop (optionnel, story 6.5 étendu aux presets) */
+  contextDroppingRules?: ContextDroppingRules | null;
 }
 
 export interface Preset {

@@ -1,6 +1,7 @@
 """Service de gestion des templates custom de génération."""
 import json
 import logging
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -13,6 +14,7 @@ from api.schemas.template import (
     Template,
     TemplateConfiguration,
     TemplateHistoryEntry,
+    TemplateVersionSummary,
 )
 from services.preset_service import PresetService
 
@@ -21,6 +23,8 @@ logger = logging.getLogger(__name__)
 DIALOGUE_GENERATOR_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_TEMPLATES_DIR = DIALOGUE_GENERATOR_DIR / "data" / "templates" / "custom"
 DEFAULT_PREBUILT_FILE = DIALOGUE_GENERATOR_DIR / "config" / "prebuilt_templates.json"
+MAX_TEMPLATE_VERSIONS = 10
+_VERSION_ID_RE = re.compile(r"^[0-9T]+$")
 
 
 class TemplateService:
@@ -151,6 +155,7 @@ class TemplateService:
             FileNotFoundError: Template absent.
         """
         template = self.get_template(template_id)
+        self._archive_version(template)
         now = datetime.now(timezone.utc)
         updates: Dict[str, Any] = {}
         if "name" in update_data:
@@ -164,8 +169,11 @@ class TemplateService:
         if "configuration" in update_data and update_data["configuration"] is not None:
             updates["configuration"] = TemplateConfiguration(**update_data["configuration"])
 
+        history_action = update_data.get("_history_action") or "updated"
+        if history_action not in ("updated", "restored"):
+            history_action = "updated"
         history = list(template.history)
-        history.append(TemplateHistoryEntry(at=now, action="updated"))
+        history.append(TemplateHistoryEntry(at=now, action=history_action))
         metadata = template.metadata.model_copy(update={"modified": now})
         template = template.model_copy(
             update={**updates, "history": history, "metadata": metadata}
@@ -191,7 +199,105 @@ class TemplateService:
         if not template_file.exists():
             raise FileNotFoundError(f"Template {template_id} not found")
         template_file.unlink()
+        self._delete_versions(template_id)
         logger.info("Template supprimé: %s", template_id)
+
+    def list_versions(self, template_id: str) -> List[TemplateVersionSummary]:
+        """Liste les snapshots (plus récent d'abord)."""
+        self.get_template(template_id)
+        versions_dir = self._versions_dir(template_id)
+        if not versions_dir.exists():
+            return []
+        items: List[TemplateVersionSummary] = []
+        for path in sorted(versions_dir.glob("*.json"), reverse=True):
+            version_id = path.stem
+            if not _VERSION_ID_RE.match(version_id):
+                continue
+            try:
+                payload = json.loads(path.read_text(encoding="utf-8"))
+                snapshot = Template(**payload)
+            except (OSError, json.JSONDecodeError, ValueError, TypeError):
+                logger.warning("Snapshot template illisible: %s", path)
+                continue
+            preview = (snapshot.configuration.instructions or "").strip()
+            if len(preview) > 160:
+                preview = preview[:157] + "..."
+            items.append(
+                TemplateVersionSummary(
+                    id=version_id,
+                    at=snapshot.metadata.modified.isoformat(),
+                    name=snapshot.name,
+                    instructionsPreview=preview,
+                )
+            )
+        return items
+
+    def restore_version(
+        self, template_id: str, version_id: str
+    ) -> Tuple[Template, List[str]]:
+        """Restaure un snapshot (nouvelle entrée history ``restored``)."""
+        snapshot = self._load_version(template_id, version_id)
+        return self.update_template(
+            template_id,
+            {
+                "name": snapshot.name,
+                "description": snapshot.description,
+                "category": snapshot.category,
+                "icon": snapshot.icon,
+                "configuration": snapshot.configuration.model_dump(mode="json"),
+                "_history_action": "restored",
+            },
+        )
+
+    def _versions_dir(self, template_id: str) -> Path:
+        """Dossier des snapshots d'un custom."""
+        return self.templates_dir.parent / "versions" / template_id
+
+    def _archive_version(self, template: Template) -> None:
+        """Écrit le JSON courant dans versions/ et plafonne à 10."""
+        versions_dir = self._versions_dir(template.id)
+        versions_dir.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f")
+        path = versions_dir / f"{stamp}.json"
+        path.write_text(
+            json.dumps(template.model_dump(mode="json"), ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        existing = sorted(
+            [p for p in versions_dir.glob("*.json") if _VERSION_ID_RE.match(p.stem)]
+        )
+        extra = len(existing) - MAX_TEMPLATE_VERSIONS
+        for stale in existing[: max(extra, 0)]:
+            try:
+                stale.unlink()
+            except OSError:
+                logger.warning("Impossible de retirer un vieux snapshot: %s", stale)
+
+    def _load_version(self, template_id: str, version_id: str) -> Template:
+        """Charge un snapshot disque."""
+        self.get_template(template_id)
+        if not _VERSION_ID_RE.match(version_id):
+            raise FileNotFoundError(f"Version {version_id} introuvable")
+        path = self._versions_dir(template_id) / f"{version_id}.json"
+        if not path.exists():
+            raise FileNotFoundError(f"Version {version_id} introuvable")
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        return Template(**payload)
+
+    def _delete_versions(self, template_id: str) -> None:
+        """Supprime le dossier de snapshots (cascade applicative)."""
+        versions_dir = self._versions_dir(template_id)
+        if not versions_dir.exists():
+            return
+        for path in versions_dir.glob("*.json"):
+            try:
+                path.unlink()
+            except OSError:
+                logger.warning("Snapshot non supprimé: %s", path)
+        try:
+            versions_dir.rmdir()
+        except OSError:
+            logger.warning("Dossier versions non vide: %s", versions_dir)
 
     def validate_template_references(self, template_id: str) -> PresetValidationResult:
         """Valide les références GDD d'un template sans muter le fichier.
