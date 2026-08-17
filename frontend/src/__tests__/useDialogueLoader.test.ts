@@ -137,6 +137,97 @@ describe('useDialogueLoader', () => {
     expect(toastMock).toHaveBeenCalledWith(expect.any(String), 'error')
   })
 
+  it('falls back to Unity raw JSON on missing_choice_id and toasts info', async () => {
+    const missingChoiceIdError = {
+      response: {
+        status: 422,
+        data: { error: { code: 'missing_choice_id', message: 'migrez' } },
+      },
+    }
+    const loadDialogueByDocumentIdMock = vi.fn().mockRejectedValue(missingChoiceIdError)
+    const loadDialogueFromRawJsonMock = vi.fn().mockResolvedValue(undefined)
+    const validateGraphMock = vi.fn().mockResolvedValue(undefined)
+    getUnityDialogueMock.mockResolvedValue({
+      json_content: JSON.stringify({
+        schemaVersion: '1.1.0',
+        nodes: [{ id: 'START', speaker: 'PNJ', line: 'Hello', choices: [] }],
+      }),
+    })
+    useGraphStore.setState({
+      loadDialogueByDocumentId: loadDialogueByDocumentIdMock,
+      loadDialogueFromRawJson: loadDialogueFromRawJsonMock,
+      validateGraph: validateGraphMock,
+    })
+
+    const { result } = renderHook(() => useDialogueLoader(toastMock, null))
+
+    act(() => {
+      result.current.setSelectedDialogue(
+        unityDialogueFixture({
+          filename: 'legacy.json',
+          title: 'Legacy',
+          node_count: 1,
+          edge_count: 0,
+        }),
+      )
+    })
+
+    await waitFor(() => {
+      expect(result.current.isLoadingDialogue).toBe(false)
+    })
+
+    expect(getUnityDialogueMock).toHaveBeenCalledWith('legacy.json')
+    expect(loadDialogueFromRawJsonMock).toHaveBeenCalled()
+    expect(toastMock).toHaveBeenCalledWith(expect.stringMatching(/identifiant stable/i), 'info')
+    expect(toastMock.mock.calls.some((call) => call[1] === 'error')).toBe(false)
+  })
+
+  it('keeps the previous graph when load fails after missing_choice_id fallback', async () => {
+    const keepNode = {
+      id: 'KEEP',
+      type: 'dialogueNode',
+      position: { x: 0, y: 0 },
+      data: { line: 'previous' },
+    }
+    useGraphStore.setState({
+      nodes: [keepNode],
+      edges: [],
+      dialogueMetadata: { filename: 'prev.json', title: 'Prev', node_count: 1, edge_count: 0 },
+    })
+
+    const missingChoiceIdError = {
+      response: {
+        status: 422,
+        data: { error: { code: 'missing_choice_id' } },
+      },
+    }
+    useGraphStore.setState({
+      loadDialogueByDocumentId: vi.fn().mockRejectedValue(missingChoiceIdError),
+      validateGraph: vi.fn().mockResolvedValue(undefined),
+    })
+    getUnityDialogueMock.mockRejectedValue(new Error('unity down'))
+
+    const { result } = renderHook(() => useDialogueLoader(toastMock, null))
+
+    act(() => {
+      result.current.setSelectedDialogue(
+        unityDialogueFixture({
+          filename: 'broken.json',
+          title: 'Broken',
+          node_count: 0,
+          edge_count: 0,
+        }),
+      )
+    })
+
+    await waitFor(() => {
+      expect(result.current.isLoadingDialogue).toBe(false)
+    })
+
+    expect(useGraphStore.getState().nodes.some((n) => n.id === 'KEEP')).toBe(true)
+    expect(toastMock).toHaveBeenCalledWith(expect.any(String), 'error')
+  })
+
   it('autosave circuit breaker: attempts save when unsaved changes exist', async () => {
     const saveDialogueMock = vi.fn().mockRejectedValue(
       Object.assign(new Error('Forbidden'), { response: { status: 403 } })

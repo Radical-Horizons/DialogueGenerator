@@ -24,8 +24,48 @@ interface RouteTarget {
 /** Circuit breaker: backoff après 4xx non-409 pour éviter la boucle d'autosave. */
 const AUTOSAVE_4XX_BACKOFF_MS = 10_000
 
+const MISSING_CHOICE_ID_INFO =
+  'Choix sans identifiant stable — ouvert quand même. La prochaine sauvegarde les écrira.'
+
+type ApiErrorShape = {
+  response?: { status?: number; data?: { error?: { code?: string } } }
+}
+
 function isNotFoundError(error: unknown): boolean {
-  return (error as { response?: { status?: number } })?.response?.status === 404
+  return (error as ApiErrorShape)?.response?.status === 404
+}
+
+function isMissingChoiceIdError(error: unknown): boolean {
+  const response = (error as ApiErrorShape)?.response
+  const status = response?.status
+  return (
+    (status === 422 || status === 400) &&
+    response?.data?.error?.code === 'missing_choice_id'
+  )
+}
+
+function shouldFallbackToUnityRaw(error: unknown): boolean {
+  return isNotFoundError(error) || isMissingChoiceIdError(error)
+}
+
+async function tryLoadCanonicalDocuments(
+  docIdsToTry: string[],
+  loadDialogueByDocumentId: (documentId: string) => Promise<void>,
+): Promise<{ loaded: boolean; missingChoiceId: boolean }> {
+  let missingChoiceId = false
+  for (const documentId of docIdsToTry) {
+    try {
+      await loadDialogueByDocumentId(documentId)
+      return { loaded: true, missingChoiceId: false }
+    } catch (error) {
+      if (isMissingChoiceIdError(error)) {
+        missingChoiceId = true
+        continue
+      }
+      if (!shouldFallbackToUnityRaw(error)) throw error
+    }
+  }
+  return { loaded: false, missingChoiceId }
 }
 
 export interface UseDialogueLoaderReturn {
@@ -152,26 +192,17 @@ export function useDialogueLoader(
         }
       }
 
-      // Reset total de l'état avant de commencer un nouveau chargement
-      resetGraphAndTemplateSession()
       const loadSeq = incrementLoadSeq()
 
       try {
-        let loaded = false
         const docIdsToTry = /\.json$/i.test(targetFilename)
           ? [targetFilename.replace(/\.json$/i, ''), targetFilename]
           : [targetFilename, `${targetFilename}.json`]
-        for (const documentId of docIdsToTry) {
-          try {
-            await loadDialogueByDocumentId(documentId)
-            loaded = true
-            break
-          } catch (error) {
-            if (!isNotFoundError(error)) throw error
-          }
-        }
-        
-        // Vérification de séquence après les tentatives asynchrones
+        const { loaded, missingChoiceId } = await tryLoadCanonicalDocuments(
+          docIdsToTry,
+          loadDialogueByDocumentId,
+        )
+
         if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
           loadInFlightRef.current = false
           setIsLoadingDialogue(false)
@@ -180,22 +211,25 @@ export function useDialogueLoader(
 
         if (!loaded) {
           const response = await unityDialoguesAPI.getUnityDialogue(targetFilename)
-          // Vérification de séquence après l'appel API externe
           if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
             loadInFlightRef.current = false
             setIsLoadingDialogue(false)
             return
           }
-          
+
           const stem = /\.json$/i.test(targetFilename) ? targetFilename.replace(/\.json$/i, '') : targetFilename
           await loadDialogueFromRawJson(response.json_content, stem || targetFilename)
         }
-        
-        // Vérification finale avant validation et UI update
+
         if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
           loadInFlightRef.current = false
           setIsLoadingDialogue(false)
           return
+        }
+
+        useGenerationStore.getState().clearTemplateSession()
+        if (missingChoiceId && !loaded) {
+          toast(MISSING_CHOICE_ID_INFO, 'info')
         }
 
         try {
@@ -243,7 +277,6 @@ export function useDialogueLoader(
     saveDialogue,
     validateGraph,
     toast,
-    resetGraphAndTemplateSession,
     incrementLoadSeq,
   ])
 
@@ -308,7 +341,6 @@ export function useDialogueLoader(
       if (loadInFlightRef.current && activeDialogueFilenameRef.current?.replace(/\.json$/i, '') === routeTarget.normalizedDialogueId) {
         return
       }
-      resetGraphAndTemplateSession()
       const loadSeq = incrementLoadSeq()
       loadInFlightRef.current = true
       setIsLoadingDialogue(true)
@@ -317,16 +349,10 @@ export function useDialogueLoader(
         const docIdsToTry = /\.json$/i.test(routeTarget.decodedDialogueId)
           ? [routeTarget.normalizedDialogueId, routeTarget.decodedDialogueId]
           : [routeTarget.normalizedDialogueId, `${routeTarget.normalizedDialogueId}.json`]
-        let loaded = false
-        for (const documentId of docIdsToTry) {
-          try {
-            await loadDialogueByDocumentId(documentId)
-            loaded = true
-            break
-          } catch (error) {
-            if (!isNotFoundError(error)) throw error
-          }
-        }
+        const { loaded, missingChoiceId } = await tryLoadCanonicalDocuments(
+          docIdsToTry,
+          loadDialogueByDocumentId,
+        )
 
         if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
           loadInFlightRef.current = false
@@ -355,6 +381,10 @@ export function useDialogueLoader(
           setIsLoadingDialogue(false)
           return
         }
+        useGenerationStore.getState().clearTemplateSession()
+        if (missingChoiceId && !loaded) {
+          toast(MISSING_CHOICE_ID_INFO, 'info')
+        }
         await finalizeLoad(loadSeq)
       } catch (err) {
         if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
@@ -375,7 +405,6 @@ export function useDialogueLoader(
     loadDialogueFromRawJson,
     validateGraph,
     toast,
-    resetGraphAndTemplateSession,
     incrementLoadSeq,
   ])
 
