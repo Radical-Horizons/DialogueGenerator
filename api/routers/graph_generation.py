@@ -254,7 +254,8 @@ async def generate_node(
                 )
                 try_compute_context_relevance(usage_service, request_id)
 
-        gdd_fp = fingerprint_for_selections_safe(
+        gdd_fp = await asyncio.to_thread(
+            fingerprint_for_selections_safe,
             context_builder,
             enriched_context,
         )

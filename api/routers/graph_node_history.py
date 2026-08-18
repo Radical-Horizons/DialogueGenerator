@@ -5,6 +5,7 @@ Story 4.14 : ~450L acceptable — 4 handlers partagent 3 helpers privés étroit
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from pathlib import Path
@@ -339,7 +340,8 @@ async def regenerate_node(
             template_name=request_data.template_name,
         )
         try_compute_context_relevance(usage_service, request_id)
-        gdd_fp = fingerprint_for_selections_safe(
+        gdd_fp = await asyncio.to_thread(
+            fingerprint_for_selections_safe,
             context_builder,
             enriched_context,
         )

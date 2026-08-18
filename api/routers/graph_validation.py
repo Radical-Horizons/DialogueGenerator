@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Annotated
 
@@ -162,7 +163,8 @@ async def validate_lore_explicit(
     request_id: Annotated[str, Depends(get_request_id)] = None,
 ) -> ValidateLoreExplicitResponse:
     """Détecte les contradictions lore explicites (texte graphe vs faits GDD)."""
-    try:
+    def _run() -> ValidateLoreExplicitResponse:
+        """Corps synchrone déporté sur un thread (merge des faits via ContextBuilder, bloquant)."""
         base_facts = [
             LoreGddFact(
                 entity_name=p.entity_name,
@@ -221,6 +223,9 @@ async def validate_lore_explicit(
             summary=summary,
             summary_explicit_only=summary_explicit_only,
         )
+
+    try:
+        return await asyncio.to_thread(_run)
     except Exception as e:
         logger.exception(
             "Erreur lors de la validation lore explicite (request_id: %s)",

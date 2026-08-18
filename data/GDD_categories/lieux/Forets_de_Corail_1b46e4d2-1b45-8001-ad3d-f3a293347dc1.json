@@ -11,7 +11,7 @@
     "Contient": "3bba437c-9511-447b-92f5-e6b19e5d34cf",
     "Date de création de la fiche": "2025-03-12T15:38:00.000Z",
     "Date vérification": "2026-05-23",
-    "Dernière modification": "2026-08-02T14:25:00.000Z",
+    "Dernière modification": "2026-08-07T10:25:00.000Z",
     "Espèces présentes": "1a16e4d2-1b45-8099-be36-db66acb76390, 1a16e4d2-1b45-807b-8a9a-ef07675d08ba, 1a16e4d2-1b45-80e9-8a7a-d5c626184d83, 2256e4d2-1b45-8048-8d1c-dc817100f567, 1cd6e4d2-1b45-80fd-85ec-e1d624fffb64, c38b5ade-b585-4789-a0ad-f5cff2b206c3, 860509cc-f9fc-4e8f-b501-c8fec5a982e1",
     "Evénements liés": "22c6e4d2-1b45-809c-8eca-f47ecfc75e36, 2306e4d2-1b45-803c-9898-f67514864771, 2306e4d2-1b45-80d8-bc98-cd7c7f4b8c69, 2306e4d2-1b45-8048-be38-f57c4827403e, 2306e4d2-1b45-80e1-b9cb-c36de6617cb1, 2306e4d2-1b45-807b-821a-c0f29ad85841",
     "Monnaie locale": "Mnème de phase",
@@ -25,9 +25,10 @@
     "Rêveur local": "5a02a16c-f725-4279-bb11-2f6079a22a51",
     "Rôle": "Zone naturelle",
     "Seuil économique": "9",
+    "Superficie (km²)": "220000",
     "Taille": "Région",
     "Type": "Région principale",
-    "Zones limitrophes": "1b46e4d2-1b45-8028-a2e5-f06744044aa4, 1b46e4d2-1b45-8069-b24d-c263445f6a8e, 2256e4d2-1b45-800f-bad7-e3e59e47a8e3, 1b46e4d2-1b45-805c-a426-e1eb48b627a5",
+    "Zones limitrophes": "1b46e4d2-1b45-8028-a2e5-f06744044aa4, 2256e4d2-1b45-800f-bad7-e3e59e47a8e3, 1b46e4d2-1b45-8069-b24d-c263445f6a8e, 1b46e4d2-1b45-805c-a426-e1eb48b627a5",
     "État": "Eléments liés à gérer"
   },
   "sections": {

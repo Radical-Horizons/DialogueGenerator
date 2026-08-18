@@ -1,4 +1,5 @@
 """Router pour la génération de dialogues."""
+import asyncio
 import logging
 import os
 import re
@@ -317,12 +318,12 @@ def _build_prompt_from_request(
         scene_type=getattr(request_data, "scene_type", None),
     )
 
-    # 4. Construire le contexte GDD via ContextBuilder
-    if request_data.previous_dialogue_preview:
-        context_builder.set_previous_dialogue_context(request_data.previous_dialogue_preview)
-    
-    # Construire le contexte JSON au plafond de mesure ; le budget utilisateur s'applique au texte.
-    structured_context = context_builder.build_context_json(
+    # 4. Construire le contexte GDD via ContextBuilder (set dialogue précédent +
+    # build atomiques : ce ContextBuilder est un singleton partagé, et cette
+    # fonction s'exécute déjà dans un thread déporté par ses appelants — voir
+    # ContextBuilder.build_context_json_with_previous_dialogue).
+    structured_context = context_builder.build_context_json_with_previous_dialogue(
+        previous_dialogue_preview=request_data.previous_dialogue_preview,
         selected_elements=context_selections_dict,
         scene_instruction=scene_instruction,
         field_configs=request_data.field_configs,
@@ -392,7 +393,8 @@ async def preview_prompt(
     Returns:
         Prompt brut construit (format XML) et sa structure JSON.
     """
-    try:
+    def _run() -> PreviewPromptResponse:
+        """Corps synchrone déporté sur un thread (construction du prompt via ContextBuilder, bloquant)."""
         # Convertir PreviewPromptRequest en EstimateTokensRequest pour réutiliser la logique
         estimate_request = EstimateTokensRequest(
             context_selections=request_data.context_selections,
@@ -413,7 +415,7 @@ async def preview_prompt(
             organization_mode=request_data.organization_mode,
             in_game_flags=request_data.in_game_flags  # Ajouter les flags
         )
-        
+
         try:
             built, _structured_context = _build_prompt_from_request(estimate_request, dialogue_service, prompt_engine, skill_service, trait_service)
         except ValueError as xml_error:
@@ -433,7 +435,7 @@ async def preview_prompt(
                 )
             # Si pas de détails XML, re-lancer l'erreur originale
             raise
-        
+
         # Convertir structured_prompt en dict pour la réponse
         structured_prompt_dict = None
         if built.structured_prompt:
@@ -447,7 +449,9 @@ async def preview_prompt(
             prompt_hash=built.prompt_hash,
             structured_prompt=structured_prompt_dict
         )
-        
+
+    try:
+        return await asyncio.to_thread(_run)
     except ValidationException:
         # Re-raise les ValidationException telles quelles
         raise
@@ -494,7 +498,8 @@ async def estimate_tokens(
     Returns:
         Estimation du nombre de tokens et prompt brut réel.
     """
-    try:
+    def _run() -> EstimateTokensResponse:
+        """Corps synchrone déporté sur un thread (build prompt + métriques via ContextBuilder, bloquant)."""
         # Construire le prompt en réutilisant la fonction helper
         try:
             built, structured_context = _build_prompt_from_request(request_data, dialogue_service, prompt_engine, skill_service, trait_service)
@@ -515,10 +520,15 @@ async def estimate_tokens(
                 )
             # Si pas de détails XML, re-lancer l'erreur originale
             raise
-        
+
         context_builder = dialogue_service.context_builder
+        # Écriture verrouillée (set_previous_dialogue_context_locked) : cette
+        # fonction ne relit pas la valeur elle-même (metrics réutilise
+        # structured_context déjà construit via _build_prompt_from_request), mais
+        # l'écriture doit rester exclusive vis-à-vis des autres threads déportés
+        # qui posent/lisent le dialogue précédent sur ce ContextBuilder partagé.
         if request_data.previous_dialogue_preview:
-            context_builder.set_previous_dialogue_context(request_data.previous_dialogue_preview)
+            context_builder.set_previous_dialogue_context_locked(request_data.previous_dialogue_preview)
 
         metrics = compute_context_selection_token_metrics(
             context_builder,
@@ -536,7 +546,7 @@ async def estimate_tokens(
             if ctx_in_prompt > 0
             else metrics.context_tokens
         )
-        
+
         # Convertir structured_prompt en dict pour la réponse
         structured_prompt_dict = None
         if built.structured_prompt:
@@ -565,7 +575,9 @@ async def estimate_tokens(
             completion_tokens=completion_tokens,
             estimated_cost_eur=estimated_cost_eur,
         )
-        
+
+    try:
+        return await asyncio.to_thread(_run)
     except ValidationException:
         # Re-raise les ValidationException telles quelles
         raise
@@ -1358,16 +1370,16 @@ async def get_raw_json_context(
     Returns:
         Structure JSON brute du contexte et hash du prompt.
     """
-    try:
+    def _run() -> RawJsonContextResponse:
+        """Corps synchrone déporté sur un thread (build contexte + prompt via ContextBuilder, bloquant)."""
         # Convertir ContextSelection en dict
         context_selections_dict = request_data.context_selections.to_service_dict()
-        
-        # Construire le contexte JSON (même logique que estimate-tokens)
+
+        # Construire le contexte JSON (même logique que estimate-tokens). Set +
+        # build atomiques (voir ContextBuilder.build_context_json_with_previous_dialogue).
         context_builder = dialogue_service.context_builder
-        if request_data.previous_dialogue_preview:
-            context_builder.set_previous_dialogue_context(request_data.previous_dialogue_preview)
-        
-        structured_context = context_builder.build_context_json(
+        structured_context = context_builder.build_context_json_with_previous_dialogue(
+            previous_dialogue_preview=request_data.previous_dialogue_preview,
             selected_elements=context_selections_dict,
             scene_instruction=request_data.user_instructions,
             field_configs=request_data.field_configs,
@@ -1376,19 +1388,19 @@ async def get_raw_json_context(
             include_dialogue_type=True,
             element_modes=context_selections_dict.get("_element_modes")
         )
-        
+
         # Construire le prompt pour obtenir le hash (services injectés)
         skills_list, attributes_list, traits_list = load_prompt_catalogs(
             skill_service, trait_service
         )
-        
+
         dramatis = resolve_scene_dramatis(
             player_character_id=request_data.player_character_id,
             npc_speaker_id=request_data.npc_speaker_id,
             context_selections=request_data.context_selections.model_dump(),
         )
         npc_speaker_id = dramatis.npc_speaker_id
-        
+
         context_text_for_prompt = cap_context_text_to_budget(
             context_builder.serialize_context_to_text(structured_context),
             request_data.max_context_tokens,
@@ -1413,18 +1425,20 @@ async def get_raw_json_context(
             max_context_tokens=request_data.max_context_tokens,
             llm_model_identifier=request_data.llm_model_identifier,
         )
-        
+
         built = prompt_engine.build_prompt(prompt_input)
         prompt_hash = built.prompt_hash
-        
+
         # Convertir structured_context en dict
         structured_context_dict = structured_context.model_dump() if hasattr(structured_context, 'model_dump') else structured_context
-        
+
         return RawJsonContextResponse(
             structured_context=structured_context_dict,
             prompt_hash=prompt_hash
         )
-        
+
+    try:
+        return await asyncio.to_thread(_run)
     except Exception as e:
         logger.exception(f"Erreur lors de la récupération du JSON brut (request_id: {request_id})")
         raise InternalServerException(

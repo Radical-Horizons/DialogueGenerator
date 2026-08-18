@@ -1,4 +1,5 @@
 """Router pour la configuration."""
+import asyncio
 import logging
 import os
 from typing import Annotated, Any, Dict, List, Optional
@@ -1087,12 +1088,13 @@ async def preview_context(
     Returns:
         Prévisualisation du contexte formaté.
     """
-    try:
+    def _run() -> ContextPreviewResponse:
+        """Corps synchrone déporté sur un thread (ContextBuilder est bloquant)."""
         # Extraire _element_modes si présent (si selected_elements est un dict avec _element_modes)
         element_modes = None
         if isinstance(request_data.selected_elements, dict):
             element_modes = request_data.selected_elements.pop("_element_modes", None)
-        
+
         # Construire le contexte JSON (obligatoire, plus de fallback)
         structured_context = context_builder.build_context_json(
             selected_elements=request_data.selected_elements,
@@ -1105,10 +1107,10 @@ async def preview_context(
         )
         # Sérialiser en texte pour compatibilité
         preview_text = context_builder.serialize_context_to_text(structured_context)
-        
+
         # Compter les tokens
         tokens = context_builder.count_tokens(preview_text)
-        
+
         # Convertir structured_context en dict pour la réponse
         structured_prompt_dict = None
         if structured_context:
@@ -1116,12 +1118,15 @@ async def preview_context(
                 structured_prompt_dict = structured_context.model_dump()
             except Exception as e:
                 logger.warning(f"Erreur lors de la conversion du structured_context en dict: {e}")
-        
+
         return ContextPreviewResponse(
             preview=preview_text or "",
             tokens=tokens,
             structured_prompt=structured_prompt_dict
         )
+
+    try:
+        return await asyncio.to_thread(_run)
     except Exception as e:
         logger.exception(f"Erreur lors de la prévisualisation du contexte (request_id: {request_id})")
         raise InternalServerException(

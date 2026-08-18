@@ -41,15 +41,24 @@ def mock_dialogue_service():
     mock_service = MagicMock(spec=DialogueGenerationService)
     mock_service.context_builder = MagicMock()
     # Aligné sur le pipeline réel (_build_prompt_from_request / estimate-tokens) : JSON → texte → tiktoken.
+    _mock_structured_context = PromptStructure(
+        sections=[],
+        metadata=PromptMetadata(
+            totalTokens=100,
+            generatedAt="2026-01-01T00:00:00",
+            organizationMode="narrative",
+        ),
+    )
+    # build_context_json_with_previous_dialogue (set + build atomiques, voir
+    # ContextBuilder) est le point d'entrée réel de _build_prompt_from_request/
+    # get_raw_json_context depuis la spec v3 — plus l'appel direct à
+    # build_context_json. Les deux restent mockés pour ne pas casser un futur
+    # appelant qui reviendrait au chemin non atomique.
     mock_service.context_builder.build_context_json = MagicMock(
-        return_value=PromptStructure(
-            sections=[],
-            metadata=PromptMetadata(
-                totalTokens=100,
-                generatedAt="2026-01-01T00:00:00",
-                organizationMode="narrative",
-            ),
-        )
+        return_value=_mock_structured_context
+    )
+    mock_service.context_builder.build_context_json_with_previous_dialogue = MagicMock(
+        return_value=_mock_structured_context
     )
     mock_service.context_builder.serialize_context_to_text = MagicMock(
         return_value="context text"
@@ -149,11 +158,15 @@ def test_estimate_tokens_builds_context_once(client, mock_dialogue_service):
 
     Auparavant : un build pour le prompt + un second build dans
     ``compute_context_selection_token_metrics``. Désormais la structure est réutilisée.
+
+    Le build passe par ``build_context_json_with_previous_dialogue`` (set du
+    dialogue précédent + build atomiques, spec v3) plutôt que par
+    ``build_context_json`` directement — voir ``core/context/context_builder.py``.
     """
     from services.context_token_budget import clear_context_metrics_cache
 
     clear_context_metrics_cache()
-    mock_dialogue_service.context_builder.build_context_json.reset_mock()
+    mock_dialogue_service.context_builder.build_context_json_with_previous_dialogue.reset_mock()
     response = client.post(
         "/api/v1/dialogues/estimate-tokens",
         json={
@@ -163,7 +176,10 @@ def test_estimate_tokens_builds_context_once(client, mock_dialogue_service):
         },
     )
     assert response.status_code == 200
-    assert mock_dialogue_service.context_builder.build_context_json.call_count == 1
+    assert (
+        mock_dialogue_service.context_builder.build_context_json_with_previous_dialogue.call_count
+        == 1
+    )
 
 
 @pytest.mark.unit

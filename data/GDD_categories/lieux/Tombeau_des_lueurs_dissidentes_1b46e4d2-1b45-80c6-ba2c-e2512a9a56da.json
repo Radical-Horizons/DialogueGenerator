@@ -8,7 +8,7 @@
     "Contenu par": "1b46e4d2-1b45-802a-8cc1-d19eea05d87d",
     "Date de création de la fiche": "2025-03-12T15:39:00.000Z",
     "Date vérification": "2026-04-30",
-    "Dernière modification": "2026-08-01T19:31:00.000Z",
+    "Dernière modification": "2026-08-07T10:24:00.000Z",
     "Espèces présentes": "1a16e4d2-1b45-805e-841e-d699f81d67a9, 1a16e4d2-1b45-8099-be36-db66acb76390, 1cd6e4d2-1b45-80fd-85ec-e1d624fffb64, 80dae34f-19a3-483a-8d7c-40221f7d8baf, 22e6e4d2-1b45-803b-82ce-ed4b01fe01c4, 442cbe0b-42d9-4630-9925-59d26183409c, 1a16e4d2-1b45-80d7-a920-c3f40e49246b, 9ccb99f1-03c5-468b-a3cd-954c5bea9a1c",
     "Evénements liés": "2306e4d2-1b45-809b-b72a-e1809283b436, 2306e4d2-1b45-8061-9f88-e5925588b94a, 2306e4d2-1b45-802b-bf07-e4197143bd8f, 2306e4d2-1b45-8005-b7b3-f7cdd1d2848c, 1024b60b-494d-4c9a-ad0f-a82978169cd0, 44fcead0-c726-446d-944f-6955caeca065, 49e9d994-e6e9-484a-b3fe-b70b1927d1e7, 849ff58e-54ac-4ecc-9085-592be651e0ba, 7cf4ac66-eda1-4cc0-8fdc-32864a443520, 6abd6e88-0ebe-43ee-abc2-274b618927b4, 773282cc-b298-4e19-9327-5958a2066e26, da62b697-3758-4e62-ab8c-6a9ebbff0f3b",
     "Monnaie locale": "Marques de Seuil",
@@ -20,9 +20,10 @@
     "Rêveur local": "7e034899-7ff1-4617-ab61-5d85ff53b949",
     "Rôle": "Lieu commercial",
     "Seuil économique": "8",
+    "Superficie (km²)": "200000",
     "Taille": "Région",
     "Type": "Région principale",
-    "Zones limitrophes": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 1b46e4d2-1b45-8071-88b9-da69653d4987, 166982c7-3cf0-4947-85c5-0a6df03ff80d, 1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d, 31ee8035-8e36-4941-a229-f6742e8954e1",
+    "Zones limitrophes": "1b46e4d2-1b45-8071-88b9-da69653d4987, 31ee8035-8e36-4941-a229-f6742e8954e1, 1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d, 166982c7-3cf0-4947-85c5-0a6df03ff80d, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
     "État": "À relire"
   },
   "sections": {

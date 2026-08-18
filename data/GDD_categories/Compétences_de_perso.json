@@ -1,5 +1,357 @@
 [
   {
+    "Nom": "Vethraak — FP — Archéologie",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "fb264847-76ff-4be6-9399-5c7a4f600dfd",
+      "Feuilles de perso": "d46d2244-26ce-452c-b860-e6a78d58842b",
+      "Identifiant": "STSKI109",
+      "Notes": "Fragments Frémissants et textes anciens.",
+      "Score": "2",
+      "Source": "Base",
+      "Valeur": "2",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "a3b2fe0d-edbd-4898-ac53-9e50f8235a87"
+  },
+  {
+    "Nom": "Vethraak — FP — Orientation",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "6740617d-f4dc-4eb8-9aa7-acd892ff942c",
+      "Feuilles de perso": "d46d2244-26ce-452c-b860-e6a78d58842b",
+      "Identifiant": "STSKI107",
+      "Notes": "Cartographe d’interstices.",
+      "Score": "3",
+      "Source": "Base",
+      "Valeur": "3",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "aa944390-da81-4bc5-96e6-6488d04cca86"
+  },
+  {
+    "Nom": "Vethraak — FP — Survie",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "77149fde-3bd1-47ac-9ef9-28adddd37be7",
+      "Feuilles de perso": "d46d2244-26ce-452c-b860-e6a78d58842b",
+      "Identifiant": "STSKI106",
+      "Notes": "Route Kesh-Maradh et quinze cycles de Marées.",
+      "Score": "3",
+      "Source": "Base",
+      "Valeur": "3",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "71783f11-8f4e-4719-8fac-bd0a50198a27"
+  },
+  {
+    "Nom": "Vethraak — FP — Sciences sociales",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "5c3f25a4-585b-4a17-931a-13a7e0df14e4",
+      "Feuilles de perso": "d46d2244-26ce-452c-b860-e6a78d58842b",
+      "Identifiant": "STSKI105",
+      "Notes": "Lecture des structures de pouvoir.",
+      "Score": "3",
+      "Source": "Base",
+      "Valeur": "3",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "f5a77d95-3496-4b6a-8b87-4faf52328c8a"
+  },
+  {
+    "Nom": "Vethraak — FP — Évaluation",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "88f4b290-b36e-4050-aa22-5db2522fa676",
+      "Feuilles de perso": "d46d2244-26ce-452c-b860-e6a78d58842b",
+      "Identifiant": "STSKI104",
+      "Notes": "Manuscrits rares et prix des choses.",
+      "Score": "3",
+      "Source": "Base",
+      "Valeur": "3",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "ed6d4f94-411a-4322-82bd-7a3d8486b323"
+  },
+  {
+    "Nom": "Vethraak — FP — Affaires",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "4933e32d-3dcd-4232-834a-9716772d8dba",
+      "Feuilles de perso": "d46d2244-26ce-452c-b860-e6a78d58842b",
+      "Identifiant": "STSKI108",
+      "Notes": "Couverture marchande et monde des caravanes.",
+      "Score": "3",
+      "Source": "Base",
+      "Valeur": "3",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "87c5c768-effc-4149-b9d8-38cf8ad3322d"
+  },
+  {
+    "Nom": "Vethraak — FP — Psychologie",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "99438183-d591-4c7a-b3f0-edf0fbc918ea",
+      "Feuilles de perso": "d46d2244-26ce-452c-b860-e6a78d58842b",
+      "Identifiant": "STSKI102",
+      "Notes": "Cartographie des vulnérabilités.",
+      "Score": "3",
+      "Source": "Base",
+      "Valeur": "3",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "b97eb1a7-a210-4f6e-affe-91b5e9ce7293"
+  },
+  {
+    "Nom": "Vethraak — FP — Éloquence",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "139430cd-d19d-4019-bb8f-483f4553e87c",
+      "Feuilles de perso": "d46d2244-26ce-452c-b860-e6a78d58842b",
+      "Identifiant": "STSKI101",
+      "Notes": "Convaincre sans mentir ni menacer.",
+      "Score": "3",
+      "Source": "Base",
+      "Valeur": "3",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "0bd92e0b-c72c-4aa2-88d8-7a9b20a28259"
+  },
+  {
+    "Nom": "Vethraak — FP — Duperie",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "930e5adf-2050-482a-b441-c1afaf798818",
+      "Feuilles de perso": "d46d2244-26ce-452c-b860-e6a78d58842b",
+      "Identifiant": "STSKI100",
+      "Notes": "Arnaqueur pragmatique.",
+      "Score": "4",
+      "Source": "Base",
+      "Valeur": "4",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "abe7179e-19b0-4838-858c-44f9c9c7cf13"
+  },
+  {
+    "Nom": "Vethraak — FP — Rhétorique",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "129c5672-795d-4185-9add-26f4051f4080",
+      "Feuilles de perso": "d46d2244-26ce-452c-b860-e6a78d58842b",
+      "Identifiant": "STSKI99",
+      "Notes": "Éloquence de cour, outil professionnel.",
+      "Score": "4",
+      "Source": "Base",
+      "Valeur": "4",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "3e9b5a2a-5f5f-41f7-b274-9b9beb50c7a3"
+  },
+  {
+    "Nom": "Vethraak — FP — Renseignement",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "5a967f53-b2b1-48ef-8e11-85e1d0ceb818",
+      "Feuilles de perso": "d46d2244-26ce-452c-b860-e6a78d58842b",
+      "Identifiant": "STSKI103",
+      "Notes": "Réseau d’informateurs nourri par la dette.",
+      "Score": "4",
+      "Source": "Base",
+      "Valeur": "4",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "b92c7a7e-90ef-4896-bb6e-f237907d028e"
+  },
+  {
+    "Nom": "Vethraak — FP — Négociation",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "2c3b8753-66c4-4995-9c34-c5cb73f8bda0",
+      "Feuilles de perso": "d46d2244-26ce-452c-b860-e6a78d58842b",
+      "Identifiant": "STSKI110",
+      "Notes": "Courtier d’informations de la Vieille Ville.",
+      "Score": "5",
+      "Source": "Base",
+      "Valeur": "5",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "b50ccc6a-ac67-4ad4-a943-cad9325e5edd"
+  },
+  {
+    "Nom": "Eonundé — FP — Escalade",
+    "values": {
+      "Cadre": "Biologique",
+      "Compétence": "0d7270f5-617b-4ad5-ac1b-689b22e64f0f",
+      "Feuilles de perso": "f7fe15c1-eadd-4f6b-b357-80686a4ec000",
+      "Identifiant": "STSKI97",
+      "Notes": "Franchir parois, corniches et ouvrages instables avec l’armure et la prothèse.",
+      "Score": "2",
+      "Source": "Base",
+      "Valeur": "2",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "135db6e7-d8cd-4de8-a5cd-905f5364121b"
+  },
+  {
+    "Nom": "Eonundé — FP — Premiers soins",
+    "values": {
+      "Cadre": "Technologique",
+      "Compétence": "4f804aec-f83b-48a6-ae5b-c9af77464fa4",
+      "Feuilles de perso": "f7fe15c1-eadd-4f6b-b357-80686a4ec000",
+      "Identifiant": "STSKI98",
+      "Notes": "Gestes appris dans la douleur.",
+      "Score": "2",
+      "Source": "Base",
+      "Valeur": "2",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "46656c9c-c85c-491b-9148-cbb17a5b3b44"
+  },
+  {
+    "Nom": "Eonundé — FP — Cultures",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "026aaacd-5bb8-4e69-9c95-b096cd4fec10",
+      "Feuilles de perso": "f7fe15c1-eadd-4f6b-b357-80686a4ec000",
+      "Identifiant": "STSKI95",
+      "Notes": "Éducation aristocratique réelle, mais tronquée.",
+      "Score": "2",
+      "Source": "Base",
+      "Valeur": "2",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "5d972467-b27c-4339-a252-9bc97d943df5"
+  },
+  {
+    "Nom": "Eonundé — FP — Vigilance",
+    "values": {
+      "Cadre": "Biologique",
+      "Compétence": "71fc1e98-b72f-467c-90bc-d2003996a741",
+      "Feuilles de perso": "f7fe15c1-eadd-4f6b-b357-80686a4ec000",
+      "Identifiant": "STSKI93",
+      "Notes": "Défaut de veille et méfiance constante.",
+      "Score": "3",
+      "Source": "Base",
+      "Valeur": "3",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "297bd718-4e9e-4e72-9430-8b7c74b164f4"
+  },
+  {
+    "Nom": "Eonundé — FP — Intimidation",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "a645ffc4-6614-4224-9a04-b81bdedd55a0",
+      "Feuilles de perso": "f7fe15c1-eadd-4f6b-b357-80686a4ec000",
+      "Identifiant": "STSKI91",
+      "Notes": "Armure ostéomécanique et provocation frontale.",
+      "Score": "3",
+      "Source": "Base",
+      "Valeur": "3",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "09279a14-ed1a-46ab-a799-bddcfb851ea0"
+  },
+  {
+    "Nom": "Eonundé — FP — Athlétisme",
+    "values": {
+      "Cadre": "Biologique",
+      "Compétence": "44fe6ef9-60f9-4a66-ab9c-f18d88f6fcb3",
+      "Feuilles de perso": "f7fe15c1-eadd-4f6b-b357-80686a4ec000",
+      "Identifiant": "STSKI92",
+      "Notes": "Chasses à Daïlon, franchissement et fuite.",
+      "Score": "5",
+      "Source": "Base",
+      "Valeur": "5",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "31b255f6-40fe-4763-954d-30d396a18471"
+  },
+  {
+    "Nom": "Eonundé — FP — Endurance",
+    "values": {
+      "Cadre": "Biologique",
+      "Compétence": "bdc8d2ce-9d5f-48a4-8f81-5f2205873477",
+      "Feuilles de perso": "f7fe15c1-eadd-4f6b-b357-80686a4ec000",
+      "Identifiant": "STSKI90",
+      "Notes": "Survie prolongée et résistance à la fatigue.",
+      "Score": "4",
+      "Source": "Base",
+      "Valeur": "4",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "de6fa093-87b3-4e52-8dce-55678928ba2e"
+  },
+  {
+    "Nom": "Eonundé — FP — Survie",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "77149fde-3bd1-47ac-9ef9-28adddd37be7",
+      "Feuilles de perso": "f7fe15c1-eadd-4f6b-b357-80686a4ec000",
+      "Identifiant": "STSKI94",
+      "Notes": "Survie seule en terrain hostile.",
+      "Score": "4",
+      "Source": "Base",
+      "Valeur": "4",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "9dd6171d-b7a3-4da7-af82-aaf7f5f33be1"
+  },
+  {
+    "Nom": "Eonundé — FP — Armes Tranchantes",
+    "values": {
+      "Cadre": "Technologique",
+      "Compétence": "763d69b6-312c-47b9-b3ce-86da943e1101",
+      "Feuilles de perso": "f7fe15c1-eadd-4f6b-b357-80686a4ec000",
+      "Identifiant": "STSKI89",
+      "Notes": "Deux épées courtes dentelées et pratique de combat autodidacte.",
+      "Score": "5",
+      "Source": "Base",
+      "Valeur": "5",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "bda9ab57-90a4-4f2e-862e-dcd27186aed7"
+  },
+  {
+    "Nom": "Eonundé — FP — Résistance Psychologique",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "1fe8159e-198d-42f0-9831-f8382198f815",
+      "Feuilles de perso": "f7fe15c1-eadd-4f6b-b357-80686a4ec000",
+      "Identifiant": "STSKI96",
+      "Notes": "Résistance au conditionnement ; passif Mémoire des Cuves.",
+      "Score": "4",
+      "Source": "Base",
+      "Valeur": "4",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "a4499d9c-1b60-4c88-929e-ee4f7371b24d"
+  },
+  {
     "Nom": "GH — Endurance",
     "values": {
       "Cadre": "Biologique",
