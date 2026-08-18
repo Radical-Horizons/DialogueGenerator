@@ -82,6 +82,7 @@ def client(template_service: TemplateService) -> Iterator[TestClient]:
 class TestTemplatesCreateHappy:
     """POST happy path — 201, fichier UUID, visible au GET."""
 
+    @pytest.mark.p0
     def test_create_template_201_writes_uuid_json_and_appears_in_get(
         self,
         client: TestClient,
@@ -278,6 +279,7 @@ class TestTemplatesGetPutDelete:
         response = client.get("/api/v1/templates/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
         assert response.status_code == 404
 
+    @pytest.mark.p0
     def test_put_updates_same_id_and_appends_history(
         self,
         client: TestClient,
@@ -332,6 +334,7 @@ class TestTemplatesGetPutDelete:
         assert response.status_code == 200
         assert len(response.json()["warnings"]) >= 1
 
+    @pytest.mark.p0
     def test_delete_204_and_gone_from_list(
         self,
         client: TestClient,

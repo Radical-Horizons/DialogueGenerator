@@ -19,6 +19,12 @@ from services.dialogue_tree_expansion_service import (
     TreeExpansionError,
     TreeExpansionResult,
 )
+from api.schemas.template import (
+    MAX_GENERATIONS,
+    MAX_MAX_DEPTH,
+    MIN_GENERATIONS,
+    MIN_MAX_DEPTH,
+)
 from services.graph_conversion_service import GraphConversionService
 from services.llm_quality_judge_service import LLMQualityJudgeService
 from services.llm_usage_service import LLMUsageService
@@ -33,11 +39,7 @@ PREBUILT_ID_PREFIX = "prebuilt:"
 MARKETPLACE_ID_PREFIX = "marketplace:"
 AB_TEST_USAGE_ENDPOINT = "templates_ab_test"
 DEFAULT_GENERATIONS = 3
-MIN_GENERATIONS = 1
-MAX_GENERATIONS = 5
 DEFAULT_MAX_DEPTH = 2
-MIN_MAX_DEPTH = 1
-MAX_MAX_DEPTH = 4
 DEFAULT_MAX_CHOICES = 3
 _USD_TO_EUR_RATE = 0.92
 WINNER_MODES = frozenset({"score", "score_thumbs", "score_cost"})
@@ -295,12 +297,17 @@ class TemplateABTestingService:
         owner_key: Optional[str],
         is_admin: bool,
     ) -> bool:
-        """Admin ou liste non scopée : tout ; sinon ``ownerKey`` strict."""
+        """Admin ou liste non scopée : tout ; sinon ``ownerKey`` strict.
+
+        Un test sans ``ownerKey`` persisté n'est visible que d'un admin : le
+        routeur en pose toujours un, donc seul un run antérieur au scoping 6.7
+        peut en manquer — il ne doit pas devenir lisible par tous.
+        """
         if is_admin or owner_key is None:
             return True
         stored = payload.get("ownerKey")
         if not stored:
-            return True
+            return False
         return stored == owner_key
 
     def apply_feedback(

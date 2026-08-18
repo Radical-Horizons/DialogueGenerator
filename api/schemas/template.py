@@ -14,6 +14,14 @@ TEMPLATE_DESCRIPTION_MAX_LENGTH = 2000
 TEMPLATE_CATEGORY_MAX_LENGTH = 120
 TEMPLATE_ICON_MAX_LENGTH = 16
 
+# Bornes A/B (Story 6.7) : source unique, consommée par le schéma (422 Pydantic)
+# et par TemplateABTestingService.validate_launch_params (garde métier). Elles
+# plafonnent la dépense LLM d'un run — N × 2 générations à la profondeur demandée.
+MIN_GENERATIONS = 1
+MAX_GENERATIONS = 5
+MIN_MAX_DEPTH = 1
+MAX_MAX_DEPTH = 4
+
 
 def _strip_required_name(value: str) -> str:
     """Normalise le nom : strip, puis refuse le vide (422)."""
@@ -335,8 +343,18 @@ class ABTestCreateRequest(BaseModel):
 
     templateAId: str = Field(..., min_length=1, description="UUID custom, prebuilt:{slug} ou marketplace:{id}")
     templateBId: str = Field(..., min_length=1, description="UUID custom, prebuilt:{slug} ou marketplace:{id}")
-    generationsPerTemplate: int = Field(default=3, description="N générations par template (1–5)")
-    maxDepth: int = Field(default=2, description="Profondeur expand-tree (1–4)")
+    generationsPerTemplate: int = Field(
+        default=3,
+        ge=MIN_GENERATIONS,
+        le=MAX_GENERATIONS,
+        description=f"N générations par template ({MIN_GENERATIONS}–{MAX_GENERATIONS})",
+    )
+    maxDepth: int = Field(
+        default=2,
+        ge=MIN_MAX_DEPTH,
+        le=MAX_MAX_DEPTH,
+        description=f"Profondeur expand-tree ({MIN_MAX_DEPTH}–{MAX_MAX_DEPTH})",
+    )
     winnerMode: Literal["score", "score_thumbs", "score_cost"] = Field(
         default="score",
         description="Critère de gagnant (score juge, pouces, ou coût)",

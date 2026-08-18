@@ -139,12 +139,17 @@ class TemplateSharingService:
         return self.visibility(template, current_user, shared_ids) is not None
 
     def can_write(self, template: Template, current_user: Mapping[str, object]) -> bool:
-        """PUT/DELETE : owner, admin, share ``can_edit``, ou legacy (6.1)."""
+        """PUT : owner, admin, ou share ``can_edit``.
+
+        Un template sans ``ownerId`` (legacy 6.1) reste lisible par tous
+        (``visibility: legacy``) mais n'est mutable que par un admin : personne
+        ne peut revendiquer l'écriture sur un objet que nul ne possède.
+        """
         if self._is_admin(current_user):
             return True
         owner = self._owner_id(template)
         if owner is None:
-            return True
+            return False
         actor = self._actor_id(current_user)
         if owner == actor:
             return True
@@ -222,12 +227,16 @@ class TemplateSharingService:
         return template
 
     def can_delete(self, template: Template, current_user: Mapping[str, object]) -> bool:
-        """DELETE JSON : owner, admin, ou legacy — pas un share ``can_edit``."""
+        """DELETE JSON : owner ou admin — pas un share ``can_edit``.
+
+        Même règle que :meth:`can_write` pour un legacy sans ``ownerId`` :
+        admin uniquement.
+        """
         if self._is_admin(current_user):
             return True
         owner = self._owner_id(template)
         if owner is None:
-            return True
+            return False
         return owner == self._actor_id(current_user)
 
     def require_deletable(

@@ -280,6 +280,35 @@ def test_ab_test_guest_can_post(ab_client: TestClient) -> None:
         app.dependency_overrides[get_current_user] = lambda: _user("writer-a")
 
 
+@pytest.mark.p0
+def test_ab_test_without_owner_key_is_admin_only(ab_client: TestClient) -> None:
+    """Given un run sans ownerKey, when un writer GET, then 404 ; l'admin voit.
+
+    Régression : le repli ``not stored -> True`` de ``_is_visible`` rendait tout
+    run antérieur au scoping 6.7 lisible par n'importe quel compte. Le routeur
+    pose toujours un ownerKey, donc seul un run orphelin est concerné.
+    """
+    ab_service = app.dependency_overrides[get_template_ab_testing_service]()
+    id_a = _create_custom(ab_client, name="Orphan A")
+    id_b = _create_custom(ab_client, name="Orphan B")
+    orphan = ab_service.create_queued_test(
+        template_a_id=id_a,
+        template_b_id=id_b,
+        generations_per_template=1,
+        max_depth=1,
+    )
+    assert orphan.get("ownerKey") is None
+
+    assert ab_client.get(f"/api/v1/templates/ab-test/{orphan['testId']}").status_code == 404
+
+    app.dependency_overrides[get_current_user] = lambda: _user("admin-1", role="admin")
+    try:
+        seen = ab_client.get(f"/api/v1/templates/ab-test/{orphan['testId']}")
+        assert seen.status_code == 200
+    finally:
+        app.dependency_overrides[get_current_user] = lambda: _user("writer-a")
+
+
 def test_ab_test_partial_generation_error(ab_client: TestClient) -> None:
     """Une gen expand KO → entrée error, l'autre scorée, gagnant si ≥1/côté."""
     expansion = app.dependency_overrides[get_dialogue_tree_expansion_service]()
@@ -306,7 +335,7 @@ def test_ab_test_partial_generation_error(ab_client: TestClient) -> None:
 
 
 def test_ab_test_same_id_and_invalid_n(ab_client: TestClient) -> None:
-    """Même ID ou N hors 1–5 → 400."""
+    """Même ID → 400 (règle métier) ; N hors 1–5 → 422 (borne Pydantic)."""
     template_id = _create_custom(ab_client, name="Solo")
     same = ab_client.post(
         "/api/v1/templates/ab-test",
@@ -325,7 +354,7 @@ def test_ab_test_same_id_and_invalid_n(ab_client: TestClient) -> None:
             "generationsPerTemplate": 9,
         },
     )
-    assert bad_n.status_code == 400
+    assert bad_n.status_code == 422
 
 
 def test_ab_test_missing_location_or_brief(ab_client: TestClient) -> None:
@@ -458,7 +487,7 @@ def test_ab_test_equality_has_no_winner(ab_client: TestClient) -> None:
 
 @pytest.mark.parametrize("max_depth", [0, 9])
 def test_ab_test_invalid_max_depth(ab_client: TestClient, max_depth: int) -> None:
-    """maxDepth hors 1–4 → 400."""
+    """maxDepth hors 1–4 → 422 (borne Pydantic, avant toute dépense LLM)."""
     id_a = _create_custom(ab_client, name="Depth A")
     id_b = _create_custom(ab_client, name="Depth B")
     response = ab_client.post(
@@ -470,7 +499,7 @@ def test_ab_test_invalid_max_depth(ab_client: TestClient, max_depth: int) -> Non
             "maxDepth": max_depth,
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 422
 
 
 def test_ab_test_judge_failure_is_partial(ab_client: TestClient) -> None:
@@ -543,6 +572,7 @@ def test_ab_test_feedback_while_running_rejected(ab_client: TestClient) -> None:
         template_b_id=id_b,
         generations_per_template=1,
         max_depth=1,
+        owner_key="writer-a",
     )
     response = ab_client.patch(
         f"/api/v1/templates/ab-test/{queued['testId']}/feedback",

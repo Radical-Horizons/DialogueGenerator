@@ -320,6 +320,37 @@ def test_legacy_public_not_shareable_prebuilt_400(
     assert prebuilt.status_code == 400
 
 
+@pytest.mark.p0
+def test_legacy_is_read_only_for_non_admin(
+    share_client: TestClient,
+    template_service: TemplateService,
+) -> None:
+    """Given un template sans ownerId, when un writer PUT/DELETE, then 403 ; l'admin passe.
+
+    Régression : le repli ``owner is None -> True`` de can_write/can_delete
+    rendait tout template sans propriétaire mutable par n'importe quel compte
+    authentifié, invité compris. La lecture publique (``visibility: legacy``)
+    reste acquise — seule la mutation est réservée à l'admin.
+    """
+    client = share_client
+    legacy, _ = template_service.create_template(_sample_create_payload(name="Legacy RO"))
+    assert legacy.ownerId is None
+
+    app.dependency_overrides[get_current_user] = lambda: _user("writer-b")
+    assert client.get(f"/api/v1/templates/{legacy.id}").status_code == 200
+    assert client.put(
+        f"/api/v1/templates/{legacy.id}",
+        json={"name": "Détourné"},
+    ).status_code == 403
+    assert client.delete(f"/api/v1/templates/{legacy.id}").status_code == 403
+
+    app.dependency_overrides[get_current_user] = lambda: _user("guest-x", role="guest")
+    assert client.delete(f"/api/v1/templates/{legacy.id}").status_code == 403
+
+    app.dependency_overrides[get_current_user] = lambda: _user("admin-1", role="admin")
+    assert client.delete(f"/api/v1/templates/{legacy.id}").status_code == 204
+
+
 def test_delete_cascades_shares(
     share_client: TestClient,
     isolated_app_database: DatabaseConnection,
@@ -403,6 +434,7 @@ def test_guest_sessions_do_not_share_templates(
     assert client.get(f"/api/v1/templates/{template_id}").status_code == 404
 
 
+@pytest.mark.p0
 def test_list_does_not_dump_others_private_templates(
     share_client: TestClient,
 ) -> None:
