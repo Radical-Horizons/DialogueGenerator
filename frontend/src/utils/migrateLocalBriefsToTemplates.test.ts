@@ -11,7 +11,6 @@ import {
   migrateLocalBriefsToTemplates,
   hasMigratedSceneBriefs,
 } from './migrateLocalBriefsToTemplates'
-import { listLocalSceneTemplates } from './localNamedTemplates'
 import { createTemplateApi, listTemplatesApi } from '../api/templates'
 
 vi.mock('../api/templates', () => ({
@@ -19,16 +18,18 @@ vi.mock('../api/templates', () => ({
   listTemplatesApi: vi.fn(),
 }))
 
-vi.mock('./localNamedTemplates', () => ({
-  listLocalSceneTemplates: vi.fn(),
-}))
-
-const mockedList = vi.mocked(listLocalSceneTemplates)
 const mockedListApi = vi.mocked(listTemplatesApi)
 const mockedCreate = vi.mocked(createTemplateApi)
 
+const LEGACY_SCENE_KEY = 'dialogue_generator_named_templates_scene_v1'
+
 function localBrief(name: string, body = 'texte') {
   return { id: `local-${name}`, name, body, updatedAt: '2026-08-19T00:00:00Z' }
+}
+
+/** Amorce la clé héritée : la migration lit désormais `localStorage` directement. */
+function seedLocalBriefs(...briefs: ReturnType<typeof localBrief>[]): void {
+  localStorage.setItem(LEGACY_SCENE_KEY, JSON.stringify(briefs))
 }
 
 describe('migrateLocalBriefsToTemplates', () => {
@@ -40,7 +41,7 @@ describe('migrateLocalBriefsToTemplates', () => {
   })
 
   it('convertit chaque brief local en template privé', async () => {
-    mockedList.mockReturnValue([localBrief('Brief A'), localBrief('Brief B')])
+    seedLocalBriefs(localBrief('Brief A'), localBrief('Brief B'))
 
     const result = await migrateLocalBriefsToTemplates()
 
@@ -55,7 +56,7 @@ describe('migrateLocalBriefsToTemplates', () => {
   })
 
   it('ne rejoue rien une fois la migration close', async () => {
-    mockedList.mockReturnValue([localBrief('Brief A')])
+    seedLocalBriefs(localBrief('Brief A'))
     await migrateLocalBriefsToTemplates()
     vi.clearAllMocks()
 
@@ -67,7 +68,7 @@ describe('migrateLocalBriefsToTemplates', () => {
   })
 
   it('ne recrée pas un brief dont le nom existe déjà côté serveur', async () => {
-    mockedList.mockReturnValue([localBrief('Déjà passé'), localBrief('Nouveau')])
+    seedLocalBriefs(localBrief('Déjà passé'), localBrief('Nouveau'))
     mockedListApi.mockResolvedValue([{ name: 'Déjà passé' }] as never)
 
     const result = await migrateLocalBriefsToTemplates()
@@ -82,7 +83,7 @@ describe('migrateLocalBriefsToTemplates', () => {
    * doit rester ouverte. La refermer perdrait définitivement les briefs non passés.
    */
   it('laisse la migration ouverte quand le serveur échoue en cours de route', async () => {
-    mockedList.mockReturnValue([localBrief('A'), localBrief('B'), localBrief('C')])
+    seedLocalBriefs(localBrief('A'), localBrief('B'), localBrief('C'))
     mockedCreate
       .mockResolvedValueOnce({ id: '1', warnings: [] } as never)
       .mockRejectedValueOnce(new Error('500'))
@@ -93,7 +94,7 @@ describe('migrateLocalBriefsToTemplates', () => {
   })
 
   it('reprend sans doublon après un échec partiel', async () => {
-    mockedList.mockReturnValue([localBrief('A'), localBrief('B')])
+    seedLocalBriefs(localBrief('A'), localBrief('B'))
     mockedCreate
       .mockResolvedValueOnce({ id: '1', warnings: [] } as never)
       .mockRejectedValueOnce(new Error('500'))
@@ -101,7 +102,7 @@ describe('migrateLocalBriefsToTemplates', () => {
 
     // Reprise : le serveur porte déjà « A », seul « B » doit partir.
     vi.clearAllMocks()
-    mockedList.mockReturnValue([localBrief('A'), localBrief('B')])
+    seedLocalBriefs(localBrief('A'), localBrief('B'))
     mockedListApi.mockResolvedValue([{ name: 'A' }] as never)
     mockedCreate.mockResolvedValue({ id: '2', warnings: [] } as never)
 
@@ -113,7 +114,7 @@ describe('migrateLocalBriefsToTemplates', () => {
   })
 
   it('se clôt sans appel réseau quand il n’y a rien à migrer', async () => {
-    mockedList.mockReturnValue([])
+    seedLocalBriefs()
 
     const result = await migrateLocalBriefsToTemplates()
 

@@ -10,9 +10,34 @@
  * fait par nom pour ne pas dupliquer ce qui est déjà passé.
  */
 import { createTemplateApi, listTemplatesApi } from '../api/templates'
-import { listLocalSceneTemplates } from './localNamedTemplates'
 
+
+const LEGACY_SCENE_KEY = 'dialogue_generator_named_templates_scene_v1'
 const MIGRATION_MARKER_KEY = 'dialogue_generator_scene_briefs_migrated_v1'
+
+interface LegacyNamedBrief {
+  id: string
+  name: string
+  body: string
+}
+
+/** Lit la clé héritée des briefs nommés ; tolère un contenu illisible. */
+function listLocalSceneTemplates(): LegacyNamedBrief[] {
+  try {
+    const raw = localStorage.getItem(LEGACY_SCENE_KEY)
+    if (!raw) return []
+    const parsed: unknown = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter(
+      (item): item is LegacyNamedBrief =>
+        typeof item === 'object' &&
+        item !== null &&
+        typeof (item as LegacyNamedBrief).name === 'string',
+    )
+  } catch {
+    return []
+  }
+}
 
 export interface BriefMigrationResult {
   /** Templates créés pendant cet appel. */

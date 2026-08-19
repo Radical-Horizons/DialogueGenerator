@@ -715,6 +715,7 @@ from api.routers import (
     mechanics_systems,
     presets,
     templates,
+    author_profiles,
     streaming,
     unity_dialogues,
     user_settings,
@@ -800,6 +801,11 @@ app.include_router(presets.router, prefix="/api/v1/presets", tags=["Presets"])
 
 # Router pour les templates custom de génération (Story 6.1.1)
 app.include_router(templates.router, prefix="/api/v1/templates", tags=["Templates"])
+app.include_router(
+    author_profiles.router,
+    prefix="/api/v1/author-profiles",
+    tags=["Author profiles"],
+)
 
 from api.routers import gdd_notion_sync
 

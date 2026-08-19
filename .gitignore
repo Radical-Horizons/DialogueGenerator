@@ -89,6 +89,10 @@ data/logs/
 data/templates/custom/*.json
 !data/templates/custom/.gitkeep
 
+# Profils d'auteur (JSON UUID locaux, comme les templates). Dossier versionné via .gitkeep.
+data/author_profiles/*.json
+!data/author_profiles/.gitkeep
+
 # Résultats A/B templates (Story 6.7) — JSON locaux, dossier versionné via .gitkeep.
 data/ab-tests/**
 !data/ab-tests/.gitkeep

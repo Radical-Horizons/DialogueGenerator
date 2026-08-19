@@ -56,6 +56,8 @@ from services.batch_validation_service import BatchValidationService
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
 from services.template_access_service import TemplateAccessService
+from services.owned_item_access import OwnedItemAccessService
+from services.author_profile_service import AuthorProfileService
 from services.template_suggestion_service import TemplateSuggestionService
 from api.services.auth_service import AuthService
 from api.services.batch_validation_job_manager import BatchValidationJobManager
@@ -134,6 +136,7 @@ class ServiceContainer:
         self._document_persistence_service: Optional[DocumentPersistenceService] = None
         self._dialogue_sharing_service: Optional[DialogueSharingService] = None
         self._template_access_service: Optional[TemplateAccessService] = None
+        self._author_profile_service: Optional[AuthorProfileService] = None
         self._template_suggestion_usage_repository: Optional[
             TemplateSuggestionUsageRepository
         ] = None
@@ -373,6 +376,18 @@ class ServiceContainer:
                 )
                 logger.info("TemplateAccessService initialisé dans le container.")
             return self._template_access_service
+
+    def get_item_access_service(self) -> OwnedItemAccessService:
+        """Service d'accès générique — même instance que celui des templates."""
+        return self.get_template_access_service()
+
+    def get_author_profile_service(self) -> AuthorProfileService:
+        """Retourne le service de persistance des profils d'auteur."""
+        with self._database_lock:
+            if self._author_profile_service is None:
+                self._author_profile_service = AuthorProfileService()
+                logger.info("AuthorProfileService initialisé dans le container.")
+            return self._author_profile_service
 
     def get_template_suggestion_usage_repository(
         self,
