@@ -9,12 +9,21 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { usePresetStore } from '../../store/presetStore';
 import { useTemplateStore } from '../../store/templateStore';
+import { migrateLocalBriefsToTemplates } from '../../utils/migrateLocalBriefsToTemplates';
 import { useLLMStore } from '../../store/llmStore';
 import { useAuthStore } from '../../store/authStore';
 import type { Preset, PresetConfiguration } from '../../types/preset';
 import type { Template, TemplateConfiguration, PrebuiltTemplate, TemplateSuggestion, TemplateSuggestionRequest } from '../../types/template';
 import { theme } from '../../theme';
-import { redesignControl, redesignDisclosureArrow, redesignRadius } from '../../theme/redesignTokens';
+import {
+  redesignAccent,
+  redesignControl,
+  redesignDisclosureArrow,
+  redesignFont,
+  redesignHairline,
+  redesignRadius,
+  redesignText,
+} from '../../theme/redesignTokens';
 import { generationPanelChrome } from '../../theme/responsiveChrome';
 import { TOUCH_TARGET_MIN_PX } from '../../constants';
 import { useToast, SaveStatusIndicator, ConfirmDialog } from '../shared';
@@ -79,6 +88,29 @@ function isSharedTemplate(template: Template): boolean {
 
 function canShareTemplate(template: Template): boolean {
   return template.relation === 'owned';
+}
+
+/** Seul le propriétaire décide qui voit son template. */
+function isOwnedTemplate(template: Template): boolean {
+  return template.relation === 'owned';
+}
+
+/** Pastille de statut : discrète pour « partagé » (le cas courant), marquée pour un brouillon. */
+function visibilityChipStyle(visibility: 'shared' | 'private'): React.CSSProperties {
+  const draft = visibility === 'private';
+  return {
+    appearance: 'none',
+    height: 18,
+    padding: '0 8px',
+    borderRadius: 99,
+    fontSize: '10.5px',
+    fontFamily: redesignFont.mono,
+    letterSpacing: '0.06em',
+    cursor: 'pointer',
+    border: `1px solid ${draft ? redesignAccent.ring : redesignHairline.strong}`,
+    background: draft ? redesignAccent.selectedBg : 'transparent',
+    color: draft ? redesignAccent.light : redesignText.muted,
+  };
 }
 
 function buildSuggestionRequest(
@@ -165,6 +197,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     prebuiltError,
     prebuiltLoading,
     createTemplate,
+    updateTemplate,
     deleteTemplate,
   } = useTemplateStore();
   const toast = useToast();
@@ -252,8 +285,15 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
 
   useEffect(() => {
     loadPresets();
-    void loadTemplates();
     void loadPrebuiltTemplates();
+    // Les briefs du navigateur rejoignent les templates serveur au premier passage.
+    // La migration copie et se reprend d'elle-même : un échec n'empêche pas la liste
+    // de s'afficher, il laisse simplement la migration ouverte pour la prochaine fois.
+    void migrateLocalBriefsToTemplates()
+      .catch((err) => console.warn('Migration des briefs locaux différée:', err))
+      .finally(() => {
+        void loadTemplates();
+      });
   }, [loadPresets, loadTemplates, loadPrebuiltTemplates]);
 
   useEffect(() => {
@@ -294,6 +334,28 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     };
     delete snapshot.temperature;
     return snapshot;
+  };
+
+  /**
+   * Bascule le statut privé/partagé d'un template dont on est propriétaire.
+   *
+   * Le serveur refuse (403) si l'acteur n'est pas propriétaire : la pastille n'est
+   * affichée que dans ce cas, la garde reste côté API.
+   */
+  const handleToggleVisibility = async (template: Template) => {
+    const next = (template.visibility ?? 'shared') === 'private' ? 'shared' : 'private';
+    try {
+      await updateTemplate(template.id, { visibility: next });
+      toast(
+        next === 'private'
+          ? 'Template repassé en brouillon privé'
+          : "Template partagé avec l'équipe",
+        'success',
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Changement de statut impossible';
+      toast(message, 'error');
+    }
   };
 
   const handleCopyPrebuilt = async (prebuilt: PrebuiltTemplate) => {
@@ -1079,8 +1141,38 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                 >
                   <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>{template.icon}</span>
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontWeight: 600, color: theme.text.primary }}>
-                      {template.name}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'baseline',
+                        gap: 9,
+                        flexWrap: 'wrap',
+                      }}
+                    >
+                      <span style={{ fontWeight: 600, color: theme.text.primary }}>
+                        {template.name}
+                      </span>
+                      {/* Le statut n'est modifiable que par le propriétaire : un collègue
+                          peut lire et appliquer, pas décider qui voit. */}
+                      {isOwnedTemplate(template) ? (
+                        <button
+                          type="button"
+                          data-testid="template-visibility-toggle"
+                          data-visibility={template.visibility ?? 'shared'}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void handleToggleVisibility(template);
+                          }}
+                          title={
+                            (template.visibility ?? 'shared') === 'private'
+                              ? 'Brouillon visible de vous seul — cliquer pour partager'
+                              : "Visible de l'équipe — cliquer pour repasser en brouillon"
+                          }
+                          style={visibilityChipStyle(template.visibility ?? 'shared')}
+                        >
+                          {(template.visibility ?? 'shared') === 'private' ? 'privé' : 'partagé'}
+                        </button>
+                      ) : null}
                     </div>
                     {template.description && (
                       <div

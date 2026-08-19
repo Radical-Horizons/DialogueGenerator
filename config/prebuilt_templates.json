@@ -209,6 +209,96 @@
           "schema_version": "1.0"
         }
       }
+    },
+    {
+      "id": "conversation",
+      "name": "Conversation",
+      "description": "Ton équilibré, répliques naturelles, dialogue classique. Idéal pour les conversations quotidiennes, échanges normaux, interactions standards.",
+      "category": "Conversation",
+      "icon": "💬",
+      "gddSystem": "Aucun — registre de ton",
+      "sceneTypeHint": "conversation",
+      "objectif": "Faire avancer une scène ordinaire sans dispositif de jeu.",
+      "casUsage": "Échange quotidien, prise de nouvelles, transition entre deux temps forts.",
+      "examples": [
+        "Alternance de répliques courtes et moyennes",
+        "Aucun test ni effet systémique imposé"
+      ],
+      "addedAt": "2026-08-19T00:00:00Z",
+      "configuration": {
+        "characters": [],
+        "locations": [],
+        "region": "",
+        "sceneType": "Generic",
+        "instructions": "Ton naturel et équilibré. Varie la longueur des répliques pour créer un rythme naturel (1-3 phrases). Les répliques courtes créent de la dynamique, les longues développent l'information. Alterne entre répliques courtes et moyennes pour maintenir un rythme conversationnel fluide. Évite les monologues trop longs (max 3-4 phrases par réplique).",
+        "contextDroppingRules": {
+          "rules_profile": "light",
+          "tolerance": null,
+          "mandatory_info": [],
+          "dialogue_type_overrides": {},
+          "schema_version": "1.0"
+        }
+      }
+    },
+    {
+      "id": "scene-action",
+      "name": "Scène d'action",
+      "description": "Ton rapide, répliques courtes, tension élevée. Idéal pour les combats, poursuites, moments intenses.",
+      "category": "Action",
+      "icon": "⚡",
+      "gddSystem": "Aucun — registre de ton",
+      "sceneTypeHint": "scene-action",
+      "objectif": "Soutenir un moment rapide où la tension prime sur l'information.",
+      "casUsage": "Combat, poursuite, fuite, urgence.",
+      "examples": [
+        "Répliques de 1–2 phrases maximum",
+        "Les répliques longues réservées aux révélations"
+      ],
+      "addedAt": "2026-08-19T00:00:00Z",
+      "configuration": {
+        "characters": [],
+        "locations": [],
+        "region": "",
+        "sceneType": "Generic",
+        "instructions": "Ton tendu et dynamique. Privilégie les répliques COURTES et PERCUTANTES (1-2 phrases maximum). Crée de la tension avec des échanges rapides. Les répliques longues sont rares et réservées aux moments de révélation ou d'émotion intense. Alterne entre répliques très courtes pour l'action et légèrement plus longues pour les moments clés.",
+        "contextDroppingRules": {
+          "rules_profile": "light",
+          "tolerance": null,
+          "mandatory_info": [],
+          "dialogue_type_overrides": {},
+          "schema_version": "1.0"
+        }
+      }
+    },
+    {
+      "id": "moment-intime",
+      "name": "Moment intime",
+      "description": "Ton calme, répliques longues, émotion profonde. Idéal pour les conversations personnelles, révélations émotionnelles, moments de vulnérabilité.",
+      "category": "Intime",
+      "icon": "🕯️",
+      "gddSystem": "Aucun — registre de ton",
+      "sceneTypeHint": "moment-intime",
+      "objectif": "Laisser une émotion se déployer sans la presser.",
+      "casUsage": "Confidence, aveu, vulnérabilité, deuil.",
+      "examples": [
+        "Répliques développées de 2–4 phrases",
+        "Les répliques courtes marquent l'hésitation"
+      ],
+      "addedAt": "2026-08-19T00:00:00Z",
+      "configuration": {
+        "characters": [],
+        "locations": [],
+        "region": "",
+        "sceneType": "Generic",
+        "instructions": "Ton calme et émotionnel. Privilégie les répliques LONGUES et DÉVELOPPÉES (2-4 phrases). Laisse le temps aux émotions de s'exprimer. Les répliques courtes sont rares et réservées aux moments de silence éloquent ou d'hésitation. Alterne entre répliques développées pour l'émotion et pauses courtes pour la réflexion.",
+        "contextDroppingRules": {
+          "rules_profile": "light",
+          "tolerance": null,
+          "mandatory_info": [],
+          "dialogue_type_overrides": {},
+          "schema_version": "1.0"
+        }
+      }
     }
   ]
 }

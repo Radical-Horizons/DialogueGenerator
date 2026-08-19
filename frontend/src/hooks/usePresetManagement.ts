@@ -46,7 +46,7 @@ function suggestionToTemplate(item: TemplateSuggestion): Template {
     icon: item.icon,
     metadata: { created: '', modified: '' },
     configuration: item.configuration,
-    visibility: item.visibility ?? null,
+    relation: item.relation ?? null,
   }
 }
 

@@ -104,11 +104,11 @@ test.describe('Templates — pré-built [6.4]', () => {
     deleteTemplateFilesByName(COPY_NAME)
   })
 
-  test('liste 7 fiches, modal, Charger hydrate le brief', async ({ page }) => {
+  test('liste 10 fiches, modal, Charger hydrate le brief', async ({ page }) => {
     await openTemplatesTab(page)
     const list = page.getByTestId('prebuilt-templates-list')
     await expect(list).toBeVisible({ timeout: E2E_MS.ui })
-    await expect(list.getByTestId('prebuilt-template-item')).toHaveCount(7)
+    await expect(list.getByTestId('prebuilt-template-item')).toHaveCount(10)
 
     const confrontation = list.locator('[data-prebuilt-id="confrontation"]')
     await expect(confrontation).toBeVisible()

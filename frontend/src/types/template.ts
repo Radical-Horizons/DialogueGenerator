@@ -29,6 +29,8 @@ export interface Template {
   configuration: TemplateConfiguration
   history?: TemplateHistoryEntry[]
   ownerId?: string | null
+  /** Statut persisté : partagé avec l'équipe (défaut) ou brouillon privé. */
+  visibility?: 'shared' | 'private'
   relation?: 'owned' | 'granted' | 'legacy' | null
   ownerUsername?: string | null
   sharedByUsername?: string | null
@@ -40,6 +42,7 @@ export interface TemplateCreate {
   category?: string
   icon?: string
   configuration: TemplateConfiguration
+  visibility?: 'shared' | 'private'
 }
 
 /** Réponse POST 201 / PUT 200 : template persisté + warnings GDD. */
@@ -56,6 +59,7 @@ export interface TemplateUpdate {
   category?: string
   icon?: string
   configuration?: TemplateConfiguration
+  visibility?: 'shared' | 'private'
 }
 
 /** Partage d'équipe (pointeur live). */

@@ -22,14 +22,16 @@ describe('SystemPromptEditor — onglet Brief', () => {
     expect(screen.getByPlaceholderText(BRIEF_PLACEHOLDER)).toBeInTheDocument()
   })
 
-  it('propose les briefs enregistrés en repli, sans remplacer le brief', () => {
+  /**
+   * Les briefs enregistrés sont devenus des templates : un objet serveur unique, avec
+   * un statut privé/partagé. L'onglet Brief ne porte plus de liste locale — c'était le
+   * doublon que « brief » vs « briefs » signalait.
+   */
+  it('ne porte plus de liste de briefs enregistrés', () => {
     render(<SystemPromptEditor userInstructions="" onUserInstructionsChange={vi.fn()} />)
 
-    const saved = screen.getByTestId('brief-saved-briefs')
-    expect(saved.tagName).toBe('DETAILS')
-    // Fermé au départ : `<details>` sans `open` masque son contenu, mais le champ
-    // de brief reste monté — c'est tout l'intérêt d'un repli plutôt qu'un onglet.
-    expect(saved).not.toHaveAttribute('open')
+    expect(screen.queryByTestId('brief-saved-briefs')).not.toBeInTheDocument()
+    expect(screen.queryByText(/briefs enregistrés/i)).not.toBeInTheDocument()
     expect(screen.getByPlaceholderText(BRIEF_PLACEHOLDER)).toBeInTheDocument()
   })
 
@@ -41,22 +43,4 @@ describe('SystemPromptEditor — onglet Brief', () => {
     expect(screen.queryByTestId('brief-link-system-prompt')).not.toBeInTheDocument()
     expect(screen.queryByTestId('brief-link-back')).not.toBeInTheDocument()
   })
-
-  /**
-   * Régression : la sauvegarde explicite du brief avait été sortie du repli et
-   * flottait au-dessus du champ, sur sa propre ligne. jsdom ne simule pas le
-   * repliement d'un `<details>` — on assertie donc l'appartenance, qui est
-   * l'invariant réel (vérifié visuellement en navigateur par ailleurs).
-   */
-  it('garde Sauvegarder et Restaurer à l’intérieur du repli', () => {
-    render(<SystemPromptEditor userInstructions="" onUserInstructionsChange={vi.fn()} />)
-
-    const repli = screen.getByTestId('brief-saved-briefs')
-    const sauvegarder = screen.getByTitle('Sauvegarde le brief de scène actuel')
-    const restaurer = screen.getByTitle('Restaure la dernière version sauvegardée')
-
-    expect(repli).toContainElement(sauvegarder)
-    expect(repli).toContainElement(restaurer)
-  })
 })
-

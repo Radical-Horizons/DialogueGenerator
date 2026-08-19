@@ -434,12 +434,16 @@ class TestTemplatesValidate:
 class TestTemplatesPrebuilt:
     """GET /prebuilt — matrice I/O 6.4."""
 
-    def test_list_prebuilt_returns_seven(self, client: TestClient) -> None:
-        """Given le catalogue versionné, when GET /prebuilt, then 7 fiches."""
+    def test_list_prebuilt_returns_full_catalog(self, client: TestClient) -> None:
+        """Given le catalogue versionné, when GET /prebuilt, then les 10 fiches.
+
+        Les trois registres de ton (conversation, scène d'action, moment intime)
+        ont rejoint les pré-built : le catalogue de départ est unique.
+        """
         response = client.get("/api/v1/templates/prebuilt")
         assert response.status_code == 200
         body = response.json()
-        assert len(body) == 7
+        assert len(body) == 10
         slugs = {item["id"] for item in body}
         assert slugs == {
             "salutation",
@@ -449,6 +453,9 @@ class TestTemplatesPrebuilt:
             "recrutement",
             "cutscene",
             "test-caracteristique",
+            "conversation",
+            "scene-action",
+            "moment-intime",
         }
         confrontation = next(item for item in body if item["id"] == "confrontation")
         assert confrontation["gddSystem"]
@@ -498,7 +505,7 @@ class TestTemplatesPrebuilt:
         headers = {"Authorization": f"Bearer {token}"}
         response = client.get("/api/v1/templates/prebuilt", headers=headers)
         assert response.status_code == 200
-        assert len(response.json()) == 7
+        assert len(response.json()) == 10
 
 
 class TestTemplatesContextDropping:

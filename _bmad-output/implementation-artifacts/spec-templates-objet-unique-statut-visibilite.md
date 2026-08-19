@@ -124,6 +124,25 @@ Template (serveur, JSON UUID)
 La migration **copie** : les clés `localStorage` ne sont effacées qu'une fois les templates
 créés et confirmés côté serveur. Un échec laisse l'utilisateur exactement où il était.
 
+## Notes d'implémentation
+
+**Le mot `visibility` était déjà pris** par un champ calculé (`owned`/`shared`/`legacy`) —
+soit exactement le travers corrigé ici. Il devient `relation`, avec `granted` au lieu de
+`shared`. Un site avait été manqué (`templateStore.ts`) : le prédicat y matchait désormais
+tous les templates, puisque le nouveau champ vaut `shared` par défaut. Attrapé par un test.
+
+**`config/scene_instruction_templates.json` n'est pas supprimé.** Contrairement à ce que la
+spec prévoyait : ce fichier alimente aussi `scene_instruction_loader`, donc la génération
+(`unity_dialogue_orchestrator`, `augment_first_meeting_instructions`) via une résolution
+`sceneType` → instructions. Le supprimer aurait cassé la génération. Seul son usage UI part ;
+son endpoint reste aussi, son POST ayant des appelants non tracés. À reprendre au lot 2.
+
+**Les invités créent des brouillons privés** : « partagé » veut dire « visible de l'équipe »,
+et une session anonyme n'en a pas.
+
+**Cinq tests changeaient de sens** — ils asseyaient l'isolation par défaut. Leur prémisse
+devient `private`, ce qui préserve la propriété réellement vérifiée.
+
 ## Verification
 
 **Commands :**

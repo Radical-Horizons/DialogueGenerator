@@ -156,7 +156,7 @@ describe('PresetSelector', () => {
       category: 'Salutation',
       icon: '👋',
       metadata: { created: '2026-08-16T10:00:00Z', modified: '2026-08-16T10:00:00Z' },
-      visibility: 'owned' as const,
+      relation: 'owned' as const,
       configuration: {
         characters: ['char-alpha'],
         locations: ['loc-alpha'],
@@ -172,7 +172,7 @@ describe('PresetSelector', () => {
       category: 'Confrontation',
       icon: '⚔️',
       metadata: { created: '2026-08-16T10:00:00Z', modified: '2026-08-16T10:00:00Z' },
-      visibility: 'owned' as const,
+      relation: 'owned' as const,
       configuration: {
         characters: ['char-beta'],
         locations: [],
@@ -188,7 +188,7 @@ describe('PresetSelector', () => {
       category: 'Salutation',
       icon: '🙂',
       metadata: { created: '2026-08-16T10:00:00Z', modified: '2026-08-16T10:00:00Z' },
-      visibility: 'owned' as const,
+      relation: 'owned' as const,
       configuration: {
         characters: [],
         locations: ['loc-beta'],
@@ -260,11 +260,13 @@ describe('PresetSelector', () => {
       expect(screen.getByRole('button', { name: /sauvegarder comme template/i })).toBeInTheDocument();
     });
 
-    it('should load presets on mount', () => {
+    it('should load presets on mount', async () => {
       render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
 
       expect(mockLoadPresets).toHaveBeenCalledOnce();
-      expect(mockLoadTemplates).toHaveBeenCalled();
+      // La liste des templates est rechargée *après* la migration des briefs locaux :
+      // l'appel n'est plus synchrone au montage.
+      await waitFor(() => expect(mockLoadTemplates).toHaveBeenCalled());
     });
 
     it('affiche l’erreur template au lieu d’une liste vide', () => {
@@ -1144,7 +1146,7 @@ describe('PresetSelector', () => {
       mockTemplateStore([
         {
           ...mockTemplates[0],
-          visibility: 'legacy',
+          relation: 'legacy',
         },
       ]);
       render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
@@ -1155,7 +1157,7 @@ describe('PresetSelector', () => {
       mockTemplateStore([
         {
           ...mockTemplates[0],
-          visibility: 'shared',
+          relation: 'granted',
           sharedByUsername: 'writer-a',
           ownerUsername: 'writer-a',
         },
@@ -1182,7 +1184,7 @@ describe('PresetSelector', () => {
       mockTemplateStore([
         {
           ...mockTemplates[0],
-          visibility: 'shared',
+          relation: 'granted',
           sharedByUsername: 'writer-a',
           ownerUsername: 'writer-a',
         },
@@ -1204,7 +1206,7 @@ describe('PresetSelector', () => {
       const show = vi.spyOn(toastManager, 'show');
       const shared: Template = {
         ...mockTemplates[0],
-        visibility: 'shared',
+        relation: 'granted',
         sharedByUsername: 'writer-a',
         metadata: { created: '2026-08-16T10:00:00Z', modified: '2026-08-16T10:00:00Z' },
       };
