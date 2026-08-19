@@ -112,6 +112,9 @@ export function GenerationPanel() {
   const [showModelSettings, setShowModelSettings] = useState(false)
   /** 1c : les variables et flags passent derrière un lien du bandeau de brief. */
   const [showFlagsPanel, setShowFlagsPanel] = useState(false)
+  /** Templates (Epic 6) : même traitement que les flags — un lien du bandeau, pas
+      un sous-produit des réglages du modèle où ils étaient jusqu'ici introuvables. */
+  const [showTemplatesPanel, setShowTemplatesPanel] = useState(false)
   // `=== true` : certains mocks de test renvoient l'objet store entier au lieu du champ
   // sélectionné ; sans cette coercition le bouton serait désactivé à tort.
   const gddCatalogLoading = useContextStore((s) => s.gddCatalogLoading) === true
@@ -648,18 +651,6 @@ export function GenerationPanel() {
           onEditBrief={() => setBriefExpandedDuringRun((v) => !v)}
         />
 
-        {/* 1c ne montre pas la barre de preset : elle vit avec les réglages du modèle. */}
-        <div style={{ display: showModelSettings && showGenerationForm ? 'block' : 'none' }}>
-          <PresetSelector
-            onPresetLoaded={presets.handlePresetLoaded}
-            onTemplateLoaded={presets.handleTemplateLoaded}
-            onPrebuiltLoaded={presets.handlePrebuiltLoaded}
-            onSuggestionLoaded={presets.handleSuggestionLoaded}
-            getCurrentConfiguration={presets.getCurrentConfiguration}
-            saveStatus={draft.saveStatus}
-          />
-        </div>
-
       {/* 2a : pendant le run, le brief se replie en une ligne avec son coût. */}
       {runActive && !briefExpandedDuringRun && (
         <div
@@ -739,6 +730,8 @@ export function GenerationPanel() {
       <SystemPromptEditor
         flagsPanelOpen={showFlagsPanel}
         onToggleFlagsPanel={() => setShowFlagsPanel((v) => !v)}
+        templatesPanelOpen={showTemplatesPanel}
+        onToggleTemplatesPanel={() => setShowTemplatesPanel((v) => !v)}
         userInstructions={userInstructions}
         authorProfile={authorProfile}
         gameRules={gameRules}
@@ -760,6 +753,25 @@ export function GenerationPanel() {
           draft.markDirty()
         }}
       />
+      </div>
+
+      {/* Templates (Epic 6) : rendus **sous** le lien qui les ouvre. Les enfermer dans
+          les réglages du modèle les affichait au-dessus de leur propre déclencheur. */}
+      <div
+        data-testid="templates-panel"
+        style={{
+          marginBottom: 22,
+          display: showFormExtras && showTemplatesPanel ? 'block' : 'none',
+        }}
+      >
+        <PresetSelector
+          onPresetLoaded={presets.handlePresetLoaded}
+          onTemplateLoaded={presets.handleTemplateLoaded}
+          onPrebuiltLoaded={presets.handlePrebuiltLoaded}
+          onSuggestionLoaded={presets.handleSuggestionLoaded}
+          getCurrentConfiguration={presets.getCurrentConfiguration}
+          saveStatus={draft.saveStatus}
+        />
       </div>
 
       {/* 1c : les flags sont un lien du bandeau de brief, pas une section pleine.

@@ -39,7 +39,14 @@ export interface SystemPromptEditorProps {
   flagsPanelOpen?: boolean
   /** Bascule du panneau flags ; sans ce callback, le lien n'est pas rendu. */
   onToggleFlagsPanel?: () => void
+  /** Le panneau templates (Epic 6) est ouvert ? */
+  templatesPanelOpen?: boolean
+  /** Bascule du panneau templates ; sans ce callback, le lien n'est pas rendu. */
+  onToggleTemplatesPanel?: () => void
 }
+
+/** Onglet principal — le brief. Toujours en tête de `tabs`. */
+const PRIMARY_TAB_ID = 'user-instructions'
 
 /** Libellés courts des liens secondaires (écran 1c). */
 const SECONDARY_TAB_LINK_LABELS: Record<string, string> = {
@@ -71,6 +78,8 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
   onSystemPromptChange,
   flagsPanelOpen,
   onToggleFlagsPanel,
+  templatesPanelOpen,
+  onToggleTemplatesPanel,
 }: SystemPromptEditorProps) {
   const {
     systemPrompt,
@@ -281,11 +290,14 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
   const isNarrow = useGenerationPanelNarrow()
   const writingMode = useUiLayoutStore((s) => s.writingMode)
   /**
-   * 1c ne montre ni les templates ni les boutons de sauvegarde explicite du brief :
+   * 1c ne montre pas les briefs enregistrés ni les boutons de sauvegarde explicite :
    * le brouillon est déjà sauvegardé en continu. La fonctionnalité n'est pas retirée,
-   * elle passe derrière le lien « templates » du bandeau de section.
+   * elle passe derrière le lien « briefs » du bandeau de section.
+   *
+   * À ne pas confondre avec le panneau « templates » (Epic 6), qui est un autre
+   * objet — piloté par le parent via ``onToggleTemplatesPanel``.
    */
-  const [showTemplates, setShowTemplates] = useState(false)
+  const [showSavedBriefs, setShowSavedBriefs] = useState(false)
   const genChrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
 
   /**
@@ -308,11 +320,11 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
       label: 'Instructions de Scène',
       content: (
         <div style={{ padding: genChrome.tabInnerPadding, minWidth: 0 }}>
-          {/* 1c : le brief occupe la colonne ; templates et briefs locaux passent en repli.
+          {/* 1c : le brief occupe la colonne ; les briefs enregistrés passent en repli.
               2c : en mode écriture, même ce repli disparaît — il ne reste que le texte. */}
           <details
-            data-testid="brief-templates"
-            style={{ marginBottom: '1rem', display: showTemplates ? 'block' : 'none' }}
+            data-testid="brief-saved-briefs"
+            style={{ marginBottom: '1rem', display: showSavedBriefs ? 'block' : 'none' }}
           >
             <summary
               style={{
@@ -325,7 +337,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 marginBottom: '0.6rem',
               }}
             >
-              Templates et briefs enregistrés
+              Briefs enregistrés
             </summary>
           <div style={{ marginBottom: '1rem' }}>
             {isLoadingTemplates ? (
@@ -574,7 +586,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 brouillon est déjà sauvegardé en continu. */}
             <div
               style={{
-                display: showTemplates ? 'flex' : 'none',
+                display: showSavedBriefs ? 'flex' : 'none',
                 gap: `${genChrome.controlGapRem}rem`,
                 flexWrap: 'wrap',
               }}
@@ -1268,6 +1280,15 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
   const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0]
 
   /**
+   * 2c promet « il ne reste que le brief » : on y revient donc en entrant dans le
+   * mode. Sans ça, entrer en mode écriture depuis un onglet secondaire y enferme —
+   * le bandeau qui porte le seul lien de retour est masqué par `!writingMode`.
+   */
+  useEffect(() => {
+    if (writingMode) setActiveTabId(PRIMARY_TAB_ID)
+  }, [writingMode])
+
+  /**
    * Écran 1c : les alternatives au brief sont des **liens discrets** à droite de son
    * étiquette, pas une barre d'onglets. Un lien actif est simplement plus clair.
    */
@@ -1331,12 +1352,22 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
             )}
             <button
               type="button"
-              data-testid="brief-link-templates"
-              onClick={() => setShowTemplates((v) => !v)}
-              style={briefLinkStyle(showTemplates)}
+              data-testid="brief-link-briefs"
+              onClick={() => setShowSavedBriefs((v) => !v)}
+              style={briefLinkStyle(showSavedBriefs)}
             >
-              templates
+              briefs
             </button>
+            {onToggleTemplatesPanel && (
+              <button
+                type="button"
+                data-testid="brief-link-templates"
+                onClick={onToggleTemplatesPanel}
+                style={briefLinkStyle(Boolean(templatesPanelOpen))}
+              >
+                templates
+              </button>
+            )}
             {secondaryTabs.map((tab) => (
               <button
                 key={tab.id}
