@@ -402,7 +402,7 @@ class TestTemplateServicePrebuilt:
     ) -> None:
         """Given le JSON versionné, when list/get, then 7 fiches et slug OK."""
         listed = template_service.list_prebuilt_templates()
-        assert len(listed) == 7
+        assert len(listed) == 10
         loaded = template_service.get_prebuilt_template("confrontation")
         assert loaded.name == "Confrontation"
         assert loaded.configuration.characters == []

@@ -108,7 +108,9 @@ test.describe('Templates — pré-built [6.4]', () => {
     await openTemplatesTab(page)
     const list = page.getByTestId('prebuilt-templates-list')
     await expect(list).toBeVisible({ timeout: E2E_MS.ui })
-    await expect(list.getByTestId('prebuilt-template-item')).toHaveCount(10)
+    await expect(list.getByTestId('prebuilt-template-item')).toHaveCount(10, {
+      timeout: E2E_MS.ui,
+    })
 
     const confrontation = list.locator('[data-prebuilt-id="confrontation"]')
     await expect(confrontation).toBeVisible()

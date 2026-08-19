@@ -9,13 +9,11 @@ from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
 
-from api.dependencies import get_template_marketplace_service, get_template_service
+from api.dependencies import get_template_service
 from api.main import app
 from api.routers.auth import get_current_user
 from services.preset_service import PresetService
 from services.repositories.sqlite.connection import DatabaseConnection
-from services.repositories.sqlite.shared_templates_repository import SharedTemplatesRepository
-from services.template_marketplace_service import TemplateMarketplaceService
 from services.template_service import TemplateService
 
 
@@ -115,18 +113,12 @@ def suggest_client(
             """,
             (user_id, user_id, role),
         )
-    marketplace = TemplateMarketplaceService(
-        repository=SharedTemplatesRepository(isolated_app_database),
-        template_service=template_service,
-    )
     app.dependency_overrides[get_template_service] = lambda: template_service
-    app.dependency_overrides[get_template_marketplace_service] = lambda: marketplace
     app.dependency_overrides[get_current_user] = lambda: _user("writer-a")
     try:
         yield TestClient(app)
     finally:
         app.dependency_overrides.pop(get_template_service, None)
-        app.dependency_overrides.pop(get_template_marketplace_service, None)
         app.dependency_overrides.pop(get_current_user, None)
 
 
@@ -223,72 +215,6 @@ def test_acl_hides_foreign_custom(suggest_client: TestClient) -> None:
     assert response.status_code == 200
     ids = {item["id"] for item in response.json()}
     assert secret_id not in ids
-
-
-def test_dedup_keeps_live_custom_over_listing(
-    suggest_client: TestClient,
-    isolated_app_database: DatabaseConnection,
-) -> None:
-    """Listing + live même source → une carte live."""
-    created = suggest_client.post(
-        "/api/v1/templates",
-        json=_sample_create_payload(name="Live publié"),
-    )
-    assert created.status_code == 201
-    template_id = created.json()["id"]
-    published = suggest_client.post(
-        "/api/v1/templates/marketplace",
-        json={"templateId": template_id},
-    )
-    assert published.status_code == 201
-    listing_id = published.json()["id"]
-    isolated_app_database.execute(
-        "UPDATE shared_templates SET usage_count = 50 WHERE id = ?",
-        (listing_id,),
-    )
-    boosted = suggest_client.post(
-        "/api/v1/templates/suggestions",
-        json=_suggest_body(instructions="confrontation"),
-    )
-    assert boosted.status_code == 200
-    live = next(item for item in boosted.json() if item["id"] == template_id)
-    assert live["source"] == "custom"
-    assert "Populaire sur le marketplace" in live["reasons"]
-    ids = [(item["source"], item["id"]) for item in boosted.json()]
-    assert ("custom", template_id) in ids
-    assert ("marketplace", listing_id) not in ids
-
-
-def test_marketplace_listing_visible_to_other_writer(
-    suggest_client: TestClient,
-    isolated_app_database: DatabaseConnection,
-) -> None:
-    """Listing marketplace d'un custom privé apparaît pour l'autre writer."""
-    created = suggest_client.post(
-        "/api/v1/templates",
-        json=_sample_create_payload(name="Publié ailleurs", visibility="private"),
-    )
-    assert created.status_code == 201
-    template_id = created.json()["id"]
-    published = suggest_client.post(
-        "/api/v1/templates/marketplace",
-        json={"templateId": template_id},
-    )
-    assert published.status_code == 201
-    listing_id = published.json()["id"]
-    isolated_app_database.execute(
-        "UPDATE shared_templates SET usage_count = 50 WHERE id = ?",
-        (listing_id,),
-    )
-    app.dependency_overrides[get_current_user] = lambda: _user("writer-b")
-    response = suggest_client.post(
-        "/api/v1/templates/suggestions",
-        json=_suggest_body(instructions="confrontation"),
-    )
-    assert response.status_code == 200
-    match = next(item for item in response.json() if item["id"] == listing_id)
-    assert match["source"] == "marketplace"
-    assert "Populaire sur le marketplace" in match["reasons"]
 
 
 def test_personal_usage_boosts_after_used(suggest_client: TestClient) -> None:

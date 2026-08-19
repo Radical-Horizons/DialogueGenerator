@@ -45,7 +45,6 @@ from services.batch_node_generation_service import BatchNodeGenerationService
 from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
 from services.template_service import TemplateService
-from services.template_marketplace_service import TemplateMarketplaceService
 from services.template_ab_testing_service import TemplateABTestingService
 from api.services.template_ab_test_job_manager import TemplateABTestJobManager
 from services.repositories.sqlite import (
@@ -57,7 +56,7 @@ from services.repositories.sqlite import (
 )
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
-from services.template_sharing_service import TemplateSharingService
+from services.template_access_service import TemplateAccessService
 from services.template_suggestion_service import TemplateSuggestionService
 from services.collection_service import CollectionService
 from services.dialogue_index_service import DialogueIndexService
@@ -128,9 +127,9 @@ def get_dialogue_sharing_service(request: Request) -> DialogueSharingService:
     return get_service_container(request).get_dialogue_sharing_service()
 
 
-def get_template_sharing_service(request: Request) -> TemplateSharingService:
+def get_template_access_service(request: Request) -> TemplateAccessService:
     """Retourne le service de partage d'équipe des templates custom."""
-    return get_service_container(request).get_template_sharing_service()
+    return get_service_container(request).get_template_access_service()
 
 
 def get_template_suggestion_service(request: Request) -> TemplateSuggestionService:
@@ -658,18 +657,6 @@ def get_template_service(request: Request) -> TemplateService:
     container = get_service_container(request)
     return container.get_template_service()
 
-
-def get_template_marketplace_service(request: Request) -> TemplateMarketplaceService:
-    """Retourne le service marketplace de templates.
-
-    Args:
-        request: La requête HTTP.
-
-    Returns:
-        Instance de TemplateMarketplaceService.
-    """
-    container = get_service_container(request)
-    return container.get_template_marketplace_service()
 
 
 def get_template_ab_testing_service(request: Request) -> TemplateABTestingService:

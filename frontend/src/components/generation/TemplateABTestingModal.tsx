@@ -18,7 +18,6 @@ import { useToast } from '../shared'
 import {
   getAbTestApi,
   listAbTestsApi,
-  listMarketplaceTemplatesApi,
   patchAbTestFeedbackApi,
   rerunAbTestApi,
   startAbTestApi,
@@ -27,13 +26,11 @@ import type {
   ABTestHistoryItem,
   ABTestResult,
   ABTestWinnerMode,
-  MarketplaceListing,
   PrebuiltTemplate,
   Template,
 } from '../../types/template'
 import {
   costBarPercents,
-  marketplaceAbTestId,
   prebuiltAbTestId,
   scoreBarPercent,
   scoreHistorySeries,
@@ -97,7 +94,6 @@ export function TemplateABTestingModal({
   const [generations, setGenerations] = useState(3)
   const [maxDepth, setMaxDepth] = useState(2)
   const [winnerMode, setWinnerMode] = useState<ABTestWinnerMode>('score')
-  const [listings, setListings] = useState<MarketplaceListing[]>([])
   const [history, setHistory] = useState<ABTestHistoryItem[]>([])
   const [result, setResult] = useState<ABTestResult | null>(null)
   const [parentResult, setParentResult] = useState<ABTestResult | null>(null)
@@ -114,12 +110,8 @@ export function TemplateABTestingModal({
         id: prebuiltAbTestId(item.id),
         name: `${item.name} (pré-built)`,
       })),
-      ...listings.map((item) => ({
-        id: marketplaceAbTestId(item.id),
-        name: `${item.name} (marketplace)`,
-      })),
     ],
-    [templates, prebuiltTemplates, listings],
+    [templates, prebuiltTemplates],
   )
 
   const stopPoll = () => {
@@ -170,9 +162,6 @@ export function TemplateABTestingModal({
       setTemplateBId(initialBId)
     }
     void loadHistory()
-    void listMarketplaceTemplatesApi()
-      .then((next) => setListings(next))
-      .catch(() => setListings([]))
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         onClose()

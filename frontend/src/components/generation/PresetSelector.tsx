@@ -11,7 +11,6 @@ import { usePresetStore } from '../../store/presetStore';
 import { useTemplateStore } from '../../store/templateStore';
 import { migrateLocalBriefsToTemplates } from '../../utils/migrateLocalBriefsToTemplates';
 import { useLLMStore } from '../../store/llmStore';
-import { useAuthStore } from '../../store/authStore';
 import type { Preset, PresetConfiguration } from '../../types/preset';
 import type { Template, TemplateConfiguration, PrebuiltTemplate, TemplateSuggestion, TemplateSuggestionRequest } from '../../types/template';
 import { theme } from '../../theme';
@@ -31,15 +30,11 @@ import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext';
 import { TemplateCreatorModal } from './TemplateCreatorModal';
 import { TemplateEditorModal } from './TemplateEditorModal';
 import { PrebuiltTemplateModal } from './PrebuiltTemplateModal';
-import { TemplateMarketplaceModal } from './TemplateMarketplaceModal';
 import { TemplateSuggestionsModal } from './TemplateSuggestionsModal';
 import { TemplateABTestingModal } from './TemplateABTestingModal';
-import { TemplateSharingModal } from './TemplateSharingModal';
 import { NarrowOverlayDrawer } from '../layout/NarrowOverlayDrawer';
 import { filterTemplates, groupTemplatesByCategory, TEMPLATE_UNCATEGORIZED_LABEL } from '../../utils/templateGroups';
 import { isPrebuiltNew } from '../../utils/templateApply';
-import { copyTemplateApi, publishMarketplaceTemplateApi } from '../../api/templates';
-import { marketplaceAbTestId } from '../../utils/abTestCharts';
 import { useContextStore } from '../../store/contextStore';
 import { useGenerationStore } from '../../store/generationStore';
 import { rencontreInitialeBySelectedCharacters } from '../../utils/templateSuggestionScore';
@@ -84,10 +79,6 @@ function formatActiveTemplateFilters(
 
 function isSharedTemplate(template: Template): boolean {
   return template.relation === 'granted';
-}
-
-function canShareTemplate(template: Template): boolean {
-  return template.relation === 'owned';
 }
 
 /** Seul le propriétaire décide qui voit son template. */
@@ -201,8 +192,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     deleteTemplate,
   } = useTemplateStore();
   const toast = useToast();
-  const currentUser = useAuthStore((state) => state.user);
-  const isGuest = currentUser?.role === 'guest';
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -220,7 +209,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   const deletingTemplateRef = useRef(false);
   const copyingPrebuiltRef = useRef(false);
   const [isCopyingPrebuilt, setIsCopyingPrebuilt] = useState(false);
-  const [isMarketplaceOpen, setIsMarketplaceOpen] = useState(false);
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
   const [suggestionRequest, setSuggestionRequest] = useState<TemplateSuggestionRequest>({
     instructions: '',
@@ -231,19 +219,9 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   });
   const [isAbTestOpen, setIsAbTestOpen] = useState(false);
   const [abSeedBId, setAbSeedBId] = useState('');
-  const [sharingTemplate, setSharingTemplate] = useState<Template | null>(null);
-  const publishingRef = useRef(false);
-  const copyingSharedRef = useRef(false);
-  const [isCopyingShared, setIsCopyingShared] = useState(false);
-  const sharedModifiedRef = useRef<Map<string, string>>(new Map());
-  const sharedToastReadyRef = useRef(false);
 
   const ownedTemplates = useMemo(
     () => templates.filter((template) => !isSharedTemplate(template)),
-    [templates],
-  );
-  const sharedTemplates = useMemo(
-    () => templates.filter((template) => isSharedTemplate(template)),
     [templates],
   );
 
@@ -295,26 +273,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         void loadTemplates();
       });
   }, [loadPresets, loadTemplates, loadPrebuiltTemplates]);
-
-  useEffect(() => {
-    if (sharedToastReadyRef.current) {
-      for (const template of sharedTemplates) {
-        const previous = sharedModifiedRef.current.get(template.id);
-        const next = template.metadata.modified;
-        if (previous && next && previous !== next) {
-          toast(`« ${template.name} » a été mis à jour`, 'info');
-        }
-      }
-    }
-    sharedToastReadyRef.current = true;
-    const nextMap = new Map<string, string>();
-    for (const template of sharedTemplates) {
-      if (template.metadata.modified) {
-        nextMap.set(template.id, template.metadata.modified);
-      }
-    }
-    sharedModifiedRef.current = nextMap;
-  }, [sharedTemplates, toast]);
 
   const handlePresetSelect = (preset: Preset) => {
     setSelectedPreset(preset);
@@ -386,45 +344,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     }
   };
 
-  const handleCopyShared = async (template: Template) => {
-    if (copyingSharedRef.current) {
-      return;
-    }
-    copyingSharedRef.current = true;
-    setIsCopyingShared(true);
-    try {
-      await copyTemplateApi(template.id);
-      await loadTemplates();
-      toast('Template copié dans Mes templates', 'success');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Copie impossible';
-      toast(message, 'error');
-    } finally {
-      copyingSharedRef.current = false;
-      setIsCopyingShared(false);
-    }
-  };
 
-  const handlePublishTemplate = async (template: Template, anonymous = false) => {
-    if (publishingRef.current || isGuest) {
-      return;
-    }
-    publishingRef.current = true;
-    try {
-      await publishMarketplaceTemplateApi(template.id, anonymous);
-      toast(
-        anonymous
-          ? `« ${template.name} » publié anonymement`
-          : `« ${template.name} » publié sur le marketplace`,
-        'success',
-      );
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Publication impossible';
-      toast(message, 'error');
-    } finally {
-      publishingRef.current = false;
-    }
-  };
 
   const handleLoadPrebuilt = (prebuilt: PrebuiltTemplate) => {
     onPrebuiltLoaded?.(prebuilt);
@@ -761,26 +681,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           Suggestions
         </button>
 
-        <button
-          type="button"
-          data-testid="marketplace-open-btn"
-          onClick={() => setIsMarketplaceOpen(true)}
-          style={{
-            padding: chrome.buttonPadding,
-            backgroundColor: theme.button.default.background,
-            border: `1px solid ${theme.border.secondary}`,
-            borderRadius: `${redesignRadius.control}px`,
-            color: theme.button.default.color,
-            fontWeight: 600,
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-            fontSize: `${chrome.buttonFontRem}rem`,
-            flex: isNarrow ? '1 1 auto' : undefined,
-            minHeight: TOUCH_TARGET_MIN_PX,
-          }}
-        >
-          Marketplace
-        </button>
 
         <button
           type="button"
@@ -858,19 +758,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         }}
       />
 
-      <TemplateMarketplaceModal
-        isOpen={isMarketplaceOpen}
-        onClose={() => setIsMarketplaceOpen(false)}
-        currentUserId={currentUser?.id ?? null}
-        currentUserRole={currentUser?.role ?? null}
-        isGuest={Boolean(isGuest)}
-        onCopied={() => loadTemplates()}
-        onCompare={(listingId) => {
-          setAbSeedBId(marketplaceAbTestId(listingId));
-          setIsMarketplaceOpen(false);
-          setIsAbTestOpen(true);
-        }}
-      />
 
       <TemplateABTestingModal
         isOpen={isAbTestOpen}
@@ -1256,72 +1143,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                       >
                         Supprimer
                       </button>
-                      {!isGuest && (
-                        <button
-                          type="button"
-                          data-testid="template-item-publish-btn"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            void handlePublishTemplate(template);
-                          }}
-                          style={{
-                            minHeight: TOUCH_TARGET_MIN_PX,
-                            padding: chrome.buttonPadding,
-                            backgroundColor: theme.button.default.background,
-                            border: `1px solid ${theme.border.secondary}`,
-                            borderRadius: `${redesignRadius.control}px`,
-                            color: theme.button.default.color,
-                            cursor: 'pointer',
-                            fontSize: `${chrome.buttonFontRem}rem`,
-                          }}
-                        >
-                          Publier
-                        </button>
-                      )}
-                      {!isGuest && (
-                        <button
-                          type="button"
-                          data-testid="template-item-publish-anon-btn"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            void handlePublishTemplate(template, true);
-                          }}
-                          style={{
-                            minHeight: TOUCH_TARGET_MIN_PX,
-                            padding: chrome.buttonPadding,
-                            backgroundColor: theme.button.default.background,
-                            border: `1px solid ${theme.border.secondary}`,
-                            borderRadius: `${redesignRadius.control}px`,
-                            color: theme.button.default.color,
-                            cursor: 'pointer',
-                            fontSize: `${chrome.buttonFontRem}rem`,
-                          }}
-                        >
-                          Publier anonymement
-                        </button>
-                      )}
-                      {canShareTemplate(template) && (
-                        <button
-                          type="button"
-                          data-testid="template-item-share-btn"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setSharingTemplate(template);
-                          }}
-                          style={{
-                            minHeight: TOUCH_TARGET_MIN_PX,
-                            padding: chrome.buttonPadding,
-                            backgroundColor: theme.button.default.background,
-                            border: `1px solid ${theme.border.secondary}`,
-                            borderRadius: `${redesignRadius.control}px`,
-                            color: theme.button.default.color,
-                            cursor: 'pointer',
-                            fontSize: `${chrome.buttonFontRem}rem`,
-                          }}
-                        >
-                          Partager
-                        </button>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -1332,92 +1153,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         )}
       </section>
 
-      <section
-        data-testid="templates-partages-list"
-        style={{
-          marginTop: `${chrome.controlGapRem}rem`,
-        }}
-      >
-        <h3
-          style={{
-            margin: `0 0 ${chrome.controlGapRem}rem`,
-            color: theme.text.primary,
-            fontSize: `${chrome.sectionTitleFontRem}rem`,
-            fontWeight: 600,
-          }}
-        >
-          Templates partagés
-        </h3>
-        {sharedTemplates.length === 0 ? (
-          <div
-            data-testid="templates-partages-empty"
-            style={{
-              fontSize: `${chrome.labelFontRem}rem`,
-              color: theme.text.secondary,
-            }}
-          >
-            Aucun template partagé
-          </div>
-        ) : (
-          sharedTemplates.map((template) => (
-            <div
-              key={template.id}
-              data-testid="shared-template-item"
-              data-template-name={template.name}
-              onClick={() => onTemplateLoaded?.(template)}
-              style={{
-                padding: chrome.dropdownOptionPadding,
-                border: `1px solid ${theme.border.secondary}`,
-                borderRadius: `${redesignRadius.control}px`,
-                marginBottom: '0.35rem',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '0.5rem',
-                cursor: 'pointer',
-              }}
-            >
-              <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>{template.icon}</span>
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontWeight: 600, color: theme.text.primary }}>
-                  {template.name}
-                </div>
-                <div
-                  data-testid="shared-template-badge"
-                  style={{
-                    fontSize: `${chrome.labelFontRem}rem`,
-                    color: theme.text.secondary,
-                    marginTop: '0.2rem',
-                  }}
-                >
-                  Partagé par {template.sharedByUsername ?? template.ownerUsername ?? 'un membre'}
-                </div>
-                <button
-                  type="button"
-                  data-testid="shared-template-copy-btn"
-                  disabled={isCopyingShared}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    void handleCopyShared(template);
-                  }}
-                  style={{
-                    minHeight: TOUCH_TARGET_MIN_PX,
-                    marginTop: '0.5rem',
-                    padding: chrome.buttonPadding,
-                    backgroundColor: theme.button.default.background,
-                    border: `1px solid ${theme.border.secondary}`,
-                    borderRadius: `${redesignRadius.control}px`,
-                    color: theme.button.default.color,
-                    cursor: 'pointer',
-                    fontSize: `${chrome.buttonFontRem}rem`,
-                  }}
-                >
-                  Copier vers mes templates
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </section>
 
       {/* Modal confirmation suppression */}
       {isDeleteConfirmOpen && presetToDelete && (
@@ -1500,14 +1235,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         onCancel={() => setDeletingTemplate(null)}
       />
 
-      {sharingTemplate && (
-        <TemplateSharingModal
-          templateId={sharingTemplate.id}
-          templateName={sharingTemplate.name}
-          open
-          onClose={() => setSharingTemplate(null)}
-        />
-      )}
     </div>
   );
 };

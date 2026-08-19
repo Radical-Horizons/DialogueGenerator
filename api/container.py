@@ -23,7 +23,6 @@ from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
 from services.template_service import TemplateService
-from services.template_marketplace_service import TemplateMarketplaceService
 from services.template_ab_testing_service import TemplateABTestingService
 from api.services.template_ab_test_job_manager import TemplateABTestJobManager
 from services.dialogue_generation_service import DialogueGenerationService
@@ -43,8 +42,6 @@ from services.repositories.sqlite import (
     DialogueSharesRepository,
     DialoguesIndexRepository,
     DialoguesSearchRepository,
-    SharedTemplatesRepository,
-    TemplateSharesRepository,
     UserRepository,
     UserSettingsRepository,
 )
@@ -58,7 +55,7 @@ from services.dialogue_metadata_service import DialogueMetadataService
 from services.batch_validation_service import BatchValidationService
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
-from services.template_sharing_service import TemplateSharingService
+from services.template_access_service import TemplateAccessService
 from services.template_suggestion_service import TemplateSuggestionService
 from api.services.auth_service import AuthService
 from api.services.batch_validation_job_manager import BatchValidationJobManager
@@ -100,10 +97,8 @@ class ServiceContainer:
         self._trait_catalog_service: Optional[TraitCatalogService] = None
         self._preset_service: Optional[PresetService] = None
         self._template_service: Optional[TemplateService] = None
-        self._template_marketplace_service: Optional[TemplateMarketplaceService] = None
         self._template_ab_testing_service: Optional[TemplateABTestingService] = None
         self._template_ab_test_job_manager: Optional[TemplateABTestJobManager] = None
-        self._shared_templates_repository: Optional[SharedTemplatesRepository] = None
         self._dialogue_generation_service: Optional[DialogueGenerationService] = None
         self._llm_usage_service: Optional[LLMUsageService] = None
         self._export_log_service: Optional[ExportLogService] = None
@@ -123,7 +118,6 @@ class ServiceContainer:
         self._app_settings_repository: Optional[AppSettingsRepository] = None
         self._dialogues_index_repository: Optional[DialoguesIndexRepository] = None
         self._dialogue_shares_repository: Optional[DialogueSharesRepository] = None
-        self._template_shares_repository: Optional[TemplateSharesRepository] = None
         self._collections_repository: Optional[CollectionsRepository] = None
         self._collection_service: Optional[CollectionService] = None
         self._dialogues_search_repository: Optional[DialoguesSearchRepository] = None
@@ -139,7 +133,7 @@ class ServiceContainer:
         self._audit_log_service: Optional[AuditLogService] = None
         self._document_persistence_service: Optional[DocumentPersistenceService] = None
         self._dialogue_sharing_service: Optional[DialogueSharingService] = None
-        self._template_sharing_service: Optional[TemplateSharingService] = None
+        self._template_access_service: Optional[TemplateAccessService] = None
         self._template_suggestion_usage_repository: Optional[
             TemplateSuggestionUsageRepository
         ] = None
@@ -211,37 +205,6 @@ class ServiceContainer:
                 )
                 logger.info("DialogueSharesRepository initialisé dans le container.")
             return self._dialogue_shares_repository
-
-    def get_template_shares_repository(self) -> TemplateSharesRepository:
-        """Retourne le repository des partages d'équipe de templates."""
-        with self._database_lock:
-            if self._template_shares_repository is None:
-                self._template_shares_repository = TemplateSharesRepository(
-                    self.get_database_connection()
-                )
-                logger.info("TemplateSharesRepository initialisé dans le container.")
-            return self._template_shares_repository
-
-    def get_shared_templates_repository(self) -> SharedTemplatesRepository:
-        """Retourne le repository du marketplace de templates."""
-        with self._database_lock:
-            if self._shared_templates_repository is None:
-                self._shared_templates_repository = SharedTemplatesRepository(
-                    self.get_database_connection()
-                )
-                logger.info("SharedTemplatesRepository initialisé dans le container.")
-            return self._shared_templates_repository
-
-    def get_template_marketplace_service(self) -> TemplateMarketplaceService:
-        """Retourne le service marketplace de templates."""
-        with self._database_lock:
-            if self._template_marketplace_service is None:
-                self._template_marketplace_service = TemplateMarketplaceService(
-                    repository=self.get_shared_templates_repository(),
-                    template_service=self.get_template_service(),
-                )
-                logger.info("TemplateMarketplaceService initialisé dans le container.")
-            return self._template_marketplace_service
 
     def get_template_ab_testing_service(self) -> TemplateABTestingService:
         """Retourne le service A/B testing de templates."""
@@ -401,16 +364,15 @@ class ServiceContainer:
                 logger.info("DialogueSharingService initialisé dans le container.")
             return self._dialogue_sharing_service
 
-    def get_template_sharing_service(self) -> TemplateSharingService:
-        """Retourne le service de partage d'équipe des templates custom."""
+    def get_template_access_service(self) -> TemplateAccessService:
+        """Retourne le service d'accès aux templates (propriété + statut)."""
         with self._database_lock:
-            if self._template_sharing_service is None:
-                self._template_sharing_service = TemplateSharingService(
-                    shares_repository=self.get_template_shares_repository(),
+            if self._template_access_service is None:
+                self._template_access_service = TemplateAccessService(
                     user_repository=self.get_user_repository(),
                 )
-                logger.info("TemplateSharingService initialisé dans le container.")
-            return self._template_sharing_service
+                logger.info("TemplateAccessService initialisé dans le container.")
+            return self._template_access_service
 
     def get_template_suggestion_usage_repository(
         self,
@@ -432,8 +394,7 @@ class ServiceContainer:
             if self._template_suggestion_service is None:
                 self._template_suggestion_service = TemplateSuggestionService(
                     usage_repository=self.get_template_suggestion_usage_repository(),
-                    sharing_service=self.get_template_sharing_service(),
-                    marketplace_service=self.get_template_marketplace_service(),
+                    access_service=self.get_template_access_service(),
                 )
                 logger.info("TemplateSuggestionService initialisé dans le container.")
             return self._template_suggestion_service
@@ -863,7 +824,7 @@ class ServiceContainer:
             self._audit_log_service = None
             self._document_persistence_service = None
             self._dialogue_sharing_service = None
-            self._template_sharing_service = None
+            self._template_access_service = None
             self._auth_service = None
     
     def reset(self) -> None:

@@ -9,15 +9,13 @@ from pathlib import Path
 from typing import Callable, List, Mapping, Optional, Sequence
 
 from api.schemas.template import (
-    MarketplaceListing,
     PrebuiltTemplate,
     Template,
     TemplateSuggestionItem,
 )
 from api.utils.job_ownership import template_owner_key
-from services.template_marketplace_service import TemplateMarketplaceService
 from services.template_service import TemplateService
-from services.template_sharing_service import TemplateSharingService
+from services.template_access_service import TemplateAccessService
 from services.repositories.sqlite.template_suggestion_usage_repository import (
     VALID_SOURCES,
     TemplateSuggestionUsageRepository,
@@ -108,14 +106,12 @@ class TemplateSuggestionService:
         self,
         *,
         usage_repository: TemplateSuggestionUsageRepository,
-        sharing_service: TemplateSharingService,
-        marketplace_service: TemplateMarketplaceService,
+        access_service: TemplateAccessService,
         flag_names_loader: FlagNamesLoader | None = None,
     ) -> None:
-        """Injecte usage SQLite, ACL 6.8 et marketplace."""
+        """Injecte le suivi d'usage SQLite et le service d'accès."""
         self._usage = usage_repository
-        self._sharing = sharing_service
-        self._marketplace = marketplace_service
+        self._sharing = access_service
         self._flag_names_loader = flag_names_loader or load_gdd_flag_noms
 
     @staticmethod
@@ -174,7 +170,7 @@ class TemplateSuggestionService:
         locations: List[str],
         rencontre_initiale_by_character: dict[str, str],
     ) -> List[TemplateSuggestionItem]:
-        """Classe les templates lisibles (ACL + pré-built + marketplace, dédup)."""
+        """Classe les templates visibles (accès + pré-built, dédup)."""
         query = SuggestionQuery(
             instructions=instructions or "",
             scene_type=_normalize_scene_type(scene_type),
@@ -197,13 +193,6 @@ class TemplateSuggestionService:
             current_user,
         )
         visible_ids = {item.id for item in visible}
-        listings = self._marketplace.browse_templates()
-        market_by_source: dict[str, int] = {}
-        for listing in listings:
-            previous = market_by_source.get(listing.sourceTemplateId, 0)
-            market_by_source[listing.sourceTemplateId] = max(
-                previous, listing.usageCount
-            )
 
         pending: list[_RankedItem] = []
         for template in visible:
@@ -211,7 +200,6 @@ class TemplateSuggestionService:
                 template,
                 query,
                 usage_map.get(("custom", template.id), 0),
-                market_by_source.get(template.id, 0),
                 context_map.get(("custom", template.id), 0),
             )
             if ranked is not None:
@@ -223,18 +211,6 @@ class TemplateSuggestionService:
                 query,
                 usage_map.get(("prebuilt", prebuilt.id), 0),
                 context_map.get(("prebuilt", prebuilt.id), 0),
-            )
-            if ranked is not None:
-                pending.append(ranked)
-
-        for listing in listings:
-            if listing.sourceTemplateId in visible_ids:
-                continue
-            ranked = self._score_marketplace(
-                listing,
-                query,
-                usage_map.get(("marketplace", listing.id), 0),
-                context_map.get(("marketplace", listing.id), 0),
             )
             if ranked is not None:
                 pending.append(ranked)
@@ -251,7 +227,6 @@ class TemplateSuggestionService:
         template: Template,
         query: SuggestionQuery,
         use_count: int,
-        market_usage: int,
         context_use_count: int = 0,
     ) -> Optional[_RankedItem]:
         """Score un custom visible."""
@@ -265,7 +240,8 @@ class TemplateSuggestionService:
             characters=tuple(template.configuration.characters),
             locations=tuple(template.configuration.locations),
             use_count=use_count,
-            market_usage_count=market_usage,
+            # Le marketplace a été retiré : plus de popularité externe à pondérer.
+            market_usage_count=0,
             context_use_count=context_use_count,
         )
         scored = score_candidate(features, query)
@@ -325,42 +301,5 @@ class TemplateSuggestionService:
             casUsage=prebuilt.casUsage,
             examples=list(prebuilt.examples),
             addedAt=prebuilt.addedAt,
-        )
-        return _RankedItem(score=scored, item=item)
-
-    def _score_marketplace(
-        self,
-        listing: MarketplaceListing,
-        query: SuggestionQuery,
-        use_count: int,
-        context_use_count: int = 0,
-    ) -> Optional[_RankedItem]:
-        """Score un listing marketplace (hors dédup live)."""
-        features = SuggestionCandidateFeatures(
-            name=listing.name,
-            description=listing.description,
-            category=listing.category,
-            scene_type_hint="",
-            scene_type=listing.configuration.sceneType,
-            instructions=listing.configuration.instructions,
-            characters=tuple(listing.configuration.characters),
-            locations=tuple(listing.configuration.locations),
-            use_count=use_count,
-            market_usage_count=listing.usageCount,
-            context_use_count=context_use_count,
-        )
-        scored = score_candidate(features, query)
-        if scored.score <= 0:
-            return None
-        item = TemplateSuggestionItem(
-            source="marketplace",
-            id=listing.id,
-            name=listing.name,
-            description=listing.description,
-            category=listing.category,
-            icon=listing.icon,
-            score=scored.score,
-            reasons=list(scored.reasons),
-            configuration=listing.configuration,
         )
         return _RankedItem(score=scored, item=item)

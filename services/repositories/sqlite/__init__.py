@@ -19,16 +19,8 @@ from services.repositories.sqlite.dialogue_shares_repository import (
     DialogueShareEntry,
     DialogueSharesRepository,
 )
-from services.repositories.sqlite.template_shares_repository import (
-    TemplateShareEntry,
-    TemplateSharesRepository,
-)
 from services.repositories.sqlite.template_suggestion_usage_repository import (
     TemplateSuggestionUsageRepository,
-)
-from services.repositories.sqlite.shared_templates_repository import (
-    SharedTemplateRow,
-    SharedTemplatesRepository,
 )
 from services.repositories.sqlite.dialogues_index_repository import (
     DialogueIndexEntry,
@@ -50,11 +42,7 @@ __all__ = [
     "DialogueIndexEntry",
     "DialogueShareEntry",
     "DialogueSharesRepository",
-    "TemplateShareEntry",
-    "TemplateSharesRepository",
     "TemplateSuggestionUsageRepository",
-    "SharedTemplateRow",
-    "SharedTemplatesRepository",
     "DialoguesIndexRepository",
     "UserRepository",
     "UserSettingsRepository",

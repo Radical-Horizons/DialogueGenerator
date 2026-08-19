@@ -20,6 +20,7 @@ EXPECTED_MIGRATION_VERSIONS = [
     ("009",),
     ("010",),
     ("011",),
+    ("012",),
 ]
 
 
@@ -84,9 +85,6 @@ def test_lifespan_creates_and_reuses_application_database(tmp_path: Path) -> Non
                 "collection_dialogues",
                 "dialogues_search_meta",
                 "dialogues_search_fts",
-                "shared_templates",
-                "template_ratings",
-                "template_shares",
                 "template_suggestion_usage",
             } <= tables
             assert migration_versions == EXPECTED_MIGRATION_VERSIONS

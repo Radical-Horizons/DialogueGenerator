@@ -29,14 +29,12 @@ from services.graph_conversion_service import GraphConversionService
 from services.llm_quality_judge_service import LLMQualityJudgeService
 from services.llm_usage_service import LLMUsageService
 from services.scene_dramatis import context_has_location
-from services.template_marketplace_service import TemplateMarketplaceService
 from services.template_service import TemplateService
 from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
 
 logger = logging.getLogger(__name__)
 
 PREBUILT_ID_PREFIX = "prebuilt:"
-MARKETPLACE_ID_PREFIX = "marketplace:"
 AB_TEST_USAGE_ENDPOINT = "templates_ab_test"
 DEFAULT_GENERATIONS = 3
 DEFAULT_MAX_DEPTH = 2
@@ -65,17 +63,14 @@ class TemplateABTestingService:
         self,
         template_service: TemplateService,
         storage_dir: Optional[Path] = None,
-        marketplace_service: Optional[TemplateMarketplaceService] = None,
     ) -> None:
         """Initialise le service.
 
         Args:
             template_service: Résolution custom UUID et pré-built.
             storage_dir: Racine ``data/ab-tests`` (surcharge tests).
-            marketplace_service: Résolution ``marketplace:{listingId}``.
         """
         self._template_service = template_service
-        self._marketplace_service = marketplace_service
         self._storage_dir = storage_dir or DEFAULT_AB_TESTS_DIR
         self._storage_dir.mkdir(parents=True, exist_ok=True)
 
@@ -98,16 +93,6 @@ class TemplateABTestingService:
             slug = raw[len(PREBUILT_ID_PREFIX) :]
             prebuilt = self._template_service.get_prebuilt_template(slug)
             return f"{PREBUILT_ID_PREFIX}{prebuilt.id}", prebuilt.name, prebuilt.configuration
-        if raw.startswith(MARKETPLACE_ID_PREFIX):
-            listing_id = raw[len(MARKETPLACE_ID_PREFIX) :]
-            if self._marketplace_service is None:
-                raise FileNotFoundError(f"Marketplace listing {listing_id} not found")
-            listing = self._marketplace_service.get_listing(listing_id)
-            return (
-                f"{MARKETPLACE_ID_PREFIX}{listing.id}",
-                listing.name,
-                listing.configuration,
-            )
         template = self._template_service.get_template(raw)
         return template.id, template.name, template.configuration
 

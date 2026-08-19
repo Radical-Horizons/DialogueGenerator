@@ -7,14 +7,9 @@ import type {
   ABTestCreateResponse,
   ABTestHistoryItem,
   ABTestResult,
-  MarketplaceComment,
-  MarketplaceListing,
-  MarketplaceRatingRequest,
   PrebuiltTemplate,
   Template,
   TemplateCreate,
-  TemplateShare,
-  TemplateShareTarget,
   TemplateSuggestion,
   TemplateSuggestionRequest,
   TemplateSuggestionUsedResponse,
@@ -81,51 +76,6 @@ export async function deleteTemplateApi(id: string): Promise<void> {
 }
 
 /**
- * Liste les destinataires d'un template (owner/admin).
- */
-export async function listTemplateSharesApi(templateId: string): Promise<TemplateShare[]> {
-  const { data } = await apiClient.get<TemplateShare[]>(
-    `/api/v1/templates/${templateId}/shares`,
-  )
-  return data
-}
-
-/**
- * Invite un writer par username.
- */
-export async function createTemplateShareApi(
-  templateId: string,
-  username: string,
-  canEdit = false,
-): Promise<TemplateShare> {
-  const { data } = await apiClient.post<TemplateShare>(
-    `/api/v1/templates/${templateId}/shares`,
-    { username, canEdit },
-  )
-  return data
-}
-
-/**
- * Writers actifs proposables comme destinataires.
- */
-export async function listTemplateShareTargetsApi(): Promise<TemplateShareTarget[]> {
-  const { data } = await apiClient.get<TemplateShareTarget[]>(
-    '/api/v1/templates/share-targets',
-  )
-  return data
-}
-
-/**
- * Révoque un destinataire.
- */
-export async function deleteTemplateShareApi(
-  templateId: string,
-  userId: string,
-): Promise<void> {
-  await apiClient.delete(`/api/v1/templates/${templateId}/shares/${userId}`)
-}
-
-/**
  * Clone un template visible en custom owned.
  */
 export async function copyTemplateApi(templateId: string): Promise<TemplateWriteResponse> {
@@ -169,28 +119,6 @@ export async function getPrebuiltTemplateApi(slug: string): Promise<PrebuiltTemp
 }
 
 /**
- * Liste les fiches marketplace.
- */
-export async function listMarketplaceTemplatesApi(): Promise<MarketplaceListing[]> {
-  const { data } = await apiClient.get<MarketplaceListing[]>('/api/v1/templates/marketplace')
-  return data
-}
-
-/**
- * Publie un template custom vers le marketplace.
- */
-export async function publishMarketplaceTemplateApi(
-  templateId: string,
-  anonymous = false,
-): Promise<MarketplaceListing> {
-  const { data } = await apiClient.post<MarketplaceListing>('/api/v1/templates/marketplace', {
-    templateId,
-    anonymous,
-  })
-  return data
-}
-
-/**
  * Copie une fiche marketplace vers Mes templates.
  */
 export async function copyMarketplaceListingApi(
@@ -203,64 +131,10 @@ export async function copyMarketplaceListingApi(
 }
 
 /**
- * Note une fiche marketplace (1–5).
- */
-export async function rateMarketplaceTemplateApi(
-  listingId: string,
-  body: MarketplaceRatingRequest,
-): Promise<MarketplaceListing> {
-  const { data } = await apiClient.put<MarketplaceListing>(
-    `/api/v1/templates/marketplace/${listingId}/rating`,
-    body,
-  )
-  return data
-}
-
-/**
  * Retire une fiche marketplace (auteur ou admin).
  */
 export async function unpublishMarketplaceListingApi(listingId: string): Promise<void> {
   await apiClient.delete(`/api/v1/templates/marketplace/${listingId}`)
-}
-
-/**
- * Commentaires d'une fiche marketplace.
- */
-export async function listMarketplaceCommentsApi(
-  listingId: string,
-): Promise<MarketplaceComment[]> {
-  const { data } = await apiClient.get<MarketplaceComment[]>(
-    `/api/v1/templates/marketplace/${listingId}/comments`,
-  )
-  return data
-}
-
-/**
- * Ajoute un commentaire marketplace (writer).
- */
-export async function createMarketplaceCommentApi(
-  listingId: string,
-  body: string,
-): Promise<MarketplaceComment> {
-  const { data } = await apiClient.post<MarketplaceComment>(
-    `/api/v1/templates/marketplace/${listingId}/comments`,
-    { body },
-  )
-  return data
-}
-
-/**
- * Marque une fiche officielle (admin).
- */
-export async function setMarketplaceOfficialApi(
-  listingId: string,
-  isOfficial: boolean,
-): Promise<MarketplaceListing> {
-  const { data } = await apiClient.patch<MarketplaceListing>(
-    `/api/v1/templates/marketplace/${listingId}/official`,
-    { isOfficial },
-  )
-  return data
 }
 
 /**
