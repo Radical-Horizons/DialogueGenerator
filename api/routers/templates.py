@@ -725,7 +725,12 @@ async def start_ab_test(
     template_service: TemplateService = Depends(get_template_service),
     sharing_service: TemplateSharingService = Depends(get_template_sharing_service),
 ) -> ABTestCreateResponse:
-    """Lance un job A/B (guest autorisé, consomme du LLM)."""
+    """Lance un job A/B — réservé aux comptes, consomme du LLM.
+
+    Un run lance N × 2 générations : le mode invité est une démonstration en lecture,
+    il n'a pas à engager le budget LLM du projet.
+    """
+    require_non_guest(current_user)
     try:
         ab_service.validate_launch_params(
             body.templateAId,
@@ -851,7 +856,11 @@ async def rerun_ab_test(
     usage_service: LLMUsageService = Depends(get_llm_usage_service),
     request_id: str = Depends(get_request_id),
 ) -> ABTestCreateResponse:
-    """Relance un test lié au parent (snapshots templates actuels)."""
+    """Relance un test lié au parent (snapshots templates actuels).
+
+    Même garde que le lancement : une relance dépense autant qu'un run initial.
+    """
+    require_non_guest(current_user)
     try:
         parent = ab_service.get_test(test_id)
         ab_service.assert_visible(

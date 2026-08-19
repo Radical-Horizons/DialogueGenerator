@@ -259,8 +259,12 @@ def test_ab_test_launch_completes_with_winner(ab_client: TestClient) -> None:
     assert body["totals"]["templateB"]["meanOverall"] == 5
 
 
-def test_ab_test_guest_can_post(ab_client: TestClient) -> None:
-    """Guest POST /ab-test → 202, pas 403."""
+def test_ab_test_guest_is_refused(ab_client: TestClient) -> None:
+    """Guest POST /ab-test → 403.
+
+    Un run lance N × 2 générations. Le mode invité est une démonstration en lecture :
+    il ne doit pas pouvoir engager le budget LLM du projet.
+    """
     app.dependency_overrides[get_current_user] = lambda: _user("guest-1", role="guest")
     try:
         id_a = _create_custom(ab_client, name="Guest A")
@@ -274,8 +278,7 @@ def test_ab_test_guest_can_post(ab_client: TestClient) -> None:
                 "maxDepth": 1,
             },
         )
-        assert created.status_code == 202, created.text
-        assert created.status_code != 403
+        assert created.status_code == 403, created.text
     finally:
         app.dependency_overrides[get_current_user] = lambda: _user("writer-a")
 
