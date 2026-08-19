@@ -66,15 +66,13 @@ test.describe('Templates — application [6.3]', () => {
     }
   }
 
-  const expandModelSettings = async (page: Page) => {
-    const modelToggle = page.getByTestId('model-settings-summary-toggle')
-    if ((await modelToggle.getAttribute('aria-expanded')) !== 'true') {
-      await modelToggle.click()
-    }
+  /** Les templates sont un onglet d'entrée depuis la refonte de la colonne. */
+  const openTemplatesTab = async (page: Page) => {
+    await page.getByTestId('input-tab-templates').click()
   }
 
   const createTemplateFromUi = async (page: Page, uniqueName: string) => {
-    await expandModelSettings(page)
+    await openTemplatesTab(page)
     const saveBtn = page.getByTestId('template-save-as-btn')
     await expect(saveBtn).toBeVisible({ timeout: E2E_MS.short })
     await expect(saveBtn).toBeEnabled()
@@ -125,26 +123,32 @@ test.describe('Templates — application [6.3]', () => {
 
       const createdItem = await createTemplateFromUi(page, uniqueName)
 
+      // Brief et Templates sont deux onglets : on bascule comme le ferait l'utilisateur.
+      await page.getByTestId('input-tab-brief').click()
       await brief.fill('')
       await expect(brief).toHaveValue('')
 
+      await openTemplatesTab(page)
       await createdItem.getByText(uniqueName).click()
       await maybeConfirmObsoleteGdd(page)
+      // Appliquer un template ramène au brief : l'effet doit être visible.
       await expect(brief).toHaveValue(snapshotBrief)
       await expect(page.getByText(/Template chargé/i).first()).toBeVisible({
         timeout: E2E_MS.short,
       })
 
       await brief.fill(laterBrief)
+      await openTemplatesTab(page)
       await createdItem.getByTestId('template-item-edit-btn').click()
       await expect(page.getByTestId('template-editor-modal')).toBeVisible({
         timeout: E2E_MS.short,
       })
-      await expect(brief).toHaveValue(laterBrief)
       await page.getByTestId('template-editor-modal').getByRole('button', { name: 'Annuler' }).click()
       await expect(page.getByTestId('template-editor-modal')).not.toBeVisible({
         timeout: E2E_MS.short,
       })
+      // « Éditer » n'applique pas : le brief garde la valeur saisie avant l'ouverture.
+      await page.getByTestId('input-tab-brief').click()
       await expect(brief).toHaveValue(laterBrief)
     } finally {
       deleteTemplateFilesByName(uniqueName)

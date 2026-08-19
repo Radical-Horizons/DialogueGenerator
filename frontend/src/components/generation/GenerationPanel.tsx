@@ -29,6 +29,10 @@ import { GenerationStreamingInline } from './GenerationStreamingInline'
 import { ModelEffortPicker } from './ModelEffortPicker'
 import { ModelSelector } from './ModelSelector'
 import { PresetSelector } from './PresetSelector'
+import { GenerationSettingsDrawer } from './GenerationSettingsDrawer'
+import { GenerationInputTabs } from './GenerationInputTabs'
+import { useGenerationInputTab } from '../../hooks/useGenerationInputTab'
+import { useGraphStore } from '../../store/graphStore'
 import { useToast } from '../shared'
 import { SaveStatusIndicator } from '../shared/SaveStatusIndicator'
 import { StyledSelect } from '../shared/StyledSelect'
@@ -52,8 +56,7 @@ import { GenerationPanelModals } from './GenerationPanelModals'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { PANEL_COMFORT_MIN_WIDTH_PX, generationPanelChrome } from '../../theme/responsiveChrome'
 import { GenerationPanelNarrowProvider } from './GenerationPanelNarrowContext'
-import { redesignAccent, redesignDisclosureArrow, redesignFont, redesignHairline, redesignReadingColumn, redesignText } from '../../theme/redesignTokens'
-import { remSize } from '../../theme/uiTypography'
+import { redesignAccent, redesignFont, redesignHairline, redesignReadingColumn, redesignText } from '../../theme/redesignTokens'
 import type { ReasoningEffort } from '../../types/api'
 
 function formatTokensShort(value: number): string {
@@ -110,11 +113,25 @@ export function GenerationPanel() {
   const [previousDialoguePreview] = useState<string | null>(null)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [showModelSettings, setShowModelSettings] = useState(false)
-  /** 1c : les variables et flags passent derrière un lien du bandeau de brief. */
-  const [showFlagsPanel, setShowFlagsPanel] = useState(false)
-  /** Templates (Epic 6) : même traitement que les flags — un lien du bandeau, pas
-      un sous-produit des réglages du modèle où ils étaient jusqu'ici introuvables. */
-  const [showTemplatesPanel, setShowTemplatesPanel] = useState(false)
+  /** Onglet d'entrée actif ; le hook garantit le repli sur le brief en mode écriture. */
+  const { activeTab: activeInputTab, setActiveTab: setActiveInputTab, tabsVisible } =
+    useGenerationInputTab()
+
+  /**
+   * Charger un template écrit dans le brief : on y revient donc, sinon l'action reste
+   * invisible — l'utilisateur applique un modèle et rien ne bouge sous ses yeux.
+   * Ne concerne pas « copier vers mes templates », qui ne touche pas au brief.
+   */
+  const backToBriefAfter = useCallback(
+    <T,>(handler: ((value: T) => void) | undefined) =>
+      (value: T) => {
+        handler?.(value)
+        setActiveInputTab('brief')
+      },
+    [setActiveInputTab]
+  )
+  /** Compteur affiché sur l'onglet Flags — nombre de variables liées au dialogue. */
+  const flagCount = useGraphStore((s) => s.dialogueFlagBindings?.length ?? 0)
   // `=== true` : certains mocks de test renvoient l'objet store entier au lieu du champ
   // sélectionné ; sans cette coercition le bouton serait désactivé à tort.
   const gddCatalogLoading = useContextStore((s) => s.gddCatalogLoading) === true
@@ -727,104 +744,63 @@ export function GenerationPanel() {
       </div>
 
       <div style={{ display: showGenerationForm ? 'block' : 'none' }}>
-      <SystemPromptEditor
-        flagsPanelOpen={showFlagsPanel}
-        onToggleFlagsPanel={() => setShowFlagsPanel((v) => !v)}
-        templatesPanelOpen={showTemplatesPanel}
-        onToggleTemplatesPanel={() => setShowTemplatesPanel((v) => !v)}
-        userInstructions={userInstructions}
-        authorProfile={authorProfile}
-        gameRules={gameRules}
-        systemPromptOverride={systemPromptOverride}
-        onUserInstructionsChange={(value) => {
-          setUserInstructions(value)
-          draft.markDirty()
-        }}
-        onAuthorProfileChange={(value) => {
-          updateAuthorProfile(value)
-          draft.markDirty()
-        }}
-        onGameRulesChange={(value) => {
-          setGameRules(value)
-          draft.markDirty()
-        }}
-        onSystemPromptChange={(value) => {
-          setSystemPromptOverride(value)
-          draft.markDirty()
-        }}
-      />
+        {/* La colonne est la zone d'ENTRÉE : ses onglets sont les trois familles
+            qu'on rédige. Un onglet annonce qu'il remplace la surface — c'est ce que
+            les anciens liens ne disaient pas. Masqué en mode écriture, où seul le
+            brief a cours. */}
+        {tabsVisible && (
+          <GenerationInputTabs
+            activeTab={activeInputTab}
+            onSelect={setActiveInputTab}
+            flagCount={flagCount}
+          />
+        )}
+
+        <div data-testid="generation-input-panel">
+          {activeInputTab === 'brief' && (
+            <SystemPromptEditor
+              userInstructions={userInstructions}
+              onUserInstructionsChange={(value) => {
+                setUserInstructions(value)
+                draft.markDirty()
+              }}
+            />
+          )}
+          {activeInputTab === 'flags' && <DialogueFlagsPanel />}
+          {activeInputTab === 'templates' && (
+            <PresetSelector
+              onPresetLoaded={backToBriefAfter(presets.handlePresetLoaded)}
+              onTemplateLoaded={backToBriefAfter(presets.handleTemplateLoaded)}
+              onPrebuiltLoaded={backToBriefAfter(presets.handlePrebuiltLoaded)}
+              onSuggestionLoaded={backToBriefAfter(presets.handleSuggestionLoaded)}
+              getCurrentConfiguration={presets.getCurrentConfiguration}
+              saveStatus={draft.saveStatus}
+            />
+          )}
+        </div>
       </div>
 
-      {/* Templates (Epic 6) : rendus **sous** le lien qui les ouvre. Les enfermer dans
-          les réglages du modèle les affichait au-dessus de leur propre déclencheur. */}
-      <div
-        data-testid="templates-panel"
-        style={{
-          marginBottom: 22,
-          display: showFormExtras && showTemplatesPanel ? 'block' : 'none',
-        }}
-      >
-        <PresetSelector
-          onPresetLoaded={presets.handlePresetLoaded}
-          onTemplateLoaded={presets.handleTemplateLoaded}
-          onPrebuiltLoaded={presets.handlePrebuiltLoaded}
-          onSuggestionLoaded={presets.handleSuggestionLoaded}
-          getCurrentConfiguration={presets.getCurrentConfiguration}
-          saveStatus={draft.saveStatus}
-        />
-      </div>
-
-      {/* 1c : les flags sont un lien du bandeau de brief, pas une section pleine.
-          Le panneau ne se monte que sur demande. */}
-      <div
-        style={{
-          marginBottom: 22,
-          display: showFormExtras && showFlagsPanel ? 'block' : 'none',
-        }}
-      >
-        <DialogueFlagsPanel />
-      </div>
-
-      {/* Réglages du modèle : résumés en une ligne cliquable (refonte UI), détail dépliable. */}
-      <div style={{ marginBottom: '1rem', display: showFormExtras ? 'block' : 'none' }}>
-        <button
-          type="button"
-          onClick={() => setShowModelSettings((v) => !v)}
-          data-testid="model-settings-summary-toggle"
-          aria-expanded={showModelSettings}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            padding: '0.4rem 0',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: theme.text.secondary,
-            fontFamily: redesignFont.mono,
-            fontSize: remSize('small'),
-            width: '100%',
-            textAlign: 'left',
+      {showFormExtras && (
+        <GenerationSettingsDrawer
+          open={showModelSettings}
+          onToggle={() => setShowModelSettings((v) => !v)}
+          summary={modelSettingsSummary}
+          authorProfile={authorProfile}
+          onAuthorProfileChange={(value) => {
+            updateAuthorProfile(value)
+            draft.markDirty()
+          }}
+          gameRules={gameRules}
+          onGameRulesChange={(value) => {
+            setGameRules(value)
+            draft.markDirty()
+          }}
+          systemPromptOverride={systemPromptOverride}
+          onSystemPromptChange={(value) => {
+            setSystemPromptOverride(value)
+            draft.markDirty()
           }}
         >
-          <span style={{ color: theme.text.tertiary }}>Réglages du modèle</span>
-          <span style={{ color: theme.text.primary }}>{modelSettingsSummary}</span>
-          <span
-            aria-hidden
-            style={{
-              marginLeft: 'auto',
-              color: theme.text.tertiary,
-              fontSize: redesignDisclosureArrow.small,
-              lineHeight: 1,
-            }}
-          >
-            {showModelSettings ? '▴' : '▾'}
-          </span>
-        </button>
-      </div>
-
-      {showModelSettings && showFormExtras && (
-      <>
       {/* Sélecteur de modèle LLM (Story 0.3) */}
       <div style={{ marginBottom: '1rem' }}>
         <div
@@ -1088,7 +1064,7 @@ export function GenerationPanel() {
         }}
         onDirty={draft.markDirty}
       />
-      </>
+        </GenerationSettingsDrawer>
       )}
 
       {error && (

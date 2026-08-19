@@ -93,6 +93,13 @@ Correspondance écran → code (point d'entrée) :
   silencieusement : côté front l'aperçu des options restait vide, côté back le `title`
   du listing était `null` pour tous les dialogues du disque. Voir `firstUnityNode`
   (front) et `_nodes_of` (`api/routers/unity_dialogues.py`).
+- **Barre d'onglets : le filet appartient au libellé, pas au bouton.** Un
+  `borderBottom` posé sur le `<button role="tab">` se fait arrondir par le rayon des
+  contrôles et rend un **arc** au lieu d'un filet. Le motif unique est
+  `redesignTab.buttonStyle()` + `redesignTab.labelStyle()` (mono capitales,
+  `letter-spacing: 0.08em`, `box-shadow: inset 0 -1px 0` sur un `<span>` interne).
+  Ne pas restyler une barre à la main — vécu en août 2026 sur la colonne de
+  génération. Garde : `GenerationInputTabs.test.tsx` › « charte graphique ».
 - **`hidden` ne masque pas un élément qui porte un `display` inline.** La règle UA
   `[hidden] { display: none }` perd en spécificité. Calculer le `display`.
 - **`useNarrowInlineSize` : le `ResizeObserver` vit dans un effet**, pas dans la

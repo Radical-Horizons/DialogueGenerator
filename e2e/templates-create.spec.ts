@@ -102,10 +102,8 @@ test.describe('Templates — création [6.1.1]', () => {
       }
     }
 
-    const modelToggle = page.getByTestId('model-settings-summary-toggle')
-    if ((await modelToggle.getAttribute('aria-expanded')) !== 'true') {
-      await modelToggle.click()
-    }
+    // Les templates sont un onglet d'entrée depuis la refonte de la colonne.
+    await page.getByTestId('input-tab-templates').click()
 
     const saveBtn = page.getByTestId('template-save-as-btn')
     await expect(saveBtn).toBeVisible({ timeout: E2E_MS.short })

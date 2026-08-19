@@ -44,11 +44,9 @@ test.describe('Templates — marketplace [6.6]', () => {
     }
   }
 
-  const expandModelSettings = async (page: Page) => {
-    const modelToggle = page.getByTestId('model-settings-summary-toggle')
-    if ((await modelToggle.getAttribute('aria-expanded')) !== 'true') {
-      await modelToggle.click()
-    }
+  /** Les templates sont un onglet d'entrée depuis la refonte de la colonne. */
+  const openTemplatesTab = async (page: Page) => {
+    await page.getByTestId('input-tab-templates').click()
   }
 
   test('publie un custom, filtre, Utiliser crée une copie', async ({ page }) => {
@@ -60,7 +58,7 @@ test.describe('Templates — marketplace [6.6]', () => {
       const generateTab = page.getByTestId('header-section-generation')
       await expect(generateTab).toBeVisible({ timeout: E2E_MS.ui })
       await generateTab.click()
-      await expandModelSettings(page)
+      await openTemplatesTab(page)
 
       await page.getByTestId('template-save-as-btn').click()
       await expect(

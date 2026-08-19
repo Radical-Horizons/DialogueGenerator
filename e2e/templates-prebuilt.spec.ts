@@ -83,11 +83,9 @@ test.describe('Templates — pré-built [6.4]', () => {
     }
   }
 
-  const expandModelSettings = async (page: Page) => {
-    const modelToggle = page.getByTestId('model-settings-summary-toggle')
-    if ((await modelToggle.getAttribute('aria-expanded')) !== 'true') {
-      await modelToggle.click()
-    }
+  /** Les templates sont un onglet d'entrée depuis la refonte de la colonne. */
+  const openTemplatesTab = async (page: Page) => {
+    await page.getByTestId('input-tab-templates').click()
   }
 
   test.beforeEach(async ({ page }) => {
@@ -107,7 +105,7 @@ test.describe('Templates — pré-built [6.4]', () => {
   })
 
   test('liste 7 fiches, modal, Charger hydrate le brief', async ({ page }) => {
-    await expandModelSettings(page)
+    await openTemplatesTab(page)
     const list = page.getByTestId('prebuilt-templates-list')
     await expect(list).toBeVisible({ timeout: E2E_MS.ui })
     await expect(list.getByTestId('prebuilt-template-item')).toHaveCount(7)
@@ -137,7 +135,9 @@ test.describe('Templates — pré-built [6.4]', () => {
     })
     expect(readConfrontationInstructions()).toBe(originalInstructions)
 
+    // « Charger » a ramené sur le brief : on rouvre l'onglet pour un second tour.
     await brief.fill(`Brief modifié ${Date.now()}`)
+    await openTemplatesTab(page)
     await confrontation.click()
     await expect(modal).toBeVisible({ timeout: E2E_MS.short })
     await page.getByTestId('prebuilt-modal-load').click()
@@ -152,19 +152,23 @@ test.describe('Templates — pré-built [6.4]', () => {
     await expect(brief).toBeVisible({ timeout: E2E_MS.ui })
     await brief.fill(uniqueBrief)
 
-    await expandModelSettings(page)
+    await openTemplatesTab(page)
     const confrontation = page.locator('[data-prebuilt-id="confrontation"]')
     await expect(confrontation).toBeVisible({ timeout: E2E_MS.ui })
     await confrontation.getByTestId('prebuilt-item-copy-btn').click()
 
     await expect(page.getByTestId('prebuilt-template-modal')).not.toBeVisible()
-    await expect(brief).toHaveValue(uniqueBrief)
     await expect(
       page.locator(`[data-testid="template-item"][data-template-name="${COPY_NAME}"]`),
     ).toBeVisible({ timeout: E2E_MS.graphField })
     await expect(page.getByText(/Template copié dans Mes templates/i).first()).toBeVisible({
       timeout: E2E_MS.short,
     })
+
+    // Copier ne charge rien : contrairement à « Charger », on reste sur l'onglet
+    // Templates. On revient au brief pour vérifier qu'il est intact.
+    await page.getByTestId('input-tab-brief').click()
+    await expect(brief).toHaveValue(uniqueBrief)
 
     expect(readConfrontationInstructions()).toBe(originalInstructions)
     expect(readCopiedConfrontationRulesProfile()).toBe('strict')

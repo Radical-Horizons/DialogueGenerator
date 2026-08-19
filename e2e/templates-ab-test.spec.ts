@@ -19,11 +19,9 @@ test.describe('Templates — A/B tester [6.7]', { tag: '@smoke' }, () => {
     }
   }
 
-  const expandModelSettings = async (page: Page) => {
-    const modelToggle = page.getByTestId('model-settings-summary-toggle')
-    if ((await modelToggle.getAttribute('aria-expanded')) !== 'true') {
-      await modelToggle.click()
-    }
+  /** Les templates sont un onglet d'entrée depuis la refonte de la colonne. */
+  const openTemplatesTab = async (page: Page) => {
+    await page.getByTestId('input-tab-templates').click()
   }
 
   test('ouvre le modal, empty historique, lance et voit le gagnant', async ({ page }) => {
@@ -129,7 +127,7 @@ test.describe('Templates — A/B tester [6.7]', { tag: '@smoke' }, () => {
     const generateTab = page.getByTestId('header-section-generation')
     await expect(generateTab).toBeVisible({ timeout: E2E_MS.ui })
     await generateTab.click()
-    await expandModelSettings(page)
+    await openTemplatesTab(page)
 
     await page.getByTestId('ab-test-open-btn').click()
     await expect(page.getByTestId('template-ab-test-modal')).toBeVisible({

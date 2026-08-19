@@ -1,11 +1,16 @@
 /**
- * Éditeur pour les instructions de scène, le profil d'auteur et le system prompt.
+ * Brief de la scène — contenu de l'onglet « Brief » de la colonne de génération.
+ *
+ * Ce composant ne route plus d'onglets : la barre appartient à `GenerationPanel`,
+ * qui détient déjà les bascules flags et templates. Le double propriétaire d'état
+ * était la cause du bug « le lien templates n'ouvre pas le panneau templates ».
+ *
+ * Le profil d'auteur, les règles du jeu et le prompt système ont rejoint le tiroir
+ * de réglages (`GenerationSettingsDrawer`) : ils décrivent le comportement du LLM,
+ * pas ce qu'on lui demande d'écrire.
  */
-import React, { memo, useCallback, useState, useEffect, useRef } from 'react'
-import { type Tab } from '../shared/Tabs'
+import { memo, useCallback, useState, useEffect, useRef } from 'react'
 import { FormField } from '../shared/FormField'
-import { useSystemPrompt } from '../../hooks/useSystemPrompt'
-import { useAuthorProfile } from '../../hooks/useAuthorProfile'
 import { useAutoGrowTextarea } from '../../hooks/useAutoGrowTextarea'
 import { useViewportFraction } from '../../hooks/useViewportFraction'
 import { useToast } from '../shared'
@@ -13,11 +18,8 @@ import { theme } from '../../theme'
 import { generationPanelChrome } from '../../theme/responsiveChrome'
 import * as configAPI from '../../api/config'
 import {
-  deleteLocalAuthorTemplate,
   deleteLocalSceneTemplate,
-  listLocalAuthorTemplates,
   listLocalSceneTemplates,
-  upsertLocalAuthorTemplate,
   upsertLocalSceneTemplate,
   type LocalNamedTemplate,
 } from '../../utils/localNamedTemplates'
@@ -28,211 +30,49 @@ import { useUiLayoutStore } from '../../store/uiLayoutStore'
 
 export interface SystemPromptEditorProps {
   userInstructions: string
-  authorProfile: string
-  gameRules: string
-  systemPromptOverride: string | null
   onUserInstructionsChange: (instructions: string) => void
-  onAuthorProfileChange: (profile: string) => void
-  onGameRulesChange: (rules: string) => void
-  onSystemPromptChange: (prompt: string | null) => void
-  /** Écran 1c : le panneau flags est ouvert ? (lien du bandeau de brief) */
-  flagsPanelOpen?: boolean
-  /** Bascule du panneau flags ; sans ce callback, le lien n'est pas rendu. */
-  onToggleFlagsPanel?: () => void
-  /** Le panneau templates (Epic 6) est ouvert ? */
-  templatesPanelOpen?: boolean
-  /** Bascule du panneau templates ; sans ce callback, le lien n'est pas rendu. */
-  onToggleTemplatesPanel?: () => void
-}
-
-/** Onglet principal — le brief. Toujours en tête de `tabs`. */
-const PRIMARY_TAB_ID = 'user-instructions'
-
-/** Libellés courts des liens secondaires (écran 1c). */
-const SECONDARY_TAB_LINK_LABELS: Record<string, string> = {
-  'author-profile': "profil d'auteur",
-  'game-rules': 'règles du jeu',
-  'system-prompt': 'prompt système',
-}
-
-/** Lien discret du bandeau de brief : texte seul, plus clair quand il est actif. */
-function briefLinkStyle(active: boolean): React.CSSProperties {
-  return {
-    border: 'none',
-    background: 'none',
-    padding: 0,
-    cursor: 'pointer',
-    fontSize: '11.5px',
-    color: active ? redesignText.strong : redesignText.secondary,
-  }
 }
 
 export const SystemPromptEditor = memo(function SystemPromptEditor({
   userInstructions,
-  authorProfile,
-  gameRules,
-  systemPromptOverride,
   onUserInstructionsChange,
-  onAuthorProfileChange,
-  onGameRulesChange,
-  onSystemPromptChange,
-  flagsPanelOpen,
-  onToggleFlagsPanel,
-  templatesPanelOpen,
-  onToggleTemplatesPanel,
 }: SystemPromptEditorProps) {
-  const {
-    systemPrompt,
-    isLoading: isLoadingSystemPrompt,
-    savePrompt,
-    restore: restoreSystemPrompt,
-    updatePrompt,
-  } = useSystemPrompt()
-
-  const {
-    authorProfile: authorProfileState,
-    saveProfile,
-    restore: restoreAuthorProfile,
-    updateProfile,
-  } = useAuthorProfile()
-
   const toast = useToast()
-
-  // Synchroniser le state du hook avec le prop (si le prop change depuis l'extérieur)
-  // Mais ne pas écraser au chargement initial si le state local a déjà une valeur depuis localStorage
-  const hasInitialized = useRef(false)
-  useEffect(() => {
-    // Au premier rendu, si le state local a une valeur mais le prop est vide, 
-    // synchroniser le prop avec le state local (le hook local a chargé depuis localStorage)
-    if (!hasInitialized.current) {
-      hasInitialized.current = true
-      if (authorProfileState && !authorProfile) {
-        onAuthorProfileChange(authorProfileState)
-        return
-      }
-    }
-    // Après l'initialisation, synchroniser le state local avec le prop
-    if (authorProfile !== authorProfileState) {
-      updateProfile(authorProfile)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authorProfile]) // Seulement quand le prop change (onAuthorProfileChange et updateProfile sont stables)
+  const isNarrow = useGenerationPanelNarrow()
+  const writingMode = useUiLayoutStore((s) => s.writingMode)
+  const genChrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
 
   const [sceneTemplates, setSceneTemplates] = useState<configAPI.SceneInstructionTemplate[]>([])
-  const [authorTemplates, setAuthorTemplates] = useState<configAPI.AuthorProfileTemplate[]>([])
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false)
   const [selectedSceneTemplateId, setSelectedSceneTemplateId] = useState<string | null>(null)
-  const [selectedAuthorTemplateId, setSelectedAuthorTemplateId] = useState<string | null>(null)
   const [showTemplatePreview, setShowTemplatePreview] = useState<string | null>(null)
-
-  const [localAuthorTemplates, setLocalAuthorTemplates] = useState<LocalNamedTemplate[]>(() =>
-    listLocalAuthorTemplates()
-  )
   const [localSceneTemplates, setLocalSceneTemplates] = useState<LocalNamedTemplate[]>(() =>
     listLocalSceneTemplates()
   )
-  const [selectedLocalAuthorId, setSelectedLocalAuthorId] = useState('')
   const [selectedLocalSceneId, setSelectedLocalSceneId] = useState('')
-  const [authorSaveAsOpen, setAuthorSaveAsOpen] = useState(false)
-  const [authorSaveAsName, setAuthorSaveAsName] = useState('')
   const [sceneSaveAsOpen, setSceneSaveAsOpen] = useState(false)
   const [sceneSaveAsName, setSceneSaveAsName] = useState('')
 
   useEffect(() => {
-    loadTemplates()
+    let cancelled = false
+    setIsLoadingTemplates(true)
+    configAPI
+      .getSceneInstructionTemplates()
+      .then((res) => {
+        if (!cancelled) setSceneTemplates(res.templates)
+      })
+      .catch((err) => console.error('Erreur lors du chargement des briefs:', err))
+      .finally(() => {
+        if (!cancelled) setIsLoadingTemplates(false)
+      })
+    return () => {
+      cancelled = true
+    }
   }, [])
 
-  const loadTemplates = async () => {
-    setIsLoadingTemplates(true)
-    try {
-      const [sceneResponse, authorResponse] = await Promise.all([
-        configAPI.getSceneInstructionTemplates(),
-        configAPI.getAuthorProfileTemplates(),
-      ])
-      setSceneTemplates(sceneResponse.templates)
-      setAuthorTemplates(authorResponse.templates)
-    } catch (err) {
-      console.error('Erreur lors du chargement des templates:', err)
-    } finally {
-      setIsLoadingTemplates(false)
-    }
-  }
-
-  const handleAuthorTemplateClick = useCallback((template: configAPI.AuthorProfileTemplate) => {
-    if (selectedAuthorTemplateId === template.id) {
-      setShowTemplatePreview(template.id)
-    } else {
-      setSelectedAuthorTemplateId(template.id)
-      // Sauvegarder explicitement dans localStorage et mettre à jour les deux hooks
-      saveProfile(template.profile)
-      updateProfile(template.profile)
-      onAuthorProfileChange(template.profile)
-    }
-  }, [selectedAuthorTemplateId, saveProfile, updateProfile, onAuthorProfileChange])
-
-  const handleSystemPromptChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const value = e.target.value
-      updatePrompt(value)
-      onSystemPromptChange(value || null)
-    },
-    [updatePrompt, onSystemPromptChange]
-  )
-
-  const handleAuthorProfileChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const value = e.target.value
-      updateProfile(value)
-      onAuthorProfileChange(value)
-      if (selectedAuthorTemplateId) {
-        setSelectedAuthorTemplateId(null)
-      }
-    },
-    [updateProfile, onAuthorProfileChange, selectedAuthorTemplateId]
-  )
-
-  const handleSaveSystemPrompt = useCallback(() => {
-    const currentPrompt = systemPromptOverride || systemPrompt || ''
-    try {
-      savePrompt(currentPrompt)
-      onSystemPromptChange(currentPrompt || null)
-      toast('Prompt système sauvegardé avec succès', 'success')
-    } catch (err) {
-      console.error('Erreur lors de la sauvegarde:', err)
-      toast('Erreur lors de la sauvegarde du prompt système', 'error')
-    }
-  }, [systemPromptOverride, systemPrompt, savePrompt, onSystemPromptChange, toast])
-
-  const handleRestoreSystemPrompt = useCallback(async () => {
-    const restoredPrompt = await restoreSystemPrompt()
-    // Utiliser la valeur restaurée directement
-    if (restoredPrompt) {
-      onSystemPromptChange(restoredPrompt)
-    } else {
-      onSystemPromptChange(null)
-    }
-  }, [restoreSystemPrompt, onSystemPromptChange])
-
-  const handleSaveAuthorProfile = useCallback(() => {
-    const currentProfile = authorProfile || ''
-    try {
-      saveProfile(currentProfile)
-      onAuthorProfileChange(currentProfile)
-      toast('Profil d\'auteur sauvegardé avec succès', 'success')
-    } catch (err) {
-      console.error('Erreur lors de la sauvegarde:', err)
-      toast('Erreur lors de la sauvegarde du profil d\'auteur', 'error')
-    }
-  }, [authorProfile, saveProfile, onAuthorProfileChange, toast])
-
-  const handleRestoreAuthorProfile = useCallback(() => {
-    restoreAuthorProfile()
-    // Le hook met à jour son state, on doit le lire après restauration
-    setTimeout(() => {
-      const saved = localStorage.getItem('dialogue_generator_saved_author_profile')
-      onAuthorProfileChange(saved || '')
-    }, 0)
-  }, [restoreAuthorProfile, onAuthorProfileChange])
+  const refreshLocalSceneTemplates = useCallback(() => {
+    setLocalSceneTemplates(listLocalSceneTemplates())
+  }, [])
 
   const handleSaveSceneInstructions = useCallback(() => {
     try {
@@ -255,26 +95,6 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
     }
   }, [onUserInstructionsChange])
 
-  const refreshLocalAuthorTemplates = useCallback(() => {
-    setLocalAuthorTemplates(listLocalAuthorTemplates())
-  }, [])
-
-  const refreshLocalSceneTemplates = useCallback(() => {
-    setLocalSceneTemplates(listLocalSceneTemplates())
-  }, [])
-
-  const handleConfirmAuthorSaveAs = useCallback(() => {
-    try {
-      upsertLocalAuthorTemplate(authorSaveAsName, authorProfile)
-      refreshLocalAuthorTemplates()
-      setAuthorSaveAsOpen(false)
-      setAuthorSaveAsName('')
-      toast('Modèle d\'auteur local enregistré', 'success')
-    } catch (err) {
-      toast(err instanceof Error ? err.message : 'Erreur lors de l\'enregistrement', 'error')
-    }
-  }, [authorSaveAsName, authorProfile, refreshLocalAuthorTemplates, toast])
-
   const handleConfirmSceneSaveAs = useCallback(() => {
     try {
       upsertLocalSceneTemplate(sceneSaveAsName, userInstructions)
@@ -283,22 +103,9 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
       setSceneSaveAsName('')
       toast('Brief de scène enregistré comme modèle local', 'success')
     } catch (err) {
-      toast(err instanceof Error ? err.message : 'Erreur lors de l\'enregistrement', 'error')
+      toast(err instanceof Error ? err.message : "Erreur lors de l'enregistrement", 'error')
     }
   }, [sceneSaveAsName, userInstructions, refreshLocalSceneTemplates, toast])
-
-  const isNarrow = useGenerationPanelNarrow()
-  const writingMode = useUiLayoutStore((s) => s.writingMode)
-  /**
-   * 1c ne montre pas les briefs enregistrés ni les boutons de sauvegarde explicite :
-   * le brouillon est déjà sauvegardé en continu. La fonctionnalité n'est pas retirée,
-   * elle passe derrière le lien « briefs » du bandeau de section.
-   *
-   * À ne pas confondre avec le panneau « templates » (Epic 6), qui est un autre
-   * objet — piloté par le parent via ``onToggleTemplatesPanel``.
-   */
-  const [showSavedBriefs, setShowSavedBriefs] = useState(false)
-  const genChrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
 
   /**
    * Le brief prend la hauteur de son texte plutôt qu'un nombre de lignes fixe.
@@ -310,21 +117,17 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
     max: writingMode ? 760 : 560,
   })
   useAutoGrowTextarea(briefRef, userInstructions, {
-    minHeightPx: isNarrow ? 140 : 176,
+    minHeightPx: 200,
     maxHeightPx: briefMaxHeightPx,
   })
 
-  const tabs: Tab[] = [
-    {
-      id: 'user-instructions',
-      label: 'Instructions de Scène',
-      content: (
+  const briefContent = (
         <div style={{ padding: genChrome.tabInnerPadding, minWidth: 0 }}>
           {/* 1c : le brief occupe la colonne ; les briefs enregistrés passent en repli.
               2c : en mode écriture, même ce repli disparaît — il ne reste que le texte. */}
           <details
             data-testid="brief-saved-briefs"
-            style={{ marginBottom: '1rem', display: showSavedBriefs ? 'block' : 'none' }}
+            style={{ marginBottom: '1rem' }}
           >
             <summary
               style={{
@@ -568,63 +371,68 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
             </div>
           </div>
 
-          </details>
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: `${genChrome.controlGapRem}rem`,
-              marginBottom: '0.5rem',
-            }}
-          >
-            {/* L'étiquette « Brief du premier nœud » vit dans le bandeau de section
-                (écran 1c) : la répéter ici ferait doublon. */}
-            <span aria-hidden />
-            {/* 2c : la sauvegarde explicite du brief sort de l'écran d'écriture — le
-                brouillon est déjà sauvegardé en continu. */}
-            <div
-              style={{
-                display: showSavedBriefs ? 'flex' : 'none',
-                gap: `${genChrome.controlGapRem}rem`,
-                flexWrap: 'wrap',
-              }}
-            >
-              <button
-                onClick={handleSaveSceneInstructions}
+            {/* Enveloppe sans `display` inline : un style inline l'emporterait sur la
+                règle UA qui replie un `<details>`, et la rangée resterait visible
+                repli fermé (piège déjà consigné dans ui_redesign_2026.md). */}
+            <div>
+              <div
                 style={{
-                  padding: genChrome.buttonPadding,
-                  border: `1px solid ${theme.border.secondary}`,
-                  borderRadius: '6px',
-                  backgroundColor: theme.button.default.background,
-                  color: theme.button.default.color,
-                  cursor: 'pointer',
-                  fontSize: `${genChrome.buttonFontRem}rem`,
-                  fontWeight: 600,
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: `${genChrome.controlGapRem}rem`,
+                  marginBottom: '0.5rem',
                 }}
-                title="Sauvegarde le brief de scène actuel"
               >
-                Sauvegarder
-              </button>
-              <button
-                onClick={handleRestoreSceneInstructions}
-                style={{
-                  padding: genChrome.buttonPadding,
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '6px',
-                  backgroundColor: theme.button.default.background,
-                  color: theme.button.default.color,
-                  cursor: 'pointer',
-                  fontSize: `${genChrome.buttonFontRem}rem`,
-                  fontWeight: 400,
-                }}
-                title="Restaure la dernière version sauvegardée"
-              >
-                Restaurer
-              </button>
+                {/* L'étiquette « Brief du premier nœud » vit dans le bandeau de section
+                    (écran 1c) : la répéter ici ferait doublon. */}
+                <span aria-hidden />
+                {/* 2c : la sauvegarde explicite du brief sort de l'écran d'écriture — le
+                    brouillon est déjà sauvegardé en continu. */}
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: `${genChrome.controlGapRem}rem`,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <button
+                    onClick={handleSaveSceneInstructions}
+                    style={{
+                      padding: genChrome.buttonPadding,
+                      border: `1px solid ${theme.border.secondary}`,
+                      borderRadius: '6px',
+                      backgroundColor: theme.button.default.background,
+                      color: theme.button.default.color,
+                      cursor: 'pointer',
+                      fontSize: `${genChrome.buttonFontRem}rem`,
+                      fontWeight: 600,
+                    }}
+                    title="Sauvegarde le brief de scène actuel"
+                  >
+                    Sauvegarder
+                  </button>
+                  <button
+                    onClick={handleRestoreSceneInstructions}
+                    style={{
+                      padding: genChrome.buttonPadding,
+                      border: `1px solid ${theme.border.primary}`,
+                      borderRadius: '6px',
+                      backgroundColor: theme.button.default.background,
+                      color: theme.button.default.color,
+                      cursor: 'pointer',
+                      fontSize: `${genChrome.buttonFontRem}rem`,
+                      fontWeight: 400,
+                    }}
+                    title="Restaure la dernière version sauvegardée"
+                  >
+                    Restaurer
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
+          </details>
           <FormField label="" htmlFor="user-instructions-textarea" style={{ marginBottom: 0 }}>
             <div
               style={{
@@ -764,535 +572,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
             </div>
           )}
         </div>
-      ),
-    },
-    {
-      id: 'author-profile',
-      label: 'Auteur (global)',
-      content: (
-        <div style={{ padding: genChrome.tabInnerPadding, minWidth: 0 }}>
-          {/* Templates de profil d'auteur */}
-          <div style={{ marginBottom: '1rem' }}>
-            <label
-              style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                color: theme.text.primary,
-                fontSize: `${genChrome.labelFontRem}rem`,
-                fontWeight: 500,
-              }}
-            >
-              Templates de profil d'auteur:
-            </label>
-            {isLoadingTemplates ? (
-              <div style={{ color: theme.text.secondary, fontSize: '0.85rem' }}>
-                Chargement des templates...
-              </div>
-            ) : (
-              <div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: `${genChrome.controlGapRem}rem`,
-                  marginBottom: '0.5rem',
-                }}
-              >
-                {authorTemplates.map((template) => (
-                  <button
-                    key={template.id}
-                    onClick={() => handleAuthorTemplateClick(template)}
-                    onDoubleClick={() => setShowTemplatePreview(template.id)}
-                    style={{
-                      padding: genChrome.buttonPadding,
-                      border: `1px solid ${selectedAuthorTemplateId === template.id ? theme.border.focus : theme.border.primary}`,
-                      borderRadius: '4px',
-                      backgroundColor: selectedAuthorTemplateId === template.id 
-                        ? theme.button.primary.background 
-                        : theme.button.default.background,
-                      color: selectedAuthorTemplateId === template.id 
-                        ? theme.button.primary.color 
-                        : theme.button.default.color,
-                      cursor: 'pointer',
-                      fontSize: `${genChrome.buttonFontRem}rem`,
-                    }}
-                    title={`${template.description}\n\nDouble-clic pour voir le contenu complet`}
-                  >
-                    {template.name}
-                    {selectedAuthorTemplateId === template.id && ' ✓'}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div style={{ marginBottom: '1rem' }}>
-            <label
-              style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                color: theme.text.primary,
-                fontSize: '0.9rem',
-                fontWeight: 500,
-              }}
-            >
-              Mes modèles (ce navigateur)
-            </label>
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '0.5rem',
-                alignItems: 'center',
-                marginBottom: '0.35rem',
-              }}
-            >
-              <select
-                aria-label="Charger un modèle d'auteur local"
-                value={selectedLocalAuthorId}
-                onChange={(e) => {
-                  const id = e.target.value
-                  setSelectedLocalAuthorId(id)
-                  if (!id) return
-                  const t = localAuthorTemplates.find((x) => x.id === id)
-                  if (t) {
-                    updateProfile(t.body)
-                    onAuthorProfileChange(t.body)
-                    saveProfile(t.body)
-                    setSelectedAuthorTemplateId(null)
-                  }
-                }}
-                style={{
-                  padding: '0.45rem 0.6rem',
-                  borderRadius: 6,
-                  border: `1px solid ${theme.border.primary}`,
-                  backgroundColor: theme.input.background,
-                  color: theme.input.color,
-                  fontSize: '0.85rem',
-                  minWidth: 200,
-                }}
-              >
-                <option value="">— Charger —</option>
-                {localAuthorTemplates.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-              <button
-                type="button"
-                onClick={() => {
-                  setAuthorSaveAsOpen(true)
-                  setAuthorSaveAsName('')
-                }}
-                style={{
-                  padding: '0.45rem 0.85rem',
-                  border: `1px solid ${theme.border.secondary}`,
-                  borderRadius: '6px',
-                  backgroundColor: theme.button.default.background,
-                  color: theme.button.default.color,
-                  cursor: 'pointer',
-                  fontSize: '0.85rem',
-                  fontWeight: 600,
-                }}
-                title="Crée ou remplace un modèle nommé dans ce navigateur"
-              >
-                Enregistrer sous…
-              </button>
-              {selectedLocalAuthorId ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    deleteLocalAuthorTemplate(selectedLocalAuthorId)
-                    refreshLocalAuthorTemplates()
-                    setSelectedLocalAuthorId('')
-                    toast('Modèle local supprimé', 'success')
-                  }}
-                  style={{
-                    padding: '0.45rem 0.85rem',
-                    border: `1px solid ${theme.border.primary}`,
-                    borderRadius: '6px',
-                    backgroundColor: theme.background.secondary,
-                    color: theme.state.error.color,
-                    cursor: 'pointer',
-                    fontSize: '0.85rem',
-                  }}
-                >
-                  Supprimer
-                </button>
-              ) : null}
-            </div>
-            <div style={{ fontSize: '0.72rem', color: theme.text.secondary }}>
-              Stockage local uniquement ; nom identique = remplacement du modèle.
-            </div>
-          </div>
-
-          {/* Prévisualisation du template */}
-          {showTemplatePreview && authorTemplates.find(t => t.id === showTemplatePreview) && (
-            <div
-              style={{
-                marginBottom: '1rem',
-                padding: '1rem',
-                backgroundColor: theme.background.secondary,
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '4px',
-                maxHeight: '300px',
-                overflowY: 'auto',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <strong style={{ color: theme.text.primary }}>
-                  {authorTemplates.find(t => t.id === showTemplatePreview)?.name}
-                </strong>
-                <button
-                  onClick={() => setShowTemplatePreview(null)}
-                  style={{
-                    padding: '0.25rem 0.5rem',
-                    border: `1px solid ${theme.border.primary}`,
-                    borderRadius: '4px',
-                    backgroundColor: theme.button.default.background,
-                    color: theme.button.default.color,
-                    cursor: 'pointer',
-                    fontSize: '0.75rem',
-                  }}
-                >
-                  Fermer
-                </button>
-              </div>
-              <pre
-                style={{
-                  margin: 0,
-                  color: theme.text.secondary,
-                  fontSize: '0.8rem',
-                  whiteSpace: 'pre-wrap',
-                  fontFamily: 'monospace',
-                }}
-              >
-                {authorTemplates.find(t => t.id === showTemplatePreview)?.profile || '(Vide)'}
-              </pre>
-            </div>
-          )}
-
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: `${genChrome.controlGapRem}rem`,
-              marginBottom: '0.5rem',
-            }}
-          >
-            <label
-              htmlFor="author-profile-textarea"
-              style={{
-                color: theme.text.primary,
-                fontSize: `${genChrome.labelFontRem}rem`,
-                fontWeight: 500,
-                flex: isNarrow ? '1 1 100%' : undefined,
-              }}
-            >
-              Profil d'auteur (réutilisable):
-            </label>
-            <div style={{ display: 'flex', gap: `${genChrome.controlGapRem}rem`, flexWrap: 'wrap' }}>
-              <button
-                onClick={handleSaveAuthorProfile}
-                style={{
-                  padding: genChrome.buttonPadding,
-                  border: `1px solid ${theme.border.secondary}`,
-                  borderRadius: '6px',
-                  backgroundColor: theme.button.default.background,
-                  color: theme.button.default.color,
-                  cursor: 'pointer',
-                  fontSize: `${genChrome.buttonFontRem}rem`,
-                  fontWeight: 600,
-                }}
-                title="Sauvegarde le profil d'auteur actuel"
-              >
-                Sauvegarder
-              </button>
-              <button
-                onClick={handleRestoreAuthorProfile}
-                style={{
-                  padding: genChrome.buttonPadding,
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '6px',
-                  backgroundColor: theme.button.default.background,
-                  color: theme.button.default.color,
-                  cursor: 'pointer',
-                  fontSize: `${genChrome.buttonFontRem}rem`,
-                  fontWeight: 400,
-                }}
-                title="Restaure la dernière version sauvegardée"
-              >
-                Restaurer
-              </button>
-            </div>
-          </div>
-          <FormField label="" htmlFor="author-profile-textarea">
-            <textarea
-              id="author-profile-textarea"
-              value={authorProfile}
-              onChange={handleAuthorProfileChange}
-              rows={8}
-              placeholder="Style d'auteur global (réutilisable entre toutes les scènes). Ex: Style littéraire, vocabulaire riche, etc."
-              style={{
-                width: '100%',
-                padding: '0.65rem 0.75rem',
-                boxSizing: 'border-box',
-                backgroundColor: theme.input.background,
-                border: `1px solid ${theme.input.border}`,
-                color: theme.input.color,
-                borderRadius: '6px',
-                fontFamily: 'inherit',
-                fontSize: `${genChrome.textareaFontRem}rem`,
-                resize: 'vertical',
-                lineHeight: 1.55,
-              }}
-            />
-          </FormField>
-          {authorSaveAsOpen && (
-            <div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="author-save-as-title"
-              style={{
-                position: 'fixed',
-                inset: 0,
-                backgroundColor: 'rgba(0,0,0,0.55)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 10050,
-              }}
-              onClick={() => setAuthorSaveAsOpen(false)}
-            >
-              <div
-                role="presentation"
-                onClick={(e) => e.stopPropagation()}
-                style={{
-                  backgroundColor: theme.background.panel,
-                  padding: '1.25rem',
-                  borderRadius: 8,
-                  border: `1px solid ${theme.border.primary}`,
-                  minWidth: 320,
-                  maxWidth: '90vw',
-                }}
-              >
-                <h4 id="author-save-as-title" style={{ marginTop: 0, color: theme.text.primary }}>
-                  Enregistrer le profil sous…
-                </h4>
-                <input
-                  type="text"
-                  value={authorSaveAsName}
-                  onChange={(e) => setAuthorSaveAsName(e.target.value)}
-                  placeholder="Nom du modèle"
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    marginBottom: '1rem',
-                    boxSizing: 'border-box',
-                    borderRadius: 6,
-                    border: `1px solid ${theme.input.border}`,
-                    backgroundColor: theme.input.background,
-                    color: theme.input.color,
-                  }}
-                  autoFocus
-                />
-                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                  <button
-                    type="button"
-                    onClick={() => setAuthorSaveAsOpen(false)}
-                    style={{
-                      padding: '0.45rem 0.85rem',
-                      borderRadius: 6,
-                      border: `1px solid ${theme.border.primary}`,
-                      backgroundColor: theme.background.secondary,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleConfirmAuthorSaveAs}
-                    style={{
-                      padding: '0.45rem 0.85rem',
-                      borderRadius: 6,
-                      border: `1px solid ${theme.button.primary.background}`,
-                      backgroundColor: theme.button.primary.background,
-                      color: theme.button.primary.color,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Enregistrer
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      ),
-    },
-    {
-      id: 'game-rules',
-      label: 'Règles du jeu',
-      content: (
-        <div style={{ padding: '1rem' }}>
-          <details>
-            <summary style={{ cursor: 'pointer', color: theme.text.primary, fontWeight: 600 }}>
-              Règles systémiques appliquées au dialogue
-            </summary>
-            <div style={{ marginTop: '0.75rem' }}>
-              <textarea
-                id="game-rules-textarea"
-                value={gameRules}
-                onChange={(e) => onGameRulesChange(e.target.value)}
-                rows={8}
-                placeholder="Ex: Influence/Respect uniquement quand la relation PNJ le justifie. Axes de réputation: Admiration, Prestige, Crainte. Inclure des options liées aux traits requis et aux gains systémiques quand pertinent."
-                style={{
-                  width: '100%',
-                  padding: '0.65rem 0.75rem',
-                  boxSizing: 'border-box',
-                  backgroundColor: theme.input.background,
-                  border: `1px solid ${theme.input.border}`,
-                  color: theme.input.color,
-                  borderRadius: '6px',
-                  fontFamily: 'inherit',
-                  fontSize: '0.9rem',
-                  resize: 'vertical',
-                  lineHeight: 1.55,
-                }}
-              />
-            </div>
-          </details>
-        </div>
-      ),
-    },
-    {
-      id: 'system-prompt',
-      label: 'Système LLM (avancé)',
-      content: (
-        <div style={{ padding: genChrome.tabInnerPadding, minWidth: 0 }}>
-          <div
-            style={{
-              marginBottom: '1rem',
-              padding: '0.75rem',
-              backgroundColor: theme.background.secondary,
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: '4px',
-              fontSize: '0.85rem',
-              color: theme.text.secondary,
-            }}
-          >
-            <strong style={{ color: theme.text.primary }}>⚠️ Zone avancée</strong>
-            <br />
-            Modifiez uniquement si vous savez ce que vous faites. Ce prompt définit l'identité technique du LLM et les règles de format de sortie.
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: `${genChrome.controlGapRem}rem`,
-              marginBottom: '0.5rem',
-            }}
-          >
-            <label
-              htmlFor="system-prompt-textarea"
-              style={{
-                color: theme.text.primary,
-                fontSize: `${genChrome.labelFontRem}rem`,
-                fontWeight: 500,
-                flex: isNarrow ? '1 1 100%' : undefined,
-              }}
-            >
-              Prompt Système Principal:
-            </label>
-            <div style={{ display: 'flex', gap: `${genChrome.controlGapRem}rem`, flexWrap: 'wrap' }}>
-              <button
-                onClick={handleSaveSystemPrompt}
-                disabled={isLoadingSystemPrompt}
-                style={{
-                  padding: genChrome.buttonPadding,
-                  border: `1px solid ${theme.border.secondary}`,
-                  borderRadius: '6px',
-                  backgroundColor: theme.button.default.background,
-                  color: theme.button.default.color,
-                  cursor: isLoadingSystemPrompt ? 'not-allowed' : 'pointer',
-                  opacity: isLoadingSystemPrompt ? 0.6 : 1,
-                  fontSize: `${genChrome.buttonFontRem}rem`,
-                  fontWeight: 600,
-                }}
-                title="Sauvegarde le prompt système actuel"
-              >
-                Sauvegarder
-              </button>
-              <button
-                onClick={handleRestoreSystemPrompt}
-                disabled={isLoadingSystemPrompt}
-                style={{
-                  padding: genChrome.buttonPadding,
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '6px',
-                  backgroundColor: theme.button.default.background,
-                  color: theme.button.default.color,
-                  cursor: isLoadingSystemPrompt ? 'not-allowed' : 'pointer',
-                  opacity: isLoadingSystemPrompt ? 0.6 : 1,
-                  fontSize: `${genChrome.buttonFontRem}rem`,
-                  fontWeight: 400,
-                }}
-                title="Restaure la dernière version sauvegardée (ou le défaut si rien n'est sauvegardé)"
-              >
-                Restaurer
-              </button>
-            </div>
-          </div>
-          <FormField label="" htmlFor="system-prompt-textarea">
-            <textarea
-              id="system-prompt-textarea"
-              value={systemPromptOverride || systemPrompt || ''}
-              onChange={handleSystemPromptChange}
-              rows={12}
-              placeholder="Modifiez le prompt système principal envoyé au LLM. Ce prompt guide le comportement général de l'IA et le format de sortie."
-              style={{
-                width: '100%',
-                padding: '0.65rem 0.75rem',
-                boxSizing: 'border-box',
-                backgroundColor: theme.input.background,
-                border: `1px solid ${theme.input.border}`,
-                color: theme.input.color,
-                borderRadius: '6px',
-                fontFamily: 'monospace',
-                fontSize: isNarrow ? '0.78rem' : '0.85rem',
-                resize: 'vertical',
-                lineHeight: 1.55,
-              }}
-            />
-          </FormField>
-        </div>
-      ),
-    },
-  ]
-
-  const [activeTabId, setActiveTabId] = useState(tabs[0].id)
-  const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0]
-
-  /**
-   * 2c promet « il ne reste que le brief » : on y revient donc en entrant dans le
-   * mode. Sans ça, entrer en mode écriture depuis un onglet secondaire y enferme —
-   * le bandeau qui porte le seul lien de retour est masqué par `!writingMode`.
-   */
-  useEffect(() => {
-    if (writingMode) setActiveTabId(PRIMARY_TAB_ID)
-  }, [writingMode])
-
-  /**
-   * Écran 1c : les alternatives au brief sont des **liens discrets** à droite de son
-   * étiquette, pas une barre d'onglets. Un lien actif est simplement plus clair.
-   */
-  const secondaryTabs = tabs.slice(1)
+  )
 
   return (
     <div
@@ -1304,85 +584,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
         backgroundColor: 'transparent',
       }}
     >
-      {/* 2c : en mode écriture il ne reste que le brief — auteur, règles du jeu et
-          prompt système restent joignables en sortant du mode (Ctrl+\). */}
-      {!writingMode && (
-        <div
-          data-testid="brief-section-header"
-          style={{
-            display: 'flex',
-            alignItems: 'baseline',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 12,
-            marginBottom: 11,
-          }}
-        >
-          <span
-            style={{
-              fontFamily: redesignFont.mono,
-              fontSize: '10px',
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              color: redesignText.label,
-            }}
-          >
-            {activeTab.id === 'user-instructions' ? 'Brief du premier nœud' : activeTab.label}
-          </span>
-          <span style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-            {activeTabId !== tabs[0].id && (
-              <button
-                type="button"
-                data-testid="brief-link-back"
-                onClick={() => setActiveTabId(tabs[0].id)}
-                style={briefLinkStyle(false)}
-              >
-                brief
-              </button>
-            )}
-            {onToggleFlagsPanel && (
-              <button
-                type="button"
-                data-testid="brief-link-flags"
-                onClick={onToggleFlagsPanel}
-                style={briefLinkStyle(Boolean(flagsPanelOpen))}
-              >
-                variables et flags
-              </button>
-            )}
-            <button
-              type="button"
-              data-testid="brief-link-briefs"
-              onClick={() => setShowSavedBriefs((v) => !v)}
-              style={briefLinkStyle(showSavedBriefs)}
-            >
-              briefs
-            </button>
-            {onToggleTemplatesPanel && (
-              <button
-                type="button"
-                data-testid="brief-link-templates"
-                onClick={onToggleTemplatesPanel}
-                style={briefLinkStyle(Boolean(templatesPanelOpen))}
-              >
-                templates
-              </button>
-            )}
-            {secondaryTabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                data-testid={`brief-link-${tab.id}`}
-                onClick={() => setActiveTabId(activeTabId === tab.id ? tabs[0].id : tab.id)}
-                style={briefLinkStyle(activeTabId === tab.id)}
-              >
-                {SECONDARY_TAB_LINK_LABELS[tab.id] ?? tab.label.toLowerCase()}
-              </button>
-            ))}
-          </span>
-        </div>
-      )}
-      <div data-testid="brief-active-panel">{activeTab.content}</div>
+      <div data-testid="brief-active-panel">{briefContent}</div>
     </div>
   )
 })

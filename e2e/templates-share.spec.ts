@@ -67,11 +67,9 @@ test.describe('Templates — partager [6.8]', { tag: '@smoke' }, () => {
     }
   }
 
-  const expandModelSettings = async (page: Page) => {
-    const modelToggle = page.getByTestId('model-settings-summary-toggle')
-    if ((await modelToggle.getAttribute('aria-expanded')) !== 'true') {
-      await modelToggle.click()
-    }
+  /** Les templates sont un onglet d'entrée depuis la refonte de la colonne. */
+  const openTemplatesTab = async (page: Page) => {
+    await page.getByTestId('input-tab-templates').click()
   }
 
   test('ouvre le modal Partager et voit la section partagés', async ({ page }) => {
@@ -130,7 +128,7 @@ test.describe('Templates — partager [6.8]', { tag: '@smoke' }, () => {
     const generateTab = page.getByTestId('header-section-generation')
     await expect(generateTab).toBeVisible({ timeout: E2E_MS.ui })
     await generateTab.click()
-    await expandModelSettings(page)
+    await openTemplatesTab(page)
 
     await expect(page.getByTestId('template-item-share-btn')).toBeVisible({
       timeout: E2E_MS.short,
