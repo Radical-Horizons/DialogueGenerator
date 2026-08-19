@@ -204,10 +204,14 @@ def test_generic_scene_type_alone_returns_empty(suggest_client: TestClient) -> N
 
 
 def test_acl_hides_foreign_custom(suggest_client: TestClient) -> None:
-    """Custom non lisible absent des suggestions."""
+    """Custom privé d'autrui absent des suggestions.
+
+    Depuis l'unification (statut `shared` par défaut), seul un template `private`
+    est invisible des collègues — c'est ce que ce test vérifie.
+    """
     created = suggest_client.post(
         "/api/v1/templates",
-        json=_sample_create_payload(name="Secret A"),
+        json=_sample_create_payload(name="Secret A", visibility="private"),
     )
     assert created.status_code == 201
     secret_id = created.json()["id"]
@@ -259,10 +263,10 @@ def test_marketplace_listing_visible_to_other_writer(
     suggest_client: TestClient,
     isolated_app_database: DatabaseConnection,
 ) -> None:
-    """Listing d'un custom non lisible apparaît pour l'autre writer."""
+    """Listing marketplace d'un custom privé apparaît pour l'autre writer."""
     created = suggest_client.post(
         "/api/v1/templates",
-        json=_sample_create_payload(name="Publié ailleurs"),
+        json=_sample_create_payload(name="Publié ailleurs", visibility="private"),
     )
     assert created.status_code == 201
     template_id = created.json()["id"]

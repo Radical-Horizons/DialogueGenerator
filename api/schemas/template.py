@@ -75,9 +75,13 @@ class Template(BaseModel):
         validation_alias=AliasChoices("ownerId", "owner_id"),
         description="Identifiant JWT du propriétaire (absent = legacy public)",
     )
-    visibility: Optional[Literal["owned", "shared", "legacy"]] = Field(
+    visibility: Literal["shared", "private"] = Field(
+        default="shared",
+        description="Statut persisté : partagé avec l'équipe (défaut) ou brouillon privé",
+    )
+    relation: Optional[Literal["owned", "granted", "legacy"]] = Field(
         default=None,
-        description="Visibilité calculée pour l'acteur (non persistée)",
+        description="Relation de l'acteur au template (calculée, non persistée)",
     )
     ownerUsername: Optional[str] = Field(
         default=None,
@@ -147,6 +151,10 @@ class TemplateCreate(BaseModel):
         max_length=TEMPLATE_ICON_MAX_LENGTH,
     )
     configuration: TemplateConfiguration = Field(..., description="Snapshot de configuration")
+    visibility: Literal["shared", "private"] = Field(
+        default="shared",
+        description="Partagé avec l'équipe par défaut ; `private` pour un brouillon",
+    )
 
     @field_validator("name")
     @classmethod
@@ -222,6 +230,10 @@ class TemplateUpdate(BaseModel):
     configuration: Optional[TemplateConfiguration] = Field(
         None,
         description="Snapshot de configuration (remplacement complet si fourni)",
+    )
+    visibility: Optional[Literal["shared", "private"]] = Field(
+        None,
+        description="Statut de visibilité ; seul le propriétaire ou un admin peut le changer",
     )
 
     @field_validator("name")
@@ -402,7 +414,7 @@ class TemplateSuggestionItem(BaseModel):
     score: int = Field(..., ge=0, le=100)
     reasons: List[str] = Field(default_factory=list)
     configuration: TemplateConfiguration
-    visibility: Optional[Literal["owned", "shared", "legacy"]] = None
+    relation: Optional[Literal["owned", "granted", "legacy"]] = None
     sceneTypeHint: Optional[str] = None
     gddSystem: Optional[str] = None
     objectif: Optional[str] = None

@@ -83,6 +83,7 @@ class TemplateService:
             configuration=TemplateConfiguration(**template_data["configuration"]),
             history=[TemplateHistoryEntry(at=now, action="created")],
             ownerId=owner_id or None,
+            visibility=template_data.get("visibility") or "shared",
         )
 
         template, warnings = self._apply_gdd_validation(template)
@@ -168,6 +169,8 @@ class TemplateService:
             updates["icon"] = update_data.get("icon") or "📋"
         if "configuration" in update_data and update_data["configuration"] is not None:
             updates["configuration"] = TemplateConfiguration(**update_data["configuration"])
+        if update_data.get("visibility") in ("shared", "private"):
+            updates["visibility"] = update_data["visibility"]
 
         history_action = update_data.get("_history_action") or "updated"
         if history_action not in ("updated", "restored"):
@@ -438,7 +441,7 @@ class TemplateService:
         template_file = self.templates_dir / f"{template.id}.json"
         payload = template.model_dump(
             mode="json",
-            exclude={"visibility", "ownerUsername", "sharedByUsername"},
+            exclude={"relation", "ownerUsername", "sharedByUsername"},
         )
         if not payload.get("ownerId"):
             payload.pop("ownerId", None)

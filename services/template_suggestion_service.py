@@ -281,7 +281,7 @@ class TemplateSuggestionService:
             score=scored.score,
             reasons=list(scored.reasons),
             configuration=template.configuration,
-            visibility=template.visibility,
+            relation=template.relation,
         )
         return _RankedItem(score=scored, item=item)
 

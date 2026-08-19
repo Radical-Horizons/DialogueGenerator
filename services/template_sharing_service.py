@@ -107,13 +107,13 @@ class TemplateSharingService:
             return user_id
         return str(record["username"])
 
-    def visibility(
+    def relation(
         self,
         template: Template,
         current_user: Mapping[str, object],
         shared_ids: Optional[set[str]] = None,
     ) -> Optional[str]:
-        """``legacy`` / ``owned`` / ``shared``, ou None si hors liste."""
+        """``legacy`` / ``owned`` / ``granted`` — ma relation au template, ou None si hors liste."""
         actor = self._actor_id(current_user)
         owner = self._owner_id(template)
         if owner is None:
@@ -124,7 +124,11 @@ class TemplateSharingService:
         if ids is None:
             ids = self._shares.list_template_ids_for_user(actor) if actor else set()
         if template.id in ids:
-            return "shared"
+            return "granted"
+        # Le statut porté par le template : `shared` le rend visible de l'équipe
+        # sans qu'un partage nominatif soit nécessaire. `private` = brouillon.
+        if getattr(template, "visibility", "shared") == "shared":
+            return "granted"
         return None
 
     def can_read(
@@ -136,13 +140,13 @@ class TemplateSharingService:
         """Lecture : visible en liste, ou admin."""
         if self._is_admin(current_user):
             return True
-        return self.visibility(template, current_user, shared_ids) is not None
+        return self.relation(template, current_user, shared_ids) is not None
 
     def can_write(self, template: Template, current_user: Mapping[str, object]) -> bool:
         """PUT : owner, admin, ou share ``can_edit``.
 
         Un template sans ``ownerId`` (legacy 6.1) reste lisible par tous
-        (``visibility: legacy``) mais n'est mutable que par un admin : personne
+        (``relation: legacy``) mais n'est mutable que par un admin : personne
         ne peut revendiquer l'écriture sur un objet que nul ne possède.
         """
         if self._is_admin(current_user):
@@ -154,6 +158,28 @@ class TemplateSharingService:
         if owner == actor:
             return True
         return bool(actor) and self._shares.has_edit_share(template.id, actor)
+
+    def can_change_visibility(
+        self, template: Template, current_user: Mapping[str, object]
+    ) -> bool:
+        """Statut privé/partagé : propriétaire ou admin uniquement.
+
+        Plus strict que :meth:`can_write` : un destinataire avec droit d'édition
+        peut modifier le contenu, pas décider qui voit le template.
+
+        Args:
+            template: Template visé.
+            current_user: Principal auth.
+
+        Returns:
+            True si l'acteur peut changer le statut.
+        """
+        if self._is_admin(current_user):
+            return True
+        owner = self._owner_id(template)
+        if owner is None:
+            return False
+        return owner == self._actor_id(current_user)
 
     def can_manage_shares(
         self, template: Template, current_user: Mapping[str, object]
@@ -172,16 +198,16 @@ class TemplateSharingService:
         current_user: Mapping[str, object],
         shared_ids: Optional[set[str]] = None,
     ) -> Template:
-        """Ajoute visibility / usernames (non persistés)."""
-        vis = self.visibility(template, current_user, shared_ids)
+        """Ajoute relation / usernames (non persistés)."""
+        vis = self.relation(template, current_user, shared_ids)
         owner = self._owner_id(template)
         if vis is None:
             vis = "legacy" if owner is None else None
         owner_name = self._username_for(owner) if owner else None
-        shared_by = owner_name if vis == "shared" else None
+        shared_by = owner_name if vis == "granted" else None
         return template.model_copy(
             update={
-                "visibility": vis,
+                "relation": vis,
                 "ownerUsername": owner_name,
                 "sharedByUsername": shared_by,
             }
@@ -197,7 +223,7 @@ class TemplateSharingService:
         shared_ids = self._shares.list_template_ids_for_user(actor) if actor else set()
         visible: List[Template] = []
         for template in templates:
-            vis = self.visibility(template, current_user, shared_ids)
+            vis = self.relation(template, current_user, shared_ids)
             if vis is None:
                 continue
             visible.append(self.annotate(template, current_user, shared_ids))

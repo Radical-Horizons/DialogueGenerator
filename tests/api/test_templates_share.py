@@ -142,7 +142,7 @@ def test_owner_grant_lists_shared_and_allows_get_not_put(
     items = visible.json()
     assert len(items) == 1
     assert items[0]["id"] == template_id
-    assert items[0]["visibility"] == "shared"
+    assert items[0]["relation"] == "granted"
     assert items[0]["sharedByUsername"] == "writer-a"
 
     loaded = client.get(f"/api/v1/templates/{template_id}")
@@ -232,9 +232,18 @@ def test_guest_owner_can_share_writer_not_guest_target(
 def test_copy_is_snapshot_and_revoke_hides_live(
     share_client: TestClient,
 ) -> None:
-    """Copy = nouvel owner ; révocation retire le live, pas la copie."""
+    """Copy = nouvel owner ; révocation retire le live, pas la copie.
+
+    Le template est `private` : sur un `shared`, la révocation d'un partage nominatif
+    ne masquerait rien, puisque le statut le rend déjà visible de l'équipe.
+    """
     client = share_client
-    template_id = _create_owned(client)
+    created = client.post(
+        "/api/v1/templates",
+        json=_sample_create_payload(visibility="private"),
+    )
+    assert created.status_code == 201
+    template_id = str(created.json()["id"])
     assert client.post(
         f"/api/v1/templates/{template_id}/shares",
         json={"username": "writer-b"},
@@ -246,7 +255,7 @@ def test_copy_is_snapshot_and_revoke_hides_live(
     body = copied.json()
     assert body["name"].endswith(" (copie)")
     assert body["ownerId"] == "writer-b"
-    assert body["visibility"] == "owned"
+    assert body["relation"] == "owned"
     copy_id = body["id"]
     assert copy_id != template_id
 
@@ -303,7 +312,7 @@ def test_legacy_public_not_shareable_prebuilt_400(
     assert listed.status_code == 200
     names = {item["name"] for item in listed.json()}
     assert "Legacy" in names
-    vis = next(item["visibility"] for item in listed.json() if item["id"] == legacy.id)
+    vis = next(item["relation"] for item in listed.json() if item["id"] == legacy.id)
     assert vis == "legacy"
 
     app.dependency_overrides[get_current_user] = lambda: _user("writer-a")
@@ -438,9 +447,18 @@ def test_guest_sessions_do_not_share_templates(
 def test_list_does_not_dump_others_private_templates(
     share_client: TestClient,
 ) -> None:
-    """La liste admin n'expose pas les customs owned d'un autre writer."""
+    """La liste admin n'expose pas un template privé d'un autre writer.
+
+    Un template `shared` est au contraire visible de toute l'équipe, admin compris :
+    c'est le sens du statut depuis l'unification.
+    """
     client = share_client
-    template_id = _create_owned(client)
+    created = client.post(
+        "/api/v1/templates",
+        json=_sample_create_payload(visibility="private"),
+    )
+    assert created.status_code == 201
+    template_id = str(created.json()["id"])
 
     app.dependency_overrides[get_current_user] = lambda: _user("admin-a", role="admin")
     listed = client.get("/api/v1/templates")

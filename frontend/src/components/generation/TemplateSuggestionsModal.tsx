@@ -30,10 +30,10 @@ function sourceLabel(item: TemplateSuggestion): string {
   if (item.source === 'marketplace') {
     return 'Marketplace'
   }
-  if (item.visibility === 'shared') {
+  if (item.relation === 'granted') {
     return 'Partagé'
   }
-  if (item.visibility === 'legacy') {
+  if (item.relation === 'legacy') {
     return 'Legacy'
   }
   return 'Mes templates'

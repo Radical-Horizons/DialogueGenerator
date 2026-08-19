@@ -29,7 +29,7 @@ export interface Template {
   configuration: TemplateConfiguration
   history?: TemplateHistoryEntry[]
   ownerId?: string | null
-  visibility?: 'owned' | 'shared' | 'legacy' | null
+  relation?: 'owned' | 'granted' | 'legacy' | null
   ownerUsername?: string | null
   sharedByUsername?: string | null
 }
@@ -231,7 +231,7 @@ export interface TemplateSuggestion {
   score: number
   reasons: string[]
   configuration: TemplateConfiguration
-  visibility?: 'owned' | 'shared' | 'legacy' | null
+  relation?: 'owned' | 'granted' | 'legacy' | null
   sceneTypeHint?: string | null
   gddSystem?: string | null
   objectif?: string | null

@@ -74,11 +74,11 @@ function formatActiveTemplateFilters(
 }
 
 function isSharedTemplate(template: Template): boolean {
-  return template.visibility === 'shared';
+  return template.relation === 'granted';
 }
 
 function canShareTemplate(template: Template): boolean {
-  return template.visibility === 'owned';
+  return template.relation === 'owned';
 }
 
 function buildSuggestionRequest(

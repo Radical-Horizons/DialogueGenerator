@@ -316,7 +316,3 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-fix-event-loop-blocking-context-endpoints.md`
   summary: `services/dialogue_generation_service.py::_build_context_summary` appelle encore `build_context_json` en synchrone direct — code mort en production (aucun appelant réel, seulement 4 tests unitaires), non déporté ni supprimé.
   evidence: Revue à 3 lentilles (adversarial) sur la spec v3. À trancher : supprimer (code mort) ou déporter si un futur appelant est prévu.
-
-- source_spec: `_bmad-output/implementation-artifacts/spec-ui-colonne-generation-onglets-tiroir.md`
-  summary: Absorber les briefs de scène enregistrés (`localStorage`, `STORAGE_SCENE_KEY`) dans les templates Epic 6, dont ils sont un sous-ensemble strict (`configuration.instructions`).
-  evidence: Découpé au kickoff quick-dev (2026-08-19) — le relogement en onglets règle déjà la collision de vocabulaire en remettant les briefs enregistrés dans l'onglet Brief. La migration est un refactor de données, avec son propre risque `localStorage`, qui n'a pas à partager la revue d'un refactor de mise en page. Les templates d'**auteur** locaux ne sont pas concernés : `PresetConfiguration` n'a pas de champ `authorProfile`.

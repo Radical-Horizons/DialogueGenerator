@@ -97,6 +97,15 @@ def _share_to_response(share: TemplateShareView) -> TemplateShareResponse:
     )
 
 
+def _is_guest(current_user: dict[str, object]) -> bool:
+    """Session invitée (pas de compte, donc pas d'équipe)."""
+    return (
+        current_user.get("role") == "guest"
+        or current_user.get("username") == "guest"
+        or current_user.get("id") == "guest"
+    )
+
+
 def _ab_is_admin(current_user: dict[str, object]) -> bool:
     """Admin actif."""
     return (
@@ -185,6 +194,12 @@ def create_template(
     try:
         payload = template_data.model_dump()
         payload["owner_id"] = template_owner_key(current_user) or None
+        # « Partagé » veut dire « visible de l'équipe ». Un invité n'a pas d'équipe :
+        # deux sessions anonymes ne doivent pas se voir. Ses templates naissent privés,
+        # sauf demande explicite dans le payload.
+        if _is_guest(current_user) and "visibility" not in template_data.model_fields_set:
+            payload["visibility"] = "private"
+
         template, warnings = template_service.create_template(payload)
         annotated = sharing_service.annotate(template, current_user)
         logger.info("Template créé: %s (ID: %s)", template.name, template.id)
@@ -1154,10 +1169,16 @@ def update_template(
         500: Erreur disque.
     """
     try:
-        sharing_service.require_writable(
-            template_service.get_template(template_id),
-            current_user,
-        )
+        existing = template_service.get_template(template_id)
+        sharing_service.require_writable(existing, current_user)
+        # Un destinataire avec droit d'édition modifie le contenu, pas le statut :
+        # décider qui voit le template reste au propriétaire.
+        if update_data.visibility is not None and not sharing_service.can_change_visibility(
+            existing, current_user
+        ):
+            raise TemplateShareForbiddenError(
+                "Seul le propriétaire peut changer la visibilité de ce template"
+            )
         template, warnings = template_service.update_template(
             template_id,
             update_data.model_dump(exclude_none=True),
