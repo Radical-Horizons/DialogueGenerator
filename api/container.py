@@ -215,7 +215,6 @@ class ServiceContainer:
             if self._template_ab_testing_service is None:
                 self._template_ab_testing_service = TemplateABTestingService(
                     template_service=self.get_template_service(),
-                    marketplace_service=self.get_template_marketplace_service(),
                 )
                 logger.info("TemplateABTestingService initialisé dans le container.")
             return self._template_ab_testing_service
