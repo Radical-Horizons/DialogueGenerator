@@ -12,7 +12,6 @@ REASON_KW = "Correspond aux mots-clés du brief"
 REASON_GDD = "Même personnages ou lieux que votre contexte"
 REASON_RENCONTRE = "Première rencontre (fiche ou flag catalogue)"
 REASON_PERSO = "Souvent chargé"
-REASON_MARKET = "Populaire sur le marketplace"
 REASON_CONTEXT = "Déjà choisi dans un scénario similaire"
 
 _TOKEN_RE = re.compile(r"[^a-z0-9]+")
@@ -43,7 +42,6 @@ class SuggestionCandidateFeatures:
     characters: tuple[str, ...]
     locations: tuple[str, ...]
     use_count: int
-    market_usage_count: int
     context_use_count: int = 0
 
 
@@ -208,9 +206,8 @@ def score_candidate(
         else 0
     )
     perso = min(max(features.use_count, 0), 10) * 1.5
-    market = min(max(features.market_usage_count, 0), 50) / 5.0
     context = min(max(features.context_use_count, 0), 10) * 2
-    total = kw + gdd + rencontre + perso + market + context
+    total = kw + gdd + rencontre + perso + context
     score = min(100, _half_up(total))
     reasons: list[str] = []
     if kw > 0:
@@ -221,8 +218,6 @@ def score_candidate(
         reasons.append(REASON_RENCONTRE)
     if perso > 0:
         reasons.append(REASON_PERSO)
-    if market > 0:
-        reasons.append(REASON_MARKET)
     if context > 0:
         reasons.append(REASON_CONTEXT)
     return SuggestionScore(score=score, reasons=tuple(reasons))

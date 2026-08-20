@@ -240,8 +240,6 @@ class TemplateSuggestionService:
             characters=tuple(template.configuration.characters),
             locations=tuple(template.configuration.locations),
             use_count=use_count,
-            # Le marketplace a été retiré : plus de popularité externe à pondérer.
-            market_usage_count=0,
             context_use_count=context_use_count,
         )
         scored = score_candidate(features, query)
@@ -279,7 +277,6 @@ class TemplateSuggestionService:
             characters=tuple(prebuilt.configuration.characters),
             locations=tuple(prebuilt.configuration.locations),
             use_count=use_count,
-            market_usage_count=0,
             context_use_count=context_use_count,
         )
         scored = score_candidate(features, query)

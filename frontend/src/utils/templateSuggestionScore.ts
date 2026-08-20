@@ -6,7 +6,6 @@ export const REASON_KW = 'Correspond aux mots-clés du brief'
 export const REASON_GDD = 'Même personnages ou lieux que votre contexte'
 export const REASON_RENCONTRE = 'Première rencontre (fiche ou flag catalogue)'
 export const REASON_PERSO = 'Souvent chargé'
-export const REASON_MARKET = 'Populaire sur le marketplace'
 export const REASON_CONTEXT = 'Déjà choisi dans un scénario similaire'
 
 export const MAX_SUGGESTIONS = 10
@@ -29,7 +28,6 @@ export interface SuggestionCandidateFeatures {
   characters: string[]
   locations: string[]
   useCount: number
-  marketUsageCount: number
   contextUseCount?: number
 }
 
@@ -225,9 +223,8 @@ export function scoreCandidate(
       ? 20
       : 0
   const perso = Math.min(Math.max(features.useCount, 0), 10) * 1.5
-  const market = Math.min(Math.max(features.marketUsageCount, 0), 50) / 5
   const context = Math.min(Math.max(features.contextUseCount ?? 0, 0), 10) * 2
-  const total = kw + gdd + rencontre + perso + market + context
+  const total = kw + gdd + rencontre + perso + context
   const score = Math.min(100, halfUp(total))
   const reasons: string[] = []
   if (kw > 0) {
@@ -241,9 +238,6 @@ export function scoreCandidate(
   }
   if (perso > 0) {
     reasons.push(REASON_PERSO)
-  }
-  if (market > 0) {
-    reasons.push(REASON_MARKET)
   }
   if (context > 0) {
     reasons.push(REASON_CONTEXT)

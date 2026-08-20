@@ -8,7 +8,6 @@ from services.template_suggestion_score import (
     REASON_CONTEXT,
     REASON_GDD,
     REASON_KW,
-    REASON_MARKET,
     REASON_PERSO,
     REASON_RENCONTRE,
     SuggestionCandidateFeatures,
@@ -36,7 +35,6 @@ def _features(**overrides: object) -> SuggestionCandidateFeatures:
         characters=("char-alpha",),
         locations=("loc-alpha",),
         use_count=0,
-        market_usage_count=0,
     )
     return replace(base, **overrides)  # type: ignore[arg-type]
 
@@ -124,8 +122,8 @@ def test_rencontre_initiale_boosts_salutation() -> None:
     assert is_first_meeting("rencontre_initiale", "X", "Y")
 
 
-def test_personal_usage_and_market_boost() -> None:
-    """5 Chargers perso et usage marketplace élèvent le score d'un jumeau."""
+def test_personal_and_context_usage_boost() -> None:
+    """5 Chargers perso et usage contextuel élèvent le score d'un jumeau."""
     query = SuggestionQuery(
         instructions="confrontation",
         scene_type="",
@@ -138,14 +136,8 @@ def test_personal_usage_and_market_boost() -> None:
         _features(characters=(), locations=(), use_count=5),
         query,
     )
-    popular = score_candidate(
-        _features(characters=(), locations=(), market_usage_count=50),
-        query,
-    )
     assert used.score > unused.score
     assert REASON_PERSO in used.reasons
-    assert popular.score > unused.score
-    assert REASON_MARKET in popular.reasons
     contextual = score_candidate(
         _features(characters=(), locations=(), context_use_count=3),
         query,

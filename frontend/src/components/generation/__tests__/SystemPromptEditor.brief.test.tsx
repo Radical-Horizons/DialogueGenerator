@@ -9,11 +9,6 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { SystemPromptEditor } from '../SystemPromptEditor'
 
-vi.mock('../../../api/config', () => ({
-  getSceneInstructionTemplates: vi.fn().mockResolvedValue({ templates: [] }),
-  getAuthorProfileTemplates: vi.fn().mockResolvedValue({ templates: [] }),
-}))
-
 const BRIEF_PLACEHOLDER = /^Ex: Bob doit annoncer/
 
 describe('SystemPromptEditor — onglet Brief', () => {

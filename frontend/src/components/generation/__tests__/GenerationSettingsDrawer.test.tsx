@@ -9,11 +9,6 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { GenerationSettingsDrawer } from '../GenerationSettingsDrawer'
 
-vi.mock('../../../api/config', () => ({
-  getAuthorProfileTemplates: vi.fn().mockResolvedValue({ templates: [] }),
-  getSceneInstructionTemplates: vi.fn().mockResolvedValue({ templates: [] }),
-}))
-
 vi.mock('../../../hooks/useSystemPrompt', () => ({
   useSystemPrompt: () => ({
     systemPrompt: 'prompt de test',

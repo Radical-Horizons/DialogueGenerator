@@ -129,3 +129,22 @@ pas un objet, c'est l'état d'un champ.
 **Manual checks :**
 - Poser deux profils locaux, recharger : ils apparaissent côté serveur, marqués privés, et un
   second rechargement n'en crée pas d'autres. Appliquer un profil remplit bien le champ actif.
+
+## Notes d'implémentation
+
+**Les deux endpoints de catalogue sont partis, pas les fichiers.** La spec prévoyait le retrait
+de `/config/author-profile-templates` ; il a d'abord été laissé en dette parce que son POST
+avait des appelants non tracés. Vérification faite, ni le GET ni le POST n'avaient d'appelant :
+seuls le client frontend (mort lui aussi) et deux tests les touchaient. Le pendant scène
+`/config/scene-instruction-templates` était dans le même état et part avec.
+
+⚠️ Les **fichiers** `config/author_profile_templates.json` et
+`config/scene_instruction_templates.json` restent : le premier alimente `list_prebuilt()`, le
+second `scene_instruction_loader` → génération. C'est la distinction déjà manquée au lot 1 —
+un endpoint sans client n'implique pas un fichier sans lecteur.
+
+**Deux sources décrivaient les mêmes quatre voix.** L'ancien endpoint lisait
+`prompts_metadata["author_profiles"]` (fichiers texte), le nouveau service lit le JSON de
+catalogue. Contenu comparé : identique octet pour octet sur les quatre profils, donc aucun
+changement visible. `ConfigurationService.get_author_profile_templates()`, devenu sans
+appelant, est retiré ; `get_scene_instruction_templates()` reste, la génération en dépend.

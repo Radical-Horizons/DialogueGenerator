@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest'
 import {
   REASON_GDD,
   REASON_KW,
-  REASON_MARKET,
   REASON_PERSO,
   REASON_RENCONTRE,
   REASON_CONTEXT,
@@ -31,7 +30,6 @@ function features(overrides: Partial<SuggestionCandidateFeatures> = {}): Suggest
     characters: ['char-alpha'],
     locations: ['loc-alpha'],
     useCount: 0,
-    marketUsageCount: 0,
     ...overrides,
   }
 }
@@ -134,7 +132,7 @@ describe('templateSuggestionScore', () => {
     ).toEqual({ 'npc-alpha': 'Hi' })
   })
 
-  it('usage perso et popularité marketplace élèvent le score', () => {
+  it('usage perso et usage contextuel élèvent le score', () => {
     const query: SuggestionQuery = {
       instructions: 'confrontation',
       sceneType: '',
@@ -144,14 +142,8 @@ describe('templateSuggestionScore', () => {
     }
     const unused = scoreCandidate(features({ characters: [], locations: [] }), query)
     const used = scoreCandidate(features({ characters: [], locations: [], useCount: 5 }), query)
-    const popular = scoreCandidate(
-      features({ characters: [], locations: [], marketUsageCount: 50 }),
-      query,
-    )
     expect(used.score).toBeGreaterThan(unused.score)
     expect(used.reasons).toContain(REASON_PERSO)
-    expect(popular.score).toBeGreaterThan(unused.score)
-    expect(popular.reasons).toContain(REASON_MARKET)
     const contextual = scoreCandidate(
       features({ characters: [], locations: [], contextUseCount: 3 }),
       query,
