@@ -115,8 +115,11 @@ class DateRotatingFileHandler(BaseRotatingHandler):
                     )
                     self.current_file_path.unlink()
             
-            # Ouvrir le fichier en mode append
-            self._file_handle = open(self.current_file_path, 'a', encoding=self.encoding)
+            # Lecture/écriture binaire : l'ajout écrase le « ] » final plutôt que de
+            # réécrire le tableau, d'où un coût constant quel que soit le volume déjà écrit.
+            if not self.current_file_path.exists():
+                self.current_file_path.touch()
+            self._file_handle = open(self.current_file_path, 'r+b')
             
         except IOError as e:
             logging.getLogger(__name__).error(f"Impossible d'ouvrir le fichier de log {self.current_file_path}: {e}")
@@ -215,48 +218,51 @@ class DateRotatingFileHandler(BaseRotatingHandler):
         return log_data
     
     def _append_log_entry(self, log_entry: Dict[str, Any]) -> None:
-        """Ajoute une entrée de log au fichier JSON.
-        
+        """Ajoute une entrée au tableau JSON du fichier courant.
+
+        L'entrée est épissée à la place du « ] » final : le coût ne dépend pas du
+        nombre de lignes déjà écrites. La version précédente relisait et réécrivait
+        le fichier entier à chaque enregistrement, ce qui rendait le coût d'une
+        session quadratique — la CI y perdait plus d'une heure.
+
+        Le fichier reste un tableau JSON valide après chaque écriture.
+
         Args:
             log_entry: L'entrée de log à ajouter.
         """
         if not self.current_file_path or not self._file_handle:
             return
-        
+
+        payload = json.dumps(
+            log_entry, ensure_ascii=False, separators=(',', ':')
+        ).encode(self.encoding or 'utf-8')
+
         try:
-            # Fermer temporairement pour lire/écrire
-            self._file_handle.flush()
-            self._file_handle.close()
-            
-            # Lire le contenu existant
-            logs = []
-            if self.current_file_path.exists():
-                try:
-                    with open(self.current_file_path, 'r', encoding=self.encoding) as f:
-                        content = f.read().strip()
-                        if content:
-                            logs = json.loads(content)
-                            if not isinstance(logs, list):
-                                logs = []
-                except (json.JSONDecodeError, IOError):
-                    # Fichier corrompu, recommencer
-                    logs = []
-            
-            # Ajouter la nouvelle entrée
-            logs.append(log_entry)
-            
-            # Réécrire le fichier
-            with open(self.current_file_path, 'w', encoding=self.encoding) as f:
-                json.dump(logs, f, ensure_ascii=False, indent=None, separators=(',', ':'))
-            
-            # Rouvrir en mode append pour les prochaines écritures
-            self._file_handle = open(self.current_file_path, 'a', encoding=self.encoding)
-            
-        except IOError as e:
-            # Erreur d'écriture, fallback vers console
+            handle = self._file_handle
+            handle.seek(0, os.SEEK_END)
+            size = handle.tell()
+
+            if size == 0:
+                handle.write(b'[' + payload + b']')
+            else:
+                handle.seek(size - 1)
+                closing = handle.read(1)
+                handle.seek(size - 1)
+                handle.truncate()
+                if closing == b']':
+                    handle.write(b',' + payload + b']')
+                else:
+                    # Tableau non refermé (écriture précédente interrompue) : on
+                    # repart d'un fichier sain plutôt que de propager la corruption.
+                    handle.seek(0)
+                    handle.truncate()
+                    handle.write(b'[' + payload + b']')
+            handle.flush()
+
+        except (IOError, OSError) as e:
             logging.getLogger(__name__).error(f"Erreur lors de l'écriture du log: {e}")
             self._file_handle = None
-    
+
     def close(self) -> None:
         """Ferme le handler et libère les ressources."""
         self._close_current_file()
