@@ -265,10 +265,13 @@ def test_ab_test_guest_is_refused(ab_client: TestClient) -> None:
     Un run lance N × 2 générations. Le mode invité est une démonstration en lecture :
     il ne doit pas pouvoir engager le budget LLM du projet.
     """
+    # Les templates sont créés par un compte : un invité ne peut plus rien écrire,
+    # et c'est bien le lancement du run qu'on veut voir refusé ici, pas la création.
+    id_a = _create_custom(ab_client, name="Guest A")
+    id_b = _create_custom(ab_client, name="Guest B")
+
     app.dependency_overrides[get_current_user] = lambda: _user("guest-1", role="guest")
     try:
-        id_a = _create_custom(ab_client, name="Guest A")
-        id_b = _create_custom(ab_client, name="Guest B")
         created = ab_client.post(
             "/api/v1/templates/ab-test",
             json={

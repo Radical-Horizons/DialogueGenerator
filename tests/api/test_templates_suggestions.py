@@ -195,6 +195,39 @@ def test_generic_scene_type_alone_returns_empty(suggest_client: TestClient) -> N
     assert response.json() == []
 
 
+def test_shared_custom_of_a_teammate_is_suggested_with_relation_team(
+    suggest_client: TestClient,
+) -> None:
+    """Le template partagé d'un collègue remonte, annoté `relation: team`.
+
+    Régression : `relation()` renvoie `team`, mais le schéma des suggestions
+    déclarait encore `granted`, hérité du partage nominatif retiré. Comme
+    `TemplateSuggestionItem` est construit par le constructeur Pydantic (qui, lui,
+    valide), l'endpoint répondait 500 — dès qu'un collègue avait un template
+    partagé qui scorait, soit le scénario nominal depuis que `shared` est le défaut.
+
+    Seul le cas `private` était couvert, d'où le trou.
+    """
+    created = suggest_client.post(
+        "/api/v1/templates",
+        json=_sample_create_payload(name="Confrontation partagée"),
+    )
+    assert created.status_code == 201
+    assert created.json()["visibility"] == "shared"
+    shared_id = created.json()["id"]
+
+    app.dependency_overrides[get_current_user] = lambda: _user("writer-b")
+    response = suggest_client.post(
+        "/api/v1/templates/suggestions",
+        json=_suggest_body(instructions="confrontation"),
+    )
+
+    assert response.status_code == 200, response.text
+    propose = {item["id"]: item for item in response.json()}
+    assert shared_id in propose, "un template partagé doit être suggéré à l'équipe"
+    assert propose[shared_id]["relation"] == "team"
+
+
 def test_acl_hides_foreign_custom(suggest_client: TestClient) -> None:
     """Custom privé d'autrui absent des suggestions.
 
@@ -240,20 +273,28 @@ def test_personal_usage_boosts_after_used(suggest_client: TestClient) -> None:
     assert "Souvent chargé" in match["reasons"]
 
 
-def test_guest_suggestions_and_used_are_200(suggest_client: TestClient) -> None:
-    """Guest : POST suggestions et used → 200, pas 403."""
+def test_guest_reads_suggestions_but_does_not_record_usage(
+    suggest_client: TestClient,
+) -> None:
+    """Guest : les suggestions se lisent (200), leur usage ne s'enregistre pas (403).
+
+    `POST /suggestions` est une lecture malgré le verbe — elle renvoie un classement
+    et n'écrit rien, donc elle reste ouverte au mode démo. `POST /suggestions/used`
+    incrémente un compteur persisté : c'est une écriture.
+    """
     app.dependency_overrides[get_current_user] = lambda: _user("guest", "guest")
+
     listed = suggest_client.post(
         "/api/v1/templates/suggestions",
         json=_suggest_body(instructions="confrontation"),
     )
     assert listed.status_code == 200
+
     recorded = suggest_client.post(
         "/api/v1/templates/suggestions/used",
         json={"source": "prebuilt", "id": "confrontation"},
     )
-    assert recorded.status_code == 200
-    assert recorded.json()["useCount"] >= 1
+    assert recorded.status_code == 403
 
 
 def test_contextual_usage_boosts_similar_scenario(suggest_client: TestClient) -> None:

@@ -108,7 +108,7 @@ describe('TemplateSuggestionsModal', () => {
 
   it('ferme avec Escape et libelle un custom partagé', async () => {
     mockSuggest.mockResolvedValue([
-      item({ source: 'custom', relation: 'granted', name: 'Partagé A' }),
+      item({ source: 'custom', relation: 'team', name: 'Partagé A' }),
     ])
     const onClose = vi.fn()
     render(

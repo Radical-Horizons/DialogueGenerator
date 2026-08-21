@@ -204,8 +204,12 @@ class TestTemplatesList:
 class TestTemplatesAuth:
     """Auth guest JWT OK ; sans JWT → 401 si auth active."""
 
-    def test_create_template_guest_jwt_201(self, client: TestClient) -> None:
-        """Given un token guest, when POST, then 201."""
+    def test_create_template_guest_jwt_403(self, client: TestClient) -> None:
+        """Given un token guest, when POST, then 403 : un invité ne peut rien écrire.
+
+        Le test affirmait auparavant l'inverse (201). Le mode invité sert à montrer
+        l'application sans créer de compte ; il n'a pas à écrire sur le serveur.
+        """
         guest = client.post("/api/v1/auth/guest")
         assert guest.status_code == 200
         token = guest.json()["access_token"]
@@ -216,9 +220,7 @@ class TestTemplatesAuth:
             headers={"Authorization": f"Bearer {token}"},
         )
 
-        assert response.status_code == 201
-        assert response.json()["name"] == "Guest template"
-        assert "warnings" in response.json()
+        assert response.status_code == 403
 
     def test_create_template_without_auth_401(
         self,
@@ -353,24 +355,28 @@ class TestTemplatesGetPutDelete:
         response = client.delete("/api/v1/templates/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
         assert response.status_code == 404
 
-    def test_put_delete_guest_jwt_ok(self, client: TestClient) -> None:
-        """Given un token guest, when PUT puis DELETE, then 200 puis 204."""
+    def test_put_delete_guest_jwt_refused(self, client: TestClient) -> None:
+        """Given un template existant, when un invité tente PUT puis DELETE, then 403.
+
+        Le template est créé par un compte (le client de test est admin) : c'est bien
+        la mutation par l'invité qu'on vérifie, pas sa capacité à créer.
+        """
         guest = client.post("/api/v1/auth/guest")
-        token = guest.json()["access_token"]
-        headers = {"Authorization": f"Bearer {token}"}
+        headers = {"Authorization": f"Bearer {guest.json()['access_token']}"}
         created = client.post(
             "/api/v1/templates",
             json=_sample_create_payload(name="Guest edit"),
-            headers=headers,
         ).json()
+
         updated = client.put(
             f"/api/v1/templates/{created['id']}",
             json={"name": "Guest renamed"},
             headers=headers,
         )
-        assert updated.status_code == 200
+        assert updated.status_code == 403
+
         deleted = client.delete(f"/api/v1/templates/{created['id']}", headers=headers)
-        assert deleted.status_code == 204
+        assert deleted.status_code == 403
 
 
 class TestTemplatesValidate:
@@ -414,15 +420,18 @@ class TestTemplatesValidate:
         assert reloaded["configuration"]["characters"] == ["char-ghost"]
 
     def test_validate_guest_jwt_ok(self, client: TestClient) -> None:
-        """Given un token guest, when GET validate, then 200."""
+        """Given un token guest, when GET validate, then 200.
+
+        La lecture reste ouverte à un invité : c'est tout l'intérêt du mode démo.
+        Le template est créé par un compte, seule la validation passe en invité.
+        """
         guest = client.post("/api/v1/auth/guest")
-        token = guest.json()["access_token"]
-        headers = {"Authorization": f"Bearer {token}"}
+        headers = {"Authorization": f"Bearer {guest.json()['access_token']}"}
         created = client.post(
             "/api/v1/templates",
             json=_sample_create_payload(name="Guest validate"),
-            headers=headers,
         ).json()
+
         response = client.get(
             f"/api/v1/templates/{created['id']}/validate",
             headers=headers,

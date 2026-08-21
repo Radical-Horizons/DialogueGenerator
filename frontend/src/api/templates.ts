@@ -119,25 +119,6 @@ export async function getPrebuiltTemplateApi(slug: string): Promise<PrebuiltTemp
 }
 
 /**
- * Copie une fiche marketplace vers Mes templates.
- */
-export async function copyMarketplaceListingApi(
-  listingId: string,
-): Promise<TemplateWriteResponse> {
-  const { data } = await apiClient.post<TemplateWriteResponse>(
-    `/api/v1/templates/marketplace/${listingId}/use`,
-  )
-  return data
-}
-
-/**
- * Retire une fiche marketplace (auteur ou admin).
- */
-export async function unpublishMarketplaceListingApi(listingId: string): Promise<void> {
-  await apiClient.delete(`/api/v1/templates/marketplace/${listingId}`)
-}
-
-/**
  * Snapshots d'un template custom.
  */
 export async function listTemplateVersionsApi(

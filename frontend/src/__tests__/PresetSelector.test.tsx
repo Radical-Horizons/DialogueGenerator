@@ -28,8 +28,6 @@ vi.mock('../store/authStore', () => ({
 vi.mock('../api/templates', () => ({
   publishMarketplaceTemplateApi: (...args: unknown[]) => mockPublishMarketplace(...args),
   listMarketplaceTemplatesApi: vi.fn().mockResolvedValue([]),
-  copyMarketplaceListingApi: vi.fn(),
-  unpublishMarketplaceListingApi: vi.fn(),
   rateMarketplaceTemplateApi: vi.fn(),
   listAbTestsApi: vi.fn().mockResolvedValue([]),
   startAbTestApi: vi.fn(),

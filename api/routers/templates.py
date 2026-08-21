@@ -68,13 +68,7 @@ logger = logging.getLogger(__name__)
 
 
 
-def _is_guest(current_user: dict[str, object]) -> bool:
-    """Session invitée (pas de compte, donc pas d'équipe)."""
-    return (
-        current_user.get("role") == "guest"
-        or current_user.get("username") == "guest"
-        or current_user.get("id") == "guest"
-    )
+
 
 
 def _ab_is_admin(current_user: dict[str, object]) -> bool:
@@ -145,14 +139,10 @@ def create_template(
     Raises:
         500: Erreur d'écriture disque ou permissions.
     """
+    require_non_guest(current_user)
     try:
         payload = template_data.model_dump()
         payload["owner_id"] = template_owner_key(current_user) or None
-        # « Partagé » veut dire « visible de l'équipe ». Un invité n'a pas d'équipe :
-        # deux sessions anonymes ne doivent pas se voir. Ses templates naissent privés,
-        # sauf demande explicite dans le payload.
-        if _is_guest(current_user) and "visibility" not in template_data.model_fields_set:
-            payload["visibility"] = "private"
 
         template, warnings = template_service.create_template(payload)
         annotated = access_service.annotate(template, current_user)
@@ -218,6 +208,7 @@ def record_template_suggestion_used(
     ),
 ) -> TemplateSuggestionUsedResponse:
     """Incrémente le compteur perso après un Charger réussi."""
+    require_non_guest(current_user)
     try:
         count = suggestion_service.record_used(
             current_user,
@@ -301,6 +292,22 @@ def get_prebuilt_template(
             detail="Error loading prebuilt template",
         ) from exc
 
+
+
+def _raise_access_http(exc: Exception) -> None:
+    """Convertit les erreurs d'accès aux templates en HTTP 400/403/404.
+
+    La copie appelait `_http_from_share_exc`, nom hérité du partage nominatif retiré
+    au lot 2 et jamais défini ici : le chemin d'erreur levait un NameError, donc un
+    500, au lieu du 404 attendu quand la source est introuvable ou invisible.
+    """
+    if isinstance(exc, TemplateAccessValidationError):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    if isinstance(exc, TemplateAccessForbiddenError):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+    if isinstance(exc, (TemplateAccessNotFoundError, FileNotFoundError)):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    raise exc
 
 
 def _raise_ab_http(exc: Exception) -> None:
@@ -511,6 +518,7 @@ def patch_ab_test_feedback(
     ab_service: TemplateABTestingService = Depends(get_template_ab_testing_service),
 ) -> Dict[str, Any]:
     """Pouce haut/bas/none sur une génération."""
+    require_non_guest(current_user)
     try:
         payload = ab_service.get_test(test_id)
         ab_service.assert_visible(
@@ -598,6 +606,7 @@ def copy_template(
     access_service: TemplateAccessService = Depends(get_template_access_service),
 ) -> TemplateCreateResponse:
     """Clone un template visible en custom owned par l'acteur."""
+    require_non_guest(current_user)
     try:
         copied, warnings = access_service.copy_template(
             template_service,
@@ -610,7 +619,7 @@ def copy_template(
         TemplateAccessNotFoundError,
         FileNotFoundError,
     ) as exc:
-        raise _http_from_share_exc(exc) from exc
+        _raise_access_http(exc)
     except PermissionError as exc:
         logger.exception("Permission denied copying template")
         raise HTTPException(
@@ -660,6 +669,7 @@ def restore_template_version(
     access_service: TemplateAccessService = Depends(get_template_access_service),
 ) -> TemplateCreateResponse:
     """Restaure un snapshot (owner / can_edit)."""
+    require_non_guest(current_user)
     try:
         access_service.require_writable(
             template_service.get_template(template_id),
@@ -766,6 +776,7 @@ def update_template(
         403: Destinataire (lecture seule).
         500: Erreur disque.
     """
+    require_non_guest(current_user)
     try:
         existing = template_service.get_template(template_id)
         access_service.require_writable(existing, current_user)
@@ -830,6 +841,7 @@ def delete_template(
         404: Template absent ou hors visibilité.
         403: Destinataire (lecture seule).
     """
+    require_non_guest(current_user)
     try:
         access_service.require_deletable(
             template_service.get_template(template_id),

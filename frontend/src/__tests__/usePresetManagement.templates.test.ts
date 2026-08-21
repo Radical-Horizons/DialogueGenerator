@@ -8,7 +8,6 @@ const mocks = vi.hoisted(() => ({
   getTemplateApi: vi.fn(),
   validateTemplateApi: vi.fn(),
   recordSuggestionUsedApi: vi.fn(),
-  copyMarketplaceListingApi: vi.fn(),
   setSceneSelection: vi.fn(),
   setProvider: vi.fn(),
   setModel: vi.fn(),
@@ -26,7 +25,6 @@ vi.mock('../api/templates', () => ({
   getTemplateApi: mocks.getTemplateApi,
   validateTemplateApi: mocks.validateTemplateApi,
   recordSuggestionUsedApi: mocks.recordSuggestionUsedApi,
-  copyMarketplaceListingApi: mocks.copyMarketplaceListingApi,
 }))
 
 vi.mock('../store/generationStore', () => ({
@@ -530,7 +528,6 @@ describe('usePresetManagement — templates [6.3]', () => {
       sceneType: 'Generic',
       characters: [],
     })
-    expect(mocks.copyMarketplaceListingApi).not.toHaveBeenCalled()
   })
 
   it('handleSuggestionLoaded custom 404 relance l’erreur', async () => {

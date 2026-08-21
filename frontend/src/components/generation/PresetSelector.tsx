@@ -78,7 +78,7 @@ function formatActiveTemplateFilters(
 }
 
 function isSharedTemplate(template: Template): boolean {
-  return template.relation === 'granted';
+  return template.relation === 'team';
 }
 
 /** Seul le propriétaire décide qui voit son template. */

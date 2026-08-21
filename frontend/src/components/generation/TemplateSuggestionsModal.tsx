@@ -30,7 +30,7 @@ function sourceLabel(item: TemplateSuggestion): string {
   if (item.source === 'marketplace') {
     return 'Marketplace'
   }
-  if (item.relation === 'granted') {
+  if (item.relation === 'team') {
     return 'Partagé'
   }
   if (item.relation === 'legacy') {

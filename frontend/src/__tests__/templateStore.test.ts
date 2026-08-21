@@ -187,7 +187,7 @@ describe('useTemplateStore', () => {
     const shared: Template = {
       ...sampleTemplate,
       id: 'tpl-shared',
-      relation: 'granted',
+      relation: 'team',
       sharedByUsername: 'writer-a',
     }
     vi.mocked(templatesApi.listTemplatesApi)
@@ -211,7 +211,7 @@ describe('useTemplateStore', () => {
       ...sampleTemplate,
       id: 'tpl-shared',
       name: 'Ancien nom',
-      relation: 'granted',
+      relation: 'team',
       metadata: { created: '2026-08-16T10:00:00Z', modified: '2026-08-16T10:00:00Z' },
     }
     const updated: Template = {

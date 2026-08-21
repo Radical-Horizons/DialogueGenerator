@@ -162,14 +162,15 @@ def test_prebuilt_catalog_is_read_only(client: TestClient) -> None:
     assert client.delete("/api/v1/author-profiles/default").status_code == 404
 
 
-def test_guest_profiles_are_private_by_default(client: TestClient) -> None:
-    """Given une session invitée, when elle crée, then le profil est privé."""
+def test_guest_cannot_create_profiles(client: TestClient) -> None:
+    """Given une session invitée, when elle crée, then 403 — lecture seule."""
     app.dependency_overrides[get_current_user] = lambda: _user(
         "guest", role="guest", session_id="sid-a"
     )
-    created = client.post("/api/v1/author-profiles", json=_payload(name="Brouillon invité"))
-    assert created.status_code == 201
-    assert created.json()["visibility"] == "private"
+
+    assert client.post(
+        "/api/v1/author-profiles", json=_payload(name="Brouillon invité")
+    ).status_code == 403
 
 
 def test_empty_name_is_refused(client: TestClient) -> None:

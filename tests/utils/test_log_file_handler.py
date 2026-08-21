@@ -232,3 +232,63 @@ def test_append_does_not_rewrite_whole_file(handler, tmp_log_dir):
         logs = json.load(f)
     assert len(logs) == 201
     assert logs[-1]["message"] == "entrée mesurée"
+
+
+def test_un_saut_de_ligne_final_nefface_pas_la_journee(handler, tmp_log_dir):
+    """Du whitespace en fin de fichier ne doit pas être pris pour une corruption.
+
+    Régression : l'épissure cherchait le « ] » sur le tout dernier octet. Ouvrir
+    `data/logs/*.json` dans un éditeur pour déboguer — ce que la règle meta-agent
+    demande explicitement de faire — y laisse un saut de ligne final. Le prochain log
+    émis repartait alors d'un tableau vide et effaçait toute la journée, sans le
+    moindre avertissement.
+    """
+    logger = logging.getLogger("test_trailing_ws")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    logger.addHandler(handler)
+
+    for i in range(5):
+        logger.info("entrée %d", i)
+    handler.flush()
+
+    log_path = tmp_log_dir / f"logs_{date.today().isoformat()}.json"
+    with open(log_path, "ab") as f:
+        f.write(b"\n")
+
+    logger.info("entrée après le saut de ligne")
+    handler.flush()
+
+    with open(log_path, "r", encoding="utf-8") as f:
+        logs = json.load(f)
+
+    assert len(logs) == 6, "les entrées précédentes ont été effacées"
+    assert logs[0]["message"] == "entrée 0"
+    assert logs[-1]["message"] == "entrée après le saut de ligne"
+
+
+def test_un_tableau_vraiment_corrompu_est_signale(handler, tmp_log_dir, caplog):
+    """Repartir de zéro reste possible, mais ne doit plus être silencieux."""
+    logger = logging.getLogger("test_corrompu")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    logger.addHandler(handler)
+
+    logger.info("première entrée")
+    handler.flush()
+
+    log_path = tmp_log_dir / f"logs_{date.today().isoformat()}.json"
+    with open(log_path, "wb") as f:
+        f.write(b'[{"message": "tronqu')
+
+    with caplog.at_level(logging.WARNING):
+        logger.info("après la troncature")
+        handler.flush()
+
+    with open(log_path, "r", encoding="utf-8") as f:
+        logs = json.load(f)
+    assert len(logs) == 1
+
+    assert any("non refermé" in message for message in caplog.messages), (
+        "la réinitialisation doit laisser une trace : une perte silencieuse est indétectable"
+    )

@@ -177,24 +177,24 @@ def test_admin_can_change_visibility(client: TestClient) -> None:
     assert changed.status_code == 200
 
 
-def test_guest_templates_are_private_by_default(client: TestClient) -> None:
-    """Given une session invitée, when elle crée, then le template est privé.
+def test_guest_cannot_create_templates(client: TestClient) -> None:
+    """Given une session invitée, when elle crée, then 403.
 
-    « Partagé » veut dire « visible de l'équipe » ; un invité n'a pas d'équipe, donc
-    deux sessions anonymes ne doivent pas se voir.
+    La question du statut par défaut ne se pose plus : un invité n'écrit rien.
+    La version précédente forçait `private` à la création, mais seulement quand le
+    client omettait `visibility` — un invité qui posait `"visibility": "shared"`
+    publiait donc à toute l'équipe, ce que la garde prétendait justement empêcher.
     """
     app.dependency_overrides[get_current_user] = lambda: _user(
         "guest", role="guest", session_id="sid-a"
     )
-    created = client.post("/api/v1/templates", json=_payload(name="Brouillon invité"))
-    assert created.status_code == 201
-    assert created.json()["visibility"] == "private"
-    template_id = created.json()["id"]
 
-    app.dependency_overrides[get_current_user] = lambda: _user(
-        "guest", role="guest", session_id="sid-b"
-    )
-    assert template_id not in _ids(client.get("/api/v1/templates"))
+    assert client.post(
+        "/api/v1/templates", json=_payload(name="Brouillon invité")
+    ).status_code == 403
+    assert client.post(
+        "/api/v1/templates", json={**_payload(name="Publication forcée"), "visibility": "shared"}
+    ).status_code == 403
 
 
 def test_visibility_survives_reload_from_disk(

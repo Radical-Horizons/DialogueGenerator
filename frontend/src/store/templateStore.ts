@@ -63,10 +63,10 @@ function mergeTemplateLists(server: Template[], local: Template[]): Template[] {
     if (serverIds.has(item.id)) {
       continue
     }
-    // Un template reçu par partage nominatif (`granted`) disparaît quand le serveur
-    // ne le renvoie plus : c'est une révocation. Ne pas confondre avec le statut
-    // persisté `visibility`, qui vaut `shared` pour la quasi-totalité des templates.
-    if (item.relation === 'granted') {
+    // Un template d'un collègue (`team`) disparaît quand le serveur ne le renvoie
+    // plus : son propriétaire l'a repassé en privé. Ne pas confondre `relation`,
+    // calculée pour l'acteur courant, avec le statut persisté `visibility`.
+    if (item.relation === 'team') {
       continue
     }
     next = upsertTemplate(next, item)

@@ -7,6 +7,9 @@ from datetime import date, datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 from logging.handlers import BaseRotatingHandler
 
+# Fenêtre suffisante pour retrouver le « ] » final malgré du whitespace de fin.
+_TAIL_PROBE_BYTES = 64
+
 
 class DateRotatingFileHandler(BaseRotatingHandler):
     """Handler de logging qui écrit dans des fichiers JSON rotatifs par date.
@@ -245,15 +248,26 @@ class DateRotatingFileHandler(BaseRotatingHandler):
             if size == 0:
                 handle.write(b'[' + payload + b']')
             else:
-                handle.seek(size - 1)
-                closing = handle.read(1)
-                handle.seek(size - 1)
-                handle.truncate()
-                if closing == b']':
+                # Le « ] » final se cherche en ignorant le whitespace de fin : ouvrir
+                # data/logs/*.json dans un éditeur pour déboguer suffit à y laisser un
+                # saut de ligne, et le prendre pour une corruption effacerait la
+                # journée entière — silencieusement.
+                queue_len = min(size, _TAIL_PROBE_BYTES)
+                handle.seek(size - queue_len)
+                queue = handle.read(queue_len)
+                depouillee = queue.rstrip(b' \t\r\n')
+                if depouillee.endswith(b']'):
+                    handle.seek(size - (len(queue) - len(depouillee)) - 1)
+                    handle.truncate()
                     handle.write(b',' + payload + b']')
                 else:
-                    # Tableau non refermé (écriture précédente interrompue) : on
-                    # repart d'un fichier sain plutôt que de propager la corruption.
+                    # Tableau réellement non refermé (écriture interrompue) : on repart
+                    # d'un fichier sain, mais on le dit — la perte doit être visible.
+                    logging.getLogger(__name__).warning(
+                        "Fichier de log non refermé (%s) : réinitialisation, %d octets perdus.",
+                        self.current_file_path,
+                        size,
+                    )
                     handle.seek(0)
                     handle.truncate()
                     handle.write(b'[' + payload + b']')

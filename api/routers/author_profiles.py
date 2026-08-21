@@ -5,7 +5,11 @@ from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from api.dependencies import get_author_profile_service, get_item_access_service
+from api.dependencies import (
+    get_author_profile_service,
+    get_item_access_service,
+    require_non_guest,
+)
 from api.routers.auth import get_current_user
 from api.schemas.author_profile import (
     AuthorProfile,
@@ -25,13 +29,6 @@ router = APIRouter(dependencies=[Depends(get_current_user)])
 logger = logging.getLogger(__name__)
 
 
-def _is_guest(current_user: dict[str, object]) -> bool:
-    """Session invitée (pas de compte, donc pas d'équipe)."""
-    return (
-        current_user.get("role") == "guest"
-        or current_user.get("username") == "guest"
-        or current_user.get("id") == "guest"
-    )
 
 
 @router.get("/prebuilt", response_model=List[PrebuiltAuthorProfile])
@@ -59,12 +56,10 @@ def create_author_profile(
     service: AuthorProfileService = Depends(get_author_profile_service),
     access: OwnedItemAccessService = Depends(get_item_access_service),
 ) -> AuthorProfile:
-    """Crée un profil, partagé par défaut (privé pour une session invitée)."""
+    """Crée un profil, partagé par défaut. Réservé aux comptes."""
+    require_non_guest(current_user)
     payload = body.model_dump()
     payload["owner_id"] = template_owner_key(current_user) or None
-    # Un invité n'a pas d'équipe : ses profils naissent privés, sauf demande explicite.
-    if _is_guest(current_user) and "visibility" not in body.model_fields_set:
-        payload["visibility"] = "private"
     try:
         created = service.create_profile(payload)
     except OSError as exc:
@@ -110,6 +105,7 @@ def update_author_profile(
         403: Profil d'autrui.
         404: Profil absent ou hors visibilité.
     """
+    require_non_guest(current_user)
     try:
         existing = service.get_profile(profile_id)
         access.require_writable(existing, current_user)
@@ -140,6 +136,7 @@ def delete_author_profile(
         403: Profil d'autrui.
         404: Profil absent ou hors visibilité.
     """
+    require_non_guest(current_user)
     try:
         access.require_deletable(service.get_profile(profile_id), current_user)
         service.delete_profile(profile_id)

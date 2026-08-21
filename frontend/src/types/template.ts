@@ -31,7 +31,7 @@ export interface Template {
   ownerId?: string | null
   /** Statut persisté : partagé avec l'équipe (défaut) ou brouillon privé. */
   visibility?: 'shared' | 'private'
-  relation?: 'owned' | 'granted' | 'legacy' | null
+  relation?: 'owned' | 'team' | 'legacy' | null
   ownerUsername?: string | null
   sharedByUsername?: string | null
 }
@@ -235,7 +235,7 @@ export interface TemplateSuggestion {
   score: number
   reasons: string[]
   configuration: TemplateConfiguration
-  relation?: 'owned' | 'granted' | 'legacy' | null
+  relation?: 'owned' | 'team' | 'legacy' | null
   sceneTypeHint?: string | null
   gddSystem?: string | null
   objectif?: string | null

@@ -79,7 +79,7 @@ class Template(BaseModel):
         default="shared",
         description="Statut persisté : partagé avec l'équipe (défaut) ou brouillon privé",
     )
-    relation: Optional[Literal["owned", "granted", "legacy"]] = Field(
+    relation: Optional[Literal["owned", "team", "legacy"]] = Field(
         default=None,
         description="Relation de l'acteur au template (calculée, non persistée)",
     )
@@ -414,7 +414,7 @@ class TemplateSuggestionItem(BaseModel):
     score: int = Field(..., ge=0, le=100)
     reasons: List[str] = Field(default_factory=list)
     configuration: TemplateConfiguration
-    relation: Optional[Literal["owned", "granted", "legacy"]] = None
+    relation: Optional[Literal["owned", "team", "legacy"]] = None
     sceneTypeHint: Optional[str] = None
     gddSystem: Optional[str] = None
     objectif: Optional[str] = None
