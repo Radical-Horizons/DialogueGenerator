@@ -5,8 +5,8 @@
 `services/template_service.py`, `services/author_profile_service.py`, `api/routers/templates.py`,
 `api/routers/author_profiles.py`, `frontend/src/components/generation/PresetSelector.tsx`).
 
-Ce guide décrit le comportement **livré**. Là où il diverge de l'intention, la section
-[Écarts connus](#écarts-connus) le dit explicitement plutôt que de décrire l'intention.
+Ce guide décrit le comportement **livré**. L'état **cible** est décrit par l'epic 6 — voir
+[État cible et écart](#état-cible-et-écart).
 
 ---
 
@@ -102,7 +102,7 @@ Détail, obligations et pièges : `.claude/rules/guest_first_auth.md`.
 | GET | `/api/v1/templates/{id}/validate` | Références GDD obsolètes ; ne mute rien |
 | GET | `/api/v1/templates/{id}/versions` | Historique |
 | POST | `/api/v1/templates/{id}/versions/{vid}/restore` | `[compte]` |
-| POST | `/api/v1/templates/{id}/copy` | `[compte]` — voir Écarts |
+| POST | `/api/v1/templates/{id}/copy` | `[compte]` — sans appelant frontend |
 | POST | `/api/v1/templates/suggestions` | **Lecture** malgré le verbe : renvoie un classement |
 | POST | `/api/v1/templates/suggestions/used` | `[compte]` — incrémente un compteur persisté |
 | GET · POST | `/api/v1/templates/ab-test` | `[compte]` en POST : dépense du budget LLM |
@@ -148,66 +148,23 @@ laisse l'utilisateur exactement où il était.
 
 ---
 
-## Écarts connus
+## État cible et écart
 
-Cette section est la raison d'être du guide : ce qui est livré ne correspond pas partout à
-l'intention. Ne pas la supprimer sans avoir corrigé ce qu'elle décrit.
+Ce guide décrit le **livré**. L'état **cible** est décrit par
+`_bmad-output/planning-artifacts/epics/epic-06.md`, section « Révision — 2026-08-21 :
+la visibilité devient un statut ». C'est elle qui fait autorité sur ce qui doit être
+construit ; ce guide n'est qu'un état des lieux.
 
-### 1. Deux listes pour un statut — et un template partagé qui n'apparaît nulle part
+L'écart principal, à connaître avant de toucher au sélecteur : l'epic demande **une
+liste unique** avec pastille et filtre ; le livré empile encore des sections héritées
+du modèle de partage nominatif retiré. Conséquence active — le filtre
+`templates.filter(t => t.relation !== 'team')` de `PresetSelector.tsx` exclut les
+templates partagés par un collègue **sans qu'aucune section ne les affiche**, donc ils
+sont invisibles. Aucun test Vitest ne couvre ce cas.
 
-L'intention était **une** liste, la visibilité n'étant qu'un statut porté par chaque élément.
-Le livré empile deux sections (`Templates pré-built`, `Mes templates`), ce qui rejoue le motif
-que ce chantier devait supprimer : une même notion découpée en sections par un critère qui n'en
-est pas un. Aucune application grand public ne procède ainsi — un badge et un filtre dans une
-liste unique sont la forme attendue.
-
-Conséquence concrète, plus grave que l'esthétique :
-
-```ts
-// PresetSelector.tsx
-const ownedTemplates = templates.filter((t) => t.relation !== 'team')
-```
-
-**Aucune section ne rend ce que ce filtre exclut.** Un template partagé par un collègue est
-chargé, passe l'ACL, arrive dans `templates` — et disparaît de la seule liste qui l'affichait.
-
-Ce filtre était longtemps mort : il testait `relation === 'granted'`, valeur que le serveur
-n'émet plus depuis le retrait du partage nominatif. Aligner le prédicat sur `'team'` l'a rendu
-vivant, donc nuisible. Aucun test Vitest ne couvre l'affichage d'un template `team`.
-
-### 2. `POST /templates/{id}/copy` n'a aucun appelant
-
-Le bouton « Copier vers mes templates » d'une fiche de catalogue **ne passe pas** par cette
-route : il appelle `POST /templates` avec la configuration du pré-built
-(`handleCopyPrebuilt`). La route `/copy` sert à dupliquer un template **custom** ; son client
-`copyTemplateApi` n'est référencé que par un mock de test.
-
-Elle reste exposée et fonctionnelle (400 sur un slug de catalogue, 403/404 selon l'accès).
-
-### 3. Reliquats du marketplace retiré
-
-`api/schemas/template.py` conserve neuf classes Pydantic orphelines (partage nominatif,
-marketplace). `VALID_SOURCES` du dépôt de suggestions accepte encore `"marketplace"`, que le
-service n'émet plus. Sans effet, mais trompeur à la lecture.
-
-### 4. Écriture non atomique des profils d'auteur
-
-`AuthorProfileService._save()` écrit directement, là où `TemplateService` passe par un fichier
-temporaire puis un `replace()` atomique. Une interruption en cours d'écriture laisse un JSON
-tronqué. `update` et `delete` du routeur profils n'ont pas non plus les `except OSError` que
-leurs équivalents templates ont.
-
-### 5. Cache de flags GDD jamais invalidé
-
-`_FLAG_NOMS_CACHE` (`services/template_suggestion_service.py`) est un global de module chargé
-une fois pour la durée du process. Une resync Notion ne le rafraîchit pas : le scoring
-« rencontre initiale » continue sur la liste capturée au premier appel.
-
-### 6. Erreurs non typées
-
-Les deux routeurs lèvent des `HTTPException` brutes plutôt que la hiérarchie
-`api/exceptions.py`. Leurs 500 ne remontent donc pas à Sentry et perdent leur code structuré —
-ce qui a précisément retardé la détection de deux bugs bloquants.
+Le reste des écarts (écriture non atomique des profils, cache de flags non invalidé,
+schémas orphelins du marketplace, erreurs non typées) est suivi dans
+`_bmad-output/implementation-artifacts/deferred-work.md`.
 
 ---
 

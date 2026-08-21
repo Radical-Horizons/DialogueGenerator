@@ -316,3 +316,16 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-fix-event-loop-blocking-context-endpoints.md`
   summary: `services/dialogue_generation_service.py::_build_context_summary` appelle encore `build_context_json` en synchrone direct — code mort en production (aucun appelant réel, seulement 4 tests unitaires), non déporté ni supprimé.
   evidence: Revue à 3 lentilles (adversarial) sur la spec v3. À trancher : supprimer (code mort) ou déporter si un futur appelant est prévu.
+
+- source_spec: `_bmad-output/planning-artifacts/epics/epic-06.md`
+  summary: Fusionner les sections du sélecteur de templates en une liste unique avec pastille de statut et filtre de provenance.
+  evidence: Révision epic-06 du 2026-08-21 : la visibilité est un statut, pas une catégorie. Le livré empile encore « Templates pré-built » et « Mes templates », héritage du modèle de partage nominatif retiré au lot 2. **Bloquant fonctionnel** : `ownedTemplates = templates.filter(t => t.relation !== 'team')` dans PresetSelector.tsx exclut les templates partagés par un collègue sans qu'aucune section ne les affiche — ils sont invisibles. Aucun test Vitest ne couvre l'affichage d'un template `team`.
+- source_spec: `_bmad-output/planning-artifacts/epics/epic-06.md`
+  summary: Rendre atomique l'écriture des profils d'auteur, et aligner la gestion d'erreurs de leur routeur sur celui des templates.
+  evidence: `AuthorProfileService._save()` fait un `write_text` direct là où `TemplateService` passe par un fichier temporaire puis `replace()`. Une interruption laisse un JSON tronqué. `update_author_profile` et `delete_author_profile` n'ont pas les `except OSError`/`PermissionError` de leurs équivalents templates.
+- source_spec: `_bmad-output/planning-artifacts/epics/epic-06.md`
+  summary: Sortir `_FLAG_NOMS_CACHE` du niveau module et l'invalider après une resync GDD.
+  evidence: `services/template_suggestion_service.py` cache la liste des flags dans un global chargé une fois par process. Une sync Notion ne le rafraîchit pas : le scoring « rencontre initiale » travaille sur une liste potentiellement obsolète jusqu'au redémarrage. Contraire à la règle DI du dépôt (pas de singleton global).
+- source_spec: `_bmad-output/planning-artifacts/epics/epic-06.md`
+  summary: Retirer les schémas Pydantic orphelins du marketplace et faire remonter les erreurs des routeurs templates/profils via `api/exceptions.py`.
+  evidence: Neuf classes de `api/schemas/template.py` (partage nominatif, marketplace) n'ont plus d'appelant ; `VALID_SOURCES` accepte encore `"marketplace"`. Les deux routeurs lèvent des `HTTPException` brutes, donc leurs 500 ne remontent pas à Sentry et perdent leur code structuré — ce qui a retardé la détection de deux bloquants.
