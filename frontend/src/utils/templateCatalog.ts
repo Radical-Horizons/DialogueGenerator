@@ -1,22 +1,22 @@
 /**
- * Catalogue unifié de templates : une seule liste, une pastille par ligne.
+ * Catalogue unifié de templates : une liste, deux statuts.
  *
- * La visibilité est un **statut porté par l'élément**, pas une catégorie qui découpe
- * l'écran. Le sélecteur empilait auparavant « Templates pré-built » et « Mes templates »,
- * héritage du partage nominatif retiré : deux listes pour une même chose, séparées par un
- * critère qui n'intéresse pas l'utilisateur. C'est l'erreur que l'epic 6 devait supprimer.
+ * Un template est un template. Qu'il soit livré avec l'application ou écrit par
+ * quelqu'un, la seule chose qui le qualifie est son **statut** : partagé (tout le monde
+ * le voit) ou privé (brouillon de son auteur).
  *
- * Conséquence directe de ce découpage : un template partagé par un collègue était filtré
- * hors de « Mes templates » sans qu'aucune section ne l'affiche — donc invisible, alors que
- * « partagé » est le statut par défaut.
+ * Ce que je peux faire d'un template ne se dit pas dans une pastille — ça se voit aux
+ * boutons présents sur la ligne. Ajouter « fourni » ou « équipe » à côté de « partagé »
+ * remettrait une taxonomie là où il n'y a qu'un statut, ce qui est exactement l'erreur
+ * que ce chantier corrige — d'abord des sections, puis des provenances.
  */
 import type { PrebuiltTemplate, Template } from '../types/template'
 import { snapshotContextTokens, templateCategoryKey } from './templateGroups'
 
-/** D'où vient un élément, du point de vue de celui qui regarde la liste. */
-export type TemplateProvenance = 'fourni' | 'mien' | 'equipe'
+/** Le seul statut d'un template. */
+export type TemplateVisibility = 'shared' | 'private'
 
-/** Un élément de la liste unique, quelle que soit son origine. */
+/** Un élément de la liste, quelle que soit son origine. */
 export interface CatalogueItem {
   /** Clé de rendu, unique tous types confondus. */
   key: string
@@ -25,11 +25,11 @@ export interface CatalogueItem {
   description: string
   category: string
   icon: string
-  provenance: TemplateProvenance
-  /** Statut persisté ; `null` pour une fiche du catalogue, qui n'en a pas. */
-  visibility: 'shared' | 'private' | null
-  /** Ce que lit l'utilisateur : provenance et statut d'un coup. */
+  visibility: TemplateVisibility
+  /** Ce que lit l'utilisateur : « partagé » ou « privé ». */
   badge: string
+  /** Décide des actions offertes — jamais de l'affichage du statut. */
+  mine: boolean
   /** L'objet d'origine, pour les actions de la ligne. */
   source:
     | { kind: 'prebuilt'; value: PrebuiltTemplate }
@@ -41,28 +41,20 @@ export interface CatalogueFilter {
   name?: string
   category?: string
   context?: string
-  /** `'tous'` ou une provenance ; `'brouillons'` restreint à mes seuls `private`. */
-  provenance?: 'tous' | TemplateProvenance | 'brouillons'
+  /** `'tous'` ou l'un des deux statuts. */
+  visibility?: 'tous' | TemplateVisibility
 }
 
-/**
- * Traduit `relation` en provenance lisible.
- *
- * `legacy` (aucun propriétaire) est rendu comme « équipe » : l'utilisateur voit un template
- * dont il n'est pas propriétaire. Que seul un admin puisse l'écrire se lit déjà à l'absence
- * de bouton d'édition — pas besoin d'une pastille de plus pour le dire.
- */
-function provenanceFromRelation(relation: Template['relation']): TemplateProvenance {
-  return relation === 'owned' ? 'mien' : 'equipe'
-}
-
-function badgeFor(provenance: TemplateProvenance, visibility: CatalogueItem['visibility']): string {
-  if (provenance === 'fourni') return 'fourni'
-  if (provenance === 'equipe') return 'équipe'
+function badgeFor(visibility: TemplateVisibility): string {
   return visibility === 'private' ? 'privé' : 'partagé'
 }
 
-/** Construit l'item d'une fiche du catalogue fourni. */
+/**
+ * Une fiche livrée avec l'application est un template partagé sans propriétaire.
+ *
+ * Elle n'est pas d'une autre espèce : personne ne peut l'éditer, ce qui se lit à
+ * l'absence de boutons, pas à un statut particulier.
+ */
 function fromPrebuilt(prebuilt: PrebuiltTemplate): CatalogueItem {
   return {
     key: `prebuilt:${prebuilt.id}`,
@@ -71,17 +63,15 @@ function fromPrebuilt(prebuilt: PrebuiltTemplate): CatalogueItem {
     description: prebuilt.description,
     category: prebuilt.category,
     icon: prebuilt.icon,
-    provenance: 'fourni',
-    visibility: null,
-    badge: badgeFor('fourni', null),
+    visibility: 'shared',
+    badge: badgeFor('shared'),
+    mine: false,
     source: { kind: 'prebuilt', value: prebuilt },
   }
 }
 
-/** Construit l'item d'un template custom, le mien ou celui d'un collègue. */
 function fromTemplate(template: Template): CatalogueItem {
-  const provenance = provenanceFromRelation(template.relation)
-  const visibility = template.visibility ?? 'shared'
+  const visibility: TemplateVisibility = template.visibility === 'private' ? 'private' : 'shared'
   return {
     key: template.id,
     id: template.id,
@@ -89,22 +79,22 @@ function fromTemplate(template: Template): CatalogueItem {
     description: template.description,
     category: template.category,
     icon: template.icon,
-    provenance,
     visibility,
-    badge: badgeFor(provenance, visibility),
+    badge: badgeFor(visibility),
+    mine: template.relation === 'owned',
     source: { kind: 'custom', value: template },
   }
 }
 
 /**
- * Réunit catalogue fourni et templates custom en une liste unique.
+ * Réunit tout ce qui est visible en une liste unique.
  *
- * **Rien n'est écarté ici.** Seul un filtre demandé par l'utilisateur retire des éléments —
- * c'est la règle qui manquait, et qui rendait les templates d'équipe invisibles.
+ * **Rien n'est écarté ici.** Seul un filtre demandé par l'utilisateur retire des
+ * éléments — c'est la règle qui manquait, et qui rendait invisibles les templates
+ * partagés par un collègue.
  *
- * @param prebuilts Fiches du catalogue versionné.
- * @param templates Templates custom déjà filtrés par l'ACL côté serveur.
- * @returns Les items, fiches fournies d'abord, puis les custom dans l'ordre reçu.
+ * @param prebuilts Fiches livrées avec l'application.
+ * @param templates Templates déjà filtrés par l'ACL côté serveur.
  */
 export function buildTemplateCatalog(
   prebuilts: PrebuiltTemplate[],
@@ -117,38 +107,29 @@ function includesInsensitive(haystack: string | undefined, needle: string): bool
   return (haystack ?? '').toLowerCase().includes(needle.toLowerCase())
 }
 
-/** Tokens de contexte d'un item, pour le filtre « contexte ». */
 function contextTokensOf(item: CatalogueItem): string[] {
   return item.source.kind === 'custom'
     ? snapshotContextTokens(item.source.value)
     : [item.source.value.gddSystem, item.source.value.sceneTypeHint].filter(Boolean)
 }
 
-function matchesProvenance(item: CatalogueItem, filtre: CatalogueFilter['provenance']): boolean {
-  if (!filtre || filtre === 'tous') return true
-  if (filtre === 'brouillons') return item.provenance === 'mien' && item.visibility === 'private'
-  return item.provenance === filtre
-}
-
 /**
- * Restreint la liste aux items correspondant aux critères.
+ * Restreint la liste aux éléments correspondant aux critères.
  *
- * Un critère vide ne filtre rien : revenir à « tous » restaure la liste complète sans
- * qu'aucune donnée n'ait été perdue en chemin.
+ * Un critère vide ne filtre rien : revenir à « tous » restaure la liste complète.
  */
 export function filterCatalog(items: CatalogueItem[], filtre: CatalogueFilter): CatalogueItem[] {
   const name = filtre.name?.trim() ?? ''
   const category = filtre.category?.trim() ?? ''
   const context = filtre.context?.trim() ?? ''
+  const visibility = filtre.visibility ?? 'tous'
 
   return items.filter((item) => {
-    if (!matchesProvenance(item, filtre.provenance)) return false
+    if (visibility !== 'tous' && item.visibility !== visibility) return false
     if (name && !includesInsensitive(item.name, name)) return false
     if (category) {
       const key =
-        item.source.kind === 'custom'
-          ? templateCategoryKey(item.source.value)
-          : item.category
+        item.source.kind === 'custom' ? templateCategoryKey(item.source.value) : item.category
       if (!includesInsensitive(key, category)) return false
     }
     if (context && !contextTokensOf(item).some((token) => includesInsensitive(token, context))) {

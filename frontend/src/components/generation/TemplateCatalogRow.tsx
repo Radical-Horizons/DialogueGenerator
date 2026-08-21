@@ -8,7 +8,7 @@
  */
 import React from 'react';
 import type { CatalogueItem } from '../../utils/templateCatalog';
-import type { PrebuiltTemplate, Template } from '../../types/template';
+import type { Template } from '../../types/template';
 import { theme } from '../../theme';
 import {
   redesignAccent,
@@ -28,13 +28,10 @@ type Chrome =
 export interface TemplateCatalogRowProps {
   item: CatalogueItem;
   chrome: Chrome;
-  /** Une copie de fiche fournie est en cours : on évite le double envoi. */
-  copying: boolean;
   onOpen: (item: CatalogueItem) => void;
   onToggleVisibility: (template: Template) => void;
   onEdit: (template: Template) => void;
   onDelete: (template: Template) => void;
-  onCopyPrebuilt: (prebuilt: PrebuiltTemplate) => void;
 }
 
 /** Pastille de statut : discrète pour le cas courant, marquée pour un brouillon. */
@@ -88,15 +85,12 @@ function derniereModification(template: Template): string | undefined {
 export function TemplateCatalogRow({
   item,
   chrome,
-  copying,
   onOpen,
   onToggleVisibility,
   onEdit,
   onDelete,
-  onCopyPrebuilt,
 }: TemplateCatalogRowProps): React.ReactElement {
   const fourni = item.source.kind === 'prebuilt';
-  const mien = item.provenance === 'mien';
   const secondaire: React.CSSProperties = {
     fontSize: `${chrome.labelFontRem}rem`,
     color: theme.text.secondary,
@@ -105,7 +99,7 @@ export function TemplateCatalogRow({
   return (
     <div
       data-testid={fourni ? 'prebuilt-template-item' : 'template-item'}
-      data-catalogue-provenance={item.provenance}
+      data-catalogue-mine={item.mine ? 'oui' : 'non'}
       data-catalogue-badge={item.badge}
       {...(fourni
         ? { 'data-prebuilt-id': item.id, 'data-prebuilt-name': item.name }
@@ -129,7 +123,7 @@ export function TemplateCatalogRow({
 
           {/* Seul le propriétaire décide qui voit son template : pour les autres la
               pastille informe, elle n'agit pas. */}
-          {mien ? (
+          {item.mine ? (
             <button
               type="button"
               data-testid="template-visibility-toggle"
@@ -201,24 +195,10 @@ export function TemplateCatalogRow({
         )}
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.5rem' }}>
-          {fourni && (
-            <button
-              type="button"
-              data-testid="prebuilt-item-copy-btn"
-              disabled={copying}
-              onClick={(event) => {
-                event.stopPropagation();
-                if (item.source.kind === 'prebuilt') onCopyPrebuilt(item.source.value);
-              }}
-              style={boutonStyle(chrome)}
-            >
-              Copier vers mes templates
-            </button>
-          )}
 
           {/* Un template d'équipe s'applique, il ne se modifie pas : le proposer puis
               refuser côté serveur serait une promesse que l'écran ne peut pas tenir. */}
-          {mien && item.source.kind === 'custom' && (
+          {item.mine && item.source.kind === 'custom' && (
             <>
               <button
                 type="button"

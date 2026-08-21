@@ -353,8 +353,8 @@ describe('PresetSelector', () => {
         .find((el) => el.getAttribute('data-template-name') === 'Négociation collègue');
 
       expect(ligne).toBeDefined();
-      expect(ligne).toHaveAttribute('data-catalogue-provenance', 'equipe');
-      expect(ligne).toHaveAttribute('data-catalogue-badge', 'équipe');
+      expect(ligne).toHaveAttribute('data-catalogue-mine', 'non');
+      expect(ligne).toHaveAttribute('data-catalogue-badge', 'partagé');
 
       // Un template d'équipe s'applique, il ne se modifie pas.
       expect(within(ligne as HTMLElement).queryByTestId('template-item-edit-btn')).toBeNull();
@@ -536,7 +536,7 @@ describe('PresetSelector', () => {
 
       expect(screen.getByTestId('prebuilt-template-item')).toHaveAttribute(
         'data-catalogue-badge',
-        'fourni',
+        'partagé',
       );
       expect(screen.getByTestId('prebuilt-template-item')).toHaveAttribute(
         'data-prebuilt-id',
@@ -582,82 +582,6 @@ describe('PresetSelector', () => {
       expect(mockOnPrebuiltLoaded).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'confrontation' }),
       );
-    });
-
-    it('Copier crée un custom sans apply', async () => {
-      mockPrebuiltStore();
-      render(
-        <PresetSelector
-          onPresetLoaded={mockOnPresetLoaded}
-          onPrebuiltLoaded={mockOnPrebuiltLoaded}
-        />,
-      );
-
-      // La liste est unique : un filtre porte sur tout ce qu'elle contient, fiches
-      // fournies comprises. Auparavant le filtre ne touchait que « Mes templates ».
-      fireEvent.change(screen.getByTestId('template-filter-name'), {
-        target: { value: 'Salut A' },
-      });
-      expect(screen.queryByText('Combat B')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('prebuilt-item-copy-btn')).not.toBeInTheDocument();
-
-      fireEvent.change(screen.getByTestId('template-filter-name'), { target: { value: '' } });
-      fireEvent.click(screen.getByTestId('prebuilt-item-copy-btn'));
-
-      await waitFor(() => {
-        expect(mockCreateTemplate).toHaveBeenCalledWith(
-          expect.objectContaining({ name: 'Confrontation (copie)' }),
-        );
-      });
-      expect(mockOnPrebuiltLoaded).not.toHaveBeenCalled();
-      expect(screen.queryByTestId('prebuilt-template-modal')).not.toBeInTheDocument();
-      expect(screen.getByText('Combat B')).toBeInTheDocument();
-    });
-
-    it('Copier depuis le modal crée un custom sans apply', async () => {
-      mockPrebuiltStore();
-      render(
-        <PresetSelector
-          onPresetLoaded={mockOnPresetLoaded}
-          onPrebuiltLoaded={mockOnPrebuiltLoaded}
-        />,
-      );
-
-      fireEvent.click(screen.getByTestId('prebuilt-template-item'));
-      fireEvent.click(screen.getByTestId('prebuilt-modal-copy'));
-
-      await waitFor(() => {
-        expect(mockCreateTemplate).toHaveBeenCalledWith(
-          expect.objectContaining({ name: 'Confrontation (copie)' }),
-        );
-      });
-      expect(mockOnPrebuiltLoaded).not.toHaveBeenCalled();
-    });
-
-    it('ignore un second Copier tant que le POST est en cours', async () => {
-      let resolveCreate: ((value: { warnings: string[] }) => void) | undefined;
-      mockCreateTemplate.mockImplementationOnce(
-        () =>
-          new Promise((resolve) => {
-            resolveCreate = resolve;
-          }),
-      );
-      mockPrebuiltStore();
-      render(
-        <PresetSelector
-          onPresetLoaded={mockOnPresetLoaded}
-          onPrebuiltLoaded={mockOnPrebuiltLoaded}
-        />,
-      );
-
-      fireEvent.click(screen.getByTestId('prebuilt-item-copy-btn'));
-      fireEvent.click(screen.getByTestId('prebuilt-item-copy-btn'));
-
-      expect(mockCreateTemplate).toHaveBeenCalledTimes(1);
-
-      await act(async () => {
-        resolveCreate?.({ warnings: [] });
-      });
     });
 
     it('affiche Chargement… tant que le catalogue n’est pas arrivé', () => {

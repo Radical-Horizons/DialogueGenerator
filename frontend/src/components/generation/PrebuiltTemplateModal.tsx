@@ -14,8 +14,6 @@ export interface PrebuiltTemplateModalProps {
   template: PrebuiltTemplate | null
   onClose: () => void
   onLoad: (template: PrebuiltTemplate) => void
-  onCopy: (template: PrebuiltTemplate) => void
-  copyDisabled?: boolean
 }
 
 export function PrebuiltTemplateModal({
@@ -23,8 +21,6 @@ export function PrebuiltTemplateModal({
   template,
   onClose,
   onLoad,
-  onCopy,
-  copyDisabled = false,
 }: PrebuiltTemplateModalProps) {
   const isNarrow = useGenerationPanelNarrow()
   const chrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
@@ -157,15 +153,6 @@ export function PrebuiltTemplateModal({
         >
           <button type="button" data-testid="prebuilt-modal-cancel" onClick={onClose} style={buttonStyle}>
             Annuler
-          </button>
-          <button
-            type="button"
-            data-testid="prebuilt-modal-copy"
-            disabled={copyDisabled}
-            onClick={() => onCopy(template)}
-            style={buttonStyle}
-          >
-            Copier vers mes templates
           </button>
           <button
             type="button"

@@ -75,7 +75,7 @@ describe('buildTemplateCatalog', () => {
     const items = buildTemplateCatalog([], [template(), collegue])
 
     expect(cle(items)).toContain('uuid-team')
-    expect(items.find((i) => i.key === 'uuid-team')?.provenance).toBe('equipe')
+    expect(items.find((i) => i.key === 'uuid-team')?.mine).toBe(false)
   })
 
   it('marque mon brouillon « privé » et mon template partagé « partagé »', () => {
@@ -91,19 +91,21 @@ describe('buildTemplateCatalog', () => {
     expect(items.find((i) => i.key === 'partage')?.badge).toBe('partagé')
   })
 
-  it('marque une fiche du catalogue « fourni », sans statut', () => {
+  it('traite une fiche du catalogue comme un template partagé', () => {
     const [item] = buildTemplateCatalog([prebuilt()], [])
 
-    expect(item.badge).toBe('fourni')
-    expect(item.visibility).toBeNull()
+    // Une fiche livrée est un template partagé, pas une espèce à part.
+    expect(item.badge).toBe('partagé')
+    expect(item.visibility).toBe('shared')
+    expect(item.mine).toBe(false)
     expect(item.source.kind).toBe('prebuilt')
   })
 
-  it("rend un template sans propriétaire comme un template d'équipe", () => {
+  it('rend un template sans propriétaire comme partagé et non éditable', () => {
     const [item] = buildTemplateCatalog([], [template({ relation: 'legacy', ownerId: null })])
 
-    expect(item.provenance).toBe('equipe')
-    expect(item.badge).toBe('équipe')
+    expect(item.mine).toBe(false)
+    expect(item.badge).toBe('partagé')
   })
 
   it('traite une visibilité absente comme partagée', () => {
@@ -126,24 +128,30 @@ describe('filterCatalog', () => {
 
   it('ne retire rien quand aucun critère n’est posé', () => {
     expect(filterCatalog(items, {})).toHaveLength(4)
-    expect(filterCatalog(items, { provenance: 'tous' })).toHaveLength(4)
+    expect(filterCatalog(items, { visibility: 'tous' })).toHaveLength(4)
   })
 
-  it('restreint à mes seuls brouillons', () => {
-    expect(cle(filterCatalog(items, { provenance: 'brouillons' }))).toEqual(['mien-brouillon'])
+  it('restreint aux brouillons privés', () => {
+    expect(cle(filterCatalog(items, { visibility: 'private' }))).toEqual(['mien-brouillon'])
   })
 
-  it('restreint par provenance', () => {
-    expect(cle(filterCatalog(items, { provenance: 'fourni' }))).toEqual(['prebuilt:salutation'])
-    expect(cle(filterCatalog(items, { provenance: 'equipe' }))).toEqual(['equipe'])
+  it('restreint par statut, sans distinguer qui a écrit quoi', () => {
+    // « Partagé » réunit la fiche livrée, la mienne et celle du collègue : c'est un
+    // statut, il ne dit rien de la provenance.
+    expect(cle(filterCatalog(items, { visibility: 'shared' }))).toEqual([
+      'prebuilt:salutation',
+      'mien-partage',
+      'equipe',
+    ])
+    expect(cle(filterCatalog(items, { visibility: 'private' }))).toEqual(['mien-brouillon'])
   })
 
   /** Le filtre ne consomme pas la liste : il se relâche. */
   it('restaure la liste complète quand on revient à « tous »', () => {
-    const restreint = filterCatalog(items, { provenance: 'brouillons' })
+    const restreint = filterCatalog(items, { visibility: 'private' })
     expect(restreint).toHaveLength(1)
 
-    expect(filterCatalog(items, { provenance: 'tous' })).toHaveLength(4)
+    expect(filterCatalog(items, { visibility: 'tous' })).toHaveLength(4)
   })
 
   it('filtre par nom sans tenir compte de la casse', () => {
@@ -163,10 +171,10 @@ describe('filterCatalog', () => {
     expect(filterCatalog(items, { name: 'introuvable' })).toEqual([])
   })
 
-  it('combine provenance et nom', () => {
-    expect(cle(filterCatalog(items, { provenance: 'mien', name: 'confrontation' }))).toEqual([
+  it('combine statut et nom', () => {
+    expect(cle(filterCatalog(items, { visibility: 'shared', name: 'confrontation' }))).toEqual([
       'mien-partage',
-      'mien-brouillon',
+      'equipe',
     ])
   })
 })

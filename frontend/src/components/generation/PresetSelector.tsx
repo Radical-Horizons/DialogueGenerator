@@ -31,7 +31,7 @@ import { TemplateABTestingModal } from './TemplateABTestingModal';
 import { NarrowOverlayDrawer } from '../layout/NarrowOverlayDrawer';
 import { TEMPLATE_UNCATEGORIZED_LABEL } from '../../utils/templateGroups';
 import { buildTemplateCatalog, filterCatalog } from '../../utils/templateCatalog';
-import type { CatalogueItem, TemplateProvenance } from '../../utils/templateCatalog';
+import type { CatalogueItem, TemplateVisibility } from '../../utils/templateCatalog';
 import { TemplateCatalogRow } from './TemplateCatalogRow';
 import { useContextStore } from '../../store/contextStore';
 import { useGenerationStore } from '../../store/generationStore';
@@ -139,7 +139,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     error: templateError,
     prebuiltError,
     prebuiltLoading,
-    createTemplate,
     updateTemplate,
     deleteTemplate,
   } = useTemplateStore();
@@ -159,8 +158,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   const [contextFilter, setContextFilter] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const deletingTemplateRef = useRef(false);
-  const copyingPrebuiltRef = useRef(false);
-  const [isCopyingPrebuilt, setIsCopyingPrebuilt] = useState(false);
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
   const [suggestionRequest, setSuggestionRequest] = useState<TemplateSuggestionRequest>({
     instructions: '',
@@ -169,10 +166,8 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     locations: [],
     rencontreInitialeByCharacter: {},
   });
-  // La provenance est un filtre, pas un découpage : la liste reste une.
-  const [provenanceFilter, setProvenanceFilter] = useState<'tous' | TemplateProvenance | 'brouillons'>(
-    'tous',
-  );
+  // Le statut est un filtre, pas un découpage : la liste reste une.
+  const [visibilityFilter, setVisibilityFilter] = useState<'tous' | TemplateVisibility>('tous');
   const [isAbTestOpen, setIsAbTestOpen] = useState(false);
   const [abSeedBId, setAbSeedBId] = useState('');
 
@@ -191,9 +186,9 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         name: nameFilter,
         category: categoryFilter,
         context: contextFilter,
-        provenance: provenanceFilter,
+        visibility: visibilityFilter,
       }),
-    [catalogue, nameFilter, categoryFilter, contextFilter, provenanceFilter],
+    [catalogue, nameFilter, categoryFilter, contextFilter, visibilityFilter],
   );
 
   const groupedCatalogue = useMemo(() => {
@@ -212,7 +207,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   }, [templates]);
 
   const hasActiveFilters = Boolean(
-    nameFilter.trim() || categoryFilter.trim() || contextFilter.trim() || provenanceFilter !== 'tous',
+    nameFilter.trim() || categoryFilter.trim() || contextFilter.trim() || visibilityFilter !== 'tous',
   );
 
   const filterInputStyle: React.CSSProperties = {
@@ -282,33 +277,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     }
   };
 
-  const handleCopyPrebuilt = async (prebuilt: PrebuiltTemplate) => {
-    if (copyingPrebuiltRef.current) {
-      return;
-    }
-    copyingPrebuiltRef.current = true;
-    setIsCopyingPrebuilt(true);
-    try {
-      await createTemplate({
-        name: `${prebuilt.name} (copie)`.slice(0, 120),
-        description: prebuilt.description,
-        category: prebuilt.category,
-        icon: prebuilt.icon,
-        configuration: prebuilt.configuration,
-      });
-      setNameFilter('');
-      setCategoryFilter('');
-      setContextFilter('');
-      toast('Template copié dans Mes templates', 'success');
-      setViewingPrebuilt(null);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Copie impossible';
-      toast(message, 'error');
-    } finally {
-      copyingPrebuiltRef.current = false;
-      setIsCopyingPrebuilt(false);
-    }
-  };
 
 
 
@@ -366,12 +334,10 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     setIsDeleteConfirmOpen(true);
   };
 
-  const provenanceOptions: Array<{ valeur: 'tous' | TemplateProvenance | 'brouillons'; libelle: string }> = [
+  const visibilityOptions: Array<{ valeur: 'tous' | TemplateVisibility; libelle: string }> = [
     { valeur: 'tous', libelle: 'Tous' },
-    { valeur: 'fourni', libelle: 'Fournis' },
-    { valeur: 'mien', libelle: 'Les miens' },
-    { valeur: 'brouillons', libelle: 'Mes brouillons' },
-    { valeur: 'equipe', libelle: "De l'équipe" },
+    { valeur: 'shared', libelle: 'Partagés' },
+    { valeur: 'private', libelle: 'Privés' },
   ];
 
   const filterFields = (
@@ -387,17 +353,15 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
       }}
     >
       <label style={{ flex: '1 1 9rem', minWidth: isNarrow ? 0 : '9rem', color: theme.text.secondary, fontSize: `${chrome.labelFontRem}rem` }}>
-        Provenance
+        Statut
         <select
-          data-testid="template-filter-provenance"
-          value={provenanceFilter}
-          onChange={(event) =>
-            setProvenanceFilter(event.target.value as 'tous' | TemplateProvenance | 'brouillons')
-          }
-          aria-label="Filtrer par provenance"
+          data-testid="template-filter-visibility"
+          value={visibilityFilter}
+          onChange={(event) => setVisibilityFilter(event.target.value as 'tous' | TemplateVisibility)}
+          aria-label="Filtrer par statut"
           style={{ ...filterInputStyle, marginTop: '0.25rem' }}
         >
-          {provenanceOptions.map((option) => (
+          {visibilityOptions.map((option) => (
             <option key={option.valeur} value={option.valeur}>
               {option.libelle}
             </option>
@@ -735,10 +699,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         template={viewingPrebuilt}
         onClose={() => setViewingPrebuilt(null)}
         onLoad={handleLoadPrebuilt}
-        onCopy={(prebuilt) => {
-          void handleCopyPrebuilt(prebuilt);
-        }}
-        copyDisabled={isCopyingPrebuilt}
       />
 
       <TemplateSuggestionsModal
@@ -868,7 +828,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                   key={item.key}
                   item={item}
                   chrome={chrome}
-                  copying={isCopyingPrebuilt}
                   onOpen={(cible) => {
                     if (cible.source.kind === 'prebuilt') {
                       setViewingPrebuilt(cible.source.value);
@@ -881,9 +840,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                   }}
                   onEdit={(template) => setEditingTemplate(template)}
                   onDelete={(template) => setDeletingTemplate(template)}
-                  onCopyPrebuilt={(prebuilt) => {
-                    void handleCopyPrebuilt(prebuilt);
-                  }}
                 />
               ))}
             </div>
