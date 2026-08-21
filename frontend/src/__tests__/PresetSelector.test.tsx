@@ -2,7 +2,7 @@
  * Tests pour PresetSelector
  */
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
-import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act, within } from '@testing-library/react';
 import { PresetSelector } from '../components/generation/PresetSelector';
 import { GenerationPanelNarrowProvider } from '../components/generation/GenerationPanelNarrowContext';
 import { usePresetStore } from '../store/presetStore';
@@ -291,7 +291,7 @@ describe('PresetSelector', () => {
       expect(screen.getByTestId('mes-templates-error')).toHaveTextContent(
         'Échec du chargement des templates : 500'
       );
-      expect(screen.queryByTestId('mes-templates-empty')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('template-catalog-empty')).not.toBeInTheDocument();
     });
 
     it('should show "Aucun preset" message when list is empty', () => {
@@ -317,10 +317,58 @@ describe('PresetSelector', () => {
       expect(screen.getByText(/aucun preset sauvegardé/i)).toBeInTheDocument();
     });
 
-    it('should group templates by category in Mes templates', () => {
+    /**
+     * Critère d'acceptation principal de la story 6.8.
+     *
+     * Régression : `templates.filter(t => t.relation !== 'team')` écartait ce template
+     * et aucune section ne l'affichait — donc invisible, alors que « partagé » est le
+     * statut par défaut. Ce test échoue sur l'implémentation précédente.
+     */
+    it("affiche le template partagé d'un collègue, sans bouton éditer ni supprimer", () => {
+      mockTemplateStore([
+        ...mockTemplates,
+        {
+          id: 'tpl-equipe',
+          name: 'Négociation collègue',
+          description: "Écrit par quelqu'un d'autre",
+          category: 'Négociation',
+          icon: '🤝',
+          metadata: { created: '2026-08-20T10:00:00Z', modified: '2026-08-20T10:00:00Z' },
+          ownerId: 'writer-b',
+          visibility: 'shared' as const,
+          relation: 'team' as const,
+          configuration: {
+            characters: [],
+            locations: [],
+            region: '',
+            sceneType: 'Generic',
+            instructions: 'Brief équipe',
+          },
+        },
+      ]);
       render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
 
-      expect(screen.getByText('Mes templates')).toBeInTheDocument();
+      const ligne = screen
+        .getAllByTestId('template-item')
+        .find((el) => el.getAttribute('data-template-name') === 'Négociation collègue');
+
+      expect(ligne).toBeDefined();
+      expect(ligne).toHaveAttribute('data-catalogue-provenance', 'equipe');
+      expect(ligne).toHaveAttribute('data-catalogue-badge', 'équipe');
+
+      // Un template d'équipe s'applique, il ne se modifie pas.
+      expect(within(ligne as HTMLElement).queryByTestId('template-item-edit-btn')).toBeNull();
+      expect(within(ligne as HTMLElement).queryByTestId('template-item-delete-btn')).toBeNull();
+      expect(within(ligne as HTMLElement).queryByTestId('template-visibility-toggle')).toBeNull();
+    });
+
+    it('groupe les templates par catégorie dans la liste unique', () => {
+      render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
+
+      // Plus de titre de section : la visibilité est un statut, pas un découpage.
+      expect(screen.queryByText('Mes templates')).not.toBeInTheDocument();
+      expect(screen.queryByText('Templates pré-built')).not.toBeInTheDocument();
+      expect(screen.getByTestId('template-catalog')).toBeInTheDocument();
       const groups = screen.getAllByTestId('template-category-group');
       expect(groups).toHaveLength(2);
       expect(groups[0]).toHaveAttribute('data-category', 'Salutation');
@@ -486,7 +534,10 @@ describe('PresetSelector', () => {
         />,
       );
 
-      expect(screen.getByText('Templates pré-built')).toBeInTheDocument();
+      expect(screen.getByTestId('prebuilt-template-item')).toHaveAttribute(
+        'data-catalogue-badge',
+        'fourni',
+      );
       expect(screen.getByTestId('prebuilt-template-item')).toHaveAttribute(
         'data-prebuilt-id',
         'confrontation',
@@ -542,11 +593,15 @@ describe('PresetSelector', () => {
         />,
       );
 
+      // La liste est unique : un filtre porte sur tout ce qu'elle contient, fiches
+      // fournies comprises. Auparavant le filtre ne touchait que « Mes templates ».
       fireEvent.change(screen.getByTestId('template-filter-name'), {
         target: { value: 'Salut A' },
       });
       expect(screen.queryByText('Combat B')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('prebuilt-item-copy-btn')).not.toBeInTheDocument();
 
+      fireEvent.change(screen.getByTestId('template-filter-name'), { target: { value: '' } });
       fireEvent.click(screen.getByTestId('prebuilt-item-copy-btn'));
 
       await waitFor(() => {
@@ -632,8 +687,8 @@ describe('PresetSelector', () => {
         />,
       );
 
-      expect(screen.getByTestId('prebuilt-templates-loading')).toHaveTextContent(/Chargement/i);
-      expect(screen.queryByTestId('prebuilt-templates-empty')).not.toBeInTheDocument();
+      expect(screen.getByTestId('template-catalog-loading')).toHaveTextContent(/Chargement/i);
+      expect(screen.queryByTestId('template-catalog-empty')).not.toBeInTheDocument();
     });
   });
 
@@ -714,12 +769,12 @@ describe('PresetSelector', () => {
         target: { value: 'zzzz-inexistant' },
       });
 
-      expect(screen.getByTestId('mes-templates-no-match')).toHaveTextContent('Aucun résultat');
+      expect(screen.getByTestId('template-catalog-no-match')).toHaveTextContent('Aucun résultat');
       expect(screen.getByTestId('mes-templates-filters')).toBeInTheDocument();
-      expect(screen.getByTestId('mes-templates-active-filters')).toHaveTextContent(
+      expect(screen.getByTestId('template-catalog-active-filters')).toHaveTextContent(
         'Filtres : nom « zzzz-inexistant »',
       );
-      expect(screen.queryByTestId('mes-templates-empty')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('template-catalog-empty')).not.toBeInTheDocument();
       expect(screen.queryByTestId('template-item')).not.toBeInTheDocument();
     });
 
@@ -755,8 +810,8 @@ describe('PresetSelector', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Fermer les filtres' }));
 
       expect(screen.queryByTestId('mes-templates-filters')).not.toBeInTheDocument();
-      expect(screen.getByTestId('mes-templates-no-match')).toHaveTextContent('Aucun résultat');
-      expect(screen.getByTestId('mes-templates-active-filters')).toHaveTextContent(
+      expect(screen.getByTestId('template-catalog-no-match')).toHaveTextContent('Aucun résultat');
+      expect(screen.getByTestId('template-catalog-active-filters')).toHaveTextContent(
         'Filtres : nom « zzzz-inexistant »',
       );
     });
@@ -889,7 +944,7 @@ describe('PresetSelector', () => {
       fireEvent.change(screen.getByTestId('template-filter-name'), {
         target: { value: 'zzzz-inexistant' },
       });
-      expect(screen.getByTestId('mes-templates-no-match')).toBeInTheDocument();
+      expect(screen.getByTestId('template-catalog-no-match')).toBeInTheDocument();
 
       fireEvent.click(screen.getByRole('button', { name: /sauvegarder comme template/i }));
       fireEvent.change(await screen.findByTestId('template-form-name'), {
@@ -903,7 +958,7 @@ describe('PresetSelector', () => {
       await waitFor(() => {
         expect(mockCreateTemplate).toHaveBeenCalled();
       });
-      expect(screen.queryByTestId('mes-templates-no-match')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('template-catalog-no-match')).not.toBeInTheDocument();
       expect(screen.getByTestId('template-filter-name')).toHaveValue('');
       expect(screen.getByText('Salut A')).toBeInTheDocument();
     });

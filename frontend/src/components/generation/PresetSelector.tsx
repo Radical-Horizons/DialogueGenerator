@@ -15,13 +15,9 @@ import type { Preset, PresetConfiguration } from '../../types/preset';
 import type { Template, TemplateConfiguration, PrebuiltTemplate, TemplateSuggestion, TemplateSuggestionRequest } from '../../types/template';
 import { theme } from '../../theme';
 import {
-  redesignAccent,
   redesignControl,
   redesignDisclosureArrow,
-  redesignFont,
-  redesignHairline,
   redesignRadius,
-  redesignText,
 } from '../../theme/redesignTokens';
 import { generationPanelChrome } from '../../theme/responsiveChrome';
 import { TOUCH_TARGET_MIN_PX } from '../../constants';
@@ -33,31 +29,14 @@ import { PrebuiltTemplateModal } from './PrebuiltTemplateModal';
 import { TemplateSuggestionsModal } from './TemplateSuggestionsModal';
 import { TemplateABTestingModal } from './TemplateABTestingModal';
 import { NarrowOverlayDrawer } from '../layout/NarrowOverlayDrawer';
-import { filterTemplates, groupTemplatesByCategory, TEMPLATE_UNCATEGORIZED_LABEL } from '../../utils/templateGroups';
-import { isPrebuiltNew } from '../../utils/templateApply';
+import { TEMPLATE_UNCATEGORIZED_LABEL } from '../../utils/templateGroups';
+import { buildTemplateCatalog, filterCatalog } from '../../utils/templateCatalog';
+import type { CatalogueItem, TemplateProvenance } from '../../utils/templateCatalog';
+import { TemplateCatalogRow } from './TemplateCatalogRow';
 import { useContextStore } from '../../store/contextStore';
 import { useGenerationStore } from '../../store/generationStore';
 import { rencontreInitialeBySelectedCharacters } from '../../utils/templateSuggestionScore';
 import type { SaveStatus } from '../shared/SaveStatusIndicator';
-
-function formatTemplateDate(isoString: string): string {
-  const date = new Date(isoString);
-  if (Number.isNaN(date.getTime())) {
-    return isoString;
-  }
-  return date.toLocaleDateString('fr-FR', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-function templateLatestAt(template: Template): string | undefined {
-  const last = template.history?.at(-1)?.at;
-  return last ?? template.metadata.modified ?? template.metadata.created;
-}
 
 function formatActiveTemplateFilters(
   nameFilter: string,
@@ -75,33 +54,6 @@ function formatActiveTemplateFilters(
     parts.push(`contexte « ${contextFilter.trim()} »`);
   }
   return `Filtres : ${parts.join(' · ')}`;
-}
-
-function isSharedTemplate(template: Template): boolean {
-  return template.relation === 'team';
-}
-
-/** Seul le propriétaire décide qui voit son template. */
-function isOwnedTemplate(template: Template): boolean {
-  return template.relation === 'owned';
-}
-
-/** Pastille de statut : discrète pour « partagé » (le cas courant), marquée pour un brouillon. */
-function visibilityChipStyle(visibility: 'shared' | 'private'): React.CSSProperties {
-  const draft = visibility === 'private';
-  return {
-    appearance: 'none',
-    height: 18,
-    padding: '0 8px',
-    borderRadius: 99,
-    fontSize: '10.5px',
-    fontFamily: redesignFont.mono,
-    letterSpacing: '0.06em',
-    cursor: 'pointer',
-    border: `1px solid ${draft ? redesignAccent.ring : redesignHairline.strong}`,
-    background: draft ? redesignAccent.selectedBg : 'transparent',
-    color: draft ? redesignAccent.light : redesignText.muted,
-  };
 }
 
 function buildSuggestionRequest(
@@ -217,27 +169,41 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     locations: [],
     rencontreInitialeByCharacter: {},
   });
+  // La provenance est un filtre, pas un découpage : la liste reste une.
+  const [provenanceFilter, setProvenanceFilter] = useState<'tous' | TemplateProvenance | 'brouillons'>(
+    'tous',
+  );
   const [isAbTestOpen, setIsAbTestOpen] = useState(false);
   const [abSeedBId, setAbSeedBId] = useState('');
 
-  const ownedTemplates = useMemo(
-    () => templates.filter((template) => !isSharedTemplate(template)),
-    [templates],
+  // Une seule liste : catalogue fourni, mes templates et ceux de l'équipe. Rien n'est
+  // écarté ici — seul un filtre demandé par l'utilisateur retire des éléments. La version
+  // précédente filtrait `relation !== 'team'`, ce qui rendait invisibles les templates
+  // partagés par un collègue puisque aucune section ne les affichait.
+  const catalogue = useMemo(
+    () => buildTemplateCatalog(prebuiltTemplates, templates),
+    [prebuiltTemplates, templates],
   );
 
-  const filteredTemplates = useMemo(
+  const filteredCatalogue = useMemo(
     () =>
-      filterTemplates(ownedTemplates, {
+      filterCatalog(catalogue, {
         name: nameFilter,
         category: categoryFilter,
         context: contextFilter,
+        provenance: provenanceFilter,
       }),
-    [ownedTemplates, nameFilter, categoryFilter, contextFilter],
+    [catalogue, nameFilter, categoryFilter, contextFilter, provenanceFilter],
   );
-  const groupedTemplates = useMemo(
-    () => groupTemplatesByCategory(filteredTemplates),
-    [filteredTemplates],
-  );
+
+  const groupedCatalogue = useMemo(() => {
+    const groupes = new Map<string, CatalogueItem[]>();
+    for (const item of filteredCatalogue) {
+      const cle = item.category?.trim() || TEMPLATE_UNCATEGORIZED_LABEL;
+      groupes.set(cle, [...(groupes.get(cle) ?? []), item]);
+    }
+    return Array.from(groupes.entries());
+  }, [filteredCatalogue]);
   const categoryOptions = useMemo(() => {
     const keys = new Set(
       templates.map((template) => template.category?.trim() || TEMPLATE_UNCATEGORIZED_LABEL),
@@ -246,7 +212,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   }, [templates]);
 
   const hasActiveFilters = Boolean(
-    nameFilter.trim() || categoryFilter.trim() || contextFilter.trim(),
+    nameFilter.trim() || categoryFilter.trim() || contextFilter.trim() || provenanceFilter !== 'tous',
   );
 
   const filterInputStyle: React.CSSProperties = {
@@ -400,6 +366,14 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     setIsDeleteConfirmOpen(true);
   };
 
+  const provenanceOptions: Array<{ valeur: 'tous' | TemplateProvenance | 'brouillons'; libelle: string }> = [
+    { valeur: 'tous', libelle: 'Tous' },
+    { valeur: 'fourni', libelle: 'Fournis' },
+    { valeur: 'mien', libelle: 'Les miens' },
+    { valeur: 'brouillons', libelle: 'Mes brouillons' },
+    { valeur: 'equipe', libelle: "De l'équipe" },
+  ];
+
   const filterFields = (
     <div
       data-testid="mes-templates-filters"
@@ -412,6 +386,24 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         padding: isNarrow ? chrome.cardPadding : undefined,
       }}
     >
+      <label style={{ flex: '1 1 9rem', minWidth: isNarrow ? 0 : '9rem', color: theme.text.secondary, fontSize: `${chrome.labelFontRem}rem` }}>
+        Provenance
+        <select
+          data-testid="template-filter-provenance"
+          value={provenanceFilter}
+          onChange={(event) =>
+            setProvenanceFilter(event.target.value as 'tous' | TemplateProvenance | 'brouillons')
+          }
+          aria-label="Filtrer par provenance"
+          style={{ ...filterInputStyle, marginTop: '0.25rem' }}
+        >
+          {provenanceOptions.map((option) => (
+            <option key={option.valeur} value={option.valeur}>
+              {option.libelle}
+            </option>
+          ))}
+        </select>
+      </label>
       <label style={{ flex: '1 1 9rem', minWidth: isNarrow ? 0 : '9rem', color: theme.text.secondary, fontSize: `${chrome.labelFontRem}rem` }}>
         Nom
         <input
@@ -771,213 +763,78 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
       />
 
       <section
-        data-testid="prebuilt-templates-list"
+        data-testid="template-catalog"
         style={{
           marginTop: `${chrome.controlGapRem}rem`,
         }}
       >
-        <h3
-          style={{
-            margin: `0 0 ${chrome.controlGapRem}rem`,
-            color: theme.text.primary,
-            fontSize: `${chrome.sectionTitleFontRem}rem`,
-            fontWeight: 600,
-          }}
-        >
-          Templates pré-built
-        </h3>
-        {prebuiltError ? (
+        {isNarrow ? (
+          <>
+            <button
+              type="button"
+              data-testid="template-filters-open-btn"
+              onClick={() => setFiltersOpen(true)}
+              style={{
+                minHeight: TOUCH_TARGET_MIN_PX,
+                marginBottom: `${chrome.controlGapRem}rem`,
+                padding: chrome.buttonPadding,
+                backgroundColor: theme.button.default.background,
+                border: `1px solid ${theme.border.secondary}`,
+                borderRadius: `${redesignRadius.control}px`,
+                color: theme.button.default.color,
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontSize: `${chrome.buttonFontRem}rem`,
+                width: '100%',
+              }}
+            >
+              Filtrer
+            </button>
+            <NarrowOverlayDrawer
+              open={filtersOpen}
+              side="right"
+              titleId="template-catalog-filters-title"
+              title="Filtrer les templates"
+              closeLabel="Fermer les filtres"
+              onClose={() => setFiltersOpen(false)}
+            >
+              {filterFields}
+            </NarrowOverlayDrawer>
+          </>
+        ) : (
+          filterFields
+        )}
+
+        {prebuiltError && (
           <div data-testid="prebuilt-templates-error" style={{ color: theme.state.error.color }}>
             {prebuiltError}
           </div>
-        ) : prebuiltLoading ? (
-          <div data-testid="prebuilt-templates-loading" style={{ color: theme.text.secondary }}>
+        )}
+
+        {/* Le catalogue fourni arrive après les templates : on montre ce qu'on a déjà
+            plutôt que de remplacer la liste par un indicateur. */}
+        {prebuiltLoading && (
+          <div data-testid="template-catalog-loading" style={{ color: theme.text.secondary }}>
             Chargement…
           </div>
-        ) : prebuiltTemplates.length === 0 ? (
-          <div data-testid="prebuilt-templates-empty" style={{ color: theme.text.secondary }}>
-            Aucun template pré-built
-          </div>
-        ) : (
-          prebuiltTemplates.map((prebuilt) => (
-            <div
-              key={prebuilt.id}
-              data-testid="prebuilt-template-item"
-              data-prebuilt-id={prebuilt.id}
-              data-prebuilt-name={prebuilt.name}
-              onClick={() => setViewingPrebuilt(prebuilt)}
-              style={{
-                padding: chrome.dropdownOptionPadding,
-                border: `1px solid ${theme.border.secondary}`,
-                borderRadius: `${redesignRadius.control}px`,
-                marginBottom: '0.35rem',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '0.5rem',
-                cursor: 'pointer',
-              }}
-            >
-              <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>{prebuilt.icon}</span>
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontWeight: 600, color: theme.text.primary }}>
-                  {prebuilt.name}
-                  {isPrebuiltNew(prebuilt.addedAt) && (
-                    <span
-                      data-testid="prebuilt-new-badge"
-                      style={{
-                        marginLeft: '0.5rem',
-                        fontSize: `${chrome.labelFontRem}rem`,
-                        fontWeight: 600,
-                        color: theme.state.info?.color ?? theme.text.secondary,
-                      }}
-                    >
-                      Nouveau
-                    </span>
-                  )}
-                </div>
-                {prebuilt.description && (
-                  <div
-                    style={{
-                      fontSize: `${chrome.labelFontRem}rem`,
-                      color: theme.text.secondary,
-                    }}
-                  >
-                    {prebuilt.description}
-                  </div>
-                )}
-                <div
-                  data-testid="prebuilt-item-gdd-system"
-                  style={{
-                    fontSize: `${chrome.labelFontRem}rem`,
-                    color: theme.text.secondary,
-                  }}
-                >
-                  {prebuilt.gddSystem}
-                </div>
-                <div
-                  data-testid="prebuilt-item-scene-type"
-                  style={{
-                    fontSize: `${chrome.labelFontRem}rem`,
-                    color: theme.text.secondary,
-                  }}
-                >
-                  {prebuilt.sceneTypeHint}
-                </div>
-                <div
-                  data-testid="prebuilt-item-preview"
-                  style={{
-                    fontSize: `${chrome.labelFontRem}rem`,
-                    color: theme.text.secondary,
-                  }}
-                >
-                  {prebuilt.configuration.instructions.slice(0, 120)}
-                  {prebuilt.configuration.instructions.length > 120 ? '…' : ''}
-                </div>
-                <button
-                  type="button"
-                  data-testid="prebuilt-item-copy-btn"
-                  disabled={isCopyingPrebuilt}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    void handleCopyPrebuilt(prebuilt);
-                  }}
-                  style={{
-                    minHeight: TOUCH_TARGET_MIN_PX,
-                    marginTop: '0.5rem',
-                    padding: chrome.buttonPadding,
-                    backgroundColor: theme.button.default.background,
-                    border: `1px solid ${theme.border.secondary}`,
-                    borderRadius: `${redesignRadius.control}px`,
-                    color: theme.button.default.color,
-                    cursor: 'pointer',
-                    fontSize: `${chrome.buttonFontRem}rem`,
-                  }}
-                >
-                  Copier vers mes templates
-                </button>
-              </div>
-            </div>
-          ))
         )}
-      </section>
 
-      <section
-        data-testid="mes-templates-list"
-        style={{
-          marginTop: `${chrome.controlGapRem}rem`,
-        }}
-      >
-        <h3
-          style={{
-            margin: `0 0 ${chrome.controlGapRem}rem`,
-            color: theme.text.primary,
-            fontSize: `${chrome.sectionTitleFontRem}rem`,
-            fontWeight: 600,
-          }}
-        >
-          Mes templates
-        </h3>
-        {ownedTemplates.length > 0 &&
-          (isNarrow ? (
-            <>
-              <button
-                type="button"
-                data-testid="template-filters-open-btn"
-                onClick={() => setFiltersOpen(true)}
-                style={{
-                  minHeight: TOUCH_TARGET_MIN_PX,
-                  marginBottom: `${chrome.controlGapRem}rem`,
-                  padding: chrome.buttonPadding,
-                  backgroundColor: theme.button.default.background,
-                  border: `1px solid ${theme.border.secondary}`,
-                  borderRadius: `${redesignRadius.control}px`,
-                  color: theme.button.default.color,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  fontSize: `${chrome.buttonFontRem}rem`,
-                  width: '100%',
-                }}
-              >
-                Filtrer
-              </button>
-              <NarrowOverlayDrawer
-                open={filtersOpen}
-                side="right"
-                titleId="mes-templates-filters-title"
-                title="Filtrer les templates"
-                closeLabel="Fermer les filtres"
-                onClose={() => setFiltersOpen(false)}
-              >
-                {filterFields}
-              </NarrowOverlayDrawer>
-            </>
-          ) : (
-            filterFields
-          ))}
-        {templateError && ownedTemplates.length === 0 ? null : ownedTemplates.length === 0 ? (
-          <div
-            data-testid="mes-templates-empty"
-            style={{
-              fontSize: `${chrome.labelFontRem}rem`,
-              color: theme.text.secondary,
-            }}
-          >
-            Aucun template sauvegardé
-          </div>
-        ) : filteredTemplates.length === 0 ? (
+        {catalogue.length === 0 ? (
+          // Une erreur de chargement se dit une fois, en haut : ne pas la doubler d'un
+          // « rien à afficher » qui laisserait croire que la liste est simplement vide.
+          templateError || prebuiltError ? null : (
+            <div data-testid="template-catalog-empty" style={{ color: theme.text.secondary }}>
+              Vos templates et ceux de l'équipe s'afficheront ici.
+            </div>
+          )
+        ) : filteredCatalogue.length === 0 ? (
           <>
-            <div
-              data-testid="mes-templates-no-match"
-              style={{
-                fontSize: `${chrome.labelFontRem}rem`,
-                color: theme.text.secondary,
-              }}
-            >
+            <div data-testid="template-catalog-no-match" style={{ color: theme.text.secondary }}>
               Aucun résultat
             </div>
             {hasActiveFilters && (
               <div
-                data-testid="mes-templates-active-filters"
+                data-testid="template-catalog-active-filters"
                 style={{
                   fontSize: `${chrome.labelFontRem}rem`,
                   color: theme.text.secondary,
@@ -989,7 +846,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
             )}
           </>
         ) : (
-          groupedTemplates.map(([category, items]) => (
+          groupedCatalogue.map(([category, items]) => (
             <div
               key={category}
               data-testid="template-category-group"
@@ -1006,152 +863,34 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
               >
                 {category}
               </div>
-              {items.map((template: Template) => {
-                const modifiedAt = templateLatestAt(template)
-                return (
-                <div
-                  key={template.id}
-                  data-testid="template-item"
-                  data-template-name={template.name}
-                  data-template-category={template.category}
-                  onClick={() => onTemplateLoaded?.(template)}
-                  style={{
-                    padding: chrome.dropdownOptionPadding,
-                    border: `1px solid ${theme.border.secondary}`,
-                    borderRadius: `${redesignRadius.control}px`,
-                    marginBottom: '0.35rem',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '0.5rem',
-                    cursor: 'pointer',
+              {items.map((item) => (
+                <TemplateCatalogRow
+                  key={item.key}
+                  item={item}
+                  chrome={chrome}
+                  copying={isCopyingPrebuilt}
+                  onOpen={(cible) => {
+                    if (cible.source.kind === 'prebuilt') {
+                      setViewingPrebuilt(cible.source.value);
+                    } else {
+                      onTemplateLoaded?.(cible.source.value);
+                    }
                   }}
-                >
-                  <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>{template.icon}</span>
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'baseline',
-                        gap: 9,
-                        flexWrap: 'wrap',
-                      }}
-                    >
-                      <span style={{ fontWeight: 600, color: theme.text.primary }}>
-                        {template.name}
-                      </span>
-                      {/* Le statut n'est modifiable que par le propriétaire : un collègue
-                          peut lire et appliquer, pas décider qui voit. */}
-                      {isOwnedTemplate(template) ? (
-                        <button
-                          type="button"
-                          data-testid="template-visibility-toggle"
-                          data-visibility={template.visibility ?? 'shared'}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            void handleToggleVisibility(template);
-                          }}
-                          title={
-                            (template.visibility ?? 'shared') === 'private'
-                              ? 'Brouillon visible de vous seul — cliquer pour partager'
-                              : "Visible de l'équipe — cliquer pour repasser en brouillon"
-                          }
-                          style={visibilityChipStyle(template.visibility ?? 'shared')}
-                        >
-                          {(template.visibility ?? 'shared') === 'private' ? 'privé' : 'partagé'}
-                        </button>
-                      ) : null}
-                    </div>
-                    {template.description && (
-                      <div
-                        style={{
-                          fontSize: `${chrome.labelFontRem}rem`,
-                          color: theme.text.secondary,
-                        }}
-                      >
-                        {template.description}
-                      </div>
-                    )}
-                    {modifiedAt && (
-                      <div
-                        data-testid="template-item-modified"
-                        style={{
-                          fontSize: `${chrome.labelFontRem}rem`,
-                          color: theme.text.secondary,
-                        }}
-                      >
-                        Modifié le {formatTemplateDate(modifiedAt)}
-                      </div>
-                    )}
-                    <div
-                      style={{
-                        fontSize: `${chrome.labelFontRem}rem`,
-                        color: theme.text.secondary,
-                      }}
-                    >
-                      {template.configuration.characters.length > 0
-                        ? `Contexte : ${template.configuration.characters.join(', ')}`
-                        : 'Contexte : —'}
-                      {template.configuration.locations.length > 0
-                        ? ` · ${template.configuration.locations.join(', ')}`
-                        : ''}
-                    </div>
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '0.35rem',
-                        marginTop: '0.5rem',
-                      }}
-                    >
-                      <button
-                        type="button"
-                        data-testid="template-item-edit-btn"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setEditingTemplate(template);
-                        }}
-                        style={{
-                          minHeight: TOUCH_TARGET_MIN_PX,
-                          padding: chrome.buttonPadding,
-                          backgroundColor: theme.button.default.background,
-                          border: `1px solid ${theme.border.secondary}`,
-                          borderRadius: `${redesignRadius.control}px`,
-                          color: theme.button.default.color,
-                          cursor: 'pointer',
-                          fontSize: `${chrome.buttonFontRem}rem`,
-                        }}
-                      >
-                        Éditer
-                      </button>
-                      <button
-                        type="button"
-                        data-testid="template-item-delete-btn"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setDeletingTemplate(template);
-                        }}
-                        style={{
-                          minHeight: TOUCH_TARGET_MIN_PX,
-                          padding: chrome.buttonPadding,
-                          backgroundColor: theme.button.default.background,
-                          border: `1px solid ${theme.border.secondary}`,
-                          borderRadius: `${redesignRadius.control}px`,
-                          color: theme.state.error.color,
-                          cursor: 'pointer',
-                          fontSize: `${chrome.buttonFontRem}rem`,
-                        }}
-                      >
-                        Supprimer
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                )
-              })}
+                  onToggleVisibility={(template) => {
+                    void handleToggleVisibility(template);
+                  }}
+                  onEdit={(template) => setEditingTemplate(template)}
+                  onDelete={(template) => setDeletingTemplate(template)}
+                  onCopyPrebuilt={(prebuilt) => {
+                    void handleCopyPrebuilt(prebuilt);
+                  }}
+                />
+              ))}
             </div>
           ))
         )}
       </section>
+
 
 
       {/* Modal confirmation suppression */}

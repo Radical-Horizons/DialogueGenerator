@@ -17,7 +17,7 @@ function includesInsensitive(haystack: string, needle: string): boolean {
   return haystack.toLocaleLowerCase().includes(needle.toLocaleLowerCase())
 }
 
-function templateCategoryKey(template: Template): string {
+export function templateCategoryKey(template: Template): string {
   return template.category?.trim() || TEMPLATE_UNCATEGORIZED_LABEL
 }
 
@@ -41,7 +41,7 @@ function collectContextValue(value: unknown, into: string[]): void {
   }
 }
 
-function snapshotContextTokens(template: Template): string[] {
+export function snapshotContextTokens(template: Template): string[] {
   const cfg = template.configuration
   const tokens: string[] = [
     ...cfg.characters,
