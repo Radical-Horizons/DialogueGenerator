@@ -1,10 +1,10 @@
 /**
- * Une ligne du catalogue unifié de templates.
+ * Une ligne du catalogue de templates.
  *
- * La provenance décide de ce que la ligne offre — pas la section dans laquelle elle se
- * trouve, puisqu'il n'y en a plus qu'une. Un template d'équipe s'applique mais ne s'édite
- * ni ne se supprime ; une fiche fournie se copie ; seuls les miens portent une pastille
- * de statut cliquable.
+ * Ce que je vois, je peux le modifier : un template partagé appartient à l'équipe qui
+ * le voit, un template privé n'est visible que de son auteur. Le statut porte déjà
+ * toute la frontière — ajouter un verrou de propriété par-dessus rendait la moitié de
+ * la liste inerte, y compris pour un admin.
  */
 import React from 'react';
 import type { CatalogueItem } from '../../utils/templateCatalog';
@@ -28,6 +28,8 @@ type Chrome =
 export interface TemplateCatalogRowProps {
   item: CatalogueItem;
   chrome: Chrome;
+  /** Session sans droit d'écriture (invité) : la liste se consulte, rien de plus. */
+  readOnly: boolean;
   onOpen: (item: CatalogueItem) => void;
   onToggleVisibility: (template: Template) => void;
   onEdit: (template: Template) => void;
@@ -85,6 +87,7 @@ function derniereModification(template: Template): string | undefined {
 export function TemplateCatalogRow({
   item,
   chrome,
+  readOnly,
   onOpen,
   onToggleVisibility,
   onEdit,
@@ -99,7 +102,6 @@ export function TemplateCatalogRow({
   return (
     <div
       data-testid={fourni ? 'prebuilt-template-item' : 'template-item'}
-      data-catalogue-mine={item.mine ? 'oui' : 'non'}
       data-catalogue-badge={item.badge}
       {...(fourni
         ? { 'data-prebuilt-id': item.id, 'data-prebuilt-name': item.name }
@@ -121,9 +123,8 @@ export function TemplateCatalogRow({
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 9, flexWrap: 'wrap' }}>
           <span style={{ fontWeight: 600, color: theme.text.primary }}>{item.name}</span>
 
-          {/* Seul le propriétaire décide qui voit son template : pour les autres la
-              pastille informe, elle n'agit pas. */}
-          {item.mine ? (
+          {/* Le statut se bascule depuis la pastille, sur n'importe quelle ligne. */}
+          {item.source.kind === 'custom' && !readOnly ? (
             <button
               type="button"
               data-testid="template-visibility-toggle"
@@ -196,9 +197,7 @@ export function TemplateCatalogRow({
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.5rem' }}>
 
-          {/* Un template d'équipe s'applique, il ne se modifie pas : le proposer puis
-              refuser côté serveur serait une promesse que l'écran ne peut pas tenir. */}
-          {item.mine && item.source.kind === 'custom' && (
+          {item.source.kind === 'custom' && !readOnly && (
             <>
               <button
                 type="button"

@@ -28,8 +28,6 @@ export interface CatalogueItem {
   visibility: TemplateVisibility
   /** Ce que lit l'utilisateur : « partagé » ou « privé ». */
   badge: string
-  /** Décide des actions offertes — jamais de l'affichage du statut. */
-  mine: boolean
   /** L'objet d'origine, pour les actions de la ligne. */
   source:
     | { kind: 'prebuilt'; value: PrebuiltTemplate }
@@ -65,7 +63,6 @@ function fromPrebuilt(prebuilt: PrebuiltTemplate): CatalogueItem {
     icon: prebuilt.icon,
     visibility: 'shared',
     badge: badgeFor('shared'),
-    mine: false,
     source: { kind: 'prebuilt', value: prebuilt },
   }
 }
@@ -81,7 +78,6 @@ function fromTemplate(template: Template): CatalogueItem {
     icon: template.icon,
     visibility,
     badge: badgeFor(visibility),
-    mine: template.relation === 'owned',
     source: { kind: 'custom', value: template },
   }
 }

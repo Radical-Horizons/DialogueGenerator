@@ -114,26 +114,35 @@ def test_owner_switches_visibility_both_ways(client: TestClient) -> None:
 
 
 @pytest.mark.p0
-def test_non_owner_cannot_change_visibility(client: TestClient) -> None:
-    """Given un profil partagé d'autrui, when j'en change le statut, then 403."""
+def test_shared_item_is_editable_by_whoever_sees_it(client: TestClient) -> None:
+    """Given un profil partagé, when un collègue le modifie, then 200.
+
+    Le statut porte toute la frontière : ce qui est partagé appartient à l'équipe qui
+    le voit. Une règle de propriété par-dessus rendait la moitié de la liste inerte,
+    y compris pour un admin.
+    """
     profile_id = client.post("/api/v1/author-profiles", json=_payload()).json()["id"]
 
     app.dependency_overrides[get_current_user] = lambda: _user("writer-b")
-    refused = client.put(
+    modifie = client.put(
         f"/api/v1/author-profiles/{profile_id}", json={"visibility": "private"}
     )
-    assert refused.status_code == 403
+    assert modifie.status_code == 200
 
 
-def test_non_owner_cannot_edit_or_delete(client: TestClient) -> None:
-    """Given un profil partagé d'autrui, when je modifie ou supprime, then 403."""
+def test_shared_profile_is_editable_and_deletable_by_the_team(client: TestClient) -> None:
+    """Given un profil partagé, when un collègue le modifie ou le supprime, then 200/204.
+
+    Ce qui est partagé appartient à l'équipe qui le voit. Un privé reste invisible des
+    autres, donc protégé par sa seule visibilité — c'est le test voisin qui le couvre.
+    """
     profile_id = client.post("/api/v1/author-profiles", json=_payload()).json()["id"]
 
     app.dependency_overrides[get_current_user] = lambda: _user("writer-b")
     assert client.put(
-        f"/api/v1/author-profiles/{profile_id}", json={"name": "Détourné"}
-    ).status_code == 403
-    assert client.delete(f"/api/v1/author-profiles/{profile_id}").status_code == 403
+        f"/api/v1/author-profiles/{profile_id}", json={"name": "Renommé par un collègue"}
+    ).status_code == 200
+    assert client.delete(f"/api/v1/author-profiles/{profile_id}").status_code == 204
 
 
 def test_owner_updates_and_deletes(client: TestClient) -> None:

@@ -105,17 +105,15 @@ class OwnedItemAccessService:
         return self.relation(item, current_user) is not None
 
     def can_write(self, item: OwnedVisibleItem, current_user: Mapping[str, object]) -> bool:
-        """Mutation : propriétaire ou admin.
+        """Qui peut le voir peut le modifier.
 
-        Un objet sans ``ownerId`` (legacy) reste lisible mais n'est mutable que par un
-        admin : personne ne revendique l'écriture sur ce que nul ne possède.
+        Le statut porte déjà toute la frontière : un objet ``private`` n'est lisible que
+        par son auteur, donc lui seul l'écrit ; un objet ``shared`` appartient à l'équipe
+        qui le voit, donc elle l'édite. Superposer une règle de propriété à un statut de
+        visibilité ajoutait une seconde frontière là où une seule a du sens — et rendait
+        intouchables les objets dont le propriétaire n'existe plus.
         """
-        if self._is_admin(current_user):
-            return True
-        owner = self._owner_id(item)
-        if owner is None:
-            return False
-        return owner == self._actor_id(current_user)
+        return self.can_read(item, current_user)
 
     def can_delete(self, item: OwnedVisibleItem, current_user: Mapping[str, object]) -> bool:
         """Suppression : mêmes droits que l'écriture."""
@@ -124,7 +122,7 @@ class OwnedItemAccessService:
     def can_change_visibility(
         self, item: OwnedVisibleItem, current_user: Mapping[str, object]
     ) -> bool:
-        """Statut privé/partagé : propriétaire ou admin."""
+        """Statut privé/partagé : mêmes droits que l'écriture."""
         return self.can_write(item, current_user)
 
     def annotate(self, item: ItemT, current_user: Mapping[str, object]) -> ItemT:

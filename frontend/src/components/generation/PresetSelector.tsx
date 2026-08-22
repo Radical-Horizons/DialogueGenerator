@@ -33,6 +33,7 @@ import { TEMPLATE_UNCATEGORIZED_LABEL } from '../../utils/templateGroups';
 import { buildTemplateCatalog, filterCatalog } from '../../utils/templateCatalog';
 import type { CatalogueItem, TemplateVisibility } from '../../utils/templateCatalog';
 import { TemplateCatalogRow } from './TemplateCatalogRow';
+import { useAuthStore } from '../../store/authStore';
 import { useContextStore } from '../../store/contextStore';
 import { useGenerationStore } from '../../store/generationStore';
 import { rencontreInitialeBySelectedCharacters } from '../../utils/templateSuggestionScore';
@@ -121,6 +122,9 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
 }) => {
   const isNarrow = useGenerationPanelNarrow();
   const chrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable;
+  // Un invité consulte : proposer une action que le serveur refusera serait une
+  // promesse que l'écran ne peut pas tenir.
+  const readOnly = useAuthStore((s) => s.user?.role === 'guest');
   const {
     presets,
     selectedPreset,
@@ -828,6 +832,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                   key={item.key}
                   item={item}
                   chrome={chrome}
+                  readOnly={readOnly}
                   onOpen={(cible) => {
                     if (cible.source.kind === 'prebuilt') {
                       setViewingPrebuilt(cible.source.value);

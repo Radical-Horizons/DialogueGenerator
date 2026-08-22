@@ -75,7 +75,7 @@ describe('buildTemplateCatalog', () => {
     const items = buildTemplateCatalog([], [template(), collegue])
 
     expect(cle(items)).toContain('uuid-team')
-    expect(items.find((i) => i.key === 'uuid-team')?.mine).toBe(false)
+    expect(items.find((i) => i.key === 'uuid-team')?.badge).toBe('partagé')
   })
 
   it('marque mon brouillon « privé » et mon template partagé « partagé »', () => {
@@ -97,14 +97,12 @@ describe('buildTemplateCatalog', () => {
     // Une fiche livrée est un template partagé, pas une espèce à part.
     expect(item.badge).toBe('partagé')
     expect(item.visibility).toBe('shared')
-    expect(item.mine).toBe(false)
     expect(item.source.kind).toBe('prebuilt')
   })
 
-  it('rend un template sans propriétaire comme partagé et non éditable', () => {
+  it('rend un template sans propriétaire comme partagé', () => {
     const [item] = buildTemplateCatalog([], [template({ relation: 'legacy', ownerId: null })])
 
-    expect(item.mine).toBe(false)
     expect(item.badge).toBe('partagé')
   })
 

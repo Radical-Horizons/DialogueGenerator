@@ -324,7 +324,7 @@ describe('PresetSelector', () => {
      * et aucune section ne l'affichait — donc invisible, alors que « partagé » est le
      * statut par défaut. Ce test échoue sur l'implémentation précédente.
      */
-    it("affiche le template partagé d'un collègue, sans bouton éditer ni supprimer", () => {
+    it("affiche et rend éditable le template partagé d'un collègue", () => {
       mockTemplateStore([
         ...mockTemplates,
         {
@@ -353,13 +353,14 @@ describe('PresetSelector', () => {
         .find((el) => el.getAttribute('data-template-name') === 'Négociation collègue');
 
       expect(ligne).toBeDefined();
-      expect(ligne).toHaveAttribute('data-catalogue-mine', 'non');
       expect(ligne).toHaveAttribute('data-catalogue-badge', 'partagé');
 
-      // Un template d'équipe s'applique, il ne se modifie pas.
-      expect(within(ligne as HTMLElement).queryByTestId('template-item-edit-btn')).toBeNull();
-      expect(within(ligne as HTMLElement).queryByTestId('template-item-delete-btn')).toBeNull();
-      expect(within(ligne as HTMLElement).queryByTestId('template-visibility-toggle')).toBeNull();
+      // Ce qui est partagé appartient à l'équipe qui le voit : elle l'édite. Un verrou
+      // de propriété par-dessus rendait la moitié de la liste inerte, admin compris.
+      const dansLaLigne = within(ligne as HTMLElement);
+      expect(dansLaLigne.getByTestId('template-item-edit-btn')).toBeInTheDocument();
+      expect(dansLaLigne.getByTestId('template-item-delete-btn')).toBeInTheDocument();
+      expect(dansLaLigne.getByTestId('template-visibility-toggle')).toBeInTheDocument();
     });
 
     it('groupe les templates par catégorie dans la liste unique', () => {

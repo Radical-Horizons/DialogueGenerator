@@ -156,16 +156,18 @@ def test_owner_can_switch_visibility_both_ways(client: TestClient) -> None:
 
 
 @pytest.mark.p0
-def test_non_owner_cannot_change_visibility(client: TestClient) -> None:
-    """Given un template partagé d'autrui, when j'en change le statut, then 403.
+def test_shared_item_is_editable_by_whoever_sees_it(client: TestClient) -> None:
+    """Given un template partagé, when un collègue le modifie, then 200.
 
-    Un collègue peut le lire et l'appliquer ; décider qui le voit reste au propriétaire.
+    Le statut porte toute la frontière : ce qui est partagé appartient à l'équipe qui
+    le voit. Une règle de propriété par-dessus rendait la moitié de la liste inerte,
+    y compris pour un admin.
     """
     template_id = client.post("/api/v1/templates", json=_payload()).json()["id"]
 
     app.dependency_overrides[get_current_user] = lambda: _user("writer-b")
-    refused = client.put(f"/api/v1/templates/{template_id}", json={"visibility": "private"})
-    assert refused.status_code == 403
+    modifie = client.put(f"/api/v1/templates/{template_id}", json={"visibility": "private"})
+    assert modifie.status_code == 200
 
 
 def test_admin_can_change_visibility(client: TestClient) -> None:

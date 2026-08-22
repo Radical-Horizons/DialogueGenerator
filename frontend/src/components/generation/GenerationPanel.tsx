@@ -1237,6 +1237,8 @@ export function GenerationPanel() {
               cursor: isGeneratePrimaryDisabled ? 'not-allowed' : 'pointer',
               opacity: isGeneratePrimaryDisabled ? 0.6 : 1,
               flexShrink: 0,
+              // Dernier de la rangée : sans cette marge il touche le bord du panneau.
+              marginRight: 9,
             }}
           >
             × {optionCount}
