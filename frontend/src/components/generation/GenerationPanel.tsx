@@ -29,6 +29,7 @@ import { GenerationStreamingInline } from './GenerationStreamingInline'
 import { ModelEffortPicker } from './ModelEffortPicker'
 import { ModelSelector } from './ModelSelector'
 import { PresetSelector } from './PresetSelector'
+import { BriefTemplateSaver } from './BriefTemplateSaver'
 import { GenerationSettingsDrawer } from './GenerationSettingsDrawer'
 import { GenerationInputTabs } from './GenerationInputTabs'
 import { useGenerationInputTab } from '../../hooks/useGenerationInputTab'
@@ -758,13 +759,16 @@ export function GenerationPanel() {
 
         <div data-testid="generation-input-panel">
           {activeInputTab === 'brief' && (
-            <SystemPromptEditor
-              userInstructions={userInstructions}
-              onUserInstructionsChange={(value) => {
-                setUserInstructions(value)
-                draft.markDirty()
-              }}
-            />
+            <>
+              <SystemPromptEditor
+                userInstructions={userInstructions}
+                onUserInstructionsChange={(value) => {
+                  setUserInstructions(value)
+                  draft.markDirty()
+                }}
+              />
+              <BriefTemplateSaver getConfiguration={presets.getCurrentConfiguration} />
+            </>
           )}
           {activeInputTab === 'flags' && <DialogueFlagsPanel />}
           {activeInputTab === 'templates' && (

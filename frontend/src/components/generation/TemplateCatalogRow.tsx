@@ -3,8 +3,8 @@
  *
  * Ce que je vois, je peux le modifier : un template partagé appartient à l'équipe qui
  * le voit, un template privé n'est visible que de son auteur. Le statut porte déjà
- * toute la frontière — ajouter un verrou de propriété par-dessus rendait la moitié de
- * la liste inerte, y compris pour un admin.
+ * toute la frontière — un verrou de propriété par-dessus rendait la moitié de la liste
+ * inerte, y compris pour un admin.
  */
 import React from 'react';
 import type { CatalogueItem } from '../../utils/templateCatalog';
@@ -19,7 +19,6 @@ import {
 } from '../../theme/redesignTokens';
 import { generationPanelChrome } from '../../theme/responsiveChrome';
 import { TOUCH_TARGET_MIN_PX } from '../../constants';
-import { isPrebuiltNew } from '../../utils/templateApply';
 
 type Chrome =
   | typeof generationPanelChrome.comfortable
@@ -30,7 +29,7 @@ export interface TemplateCatalogRowProps {
   chrome: Chrome;
   /** Session sans droit d'écriture (invité) : la liste se consulte, rien de plus. */
   readOnly: boolean;
-  onOpen: (item: CatalogueItem) => void;
+  onApply: (template: Template) => void;
   onToggleVisibility: (template: Template) => void;
   onEdit: (template: Template) => void;
   onDelete: (template: Template) => void;
@@ -81,32 +80,32 @@ function formatDate(isoString: string): string {
 }
 
 function derniereModification(template: Template): string | undefined {
-  return template.history?.at(-1)?.at ?? template.metadata.modified ?? template.metadata.created;
+  return template.history?.at(-1)?.at ?? template.metadata?.modified ?? template.metadata?.created;
 }
 
 export function TemplateCatalogRow({
   item,
   chrome,
   readOnly,
-  onOpen,
+  onApply,
   onToggleVisibility,
   onEdit,
   onDelete,
 }: TemplateCatalogRowProps): React.ReactElement {
-  const fourni = item.source.kind === 'prebuilt';
   const secondaire: React.CSSProperties = {
     fontSize: `${chrome.labelFontRem}rem`,
     color: theme.text.secondary,
   };
+  const modifieLe = derniereModification(item.template);
+  const { characters, locations } = item.template.configuration;
 
   return (
     <div
-      data-testid={fourni ? 'prebuilt-template-item' : 'template-item'}
+      data-testid="template-item"
+      data-template-name={item.name}
+      data-template-category={item.category}
       data-catalogue-badge={item.badge}
-      {...(fourni
-        ? { 'data-prebuilt-id': item.id, 'data-prebuilt-name': item.name }
-        : { 'data-template-name': item.name, 'data-template-category': item.category })}
-      onClick={() => onOpen(item)}
+      onClick={() => onApply(item.template)}
       style={{
         padding: chrome.dropdownOptionPadding,
         border: `1px solid ${theme.border.secondary}`,
@@ -124,14 +123,18 @@ export function TemplateCatalogRow({
           <span style={{ fontWeight: 600, color: theme.text.primary }}>{item.name}</span>
 
           {/* Le statut se bascule depuis la pastille, sur n'importe quelle ligne. */}
-          {item.source.kind === 'custom' && !readOnly ? (
+          {readOnly ? (
+            <span data-testid="catalogue-badge" style={chipStyle(false, false)}>
+              {item.badge}
+            </span>
+          ) : (
             <button
               type="button"
               data-testid="template-visibility-toggle"
-              data-visibility={item.visibility ?? 'shared'}
+              data-visibility={item.visibility}
               onClick={(event) => {
                 event.stopPropagation();
-                if (item.source.kind === 'custom') onToggleVisibility(item.source.value);
+                onToggleVisibility(item.template);
               }}
               title={
                 item.visibility === 'private'
@@ -142,88 +145,48 @@ export function TemplateCatalogRow({
             >
               {item.badge}
             </button>
-          ) : (
-            <span data-testid="catalogue-badge" style={chipStyle(false, false)}>
-              {item.badge}
-            </span>
-          )}
-
-          {item.source.kind === 'prebuilt' && isPrebuiltNew(item.source.value.addedAt) && (
-            <span
-              data-testid="prebuilt-new-badge"
-              style={{
-                fontSize: `${chrome.labelFontRem}rem`,
-                fontWeight: 600,
-                color: theme.state.info?.color ?? theme.text.secondary,
-              }}
-            >
-              Nouveau
-            </span>
           )}
         </div>
 
         {item.description && <div style={secondaire}>{item.description}</div>}
 
-        {item.source.kind === 'prebuilt' ? (
-          <>
-            <div data-testid="prebuilt-item-gdd-system" style={secondaire}>
-              {item.source.value.gddSystem}
-            </div>
-            <div data-testid="prebuilt-item-scene-type" style={secondaire}>
-              {item.source.value.sceneTypeHint}
-            </div>
-            <div data-testid="prebuilt-item-preview" style={secondaire}>
-              {item.source.value.configuration.instructions.slice(0, 120)}
-              {item.source.value.configuration.instructions.length > 120 ? '…' : ''}
-            </div>
-          </>
-        ) : (
-          <>
-            {derniereModification(item.source.value) && (
-              <div data-testid="template-item-modified" style={secondaire}>
-                Modifié le {formatDate(derniereModification(item.source.value) as string)}
-              </div>
-            )}
-            <div style={secondaire}>
-              {item.source.value.configuration.characters.length > 0
-                ? `Contexte : ${item.source.value.configuration.characters.join(', ')}`
-                : 'Contexte : —'}
-              {item.source.value.configuration.locations.length > 0
-                ? ` · ${item.source.value.configuration.locations.join(', ')}`
-                : ''}
-            </div>
-          </>
+        {modifieLe && (
+          <div data-testid="template-item-modified" style={secondaire}>
+            Modifié le {formatDate(modifieLe)}
+          </div>
         )}
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.5rem' }}>
-
-          {item.source.kind === 'custom' && !readOnly && (
-            <>
-              <button
-                type="button"
-                data-testid="template-item-edit-btn"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  if (item.source.kind === 'custom') onEdit(item.source.value);
-                }}
-                style={boutonStyle(chrome)}
-              >
-                Éditer
-              </button>
-              <button
-                type="button"
-                data-testid="template-item-delete-btn"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  if (item.source.kind === 'custom') onDelete(item.source.value);
-                }}
-                style={boutonStyle(chrome, theme.state.error.color)}
-              >
-                Supprimer
-              </button>
-            </>
-          )}
+        <div style={secondaire}>
+          {characters.length > 0 ? `Contexte : ${characters.join(', ')}` : 'Contexte : —'}
+          {locations.length > 0 ? ` · ${locations.join(', ')}` : ''}
         </div>
+
+        {!readOnly && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.5rem' }}>
+            <button
+              type="button"
+              data-testid="template-item-edit-btn"
+              onClick={(event) => {
+                event.stopPropagation();
+                onEdit(item.template);
+              }}
+              style={boutonStyle(chrome)}
+            >
+              Éditer
+            </button>
+            <button
+              type="button"
+              data-testid="template-item-delete-btn"
+              onClick={(event) => {
+                event.stopPropagation();
+                onDelete(item.template);
+              }}
+              style={boutonStyle(chrome, theme.state.error.color)}
+            >
+              Supprimer
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -15,8 +15,6 @@ import type { Preset, PresetConfiguration } from '../../types/preset';
 import type { Template, TemplateConfiguration, PrebuiltTemplate, TemplateSuggestion, TemplateSuggestionRequest } from '../../types/template';
 import { theme } from '../../theme';
 import {
-  redesignControl,
-  redesignDisclosureArrow,
   redesignRadius,
 } from '../../theme/redesignTokens';
 import { generationPanelChrome } from '../../theme/responsiveChrome';
@@ -112,7 +110,6 @@ export interface PresetSelectorProps {
 }
 
 export const PresetSelector: React.FC<PresetSelectorProps> = ({
-  onPresetLoaded,
   onTemplateLoaded,
   onPrebuiltLoaded,
   onSuggestionLoaded,
@@ -126,14 +123,9 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   // promesse que l'écran ne peut pas tenir.
   const readOnly = useAuthStore((s) => s.user?.role === 'guest');
   const {
-    presets,
-    selectedPreset,
-    isLoading,
     error,
     loadPresets,
-    updatePreset,
     deletePreset,
-    setSelectedPreset,
   } = usePresetStore();
   const {
     templates,
@@ -147,8 +139,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     deleteTemplate,
   } = useTemplateStore();
   const toast = useToast();
-
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [presetToDelete, setPresetToDelete] = useState<Preset | null>(null);
@@ -156,7 +146,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
   const [deletingTemplate, setDeletingTemplate] = useState<Template | null>(null);
   const [viewingPrebuilt, setViewingPrebuilt] = useState<PrebuiltTemplate | null>(null);
-  const [isUpdatingPreset, setIsUpdatingPreset] = useState(false);
   const [nameFilter, setNameFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [contextFilter, setContextFilter] = useState('');
@@ -179,10 +168,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   // écarté ici — seul un filtre demandé par l'utilisateur retire des éléments. La version
   // précédente filtrait `relation !== 'team'`, ce qui rendait invisibles les templates
   // partagés par un collègue puisque aucune section ne les affichait.
-  const catalogue = useMemo(
-    () => buildTemplateCatalog(prebuiltTemplates, templates),
-    [prebuiltTemplates, templates],
-  );
+  const catalogue = useMemo(() => buildTemplateCatalog(templates), [templates]);
 
   const filteredCatalogue = useMemo(
     () =>
@@ -239,11 +225,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
       });
   }, [loadPresets, loadTemplates, loadPrebuiltTemplates]);
 
-  const handlePresetSelect = (preset: Preset) => {
-    setSelectedPreset(preset);
-    onPresetLoaded(preset);
-    setIsDropdownOpen(false);
-  };
 
   const captureTemplateSnapshot = (): TemplateConfiguration | null => {
     const cfg = currentConfiguration || getCurrentConfiguration?.() || null;
@@ -289,22 +270,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     setViewingPrebuilt(null);
   };
 
-  const handleUpdatePreset = async () => {
-    const configToSave = currentConfiguration || getCurrentConfiguration?.() || null;
-    if (!selectedPreset || !configToSave) return;
-
-    setIsUpdatingPreset(true);
-    try {
-      await updatePreset(selectedPreset.id, {
-        configuration: configToSave,
-      });
-      toast('Preset enregistré avec succès', 'success');
-    } catch (error) {
-      // Error already handled by store
-    } finally {
-      setIsUpdatingPreset(false);
-    }
-  };
 
   const handleDeletePreset = async () => {
     if (!presetToDelete) return;
@@ -332,11 +297,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     }
   };
 
-  const openDeleteConfirm = (preset: Preset, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setPresetToDelete(preset);
-    setIsDeleteConfirmOpen(true);
-  };
 
   const visibilityOptions: Array<{ valeur: 'tous' | TemplateVisibility; libelle: string }> = [
     { valeur: 'tous', libelle: 'Tous' },
@@ -443,178 +403,6 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           alignItems: 'center',
         }}
       >
-        {/* Dropdown "Charger preset" */}
-        <div
-          style={{
-            position: 'relative',
-            flex: isNarrow ? '1 1 100%' : '1',
-            minWidth: 0,
-          }}
-        >
-          <button
-            type="button"
-            data-testid="preset-dropdown-trigger"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            style={{
-              width: '100%',
-              padding: chrome.buttonPadding,
-              backgroundColor: theme.background.secondary,
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: '4px',
-              color: theme.text.primary,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              fontSize: `${chrome.buttonFontRem}rem`,
-              boxSizing: 'border-box',
-            }}
-          >
-            <span>Charger preset</span>
-            <span
-              aria-hidden
-              style={{ fontSize: redesignDisclosureArrow.solid, lineHeight: 1 }}
-            >
-              {isDropdownOpen ? '▲' : '▼'}
-            </span>
-          </button>
-
-          {/* Dropdown menu */}
-          {isDropdownOpen && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 'calc(100% + 0.25rem)',
-                left: 0,
-                right: 0,
-                backgroundColor: theme.background.panel,
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '4px',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                zIndex: 1000,
-                maxHeight: '300px',
-                overflowY: 'auto',
-              }}
-            >
-              {isLoading && (
-                <div style={{ padding: '1rem', textAlign: 'center', color: theme.text.secondary }}>
-                  Chargement...
-                </div>
-              )}
-
-              {!isLoading && presets.length === 0 && (
-                <div style={{ padding: '1rem', textAlign: 'center', color: theme.text.secondary }}>
-                  Aucun preset sauvegardé
-                </div>
-              )}
-
-              {!isLoading &&
-                presets.map((preset) => (
-                  <div
-                    key={preset.id}
-                    data-testid="preset-item"
-                    data-preset-name={preset.name}
-                    style={{
-                      padding: '0.75rem 1rem',
-                      cursor: 'pointer',
-                      borderBottom: `1px solid ${theme.border.secondary}`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = theme.background.secondary;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    <div
-                      onClick={() => handlePresetSelect(preset)}
-                      style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                    >
-                      <span style={{ fontSize: '1.25rem' }}>{preset.icon}</span>
-                      <div>
-                        <div style={{ fontWeight: 'bold', color: theme.text.primary }}>
-                          {preset.name}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: theme.text.secondary }}>
-                          {preset.configuration.characters.length} perso(s),{' '}
-                          {preset.configuration.locations.length} lieu(x)
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Menu contextuel : Supprimer */}
-                    <button
-                      onClick={(e) => openDeleteConfirm(preset, e)}
-                      style={{
-                        padding: '0.25rem 0.5rem',
-                        backgroundColor: 'transparent',
-                      border: 'none',
-                      color: theme.state.error.color,
-                      cursor: 'pointer',
-                        fontSize: '0.875rem',
-                      }}
-                      title="Supprimer"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                ))}
-            </div>
-          )}
-        </div>
-
-        {/* Bouton "Enregistrer" */}
-        <button
-          type="button"
-          data-testid="preset-save-btn"
-          onClick={handleUpdatePreset}
-          disabled={!selectedPreset || (!currentConfiguration && !getCurrentConfiguration) || isUpdatingPreset}
-          title={selectedPreset ? `Enregistrer "${selectedPreset.name}"` : 'Chargez un preset pour l’enregistrer'}
-          style={{
-            padding: '0.5rem 1rem',
-            // Un seul bouton plein bleu par écran : l'action primaire est « Générer ».
-            backgroundColor: 'transparent',
-            border: `1px solid ${redesignControl.border}`,
-            borderRadius: `${redesignRadius.control}px`,
-            color: theme.text.secondary,
-            fontWeight: 500,
-            cursor: selectedPreset && (currentConfiguration || getCurrentConfiguration) && !isUpdatingPreset ? 'pointer' : 'not-allowed',
-            opacity: selectedPreset && (currentConfiguration || getCurrentConfiguration) && !isUpdatingPreset ? 1 : 0.5,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {isUpdatingPreset ? 'Enregistrement…' : 'Enregistrer'}
-        </button>
-
-        {/* Bouton « Sauvegarder comme template » */}
-        <button
-          type="button"
-          data-testid="template-save-as-btn"
-          onClick={() => {
-            setSnapshotConfiguration(captureTemplateSnapshot());
-            setIsCreateModalOpen(true);
-          }}
-          disabled={!currentConfiguration && !getCurrentConfiguration}
-          style={{
-            padding: chrome.buttonPadding,
-            backgroundColor: theme.button.default.background,
-            border: `1px solid ${theme.border.secondary}`,
-            borderRadius: `${redesignRadius.control}px`,
-            color: theme.button.default.color,
-            fontWeight: 600,
-            cursor: currentConfiguration || getCurrentConfiguration ? 'pointer' : 'not-allowed',
-            opacity: currentConfiguration || getCurrentConfiguration ? 1 : 0.5,
-            whiteSpace: 'nowrap',
-            fontSize: `${chrome.buttonFontRem}rem`,
-            flex: isNarrow ? '1 1 auto' : undefined,
-          }}
-        >
-          Sauvegarder comme template
-        </button>
-
         <button
           type="button"
           data-testid="suggestions-open-btn"
@@ -833,13 +621,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                   item={item}
                   chrome={chrome}
                   readOnly={readOnly}
-                  onOpen={(cible) => {
-                    if (cible.source.kind === 'prebuilt') {
-                      setViewingPrebuilt(cible.source.value);
-                    } else {
-                      onTemplateLoaded?.(cible.source.value);
-                    }
-                  }}
+                  onApply={(template) => onTemplateLoaded?.(template)}
                   onToggleVisibility={(template) => {
                     void handleToggleVisibility(template);
                   }}
