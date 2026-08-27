@@ -1,12 +1,12 @@
 # Templates de génération et profils d'auteur
 
-**Dernière mise à jour :** 2026-08-21
+**Dernière mise à jour :** 2026-08-23
 **Référence d'implémentation :** le code et les tests font foi (`services/owned_item_access.py`,
 `services/template_service.py`, `services/author_profile_service.py`, `api/routers/templates.py`,
 `api/routers/author_profiles.py`, `frontend/src/components/generation/PresetSelector.tsx`).
 
-Ce guide décrit le comportement **livré**. L'état **cible** est décrit par l'epic 6 — voir
-[État cible et écart](#état-cible-et-écart).
+Ce guide décrit le comportement **livré**, qui correspond désormais à la cible de
+l'epic 6 (« Révision — 2026-08-21 : la visibilité devient un statut »).
 
 ---
 
@@ -18,17 +18,31 @@ qui partagent le même modèle de possession et de visibilité.
 
 | | Template | Profil d'auteur |
 |---|---|---|
-| Créé par l'utilisateur | `data/templates/custom/{uuid}.json` | `data/author_profiles/{uuid}.json` |
-| Catalogue fourni | `config/prebuilt_templates.json` — **10 fiches** | `config/author_profile_templates.json` — **4 voix** |
+| Sur disque | `data/templates/custom/{uuid}.json` | `data/author_profiles/{uuid}.json` |
 | Schéma | `api/schemas/template.py` | `api/schemas/author_profile.py` |
 | Service | `services/template_service.py` | `services/author_profile_service.py` |
 
 Les deux répertoires `data/` sont **gitignorés** (avec un `.gitkeep`) : ce sont des données
 utilisateur, pas du code.
 
-Les fiches du catalogue sont en **lecture seule**. Elles ne sont ni modifiables ni supprimables :
-un `PUT` ou un `DELETE` sur un slug de catalogue répond 404, parce que les routes `/{id}` exigent
-un UUID.
+### Convergence : il n'y a plus qu'un objet réutilisable
+
+Trois objets couvraient autrefois la même idée — « une configuration que je réutilise » :
+les **presets** (`data/presets/`, avec leur propre menu « Charger preset »), les **fiches
+livrées** (`config/prebuilt_templates.json`, en lecture seule) et les templates.
+`TemplateConvergenceService` les importe au démarrage comme templates ordinaires, une
+seule fois.
+
+Une fiche livrée n'était pas figée par choix de conception : elle l'était parce qu'elle
+vivait dans un fichier de config. Convergée, elle s'édite comme le reste.
+
+La convergence **copie** : `data/presets/` et le catalogue restent intacts. Le marqueur
+`.convergence-templates-v1` n'est posé qu'après un passage complet, et la reprise se fait
+par nom — un passage interrompu ne duplique rien.
+
+⚠️ **Déduplication par nom**, mesurée sur les données réelles : 27 fichiers de presets
+pour 5 noms distincts, le reste étant des doublons de tests E2E. Ne pas conclure d'un
+écart entre le nombre de fichiers et le nombre de templates que la convergence a échoué.
 
 ---
 
@@ -45,7 +59,10 @@ Deux champs, à ne pas confondre — c'est la confusion qui a coûté le plus ch
 | `shared` | Visible de l'équipe | **Défaut.** Le cas courant. |
 | `private` | Visible du seul propriétaire | Brouillon. Une copie démarre toujours ainsi. |
 
-Seul le propriétaire (ou un admin) peut changer ce statut.
+**Qui voit peut modifier.** Un `private` n'est lisible que par son auteur, donc lui seul
+l'écrit ; un `shared` est lu par toute l'équipe, donc elle l'édite. `can_write` vaut
+`can_read` — le statut porte toute la frontière, et superposer une règle de propriété
+rendait la moitié de la liste inerte, y compris pour un admin.
 
 ### `relation` — une valeur calculée
 
@@ -59,13 +76,21 @@ Jamais persistée. Calculée **pour l'acteur qui fait la requête**, par
 | `legacy` | Aucun `ownerId` — fichier antérieur au modèle |
 
 ⚠️ **Le même objet a un `relation` différent selon qui le lit.** `visibility` décrit l'objet ;
-`relation` décrit une relation entre l'objet et un lecteur. Un template `shared` vaut `owned`
+`relation` décrit un rapport entre l'objet et un lecteur. Un template `shared` vaut `owned`
 pour son auteur et `team` pour ses collègues.
 
-### Le cas `legacy`
+⚠️ **`relation` ne commande plus rien à l'écran.** L'interface n'affiche que le statut, et
+les actions dépendent de ce que la session peut écrire — pas de qui a écrit quoi. Un
+prédicat `relation === 'team'` avait déjà rendu invisibles les templates des collègues.
 
-Un fichier écrit avant l'introduction d'`ownerId` n'a pas de propriétaire. Il est **lisible par
-tous** et **modifiable par le seul admin** — pas par le premier venu qui peut le lire.
+### Les objets sans propriétaire
+
+Un fichier écrit avant `ownerId`, ou convergé depuis les presets et le catalogue, n'a pas
+de propriétaire. Il est `shared` : visible et **modifiable** par l'équipe.
+
+C'est un effet voulu de `can_write == can_read`. Sous l'ancienne règle, un objet dont le
+propriétaire était une session invitée expirée devenait intouchable par quiconque —
+admin compris — et s'accumulait dans la liste de tout le monde.
 
 ### Une seule implémentation d'ACL
 
@@ -131,8 +156,13 @@ le brief ; un onglet ramène toujours à quelque chose d'éditable. C'est la ré
 motivé cette structure — les réglages étaient des onglets à égalité avec le brief, et les
 ouvrir effaçait la zone de saisie.
 
-L'onglet `TEMPLATES` (`PresetSelector.tsx`) affiche **deux sections empilées** :
-`Templates pré-built`, puis `Mes templates` avec ses filtres.
+L'onglet `TEMPLATES` (`PresetSelector.tsx`) affiche **une seule liste**, groupée par
+catégorie, avec une pastille de statut par ligne et un filtre `Statut` / `Nom` /
+`Catégorie` / `Contexte`. Aucune section : un statut est une propriété d'un élément, pas
+un découpage d'écran.
+
+Enregistrer un template se fait **depuis l'onglet Brief** (`BriefTemplateSaver`), sous la
+zone de saisie : c'est le brief qui est capturé, et le bouton le dit.
 
 Le profil d'auteur vit dans le tiroir (`AuthorProfilePanel`). Sa **valeur active** — le texte
 envoyé au LLM — reste en `localStorage` : ce n'est pas un objet, c'est l'état d'un champ, au
@@ -148,23 +178,12 @@ laisse l'utilisateur exactement où il était.
 
 ---
 
-## État cible et écart
+## Dette connue
 
-Ce guide décrit le **livré**. L'état **cible** est décrit par
-`_bmad-output/planning-artifacts/epics/epic-06.md`, section « Révision — 2026-08-21 :
-la visibilité devient un statut ». C'est elle qui fait autorité sur ce qui doit être
-construit ; ce guide n'est qu'un état des lieux.
-
-L'écart principal, à connaître avant de toucher au sélecteur : l'epic demande **une
-liste unique** avec pastille et filtre ; le livré empile encore des sections héritées
-du modèle de partage nominatif retiré. Conséquence active — le filtre
-`templates.filter(t => t.relation !== 'team')` de `PresetSelector.tsx` exclut les
-templates partagés par un collègue **sans qu'aucune section ne les affiche**, donc ils
-sont invisibles. Aucun test Vitest ne couvre ce cas.
-
-Le reste des écarts (écriture non atomique des profils, cache de flags non invalidé,
-schémas orphelins du marketplace, erreurs non typées) est suivi dans
-`_bmad-output/implementation-artifacts/deferred-work.md`.
+L'écart avec l'epic est comblé : liste unique, deux statuts, tout éditable. Ce qui reste
+est suivi dans `_bmad-output/implementation-artifacts/deferred-work.md` — écriture non
+atomique des profils d'auteur, cache de flags GDD jamais invalidé, schémas orphelins du
+marketplace, erreurs non typées dans les deux routeurs.
 
 ---
 
@@ -178,6 +197,9 @@ schémas orphelins du marketplace, erreurs non typées) est suivi dans
   `relation` désaligné donnait 500 sur les suggestions et rien sur la liste.
 - **Une garde ne se conditionne pas au contenu de la requête.** Forcer `private` seulement
   quand le client omet `visibility` laisse passer celui qui le pose explicitement.
+- **Un statut ne découpe pas l'écran.** Sections, puis provenances, puis pastilles : à
+  trois reprises la même taxonomie a été déplacée au lieu d'être supprimée. Le signal
+  est qu'une solution *ajoute* du vocabulaire là où l'utilisateur en demande moins.
 - **Le container n'était exercé par aucun test** : les tests A/B injectaient leur propre service
   et masquaient un `AttributeError` qui rendait la fonctionnalité inutilisable.
   Garde : `tests/api/test_container_wiring.py`.
