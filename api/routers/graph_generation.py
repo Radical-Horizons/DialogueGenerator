@@ -246,7 +246,11 @@ async def generate_node(
             )
             if first_node_id:
                 usage_service.annotate_usage(
-                    request_id, request_data.dialogue_id, str(first_node_id)
+                    request_id,
+                    request_data.dialogue_id,
+                    str(first_node_id),
+                    template_id=request_data.template_id,
+                    template_name=request_data.template_name,
                 )
                 try_compute_context_relevance(usage_service, request_id)
 

@@ -194,6 +194,29 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
             app.state.container = container
             logger.info("ServiceContainer initialisé dans app.state (GDD chargé une seule fois).")
+
+            # Presets et fiches du catalogue rejoignent les templates : un seul objet
+            # réutilisable, donc une seule liste et rien qui soit livré non modifiable.
+            # Idempotent, et non bloquant — un échec ici ne doit pas empêcher l'API de
+            # démarrer, la convergence se retentera au prochain lancement.
+            try:
+                from services.template_convergence_service import TemplateConvergenceService
+
+                convergence = TemplateConvergenceService(
+                    template_service=container.get_template_service(),
+                    preset_service=container.get_preset_service(),
+                )
+                resultat = convergence.converge()
+                if resultat.created:
+                    logger.info(
+                        "Convergence : %d preset(s) et %d fiche(s) importés en templates.",
+                        resultat.from_presets,
+                        resultat.from_catalog,
+                    )
+            except Exception as exc:
+                logger.warning(
+                    "Convergence des templates différée (elle sera retentée) : %s", exc
+                )
         except Exception as e:
             logger.error(f"Erreur lors de l'initialisation du container ou de la validation GDD: {e}", exc_info=True)
             _startup_timer.mark("container_init_failed")
@@ -272,6 +295,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             if batch_container is not None:
                 await batch_container.get_batch_validation_job_manager().start_cleanup_task()
                 await batch_container.get_batch_node_generation_job_manager().start_cleanup_task()
+                await batch_container.get_template_ab_test_job_manager().start_cleanup_task()
                 logger.info("Cleanup tasks des jobs batch (validation/génération) démarrées")
         except Exception as e:
             logger.warning(f"Erreur lors du démarrage des cleanup tasks batch: {e}")
@@ -336,6 +360,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             if batch_container is not None:
                 await batch_container.get_batch_validation_job_manager().stop_cleanup_task()
                 await batch_container.get_batch_node_generation_job_manager().stop_cleanup_task()
+                await batch_container.get_template_ab_test_job_manager().stop_cleanup_task()
                 logger.info("Cleanup tasks des jobs batch (validation/génération) arrêtées")
         except Exception as e:
             logger.warning(f"Erreur lors de l'arrêt des cleanup tasks batch: {e}")
@@ -712,6 +737,8 @@ from api.routers import (
     mechanics_flags,
     mechanics_systems,
     presets,
+    templates,
+    author_profiles,
     streaming,
     unity_dialogues,
     user_settings,
@@ -794,6 +821,14 @@ app.include_router(
 
 # Router pour les presets de génération
 app.include_router(presets.router, prefix="/api/v1/presets", tags=["Presets"])
+
+# Router pour les templates custom de génération (Story 6.1.1)
+app.include_router(templates.router, prefix="/api/v1/templates", tags=["Templates"])
+app.include_router(
+    author_profiles.router,
+    prefix="/api/v1/author-profiles",
+    tags=["Author profiles"],
+)
 
 from api.routers import gdd_notion_sync
 

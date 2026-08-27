@@ -96,6 +96,8 @@ export interface GenerationLogEntry {
   response?: string | null
   fallback_from?: string | null
   fallback_reason?: string | null
+  template_id?: string | null
+  template_name?: string | null
 }
 
 /** Réponse GET /dialogue/{id}/generation-logs (Story 1.15). */

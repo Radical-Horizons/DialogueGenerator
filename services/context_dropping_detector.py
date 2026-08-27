@@ -186,6 +186,61 @@ def _check_mandatory_info(
     return cases
 
 
+_DIGIT_RE = re.compile(r"\d")
+
+
+def _choice_has_numeric_mechanic(choice: Dict[str, Any]) -> bool:
+    """True si le choix porte un DD de test ou un delta de réputation numérique."""
+    test = choice.get("test")
+    if isinstance(test, str) and _DIGIT_RE.search(test):
+        return True
+    skill = choice.get("skillCheckConfig")
+    if isinstance(skill, dict):
+        for key in ("difficulty", "dd", "target"):
+            if isinstance(skill.get(key), (int, float)):
+                return True
+    for key in ("influenceDelta", "respectDelta"):
+        if isinstance(choice.get(key), (int, float)):
+            return True
+    return False
+
+
+def _check_explicit_mechanics(
+    dialogue_nodes: Sequence[Dict[str, Any]],
+) -> List[ContextDroppingCaseInternal]:
+    """Mode strict : les nœuds à choix doivent exposer DD ou deltas numériques."""
+    cases: List[ContextDroppingCaseInternal] = []
+    for node in dialogue_nodes:
+        data = _node_data(node)
+        choices = data.get("choices")
+        if not isinstance(choices, list) or not choices:
+            continue
+        usable = [c for c in choices if isinstance(c, dict)]
+        if not usable:
+            continue
+        if any(_choice_has_numeric_mechanic(choice) for choice in usable):
+            continue
+        node_id = _node_id(node) or GLOBAL_NODE_ID
+        cases.append(
+            ContextDroppingCaseInternal(
+                kind="too_subtle",
+                node_id=node_id,
+                node_display_id=str(data.get("displayName") or node_id),
+                context_label="DD / deltas de réputation",
+                message=(
+                    "Aucun DD de test ni delta d'influence/respect numérique "
+                    "dans les choix de ce nœud (mode strict)."
+                ),
+                suggestion=(
+                    "Ajoutez un test du type « Raison+Rhétorique:8 » et/ou "
+                    "influenceDelta / respectDelta numériques dans le JSON des choix."
+                ),
+                severity="warning",
+            )
+        )
+    return cases
+
+
 class ContextDroppingDetector:
     """Compare des mentions clés du contexte au texte des nœuds dialogue."""
 
@@ -228,19 +283,21 @@ class ContextDroppingDetector:
             opts.mandatory_info, combined_norm, first_id, first_disp
         )
         result.cases.extend(mandatory_cases)
+        if profile == "strict":
+            result.cases.extend(_check_explicit_mechanics(dialogue_nodes))
 
         if not phrases:
-            result.message = (
-                "Aucune mention exploitable dans les sélections contexte envoyées "
-                "(listes vides, entrées trop courtes, ou texte libre absent). "
-                "Cochez des éléments dans le sélecteur de contexte ou complétez la consigne."
-            )
-            if not mandatory_cases:
+            if not result.cases:
+                result.message = (
+                    "Aucune mention exploitable dans les sélections contexte envoyées "
+                    "(listes vides, entrées trop courtes, ou texte libre absent). "
+                    "Cochez des éléments dans le sélecteur de contexte ou complétez la consigne."
+                )
                 result.summary = "0 cas de context dropping détectés"
                 result.case_count = 0
                 return result
 
-        if not node_text_map and not mandatory_cases:
+        if not node_text_map and not result.cases:
             result.message = (
                 "Aucun texte de dialogue ou de choix exploitable dans les nœuds "
                 "(graphe sans contenu textuel)."

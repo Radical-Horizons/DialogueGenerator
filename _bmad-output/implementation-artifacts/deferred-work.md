@@ -236,6 +236,68 @@
   summary: Le test de régression d'ancrage de la barre d'action lit `parent.style.overflow` — le style **inline**. Il deviendrait muet si le défilement passait un jour en classe CSS.
   evidence: Relevé en revue (angle verification-gap). Acceptable aujourd'hui car `GenerationPanel` style tout en inline, mais la garantie est liée à ce choix d'implémentation plutôt qu'au comportement. `getComputedStyle` serait plus robuste ; il retourne des valeurs peu fiables en jsdom, d'où le compromis actuel. À revoir si le panneau migre vers des classes.
 
+- source_spec: none
+  summary: Story 6.2 — Sauvegarder, éditer et supprimer les templates (FR56).
+  evidence: Split de l'épic 6 au kickoff quick-dev — 6.1 pose la création ; l'édition et la suppression sont un livrable CRUD distinct.
+- source_spec: none
+  summary: Story 6.3 — Appliquer un template à la génération (FR57).
+  evidence: Split de l'épic 6 — chargement snapshot + hydratation des champs de génération, indépendant de la création.
+- source_spec: none
+  summary: Story 6.4 — Fournir les templates pré-built Alteir (FR58).
+  evidence: Split de l'épic 6 — catalogue lecture seule, dépend du modèle et de l'application (6.1/6.3).
+- source_spec: none
+  summary: Story 6.5 — Configurer l'anti-context-dropping (explicite vs subtil) (FR59).
+  evidence: Split de l'épic 6 — règles de validation à la génération, distinctes de la sauvegarde d'un template custom.
+- source_spec: none
+  summary: Story 6.6 — Parcourir le marketplace de templates (V1.5+, FR60).
+  evidence: Split de l'épic 6 — phase V1.5+, hors noyau V1.
+- source_spec: none
+  summary: Story 6.7 — A/B tester les templates et scorer la qualité (V2.5+, FR61).
+  evidence: Split de l'épic 6 — phase V2.5+, hors noyau V1.
+- source_spec: none
+  summary: Story 6.8 — Partager les templates avec les membres de l'équipe (FR62).
+  evidence: Split de l'épic 6 — s'appuie sur les identités Epic 7 ; hors scope de la création locale.
+- source_spec: none
+  summary: Story 6.9 — Suggérer des templates selon le scénario (FR63).
+  evidence: Split de l'épic 6 — ranking contextuel, dépend de la liste et de l'application (6.1/6.3).
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-1-1-creer-templates-custom-generation-dialogue-fr55.md`
+  summary: Story 6.1.2 — Filtrer les templates custom par nom, catégorie ou contexte GDD (FR55).
+  evidence: Split token de 6.1 — la création + liste groupée est 6.1.1 ; le filtre est un livrable UI distinct (spec `spec-6-1-2-filtrer-templates-nom-categorie-contexte-fr55.md`).
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-1-1-creer-templates-custom-generation-dialogue-fr55.md`
+  summary: Le nettoyage lazy des refs GDD obsolètes ne filtre que `characters` et `locations`, pas `region` / `subLocation` / `contextSelections` (même limite que les presets).
+  evidence: Revue 6.1.1 (edge-case-hunter) — `template_service.py` copie le strip de `PresetService.create_preset` ; un ID obsolète hors ces deux listes reste dans le snapshot malgré les warnings. À traiter avec le même correctif presets, pas seulement templates.
+
+## Deferred from: code review of spec-6-1-1 + spec-6-1-2 (2026-08-16)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-1-1-creer-templates-custom-generation-dialogue-fr55.md`
+  summary: Strip GDD lazy seulement `characters`/`locations` (pas region / subLocation / contextSelections) — confirmé en revue combinée 6.1.1+6.1.2 ; même limite presets.
+  evidence: `services/template_service.py` ~L91 ; déjà au ledger après la revue 6.1.1.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-3-appliquer-templates-a-generation-dialogue-fr57.md`
+  summary: Enregistrer le `template_id` dans les logs de génération (Story 1.15 / AC épic 6.3).
+  evidence: Livré en patch 2026-08-16 — `template_id` / `template_name` annotés à generate/regenerate, exposés dans GET generation-logs et le panneau Logs.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-5-configurer-templates-anti-context-dropping-subtilite-lore-vs-explicite-fr59.md`
+  summary: Overlay `tolerance: null` retombe sur le seuil du fichier 4.10 via le merge options existant.
+  evidence: Revue 6.5 — `_context_dropping_options_to_data` ne distingue pas « null explicite » d’« omit » ; la spec demande de réutiliser ce merge.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-5-configurer-templates-anti-context-dropping-subtilite-lore-vs-explicite-fr59.md`
+  summary: Toast GraphEditor du warning post-detect non couvert par un test de montage GraphEditor.
+  evidence: Revue 6.5 — le store et generationSlice sont testés ; monter GraphEditor pour l’effet toast est hors budget T1.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-8-partager-templates-avec-membres-équipe-fr62.md`
+  summary: Un writer désactivé avec un JWT encore valide continue de lire les templates partagés (list_template_ids ne joint pas users.is_active).
+  evidence: Revue 6.8 — grant refuse is_active=0, mais can_read ignore ce flag ; la spec ne dit la cible active qu’à l’invite.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-8-partager-templates-avec-membres-équipe-fr62.md`
+  summary: POST /ab-test résout encore les UUID custom sans ACL 6.8 (guest peut lancer un A/B sur le live d’un autre writer).
+  evidence: Revue 6.8 — brancher require_readable casse les tests 6.7 (guest A/B sur templates d’un autre compte, 400 N invalide avant 404 UUID). Ask First : scoping 6.6/6.7 par user. Never : ne pas casser 6.7.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-9-suggérer-templates-basés-sur-scénario-dialogue-fr63.md`
+  summary: Pagination GDD page 1 / alias de noms — un PNJ hors de la première page n’a pas sa fiche dans `contextStore.characters` donc pas de `rencontre_initiale`.
+  evidence: Revue 6.9 — 3B = fiches déjà dans le store ; le trou est préexistant ContextSelector (`setElementLists`), pas un bug du scorer.
 - source_spec: `_bmad-output/implementation-artifacts/spec-fix-event-loop-blocking-context-endpoints.md`
   summary: `GddNotionSyncService._sync_progress` (dict d'état muté par `_sync_progress_update`) est maintenant écrit depuis des threads workers (`_apply_staging_despite_errors`, l'écriture par source, `_promote_and_finalize`, tous déportés en v3) pendant que `read_sync_progress()` continue de le lire depuis la boucle event via le polling de statut — aucune synchronisation ajoutée alors que la docstring de la méthode suppose un seul thread.
   evidence: Revue à 3 lentilles (edge-case-hunter) sur la spec v3. Risque borné : lecture partiellement incohérente d'un dict de progression affiché en UI, pas de donnée durable corrompue. Correctif proposé : `threading.Lock` autour de `_sync_progress_update`/`read_sync_progress`.
@@ -254,3 +316,13 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-fix-event-loop-blocking-context-endpoints.md`
   summary: `services/dialogue_generation_service.py::_build_context_summary` appelle encore `build_context_json` en synchrone direct — code mort en production (aucun appelant réel, seulement 4 tests unitaires), non déporté ni supprimé.
   evidence: Revue à 3 lentilles (adversarial) sur la spec v3. À trancher : supprimer (code mort) ou déporter si un futur appelant est prévu.
+
+- source_spec: `_bmad-output/planning-artifacts/epics/epic-06.md`
+  summary: Rendre atomique l'écriture des profils d'auteur, et aligner la gestion d'erreurs de leur routeur sur celui des templates.
+  evidence: `AuthorProfileService._save()` fait un `write_text` direct là où `TemplateService` passe par un fichier temporaire puis `replace()`. Une interruption laisse un JSON tronqué. `update_author_profile` et `delete_author_profile` n'ont pas les `except OSError`/`PermissionError` de leurs équivalents templates.
+- source_spec: `_bmad-output/planning-artifacts/epics/epic-06.md`
+  summary: Sortir `_FLAG_NOMS_CACHE` du niveau module et l'invalider après une resync GDD.
+  evidence: `services/template_suggestion_service.py` cache la liste des flags dans un global chargé une fois par process. Une sync Notion ne le rafraîchit pas : le scoring « rencontre initiale » travaille sur une liste potentiellement obsolète jusqu'au redémarrage. Contraire à la règle DI du dépôt (pas de singleton global).
+- source_spec: `_bmad-output/planning-artifacts/epics/epic-06.md`
+  summary: Retirer les schémas Pydantic orphelins du marketplace et faire remonter les erreurs des routeurs templates/profils via `api/exceptions.py`.
+  evidence: Neuf classes de `api/schemas/template.py` (partage nominatif, marketplace) n'ont plus d'appelant ; `VALID_SOURCES` accepte encore `"marketplace"`. Les deux routeurs lèvent des `HTTPException` brutes, donc leurs 500 ne remontent pas à Sentry et perdent leur code structuré — ce qui a retardé la détection de deux bloquants.

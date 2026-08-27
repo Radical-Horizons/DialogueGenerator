@@ -85,6 +85,8 @@ export interface GenerateNodeRequest {
   generate_all_choices?: boolean
   choices_mode?: 'free' | 'capped'
   dialogue_id?: string
+  template_id?: string
+  template_name?: string
   dialogue_nodes?: Array<{
     id: string
     speaker: string
@@ -175,6 +177,8 @@ export interface RegenerateNodeRequest {
   via_choice_index?: number
   player_character_id?: string
   dialogue_nodes?: GenerateNodeRequest['dialogue_nodes']
+  template_id?: string
+  template_name?: string
 }
 
 export interface RegenerateNodeResponse {

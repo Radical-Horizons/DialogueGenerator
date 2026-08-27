@@ -42,13 +42,27 @@ describe('presetUtils resolved references', () => {
     expect(resolved.configuration.contextSelections?.characters_full).toEqual(['Uresaïr'])
   })
 
-  it('preparePresetForApply resolves then filters obsolete', () => {
-    const prepared = preparePresetForApply(basePreset, {
-      valid: false,
-      warnings: [],
-      obsoleteRefs: ['Ghost'],
-      resolvedRefs: { 'Seigneuresse Uresaïr': 'Uresaïr' },
-    })
+  it('preparePresetForApply resolves then filters obsolete including contextSelections', () => {
+    const prepared = preparePresetForApply(
+      {
+        ...basePreset,
+        configuration: {
+          ...basePreset.configuration,
+          characters: [...basePreset.configuration.characters, 'Ghost'],
+          contextSelections: {
+            ...basePreset.configuration.contextSelections!,
+            characters_full: ['Seigneuresse Uresaïr', 'Ghost'],
+          },
+        },
+      },
+      {
+        valid: false,
+        warnings: [],
+        obsoleteRefs: ['Ghost'],
+        resolvedRefs: { 'Seigneuresse Uresaïr': 'Uresaïr' },
+      },
+    )
     expect(prepared.configuration.characters).toEqual(['Uresaïr', 'Barvas le Juge-Mendiant'])
+    expect(prepared.configuration.contextSelections?.characters_full).toEqual(['Uresaïr'])
   })
 })

@@ -6,19 +6,101 @@
  * - Sauvegarder la configuration actuelle comme preset
  * - Supprimer un preset (menu contextuel)
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { usePresetStore } from '../../store/presetStore';
+import { useTemplateStore } from '../../store/templateStore';
+import { migrateLocalBriefsToTemplates } from '../../utils/migrateLocalBriefsToTemplates';
+import { useLLMStore } from '../../store/llmStore';
 import type { Preset, PresetConfiguration } from '../../types/preset';
+import type { Template, TemplateConfiguration, PrebuiltTemplate, TemplateSuggestion, TemplateSuggestionRequest } from '../../types/template';
 import { theme } from '../../theme';
-import { redesignControl, redesignDisclosureArrow, redesignRadius } from '../../theme/redesignTokens';
+import {
+  redesignRadius,
+} from '../../theme/redesignTokens';
 import { generationPanelChrome } from '../../theme/responsiveChrome';
-import { useToast, SaveStatusIndicator } from '../shared';
+import { TOUCH_TARGET_MIN_PX } from '../../constants';
+import { useToast, SaveStatusIndicator, ConfirmDialog } from '../shared';
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext';
+import { TemplateCreatorModal } from './TemplateCreatorModal';
+import { TemplateEditorModal } from './TemplateEditorModal';
+import { PrebuiltTemplateModal } from './PrebuiltTemplateModal';
+import { TemplateSuggestionsModal } from './TemplateSuggestionsModal';
+import { TemplateABTestingModal } from './TemplateABTestingModal';
+import { NarrowOverlayDrawer } from '../layout/NarrowOverlayDrawer';
+import { TEMPLATE_UNCATEGORIZED_LABEL } from '../../utils/templateGroups';
+import { buildTemplateCatalog, filterCatalog } from '../../utils/templateCatalog';
+import type { CatalogueItem, TemplateVisibility } from '../../utils/templateCatalog';
+import { TemplateCatalogRow } from './TemplateCatalogRow';
+import { useAuthStore } from '../../store/authStore';
+import { useContextStore } from '../../store/contextStore';
+import { useGenerationStore } from '../../store/generationStore';
+import { rencontreInitialeBySelectedCharacters } from '../../utils/templateSuggestionScore';
 import type { SaveStatus } from '../shared/SaveStatusIndicator';
+
+function formatActiveTemplateFilters(
+  nameFilter: string,
+  categoryFilter: string,
+  contextFilter: string,
+): string {
+  const parts: string[] = [];
+  if (nameFilter.trim()) {
+    parts.push(`nom « ${nameFilter.trim()} »`);
+  }
+  if (categoryFilter.trim()) {
+    parts.push(`catégorie « ${categoryFilter.trim()} »`);
+  }
+  if (contextFilter.trim()) {
+    parts.push(`contexte « ${contextFilter.trim()} »`);
+  }
+  return `Filtres : ${parts.join(' · ')}`;
+}
+
+function buildSuggestionRequest(
+  getCurrentConfiguration?: () => PresetConfiguration,
+  currentConfiguration?: PresetConfiguration,
+): TemplateSuggestionRequest {
+  const generation = useGenerationStore.getState();
+  const context = useContextStore.getState();
+  const config = getCurrentConfiguration?.() ?? currentConfiguration;
+  const uniq = <T,>(arr: T[]) => Array.from(new Set(arr));
+  const characters = uniq([
+    ...(Array.isArray(context.selections.characters_full) ? context.selections.characters_full : []),
+    ...(Array.isArray(context.selections.characters_excerpt)
+      ? context.selections.characters_excerpt
+      : []),
+  ]);
+  const locations = uniq([
+    ...(Array.isArray(context.selections.locations_full) ? context.selections.locations_full : []),
+    ...(Array.isArray(context.selections.locations_excerpt)
+      ? context.selections.locations_excerpt
+      : []),
+    ...(context.selectedRegion ? [context.selectedRegion] : []),
+    ...(Array.isArray(context.selectedSubLocations) ? context.selectedSubLocations : []),
+  ]);
+  return {
+    instructions: generation.generationUserInstructions || config?.instructions || '',
+    sceneType:
+      !config?.sceneType || config.sceneType.trim().toLowerCase() === 'generic'
+        ? ''
+        : config.sceneType,
+    characters,
+    locations,
+    rencontreInitialeByCharacter: rencontreInitialeBySelectedCharacters(
+      characters,
+      context.characters,
+    ),
+  };
+}
 
 export interface PresetSelectorProps {
   /** Callback appelé quand un preset est chargé */
   onPresetLoaded: (preset: Preset) => void;
+  /** Callback appelé quand un template custom est appliqué (clic carte) */
+  onTemplateLoaded?: (template: Template) => void;
+  /** Callback appelé quand une fiche pré-built est chargée (bouton Charger) */
+  onPrebuiltLoaded?: (prebuilt: PrebuiltTemplate) => void;
+  /** Callback appelé depuis le modal Suggestions */
+  onSuggestionLoaded?: (item: TemplateSuggestion) => void | Promise<void>;
   /** Configuration actuelle pour sauvegarde */
   currentConfiguration?: PresetConfiguration;
   /** Getter lazy pour éviter recalculs coûteux à chaque render */
@@ -28,93 +110,166 @@ export interface PresetSelectorProps {
 }
 
 export const PresetSelector: React.FC<PresetSelectorProps> = ({
-  onPresetLoaded,
+  onTemplateLoaded,
+  onPrebuiltLoaded,
+  onSuggestionLoaded,
   currentConfiguration,
   getCurrentConfiguration,
   saveStatus,
 }) => {
   const isNarrow = useGenerationPanelNarrow();
   const chrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable;
+  // Un invité consulte : proposer une action que le serveur refusera serait une
+  // promesse que l'écran ne peut pas tenir.
+  const readOnly = useAuthStore((s) => s.user?.role === 'guest');
   const {
-    presets,
-    selectedPreset,
-    isLoading,
     error,
     loadPresets,
-    createPreset,
-    updatePreset,
     deletePreset,
-    setSelectedPreset,
   } = usePresetStore();
+  const {
+    templates,
+    prebuiltTemplates,
+    loadTemplates,
+    loadPrebuiltTemplates,
+    error: templateError,
+    prebuiltError,
+    prebuiltLoading,
+    updateTemplate,
+    deleteTemplate,
+  } = useTemplateStore();
   const toast = useToast();
-
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [presetToDelete, setPresetToDelete] = useState<Preset | null>(null);
-  const [newPresetName, setNewPresetName] = useState('');
-  const [newPresetIcon, setNewPresetIcon] = useState('📋');
-  const [snapshotConfiguration, setSnapshotConfiguration] = useState<PresetConfiguration | null>(null);
-  /** Soumission création preset — ne pas réutiliser ``isLoading`` du store (chargement liste) pour le bouton Créer. */
-  const [isCreatingPreset, setIsCreatingPreset] = useState(false);
-  const [isUpdatingPreset, setIsUpdatingPreset] = useState(false);
+  const [snapshotConfiguration, setSnapshotConfiguration] = useState<TemplateConfiguration | null>(null);
+  const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
+  const [deletingTemplate, setDeletingTemplate] = useState<Template | null>(null);
+  const [viewingPrebuilt, setViewingPrebuilt] = useState<PrebuiltTemplate | null>(null);
+  const [nameFilter, setNameFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [contextFilter, setContextFilter] = useState('');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const deletingTemplateRef = useRef(false);
+  const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
+  const [suggestionRequest, setSuggestionRequest] = useState<TemplateSuggestionRequest>({
+    instructions: '',
+    sceneType: '',
+    characters: [],
+    locations: [],
+    rencontreInitialeByCharacter: {},
+  });
+  // Le statut est un filtre, pas un découpage : la liste reste une.
+  const [visibilityFilter, setVisibilityFilter] = useState<'tous' | TemplateVisibility>('tous');
+  const [isAbTestOpen, setIsAbTestOpen] = useState(false);
+  const [abSeedBId, setAbSeedBId] = useState('');
 
-  // Charger presets au montage
+  // Une seule liste : catalogue fourni, mes templates et ceux de l'équipe. Rien n'est
+  // écarté ici — seul un filtre demandé par l'utilisateur retire des éléments. La version
+  // précédente filtrait `relation !== 'team'`, ce qui rendait invisibles les templates
+  // partagés par un collègue puisque aucune section ne les affichait.
+  const catalogue = useMemo(() => buildTemplateCatalog(templates), [templates]);
+
+  const filteredCatalogue = useMemo(
+    () =>
+      filterCatalog(catalogue, {
+        name: nameFilter,
+        category: categoryFilter,
+        context: contextFilter,
+        visibility: visibilityFilter,
+      }),
+    [catalogue, nameFilter, categoryFilter, contextFilter, visibilityFilter],
+  );
+
+  const groupedCatalogue = useMemo(() => {
+    const groupes = new Map<string, CatalogueItem[]>();
+    for (const item of filteredCatalogue) {
+      const cle = item.category?.trim() || TEMPLATE_UNCATEGORIZED_LABEL;
+      groupes.set(cle, [...(groupes.get(cle) ?? []), item]);
+    }
+    return Array.from(groupes.entries());
+  }, [filteredCatalogue]);
+  const categoryOptions = useMemo(() => {
+    const keys = new Set(
+      templates.map((template) => template.category?.trim() || TEMPLATE_UNCATEGORIZED_LABEL),
+    );
+    return Array.from(keys);
+  }, [templates]);
+
+  const hasActiveFilters = Boolean(
+    nameFilter.trim() || categoryFilter.trim() || contextFilter.trim() || visibilityFilter !== 'tous',
+  );
+
+  const filterInputStyle: React.CSSProperties = {
+    width: '100%',
+    minHeight: TOUCH_TARGET_MIN_PX,
+    boxSizing: 'border-box',
+    padding: chrome.selectTriggerPadding,
+    backgroundColor: theme.background.secondary,
+    border: `1px solid ${theme.border.primary}`,
+    borderRadius: `${redesignRadius.control}px`,
+    color: theme.text.primary,
+    fontSize: `${chrome.buttonFontRem}rem`,
+  };
+
   useEffect(() => {
     loadPresets();
-  }, [loadPresets]);
+    void loadPrebuiltTemplates();
+    // Les briefs du navigateur rejoignent les templates serveur au premier passage.
+    // La migration copie et se reprend d'elle-même : un échec n'empêche pas la liste
+    // de s'afficher, il laisse simplement la migration ouverte pour la prochaine fois.
+    void migrateLocalBriefsToTemplates()
+      .catch((err) => console.warn('Migration des briefs locaux différée:', err))
+      .finally(() => {
+        void loadTemplates();
+      });
+  }, [loadPresets, loadTemplates, loadPrebuiltTemplates]);
 
-  const handlePresetSelect = (preset: Preset) => {
-    setSelectedPreset(preset);
-    onPresetLoaded(preset);
-    setIsDropdownOpen(false);
+
+  const captureTemplateSnapshot = (): TemplateConfiguration | null => {
+    const cfg = currentConfiguration || getCurrentConfiguration?.() || null;
+    if (!cfg) {
+      return null;
+    }
+    const llmState = useLLMStore.getState();
+    const snapshot: TemplateConfiguration = {
+      ...cfg,
+      llmProvider: llmState.provider,
+    };
+    delete snapshot.temperature;
+    return snapshot;
   };
 
-  const handleCreatePreset = async () => {
-    const configToSave = snapshotConfiguration || currentConfiguration || getCurrentConfiguration?.() || null;
-    if (!newPresetName.trim() || !configToSave) return;
-
-    setIsCreatingPreset(true);
+  /**
+   * Bascule le statut privé/partagé d'un template dont on est propriétaire.
+   *
+   * Le serveur refuse (403) si l'acteur n'est pas propriétaire : la pastille n'est
+   * affichée que dans ce cas, la garde reste côté API.
+   */
+  const handleToggleVisibility = async (template: Template) => {
+    const next = (template.visibility ?? 'shared') === 'private' ? 'shared' : 'private';
     try {
-      const { cleanupMessage } = await createPreset({
-        name: newPresetName.trim(),
-        icon: newPresetIcon,
-        configuration: configToSave,
-      });
-
-      if (cleanupMessage) {
-        toast(cleanupMessage, 'warning');
-      } else {
-        toast('Preset créé avec succès', 'success');
-      }
-
-      setIsCreateModalOpen(false);
-      setNewPresetName('');
-      setNewPresetIcon('📋');
-      setSnapshotConfiguration(null);
+      await updateTemplate(template.id, { visibility: next });
+      toast(
+        next === 'private'
+          ? 'Template repassé en brouillon privé'
+          : "Template partagé avec l'équipe",
+        'success',
+      );
     } catch (error) {
-      // Error already handled by store
-    } finally {
-      setIsCreatingPreset(false);
+      const message = error instanceof Error ? error.message : 'Changement de statut impossible';
+      toast(message, 'error');
     }
   };
 
-  const handleUpdatePreset = async () => {
-    const configToSave = currentConfiguration || getCurrentConfiguration?.() || null;
-    if (!selectedPreset || !configToSave) return;
 
-    setIsUpdatingPreset(true);
-    try {
-      await updatePreset(selectedPreset.id, {
-        configuration: configToSave,
-      });
-      toast('Preset enregistré avec succès', 'success');
-    } catch (error) {
-      // Error already handled by store
-    } finally {
-      setIsUpdatingPreset(false);
-    }
+
+
+  const handleLoadPrebuilt = (prebuilt: PrebuiltTemplate) => {
+    onPrebuiltLoaded?.(prebuilt);
+    setViewingPrebuilt(null);
   };
+
 
   const handleDeletePreset = async () => {
     if (!presetToDelete) return;
@@ -124,11 +279,103 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     setPresetToDelete(null);
   };
 
-  const openDeleteConfirm = (preset: Preset, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setPresetToDelete(preset);
-    setIsDeleteConfirmOpen(true);
+  const handleDeleteTemplate = async () => {
+    if (!deletingTemplate || deletingTemplateRef.current) return;
+    deletingTemplateRef.current = true;
+    try {
+      await deleteTemplate(deletingTemplate.id);
+      toast('Template supprimé', 'success');
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : 'Échec de la suppression du template';
+      toast(message, 'error');
+    } finally {
+      deletingTemplateRef.current = false;
+      setDeletingTemplate(null);
+    }
   };
+
+
+  const visibilityOptions: Array<{ valeur: 'tous' | TemplateVisibility; libelle: string }> = [
+    { valeur: 'tous', libelle: 'Tous' },
+    { valeur: 'shared', libelle: 'Partagés' },
+    { valeur: 'private', libelle: 'Privés' },
+  ];
+
+  const filterFields = (
+    <div
+      data-testid="mes-templates-filters"
+      style={{
+        display: 'flex',
+        flexDirection: isNarrow ? 'column' : 'row',
+        flexWrap: isNarrow ? 'nowrap' : 'wrap',
+        gap: `${chrome.controlGapRem}rem`,
+        marginBottom: isNarrow ? 0 : `${chrome.controlGapRem}rem`,
+        padding: isNarrow ? chrome.cardPadding : undefined,
+      }}
+    >
+      <label style={{ flex: '1 1 9rem', minWidth: isNarrow ? 0 : '9rem', color: theme.text.secondary, fontSize: `${chrome.labelFontRem}rem` }}>
+        Statut
+        <select
+          data-testid="template-filter-visibility"
+          value={visibilityFilter}
+          onChange={(event) => setVisibilityFilter(event.target.value as 'tous' | TemplateVisibility)}
+          aria-label="Filtrer par statut"
+          style={{ ...filterInputStyle, marginTop: '0.25rem' }}
+        >
+          {visibilityOptions.map((option) => (
+            <option key={option.valeur} value={option.valeur}>
+              {option.libelle}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label style={{ flex: '1 1 9rem', minWidth: isNarrow ? 0 : '9rem', color: theme.text.secondary, fontSize: `${chrome.labelFontRem}rem` }}>
+        Nom
+        <input
+          data-testid="template-filter-name"
+          type="search"
+          value={nameFilter}
+          onChange={(event) => setNameFilter(event.target.value)}
+          placeholder="Filtrer par nom"
+          aria-label="Filtrer par nom"
+          style={{ ...filterInputStyle, marginTop: '0.25rem' }}
+        />
+      </label>
+      <label style={{ flex: '1 1 9rem', minWidth: isNarrow ? 0 : '9rem', color: theme.text.secondary, fontSize: `${chrome.labelFontRem}rem` }}>
+        Catégorie
+        <input
+          data-testid="template-filter-category"
+          type="search"
+          list="template-filter-category-options"
+          value={categoryFilter}
+          onChange={(event) => setCategoryFilter(event.target.value)}
+          placeholder="Filtrer par catégorie"
+          aria-label="Filtrer par catégorie"
+          style={{ ...filterInputStyle, marginTop: '0.25rem' }}
+        />
+        <datalist id="template-filter-category-options">
+          {categoryOptions.map((option) => (
+            <option key={option} value={option} />
+          ))}
+        </datalist>
+      </label>
+      <label style={{ flex: '1 1 9rem', minWidth: isNarrow ? 0 : '9rem', color: theme.text.secondary, fontSize: `${chrome.labelFontRem}rem` }}>
+        Contexte
+        <input
+          data-testid="template-filter-context"
+          type="search"
+          value={contextFilter}
+          onChange={(event) => setContextFilter(event.target.value)}
+          placeholder="Filtrer par contexte GDD"
+          aria-label="Filtrer par contexte"
+          style={{ ...filterInputStyle, marginTop: '0.25rem' }}
+        />
+      </label>
+    </div>
+  );
 
   return (
     <div style={{ marginBottom: '1rem' }}>
@@ -136,6 +383,14 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
       {error && (
         <div style={{ color: theme.state.error.color, marginBottom: '0.5rem', fontSize: '0.875rem' }}>
           {error}
+        </div>
+      )}
+      {templateError && (
+        <div
+          data-testid="mes-templates-error"
+          style={{ color: theme.state.error.color, marginBottom: '0.5rem', fontSize: '0.875rem' }}
+        >
+          {templateError}
         </div>
       )}
 
@@ -148,179 +403,52 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           alignItems: 'center',
         }}
       >
-        {/* Dropdown "Charger preset" */}
-        <div
-          style={{
-            position: 'relative',
-            flex: isNarrow ? '1 1 100%' : '1',
-            minWidth: 0,
-          }}
-        >
-          <button
-            type="button"
-            data-testid="preset-dropdown-trigger"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            style={{
-              width: '100%',
-              padding: chrome.buttonPadding,
-              backgroundColor: theme.background.secondary,
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: '4px',
-              color: theme.text.primary,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              fontSize: `${chrome.buttonFontRem}rem`,
-              boxSizing: 'border-box',
-            }}
-          >
-            <span>Charger preset</span>
-            <span
-              aria-hidden
-              style={{ fontSize: redesignDisclosureArrow.solid, lineHeight: 1 }}
-            >
-              {isDropdownOpen ? '▲' : '▼'}
-            </span>
-          </button>
-
-          {/* Dropdown menu */}
-          {isDropdownOpen && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 'calc(100% + 0.25rem)',
-                left: 0,
-                right: 0,
-                backgroundColor: theme.background.panel,
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '4px',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                zIndex: 1000,
-                maxHeight: '300px',
-                overflowY: 'auto',
-              }}
-            >
-              {isLoading && (
-                <div style={{ padding: '1rem', textAlign: 'center', color: theme.text.secondary }}>
-                  Chargement...
-                </div>
-              )}
-
-              {!isLoading && presets.length === 0 && (
-                <div style={{ padding: '1rem', textAlign: 'center', color: theme.text.secondary }}>
-                  Aucun preset sauvegardé
-                </div>
-              )}
-
-              {!isLoading &&
-                presets.map((preset) => (
-                  <div
-                    key={preset.id}
-                    data-testid="preset-item"
-                    data-preset-name={preset.name}
-                    style={{
-                      padding: '0.75rem 1rem',
-                      cursor: 'pointer',
-                      borderBottom: `1px solid ${theme.border.secondary}`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = theme.background.secondary;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    <div
-                      onClick={() => handlePresetSelect(preset)}
-                      style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                    >
-                      <span style={{ fontSize: '1.25rem' }}>{preset.icon}</span>
-                      <div>
-                        <div style={{ fontWeight: 'bold', color: theme.text.primary }}>
-                          {preset.name}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: theme.text.secondary }}>
-                          {preset.configuration.characters.length} perso(s),{' '}
-                          {preset.configuration.locations.length} lieu(x)
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Menu contextuel : Supprimer */}
-                    <button
-                      onClick={(e) => openDeleteConfirm(preset, e)}
-                      style={{
-                        padding: '0.25rem 0.5rem',
-                        backgroundColor: 'transparent',
-                      border: 'none',
-                      color: theme.state.error.color,
-                      cursor: 'pointer',
-                        fontSize: '0.875rem',
-                      }}
-                      title="Supprimer"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                ))}
-            </div>
-          )}
-        </div>
-
-        {/* Bouton "Enregistrer" */}
         <button
           type="button"
-          data-testid="preset-save-btn"
-          onClick={handleUpdatePreset}
-          disabled={!selectedPreset || (!currentConfiguration && !getCurrentConfiguration) || isUpdatingPreset}
-          title={selectedPreset ? `Enregistrer "${selectedPreset.name}"` : 'Chargez un preset pour l’enregistrer'}
-          style={{
-            padding: '0.5rem 1rem',
-            // Un seul bouton plein bleu par écran : l'action primaire est « Générer ».
-            backgroundColor: 'transparent',
-            border: `1px solid ${redesignControl.border}`,
-            borderRadius: `${redesignRadius.control}px`,
-            color: theme.text.secondary,
-            fontWeight: 500,
-            cursor: selectedPreset && (currentConfiguration || getCurrentConfiguration) && !isUpdatingPreset ? 'pointer' : 'not-allowed',
-            opacity: selectedPreset && (currentConfiguration || getCurrentConfiguration) && !isUpdatingPreset ? 1 : 0.5,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {isUpdatingPreset ? 'Enregistrement…' : 'Enregistrer'}
-        </button>
-
-        {/* Bouton "Enregistrer sous" */}
-        <button
-          type="button"
-          data-testid="preset-save-as-btn"
+          data-testid="suggestions-open-btn"
           onClick={() => {
-            const cfg = currentConfiguration || getCurrentConfiguration?.() || null;
-            setSnapshotConfiguration(cfg);
-            setNewPresetName(selectedPreset ? `${selectedPreset.name} copie` : '');
-            setNewPresetIcon(selectedPreset?.icon || '📋');
-            setIsCreateModalOpen(true);
+            setSuggestionRequest(
+              buildSuggestionRequest(getCurrentConfiguration, currentConfiguration),
+            );
+            setIsSuggestionsOpen(true);
           }}
-          disabled={!currentConfiguration && !getCurrentConfiguration}
           style={{
             padding: chrome.buttonPadding,
             backgroundColor: theme.button.default.background,
             border: `1px solid ${theme.border.secondary}`,
-            borderRadius: '6px',
+            borderRadius: `${redesignRadius.control}px`,
             color: theme.button.default.color,
             fontWeight: 600,
-            cursor: currentConfiguration || getCurrentConfiguration ? 'pointer' : 'not-allowed',
-            opacity: currentConfiguration || getCurrentConfiguration ? 1 : 0.5,
+            cursor: 'pointer',
             whiteSpace: 'nowrap',
             fontSize: `${chrome.buttonFontRem}rem`,
             flex: isNarrow ? '1 1 auto' : undefined,
+            minHeight: TOUCH_TARGET_MIN_PX,
           }}
         >
-          Enregistrer sous
+          Suggestions
+        </button>
+
+
+        <button
+          type="button"
+          data-testid="ab-test-open-btn"
+          onClick={() => setIsAbTestOpen(true)}
+          style={{
+            padding: chrome.buttonPadding,
+            backgroundColor: theme.button.default.background,
+            border: `1px solid ${theme.border.secondary}`,
+            borderRadius: `${redesignRadius.control}px`,
+            color: theme.button.default.color,
+            fontWeight: 600,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            fontSize: `${chrome.buttonFontRem}rem`,
+            flex: isNarrow ? '1 1 auto' : undefined,
+            minHeight: TOUCH_TARGET_MIN_PX,
+          }}
+        >
+          A/B tester
         </button>
 
         {/* Indicateur de statut de sauvegarde */}
@@ -331,159 +459,182 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         )}
       </div>
 
-      {/* Modal création preset */}
-      {isCreateModalOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 2000,
-          }}
-          onClick={() => setIsCreateModalOpen(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              backgroundColor: theme.background.panel,
-              padding: '2rem',
-              borderRadius: '8px',
-              minWidth: '400px',
-              maxWidth: '500px',
-              border: `1px solid ${theme.border.primary}`,
-            }}
-          >
-            <h3 style={{ marginTop: 0, color: theme.text.primary }}>Enregistrer sous</h3>
+      <TemplateCreatorModal
+        isOpen={isCreateModalOpen}
+        snapshot={snapshotConfiguration}
+        onCreated={() => {
+          setNameFilter('');
+          setCategoryFilter('');
+          setContextFilter('');
+        }}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          setSnapshotConfiguration(null);
+        }}
+      />
 
-            <div style={{ marginBottom: '1rem' }}>
-              <label
-                htmlFor="preset-name"
-                style={{ display: 'block', marginBottom: '0.5rem', color: theme.text.secondary }}
-              >
-                Nom
-              </label>
-              <input
-                id="preset-name"
-                type="text"
-                value={newPresetName}
-                onChange={(e) => setNewPresetName(e.target.value)}
-                placeholder="Ex: Confrontation Akthar-Neth"
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  backgroundColor: theme.background.secondary,
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
-                  color: theme.text.primary,
-                }}
-              />
+      <TemplateEditorModal
+        key={editingTemplate?.id ?? 'closed'}
+        isOpen={editingTemplate != null}
+        template={editingTemplate}
+        captureSnapshot={captureTemplateSnapshot}
+        onSaved={() => {
+          setNameFilter('');
+          setCategoryFilter('');
+          setContextFilter('');
+        }}
+        onClose={() => setEditingTemplate(null)}
+      />
+
+      <PrebuiltTemplateModal
+        isOpen={viewingPrebuilt != null}
+        template={viewingPrebuilt}
+        onClose={() => setViewingPrebuilt(null)}
+        onLoad={handleLoadPrebuilt}
+      />
+
+      <TemplateSuggestionsModal
+        isOpen={isSuggestionsOpen}
+        onClose={() => setIsSuggestionsOpen(false)}
+        request={suggestionRequest}
+        onLoad={async (item) => {
+          await onSuggestionLoaded?.(item);
+        }}
+      />
+
+
+      <TemplateABTestingModal
+        isOpen={isAbTestOpen}
+        onClose={() => {
+          setIsAbTestOpen(false);
+          setAbSeedBId('');
+        }}
+        templates={templates}
+        prebuiltTemplates={prebuiltTemplates}
+        initialBId={abSeedBId}
+      />
+
+      <section
+        data-testid="template-catalog"
+        style={{
+          marginTop: `${chrome.controlGapRem}rem`,
+        }}
+      >
+        {isNarrow ? (
+          <>
+            <button
+              type="button"
+              data-testid="template-filters-open-btn"
+              onClick={() => setFiltersOpen(true)}
+              style={{
+                minHeight: TOUCH_TARGET_MIN_PX,
+                marginBottom: `${chrome.controlGapRem}rem`,
+                padding: chrome.buttonPadding,
+                backgroundColor: theme.button.default.background,
+                border: `1px solid ${theme.border.secondary}`,
+                borderRadius: `${redesignRadius.control}px`,
+                color: theme.button.default.color,
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontSize: `${chrome.buttonFontRem}rem`,
+                width: '100%',
+              }}
+            >
+              Filtrer
+            </button>
+            <NarrowOverlayDrawer
+              open={filtersOpen}
+              side="right"
+              titleId="template-catalog-filters-title"
+              title="Filtrer les templates"
+              closeLabel="Fermer les filtres"
+              onClose={() => setFiltersOpen(false)}
+            >
+              {filterFields}
+            </NarrowOverlayDrawer>
+          </>
+        ) : (
+          filterFields
+        )}
+
+        {prebuiltError && (
+          <div data-testid="prebuilt-templates-error" style={{ color: theme.state.error.color }}>
+            {prebuiltError}
+          </div>
+        )}
+
+        {/* Le catalogue fourni arrive après les templates : on montre ce qu'on a déjà
+            plutôt que de remplacer la liste par un indicateur. */}
+        {prebuiltLoading && (
+          <div data-testid="template-catalog-loading" style={{ color: theme.text.secondary }}>
+            Chargement…
+          </div>
+        )}
+
+        {catalogue.length === 0 ? (
+          // Une erreur de chargement se dit une fois, en haut : ne pas la doubler d'un
+          // « rien à afficher » qui laisserait croire que la liste est simplement vide.
+          templateError || prebuiltError ? null : (
+            <div data-testid="template-catalog-empty" style={{ color: theme.text.secondary }}>
+              Vos templates et ceux de l'équipe s'afficheront ici.
             </div>
-
-            <div style={{ marginBottom: '1rem' }}>
-              <label
-                htmlFor="preset-icon"
-                style={{ display: 'block', marginBottom: '0.5rem', color: theme.text.secondary }}
-              >
-                Icône (emoji)
-              </label>
-              <input
-                id="preset-icon"
-                type="text"
-                value={newPresetIcon}
-                onChange={(e) => setNewPresetIcon(e.target.value)}
-                maxLength={2}
-                style={{
-                  width: '60px',
-                  padding: '0.5rem',
-                  backgroundColor: theme.background.secondary,
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
-                  color: theme.text.primary,
-                  textAlign: 'center',
-                  fontSize: '1.5rem',
-                }}
-              />
+          )
+        ) : filteredCatalogue.length === 0 ? (
+          <>
+            <div data-testid="template-catalog-no-match" style={{ color: theme.text.secondary }}>
+              Aucun résultat
             </div>
-
-            {/* Aperçu configuration */}
-            {snapshotConfiguration && (
+            {hasActiveFilters && (
               <div
+                data-testid="template-catalog-active-filters"
                 style={{
-                  padding: '1rem',
-                  backgroundColor: theme.background.secondary,
-                  borderRadius: '4px',
-                  marginBottom: '1rem',
+                  fontSize: `${chrome.labelFontRem}rem`,
+                  color: theme.text.secondary,
+                  marginTop: '0.35rem',
                 }}
               >
-                <div style={{ fontSize: '0.875rem', color: theme.text.secondary, marginBottom: '0.5rem' }}>
-                  Aperçu configuration :
-                </div>
-                <div style={{ fontSize: '0.875rem', color: theme.text.primary }}>
-                  <div>Personnages : {snapshotConfiguration.characters.length}</div>
-                  <div>Lieux : {snapshotConfiguration.locations.length}</div>
-                  <div>Région : {snapshotConfiguration.region}</div>
-                  {snapshotConfiguration.subLocation && <div>Sous-lieu : {snapshotConfiguration.subLocation}</div>}
-                  <div>Scène : {snapshotConfiguration.sceneType}</div>
-                  {snapshotConfiguration.contextSelections && (
-                    <>
-                      <div>
-                        Objets : {new Set([...(snapshotConfiguration.contextSelections.items_full || []), ...(snapshotConfiguration.contextSelections.items_excerpt || [])]).size}
-                      </div>
-                      <div>
-                        Espèces : {new Set([...(snapshotConfiguration.contextSelections.species_full || []), ...(snapshotConfiguration.contextSelections.species_excerpt || [])]).size}
-                      </div>
-                      <div>
-                        Communautés : {new Set([...(snapshotConfiguration.contextSelections.communities_full || []), ...(snapshotConfiguration.contextSelections.communities_excerpt || [])]).size}
-                      </div>
-                    </>
-                  )}
-                </div>
+                {formatActiveTemplateFilters(nameFilter, categoryFilter, contextFilter)}
               </div>
             )}
-
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                disabled={isCreatingPreset}
+          </>
+        ) : (
+          groupedCatalogue.map(([category, items]) => (
+            <div
+              key={category}
+              data-testid="template-category-group"
+              data-category={category}
+              style={{ marginBottom: `${chrome.controlGapRem}rem` }}
+            >
+              <div
                 style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: theme.background.secondary,
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
-                  color: theme.text.primary,
-                  cursor: isCreatingPreset ? 'not-allowed' : 'pointer',
-                  opacity: isCreatingPreset ? 0.6 : 1,
+                  fontSize: `${chrome.labelFontRem}rem`,
+                  color: theme.text.secondary,
+                  marginBottom: '0.35rem',
+                  fontWeight: 600,
                 }}
               >
-                Annuler
-              </button>
-              <button
-                type="button"
-                data-testid="preset-modal-create-btn"
-                onClick={handleCreatePreset}
-                disabled={!newPresetName.trim() || isCreatingPreset}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: theme.button.primary.background,
-                  border: 'none',
-                  borderRadius: '4px',
-                  color: 'white',
-                  cursor: !newPresetName.trim() || isCreatingPreset ? 'not-allowed' : 'pointer',
-                  opacity: !newPresetName.trim() || isCreatingPreset ? 0.6 : 1,
-                }}
-              >
-                {isCreatingPreset ? 'Sauvegarde…' : 'Créer'}
-              </button>
+                {category}
+              </div>
+              {items.map((item) => (
+                <TemplateCatalogRow
+                  key={item.key}
+                  item={item}
+                  chrome={chrome}
+                  readOnly={readOnly}
+                  onApply={(template) => onTemplateLoaded?.(template)}
+                  onToggleVisibility={(template) => {
+                    void handleToggleVisibility(template);
+                  }}
+                  onEdit={(template) => setEditingTemplate(template)}
+                  onDelete={(template) => setDeletingTemplate(template)}
+                />
+              ))}
             </div>
-          </div>
-        </div>
-      )}
+          ))
+        )}
+      </section>
+
+
 
       {/* Modal confirmation suppression */}
       {isDeleteConfirmOpen && presetToDelete && (
@@ -548,6 +699,24 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={deletingTemplate != null}
+        title="Supprimer ce template ?"
+        message={
+          deletingTemplate
+            ? `Le template « ${deletingTemplate.name} » sera retiré définitivement.`
+            : ''
+        }
+        confirmLabel="Supprimer"
+        cancelLabel="Annuler"
+        variant="danger"
+        onConfirm={() => {
+          void handleDeleteTemplate();
+        }}
+        onCancel={() => setDeletingTemplate(null)}
+      />
+
     </div>
   );
 };

@@ -85,6 +85,18 @@ e2e/.auth/
 data/logs/
 *.log
 
+# Templates custom (JSON UUID locaux, comme data/presets/). Le dossier reste versionné via .gitkeep.
+data/templates/custom/*.json
+!data/templates/custom/.gitkeep
+
+# Profils d'auteur (JSON UUID locaux, comme les templates). Dossier versionné via .gitkeep.
+data/author_profiles/*.json
+!data/author_profiles/.gitkeep
+
+# Résultats A/B templates (Story 6.7) — JSON locaux, dossier versionné via .gitkeep.
+data/ab-tests/**
+!data/ab-tests/.gitkeep
+
 # Data directories (generated/cache files)
 data/cost_budgets.json
 data/app.db

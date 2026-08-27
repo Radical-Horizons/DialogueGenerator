@@ -143,3 +143,37 @@ export const redesignMonoLabelStyle: CSSProperties = {
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
 }
+
+/**
+ * Barre d'onglets — motif unique de la refonte (panneau droit, inspecteur, colonne
+ * de génération).
+ *
+ * ⚠️ Le filet actif appartient au **libellé**, pas à la boîte du bouton : un
+ * `borderBottom` sur le `<button>` se fait arrondir par le rayon des contrôles et
+ * rend un arc au lieu d'un filet. D'où le `<span>` interne et le `box-shadow`.
+ * Utiliser `tabButtonStyle` + `tabLabelStyle` ensemble, jamais l'un sans l'autre.
+ */
+export const redesignTab = {
+  /** Style du `<button role="tab">` : mono capitales, sans bordure. */
+  buttonStyle(active: boolean, fontSizePx = 10): CSSProperties {
+    return {
+      border: 'none',
+      background: 'none',
+      padding: 0,
+      cursor: 'pointer',
+      fontFamily: redesignFont.mono,
+      fontSize: `${fontSizePx}px`,
+      letterSpacing: '0.08em',
+      textTransform: 'uppercase',
+      color: active ? redesignText.strong : redesignText.label,
+      whiteSpace: 'nowrap',
+    }
+  },
+  /** Style du `<span>` interne qui porte le filet actif. */
+  labelStyle(active: boolean): CSSProperties {
+    return {
+      paddingBottom: 2,
+      boxShadow: active ? `inset 0 -1px 0 ${redesignAccent.base}` : 'none',
+    }
+  },
+} as const

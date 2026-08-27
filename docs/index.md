@@ -74,6 +74,7 @@ Located in `[guides/](./guides/)`
 - [Security](./guides/SECURITY.md) - Security documentation
 - [Testing](./guides/TESTING.md) - Testing guide
 - [Game Systems Integration (FR94)](./guides/game-systems-integration.md) - Skill checks, Effort, Réputation FR94, preview playthrough VN, catalogue skill-check, diagnostics
+- [Templates et profils d'auteur](./guides/templates-et-profils-auteur.md) - Objets serveur, statut privé/partagé, ACL généralisée, invité en lecture seule, écarts connus
 
 ### Troubleshooting
 

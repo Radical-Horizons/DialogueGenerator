@@ -44,6 +44,9 @@ from api.services.batch_node_generation_job_manager import BatchNodeGenerationJo
 from services.batch_node_generation_service import BatchNodeGenerationService
 from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
+from services.template_service import TemplateService
+from services.template_ab_testing_service import TemplateABTestingService
+from api.services.template_ab_test_job_manager import TemplateABTestJobManager
 from services.repositories.sqlite import (
     AppSettingsRepository,
     DatabaseConnection,
@@ -53,6 +56,10 @@ from services.repositories.sqlite import (
 )
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
+from services.template_access_service import TemplateAccessService
+from services.owned_item_access import OwnedItemAccessService
+from services.author_profile_service import AuthorProfileService
+from services.template_suggestion_service import TemplateSuggestionService
 from services.collection_service import CollectionService
 from services.dialogue_index_service import DialogueIndexService
 from services.dialogue_metadata_service import DialogueMetadataService
@@ -120,6 +127,26 @@ def get_document_persistence_service(request: Request) -> DocumentPersistenceSer
 def get_dialogue_sharing_service(request: Request) -> DialogueSharingService:
     """Retourne le service de partage co-édition des dialogues."""
     return get_service_container(request).get_dialogue_sharing_service()
+
+
+def get_template_access_service(request: Request) -> TemplateAccessService:
+    """Retourne le service d'accès aux templates (propriété + statut)."""
+    return get_service_container(request).get_template_access_service()
+
+
+def get_item_access_service(request: Request) -> OwnedItemAccessService:
+    """Retourne le service d'accès générique (templates, profils d'auteur)."""
+    return get_service_container(request).get_item_access_service()
+
+
+def get_author_profile_service(request: Request) -> AuthorProfileService:
+    """Retourne le service de persistance des profils d'auteur."""
+    return get_service_container(request).get_author_profile_service()
+
+
+def get_template_suggestion_service(request: Request) -> TemplateSuggestionService:
+    """Retourne le service de suggestions de templates (Story 6.9)."""
+    return get_service_container(request).get_template_suggestion_service()
 
 
 def get_collection_service(request: Request) -> CollectionService:
@@ -623,6 +650,51 @@ def get_preset_service(request: Request) -> PresetService:
     """
     container = get_service_container(request)
     return container.get_preset_service()
+
+
+def get_template_service(request: Request) -> TemplateService:
+    """Retourne le service de gestion des templates custom.
+
+    Utilise le ServiceContainer depuis app.state (système unifié).
+
+    Args:
+        request: La requête HTTP (injecté automatiquement par FastAPI).
+
+    Returns:
+        Instance de TemplateService.
+
+    Raises:
+        RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
+    """
+    container = get_service_container(request)
+    return container.get_template_service()
+
+
+
+def get_template_ab_testing_service(request: Request) -> TemplateABTestingService:
+    """Retourne le service A/B testing de templates.
+
+    Args:
+        request: La requête HTTP.
+
+    Returns:
+        Instance de TemplateABTestingService.
+    """
+    container = get_service_container(request)
+    return container.get_template_ab_testing_service()
+
+
+def get_template_ab_test_job_manager(request: Request) -> TemplateABTestJobManager:
+    """Retourne le gestionnaire de jobs A/B templates.
+
+    Args:
+        request: La requête HTTP.
+
+    Returns:
+        Instance de TemplateABTestJobManager.
+    """
+    container = get_service_container(request)
+    return container.get_template_ab_test_job_manager()
 
 
 def get_gdd_notion_sync_service(request: Request):

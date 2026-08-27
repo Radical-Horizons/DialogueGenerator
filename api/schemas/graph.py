@@ -138,6 +138,14 @@ class GenerateNodeRequest(BaseModel):
     target_choice_index: Optional[int] = Field(None, description="Index du choix spécifique à connecter (si None, génère pour tous les choix sans targetNode)")
     generate_all_choices: bool = Field(False, description="Si True, génère un nœud pour chaque choix sans targetNode")
     dialogue_id: Optional[str] = Field(None, description="ID du dialogue (pour annotation post-hoc des coûts)")
+    template_id: Optional[str] = Field(
+        None,
+        description="Template appliqué (UUID custom ou slug pré-built)",
+    )
+    template_name: Optional[str] = Field(
+        None,
+        description="Nom du template au moment de la génération",
+    )
     dialogue_nodes: Optional[List[Dict[str, Any]]] = Field(
         None,
         description="Nœuds du graphe pour reconstruire le chemin ancêtre dans le prompt",
@@ -444,6 +452,14 @@ class RegenerateNodeRequest(BaseModel):
     dialogue_nodes: Optional[List[Dict[str, Any]]] = Field(
         None,
         description="Nœuds du graphe pour reconstruire le chemin ancêtre dans le prompt",
+    )
+    template_id: Optional[str] = Field(
+        None,
+        description="Template appliqué (UUID custom ou slug pré-built)",
+    )
+    template_name: Optional[str] = Field(
+        None,
+        description="Nom du template au moment de la génération",
     )
 
 

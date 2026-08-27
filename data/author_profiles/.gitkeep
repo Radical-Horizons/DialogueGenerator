@@ -1,0 +1,5 @@
+# Profils d'auteur (Story lot 3)
+#
+# Ce dossier stocke les profils utilisateur en fichiers JSON UUID.
+# Les JSON sont locaux (comme data/templates/custom/) et ignorés par git ;
+# ce fichier garde le dossier versionné.

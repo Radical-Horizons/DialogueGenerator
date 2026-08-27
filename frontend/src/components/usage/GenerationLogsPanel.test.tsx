@@ -48,8 +48,10 @@ const twoEntriesResponse: GenerationLogsResponse = {
       cost_eur: 0.00092,
       duration_ms: 500,
       success: true,
-      prompt: 'System: Write.',
+            prompt: 'System: Write.',
       response: '{"node": {}}',
+      template_id: 'confrontation',
+      template_name: 'Confrontation',
     },
     {
       request_id: 'req_2',
@@ -100,6 +102,7 @@ describe('GenerationLogsPanel', () => {
     expect(screen.getByText(/total/)).toBeInTheDocument()
     expect(screen.getByText('NODE_1')).toBeInTheDocument()
     expect(screen.getByText('NODE_2')).toBeInTheDocument()
+    expect(screen.getByText('Confrontation')).toBeInTheDocument()
     expect(screen.getByText('Succès')).toBeInTheDocument()
     expect(screen.getByText('Échec')).toBeInTheDocument()
   })

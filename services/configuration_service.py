@@ -277,29 +277,7 @@ class ConfigurationService:
             return self._load_text_file(full_path)
         return ""
     
-    def get_author_profile_templates(self) -> List[Dict[str, Any]]:
-        """Gets the list of author profile templates.
-        
-        Returns:
-            List of template dictionaries, each containing id, name, description, and profile.
-        """
-        templates = []
-        author_profiles_meta = self.prompts_metadata.get("author_profiles", {})
-        
-        for profile_id, meta in author_profiles_meta.items():
-            file_path = meta.get("file")
-            if file_path:
-                full_path = CONFIG_DIR / file_path
-                profile_content = self._load_text_file(full_path)
-                templates.append({
-                    "id": profile_id,
-                    "name": meta.get("name", profile_id),
-                    "description": meta.get("description", ""),
-                    "profile": profile_content
-                })
-        
-        return templates
-    
+
     def get_scene_instruction_templates(self) -> List[Dict[str, Any]]:
         """Gets the list of scene instruction templates.
         

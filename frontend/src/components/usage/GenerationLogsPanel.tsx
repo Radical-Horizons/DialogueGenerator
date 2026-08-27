@@ -100,6 +100,8 @@ export function GenerationLogsPanel({ dialogueId }: GenerationLogsPanelProps) {
                 'error_message',
                 'prompt',
                 'response',
+                'template_id',
+                'template_name',
               ].join(',')
               const rows = entries.map((e) =>
                 [
@@ -115,6 +117,8 @@ export function GenerationLogsPanel({ dialogueId }: GenerationLogsPanelProps) {
                   e.error_message ?? '',
                   e.prompt ?? '',
                   e.response ?? '',
+                  e.template_id ?? '',
+                  e.template_name ?? '',
                 ]
                   .map(csvEscape)
                   .join(',')
@@ -214,6 +218,7 @@ export function GenerationLogsPanel({ dialogueId }: GenerationLogsPanelProps) {
               <tr>
                 <th>Date</th>
                 <th>Nœud</th>
+                <th>Template</th>
                 <th>Coût</th>
                 <th>Tokens</th>
                 <th>Provider</th>
@@ -237,6 +242,7 @@ export function GenerationLogsPanel({ dialogueId }: GenerationLogsPanelProps) {
                 >
                   <td>{formatLogTimestamp(entry.timestamp)}</td>
                   <td className="glp__node-id">{entry.node_id ?? '—'}</td>
+                  <td className="glp__node-id">{entry.template_name || entry.template_id || '—'}</td>
                   <td>{formatCostEur(entry.cost_eur)}</td>
                   <td>{entry.total_tokens.toLocaleString()}</td>
                   <td>{entry.model_name}</td>
@@ -266,6 +272,11 @@ export function GenerationLogsPanel({ dialogueId }: GenerationLogsPanelProps) {
               <div className="glp__detail-meta">
                 <span>Durée : {formatDuration(selectedEntry.duration_ms)}</span>
                 <span>Coût : {formatCostEur(selectedEntry.cost_eur)}</span>
+                {(selectedEntry.template_name || selectedEntry.template_id) && (
+                  <span>
+                    Template : {selectedEntry.template_name || selectedEntry.template_id}
+                  </span>
+                )}
                 {!selectedEntry.success && selectedEntry.error_message && (
                   <span className="glp__detail-error">Erreur : {selectedEntry.error_message}</span>
                 )}

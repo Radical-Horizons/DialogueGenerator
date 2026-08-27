@@ -46,7 +46,7 @@ import { remSize } from '../../theme/uiTypography'
 import { NarrowOverlayDrawer } from './NarrowOverlayDrawer'
 import type { CharacterResponse, LocationResponse, ItemResponse, SpeciesResponse, CommunityResponse, UnityDialogueMetadata } from '../../types/api'
 import { theme } from '../../theme'
-import { redesignAccent, redesignFont, redesignHairline, redesignText } from '../../theme/redesignTokens'
+import { redesignAccent, redesignFont, redesignHairline, redesignTab, redesignText } from '../../theme/redesignTokens'
 import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { useGenerationRunActive } from '../../hooks/useGenerationRunState'
 import { GenerationTracePanel } from '../generation/GenerationTracePanel'
@@ -1610,27 +1610,11 @@ export function Dashboard() {
                     onClick={() =>
                       setRightPanelTab(tab.id as 'prompt' | 'dialogue' | 'node' | 'details')
                     }
-                    style={{
-                      border: 'none',
-                      background: 'none',
-                      padding: 0,
-                      cursor: 'pointer',
-                      fontFamily: redesignFont.mono,
-                      // FR118 (17.6) : densité adaptive de l'étiquette d'en-tête.
-                      fontSize: `${panelHeaderMonoLabelPx}px`,
-                      letterSpacing: '0.08em',
-                      textTransform: 'uppercase',
-                      color: actif ? redesignText.strong : redesignText.label,
-                      whiteSpace: 'nowrap',
-                    }}
+                    // FR118 (17.6) : densité adaptive de l'étiquette d'en-tête.
+                    style={redesignTab.buttonStyle(actif, panelHeaderMonoLabelPx)}
                   >
                     {/* Le filet appartient au libellé, pas à la boîte du bouton. */}
-                    <span
-                      style={{
-                        paddingBottom: 2,
-                        boxShadow: actif ? `inset 0 -1px 0 ${redesignAccent.base}` : 'none',
-                      }}
-                    >
+                    <span style={redesignTab.labelStyle(actif)}>
                       {/* Libellés courts, comme l'inspecteur du graphe : « Ce qui part
                           au modèle » à lui seul chassait les deux autres onglets de la
                           barre. Le sens reste porté par le contenu de la vue. */}

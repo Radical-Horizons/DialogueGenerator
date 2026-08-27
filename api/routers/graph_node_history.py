@@ -332,7 +332,13 @@ async def regenerate_node(
             request_data.parent_node_id,
             request_id,
         )
-        usage_service.annotate_usage(request_id, request_data.dialogue_id, str(node_id))
+        usage_service.annotate_usage(
+            request_id,
+            request_data.dialogue_id,
+            str(node_id),
+            template_id=request_data.template_id,
+            template_name=request_data.template_name,
+        )
         try_compute_context_relevance(usage_service, request_id)
         gdd_fp = await asyncio.to_thread(
             fingerprint_for_selections_safe,

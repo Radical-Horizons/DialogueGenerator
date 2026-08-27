@@ -12,6 +12,9 @@ describe('generationStore - Streaming Extensions', () => {
     if (store.resetStreamingState) {
       store.resetStreamingState()
     }
+    store.setContextDroppingRulesOverlay(null)
+    store.setContextDroppingWarning(null)
+    store.clearTemplateSession()
   })
 
   it('should have initial streaming state as false', () => {
@@ -158,5 +161,41 @@ describe('generationStore - Streaming Extensions', () => {
     expect(streamingContent).toBe('')
     expect(currentStep).toBe('Prompting')
     expect(error).toBeNull()
+  })
+
+  it('stocke un overlay session anti-drop indépendant du streaming', () => {
+    const rules = {
+      rules_profile: 'light' as const,
+      tolerance: null,
+      mandatory_info: ['fait'],
+      dialogue_type_overrides: {},
+      schema_version: '1.0',
+    }
+    useGenerationStore.getState().setContextDroppingRulesOverlay(rules)
+    expect(useGenerationStore.getState().contextDroppingRulesOverlay).toEqual(rules)
+    useGenerationStore.getState().setContextDroppingWarning('2 cas')
+    expect(useGenerationStore.getState().contextDroppingWarning).toBe('2 cas')
+    useGenerationStore.getState().resetStreamingState()
+    expect(useGenerationStore.getState().contextDroppingRulesOverlay).toEqual(rules)
+    useGenerationStore.getState().setContextDroppingRulesOverlay(null)
+    expect(useGenerationStore.getState().contextDroppingRulesOverlay).toBeNull()
+  })
+
+  it('clearTemplateSession retire overlay et template appliqué', () => {
+    const rules = {
+      rules_profile: 'light' as const,
+      tolerance: null,
+      mandatory_info: ['fait'],
+      dialogue_type_overrides: {},
+      schema_version: '1.0',
+    }
+    useGenerationStore.getState().setContextDroppingRulesOverlay(rules)
+    useGenerationStore.getState().setContextDroppingWarning('2 cas')
+    useGenerationStore.getState().setAppliedTemplate('confrontation', 'Confrontation')
+    useGenerationStore.getState().clearTemplateSession()
+    expect(useGenerationStore.getState().contextDroppingRulesOverlay).toBeNull()
+    expect(useGenerationStore.getState().contextDroppingWarning).toBeNull()
+    expect(useGenerationStore.getState().appliedTemplateId).toBeNull()
+    expect(useGenerationStore.getState().appliedTemplateName).toBeNull()
   })
 })

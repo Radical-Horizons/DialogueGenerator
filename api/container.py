@@ -22,6 +22,9 @@ from services.prompt_builder import PromptBuilder
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
+from services.template_service import TemplateService
+from services.template_ab_testing_service import TemplateABTestingService
+from api.services.template_ab_test_job_manager import TemplateABTestJobManager
 from services.dialogue_generation_service import DialogueGenerationService
 from services.llm_usage_service import LLMUsageService
 from services.export_log_service import ExportLogService
@@ -42,6 +45,9 @@ from services.repositories.sqlite import (
     UserRepository,
     UserSettingsRepository,
 )
+from services.repositories.sqlite.template_suggestion_usage_repository import (
+    TemplateSuggestionUsageRepository,
+)
 from services.audit_log_service import AuditLogService
 from services.collection_service import CollectionService
 from services.dialogue_index_service import DialogueIndexService
@@ -49,6 +55,10 @@ from services.dialogue_metadata_service import DialogueMetadataService
 from services.batch_validation_service import BatchValidationService
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
+from services.template_access_service import TemplateAccessService
+from services.owned_item_access import OwnedItemAccessService
+from services.author_profile_service import AuthorProfileService
+from services.template_suggestion_service import TemplateSuggestionService
 from api.services.auth_service import AuthService
 from api.services.batch_validation_job_manager import BatchValidationJobManager
 from api.services.batch_node_generation_job_manager import BatchNodeGenerationJobManager
@@ -88,6 +98,9 @@ class ServiceContainer:
         self._skill_catalog_service: Optional[SkillCatalogService] = None
         self._trait_catalog_service: Optional[TraitCatalogService] = None
         self._preset_service: Optional[PresetService] = None
+        self._template_service: Optional[TemplateService] = None
+        self._template_ab_testing_service: Optional[TemplateABTestingService] = None
+        self._template_ab_test_job_manager: Optional[TemplateABTestJobManager] = None
         self._dialogue_generation_service: Optional[DialogueGenerationService] = None
         self._llm_usage_service: Optional[LLMUsageService] = None
         self._export_log_service: Optional[ExportLogService] = None
@@ -122,6 +135,12 @@ class ServiceContainer:
         self._audit_log_service: Optional[AuditLogService] = None
         self._document_persistence_service: Optional[DocumentPersistenceService] = None
         self._dialogue_sharing_service: Optional[DialogueSharingService] = None
+        self._template_access_service: Optional[TemplateAccessService] = None
+        self._author_profile_service: Optional[AuthorProfileService] = None
+        self._template_suggestion_usage_repository: Optional[
+            TemplateSuggestionUsageRepository
+        ] = None
+        self._template_suggestion_service: Optional[TemplateSuggestionService] = None
         self._auth_service: Optional[AuthService] = None
         self._database_initialization_failed = database_initialization_failed
         self._database_lock = threading.RLock()
@@ -189,6 +208,24 @@ class ServiceContainer:
                 )
                 logger.info("DialogueSharesRepository initialisé dans le container.")
             return self._dialogue_shares_repository
+
+    def get_template_ab_testing_service(self) -> TemplateABTestingService:
+        """Retourne le service A/B testing de templates."""
+        with self._database_lock:
+            if self._template_ab_testing_service is None:
+                self._template_ab_testing_service = TemplateABTestingService(
+                    template_service=self.get_template_service(),
+                )
+                logger.info("TemplateABTestingService initialisé dans le container.")
+            return self._template_ab_testing_service
+
+    def get_template_ab_test_job_manager(self) -> TemplateABTestJobManager:
+        """Retourne le gestionnaire de jobs A/B templates."""
+        with self._database_lock:
+            if self._template_ab_test_job_manager is None:
+                self._template_ab_test_job_manager = TemplateABTestJobManager()
+                logger.info("TemplateABTestJobManager initialisé dans le container.")
+            return self._template_ab_test_job_manager
 
     def get_collections_repository(self) -> CollectionsRepository:
         """Retourne le repository des collections de dialogues."""
@@ -328,6 +365,53 @@ class ServiceContainer:
                 )
                 logger.info("DialogueSharingService initialisé dans le container.")
             return self._dialogue_sharing_service
+
+    def get_template_access_service(self) -> TemplateAccessService:
+        """Retourne le service d'accès aux templates (propriété + statut)."""
+        with self._database_lock:
+            if self._template_access_service is None:
+                self._template_access_service = TemplateAccessService(
+                    user_repository=self.get_user_repository(),
+                )
+                logger.info("TemplateAccessService initialisé dans le container.")
+            return self._template_access_service
+
+    def get_item_access_service(self) -> OwnedItemAccessService:
+        """Service d'accès générique — même instance que celui des templates."""
+        return self.get_template_access_service()
+
+    def get_author_profile_service(self) -> AuthorProfileService:
+        """Retourne le service de persistance des profils d'auteur."""
+        with self._database_lock:
+            if self._author_profile_service is None:
+                self._author_profile_service = AuthorProfileService()
+                logger.info("AuthorProfileService initialisé dans le container.")
+            return self._author_profile_service
+
+    def get_template_suggestion_usage_repository(
+        self,
+    ) -> TemplateSuggestionUsageRepository:
+        """Retourne le repository des compteurs d'usage suggestions."""
+        with self._database_lock:
+            if self._template_suggestion_usage_repository is None:
+                self._template_suggestion_usage_repository = (
+                    TemplateSuggestionUsageRepository(self.get_database_connection())
+                )
+                logger.info(
+                    "TemplateSuggestionUsageRepository initialisé dans le container."
+                )
+            return self._template_suggestion_usage_repository
+
+    def get_template_suggestion_service(self) -> TemplateSuggestionService:
+        """Retourne le service de suggestions de templates."""
+        with self._database_lock:
+            if self._template_suggestion_service is None:
+                self._template_suggestion_service = TemplateSuggestionService(
+                    usage_repository=self.get_template_suggestion_usage_repository(),
+                    access_service=self.get_template_access_service(),
+                )
+                logger.info("TemplateSuggestionService initialisé dans le container.")
+            return self._template_suggestion_service
 
     def get_auth_service(self) -> AuthService:
         """Retourne le service d'authentification avec son repository injecté."""
@@ -500,6 +584,19 @@ class ServiceContainer:
             )
             logger.info("PresetService initialisé dans le container.")
         return self._preset_service
+
+    def get_template_service(self) -> TemplateService:
+        """Retourne le service de gestion des templates custom.
+
+        Returns:
+            Instance de TemplateService.
+        """
+        if self._template_service is None:
+            self._template_service = TemplateService(
+                preset_service=self.get_preset_service(),
+            )
+            logger.info("TemplateService initialisé dans le container.")
+        return self._template_service
     
     def get_dialogue_generation_service(self) -> DialogueGenerationService:
         """Retourne le service de génération de dialogues.
@@ -727,6 +824,7 @@ class ServiceContainer:
             self._app_settings_repository = None
             self._dialogues_index_repository = None
             self._dialogue_shares_repository = None
+            self._template_shares_repository = None
             self._collections_repository = None
             self._collection_service = None
             self._dialogues_search_repository = None
@@ -740,6 +838,7 @@ class ServiceContainer:
             self._audit_log_service = None
             self._document_persistence_service = None
             self._dialogue_sharing_service = None
+            self._template_access_service = None
             self._auth_service = None
     
     def reset(self) -> None:
@@ -756,6 +855,7 @@ class ServiceContainer:
         self._skill_catalog_service = None
         self._trait_catalog_service = None
         self._preset_service = None
+        self._template_service = None
         self._dialogue_generation_service = None
         self._llm_usage_service = None
         self._dialogue_metadata_service = None

@@ -3,6 +3,7 @@
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useGraphStore } from '@/store/graphStore'
+import { useGenerationStore } from '@/store/generationStore'
 import * as graphAPI from '@/api/graph'
 import type { Node } from 'reactflow'
 
@@ -13,6 +14,7 @@ vi.mock('@/api/graph', () => ({
   saveGraph: vi.fn(),
   saveGraphAndWrite: vi.fn(),
   generateNode: vi.fn(),
+  detectContextDropping: vi.fn(),
   loadGraph: vi.fn(),
   validateGraph: vi.fn(),
   calculateLayout: vi.fn(),
@@ -25,6 +27,8 @@ vi.mock('@/components/shared/Toast', () => ({
 describe('graphStore - Regeneration & history (Story 1.10)', () => {
   beforeEach(() => {
     useGraphStore.getState().resetGraph()
+    useGenerationStore.getState().setContextDroppingRulesOverlay(null)
+    useGenerationStore.getState().setContextDroppingWarning(null)
     vi.clearAllMocks()
   })
 
