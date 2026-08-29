@@ -74,10 +74,18 @@ Les deux ensemble : `npm run dev` (via `node scripts/dev.js`).
 Grille complète : **`/test-tiers`**. Obligations agents et protocole Vitest : `.claude/rules/workflow.md`.
 
 - **Backend** : `npm run test:backend:smoke` (T0) · `test:backend:fast` (T2) · `test:backend:full` (T3)
-- **Agrégat T0** : `npm run test:smoke` · **Pré-merge T2** : `npm run test:premerge`
+- **Agrégat T0** : `npm run test:smoke` · **T2** : `npm run test:premerge`
 - **E2E** : `npm run test:e2e:smoke` (fumée) · `npm run test:e2e:verify` (complet) · `npm run test:e2e:pwa` (PWA, non inclus dans verify)
 - **Lint frontend** : `npm --prefix frontend run lint` — baseline **zéro erreur**
 - **Typecheck frontend** : `npm --prefix frontend run typecheck` (`tsc --noEmit`) — baseline **zéro erreur**, tests inclus. Ni `vite build` (esbuild, transpile seul) ni Vitest ne vérifient les types : c'est le seul garde-fou. Même job CI que l'ESLint.
+
+**Quelle gate selon la cible** — détail : `.claude/rules/branching.md`.
+
+| Cible | Attendu |
+|---|---|
+| PR vers `dev` (**`/pr`**) | **T0/T1** + lint/typecheck si le frontend bouge. La CI lance T2 et les e2e en ~4 min. T2 local recommandé, pas obligatoire. |
+| Merge direct dans `dev` | **T2** — un push `dev` ne déclenche aucune CI |
+| Vers `main` | **T3** complet — `.claude/rules/ci_before_push.md` |
 
 **Exécuter les tests, pas seulement les suggérer.** Ne jamais annoncer « vert » sans sortie de commande. Quand on te demande de corriger un test, **relance-le après le correctif** et montre la preuve.
 

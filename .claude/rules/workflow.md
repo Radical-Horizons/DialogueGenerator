@@ -73,7 +73,10 @@ description: Workflow — commandes essentielles, tests, déploiement, venv
 
 - **Version produit (semver)** : règle **`.claude/rules/app_versioning.md`** — PR epic = mineure, main direct = patch ; tags `vX.Y.Z` · `docs/releases/semver-and-tags.md` · rétro BMAD = section **Version livrée**. Procédure prod + canvas : `/prod-release`.
 
-- **Avant commit** : **T2** recommandé — `npm run test:premerge` +, si changements critiques ou release, **`npm run test:frontend`** (build inclus) et/ou **`npm test`** (pytest complet). **T3** avant merge vers `main` si la CI complète n’a pas encore tourné sur la branche.
+- **Avant commit / PR — la gate dépend de la cible**, détail dans `.claude/rules/branching.md` :
+  - **PR vers `dev`** : **T0/T1** suffisent (ciblage sur le diff, lint + typecheck si le frontend bouge, preuve UI si c'est visible). La CI lance T2 et les deux suites e2e en ~4 min sur la PR ; le même T2 coûte **1 h 32** sur un poste Windows de ce dépôt. **T2 local reste recommandé mais facultatif** — hors ligne, ou diff très large. Commande : **`/pr`**.
+  - **Merge direct dans `dev`, sans PR** : **T2 obligatoire** (`npm run test:premerge`) — un push sur `dev` ne déclenche **aucune** CI.
+  - **Merge ou push vers `main`** : **T3** complet — `.claude/rules/ci_before_push.md`.
 
 - **Avant `git push` vers `main`** (obligatoire agents) : suite CI T3 complète — voir **`.claude/rules/ci_before_push.md`**. Interdit de pousser sur `main` sans les trois jobs verts (backend full, Vitest `VITEST_FULL=1`, PWA). La commande `/commit` avec push suit la même gate.
 
