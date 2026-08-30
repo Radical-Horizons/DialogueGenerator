@@ -79,6 +79,9 @@ class BenchmarkModelValidity(BaseModel):
         attempted: ``valid + invalid`` — générations réellement tentées.
         validity_rate: ``valid / attempted``, 0.0 si rien n'a été tenté.
         cost_usd: Coût cumulé des générations du modèle.
+        truncated: Générations coupées par le plafond de complétion. C'est un
+            défaut du **harnais** : un chiffre non nul invalide la comparaison
+            plutôt qu'il ne condamne le modèle.
         gate_failures: Nombre de recalages par identifiant de porte.
     """
 
@@ -90,6 +93,7 @@ class BenchmarkModelValidity(BaseModel):
     attempted: int = 0
     validity_rate: float = 0.0
     cost_usd: float = 0.0
+    truncated: int = 0
     gate_failures: Dict[str, int] = Field(default_factory=dict)
 
 

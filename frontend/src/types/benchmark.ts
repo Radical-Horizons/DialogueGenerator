@@ -144,6 +144,11 @@ export interface BenchmarkModelValidity {
   attempted: number
   validity_rate: number
   cost_usd: number
+  /**
+   * Générations coupées par le plafond de complétion. Défaut du **harnais** :
+   * un chiffre non nul invalide la comparaison, il ne condamne pas le modèle.
+   */
+  truncated: number
   gate_failures: Record<string, number>
 }
 

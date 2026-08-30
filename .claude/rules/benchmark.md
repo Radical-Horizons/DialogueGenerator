@@ -10,6 +10,7 @@ paths:
   - "api/schemas/benchmark*.py"
   - "tests/api/test_benchmark*.py"
   - "core/prompt/benchmark_judge.py"
+  - "core/llm/finish_reason.py"
   - "models/dialogue_structure/unity_dialogue_fragment.py"
   - "tests/services/test_benchmark_*.py"
 ---
@@ -155,14 +156,30 @@ mesure sans en être une** — le mode de défaillance propre à ce genre d'outi
 
 ## Diagnosticabilité
 
-- **Un échec doit être imputable.** Tant que le harnais n'enregistre ni coût, ni
-  tokens, ni raison d'arrêt sur une génération ratée, on ne peut pas distinguer
-  « le modèle a mal répondu » de « on l'a coupé » — et toute conclusion sur le
-  modèle est une opinion. Constaté le 2026-08-09 : cinq échecs à « 0 token,
-  0 $ », dont deux fragments d'un seul panneau **dont les choix pointaient vers
-  des panneaux jamais écrits**.
+- **Un échec doit être imputable.** Sans raison d'arrêt, « le modèle a mal
+  répondu » et « on l'a coupé » produisent la même sortie tronquée, et toute
+  conclusion sur le modèle est une opinion. Constaté le 2026-08-09 : cinq échecs
+  à « 0 token, 0 $ », dont deux fragments d'un seul panneau **dont les choix
+  pointaient vers des panneaux jamais écrits**.
+  Mécanique : `core/llm/finish_reason.py` normalise les deux familles d'API
+  (`choices[0].finish_reason` côté Chat Completions, `status` +
+  `incomplete_details` côté Responses) sur un seul vocabulaire ; les clients
+  exposent `last_finish_reason` comme ils exposent déjà `last_call_cost`,
+  l'orchestrateur le porte sur l'événement **et sur le chemin d'erreur**, et il
+  se persiste dans `BenchmarkGenerationRecord.finish_reason`.
+- **`None` veut dire « on ne sait pas », jamais « tout va bien ».** Un `status:
+  incomplete` sans motif reste `incomplete` : deviner la troncature
+  réintroduirait exactement le défaut qu'on corrige.
+- **Une troncature accuse le banc, pas le modèle.** `length` compte dans
+  `BenchmarkModelValidity.truncated`, et le rapport le dit **avant** le tableau :
+  tant qu'il y en a, les taux et les notes ne se comparent pas. Le réflexe est de
+  relever `COMPLETION_TOKENS`, pas de conclure sur un modèle.
 - **Un appel en échec a coûté.** L'usage est relevé sur le client jusque dans le
   chemin d'erreur : sinon le plafond budgétaire sous-compte la dépense réelle.
+  Corollaire côté client : ne **jamais** remettre `last_call_cost` et les
+  compteurs de tokens à zéro parce que le parsing a échoué. Le modèle a lu le
+  prompt et écrit sa réponse — c'est facturé. Ce zéro-sur-échec était la source
+  des « 0 token, 0 $ » du 8 août.
 - **Le plafond de complétion se dimensionne sur l'unité mesurée.** Il valait 2000
   depuis l'ère du panneau unique ; la bascule en fragment a quadruplé la sortie
   attendue sans que personne ne le suive. La meilleure génération consommait 86 %

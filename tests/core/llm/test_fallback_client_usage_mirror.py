@@ -40,6 +40,7 @@ class _StubFallback(ILLMClient):
         self.last_call_cost = 0.042
         self.last_usage_prompt_tokens = 100
         self.last_usage_completion_tokens = 200
+        self.last_finish_reason = "length"
 
     async def generate_variants(
         self,
@@ -79,3 +80,7 @@ async def test_fallback_mirrors_last_usage_after_success() -> None:
     assert fb.last_call_cost == pytest.approx(0.042)
     assert fb.last_usage_prompt_tokens == 100
     assert fb.last_usage_completion_tokens == 200
+    # L'orchestrateur ne voit que le wrapper : une raison d'arrêt qui reste au
+    # niveau du sous-client rendrait toute troncature invisible dès qu'un repli
+    # entre en jeu.
+    assert fb.last_finish_reason == "length"

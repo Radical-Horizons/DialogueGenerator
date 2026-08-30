@@ -208,3 +208,14 @@
   evidence: "Catalogue de l'API Mistral listé le 2026-08-08 avec la clé du projet : 53 modèles, aucun ne porte ce nom (les Labs sont `labs-leanstral-1-5*`). Un run benchmark avec ce modèle produirait des `config_error`, pas des mesures. Le tarif a été renseigné pour débloquer l'estimation ; l'identifiant reste faux. Touche aussi `e2e/multi-provider-llm.spec.ts` et plusieurs tests — relève du skill `/llm-model-update`."
   status: done
   resolution: "Remplacé par `mistralai/mistral-medium-3-5` (OpenRouter) le 2026-08-08, avec entrée dans LEGACY_MODEL_ID_MAP côté Python et TypeScript."
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-admin-ui.md`
+  summary: "Capturer la raison d'arrêt du modèle (`finish_reason`) pour distinguer une troncature d'un échec d'écriture."
+  evidence: "Relevé le 2026-08-09 : aucun client ne lisait `finish_reason`, donc une génération coupée par le plafond de complétion était indiscernable d'une mauvaise réponse. Cinq échecs du run `20260808T214145-0b3b2f22` restaient inexplicables — dont deux fragments d'un seul panneau aux `leadsTo` orphelins."
+  status: done
+  resolution: "`core/llm/finish_reason.py` normalise Chat Completions et Responses API ; les quatre clients exposent `last_finish_reason`, l'orchestrateur le porte y compris sur le chemin d'erreur, `BenchmarkGenerationRecord.finish_reason` le persiste et le rapport le compte en `truncated` avec alerte en tête d'écran. Corrigé au passage : le client OpenAI remettait coût et tokens à zéro dès que le parsing échouait — origine des « 0 token, 0 $ »."
+- source_spec: `_bmad-output/implementation-artifacts/spec-benchmark-admin-ui.md`
+  summary: Relever la raison d'arrêt sur les chemins **streamés** de Mistral et OpenRouter.
+  evidence: Les deux accumulent les deltas sans lire le `finish_reason` du dernier chunk ; `last_finish_reason` y reste donc `None`. Sans effet sur le benchmark, qui force la voie non-streamée (`fragment_mode`), mais l'information manque au streaming de production.
+- source_spec: none
+  summary: "Trancher le sort d'`aion-2.0` au catalogue : 0/3 générations exploitables au banc du 2026-08-08, ~30 s par appel."
+  evidence: "Décision volontairement reportée : ce run tournait sous un plafond de complétion de 2000 tokens et un schéma qui refusait un fragment d'un seul panneau. Retirer un modèle sur cette mesure reproduirait l'erreur qu'on vient de corriger. À rejuger sur un run refait, où `finish_reason` dira si le modèle a été coupé ou s'il ne sait pas produire la structure."

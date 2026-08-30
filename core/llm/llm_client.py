@@ -6,6 +6,8 @@ from typing import List, Optional, Type, Union, Dict, Any
 from pydantic import BaseModel, ValidationError
 import inspect
 
+from core.llm.finish_reason import COMPLETED
+
 logger = logging.getLogger(__name__)
 
 class ILLMClient(ABC):
@@ -47,6 +49,7 @@ class DummyLLMClient(ILLMClient):
         self.last_call_cost: float = 0.0
         self.last_usage_prompt_tokens: int = 0
         self.last_usage_completion_tokens: int = 0
+        self.last_finish_reason: Optional[str] = COMPLETED
         logger.info(f"DummyLLMClient initialisé avec un délai de {self.delay_seconds}s par variante.")
 
     async def generate_variants(self, prompt: str, k: int, response_model: Optional[Type[BaseModel]] = None, previous_dialogue_context: Optional[List[Dict[str, Any]]] = None, user_system_prompt_override: Optional[str] = None) -> List[Union[str, BaseModel]]:

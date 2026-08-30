@@ -22,6 +22,7 @@ import logging
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
 from api.schemas.benchmark import BenchmarkGenerationRecord
+from core.llm.finish_reason import is_truncated
 from api.schemas.benchmark_judging import (
     CriterionDefinition,
     PairwiseVerdict,
@@ -266,6 +267,8 @@ class BenchmarkReportService:
             )
             entry.generations += 1
             entry.cost_usd += record.cost_usd
+            if is_truncated(record.finish_reason):
+                entry.truncated += 1
             if record.status == "valid":
                 entry.valid += 1
             elif record.status == "invalid":

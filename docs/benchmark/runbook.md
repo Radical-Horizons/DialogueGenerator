@@ -147,7 +147,18 @@ Suivre : `GET /judge/progress`.
 modèle, notes et duels par juge). Le détail brut reste sur
 `GET /runs/<RUN_ID>/generations`, `/verdicts?judge_model=…`, `/pairwise?judge_model=…`.
 
-## Runs produits avant le correctif de classification
+## Runs produits avant le 2026-08-09
+
+Deux correctifs successifs rendent les runs antérieurs non comparables aux
+suivants, et il faut refaire la mesure plutôt que relire l'ancienne :
+
+1. la classification rangeait toute erreur en `config_error` (voir ci-dessous) ;
+2. rien n'enregistrait la raison d'arrêt, et le plafond de complétion valait
+   encore 2000 tokens — hérité de l'ère du panneau unique, alors que la
+   meilleure génération en consommait déjà 86 %. Une partie des « échecs de
+   modèle » de ces runs étaient des troncatures du banc.
+
+### Reclassement des générations mal étiquetées
 
 Les runs antérieurs au 2026-08-09 rangeaient toute erreur en `config_error`, y
 compris les sorties non conformes — donc **hors** du taux de validité, ce qui
@@ -163,6 +174,12 @@ d'une sortie inexploitable changent d'étiquette. Une panne d'environnement rest
 
 ## Lire les résultats sans se tromper
 
+- **La colonne « Tronquées » se lit avant toutes les autres.** Elle compte les
+  générations coupées par le plafond de complétion (`finish_reason: length`).
+  C'est un défaut du **banc**, pas des modèles : tant qu'elle n'est pas à zéro,
+  les taux et les notes ne se comparent pas. Le correctif est de relever
+  `COMPLETION_TOKENS` dans `services/benchmark_suite_seed.py`, pas de conclure
+  quoi que ce soit sur un modèle. Un rapport concerné le dit en clair, en haut.
 - **Le taux de validité est une mesure de premier ordre**, pas un détail
   technique. Une génération recalée est exclue des moyennes, jamais notée zéro.
 - **Le juge est enregistré avec chaque note.** Ne jamais agréger des notes de

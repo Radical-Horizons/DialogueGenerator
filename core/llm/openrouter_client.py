@@ -12,6 +12,7 @@ from typing import Any, Callable, Coroutine, Dict, List, Optional, Type
 from openai import APIError, AsyncOpenAI
 from pydantic import BaseModel, ValidationError
 
+from core.llm.finish_reason import extract_finish_reason
 from core.llm.llm_client import ILLMClient
 
 logger = logging.getLogger(__name__)
@@ -81,6 +82,9 @@ class OpenRouterClient(ILLMClient):
         self.reasoning_trace: Optional[Dict[str, Any]] = None
 
         self.last_call_cost: float = 0.0
+        # Raison d'arrêt : sans elle, une réponse coupée par le plafond
+        # passe pour une réponse ratée, et le modèle porte le défaut.
+        self.last_finish_reason: Optional[str] = None
         self.last_usage_prompt_tokens: int = 0
         self.last_usage_completion_tokens: int = 0
 
@@ -172,6 +176,10 @@ class OpenRouterClient(ILLMClient):
                         "function": {"name": "generate_interaction"},
                     }
 
+                # Repartir de « on ne sait pas » : un appel qui lève laisserait
+                # sinon la raison d'arrêt de la variante précédente.
+                self.last_finish_reason = None
+
                 if stream:
                     accumulated_content = ""
                     response_stream = await self.client.chat.completions.create(
@@ -193,6 +201,7 @@ class OpenRouterClient(ILLMClient):
                 else:
                     response = await self.client.chat.completions.create(**chat_params)
                     raw_response_str = response.model_dump_json()
+                    self.last_finish_reason = extract_finish_reason(response)
 
                     if response.usage:
                         prompt_tokens = int(getattr(response.usage, "prompt_tokens", 0) or 0)

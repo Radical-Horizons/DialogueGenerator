@@ -71,6 +71,11 @@ def _safe_float_cost(value: object, default: float = 0.0) -> float:
     return default
 
 
+def _safe_finish_reason(value: object) -> Optional[str]:
+    """Retourne une raison d'arrêt lisible ; ignore les mocks et objets exotiques."""
+    return value if isinstance(value, str) and value else None
+
+
 @dataclass
 class GenerationEvent:
     """Événement de génération pour SSE streaming.
@@ -489,6 +494,7 @@ class UnityDialogueOrchestrator:
             cost = _safe_float_cost(getattr(llm_client, "last_call_cost", 0.0), 0.0)
             usage_pt = _safe_int_usage(getattr(llm_client, "last_usage_prompt_tokens", 0), 0)
             usage_ct = _safe_int_usage(getattr(llm_client, "last_usage_completion_tokens", 0), 0)
+            finish_reason = _safe_finish_reason(getattr(llm_client, "last_finish_reason", None))
             
             # Metadata (Story 1.16: fallback si utilisé)
             metadata_data: Dict[str, Any] = {
@@ -498,6 +504,9 @@ class UnityDialogueOrchestrator:
                 "usage_completion_tokens": usage_ct,
                 "cost_usd": cost,
                 "cost": cost,
+                # Pourquoi le modèle s'est arrêté. Une sortie tronquée et une
+                # sortie ratée se ressemblent ; seule cette valeur les sépare.
+                "finish_reason": finish_reason,
             }
             fallback_info = getattr(llm_client, '_last_used_fallback', None)
             if fallback_info and isinstance(fallback_info, (list, tuple)) and len(fallback_info) >= 2:
@@ -549,6 +558,9 @@ class UnityDialogueOrchestrator:
                     ),
                     'usage_completion_tokens': _safe_int_usage(
                         getattr(spent, 'last_usage_completion_tokens', 0), 0
+                    ),
+                    'finish_reason': _safe_finish_reason(
+                        getattr(spent, 'last_finish_reason', None)
                     ),
                 },
             )

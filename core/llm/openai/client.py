@@ -13,6 +13,7 @@ from core.llm.openai.parameter_builder import OpenAIParameterBuilder
 from core.llm.openai.response_parser import OpenAIResponseParser
 from core.llm.openai.reasoning_extractor import OpenAIReasoningExtractor
 from core.llm.openai.usage_tracker import OpenAIUsageTracker
+from core.llm.finish_reason import extract_finish_reason
 from core.llm.openai.stream_parser import OpenAIStreamParser, StreamChunk, StreamEventType
 
 logger = logging.getLogger(__name__)
@@ -80,6 +81,9 @@ class OpenAIClient(ILLMClient):
         self.last_call_cost: float = 0.0
         self.last_usage_prompt_tokens: int = 0
         self.last_usage_completion_tokens: int = 0
+        # Sans raison d'arrêt, une sortie tronquée est indiscernable d'une sortie
+        # ratée : on impute au modèle ce qui vient du plafond de complétion.
+        self.last_finish_reason: Optional[str] = None
         
         # Initialiser retry et circuit breaker (optionnel)
         self._retry_with_backoff = None
@@ -173,6 +177,7 @@ class OpenAIClient(ILLMClient):
                 logger.info(f"Début de la génération de la variante {i+1}/{k} pour le prompt.")
                 
                 # Appel API avec retry et circuit breaker
+                self.last_finish_reason = None
                 response = await self._make_api_call_with_protection(responses_params)
                 raw_response_str = response.model_dump_json() if hasattr(response, "model_dump_json") else str(response)
                 
@@ -194,6 +199,7 @@ class OpenAIClient(ILLMClient):
                 prompt_tokens = usage_metrics["prompt_tokens"]
                 completion_tokens = usage_metrics["completion_tokens"]
                 total_tokens = usage_metrics["total_tokens"]
+                self.last_finish_reason = extract_finish_reason(response)
                 
                 # Extraire le reasoning trace
                 self.reasoning_trace = await OpenAIReasoningExtractor.extract_and_notify_reasoning(
@@ -246,18 +252,18 @@ class OpenAIClient(ILLMClient):
                             prompt=full_prompt_str,
                             response=raw_response_str,
                         )
-                        if success:
-                            self.last_usage_prompt_tokens = prompt_tokens
-                            self.last_usage_completion_tokens = completion_tokens
-                            self.last_call_cost = self.usage_service.pricing_service.calculate_cost(
-                                model_name=self.model_name,
-                                prompt_tokens=prompt_tokens,
-                                completion_tokens=completion_tokens,
-                            )
-                        else:
-                            self.last_call_cost = 0.0
-                            self.last_usage_prompt_tokens = 0
-                            self.last_usage_completion_tokens = 0
+                        # Un appel en échec a coûté : le modèle a lu le prompt et
+                        # écrit quelque chose, facturé, avant que le parsing ne
+                        # refuse sa sortie. Remettre ces compteurs à zéro faisait
+                        # afficher « 0 token, 0 $ » sur une génération payée — et
+                        # le plafond budgétaire du benchmark sous-comptait d'autant.
+                        self.last_usage_prompt_tokens = prompt_tokens
+                        self.last_usage_completion_tokens = completion_tokens
+                        self.last_call_cost = self.usage_service.pricing_service.calculate_cost(
+                            model_name=self.model_name,
+                            prompt_tokens=prompt_tokens,
+                            completion_tokens=completion_tokens,
+                        )
                     except Exception as tracking_error:
                         logger.error(
                             f"Erreur lors du tracking de l'usage LLM: {tracking_error}",
@@ -382,6 +388,7 @@ class OpenAIClient(ILLMClient):
                             prompt_tokens = usage_metrics["prompt_tokens"]
                             completion_tokens = usage_metrics["completion_tokens"]
                             total_tokens = usage_metrics["total_tokens"]
+                            self.last_finish_reason = extract_finish_reason(completed_response)
                             
                             # Extraire le reasoning trace
                             self.reasoning_trace = await OpenAIReasoningExtractor.extract_and_notify_reasoning(
@@ -411,6 +418,7 @@ class OpenAIClient(ILLMClient):
 
                     elif chunk.event_type == StreamEventType.RESPONSE_INCOMPLETE.value:
                         inc = chunk.data.get("response")
+                        self.last_finish_reason = extract_finish_reason(inc)
                         error_message = (
                             f"Réponse OpenAI incomplète ou tronquée (max output / annulation): {inc!r}"
                         )
@@ -475,18 +483,18 @@ class OpenAIClient(ILLMClient):
                                 prompt=full_prompt_str,
                                 response=raw_response_str,
                             )
-                            if success:
-                                self.last_usage_prompt_tokens = prompt_tokens
-                                self.last_usage_completion_tokens = completion_tokens
-                                self.last_call_cost = self.usage_service.pricing_service.calculate_cost(
-                                    model_name=self.model_name,
-                                    prompt_tokens=prompt_tokens,
-                                    completion_tokens=completion_tokens,
-                                )
-                            else:
-                                self.last_call_cost = 0.0
-                                self.last_usage_prompt_tokens = 0
-                                self.last_usage_completion_tokens = 0
+                            # Un appel en échec a coûté : le modèle a lu le prompt et
+                            # écrit quelque chose, facturé, avant que le parsing ne
+                            # refuse sa sortie. Remettre ces compteurs à zéro faisait
+                            # afficher « 0 token, 0 $ » sur une génération payée — et
+                            # le plafond budgétaire du benchmark sous-comptait d'autant.
+                            self.last_usage_prompt_tokens = prompt_tokens
+                            self.last_usage_completion_tokens = completion_tokens
+                            self.last_call_cost = self.usage_service.pricing_service.calculate_cost(
+                                model_name=self.model_name,
+                                prompt_tokens=prompt_tokens,
+                                completion_tokens=completion_tokens,
+                            )
                     except Exception as tracking_error:
                         logger.error(
                             f"Erreur lors du tracking de l'usage LLM: {tracking_error}",

@@ -322,6 +322,7 @@ class BenchmarkGenerationRecord(BaseModel):
         prompt_tokens: Tokens d'entrée consommés.
         completion_tokens: Tokens de sortie consommés.
         duration_ms: Durée de l'appel.
+        finish_reason: Pourquoi le modèle s'est arrêté d'écrire.
         language_detector: Détecteur ayant tranché la porte de langue.
         error_message: Message d'erreur quand ``status`` vaut ``config_error``.
         created_at: Horodatage ISO-8601.
@@ -341,6 +342,16 @@ class BenchmarkGenerationRecord(BaseModel):
     prompt_tokens: int = 0
     completion_tokens: int = 0
     duration_ms: int = 0
+    finish_reason: Optional[str] = Field(
+        None,
+        description=(
+            "Raison d'arrêt normalisée (stop / length / content_filter / …), telle "
+            "que rendue par l'API du modèle. `length` signale une troncature par le "
+            "plafond de complétion : un défaut du harnais, pas du modèle. Sans "
+            "cette valeur, les deux sont indiscernables et l'échec devient une "
+            "opinion. `None` veut dire « on ne sait pas », jamais « tout va bien »."
+        ),
+    )
     language_detector: Optional[str] = Field(
         None,
         description=(

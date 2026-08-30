@@ -133,6 +133,14 @@ export function BenchmarkPanel() {
   const [duelProgress, setDuelProgress] = useState<PairwisePassProgress | null>(null)
   const [judgeNotice, setJudgeNotice] = useState<string | null>(null)
 
+  // Une troncature n'est pas un défaut du modèle mais du banc : tant qu'il y en
+  // a, les taux et les notes ne se comparent pas. Le dire une fois, en haut,
+  // plutôt que de le laisser dans une colonne qu'on ne lira pas.
+  const truncatedTotal = (report?.models ?? []).reduce(
+    (total, entry) => total + entry.truncated,
+    0,
+  )
+
   useEffect(() => {
     void (async () => {
       try {
@@ -956,6 +964,14 @@ export function BenchmarkPanel() {
             </p>
           )}
 
+          {truncatedTotal > 0 && (
+            <p role="alert" style={{ color: theme.state.error.color, margin: 0 }}>
+              {truncatedTotal} génération(s) coupée(s) par le plafond de complétion.
+              C’est un défaut du banc, pas des modèles : leurs taux et leurs notes
+              ne sont pas comparables tant que le plafond n’est pas relevé.
+            </p>
+          )}
+
           <section>
             <h2 style={{ fontSize: '1rem', margin: '0 0 0.5rem' }}>Validité par modèle</h2>
             <div style={scrollBox}>
@@ -967,6 +983,7 @@ export function BenchmarkPanel() {
                     <th style={cellStyle}>Valides</th>
                     <th style={cellStyle}>Recalées</th>
                     <th style={cellStyle}>Erreurs config</th>
+                    <th style={cellStyle}>Tronquées</th>
                     <th style={cellStyle}>Taux</th>
                     <th style={cellStyle}>Coût</th>
                     <th style={cellStyle}>Portes échouées</th>
@@ -980,6 +997,7 @@ export function BenchmarkPanel() {
                       <td style={cellStyle}>{entry.valid}</td>
                       <td style={cellStyle}>{entry.invalid}</td>
                       <td style={cellStyle}>{entry.config_error || '—'}</td>
+                      <td style={cellStyle}>{entry.truncated || '—'}</td>
                       <td style={cellStyle}>
                         {entry.attempted === 0 ? 'aucune tentative' : formatRate(entry.validity_rate)}
                       </td>

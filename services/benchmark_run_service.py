@@ -1048,6 +1048,7 @@ class BenchmarkRunService:
         completion_tokens = 0
         error_message: Optional[str] = None
         error_kind = "runtime"
+        finish_reason: Optional[str] = None
 
         try:
             orchestrator = self._orchestrator_factory(request_id)
@@ -1057,6 +1058,7 @@ class BenchmarkRunService:
                     cost = float(event.data.get("cost_usd", 0.0) or 0.0)
                     prompt_tokens = int(event.data.get("usage_prompt_tokens", 0) or 0)
                     completion_tokens = int(event.data.get("usage_completion_tokens", 0) or 0)
+                    finish_reason = event.data.get("finish_reason") or finish_reason
                 elif event.type == "complete":
                     result = event.data.get("result") or {}
                     json_content = result.get("json_content")
@@ -1077,6 +1079,9 @@ class BenchmarkRunService:
                         completion_tokens = int(
                             event.data.get("usage_completion_tokens", 0) or 0
                         )
+                    # C'est sur le chemin d'échec que cette valeur compte le plus :
+                    # elle sépare « le modèle a mal écrit » de « on l'a coupé ».
+                    finish_reason = event.data.get("finish_reason") or finish_reason
         except UnityStructuredOutputError as exc:
             error_message = str(exc)
             error_kind = "model_output"
@@ -1123,6 +1128,7 @@ class BenchmarkRunService:
                 prompt_tokens=prompt_tokens,
                 completion_tokens=completion_tokens,
                 duration_ms=duration_ms,
+                finish_reason=finish_reason,
                 error_message=error_message or "Aucun contenu généré",
                 created_at=_now_iso(),
             )
@@ -1165,6 +1171,7 @@ class BenchmarkRunService:
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
             duration_ms=duration_ms,
+            finish_reason=finish_reason,
             language_detector=self._gate_service.detect_language_of(json_content),
             created_at=_now_iso(),
         )

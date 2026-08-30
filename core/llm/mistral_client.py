@@ -16,6 +16,7 @@ except ImportError:
     from mistralai import Mistral
     from mistralai.models import SDKError, ChatCompletionResponse
 
+from core.llm.finish_reason import extract_finish_reason
 from core.llm.llm_client import ILLMClient
 
 logger = logging.getLogger(__name__)
@@ -77,6 +78,9 @@ class MistralClient(ILLMClient):
         self.reasoning_trace: Optional[Dict[str, Any]] = None
 
         self.last_call_cost: float = 0.0
+        # Raison d'arrêt : sans elle, une réponse coupée par le plafond
+        # passe pour une réponse ratée, et le modèle porte le défaut.
+        self.last_finish_reason: Optional[str] = None
         self.last_usage_prompt_tokens: int = 0
         self.last_usage_completion_tokens: int = 0
 
@@ -170,6 +174,10 @@ class MistralClient(ILLMClient):
                     chat_params["tools"] = [tool_definition]
                     chat_params["tool_choice"] = "any"  # Force l'utilisation du tool
 
+                # Repartir de « on ne sait pas » : un appel qui lève laisserait
+                # sinon la raison d'arrêt de la variante précédente.
+                self.last_finish_reason = None
+
                 # Streaming
                 if stream:
                     accumulated_content = ""
@@ -210,6 +218,7 @@ class MistralClient(ILLMClient):
                     # Appel API sans streaming
                     response: ChatCompletionResponse = await self.client.chat.complete_async(**chat_params)
                     raw_response_str = response.model_dump_json() if hasattr(response, "model_dump_json") else str(response)
+                    self.last_finish_reason = extract_finish_reason(response)
 
                     # Extraire les métriques d'utilisation
                     if hasattr(response, 'usage') and response.usage:

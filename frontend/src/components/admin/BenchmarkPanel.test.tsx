@@ -403,6 +403,7 @@ describe('BenchmarkPanel — rapport', () => {
           attempted: 3,
           validity_rate: 0.6667,
           cost_usd: 0.25,
+          truncated: 0,
           gate_failures: { connectivity: 1 },
         },
       ],
@@ -524,6 +525,36 @@ describe('BenchmarkPanel — rapport', () => {
     expect(screen.getByText(/< 0,5 %/)).toBeInTheDocument()
   })
 
+  it('avertit qu’une troncature fausse la comparaison, sans accuser le modèle', async () => {
+    vi.mocked(api.getBenchmarkRunReport).mockResolvedValue(
+      report({
+        models: [
+          {
+            model_id: MODEL_A,
+            generations: 3,
+            valid: 1,
+            invalid: 2,
+            config_error: 0,
+            attempted: 3,
+            validity_rate: 0.3333,
+            cost_usd: 0.12,
+            truncated: 2,
+            gate_failures: {},
+          },
+        ],
+      }),
+    )
+    const interaction = userEvent.setup()
+    render(<BenchmarkPanel />)
+
+    await interaction.click(await screen.findByRole('button', { name: 'Rapport' }))
+    await interaction.click(await screen.findByRole('button', { name: 'Afficher le rapport' }))
+
+    // Le taux de 33 % ne dit rien du modèle tant que le banc le coupe.
+    expect(await screen.findByText(/coupée\(s\) par le plafond de complétion/)).toBeInTheDocument()
+    expect(screen.getByText(/défaut du banc, pas des modèles/)).toBeInTheDocument()
+  })
+
   it('distingue une erreur de configuration d’un recalage de qualité', async () => {
     vi.mocked(api.getBenchmarkRunReport).mockResolvedValue(
       report({
@@ -537,6 +568,7 @@ describe('BenchmarkPanel — rapport', () => {
             attempted: 0,
             validity_rate: 0,
             cost_usd: 0,
+            truncated: 0,
             gate_failures: {},
           },
         ],
