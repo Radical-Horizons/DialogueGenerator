@@ -60,7 +60,14 @@ Utile en headless, en reprise après incident, ou pour scripter une campagne.
    silencieusement sur `DummyLLMClient` : le run « réussit » et ne mesure rien.
    Le diagnostic de modèles renvoyé au lancement (`model_diagnostics`) le dit —
    le lire.
-2. **Depuis un worktree git**, quatre pièges :
+2. **Depuis un worktree git**, cinq pièges :
+   - le worktree peut se retrouver en **HEAD détaché** (reprise de session,
+     outillage tiers). `git push` échoue alors avec « use git push origin
+     HEAD:<name> », et un commit fait là reste orphelin. Vérifier
+     `git rev-parse --abbrev-ref HEAD` ; si c'est `HEAD`, comparer à la branche
+     (`git rev-parse feat/... HEAD`) et la rattacher par
+     `git switch -C <branche>` **seulement** si l'avance est un simple
+     fast-forward.
    - `.env` n'est **pas** recopié par `git worktree add`. Charger celui du dépôt
      principal dans l'environnement du processus plutôt que dupliquer un fichier
      de secrets.
