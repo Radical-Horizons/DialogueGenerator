@@ -234,3 +234,12 @@
 - source_spec: none
   summary: "`mistral-large-2512` n'est pas servi par la clé Mistral du projet."
   evidence: "Catalogue listé le 2026-09-21 : 46 modèles, aucun `large`. Sur OpenRouter le slug synchrone n'existe pas non plus, seul `:batch`. C'était la recommandation n°1 de la recherche modèles — non activable en l'état. À revoir si le compte change de palier."
+- source_spec: none
+  summary: "Remesurer `z-ai/glm-5.3` avec un plafond de complétion relevé."
+  evidence: "Run 20260921T134830 : cinq générations sur cinq tronquées, `finish_reason: length`, 6000 tokens pile à chaque fois. Le modèle n'a pas été mesuré, il a été coupé — même famille de défaut qu'Aion en août, mais cette fois le banc le dit. Relever COMPLETION_TOKENS change l'empreinte de suite, donc l'identité du run : il faudra remesurer tous les candidats au nouveau plafond, pas seulement GLM."
+- source_spec: none
+  summary: "Remesurer `mistralai/mistral-small-2603` par l'API Mistral directe plutôt que par OpenRouter."
+  evidence: "Run 20260921T134830 : quatre `config_error` sur cinq, 429 malgré trois tentatives avec backoff. OpenRouter indique `limit_source: upstream_provider_shared_pool` — le modèle passe par le pool gratuit partagé. Le projet possède une MISTRAL_API_KEY et un MistralClient ; `mistral-small-2603` figure au catalogue de cette clé. Une entrée `client_type: mistral` sortirait du pool partagé."
+- source_spec: none
+  summary: "Réduire l'instabilité de position du juge, ou la publier au niveau du cas."
+  evidence: "Run 20260921T134830 : 31,8 % de désaccord entre les deux sens de lecture d'un duel. L'ordre général survit (80,8 % contre 51,0 %), mais la précision du classement en souffre. Le taux est agrégé sur tout le run ; le publier par cas dirait sur quels cas le juge hésite, ce qui est actionnable — un cas où il hésite systématiquement est un cas mal cadré."

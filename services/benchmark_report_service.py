@@ -346,37 +346,39 @@ class BenchmarkReportService:
         # passes change le sens ou le poids d'un critère, et fondre les deux
         # appliquerait les anciens poids aux nouvelles notes.
         #
-        # Elle inclut aussi l'empreinte de la consigne du juge : son nom ne
-        # suffit pas. Le 2026-09-21, annoncer l'horizon du fragment a changé ce
-        # que le juge pénalise sous un `judge_model` inchangé. Rejuger un ancien
-        # run — le geste naturel pour comparer avant/après — ferait sinon tomber
-        # anciennes et nouvelles notes dans la même moyenne.
+        # L'empreinte de consigne n'entre **pas** dans la clé : noter et comparer
+        # sont deux tâches, donc deux consignes par construction, et la mettre en
+        # clé couperait un même juge en deux blocs à moitié vides. Le danger est
+        # ailleurs — mélanger deux passes **de la même jambe** produites sous des
+        # consignes différentes, ce que `judge_prompt_mixed` signale plus bas.
         def _key(verdict: Any) -> tuple:
-            """Identité d'un juge : son nom, sa grille, et sa consigne."""
-            return (
-                verdict.judge_model,
-                verdict.grid_id,
-                verdict.grid_version,
-                getattr(verdict, "judge_prompt_hash", None) or "",
-            )
+            """Identité d'un juge : son nom et sa grille."""
+            return (verdict.judge_model, verdict.grid_id, verdict.grid_version)
 
         keys = sorted({_key(v) for v in rubric} | {_key(v) for v in pairwise})
         reports: List[BenchmarkJudgeReport] = []
-        for judge_model, grid_id, grid_version, prompt_hash in keys:
+        for judge_model, grid_id, grid_version in keys:
 
             def _same(verdict: Any) -> bool:
                 """Vrai si le verdict appartient au bloc courant."""
-                return _key(verdict) == (judge_model, grid_id, grid_version, prompt_hash)
+                return _key(verdict) == (judge_model, grid_id, grid_version)
 
             judge_rubric = [v for v in rubric if _same(v)]
             judge_pairwise = [v for v in pairwise if _same(v)]
             decided = [v for v in judge_pairwise if v.status == "decided"]
+            # Une jambe qui porte plusieurs empreintes mélange deux juges sous un
+            # même nom : c'est ce que produit une re-notation après changement de
+            # consigne, et c'est exactement ce que le protocole interdit.
+            rubric_hashes = self._prompt_hashes(judge_rubric)
+            pairwise_hashes = self._prompt_hashes(judge_pairwise)
             reports.append(
                 BenchmarkJudgeReport(
                     judge_model=judge_model,
                     grid_id=grid_id,
                     grid_version=grid_version,
-                    judge_prompt_hash=prompt_hash or None,
+                    rubric_prompt_hashes=rubric_hashes,
+                    pairwise_prompt_hashes=pairwise_hashes,
+                    judge_prompt_mixed=len(rubric_hashes) > 1 or len(pairwise_hashes) > 1,
                     models=self._rubric_summaries(judge_rubric),
                     pairwise=self._pairwise_summaries(decided),
                     pairwise_decided=len(decided),
@@ -385,6 +387,25 @@ class BenchmarkReportService:
                 )
             )
         return reports
+
+    @staticmethod
+    def _prompt_hashes(verdicts: List[Any]) -> List[str]:
+        """Empreintes de consigne distinctes présentes dans une jambe.
+
+        Args:
+            verdicts: Verdicts d'une seule jambe.
+
+        Returns:
+            Les empreintes triées. Plus d'une signifie que deux consignes ont
+            produit ces notes : ce sont deux juges, et les moyennes qui les
+            réunissent ne mesurent rien.
+        """
+        return sorted(
+            {
+                getattr(v, "judge_prompt_hash", None) or "inconnue"
+                for v in verdicts
+            }
+        )
 
     def _rubric_summaries(
         self, verdicts: List[RubricVerdict]

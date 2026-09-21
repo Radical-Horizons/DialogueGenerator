@@ -169,6 +169,13 @@ class BenchmarkJudgeReport(BaseModel):
         judge_model: Juge ayant produit ces notes.
         grid_id: Grille employée.
         grid_version: Version de la grille employée.
+        rubric_prompt_hashes: Empreintes de consigne présentes dans la jambe
+            rubrique. Plus d'une signifie que deux consignes ont produit ces notes.
+        pairwise_prompt_hashes: Idem pour les duels. Les deux jambes ont des
+            consignes différentes par construction — noter et comparer sont deux
+            tâches — donc on ne compare jamais l'une à l'autre.
+        judge_prompt_mixed: Une jambe au moins mélange deux consignes. La moyenne
+            qui les réunit ne mesure rien : même nom de modèle, mais deux juges.
         models: Résumé rubrique par modèle.
         pairwise: Bilan des duels par modèle.
         pairwise_decided: Duels tranchés.
@@ -181,7 +188,9 @@ class BenchmarkJudgeReport(BaseModel):
     judge_model: str
     grid_id: str = ""
     grid_version: int = 0
-    judge_prompt_hash: Optional[str] = None
+    rubric_prompt_hashes: List[str] = Field(default_factory=list)
+    pairwise_prompt_hashes: List[str] = Field(default_factory=list)
+    judge_prompt_mixed: bool = False
     models: List[BenchmarkModelRubricSummary] = Field(default_factory=list)
     pairwise: List[BenchmarkPairwiseSummary] = Field(default_factory=list)
     pairwise_decided: int = 0
