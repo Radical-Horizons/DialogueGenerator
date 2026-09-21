@@ -169,10 +169,23 @@ class LLMClientFactory:
             openrouter_env = config.get("openrouter_api_key_env_var") or "OPENROUTER_API_KEY"
             api_key = os.getenv(openrouter_env)
             if _is_placeholder_llm_api_key(api_key):
-                raise ValueError(
-                    f"OPENROUTER_API_KEY manquante (variable: {openrouter_env}). "
-                    "Impossible d'utiliser un modèle OpenRouter."
+                # Même repli que les routes OpenAI et Mistral. Lever ici était
+                # tenable tant qu'OpenRouter ne portait que quelques modèles ;
+                # depuis la bascule du catalogue entier (2026-09-21), cela
+                # casserait la garantie du dépôt — développer sans clé LLM, avec
+                # `DummyLLMClient` en doublure.
+                #
+                # Le benchmark, lui, refuse ce repli : `diagnose_models` détecte
+                # un `DummyLLMClient` rendu pour un modèle réel et marque le
+                # candidat inutilisable, plutôt que de noter des générations
+                # factices comme si elles venaient du modèle demandé.
+                logger.warning(
+                    "Clé API OpenRouter absente ou factice (variable: %s) pour le "
+                    "modèle '%s'. Utilisation de DummyLLMClient.",
+                    openrouter_env,
+                    model_id,
                 )
+                return DummyLLMClient()
             model_identifier = (
                 model_config.get("api_identifier")
                 or model_config.get("model_identifier")

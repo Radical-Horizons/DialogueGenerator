@@ -546,6 +546,7 @@ class BenchmarkRunService:
                 models=list(config.models),
                 repetitions=config.repetitions,
                 narration_mode=config.narration_mode,
+                reasoning_effort=config.reasoning_effort,
             ),
             status="running",
             generations_total=len(suite.cases) * len(config.models) * config.repetitions,
@@ -1072,6 +1073,7 @@ class BenchmarkRunService:
         case: BenchmarkCase,
         model_id: str,
         narration_mode: BenchmarkNarrationMode = "sans",
+        reasoning_effort: str = "medium",
     ) -> GenerateUnityDialogueRequest:
         """Construit la requête d'un cas pour un modèle donné.
 
@@ -1108,6 +1110,9 @@ class BenchmarkRunService:
             # et la suite de chacune avec ses propres options. Sur un nœud isolé,
             # « conséquence perceptible » et « cohérence des embranchements » notent le vide.
             "fragment_mode": True,
+            # Imposé à tous les candidats : sans lui, chacun tourne au défaut de
+            # son fournisseur et le banc compare des réglages, pas des modèles.
+            "reasoning_effort": reasoning_effort,
             # Le mode de narration doit retirer les consignes contraires, pas
             # seulement s'y ajouter — sinon la directive est minoritaire dans son
             # propre prompt et le modèle a raison de l'ignorer.
@@ -1142,7 +1147,12 @@ class BenchmarkRunService:
             ``config_error`` — jamais un score nul, qui classerait à tort le modèle
             dernier pour un problème de protocole.
         """
-        request = self._build_request(case, model_id, run.config.narration_mode)
+        request = self._build_request(
+            case,
+            model_id,
+            run.config.narration_mode,
+            reasoning_effort=run.config.reasoning_effort,
+        )
         request_id = f"benchmark-{run.run_id}-{slug_for_filename(model_id)}-{slug_for_filename(case.case_id)}-{repetition}"
         started = time.monotonic()
 

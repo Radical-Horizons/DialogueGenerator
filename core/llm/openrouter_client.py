@@ -70,6 +70,12 @@ class OpenRouterClient(ILLMClient):
         self.model_name = self.llm_config.get("default_model", "aion-labs/aion-2.0")
         self.temperature = self.llm_config.get("temperature", 0.7)
         self.max_tokens = self.llm_config.get("max_tokens", 32000)
+        # Effort de raisonnement — `None` laisse au fournisseur son défaut, qui
+        # diffère d'un modèle à l'autre. Le laisser flotter revient à comparer
+        # des réglages : au banc du 2026-09-21, les modèles OpenAI tournaient à
+        # `medium` et GLM ou Kimi au maximum de leur fournisseur, d'où dix fois
+        # plus de tokens facturés sans que personne l'ait demandé.
+        self.reasoning_effort = self.llm_config.get("reasoning_effort", None)
         self.system_prompt_template = self.llm_config.get(
             "system_prompt_template",
             "Tu es un assistant expert en écriture de dialogues pour jeux de rôle (RPG).",
@@ -180,6 +186,16 @@ class OpenRouterClient(ILLMClient):
                     "temperature": self.temperature,
                     "max_tokens": self.max_tokens,
                 }
+                # OpenRouter accepte `reasoning` sur tous les modèles qui
+                # raisonnent, quel que soit le fournisseur derrière. Le poser
+                # explicitement est ce qui rend deux modèles comparables — sans
+                # lui, chacun tourne à son propre défaut.
+                if self.reasoning_effort:
+                    chat_params["extra_body"] = {
+                        **chat_params.get("extra_body", {}),
+                        "reasoning": {"effort": self.reasoning_effort},
+                    }
+
                 if tool_definition:
                     chat_params["tools"] = [tool_definition]
                     chat_params["tool_choice"] = {

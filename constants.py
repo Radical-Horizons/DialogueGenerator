@@ -52,12 +52,19 @@ class ModelNames:
 
     Famille GPT-5.6 (doc OpenAI) : Sol = flagship, Terra = équilibre, Luna = volume/coût.
     """
-    # GPT-5.6 — tiers durables (developers.openai.com/api/docs/models/gpt-5.6-*)
-    GPT_5_6_SOL = "gpt-5.6-sol"
-    GPT_5_6_TERRA = "gpt-5.6-terra"
-    GPT_5_6_LUNA = "gpt-5.6-luna"
+    # GPT-5.6 — tiers durables, routés par OpenRouter comme tout le catalogue.
+    #
+    # Une seule route veut dire un seul client à régler, une seule source de
+    # tarifs, une seule surface de paramètres. La double route coûtait cher :
+    # `reasoning_effort` n'était câblé que côté OpenAI, si bien qu'au banc du
+    # 2026-09-21 les modèles OpenAI tournaient à `medium` et les autres au défaut
+    # de leur fournisseur — on comparait des réglages, pas des modèles.
+    # Sol y gagne au passage : 2/10 par million via OpenRouter contre 5/30 en direct.
+    GPT_5_6_SOL = "openai/gpt-5.6-sol"
+    GPT_5_6_TERRA = "openai/gpt-5.6-terra"
+    GPT_5_6_LUNA = "openai/gpt-5.6-luna"
     # Alias API OpenAI : gpt-5.6 → Sol
-    GPT_5_6 = "gpt-5.6"
+    GPT_5_6 = "openai/gpt-5.6"
 
     # Alias de code (mêmes valeurs que les slugs 5.6) — préférer GPT_5_6_*
     GPT_5_4 = GPT_5_6_SOL
@@ -89,6 +96,11 @@ class ModelNames:
         "gpt-5-mini": GPT_5_6_LUNA,
         "gpt-5-nano": GPT_5_6_LUNA,
         "gpt-5.6": GPT_5_6_SOL,
+        # Bascule des trois tiers 5.6 sur OpenRouter (2026-09-21). Les presets,
+        # le localStorage et les runs antérieurs portent encore les slugs nus.
+        "gpt-5.6-sol": GPT_5_6_SOL,
+        "gpt-5.6-terra": GPT_5_6_TERRA,
+        "gpt-5.6-luna": GPT_5_6_LUNA,
         # `labs-mistral-small-creative` n'a jamais existé au catalogue Mistral
         # (53 modèles listés le 2026-08-08, aucun ne porte ce nom). Les presets et
         # le localStorage qui le portent encore migrent vers le modèle retenu.

@@ -257,6 +257,20 @@ class BenchmarkAutoJudgeConfig(BaseModel):
     with_duels: bool = True
 
 
+BenchmarkReasoningEffort = Literal["none", "low", "medium", "high"]
+"""Effort de raisonnement imposé à **tous** les candidats d'un run.
+
+Laisser flotter ce réglage revient à comparer des configurations, pas des
+modèles : au banc du 2026-09-21, les modèles OpenAI tournaient à `medium`, leur
+défaut, tandis que `z-ai/glm-5.3` et `moonshotai/kimi-k3` tournaient au défaut
+de leur fournisseur — dix fois plus de tokens facturés, sans que personne l'ait
+demandé, et un écart de coût qui ne disait rien des modèles.
+
+Comme `narration_mode`, ce réglage fait partie de l'identité du run : deux runs
+à efforts différents ne s'agrègent pas et ne se comparent pas.
+"""
+
+
 class BenchmarkRunConfig(BaseModel):
     """Paramètres d'un run.
 
@@ -275,6 +289,13 @@ class BenchmarkRunConfig(BaseModel):
     models: List[str] = Field(..., min_length=1, description="Modèles candidats")
     repetitions: int = Field(3, ge=1, le=20, description="Générations par cas et par modèle")
     budget_cap_usd: float = Field(..., gt=0, description="Plafond dur du run en USD")
+    reasoning_effort: BenchmarkReasoningEffort = Field(
+        "medium",
+        description=(
+            "Effort de raisonnement imposé à tous les candidats. Défaut `medium`, "
+            "celui d'OpenAI — ce que le banc mesurait déjà sans le savoir."
+        ),
+    )
     narration_mode: BenchmarkNarrationMode = Field(
         "sans",
         description=(
@@ -463,6 +484,7 @@ class BenchmarkRunIdentity(BaseModel):
     suite_fingerprint: str = Field(..., description="Empreinte du contenu de la suite")
     models: List[str]
     repetitions: int
+    reasoning_effort: BenchmarkReasoningEffort = "medium"
     narration_mode: BenchmarkNarrationMode = Field(
         "sans",
         description=(

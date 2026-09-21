@@ -16,6 +16,7 @@ from typing import Dict, List, Optional
 from pydantic import BaseModel, Field, field_validator
 
 from api.schemas.benchmark import (
+    BenchmarkReasoningEffort,
     BenchmarkCostEstimate,
     BenchmarkModelDiagnostic,
     BenchmarkNarrationMode,
@@ -257,6 +258,7 @@ class BenchmarkRunPreviewRequest(BaseModel):
     models: List[str] = Field(..., min_length=1)
     repetitions: int = Field(3, ge=1, le=20)
     narration_mode: BenchmarkNarrationMode = "sans"
+    reasoning_effort: BenchmarkReasoningEffort = "medium"
     judge_model: Optional[str] = Field(
         None,
         description=(
@@ -285,4 +287,5 @@ class BenchmarkRunPreviewRequest(BaseModel):
             repetitions=self.repetitions,
             budget_cap_usd=budget_cap_usd,
             narration_mode=self.narration_mode,
+            reasoning_effort=self.reasoning_effort,
         )
