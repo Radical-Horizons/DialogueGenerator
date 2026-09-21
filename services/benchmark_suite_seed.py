@@ -22,6 +22,7 @@ from __future__ import annotations
 from typing import Any, Dict, List
 
 from api.schemas.benchmark import BenchmarkSuite
+from constants import Defaults
 
 SMOKE_SUITE_ID = "alteir-smoke"
 """Suite de fumée : trois cas, de quoi valider la chaîne pour quelques centimes."""
@@ -61,20 +62,21 @@ dessous, et c'est de toute façon le plancher utile quand une fiche de personnag
 complète occupe déjà l'essentiel du budget.
 """
 
-COMPLETION_TOKENS = 6000
-"""De quoi écrire un fragment entier — ouverture + branches — sans jamais tronquer.
+COMPLETION_TOKENS = Defaults.MAX_COMPLETION_TOKENS
+"""Assez haut pour ne jamais jouer : les modèles écrivent, le juge juge.
 
-Un plafond serré produirait des générations coupées, que les portes recaleraient :
-on mesurerait la limite qu'on a posée, pas le modèle.
+On paie les tokens **produits**, pas le plafond. Un modèle qui s'arrête de
+lui-même à 1500 coûte 1500, que la borne soit à 6000 ou à 128000 — desserrer ne
+coûte donc rien, et serrer coûte une mesure. Ce qui borne réellement la dépense
+d'un run est son plafond budgétaire, pas celui-ci.
 
-⚠️ Valeur relevée le 2026-08-09. Elle valait 2000 depuis l'époque où l'unité
-mesurée était **un** panneau ; la bascule en `fragment_mode` a quadruplé la
-sortie attendue sans que le plafond suive. Au bench du 8 août, la meilleure
-génération consommait 1718 tokens sur 2000 — 86 % du plafond — et deux
-générations ont rendu un panneau isolé dont les choix pointaient vers des
-panneaux jamais écrits. Le budget doit couvrir MAX_WORDS_PER_PANEL × MIN_PANELS
-en français, plus les options et la structure JSON, avec de la marge pour les
-modèles qui raisonnent avant de répondre.
+Cette valeur s'est périmée deux fois en silence, et chaque fois le banc a
+mesuré sa propre borne au lieu du modèle : à 2000, héritée de l'époque où
+l'unité était *un* panneau, elle coupait des fragments entiers ; à 6000, elle
+tenait pour les modèles OpenAI (1300 à 2000 tokens) mais `z-ai/glm-5.3` tapait
+exactement 6000 cinq fois sur cinq au banc du 2026-09-21.
+
+Il n'y aura pas de troisième fois : la borne est désormais celle de l'API.
 """
 
 

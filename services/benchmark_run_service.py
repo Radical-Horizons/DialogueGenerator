@@ -94,8 +94,19 @@ non » ne dépend ni du personnage ni du lieu, et la porter par cas doublerait l
 coût de la suite pour un axe qui s'observe en comparant deux runs.
 """
 
-DEFAULT_COMPLETION_TOKENS_ESTIMATE = 1000
-"""Estimation de sortie quand le cas ne déclare pas de plafond de complétion."""
+EXPECTED_COMPLETION_TOKENS = 3000
+"""Sortie **attendue** d'une génération — ce n'est pas le plafond.
+
+Le plafond borne ce qui est permis, cette valeur prédit ce qui est probable :
+les confondre fait qu'en relever un casse l'autre. Le plafond vaut désormais
+celui de l'API (128 000), et l'estimation calée dessus annonçait 17,58 $ pour un
+run qui en coûte 1,04 — de quoi décocher trois modèles sur cinq au seuil de coût
+et rendre le plafond budgétaire absurde.
+
+Calée sur ce qui a été mesuré au banc du 2026-09-21 : Luna 1513, Terra 1473,
+Claude Sonnet 5 1974, et `aion-labs/aion-2.0` 4764 au banc du 2026-08-08. La
+fourchette basse applique en plus ``COST_ESTIMATE_LOW_RATIO``.
+"""
 
 COST_ESTIMATE_LOW_RATIO = 0.4
 """Borne basse de la fourchette : les plafonds déclarés sont rarement atteints."""
@@ -379,9 +390,10 @@ class BenchmarkRunService:
         prompt_tokens = (
             case.request.max_context_tokens or DEFAULT_PROMPT_TOKENS_ESTIMATE
         ) + PROMPT_OVERHEAD_TOKENS_ESTIMATE
-        completion_tokens = (
-            case.request.max_completion_tokens or DEFAULT_COMPLETION_TOKENS_ESTIMATE
-        )
+        # Volontairement indépendant de `max_completion_tokens` : ce plafond est
+        # une borne de sécurité, pas une prévision de longueur. S'y référer
+        # faisait grimper l'estimation avec lui sans que la dépense bouge.
+        completion_tokens = EXPECTED_COMPLETION_TOKENS
         return self._pricing_service.calculate_cost(
             model_id, prompt_tokens, completion_tokens
         )
@@ -394,11 +406,10 @@ class BenchmarkRunService:
         C'est la grandeur qui décide si un modèle est employable en nombre — pas
         le tarif affiché, que le poids du contexte rend trompeur.
 
-        Le ratio bas est appliqué à dessein. Les plafonds déclarés par un cas
-        servent à borner une dépense, pas à décrire une génération : le plafond
-        de complétion vaut 6000 tokens quand les modèles en consomment 1200 à
-        1500. Comparer un pire cas à un seuil de production décochait
-        `gpt-5.6-terra` à 0,111 $ alors qu'il coûte 0,061 $ mesuré.
+        Aucun ratio n'est appliqué : `_case_unit_cost` part désormais de
+        `EXPECTED_COMPLETION_TOKENS`, une sortie déjà réaliste. Rabattre encore
+        de 60 % ferait passer sous le seuil des modèles qui le dépassent —
+        `anthropic/claude-sonnet-5`, mesuré à 0,119 $, s'affichait à 0,028 $.
 
         Args:
             suite: Suite à rejouer.
@@ -416,7 +427,7 @@ class BenchmarkRunService:
         if not suite.cases:
             return None
         total = sum(self._case_unit_cost(model_id, case) for case in suite.cases)
-        return round(total * COST_ESTIMATE_LOW_RATIO / len(suite.cases), 6)
+        return round(total / len(suite.cases), 6)
 
     def diagnose_models(self, models: List[str]) -> List[BenchmarkModelDiagnostic]:
         """Vérifie que chaque modèle peut réellement produire une mesure.
