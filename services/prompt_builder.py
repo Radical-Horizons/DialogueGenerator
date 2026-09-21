@@ -143,12 +143,15 @@ class PromptBuilder:
         # sur 5 — il obéissait — et a été pénalisé pour « fragment incomplet ».
         if getattr(input, "fragment_mode", False):
             format_text = (
-                "**IMPORTANT : Génère un FRAGMENT complet en un seul appel** — le "
-                "panneau d'ouverture, puis le panneau qui suit chacun de ses choix, "
-                "chacun portant ses propres choix.\n"
-                "Ne t'arrête pas au premier panneau : le schéma attend la suite de "
-                "chaque option. Le Structured Output garantit le format JSON, mais tu "
-                "dois respecter cette logique métier."
+                "**IMPORTANT : Génère un FRAGMENT de DEUX niveaux, en un seul "
+                "appel.**\n"
+                "Niveau 1 : le panneau d'ouverture et ses options.\n"
+                "Niveau 2 : UN panneau par option du niveau 1, chacun portant ses "
+                "propres options.\n"
+                "Pas de troisième niveau : les options du niveau 2 terminent le "
+                "fragment. Ne t'arrête pas non plus au premier panneau — le schéma "
+                "attend la suite de chaque option. Le Structured Output garantit le "
+                "format JSON, mais tu dois respecter cette logique métier."
             )
         else:
             format_text = (

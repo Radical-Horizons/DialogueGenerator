@@ -37,8 +37,21 @@ def test_fragment_mode_asks_for_the_whole_fragment() -> None:
     """Le schéma attend la suite de chaque choix : la consigne doit le dire."""
     prompt = _prompt(fragment_mode=True)
 
-    assert "FRAGMENT complet" in prompt
-    assert "la suite de chaque" in prompt
+    assert "FRAGMENT de DEUX niveaux" in prompt
+    assert "la suite de chaque option" in prompt
+
+
+def test_fragment_mode_bounds_the_depth() -> None:
+    """« La suite de chaque choix » se lit aussi comme « et ainsi de suite ».
+
+    Sans borne explicite, `gpt-5.6-luna` a produit dix panneaux sur trois
+    niveaux là où l'unité mesurée en compte quatre — et trois de ses cibles
+    pointaient dans le vide. Une unité de mesure qui varie du simple au triple
+    selon le modèle ne compare plus rien.
+    """
+    prompt = _prompt(fragment_mode=True)
+
+    assert "Pas de troisième niveau" in prompt
 
 
 def test_fragment_mode_never_asks_for_a_single_node() -> None:
@@ -54,7 +67,7 @@ def test_single_node_mode_is_untouched() -> None:
     prompt = _prompt(fragment_mode=False)
 
     assert "UN SEUL nœud" in prompt
-    assert "FRAGMENT complet" not in prompt
+    assert "FRAGMENT de DEUX niveaux" not in prompt
 
 
 @pytest.mark.parametrize("fragment_mode", [True, False])
@@ -87,5 +100,5 @@ def test_the_two_axes_are_independent() -> None:
     """Fragment et didascalies se règlent séparément : pas de couplage caché."""
     prompt = _prompt(fragment_mode=True, allow_stage_directions=False)
 
-    assert "FRAGMENT complet" in prompt
+    assert "FRAGMENT de DEUX niveaux" in prompt
     assert "Aucune didascalie" in prompt

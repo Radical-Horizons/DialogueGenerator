@@ -198,3 +198,63 @@ async def test_unexpected_exception_is_not_blamed_on_the_model(tmp_path: Path) -
 
     assert record.status == "config_error"
     assert record.gate_failures == []
+
+
+class _RateLimitedClient:
+    """Client dont le fournisseur a refusé l'appel : rien n'a été facturé."""
+
+    model_name = MODEL
+    last_usage_prompt_tokens = 0
+    last_usage_completion_tokens = 0
+    last_call_cost = 0.0
+    last_finish_reason = None
+
+    async def generate_variants(self, **kwargs: Any) -> List[str]:
+        """Rend l'erreur du relais, telle que les clients la remontent."""
+        return [
+            "Erreur API: OpenRouter API unavailable: Error code: 429 - "
+            "{'error': {'message': 'Provider returned error'}}"
+        ]
+
+
+class _EmptyAnswerClient(_RateLimitedClient):
+    """Client dont le modèle a bien répondu, mais n'importe quoi."""
+
+    last_usage_prompt_tokens = 18_000
+    last_usage_completion_tokens = 12
+
+    async def generate_variants(self, **kwargs: Any) -> List[str]:
+        """Rend une chaîne libre là où un fragment était attendu."""
+        return ["Je ne peux pas produire ce dialogue."]
+
+
+@pytest.mark.asyncio
+async def test_rate_limited_provider_is_not_blamed_on_the_model() -> None:
+    """Un 429 n'est pas une faute d'écriture : le modèle n'a pas été mesuré.
+
+    Constaté le 2026-09-21 : `mistral-small-2603` saturé par OpenRouter
+    s'affichait `invalid` avec une porte `schema` — son taux de validité
+    chutait pour une saturation d'API. Symétrique exact de l'erreur d'août.
+    """
+    from services.unity_dialogue_generation_service import (
+        UnityDialogueGenerationService,
+        UnityProviderUnavailableError,
+    )
+
+    with pytest.raises(UnityProviderUnavailableError):
+        await UnityDialogueGenerationService().generate_dialogue_fragment(
+            llm_client=_RateLimitedClient(), prompt="Écris le fragment."
+        )
+
+
+@pytest.mark.asyncio
+async def test_an_answered_but_unusable_call_stays_the_model_s_fault() -> None:
+    """Le modèle a lu le prompt et mal répondu : il a été mesuré, il compte."""
+    from services.unity_dialogue_generation_service import (
+        UnityDialogueGenerationService,
+    )
+
+    with pytest.raises(UnityStructuredOutputError):
+        await UnityDialogueGenerationService().generate_dialogue_fragment(
+            llm_client=_EmptyAnswerClient(), prompt="Écris le fragment."
+        )

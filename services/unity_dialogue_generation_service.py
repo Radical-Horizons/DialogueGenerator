@@ -51,6 +51,19 @@ def resolve_generated_display_name(
     return start_id
 
 
+class UnityProviderUnavailableError(RuntimeError):
+    """Le fournisseur n'a pas traité l'appel — 429, coupure, clé refusée.
+
+    À ne surtout pas confondre avec `UnityStructuredOutputError` : ici le modèle
+    n'a rien écrit, donc il n'a **pas été mesuré**. Le compter `invalid` ferait
+    chuter son taux de validité pour une saturation d'API, exactement l'erreur
+    symétrique de celle qu'on a corrigée en août.
+
+    Le discriminant est le nombre de tokens d'entrée facturés : une réponse
+    vide ou hors schéma en consomme, une requête jamais traitée non.
+    """
+
+
 class UnityStructuredOutputError(ValueError):
     """Le modèle a répondu, mais sa sortie ne respecte pas le schéma demandé.
 
@@ -115,8 +128,19 @@ class UnityDialogueGenerationService:
 
         result = variants[0]
         if isinstance(result, str):
-            # Le client OpenAI renvoie les erreurs de validation comme chaînes dans
-            # la liste des variantes : sans ce test, elles passeraient pour un succès.
+            # Les clients renvoient leurs erreurs comme chaînes dans la liste des
+            # variantes : sans ce test, elles passeraient pour un succès.
+            #
+            # Reste à savoir *qui* a échoué. Zéro token d'entrée facturé signifie
+            # que la requête n'a jamais été traitée — saturation, coupure, clé
+            # refusée : le modèle n'a pas été mesuré. Une réponse vide ou hors
+            # schéma, elle, a bien consommé le prompt.
+            prompt_tokens = getattr(llm_client, "last_usage_prompt_tokens", 0) or 0
+            if not prompt_tokens:
+                raise UnityProviderUnavailableError(
+                    f"Le fournisseur de '{model_name}' n'a pas traité l'appel "
+                    f"(aucun token facturé). Détails : {result[:400]}"
+                )
             raise UnityStructuredOutputError(
                 f"Le modèle '{model_name}' n'a pas retourné de structured output "
                 f"exploitable pour le fragment. Détails : {result[:400]}"
