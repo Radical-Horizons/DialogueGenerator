@@ -284,8 +284,14 @@ class BenchmarkGateService:
             )
         ]
 
-    _TECHNICAL_SPEAKER = re.compile(r"^[a-z0-9]+(?:_[a-z0-9]+)+$")
+    _TECHNICAL_SPEAKER = re.compile(r"^[a-z0-9]+(?:_[a-z0-9]+)+$", re.I)
+    """Casse ignorée : `Akthar_Neth` s'affiche aussi mal que `akthar_neth`.
+
+    Sol n'a produit que des minuscules, mais une porte plus étroite que le
+    défaut qu'elle vise finit par laisser passer sa variante."""
+
     _STAGE_DIRECTION = re.compile(r"\*[^*]{3,}\*")
+    _QUOTED = re.compile(r"«[^»]*»")
 
     @staticmethod
     def _fragment_shape_failures(
@@ -314,7 +320,15 @@ class BenchmarkGateService:
         if len(nodes) < 2:
             # Un panneau isolé relève du plancher attendu par le cas, pas d'ici.
             return []
-        opening = nodes[0] if isinstance(nodes[0], dict) else {}
+        opening = next(
+            (n for n in nodes if isinstance(n, dict) and str(n.get("id")) == "START"),
+            None,
+        )
+        if opening is None:
+            # Sans ouverture identifiable, la forme attendue n'est pas calculable.
+            # L'ordre du tableau n'en tient pas lieu : rien ne le garantit après
+            # résolution des clés d'auteur en identifiants Unity.
+            return []
         expected = 1 + len(opening.get("choices") or [])
         if len(nodes) <= expected:
             return []
@@ -392,7 +406,14 @@ class BenchmarkGateService:
             for choice in node.get("choices") or []:
                 if isinstance(choice, dict):
                     textes.append(str(choice.get("text") or ""))
-            count += sum(1 for texte in textes if self._STAGE_DIRECTION.search(texte))
+            # L'emphase à l'intérieur des guillemets — « Je ne *veux* pas. » — est
+            # du texte parlé, pas une didascalie. Les retirer avant de chercher
+            # évite de compter un effet de style comme un écart de consigne.
+            count += sum(
+                1
+                for texte in textes
+                if self._STAGE_DIRECTION.search(self._QUOTED.sub("", texte))
+            )
         if not count:
             return []
         return [

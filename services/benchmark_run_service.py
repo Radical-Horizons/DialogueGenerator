@@ -936,9 +936,17 @@ class BenchmarkRunService:
                                 model_id=model_id,
                                 repetition=repetition,
                             )
+                            self._persist_record(record)
+                            spent += record.cost_usd
+                            completed += 1
+                            self._update_progress(completed, spent, model_id, case, repetition)
+
                             # Le prompt n'existe qu'une fois assemblé : on ne peut
                             # l'auditer qu'après le premier appel. Une génération
-                            # perdue vaut mieux que vingt-cinq mesures fausses.
+                            # perdue vaut mieux que vingt-cinq mesures fausses —
+                            # mais elle a été facturée, donc elle est enregistrée et
+                            # comptée **avant** qu'on arrête, sinon le run s'achève
+                            # sur une dépense que rien ne rapporte.
                             if not prompt_audited and record.raw_prompt:
                                 prompt_audited = True
                                 problems = audit_prompt(
@@ -950,10 +958,6 @@ class BenchmarkRunService:
                                 )
                                 if problems:
                                     raise _IncoherentPrompt("; ".join(problems))
-                            self._persist_record(record)
-                            spent += record.cost_usd
-                            completed += 1
-                            self._update_progress(completed, spent, model_id, case, repetition)
 
                 status = "completed"
                 message = "Run terminé"

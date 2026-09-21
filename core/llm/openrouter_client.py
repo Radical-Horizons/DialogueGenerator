@@ -88,6 +88,17 @@ class OpenRouterClient(ILLMClient):
         self.last_usage_prompt_tokens: int = 0
         self.last_usage_completion_tokens: int = 0
 
+        # Le helper partagé du dépôt, déjà utilisé par le client OpenAI : il
+        # connaît 429, 500, 502, 503, 504 et les coupures réseau, et se règle
+        # par LLM_RETRY_MAX_ATTEMPTS / LLM_RETRY_BASE_DELAY.
+        self._retry_with_backoff = None
+        try:
+            from api.utils.retry import retry_with_backoff
+
+            self._retry_with_backoff = retry_with_backoff
+        except (ImportError, AttributeError):
+            logger.debug("Retry indisponible pour OpenRouter : appels sans reprise.")
+
         logger.info(
             "OpenRouterClient initialisé modèle=%s, API key présente=Oui",
             self.model_name,
@@ -199,7 +210,7 @@ class OpenRouterClient(ILLMClient):
                     raw_response_str = accumulated_content[:12000] if accumulated_content else None
                     self._update_last_usage(prompt_tokens, completion_tokens)
                 else:
-                    response = await self.client.chat.completions.create(**chat_params)
+                    response = await self._create_with_retry(**chat_params)
                     raw_response_str = response.model_dump_json()
                     self.last_finish_reason = extract_finish_reason(response)
 
@@ -301,6 +312,34 @@ class OpenRouterClient(ILLMClient):
                         )
 
         return generated_results
+
+    async def _create_with_retry(self, **chat_params: Any) -> Any:
+        """Appelle OpenRouter en réessayant les échecs temporaires.
+
+        Sur un relais, un 429 est la règle et non l'exception pour les modèles
+        populaires. Sans reprise, un candidat qui en prend trois sur cinq cas
+        n'est mesuré que sur deux — on a payé un run pour ne pas le mesurer.
+
+        Le classement en aval reste juste dans les deux cas (`config_error`,
+        hors du taux de validité) ; ce qui manque sans reprise, c'est la mesure
+        elle-même.
+
+        Args:
+            **chat_params: Paramètres de l'appel Chat Completions.
+
+        Returns:
+            La réponse du relais.
+
+        Raises:
+            Exception: La dernière erreur si toutes les tentatives échouent.
+        """
+        if self._retry_with_backoff is None:
+            return await self.client.chat.completions.create(**chat_params)
+
+        async def _call() -> Any:
+            return await self.client.chat.completions.create(**chat_params)
+
+        return await self._retry_with_backoff(_call)
 
     def _update_last_usage(self, prompt_tokens: int, completion_tokens: int) -> None:
         """Met à jour last_* tokens/cost depuis le pricing service."""

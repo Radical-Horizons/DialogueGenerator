@@ -79,6 +79,11 @@
       "input_price_per_1M": 0.91,
       "output_price_per_1M": 2.86,
       "description": "Tarif OpenRouter synchronisé (z-ai/glm-5.3)"
+    },
+    "dummy": {
+      "input_price_per_1M": 0.0,
+      "output_price_per_1M": 0.0,
+      "description": "DummyLLMClient — ne consomme aucun jeton. Tarif nul pour que le banc accepte un run à blanc : sans entrée ici, l'estimation le déclare 'sans tarif' et refuse de lancer."
     }
   },
   "last_updated": "2026-08-08",

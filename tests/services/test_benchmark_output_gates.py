@@ -163,3 +163,38 @@ def test_the_shape_gate_never_disqualifies() -> None:
     failures = _gates().evaluate(_fragment(levels=3))
 
     assert not [f for f in failures if f.severity == "blocking"]
+
+
+@pytest.mark.parametrize("speaker", ["Akthar_Neth", "GENKA_LIEN", "L_Ensevelie"])
+def test_technical_identifiers_are_caught_whatever_the_case(speaker: str) -> None:
+    """Sol n'a produit que des minuscules ; la porte ne doit pas s'y limiter."""
+    assert "speaker_label" in _gates_hit(_gates().evaluate(_document(speaker=speaker)))
+
+
+def test_emphasis_inside_quotes_is_speech_not_stage_direction() -> None:
+    """« Je ne *veux* pas. » est du texte parlé, pas une didascalie."""
+    document = _document(line="« Je ne *veux* pas de votre or, marchand. »")
+    failures = _gates().evaluate(document, allow_stage_directions=False)
+
+    assert "narration" not in _gates_hit(failures)
+
+
+def test_a_stage_direction_outside_quotes_is_still_caught() -> None:
+    """L'exclusion de l'emphase ne doit pas ouvrir une porte dérobée."""
+    document = _document(line="*Voknir recule d'un pas.* « Je ne *veux* pas. »")
+    failures = _gates().evaluate(document, allow_stage_directions=False)
+
+    assert "narration" in _gates_hit(failures)
+
+
+def test_the_shape_gate_finds_the_opening_by_id_not_by_order() -> None:
+    """Rien ne garantit que l'ouverture soit en tête après résolution.
+
+    La porte cherche `START` ; si elle se fiait au premier élément du tableau,
+    un document réordonné lui ferait calculer une forme attendue fantaisiste.
+    """
+    document = json.loads(_fragment(levels=3))
+    document["nodes"].reverse()
+    failures = _gates().evaluate(json.dumps(document, ensure_ascii=False))
+
+    assert _gates_hit(failures).get("panel_count") == "observation"

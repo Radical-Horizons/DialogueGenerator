@@ -201,6 +201,9 @@ class UnityDialogueOrchestrator:
                 max_depth=DEFAULT_PROGRESSION_MAX_DEPTH,
                 is_start=True,
                 scene_type=request_data.scene_type,
+                allow_stage_directions=bool(
+                    getattr(request_data, 'allow_stage_directions', True)
+                ),
             )
             
             # 2. Charger catalogues (services injectés)

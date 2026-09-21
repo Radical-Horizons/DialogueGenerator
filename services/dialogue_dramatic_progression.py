@@ -106,6 +106,47 @@ DIALOGUE_GENERATION_GLOBAL_CONSTRAINTS = (
 )
 
 
+DIALOGUE_GENERATION_GLOBAL_CONSTRAINTS_NO_STAGE_DIRECTIONS = (
+    "\n\nContraintes de génération:\n"
+    "- Format `line` : paroles « … » uniquement. Aucune didascalie, aucun "
+    "italique narrateur, aucune description de geste, de lieu ou de réaction.\n"
+    "- Interdit : acquiescements vides (« Très bien », « Vous l'avez demandé ») "
+    "en ouverture.\n"
+    "- `choices.text` : « réplique PJ » ; pas synopsis d'intention.\n"
+    "- Flags / état durable → `consequences` en complément si besoin.\n"
+    "- `choices.test` autorisé avec parcimonie quand le choix comporte risque, "
+    "incertitude, pression sociale ou effort notable (format Attribut+Compétence:DD) ; "
+    "éviter d'en mettre partout.\n"
+    "- 1 à 4 phrases ; même tu/vous que le START.\n"
+    "- Ne pas répéter formulations déjà dans l'historique.\n"
+)
+"""Variante sans didascalies du bloc de contraintes.
+
+Ce n'est pas le bloc normal augmenté d'une interdiction : c'est le même bloc
+**débarrassé** de ce qui autorise, décrit ou compte les didascalies. Empiler une
+interdiction sur des autorisations ne mesure pas l'obéissance du modèle mais sa
+lecture de notre incohérence — et c'est ce que le banc du 2026-09-21 a mesuré
+sans le savoir.
+
+Découvert par un run à blanc : les tests unitaires assemblaient un prompt
+partiel et ne voyaient pas ce bloc, ajouté plus haut dans la chaîne.
+"""
+
+
+def global_constraints(*, allow_stage_directions: bool = True) -> str:
+    """Bloc de contraintes correspondant au mode de narration.
+
+    Args:
+        allow_stage_directions: Les didascalies sont-elles autorisées ?
+
+    Returns:
+        Le bloc à concaténer aux instructions de scène.
+    """
+    if allow_stage_directions:
+        return DIALOGUE_GENERATION_GLOBAL_CONSTRAINTS
+    return DIALOGUE_GENERATION_GLOBAL_CONSTRAINTS_NO_STAGE_DIRECTIONS
+
+
 def _resolve_beat_phase(
     *,
     depth: int,
@@ -161,6 +202,7 @@ def compose_generation_instructions(
     include_global_constraints: bool = True,
     include_beat: bool = True,
     scene_type: Optional[str] = None,
+    allow_stage_directions: bool = True,
 ) -> str:
     """Assemble consignes utilisateur, beat à la volée et contraintes globales."""
     parts: list[str] = []
@@ -182,5 +224,5 @@ def compose_generation_instructions(
 
     composed = "\n\n".join(parts)
     if include_global_constraints:
-        composed = f"{composed}{DIALOGUE_GENERATION_GLOBAL_CONSTRAINTS}"
+        composed = f"{composed}{global_constraints(allow_stage_directions=allow_stage_directions)}"
     return composed

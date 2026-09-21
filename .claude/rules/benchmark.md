@@ -91,6 +91,26 @@ mesure sans en être une** — le mode de défaillance propre à ce genre d'outi
   aussi comme « et ainsi de suite » : sans « pas de troisième niveau », un
   modèle a rendu dix panneaux là où l'unité en compte quatre.
 
+## Ce qu'un test ne voit pas
+
+- **Un run à blanc `dummy` est gratuit, et il voit ce que les tests ne voient
+  pas.** Les tests unitaires assemblent un prompt partiel ; l'orchestrateur en
+  assemble un autre, plus long, où d'autres modules ont ajouté leurs consignes.
+  Le 2026-09-21, deux contradictions ont survécu à une suite verte et sont
+  tombées au premier run `dummy` — le `DummyLLMClient` ignore le prompt, mais
+  `raw_prompt` est réel, donc l'audit tourne pour de bon. À lancer avant tout
+  run facturé :
+  `POST /runs {"models":["dummy"],"budget_cap_usd":0.01}` — sans `auto_judge`,
+  le juge `dummy` étant interdit à raison.
+- **Un double de test qui ne passerait pas les contrôles de la production ment.**
+  Un faux orchestrateur rendait `raw_prompt: "prompt"` : il faisait croire à un
+  run sain là où la production s'arrête. Corriger le double, pas le contrôle.
+- **Un relais sature : 429 se réessaie.** Sur OpenRouter c'est la règle pour les
+  modèles populaires. Le classement reste juste sans reprise (`config_error`,
+  hors du taux), mais la **mesure** manque — on a payé un run pour ne pas
+  mesurer un candidat. `OpenRouterClient` passe par `retry_with_backoff`, borné
+  par `LLM_RETRY_MAX_ATTEMPTS`.
+
 ## Forme de la sortie
 
 - **Ce qui est vérifiable mécaniquement ne se demande pas au juge**, et cela
@@ -129,7 +149,10 @@ mesure sans en être une** — le mode de défaillance propre à ce genre d'outi
 - **Le raisonnement libre du juge est conservé pour audit, jamais parsé** pour en
   extraire un verdict. C'est le mode de défaillance n°1 d'EQ-Bench.
 - **Le modèle juge est enregistré avec chaque note.** Ne jamais agréger des notes
-  produites par des juges différents.
+  produites par des juges différents — **ni par le même modèle sous une autre
+  consigne**. Le prompt système des deux juges a changé le 2026-09-21 (horizon du
+  fragment annoncé) : les notes antérieures viennent d'un autre juge et ne se
+  comparent pas aux suivantes, même si `judge_model` affiche le même nom.
 - **Les critères sont de la donnée, appariés par identifiant stable** — jamais par
   libellé. Chaque verdict fige un `criteria_snapshot` (sens et poids).
 
