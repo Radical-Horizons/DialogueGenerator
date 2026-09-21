@@ -198,3 +198,77 @@ async def test_a_run_stops_instead_of_paying_for_a_broken_measure(tmp_path) -> N
     final = service.get_run(run.run_id)
     assert final.status == "failed"
     assert "contredit" in (final.message or "")
+
+
+@pytest.mark.asyncio
+async def test_a_run_stopped_for_an_incoherent_prompt_cannot_be_resumed(tmp_path) -> None:
+    """Reprendre mêlerait deux consignes dans le même rapport.
+
+    La génération déjà produite l'a été sous un prompt qu'on sait faux ; la
+    reprise la garde — `_record_is_usable` la juge réutilisable — et lui ajoute
+    des générations d'après correction. Le run neuf est la seule mesure honnête.
+    """
+    from services.benchmark_gate_service import BenchmarkGateService
+    from services.benchmark_run_service import (
+        BenchmarkRunConflictError,
+        BenchmarkRunService,
+    )
+    from services.benchmark_suite_store import BenchmarkSuiteStore
+    from tests.services.benchmark_fixtures import (
+        _FakeConfigService,
+        _FakePricingService,
+        _case,
+        _run,
+    )
+    from api.schemas.benchmark import BenchmarkSuite
+
+    service = BenchmarkRunService(
+        suite_store=BenchmarkSuiteStore(suites_dir=tmp_path / "suites"),
+        gate_service=BenchmarkGateService(flag_validation_service=None),
+        pricing_service=_FakePricingService(),
+        config_service=_FakeConfigService(),
+        orchestrator_factory=lambda request_id: _ContradictoryOrchestrator(),
+        runs_dir=tmp_path / "runs",
+    )
+    run = _run()
+    suite = BenchmarkSuite(
+        suite_id="alteir-smoke", version=1, name="Fumée", cases=[_case()]
+    )
+    await service._execute(run, suite)
+    assert service.get_run(run.run_id).prompt_incoherent is True
+
+    with pytest.raises(BenchmarkRunConflictError, match="consigne incohérente"):
+        await service.resume_run(run.run_id)
+
+
+@pytest.mark.asyncio
+async def test_the_generation_that_triggered_the_stop_is_still_recorded(tmp_path) -> None:
+    """Elle a été facturée : la perdre ferait sous-compter la dépense réelle."""
+    from services.benchmark_gate_service import BenchmarkGateService
+    from services.benchmark_run_service import BenchmarkRunService
+    from services.benchmark_suite_store import BenchmarkSuiteStore
+    from tests.services.benchmark_fixtures import (
+        _FakeConfigService,
+        _FakePricingService,
+        _case,
+        _run,
+    )
+    from api.schemas.benchmark import BenchmarkSuite
+
+    service = BenchmarkRunService(
+        suite_store=BenchmarkSuiteStore(suites_dir=tmp_path / "suites"),
+        gate_service=BenchmarkGateService(flag_validation_service=None),
+        pricing_service=_FakePricingService(),
+        config_service=_FakeConfigService(),
+        orchestrator_factory=lambda request_id: _ContradictoryOrchestrator(),
+        runs_dir=tmp_path / "runs",
+    )
+    run = _run()
+    await service._execute(
+        run,
+        BenchmarkSuite(suite_id="alteir-smoke", version=1, name="Fumée", cases=[_case()]),
+    )
+
+    records = service.list_generations(run.run_id)
+    assert len(records) == 1
+    assert service.get_run(run.run_id).spent_usd > 0

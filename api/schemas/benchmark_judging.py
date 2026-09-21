@@ -150,6 +150,9 @@ class RubricVerdict(BaseModel):
             de juge change les résultats et deux juges ne s'agrègent pas.
         grid_id: Grille employée.
         grid_version: Version de la grille employée.
+        judge_prompt_hash: Empreinte de la consigne système du juge. Changer la
+            consigne change ce que le juge pénalise : deux empreintes différentes
+            sont deux juges, même sous un `judge_model` identique.
         status: `scored` ou `judge_error`.
         scores: Score par `criterion_id`, tel que lu dans les champs structurés.
         comments: Commentaire du juge par `criterion_id`.
@@ -167,6 +170,7 @@ class RubricVerdict(BaseModel):
     judge_model: str
     grid_id: str
     grid_version: int
+    judge_prompt_hash: Optional[str] = None
     status: RubricVerdictStatus
     scores: Dict[str, int] = Field(default_factory=dict)
     comments: Dict[str, str] = Field(default_factory=dict)
@@ -323,6 +327,9 @@ class PairwiseVerdict(BaseModel):
         grid_id: Grille employée.
         grid_version: Version de la grille employée.
         criteria_snapshot: Critères tels qu'ils étaient au moment du duel.
+        judge_prompt_hash: Empreinte de la consigne système du juge. Deux
+            empreintes différentes sont deux juges, même sous un ``judge_model``
+            identique.
         status: ``decided`` ou ``judge_error``.
         outcomes: Résultat agrégé par critère.
         reasoning_forward: Raisonnement du sens direct — audit seul, jamais analysé.
@@ -344,6 +351,7 @@ class PairwiseVerdict(BaseModel):
     grid_id: str
     grid_version: int
     criteria_snapshot: List[CriterionDefinition] = Field(default_factory=list)
+    judge_prompt_hash: Optional[str] = None
     status: PairwiseVerdictStatus
     outcomes: List[PairwiseCriterionOutcome] = Field(default_factory=list)
     reasoning_forward: str = ""

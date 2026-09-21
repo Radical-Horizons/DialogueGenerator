@@ -181,6 +181,7 @@ class BenchmarkJudgeReport(BaseModel):
     judge_model: str
     grid_id: str = ""
     grid_version: int = 0
+    judge_prompt_hash: Optional[str] = None
     models: List[BenchmarkModelRubricSummary] = Field(default_factory=list)
     pairwise: List[BenchmarkPairwiseSummary] = Field(default_factory=list)
     pairwise_decided: int = 0

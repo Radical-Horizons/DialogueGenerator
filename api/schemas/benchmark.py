@@ -376,9 +376,13 @@ défaut ne l'est pas.
 
 Le critère est le coût **par génération**, pas le tarif affiché : l'entrée
 domine largement (≈ 18 k tokens de contexte GDD contre ≈ 1,5 k de sortie), si
-bien qu'un seuil posé sur le prix de sortie classerait de travers. Valeur
-calée sur le run du 2026-09-21 : Terra 0,076 $, Sol 0,164 $ — le seuil laisse
-30 % de marge au-dessus du plus cher des modèles retenus.
+bien qu'un seuil posé sur le prix de sortie classerait de travers.
+
+La comparaison porte sur le coût **courant** rendu par
+``estimate_cost_per_generation`` — les plafonds d'un cas bornent une dépense,
+ils ne décrivent pas une génération. Aux tarifs officiels vérifiés le
+2026-09-21, cela place Terra à 0,044 $ et Sol à 0,111 $ : le seuil sépare les
+deux avec plus du double de marge au-dessus du plus cher des modèles retenus.
 """
 
 
@@ -485,6 +489,10 @@ class BenchmarkRun(BaseModel):
         message: Message d'état lisible.
         created_at: Horodatage de création.
         updated_at: Horodatage de dernière écriture.
+        prompt_incoherent: Le run a été arrêté parce que la consigne envoyée
+            contredisait ce qui était demandé. Sa reprise est refusée : les
+            générations déjà produites l'ont été sous un prompt qu'on sait
+            faux, et ne se comparent pas à celles d'après correction.
     """
 
     run_id: str
@@ -496,6 +504,7 @@ class BenchmarkRun(BaseModel):
     cases_total: int = 0
     cases_covered: int = 0
     spent_usd: float = 0.0
+    prompt_incoherent: bool = False
     model_diagnostics: List[BenchmarkModelDiagnostic] = Field(default_factory=list)
     message: str = ""
     created_at: Optional[str] = None

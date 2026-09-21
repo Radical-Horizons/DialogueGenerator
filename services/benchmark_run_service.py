@@ -569,6 +569,15 @@ class BenchmarkRunService:
         run = self.get_run(run_id)
         if run.status == "completed":
             raise BenchmarkRunConflictError(f"Run '{run_id}' déjà terminé")
+        if run.prompt_incoherent:
+            # Reprendre garderait les générations produites sous le prompt fautif
+            # et les mêlerait à celles d'après correction : le rapport agrégerait
+            # deux consignes. Un run neuf est la seule mesure honnête.
+            raise BenchmarkRunConflictError(
+                f"Run '{run_id}' arrêté pour consigne incohérente : reprise refusée. "
+                "Les générations déjà produites l'ont été sous un prompt qu'on sait "
+                "faux — corriger le prompt, puis lancer un run neuf."
+            )
 
         suite = self._suite_store.get_suite(
             run.identity.suite_id, version=run.identity.suite_version
@@ -964,6 +973,7 @@ class BenchmarkRunService:
 
             except _IncoherentPrompt as exc:
                 status = "failed"
+                run.prompt_incoherent = True
                 message = (
                     f"Run arrêté : le prompt contredit ce qui est demandé — {exc}. "
                     "Aucune comparaison n'est valable tant que la consigne est "

@@ -345,20 +345,28 @@ class BenchmarkReportService:
         # La clé inclut la grille et sa version : une grille rééditée entre deux
         # passes change le sens ou le poids d'un critère, et fondre les deux
         # appliquerait les anciens poids aux nouvelles notes.
-        keys = sorted(
-            {(v.judge_model, v.grid_id, v.grid_version) for v in rubric}
-            | {(v.judge_model, v.grid_id, v.grid_version) for v in pairwise}
-        )
+        #
+        # Elle inclut aussi l'empreinte de la consigne du juge : son nom ne
+        # suffit pas. Le 2026-09-21, annoncer l'horizon du fragment a changé ce
+        # que le juge pénalise sous un `judge_model` inchangé. Rejuger un ancien
+        # run — le geste naturel pour comparer avant/après — ferait sinon tomber
+        # anciennes et nouvelles notes dans la même moyenne.
+        def _key(verdict: Any) -> tuple:
+            """Identité d'un juge : son nom, sa grille, et sa consigne."""
+            return (
+                verdict.judge_model,
+                verdict.grid_id,
+                verdict.grid_version,
+                getattr(verdict, "judge_prompt_hash", None) or "",
+            )
+
+        keys = sorted({_key(v) for v in rubric} | {_key(v) for v in pairwise})
         reports: List[BenchmarkJudgeReport] = []
-        for judge_model, grid_id, grid_version in keys:
+        for judge_model, grid_id, grid_version, prompt_hash in keys:
 
             def _same(verdict: Any) -> bool:
                 """Vrai si le verdict appartient au bloc courant."""
-                return (
-                    verdict.judge_model == judge_model
-                    and verdict.grid_id == grid_id
-                    and verdict.grid_version == grid_version
-                )
+                return _key(verdict) == (judge_model, grid_id, grid_version, prompt_hash)
 
             judge_rubric = [v for v in rubric if _same(v)]
             judge_pairwise = [v for v in pairwise if _same(v)]
@@ -368,6 +376,7 @@ class BenchmarkReportService:
                     judge_model=judge_model,
                     grid_id=grid_id,
                     grid_version=grid_version,
+                    judge_prompt_hash=prompt_hash or None,
                     models=self._rubric_summaries(judge_rubric),
                     pairwise=self._pairwise_summaries(decided),
                     pairwise_decided=len(decided),

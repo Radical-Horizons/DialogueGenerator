@@ -31,6 +31,7 @@ from core.llm.llm_client import ILLMClient
 from core.prompt.benchmark_judge import (
     BENCHMARK_PAIRWISE_JUDGE_SYSTEM_PROMPT,
     BENCHMARK_RUBRIC_JUDGE_SYSTEM_PROMPT,
+    judge_prompt_fingerprint,
     build_pairwise_judge_user_prompt,
     build_rubric_judge_user_prompt,
 )
@@ -211,6 +212,9 @@ class BenchmarkJudgeService:
             "grid_version": grid.version,
             "text_length_chars": measure_text_length(record.json_content),
             "criteria_snapshot": list(grid.criteria),
+            "judge_prompt_hash": judge_prompt_fingerprint(
+                BENCHMARK_RUBRIC_JUDGE_SYSTEM_PROMPT
+            ),
             "created_at": _now_iso(),
         }
 
@@ -550,6 +554,9 @@ class BenchmarkPairwiseJudgeService(BenchmarkJudgeService):
             "grid_id": grid.grid_id,
             "grid_version": grid.version,
             "criteria_snapshot": list(grid.criteria),
+            "judge_prompt_hash": judge_prompt_fingerprint(
+                BENCHMARK_PAIRWISE_JUDGE_SYSTEM_PROMPT
+            ),
             "length_a": pair.length_a,
             "length_b": pair.length_b,
             "truncated": pair.truncated,

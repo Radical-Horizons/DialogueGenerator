@@ -11,6 +11,8 @@ logique métier — quoi évaluer, dans quel sens, et ce qui ne doit pas peser.
 
 from __future__ import annotations
 
+import hashlib
+
 from typing import TYPE_CHECKING, List, Optional
 
 if TYPE_CHECKING:  # pragma: no cover - import de typage seulement
@@ -47,6 +49,27 @@ BENCHMARK_RUBRIC_JUDGE_SYSTEM_PROMPT = (
     "que les critères décrivent.\n"
     "Tu ne compares à aucun autre texte : tu notes celui-ci, seul."
 )
+
+
+def judge_prompt_fingerprint(system_prompt: str) -> str:
+    """Empreinte courte de la consigne donnée au juge.
+
+    Le modèle juge est enregistré avec chaque note, mais son nom ne suffit pas :
+    **changer sa consigne, c'est changer de juge**. Le 2026-09-21, annoncer
+    l'horizon du fragment aux deux juges a modifié ce qu'ils pénalisent, sous un
+    `judge_model` inchangé. Sans cette empreinte, rejuger un ancien run avec
+    « le même » Luna ferait tomber anciennes et nouvelles notes dans la même
+    moyenne — précisément ce que l'invariant « ne jamais agréger deux juges »
+    interdit, et que le nom du modèle ne permet pas de détecter.
+
+    Args:
+        system_prompt: Consigne système effectivement envoyée.
+
+    Returns:
+        Les douze premiers caractères du SHA-256, assez pour distinguer sans
+        alourdir chaque verdict.
+    """
+    return hashlib.sha256(system_prompt.encode("utf-8")).hexdigest()[:12]
 
 
 def _format_criterion(index: int, criterion_id: str, label: str, description: str, direction: str) -> str:
