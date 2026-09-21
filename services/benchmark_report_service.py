@@ -21,7 +21,13 @@ from __future__ import annotations
 import logging
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
-from api.schemas.benchmark import BenchmarkGenerationRecord
+from api.schemas.benchmark import (
+    BENCHMARK_MODEL_EXCLUSIONS,
+    MAX_COST_PER_GENERATION_USD,
+    BenchmarkGenerationRecord,
+    BenchmarkModelDiagnostic,
+    BenchmarkSuite,
+)
 from core.llm.finish_reason import is_truncated
 from api.schemas.benchmark_judging import (
     CriterionDefinition,
@@ -103,6 +109,7 @@ class BenchmarkReportService:
         config = request.to_run_config(_PREVIEW_MIN_CAP_USD)
         estimate = self._run_service.estimate_cost(suite, config)
         diagnostics = self._run_service.diagnose_models(list(request.models))
+        self._apply_default_selection(diagnostics, suite)
 
         # Le plafond réel n'est pas encore connu — c'est ce que l'aperçu sert à
         # décider. On soumet donc un plafond au-dessus de l'estimation haute pour
@@ -210,6 +217,37 @@ class BenchmarkReportService:
             judges=self._judge_reports(rubric, pairwise),
             verdicts_unreadable=rubric_unreadable or pairwise_unreadable,
         )
+
+    def _apply_default_selection(
+        self, diagnostics: List[BenchmarkModelDiagnostic], suite: BenchmarkSuite
+    ) -> None:
+        """Décoche par défaut ce qui n'est pas un candidat crédible.
+
+        Deux motifs, tous deux **réversibles d'un clic** : un coût par
+        génération incompatible avec une production en nombre, et une exclusion
+        nommée dans ``BENCHMARK_MODEL_EXCLUSIONS``.
+
+        On ne touche jamais à ``usable`` : confondre un arbitrage — économique
+        ou éditorial — avec un défaut technique sortirait le modèle du
+        dénominateur du taux de validité et flatterait tous les autres.
+
+        Args:
+            diagnostics: Diagnostics à enrichir, modifiés sur place.
+            suite: Suite dont les plafonds donnent le coût unitaire.
+        """
+        for diagnostic in diagnostics:
+            unit = self._run_service.estimate_cost_per_generation(suite, diagnostic.model_id)
+            diagnostic.cost_per_generation_usd = unit
+            named = BENCHMARK_MODEL_EXCLUSIONS.get(diagnostic.model_id)
+            if named:
+                diagnostic.recommended = False
+                diagnostic.not_recommended_reason = named
+            elif unit is not None and unit > MAX_COST_PER_GENERATION_USD:
+                diagnostic.recommended = False
+                diagnostic.not_recommended_reason = (
+                    f"{unit:.4f} $ par génération, au-dessus du seuil de "
+                    f"{MAX_COST_PER_GENERATION_USD:.2f} $ : trop cher pour produire en nombre."
+                )
 
     @staticmethod
     def _safe_verdicts(

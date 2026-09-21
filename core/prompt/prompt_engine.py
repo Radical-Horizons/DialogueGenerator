@@ -41,6 +41,11 @@ class PromptInput:
         vocabulary_config: Configuration du vocabulaire Alteir (optionnel).
         include_narrative_guides: Si True, inclut les guides narratifs.
         in_game_flags: Flags in-game sélectionnés (optionnel).
+        fragment_mode: Le modèle doit produire un **fragment** — un panneau
+            d'ouverture et la suite de chaque choix — en un seul appel, et non
+            un nœud isolé. Sans ce drapeau, la consigne « génère UN SEUL nœud »
+            contredit le schéma demandé, et un modèle obéissant est puni pour
+            avoir suivi l'instruction.
     """
     user_instructions: str
     npc_speaker_id: str
@@ -61,6 +66,7 @@ class PromptInput:
     in_game_flags: Optional[List[Dict[str, Any]]] = None
     max_context_tokens: Optional[int] = None
     llm_model_identifier: Optional[str] = None
+    fragment_mode: bool = False
 
 @dataclass
 class BuiltPrompt:

@@ -133,6 +133,12 @@ export function BenchmarkPanel() {
   const [duelProgress, setDuelProgress] = useState<PairwisePassProgress | null>(null)
   const [judgeNotice, setJudgeNotice] = useState<string | null>(null)
 
+  // « Non recommandé » n'est pas « inutilisable » : le run part quand même,
+  // mais l'écran doit le dire avant la dépense, pas dans le rapport après coup.
+  const notRecommendedSelected = (preview?.model_diagnostics ?? []).filter(
+    (diagnostic) => diagnostic.recommended === false,
+  )
+
   // Une troncature n'est pas un défaut du modèle mais du banc : tant qu'il y en
   // a, les taux et les notes ne se comparent pas. Le dire une fois, en haut,
   // plutôt que de le laisser dans une colonne qu'on ne lira pas.
@@ -661,9 +667,26 @@ export function BenchmarkPanel() {
               <li key={diagnostic.model_id}>
                 {diagnostic.model_id} —{' '}
                 {diagnostic.usable ? 'utilisable' : `inutilisable : ${diagnostic.reason ?? '—'}`}
+                {diagnostic.cost_per_generation_usd != null && (
+                  <> · {formatUsd(diagnostic.cost_per_generation_usd)} / génération</>
+                )}
               </li>
             ))}
           </ul>
+          {notRecommendedSelected.length > 0 && (
+            <div role="alert" style={{ color: theme.state.warning.color }}>
+              <strong>Modèles non recommandés dans cette sélection :</strong>
+              <ul style={{ margin: '0.25rem 0 0', paddingLeft: '1.2rem' }}>
+                {notRecommendedSelected.map((diagnostic) => (
+                  <li key={diagnostic.model_id}>
+                    {diagnostic.model_id} — {diagnostic.not_recommended_reason}
+                  </li>
+                ))}
+              </ul>
+              Les mesurer reste possible ; décochez-les si vous cherchiez seulement le
+              modèle à employer en production.
+            </div>
+          )}
           {preview.blocking_reasons.map((reason) => (
             <p key={reason} role="alert" style={{ color: theme.state.error.color, margin: 0 }}>
               {reason}

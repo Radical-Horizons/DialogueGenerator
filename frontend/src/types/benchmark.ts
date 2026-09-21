@@ -36,10 +36,29 @@ export interface BenchmarkCostEstimate {
   unpriced_models: string[]
 }
 
+/**
+ * Au-delà, un modèle est écarté par défaut de la sélection.
+ *
+ * Miroir de `MAX_COST_PER_GENERATION_USD` (api/schemas/benchmark.py). Le
+ * critère est le coût **par génération**, pas le tarif affiché : l'entrée
+ * domine (≈ 18 k tokens de contexte contre ≈ 1,5 k de sortie).
+ */
+export const MAX_COST_PER_GENERATION_USD = 0.1
+
 export interface BenchmarkModelDiagnostic {
   model_id: string
   usable: boolean
   reason?: string | null
+  /** Coût estimé d'une génération ; `null` quand le tarif est inconnu. */
+  cost_per_generation_usd?: number | null
+  /**
+   * Proposé par défaut dans la sélection. Distinct de `usable` : un modèle
+   * non recommandé reste cochable et parfaitement mesurable — c'est un
+   * arbitrage, pas une panne.
+   */
+  recommended?: boolean
+  /** Pourquoi il est décoché, en une phrase lisible. */
+  not_recommended_reason?: string | null
 }
 
 export interface BenchmarkRunPreviewRequest {

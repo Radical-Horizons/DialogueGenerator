@@ -364,18 +364,69 @@ class BenchmarkGenerationRecord(BaseModel):
     created_at: Optional[str] = None
 
 
+MAX_COST_PER_GENERATION_USD = 0.10
+"""Au-delà, un modèle est écarté **par défaut** de la sélection.
+
+L'outil répond à « quel modèle employer pour produire nos dialogues en
+nombre ». Un modèle hors de prix à la génération ne peut pas être cette
+réponse, quelle que soit sa note — le mesurer reste possible, le proposer par
+défaut ne l'est pas.
+
+Le critère est le coût **par génération**, pas le tarif affiché : l'entrée
+domine largement (≈ 18 k tokens de contexte GDD contre ≈ 1,5 k de sortie), si
+bien qu'un seuil posé sur le prix de sortie classerait de travers. Valeur
+calée sur le run du 2026-09-21 : Terra 0,076 $, Sol 0,164 $ — le seuil laisse
+30 % de marge au-dessus du plus cher des modèles retenus.
+"""
+
+
+BENCHMARK_MODEL_EXCLUSIONS: Dict[str, str] = {
+    "aion-labs/aion-2.0": (
+        "Dernier du banc du 2026-09-21 (6,90/10 · 31 % de duels gagnés) et 57 s par "
+        "génération. Finetune anglophone de DeepSeek : l'écart se lit surtout en français."
+    ),
+    "mistralai/mistral-medium-3-5": (
+        "Modèle orienté code, pas écriture créative. Écarté sur cette seule raison : "
+        "ses mauvais chiffres au banc du 2026-09-21 (fragments trop courts, cibles "
+        "pendantes) venaient d'un prompt qui lui demandait « un seul nœud » — il "
+        "obéissait. À remesurer sur un banc corrigé avant toute conclusion sur sa plume."
+    ),
+}
+"""Modèles décochés par défaut, avec le motif qui le justifie.
+
+Un modèle listé ici reste **cochable et mesurable** : on ne masque pas un
+candidat, on cesse de le proposer. Le motif voyage avec l'exclusion pour qu'on
+puisse la contester — une liste sans raisons se périme en silence.
+
+Le coût n'y figure pas : il se recalcule à chaque aperçu contre
+``MAX_COST_PER_GENERATION_USD``, et fige donc moins vite qu'un nom écrit ici.
+"""
+
+
 class BenchmarkModelDiagnostic(BaseModel):
     """Diagnostic de configuration d'un modèle candidat.
+
+    « Trop cher » et « inutilisable » sont deux verdicts distincts : un modèle
+    hors budget reste parfaitement mesurable, et `usable` doit continuer de
+    dire ce qu'il dit — sans quoi un choix économique se déguiserait en panne
+    technique et sortirait le modèle du taux de validité.
 
     Attributes:
         model_id: Modèle concerné.
         usable: ``False`` si le modèle ne peut pas produire de mesure valable.
         reason: Raison lisible quand ``usable`` est ``False``.
+        cost_per_generation_usd: Coût estimé d'une génération, ``None`` sans tarif.
+        recommended: Proposé par défaut dans la sélection. ``False`` ne ferme
+            rien : le modèle reste cochable et parfaitement mesurable.
+        not_recommended_reason: Pourquoi il est décoché, en une phrase lisible.
     """
 
     model_id: str
     usable: bool
     reason: Optional[str] = None
+    cost_per_generation_usd: Optional[float] = None
+    recommended: bool = True
+    not_recommended_reason: Optional[str] = None
 
 
 class BenchmarkCostEstimate(BaseModel):

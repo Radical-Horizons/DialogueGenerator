@@ -134,12 +134,29 @@ class PromptBuilder:
             has_content = True
         
         # FORMAT DE SORTIE / INTERDICTIONS (toujours présentes car essentielles)
-        format_text = (
-            "**IMPORTANT : Génère UN SEUL nœud de dialogue (un nœud = une réplique du PNJ + choix du joueur).**\n"
-            "Ne génère PAS de séquence de nœuds dans un même appel : l'expansion d'arbre se fait par "
-            "appels successifs (un nœud par requête). Le Structured Output garantit le format JSON, "
-            "mais tu dois respecter cette logique métier."
-        )
+        # Le mode fragment demande l'inverse du mode mono-nœud. Émettre la
+        # consigne mono-nœud dans les deux cas met le prompt en contradiction avec
+        # le schéma : au banc du 2026-09-21, un modèle a rendu 1 panneau sur 4 cas
+        # sur 5 — il obéissait — et a été pénalisé pour « fragment incomplet ».
+        if getattr(input, "fragment_mode", False):
+            format_text = (
+                "**IMPORTANT : Génère un FRAGMENT complet en un seul appel** — le "
+                "panneau d'ouverture, puis le panneau qui suit chacun de ses choix, "
+                "chacun portant ses propres choix.\n"
+                "Ne t'arrête pas au premier panneau : le schéma attend la suite de "
+                "chaque option. Le Structured Output garantit le format JSON, mais tu "
+                "dois respecter cette logique métier."
+            )
+        else:
+            format_text = (
+                "**IMPORTANT : Génère UN SEUL nœud de dialogue (un nœud = une "
+                "réplique du PNJ + choix du joueur).**\n"
+                "Ne génère PAS de séquence de nœuds dans un même appel : l'expansion "
+                "d'arbre se fait par appels successifs (un nœud par requête). Le "
+                "Structured Output garantit le format JSON, mais tu dois respecter "
+                "cette logique métier."
+            )
+
         if format_text.strip():
             format_elem = ET.SubElement(contract_elem, "output_format")
             format_elem.text = escape_xml_text(format_text)

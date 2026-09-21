@@ -11,14 +11,14 @@
       "description": "Alias gpt-5.6 → gpt-5.6-sol"
     },
     "gpt-5.6-terra": {
-      "input_price_per_1M": 2.5,
-      "output_price_per_1M": 15.0,
-      "description": "GPT-5.6 Terra — équilibre intelligence/coût (doc OpenAI)"
+      "input_price_per_1M": 2.0,
+      "output_price_per_1M": 12.0,
+      "description": "GPT-5.6 Terra — tarif officiel OpenAI vérifié le 2026-09-21 (était 2.5/15.0)"
     },
     "gpt-5.6-luna": {
-      "input_price_per_1M": 1.0,
-      "output_price_per_1M": 6.0,
-      "description": "GPT-5.6 Luna — volume / coût (doc OpenAI)"
+      "input_price_per_1M": 0.2,
+      "output_price_per_1M": 1.2,
+      "description": "GPT-5.6 Luna — tarif officiel OpenAI vérifié le 2026-09-21 (était 1.0/6.0)"
     },
     "gpt-4o": {
       "input_price_per_1M": 2.5,

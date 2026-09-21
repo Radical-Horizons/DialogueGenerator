@@ -345,15 +345,7 @@ class BenchmarkRunService:
                 unpriced.append(model_id)
                 continue
             for case in suite.cases:
-                prompt_tokens = (
-                    case.request.max_context_tokens or DEFAULT_PROMPT_TOKENS_ESTIMATE
-                ) + PROMPT_OVERHEAD_TOKENS_ESTIMATE
-                completion_tokens = (
-                    case.request.max_completion_tokens or DEFAULT_COMPLETION_TOKENS_ESTIMATE
-                )
-                unit = self._pricing_service.calculate_cost(
-                    model_id, prompt_tokens, completion_tokens
-                )
+                unit = self._case_unit_cost(model_id, case)
                 high += unit * config.repetitions
                 low += unit * COST_ESTIMATE_LOW_RATIO * config.repetitions
         return BenchmarkCostEstimate(
@@ -362,6 +354,52 @@ class BenchmarkRunService:
             estimated_max_usd=round(high, 6),
             unpriced_models=unpriced,
         )
+
+    def _case_unit_cost(self, model_id: str, case: BenchmarkCase) -> float:
+        """Coût d'une génération, au plafond déclaré par le cas.
+
+        Args:
+            model_id: Modèle candidat.
+            case: Cas rejoué.
+
+        Returns:
+            Le coût en USD.
+        """
+        prompt_tokens = (
+            case.request.max_context_tokens or DEFAULT_PROMPT_TOKENS_ESTIMATE
+        ) + PROMPT_OVERHEAD_TOKENS_ESTIMATE
+        completion_tokens = (
+            case.request.max_completion_tokens or DEFAULT_COMPLETION_TOKENS_ESTIMATE
+        )
+        return self._pricing_service.calculate_cost(
+            model_id, prompt_tokens, completion_tokens
+        )
+
+    def estimate_cost_per_generation(
+        self, suite: BenchmarkSuite, model_id: str
+    ) -> Optional[float]:
+        """Coût moyen d'une génération de ce modèle sur cette suite.
+
+        C'est la grandeur qui décide si un modèle est employable en nombre — pas
+        le tarif affiché, que le poids du contexte rend trompeur.
+
+        Args:
+            suite: Suite à rejouer.
+            model_id: Modèle candidat.
+
+        Returns:
+            Le coût moyen en USD, ou ``None`` si le tarif est inconnu.
+        """
+        try:
+            if not self._pricing_service.get_model_pricing(model_id):
+                return None
+        except Exception as exc:  # tarif illisible : traité comme inconnu, jamais comme gratuit
+            logger.warning("Tarif indisponible pour '%s' : %s", model_id, exc)
+            return None
+        if not suite.cases:
+            return None
+        total = sum(self._case_unit_cost(model_id, case) for case in suite.cases)
+        return round(total / len(suite.cases), 6)
 
     def diagnose_models(self, models: List[str]) -> List[BenchmarkModelDiagnostic]:
         """Vérifie que chaque modèle peut réellement produire une mesure.
