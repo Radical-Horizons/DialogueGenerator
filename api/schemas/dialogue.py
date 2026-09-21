@@ -145,6 +145,15 @@ class BasePromptRequest(BaseModel):
             "Par défaut la génération reste mono-nœud."
         ),
     )
+    allow_stage_directions: bool = Field(
+        default=True,
+        description=(
+            "Didascalies autorisées dans le texte des panneaux. `False` **retire** les "
+            "lignes de consigne qui les autorisent, au lieu d'empiler une interdiction "
+            "par-dessus : un prompt qui autorise quatre fois et interdit une fois ne "
+            "mesure pas l'obéissance du modèle, il mesure sa lecture de notre incohérence."
+        ),
+    )
     system_prompt_override: Optional[str] = Field(None, description="Surcharge du system prompt")
     author_profile: Optional[str] = Field(None, description="Profil d'auteur global (style réutilisable entre scènes)")
     game_rules: Optional[str] = Field(None, description="Règles du jeu spécifiques à appliquer au dialogue")

@@ -255,6 +255,9 @@ class UnityDialogueOrchestrator:
                 max_context_tokens=request_data.max_context_tokens,
                 llm_model_identifier=request_data.llm_model_identifier,
                 fragment_mode=bool(getattr(request_data, 'fragment_mode', False)),
+                allow_stage_directions=bool(
+                    getattr(request_data, 'allow_stage_directions', True)
+                ),
             )
             
             built = self.prompt_engine.build_prompt(prompt_input)

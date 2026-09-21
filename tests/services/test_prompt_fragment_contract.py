@@ -20,13 +20,14 @@ from core.prompt.prompt_engine import PromptInput
 from services.prompt_builder import PromptBuilder
 
 
-def _prompt(*, fragment_mode: bool) -> str:
+def _prompt(*, fragment_mode: bool = False, allow_stage_directions: bool = True) -> str:
     """Construit la structure de prompt et la rend en texte."""
     structure = PromptBuilder().build_structure(
         PromptInput(
             user_instructions="Écris l'ouverture de la scène.",
             npc_speaker_id="Voknir",
             fragment_mode=fragment_mode,
+            allow_stage_directions=allow_stage_directions,
         )
     )
     return ET.tostring(structure, encoding="unicode")
@@ -60,3 +61,31 @@ def test_single_node_mode_is_untouched() -> None:
 def test_both_modes_keep_the_structured_output_reminder(fragment_mode: bool) -> None:
     """Les deux branches disent que le JSON est garanti mais pas la logique métier."""
     assert "Structured Output" in _prompt(fragment_mode=fragment_mode)
+
+
+def test_narration_sans_removes_the_permissions_it_contradicts() -> None:
+    """Interdire les didascalies doit retirer ce qui les autorise.
+
+    Au banc du 2026-09-21, le prompt les autorisait quatre fois et les
+    interdisait une : la directive était minoritaire dans son propre prompt.
+    """
+    prompt = _prompt(allow_stage_directions=False)
+
+    assert "Didascalies autorisées" not in prompt
+    assert "Aucune didascalie" in prompt
+
+
+def test_narration_avec_keeps_them_authorised() -> None:
+    """Le mode « avec » reste le comportement de production, inchangé."""
+    prompt = _prompt(allow_stage_directions=True)
+
+    assert "Didascalies autorisées" in prompt
+    assert "Aucune didascalie" not in prompt
+
+
+def test_the_two_axes_are_independent() -> None:
+    """Fragment et didascalies se règlent séparément : pas de couplage caché."""
+    prompt = _prompt(fragment_mode=True, allow_stage_directions=False)
+
+    assert "FRAGMENT complet" in prompt
+    assert "Aucune didascalie" in prompt

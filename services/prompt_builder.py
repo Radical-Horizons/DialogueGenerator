@@ -9,7 +9,10 @@ from typing import Optional, TYPE_CHECKING, List, Dict, Any
 import xml.etree.ElementTree as ET
 
 from utils.xml_utils import escape_xml_text
-from services.dialogue_dramatic_progression import DIALOGUE_ORALITY_PROMPT_LINES
+from services.dialogue_dramatic_progression import (
+    DIALOGUE_ORALITY_PROMPT_LINES,
+    dialogue_orality_prompt_lines,
+)
 from services.prompt_xml_parsers import build_narrative_guides_xml, build_vocabulary_xml
 from services.context_truncator import ContextTruncator, cap_context_text_to_budget
 from services.context_serializer.text_serializer import TextSerializer
@@ -283,7 +286,11 @@ class PromptBuilder:
             "- L'Éthérée ne doit jamais apparaître comme speaker ; ses répliques passent par les choices.",
             "- Tests d'attributs : Format 'Caractéristique+Compétence:DD' (ex. 'Intelligence+Rhétorique:8'). Utilisez exactement les identifiants listés ci-dessous (sans espace).",
         ]
-        gen_parts.extend(DIALOGUE_ORALITY_PROMPT_LINES)
+        gen_parts.extend(
+            dialogue_orality_prompt_lines(
+                allow_stage_directions=getattr(input, "allow_stage_directions", True)
+            )
+        )
         
         # Instructions sur le nombre de choix
         if input.choices_mode == "capped" and input.max_choices is not None:

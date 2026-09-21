@@ -59,6 +59,26 @@
       "input_price_per_1M": 1.5,
       "output_price_per_1M": 7.5,
       "description": "Mistral Medium 3.5 via OpenRouter — structured outputs, temperature/top_p acceptes, contexte 262k"
+    },
+    "anthropic/claude-sonnet-5": {
+      "input_price_per_1M": 2.0,
+      "output_price_per_1M": 10.0,
+      "description": "Tarif OpenRouter synchronisé (anthropic/claude-sonnet-5)"
+    },
+    "mistralai/ministral-14b-2512": {
+      "input_price_per_1M": 0.2,
+      "output_price_per_1M": 0.2,
+      "description": "Tarif OpenRouter synchronisé (mistralai/ministral-14b-2512)"
+    },
+    "mistralai/mistral-small-2603": {
+      "input_price_per_1M": 0.15,
+      "output_price_per_1M": 0.6,
+      "description": "Tarif OpenRouter synchronisé (mistralai/mistral-small-2603)"
+    },
+    "z-ai/glm-5.3": {
+      "input_price_per_1M": 0.91,
+      "output_price_per_1M": 2.86,
+      "description": "Tarif OpenRouter synchronisé (z-ai/glm-5.3)"
     }
   },
   "last_updated": "2026-08-08",

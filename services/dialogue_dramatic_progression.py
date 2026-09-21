@@ -32,6 +32,39 @@ DIALOGUE_ORALITY_PROMPT_LINES: tuple[str, ...] = (
     "- Langage clair au premier passage.",
 )
 
+def dialogue_orality_prompt_lines(*, allow_stage_directions: bool = True) -> tuple[str, ...]:
+    """Lignes d'oralité, adaptées au mode de narration demandé.
+
+    Le jeu de lignes par défaut **autorise** les didascalies à quatre endroits.
+    Les émettre quand le run demande « sans didascalies » met le prompt en
+    contradiction avec lui-même : au banc du 2026-09-21, la directive
+    interdictrice était seule contre quatre autorisations, et un modèle qui
+    plaçait des didascalies suivait simplement la majorité.
+
+    Args:
+        allow_stage_directions: ``False`` retire toute mention de didascalie et
+            la remplace par une interdiction unique et sans concurrence.
+
+    Returns:
+        Les lignes à injecter dans ``<generation_instructions>``.
+    """
+    if allow_stage_directions:
+        return DIALOGUE_ORALITY_PROMPT_LINES
+    return (
+        "Format `line` (dialogue seul, SANS didascalie) :",
+        "- Paroles du PNJ entre guillemets français « … » ; au nœud START, fixer tu ou vous "
+        "dès la première réplique (cohérent sur tout le sous-arbre ; s'appuyer sur la fiche voix "
+        "du PNJ et les instructions de scène).",
+        "- Aucune didascalie : pas d'italique narrateur, pas de description de geste, de lieu "
+        "ou de réaction. Écris uniquement ce qui est prononcé.",
+        "- Exemple : « Donne-moi ta main. Le prix est fixé. »",
+        "- Événements mécaniques (flag, état durable) → `consequences`, jamais dans le texte.",
+        "- `choices.text` = réplique PJ entre guillemets « … ».",
+        "- Pas d'acquiescement vide en ouverture (« Très bien », « Vous l'avez demandé »).",
+        "- Langage clair au premier passage.",
+    )
+
+
 _BEAT_BY_PHASE = {
     "accroche": (
         "Beat dramatique (accroche) : tension immédiate (refus, prix, secret, provocation). "

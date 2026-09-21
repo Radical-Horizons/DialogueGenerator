@@ -67,6 +67,7 @@ class PromptInput:
     max_context_tokens: Optional[int] = None
     llm_model_identifier: Optional[str] = None
     fragment_mode: bool = False
+    allow_stage_directions: bool = True
 
 @dataclass
 class BuiltPrompt:

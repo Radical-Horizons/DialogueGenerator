@@ -146,6 +146,7 @@ class _FakeRunService:
         estimate: Optional[BenchmarkCostEstimate] = None,
         diagnostics: Optional[List[BenchmarkModelDiagnostic]] = None,
         refusal: Optional[str] = None,
+        unit_cost: Optional[float] = 0.01,
     ) -> None:
         self._run = run
         self._generations = generations
@@ -154,6 +155,7 @@ class _FakeRunService:
         )
         self._diagnostics = diagnostics or []
         self._refusal = refusal
+        self._unit_cost = unit_cost
         self.started = 0
 
     def get_run(self, run_id: str) -> BenchmarkRun:
@@ -164,6 +166,15 @@ class _FakeRunService:
 
     def estimate_cost(self, suite, config) -> BenchmarkCostEstimate:
         return self._estimate
+
+    def estimate_cost_per_generation(self, suite, model_id: str) -> Optional[float]:
+        """Coût courant d'une génération, sous le seuil par défaut.
+
+        Le double doit exposer cette méthode : l'aperçu s'en sert pour décocher
+        les modèles hors budget, et un double incomplet ferait passer pour un
+        bug du service ce qui n'est qu'une interface non suivie.
+        """
+        return self._unit_cost
 
     def diagnose_models(self, models) -> List[BenchmarkModelDiagnostic]:
         return self._diagnostics or [

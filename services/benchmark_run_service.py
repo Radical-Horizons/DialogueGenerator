@@ -378,17 +378,23 @@ class BenchmarkRunService:
     def estimate_cost_per_generation(
         self, suite: BenchmarkSuite, model_id: str
     ) -> Optional[float]:
-        """Coût moyen d'une génération de ce modèle sur cette suite.
+        """Coût **courant** d'une génération de ce modèle sur cette suite.
 
         C'est la grandeur qui décide si un modèle est employable en nombre — pas
         le tarif affiché, que le poids du contexte rend trompeur.
+
+        Le ratio bas est appliqué à dessein. Les plafonds déclarés par un cas
+        servent à borner une dépense, pas à décrire une génération : le plafond
+        de complétion vaut 6000 tokens quand les modèles en consomment 1200 à
+        1500. Comparer un pire cas à un seuil de production décochait
+        `gpt-5.6-terra` à 0,111 $ alors qu'il coûte 0,061 $ mesuré.
 
         Args:
             suite: Suite à rejouer.
             model_id: Modèle candidat.
 
         Returns:
-            Le coût moyen en USD, ou ``None`` si le tarif est inconnu.
+            Le coût courant en USD, ou ``None`` si le tarif est inconnu.
         """
         try:
             if not self._pricing_service.get_model_pricing(model_id):
@@ -399,7 +405,7 @@ class BenchmarkRunService:
         if not suite.cases:
             return None
         total = sum(self._case_unit_cost(model_id, case) for case in suite.cases)
-        return round(total / len(suite.cases), 6)
+        return round(total * COST_ESTIMATE_LOW_RATIO / len(suite.cases), 6)
 
     def diagnose_models(self, models: List[str]) -> List[BenchmarkModelDiagnostic]:
         """Vérifie que chaque modèle peut réellement produire une mesure.
@@ -1043,6 +1049,10 @@ class BenchmarkRunService:
             # et la suite de chacune avec ses propres options. Sur un nœud isolé,
             # « conséquence perceptible » et « cohérence des embranchements » notent le vide.
             "fragment_mode": True,
+            # Le mode de narration doit retirer les consignes contraires, pas
+            # seulement s'y ajouter — sinon la directive est minoritaire dans son
+            # propre prompt et le modèle a raison de l'ignorer.
+            "allow_stage_directions": narration_mode == "avec",
             "user_instructions": (
                 f"{case.request.user_instructions.rstrip()}\n\n"
                 f"{NARRATION_MODE_DIRECTIVES[narration_mode]}"

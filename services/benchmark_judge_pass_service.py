@@ -54,11 +54,31 @@ from services.gdd_notion_atomic_io import read_json_file, write_json_atomic
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_JUDGE_PROMPT_TOKENS_ESTIMATE = 2000
-"""Estimation d'entrée d'un appel de juge (grille + fragment de dialogue)."""
+DEFAULT_JUDGE_PROMPT_TOKENS_ESTIMATE = 14000
+"""Entrée d'un appel de juge : grille, contexte du candidat, fragment à noter.
 
-DEFAULT_JUDGE_COMPLETION_TOKENS_ESTIMATE = 800
-"""Estimation de sortie d'un appel de juge (une note et un commentaire par critère)."""
+Mesuré sur le run `20260921T090302-e4e6e842`, 25 verdicts : 10 118 tokens en
+moyenne, **11 325 au maximum**. La valeur portée ici garde une marge, parce que
+`estimate_max_cost` doit majorer — c'est une borne, pas une prévision.
+
+Elle valait 2000, d'avant l'injection du contexte GDD complet dans le prompt du
+candidat, que le juge reçoit à son tour. Sous-estimer d'un facteur six ne rend
+pas seulement l'aperçu faux : la garde de pré-vol utilise la même fonction, donc
+elle laissait démarrer une passe que le plafond coupait à mi-course — le « run à
+moitié noté » que l'invariant est censé empêcher."""
+
+DEFAULT_JUDGE_COMPLETION_TOKENS_ESTIMATE = 1800
+"""Sortie d'un appel de juge : une note et un commentaire par critère.
+
+Mesuré : 1 028 en moyenne, 1 380 au maximum sur 17 critères."""
+
+DEFAULT_DUEL_COMPLETION_TOKENS_ESTIMATE = 4200
+"""Sortie d'un duel — sa propre constante, et non un multiple de la précédente.
+
+Le prompt d'un duel est bien le double de celui d'une rubrique (deux textes au
+lieu d'un), ce que le code exprimait déjà correctement. Mais sa **sortie** n'est
+pas un doublement structurel : comparer demande plus de raisonnement que noter.
+Mesuré sur 50 duels : 2 770 en moyenne, **3 351 au maximum**, contre 800 estimés."""
 
 _PASS_STATE_NAME = "_pass.json"
 """État de passe, logé parmi les verdicts mais exclu de leur relevé."""
@@ -875,7 +895,7 @@ class BenchmarkPairwisePassService:
             unit = self._pricing_service.calculate_cost(
                 judge_model,
                 DEFAULT_JUDGE_PROMPT_TOKENS_ESTIMATE * 2,
-                DEFAULT_JUDGE_COMPLETION_TOKENS_ESTIMATE,
+                DEFAULT_DUEL_COMPLETION_TOKENS_ESTIMATE,
             )
         except Exception as exc:
             raise JudgePassConflictError(
