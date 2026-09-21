@@ -8,6 +8,8 @@ qu'un détail d'implémentation.
 
 from __future__ import annotations
 
+import json
+
 from typing import Dict, List, Optional
 
 import pytest
@@ -516,3 +518,61 @@ def test_preview_request_rejects_a_duplicated_model() -> None:
     """Le même garde-fou qu'au lancement : un doublon fausserait le compte."""
     with pytest.raises(ValueError):
         BenchmarkRunPreviewRequest(suite_id="alteir-smoke", models=[MODEL_A, MODEL_A])
+
+
+def test_delivered_text_is_reported_next_to_the_cost() -> None:
+    """Les tokens facturés ne mesurent pas ce que le modèle écrit.
+
+    `completion_tokens` inclut le raisonnement, qui ne sort jamais du modèle.
+    Au banc du 2026-09-21, `z-ai/glm-5.3` consommait 18 194 tokens pour 4 090
+    caractères livrés — 23,8 tokens par mot, contre 3 à 5 pour les autres. Lire
+    ce compte comme une longueur faisait conclure qu'il écrivait treize fois
+    plus que Terra ; il en écrivait deux fois plus.
+    """
+    verbeux = BenchmarkGenerationRecord.model_validate(
+        {
+            "run_id": "run-1",
+            "case_id": "voknir",
+            "model_id": "z-ai/glm-5.3",
+            "repetition": 0,
+            "status": "valid",
+            "completion_tokens": 18194,
+            "json_content": json.dumps(
+                {
+                    "schemaVersion": "1.1.0",
+                    "nodes": [
+                        {
+                            "id": "START",
+                            "speaker": "Voknir",
+                            "line": "A" * 300,
+                            "choices": [{"choiceId": "c0", "text": "B" * 100}],
+                        }
+                    ],
+                },
+                ensure_ascii=False,
+            ),
+        }
+    )
+
+    validity = BenchmarkReportService._model_validity(["z-ai/glm-5.3"], [verbeux])
+
+    # 400 caractères livrés pour 18 194 tokens facturés : l'écart est le sujet.
+    assert validity[0].mean_text_chars == 400
+
+
+def test_only_valid_generations_count_towards_the_delivered_length() -> None:
+    """Une génération recalée n'a rien livré : la moyenner fausserait la mesure."""
+    recalee = BenchmarkGenerationRecord.model_validate(
+        {
+            "run_id": "run-1",
+            "case_id": "voknir",
+            "model_id": "modele",
+            "repetition": 0,
+            "status": "invalid",
+            "json_content": json.dumps({"schemaVersion": "1.1.0", "nodes": []}),
+        }
+    )
+
+    validity = BenchmarkReportService._model_validity(["modele"], [recalee])
+
+    assert validity[0].mean_text_chars == 0

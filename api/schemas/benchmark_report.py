@@ -82,6 +82,13 @@ class BenchmarkModelValidity(BaseModel):
         truncated: Générations coupées par le plafond de complétion. C'est un
             défaut du **harnais** : un chiffre non nul invalide la comparaison
             plutôt qu'il ne condamne le modèle.
+        mean_text_chars: Longueur moyenne du texte **livré**, par génération
+            valide. À lire à côté de `cost_usd` et non à sa place : les tokens
+            facturés incluent le raisonnement, qui ne sort jamais du modèle.
+            `z-ai/glm-5.3` consommait 18 194 tokens pour 4 090 caractères au banc
+            du 2026-09-21 — 23,8 tokens par mot livré, contre 3 à 5 ailleurs. Lire
+            les tokens comme une longueur faisait croire qu'il écrivait treize
+            fois plus ; il en écrivait deux fois plus et réfléchissait le reste.
         gate_failures: Nombre de recalages par identifiant de porte.
     """
 
@@ -94,6 +101,7 @@ class BenchmarkModelValidity(BaseModel):
     validity_rate: float = 0.0
     cost_usd: float = 0.0
     truncated: int = 0
+    mean_text_chars: int = 0
     gate_failures: Dict[str, int] = Field(default_factory=dict)
 
 

@@ -19,6 +19,7 @@ exemplaire.
 from __future__ import annotations
 
 import logging
+from collections import defaultdict
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
 from api.schemas.benchmark import (
@@ -29,6 +30,7 @@ from api.schemas.benchmark import (
     BenchmarkSuite,
 )
 from core.llm.finish_reason import is_truncated
+from services.benchmark_judge_service import measure_text_length
 from api.schemas.benchmark_judging import (
     CriterionDefinition,
     PairwiseVerdict,
@@ -299,6 +301,7 @@ class BenchmarkReportService:
         buckets: Dict[str, BenchmarkModelValidity] = {
             model_id: BenchmarkModelValidity(model_id=model_id) for model_id in models
         }
+        written: Dict[str, List[int]] = defaultdict(list)
         for record in generations:
             entry = buckets.setdefault(
                 record.model_id, BenchmarkModelValidity(model_id=record.model_id)
@@ -308,6 +311,8 @@ class BenchmarkReportService:
             if is_truncated(record.finish_reason):
                 entry.truncated += 1
             if record.status == "valid":
+                written[record.model_id].append(measure_text_length(record.json_content))
+            if record.status == "valid":
                 entry.valid += 1
             elif record.status == "invalid":
                 entry.invalid += 1
@@ -315,6 +320,10 @@ class BenchmarkReportService:
                 entry.config_error += 1
             for failure in record.gate_failures:
                 entry.gate_failures[failure.gate] = entry.gate_failures.get(failure.gate, 0) + 1
+
+        for model_id, lengths in written.items():
+            if lengths:
+                buckets[model_id].mean_text_chars = round(sum(lengths) / len(lengths))
 
         for entry in buckets.values():
             entry.cost_usd = round(entry.cost_usd, 6)
