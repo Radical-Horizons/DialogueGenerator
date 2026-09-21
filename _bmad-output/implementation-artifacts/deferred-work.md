@@ -219,3 +219,18 @@
 - source_spec: none
   summary: "Trancher le sort d'`aion-2.0` au catalogue : 0/3 générations exploitables au banc du 2026-08-08, ~30 s par appel."
   evidence: "Décision volontairement reportée : ce run tournait sous un plafond de complétion de 2000 tokens et un schéma qui refusait un fragment d'un seul panneau. Retirer un modèle sur cette mesure reproduirait l'erreur qu'on vient de corriger. À rejuger sur un run refait, où `finish_reason` dira si le modèle a été coupé ou s'il ne sait pas produire la structure."
+- source_spec: none
+  summary: "Chemin `response_format` en repli dans `OpenRouterClient`, pour les modèles qui supportent `structured_outputs` sans `tools`."
+  evidence: "Le client force `tools` + `tool_choice='any'` (core/llm/openrouter_client.py). Or 38 modèles du catalogue OpenRouter au 2026-09-21 annoncent `structured_outputs` **sans** `tools`, et c'est là que vivent les finetunes créatifs : Cydonia 24B v4.1 (base Mistral Small 3.2, 0,30/0,50 $), Skyfall 36B v2, Magnum, Euryale. `response_format: {type: json_schema}` contraint la sortie aussi strictement que `generate_interaction`. Un petit diff dans un seul client ouvrirait toute cette catégorie au banc."
+- source_spec: none
+  summary: "Router les modèles OpenAI par OpenRouter pour unifier tarifs et estimation."
+  evidence: "Sol coûte 5/30 en direct contre 2/10 via OpenRouter, soit 2,9× moins cher, et la synchronisation des tarifs deviendrait exacte pour tout le catalogue. L'objection historique — OpenRouter ne fait pas respecter `minItems` côté serveur — est tombée : les bornes du schéma valent désormais 1/1 et la revalidation se fait en Pydantic. Le changement touche `constants.py`, la chaîne de repli, les presets stockés et les e2e, donc le chemin de génération de production : lot à part, pas un correctif en passant."
+- source_spec: none
+  summary: "Mesurer une conséquence réelle plutôt que l'annoncer au juge."
+  evidence: "Le fragment s'arrête à deux niveaux et ses feuilles pointent vers END. Le juge lisait cet horizon comme un défaut et pénalisait les cinq modèles sur « conséquence perceptible » (pondéré 1,2). Palliatif livré le 2026-09-21 : `FRAGMENT_HORIZON_NOTICE` le prévient que la troncature vient du banc. Le vrai correctif serait de mesurer un parcours — ouverture, choix, panneau suivant, et la réaction effective — ce qui change l'unité mesurée et donc le coût d'un run."
+- source_spec: none
+  summary: "Aucun finetune « français littéraire » n'est accessible par API avec tool calling (état au 2026-09-21)."
+  evidence: "Recherche approfondie : sur 446 modèles OpenRouter, un seul mentionne le français (mistralai/mistral-nemo, 2024). Luciole (OpenLLM-France) est post-entraînée « almost entirely on English data » selon sa propre carte, sans tool calling ni hébergeur. EuroLLM n'a pas `tools` dans son chat template. Teuken retiré d'IONOS en avril 2026, Occiglot et CroissantLLM arrêtés en 2024, ALIA-fc en dépôt restreint. Mistral Small Creative retiré le 31 mars 2026 sans successeur créatif. Aucun benchmark de français littéraire n'existe non plus. Si la qualité ne vient d'aucun modèle servi, la seule voie restante est un QLoRA maison sur Mistral Small 24B, corpus OpenCulture de Common Corpus."
+- source_spec: none
+  summary: "`mistral-large-2512` n'est pas servi par la clé Mistral du projet."
+  evidence: "Catalogue listé le 2026-09-21 : 46 modèles, aucun `large`. Sur OpenRouter le slug synchrone n'existe pas non plus, seul `:batch`. C'était la recommandation n°1 de la recherche modèles — non activable en l'état. À revoir si le compte change de palier."

@@ -57,6 +57,22 @@ def _unity_document() -> str:
     )
 
 
+_COHERENT_PROMPT = (
+    "<prompt><contract><output_format>**IMPORTANT : Génère un FRAGMENT de DEUX "
+    "niveaux, en un seul appel.** Niveau 1 : le panneau d'ouverture et ses options. "
+    "Niveau 2 : UN panneau par option du niveau 1.</output_format></contract>"
+    "<technical><speaker_voice>Voix du PNJ, registre soutenu, phrases brèves."
+    "</speaker_voice></technical><context><gdd_context>Contexte de scène : le "
+    "marchandage se tient dans un tunnel vertébral, sous la surveillance des "
+    "Fixés.</gdd_context></context></prompt>"
+)
+"""Prompt minimal mais **cohérent** : le run l'audite avant de continuer.
+
+Un double qui ne passerait pas cet audit ferait croire à un run sain là où la
+production s'arrêterait — il testerait autre chose que ce qu'on croit.
+"""
+
+
 class _Event:
     """Événement de génération, calqué sur ``GenerationEvent``."""
 
@@ -96,7 +112,7 @@ class _FakeOrchestrator:
                 "result": {
                     "json_content": _unity_document(),
                     "title": "Marchandage",
-                    "raw_prompt": "prompt",
+                    "raw_prompt": _COHERENT_PROMPT,
                     "prompt_hash": "hash",
                 }
             },

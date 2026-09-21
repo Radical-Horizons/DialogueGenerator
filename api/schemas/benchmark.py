@@ -33,6 +33,8 @@ BenchmarkGateId = Literal[
     "length",
     "connectivity",
     "panel_count",
+    "speaker_label",
+    "narration",
 ]
 """Identifiant stable d'une porte structurelle."""
 

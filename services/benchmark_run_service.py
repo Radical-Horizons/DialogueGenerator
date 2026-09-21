@@ -50,6 +50,7 @@ from factories.llm_factory import LLMClientFactory
 from services.benchmark_gate_service import BenchmarkGateService
 from services.benchmark_pass_control import CooperativePassControl, PassCancelled
 from services.benchmark_suite_store import BenchmarkSuiteStore, suite_fingerprint
+from services.benchmark_prompt_audit import audit_prompt
 from services.gdd_notion_atomic_io import read_json_file, write_json_atomic
 from services.unity_dialogue_generation_service import UnityStructuredOutputError
 
@@ -107,6 +108,16 @@ _RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]*$")
 
 BenchmarkRunCancelled = PassCancelled
 """Annulation coopérative d'un run (alias du signal partagé des passes de fond)."""
+
+
+class _IncoherentPrompt(RuntimeError):
+    """Le prompt réellement envoyé contredit ce que le run demande.
+
+    On arrête le run entier : un prompt incohérent ne rend pas la mesure
+    imprécise, il la fausse **dans une direction connue** — contre les modèles
+    qui suivent les instructions. Continuer produirait un classement qui a
+    l'air d'une mesure sans en être une.
+    """
 
 
 class _BudgetExhausted(Exception):
@@ -877,6 +888,7 @@ class BenchmarkRunService:
                 message="Run démarré",
             )
 
+            prompt_audited = False
             try:
                 for case in suite.cases:
                     for model_id in run.config.models:
@@ -924,6 +936,20 @@ class BenchmarkRunService:
                                 model_id=model_id,
                                 repetition=repetition,
                             )
+                            # Le prompt n'existe qu'une fois assemblé : on ne peut
+                            # l'auditer qu'après le premier appel. Une génération
+                            # perdue vaut mieux que vingt-cinq mesures fausses.
+                            if not prompt_audited and record.raw_prompt:
+                                prompt_audited = True
+                                problems = audit_prompt(
+                                    record.raw_prompt,
+                                    fragment_mode=True,
+                                    allow_stage_directions=(
+                                        run.identity.narration_mode == "avec"
+                                    ),
+                                )
+                                if problems:
+                                    raise _IncoherentPrompt("; ".join(problems))
                             self._persist_record(record)
                             spent += record.cost_usd
                             completed += 1
@@ -932,6 +958,14 @@ class BenchmarkRunService:
                 status = "completed"
                 message = "Run terminé"
 
+            except _IncoherentPrompt as exc:
+                status = "failed"
+                message = (
+                    f"Run arrêté : le prompt contredit ce qui est demandé — {exc}. "
+                    "Aucune comparaison n'est valable tant que la consigne est "
+                    "ambiguë : corriger le prompt, puis relancer."
+                )
+                logger.error("Run %s : prompt incohérent — %s", run.run_id, exc)
             except _BudgetExhausted:
                 logger.info("Run %s interrompu par le plafond budgétaire", run.run_id)
             except BenchmarkRunCancelled:
@@ -1182,7 +1216,13 @@ class BenchmarkRunService:
             )
 
         try:
-            failures = self._gate_service.evaluate(json_content, expectations=case.expectations)
+            failures = self._gate_service.evaluate(
+                json_content,
+                expectations=case.expectations,
+                # La porte narration n'a de sens que si le prompt interdit
+                # réellement les didascalies — sinon elle punit l'obéissance.
+                allow_stage_directions=run.config.narration_mode == "avec",
+            )
         except Exception as exc:
             # Une sortie pathologique (récursion profonde, encodage exotique) ne doit
             # pas faire tomber le run entier et abandonner les générations restantes.

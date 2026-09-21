@@ -11,6 +11,8 @@ paths:
   - "tests/api/test_benchmark*.py"
   - "core/prompt/benchmark_judge.py"
   - "core/llm/finish_reason.py"
+  - "services/prompt_builder.py"
+  - "core/prompt/prompt_engine.py"
   - "models/dialogue_structure/unity_dialogue_fragment.py"
   - "tests/services/test_benchmark_*.py"
 ---
@@ -67,6 +69,51 @@ mesure sans en être une** — le mode de défaillance propre à ce genre d'outi
   Un nom de flag accentué passe par `normalize_unity_export_document` ; le
   compter invalide ferait chuter un taux de validité pour une raison sans rapport
   avec la qualité du dialogue.
+
+## Cohérence de la consigne
+
+- **Un prompt qui se contredit fait échouer le run, il ne le dégrade pas.**
+  `services/benchmark_prompt_audit.py` relit le prompt **assemblé** après la
+  première génération et arrête tout si la consigne contredit le run. Un prompt
+  incohérent ne rend pas la mesure imprécise : il la fausse **dans une direction
+  connue**, contre les modèles qui suivent les instructions. Une génération
+  perdue vaut mieux que vingt-cinq mesures fausses.
+- **La contradiction naît de l'assemblage, jamais d'un morceau.** Chaque bloc de
+  prompt était correct isolément ; c'est leur réunion qui demandait « un seul
+  nœud » à un run en mode fragment, et autorisait les didascalies quatre fois
+  contre une interdiction. Aucun test de morceau ne pouvait le voir : l'audit
+  porte donc sur le texte final, et sur lui seul.
+- **Une directive doit retirer ce qu'elle contredit, pas s'y ajouter.**
+  `allow_stage_directions=False` **supprime** les lignes qui autorisent les
+  didascalies. Empiler une interdiction sur quatre autorisations ne mesure pas
+  l'obéissance du modèle, mais sa lecture de notre incohérence.
+- **Le mode fragment borne les deux bouts.** « Un panneau par option » se lit
+  aussi comme « et ainsi de suite » : sans « pas de troisième niveau », un
+  modèle a rendu dix panneaux là où l'unité en compte quatre.
+
+## Forme de la sortie
+
+- **Ce qui est vérifiable mécaniquement ne se demande pas au juge**, et cela
+  vaut aussi pour ce qu'il ne lit pas. Au run du 2026-09-21, les cinq modèles
+  ont reçu **exactement** 6,2 en « Respect de la consigne » alors que leurs
+  écarts de forme allaient de zéro à quatre par génération.
+  - `speaker_label` : un identifiant technique dans le champ locuteur
+    (`genka_lien`, `l_ensevelie`) s'affiche tel quel en jeu. Le juge ne lit pas
+    ce champ ; un modèle sur cinq y dérapait, douze panneaux sur vingt.
+  - `narration` : des didascalies quand le run n'en veut pas. Cette porte
+    **n'aurait pas dû exister** tant que le prompt les autorisait par ailleurs.
+    Une porte n'est légitime que si la consigne l'est.
+  - `panel_count` contrôle désormais les deux sens. Le compte attendu se déduit
+    du document — une ouverture à *n* options appelle *n+1* panneaux — donc un
+    troisième niveau se voit sans qu'on ait à le prévoir.
+- **Une panne du fournisseur n'est pas un échec du modèle.** Un 429 remonté en
+  chaîne devenait `invalid` avec une porte `schema` : le taux de validité
+  chutait pour une saturation d'API. `UnityProviderUnavailableError` les sépare
+  sur un critère mesurable et non sur le texte du message — **zéro token
+  d'entrée facturé signifie que la requête n'a jamais été traitée**, donc que le
+  modèle n'a pas été mesuré. C'est l'erreur symétrique de celle d'août : là on
+  flattait un modèle en sortant ses échecs du dénominateur, ici on le condamnait
+  pour une panne qui n'était pas la sienne.
 
 ## Juge
 

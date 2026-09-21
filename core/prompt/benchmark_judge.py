@@ -16,10 +16,31 @@ from typing import TYPE_CHECKING, List, Optional
 if TYPE_CHECKING:  # pragma: no cover - import de typage seulement
     from api.schemas.benchmark_judging import CriteriaGrid
 
+FRAGMENT_HORIZON_NOTICE = (
+    "Ce fragment s'arrête volontairement après deux niveaux : le panneau "
+    "d'ouverture, puis le panneau qui suit chacune de ses options. Les options "
+    "de ce second niveau mènent toutes à `END` **par construction du banc**, "
+    "non par défaut d'écriture.\n"
+    "N'en tiens donc pas grief. Une conséquence se juge sur ce que le texte "
+    "engage, annonce ou rend inévitable — pas sur des branches que l'exercice "
+    "n'a pas demandé d'écrire."
+)
+"""Ce que le juge doit savoir de l'unité mesurée, sous peine de noter le vide.
+
+Sans cette note, le juge lit l'horizon du fragment comme un défaut. Au run du
+2026-09-21 il l'a écrit noir sur blanc — « les branches aboutissent toutes à
+END sans conséquence narrative visible » — et a pénalisé les **cinq** modèles
+sur « conséquence perceptible », critère pondéré 1,2. Un critère que personne
+ne peut satisfaire ne classe rien : il abaisse tout le monde et ajoute du bruit.
+"""
+
+
 BENCHMARK_RUBRIC_JUDGE_SYSTEM_PROMPT = (
     "Tu es juge de dialogues de jeu de rôle écrits en français. Tu évalues un "
-    "fragment de dialogue au format JSON Unity : une réplique de PNJ et les choix "
-    "proposés au joueur.\n"
+    "fragment de dialogue au format JSON Unity : un panneau d'ouverture avec ses "
+    "options, puis un panneau par option, portant à son tour ses propres "
+    "options.\n"
+    + FRAGMENT_HORIZON_NOTICE + "\n"
     "Tu notes chaque critère de la grille fournie, indépendamment des autres, en "
     "reprenant son identifiant exactement tel qu'il t'est donné.\n"
     "Tu ne juges ni la longueur en soi, ni la mise en forme du JSON : uniquement ce "
@@ -157,7 +178,8 @@ BENCHMARK_PAIRWISE_JUDGE_SYSTEM_PROMPT = (
     "Ne préfère pas une proposition parce qu'elle est plus longue ou plus fournie : "
     "à qualité égale, la plus concise vaut mieux.\n"
     "Juge chaque critère indépendamment : une proposition peut gagner sur l'un et "
-    "perdre sur l'autre."
+    "perdre sur l'autre.\n"
+    + FRAGMENT_HORIZON_NOTICE
 )
 
 

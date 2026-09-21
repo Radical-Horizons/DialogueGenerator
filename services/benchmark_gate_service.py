@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from typing import Any, Dict, List, Optional
 
 from api.schemas.benchmark import BenchmarkCaseExpectations, BenchmarkGateFailure
@@ -123,12 +124,15 @@ class BenchmarkGateService:
         json_content: Optional[str],
         *,
         expectations: Optional[BenchmarkCaseExpectations] = None,
+        allow_stage_directions: bool = True,
     ) -> List[BenchmarkGateFailure]:
         """Évalue toutes les portes applicables sur une génération.
 
         Args:
             json_content: Sortie Unity brute renvoyée par l'orchestrateur.
             expectations: Attentes structurelles du cas, le cas échéant.
+            allow_stage_directions: Le run accepte-t-il les didascalies ? Par
+                défaut oui, pour que la production ne change pas de verdict.
 
         Returns:
             Liste des portes échouées. Vide si la génération est valide.
@@ -172,6 +176,10 @@ class BenchmarkGateService:
         failures.extend(self._choice_id_failures(nodes))
         failures.extend(self._flag_failures(parsed, nodes))
         failures.extend(self._expectation_failures(nodes, expectations))
+        failures.extend(self._speaker_label_failures(nodes))
+        failures.extend(self._fragment_shape_failures(nodes))
+        if not allow_stage_directions:
+            failures.extend(self._narration_failures(nodes))
 
         text = _collect_text(nodes)
         if nodes and not text.strip():
@@ -273,6 +281,128 @@ class BenchmarkGateService:
             BenchmarkGateFailure(
                 gate="schema",
                 message=f"Document Unity non conforme : {details}{suffix}",
+            )
+        ]
+
+    _TECHNICAL_SPEAKER = re.compile(r"^[a-z0-9]+(?:_[a-z0-9]+)+$")
+    _STAGE_DIRECTION = re.compile(r"\*[^*]{3,}\*")
+
+    @staticmethod
+    def _fragment_shape_failures(
+        nodes: List[Dict[str, Any]],
+    ) -> List[BenchmarkGateFailure]:
+        """L'unité mesurée a-t-elle la forme attendue ?
+
+        Un fragment fait deux niveaux : le panneau d'ouverture, puis un panneau
+        par option de ce panneau. Le compte attendu se déduit donc du document
+        lui-même, sans configuration — et c'est ce qui rend la porte utile : un
+        troisième niveau se voit sans qu'on ait à le prévoir.
+
+        Le contrôle manquait dans un seul sens. `panel_count` ne vérifiait qu'un
+        plancher, si bien qu'un fragment de dix panneaux passait en silence :
+        `gpt-5.6-luna` en a produit dix sur trois niveaux le 2026-09-21, contre
+        quatre pour les autres. Comparer deux modèles dont l'unité varie du
+        simple au triple ne compare plus rien — ni la longueur, ni le coût, ni
+        la note.
+
+        Args:
+            nodes: Nœuds du document, dans l'ordre de génération.
+
+        Returns:
+            Une observation si le compte s'écarte de la forme attendue.
+        """
+        if len(nodes) < 2:
+            # Un panneau isolé relève du plancher attendu par le cas, pas d'ici.
+            return []
+        opening = nodes[0] if isinstance(nodes[0], dict) else {}
+        expected = 1 + len(opening.get("choices") or [])
+        if len(nodes) <= expected:
+            return []
+        return [
+            BenchmarkGateFailure(
+                gate="panel_count",
+                message=(
+                    f"{len(nodes)} panneaux pour une ouverture à "
+                    f"{expected - 1} option(s) : {expected} attendus. "
+                    "Le fragment dépasse ses deux niveaux."
+                ),
+                severity="observation",
+            )
+        ]
+
+    def _speaker_label_failures(
+        self, nodes: List[Dict[str, Any]]
+    ) -> List[BenchmarkGateFailure]:
+        """Le locuteur est-il nommé, ou désigné par un identifiant technique ?
+
+        Ce libellé s'affiche tel quel en jeu. Au banc du 2026-09-21,
+        `gpt-5.6-sol` a écrit `genka_lien`, `l_ensevelie` et
+        `akthar_neth_amatru` dans douze panneaux sur vingt, là où les quatre
+        autres modèles n'ont jamais dérapé — un défaut réel, invisible du juge
+        parce qu'il ne lit pas ce champ.
+
+        Args:
+            nodes: Nœuds du document.
+
+        Returns:
+            Une observation par forme fautive rencontrée.
+        """
+        fautifs = sorted(
+            {
+                speaker
+                for node in nodes
+                if isinstance(node, dict)
+                for speaker in [str(node.get("speaker") or "").strip()]
+                if speaker and self._TECHNICAL_SPEAKER.match(speaker)
+            }
+        )
+        if not fautifs:
+            return []
+        return [
+            BenchmarkGateFailure(
+                gate="speaker_label",
+                message=(
+                    "Identifiant technique dans le champ locuteur, affiché tel quel "
+                    f"en jeu : {', '.join(fautifs)}"
+                ),
+                severity="observation",
+            )
+        ]
+
+    def _narration_failures(
+        self, nodes: List[Dict[str, Any]]
+    ) -> List[BenchmarkGateFailure]:
+        """Des didascalies dans un run qui les interdit.
+
+        À n'appeler **que** si le prompt les interdit réellement. Tant qu'il les
+        autorisait par ailleurs, cette porte aurait puni les modèles pour avoir
+        suivi la majorité de leur consigne — c'est pourquoi elle n'existait pas.
+
+        Args:
+            nodes: Nœuds du document.
+
+        Returns:
+            Une observation si au moins une didascalie subsiste.
+        """
+        count = 0
+        for node in nodes:
+            if not isinstance(node, dict):
+                continue
+            textes = [str(node.get("line") or "")]
+            for choice in node.get("choices") or []:
+                if isinstance(choice, dict):
+                    textes.append(str(choice.get("text") or ""))
+            count += sum(1 for texte in textes if self._STAGE_DIRECTION.search(texte))
+        if not count:
+            return []
+        return [
+            BenchmarkGateFailure(
+                gate="narration",
+                message=(
+                    f"{count} passage(s) en didascalie alors que le run demande "
+                    "un dialogue sans narration"
+                ),
+                severity="observation",
             )
         ]
 
