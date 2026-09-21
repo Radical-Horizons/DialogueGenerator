@@ -51,6 +51,24 @@ BENCHMARK_RUBRIC_JUDGE_SYSTEM_PROMPT = (
 )
 
 
+JUDGE_CONTEXT_POLICY = "full-prompt"
+"""Politique de contexte remise au juge — versionnée parce qu'elle EST une consigne.
+
+Jusqu'au 2026-09-21 le contexte était coupé à 24 000 caractères, et le juge
+recevait l'ordre explicite de ne rien reprocher au-delà de l'extrait. Or le
+prompt d'un candidat place `<scene_instructions>` à la fin : sur le run
+`20260921T144810`, la consigne de scène tombait entre les offsets 47 000 et
+115 000. Le juge ne l'a vue dans **aucune** des vingt générations, et notait
+pourtant `instruction_compliance` — le critère de plus forte variance, celui
+qui classe. Il jugeait le respect d'une consigne qu'il n'avait pas lue.
+
+La coupure disparaît donc : le juge reçoit le prompt entier. Elle laisse une
+trace ici parce que les verdicts d'avant et d'après ne mesurent pas la même
+chose et ne doivent jamais s'agréger — et que l'empreinte du juge ne couvrait
+que le prompt système, où cette coupure n'apparaissait pas.
+"""
+
+
 def judge_prompt_fingerprint(system_prompt: str) -> str:
     """Empreinte courte de la consigne donnée au juge.
 
@@ -62,6 +80,12 @@ def judge_prompt_fingerprint(system_prompt: str) -> str:
     moyenne — précisément ce que l'invariant « ne jamais agréger deux juges »
     interdit, et que le nom du modèle ne permet pas de détecter.
 
+    La consigne système ne suffit pas non plus : ce que le juge **voit** est
+    une consigne au même titre que ce qu'on lui dit. La coupure du contexte
+    vivait dans le prompt utilisateur et n'entrait pas dans cette empreinte ;
+    un juge aveugle et un juge informé partageaient donc la même identité.
+    D'où `JUDGE_CONTEXT_POLICY` dans le matériau haché.
+
     Args:
         system_prompt: Consigne système effectivement envoyée.
 
@@ -69,7 +93,8 @@ def judge_prompt_fingerprint(system_prompt: str) -> str:
         Les douze premiers caractères du SHA-256, assez pour distinguer sans
         alourdir chaque verdict.
     """
-    return hashlib.sha256(system_prompt.encode("utf-8")).hexdigest()[:12]
+    material = f"{JUDGE_CONTEXT_POLICY}\n{system_prompt}"
+    return hashlib.sha256(material.encode("utf-8")).hexdigest()[:12]
 
 
 def _format_criterion(index: int, criterion_id: str, label: str, description: str, direction: str) -> str:
@@ -107,15 +132,6 @@ changé ici sans elle rendrait la normalisation `lower_is_better` fausse d'un
 facteur, sous un en-tête qui continuerait d'afficher « /10 ».
 """
 
-JUDGE_CONTEXT_MAX_CHARS = 24000
-"""Plafond du contexte transmis au juge.
-
-Le prompt d'un candidat peut atteindre 30k tokens de fiches GDD : l'envoyer
-entier à chaque verdict coûterait plus cher que la génération notée. La coupure
-est signalée au juge, qui sait alors qu'il ne voit pas tout.
-"""
-
-
 def _context_block(context: Optional[str]) -> str:
     """Construit le bloc de contexte remis au juge.
 
@@ -138,20 +154,12 @@ def _context_block(context: Optional[str]) -> str:
             "de cohérence interne, et dis dans ton commentaire que la vérification "
             "externe est impossible.\n\n"
         )
-    trimmed = context.strip()
-    note = ""
-    if len(trimmed) > JUDGE_CONTEXT_MAX_CHARS:
-        trimmed = trimmed[:JUDGE_CONTEXT_MAX_CHARS]
-        note = (
-            "\n[…contexte coupé par l'outil : tu n'en vois que le début. "
-            "Ne reproche pas à l'auteur d'employer un élément absent de cet extrait.]"
-        )
     return (
         "CONTEXTE FOURNI À L'AUTEUR\n"
         "Voici exactement ce que l'auteur du dialogue avait sous les yeux : consigne "
-        "de scène et fiches du monde. C'est la référence pour juger la fidélité et "
-        "la justesse des voix.\n"
-        f"```\n{trimmed}{note}\n```\n\n"
+        "de scène et fiches du monde, dans leur intégralité. C'est la référence pour "
+        "juger la fidélité, la justesse des voix et le respect de la consigne.\n"
+        f"```\n{context.strip()}\n```\n\n"
     )
 
 

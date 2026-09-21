@@ -26,6 +26,11 @@ from api.middleware.billable_user_context import (
     reset_billable_user_id,
 )
 from api.schemas.benchmark import BenchmarkGenerationRecord
+from core.prompt.benchmark_judge import (
+    BENCHMARK_PAIRWISE_JUDGE_SYSTEM_PROMPT,
+    BENCHMARK_RUBRIC_JUDGE_SYSTEM_PROMPT,
+    judge_prompt_fingerprint,
+)
 from api.schemas.benchmark_judging import (
     CriteriaGrid,
     JudgePassConfig,
@@ -158,6 +163,13 @@ class BenchmarkJudgePassService:
         Le juge fait partie du chemin : deux juges cohabitent sans collision, et
         refuser d'agréger des juges différents devient trivial.
 
+        Son **empreinte de consigne** aussi, et pas seulement son nom. Sans elle,
+        rejuger un run après un changement de consigne retombait dans le même
+        répertoire : `_verdict_is_usable` validait les anciens verdicts, la passe
+        sautait toutes les cellules et se déclarait terminée sans avoir rien
+        rejugé. L'identité du juge était inscrite *dans* le verdict mais absente
+        de sa *clé* — elle n'empêchait donc rien.
+
         Args:
             run_id: Run jugé.
             judge_model: Modèle juge.
@@ -165,7 +177,8 @@ class BenchmarkJudgePassService:
         Returns:
             Chemin du répertoire des verdicts.
         """
-        digest = hashlib.sha256(judge_model.encode("utf-8")).hexdigest()[:8]
+        identity = f"{judge_model}|{judge_prompt_fingerprint(BENCHMARK_RUBRIC_JUDGE_SYSTEM_PROMPT)}"
+        digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:8]
         directory = f"{slug_for_filename(judge_model)}__{digest}"
         return self._run_service.run_dir(run_id) / "verdicts" / "rubric" / directory
 
@@ -752,8 +765,14 @@ class BenchmarkPairwisePassService:
     # ------------------------------------------------------------------
 
     def _duels_dir(self, run_id: str, judge_model: str) -> Path:
-        """Répertoire des duels d'un juge pour un run."""
-        digest = hashlib.sha256(judge_model.encode("utf-8")).hexdigest()[:8]
+        """Répertoire des duels d'un juge pour un run.
+
+        Même règle que pour la rubrique : l'empreinte de consigne entre dans la
+        clé, faute de quoi une re-notation écraserait ou sauterait les duels
+        produits sous l'ancienne consigne au lieu de cohabiter avec eux.
+        """
+        identity = f"{judge_model}|{judge_prompt_fingerprint(BENCHMARK_PAIRWISE_JUDGE_SYSTEM_PROMPT)}"
+        digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:8]
         directory = f"{slug_for_filename(judge_model)}__{digest}"
         return self._run_service.run_dir(run_id) / "verdicts" / "pairwise" / directory
 
