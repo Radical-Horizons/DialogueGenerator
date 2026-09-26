@@ -20,6 +20,15 @@ paths:
 Les explorations **1a** et **1b** ont été **retirées** : elles n'ont jamais été la cible. Si un
 ancien fichier les contient encore, il est périmé.
 
+## Design system
+
+Artifact « DialogueGenerator » (<https://claude.ai/artifact/REQGGaEUwUPLt2tgStXdjv>, type Design System) :
+brand book, jetons avec usage, 16 composants, écrans, correspondance avec le code. Il décrit le code
+à `dev@e54da4b06` ; pour le relire : Artifact `read` sur `project/README.md`. Point d'entrée BMAD :
+`_bmad-output/planning-artifacts/ux-design-specification/design-system-foundation.md` (écarts connus
+entre le code et le système). En cas de divergence, le code et la maquette HTML priment : corriger
+l'artifact ensuite, par fichier (`project/tokens.json` entier).
+
 ## Règle d'or : lire le HTML avant de coder
 
 Les valeurs exactes — couleurs, `font-size`, `padding`, largeurs de colonne, `letter-spacing` —
