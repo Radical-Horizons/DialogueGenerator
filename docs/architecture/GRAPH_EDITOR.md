@@ -220,7 +220,7 @@ Option B : Depuis l'URL
 
 - Le graphe se charge automatiquement
 - Utiliser zoom/pan pour naviguer
-- La minimap affiche la vue d'ensemble
+- La minimap (vue d'ensemble) est masquée par défaut : « CARTE » dans la barrette de zoom l'affiche ou la masque (`uiLayoutStore.showGraphMinimap`, non persisté). Affichée d'office, elle recouvrait le coin bas-droit du canvas — là où atterrissent les nœuds générés — et interceptait les clics sur leurs actions.
 
 ### 3. Éditer un Nœud
 

@@ -2,7 +2,7 @@
  * Utilitaires partagés pour les tests Playwright E2E.
  */
 import { expect } from '@playwright/test'
-import type { APIRequestContext, Page, Response, TestInfo } from '@playwright/test'
+import type { APIRequestContext, Locator, Page, Response, TestInfo } from '@playwright/test'
 
 import { E2E_MS } from './timeouts'
 
@@ -97,8 +97,25 @@ export async function seedDocumentWithRetry(
 }
 
 /**
- * Dashboard → onglet « Éditeur de Graphe » → sélection d’un dialogue dont le nom contient ``documentStem``.
+ * Barre supérieure → section « Graphe » (`header-section-graph`, écran 1c).
+ * Les onglets « Génération de Dialogues » / « Éditeur de Graphe » n'existent plus.
+ *
+ * @param page Page Playwright (déjà sur l’app, session ok).
+ * @returns Le conteneur `graph-editor`, monté au premier passage (keep-alive paresseux).
+ */
+export async function openGraphSection(page: Page): Promise<Locator> {
+  const graphSection = page.getByTestId('header-section-graph')
+  await expect(graphSection).toBeVisible({ timeout: E2E_MS.graphField })
+  await graphSection.click()
+  const graphEditor = page.getByTestId('graph-editor')
+  await expect(graphEditor).toBeVisible({ timeout: E2E_MS.graphPanel })
+  return graphEditor
+}
+
+/**
+ * Section « Graphe » → sélection d’un dialogue dont le nom contient ``documentStem``.
  * Préfère ``data-testid`` + ``hasText`` au ``getByRole(button)`` : le libellé accessible est formaté (underscores, casse).
+ * Scopé à `graph-editor` : la liste de la section « Éditer », gardée montée, est cachée mais présente.
  *
  * @param page Page Playwright (déjà sur l’app, session ok).
  * @param documentStem Tronc ou id document (ex. ``e2e-foo-w0-abc``), sans obligation d’extension ``.json``.
@@ -107,21 +124,15 @@ export async function openDashboardGraphTabAndSelectDocument(
   page: Page,
   documentStem: string
 ): Promise<void> {
-  await page
-    .getByRole('button', { name: /Génération de Dialogues/i })
-    .waitFor({ state: 'visible', timeout: E2E_MS.graphField })
-    .catch(() => {})
-  await page.getByRole('button', { name: /Éditeur de Graphe/i }).click({ timeout: E2E_MS.graphField })
-  // Lazy keep-alive : le premier clic sur l’onglet graphe monte GraphEditor + liste.
   const needle = documentStem.replace(/\.json$/i, '')
-  const graphEditor = page.getByTestId('graph-editor')
-  await expect(graphEditor).toBeVisible({ timeout: E2E_MS.graphPanel })
+  const graphEditor = await openGraphSection(page)
 
   const dialogueList = graphEditor.getByTestId('unity-dialogue-list')
   const comboboxTrigger = graphEditor.getByTestId('dialogue-combobox-trigger')
   await expect(dialogueList.or(comboboxTrigger)).toBeVisible({ timeout: E2E_MS.dashboardList })
   if (await dialogueList.isVisible()) {
-    const searchInput = dialogueList.getByPlaceholder(/Rechercher/i)
+    // « Chercher un dialogue… » depuis la refonte (anciennement « Rechercher… »).
+    const searchInput = dialogueList.getByPlaceholder(/chercher/i)
     await expect(searchInput).toBeVisible({ timeout: E2E_MS.dashboardList })
     await searchInput.fill(needle)
     const item = dialogueList.getByTestId('unity-dialogue-item').first()

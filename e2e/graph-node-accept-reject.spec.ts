@@ -142,6 +142,27 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     return nodes
   }
 
+  /**
+   * Nœuds du canvas, visibles ou non. Compter `.react-flow__node` ne marche pas :
+   * `onlyRenderVisibleElements` ne rend que ceux du viewport, et le focus du nœud généré
+   * zoome dessus — une fois rejeté, les autres sont hors champ.
+   */
+  const canvasNodeCount = (page: Page): Promise<number> =>
+    page.evaluate(() => {
+      const graphView = (
+        globalThis as unknown as {
+          __graphViewStoreE2E?: {
+            getState: () => { reactFlowInstance: { getNodes: () => unknown[] } | null }
+          }
+        }
+      ).__graphViewStoreE2E
+      const instance = graphView?.getState().reactFlowInstance
+      if (!instance) {
+        throw new Error('window.__graphViewStoreE2E absent — lancer Vite en dev pour les E2E.')
+      }
+      return instance.getNodes().length
+    })
+
   const generatePendingNode = async (page: Page) => {
     const countBefore = await page.locator('.react-flow__node').count()
     const firstNode = page.locator('.react-flow__node').first()
@@ -229,15 +250,17 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     await generatePendingNode(page)
     const pendingNode = page.locator('.react-flow__node:has([data-status="pending"])').first()
     await expect(pendingNode).toBeVisible({ timeout: E2E_MS.short })
-    const countBefore = await page.locator('.react-flow__node').count()
+    const rejectedId = await pendingNode.getAttribute('data-id')
+    expect(rejectedId).toBeTruthy()
+    const countBefore = await canvasNodeCount(page)
     await pendingNode.hover({ force: true })
     const reject = pendingNode.locator('button:has-text("Rejeter")')
     await expect(reject).toBeVisible({ timeout: E2E_MS.probe })
     await reject.click()
     await expect(page.locator('text="Nœud rejeté"')).toBeVisible({ timeout: E2E_MS.toast })
     await expect(page.locator('.react-flow__node:has([data-status="pending"])')).toHaveCount(0, { timeout: E2E_MS.short })
-    const countAfter = await page.locator('.react-flow__node').count()
-    expect(countAfter).toBe(countBefore - 1)
+    await expect(page.locator(`.react-flow__node[data-id="${rejectedId}"]`)).toHaveCount(0)
+    await expect.poll(() => canvasNodeCount(page), { timeout: E2E_MS.short }).toBe(countBefore - 1)
   })
 
   test('AC#5: pending nodes restored after reload (session recovery)', async ({ page }) => {

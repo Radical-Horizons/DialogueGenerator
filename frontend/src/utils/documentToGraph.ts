@@ -378,9 +378,10 @@ export function graphToDocument(nodes: Node[], edges: Edge[]): UnityDocument {
   // Si les deux coexistent (ex. disconnect incomplet + reconnect), la cible explicite nextNode prime.
   // Plusieurs « Suivant » seuls : l’ordre du tableau edges n’est pas canonique — tie-break via
   // node.data.nextNode (mis à jour par connectNodes / ConnectionTargetSelect).
+  // `choices` absent compte comme vide, comme au chargement (`unityNode.choices ?? []`).
   for (const u of unityNodes) {
     const choices = u.choices as Record<string, unknown>[] | undefined
-    if (!Array.isArray(choices) || choices.length !== 0) continue
+    if (Array.isArray(choices) && choices.length !== 0) continue
     const sourceId = u.id as string
     const sourceRf = nodes.find((n) => n.id === sourceId && n.type !== 'testNode')
     const dataNextRaw = (sourceRf?.data as { nextNode?: string } | undefined)?.nextNode

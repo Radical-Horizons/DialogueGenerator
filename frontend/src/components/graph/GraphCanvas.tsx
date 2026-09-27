@@ -35,6 +35,7 @@ import { useGraphStore } from '../../store/graphStore'
 import { useGraphViewStore } from '../../store/graphViewStore'
 import { useContextStore } from '../../store/contextStore'
 import { useAuthStore } from '../../store/authStore'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { theme } from '../../theme'
 import { applyNodeFilters, applyEdgeFilters } from './graphFilterUtils'
 import { useReactFlowHandlers } from '../../hooks/useReactFlowHandlers'
@@ -101,6 +102,9 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
   useEffect(() => {
     if (!focusHeadId) return
     useGraphViewStore.getState().dequeueFocus()
+    // Seul un focus suivant annule le recentrage en attente. Pas de nettoyage d'effet :
+    // `dequeueFocus` fait passer `focusHeadId` à null, et ce re-rendu annulait le
+    // minuteur avant son échéance — sélection sans recentrage.
     if (fitViewTimeoutRef.current !== null) {
       window.clearTimeout(fitViewTimeoutRef.current)
       fitViewTimeoutRef.current = null
@@ -114,10 +118,13 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
         fitView({ nodes: [node], duration: 300, padding: 0.3 })
       }, 100)
     }
-    return () => {
-      if (fitViewTimeoutRef.current !== null) window.clearTimeout(fitViewTimeoutRef.current)
-    }
   }, [focusHeadId, getNode, fitView, setSelectedNodeInner, setHighlightedNodesInner])
+  useEffect(
+    () => () => {
+      if (fitViewTimeoutRef.current !== null) window.clearTimeout(fitViewTimeoutRef.current)
+    },
+    []
+  )
 
   const pendingFitViewNodeIds = useGraphViewStore((s) => s.pendingFitViewNodeIds)
   useEffect(() => {
@@ -165,6 +172,18 @@ const graphZoomBarButtonStyle: CSSProperties = {
   justifyContent: 'center',
 }
 
+/** Entrée texte mono de la barrette (« AJUSTER », « CARTE »), séparée par un filet. */
+const graphZoomBarTextButtonStyle: CSSProperties = {
+  ...graphZoomBarButtonStyle,
+  width: 'auto',
+  padding: '0 10px',
+  borderLeft: `1px solid ${redesignHairline.standard}`,
+  fontFamily: redesignFont.mono,
+  fontSize: '10px',
+  letterSpacing: '0.09em',
+  textTransform: 'uppercase',
+}
+
 const SNAP_GRID: [number, number] = [15, 15]
 
 export const GraphCanvas = memo(function GraphCanvas() {
@@ -208,6 +227,8 @@ export const GraphCanvas = memo(function GraphCanvas() {
     }))
   )
   const isGuest = useAuthStore((s) => s.user?.role === 'guest')
+  const showGraphMinimap = useUiLayoutStore((s) => s.showGraphMinimap)
+  const toggleGraphMinimap = useUiLayoutStore((s) => s.toggleGraphMinimap)
 
   const visibleStoreNodes = useMemo(
     () => applyNodeFilters(storeNodes, graphFilters),
@@ -665,7 +686,8 @@ export const GraphCanvas = memo(function GraphCanvas() {
             pile de quatre pastilles de React Flow doublée d'un badge de zoom.
             Mêmes actions, un seul objet à l'écran. En canvas étroit la barrette
             garde son compteur mais perd ses boutons : 28 px n'est pas une cible
-            tactile (FR119), et le pincement fait le travail. */}
+            tactile (FR119), et le pincement fait le travail — y compris pour la vue
+            d'ensemble que donnerait « CARTE ». */}
         <div
             data-testid="graph-zoom-bar"
             aria-label="Zoom"
@@ -722,28 +744,37 @@ export const GraphCanvas = memo(function GraphCanvas() {
                   onClick={() =>
                     reactFlowInstanceRef.current?.fitView({ padding: 0.2, duration: 220 })
                   }
-                  style={{
-                    ...graphZoomBarButtonStyle,
-                    width: 'auto',
-                    padding: '0 10px',
-                    borderLeft: `1px solid ${redesignHairline.standard}`,
-                    fontFamily: redesignFont.mono,
-                    fontSize: '10px',
-                    letterSpacing: '0.09em',
-                    textTransform: 'uppercase',
-                  }}
+                  style={graphZoomBarTextButtonStyle}
                 >
                   Ajuster
+                </button>
+                <button
+                  type="button"
+                  data-testid="graph-minimap-toggle"
+                  aria-pressed={showGraphMinimap}
+                  title={showGraphMinimap ? 'Masquer la carte du graphe' : 'Afficher la carte du graphe'}
+                  onClick={toggleGraphMinimap}
+                  style={{
+                    ...graphZoomBarTextButtonStyle,
+                    color: showGraphMinimap ? redesignText.strong : redesignText.secondary,
+                  }}
+                >
+                  Carte
                 </button>
               </>
             )}
           </div>
-        <MiniMap
-          nodeColor={(node) => graphMinimapNodeColor(node.type)}
-          nodeBorderRadius={8}
-          style={minimapStyle}
-          maskColor={`${redesignSurface.canvas}80`}
-        />
+        {/* À la demande seulement : la maquette 2e n'a pas de minimap, et affichée
+            d'office elle recouvrait le coin bas-droit, où atterrissent les nœuds
+            générés, en y captant les clics. */}
+        {showGraphMinimap && (
+          <MiniMap
+            nodeColor={(node) => graphMinimapNodeColor(node.type)}
+            nodeBorderRadius={8}
+            style={minimapStyle}
+            maskColor={`${redesignSurface.canvas}80`}
+          />
+        )}
       </ReactFlow>
       {menu && (
         <NodeContextMenu
