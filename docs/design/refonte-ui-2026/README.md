@@ -207,6 +207,7 @@ Aucun. Les emoji actuels (`🔍`, `📊`, `▼`) sont supprimés : la recherche 
 | --- | --- |
 | `accueil-1c.dc.html` | Écran `1c` — page de génération au repos. **Cible d'implémentation.** Les explorations `1a` et `1b` ont été retirées : elles ne sont plus une cible. |
 | `etats-2a-2e.dc.html` | `2a` génération · `2b` résultat · `2c` mode écriture · `2d` 1024 px · `2e` éditeur de graphe. Contient aussi un bloc « specs d'implémentation » résumé. |
+| `comparaison-2b.dc.html` | `2b` vue « côte à côte » : les 4 options en colonnes, une rangée par critère (réplique, didascalie, réponses, flags, fiches citées, longueur). Retenue le 2026-09-27 (planche A). |
 | `support.js` | Runtime nécessaire pour ouvrir les deux fichiers dans un navigateur. |
 
 **Lire le HTML avant de coder.** Les valeurs exactes (couleurs, tailles, paddings, largeurs) sont
@@ -217,6 +218,6 @@ Aperçu local : `npm run design:refs` puis http://localhost:8972/accueil-1c.dc.h
 
 ## Points ouverts
 
-- La vue « côte à côte » des 4 options (`2b`) reste à dessiner.
-- Le tiroir bas de `2d` : glissant sur toute la hauteur, ou plafonné à 60 % ?
+- ~~La vue « côte à côte » des 4 options (`2b`)~~ — tranché le 2026-09-27 : colonnes alignées par rangée (`comparaison-2b.dc.html`), bascule « LISTE / CÔTE À CÔTE » dans l'en-tête des options, liste forcée quand la colonne est trop étroite. Code : `GenerationOptionsColumns`.
+- ~~Le tiroir bas de `2d` : toute la hauteur ou 60 % ?~~ — tranché le 2026-09-27 : **plafonné à 60 %** (`PROMPT_DRAWER_MAX_HEIGHT`) ; le titre de scène et « Générer » restent visibles.
 - Instrument Serif : à valider ou à remplacer par Georgia.

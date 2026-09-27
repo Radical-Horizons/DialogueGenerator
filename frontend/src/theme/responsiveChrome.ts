@@ -101,6 +101,14 @@ export const PROMPT_DRAWER_MAX_WIDTH_PX = 1200
  */
 export const GRAPH_TOOLBAR_SINGLE_ROW_MIN_WIDTH_PX = 980
 
+/**
+ * Vue « côte à côte » des options (écran 2b) : colonne des libellés de rangée, puis une
+ * colonne par option. Sous `label + n × colonne`, la vue repasse en liste — une
+ * réplique serif sur moins de ~22 caractères ne se compare plus, elle se déchiffre.
+ */
+export const OPTIONS_COLUMNS_LABEL_WIDTH_PX = 96
+export const OPTIONS_COLUMN_MIN_WIDTH_PX = 190
+
 /** Même seuil conteneur pour panneau Génération, graphe, etc. */
 export const PANEL_COMFORT_MIN_WIDTH_PX = GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX
 

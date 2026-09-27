@@ -28,6 +28,7 @@ vi.mock('../../store/contextStore', () => ({
 }))
 
 import { useGenerationOptionsStore } from '../../store/generationOptionsStore'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { GenerationOptionsComparison } from './GenerationOptionsComparison'
 
 const REQUEST = { user_instructions: 'x' } as GenerateUnityDialogueRequest
@@ -182,5 +183,86 @@ describe('GenerationOptionsComparison', () => {
     expect(screen.getByText('boom')).toBeInTheDocument()
     expect(screen.getByTestId('option-retry-1')).toBeInTheDocument()
     expect(screen.getByTestId('option-keep-0')).toBeInTheDocument()
+  })
+})
+
+describe('GenerationOptionsComparison — vue côte à côte', () => {
+  /** La bascule n'existe que si chaque option garde une colonne lisible : on fixe la largeur. */
+  const renderAt = (widthPx: number) =>
+    render(
+      <div style={{ width: `${widthPx}px` }}>
+        <GenerationOptionsComparison />
+      </div>
+    )
+
+  beforeEach(() => {
+    vi.stubGlobal('EventSource', NoopEventSource as unknown as typeof EventSource)
+    setUnityDialogueResponse.mockClear()
+    mockSelections = { characters: [], locations: [] }
+    useUiLayoutStore.setState({ optionsView: 'list' })
+    useGenerationOptionsStore.setState({
+      optionCount: 2,
+      slots: [],
+      lastRequest: REQUEST,
+      keptIndex: null,
+    })
+    startTwoReadyOptions()
+  })
+
+  it('propose Liste / Côte à côte, la liste par défaut', () => {
+    renderAt(1200)
+    expect(screen.getByTestId('options-view-list')).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByTestId('options-view-columns')).toHaveAttribute('aria-selected', 'false')
+    expect(screen.getByTestId('generation-options-comparison')).toHaveAttribute('data-view', 'list')
+  })
+
+  it('aligne les options en colonnes et masque la colonne Diagnostic', () => {
+    renderAt(1200)
+    fireEvent.click(screen.getByTestId('options-view-columns'))
+
+    expect(screen.getByTestId('options-columns')).toBeInTheDocument()
+    expect(screen.getByTestId('options-column-head-0')).toBeInTheDocument()
+    expect(screen.getByTestId('options-column-head-1')).toBeInTheDocument()
+    expect(screen.getByTestId('options-cell-line-0')).toHaveTextContent('Première réplique.')
+    expect(screen.getByTestId('options-cell-line-1')).toHaveTextContent('Seconde réplique.')
+    expect(screen.queryByTestId('option-diagnostic-column')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('options-collapse-all')).not.toBeInTheDocument()
+    // La préférence survit au lot suivant : elle vit dans le store de disposition.
+    expect(useUiLayoutStore.getState().optionsView).toBe('columns')
+  })
+
+  it('seule la colonne retenue porte « Garder » ; « Retenir » déplace le bouton plein', () => {
+    useUiLayoutStore.setState({ optionsView: 'columns' })
+    renderAt(1200)
+
+    expect(screen.getByTestId('options-column-head-0')).toHaveAttribute('data-retained', 'true')
+    expect(screen.getByTestId('option-keep-0')).toBeInTheDocument()
+    expect(screen.queryByTestId('option-keep-1')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('option-retain-1'))
+
+    expect(screen.getByTestId('options-column-head-1')).toHaveAttribute('data-retained', 'true')
+    expect(screen.getByTestId('option-keep-1')).toBeInTheDocument()
+    expect(screen.queryByTestId('option-keep-0')).not.toBeInTheDocument()
+  })
+
+  it('« Garder » en colonnes pousse le résultat de la colonne retenue', () => {
+    useUiLayoutStore.setState({ optionsView: 'columns' })
+    renderAt(1200)
+    fireEvent.click(screen.getByTestId('option-retain-1'))
+    fireEvent.click(screen.getByTestId('option-keep-1'))
+
+    const slot1 = useGenerationOptionsStore.getState().slots[1]
+    expect(setUnityDialogueResponse).toHaveBeenCalledWith(slot1.result)
+    expect(useGenerationOptionsStore.getState().keptIndex).toBe(1)
+  })
+
+  it('colonne trop étroite : pas de bascule, la liste s’impose même si la préférence est côte à côte', () => {
+    useUiLayoutStore.setState({ optionsView: 'columns' })
+    renderAt(320)
+
+    expect(screen.queryByTestId('options-view-columns')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('options-columns')).not.toBeInTheDocument()
+    expect(screen.getByTestId('generation-options-comparison')).toHaveAttribute('data-view', 'list')
   })
 })

@@ -14,6 +14,7 @@ paths:
 |---|---|
 | `accueil-1c.dc.html` | **1c** — page de génération au repos (cible retenue) |
 | `etats-2a-2e.dc.html` | **2a** génération · **2b** résultat · **2c** mode écriture · **2d** 1024 px · **2e** éditeur de graphe |
+| `comparaison-2b.dc.html` | **2b** vue « côte à côte » des options (colonnes alignées par rangée) |
 | `README.md` | Handoff : layout, tokens, ordre d'implémentation, points ouverts |
 | `support.js` | Runtime requis pour ouvrir les `.dc.html` dans un navigateur |
 
@@ -90,7 +91,7 @@ Correspondance écran → code (point d'entrée) :
 |---|---|
 | **1c** repos | `GenerationPanel`, `SceneSelectionWidget`, `Dashboard` (3 colonnes) |
 | **2a** génération | `useGenerationRunState` + `GenerationStreamingInline` + `GenerationTracePanel` |
-| **2b** comparaison | `generationOptionsStore`, `GenerationOptionsComparison`, `generationOptionDiagnostics` |
+| **2b** comparaison | `generationOptionsStore`, `GenerationOptionsComparison` (liste), `GenerationOptionsColumns` (côte à côte, `uiLayoutStore.optionsView`), `generationOptionDiagnostics` |
 | **2c** écriture | `uiLayoutStore.writingMode`, `WritingModeRail`, `Tabs hideTabList` |
 | **2d** 1024–1200px | `PromptBudgetBottomDrawer` + `useMediaQuery` |
 | **2e** graphe | `uiLayoutStore.inspectorTab`, `GraphInspector`, `GraphInspectorNodeSummary` |
