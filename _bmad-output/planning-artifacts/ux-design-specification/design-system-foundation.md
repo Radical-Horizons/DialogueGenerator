@@ -14,7 +14,7 @@
 | `docs/design/refonte-ui-2026/` | Maquettes HTML haute fidélité (1c, 2a–2e) et handoff. |
 | `.claude/rules/ui_redesign_2026.md` | Invariants que les agents doivent respecter en codant l'UI. |
 
-L'artifact a été extrait du code au commit `dev@e54da4b06`. Quand le code et l'artifact divergent,
+L'artifact a été extrait du code au commit `dev@e54da4b06` et tenu à jour jusqu'à `dev@122dc29a7` (version 6). Quand le code et l'artifact divergent,
 **le code gagne** ; mettre l'artifact à jour ensuite.
 
 ## Choix
@@ -26,7 +26,7 @@ Les raisons de janvier tiennent toujours : brownfield, contrôle fin des surface
 ## Ce qu'il faut savoir avant de dessiner ou coder un écran
 
 - Un seul thème, sombre, un seul fond (`bg-app` = `#17171b`) ; les colonnes se séparent par des filets.
-- Un seul bouton plein `#4f7fff` par écran ; le bleu ne sert qu'à la sélection, la jauge de budget et l'action primaire.
+- Un seul bouton plein par écran, en `redesignAccent.fill` (`#3d6ae8`) ; l'accent `#4f7fff` ne sert qu'aux marques (sélection, jauge de budget, filet d'onglet).
 - Trois familles : Instrument Serif (titres de scène, répliques), Instrument Sans (interface), IBM Plex Mono (tous les chiffres et étiquettes).
 - Espacements 5 / 9 / 14 / 20 / 34 px ; rayons 6 / 8 / 10 / 99 px.
 - Chaque panneau vide dit, en une phrase, ce qui s'y affichera.
@@ -54,8 +54,16 @@ Ce qui a été aligné sur le système (branche `ui/design-system-integration`) 
 - Onglet COÛT de l'inspecteur : affichait 0 nœud (identifiant avec `.json`) ; corrigé.
 - Couleurs en dur : 12 restantes dans les TSX, toutes nommées (palette des locuteurs, valeurs exactes de maquette).
 
+## Points ouverts tranchés (2026-09-27, PR #75 et #76)
+
+- **Minicarte du graphe** masquée par défaut (absente de la maquette, elle recouvrait les actions des nœuds) ; bouton `CARTE` dans la barre de zoom pour l'afficher.
+- **2b — comparaison des options** : vue « côte à côte » en plus de la liste (`GenerationOptionsColumns`, maquette `docs/design/refonte-ui-2026/comparaison-2b.dc.html`). Colonnes alignées par rangée (réplique, didascalie, réponses, flags, fiches citées, longueur) ; la liste s'impose quand chaque option n'aurait plus 190 px. Le panneau droit suit l'option retenue tant qu'aucune n'est gardée et qu'il n'a pas été modifié.
+- **Tiroir « ce qui part au modèle »** (2d) plafonné à 60 % de la hauteur.
+- **Rails repliés** : la colonne centrale leur réserve leur largeur (52 px rail riche, 32 px pilule) partout où aucune marge ne les protège — comparaison, étroit, graphe, mode écriture (`railReserve.ts`).
+- **Inspecteur 2e** : un nœud créé à la main s'ouvre directement en édition ; les autres restent en lecture d'abord.
+
 ## Écarts restants
 
 - Icônes de template : emoji choisis par l'utilisateur (donnée, défaut `📋` côté API), gardés.
 - La maquette 2e dessine le chemin bleu entrant dans le nœud sélectionné, le README de handoff dit « sortant » : le code suit le README.
-- La minicarte du graphe (absente de la maquette) peut recouvrir les actions d'un nœud fraîchement généré ; suivi à part.
+- La maquette 2b remplit à la fois « Garder » (option retenue) et « Garder et continuer » : deux boutons pleins sur un écran, contre la règle du bouton unique. Le code suit la maquette ; à trancher si la règle doit primer.
