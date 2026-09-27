@@ -37,6 +37,14 @@ interface UiLayoutState {
   writingMode: boolean
   setWritingMode: (on: boolean) => void
   toggleWritingMode: () => void
+  /**
+   * Minimap du graphe. Masquée par défaut : l'écran 2e n'en montre pas, et affichée
+   * d'office elle recouvrait le coin bas-droit du canvas, où atterrissent les nœuds
+   * générés — elle interceptait les clics sur leurs actions. « CARTE » dans la
+   * barrette de zoom la ramène à la demande.
+   */
+  showGraphMinimap: boolean
+  toggleGraphMinimap: () => void
 }
 
 export const useUiLayoutStore = create<UiLayoutState>()((set) => ({
@@ -53,4 +61,7 @@ export const useUiLayoutStore = create<UiLayoutState>()((set) => ({
   writingMode: false,
   setWritingMode: (on) => set({ writingMode: on }),
   toggleWritingMode: () => set((state) => ({ writingMode: !state.writingMode })),
+
+  showGraphMinimap: false,
+  toggleGraphMinimap: () => set((state) => ({ showGraphMinimap: !state.showGraphMinimap })),
 }))
