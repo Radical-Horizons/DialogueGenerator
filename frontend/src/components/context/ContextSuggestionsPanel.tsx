@@ -137,8 +137,8 @@ const baseButtonStyle: React.CSSProperties = {
 
 const acceptStyle: React.CSSProperties = {
   ...baseButtonStyle,
-  backgroundColor: theme.state.success?.background ?? '#2d6a4f',
-  color: '#fff',
+  backgroundColor: theme.state.success.background,
+  color: theme.state.success.color,
 }
 
 const ignoreStyle: React.CSSProperties = {

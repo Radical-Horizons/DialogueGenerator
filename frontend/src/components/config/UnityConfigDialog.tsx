@@ -138,7 +138,8 @@ export function UnityConfigDialog({ isOpen, onClose }: UnityConfigDialogProps) {
               backgroundColor: theme.button.primary.background,
               color: theme.button.primary.color,
               border: 'none',
-              borderRadius: '4px',
+              borderRadius: '6px',
+              fontWeight: 600,
               cursor: isSaving || isLoading ? 'not-allowed' : 'pointer',
               opacity: isSaving || isLoading ? 0.6 : 1,
             }}

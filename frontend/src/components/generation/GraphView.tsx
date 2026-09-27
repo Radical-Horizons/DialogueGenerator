@@ -30,6 +30,11 @@ interface GraphViewProps {
   json_content: string
 }
 
+/** Même teinte que les liens de résultat de test de l'éditeur de graphe. */
+function testResultEdgeColor(handleId: 'success' | 'failure'): string | undefined {
+  return TEST_RESULT_EDGE_CONFIG.find((result) => result.handleId === handleId)?.color
+}
+
 /**
  * Convertit un dialogue Unity JSON en format ReactFlow (nodes + edges).
  * 
@@ -101,7 +106,7 @@ export function unityJsonToGraph(jsonContent: string): { nodes: Node[]; edges: E
           target: unityNode.successNode,
           type: 'smoothstep',
           label: 'Succès',
-          style: { stroke: '#27AE60' },
+          style: { stroke: testResultEdgeColor('success') },
         })
       }
       
@@ -112,7 +117,7 @@ export function unityJsonToGraph(jsonContent: string): { nodes: Node[]; edges: E
           target: unityNode.failureNode,
           type: 'smoothstep',
           label: 'Échec',
-          style: { stroke: '#E74C3C' },
+          style: { stroke: testResultEdgeColor('failure') },
         })
       }
       

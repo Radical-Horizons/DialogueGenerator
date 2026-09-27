@@ -19,6 +19,7 @@ import type { UnityDialogueMetadata } from '../../types/api'
 import { highlightText } from '../../utils/textHighlight'
 import { getDialogueDisplayTitle } from '../../utils/formatDialogueTitle'
 import { formatCostEur, formatRelativeTime } from '../../utils/dialogueMetadataFormat'
+import { formatNumber } from '../../utils/formatCurrency'
 
 export interface UnityDialogueItemProps {
   dialogue: UnityDialogueMetadata
@@ -97,9 +98,9 @@ export const UnityDialogueItem = memo(
       )
 
       const formatSize = (bytes: number): string => {
-        if (bytes < 1024) return `${bytes} B`
-        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+        if (bytes < 1024) return `${formatNumber(bytes)}\u00a0o`
+        if (bytes < 1024 * 1024) return `${formatNumber(bytes / 1024, 1)}\u00a0Ko`
+        return `${formatNumber(bytes / (1024 * 1024), 1)}\u00a0Mo`
       }
 
       const formatDate = (isoString: string): string => {
@@ -205,12 +206,12 @@ export const UnityDialogueItem = memo(
                 {structureLabel}
               </span>
             ) : (
-              <span>{formatSize(dialogue.size_bytes)}</span>
+              <span style={{ fontFamily: redesignFont.mono }}>{formatSize(dialogue.size_bytes)}</span>
             )}
             {dialogue.total_cost_eur != null && dialogue.total_cost_eur > 0 && (
               <>
                 <span aria-hidden>•</span>
-                <span data-testid="unity-dialogue-item-cost">
+                <span data-testid="unity-dialogue-item-cost" style={{ fontFamily: redesignFont.mono }}>
                   {formatCostEur(dialogue.total_cost_eur)}
                 </span>
               </>

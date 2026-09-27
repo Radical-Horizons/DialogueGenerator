@@ -731,7 +731,7 @@ export function GenerationPanel() {
                   ? '1px solid rgba(79,127,255,0.4)'
                   : '1px solid rgba(255,255,255,0.12)',
                 backgroundColor: active ? 'rgba(79,127,255,0.1)' : 'transparent',
-                color: active ? '#a9c3ff' : redesignText.muted,
+                color: active ? redesignAccent.light : redesignText.muted,
                 fontSize: '11.5px',
                 display: 'flex',
                 alignItems: 'center',
@@ -1172,7 +1172,7 @@ export function GenerationPanel() {
               borderRadius: 6,
               border: 'none',
               backgroundColor: redesignAccent.fill,
-              color: '#ffffff',
+              color: theme.button.primary.color,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

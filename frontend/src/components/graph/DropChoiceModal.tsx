@@ -133,7 +133,7 @@ export const DropChoiceModal = memo(function DropChoiceModal({
                 textAlign: 'left',
               }}
             >
-              ➕ Créer un nœud vide
+              Créer un nœud vide
             </button>
             <button
               type="button"
@@ -149,7 +149,7 @@ export const DropChoiceModal = memo(function DropChoiceModal({
                 textAlign: 'left',
               }}
             >
-              ✨ Générer un nœud (IA)
+              Générer un nœud (IA)
             </button>
             <button
               type="button"

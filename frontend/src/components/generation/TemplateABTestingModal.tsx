@@ -274,7 +274,7 @@ export function TemplateABTestingModal({
     width: '100%',
     minHeight: TOUCH_TARGET_MIN_PX,
     padding: chrome.buttonPadding,
-    border: `1px solid ${theme.border.secondary}`,
+    border: `1px solid ${redesignControl.inputBorder}`,
     borderRadius: `${redesignRadius.control}px`,
     backgroundColor: theme.input.background,
     color: theme.text.primary,
@@ -284,12 +284,18 @@ export function TemplateABTestingModal({
     minHeight: TOUCH_TARGET_MIN_PX,
     padding: chrome.buttonPadding,
     backgroundColor: theme.button.default.background,
-    border: `1px solid ${theme.border.secondary}`,
+    border: `1px solid ${theme.button.default.border}`,
     borderRadius: `${redesignRadius.control}px`,
     color: theme.button.default.color,
     cursor: 'pointer',
     fontSize: `${chrome.buttonFontRem}rem`,
   }
+  const thumbButtonStyle = (active: boolean): CSSProperties => ({
+    ...buttonStyle,
+    borderColor: active ? redesignAccent.base : theme.button.default.border,
+    backgroundColor: active ? redesignAccent.selectedBg : theme.button.default.background,
+    color: active ? redesignAccent.light : theme.button.default.color,
+  })
   const canLaunch = Boolean(
     templateAId &&
       templateBId &&
@@ -618,9 +624,10 @@ export function TemplateABTestingModal({
                             generation.thumb === 'up' ? 'none' : 'up',
                           )
                         }
-                        style={buttonStyle}
+                        aria-pressed={generation.thumb === 'up'}
+                        style={thumbButtonStyle(generation.thumb === 'up')}
                       >
-                        👍
+                        ✓ Réussie
                       </button>{' '}
                       <button
                         type="button"
@@ -631,9 +638,10 @@ export function TemplateABTestingModal({
                             generation.thumb === 'down' ? 'none' : 'down',
                           )
                         }
-                        style={buttonStyle}
+                        aria-pressed={generation.thumb === 'down'}
+                        style={thumbButtonStyle(generation.thumb === 'down')}
                       >
-                        👎
+                        ✕ Ratée
                       </button>
                     </li>
                   ))}

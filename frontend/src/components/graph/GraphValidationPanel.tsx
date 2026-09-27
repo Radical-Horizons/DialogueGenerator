@@ -22,6 +22,7 @@ import {
 } from './GraphValidationPanelLists'
 import { GraphStructuralWarningsSummary } from './GraphStructuralWarningsSummary'
 import { GraphToolFloatingShell } from './GraphToolFloatingShell'
+import { ValidationSeverityDot } from './ValidationSeverityDot'
 
 interface GraphValidationPanelProps {
   validationErrors: ValidationErrorDetail[]
@@ -179,7 +180,6 @@ export function GraphValidationPanel({
         ? theme.state.warning.color
         : theme.state.success.color
 
-  const headerIcon = tone === 'error' ? '✗' : tone === 'warning' ? '⚠' : '✓'
   const headerText =
     errors.length > 0
       ? `${errors.length} erreur${errors.length > 1 ? 's' : ''}`
@@ -190,7 +190,7 @@ export function GraphValidationPanel({
       variant={variant}
       title={
         <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0 }}>
-          <span aria-hidden>{headerIcon}</span>
+          <ValidationSeverityDot tone={tone} testId="graph-validation-header-dot" />
           <span>{headerText}</span>
         </span>
       }

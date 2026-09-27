@@ -181,7 +181,7 @@ export const EffectEditor = memo(function EffectEditor({ choiceIndex }: EffectEd
                 <button
                   type="button"
                   onClick={() => remove(idx)}
-                  style={{ fontSize: '0.65rem', color: '#c0392b' }}
+                  style={{ fontSize: '0.65rem', color: theme.state.error.color }}
                 >
                   Retirer
                 </button>

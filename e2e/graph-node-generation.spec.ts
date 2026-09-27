@@ -61,7 +61,7 @@ test.describe('Graph Node Generation (Story 0.5.5)', () => {
       await firstNode.click()
       
       // Ouvrir le panneau de génération IA (bouton dans le graphe ou menu contextuel)
-      const generateButton = page.locator('button:has-text("Générer")').or(page.locator('button:has-text("✨")'))
+      const generateButton = page.locator('button:has-text("Générer")')
       if (await generateButton.isVisible({ timeout: E2E_MS.probe })) {
         await generateButton.click()
         
@@ -78,7 +78,7 @@ test.describe('Graph Node Generation (Story 0.5.5)', () => {
         }
         
         // Lancer la génération
-        const generateSubmitButton = page.locator('button:has-text("✨ Générer")').or(page.locator('button:has-text("Générer")'))
+        const generateSubmitButton = page.locator('button:has-text("Générer")')
         await generateSubmitButton.click()
         
         // Attendre que la génération se termine (toast de succès ou nouveau nœud visible)
@@ -136,7 +136,7 @@ test.describe('Graph Node Generation (Story 0.5.5)', () => {
       await nodeWithChoices.click()
       
       // Ouvrir le panneau de génération IA
-      const generateButton = page.locator('button:has-text("Générer")').or(page.locator('button:has-text("✨")'))
+      const generateButton = page.locator('button:has-text("Générer")')
       if (await generateButton.isVisible({ timeout: E2E_MS.probe })) {
         await generateButton.click()
         
@@ -171,7 +171,7 @@ test.describe('Graph Node Generation (Story 0.5.5)', () => {
       await linearNode.click()
       
       // Ouvrir le panneau de génération
-      const generateButton = page.locator('button:has-text("Générer")').or(page.locator('button:has-text("✨")'))
+      const generateButton = page.locator('button:has-text("Générer")')
       if (await generateButton.isVisible({ timeout: E2E_MS.probe })) {
         await generateButton.click()
         
@@ -185,7 +185,7 @@ test.describe('Graph Node Generation (Story 0.5.5)', () => {
         }
         
         // Lancer la génération
-        const generateButton2 = page.locator('button:has-text("✨ Générer")')
+        const generateButton2 = page.getByRole('button', { name: /^Générer$/ })
         await generateButton2.click()
         
         // Attendre que la génération se termine
@@ -250,7 +250,7 @@ test.describe('Graph Node Generation (Story 0.5.5)', () => {
       await nodeWithChoices.click()
       
       // Ouvrir le panneau de génération
-      const generateButton = page.locator('button:has-text("Générer")').or(page.locator('button:has-text("✨")'))
+      const generateButton = page.locator('button:has-text("Générer")')
       if (await generateButton.isVisible({ timeout: E2E_MS.probe })) {
         await generateButton.click()
         
@@ -298,8 +298,8 @@ test.describe('Graph Node Generation (Story 0.5.5)', () => {
         await instructionsTextarea.fill('Génère une réponse pour ce choix')
       }
       
-      // Cliquer sur le bouton "✨ Générer" dans un ChoiceEditor
-      const choiceGenerateButton = page.locator('button:has-text("✨ Générer")').first()
+      // Cliquer sur le bouton "Générer" dans un ChoiceEditor
+      const choiceGenerateButton = page.getByRole('button', { name: /^Générer$/ }).first()
       if (await choiceGenerateButton.isVisible({ timeout: E2E_MS.probe })) {
         await choiceGenerateButton.click()
         
@@ -317,7 +317,7 @@ test.describe('Graph Node Generation (Story 0.5.5)', () => {
         })
         expect(selectedNodeId).toBeTruthy()
       } else {
-        test.skip('Bouton "✨ Générer" non visible dans ChoiceEditor - peut-être tous les choix sont connectés')
+        test.skip('Bouton "Générer" non visible dans ChoiceEditor - peut-être tous les choix sont connectés')
       }
     } else {
       test.skip('Aucun dialogue chargé avec des nœuds - test ignoré')

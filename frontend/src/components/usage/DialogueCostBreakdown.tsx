@@ -3,8 +3,12 @@
  *
  * Affiche : coût total, nombre de nœuds, coût moyen et un bar chart CSS par nœud.
  * Clic sur une barre → tooltip avec les détails du nœud.
+ *
+ * Rendu nu (fond transparent, filets, pas de cadre) : le composant s'insère dans
+ * l'inspecteur du graphe, la modale de coûts et le panneau de métadonnées.
+ * Montants en euros — les champs `*_cost_eur` de l'API.
  */
-import { useState, useCallback } from 'react'
+import { useState, useCallback, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
   getDialogueCosts,
@@ -12,14 +16,14 @@ import {
   type NodeCostEntry,
   type DialogueCostSummaryEntry,
 } from '../../api/llmUsage'
+import { theme } from '../../theme'
+import { formatCostDetail, formatCurrency, formatNumber } from '../../utils/formatCurrency'
 import './DialogueCostBreakdown.css'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatCostEur(eur: number): string {
-  if (eur < 0.001) return `${(eur * 100).toFixed(4)}¢`
-  return `€${eur.toFixed(4)}`
-}
+const MODERATE_COST_EUR = 0.01
+const EXPENSIVE_COST_EUR = 0.05
 
 function formatTimestamp(iso: string): string {
   try {
@@ -34,11 +38,48 @@ function formatTimestamp(iso: string): string {
   }
 }
 
-/** Détermine la couleur selon le coût par nœud (€). */
-function costColor(costEur: number): string {
-  if (costEur > 0.05) return '#ef4444' // rouge — cher
-  if (costEur >= 0.01) return '#f59e0b' // orange — modéré
-  return '#22c55e' // vert — économique
+interface CostTier {
+  color: string
+  label: string
+}
+
+const TIER_ECONOMIC: CostTier = { color: theme.state.accepted.border, label: 'Économique' }
+const TIER_MODERATE: CostTier = { color: theme.state.pending.border, label: 'Modéré' }
+const TIER_EXPENSIVE: CostTier = { color: theme.state.error.color, label: 'Cher' }
+
+/** Palier de coût par nœud (€) : couleur d'état du système + libellé. */
+function costTier(costEur: number): CostTier {
+  if (costEur > EXPENSIVE_COST_EUR) return TIER_EXPENSIVE
+  if (costEur >= MODERATE_COST_EUR) return TIER_MODERATE
+  return TIER_ECONOMIC
+}
+
+const LEGEND: Array<{ tier: CostTier; range: string }> = [
+  { tier: TIER_ECONOMIC, range: `< ${formatCurrency(MODERATE_COST_EUR, 'EUR')}` },
+  {
+    tier: TIER_MODERATE,
+    range: `${formatCurrency(MODERATE_COST_EUR, 'EUR')} – ${formatCurrency(EXPENSIVE_COST_EUR, 'EUR')}`,
+  },
+  { tier: TIER_EXPENSIVE, range: `> ${formatCurrency(EXPENSIVE_COST_EUR, 'EUR')}` },
+]
+
+/** Pastille 6px + libellé mono : la seule forme d'un statut. */
+function StatusDot({ color, children }: { color: string; children: ReactNode }) {
+  return (
+    <span className="dcb__status">
+      <span className="dcb__dot" style={{ background: color }} aria-hidden="true" />
+      {children}
+    </span>
+  )
+}
+
+function SummaryRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="dcb__row">
+      <span className="dcb__row-label">{label}</span>
+      <span className="dcb__row-value">{children}</span>
+    </div>
+  )
 }
 
 // ── Composant ─────────────────────────────────────────────────────────────────
@@ -111,42 +152,27 @@ export function DialogueCostBreakdown({ dialogueId, onSelectDialogue }: Dialogue
 
   const { total_cost_eur, node_count, avg_cost_per_node_eur, breakdown } = data
   const maxCost = breakdown.length > 0 ? Math.max(...breakdown.map((e) => e.cost_eur), 0.00001) : 1
+  const avgTier = costTier(avg_cost_per_node_eur)
 
   return (
     <div className="dcb" onClick={tooltip ? handleClose : undefined}>
-      {/* ── Bouton comparaison multi-dialogues (AC#3) ── */}
-      <div className="dcb__actions">
-        <button
-          className="dcb__btn-compare"
-          onClick={() => setShowComparison(true)}
-          title="Comparer les coûts de tous les dialogues"
-          aria-label="Comparer tous les dialogues"
-        >
-          📊 Comparer tous les dialogues
-        </button>
-      </div>
-
-      {/* ── Cartes de résumé ── */}
-      <div className="dcb__summary">
-        <div className="dcb__stat">
-          <span className="dcb__stat-label">Coût total</span>
-          <span className="dcb__stat-value" style={{ color: costColor(avg_cost_per_node_eur) }}>
-            {formatCostEur(total_cost_eur)}
-          </span>
-        </div>
-        <div className="dcb__stat">
-          <span className="dcb__stat-label">Nœuds générés</span>
-          <span className="dcb__stat-value">{node_count}</span>
-        </div>
-        <div className="dcb__stat">
-          <span className="dcb__stat-label">Coût moyen / nœud</span>
-          <span className="dcb__stat-value" style={{ color: costColor(avg_cost_per_node_eur) }}>
-            {node_count > 0 ? formatCostEur(avg_cost_per_node_eur) : '—'}
-          </span>
-        </div>
+      {/* ── Résumé ── */}
+      <div className="dcb__section-label">Résumé</div>
+      <div className="dcb__rows">
+        <SummaryRow label="Coût total">{formatCostDetail(total_cost_eur, 'EUR')}</SummaryRow>
+        <SummaryRow label="Nœuds générés">{formatNumber(node_count)}</SummaryRow>
+        <SummaryRow label="Coût moyen / nœud">
+          {node_count > 0 ? formatCostDetail(avg_cost_per_node_eur, 'EUR') : '—'}
+        </SummaryRow>
+        {node_count > 0 && (
+          <SummaryRow label="Palier">
+            <StatusDot color={avgTier.color}>{avgTier.label}</StatusDot>
+          </SummaryRow>
+        )}
       </div>
 
       {/* ── Bar chart ── */}
+      <div className="dcb__section-label">Par nœud</div>
       {breakdown.length === 0 ? (
         <p className="dcb__empty">Aucun nœud généré pour ce dialogue.</p>
       ) : (
@@ -154,8 +180,8 @@ export function DialogueCostBreakdown({ dialogueId, onSelectDialogue }: Dialogue
           <div className="dcb__bars">
             {breakdown.map((entry, i) => {
               const heightPct = (entry.cost_eur / maxCost) * 100
-              const color = costColor(entry.cost_eur)
               const label = entry.node_id ? entry.node_id.slice(-6) : `#${i + 1}`
+              const cost = formatCostDetail(entry.cost_eur, 'EUR')
               return (
                 <div
                   key={entry.node_id ?? i}
@@ -164,11 +190,11 @@ export function DialogueCostBreakdown({ dialogueId, onSelectDialogue }: Dialogue
                 >
                   <div
                     className={`dcb__bar${entry.deleted ? ' dcb__bar--deleted' : ''}`}
-                    style={{ height: `${heightPct}%`, background: color }}
-                    title={`${label} — ${formatCostEur(entry.cost_eur)}`}
+                    style={{ height: `${heightPct}%`, background: costTier(entry.cost_eur).color }}
+                    title={`${label} — ${cost}`}
                     role="button"
                     tabIndex={0}
-                    aria-label={`Nœud ${label}, coût ${formatCostEur(entry.cost_eur)}`}
+                    aria-label={`Nœud ${label}, coût ${cost}`}
                     onClick={(e) => {
                       e.stopPropagation()
                       handleBarClick(entry, e)
@@ -186,12 +212,26 @@ export function DialogueCostBreakdown({ dialogueId, onSelectDialogue }: Dialogue
             })}
           </div>
           <div className="dcb__legend">
-            <span className="dcb__legend-item dcb__legend-item--green">{'< 0.01€ : économique'}</span>
-            <span className="dcb__legend-item dcb__legend-item--orange">{'0.01–0.05€ : modéré'}</span>
-            <span className="dcb__legend-item dcb__legend-item--red">{'> 0.05€ : cher'}</span>
+            {LEGEND.map(({ tier, range }) => (
+              <StatusDot key={tier.label} color={tier.color}>
+                {tier.label} {range}
+              </StatusDot>
+            ))}
           </div>
         </div>
       )}
+
+      <div className="dcb__actions">
+        <button
+          type="button"
+          className="dcb__btn"
+          onClick={() => setShowComparison(true)}
+          title="Comparer les coûts de tous les dialogues"
+          aria-label="Comparer tous les dialogues"
+        >
+          Comparer tous les dialogues
+        </button>
+      </div>
 
       {/* ── Tooltip détails nœud ── */}
       {tooltip && (
@@ -236,28 +276,29 @@ function AllDialoguesComparison({ currentDialogueId, onBack, onSelectDialogue }:
 
   return (
     <div className="dcb">
-      <div className="dcb__actions">
-        <button className="dcb__btn-compare" onClick={onBack} aria-label="Retour">
+      <div className="dcb__actions dcb__actions--top">
+        <button type="button" className="dcb__btn" onClick={onBack} aria-label="Retour">
           ← Retour au dialogue actuel
         </button>
       </div>
-      <h3 className="dcb__compare-title">
-        Comparaison des coûts — {dialogues.length} dialogue{dialogues.length !== 1 ? 's' : ''}
-      </h3>
+      <div className="dcb__section-label">
+        Comparaison — {formatNumber(dialogues.length)} dialogue{dialogues.length !== 1 ? 's' : ''}
+      </div>
       {dialogues.length === 0 ? (
         <p className="dcb__empty">Aucun dialogue avec des coûts trackés.</p>
       ) : (
         <div className="dcb__compare-list" aria-label="Liste des dialogues triés par coût">
           {dialogues.map((d: DialogueCostSummaryEntry) => {
             const isCurrent = d.dialogue_id === currentDialogueId
-            const color = costColor(d.avg_cost_per_node_eur)
+            const tier = costTier(d.avg_cost_per_node_eur)
+            const cost = formatCostDetail(d.total_cost_eur, 'EUR')
             return (
               <div
                 key={d.dialogue_id}
                 className={`dcb__compare-row${isCurrent ? ' dcb__compare-row--current' : ''}`}
                 role={onSelectDialogue ? 'button' : undefined}
                 tabIndex={onSelectDialogue ? 0 : undefined}
-                aria-label={`Dialogue ${d.dialogue_id}, coût ${formatCostEur(d.total_cost_eur)}`}
+                aria-label={`Dialogue ${d.dialogue_id}, coût ${cost}`}
                 onClick={() => onSelectDialogue?.(d.dialogue_id)}
                 onKeyDown={(e) => {
                   if ((e.key === 'Enter' || e.key === ' ') && onSelectDialogue) {
@@ -267,18 +308,19 @@ function AllDialoguesComparison({ currentDialogueId, onBack, onSelectDialogue }:
                 }}
               >
                 <span
-                  className="dcb__compare-indicator"
-                  style={{ background: color }}
+                  className="dcb__dot"
+                  style={{ background: tier.color }}
+                  title={tier.label}
                   aria-hidden="true"
                 />
                 <span className="dcb__compare-name" title={d.dialogue_id}>
                   {d.dialogue_id}
-                  {isCurrent && <span className="dcb__compare-current-badge"> (actuel)</span>}
+                  {isCurrent && <span className="dcb__compare-current-badge"> actuel</span>}
                 </span>
-                <span className="dcb__compare-cost" style={{ color }}>
-                  {formatCostEur(d.total_cost_eur)}
+                <span className="dcb__compare-cost">{cost}</span>
+                <span className="dcb__compare-nodes">
+                  {formatNumber(d.node_count)} nœud{d.node_count !== 1 ? 's' : ''}
                 </span>
-                <span className="dcb__compare-nodes">{d.node_count} nœud{d.node_count !== 1 ? 's' : ''}</span>
               </div>
             )
           })}
@@ -305,49 +347,34 @@ function NodeDetailTooltip({ entry, onClose }: NodeDetailTooltipProps) {
       data-testid="dcb-tooltip"
       onClick={(e) => e.stopPropagation()}
     >
-      <button className="dcb__tooltip-close" onClick={onClose} aria-label="Fermer">
-        ✕
+      <button type="button" className="dcb__tooltip-close" onClick={onClose} aria-label="Fermer">
+        ×
       </button>
-      <div className="dcb__tooltip-title">
-        Nœud : <code>{entry.node_id ?? '—'}</code>
-      </div>
-      <table className="dcb__tooltip-table">
-        <tbody>
-          <tr>
-            <td>Généré le</td>
-            <td>{formatTimestamp(entry.timestamp)}</td>
-          </tr>
-          <tr>
-            <td>Modèle</td>
-            <td>{entry.model_name}</td>
-          </tr>
-          <tr>
-            <td>Tokens prompt</td>
-            <td>{entry.prompt_tokens.toLocaleString()}</td>
-          </tr>
-          <tr>
-            <td>Tokens completion</td>
-            <td>{entry.completion_tokens.toLocaleString()}</td>
-          </tr>
-          <tr>
-            <td>Coût</td>
-            <td style={{ color: costColor(entry.cost_eur), fontWeight: 600 }}>
-              {formatCostEur(entry.cost_eur)}
-            </td>
-          </tr>
-          <tr>
-            <td>Statut</td>
-            <td>{entry.success ? '✅ Succès' : '❌ Échec'}</td>
-          </tr>
-          {entry.deleted && (
-            <tr>
-              <td colSpan={2} style={{ color: '#f59e0b', fontStyle: 'italic' }}>
-                Nœud supprimé du graphe
-              </td>
-            </tr>
+      <div className="dcb__section-label">Nœud</div>
+      <div className="dcb__tooltip-id">{entry.node_id ?? '—'}</div>
+      <div className="dcb__rows">
+        <SummaryRow label="Généré le">{formatTimestamp(entry.timestamp)}</SummaryRow>
+        <SummaryRow label="Modèle">{entry.model_name}</SummaryRow>
+        <SummaryRow label="Tokens prompt">{formatNumber(entry.prompt_tokens)}</SummaryRow>
+        <SummaryRow label="Tokens completion">{formatNumber(entry.completion_tokens)}</SummaryRow>
+        <SummaryRow label="Coût">
+          <StatusDot color={costTier(entry.cost_eur).color}>
+            {formatCostDetail(entry.cost_eur, 'EUR')}
+          </StatusDot>
+        </SummaryRow>
+        <SummaryRow label="Statut">
+          {entry.success ? (
+            <StatusDot color={theme.state.accepted.border}>Succès</StatusDot>
+          ) : (
+            <StatusDot color={theme.state.error.color}>Échec</StatusDot>
           )}
-        </tbody>
-      </table>
+        </SummaryRow>
+        {entry.deleted && (
+          <SummaryRow label="Graphe">
+            <StatusDot color={theme.state.pending.border}>Nœud supprimé du graphe</StatusDot>
+          </SummaryRow>
+        )}
+      </div>
     </div>
   )
 }

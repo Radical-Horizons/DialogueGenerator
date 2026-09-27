@@ -29,7 +29,7 @@ export function WarningBanner({
       style={{
         padding: `${redesignSpacing.sm}px ${redesignSpacing.md}px`,
         paddingRight: onDismiss ? `${redesignSpacing.xl}px` : `${redesignSpacing.md}px`,
-        // Teinte de `theme.state.warning.color` (#ffd43b) à faible opacité : un voile, pas un bloc coloré.
+        // Teinte de `theme.state.warning.color` à faible opacité : un voile, pas un bloc coloré.
         backgroundColor: 'rgba(255, 212, 59, 0.06)',
         border: '1px solid rgba(255, 212, 59, 0.25)',
         borderRadius: `${redesignRadius.control}px`,

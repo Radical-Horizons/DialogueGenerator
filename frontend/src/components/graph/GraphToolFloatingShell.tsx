@@ -80,7 +80,7 @@ export interface GraphToolFloatingShellProps {
   storageKey?: string
   width?: string
   maxHeight?: string
-  /** Boutons entre titre et fermer (ex. ⚙ Règles). */
+  /** Boutons entre titre et fermer (ex. Règles). */
   headerEnd?: React.ReactNode
   /** Styles du conteneur externe (bordure, fond global). */
   containerStyle?: React.CSSProperties

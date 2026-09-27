@@ -32,6 +32,12 @@ import { useGddNotionSyncPreview } from '../../hooks/useGddNotionSyncPreview'
 import { useGddNotebooklmExport } from '../../hooks/useGddNotebooklmExport'
 import { useGddNotionSyncRun } from '../../hooks/useGddNotionSyncRun'
 import { theme } from '../../theme'
+import {
+  redesignAccent,
+  redesignMonoLabelStyle,
+  redesignRadius,
+  redesignText,
+} from '../../theme/redesignTokens'
 import { isGddNotionSyncSecondaryDatabase } from '../../constants/gddNotionSyncSecondaryDatabases'
 import { PasswordInput } from '../shared/PasswordInput'
 
@@ -51,7 +57,7 @@ function gddSyncOutcomeBannerPalette(tone: GddNotionSyncOutcomeTone): {
   }
   if (tone === 'warning') {
     return {
-      border: theme.state.warning.border ?? '#ffc107',
+      border: theme.state.warning.border,
       background: theme.state.warning.background,
       accent: theme.state.warning.color,
       title: 'Synchronisation terminée — action requise',
@@ -234,11 +240,11 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                 style={{
                   padding: '0.55rem 1.25rem',
                   borderRadius: '6px',
-                  border: `1px solid ${theme.button.primary.background}`,
-                  backgroundColor: theme.button.primary.background,
-                  color: theme.button.primary.color,
+                  border: `1px solid ${theme.button.default.border}`,
+                  backgroundColor: 'transparent',
+                  color: redesignText.body,
                   cursor: 'pointer',
-                  fontWeight: 600,
+                  fontWeight: 500,
                   fontSize: '0.9rem',
                 }}
               >
@@ -642,7 +648,7 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                 type="button"
                 disabled={!config || saving || busy}
                 onClick={() => void handleSaveSettings()}
-                style={buttonStyle(saving || busy, true)}
+                style={buttonStyle(saving || busy)}
               >
                 {saving ? 'Sauvegarde…' : 'Sauver sans sync'}
               </button>
@@ -684,7 +690,7 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
             type="button"
             disabled={busy || !config}
             onClick={() => runGddSync(false)}
-            style={buttonStyle(busy || !config, true)}
+            style={buttonStyle(busy || !config)}
             title={
               config
                 ? undefined
@@ -713,14 +719,13 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
               {checkpoint?.resumable ? (
                 <span
                   style={{
+                    ...redesignMonoLabelStyle,
                     fontSize: '0.7rem',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.04em',
                     padding: '0.2rem 0.5rem',
-                    borderRadius: '4px',
-                    backgroundColor: theme.border.focus,
-                    color: theme.background.panel,
+                    borderRadius: `${redesignRadius.chip}px`,
+                    border: `1px solid ${redesignAccent.ring}`,
+                    backgroundColor: redesignAccent.selectedBg,
+                    color: redesignAccent.text,
                     whiteSpace: 'nowrap',
                   }}
                   title="Une sync complète est en cours côté serveur (staging). Utilisez Reprendre ci-dessous."
@@ -862,7 +867,7 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                       type="button"
                       disabled={busy}
                       onClick={() => runGddSync(true, { applyStagingDespiteErrors: true })}
-                      style={buttonStyle(busy, true)}
+                      style={buttonStyle(busy)}
                     >
                       Appliquer le miroir malgré tout
                     </button>
@@ -874,7 +879,7 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                   type="button"
                   disabled={busy}
                   onClick={() => runGddSync(true, { resume: true })}
-                  style={buttonStyle(busy, true)}
+                  style={buttonStyle(busy)}
                 >
                   Reprendre la sync
                 </button>
@@ -919,7 +924,7 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                 type="button"
                 disabled={busy}
                 onClick={() => runGddSync(true, { fresh: true })}
-                style={buttonStyle(busy, true)}
+                style={buttonStyle(busy)}
               >
                 Tout recommencer
               </button>
@@ -968,7 +973,7 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                     }
                   })()
                 }
-                style={buttonStyle(busy, true)}
+                style={buttonStyle(busy)}
               >
                 Supprimer les dossiers .staging orphelins
               </button>

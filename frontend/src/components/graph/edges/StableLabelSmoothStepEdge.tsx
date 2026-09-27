@@ -66,7 +66,7 @@ const MemoizedLabelContent = memo(function MemoizedLabelContent({
           ry={radius}
           className="react-flow__edge-textbg"
           style={{
-            fill: theme.background.panel ?? '#2a2a2a',
+            fill: theme.background.panel,
             stroke: theme.border.primary,
             ...labelBgStyle,
           }}

@@ -7,6 +7,7 @@ import { getBudget, getUsage, type BudgetResponse, type UsageResponse } from '..
 import { UsageStatsCard } from './UsageStatsCard'
 import { UsageHistoryTable } from './UsageHistoryTable'
 import { getErrorMessage } from '../../types/errors'
+import { formatCost, formatDurationMs, formatNumber, formatPercent } from '../../utils/formatCurrency'
 import './UsageDashboard.css'
 
 type BudgetTone = 'ok' | 'warning' | 'over'
@@ -61,15 +62,8 @@ export function UsageDashboard() {
     void loadStatistics()
   }, [loadStatistics])
 
-  const formatCost = (cost: number) => {
-    if (cost < 0.01) return `$${cost.toFixed(6)}`
-    return `$${cost.toFixed(2)}`
-  }
-
-  const formatDuration = (ms: number) => {
-    if (ms < 1000) return `${Math.round(ms)}ms`
-    return `${(ms / 1000).toFixed(1)}s`
-  }
+  // Budget, quota et statistiques d'usage sont en dollars (coûts calculés en USD).
+  const formatUsd = (cost: number) => formatCost(cost, 'USD')
 
   const budgetStatus = budget ? budgetStatusOf(budget.percentage) : null
 
@@ -130,26 +124,26 @@ export function UsageDashboard() {
                 <div className="usage-dashboard__stats-grid">
                   <UsageStatsCard
                     title="Quota mensuel"
-                    value={formatCost(budget.quota)}
+                    value={formatUsd(budget.quota)}
                     subtitle="Budget total"
                   />
                   <UsageStatsCard
                     title="Montant dépensé"
-                    value={formatCost(budget.amount)}
+                    value={formatUsd(budget.amount)}
                     subtitle={
                       <>
-                        <span className="usage-dashboard__num">{budget.percentage.toFixed(1)}%</span> utilisé
+                        <span className="usage-dashboard__num">{formatPercent(budget.percentage)}</span> utilisé
                       </>
                     }
                   />
                   <UsageStatsCard
                     title="Montant restant"
-                    value={formatCost(budget.remaining)}
+                    value={formatUsd(budget.remaining)}
                     subtitle="Disponible ce mois"
                   />
                   <UsageStatsCard
                     title="Pourcentage utilisé"
-                    value={budget.percentage.toFixed(1)}
+                    value={formatNumber(budget.percentage, 1)}
                     unit="%"
                     gaugePercent={budget.percentage}
                     subtitle={
@@ -175,7 +169,7 @@ export function UsageDashboard() {
                           <div
                             className="usage-dashboard__chart-bar"
                             style={{ height: `${heightPercent}%` }}
-                            title={`${daily.date}: ${formatCost(daily.cost)}`}
+                            title={`${daily.date} : ${formatUsd(daily.cost)}`}
                           />
                           <div className="usage-dashboard__chart-label">
                             {new Date(daily.date).getDate()}
@@ -187,11 +181,11 @@ export function UsageDashboard() {
                   <div className="usage-dashboard__chart-summary">
                     <div>
                       <span className="usage-dashboard__summary-label">Total du mois</span>
-                      <span className="usage-dashboard__num">{formatCost(usage.total)}</span>
+                      <span className="usage-dashboard__num">{formatUsd(usage.total)}</span>
                     </div>
                     <div>
                       <span className="usage-dashboard__summary-label">Pourcentage du budget</span>
-                      <span className="usage-dashboard__num">{usage.percentage.toFixed(1)}%</span>
+                      <span className="usage-dashboard__num">{formatPercent(usage.percentage)}</span>
                     </div>
                   </div>
                 </div>
@@ -203,39 +197,39 @@ export function UsageDashboard() {
               <div className="usage-dashboard__stats-grid">
                 <UsageStatsCard
                   title="Coût total"
-                  value={formatCost(statistics.total_cost)}
+                  value={formatUsd(statistics.total_cost)}
                   subtitle={
                     <>
-                      <span className="usage-dashboard__num">{statistics.calls_count}</span> appels
+                      <span className="usage-dashboard__num">{formatNumber(statistics.calls_count)}</span> appels
                     </>
                   }
                 />
                 <UsageStatsCard
                   title="Tokens totaux"
-                  value={statistics.total_tokens.toLocaleString()}
+                  value={formatNumber(statistics.total_tokens)}
                   unit="tokens"
                   subtitle={
                     <>
-                      <span className="usage-dashboard__num">{statistics.total_prompt_tokens.toLocaleString()}</span> prompt
+                      <span className="usage-dashboard__num">{formatNumber(statistics.total_prompt_tokens)}</span> prompt
                       {' + '}
-                      <span className="usage-dashboard__num">{statistics.total_completion_tokens.toLocaleString()}</span> completion
+                      <span className="usage-dashboard__num">{formatNumber(statistics.total_completion_tokens)}</span> completion
                     </>
                   }
                 />
                 <UsageStatsCard
                   title="Taux de succès"
-                  value={statistics.success_rate.toFixed(1)}
+                  value={formatNumber(statistics.success_rate, 1)}
                   unit="%"
                   subtitle={
                     <>
-                      <span className="usage-dashboard__num">{statistics.success_count}</span> réussis /{' '}
-                      <span className="usage-dashboard__num">{statistics.error_count}</span> erreurs
+                      <span className="usage-dashboard__num">{formatNumber(statistics.success_count)}</span> réussis /{' '}
+                      <span className="usage-dashboard__num">{formatNumber(statistics.error_count)}</span> erreurs
                     </>
                   }
                 />
                 <UsageStatsCard
                   title="Durée moyenne"
-                  value={formatDuration(statistics.avg_duration_ms)}
+                  value={formatDurationMs(statistics.avg_duration_ms)}
                   subtitle="Par appel"
                 />
               </div>

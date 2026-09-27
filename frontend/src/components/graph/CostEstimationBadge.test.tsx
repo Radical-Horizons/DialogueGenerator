@@ -83,7 +83,7 @@ describe('CostEstimationBadge', () => {
     await act(async () => { vi.advanceTimersByTime(400) })
     vi.useRealTimers()
     await waitFor(() => {
-      expect(screen.getByText(/0\.0023/)).toBeInTheDocument()
+      expect(screen.getByText(/≈ 0,0023 €/)).toBeInTheDocument()
       expect(screen.getByText(/470/)).toBeInTheDocument()
     })
     vi.useFakeTimers()
@@ -107,7 +107,7 @@ describe('CostEstimationBadge', () => {
     await act(async () => { vi.advanceTimersByTime(400) })
     vi.useRealTimers()
     await waitFor(() => {
-      expect(screen.getByText(/mistral.*-95\.7%/i)).toBeInTheDocument()
+      expect(screen.getByText(/mistral.*-95,7 %/i)).toBeInTheDocument()
     })
     vi.useFakeTimers()
   })
@@ -142,7 +142,7 @@ describe('CostEstimationBadge', () => {
     await act(async () => { vi.advanceTimersByTime(400) })
     vi.useRealTimers()
     await waitFor(() => {
-      expect(screen.getByText(/90%/i)).toBeInTheDocument()
+      expect(screen.getByText(/90 %/i)).toBeInTheDocument()
     })
     vi.useFakeTimers()
   })

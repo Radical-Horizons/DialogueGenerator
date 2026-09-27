@@ -232,6 +232,7 @@ export function AuditLogsPanel() {
             background: theme.button.primary.background,
             color: theme.button.primary.color,
             border: 'none',
+            fontWeight: 600,
           }}
         >
           Filtrer

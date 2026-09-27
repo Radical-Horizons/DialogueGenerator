@@ -5,6 +5,7 @@ import type { CSSProperties } from 'react'
 import type { GddNotionSyncProgressResponse } from '../../api/gddNotionSync'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
+import { redesignText } from '../../theme/redesignTokens'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { modalTypography } from '../../theme/responsiveChrome'
 
@@ -209,18 +210,20 @@ export function GddNotionSyncProgressModal({
 const modalButtonStyle: CSSProperties = {
   padding: '0.45rem 0.85rem',
   borderRadius: '6px',
-  border: `1px solid ${theme.border.primary}`,
-  backgroundColor: theme.background.secondary,
-  color: theme.text.primary,
+  border: `1px solid ${theme.button.default.border}`,
+  backgroundColor: 'transparent',
+  color: redesignText.body,
   cursor: 'pointer',
   fontSize: remSize('body'),
+  fontWeight: 500,
 }
 
 const modalButtonStylePrimary: CSSProperties = {
   ...modalButtonStyle,
-  borderColor: theme.border.focus,
-  backgroundColor: theme.border.focus,
-  color: theme.background.elevated,
+  borderColor: theme.button.primary.background,
+  backgroundColor: theme.button.primary.background,
+  color: theme.button.primary.color,
+  fontWeight: 600,
 }
 
 const modalButtonStyleDanger: CSSProperties = {

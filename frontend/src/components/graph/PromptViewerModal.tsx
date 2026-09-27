@@ -172,8 +172,8 @@ export const PromptViewerModal = memo(function PromptViewerModal({
             style={{
               marginBottom: '1rem',
               padding: '0.5rem 0.75rem',
-              backgroundColor: theme.state?.error?.background ?? 'rgba(231, 76, 60, 0.15)',
-              border: `1px solid ${theme.state?.error?.color ?? '#E74C3C'}`,
+              backgroundColor: theme.state.error.background,
+              border: `1px solid ${theme.state.error.color}`,
               borderRadius: '4px',
               color: theme.text.primary,
               fontSize: `${typo.bodyFontRem}rem`,
@@ -189,8 +189,8 @@ export const PromptViewerModal = memo(function PromptViewerModal({
             style={{
               marginBottom: '1rem',
               padding: '0.5rem 0.75rem',
-              backgroundColor: theme.state?.warning?.background ?? 'rgba(245, 166, 35, 0.15)',
-              border: `1px solid ${theme.state?.warning?.color ?? '#F5A623'}`,
+              backgroundColor: theme.state.warning.background,
+              border: `1px solid ${theme.state.warning.color}`,
               borderRadius: '4px',
               color: theme.text.primary,
               fontSize: `${typo.bodyFontRem}rem`,

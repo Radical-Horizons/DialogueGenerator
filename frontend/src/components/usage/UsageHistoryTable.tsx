@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { getUsageHistory, type LLMUsageRecord } from '../../api/llmUsage'
 import { getErrorMessage } from '../../types/errors'
+import { formatCurrency, formatDurationMs, formatNumber } from '../../utils/formatCurrency'
 import './UsageHistoryTable.css'
 
 interface UsageHistoryTableProps {
@@ -54,14 +55,9 @@ export function UsageHistoryTable({
     })
   }
 
-  const formatCost = (cost: number) => {
-    return `$${cost.toFixed(6)}`
-  }
-
-  const formatDuration = (ms: number) => {
-    if (ms < 1000) return `${ms}ms`
-    return `${(ms / 1000).toFixed(2)}s`
-  }
+  // Coût d'un appel, en dollars : six décimales fixes, un appel coûte souvent moins d'un centime.
+  const formatCallCost = (cost: number) =>
+    formatCurrency(cost, 'USD', { minimumFractionDigits: 6, maximumFractionDigits: 6 })
 
   if (loading) {
     return <div className="usage-history-loading">Chargement...</div>
@@ -76,7 +72,7 @@ export function UsageHistoryTable({
       <div className="usage-history-table__header">
         <h3>Historique des appels LLM</h3>
         <div className="usage-history-table__pagination-info">
-          Page {page} sur {totalPages} ({total} enregistrements)
+          Page {page} sur {totalPages} ({formatNumber(total)} enregistrements)
         </div>
       </div>
 
@@ -106,9 +102,9 @@ export function UsageHistoryTable({
                     <td className="date-cell">{formatDate(record.timestamp)}</td>
                     <td className="model-cell">{record.model_name}</td>
                     <td className="endpoint-cell">{record.endpoint}</td>
-                    <td className="num-cell">{record.total_tokens.toLocaleString()}</td>
-                    <td className="num-cell">{formatCost(record.estimated_cost)}</td>
-                    <td className="num-cell">{formatDuration(record.duration_ms)}</td>
+                    <td className="num-cell">{formatNumber(record.total_tokens)}</td>
+                    <td className="num-cell">{formatCallCost(record.estimated_cost)}</td>
+                    <td className="num-cell">{formatDurationMs(record.duration_ms, 2)}</td>
                     <td className="num-cell">{record.k_variants}</td>
                     <td>
                       <span className={`status-badge ${record.success ? 'success' : 'error'}`}>

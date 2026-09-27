@@ -9,6 +9,7 @@ import { useGraphStore } from '../../store/graphStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
+import { redesignMonoLabelStyle } from '../../theme/redesignTokens'
 import { formatContextScorePercent } from '../../utils/contextRelevanceFormat'
 
 const TYPE_LABELS: Record<string, string> = {
@@ -182,7 +183,7 @@ export function ContextRelevancePanel({ embedded = false }: ContextRelevancePane
                   marginLeft: '0.5rem',
                   fontSize: remSize('small'),
                   fontWeight: 600,
-                  color: '#c9a227',
+                  color: theme.state.warning.color,
                 }}
               >
                 Faible utilisation du contexte (seuil {detail.low_threshold_percent} %)
@@ -263,7 +264,18 @@ export function ContextRelevancePanel({ embedded = false }: ContextRelevancePane
               >
                 {row.timestamp.slice(0, 19)} — nœud {row.node_id ?? '?'} — req {row.request_id} —{' '}
                 {formatContextScorePercent(row.score_percent)}
-                {row.low_context_warning ? ' ⚠' : ''}
+                {row.low_context_warning && (
+                  <span
+                    style={{
+                      ...redesignMonoLabelStyle,
+                      marginLeft: 5,
+                      fontSize: '9.5px',
+                      color: theme.state.warning.color,
+                    }}
+                  >
+                    faible
+                  </span>
+                )}
               </li>
             ))}
           </ul>

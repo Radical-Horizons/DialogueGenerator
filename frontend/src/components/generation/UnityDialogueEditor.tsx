@@ -1046,9 +1046,9 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                     border: `1px solid ${theme.input.border}`,
                                     color:
                                       choice.influenceDelta !== undefined && choice.influenceDelta >= 0
-                                        ? '#4CAF50'
+                                        ? theme.state.success.color
                                         : choice.influenceDelta !== undefined
-                                          ? '#F44336'
+                                          ? theme.state.error.color
                                           : theme.input.color,
                                     fontFamily: 'monospace',
                                     fontWeight: choice.influenceDelta !== undefined ? 'bold' : 'normal',
@@ -1078,9 +1078,9 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                     border: `1px solid ${theme.input.border}`,
                                     color:
                                       choice.respectDelta !== undefined && choice.respectDelta >= 0
-                                        ? '#4CAF50'
+                                        ? theme.state.success.color
                                         : choice.respectDelta !== undefined
-                                          ? '#F44336'
+                                          ? theme.state.error.color
                                           : theme.input.color,
                                     fontFamily: 'monospace',
                                     fontWeight: choice.respectDelta !== undefined ? 'bold' : 'normal',
@@ -1163,7 +1163,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                   display: 'inline-flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
-                                  border: `1px solid ${theme.border.primary}`,
+                                  border: `1px solid ${theme.button.default.border}`,
                                   borderRadius: '6px',
                                   backgroundColor: theme.button.default.background,
                                   color: theme.button.default.color,
@@ -1172,7 +1172,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                   lineHeight: 1,
                                 }}
                               >
-                                🗑️
+                                ✕
                               </button>
                             </div>
                             <datalist id={`node-ids-${node.id}`}>

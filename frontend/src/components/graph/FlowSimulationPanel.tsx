@@ -191,7 +191,7 @@ export function FlowSimulationPanel({ onClose }: FlowSimulationPanelProps) {
                 singular="cul-de-sac"
                 plural="cul-de-sacs"
                 itemTestId="flow-simulation-cul-de-sac-item"
-                color="#f57c00"
+                color={theme.state.warning.color}
               />
             </div>
           )}

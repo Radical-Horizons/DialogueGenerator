@@ -3,6 +3,7 @@
  * Extrait de GraphEditor pour isoler ce bloc JSX auto-suffisant.
  */
 import { DialogueCostBreakdown } from '../usage/DialogueCostBreakdown'
+import { usageDialogueId } from '../../utils/usageDialogueId'
 import { theme } from '../../theme'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { modalTypography } from '../../theme/responsiveChrome'
@@ -23,7 +24,7 @@ export function DialogueCostModal({ filename, variant = 'floating', onClose }: D
   if (variant === 'inspector') {
     return (
       <div data-testid="dialogue-cost-inspector" style={{ padding: '0 18px 12px' }}>
-        <DialogueCostBreakdown dialogueId={filename} />
+        <DialogueCostBreakdown dialogueId={usageDialogueId(filename)} />
       </div>
     )
   }
@@ -98,7 +99,7 @@ export function DialogueCostModal({ filename, variant = 'floating', onClose }: D
           </button>
         </div>
         <div style={{ flex: '1 1 auto', overflowY: 'auto', padding: isNarrow ? '0.8rem' : '1rem' }}>
-          <DialogueCostBreakdown dialogueId={filename} />
+          <DialogueCostBreakdown dialogueId={usageDialogueId(filename)} />
         </div>
         <div
           style={{

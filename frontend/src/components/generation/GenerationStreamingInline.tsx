@@ -17,6 +17,7 @@ import {
   redesignMonoLabelStyle,
   redesignRadius,
   redesignSpacing,
+  redesignSurface,
   redesignText,
 } from '../../theme/redesignTokens'
 import { ReasoningTraceViewer } from './ReasoningTraceViewer'
@@ -751,7 +752,7 @@ export function GenerationStreamingInline({
               border: 'none',
               borderRadius: `${redesignRadius.control}px`,
               backgroundColor: redesignAccent.fill,
-              color: '#ffffff',
+              color: theme.button.primary.color,
               fontWeight: 600,
               cursor: 'pointer',
             }}
@@ -771,7 +772,8 @@ export function GenerationStreamingInline({
                 height: 42,
                 border: `1px solid ${theme.button.default.border}`,
                 borderRadius: `${redesignRadius.control}px`,
-                backgroundColor: '#1a1a1f',
+                // La maquette 2a pose ce fond un cran sous `redesignSurface.panel` : jeton le plus proche.
+                backgroundColor: redesignSurface.panel,
                 color: theme.text.primary,
                 cursor: 'pointer',
                 display: 'flex',
@@ -825,7 +827,7 @@ export function GenerationStreamingInline({
               fontFamily: redesignFont.mono,
               fontSize: '10.5px',
               letterSpacing: '0.06em',
-              color: '#63636c',
+              color: redesignText.label,
             }}
           >
             ≈ {Math.max(1, Math.round(content.length / 4)).toLocaleString('fr-FR')} TOKENS REÇUS

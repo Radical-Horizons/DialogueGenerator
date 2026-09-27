@@ -177,12 +177,13 @@ export function GenerationPanelControls({
             onClick={onApplyConfigFixes}
             style={{
               padding: '0.35rem 0.75rem',
-              borderRadius: '4px',
-              border: `1px solid ${theme.border.focus}`,
-              backgroundColor: theme.button.primary.background,
-              color: theme.button.primary.color,
+              borderRadius: '6px',
+              border: `1px solid ${theme.button.default.border}`,
+              backgroundColor: 'transparent',
+              color: theme.button.default.color,
               cursor: 'pointer',
               fontSize: '0.85rem',
+              fontWeight: 500,
             }}
           >
             Corriger automatiquement

@@ -125,7 +125,9 @@ export function LoginForm() {
           padding: '0.75rem',
           backgroundColor: theme.button.primary.background,
           color: theme.button.primary.color,
-        }}
+          border: 'none',
+          fontWeight: 600,
+          }}
       >
         {isLoading ? 'Connexion...' : 'Se connecter'}
       </button>

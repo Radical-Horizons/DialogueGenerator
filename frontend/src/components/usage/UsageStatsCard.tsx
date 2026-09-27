@@ -3,6 +3,7 @@
  * Pas de carte — les colonnes sont séparées par des filets posés par la grille parente.
  */
 import type { ReactNode } from 'react'
+import { formatNumber } from '../../utils/formatCurrency'
 import './UsageStatsCard.css'
 
 interface UsageStatsCardProps {
@@ -28,7 +29,7 @@ export function UsageStatsCard({
     <div className={`usage-stats-card ${className}`}>
       <div className="usage-stats-card__title">{title}</div>
       <div className="usage-stats-card__value">
-        {typeof value === 'number' ? value.toLocaleString() : value}
+        {typeof value === 'number' ? formatNumber(value) : value}
         {unit && <span className="usage-stats-card__unit">{unit}</span>}
       </div>
       {gaugePercent !== undefined && (

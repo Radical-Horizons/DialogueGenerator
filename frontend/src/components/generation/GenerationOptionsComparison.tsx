@@ -545,8 +545,10 @@ export function GenerationOptionsComparison({
                           style={{
                             ...ghostButtonStyle,
                             border: 'none',
-                            background: kept ? redesignAccent.selectedBg : redesignAccent.base,
-                            color: kept ? redesignAccent.light : '#ffffff',
+                            // 2b : « Garder » est l'action primaire de l'option dépliée (la barre
+                            // Générer est masquée) — remplissage `fill`, jamais `base`.
+                            background: kept ? redesignAccent.selectedBg : redesignAccent.fill,
+                            color: kept ? redesignAccent.light : theme.button.primary.color,
                             fontWeight: 600,
                             padding: '0 14px',
                           }}

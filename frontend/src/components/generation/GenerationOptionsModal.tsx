@@ -541,7 +541,7 @@ export function GenerationOptionsModal({
               border: `1px solid ${redesignAccent.fill}`,
               borderRadius: redesignRadius.control,
               backgroundColor: redesignAccent.fill,
-              color: '#ffffff',
+              color: theme.button.primary.color,
               fontWeight: 600,
               cursor: 'pointer',
             }}

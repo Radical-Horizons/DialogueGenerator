@@ -877,7 +877,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             }}
           >
             <h3 style={{ margin: 0, marginBottom: '0.75rem', fontSize: remSize('section'), fontWeight: 'bold', color: theme.text.primary }}>
-              ✨ Génération IA
+              Génération IA
             </h3>
             <button
               type="button"
@@ -897,7 +897,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                 opacity: isGenerating ? 0.7 : 1,
               }}
             >
-              {isGenerating ? 'Génération...' : '✨ Générer la suite pour ce test'}
+              {isGenerating ? 'Génération...' : 'Générer la suite pour ce test'}
             </button>
           </div>
         )}
@@ -932,7 +932,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
               <h3 style={{ margin: 0, fontSize: remSize('section'), fontWeight: 'bold', color: theme.text.primary }}>
-                ✨ Génération IA
+                Génération IA
               </h3>
               <button
                 type="button"
@@ -1036,7 +1036,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                       fontWeight: 'bold',
                     }}
                   >
-                    {isGenerating ? 'Génération...' : '✨ Générer la suite (nextNode)'}
+                    {isGenerating ? 'Génération...' : 'Générer la suite (nextNode)'}
                   </button>
                   
                   {/* Bouton "Générer pour tous les choix" si plusieurs choix sans targetNode */}
@@ -1066,7 +1066,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                           ? batchProgress?.total
                             ? `Génération ${batchProgress.current}/${batchProgress.total}...`
                             : 'Génération batch...'
-                          : `✨ Générer pour tous les choix (${unconnectedChoices.length} choix → ${batchNodeTotal} nœud${batchNodeTotal > 1 ? 's' : ''})`}
+                          : `Générer pour tous les choix (${unconnectedChoices.length} choix → ${batchNodeTotal} nœud${batchNodeTotal > 1 ? 's' : ''})`}
                       </button>
                     ) : null
                   })()}
@@ -1099,8 +1099,9 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               fontWeight: 'bold',
             }}
             title="Dupliquer ce nœud"
+            aria-label="Dupliquer ce nœud"
           >
-            👯
+            Dupliquer
           </button>
           
           <button
@@ -1108,16 +1109,18 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             onClick={handleDelete}
             style={{
               padding: '0.75rem',
-              border: `1px solid ${theme.border.primary}`,
+              border: `1px solid ${theme.state.error.border}`,
               borderRadius: 4,
-              backgroundColor: '#E74C3C',
-              color: 'white',
+              backgroundColor: theme.state.error.background,
+              color: theme.state.error.color,
               cursor: 'pointer',
               fontSize: remSize('body'),
               fontWeight: 'bold',
             }}
+            title="Supprimer ce nœud"
+            aria-label="Supprimer le nœud"
           >
-            🗑️
+            Supprimer
           </button>
         </div>
       </form>

@@ -185,17 +185,17 @@ describe('DialogueCostBreakdown', () => {
     })
   })
 
-  it('affiche la couleur rouge pour un coût > 0.05€', async () => {
+  it('affiche la couleur d’erreur du système pour un coût > 0,05 €', async () => {
     mockGetDialogueCosts.mockResolvedValue(expensiveResponse)
     renderComponent('diag_exp')
     await waitFor(() => screen.getAllByTestId(/^dcb-bar-/))
 
     const bar = screen.getByTestId('dcb-bar-0').querySelector('[role="button"]')!
-    // La couleur de la barre doit être rouge (#ef4444)
-    expect((bar as HTMLElement).style.background).toBe('rgb(239, 68, 68)')
+    // theme.state.error.color (#ff6b6b)
+    expect((bar as HTMLElement).style.background).toBe('rgb(255, 107, 107)')
   })
 
-  it('affiche la couleur verte pour un coût < 0.01€', async () => {
+  it('affiche la couleur « validé » du système pour un coût < 0,01 €', async () => {
     const cheapResponse: DialogueCostResponse = {
       dialogue_id: 'diag_cheap',
       total_cost_eur: 0.005,
@@ -219,7 +219,29 @@ describe('DialogueCostBreakdown', () => {
     await waitFor(() => screen.getAllByTestId(/^dcb-bar-/))
 
     const bar = screen.getByTestId('dcb-bar-0').querySelector('[role="button"]')!
-    expect((bar as HTMLElement).style.background).toBe('rgb(34, 197, 94)')
+    // theme.state.accepted.border (#27ae60)
+    expect((bar as HTMLElement).style.background).toBe('rgb(39, 174, 96)')
+  })
+
+  it('affiche les montants en euros au format français, sans emoji', async () => {
+    mockGetDialogueCosts.mockResolvedValue(fullResponse)
+    const { container } = renderComponent('diag_full')
+    await waitFor(() => screen.getAllByTestId(/^dcb-bar-/))
+
+    expect(screen.getByText('0,0276 €')).toBeInTheDocument()
+    expect(screen.getByText('0,0092 €')).toBeInTheDocument()
+    expect(container.textContent).not.toMatch(/📊|✅|❌|€\d/)
+  })
+
+  it('affiche le statut du nœud en pastille + libellé', async () => {
+    mockGetDialogueCosts.mockResolvedValue(fullResponse)
+    renderComponent('diag_full')
+    await waitFor(() => screen.getAllByTestId(/^dcb-bar-/))
+
+    fireEvent.click(screen.getByTestId('dcb-bar-2').querySelector('[role="button"]')!)
+    const tooltip = await screen.findByTestId('dcb-tooltip')
+    expect(tooltip).toHaveTextContent('Échec')
+    expect(tooltip).not.toHaveTextContent('❌')
   })
 
   it("affiche un message d'erreur si l'API échoue", async () => {

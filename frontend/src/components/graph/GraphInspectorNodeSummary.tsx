@@ -11,6 +11,7 @@ import type { ReactNode } from 'react'
 import type { Node } from 'reactflow'
 import { theme } from '../../theme'
 import { redesignFont, redesignText } from '../../theme/redesignTokens'
+import { formatCost } from '../../utils/formatCurrency'
 import { formatVisibilityConditionsSummary } from '../../utils/visibilityConditions'
 import type { VisibilityConditionsBlock } from '../../types/visibilityConditions'
 import { GraphInspectorRow } from './GraphInspector'
@@ -150,7 +151,7 @@ export function GraphInspectorNodeSummary({
             {formatOrigin(lastGeneration.timestamp)}
             {lastGeneration.provider ? ` · ${lastGeneration.provider}` : ''}
             {typeof lastGeneration.cost === 'number'
-              ? ` · ${lastGeneration.cost.toFixed(2)} $`
+              ? ` · ${formatCost(lastGeneration.cost, 'USD')}`
               : ''}
           </span>
         ) : (

@@ -134,6 +134,6 @@ describe('GraphInspectorNodeSummary', () => {
       />
     )
     expect(screen.getByText(/gpt-5\.6/)).toBeInTheDocument()
-    expect(screen.getByText(/0\.04 \$/)).toBeInTheDocument()
+    expect(screen.getByText(/0,04 \$/)).toBeInTheDocument()
   })
 })

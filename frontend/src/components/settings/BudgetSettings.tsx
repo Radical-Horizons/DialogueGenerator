@@ -4,7 +4,9 @@
  */
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import { getBudget, updateBudget, type BudgetResponse } from '../../api/costs'
+import { theme } from '../../theme'
 import { getErrorMessage } from '../../types/errors'
+import { formatCost, formatCurrency, formatPercent } from '../../utils/formatCurrency'
 import {
   redesignControl,
   redesignFont,
@@ -59,11 +61,11 @@ export const BudgetSettings = forwardRef<BudgetSettingsHandle, BudgetSettingsPro
       }
       const MIN_QUOTA = 0.01
       if (quotaValue > 0 && quotaValue < MIN_QUOTA) {
-        return `Le quota minimum est ${MIN_QUOTA.toFixed(2)} USD (1 centime)`
+        return `Le quota minimum est ${formatCurrency(MIN_QUOTA, 'USD')} (1 centime)`
       }
       const MAX_QUOTA = 10000.0
       if (quotaValue > MAX_QUOTA) {
-        return `Le quota maximum est ${MAX_QUOTA.toFixed(2)} USD par mois. Contactez l'administrateur pour un quota supérieur.`
+        return `Le quota maximum est ${formatCurrency(MAX_QUOTA, 'USD')} par mois. Contactez l'administrateur pour un quota supérieur.`
       }
       return null
     }
@@ -104,10 +106,8 @@ export const BudgetSettings = forwardRef<BudgetSettingsHandle, BudgetSettingsPro
       [budget, quota, onBudgetUpdated]
     )
 
-    const formatCost = (cost: number) => {
-      if (cost < 0.01) return `$${cost.toFixed(6)}`
-      return `$${cost.toFixed(2)}`
-    }
+    // Le budget est tenu en dollars côté backend (`DEFAULT_MONTHLY_LLM_QUOTA_USD`).
+    const formatUsd = (cost: number) => formatCost(cost, 'USD')
 
     if (loading) {
       return <div style={{ color: redesignText.label }}>Chargement du budget…</div>
@@ -131,10 +131,10 @@ export const BudgetSettings = forwardRef<BudgetSettingsHandle, BudgetSettingsPro
           <div style={{
             padding: redesignSpacing.sm,
             marginBottom: redesignSpacing.md,
-            backgroundColor: 'rgba(255, 68, 68, 0.08)',
-            border: '1px solid rgba(255, 68, 68, 0.4)',
+            backgroundColor: 'rgba(255, 107, 107, 0.08)',
+            border: `1px solid ${theme.state.error.color}`,
             borderRadius: redesignRadius.control,
-            color: '#ff8a8a',
+            color: theme.state.error.color,
           }}>
             Erreur : {error}
           </div>
@@ -151,12 +151,12 @@ export const BudgetSettings = forwardRef<BudgetSettingsHandle, BudgetSettingsPro
               }}
             >
               {[
-                { label: 'Budget mensuel', value: formatCost(budget.quota) },
+                { label: 'Budget mensuel', value: formatUsd(budget.quota) },
                 {
                   label: 'Dépensé',
-                  value: `${formatCost(budget.amount)} · ${budget.percentage.toFixed(1)} %`,
+                  value: `${formatUsd(budget.amount)} · ${formatPercent(budget.percentage)}`,
                 },
-                { label: 'Restant', value: formatCost(budget.remaining) },
+                { label: 'Restant', value: formatUsd(budget.remaining) },
               ].map((row) => (
                 <div
                   key={row.label}
@@ -212,7 +212,7 @@ export const BudgetSettings = forwardRef<BudgetSettingsHandle, BudgetSettingsPro
                   padding: `${redesignSpacing.sm}px ${redesignSpacing.md}px`,
                   fontFamily: redesignFont.mono,
                   fontSize: '13px',
-                  border: `1px solid ${redesignControl.border}`,
+                  border: `1px solid ${redesignControl.inputBorder}`,
                   borderRadius: redesignRadius.control,
                   backgroundColor: redesignSurface.base,
                   color: redesignText.strong,

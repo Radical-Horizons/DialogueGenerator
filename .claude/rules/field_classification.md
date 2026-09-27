@@ -28,4 +28,4 @@ Détection : `_is_metadata_field()` utilise d’abord `Introduction` si présent
 ## Usage
 
 - `is_metadata` : Filtrage onglets (Métadonnées vs Contexte)
-- `is_essential` : Indicateur "champ essentiel" (⭐) et boutons de sélection
+- `is_essential` : Indicateur "champ essentiel" (★) et boutons de sélection

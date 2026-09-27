@@ -203,7 +203,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
             fontWeight: 400,
             lineHeight: 1.12,
             letterSpacing: '0.005em',
-            color: '#ffffff',
+            color: redesignText.strong,
           }}
         >
           {sceneTitle}

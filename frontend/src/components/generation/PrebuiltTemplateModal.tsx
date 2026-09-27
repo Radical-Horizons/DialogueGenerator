@@ -163,6 +163,7 @@ export function PrebuiltTemplateModal({
               backgroundColor: theme.button.primary.background,
               border: 'none',
               color: theme.button.primary.color,
+              fontWeight: 600,
             }}
           >
             Charger

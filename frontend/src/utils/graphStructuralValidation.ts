@@ -3,6 +3,8 @@
  * FR37 : complétude de contenu (`missing_dialogue_text`, `missing_test`) → orange si aucune erreur structure sur le nœud.
  * `broken_reference` : rouge canvas via `getValidationHighlightKind` uniquement (pas dans `isStructuralValidationErrorType`, hors périmètre FR36).
  */
+import { theme } from '../theme'
+
 export const STRUCTURAL_VALIDATION_ERROR_TYPES = new Set<string>([
   'missing_display_name',
   'missing_stable_id',
@@ -70,7 +72,7 @@ export const GRAPH_TOPOLOGY_WARNING_STYLES: Record<
   GraphTopologyWarningKind,
   { border: string; background: string }
 > = {
-  orphan: { border: '#ff9800', background: 'rgba(255, 152, 0, 0.14)' },
-  unreachable: { border: '#5c6bc0', background: 'rgba(92, 107, 192, 0.14)' },
+  orphan: { border: theme.state.warning.border, background: theme.state.warning.background },
+  unreachable: { border: theme.state.info.color, background: theme.state.info.background },
 }
 

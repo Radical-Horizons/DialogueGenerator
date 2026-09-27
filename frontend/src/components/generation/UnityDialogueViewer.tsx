@@ -4,6 +4,7 @@
  */
 import { memo, useMemo, useState, useCallback } from 'react'
 import { theme } from '../../theme'
+import { redesignAccent, redesignRadius } from '../../theme/redesignTokens'
 import type { GenerateUnityDialogueResponse } from '../../types/api'
 import * as dialoguesAPI from '../../api/dialogues'
 import { getErrorMessage } from '../../types/errors'
@@ -156,13 +157,13 @@ export const UnityDialogueViewer = memo(function UnityDialogueViewer({
               onClick={handleExport}
               style={{
                 padding: '0.5rem 1rem',
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '4px',
+                border: 'none',
+                borderRadius: '6px',
                 backgroundColor: theme.button.primary.background,
                 color: theme.button.primary.color,
                 cursor: 'pointer',
                 fontSize: '0.9rem',
-                fontWeight: 'bold',
+                fontWeight: 600,
                 whiteSpace: 'nowrap',
               }}
             >
@@ -263,9 +264,10 @@ export const UnityDialogueViewer = memo(function UnityDialogueViewer({
                     <span
                       style={{
                         padding: '0.25rem 0.75rem',
-                        backgroundColor: theme.button.primary.background,
-                        color: theme.button.primary.color,
-                        borderRadius: '12px',
+                        backgroundColor: redesignAccent.selectedBg,
+                        color: redesignAccent.light,
+                        border: `1px solid ${redesignAccent.ring}`,
+                        borderRadius: `${redesignRadius.chip}px`,
                         fontSize: '0.85rem',
                         fontWeight: '500',
                       }}
@@ -302,7 +304,7 @@ export const UnityDialogueViewer = memo(function UnityDialogueViewer({
                       padding: '1rem',
                       backgroundColor: theme.background.panel,
                       borderRadius: '4px',
-                      borderLeft: `4px solid ${theme.button.primary.background}`,
+                      borderLeft: `4px solid ${redesignAccent.base}`,
                     }}
                   >
                     <div
@@ -409,7 +411,7 @@ export const UnityDialogueViewer = memo(function UnityDialogueViewer({
                                     <span style={{ color: theme.text.secondary, minWidth: '80px' }}>Influence:</span>
                                     <span style={{ 
                                       fontFamily: 'monospace', 
-                                      color: choice.influenceDelta >= 0 ? '#4CAF50' : '#F44336',
+                                      color: choice.influenceDelta >= 0 ? theme.state.success.color : theme.state.error.color,
                                       fontWeight: 'bold',
                                     }}>
                                       {choice.influenceDelta >= 0 ? '+' : ''}{choice.influenceDelta}
@@ -421,7 +423,7 @@ export const UnityDialogueViewer = memo(function UnityDialogueViewer({
                                     <span style={{ color: theme.text.secondary, minWidth: '80px' }}>Respect:</span>
                                     <span style={{ 
                                       fontFamily: 'monospace', 
-                                      color: choice.respectDelta >= 0 ? '#4CAF50' : '#F44336',
+                                      color: choice.respectDelta >= 0 ? theme.state.success.color : theme.state.error.color,
                                       fontWeight: 'bold',
                                     }}>
                                       {choice.respectDelta >= 0 ? '+' : ''}{choice.respectDelta}
