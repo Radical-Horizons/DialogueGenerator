@@ -266,15 +266,22 @@ const mockConfigAPI = vi.mocked(configAPI)
 describe('GenerationPanel - Tests Baseline', () => {
   let eventSourceInstances: MockEventSource[] = []
 
-  /** Attend que le panneau ait rendu les champs principaux (évite timeouts avec findByTestId). */
+  /**
+   * Attend que le panneau ait rendu le brief (évite timeouts avec findByTestId).
+   * PresetSelector n'est monté que sous l'onglet Templates : voir `openTemplatesTab`.
+   */
   async function waitForPanelReady() {
     await waitFor(
       () => {
         expect(screen.getByTestId('user-instructions-input')).toBeInTheDocument()
-        expect(screen.getByTestId('preset-selector')).toBeInTheDocument()
       },
       { timeout: 4000, interval: 100 }
     )
+  }
+
+  async function openTemplatesTab(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(screen.getByTestId('input-tab-templates'))
+    expect(screen.getByTestId('preset-selector')).toBeInTheDocument()
   }
 
   function buildMockGenerationStoreState(): Record<string, unknown> {
@@ -394,10 +401,21 @@ describe('GenerationPanel - Tests Baseline', () => {
       return graphStoreState
     }) as typeof useGraphStore)
 
-    mockUseLLMStore.mockReturnValue({
+    // ModelEffortPicker lit le store par sélecteurs : un mockReturnValue lui
+    // rendrait l'objet entier à la place de `availableModels`.
+    const llmStoreState: ReturnType<typeof useLLMStore.getState> = {
       model: 'gpt-4o-mini',
       provider: 'openai',
-    } as ReturnType<typeof useLLMStore>)
+      availableModels: [],
+      setProvider: vi.fn(),
+      setModel: vi.fn(),
+      setAvailableModels: vi.fn(),
+      loadModels: vi.fn().mockResolvedValue(undefined),
+    }
+    mockUseLLMStore.mockImplementation(((selector?: (s: typeof llmStoreState) => unknown) => {
+      if (typeof selector === 'function') return selector(llmStoreState)
+      return llmStoreState
+    }) as typeof useLLMStore)
 
     mockUseAuthorProfile.mockReturnValue({
       authorProfile: '',
@@ -625,23 +643,27 @@ describe('GenerationPanel - Tests Baseline', () => {
       const user = userEvent.setup()
       render(<GenerationPanel />)
       await waitForPanelReady()
+      await openTemplatesTab(user)
 
       const loadPresetBtn = screen.getByTestId('load-preset-btn')
       await user.click(loadPresetBtn)
 
-      // Le mock PresetSelector appelle onPresetLoaded au clic ; le panel ne crash pas
-      expect(screen.getByTestId('preset-selector')).toBeInTheDocument()
+      // Charger un preset écrit dans le brief : le panneau y revient.
+      expect(screen.getByTestId('user-instructions-input')).toBeInTheDocument()
+      expect(screen.queryByTestId('preset-selector')).not.toBeInTheDocument()
     }, 10000)
 
     it('devrait afficher modal de validation pour preset avec références obsolètes', async () => {
       const user = userEvent.setup()
       render(<GenerationPanel />)
       await waitForPanelReady()
+      await openTemplatesTab(user)
 
       const loadPresetBtn = screen.getByTestId('load-preset-btn')
       await user.click(loadPresetBtn)
 
-      expect(screen.getByTestId('preset-selector')).toBeInTheDocument()
+      expect(screen.getByTestId('user-instructions-input')).toBeInTheDocument()
+      expect(screen.queryByTestId('preset-selector')).not.toBeInTheDocument()
     }, 10000)
   })
 
