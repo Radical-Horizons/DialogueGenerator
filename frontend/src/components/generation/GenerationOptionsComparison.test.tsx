@@ -16,9 +16,11 @@ vi.mock('../../api/dialogues', () => ({
 }))
 
 const setUnityDialogueResponse = vi.fn()
+/** Contenu du panneau droit (« Garder et continuer ») vu par la comparaison. */
+let mockPanelResponse: GenerateUnityDialogueResponse | null = null
 vi.mock('../../store/generationStore', () => ({
   useGenerationStore: (selector: (s: Record<string, unknown>) => unknown) =>
-    selector({ setUnityDialogueResponse }),
+    selector({ setUnityDialogueResponse, unityDialogueResponse: mockPanelResponse }),
 }))
 
 let mockSelections: Record<string, string[]> = { characters: [], locations: [] }
@@ -58,11 +60,12 @@ class NoopEventSource {
   close() {}
 }
 
+/** Comme en vrai : l'option 1, streamée par le pipeline principal, occupe déjà le panneau. */
 function startTwoReadyOptions() {
+  const main = makeResult('Première réplique.')
+  mockPanelResponse = main
   useGenerationOptionsStore.getState().startRun(2, REQUEST)
-  useGenerationOptionsStore
-    .getState()
-    .updateSlot(0, { status: 'completed', result: makeResult('Première réplique.') })
+  useGenerationOptionsStore.getState().updateSlot(0, { status: 'completed', result: main })
   useGenerationOptionsStore
     .getState()
     .updateSlot(1, { status: 'completed', result: makeResult('Seconde réplique.') })
@@ -72,6 +75,7 @@ describe('GenerationOptionsComparison', () => {
   beforeEach(() => {
     vi.stubGlobal('EventSource', NoopEventSource as unknown as typeof EventSource)
     setUnityDialogueResponse.mockClear()
+    mockPanelResponse = null
     mockSelections = { characters: [], locations: [] }
     useGenerationOptionsStore.setState({
       optionCount: 2,
@@ -198,6 +202,7 @@ describe('GenerationOptionsComparison — vue côte à côte', () => {
   beforeEach(() => {
     vi.stubGlobal('EventSource', NoopEventSource as unknown as typeof EventSource)
     setUnityDialogueResponse.mockClear()
+    mockPanelResponse = null
     mockSelections = { characters: [], locations: [] }
     useUiLayoutStore.setState({ optionsView: 'list' })
     useGenerationOptionsStore.setState({
@@ -225,6 +230,8 @@ describe('GenerationOptionsComparison — vue côte à côte', () => {
     expect(screen.getByTestId('options-column-head-1')).toBeInTheDocument()
     expect(screen.getByTestId('options-cell-line-0')).toHaveTextContent('Première réplique.')
     expect(screen.getByTestId('options-cell-line-1')).toHaveTextContent('Seconde réplique.')
+    // Régression : un tag de test sans espace débordait sur la colonne voisine.
+    expect(screen.getByTestId('options-cell-choices-0').style.overflowWrap).toBe('anywhere')
     expect(screen.queryByTestId('option-diagnostic-column')).not.toBeInTheDocument()
     expect(screen.queryByTestId('options-collapse-all')).not.toBeInTheDocument()
     // La préférence survit au lot suivant : elle vit dans le store de disposition.
@@ -264,5 +271,64 @@ describe('GenerationOptionsComparison — vue côte à côte', () => {
     expect(screen.queryByTestId('options-view-columns')).not.toBeInTheDocument()
     expect(screen.queryByTestId('options-columns')).not.toBeInTheDocument()
     expect(screen.getByTestId('generation-options-comparison')).toHaveAttribute('data-view', 'list')
+  })
+})
+
+describe('GenerationOptionsComparison — panneau droit', () => {
+  beforeEach(() => {
+    vi.stubGlobal('EventSource', NoopEventSource as unknown as typeof EventSource)
+    setUnityDialogueResponse.mockClear()
+    mockPanelResponse = null
+    mockSelections = { characters: [], locations: [] }
+    useUiLayoutStore.setState({ optionsView: 'list' })
+    useGenerationOptionsStore.setState({
+      optionCount: 2,
+      slots: [],
+      lastRequest: REQUEST,
+      keptIndex: null,
+    })
+  })
+
+  it('suit l’option retenue : « Garder et continuer » ne sauvegarde plus l’option 1 à sa place (régression)', () => {
+    startTwoReadyOptions()
+    render(<GenerationOptionsComparison />)
+    expect(setUnityDialogueResponse).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByTestId('option-expand-1'))
+
+    expect(setUnityDialogueResponse).toHaveBeenCalledWith(useGenerationOptionsStore.getState().slots[1].result)
+  })
+
+  it('n’écrase jamais un panneau que l’auteur a modifié', () => {
+    startTwoReadyOptions()
+    mockPanelResponse = { ...(mockPanelResponse as GenerateUnityDialogueResponse), json_content: '[{"id":"START"}]' }
+    render(<GenerationOptionsComparison />)
+
+    fireEvent.click(screen.getByTestId('option-expand-1'))
+
+    expect(setUnityDialogueResponse).not.toHaveBeenCalled()
+  })
+
+  it('attend la fin du stream principal : le slot 0 se remplit depuis ce même panneau', () => {
+    mockPanelResponse = null
+    useGenerationOptionsStore.getState().startRun(2, REQUEST)
+    useGenerationOptionsStore.getState().updateSlot(0, { status: 'running' })
+    useGenerationOptionsStore
+      .getState()
+      .updateSlot(1, { status: 'completed', result: makeResult('Arrivée la première.') })
+    render(<GenerationOptionsComparison />)
+
+    expect(setUnityDialogueResponse).not.toHaveBeenCalled()
+  })
+
+  it('une option gardée fixe le panneau : en déplier une autre ne la remplace pas', () => {
+    startTwoReadyOptions()
+    render(<GenerationOptionsComparison />)
+    fireEvent.click(screen.getByTestId('option-keep-0'))
+    setUnityDialogueResponse.mockClear()
+
+    fireEvent.click(screen.getByTestId('option-expand-1'))
+
+    expect(setUnityDialogueResponse).not.toHaveBeenCalled()
   })
 })

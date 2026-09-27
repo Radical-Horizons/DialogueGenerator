@@ -8,7 +8,7 @@
  * « Garder » pousse l'option dans le résultat courant, « Variante » relance cette
  * seule option (Story 1.10 recâblée), « Régénérer les N » relance tout le lot.
  */
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { theme } from '../../theme'
 import {
   redesignAccent,
@@ -336,6 +336,31 @@ export function GenerationOptionsComparison({
         : null
       : openIndexChoice
   const setOpenIndex = (next: number | null) => setOpenIndexChoice(next)
+
+  const panelResponse = useGenerationStore((s) => s.unityDialogueResponse)
+  const syncedPanelJsonRef = useRef<string | null>(null)
+
+  // Le panneau droit, dont « Garder et continuer » sauvegarde le contenu, reçoit le
+  // stream de l'option 1. Tant qu'aucune option n'est gardée et que l'auteur n'y a
+  // rien modifié, il suit l'option retenue : sinon il sauvegarderait l'option 1 sous
+  // une autre colonne marquée « RETENUE ». Jamais avant la fin du stream principal :
+  // GenerationPanel remplit le slot 0 depuis ce même panneau tant que le slot court.
+  useEffect(() => {
+    if (keptIndex != null || openIndex == null) return
+    const mainStatus = slots.find((s) => s.index === 0)?.status
+    if (mainStatus === 'running' || mainStatus === 'pending') return
+    const target = slots[openIndex]?.result
+    if (!target) return
+    const currentJson = panelResponse?.json_content ?? null
+    if (currentJson === target.json_content) return
+    const untouched =
+      currentJson == null ||
+      currentJson === syncedPanelJsonRef.current ||
+      slots.some((s) => s.result?.json_content === currentJson)
+    if (!untouched) return
+    syncedPanelJsonRef.current = target.json_content
+    setUnityDialogueResponse(target)
+  }, [keptIndex, openIndex, slots, panelResponse, setUnityDialogueResponse])
 
   if (slots.length < 2) return null
 

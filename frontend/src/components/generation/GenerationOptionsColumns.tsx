@@ -84,6 +84,9 @@ export function GenerationOptionsColumns({
     return {
       padding: '11px 12px',
       minWidth: 0,
+      // Tags de test et flags sont des mots mono sans espace (« INTELLIGENCE+CONNAISSANCES… ») :
+      // sans coupure forcée, ils débordaient sur la colonne voisine.
+      overflowWrap: 'anywhere',
       borderTop: `1px solid ${redesignHairline.standard}`,
       borderLeft: `1px solid ${redesignHairline.standard}`,
       background: retained ? redesignAccent.selectedBgStrong : 'transparent',
