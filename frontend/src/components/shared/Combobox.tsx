@@ -104,7 +104,7 @@ export function Combobox({
     const recentOptions = recentlyUsed
       .map((val) => options.find((opt) => opt.value === val))
       .filter((opt): opt is ComboboxOption => opt !== undefined)
-      .map((opt) => ({ ...opt, label: `⭐ ${opt.label}` }))
+      .map((opt) => ({ ...opt, label: `★ ${opt.label}` }))
 
     const otherOptions = filteredOptions.filter(
       (opt) => !recentlyUsed.includes(opt.value)

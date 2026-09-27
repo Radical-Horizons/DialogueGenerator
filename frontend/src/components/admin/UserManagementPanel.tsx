@@ -331,7 +331,9 @@ export function UserManagementPanel() {
               cursor: isCreating || isLoading ? 'wait' : 'pointer',
               background: theme.button.primary.background,
               color: theme.button.primary.color,
-            }}
+              border: 'none',
+              fontWeight: 600,
+              }}
           >
             {isCreating ? 'Création…' : 'Créer le compte'}
           </button>

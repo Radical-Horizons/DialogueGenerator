@@ -39,9 +39,12 @@ import { theme } from '../../theme'
 import { applyNodeFilters, applyEdgeFilters } from './graphFilterUtils'
 import { useReactFlowHandlers } from '../../hooks/useReactFlowHandlers'
 import {
-  edgeStrokeFromSource,
-  edgeStrokeFromSourceHandle,
+  canvasEdgeStroke,
+  EDGE_NEUTRAL_COLOR,
+  EDGE_STROKE_WIDTH,
+  highlightSelectedOutgoingEdges,
   stableChoiceEdgeId,
+  toRestingCanvasEdge,
 } from '../../utils/graphEdgeBuilders'
 import { useToast } from '../shared'
 import { getErrorMessage } from '../../types/errors'
@@ -169,6 +172,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
     nodes: storeNodes,
     edges: storeEdges,
     graphFilters,
+    selectedNodeId,
     selectedNodeIds,
     validationErrors,
     highlightedNodeIds,
@@ -187,6 +191,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
       nodes: s.nodes,
       edges: s.edges,
       graphFilters: s.graphFilters,
+      selectedNodeId: s.selectedNodeId,
       selectedNodeIds: s.selectedNodeIds,
       validationErrors: s.validationErrors,
       highlightedNodeIds: s.highlightedNodeIds,
@@ -226,12 +231,8 @@ export const GraphCanvas = memo(function GraphCanvas() {
     }
     for (const [targetId, targetEdges] of edgesByTarget.entries()) {
       const preferred = [...targetEdges].sort((a, b) => a.id.localeCompare(b.id))[0]
-      const stroke = preferred.style?.stroke
-      const color =
-        (typeof stroke === 'string' ? stroke : undefined) ??
-        edgeStrokeFromSourceHandle(preferred.sourceHandle ?? undefined) ??
-        theme.text.secondary
-      byTarget.set(targetId, color)
+      // Couleur au repos, hors sélection : le handle d'un enfant ne s'allume pas quand son parent est sélectionné.
+      byTarget.set(targetId, canvasEdgeStroke(preferred, null))
     }
     return byTarget
   }, [visibleStoreEdges])
@@ -559,45 +560,27 @@ export const GraphCanvas = memo(function GraphCanvas() {
   }, [visibleStoreNodes, selectedNodeIds, validationErrors, highlightedNodeIds, highlightedCycleNodes, incomingEdgeColorByTarget])
 
   // Dériver edges du store — Story 2.9 FR30, ADR-008
-  const edges = useMemo(() => {
-    const brokenReferences = validationErrors.filter(
-      (err) => err.type === 'broken_reference' && err.target
-    )
-    const brokenTargets = new Set(brokenReferences.map((err) => err.target!))
-    const validEdges = visibleStoreEdges.filter((edge) => {
-      const sh = edge.sourceHandle
-      if (sh && /^choice-\d+$/.test(sh)) return false
-      return true
-    })
-    return validEdges.map((edge) => {
-      const sourceDerivedStroke = edgeStrokeFromSource({
-        sourceHandle: edge.sourceHandle ?? undefined,
-        connectionType: (edge.data as { edgeType?: string } | undefined)?.edgeType,
-        edgeLabel: typeof edge.label === 'string' ? edge.label : undefined,
-      })
-      const isBroken = brokenTargets.has(edge.target)
-      if (isBroken) {
-        return {
-          ...edge,
-          style: {
-            ...edge.style,
-            stroke: theme.state.error.border,
-            strokeDasharray: '8,4',
-            opacity: 0.5,
-          },
-          animated: false,
-        }
-      }
-      if (!sourceDerivedStroke) return edge
-      return {
-        ...edge,
-        style: {
-          ...edge.style,
-          stroke: sourceDerivedStroke,
-        },
-      }
-    })
-  }, [visibleStoreEdges, validationErrors])
+  const brokenEdgeTargets = useMemo(
+    () =>
+      new Set(
+        validationErrors
+          .filter((err) => err.type === 'broken_reference' && err.target)
+          .map((err) => err.target!)
+      ),
+    [validationErrors]
+  )
+  const restingEdges = useMemo(
+    () =>
+      visibleStoreEdges
+        .filter((edge) => !(edge.sourceHandle && /^choice-\d+$/.test(edge.sourceHandle)))
+        .map((edge) => toRestingCanvasEdge(edge, brokenEdgeTargets.has(edge.target))),
+    [visibleStoreEdges, brokenEdgeTargets]
+  )
+  // Écran 2e : le chemin sortant du nœud sélectionné passe à l'accent.
+  const edges = useMemo(
+    () => highlightSelectedOutgoingEdges(restingEdges, selectedNodeId, brokenEdgeTargets),
+    [restingEdges, selectedNodeId, brokenEdgeTargets]
+  )
 
   const nodeTypes: NodeTypes = useMemo(
     () => ({ dialogueNode: DialogueNode, testNode: TestNode, endNode: EndNode }),
@@ -608,7 +591,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
     () => ({
       type: 'smoothstep' as const,
       animated: false,
-      style: { stroke: theme.text.secondary, strokeWidth: 2 },
+      style: { stroke: EDGE_NEUTRAL_COLOR, strokeWidth: EDGE_STROKE_WIDTH },
     }),
     []
   )

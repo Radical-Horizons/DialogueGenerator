@@ -9,15 +9,32 @@
  */
 import type { Edge } from 'reactflow'
 import { theme } from '../theme'
+import { redesignAccent, redesignGraphEdge } from '../theme/redesignTokens'
 
 /** Longueur max du label affiché sur les edges de choix. */
 export const CHOICE_LABEL_MAX_LENGTH = 30
-export const CHOICE_EDGE_COLOR = '#F5A623'
+
 /**
- * Lien linéaire « suivant » : neutre, comme le trait par défaut du canvas. Il ne porte
- * aucune information à distinguer, et le bleu est réservé à la sélection.
+ * Écran 2e : un seul trait neutre de 1,5 px pour les choix et les suites. Le type de lien
+ * se lit déjà à son handle et à son libellé ; la couleur est réservée aux issues de test
+ * et au chemin sortant du nœud sélectionné.
  */
-export const NEXT_EDGE_COLOR = theme.text.secondary
+export const EDGE_NEUTRAL_COLOR = redesignGraphEdge.neutral
+export const EDGE_STROKE_WIDTH = 1.5
+export const SELECTED_OUTGOING_EDGE_COLOR = redesignAccent.base
+export const CHOICE_EDGE_COLOR = EDGE_NEUTRAL_COLOR
+export const NEXT_EDGE_COLOR = EDGE_NEUTRAL_COLOR
+
+/**
+ * Couleurs des 4 issues de test. Elles encodent le résultat et doivent rester identiques
+ * aux libellés colorés du TestNode (`É. CRIT`, `ÉCHEC`, `RÉUSSITE`, `R. CRIT`).
+ */
+export const TEST_RESULT_EDGE_COLORS = {
+  criticalFailure: '#C0392B',
+  failure: '#E74C3C',
+  success: '#27AE60',
+  criticalSuccess: '#0088FF',
+} as const
 
 /** Config des 4 résultats de test (TestNode → nœud de résultat). */
 export const TEST_RESULT_EDGE_CONFIG = [
@@ -25,33 +42,37 @@ export const TEST_RESULT_EDGE_CONFIG = [
     field: 'testCriticalFailureNode' as const,
     handleId: 'critical-failure',
     label: 'Échec critique',
-    color: '#C0392B',
+    color: TEST_RESULT_EDGE_COLORS.criticalFailure,
   },
   {
     field: 'testFailureNode' as const,
     handleId: 'failure',
     label: 'Échec',
-    color: '#E74C3C',
+    color: TEST_RESULT_EDGE_COLORS.failure,
   },
   {
     field: 'testSuccessNode' as const,
     handleId: 'success',
     label: 'Réussite',
-    color: '#27AE60',
+    color: TEST_RESULT_EDGE_COLORS.success,
   },
   {
     field: 'testCriticalSuccessNode' as const,
     handleId: 'critical-success',
     label: 'Réussite critique',
-    color: '#0088FF',
+    color: TEST_RESULT_EDGE_COLORS.criticalSuccess,
   },
 ] as const
+
+export function testResultEdgeColor(sourceHandle?: string | null): string | undefined {
+  if (!sourceHandle) return undefined
+  return TEST_RESULT_EDGE_CONFIG.find((c) => c.handleId === sourceHandle)?.color
+}
 
 export function edgeStrokeFromSourceHandle(sourceHandle?: string): string | undefined {
   if (!sourceHandle) return undefined
   if (sourceHandle.startsWith('choice:')) return CHOICE_EDGE_COLOR
-  const testConfig = TEST_RESULT_EDGE_CONFIG.find((c) => c.handleId === sourceHandle)
-  return testConfig?.color
+  return testResultEdgeColor(sourceHandle)
 }
 
 export function edgeStrokeFromSource(params: {
@@ -65,6 +86,68 @@ export function edgeStrokeFromSource(params: {
     return NEXT_EDGE_COLOR
   }
   return undefined
+}
+
+/**
+ * Couleur d'un lien sur le canvas. Priorité : issue de test (elle encode le résultat,
+ * y compris quand son TestNode est sélectionné) > chemin sortant du nœud sélectionné > neutre.
+ */
+export function canvasEdgeStroke(
+  edge: Pick<Edge, 'source' | 'sourceHandle'>,
+  selectedNodeId: string | null
+): string {
+  const outcome = testResultEdgeColor(edge.sourceHandle)
+  if (outcome) return outcome
+  if (selectedNodeId !== null && edge.source === selectedNodeId) {
+    return SELECTED_OUTGOING_EDGE_COLOR
+  }
+  return EDGE_NEUTRAL_COLOR
+}
+
+/**
+ * Style d'un lien hors sélection. Le trait est posé explicitement : React Flow fusionne
+ * `defaultEdgeOptions` en surface, donc un lien qui porte son propre `style` perdrait
+ * l'épaisseur par défaut.
+ */
+export function toRestingCanvasEdge(edge: Edge, isBrokenTarget: boolean): Edge {
+  if (isBrokenTarget) {
+    return {
+      ...edge,
+      style: {
+        ...edge.style,
+        stroke: theme.state.error.border,
+        strokeDasharray: '8,4',
+        opacity: 0.5,
+      },
+      animated: false,
+    }
+  }
+  return {
+    ...edge,
+    style: {
+      ...edge.style,
+      stroke: canvasEdgeStroke(edge, null),
+      strokeWidth: EDGE_STROKE_WIDTH,
+    },
+  }
+}
+
+/**
+ * Passe à l'accent les liens sortants du nœud sélectionné. Les autres liens gardent leur
+ * référence, pour que React Flow ne re-rende que ceux qui changent à chaque sélection.
+ */
+export function highlightSelectedOutgoingEdges(
+  edges: Edge[],
+  selectedNodeId: string | null,
+  brokenTargets: ReadonlySet<string>
+): Edge[] {
+  if (selectedNodeId === null) return edges
+  return edges.map((edge) => {
+    if (edge.source !== selectedNodeId || brokenTargets.has(edge.target)) return edge
+    const stroke = canvasEdgeStroke(edge, selectedNodeId)
+    if (edge.style?.stroke === stroke) return edge
+    return { ...edge, style: { ...edge.style, stroke } }
+  })
 }
 
 /**

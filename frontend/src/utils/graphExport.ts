@@ -2,6 +2,8 @@
  * Utilitaires pour exporter le graphe en PNG ou SVG.
  */
 
+import { redesignSurface } from '../theme/redesignTokens'
+
 /**
  * Exporte le graphe visible en PNG.
  * Utilise html-to-image pour capturer le canvas ReactFlow.
@@ -25,7 +27,7 @@ export async function exportGraphToPNG(
     const options = {
       quality,
       pixelRatio: 2, // Pour une meilleure qualité
-      backgroundColor: getComputedStyle(reactFlowElement).backgroundColor || '#121214',
+      backgroundColor: getComputedStyle(reactFlowElement).backgroundColor || redesignSurface.canvas,
       filter: (node: HTMLElement) => {
         // Exclure les contrôles et la minimap
         return !node.classList.contains('react-flow__controls') &&
@@ -66,7 +68,7 @@ export async function exportGraphToSVG(
     
     // Options pour l'export SVG
     const options = {
-      backgroundColor: getComputedStyle(reactFlowElement).backgroundColor || '#121214',
+      backgroundColor: getComputedStyle(reactFlowElement).backgroundColor || redesignSurface.canvas,
       filter: (node: HTMLElement) => {
         // Exclure les contrôles et la minimap
         return !node.classList.contains('react-flow__controls') &&

@@ -44,10 +44,11 @@ describe('CollectionManager', () => {
     })
     fireEvent.click(screen.getByTestId('collection-form-submit'))
     await waitFor(() => {
+      // Pas d'icône imposée : sans saisie, la collection n'en porte aucune.
       expect(onCreate).toHaveBeenCalledWith({
         name: 'Nouveau',
         description: null,
-        icon: '📁',
+        icon: null,
       })
     })
   })
@@ -64,7 +65,23 @@ describe('CollectionManager', () => {
       />,
     )
 
-    expect(screen.getByTestId('collection-edit-c1')).toBeInTheDocument()
+    expect(screen.getByTestId('collection-edit-c1')).toHaveTextContent('Modifier')
     expect(screen.getByTestId('collection-delete-c1')).toBeInTheDocument()
+  })
+
+  it('n’ajoute pas d’icône par défaut à une collection qui n’en a pas', () => {
+    render(
+      <CollectionManager
+        collections={[{ ...SAMPLE, icon: null }]}
+        activeCollectionId={null}
+        onSelect={vi.fn()}
+        onCreate={vi.fn()}
+        onUpdate={vi.fn()}
+        onDelete={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByTestId('collection-select-c1')).toHaveTextContent('Chapitre 1 (1)')
+    expect(screen.getByTestId('collection-select-c1').textContent).not.toContain('📁')
   })
 })

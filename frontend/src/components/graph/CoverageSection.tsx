@@ -6,12 +6,13 @@
  * La section est masquée quand `coverage` est absent ou que `total_nodes == 0`.
  */
 import type { FlowCoverageStats } from '../../types/graph'
+import { theme } from '../../theme'
 
 /** Seuils et couleurs du badge de couverture : ≥90% vert, 70–89% orange, <70% rouge. */
 const COVERAGE_COLOR_THRESHOLDS = [
-  { min: 90, color: 'green', hex: '#2e7d32' },
-  { min: 70, color: 'orange', hex: '#e65100' },
-  { min: 0, color: 'red', hex: '#b71c1c' },
+  { min: 90, color: 'green', tone: theme.state.success },
+  { min: 70, color: 'orange', tone: theme.state.warning },
+  { min: 0, color: 'red', tone: theme.state.error },
 ] as const
 
 type CoverageThreshold = (typeof COVERAGE_COLOR_THRESHOLDS)[number]
@@ -30,7 +31,7 @@ interface CoverageSectionProps {
 export function CoverageSection({ coverage }: CoverageSectionProps) {
   if (coverage.total_nodes === 0) return null
 
-  const { color, hex } = getCoverageColor(coverage.coverage_percentage)
+  const { color, tone } = getCoverageColor(coverage.coverage_percentage)
 
   return (
     <section data-testid="coverage-section" aria-label="Couverture du dialogue">
@@ -42,8 +43,8 @@ export function CoverageSection({ coverage }: CoverageSectionProps) {
           data-testid="coverage-badge"
           data-color={color}
           style={{
-            backgroundColor: hex,
-            color: '#fff',
+            backgroundColor: tone.background,
+            color: tone.color,
             borderRadius: 4,
             padding: '2px 8px',
             fontWeight: 700,

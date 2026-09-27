@@ -167,7 +167,7 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     await expect(firstChoice).toBeVisible({ timeout: E2E_MS.control })
     await firstChoice.click()
 
-    const submitSingle = page.getByRole('button', { name: /^✨ Générer$|✨ Générer :/ })
+    const submitSingle = page.getByRole('button', { name: /^Générer$|^Générer :/ })
     const submitBatch = page.getByRole('button', { name: /tous les choix/i })
     const submit = (await submitSingle.count()) > 0 ? submitSingle.first() : submitBatch.first()
     await expect(submit).toBeVisible({ timeout: E2E_MS.graphField })

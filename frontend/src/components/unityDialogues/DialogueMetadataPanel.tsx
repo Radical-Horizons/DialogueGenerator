@@ -1,13 +1,22 @@
 /** Panneau de consultation des métadonnées agrégées d'un dialogue. */
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 
 import * as dialogueMetadataAPI from '../../api/dialogueMetadata'
 import { TOUCH_TARGET_MIN_PX } from '../../constants'
 import { useAuthStore } from '../../store/authStore'
 import { theme } from '../../theme'
+import {
+  redesignFont,
+  redesignHairline,
+  redesignMonoLabelStyle,
+  redesignRadius,
+  redesignSpacing,
+  redesignText,
+} from '../../theme/redesignTokens'
 import type { DialogueMetadataResponse } from '../../types/api'
 import { getErrorMessage } from '../../types/errors'
 import { formatCostEur } from '../../utils/dialogueMetadataFormat'
+import { formatNumber } from '../../utils/formatCurrency'
 import { DialogueCostBreakdown } from '../usage/DialogueCostBreakdown'
 import { DialoguePermissionsPanel } from './DialoguePermissionsPanel'
 
@@ -15,6 +24,67 @@ export interface DialogueMetadataPanelProps {
   documentId: string
   open: boolean
   onClose: () => void
+}
+
+/**
+ * Étiquette mono capitales. Sur la surface élevée de la modale (#1f1f26), `label`
+ * (#84848f) passe sous 4,5:1 : on prend `muted`.
+ */
+const monoLabelStyle: CSSProperties = {
+  ...redesignMonoLabelStyle,
+  fontSize: '10px',
+  letterSpacing: '0.12em',
+  color: redesignText.muted,
+}
+
+const secondaryButtonStyle: CSSProperties = {
+  minHeight: TOUCH_TARGET_MIN_PX,
+  padding: `${redesignSpacing.sm}px ${redesignSpacing.md}px`,
+  borderRadius: redesignRadius.control,
+  border: `1px solid ${theme.button.secondary.border}`,
+  backgroundColor: theme.button.secondary.background,
+  color: theme.button.secondary.color,
+  fontSize: '13px',
+  cursor: 'pointer',
+}
+
+function MetadataRow({
+  label,
+  mono = false,
+  testId,
+  children,
+}: {
+  label: string
+  mono?: boolean
+  testId?: string
+  children: ReactNode
+}) {
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'minmax(9rem, 1fr) minmax(0, 2fr)',
+        alignItems: 'baseline',
+        gap: redesignSpacing.md,
+        padding: `${redesignSpacing.sm}px 0`,
+        borderBottom: `1px solid ${redesignHairline.standard}`,
+      }}
+    >
+      <dt style={monoLabelStyle}>{label}</dt>
+      <dd
+        data-testid={testId}
+        style={{
+          margin: 0,
+          fontSize: '13px',
+          color: redesignText.body,
+          overflowWrap: 'anywhere',
+          ...(mono ? { fontFamily: redesignFont.mono, fontVariantNumeric: 'tabular-nums' } : {}),
+        }}
+      >
+        {children}
+      </dd>
+    </div>
+  )
 }
 
 function formatDate(isoTimestamp: string): string {
@@ -72,16 +142,6 @@ export function DialogueMetadataPanel({
 
   if (!open) return null
 
-  const actionStyle = {
-    minHeight: TOUCH_TARGET_MIN_PX,
-    padding: '0.55rem 0.9rem',
-    borderRadius: 6,
-    border: `1px solid ${theme.border.primary}`,
-    backgroundColor: theme.button.secondary.background,
-    color: theme.button.secondary.color,
-    cursor: 'pointer',
-  } as const
-
   return (
     <>
       <div
@@ -108,69 +168,89 @@ export function DialogueMetadataPanel({
             width: 'min(720px, 100%)',
             maxHeight: 'min(820px, calc(100vh - 2rem))',
             overflowY: 'auto',
-            padding: '1.25rem',
-            borderRadius: 8,
-            border: `1px solid ${theme.border.primary}`,
-            backgroundColor: theme.background.secondary,
-            color: theme.text.primary,
-            boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
+            padding: redesignSpacing.lg,
+            borderRadius: redesignRadius.frame,
+            border: `1px solid ${redesignHairline.strong}`,
+            backgroundColor: theme.background.elevated,
+            color: redesignText.body,
+            boxShadow: theme.shadow.card,
           }}
         >
-          <h2 id="dialogue-metadata-title" style={{ marginTop: 0 }}>
+          <h2
+            id="dialogue-metadata-title"
+            style={{
+              margin: `0 0 ${redesignSpacing.md}px`,
+              fontSize: '15px',
+              fontWeight: 600,
+              color: redesignText.strong,
+            }}
+          >
             Métadonnées dialogue
           </h2>
-          {isLoading && <p role="status">Chargement…</p>}
-          {error && <p role="alert" style={{ color: theme.state.error.color }}>{error}</p>}
+          {isLoading && (
+            <p role="status" style={{ margin: 0, fontSize: '13px', color: redesignText.secondary }}>
+              Chargement…
+            </p>
+          )}
+          {error && (
+            <p role="alert" style={{ margin: 0, fontSize: '13px', color: theme.state.error.color }}>
+              {error}
+            </p>
+          )}
           {metadata && (
             <>
-              <dl
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'minmax(9rem, 1fr) minmax(0, 2fr)',
-                  gap: '0.65rem 1rem',
-                  margin: 0,
-                }}
-              >
-                <dt>Nom</dt><dd style={{ margin: 0 }}>{metadata.name}</dd>
-                <dt>Auteur</dt><dd style={{ margin: 0 }}>{metadata.owner_username ?? 'Inconnu'}</dd>
-                <dt>Créé le</dt><dd style={{ margin: 0 }}>{formatDate(metadata.created_at)}</dd>
-                <dt>Modifié le</dt><dd style={{ margin: 0 }}>{formatDate(metadata.updated_at)}</dd>
-                <dt>Dernier éditeur</dt>
-                <dd style={{ margin: 0 }}>{metadata.last_modified_by_username ?? 'Inconnu'}</dd>
-                <dt>Nœuds</dt><dd style={{ margin: 0 }}>{metadata.node_count}</dd>
-                <dt>Coût total</dt>
-                <dd data-testid="dialogue-metadata-total-cost" style={{ margin: 0 }}>
+              <dl style={{ margin: 0, borderTop: `1px solid ${redesignHairline.standard}` }}>
+                <MetadataRow label="Nom">{metadata.name}</MetadataRow>
+                <MetadataRow label="Auteur">{metadata.owner_username ?? 'Inconnu'}</MetadataRow>
+                <MetadataRow label="Créé le" mono>{formatDate(metadata.created_at)}</MetadataRow>
+                <MetadataRow label="Modifié le" mono>{formatDate(metadata.updated_at)}</MetadataRow>
+                <MetadataRow label="Dernier éditeur">
+                  {metadata.last_modified_by_username ?? 'Inconnu'}
+                </MetadataRow>
+                <MetadataRow label="Nœuds" mono>{formatNumber(metadata.node_count)}</MetadataRow>
+                <MetadataRow label="Coût total" mono testId="dialogue-metadata-total-cost">
                   {formatCostEur(metadata.total_cost_eur)}
-                </dd>
-                <dt>Coût par nœud</dt>
-                <dd style={{ margin: 0 }}>{formatCostEur(metadata.cost_per_node_eur)}</dd>
+                </MetadataRow>
+                <MetadataRow label="Coût par nœud" mono>
+                  {formatCostEur(metadata.cost_per_node_eur)}
+                </MetadataRow>
               </dl>
 
-              <section style={{ marginTop: '1.25rem' }}>
-                <h3 style={{ fontSize: '1rem' }}>Coûts LLM</h3>
+              <section style={{ marginTop: redesignSpacing.lg }}>
+                <h3 style={{ ...monoLabelStyle, margin: `0 0 ${redesignSpacing.sm}px`, fontWeight: 400 }}>
+                  Coûts LLM
+                </h3>
                 <button
                   type="button"
-                  style={actionStyle}
+                  style={secondaryButtonStyle}
                   onClick={() => setShowCosts((current) => !current)}
                 >
                   {showCosts ? 'Masquer le détail des coûts' : 'Voir le détail des coûts'}
                 </button>
                 {showCosts && (
-                  <div style={{ marginTop: '0.75rem' }}>
+                  <div style={{ marginTop: redesignSpacing.md }}>
                     <DialogueCostBreakdown dialogueId={metadata.document_id} />
                   </div>
                 )}
               </section>
 
               {userRole !== 'guest' && (
-                <section style={{ marginTop: '1.25rem' }}>
-                  <h3 style={{ fontSize: '1rem' }}>Permissions</h3>
-                  <p style={{ color: theme.text.secondary }}>
+                <section style={{ marginTop: redesignSpacing.lg }}>
+                  <h3 style={{ ...monoLabelStyle, margin: `0 0 ${redesignSpacing.sm}px`, fontWeight: 400 }}>
+                    Permissions
+                  </h3>
+                  <p
+                    style={{
+                      margin: `0 0 ${redesignSpacing.sm}px`,
+                      fontSize: '13px',
+                      color: redesignText.secondary,
+                    }}
+                  >
                     Consultez le propriétaire et les co-éditeurs de ce dialogue.
                   </p>
                   <button
                     type="button"
-                    style={actionStyle}
+                    style={secondaryButtonStyle}
                     onClick={() => setShowPermissions(true)}
                   >
                     Voir les permissions
@@ -179,8 +259,8 @@ export function DialogueMetadataPanel({
               )}
             </>
           )}
-          <div style={{ marginTop: '1.25rem', textAlign: 'right' }}>
-            <button type="button" style={actionStyle} onClick={onClose}>
+          <div style={{ marginTop: redesignSpacing.lg, textAlign: 'right' }}>
+            <button type="button" style={secondaryButtonStyle} onClick={onClose}>
               Fermer
             </button>
           </div>

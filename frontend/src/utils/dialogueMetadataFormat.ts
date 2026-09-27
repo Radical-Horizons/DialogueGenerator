@@ -1,7 +1,11 @@
-/** Formate un coût LLM en euros avec une précision adaptée aux petits montants. */
-export function formatCostEur(costEur: number): string {
-  if (costEur < 0.001) return `${(costEur * 100).toFixed(4)}¢`
-  return `${costEur.toFixed(2)}€`
+import { formatCost } from './formatCurrency'
+
+/**
+ * Coût LLM d'un dialogue, en euros (champs `*_cost_eur`) : « 8,20 € », « 0,0042 € ».
+ * Même devise pour le total et le coût par nœud — plus de centimes « ¢ ».
+ */
+export function formatCostEur(costEur: number | null | undefined): string {
+  return formatCost(costEur, 'EUR')
 }
 
 /** Formate un horodatage ISO en durée relative compacte française. */

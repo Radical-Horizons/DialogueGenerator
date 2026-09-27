@@ -163,7 +163,6 @@ const unityDialogueEditorPaddingHorizontal = {
 export const contextGddTabChrome = {
   balanced: {
     tabPadding: '0.14rem 0.1rem',
-    gearPadding: '0.18rem 0.14rem',
     barPadding: '0.14rem 0.42rem 0',
     barGap: '0.16rem',
     borderRadiusPx: 6,
@@ -173,7 +172,6 @@ export const contextGddTabChrome = {
   },
   tight: {
     tabPadding: '0.12rem 0.08rem',
-    gearPadding: '0.12rem 0.14rem',
     barPadding: '2px 4px 0',
     barGap: '0.06rem',
     borderRadiusPx: 4,

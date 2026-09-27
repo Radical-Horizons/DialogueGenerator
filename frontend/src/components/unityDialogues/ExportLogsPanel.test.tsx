@@ -130,6 +130,15 @@ describe('ExportLogsPanel', () => {
     expect(await screen.findByText(/Erreur/)).toBeInTheDocument()
   })
 
+  it('affiche le coût LLM du détail en euros au format français', async () => {
+    mockGetExportLogs.mockResolvedValue(sampleResponse)
+    renderPanel()
+    fireEvent.click(await screen.findByText('doc_ok'))
+    const detail = await screen.findByTestId('export-log-detail')
+    expect(detail).toHaveTextContent('0,0100 €')
+    expect(detail).not.toHaveTextContent('€0')
+  })
+
   it('affiche résumé échec validation au clic sur entrée failure', async () => {
     mockGetExportLogs.mockResolvedValue(sampleResponse)
     renderPanel()

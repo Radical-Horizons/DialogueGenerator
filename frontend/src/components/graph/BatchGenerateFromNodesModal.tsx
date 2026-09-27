@@ -89,7 +89,7 @@ export function BatchGenerateFromNodesModal({
                       ? Math.min(100, (100 * progress.current) / progress.total)
                       : 0
                   }%`,
-                  backgroundColor: theme.state.info?.color || '#4dabf7',
+                  backgroundColor: theme.state.info.color,
                   transition: 'width 0.2s ease',
                 }}
               />
@@ -117,7 +117,7 @@ export function BatchGenerateFromNodesModal({
           <div data-testid="batch-generate-report">
             <p style={{ margin: '0 0 0.5rem', fontWeight: 600 }}>{summary}</p>
             {report.cancelled && (
-              <p style={{ margin: '0 0 0.5rem', color: '#ffd43b' }}>Lot annulé (partiel conservé).</p>
+              <p style={{ margin: '0 0 0.5rem', color: theme.state.warning.color }}>Lot annulé (partiel conservé).</p>
             )}
             <ul
               style={{

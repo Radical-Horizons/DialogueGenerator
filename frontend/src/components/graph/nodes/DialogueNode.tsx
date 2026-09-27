@@ -32,10 +32,15 @@ import {
   GRAPH_TOPOLOGY_WARNING_STYLES,
 } from '../../../utils/graphStructuralValidation'
 import { reconstructNodePromptFromGraph } from '../../../utils/graphPromptPreview'
-import { NEXT_EDGE_COLOR } from '../../../utils/graphEdgeBuilders'
+import {
+  CHOICE_EDGE_COLOR,
+  EDGE_NEUTRAL_COLOR,
+  NEXT_EDGE_COLOR,
+} from '../../../utils/graphEdgeBuilders'
 import { Badge } from '../../shared'
 import {
   redesignAccent,
+  redesignControl,
   redesignFont,
   redesignHairline,
   redesignNodeBorder,
@@ -96,6 +101,28 @@ const BOTTOM_RESERVED_WITH_CHOICES = 52 // hasChoices : handles + lien
 const BOTTOM_RESERVED_SINGLE = 28 // pas de choix : handle + lien
 const CHOICE_TOOLTIP_BOTTOM_PX = 56 // tooltip au survol d’un choix au-dessus du lien
 const CONTENT_PADDING_TOP_WHEN_PENDING = 32 // pour ne pas passer sous Accepter/Régénérer/Rejeter
+
+/**
+ * Anneau d'un handle de choix porteur d'effets. Violet hors palette d'état : il ne signale ni
+ * une erreur ni le lore, seulement la présence d'effets sur ce choix.
+ */
+const CHOICE_EFFECTS_RING_COLOR = '#9B59B6'
+
+/**
+ * Pastille du locuteur : palette catégorielle, volontairement hors des tokens d'état — un
+ * locuteur en rouge ne doit pas se lire comme une erreur. Le premier cran reste neutre car
+ * le bleu d'accent est réservé à la sélection du nœud.
+ */
+const SPEAKER_DOT_PALETTE = [
+  redesignTextTokens.secondary,
+  '#9013FE',
+  '#F5A623',
+  '#E74C3C',
+  '#27AE60',
+  '#16A085',
+  '#8E44AD',
+  '#D35400',
+] as const
 
 export const DialogueNode = memo(function DialogueNode({
   data,
@@ -433,27 +460,7 @@ export const DialogueNode = memo(function DialogueNode({
             zIndex: 10,
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
           }}
-          title={errors.map((e, idx) => {
-            const icon =
-              e.type === 'orphan_node'
-                ? '🔗'
-                : e.type === 'broken_reference'
-                  ? '🔴'
-                  : e.type === 'lore_contradiction_explicit' ||
-                    e.type === 'lore_contradiction_potential' ||
-                    e.type === 'lore_potential_ambiguity'
-                    ? '📜'
-                    : e.type === 'empty_node' || e.type === 'missing_dialogue_text'
-                      ? '⚪'
-                      : e.type === 'missing_display_name'
-                        ? '📝'
-                        : e.type === 'missing_stable_id'
-                          ? '🆔'
-                          : e.type === 'dialogue_flag_undeclared'
-                            ? '🏁'
-                            : '⚠️'
-            return `${icon} ${e.message}${idx < errors.length - 1 ? '\n' : ''}`
-          }).join('')}
+          title={errors.map((e) => e.message).join('\n')}
         >
           {errors.length}
         </div>
@@ -505,17 +512,7 @@ export const DialogueNode = memo(function DialogueNode({
             zIndex: 10,
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
           }}
-          title={warnings.map((w, idx) => {
-            const icon =
-              w.type === 'orphan_node'
-                ? '🔗'
-                : w.type === 'unreachable_node'
-                  ? '📍'
-                  : w.type === 'cycle_detected'
-                    ? '🔄'
-                    : '⚠️'
-            return `${icon} ${w.message}${idx < warnings.length - 1 ? '\n' : ''}`
-          }).join('')}
+          title={warnings.map((w) => w.message).join('\n')}
         >
           {warnings.length}
         </div>
@@ -525,7 +522,7 @@ export const DialogueNode = memo(function DialogueNode({
         type="target"
         position={Position.Top}
         style={{
-          background: data.incomingEdgeColor ?? theme.text.secondary,
+          background: data.incomingEdgeColor ?? EDGE_NEUTRAL_COLOR,
           width: 12,
           height: 12,
           border: '2px solid white',
@@ -631,7 +628,7 @@ export const DialogueNode = memo(function DialogueNode({
         {hasNodeCond && <span title={nodeCondSummary || 'Conditions de visibilité'}>COND.</span>}
       </div>
 
-      {/* Tooltip au survol d'un rond orange (réponse associée) — au-dessus du lien "Voir le prompt" */}
+      {/* Tooltip au survol d'un handle de choix (réponse associée) — au-dessus du lien "Voir le prompt" */}
       {hasChoices && hoveredChoiceIndex !== null && choices[hoveredChoiceIndex] && (
         <div
           style={{
@@ -640,7 +637,7 @@ export const DialogueNode = memo(function DialogueNode({
             bottom: CHOICE_TOOLTIP_BOTTOM_PX,
             transform: 'translateX(-50%)',
             backgroundColor: theme.background.secondary,
-            border: '1px solid #F5A623',
+            border: `1px solid ${redesignControl.border}`,
             color: theme.text.primary,
             padding: '6px 8px',
             borderRadius: 8,
@@ -702,7 +699,7 @@ export const DialogueNode = memo(function DialogueNode({
         </div>
       )}
 
-      {/* Ronds oranges (handles) uniquement, dans la carte du nœud */}
+      {/* Handles de choix, même teinte que les liens de choix (neutre, maquette 2e) */}
       {hasChoices &&
         choices.map((choice, index) => {
           const leftPercent = getChoiceHandleLeftPercent(index)
@@ -775,7 +772,7 @@ export const DialogueNode = memo(function DialogueNode({
               onMouseEnter={() => setHoveredChoiceIndex(index)}
               onMouseLeave={() => setHoveredChoiceIndex((prev) => (prev === index ? null : prev))}
               style={{
-                background: '#F5A623',
+                background: CHOICE_EDGE_COLOR,
                 width: 10,
                 height: 10,
                 border: '2px solid white',
@@ -786,7 +783,7 @@ export const DialogueNode = memo(function DialogueNode({
                 opacity: dimChoice || dimByEffort ? 0.48 : 1,
                 filter: dimChoice || dimByEffort ? 'grayscale(45%)' : undefined,
                 boxShadow: hasChoiceEffects
-                  ? '0 0 0 2px #9B59B6'
+                  ? `0 0 0 2px ${CHOICE_EFFECTS_RING_COLOR}`
                   : undefined,
               }}
               aria-label={choiceAriaParts.join(' — ')}
@@ -820,10 +817,10 @@ export const DialogueNode = memo(function DialogueNode({
               top: 34,
               right: 8,
               padding: '0.4rem 0.6rem',
-              border: 'none',
+              border: `1px solid ${theme.state.accepted.border}`,
               borderRadius: '6px',
-              backgroundColor: '#27AE60',
-              color: 'white',
+              backgroundColor: theme.state.success.background,
+              color: theme.state.success.color,
               cursor: 'pointer',
               fontSize: '0.9rem',
               fontWeight: 600,
@@ -855,10 +852,10 @@ export const DialogueNode = memo(function DialogueNode({
               top: 34,
               left: 8,
               padding: '0.4rem 0.6rem',
-              border: 'none',
+              border: `1px solid ${theme.state.error.border}`,
               borderRadius: '6px',
-              backgroundColor: '#E74C3C',
-              color: 'white',
+              backgroundColor: theme.state.error.background,
+              color: theme.state.error.color,
               cursor: 'pointer',
               fontSize: '0.9rem',
               fontWeight: 600,
@@ -891,10 +888,10 @@ export const DialogueNode = memo(function DialogueNode({
               left: '50%',
               transform: 'translateX(-50%)',
               padding: '0.4rem 0.6rem',
-              border: 'none',
+              border: `1px solid ${theme.state.pending.border}`,
               borderRadius: '6px',
-              backgroundColor: '#F5A623',
-              color: theme.text.inverse,
+              backgroundColor: theme.state.warning.background,
+              color: theme.state.warning.color,
               cursor: 'pointer',
               fontSize: '0.8rem',
               fontWeight: 600,
@@ -971,23 +968,11 @@ export const DialogueNode = memo(function DialogueNode({
  * Utilise l'ID du nœud pour garantir une couleur stable même si le speaker change.
  */
 function getSpeakerColor(identifier: string): string {
-  const colors = [
-    // Neutre plutôt que bleu : le bleu d'accent est réservé à la sélection du nœud.
-    redesignTextTokens.secondary,
-    '#9013FE', // Violet
-    '#F5A623', // Orange
-    '#E74C3C', // Rouge
-    '#27AE60', // Vert
-    '#16A085', // Turquoise
-    '#8E44AD', // Violet foncé
-    '#D35400', // Orange foncé
-  ]
-  
   // Hash simple de l'identifiant pour sélectionner une couleur stable
   let hash = 0
   for (let i = 0; i < identifier.length; i++) {
     hash = identifier.charCodeAt(i) + ((hash << 5) - hash)
   }
-  
-  return colors[Math.abs(hash) % colors.length]
+
+  return SPEAKER_DOT_PALETTE[Math.abs(hash) % SPEAKER_DOT_PALETTE.length]
 }

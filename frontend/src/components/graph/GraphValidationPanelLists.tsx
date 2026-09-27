@@ -7,11 +7,8 @@ import {
   isDismissibleLoreWarning,
   resolveLoreWarningKey,
 } from '../../utils/loreWarningUi'
-import {
-  getIconForType,
-  getLabelForType,
-  isDocumentIdRepairable,
-} from './validationPanelLabels'
+import { getLabelForType, isDocumentIdRepairable } from './validationPanelLabels'
+import { ValidationSeverityDot } from './ValidationSeverityDot'
 
 const CONSOLIDATED_BULK_REPAIR_TYPES = new Set(['missing_display_name'])
 
@@ -84,7 +81,7 @@ export function ValidationErrorsByType({
                 flexWrap: 'wrap',
               }}
             >
-              <span aria-hidden>{getIconForType(type)}</span>
+              <ValidationSeverityDot tone="error" />
               <span style={{ flex: '1 1 auto', minWidth: 0 }}>
                 {getLabelForType(type)} ({typeErrors.length})
               </span>
@@ -121,7 +118,7 @@ export function ValidationErrorsByType({
               flexWrap: 'wrap',
             }}
           >
-            <span>{getIconForType(type)}</span>
+            <ValidationSeverityDot tone="error" />
             <span>
               {getLabelForType(type)} ({typeErrors.length})
             </span>
@@ -283,7 +280,7 @@ export function ValidationWarningsByType({
               gap: '0.4rem',
             }}
           >
-            <span>{getIconForType(type)}</span>
+            <ValidationSeverityDot tone="warning" />
             <span>
               {getLabelForType(type)} ({typeWarnings.length})
             </span>

@@ -36,7 +36,7 @@ describe('UnityDialogueItem métadonnées compactes', () => {
     expect(screen.getByTestId('unity-dialogue-structure')).toHaveTextContent(
       '45 RÉPLIQUES'
     )
-    expect(screen.getByTestId('unity-dialogue-item-cost')).toHaveTextContent('8.20€')
+    expect(screen.getByTestId('unity-dialogue-item-cost')).toHaveTextContent('8,20 €')
     expect(screen.getByTitle('Dernière modification')).toHaveTextContent('il y a 2h')
   })
 
@@ -50,7 +50,7 @@ describe('UnityDialogueItem métadonnées compactes', () => {
     )
     fireEvent.mouseEnter(screen.getByTestId('unity-dialogue-item'))
     expect(screen.getByRole('tooltip')).toHaveTextContent(
-      '45 nœuds, 8.20€, modifié il y a 2h par Marc'
+      '45 nœuds, 8,20 €, modifié il y a 2h par Marc'
     )
 
     act(() => {
@@ -59,7 +59,7 @@ describe('UnityDialogueItem métadonnées compactes', () => {
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
   })
 
-  it('n’affiche pas le coût compact à 0€', () => {
+  it('n’affiche pas le coût compact à 0 €', () => {
     render(
       <UnityDialogueItem
         dialogue={{ ...dialogue, total_cost_eur: 0 }}
@@ -68,6 +68,17 @@ describe('UnityDialogueItem métadonnées compactes', () => {
       />
     )
     expect(screen.queryByTestId('unity-dialogue-item-cost')).not.toBeInTheDocument()
+  })
+
+  it('écrit un coût sous le centime en euros plutôt que « 0,00 € »', () => {
+    render(
+      <UnityDialogueItem
+        dialogue={{ ...dialogue, total_cost_eur: 0.0031 }}
+        onClick={() => {}}
+        isSelected={false}
+      />
+    )
+    expect(screen.getByTestId('unity-dialogue-item-cost')).toHaveTextContent('0,0031 €')
   })
 
   it('masque le tooltip au leave et au clic', () => {

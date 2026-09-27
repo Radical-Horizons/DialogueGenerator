@@ -1,7 +1,7 @@
 /**
  * Panneau "Logs de génération" pour un dialogue (Story 1.15).
  * Liste chronologique (plus récent en premier), détail au clic (prompt, réponse, coût),
- * filtres période et provider, résumé "X générations, Y€ total".
+ * filtres période et provider, résumé « X générations, Y € total ».
  */
 import { useCallback, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -11,6 +11,7 @@ import {
   type GetGenerationLogsParams,
 } from '../../api/llmUsage'
 import { getErrorMessage } from '../../types/errors'
+import { formatCostDetail, formatDurationMs, formatNumber } from '../../utils/formatCurrency'
 import './GenerationLogsPanel.css'
 import { StyledSelect } from '../shared/StyledSelect'
 
@@ -23,16 +24,6 @@ import {
 } from '../../utils/logPanelUtils'
 
 type ProviderFilter = 'all' | 'openai' | 'mistral'
-
-function formatCostEur(eur: number): string {
-  if (eur < 0.0001) return `€${eur.toFixed(6)}`
-  return `€${eur.toFixed(4)}`
-}
-
-function formatDuration(ms: number): string {
-  if (ms < 1000) return `${ms} ms`
-  return `${(ms / 1000).toFixed(2)} s`
-}
 
 function filterByProvider(entries: GenerationLogEntry[], provider: ProviderFilter): GenerationLogEntry[] {
   if (provider === 'all') return entries
@@ -156,7 +147,7 @@ export function GenerationLogsPanel({ dialogueId }: GenerationLogsPanelProps) {
       <div className="glp__header">
         <h3>Logs de génération</h3>
         <div className="glp__summary">
-          {totalCount} génération{totalCount !== 1 ? 's' : ''}, {formatCostEur(totalCostEur)} total
+          {formatNumber(totalCount)} génération{totalCount !== 1 ? 's' : ''}, {formatCostDetail(totalCostEur, 'EUR')} total
         </div>
       </div>
 
@@ -247,8 +238,8 @@ export function GenerationLogsPanel({ dialogueId }: GenerationLogsPanelProps) {
                     <td className="glp__date">{formatLogTimestamp(entry.timestamp)}</td>
                     <td className="glp__node-id">{entry.node_id ?? '—'}</td>
                     <td className="glp__template">{entry.template_name || entry.template_id || '—'}</td>
-                    <td className="glp__num">{formatCostEur(entry.cost_eur)}</td>
-                    <td className="glp__num">{entry.total_tokens.toLocaleString()}</td>
+                    <td className="glp__num">{formatCostDetail(entry.cost_eur, 'EUR')}</td>
+                    <td className="glp__num">{formatNumber(entry.total_tokens)}</td>
                     <td className="glp__model">{entry.model_name}</td>
                     <td>
                       <span className={`glp__status ${entry.success ? 'glp__status--ok' : 'glp__status--fail'}`}>
@@ -280,11 +271,11 @@ export function GenerationLogsPanel({ dialogueId }: GenerationLogsPanelProps) {
               <div className="glp__detail-meta">
                 <span>
                   <span className="glp__label">Durée</span>
-                  <span className="glp__mono">{formatDuration(selectedEntry.duration_ms)}</span>
+                  <span className="glp__mono">{formatDurationMs(selectedEntry.duration_ms, 2)}</span>
                 </span>
                 <span>
                   <span className="glp__label">Coût</span>
-                  <span className="glp__mono">{formatCostEur(selectedEntry.cost_eur)}</span>
+                  <span className="glp__mono">{formatCostDetail(selectedEntry.cost_eur, 'EUR')}</span>
                 </span>
                 {(selectedEntry.template_name || selectedEntry.template_id) && (
                   <span>

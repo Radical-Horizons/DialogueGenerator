@@ -3,6 +3,7 @@
  */
 import type { CSSProperties } from 'react'
 import { theme } from '../../theme'
+import { redesignRadius, redesignText } from '../../theme/redesignTokens'
 
 export function formatArchiveLabel(iso: string): string {
   try {
@@ -64,25 +65,26 @@ export const labelStyle: CSSProperties = {
 
 export const inputStyle: CSSProperties = {
   padding: '0.45rem 0.6rem',
-  borderRadius: '4px',
-  border: `1px solid ${theme.border.primary}`,
-  backgroundColor: theme.background.secondary,
+  borderRadius: `${redesignRadius.control}px`,
+  border: `1px solid ${theme.input.border}`,
+  backgroundColor: theme.input.background,
   color: theme.text.primary,
 }
 
+/**
+ * `primary` : réservé aux modales de sync (ex. « Restaurer »). Le panneau vit dans la
+ * modale Options, dont le seul bouton plein est « Appliquer » : ses actions restent
+ * secondaires — contour, fond transparent.
+ */
 export function buttonStyle(disabled: boolean, primary = false): CSSProperties {
   return {
     padding: '0.5rem 1rem',
-    border: 'none',
-    borderRadius: '4px',
-    backgroundColor: disabled
-      ? theme.button.default.background
-      : primary
-        ? theme.button.primary.background
-        : theme.button.default.background,
-    color: primary ? theme.button.primary.color : theme.text.primary,
+    border: primary ? `1px solid ${theme.button.primary.background}` : `1px solid ${theme.button.default.border}`,
+    borderRadius: `${redesignRadius.control}px`,
+    backgroundColor: primary ? theme.button.primary.background : theme.button.default.background,
+    color: primary ? theme.button.primary.color : redesignText.body,
     cursor: disabled ? 'not-allowed' : 'pointer',
     opacity: disabled ? 0.6 : 1,
-    fontWeight: primary ? 'bold' : 'normal',
+    fontWeight: primary ? 600 : 500,
   }
 }

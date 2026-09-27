@@ -121,6 +121,7 @@ export function SearchIndexPanel() {
           borderRadius: '6px',
           backgroundColor: theme.button.primary.background,
           color: theme.button.primary.color,
+          fontWeight: 600,
           cursor:
             isReindexing || stats?.rebuild_status === 'running'
               ? 'not-allowed'

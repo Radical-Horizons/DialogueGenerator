@@ -199,3 +199,15 @@ export const redesignTab = {
     }
   },
 } as const
+
+/**
+ * Liens du graphe (écran 2e) — trait neutre des choix et des suites.
+ *
+ * La maquette donne `rgba(255,255,255,0.2)`, soit **1,83:1** sur le canvas `#101013`.
+ * Un lien porte du sens (il dit où mène une réplique) : WCAG 1.4.11 lui demande 3:1.
+ * Remonté au premier alpha conforme : 0,34 compose `#616163` sur le canvas, **3,07:1**
+ * (0,33 donne 2,98:1). Le chemin sortant du nœud sélectionné reste en `redesignAccent.base`.
+ */
+export const redesignGraphEdge = {
+  neutral: 'rgba(255, 255, 255, 0.34)',
+} as const

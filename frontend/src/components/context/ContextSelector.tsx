@@ -841,7 +841,7 @@ export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }
         placeholder="Chercher une fiche…"
       />
 
-      {/* Barre d'onglets compacte : 5 onglets + ⚙ sur une ligne (repli caption si débordement) */}
+      {/* Barre d'onglets compacte : 5 onglets + « Règles » (repli caption si débordement) */}
       <div
         ref={tabBarRef}
         data-context-gdd-tab-density={tabBarDensity}
@@ -916,26 +916,12 @@ export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }
           onClick={() => setShowRulesEditor((v) => !v)}
           title="Règles de sélection de contexte"
           style={{
+            ...contextGddTabButtonStyle(showRulesEditor, tabChromeTier),
             flexShrink: 0,
-            minHeight: tabChromeTier.tabMinHeightPx,
-            padding: tabChromeTier.gearPadding,
-            border: 'none',
-            borderRadius: tabChromeTier.borderRadiusPx,
-            borderBottom: showRulesEditor
-              ? `2px solid ${theme.button.primary.background}`
-              : '2px solid transparent',
-            backgroundColor: showRulesEditor ? theme.background.tertiary : 'transparent',
-            color: theme.text.primary,
-            cursor: 'pointer',
-            fontSize: remSize('section'),
-            lineHeight: 1.2,
-            boxSizing: 'border-box',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            marginLeft: 'auto',
           }}
         >
-          ⚙
+          <span style={contextGddTabLabelStyle(showRulesEditor)}>Règles</span>
         </button>
       </div>
 

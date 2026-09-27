@@ -4,6 +4,7 @@
 import { useEffect, useCallback, useRef } from 'react'
 import { useFlagsStore } from '../../store/flagsStore'
 import { theme } from '../../theme'
+import { redesignAccent, redesignRadius } from '../../theme/redesignTokens'
 import { remSize } from '../../theme/uiTypography'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { modalTypography } from '../../theme/responsiveChrome'
@@ -11,6 +12,17 @@ import { useToast } from '../shared'
 import type { FlagDefinition } from '../../types/flags'
 import * as flagsAPI from '../../api/flags'
 import { getErrorMessage } from '../../types/errors'
+
+/** Filtre actif = marque d'accent (chip), pas un bouton plein. */
+function filterChipStyle(active: boolean): React.CSSProperties {
+  return {
+    backgroundColor: active ? redesignAccent.selectedBg : 'transparent',
+    color: active ? redesignAccent.light : theme.button.default.color,
+    border: `1px solid ${active ? redesignAccent.ring : theme.button.default.border}`,
+    borderRadius: `${redesignRadius.chip}px`,
+    cursor: 'pointer',
+  }
+}
 
 export interface InGameFlagsModalProps {
   isOpen: boolean
@@ -187,8 +199,8 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
             display: 'flex',
             alignItems: 'center',
             padding: '0.75rem',
-            backgroundColor: isSelected ? theme.button.primary.background : theme.background.secondary,
-            border: `1px solid ${isSelected ? theme.border.focus : theme.border.primary}`,
+            backgroundColor: isSelected ? redesignAccent.selectedBg : theme.background.secondary,
+            border: `1px solid ${isSelected ? redesignAccent.base : theme.border.primary}`,
             borderRadius: '4px',
             cursor: 'pointer',
             transition: 'all 0.2s'
@@ -249,8 +261,8 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
           key={flag.id}
           style={{
             padding: '0.75rem',
-            backgroundColor: isSelected ? theme.button.primary.background : theme.background.secondary,
-            border: `1px solid ${isSelected ? theme.border.focus : theme.border.primary}`,
+            backgroundColor: isSelected ? redesignAccent.selectedBg : theme.background.secondary,
+            border: `1px solid ${isSelected ? redesignAccent.base : theme.border.primary}`,
             borderRadius: '4px'
           }}
         >
@@ -319,8 +331,8 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
           key={flag.id}
           style={{
             padding: '0.75rem',
-            backgroundColor: isSelected ? theme.button.primary.background : theme.background.secondary,
-            border: `1px solid ${isSelected ? theme.border.focus : theme.border.primary}`,
+            backgroundColor: isSelected ? redesignAccent.selectedBg : theme.background.secondary,
+            border: `1px solid ${isSelected ? redesignAccent.base : theme.border.primary}`,
             borderRadius: '4px'
           }}
         >
@@ -504,11 +516,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
                 onClick={toggleFavoritesFilter}
                 style={{
                   padding: '0.5rem 1rem',
-                  backgroundColor: favoritesOnly ? theme.button.primary.background : theme.button.default.background,
-                  color: favoritesOnly ? theme.button.primary.color : theme.button.default.color,
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
-                  cursor: 'pointer'
+                  ...filterChipStyle(favoritesOnly),
                 }}
               >
                 ★ Favoris uniquement
@@ -520,11 +528,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
                   onClick={() => toggleCategoryFilter(cat)}
                   style={{
                     padding: '0.5rem 1rem',
-                    backgroundColor: selectedCategories.has(cat) ? theme.button.primary.background : theme.button.default.background,
-                    color: selectedCategories.has(cat) ? theme.button.primary.color : theme.button.default.color,
-                    border: `1px solid ${theme.border.primary}`,
-                    borderRadius: '4px',
-                    cursor: 'pointer'
+                    ...filterChipStyle(selectedCategories.has(cat)),
                   }}
                 >
                   {cat}
@@ -662,9 +666,9 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
                 backgroundColor: theme.button.primary.background,
                 color: theme.button.primary.color,
                 border: 'none',
-                borderRadius: '4px',
+                borderRadius: `${redesignRadius.control}px`,
                 cursor: 'pointer',
-                fontWeight: 'bold'
+                fontWeight: 600
               }}
             >
               Fermer

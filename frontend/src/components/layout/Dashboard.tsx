@@ -205,7 +205,8 @@ function PanelExpandButton({
   const [hovered, setHovered] = useState(false)
   const [pressed, setPressed] = useState(false)
 
-  const accentColor = theme.button.primary.background
+  // Marque de survol, pas un bouton plein : l'accent `base`, jamais `fill`.
+  const accentColor = redesignAccent.base
   const isActive = hovered || pressed
   const scale = pressed ? 0.94 : hovered ? 1.05 : 1
   const translateX = hovered ? (side === 'left' ? 2 : -2) : 0
@@ -216,10 +217,10 @@ function PanelExpandButton({
   const globalOpacity = isActive ? 1 : 0.38
   /* Fond opaque même au repos pour éviter que les éléments derrière (ex: flèche native du <select>)
    * transparaissent à travers le rail — seuls les textes/bords/ombres varient avec l'opacité globale. */
-  const bg = isActive ? `${accentColor}38` : 'rgba(18, 18, 22, 1)'
-  const borderColor = isActive ? accentColor : 'rgba(255,255,255,0.15)'
+  const bg = isActive ? redesignAccent.ring : theme.background.primary
+  const borderColor = isActive ? accentColor : theme.button.default.border
   const glow = isActive
-    ? `0 0 18px ${accentColor}55, 0 6px 18px rgba(0,0,0,0.5)`
+    ? `0 0 18px ${redesignAccent.ring}, 0 6px 18px rgba(0,0,0,0.5)`
     : '0 2px 8px rgba(0,0,0,0.3)'
 
   const verticalStyle =
@@ -250,7 +251,7 @@ function PanelExpandButton({
         backgroundColor: bg,
         backdropFilter: 'blur(8px)',
         WebkitBackdropFilter: 'blur(8px)',
-        color: isActive ? '#fff' : theme.text.secondary,
+        color: isActive ? redesignText.strong : theme.text.secondary,
         cursor: 'pointer',
         boxShadow: glow,
         opacity: globalOpacity,
@@ -1213,7 +1214,7 @@ export function Dashboard() {
                   left: 0,
                   height: '100%',
                   width: '40%',
-                  backgroundColor: theme.button.primary.background,
+                  backgroundColor: redesignAccent.base,
                   animation: 'loading-slide 1.5s ease-in-out infinite',
                 }}
               />

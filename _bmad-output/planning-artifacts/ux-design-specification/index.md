@@ -43,6 +43,7 @@
     - [Choix](./design-system-foundation.md#choix)
     - [Ce qu'il faut savoir avant de dessiner ou coder un écran](./design-system-foundation.md#ce-quil-faut-savoir-avant-de-dessiner-ou-coder-un-écran)
     - [Intégration du 2026-09-27](./design-system-foundation.md#intégration-du-2026-09-27)
+    - [Reste à faire traité](./design-system-foundation.md#reste-à-faire-traité-2026-09-27-branche-uidesign-system-raf)
     - [Écarts restants](./design-system-foundation.md#écarts-restants)
   - [Design Direction Decision](./design-direction-decision.md)
     - [Design Directions Explored](./design-direction-decision.md#design-directions-explored)

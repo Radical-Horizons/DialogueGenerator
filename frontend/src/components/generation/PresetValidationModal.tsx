@@ -2,17 +2,39 @@
  * PresetValidationModal - Modal d'affichage de la validation d'un preset
  * 
  * Affiche le résultat de la validation GDD d'un preset :
- * - ✅ Valide : toutes les références existent dans le GDD
- * - ⚠️ Invalide : certaines références sont obsolètes ou manquantes
+ * - Valide : toutes les références existent dans le GDD
+ * - Invalide : certaines références sont obsolètes ou manquantes
  * 
  * Permet de charger le preset malgré les warnings (choix utilisateur).
  */
 import React from 'react';
 import type { PresetValidationResult } from '../../types/preset';
 import { theme } from '../../theme';
-import { remSize } from '../../theme/uiTypography';
+import { redesignMonoLabelStyle, redesignRadius, redesignText } from '../../theme/redesignTokens';
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize';
 import { modalTypography } from '../../theme/responsiveChrome';
+
+/** Statut « point + étiquette mono » du design system, à la place d'un emoji. */
+function StatusTag({ color, label }: { color: string; label: string }) {
+  return (
+    <span
+      style={{
+        ...redesignMonoLabelStyle,
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 7,
+        fontSize: '10.5px',
+        color,
+      }}
+    >
+      <span
+        aria-hidden
+        style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: color, flexShrink: 0 }}
+      />
+      {label}
+    </span>
+  );
+}
 
 export interface PresetValidationModalProps {
   /** Contrôle l'affichage de la modal */
@@ -93,8 +115,8 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
               border: `1px solid ${theme.state.success.color}`,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <span style={{ fontSize: remSize('title') }}>✅</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+              <StatusTag color={theme.state.success.color} label="Valide" />
               <strong style={{ color: theme.state.success.color }}>{entityWordCap} valide</strong>
             </div>
             <div style={{ fontSize: `${typo.bodyFontRem}rem`, color: theme.text.secondary }}>
@@ -114,8 +136,8 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
               border: `1px solid ${theme.state.warning.color}`,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <span style={{ fontSize: remSize('title') }}>⚠️</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+              <StatusTag color={theme.state.warning.color} label="Avertissement" />
               <strong style={{ color: theme.state.warning.color }}>{entityWordCap} contient des références obsolètes</strong>
             </div>
             <div style={{ fontSize: `${typo.bodyFontRem}rem`, color: theme.text.secondary, marginBottom: '1rem' }}>
@@ -163,28 +185,31 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
             onClick={onClose}
             style={{
               padding: '0.5rem 1rem',
-              backgroundColor: theme.background.secondary,
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: '4px',
-              color: theme.text.primary,
+              backgroundColor: 'transparent',
+              border: `1px solid ${theme.button.default.border}`,
+              borderRadius: `${redesignRadius.control}px`,
+              color: redesignText.body,
               cursor: 'pointer',
               fontSize: `${typo.bodyFontRem}rem`,
+              fontWeight: 500,
             }}
           >
             Annuler
           </button>
+          {/* Action primaire dans les deux états : l'avertissement est porté par le bandeau. */}
           <button
             type="button"
             data-testid="preset-validation-confirm"
             onClick={onConfirm}
             style={{
               padding: '0.5rem 1rem',
-              backgroundColor: valid ? theme.button.primary.background : theme.state.warning.color,
+              backgroundColor: theme.button.primary.background,
               border: 'none',
-              borderRadius: '4px',
-              color: 'white',
+              borderRadius: `${redesignRadius.control}px`,
+              color: theme.button.primary.color,
               cursor: 'pointer',
               fontSize: `${typo.bodyFontRem}rem`,
+              fontWeight: 600,
             }}
           >
             {valid ? 'Charger' : 'Charger quand même'}

@@ -45,10 +45,17 @@ Ce qui a été aligné sur le système (branche `ui/design-system-integration`) 
 - Graphe : bleus hérités (`#4A90E2`) retirés des liens « suivant », poignées et minicarte ; état vide sans emoji.
 - Icône d'application et favicon redessinés en `accent`, PNG versionnés.
 
+## Reste à faire traité (2026-09-27, branche `ui/design-system-raf`)
+
+- Liens du graphe neutres à 1,5 px (blanc à 34 %, 3,07:1 sur le canvas), liens sortants du nœud sélectionné en accent ; seules les quatre issues de test gardent leur couleur.
+- Emoji retirés de l'interface ; gravités de validation en point + mot. Sélecteurs e2e « ✨ Générer » mis à jour.
+- Montants au format français dans leur vraie devise (`utils/formatCurrency.ts`) : « 0,18 $ », « 0,0042 € », plus de « ¢ ». L'alerte de budget annonçait des euros pour un budget en dollars : corrigé.
+- `DialogueCostBreakdown`, modale des métadonnées, journaux d'export, collections : alignés sur le système.
+- Onglet COÛT de l'inspecteur : affichait 0 nœud (identifiant avec `.json`) ; corrigé.
+- Couleurs en dur : 12 restantes dans les TSX, toutes nommées (palette des locuteurs, valeurs exactes de maquette).
+
 ## Écarts restants
 
-- Liens de choix et issues de test colorés par nature ; la maquette 2e voulait des liens neutres.
-- Emoji restants là où des sélecteurs e2e ou des tests les ciblent (« ✨ Générer », `PresetValidationModal`), et dans les menus contextuels du graphe.
-- `DialogueCostBreakdown` : `📊`, `✅/❌`, couleurs `#22c55e` / `#f59e0b` / `#ef4444`.
-- Montants au format `$10.00` au lieu de « 10,00 $ ».
-- 72 littéraux hexadécimaux restent dans les TSX (contre 112 avant), surtout dans des modales et formulaires hors refonte.
+- Icônes de template : emoji choisis par l'utilisateur (donnée, défaut `📋` côté API), gardés.
+- La maquette 2e dessine le chemin bleu entrant dans le nœud sélectionné, le README de handoff dit « sortant » : le code suit le README.
+- La minicarte du graphe (absente de la maquette) peut recouvrir les actions d'un nœud fraîchement généré ; suivi à part.

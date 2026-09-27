@@ -65,6 +65,7 @@ import {
   PANEL_COMFORT_MIN_WIDTH_PX,
 } from '../../theme/responsiveChrome'
 import type { UnityDialogueMetadata } from '../../types/api'
+import { usageDialogueId } from '../../utils/usageDialogueId'
 
 interface GraphEditorProps {
   mode?: 'embedded' | 'standalone'
@@ -620,7 +621,7 @@ export function GraphEditor({
                       dialogueListRef.current?.refresh()
                       if (activeDialogueFilename) {
                         queryClient.invalidateQueries({
-                          queryKey: ['dialogue-costs', activeDialogueFilename],
+                          queryKey: ['dialogue-costs', usageDialogueId(activeDialogueFilename)],
                         })
                       }
                       queryClient.invalidateQueries({ queryKey: ['all-dialogues-costs'] })

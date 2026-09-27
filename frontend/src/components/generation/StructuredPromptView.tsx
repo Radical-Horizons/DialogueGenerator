@@ -201,7 +201,7 @@ function AccordionSection({
                   style={{
                     margin: 0,
                     padding: '0.75rem',
-                    backgroundColor: '#1e1e1e',
+                    backgroundColor: theme.background.elevated,
                     borderRadius: '4px',
                     overflow: 'auto',
                     fontFamily: 'monospace',

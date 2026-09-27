@@ -7,6 +7,7 @@ import { memo, useCallback } from 'react'
 import type { ContextSelection, ElementMode } from '../../types/api'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
+import { redesignRadius } from '../../theme/redesignTokens'
 import * as contextAPI from '../../api/context'
 import { useContextStore } from '../../store/contextStore'
 import { useGenerationStore } from '../../store/generationStore'
@@ -76,7 +77,6 @@ const EntityCategoryList = memo(function EntityCategoryList({
               <Badge
                 variant={mode === 'excerpt' ? 'warning' : 'neutral'}
                 size="sm"
-                icon={mode === 'full' ? '📄' : '✂️'}
                 data-testid={`mode-toggle-${entityType}-${name}`}
                 onClick={() => onModeChange(entityType, name, mode === 'full' ? 'excerpt' : 'full')}
                 title={
@@ -103,9 +103,9 @@ const EntityCategoryList = memo(function EntityCategoryList({
                   flexShrink: 0,
                   padding: '0.1rem 0.4rem',
                   fontSize: remSize('small'),
-                  fontWeight: 'bold',
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '3px',
+                  fontWeight: 500,
+                  border: `1px solid ${theme.button.default.border}`,
+                  borderRadius: `${redesignRadius.control}px`,
                   backgroundColor: 'transparent',
                   color: theme.text.secondary,
                   cursor: 'pointer',
@@ -185,8 +185,8 @@ export const SelectedContextSummary = memo(function SelectedContextSummary({
                 style={{
                   padding: '0.25rem 0.5rem',
                   fontSize: remSize('small'),
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
+                  border: `1px solid ${theme.button.default.border}`,
+                  borderRadius: `${redesignRadius.control}px`,
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   cursor: !sceneSelection.characterA && !sceneSelection.characterB && !sceneSelection.sceneRegion
@@ -204,8 +204,8 @@ export const SelectedContextSummary = memo(function SelectedContextSummary({
                 style={{
                   padding: '0.25rem 0.5rem',
                   fontSize: remSize('small'),
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
+                  border: `1px solid ${theme.button.default.border}`,
+                  borderRadius: `${redesignRadius.control}px`,
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   cursor: 'pointer',

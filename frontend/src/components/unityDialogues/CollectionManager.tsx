@@ -5,6 +5,7 @@
 import { useEffect, useState, type CSSProperties, type FormEvent } from 'react'
 import type { DialogueCollection } from '../../api/collections'
 import { theme } from '../../theme'
+import { redesignRadius } from '../../theme/redesignTokens'
 import { remSize } from '../../theme/uiTypography'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { StyledSelect } from '../shared/StyledSelect'
@@ -42,7 +43,7 @@ interface CollectionFormState {
 const EMPTY_FORM: CollectionFormState = {
   name: '',
   description: '',
-  icon: '📁',
+  icon: '',
 }
 
 /**
@@ -58,7 +59,7 @@ const SELECT_ROW_HEIGHT = '2.02rem'
 const iconButtonStyle: CSSProperties = {
   appearance: 'none',
   WebkitAppearance: 'none',
-  border: `1px solid ${theme.border.primary}`,
+  border: `1px solid ${theme.button.default.border}`,
   borderRadius: '6px',
   backgroundColor: theme.button.default.background,
   color: theme.text.secondary,
@@ -126,7 +127,7 @@ export function CollectionManager({
     setForm({
       name: collection.name,
       description: collection.description ?? '',
-      icon: collection.icon ?? '📁',
+      icon: collection.icon ?? '',
     })
     setFormError(null)
     setEditingId(collection.id)
@@ -248,7 +249,7 @@ export function CollectionManager({
               data-testid={`collection-select-${collection.id}`}
               value={collection.id}
             >
-              {(collection.icon || '📁') + ' '}
+              {collection.icon ? `${collection.icon} ` : ''}
               {collection.name} ({collection.dialogue_ids.length})
             </option>
           ))}
@@ -291,7 +292,7 @@ export function CollectionManager({
             onClick={() => openEdit(activeCollection)}
             style={iconButtonStyle}
           >
-            ✎
+            Modifier
           </button>
           <button
             type="button"
@@ -349,9 +350,9 @@ export function CollectionManager({
             }}
             style={{
               width: 'min(22rem, 92vw)',
-              backgroundColor: theme.background.panel,
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: '8px',
+              backgroundColor: theme.background.elevated,
+              border: `1px solid ${theme.border.secondary}`,
+              borderRadius: redesignRadius.frame,
               padding: '1rem',
               display: 'flex',
               flexDirection: 'column',
@@ -382,7 +383,7 @@ export function CollectionManager({
                   backgroundColor: theme.input.background,
                   color: theme.input.color,
                   border: `1px solid ${theme.input.border}`,
-                  borderRadius: '4px',
+                  borderRadius: redesignRadius.control,
                 }}
               />
             </label>
@@ -405,7 +406,7 @@ export function CollectionManager({
                   backgroundColor: theme.input.background,
                   color: theme.input.color,
                   border: `1px solid ${theme.input.border}`,
-                  borderRadius: '4px',
+                  borderRadius: redesignRadius.control,
                   resize: 'vertical',
                 }}
               />
@@ -428,7 +429,7 @@ export function CollectionManager({
                   backgroundColor: theme.input.background,
                   color: theme.input.color,
                   border: `1px solid ${theme.input.border}`,
-                  borderRadius: '4px',
+                  borderRadius: redesignRadius.control,
                 }}
               />
             </label>
@@ -455,8 +456,8 @@ export function CollectionManager({
                 }}
                 style={{
                   padding: '0.35rem 0.7rem',
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
+                  border: `1px solid ${theme.button.default.border}`,
+                  borderRadius: redesignRadius.control,
                   background: 'transparent',
                   color: theme.text.secondary,
                   cursor: 'pointer',
@@ -471,7 +472,7 @@ export function CollectionManager({
                 style={{
                   padding: '0.35rem 0.7rem',
                   border: 'none',
-                  borderRadius: '4px',
+                  borderRadius: redesignRadius.control,
                   backgroundColor: theme.button.primary.background,
                   color: theme.button.primary.color,
                   cursor: isSubmitting ? 'not-allowed' : 'pointer',

@@ -87,7 +87,7 @@ export function GraphContextDroppingPanel({ onClose }: GraphContextDroppingPanel
             fontSize: '0.8rem',
           }}
         >
-          ⚙ Règles
+          Règles
         </button>
       }
     >

@@ -8,7 +8,7 @@ import { useGraphStore } from '../../../store/graphStore'
 import { useGraphViewStore } from '../../../store/graphViewStore'
 import { PromptViewerModal } from '../PromptViewerModal'
 import { TEST_NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
-import { TEST_RESULT_EDGE_CONFIG } from '../../../utils/graphEdgeBuilders'
+import { EDGE_NEUTRAL_COLOR, TEST_RESULT_EDGE_CONFIG } from '../../../utils/graphEdgeBuilders'
 import { reconstructNodePromptFromGraph } from '../../../utils/graphPromptPreview'
 import type { NodePromptResponse } from '../../../types/graph'
 import {
@@ -190,23 +190,7 @@ export const TestNode = memo(function TestNode({
             zIndex: 10,
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
           }}
-          title={errors.map((e, idx) => {
-            const icon =
-              e.type === 'orphan_node'
-                ? '🔗'
-                : e.type === 'broken_reference'
-                  ? '🔴'
-                  : e.type === 'empty_node' || e.type === 'missing_dialogue_text'
-                    ? '⚪'
-                    : e.type === 'missing_display_name'
-                      ? '📝'
-                      : e.type === 'missing_stable_id'
-                        ? '🆔'
-                        : e.type === 'missing_test'
-                          ? '❓'
-                          : '⚠️'
-            return `${icon} ${e.message}${idx < errors.length - 1 ? '\n' : ''}`
-          }).join('')}
+          title={errors.map((e) => e.message).join('\n')}
         >
           {errors.length}
         </div>
@@ -232,10 +216,7 @@ export const TestNode = memo(function TestNode({
             zIndex: 10,
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
           }}
-          title={warnings.map((w, idx) => {
-            const icon = w.type === 'unreachable_node' ? '📍' : w.type === 'cycle_detected' ? '🔄' : '⚠️'
-            return `${icon} ${w.message}${idx < warnings.length - 1 ? '\n' : ''}`
-          }).join('')}
+          title={warnings.map((w) => w.message).join('\n')}
         >
           {warnings.length}
         </div>
@@ -246,7 +227,7 @@ export const TestNode = memo(function TestNode({
         type="target"
         position={Position.Top}
         style={{
-          background: data.incomingEdgeColor ?? theme.text.secondary,
+          background: data.incomingEdgeColor ?? EDGE_NEUTRAL_COLOR,
           width: 12,
           height: 12,
           border: '2px solid white',

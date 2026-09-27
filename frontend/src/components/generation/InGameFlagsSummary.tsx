@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import { useFlagsStore } from '../../store/flagsStore'
 import { theme } from '../../theme'
+import { redesignAccent, redesignRadius } from '../../theme/redesignTokens'
 import { generationPanelChrome } from '../../theme/responsiveChrome'
 import { InGameFlagsModal } from './InGameFlagsModal'
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
@@ -100,15 +101,15 @@ export function InGameFlagsSummary() {
                   alignItems: 'center',
                   gap: '0.5rem',
                   padding: '0.375rem 0.75rem',
-                  backgroundColor: theme.button.primary.background,
-                  color: theme.button.primary.color,
-                  border: `1px solid ${theme.border.focus}`,
-                  borderRadius: '4px',
+                  backgroundColor: redesignAccent.selectedBg,
+                  color: redesignAccent.light,
+                  border: `1px solid ${redesignAccent.ring}`,
+                  borderRadius: `${redesignRadius.chip}px`,
                   fontSize: '0.85rem',
                   maxWidth: '100%'
                 }}
               >
-                <span style={{ fontWeight: 'bold' }}>
+                <span style={{ fontWeight: 600 }}>
                   {getFlagLabel(flag.id)}
                 </span>
                 <span style={{ opacity: 0.8, fontFamily: 'monospace', fontSize: '0.75rem' }}>
@@ -124,7 +125,7 @@ export function InGameFlagsSummary() {
                     padding: '0 0.25rem',
                     backgroundColor: 'transparent',
                     border: 'none',
-                    color: theme.button.primary.color,
+                    color: 'inherit',
                     cursor: 'pointer',
                     fontSize: '1rem',
                     lineHeight: '1',

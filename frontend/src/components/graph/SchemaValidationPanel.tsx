@@ -23,11 +23,11 @@ interface SchemaValidationPanelProps {
 
 const SCHEMA_STATUS_STYLES = {
   valid: {
-    badge: { backgroundColor: '#22c55e', color: '#fff' },
+    badge: { backgroundColor: theme.state.success.background, color: theme.state.success.color },
     label: 'Schéma Unity : 100 % conforme',
   },
   invalid: {
-    badge: { backgroundColor: '#ef4444', color: '#fff' },
+    badge: { backgroundColor: theme.state.error.background, color: theme.state.error.color },
   },
 } as const
 

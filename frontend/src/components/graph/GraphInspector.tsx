@@ -266,7 +266,7 @@ export function GraphInspectorPrimaryAction({
         borderRadius: `${redesignRadius.control}px`,
         border: 'none',
         backgroundColor: redesignAccent.fill,
-        color: '#ffffff',
+        color: theme.button.primary.color,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

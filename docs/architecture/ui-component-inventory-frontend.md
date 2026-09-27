@@ -30,7 +30,6 @@ Components are organized by feature domain in `frontend/src/components/`.
 - **StructuredPromptView.tsx**: Structured prompt visualization
 - **SystemPromptEditor.tsx**: System prompt editor
 - **SceneSelectionWidget.tsx**: Scene selection interface
-- **TokenBudgetBar.tsx**: Token budget visualization
 - **UnityDialogueEditor.tsx**: Unity dialogue node editor
 - **UnityDialogueViewer.tsx**: Unity dialogue viewer
 - **GraphView.tsx**: Graph visualization

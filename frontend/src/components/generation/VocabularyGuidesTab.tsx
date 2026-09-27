@@ -149,15 +149,14 @@ export function VocabularyGuidesTab() {
           disabled={isSyncing || isLoading}
           style={{
             padding: '0.5rem 1rem',
-            border: 'none',
-            borderRadius: '4px',
-            backgroundColor: isSyncing
-              ? theme.button.default.background
-              : theme.button.primary.background,
-            color: theme.button.primary.color,
+            // Secondaire : dans la modale Options, le bouton plein est « Appliquer ».
+            border: `1px solid ${theme.button.default.border}`,
+            borderRadius: '6px',
+            backgroundColor: 'transparent',
+            color: theme.button.default.color,
             cursor: isSyncing ? 'not-allowed' : 'pointer',
             opacity: isSyncing ? 0.6 : 1,
-            fontWeight: 'bold',
+            fontWeight: 500,
           }}
         >
           {isSyncing ? 'Synchronisation...' : 'Synchroniser depuis Notion'}

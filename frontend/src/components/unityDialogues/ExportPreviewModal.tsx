@@ -3,6 +3,7 @@
  */
 import { memo, useCallback, useState } from 'react'
 import { theme } from '../../theme'
+import { redesignRadius } from '../../theme/redesignTokens'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { modalTypography } from '../../theme/responsiveChrome'
 import { formatBytes } from '../../utils/formatBytes'
@@ -174,9 +175,9 @@ export const ExportPreviewModal = memo(function ExportPreviewModal({
             style={{
               padding: '0.5rem 0.75rem',
               marginBottom: '1rem',
-              backgroundColor: theme.state.warning?.background ?? 'rgba(241, 196, 15, 0.15)',
-              border: `1px solid ${theme.state.warning?.color ?? '#F1C40F'}`,
-              borderRadius: '4px',
+              backgroundColor: 'rgba(245, 166, 35, 0.08)',
+              border: `1px solid ${theme.state.pending.border}`,
+              borderRadius: redesignRadius.control,
               fontSize: `${typo.bodyFontRem}rem`,
             }}
           >

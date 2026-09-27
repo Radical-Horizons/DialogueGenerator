@@ -244,21 +244,21 @@ export function ContextFieldSelector({
     
     // Afficher un avertissement si le champ est invalide
     if (isInvalid) {
-      return { icon: '⚠️', color: theme.state.error.color, title: 'Champ invalide (n\'existe pas dans les données GDD)' }
+      return { icon: '✕', color: theme.state.error.color, title: 'Champ invalide (n\'existe pas dans les données GDD)' }
     }
     
     if (isSuggested) {
       return { icon: '✓', color: theme.state.success.color, title: 'Champ suggéré' }
     }
 
-    // ⭐ doit représenter les champs essentiels (is_essential), pas la fréquence.
+    // ★ doit représenter les champs essentiels (is_essential), pas la fréquence.
     if (isEssential) {
-      return { icon: '⭐', color: theme.state.info.color, title: 'Champ essentiel' }
+      return { icon: '★', color: theme.state.info.color, title: 'Champ essentiel' }
     }
-    
+
     // Indicateur pour les champs dans la config mais non essentiels
     if (isInConfig) {
-      return { icon: '📋', color: theme.text.secondary, title: 'Champ dans la configuration' }
+      return { icon: '•', color: theme.text.secondary, title: 'Champ dans la configuration' }
     }
     
     switch (importance) {
@@ -469,19 +469,19 @@ export function ContextFieldSelector({
 
   const visualIndicatorsTooltip = (
     <div>
-      <div style={{ marginBottom: '0.5rem', fontWeight: 'bold' }}>Indicateurs Visuels</div>
+      <div style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Indicateurs Visuels</div>
       <ul style={{ margin: 0, paddingLeft: '1.25rem', listStyle: 'none' }}>
         <li style={{ marginBottom: '0.25rem' }}>
-          <span style={{ color: theme.state.error.color }}>⚠️</span> Rouge : Champ invalide (n'existe pas dans les données GDD)
+          <span style={{ color: theme.state.error.color }}>✕</span> Rouge : Champ invalide (n'existe pas dans les données GDD)
         </li>
         <li style={{ marginBottom: '0.25rem' }}>
           <span style={{ color: theme.state.success.color }}>✓</span> Vert : Champ suggéré/recommandé
         </li>
         <li style={{ marginBottom: '0.25rem' }}>
-          <span style={{ color: theme.state.info.color }}>⭐</span> Bleu : Champ essentiel
+          <span style={{ color: theme.state.info.color }}>★</span> Bleu : Champ essentiel
         </li>
         <li style={{ marginBottom: '0.25rem' }}>
-          <span style={{ color: theme.text.secondary }}>📋</span> Gris : Champ dans la configuration
+          <span style={{ color: theme.text.secondary }}>•</span> Gris : Champ dans la configuration
         </li>
         <li style={{ marginBottom: '0.25rem' }}>
           <span style={{ color: theme.text.secondary }}>ⓘ</span> Gris : Champ commun
