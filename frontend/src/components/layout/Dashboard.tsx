@@ -51,6 +51,7 @@ import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { useGenerationRunActive } from '../../hooks/useGenerationRunState'
 import { GenerationTracePanel } from '../generation/GenerationTracePanel'
 import { WritingModeRail } from './WritingModeRail'
+import { centerColumnRailPadding } from './railReserve'
 import { PromptBudgetBottomDrawer } from './PromptBudgetBottomDrawer'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { PROMPT_DRAWER_MAX_WIDTH_PX, VIEWPORT_DESKTOP_MIN_PX } from '../../theme/responsiveChrome'
@@ -174,7 +175,6 @@ const RIGHT_PANEL_TAB_SHORT_LABELS: Record<string, string> = {
 }
 
 /** Largeur réservée aux rails de repli en overlay : écart 4 + rail 24 + respiration 4. */
-const RAIL_GUTTER_PX = 32
 
 /**
  * Bouton flottant sur le bord du panneau central pour ré-ouvrir un panneau replié.
@@ -1408,21 +1408,21 @@ export function Dashboard() {
           height: '100%',
           position: 'relative',
           minWidth: 0,
-          // Les rails de repli sont en overlay (`position: absolute`, z-50). En
-          // desktop les marges de la colonne de lecture leur laissent la place ;
-          // en narrow il n'y en a aucune et ils se posaient sur le texte du brief
-          // (mesuré à 380 px : rail 10-34, texte à partir de 14). On leur réserve
-          // leur largeur — 4 px d'écart + 24 px de rail + 4 px de respiration.
-          // Même réserve sur l'écran graphe : sa liste de dialogues touche le bord
-          // gauche du panneau, donc le rail s'y posait sur les cases de sélection.
-          paddingLeft:
-            showCollapsedLeftAffordance && (useNarrowSidePanels || centerPanelTab === 'graph')
-              ? RAIL_GUTTER_PX
-              : undefined,
-          paddingRight:
-            showCollapsedRightAffordance && (useNarrowSidePanels || centerPanelTab === 'graph')
-              ? RAIL_GUTTER_PX
-              : undefined,
+          // Les rails de repli sont en overlay : la colonne leur réserve leur largeur
+          // partout où rien d'autre ne les protège (étroit, graphe, comparaison 2b,
+          // mode écriture). Mesures et règle : `railReserve.ts`.
+          paddingLeft: centerColumnRailPadding('left', {
+            collapsed: showCollapsedLeftAffordance,
+            writingMode,
+            comparisonActive,
+            narrowOrGraph: useNarrowSidePanels || centerPanelTab === 'graph',
+          }),
+          paddingRight: centerColumnRailPadding('right', {
+            collapsed: showCollapsedRightAffordance,
+            writingMode,
+            comparisonActive,
+            narrowOrGraph: useNarrowSidePanels || centerPanelTab === 'graph',
+          }),
           boxSizing: 'border-box',
           ...centerColumnKeyboardStyle,
         }}

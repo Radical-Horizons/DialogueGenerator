@@ -16,6 +16,9 @@ export type InspectorTab = 'node' | 'health' | 'quality' | 'cost'
 /** Sections applicatives, présentées dans la barre supérieure (écran 1c). */
 export type CenterPanelTab = 'generation' | 'edition' | 'graph'
 
+/** Affichage des options d'un résultat (écran 2b) : une dépliée, ou toutes côte à côte. */
+export type OptionsView = 'list' | 'columns'
+
 interface UiLayoutState {
   /**
    * Section active. Dans la maquette la navigation vit dans la barre supérieure,
@@ -45,6 +48,12 @@ interface UiLayoutState {
    */
   showGraphMinimap: boolean
   toggleGraphMinimap: () => void
+  /**
+   * Vue des options générées. Gardée d'un lot à l'autre pendant la session : un
+   * auteur qui compare en colonnes ne doit pas rebasculer à chaque génération.
+   */
+  optionsView: OptionsView
+  setOptionsView: (view: OptionsView) => void
 }
 
 export const useUiLayoutStore = create<UiLayoutState>()((set) => ({
@@ -64,4 +73,7 @@ export const useUiLayoutStore = create<UiLayoutState>()((set) => ({
 
   showGraphMinimap: false,
   toggleGraphMinimap: () => set((state) => ({ showGraphMinimap: !state.showGraphMinimap })),
+
+  optionsView: 'list',
+  setOptionsView: (view) => set({ optionsView: view }),
 }))

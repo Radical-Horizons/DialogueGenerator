@@ -8,16 +8,22 @@
  * « Garder » pousse l'option dans le résultat courant, « Variante » relance cette
  * seule option (Story 1.10 recâblée), « Régénérer les N » relance tout le lot.
  */
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { theme } from '../../theme'
 import {
   redesignAccent,
-  redesignControl,
   redesignFont,
   redesignHairline,
   redesignRadius,
+  redesignTab,
   redesignText,
 } from '../../theme/redesignTokens'
+import {
+  OPTIONS_COLUMNS_LABEL_WIDTH_PX,
+  OPTIONS_COLUMN_MIN_WIDTH_PX,
+} from '../../theme/responsiveChrome'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { useUiLayoutStore, type OptionsView } from '../../store/uiLayoutStore'
 import {
   launchBackgroundOption,
   useGenerationOptionsStore,
@@ -30,48 +36,14 @@ import {
   formatOptionMeta,
   type OptionDiagnostics,
 } from '../../utils/generationOptionDiagnostics'
-
-const STATUS_LABELS: Record<GenerationOptionSlot['status'], string> = {
-  pending: 'EN ATTENTE',
-  running: 'EN ÉCRITURE',
-  completed: 'PRÊTE',
-  error: 'ERREUR',
-  cancelled: 'ANNULÉE',
-}
-
-function statusColor(status: GenerationOptionSlot['status'], kept: boolean): string {
-  if (kept) return redesignAccent.base
-  switch (status) {
-    case 'completed':
-      return theme.state.accepted.border
-    case 'error':
-      return theme.state.error.color
-    case 'running':
-      return redesignAccent.light
-    default:
-      return redesignText.label
-  }
-}
-
-const ghostButtonStyle = {
-  height: 30,
-  padding: '0 12px',
-  borderRadius: redesignRadius.control,
-  border: `1px solid ${redesignControl.border}`,
-  background: 'transparent',
-  color: redesignText.body,
-  cursor: 'pointer',
-  fontSize: '12.5px',
-  whiteSpace: 'nowrap' as const,
-  flexShrink: 0,
-}
-
-const monoLabelStyle = {
-  fontFamily: redesignFont.mono,
-  fontSize: '10px',
-  letterSpacing: '0.12em',
-  color: redesignText.label,
-}
+import { GenerationOptionsColumns } from './GenerationOptionsColumns'
+import {
+  STATUS_LABELS,
+  ghostButtonStyle,
+  keepButtonStyle,
+  monoLabelStyle,
+  statusColor,
+} from './generationOptionsChrome'
 
 /** Noms de toutes les fiches GDD envoyées au modèle, toutes catégories confondues. */
 function useSentEntityNames(): string[] {
@@ -338,6 +310,15 @@ export function GenerationOptionsComparison({
    */
   const [openIndexChoice, setOpenIndexChoice] = useState<number | null | undefined>(undefined)
 
+  const optionsView = useUiLayoutStore((s) => s.optionsView)
+  const setOptionsView = useUiLayoutStore((s) => s.setOptionsView)
+  // Côte à côte seulement quand chaque option garde une colonne lisible ; sinon la liste.
+  const { ref: sectionRef, isNarrow } = useNarrowInlineSize(
+    OPTIONS_COLUMNS_LABEL_WIDTH_PX + Math.max(slots.length, 2) * OPTIONS_COLUMN_MIN_WIDTH_PX
+  )
+  const columnsAvailable = !isNarrow
+  const view: OptionsView = columnsAvailable ? optionsView : 'list'
+
   const diagnostics = useMemo(
     () => slots.map((slot) => computeOptionDiagnostics(slot.result?.json_content, sentEntityNames)),
     [slots, sentEntityNames]
@@ -355,6 +336,31 @@ export function GenerationOptionsComparison({
         : null
       : openIndexChoice
   const setOpenIndex = (next: number | null) => setOpenIndexChoice(next)
+
+  const panelResponse = useGenerationStore((s) => s.unityDialogueResponse)
+  const syncedPanelJsonRef = useRef<string | null>(null)
+
+  // Le panneau droit, dont « Garder et continuer » sauvegarde le contenu, reçoit le
+  // stream de l'option 1. Tant qu'aucune option n'est gardée et que l'auteur n'y a
+  // rien modifié, il suit l'option retenue : sinon il sauvegarderait l'option 1 sous
+  // une autre colonne marquée « RETENUE ». Jamais avant la fin du stream principal :
+  // GenerationPanel remplit le slot 0 depuis ce même panneau tant que le slot court.
+  useEffect(() => {
+    if (keptIndex != null || openIndex == null) return
+    const mainStatus = slots.find((s) => s.index === 0)?.status
+    if (mainStatus === 'running' || mainStatus === 'pending') return
+    const target = slots[openIndex]?.result
+    if (!target) return
+    const currentJson = panelResponse?.json_content ?? null
+    if (currentJson === target.json_content) return
+    const untouched =
+      currentJson == null ||
+      currentJson === syncedPanelJsonRef.current ||
+      slots.some((s) => s.result?.json_content === currentJson)
+    if (!untouched) return
+    syncedPanelJsonRef.current = target.json_content
+    setUnityDialogueResponse(target)
+  }, [keptIndex, openIndex, slots, panelResponse, setUnityDialogueResponse])
 
   if (slots.length < 2) return null
 
@@ -378,9 +384,16 @@ export function GenerationOptionsComparison({
 
   const openDiag = openIndex != null ? diagnostics[openIndex] : null
 
+  const handleEdit = (slot: GenerationOptionSlot) => {
+    handleKeep(slot)
+    onEditKept?.()
+  }
+
   return (
     <section
+      ref={sectionRef}
       data-testid="generation-options-comparison"
+      data-view={view}
       style={{ marginBottom: 20, display: 'flex', gap: 0, minWidth: 0 }}
     >
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -455,27 +468,66 @@ export function GenerationOptionsComparison({
                 {briefExpanded ? 'ranger le brief' : 'modifier le brief'}
               </button>
             )}
-            <button
-              type="button"
-              data-testid="options-collapse-all"
-              onClick={() =>
-                setOpenIndex(openIndex === null ? (firstReadyIndex >= 0 ? firstReadyIndex : 0) : null)
-              }
-              style={{
-                border: 'none',
-                background: 'none',
-                padding: 0,
-                cursor: 'pointer',
-                fontSize: '11.5px',
-                color: redesignText.secondary,
-              }}
-            >
-              {openIndex === null ? 'déplier la première' : 'tout replier'}
-            </button>
+            {view === 'list' && (
+              <button
+                type="button"
+                data-testid="options-collapse-all"
+                onClick={() =>
+                  setOpenIndex(openIndex === null ? (firstReadyIndex >= 0 ? firstReadyIndex : 0) : null)
+                }
+                style={{
+                  border: 'none',
+                  background: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
+                  fontSize: '11.5px',
+                  color: redesignText.secondary,
+                }}
+              >
+                {openIndex === null ? 'déplier la première' : 'tout replier'}
+              </button>
+            )}
+            {columnsAvailable && (
+              <span role="tablist" aria-label="Affichage des options" style={{ display: 'flex', gap: 14 }}>
+                {(
+                  [
+                    ['list', 'Liste'],
+                    ['columns', 'Côte à côte'],
+                  ] as const
+                ).map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    role="tab"
+                    aria-selected={view === id}
+                    data-testid={`options-view-${id}`}
+                    onClick={() => setOptionsView(id)}
+                    style={redesignTab.buttonStyle(view === id)}
+                  >
+                    <span style={redesignTab.labelStyle(view === id)}>{label}</span>
+                  </button>
+                ))}
+              </span>
+            )}
           </span>
         </div>
 
+        {view === 'columns' && (
+          <GenerationOptionsColumns
+            slots={slots}
+            diagnostics={diagnostics}
+            retainedIndex={openIndex}
+            keptIndex={keptIndex}
+            canRelaunch={!!lastRequest}
+            onRetain={(index) => setOpenIndex(index)}
+            onKeep={handleKeep}
+            onEdit={handleEdit}
+            onVariant={handleVariant}
+          />
+        )}
+
         {/* Options : une seule dépliée, les autres en une ligne. */}
+        {view === 'list' && (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           {slots.map((slot) => {
             const diag = diagnostics[slot.index] ?? diagnostics[0]
@@ -542,26 +594,16 @@ export function GenerationOptionsComparison({
                           type="button"
                           data-testid={`option-keep-${slot.index}`}
                           onClick={() => handleKeep(slot)}
-                          style={{
-                            ...ghostButtonStyle,
-                            border: 'none',
-                            // 2b : « Garder » est l'action primaire de l'option dépliée (la barre
-                            // Générer est masquée) — remplissage `fill`, jamais `base`.
-                            background: kept ? redesignAccent.selectedBg : redesignAccent.fill,
-                            color: kept ? redesignAccent.light : theme.button.primary.color,
-                            fontWeight: 600,
-                            padding: '0 14px',
-                          }}
+                          // 2b : « Garder » est l'action primaire de l'option dépliée (la barre
+                          // Générer est masquée) — remplissage `fill`, jamais `base`.
+                          style={keepButtonStyle(kept)}
                         >
                           {kept ? 'Gardée' : 'Garder'}
                         </button>
                         <button
                           type="button"
                           data-testid={`option-edit-${slot.index}`}
-                          onClick={() => {
-                            handleKeep(slot)
-                            onEditKept?.()
-                          }}
+                          onClick={() => handleEdit(slot)}
                           title="Garder cette option et l'ouvrir dans l'éditeur"
                           style={{ ...ghostButtonStyle, color: redesignText.body }}
                         >
@@ -641,10 +683,11 @@ export function GenerationOptionsComparison({
             )
           })}
         </div>
+        )}
       </div>
 
-      {/* Diagnostic de l'option ouverte — ce qui aide à trancher. */}
-      {openIndex != null && openDiag && slots[openIndex]?.status === 'completed' && (
+      {/* Diagnostic de l'option ouverte — en vue côte à côte, ses critères sont les rangées. */}
+      {view === 'list' && openIndex != null && openDiag && slots[openIndex]?.status === 'completed' && (
         <OptionDiagnosticColumn diag={openDiag} optionNumber={openIndex + 1} />
       )}
     </section>
