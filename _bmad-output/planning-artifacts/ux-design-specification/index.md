@@ -44,6 +44,7 @@
     - [Ce qu'il faut savoir avant de dessiner ou coder un écran](./design-system-foundation.md#ce-quil-faut-savoir-avant-de-dessiner-ou-coder-un-écran)
     - [Intégration du 2026-09-27](./design-system-foundation.md#intégration-du-2026-09-27)
     - [Reste à faire traité](./design-system-foundation.md#reste-à-faire-traité-2026-09-27-branche-uidesign-system-raf)
+    - [Points ouverts tranchés](./design-system-foundation.md#points-ouverts-tranchés-2026-09-27-pr-75-et-76)
     - [Écarts restants](./design-system-foundation.md#écarts-restants)
   - [Design Direction Decision](./design-direction-decision.md)
     - [Design Directions Explored](./design-direction-decision.md#design-directions-explored)
