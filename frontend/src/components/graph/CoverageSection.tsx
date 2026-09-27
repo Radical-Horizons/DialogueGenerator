@@ -35,7 +35,7 @@ export function CoverageSection({ coverage }: CoverageSectionProps) {
   return (
     <section data-testid="coverage-section" aria-label="Couverture du dialogue">
       <div style={{ fontWeight: 600, marginBottom: 6, fontSize: '0.85rem' }}>
-        📊 Couverture
+        Couverture
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <span

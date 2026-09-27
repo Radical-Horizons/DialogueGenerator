@@ -108,6 +108,7 @@ vi.mock('../theme', () => ({
       info: { color: '#17a2b8' },
       warning: { color: '#ffc107' },
     },
+    shadow: { card: '0 2px 10px rgba(0, 0, 0, 0.4)' },
   },
 }));
 

@@ -15,6 +15,7 @@ import ReactFlow, {
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 import { DialogueNode, TestNode, EndNode } from '../graph/nodes'
+import { graphMinimapNodeColor } from '../graph/graphMinimapLayout'
 import { theme } from '../../theme'
 import type { UnityDialogueNode } from '../../types/api'
 import {
@@ -268,11 +269,7 @@ export const GraphView = memo(function GraphView({
         <Background />
         <Controls />
         <MiniMap
-          nodeColor={(node) => {
-            if (node.type === 'testNode') return '#F5A623'
-            if (node.type === 'endNode') return '#B8B8B8'
-            return '#4A90E2'
-          }}
+          nodeColor={(node) => graphMinimapNodeColor(node.type)}
           style={{ backgroundColor: theme.background.secondary }}
         />
       </ReactFlow>

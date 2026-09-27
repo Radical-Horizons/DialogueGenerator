@@ -71,7 +71,7 @@ export function SystemPromptPanel({
           color: theme.text.secondary,
         }}
       >
-        <strong style={{ color: theme.text.primary }}>⚠️ Zone avancée</strong>
+        <strong style={{ color: theme.text.primary }}>Zone avancée</strong>
         <br />
         Modifiez uniquement si vous savez ce que vous faites. Ce prompt définit l'identité technique du LLM et les règles de format de sortie.
       </div>

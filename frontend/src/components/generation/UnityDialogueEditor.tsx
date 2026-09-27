@@ -620,7 +620,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                   padding: chrome.toolbarButtonPadding,
                   minHeight: `${chrome.toolbarButtonMinHeightPx}px`,
                   fontSize: `${chrome.toolbarButtonFontRem}rem`,
-                  fontWeight: chrome.toolbarButtonFontWeight,
+                  fontWeight: 600,
                   lineHeight: 1.25,
                   display: 'inline-flex',
                   alignItems: 'center',

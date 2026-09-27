@@ -4,6 +4,7 @@
  */
 import { useMemo } from 'react'
 import { theme } from '../../theme'
+import { redesignAccent } from '../../theme/redesignTokens'
 import type { PromptStructure } from '../../types/prompt'
 
 export interface TokenBudgetBarProps {
@@ -27,7 +28,7 @@ interface TokenSegment {
 }
 
 const SEGMENT_COLORS = {
-  system: '#4A90E2',      // Bleu
+  system: redesignAccent.base, // jauge de budget : seul segment sur le bleu d'accent
   characters: '#50C878',  // Vert
   locations: '#FFD700',   // Jaune
   instructions: '#9B59B6', // Violet
@@ -294,7 +295,7 @@ export function TokenBudgetBar({
           textAlign: 'right',
         }}>
           {percentageOfMax > 100 
-            ? `⚠️ Dépassement: ${(percentageOfMax - 100).toFixed(1)}%`
+            ? `Dépassement : ${(percentageOfMax - 100).toFixed(1)}%`
             : `${percentageOfMax.toFixed(1)}% du budget utilisé`
           }
         </div>

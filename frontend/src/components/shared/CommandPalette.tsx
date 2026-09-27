@@ -5,6 +5,16 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
+import {
+  redesignControl,
+  redesignFont,
+  redesignHairline,
+  redesignMonoLabelStyle,
+  redesignRadius,
+  redesignSpacing,
+  redesignText,
+} from '../../theme/redesignTokens'
+import { listItemSelectionStyle } from '../../theme/selectionTokens'
 import { filterCommandPaletteItems, type CommandPaletteItem } from '../../hooks/useCommandPalette'
 import * as contextAPI from '../../api/context'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
@@ -252,6 +262,16 @@ export function CommandPalette({ isOpen, onClose, keyboardBottomInsetPx = 0 }: C
 
   if (!isOpen) return null
 
+  const kbdStyle: React.CSSProperties = {
+    fontFamily: redesignFont.mono,
+    fontSize: '10.5px',
+    color: redesignText.muted,
+    padding: '1px 5px',
+    border: `1px solid ${redesignHairline.strong}`,
+    borderRadius: '3px',
+    backgroundColor: 'transparent',
+  }
+
   return (
     <div
       style={{
@@ -272,15 +292,17 @@ export function CommandPalette({ isOpen, onClose, keyboardBottomInsetPx = 0 }: C
       <div
         data-shell-keyboard-zone="true"
         style={{
-          backgroundColor: theme.background.panel,
-          borderRadius: '8px',
-          padding: '1rem',
+          backgroundColor: theme.background.elevated,
+          border: `1px solid ${redesignHairline.strong}`,
+          borderRadius: `${redesignRadius.frame}px`,
+          padding: `${redesignSpacing.md}px`,
+          // `1rem` conservé : `CommandPalette.keyboard.test.tsx` (17.4) vérifie cette expression.
           paddingBottom: `calc(1rem + ${keyboardBottomInsetPx}px)`,
           width: '90%',
           maxWidth: '600px',
           maxHeight: '60vh',
           overflow: 'hidden',
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+          boxShadow: theme.shadow.card,
           display: 'flex',
           flexDirection: 'column',
           boxSizing: 'border-box',
@@ -300,13 +322,14 @@ export function CommandPalette({ isOpen, onClose, keyboardBottomInsetPx = 0 }: C
           placeholder="Rechercher des actions, personnages, lieux, dialogues..."
           style={{
             width: '100%',
-            padding: '0.75rem',
+            boxSizing: 'border-box',
+            padding: `${redesignSpacing.sm}px ${redesignSpacing.md}px`,
             fontSize: remSize('section'),
             backgroundColor: theme.input.background,
-            color: theme.text.primary,
-            border: `1px solid ${theme.border.primary}`,
-            borderRadius: '4px',
-            marginBottom: '1rem',
+            color: redesignText.strong,
+            border: `1px solid ${redesignControl.inputBorder}`,
+            borderRadius: `${redesignRadius.control}px`,
+            marginBottom: `${redesignSpacing.sm}px`,
           }}
         />
 
@@ -320,24 +343,23 @@ export function CommandPalette({ isOpen, onClose, keyboardBottomInsetPx = 0 }: C
           }}
         >
           {isLoading ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: theme.text.secondary }}>
+            <div style={{ padding: `${redesignSpacing.xl}px ${redesignSpacing.md}px`, textAlign: 'center', fontSize: '13px', color: redesignText.secondary }}>
               Chargement...
             </div>
           ) : filteredItems.length === 0 ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: theme.text.secondary }}>
+            <div style={{ padding: `${redesignSpacing.xl}px ${redesignSpacing.md}px`, textAlign: 'center', fontSize: '13px', color: redesignText.secondary }}>
               Aucun résultat trouvé
             </div>
           ) : (
             Object.entries(groupedItems).map(([category, categoryItems]) => (
-              <div key={category} style={{ marginBottom: '1rem' }}>
+              <div key={category} style={{ marginBottom: `${redesignSpacing.sm}px` }}>
                 <div
                   style={{
-                    fontSize: remSize('small'),
-                    fontWeight: 'bold',
-                    color: theme.text.secondary,
-                    textTransform: 'uppercase',
-                    padding: '0.5rem 0.75rem',
-                    backgroundColor: theme.background.secondary,
+                    ...redesignMonoLabelStyle,
+                    fontSize: '10px',
+                    letterSpacing: '0.12em',
+                    color: redesignText.muted,
+                    padding: `${redesignSpacing.sm}px ${redesignSpacing.md}px ${redesignSpacing.xs}px`,
                   }}
                 >
                   {CATEGORY_LABELS[category as CommandPaletteItem['category']]}
@@ -352,18 +374,23 @@ export function CommandPalette({ isOpen, onClose, keyboardBottomInsetPx = 0 }: C
                       onClick={() => item.action()}
                       onMouseEnter={() => setHighlightedIndex(globalIndex)}
                       style={{
-                        padding: '0.75rem 1rem',
+                        ...listItemSelectionStyle(isHighlighted),
+                        padding: `${redesignSpacing.sm}px ${redesignSpacing.md}px`,
                         cursor: 'pointer',
-                        backgroundColor: isHighlighted ? theme.border.focus : 'transparent',
-                        color: theme.text.primary,
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '0.25rem',
                       }}
                     >
-                      <div style={{ fontWeight: isHighlighted ? 'bold' : 'normal' }}>{item.label}</div>
+                      <div
+                        style={{
+                          fontSize: remSize('section'),
+                          color: isHighlighted ? redesignText.strong : redesignText.row,
+                        }}
+                      >
+                        {item.label}
+                      </div>
                       {item.description && (
-                        <div style={{ fontSize: remSize('accent'), color: theme.text.secondary }}>{item.description}</div>
+                        <div style={{ fontSize: remSize('accent'), color: redesignText.secondary }}>{item.description}</div>
                       )}
                     </div>
                   )
@@ -376,24 +403,25 @@ export function CommandPalette({ isOpen, onClose, keyboardBottomInsetPx = 0 }: C
         {/* Aide */}
         <div
           style={{
-            marginTop: '0.5rem',
-            paddingTop: '0.5rem',
-            borderTop: `1px solid ${theme.border.primary}`,
-            fontSize: remSize('small'),
-            color: theme.text.secondary,
+            marginTop: `${redesignSpacing.sm}px`,
+            paddingTop: `${redesignSpacing.sm}px`,
+            borderTop: `1px solid ${redesignHairline.standard}`,
+            fontSize: '11px',
+            color: redesignText.muted,
             display: 'flex',
-            gap: '1rem',
+            flexWrap: 'wrap',
+            gap: `${redesignSpacing.md}px`,
             justifyContent: 'center',
           }}
         >
           <span>
-            <kbd style={{ padding: '0.125rem 0.25rem', backgroundColor: theme.input.background, borderRadius: '2px' }}>↑↓</kbd> Naviguer
+            <kbd style={kbdStyle}>↑↓</kbd> Naviguer
           </span>
           <span>
-            <kbd style={{ padding: '0.125rem 0.25rem', backgroundColor: theme.input.background, borderRadius: '2px' }}>Enter</kbd> Sélectionner
+            <kbd style={kbdStyle}>Enter</kbd> Sélectionner
           </span>
           <span>
-            <kbd style={{ padding: '0.125rem 0.25rem', backgroundColor: theme.input.background, borderRadius: '2px' }}>Esc</kbd> Fermer
+            <kbd style={kbdStyle}>Esc</kbd> Fermer
           </span>
         </div>
       </div>

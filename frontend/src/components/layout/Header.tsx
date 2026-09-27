@@ -19,6 +19,8 @@ import {
   redesignAccent,
   redesignDisclosureArrow,
   redesignFont,
+  redesignRadius,
+  redesignSpacing,
   redesignText,
 } from '../../theme/redesignTokens'
 import { useGenerationElapsed } from '../../hooks/useGenerationRunState'
@@ -372,7 +374,7 @@ export function Header() {
                 fontFamily: redesignFont.mono,
                 fontSize: '10.5px',
                 letterSpacing: '0.06em',
-                color: '#8fb0ff',
+                color: redesignAccent.text,
                 whiteSpace: 'nowrap',
               }}
             >
@@ -642,20 +644,28 @@ export function Header() {
             type="button"
             data-testid="header-login-button"
             onClick={() => navigate('/login')}
-            style={{
-              minHeight: TOUCH_TARGET_MIN_PX,
-              minWidth: TOUCH_TARGET_MIN_PX,
-              padding: '0.5rem 1rem',
-              fontSize: remSize('body'),
-              fontWeight: 600,
-              backgroundColor: theme.button.primary.background,
-              color: theme.button.primary.color,
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
+            style={{ ...headerMonoLinkStyle, padding: 0 }}
           >
-            Connexion
+            {/* Bouton secondaire : l'écran a déjà son bouton plein (Générer). La cible
+                tactile reste celle du conteneur, le contour ne dessine que 30 px. */}
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                height: 30,
+                padding: `0 ${redesignSpacing.md}px`,
+                border: `1px solid ${theme.button.default.border}`,
+                borderRadius: redesignRadius.control,
+                fontFamily: redesignFont.sans,
+                fontSize: '13px',
+                fontWeight: 500,
+                letterSpacing: 0,
+                textTransform: 'none',
+                color: redesignText.body,
+              }}
+            >
+              Connexion
+            </span>
           </button>
         )}
       </div>

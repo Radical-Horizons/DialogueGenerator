@@ -4,6 +4,25 @@
 import { useState, useEffect } from 'react'
 import { theme } from '../../theme'
 import { getAllShortcuts, formatShortcut } from '../../hooks/useKeyboardShortcuts'
+import {
+  redesignFont,
+  redesignHairline,
+  redesignRadius,
+  redesignSpacing,
+  redesignText,
+} from '../../theme/redesignTokens'
+import { listRowHairlineBorder } from '../../theme/selectionTokens'
+
+const KBD_STYLE: React.CSSProperties = {
+  fontFamily: redesignFont.mono,
+  fontSize: '10.5px',
+  color: redesignText.muted,
+  padding: '2px 6px',
+  border: `1px solid ${redesignHairline.strong}`,
+  borderRadius: '4px',
+  backgroundColor: 'transparent',
+  whiteSpace: 'nowrap',
+}
 
 export interface KeyboardShortcutsHelpProps {
   isOpen: boolean
@@ -81,28 +100,38 @@ export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelp
     >
       <div
         style={{
-          backgroundColor: theme.background.panel,
-          borderRadius: '8px',
-          padding: '2rem',
+          backgroundColor: theme.background.elevated,
+          border: `1px solid ${redesignHairline.strong}`,
+          borderRadius: `${redesignRadius.frame}px`,
+          padding: `${redesignSpacing.lg}px`,
           maxWidth: '600px',
           width: '90%',
           maxHeight: '80vh',
           overflowY: 'auto',
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+          boxSizing: 'border-box',
+          boxShadow: theme.shadow.card,
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h2 style={{ margin: 0, color: theme.text.primary }}>Raccourcis clavier</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: `${redesignSpacing.md}px` }}>
+          <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: redesignText.strong }}>Raccourcis clavier</h2>
           <button
             onClick={onClose}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = redesignHairline.rowHover
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+            }}
             style={{
-              background: 'none',
+              background: 'transparent',
               border: 'none',
-              fontSize: '1.5rem',
+              borderRadius: `${redesignRadius.control}px`,
+              fontSize: '18px',
+              lineHeight: 1,
               cursor: 'pointer',
-              color: theme.text.secondary,
-              padding: '0.25rem 0.5rem',
+              color: redesignText.muted,
+              padding: `2px ${redesignSpacing.xs}px`,
             }}
             aria-label="Fermer"
           >
@@ -110,7 +139,7 @@ export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelp
           </button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
           {shortcuts.map((shortcut, index) => (
             <div
               key={index}
@@ -118,41 +147,26 @@ export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelp
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: '0.75rem',
-                backgroundColor: theme.background.secondary,
-                borderRadius: '4px',
+                gap: `${redesignSpacing.md}px`,
+                padding: `${redesignSpacing.sm}px 0`,
+                borderBottom: listRowHairlineBorder,
               }}
             >
-              <span style={{ color: theme.text.secondary }}>{shortcut.description}</span>
-              <kbd
-                style={{
-                  padding: '0.25rem 0.5rem',
-                  backgroundColor: theme.input.background,
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
-                  fontSize: '0.85rem',
-                  fontFamily: 'monospace',
-                  color: theme.text.primary,
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-                }}
-              >
-                {formatShortcut(shortcut.key)}
-              </kbd>
+              <span style={{ fontSize: '13px', color: redesignText.body }}>{shortcut.description}</span>
+              <kbd style={KBD_STYLE}>{formatShortcut(shortcut.key)}</kbd>
             </div>
           ))}
         </div>
 
         <div
           style={{
-            marginTop: '1.5rem',
-            paddingTop: '1rem',
-            borderTop: `1px solid ${theme.border.primary}`,
-            fontSize: '0.85rem',
-            color: theme.text.secondary,
+            marginTop: `${redesignSpacing.md}px`,
+            fontSize: '12px',
+            color: redesignText.secondary,
             textAlign: 'center',
           }}
         >
-          Appuyez sur <kbd style={{ padding: '0.125rem 0.25rem', backgroundColor: theme.input.background, borderRadius: '2px' }}>Esc</kbd> pour fermer
+          Appuyez sur <kbd style={KBD_STYLE}>Esc</kbd> pour fermer
         </div>
       </div>
     </div>

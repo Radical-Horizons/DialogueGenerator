@@ -2,6 +2,13 @@
  * Barre d'actions sticky avec les CTA principaux.
  */
 import { theme } from '../../theme'
+import {
+  redesignFont,
+  redesignHairline,
+  redesignRadius,
+  redesignSpacing,
+  redesignText,
+} from '../../theme/redesignTokens'
 
 export interface ActionButton {
   id: string
@@ -20,41 +27,58 @@ interface ActionBarProps {
 }
 
 export function ActionBar({ actions, isDirty = false, style }: ActionBarProps) {
-  const getButtonStyles = (variant: ActionButton['variant'] = 'secondary') => {
+  const getButtonStyles = (variant: ActionButton['variant'] = 'secondary'): React.CSSProperties => {
     const baseStyles: React.CSSProperties = {
-      padding: '0.5rem 1rem',
-      border: 'none',
-      borderRadius: '4px',
-      cursor: 'pointer',
-      fontSize: '0.9rem',
-      fontWeight: 500,
+      height: 30,
+      padding: `0 ${redesignSpacing.md}px`,
+      borderRadius: `${redesignRadius.control}px`,
+      fontSize: '12.5px',
       display: 'inline-flex',
       alignItems: 'center',
-      gap: '0.5rem',
-      transition: 'all 0.2s',
+      gap: `${redesignSpacing.xs}px`,
+      whiteSpace: 'nowrap',
     }
 
     switch (variant) {
       case 'primary':
         return {
           ...baseStyles,
+          border: `1px solid ${theme.button.primary.background}`,
           backgroundColor: theme.button.primary.background,
           color: theme.button.primary.color,
+          fontWeight: 600,
         }
+      // Destructif sans être l'action principale : contour et libellé d'erreur, pas de remplissage.
       case 'danger':
         return {
           ...baseStyles,
-          backgroundColor: '#dc3545',
-          color: '#ffffff',
+          border: `1px solid ${theme.state.error.border}`,
+          backgroundColor: 'transparent',
+          color: theme.state.error.color,
+          fontWeight: 500,
         }
       case 'secondary':
       default:
         return {
           ...baseStyles,
-          backgroundColor: theme.button.default.background,
-          color: theme.button.default.color,
-          border: `1px solid ${theme.border.primary}`,
+          border: `1px solid ${theme.button.default.border}`,
+          backgroundColor: 'transparent',
+          color: redesignText.body,
+          fontWeight: 500,
         }
+    }
+  }
+
+  const setHover = (el: HTMLButtonElement, variant: ActionButton['variant'], hovered: boolean) => {
+    if (variant === 'primary') {
+      el.style.backgroundColor = hovered
+        ? theme.button.primary.hover.background
+        : theme.button.primary.background
+      return
+    }
+    el.style.backgroundColor = hovered ? redesignHairline.rowHover : 'transparent'
+    if (variant !== 'danger') {
+      el.style.borderColor = hovered ? theme.button.default.hover.border : theme.button.default.border
     }
   }
 
@@ -64,22 +88,28 @@ export function ActionBar({ actions, isDirty = false, style }: ActionBarProps) {
         position: 'sticky',
         top: 0,
         zIndex: 100,
-        backgroundColor: theme.background.panelHeader,
-        borderBottom: `2px solid ${theme.border.primary}`,
-        padding: '0.75rem 1rem',
+        backgroundColor: theme.background.primary,
+        borderBottom: `1px solid ${redesignHairline.standard}`,
+        padding: `${redesignSpacing.sm}px ${redesignSpacing.md}px`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: '0.75rem',
+        gap: `${redesignSpacing.sm}px`,
         ...style,
       }}
     >
-      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', flex: 1 }}>
+      <div style={{ display: 'flex', gap: `${redesignSpacing.xs}px`, flexWrap: 'wrap', flex: 1 }}>
         {actions.map((action) => (
           <button
             key={action.id}
             onClick={action.onClick}
             disabled={action.disabled}
+            onMouseEnter={(e) => {
+              if (!action.disabled) setHover(e.currentTarget, action.variant, true)
+            }}
+            onMouseLeave={(e) => {
+              if (!action.disabled) setHover(e.currentTarget, action.variant, false)
+            }}
             style={{
               ...getButtonStyles(action.variant),
               opacity: action.disabled ? 0.6 : 1,
@@ -92,9 +122,11 @@ export function ActionBar({ actions, isDirty = false, style }: ActionBarProps) {
             {action.shortcut && (
               <span
                 style={{
-                  fontSize: '0.75rem',
-                  opacity: 0.7,
-                  marginLeft: '0.25rem',
+                  fontFamily: redesignFont.mono,
+                  fontSize: '10.5px',
+                  color: action.variant === 'primary' ? 'inherit' : redesignText.muted,
+                  opacity: action.variant === 'primary' ? 0.75 : 1,
+                  marginLeft: `${redesignSpacing.xs}px`,
                 }}
               >
                 {action.shortcut}
@@ -106,17 +138,30 @@ export function ActionBar({ actions, isDirty = false, style }: ActionBarProps) {
       {isDirty && (
         <div
           style={{
-            fontSize: '0.85rem',
-            color: theme.state.info.color,
-            fontStyle: 'italic',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 7,
+            fontFamily: redesignFont.mono,
+            fontSize: '10.5px',
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+            color: redesignText.secondary,
+            whiteSpace: 'nowrap',
           }}
         >
-          ● Brouillon non sauvegardé
+          <span
+            aria-hidden
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              backgroundColor: theme.state.pending.border,
+              flexShrink: 0,
+            }}
+          />
+          Brouillon non sauvegardé
         </div>
       )}
     </div>
   )
 }
-
-
-

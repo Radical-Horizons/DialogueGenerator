@@ -18,7 +18,6 @@ interface FlowSimulationPanelProps {
 interface SimulationItemListProps {
   items: ValidationErrorDetail[]
   titleId: string
-  icon: string
   singular: string
   plural: string
   itemTestId: string
@@ -28,7 +27,6 @@ interface SimulationItemListProps {
 function SimulationItemList({
   items,
   titleId,
-  icon,
   singular,
   plural,
   itemTestId,
@@ -40,7 +38,7 @@ function SimulationItemList({
   return (
     <section aria-labelledby={titleId}>
       <div id={titleId} style={{ fontWeight: 600, marginBottom: 4, color }}>
-        {icon} {items.length} {items.length > 1 ? plural : singular}
+        {items.length} {items.length > 1 ? plural : singular}
       </div>
       <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.82rem' }}>
         {items.map((item) => (
@@ -175,14 +173,13 @@ export function FlowSimulationPanel({ onClose }: FlowSimulationPanelProps) {
               data-testid="flow-simulation-ok"
               style={{ color: theme.text.secondary, fontSize: '0.85rem' }}
             >
-              ✅ Aucun problème détecté
+              Aucun problème détecté
             </p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <SimulationItemList
                 items={last.dead_ends}
                 titleId="flow-dead-ends-title"
-                icon="🚫"
                 singular="dead end"
                 plural="dead ends"
                 itemTestId="flow-simulation-dead-end-item"
@@ -191,7 +188,6 @@ export function FlowSimulationPanel({ onClose }: FlowSimulationPanelProps) {
               <SimulationItemList
                 items={last.cul_de_sacs}
                 titleId="flow-cul-de-sacs-title"
-                icon="⚠️"
                 singular="cul-de-sac"
                 plural="cul-de-sacs"
                 itemTestId="flow-simulation-cul-de-sac-item"

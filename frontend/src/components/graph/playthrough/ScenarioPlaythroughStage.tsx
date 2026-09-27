@@ -50,7 +50,7 @@ export function ScenarioPlaythroughStage({ step, transientMessage }: ScenarioPla
             marginBottom: '1rem',
             padding: '10px 16px',
             borderRadius: 8,
-            backgroundColor: theme.state.info?.background ?? 'rgba(100, 108, 255, 0.15)',
+            backgroundColor: theme.state.info.background,
             border: `1px solid ${playthroughChrome.choiceAccent}`,
             color: theme.text.primary,
             fontSize: '0.9rem',

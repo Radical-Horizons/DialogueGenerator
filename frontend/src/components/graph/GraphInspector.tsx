@@ -234,7 +234,7 @@ export function GraphInspectorNodeHeading({
             fontFamily: redesignFont.serif,
             fontSize: '14.5px',
             lineHeight: 1.55,
-            color: '#f0efe9',
+            color: redesignText.dialogue,
           }}
         >
           {line}
@@ -265,7 +265,7 @@ export function GraphInspectorPrimaryAction({
         height: 40,
         borderRadius: `${redesignRadius.control}px`,
         border: 'none',
-        backgroundColor: redesignAccent.base,
+        backgroundColor: redesignAccent.fill,
         color: '#ffffff',
         display: 'flex',
         alignItems: 'center',
@@ -282,7 +282,7 @@ export function GraphInspectorPrimaryAction({
           style={{
             fontFamily: redesignFont.mono,
             fontSize: '10.5px',
-            color: 'rgba(255,255,255,0.6)',
+            color: theme.button.primary.color,
           }}
         >
           {shortcut}

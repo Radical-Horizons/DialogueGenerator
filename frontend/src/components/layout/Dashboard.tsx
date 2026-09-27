@@ -216,7 +216,7 @@ function PanelExpandButton({
   const globalOpacity = isActive ? 1 : 0.38
   /* Fond opaque même au repos pour éviter que les éléments derrière (ex: flèche native du <select>)
    * transparaissent à travers le rail — seuls les textes/bords/ombres varient avec l'opacité globale. */
-  const bg = isActive ? `rgba(0,123,255,0.22)` : 'rgba(18, 18, 22, 1)'
+  const bg = isActive ? `${accentColor}38` : 'rgba(18, 18, 22, 1)'
   const borderColor = isActive ? accentColor : 'rgba(255,255,255,0.15)'
   const glow = isActive
     ? `0 0 18px ${accentColor}55, 0 6px 18px rgba(0,0,0,0.5)`
@@ -679,8 +679,8 @@ export function Dashboard() {
                     minHeight: '44px',
                     padding: '0.5rem 0.75rem',
                     fontSize: remSize('body'),
-                    fontWeight: 700,
-                    backgroundColor: redesignAccent.base,
+                    fontWeight: 600,
+                    backgroundColor: redesignAccent.fill,
                     color: theme.button.primary.color,
                     border: 'none',
                     borderRadius: '6px',
@@ -1261,8 +1261,8 @@ export function Dashboard() {
                 height: 46,
                 padding: '0 0.75rem',
                 fontSize: remSize('section'),
-                fontWeight: 'bold',
-                backgroundColor: redesignAccent.base,
+                fontWeight: 600,
+                backgroundColor: redesignAccent.fill,
                 color: theme.button.primary.color,
                 border: 'none',
                 borderRadius: 6,
@@ -1282,7 +1282,6 @@ export function Dashboard() {
                   style={{
                     fontFamily: redesignFont.mono,
                     fontSize: remSize('caption'),
-                    opacity: 0.8,
                     fontWeight: 'normal',
                   }}
                 >

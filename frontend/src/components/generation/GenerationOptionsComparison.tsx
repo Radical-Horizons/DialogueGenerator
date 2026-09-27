@@ -112,7 +112,7 @@ function OpenOptionBody({ diag }: { diag: OptionDiagnostics }) {
             fontFamily: redesignFont.serif,
             fontSize: '16.5px',
             lineHeight: 1.65,
-            color: '#f0efe9',
+            color: redesignText.dialogue,
           }}
         >
           {diag.line}
@@ -155,7 +155,7 @@ function OpenOptionBody({ diag }: { diag: OptionDiagnostics }) {
                     fontFamily: redesignFont.mono,
                     fontSize: '10px',
                     letterSpacing: '0.06em',
-                    color: choice.emphasised ? '#8fb0ff' : redesignText.label,
+                    color: choice.emphasised ? redesignAccent.text : redesignText.label,
                     flexShrink: 0,
                   }}
                 >
@@ -396,7 +396,7 @@ export function GenerationOptionsComparison({
         >
           <span
             data-testid="options-progress-label"
-            style={{ ...monoLabelStyle, color: allSettled ? redesignText.label : '#8fb0ff' }}
+            style={{ ...monoLabelStyle, color: allSettled ? redesignText.label : redesignAccent.text }}
           >
             {allSettled
               ? `${doneCount} OPTION${doneCount > 1 ? 'S' : ''} SUR ${slots.length} — À COMPARER`
@@ -511,7 +511,7 @@ export function GenerationOptionsComparison({
                       style={{
                         fontFamily: redesignFont.mono,
                         fontSize: '11px',
-                        color: open ? '#8fb0ff' : redesignText.label,
+                        color: open ? redesignAccent.text : redesignText.label,
                         flexShrink: 0,
                       }}
                     >

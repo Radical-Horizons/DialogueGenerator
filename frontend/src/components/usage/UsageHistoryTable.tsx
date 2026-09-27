@@ -81,41 +81,45 @@ export function UsageHistoryTable({
       </div>
 
       {records.length === 0 ? (
-        <div className="usage-history-empty">Aucun enregistrement trouvé</div>
+        <div className="usage-history-empty">
+          Aucun appel sur cette période. Chaque génération s&apos;inscrira ici avec son coût et sa durée.
+        </div>
       ) : (
         <>
-          <table className="usage-history-table__table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Modèle</th>
-                <th>Endpoint</th>
-                <th>Tokens</th>
-                <th>Coût</th>
-                <th>Durée</th>
-                <th>Variantes</th>
-                <th>Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              {records.map((record) => (
-                <tr key={record.request_id} className={record.success ? '' : 'error-row'}>
-                  <td>{formatDate(record.timestamp)}</td>
-                  <td>{record.model_name}</td>
-                  <td className="endpoint-cell">{record.endpoint}</td>
-                  <td>{record.total_tokens.toLocaleString()}</td>
-                  <td>{formatCost(record.estimated_cost)}</td>
-                  <td>{formatDuration(record.duration_ms)}</td>
-                  <td>{record.k_variants}</td>
-                  <td>
-                    <span className={`status-badge ${record.success ? 'success' : 'error'}`}>
-                      {record.success ? '✓' : '✗'}
-                    </span>
-                  </td>
+          <div className="usage-history-table__scroll">
+            <table className="usage-history-table__table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Modèle</th>
+                  <th>Endpoint</th>
+                  <th className="num-cell">Tokens</th>
+                  <th className="num-cell">Coût</th>
+                  <th className="num-cell">Durée</th>
+                  <th className="num-cell">Variantes</th>
+                  <th>Statut</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {records.map((record) => (
+                  <tr key={record.request_id} className={record.success ? '' : 'error-row'}>
+                    <td className="date-cell">{formatDate(record.timestamp)}</td>
+                    <td className="model-cell">{record.model_name}</td>
+                    <td className="endpoint-cell">{record.endpoint}</td>
+                    <td className="num-cell">{record.total_tokens.toLocaleString()}</td>
+                    <td className="num-cell">{formatCost(record.estimated_cost)}</td>
+                    <td className="num-cell">{formatDuration(record.duration_ms)}</td>
+                    <td className="num-cell">{record.k_variants}</td>
+                    <td>
+                      <span className={`status-badge ${record.success ? 'success' : 'error'}`}>
+                        {record.success ? 'Succès' : 'Échec'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           <div className="usage-history-table__pagination">
             <button
@@ -141,7 +145,3 @@ export function UsageHistoryTable({
     </div>
   )
 }
-
-
-
-

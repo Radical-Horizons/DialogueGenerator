@@ -2,6 +2,12 @@
  * Bandeau d'avertissement pour afficher des notifications non-bloquantes.
  */
 import { theme } from '../../theme'
+import {
+  redesignHairline,
+  redesignRadius,
+  redesignSpacing,
+  redesignText,
+} from '../../theme/redesignTokens'
 
 export interface WarningBannerProps {
   message: string
@@ -21,18 +27,20 @@ export function WarningBanner({
   return (
     <div
       style={{
-        padding: '0.75rem 1rem',
-        paddingRight: onDismiss ? '2.25rem' : '1rem',
-        backgroundColor: theme.state.warning.background || '#fff3cd',
-        border: `1px solid ${theme.state.warning.border || '#ffc107'}`,
-        borderRadius: '6px',
-        color: theme.state.warning.color || '#856404',
-        fontSize: '0.875rem',
+        padding: `${redesignSpacing.sm}px ${redesignSpacing.md}px`,
+        paddingRight: onDismiss ? `${redesignSpacing.xl}px` : `${redesignSpacing.md}px`,
+        // Teinte de `theme.state.warning.color` (#ffd43b) à faible opacité : un voile, pas un bloc coloré.
+        backgroundColor: 'rgba(255, 212, 59, 0.06)',
+        border: '1px solid rgba(255, 212, 59, 0.25)',
+        borderRadius: `${redesignRadius.control}px`,
+        color: redesignText.body,
+        fontSize: '13px',
+        lineHeight: 1.5,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'stretch',
-        gap: '0.75rem',
-        marginBottom: '1rem',
+        gap: `${redesignSpacing.sm}px`,
+        marginBottom: `${redesignSpacing.md}px`,
         position: 'relative',
         ...style,
       }}
@@ -42,22 +50,22 @@ export function WarningBanner({
           onClick={onDismiss}
           style={{
             position: 'absolute',
-            top: '0.5rem',
-            right: '0.5rem',
-            padding: '0.25rem 0.5rem',
+            top: `${redesignSpacing.xs}px`,
+            right: `${redesignSpacing.xs}px`,
+            padding: `2px ${redesignSpacing.xs}px`,
             border: 'none',
-            borderRadius: '4px',
+            borderRadius: `${redesignRadius.control}px`,
             backgroundColor: 'transparent',
-            color: theme.state.warning.color || '#856404',
+            color: redesignText.muted,
             cursor: 'pointer',
-            fontSize: '1.25rem',
+            fontSize: '16px',
             lineHeight: 1,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.1)'
+            e.currentTarget.style.backgroundColor = redesignHairline.rowHover
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = 'transparent'
@@ -67,8 +75,18 @@ export function WarningBanner({
           ×
         </button>
       )}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', width: '100%' }}>
-        <span style={{ fontSize: '1rem', flexShrink: 0 }}>⚠️</span>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: `${redesignSpacing.sm}px`, width: '100%' }}>
+        <span
+          aria-hidden
+          style={{
+            width: 6,
+            height: 6,
+            borderRadius: '50%',
+            backgroundColor: theme.state.warning.color,
+            flexShrink: 0,
+            marginTop: 7,
+          }}
+        />
         <span style={{ flex: 1 }}>{message}</span>
       </div>
       {onAction && actionLabel && (
@@ -76,21 +94,24 @@ export function WarningBanner({
           onClick={onAction}
           style={{
             alignSelf: 'flex-start',
-            padding: '0.375rem 0.75rem',
-            border: `1px solid ${theme.state.warning.border || '#ffc107'}`,
-            borderRadius: '4px',
-            backgroundColor: theme.button.default.background || '#fff',
-            color: theme.state.warning.color || '#856404',
+            height: 30,
+            padding: `0 ${redesignSpacing.md}px`,
+            border: `1px solid ${theme.button.default.border}`,
+            borderRadius: `${redesignRadius.control}px`,
+            backgroundColor: 'transparent',
+            color: redesignText.body,
             cursor: 'pointer',
-            fontSize: '0.875rem',
-            fontWeight: '500',
+            fontSize: '12.5px',
+            fontWeight: 500,
             whiteSpace: 'nowrap',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = theme.button.default.hover?.background || '#f8f9fa'
+            e.currentTarget.style.backgroundColor = redesignHairline.rowHover
+            e.currentTarget.style.borderColor = theme.button.default.hover.border
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = theme.button.default.background || '#fff'
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.borderColor = theme.button.default.border
           }}
         >
           {actionLabel}

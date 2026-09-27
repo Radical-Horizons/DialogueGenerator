@@ -38,9 +38,6 @@ export function ScenarioPlaythroughEndScreen({
         gap: '1.25rem',
       }}
     >
-      <div style={{ fontSize: '2.5rem' }} aria-hidden>
-        🏁
-      </div>
       <h2 style={{ margin: 0, color: theme.text.primary, fontSize: '1.5rem' }}>Fin du dialogue</h2>
       <div
         style={{

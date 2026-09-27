@@ -92,7 +92,7 @@ export function SchemaValidationPanel({
             data-testid="schema-loading-indicator"
             style={{ textAlign: 'center', padding: '1rem 0', color: theme.text.secondary }}
           >
-            ⏳ Validation en cours…
+            Validation en cours…
           </div>
         )}
 
@@ -114,8 +114,8 @@ export function SchemaValidationPanel({
               }}
             >
               {isValid
-                ? '✅ conforme'
-                : `❌ ${errorCount} erreur${errorCount > 1 ? 's' : ''} détectée${errorCount > 1 ? 's' : ''}`}
+                ? '✓ conforme'
+                : `✗ ${errorCount} erreur${errorCount > 1 ? 's' : ''} détectée${errorCount > 1 ? 's' : ''}`}
             </div>
 
             {isValid && warnings.length === 0 && (

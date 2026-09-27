@@ -317,10 +317,11 @@ export function UnityDialogueDetails({
                 style={{
                   padding: tb.toolbarButtonPadding,
                   minHeight: `${tb.toolbarButtonMinHeightPx}px`,
-                  border: `1px solid ${theme.button.secondary.border}`,
+                  // Destructif mais pas primaire : contour et texte d'erreur, pas de fond plein.
+                  border: `1px solid ${theme.state.error.border}`,
                   borderRadius: '6px',
-                  backgroundColor: '#dc3545',
-                  color: '#ffffff',
+                  backgroundColor: 'transparent',
+                  color: theme.state.error.color,
                   cursor: isDeleting ? 'not-allowed' : 'pointer',
                   opacity: isDeleting ? 0.6 : 1,
                   fontSize: `${tb.toolbarButtonFontRem}rem`,

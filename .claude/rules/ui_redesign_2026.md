@@ -55,7 +55,8 @@ libertés : données factices (noms, chiffres de tokens) et placement des nœuds
 
 Invariants transverses (détail dans le README) :
 
-- Un **seul** bouton plein `#4f7fff` par écran — sinon bordure `#2e2e36`, fond transparent.
+- Un **seul** bouton plein par écran, rempli de `redesignAccent.fill` (`#3d6ae8`, libellé blanc à 4,75:1) — jamais `redesignAccent.base`, réservé aux marques (sélection, jauge, filet d'onglet). Sinon bordure `#2e2e36`, fond transparent.
+- Champs de saisie : cadre `redesignControl.inputBorder` (`#6a6a78`, 3:1), pas `#2e2e36`.
 - **Aucun chiffre en sans-serif** : tokens, coûts, compteurs, horodatages, ids → mono.
 - Espacements : **5 / 9 / 14 / 20 / 34 px**, rien entre.
 - Rayons : 6 (contrôles) · 8 (nœuds) · 99 (chips).

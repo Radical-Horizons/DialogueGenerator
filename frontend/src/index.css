@@ -1,5 +1,7 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* Instrument Sans (chargée dans index.html) : famille d'interface de la refonte.
+     Remplace la pile Inter du gabarit Vite, jamais chargée — l'app tombait sur la police système. */
+  font-family: "Instrument Sans", system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -39,11 +41,11 @@ html {
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #8fb0ff;
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: #a9c3ff;
 }
 
 body {
@@ -78,8 +80,9 @@ input[type="number"],
 input[type="email"],
 textarea,
 select {
-  background-color: #26262c;
-  border: 1px solid #3d3d46;
+  /* Valeurs de theme.input : fond un cran au-dessus de la page, cadre à 3:1 (WCAG 1.4.11). */
+  background-color: #1c1c22;
+  border: 1px solid #6a6a78;
   color: rgba(255, 255, 255, 0.87);
   border-radius: 6px;
   padding: 0.55rem 0.65rem;
@@ -95,26 +98,30 @@ input[type="email"]:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: #646cff;
-  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+  border-color: #4f7fff;
+  box-shadow: 0 0 0 2px rgba(79, 127, 255, 0.25);
 }
 
+/*
+ * Bouton par défaut = bouton secondaire de la refonte : contour, fond transparent.
+ * Le seul bouton plein d'un écran porte ses styles inline (theme.button.primary).
+ * Pas de transition : le survol des contrôles est immédiat.
+ */
 button {
-  border-radius: 8px;
-  border: 1px solid #3d3d46;
+  border-radius: 6px;
+  border: 1px solid #2e2e36;
   padding: 0.5em 1em;
   font-size: 0.9375em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #333333;
+  background-color: transparent;
   color: rgba(255, 255, 255, 0.87);
   cursor: pointer;
-  transition: all 0.25s;
 }
 
 button:hover:not(:disabled) {
-  background-color: #3a3a3a;
-  border-color: #646cff;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-color: #3d3d46;
 }
 
 button:disabled {

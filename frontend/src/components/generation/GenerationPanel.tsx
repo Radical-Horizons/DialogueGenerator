@@ -1171,7 +1171,7 @@ export function GenerationPanel() {
               padding: writingMode ? '0 20px' : undefined,
               borderRadius: 6,
               border: 'none',
-              backgroundColor: redesignAccent.base,
+              backgroundColor: redesignAccent.fill,
               color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
@@ -1196,9 +1196,9 @@ export function GenerationPanel() {
               style={{
                 fontFamily: redesignFont.mono,
                 fontSize: '11px',
-                // Sur l'accent, le blanc pur plafonne à 3,61:1 : on prend ce maximum
-                // plutôt que 2,26:1. AA reste hors d'atteinte sans changer l'accent,
-                // ce que la décision produit interdit (voir spec-audit-rendu-ui).
+                // Blanc pur sur `redesignAccent.fill` : 4,75:1 (AA). Le rappel se distingue
+                // par sa police mono, pas par une opacité réduite. Remplace l'arbitrage du
+                // 2026-08-06 (accent figé, 3,61:1), levé lors de l'intégration du design system.
                 color: theme.button.primary.color,
               }}
             >
@@ -1232,7 +1232,7 @@ export function GenerationPanel() {
               height: actionRowHeight,
               padding: '0 14px',
               borderRadius: 6,
-              border: '1px solid #2e2e36',
+              border: `1px solid ${theme.button.default.border}`,
               backgroundColor: 'transparent',
               color: optionCount > 1 ? redesignAccent.light : redesignText.secondary,
               fontFamily: redesignFont.mono,

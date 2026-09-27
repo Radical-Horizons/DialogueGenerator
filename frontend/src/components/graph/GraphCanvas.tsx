@@ -10,6 +10,7 @@ import {
   redesignFont,
   redesignHairline,
   redesignRadius,
+  redesignSurface,
   redesignText,
 } from '../../theme/redesignTokens'
 import ReactFlow, {
@@ -55,6 +56,7 @@ import {
 import { GRAPH_VIEWPORT_INTERACTION_OPTIONS } from './graphViewportInteraction'
 import {
   computeGraphMinimapSizePx,
+  graphMinimapNodeColor,
   REACT_FLOW_MINIMAP_DEFAULT_HEIGHT,
   REACT_FLOW_MINIMAP_DEFAULT_WIDTH,
 } from './graphMinimapLayout'
@@ -610,11 +612,11 @@ export const GraphCanvas = memo(function GraphCanvas() {
     }),
     []
   )
-  const reactFlowStyle = useMemo(() => ({ backgroundColor: '#101013' }), [])
+  const reactFlowStyle = useMemo(() => ({ backgroundColor: redesignSurface.canvas }), [])
   const minimapStyle = useMemo(
     () =>
       ({
-        backgroundColor: theme.background.secondary,
+        backgroundColor: redesignSurface.canvas,
         border: `1px solid ${theme.border.primary}`,
         width: minimapSize.width,
         height: minimapSize.height,
@@ -754,17 +756,10 @@ export const GraphCanvas = memo(function GraphCanvas() {
             )}
           </div>
         <MiniMap
-          nodeColor={(node) => {
-            switch (node.type) {
-              case 'dialogueNode': return '#4A90E2'
-              case 'testNode': return '#F5A623'
-              case 'endNode': return '#B8B8B8'
-              default: return '#4A90E2'
-            }
-          }}
+          nodeColor={(node) => graphMinimapNodeColor(node.type)}
           nodeBorderRadius={8}
           style={minimapStyle}
-          maskColor={`${theme.background.panel}80`}
+          maskColor={`${redesignSurface.canvas}80`}
         />
       </ReactFlow>
       {menu && (
