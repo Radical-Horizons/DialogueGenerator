@@ -33,17 +33,14 @@ test.describe('Graph Manual Node (Story 1.6)', () => {
       await page.getByLabel(/nom d'utilisateur/i).fill('admin')
       await page.getByLabel(/mot de passe/i).fill('admin123')
       await page.getByRole('button', { name: /se connecter/i }).click()
-      await Promise.race([
-        page.waitForURL('**/', { timeout: E2E_MS.short }).catch(() => {}),
-        page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.short }).catch(() => {}),
-      ])
+      await page.waitForURL('**/', { timeout: E2E_MS.short })
     }
   }
 
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
     await login(page)
-    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.ui })
+    await expect(page.getByTestId('header-section-nav')).toBeVisible({ timeout: E2E_MS.ui })
   })
 
   test.afterEach(async ({ request }, testInfo) => {

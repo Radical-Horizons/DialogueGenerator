@@ -97,6 +97,17 @@ export async function seedDocumentWithRetry(
 }
 
 /**
+ * Ouvre l'app et attend la barre supérieure (écran 1c) : la section « Générer » est
+ * ouverte par défaut. Remplace l'attente de l'ancien onglet « Génération de Dialogues ».
+ *
+ * @param page Page Playwright (session `storageState` de l'e2e).
+ */
+export async function openApp(page: Page): Promise<void> {
+  await page.goto('/')
+  await expect(page.getByTestId('header-section-nav')).toBeVisible({ timeout: E2E_MS.ui })
+}
+
+/**
  * Barre supérieure → section « Graphe » (`header-section-graph`, écran 1c).
  * Les onglets « Génération de Dialogues » / « Éditeur de Graphe » n'existent plus.
  *
@@ -110,6 +121,24 @@ export async function openGraphSection(page: Page): Promise<Locator> {
   const graphEditor = page.getByTestId('graph-editor')
   await expect(graphEditor).toBeVisible({ timeout: E2E_MS.graphPanel })
   return graphEditor
+}
+
+/**
+ * Inspecteur du graphe (écran 2e) : un nœud sélectionné s'ouvre d'abord en lecture ;
+ * « éditer » monte `NodeEditorPanel`. Remplace l'ancien onglet « Édition de nœud ».
+ *
+ * @param page Page Playwright, un nœud déjà sélectionné.
+ * @returns Le conteneur `graph-inspector`, formulaire de nœud monté.
+ */
+export async function openNodeEditor(page: Page): Promise<Locator> {
+  const inspector = page.getByTestId('graph-inspector')
+  await inspector
+    .getByTestId('graph-inspector-node-summary')
+    .getByRole('button', { name: 'éditer' })
+    .first()
+    .click()
+  await expect(inspector.locator('input[name="speaker"]')).toBeVisible({ timeout: E2E_MS.graphField })
+  return inspector
 }
 
 /**

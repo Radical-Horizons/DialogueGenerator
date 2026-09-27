@@ -87,6 +87,12 @@ export interface GraphViewState {
   // --- Edge label edit ---
   edgeLabelEditRequest: { edgeId: string } | null
 
+  /**
+   * Nœud à ouvrir directement en édition dans l'inspecteur, au lieu de la vue lecture
+   * (2e). Posé par la création manuelle : un nœud vide n'a rien à lire (Story 1.6 AC#2).
+   */
+  nodeEditRequest: string | null
+
   // --- Context menu (nœud) ---
   contextMenuRequest: { nodeId: string; x: number; y: number } | null
 
@@ -137,6 +143,9 @@ export interface GraphViewState {
   // --- Actions : edge label edit ---
   requestEdgeLabelEdit: (edgeId: string) => void
   clearEdgeLabelEdit: () => void
+
+  requestNodeEdit: (nodeId: string) => void
+  clearNodeEditRequest: () => void
 
   // --- Actions : context menu ---
   openContextMenu: (nodeId: string, x: number, y: number) => void
@@ -210,6 +219,7 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
   pendingFitView: false,
   pendingFitViewNodeIds: null,
   edgeLabelEditRequest: null,
+  nodeEditRequest: null,
   contextMenuRequest: null,
   promptViewerNodeId: null,
   aiGenerationNodeId: null,
@@ -248,6 +258,9 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
 
   requestEdgeLabelEdit: (edgeId) => set({ edgeLabelEditRequest: { edgeId } }),
   clearEdgeLabelEdit: () => set({ edgeLabelEditRequest: null }),
+
+  requestNodeEdit: (nodeId) => set({ nodeEditRequest: nodeId }),
+  clearNodeEditRequest: () => set({ nodeEditRequest: null }),
 
   openContextMenu: (nodeId, x, y) => set({ contextMenuRequest: { nodeId, x, y } }),
   closeContextMenu: () => set({ contextMenuRequest: null }),

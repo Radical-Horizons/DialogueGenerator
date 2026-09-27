@@ -4,6 +4,7 @@
 import { useCallback, type CSSProperties } from 'react'
 import type { Node, ReactFlowInstance } from 'reactflow'
 import { theme } from '../../theme'
+import { useGraphViewStore } from '../../store/graphViewStore'
 import {
   MANUAL_NODE_OFFSET_X,
   MANUAL_NODE_OFFSET_Y,
@@ -119,6 +120,8 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
             }
             const node = createEmptyNode(position)
             addNode(node)
+            // Avant la sélection : l'inspecteur lit la demande au changement de nœud.
+            useGraphViewStore.getState().requestNodeEdit(node.id)
             setSelectedNode(node.id)
             if (reactFlowInstance) {
               requestAnimationFrame(() => {

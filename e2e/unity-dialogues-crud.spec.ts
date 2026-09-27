@@ -1,147 +1,86 @@
 /**
  * Tests E2E pour les opérations CRUD des dialogues Unity (P0).
- * 
- * Scénarios P0 critiques:
- * - Lister les dialogues Unity
- * - Lire un dialogue Unity
- * - Supprimer un dialogue Unity
+ *
+ * Section « Éditer » (barre supérieure) : un document unique est seedé par l'API,
+ * retrouvé par la recherche de la liste, ouvert, puis supprimé par le menu contextuel.
  */
-import { test, expect, type Page } from '@playwright/test'
+import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test'
 
+import { seedDocumentWithRetry, uniqueE2EDocumentId } from './helpers'
 import { E2E_MS } from './timeouts'
 
-test.describe('Unity Dialogues CRUD Operations [P0]', { tag: '@smoke' }, () => {
-  const login = async (page: Page) => {
-    const loginHeading = page.getByRole('heading', { name: /connexion/i })
-    const isLoginPage = await loginHeading.isVisible({ timeout: E2E_MS.probe }).catch(() => false)
-    
-    if (isLoginPage) {
-      await page.getByLabel(/nom d'utilisateur/i).fill('admin')
-      await page.getByLabel(/mot de passe/i).fill('admin123')
-      await page.getByRole('button', { name: /se connecter/i }).click()
-      await Promise.race([
-        page.waitForURL('**/', { timeout: E2E_MS.short }).catch(() => {}),
-        page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.short }).catch(() => {})
-      ])
-    }
+const API_BASE = process.env.API_BASE ?? 'http://127.0.0.1:4243'
+const FIXTURE_PREFIX = 'e2e-unity-crud'
+const NODE = 'node-c3d4e5f6789012345678901abcdef123'
+const LINE = 'Ligne témoin du CRUD e2e.'
+
+const FIXTURE_DOC = {
+  schemaVersion: '1.1.0',
+  nodes: [{ id: NODE, stableId: NODE, displayName: 'Témoin', speaker: 'E2E', line: LINE }],
+}
+
+async function deleteFixture(request: APIRequestContext, fixtureId: string): Promise<void> {
+  const res = await request.delete(`${API_BASE}/api/v1/documents/${fixtureId}`)
+  if (!res.ok() && res.status() !== 404) {
+    throw new Error(`Cleanup DELETE failed ${res.status()}: ${await res.text().catch(() => '')}`)
   }
+}
 
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/')
-    await login(page)
-    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.ui })
+/** Section « Éditer » → liste filtrée sur l'id unique du document seedé. */
+async function findInEditionList(page: Page, fixtureId: string): Promise<{ list: Locator; item: Locator }> {
+  await page.goto('/')
+  const edition = page.getByTestId('header-section-edition')
+  await expect(edition).toBeVisible({ timeout: E2E_MS.ui })
+  await edition.click()
+  const list = page.locator('[data-testid="unity-dialogue-list"]:visible')
+  const search = list.getByPlaceholder(/chercher/i)
+  await expect(search).toBeVisible({ timeout: E2E_MS.dashboardList })
+  await search.fill(fixtureId)
+  return { list, item: list.getByTestId('unity-dialogue-item') }
+}
+
+test.describe('Unity Dialogues CRUD Operations [P0]', { tag: '@smoke' }, () => {
+  test.afterEach(async ({ request }, testInfo) => {
+    await deleteFixture(request, uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo))
   })
 
-  test('[P0] should list Unity dialogues', async ({ page }) => {
-    // GIVEN: Je suis sur l'application
-    // WHEN: Je navigue vers la bibliothèque de dialogues Unity
-    const dialoguesTab = page.getByRole('button', { name: /dialogues|bibliothèque/i }).or(
-      page.locator('button').filter({ hasText: /dialogue/i })
-    )
-    
-    if (await dialoguesTab.isVisible({ timeout: E2E_MS.control }).catch(() => false)) {
-      await dialoguesTab.click()
-      
-      // Attendre que la liste se charge
-      await page.waitForSelector('[data-testid*="dialogue"]', { timeout: E2E_MS.short }).catch(() => {
-        // Si pas de data-testid, chercher une liste ou table
-        return page.waitForSelector('div:has-text(".json")', { timeout: E2E_MS.short })
-      })
-      
-      // THEN: La liste des dialogues Unity s'affiche
-      const dialogueList = page.locator('[data-testid*="dialogue"]').or(
-        page.locator('div:has-text(".json")')
-      )
-      const count = await dialogueList.count()
-      
-      // Vérifier qu'au moins la structure de liste existe
-      expect(count).toBeGreaterThanOrEqual(0)
-    } else {
-      test.skip('Fonctionnalité Dialogues Unity non disponible - test ignoré')
-    }
+  test('[P0] should list Unity dialogues', async ({ page, request }, testInfo) => {
+    const fixtureId = uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo)
+    await seedDocumentWithRetry(request, API_BASE, fixtureId, FIXTURE_DOC)
+
+    const { item } = await findInEditionList(page, fixtureId)
+
+    await expect(item).toHaveCount(1, { timeout: E2E_MS.dashboardList })
   })
 
-  test('[P0] should read a Unity dialogue', async ({ page }) => {
-    // GIVEN: Des dialogues Unity existent
-    // WHEN: Je clique sur un dialogue dans la liste
-    const dialoguesTab = page.getByRole('button', { name: /dialogues|bibliothèque/i })
-    
-    if (await dialoguesTab.isVisible({ timeout: E2E_MS.control }).catch(() => false)) {
-      await dialoguesTab.click()
-      
-      await page.waitForSelector('[data-testid*="dialogue"]', { timeout: E2E_MS.short }).catch(() => {
-        return page.waitForSelector('div:has-text(".json")', { timeout: E2E_MS.short })
-      })
-      
-      // Cliquer sur le premier dialogue
-      const firstDialogue = page.locator('[data-testid*="dialogue"]').or(
-        page.locator('div:has-text(".json")')
-      ).first()
-      
-      if (await firstDialogue.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
-        await firstDialogue.click()
-        
-        // THEN: Le contenu du dialogue s'affiche
-        // Vérifier qu'on voit le contenu JSON ou une vue structurée
-        await expect(
-          page.locator('pre').or(
-            page.locator('[data-testid*="dialogue-content"]')
-          ).or(
-            page.getByText(/id.*speaker.*line/i)
-          )
-        ).toBeVisible({ timeout: E2E_MS.control })
-      }
-    } else {
-      test.skip('Fonctionnalité Dialogues Unity non disponible - test ignoré')
-    }
+  test('[P0] should read a Unity dialogue', async ({ page, request }, testInfo) => {
+    const fixtureId = uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo)
+    await seedDocumentWithRetry(request, API_BASE, fixtureId, FIXTURE_DOC)
+
+    const { item } = await findInEditionList(page, fixtureId)
+    await expect(item).toHaveCount(1, { timeout: E2E_MS.dashboardList })
+    await item.click()
+
+    const shownAsText = page.getByText(LINE, { exact: false })
+    const shownInField = page.locator('textarea:visible, input:visible').filter({ hasText: LINE })
+    await expect(shownAsText.or(shownInField).first()).toBeVisible({ timeout: E2E_MS.graphPanel })
   })
 
-  test('[P0] should delete a Unity dialogue', async ({ page }) => {
-    // GIVEN: Un dialogue Unity existe
-    // WHEN: Je supprime le dialogue
-    const dialoguesTab = page.getByRole('button', { name: /dialogues|bibliothèque/i })
-    
-    if (await dialoguesTab.isVisible({ timeout: E2E_MS.control }).catch(() => false)) {
-      await dialoguesTab.click()
-      
-      await page.waitForSelector('[data-testid*="dialogue"]', { timeout: E2E_MS.short }).catch(() => {
-        return page.waitForSelector('div:has-text(".json")', { timeout: E2E_MS.short })
-      })
-      
-      // Cliquer droit sur un dialogue ou utiliser un bouton supprimer
-      const firstDialogue = page.locator('[data-testid*="dialogue"]').or(
-        page.locator('div:has-text(".json")')
-      ).first()
-      
-      if (await firstDialogue.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
-        // Clic droit pour menu contextuel
-        await firstDialogue.click({ button: 'right' })
-        
-        // Cliquer sur "Supprimer"
-        const deleteButton = page.getByRole('button', { name: /supprimer|delete/i }).or(
-          page.getByText(/supprimer/i)
-        )
-        
-        if (await deleteButton.isVisible({ timeout: E2E_MS.micro }).catch(() => false)) {
-          await deleteButton.click()
-          
-          // Confirmer si modal de confirmation
-          const confirmButton = page.getByRole('button', { name: /confirmer|oui/i })
-          if (await confirmButton.isVisible({ timeout: E2E_MS.micro }).catch(() => false)) {
-            await confirmButton.click()
-          }
-          
-          // THEN: Le dialogue est supprimé
-          await expect(
-            page.getByText(/supprimé|deleted/i)
-          ).toBeVisible({ timeout: E2E_MS.control }).catch(() => {
-            // Si pas de message, vérifier que le dialogue a disparu
-            expect(firstDialogue).not.toBeVisible({ timeout: E2E_MS.probe })
-          })
-        }
-      }
-    } else {
-      test.skip('Fonctionnalité Dialogues Unity non disponible - test ignoré')
-    }
+  test('[P0] should delete a Unity dialogue', async ({ page, request }, testInfo) => {
+    const fixtureId = uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo)
+    await seedDocumentWithRetry(request, API_BASE, fixtureId, FIXTURE_DOC)
+
+    const { item } = await findInEditionList(page, fixtureId)
+    await expect(item).toHaveCount(1, { timeout: E2E_MS.dashboardList })
+
+    await item.click({ button: 'right' })
+    const deleteEntry = page.getByTestId('dialogue-list-context-delete')
+    await expect(deleteEntry).toBeVisible({ timeout: E2E_MS.control })
+    page.once('dialog', (dialog) => void dialog.accept())
+    await deleteEntry.click()
+
+    await expect(item).toHaveCount(0, { timeout: E2E_MS.dashboardList })
+    const gone = await request.get(`${API_BASE}/api/v1/documents/${fixtureId}`)
+    expect(gone.status()).toBe(404)
   })
 })

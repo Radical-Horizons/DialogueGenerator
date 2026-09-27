@@ -20,6 +20,7 @@ import { test, expect, type APIRequestContext, type Locator, type Page } from '@
 
 import {
   openDashboardGraphTabAndSelectDocument,
+  openNodeEditor,
   seedDocumentWithRetry,
   uniqueE2EDocumentId,
 } from './helpers'
@@ -184,18 +185,6 @@ async function openAIGenerationPanel(page: Page): Promise<Locator> {
   const panel = page.getByTestId('ai-generation-panel')
   await expect(panel).toBeVisible({ timeout: E2E_MS.control })
   return panel
-}
-
-/** Inspecteur 2e : la vue lecture s'ouvre d'abord, « éditer » monte `NodeEditorPanel`. */
-async function openNodeEditor(page: Page): Promise<Locator> {
-  const inspector = page.getByTestId('graph-inspector')
-  await inspector
-    .getByTestId('graph-inspector-node-summary')
-    .getByRole('button', { name: 'éditer' })
-    .first()
-    .click()
-  await expect(inspector.locator('input[name="speaker"]')).toBeVisible({ timeout: E2E_MS.graphField })
-  return inspector
 }
 
 /** Section « Génération IA » du formulaire de nœud, dépliée. */
