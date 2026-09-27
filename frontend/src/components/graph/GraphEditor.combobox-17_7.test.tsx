@@ -233,3 +233,15 @@ describe('GraphEditor — 17.7 sélecteur de dialogue dans toolbar narrow', () =
     expect(screen.queryByTestId('dialogue-combobox-trigger')).not.toBeInTheDocument()
   })
 })
+
+describe('GraphEditor — panneau vide sans dialogue (design system)', () => {
+  it('étiquette mono « Graphe » puis une phrase, sans emoji ni icône', async () => {
+    render(<GraphEditor />)
+
+    const empty = await screen.findByTestId('graph-empty-state')
+    expect(empty).toHaveTextContent(/^Graphe/)
+    expect(empty).toHaveTextContent(/Sélectionnez un dialogue Unity dans la liste à gauche/)
+    expect(empty.textContent ?? '').not.toMatch(/\p{Extended_Pictographic}/u)
+    expect(empty.querySelector('svg, img')).toBeNull()
+  })
+})

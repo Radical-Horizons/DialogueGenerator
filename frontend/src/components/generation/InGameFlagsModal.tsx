@@ -636,7 +636,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
               }}
               title="Importer un snapshot Unity (JSON)"
             >
-              📥 Importer snapshot
+              Importer snapshot
             </button>
             {selectedFlags.size > 0 && (
               <button
@@ -652,7 +652,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
                 }}
                 title="Exporter la sélection actuelle en snapshot JSON"
               >
-                📤 Exporter sélection
+                Exporter sélection
               </button>
             )}
             <button

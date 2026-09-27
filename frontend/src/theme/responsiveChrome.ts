@@ -208,7 +208,8 @@ export const unityDialogueEditorChrome = {
     toolbarGapRem: 0.4,
     toolbarButtonPadding: '0.375rem 0.75rem',
     toolbarButtonFontRem: 0.85,
-    toolbarButtonFontWeight: 700,
+    /** Boutons secondaires de la refonte : 500. Le bouton plein monte à 600 de lui-même. */
+    toolbarButtonFontWeight: 500,
     toolbarButtonMinHeightPx: 30,
     contentPadding: unityDialogueEditorPaddingHorizontal.comfortable,
     nodeSectionGapRem: 1.25,
@@ -225,7 +226,7 @@ export const unityDialogueEditorChrome = {
     toolbarGapRem: 0.38,
     toolbarButtonPadding: '0.36rem 0.65rem',
     toolbarButtonFontRem: 0.8,
-    toolbarButtonFontWeight: 600,
+    toolbarButtonFontWeight: 500,
     /** Grille 2×2 : hauteur ~75 % de la cible tactile précédente (44px). */
     toolbarButtonMinHeightPx: 33,
     contentPadding: unityDialogueEditorPaddingHorizontal.narrow,

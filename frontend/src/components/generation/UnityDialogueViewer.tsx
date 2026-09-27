@@ -531,7 +531,7 @@ export const UnityDialogueViewer = memo(function UnityDialogueViewer({
         >
           {response.warning && (
             <div style={{ color: theme.state.error.color, marginBottom: '0.25rem' }}>
-              ⚠️ {response.warning}
+              {response.warning}
             </div>
           )}
           {response.estimated_tokens && (

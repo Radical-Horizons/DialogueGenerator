@@ -160,7 +160,7 @@ export function GenerationTracePanel({ onHide }: GenerationTracePanelProps) {
                 flexShrink: 0,
               }}
             />
-            <span style={{ fontSize: '12.5px', color: '#8fb0ff' }}>
+            <span style={{ fontSize: '12.5px', color: redesignAccent.text }}>
               {currentStep === 'Validating' ? 'valide la structure…' : 'écrit la réplique…'}
             </span>
           </div>

@@ -246,7 +246,7 @@ export const TestNode = memo(function TestNode({
         type="target"
         position={Position.Top}
         style={{
-          background: data.incomingEdgeColor ?? '#4A90E2',
+          background: data.incomingEdgeColor ?? theme.text.secondary,
           width: 12,
           height: 12,
           border: '2px solid white',

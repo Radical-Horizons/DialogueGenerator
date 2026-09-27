@@ -15,6 +15,8 @@ import {
   edgeStrokeFromSourceHandle,
   edgeStrokeFromSource,
 } from './graphEdgeBuilders'
+import { theme } from '../theme'
+import { redesignAccent } from '../theme/redesignTokens'
 
 describe('truncateChoiceLabel', () => {
   it('should return fallback "Choix N" when choiceText is undefined', () => {
@@ -145,6 +147,11 @@ describe('edgeStrokeFromSource', () => {
   it('maps nextNode/suivant to next handle color', () => {
     expect(edgeStrokeFromSource({ connectionType: 'nextNode' })).toBe(NEXT_EDGE_COLOR)
     expect(edgeStrokeFromSource({ edgeLabel: 'Suivant' })).toBe(NEXT_EDGE_COLOR)
+  })
+
+  it('le lien « suivant » est neutre : le bleu reste réservé à la sélection', () => {
+    expect(NEXT_EDGE_COLOR).toBe(theme.text.secondary)
+    expect(NEXT_EDGE_COLOR).not.toBe(redesignAccent.base)
   })
 })
 

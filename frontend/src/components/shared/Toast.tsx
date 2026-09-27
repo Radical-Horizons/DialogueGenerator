@@ -4,6 +4,13 @@
 /* eslint-disable react-refresh/only-export-components */
 import { useState, useCallback, useEffect } from 'react'
 import { theme } from '../../theme'
+import {
+  redesignFont,
+  redesignHairline,
+  redesignRadius,
+  redesignSpacing,
+  redesignText,
+} from '../../theme/redesignTokens'
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning'
 
@@ -39,73 +46,73 @@ function ToastComponent({ toast, onRemove }: ToastProps) {
     return () => clearTimeout(timer)
   }, [toast, onRemove])
 
-  const getStyles = () => {
-    const baseStyles: React.CSSProperties = {
-      padding: '0.75rem 1rem',
-      borderRadius: '4px',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-      marginBottom: '0.5rem',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      minWidth: '300px',
-      maxWidth: '500px',
-      animation: 'slideIn 0.3s ease-out',
-    }
-
-    switch (toast.type) {
-      case 'success':
-        return {
-          ...baseStyles,
-          backgroundColor: theme.state.success.background,
-          color: theme.state.success.color,
-          borderLeft: `4px solid ${theme.state.success.color}`,
-        }
-      case 'error':
-        return {
-          ...baseStyles,
-          backgroundColor: theme.state.error.background,
-          color: theme.state.error.color,
-          borderLeft: `4px solid ${theme.state.error.border}`,
-          border: `2px solid ${theme.state.error.border}`,
-          minWidth: '400px',
-          maxWidth: '600px',
-        }
-      case 'warning':
-        return {
-          ...baseStyles,
-          backgroundColor: '#3a3a1a',
-          color: '#ffd43b',
-          borderLeft: '4px solid #ffd43b',
-        }
-      case 'info':
-      default:
-        return {
-          ...baseStyles,
-          backgroundColor: theme.state.info.background,
-          color: theme.state.info.color,
-          borderLeft: `4px solid ${theme.state.info.color}`,
-        }
-    }
-  }
+  const dotColor = {
+    success: theme.state.success.color,
+    error: theme.state.error.color,
+    warning: theme.state.warning.color,
+    info: theme.state.info.color,
+  }[toast.type]
+  const heading = toast.type === 'error' ? 'Erreur' : toast.type === 'warning' ? 'Avertissement' : ''
+  const hasHeading = heading !== '' || toast.count > 1
+  const isError = toast.type === 'error'
 
   return (
-    <div style={getStyles()}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
-          {toast.type === 'error' && (
-            <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>⚠️</span>
-          )}
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: toast.type === 'error' ? 'bold' : 'normal', marginBottom: toast.type === 'error' ? '0.25rem' : 0 }}>
-              {toast.type === 'error' ? 'Erreur' : toast.type === 'warning' ? 'Avertissement' : ''}
-              {toast.count > 1 ? ` (x${toast.count})` : ''}
-            </div>
-            <span style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{toast.message}</span>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: `${redesignSpacing.sm}px`,
+        padding: `${redesignSpacing.sm}px ${redesignSpacing.md}px`,
+        marginBottom: `${redesignSpacing.sm}px`,
+        minWidth: isError ? '400px' : '300px',
+        maxWidth: isError ? '600px' : '500px',
+        backgroundColor: theme.background.elevated,
+        border: `1px solid ${redesignHairline.strong}`,
+        borderRadius: `${redesignRadius.control}px`,
+        boxShadow: theme.shadow.card,
+        animation: 'toastFadeIn 0.2s ease-out',
+      }}
+    >
+      {/* Le point s'aligne sur la première ligne : titre mono si présent, sinon le message. */}
+      <span
+        aria-hidden
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: '50%',
+          backgroundColor: dotColor,
+          flexShrink: 0,
+          marginTop: hasHeading ? 5 : 7,
+        }}
+      />
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: `${redesignSpacing.xs}px` }}>
+        {hasHeading && (
+          <div
+            style={{
+              fontFamily: redesignFont.mono,
+              fontSize: '10.5px',
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              color: redesignText.secondary,
+            }}
+          >
+            {heading}
+            {toast.count > 1 ? ` (x${toast.count})` : ''}
           </div>
-        </div>
+        )}
+        <span
+          style={{
+            fontSize: '13px',
+            lineHeight: 1.5,
+            color: redesignText.body,
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+          }}
+        >
+          {toast.message}
+        </span>
         {toast.actions && toast.actions.length > 0 && (
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+          <div style={{ display: 'flex', gap: `${redesignSpacing.xs}px`, marginTop: `${redesignSpacing.xs}px` }}>
             {toast.actions.map((action, index) => (
               <button
                 key={index}
@@ -113,18 +120,25 @@ function ToastComponent({ toast, onRemove }: ToastProps) {
                   action.action()
                   onRemove(toast.id)
                 }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = redesignHairline.rowHover
+                  e.currentTarget.style.borderColor = theme.button.default.hover.border
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.borderColor = theme.button.default.border
+                }}
                 style={{
-                  padding: '0.25rem 0.75rem',
-                  border: action.style === 'secondary' ? `1px solid ${theme.border.primary}` : 'none',
-                  borderRadius: '4px',
-                  backgroundColor:
-                    action.style === 'secondary'
-                      ? theme.button.default.background
-                      : 'rgba(255, 255, 255, 0.2)',
-                  color: 'inherit',
+                  height: 28,
+                  padding: `0 ${redesignSpacing.sm}px`,
+                  border: `1px solid ${theme.button.default.border}`,
+                  borderRadius: `${redesignRadius.control}px`,
+                  backgroundColor: 'transparent',
+                  color: action.style === 'primary' ? redesignText.strong : redesignText.body,
                   cursor: 'pointer',
-                  fontSize: '0.85rem',
-                  fontWeight: action.style === 'primary' ? 'bold' : 'normal',
+                  fontSize: '12px',
+                  fontWeight: action.style === 'primary' ? 600 : 500,
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {action.label}
@@ -138,14 +152,12 @@ function ToastComponent({ toast, onRemove }: ToastProps) {
         style={{
           background: 'none',
           border: 'none',
-          color: 'inherit',
+          color: redesignText.muted,
           cursor: 'pointer',
-          fontSize: '1.2rem',
+          fontSize: '16px',
           lineHeight: 1,
-          marginLeft: '1rem',
-          opacity: 0.7,
           padding: 0,
-          alignSelf: 'flex-start',
+          flexShrink: 0,
         }}
         aria-label="Fermer"
       >
@@ -242,15 +254,9 @@ export function ToastContainer() {
     >
       <style>
         {`
-          @keyframes slideIn {
-            from {
-              transform: translateX(100%);
-              opacity: 0;
-            }
-            to {
-              transform: translateX(0);
-              opacity: 1;
-            }
+          @keyframes toastFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
           }
         `}
       </style>

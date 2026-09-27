@@ -20,6 +20,15 @@ paths:
 Les explorations **1a** et **1b** ont été **retirées** : elles n'ont jamais été la cible. Si un
 ancien fichier les contient encore, il est périmé.
 
+## Design system
+
+Artifact « DialogueGenerator » (<https://claude.ai/artifact/REQGGaEUwUPLt2tgStXdjv>, type Design System) :
+brand book, jetons avec usage, 16 composants, écrans, correspondance avec le code. Il décrit le code
+à `dev@e54da4b06` ; pour le relire : Artifact `read` sur `project/README.md`. Point d'entrée BMAD :
+`_bmad-output/planning-artifacts/ux-design-specification/design-system-foundation.md` (écarts connus
+entre le code et le système). En cas de divergence, le code et la maquette HTML priment : corriger
+l'artifact ensuite, par fichier (`project/tokens.json` entier).
+
 ## Règle d'or : lire le HTML avant de coder
 
 Les valeurs exactes — couleurs, `font-size`, `padding`, largeurs de colonne, `letter-spacing` —
@@ -46,7 +55,8 @@ libertés : données factices (noms, chiffres de tokens) et placement des nœuds
 
 Invariants transverses (détail dans le README) :
 
-- Un **seul** bouton plein `#4f7fff` par écran — sinon bordure `#2e2e36`, fond transparent.
+- Un **seul** bouton plein par écran, rempli de `redesignAccent.fill` (`#3d6ae8`, libellé blanc à 4,75:1) — jamais `redesignAccent.base`, réservé aux marques (sélection, jauge, filet d'onglet). Sinon bordure `#2e2e36`, fond transparent.
+- Champs de saisie : cadre `redesignControl.inputBorder` (`#6a6a78`, 3:1), pas `#2e2e36`.
 - **Aucun chiffre en sans-serif** : tokens, coûts, compteurs, horodatages, ids → mono.
 - Espacements : **5 / 9 / 14 / 20 / 34 px**, rien entre.
 - Rayons : 6 (contrôles) · 8 (nœuds) · 99 (chips).

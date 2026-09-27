@@ -538,9 +538,9 @@ export function GenerationOptionsModal({
             }}
             style={{
               padding: `${redesignSpacing.sm}px ${redesignSpacing.lg}px`,
-              border: `1px solid ${redesignAccent.base}`,
+              border: `1px solid ${redesignAccent.fill}`,
               borderRadius: redesignRadius.control,
-              backgroundColor: redesignAccent.base,
+              backgroundColor: redesignAccent.fill,
               color: '#ffffff',
               fontWeight: 600,
               cursor: 'pointer',

@@ -71,8 +71,8 @@ export function InGameFlagsSummary() {
             title="Ouvrir le sélecteur de flags"
           >
             {selectedFlags.size > 0 
-              ? `🔗 ${selectedFlags.size} flag${selectedFlags.size > 1 ? 's' : ''} sélectionné${selectedFlags.size > 1 ? 's' : ''}`
-              : '🔗 Sélectionner des flags...'
+              ? `${selectedFlags.size} flag${selectedFlags.size > 1 ? 's' : ''} sélectionné${selectedFlags.size > 1 ? 's' : ''}`
+              : 'Sélectionner des flags...'
             }
           </button>
         </div>

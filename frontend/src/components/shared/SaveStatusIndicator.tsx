@@ -3,6 +3,7 @@
  */
 import { useState, useEffect } from 'react'
 import { theme } from '../../theme'
+import { redesignAccent, redesignFont, redesignText } from '../../theme/redesignTokens'
 
 export type SaveStatus = 'saved' | 'saving' | 'unsaved' | 'error'
 
@@ -15,7 +16,7 @@ export interface SaveStatusIndicatorProps {
   variant?: 'draft' | 'disk' // Optionnel, pour wording si besoin (Task 3 - Story 0.5)
   /**
    * dot = pastille colorée seule (compact) ;
-   * discreet = texte discret type « Sauvegardé ✓ » (barres d’outils modernes).
+   * discreet = pastille + libellé mono capitales type « BROUILLON SAUVEGARDÉ ✓ ».
    */
   appearance?: 'dot' | 'discreet'
   errorMessage?: string | null // Message d'erreur optionnel (Task 3 - Story 0.5)
@@ -28,12 +29,33 @@ export interface SaveStatusIndicatorProps {
   syncStatusDisplay?: SyncStatusDisplay
 }
 
-const STATUS_CONFIG: Record<SaveStatus, { label: string; color: string }> = {
-  saved: { label: 'Sauvegardé', color: theme.state.success.color },
-  saving: { label: 'Sauvegarde…', color: theme.state.info.color },
-  unsaved: { label: 'En attente', color: theme.state.warning.color },
-  error: { label: 'Erreur', color: theme.state.error.color },
+const STATUS_LABELS: Record<SaveStatus, string> = {
+  saved: 'Sauvegardé',
+  saving: 'Sauvegarde…',
+  unsaved: 'En attente',
+  error: 'Erreur',
 }
+
+/** Couleur du point d'état — mêmes teintes que les bordures de nœuds validés / en attente. */
+function statusDotColor(status: SaveStatus): string {
+  switch (status) {
+    case 'saved':
+      return theme.state.accepted.border
+    case 'saving':
+      return redesignAccent.base
+    case 'unsaved':
+      return theme.state.pending.border
+    case 'error':
+      return theme.state.error.color
+  }
+}
+
+const PULSE_KEYFRAMES = `
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+`
 
 /** Libellés brouillon local (discreet) — évite la confusion avec la sauvegarde fichier dialogue. */
 const DISCREET_DRAFT_LABELS: Record<SaveStatus, string> = {
@@ -68,7 +90,7 @@ export function SaveStatusIndicator({
   pendingCount = 0,
   syncStatusDisplay,
 }: SaveStatusIndicatorProps) {
-  const config = STATUS_CONFIG[status]
+  const statusLabel = STATUS_LABELS[status]
   const [relativeTime, setRelativeTime] = useState<string | null>(null)
 
   // Mettre à jour le temps relatif toutes les 10 secondes (Task 3 - Story 0.5)
@@ -85,7 +107,7 @@ export function SaveStatusIndicator({
   }, [status, lastSavedAt])
 
   // ADR-006: libellés Synced (seq …) / Offline, N changes queued / Error
-  let label = config.label
+  let label = statusLabel
   if (syncStatusDisplay === 'synced' && ackSeq != null) {
     label = `Synced (seq ${ackSeq})`
   } else if (syncStatusDisplay === 'offline') {
@@ -93,7 +115,7 @@ export function SaveStatusIndicator({
   } else if (syncStatusDisplay === 'error') {
     label = 'Error'
   } else if (status === 'saved' && relativeTime) {
-    label = `${config.label} ${relativeTime}`
+    label = `${statusLabel} ${relativeTime}`
   }
 
   let discreetLine = label
@@ -108,31 +130,45 @@ export function SaveStatusIndicator({
 
   const tooltipText = status === 'error' && errorMessage ? errorMessage : label
 
+  const dot = (
+    <span
+      aria-hidden
+      style={{
+        display: 'inline-block',
+        width: 6,
+        height: 6,
+        borderRadius: '50%',
+        flexShrink: 0,
+        backgroundColor: statusDotColor(status),
+        opacity: status === 'saving' ? 0.6 : 1,
+        animation: status === 'saving' ? 'pulse 1.5s ease-in-out infinite' : 'none',
+      }}
+    />
+  )
+
   if (appearance === 'discreet') {
-    const textColor =
-      status === 'error'
-        ? theme.state.error.color
-        : status === 'unsaved'
-          ? theme.text.secondary
-          : status === 'saving'
-            ? theme.state.info.color
-            : theme.text.tertiary
     return (
       <span
         style={{
-          fontSize: '0.78rem',
-          fontWeight: 500,
-          color: textColor,
-          letterSpacing: '0.01em',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 7,
+          fontFamily: redesignFont.mono,
+          fontSize: '10.5px',
+          letterSpacing: '0.05em',
+          textTransform: 'uppercase',
+          color: redesignText.secondary,
           whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
           maxWidth: 'min(220px, 42vw)',
           ...style,
         }}
         title={tooltipText}
       >
-        {syncStatusDisplay ? label : discreetLine}
+        {dot}
+        <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {syncStatusDisplay ? label : discreetLine}
+        </span>
+        <style>{PULSE_KEYFRAMES}</style>
       </span>
     )
   }
@@ -142,32 +178,13 @@ export function SaveStatusIndicator({
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '0.5rem',
-        fontSize: '0.85rem',
-        color: config.color,
+        cursor: 'default',
         ...style,
       }}
       title={tooltipText}
     >
-      <div
-        style={{
-          width: '8px',
-          height: '8px',
-          borderRadius: '50%',
-          backgroundColor: config.color,
-          opacity: status === 'saving' ? 0.6 : 1,
-          animation: status === 'saving' ? 'pulse 1.5s ease-in-out infinite' : 'none',
-          cursor: 'default',
-        }}
-      />
-      <style>
-        {`
-          @keyframes pulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-          }
-        `}
-      </style>
+      {dot}
+      <style>{PULSE_KEYFRAMES}</style>
     </div>
   )
 }

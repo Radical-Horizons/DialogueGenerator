@@ -66,11 +66,12 @@ export const theme = {
       },
     },
     primary: {
-      // Accent unique de la refonte — un seul bouton plein par écran.
-      background: '#4f7fff',
+      // Un seul bouton plein par écran. Un cran sous l'accent #4f7fff : c'est ce qui
+      // porte le libellé blanc à 4,75:1 (AA). Les marques bleues gardent l'accent.
+      background: '#3d6ae8',
       color: '#ffffff',
       hover: {
-        background: '#3d6ae8',
+        background: '#3560d8',
       },
     },
     secondary: {
@@ -88,7 +89,8 @@ export const theme = {
   input: {
     // Un cran au-dessus du fond de page, sinon le champ disparaît dedans.
     background: '#1c1c22',
-    border: '#2e2e36',
+    // 3:1 contre le fond (WCAG 1.4.11) : un champ n'a que son cadre pour se signaler.
+    border: '#6a6a78',
     color: 'rgba(255, 255, 255, 0.87)',
     focus: {
       border: '#4f7fff',

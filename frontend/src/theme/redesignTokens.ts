@@ -11,6 +11,18 @@ import type { CSSProperties } from 'react'
 export const redesignAccent = {
   base: '#4f7fff',
   light: '#a9c3ff',
+  /**
+   * Texte d'un état en cours (« OPTION 2 SUR 4 — EN ÉCRITURE », statut de génération),
+   * liens. 8,4:1 sur le fond.
+   */
+  text: '#8fb0ff',
+  /**
+   * Remplissage du bouton primaire. `base` sous un libellé blanc ne tenait que 3,6:1 ;
+   * un cran plus profond passe l'AA (4,75:1) sans changer de teinte. Les marques
+   * (sélection, jauge, filet d'onglet) restent sur `base`.
+   */
+  fill: '#3d6ae8',
+  fillHover: '#3560d8',
   selectedBg: 'rgba(79, 127, 255, 0.08)',
   selectedBgStrong: 'rgba(79, 127, 255, 0.05)',
   ring: 'rgba(79, 127, 255, 0.18)',
@@ -28,10 +40,18 @@ export const redesignSurface = {
   panel: '#1c1c22',
   node: '#1f1f26',
   nodeHeader: '#2a2a33',
+  /** Fond du canvas du graphe, seul endroit plus sombre que le fond de l'app. */
+  canvas: '#101013',
 } as const
 
 export const redesignControl = {
+  /** Contour des boutons secondaires : leur libellé suffit à les identifier. */
   border: '#2e2e36',
+  /**
+   * Contour des champs de saisie. Un champ n'a pas de libellé interne : son cadre doit
+   * tenir 3:1 contre le fond (WCAG 1.4.11), ce que `border` (1,3:1) ne faisait pas.
+   */
+  inputBorder: '#6a6a78',
 } as const
 
 /** Bordures des nœuds du graphe (écran 2e) : neutre par défaut, renforcée si validé. */
@@ -63,6 +83,8 @@ export const redesignText = {
   muted: '#8a8a95',
   /** Texte principal sur fond sombre. */
   strong: '#f2f2f5',
+  /** Répliques en serif (colonne de lecture, inspecteur) : teinte légèrement chaude. */
+  dialogue: '#f0efe9',
 } as const
 
 /** Échelle unique d'espacement. Rien entre ces valeurs. */

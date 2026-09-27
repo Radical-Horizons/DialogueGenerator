@@ -2,6 +2,23 @@
  * Taille du MiniMap React Flow : bornes par rapport au canvas (pas le viewport fenêtre).
  * @see @reactflow/minimap — défaut interne 200×150, le viewBox dépend de width/height numériques.
  */
+import { theme } from '../../theme'
+import { redesignText } from '../../theme/redesignTokens'
+
+/**
+ * Couleur d'un nœud dans le MiniMap. Le bleu est réservé à la sélection : les répliques
+ * restent neutres, seuls les tests gardent l'orange qui les distingue aussi sur le canvas.
+ */
+export function graphMinimapNodeColor(nodeType: string | undefined): string {
+  switch (nodeType) {
+    case 'testNode':
+      return theme.state.pending.border
+    case 'endNode':
+      return redesignText.label
+    default:
+      return redesignText.secondary
+  }
+}
 
 export const REACT_FLOW_MINIMAP_DEFAULT_WIDTH = 200
 export const REACT_FLOW_MINIMAP_DEFAULT_HEIGHT = 150

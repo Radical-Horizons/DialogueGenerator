@@ -326,7 +326,7 @@ export function GenerationPanelControls({
           }
           .token-slider::-webkit-slider-thumb:hover {
             background: ${theme.button.primary.background};
-            box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.35), 0 2px 4px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 0 3px ${theme.border.focus}59, 0 2px 4px rgba(0, 0, 0, 0.3);
           }
           .token-slider::-moz-range-track {
             height: 6px;
@@ -344,7 +344,7 @@ export function GenerationPanelControls({
           }
           .token-slider::-moz-range-thumb:hover {
             background: ${theme.button.primary.background};
-            box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.35), 0 2px 4px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 0 3px ${theme.border.focus}59, 0 2px 4px rgba(0, 0, 0, 0.3);
           }
           .token-slider::-ms-track {
             height: 6px;
@@ -364,7 +364,7 @@ export function GenerationPanelControls({
           }
           .token-slider::-ms-thumb:hover {
             background: ${theme.button.primary.background};
-            box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.35), 0 2px 4px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 0 3px ${theme.border.focus}59, 0 2px 4px rgba(0, 0, 0, 0.3);
           }
         `}</style>
       </div>

@@ -210,56 +210,64 @@ export function GenerationLogsPanel({ dialogueId }: GenerationLogsPanelProps) {
       </div>
 
       {entries.length === 0 ? (
-        <div className="glp__empty">Aucun log pour cette période ou ce provider.</div>
+        <div className="glp__empty">
+          Aucun log pour cette période ou ce provider — chaque génération de ce dialogue
+          s&apos;inscrira ici avec son prompt, sa réponse et son coût.
+        </div>
       ) : (
         <>
-          <table className="glp__table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Nœud</th>
-                <th>Template</th>
-                <th>Coût</th>
-                <th>Tokens</th>
-                <th>Provider</th>
-                <th>Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map((entry) => (
-                <tr
-                  key={entry.request_id}
-                  onClick={() => onRowClick(entry)}
-                  className={`glp__row ${!entry.success ? 'glp__row--error' : ''} ${selectedEntry?.request_id === entry.request_id ? 'glp__row--selected' : ''}`}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      onRowClick(entry)
-                    }
-                  }}
-                >
-                  <td>{formatLogTimestamp(entry.timestamp)}</td>
-                  <td className="glp__node-id">{entry.node_id ?? '—'}</td>
-                  <td className="glp__node-id">{entry.template_name || entry.template_id || '—'}</td>
-                  <td>{formatCostEur(entry.cost_eur)}</td>
-                  <td>{entry.total_tokens.toLocaleString()}</td>
-                  <td>{entry.model_name}</td>
-                  <td>
-                    <span className={`glp__status ${entry.success ? 'glp__status--ok' : 'glp__status--fail'}`}>
-                      {entry.success ? 'Succès' : 'Échec'}
-                    </span>
-                  </td>
+          <div className="glp__scroll">
+            <table className="glp__table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Nœud</th>
+                  <th>Template</th>
+                  <th className="glp__num">Coût</th>
+                  <th className="glp__num">Tokens</th>
+                  <th>Provider</th>
+                  <th>Statut</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {entries.map((entry) => (
+                  <tr
+                    key={entry.request_id}
+                    onClick={() => onRowClick(entry)}
+                    className={`glp__row ${!entry.success ? 'glp__row--error' : ''} ${selectedEntry?.request_id === entry.request_id ? 'glp__row--selected' : ''}`}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        onRowClick(entry)
+                      }
+                    }}
+                  >
+                    <td className="glp__date">{formatLogTimestamp(entry.timestamp)}</td>
+                    <td className="glp__node-id">{entry.node_id ?? '—'}</td>
+                    <td className="glp__template">{entry.template_name || entry.template_id || '—'}</td>
+                    <td className="glp__num">{formatCostEur(entry.cost_eur)}</td>
+                    <td className="glp__num">{entry.total_tokens.toLocaleString()}</td>
+                    <td className="glp__model">{entry.model_name}</td>
+                    <td>
+                      <span className={`glp__status ${entry.success ? 'glp__status--ok' : 'glp__status--fail'}`}>
+                        {entry.success ? 'Succès' : 'Échec'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {selectedEntry && (
             <div className="glp__detail">
               <div className="glp__detail-header">
-                <strong>Détail — {selectedEntry.node_id ?? selectedEntry.request_id}</strong>
+                <div className="glp__detail-title">
+                  <span className="glp__label">Détail</span>
+                  <span className="glp__detail-id">{selectedEntry.node_id ?? selectedEntry.request_id}</span>
+                </div>
                 <button
                   type="button"
                   className="glp__detail-close"
@@ -270,11 +278,18 @@ export function GenerationLogsPanel({ dialogueId }: GenerationLogsPanelProps) {
                 </button>
               </div>
               <div className="glp__detail-meta">
-                <span>Durée : {formatDuration(selectedEntry.duration_ms)}</span>
-                <span>Coût : {formatCostEur(selectedEntry.cost_eur)}</span>
+                <span>
+                  <span className="glp__label">Durée</span>
+                  <span className="glp__mono">{formatDuration(selectedEntry.duration_ms)}</span>
+                </span>
+                <span>
+                  <span className="glp__label">Coût</span>
+                  <span className="glp__mono">{formatCostEur(selectedEntry.cost_eur)}</span>
+                </span>
                 {(selectedEntry.template_name || selectedEntry.template_id) && (
                   <span>
-                    Template : {selectedEntry.template_name || selectedEntry.template_id}
+                    <span className="glp__label">Template</span>
+                    <span>{selectedEntry.template_name || selectedEntry.template_id}</span>
                   </span>
                 )}
                 {!selectedEntry.success && selectedEntry.error_message && (

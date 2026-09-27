@@ -493,7 +493,7 @@ export function GenerationStreamingInline({
             ...redesignMonoLabelStyle,
             fontSize: '10px',
             letterSpacing: '0.12em',
-            color: currentStep === 'Complete' ? redesignText.label : '#8fb0ff',
+            color: currentStep === 'Complete' ? redesignText.label : redesignAccent.text,
           }}
         >
           {isInterrupting
@@ -750,8 +750,9 @@ export function GenerationStreamingInline({
               padding: '0.5rem 1rem',
               border: 'none',
               borderRadius: `${redesignRadius.control}px`,
-              backgroundColor: redesignAccent.base,
+              backgroundColor: redesignAccent.fill,
               color: '#ffffff',
+              fontWeight: 600,
               cursor: 'pointer',
             }}
           >
@@ -768,7 +769,7 @@ export function GenerationStreamingInline({
                 flex: 1,
                 minWidth: 0,
                 height: 42,
-                border: '1px solid #2e2e36',
+                border: `1px solid ${theme.button.default.border}`,
                 borderRadius: `${redesignRadius.control}px`,
                 backgroundColor: '#1a1a1f',
                 color: theme.text.primary,
@@ -801,7 +802,7 @@ export function GenerationStreamingInline({
                 style={{
                   height: 42,
                   padding: '0 16px',
-                  border: '1px solid #2e2e36',
+                  border: `1px solid ${theme.button.default.border}`,
                   borderRadius: `${redesignRadius.control}px`,
                   backgroundColor: 'transparent',
                   color: theme.text.secondary,

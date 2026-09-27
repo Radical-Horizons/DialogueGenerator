@@ -3,6 +3,12 @@
  */
 import { useState, useRef, useEffect, useCallback, ReactNode } from 'react'
 import { theme } from '../../theme'
+import {
+  redesignHairline,
+  redesignRadius,
+  redesignSpacing,
+  redesignText,
+} from '../../theme/redesignTokens'
 
 export interface TooltipProps {
   /**
@@ -151,16 +157,16 @@ export function Tooltip({
             position: 'absolute',
             top: `${tooltipPosition.top}px`,
             left: `${tooltipPosition.left}px`,
-            backgroundColor: theme.background.panel,
-            color: theme.text.primary,
-            padding: '0.75rem',
-            borderRadius: '6px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            backgroundColor: theme.background.elevated,
+            color: redesignText.body,
+            padding: `${redesignSpacing.sm}px ${redesignSpacing.md}px`,
+            borderRadius: `${redesignRadius.control}px`,
+            boxShadow: theme.shadow.card,
             zIndex: 10000,
             maxWidth,
-            fontSize: '0.875rem',
+            fontSize: '12px',
             lineHeight: '1.5',
-            border: `1px solid ${theme.border.primary}`,
+            border: `1px solid ${redesignHairline.strong}`,
             pointerEvents: 'none',
           }}
         >
@@ -189,6 +195,7 @@ export interface InfoIconProps {
 export function InfoIcon({ content, position = 'top' }: InfoIconProps) {
   return (
     <Tooltip content={content} position={position}>
+      {/* Le glyphe ⓘ porte déjà son cercle : pas de bordure autour, sinon deux cercles concentriques. */}
       <span
         style={{
           display: 'inline-flex',
@@ -196,13 +203,11 @@ export function InfoIcon({ content, position = 'top' }: InfoIconProps) {
           justifyContent: 'center',
           width: '18px',
           height: '18px',
-          borderRadius: '50%',
-          backgroundColor: theme.background.secondary,
-          color: theme.text.secondary,
-          fontSize: '12px',
+          color: redesignText.muted,
+          fontSize: '14px',
+          lineHeight: 1,
           cursor: 'help',
-          border: `1px solid ${theme.border.primary}`,
-          marginLeft: '0.5rem',
+          marginLeft: `${redesignSpacing.xs}px`,
           verticalAlign: 'middle',
         }}
       >

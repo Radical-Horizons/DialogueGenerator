@@ -8,11 +8,16 @@
  * - TestNode id : test:{choiceId} ou test-node-{nodeId}-choice-{index} (legacy)
  */
 import type { Edge } from 'reactflow'
+import { theme } from '../theme'
 
 /** Longueur max du label affiché sur les edges de choix. */
 export const CHOICE_LABEL_MAX_LENGTH = 30
 export const CHOICE_EDGE_COLOR = '#F5A623'
-export const NEXT_EDGE_COLOR = '#4A90E2'
+/**
+ * Lien linéaire « suivant » : neutre, comme le trait par défaut du canvas. Il ne porte
+ * aucune information à distinguer, et le bleu est réservé à la sélection.
+ */
+export const NEXT_EDGE_COLOR = theme.text.secondary
 
 /** Config des 4 résultats de test (TestNode → nœud de résultat). */
 export const TEST_RESULT_EDGE_CONFIG = [

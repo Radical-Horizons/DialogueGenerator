@@ -32,6 +32,7 @@ import {
   GRAPH_TOPOLOGY_WARNING_STYLES,
 } from '../../../utils/graphStructuralValidation'
 import { reconstructNodePromptFromGraph } from '../../../utils/graphPromptPreview'
+import { NEXT_EDGE_COLOR } from '../../../utils/graphEdgeBuilders'
 import { Badge } from '../../shared'
 import {
   redesignAccent,
@@ -524,7 +525,7 @@ export const DialogueNode = memo(function DialogueNode({
         type="target"
         position={Position.Top}
         style={{
-          background: data.incomingEdgeColor ?? '#4A90E2',
+          background: data.incomingEdgeColor ?? theme.text.secondary,
           width: 12,
           height: 12,
           border: '2px solid white',
@@ -800,7 +801,7 @@ export const DialogueNode = memo(function DialogueNode({
           position={Position.Bottom}
           isConnectable={!playthroughReaderActive}
           style={{
-            background: '#4A90E2',
+            background: NEXT_EDGE_COLOR,
             width: 12,
             height: 12,
             border: '2px solid white',
@@ -914,7 +915,7 @@ export const DialogueNode = memo(function DialogueNode({
             }}
             title="Régénérer avec d'autres instructions"
           >
-            <span>🔄</span>
+            <span aria-hidden>↻</span>
             <span>Régénérer</span>
           </button>
         </>
@@ -971,7 +972,8 @@ export const DialogueNode = memo(function DialogueNode({
  */
 function getSpeakerColor(identifier: string): string {
   const colors = [
-    '#4A90E2', // Bleu
+    // Neutre plutôt que bleu : le bleu d'accent est réservé à la sélection du nœud.
+    redesignTextTokens.secondary,
     '#9013FE', // Violet
     '#F5A623', // Orange
     '#E74C3C', // Rouge

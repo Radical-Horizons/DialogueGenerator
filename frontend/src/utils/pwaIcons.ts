@@ -66,7 +66,10 @@ export interface EnsurePwaIconsOptions {
 }
 
 /**
- * Ensure we have PNG PWA icons without committing binaries.
+ * Fallback: ensure PNG PWA icons exist when the committed ones are missing.
+ *
+ * The real icons (`icon-*.png`, rasterized from `icon-*.svg`) are versioned; this
+ * only writes a plain square so a fresh checkout without them still has valid assets.
  *
  * The files are written into `frontend/public/icons/`:
  * - `icon-192.png`

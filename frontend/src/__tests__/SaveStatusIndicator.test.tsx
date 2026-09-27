@@ -17,6 +17,8 @@ vi.mock('../theme', () => ({
       info: { color: '#17a2b8' },
       warning: { color: '#ffc107' },
       error: { color: '#dc3545' },
+      accepted: { border: '#27AE60' },
+      pending: { border: '#F5A623' },
     },
   },
 }))

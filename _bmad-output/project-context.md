@@ -32,6 +32,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 ### Framework-Specific Rules
 
 - **FastAPI:** Routers dans `api/routers/`, schemas dans `api/schemas/`, logique métier dans `services/`. Injection via `api/container.py` (ServiceContainer) et `api/dependencies.py` — pas de singletons globaux. Versioning `/api/v1/`. Exceptions via `api/exceptions.py`, handler global.
+- **UI / design system:** Avant tout écran, lire `_bmad-output/planning-artifacts/ux-design-specification/design-system-foundation.md` (pointeur vers l'artifact design system et écarts connus) et `.claude/rules/ui_redesign_2026.md`. Jetons dans `frontend/src/theme.ts` et `frontend/src/theme/redesignTokens.ts` : les importer, ne jamais recopier une valeur. Un seul bouton plein `#4f7fff` par écran, aucun chiffre en sans-serif, espacements 5/9/14/20/34 px. Les valeurs de `visual-design-foundation.md` sont périmées.
 - **React:** Logique dans `frontend/src/` — composants (`components/`), store Zustand (`store/`), client API par domaine (`api/*.ts`). Pas de logique métier dans le frontend ; tout passe par l’API REST. Routes protégées avec `ProtectedRoute`, JWT en localStorage, refresh via intercepteur axios.
 
 ### Testing Rules

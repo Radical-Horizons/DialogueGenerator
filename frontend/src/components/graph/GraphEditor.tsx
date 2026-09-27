@@ -46,6 +46,7 @@ import { useGraphViewStore } from '../../store/graphViewStore'
 import { useGenerationStore } from '../../store/generationStore'
 import { useToast, ConfirmDialog } from '../shared'
 import { theme } from '../../theme'
+import { redesignMonoLabelStyle, redesignSpacing, redesignText } from '../../theme/redesignTokens'
 import {
   unityDialogueListColumnStyle,
   unityDialogueWorkspaceColumnStyle,
@@ -435,29 +436,43 @@ export function GraphEditor({
 
         {/* Contenu graphe */}
         {!hasActiveDialogue && nodes.length === 0 ? (
+          /* Panneau vide du design system : ni emoji ni icône — une étiquette mono,
+             puis la phrase qui dit ce qui s'affichera ici. */
           <div
+            data-testid="graph-empty-state"
             style={{
               flex: 1,
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              color: theme.text.secondary,
-              padding: '2rem',
+              gap: redesignSpacing.sm,
+              padding: redesignSpacing.xl,
               textAlign: 'center',
             }}
           >
-            <div>
-              <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.7 }}>📊</div>
-              <div
-                style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: theme.text.primary }}
-              >
-                {isStandalone ? 'Chargez un dialogue Unity' : 'Sélectionnez un dialogue Unity'}
-              </div>
-              <div style={{ fontSize: '0.9rem' }}>
-                Choisissez un dialogue dans la liste à gauche pour le visualiser et l'éditer sous
-                forme de graphe
-              </div>
-            </div>
+            <span
+              style={{
+                ...redesignMonoLabelStyle,
+                fontSize: '10px',
+                letterSpacing: '0.12em',
+                color: redesignText.label,
+              }}
+            >
+              Graphe
+            </span>
+            <p
+              style={{
+                margin: 0,
+                maxWidth: 420,
+                fontSize: '13px',
+                lineHeight: 1.55,
+                color: redesignText.secondary,
+              }}
+            >
+              {isStandalone ? 'Chargez un dialogue Unity' : 'Sélectionnez un dialogue Unity'} dans
+              la liste à gauche pour le visualiser et l'éditer sous forme de graphe.
+            </p>
           </div>
         ) : (
           <div
