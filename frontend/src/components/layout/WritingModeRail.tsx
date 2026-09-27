@@ -7,8 +7,9 @@
  */
 import { redesignAccent, redesignFont, redesignHairline, redesignText } from '../../theme/redesignTokens'
 import { entityInitials } from '../../utils/entityInitials'
+import { WRITING_MODE_RAIL_WIDTH_PX } from './railReserve'
 
-const RAIL_WIDTH_PX = 52
+const RAIL_WIDTH_PX = WRITING_MODE_RAIL_WIDTH_PX
 /** Au-delà, les puces déborderaient la hauteur utile du rail. */
 const MAX_RAIL_CHIPS = 5
 
