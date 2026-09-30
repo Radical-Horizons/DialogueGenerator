@@ -320,33 +320,14 @@ button.context-gdd-tab:focus-visible {
 }
 
 /**
- * Barre de défilement discrète (refonte 2026).
+ * Barre de défilement discrète (refonte 2026), pour toute l'app.
  *
- * La barre native de Windows est large et opaque : dans une zone d'écriture posée
- * sur un simple filet, elle écrase tout. Réservée aux surfaces où le défilement
- * est normal (brief long, listes), via `.dg-scroll-slim`.
+ * La barre native de Windows est large et opaque : elle écrase les colonnes posées
+ * sur de simples filets. Globale plutôt qu'opt-in par composant — une classe posée
+ * au cas par cas laissait cohabiter deux styles de barre côte à côte.
+ * `scrollbar-width` ne s'hérite pas, d'où le sélecteur universel.
  */
-.dg-scroll-slim {
+* {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
-}
-.dg-scroll-slim::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-.dg-scroll-slim::-webkit-scrollbar-track {
-  background: transparent;
-}
-.dg-scroll-slim::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.16);
-  border-radius: 99px;
-  /* Une bordure transparente amincit le pouce sans reduire la zone de clic. */
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
-.dg-scroll-slim::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.28);
-}
-.dg-scroll-slim::-webkit-scrollbar-corner {
-  background: transparent;
 }

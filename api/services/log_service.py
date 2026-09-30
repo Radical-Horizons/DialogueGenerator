@@ -5,7 +5,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from constants import FilePaths
+from constants import resolve_logs_dir
 
 
 logger = logging.getLogger(__name__)
@@ -18,9 +18,9 @@ class LogService:
         """Initialise le service.
         
         Args:
-            log_dir: Dossier contenant les fichiers de logs. Par défaut: FilePaths.LOGS_DIR.
+            log_dir: Dossier contenant les fichiers de logs. Par défaut: ``resolve_logs_dir()``.
         """
-        self.log_dir = Path(log_dir) if log_dir else FilePaths.LOGS_DIR
+        self.log_dir = Path(log_dir) if log_dir else resolve_logs_dir()
         if not self.log_dir.exists():
             self.log_dir.mkdir(parents=True, exist_ok=True)
     

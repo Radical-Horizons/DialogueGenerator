@@ -1,12 +1,10 @@
-"""Journalisation dédiée sync GDD Notion (fichier sous data/logs/)."""
+"""Journalisation dédiée sync GDD Notion (fichier sous le dossier de logs, ``LOG_DIR`` ou data/logs/)."""
 from __future__ import annotations
 
 import logging
-import os
-from pathlib import Path
 from typing import Optional
 
-from constants import FilePaths
+from constants import resolve_logs_dir
 
 _SYNC_LOGGER_NAME = "gdd_notion_sync"
 _configured = False
@@ -21,10 +19,7 @@ def get_gdd_notion_sync_logger() -> logging.Logger:
     log.setLevel(logging.INFO)
     log.propagate = True
     try:
-        # `LOG_DIR` comme le handler JSON principal (`setup_logging`).
-        log_dir = Path(
-            os.getenv("LOG_DIR") or Path(__file__).resolve().parent.parent / FilePaths.LOGS_DIR
-        )
+        log_dir = resolve_logs_dir()
         log_dir.mkdir(parents=True, exist_ok=True)
         path = log_dir / "gdd_notion_sync.log"
         fh = logging.FileHandler(path, encoding="utf-8")

@@ -73,23 +73,17 @@ class TestLogCleanup:
         assert result == 0
     
     def test_cleanup_on_startup(self, tmp_path, monkeypatch):
-        """Test de nettoyage au démarrage."""
+        """Le nettoyage au démarrage purge le dossier désigné par ``LOG_DIR``."""
         log_dir = tmp_path / "logs"
         log_dir.mkdir()
-        
+
         # Créer un fichier ancien
         old_date = date.today() - timedelta(days=40)
         old_file = log_dir / f"logs_{old_date.isoformat()}.json"
         old_file.write_text('{"test": "data"}')
-        
-        # Mock FilePaths.LOGS_DIR
-        from constants import FilePaths
-        original_logs_dir = FilePaths.LOGS_DIR
-        FilePaths.LOGS_DIR = log_dir
-        
-        try:
-            cleanup_on_startup()
-            # Le fichier ancien devrait être supprimé
-            assert not old_file.exists()
-        finally:
-            FilePaths.LOGS_DIR = original_logs_dir
+
+        monkeypatch.setenv("LOG_DIR", str(log_dir))
+
+        cleanup_on_startup()
+        # Le fichier ancien devrait être supprimé
+        assert not old_file.exists()

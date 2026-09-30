@@ -5,7 +5,7 @@ from datetime import date, timedelta
 from pathlib import Path
 from typing import Optional
 
-from constants import FilePaths
+from constants import resolve_logs_dir
 
 logger = logging.getLogger(__name__)
 
@@ -15,15 +15,12 @@ def cleanup_old_logs(retention_days: int = 30, log_dir: Optional[str] = None) ->
     
     Args:
         retention_days: Nombre de jours de rétention (défaut: 30).
-        log_dir: Dossier contenant les fichiers de logs. Par défaut: FilePaths.LOGS_DIR.
-        
+        log_dir: Dossier contenant les fichiers de logs. Par défaut: ``resolve_logs_dir()``.
+
     Returns:
         Nombre de fichiers supprimés.
     """
-    if log_dir is None:
-        log_dir = FilePaths.LOGS_DIR
-    
-    log_path = Path(log_dir)
+    log_path = Path(log_dir) if log_dir is not None else resolve_logs_dir()
     if not log_path.exists():
         logger.debug(f"Dossier de logs n'existe pas: {log_path}")
         return 0
