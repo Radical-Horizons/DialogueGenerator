@@ -23,10 +23,9 @@ os.environ.setdefault("DISABLE_AUTH", "true")
 # Prometheus middleware + FastAPI récent (_IncludedRouter) → AttributeError sur TestClient en CI.
 os.environ.setdefault("PROMETHEUS_ENABLED", "false")
 # ~30 000 entrées par run T2 : hors de `data/logs/`, que le diagnostic lit comme la trace
-# de l'app réelle. Dossier fixe, borné par la rétention du handler.
-os.environ.setdefault(
-    "LOG_DIR", str(Path(tempfile.gettempdir()) / "dialoguegenerator-pytest" / "logs")
-)
+# de l'app réelle. Dossier fixe, borné par la rétention du handler. Imposé, pas `setdefault` :
+# un `LOG_DIR` hérité de la machine passerait devant, comme les clés ci-dessous.
+os.environ["LOG_DIR"] = str(Path(tempfile.gettempdir()) / "dialoguegenerator-pytest" / "logs")
 
 # Clés des services facturés ou distants. Sur un poste de dev elles vivent souvent dans
 # l'environnement utilisateur Windows : pytest en hérite, et le garde `load_dotenv` de
