@@ -4,6 +4,8 @@ paths:
   - "api/utils/log*.py"
   - "api/services/log_service.py"
   - "api/routers/logs.py"
+  - "services/gdd_notion_sync_log.py"
+  - "services/export_log_service.py"
   - "frontend/src/utils/logging.ts"
 ---
 - **Architecture**: Logging structuré avec archivage persistant (fichiers JSON par date), rotation automatique, API de consultation, intégration frontend.
