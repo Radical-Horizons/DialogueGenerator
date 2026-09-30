@@ -10,7 +10,6 @@ from pydantic import BaseModel
 
 from api.dependencies import get_request_id
 from api.services.log_service import LogService
-from constants import FilePaths
 
 logger = logging.getLogger(__name__)
 
@@ -84,8 +83,7 @@ def get_log_service() -> LogService:
     Returns:
         Instance de LogService.
     """
-    log_dir = str(FilePaths.LOGS_DIR)
-    return LogService(log_dir=log_dir)
+    return LogService()
 
 
 # Endpoints

@@ -53,7 +53,7 @@ pip install -r requirements.txt
    - `AUTH_RATE_LIMIT_WINDOW`: Fenêtre en secondes (par défaut: `60`)
    - `LOG_FILE_ENABLED`: Activer l'archivage des logs dans des fichiers (par défaut: `true`)
    - `LOG_RETENTION_DAYS`: Durée de rétention des logs en jours (par défaut: `30`)
-   - `LOG_DIR`: Dossier de stockage des logs (par défaut: `data/logs`)
+   - `LOG_DIR`: Dossier de stockage des logs (par défaut: `data/logs` à la racine du dépôt), lu aussi par `/api/v1/logs` et le nettoyage au démarrage
    - `LOG_MAX_FILE_SIZE_MB`: Taille maximale d'un fichier de log en MB avant rotation (par défaut: `100`)
    - `LOG_FORMAT`: Format des logs (`json` ou `text`, par défaut: `text` en dev, `json` en prod)
    - `LOG_LEVEL`: Niveau de log (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`, par défaut: `INFO`)
@@ -236,7 +236,7 @@ Les logs sont automatiquement archivés dans des fichiers JSON par date dans le 
 Variables d'environnement pour le logging :
 - `LOG_FILE_ENABLED`: Activer l'archivage fichier (défaut: `true`)
 - `LOG_RETENTION_DAYS`: Durée de rétention en jours (défaut: `30`)
-- `LOG_DIR`: Dossier de stockage (défaut: `data/logs`)
+- `LOG_DIR`: Dossier de stockage, pour l'écriture comme pour la consultation (défaut: `data/logs` à la racine du dépôt)
 - `LOG_MAX_FILE_SIZE_MB`: Taille max avant rotation intra-jour (défaut: `100`)
 - `LOG_FORMAT`: Format console (`json` ou `text`, défaut: `text` en dev, `json` en prod)
 - `LOG_LEVEL`: Niveau de log (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`, défaut: `INFO`)
