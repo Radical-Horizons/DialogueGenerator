@@ -17,7 +17,7 @@ paths:
 
 1. Créer `tests/api/test_<nom_endpoint>.py`
 2. Utiliser `TestClient` de FastAPI (fixture `client` disponible dans `conftest.py`)
-3. Mock des dépendances : `app.dependency_overrides` ou `monkeypatch.setattr("api.dependencies.<fonction>", mock)`
+3. Mock des dépendances : `app.dependency_overrides[get_x] = …` (retiré en fin de test). Pas `monkeypatch.setattr` sur une fonction passée à `Depends` : sans effet — voir `.claude/rules/tests_patterns.md`
 4. **Référence** : Voir `tests/api/test_config_field_validation.py` pour exemple complet
 
 ### Test service (logique métier)
