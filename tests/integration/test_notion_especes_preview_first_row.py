@@ -14,7 +14,6 @@ Marqueurs : ``integration`` + ``slow`` (hors fumée T0 par défaut).
 """
 from __future__ import annotations
 
-import os
 import unicodedata
 from pathlib import Path
 
@@ -98,8 +97,8 @@ def _max_narrative_body_len(record: dict) -> tuple[int, str, str]:
 
 
 @pytest.fixture
-def notion_api_key() -> str:
-    key = os.getenv("NOTION_API_KEY", "").strip()
+def notion_api_key(real_service_credentials: dict[str, str]) -> str:
+    key = real_service_credentials.get("NOTION_API_KEY", "").strip()
     if not key:
         pytest.skip("NOTION_API_KEY absent : test d’intégration Notion ignoré.")
     return key

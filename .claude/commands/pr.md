@@ -1,5 +1,5 @@
 ---
-description: Ouvre une PR vers dev (jamais main), avec la gate locale T0/T1 et l'auto-merge optionnel.
+description: Ouvre une PR vers dev (jamais main), avec la gate locale T2 et l'auto-merge optionnel.
 argument-hint: "[titre optionnel] [auto pour activer l'auto-merge]"
 allowed-tools: Bash(git:*), Bash(gh:*), Bash(npm:*), Bash(npx:*)
 ---
@@ -23,14 +23,15 @@ l'ouvre jamais.
 
 ## Gate avant d'ouvrir
 
-**T0/T1 suffisent** — CI fait le reste (voir plus bas).
+**T2 vert avant d'ouvrir** — `.claude/rules/branching.md`.
 
-1. Tests ciblés sur le diff (T1) : pytest sur les fichiers touchés, `npx vitest run <fichier>`.
-2. Si le diff touche `frontend/` : `npm --prefix frontend run lint` et `npm --prefix frontend run typecheck`.
+1. `npm run test:premerge` (pytest `not slow` + ESLint + Vitest, ~7 min). Rouge → corriger
+   d'abord, ne pas ouvrir la PR en comptant sur la CI.
+2. Si le diff touche `frontend/` : `npm --prefix frontend run typecheck` (absent de `test:premerge`).
 3. Preuve UI si le changement est visible (`.claude/rules/workflow.md`).
 
-T2 (`npm run test:premerge`) reste **recommandé mais facultatif** : utile hors ligne ou
-sur un diff large, inutile en doublon de la CI.
+Seule dérogation : diff limité à `.claude/**`, `CLAUDE.md`, `AGENTS.md`, `docs/**`,
+`_bmad-output/**` — aucune surface de test.
 
 ## Étapes
 
@@ -51,8 +52,8 @@ sur un diff large, inutile en doublon de la CI.
 Sur une PR vers `dev`, `ci.yml` lance **cinq jobs en parallèle** : lint + typecheck,
 pytest T2 (`not slow`), Vitest T2, PWA e2e, auth e2e. Environ 4 min de bout en bout.
 
-Ne pas rejouer T2 en local « pour être sûr » : c'est la CI qui l'exécute, plus vite et
-plus complètement (les deux suites e2e ne sont pas dans `test:premerge`).
+C'est le **second** filet : elle ajoute les deux suites e2e, absentes de `test:premerge`.
+Une CI rouge sur une PR qui n'a pas passé T2 en local, c'est un aller-retour évitable.
 
 ## `data/` GDD
 

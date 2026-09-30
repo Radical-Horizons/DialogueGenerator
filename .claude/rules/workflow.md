@@ -74,7 +74,7 @@ description: Workflow — commandes essentielles, tests, déploiement, venv
 - **Version produit (semver)** : règle **`.claude/rules/app_versioning.md`** — PR epic = mineure, main direct = patch ; tags `vX.Y.Z` · `docs/releases/semver-and-tags.md` · rétro BMAD = section **Version livrée**. Procédure prod + canvas : `/prod-release`.
 
 - **Avant commit / PR — la gate dépend de la cible**, détail dans `.claude/rules/branching.md` :
-  - **PR vers `dev`** : **T0/T1** suffisent (ciblage sur le diff, lint + typecheck si le frontend bouge, preuve UI si c'est visible). La CI lance T2 et les deux suites e2e en ~4 min sur la PR ; le même T2 coûte **1 h 32** sur un poste Windows de ce dépôt. **T2 local reste recommandé mais facultatif** — hors ligne, ou diff très large. Commande : **`/pr`**.
+  - **PR vers `dev`** : **T2 obligatoire avant d'ouvrir** (`npm run test:premerge`, ~7 min sur le poste Windows, mesuré le 2026-09-30), plus typecheck si le frontend bouge et preuve UI si c'est visible. La CI de PR rejoue T2 et ajoute les deux suites e2e : second filet, pas premier. Commande : **`/pr`**.
   - **Merge direct dans `dev`, sans PR** : **T2 obligatoire** (`npm run test:premerge`) — un push sur `dev` ne déclenche **aucune** CI.
   - **Merge ou push vers `main`** : **T3** complet — `.claude/rules/ci_before_push.md`.
 

@@ -57,18 +57,24 @@ def mock_config_service():
     return service
 ```
 
-### Monkeypatch pour dépendances FastAPI
+### Remplacer une dépendance FastAPI : `app.dependency_overrides`
 ```python
-def test_endpoint(self, client, monkeypatch):
-    """Test avec monkeypatch des dépendances."""
+@pytest.fixture
+def fake_service() -> Iterator[None]:
     from api.dependencies import get_<service>
-    
-    def mock_get_<service>():
-        return mock_<service>
-    
-    monkeypatch.setattr("api.dependencies.get_<service>", mock_get_<service>)
-    response = client.get("/api/v1/...")
+
+    app.dependency_overrides[get_<service>] = lambda: mock_<service>
+    yield
+    app.dependency_overrides.pop(get_<service>, None)
 ```
+
+⚠️ **Ne pas** réassigner l'attribut du module (`monkeypatch.setattr("api.dependencies.get_x", …)`
+ou `module.get_x = …`) pour une fonction utilisée en `Depends(get_x)` : `Depends` a capturé
+la fonction à la déclaration de la route, le remplacement n'a **aucun effet** et le test
+tourne sur la vraie dépendance. Vécu en septembre 2026 : `tests/api/test_logs.py` lisait
+les vrais `data/logs/` au lieu de ses fichiers d'exemple, et ne passait en CI que parce que
+pytest y écrivait lui-même ses logs. `monkeypatch.setattr` ne vaut que pour une fonction
+appelée par son module **au moment de la requête**.
 
 ## Références
 

@@ -83,7 +83,7 @@ Grille complète : **`/test-tiers`**. Obligations agents et protocole Vitest : `
 
 | Cible | Attendu |
 |---|---|
-| PR vers `dev` (**`/pr`**) | **T0/T1** + lint/typecheck si le frontend bouge. La CI lance T2 et les e2e en ~4 min. T2 local recommandé, pas obligatoire. |
+| PR vers `dev` (**`/pr`**) | **T2** (`npm run test:premerge`, ~7 min) vert avant d'ouvrir + typecheck si le frontend bouge. La CI rejoue T2 et ajoute les e2e. |
 | Merge direct dans `dev` | **T2** — un push `dev` ne déclenche aucune CI |
 | Vers `main` | **T3** complet — `.claude/rules/ci_before_push.md` |
 

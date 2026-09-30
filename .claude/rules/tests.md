@@ -17,7 +17,7 @@ paths:
 
 1. Créer `tests/api/test_<nom_endpoint>.py`
 2. Utiliser `TestClient` de FastAPI (fixture `client` disponible dans `conftest.py`)
-3. Mock des dépendances : `app.dependency_overrides` ou `monkeypatch.setattr("api.dependencies.<fonction>", mock)`
+3. Mock des dépendances : `app.dependency_overrides[get_x] = …` (retiré en fin de test). Pas `monkeypatch.setattr` sur une fonction passée à `Depends` : sans effet — voir `.claude/rules/tests_patterns.md`
 4. **Référence** : Voir `tests/api/test_config_field_validation.py` pour exemple complet
 
 ### Test service (logique métier)
@@ -74,6 +74,27 @@ paths:
 
 - **PR (GitHub Actions)** : backend et frontend en **T2** (`not slow`, Vitest sans `VITEST_FULL`). **Push sur `main`** : **T3** (pytest complet, `VITEST_FULL=1`). Détail : `.github/workflows/ci.yml`.
 - **Orchestration agent / humain** : tableau unique **T0–T3** — `.claude/commands/test-tiers.md` + `.claude/rules/workflow.md`.
+
+### La suite ne touche ni aux services réels ni à `data/`
+
+`tests/conftest.py` retire `OPENAI_API_KEY`, `MISTRAL_API_KEY`, `OPENROUTER_API_KEY` et
+`NOTION_API_KEY` de l'environnement **avant** d'importer `api.main`. Le garde `load_dotenv`
+de `api.main` ne suffit pas : sur le poste de dev, ces clés sont des variables
+d'environnement **utilisateur Windows**, héritées par pytest. Vécu en septembre 2026 :
+un test nommé « dummy_llm » facturait un vrai appel `gpt-5.6-terra`, un test de sync
+réécrivait `data/notion_cache/`, et chaque run incrémentait le budget LLM réel — tout ça
+invisible en CI, qui n'a pas ces clés.
+
+- Un test qui doit vraiment appeler un service le demande **explicitement** via la fixture
+  `real_service_credentials` (et porte `integration` + `slow`). Jamais `os.getenv` sur une
+  clé : elle n'y est plus.
+- Du code qui écrit sous la racine du dépôt sans chemin injectable se redirige dans la
+  fixture autouse `isolated_local_state` (déjà : registre d'usage + budget LLM, historique
+  d'entités GDD). Les logs fichier — JSON principal, journal de sync Notion, journal des
+  exports Unity — suivent `LOG_DIR`, que le conftest pointe vers
+  `%TEMP%\dialoguegenerator-pytest\logs`. Un nouveau fichier de log doit lire `LOG_DIR`.
+- Garde : `tests/test_pytest_isolation.py`. Une assertion sur une variable secrète compare
+  des **noms**, jamais des valeurs — l'introspection de pytest imprime la clé en clair.
 
 ### Un test qui parcourt l'arborescence doit élaguer, pas filtrer
 

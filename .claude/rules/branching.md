@@ -32,40 +32,36 @@ du dépôt, pas une consigne du projet. **Cette règle prime.**
 
 | Cible | Attendu |
 |---|---|
-| PR vers `dev` | **T0/T1** — ciblé sur le diff, plus lint/typecheck si le frontend bouge et la preuve UI si le changement est visible. **T2 recommandé mais facultatif.** |
-| Merge direct vers `dev`, sans PR | **T2** — `npm run test:premerge` : aucune CI ne tourne sur un push `dev` |
+| PR vers `dev` | **T2** — `npm run test:premerge` vert **avant** d'ouvrir la PR, plus typecheck si le frontend bouge et la preuve UI si le changement est visible. La CI rejoue T2 et ajoute les e2e. |
+| Merge direct vers `dev`, sans PR | **T2** — idem : aucune CI ne tourne sur un push `dev`, c'est la seule gate |
 | PR ou push vers `main` | **T3** complet — voir `.claude/rules/ci_before_push.md` |
 
-### Pourquoi T2 n'est plus exigé pour une PR vers `dev`
+### Pourquoi T2 avant une PR vers `dev`
 
-`ci.yml` se déclenche sur `pull_request: branches: [main, dev]` et lance **cinq jobs en
-parallèle** : lint + typecheck, pytest T2 (`not slow`), Vitest T2, PWA e2e, auth e2e.
-Elle couvre donc **davantage** que `npm run test:premerge`, qui ne lance aucune des deux
-suites e2e.
+Mesures du 2026-09-30 sur le poste de dev Windows, `npm run test:premerge` :
 
-Les mesures d'août 2026 sur ce dépôt :
+| Étape | Durée |
+|---|---|
+| pytest `not slow` (~2 500 tests) | 3 min 58 |
+| ESLint | quelques secondes |
+| Vitest (287 fichiers, 1 700 tests) | 2 min 56 |
+| **Total** | **7 min 06** |
 
-| | Backend pytest (même tier `not slow`) | Bout en bout |
-|---|---|---|
-| CI GitHub | **~2 min** | **~4 min**, 5 jobs parallèles |
-| Poste de dev Windows | **1 h 32** | 1 h 32, en série |
+Sept minutes, c'est le prix d'une PR qui arrive verte. La CI de PR (`ci.yml`, ~4 min,
+cinq jobs dont les deux suites e2e absentes de `test:premerge`) reste le **second**
+filet, pas le premier : une CI rouge coûte un aller-retour complet — lecture du log,
+correctif, push, nouveau run.
 
-Rejouer T2 en local avant une PR, c'est donc immobiliser la machine une heure et demie
-pour refaire, en moins bien, ce que la CI fait en quatre minutes. **Ouvrir la PR est la
-façon la moins chère de faire tourner la gate.**
+⚠️ Du 29/08 au 30/09, cette règle rendait T2 **facultatif** avant PR, sur la foi d'un
+T2 local à « **1 h 32** ». C'était **un seul run**, le 2026-08-13, pris pendant qu'un
+bug de logging quadratique (`DateRotatingFileHandler`, corrigé le 20/08) faisait exploser
+la durée — recopié le 29/08 comme une mesure fraîche, alors que trois runs du 20/08
+donnaient déjà 4 à 6 min. Un chiffre qui justifie une règle se date, se source, et se
+remesure avant d'être cité.
 
-T2 en local garde son intérêt hors ligne, sur un diff très large, ou quand on veut la
-certitude avant de pousser — d'où « recommandé ».
-
-⚠️ **L'exception qui compte** : un **merge direct dans `dev` sans PR** ne déclenche
-**rien** (`push: branches: [main]` seulement). Dans ce cas la gate locale T2 n'est plus
-facultative : c'est la seule qui existe.
-
-Seule dérogation à ce T2 : un diff **sans aucune surface de test** — uniquement
-`.claude/**`, `CLAUDE.md`, `AGENTS.md`, `docs/**` ou `_bmad-output/**`. Aucun test ne
-peut casser sur ces fichiers, et rejouer 1 h 32 de pytest pour un markdown contredirait
-la raison même de cette section. Dès qu'un seul fichier sort de cette liste, T2 rede-
-vient obligatoire.
+Seule dérogation : un diff **sans aucune surface de test** — uniquement `.claude/**`,
+`CLAUDE.md`, `AGENTS.md`, `docs/**` ou `_bmad-output/**`. Aucun test ne peut casser sur
+ces fichiers. Dès qu'un seul fichier sort de cette liste, T2 redevient obligatoire.
 
 ## Pourquoi ce modèle, et pas « tout sur main »
 
