@@ -43,16 +43,22 @@ parallèle** : lint + typecheck, pytest T2 (`not slow`), Vitest T2, PWA e2e, aut
 Elle couvre donc **davantage** que `npm run test:premerge`, qui ne lance aucune des deux
 suites e2e.
 
-Les mesures d'août 2026 sur ce dépôt :
+Mesures du 2026-09-30, même tier `not slow` (~2 500 tests) :
 
-| | Backend pytest (même tier `not slow`) | Bout en bout |
+| | Backend pytest | Bout en bout |
 |---|---|---|
-| CI GitHub | **~2 min** | **~4 min**, 5 jobs parallèles |
-| Poste de dev Windows | **1 h 32** | 1 h 32, en série |
+| CI GitHub | **1 min 38** | **~4 min**, 5 jobs parallèles |
+| Poste de dev Windows | **4 min 34** | pytest seul, sans aucune suite e2e |
 
-Rejouer T2 en local avant une PR, c'est donc immobiliser la machine une heure et demie
-pour refaire, en moins bien, ce que la CI fait en quatre minutes. **Ouvrir la PR est la
-façon la moins chère de faire tourner la gate.**
+Rejouer T2 en local avant une PR refait donc, en moins complet, ce que la CI fait en
+quatre minutes sur la PR. **Ouvrir la PR est la façon la plus complète de faire tourner
+la gate.**
+
+⚠️ Cette section a longtemps cité « **1 h 32** » en local. C'était **un seul run**, le
+2026-08-13, pris pendant qu'un bug de logging quadratique (`DateRotatingFileHandler`,
+corrigé le 20/08) faisait exploser la durée — puis recopié le 29/08 comme une mesure
+fraîche, alors que trois runs du 20/08 donnaient déjà 4 à 6 min. Un chiffre qui justifie
+une règle se date, se source, et se remesure avant d'être cité.
 
 T2 en local garde son intérêt hors ligne, sur un diff très large, ou quand on veut la
 certitude avant de pousser — d'où « recommandé ».
@@ -63,7 +69,7 @@ facultative : c'est la seule qui existe.
 
 Seule dérogation à ce T2 : un diff **sans aucune surface de test** — uniquement
 `.claude/**`, `CLAUDE.md`, `AGENTS.md`, `docs/**` ou `_bmad-output/**`. Aucun test ne
-peut casser sur ces fichiers, et rejouer 1 h 32 de pytest pour un markdown contredirait
+peut casser sur ces fichiers, et rejouer toute la suite pour un markdown contredirait
 la raison même de cette section. Dès qu'un seul fichier sort de cette liste, T2 rede-
 vient obligatoire.
 

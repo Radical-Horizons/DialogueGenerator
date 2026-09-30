@@ -1,6 +1,7 @@
 """Configuration globale des tests pytest."""
 import json
 import os
+import tempfile
 from pathlib import Path
 from typing import Iterator
 from unittest.mock import patch
@@ -21,6 +22,26 @@ os.environ.setdefault("AUTH_RATE_LIMIT_ENABLED", "false")
 os.environ.setdefault("DISABLE_AUTH", "true")
 # Prometheus middleware + FastAPI récent (_IncludedRouter) → AttributeError sur TestClient en CI.
 os.environ.setdefault("PROMETHEUS_ENABLED", "false")
+# ~30 000 entrées par run T2 : hors de `data/logs/`, que le diagnostic lit comme la trace
+# de l'app réelle. Dossier fixe, borné par la rétention du handler.
+os.environ.setdefault(
+    "LOG_DIR", str(Path(tempfile.gettempdir()) / "dialoguegenerator-pytest" / "logs")
+)
+
+# Clés des services facturés ou distants. Sur un poste de dev elles vivent souvent dans
+# l'environnement utilisateur Windows : pytest en hérite, et le garde `load_dotenv` de
+# `api.main` n'y peut rien. Sans ce retrait, un test « DummyLLM » appelait OpenAI pour de
+# vrai et un test de sync importait Notion dans `data/notion_cache/`. Retirées pour que la
+# suite tourne comme en CI ; un test réseau les redemande via `real_service_credentials`.
+_EXTERNAL_SERVICE_KEYS = (
+    "OPENAI_API_KEY",
+    "MISTRAL_API_KEY",
+    "OPENROUTER_API_KEY",
+    "NOTION_API_KEY",
+)
+_REAL_SERVICE_CREDENTIALS: dict[str, str] = {
+    name: os.environ.pop(name) for name in _EXTERNAL_SERVICE_KEYS if name in os.environ
+}
 
 from api.main import app
 
@@ -74,6 +95,27 @@ def unlimited_llm_cost_budget(tmp_path):
         return_value=repository,
     ):
         yield
+
+
+@pytest.fixture(autouse=True)
+def isolated_local_state(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Redirige l'état local que le code écrit sous la racine du dépôt, sans injection possible.
+
+    Sans ça, chaque run local incrémentait le budget LLM mensuel réel (celui qui déclenche
+    les 429), ajoutait des lignes au registre d'usage, et remplissait l'historique de vraies
+    fiches — plafonné à 40 entrées — avec des snapshots de test qui en évinçaient le contenu.
+    """
+    monkeypatch.setattr("api.llm_usage_factory._PROJECT_ROOT", tmp_path / ".pytest-llm-usage")
+    # Chemin absolu : `repo_root / _HISTORY_ROOT` rend alors `_HISTORY_ROOT` tel quel.
+    monkeypatch.setattr(
+        "services.gdd_entity_history._HISTORY_ROOT", tmp_path / ".pytest-entity-history"
+    )
+
+
+@pytest.fixture
+def real_service_credentials() -> dict[str, str]:
+    """Clés réelles retirées de l'environnement au chargement, pour les tests réseau explicites."""
+    return dict(_REAL_SERVICE_CREDENTIALS)
 
 
 @pytest.fixture(scope="function", autouse=True)

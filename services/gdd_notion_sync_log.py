@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -20,7 +21,10 @@ def get_gdd_notion_sync_logger() -> logging.Logger:
     log.setLevel(logging.INFO)
     log.propagate = True
     try:
-        log_dir = Path(__file__).resolve().parent.parent / FilePaths.LOGS_DIR
+        # `LOG_DIR` comme le handler JSON principal (`setup_logging`).
+        log_dir = Path(
+            os.getenv("LOG_DIR") or Path(__file__).resolve().parent.parent / FilePaths.LOGS_DIR
+        )
         log_dir.mkdir(parents=True, exist_ok=True)
         path = log_dir / "gdd_notion_sync.log"
         fh = logging.FileHandler(path, encoding="utf-8")
