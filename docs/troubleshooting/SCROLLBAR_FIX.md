@@ -71,7 +71,7 @@ La scrollbar du panneau "Prompt Estimé" n'était pas visible, malgré plusieurs
 
 3. **`scrollbarGutter: 'stable'`** : Réserve l'espace pour la scrollbar même quand elle n'est pas visible, évitant les décalages de layout
 
-4. **Pas de styles personnalisés** : Utilise les scrollbars par défaut du navigateur, comme les autres composants (ContextList, ContextSelector), garantissant la cohérence visuelle
+4. **Pas de styles personnalisés par composant** : le style de barre est unique et global (`frontend/src/index.css`, sélecteur `*` — barre fine depuis la refonte 2026), garantissant la cohérence visuelle
 
 ## Références
 
@@ -83,7 +83,7 @@ La scrollbar du panneau "Prompt Estimé" n'était pas visible, malgré plusieurs
 
 1. **React combine `overflowY` et `overflowX`** : Toujours les définir séparément dans les styles inline
 2. **Flexbox et hauteur** : Utiliser `height: 0` avec `flex: '1 1 0%'` pour contraindre un conteneur flex
-3. **Scrollbars par défaut** : Mieux vaut utiliser les styles par défaut du navigateur pour la cohérence
+3. **Un seul style de barre** : jamais de style local à un composant — il cohabiterait avec le style global de `index.css` et on verrait deux barres différentes côte à côte
 4. **`scrollbarGutter: 'stable'`** : Utile pour éviter les décalages de layout avec les scrollbars overlay
 
 

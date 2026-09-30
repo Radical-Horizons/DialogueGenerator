@@ -60,7 +60,6 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
             >
               <textarea
                 ref={briefRef}
-                className="dg-scroll-slim"
                 id="user-instructions-textarea"
                 value={userInstructions}
                 onChange={(e) => onUserInstructionsChange(e.target.value)}
