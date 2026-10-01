@@ -580,12 +580,11 @@ class ServiceContainer:
             Magasin pointant sur ``data/benchmarks/suites/`` (jamais de chemin en dur).
         """
         if self._benchmark_suite_store is None:
-            from constants import FilePaths
+            from constants import resolve_benchmarks_dir
             from services.benchmark_suite_store import BenchmarkSuiteStore
 
-            root = Path(__file__).resolve().parent.parent
             self._benchmark_suite_store = BenchmarkSuiteStore(
-                suites_dir=root / FilePaths.BENCHMARK_SUITES_DIR
+                suites_dir=resolve_benchmarks_dir() / "suites"
             )
             # Amorçage ici, jamais depuis un chemin de lecture : un GET ne doit pas
             # provoquer d'écriture disque. Un benchmark embarque son jeu de test —
@@ -628,18 +627,17 @@ class ServiceContainer:
             Moteur configuré sur ``data/benchmarks/runs/``.
         """
         if self._benchmark_run_service is None:
-            from constants import FilePaths
+            from constants import resolve_benchmarks_dir
             from services.benchmark_run_service import BenchmarkRunService
             from services.llm_pricing_service import LLMPricingService
 
-            root = Path(__file__).resolve().parent.parent
             self._benchmark_run_service = BenchmarkRunService(
                 suite_store=self.get_benchmark_suite_store(),
                 gate_service=self.get_benchmark_gate_service(),
                 pricing_service=LLMPricingService(),
                 config_service=self.get_config_service(),
                 orchestrator_factory=self.get_unity_dialogue_orchestrator,
-                runs_dir=root / FilePaths.BENCHMARK_RUNS_DIR,
+                runs_dir=resolve_benchmarks_dir() / "runs",
                 auto_judge_hook=self._run_auto_judge,
             )
             logger.info("BenchmarkRunService initialisé dans le container.")
@@ -688,12 +686,11 @@ class ServiceContainer:
             Magasin pointant sur ``data/benchmarks/criteria/``.
         """
         if self._benchmark_criteria_store is None:
-            from constants import FilePaths
+            from constants import resolve_benchmarks_dir
             from services.benchmark_criteria_store import BenchmarkCriteriaStore
 
-            root = Path(__file__).resolve().parent.parent
             self._benchmark_criteria_store = BenchmarkCriteriaStore(
-                criteria_dir=root / FilePaths.BENCHMARK_CRITERIA_DIR
+                criteria_dir=resolve_benchmarks_dir() / "criteria"
             )
             # Amorçage ici, jamais depuis un chemin de lecture : un GET ne doit pas
             # provoquer d'écriture disque, a fortiori depuis un endpoint ouvert.

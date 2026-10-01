@@ -1,4 +1,8 @@
+import os
 from pathlib import Path
+
+# `constants.py` est à la racine du dépôt (ou du worktree) qui exécute le code.
+_REPO_ROOT = Path(__file__).resolve().parent
 
 class UIText:
     NONE = "(Aucun)"
@@ -43,6 +47,61 @@ class FilePaths:
     BENCHMARK_RUNS_DIR = BENCHMARKS_DIR / "runs"
     BENCHMARK_CRITERIA_DIR = BENCHMARKS_DIR / "criteria"
     LLM_CONFIG = "llm_config.json"
+
+def resolve_benchmarks_dir() -> Path:
+    """Retourne la racine des données de benchmark : suites, grilles et runs.
+
+    ``BENCHMARK_DATA_DIR`` l'emporte. Sinon, et c'est tout l'intérêt de cette
+    fonction, le dépôt **principal** est préféré au worktree depuis lequel le code
+    tourne.
+
+    Un banc existe pour comparer des runs **dans le temps** : un worktree est un
+    détail de workflow, pas une frontière de données. Or ``data/benchmarks/`` est en
+    ``.gitignore``, donc rien ne le suit, et un worktree supprimé emporte tout. C'est
+    arrivé le 2026-10-01 : seize runs de septembre, dont trois mesures complètes
+    facturées, ont disparu avec le leur. Les faire vivre dans le dépôt principal les
+    rend partagés par tous les worktrees et survivants à chacun.
+
+    Les identifiants de run portent un horodatage et un suffixe aléatoire : deux
+    worktrees qui mesurent en parallèle écrivent côte à côte sans collision.
+
+    Returns:
+        Le répertoire racine des données de benchmark. Lu à chaque appel, pas à
+        l'import : les tests le redéfinissent après coup.
+    """
+    override = os.getenv("BENCHMARK_DATA_DIR", "").strip()
+    if override:
+        return Path(override)
+    return _main_checkout_root() / FilePaths.BENCHMARKS_DIR
+
+
+def _main_checkout_root() -> Path:
+    """Racine du dépôt principal, même appelée depuis un worktree.
+
+    Dans un worktree, ``.git`` est un **fichier** qui pointe vers
+    ``<principal>/.git/worktrees/<nom>``. Remonter de là donne le checkout
+    principal sans lancer de sous-processus git.
+
+    Returns:
+        La racine principale, ou celle du code courant si rien ne permet de
+        conclure — un dépôt ordinaire, une archive, un `.git` illisible.
+    """
+    git_path = _REPO_ROOT / ".git"
+    try:
+        if not git_path.is_file():
+            return _REPO_ROOT
+        pointer = git_path.read_text(encoding="utf-8").strip()
+    except OSError:
+        return _REPO_ROOT
+    if not pointer.startswith("gitdir:"):
+        return _REPO_ROOT
+    git_dir = Path(pointer.split(":", 1)[1].strip())
+    # <principal>/.git/worktrees/<nom> → <principal>
+    for parent in git_dir.parents:
+        if parent.name == ".git":
+            return parent.parent
+    return _REPO_ROOT
+
 
 class ModelNames:
     """Noms des modèles OpenAI utilisés dans l'application.
