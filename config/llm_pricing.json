@@ -124,6 +124,11 @@
       "input_price_per_1M": 0.14,
       "output_price_per_1M": 0.28,
       "description": "MiMo-V2.6-Flash via OpenRouter. Doc Xiaomi : compatible OpenAI Chat Completions, temperature/top_p, tool calling. Capacites de raisonnement non documentees ; sorties structurees verifiees par sonde runtime, non par la doc."
+    },
+    "openai/gpt-6-sol": {
+      "input_price_per_1M": 2.0,
+      "output_price_per_1M": 10.0,
+      "description": "GPT-6 Sol via OpenRouter. Doc OpenAI : structured outputs, reasoning none-max (defaut medium), 128k sortie, 1,05M contexte, Chat Completions et Responses. Tarif identique en direct et sur la route."
     }
   },
   "last_updated": "2026-08-08",
