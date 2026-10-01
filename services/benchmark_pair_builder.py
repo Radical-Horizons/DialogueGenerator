@@ -35,11 +35,28 @@ from api.schemas.benchmark import BenchmarkGenerationRecord
 
 logger = logging.getLogger(__name__)
 
-PAIRWISE_TRUNCATION_CHARS = 4000
-"""Limite commune appliquée aux deux textes d'un duel, en caractères."""
+PAIRWISE_TRUNCATION_CHARS = None
+"""Plus de coupure : les deux propositions sont montrées entières.
+
+La borne valait 4 000 caractères, mesurés sur le **document**, là où la porte
+`length` compte les **mots par panneau** (300). Les deux bornes ne mesuraient pas
+la même chose, et la génération du 2026-10-01 — 6 546 caractères, toutes portes
+vertes — perdait **39 %** de son texte en duel : tout le second niveau du
+fragment, c'est-à-dire précisément ce que « cohérence des embranchements » et
+« conséquence perceptible » sont censés juger.
+
+Le prompt annonçait la coupure au juge pour qu'il ne la pénalise pas. C'est la
+même erreur que la troncature du contexte, un étage plus bas : habiller une borne
+qui fausse la mesure au lieu de la retirer. Un juge prévenu ne voit pas davantage.
+"""
 
 TRUNCATION_MARKER = "\n[…texte tronqué à la même limite pour les deux propositions…]"
-"""Marque de coupure, visible du juge et annoncée dans le prompt."""
+"""Marque de coupure, visible du juge et annoncée dans le prompt.
+
+Conservée : `truncate_for_pairwise` accepte toujours une limite explicite, et la
+marque est ce qui distingue, aux yeux du juge, une coupure de l'outil d'une
+réplique que le modèle a laissée en suspens.
+"""
 
 
 @dataclass(frozen=True)
@@ -104,18 +121,18 @@ def pair_seed(
 
 
 def truncate_for_pairwise(
-    text: str, limit: int = PAIRWISE_TRUNCATION_CHARS
+    text: str, limit: Optional[int] = PAIRWISE_TRUNCATION_CHARS
 ) -> Tuple[str, bool]:
     """Tronque un texte à la limite commune.
 
     Args:
-        text: Texte à tronquer.
-        limit: Limite en caractères.
+        limit: Limite en caractères. ``None`` — le défaut depuis le 2026-10-01 —
+            laisse le texte entier.
 
     Returns:
         Couple ``(texte, tronqué)``.
     """
-    if len(text) <= limit:
+    if limit is None or len(text) <= limit:
         return text, False
     return text[:limit] + TRUNCATION_MARKER, True
 
@@ -140,7 +157,7 @@ def build_pairs(
     records: Sequence[BenchmarkGenerationRecord],
     *,
     run_id: str,
-    truncation_limit: int = PAIRWISE_TRUNCATION_CHARS,
+    truncation_limit: Optional[int] = PAIRWISE_TRUNCATION_CHARS,
 ) -> List[PairAssignment]:
     """Construit toutes les paires comparables d'un run.
 

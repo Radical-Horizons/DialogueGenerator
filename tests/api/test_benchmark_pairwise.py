@@ -31,9 +31,9 @@ from services.benchmark_judge_service import BenchmarkPairwiseJudgeService
 from services.benchmark_run_service import BenchmarkRunService
 from services.benchmark_suite_store import BenchmarkSuiteStore
 
-MODEL_A = "gpt-5.6-luna"
-MODEL_B = "gpt-5.6-terra"
-JUDGE = "gpt-5.6-sol"
+MODEL_A = "openai/gpt-5.6-luna"
+MODEL_B = "openai/gpt-5.6-terra"
+JUDGE = "openai/gpt-5.6-sol"
 BASE = "/api/v1/benchmark"
 CRITERIA = ("voice_fidelity", "french_correctness")
 
@@ -323,7 +323,7 @@ def test_pairwise_listing_exposes_total_and_all_judges(
     client, run_service, pass_service = pairwise_client
     run_id = _produce_run(client, run_service, ["cas-0"], [MODEL_A, MODEL_B])
 
-    for judge in (JUDGE, "gpt-5.6-luna"):
+    for judge in (JUDGE, "openai/gpt-5.6-luna"):
         client.post(
             f"{BASE}/runs/{run_id}/judge/pairwise",
             json={"grid_id": "test", "judge_model": judge, "budget_cap_usd": 1.0},
