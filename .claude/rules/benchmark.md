@@ -151,6 +151,19 @@ mesure sans en être une** — le mode de défaillance propre à ce genre d'outi
   cet extrait ») : l'invisibilité valait acquittement, et une erreur factuelle hors
   fenêtre était impossible à sanctionner. Si le contexte ne tient pas, c'est la
   mesure qu'il faut revoir, pas le contexte qu'il faut couper.
+- **L'échantillonnage des candidats est uniforme, et un test l'exige.** La
+  température vaut 0,7 pour les douze modèles, mais **par héritage** de la
+  configuration globale : un modèle ajouté avec son propre `default_temperature`
+  quitterait la comparaison en silence. `tests/test_benchmark_sampling_uniformity.py`
+  casse dans ce cas.
+
+  ⚠️ **Cet axe n'est pas contrôlable, seulement surveillable.** Sondé le
+  2026-10-01, trois appels par régime via OpenRouter : `openai/gpt-5.6-luna` accepte
+  `temperature` sans erreur **et sans effet** (ni collapse à 0,0, ni dégât à 2,0),
+  tandis que `z-ai/glm-5.3` l'honore et rend trois réponses **vides** à 2,0. Envoyer
+  la même valeur à tous ne produit donc **pas** le même régime : c'est « GPT-5.6 au
+  défaut du fournisseur, les autres à 0,7 ». Ne pas prétendre le contraire dans un
+  rapport.
 - **L'effort de raisonnement du juge est fixé par le dépôt** (`JUDGE_REASONING_EFFORT`),
   jamais laissé au défaut du fournisseur, et **jamais piloté par le run** : faire
   varier le juge en même temps que les candidats rendrait tout écart inattribuable.

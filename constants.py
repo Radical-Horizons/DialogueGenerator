@@ -176,9 +176,18 @@ class ModelNames:
         GPT_5_6_SOL, GPT_5_6_TERRA, GPT_5_6_LUNA, GPT_5_6,
     ]
     
-    # GPT-5.6 Responses API : temperature / top_p rejetés (400 Unsupported parameter).
-    # Preuve runtime 2026-07-17 + doc : omit effort → défaut medium.
-    # Contrôler la « créativité » via reasoning.effort / text.verbosity, pas temperature.
+    # GPT-5.6 par l'API OpenAI directe : temperature / top_p rejetés (400 Unsupported
+    # parameter). Preuve runtime 2026-07-17. Contrôler la « créativité » via
+    # reasoning.effort / text.verbosity, pas temperature ; omettre l'effort vaut medium.
+    #
+    # ⚠️ Cette liste ne protège **que** le chemin OpenAI : le garde-fou vit dans
+    # `OpenAIParameterBuilder`, et `OpenRouterClient` envoie `temperature`
+    # inconditionnellement. Depuis la bascule du catalogue entier sur OpenRouter
+    # (2026-09-21), elle est donc inerte en pratique. Sondé le 2026-10-01, trois
+    # appels par régime : via OpenRouter, Luna accepte `temperature` **sans erreur et
+    # sans effet** (ni collapse à 0,0 ni dégât à 2,0), là où `z-ai/glm-5.3` rend
+    # trois réponses vides à 2,0. Ne pas lire cette liste comme une garantie que
+    # GPT-5.6 ne reçoit pas de température : il en reçoit une, elle ne fait rien.
     MODELS_WITHOUT_CUSTOM_TEMPERATURE = [
         GPT_5_6_SOL, GPT_5_6_TERRA, GPT_5_6_LUNA, GPT_5_6,
     ]
