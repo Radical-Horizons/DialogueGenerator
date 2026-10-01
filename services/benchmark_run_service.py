@@ -51,6 +51,10 @@ from services.benchmark_gate_service import BenchmarkGateService
 from services.benchmark_pass_control import CooperativePassControl, PassCancelled
 from services.benchmark_suite_store import BenchmarkSuiteStore, suite_fingerprint
 from services.benchmark_prompt_audit import audit_prompt
+from services.benchmark_prompt_fingerprint import (
+    fragment_tool_schema_text,
+    generation_prompt_fingerprint,
+)
 from services.gdd_notion_atomic_io import read_json_file, write_json_atomic
 from services.unity_dialogue_generation_service import UnityStructuredOutputError
 
@@ -972,6 +976,7 @@ class BenchmarkRunService:
                                 prompt_audited = True
                                 problems = audit_prompt(
                                     record.raw_prompt,
+                                    tool_schema=fragment_tool_schema_text(),
                                     fragment_mode=True,
                                     allow_stage_directions=(
                                         run.identity.narration_mode == "avec"
@@ -1031,6 +1036,7 @@ class BenchmarkRunService:
                             "generations_completed": len(records),
                             "cases_covered": covered,
                             "spent_usd": round(sum(record.cost_usd for record in records), 6),
+                            "prompt_fingerprint": generation_prompt_fingerprint(records),
                         }
                     )
                     self._persist_run(final)
@@ -1159,6 +1165,7 @@ class BenchmarkRunService:
         json_content: Optional[str] = None
         title: Optional[str] = None
         raw_prompt: Optional[str] = None
+        system_prompt: Optional[str] = None
         prompt_hash: Optional[str] = None
         cost = 0.0
         prompt_tokens = 0
@@ -1181,6 +1188,7 @@ class BenchmarkRunService:
                     json_content = result.get("json_content")
                     title = result.get("title")
                     raw_prompt = result.get("raw_prompt")
+                    system_prompt = result.get("raw_system_prompt")
                     prompt_hash = result.get("prompt_hash")
                 elif event.type == "error":
                     error_message = str(event.data.get("message", "Erreur de génération"))
@@ -1240,6 +1248,7 @@ class BenchmarkRunService:
                     else []
                 ),
                 raw_prompt=raw_prompt,
+                system_prompt=system_prompt,
                 prompt_hash=prompt_hash,
                 cost_usd=cost,
                 prompt_tokens=prompt_tokens,
@@ -1289,6 +1298,7 @@ class BenchmarkRunService:
             json_content=json_content,
             title=title,
             raw_prompt=raw_prompt,
+            system_prompt=system_prompt,
             prompt_hash=prompt_hash,
             cost_usd=cost,
             prompt_tokens=prompt_tokens,

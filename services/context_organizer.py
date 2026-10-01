@@ -5,6 +5,8 @@ import re
 from collections import OrderedDict, defaultdict
 from typing import Any, List, Dict, Mapping, Optional, Tuple
 
+from services.gdd_prompt_text import clean_gdd_value, cut_text, is_editorial_field
+
 logger = logging.getLogger(__name__)
 
 # Import des modèles de structure JSON
@@ -39,10 +41,13 @@ class ContextOrganizer:
     """
     
     # Ordre des sections pour le mode "narrative"
+    # La voix passe avant la caractérisation : quand le budget de contexte coupe une
+    # fiche, il la coupe par la fin, et c'est d'abord la voix qu'un dialogue doit
+    # garder.
     NARRATIVE_SECTIONS = [
         "identity",
-        "characterization",
         "voice",
+        "characterization",
         "background",
         "mechanics",
     ]
@@ -437,29 +442,87 @@ class ContextOrganizer:
                 return
         section_content[label] = value
     
+    # Les fiches synchronisées depuis Notion portent des clés « slugifiées » où
+    # chaque lettre accentuée devient « e_ » : `de_sir__want`, `voix_et_pre_sence`,
+    # `re_ve_lateurs`. Les mots-clés accentués ne les reconnaissaient pas, et la
+    # moitié des champs de voix — gestes, champs lexicaux, ce dont le personnage
+    # refuse de parler — tombaient dans « AUTRES », en fin de fiche, là où la
+    # troncature coupe d'abord.
+    _VOICE_KEYWORDS: Tuple[str, ...] = (
+        "dialogue", "registre", "lexical", "lexicaux", "expression", "voix",
+        "langage", "gestes", "tics", "rencontre_initiale", "refuse",
+        "communication", "perception",
+    )
+    _CHARACTERIZATION_KEYWORDS: Tuple[str, ...] = (
+        "désir", "de_sir", "faiblesse", "compulsion", "qualité", "qualite",
+        "défaut", "de_faut", "ghost", "noyau", "need", "tableau_socio", "peur",
+    )
+    _BACKGROUND_KEYWORDS: Tuple[str, ...] = (
+        "background", "histoire", "contexte", "relation", "évènement",
+        "e_ve_nement", "centre", "biographie", "ce_qu_il_sait", "ce_qu_il_ignore",
+        "ce_que_les_autres",
+    )
+    _MECHANICS_KEYWORDS: Tuple[str, ...] = (
+        "pouvoir", "héritage", "he_ritage", "compétence", "compe_tence", "stats",
+        "statistique", "attribut", "trait",
+    )
+    _RELATION_SUFFIXES: Tuple[str, ...] = ("liés", "liées", "lie_s", "lie_es")
+
     def _categorize_field(self, path: str, element_type: str) -> Optional[str]:
-        """Catégorise un champ selon son chemin."""
+        """Catégorise un champ selon son chemin.
+
+        Args:
+            path: Chemin du champ (ex. ``sections.gestes_et_tics_re_ve_lateurs``).
+            element_type: Type d'élément (non utilisé, gardé pour la signature).
+
+        Returns:
+            La clé de section narrative, ou ``None`` pour « AUTRES ».
+        """
         path_lower = path.lower()
-        
-        # Vérifier les catégories spécifiques en premier (priorité)
-        if any(kw in path_lower for kw in ["dialogue", "registre", "lexical", "expression", "voix", "langage"]):
+        # Une relation (« Dialogues liés ») n'est pas une voix : c'est une liste de
+        # fiches, qui vaut contexte et non manière de parler.
+        is_relation = path_lower.endswith(self._RELATION_SUFFIXES)
+
+        if not is_relation and any(kw in path_lower for kw in self._VOICE_KEYWORDS):
             return "voice"
-        
-        if any(kw in path_lower for kw in ["désir", "faiblesse", "compulsion", "qualité", "défaut"]):
+        if any(kw in path_lower for kw in self._CHARACTERIZATION_KEYWORDS):
             return "characterization"
-        
-        if any(kw in path_lower for kw in ["background", "histoire", "contexte", "relation", "évènement", "centre"]):
+        if is_relation or any(kw in path_lower for kw in self._BACKGROUND_KEYWORDS):
             return "background"
-        
-        if any(kw in path_lower for kw in ["pouvoir", "héritage", "compétence", "stat", "attribut", "trait"]):
+        if any(kw in path_lower for kw in self._MECHANICS_KEYWORDS):
             return "mechanics"
-        
-        # Catégories basées sur les mots-clés génériques (en dernier)
         if any(kw in path_lower for kw in ["nom", "alias", "occupation", "type", "rôle", "catégorie"]):
             return "identity"
-        
         return None
-    
+
+    def _prompt_value(
+        self,
+        element_data: Dict,
+        path: str,
+        field_char_limits: Optional[Mapping[str, int]] = None,
+    ) -> Any:
+        """Valeur d'un champ telle qu'elle doit entrer dans le prompt.
+
+        Nettoyée du balisage Notion, identifiants résolus en noms, raccourcie au
+        plafond d'extrait du champ s'il en a un.
+
+        Args:
+            element_data: Fiche GDD.
+            path: Chemin du champ.
+            field_char_limits: Plafonds de caractères par chemin (mode extrait).
+
+        Returns:
+            La valeur prête, ou ``None`` si le champ est éditorial ou vide une fois
+            nettoyé.
+        """
+        if is_editorial_field(path):
+            return None
+        value = clean_gdd_value(self._extract_field_value(element_data, path), self._relation_index)
+        limit = (field_char_limits or {}).get(path)
+        if isinstance(value, str) and limit:
+            value = cut_text(value, limit)
+        return value
+
     def organize_context_json(
         self,
         element_data: Dict,
@@ -467,7 +530,8 @@ class ContextOrganizer:
         fields_to_include: List[str],
         organization_mode: str = "default",
         field_labels_map: Optional[Dict[str, str]] = None,
-        element_mode: Optional[str] = None
+        element_mode: Optional[str] = None,
+        field_char_limits: Optional[Mapping[str, int]] = None,
     ) -> Optional['ContextItem']:
         """Organise les champs d'un élément selon le mode d'organisation et retourne une structure JSON.
         
@@ -498,7 +562,7 @@ class ContextOrganizer:
         # Valider les champs
         validated_fields = []
         for field_path in fields_to_include:
-            value = self._extract_field_value(element_data, field_path)
+            value = self._prompt_value(element_data, field_path, field_char_limits)
             if value is not None:
                 validated_fields.append(field_path)
         
@@ -511,6 +575,8 @@ class ContextOrganizer:
             organization_mode,
             element_mode or "full",
             tuple(validated_fields),
+            tuple(sorted((field_char_limits or {}).items())),
+            len(self._relation_index or {}),
         )
         cached_item = _ORGANIZE_JSON_CACHE.get(cache_key)
         if cached_item is not None:
@@ -520,15 +586,18 @@ class ContextOrganizer:
         # Organiser selon le mode
         if organization_mode == "narrative":
             sections = self._organize_narrative_json(
-                element_data, element_type, validated_fields, field_labels_map, element_mode
+                element_data, element_type, validated_fields, field_labels_map, element_mode,
+                field_char_limits,
             )
         elif organization_mode == "minimal":
             sections = self._organize_minimal_json(
-                element_data, element_type, validated_fields, field_labels_map, element_mode
+                element_data, element_type, validated_fields, field_labels_map, element_mode,
+                field_char_limits,
             )
         else:  # default
             sections = self._organize_default_json(
-                element_data, element_type, validated_fields, field_labels_map, element_mode
+                element_data, element_type, validated_fields, field_labels_map, element_mode,
+                field_char_limits,
             )
         
         # Calculer le token count total
@@ -555,7 +624,8 @@ class ContextOrganizer:
         element_type: str,
         fields_to_include: List[str],
         field_labels_map: Optional[Dict[str, str]] = None,
-        element_mode: Optional[str] = None
+        element_mode: Optional[str] = None,
+        field_char_limits: Optional[Mapping[str, int]] = None,
     ) -> List['ItemSection']:
         """Organisation par défaut : ordre linéaire des champs en JSON.
         
@@ -566,7 +636,7 @@ class ContextOrganizer:
         section_content = {}
         
         for field_path in fields_to_include:
-            value = self._extract_field_value(element_data, field_path)
+            value = self._prompt_value(element_data, field_path, field_char_limits)
             if value is None:
                 continue
             
@@ -590,7 +660,8 @@ class ContextOrganizer:
         element_type: str,
         fields_to_include: List[str],
         field_labels_map: Optional[Dict[str, str]] = None,
-        element_mode: Optional[str] = None
+        element_mode: Optional[str] = None,
+        field_char_limits: Optional[Mapping[str, int]] = None,
     ) -> List['ItemSection']:
         """Organisation narrative : groupement par sections logiques en JSON."""
         sections = []
@@ -610,7 +681,7 @@ class ContextOrganizer:
                 # Collecter les valeurs structurées
                 section_content = {}
                 for field_path in section_fields:
-                    value = self._extract_field_value(element_data, field_path)
+                    value = self._prompt_value(element_data, field_path, field_char_limits)
                     if value is None:
                         continue
                     
@@ -632,7 +703,7 @@ class ContextOrganizer:
             if other_fields:
                 section_content = {}
                 for field_path in other_fields:
-                    value = self._extract_field_value(element_data, field_path)
+                    value = self._prompt_value(element_data, field_path, field_char_limits)
                     if value is None:
                         continue
                     
@@ -655,7 +726,8 @@ class ContextOrganizer:
         element_type: str,
         fields_to_include: List[str],
         field_labels_map: Optional[Dict[str, str]] = None,
-        element_mode: Optional[str] = None
+        element_mode: Optional[str] = None,
+        field_char_limits: Optional[Mapping[str, int]] = None,
     ) -> List['ItemSection']:
         """Organisation minimale : seulement les champs essentiels en JSON."""
         # Filtrer pour ne garder que les champs essentiels
@@ -669,7 +741,10 @@ class ContextOrganizer:
         if not minimal_fields:
             minimal_fields = fields_to_include[:5]  # Limiter à 5 champs
         
-        return self._organize_default_json(element_data, element_type, minimal_fields, field_labels_map, element_mode)
+        return self._organize_default_json(
+            element_data, element_type, minimal_fields, field_labels_map, element_mode,
+            field_char_limits,
+        )
     
     def _estimate_tokens(self, text: str) -> int:
         """Estime le nombre de tokens dans un texte."""

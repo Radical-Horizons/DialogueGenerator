@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 import logging
 from typing import Any, Dict, Optional, Set, TYPE_CHECKING
 
-from utils.xml_utils import escape_xml_text
+from utils.xml_utils import sanitize_xml_text
 from services.context_serializer.field_normalizer import FieldNormalizer
 from services.context_serializer.section_mapper import SectionMapper
 from services.context_serializer.xml_element_builder import XmlElementBuilder
@@ -132,7 +132,7 @@ class InformationsSectionParser:
                                 if isinstance(json_in_value, dict):
                                     self._xml_builder.build_from_dict(section_elem, json_in_value, None)
                                 else:
-                                    section_elem.text = escape_xml_text(field_value)
+                                    section_elem.text = sanitize_xml_text(field_value)
                                 continue  # Ne pas ajouter dans metadata
                             
                             # Sinon, traitement normal : créer l'élément de catégorie si nécessaire
@@ -154,7 +154,7 @@ class InformationsSectionParser:
                             if isinstance(json_in_value, dict):
                                 self._xml_builder.build_from_dict(field_elem, json_in_value, None)
                             else:
-                                field_elem.text = escape_xml_text(field_value)
+                                field_elem.text = sanitize_xml_text(field_value)
                         else:
                             # Pas de JSON, traitement normal
                             # Créer l'élément de catégorie si nécessaire
@@ -173,7 +173,7 @@ class InformationsSectionParser:
                             
                             # Créer l'élément pour ce champ
                             field_elem = ET.SubElement(target_elem, tag)
-                            field_elem.text = escape_xml_text(field_value)
+                            field_elem.text = sanitize_xml_text(field_value)
     
     def extract_fields_from_dict(self, data: Dict[str, Any]) -> Set[str]:
         """Extrait récursivement tous les noms de champs d'un dictionnaire.

@@ -8,14 +8,33 @@ import logging
 from typing import Optional, TYPE_CHECKING, List, Dict, Any
 import xml.etree.ElementTree as ET
 
-from utils.xml_utils import escape_xml_text
+from utils.xml_utils import sanitize_xml_text
+from services.gdd_prompt_text import strip_stage_directions
+from models.dialogue_structure.unity_dialogue_fragment import MAX_CHOICES as FRAGMENT_MAX_CHOICES
 from services.dialogue_dramatic_progression import (
     DIALOGUE_ORALITY_PROMPT_LINES,
     dialogue_orality_prompt_lines,
 )
 from services.prompt_xml_parsers import build_narrative_guides_xml, build_vocabulary_xml
-from services.context_truncator import ContextTruncator, cap_context_text_to_budget
+from services.context_truncator import (
+    ContextTruncator,
+    cap_context_text_to_budget,
+    entity_names_from_structured,
+)
 from services.context_serializer.text_serializer import TextSerializer
+
+def _strip_stage_directions_in_tree(element: ET.Element) -> None:
+    """Retire les didascalies des exemples de fiche, dans tout un sous-arbre XML.
+
+    Args:
+        element: Élément dont le texte et celui des descendants sont nettoyés.
+    """
+    for node in element.iter():
+        if node.text:
+            node.text = strip_stage_directions(node.text)
+        if node.tail:
+            node.tail = strip_stage_directions(node.tail)
+
 
 # Réserve tokens pour l’enveloppe XML plate (<context><gdd_context>) quand le XML hiérarchique dépasse le budget.
 _XML_CONTEXT_ENVELOPE_TOKEN_RESERVE = 96
@@ -74,6 +93,8 @@ class PromptBuilder:
         # Section 2A : Contexte GDD
         context_elem = self._build_context_section(input)
         if context_elem is not None:
+            if not getattr(input, "allow_stage_directions", True):
+                _strip_stage_directions_in_tree(context_elem)
             root.append(context_elem)
         
         # Section 2B : Guides narratifs
@@ -108,12 +129,12 @@ class PromptBuilder:
         # DIRECTIVES D'AUTEUR (GLOBAL)
         if input.author_profile and input.author_profile.strip():
             author_elem = ET.SubElement(contract_elem, "author_directives")
-            author_elem.text = escape_xml_text(input.author_profile)
+            author_elem.text = sanitize_xml_text(input.author_profile)
             has_content = True
 
         if input.game_rules and input.game_rules.strip():
             rules_elem = ET.SubElement(contract_elem, "game_rules")
-            rules_elem.text = escape_xml_text(input.game_rules)
+            rules_elem.text = sanitize_xml_text(input.game_rules)
             has_content = True
         
         # TON NARRATIF
@@ -121,7 +142,7 @@ class PromptBuilder:
             tags_text = ", ".join([f"#{tag}" for tag in input.narrative_tags])
             if tags_text.strip():
                 tone_elem = ET.SubElement(contract_elem, "narrative_tone")
-                tone_elem.text = escape_xml_text(f"Ton : {tags_text}. Adapte le style, le rythme et l'intensité émotionnelle en fonction de ces tags.")
+                tone_elem.text = sanitize_xml_text(f"Ton : {tags_text}. Adapte le style, le rythme et l'intensité émotionnelle en fonction de ces tags.")
                 has_content = True
         
         # RÈGLES DE PRIORITÉ (toujours présentes car essentielles)
@@ -133,7 +154,7 @@ class PromptBuilder:
         )
         if priority_text.strip():
             priority_elem = ET.SubElement(contract_elem, "priority_rules")
-            priority_elem.text = escape_xml_text(priority_text)
+            priority_elem.text = sanitize_xml_text(priority_text)
             has_content = True
         
         # FORMAT DE SORTIE / INTERDICTIONS (toujours présentes car essentielles)
@@ -165,7 +186,7 @@ class PromptBuilder:
 
         if format_text.strip():
             format_elem = ET.SubElement(contract_elem, "output_format")
-            format_elem.text = escape_xml_text(format_text)
+            format_elem.text = sanitize_xml_text(format_text)
             has_content = True
         
         # Ne retourner que si au moins un élément a du contenu
@@ -257,7 +278,7 @@ class PromptBuilder:
             raw_content = (cut[:last_nl] if last_nl > 1200 else cut) + "\n... (extrait)"
 
         voice_elem = ET.Element("speaker_voice")
-        voice_elem.text = escape_xml_text(
+        voice_elem.text = sanitize_xml_text(
             f"Voix du PNJ {npc_name} — à respecter dans toutes les répliques `line` :\n{raw_content}"
         )
         return voice_elem
@@ -302,13 +323,17 @@ class PromptBuilder:
             else:
                 gen_parts.append(f"- Nombre de choix : Entre 1 et {input.max_choices} selon ce qui est approprié pour la scène.")
         else:
-            gen_parts.append("- Nombre de choix : L'IA décide librement entre 2 et 8 choix selon ce qui est approprié pour la scène. Le nœud DOIT avoir au moins 2 choix.")
+            # La borne annoncée est celle que le schéma de sortie applique : « 2 à
+            # 8 » face à un schéma de fragment plafonné à 6 invitait un modèle
+            # obéissant à écrire une sortie que la validation rejette.
+            upper = FRAGMENT_MAX_CHOICES if getattr(input, "fragment_mode", False) else 8
+            gen_parts.append(f"- Nombre de choix : L'IA décide librement entre 2 et {upper} choix selon ce qui est approprié pour la scène. Le nœud DOIT avoir au moins 2 choix.")
         
         # INSTRUCTION POUR RÉACTIVITÉ AUX FLAGS (si des flags sont fournis)
         if input.in_game_flags and len(input.in_game_flags) > 0:
             gen_parts.append("- **IMPORTANT : Le PNJ doit réagir/mentionner explicitement au moins 1 flag in-game sélectionné dans son dialogue.**")
         
-        gen_elem.text = escape_xml_text("\n".join(gen_parts))
+        gen_elem.text = sanitize_xml_text("\n".join(gen_parts))
         has_content = True
 
         if input.attributes_list:
@@ -318,7 +343,7 @@ class PromptBuilder:
                 f"Caractéristiques disponibles: {attrs_text}\n"
                 "Utilisez exactement ces noms (sans espace) avant le « + » dans les tests."
             )
-            attrs_elem.text = escape_xml_text(attrs_content)
+            attrs_elem.text = sanitize_xml_text(attrs_content)
             has_content = True
         
         # COMPÉTENCES DISPONIBLES
@@ -331,7 +356,7 @@ class PromptBuilder:
                 f"Compétences disponibles (identifiants sans espace): {skills_text}\n"
                 "Utilisez exactement ces identifiants après le « + » (format: Caractéristique+Compétence:DD)."
             )
-            skills_elem.text = escape_xml_text(skills_content)
+            skills_elem.text = sanitize_xml_text(skills_content)
             has_content = True
         
         # TRAITS DISPONIBLES
@@ -341,7 +366,7 @@ class PromptBuilder:
             if len(input.traits_list) > 30:
                 traits_text += f" (et {len(input.traits_list) - 30} autres traits)"
             traits_content = f"Traits disponibles: {traits_text}\nUtilise ces traits dans traitRequirements des choix (format: [{{'trait': 'NomTrait', 'minValue': 5}}]).\nLes traits peuvent être positifs (ex: 'Courageux') ou négatifs (ex: 'Lâche')."
-            traits_elem.text = escape_xml_text(traits_content)
+            traits_elem.text = sanitize_xml_text(traits_content)
             has_content = True
         
         return technical_elem if has_content else None
@@ -378,29 +403,16 @@ class PromptBuilder:
         
         if flag_pairs:
             flags_text = "[FLAGS IN-GAME] " + ", ".join(flag_pairs)
-            flags_elem.text = escape_xml_text(flags_text)
+            flags_elem.text = sanitize_xml_text(flags_text)
             return flags_elem
         
         return None
     
-    def _character_names_from_structured(self, structured_context: Any) -> List[str]:
-        """Liste les noms de fiches personnages dans le contexte structuré."""
-        names: List[str] = []
-        for section in getattr(structured_context, "sections", None) or []:
-            for category in getattr(section, "categories", None) or []:
-                if getattr(category, "type", "") != "characters":
-                    continue
-                for item in getattr(category, "items", []) or []:
-                    name = (getattr(item, "name", None) or "").strip()
-                    if name:
-                        names.append(name)
-        return names
-
     def _cap_gdd_context_text(self, text_ser: str, max_tok: int, input: 'PromptInput') -> str:
         """Applique le plafond tokens en protégeant la fiche du PNJ speaker."""
         protect = [input.npc_speaker_id] if input.npc_speaker_id else None
         all_chars = (
-            self._character_names_from_structured(input.structured_context)
+            entity_names_from_structured(input.structured_context)
             if input.structured_context
             else None
         )
@@ -456,7 +468,7 @@ class PromptBuilder:
                             body_text = self._cap_gdd_context_text(text_ser, inner_budget, input)
                         flat_ctx = ET.Element("context")
                         gdd_el = ET.SubElement(flat_ctx, "gdd_context")
-                        gdd_el.text = escape_xml_text(body_text)
+                        gdd_el.text = sanitize_xml_text(body_text)
                         if input.in_game_flags and len(input.in_game_flags) > 0:
                             flags_elem = self._build_in_game_flags_element(input.in_game_flags)
                             if flags_elem is not None:
@@ -507,7 +519,7 @@ class PromptBuilder:
             location_text = f"Lieu : {lieu}"
             if sous_lieu:
                 location_text += f"\nSous-Lieu : {sous_lieu}"
-            location_elem.text = escape_xml_text(location_text)
+            location_elem.text = sanitize_xml_text(location_text)
             
             # INJECTION DES FLAGS IN-GAME (si présents et pas de structured_context)
             if input.in_game_flags and len(input.in_game_flags) > 0:
@@ -614,5 +626,5 @@ class PromptBuilder:
             return None
         
         scene_elem = ET.Element("scene_instructions")
-        scene_elem.text = escape_xml_text(input.user_instructions)
+        scene_elem.text = sanitize_xml_text(input.user_instructions)
         return scene_elem

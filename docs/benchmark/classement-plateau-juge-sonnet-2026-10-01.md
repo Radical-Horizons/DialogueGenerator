@@ -1,5 +1,18 @@
 # Classement du plateau — juge tiers Claude Sonnet 5 (2026-10-01)
 
+> ⚠️ **Mesuré sur un prompt amputé** (constaté le 2026-10-02 en relisant les 48
+> `raw_prompt`). Dans **4 cas sur 8** (`voknir-premiere-rencontre`,
+> `genka-marchandage`, `ensevelie-revelation`, `akthar-interdit`), la fiche du PNJ
+> dépassait à elle seule le budget de contexte : coupée par la tête, elle a évincé
+> **le PJ, le lieu et l'espèce**. `akthar-interdit` n'a jamais montré au modèle le
+> champ qu'il teste. Les **guides narratifs** de la production étaient absents des
+> douze runs (cache Notion résolu depuis le worktree), et `context_fidelity` a été
+> noté contre ce contexte coupé.
+>
+> L'ordre relatif tient **pour ce prompt-là** — tous les modèles ont reçu le même —
+> mais ce n'est pas le prompt de la production. Le plateau est à refaire sur le
+> prompt corrigé.
+
 Six candidats, 8 cas, effort `medium`, rubrique seule. Juge
 `anthropic/claude-sonnet-5` à l'effort `high`, contexte entier, grille v2.
 48 générations, 48 verdicts, **zéro échec de juge**.

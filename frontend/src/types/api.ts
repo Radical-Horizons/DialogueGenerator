@@ -464,6 +464,8 @@ export interface GenerateUnityDialogueResponse {
   title?: string
   reasoning_trace?: ReasoningTrace | null
   raw_prompt: RawPrompt
+  /** Message système réellement envoyé ; absent avec le client factice. */
+  raw_system_prompt?: string | null
   prompt_hash: string
   estimated_tokens: number
   warning?: string

@@ -14,6 +14,12 @@ Aucun test ne pouvait les voir : chaque morceau de prompt était correct
 isolément, la contradiction naissait de leur assemblage. L'audit porte donc sur
 le **texte assemblé**, juste avant de dépenser.
 
+Le texte assemblé, c'est aussi le **schéma de l'outil**. Ses descriptions de champs
+sont lues par le modèle, et jusqu'en octobre 2026 celles de `line` et de
+`choices.text` décrivaient les didascalies en italique dans tous les modes : un run
+« sans didascalies » en recevait l'autorisation par une voie que l'audit ne lisait
+pas.
+
 Un prompt incohérent ne rend pas la mesure imprécise : il la rend fausse dans
 une direction précise, contre les modèles qui suivent les instructions. Mieux
 vaut refuser le run.
@@ -78,7 +84,7 @@ _NO_STAGE_DIRECTIONS_FORBIDDEN: tuple[_Rule, ...] = (
         "le prompt autorise les didascalies alors que le run les interdit",
     ),
     _Rule(
-        re.compile(r"didascalies?\s+\*italique\*", re.I),
+        re.compile(r"didascalies?\s+(?:en\s+)?\*italique\*", re.I),
         "le prompt décrit le format des didascalies alors que le run les interdit",
     ),
     _Rule(
@@ -89,7 +95,11 @@ _NO_STAGE_DIRECTIONS_FORBIDDEN: tuple[_Rule, ...] = (
 
 
 def audit_prompt(
-    prompt: str, *, fragment_mode: bool, allow_stage_directions: bool
+    prompt: str,
+    *,
+    fragment_mode: bool,
+    allow_stage_directions: bool,
+    tool_schema: str = "",
 ) -> List[str]:
     """Relève les contradictions entre un prompt assemblé et le run demandé.
 
@@ -97,6 +107,9 @@ def audit_prompt(
         prompt: Le texte réellement envoyé au modèle.
         fragment_mode: Le run attend un fragment de deux niveaux.
         allow_stage_directions: Le run accepte les didascalies.
+        tool_schema: Schéma JSON de l'outil de sortie. Une formulation interdite y
+            compte autant que dans le prompt ; une formulation **requise**, non :
+            le schéma ne porte pas la consigne.
 
     Returns:
         Les contradictions, en clair. Liste vide si le prompt est cohérent —
@@ -106,14 +119,19 @@ def audit_prompt(
     if not prompt or not any(marker in prompt for marker in _ASSEMBLED_MARKERS):
         return []
 
+    read_by_model = f"{prompt}\n{tool_schema}"
     problems: List[str] = []
     if fragment_mode:
-        problems += [r.message for r in _FRAGMENT_FORBIDDEN if r.pattern.search(prompt)]
+        problems += [
+            r.message for r in _FRAGMENT_FORBIDDEN if r.pattern.search(read_by_model)
+        ]
         problems += [
             r.message for r in _FRAGMENT_REQUIRED if not r.pattern.search(prompt)
         ]
     if not allow_stage_directions:
         problems += [
-            r.message for r in _NO_STAGE_DIRECTIONS_FORBIDDEN if r.pattern.search(prompt)
+            r.message
+            for r in _NO_STAGE_DIRECTIONS_FORBIDDEN
+            if r.pattern.search(read_by_model)
         ]
     return problems

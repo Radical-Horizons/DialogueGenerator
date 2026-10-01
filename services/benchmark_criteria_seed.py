@@ -18,6 +18,16 @@ pondérée : fondue dans la fidélité, elle rendait la note illisible — on ne
 plus si un 6 signalait un monde contredit ou un ajout heureux. Séparée, elle garde
 sa propre colonne et ses propres commentaires, où l'on va chercher les trouvailles
 qui méritent d'entrer dans le GDD.
+
+La version 3 (octobre 2026) sépare ce que la v2 laissait au juge de concilier. Le
+naturel de l'oral se note **brut**, avec des repères : 28 notes sur 48 valaient
+exactement 6, et une échelle aussi comprimée ne voit pas un progrès. La
+**cohérence interne de la voix** entre comme critère à part : le jeu assume des
+personnages bizarres, et une oralité faible n'est légitime que si la voix est
+juste **et** tenue sans faille — règle appliquée par le rapport, pas par le juge,
+qui excusait l'oralité au cas par cas (« cohérent avec la fiche, mais… »). Enfin
+la justesse de la voix ne récompense plus la recopie : le juge saluait une formule
+reprise « presque mot pour mot » comme un signe de fidélité.
 """
 
 from __future__ import annotations
@@ -46,10 +56,27 @@ def default_criteria() -> List[Dict[str, Any]]:
             "label": "Justesse de la voix du personnage",
             "description": (
                 "Le personnage parle comme sa fiche GDD le décrit : registre, tics, "
-                "vocabulaire, rapport à l'autorité. On le reconnaîtrait sans son nom."
+                "vocabulaire, rythme, rapport à l'autorité. On le reconnaîtrait sans "
+                "son nom. Reprendre mot pour mot une formule de la fiche n'est pas en "
+                "soi une preuve de fidélité : c'est la manière qui compte, pas la "
+                "citation."
             ),
             "direction": "higher_is_better",
             "weight": 1.5,
+            "group": _REPLIQUE,
+        },
+        {
+            "criterion_id": "voice_consistency",
+            "label": "Cohérence interne de la voix",
+            "description": (
+                "D'un panneau à l'autre et d'une branche à l'autre, le personnage parle "
+                "selon les mêmes règles : ses singularités — syntaxe, tics, registre, "
+                "tutoiement ou vouvoiement — sont tenues sans faille, pas semées au "
+                "hasard. Une étrangeté constante est une voix ; une étrangeté "
+                "intermittente est une erreur."
+            ),
+            "direction": "higher_is_better",
+            "weight": 1.0,
             "group": _REPLIQUE,
         },
         {
@@ -68,7 +95,14 @@ def default_criteria() -> List[Dict[str, Any]]:
             "label": "Naturel de l'oral",
             "description": (
                 "Ça se dit à voix haute. Pas de tournure qui ne s'emploie qu'à l'écrit, "
-                "pas de phrase qu'un acteur trébucherait à prononcer."
+                "pas de phrase qu'un acteur trébucherait à prononcer. Repères : 8 — "
+                "chaque phrase se dit d'un souffle, le rythme est celui d'une parole ; "
+                "6 — prononçable, mais des phrases longues ou soudées (point-virgule, "
+                "deux-points, subordonnées en cascade) trahissent l'écrit ; 4 — il faut "
+                "relire une phrase avant de pouvoir la dire. Une syntaxe singulière "
+                "exigée par la fiche se note ici comme les autres : c'est la justesse "
+                "et la cohérence de la voix, notées à part, qui disent si elle est "
+                "légitime."
             ),
             "direction": "higher_is_better",
             "weight": 1.2,
@@ -264,7 +298,7 @@ def default_grid_payload() -> Dict[str, Any]:
     """
     return {
         "grid_id": DEFAULT_GRID_ID,
-        "version": 2,
+        "version": 3,
         "name": "Grille dialogue FR (départ)",
         "description": (
             "Grille de départ issue de la spécification fonctionnelle du mode benchmark. "

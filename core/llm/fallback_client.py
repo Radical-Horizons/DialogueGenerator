@@ -107,6 +107,7 @@ class FallbackLLMClient(ILLMClient):
         self.last_usage_prompt_tokens: int = 0
         self.last_usage_completion_tokens: int = 0
         self.last_finish_reason: Optional[str] = None
+        self.last_system_prompt: Optional[str] = None
 
     def _sync_last_usage_from(self, client: object) -> None:
         """Copie last_* du client effectif (OpenAI, Mistral, etc.) pour l'orchestrateur SSE."""
@@ -115,6 +116,7 @@ class FallbackLLMClient(ILLMClient):
         self.last_usage_completion_tokens = int(getattr(client, "last_usage_completion_tokens", 0) or 0)
         reason = getattr(client, "last_finish_reason", None)
         self.last_finish_reason = str(reason) if reason else None
+        self.last_system_prompt = getattr(client, "last_system_prompt", None)
 
     def _get_client(self, index: int, fallback_from: Optional[str] = None, fallback_reason: Optional[str] = None) -> ILLMClient:
         """Retourne le client à l'index, en le créant si nécessaire."""

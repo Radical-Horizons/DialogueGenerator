@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 import logging
 from typing import Any, Dict, Optional
 
-from utils.xml_utils import escape_xml_text
+from utils.xml_utils import sanitize_xml_text
 from services.context_serializer.field_normalizer import FieldNormalizer
 
 logger = logging.getLogger(__name__)
@@ -83,8 +83,8 @@ class XmlElementBuilder:
                         self.build_from_dict(item_elem, item, tag_mapping)
                     else:
                         item_elem = ET.SubElement(parent_elem, tag)
-                        item_elem.text = escape_xml_text(str(item))
+                        item_elem.text = sanitize_xml_text(str(item))
             else:
                 # Valeur simple: créer un élément avec texte
                 child_elem = ET.SubElement(parent_elem, tag)
-                child_elem.text = escape_xml_text(str(value))
+                child_elem.text = sanitize_xml_text(str(value))

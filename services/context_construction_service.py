@@ -276,33 +276,25 @@ class ContextConstructionService:
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug(f"Champs extraits automatiquement pour {element_type} '{name}': {len(fields_to_use)} champs")
         
-        # Toujours créer des sections structurées via organize_context_json
-        # (plus de fallback INFORMATIONS)
+        # En mode extrait, chaque champ est plafonné à son `truncate_excerpt`. Ce
+        # plafond n'était appliqué qu'à `ItemSection.content`, que le chemin JSON
+        # laisse toujours vide : aucun extrait n'était jamais raccourci, et un lieu
+        # « en extrait » injectait son histoire entière — 10 000 caractères là où la
+        # configuration en prévoit 1 200.
+        char_limits = (
+            self._get_field_manager().get_excerpt_truncation_map(element_type)
+            if element_mode == "excerpt"
+            else None
+        )
         context_item = organizer.organize_context_json(
             element_data=element_data,
             element_type=element_type,
             fields_to_include=fields_to_use or [],
             organization_mode=organization_mode,
             field_labels_map=field_labels_map,
-            element_mode=element_mode
+            element_mode=element_mode,
+            field_char_limits=char_limits,
         )
-
-        # En mode excerpt, appliquer la troncature par champ sur le contenu textuel
-        # de chaque ItemSection (le path JSON n'a pas accès à truncation_map directement).
-        if context_item and element_mode == "excerpt":
-            field_manager = self._get_field_manager()
-            trunc_map = field_manager.get_excerpt_truncation_map(element_type)
-            if trunc_map:
-                for item_section in context_item.sections:
-                    if not item_section.content:
-                        continue
-                    # Troncature par section (pas par champ individuel ici — on applique
-                    # le max par section en utilisant la somme des troncatures des champs voix
-                    # qui y tombent). Simple heuristique : cap section à 1500 chars.
-                    if len(item_section.content) > 1500:
-                        cut = item_section.content[:1500]
-                        last_nl = cut.rfind("\n")
-                        item_section.content = (cut[:last_nl] if last_nl > 1200 else cut) + "\n... (extrait)"
 
         if context_item:
             # Définir l'ID et le nom affiché (nom canonique de la fiche GDD)

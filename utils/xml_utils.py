@@ -1,7 +1,7 @@
 """Utilitaires XML partagés pour la construction de prompts.
 
 Ce module fournit des fonctions réutilisables pour :
-- L'échappement de texte XML
+- Le nettoyage du texte confié à ElementTree
 - L'indentation d'éléments XML
 - La validation de contenu XML
 - La création de documents XML complets
@@ -14,53 +14,28 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 
-def escape_xml_text(text: str) -> str:
-    """Échappe les caractères spéciaux XML dans un texte.
-    
-    Gère :
-    - Les caractères XML de base (&, <, >)
-    - Les caractères de contrôle (0x00-0x1F sauf 0x09, 0x0A, 0x0D)
-    - Les entités déjà échappées (évite le double échappement)
-    
+def sanitize_xml_text(text: Optional[str]) -> str:
+    """Prépare un texte destiné à un élément ou un attribut ElementTree.
+
+    Ne fait **qu'une** chose : retirer les caractères de contrôle interdits en XML
+    (0x00-0x08, 0x0B-0x0C, 0x0E-0x1F ; tabulation, LF et CR sont gardés).
+
+    Il n'échappe **pas** ``&``, ``<`` et ``>`` : ElementTree le fait lui-même à la
+    sérialisation. Cette fonction s'appelait ``escape_xml_text`` et les échappait
+    aussi, si bien que chaque prompt envoyé au modèle portait des entités
+    doublement échappées — ``&amp;lt;scene_instructions&amp;gt;`` dans les règles de
+    priorité, ``&amp;lt;br&amp;gt;`` par centaines dans les fiches GDD (relevé sur les
+    prompts de benchmark d'octobre 2026). Du bruit lu par le modèle, et payé.
+
     Args:
-        text: Texte à échapper.
-        
+        text: Texte brut, ou ``None``.
+
     Returns:
-        Texte échappé pour inclusion dans XML.
+        Le texte sans caractères de contrôle invalides ; chaîne vide pour ``None``.
     """
     if not text:
         return ""
-    
-    # Éviter le double échappement : si le texte contient déjà des entités échappées,
-    # on ne les échappe pas à nouveau
-    # Pattern pour détecter les entités XML valides : &amp; &lt; &gt; &quot; &apos; ou &#...;
-    entity_pattern = r'&(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);'
-    
-    # Remplacer temporairement les entités existantes par des placeholders uniques
-    placeholders = {}
-    matches = list(re.finditer(entity_pattern, text))
-    # Traiter de la fin vers le début pour préserver les indices
-    for match in reversed(matches):
-        placeholder = f"__ENTITY_PLACEHOLDER_{len(placeholders)}__"
-        placeholders[placeholder] = match.group(0)
-        text = text[:match.start()] + placeholder + text[match.end():]
-    
-    # Échapper les & restants (qui ne sont pas dans des entités)
-    text = text.replace("&", "&amp;")
-    
-    # Échapper < et >
-    text = text.replace("<", "&lt;")
-    text = text.replace(">", "&gt;")
-    
-    # Restaurer les entités originales (qui étaient déjà échappées)
-    for placeholder, entity in placeholders.items():
-        text = text.replace(placeholder, entity)
-    
-    # Supprimer les caractères de contrôle invalides (0x00-0x08, 0x0B-0x0C, 0x0E-0x1F)
-    # Garder : 0x09 (tab), 0x0A (LF), 0x0D (CR)
-    text = re.sub(r'[\x00-\x08\x0B-\x0C\x0E-\x1F]', '', text)
-    
-    return text
+    return re.sub(r"[\x00-\x08\x0B-\x0C\x0E-\x1F]", "", text)
 
 
 def indent_xml_element(elem: ET.Element, level: int = 0) -> None:

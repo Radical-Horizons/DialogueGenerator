@@ -26,7 +26,16 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
+"""Version du format **et du compilateur** des variantes en cache.
+
+La clé d'une variante est le hash du contenu de la fiche : elle ne voit pas le code
+qui la compile. Toute évolution de ce que produit l'organisateur — ordre des
+sections, nettoyage des valeurs, résolution des relations — doit donc incrémenter
+cette version, sans quoi le cache continue de servir l'ancienne sortie. Passée à 3
+en octobre 2026 : nettoyage du balisage Notion et résolution des UUID, que le
+cache masquait entièrement.
+"""
 _PRECOMPILE_ROOT = Path("data") / ".gdd_context_precompile"
 _ORGANIZATION_MODES = ("narrative", "default", "minimal")
 _ELEMENT_MODES = ("full", "excerpt")
@@ -62,7 +71,30 @@ def get_or_create_precompile_context_builder(*, reload: bool = False) -> "Contex
         _lazy_precompile_builder.load_gdd_files()
     elif reload:
         _lazy_precompile_builder.load_gdd_files()
+    _inject_relation_index(_lazy_precompile_builder)
     return _lazy_precompile_builder
+
+
+def _inject_relation_index(context_builder: "ContextBuilder") -> None:
+    """Donne au builder de précompilation l'index UUID → Nom du disque GDD.
+
+    Le container l'injecte dans son propre builder ; celui-ci, utilisé pendant les
+    synchronisations, n'en avait pas. Les variantes qu'il écrivait gardaient leurs
+    relations en UUID bruts, et c'étaient elles que le cache servait ensuite.
+
+    Args:
+        context_builder: Builder dont le service de construction reçoit l'index.
+    """
+    from core.context.context_builder import PROJECT_ROOT_DIR
+    from services.gdd_paths import resolve_gdd_categories_path
+    from services.gdd_relation_resolver import build_global_relation_index
+
+    construction = getattr(context_builder, "_context_construction_service", None)
+    if construction is None:
+        return
+    construction._relation_index = build_global_relation_index(
+        resolve_gdd_categories_path(Path(PROJECT_ROOT_DIR))
+    )
 
 
 def clear_precompile_context_builder() -> None:
@@ -333,7 +365,9 @@ def _compile_single_variant(
 
     from services.context_organizer import ContextOrganizer
 
-    organizer = ContextOrganizer()
+    # Sans l'index, les relations restaient en UUID dans la variante mise en cache
+    # — celle qui est ensuite servie — alors même que l'index était injecté ailleurs.
+    organizer = ContextOrganizer(relation_index=getattr(construction, "_relation_index", None))
     context_item = construction._build_context_item(
         element_data=element_data,
         element_type=element_type,

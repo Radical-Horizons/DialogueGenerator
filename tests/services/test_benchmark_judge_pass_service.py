@@ -632,3 +632,24 @@ async def test_missing_grid_is_refused_before_any_judge_call(tmp_path: Path) -> 
     with pytest.raises(CriteriaGridNotFoundError):
         await harness.pass_service.start_pass(run_id, _config(grid_id="inconnue"))
     assert harness.judge_client.calls == 0
+
+
+@pytest.mark.asyncio
+async def test_a_reedited_grid_rejudges_instead_of_skipping(tmp_path: Path) -> None:
+    """Régression : relancée sous une grille rééditée, la passe sautait tout.
+
+    Les verdicts déjà présents se validaient sans regarder leur grille : la passe
+    se déclarait terminée sur la nouvelle version alors que chaque note sur disque
+    portait l'ancienne. Les duels vérifiaient la grille ; la rubrique, non.
+    """
+    harness = _Harness(tmp_path)
+    run_id = await harness.produce_run(case_ids=["cas-0", "cas-1"], models=[MODEL_A])
+    await harness.pass_service.start_pass(run_id, _config())
+    await harness.drain_judge()
+    assert harness.judge_client.calls == 2
+
+    harness.criteria_store.save_grid(_grid(), bump_version=True)
+    await harness.pass_service.start_pass(run_id, _config())
+    await harness.drain_judge()
+
+    assert harness.judge_client.calls == 4, "chaque cellule doit être rejugée sous la nouvelle grille"

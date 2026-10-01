@@ -83,6 +83,10 @@ class MistralClient(ILLMClient):
         self.last_finish_reason: Optional[str] = None
         self.last_usage_prompt_tokens: int = 0
         self.last_usage_completion_tokens: int = 0
+        # Message système réellement envoyé au dernier appel : le banc l'inscrit
+        # dans l'empreinte du prompt, sans quoi deux consignes se comparent en
+        # silence.
+        self.last_system_prompt: Optional[str] = None
 
         logger.info(f"MistralClient initialisé avec le modèle: {self.model_name}, API Key présente: {'Oui' if api_key else 'Non'}.")
         logger.info(f"System prompt template utilisé: '{self.system_prompt_template}'")
@@ -115,6 +119,7 @@ class MistralClient(ILLMClient):
         system_message_content = user_system_prompt_override if user_system_prompt_override else self.system_prompt_template
         if response_model:
             system_message_content += " Tu DOIS utiliser la fonction 'generate_interaction' pour formater ta réponse."
+        self.last_system_prompt = system_message_content
 
         messages = [{"role": "system", "content": system_message_content}]
         if previous_dialogue_context:

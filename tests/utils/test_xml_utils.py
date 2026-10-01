@@ -2,7 +2,7 @@
 import pytest
 import xml.etree.ElementTree as ET
 from utils.xml_utils import (
-    escape_xml_text,
+    sanitize_xml_text,
     indent_xml_element,
     validate_xml_content,
     create_xml_document,
@@ -10,66 +10,33 @@ from utils.xml_utils import (
 )
 
 
-class TestEscapeXmlText:
-    """Tests pour escape_xml_text()."""
-    
-    def test_escape_basic_characters(self):
-        """Test l'échappement des caractères XML de base."""
-        text = "Test & <test> content"
-        result = escape_xml_text(text)
-        assert "&amp;" in result
-        assert "&lt;" in result
-        assert "&gt;" in result
-        # Vérifier qu'il n'y a pas de & non échappé (sauf dans les entités)
-        # Tous les & doivent être dans &amp; &lt; ou &gt;
-        unescaped_ampersands = result.replace("&amp;", "").replace("&lt;", "").replace("&gt;", "")
-        assert "&" not in unescaped_ampersands
-        assert "<" not in result
-        assert ">" not in result
-    
-    def test_escape_empty_string(self):
-        """Test avec une chaîne vide."""
-        assert escape_xml_text("") == ""
-        assert escape_xml_text(None) == ""
-    
-    def test_escape_already_escaped_entities(self):
-        """Test que les entités déjà échappées ne sont pas doublement échappées."""
-        text = "Test &amp; already escaped &lt;content&gt;"
-        result = escape_xml_text(text)
-        # Vérifier qu'on n'a pas &amp;amp;
-        assert "&amp;amp;" not in result
-        assert "&amp;" in result
-        assert "&lt;" in result
-        assert "&gt;" in result
-    
-    def test_escape_control_characters(self):
-        """Test que les caractères de contrôle sont supprimés."""
-        # Caractères de contrôle à supprimer (sauf tab, LF, CR)
-        text = "Test\x00\x01\x02\x0B\x0C\x1F content"
-        result = escape_xml_text(text)
-        assert "\x00" not in result
-        assert "\x01" not in result
-        assert "\x0B" not in result
-        assert "\x1F" not in result
-        # Tab, LF, CR doivent être préservés
-        text2 = "Test\t\n\r content"
-        result2 = escape_xml_text(text2)
-        assert "\t" in result2
-        assert "\n" in result2
-        assert "\r" in result2
-    
-    def test_escape_special_cases(self):
-        """Test des cas spéciaux."""
-        # Texte avec plusieurs &
-        text = "A & B & C"
-        result = escape_xml_text(text)
-        assert result.count("&amp;") == 2
-        
-        # Texte avec < et > multiples
-        text = "<<test>>"
-        result = escape_xml_text(text)
-        assert result.count("&lt;") == 2
-        assert result.count("&gt;") == 2
+class TestSanitizeXmlText:
+    """Tests pour sanitize_xml_text()."""
+
+    def test_leaves_xml_special_characters_to_elementtree(self) -> None:
+        """`&`, `<` et `>` passent tels quels : ElementTree les échappe lui-même."""
+        assert sanitize_xml_text("A & <b>") == "A & <b>"
+
+    def test_serialized_element_is_escaped_exactly_once(self) -> None:
+        """Régression : le texte pré-échappé sortait en `&amp;lt;` une fois sérialisé."""
+        elem = ET.Element("priority_rules")
+        elem.text = sanitize_xml_text("Instructions de scène (<scene_instructions>) & co")
+        xml_str = ET.tostring(elem, encoding="unicode")
+        assert "&lt;scene_instructions&gt;" in xml_str
+        assert "&amp;lt;" not in xml_str
+        assert "&amp;amp;" not in xml_str
+        assert ET.fromstring(xml_str).text == "Instructions de scène (<scene_instructions>) & co"
+
+    def test_empty_values(self) -> None:
+        """Chaîne vide et `None` donnent une chaîne vide."""
+        assert sanitize_xml_text("") == ""
+        assert sanitize_xml_text(None) == ""
+
+    def test_strips_invalid_control_characters(self) -> None:
+        """Les caractères de contrôle interdits en XML sont retirés, pas tab/LF/CR."""
+        result = sanitize_xml_text("Test\x00\x01\x0B\x1F content")
+        assert result == "Test content"
+        assert sanitize_xml_text("Test\t\n\r") == "Test\t\n\r"
 
 
 class TestIndentXmlElement:

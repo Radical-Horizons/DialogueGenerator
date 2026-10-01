@@ -93,6 +93,10 @@ class OpenRouterClient(ILLMClient):
         self.last_finish_reason: Optional[str] = None
         self.last_usage_prompt_tokens: int = 0
         self.last_usage_completion_tokens: int = 0
+        # Message système réellement envoyé au dernier appel : le banc l'inscrit
+        # dans l'empreinte du prompt, sans quoi deux consignes se comparent en
+        # silence.
+        self.last_system_prompt: Optional[str] = None
 
         # Le helper partagé du dépôt, déjà utilisé par le client OpenAI : il
         # connaît 429, 500, 502, 503, 504 et les coupures réseau, et se règle
@@ -143,6 +147,7 @@ class OpenRouterClient(ILLMClient):
             system_message_content += (
                 " Tu DOIS utiliser la fonction 'generate_interaction' pour formater ta réponse."
             )
+        self.last_system_prompt = system_message_content
 
         messages: List[Dict[str, Any]] = [{"role": "system", "content": system_message_content}]
         if previous_dialogue_context:

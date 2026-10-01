@@ -7,7 +7,7 @@ import logging
 import xml.etree.ElementTree as ET
 from typing import Optional
 
-from utils.xml_utils import escape_xml_text
+from utils.xml_utils import sanitize_xml_text
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ def build_narrative_guides_xml(guides_text: str) -> ET.Element:
             if current_section is not None and current_content:
                 # Finaliser la section précédente
                 if current_subsection is not None:
-                    current_subsection.text = escape_xml_text("\n".join(current_content))
+                    current_subsection.text = sanitize_xml_text("\n".join(current_content))
                 current_content = []
             
             current_section = ET.SubElement(guides_elem, "dialogue_guide")
@@ -51,7 +51,7 @@ def build_narrative_guides_xml(guides_text: str) -> ET.Element:
             if current_section is not None and current_content:
                 # Finaliser la section précédente
                 if current_subsection is not None:
-                    current_subsection.text = escape_xml_text("\n".join(current_content))
+                    current_subsection.text = sanitize_xml_text("\n".join(current_content))
                 current_content = []
             
             current_section = ET.SubElement(guides_elem, "narrative_guide")
@@ -62,7 +62,7 @@ def build_narrative_guides_xml(guides_text: str) -> ET.Element:
             if current_section is not None and current_content:
                 # Finaliser la section précédente
                 if current_subsection is not None:
-                    current_subsection.text = escape_xml_text("\n".join(current_content))
+                    current_subsection.text = sanitize_xml_text("\n".join(current_content))
                 current_content = []
             
             current_section = ET.SubElement(guides_elem, "extracted_rules")
@@ -75,7 +75,7 @@ def build_narrative_guides_xml(guides_text: str) -> ET.Element:
             if line.startswith("# ") or line.startswith("## "):
                 # Titre de sous-section
                 if current_subsection is not None and current_content:
-                    current_subsection.text = escape_xml_text("\n".join(current_content))
+                    current_subsection.text = sanitize_xml_text("\n".join(current_content))
                     current_content = []
                 
                 # Extraire le titre (enlever # et espaces)
@@ -97,7 +97,7 @@ def build_narrative_guides_xml(guides_text: str) -> ET.Element:
             elif line.startswith("TON:") or line.startswith("STRUCTURE:") or line.startswith("INTERDITS:"):
                 # Sous-section dans extracted_rules
                 if current_subsection is not None and current_content:
-                    current_subsection.text = escape_xml_text("\n".join(current_content))
+                    current_subsection.text = sanitize_xml_text("\n".join(current_content))
                     current_content = []
                 
                 rule_type = line.rstrip(":").lower()
@@ -119,10 +119,10 @@ def build_narrative_guides_xml(guides_text: str) -> ET.Element:
     
     # Finaliser la dernière section
     if current_subsection is not None and current_content:
-        current_subsection.text = escape_xml_text("\n".join(current_content))
+        current_subsection.text = sanitize_xml_text("\n".join(current_content))
     elif current_section is not None and current_content and current_section.tag != "dialogue_guide":
         # Section sans sous-sections, mettre le contenu directement
-        current_section.text = escape_xml_text("\n".join(current_content))
+        current_section.text = sanitize_xml_text("\n".join(current_content))
     
     return guides_elem
 
@@ -196,9 +196,9 @@ def build_vocabulary_xml(vocab_text: str) -> ET.Element:
                     
                     # Créer l'élément term
                     term_elem = ET.SubElement(current_scope, "term")
-                    term_elem.set("name", escape_xml_text(term_name))
+                    term_elem.set("name", sanitize_xml_text(term_name))
                     if term_definition:
-                        term_elem.text = escape_xml_text(term_definition)
+                        term_elem.text = sanitize_xml_text(term_definition)
         
         i += 1
     

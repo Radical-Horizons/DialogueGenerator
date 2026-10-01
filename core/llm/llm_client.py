@@ -50,6 +50,8 @@ class DummyLLMClient(ILLMClient):
         self.last_usage_prompt_tokens: int = 0
         self.last_usage_completion_tokens: int = 0
         self.last_finish_reason: Optional[str] = COMPLETED
+        # Le client factice n'envoie rien : il n'a pas de message système.
+        self.last_system_prompt: Optional[str] = None
         logger.info(f"DummyLLMClient initialisé avec un délai de {self.delay_seconds}s par variante.")
 
     async def generate_variants(self, prompt: str, k: int, response_model: Optional[Type[BaseModel]] = None, previous_dialogue_context: Optional[List[Dict[str, Any]]] = None, user_system_prompt_override: Optional[str] = None) -> List[Union[str, BaseModel]]:

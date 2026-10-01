@@ -1,5 +1,4 @@
 """Cache pour les données Notion avec stockage fichier JSON local."""
-import os
 import json
 import logging
 import time
@@ -7,10 +6,10 @@ from typing import Dict, Optional, Any
 from pathlib import Path
 from datetime import datetime
 
+from constants import resolve_notion_cache_dir
+
 logger = logging.getLogger(__name__)
 
-# Chemin par défaut pour le cache Notion
-DEFAULT_CACHE_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "notion_cache"
 
 
 class NotionCache:
@@ -27,9 +26,9 @@ class NotionCache:
         """Initialise le cache Notion.
         
         Args:
-            cache_dir: Répertoire de cache. Si None, utilise le répertoire par défaut.
+            cache_dir: Répertoire de cache. Si None, `resolve_notion_cache_dir()`.
         """
-        self.cache_dir = cache_dir or DEFAULT_CACHE_DIR
+        self.cache_dir = cache_dir or resolve_notion_cache_dir()
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.metadata_file = self.cache_dir / "metadata.json"
         self._metadata: Dict[str, Any] = self._load_metadata()
@@ -223,11 +222,7 @@ def get_notion_cache() -> NotionCache:
     global _notion_cache
     
     if _notion_cache is None:
-        cache_dir = os.getenv("NOTION_CACHE_DIR")
-        if cache_dir:
-            _notion_cache = NotionCache(cache_dir=Path(cache_dir))
-        else:
-            _notion_cache = NotionCache()
+        _notion_cache = NotionCache()
         logger.info("Cache Notion initialisé (singleton)")
     
     return _notion_cache

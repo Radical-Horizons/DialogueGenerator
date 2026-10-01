@@ -14,7 +14,7 @@ from api.schemas.dialogue import ContextSelection
 from constants import Defaults, ModelNames, PlayableCharacters
 from core.prompt.prompt_engine import PromptInput
 from services.configuration_service import ConfigurationService
-from services.context_truncator import cap_context_text_to_budget
+from services.context_truncator import cap_context_text_to_budget, entity_names_from_structured
 from services.dialogue_dramatic_progression import (
     DEFAULT_PROGRESSION_MAX_DEPTH,
     compose_generation_instructions,
@@ -86,7 +86,7 @@ def main() -> int:
         serialized,
         Defaults.CONTEXT_TOKENS,
         protect_entity_names=[dramatis.npc_speaker_id],
-        all_entity_names=context_dict.get("characters"),
+        all_entity_names=entity_names_from_structured(structured_context),
     )
 
     try:

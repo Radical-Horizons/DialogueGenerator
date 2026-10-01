@@ -19,7 +19,7 @@ from api.schemas.dialogue import (
 from constants import Defaults
 from models.prompt_structure import PromptMetadata, PromptSection, PromptStructure
 from services.context_token_budget import compute_context_selection_token_metrics
-from services.context_truncator import cap_context_text_to_budget
+from services.context_truncator import cap_context_text_to_budget, entity_names_from_structured
 from services.context_selection_optimizer import optimize_context_selection
 from api.dependencies import (
     get_context_builder,
@@ -200,7 +200,15 @@ async def build_context(
             element_modes=context_selections_dict.get("_element_modes")
         )
         context_text = context_builder.serialize_context_to_text(structured_context)
-        capped = cap_context_text_to_budget(context_text, request_data.max_tokens)
+        # Même politique que la génération : la première fiche personnage passe en
+        # tête sans évincer les autres. Une coupe par la tête montrerait ici un
+        # contexte que le modèle ne reçoit jamais.
+        capped = cap_context_text_to_budget(
+            context_text,
+            request_data.max_tokens,
+            protect_entity_names=entity_names_from_structured(structured_context, "characters")[:1] or None,
+            all_entity_names=entity_names_from_structured(structured_context) or None,
+        )
         token_count = context_builder._count_tokens(capped)
 
         return BuildContextResponse(
@@ -367,6 +375,8 @@ async def estimate_context_tokens(
         context_text = cap_context_text_to_budget(
             metrics.serialized_text or context_builder.serialize_context_to_text(structured_context),
             request_data.max_context_tokens,
+            protect_entity_names=entity_names_from_structured(structured_context, "characters")[:1] or None,
+            all_entity_names=entity_names_from_structured(structured_context) or None,
         )
         prompt_overhead_tokens, structured_prompt = _build_lightweight_prompt_structure(
             request_data,

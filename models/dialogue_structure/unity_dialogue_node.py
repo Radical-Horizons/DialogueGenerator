@@ -34,8 +34,8 @@ class UnityDialogueChoiceContent(BaseModel):
     text: str = Field(
         ...,
         description=(
-            "Réplique du joueur entre guillemets « … », ou geste en *[italique crochets]* "
-            "(ex. *[Lui tend la main.]*)."
+            "Texte de l'option, tel que le joueur le lit. Son format suit les "
+            "instructions de génération."
         ),
     )
     test: Optional[str] = Field(None, description="Format: AttributeType+SkillId:DD (ex: 'Raison+Rhétorique:8')")
@@ -74,8 +74,9 @@ class UnityDialogueNodeContent(BaseModel):
     line: Optional[str] = Field(
         None,
         description=(
-            "Texte du nœud : paroles du PNJ entre guillemets « … » ; didascalies en *italique* "
-            "(markdown), voix narrateur 3e personne, hors guillemets. Retours à la ligne \\n autorisés."
+            "Texte du nœud, tel qu'il s'affiche en jeu. Son format — guillemets, "
+            "didascalies ou non — suit les instructions de génération. Retours à la "
+            "ligne \\n autorisés."
         ),
     )
     test: Optional[str] = Field(

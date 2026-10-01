@@ -59,8 +59,8 @@ class UnityDialogueFragmentChoice(BaseModel):
     text: str = Field(
         ...,
         description=(
-            "Réplique du joueur entre guillemets « … », ou geste en *[italique crochets]* "
-            "(ex. *[Lui tend la main.]*)."
+            "Texte de l'option, tel que le joueur le lit. Son format suit les "
+            "instructions de génération."
         ),
     )
     leadsTo: Optional[str] = Field(
@@ -109,8 +109,8 @@ class UnityDialogueFragmentPanel(BaseModel):
     line: Optional[str] = Field(
         None,
         description=(
-            "Texte du panneau : paroles du PNJ entre guillemets « … » ; didascalies en "
-            "*italique* (markdown), voix narrateur 3e personne, hors guillemets."
+            "Texte du panneau, tel qu'il s'affiche en jeu. Son format — guillemets, "
+            "didascalies ou non — suit les instructions de génération."
         ),
     )
     test: Optional[str] = Field(

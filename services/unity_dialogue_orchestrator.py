@@ -19,7 +19,7 @@ from services.prompt_catalog_loader import load_prompt_catalogs
 from services.trait_catalog_service import TraitCatalogService
 from services.configuration_service import ConfigurationService
 from services.llm_usage_service import LLMUsageService
-from services.context_truncator import cap_context_text_to_budget
+from services.context_truncator import cap_context_text_to_budget, entity_names_from_structured
 from services.scene_dramatis import enrich_context_selections_for_scene, resolve_scene_dramatis
 from services.scene_instruction_loader import augment_first_meeting_instructions
 from services.dialogue_dramatic_progression import (
@@ -73,6 +73,11 @@ def _safe_float_cost(value: object, default: float = 0.0) -> float:
 
 def _safe_finish_reason(value: object) -> Optional[str]:
     """Retourne une raison d'arrêt lisible ; ignore les mocks et objets exotiques."""
+    return value if isinstance(value, str) and value else None
+
+
+def _safe_text(value: object) -> Optional[str]:
+    """Retourne un texte non vide ; ignore les mocks et objets exotiques."""
     return value if isinstance(value, str) and value else None
 
 
@@ -228,12 +233,11 @@ class UnityDialogueOrchestrator:
             serialized_context = _coerce_context_text(
                 context_builder.serialize_context_to_text(structured_context)
             )
-            all_character_names = context_selections_dict.get("characters") or []
             context_summary = cap_context_text_to_budget(
                 serialized_context,
                 request_data.max_context_tokens,
                 protect_entity_names=[npc_speaker_id] if npc_speaker_id else None,
-                all_entity_names=all_character_names,
+                all_entity_names=entity_names_from_structured(structured_context),
             )
             
             # 4. Construire le prompt Unity via le builder unique
@@ -527,6 +531,7 @@ class UnityDialogueOrchestrator:
                 json_content=json_content,
                 title=dialogue_title,
                 raw_prompt=prompt,
+                raw_system_prompt=_safe_text(getattr(llm_client, "last_system_prompt", None)),
                 prompt_hash=prompt_hash,
                 estimated_tokens=estimated_tokens,
                 warning=getattr(llm_client, 'warning', None),

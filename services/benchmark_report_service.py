@@ -31,6 +31,7 @@ from api.schemas.benchmark import (
 )
 from core.llm.finish_reason import is_truncated
 from services.benchmark_judge_service import measure_text_length
+from services.benchmark_oral_metrics import OralTally, copied_ngrams, npc_lines, tally
 from api.schemas.benchmark_judging import (
     CriterionDefinition,
     PairwiseVerdict,
@@ -42,6 +43,7 @@ from api.schemas.benchmark_report import (
     BenchmarkJudgeReport,
     BenchmarkModelRubricSummary,
     BenchmarkModelValidity,
+    BenchmarkOralObservations,
     BenchmarkPairwiseSummary,
     BenchmarkRunPreview,
     BenchmarkRunPreviewRequest,
@@ -61,6 +63,40 @@ logger = logging.getLogger(__name__)
 
 _PREVIEW_MIN_CAP_USD = 0.01
 """Plafond fictif de l'aperçu : ``BenchmarkRunConfig`` en exige un strictement positif."""
+
+
+ORAL_LOW_THRESHOLD = 6
+"""En dessous de cette note, l'oralité est faible."""
+
+VOICE_LEGITIMACY_THRESHOLD = 8
+"""Note minimale de justesse **et** de cohérence de la voix pour excuser une oralité faible."""
+
+
+def is_oral_low_legitimate(scores: Dict[str, int]) -> bool:
+    """Une oralité faible est-elle légitime dans ce verdict ?
+
+    Règle produit (2026-10-02) : le jeu assume des personnages bizarres. Une
+    syntaxe difficile à dire est acceptable si, et seulement si, la voix est juste
+    **et** tenue sans faille — une étrangeté constante est une voix, une étrangeté
+    intermittente est une erreur. Le juge n'arbitre pas : il note les trois critères
+    séparément, et c'est ici qu'ils se combinent.
+
+    Args:
+        scores: Notes du verdict par critère.
+
+    Returns:
+        ``True`` si l'oralité est faible mais excusée par la voix.
+    """
+    oral = scores.get("oral_naturalness")
+    fidelity = scores.get("voice_fidelity")
+    consistency = scores.get("voice_consistency")
+    if oral is None or fidelity is None or consistency is None:
+        return False
+    return (
+        oral < ORAL_LOW_THRESHOLD
+        and fidelity >= VOICE_LEGITIMACY_THRESHOLD
+        and consistency >= VOICE_LEGITIMACY_THRESHOLD
+    )
 
 
 class BenchmarkReportService:
@@ -302,6 +338,8 @@ class BenchmarkReportService:
             model_id: BenchmarkModelValidity(model_id=model_id) for model_id in models
         }
         written: Dict[str, List[int]] = defaultdict(list)
+        spoken: Dict[str, OralTally] = defaultdict(OralTally)
+        copies: Dict[str, List[int]] = defaultdict(list)
         for record in generations:
             entry = buckets.setdefault(
                 record.model_id, BenchmarkModelValidity(model_id=record.model_id)
@@ -312,6 +350,9 @@ class BenchmarkReportService:
                 entry.truncated += 1
             if record.status == "valid":
                 written[record.model_id].append(measure_text_length(record.json_content))
+                lines = npc_lines(record.json_content)
+                spoken[record.model_id] = spoken[record.model_id] + tally(lines)
+                copies[record.model_id].append(copied_ngrams(lines, record.raw_prompt))
             if record.status == "valid":
                 entry.valid += 1
             elif record.status == "invalid":
@@ -324,6 +365,17 @@ class BenchmarkReportService:
         for model_id, lengths in written.items():
             if lengths:
                 buckets[model_id].mean_text_chars = round(sum(lengths) / len(lengths))
+
+        for model_id, counts in spoken.items():
+            if not counts.words:
+                continue
+            buckets[model_id].oral = BenchmarkOralObservations(
+                words_per_sentence=round(counts.words / counts.sentences, 2),
+                joins_per_100_words=round(100 * counts.joins / counts.words, 2),
+                breaks_per_100_words=round(100 * counts.breaks / counts.words, 2),
+                copied_ngrams=sum(copies[model_id]),
+                generations_with_copy=sum(1 for count in copies[model_id] if count),
+            )
 
         for entry in buckets.values():
             entry.cost_usd = round(entry.cost_usd, 6)
@@ -488,6 +540,16 @@ class BenchmarkReportService:
             model_verdicts = by_model[model_id]
             scored = [v for v in model_verdicts if v.status == "scored"]
             criteria = self._criterion_scores(scored)
+            excused = [is_oral_low_legitimate(v.scores) for v in scored]
+            # Sans `voice_consistency` (grilles v1-v2), la règle ne s'applique pas :
+            # pas de moyenne « hors excuses » plutôt qu'une moyenne qui n'excuse rien.
+            unexcused = [
+                v.scores["oral_naturalness"]
+                for v, is_excused in zip(scored, excused)
+                if not is_excused
+                and "oral_naturalness" in v.scores
+                and "voice_consistency" in v.scores
+            ]
             summaries.append(
                 BenchmarkModelRubricSummary(
                     model_id=model_id,
@@ -495,6 +557,10 @@ class BenchmarkReportService:
                     judge_errors=len(model_verdicts) - len(scored),
                     weighted_mean=self._weighted_mean(criteria),
                     criteria=criteria,
+                    oral_low_legitimate=sum(excused),
+                    oral_naturalness_unexcused=(
+                        round(sum(unexcused) / len(unexcused), 3) if unexcused else None
+                    ),
                 )
             )
         return summaries

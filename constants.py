@@ -46,6 +46,7 @@ class FilePaths:
     BENCHMARK_SUITES_DIR = BENCHMARKS_DIR / "suites"
     BENCHMARK_RUNS_DIR = BENCHMARKS_DIR / "runs"
     BENCHMARK_CRITERIA_DIR = BENCHMARKS_DIR / "criteria"
+    NOTION_CACHE_DIR = DATA_DIR / "notion_cache"
     LLM_CONFIG = "llm_config.json"
 
 def resolve_benchmarks_dir() -> Path:
@@ -73,6 +74,26 @@ def resolve_benchmarks_dir() -> Path:
     if override:
         return Path(override)
     return _main_checkout_root() / FilePaths.BENCHMARKS_DIR
+
+
+def resolve_notion_cache_dir() -> Path:
+    """Retourne le répertoire du cache Notion : vocabulaire et guides narratifs.
+
+    ``NOTION_CACHE_DIR`` l'emporte. Sinon, comme pour les benchmarks, le dépôt
+    **principal** est préféré au worktree : ``data/notion_cache/`` est en
+    ``.gitignore``, donc un worktree en reçoit une copie **vide**. Résolu depuis le
+    code, le cache privait en silence le prompt de ses guides narratifs — ce qui
+    est arrivé aux douze runs de benchmark de septembre et d'octobre 2026, lancés
+    depuis un worktree : la production envoie environ 23 000 caractères de
+    consignes de style que le banc n'a jamais vus.
+
+    Returns:
+        Le répertoire du cache. Lu à chaque appel, pas à l'import.
+    """
+    override = os.getenv("NOTION_CACHE_DIR", "").strip()
+    if override:
+        return Path(override)
+    return _main_checkout_root() / FilePaths.NOTION_CACHE_DIR
 
 
 def _main_checkout_root() -> Path:

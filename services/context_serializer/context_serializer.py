@@ -172,7 +172,7 @@ class ContextSerializer:
             ValueError: Si la structure est invalide ou si la sérialisation échoue.
         """
         from models.prompt_structure import PromptSection, ContextCategory, ContextItem
-        from utils.xml_utils import escape_xml_text
+        from utils.xml_utils import sanitize_xml_text
         
         try:
             # Créer l'élément racine
@@ -250,7 +250,7 @@ class ContextSerializer:
             category_tag_map: Mapping types → tags catégories.
             item_tag_map: Mapping types → tags items.
         """
-        from utils.xml_utils import escape_xml_text
+        from utils.xml_utils import sanitize_xml_text
         
         category_type = category.type.lower()
         category_tag = category_tag_map.get(category_type, "category")
@@ -271,14 +271,18 @@ class ContextSerializer:
             category_elem: Élément XML de la catégorie.
             item_tag: Tag XML à utiliser pour l'item.
         """
-        from utils.xml_utils import escape_xml_text
+        from utils.xml_utils import sanitize_xml_text
         
         # Créer l'élément item
         item_elem = ET.SubElement(category_elem, item_tag)
         
-        # Ajouter le nom comme attribut
-        if item.metadata and "name" in item.metadata:
-            item_elem.set("name", escape_xml_text(str(item.metadata["name"])))
+        # Le nom de la fiche en attribut. Il était lu sous `metadata["name"]`, clé que
+        # personne n'écrit (le service pose `real_name`) : le modèle recevait des
+        # blocs <character> anonymes, sans savoir lequel était le locuteur.
+        metadata = item.metadata or {}
+        name = metadata.get("name") or getattr(item, "name", None) or metadata.get("real_name")
+        if name:
+            item_elem.set("name", sanitize_xml_text(str(name)))
         
         # PREMIER PASSAGE : Collecter les champs déjà traités dans les sections structurées
         already_processed_fields = self._collect_processed_fields(item)
@@ -326,7 +330,7 @@ class ContextSerializer:
             item_elem: Élément XML de l'item.
             already_processed_fields: Champs déjà traités.
         """
-        from utils.xml_utils import escape_xml_text
+        from utils.xml_utils import sanitize_xml_text
         section_title = item_section.title or ""
         section_title_lower = section_title.lower()
         
@@ -375,7 +379,7 @@ class ContextSerializer:
             tag_xml: Tag XML à utiliser.
             json_data: Données JSON parsées.
         """
-        from utils.xml_utils import escape_xml_text
+        from utils.xml_utils import sanitize_xml_text
         
         # Déstructurer le JSON en éléments XML
         section_elem = ET.SubElement(item_elem, tag_xml)
@@ -394,11 +398,11 @@ class ContextSerializer:
                         self._xml_builder.build_from_dict(section_elem, item, tag_mapping)
                     else:
                         item_elem_child = ET.SubElement(section_elem, "item")
-                        item_elem_child.text = escape_xml_text(str(item))
+                        item_elem_child.text = sanitize_xml_text(str(item))
         except Exception as e:
             # En cas d'erreur, logger et ajouter le contenu brut
             logger.warning(f"Erreur lors de la déstructuration JSON pour section '{item_section.title}': {e}")
-            section_elem.text = escape_xml_text(item_section.content)
+            section_elem.text = sanitize_xml_text(item_section.content)
     
     def _serialize_raw_content_section(
         self, 
@@ -417,7 +421,7 @@ class ContextSerializer:
             section_title: Titre de la section.
             already_processed_fields: Champs déjà traités.
         """
-        from utils.xml_utils import escape_xml_text
+        from utils.xml_utils import sanitize_xml_text
         
         raw_content = item_section.raw_content
         
@@ -437,7 +441,7 @@ class ContextSerializer:
                     if isinstance(value, (dict, list)):
                         self._xml_builder.build_from_dict(field_elem, value if isinstance(value, dict) else {"items": value}, None)
                     else:
-                        field_elem.text = escape_xml_text(str(value))
+                        field_elem.text = sanitize_xml_text(str(value))
             return
         
         # Créer l'élément de section
@@ -445,7 +449,7 @@ class ContextSerializer:
         
         # Si c'est un tag générique, ajouter l'attribut title
         if is_generic and section_title:
-            section_elem.set("title", escape_xml_text(section_title))
+            section_elem.set("title", sanitize_xml_text(section_title))
         
         # Sérialiser le contenu
         tag_mapping = self._get_tag_mapping(tag_xml)
@@ -459,14 +463,14 @@ class ContextSerializer:
                         self._xml_builder.build_from_dict(section_elem, item, tag_mapping)
                     else:
                         item_elem_child = ET.SubElement(section_elem, "item")
-                        item_elem_child.text = escape_xml_text(str(item))
+                        item_elem_child.text = sanitize_xml_text(str(item))
             else:
                 # Valeur simple
-                section_elem.text = escape_xml_text(str(raw_content))
+                section_elem.text = sanitize_xml_text(str(raw_content))
         except Exception as e:
             logger.warning(f"Erreur lors de la sérialisation de raw_content pour section '{section_title}': {e}")
             # Fallback: convertir en texte
-            section_elem.text = escape_xml_text(str(raw_content))
+            section_elem.text = sanitize_xml_text(str(raw_content))
     
     def _serialize_text_section(
         self, 
@@ -483,17 +487,17 @@ class ContextSerializer:
             tag_xml: Tag XML à utiliser.
             is_generic: Si True, ajouter un attribut title.
         """
-        from utils.xml_utils import escape_xml_text
+        from utils.xml_utils import sanitize_xml_text
         
         # Contenu texte normal
         section_elem = ET.SubElement(item_elem, tag_xml)
         
         # Si c'est un tag générique, ajouter l'attribut title
         if is_generic:
-            section_elem.set("title", escape_xml_text(item_section.title))
+            section_elem.set("title", sanitize_xml_text(item_section.title))
         
         # Ajouter le contenu (échappé)
-        section_elem.text = escape_xml_text(item_section.content)
+        section_elem.text = sanitize_xml_text(item_section.content)
     
     def _get_tag_mapping(self, tag_xml: str) -> dict:
         """Retourne le mapping de tags pour une section donnée.

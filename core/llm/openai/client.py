@@ -84,6 +84,10 @@ class OpenAIClient(ILLMClient):
         # Sans raison d'arrêt, une sortie tronquée est indiscernable d'une sortie
         # ratée : on impute au modèle ce qui vient du plafond de complétion.
         self.last_finish_reason: Optional[str] = None
+        # Message système réellement envoyé au dernier appel : le banc l'inscrit
+        # dans l'empreinte du prompt, sans quoi deux consignes se comparent en
+        # silence.
+        self.last_system_prompt: Optional[str] = None
         
         # Initialiser retry et circuit breaker (optionnel)
         self._retry_with_backoff = None
@@ -136,6 +140,7 @@ class OpenAIClient(ILLMClient):
             system_message_content += (
                 " Tu DOIS utiliser la fonction 'generate_interaction' pour formater ta réponse."
             )
+        self.last_system_prompt = system_message_content
         
         # Construire les messages (sans system message si on utilise instructions séparé)
         # Le system message sera passé via le paramètre instructions
@@ -302,6 +307,7 @@ class OpenAIClient(ILLMClient):
             system_message_content += (
                 " Tu DOIS utiliser la fonction 'generate_interaction' pour formater ta réponse."
             )
+        self.last_system_prompt = system_message_content
         
         # Construire les messages (sans system message)
         messages: List[Dict[str, Any]] = []

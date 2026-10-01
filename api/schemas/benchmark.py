@@ -384,6 +384,7 @@ class BenchmarkGenerationRecord(BaseModel):
         json_content: Sortie Unity brute, conservée pour audit et jugement ultérieur.
         title: Titre proposé par le modèle.
         raw_prompt: Prompt réellement envoyé.
+        system_prompt: Message système réellement envoyé avec ce prompt.
         prompt_hash: Empreinte SHA-256 du prompt.
         cost_usd: Coût réel de l'appel.
         prompt_tokens: Tokens d'entrée consommés.
@@ -404,6 +405,7 @@ class BenchmarkGenerationRecord(BaseModel):
     json_content: Optional[str] = None
     title: Optional[str] = None
     raw_prompt: Optional[str] = None
+    system_prompt: Optional[str] = None
     prompt_hash: Optional[str] = None
     cost_usd: float = 0.0
     prompt_tokens: int = 0
@@ -559,6 +561,10 @@ class BenchmarkRun(BaseModel):
             contredisait ce qui était demandé. Sa reprise est refusée : les
             générations déjà produites l'ont été sous un prompt qu'on sait
             faux, et ne se comparent pas à celles d'après correction.
+        prompt_fingerprint: Empreinte de la consigne réellement envoyée —
+            message système, schéma de sortie, prompt de chaque cas. Calculée à
+            la fin de la génération. Deux runs d'empreintes différentes n'ont pas
+            reçu la même consigne et ne se comparent pas.
     """
 
     run_id: str
@@ -571,6 +577,7 @@ class BenchmarkRun(BaseModel):
     cases_covered: int = 0
     spent_usd: float = 0.0
     prompt_incoherent: bool = False
+    prompt_fingerprint: Optional[str] = None
     model_diagnostics: List[BenchmarkModelDiagnostic] = Field(default_factory=list)
     message: str = ""
     created_at: Optional[str] = None

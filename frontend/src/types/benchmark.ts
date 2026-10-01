@@ -169,6 +169,17 @@ export interface BenchmarkModelValidity {
    */
   truncated: number
   gate_failures: Record<string, number>
+  /** Mesures déterministes de l'oralité ; absent sans génération valide. */
+  oral?: BenchmarkOralObservations | null
+}
+
+/** Oralité mesurée sans juge, sur les répliques du PNJ (voir `benchmark_oral_metrics.py`). */
+export interface BenchmarkOralObservations {
+  words_per_sentence: number
+  joins_per_100_words: number
+  breaks_per_100_words: number
+  copied_ngrams: number
+  generations_with_copy: number
 }
 
 export interface BenchmarkCriterionScore {
@@ -187,6 +198,10 @@ export interface BenchmarkModelRubricSummary {
   /** `null` quand rien n'a été noté — l'absence de note n'est pas un zéro. */
   weighted_mean: number | null
   criteria: BenchmarkCriterionScore[]
+  /** Verdicts où une oralité faible est excusée par une voix juste et tenue. */
+  oral_low_legitimate?: number
+  /** Oralité moyenne hors de ces verdicts ; `null` sans `voice_consistency` dans la grille. */
+  oral_naturalness_unexcused?: number | null
 }
 
 export interface BenchmarkPairwiseSummary {

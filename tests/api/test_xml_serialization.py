@@ -690,3 +690,40 @@ def test_end_to_end_no_duplicate_fields_real_data(real_client):
 def real_client():
     """Client de test sans mocks - utilise les vrais services."""
     yield TestClient(app)
+
+
+@pytest.mark.unit
+def test_items_built_by_the_service_are_named(context_builder):
+    """Régression : le nom n'était lu que sous `metadata["name"]`, clé que le service
+    n'écrit pas (il pose `real_name`). Le modèle recevait des <character> anonymes,
+    sans savoir lequel était le locuteur."""
+    structure = PromptStructure(
+        sections=[
+            PromptSection(
+                type="context",
+                title="CONTEXTE GDD",
+                content="",
+                categories=[
+                    ContextCategory(
+                        type="characters",
+                        title="CHARACTERS",
+                        items=[
+                            ContextItem(
+                                id="PNJ_1",
+                                name="Voknir Esh'Maradel",
+                                sections=[ItemSection(title="IDENTITÉ", content="Nom: Voknir")],
+                                metadata={"real_name": "Voknir Esh'Maradel", "mode": "full"},
+                            )
+                        ],
+                    )
+                ],
+            )
+        ],
+        metadata=PromptMetadata(
+            totalTokens=10,
+            generatedAt=datetime.now().isoformat(),
+            organizationMode="narrative",
+        ),
+    )
+    root = context_builder._context_serializer.serialize_to_xml(structure)
+    assert root.find("characters/character").get("name") == "Voknir Esh'Maradel"

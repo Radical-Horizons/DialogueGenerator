@@ -150,38 +150,77 @@ class ContextTruncator:
         return '\n'.join(truncated_lines)
 
 
-_GDD_CATEGORY_MARKERS: tuple[str, ...] = (
-    "--- LOCATIONS ---",
-    "--- ITEMS ---",
-    "--- SPECIES ---",
-    "--- COMMUNITIES ---",
-    "--- QUESTS ---",
-    "--- NARRATIVE_STRUCTURES ---",
-    "--- CHAPTERS ---",
-    "--- SCENES ---",
-)
+NON_SPEAKER_CONTEXT_SHARE = 0.4
+"""Part maximale du budget de contexte réservée aux fiches autres que le locuteur.
+
+Elle n'est prise que si ces fiches en ont besoin : un PJ en extrait, un lieu et une
+espèce tiennent d'ordinaire bien en dessous, et le reste revient au locuteur.
+"""
+
+_GDD_CATEGORY_MARKER = re.compile(r"^--- [A-Z_]+ ---$")
+"""Ligne d'en-tête de catégorie (``--- LOCATIONS ---``) : toujours en capitales."""
+
+_TRUNCATION_MARKER_TOKENS = 8
 
 
-def _extract_gdd_entity_block(section_text: str, entity_name: str, entity_names: Sequence[str]) -> str:
-    """Extrait le bloc texte d'une fiche GDD (marqueur ``--- Nom ---``)."""
-    start_marker = f"--- {entity_name} ---"
-    start_idx = section_text.find(start_marker)
-    if start_idx < 0:
-        return ""
-    end_idx = len(section_text)
-    search_from = start_idx + len(start_marker)
-    for other in entity_names:
-        if other == entity_name:
+def _split_entity_segments(
+    text: str, entity_names: Sequence[str]
+) -> tuple[str, list[tuple[str, str]]]:
+    """Découpe le contexte sérialisé en préambule et en une tranche par fiche.
+
+    Une tranche commence au marqueur ``--- Nom ---`` de sa fiche, ou à l'en-tête de
+    catégorie qui le précède immédiatement : couper une tranche ne doit pas emporter
+    l'en-tête de la catégorie suivante.
+
+    Args:
+        text: Contexte sérialisé.
+        entity_names: Noms des fiches présentes, toutes catégories confondues.
+
+    Returns:
+        Le préambule et la liste ordonnée ``(nom, tranche)``.
+    """
+    starts: list[tuple[int, str]] = []
+    for name in dict.fromkeys(n for n in entity_names if n):
+        match = re.search(rf"^--- {re.escape(name)} ---$", text, re.M)
+        if not match:
             continue
-        marker = f"\n--- {other} ---"
-        pos = section_text.find(marker, search_from)
-        if pos >= 0:
-            end_idx = min(end_idx, pos)
-    for cat_marker in _GDD_CATEGORY_MARKERS:
-        pos = section_text.find(f"\n{cat_marker}", search_from)
-        if pos >= 0:
-            end_idx = min(end_idx, pos)
-    return section_text[start_idx:end_idx].strip()
+        start = match.start()
+        previous_line_start = text.rfind("\n", 0, max(0, start - 1)) + 1
+        previous_line = text[previous_line_start : max(0, start - 1)]
+        if _GDD_CATEGORY_MARKER.match(previous_line):
+            start = previous_line_start
+        starts.append((start, name))
+    starts.sort()
+    if not starts:
+        return text, []
+    segments = [
+        (name, text[start : (starts[i + 1][0] if i + 1 < len(starts) else len(text))].rstrip())
+        for i, (start, name) in enumerate(starts)
+    ]
+    return text[: starts[0][0]], segments
+
+
+def _fair_shares(needs: Sequence[int], budget: int) -> list[int]:
+    """Répartit un budget entre des besoins, sans qu'aucun n'écrase les autres.
+
+    Chacun reçoit au plus son besoin ; ce qu'un petit besoin laisse revient aux plus
+    gros, à parts égales.
+
+    Args:
+        needs: Besoin en tokens de chaque tranche.
+        budget: Budget à répartir.
+
+    Returns:
+        La part accordée à chaque tranche, dans l'ordre d'entrée.
+    """
+    shares = [0] * len(needs)
+    remaining = max(0, budget)
+    order = sorted(range(len(needs)), key=lambda i: needs[i])
+    for rank, index in enumerate(order):
+        share = remaining // (len(order) - rank)
+        shares[index] = min(needs[index], share)
+        remaining -= shares[index]
+    return shares
 
 
 def cap_context_text_preserving_entities(
@@ -191,19 +230,24 @@ def cap_context_text_preserving_entities(
     *,
     all_entity_names: Optional[Sequence[str]] = None,
 ) -> Optional[str]:
-    """Tronque le contexte GDD en préservant les fiches ``protect_entity_names``.
+    """Tronque le contexte GDD sans qu'une fiche en évince une autre.
 
-    Les entités protégées sont conservées intégralement ; le reste est tronqué
-    depuis la fin pour respecter ``max_tokens``.
+    Le locuteur passe en premier, mais pas au point d'évincer tout le reste. Quand sa
+    fiche dépassait à elle seule le budget, le texte entier était coupé par la tête :
+    la fiche du PNJ, tronquée, puis plus rien — ni PJ, ni lieu, ni espèce. Constaté
+    sur quatre cas de benchmark sur huit en octobre 2026. Une part du budget est donc
+    réservée aux autres fiches, partagée équitablement entre elles ; chaque fiche est
+    coupée par sa fin, que l'organisateur réserve à ce qui compte le moins.
 
     Args:
         text: Contexte sérialisé (format ``--- … ---``).
         max_tokens: Plafond de tokens.
-        protect_entity_names: Noms de fiches à ne jamais couper.
-        all_entity_names: Tous les noms de fiches présents (délimitation des blocs).
+        protect_entity_names: Fiches prioritaires (le locuteur).
+        all_entity_names: Noms de **toutes** les fiches présentes, toutes catégories
+            confondues — c'est par eux que le texte est découpé.
 
     Returns:
-        Texte tronqué, ou None si la section CHARACTERS est absente.
+        Texte tronqué, ou ``None`` si aucune fiche protégée n'est repérable.
     """
     if not text or max_tokens <= 0 or not protect_entity_names:
         return None
@@ -212,56 +256,62 @@ def cap_context_text_preserving_entities(
     if truncator.count_tokens(text) <= max_tokens:
         return text
 
-    char_match = re.search(r"\n--- CHARACTERS ---\n", text)
-    if not char_match:
+    names = list(all_entity_names or []) + [n for n in protect_entity_names if n]
+    prefix, segments = _split_entity_segments(text, names)
+    protected = [i for i, (name, _) in enumerate(segments) if name in protect_entity_names]
+    if not protected:
         return None
 
-    prefix = text[: char_match.end()]
-    characters_body = text[char_match.end() :]
-    names = list(dict.fromkeys(n for n in (all_entity_names or protect_entity_names) if n))
+    needs = [truncator.count_tokens(segment) for _, segment in segments]
+    # Chaque tranche coupée reçoit un marqueur de troncature : le compter d'avance
+    # garde le total sous le plafond.
+    available = max(
+        0, max_tokens - truncator.count_tokens(prefix) - _TRUNCATION_MARKER_TOKENS * len(segments)
+    )
+    others = [i for i in range(len(segments)) if i not in protected]
+    reserve = min(sum(needs[i] for i in others), int(available * NON_SPEAKER_CONTEXT_SHARE))
 
-    protected_blocks: list[str] = []
-    for name in protect_entity_names:
-        block = _extract_gdd_entity_block(characters_body, name, names)
-        if block:
-            protected_blocks.append(block)
+    budgets = [0] * len(segments)
+    for index, share in zip(protected, _fair_shares([needs[i] for i in protected], available - reserve)):
+        budgets[index] = share
+    left = available - sum(budgets[i] for i in protected)
+    for index, share in zip(others, _fair_shares([needs[i] for i in others], left)):
+        budgets[index] = share
 
-    if not protected_blocks:
-        return None
+    parts = [prefix.rstrip()]
+    for (_, segment), need, budget in zip(segments, needs, budgets):
+        if budget >= need:
+            parts.append(segment)
+        elif budget > 0:
+            parts.append(truncator.truncate_context(segment, budget))
+    return "\n\n".join(part for part in parts if part)
 
-    protected_text = "\n\n".join(protected_blocks)
-    assembled = f"{prefix}{protected_text}"
-    if truncator.count_tokens(assembled) > max_tokens:
-        return truncator.truncate_context(text, max_tokens)
 
-    remainder_budget = max_tokens - truncator.count_tokens(assembled)
-    if remainder_budget <= 0:
-        return assembled + "\n... (contexte tronqué)"
+def entity_names_from_structured(
+    structured_context: Any, category_type: Optional[str] = None
+) -> list[str]:
+    """Liste, dans l'ordre du contexte, les noms des fiches présentes.
 
-    other_blocks: list[str] = []
-    for name in names:
-        if name in protect_entity_names:
-            continue
-        block = _extract_gdd_entity_block(characters_body, name, names)
-        if block:
-            other_blocks.append(block)
+    L'ordre compte : le locuteur est placé en tête par la composition de scène, et
+    c'est lui que la troncature privilégie.
 
-    categories_tail = ""
-    for marker in _GDD_CATEGORY_MARKERS:
-        pos = text.find(marker, char_match.end())
-        if pos >= 0:
-            categories_tail = text[pos:].strip()
-            break
+    Args:
+        structured_context: ``PromptStructure`` produit par ``build_context_json``.
+        category_type: Restreint à une catégorie (``characters``…) ; toutes sinon.
 
-    remainder_parts = list(other_blocks)
-    if categories_tail:
-        remainder_parts.append(categories_tail)
-    remainder_text = "\n\n".join(p for p in remainder_parts if p)
-    if not remainder_text:
-        return assembled
-
-    capped_tail = truncator.truncate_context(remainder_text, remainder_budget)
-    return f"{assembled}\n\n{capped_tail}"
+    Returns:
+        Les noms non vides des fiches.
+    """
+    names: list[str] = []
+    for section in getattr(structured_context, "sections", None) or []:
+        for category in getattr(section, "categories", None) or []:
+            if category_type and getattr(category, "type", "") != category_type:
+                continue
+            for item in getattr(category, "items", []) or []:
+                name = (getattr(item, "name", None) or "").strip()
+                if name:
+                    names.append(name)
+    return names
 
 
 _SHARED_TRUNCATOR: Optional["ContextTruncator"] = None

@@ -91,6 +91,53 @@ mesure sans en être une** — le mode de défaillance propre à ce genre d'outi
   aussi comme « et ainsi de suite » : sans « pas de troisième niveau », un
   modèle a rendu dix panneaux là où l'unité en compte quatre.
 
+## Le prompt mesuré
+
+Relu le 2026-10-02 sur les 48 prompts d'un run : le banc mesurait un prompt que la
+production n'envoie pas. Chaque point ci-dessous en vient.
+
+- **Le banc mesure le prompt de la production, en entier.** Les guides narratifs
+  viennent du cache Notion, gitignoré : résolu depuis le code, un worktree le voit
+  **vide**. `resolve_notion_cache_dir()` préfère le checkout principal, comme
+  `resolve_benchmarks_dir()` — sans quoi douze runs ont été mesurés sans ~23 000
+  caractères de consignes de style.
+- **Le run sait quelle consigne il a mesurée.** `BenchmarkRun.prompt_fingerprint`
+  hache ce qui a **réellement** été envoyé : message système relevé sur le client
+  (`last_system_prompt`), schéma de l'outil, `prompt_hash` de chaque cas. Deux runs
+  d'empreintes différentes ne se comparent pas. Pas de constante de version : on
+  oublie de l'incrémenter.
+- **Le schéma de sortie est du prompt.** Les descriptions de `line` et
+  `choices.text` décrivaient les didascalies dans tous les modes ; l'audit lit donc
+  aussi `fragment_tool_schema_text()`. Une description de champ reste **neutre** :
+  le format vit dans le prompt, qui connaît le mode.
+- **Aucune fiche n'en évince une autre.** Une fiche PNJ plus grosse que le budget
+  coupait tout le reste — ni PJ, ni lieu, ni espèce, sur quatre cas sur huit. La
+  troncature réserve une part aux autres fiches et la partage équitablement
+  (`cap_context_text_preserving_entities`) ; chaque fiche est coupée par sa fin, que
+  l'organisateur réserve au moins utile (la voix suit l'identité).
+- **Le contexte est lisible avant d'entrer.** `services/gdd_prompt_text.py` résout
+  relations et mentions Notion en noms et retire balisage et suivi éditorial. Une
+  mention auto-fermante ne porte que l'URL : sans résolution, la phrase arrivait au
+  modèle **sans son sujet**.
+- **Le cache précompilé ne voit pas son compilateur.** Sa clé est le hash de la
+  fiche : toute évolution de ce que produit l'organisateur incrémente
+  `gdd_context_precompile.SCHEMA_VERSION`, sinon l'ancienne sortie reste servie.
+- **Un exemple ajouté au prompt vient d'hors du jeu de test**, sinon le banc mesure
+  de la mémorisation. La recopie se compte sans juge (`copied_ngrams`) : la grille
+  a longtemps récompensé la reprise mot pour mot.
+
+## Oralité
+
+- **Mesurée deux fois : par le juge, et sans lui.** Le juge est comprimé (28 notes
+  sur 48 à exactement 6). `services/benchmark_oral_metrics.py` publie mots par
+  phrase, `;`/`:` et ruptures pour 100 mots — tirés de ce que le juge reprochait,
+  normalisés pour qu'un panneau plus long ne les déplace pas seul.
+- **Une oralité faible est légitime si, et seulement si, la voix est juste et tenue**
+  (décision produit du 2026-10-02 : le jeu assume des personnages bizarres). Le juge
+  note `oral_naturalness` **brut** ; `is_oral_low_legitimate` combine au rapport. Le
+  juge n'excuse pas au cas par cas — il le faisait (« cohérent avec la fiche,
+  mais… ») et brouillait les deux critères.
+
 ## Ce qu'un test ne voit pas
 
 - **Un run à blanc `dummy` est gratuit, et il voit ce que les tests ne voient
@@ -226,6 +273,9 @@ mesure sans en être une** — le mode de défaillance propre à ce genre d'outi
   mesure mais absente de sa clé n'empêche rien.
 - **Les critères sont de la donnée, appariés par identifiant stable** — jamais par
   libellé. Chaque verdict fige un `criteria_snapshot` (sens et poids).
+- **La grille fait partie de l'identité d'un verdict, rubrique comme duels.** Seuls
+  les duels la vérifiaient : relancée sous une grille rééditée, la passe rubrique
+  sautait chaque cellule et se déclarait terminée. Même piège que l'empreinte.
 
 ## Comparabilité et coût
 

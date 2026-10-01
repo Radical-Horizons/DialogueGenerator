@@ -65,6 +65,29 @@ class BenchmarkRunPreview(BaseModel):
     )
 
 
+class BenchmarkOralObservations(BaseModel):
+    """Mesures déterministes de l'oralité, sur les répliques du PNJ des générations valides.
+
+    Elles recoupent la note du juge sans en dépendre : voir
+    `services/benchmark_oral_metrics.py`. Normalisées par phrase et par 100 mots,
+    elles ne bougent pas du seul fait qu'un panneau s'allonge.
+
+    Attributes:
+        words_per_sentence: Longueur moyenne d'une phrase, en mots. Bas = plus oral.
+        joins_per_100_words: `;` et `:` pour 100 mots — les soudures que le juge
+            reproche. Bas = plus oral.
+        breaks_per_100_words: Ruptures (`…`, tirets d'interruption) pour 100 mots.
+        copied_ngrams: Séquences de huit mots reprises à l'identique du prompt.
+        generations_with_copy: Générations contenant au moins une telle séquence.
+    """
+
+    words_per_sentence: float = 0.0
+    joins_per_100_words: float = 0.0
+    breaks_per_100_words: float = 0.0
+    copied_ngrams: int = 0
+    generations_with_copy: int = 0
+
+
 class BenchmarkModelValidity(BaseModel):
     """Validité et coût d'un modèle sur un run — mesure de premier ordre.
 
@@ -91,6 +114,7 @@ class BenchmarkModelValidity(BaseModel):
             les tokens comme une longueur faisait croire qu'il écrivait treize
             fois plus ; il en écrivait deux fois plus et réfléchissait le reste.
         gate_failures: Nombre de recalages par identifiant de porte.
+        oral: Mesures déterministes de l'oralité, ou ``None`` sans génération valide.
     """
 
     model_id: str
@@ -104,6 +128,7 @@ class BenchmarkModelValidity(BaseModel):
     truncated: int = 0
     mean_text_chars: int = 0
     gate_failures: Dict[str, int] = Field(default_factory=dict)
+    oral: Optional[BenchmarkOralObservations] = None
 
 
 class BenchmarkCriterionScore(BaseModel):
@@ -141,6 +166,12 @@ class BenchmarkModelRubricSummary(BaseModel):
             « plus haut vaut mieux ». ``None`` si aucun verdict exploitable —
             l'absence de note n'est pas une note de zéro.
         criteria: Détail par critère.
+        oral_low_legitimate: Verdicts où une oralité faible est **légitime** — voix
+            juste et tenue sans faille (voir `services/benchmark_report_service.py`).
+        oral_naturalness_unexcused: Moyenne de `oral_naturalness` hors de ces
+            verdicts. C'est elle qu'une campagne sur l'oralité doit faire monter :
+            un personnage bizarre bien tenu n'a pas à devenir lisse. ``None`` si la
+            grille ne porte pas les critères nécessaires.
     """
 
     model_id: str
@@ -148,6 +179,8 @@ class BenchmarkModelRubricSummary(BaseModel):
     judge_errors: int = 0
     weighted_mean: Optional[float] = None
     criteria: List[BenchmarkCriterionScore] = Field(default_factory=list)
+    oral_low_legitimate: int = 0
+    oral_naturalness_unexcused: Optional[float] = None
 
 
 class BenchmarkPairwiseSummary(BaseModel):

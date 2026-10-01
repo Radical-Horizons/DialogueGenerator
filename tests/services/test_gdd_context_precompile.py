@@ -9,6 +9,7 @@ import pytest
 
 from models.prompt_structure import PromptMetadata, PromptStructure
 from services.gdd_context_precompile import (
+    SCHEMA_VERSION,
     PrecompiledFicheVariant,
     compute_content_hash,
     load_variant,
@@ -126,7 +127,7 @@ def test_write_manifest(repo_root: Path) -> None:
     assert manifest_path.is_file()
     data = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert data["entity_count"] == 3
-    assert data["schema_version"] == 2
+    assert data["schema_version"] == SCHEMA_VERSION
 
 
 def test_variant_cache_key_format() -> None:
@@ -169,3 +170,40 @@ def test_append_entity_history_triggers_precompile(tmp_path: Path) -> None:
         mock_pre.assert_called_once()
         assert mock_pre.call_args.kwargs["category_stem"] == "personnages"
         assert mock_pre.call_args.kwargs["record"]["Nom"] == "Bob"
+
+
+def test_compiled_variants_resolve_relations() -> None:
+    """Régression : la variante mise en cache était compilée sans index des relations.
+
+    C'est elle que le cache sert ensuite : même avec l'index injecté ailleurs, les
+    relations arrivaient au modèle en UUID bruts.
+    """
+    from types import SimpleNamespace
+
+    from services.gdd_context_precompile import _compile_single_variant
+
+    seen = []
+
+    class _Construction:
+        _element_resolver = None
+        _relation_index = {"uuid": "Nom résolu"}
+
+        def _get_field_manager(self) -> SimpleNamespace:
+            return SimpleNamespace(get_field_config_for_mode=lambda *args: None)
+
+        def _build_context_item(self, **kwargs):
+            seen.append(kwargs["organizer"]._relation_index)
+            return None
+
+    with pytest.raises(ValueError):
+        _compile_single_variant(
+            _Construction(),
+            None,
+            category_key="characters",
+            canonical_name="Test",
+            element_data={"Nom": "Test"},
+            organization_mode="narrative",
+            element_mode="full",
+            field_configs=None,
+        )
+    assert seen == [{"uuid": "Nom résolu"}]

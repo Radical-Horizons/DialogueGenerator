@@ -568,6 +568,7 @@ class GenerateUnityDialogueResponse(BaseModel):
         json_content: Contenu JSON du dialogue au format Unity.
         title: Titre descriptif du dialogue généré par l'IA.
         raw_prompt: Le prompt brut réel utilisé pour la génération (RawPrompt).
+        raw_system_prompt: Le message système réellement envoyé avec ce prompt.
         prompt_hash: Hash SHA-256 du prompt pour validation.
         estimated_tokens: Nombre estimé de tokens utilisés.
         warning: Avertissement éventuel.
@@ -577,6 +578,13 @@ class GenerateUnityDialogueResponse(BaseModel):
     json_content: str = Field(..., description="Contenu JSON du dialogue au format Unity")
     title: Optional[str] = Field(None, description="Titre descriptif du dialogue généré par l'IA")
     raw_prompt: str = Field(..., description="Le prompt brut réel utilisé pour la génération")
+    raw_system_prompt: Optional[str] = Field(
+        None,
+        description=(
+            "Message système réellement envoyé avec le prompt. `None` quand le client "
+            "n'en envoie pas (client factice)."
+        ),
+    )
     prompt_hash: str = Field(..., description="Hash SHA-256 du prompt")
     estimated_tokens: int = Field(..., description="Nombre estimé de tokens")
     warning: Optional[str] = Field(None, description="Avertissement (ex: DummyLLMClient utilisé)")

@@ -198,18 +198,23 @@ class BenchmarkJudgePassService:
         )
         return verdict_dir / name
 
-    def _verdict_is_usable(self, path: Path) -> bool:
+    def _verdict_is_usable(self, path: Path, grid: Optional[CriteriaGrid] = None) -> bool:
         """Indique si un verdict déjà présent peut être considéré comme produit.
 
         Se fier à la seule lisibilité du JSON ferait passer un verdict d'un schéma
         antérieur pour une notation faite : la cellule ne serait jamais rejouée et
         manquerait définitivement, alors que la passe se déclarerait terminée.
 
+        La grille compte aussi, comme pour les duels : une passe relancée après une
+        réédition de la grille sautait chaque cellule déjà notée sous l'ancienne et
+        se déclarait terminée sans avoir rien rejugé.
+
         Args:
             path: Chemin du verdict.
+            grid: Grille de la passe courante, si l'appelant veut vérifier la version.
 
         Returns:
-            ``True`` si le fichier existe et se valide.
+            ``True`` si le fichier existe, se valide, et relève de la même grille.
         """
         if not path.exists():
             return False
@@ -217,9 +222,21 @@ class BenchmarkJudgePassService:
         if raw is None:
             return False
         try:
-            RubricVerdict.model_validate(raw)
+            verdict = RubricVerdict.model_validate(raw)
         except ValidationError as exc:
             logger.warning("Verdict de benchmark invalide, rejugement (%s) : %s", path.name, exc)
+            return False
+        if grid is not None and (
+            verdict.grid_id != grid.grid_id or verdict.grid_version != grid.version
+        ):
+            logger.info(
+                "Verdict produit sur %s v%s, grille courante %s v%s — rejugement (%s)",
+                verdict.grid_id,
+                verdict.grid_version,
+                grid.grid_id,
+                grid.version,
+                path.name,
+            )
             return False
         return True
 
@@ -350,6 +367,7 @@ class BenchmarkJudgePassService:
         records: List[BenchmarkGenerationRecord],
         run_id: str,
         judge_model: str,
+        grid: Optional[CriteriaGrid] = None,
     ) -> List[BenchmarkGenerationRecord]:
         """Générations restant à noter pour ce juge.
 
@@ -365,7 +383,7 @@ class BenchmarkJudgePassService:
         return [
             record
             for record in records
-            if not self._verdict_is_usable(self._verdict_path(directory, record))
+            if not self._verdict_is_usable(self._verdict_path(directory, record), grid)
         ]
 
     def _assert_judge_is_usable(self, judge_model: str) -> None:
@@ -474,7 +492,7 @@ class BenchmarkJudgePassService:
         # ferait sauter la cellule au relancement, alors que la cause a été corrigée.
         self._discard_judge_error_verdicts(run_id, config.judge_model)
 
-        remaining = self._remaining_records(records, run_id, config.judge_model)
+        remaining = self._remaining_records(records, run_id, config.judge_model, grid)
         # `budget_cap_usd` plafonne la dépense **totale** du jugement de ce run par
         # ce juge, reprises comprises : le compteur d'exécution repart du déjà-dépensé,
         # sinon chaque relance réautoriserait un plafond entier. La garde de lancement
@@ -606,7 +624,7 @@ class BenchmarkJudgePassService:
                     await self._control.checkpoint()
 
                     path = self._verdict_path(verdict_dir, record)
-                    if self._verdict_is_usable(path):
+                    if self._verdict_is_usable(path, grid):
                         completed += 1
                         continue
 
