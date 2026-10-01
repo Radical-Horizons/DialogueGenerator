@@ -124,6 +124,16 @@
 **FR120:** Users can access context selection and node detail panels on narrow viewports via mobile-appropriate patterns (drawers, full-screen panels, or explicit tabs) *(NEW - Narrow panels)*  
 **FR121:** Users can install the web app as a PWA (home screen icon / install prompt) where the browser supports it (V1.5+) *(NEW - PWA)*
 
+**FR122:** Users can edit a node's NPC dialogue line directly on the canvas node (in-situ): a single click into the text of an already-selected node places the caret; a first click on an unselected node selects and expands it *(NEW - Édition in-situ)*  
+**FR123:** Nodes display the full dialogue line (no 100-character truncation) **in expanded density** (single-selected node), with adaptive height bounded by a maximum (440px) and internal scrolling beyond it; summary density keeps the compact rendering *(NEW - Édition in-situ)*  
+**FR124:** Users can read and edit the text of each player response (choice) as a row inside the canvas node, preserving `choiceId` and row order *(NEW - Édition in-situ)*  
+**FR125:** Users can edit the speaker and the node title in-situ on the canvas node *(NEW - Édition in-situ)*  
+**FR126:** In-situ edits are persisted with no explicit save action ("edit = save"), pushed to the store within <=100ms per ADR-006; Escape leaves the field (the text is already saved) and Ctrl+Z reverts a coalesced edit unit via a transactional undo path *(NEW - Édition in-situ)*  
+**FR127:** In-situ editing and the right-hand detail panel stay bidirectionally consistent - one single source of truth (store), no competing flush, no last-writer-wins race *(NEW - Édition in-situ)*  
+**FR128:** In-situ editing is operable by keyboard (Tab chain across the node's fields, visible focus) and by touch on narrow viewports *(NEW - Édition in-situ)*  
+**FR129:** Users can open node generation, GDD context details and game variables as overlays launched from the node itself, so that the permanent right-hand panel is no longer required to author a dialogue *(NEW - Canvas-first, Epic 19)*  
+**FR130:** Users can collapse or remove the permanent right-hand panel and recover its width for the graph canvas, with no loss of access to any of its functions *(NEW - Canvas-first, Epic 19 — **PROVISOIRE** : "collapse" et "remove" décrivent deux produits différents ; l'exigence n'est pas testable avant arbitrage, prévu après retour d'usage d'Epic 18)*
+
 ### NonFunctional Requirements
 
 **NFR-P1: Graph Editor Rendering Performance** - System must render dialogue graphs with 500+ nodes in <1 second.
@@ -206,6 +216,24 @@
   - Format Unity strict (JSON schema validation)
   - 18 Cursor rules à respecter
 
+### UX Design Requirements
+
+Exigences de conception issues de la spec UX (`ux-design-specification/`), de la maquette de refonte 2026
+(`docs/design/refonte-ui-2026/`) et du design system. Portees par Epic 18.
+
+**UX-DR1:** Reviser les 22 affirmations de la spec UX qui ecartent l'edition in-situ au profit du seul panneau droit — inventaire exhaustif dans `epic-18.md` (9 shards), dont deux anti-patterns qui interdisent explicitement FR127 (`ux-pattern-analysis-inspiration.md:154-156`, `:217-219`)
+**UX-DR2:** Affordance d'edition non ambigue sur une zone de texte editable (curseur texte, filet au survol), sans casser la lisibilite en lecture ni le drag du noeud
+**UX-DR3:** Respect des tokens de la refonte 2026 en edition comme en lecture — serif pour la replique, mono pour les metadonnees, echelle d'espacement du design system
+**UX-DR4:** Etats de synchronisation visibles et honnetes (synchronise / en attente avec compteur / erreur), via le composant existant `SaveStatusIndicator` — pas un second indicateur concurrent
+**UX-DR5:** Cibles d'appui tactile >= 44x44px pour activer l'edition sur viewport etroit. **Extension assumee** : les 44px d'Epic 17 sont scopes au chrome (`epic-17.md:63-65`), pas au contenu d'un noeud
+**UX-DR6:** Focus visible et ordre de tabulation deterministe, avec les tokens de focus de la story 14.2 (dependance Epic 14)
+**UX-DR7:** Reviser la maquette 2026 — `etats-2a-2e.dc.html` bloc 2e (le noeud SELECTIONNE y est dessine en resume), `README.md` §F (structure, hauteur max, largeur 220 -> 280px), et poser une levee d'ambiguite dans `.claude/rules/ui_redesign_2026.md`
+**UX-DR8:** Role et nom accessibles sur chaque zone de texte editable du noeud (`responsive-design-accessibility.md:53-56` — ARIA sur tout composant interactif)
+**UX-DR9:** Annonce accessible du contenu restaure par un undo — l'operation la plus desorientante dans un champ sans mode
+**UX-DR10:** Placeholder sur un champ vide, disant ce qui s'y ecrit — invariant « chaque surface vide dit ce qui s'y affichera » (`design-system-foundation.md:32`)
+**UX-DR11:** `aria-invalid` et `aria-describedby` sur un champ in-situ en erreur de validation (`ux-consistency-patterns.md:81`)
+**UX-DR12:** Espacement minimal de 8px entre elements interactifs (`responsive-design-accessibility.md:58-60`), contraignant dans un noeud de 280px
+
 ### FR Coverage Map
 
 **Infrastructure & Setup:**
@@ -256,12 +284,37 @@
 **Accessibility:**
 - FR114-117 → Epic 14: Accessibilité
 
-**NFR Coverage:**
-- NFR-P1 à P5 (Performance) → Epics 1, 2, 10, 11, 13, 15
-- NFR-S1 à S3 (Security) → Epics 0, 7
-- NFR-SC1 à SC3 (Scalability) → Epics 2, 6, 7, 8
-- NFR-R1 à R4 (Reliability) → Epics 0, 1, 4, 10, 13
-- NFR-A1 à A3 (Accessibility) → Epics 2, 11, 12, 14, 15
-- NFR-I1 à I3 (Integration) → Epics 3, 5, 9
+**Mobile & Responsive:**
+- FR118-121 → Epic 17: Expérience mobile et responsive (web)
 
-
+**Édition in-situ des nœuds:**
+- FR122-128 → Epic 18: Édition in-situ du dialogue dans le nœud
+
+**Canvas-first (surfaces à la demande):**
+- FR129-130 → Epic 19: Canvas-first — surfaces à la demande, récupération de l'espace graphe
+
+**NFR Coverage** (mise à jour 2026-10-01 — la version précédente omettait les Epics 16 à 19 et ne mentionnait jamais NFR-R3) :
+
+| NFR | Intitulé exact | Epics |
+|---|---|---|
+| NFR-P1 | Graph Editor Rendering Performance | 1, 2, 15, **16, 17, 18** |
+| NFR-P2 | LLM Generation Response Time | 1, 15 |
+| NFR-P3 | API Response Time (Non-LLM) | 1, 8, 13 |
+| NFR-P4 | UI Interaction Responsiveness | 2, 11, 13, **16, 17, 18** |
+| NFR-P5 | Initial Page Load Time | 10, 13, **17** |
+| NFR-S1 à S3 | Security (clés LLM, sessions, données) | 0, 7 |
+| NFR-SC1 à SC3 | Scalability | 2, 6, 7, 8 |
+| NFR-R1 | Zero Blocking Bugs | 0, 1, 4 |
+| NFR-R2 | **System Uptime >99 %** | 0, 13 — ⚠️ **pas** « zéro perte » |
+| NFR-R3 | **Data Loss Prevention** | 0, 10, **16, 18** |
+| NFR-R4 | Error Recovery (LLM API Failures) | 1, 4, 13 |
+| NFR-A1 | Keyboard Navigation | 2, 12, 14, **18** |
+| NFR-A2 | Color Contrast (WCAG AA) | 11, 14, 15, **17** |
+| NFR-A3 | Screen Reader Support (V2.0+) | 14, **18** |
+| NFR-I1 à I3 | Integration (Unity, LLM, Notion) | 3, 5, 9, **16** |
+
+⚠️ **Piège de nommage.** NFR-R2 est *System Uptime*, NFR-R3 est *Data Loss Prevention*. La première rédaction d'Epic 18 citait R2 six fois en croyant désigner la non-perte de données. Vérifier l'intitulé avant de citer un identifiant NFR.
+
+**Espaces de numérotation distincts.** `prd/prd-rlm-context-selector.md` ouvre un **second** espace FR1–FR8 / NFR1–NFR6, sans rapport avec le référentiel principal. `epic-15.md` revendique « FR1-FR8 » et « NFR1-NFR6 » : lu hors contexte, Epic 15 semble revendiquer les FR de génération d'Epic 1. À désambiguïser en `RLM-FR1…` / `RLM-NFR1…`.
+
+

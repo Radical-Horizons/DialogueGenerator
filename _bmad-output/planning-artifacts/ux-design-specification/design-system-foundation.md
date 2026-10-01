@@ -61,6 +61,12 @@ Ce qui a été aligné sur le système (branche `ui/design-system-integration`) 
 - **Tiroir « ce qui part au modèle »** (2d) plafonné à 60 % de la hauteur.
 - **Rails repliés** : la colonne centrale leur réserve leur largeur (52 px rail riche, 32 px pilule) partout où aucune marge ne les protège — comparaison, étroit, graphe, mode écriture (`railReserve.ts`).
 - **Inspecteur 2e** : un nœud créé à la main s'ouvre directement en édition ; les autres restent en lecture d'abord.
+  > ⚠️ **Ne pas lire « lecture d'abord » comme une intention produit.** L'intention est et reste
+  > **l'écriture d'abord** ; l'effort de la refonte a porté sur la **lisibilité** du résultat — le
+  > produit est « écriture d'abord, **lecture friendly** ». Cette ligne décrit un comportement
+  > d'inspecteur, pas une philosophie d'outil. [Epic 18](../epics/epic-18.md) prolonge l'écriture
+  > d'abord jusqu'au canvas (édition in-situ) ; sa story 18.9 fait router `requestNodeEdit` vers
+  > le nœud plutôt que vers le panneau.
 
 ## Écarts restants
 
