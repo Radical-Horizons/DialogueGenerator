@@ -61,25 +61,66 @@ personnage ni du lieu, et la porter par cas doublerait le coût de la suite pour
 un axe qui s'observe très bien en comparant deux runs.
 """
 
-def reject_duplicate_models(models: List[str]) -> List[str]:
-    """Refuse un modèle listé deux fois.
+def canonicalize_models(models: List[str]) -> List[str]:
+    """Ramène chaque candidat à son identifiant courant, puis refuse les doublons.
 
-    Partagé par la configuration de run et par l'aperçu : un doublon fausserait
-    le nombre de générations, donc l'estimation *et* la dépense. Deux copies de
-    cette règle divergeraient à la première évolution.
+    Partagé par la configuration de run et par l'aperçu : un doublon fausserait le
+    nombre de générations, donc l'estimation *et* la dépense. Deux copies de cette
+    règle divergeraient à la première évolution.
+
+    **La normalisation vient d'abord, et c'est le point délicat.** Un slug hérité
+    (`gpt-5.6-luna`) désigne le même modèle que son nom courant
+    (`openai/gpt-5.6-luna`) depuis la bascule OpenRouter, et
+    `LEGACY_MODEL_ID_MAP` existe pour cela. Sans elle, deux défauts :
+
+    - Le diagnostic répondait « Modèle hors whitelist de génération Unity
+      (structured output requis) » — un motif **faux**, puisque Luna supporte les
+      sorties structurées. Vécu le 2026-10-01.
+    - Pire, un run qui passait tout de même **appelait** le modèle courant
+      (`LLMClientFactory.create_client` normalise, lui) tout en s'**enregistrant**
+      sous l'ancien nom. Or le répertoire des verdicts, le regroupement du rapport
+      et la recherche de tarif s'indexent sur le nom enregistré : le run aurait
+      mesuré un modèle et facturé, classé, diagnostiqué un autre.
+
+    Normaliser d'abord resserre aussi la détection de doublons : deux écritures du
+    même modèle dans la même liste passaient avant, et doublaient ses générations.
 
     Args:
-        models: Modèles candidats.
+        models: Modèles candidats, éventuellement sous un nom hérité.
 
     Returns:
-        La liste inchangée.
+        La liste des identifiants courants, dans l'ordre reçu.
 
     Raises:
-        ValueError: Si un modèle apparaît plusieurs fois.
+        ValueError: Si deux entrées désignent le même modèle.
     """
-    if len(set(models)) != len(models):
+    from constants import ModelNames
+
+    canonical = [ModelNames.normalize_model_id(model) for model in models]
+    if len(set(canonical)) != len(canonical):
         raise ValueError("Un modèle ne peut être listé qu'une fois")
-    return models
+    return canonical
+
+
+def canonicalize_model(model: str) -> str:
+    """Ramène un identifiant unique à son nom courant.
+
+    Même raison que `canonicalize_models`, pour les champs qui ne portent qu'un
+    modèle — le juge, notamment, dont le nom commande le répertoire des verdicts.
+
+    Args:
+        model: Identifiant, éventuellement hérité.
+
+    Returns:
+        L'identifiant courant.
+    """
+    from constants import ModelNames
+
+    return ModelNames.normalize_model_id(model)
+
+
+# Ancien nom, conservé le temps que les appelants externes suivent.
+reject_duplicate_models = canonicalize_models
 
 
 BenchmarkRunStatus = Literal[
@@ -257,6 +298,8 @@ class BenchmarkAutoJudgeConfig(BaseModel):
     budget_cap_usd: float = Field(..., gt=0)
     with_duels: bool = True
 
+    _canonicalize_judge = field_validator("judge_model")(canonicalize_model)
+
 
 BenchmarkReasoningEffort = Literal["none", "low", "medium", "high"]
 """Effort de raisonnement imposé à **tous** les candidats d'un run.
@@ -312,7 +355,7 @@ class BenchmarkRunConfig(BaseModel):
         ),
     )
 
-    _validate_models = field_validator("models")(reject_duplicate_models)
+    _canonicalize_models = field_validator("models")(canonicalize_models)
 
 
 class BenchmarkGateFailure(BaseModel):

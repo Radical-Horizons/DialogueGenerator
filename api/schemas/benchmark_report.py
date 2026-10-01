@@ -22,7 +22,7 @@ from api.schemas.benchmark import (
     BenchmarkNarrationMode,
     BenchmarkRunConfig,
     BenchmarkRunStatus,
-    reject_duplicate_models,
+    canonicalize_models,
 )
 
 from core.prompt.benchmark_judge import SCORE_MAX
@@ -268,7 +268,7 @@ class BenchmarkRunPreviewRequest(BaseModel):
     )
     with_duels: bool = True
 
-    _validate_models = field_validator("models")(reject_duplicate_models)
+    _canonicalize_models = field_validator("models")(canonicalize_models)
 
     def to_run_config(self, budget_cap_usd: float) -> BenchmarkRunConfig:
         """Compose la configuration de run équivalente pour l'estimateur.

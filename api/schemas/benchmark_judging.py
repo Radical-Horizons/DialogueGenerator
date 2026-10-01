@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from typing import Dict, List, Literal, Optional
 
+from api.schemas.benchmark import canonicalize_model
 from pydantic import BaseModel, Field, field_validator
 
 CriterionDirection = Literal["higher_is_better", "lower_is_better"]
@@ -211,6 +212,8 @@ class JudgePassConfig(BaseModel):
     grid_id: str = Field(..., min_length=1)
     grid_version: Optional[int] = Field(None, ge=1)
     judge_model: str = Field(..., min_length=1)
+
+    _canonicalize_judge = field_validator("judge_model")(canonicalize_model)
     budget_cap_usd: float = Field(..., gt=0)
 
 
