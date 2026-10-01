@@ -257,6 +257,14 @@ class JudgePassProgress(BaseModel):
     status: Optional[JudgePassStatus] = None
     verdicts_total: int = 0
     verdicts_completed: int = 0
+    judge_errors: int = 0
+    """Échecs du juge déjà rencontrés dans cette passe.
+
+    Absent jusqu'au 2026-10-01, et c'est ainsi qu'une passe a pu perdre **9
+    verdicts sur 24** sans que rien ne le signale en cours de route : le suivi
+    n'affichait que les verdicts « complétés », échecs compris. Une moyenne
+    calculée sur trois notes au lieu de huit ressemble à une mesure.
+    """
     current_model: Optional[str] = None
     current_case: Optional[str] = None
     spent_usd: float = 0.0

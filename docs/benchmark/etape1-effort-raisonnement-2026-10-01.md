@@ -1,5 +1,13 @@
 # Étape 1 — quel effort de raisonnement ? (2026-10-01)
 
+> ⚠️ **Conclusion invalidée le même jour.** Le juge était Luna et Luna était
+> candidate. Rejoué avec `anthropic/claude-sonnet-5` comme juge tiers sur les
+> mêmes textes, l'effet d'effort **disparaît** : la montée monotone du respect de
+> la consigne était de l'auto-préférence, et son biais **croissait avec l'effort**
+> (+0,75 à `none`, +2,12 à `high`). Voir
+> `etape1-bis-juge-tiers-2026-10-01.md`. Les chiffres ci-dessous restent exacts
+> comme mesure de ce que Luna pense de Luna ; ils ne mesurent pas l'effort.
+
 Quatre runs, 48 générations, **1,3044 $** dépensés (0,9057 génération + 0,3987
 notation). Suite `alteir-standard` v2, 8 cas. Juge `openai/gpt-5.6-luna` à
 l'effort `high`, contexte entier, grille `grille-dialogue-fr` v2.

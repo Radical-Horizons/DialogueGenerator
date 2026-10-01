@@ -253,7 +253,9 @@ class OpenRouterClient(ILLMClient):
                                 generated_results.append(parsed_output)
                                 success = True
                             except ValidationError as exc:
-                                normalized = self._try_normalize_unity_consequences(
+                                normalized = self._try_unwrap_stringified_payload(
+                                    response_model, function_args_raw
+                                ) or self._try_normalize_unity_consequences(
                                     response_model, function_args_raw
                                 )
                                 if normalized is not None:
@@ -377,6 +379,65 @@ class OpenRouterClient(ILLMClient):
         self.last_usage_completion_tokens = int(completion_tokens)
 
     @staticmethod
+    @staticmethod
+    def _try_unwrap_stringified_payload(
+        response_model: Type[BaseModel],
+        function_args_raw: Any,
+    ) -> Optional[BaseModel]:
+        """Rattrape un appel d'outil dont un champ arrive **stringifié**.
+
+        Bizarrerie de la passerelle tool-calling d'OpenRouter pour les modèles
+        Anthropic : au lieu de
+        ``{"criteria": [...]}``, l'argument peut valoir
+        ``{"criteria": "{\\"criteria\\": [...]}"}`` — la charge entière, encodée en
+        chaîne, dans le premier champ. Le contenu est correct ; seule l'enveloppe
+        diffère.
+
+        Observé le 2026-10-01 : `anthropic/claude-sonnet-5` employé comme juge a
+        perdu **9 verdicts sur 24** ainsi, déjà payés. Rien ne distinguait ce cas
+        d'un juge incapable — d'où une conclusion qui serait partie sur trois notes
+        au lieu de huit.
+
+        Args:
+            response_model: Schéma attendu.
+            function_args_raw: Arguments bruts de l'appel d'outil.
+
+        Returns:
+            L'instance validée, ou ``None`` si rien ne se déballe.
+        """
+        if not isinstance(function_args_raw, str):
+            return None
+        try:
+            brut = json.loads(function_args_raw)
+        except json.JSONDecodeError:
+            return None
+        if not isinstance(brut, dict):
+            return None
+
+        change = False
+        for cle, valeur in list(brut.items()):
+            if not isinstance(valeur, str):
+                continue
+            tete = valeur.lstrip()[:1]
+            if tete not in ("{", "["):
+                continue
+            try:
+                decode = json.loads(valeur)
+            except json.JSONDecodeError:
+                continue
+            # Double enveloppe : la chaîne contient tout l'objet, même clé comprise.
+            if isinstance(decode, dict) and cle in decode:
+                decode = decode[cle]
+            brut[cle] = decode
+            change = True
+
+        if not change:
+            return None
+        try:
+            return response_model.model_validate(brut)
+        except ValidationError:
+            return None
+
     def _try_normalize_unity_consequences(
         response_model: Type[BaseModel],
         function_args_raw: Any,

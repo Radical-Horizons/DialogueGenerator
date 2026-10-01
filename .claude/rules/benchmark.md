@@ -169,6 +169,23 @@ mesure sans en être une** — le mode de défaillance propre à ce genre d'outi
   varier le juge en même temps que les candidats rendrait tout écart inattribuable.
   Recouper un dialogue contre 120 000 caractères de fiches est un travail de
   vérification, pas de lecture.
+- **Un modèle ne juge pas ses propres générations dès qu'un chiffre doit être
+  publié.** Mesuré le 2026-10-01 sur 24 textes notés deux fois : Luna s'accorde
+  **+1,13 à +1,33 point** de plus que `claude-sonnet-5` sur les mêmes textes.
+
+  ⚠️ Et ce biais **n'est pas constant**. Sur `instruction_compliance` il va de
+  +0,75 (`none`) à +2,12 (`high`) : il croît avec l'effort. On ne peut donc pas
+  se rassurer en disant qu'un biais constant s'annule dans une comparaison — je
+  l'ai écrit, et c'était faux : c'est ce biais croissant qui a fabriqué un effet
+  d'effort inexistant.
+
+  Le biais épargne ce qui est vérifiable (`french_correctness` : ±0,12) et se
+  concentre sur le goût (naturel de l'oral : +1,75 à +1,88). Un juge impartial là
+  où l'on peut vérifier, complaisant là où l'on ne peut pas.
+
+  Si le juge doit être candidat (coût, disponibilité), l'écran le signale déjà —
+  mais aucune conclusion publiée ne doit en dépendre. Noter **les mêmes textes**
+  avec un second juge tiers coûte une passe et tranche.
 - **Chaque paire est jugée dans les deux sens**, étiquettes opaques. Un fort taux
   de désaccord entre les deux passes est une information sur l'instabilité du
   juge, pas un bruit à moyenner.

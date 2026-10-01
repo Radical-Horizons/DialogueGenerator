@@ -585,6 +585,7 @@ class BenchmarkJudgePassService:
             # le recalculer ici oublierait ce que ces appels ont coûté.
             spent = already_spent
             completed = 0
+            echecs = 0
             status: str = "failed"
             message = "Passe interrompue avant la fin (arrêt du processus ?)"
 
@@ -630,9 +631,18 @@ class BenchmarkJudgePassService:
                         logger.warning("Verdict non persisté (%s) : %s", path.name, exc)
                     spent += verdict.cost_usd
                     completed += 1
+                    if verdict.status == "judge_error":
+                        echecs += 1
+                        logger.warning(
+                            "Échec du juge sur %s / %s : %s",
+                            record.model_id,
+                            record.case_id,
+                            (verdict.error_message or "")[:200],
+                        )
                     self._progress = self._progress.model_copy(
                         update={
                             "verdicts_completed": completed,
+                            "judge_errors": echecs,
                             "spent_usd": round(spent, 6),
                             "current_model": record.model_id,
                             "current_case": record.case_id,
@@ -701,6 +711,7 @@ class BenchmarkJudgePassService:
                         status=final.status,
                         verdicts_total=state.verdicts_total,
                         verdicts_completed=final.verdicts_completed,
+                        judge_errors=final.judge_errors,
                         spent_usd=final.spent_usd,
                         budget_cap_usd=budget_cap_usd,
                         message=message,
