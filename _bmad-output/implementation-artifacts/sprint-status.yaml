@@ -236,6 +236,18 @@ development_status:
   15-5-mode-override-lock: backlog
   15-6-fallback-gracieux-tests-e2e: backlog
   epic-15-retrospective: optional
+  epic-18: backlog
+  18-1-densite-adaptative-du-noeud-et-replique-integrale-fr123: backlog
+  18-2-reponses-pj-affichees-en-lignes-dans-le-noeud-fr124: backlog
+  18-3-editer-la-replique-pnj-dans-le-noeud-fr122-fr126: backlog
+  18-4-editer-le-texte-des-reponses-pj-dans-le-noeud-fr124-fr126: backlog
+  18-5-editer-le-speaker-et-le-titre-dans-le-noeud-fr125-fr126: backlog
+  18-6-source-unique-coherence-noeud-panneau-de-droite-fr127: backlog
+  18-7-indicateur-de-synchronisation-et-annonce-accessible-fr126: backlog
+  18-8-clavier-chaine-tab-focus-visible-curseur-pre-place-fr128: backlog
+  18-9-edition-in-situ-au-tactile-sur-viewport-etroit-fr128: backlog
+  epic-18-retrospective: optional
+  epic-19: backlog
 
 action_items:
   - epic: 7

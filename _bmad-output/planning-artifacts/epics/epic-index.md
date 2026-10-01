@@ -54,3 +54,9 @@
 - **Epic 14**: [Accessibilité](epic-14.md)  
   Les utilisateurs peuvent naviguer l'éditeur de graphe entièrement au clavier avec indicateurs de focus visibles. Le système supporte personnalisation contraste couleurs (WCAG AA), et lecteurs d'écran avec ARIA labels (V2.0+).
 
+
+- **Epic 18**: [Édition in-situ du dialogue dans le nœud](epic-18.md)  
+  Les auteurs peuvent écrire la réplique PNJ et les réponses PJ directement dans le nœud (clic simple, éditer = sauvegarder, ADR-006), avec densité adaptative pour préserver la lisibilité des graphes 500+ nœuds. Le panneau de droite reste le lieu des conditions, effets et métadonnées.
+
+- **Epic 19**: [Canvas-first — surfaces à la demande](epic-19.md) — **squelette**  
+  Génération, détails GDD et variables en overlays lancés depuis le nœud ; suppression du panneau de droite permanent et récupération de son espace pour le graphe. Dépend d'Epic 18 ; détail à figer après retour d'usage.

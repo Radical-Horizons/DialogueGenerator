@@ -58,6 +58,15 @@
    - Double-click ou context menu pour éditer sans quitter le canvas
    - **Pattern transférable** : Panel droit pour édition sans perdre contexte graphe
 
+   > ⚠️ **Révisé par [Epic 18](../epics/epic-18.md) (2026-10-01).** La conclusion ci-dessus
+   > écartait l'édition in-situ au profit du seul panneau droit. Décision inversée : le
+   > pattern Articy est **adopté** — édition de la réplique PNJ et des réponses PJ
+   > directement dans le nœud, **au clic simple** (le double-clic reste attribué à
+   > l'`AIGenerationPanel`). Le panneau droit est conservé en complément, pour ce qui ne
+   > tient pas dans un nœud. Cadrage complet :
+   > [`research/ux-edition-in-situ-articy-notion-2026-10-01.md`](../research/ux-edition-in-situ-articy-notion-2026-10-01.md).
+   > La réécriture de cette section est un livrable de la story 18.1.
+
 5. **Undo/Redo & Safety**
    - Undo/redo essentiel, confirmations pour actions destructives
    - **Pattern transférable** : Auto-save, session recovery, retry facile

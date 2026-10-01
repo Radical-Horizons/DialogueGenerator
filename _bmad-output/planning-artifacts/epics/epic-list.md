@@ -65,3 +65,11 @@ Les utilisateurs peuvent naviguer l'éditeur de graphe entièrement au clavier a
 ## Epic 17: Expérience mobile et responsive (web) — **in-progress**
 
 Les utilisateurs peuvent utiliser l’application sur navigateur mobile et tablette (viewports étroits) avec shell adaptatif, interactions tactiles sur le graphe et panneaux accessibles en patterns mobile. PWA installable en option (V1.5+). Voir [epic-17.md](epic-17.md). Stories **17.9–17.11** (refactor toolbar, 3 US séquentielles) complètent l’epic.
+
+## Epic 18: Édition in-situ du dialogue dans le nœud
+
+Les auteurs peuvent lire et écrire le dialogue complet — réplique PNJ et réponses PJ — **directement dans le nœud sur le canvas**, par simple clic dans le texte, sans ouvrir le panneau de droite et sans action d'enregistrement (ADR-006 : éditer = sauvegarder). Densité **adaptative** : le nœud résume par défaut (maquette 2026 inchangée) et déplie réplique + réponses à la sélection ou au-delà d'un seuil de zoom. Le panneau de droite reste disponible pour ce qui ne tient pas dans un nœud (conditions, effets, skill checks, métadonnées). Voir [epic-18.md](epic-18.md).
+
+## Epic 19: Canvas-first — surfaces à la demande (squelette)
+
+Les auteurs lancent la génération, les détails GDD et les variables depuis **le nœud lui-même**, en overlays appelés à la demande ; le panneau de droite permanent disparaît et sa largeur revient au graphe. **Dépend d'Epic 18** — on ne retire pas le panneau tant que l'édition quotidienne en dépend. Volontairement laissée en squelette : son détail dépend du retour d'usage d'Epic 18. Voir [epic-19.md](epic-19.md).

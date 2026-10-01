@@ -124,6 +124,16 @@
 **FR120:** Users can access context selection and node detail panels on narrow viewports via mobile-appropriate patterns (drawers, full-screen panels, or explicit tabs) *(NEW - Narrow panels)*  
 **FR121:** Users can install the web app as a PWA (home screen icon / install prompt) where the browser supports it (V1.5+) *(NEW - PWA)*
 
+**FR122:** Users can edit a node's NPC dialogue line directly on the canvas node (in-situ, single click into the text), without opening the right-hand detail panel *(NEW - Édition in-situ)*  
+**FR123:** Nodes display the full dialogue line (no 100-character truncation), with adaptive height bounded by a maximum and internal scrolling beyond it *(NEW - Édition in-situ)*  
+**FR124:** Users can read and edit the text of each player response (choice) as a row inside the canvas node, preserving `choiceId` and row order *(NEW - Édition in-situ)*  
+**FR125:** Users can edit the speaker and the node title in-situ on the canvas node *(NEW - Édition in-situ)*  
+**FR126:** In-situ edits are persisted with no explicit save action ("edit = save"), pushed to the store within <=100ms per ADR-006; Escape leaves the field (the text is already saved) and Ctrl+Z reverts via the existing undo stack *(NEW - Édition in-situ)*  
+**FR127:** In-situ editing and the right-hand detail panel stay bidirectionally consistent - one single source of truth (store), no competing flush, no last-writer-wins race *(NEW - Édition in-situ)*  
+**FR128:** In-situ editing is operable by keyboard (Tab chain across the node's fields, visible focus) and by touch on narrow viewports *(NEW - Édition in-situ)*  
+**FR129:** Users can open node generation, GDD context details and game variables as overlays launched from the node itself, so that the permanent right-hand panel is no longer required to author a dialogue *(NEW - Canvas-first, Epic 19)*  
+**FR130:** Users can collapse or remove the permanent right-hand panel and recover its width for the graph canvas, with no loss of access to any of its functions *(NEW - Canvas-first, Epic 19)*
+
 ### NonFunctional Requirements
 
 **NFR-P1: Graph Editor Rendering Performance** - System must render dialogue graphs with 500+ nodes in <1 second.
@@ -256,6 +266,15 @@
 **Accessibility:**
 - FR114-117 → Epic 14: Accessibilité
 
+**Mobile & Responsive:**
+- FR118-121 → Epic 17: Expérience mobile et responsive (web)
+
+**Édition in-situ des nœuds:**
+- FR122-128 → Epic 18: Édition in-situ du dialogue dans le nœud
+
+**Canvas-first (surfaces à la demande):**
+- FR129-130 → Epic 19: Canvas-first — surfaces à la demande, récupération de l'espace graphe
+
 **NFR Coverage:**
 - NFR-P1 à P5 (Performance) → Epics 1, 2, 10, 11, 13, 15
 - NFR-S1 à S3 (Security) → Epics 0, 7
@@ -264,4 +283,4 @@
 - NFR-A1 à A3 (Accessibility) → Epics 2, 11, 12, 14, 15
 - NFR-I1 à I3 (Integration) → Epics 3, 5, 9
 
-
+
