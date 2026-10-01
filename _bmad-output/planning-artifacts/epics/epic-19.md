@@ -45,15 +45,16 @@ Trois surfaces à déplacer du panneau permanent vers des overlays à la demande
 1. **Inventaire avant suppression.** Lister exhaustivement ce que `NodeEditorPanel.tsx` (1272 lignes) expose aujourd'hui, et pour **chaque** fonction nommer sa destination. Aucune fonction ne disparaît sans décision explicite. Un panneau retiré avec trois fonctions oubliées est une régression, pas un gain d'espace.
 2. **Ne pas réécrire ce qui existe.** `AIGenerationPanel`, `ContextSelector`, `GameSystemsIntegrationPanel` existent et fonctionnent. Les déplacer dans un overlay est un changement de conteneur, pas une réimplémentation.
 3. **Accessibilité des overlays.** Focus trap à l'ouverture, retour du focus au déclencheur à la fermeture, `Échap` ferme, rôle de dialogue correct. Coordonner avec Epic 14 sans dupliquer.
-4. **Articulation avec Epic 17.** Sur viewport étroit, les panneaux sont **déjà** en drawers / plein écran (stories 17.3 et 17.5). L'overlay desktop doit converger avec ce pattern, pas en créer un troisième.
+4. **Articulation avec Epic 17.** Sur viewport étroit, les panneaux sont **déjà** en drawers / plein écran (stories 17.3 et 17.7). ⚠️ La première rédaction citait « 17.5 » — c'est la **PWA**, sans rapport. L'overlay desktop doit converger avec ce pattern, pas en créer un troisième.
 5. **Mesurer le gain.** La largeur rendue au canvas est l'objet de l'epic : la mesurer avant / après, et vérifier que NFR-P1 ne se dégrade pas sur un graphe 500+ nœuds une fois le canvas élargi.
 6. **Réversibilité.** Prévoir comment on revient en arrière si l'usage dit que le panneau manquait. Un panneau supprimé sans chemin de retour est un pari non couvert.
+7. **Le narrow n'a aujourd'hui aucune surface d'édition de nœud** : `GraphEditor.tsx:533` ne monte `GraphInspector` que si `!isGraphEditorNarrow`, et `NodeEditorPanel` n'est monté nulle part ailleurs dans l'écran graphe. Trou laissé par Epic 17, comblé par la story **18.10**. Epic 19 doit en tenir compte : sur narrow, il n'y a rien à retirer.
 
 ---
 
 ## Questions ouvertes (à trancher au découpage, pas avant)
 
-- Le panneau est-il **supprimé** ou **repliable par défaut** ? FR130 dit « collapse ou remove » — l'usage tranchera.
+- Le panneau est-il **supprimé** ou **repliable par défaut** ? FR130 dit « collapse ou remove » — l'usage tranchera. **FR130 est marquée PROVISOIRE dans l'inventaire** : en l'état elle décrit deux produits et n'est pas testable.
 - Un déclencheur unique (« + » sur le nœud, ouvrant un menu) ou un déclencheur par surface ?
 - Les overlays sont-ils ancrés au nœud (popover) ou centrés (modal) ? L'ancrage préserve le contexte spatial ; le modal supporte plus de contenu.
 - Que devient la consultation **multi-nœuds** — comparer deux nœuds est-il encore possible sans panneau permanent ? (Epic 12 / FR110 : comparaison side-by-side.)
@@ -64,4 +65,4 @@ Trois surfaces à déplacer du panneau permanent vers des overlays à la demande
 
 *À créer après le retour d'usage d'Epic 18, via `/bmad-create-story`.*
 
-**References:** FR129, FR130, Epic 18 (bloquante), Epic 12 (FR110), Epic 14, Epic 17 (stories 17.3, 17.5)
+**References:** FR129, FR130, Epic 18 (bloquante), Epic 12 (FR110), Epic 14, Epic 17 (stories 17.3, 17.7)

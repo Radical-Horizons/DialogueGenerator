@@ -18,7 +18,7 @@
 - **Epic 3**: [Gestion du contexte narratif (GDD)](epic-03.md)  
   Les utilisateurs peuvent explorer, sélectionner et utiliser le Game Design Document (500+ pages) pour enrichir la génération de dialogues. Le système permet le browse des entités (personnages, lieux, régions), sélection manuelle/automatique, règles de contexte, budget tokens, et sync Notion (V2.0+).
 
-- **Epic 17**: [Expérience mobile et responsive (web)](epic-17.md) — **in-progress** (17.1–17.8 done ; **17.9–17.11** refactor toolbar)  
+- **Epic 17**: [Expérience mobile et responsive (web)](epic-17.md) — **done** (17.1–17.11 ; rétrospective 2026-06-20)  
   Les utilisateurs peuvent utiliser DialogueGenerator sur mobile/tablette (web responsive) : shell adaptatif, tactiles sur le graphe, panneaux en drawers/plein écran, PWA optionnelle (V1.5+).
 
 - **Epic 4**: [Validation et assurance qualité](epic-04.md)  
@@ -60,3 +60,9 @@
 
 - **Epic 19**: [Canvas-first — surfaces à la demande](epic-19.md) — **squelette**  
   Génération, détails GDD et variables en overlays lancés depuis le nœud ; suppression du panneau de droite permanent et récupération de son espace pour le graphe. Dépend d'Epic 18 ; détail à figer après retour d'usage.
+
+- **Epic 15**: [RLM Context Selector (sélection automatique du contexte GDD)](epic-15.md)  
+  Les utilisateurs peuvent activer la sélection automatique du contexte GDD via un service RLM optionnel, qui explore le GDD par function calling et réduit le contexte de 20k+ à 12-15k tokens sans perte de pertinence. Fallback gracieux vers la sélection manuelle. ⚠️ Ses « FR1-FR8 / NFR1-NFR6 » appartiennent à l'espace de numérotation de `prd/prd-rlm-context-selector.md`, **pas** au référentiel principal.
+
+- **Epic 16**: [Implémentation ADR-008 — pipeline document canonique Unity JSON](epic-16.md)  
+  Le document canonique Unity JSON devient la source de vérité partout : backend propriétaire (GET/PUT, revision, 409), `choiceId` stables, layout en artefact distinct, frontend qui envoie le document et non nodes/edges. Migration one-shot, pas de coexistence longue.

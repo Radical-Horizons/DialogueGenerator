@@ -77,11 +77,27 @@ et pas seulement décorative.
    pris** (`ux-consistency-patterns.md:105` → ouverture de l'AIGenerationPanel ; epic-02 →
    focus nœud ; et React Flow zoome au double-clic par défaut). L'activation par clic simple
    est à la fois le pattern Notion et le seul créneau libre.
+
+   > ⚠️ **Correction du 2026-10-01.** L'`AIGenerationPanel` ne s'ouvre **pas** au double-clic :
+   > `useReactFlowHandlers.ts:260-262` câble `onNodeDoubleClick` sur `focusNode` (recentrage animé
+   > de 300 ms). `ux-consistency-patterns.md:105` est périmé. La conclusion tient — et pour une
+   > raison pire : sélectionner un mot au double-clic déclencherait un `fitView`. Quatrième
+   > attribution non recensée : l'édition du label d'arête (Epic 2, story 2.13). Et le **clic
+   > simple n'est pas libre** non plus — il porte la sélection, et `ux-consistency-patterns.md:104`
+   > lui attribue aussi l'ouverture du panneau : arbitré dans Epic 18 § D1.
 2. **`Échap` = quitter le champ, pas annuler.** À retenir absolument : ma première
    formulation (« Échap annule la saisie ») **contredit ADR-006**. ADR-006 dit « pas de
    brouillon dans les formulaires, push au store à la saisie ». Si le texte est déjà dans le
-   store, il n'y a rien à annuler — l'annulation, c'est **`Ctrl+Z`** sur la pile undo
-   existante (zundo). FR126 est corrigé en ce sens.
+   store, il n'y a rien à annuler — l'annulation, c'est **`Ctrl+Z`**. FR126 est corrigé en ce sens.
+
+   > 🔴 **Correction du 2026-10-01.** Cette note affirmait que `Ctrl+Z` s'appuie sur « la pile
+   > undo existante (zundo) ». **Faux, vérifié** : `zundo` n'est pas dans ce projet (absent de
+   > `frontend/package.json`, zéro occurrence dans `src/`) ; l'undo est maison (`undoSlice.ts`,
+   > `MAX_UNDO_SNAPSHOTS = 50`) ; `updateNode` (`nodeSlice.ts:489`) ne pousse **aucun** snapshot ;
+   > et `ctrl+z` n'est pas dans `allowedInInputs` (`useKeyboardShortcuts.ts:148`). L'annulation
+   > d'une édition de texte **n'existe pas** et doit être construite — c'est la story **18.4**
+   > (`updateNode` transactionnel + coalescence par inactivité). Le raisonnement sur `Échap`
+   > reste juste ; c'est sa contrepartie qui manquait.
 3. **Pas de bouton Enregistrer.** C'est déjà la règle du dépôt (ADR-006 : « pas de bouton
    Sauvegarder ; optionnel : Synchroniser maintenant »).
 
@@ -92,7 +108,12 @@ l'inverse de ce qu'on fait :
 
 - **Accessibilité** : pour les contrôles déclaratifs (champs texte, cases, listes), la
   sauvegarde **explicite** est recommandée — un changement de contexte déclenché par la seule
-  saisie est hostile au lecteur d'écran (esprit de WCAG 3.2.2 *On Input*).
+  saisie est hostile au lecteur d'écran (WCAG 3.2.2 *On Input*).
+  **Précision du 2026-10-01** : écrire « l'esprit de » minimisait la norme. **3.2.2 est de niveau
+  A**, et `responsive-design-accessibility.md:35` fixe la cible du projet à **WCAG 2.1 niveau A**.
+  Ce n'est donc pas un critère AA optionnel, c'est le niveau minimal déjà déclaré. L'arbitrage
+  reste défendable — 3.2.2 interdit un *changement de contexte* sur saisie, et un autosave qui
+  ne déplace pas le focus n'en est pas un — mais il faut le dire ainsi, pas en relativisant.
 - **Psychologie utilisateur** : « les gens paniquent quand il n'y a pas de bouton Enregistrer »
   — le conseil courant est de **garder** un bouton, même décoratif.
 

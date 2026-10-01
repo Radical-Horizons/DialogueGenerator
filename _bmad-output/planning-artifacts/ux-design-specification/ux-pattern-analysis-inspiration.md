@@ -61,11 +61,22 @@
    > ⚠️ **Révisé par [Epic 18](../epics/epic-18.md) (2026-10-01).** La conclusion ci-dessus
    > écartait l'édition in-situ au profit du seul panneau droit. Décision inversée : le
    > pattern Articy est **adopté** — édition de la réplique PNJ et des réponses PJ
-   > directement dans le nœud, **au clic simple** (le double-clic reste attribué à
-   > l'`AIGenerationPanel`). Le panneau droit est conservé en complément, pour ce qui ne
-   > tient pas dans un nœud. Cadrage complet :
+   > directement dans le nœud, **au clic simple**. Le panneau droit est conservé en
+   > complément, pour les champs denses (conditions, effets, skill checks, métadonnées).
+   >
+   > **Le double-clic reste libre de toute attribution d'édition.** Une version antérieure
+   > de cette note affirmait qu'il « reste attribué à l'`AIGenerationPanel` » : c'est
+   > **faux**. Aucun code n'ouvre l'`AIGenerationPanel` au double-clic —
+   > `useReactFlowHandlers.ts:260-262` le câble sur `focusNode` (recentrage animé). Ne pas
+   > chercher à préserver un comportement qui n'existe pas. `ux-consistency-patterns.md:105`
+   > est périmé sur ce point.
+   >
+   > Cadrage complet :
    > [`research/ux-edition-in-situ-articy-notion-2026-10-01.md`](../research/ux-edition-in-situ-articy-notion-2026-10-01.md).
-   > La réécriture de cette section est un livrable de la story 18.1.
+   > ⚠️ Cette note ne couvre qu'un paragraphe. **22 affirmations contredisent encore Epic 18
+   > dans 9 shards**, dont les anti-patterns `:154-156` et `:217-219` qui interdisent
+   > explicitement FR127 — inventaire exhaustif et périmètre de révision dans
+   > `epic-18.md` § UX-DR1. La réécriture est un livrable de la story 18.1.
 
 5. **Undo/Redo & Safety**
    - Undo/redo essentiel, confirmations pour actions destructives
