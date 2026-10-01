@@ -43,7 +43,8 @@ class LLMClientFactory:
         available_models: list[dict],
         usage_service: Optional[Any] = None,
         request_id: Optional[str] = None,
-        endpoint: Optional[str] = None
+        endpoint: Optional[str] = None,
+        reasoning_effort: Optional[str] = None,
     ) -> ILLMClient:
         """
         Crée un client LLM basé sur model_id et la configuration.
@@ -54,6 +55,11 @@ class LLMClientFactory:
                     Utilisé pour trouver les détails spécifiques du modèle comme 
                     la variable d'env pour la clé API.
             available_models: La liste des modèles disponibles avec leurs configurations.
+            reasoning_effort: Effort de raisonnement imposé à ce client, qui l'emporte
+                sur la valeur de `llm_config.json`. ``None`` laisse le modèle à son
+                réglage de configuration. Un appelant qui **mesure** doit le fixer :
+                sans lui, deux modèles tournent aux défauts de leurs fournisseurs et
+                la comparaison porte sur des réglages, pas sur des modèles.
 
         Returns:
             Une instance de ILLMClient (OpenAIClient ou DummyLLMClient).
@@ -106,7 +112,9 @@ class LLMClientFactory:
                 # On construit une config compatible avec OpenAIClient qui attend "default_model"
                 model_identifier = model_config.get("api_identifier") or model_config.get("model_identifier") or model_id
                 client_config = config.copy()  # Commencer avec la config globale
-                client_config["default_model"] = model_identifier  # Définir le modèle spécifique
+                client_config["default_model"] = model_identifier
+                if reasoning_effort is not None:
+                    client_config["reasoning_effort"] = reasoning_effort
                 # Ajouter les paramètres du modèle s'ils existent
                 if "parameters" in model_config:
                     if "default_temperature" in model_config["parameters"]:
@@ -146,7 +154,9 @@ class LLMClientFactory:
                 # La config passée à MistralClient doit contenir default_model avec l'identifiant du modèle
                 model_identifier = model_config.get("api_identifier") or model_config.get("model_identifier") or model_id
                 client_config = config.copy()  # Commencer avec la config globale
-                client_config["default_model"] = model_identifier  # Définir le modèle spécifique
+                client_config["default_model"] = model_identifier
+                if reasoning_effort is not None:
+                    client_config["reasoning_effort"] = reasoning_effort
                 # Ajouter les paramètres du modèle s'ils existent
                 if "parameters" in model_config:
                     if "default_temperature" in model_config["parameters"]:
@@ -193,6 +203,8 @@ class LLMClientFactory:
             )
             client_config = config.copy()
             client_config["default_model"] = model_identifier
+            if reasoning_effort is not None:
+                client_config["reasoning_effort"] = reasoning_effort
             params = model_config.get("parameters")
             if isinstance(params, dict):
                 if "default_temperature" in params:

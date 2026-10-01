@@ -137,10 +137,25 @@ mesure sans en être une** — le mode de défaillance propre à ce genre d'outi
 
 ## Juge
 
-- **Le juge reçoit le contexte réellement fourni au candidat.** Sans lui,
+- **Le juge reçoit le contexte réellement fourni au candidat, en entier.** Sans lui,
   « justesse de la voix » et « fidélité au contexte » sont notés à l'aveugle — le
   juge le dit lui-même dans ses commentaires, et la note entre quand même dans la
   moyenne pondérée avec l'autorité d'une mesure.
+
+  ⚠️ **Ne jamais tronquer ce contexte par le début.** Le prompt place
+  `<scene_instructions>` à la **fin** : toute coupure évince donc la consigne avant
+  les fiches. Une coupure à 24 000 caractères a ainsi privé le juge de la consigne
+  de scène sur **les vingt générations** du run `20260921T144810`, alors qu'il notait
+  `instruction_compliance` — le critère de plus forte variance. Pire, la coupure
+  s'accompagnait d'une amnistie explicite (« ne reproche pas un élément absent de
+  cet extrait ») : l'invisibilité valait acquittement, et une erreur factuelle hors
+  fenêtre était impossible à sanctionner. Si le contexte ne tient pas, c'est la
+  mesure qu'il faut revoir, pas le contexte qu'il faut couper.
+- **L'effort de raisonnement du juge est fixé par le dépôt** (`JUDGE_REASONING_EFFORT`),
+  jamais laissé au défaut du fournisseur, et **jamais piloté par le run** : faire
+  varier le juge en même temps que les candidats rendrait tout écart inattribuable.
+  Recouper un dialogue contre 120 000 caractères de fiches est un travail de
+  vérification, pas de lecture.
 - **Chaque paire est jugée dans les deux sens**, étiquettes opaques. Un fort taux
   de désaccord entre les deux passes est une information sur l'instabilité du
   juge, pas un bruit à moyenner.
@@ -153,6 +168,14 @@ mesure sans en être une** — le mode de défaillance propre à ce genre d'outi
   consigne**. Le prompt système des deux juges a changé le 2026-09-21 (horizon du
   fragment annoncé) : les notes antérieures viennent d'un autre juge et ne se
   comparent pas aux suivantes, même si `judge_model` affiche le même nom.
+
+  L'identité d'un juge, c'est sa consigne **plus ce qu'il voit et ce qu'il réfléchit** :
+  `judge_prompt_fingerprint` hache le prompt système, la politique de contexte et
+  l'effort. Et cette empreinte entre dans le **chemin** des verdicts : sans elle, une
+  passe relancée sous une nouvelle consigne retombait dans l'ancien répertoire, où
+  `_verdict_is_usable` validait les vieux verdicts — la passe sautait chaque cellule
+  et se déclarait terminée sans avoir rien rejugé. Une identité inscrite dans la
+  mesure mais absente de sa clé n'empêche rien.
 - **Les critères sont de la donnée, appariés par identifiant stable** — jamais par
   libellé. Chaque verdict fige un `criteria_snapshot` (sens et poids).
 

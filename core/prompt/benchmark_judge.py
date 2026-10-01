@@ -69,6 +69,25 @@ que le prompt système, où cette coupure n'apparaissait pas.
 """
 
 
+JUDGE_REASONING_EFFORT = "high"
+"""Effort de raisonnement du juge — fixé ici, jamais laissé au défaut du fournisseur.
+
+Le juge est passé d'un extrait de 24 000 caractères au prompt entier : sa tâche
+n'est plus de lire un texte court mais de **recouper** un dialogue de 4 000
+caractères contre 50 000 à 120 000 caractères de fiches. C'est un travail de
+recherche et de vérification, exactement là où le raisonnement paie.
+
+Le laisser au défaut reproduirait, du côté du juge, le défaut corrigé côté
+candidats le 2026-09-21 : une mesure dont le réglage déterminant n'est ni choisi
+ni enregistré. Un juge paresseux et un juge qui réfléchit ne rendent pas les
+mêmes notes — ce sont deux juges, d'où sa présence dans l'empreinte.
+
+Contrairement à l'effort des candidats, celui-ci n'est **pas** un paramètre de
+run : faire varier le juge en même temps que les candidats rendrait tout
+écart inattribuable.
+"""
+
+
 def judge_prompt_fingerprint(system_prompt: str) -> str:
     """Empreinte courte de la consigne donnée au juge.
 
@@ -84,7 +103,9 @@ def judge_prompt_fingerprint(system_prompt: str) -> str:
     une consigne au même titre que ce qu'on lui dit. La coupure du contexte
     vivait dans le prompt utilisateur et n'entrait pas dans cette empreinte ;
     un juge aveugle et un juge informé partageaient donc la même identité.
-    D'où `JUDGE_CONTEXT_POLICY` dans le matériau haché.
+    D'où `JUDGE_CONTEXT_POLICY` et `JUDGE_REASONING_EFFORT` dans le matériau
+    haché : ce que le juge voit et ce qu'il met à réfléchir le définissent autant
+    que le texte de sa consigne.
 
     Args:
         system_prompt: Consigne système effectivement envoyée.
@@ -93,7 +114,9 @@ def judge_prompt_fingerprint(system_prompt: str) -> str:
         Les douze premiers caractères du SHA-256, assez pour distinguer sans
         alourdir chaque verdict.
     """
-    material = f"{JUDGE_CONTEXT_POLICY}\n{system_prompt}"
+    material = (
+        f"{JUDGE_CONTEXT_POLICY}|effort={JUDGE_REASONING_EFFORT}\n{system_prompt}"
+    )
     return hashlib.sha256(material.encode("utf-8")).hexdigest()[:12]
 
 

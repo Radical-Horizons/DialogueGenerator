@@ -4,9 +4,20 @@ Livrée en donnée : c'est un point de départ à ajuster, pas une vérité du c
 Chaque critère porte un identifiant stable — jamais son libellé — et son sens
 explicite, de sorte qu'un critère négatif reste négatif quel que soit l'affichage.
 
-Le poids de la **correction du français** est délibérément le plus élevé : les
-benchmarks anglophones ne le mesurent pas, et c'est précisément là que se cassent
-les modèles fine-tunés sur de l'anglais.
+Deux critères portent le poids maximal, pour la même raison — ils décident à eux
+seuls si une génération est utilisable :
+
+- la **correction du français**, que les benchmarks anglophones ne mesurent pas et
+  où se cassent les modèles fine-tunés sur de l'anglais ;
+- la **fidélité au contexte fourni**, parce que l'outil travaille sur 50 000 à
+  120 000 caractères de fiches : un modèle qui contredit le monde produit du
+  texte à jeter, quelle qu'en soit la beauté.
+
+L'**invention hors contexte** est délibérément séparée de la seconde et faiblement
+pondérée : fondue dans la fidélité, elle rendait la note illisible — on ne savait
+plus si un 6 signalait un monde contredit ou un ajout heureux. Séparée, elle garde
+sa propre colonne et ses propres commentaires, où l'on va chercher les trouvailles
+qui méritent d'entrer dans le GDD.
 """
 
 from __future__ import annotations
@@ -135,11 +146,32 @@ def default_criteria() -> List[Dict[str, Any]]:
             "criterion_id": "context_fidelity",
             "label": "Fidélité au contexte fourni",
             "description": (
-                "Utilise ce que le contexte donne et n'invente rien qui le contredise. "
-                "Inventer du neuf non contradictoire n'est pas pénalisé ici."
+                "Utilise ce que le contexte donne, et ne le **contredit pas**. Toute "
+                "affirmation incompatible avec les fiches — un fait, un nom, une "
+                "relation, un état du monde rendu faux — doit faire chuter la note "
+                "lourdement, même si le texte est beau par ailleurs : un dialogue qui "
+                "contredit le monde est inutilisable en production. Cite la "
+                "contradiction dans ton commentaire. Ce qui dépasse le contexte sans "
+                "le contredire ne se juge pas ici mais sur `unsupported_invention`."
             ),
             "direction": "higher_is_better",
-            "weight": 1.5,
+            "weight": 2.0,
+            "group": _CADRE,
+        },
+        {
+            "criterion_id": "unsupported_invention",
+            "label": "Invention hors contexte",
+            "description": (
+                "Éléments posés comme établis alors que le contexte ne les donne pas, "
+                "sans pour autant le contredire : un lieu, un rite, un personnage, un "
+                "antécédent inventés de toutes pièces. À pénaliser **légèrement** : "
+                "c'est un écart au cadre, pas une faute de fond. **Énumère dans ton "
+                "commentaire chaque invention repérée, telle que le texte la formule** "
+                "— certaines méritent d'entrer dans le monde, et c'est ton commentaire "
+                "qui permet de les retrouver."
+            ),
+            "direction": "lower_is_better",
+            "weight": 0.5,
             "group": _CADRE,
         },
         {
@@ -232,7 +264,7 @@ def default_grid_payload() -> Dict[str, Any]:
     """
     return {
         "grid_id": DEFAULT_GRID_ID,
-        "version": 1,
+        "version": 2,
         "name": "Grille dialogue FR (départ)",
         "description": (
             "Grille de départ issue de la spécification fonctionnelle du mode benchmark. "

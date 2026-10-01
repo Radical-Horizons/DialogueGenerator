@@ -711,6 +711,7 @@ class ServiceContainer:
             from services.benchmark_judge_pass_service import BenchmarkJudgePassService
             from services.benchmark_judge_service import BenchmarkJudgeService
             from services.llm_pricing_service import LLMPricingService
+            from core.prompt.benchmark_judge import JUDGE_REASONING_EFFORT
             from factories.llm_factory import LLMClientFactory
 
             config_service = self.get_config_service()
@@ -725,6 +726,7 @@ class ServiceContainer:
                     available_models=config_service.get_available_llm_models(),
                     usage_service=usage_service,
                     endpoint="benchmark/judge",
+                    reasoning_effort=JUDGE_REASONING_EFFORT,
                 )
 
             criteria_store = self.get_benchmark_criteria_store()
@@ -750,6 +752,7 @@ class ServiceContainer:
             from services.benchmark_judge_pass_service import BenchmarkPairwisePassService
             from services.benchmark_judge_service import BenchmarkPairwiseJudgeService
             from services.llm_pricing_service import LLMPricingService
+            from core.prompt.benchmark_judge import JUDGE_REASONING_EFFORT
             from factories.llm_factory import LLMClientFactory
 
             config_service = self.get_config_service()
@@ -764,6 +767,7 @@ class ServiceContainer:
                     available_models=config_service.get_available_llm_models(),
                     usage_service=usage_service,
                     endpoint="benchmark/pairwise",
+                    reasoning_effort=JUDGE_REASONING_EFFORT,
                 )
 
             criteria_store = self.get_benchmark_criteria_store()
