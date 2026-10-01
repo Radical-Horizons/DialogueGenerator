@@ -178,6 +178,7 @@ class BenchmarkGateService:
         failures.extend(self._expectation_failures(nodes, expectations))
         failures.extend(self._speaker_label_failures(nodes))
         failures.extend(self._fragment_shape_failures(nodes))
+        failures.extend(self._address_consistency_failures(nodes))
         if not allow_stage_directions:
             failures.extend(self._narration_failures(nodes))
 
@@ -292,6 +293,107 @@ class BenchmarkGateService:
 
     _STAGE_DIRECTION = re.compile(r"\*[^*]{3,}\*")
     _QUOTED = re.compile(r"«[^»]*»")
+
+    # Marqueurs d'adresse retenus parce qu'ils ne sont rien d'autre. Volontairement
+    # absents : « ton » (le nom commun est fréquent — « sur ce ton ») et « tu »
+    # précédé d'un auxiliaire, qui est le participe passé de taire — « il s'est tu ».
+    _TU = re.compile(
+        r"(?<!est )(?<!sont )(?<!'est )\btu\b"
+        r"|\b(?:te|toi|tes|ta)\b"
+        r"|\bt'(?:a|as|es|y)\b",
+        re.I,
+    )
+    _VOUS = re.compile(r"\b(?:vous|votre|vos)\b", re.I)
+
+    @classmethod
+    def _address_form(cls, textes: List[str]) -> Optional[str]:
+        """Forme d'adresse d'un lot de répliques : ``"tu"``, ``"vous"`` ou ``None``.
+
+        ``None`` quand rien ne tranche — aucun marqueur, ou les deux à la fois. Un
+        panneau muet sur ce point ne doit pas compter comme un changement.
+
+        Args:
+            textes: Répliques à examiner ensemble.
+
+        Returns:
+            La forme, ou ``None`` si elle n'est pas déterminable.
+        """
+        joined = " ".join(textes)
+        tu = bool(cls._TU.search(joined))
+        vous = bool(cls._VOUS.search(joined))
+        if tu == vous:
+            return None
+        return "tu" if tu else "vous"
+
+    @classmethod
+    def _address_consistency_failures(
+        cls, nodes: List[Dict[str, Any]]
+    ) -> List[BenchmarkGateFailure]:
+        """Le fragment garde-t-il le tu/vous posé au panneau d'ouverture ?
+
+        Les cas de la suite imposent « même tu/vous que le START », et c'est la
+        contrainte la plus mécanique de leur consigne — donc celle qu'on ne doit pas
+        confier au discernement d'un juge. Le 2026-10-01, Luna a ouvert en tutoyant
+        Uresäir puis vouvoyé dans **les trois** panneaux suivants ; le juge, qui
+        voyait pourtant la consigne entière, a mis 9 sur `instruction_compliance` et
+        écrit que « les répliques restent dans le format demandé ». Une vérification
+        déterministe ne se délègue pas à un modèle.
+
+        Les deux sens d'adresse sont suivis **séparément** : le PNJ peut tutoyer le
+        PJ qui le vouvoie sans que ce soit une faute — c'est même une caractérisation
+        ordinaire. Ce qu'on refuse, c'est qu'un locuteur change d'adresse en cours
+        de fragment.
+
+        Args:
+            nodes: Nœuds du document.
+
+        Returns:
+            Une observation par sens d'adresse qui a basculé.
+        """
+        panels = [node for node in nodes if isinstance(node, dict)]
+        opening = next((n for n in panels if n.get("id") == "START"), None)
+        if opening is None:
+            return []
+
+        def _lines(node: Dict[str, Any]) -> List[str]:
+            """Ce que dit le PNJ dans ce panneau."""
+            return [str(node.get("line") or "")]
+
+        def _choices(node: Dict[str, Any]) -> List[str]:
+            """Ce que dit le PJ dans ce panneau."""
+            return [
+                str(choice.get("text") or "")
+                for choice in node.get("choices") or []
+                if isinstance(choice, dict)
+            ]
+
+        failures: List[BenchmarkGateFailure] = []
+        for who, extract in (("PNJ", _lines), ("PJ", _choices)):
+            reference = cls._address_form(extract(opening))
+            if reference is None:
+                continue
+            drifted = [
+                str(node.get("id") or "?")
+                for node in panels
+                if node is not opening
+                and (form := cls._address_form(extract(node))) is not None
+                and form != reference
+            ]
+            if not drifted:
+                continue
+            other = "vous" if reference == "tu" else "tu"
+            failures.append(
+                BenchmarkGateFailure(
+                    gate="address_consistency",
+                    message=(
+                        f"Adresse du {who} : « {reference} » au START, "
+                        f"« {other} » dans {len(drifted)} panneau(x) "
+                        f"({', '.join(drifted[:3])})"
+                    ),
+                    severity="observation",
+                )
+            )
+        return failures
 
     @staticmethod
     def _fragment_shape_failures(
