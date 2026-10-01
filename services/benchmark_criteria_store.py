@@ -12,20 +12,23 @@ import logging
 import re
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import ValidationError
 
 from api.schemas.benchmark_judging import CriteriaGrid, CriteriaGridSummary
 from services.benchmark_criteria_seed import DEFAULT_GRID_ID, default_grid_payload
+from services.benchmark_seed_marker import (
+    content_hash,
+    is_untouched,
+    marker_exists,
+    write_marker,
+)
 from services.gdd_notion_atomic_io import read_json_file, write_json_atomic
 
 logger = logging.getLogger(__name__)
 
 _GRID_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
-
-_SEED_MARKER_NAME = ".seeded"
-"""Marqueur d'amorçage : l'absence de grille ne suffit pas à décider de semer."""
 
 _WINDOWS_RESERVED_NAMES = frozenset(
     {"CON", "PRN", "AUX", "NUL"}
@@ -83,35 +86,81 @@ class BenchmarkCriteriaStore:
         return self._criteria_dir / f"{grid_id}.json"
 
     def ensure_seeded(self) -> None:
-        """Sème la grille de départ, une seule fois dans la vie du magasin.
+        """Sème la grille de départ, et rattrape une grille d'usine restée périmée.
 
         Un marqueur sur disque, et non la vacuité du répertoire, décide de
         l'amorçage : sinon supprimer la dernière grille la ferait renaître au
         contenu d'usine, ce qui contredirait l'intention de la suppression.
 
+        Le marqueur porte l'**empreinte** de ce qui a été semé, ce qui autorise la
+        seule montée de version qui soit sûre : si la grille sur disque est
+        exactement celle qu'on avait écrite, on peut la remplacer sans rien perdre.
+        Dès qu'elle a été touchée, on n'y revient pas — c'est de la donnée
+        utilisateur, et le banc doit mesurer sous la grille qu'il a voulue. Sans ce
+        rattrapage, un poste semé avant le 2026-10-01 garderait la v1 pour toujours
+        et noterait sous un barème que le code ne décrit plus, sans rien signaler.
+
         Cette méthode **écrit** : elle est appelée à la construction du service,
         jamais depuis un chemin de lecture — un ``GET`` ne doit pas provoquer
         d'écriture, encore moins depuis un endpoint ouvert.
         """
-        marker = self._criteria_dir / _SEED_MARKER_NAME
-        if marker.exists():
+        payload = default_grid_payload()
+        if not marker_exists(self._criteria_dir):
+            if self._criteria_dir.exists() and any(self._criteria_dir.glob("*.json")):
+                # Grilles préexistantes, provenance inconnue : on pose un marqueur
+                # sans empreinte, donc sans jamais s'autoriser à les remplacer.
+                write_marker(self._criteria_dir, {})
+                return
+            self.save_grid(CriteriaGrid.model_validate(payload), bump_version=False)
+            write_marker(self._criteria_dir, {DEFAULT_GRID_ID: self._stored_hash()})
+            logger.info("Grille de critères de départ semée : %s", DEFAULT_GRID_ID)
             return
-        if self._criteria_dir.exists() and any(self._criteria_dir.glob("*.json")):
-            self._write_seed_marker(marker)
-            return
-        grid = CriteriaGrid.model_validate(default_grid_payload())
-        self.save_grid(grid, bump_version=False)
-        self._write_seed_marker(marker)
-        logger.info("Grille de critères de départ semée : %s", DEFAULT_GRID_ID)
 
-    @staticmethod
-    def _write_seed_marker(marker: Path) -> None:
-        """Pose le marqueur d'amorçage, sans faire échouer le service s'il résiste."""
+        self._upgrade_untouched_seed(payload)
+
+    def _stored_hash(self) -> str:
+        """Empreinte de la grille d'usine **telle qu'elle se relit**.
+
+        L'aller-retour disque n'est pas l'identité — des validateurs remplissent
+        des défauts. Empreindre la charge utile d'avant écriture donnerait une
+        valeur que la relecture ne reproduit jamais, et aucune montée ne se
+        déclencherait plus.
+
+        Returns:
+            L'empreinte du document relu.
+        """
+        return content_hash(self.get_grid(DEFAULT_GRID_ID).model_dump(mode="json"))
+
+    def _upgrade_untouched_seed(self, payload: Dict[str, Any]) -> None:
+        """Remplace la grille d'usine si elle n'a pas bougé depuis le semis.
+
+        Args:
+            payload: Grille de départ telle que le code la décrit aujourd'hui.
+        """
         try:
-            marker.parent.mkdir(parents=True, exist_ok=True)
-            marker.write_text("seeded", encoding="utf-8")
-        except OSError as exc:
-            logger.warning("Marqueur d'amorçage des grilles non écrit : %s", exc)
+            stored = self.get_grid(DEFAULT_GRID_ID)
+        except (CriteriaGridNotFoundError, CriteriaGridInvalidError):
+            return
+        on_disk = stored.model_dump(mode="json")
+        if content_hash(on_disk) == content_hash(payload):
+            return
+        if not is_untouched(self._criteria_dir, DEFAULT_GRID_ID, on_disk):
+            logger.info(
+                "Grille '%s' modifiée sur disque (v%s) : la v%s du code n'est pas "
+                "appliquée. C'est volontaire — une grille éditée appartient à son auteur.",
+                DEFAULT_GRID_ID,
+                stored.version,
+                payload.get("version"),
+            )
+            return
+        self.save_grid(CriteriaGrid.model_validate(payload), bump_version=False)
+        write_marker(self._criteria_dir, {DEFAULT_GRID_ID: self._stored_hash()})
+        logger.info(
+            "Grille d'usine '%s' intacte depuis son semis : montée de v%s à v%s.",
+            DEFAULT_GRID_ID,
+            stored.version,
+            payload.get("version"),
+        )
 
     def list_grids(self) -> List[CriteriaGridSummary]:
         """Liste les grilles lisibles.
