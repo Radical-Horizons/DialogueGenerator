@@ -22,7 +22,7 @@ from services.benchmark_gate_service import BenchmarkGateService
 from services.benchmark_run_service import BenchmarkRunService
 from services.benchmark_suite_store import BenchmarkSuiteStore
 
-MODEL = "gpt-5.6-luna"
+MODEL = "openai/gpt-5.6-luna"
 
 AUTO_JUDGE = BenchmarkAutoJudgeConfig(
     grid_id="grille-dialogue-fr", judge_model=MODEL, budget_cap_usd=1.0, with_duels=True

@@ -274,6 +274,64 @@ _AKTHAR = _case(
 )
 
 
+_VOKNIR_EXPOSITION = _case(
+    case_id="voknir-exposition-dedale",
+    title="Voknir — exposition, Dédale Médullaire",
+    npc="Voknir Esh'Maradel",
+    location="Strate II - Le Dédale Médullaire",
+    parent_locations=["Plis d’ossements"],
+    species=["Van’Doei"],
+    categories={
+        "fonction": "exposition",
+        "ton": "febrile",
+        "contexte": "long",
+        "personnage": "Voknir",
+    },
+    context_tokens=CONTEXT_TOKENS_LONG,
+    instructions=(
+        "Uresaïr doit traverser une section du Dédale Médullaire que Voknir Esh'Maradel est le seul à avoir relevée. Il sait ce qui s'y trouve, elle non, et il a besoin qu'elle le comprenne avant d'y entrer.\n\nÉcris le panneau où Voknir explique ce qu'elle va rencontrer, trois options pour Uresaïr, et pour chacune la suite immédiate avec ses propres options.\n\nCe qui est mesuré ici : faire passer de l'information sans que cela devienne un exposé. L'exposition est **légitime** — il a une raison de parler, elle a une raison d'ignorer — mais elle doit traverser son obsession : ses coordonnées, ses équations murmurées, sa façon de s'adresser à son relevé autant qu'à elle. Deux personnages qui se récitent ce qu'ils savent déjà pour informer le joueur est l'échec exact de ce cas.\n\nLes options doivent permettre de demander une précision, de contester le relevé, et d'y aller sans en savoir plus."
+    ),
+)
+
+_GENKA_CONFRONTATION = _case(
+    case_id="genka-confrontation",
+    title="Genka Lien — confrontation, Marché des Obeloi",
+    npc="Genka Lien",
+    location="Le Marché des Obeloi",
+    parent_locations=[],
+    species=[],
+    categories={
+        "fonction": "confrontation",
+        "ton": "accule-affable",
+        "contexte": "long",
+        "personnage": "Genka Lien",
+    },
+    context_tokens=CONTEXT_TOKENS_LONG,
+    instructions=(
+        "Uresaïr met Genka Lien devant ce qu'iel a fait, au Marché des Obeloi, et devant témoins. Iel ne peut ni nier tout à fait, ni reconnaître sans perdre son commerce.\n\nÉcris le panneau de Genka acculé, trois options pour Uresaïr, et pour chacune la suite immédiate avec ses propres options.\n\nCe qui est mesuré ici : la **tenue de la voix sous pression**. Genka acculé ne doit pas s'aplatir en marchand générique pris la main dans le sac : son parler de routes, ses comparaisons spontanées avec d'autres lieux, sa manière de donner une nationalité aux idées abstraites doivent tenir — et même servir d'esquive.\n\nLes options doivent offrir d'enfoncer, de laisser une sortie, et de monnayer le silence. Le risque de chacune doit se lire dans son libellé sans que la conséquence soit annoncée."
+    ),
+)
+
+_ZAEHRIA_MARCHANDAGE = _case(
+    case_id="zaehria-marchandage",
+    title="Zaehria — marchandage du tribut, Catacombes Temporelles",
+    npc="Zaehria Neth'Varu",
+    location="Strate III - Les Catacombes Temporelles",
+    parent_locations=["Plis d’ossements"],
+    species=[],
+    categories={
+        "fonction": "marchandage",
+        "ton": "feutre",
+        "contexte": "long",
+        "personnage": "Zaehria",
+    },
+    context_tokens=CONTEXT_TOKENS_LONG,
+    instructions=(
+        "Dans les Catacombes Temporelles, Zaehria Neth'Varu détient ce qu'Uresaïr est venue chercher. Le prix n'est pas de la monnaie : c'est un tribut mémoriel, et Zaehria préfère qu'il soit accepté plutôt qu'extorqué.\n\nÉcris le panneau où Zaehria pose son prix, trois options pour Uresaïr, et pour chacune la suite immédiate avec ses propres options.\n\nCe qui est mesuré ici : le **contrat de visibilité des conséquences**. Ce qu'Uresaïr risque de perdre doit être lisible dans le texte — la nature du prix, pas son montant exact — sans qu'aucun gain futur ni aucun drapeau soit affiché. Tout dévoiler est une faute ; faire payer un prix majeur sans le moindre signe en est une autre.\n\nLes options doivent permettre d'accepter, de négocier la nature du tribut, et de refuser sans fermer la porte."
+    ),
+)
+
+
 def default_suite_payloads() -> List[Dict[str, Any]]:
     """Retourne les suites de départ, dans l'ordre où elles sont semées.
 
@@ -293,14 +351,25 @@ def default_suite_payloads() -> List[Dict[str, Any]]:
         },
         {
             "suite_id": STANDARD_SUITE_ID,
-            "version": 1,
+            "version": 2,
             "name": "Alteir — first playable",
             "description": (
-                "Cinq cas couvrant les cinq PNJ du first playable et cinq fonctions "
-                "de dialogue, en contexte court et long. Les didascalies de narration "
-                "relèvent du mode de run : lancer deux runs pour trancher cet axe."
+                "Huit cas couvrant les cinq PNJ du first playable et cinq fonctions "
+                "de dialogue, en contexte court et long. Trois PNJ sont joués dans "
+                "deux fonctions différentes : c'est ainsi qu'on mesure si une voix "
+                "tient ailleurs que là où elle est facile. Les didascalies de "
+                "narration relèvent du mode de run : lancer deux runs pour cet axe."
             ),
-            "cases": [_VOKNIR, _GENKA, _ZAEHRIA, _ENSEVELIE, _AKTHAR],
+            "cases": [
+                _VOKNIR,
+                _VOKNIR_EXPOSITION,
+                _GENKA,
+                _GENKA_CONFRONTATION,
+                _ZAEHRIA,
+                _ZAEHRIA_MARCHANDAGE,
+                _ENSEVELIE,
+                _AKTHAR,
+            ],
         },
     ]
 

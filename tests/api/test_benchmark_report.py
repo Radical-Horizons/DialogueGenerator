@@ -27,8 +27,8 @@ from services.benchmark_report_service import BenchmarkReportService
 from services.benchmark_run_service import BenchmarkRunService
 from services.benchmark_suite_store import BenchmarkSuiteStore
 
-MODEL_A = "gpt-5.6-luna"
-MODEL_B = "gpt-5.6-terra"
+MODEL_A = "openai/gpt-5.6-luna"
+MODEL_B = "openai/gpt-5.6-terra"
 BASE = "/api/v1/benchmark"
 
 

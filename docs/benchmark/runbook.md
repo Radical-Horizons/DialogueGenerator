@@ -46,9 +46,16 @@ Mesuré, `gpt-5.6-luna` vs `gpt-5.6-terra`, juge `gpt-5.6-sol` :
 | Notation rubrique | 1 verdict par génération valide | ~0,08 $ / verdict |
 | Duels | 1 duel par cas où les deux modèles sont valides | ~0,10 $ / duel |
 
-Un smoke complet revient à **moins d'un dollar**. `alteir-standard` avec 3 modèles
-et K=3 est de l'ordre de **4 à 8 $** — le plafond budgétaire du run est dur,
-utilisez-le.
+Un smoke complet revient à **moins d'un dollar**.
+
+⚠️ Ces chiffres datent d'août et **sous-estiment désormais la notation**, pour
+deux raisons voulues : le juge reçoit le prompt **entier** (et non un extrait de
+24 000 caractères) et tourne à l'effort **`high`**. Mesuré le 2026-10-01 sur le
+cas le plus long de la suite : **0,0077 $** la génération (Luna, effort `medium`)
+et **0,0106 $** le verdict rubrique, soit 33 000 tokens en entrée. La notation
+coûte donc désormais **plus cher que la génération** sur les cas à long contexte.
+Les duels suivent la même pente : ils ne tronquent plus les textes à 4 000
+caractères. Le plafond budgétaire du run est dur, utilisez-le.
 
 ## Par l'API
 
@@ -106,7 +113,9 @@ il n'y a rien à créer.
 curl -s http://127.0.0.1:4243/api/v1/benchmark/suites
 ```
 
-`alteir-smoke` (3 cas) et `alteir-standard` (5 cas) doivent apparaître.
+`alteir-smoke` (3 cas) et `alteir-standard` (**8 cas** depuis le 2026-10-01, version 2) doivent apparaître. Trois PNJ y sont joués dans deux fonctions différentes — c'est ainsi qu'on mesure si une voix tient ailleurs que là où elle est facile.
+
+⚠️ L'empreinte de suite entre dans l'identité du run : **aucun run sur la v1 ne se compare à un run sur la v2.**
 
 ```bash
 curl -s http://127.0.0.1:4243/api/v1/benchmark/criteria

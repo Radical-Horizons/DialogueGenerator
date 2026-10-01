@@ -60,7 +60,20 @@ def test_seed_suites_are_structurally_valid() -> None:
     suites = {suite.suite_id: suite for suite in default_suites()}
     assert set(suites) == {SMOKE_SUITE_ID, STANDARD_SUITE_ID}
     assert len(suites[SMOKE_SUITE_ID].cases) == 3
-    assert len(suites[STANDARD_SUITE_ID].cases) == 5
+    assert len(suites[STANDARD_SUITE_ID].cases) == 8
+    # Un identifiant en double écraserait silencieusement un cas à l'écriture, et
+    # le run mesurerait moins de cas que la suite n'en annonce.
+    ids = [case.case_id for case in suites[STANDARD_SUITE_ID].cases]
+    assert len(set(ids)) == len(ids)
+    # L'axe `fonction` découpe le rapport : une fonction absente est un angle mort.
+    fonctions = {case.categories.get("fonction") for case in suites[STANDARD_SUITE_ID].cases}
+    assert fonctions == {
+        "premiere-rencontre",
+        "exposition",
+        "marchandage",
+        "confrontation",
+        "revelation",
+    }
 
 
 @pytest.mark.parametrize("category", ["personnages", "lieux", "especes"])
@@ -197,8 +210,17 @@ class TestSeeding:
         store.ensure_seeded()
         assert {summary.suite_id for summary in store.list_suites()} == {STANDARD_SUITE_ID}
 
-    def test_seeded_suites_start_at_version_one(self, tmp_path: Path) -> None:
-        """Le semis n'incrémente pas la version : la suite livrée est la version 1."""
+    def test_seeding_does_not_bump_the_version(self, tmp_path: Path) -> None:
+        """Le semis écrit la version du code, sans l'incrémenter au passage.
+
+        Assertion volontairement relative : la suite standard est passée en v2 le
+        2026-10-01 (trois cas ajoutés), et une valeur en dur rendrait ce test faux
+        à chaque évolution du jeu de cas au lieu de vérifier ce qui compte — que
+        `bump_version=False` est bien respecté.
+        """
+        attendue = {
+            suite.suite_id: suite.version for suite in default_suites()
+        }[STANDARD_SUITE_ID]
         store = BenchmarkSuiteStore(suites_dir=tmp_path / "suites")
         store.ensure_seeded()
-        assert store.get_suite(STANDARD_SUITE_ID).version == 1
+        assert store.get_suite(STANDARD_SUITE_ID).version == attendue

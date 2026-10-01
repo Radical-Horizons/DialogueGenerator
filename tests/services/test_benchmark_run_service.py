@@ -28,8 +28,8 @@ from services.benchmark_run_service import (
 )
 from services.benchmark_suite_store import BenchmarkSuiteStore
 
-MODEL_A = "gpt-5.6-luna"
-MODEL_B = "gpt-5.6-terra"
+MODEL_A = "openai/gpt-5.6-luna"
+MODEL_B = "openai/gpt-5.6-terra"
 
 FRENCH_LINE = (
     "Je n'ai pas confiance en toi, marchand : tu vends des promesses et tu gardes "

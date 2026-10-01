@@ -33,8 +33,8 @@ from services.benchmark_judge_service import BenchmarkJudgeService
 from services.benchmark_run_service import BenchmarkRunService
 from services.benchmark_suite_store import BenchmarkSuiteStore
 
-MODEL_A = "gpt-5.6-luna"
-JUDGE = "gpt-5.6-sol"
+MODEL_A = "openai/gpt-5.6-luna"
+JUDGE = "openai/gpt-5.6-sol"
 BASE = "/api/v1/benchmark"
 CRITERIA = ("voice_fidelity", "french_correctness")
 
@@ -326,7 +326,7 @@ def test_verdicts_expose_judge_plurality(
     client.put(f"{BASE}/criteria/test", json=_grid_payload())
     run_id = _produce_run(client, run_service, ["cas-0"])
 
-    for judge in (JUDGE, "gpt-5.6-terra"):
+    for judge in (JUDGE, "openai/gpt-5.6-terra"):
         client.post(
             f"{BASE}/runs/{run_id}/judge",
             json={"grid_id": "test", "judge_model": judge, "budget_cap_usd": 1.0},

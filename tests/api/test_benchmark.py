@@ -21,9 +21,10 @@ from api.routers.auth import get_current_user_or_none
 from api.schemas.benchmark import BenchmarkModelDiagnostic
 from services.benchmark_gate_service import BenchmarkGateService
 from services.benchmark_run_service import BenchmarkRunService
+from services.benchmark_suite_seed import default_suites
 from services.benchmark_suite_store import BenchmarkSuiteStore
 
-MODEL_A = "gpt-5.6-luna"
+MODEL_A = "openai/gpt-5.6-luna"
 BASE = "/api/v1/benchmark"
 
 FRENCH_LINE = (
@@ -513,7 +514,12 @@ def test_seeded_store_serves_the_starter_suites(tmp_path: Path) -> None:
             detail = client.get(f"{BASE}/suites/{STANDARD_SUITE_ID}")
             assert detail.status_code == 200
             cases = detail.json()["suite"]["cases"]
-            assert len(cases) == 5
+            # Compte lu depuis le semis : la suite standard evolue (5 cas en aout,
+            # 8 depuis le 2026-10-01) et une valeur en dur casserait a chaque ajout
+            # de cas, au lieu de verifier ce que ce test vise -- que l'API sert bien
+            # ce que le semis a ecrit.
+            attendus = {s.suite_id: len(s.cases) for s in default_suites()}
+            assert len(cases) == attendus[STANDARD_SUITE_ID]
             assert all(case["request"]["context_selections"]["characters_full"] for case in cases)
     finally:
         app.dependency_overrides.pop(get_benchmark_suite_store, None)
