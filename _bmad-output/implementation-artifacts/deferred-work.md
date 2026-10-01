@@ -273,3 +273,6 @@
 - source_spec: none
   summary: "`data/Vision.json` et la fiche système Dialogues ne sont jamais injectés."
   evidence: "`vision_data` est chargé (`services/gdd_loader.py`) mais aucun code de prompt ne le lit ; `ContextSelection` n'a pas de catégorie « systèmes de jeu », donc la fiche Dialogues — panneau ≤ 150 mots, contrat de visibilité des conséquences, référence Planescape: Torment — n'atteint le modèle que paraphrasée dans une consigne de cas. Le ton du jeu (« sérieux, surréaliste, introspectif ») n'apparaît dans aucun prompt."
+- source_spec: none
+  summary: "L'estimation de notation sous-évalue le juge Sonnet d'un facteur ~2."
+  evidence: "Aperçu du 2026-10-02 pour B0 (24 verdicts, `anthropic/claude-sonnet-5`) : `judging_max_usd` = 1,104 $, soit 0,046 $ par verdict. Coût réel au run du 2026-10-01, même juge, même effort `high` : 4,99 $ pour 48 verdicts, soit 0,104 $. Cause pressentie, non vérifiée : l'estimation ignore les tokens de raisonnement du juge, qu'il facture à l'effort `high`. Conséquence directe : un plafond calé sur l'aperçu arrête la notation à mi-run (`interrupted_budget`) — exactement le « pire des deux mondes » que `benchmark.md` interdit. En attendant, caler le plafond de notation sur le coût observé."
