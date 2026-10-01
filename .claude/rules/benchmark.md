@@ -170,7 +170,25 @@ mesure sans en être une** — le mode de défaillance propre à ce genre d'outi
   Recouper un dialogue contre 120 000 caractères de fiches est un travail de
   vérification, pas de lecture.
 - **Un modèle ne juge pas ses propres générations dès qu'un chiffre doit être
-  publié.** Mesuré le 2026-10-01 sur 24 textes notés deux fois : Luna s'accorde
+  publié**, et **un juge se qualifie avant de servir** — sur des textes déjà
+  notés par un autre, ce qui coûte une passe et évite de confondre sévérité et
+  biais. Mesuré le 2026-10-01 sur 24 textes notés par **trois** juges :
+
+  ⚠️ **Ne pas confondre le niveau et la forme.** Le décalage de niveau n'était
+  pas de l'auto-préférence : `z-ai/glm-5.3`, désintéressé, est à +1,19 de
+  `claude-sonnet-5` là où Luna est à +1,22. C'est Sonnet qui est sévère. La
+  **forme**, elle, était bien un artefact : sur `instruction_compliance`, Luna
+  seule voit une montée avec l'effort (+1,12) là où Sonnet (−0,25) et GLM
+  (−0,08) ne voient rien. Pour **classer**, seule la forme compte, et deux juges
+  séparés par 1,2 point peuvent classer pareil. Pour dire « 8,5 est bon », le
+  niveau compte — et aucune vérité terrain ne l'arbitre.
+
+  Un juge disqualifié comme **candidat** peut très bien servir comme **juge** : les
+  schémas n'ont rien à voir. Mais l'indiscipline, si : GLM, écarté pour avoir
+  substitué ses libellés aux identifiants de nœuds, a rendu `ai_ticks` au lieu de
+  `ai_tics` sur un verdict. 8 % d'échecs à budgéter en reprises — bruyants, donc
+  sans effet sur les moyennes.
+ Mesuré le 2026-10-01 sur 24 textes notés deux fois : Luna s'accorde
   **+1,13 à +1,33 point** de plus que `claude-sonnet-5` sur les mêmes textes.
 
   ⚠️ Et ce biais **n'est pas constant**. Sur `instruction_compliance` il va de
