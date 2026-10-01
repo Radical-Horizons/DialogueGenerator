@@ -51,6 +51,14 @@ désintéressé puisque disqualifié comme candidat. Sonnet en contre-épreuve
 occasionnelle. Pour classer des candidats, le niveau absolu n'importe pas ; les
 deux juges s'accordent sur la **forme**, qui est ce qui classe.
 
+⚠️ **L'accord entre GLM et Sonnet est établi sur la question de l'EFFORT, pas sur
+le classement des modèles.** Les deux seuls verdicts Sonnet du mini test, tous
+deux sur `akthar-interdit`, donnent MiMo à 7,93 et gpt-6-luna à 7,05 — soit
+l'inverse du classement de GLM. n=1 par modèle sur le cas le plus long : ça ne
+réfute rien, mais ça avertit. Conclure que GLM remplace Sonnet pour CLASSER
+demande de lui faire juger les 16 générations du mini test (~1,70 $) et de
+comparer les deux ordres.
+
 ⚠️ Aucune vérité terrain ne dit lequel a raison sur le niveau. Pour « 8,5 est-il
 bon dans l'absolu », l'écart de 1,2 point compte ; pour « A vaut-il mieux que B »,
 non.

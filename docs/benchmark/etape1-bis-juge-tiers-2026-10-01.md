@@ -84,8 +84,31 @@ Le plancher de fidélité qui montait de 5 à 8, présenté la veille comme le
 résultat, ne s'est pas reproduit : sous Sonnet le minimum est 5 à `none` **et à**
 `medium`. C'était un tirage, pas un effet.
 
-Implication de production : **`none` convient**, et économise les tokens de
-raisonnement (1 307 contre 2 227 à `high`).
+### Implication de production : `medium`, et non `none`
+
+J'avais écrit « `none` convient ». C'était une sur-optimisation, faute d'avoir
+regardé l'ordre de grandeur de ce qu'on économise :
+
+| effort | $/1 000 fragments | tok. sortie |
+|---|---|---|
+| `none` | 6,11 | 1 307 |
+| `medium` | 6,27 | 1 438 |
+| `high` | 7,21 | 2 227 |
+
+Passer de `none` à `medium` coûte **16 centimes pour mille fragments**. Aucun
+arbitrage ne se joue à ce prix. Or n=8 ne détecte qu'un écart d'environ 1 point :
+un bénéfice réel mais modeste resterait invisible. Face à une incertitude qu'on
+n'a pas les moyens de lever, et à une assurance qui coûte 0,16 $, on prend
+l'assurance — un fragment mal formé coûte une reprise manuelle, ce qui écrase
+l'économie de plusieurs ordres de grandeur.
+
+**`medium` par défaut.** `high`, en revanche, coûte 1,10 $ de plus pour mille
+(+18 %) sans rien de mesuré : à écarter.
+
+Le « plancher de fidélité » ne soutient aucune des deux thèses. Le minimum de 5
+apparaît à `none` et `medium` chez Sonnet, à `medium` chez GLM, nulle part chez
+Luna — sans aucun motif cohérent entre juges. C'est du bruit, ce qui est
+cohérent avec « pas d'effet ».
 
 ⚠️ « Rien de mesurable » n'est pas « aucun effet ». Avec n=8 et σ ≈ 1,0, seul un
 écart d'environ 1 point serait détectable. Un bénéfice réel mais modeste resterait
