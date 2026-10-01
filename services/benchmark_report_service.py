@@ -372,14 +372,17 @@ class BenchmarkReportService:
                 """Vrai si le verdict appartient au bloc courant."""
                 return _key(verdict) == (judge_model, grid_id, grid_version)
 
-            judge_rubric = [v for v in rubric if _same(v)]
-            judge_pairwise = [v for v in pairwise if _same(v)]
-            decided = [v for v in judge_pairwise if v.status == "decided"]
+            leg_rubric = [v for v in rubric if _same(v)]
+            leg_pairwise = [v for v in pairwise if _same(v)]
             # Une jambe qui porte plusieurs empreintes mélange deux juges sous un
             # même nom : c'est ce que produit une re-notation après changement de
-            # consigne, et c'est exactement ce que le protocole interdit.
-            rubric_hashes = self._prompt_hashes(judge_rubric)
-            pairwise_hashes = self._prompt_hashes(judge_pairwise)
+            # consigne, et c'est exactement ce que le protocole interdit. Signaler
+            # ne suffisait pas — les moyennes se faisaient quand même.
+            rubric_hashes = self._prompt_hashes(leg_rubric)
+            pairwise_hashes = self._prompt_hashes(leg_pairwise)
+            judge_rubric = self._latest_cohort(leg_rubric)
+            judge_pairwise = self._latest_cohort(leg_pairwise)
+            decided = [v for v in judge_pairwise if v.status == "decided"]
             reports.append(
                 BenchmarkJudgeReport(
                     judge_model=judge_model,
@@ -396,6 +399,55 @@ class BenchmarkReportService:
                 )
             )
         return reports
+
+    @staticmethod
+    def _latest_cohort(verdicts: List[Any]) -> List[Any]:
+        """Ne garde que les verdicts de la consigne la plus récente de cette jambe.
+
+        Deux empreintes dans une jambe, ce sont deux juges — et le protocole
+        interdit de les agréger. Les signaler sans rien faire laissait une moyenne
+        mélangée à côté du drapeau : un chiffre qui a l'air d'une mesure sans en
+        être une, ce que tout le reste du banc sert à éliminer.
+
+        On retient la plus récente parce qu'on rejuge **quand l'ancien juge était
+        en défaut** — contexte tronqué, consigne contradictoire, effort non fixé.
+        Le rapport doit montrer le juge courant. Si la re-notation n'a rien
+        amélioré, c'est à l'utilisateur de revenir en arrière, pas au rapport de
+        moyenner les deux. Les empreintes écartées restent publiées dans
+        ``rubric_prompt_hashes`` / ``pairwise_prompt_hashes``, et
+        ``judge_prompt_mixed`` reste vrai : l'historique est visible, il n'entre
+        simplement plus dans les chiffres.
+
+        Args:
+            verdicts: Verdicts d'une seule jambe, tous juges de même nom.
+
+        Returns:
+            Les verdicts de la dernière consigne employée. La liste entière si une
+            seule empreinte est présente, ou si aucune date ne permet de trancher.
+        """
+        cohorts: Dict[str, List[Any]] = {}
+        for verdict in verdicts:
+            key = getattr(verdict, "judge_prompt_hash", None) or "inconnue"
+            cohorts.setdefault(key, []).append(verdict)
+        if len(cohorts) <= 1:
+            return verdicts
+
+        def _freshness(items: List[Any]) -> str:
+            """Date la plus récente d'une cohorte, chaîne vide si aucune."""
+            return max(
+                (str(getattr(item, "created_at", "") or "") for item in items),
+                default="",
+            )
+
+        newest = max(cohorts.values(), key=_freshness)
+        logger.warning(
+            "Jambe sous %d consignes de juge différentes : seuls les %d verdicts de "
+            "la plus récente entrent dans les moyennes (%d écartés).",
+            len(cohorts),
+            len(newest),
+            len(verdicts) - len(newest),
+        )
+        return newest
 
     @staticmethod
     def _prompt_hashes(verdicts: List[Any]) -> List[str]:
