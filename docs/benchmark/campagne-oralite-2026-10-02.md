@@ -114,6 +114,13 @@ verdicts disaient :
 - **Critère primaire** : `oral_naturalness` hors oralité faible légitime, en hausse
   d'au moins **+0,5** sur le palier précédent (≈ 2,5 erreurs standard à n = 24),
   **et** les mesures sans juge dans le bon sens (mots/phrase et jointures en baisse).
+- **Garde contre une règle qui se récompense elle-même** : la moyenne « hors
+  excuses » a un dénominateur mobile. Un levier qui fait monter la justesse ou la
+  cohérence de la voix range davantage de verdicts dans le panier excusé, et la
+  moyenne monte sans qu'une réplique soit devenue plus dicible. Chaque palier
+  publie donc **trois** chiffres — moyenne **brute** de `oral_naturalness`,
+  moyenne hors excuses, nombre de verdicts excusés — et ne compte comme gain que
+  si la moyenne brute monte aussi, ou si le nombre d'excusés reste stable.
 - **Garde-fous** — aucune baisse > 0,4 : `context_fidelity`, `voice_fidelity`,
   `voice_consistency`, `french_correctness`. Aucune hausse > 0,4 : `ai_tics`,
   `overwriting`, `blandness`, `forced_exposition`. La recopie ne monte pas.
@@ -129,3 +136,11 @@ verdicts disaient :
 | L2 | `<speaker_voice>` élargi et placé avant la consigne de scène | ≈ 2,6 $ |
 | L3 | exemples écrit ✗ / dit ✓, hors jeu de test, validés par l'auteur | ≈ 2,6 $ |
 | Confirmation | second juge GLM sur B0 et le final ; plateau des six modèles refait | ≈ 7,5 $ |
+
+### Ce que B0 ne pourra pas dire
+
+B0 et le run du 2026-10-01 ne se comparent pas sur les notes du juge, même pour
+`gpt-6-luna` : le prompt **et** la grille ont changé. Le seul pont est fait des
+mesures sans juge — mots par phrase, jointures, ruptures — que B0 publiera à côté
+du tableau ci-dessus. C'est le seul effet de la phase 1 sur l'oralité qui soit
+mesurable.

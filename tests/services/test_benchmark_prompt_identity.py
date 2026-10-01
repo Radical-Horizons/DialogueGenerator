@@ -128,3 +128,23 @@ def test_notion_cache_is_resolved_from_the_main_checkout(
     )
     monkeypatch.setenv("NOTION_CACHE_DIR", "ailleurs")
     assert constants.resolve_notion_cache_dir() == Path("ailleurs")
+
+
+def test_speaker_voice_loses_its_stage_directions_too() -> None:
+    """La voix épinglée hors budget reprend la fiche : elle est nettoyée comme le contexte."""
+    from unittest.mock import patch
+
+    with patch.object(
+        PromptBuilder,
+        "_build_speaker_voice_section",
+        return_value=_voice_element("Voix basse *(phénomène émergent)* et lente."),
+    ):
+        prompt = _built()
+    assert "*(" not in prompt.split("<context>")[0]
+
+
+def _voice_element(text: str) -> ET.Element:
+    """Élément `<speaker_voice>` portant ce texte."""
+    element = ET.Element("speaker_voice")
+    element.text = text
+    return element

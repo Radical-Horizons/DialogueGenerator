@@ -12,6 +12,12 @@
 > L'ordre relatif tient **pour ce prompt-là** — tous les modèles ont reçu le même —
 > mais ce n'est pas le prompt de la production. Le plateau est à refaire sur le
 > prompt corrigé.
+>
+> **Kimi K3 et `speaker_label`** : le schéma de sortie décrivait `speaker` comme
+> « ID du personnage qui parle », et la doc du format Unity le dit aussi. Kimi a
+> obéi au schéma ; la porte l'a compté comme un défaut. « Sortie inexploitable »
+> ci-dessous est donc en partie la faute de notre consigne — la contradiction
+> attend d'être tranchée (registre différé).
 
 Six candidats, 8 cas, effort `medium`, rubrique seule. Juge
 `anthropic/claude-sonnet-5` à l'effort `high`, contexte entier, grille v2.

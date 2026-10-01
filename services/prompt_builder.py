@@ -88,6 +88,9 @@ class PromptBuilder:
         # Section 1 : Instructions techniques
         technical_elem = self._build_technical_section(input)
         if technical_elem is not None:
+            # `<speaker_voice>` reprend la voix de la fiche, exemples compris.
+            if not getattr(input, "allow_stage_directions", True):
+                _strip_stage_directions_in_tree(technical_elem)
             root.append(technical_elem)
         
         # Section 2A : Contexte GDD
