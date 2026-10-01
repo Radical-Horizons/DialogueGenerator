@@ -238,3 +238,9 @@ Les AC de la **story 1.5** (`epic-01.md:290`, `:301`, `:306`, `:321-323`) sont n
 | **Epic 19** | différée | **différée** — inchangé, hors lot sprintable, gate citée. FR130 marquée provisoire. |
 
 Les trois arbitrages produit en attente ont été tranchés : **densité** (sélection unique, pas de seuil de zoom, 280 × 440 px), **`requestNodeEdit`** (in-situ), **`Tab`** (reste à Epic 14, entrée par `Enter`).
+
+### Réserve sur ce verdict
+
+« Prête » veut dire **prête à découper en stories**, pas « tous les documents sont alignés ». Les livrables documentaires de B4 — révision de `etats-2a-2e.dc.html` bloc 2e, de `README.md` §F, et levée d'ambiguïté dans `.claude/rules/ui_redesign_2026.md` — sont **assignés à la story 18.1**, pas faits.
+
+Conséquence concrète : **jusqu'à la livraison de 18.1, un dev agent qui ouvre `DialogueNode.tsx` reçoit encore `ui_redesign_2026.md` dans son contexte** (la règle se charge sur `frontend/src/**`) avec son exigence de fidélité à un écran qui dessine le nœud sélectionné en résumé. 18.1 doit donc commencer par ses livrables documentaires, pas finir par eux. C'est écrit dans la story ; ce rappel existe pour qu'on ne l'inverse pas.
