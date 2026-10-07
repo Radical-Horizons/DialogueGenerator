@@ -224,9 +224,28 @@ Correction du périmètre produit, apportée par l'équipe après lecture du rap
 - `design-system-foundation.md:63` : levée d'ambiguïté « écriture d'abord, lecture friendly ».
 - `research/ux-edition-in-situ-articy-notion-2026-10-01.md` : trois corrections — `zundo`, le niveau WCAG de 3.2.2 (niveau A, pas « l'esprit » d'un critère AA), et la justification du double-clic.
 
-### Hors périmètre — délégué
+### Hors périmètre lors de l'audit — traité le 2026-10-07
 
-Les AC de la **story 1.5** (`epic-01.md:290`, `:301`, `:306`, `:321-323`) sont non conformes à ADR-006 — bouton « Sauvegarder », `Ctrl+S`, `Échap` qui jette les modifications — tout en étant marquées « DÉJÀ IMPLÉMENTÉ ». Deux des trois contradictions sont **antérieures** à Epic 18. **FR5 se garde** : elle est agnostique de canal, et FR122/FR124/FR125 la raffinent. Ses AC se réécrivent dans Epic 1, avec une vérification du même défaut sur FR97 et la story 10.2 d'`epic-10.md:108-161`. Tâche de fond créée.
+Les AC de la **story 1.5** (`epic-01.md`) étaient non conformes à ADR-006 tout en étant marquées « ✅ DÉJÀ IMPLÉMENTÉ ». Tâche exécutée. **La vérification contre le code a trouvé plus que ce que l'audit signalait** :
+
+| AC d'origine | Réalité | Verdict |
+|---|---|---|
+| double-clic → panneau d'édition | `onNodeDoubleClick` = `focusNode` + `fitView` | **FAUX** |
+| clic droit → « Éditer » → panneau | `NodeContextMenu.handleEdit` fait `setSelectedNode(id)` **et rien d'autre** | **FAUX** — et bug d'intitulé : un menu « Éditer » qui n'édite pas |
+| Ctrl+S ou bouton « Sauvegarder » | `Ctrl+S` existe mais c'est un **sync forcé** ; aucun bouton « Sauvegarder », `SaveStatusIndicator` à sa place | **MAL FORMULÉ** — le code était conforme, l'AC non |
+| indicateur « Modifié » (étoile) | absent | **JAMAIS IMPLÉMENTÉ** → acté **caduc** (sous ADR-006, tout est toujours enregistré) |
+| auto-save « dans les 2 minutes » | debounce **50 ms** (`useDialogueLoader.ts:436-450`) | **FAUX** |
+| warning « Speaker 'X' non trouvé dans GDD » | absent du front **et** du back | **JAMAIS IMPLÉMENTÉ** → **gardé** comme reste-à-faire |
+| metadata validées **avant** sauvegarde | validation **serveur**, erreurs retournées **après** en `documentFieldErrors` | **INVERSÉ** |
+| `Escape` / « Annuler » → modifs perdues + confirmation | aucun handler `Escape`, aucun bouton « Annuler » | **JAMAIS IMPLÉMENTÉ** → acté **caduc** (pas de brouillon), l'annulation relève de la story 18.4 |
+
+**Statut corrigé** : 🟡 PARTIELLEMENT IMPLÉMENTÉ. Le compteur du header d'Epic 1 est corrigé au passage — il annonçait « DONE (8) » en listant 7 US, et comptait 1.5 comme terminée.
+
+**Effet de retour sur Epic 18.** Sa story 18.7 affirmait que l'avertissement speaker/GDD est « **conservé** » sur le chemin in-situ. Il n'y avait rien à conserver : l'AC est corrigée et l'avertissement reste porté par la story 1.5, pour éviter de le spécifier deux fois.
+
+**FR5 est gardée** : elle est agnostique de canal, FR122/FR124/FR125 la raffinent.
+
+**FR97 et story 10.2 — signalés, non corrigés.** Un avertissement ADR-006 est posé dans `epic-10.md` : bouton « Sauvegarder », « prochaine auto-save dans 2 min » et `localStorage` (le journal est en IndexedDB) y divergent de l'architecture. Epic 10 est en `backlog`, donc ce sont des specs non implémentées et le correctif est bon marché — mais il dépasse le périmètre de cette passe. À l'actif de 10.2 : elle citait déjà correctement **NFR-R3**.
 
 ---
 

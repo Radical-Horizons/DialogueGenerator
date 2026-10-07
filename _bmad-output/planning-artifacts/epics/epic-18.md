@@ -472,8 +472,10 @@ So that **renommer un locuteur ne me coûte pas un aller-retour vers le panneau*
 
 **Given** un speaker qui n'existe pas dans le GDD
 **When** je quitte le champ
-**Then** l'avertissement « Speaker 'X' non trouvé dans le GDD » de la story 1.5 (`epic-01.md:311-314`) est **conservé** sur ce chemin d'édition
-**And** si l'équipe décide de ne pas le porter, c'est acté comme régression assumée — pas perdu par omission
+**Then** aucun avertissement n'est attendu de cette story — l'avertissement « Speaker 'X' non trouvé dans le GDD » **n'existe pas** (vérifié le 2026-10-07 : absent du frontend et du backend)
+**And** il reste **à créer**, une seule fois, pour couvrir les deux chemins d'édition (panneau et in-situ) — porté par la story 1.5 d'Epic 1, pas par celle-ci
+
+> ⚠️ **Correction du 2026-10-07.** Cette AC affirmait que l'avertissement est « conservé » sur le chemin in-situ, en citant la story 1.5. **Il n'y a rien à conserver** : la story 1.5 le décrivait comme implémenté alors qu'il ne l'a jamais été — `grep` sur `frontend/src/`, `api/`, `services/` et `core/` ne renvoie rien. La story 1.5 a été réécrite en conséquence ; l'avertissement y est acté comme reste-à-faire. Le spécifier dans Epic 18 reviendrait à le spécifier deux fois.
 
 **Given** un speaker ou un titre long
 **When** il dépasse la largeur du nœud

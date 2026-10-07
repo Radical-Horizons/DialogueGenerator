@@ -12,11 +12,14 @@
 
 **Dépendances:** Epic 0 (infrastructure), Epic 3 (contexte GDD requis pour génération)
 
-**Statut des US :**
-- ✅ **DONE (8)** : US 1.1, 1.2, 1.3, 1.5, 1.8, 1.9, 1.13
+**Statut des US** (recompté le 2026-10-07 — l'ancienne version annonçait « DONE (8) » en n'en listant que 7, et comptait 1.5 comme terminée) **:**
+- ✅ **DONE (6)** : US 1.1, 1.2, 1.3, 1.8, 1.9, 1.13
+- 🟡 **PARTIELLEMENT IMPLÉMENTÉ (1)** : US 1.5 — AC réécrites, 1 reste à faire (warning speaker/GDD), 2 actées caduques par ADR-006
 - 🔴 **PRIORITÉ A - Critiques (4)** : US 1.4, 1.6, 1.10, 1.17
 - 🟡 **PRIORITÉ B - Importantes (3)** : US 1.7, 1.11, 1.15
 - 🟢 **PRIORITÉ C - Nice-to-have (3)** : US 1.12, 1.14, 1.16
+
+Total : **17** US (1.1 à 1.17).
 
 ---
 
@@ -287,9 +290,13 @@ So that **je peux itérer rapidement sur la qualité des dialogues sans workflow
 
 ### Story 1.5: Éditer manuellement le contenu des nœuds générés (FR5)
 
-**Status:** ✅ **DÉJÀ IMPLÉMENTÉ**
+**Status:** 🟡 **PARTIELLEMENT IMPLÉMENTÉ** — AC réécrites le 2026-10-07
 
-**Note:** Cette fonctionnalité existe déjà. Le composant `NodeEditorPanel.tsx` permet l'édition complète des nœuds (texte, speaker, metadata).
+> ⚠️ **Cette story était marquée « ✅ DÉJÀ IMPLÉMENTÉ ». Elle ne l'était pas.** L'audit d'implementation readiness d'Epic 18 ([rapport](../implementation-readiness-report-2026-10-01.md)) a signalé que trois de ses critères d'acceptation contredisent **ADR-006** (`architecture/v10-architectural-decisions-adrs.md:478-530`). La vérification contre le code a trouvé davantage : **trois AC n'ont jamais été implémentées, deux étaient factuellement fausses, deux décrivaient le mécanisme à l'envers.**
+>
+> Deux de ces contradictions sont **antérieures à Epic 18** : ADR-006 les invalidait déjà.
+
+**Le chemin d'édition réellement en place :** clic sur un nœud → sélection → `GraphInspectorNodeSummary` en **lecture** → action « éditer » sur une ligne (`GraphInspectorNodeSummary.tsx:115`, `:127`, `:139`) → `nodeInspectorEditing = true` (`GraphEditor.tsx:128`, `:288`) → `NodeEditorPanel`. L'écriture pousse au store à la saisie (debounce ≤ 100 ms, `NodeEditorPanel.tsx:222-236`), `markDirty` journalise dans IndexedDB avec un `clientSeq` (`uiSlice.ts:313-328`), et l'autosave part **50 ms** plus tard (`useDialogueLoader.ts:436-450`). Conforme ADR-006.
 
 As a **utilisateur créant des dialogues**,
 I want **éditer manuellement le contenu des nœuds générés (texte, speaker, metadata)**,
@@ -297,41 +304,78 @@ So that **je peux affiner et personnaliser les dialogues générés par l'IA**.
 
 **Acceptance Criteria:**
 
-**Given** un nœud est généré et accepté dans le graphe
-**When** je double-clique sur le nœud (ou clic droit → "Éditer")
-**Then** un panneau d'édition s'ouvre avec les champs : texte, speaker, metadata
+**Given** un nœud est sélectionné dans le graphe
+**When** je clique sur l'action « éditer » d'une ligne de l'inspecteur
+**Then** `NodeEditorPanel` remplace la vue résumée avec les champs : speaker, line, choices, metadata
 **And** je peux modifier chaque champ
 
-**Given** je modifie le texte d'un nœud
-**When** je sauvegarde (Ctrl+S ou bouton "Sauvegarder")
-**Then** les modifications sont persistées dans le dialogue
-**And** un indicateur "Modifié" s'affiche sur le nœud (icône étoile)
-**And** l'auto-save (Epic 0 Story 0.5) sauvegarde les modifications dans les 2 minutes
+**Given** j'édite un champ du panneau
+**When** je saisis
+**Then** la valeur est poussée au store dans un délai ≤ 100 ms, **sans action d'enregistrement** (ADR-006 — pas de bouton « Sauvegarder », pas de brouillon)
+**And** `markDirty` incrémente `clientSeq` et journalise l'état dans IndexedDB
+**And** l'autosave vers le backend part ~50 ms après, et l'état visible passe par `SaveStatusIndicator`
 
-**Given** je modifie le speaker d'un nœud
-**When** le speaker n'existe pas dans le GDD
-**Then** un warning s'affiche "Speaker 'X' non trouvé dans GDD"
-**And** je peux quand même sauvegarder (speaker custom autorisé)
+**Given** je veux forcer une synchronisation immédiate
+**When** je presse `Ctrl+S`
+**Then** le formulaire est flushé puis le document est poussé au backend sans attendre le debounce
+**And** ce raccourci est l'affordance « Synchroniser maintenant » autorisée par ADR-006 — **pas** un enregistrement de brouillon
 
-**Given** je modifie les metadata d'un nœud (tags, conditions, effets)
-**When** je sauvegarde
-**Then** les metadata sont validées (format JSON Unity)
-**And** les erreurs de validation sont affichées avant sauvegarde
+**Given** j'édite les metadata d'un nœud (conditions, effets)
+**When** la validation du document s'exécute côté backend
+**Then** les erreurs reviennent en erreurs de champ (`documentFieldErrors`) et marquent le champ fautif `aria-invalid` (`NodeEditorPanel.tsx:692`, `:719`)
+**And** l'erreur est effaçable à la correction (`clearDocumentFieldError`)
 
-**Given** j'annule l'édition (Escape ou bouton "Annuler")
-**When** je ferme le panneau d'édition
-**Then** les modifications non sauvegardées sont perdues
-**And** un message de confirmation s'affiche si modifications non sauvegardées
+**Given** j'ai fini d'éditer un nœud
+**When** je sélectionne un autre nœud
+**Then** le formulaire est flushé vers le store avant le changement, via `mergeDialogueNodeFormIntoStoreData()` — **jamais** par un spread, qui écraserait `choices[N].targetNode`
+**And** l'inspecteur revient en vue résumée sur le nouveau nœud
+
+---
+
+## Ce qui a été vérifié, et ce que ça a donné
+
+Vérification menée le 2026-10-07 contre le code, AC par AC.
+
+| AC d'origine | Réalité du code | Verdict |
+|---|---|---|
+| « je **double-clique** sur le nœud → un panneau d'édition s'ouvre » | `onNodeDoubleClick` est câblé sur `focusNode` → `fitView` animé 300 ms (`useReactFlowHandlers.ts:260-262`). Rien n'ouvre un panneau au double-clic. | **FAUX** |
+| « (ou **clic droit → « Éditer »**) » | `NodeContextMenu.handleEdit` fait `setSelectedNode(id)` **et rien d'autre** (`NodeContextMenu.tsx:98-101`). L'entrée de menu nommée « Éditer » n'ouvre pas l'éditeur. | **FAUX** — et bug d'intitulé, voir ci-dessous |
+| « je sauvegarde (**Ctrl+S ou bouton « Sauvegarder »**) » | `Ctrl+S` existe (`useGraphToolbar.ts:260` → `handleSave`, `useDialogueLoader.ts:481`) mais c'est un **flush + sync forcé**. **Aucun bouton « Sauvegarder »** dans l'éditeur de graphe : à sa place, `SaveStatusIndicator` (`GraphToolbarStatusRow.tsx:207`). | **MAL FORMULÉ** — le code est conforme ADR-006, l'AC le décrit comme un enregistrement explicite |
+| « un indicateur « **Modifié** » s'affiche sur le nœud (icône étoile) » | Absent de `DialogueNode.tsx`. | **JAMAIS IMPLÉMENTÉ — caduc**, voir ci-dessous |
+| « l'auto-save sauvegarde les modifications dans les **2 minutes** » | Debounce **50 ms** (`useDialogueLoader.ts:436-450`), précédé du journal IndexedDB au `markDirty`. | **FAUX** — c'est ADR-006 qui est implémenté, pas les 2 minutes |
+| « un warning s'affiche « **Speaker 'X' non trouvé dans GDD** » » | Absent du frontend **et** du backend (`grep` sur `api/`, `services/`, `core/`). | **JAMAIS IMPLÉMENTÉ — à garder**, voir ci-dessous |
+| « les metadata sont validées **avant** sauvegarde, erreurs affichées **avant** » | Validation **serveur** ; les erreurs reviennent **après** tentative, en `documentFieldErrors` + `aria-invalid`. | **INVERSÉ** — le mécanisme existe, dans l'autre sens |
+| « j'annule l'édition (**Escape ou bouton « Annuler »**) → les modifications non sauvegardées sont perdues + message de confirmation » | Aucun handler `Escape` dans `NodeEditorPanel`, aucun bouton « Annuler ». La sortie du mode édition se fait en **changeant de nœud** (`GraphEditor.tsx:129-133`). | **JAMAIS IMPLÉMENTÉ — caduc**, voir ci-dessous |
+
+### Les trois AC jamais implémentées — décision prise, pas omission
+
+**1. Indicateur « Modifié » (icône étoile) → caduc.** Sous ADR-006, tout est toujours enregistré : un marqueur « modifié » par nœud n'a plus de référent. L'état de synchronisation est porté globalement par `SaveStatusIndicator`, déjà en place et déjà dessiné dans la maquette (`docs/design/refonte-ui-2026/README.md:104-105`). **Retiré du périmètre.**
+
+**2. Annulation par `Escape` / bouton « Annuler » + confirmation → caduc.** ADR-006 interdit le brouillon : il n'existe pas de « modifications non sauvegardées » à perdre, donc rien à confirmer. L'annulation d'une édition relève de l'**undo**, et l'undo sur les champs texte n'existe pas encore : `updateNode` (`nodeSlice.ts:489`) ne pousse aucun snapshot. C'est le chantier de la **story 18.4** d'Epic 18, qui rend `updateNode` transactionnel avec coalescence. **Retiré d'ici, couvert là-bas.**
+
+**3. Warning « Speaker 'X' non trouvé dans le GDD » → garder, et acter qu'il reste à faire.** Celui-là a une vraie valeur produit : il attrape les coquilles sur les noms de locuteurs, qui cassent silencieusement l'appariement avec le GDD. Il n'a jamais été implémenté — ni au front, ni au back.
+
+> ⚠️ **Correction à porter sur Epic 18.** Sa story 18.7 écrit que cet avertissement est « **conservé** » sur le chemin d'édition in-situ. Il n'y a rien à conserver : il est **à créer**. Si l'équipe le veut, il doit être spécifié une fois et couvrir les deux chemins (panneau et in-situ), pas être porté par 18.7 comme un acquis.
+
+### Bug relevé en passant — l'entrée de menu « Éditer » n'édite pas
+
+`NodeContextMenu.tsx:98-101` : `handleEdit` sélectionne le nœud et ferme le menu. L'utilisateur qui clique « Éditer » obtient la **vue résumée** de l'inspecteur, puis doit cliquer une seconde fois sur « éditer » dans une ligne. Deux lectures possibles :
+
+- **(a)** renommer l'entrée de menu en « Sélectionner » ou « Ouvrir dans l'inspecteur » — honnête, zéro code ;
+- **(b)** faire que `handleEdit` appelle aussi `requestNodeEdit(id)`, ce qui ouvrirait `NodeEditorPanel` directement — conforme à l'intention produit « écriture d'abord ».
+
+**Recommandation : (b)**, cohérent avec « écriture d'abord, lecture friendly ». ⚠️ À coordonner avec la **story 18.9** d'Epic 18, qui fait router `requestNodeEdit` vers l'édition **in-situ dans le nœud** plutôt que vers le panneau. Les deux doivent aboutir au même endroit, sinon « Éditer » et la création d'un nœud ouvrent deux surfaces différentes.
 
 **Technical Requirements:**
-- Frontend : Composant `NodeEditorPanel.tsx` avec formulaires texte/speaker/metadata
-- Zustand store : `useGraphStore` avec méthode `updateNode(nodeId, updates)`
-- Backend : Endpoint `/api/v1/dialogues/{id}/nodes/{nodeId}` (PUT) pour mise à jour nœud
-- Validation : Format Unity JSON (Pydantic models) avant sauvegarde
-- Integration : Epic 0 Story 0.5 (auto-save) pour sauvegarde automatique
-- Tests : Unit (édition nœud), Integration (API update), E2E (workflow édition complet)
+- Frontend : `NodeEditorPanel.tsx` (formulaires speaker / line / choices / metadata) ; `GraphInspectorNodeSummary.tsx` (vue lecture + actions « éditer ») ; bascule par `nodeInspectorEditing` dans `GraphEditor.tsx:128`
+- Store : `useGraphStore.updateNode(nodeId, updates)` — patche champ par champ en mode document-SoT (`nodeSlice.ts:160-169`)
+- Flush : **toujours** `mergeDialogueNodeFormIntoStoreData()` (`utils/mergeNodeEditorForm.ts:18-69`) ; un spread écrase `choices[N].targetNode` posé par `connectNodes`
+- Persistance : `markDirty` → journal IndexedDB + `clientSeq` (`uiSlice.ts:313-328`) ; autosave 50 ms (`useDialogueLoader.ts:436-450`) ; `Ctrl+S` = sync forcé (`useGraphToolbar.ts:260`)
+- Validation : erreurs de champ serveur via `documentFieldErrors` + `aria-invalid`
+- Tests : Vitest sur le flush et la préservation de `targetNode` ; E2E sur le parcours sélection → éditer → saisie → rechargement
 
-**References:** FR5 (édition manuelle), FR48 (validation JSON Unity), Epic 0 Story 0.5 (auto-save)
+**References:** FR5 (édition manuelle), FR48 (validation JSON Unity), **ADR-006** (autosave immédiat, pas de bouton Sauvegarder), Epic 18 stories **18.4** (undo transactionnel) et **18.9** (`requestNodeEdit`), Epic 10 story 10.2 (voir l'avertissement ADR-006 qui y est posé)
+
 
 ---
 

@@ -107,6 +107,20 @@ So that **je ne perds pas mon travail même si le navigateur se ferme accidentel
 
 ### Story 10.2: Sauvegarder manuellement le progrès dialogue (FR97)
 
+> ⚠️ **AC non conformes à ADR-006 — signalé le 2026-10-07, non corrigé.** Relevé pendant la réécriture de la story 1.5 d'Epic 1. Epic 10 est en `backlog`, donc ce sont des specs non implémentées : le correctif est bon marché, mais il dépasse le périmètre de cette passe et n'a pas été arbitré.
+>
+> Trois divergences avec **ADR-006** (`architecture/v10-architectural-decisions-adrs.md:478-530`) :
+>
+> | AC | ADR-006 / code réel |
+> |---|---|
+> | « je clique sur **"Sauvegarder"** (bouton ou Ctrl+S) » | ADR-006 `:493` et `:524` : **« pas de bouton "Sauvegarder" »**, seulement un « Synchroniser maintenant » optionnel. En place aujourd'hui : `Ctrl+S` → flush + sync forcé (`useGraphToolbar.ts:260`), et `SaveStatusIndicator` à la place du bouton. |
+> | « le timer auto-save est réinitialisé (**prochaine auto-save dans 2min**) » | Il n'y a pas de timer : debounce **50 ms** après `markDirty` (`useDialogueLoader.ts:436-450`). Les « 2 min » viennent de la rédaction initiale de FR95, antérieure à ADR-006. |
+> | « les modifications restent dans **localStorage** » | Le journal est en **IndexedDB**, par `documentId`, avec `clientSeq` / `ackSeq` (`uiSlice.ts:313-328`, `utils/graphJournal.ts`). |
+>
+> **FR97 lui-même** (« Users can manually save dialogue progress ») gagnerait à être reformulé : « forcer une synchronisation immédiate » plutôt que « sauvegarder », ou marqué *superseded by ADR-006*. À trancher avec l'équipe.
+>
+> ✅ À l'actif de cette story : elle cite déjà correctement **NFR-R3** (Data Loss Prevention) — c'est Epic 18 qui citait NFR-R2 par erreur, pas celle-ci.
+
 As a **utilisateur éditant des dialogues**,
 I want **sauvegarder manuellement mon dialogue à tout moment**,
 So that **je peux contrôler quand mes modifications sont persistées et m'assurer que tout est sauvegardé avant de quitter**.
