@@ -66,7 +66,6 @@ export function GraphExportFormatDialog({
               justifyContent: 'center',
             }}
           >
-            <span>📷</span>
             <span>PNG (Image raster)</span>
           </button>
           <button
@@ -85,7 +84,6 @@ export function GraphExportFormatDialog({
               justifyContent: 'center',
             }}
           >
-            <span>🎨</span>
             <span>SVG (Vectoriel)</span>
           </button>
         </div>

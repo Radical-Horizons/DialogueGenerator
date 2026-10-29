@@ -74,6 +74,7 @@ describe('BudgetSettings', () => {
     const ok = await ref.current!.apply()
     expect(ok).toBe(false)
     expect(mockUpdateBudget).not.toHaveBeenCalled()
-    expect(screen.getByText(/Erreur:/i)).toBeInTheDocument()
+    // Espace insécable typographique avant le deux-points : matcher le mot seul.
+    expect(screen.getByText(/Erreur\s*:/i)).toBeInTheDocument()
   })
 })

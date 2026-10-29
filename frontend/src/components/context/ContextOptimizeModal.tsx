@@ -386,10 +386,11 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
                 }
                 style={{
                   padding: '0.35rem 0.65rem',
-                  borderRadius: 4,
+                  borderRadius: 6,
                   border: 'none',
                   backgroundColor: theme.button.primary.background,
                   color: theme.button.primary.color,
+                  fontWeight: 600,
                   cursor:
                     error || !proposal || (!proposal.no_op && !proposal.budget_respected)
                       ? 'not-allowed'
@@ -435,10 +436,11 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
                 }}
                 style={{
                   padding: '0.35rem 0.65rem',
-                  borderRadius: 4,
+                  borderRadius: 6,
                   border: 'none',
                   backgroundColor: theme.button.primary.background,
                   color: theme.button.primary.color,
+                  fontWeight: 600,
                   cursor: 'pointer',
                 }}
               >

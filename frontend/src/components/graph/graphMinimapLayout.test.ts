@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
   computeGraphMinimapSizePx,
+  graphMinimapNodeColor,
   MINIMAP_MAX_EDITOR_FRACTION,
   REACT_FLOW_MINIMAP_DEFAULT_HEIGHT,
   REACT_FLOW_MINIMAP_DEFAULT_WIDTH,
 } from './graphMinimapLayout'
+import { theme } from '../../theme'
+import { redesignAccent, redesignText } from '../../theme/redesignTokens'
 
 describe('computeGraphMinimapSizePx', () => {
   it('retourne null si largeur ou hauteur éditeur non positive', () => {
@@ -48,5 +51,17 @@ describe('computeGraphMinimapSizePx', () => {
     expect(result!.height).toBeGreaterThanOrEqual(1)
     expect(result!.width).toBeLessThanOrEqual(maxW)
     expect(result!.height).toBeLessThanOrEqual(maxH)
+  })
+})
+
+describe('graphMinimapNodeColor', () => {
+  it('répliques neutres, tests en orange, fins en gris étiquette — jamais le bleu d’accent', () => {
+    expect(graphMinimapNodeColor('dialogueNode')).toBe(redesignText.secondary)
+    expect(graphMinimapNodeColor('testNode')).toBe(theme.state.pending.border)
+    expect(graphMinimapNodeColor('endNode')).toBe(redesignText.label)
+    expect(graphMinimapNodeColor(undefined)).toBe(redesignText.secondary)
+    for (const type of ['dialogueNode', 'testNode', 'endNode', undefined]) {
+      expect(graphMinimapNodeColor(type)).not.toBe(redesignAccent.base)
+    }
   })
 })

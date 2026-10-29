@@ -18,6 +18,25 @@ def test_resolve_historical_alias_plus_nom() -> None:
     assert resolver.resolve_character("Seigneuresse Uresaïr") == "Uresaïr"
 
 
+def test_resolve_historical_nom_comma_alias() -> None:
+    """Akthar-Neth Amatru, l'Exégète → Akthar-Neth Amatru."""
+    gdd_data = GDDData(
+        characters=[
+            {
+                "Nom": "Akthar-Neth Amatru",
+                "values": {"Alias": "l\u2019Exégète, Grand-Père"},
+            }
+        ]
+    )
+    resolver = GddNameResolver(gdd_data)
+
+    assert resolver.resolve_character("Akthar-Neth Amatru, l'Exégète") == "Akthar-Neth Amatru"
+    assert (
+        resolver.resolve_character("Akthar-Neth Amatru, l\u2019Exégète")
+        == "Akthar-Neth Amatru"
+    )
+
+
 def test_fuzzy_resolves_typo() -> None:
     """Typo légère sur le nom canonique."""
     gdd_data = GDDData(characters=[{"Nom": "Uresaïr"}])

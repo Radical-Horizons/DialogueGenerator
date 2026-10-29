@@ -8,7 +8,7 @@ import { useGraphStore } from '../../../store/graphStore'
 import { useGraphViewStore } from '../../../store/graphViewStore'
 import { PromptViewerModal } from '../PromptViewerModal'
 import { TEST_NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
-import { TEST_RESULT_EDGE_CONFIG } from '../../../utils/graphEdgeBuilders'
+import { EDGE_NEUTRAL_COLOR, TEST_RESULT_EDGE_CONFIG } from '../../../utils/graphEdgeBuilders'
 import { reconstructNodePromptFromGraph } from '../../../utils/graphPromptPreview'
 import type { NodePromptResponse } from '../../../types/graph'
 import {
@@ -16,6 +16,15 @@ import {
   getValidationHighlightKind,
   GRAPH_TOPOLOGY_WARNING_STYLES,
 } from '../../../utils/graphStructuralValidation'
+import {
+  redesignAccent,
+  redesignFont,
+  redesignHairline,
+  redesignNodeBorder,
+  redesignRadius,
+  redesignSurface,
+  redesignText,
+} from '../../../theme/redesignTokens'
 
 interface ValidationError {
   type: string
@@ -91,7 +100,8 @@ export const TestNode = memo(function TestNode({
   const topologyKind = getGraphTopologyWarningKind(warnings.map((w) => w.type))
   const topologyStyle = topologyKind ? GRAPH_TOPOLOGY_WARNING_STYLES[topologyKind] : null
 
-  let borderColor = selected ? '#27AE60' : '#F5A623'
+  // Écran 2e : carte neutre, en-tête mono — la sélection passe à l'accent.
+  let borderColor: string = selected ? redesignAccent.base : redesignNodeBorder.default
   if (validationHighlightKind === 'structural') {
     borderColor = theme.state.error.border
   } else if (validationHighlightKind === 'content') {
@@ -106,19 +116,9 @@ export const TestNode = memo(function TestNode({
 
   const backgroundColor = isHighlighted
     ? theme.state.selected.background
-    : validationHighlightKind === 'structural'
-      ? theme.state.error.background
-      : validationHighlightKind === 'content'
-        ? theme.state.warning.background
-        : validationHighlightKind === 'lore'
-          ? theme.state.lore.background
-          : hasErrors
-            ? theme.state.error.background
-            : hasWarnings && topologyStyle && !validationHighlightKind
-              ? topologyStyle.background
-              : hasWarnings
-                ? theme.state.warning.background
-                : '#16a085'
+    : hasWarnings && topologyStyle && !validationHighlightKind
+      ? topologyStyle.background
+      : redesignSurface.node
 
   const openAndLoadPromptModal = useCallback(() => {
     setShowPromptModal(true)
@@ -150,23 +150,19 @@ export const TestNode = memo(function TestNode({
       title={TEST_NODE_DRAG_TOOLTIP}
       style={{
         width: 200,
-        height: 44, // Hauteur réduite mais suffisante pour les cercles complets
-        border: `2px solid ${borderColor}`,
-        borderRadius: 8,
+        border: `1px solid ${borderColor}`,
+        borderRadius: redesignRadius.node,
         backgroundColor,
         boxShadow: selected
-          ? '0 4px 12px rgba(0, 0, 0, 0.3)'
+          ? `0 0 0 3px ${redesignAccent.ring}`
           : isHighlighted
           ? '0 0 0 3px rgba(116, 192, 252, 0.5)'
-          : '0 2px 6px rgba(0, 0, 0, 0.2)',
+          : 'none',
         overflow: 'visible',
         position: 'relative',
         transition: 'all 0.2s ease',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '8px 4px', // Padding adapté à la hauteur réduite
       }}
     >
       {/* Badge d'erreur */}
@@ -194,23 +190,7 @@ export const TestNode = memo(function TestNode({
             zIndex: 10,
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
           }}
-          title={errors.map((e, idx) => {
-            const icon =
-              e.type === 'orphan_node'
-                ? '🔗'
-                : e.type === 'broken_reference'
-                  ? '🔴'
-                  : e.type === 'empty_node' || e.type === 'missing_dialogue_text'
-                    ? '⚪'
-                    : e.type === 'missing_display_name'
-                      ? '📝'
-                      : e.type === 'missing_stable_id'
-                        ? '🆔'
-                        : e.type === 'missing_test'
-                          ? '❓'
-                          : '⚠️'
-            return `${icon} ${e.message}${idx < errors.length - 1 ? '\n' : ''}`
-          }).join('')}
+          title={errors.map((e) => e.message).join('\n')}
         >
           {errors.length}
         </div>
@@ -236,10 +216,7 @@ export const TestNode = memo(function TestNode({
             zIndex: 10,
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
           }}
-          title={warnings.map((w, idx) => {
-            const icon = w.type === 'unreachable_node' ? '📍' : w.type === 'cycle_detected' ? '🔄' : '⚠️'
-            return `${icon} ${w.message}${idx < warnings.length - 1 ? '\n' : ''}`
-          }).join('')}
+          title={warnings.map((w) => w.message).join('\n')}
         >
           {warnings.length}
         </div>
@@ -250,7 +227,7 @@ export const TestNode = memo(function TestNode({
         type="target"
         position={Position.Top}
         style={{
-          background: data.incomingEdgeColor ?? '#4A90E2',
+          background: data.incomingEdgeColor ?? EDGE_NEUTRAL_COLOR,
           width: 12,
           height: 12,
           border: '2px solid white',
@@ -258,30 +235,70 @@ export const TestNode = memo(function TestNode({
         }}
       />
       
-      {/* Test formaté (ex: "Architecture (DD8)") - centré dans la barre */}
+      {/* En-tête mono maquette 2e : `TEST — COMPÉTENCE (DDx)`. */}
       <div
         style={{
-          fontFamily: 'system-ui, -apple-system, sans-serif',
-          fontSize: '0.8rem',
-          color: theme.text.primary,
-          fontWeight: '600',
-          textAlign: 'center',
-          padding: '0 8px',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          maxWidth: '100%',
-          flex: 1,
+          padding: '7px 11px',
+          backgroundColor: redesignSurface.nodeHeader,
+          borderBottom: `1px solid ${redesignHairline.standard}`,
+          borderTopLeftRadius: redesignRadius.node - 1,
+          borderTopRightRadius: redesignRadius.node - 1,
+        }}
+      >
+        <span
+          style={{
+            fontFamily: redesignFont.mono,
+            fontSize: '9.5px',
+            letterSpacing: '0.09em',
+            textTransform: 'uppercase',
+            color: redesignText.secondary,
+            display: 'block',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+          title={test}
+        >
+          TEST — {formattedTest}
+        </span>
+      </div>
+
+      {/* Issues du test, mono colorées, alignées sur les 4 handles. */}
+      <div
+        style={{
+          padding: '8px 6px 14px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          marginTop: -15, // Remonte le texte
         }}
-        title={test} // Tooltip avec le format original
       >
-        {formattedTest}
+        {TEST_RESULT_EDGE_CONFIG.map((cfg) => (
+          <span
+            key={cfg.handleId}
+            title={cfg.label}
+            style={{
+              flex: 1,
+              textAlign: 'center',
+              fontFamily: redesignFont.mono,
+              fontSize: '8.5px',
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              color: cfg.color,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {cfg.handleId === 'critical-failure'
+              ? 'É. CRIT'
+              : cfg.handleId === 'failure'
+                ? 'ÉCHEC'
+                : cfg.handleId === 'success'
+                  ? 'RÉUSSITE'
+                  : 'R. CRIT'}
+          </span>
+        ))}
       </div>
-      
+
       {/* Output Handles (bas) - 4 handles répartis équitablement avec couleurs vives */}
       <Handle
         type="source"

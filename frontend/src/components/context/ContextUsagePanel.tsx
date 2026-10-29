@@ -233,7 +233,7 @@ export function ContextUsagePanel() {
                         marginLeft: '0.35rem',
                         color:
                           sec.status === 'reflected'
-                            ? theme.state.success?.color ?? '#2e7d32'
+                            ? theme.state.success.color
                             : theme.text.secondary,
                       }}
                     >

@@ -19,12 +19,14 @@ export interface BatchExportToolbarProps {
   batchOptions: BatchExportOptions
   onToggleSelectAll: () => void
   onStartExport: () => void
+  onStartValidate?: () => void
   onStartPreview?: () => void
   onCancelExport: () => void
   onToggleOptions: () => void
   onOptionsChange: (options: BatchExportOptions) => void
   /** Masque les contrôles (menu Actions toolbar) ; conserve options + progression. */
   controlsHidden?: boolean
+  isBatchValidating?: boolean
 }
 
 export function BatchExportToolbar({
@@ -36,13 +38,16 @@ export function BatchExportToolbar({
   batchOptions,
   onToggleSelectAll,
   onStartExport,
+  onStartValidate,
   onStartPreview,
   onCancelExport,
   onToggleOptions,
   onOptionsChange,
   controlsHidden = false,
+  isBatchValidating = false,
 }: BatchExportToolbarProps) {
   const allSelected = filteredCount > 0 && checkedCount === filteredCount
+  const busy = isBatchExporting || isBatchValidating
 
   if (controlsHidden && !showOptionsPanel && !(isBatchExporting && batchProgress)) {
     return null
@@ -81,7 +86,7 @@ export function BatchExportToolbar({
             data-testid="batch-select-all"
             checked={allSelected}
             onChange={onToggleSelectAll}
-            disabled={isBatchExporting || filteredCount === 0}
+            disabled={busy || filteredCount === 0}
           />
           Tout sélectionner
         </label>
@@ -89,17 +94,28 @@ export function BatchExportToolbar({
           type="button"
           data-testid="batch-export-start"
           onClick={onStartExport}
-          disabled={isBatchExporting || checkedCount === 0}
+          disabled={busy || checkedCount === 0}
           style={toolbarButtonStyle}
         >
           Exporter batch
         </button>
+        {onStartValidate && (
+          <button
+            type="button"
+            data-testid="batch-validate-start"
+            onClick={onStartValidate}
+            disabled={busy || checkedCount === 0}
+            style={toolbarButtonStyle}
+          >
+            Valider en batch
+          </button>
+        )}
         {onStartPreview && (
           <button
             type="button"
             data-testid="batch-preview-export"
             onClick={onStartPreview}
-            disabled={isBatchExporting || checkedCount === 0}
+            disabled={busy || checkedCount === 0}
             style={toolbarButtonStyle}
           >
             Prévisualiser export batch

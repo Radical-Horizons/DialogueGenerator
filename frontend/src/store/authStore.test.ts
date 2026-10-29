@@ -48,6 +48,7 @@ describe('authStore guest-first', () => {
     mockedAuth.loginAsGuest.mockResolvedValue({
       access_token: 'guest-token',
       token_type: 'bearer',
+      expires_in: 900,
     })
     mockedAuth.refreshToken.mockRejectedValue({ response: { status: 401 } })
     mockedAuth.getCurrentUser.mockResolvedValue(guestUser)
@@ -115,6 +116,7 @@ describe('authStore guest-first', () => {
     mockedAuth.loginAsGuest.mockResolvedValueOnce({
       access_token: 'guest-token',
       token_type: 'bearer',
+      expires_in: 900,
     })
     await useAuthStore.getState().initialize()
 

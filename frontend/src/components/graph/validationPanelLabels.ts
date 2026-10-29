@@ -1,25 +1,10 @@
 import type { ValidationErrorDetail } from '../../types/graph'
 
-/** Libellés et icônes par type d'erreur (FR36 structure + FR37 complétude + FR46 simulation). */
-export const ICON_FOR_TYPE: Record<string, string> = {
-  orphan_node: '🔗',
-  broken_reference: '🔴',
-  empty_node: '⚪',
-  missing_display_name: '📝',
-  missing_stable_id: '🆔',
-  missing_dialogue_text: '💬',
-  missing_test: '❓',
-  unreachable_node: '📍',
-  cycle_detected: '🔄',
-  lore_contradiction_explicit: '📜',
-  lore_contradiction_potential: '📋',
-  lore_potential_ambiguity: '❓',
-  dead_end_node: '🚫',
-  cul_de_sac_node: '⚠️',
-  dialogue_flag_undeclared: '🏁',
-  dialogue_flag_unused: '📎',
-}
-
+/**
+ * Libellés par type d'erreur (FR36 structure + FR37 complétude + FR46 simulation).
+ * Pas d'icône par type : le libellé dit déjà ce qui ne va pas, la gravité passe par le
+ * point d'état (`ValidationSeverityDot`).
+ */
 export const LABEL_FOR_TYPE: Record<string, string> = {
   orphan_node: 'Nœuds orphelins (sans connexion entrante)',
   broken_reference: 'Références cassées',
@@ -45,10 +30,6 @@ export function isDocumentIdRepairable(err: ValidationErrorDetail): boolean {
     Boolean(err.node_id) &&
     (err.message.includes('data.id') || err.message.includes('identifiant document'))
   )
-}
-
-export function getIconForType(type: string): string {
-  return ICON_FOR_TYPE[type] ?? '⚠️'
 }
 
 export function getLabelForType(type: string): string {

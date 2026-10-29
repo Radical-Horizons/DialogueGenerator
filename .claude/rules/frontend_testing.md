@@ -1,19 +1,29 @@
 ---
 description: Tests Frontend — Vitest, React Testing Library, Playwright, workflow de test automatique, tout bug ou problème lié à l'interface, aux boutons, aux écrans, aux formulaires, etc.
-alwaysApply: false
+paths:
+  - "frontend/**/*.test.{ts,tsx}"
+  - "frontend/src/test/**"
+  - "e2e/**/*.ts"
+  - "playwright.config.ts"
+  - "frontend/vitest.config.ts"
 ---
 - Tu es autonome pour les tests frontend via l'outil browser. Tu peux te connecter avec le login admin et le mot de passe admin123.
 - **Tests unitaires**: Vitest + React Testing Library dans `frontend/src/test/` et `frontend/src/**/*.test.ts`. Tests rapides, isolation complète, mocks pour API. Tests de parsing dans `frontend/src/hooks/usePromptPreview.test.ts`.
 - **`npm test` dans `frontend/`** = **`vitest run` rapide** (exclut 3 fichiers d’intégration lourds ; liste dans `frontend/vitest.config.ts`). **`npm run test:full`** = suite complète (comme la CI). Le watch = **`npm run test:watch`** (ne se termine pas).
 - **Exécution depuis un agent Cursor** : grille T0–T3 → **`.claude/commands/test-tiers.md`** ; politique Vitest (filtres, interdits, PowerShell) → **`.claude/rules/workflow.md`**. Ici : patterns de tests, pas la procédure d’orchestration.
 - **Tests E2E**: Playwright dans `e2e/`. Tests critiques (auth, navigation, génération), nécessite serveurs lancés. L'environnement E2E est complet (clé API, budget, GDD, etc.) ; tous les tests E2E sont censés passer. Pour l'éditeur de graphe : scoper la liste dans le contexte actif : `page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')` quand le test travaille sur l'onglet Éditeur de Graphe. Specs avec LLM : voir `docs/troubleshooting/e2e-llm.md` pour preflight et dépannage. Post-mortem : `docs/troubleshooting/post-mortem-e2e-llm.md`.
+- **E2E graphe — navigation et comptage** : la section Graphe s'ouvre par `header-section-graph` (helper `openGraphSection` / `openDashboardGraphTabAndSelectDocument` dans `e2e/helpers.ts`) ; les libellés « Génération de Dialogues » / « Éditeur de Graphe » / « Édition de nœud » n'existent plus. App prête = `openApp` ; un nœud sélectionné s'ouvre en **lecture** dans l'inspecteur, `openNodeEditor` clique « éditer » pour monter `NodeEditorPanel`. `.react-flow__node` ne compte que les nœuds **rendus** (`onlyRenderVisibleElements`) : après un `focusNode`, la vue zoome sur un nœud et les autres sortent du DOM. Pour un total, lire `window.__graphViewStoreE2E.getState().reactFlowInstance.getNodes()` (cf. `graph-node-accept-reject.spec.ts`), ou le document persisté via l'API.
+- **E2E en local : jamais contre `npm run dev`.** `reuseExistingServer` réutilise tout serveur déjà sur :4243/:3000 ; celui de `npm run dev` a l'auth active, donc chaque seed `request.put/post` sans Bearer prend un **401 « Token manquant »** — symptôme trompeur, vécu en septembre 2026 (deux agents bloqués dessus). Arrêter le dev server (`npm run dev:stop`) et laisser Playwright démarrer les siens (`DISABLE_AUTH=true`, voir `webServer`). Pour enchaîner plusieurs lots sans redémarrer l'API à chaque fichier, lancer une fois un serveur avec **exactement** les variables de `webServer`.
+- **Fixtures e2e : ids valides au schéma Unity** (`START`, `END`, `node-…`). Le seed (`PUT`, mode draft) accepte `n-cf`, mais l'autosave valide en mode `export` : il échoue, et l'app **auto-sélectionne le premier nœud en erreur** — l'inspecteur change de nœud sous le test, qui échoue loin de la cause.
+- **Budget e2e = budget réel du poste.** `data/cost_budgets.json` (ignoré par git) est celui du compte `admin` local : toute spec qui modifie le quota le restaure à sa valeur **exacte** d'avant, dans un `finally` (cf. `cost-governance.spec.ts`). Un quota laissé à 0,001 $ bloque toute génération suivante.
 - **Formulaires (react-hook-form) + Playwright** : `page.fill()` met à jour le DOM mais RHF peut ne pas mettre à jour son store interne (il écoute le `change` natif). Pour vérifier la persistance après save : soit blur explicite (Tab ou clic canvas) avant de déclencher la sauvegarde, soit asserter via API (GET du fichier sauvegardé) plutôt que via reload de la page.
 - **Seed E2E (PUT document)** : en cas de 409 (optimistic locking), réessayer le PUT avec la `revision` renvoyée dans le corps de la réponse jusqu'à succès. Convention utilisée dans `e2e/documents-layout-adr008.spec.ts`.
 - **Vérifications automatiques après modification frontend**:
-  1. Build check : `cd frontend && npm run build` (détecte erreurs TypeScript)
+  1. Typecheck : `cd frontend && npm run typecheck` (`tsc --noEmit`, fichiers de test inclus) — **le seul** contrôle de types du dépôt. ⚠️ `npm run build` = `vite build` : esbuild transpile sans vérifier les types, il ne détecte **aucune** erreur TS ; Vitest non plus. C'est ainsi que 119 erreurs se sont accumulées avant l'ajout du job CI.
   2. Lint check : `cd frontend && npm run lint` (détecte erreurs de code)
-  3. Tests unitaires : commandes et contraintes agent → **`workflow.md`**. En local humain : `cd frontend && npm test` ou rapports JSON selon scripts du `package.json`.
-  4. Tests E2E : `npm run test:e2e` (si serveurs lancés, tests critiques)
+  3. Build check : `cd frontend && npm run build` (bundling, assets, PWA — **pas** les types)
+  4. Tests unitaires : commandes et contraintes agent → **`workflow.md`**. En local humain : `cd frontend && npm test` ou rapports JSON selon scripts du `package.json`.
+  5. Tests E2E : `npm run test:e2e` (si serveurs lancés, tests critiques)
 - **Script automatisé**: `.\scripts\test-frontend.ps1` (build + lint + tests unitaires), `.\scripts\test-frontend.ps1 -E2E` (inclut E2E).
 - **MCP Browser** (si disponible): Pour inspection visuelle, vérifier console logs, network requests, après avoir lancé `npm run dev`.
 - **Quand tester**:
@@ -78,12 +88,12 @@ const fn = useCallback(() => {
 `useNarrowInlineSize` mesure un nœud via `ResizeObserver` + `readLayoutWidthPx` (parent walker `style.width`). En jsdom :
 
 1. **`offsetWidth` / `clientWidth` valent souvent 0** — le hook retombe sur `style.width` en px (ou % remontée aux parents).
-2. **Depuis Story 17.8** : la ref exposée est une **callback ref** — le `ResizeObserver` se rattache dès que le nœud existe, y compris après un **montage tardif** (onglet, drawer). Le bug « `isNarrow` figé à `false` » (ref `null` au 1er `useEffect`) est corrigé ; cf. `frontend/src/hooks/useNarrowInlineSize.test.tsx`.
+2. **Le `ResizeObserver` vit dans un effet**, pas dans la callback ref (refonte UI 2026). La callback ref ne fait que poser le nœud en state ; c'est un `useLayoutEffect` qui branche l'observateur. Sous `React.StrictMode`, un RO créé dans la callback ref serait déconnecté par le cleanup du démontage simulé et **jamais recréé** — les callback refs ne sont pas ré-invoquées — laissant le hook aveugle après le premier paint. Le montage tardif (onglet, drawer) reste couvert. Cf. `frontend/src/hooks/useNarrowInlineSize.test.tsx` et `.claude/rules/ui_redesign_2026.md`.
 3. **`waitFor` long** : si un test attend encore un élément narrow sans que le nœud mesuré ne soit jamais monté ou sans largeur explicite en `style`, vérifier le wiring du test avant de suspecter le hook.
 
 **Patterns de test** :
 
-- **Vrai hook + wrapper dimensionné** : utile pour intégration (ex. `Dashboard.combobox-17_7.test.tsx` — conteneur `width: 480` / `1440` après clic sur l’onglet, le workspace se monte et la callback ref mesure).
+- **Vrai hook + wrapper dimensionné** : utile pour intégration (ex. `Dashboard.combobox-17_7.test.tsx` — conteneur `width: 480` / `1440` après clic sur l’onglet, le workspace se monte et l’effet mesure).
 - **Mock du hook** : reste valide pour **accélérer** les suites lourdes ou isoler un composant qui n’a pas besoin de la chaîne Dashboard complète ; utiliser `vi.mock('../../hooks/useNarrowInlineSize', …)` avec des seuils cohérents (`PANEL_COMFORT_MIN_WIDTH_PX`, etc.).
 - **Provider** : `<DialogueEditionNarrowProvider value={true}>` dans `UnityDialogueEditor.narrow.test.tsx` quand le composant sous test consomme déjà ce contexte.
 

@@ -7,7 +7,7 @@ import * as flagsAPI from '../../../api/flags'
 import * as contextAPI from '../../../api/context'
 import { theme } from '../../../theme'
 import type { DialogueNodeData } from '../../../schemas/nodeEditorSchema'
-import type { ConditionAtom } from '../../../types/visibilityConditions'
+import type { ConditionAtomForm } from '../../../schemas/visibilityConditionsSchema'
 import type { FlagDefinition } from '../../../types/flags'
 import type { CommunityResponse } from '../../../types/api'
 import {
@@ -25,7 +25,7 @@ export interface ConditionEditorProps {
   choiceIndex?: number
 }
 
-function defaultAtom(kind: ConditionAtom['kind']): ConditionAtom {
+function defaultAtom(kind: ConditionAtomForm['kind']): ConditionAtomForm {
   switch (kind) {
     case 'flag_bool':
       return { kind: 'flag_bool', flagId: '', equals: true }
@@ -131,7 +131,7 @@ export const ConditionEditor = memo(function ConditionEditor({
   const flagIdsUsed = useMemo(() => {
     const ids = new Set<string>()
     const items = watchBlock?.items || []
-    for (const it of items as ConditionAtom[]) {
+    for (const it of items as ConditionAtomForm[]) {
       if (!it) continue
       if ('flagId' in it && it.flagId) ids.add(it.flagId)
     }
@@ -141,7 +141,7 @@ export const ConditionEditor = memo(function ConditionEditor({
   const reputationKeys = useMemo(() => {
     const keys: { axisId: string; factionId: string }[] = []
     const items = watchBlock?.items || []
-    for (const it of items as ConditionAtom[]) {
+    for (const it of items as ConditionAtomForm[]) {
       if (it?.kind === 'reputation') {
         keys.push({ axisId: it.axisId, factionId: it.factionId })
       }
@@ -372,7 +372,9 @@ const ConditionRow = memo(function ConditionRow({
 }) {
   const { watch, setValue } = useFormContext<DialogueNodeData>()
   const base = `${fieldName}.${index}` as const
-  const atom = watch(base as never) as ConditionAtom | undefined
+  // Chemin construit dynamiquement : rattaché au chemin typé équivalent,
+  // même convention que le `useFieldArray` plus haut.
+  const atom = watch(base as 'visibilityConditions.items.0') as ConditionAtomForm | undefined
   const kind = atom?.kind ?? 'flag_bool'
 
   return (
@@ -390,7 +392,7 @@ const ConditionRow = memo(function ConditionRow({
           aria-label={`Type condition ${index + 1}`}
           value={kind}
           onChange={(e) => {
-            const k = e.target.value as ConditionAtom['kind']
+            const k = e.target.value as ConditionAtomForm['kind']
             setValue(base as never, defaultAtom(k) as never)
           }}
           style={{ fontSize: '0.75rem', padding: '0.2rem', flex: '0 0 auto' }}

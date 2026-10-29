@@ -2,7 +2,11 @@
  * E2E : dialogue minimal avec branche (choix) + export Unity JSON.
  *
  * Valide le flux Dashboard → Éditeur de graphe → Actions → Export Unity
- * (validate-schema bloquant puis save-and-write serveur — Story 5.1).
+ * (validate-schema bloquant puis écriture serveur — Story 5.1).
+ *
+ * Le document existe déjà sur disque : l'écriture passe par PUT /documents/{id}
+ * avec sa révision. `save-and-write` ne crée que des documents neufs et répond
+ * 409 `canonical_revision_required` sur un fichier existant (ADR-008).
  */
 import { test, expect, type Page } from '@playwright/test'
 import { uniqueE2EDocumentId, seedDocumentWithRetry, openDashboardGraphTabAndSelectDocument } from './helpers'
@@ -96,10 +100,15 @@ test.describe('Graph — petit dialogue + export Unity', () => {
       (r) => r.url().includes('/validate-schema') && r.request().method() === 'POST',
       { timeout: E2E_MS.graphField }
     )
+    const documentPath = `/api/v1/documents/${encodeURIComponent(fixtureId)}`
     const writePromise = page.waitForResponse(
-      (r) => r.url().includes('/save-and-write') && r.request().method() === 'POST',
+      (r) => new URL(r.url()).pathname === documentPath && r.request().method() === 'PUT',
       { timeout: E2E_MS.graphField }
     )
+    const legacyWrites: string[] = []
+    page.on('request', (r) => {
+      if (r.url().includes('/save-and-write')) legacyWrites.push(r.url())
+    })
 
     await page.getByTestId('btn-export-unity').click()
 
@@ -110,19 +119,19 @@ test.describe('Graph — petit dialogue + export Unity', () => {
 
     const writeResponse = await writePromise
     expect(writeResponse.ok()).toBe(true)
-    const body = (await writeResponse.json()) as {
-      success: boolean
-      filename: string
-      json_content: string
-    }
-    expect(body.success).toBe(true)
-    expect(body.filename).toMatch(/\.json$/i)
+    const { revision } = (await writeResponse.json()) as { revision: number }
+    expect(revision).toBeGreaterThan(1)
 
     await expect(page.getByText(/Dialogue exporté/i)).toBeVisible({ timeout: E2E_MS.ui })
+    expect(legacyWrites).toEqual([])
 
-    const parsed = JSON.parse(body.json_content) as { schemaVersion?: string; nodes?: unknown[] }
-    expect(parsed.schemaVersion).toBe('1.1.0')
-    expect(Array.isArray(parsed.nodes)).toBe(true)
-    expect(parsed.nodes!.length).toBeGreaterThanOrEqual(2)
+    const persisted = await request.get(`${API_BASE}${documentPath}`)
+    expect(persisted.ok()).toBe(true)
+    const { document } = (await persisted.json()) as {
+      document: { schemaVersion?: string; nodes?: unknown[] }
+    }
+    expect(document.schemaVersion).toBe('1.1.0')
+    expect(Array.isArray(document.nodes)).toBe(true)
+    expect(document.nodes!.length).toBeGreaterThanOrEqual(2)
   })
 })

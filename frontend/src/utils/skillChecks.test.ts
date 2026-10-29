@@ -38,6 +38,9 @@ describe('skillChecks', () => {
       { attributes: { sociabilite: 0 }, skills: { tromperie: 1 } },
     )
 
+    // Le choix porte un skillCheck : la preview ne peut pas être null ici.
+    if (!preview) throw new Error('preview attendue pour un choix avec skillCheck')
+
     expect(preview.visible).toBe(true)
     expect(preview.issue).toBe('échec_critique')
     expect(preview.targetNode).toBe('CRIT_FAILURE')

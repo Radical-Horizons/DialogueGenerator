@@ -10,9 +10,11 @@ import { unityDialogueEditorChrome } from '../../theme/responsiveChrome'
 import { UnityDialogueEditor } from '../generation/UnityDialogueEditor'
 import { useDialogueEditionNarrow } from './DialogueEditionNarrowContext'
 import { DialoguePermissionsPanel } from './DialoguePermissionsPanel'
+import { DialogueMetadataPanel } from './DialogueMetadataPanel'
 import { DialogueSharingModal } from './DialogueSharingModal'
 import { useAuthStore } from '../../store/authStore'
 import { formatDialogueTitle } from '../../utils/formatDialogueTitle'
+import { consumePendingValidationFocus } from '../../utils/pendingValidationFocus'
 
 interface UnityDialogueDetailsProps {
   filename: string
@@ -48,13 +50,16 @@ export function UnityDialogueDetails({
   const [canDelete, setCanDelete] = useState(false)
   const [isOwner, setIsOwner] = useState(false)
   const [permissionsPanelOpen, setPermissionsPanelOpen] = useState(false)
+  const [metadataPanelOpen, setMetadataPanelOpen] = useState(false)
   const [shareModalOpen, setShareModalOpen] = useState(false)
+  const [focusNodeId, setFocusNodeId] = useState<string | undefined>()
   const canManageShares = isOwner || userRole === 'admin'
   const canViewPermissions = Boolean(authUser && userRole !== 'guest')
 
   const loadDialogue = useCallback(async (propagateError = false) => {
     setIsLoading(true)
     setError(null)
+    setFocusNodeId(undefined)
     try {
       const documentId = filename.replace(/\.json$/i, '')
       const response = await documentsAPI.getDocument(documentId)
@@ -72,6 +77,8 @@ export function UnityDialogueDetails({
           ? response.document.title
           : formatDialogueTitle(filename)
       )
+      // Story 8.8 : consommer le focus différé après load (parcours bibliothèque).
+      setFocusNodeId(consumePendingValidationFocus())
     } catch (err) {
       setError(getErrorMessage(err))
       if (propagateError) {
@@ -171,6 +178,11 @@ export function UnityDialogueDetails({
         open={permissionsPanelOpen}
         onClose={() => setPermissionsPanelOpen(false)}
       />
+      <DialogueMetadataPanel
+        documentId={filename.replace(/\.json$/i, '')}
+        open={metadataPanelOpen}
+        onClose={() => setMetadataPanelOpen(false)}
+      />
       <UnityDialogueEditor
         json_content={jsonContent}
         title={title}
@@ -182,8 +194,36 @@ export function UnityDialogueDetails({
         onSave={handleSave}
         onCancel={onClose}
         headerSelector={headerSelector}
+        focusNodeId={focusNodeId}
         extraActions={
           <>
+            <div style={{ width: isNarrow ? '100%' : undefined }}>
+              <button
+                type="button"
+                data-testid="dialogue-metadata-open"
+                onClick={() => setMetadataPanelOpen(true)}
+                style={{
+                  padding: tb.toolbarButtonPadding,
+                  minHeight: `${tb.toolbarButtonMinHeightPx}px`,
+                  border: `1px solid ${theme.button.secondary.border}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme.button.secondary.background,
+                  color: theme.button.secondary.color,
+                  cursor: 'pointer',
+                  fontSize: `${tb.toolbarButtonFontRem}rem`,
+                  fontWeight: tb.toolbarButtonFontWeight,
+                  lineHeight: 1.25,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxSizing: 'border-box',
+                  width: isNarrow ? '100%' : undefined,
+                  minWidth: isNarrow ? 0 : undefined,
+                }}
+              >
+                Métadonnées dialogue
+              </button>
+            </div>
             {canViewPermissions && (
               <div style={{ width: isNarrow ? '100%' : undefined }}>
                 <button
@@ -193,7 +233,7 @@ export function UnityDialogueDetails({
                   style={{
                     padding: tb.toolbarButtonPadding,
                     minHeight: `${tb.toolbarButtonMinHeightPx}px`,
-                    border: `1px solid ${theme.border.primary}`,
+                    border: `1px solid ${theme.button.secondary.border}`,
                     borderRadius: '6px',
                     backgroundColor: theme.button.secondary.background,
                     color: theme.button.secondary.color,
@@ -222,7 +262,7 @@ export function UnityDialogueDetails({
                   style={{
                     padding: tb.toolbarButtonPadding,
                     minHeight: `${tb.toolbarButtonMinHeightPx}px`,
-                    border: `1px solid ${theme.border.primary}`,
+                    border: `1px solid ${theme.button.secondary.border}`,
                     borderRadius: '6px',
                     backgroundColor: theme.button.secondary.background,
                     color: theme.button.secondary.color,
@@ -249,10 +289,10 @@ export function UnityDialogueDetails({
                   style={{
                     padding: tb.toolbarButtonPadding,
                     minHeight: `${tb.toolbarButtonMinHeightPx}px`,
-                    border: `1px solid ${theme.border.primary}`,
+                    border: `1px solid ${theme.button.secondary.border}`,
                     borderRadius: '6px',
-                    backgroundColor: theme.button.primary.background,
-                    color: theme.button.primary.color,
+                    backgroundColor: theme.button.secondary.background,
+                    color: theme.button.secondary.color,
                     cursor: 'pointer',
                     fontSize: `${tb.toolbarButtonFontRem}rem`,
                     fontWeight: tb.toolbarButtonFontWeight,
@@ -277,10 +317,11 @@ export function UnityDialogueDetails({
                 style={{
                   padding: tb.toolbarButtonPadding,
                   minHeight: `${tb.toolbarButtonMinHeightPx}px`,
-                  border: `1px solid ${theme.border.primary}`,
+                  // Destructif mais pas primaire : contour et texte d'erreur, pas de fond plein.
+                  border: `1px solid ${theme.state.error.border}`,
                   borderRadius: '6px',
-                  backgroundColor: '#dc3545',
-                  color: '#ffffff',
+                  backgroundColor: 'transparent',
+                  color: theme.state.error.color,
                   cursor: isDeleting ? 'not-allowed' : 'pointer',
                   opacity: isDeleting ? 0.6 : 1,
                   fontSize: `${tb.toolbarButtonFontRem}rem`,

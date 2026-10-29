@@ -161,6 +161,23 @@ Contient les instructions spécifiques de la scène. **Priorité haute**.
 </scene_instructions>
 ```
 
+#### Résolution dramatis (PJ / PNJ / lieu)
+
+Avant injection dans `<scene_instructions>`, le pipeline de génération Unity résout les rôles narratifs et enrichit le contexte GDD :
+
+| Concept | Rôle |
+|---------|------|
+| `scene_type` | Identifiant template (`first_meeting`, `conversation`, …) → fichier `config/scene_instructions/*.txt` via `load_scene_instructions_text()` |
+| `SceneDramatis` | PJ jouable (`player_character_id`) + PNJ speaker (`npc_speaker_id`) |
+| `resolve_scene_dramatis()` | Canonise les noms GDD (accents), valide PJ/PNJ (l'Éthérée interdite comme speaker) |
+| `enrich_context_selections_for_scene()` | Infère le lieu parent depuis sous-lieu + fiche PNJ ; réordonne `characters_full` (speaker en tête) |
+
+**Première rencontre (`scene_type == "first_meeting"`)** : les instructions template sont enrichies avec la section `rencontre_initiale` de la fiche PNJ (`augment_first_meeting_instructions`).
+
+**Code :** `services/scene_dramatis.py`, `services/scene_instruction_loader.py`, orchestration dans `services/unity_dialogue_orchestrator.py`.
+
+**Tests :** `tests/services/test_scene_dramatis.py`, `tests/services/test_scene_dramatis_canonical.py`.
+
 ## Attributs XML
 
 Les attributs sont utilisés de manière minimale, uniquement quand ils changent vraiment le sens :

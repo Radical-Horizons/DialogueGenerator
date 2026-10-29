@@ -27,6 +27,9 @@ vi.mock('../theme', () => ({
         background: '#007bff',
         color: '#fff',
       },
+      default: {
+        border: '#2e2e36',
+      },
     },
     state: {
       primary: '#007bff',
@@ -174,7 +177,7 @@ describe('PresetValidationModal', () => {
       expect(screen.getByText(/location 'escelion' is obsolete/i)).toBeInTheDocument();
     });
 
-    it('should show warning icon for invalid preset', () => {
+    it('should show warning status tag (no emoji) for invalid preset', () => {
       const validationResult: PresetValidationResult = {
         valid: false,
         warnings: ['Some warning'],
@@ -190,7 +193,8 @@ describe('PresetValidationModal', () => {
         />
       );
 
-      expect(screen.getByText('⚠️')).toBeInTheDocument();
+      expect(screen.getByText('Avertissement')).toBeInTheDocument();
+      expect(screen.queryByText('⚠️')).not.toBeInTheDocument();
     });
 
     it('should show "Charger quand même" button for invalid preset', () => {
@@ -324,6 +328,31 @@ describe('PresetValidationModal', () => {
       );
 
       expect(screen.getByText(/3 référence\(s\) obsolète\(s\)/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('Template label', () => {
+    it('affiche le libellé template quand entityLabel=template', () => {
+      const validationResult: PresetValidationResult = {
+        valid: false,
+        warnings: ['Personnage inconnu'],
+        obsoleteRefs: ['char-ghost'],
+      };
+
+      render(
+        <PresetValidationModal
+          isOpen={true}
+          validationResult={validationResult}
+          onClose={mockOnClose}
+          onConfirm={mockOnConfirm}
+          entityLabel="template"
+        />
+      );
+
+      expect(screen.getByTestId('preset-validation-modal')).toBeInTheDocument();
+      expect(screen.getByText(/validation du template/i)).toBeInTheDocument();
+      expect(screen.getByTestId('preset-validation-cancel')).toHaveTextContent('Annuler');
+      expect(screen.getByTestId('preset-validation-confirm')).toHaveTextContent('Charger quand même');
     });
   });
 });

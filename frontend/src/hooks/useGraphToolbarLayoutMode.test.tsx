@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import {
-  GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX,
+  GRAPH_TOOLBAR_SINGLE_ROW_MIN_WIDTH_PX,
   graphToolbarChrome,
 } from '../theme/responsiveChrome'
 import * as narrowHook from './useNarrowInlineSize'
@@ -42,13 +42,13 @@ describe('useGraphToolbarLayoutMode', () => {
     vi.restoreAllMocks()
   })
 
-  it('appelle useNarrowInlineSize avec seuil 640 et measureParentClientWidth', () => {
+  it('appelle useNarrowInlineSize avec le seuil rangée unique 2e et measureParentClientWidth', () => {
     const spy = vi.spyOn(narrowHook, 'useNarrowInlineSize').mockReturnValue({
       ref: () => {},
       isNarrow: false,
     })
-    render(<LayoutHost parentWidthPx={800} />)
-    expect(spy).toHaveBeenCalledWith(GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX, {
+    render(<LayoutHost parentWidthPx={1100} />)
+    expect(spy).toHaveBeenCalledWith(GRAPH_TOOLBAR_SINGLE_ROW_MIN_WIDTH_PX, {
       measureParentClientWidth: true,
     })
   })
@@ -63,8 +63,8 @@ describe('useGraphToolbarLayoutMode', () => {
     expect(Number(toolbar.dataset.buttonFont)).toBe(graphToolbarChrome.narrow.buttonFontSizeRem)
   })
 
-  it('800px parent → isNarrow false, chrome comfortable', () => {
-    render(<LayoutHost parentWidthPx={800} />)
+  it('1100px parent → isNarrow false, chrome comfortable', () => {
+    render(<LayoutHost parentWidthPx={1100} />)
     const toolbar = screen.getByTestId('toolbar')
     expect(toolbar).toHaveAttribute('data-narrow', 'false')
     expect(toolbar).toHaveAttribute('data-chrome', 'comfortable')
@@ -75,12 +75,12 @@ describe('useGraphToolbarLayoutMode', () => {
     )
   })
 
-  it(`seuil = GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX (${GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX})`, () => {
-    expect(GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX).toBe(640)
-    render(<LayoutHost parentWidthPx={639} />)
+  it(`seuil = GRAPH_TOOLBAR_SINGLE_ROW_MIN_WIDTH_PX (${GRAPH_TOOLBAR_SINGLE_ROW_MIN_WIDTH_PX})`, () => {
+    expect(GRAPH_TOOLBAR_SINGLE_ROW_MIN_WIDTH_PX).toBe(980)
+    render(<LayoutHost parentWidthPx={979} />)
     expect(screen.getByTestId('toolbar')).toHaveAttribute('data-narrow', 'true')
     cleanup()
-    render(<LayoutHost parentWidthPx={640} />)
+    render(<LayoutHost parentWidthPx={980} />)
     expect(screen.getByTestId('toolbar')).toHaveAttribute('data-narrow', 'false')
   })
 
@@ -98,7 +98,7 @@ describe('useGraphToolbarLayoutMode', () => {
   })
 
   it('rootLayout confort → display flex, pas de gridTemplateAreas', () => {
-    render(<LayoutHost parentWidthPx={800} showSearchBar />)
+    render(<LayoutHost parentWidthPx={1100} showSearchBar />)
     const toolbar = screen.getByTestId('toolbar')
     expect(toolbar).toHaveAttribute('data-display', 'flex')
     expect(toolbar).toHaveAttribute('data-areas', 'none')

@@ -7,9 +7,9 @@
  * - AC#3 : Marquage cycle intentionnel (checkbox)
  * - AC#4 : Graphe sans cycles ne montre pas de warning cycle
  */
-import { test, expect, type APIRequestContext, type Page } from '@playwright/test'
+import { test, expect, type APIRequestContext } from '@playwright/test'
 
-import { E2E_MS } from './timeouts'
+import { openApp, openGraphSection } from './helpers'
 
 test.describe('Graph Cycle Validation (Story 0.6)', () => {
   /**
@@ -239,13 +239,8 @@ test.describe('Graph Cycle Validation (Story 0.6)', () => {
   // Note: Les tests suivants nécessitent une intégration complète avec l'UI
   test.describe('UI (placeholders)', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('/')
-      await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.ui })
-      const graphTab = page.locator('button').filter({ hasText: /Éditeur de Graphe|📊/ })
-      if ((await graphTab.count()) > 0) {
-        await graphTab.click()
-      }
-      await page.waitForSelector('.react-flow', { timeout: E2E_MS.short }).catch(() => {})
+      await openApp(page)
+      await openGraphSection(page)
     })
 
   test.skip('AC#1 (UI): Warning cycle affiché dans le panneau d\'erreurs', async ({ page }) => {

@@ -11,20 +11,24 @@ import type { APIError } from '../types/errors'
 import type { ToastAction } from '../components/shared/Toast'
 import { useGenerationRequest } from './useGenerationRequest'
 import { useCostGovernance } from './useCostGovernance'
+import {
+  launchBackgroundOption,
+  useGenerationOptionsStore,
+} from '../store/generationOptionsStore'
 import { CONTEXT_TOKENS_LIMITS } from '../constants'
 import {
   applyGenerationConfigFixes,
   fixesFromApiValidationDetails,
   type GenerationConfigFix,
 } from '../utils/generationConfigNormalization'
-import type { LLMModelResponse } from '../types/api'
+import type { LLMModelResponse, ReasoningEffort } from '../types/api'
 
 export interface UseGenerationHandlersOptions {
   userInstructions: string
   maxContextTokens: number
   maxCompletionTokens: number | null
   llmModel: string
-  reasoningEffort: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  reasoningEffort: ReasoningEffort | null
   topP: number | null
   maxChoices: number | null
   choicesMode: 'free' | 'capped'
@@ -182,15 +186,30 @@ export function useGenerationHandlers(
         availableModels: modelsToCheck,
       })
 
-      const job = await dialoguesAPI.createGenerationJob(request, {
+      const costEstimate = {
         promptTokens: tokenCount ?? undefined,
         completionTokens: request.max_completion_tokens ?? undefined,
         llmModelIdentifier: request.llm_model_identifier ?? undefined,
-      })
+      }
+      const job = await dialoguesAPI.createGenerationJob(request, costEstimate)
 
       disconnectSSE()
       startGeneration(job.job_id)
       connectSSE(job.stream_url)
+
+      // Multi-options (écran 2b) : N-1 jobs parallèles supplémentaires, plafonnés.
+      // L'option 1 reste le stream principal ; les autres se résolvent en arrière-plan.
+      const { optionCount, startRun, updateSlot, clearRun } =
+        useGenerationOptionsStore.getState()
+      if (optionCount > 1) {
+        startRun(optionCount, request)
+        updateSlot(0, { jobId: job.job_id, status: 'running' })
+        for (let i = 1; i < optionCount; i++) {
+          void launchBackgroundOption(i, request, costEstimate)
+        }
+      } else {
+        clearRun()
+      }
     } catch (err) {
       const axiosErr = err as APIError
       const errorMsg = getErrorMessage(err)
@@ -211,7 +230,7 @@ export function useGenerationHandlers(
         toast(errorMsg, 'error', 12_000, [
           {
             label: 'Corriger les paramètres',
-            onClick: () => {
+            action: () => {
               applyPatchToState(patch, {
                 setMaxContextTokens,
                 setMaxCompletionTokens,

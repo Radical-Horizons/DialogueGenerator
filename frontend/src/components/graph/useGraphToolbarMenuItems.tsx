@@ -2,9 +2,9 @@
  * Items des menus Actions et Qualités de la toolbar graphe (Story 17.9).
  */
 import { useCallback, type CSSProperties } from 'react'
-import type { Node } from '@xyflow/react'
-import type { ReactFlowInstance } from '@xyflow/react'
+import type { Node, ReactFlowInstance } from 'reactflow'
 import { theme } from '../../theme'
+import { useGraphViewStore } from '../../store/graphViewStore'
 import {
   MANUAL_NODE_OFFSET_X,
   MANUAL_NODE_OFFSET_Y,
@@ -120,6 +120,8 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
             }
             const node = createEmptyNode(position)
             addNode(node)
+            // Avant la sélection : l'inspecteur lit la demande au changement de nœud.
+            useGraphViewStore.getState().requestNodeEdit(node.id)
             setSelectedNode(node.id)
             if (reactFlowInstance) {
               requestAnimationFrame(() => {
@@ -138,7 +140,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
             e.currentTarget.style.backgroundColor = 'transparent'
           }}
         >
-          ➕ Nouveau nœud
+          Nouveau nœud
         </button>
         <button
           type="button"
@@ -156,7 +158,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
             e.currentTarget.style.backgroundColor = 'transparent'
           }}
         >
-          ✨ Générer nœud
+          Générer nœud
         </button>
         <button
           type="button"
@@ -173,7 +175,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
             e.currentTarget.style.backgroundColor = 'transparent'
           }}
         >
-          🎯 Aller à un nœud (Ctrl+J)
+          Aller à un nœud (Ctrl+J)
         </button>
         <button
           type="button"
@@ -192,7 +194,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
           }}
           title="Exporter le graphe en image (PNG ou SVG)"
         >
-          📤 Exporter en image (PNG/SVG)
+          Exporter en image (PNG/SVG)
         </button>
         <button
           type="button"
@@ -213,7 +215,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
           title="Exporter le dialogue au format Unity JSON"
           aria-label="Export Unity"
         >
-          📦 Export Unity
+          Export Unity
         </button>
         <button
           type="button"
@@ -234,7 +236,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
           title="Prévisualiser l'export Unity avant téléchargement"
           aria-label="Prévisualiser export"
         >
-          👁 Prévisualiser export
+          Prévisualiser export
         </button>
         <button
           type="button"
@@ -253,7 +255,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
             e.currentTarget.style.backgroundColor = 'transparent'
           }}
         >
-          🔽 Filtres
+          Filtres
         </button>
         <button
           type="button"
@@ -273,7 +275,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
               : 'transparent'
           }}
         >
-          🔀 Simulation flow
+          Simulation flow
         </button>
         <button
           type="button"
@@ -295,7 +297,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
               : 'transparent'
           }}
         >
-          ⚙️ Systèmes de jeu
+          Systèmes de jeu
         </button>
       </>
     )
@@ -342,7 +344,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
               : 'transparent'
           }}
         >
-          🧪 Qualité LLM
+          Qualité LLM
         </button>
         <button
           type="button"
@@ -362,7 +364,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
               : 'transparent'
           }}
         >
-          🧹 Anti-slop IA
+          Anti-slop IA
         </button>
         <button
           type="button"
@@ -382,7 +384,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
               : 'transparent'
           }}
         >
-          🧠 Context dropping
+          Context dropping
         </button>
         <button
           type="button"
@@ -402,7 +404,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
               : 'transparent'
           }}
         >
-          ✅ Validation schéma
+          Validation schéma
         </button>
         <button
           type="button"
@@ -427,7 +429,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
               : 'transparent'
           }}
         >
-          👁 Preview scénario
+          Preview scénario
         </button>
         <button
           type="button"
@@ -449,7 +451,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
               : 'transparent'
           }}
         >
-          💰 Coûts
+          Coûts
         </button>
       </>
     )

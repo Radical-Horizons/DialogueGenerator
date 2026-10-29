@@ -1,7 +1,7 @@
 {
   "name": "dialogue-generator-frontend",
   "private": true,
-  "version": "1.8.4",
+  "version": "1.9.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,6 +10,7 @@
     "prebuild": "node ./scripts/generate-pwa-icons.mjs",
     "build": "vite build",
     "build:check": "tsc && vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "test": "vitest run",

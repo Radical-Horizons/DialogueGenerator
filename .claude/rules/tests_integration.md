@@ -1,7 +1,8 @@
 ---
-alwaysApply: false
 description: Règles spécifiques pour tests d'intégration avec données réelles GDD
-globs: ["tests/**/*integration*.py", "tests/**/test_*_real*.py"]
+paths:
+  - "tests/**/*integration*.py"
+  - "tests/**/test_*_real*.py"
 ---
 # Tests — Tests d'intégration avec données réelles
 

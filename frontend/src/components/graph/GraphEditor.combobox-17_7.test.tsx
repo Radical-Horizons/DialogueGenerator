@@ -5,7 +5,7 @@
  * On mocke `useNarrowInlineSize` (Cf. dette technique 17.8) pour rendre le
  * test déterministe et rapide ; le calcul réel est couvert ailleurs.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import {
   PANEL_COMFORT_MIN_WIDTH_PX,
@@ -13,6 +13,7 @@ import {
 } from '../../theme/responsiveChrome'
 
 let mockGraphEditorNarrow = false
+let mockHasActiveDialogue = false
 
 vi.mock('../../hooks/useNarrowInlineSize', () => ({
   useNarrowInlineSize: vi.fn((threshold: number) => {
@@ -32,6 +33,18 @@ vi.mock('../../api/unityDialogues', () => ({
   getUnityDialogue: vi.fn(),
   deleteUnityDialogue: vi.fn(),
   previewUnityDialogue: vi.fn(),
+}))
+
+// Sans ce mock, l'appel réseau réel échoue après le démontage de jsdom et
+// UnityDialogueList fait un setState sur un environnement détruit (erreur non gérée en CI).
+vi.mock('../../api/collections', () => ({
+  listCollections: vi.fn().mockResolvedValue([]),
+  createCollection: vi.fn(),
+  updateCollection: vi.fn(),
+  deleteCollection: vi.fn(),
+  addDialoguesToCollection: vi.fn(),
+  removeDialoguesFromCollection: vi.fn(),
+  buildDocumentCollectionMap: () => new Map(),
 }))
 
 vi.mock('./GraphCanvas', () => ({
@@ -75,9 +88,9 @@ vi.mock('./GraphValidationPanel', () => ({
 }))
 
 const graphStoreState = {
-  nodes: [],
+  nodes: [] as Array<{ id: string; type: string; position: { x: number; y: number }; data: Record<string, unknown> }>,
   edges: [],
-  selectedNodeId: null,
+  selectedNodeId: null as string | null,
   selectedNodeIds: [],
   validationErrors: [],
   intentionalCycles: [],
@@ -110,11 +123,24 @@ vi.mock('../../store/graphStore', () => ({
   ),
 }))
 
+/** Demande d'édition directe posée par la création manuelle d'un nœud. */
+const mockGraphView = { nodeEditRequest: null as string | null, clearNodeEditRequest: vi.fn() }
 vi.mock('../../store/graphViewStore', () => ({
-  useGraphViewStore: vi.fn(() => ({
-    showFiltersPanel: false,
-    setShowFiltersPanel: vi.fn(),
-  })),
+  useGraphViewStore: Object.assign(
+    vi.fn(() => ({
+      showFiltersPanel: false,
+      setShowFiltersPanel: vi.fn(),
+    })),
+    { getState: () => mockGraphView },
+  ),
+}))
+
+vi.mock('./NodeEditorPanel', () => ({
+  NodeEditorPanel: () => <div data-testid="node-editor-panel-mock" />,
+}))
+
+vi.mock('./GraphInspectorNodeSummary', () => ({
+  GraphInspectorNodeSummary: () => <div data-testid="node-summary-mock" />,
 }))
 
 vi.mock('../../hooks/useDialogueLoader', () => ({
@@ -122,9 +148,9 @@ vi.mock('../../hooks/useDialogueLoader', () => ({
     selectedDialogue: null,
     setSelectedDialogue: vi.fn(),
     isLoadingDialogue: false,
-    activeDialogueFilename: null,
+    activeDialogueFilename: mockHasActiveDialogue ? 'scene.json' : null,
     activeDialogueTitle: undefined,
-    hasActiveDialogue: false,
+    hasActiveDialogue: mockHasActiveDialogue,
     handleSave: vi.fn().mockResolvedValue(undefined),
     dialogueListRef: { current: null },
   })),
@@ -208,6 +234,7 @@ vi.mock('reactflow', () => ({
 }))
 
 import { GraphEditor } from './GraphEditor'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
 
 describe('GraphEditor — 17.7 sélecteur de dialogue dans toolbar narrow', () => {
   beforeEach(() => {
@@ -231,5 +258,57 @@ describe('GraphEditor — 17.7 sélecteur de dialogue dans toolbar narrow', () =
     expect(await screen.findByTestId('unity-dialogue-list')).toBeInTheDocument()
     expect(screen.queryByTestId('graph-editor-header-selector')).not.toBeInTheDocument()
     expect(screen.queryByTestId('dialogue-combobox-trigger')).not.toBeInTheDocument()
+  })
+})
+
+describe('GraphEditor — panneau vide sans dialogue (design system)', () => {
+  it('étiquette mono « Graphe » puis une phrase, sans emoji ni icône', async () => {
+    render(<GraphEditor />)
+
+    const empty = await screen.findByTestId('graph-empty-state')
+    expect(empty).toHaveTextContent(/^Graphe/)
+    expect(empty).toHaveTextContent(/Sélectionnez un dialogue Unity dans la liste à gauche/)
+    expect(empty.textContent ?? '').not.toMatch(/\p{Extended_Pictographic}/u)
+    expect(empty.querySelector('svg, img')).toBeNull()
+  })
+})
+
+describe('GraphEditor — inspecteur du nœud sélectionné (2e)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockHasActiveDialogue = true
+    useUiLayoutStore.setState({ inspectorTab: 'node' })
+    graphStoreState.nodes = [{ id: 'n1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: { line: '' } }]
+    graphStoreState.selectedNodeId = 'n1'
+  })
+
+  afterEach(() => {
+    mockHasActiveDialogue = false
+    mockGraphView.nodeEditRequest = null
+    graphStoreState.nodes = []
+    graphStoreState.selectedNodeId = null
+  })
+
+  it('un nœud existant s’ouvre en lecture', async () => {
+    render(<GraphEditor />)
+
+    expect(await screen.findByTestId('node-summary-mock')).toBeInTheDocument()
+    expect(screen.queryByTestId('node-editor-panel-mock')).not.toBeInTheDocument()
+  })
+
+  it('un nœud créé à la main s’ouvre directement en édition (régression Story 1.6 AC#2)', async () => {
+    mockGraphView.nodeEditRequest = 'n1'
+    render(<GraphEditor />)
+
+    expect(await screen.findByTestId('node-editor-panel-mock')).toBeInTheDocument()
+    expect(screen.queryByTestId('node-summary-mock')).not.toBeInTheDocument()
+    expect(mockGraphView.clearNodeEditRequest).toHaveBeenCalled()
+  })
+
+  it('une demande pour un autre nœud laisse la lecture', async () => {
+    mockGraphView.nodeEditRequest = 'autre'
+    render(<GraphEditor />)
+
+    expect(await screen.findByTestId('node-summary-mock')).toBeInTheDocument()
   })
 })

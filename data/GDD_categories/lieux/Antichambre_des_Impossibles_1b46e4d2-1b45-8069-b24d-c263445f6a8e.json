@@ -5,16 +5,17 @@
     "Contenu par": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
     "Date de création de la fiche": "2025-03-12T16:16:00.000Z",
     "Date vérification": "2026-06-10",
-    "Dernière modification": "2026-07-22T15:19:00.000Z",
+    "Dernière modification": "2026-08-03T16:09:00.000Z",
     "Espèces présentes": "1a16e4d2-1b45-80bc-af1d-ceab1be781b4, 1cd6e4d2-1b45-80fd-85ec-e1d624fffb64",
     "Evénements liés": "22c6e4d2-1b45-80c4-8a2a-fb5261a4872d, 2306e4d2-1b45-8049-abe4-c5086b65c24c, 2306e4d2-1b45-808e-9f23-c1276c085c30, 2306e4d2-1b45-80f4-8a63-f37b0f0f1a7c, 2306e4d2-1b45-8093-a2e1-df39ff8fd692, 2306e4d2-1b45-8051-ab95-e0c26a35c46a, 2306e4d2-1b45-803f-8d4c-e1e1eef79d56, db3dd32b-18f1-497b-b73d-c7512143805b",
     "Niveau d’IA": "co-écrit",
     "Qualité": "7",
-    "Résumé IA": "L’Antichambre des Impossibles est une macro‑entité chaotique à la lisière d’Escelion, structurée en six cercles de stabilité décroissante où la physique, le temps et la causalité sont altérés. Elle agit comme une archive des potentialités abandonnées, abritant des poches de survie, des explorateurs et des entités impossibles, et influence le récit d’Alteir en reflétant les choix non réalisés. Actuellement, les enjeux portent sur son expansion anormale, la quête de la Tour des Futurs Disparus et les implications pour la stabilité continentale.",
+    "Résumé IA": "L’Antichambre des Impossibles est une macro‑entité de bordure, zone magique de 200 000 km² en constante expansion, organisée en six cercles de stabilité décroissante où la gravité, la lumière, la temporalité et la causalité deviennent instables ; elle abrite des espèces rares, des communautés éphémères comme l’Essaim du Manifold et les Cartographes des Impossibilités, et constitue un registre des réalités non réalisées, jouant un rôle central dans l’intrigue d’Alteir en confrontant les héros aux choix et aux mondes abandonnés, tout en présentant des enjeux d’exploration, de survie et de quête vers la mystérieuse Tour des Futurs Disparus.",
     "Rôle": "Zone magique",
+    "Superficie (km²)": "200000",
     "Taille": "Monde",
     "Type": "Macro-entité",
-    "Zones limitrophes": "1a96e4d2-1b45-8049-b21b-ee91c108b551, 1b46e4d2-1b45-801a-ada0-f6ec210d2fa0, 1b46e4d2-1b45-8081-854b-e222c4c6aaaf, 1b46e4d2-1b45-8001-ad3d-f3a293347dc1, 1b46e4d2-1b45-8028-a2e5-f06744044aa4, 1b46e4d2-1b45-80f2-94b4-f100d3e65fa5, 1b46e4d2-1b45-805c-a426-e1eb48b627a5, 15f02d22-65fb-4afb-b80e-68925f6f0f3b, 16538949-d5a8-4a83-b088-6f12f27eb580",
+    "Zones limitrophes": "1a96e4d2-1b45-8049-b21b-ee91c108b551, 1b46e4d2-1b45-801a-ada0-f6ec210d2fa0, 1b46e4d2-1b45-8081-854b-e222c4c6aaaf, 1b46e4d2-1b45-80f2-94b4-f100d3e65fa5, 15f02d22-65fb-4afb-b80e-68925f6f0f3b, 16538949-d5a8-4a83-b088-6f12f27eb580, 1b46e4d2-1b45-8001-ad3d-f3a293347dc1, 1b46e4d2-1b45-8028-a2e5-f06744044aa4, 1b46e4d2-1b45-805c-a426-e1eb48b627a5",
     "État": "À relire"
   },
   "sections": {
@@ -43,7 +44,7 @@
     "the_me_musical___ambiance_sonore_macro": "Le thème macro de l'Antichambre devrait mêler nappes instables, pulsations sourdes, motifs mélodiques à peine fixés, voix lointaines réverbérées et ruptures de texture qui donnent la sensation d'un morceau cherchant sa propre version. Les cercles externes peuvent encore porter des traces sonores des Périphéries voisines. Les profondeurs doivent au contraire produire une impression d'étrangeté cohérente, belle et dangereuse.",
     "me_moire_syste_me": "Les états persistants utiles à cette macro-entité relèvent surtout de la progression d'accès, de la cartographie partielle et des informations critiques sur les cercles profonds. Ils doivent s'appuyer sur les systèmes **Exploration**, **Dialogues**, **Connaissances** et **Flags évènementiels**, sans créer de sous-système autonome non validé.\n\t### Flags et compteurs propres à cette macro-entité\n\t<database url=\"https://app.notion.com/p/635a9498d7e3462dbcd6d31e21c86c8d\" inline=\"true\">Flags de ce lieu</database>",
     "remarques_de_conception": "<empty-block/>",
-    "re_sume__ia": "L’Antichambre des Impossibles est une macro‑entité chaotique à la lisière d’Escelion, structurée en six cercles de stabilité décroissante où la physique, le temps et la causalité sont altérés. Elle agit comme une archive des potentialités abandonnées, abritant des poches de survie, des explorateurs et des entités impossibles, et influence le récit d’Alteir en reflétant les choix non réalisés. Actuellement, les enjeux portent sur son expansion anormale, la quête de la Tour des Futurs Disparus et les implications pour la stabilité continentale."
+    "re_sume__ia": "L’Antichambre des Impossibles est une macro‑entité de bordure, zone magique de 200 000 km² en constante expansion, organisée en six cercles de stabilité décroissante où la gravité, la lumière, la temporalité et la causalité deviennent instables ; elle abrite des espèces rares, des communautés éphémères comme l’Essaim du Manifold et les Cartographes des Impossibilités, et constitue un registre des réalités non réalisées, jouant un rôle central dans l’intrigue d’Alteir en confrontant les héros aux choix et aux mondes abandonnés, tout en présentant des enjeux d’exploration, de survie et de quête vers la mystérieuse Tour des Futurs Disparus."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

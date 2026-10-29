@@ -1,8 +1,6 @@
 ---
 description: Workflow — commandes essentielles, tests, déploiement, venv
-alwaysApply: false
 ---
-
 - **Agentivité vs garde-fous techniques** : les limites ci-dessous (ex. Vitest sans filtre) sont des contraintes **techniques** (temps, workers, fiabilité du terminal Windows) — pas une consigne de « réduire les coûts ». Si l’utilisateur demande explicitement la suite complète, l’exécuter. Voir `.claude/rules/agentivity.md`.
 
 - **Environnement virtuel Python** :
@@ -16,6 +14,7 @@ alwaysApply: false
   - Seuls pytest / Vitest / lint **ne constituent pas** une preuve suffisante quand il s’agit de ce que l’utilisateur voit ou manipule dans l’app.
   - **Preuve attendue** : démarrer l’app (`npm run dev`), ouvrir le navigateur sur l’UI (ex. `http://localhost:3000`), et **vérifier** le comportement ou l’affichage concerné ; de préférence via le MCP navigateur Cursor (`cursor-ide-browser`) lorsqu’il est disponible.
   - Ne pas présenter « preuve complète » sur une feature UI sans cette étape (sauf impossibilité technique explicite, à mentionner).
+  - **Captures proactives (sans qu'on demande)** : envoyer 2-4 captures d'écran de l'app (`SendUserFile`, statut proactif) sans attendre la demande dans deux cas précis — (1) à la clôture de la **dernière US d'une epic**, (2) une fois les correctifs d'une **revue de code externe de PR** (humaine, CI, ou ultrareview) appliqués et re-vérifiés. Si le panneau Browser ne compose pas les frames ("Browser pane is not displayed"), basculer sur un fallback headless Playwright (déjà en devDependency de ce repo, `npx playwright`) depuis la racine du projet, sortie dans `tmp/` (gitignored) — ne pas redemander à l'utilisateur d'agir avant d'avoir épuisé cette alternative. Protocole complet : skill `milestone-screenshots`.
 
 - **Niveaux de test T0–T3** (détail + tableau : **`.claude/commands/test-tiers.md`**). Résumé : **T0** fumée (`npm run test:backend:smoke`, Vitest `--bail=1`, `npm run test:e2e:smoke`) ; **T1** fichiers / `-k` / liste de specs Playwright ; **T2** `npm run test:premerge` ou équivalent (backend `not slow`, lint, Vitest défaut) ; **T3** `npm test`, `VITEST_FULL=1`, suite E2E complète — sur **demande explicite** ou équivalent CI sur `main`. Les agents privilégient **T0/T1** après un petit diff ; **T3** si l’utilisateur impose la suite complète (voir `.claude/rules/agentivity.md`).
 
@@ -74,7 +73,10 @@ alwaysApply: false
 
 - **Version produit (semver)** : règle **`.claude/rules/app_versioning.md`** — PR epic = mineure, main direct = patch ; tags `vX.Y.Z` · `docs/releases/semver-and-tags.md` · rétro BMAD = section **Version livrée**. Procédure prod + canvas : `/prod-release`.
 
-- **Avant commit** : **T2** recommandé — `npm run test:premerge` +, si changements critiques ou release, **`npm run test:frontend`** (build inclus) et/ou **`npm test`** (pytest complet). **T3** avant merge vers `main` si la CI complète n’a pas encore tourné sur la branche.
+- **Avant commit / PR — la gate dépend de la cible**, détail dans `.claude/rules/branching.md` :
+  - **PR vers `dev`** : **T2 obligatoire avant d'ouvrir** (`npm run test:premerge`, ~7 min sur le poste Windows, mesuré le 2026-09-30), plus typecheck si le frontend bouge et preuve UI si c'est visible. La CI de PR rejoue T2 et ajoute les deux suites e2e : second filet, pas premier. Commande : **`/pr`**.
+  - **Merge direct dans `dev`, sans PR** : **T2 obligatoire** (`npm run test:premerge`) — un push sur `dev` ne déclenche **aucune** CI.
+  - **Merge ou push vers `main`** : **T3** complet — `.claude/rules/ci_before_push.md`.
 
 - **Avant `git push` vers `main`** (obligatoire agents) : suite CI T3 complète — voir **`.claude/rules/ci_before_push.md`**. Interdit de pousser sur `main` sans les trois jobs verts (backend full, Vitest `VITEST_FULL=1`, PWA). La commande `/commit` avec push suit la même gate.
 

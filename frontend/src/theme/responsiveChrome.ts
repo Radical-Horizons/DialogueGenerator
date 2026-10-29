@@ -61,6 +61,15 @@ export const panelHeaderTitleTypography = {
 } as const
 
 /**
+ * Étiquette mono d'en-tête de panneau (refonte UI) — remplace le titre en gras.
+ * Conserve la densité adaptive de FR118 17.6 : plus compacte en colonne étroite.
+ */
+export const panelHeaderMonoLabel = {
+  comfortableFontPx: 10,
+  narrowFontPx: 9,
+} as const
+
+/**
  * Libellé vertical des `PanelExpandButton` (rails GDD / Détails) — variante « caption »
  * AC1 : plancher lisibilité ≥ ~12px (`0.75rem` si root 16px).
  */
@@ -74,6 +83,31 @@ export const panelExpandRailCaptionTypography = {
  * Se base sur une mesure de largeur du conteneur (pas le viewport).
  */
 export const GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX = 640
+
+/** Frontière basse du mode desktop (`useViewportMode`) — sous ce seuil, drawers FR120. */
+export const VIEWPORT_DESKTOP_MIN_PX = 1024
+
+/**
+ * Écran 2d : au-dessus de cette largeur, « ce qui part au modèle » garde sa colonne.
+ * En dessous (et au-dessus de 1024px), il devient une barre repliée sous la colonne
+ * centrale — une troisième colonne rognerait la lecture sans rien apporter.
+ */
+export const PROMPT_DRAWER_MAX_WIDTH_PX = 1200
+
+/**
+ * Rangée unique 46px de l'écran 2e : titre + compteurs + undo/redo + entrées texte
+ * + santé + save calés à droite. Largeur intrinsèque mesurée ≈ 980px (août 2026) —
+ * en dessous, la toolbar bascule sur le layout narrow empilé (aucune action perdue).
+ */
+export const GRAPH_TOOLBAR_SINGLE_ROW_MIN_WIDTH_PX = 980
+
+/**
+ * Vue « côte à côte » des options (écran 2b) : colonne des libellés de rangée, puis une
+ * colonne par option. Sous `label + n × colonne`, la vue repasse en liste — une
+ * réplique serif sur moins de ~22 caractères ne se compare plus, elle se déchiffre.
+ */
+export const OPTIONS_COLUMNS_LABEL_WIDTH_PX = 96
+export const OPTIONS_COLUMN_MIN_WIDTH_PX = 190
 
 /** Même seuil conteneur pour panneau Génération, graphe, etc. */
 export const PANEL_COMFORT_MIN_WIDTH_PX = GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX
@@ -137,7 +171,6 @@ const unityDialogueEditorPaddingHorizontal = {
 export const contextGddTabChrome = {
   balanced: {
     tabPadding: '0.14rem 0.1rem',
-    gearPadding: '0.18rem 0.14rem',
     barPadding: '0.14rem 0.42rem 0',
     barGap: '0.16rem',
     borderRadiusPx: 6,
@@ -147,7 +180,6 @@ export const contextGddTabChrome = {
   },
   tight: {
     tabPadding: '0.12rem 0.08rem',
-    gearPadding: '0.12rem 0.14rem',
     barPadding: '2px 4px 0',
     barGap: '0.06rem',
     borderRadiusPx: 4,
@@ -182,7 +214,8 @@ export const unityDialogueEditorChrome = {
     toolbarGapRem: 0.4,
     toolbarButtonPadding: '0.375rem 0.75rem',
     toolbarButtonFontRem: 0.85,
-    toolbarButtonFontWeight: 700,
+    /** Boutons secondaires de la refonte : 500. Le bouton plein monte à 600 de lui-même. */
+    toolbarButtonFontWeight: 500,
     toolbarButtonMinHeightPx: 30,
     contentPadding: unityDialogueEditorPaddingHorizontal.comfortable,
     nodeSectionGapRem: 1.25,
@@ -199,7 +232,7 @@ export const unityDialogueEditorChrome = {
     toolbarGapRem: 0.38,
     toolbarButtonPadding: '0.36rem 0.65rem',
     toolbarButtonFontRem: 0.8,
-    toolbarButtonFontWeight: 600,
+    toolbarButtonFontWeight: 500,
     /** Grille 2×2 : hauteur ~75 % de la cible tactile précédente (44px). */
     toolbarButtonMinHeightPx: 33,
     contentPadding: unityDialogueEditorPaddingHorizontal.narrow,

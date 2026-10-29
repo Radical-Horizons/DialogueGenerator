@@ -392,28 +392,57 @@ class AuthService:
     def create_guest_access_token(self) -> str:
         """Émet un JWT invité (hors table users) pour la démo lecture seule.
 
+        Chaque émission porte un ``sid`` unique (UUID) pour isoler les jobs
+        en mémoire entre sessions guest (anti-IDOR Epic 8).
+
         Returns:
             Access token JWT avec ``role=guest`` et TTL de 8 heures.
         """
+        session_id = str(uuid4())
         return self.create_access_token(
-            data={"sub": GUEST_SUBJECT, "role": GUEST_ROLE},
+            data={
+                "sub": GUEST_SUBJECT,
+                "role": GUEST_ROLE,
+                "sid": session_id,
+            },
             expires_delta=timedelta(hours=GUEST_ACCESS_TOKEN_EXPIRE_HOURS),
         )
 
     @staticmethod
-    def guest_principal() -> dict[str, object]:
+    def guest_principal(session_id: Optional[str] = None) -> dict[str, object]:
         """Retourne l'identité synthétique invité (aucune ligne SQLite).
+
+        Args:
+            session_id: Identifiant de session JWT (``sid``), si présent.
 
         Returns:
             Dictionnaire compatible avec les dépendances d'auth.
         """
-        return {
+        principal: dict[str, object] = {
             "id": GUEST_SUBJECT,
             "username": GUEST_SUBJECT,
             "email": None,
             "role": GUEST_ROLE,
             "is_active": True,
         }
+        if isinstance(session_id, str) and session_id.strip():
+            principal["session_id"] = session_id.strip()
+        return principal
+
+    @staticmethod
+    def guest_principal_from_payload(payload: dict) -> dict[str, object]:
+        """Construit le principal guest depuis un payload JWT vérifié.
+
+        Args:
+            payload: Claims du token access (``sub``, ``role``, ``sid``).
+
+        Returns:
+            Principal guest, avec ``session_id`` si ``sid`` est présent.
+        """
+        sid = payload.get("sid")
+        session_id = str(sid).strip() if isinstance(sid, str) and sid.strip() else None
+        return AuthService.guest_principal(session_id=session_id)
+
 
     @property
     def guest_token_expire_seconds(self) -> int:

@@ -97,7 +97,7 @@ export function ScenarioPlaythroughChoices({
               boxShadow: choice.status === 'untested' ? playthroughChrome.choiceUntestedGlow : undefined,
               background:
                 choice.status === 'untested'
-                  ? 'rgba(100, 108, 255, 0.12)'
+                  ? playthroughChrome.choiceUntestedBackground
                   : theme.background.tertiary,
               color: disabled ? theme.text.tertiary : theme.text.primary,
               cursor: disabled ? 'not-allowed' : 'pointer',

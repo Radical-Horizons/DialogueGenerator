@@ -130,7 +130,6 @@ export function NodeContextMenu({
           e.currentTarget.style.backgroundColor = 'transparent'
         }}
       >
-        <span>✏️</span>
         <span>Éditer</span>
       </button>
 
@@ -163,7 +162,6 @@ export function NodeContextMenu({
               e.currentTarget.style.backgroundColor = 'transparent'
             }}
           >
-            <span>✨</span>
             <span>Générer</span>
           </button>
           <button
@@ -194,7 +192,6 @@ export function NodeContextMenu({
               e.currentTarget.style.backgroundColor = 'transparent'
             }}
           >
-            <span>📄</span>
             <span>Voir le prompt</span>
           </button>
         </>
@@ -229,7 +226,6 @@ export function NodeContextMenu({
           e.currentTarget.style.backgroundColor = 'transparent'
         }}
       >
-        <span>👯</span>
         <span>Dupliquer</span>
       </button>
 
@@ -246,7 +242,7 @@ export function NodeContextMenu({
           textAlign: 'left',
           backgroundColor: 'transparent',
           border: 'none',
-          color: '#ff6b6b',
+          color: theme.state.error.color,
           fontSize: '0.9rem',
           cursor: 'pointer',
           display: 'flex',
@@ -260,7 +256,6 @@ export function NodeContextMenu({
           e.currentTarget.style.backgroundColor = 'transparent'
         }}
       >
-        <span>🗑️</span>
         <span>Supprimer</span>
       </button>
     </div>

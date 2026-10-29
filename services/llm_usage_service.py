@@ -183,6 +183,8 @@ class LLMUsageService:
         request_id: str,
         dialogue_id: str,
         node_id: str,
+        template_id: Optional[str] = None,
+        template_name: Optional[str] = None,
     ) -> None:
         """Annote post-hoc un enregistrement existant avec le contexte dialogue/nœud.
         
@@ -193,6 +195,8 @@ class LLMUsageService:
             request_id: ID de la requête LLM déjà trackée.
             dialogue_id: ID du dialogue à associer.
             node_id: ID du nœud généré à associer.
+            template_id: Template appliqué (UUID ou slug), optionnel.
+            template_name: Nom snapshoté du template, optionnel.
         """
         try:
             record = self.repository.get_by_request_id(request_id)
@@ -203,10 +207,13 @@ class LLMUsageService:
                 return
             record.dialogue_id = dialogue_id
             record.node_id = node_id
+            if template_id is not None:
+                record.template_id = template_id
+                record.template_name = template_name
             self.repository.update(record)
             logger.debug(
                 f"annotate_usage: request_id='{request_id}' annoté → "
-                f"dialogue='{dialogue_id}', node='{node_id}'"
+                f"dialogue='{dialogue_id}', node='{node_id}', template='{template_id}'"
             )
         except Exception as e:
             logger.error(
@@ -381,6 +388,8 @@ class LLMUsageService:
                 "response": r.response,
                 "fallback_from": r.fallback_from,
                 "fallback_reason": r.fallback_reason,
+                "template_id": getattr(r, "template_id", None),
+                "template_name": getattr(r, "template_name", None),
             }
             for r in records
         ]

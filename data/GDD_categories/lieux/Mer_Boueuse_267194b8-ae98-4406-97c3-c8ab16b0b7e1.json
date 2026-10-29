@@ -1,14 +1,15 @@
 {
   "Nom": "Mer Boueuse",
   "values": {
+    "Contenu par": "1b46e4d2-1b45-80f2-94b4-f100d3e65fa5",
     "Date de création de la fiche": "2026-07-08T11:59:00.000Z",
-    "Dernière modification": "2026-07-25T18:32:00.000Z",
+    "Dernière modification": "2026-08-08T23:46:00.000Z",
     "Espèces présentes": "8c5b687f-11d4-4950-adaa-3cac6af7c539, 1a16e4d2-1b45-80d7-a920-c3f40e49246b, 1a16e4d2-1b45-8089-bfc0-c5e513847d8b, 1a16e4d2-1b45-8062-aaa7-f39bb07d72f8, 6c055503-6e2d-4743-a201-34af3357b317, f5ec9a38-e4dd-43be-b3a7-a7e3274c0999",
     "Monnaie locale": "Troc dominant ; jetons de trébul et écailles d'orve circulant via la Traîne depuis les Marches Couchées ; concréments comme medium d'échange inter-guildes",
-    "Patterns": "f854e110-f51c-49fa-9c77-30353691b945",
     "Qualité": "8",
     "Résumé IA": "Mer Boueuse est une vaste région secondaire continentale d’un océan de boue géothermique, où le chant constant du Décanteur influence la vie et l’économie : extraction de céramiques exceptionnelles, collecte de concréments, pèlerinages d’enrobement et conflits entre guildes céramistes, communautés d’éleveurs, gardiens de zones rituelles, Fixeuses et Sans‑Contrat. La zone abrite des espèces uniques (Broyeurs‑Vase, Glisseurs de vase, Argillites, Lithorins, Clispes, Ondres) et des points d’intérêt comme l’Îlot du Chant Profond, le Delta de la Traîne et la Zone de Contact Ligneux‑Boue. Les enjeux actuels portent sur le changement du chant de l’Îlot, la stabilité du Décanteur, l’émergence d’une cinquième guilde et les tensions économiques et politiques qui en découlent.",
     "Rôle": "Zone naturelle",
+    "Superficie (km²)": "400000",
     "Taille": "Continent",
     "Type": "Région secondaire",
     "Zones limitrophes": "16538949-d5a8-4a83-b088-6f12f27eb580, 15f02d22-65fb-4afb-b80e-68925f6f0f3b, 9169952e-7ac7-4b9d-8c06-8cba2978045d, 1b46e4d2-1b45-801a-ada0-f6ec210d2fa0",

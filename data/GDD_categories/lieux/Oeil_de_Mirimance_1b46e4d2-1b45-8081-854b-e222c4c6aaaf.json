@@ -6,18 +6,19 @@
     "Contenu par": "1b46e4d2-1b45-80f2-94b4-f100d3e65fa5",
     "Date de création de la fiche": "2025-03-12T15:41:00.000Z",
     "Date vérification": "2026-04-30",
-    "Dernière modification": "2026-07-16T11:32:00.000Z",
+    "Dernière modification": "2026-08-07T09:41:00.000Z",
     "Espèces présentes": "1a16e4d2-1b45-805e-841e-d699f81d67a9, 1a16e4d2-1b45-8006-a568-d4688d3b154b, 1a16e4d2-1b45-8051-88d9-d744a1bbc095",
     "Evénements liés": "f2f08c68-53de-40c2-83ec-9d9bde8b2ac8",
     "Niveau d’IA": "co-écrit",
-    "Patterns": "3ce41c2d-fd5b-4b7e-9e87-2f9550c5d52f, 0f3c053f-3c23-4790-8a90-e368cf706384, 656766d0-0db2-41a6-8cf9-574dc42603f9, 2f06e4d2-1b45-8097-a118-ce9c0ee23111, f408d92b-335d-4315-9c66-969bda1b9699, 15277d01-9b4e-4760-9ee7-b1c1a4fffacb",
+    "Patterns": "0f3c053f-3c23-4790-8a90-e368cf706384, 656766d0-0db2-41a6-8cf9-574dc42603f9, 2f06e4d2-1b45-8097-a118-ce9c0ee23111, f408d92b-335d-4315-9c66-969bda1b9699, 15277d01-9b4e-4760-9ee7-b1c1a4fffacb",
     "Qualité": "6",
-    "Résumé IA": "L’Œil de Mirimance est un cratère vitrifié de 12 km de diamètre, centre d’un conflit entre les Greffeurs symbiotiques (cultivant les fibres‑kelmar) et les Courtiers d’observation (commercialisant les perceptions), tandis que les Contemplatifs barvasinkul gardent les profondeurs et assurent les descentes rituelles. Le site subit des cycles de clignotement (17 Veilles ouvertes/3 fermées), des ondulations rétiniennes toutes les sept minutes et un Nerf Conducteur qui influence les ressources et les dangers (cécité, greffes involontaires, froid extrême). La tension actuelle porte sur des sabotages, des disparitions et le risque d’un Clignotement éternel, avec une économie fragile basée sur le commerce des fibres‑kelmar, de la lymphe conductrice et du verre vitrifié.",
+    "Résumé IA": "L’Œil de Mirimance est un cratère vitrifié de 12 km de diamètre, zone magique où se croisent deux puissances économiques – les Greffeurs symbiotiques et les Courtiers d’observation – ainsi qu’une communauté contemplative barvasinkul qui garde les profondeurs. Le site subit des cycles de « clignotement » (17 Veilles ouvertes, 3 fermées), des ondulations rétiniennes toutes les sept minutes et un nerf conducteur qui influence les ressources de fibres‑kelmar et de lymphe conductrice. Les tensions entre Greffeurs et Courtiers, les disparitions récentes et le risque d’un clignotement éternel menacent l’équilibre fragile de la région, tandis que les rituels, le commerce d’observations et la recherche de stabilité restent au cœur de la dynamique locale.",
     "Rôle": "Zone magique",
     "Seuil économique": "9",
-    "Taille": "Secteur",
+    "Superficie (km²)": "113",
+    "Taille": "District",
     "Type": "Région principale",
-    "Zones limitrophes": "1a96e4d2-1b45-8049-b21b-ee91c108b551, 1b46e4d2-1b45-8069-b24d-c263445f6a8e, 1a96e4d2-1b45-8090-89eb-cd5168580e06",
+    "Zones limitrophes": "1a96e4d2-1b45-8049-b21b-ee91c108b551, 1b46e4d2-1b45-8069-b24d-c263445f6a8e, 1a96e4d2-1b45-8090-89eb-cd5168580e06, 923c82ae-e41e-4c20-99be-4e409b985d02",
     "État": "À relire"
   },
   "sections": {
@@ -44,7 +45,7 @@
     "syste_mes_de_jeu_actifs": "<database url=\"https://app.notion.com/p/301c0d619c044fd9a7fc7c8963e22812\" inline=\"true\">Systèmes de jeu actifs</database>",
     "me_moire_syste_me": "<database url=\"https://app.notion.com/p/e86422b1b8b34261bf2099b28acf48ca\" inline=\"true\">Flags de ce lieu</database>",
     "remarques_de_conception": "- Lieu non prévu ingame.",
-    "re_sume__ia": "L’Œil de Mirimance est un cratère vitrifié de 12 km de diamètre, centre d’un conflit entre les Greffeurs symbiotiques (cultivant les fibres‑kelmar) et les Courtiers d’observation (commercialisant les perceptions), tandis que les Contemplatifs barvasinkul gardent les profondeurs et assurent les descentes rituelles. Le site subit des cycles de clignotement (17 Veilles ouvertes/3 fermées), des ondulations rétiniennes toutes les sept minutes et un Nerf Conducteur qui influence les ressources et les dangers (cécité, greffes involontaires, froid extrême). La tension actuelle porte sur des sabotages, des disparitions et le risque d’un Clignotement éternel, avec une économie fragile basée sur le commerce des fibres‑kelmar, de la lymphe conductrice et du verre vitrifié."
+    "re_sume__ia": "L’Œil de Mirimance est un cratère vitrifié de 12 km de diamètre, zone magique où se croisent deux puissances économiques – les Greffeurs symbiotiques et les Courtiers d’observation – ainsi qu’une communauté contemplative barvasinkul qui garde les profondeurs. Le site subit des cycles de « clignotement » (17 Veilles ouvertes, 3 fermées), des ondulations rétiniennes toutes les sept minutes et un nerf conducteur qui influence les ressources de fibres‑kelmar et de lymphe conductrice. Les tensions entre Greffeurs et Courtiers, les disparitions récentes et le risque d’un clignotement éternel menacent l’équilibre fragile de la région, tandis que les rituels, le commerce d’observations et la recherche de stabilité restent au cœur de la dynamique locale."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

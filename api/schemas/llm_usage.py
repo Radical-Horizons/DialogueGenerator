@@ -90,6 +90,14 @@ class GenerationLogEntry(BaseModel):
     response: Optional[str] = Field(default=None, description="Réponse brute du LLM")
     fallback_from: Optional[str] = Field(default=None, description="Provider initial en échec si fallback utilisé (Story 1.16)")
     fallback_reason: Optional[str] = Field(default=None, description="Raison de l'échec du provider initial (Story 1.16)")
+    template_id: Optional[str] = Field(
+        default=None,
+        description="Template appliqué (UUID custom ou slug pré-built)",
+    )
+    template_name: Optional[str] = Field(
+        default=None,
+        description="Nom du template au moment de la génération",
+    )
 
     @field_serializer('timestamp')
     def serialize_timestamp(self, value: datetime) -> str:

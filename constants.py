@@ -1,4 +1,8 @@
+import os
 from pathlib import Path
+
+# `constants.py` est à la racine du dépôt.
+_REPO_ROOT = Path(__file__).resolve().parent
 
 class UIText:
     NONE = "(Aucun)"
@@ -39,6 +43,18 @@ class FilePaths:
     )
     LOGS_DIR = DATA_DIR / "logs"
     LLM_CONFIG = "llm_config.json"
+
+
+def resolve_logs_dir() -> Path:
+    """Retourne le dossier des logs applicatifs : ``LOG_DIR`` s'il est défini, sinon ``<dépôt>/data/logs``.
+
+    Seule résolution à utiliser, côté écrivains (handler JSON, journal sync Notion, logs
+    export) comme côté lecteurs (``LogService``, nettoyage au démarrage) : un lecteur qui
+    relirait ``FilePaths.LOGS_DIR`` en dur ne verrait plus rien dès que ``LOG_DIR`` est posé.
+    Lue à chaque appel, pas à l'import : les tests changent ``LOG_DIR`` après coup.
+    """
+    override = os.getenv("LOG_DIR", "").strip()
+    return Path(override) if override else _REPO_ROOT / FilePaths.LOGS_DIR
 
 class ModelNames:
     """Noms des modèles OpenAI utilisés dans l'application.

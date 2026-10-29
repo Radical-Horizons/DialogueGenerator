@@ -46,7 +46,7 @@ export function useGraphContextMenuLongPress({
   onNodeLongPress,
   onPaneLongPress,
 }: UseGraphContextMenuLongPressArgs): GraphContextMenuLongPressHandlers {
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const timerRef = useRef<number | null>(null)
   const startRef = useRef<{ x: number; y: number; nodeId: string | null } | null>(null)
   const optsRef = useRef({ onNodeLongPress, onPaneLongPress })
   optsRef.current = { onNodeLongPress, onPaneLongPress }

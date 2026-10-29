@@ -55,6 +55,7 @@ describe('EffectEditor', () => {
           isFavorite: false,
         },
       ],
+      total: 1,
     })
 
     render(<Wrap />)
@@ -65,7 +66,7 @@ describe('EffectEditor', () => {
   })
 
   it('affiche un aperçu concaténé lorsque choiceEffects est prérempli', async () => {
-    vi.mocked(flagsAPI.listFlags).mockResolvedValue({ flags: [] })
+    vi.mocked(flagsAPI.listFlags).mockResolvedValue({ flags: [], total: 0 })
 
     render(
       <Wrap
@@ -85,7 +86,7 @@ describe('EffectEditor', () => {
 
   it('utilise des selects pour les effets de réputation', async () => {
     const user = userEvent.setup()
-    vi.mocked(flagsAPI.listFlags).mockResolvedValue({ flags: [] })
+    vi.mocked(flagsAPI.listFlags).mockResolvedValue({ flags: [], total: 0 })
 
     render(<Wrap />)
 

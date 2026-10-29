@@ -69,10 +69,6 @@ async function loginAndOpenFixtureOnDashboardGraph(page: Page, fixtureId: string
     await page.getByRole('button', { name: /se connecter/i }).click()
     await expect(page).toHaveURL(/\//, { timeout: E2E_MS.ui })
   }
-  await page
-    .getByRole('button', { name: /Génération de Dialogues/i })
-    .waitFor({ state: 'visible', timeout: E2E_MS.graphField })
-    .catch(() => {})
   await openDashboardGraphTabAndSelectDocument(page, fixtureId)
 }
 

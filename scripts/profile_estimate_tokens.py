@@ -51,7 +51,7 @@ def _run_pipeline(
     request_data: EstimateTokensRequest,
     service_dict: Dict[str, Any],
 ) -> Dict[str, float]:
-    from api.routers.context import _build_lightweight_prompt_structure
+    from api.routers.context_build import _build_lightweight_prompt_structure
     from services.context_token_budget import compute_context_selection_token_metrics
     from services.context_truncator import cap_context_text_to_budget
 

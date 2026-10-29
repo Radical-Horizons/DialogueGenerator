@@ -1,9 +1,8 @@
 ---
 description: Backend API REST FastAPI — architecture, SOLID, RESTful, sécurité
-globs: ["api/**/*.py", "backend/**/*.py", "server/**/*.py"]
-alwaysApply: false
+paths:
+  - "api/**/*.py"
 ---
-
 - **Architecture**: API REST FastAPI dans `api/`. La logique métier reste dans `services/` (réutilisable pour l'API web + tests). ⚠️ L'UI desktop PySide6 est dépréciée, utiliser l'interface web React.
 - **Structure**: `api/routers/` (routes HTTP), `api/schemas/` (DTOs Pydantic), `api/services/` (adaptateurs), `api/dependencies.py` (injection).
 - **SOLID**: Routers = routes uniquement, Services API = adaptation, Services métier = logique pure, Repositories = données.

@@ -25,6 +25,22 @@ Le backend peut **télécharger le GDD depuis Notion** et l’écrire sous `data
 
 - **`sources`** : liste d’objets `{ notion_id, kind: "database" \| "page", category_file, notion_data_source_ids? }`. Chaque source mappe une page ou une base Notion vers un nom de fichier cible (ex. `personnages.json`).
 - **`included_categories`** : si **non vide**, seules les sources **database** dont `category_file` est listé sont synchronisées ; les sources **page** sont exclues pour ce run (comportement documenté dans `GddNotionSyncConfigPublic`). Après une **sync complète** réussie (promotion miroir), les fichiers ou dossiers shards correspondant aux bases **non cochées** sont **supprimés** du disque sous `GDD_categories/` (les JSON issus des fiches `page` déjà présents ne sont pas effacés).
+- **`[]` signifie « aucun filtre »** : toutes les bases **et** toutes les fiches `page` deviennent éligibles. Ce n’est pas « zéro base ».
+
+### Périmètre des runs (persisté vs éphémère)
+
+Deux mécanismes distincts contrôlent quelles sources sont synchronisées :
+
+| Mécanisme | Où | Usage |
+|-----------|-----|--------|
+| **`included_categories` persisté** | `settings.json` | Défaut pour chaque run (`included_filter=persisted`, défaut API). Mis à jour via `PUT /config` ou bouton **Sauver** de l’UI. |
+| **Filtre éphémère UI** | Query `included_filter=ui` + `included_category` répété | Cases cochées **sans** sauvegarde : le prochain run utilise uniquement cette sélection. L’UI envoie ce mode à chaque sync depuis v1.8.4. |
+
+**Sync incrémentale et complète** appliquent le même filtre de périmètre (`_collect_eligible_sources` dans `GddNotionSyncService`). Avant juillet 2026, la sync incrémentale ignorait parfois le périmètre coché — corrigé ; les deux modes sont alignés.
+
+**Piège UI** : ne pas lancer de sync tant que `GET /config` n’a pas répondu. Si l’UI envoyait `included_filter=ui` avec une liste vide pendant le chargement, le service interpréterait « aucun filtre » et parcourrait **toutes** les sources (bases + fiches page). `GddNotionSyncSection` renvoie `undefined` pour le filtre éphémère tant que `config` est `null` et désactive les boutons de sync.
+
+**Diagnostic** : dans `data/logs/logs_YYYY-MM-DD.json`, un run filtré émet `… exclu du périmètre (included_categories)` ; leur absence indique un filtre vide. `sources_total` du modal de progression = nombre de sources éligibles.
 - **`auto_sync_enabled` / `sync_interval_minutes`** : planification côté serveur (voir `api/main.py` / tâches de fond).
 - **`archive_retention_count`** : nombre max de dossiers sous `.archive/` (les plus anciens sont supprimés).
 - **`mirror_rebuild_on_full_sync`** : **déprécié**, ignoré ; une sync complète applique toujours le miroir disque.
@@ -43,7 +59,7 @@ Les autres bases peuvent éviter `get_page_content` après **sonde** sur les 3 p
 
 ## Sync incrémentale vs complète
 
-- **POST `/api/v1/gdd-notion-sync/sync`** (sans `full=true`) : sync incrémentale guidée par le manifeste.
+- **POST `/api/v1/gdd-notion-sync/sync`** (sans `full=true`) : sync incrémentale guidée par le manifeste. Respecte `included_categories` (persisté ou filtre UI).
 - **`full=true`** : sync complète — archive l’état courant, écriture sous `.staging/<run>/`, promotion vers les cibles des sources si pas d’erreur bloquante. Le query param `mirror_rebuild` est **déprécié** (sans effet).
 
 **Reprise / abandon** :

@@ -613,6 +613,30 @@ Catalogue des familles de systèmes de jeu utilisables dans les dialogues (FR94)
 
 **Reste à faire :** connexion runtime live (Unity/API) non implémentée.
 
+### GET `/mechanics/systems/skill-check-catalog`
+
+Catalogue caractéristiques + compétences pour l'éditeur de tests Unity (`Attribut+Compétence:DD`) et l'autocomplétion frontend.
+
+**Response:** `SkillCheckCatalogResponse`
+
+```json
+{
+  "attributes": [
+    { "id": "Sociabilité", "label": "Sociabilité" },
+    { "id": "Puissance", "label": "Puissance" }
+  ],
+  "skills": [
+    { "id": "Tromperie", "label": "Tromperie" },
+    { "id": "Diplomatie", "label": "Diplomatie" }
+  ]
+}
+```
+
+- **Attributs** : 8 caractéristiques canoniques (`services/skill_check_catalog.py` — `CORE_ATTRIBUTE_ENTRIES`).
+- **Compétences** : lues depuis `data/UnityData/SkillCatalog.csv` via `SkillCatalogService`.
+
+**Client TS :** `frontend/src/api/skillCheckCatalog.ts`. Guide : [`docs/guides/game-systems-integration.md`](../guides/game-systems-integration.md).
+
 ---
 
 ## Documents Endpoints (`/api/v1/documents`)
@@ -854,6 +878,9 @@ All routes require JWT (`Authorization: Bearer <token>`). Schémas : `api/schema
 - `mirror_rebuild` (bool) — **déprécié, sans effet**.
 - `resume` (bool) — reprendre une sync complète (`full=true` obligatoire ; mutuellement exclusif avec `fresh`).
 - `fresh` (bool) — abandon checkpoint + nouveau run complet (`full=true` obligatoire).
+- `category_file` (string[], répétable) — limite le run à une ou plusieurs bases (incompatible avec `resume=true`).
+- `included_filter` (`persisted` | `ui`, default `persisted`) — `persisted` : filtre `included_categories` sauvegardé ; `ui` : filtre éphémère via `included_category`.
+- `included_category` (string[], répétable) — avec `included_filter=ui` : bases cochées pour ce run uniquement. Absent ou liste vide = toutes les bases et fiches page éligibles.
 
 **Response:** `GddNotionSyncRunResponse` (`success`, `message`, `updated_entities`, `partial_errors`).
 
@@ -1029,6 +1056,14 @@ Catalog of game-system families (attributes/skills, effort, reputation) and runt
 **Response:** `GameSystemsIntegrationCatalogResponse` — `{ families[], runtime_source }`
 
 Implementation: `api/routers/mechanics_systems.py`, `services/game_systems_integration_service.py`.
+
+### GET `/mechanics/systems/skill-check-catalog`
+
+Attribute and skill catalog for Unity test editor autocomplete (`Attribute+Skill:DC` format).
+
+**Response:** `SkillCheckCatalogResponse` — `{ attributes: [{ id, label }], skills: [{ id, label }] }`
+
+Sources: `CORE_ATTRIBUTE_ENTRIES` (8 attributes) + `data/UnityData/SkillCatalog.csv` via `SkillCatalogService`.
 
 ---
 

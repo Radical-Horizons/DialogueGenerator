@@ -1,8 +1,13 @@
 /**
  * Boutons undo/redo partagés confort (top-left) et narrow (row-actions) — Story 17.9.
+ * Confort (écran 2e) : glyphes ↶/↷ nus, sans bordure — zone tactile FR119 conservée.
  */
 import { theme } from '../../theme'
+import { redesignText } from '../../theme/redesignTokens'
 import type { GraphToolbarChromeStyles, GraphToolbarChromeTokens } from './graphToolbarTypes'
+
+/** Glyphe désactivé de la maquette 2e (plus sombre que l'étiquette standard). */
+const DISABLED_GLYPH_COLOR = '#3f3f47'
 
 export interface GraphToolbarUndoRedoButtonsProps {
   variant: 'comfort-icon' | 'narrow-labeled'
@@ -41,6 +46,24 @@ export function GraphToolbarUndoRedoButtons({
         fontSize: `${effectiveButtonFontSizeRem}rem`,
       }
 
+  // Chrome par variante : narrow garde ses boutons bordés ; confort passe au glyphe nu (2e).
+  const chromeByEnabled = (enabled: boolean) =>
+    isNarrow
+      ? {
+          border: `1px solid ${theme.border.primary}`,
+          borderRadius: '6px',
+          backgroundColor: theme.button.default.background,
+          color: !enabled ? theme.text.secondary : theme.button.default.color,
+          opacity: enabled ? 1 : 0.6,
+        }
+      : {
+          border: 'none',
+          borderRadius: '5px',
+          backgroundColor: 'transparent',
+          color: enabled ? redesignText.secondary : DISABLED_GLYPH_COLOR,
+          fontSize: '13px',
+        }
+
   return (
     <>
       <button
@@ -50,12 +73,8 @@ export function GraphToolbarUndoRedoButtons({
         disabled={!canUndoNow}
         style={{
           ...baseStyle,
-          border: `1px solid ${theme.border.primary}`,
-          borderRadius: '6px',
-          backgroundColor: theme.button.default.background,
-          color: !canUndoNow ? theme.text.secondary : theme.button.default.color,
+          ...chromeByEnabled(canUndoNow),
           cursor: canUndoNow ? 'pointer' : 'not-allowed',
-          opacity: canUndoNow ? 1 : 0.6,
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -63,7 +82,7 @@ export function GraphToolbarUndoRedoButtons({
         title="Annuler (Ctrl+Z)"
         aria-label="Annuler"
       >
-        <span aria-hidden>↩</span>
+        <span aria-hidden>↶</span>
       </button>
       <button
         type="button"
@@ -72,12 +91,8 @@ export function GraphToolbarUndoRedoButtons({
         disabled={!canRedoNow}
         style={{
           ...baseStyle,
-          border: `1px solid ${theme.border.primary}`,
-          borderRadius: '6px',
-          backgroundColor: theme.button.default.background,
-          color: !canRedoNow ? theme.text.secondary : theme.button.default.color,
+          ...chromeByEnabled(canRedoNow),
           cursor: canRedoNow ? 'pointer' : 'not-allowed',
-          opacity: canRedoNow ? 1 : 0.6,
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -85,7 +100,7 @@ export function GraphToolbarUndoRedoButtons({
         title="Refaire (Ctrl+Y)"
         aria-label="Refaire"
       >
-        <span aria-hidden>↪</span>
+        <span aria-hidden>↷</span>
       </button>
     </>
   )

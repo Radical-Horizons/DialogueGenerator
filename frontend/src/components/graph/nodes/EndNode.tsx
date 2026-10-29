@@ -6,6 +6,15 @@ import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
 import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
 import { getValidationHighlightKind } from '../../../utils/graphStructuralValidation'
+import { EDGE_NEUTRAL_COLOR } from '../../../utils/graphEdgeBuilders'
+import {
+  redesignAccent,
+  redesignFont,
+  redesignNodeBorder,
+  redesignRadius,
+  redesignSurface,
+  redesignText,
+} from '../../../theme/redesignTokens'
 
 interface ValidationError {
   type: string
@@ -35,7 +44,8 @@ export const EndNode = memo(function EndNode({
   const isHighlighted = data?.isHighlighted || false
 
   const validationHighlightKind = getValidationHighlightKind(errors.map((e) => e.type))
-  let borderColor = selected ? '#27AE60' : '#B8B8B8'
+  // Écran 2e : plaque sombre neutre, bordure fine — la sélection passe à l'accent.
+  let borderColor: string = selected ? redesignAccent.base : redesignNodeBorder.default
   if (validationHighlightKind === 'structural') {
     borderColor = theme.state.error.border
   } else if (validationHighlightKind === 'content') {
@@ -50,40 +60,28 @@ export const EndNode = memo(function EndNode({
 
   const backgroundColor = isHighlighted
     ? theme.state.selected.background
-    : validationHighlightKind === 'structural'
-      ? theme.state.error.background
-      : validationHighlightKind === 'content'
-        ? theme.state.warning.background
-        : validationHighlightKind === 'lore'
-          ? theme.state.lore.background
-          : hasErrors
-          ? theme.state.error.background
-          : hasWarnings
-            ? theme.state.warning.background
-            : theme.background.secondary
-  
+    : redesignSurface.panel
+
   return (
     <div
       data-testid="graph-node-content"
       data-node-type="end"
       title={NODE_DRAG_TOOLTIP}
       style={{
-        width: 200,
-        height: 80,
-        border: `2px dashed ${borderColor}`,
-        borderRadius: 8,
+        width: 180,
+        border: `1px solid ${borderColor}`,
+        borderRadius: redesignRadius.node,
         backgroundColor,
         boxShadow: selected
-          ? '0 4px 12px rgba(0, 0, 0, 0.3)'
+          ? `0 0 0 3px ${redesignAccent.ring}`
           : isHighlighted
           ? '0 0 0 3px rgba(116, 192, 252, 0.5)'
-          : '0 2px 6px rgba(0, 0, 0, 0.1)',
+          : 'none',
+        padding: '9px 11px',
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         gap: 8,
-        opacity: 0.8,
         position: 'relative',
         transition: 'all 0.2s ease',
       }}
@@ -108,23 +106,7 @@ export const EndNode = memo(function EndNode({
             zIndex: 10,
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
           }}
-          title={errors.map((e, idx) => {
-            const icon =
-              e.type === 'orphan_node'
-                ? '🔗'
-                : e.type === 'broken_reference'
-                  ? '🔴'
-                  : e.type === 'empty_node' || e.type === 'missing_dialogue_text'
-                    ? '⚪'
-                    : e.type === 'missing_display_name'
-                      ? '📝'
-                      : e.type === 'missing_stable_id'
-                        ? '🆔'
-                        : e.type === 'missing_test'
-                          ? '🧪'
-                          : '⚠️'
-            return `${icon} ${e.message}${idx < errors.length - 1 ? '\n' : ''}`
-          }).join('')}
+          title={errors.map((e) => e.message).join('\n')}
         >
           {errors.length}
         </div>
@@ -150,10 +132,7 @@ export const EndNode = memo(function EndNode({
             zIndex: 10,
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
           }}
-          title={warnings.map((w, idx) => {
-            const icon = w.type === 'unreachable_node' ? '📍' : w.type === 'cycle_detected' ? '🔄' : '⚠️'
-            return `${icon} ${w.message}${idx < warnings.length - 1 ? '\n' : ''}`
-          }).join('')}
+          title={warnings.map((w) => w.message).join('\n')}
         >
           {warnings.length}
         </div>
@@ -163,28 +142,33 @@ export const EndNode = memo(function EndNode({
         type="target"
         position={Position.Top}
         style={{
-          background: data.incomingEdgeColor ?? '#B8B8B8',
+          background: data.incomingEdgeColor ?? EDGE_NEUTRAL_COLOR,
           width: 12,
           height: 12,
           border: '2px solid white',
         }}
       />
-      
-      {/* Icône de fin */}
-      <div style={{ fontSize: '1.5rem' }}>🏁</div>
-      
-      {/* Label */}
-      <div
+
+      {/* Libellé mono maquette 2e : `FIN` + carré plein. */}
+      <span
+        title="Fin du dialogue"
         style={{
-          fontSize: '0.9rem',
-          fontWeight: 'bold',
-          color: theme.text.secondary,
-          textAlign: 'center',
+          fontFamily: redesignFont.mono,
+          fontSize: '9.5px',
+          letterSpacing: '0.09em',
+          textTransform: 'uppercase',
+          color: redesignText.muted,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
         }}
       >
         Fin du dialogue
-      </div>
-      
+      </span>
+      <span aria-hidden style={{ fontSize: 11, color: redesignText.label, flexShrink: 0 }}>
+        ■
+      </span>
+
       {/* Pas de handle de sortie (c'est une fin) */}
     </div>
   )

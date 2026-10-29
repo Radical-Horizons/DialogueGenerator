@@ -40,6 +40,14 @@ class LLMUsageRecord(BaseModel):
         default=None,
         description="Identifiant scope coûts (JWT sub / username) pour agrégation multi-utilisateur",
     )
+    template_id: Optional[str] = Field(
+        default=None,
+        description="Template appliqué à la génération (UUID custom ou slug pré-built)",
+    )
+    template_name: Optional[str] = Field(
+        default=None,
+        description="Nom du template au moment de la génération (snapshot)",
+    )
 
     model_config = ConfigDict(
         json_schema_extra={

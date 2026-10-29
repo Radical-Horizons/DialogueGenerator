@@ -12,6 +12,45 @@ Les utilisateurs peuvent créer, sauvegarder et réutiliser des configurations d
 
 ---
 
+---
+
+## Révision — 2026-08-21 : la visibilité devient un statut
+
+**Décision produit.** Le partage d'un template n'est plus une action dirigée vers des
+personnes, c'est un **statut porté par l'élément** :
+
+| Statut | Sens | Quand |
+|---|---|---|
+| `partagé` | Visible de toute l'équipe | **Défaut.** Le cas courant. |
+| `privé` | Visible du seul propriétaire | Brouillon. |
+
+**Ce que cette décision remplace :**
+
+- Le **partage nominatif** (Story 6.8 d'origine) — choisir des destinataires, une table
+  `template_shares`, un modal de sélection de membres, une révocation.
+- Le **marketplace** (Story 6.6) — publication communautaire, notes, commentaires.
+
+**Ce qu'elle implique pour l'écran, et qui est le cœur de la révision :**
+
+⚠️ **Une seule liste.** Un statut est une propriété d'un élément, pas une catégorie qui
+découpe l'interface. La version précédente de cet epic prescrivait quatre sections
+empilées — « Templates pré-built », « Marketplace », « Templates partagés », « mes
+templates » — parce qu'elles avaient un sens sous le modèle nominatif : chacune
+répondait à « d'où vient cet élément ». Avec un statut, cette question se répond par
+une **pastille** sur la ligne et un **filtre** au-dessus de la liste, jamais par un
+empilement de sections.
+
+C'est le motif que l'Epic 6 devait justement supprimer : au départ, « Mes briefs (ce
+navigateur) » et « Mes templates » étaient deux listes pour une même chose, séparées
+par un critère — le lieu de stockage — qui n'intéresse aucun utilisateur. Découper par
+visibilité rejoue exactement la même erreur avec un autre critère.
+
+**Portée de la révision :** Story 6.6 passe hors périmètre, Story 6.8 est réécrite,
+Story 6.2 et Story 6.4 voient leurs critères d'affichage alignés sur la liste unique.
+Les Stories 6.1, 6.3, 6.5, 6.7 et 6.9 sont inchangées.
+
+---
+
 ## Contexte GDD Alteir — Ce que les templates doivent couvrir
 
 Source : `gdd-systems-reference.md`. Les templates de DialogueGenerator ne sont pas neutres : ils embarquent implicitement la connaissance des systèmes Alteir. Un template "Confrontation" doit savoir que les choix peuvent tester `Sociabilité` ou `Puissance`, qu'ils peuvent modifier la réputation (axe Crainte), et qu'un flag `Flag_perso_X_confrontation` sera probablement affecté.
@@ -227,7 +266,8 @@ So that **je peux démarrer rapidement avec des configurations optimisées sans 
 
 **Given** je suis sur l'écran de génération
 **When** j'ouvre le sélecteur de templates
-**Then** une section "Templates pré-built" s'affiche avec templates Alteir : Salutation/Première rencontre, Confrontation, Révélation narrative, Négociation, Recrutement compagnon, Cut-scene, Test de caractéristique
+**Then** les templates Alteir du catalogue apparaissent dans la liste unique, marqués « fourni » : Salutation/Première rencontre, Confrontation, Révélation narrative, Négociation, Recrutement compagnon, Cut-scene, Test de caractéristique
+**And** ils se distinguent par leur pastille et par le filtre de provenance, **pas** par une section séparée (voir Révision 2026-08-21)
 **And** chaque template pré-built affiche : nom, description, système GDD associé, aperçu (instructions type)
 
 **Given** je sélectionne un template pré-built "Confrontation"
@@ -310,48 +350,23 @@ So that **je peux standardiser l'utilisation du contexte GDD selon mes préfére
 
 ---
 
-### Story 6.6: Parcourir marketplace de templates (V1.5+) (FR60)
+### Story 6.6: Marketplace de templates — HORS PÉRIMÈTRE (FR60)
 
-As a **utilisateur créant des dialogues**,
-I want **parcourir un marketplace de templates (V1.5+)**,
-So that **je peux découvrir et utiliser des templates créés par d'autres utilisateurs**.
+**Statut : retirée.** Remplacée par la décision « la visibilité est un statut »
+(voir Révision 2026-08-21).
 
-**Acceptance Criteria:**
+Le marketplace supposait une audience publique au-delà de l'équipe : publication,
+notes, commentaires, popularité. Le produit n'a pas cette audience — les utilisateurs
+sont une équipe qui partage un GDD. « Partagé » y veut dire « visible de l'équipe »,
+ce qui couvre le besoin réel de découverte sans introduire une seconde surface sociale
+à modérer.
 
-**Given** le marketplace de templates est disponible (V1.5+)
-**When** j'ouvre le sélecteur de templates
-**Then** une section "Marketplace" s'affiche avec templates partagés par la communauté
-**And** je peux parcourir les templates par catégorie, popularité, ou date
+Ce qui est conservé du besoin d'origine (« découvrir des templates que je n'ai pas
+écrits ») : les templates de l'équipe apparaissent dans la liste unique au même titre
+que les miens, et la Story 6.9 les propose activement selon le contexte de la scène.
 
-**Given** je parcours le marketplace
-**When** je consulte un template du marketplace
-**Then** je vois : nom, description, auteur, nombre d'utilisations, note moyenne
-**And** je peux voir un aperçu du template (instructions, contexte type)
-
-**Given** je trouve un template intéressant dans le marketplace
-**When** je clique sur "Utiliser ce template"
-**Then** le template est ajouté à mes templates personnels (copie locale)
-**And** je peux utiliser le template comme mes templates custom (voir Story 6.3)
-
-**Given** je partage un de mes templates au marketplace (voir Story 6.7)
-**When** le template est partagé
-**Then** le template apparaît dans le marketplace avec mon nom comme auteur
-**And** d'autres utilisateurs peuvent découvrir et utiliser mon template
-
-**Given** je filtre le marketplace par catégorie ou popularité
-**When** je sélectionne un filtre
-**Then** seuls les templates correspondants sont affichés
-**And** je peux trier par : popularité, date, note, nombre utilisations
-
-**Technical Requirements:**
-- Backend : Endpoints `/api/v1/templates/marketplace` (GET liste, POST partager) pour marketplace
-- Service : `TemplateMarketplaceService` avec méthodes `browse_templates(filters)`, `share_template(template_id)`
-- Base de données : Table `shared_templates` (template_id, author_id, category, popularity, rating, usage_count)
-- Frontend : Composant `TemplateMarketplacePanel.tsx` avec liste templates + filtres + tri
-- Partage : Intégration avec Story 6.7 (partage templates) pour publier templates
-- Tests : Unit (marketplace logic), Integration (API marketplace), E2E (workflow marketplace)
-
-**References:** FR60 (marketplace templates V1.5+), Story 6.7 (partage templates), Story 6.3 (appliquer templates)
+**FR60 est donc sans objet en V1.** Le rouvrir supposerait de reposer la question de
+l'audience — pas seulement de rebrancher du code.
 
 ---
 
@@ -402,51 +417,63 @@ So that **je peux identifier les templates les plus performants et améliorer la
 
 ---
 
-### Story 6.8: Partager templates avec membres équipe (FR62)
+### Story 6.8: Choisir la visibilité d'un template (FR62 — révisée)
 
 As a **utilisateur travaillant en équipe**,
-I want **partager mes templates avec les membres de mon équipe**,
-So that **nous pouvons standardiser nos configurations et réutiliser les meilleures pratiques**.
+I want **que mes templates soient visibles de l'équipe par défaut, et pouvoir en garder certains privés**,
+So that **l'équipe standardise ses configurations sans démarche de partage, et que mes brouillons ne polluent pas la bibliothèque commune**.
 
 **Acceptance Criteria:**
 
-**Given** j'ai créé un template custom (voir Story 6.1)
-**When** je sélectionne le template et clique sur "Partager avec équipe"
-**Then** un modal s'affiche avec liste des membres de l'équipe (voir Epic 7)
-**And** je peux sélectionner les membres avec qui partager
+**Given** je crée un template
+**When** je ne fais rien de plus
+**Then** il est `partagé` — visible de toute l'équipe
+**And** aucune action de partage n'est requise ni proposée
 
-**Given** je partage un template avec un membre de l'équipe
-**When** le partage est confirmé
-**Then** le template apparaît dans la liste de templates du membre
-**And** le template est marqué comme "Partagé par [mon nom]"
-**And** le membre peut utiliser le template comme ses templates custom
+**Given** un template dont je suis propriétaire
+**When** je bascule son statut sur `privé`
+**Then** il n'est plus visible que de moi et d'un administrateur
+**And** il disparaît de la liste de mes collègues au prochain chargement
 
-**Given** un membre de l'équipe partage un template avec moi
-**When** je consulte mes templates
-**Then** le template partagé apparaît dans une section "Templates partagés"
-**And** je peux utiliser le template normalement (voir Story 6.3)
-**And** je peux voir qui a partagé le template
+**Given** un template dont je ne suis pas propriétaire
+**When** je tente d'en changer le statut
+**Then** l'action est refusée et un message explicite le dit
 
-**Given** je modifie un template que j'ai partagé
-**When** le template est modifié
-**Then** les membres avec qui le template est partagé voient la mise à jour
-**And** un message informatif s'affiche "Template '[nom]' a été mis à jour par [auteur]"
+**Given** j'ouvre l'onglet Templates
+**When** la liste s'affiche
+**Then** je vois **une seule liste** réunissant le catalogue fourni, mes templates et ceux de l'équipe
+**And** chaque ligne porte une **pastille** indiquant son statut et sa provenance
+**And** un **filtre** me permet de restreindre à une provenance ou à un statut
+**And** la liste n'est **pas** scindée en sections empilées
 
-**Given** je retire le partage d'un template
-**When** je clique sur "Arrêter le partage"
-**Then** le template disparaît de la liste des membres
-**And** les membres ne peuvent plus utiliser le template (sauf s'ils l'ont copié localement)
+**Given** je filtre sur « mes templates privés »
+**When** le filtre s'applique
+**Then** seuls mes brouillons restent affichés
+**And** le filtre est réversible sans rechargement
+
+**Given** un template partagé par un collègue
+**When** je le consulte dans la liste
+**Then** je vois qui en est le propriétaire
+**And** je peux l'appliquer exactement comme les miens
+**And** je ne peux ni le modifier ni le supprimer
+
+**Given** un template sans propriétaire connu (antérieur au modèle)
+**When** il est affiché
+**Then** il est lisible par tous
+**And** seul un administrateur peut le modifier
 
 **Technical Requirements:**
-- Backend : Endpoints `/api/v1/templates/{id}/share` (POST partager, DELETE arrêter partage) avec liste membres
-- Service : `TemplateSharingService` avec méthodes `share_template(template_id, member_ids)`, `revoke_share(template_id)`
-- Base de données : Table `template_shares` (template_id, owner_id, shared_with_user_id, timestamp)
-- Frontend : Composant `TemplateSharingModal.tsx` avec sélection membres équipe + gestion partage
-- Notifications : Intégration avec Epic 7 (collaboration) pour notifications partage templates
-- Sync : Mise à jour templates partagés en temps réel (WebSocket ou polling)
-- Tests : Unit (partage logique), Integration (API sharing), E2E (workflow partage)
+- Champ `visibility` (`shared` | `private`) **persisté** sur l'objet, `shared` par défaut.
+- Champ `relation` **calculé pour le lecteur** (`owned` | `team` | `legacy`) — jamais persisté.
+  Ne pas confondre les deux : `visibility` décrit l'objet, `relation` décrit son rapport
+  à celui qui le lit. Le même template vaut `owned` pour son auteur et `team` pour un collègue.
+- Une **seule** implémentation d'ACL, partagée avec les profils d'auteur.
+- Frontend : une liste, une pastille par ligne, un filtre. Pas de composant « section ».
+- Tests : le cas « template partagé d'un collègue **visible dans la liste** » doit être
+  couvert — c'est le scénario nominal depuis que `partagé` est le défaut, et son absence
+  a laissé passer une régression qui le rendait invisible.
 
-**References:** FR62 (partage templates équipe), Epic 7 (collaboration), Story 6.1 (créer templates), Story 6.3 (appliquer templates)
+**References:** FR62 (révisée), Story 6.1, Story 6.3, Révision 2026-08-21
 
 ---
 
@@ -497,3 +524,17 @@ So that **je peux découvrir rapidement les templates les plus pertinents pour m
 
 ---
 
+## Hors périmètre (explicitement)
+
+- **Partage nominatif** — choisir des destinataires un par un. Remplacé par le statut.
+  Rouvrir supposerait un besoin que l'équipe n'a pas exprimé : partager avec *certains*
+  collègues et pas d'autres, à l'intérieur d'une équipe qui partage déjà tout le GDD.
+- **Marketplace public** — voir Story 6.6.
+- **Sections empilées dans le sélecteur** — une liste, une pastille, un filtre.
+- **Notifications de mise à jour d'un template** (« X a modifié le template Y ») — relevait
+  du modèle nominatif, où le destinataire subissait une modification qu'il n'avait pas
+  demandée. Sans objet quand tout le monde voit la même bibliothèque.
+- **Stockage navigateur d'un objet métier** — un template ou un profil nommé vit sur le
+  serveur. Seul l'état d'un champ en cours de saisie reste local.
+
+---

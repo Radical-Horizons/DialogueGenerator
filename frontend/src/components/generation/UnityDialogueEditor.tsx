@@ -56,6 +56,11 @@ export interface UnityDialogueEditorProps {
    * — le mode desktop conserve la liste latérale et n'utilise pas ce slot.
    */
   headerSelector?: ReactNode
+  /**
+   * Story 8.8 : après ouverture depuis un rapport de validation batch,
+   * scroll + focus le nœud concerné (deep-link léger).
+   */
+  focusNodeId?: string
 }
 
 export interface UnityDialogueEditorHandle {
@@ -85,6 +90,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
   extraActions,
   hideHeaderSaveButton = false,
   headerSelector,
+  focusNodeId,
 }, ref) {
   const toast = useToast()
   const isNarrow = useDialogueEditionNarrow()
@@ -184,6 +190,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
 
   const firstFieldError = fieldErrors[0]
   const contentRef = useRef<HTMLDivElement>(null)
+  const appliedFocusNodeRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (!firstFieldError) return
@@ -196,6 +203,25 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
     el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
     el.querySelector<HTMLElement>('input')?.focus()
   }, [firstFieldError])
+
+  useEffect(() => {
+    if (!focusNodeId) {
+      appliedFocusNodeRef.current = null
+      return
+    }
+    if (appliedFocusNodeRef.current === focusNodeId) return
+    const root = contentRef.current
+    if (!root) return
+    const el = root.querySelector(
+      `[data-dialogue-node-id="${CSS.escape(focusNodeId)}"]`
+    )
+    if (!(el instanceof HTMLElement)) return
+    appliedFocusNodeRef.current = focusNodeId
+    el.scrollIntoView({ block: 'start', behavior: 'smooth' })
+    const focusable =
+      el.querySelector<HTMLElement>('textarea, input, select, button') ?? el
+    focusable.focus()
+  }, [focusNodeId, json_content])
 
   const fieldErrorByKey = useMemo(() => {
     const map = new Map<string, string>()
@@ -594,7 +620,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                   padding: chrome.toolbarButtonPadding,
                   minHeight: `${chrome.toolbarButtonMinHeightPx}px`,
                   fontSize: `${chrome.toolbarButtonFontRem}rem`,
-                  fontWeight: chrome.toolbarButtonFontWeight,
+                  fontWeight: 600,
                   lineHeight: 1.25,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -627,7 +653,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  border: `1px solid ${theme.border.primary}`,
+                  border: `1px solid ${theme.button.default.border}`,
                   borderRadius: '6px',
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
@@ -685,6 +711,8 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
           return (
             <div
               key={node.id}
+              data-dialogue-node-id={node.id}
+              data-testid={`unity-dialogue-node-${node.id}`}
               style={{
                 border: `1px solid ${theme.border.primary}`,
                 borderRadius: '6px',
@@ -1018,9 +1046,9 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                     border: `1px solid ${theme.input.border}`,
                                     color:
                                       choice.influenceDelta !== undefined && choice.influenceDelta >= 0
-                                        ? '#4CAF50'
+                                        ? theme.state.success.color
                                         : choice.influenceDelta !== undefined
-                                          ? '#F44336'
+                                          ? theme.state.error.color
                                           : theme.input.color,
                                     fontFamily: 'monospace',
                                     fontWeight: choice.influenceDelta !== undefined ? 'bold' : 'normal',
@@ -1050,9 +1078,9 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                     border: `1px solid ${theme.input.border}`,
                                     color:
                                       choice.respectDelta !== undefined && choice.respectDelta >= 0
-                                        ? '#4CAF50'
+                                        ? theme.state.success.color
                                         : choice.respectDelta !== undefined
-                                          ? '#F44336'
+                                          ? theme.state.error.color
                                           : theme.input.color,
                                     fontFamily: 'monospace',
                                     fontWeight: choice.respectDelta !== undefined ? 'bold' : 'normal',
@@ -1135,7 +1163,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                   display: 'inline-flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
-                                  border: `1px solid ${theme.border.primary}`,
+                                  border: `1px solid ${theme.button.default.border}`,
                                   borderRadius: '6px',
                                   backgroundColor: theme.button.default.background,
                                   color: theme.button.default.color,
@@ -1144,7 +1172,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                   lineHeight: 1,
                                 }}
                               >
-                                🗑️
+                                ✕
                               </button>
                             </div>
                             <datalist id={`node-ids-${node.id}`}>

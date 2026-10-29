@@ -2,6 +2,7 @@
  * Utilitaire pour rendre le markdown en React.
  */
 import React from 'react'
+import { theme } from '../theme'
 
 /**
  * Rendu simple du markdown en React.
@@ -97,7 +98,7 @@ export function renderMarkdown(text: string): React.ReactNode {
           {
             key: i,
             style: {
-              backgroundColor: '#1e1e1e',
+              backgroundColor: theme.background.elevated,
               padding: '0.75rem',
               borderRadius: '4px',
               overflow: 'auto',
@@ -192,7 +193,7 @@ function renderInlineMarkdown(text: string): React.ReactNode {
           {
             key: match.start,
             style: {
-              backgroundColor: '#1e1e1e',
+              backgroundColor: theme.background.elevated,
               padding: '0.125rem 0.25rem',
               borderRadius: '3px',
               fontSize: '0.9em',

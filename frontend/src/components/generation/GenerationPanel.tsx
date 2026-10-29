@@ -8,18 +8,34 @@ import * as configAPI from '../../api/config'
 import * as dialoguesAPI from '../../api/dialogues'
 import { useGenerationStore } from '../../store/generationStore'
 import { useContextConfigStore } from '../../store/contextConfigStore'
+import { useContextStore } from '../../store/contextStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useLLMStore } from '../../store/llmStore'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
+
+import {
+  MAX_GENERATION_OPTIONS,
+  cancelBackgroundOptions,
+  useGenerationOptionsStore,
+} from '../../store/generationOptionsStore'
+import { GenerationOptionsComparison } from './GenerationOptionsComparison'
 import { useAuthorProfile } from '../../hooks/useAuthorProfile'
 import { theme } from '../../theme'
 import type { LLMModelResponse } from '../../types/api'
 import { SystemPromptEditor } from './SystemPromptEditor'
 import { SceneSelectionWidget } from './SceneSelectionWidget'
 import { DialogueFlagsPanel } from './DialogueFlagsPanel'
-import { GenerationProgressModal } from './GenerationProgressModal'
+import { GenerationStreamingInline } from './GenerationStreamingInline'
+import { ModelEffortPicker } from './ModelEffortPicker'
 import { ModelSelector } from './ModelSelector'
 import { PresetSelector } from './PresetSelector'
+import { BriefTemplateSaver } from './BriefTemplateSaver'
+import { GenerationSettingsDrawer } from './GenerationSettingsDrawer'
+import { GenerationInputTabs } from './GenerationInputTabs'
+import { useGenerationInputTab } from '../../hooks/useGenerationInputTab'
+import { useGraphStore } from '../../store/graphStore'
 import { useToast } from '../shared'
+import { SaveStatusIndicator } from '../shared/SaveStatusIndicator'
 import { StyledSelect } from '../shared/StyledSelect'
 import {
   CONTEXT_TOKENS_LIMITS,
@@ -27,6 +43,8 @@ import {
   DEFAULT_MODEL,
   API_TIMEOUTS,
   REASONING_EFFORT_MODELS,
+  REASONING_EFFORT_OPTIONS,
+  REASONING_EFFORT_SHORT_LABELS,
 } from '../../constants'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 // Hooks métier extraits
@@ -39,6 +57,12 @@ import { GenerationPanelModals } from './GenerationPanelModals'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { PANEL_COMFORT_MIN_WIDTH_PX, generationPanelChrome } from '../../theme/responsiveChrome'
 import { GenerationPanelNarrowProvider } from './GenerationPanelNarrowContext'
+import { redesignAccent, redesignFont, redesignHairline, redesignReadingColumn, redesignText } from '../../theme/redesignTokens'
+import type { ReasoningEffort } from '../../types/api'
+
+function formatTokensShort(value: number): string {
+  return value >= 1000 ? `${Math.round(value / 1000)}K` : String(value)
+}
 
 export function GenerationPanel() {
   // Stores
@@ -55,6 +79,7 @@ export function GenerationPanel() {
     error: streamingError,
     currentJobId,
     isInterrupting,
+    unityDialogueResponse,
     interrupt,
     minimize,
     resetStreamingState,
@@ -76,9 +101,10 @@ export function GenerationPanel() {
   const [maxCompletionTokens, setMaxCompletionTokens] = useState<number | null>(null)
   const [llmModel, setLlmModel] = useState<string>(DEFAULT_MODEL)
   const [reasoningEffort, setReasoningEffort] = useState<
-    'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | 'max' | null
+    ReasoningEffort | null
   >(null)
   const [topP, setTopP] = useState<number | null>(null)
+  const [temperature, setTemperature] = useState<number | null>(null)
   const [maxChoices, setMaxChoices] = useState<number | null>(null)
   const choicesMode: 'free' | 'capped' = maxChoices !== null ? 'capped' : 'free'
   const [availableModels, setAvailableModels] = useState<LLMModelResponse[]>([])
@@ -87,6 +113,29 @@ export function GenerationPanel() {
   const [narrativeTags, setNarrativeTags] = useState<string[]>([])
   const [previousDialoguePreview] = useState<string | null>(null)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [showModelSettings, setShowModelSettings] = useState(false)
+  /** Onglet d'entrée actif ; le hook garantit le repli sur le brief en mode écriture. */
+  const { activeTab: activeInputTab, setActiveTab: setActiveInputTab, tabsVisible } =
+    useGenerationInputTab()
+
+  /**
+   * Charger un template écrit dans le brief : on y revient donc, sinon l'action reste
+   * invisible — l'utilisateur applique un modèle et rien ne bouge sous ses yeux.
+   * Ne concerne pas « copier vers mes templates », qui ne touche pas au brief.
+   */
+  const backToBriefAfter = useCallback(
+    <T,>(handler: ((value: T) => void) | undefined) =>
+      (value: T) => {
+        handler?.(value)
+        setActiveInputTab('brief')
+      },
+    [setActiveInputTab]
+  )
+  /** Compteur affiché sur l'onglet Flags — nombre de variables liées au dialogue. */
+  const flagCount = useGraphStore((s) => s.dialogueFlagBindings?.length ?? 0)
+  // `=== true` : certains mocks de test renvoient l'objet store entier au lieu du champ
+  // sélectionné ; sans cette coercition le bouton serait désactivé à tort.
+  const gddCatalogLoading = useContextStore((s) => s.gddCatalogLoading) === true
   const toast = useToast()
   
   const availableNarrativeTags = ['tension', 'humour', 'dramatique', 'intime', 'révélation']
@@ -148,6 +197,8 @@ export function GenerationPanel() {
     setMaxChoices,
     llmModel,
     setLlmModel,
+    temperature,
+    setTemperature,
   })
   
   // Synchroniser l'état local llmModel avec useLLMStore (Story 0.3)
@@ -391,48 +442,369 @@ export function GenerationPanel() {
     PANEL_COMFORT_MIN_WIDTH_PX
   )
   const genChrome = isGenerationNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
+  const writingMode = useUiLayoutStore((s) => s.writingMode)
+  // 2a : pendant le run, le brief se range et le formulaire cède la colonne au texte
+  // qui arrive. « voir » le redéploie sans interrompre la génération.
+  // Valeurs déjà déstructurées du store plus haut : pas de seconde souscription, et
+  // surtout pas de sélecteur — les mocks de test qui renvoient le store entier
+  // rendraient un sélecteur inopérant ici (cf. `useGenerationRunActive`).
+  const runActive = isGenerating || isInterrupting
+  const [briefExpandedDuringRun, setBriefExpandedDuringRun] = useState(false)
+  const optionCount = useGenerationOptionsStore((s) => s.optionCount)
+  const optionSlots = useGenerationOptionsStore((s) => s.slots)
+  const comparisonActive = optionSlots.length >= 2
+  /**
+   * Le brief se range dès qu'autre chose occupe la colonne : le texte qui arrive
+   * (2a) ou les options à trancher (2b). Il reste rappelable d'un lien — c'est un
+   * repli, pas une suppression.
+   */
+  const briefCollapsedByContext = runActive || comparisonActive
+  const showGenerationForm = !briefCollapsedByContext || briefExpandedDuringRun
+  useEffect(() => {
+    if (!briefCollapsedByContext) setBriefExpandedDuringRun(false)
+  }, [briefCollapsedByContext])
+  /** 2c : chips de ton, flags et réglages se condensent dans la barre de pied. */
+  const showFormExtras = showGenerationForm && !writingMode
+
+  // Multi-options : l'option 1 est le stream principal — quand il aboutit (ou échoue),
+  // refléter son état dans le slot 0 de la comparaison.
+  useEffect(() => {
+    if (optionSlots.length < 2) return
+    const slot0 = optionSlots.find((s) => s.index === 0)
+    if (!slot0 || slot0.status !== 'running') return
+    if (unityDialogueResponse) {
+      useGenerationOptionsStore
+        .getState()
+        .updateSlot(0, { status: 'completed', result: unityDialogueResponse })
+    } else if (streamingError) {
+      useGenerationOptionsStore.getState().updateSlot(0, { status: 'error', error: streamingError })
+    }
+  }, [optionSlots, unityDialogueResponse, streamingError])
+
+  /**
+   * Interruption de la génération en cours : annulation du job puis remise à zéro de l'état SSE.
+   * Comportement inchangé depuis la modale de progression (Story 0.8).
+   */
+  const handleInterruptGeneration = useCallback(async () => {
+    // Afficher "Interruption en cours..."
+    setInterrupting(true)
+
+    // Multi-options : annuler aussi les jobs d'arrière-plan (2b).
+    cancelBackgroundOptions()
+
+    // Appeler l'API de cancel avec le job_id avec timeout de 10s
+    if (currentJobId) {
+      try {
+        const cancelPromise = dialoguesAPI.cancelGenerationJob(currentJobId).catch((err) => {
+          console.warn('Erreur lors de l\'annulation du job:', err)
+          return 'error' as const
+        })
+        const timeoutPromise = new Promise<'timeout'>((resolve) =>
+          setTimeout(() => resolve('timeout'), API_TIMEOUTS.CANCEL_JOB)
+        )
+
+        const result = await Promise.race([cancelPromise, timeoutPromise])
+
+        // Si timeout atteint ou erreur, force close EventSource
+        if (result === 'timeout' || result === 'error') {
+          closeEventSource()
+          setStreamingError('Interruption terminée')
+        } else {
+          // Interruption réussie
+          closeEventSource()
+          setStreamingError('Génération interrompue')
+        }
+      } catch (err) {
+        console.warn('Erreur lors de l\'annulation du job:', err)
+        closeEventSource()
+        setStreamingError('Interruption terminée')
+      }
+    } else {
+      closeEventSource()
+      setStreamingError('Génération interrompue')
+    }
+
+    // `interrupt()` remet à zéro streamingContent et error : l'appeler ici effacerait
+    // l'avis d'interruption et le texte déjà écrit avant tout rendu. On laisse donc le
+    // bloc afficher « Génération interrompue » + le partiel, puis on nettoie au timeout.
+    setTimeout(() => {
+      setInterrupting(false)
+      interrupt()
+      resetStreamingState()
+      setIsLoading(false)
+    }, 2000)
+  }, [
+    currentJobId,
+    closeEventSource,
+    interrupt,
+    resetStreamingState,
+    setInterrupting,
+    setStreamingError,
+  ])
+
+  /**
+   * Seconde sortie de l'écran 2a : couper l'appel **sans** jeter le texte déjà streamé.
+   * Contrairement à `handleInterruptGeneration`, on ne remet pas l'état à zéro : le bloc
+   * reste affiché avec son partiel, l'utilisateur le ferme quand il l'a récupéré.
+   */
+  const handleKeepPartialGeneration = useCallback(async () => {
+    cancelBackgroundOptions()
+    if (currentJobId) {
+      await dialoguesAPI.cancelGenerationJob(currentJobId).catch((err) => {
+        console.warn('Erreur lors de l\'annulation du job:', err)
+      })
+    }
+    closeEventSource()
+    setStreamingError('Génération interrompue — texte conservé')
+    setIsLoading(false)
+  }, [currentJobId, closeEventSource, setStreamingError])
+
+  const handleCloseStreaming = useCallback(() => {
+    closeEventSource()
+    resetStreamingState()
+    setIsLoading(false)
+  }, [closeEventSource, resetStreamingState])
+
+  /** Même garde que l'ancien bouton du pied : génération, estimation, catalogue GDD. */
+  const isGeneratePrimaryDisabled =
+    isLoading || orchestrator.isEstimating || gddCatalogLoading
+
+  const modelSettingsSummary = [
+    llmModel,
+    REASONING_EFFORT_SHORT_LABELS[reasoningEffort ?? 'none'],
+    `${formatTokensShort(maxContextTokens)}/${formatTokensShort(maxCompletionTokens ?? COMPLETION_TOKENS_LIMITS.DEFAULT)}`,
+    maxChoices === null ? 'libre' : `≤ ${maxChoices}`,
+  ].join(' · ')
+
+  /**
+   * Hauteur commune de la rangée d'action : « Générer », la pastille de réglages
+   * et le compteur « × N » se touchent, ils se mesurent donc au même trait.
+   * Le compteur était figé à 46 et dépassait le bouton en mode écriture.
+   */
+  const actionRowHeight = writingMode ? 38 : 46
+
+  // 2c : modèle et raisonnement sont déjà lisibles sur la pastille voisine — la
+  // ligne de métriques ne répète que ce qu'elle seule porte.
+  const advancedSettingsSummary = [
+    `${formatTokensShort(maxContextTokens)}/${formatTokensShort(maxCompletionTokens ?? COMPLETION_TOKENS_LIMITS.DEFAULT)}`,
+    maxChoices === null ? 'libre' : `≤ ${maxChoices}`,
+  ].join(' · ')
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: theme.background.panel }}>
       <GenerationPanelNarrowProvider value={isGenerationNarrow}>
       <div
         ref={generationScrollRef}
-        style={{ padding: genChrome.containerPadding, flex: 1, overflowY: 'auto', minWidth: 0 }}
+        style={{
+          padding: genChrome.containerPadding,
+          flex: 1,
+          overflowY: 'auto',
+          minWidth: 0,
+          // Le contenu défile ; la barre d'action est ancrée en dehors (voir plus
+          // bas), donc plus besoin de forcer un flux vertical pleine hauteur ici.
+          // Colonne de lecture 660px centrée (écran 1c) — 760px en mode écriture (2c).
+          // 2b : la comparaison n'est pas une lecture, elle prend toute la largeur
+          // (option ouverte + colonne diagnostic ne tiennent pas dans 660px).
+          width: '100%',
+          // Mode écriture : largeur fixe de la maquette. Sinon : marges flexibles
+          // plafonnées, la colonne prend le reste — sur un écran large, une largeur
+          // fixe rejetterait le texte au milieu d'un vide qui grandit sans fin.
+          maxWidth: isGenerationNarrow || comparisonActive
+            ? undefined
+            : writingMode
+              ? redesignReadingColumn.writingMode
+              : undefined,
+          paddingLeft:
+            isGenerationNarrow || comparisonActive || writingMode
+              ? undefined
+              : redesignReadingColumn.sideGutter,
+          paddingRight:
+            isGenerationNarrow || comparisonActive || writingMode
+              ? undefined
+              : redesignReadingColumn.sideGutter,
+          marginLeft: isGenerationNarrow ? undefined : 'auto',
+          marginRight: isGenerationNarrow ? undefined : 'auto',
+          boxSizing: 'border-box',
+        }}
       >
-        {/* PresetSelector (Task 6) */}
-        <PresetSelector
-          onPresetLoaded={presets.handlePresetLoaded}
-          getCurrentConfiguration={presets.getCurrentConfiguration}
-          saveStatus={draft.saveStatus}
+        {/* Le titre de scène ouvre la colonne sur tous les états (1c, 2a, 2b) : c'est
+            le repère qui ne bouge pas pendant que le reste se transforme. */}
+        <SceneSelectionWidget />
+
+        {/* Progression du streaming : dans le flux de l'écran, plus de modale (Story 0.2 → refonte UI) */}
+        <GenerationStreamingInline
+          isActive={
+            // 2b : dès qu'un lot d'options est là, la comparaison porte le résultat —
+            // laisser le bloc de streaming au-dessus ferait un doublon vide.
+            !comparisonActive &&
+            (isGenerating ||
+              currentStep === 'Complete' ||
+              Boolean(streamingError) ||
+              isInterrupting)
+          }
+          content={streamingContent}
+          currentStep={currentStep}
+          isMinimized={isMinimized}
+          error={streamingError}
+          isInterrupting={isInterrupting}
+          reasoningTrace={unityDialogueResponse?.reasoning_trace ?? null}
+          onInterrupt={() => {
+            void handleInterruptGeneration()
+          }}
+          onKeepPartial={() => {
+            void handleKeepPartialGeneration()
+          }}
+          onMinimize={minimize}
+          onClose={handleCloseStreaming}
         />
 
-            <SceneSelectionWidget />
+        {/* Comparaison des options (écran 2b) — rendue dès qu'un run multi-options existe. */}
+        <GenerationOptionsComparison
+          onEditKept={() => {
+            // « Éditer » garde l'option puis ouvre l'onglet Édition, seule surface
+            // d'édition du dialogue généré.
+            useGenerationActionsStore.getState().actions?.handlePreview?.()
+          }}
+          briefExpanded={briefExpandedDuringRun}
+          onEditBrief={() => setBriefExpandedDuringRun((v) => !v)}
+        />
 
-      <SystemPromptEditor
-        userInstructions={userInstructions}
-        authorProfile={authorProfile}
-        gameRules={gameRules}
-        systemPromptOverride={systemPromptOverride}
-        onUserInstructionsChange={(value) => {
-          setUserInstructions(value)
-          draft.markDirty()
-        }}
-        onAuthorProfileChange={(value) => {
-          updateAuthorProfile(value)
-          draft.markDirty()
-        }}
-        onGameRulesChange={(value) => {
-          setGameRules(value)
-          draft.markDirty()
-        }}
-        onSystemPromptChange={(value) => {
-          setSystemPromptOverride(value)
-          draft.markDirty()
-        }}
-      />
+      {/* 2a : pendant le run, le brief se replie en une ligne avec son coût. */}
+      {runActive && !briefExpandedDuringRun && (
+        <div
+          data-testid="brief-collapsed-line"
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'flex-end',
+            gap: 6,
+            marginBottom: 22,
+            fontSize: '12px',
+            color: redesignText.muted,
+          }}
+        >
+          <span>brief · {Math.max(1, Math.ceil(userInstructions.length / 4))} tok ·</span>
+          <button
+            type="button"
+            data-testid="brief-reveal"
+            onClick={() => setBriefExpandedDuringRun(true)}
+            style={{
+              border: 'none',
+              background: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              color: redesignText.secondary,
+              fontSize: '12px',
+            }}
+          >
+            voir
+          </button>
+        </div>
+      )}
 
-      <DialogueFlagsPanel />
+      {/* Chips de ton (écran 1c) — juste sous le titre de scène. */}
+      <div
+        style={{
+          display: showFormExtras ? 'flex' : 'none',
+          flexWrap: 'wrap',
+          gap: 7,
+          marginBottom: 22,
+        }}
+      >
+        {availableNarrativeTags.map((tag) => {
+          const active = narrativeTags.includes(tag)
+          return (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => {
+                setNarrativeTags(
+                  active ? narrativeTags.filter((t) => t !== tag) : [...narrativeTags, tag],
+                )
+                draft.markDirty()
+              }}
+              style={{
+                height: 25,
+                padding: '0 10px',
+                borderRadius: 99,
+                border: active
+                  ? '1px solid rgba(79,127,255,0.4)'
+                  : '1px solid rgba(255,255,255,0.12)',
+                backgroundColor: active ? 'rgba(79,127,255,0.1)' : 'transparent',
+                color: active ? redesignAccent.light : redesignText.muted,
+                fontSize: '11.5px',
+                display: 'flex',
+                alignItems: 'center',
+                cursor: 'pointer',
+              }}
+            >
+              {tag}
+            </button>
+          )
+        })}
+      </div>
 
+      <div style={{ display: showGenerationForm ? 'block' : 'none' }}>
+        {/* La colonne est la zone d'ENTRÉE : ses onglets sont les trois familles
+            qu'on rédige. Un onglet annonce qu'il remplace la surface — c'est ce que
+            les anciens liens ne disaient pas. Masqué en mode écriture, où seul le
+            brief a cours. */}
+        {tabsVisible && (
+          <GenerationInputTabs
+            activeTab={activeInputTab}
+            onSelect={setActiveInputTab}
+            flagCount={flagCount}
+          />
+        )}
+
+        <div data-testid="generation-input-panel">
+          {activeInputTab === 'brief' && (
+            <>
+              <SystemPromptEditor
+                userInstructions={userInstructions}
+                onUserInstructionsChange={(value) => {
+                  setUserInstructions(value)
+                  draft.markDirty()
+                }}
+              />
+              <BriefTemplateSaver getConfiguration={presets.getCurrentConfiguration} />
+            </>
+          )}
+          {activeInputTab === 'flags' && <DialogueFlagsPanel />}
+          {activeInputTab === 'templates' && (
+            <PresetSelector
+              onPresetLoaded={backToBriefAfter(presets.handlePresetLoaded)}
+              onTemplateLoaded={backToBriefAfter(presets.handleTemplateLoaded)}
+              onPrebuiltLoaded={backToBriefAfter(presets.handlePrebuiltLoaded)}
+              onSuggestionLoaded={backToBriefAfter(presets.handleSuggestionLoaded)}
+              getCurrentConfiguration={presets.getCurrentConfiguration}
+              saveStatus={draft.saveStatus}
+            />
+          )}
+        </div>
+      </div>
+
+      {showFormExtras && (
+        <GenerationSettingsDrawer
+          open={showModelSettings}
+          onToggle={() => setShowModelSettings((v) => !v)}
+          summary={modelSettingsSummary}
+          authorProfile={authorProfile}
+          onAuthorProfileChange={(value) => {
+            updateAuthorProfile(value)
+            draft.markDirty()
+          }}
+          gameRules={gameRules}
+          onGameRulesChange={(value) => {
+            setGameRules(value)
+            draft.markDirty()
+          }}
+          systemPromptOverride={systemPromptOverride}
+          onSystemPromptChange={(value) => {
+            setSystemPromptOverride(value)
+            draft.markDirty()
+          }}
+        >
       {/* Sélecteur de modèle LLM (Story 0.3) */}
       <div style={{ marginBottom: '1rem' }}>
         <div
@@ -525,7 +897,7 @@ export function GenerationPanel() {
                 id="reasoning-effort-select"
                 value={reasoningEffort || 'none'}
                 onChange={(e) => {
-                  const newValue = e.target.value as 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | 'max'
+                  const newValue = e.target.value as ReasoningEffort
                   setReasoningEffort(newValue === 'none' ? null : newValue)
                   draft.markDirty()
                 }}
@@ -541,12 +913,11 @@ export function GenerationPanel() {
                 }}
               >
                 <>
-                  <option value="none">Aucun (rapide, latence minimale)</option>
-                  <option value="low">Faible</option>
-                  <option value="medium">Moyen (équilibré, recommandé)</option>
-                  <option value="high">Élevé</option>
-                  <option value="xhigh">Très élevé (xhigh)</option>
-                  <option value="max">Maximum (qualité d'abord)</option>
+                  {REASONING_EFFORT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.hint ? `${option.label} (${option.hint.toLowerCase()})` : option.label}
+                    </option>
+                  ))}
                 </>
               </StyledSelect>
             </div>
@@ -697,6 +1068,8 @@ export function GenerationPanel() {
         }}
         onDirty={draft.markDirty}
       />
+        </GenerationSettingsDrawer>
+      )}
 
       {error && (
         <div style={{ 
@@ -710,74 +1083,206 @@ export function GenerationPanel() {
         </div>
       )}
       </div>
-      </GenerationPanelNarrowProvider>
-      
-      {/* Modal de progression streaming (Story 0.2) */}
-      <GenerationProgressModal
-        isOpen={
-          isGenerating ||
-          currentStep === 'Complete' ||
-          Boolean(streamingError) ||
-          isInterrupting
-        }
-        content={streamingContent}
-        currentStep={currentStep}
-        isMinimized={isMinimized}
-        error={streamingError}
-        isInterrupting={isInterrupting}
-        onInterrupt={async () => {
-          // Afficher "Interruption en cours..."
-          setInterrupting(true)
-          
-          // Appeler l'API de cancel avec le job_id avec timeout de 10s
-          if (currentJobId) {
-            try {
-              const cancelPromise = dialoguesAPI.cancelGenerationJob(currentJobId).catch((err) => {
-                console.warn('Erreur lors de l\'annulation du job:', err)
-                return 'error' as const
-              })
-              const timeoutPromise = new Promise<'timeout'>((resolve) => 
-                setTimeout(() => resolve('timeout'), API_TIMEOUTS.CANCEL_JOB)
-              )
-              
-              const result = await Promise.race([cancelPromise, timeoutPromise])
-              
-              // Si timeout atteint ou erreur, force close EventSource
-              if (result === 'timeout' || result === 'error') {
-                closeEventSource()
-                setStreamingError('Interruption terminée')
-              } else {
-                // Interruption réussie
-                closeEventSource()
-                setStreamingError('Génération interrompue')
-              }
-            } catch (err) {
-              console.warn('Erreur lors de l\'annulation du job:', err)
-              closeEventSource()
-              setStreamingError('Interruption terminée')
+
+      {/* Barre d'action bas de colonne de lecture (écran 1c) : réglages résumés, bouton, coût.
+          2a : masquée pendant le run — les deux sorties vivent dans le bloc de streaming.
+          2c : une seule rangée — mots · tokens · coût à gauche, réglages + Générer à droite. */}
+      <div
+        data-testid="generation-primary-action"
+        // 2a : les deux sorties vivent dans le bloc de streaming. 2b : l'action
+        // primaire est « Garder et continuer », et relancer passe par
+        // « Régénérer les N ». Dans les deux cas la barre revient dès que
+        // l'utilisateur redéploie le brief.
+        hidden={!showGenerationForm}
+        style={{
+          borderTop: `1px solid ${redesignHairline.strong}`,
+          paddingTop: writingMode ? 16 : 13,
+          // Ancrée par la structure (sœur du conteneur défilant), plus par une
+          // marge : `marginTop: auto` la collait au bas du *contenu*, donc elle
+          // partait sous le tiroir bas dès que le contenu débordait (mesuré à
+          // 1024x800 : barre en 739-824, colonne défilante arrêtée à 764).
+          marginTop: 0,
+          flexShrink: 0,
+          paddingBottom: writingMode ? 40 : 0,
+          // `display` explicite : un `display` inline l'emporte sur la règle UA
+          // `[hidden] { display: none }`, donc l'attribut seul ne masquerait rien.
+          display: showGenerationForm ? 'flex' : 'none',
+          flexDirection: writingMode ? 'row' : 'column',
+          alignItems: writingMode ? 'center' : undefined,
+          justifyContent: writingMode ? 'space-between' : undefined,
+          gap: writingMode ? 22 : 9,
+          flexWrap: 'wrap',
+        }}
+      >
+        {writingMode && (
+          <span
+            data-testid="writing-mode-metrics"
+            style={{
+              display: 'flex',
+              gap: 22,
+              fontFamily: redesignFont.mono,
+              fontSize: '10.5px',
+              letterSpacing: '0.05em',
+              color: redesignText.label,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <span>
+              {userInstructions.trim() ? userInstructions.trim().split(/\s+/).length : 0} MOTS
+            </span>
+            {orchestrator.tokenCount != null && (
+              <span>{orchestrator.tokenCount.toLocaleString('fr-FR')} TOKENS</span>
+            )}
+          </span>
+        )}
+        {writingMode && (
+          <span
+            style={{
+              fontFamily: redesignFont.mono,
+              fontSize: '11px',
+              color: redesignText.muted,
+              whiteSpace: 'nowrap',
+              marginLeft: 'auto',
+            }}
+          >
+            {advancedSettingsSummary}
+          </span>
+        )}
+        {/* `wrap` + le `minWidth` du bouton primaire : sous ~470px les réglages
+            passent à la ligne au lieu d'écraser « Générer » (mesuré à 320px :
+            libellé cassé sur trois lignes et compteur d'options hors cadre).
+            `alignItems: center` garde pastille et « × N » alignés sur le bouton. */}
+        <div
+          style={{
+            display: 'flex',
+            gap: 9,
+            flexShrink: 0,
+            minWidth: 0,
+            flexWrap: 'wrap',
+            alignItems: 'center',
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => void orchestrator.handleGenerate()}
+            disabled={isGeneratePrimaryDisabled}
+            style={{
+              height: actionRowHeight,
+              padding: writingMode ? '0 20px' : undefined,
+              borderRadius: 6,
+              border: 'none',
+              backgroundColor: redesignAccent.fill,
+              color: theme.button.primary.color,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 11,
+              cursor: isGeneratePrimaryDisabled ? 'not-allowed' : 'pointer',
+              opacity: isGeneratePrimaryDisabled ? 0.6 : 1,
+              flex: 1,
+              // Plancher de lisibilité du libellé : c'est lui qui déclenche le
+              // passage à la ligne du conteneur plutôt que l'écrasement.
+              minWidth: 200,
+            }}
+          >
+            <span style={{ fontSize: writingMode ? '13.5px' : '14.5px', fontWeight: 600 }}>
+              {optionCount > 1
+                ? `Générer ${optionCount} options`
+                : writingMode
+                  ? 'Générer'
+                  : 'Générer le premier nœud'}
+            </span>
+            <span
+              style={{
+                fontFamily: redesignFont.mono,
+                fontSize: '11px',
+                // Blanc pur sur `redesignAccent.fill` : 4,75:1 (AA). Le rappel se distingue
+                // par sa police mono, pas par une opacité réduite. Remplace l'arbitrage du
+                // 2026-08-06 (accent figé, 3,61:1), levé lors de l'intégration du design system.
+                color: theme.button.primary.color,
+              }}
+            >
+              CTRL+↵
+            </span>
+          </button>
+          <ModelEffortPicker
+            reasoningEffort={reasoningEffort}
+            onReasoningEffortChange={(value) => {
+              setReasoningEffort(value)
+              draft.markDirty()
+            }}
+            // Volontairement pas `isGeneratePrimaryDisabled` : ce prédicat couvre
+            // aussi le chargement du catalogue GDD et l'estimation, pendant lesquels
+            // choisir son modèle reste légitime. Seul un run en vol fige le réglage.
+            disabled={isLoading}
+            height={actionRowHeight}
+          />
+          {/* 2b : nombre d'options par génération — N appels LLM parallèles, plafonnés. */}
+          <button
+            type="button"
+            data-testid="generation-option-count"
+            onClick={() =>
+              useGenerationOptionsStore
+                .getState()
+                .setOptionCount(optionCount >= MAX_GENERATION_OPTIONS ? 1 : optionCount + 1)
             }
-          } else {
-            closeEventSource()
-            setStreamingError('Génération interrompue')
-          }
-          
-          // Réinitialiser l'état
-          interrupt()
-          
-          // Réinitialiser l'état d'interruption après un court délai
-          setTimeout(() => {
-            setInterrupting(false)
-            resetStreamingState()
-            setIsLoading(false)
-          }, 2000)
-        }}
-        onMinimize={minimize}
-        onClose={() => {
-          closeEventSource()
-          resetStreamingState()
-          setIsLoading(false)
-        }}
-      />
+            disabled={isGeneratePrimaryDisabled}
+            title={`Nombre d'options générées en parallèle (coût ×${optionCount}). Cliquer pour changer — max ${MAX_GENERATION_OPTIONS}.`}
+            style={{
+              height: actionRowHeight,
+              padding: '0 14px',
+              borderRadius: 6,
+              border: `1px solid ${theme.button.default.border}`,
+              backgroundColor: 'transparent',
+              color: optionCount > 1 ? redesignAccent.light : redesignText.secondary,
+              fontFamily: redesignFont.mono,
+              fontSize: '11px',
+              letterSpacing: '0.05em',
+              cursor: isGeneratePrimaryDisabled ? 'not-allowed' : 'pointer',
+              opacity: isGeneratePrimaryDisabled ? 0.6 : 1,
+              flexShrink: 0,
+              // Dernier de la rangée : sans cette marge il touche le bord du panneau.
+              marginRight: 9,
+            }}
+          >
+            × {optionCount}
+          </button>
+        </div>
+        {/* L'état du brouillon ne dépend pas d'une estimation : conditionner toute
+            la ligne au décompte de tokens le faisait disparaître tant qu'aucune
+            estimation n'avait eu lieu — alors qu'il était toujours visible du temps
+            où il vivait dans l'en-tête du panneau droit. */}
+        {(orchestrator.tokenCount != null || draft.saveStatus) && !writingMode && (
+          <div
+            style={{
+              textAlign: 'center',
+              fontFamily: redesignFont.mono,
+              fontSize: '10.5px',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              color: redesignText.label,
+            }}
+          >
+            {orchestrator.tokenCount != null
+              ? `${orchestrator.tokenCount.toLocaleString('fr-FR')} tokens · ${llmModel}`
+              : llmModel}
+            {/* L'état du brouillon se lit là où l'on écrit — il vient de l'en-tête du
+                panneau droit, où il rognait la place des onglets. */}
+            {draft.saveStatus ? (
+              <>
+                {' · '}
+                <SaveStatusIndicator
+                  appearance="discreet"
+                  status={draft.saveStatus}
+                  lastSavedAt={draft.draftLastSavedAt}
+                  style={{ display: 'inline-flex', verticalAlign: 'baseline' }}
+                />
+              </>
+            ) : null}
+          </div>
+        )}
+      </div>
+      </GenerationPanelNarrowProvider>
       
       {/* Modals (reset confirm, preset validation, budget block) */}
       <GenerationPanelModals
@@ -798,6 +1303,7 @@ export function GenerationPanel() {
         onBudgetBlockClose={() => setShowBudgetBlockModal(false)}
         onValidationClose={presets.handleValidationClose}
         onValidationConfirm={presets.handleValidationConfirm}
+        validationEntityLabel={presets.validationEntityLabel}
       />
     </div>
   )

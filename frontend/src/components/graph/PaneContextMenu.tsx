@@ -76,7 +76,6 @@ export function PaneContextMenu({
           e.currentTarget.style.backgroundColor = 'transparent'
         }}
       >
-        <span>➕</span>
         <span>Nouveau nœud</span>
       </button>
       <button
@@ -94,7 +93,6 @@ export function PaneContextMenu({
           e.currentTarget.style.backgroundColor = 'transparent'
         }}
       >
-        <span>🔀</span>
         <span>Auto-layout</span>
       </button>
     </div>

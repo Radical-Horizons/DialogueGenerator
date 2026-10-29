@@ -96,7 +96,13 @@ class ElementRepository:
         element_data: Dict[str, Any],
         normalized_search_name: str,
     ) -> bool:
-        """Vérifie alias exact ou forme historique « alias + Nom »."""
+        """Vérifie alias exact ou formes historiques d'affichage.
+
+        Formes reconnues :
+        - alias seul (ex. ``l'Exégète``)
+        - ``alias + Nom`` (ex. ``Seigneuresse Uresaïr``)
+        - ``Nom, alias`` (ex. ``Akthar-Neth Amatru, l'Exégète`` — presets / prompts)
+        """
         alias_tokens = self._alias_tokens(element_data)
         if normalized_search_name in alias_tokens:
             return True
@@ -107,6 +113,8 @@ class ElementRepository:
         normalized_nom = self._normalize_string_for_matching(str(nom))
         for token in alias_tokens:
             if normalized_search_name == f"{token} {normalized_nom}".strip():
+                return True
+            if normalized_search_name == f"{normalized_nom}, {token}".strip():
                 return True
         return False
     

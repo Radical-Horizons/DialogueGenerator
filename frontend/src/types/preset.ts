@@ -2,7 +2,8 @@
  * Types TypeScript pour les presets de génération
  */
 
-import type { ContextSelection } from './api'
+import type { ContextSelection, ReasoningEffort } from './api'
+import type { ContextDroppingRules } from './graph'
 
 export interface PresetMetadata {
   created: string; // ISO 8601
@@ -26,13 +27,15 @@ export interface PresetConfiguration {
   /** Top_p (nucleus sampling) - optionnel */
   topP?: number | null;
   /** Reasoning effort - optionnel */
-  reasoningEffort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null;
+  reasoningEffort?: ReasoningEffort | null;
   /** Max completion tokens - optionnel */
   maxCompletionTokens?: number | null;
   /** Max choices - optionnel */
   maxChoices?: number | null;
   /** LLM model identifier - optionnel */
   llmModel?: string;
+  /** Overlay anti-drop (optionnel, story 6.5 étendu aux presets) */
+  contextDroppingRules?: ContextDroppingRules | null;
 }
 
 export interface Preset {

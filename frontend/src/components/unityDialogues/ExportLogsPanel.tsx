@@ -7,6 +7,7 @@ import { getExportLogs, type ExportLogEntry, type ExportLogStatus } from '../../
 import { previewUnityDialogueExport, downloadUnityDialogue } from '../../api/dialogues'
 import { getErrorMessage } from '../../types/errors'
 import { formatBytes } from '../../utils/formatBytes'
+import { formatCostDetail } from '../../utils/formatCurrency'
 import {
   csvEscape,
   downloadLogBlob,
@@ -20,12 +21,6 @@ import type { ExportPreviewResponse } from '../../types/graph'
 import './ExportLogsPanel.css'
 
 type StatusFilter = 'all' | ExportLogStatus
-
-function formatCostEur(eur: number | null): string {
-  if (eur === null) return '—'
-  if (eur < 0.0001) return `€${eur.toFixed(6)}`
-  return `€${eur.toFixed(4)}`
-}
 
 export interface ExportLogsPanelProps {
   onClose?: () => void
@@ -233,11 +228,11 @@ export function ExportLogsPanel({ onClose }: ExportLogsPanelProps) {
           <h4>Détail export</h4>
           <dl>
             <dt>Timestamp</dt>
-            <dd>{formatLogTimestamp(selectedEntry.timestamp)}</dd>
+            <dd className="elp__mono">{formatLogTimestamp(selectedEntry.timestamp)}</dd>
             <dt>Dialogue ID</dt>
-            <dd>{selectedEntry.dialogue_id}</dd>
+            <dd className="elp__mono">{selectedEntry.dialogue_id}</dd>
             <dt>Coût LLM</dt>
-            <dd>{formatCostEur(selectedEntry.cost_eur)}</dd>
+            <dd className="elp__mono">{formatCostDetail(selectedEntry.cost_eur, 'EUR')}</dd>
             <dt>Validation</dt>
             <dd>{selectedEntry.validation_status}</dd>
             {selectedEntry.errors.length > 0 && (

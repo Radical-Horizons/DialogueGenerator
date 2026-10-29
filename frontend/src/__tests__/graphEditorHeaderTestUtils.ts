@@ -8,91 +8,19 @@ import type { UseGraphToolbarReturn } from '../hooks/useGraphToolbar'
 import { useGraphStore } from '../store/graphStore'
 import { GraphEditorHeader } from '../components/graph/GraphEditorHeader'
 import * as narrowHook from '../hooks/useNarrowInlineSize'
+import { makeMockGraphToolbar } from '../testFixtures/graphToolbar'
 
 type NarrowHookReturn = ReturnType<typeof narrowHook.useNarrowInlineSize>
 
-function nullRef<T>() {
-  return { current: null as T | null }
-}
-
-/** Baseline complète UseGraphToolbarReturn — union desktopToolbar / searchRow / undoRedo. */
-export const defaultMockToolbarState: UseGraphToolbarReturn = {
-  showAutoLayoutDropdown: false,
-  setShowAutoLayoutDropdown: () => {},
-  showActionsDropdown: false,
-  setShowActionsDropdown: () => {},
-  showValidationToolsDropdown: false,
-  setShowValidationToolsDropdown: () => {},
-  showAIGenerationPanel: false,
-  setShowAIGenerationPanel: () => {},
-  showExportFormatDialog: false,
-  setShowExportFormatDialog: () => {},
-  showValidationPanel: false,
-  setShowValidationPanel: () => {},
-  showQualityLlmPanel: false,
-  setShowQualityLlmPanel: () => {},
-  showAiSlopPanel: false,
-  setShowAiSlopPanel: () => {},
-  showContextDroppingPanel: false,
-  setShowContextDroppingPanel: () => {},
-  showFlowSimulationPanel: false,
-  setShowFlowSimulationPanel: () => {},
-  showDialoguePreviewPanel: false,
-  setShowDialoguePreviewPanel: () => {},
-  showGameSystemsIntegrationPanel: false,
-  setShowGameSystemsIntegrationPanel: () => {},
-  showSchemaValidationPanel: false,
-  schemaValidationLoading: false,
-  schemaValidationIsValid: true,
-  schemaValidationErrors: [],
-  schemaValidationErrorCount: 0,
-  schemaValidationWarnings: [],
-  schemaValidationStructuredErrors: [],
-  handleToggleSchemaValidation: () => {},
-  handleSchemaIssueClick: () => {},
-  showCostBreakdown: false,
-  setShowCostBreakdown: () => {},
-  showShortcutsTooltip: false,
-  setShowShortcutsTooltip: () => {},
-  showSearchBar: false,
-  setShowSearchBar: () => {},
-  showJumpToNodeModal: false,
-  setShowJumpToNodeModal: () => {},
-  showFiltersPanel: false,
-  setShowFiltersPanel: () => {},
-  layoutDirection: 'TB',
-  layoutSpacingMode: 'normal',
-  setLayoutSpacingMode: () => {},
-  autoLayoutDropdownRef: nullRef(),
-  actionsDropdownRef: nullRef(),
-  actionsDropdownBtnRef: nullRef(),
-  validationToolsDropdownRef: nullRef(),
-  canvasWrapperRef: nullRef(),
-  reactFlowInstance: null,
-  handleAutoLayout: async () => {},
-  handleOpenExportDialog: () => {},
-  handleExportPNG: async () => {},
-  handleExportSVG: async () => {},
-  handleExportUnity: async () => {},
-  handlePreviewExport: async () => {},
-  previewOpen: false,
-  previewMode: 'single',
-  previewLoading: false,
-  previewError: null,
-  singlePreview: null,
-  batchPreview: null,
-  isExportingFromPreview: false,
-  handleExportFromPreview: async () => {},
-  closePreview: () => {},
+/**
+ * Baseline complète UseGraphToolbarReturn : déléguée à la fixture partagée
+ * (`src/testFixtures/graphToolbar.ts`), seul endroit où les ~75 champs sont énumérés.
+ * Surcouche locale : undo/redo câblés sur le vrai store, ce que les tests header exercent.
+ */
+export const defaultMockToolbarState: UseGraphToolbarReturn = makeMockGraphToolbar({
   undo: () => useGraphStore.getState().undo(),
   redo: () => useGraphStore.getState().redo(),
-  canUndoNow: false,
-  canRedoNow: false,
-  lastExportDownload: null,
-  isExportDownloading: false,
-  handleDownloadLastExport: () => {},
-  dismissExportDownload: () => {},
-}
+})
 
 export function makeMockToolbar(
   overrides: Partial<UseGraphToolbarReturn> = {},

@@ -1,6 +1,7 @@
 /**
- * Résolution des noms canoniques GDD (alias, formes historiques « alias + Nom »).
- * Miroir simplifié de ``ElementRepository`` côté backend.
+ * Résolution des noms canoniques GDD (alias, formes historiques).
+ * Miroir simplifié de ``ElementRepository`` côté backend :
+ * alias seul, ``alias + Nom``, ``Nom, alias``.
  */
 
 export interface GddCatalogEntry {
@@ -40,7 +41,11 @@ function matchesAliasOrHistoricalName(
   const nom = data.Nom
   if (!nom) return false
   const normalizedNom = normalizeGddNameForMatch(String(nom))
-  return tokens.some((token) => normalizedSearch === `${token} ${normalizedNom}`.trim())
+  return tokens.some(
+    (token) =>
+      normalizedSearch === `${token} ${normalizedNom}`.trim() ||
+      normalizedSearch === `${normalizedNom}, ${token}`.trim(),
+  )
 }
 
 function resolveCanonicalName(name: string, catalog: GddCatalogEntry[]): string {

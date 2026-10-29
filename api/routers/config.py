@@ -1,4 +1,5 @@
 """Router pour la configuration."""
+import asyncio
 import logging
 import os
 from typing import Annotated, Any, Dict, List, Optional
@@ -1087,12 +1088,13 @@ async def preview_context(
     Returns:
         Prévisualisation du contexte formaté.
     """
-    try:
+    def _run() -> ContextPreviewResponse:
+        """Corps synchrone déporté sur un thread (ContextBuilder est bloquant)."""
         # Extraire _element_modes si présent (si selected_elements est un dict avec _element_modes)
         element_modes = None
         if isinstance(request_data.selected_elements, dict):
             element_modes = request_data.selected_elements.pop("_element_modes", None)
-        
+
         # Construire le contexte JSON (obligatoire, plus de fallback)
         structured_context = context_builder.build_context_json(
             selected_elements=request_data.selected_elements,
@@ -1105,10 +1107,10 @@ async def preview_context(
         )
         # Sérialiser en texte pour compatibilité
         preview_text = context_builder.serialize_context_to_text(structured_context)
-        
+
         # Compter les tokens
         tokens = context_builder.count_tokens(preview_text)
-        
+
         # Convertir structured_context en dict pour la réponse
         structured_prompt_dict = None
         if structured_context:
@@ -1116,12 +1118,15 @@ async def preview_context(
                 structured_prompt_dict = structured_context.model_dump()
             except Exception as e:
                 logger.warning(f"Erreur lors de la conversion du structured_context en dict: {e}")
-        
+
         return ContextPreviewResponse(
             preview=preview_text or "",
             tokens=tokens,
             structured_prompt=structured_prompt_dict
         )
+
+    try:
+        return await asyncio.to_thread(_run)
     except Exception as e:
         logger.exception(f"Erreur lors de la prévisualisation du contexte (request_id: {request_id})")
         raise InternalServerException(
@@ -1208,92 +1213,6 @@ async def get_template_file_paths(
         )
 
 
-@router.get(
-    "/scene-instruction-templates",
-    response_model=SceneInstructionTemplatesResponse,
-    status_code=status.HTTP_200_OK
-)
-async def get_scene_instruction_templates(
-    request: Request,
-    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
-    request_id: Annotated[str, Depends(get_request_id)]
-) -> SceneInstructionTemplatesResponse:
-    """Récupère la liste des templates d'instructions de scène disponibles.
-    
-    Args:
-        request: La requête HTTP.
-        config_service: Service de configuration injecté.
-        request_id: ID de la requête.
-        
-    Returns:
-        Liste des templates d'instructions de scène disponibles.
-    """
-    try:
-        templates_data = config_service.get_scene_instruction_templates()
-        templates = [
-            SceneInstructionTemplate(
-                id=template.get("id", ""),
-                name=template.get("name", ""),
-                description=template.get("description", ""),
-                instructions=template.get("instructions", "")
-            )
-            for template in templates_data
-        ]
-        return SceneInstructionTemplatesResponse(
-            templates=templates,
-            total=len(templates)
-        )
-    except Exception as e:
-        logger.exception(f"Erreur lors de la récupération des templates d'instructions de scène (request_id: {request_id})")
-        raise InternalServerException(
-            message="Erreur lors de la récupération des templates d'instructions de scène",
-            details={"error": str(e)},
-            request_id=request_id
-        )
-
-
-@router.get(
-    "/author-profile-templates",
-    response_model=AuthorProfileTemplatesResponse,
-    status_code=status.HTTP_200_OK
-)
-async def get_author_profile_templates(
-    request: Request,
-    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
-    request_id: Annotated[str, Depends(get_request_id)]
-) -> AuthorProfileTemplatesResponse:
-    """Récupère la liste des templates de profils d'auteur disponibles.
-    
-    Args:
-        request: La requête HTTP.
-        config_service: Service de configuration injecté.
-        request_id: ID de la requête.
-        
-    Returns:
-        Liste des templates de profils d'auteur disponibles.
-    """
-    try:
-        templates_data = config_service.get_author_profile_templates()
-        templates = [
-            AuthorProfileTemplate(
-                id=template.get("id", ""),
-                name=template.get("name", ""),
-                description=template.get("description", ""),
-                profile=template.get("profile", "")
-            )
-            for template in templates_data
-        ]
-        return AuthorProfileTemplatesResponse(
-            templates=templates,
-            total=len(templates)
-        )
-    except Exception as e:
-        logger.exception(f"Erreur lors de la récupération des templates de profils d'auteur (request_id: {request_id})")
-        raise InternalServerException(
-            message="Erreur lors de la récupération des templates de profils d'auteur",
-            details={"error": str(e)},
-            request_id=request_id
-        )
 
 
 @router.get(

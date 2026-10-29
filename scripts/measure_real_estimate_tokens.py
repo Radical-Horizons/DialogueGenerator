@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 
 from api.container import ServiceContainer
 from api.main import app
-from api.routers.context import _build_lightweight_prompt_structure
+from api.routers.context_build import _build_lightweight_prompt_structure
 from api.schemas.dialogue import ContextSelection, EstimateTokensRequest
 from constants import Defaults
 from core.context.context_builder import ContextBuilder

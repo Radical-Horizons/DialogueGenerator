@@ -198,7 +198,7 @@ export interface EstimateTokensResponse {
   total_estimated_tokens?: number | null
   raw_prompt: RawPrompt
   prompt_hash: string
-  structured_prompt?: import('./prompt').PromptStructure
+  structured_prompt?: import('./prompt').PromptStructure | null
   completion_tokens?: number
   estimated_cost_eur?: number | null
 }
@@ -246,7 +246,7 @@ export interface PreviewPromptRequest extends BasePromptRequest {
 export interface PreviewPromptResponse {
   raw_prompt: RawPrompt
   prompt_hash: string
-  structured_prompt?: import('./prompt').PromptStructure
+  structured_prompt?: import('./prompt').PromptStructure | null
 }
 
 // Context
@@ -441,10 +441,16 @@ export interface UnityDialoguesPathResponse {
 // InteractionContextPathResponse supprimé - système obsolète
 
 // Unity Dialogue
+/**
+ * Effort de raisonnement GPT-5.6 — miroir du Literal backend défini dans
+ * `api/schemas/dialogue.py`. Inclut `max`, que le sélecteur de GenerationPanel propose.
+ */
+export type ReasoningEffort = 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | 'max'
+
 export interface GenerateUnityDialogueRequest extends BasePromptRequest {
   llm_model_identifier: string
   max_completion_tokens?: number | null
-  reasoning_effort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  reasoning_effort?: ReasoningEffort | null
   top_p?: number | null
   field_configs?: Record<string, string[]>
   organization_mode?: string
@@ -467,7 +473,7 @@ export interface GenerateUnityDialogueResponse {
   prompt_hash: string
   estimated_tokens: number
   warning?: string
-  structured_prompt?: import('./prompt').PromptStructure
+  structured_prompt?: import('./prompt').PromptStructure | null
 }
 
 /** GET /api/v1/dialogues/generate/jobs/{job_id} — aligné sur ``GenerationJobStatus`` OpenAPI. */
@@ -531,12 +537,42 @@ export interface BatchExportPreviewResponse {
 }
 
 // Unity Dialogues Library
+export interface DialogueMetadataResponse {
+  document_id: string
+  name: string
+  owner_id?: string | null
+  owner_username?: string | null
+  last_modified_by?: string | null
+  last_modified_by_username?: string | null
+  created_at: string
+  updated_at: string
+  node_count: number
+  total_cost_eur: number
+  cost_per_node_eur: number
+}
+
 export interface UnityDialogueMetadata {
   filename: string
   file_path: string
   size_bytes: number
   modified_time: string
+  /** Date de création (ISO) : index SQLite si indexé, sinon repli fichier. */
+  created_at?: string
   title?: string
+  /** Personnages (`speaker`) uniques du dialogue, pour la recherche (FR81). */
+  speakers?: string[]
+  /** Texte cherchable minuscule (répliques concaténées, borné) pour FR81. */
+  search_text?: string
+  /** Identifiant propriétaire (index SQLite) — filtre auteur FR82. */
+  owner_id?: string
+  /** Username du propriétaire résolu, si indexé. */
+  owner_username?: string
+  /** Coût LLM agrégé en euros ; absent si aucun usage connu. */
+  total_cost_eur?: number | null
+  /** Identifiant du dernier éditeur indexé. */
+  last_modified_by?: string
+  /** Username du dernier éditeur indexé. */
+  last_modified_by_username?: string
   share_count?: number
   /** Présent côté UI / listes enrichies ; optionnel selon l’endpoint. */
   node_count?: number
@@ -552,6 +588,12 @@ export interface UnityDialogueMetadata {
 export interface UnityDialogueListResponse {
   dialogues: UnityDialogueMetadata[]
   total: number
+  /** Numéro de page courante (1-indexé) si la pagination serveur est active. */
+  page?: number | null
+  /** Taille de page appliquée si la pagination serveur est active. */
+  page_size?: number | null
+  /** Nombre total de pages si la pagination serveur est active. */
+  total_pages?: number | null
 }
 
 export interface UnityDialogueReadResponse {

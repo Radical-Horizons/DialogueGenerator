@@ -1,7 +1,7 @@
 ---
 description: Python (global) — conventions, qualité, Windows-first, migration web
-globs: []
-alwaysApply: true
+paths:
+  - "**/*.py"
 ---
 - Architecture : modules core dans `core/` (context, prompt, llm), services réutilisables dans `services/`, API dans `api/`
 - Imports : Préférer `from core.context.context_builder import ContextBuilder` aux anciens imports racine (dépréciés)

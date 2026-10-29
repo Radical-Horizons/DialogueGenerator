@@ -83,7 +83,6 @@ export const ReasoningTraceViewer = memo(function ReasoningTraceViewer({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <span style={{ fontSize: '0.95rem' }}>🧠</span>
           <div>
             <div
               style={{
@@ -128,7 +127,7 @@ export const ReasoningTraceViewer = memo(function ReasoningTraceViewer({
               e.currentTarget.style.backgroundColor = theme.background.panel
             }}
           >
-            📋 Copier
+            Copier
           </button>
         )}
       </div>

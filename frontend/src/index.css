@@ -1,11 +1,13 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* Instrument Sans (chargée dans index.html) : famille d'interface de la refonte.
+     Remplace la pile Inter du gabarit Vite, jamais chargée — l'app tombait sur la police système. */
+  font-family: "Instrument Sans", system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #121214;
+  background-color: #17171b;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -39,11 +41,11 @@ html {
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #8fb0ff;
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: #a9c3ff;
 }
 
 body {
@@ -51,7 +53,7 @@ body {
   padding: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #121214;
+  background-color: #17171b;
   color: rgba(255, 255, 255, 0.87);
   line-height: 1.55;
 }
@@ -78,8 +80,9 @@ input[type="number"],
 input[type="email"],
 textarea,
 select {
-  background-color: #26262c;
-  border: 1px solid #3d3d46;
+  /* Valeurs de theme.input : fond un cran au-dessus de la page, cadre à 3:1 (WCAG 1.4.11). */
+  background-color: #1c1c22;
+  border: 1px solid #6a6a78;
   color: rgba(255, 255, 255, 0.87);
   border-radius: 6px;
   padding: 0.55rem 0.65rem;
@@ -95,26 +98,30 @@ input[type="email"]:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: #646cff;
-  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+  border-color: #4f7fff;
+  box-shadow: 0 0 0 2px rgba(79, 127, 255, 0.25);
 }
 
+/*
+ * Bouton par défaut = bouton secondaire de la refonte : contour, fond transparent.
+ * Le seul bouton plein d'un écran porte ses styles inline (theme.button.primary).
+ * Pas de transition : le survol des contrôles est immédiat.
+ */
 button {
-  border-radius: 8px;
-  border: 1px solid #3d3d46;
+  border-radius: 6px;
+  border: 1px solid #2e2e36;
   padding: 0.5em 1em;
   font-size: 0.9375em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #333333;
+  background-color: transparent;
   color: rgba(255, 255, 255, 0.87);
   cursor: pointer;
-  transition: all 0.25s;
 }
 
 button:hover:not(:disabled) {
-  background-color: #3a3a3a;
-  border-color: #646cff;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-color: #3d3d46;
 }
 
 button:disabled {
@@ -122,10 +129,54 @@ button:disabled {
   cursor: not-allowed;
 }
 
-button:focus,
-button:focus-visible {
-  outline: 2px solid #646cff;
+/**
+ * Anneau de focus (refonte 2026).
+ *
+ * `button:focus` posait un cadre epais a `#646cff` — l'accent d'AVANT la refonte —
+ * apres chaque clic souris : sur des controles devenus des libelles nus, il se
+ * lisait comme un style d'onglet reste en arriere. Restreint a `:focus-visible`
+ * (clavier), et aligne sur l'accent courant.
+ */
+button:focus-visible,
+a:focus-visible,
+[role='tab']:focus-visible {
+  outline: 2px solid rgba(79, 127, 255, 0.75);
   outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/**
+ * Rangees de liste de dialogues (listbox ou bouton, selon le mode d'affichage).
+ *
+ * La selection est deja dite par l'accent lateral de `listItemSelectionStyle`.
+ * Par-dessus se posait un second surlignement : l'anneau par defaut du navigateur
+ * sur `[role=option]`, et sur `<button>` la regle `:focus-visible` ci-dessus avec
+ * son `border-radius: 3px` et son `outline-offset: 2px` — d'ou un cadre ARRONDI
+ * autour d'une rangee, au milieu d'une refonte qui a aplati toutes les surfaces.
+ * Un seul indicateur suffit : l'accent lateral. Le focus reste signale au clavier,
+ * mais a plat et a l'interieur de la rangee.
+ */
+[role='option']:focus,
+button[data-list-row]:focus {
+  outline: none;
+}
+
+[role='option']:focus-visible,
+button[data-list-row]:focus-visible {
+  outline: 2px solid rgba(79, 127, 255, 0.75);
+  outline-offset: -2px;
+  border-radius: 0;
+}
+
+/**
+ * Onglets de la modale Options : leur rangee defile en `overflow-x: auto`, ce qui
+ * rognait l'anneau `button:focus-visible` (offset 2px, rayon 3px) en un arc bleu
+ * flottant sous le libelle. Pose a l'interieur, il reste entier et a plat.
+ */
+button[data-options-tab]:focus-visible {
+  outline: 2px solid rgba(79, 127, 255, 0.75);
+  outline-offset: -2px;
+  border-radius: 0;
 }
 
 /**
@@ -156,10 +207,9 @@ button:focus-visible {
 /**
  * Onglets Contexte GDD : anneau intérieur pour éviter la découpe (outline-offset + parent overflow / bordure basse).
  */
-button.context-gdd-tab:focus,
 button.context-gdd-tab:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 2px #646cff;
+  box-shadow: inset 0 0 0 2px rgba(79, 127, 255, 0.75);
 }
 
 .dg-mechanical-trait-row {
@@ -269,3 +319,15 @@ button.context-gdd-tab:focus-visible {
   border: 2px dashed rgba(255, 255, 255, 0.9) !important;
 }
 
+/**
+ * Barre de défilement discrète (refonte 2026), pour toute l'app.
+ *
+ * La barre native de Windows est large et opaque : elle écrase les colonnes posées
+ * sur de simples filets. Globale plutôt qu'opt-in par composant — une classe posée
+ * au cas par cas laissait cohabiter deux styles de barre côte à côte.
+ * `scrollbar-width` ne s'hérite pas, d'où le sélecteur universel.
+ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}

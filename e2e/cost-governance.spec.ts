@@ -9,6 +9,7 @@
  */
 import { test, expect, type Page } from '@playwright/test'
 
+import { openApp } from './helpers'
 import { E2E_MS, E2E_TEST_TIMEOUT_MS } from './timeouts'
 
 const API_BASE = 'http://127.0.0.1:4243'
@@ -16,25 +17,33 @@ const API_BASE = 'http://127.0.0.1:4243'
 /** Tests API purs : pas de beforeEach UI (évite de saturer le timeout et de disposer le request context). */
 test.describe('Cost Governance — API', () => {
   test('AC#1: Configuration budget fonctionne', async ({ request }) => {
-    const response = await request.put(`${API_BASE}/api/v1/costs/budget`, {
-      data: { quota: 150.0 },
-    })
-    if (!response.ok()) {
-      const text = await response.text().catch(() => '')
-      throw new Error(`PUT budget failed: ${response.status()} ${text}`)
+    // Le budget e2e est celui du compte admin local : le quota d'origine est rétabli.
+    const baseline = (await (await request.get(`${API_BASE}/api/v1/costs/budget`)).json()) as {
+      quota: number
     }
-    const data = await response.json()
-    expect(Number(data.quota)).toBeGreaterThanOrEqual(149)
-    expect(Number(data.quota)).toBeLessThanOrEqual(151)
-    expect(Number(data.amount)).toBeGreaterThanOrEqual(0)
-    expect(Number(data.percentage)).toBeGreaterThanOrEqual(0)
-    expect(Number(data.remaining)).toBeGreaterThanOrEqual(0)
+    try {
+      const response = await request.put(`${API_BASE}/api/v1/costs/budget`, {
+        data: { quota: 150.0 },
+      })
+      if (!response.ok()) {
+        const text = await response.text().catch(() => '')
+        throw new Error(`PUT budget failed: ${response.status()} ${text}`)
+      }
+      const data = await response.json()
+      expect(Number(data.quota)).toBeGreaterThanOrEqual(149)
+      expect(Number(data.quota)).toBeLessThanOrEqual(151)
+      expect(Number(data.amount)).toBeGreaterThanOrEqual(0)
+      expect(Number(data.percentage)).toBeGreaterThanOrEqual(0)
+      expect(Number(data.remaining)).toBeGreaterThanOrEqual(0)
 
-    const getResponse = await request.get(`${API_BASE}/api/v1/costs/budget`)
-    expect(getResponse.status()).toBe(200)
-    const budgetData = await getResponse.json()
-    expect(Number(budgetData.quota)).toBeGreaterThanOrEqual(149)
-    expect(Number(budgetData.quota)).toBeLessThanOrEqual(151)
+      const getResponse = await request.get(`${API_BASE}/api/v1/costs/budget`)
+      expect(getResponse.status()).toBe(200)
+      const budgetData = await getResponse.json()
+      expect(Number(budgetData.quota)).toBeGreaterThanOrEqual(149)
+      expect(Number(budgetData.quota)).toBeLessThanOrEqual(151)
+    } finally {
+      await request.put(`${API_BASE}/api/v1/costs/budget`, { data: { quota: baseline.quota } })
+    }
   })
 })
 
@@ -56,39 +65,34 @@ test.describe('Cost Governance — UI (Story 0.7)', () => {
 
   test.beforeEach(async ({ page }) => {
     await login(page)
-    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({
-      state: 'visible',
-      timeout: E2E_MS.graphField,
-    })
+    await openApp(page)
   })
 
   test('AC#3: Dashboard affiche budget et graphique', async ({ page }) => {
-    const usageButton = page.locator('button:has-text("Usage")').or(page.locator('[data-testid="usage-button"]'))
-    if (await usageButton.isVisible({ timeout: E2E_MS.probe })) {
-      await usageButton.click()
+    // L'ancien bouton « Usage » de la barre a disparu avec la refonte : le test se sautait.
+    // Le tableau de bord reste servi par la route `/usage`.
+    await page.goto('/usage')
+    await expect(page.getByRole('heading', { name: /Suivi d'utilisation/i })).toBeVisible({
+      timeout: E2E_MS.short,
+    })
 
-      await page.waitForSelector('text=/Budget LLM|Suivi d\'utilisation/i', { timeout: E2E_MS.short })
-
-      const budgetSection = page.locator('text=/Budget LLM/i')
-      await expect(budgetSection).toBeVisible()
-
-      await expect(page.locator('text=/Quota mensuel/i')).toBeVisible()
-      await expect(page.locator('text=/Montant dépensé/i')).toBeVisible()
-      await expect(page.locator('text=/Montant restant/i')).toBeVisible()
-      await expect(page.locator('text=/Pourcentage utilisé/i')).toBeVisible()
-
-      const chartSection = page.locator('text=/Évolution des coûts/i')
-      await expect(chartSection).toBeVisible({ timeout: E2E_MS.short })
-    } else {
-      test.skip('Bouton Usage non trouvé - test ignoré')
-    }
+    await expect(page.getByRole('heading', { name: /Budget LLM/i })).toBeVisible()
+    await expect(page.getByText(/Quota mensuel/i).first()).toBeVisible()
+    await expect(page.getByText(/Montant dépensé/i).first()).toBeVisible()
+    await expect(page.getByText(/Montant restant/i).first()).toBeVisible()
+    await expect(page.getByText(/Pourcentage utilisé/i).first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Évolution des coûts/i })).toBeVisible({
+      timeout: E2E_MS.short,
+    })
   })
 
   test('AC#1: Toast warning affiché à 90%', async ({ page }) => {
     const baselineRes = await page.request.get(`${API_BASE}/api/v1/costs/budget`)
     expect(baselineRes.ok()).toBe(true)
     const baseline = (await baselineRes.json()) as { amount?: number; quota?: number }
-    const restoreQuota = Math.max(50, Number(baseline.quota) || 50)
+    // Quota exact d'avant le test : le budget e2e est celui du compte admin local
+    // (`data/cost_budgets.json`), le gonfler ou le laisser bas pollue le poste.
+    const restoreQuota = Number(baseline.quota)
     const amount = Number(baseline.amount) || 0
     if (amount <= 0) {
       test.skip(true, 'Montant dépensé nul — impossible de calibrer ~90% pour le toast')
@@ -110,7 +114,7 @@ test.describe('Cost Governance — UI (Story 0.7)', () => {
       }
 
       await login(page)
-      await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.graphField })
+      await openApp(page)
 
       // La génération exige une scène ou des instructions. Un brief explicite
       // évite de dépendre de la sélection persistante des personnages.
@@ -130,33 +134,38 @@ test.describe('Cost Governance — UI (Story 0.7)', () => {
   })
 
   test('AC#2: Modal bloque génération à 100%', async ({ page }) => {
-    await page.request.put(`${API_BASE}/api/v1/costs/budget`, {
-      data: { quota: 0.001 },
-    })
-
-    const budgetResponse = await page.request.get(`${API_BASE}/api/v1/costs/budget`)
-    const budget = await budgetResponse.json()
-
-    if (budget.percentage >= 100) {
-      const generateResponse = await page.request.post(`${API_BASE}/api/v1/dialogues/generate/unity-dialogue`, {
-        data: {
-          user_instructions: 'Test generation',
-          context_selections: {
-            characters_full: ['TEST_CHAR'],
-          },
-        },
-        failOnStatusCode: false,
+    const baseline = (await (await page.request.get(`${API_BASE}/api/v1/costs/budget`)).json()) as {
+      quota: number
+    }
+    // Sans restauration, le quota admin local restait à 0,001 $ : toute génération
+    // suivante (autres specs, usage réel du poste) tombait en QUOTA_EXCEEDED.
+    try {
+      await page.request.put(`${API_BASE}/api/v1/costs/budget`, {
+        data: { quota: 0.001 },
       })
 
-      expect(generateResponse.status()).toBe(429)
-      const errorData = await generateResponse.json()
-      expect(errorData.error.code).toBe('QUOTA_EXCEEDED')
-    } else {
-      await page.goto('http://localhost:3000')
-      await login(page)
-      await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.ui })
+      const budgetResponse = await page.request.get(`${API_BASE}/api/v1/costs/budget`)
+      const budget = await budgetResponse.json()
 
-      test.skip('Budget n\'est pas à 100% - nécessite setup manuel du budget à 100%')
+      if (budget.percentage >= 100) {
+        const generateResponse = await page.request.post(`${API_BASE}/api/v1/dialogues/generate/unity-dialogue`, {
+          data: {
+            user_instructions: 'Test generation',
+            context_selections: {
+              characters_full: ['TEST_CHAR'],
+            },
+          },
+          failOnStatusCode: false,
+        })
+
+        expect(generateResponse.status()).toBe(429)
+        const errorData = await generateResponse.json()
+        expect(errorData.error.code).toBe('QUOTA_EXCEEDED')
+      } else {
+        test.skip(true, 'Budget n\'est pas à 100% - nécessite setup manuel du budget à 100%')
+      }
+    } finally {
+      await page.request.put(`${API_BASE}/api/v1/costs/budget`, { data: { quota: baseline.quota } })
     }
   })
 })

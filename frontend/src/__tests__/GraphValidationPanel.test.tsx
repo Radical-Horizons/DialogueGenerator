@@ -5,6 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { GraphValidationPanel } from '../components/graph/GraphValidationPanel'
 import { useGraphStore } from '../store/graphStore'
+import { theme } from '../theme'
 
 const hoisted = vi.hoisted(() => {
   const focusNodeMock = vi.fn()
@@ -195,7 +196,7 @@ describe('GraphValidationPanel (FR36)', () => {
     expect(focusNodeMock).toHaveBeenCalledWith('N1')
   })
 
-  it('0 erreur et 0 avertissement : en-tête vert avec ✓ et « 0 avertissement »', () => {
+  it('0 erreur et 0 avertissement : en-tête avec point d’état vert et « 0 avertissement »', () => {
     render(
       <GraphValidationPanel
         validationErrors={[]}
@@ -204,8 +205,10 @@ describe('GraphValidationPanel (FR36)', () => {
       />
     )
     expect(screen.getByText('0 avertissement')).toBeInTheDocument()
-    const headerRow = screen.getByText('0 avertissement').closest('div')?.parentElement
-    expect(headerRow?.textContent).toContain('✓')
+    const dot = screen.getByTestId('graph-validation-header-dot')
+    expect(dot).toHaveAttribute('data-tone', 'success')
+    expect(dot).toHaveStyle({ backgroundColor: theme.state.success.color })
+    expect(dot.parentElement).toHaveTextContent('0 avertissement')
   })
 
   it('FR39: Ignorer masque l’avertissement lore révisable et remet le compteur affiché à 0', () => {

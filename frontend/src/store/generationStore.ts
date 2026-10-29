@@ -2,6 +2,7 @@
  * Store Zustand pour gérer l'état de génération.
  */
 import { create } from 'zustand'
+import type { ContextDroppingRules } from '../types/graph'
 import type { SceneSelection } from '../types/generation'
 import type { ContextSelection } from '../types/api'
 import type { ContextTokenBreakdownRow, GenerateUnityDialogueResponse, RawPrompt } from '../types/api'
@@ -54,7 +55,17 @@ interface GenerationState {
   unityDialogueResponse: GenerateUnityDialogueResponse | null
   tokensUsed: number | null
 
-  /** Instructions scène (panneau génération) — pour estimation budget contexte côté ContextSelector */
+  /** Overlay session anti-drop (template 6.5). null = hériter fichier 4.10. */
+  contextDroppingRulesOverlay: ContextDroppingRules | null
+  setContextDroppingRulesOverlay: (rules: ContextDroppingRules | null) => void
+  contextDroppingWarning: string | null
+  setContextDroppingWarning: (message: string | null) => void
+  /** Template chargé pour cette session (logs 1.15). */
+  appliedTemplateId: string | null
+  appliedTemplateName: string | null
+  setAppliedTemplate: (id: string | null, name?: string | null) => void
+  clearTemplateSession: () => void
+  /** Brief génération (textarea) — lu par preview/optimize sans le store graphe. */
   generationUserInstructions: string
   setGenerationUserInstructions: (value: string) => void
   
@@ -66,6 +77,8 @@ interface GenerationState {
   error: string | null
   currentJobId: string | null
   isInterrupting: boolean  // Task 4 - Story 0.8
+  /** Horodatage du début du run (écran 2a : compteur `GÉNÉRATION · MM:SS` du header). */
+  generationStartedAt: number | null
   chunkBuffer: Map<number, string>  // Buffer pour réordonner les chunks avec séquence
   lastProcessedSequence: number  // Dernière séquence traitée (pour réordonnancement)
   
@@ -183,7 +196,22 @@ export const useGenerationStore = create<GenerationState>((set) => ({
   unityDialogueResponse: null,
   tokensUsed: null,
   generationUserInstructions: '',
-  setGenerationUserInstructions: (value) => set({ generationUserInstructions: value }),
+  setGenerationUserInstructions: (value: string) => set({ generationUserInstructions: value }),
+  contextDroppingRulesOverlay: null,
+  setContextDroppingRulesOverlay: (rules) => set({ contextDroppingRulesOverlay: rules }),
+  contextDroppingWarning: null,
+  setContextDroppingWarning: (message) => set({ contextDroppingWarning: message }),
+  appliedTemplateId: null,
+  appliedTemplateName: null,
+  setAppliedTemplate: (id, name = null) =>
+    set({ appliedTemplateId: id, appliedTemplateName: id ? (name ?? null) : null }),
+  clearTemplateSession: () =>
+    set({
+      contextDroppingRulesOverlay: null,
+      contextDroppingWarning: null,
+      appliedTemplateId: null,
+      appliedTemplateName: null,
+    }),
 
   // État streaming initial (Task 2 - Story 0.2)
   isGenerating: false,
@@ -193,6 +221,7 @@ export const useGenerationStore = create<GenerationState>((set) => ({
   error: null,
   currentJobId: null,
   isInterrupting: false,  // Task 4 - Story 0.8
+  generationStartedAt: null,
   chunkBuffer: new Map<number, string>(),
   lastProcessedSequence: -1,  // Dernière séquence traitée
 
@@ -366,7 +395,7 @@ export const useGenerationStore = create<GenerationState>((set) => ({
     useGenerationStore.getState().syncIncrementalContextFromCache(selections)
   },
 
-  applyBootstrapFromPrecomputed: (selections, payload) => {
+  applyBootstrapFromPrecomputed: (_selections, payload) => {
     const entityTokenByKey: Record<string, number> = {}
     const entityContextItemsByKey: Record<string, ContextItem> = {}
     const entries = payload.entities
@@ -441,6 +470,7 @@ export const useGenerationStore = create<GenerationState>((set) => ({
       isMinimized: false,
       error: null,
       currentJobId: jobId,
+      generationStartedAt: Date.now(),
       chunkBuffer: new Map<number, string>(),
       lastProcessedSequence: -1,
     }),
@@ -504,6 +534,7 @@ export const useGenerationStore = create<GenerationState>((set) => ({
       error: null,
       currentJobId: null,
       isInterrupting: false,  // Fix: Réinitialiser isInterrupting (Issue #4)
+      generationStartedAt: null,
     }),
 
   minimize: () =>
@@ -534,6 +565,7 @@ export const useGenerationStore = create<GenerationState>((set) => ({
       error: null,
       currentJobId: null,
       isInterrupting: false,
+      generationStartedAt: null,
       chunkBuffer: new Map<number, string>(),
       lastProcessedSequence: -1,
     }),
@@ -541,5 +573,20 @@ export const useGenerationStore = create<GenerationState>((set) => ({
   setInterrupting: (isInterrupting) =>
     set({ isInterrupting }),  // Task 4 - Story 0.8
 }))
+
+/** Champs template à envoyer avec generate/regenerate (absents si aucun template chargé). */
+export function getAppliedTemplateLogFields(): {
+  template_id?: string
+  template_name?: string
+} {
+  const { appliedTemplateId, appliedTemplateName } = useGenerationStore.getState()
+  if (!appliedTemplateId) {
+    return {}
+  }
+  return {
+    template_id: appliedTemplateId,
+    ...(appliedTemplateName ? { template_name: appliedTemplateName } : {}),
+  }
+}
 
 

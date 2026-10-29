@@ -13,6 +13,7 @@
 - FR89, FR92-93: Variables basic (InGameFlagsModal, catalogs)
 - FR97, FR99: Session management (save, unsaved warning)
 - FR103, FR105: Documentation & samples (docs/, GDD samples)
+- FR55-63: Templates (custom, pré-built, apply, anti-drop overlay, marketplace, A/B, partage équipe, suggestions — PresetSelector, `/api/v1/templates`)
 
 ### ⚠️ Partially Implemented (~25-30%)
 
@@ -23,7 +24,6 @@
 - FR28-30: Graph nav advanced (search exists, jump/filter partial)
 - FR31-35: Bulk ops & UX (NEW, not implemented)
 - FR42-45: Quality LLM judge (NarrativeValidator partial, V1.5)
-- FR55-59: Templates (PromptsTab exists, full system V1.5)
 - FR66-71: RBAC (auth exists, roles not implemented V1.5)
 - FR85: Search advanced (basic exists, index V1.0)
 - FR90-91: Conditions/effects advanced (partial, V1.0+)
@@ -36,8 +36,6 @@
 - FR38-39: Lore contradiction detection (NEW V1.5)
 - FR42-45: Context dropping detection (NEW V1.5)
 - FR46-47: Simulation flow (NEW V1.0)
-- FR57: Anti-context-dropping templates (NEW V1.5)
-- FR60-63: Template marketplace (NEW V1.5-V2.5)
 - FR66-71: RBAC complete (NEW V1.5)
 - FR79: Fallback LLM provider (NEW V1.0)
 - FR85, FR87-88: Index & batch ops (NEW V1.0)

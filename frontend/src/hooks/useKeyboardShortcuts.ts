@@ -3,6 +3,7 @@
  * Évite les conflits de raccourcis en utilisant un registre centralisé.
  */
 import { useEffect, useRef } from 'react'
+import { isApplePlatform } from '../utils/platformShortcut'
 
 export interface KeyboardShortcut {
   /** Combinaison de touches (ex: "ctrl+k", "alt+s", "/") */
@@ -56,7 +57,10 @@ function matchesShortcut(event: KeyboardEvent, parsed: ReturnType<typeof parseSh
   // Défensif: raccourci mal parsé (clé manquante)
   if (!parsed.key) return false
 
-  if (parsed.ctrl && !event.ctrlKey) return false
+  // Sur Apple, le modificateur d'usage est Cmd : un raccourci declare `ctrl+k`
+  // doit y repondre a Cmd+K, sinon le libelle « ⌘K » du chrome annonce un
+  // raccourci qui n'existe pas. Voir `utils/platformShortcut.ts`.
+  if (parsed.ctrl && !(event.ctrlKey || (isApplePlatform() && event.metaKey))) return false
   if (parsed.alt && !event.altKey) return false
   if (parsed.shift && !event.shiftKey) return false
   if (parsed.meta && !event.metaKey) return false

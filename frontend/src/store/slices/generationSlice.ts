@@ -22,6 +22,42 @@ import {
   deriveAutoDisplayName,
   nodeHasStructuralDisplayName,
 } from '../../utils/nodeTargetLabel'
+import { useGenerationStore, getAppliedTemplateLogFields } from '../generationStore'
+import { toGraphEdgePayloads, toGraphNodePayloads } from '../../utils/graphPayload'
+import {
+  rulesToDetectOptions,
+  withAntiDropClause,
+} from '../../utils/contextDroppingOverlay'
+import type { ContextDroppingRules } from '../../types/graph'
+
+function schedulePostGenerateContextDropDetect(
+  nodes: GraphState['nodes'],
+  edges: GraphState['edges'],
+  overlay: ContextDroppingRules,
+  contextSelections: Record<string, unknown>,
+): void {
+  void graphAPI
+    .detectContextDropping({
+      nodes: toGraphNodePayloads(nodes),
+      edges: toGraphEdgePayloads(edges),
+      context_selections: contextSelections,
+      scene_instruction: '',
+      options: rulesToDetectOptions(overlay),
+    })
+    .then((report) => {
+      if (useGenerationStore.getState().contextDroppingRulesOverlay !== overlay) {
+        return
+      }
+      if (report.case_count > 0) {
+        useGenerationStore.getState().setContextDroppingWarning(
+          report.summary || `${report.case_count} cas de context dropping détectés`,
+        )
+      }
+    })
+    .catch((detectError: unknown) => {
+      console.warn('Post-detect context dropping ignoré:', detectError)
+    })
+}
 
 /** Hash simple pour contexte GDD (Story 1.10 AC#5 - stockage). */
 function simpleHash(s: string): string {
@@ -111,7 +147,7 @@ function normalizeParentContentForGeneration(content: Record<string, unknown>): 
 
 export type GenerationSlice = Pick<
   GraphState,
-  'generateFromNode' | 'acceptNode' | 'rejectNode' | 'regenerateNode'
+  'generateFromNode' | 'applyGenerateNodeResponse' | 'acceptNode' | 'rejectNode' | 'regenerateNode'
 >
 
 export const createGenerationSlice: StateCreator<
@@ -200,6 +236,7 @@ export const createGenerationSlice: StateCreator<
           ? (options.onBatchProgress as (current: number, total: number) => void)
           : undefined
 
+      const overlay = useGenerationStore.getState().contextDroppingRulesOverlay
       const dialogueIdForCosts = state.dialogueMetadata.filename || undefined
       // Ne pas envoyer de test vide pour un choix (évite 422 après suppression du TestNode)
       const normalizedContent = normalizeParentContentForGeneration(parentNodeContent)
@@ -208,7 +245,7 @@ export const createGenerationSlice: StateCreator<
         {
           parent_node_id: parentNodeId,
           parent_node_content: normalizedContent,
-          user_instructions: instructions,
+          user_instructions: withAntiDropClause(instructions, overlay),
           context_selections: contextSelections,
           max_choices: maxChoices,
           npc_speaker_id: npcSpeakerId,
@@ -221,9 +258,58 @@ export const createGenerationSlice: StateCreator<
           choices_mode: choicesMode,
           dialogue_id: dialogueIdForCosts,
           dialogue_nodes: dialogueNodesForApi,
+          ...getAppliedTemplateLogFields(),
         },
         { llmModelIdentifier: llmModelIdentifier ?? undefined }
       )
+
+      return await get().applyGenerateNodeResponse(parentNodeId, response, {
+        ...options,
+        context_selections: contextSelections,
+        instructions,
+        generate_all_choices: generateAllChoices,
+        target_choice_index: targetChoiceIndex,
+        onBatchProgress,
+        _generationSeq: generationSeq,
+      })
+    } catch (error: unknown) {
+      console.error('Erreur lors de la génération de nœud:', error)
+      set({ isGenerating: false })
+      throw error
+    }
+  },
+
+  applyGenerateNodeResponse: async (parentNodeId, response, options = {}) => {
+    const generationSeq =
+      typeof options._generationSeq === 'number'
+        ? (options._generationSeq as number)
+        : get().activeLoadSeq
+    const skipGeneratingFlag = options._generationSeq != null
+    if (!skipGeneratingFlag) {
+      set({ isGenerating: true })
+    }
+    try {
+      const state = get()
+      const parentNode = state.nodes.find((n) => n.id === parentNodeId)
+      if (!parentNode) {
+        throw new Error(`Nœud parent ${parentNodeId} introuvable`)
+      }
+
+      const contextSelections =
+        typeof options.context_selections === 'object' && options.context_selections != null
+          ? (options.context_selections as Record<string, unknown>)
+          : {}
+      const instructions =
+        typeof options.instructions === 'string' ? options.instructions : ''
+      const targetChoiceIndex =
+        typeof options.target_choice_index === 'number'
+          ? options.target_choice_index
+          : null
+      const generateAllChoices = options.generate_all_choices !== false
+      const onBatchProgress =
+        typeof options.onBatchProgress === 'function'
+          ? (options.onBatchProgress as (current: number, total: number) => void)
+          : undefined
 
       const isTestNode =
         parentNode.type === 'testNode' ||
@@ -296,7 +382,6 @@ export const createGenerationSlice: StateCreator<
           }
         }
       } else if (isBatch && generatedNodes.length > 0) {
-        // Batch API : inclure tous les nœuds (choix avec test = 4 nœuds + connexions test-*).
         nodesToAdd = generatedNodes.map((node, index) => ({
           node,
           choiceIndex: index,
@@ -423,7 +508,6 @@ export const createGenerationSlice: StateCreator<
               ? conn.connection_type
               : undefined
 
-        // Une connexion de choix sans index est ambiguë : on la remplace par le fallback frontend plus bas.
         if (conn.connection_type === 'choice' && conn.via_choice_index === undefined && !sourceHandle) {
           continue
         }
@@ -536,6 +620,21 @@ export const createGenerationSlice: StateCreator<
       set({ isGenerating: false })
       get().markDirty()
 
+      const overlay = useGenerationStore.getState().contextDroppingRulesOverlay
+      if (overlay) {
+        const detectSelections =
+          typeof options.context_selections === 'object' && options.context_selections != null
+            ? (options.context_selections as Record<string, unknown>)
+            : {}
+        const applied = get()
+        schedulePostGenerateContextDropDetect(
+          applied.nodes,
+          applied.edges,
+          overlay,
+          detectSelections,
+        )
+      }
+
       const firstNodeId = generatedNodeIds[0] || generatedNodes[0]?.id
       const batchInfo = generateAllChoices
         ? {
@@ -557,7 +656,7 @@ export const createGenerationSlice: StateCreator<
 
       return { nodeId: firstNodeId ?? null, batchInfo }
     } catch (error: unknown) {
-      console.error('Erreur lors de la génération de nœud:', error)
+      console.error('Erreur lors de l\'application de la génération:', error)
       set({ isGenerating: false })
       throw error
     }
@@ -648,9 +747,10 @@ export const createGenerationSlice: StateCreator<
           ? regenProtagonists.personnage_a
           : undefined
 
+      const overlay = useGenerationStore.getState().contextDroppingRulesOverlay
       const response = await graphAPI.regenerateNode(nodeId, {
         dialogue_id: dialogueId,
-        new_instructions: newInstructions,
+        new_instructions: withAntiDropClause(newInstructions, overlay),
         preserve_connections: true,
         parent_node_id: parentNode.id,
         parent_node_content: parentNode.data as Record<string, unknown>,
@@ -658,6 +758,7 @@ export const createGenerationSlice: StateCreator<
         via_choice_index,
         player_character_id: regenPlayerId,
         dialogue_nodes: serializeDialogueNodesForApi(state.nodes),
+        ...getAppliedTemplateLogFields(),
       })
       const existingHistory = (existingData.regenerationHistory as Array<{ instructions: string; timestamp: string; generationId: string }>) ?? []
       const newEntry = {
@@ -709,6 +810,15 @@ export const createGenerationSlice: StateCreator<
         }
       })
       get().markDirty()
+      if (overlay) {
+        const applied = get()
+        schedulePostGenerateContextDropDetect(
+          applied.nodes,
+          applied.edges,
+          overlay,
+          regenSelections,
+        )
+      }
     } catch (err) {
       set({ isGenerating: false })
       console.error('Erreur lors de la régénération du nœud:', err)

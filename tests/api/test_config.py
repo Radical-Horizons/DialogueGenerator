@@ -259,50 +259,10 @@ class TestContextFields:
 class TestTemplates:
     """Tests pour les endpoints de templates."""
     
-    def test_get_scene_instruction_templates(self, client, mock_config_service):
-        """Test de récupération des templates d'instructions de scène."""
-        response = client.get("/api/v1/config/scene-instruction-templates")
-        
-        assert response.status_code == 200
-        data = response.json()
-        assert "templates" in data
-    
-    def test_create_scene_instruction_template(self, client, mock_config_service):
-        """Test de création d'un template d'instruction de scène."""
-        template_data = {
-            "name": "Test Template",
-            "content": "Test content"
-        }
-        response = client.post("/api/v1/config/scene-instruction-templates", json=template_data)
-        
-        # L'endpoint peut ne pas exister (405) ou exister (200)
-        assert response.status_code in [200, 405]
-        if response.status_code == 200:
-            data = response.json()
-            assert "template" in data or "message" in data
-    
-    def test_get_author_profile_templates(self, client, mock_config_service):
-        """Test de récupération des templates de profil d'auteur."""
-        response = client.get("/api/v1/config/author-profile-templates")
-        
-        assert response.status_code == 200
-        data = response.json()
-        assert "templates" in data
-    
-    def test_create_author_profile_template(self, client, mock_config_service):
-        """Test de création d'un template de profil d'auteur."""
-        template_data = {
-            "name": "Test Author",
-            "profile": "Test profile"
-        }
-        response = client.post("/api/v1/config/author-profile-templates", json=template_data)
-        
-        # L'endpoint peut ne pas exister (405) ou exister (200)
-        assert response.status_code in [200, 405]
-        if response.status_code == 200:
-            data = response.json()
-            assert "template" in data or "message" in data
-    
+
+
+
+
     def test_get_template_file_paths(self, client, mock_config_service):
         """Test de récupération des chemins des fichiers de templates."""
         # Mocker prompts_metadata si nécessaire

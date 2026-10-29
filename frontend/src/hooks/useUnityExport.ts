@@ -96,6 +96,20 @@ export function useUnityExport(
         return
       }
 
+      if (state.documentId) {
+        // Document canonique déjà présent sur disque : POST /graph/save-and-write
+        // refuse systématiquement (409 canonical_revision_required — ADR-008,
+        // `require_edit` + révision optimiste). Persister via le même chemin que
+        // l'autosave (PUT /documents/{id}, révision-aware) puis servir le JSON
+        // Unity local (`exportToUnity`, déjà aligné avec le document sauvegardé).
+        await useGraphStore.getState().saveDialogue()
+        const jsonContent = useGraphStore.getState().exportToUnity()
+        const filename = state.dialogueMetadata.filename || `${state.documentId}.json`
+        registerSuccessfulExport(jsonContent, filename)
+        toast(`Dialogue exporté : ${filename}`, 'success', 3000)
+        return
+      }
+
       const response = await graphAPI.saveGraphAndWrite({
         ...payload,
         metadata: state.dialogueMetadata,

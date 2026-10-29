@@ -1,7 +1,7 @@
 /**
  * Résumé compact du contexte avec chips (PJ, PNJ, Région, etc.).
  */
-import { theme } from '../../theme'
+import { redesignAccent, redesignRadius, redesignSpacing, redesignText } from '../../theme/redesignTokens'
 import type { SceneSelection } from '../../types/generation'
 import { useContextStore } from '../../store/contextStore'
 import { resolveLocationDisplayName } from '../../utils/gddEntityNames'
@@ -54,34 +54,37 @@ export function ContextSummaryChips({
       style={{
         display: 'flex',
         flexWrap: 'wrap',
-        gap: '0.5rem',
-        padding: '0.75rem',
-        backgroundColor: theme.background.tertiary,
-        borderRadius: '4px',
-        border: `1px solid ${theme.border.primary}`,
+        gap: `${redesignSpacing.xs}px`,
         ...style,
       }}
     >
-      {chips.map((chip, index) => (
-        <div
-          key={`${chip.label}-${chip.value}-${index}`}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            padding: '0.25rem 0.75rem',
-            backgroundColor: theme.state.selected.background,
-            color: theme.text.primary,
-            borderRadius: '16px',
-            fontSize: '0.85rem',
-            border: `1px solid ${theme.button.primary.background}`,
-          }}
-        >
-          <span style={{ fontWeight: 500, marginRight: '0.25rem' }}>
-            {chip.label}:
-          </span>
-          <span>{chip.value}</span>
-        </div>
-      ))}
+      {chips.map((chip, index) => {
+        // Les tags sont des étiquettes libres : chip neutre. Le reste décrit la scène sélectionnée.
+        const isNeutral = chip.label === 'Tag'
+        return (
+          <div
+            key={`${chip.label}-${chip.value}-${index}`}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              boxSizing: 'border-box',
+              height: 22,
+              padding: '0 8px',
+              borderRadius: `${redesignRadius.chip}px`,
+              border: `1px solid ${isNeutral ? 'rgba(255, 255, 255, 0.12)' : 'rgba(79, 127, 255, 0.4)'}`,
+              backgroundColor: isNeutral ? 'transparent' : 'rgba(79, 127, 255, 0.1)',
+              color: isNeutral ? redesignText.muted : redesignAccent.light,
+              fontSize: '11px',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <span style={{ fontWeight: 500, marginRight: redesignSpacing.xs }}>
+              {chip.label}:
+            </span>
+            <span>{chip.value}</span>
+          </div>
+        )
+      })}
     </div>
   )
 }

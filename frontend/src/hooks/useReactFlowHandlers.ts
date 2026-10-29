@@ -28,7 +28,7 @@ export interface UseReactFlowHandlersOptions {
   getFlowPosition: (event: MouseEvent | TouchEvent) => { x: number; y: number }
   onChoiceDropOnPane: (position: { x: number; y: number }, pending: PendingChoiceConnection) => void
   /** Wrapper du graphe : pour rattacher un choix lâché sur le corps d'un nœud (hors rayon de la poignée). */
-  flowContainerRef?: RefObject<HTMLElement | null>
+  flowContainerRef?: RefObject<HTMLElement>
 }
 
 export interface UseReactFlowHandlersReturn {

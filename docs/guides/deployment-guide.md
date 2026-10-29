@@ -117,7 +117,7 @@ CORS_ORIGINS=https://yourdomain.com
 - **OPENAI_API_KEY**: Production OpenAI API key
 - **CORS_ORIGINS**: Comma-separated list of allowed origins
 
-See `docs/SECURITY.md` for security best practices.
+See `docs/guides/SECURITY.md` for security best practices.
 
 ## Deployment Platforms
 
@@ -236,6 +236,6 @@ npm run deploy:check
 
 ## Additional Resources
 
-- **Security Guide**: `docs/SECURITY.md`
+- **Security Guide**: `docs/guides/SECURITY.md`
 - **API Documentation**: `README_API.md`
 - **Configuration Examples**: `docs/deployment/`

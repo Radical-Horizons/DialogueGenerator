@@ -4,9 +4,10 @@ description: >-
   deploy-from-wsl.sh, nginx, systemd, .env prod (ENVIRONMENT, JWT, CORS), 403 frontend/dist
   permissions, SSE proxy_buffering. Apply when deploying, configuring prod, or debugging
   production, nginx, or health checks — même sans ouvrir les scripts deploy.
-alwaysApply: false
+paths:
+  - "scripts/deploy*"
+  - "docs/deployment/**"
 ---
-
 - **Référence longue** : `docs/deployment/PRODUCTION.md` (serveur, systemd, nginx, logs, `.env` prod). URL publique de référence : `demo.auto-diffusion.net`.
 - **Release prod (semver + canvas)** : **`.claude/rules/app_versioning.md`** · skill `/prod-release` · deploy `npm run deploy`.
 

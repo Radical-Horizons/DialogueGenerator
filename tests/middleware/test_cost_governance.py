@@ -286,3 +286,49 @@ def test_middleware_resolve_model_ignores_unknown_x_llm_model_header() -> None:
     }
     req = Request(scope)
     assert mw._resolve_model_for_cost_estimate(req) == Defaults.MODEL_ID
+
+
+@pytest.mark.asyncio
+async def test_batch_generate_estimate_multiplies_by_parent_count() -> None:
+    """FR88 : estimation coût × N parents via X-Batch-Parent-Count."""
+    from starlette.requests import Request
+
+    test_app = FastAPI()
+    mw = CostGovernanceMiddleware(test_app)
+
+    def _req(headers: list[tuple[bytes, bytes]]) -> Request:
+        return Request(
+            {
+                "type": "http",
+                "asgi": {"version": "3.0"},
+                "method": "POST",
+                "path": "/api/v1/unity-dialogues/graph/batch-generate-from-nodes/jobs",
+                "raw_path": b"/",
+                "root_path": "",
+                "scheme": "http",
+                "query_string": b"",
+                "headers": headers,
+                "client": ("127.0.0.1", 12345),
+                "server": ("127.0.0.1", 80),
+            }
+        )
+
+    cost_one = await mw._estimate_cost(
+        _req([(b"x-batch-parent-count", b"1")])
+    )
+    cost_ten = await mw._estimate_cost(
+        _req([(b"x-batch-parent-count", b"10")])
+    )
+    assert cost_ten == pytest.approx(cost_one * 10, rel=1e-6)
+
+
+def test_cancel_path_not_cost_governed() -> None:
+    """POST …/jobs/{id}/cancel ne doit pas passer le middleware budget."""
+    from api.middleware.cost_governance import _is_cost_governed_generation_path
+
+    assert _is_cost_governed_generation_path(
+        "/api/v1/unity-dialogues/graph/batch-generate-from-nodes/jobs"
+    )
+    assert not _is_cost_governed_generation_path(
+        "/api/v1/unity-dialogues/graph/batch-generate-from-nodes/jobs/abc/cancel"
+    )

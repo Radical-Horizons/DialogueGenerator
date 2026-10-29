@@ -23,11 +23,11 @@ interface SchemaValidationPanelProps {
 
 const SCHEMA_STATUS_STYLES = {
   valid: {
-    badge: { backgroundColor: '#22c55e', color: '#fff' },
+    badge: { backgroundColor: theme.state.success.background, color: theme.state.success.color },
     label: 'Schéma Unity : 100 % conforme',
   },
   invalid: {
-    badge: { backgroundColor: '#ef4444', color: '#fff' },
+    badge: { backgroundColor: theme.state.error.background, color: theme.state.error.color },
   },
 } as const
 
@@ -92,7 +92,7 @@ export function SchemaValidationPanel({
             data-testid="schema-loading-indicator"
             style={{ textAlign: 'center', padding: '1rem 0', color: theme.text.secondary }}
           >
-            ⏳ Validation en cours…
+            Validation en cours…
           </div>
         )}
 
@@ -114,8 +114,8 @@ export function SchemaValidationPanel({
               }}
             >
               {isValid
-                ? '✅ conforme'
-                : `❌ ${errorCount} erreur${errorCount > 1 ? 's' : ''} détectée${errorCount > 1 ? 's' : ''}`}
+                ? '✓ conforme'
+                : `✗ ${errorCount} erreur${errorCount > 1 ? 's' : ''} détectée${errorCount > 1 ? 's' : ''}`}
             </div>
 
             {isValid && warnings.length === 0 && (
@@ -153,7 +153,7 @@ export function SchemaValidationPanel({
               style={{
                 marginTop: 12,
                 background: 'transparent',
-                border: `1px solid ${theme.border.default}`,
+                border: `1px solid ${theme.border.primary}`,
                 borderRadius: 4,
                 padding: '4px 8px',
                 fontSize: '0.78rem',

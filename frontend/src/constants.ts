@@ -72,6 +72,42 @@ export const FULL_REASONING_EFFORT_MODELS = [
 ] as const
 
 /**
+ * Niveaux de raisonnement, du plus rapide au plus coûteux.
+ *
+ * Source unique : le sélecteur compact de la barre d'action **et** le panneau
+ * « Réglages du modèle » lisent cette liste — deux listes divergentes, c'est
+ * l'utilisateur qui voit deux vocabulaires pour le même réglage.
+ */
+export const REASONING_EFFORT_OPTIONS = [
+  { value: 'none', short: 'aucun', label: 'Aucun', hint: 'Latence minimale' },
+  { value: 'low', short: 'faible', label: 'Faible', hint: null },
+  { value: 'medium', short: 'moyen', label: 'Moyen', hint: 'Équilibré, recommandé' },
+  { value: 'high', short: 'élevé', label: 'Élevé', hint: null },
+  { value: 'xhigh', short: 'xhigh', label: 'Très élevé', hint: null },
+  { value: 'max', short: 'max', label: 'Maximum', hint: "Qualité d'abord" },
+] as const
+
+/** Libellé compact d'un niveau de raisonnement (résumés, pastille). */
+export const REASONING_EFFORT_SHORT_LABELS: Readonly<Record<string, string>> = {
+  ...Object.fromEntries(REASONING_EFFORT_OPTIONS.map((o) => [o.value, o.short])),
+  /** Ancien palier OpenAI, encore possible dans un draft ou un preset. */
+  minimal: 'minimal',
+}
+
+/**
+ * Une ligne de description par modèle, pour le sélecteur compact.
+ *
+ * Reprend les tiers documentés dans `constants.py` (« Sol = flagship,
+ * Terra = équilibre, Luna = volume/coût ») — ne pas inventer d'autre promesse
+ * ici : c'est le backend qui fait foi sur ce que vaut un modèle.
+ */
+export const MODEL_TIER_DESCRIPTIONS: Readonly<Record<string, string>> = {
+  [MODEL_NAMES.GPT_5_6_SOL]: 'Le plus capable — tâches complexes',
+  [MODEL_NAMES.GPT_5_6_TERRA]: 'Équilibre qualité / coût',
+  [MODEL_NAMES.GPT_5_6_LUNA]: 'Le plus rapide et le moins cher',
+}
+
+/**
  * Modèle par défaut à utiliser.
  * Doit correspondre à Defaults.MODEL_ID dans constants.py.
  */

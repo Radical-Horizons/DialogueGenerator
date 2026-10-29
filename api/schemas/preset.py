@@ -4,6 +4,8 @@ from typing import Optional, List, Dict
 from datetime import datetime
 from uuid import UUID
 
+from api.schemas.validation_rules import ContextDroppingRulesSchema
+
 
 class PresetMetadata(BaseModel):
     """Métadonnées du preset."""
@@ -31,6 +33,10 @@ class PresetConfiguration(BaseModel):
     maxCompletionTokens: Optional[int] = Field(None, ge=0, description="Plafond tokens complétion")
     maxChoices: Optional[int] = Field(None, ge=0, description="Nombre max de choix générés")
     llmModel: Optional[str] = Field(None, description="Identifiant modèle LLM")
+    contextDroppingRules: Optional[ContextDroppingRulesSchema] = Field(
+        None,
+        description="Copie des règles anti-drop (None = pas d'overlay)",
+    )
 
 
 class Preset(BaseModel):

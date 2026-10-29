@@ -5,6 +5,7 @@ import axios from 'axios'
 
 import { UserManagementPanel } from './UserManagementPanel'
 import * as usersApi from '../../api/users'
+import type { UserResponse } from '../../types/api'
 
 const navigateMock = vi.fn()
 vi.mock('react-router-dom', async () => {
@@ -162,7 +163,7 @@ describe('UserManagementPanel', () => {
 
   it('sérialise les mutations d’un compte et désactive ses contrôles', async () => {
     const interaction = userEvent.setup()
-    let resolveUpdate: ((value: typeof writer) => void) | undefined
+    let resolveUpdate: ((value: UserResponse) => void) | undefined
     vi.spyOn(window, 'confirm').mockReturnValue(true)
     vi.mocked(usersApi.updateUser).mockImplementation(() => (
       new Promise((resolve) => {

@@ -132,9 +132,7 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
     render(
       <GraphEditorHeader
         toolbar={toolbar}
-
         hasActiveDialogue={true}
-        activeDialogueTitle="Test"
         activeDialogueFilename="test.json"
         handleSave={async () => {}}
         onBatchTagApply={() => {}}

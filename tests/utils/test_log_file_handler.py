@@ -1,9 +1,11 @@
 """Tests pour le handler de fichier rotatif de logs."""
+import builtins
 import json
 import pytest
 import logging
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
+from unittest.mock import patch
 from api.utils.log_file_handler import DateRotatingFileHandler
 
 
@@ -160,4 +162,133 @@ def test_handler_enriches_log_context(handler, tmp_log_dir):
         assert logs[0]["endpoint"] == "/api/test"
         assert logs[0]["method"] == "GET"
 
+def test_append_does_not_rewrite_whole_file(handler, tmp_log_dir):
+    """L'ajout d'une entrée ne relit ni ne réécrit le tableau entier.
 
+    Régression : `_append_log_entry` relisait tout le fichier, le parsait, puis le
+    réécrivait à chaque enregistrement. Le coût d'une session devenait quadratique —
+    la CI backend a dépassé son plafond d'une heure trente alors que la même suite
+    tourne en quatre minutes en local.
+
+    On compte les octets qui transitent par le fichier de log, quel que soit le
+    descripteur employé : sonder le seul `_file_handle` laisserait passer une
+    régression qui rouvrirait le fichier à côté. Le chronomètre est évité, il
+    rendrait le test sensible à la charge de la machine.
+    """
+    logger = logging.getLogger("test_append_cost")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    logger.addHandler(handler)
+
+    for i in range(200):
+        logger.info("entrée de garnissage numéro %d", i)
+    handler.flush()
+
+    log_path = tmp_log_dir / f"logs_{date.today().isoformat()}.json"
+    assert log_path.stat().st_size > 10_000, "le fichier doit peser assez pour qu'une relecture se voie"
+
+    volume = [0]
+    real_open = builtins.open
+
+    class _CountingFile:
+        """Compte ce qui passe en lecture et en écriture, délègue le reste."""
+
+        def __init__(self, inner):
+            self._inner = inner
+
+        def read(self, *args):
+            chunk = self._inner.read(*args)
+            volume[0] += len(chunk)
+            return chunk
+
+        def write(self, data):
+            volume[0] += len(data)
+            return self._inner.write(data)
+
+        def __getattr__(self, name):
+            return getattr(self._inner, name)
+
+        def __enter__(self):
+            self._inner.__enter__()
+            return self
+
+        def __exit__(self, *args):
+            return self._inner.__exit__(*args)
+
+    def counting_open(file, *args, **kwargs):
+        handle = real_open(file, *args, **kwargs)
+        return _CountingFile(handle) if str(file) == str(log_path) else handle
+
+    with patch("builtins.open", counting_open):
+        logger.info("entrée mesurée")
+        handler.flush()
+
+    assert volume[0] < 1024, (
+        f"{volume[0]} octets transférés pour un seul ajout : le fichier entier est "
+        "relu ou réécrit, le coût d'une session redevient quadratique"
+    )
+
+    with open(log_path, "r", encoding="utf-8") as f:
+        logs = json.load(f)
+    assert len(logs) == 201
+    assert logs[-1]["message"] == "entrée mesurée"
+
+
+def test_un_saut_de_ligne_final_nefface_pas_la_journee(handler, tmp_log_dir):
+    """Du whitespace en fin de fichier ne doit pas être pris pour une corruption.
+
+    Régression : l'épissure cherchait le « ] » sur le tout dernier octet. Ouvrir
+    `data/logs/*.json` dans un éditeur pour déboguer — ce que la règle meta-agent
+    demande explicitement de faire — y laisse un saut de ligne final. Le prochain log
+    émis repartait alors d'un tableau vide et effaçait toute la journée, sans le
+    moindre avertissement.
+    """
+    logger = logging.getLogger("test_trailing_ws")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    logger.addHandler(handler)
+
+    for i in range(5):
+        logger.info("entrée %d", i)
+    handler.flush()
+
+    log_path = tmp_log_dir / f"logs_{date.today().isoformat()}.json"
+    with open(log_path, "ab") as f:
+        f.write(b"\n")
+
+    logger.info("entrée après le saut de ligne")
+    handler.flush()
+
+    with open(log_path, "r", encoding="utf-8") as f:
+        logs = json.load(f)
+
+    assert len(logs) == 6, "les entrées précédentes ont été effacées"
+    assert logs[0]["message"] == "entrée 0"
+    assert logs[-1]["message"] == "entrée après le saut de ligne"
+
+
+def test_un_tableau_vraiment_corrompu_est_signale(handler, tmp_log_dir, caplog):
+    """Repartir de zéro reste possible, mais ne doit plus être silencieux."""
+    logger = logging.getLogger("test_corrompu")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    logger.addHandler(handler)
+
+    logger.info("première entrée")
+    handler.flush()
+
+    log_path = tmp_log_dir / f"logs_{date.today().isoformat()}.json"
+    with open(log_path, "wb") as f:
+        f.write(b'[{"message": "tronqu')
+
+    with caplog.at_level(logging.WARNING):
+        logger.info("après la troncature")
+        handler.flush()
+
+    with open(log_path, "r", encoding="utf-8") as f:
+        logs = json.load(f)
+    assert len(logs) == 1
+
+    assert any("non refermé" in message for message in caplog.messages), (
+        "la réinitialisation doit laisser une trace : une perte silencieuse est indétectable"
+    )

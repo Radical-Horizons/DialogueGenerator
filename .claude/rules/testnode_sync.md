@@ -1,9 +1,9 @@
 ---
 description: Synchronisation bidirectionnelle TestNode ↔ choix parent
-globs: ["frontend/src/store/graphStore.ts", "frontend/src/utils/testNodeSync.ts", "frontend/src/components/graph/nodes/TestNode.tsx"]
-alwaysApply: false
+paths:
+  - "frontend/src/utils/testNodeSync.ts"
+  - "frontend/src/components/graph/**"
 ---
-
 - **Source of Truth** : Le choix parent (JSON Unity) est la source de vérité. Les TestNodes sont des vues dérivées (artefacts de visualisation ReactFlow).
 - **Synchronisation bidirectionnelle** : Toute modification TestNode → choix parent, toute modification choix → TestNode. Utiliser `testNodeSync.ts` pour toute logique de sync.
 - **Module utilitaire** : `frontend/src/utils/testNodeSync.ts` (SRP) avec `parseTestNodeId()`, `getParentChoiceForTestNode()`, `syncTestNodeFromChoice()`, `syncChoiceFromTestNode()`, `syncTestNodeResultEdges()`.

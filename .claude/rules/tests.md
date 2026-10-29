@@ -1,6 +1,7 @@
 ---
-alwaysApply: false
 description: Structure et bonnes pratiques pour les tests pytest
+paths:
+  - "tests/**/*.py"
 ---
 # Tests — Structure et bonnes pratiques
 
@@ -16,7 +17,7 @@ description: Structure et bonnes pratiques pour les tests pytest
 
 1. Créer `tests/api/test_<nom_endpoint>.py`
 2. Utiliser `TestClient` de FastAPI (fixture `client` disponible dans `conftest.py`)
-3. Mock des dépendances : `app.dependency_overrides` ou `monkeypatch.setattr("api.dependencies.<fonction>", mock)`
+3. Mock des dépendances : `app.dependency_overrides[get_x] = …` (retiré en fin de test). Pas `monkeypatch.setattr` sur une fonction passée à `Depends` : sans effet — voir `.claude/rules/tests_patterns.md`
 4. **Référence** : Voir `tests/api/test_config_field_validation.py` pour exemple complet
 
 ### Test service (logique métier)
@@ -74,6 +75,52 @@ description: Structure et bonnes pratiques pour les tests pytest
 - **PR (GitHub Actions)** : backend et frontend en **T2** (`not slow`, Vitest sans `VITEST_FULL`). **Push sur `main`** : **T3** (pytest complet, `VITEST_FULL=1`). Détail : `.github/workflows/ci.yml`.
 - **Orchestration agent / humain** : tableau unique **T0–T3** — `.claude/commands/test-tiers.md` + `.claude/rules/workflow.md`.
 
+### La suite ne touche ni aux services réels ni à `data/`
+
+`tests/conftest.py` retire `OPENAI_API_KEY`, `MISTRAL_API_KEY`, `OPENROUTER_API_KEY` et
+`NOTION_API_KEY` de l'environnement **avant** d'importer `api.main`. Le garde `load_dotenv`
+de `api.main` ne suffit pas : sur le poste de dev, ces clés sont des variables
+d'environnement **utilisateur Windows**, héritées par pytest. Vécu en septembre 2026 :
+un test nommé « dummy_llm » facturait un vrai appel `gpt-5.6-terra`, un test de sync
+réécrivait `data/notion_cache/`, et chaque run incrémentait le budget LLM réel — tout ça
+invisible en CI, qui n'a pas ces clés.
+
+- Un test qui doit vraiment appeler un service le demande **explicitement** via la fixture
+  `real_service_credentials` (et porte `integration` + `slow`). Jamais `os.getenv` sur une
+  clé : elle n'y est plus.
+- Du code qui écrit sous la racine du dépôt sans chemin injectable se redirige dans la
+  fixture autouse `isolated_local_state` (déjà : registre d'usage + budget LLM, historique
+  d'entités GDD). Les logs fichier — JSON principal, journal de sync Notion, journal des
+  exports Unity — suivent `LOG_DIR`, que le conftest pointe vers
+  `%TEMP%\dialoguegenerator-pytest\logs`. Un nouveau fichier de log doit lire `LOG_DIR`.
+- Garde : `tests/test_pytest_isolation.py`. Une assertion sur une variable secrète compare
+  des **noms**, jamais des valeurs — l'introspection de pytest imprime la clé en clair.
+
+### Un test qui parcourt l'arborescence doit élaguer, pas filtrer
+
+`Path.rglob("*.py")` **descend** dans un répertoire avant qu'on puisse l'écarter :
+filtrer le résultat ne coûte pas moins cher, ça coûte tout le parcours. Sur ce dépôt
+le piège est massif — `.venv` (~4 300 `.py`), `.claude/worktrees` (3 copies complètes
+du dépôt, ~7 300 `.py`, chacune avec son venv et ses `node_modules`).
+
+Utiliser `os.walk` et élaguer **en place** :
+
+```python
+for dirpath, dirnames, filenames in os.walk(PROJECT_ROOT):
+    dirnames[:] = [d for d in dirnames if d not in EXCLUDED_DIRS]  # coupe la descente
+```
+
+Vécu en août 2026, mesuré : `test_no_deprecated_imports` prenait **2 h 09 min à lui
+seul** — sur 2 h 13 de suite T2 complète, les 2 054 autres tests tenant en ~4 minutes.
+Après élagage : **0,43 s**, suite complète en 3 min 14. La suite finissait donc, mais
+`npm run test:backend:fast` était inutilisable comme gate de pré-merge.
+
+Corollaire : **exclure par chemin, pas par nom de fichier**. L'exclusion des wrappers
+racine (`context_builder.py`…) matchait le basename et masquait donc aussi
+`core/context/context_builder.py` — le vrai module. Un scan rapide ne doit pas être un
+scan vide : accompagner tout filtre d'un test qui vérifie que le vrai code est
+toujours couvert.
+
 ## Quand tester
 
 - **Après modification backend** : ciblé T1 → fichier ou `-k` ; large → `npm run test:backend:fast` ; complet → `pytest tests/` (T3)
@@ -93,7 +140,7 @@ description: Structure et bonnes pratiques pour les tests pytest
 ## Maintenance
 
 - **Test manquant** : Si un composant/service/endpoint n'a pas de test, le créer immédiatement
-- **Test cassé** : Corriger avant de continuer. Ne pas skip sauf raison documentée. **Preuve obligatoire** : après toute correction demandée par l’utilisateur (y compris échec CI), **relancer** le test ou la spec touchée et ne pas conclure sans sortie pass/fail — voir `.claude/rules/workflow.md` (section « Correction de tests »).
+- **Test cassé** : Corriger avant de continuer. Ne pas skip sauf raison documentée. **Un test rouge croisé en chemin ne s'ignore jamais**, même hors du périmètre de la tâche : le corriger, ou le signaler explicitement à l'utilisateur avec sa sortie — jamais le laisser passer en silence. **Preuve obligatoire** : après toute correction demandée par l’utilisateur (y compris échec CI), **relancer** le test ou la spec touchée et ne pas conclure sans sortie pass/fail — voir `.claude/rules/workflow.md` (section « Correction de tests »).
 - **Refactoring** : Mettre à jour les tests en même temps que le code
 - **Nouvelle fonctionnalité** : Tests requis pour validation, edge cases, erreurs
 - **Couverture** : Viser >80% pour code critique (services, API)

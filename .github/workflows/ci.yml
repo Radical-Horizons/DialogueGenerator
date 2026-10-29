@@ -35,6 +35,9 @@ concurrency:
 
 jobs:
   lint:
+    # Nom inchangé volontairement : c'est l'identifiant du check requis en protection
+    # de branche. Le renommer ferait attendre indéfiniment un check qui ne remonte plus.
+    # Ce job couvre désormais ESLint *et* tsc.
     name: Frontend lint (ESLint)
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -57,6 +60,16 @@ jobs:
       # vérification en CI — toute régression passait donc inaperçue.
       - name: ESLint
         run: npm run lint
+        working-directory: frontend
+
+      # `vite build` transpile via esbuild sans vérifier les types, et Vitest ne
+      # typecheck pas : sans cette étape, aucun job ne lit `tsconfig.json`. Des erreurs
+      # s'accumulaient donc en silence — 119 au moment de l'ajout, dont des imports vers
+      # un paquet absent (`@xyflow/react`), des tokens de thème inexistants rendus
+      # `undefined`, et une action de toast branchée sur une clé ignorée.
+      # `include: ["src"]` couvre les fichiers de test au même titre que le code.
+      - name: TypeScript (tsc --noEmit)
+        run: npm run typecheck
         working-directory: frontend
 
   backend:

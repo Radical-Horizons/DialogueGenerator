@@ -32,7 +32,25 @@ import {
   GRAPH_TOPOLOGY_WARNING_STYLES,
 } from '../../../utils/graphStructuralValidation'
 import { reconstructNodePromptFromGraph } from '../../../utils/graphPromptPreview'
+import {
+  CHOICE_EDGE_COLOR,
+  EDGE_NEUTRAL_COLOR,
+  NEXT_EDGE_COLOR,
+} from '../../../utils/graphEdgeBuilders'
 import { Badge } from '../../shared'
+import {
+  redesignAccent,
+  redesignControl,
+  redesignFont,
+  redesignHairline,
+  redesignNodeBorder,
+  redesignNodeShadow,
+  redesignRadius,
+  redesignSurface,
+  redesignText as redesignTextTokens,
+} from '../../../theme/redesignTokens'
+
+const redesignTextBody = redesignTextTokens.body
 
 interface ValidationError {
   type: string
@@ -83,6 +101,28 @@ const BOTTOM_RESERVED_WITH_CHOICES = 52 // hasChoices : handles + lien
 const BOTTOM_RESERVED_SINGLE = 28 // pas de choix : handle + lien
 const CHOICE_TOOLTIP_BOTTOM_PX = 56 // tooltip au survol d’un choix au-dessus du lien
 const CONTENT_PADDING_TOP_WHEN_PENDING = 32 // pour ne pas passer sous Accepter/Régénérer/Rejeter
+
+/**
+ * Anneau d'un handle de choix porteur d'effets. Violet hors palette d'état : il ne signale ni
+ * une erreur ni le lore, seulement la présence d'effets sur ce choix.
+ */
+const CHOICE_EFFECTS_RING_COLOR = '#9B59B6'
+
+/**
+ * Pastille du locuteur : palette catégorielle, volontairement hors des tokens d'état — un
+ * locuteur en rouge ne doit pas se lire comme une erreur. Le premier cran reste neutre car
+ * le bleu d'accent est réservé à la sélection du nœud.
+ */
+const SPEAKER_DOT_PALETTE = [
+  redesignTextTokens.secondary,
+  '#9013FE',
+  '#F5A623',
+  '#E74C3C',
+  '#27AE60',
+  '#16A085',
+  '#8E44AD',
+  '#D35400',
+] as const
 
 export const DialogueNode = memo(function DialogueNode({
   data,
@@ -284,10 +324,11 @@ export const DialogueNode = memo(function DialogueNode({
   // Utiliser l'ID du nœud plutôt que le speaker pour avoir une couleur stable
   const speakerColor = getSpeakerColor(data.id)
   
-  // Déterminer la couleur et le style de la bordure selon le statut et les erreurs
-  let borderColor = selected ? '#27AE60' : '#4A90E2'
-  let borderStyle: 'solid' | 'dashed' = 'solid'
-  
+  // Écran 2e : bordure neutre par défaut — l'état (validé / à valider) vit dans l'en-tête mono.
+  // Les couleurs de validation (erreur / warning / lore) restent des signaux fonctionnels.
+  let borderColor: string = redesignNodeBorder.default
+  const borderStyle: 'solid' | 'dashed' = 'solid'
+
   const validationHighlightKind = getValidationHighlightKind(errors.map((e) => e.type))
   const topologyKind = getGraphTopologyWarningKind(warnings.map((w) => w.type))
   const topologyStyle = topologyKind ? GRAPH_TOPOLOGY_WARNING_STYLES[topologyKind] : null
@@ -302,18 +343,25 @@ export const DialogueNode = memo(function DialogueNode({
     borderColor = theme.state.error.border
   } else if (hasWarnings) {
     borderColor = topologyStyle?.border ?? theme.state.warning.color
-  } else if (isPending) {
-    borderColor = theme.state.pending.border
-    borderStyle = 'dashed'
   } else if (isAccepted) {
-    borderColor = theme.state.accepted.border
-    borderStyle = 'solid'
+    borderColor = redesignNodeBorder.strong
   }
 
   const canvasBackground =
     !hasErrors && hasWarnings && topologyStyle && !validationHighlightKind
       ? topologyStyle.background
       : undefined
+
+  /** Libellé d'état en mono dans l'en-tête (remplace les pastilles colorées). */
+  const nodeStateLabel: { text: string; color: string } | null = selected
+    ? { text: 'Sélectionné', color: redesignAccent.light }
+    : validationHighlightKind === 'lore'
+      ? { text: 'Lore', color: theme.state.lore.color }
+      : isPending
+        ? { text: 'À valider', color: theme.state.pending.border }
+        : isAccepted
+          ? { text: 'Validé', color: theme.state.accepted.border }
+          : null
 
   const getChoiceHandleLeftPercent = (index: number): number => {
     // Répartition uniforme sur la largeur du node, sans coller aux bords
@@ -339,17 +387,19 @@ export const DialogueNode = memo(function DialogueNode({
         width: NODE_WIDTH,
         minHeight: 120,
         maxHeight: 500,
-        border: `2px ${borderStyle} ${borderColor}`,
-        borderRadius: 8,
+        border: `${selected ? 2 : 1}px ${borderStyle} ${selected ? redesignAccent.base : borderColor}`,
+        borderRadius: redesignRadius.node,
         backgroundColor:
           isHighlighted
             ? theme.state.selected.background
-            : (canvasBackground ?? theme.background.tertiary),
+            : (canvasBackground ?? redesignSurface.node),
         boxShadow: selected
-          ? '0 4px 12px rgba(0, 0, 0, 0.3)'
+          ? `0 0 0 3px ${redesignAccent.ring}, ${redesignNodeShadow}`
           : isHighlighted
           ? '0 0 0 3px rgba(116, 192, 252, 0.5)'
-          : '0 2px 6px rgba(0, 0, 0, 0.2)',
+          : isAccepted
+            ? redesignNodeShadow
+            : theme.shadow.card,
         overflow: 'visible',
         position: 'relative',
         transition: 'all 0.2s ease',
@@ -362,30 +412,7 @@ export const DialogueNode = memo(function DialogueNode({
       onMouseLeave={() => setIsHovered(false)}
       onContextMenu={handleContextMenu}
     >
-      {/* Story 9.2 — indicateur conditions sur le nœud */}
-      {hasNodeCond && (
-        <div
-          role="img"
-          aria-label="Ce nœud a des conditions de visibilité"
-          title={nodeCondSummary || 'Conditions de visibilité'}
-          style={{
-            position: 'absolute',
-            top: tag ? 26 : 4,
-            left: tag ? 4 : undefined,
-            right: tag ? undefined : hasErrors || hasWarnings ? 56 : 28,
-            padding: '2px 5px',
-            borderRadius: 4,
-            fontSize: '0.65rem',
-            fontWeight: 700,
-            backgroundColor: theme.background.secondary,
-            color: theme.text.secondary,
-            border: `1px solid ${theme.border.primary}`,
-            zIndex: 11,
-          }}
-        >
-          ◆
-        </div>
-      )}
+      {/* Story 9.2 — l'indicateur conditions vit dans le pied mono (COND.), plus de badge flottant. */}
 
       {/* Badge tag (Story 2.11 FR32) */}
       {tag && (
@@ -433,27 +460,7 @@ export const DialogueNode = memo(function DialogueNode({
             zIndex: 10,
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
           }}
-          title={errors.map((e, idx) => {
-            const icon =
-              e.type === 'orphan_node'
-                ? '🔗'
-                : e.type === 'broken_reference'
-                  ? '🔴'
-                  : e.type === 'lore_contradiction_explicit' ||
-                    e.type === 'lore_contradiction_potential' ||
-                    e.type === 'lore_potential_ambiguity'
-                    ? '📜'
-                    : e.type === 'empty_node' || e.type === 'missing_dialogue_text'
-                      ? '⚪'
-                      : e.type === 'missing_display_name'
-                        ? '📝'
-                        : e.type === 'missing_stable_id'
-                          ? '🆔'
-                          : e.type === 'dialogue_flag_undeclared'
-                            ? '🏁'
-                            : '⚠️'
-            return `${icon} ${e.message}${idx < errors.length - 1 ? '\n' : ''}`
-          }).join('')}
+          title={errors.map((e) => e.message).join('\n')}
         >
           {errors.length}
         </div>
@@ -505,17 +512,7 @@ export const DialogueNode = memo(function DialogueNode({
             zIndex: 10,
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
           }}
-          title={warnings.map((w, idx) => {
-            const icon =
-              w.type === 'orphan_node'
-                ? '🔗'
-                : w.type === 'unreachable_node'
-                  ? '📍'
-                  : w.type === 'cycle_detected'
-                    ? '🔄'
-                    : '⚠️'
-            return `${icon} ${w.message}${idx < warnings.length - 1 ? '\n' : ''}`
-          }).join('')}
+          title={warnings.map((w) => w.message).join('\n')}
         >
           {warnings.length}
         </div>
@@ -525,7 +522,7 @@ export const DialogueNode = memo(function DialogueNode({
         type="target"
         position={Position.Top}
         style={{
-          background: data.incomingEdgeColor ?? '#4A90E2',
+          background: data.incomingEdgeColor ?? EDGE_NEUTRAL_COLOR,
           width: 12,
           height: 12,
           border: '2px solid white',
@@ -535,9 +532,9 @@ export const DialogueNode = memo(function DialogueNode({
       {/* En-tête : titre en avant-plan, speaker en second plan */}
       <div
         style={{
-          padding: '8px 12px',
-          backgroundColor: speakerColor,
-          borderBottom: `1px solid ${theme.border.primary}`,
+          padding: '7px 11px',
+          backgroundColor: redesignSurface.nodeHeader,
+          borderBottom: `1px solid ${redesignHairline.standard}`,
           display: 'flex',
           alignItems: 'center',
           gap: 8,
@@ -545,51 +542,44 @@ export const DialogueNode = memo(function DialogueNode({
       >
         <div
           style={{
-            width: 8,
-            height: 8,
+            width: 6,
+            height: 6,
             borderRadius: '50%',
-            backgroundColor: 'white',
+            backgroundColor: speakerColor,
+            flexShrink: 0,
           }}
         />
-        <div
+        <span
           style={{
-            display: 'flex',
-            flexDirection: 'column',
-            minWidth: 0,
+            fontFamily: redesignFont.mono,
+            fontSize: '9.5px',
+            letterSpacing: '0.09em',
+            textTransform: 'uppercase',
+            color: theme.text.secondary,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
             flex: 1,
-            gap: 2,
+            minWidth: 0,
           }}
+          title={title ? `${title} (${speaker})` : speaker}
         >
+          {speaker}
+        </span>
+        {nodeStateLabel && (
           <span
             style={{
-              fontSize: '0.9rem',
-              fontWeight: 'bold',
-              color: 'white',
-              textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
+              fontFamily: redesignFont.mono,
+              fontSize: '9.5px',
+              letterSpacing: '0.09em',
+              textTransform: 'uppercase',
+              color: nodeStateLabel.color,
+              flexShrink: 0,
             }}
-            title={title ? `${title} (${speaker})` : speaker}
           >
-            {title ? title : speaker}
+            {nodeStateLabel.text}
           </span>
-          {title ? (
-            <span
-              style={{
-                fontSize: '0.72rem',
-                fontWeight: 'normal',
-                color: 'rgba(255,255,255,0.9)',
-                textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              ({speaker})
-            </span>
-          ) : null}
-        </div>
+        )}
       </div>
       
       {/* Contenu (dialogue) — padding bas réservé pour handles + "Voir le prompt" */}
@@ -600,20 +590,45 @@ export const DialogueNode = memo(function DialogueNode({
             isPending && (isHovered || selected)
               ? CONTENT_PADDING_TOP_WHEN_PENDING
               : 12,
-          paddingBottom: hasChoices ? BOTTOM_RESERVED_WITH_CHOICES : BOTTOM_RESERVED_SINGLE,
-          fontSize: '0.9rem',
-          lineHeight: 1.4,
-          color: theme.text.primary,
+          paddingBottom: 8,
+          fontFamily: redesignFont.serif,
+          fontSize: '12.5px',
+          lineHeight: 1.45,
+          color: redesignTextBody,
           whiteSpace: 'pre-wrap',
           wordWrap: 'break-word',
           flex: '1 1 auto',
           minHeight: 0,
         }}
       >
-        {line ? truncatedLine : null}
+        {line ? (truncatedLine.startsWith('«') ? truncatedLine : `« ${truncatedLine} »`) : null}
       </div>
-      
-      {/* Tooltip au survol d'un rond orange (réponse associée) — au-dessus du lien "Voir le prompt" */}
+
+      {/* Pied maquette 2e : compteur de réponses mono — au-dessus de la zone handles/lien. */}
+      <div
+        style={{
+          padding: '0 12px',
+          paddingBottom: hasChoices ? BOTTOM_RESERVED_WITH_CHOICES : BOTTOM_RESERVED_SINGLE,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontFamily: redesignFont.mono,
+          fontSize: '9.5px',
+          color: redesignTextTokens.label,
+          letterSpacing: '0.04em',
+        }}
+      >
+        <span>
+          {hasChoices
+            ? `${choices.length} ${choices.length === 1 ? 'RÉPONSE' : 'RÉPONSES'}`
+            : data.nextNode
+              ? 'SUITE →'
+              : ''}
+        </span>
+        {hasNodeCond && <span title={nodeCondSummary || 'Conditions de visibilité'}>COND.</span>}
+      </div>
+
+      {/* Tooltip au survol d'un handle de choix (réponse associée) — au-dessus du lien "Voir le prompt" */}
       {hasChoices && hoveredChoiceIndex !== null && choices[hoveredChoiceIndex] && (
         <div
           style={{
@@ -622,7 +637,7 @@ export const DialogueNode = memo(function DialogueNode({
             bottom: CHOICE_TOOLTIP_BOTTOM_PX,
             transform: 'translateX(-50%)',
             backgroundColor: theme.background.secondary,
-            border: '1px solid #F5A623',
+            border: `1px solid ${redesignControl.border}`,
             color: theme.text.primary,
             padding: '6px 8px',
             borderRadius: 8,
@@ -684,7 +699,7 @@ export const DialogueNode = memo(function DialogueNode({
         </div>
       )}
 
-      {/* Ronds oranges (handles) uniquement, dans la carte du nœud */}
+      {/* Handles de choix, même teinte que les liens de choix (neutre, maquette 2e) */}
       {hasChoices &&
         choices.map((choice, index) => {
           const leftPercent = getChoiceHandleLeftPercent(index)
@@ -757,7 +772,7 @@ export const DialogueNode = memo(function DialogueNode({
               onMouseEnter={() => setHoveredChoiceIndex(index)}
               onMouseLeave={() => setHoveredChoiceIndex((prev) => (prev === index ? null : prev))}
               style={{
-                background: '#F5A623',
+                background: CHOICE_EDGE_COLOR,
                 width: 10,
                 height: 10,
                 border: '2px solid white',
@@ -768,7 +783,7 @@ export const DialogueNode = memo(function DialogueNode({
                 opacity: dimChoice || dimByEffort ? 0.48 : 1,
                 filter: dimChoice || dimByEffort ? 'grayscale(45%)' : undefined,
                 boxShadow: hasChoiceEffects
-                  ? '0 0 0 2px #9B59B6'
+                  ? `0 0 0 2px ${CHOICE_EFFECTS_RING_COLOR}`
                   : undefined,
               }}
               aria-label={choiceAriaParts.join(' — ')}
@@ -783,7 +798,7 @@ export const DialogueNode = memo(function DialogueNode({
           position={Position.Bottom}
           isConnectable={!playthroughReaderActive}
           style={{
-            background: '#4A90E2',
+            background: NEXT_EDGE_COLOR,
             width: 12,
             height: 12,
             border: '2px solid white',
@@ -802,10 +817,10 @@ export const DialogueNode = memo(function DialogueNode({
               top: 34,
               right: 8,
               padding: '0.4rem 0.6rem',
-              border: 'none',
+              border: `1px solid ${theme.state.accepted.border}`,
               borderRadius: '6px',
-              backgroundColor: '#27AE60',
-              color: 'white',
+              backgroundColor: theme.state.success.background,
+              color: theme.state.success.color,
               cursor: 'pointer',
               fontSize: '0.9rem',
               fontWeight: 600,
@@ -837,10 +852,10 @@ export const DialogueNode = memo(function DialogueNode({
               top: 34,
               left: 8,
               padding: '0.4rem 0.6rem',
-              border: 'none',
+              border: `1px solid ${theme.state.error.border}`,
               borderRadius: '6px',
-              backgroundColor: '#E74C3C',
-              color: 'white',
+              backgroundColor: theme.state.error.background,
+              color: theme.state.error.color,
               cursor: 'pointer',
               fontSize: '0.9rem',
               fontWeight: 600,
@@ -873,10 +888,10 @@ export const DialogueNode = memo(function DialogueNode({
               left: '50%',
               transform: 'translateX(-50%)',
               padding: '0.4rem 0.6rem',
-              border: 'none',
+              border: `1px solid ${theme.state.pending.border}`,
               borderRadius: '6px',
-              backgroundColor: '#F5A623',
-              color: theme.text.inverse,
+              backgroundColor: theme.state.warning.background,
+              color: theme.state.warning.color,
               cursor: 'pointer',
               fontSize: '0.8rem',
               fontWeight: 600,
@@ -897,7 +912,7 @@ export const DialogueNode = memo(function DialogueNode({
             }}
             title="Régénérer avec d'autres instructions"
           >
-            <span>🔄</span>
+            <span aria-hidden>↻</span>
             <span>Régénérer</span>
           </button>
         </>
@@ -953,22 +968,11 @@ export const DialogueNode = memo(function DialogueNode({
  * Utilise l'ID du nœud pour garantir une couleur stable même si le speaker change.
  */
 function getSpeakerColor(identifier: string): string {
-  const colors = [
-    '#4A90E2', // Bleu
-    '#9013FE', // Violet
-    '#F5A623', // Orange
-    '#E74C3C', // Rouge
-    '#27AE60', // Vert
-    '#16A085', // Turquoise
-    '#8E44AD', // Violet foncé
-    '#D35400', // Orange foncé
-  ]
-  
   // Hash simple de l'identifiant pour sélectionner une couleur stable
   let hash = 0
   for (let i = 0; i < identifier.length; i++) {
     hash = identifier.charCodeAt(i) + ((hash << 5) - hash)
   }
-  
-  return colors[Math.abs(hash) % colors.length]
+
+  return SPEAKER_DOT_PALETTE[Math.abs(hash) % SPEAKER_DOT_PALETTE.length]
 }

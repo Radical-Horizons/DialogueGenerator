@@ -142,7 +142,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                     raise
             _startup_timer.mark("service_container_created")
 
-            context_builder = container.get_context_builder()
+            # Déporté en thread : get_context_builder() charge le GDD depuis disque
+            # (load_gdd_files(), bloquant) au premier accès — ne doit pas s'exécuter
+            # directement sur la boucle event du lifespan ASGI (déclencherait le
+            # garde-fou runtime de ContextBuilder en plus de bloquer le démarrage).
+            context_builder = await asyncio.to_thread(container.get_context_builder)
             _startup_timer.mark("context_builder_gdd_loaded")
 
             config_service = container.get_config_service()
@@ -190,6 +194,29 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
             app.state.container = container
             logger.info("ServiceContainer initialisé dans app.state (GDD chargé une seule fois).")
+
+            # Presets et fiches du catalogue rejoignent les templates : un seul objet
+            # réutilisable, donc une seule liste et rien qui soit livré non modifiable.
+            # Idempotent, et non bloquant — un échec ici ne doit pas empêcher l'API de
+            # démarrer, la convergence se retentera au prochain lancement.
+            try:
+                from services.template_convergence_service import TemplateConvergenceService
+
+                convergence = TemplateConvergenceService(
+                    template_service=container.get_template_service(),
+                    preset_service=container.get_preset_service(),
+                )
+                resultat = convergence.converge()
+                if resultat.created:
+                    logger.info(
+                        "Convergence : %d preset(s) et %d fiche(s) importés en templates.",
+                        resultat.from_presets,
+                        resultat.from_catalog,
+                    )
+            except Exception as exc:
+                logger.warning(
+                    "Convergence des templates différée (elle sera retentée) : %s", exc
+                )
         except Exception as e:
             logger.error(f"Erreur lors de l'initialisation du container ou de la validation GDD: {e}", exc_info=True)
             _startup_timer.mark("container_init_failed")
@@ -261,6 +288,18 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning(f"Erreur lors du démarrage de la cleanup task: {e}")
 
+        # Cleanup périodique des jobs batch validation/génération (Epic 8) :
+        # sans ce sweep, un job jamais re-pollé (onglet fermé) fuit en mémoire.
+        try:
+            batch_container = getattr(app.state, "container", None)
+            if batch_container is not None:
+                await batch_container.get_batch_validation_job_manager().start_cleanup_task()
+                await batch_container.get_batch_node_generation_job_manager().start_cleanup_task()
+                await batch_container.get_template_ab_test_job_manager().start_cleanup_task()
+                logger.info("Cleanup tasks des jobs batch (validation/génération) démarrées")
+        except Exception as e:
+            logger.warning(f"Erreur lors du démarrage des cleanup tasks batch: {e}")
+
         async def gdd_notion_scheduler() -> None:
             """Sync GDD Notion périodique si activée (FR18, pas de cron OS)."""
             await asyncio.sleep(20)
@@ -315,6 +354,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             logger.info("Cleanup task des jobs de génération arrêtée")
         except Exception as e:
             logger.warning(f"Erreur lors de l'arrêt de la cleanup task: {e}")
+
+        try:
+            batch_container = getattr(app.state, "container", None)
+            if batch_container is not None:
+                await batch_container.get_batch_validation_job_manager().stop_cleanup_task()
+                await batch_container.get_batch_node_generation_job_manager().stop_cleanup_task()
+                await batch_container.get_template_ab_test_job_manager().stop_cleanup_task()
+                logger.info("Cleanup tasks des jobs batch (validation/génération) arrêtées")
+        except Exception as e:
+            logger.warning(f"Erreur lors de l'arrêt des cleanup tasks batch: {e}")
 
         sched_task = getattr(app.state, "_gdd_notion_scheduler_task", None)
         if sched_task is not None:
@@ -663,8 +712,14 @@ from api.routers import (
     audit_logs,
     auth,
     config,
-    context,
+    context_build,
+    context_entities,
+    context_locations,
+    context_rules,
+    context_staleness,
+    context_suggestions,
     costs,
+    collections,
     dialogue_shares,
     dialogues,
     documents,
@@ -682,6 +737,8 @@ from api.routers import (
     mechanics_flags,
     mechanics_systems,
     presets,
+    templates,
+    author_profiles,
     streaming,
     unity_dialogues,
     user_settings,
@@ -695,11 +752,11 @@ app.include_router(user_settings.router, prefix="/api/v1", tags=["User Settings"
 app.include_router(audit_logs.router, prefix="/api/v1", tags=["Audit Logs"])
 app.include_router(admin.router, prefix="/api/v1", tags=["Admin Settings"])
 app.include_router(dialogues.router, prefix="/api/v1/dialogues", tags=["Dialogues"])
+app.include_router(collections.router, prefix="/api/v1/collections", tags=["Collections"])
 app.include_router(dialogue_shares.router, prefix="/api/v1/dialogues", tags=["Dialogue Shares"])
 app.include_router(streaming.router, prefix="/api/v1/dialogues", tags=["Dialogues"])  # SSE streaming (Story 0.2)
 app.include_router(unity_dialogues.router, prefix="/api/v1/unity-dialogues", tags=["Unity Dialogues"])
 app.include_router(documents.router, prefix="/api/v1/documents", tags=["Documents"])
-app.include_router(context.router, prefix="/api/v1/context", tags=["Context"])
 app.include_router(config.router, prefix="/api/v1/config", tags=["Configuration"])
 app.include_router(llm_usage.router, prefix="/api/v1/llm-usage", tags=["LLM Usage"])
 app.include_router(exports.router, prefix="/api/v1/exports", tags=["Exports"])
@@ -734,6 +791,25 @@ for _graph_mod in _GRAPH_ROUTER_MODULES:
         dependencies=[Depends(get_current_user)],
     )
 
+# Routers contexte GDD (split api/routers/context.py).
+# ``context_locations`` en tête : il porte à la fois les chemins statiques
+# ``/locations/regions``, ``/locations/scene/...`` et le paramétré ``/locations/{name}``,
+# dont l'ordre relatif conditionne la résolution FastAPI.
+_CONTEXT_ROUTER_MODULES = (
+    context_locations,
+    context_entities,
+    context_build,
+    context_suggestions,
+    context_rules,
+    context_staleness,
+)
+for _context_mod in _CONTEXT_ROUTER_MODULES:
+    app.include_router(
+        _context_mod.router,
+        prefix="/api/v1/context",
+        tags=["Context"],
+    )
+
 # Router pour les règles de validation (Story 4.10) — persistance disque : même auth que le graphe
 from api.routers import validation_rules
 app.include_router(
@@ -745,6 +821,14 @@ app.include_router(
 
 # Router pour les presets de génération
 app.include_router(presets.router, prefix="/api/v1/presets", tags=["Presets"])
+
+# Router pour les templates custom de génération (Story 6.1.1)
+app.include_router(templates.router, prefix="/api/v1/templates", tags=["Templates"])
+app.include_router(
+    author_profiles.router,
+    prefix="/api/v1/author-profiles",
+    tags=["Author profiles"],
+)
 
 from api.routers import gdd_notion_sync
 

@@ -3,6 +3,7 @@
  */
 import type { CSSProperties } from 'react'
 import { theme } from '../../theme'
+import { redesignAccent, redesignControl } from '../../theme/redesignTokens'
 import { remSize } from '../../theme/uiTypography'
 import type { UnityBatchExportMenuSnapshot } from '../../store/unityBatchExportMenuStore'
 
@@ -18,6 +19,34 @@ function menuItemStyle(active: boolean, disabled: boolean): CSSProperties {
     cursor: disabled ? 'not-allowed' : 'pointer',
     opacity: disabled ? 0.6 : 1,
   }
+}
+
+/** Case visuelle (décorative) : le libellé du bouton dit déjà l'action. */
+function CheckMark({ checked }: { checked: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      data-testid="batch-select-all-mark"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 12,
+        height: 12,
+        marginRight: 9,
+        verticalAlign: '-1px',
+        boxSizing: 'border-box',
+        border: `1px solid ${checked ? redesignAccent.base : redesignControl.inputBorder}`,
+        borderRadius: 3,
+        backgroundColor: checked ? redesignAccent.base : 'transparent',
+        color: theme.button.primary.color,
+        fontSize: 9,
+        lineHeight: 1,
+      }}
+    >
+      {checked ? '✓' : null}
+    </span>
+  )
 }
 
 function menuSeparatorStyle(): CSSProperties {
@@ -68,7 +97,8 @@ export function UnityBatchExportActionsMenuItems({
             : 'transparent'
         }}
       >
-        {batch.allSelected ? '☑ Tout désélectionner' : '☐ Tout sélectionner'}
+        <CheckMark checked={batch.allSelected} />
+        {batch.allSelected ? 'Tout désélectionner' : 'Tout sélectionner'}
         {batch.checkedCount > 0 ? ` (${batch.checkedCount})` : ''}
       </button>
       <button

@@ -15,6 +15,7 @@ import ReactFlow, {
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 import { DialogueNode, TestNode, EndNode } from '../graph/nodes'
+import { graphMinimapNodeColor } from '../graph/graphMinimapLayout'
 import { theme } from '../../theme'
 import type { UnityDialogueNode } from '../../types/api'
 import {
@@ -27,6 +28,11 @@ import {
 
 interface GraphViewProps {
   json_content: string
+}
+
+/** Même teinte que les liens de résultat de test de l'éditeur de graphe. */
+function testResultEdgeColor(handleId: 'success' | 'failure'): string | undefined {
+  return TEST_RESULT_EDGE_CONFIG.find((result) => result.handleId === handleId)?.color
 }
 
 /**
@@ -100,7 +106,7 @@ export function unityJsonToGraph(jsonContent: string): { nodes: Node[]; edges: E
           target: unityNode.successNode,
           type: 'smoothstep',
           label: 'Succès',
-          style: { stroke: '#27AE60' },
+          style: { stroke: testResultEdgeColor('success') },
         })
       }
       
@@ -111,7 +117,7 @@ export function unityJsonToGraph(jsonContent: string): { nodes: Node[]; edges: E
           target: unityNode.failureNode,
           type: 'smoothstep',
           label: 'Échec',
-          style: { stroke: '#E74C3C' },
+          style: { stroke: testResultEdgeColor('failure') },
         })
       }
       
@@ -268,11 +274,7 @@ export const GraphView = memo(function GraphView({
         <Background />
         <Controls />
         <MiniMap
-          nodeColor={(node) => {
-            if (node.type === 'testNode') return '#F5A623'
-            if (node.type === 'endNode') return '#B8B8B8'
-            return '#4A90E2'
-          }}
+          nodeColor={(node) => graphMinimapNodeColor(node.type)}
           style={{ backgroundColor: theme.background.secondary }}
         />
       </ReactFlow>

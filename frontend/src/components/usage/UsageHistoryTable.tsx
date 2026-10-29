@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { getUsageHistory, type LLMUsageRecord } from '../../api/llmUsage'
 import { getErrorMessage } from '../../types/errors'
+import { formatCurrency, formatDurationMs, formatNumber } from '../../utils/formatCurrency'
 import './UsageHistoryTable.css'
 
 interface UsageHistoryTableProps {
@@ -54,14 +55,9 @@ export function UsageHistoryTable({
     })
   }
 
-  const formatCost = (cost: number) => {
-    return `$${cost.toFixed(6)}`
-  }
-
-  const formatDuration = (ms: number) => {
-    if (ms < 1000) return `${ms}ms`
-    return `${(ms / 1000).toFixed(2)}s`
-  }
+  // Coût d'un appel, en dollars : six décimales fixes, un appel coûte souvent moins d'un centime.
+  const formatCallCost = (cost: number) =>
+    formatCurrency(cost, 'USD', { minimumFractionDigits: 6, maximumFractionDigits: 6 })
 
   if (loading) {
     return <div className="usage-history-loading">Chargement...</div>
@@ -76,46 +72,50 @@ export function UsageHistoryTable({
       <div className="usage-history-table__header">
         <h3>Historique des appels LLM</h3>
         <div className="usage-history-table__pagination-info">
-          Page {page} sur {totalPages} ({total} enregistrements)
+          Page {page} sur {totalPages} ({formatNumber(total)} enregistrements)
         </div>
       </div>
 
       {records.length === 0 ? (
-        <div className="usage-history-empty">Aucun enregistrement trouvé</div>
+        <div className="usage-history-empty">
+          Aucun appel sur cette période. Chaque génération s&apos;inscrira ici avec son coût et sa durée.
+        </div>
       ) : (
         <>
-          <table className="usage-history-table__table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Modèle</th>
-                <th>Endpoint</th>
-                <th>Tokens</th>
-                <th>Coût</th>
-                <th>Durée</th>
-                <th>Variantes</th>
-                <th>Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              {records.map((record) => (
-                <tr key={record.request_id} className={record.success ? '' : 'error-row'}>
-                  <td>{formatDate(record.timestamp)}</td>
-                  <td>{record.model_name}</td>
-                  <td className="endpoint-cell">{record.endpoint}</td>
-                  <td>{record.total_tokens.toLocaleString()}</td>
-                  <td>{formatCost(record.estimated_cost)}</td>
-                  <td>{formatDuration(record.duration_ms)}</td>
-                  <td>{record.k_variants}</td>
-                  <td>
-                    <span className={`status-badge ${record.success ? 'success' : 'error'}`}>
-                      {record.success ? '✓' : '✗'}
-                    </span>
-                  </td>
+          <div className="usage-history-table__scroll">
+            <table className="usage-history-table__table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Modèle</th>
+                  <th>Endpoint</th>
+                  <th className="num-cell">Tokens</th>
+                  <th className="num-cell">Coût</th>
+                  <th className="num-cell">Durée</th>
+                  <th className="num-cell">Variantes</th>
+                  <th>Statut</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {records.map((record) => (
+                  <tr key={record.request_id} className={record.success ? '' : 'error-row'}>
+                    <td className="date-cell">{formatDate(record.timestamp)}</td>
+                    <td className="model-cell">{record.model_name}</td>
+                    <td className="endpoint-cell">{record.endpoint}</td>
+                    <td className="num-cell">{formatNumber(record.total_tokens)}</td>
+                    <td className="num-cell">{formatCallCost(record.estimated_cost)}</td>
+                    <td className="num-cell">{formatDurationMs(record.duration_ms, 2)}</td>
+                    <td className="num-cell">{record.k_variants}</td>
+                    <td>
+                      <span className={`status-badge ${record.success ? 'success' : 'error'}`}>
+                        {record.success ? 'Succès' : 'Échec'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           <div className="usage-history-table__pagination">
             <button
@@ -141,7 +141,3 @@ export function UsageHistoryTable({
     </div>
   )
 }
-
-
-
-

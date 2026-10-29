@@ -56,3 +56,49 @@ def test_full_phrase_present_no_case():
     raw = ContextDroppingDetector.detect(nodes, [], {"characters_full": ["Entité Alpine Zeta"]})
     assert raw.case_count == 0
     assert raw.message is not None
+
+
+def test_strict_choices_without_numeric_mechanics_warns() -> None:
+    """Mode strict : choix sans DD ni deltas → too_subtle."""
+    from services.context_dropping_detector import ContextDroppingOptionsData
+
+    node = {
+        "id": "n1",
+        "type": "dialogueNode",
+        "position": {"x": 0, "y": 0},
+        "data": {
+            "line": "Rencontre avec Entité Alpine Zeta ici.",
+            "choices": [{"text": "Continuer", "test": None}],
+            "stableId": "st-n1",
+        },
+    }
+    raw = ContextDroppingDetector.detect(
+        [node],
+        [],
+        {"characters_full": ["Entité Alpine Zeta"]},
+        options=ContextDroppingOptionsData(rules_profile="strict"),
+    )
+    assert any(c.kind == "too_subtle" and "DD" in c.message for c in raw.cases)
+
+
+def test_strict_choices_with_dd_skip_mechanic_warning() -> None:
+    """Un test numérique évite le warning DD."""
+    from services.context_dropping_detector import ContextDroppingOptionsData
+
+    node = {
+        "id": "n1",
+        "type": "dialogueNode",
+        "position": {"x": 0, "y": 0},
+        "data": {
+            "line": "Rencontre avec Entité Alpine Zeta ici.",
+            "choices": [{"text": "Tenter", "test": "Raison+Rhétorique:8"}],
+            "stableId": "st-n1",
+        },
+    }
+    raw = ContextDroppingDetector.detect(
+        [node],
+        [],
+        {"characters_full": ["Entité Alpine Zeta"]},
+        options=ContextDroppingOptionsData(rules_profile="strict"),
+    )
+    assert not any("DD / deltas" in (c.context_label or "") for c in raw.cases)

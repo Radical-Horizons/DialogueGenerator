@@ -96,6 +96,9 @@ interface ContextState {
   /** Incrémenté après sync GDD Notion / restauration archive pour forcer le rechargement des listes contexte. */
   gddDataRevision: number
   bumpGddDataRevision: () => void
+  /** Chargement du catalogue GDD — lu par le bouton Générer pour se désactiver. */
+  gddCatalogLoading: boolean
+  setGddCatalogLoading: (loading: boolean) => void
 }
 
 const defaultSelections: ContextSelection = {
@@ -165,6 +168,9 @@ export const useContextStore = create<ContextState>((set, get) => ({
   cachedSceneSubLocations: new Map<string, CachedData>(),
   cachedNarrativeContexts: null,
   gddDataRevision: 0,
+  gddCatalogLoading: false,
+
+  setGddCatalogLoading: (loading: boolean) => set({ gddCatalogLoading: loading }),
 
   setSelections: (selections: ContextSelection) => {
     set({ selections: normalizeSelections(selections) })

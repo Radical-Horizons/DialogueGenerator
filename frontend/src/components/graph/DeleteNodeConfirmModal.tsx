@@ -1,6 +1,6 @@
 /**
  * Modale de confirmation avant suppression d'un nœud du graphe.
- * Ouverte par le raccourci Suppr. ou le bouton 🗑️ du NodeEditorPanel.
+ * Ouverte par le raccourci Suppr. ou le bouton Supprimer du NodeEditorPanel.
  */
 import { memo } from 'react'
 import { useGraphStore } from '../../store/graphStore'
@@ -51,7 +51,7 @@ export const DeleteNodeConfirmModal = memo(function DeleteNodeConfirmModal() {
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.elevated,
           padding: isNarrow ? '0.9rem' : '2rem',
           borderRadius: '8px',
           minWidth: isNarrow ? 'unset' : '350px',

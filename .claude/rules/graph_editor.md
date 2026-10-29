@@ -1,24 +1,9 @@
 ---
 description: Règles spécifiques pour l'éditeur de graphe (GraphEditor/GraphCanvas/graphStore + API /graph).
-globs:
+paths:
   - "frontend/src/components/graph/**"
-  - "frontend/src/utils/mergeNodeEditorForm.ts"
-  - "frontend/src/utils/documentValidationFieldErrors.ts"
-  - "frontend/src/components/shared/InlineFieldError.tsx"
-  - "frontend/src/store/graphStore.ts"
-  - "frontend/src/store/slices/*Slice.ts"
-  - "frontend/src/store/graphViewStore.ts"
-  - "frontend/src/store/utils/runGraphTransaction.ts"
-  - "frontend/src/hooks/useReactFlowHandlers.ts"
-  - "frontend/src/hooks/useGraphToolbar.ts"
-  - "frontend/src/hooks/useKeyboardShortcuts.ts"
-  - "frontend/src/__tests__/Graph*.test.tsx"
-  - "frontend/src/__tests__/graphStore*.test.ts"
-  - "api/routers/graph.py"
-  - "api/schemas/graph.py"
-alwaysApply: false
+  - "frontend/src/store/**"
 ---
-
 - **Invariant éditeur de nœud** : au changement de sélection dans `NodeEditorPanel`, flush le formulaire avec **`mergeNodeFormIntoStoreData()`** / **`mergeDialogueNodeFormIntoStoreData()`** (`frontend/src/utils/mergeNodeEditorForm.ts`), pas un spread `{ ...nodeData, ...formValues }` — sinon `choices[i].targetNode` (rempli par `connectNodes` / `edgeSlice`) peut être écrasé, et `choice.test` peut être effacé si le champ formulaire est vide alors que le store l'a encore. Détails du flux dans `CLAUDE.md` (Learned Workspace Facts).
 
 - **Validation inline à la sauvegarde** :

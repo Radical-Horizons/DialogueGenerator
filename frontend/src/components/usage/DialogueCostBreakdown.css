@@ -1,54 +1,91 @@
-/* DialogueCostBreakdown — Styles (Story 1.12 / FR73) */
+/* DialogueCostBreakdown — Story 1.12 / FR73, charte refonte 2026.
+   Rendu nu : ni fond, ni cadre, ni rayon — le composant vit dans l'inspecteur du graphe,
+   la modale de coûts et le panneau de métadonnées, qui portent déjà leur surface.
+   Chiffres en mono, séparations par filets, statuts en pastille 6px + libellé mono. */
 
 .dcb {
-  padding: 1.25rem;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
+  background: transparent;
+  color: #dcdce4;
+  font-size: 12.5px;
 }
 
-/* ── Résumé ── */
-.dcb__summary {
-  display: flex;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.dcb__stat {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-width: 100px;
-}
-
-.dcb__stat-label {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.55);
+/* ── Étiquette de section ── */
+.dcb__section-label {
+  margin: 20px 0 9px;
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  color: #84848f;
 }
 
-.dcb__stat-value {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.92);
+.dcb > .dcb__section-label:first-child {
+  margin-top: 0;
+}
+
+/* ── Rangées libellé / valeur ── */
+.dcb__rows {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dcb__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dcb__row-label {
+  font-size: 12.5px;
+  color: #9a9aa4;
+}
+
+.dcb__row-value {
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: #dcdce4;
+  text-align: right;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ── Statut : pastille 6px + libellé mono ── */
+.dcb__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9a9aa4;
+  white-space: nowrap;
+}
+
+.dcb__row-value .dcb__status {
+  font-size: 11px;
+}
+
+.dcb__dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 /* ── Chart ── */
-.dcb__chart {
-  margin-top: 0.5rem;
-}
-
 .dcb__bars {
   display: flex;
   align-items: flex-end;
-  gap: 4px;
-  height: 160px;
-  padding: 0.75rem;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
+  gap: 5px;
+  height: 140px;
+  padding-top: 9px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
   overflow-x: auto;
 }
 
@@ -58,23 +95,25 @@
   max-width: 60px;
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   align-items: center;
   height: 100%;
 }
 
 .dcb__bar {
   width: 100%;
-  border-radius: 3px 3px 0 0;
   min-height: 3px;
   cursor: pointer;
-  transition: opacity 0.15s, transform 0.15s;
+  transition: opacity 0.15s;
 }
 
-.dcb__bar:hover,
-.dcb__bar:focus {
+.dcb__bar:hover {
   opacity: 0.8;
-  transform: scaleY(1.06);
-  outline: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.dcb__bar:focus-visible {
+  outline: 1px solid #4f7fff;
+  outline-offset: 2px;
 }
 
 .dcb__bar--deleted {
@@ -89,9 +128,10 @@
 }
 
 .dcb__bar-label {
-  margin-top: 4px;
-  font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.45);
+  margin-top: 5px;
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 9.5px;
+  color: #84848f;
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -101,150 +141,113 @@
 
 /* ── Légende ── */
 .dcb__legend {
-  margin-top: 0.75rem;
+  margin-top: 9px;
   display: flex;
-  gap: 1rem;
-  font-size: 0.75rem;
+  gap: 14px;
   flex-wrap: wrap;
 }
-
-.dcb__legend-item {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.dcb__legend-item::before {
-  content: '●';
-  font-size: 0.85rem;
-}
-
-.dcb__legend-item--green::before { color: #22c55e; }
-.dcb__legend-item--orange::before { color: #f59e0b; }
-.dcb__legend-item--red::before { color: #ef4444; }
 
 /* ── États ── */
 .dcb__loading,
 .dcb__empty {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.875rem;
-  padding: 0.5rem 0;
+  margin: 0;
+  padding: 9px 0;
+  font-size: 12.5px;
+  color: #9a9aa4;
 }
 
 .dcb__error {
-  color: #ef4444;
-  font-size: 0.875rem;
-  padding: 0.5rem 0;
+  padding: 9px 0;
+  font-size: 12.5px;
+  color: #ff6b6b;
 }
 
-/* ── Tooltip ── */
+/* ── Actions ── */
+.dcb__actions {
+  margin-top: 14px;
+}
+
+.dcb__actions--top {
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+
+/* Bouton secondaire de la charte : fond transparent, contour #2e2e36, rayon 6. */
+.dcb__btn {
+  background: transparent;
+  border: 1px solid #2e2e36;
+  border-radius: 6px;
+  color: #dcdce4;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 5px 9px;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.dcb__btn:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: #3d3d46;
+}
+
+/* ── Tooltip (popover flottant : il garde une surface) ── */
 .dcb__tooltip {
   position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  background: rgba(20, 20, 30, 0.97);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
-  padding: 1rem 1.25rem;
+  bottom: 20px;
+  right: 20px;
   z-index: 9999;
-  min-width: 240px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  min-width: 260px;
+  padding: 14px 20px;
+  background: #1f1f26;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.dcb__tooltip .dcb__section-label {
+  margin-top: 0;
 }
 
 .dcb__tooltip-close {
   position: absolute;
-  top: 0.5rem;
-  right: 0.75rem;
+  top: 9px;
+  right: 14px;
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.55);
+  color: #9a9aa4;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 16px;
   padding: 0;
   line-height: 1;
 }
 
 .dcb__tooltip-close:hover {
-  color: rgba(255, 255, 255, 0.9);
+  color: #f2f2f5;
 }
 
-.dcb__tooltip-title {
-  margin-bottom: 0.75rem;
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 600;
-}
-
-.dcb__tooltip-title code {
-  font-family: monospace;
-  color: #a5b4fc;
-  font-size: 0.8rem;
-}
-
-.dcb__tooltip-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.dcb__tooltip-table td {
-  padding: 0.2rem 0.5rem 0.2rem 0;
-  vertical-align: top;
-}
-
-.dcb__tooltip-table td:first-child {
-  color: rgba(255, 255, 255, 0.45);
-  white-space: nowrap;
-  padding-right: 0.75rem;
-}
-
-/* ── Actions (bouton comparaison) ── */
-.dcb__actions {
-  margin-bottom: 0.75rem;
-}
-
-.dcb__btn-compare {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
-  color: rgba(255, 255, 255, 0.7);
-  cursor: pointer;
-  font-size: 0.8rem;
-  padding: 0.35rem 0.75rem;
-  transition: background 0.15s, color 0.15s;
-}
-
-.dcb__btn-compare:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.95);
+.dcb__tooltip-id {
+  margin: -5px 0 9px;
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 12px;
+  color: #f2f2f5;
+  overflow-wrap: anywhere;
 }
 
 /* ── Vue comparaison multi-dialogues (AC#3) ── */
-.dcb__compare-title {
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0 0 0.75rem;
-  font-weight: 500;
-}
-
 .dcb__compare-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
   max-height: 320px;
   overflow-y: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .dcb__compare-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid transparent;
-  transition: background 0.12s;
+  gap: 9px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background-color 0.12s;
 }
 
 .dcb__compare-row[role="button"] {
@@ -252,47 +255,47 @@
 }
 
 .dcb__compare-row[role="button"]:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .dcb__compare-row--current {
-  border-color: rgba(165, 180, 252, 0.3);
-  background: rgba(165, 180, 252, 0.06);
-}
-
-.dcb__compare-indicator {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
+  background: rgba(79, 127, 255, 0.08);
+  box-shadow: inset 2px 0 0 #4f7fff;
+  padding-left: 9px;
 }
 
 .dcb__compare-name {
   flex: 1;
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.8);
+  min-width: 0;
+  font-size: 12.5px;
+  color: #d5d5dd;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .dcb__compare-current-badge {
-  font-size: 0.7rem;
-  color: #a5b4fc;
-  font-style: italic;
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #84848f;
+}
+
+.dcb__compare-cost,
+.dcb__compare-nodes {
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .dcb__compare-cost {
-  font-size: 0.85rem;
-  font-weight: 600;
-  min-width: 70px;
-  text-align: right;
+  font-size: 12px;
+  color: #dcdce4;
 }
 
 .dcb__compare-nodes {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.4);
-  min-width: 55px;
-  text-align: right;
+  font-size: 11px;
+  color: #8a8a95;
 }

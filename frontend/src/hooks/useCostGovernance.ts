@@ -6,6 +6,7 @@
 import { useState, useCallback } from 'react'
 import { getBudget, type BudgetResponse } from '../api/costs'
 import { useToast } from '../components/shared/Toast'
+import { formatCost, formatPercent } from '../utils/formatCurrency'
 
 export interface BudgetCheckResult {
   /** True si génération autorisée, false si bloquée */
@@ -57,14 +58,14 @@ export function useCostGovernance(): UseCostGovernanceReturn {
         return {
           allowed: false,
           percentage,
-          message: `Budget dépassé (${percentage.toFixed(1)}%) - Veuillez augmenter le budget ou attendre le prochain mois`
+          message: `Budget dépassé (${formatPercent(percentage)}) — veuillez augmenter le budget ou attendre le prochain mois`
         }
       }
 
       // Soft warning à 90%
       if (percentage >= 90 && percentage < 100) {
-        const remaining = budgetData.remaining
-        const warningMessage = `Budget atteint à ${percentage.toFixed(1)}% - ${remaining.toFixed(2)}€ restants`
+        // Le budget est tenu en dollars (quota `DEFAULT_MONTHLY_LLM_QUOTA_USD`), pas en euros.
+        const warningMessage = `Budget atteint à ${formatPercent(percentage)} — ${formatCost(budgetData.remaining, 'USD')} restants`
         toast(warningMessage, 'warning', 5000)
         return {
           allowed: true,

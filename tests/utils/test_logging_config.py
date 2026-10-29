@@ -182,21 +182,25 @@ def test_get_log_level_invalid():
         assert level == "INFO"
 
 
-def test_setup_logging():
+def test_setup_logging(tmp_path):
     """Test que setup_logging configure le logging."""
-    with patch.dict(os.environ, {"LOG_FORMAT": "text", "LOG_LEVEL": "INFO"}, clear=True):
+    # `LOG_DIR` explicite : `clear=True` l'effacerait, et le handler fichier écrirait dans le vrai `data/logs/`.
+    env = {"LOG_FORMAT": "text", "LOG_LEVEL": "INFO", "LOG_DIR": str(tmp_path)}
+    with patch.dict(os.environ, env, clear=True):
         # Nettoyer les handlers existants
         root_logger = logging.getLogger()
         original_handlers = root_logger.handlers[:]
         root_logger.handlers = []
-        
+
         try:
             setup_logging()
-            
+
             # Vérifier qu'un handler a été ajouté
             assert len(root_logger.handlers) > 0
-            
+
         finally:
+            for handler in root_logger.handlers:
+                handler.close()
             # Restaurer les handlers originaux
             root_logger.handlers = original_handlers
 

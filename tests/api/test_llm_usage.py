@@ -234,6 +234,8 @@ def test_get_generation_logs_200_returns_list(client, tmp_path):
             node_id=f"node_{i}",
             prompt="System: Write dialogue.",
             response='{"node": {}}',
+            template_id="confrontation",
+            template_name="Confrontation",
         )
         repo.save(r)
     test_service = LLMUsageService(repository=repo, pricing_service=LLMPricingService())
@@ -255,6 +257,8 @@ def test_get_generation_logs_200_returns_list(client, tmp_path):
         assert "success" in entry
         assert entry["prompt"] == "System: Write dialogue."
         assert entry["response"] == '{"node": {}}'
+        assert entry["template_id"] == "confrontation"
+        assert entry["template_name"] == "Confrontation"
     finally:
         app.dependency_overrides.pop(get_llm_usage_service, None)
 

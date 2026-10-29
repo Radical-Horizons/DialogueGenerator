@@ -3,4 +3,4 @@
 Ne pas modifier manuellement : exécuter `npm run version:sync`.
 """
 
-APP_VERSION: str = "1.8.4"
+APP_VERSION: str = "1.9.0"

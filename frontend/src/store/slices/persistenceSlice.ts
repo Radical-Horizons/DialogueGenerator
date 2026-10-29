@@ -197,7 +197,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
     }
   },
 
-  /** Charge depuis le JSON brut (frontend uniquement, pas de backend loadGraph). Utilisé quand l’API documents renvoie 404. */
+  /** Charge depuis le JSON brut (frontend uniquement). Fallback 404 documents ou 422 missing_choice_id. */
   loadDialogueFromRawJson: async (jsonContent: string, documentId: string) => {
     const loadSeq = get().activeLoadSeq
     set({ isLoading: true })
@@ -351,15 +351,6 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
       if (get().activeLoadSeq !== loadSeq) return
       console.error('Erreur chargement document:', error)
       set({ isLoading: false })
-      const err = error as {
-        response?: { status?: number; data?: { error?: { code?: string } } }
-      }
-      if (
-        (err?.response?.status === 422 || err?.response?.status === 400) &&
-        err?.response?.data?.error?.code === 'missing_choice_id'
-      ) {
-        throw new Error("Ce dialogue doit être migré avec l'outil de migration choiceId.")
-      }
       throw error
     }
   },
@@ -411,6 +402,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
       activeSaveSeq: get().activeSaveSeq + 1,
       validationErrors: [],
       loreExplicitValidationSummary: null,
+      loreExplicitValidationLoading: false,
       highlightedNodeIds: [],
       highlightedCycleNodes: [],
       intentionalCycles,
@@ -421,6 +413,12 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
       lastAckSeq: null,
       undoStack: [],
       redoStack: [],
+      selectedNodeId: null,
+      selectedNodeIds: [],
+      documentFieldErrors: [],
+      graphFilters: {},
+      isGenerating: false,
+      showDeleteNodeConfirm: false,
     })
     return true
   },

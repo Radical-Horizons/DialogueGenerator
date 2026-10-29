@@ -1,6 +1,6 @@
 # Intégration systèmes de jeu (FR94)
 
-**Dernière mise à jour :** 2026-06-12  
+**Dernière mise à jour :** 2026-07-13  
 **Référence d'implémentation :** le code et les tests font foi (`services/game_systems_*.py`, `frontend/src/utils/*`, tests `test_game_systems_*`).
 
 Ce guide décrit le comportement **livré** dans l'éditeur de graphe et l'API documents. En cas d'écart avec un document de planification, vérifier le code.
@@ -94,6 +94,41 @@ Quand la preview locale ne peut pas reproduire le runtime (ex. agrégat communau
 
 ---
 
+## Catalogue skill-check (API + éditeur)
+
+`GET /api/v1/mechanics/systems/skill-check-catalog` expose les caractéristiques et compétences utilisables dans les tests Unity et l'autocomplétion de l'éditeur.
+
+**Réponse :** `SkillCheckCatalogResponse` — `{ attributes: [{ id, label }], skills: [{ id, label }] }`
+
+| Source | Contenu |
+|--------|---------|
+| `load_attribute_entries()` | 8 caractéristiques canoniques (GDD Core System) |
+| `SkillCatalogService` | Compétences depuis `data/UnityData/SkillCatalog.csv` |
+
+**Client frontend :** `frontend/src/api/skillCheckCatalog.ts` — chargé au montage de l'éditeur pour alimenter `AttributeSkillTestEditor` et la validation inline (`documentValidationFieldErrors.ts`).
+
+**Tests :** `tests/services/test_skill_check_catalog.py`, injection prompt : `tests/services/test_prompt_skill_catalog_injection.py`.
+
+---
+
+## Format test attribut + compétence (`Attribut+Compétence:DD`)
+
+Les **TestNode** et le champ `choices[N].test` utilisent le format Unity canonique :
+
+```
+Sociabilité+Tromperie:7
+```
+
+- **Attribut** et **compétence** : identifiants catalogue (sans espaces) ou libellés GDD reconnus.
+- **DD** : difficulté entière après `:`.
+- L'éditeur graphique (`AttributeSkillTestEditor`) décompose ce format en trois champs avec autocomplétion fuzzy sur le catalogue.
+
+**Utilitaires :** `frontend/src/utils/attributeSkillTest.ts` (`parseAttributeSkillTest`, `formatAttributeSkillTest`).
+
+En **preview playthrough**, le même format est évalué via `parseAttributeSkillTest` + `evaluateSkillCheck` pour router vers les branches test.
+
+---
+
 ## Tests de compétence (skill checks)
 
 Sur un choix, champ `skillCheck` (camelCase dans le JSON dialogue) :
@@ -178,6 +213,38 @@ Kind `faction_title` : doit référencer `Flag_faction_titre_{faction}` ou un `t
 
 ---
 
+## Preview scénario (mode Visual Novel)
+
+Le menu **Actions → 👁 Preview scénario** (toolbar graphe) ouvre un overlay plein écran qui simule le parcours joueur sans sauvegarder le document.
+
+| Composant | Rôle |
+|-----------|------|
+| `ScenarioPlaythroughOverlay` | Coque VN (portail React, z-index dédié) |
+| `scenarioPlaythroughEngine.ts` | Moteur pur : résolution d'étape, skill checks, visibilité, effort |
+| `useScenarioPlaythrough` | Navigation (choix, continuer, retour, jump, reset) |
+| `graphViewStore.scenarioPlaythrough` | État session (nœud courant, historique, couverture) |
+
+**État simulé au démarrage :**
+
+- `visibilityEvalState` : flags catalogue + réputation initialisés depuis `dialogueFlagBindings` et clés du graphe.
+- `previewGameSystemsState` : stats FR94 (attributs, compétences, effort, réputation) — réglables dans le **tiroir dev** (`ScenarioPlaythroughDevDrawer`).
+
+**Comportement clé :**
+
+- Nœud de départ : id `START`, sinon racine sans arête entrante.
+- Choix masqués si `visibilityConditions` non satisfaites ; grisés si `effortCost` > pool simulé.
+- Skill checks : choix visibles, issue tirée de `evaluateSkillCheck` (ou forcée via tiroir dev) → branche `branches[issue]`.
+- **Graph peek** (`G`) : retour canvas avec focus sur le nœud courant.
+- **Jump** (`J`) : `JumpToNodeModal` pour sauter à un nœud (debug / QA).
+
+**Raccourcis overlay :** `1–4` choix · `Entrée` continuer · `Retour arrière` · `R` reset · `D` dev · `G` graphe · `J` jump · `?` aide · `Échap` quitter.
+
+**Tests :** `scenarioPlaythroughEngine.test.ts`, `graphViewStore.playthrough.test.ts`, `ScenarioPlaythroughOverlay.test.tsx`, `GraphEditor.playthrough.test.tsx`.
+
+Guide éditeur : [`docs/architecture/GRAPH_EDITOR.md`](../architecture/GRAPH_EDITOR.md#preview-scénario-mode-visual-novel).
+
+---
+
 ## Distinction avec la couche prompt LLM
 
 [`docs/mechanics/INTEGRATION_MECANIQUES_STABLE.md`](../mechanics/INTEGRATION_MECANIQUES_STABLE.md) traite l'injection de traits/compétences dans les **prompts de génération** LLM. Ce guide couche **runtime / preview / validation** des dialogues JSON — périmètres différents.
@@ -188,7 +255,9 @@ Kind `faction_title` : doit référencer `Flag_faction_titre_{faction}` ou un `t
 
 | Zone | Fichiers |
 |------|----------|
-| API catalogue | `api/routers/mechanics_systems.py`, `services/game_systems_integration_service.py` |
+| API catalogue | `api/routers/mechanics_systems.py`, `services/game_systems_integration_service.py`, `services/skill_catalog_service.py` |
+| Playthrough VN | `frontend/src/components/graph/playthrough/*`, `frontend/src/utils/scenarioPlaythroughEngine.ts` |
+| Éditeur tests | `frontend/src/components/graph/AttributeSkillTestEditor.tsx` |
 | API preview | `api/routers/documents.py`, `api/schemas/dialogue_preview.py`, `api/schemas/game_systems.py` |
 | UI | `GameSystemsIntegrationPanel.tsx`, `DialoguePreviewPanel.tsx`, `DialogueNode.tsx` |
 | Tests | `tests/api/test_mechanics_systems_integration.py`, `tests/api/test_documents_preview_game_systems.py`, `tests/services/test_game_systems_*.py` |

@@ -1,233 +1,177 @@
 /**
  * Tests E2E pour les tests avec 4 résultats (Story 0.10).
- * 
- * Scénarios testés :
- * - AC#1 : Créer choix avec test, générer 4 nœuds, vérifier connexions
- * - AC#2 : Exporter dialogue avec 4 résultats, importer, vérifier graphe
- * - AC#3 : Éditer manuellement les 4 connexions dans l'éditeur
- * - AC#4 : Rétrocompatibilité : Charger ancien dialogue avec 2 résultats fonctionne
+ *
+ * - AC#1 : un choix portant un test fait apparaître un TestNode à 4 sorties
+ * - AC#3 : les 4 connexions s'éditent dans l'inspecteur et sont persistées
+ * - AC#4 : rétrocompatibilité — un ancien dialogue à 2 résultats se charge
+ *
+ * Chaque test sème son dialogue : l'ancienne version ne chargeait aucun document et
+ * se sautait entièrement. AC#2 (export puis import) n'est plus couvert ici : il n'existe
+ * pas d'import, l'export est couvert par `graph-small-dialogue-unity-export.spec.ts` et
+ * la génération des 4 nœuds par `graph-test-node-generation-4results.spec.ts`.
  */
-import { test, expect, type Page } from '@playwright/test'
+import { test, expect, type APIRequestContext, type Page } from '@playwright/test'
 
-import { E2E_MS } from './timeouts'
+import {
+  openApp,
+  openDashboardGraphTabAndSelectDocument,
+  seedDocumentWithRetry,
+  uniqueE2EDocumentId,
+} from './helpers'
+import { E2E_MS, E2E_TEST_TIMEOUT_MS } from './timeouts'
+import { triggerGraphSave } from './trigger-graph-save'
+
+const API_BASE = process.env.API_BASE ?? 'http://127.0.0.1:4243'
+const FIXTURE_PREFIX = 'e2e-graph-4-results'
+const TEST_NODE_ID = 'test-node-START-choice-0'
+const HANDLES = ['critical-failure', 'failure', 'success', 'critical-success'] as const
+
+const resultNode = (id: string, displayName: string) => ({
+  id,
+  displayName,
+  speaker: 'E2E',
+  line: `${displayName}.`,
+  choices: [],
+})
+
+function fixture(results: Record<string, string>) {
+  return {
+    schemaVersion: '1.1.0',
+    nodes: [
+      {
+        id: 'START',
+        speaker: 'E2E',
+        line: 'Un test à quatre issues.',
+        choices: [{ choiceId: 'c0', text: 'Tenter de convaincre', test: 'Raison+Diplomatie:8', ...results }],
+      },
+      resultNode('node-cf', 'Échec critique'),
+      resultNode('node-f', 'Échec simple'),
+      resultNode('node-s', 'Réussite simple'),
+      resultNode('node-cs', 'Réussite critique'),
+      resultNode('node-alt', 'Issue alternative'),
+    ],
+  }
+}
+
+const FOUR_RESULTS = {
+  testCriticalFailureNode: 'node-cf',
+  testFailureNode: 'node-f',
+  testSuccessNode: 'node-s',
+  testCriticalSuccessNode: 'node-cs',
+}
+
+async function deleteFixture(request: APIRequestContext, fixtureId: string): Promise<void> {
+  const res = await request.delete(`${API_BASE}/api/v1/documents/${fixtureId}`)
+  if (!res.ok() && res.status() !== 404) {
+    throw new Error(`Cleanup DELETE failed ${res.status()}: ${await res.text().catch(() => '')}`)
+  }
+}
+
+async function persistedChoice(request: APIRequestContext, fixtureId: string): Promise<Record<string, unknown>> {
+  const res = await request.get(`${API_BASE}/api/v1/documents/${fixtureId}`)
+  expect(res.ok()).toBe(true)
+  const { document } = (await res.json()) as {
+    document: { nodes: Array<{ id: string; choices?: Array<Record<string, unknown>> }> }
+  }
+  return document.nodes.find((n) => n.id === 'START')?.choices?.[0] ?? {}
+}
+
+async function openTestNodeEditor(page: Page): Promise<void> {
+  const testNode = page.locator(`[data-testid="graph-editor"] [data-id="${TEST_NODE_ID}"]`)
+  await expect(testNode).toBeVisible({ timeout: E2E_MS.graphField })
+  await testNode.click({ force: true })
+  await openNodeEditorForTestNode(page)
+}
+
+/** Un TestNode n'a pas de champ `speaker` : on attend ses connexions plutôt que le formulaire de réplique. */
+async function openNodeEditorForTestNode(page: Page): Promise<void> {
+  const inspector = page.getByTestId('graph-inspector')
+  await inspector
+    .getByTestId('graph-inspector-node-summary')
+    .getByRole('button', { name: 'éditer' })
+    .first()
+    .click()
+  await expect(inspector.getByText('Connexions de test')).toBeVisible({ timeout: E2E_MS.graphField })
+}
 
 test.describe('Graph 4 Test Results (Story 0.10)', () => {
-  // Helper pour s'authentifier
-  const login = async (page: Page) => {
-    const loginHeading = page.getByRole('heading', { name: /connexion/i })
-    const isLoginPage = await loginHeading.isVisible({ timeout: E2E_MS.probe }).catch(() => false)
-    
-    if (isLoginPage) {
-      await page.getByLabel(/nom d'utilisateur/i).fill('admin')
-      await page.getByLabel(/mot de passe/i).fill('admin123')
-      await page.getByRole('button', { name: /se connecter/i }).click()
-      await Promise.race([
-        page.waitForURL('**/', { timeout: E2E_MS.short }).catch(() => {}),
-        page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.short }).catch(() => {})
-      ])
-    }
-  }
+  test.setTimeout(E2E_TEST_TIMEOUT_MS.graphHeavy)
 
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/')
-    await login(page)
-    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.ui })
-    
-    const graphTab = page.getByRole('button', { name: /Éditeur de Graphe|📊/ }).first()
-    if (await graphTab.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
-      await graphTab.click()
-      await page.locator('.react-flow__node').first().waitFor({ state: 'attached', timeout: E2E_MS.graphField }).catch(() => {})
+  test.afterEach(async ({ request }, testInfo) => {
+    await deleteFixture(request, uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo))
+  })
+
+  test('AC#1: un choix avec test fait apparaître un TestNode à 4 sorties', async ({ page, request }, testInfo) => {
+    const fixtureId = uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo)
+    await seedDocumentWithRetry(request, API_BASE, fixtureId, fixture({}))
+    await openApp(page)
+    await openDashboardGraphTabAndSelectDocument(page, fixtureId)
+
+    const testNode = page.locator(`[data-testid="graph-editor"] [data-id="${TEST_NODE_ID}"]`)
+    await expect(testNode).toBeVisible({ timeout: E2E_MS.graphField })
+    for (const handle of HANDLES) {
+      await expect(testNode.locator(`[data-handleid="${handle}"]`)).toHaveCount(1)
     }
   })
 
-  test('AC#1: Créer choix avec test, générer 4 nœuds, vérifier connexions', async ({ page }) => {
-    // GIVEN: Un dialogue avec un nœud START
-    // (On suppose qu'un dialogue existe ou on en crée un)
-    
-    // WHEN: Sélectionner un nœud et ajouter un choix avec test
-    const startNode = page.locator('[data-id="START"]').or(page.locator('[data-id^="NODE_"]').first())
-    if (await startNode.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
-      await startNode.click()
-      
-      // Attendre que le panneau d'édition s'affiche
-      await page.waitForSelector('text=/Édition de nœud|Éditer/i', { timeout: E2E_MS.probe })
-      
-      // Ajouter un choix avec test
-      const addChoiceButton = page.locator('button:has-text("Ajouter un choix")').or(
-        page.locator('button').filter({ hasText: /choix|choice/i })
-      )
-      if (await addChoiceButton.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
-        await addChoiceButton.click()
-        
-        // Remplir le texte du choix
-        const choiceTextInput = page.locator('input[name*="text"]').or(
-          page.locator('textarea[name*="text"]')
-        ).first()
-        await choiceTextInput.fill('Tenter de convaincre')
-        
-        // Ajouter l'attribut test
-        const testInput = page.locator('input[name*="test"]').or(
-          page.locator('input[placeholder*="test"]')
-        )
-        await testInput.fill('Raison+Diplomatie:8')
-        
-        // Sauvegarder le choix
-        const saveButton = page.locator('button:has-text("Sauvegarder")').or(
-          page.locator('button:has-text("Enregistrer")')
-        )
-        await saveButton.click()
-        
-        // THEN: Un TestNode doit apparaître automatiquement avec 4 handles
-        const testNode = page.locator('[data-id*="test-node-"]')
-        await expect(testNode).toBeVisible({ timeout: E2E_MS.short })
-        
-        // Vérifier que le TestNode a 4 handles (visualisation)
-        // Les handles sont des éléments avec des classes spécifiques ou des data-attributes
-        const handles = testNode.locator('[data-handleid*="critical"]').or(
-          testNode.locator('[data-handleid*="failure"]')
-        ).or(testNode.locator('[data-handleid*="success"]'))
-        // Note: La vérification exacte dépend de l'implémentation ReactFlow des handles
-        
-        // WHEN: Générer les 4 nœuds de résultat via l'IA
-        // (Ceci nécessite l'intégration avec l'API de génération)
-        // Pour l'instant, on vérifie juste que le TestNode est visible
-        
-        // THEN: Les 4 connexions doivent être visibles dans le graphe
-        // (Vérification visuelle ou via les edges ReactFlow)
-      } else {
-        test.skip('Fonctionnalité d\'ajout de choix non disponible - test ignoré')
-      }
-    } else {
-      test.skip('Aucun dialogue chargé - test ignoré')
-    }
+  test('AC#3: les 4 connexions s’éditent dans l’inspecteur et sont persistées', async ({
+    page,
+    request,
+  }, testInfo) => {
+    const fixtureId = uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo)
+    await seedDocumentWithRetry(request, API_BASE, fixtureId, fixture(FOUR_RESULTS))
+    await openApp(page)
+    await openDashboardGraphTabAndSelectDocument(page, fixtureId)
+    await openTestNodeEditor(page)
+
+    await expect(page.getByTestId('panel-test-cf')).toContainText('Échec critique (node-cf)')
+    await expect(page.getByTestId('panel-test-f')).toContainText('Échec simple (node-f)')
+    await expect(page.getByTestId('panel-test-s')).toContainText('Réussite simple (node-s)')
+    await expect(page.getByTestId('panel-test-cs')).toContainText('Réussite critique (node-cs)')
+
+    await page.getByTestId('panel-test-cf').click()
+    // Liste en portail `document.body` : ne pas scoper sous le déclencheur.
+    await page.getByText('Issue alternative (node-alt)', { exact: true }).click()
+    await expect(page.getByTestId('panel-test-cf')).toContainText('Issue alternative (node-alt)')
+
+    // Flush depuis START (comme graph-test-node-generation-4results) avant la sauvegarde.
+    await page.locator('[data-testid="graph-editor"] [data-id="START"]').click({ force: true })
+    await triggerGraphSave(page)
+
+    await expect
+      .poll(async () => (await persistedChoice(request, fixtureId)).testCriticalFailureNode, {
+        timeout: E2E_MS.graphField,
+      })
+      .toBe('node-alt')
+    const choice = await persistedChoice(request, fixtureId)
+    expect(choice.testFailureNode).toBe('node-f')
+    expect(choice.testSuccessNode).toBe('node-s')
+    expect(choice.testCriticalSuccessNode).toBe('node-cs')
   })
 
-  test('AC#2: Exporter dialogue avec 4 résultats, importer, vérifier graphe', async ({ page }) => {
-    // GIVEN: Un dialogue avec un choix contenant les 4 résultats de test
-    // (On suppose qu'un dialogue existe avec cette structure)
-    
-    // WHEN: Exporter le dialogue vers Unity JSON
-    const exportButton = page.locator('button:has-text("Exporter")').or(
-      page.locator('button:has-text("Export")')
+  test('AC#4: rétrocompatibilité — un dialogue à 2 résultats se charge avec 4 sorties', async ({
+    page,
+    request,
+  }, testInfo) => {
+    const fixtureId = uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo)
+    await seedDocumentWithRetry(
+      request,
+      API_BASE,
+      fixtureId,
+      fixture({ testFailureNode: 'node-f', testSuccessNode: 'node-s' })
     )
-    if (await exportButton.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
-      await exportButton.click()
-      
-      // Attendre que le JSON soit exporté (toast ou modal)
-      await page.waitForSelector('text=/exporté|succès/i', { timeout: E2E_MS.short })
-      
-      // WHEN: Importer le JSON exporté
-      const importButton = page.locator('button:has-text("Importer")').or(
-        page.locator('button:has-text("Import")')
-      )
-      if (await importButton.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
-        // (Ceci nécessite l'implémentation de l'import)
-        // Pour l'instant, on vérifie juste que l'export fonctionne
-        
-        // THEN: Le graphe doit afficher correctement les 4 connexions
-        const testNode = page.locator('[data-id*="test-node-"]')
-        await expect(testNode).toBeVisible({ timeout: E2E_MS.short })
-      } else {
-        test.skip('Fonctionnalité d\'import non disponible - test ignoré')
-      }
-    } else {
-      test.skip('Fonctionnalité d\'export non disponible - test ignoré')
-    }
-  })
+    await openApp(page)
+    await openDashboardGraphTabAndSelectDocument(page, fixtureId)
+    await openTestNodeEditor(page)
 
-  test('AC#3: Éditer manuellement les 4 connexions dans l\'éditeur', async ({ page }) => {
-    // GIVEN: Un dialogue avec un TestNode existant
-    const testNode = page.locator('[data-id*="test-node-"]')
-    if (await testNode.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
-      await testNode.click()
-      
-      // WHEN: Éditer les 4 connexions dans le panneau d'édition
-      await page.waitForSelector('text=/Connexions de test/i', { timeout: E2E_MS.probe })
-      
-      // Vérifier que les 4 champs sont visibles
-      const criticalFailureInput = page.locator('input[name*="criticalFailure"]').or(
-        page.locator('label:has-text("Échec critique")').locator('..').locator('input')
-      )
-      const failureInput = page.locator('input[name*="failureNode"]').or(
-        page.locator('label:has-text("Échec")').locator('..').locator('input')
-      )
-      const successInput = page.locator('input[name*="successNode"]').or(
-        page.locator('label:has-text("Réussite")').locator('..').locator('input')
-      )
-      const criticalSuccessInput = page.locator('input[name*="criticalSuccess"]').or(
-        page.locator('label:has-text("Réussite critique")').locator('..').locator('input')
-      )
-      
-      await expect(criticalFailureInput).toBeVisible({ timeout: E2E_MS.probe })
-      await expect(failureInput).toBeVisible({ timeout: E2E_MS.probe })
-      await expect(successInput).toBeVisible({ timeout: E2E_MS.probe })
-      await expect(criticalSuccessInput).toBeVisible({ timeout: E2E_MS.probe })
-      
-      // Modifier une connexion
-      await criticalFailureInput.fill('NODE_CRITICAL_FAILURE')
-      await failureInput.fill('NODE_FAILURE')
-      await successInput.fill('NODE_SUCCESS')
-      await criticalSuccessInput.fill('NODE_CRITICAL_SUCCESS')
-      
-      // Sauvegarder
-      const saveButton = page.locator('button:has-text("Sauvegarder")').or(
-        page.locator('button:has-text("Enregistrer")')
-      )
-      const saveResponsePromise = page.waitForResponse(
-        (r) =>
-          r.url().includes('/api/v1/documents/') ||
-          r.url().includes('/api/v1/unity-dialogues/graph/save'),
-        { timeout: E2E_MS.medium }
-      )
-      await saveButton.click()
-      await saveResponsePromise.catch(() => {})
-
-      // THEN: Les connexions doivent être mises à jour dans le graphe
-    } else {
-      test.skip('Aucun TestNode trouvé - test ignoré')
+    const testNode = page.locator(`[data-testid="graph-editor"] [data-id="${TEST_NODE_ID}"]`)
+    for (const handle of HANDLES) {
+      await expect(testNode.locator(`[data-handleid="${handle}"]`)).toHaveCount(1)
     }
-  })
-
-  test('AC#4: Rétrocompatibilité - Charger ancien dialogue avec 2 résultats fonctionne', async ({ page }) => {
-    // GIVEN: Un dialogue Unity JSON avec seulement 2 résultats (testSuccessNode, testFailureNode)
-    // (Ce dialogue doit être chargé dans l'application)
-    
-    // WHEN: Charger le dialogue dans l'éditeur de graphe
-    // (On suppose qu'un dialogue existe avec cette structure ancienne)
-    
-    // THEN: Le TestNode doit être visible avec 4 handles
-    const testNode = page.locator('[data-id*="test-node-"]')
-    if (await testNode.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
-      await testNode.click()
-      
-      // Vérifier que les 4 champs sont visibles (même si seulement 2 sont définis)
-      await page.waitForSelector('text=/Connexions de test/i', { timeout: E2E_MS.probe })
-      
-      const criticalFailureInput = page.locator('input[name*="criticalFailure"]')
-      const failureInput = page.locator('input[name*="failureNode"]')
-      const successInput = page.locator('input[name*="successNode"]')
-      const criticalSuccessInput = page.locator('input[name*="criticalSuccess"]')
-      
-      // Les 4 champs doivent être visibles
-      await expect(criticalFailureInput).toBeVisible({ timeout: E2E_MS.probe })
-      await expect(failureInput).toBeVisible({ timeout: E2E_MS.probe })
-      await expect(successInput).toBeVisible({ timeout: E2E_MS.probe })
-      await expect(criticalSuccessInput).toBeVisible({ timeout: E2E_MS.probe })
-      
-      // Vérifier que seulement failureNode et successNode ont des valeurs
-      const failureValue = await failureInput.inputValue()
-      const successValue = await successInput.inputValue()
-      
-      expect(failureValue).toBeTruthy()
-      expect(successValue).toBeTruthy()
-      
-      // Les champs critiques peuvent être vides (rétrocompatibilité)
-      const criticalFailureValue = await criticalFailureInput.inputValue()
-      const criticalSuccessValue = await criticalSuccessInput.inputValue()
-      
-      // C'est OK si les champs critiques sont vides (fallback Unity)
-    } else {
-      test.skip('Aucun TestNode trouvé - test ignoré (dialogue avec test non chargé)')
-    }
+    await expect(page.getByTestId('panel-test-f')).toContainText('Échec simple (node-f)')
+    await expect(page.getByTestId('panel-test-s')).toContainText('Réussite simple (node-s)')
+    // Les issues critiques restent vides : Unity retombe sur échec / réussite simples.
+    await expect(page.getByTestId('panel-test-cf')).not.toContainText('(node-')
+    await expect(page.getByTestId('panel-test-cs')).not.toContainText('(node-')
   })
 })

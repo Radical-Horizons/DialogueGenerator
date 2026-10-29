@@ -35,6 +35,7 @@ from api.exceptions import AuthenticationException
 from api.config.security_config import get_security_config
 from api.utils.sse_job_token import create_sse_job_token, verify_sse_job_token
 from api.middleware.billable_user_context import push_billable_user_id, reset_billable_user_id
+from api.utils.job_ownership import job_owner_key
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ def _security_skips_job_ownership() -> bool:
 
 def _job_owner_label(user: dict) -> str:
     """Clé alignée sur ``owner_username`` stocké à la création du job."""
-    return str(user.get("username") or user.get("id") or "")
+    return job_owner_key(user)
 
 
 def _ensure_job_owned_by(job: Dict[str, Any], user: dict) -> None:

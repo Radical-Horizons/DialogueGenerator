@@ -13,7 +13,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional
 
-from constants import FilePaths
+from constants import resolve_logs_dir
 from services.llm_usage_service import LLMUsageService
 from services.unity_export_validation_service import validate_unity_export_document
 
@@ -35,8 +35,8 @@ class ExportLogListResult:
 
 
 def _default_logs_dir() -> Path:
-    """Répertoire dédié aux logs export métier."""
-    return Path(__file__).resolve().parent.parent / FilePaths.LOGS_DIR / "exports"
+    """Répertoire dédié aux logs export métier, sous le dossier de logs commun."""
+    return resolve_logs_dir() / "exports"
 
 
 def _read_daily_entries(log_file: Path) -> List[Dict[str, Any]]:

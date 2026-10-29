@@ -219,7 +219,8 @@ function rowsFromApiError(error: unknown): ValidationReportRow[] {
         typeof r === 'object' && r !== null && typeof (r as ValidationReportRow).message === 'string',
     )
   }
-  const details = rawData?.error?.details as Record<string, unknown> | undefined
+  const apiError = rawData?.error as { details?: Record<string, unknown> } | undefined
+  const details = apiError?.details
   if (!details) return []
 
   const structured = details.structured_errors

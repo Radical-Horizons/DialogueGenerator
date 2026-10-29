@@ -109,4 +109,20 @@ describe('ContextDroppingRulesEditor', () => {
     await userEvent.click(closeBtn)
     expect(onClose).toHaveBeenCalledOnce()
   })
+
+  it('mode contrôlé : jamais de GET/PUT, pas de boutons Sauvegarder/Fermer', () => {
+    const onChange = vi.fn()
+    render(
+      <ContextDroppingRulesEditor
+        persist={false}
+        value={{ ...DEFAULT_RULES, rules_profile: 'light' }}
+        onChange={onChange}
+      />,
+    )
+
+    expect(graphAPI.getContextDroppingRules).not.toHaveBeenCalled()
+    expect(screen.queryByRole('button', { name: /sauvegarder/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /fermer/i })).not.toBeInTheDocument()
+    expect(screen.getByTestId('context-dropping-rules-form')).toBeInTheDocument()
+  })
 })

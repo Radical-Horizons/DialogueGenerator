@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { SelectedContextSummary } from './SelectedContextSummary'
-import type { ContextSelection } from '../../types/api'
+import { makeContextSelection } from '../../testFixtures/contextSelection'
 
 function expectActiveSelectionsBadgeCount(count: number): void {
   const toggle = screen.getByTestId('selected-context-summary-toggle')
@@ -21,7 +21,7 @@ describe('SelectedContextSummary', () => {
   })
 
   it('affiche "Aucune sélection" quand il n\'y a pas de sélections', () => {
-    const emptySelections: ContextSelection = {
+    const emptySelections = makeContextSelection({
       characters_full: [],
       characters_excerpt: [],
       locations_full: [],
@@ -33,7 +33,7 @@ describe('SelectedContextSummary', () => {
       communities_full: [],
       communities_excerpt: [],
       dialogues_examples: [],
-    }
+    })
 
     render(<SelectedContextSummary selections={emptySelections} onClear={mockOnClear} />)
     
@@ -41,7 +41,7 @@ describe('SelectedContextSummary', () => {
   })
 
   it('affiche le compteur total correct', () => {
-    const selections: ContextSelection = {
+    const selections = makeContextSelection({
       characters_full: ['Personnage 1'],
       characters_excerpt: ['Personnage 2'],
       locations_full: ['Lieu 1'],
@@ -53,7 +53,7 @@ describe('SelectedContextSummary', () => {
       communities_full: [],
       communities_excerpt: [],
       dialogues_examples: [],
-    }
+    })
 
     render(<SelectedContextSummary selections={selections} onClear={mockOnClear} />)
     
@@ -63,7 +63,7 @@ describe('SelectedContextSummary', () => {
 
   it('affiche les catégories avec leurs compteurs corrects', async () => {
     const user = userEvent.setup()
-    const selections: ContextSelection = {
+    const selections = makeContextSelection({
       characters_full: ['Personnage 1', 'Personnage 2'],
       characters_excerpt: [],
       locations_full: ['Lieu 1', 'Lieu 2'],
@@ -75,7 +75,7 @@ describe('SelectedContextSummary', () => {
       communities_full: ['Communauté 1'],
       communities_excerpt: [],
       dialogues_examples: [],
-    }
+    })
 
     const { container } = render(<SelectedContextSummary selections={selections} onClear={mockOnClear} />)
     
@@ -107,7 +107,7 @@ describe('SelectedContextSummary', () => {
   it('détecte les doublons dans les sélections de personnages', async () => {
     const user = userEvent.setup()
     // Cas avec doublon : "Akthar-Neth Amatru" et "l'Exégète" sont le même personnage
-    const selectionsWithDuplicates: ContextSelection = {
+    const selectionsWithDuplicates = makeContextSelection({
       characters_full: ['Akthar-Neth Amatru', 'l\'Exégète', 'Personnage 2'],
       characters_excerpt: [],
       locations_full: [],
@@ -119,7 +119,7 @@ describe('SelectedContextSummary', () => {
       communities_full: [],
       communities_excerpt: [],
       dialogues_examples: [],
-    }
+    })
 
     const { container } = render(<SelectedContextSummary selections={selectionsWithDuplicates} onClear={mockOnClear} />)
     
@@ -143,7 +143,7 @@ describe('SelectedContextSummary', () => {
 
   it('appelle onClear quand on clique sur "Tout effacer"', async () => {
     const user = userEvent.setup()
-    const selections: ContextSelection = {
+    const selections = makeContextSelection({
       characters_full: ['Personnage 1'],
       characters_excerpt: [],
       locations_full: [],
@@ -155,7 +155,7 @@ describe('SelectedContextSummary', () => {
       communities_full: [],
       communities_excerpt: [],
       dialogues_examples: [],
-    }
+    })
 
     render(<SelectedContextSummary selections={selections} onClear={mockOnClear} />)
     
@@ -166,7 +166,7 @@ describe('SelectedContextSummary', () => {
   })
 
   it('affiche correctement le total avec toutes les catégories', () => {
-    const selections: ContextSelection = {
+    const selections = makeContextSelection({
       characters_full: ['P1', 'P2'], // 2
       characters_excerpt: [],
       locations_full: ['L1', 'L2', 'L3'], // 3
@@ -178,7 +178,7 @@ describe('SelectedContextSummary', () => {
       communities_full: ['C1'], // 1
       communities_excerpt: [],
       dialogues_examples: ['D1', 'D2'], // 2
-    }
+    })
 
     render(<SelectedContextSummary selections={selections} onClear={mockOnClear} />)
     
@@ -189,7 +189,7 @@ describe('SelectedContextSummary', () => {
   it('le compteur correspond exactement au nombre d\'éléments uniques dans chaque catégorie', () => {
     // Test avec des tableaux qui pourraient contenir des doublons
     // Si le store autorise les doublons, le compteur sera faux
-    const selectionsWithPotentialDuplicates: ContextSelection = {
+    const selectionsWithPotentialDuplicates = makeContextSelection({
       characters_full: ['Personnage 1', 'Personnage 1'], // Doublon réel dans le tableau
       characters_excerpt: [],
       locations_full: ['Lieu 1'],
@@ -201,7 +201,7 @@ describe('SelectedContextSummary', () => {
       communities_full: [],
       communities_excerpt: [],
       dialogues_examples: [],
-    }
+    })
 
     render(<SelectedContextSummary selections={selectionsWithPotentialDuplicates} onClear={mockOnClear} />)
     
@@ -212,7 +212,7 @@ describe('SelectedContextSummary', () => {
 
   it('affiche la liste complète des éléments quand développé', async () => {
     const user = userEvent.setup()
-    const selections: ContextSelection = {
+    const selections = makeContextSelection({
       characters_full: ['Personnage A', 'Personnage B', 'Personnage C'],
       characters_excerpt: [],
       locations_full: [],
@@ -224,7 +224,7 @@ describe('SelectedContextSummary', () => {
       communities_full: [],
       communities_excerpt: [],
       dialogues_examples: [],
-    }
+    })
 
     const { container } = render(<SelectedContextSummary selections={selections} onClear={mockOnClear} />)
     
@@ -246,7 +246,7 @@ describe('SelectedContextSummary', () => {
   it('affiche un bouton X par entité dans le panneau développé et appelle onRemoveEntity', async () => {
     const user = userEvent.setup()
     const mockRemove = vi.fn()
-    const selections: ContextSelection = {
+    const selections = makeContextSelection({
       characters_full: ['Personnage A'],
       characters_excerpt: [],
       locations_full: ['Lieu B'],
@@ -258,7 +258,7 @@ describe('SelectedContextSummary', () => {
       communities_full: [],
       communities_excerpt: [],
       dialogues_examples: [],
-    }
+    })
 
     render(
       <SelectedContextSummary
@@ -281,7 +281,7 @@ describe('SelectedContextSummary', () => {
   it('le bouton X appelle onRemoveEntity avec le bon type pour chaque catégorie', async () => {
     const user = userEvent.setup()
     const mockRemove = vi.fn()
-    const selections: ContextSelection = {
+    const selections = makeContextSelection({
       characters_full: [],
       characters_excerpt: [],
       locations_full: [],
@@ -293,7 +293,7 @@ describe('SelectedContextSummary', () => {
       communities_full: ['Commu Y'],
       communities_excerpt: [],
       dialogues_examples: [],
-    }
+    })
 
     render(
       <SelectedContextSummary
@@ -314,7 +314,7 @@ describe('SelectedContextSummary', () => {
 
   it('n\'affiche pas de bouton X quand onRemoveEntity n\'est pas fourni', async () => {
     const user = userEvent.setup()
-    const selections: ContextSelection = {
+    const selections = makeContextSelection({
       characters_full: ['Perso Z'],
       characters_excerpt: [],
       locations_full: [],
@@ -326,7 +326,7 @@ describe('SelectedContextSummary', () => {
       communities_full: [],
       communities_excerpt: [],
       dialogues_examples: [],
-    }
+    })
 
     render(<SelectedContextSummary selections={selections} onClear={vi.fn()} />)
 
@@ -341,7 +341,7 @@ describe('SelectedContextSummary', () => {
 
   it('affiche le badge de mode (Complet/Extrait) pour chaque entité sélectionnée', async () => {
     const user = userEvent.setup()
-    const selections: ContextSelection = {
+    const selections = makeContextSelection({
       characters_full: ['Perso Complet'],
       characters_excerpt: ['Perso Extrait'],
       locations_full: [],
@@ -353,7 +353,7 @@ describe('SelectedContextSummary', () => {
       communities_full: [],
       communities_excerpt: [],
       dialogues_examples: [],
-    }
+    })
 
     render(
       <SelectedContextSummary
@@ -372,7 +372,7 @@ describe('SelectedContextSummary', () => {
   it('appelle onModeChange avec le mode inversé au clic sur le badge de mode', async () => {
     const user = userEvent.setup()
     const mockModeChange = vi.fn()
-    const selections: ContextSelection = {
+    const selections = makeContextSelection({
       characters_full: ['Perso Full'],
       characters_excerpt: ['Perso Excerpt'],
       locations_full: [],
@@ -384,7 +384,7 @@ describe('SelectedContextSummary', () => {
       communities_full: [],
       communities_excerpt: [],
       dialogues_examples: [],
-    }
+    })
 
     render(
       <SelectedContextSummary
@@ -407,7 +407,7 @@ describe('SelectedContextSummary', () => {
 
   it('n\'affiche pas de badge de mode quand onModeChange n\'est pas fourni', async () => {
     const user = userEvent.setup()
-    const selections: ContextSelection = {
+    const selections = makeContextSelection({
       characters_full: ['Perso Z'],
       characters_excerpt: [],
       locations_full: [],
@@ -419,7 +419,7 @@ describe('SelectedContextSummary', () => {
       communities_full: [],
       communities_excerpt: [],
       dialogues_examples: [],
-    }
+    })
 
     render(<SelectedContextSummary selections={selections} onClear={vi.fn()} />)
 

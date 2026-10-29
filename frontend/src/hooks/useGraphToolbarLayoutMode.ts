@@ -1,12 +1,13 @@
 import type { CSSProperties, RefCallback } from 'react'
 import { theme } from '../theme'
+import { redesignHairline } from '../theme/redesignTokens'
 import type {
   GraphToolbarChromeStyles,
   GraphToolbarChromeTokens,
 } from '../components/graph/graphToolbarTypes'
 import { useNarrowInlineSize } from './useNarrowInlineSize'
 import {
-  GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX,
+  GRAPH_TOOLBAR_SINGLE_ROW_MIN_WIDTH_PX,
   graphToolbarChrome,
 } from '../theme/responsiveChrome'
 
@@ -82,13 +83,15 @@ export function buildGraphToolbarRootStyle(
 ): CSSProperties {
   return {
     flexShrink: 0,
-    padding: chrome.containerPadding,
-    borderBottom: `1px solid ${theme.border.primary}`,
+    // Écran 2e (confort) : une rangée de 46px, filet hairline, gaps 14px.
+    padding: isNarrow ? chrome.containerPadding : '0 18px',
+    minHeight: isNarrow ? undefined : 46,
+    borderBottom: `1px solid ${isNarrow ? theme.border.primary : redesignHairline.standard}`,
     backgroundColor: theme.background.panelHeader,
     display: rootLayout.display,
     gridTemplateColumns: rootLayout.gridTemplateColumns,
     gridTemplateAreas: rootLayout.gridTemplateAreas,
-    gap: `${chrome.containerGapRem}rem`,
+    gap: isNarrow ? `${chrome.containerGapRem}rem` : 14,
     rowGap: isNarrow ? `${chrome.containerGapRem}rem` : undefined,
     alignItems: rootLayout.alignItems,
     justifyContent: rootLayout.justifyContent,
@@ -107,7 +110,7 @@ export function useGraphToolbarLayoutMode(
 ): UseGraphToolbarLayoutModeReturn {
   const showSearchBar = options?.showSearchBar ?? false
   const { ref: toolbarRef, isNarrow } = useNarrowInlineSize(
-    GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX,
+    GRAPH_TOOLBAR_SINGLE_ROW_MIN_WIDTH_PX,
     { measureParentClientWidth: true }
   )
   const chrome = isNarrow ? graphToolbarChrome.narrow : graphToolbarChrome.comfortable

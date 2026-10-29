@@ -28,7 +28,19 @@
       "Bash(bmad-loop validate:*)",
       "Bash(bmad-loop mux:*)",
       "Bash(bmad-loop diagnose:*)",
-      "Bash(bmad-loop --version)"
+      "Bash(bmad-loop --version)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(git tag -l:*)",
+      "Bash(git remote -v)",
+      "Bash(git describe:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(node scripts/vitest-summary.js)"
     ],
     "deny": [
       "Bash(git push --force:*)",

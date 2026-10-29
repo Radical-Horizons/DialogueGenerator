@@ -44,6 +44,7 @@ def create_llm_client_for_router(
     config_service: ConfigurationService,
     usage_service: LLMUsageService,
     request_id: Optional[str],
+    endpoint: Optional[str] = None,
 ) -> Any:
     """Instancie le client LLM avec chaîne de fallback si configurée.
 
@@ -52,6 +53,7 @@ def create_llm_client_for_router(
         config_service: Service de configuration.
         usage_service: Service de suivi d'usage.
         request_id: ID de la requête pour le logging.
+        endpoint: Libellé d'usage optionnel (ex. templates_ab_test).
 
     Returns:
         Client LLM prêt à l'emploi (avec ou sans fallback).
@@ -67,6 +69,7 @@ def create_llm_client_for_router(
             available_models=config_service.get_available_llm_models(),
             usage_service=usage_service,
             request_id=request_id,
+            endpoint=endpoint,
         )
     return LLMClientFactory.create_client(
         model_id=model_identifier,
@@ -74,4 +77,5 @@ def create_llm_client_for_router(
         available_models=config_service.get_available_llm_models(),
         usage_service=usage_service,
         request_id=request_id,
+        endpoint=endpoint,
     )

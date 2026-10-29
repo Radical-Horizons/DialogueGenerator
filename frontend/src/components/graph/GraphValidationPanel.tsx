@@ -22,6 +22,7 @@ import {
 } from './GraphValidationPanelLists'
 import { GraphStructuralWarningsSummary } from './GraphStructuralWarningsSummary'
 import { GraphToolFloatingShell } from './GraphToolFloatingShell'
+import { ValidationSeverityDot } from './ValidationSeverityDot'
 
 interface GraphValidationPanelProps {
   validationErrors: ValidationErrorDetail[]
@@ -29,14 +30,17 @@ interface GraphValidationPanelProps {
   loreExplicitSummary?: string | null
   /** Clé stable dialogue (filename ou documentId) pour persistance FR39 */
   loreDialogueScopeKey?: string
+  /** `inspector` : rendu nu dans l'inspecteur de graphe (écran 2e), sans chrome flottant. */
+  variant?: 'floating' | 'inspector'
   /** Ferme le bandeau (masque le panneau dans l’éditeur). */
-  onClose: () => void
+  onClose?: () => void
 }
 
 export function GraphValidationPanel({
   validationErrors,
   loreExplicitSummary,
   loreDialogueScopeKey = 'default',
+  variant = 'floating',
   onClose,
 }: GraphValidationPanelProps) {
   const {
@@ -176,7 +180,6 @@ export function GraphValidationPanel({
         ? theme.state.warning.color
         : theme.state.success.color
 
-  const headerIcon = tone === 'error' ? '✗' : tone === 'warning' ? '⚠' : '✓'
   const headerText =
     errors.length > 0
       ? `${errors.length} erreur${errors.length > 1 ? 's' : ''}`
@@ -184,9 +187,10 @@ export function GraphValidationPanel({
 
   return (
     <GraphToolFloatingShell
+      variant={variant}
       title={
         <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0 }}>
-          <span aria-hidden>{headerIcon}</span>
+          <ValidationSeverityDot tone={tone} testId="graph-validation-header-dot" />
           <span>{headerText}</span>
         </span>
       }

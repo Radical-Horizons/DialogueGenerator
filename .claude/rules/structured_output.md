@@ -1,9 +1,10 @@
 ---
 description: Structured Output OpenAI — principe, garanties, usage dans le projet
-globs: ["llm_client.py", "models/dialogue_structure/**/*.py", "services/unity_dialogue_generation_service.py", "prompt_engine.py"]
-alwaysApply: false
+paths:
+  - "models/dialogue_structure/**"
+  - "services/unity_dialogue_generation_service.py"
+  - "core/llm/**"
 ---
-
 - **Principe** : Le Structured Output garantit que la réponse du LLM respecte un schéma JSON prédéfini (via function calling avec `tools` et `tool_choice` dans OpenAI API).
 - **Implémentation** : Modèle Pydantic → `model_json_schema()` → schéma JSON dans `tool_definition` → `response_model` passé au client LLM.
 - **Garanties du Structured Output** :

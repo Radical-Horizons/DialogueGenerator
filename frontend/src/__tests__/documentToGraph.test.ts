@@ -489,6 +489,78 @@ describe('graphToDocument', () => {
     expect((start as { nextNode?: string } | undefined)?.nextNode).toBe('END')
   })
 
+  it('garde nextNode d’un nœud sans clé `choices` (lecture et écriture symétriques)', () => {
+    // Au chargement, `choices` absent vaut `[]` (`documentToGraph`). À l'écriture, seul un
+    // tableau vide explicite rebâtissait nextNode : le lien généré vers la suite d'un nœud
+    // linéaire sans clé `choices` disparaissait à la sauvegarde (E2E génération AC#5).
+    const loaded = documentToGraph(
+      {
+        schemaVersion: '1.1.0',
+        nodes: [
+          { id: 'LIN', speaker: 'A', line: 'Sans réponse' },
+          { id: 'NEXT', speaker: 'B', line: 'Suite' },
+        ],
+      },
+      null
+    )
+    const linearNode = loaded.nodes.find((n) => n.id === 'LIN')
+    expect((linearNode?.data as { choices?: unknown }).choices).toBeUndefined()
+
+    const nodes = loaded.nodes.map((n) =>
+      n.id === 'LIN' ? { ...n, data: { ...n.data, nextNode: 'NEXT' } } : n
+    )
+    const edges = [
+      ...loaded.edges,
+      {
+        id: 'LIN->NEXT',
+        source: 'LIN',
+        target: 'NEXT',
+        type: 'smoothstep',
+        label: 'Suivant',
+        data: { edgeType: 'nextNode' },
+      },
+    ]
+    const doc = graphToDocument(nodes, edges)
+    const lin = doc.nodes.find((n) => n.id === 'LIN')
+    expect((lin as { nextNode?: string } | undefined)?.nextNode).toBe('NEXT')
+  })
+
+  it('un nœud avec réponses ne reçoit jamais de nextNode', () => {
+    const nodes = [
+      {
+        id: 'START',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: {
+          id: 'START',
+          speaker: 'A',
+          line: 'L',
+          choices: [{ choiceId: 'c0', text: 'Oui', targetNode: 'MID' }],
+          nextNode: 'MID',
+        },
+      },
+      {
+        id: 'MID',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: { id: 'MID', speaker: 'B', line: 'M' },
+      },
+    ]
+    const edges = [
+      {
+        id: 'START->MID',
+        source: 'START',
+        target: 'MID',
+        type: 'smoothstep',
+        label: 'Suivant',
+        data: { edgeType: 'nextNode' },
+      },
+    ]
+    const doc = graphToDocument(nodes as never, edges as never)
+    const start = doc.nodes.find((n) => n.id === 'START')
+    expect((start as { nextNode?: string } | undefined)?.nextNode).toBeUndefined()
+  })
+
   it('reconstructs document with choiceId from stable sourceHandle', () => {
     const doc: UnityDocument = {
       schemaVersion: '1.1.0',

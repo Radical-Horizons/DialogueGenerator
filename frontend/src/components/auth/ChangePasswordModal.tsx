@@ -118,7 +118,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
         style={{
           width: 'min(420px, 100%)',
           padding: '1.25rem',
-          background: theme.background.panel,
+          background: theme.background.elevated,
           border: `1px solid ${theme.border.primary}`,
           borderRadius: 8,
           color: theme.text.primary,
@@ -145,8 +145,9 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
                 padding: '0.5rem 1rem',
                 background: theme.button.primary.background,
                 color: theme.button.primary.color,
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: 4,
+                border: 'none',
+                borderRadius: 6,
+                fontWeight: 600,
                 cursor: 'pointer',
               }}
             >
@@ -250,8 +251,9 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
                   padding: '0.5rem 1rem',
                   background: theme.button.primary.background,
                   color: theme.button.primary.color,
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: 4,
+                  border: 'none',
+                  borderRadius: 6,
+                  fontWeight: 600,
                   cursor: isSubmitting ? 'wait' : 'pointer',
                 }}
               >

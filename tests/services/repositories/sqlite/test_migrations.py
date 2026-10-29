@@ -8,7 +8,38 @@ from fastapi.testclient import TestClient
 
 from api.main import app
 
-EXPECTED_MIGRATION_VERSIONS = [("001",), ("002",), ("003",), ("004",), ("005",)]
+EXPECTED_MIGRATION_VERSIONS = [
+    ("001",),
+    ("002",),
+    ("003",),
+    ("004",),
+    ("005",),
+    ("006",),
+    ("007",),
+    ("008",),
+    ("009",),
+    ("010",),
+    ("011",),
+    ("012",),
+]
+
+
+def test_expected_versions_match_migration_files_on_disk() -> None:
+    """Given les .sql du dépôt, when on les liste, then la constante les couvre toutes.
+
+    Garde anti-dérive : ``EXPECTED_MIGRATION_VERSIONS`` est maintenue à la main.
+    La migration 011 a été livrée sans y être ajoutée, ce qui n'a échoué que dans
+    le test de lifespan — loin de la cause. Ici l'échec nomme le fichier oublié.
+    """
+    from services.repositories.sqlite.migrations import runner as migrations_runner
+
+    directory = Path(migrations_runner.__file__).parent
+    on_disk = sorted(
+        migrations_runner.MigrationRunner._version_from_path(path)
+        for path in directory.glob("*.sql")
+        if migrations_runner._MIGRATION_PATTERN.match(path.name)
+    )
+    assert on_disk == [version for (version,) in EXPECTED_MIGRATION_VERSIONS]
 
 
 def test_lifespan_creates_and_reuses_application_database(tmp_path: Path) -> None:
@@ -50,6 +81,11 @@ def test_lifespan_creates_and_reuses_application_database(tmp_path: Path) -> Non
                 "dialogues_index",
                 "dialogue_shares",
                 "audit_logs",
+                "collections",
+                "collection_dialogues",
+                "dialogues_search_meta",
+                "dialogues_search_fts",
+                "template_suggestion_usage",
             } <= tables
             assert migration_versions == EXPECTED_MIGRATION_VERSIONS
             assert dialogue_foreign_keys == {

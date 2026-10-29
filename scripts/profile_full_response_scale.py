@@ -5,7 +5,7 @@ import json
 import time
 
 from api.container import ServiceContainer
-from api.routers.context import _build_lightweight_prompt_structure
+from api.routers.context_build import _build_lightweight_prompt_structure
 from api.schemas.dialogue import ContextSelection, EstimateTokensRequest
 from constants import Defaults
 from services.context_token_budget import compute_context_selection_token_metrics

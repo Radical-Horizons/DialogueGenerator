@@ -801,5 +801,26 @@ describe('graphStore - document SoT load/save', () => {
       expect(choiceEdge?.sourceHandle).toBe('choice:accept')
       expect(choiceEdge?.id).toBe('e:START:choice:accept')
     })
+
+    it('rethrows missing_choice_id 422 without wrapping the Axios error', async () => {
+      const apiError = {
+        response: {
+          status: 422,
+          data: {
+            error: {
+              code: 'missing_choice_id',
+              message: "Ce dialogue doit être migré avec l'outil de migration choiceId.",
+            },
+          },
+        },
+      }
+      vi.mocked(documentsAPI.getDocument).mockRejectedValue(apiError)
+      vi.mocked(documentsAPI.getLayout).mockResolvedValue({ layout: {}, revision: 1 })
+
+      await expect(useGraphStore.getState().loadDialogueByDocumentId('legacy')).rejects.toBe(
+        apiError,
+      )
+      expect(useGraphStore.getState().isLoading).toBe(false)
+    })
   })
 })

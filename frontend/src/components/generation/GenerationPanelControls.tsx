@@ -22,7 +22,7 @@ const TOKEN_SLIDER_INPUT_STYLE: CSSProperties = {
 interface TokenSliderRowProps {
   isNarrow: boolean
   controlGapRem: number
-  sliderRef: RefObject<HTMLInputElement | null>
+  sliderRef: RefObject<HTMLInputElement>
   min: number
   max: number
   step: number
@@ -177,12 +177,13 @@ export function GenerationPanelControls({
             onClick={onApplyConfigFixes}
             style={{
               padding: '0.35rem 0.75rem',
-              borderRadius: '4px',
-              border: `1px solid ${theme.border.focus}`,
-              backgroundColor: theme.button.primary.background,
-              color: theme.button.primary.color,
+              borderRadius: '6px',
+              border: `1px solid ${theme.button.default.border}`,
+              backgroundColor: 'transparent',
+              color: theme.button.default.color,
               cursor: 'pointer',
               fontSize: '0.85rem',
+              fontWeight: 500,
             }}
           >
             Corriger automatiquement
@@ -326,7 +327,7 @@ export function GenerationPanelControls({
           }
           .token-slider::-webkit-slider-thumb:hover {
             background: ${theme.button.primary.background};
-            box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.35), 0 2px 4px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 0 3px ${theme.border.focus}59, 0 2px 4px rgba(0, 0, 0, 0.3);
           }
           .token-slider::-moz-range-track {
             height: 6px;
@@ -344,7 +345,7 @@ export function GenerationPanelControls({
           }
           .token-slider::-moz-range-thumb:hover {
             background: ${theme.button.primary.background};
-            box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.35), 0 2px 4px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 0 3px ${theme.border.focus}59, 0 2px 4px rgba(0, 0, 0, 0.3);
           }
           .token-slider::-ms-track {
             height: 6px;
@@ -364,7 +365,7 @@ export function GenerationPanelControls({
           }
           .token-slider::-ms-thumb:hover {
             background: ${theme.button.primary.background};
-            box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.35), 0 2px 4px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 0 3px ${theme.border.focus}59, 0 2px 4px rgba(0, 0, 0, 0.3);
           }
         `}</style>
       </div>

@@ -15,19 +15,25 @@ import {
   DialogueListContextMenu,
   type DialogueListContextMenuState,
 } from './DialogueListContextMenu'
-import { StyledSelect } from '../shared/StyledSelect'
+import { SELECT_ARROW_FONT_SIZE, StyledSelect } from '../shared/StyledSelect'
 import { useDialogueListData } from '../../hooks/useDialogueListData'
 import {
   normalizeDialogueFilenameKey,
   titleToDocumentId,
 } from '../../utils/formatDialogueTitle'
-import { useToast } from '../shared'
+import { useToast, Badge } from '../shared'
 import { useBatchUnityExport, toDocumentId } from '../../hooks/useBatchUnityExport'
+import { useBatchDialogueValidation } from '../../hooks/useBatchDialogueValidation'
 import { useRegisterUnityBatchExportMenu } from '../../hooks/useRegisterUnityBatchExportMenu'
 import { useDocumentSchemaValidation } from '../../hooks/useDocumentSchemaValidation'
 import { useUnityExportPreview } from '../../hooks/useUnityExportPreview'
 import { BatchExportToolbar } from './BatchExportToolbar'
 import { BatchExportSummaryBanner } from './BatchExportSummaryBanner'
+import { BatchValidationModal } from './BatchValidationModal'
+import { CollectionManager } from './CollectionManager'
+import * as collectionsAPI from '../../api/collections'
+import type { DialogueCollection } from '../../api/collections'
+import { getErrorMessage } from '../../types/errors'
 import { ExportPreviewModal } from './ExportPreviewModal'
 import { ExportLogsPanel } from './ExportLogsPanel'
 import { DownloadExportOptionsPanel } from './DownloadExportOptionsPanel'
@@ -37,11 +43,21 @@ import {
   saveDownloadExportOptions,
   type DownloadExportOptions,
 } from '../../utils/downloadExportOptions'
+import {
+  DIALOGUE_DATE_PERIOD_LABELS,
+  type DialogueDatePeriod,
+} from '../../utils/dialogueListFilters'
 import { downloadAllExportedFiles, downloadPersistedUnityDialogue } from '../../utils/unityExportDownload'
 import { useGraphStore } from '../../store/graphStore'
 import { getDialogueDisplayTitle } from '../../utils/formatDialogueTitle'
 import * as documentsAPI from '../../api/documents'
-import { getErrorMessage } from '../../types/errors'
+import {
+  redesignAccent,
+  redesignFont,
+  redesignHairline,
+  redesignSpacing,
+  redesignText,
+} from '../../theme/redesignTokens'
 
 const BATCH_UNSAVED_WARNING =
   'Le dialogue ouvert a des modifications non sauvegardées. Sauvegardez avant de l’inclure dans l’export batch.'
@@ -49,6 +65,8 @@ const BATCH_UNSAVED_WARNING =
 interface UnityDialogueListProps {
   onSelectDialogue: (dialogue: UnityDialogueMetadata | null) => void
   selectedFilename: string | null
+  /** Ouverture depuis le rapport de validation batch (focus nœud optionnel). */
+  onOpenValidatedDialogue?: (documentId: string, focusNodeId?: string) => void
 }
 
 export interface UnityDialogueListRef {
@@ -56,10 +74,15 @@ export interface UnityDialogueListRef {
 }
 
 export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueListProps>(
-  function UnityDialogueList({ onSelectDialogue, selectedFilename }, ref) {
+  function UnityDialogueList(
+    { onSelectDialogue, selectedFilename, onOpenValidatedDialogue },
+    ref
+  ) {
   const toast = useToast()
   const isGuest = useAuthStore((s) => s.user?.role === 'guest')
   const batch = useBatchUnityExport(toast)
+  const batchValidation = useBatchDialogueValidation(toast)
+  const [showBatchValidationModal, setShowBatchValidationModal] = useState(false)
   const [downloadOptions, setDownloadOptionsState] = useState<DownloadExportOptions>(() =>
     loadDownloadExportOptions(),
   )
@@ -72,12 +95,25 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
   const openFilename = useGraphStore((s) => s.dialogueMetadata.filename)
   const {
     filteredDialogues,
+    paginatedDialogues,
     total,
     filteredCount,
     searchQuery,
     setSearchQuery,
+    datePeriod,
+    setDatePeriod,
+    authorId,
+    setAuthorId,
+    availableAuthors,
+    hasActiveFilters,
+    resetFilters,
+    activeCollectionId,
+    setActiveCollectionFilter,
     sortType,
     setSortType,
+    page,
+    totalPages,
+    setPage,
     isLoading,
     error,
     refresh,
@@ -85,6 +121,12 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [contextMenu, setContextMenu] = useState<DialogueListContextMenuState | null>(null)
   const [isCreating, setIsCreating] = useState(false)
+  /** Repli date/auteur (disclosure) : évite que 4 contrôles se battent pour la largeur d'un rail étroit. */
+  const [showFilters, setShowFilters] = useState(false)
+  const [collections, setCollections] = useState<DialogueCollection[]>([])
+  const [collectionsLoading, setCollectionsLoading] = useState(false)
+  const [addToCollectionId, setAddToCollectionId] = useState('')
+  const [isAddingToCollection, setIsAddingToCollection] = useState(false)
   const batchPreview = useUnityExportPreview(
     toast,
     {
@@ -133,6 +175,148 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
   useImperativeHandle(ref, () => ({
     refresh,
   }), [refresh])
+
+  const refreshCollections = useCallback(async () => {
+    setCollectionsLoading(true)
+    try {
+      const next = await collectionsAPI.listCollections()
+      setCollections(next)
+    } catch (err) {
+      toast(getErrorMessage(err), 'error')
+    } finally {
+      setCollectionsLoading(false)
+    }
+  }, [toast])
+
+  useEffect(() => {
+    void refreshCollections()
+  }, [refreshCollections])
+
+  // Resynchroniser les membres du filtre actif après un refresh collections.
+  useEffect(() => {
+    if (!activeCollectionId) return
+    if (collectionsLoading) return
+    const current = collections.find((item) => item.id === activeCollectionId)
+    if (current) {
+      setActiveCollectionFilter(current.id, current.dialogue_ids)
+    } else {
+      setActiveCollectionFilter(null)
+    }
+  }, [
+    activeCollectionId,
+    collections,
+    collectionsLoading,
+    setActiveCollectionFilter,
+  ])
+
+  const collectionsByDocumentId = useMemo(
+    () => collectionsAPI.buildDocumentCollectionMap(collections),
+    [collections]
+  )
+
+  const handleSelectCollection = useCallback(
+    (collection: DialogueCollection | null) => {
+      if (!collection) {
+        setActiveCollectionFilter(null)
+        return
+      }
+      setActiveCollectionFilter(collection.id, collection.dialogue_ids)
+    },
+    [setActiveCollectionFilter]
+  )
+
+  const handleCollectionBadgeClick = useCallback(
+    (collectionId: string) => {
+      const collection = collections.find((item) => item.id === collectionId)
+      if (!collection) return
+      setActiveCollectionFilter(collection.id, collection.dialogue_ids)
+    },
+    [collections, setActiveCollectionFilter]
+  )
+
+  const handleCreateCollection = useCallback(
+    async (payload: {
+      name: string
+      description: string | null
+      icon: string | null
+    }) => {
+      const created = await collectionsAPI.createCollection(payload)
+      // Seed avec la sélection batch courante, si elle existe : « + » depuis
+      // une sélection de dialogues cochés crée la collection ET les y ajoute
+      // en un geste, plutôt que d'exiger un second passage par le menu batch.
+      const checkedIds = Array.from(batch.checkedDocumentIds)
+      if (checkedIds.length > 0) {
+        await collectionsAPI.addDialoguesToCollection(created.id, checkedIds)
+      }
+      await refreshCollections()
+      toast(
+        checkedIds.length > 0
+          ? `Collection créée avec ${checkedIds.length} dialogue${checkedIds.length > 1 ? 's' : ''}`
+          : 'Collection créée',
+        'success'
+      )
+    },
+    [batch.checkedDocumentIds, refreshCollections, toast]
+  )
+
+  const handleUpdateCollection = useCallback(
+    async (
+      collectionId: string,
+      payload: {
+        name: string
+        description: string | null
+        icon: string | null
+      }
+    ) => {
+      await collectionsAPI.updateCollection(collectionId, payload)
+      await refreshCollections()
+      toast('Collection mise à jour', 'success')
+    },
+    [refreshCollections, toast]
+  )
+
+  const handleDeleteCollection = useCallback(
+    async (collection: DialogueCollection) => {
+      const result = await collectionsAPI.deleteCollection(collection.id)
+      if (activeCollectionId === collection.id) {
+        setActiveCollectionFilter(null)
+      }
+      await refreshCollections()
+      toast(
+        `Collection « ${collection.name} » supprimée — ${result.removed_dialogue_count} dialogue${result.removed_dialogue_count !== 1 ? 's' : ''} retiré${result.removed_dialogue_count !== 1 ? 's' : ''}`,
+        'success'
+      )
+    },
+    [
+      activeCollectionId,
+      refreshCollections,
+      setActiveCollectionFilter,
+      toast,
+    ]
+  )
+
+  const handleAddCheckedToCollection = useCallback(async () => {
+    if (!addToCollectionId || batch.checkedDocumentIds.size === 0) return
+    setIsAddingToCollection(true)
+    try {
+      await collectionsAPI.addDialoguesToCollection(
+        addToCollectionId,
+        Array.from(batch.checkedDocumentIds)
+      )
+      await refreshCollections()
+      toast('Dialogues ajoutés à la collection', 'success')
+      setAddToCollectionId('')
+    } catch (err) {
+      toast(getErrorMessage(err), 'error')
+    } finally {
+      setIsAddingToCollection(false)
+    }
+  }, [
+    addToCollectionId,
+    batch.checkedDocumentIds,
+    refreshCollections,
+    toast,
+  ])
 
   const handleItemClick = (dialogue: UnityDialogueMetadata) => {
     if (
@@ -220,6 +404,35 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
     openFilename,
     toast,
   ])
+
+  const handleStartBatchValidate = useCallback(() => {
+    const ids = Array.from(batch.checkedDocumentIds)
+    if (ids.length === 0) return
+    setShowBatchValidationModal(true)
+    void batchValidation.startBatchValidation(ids)
+  }, [batch.checkedDocumentIds, batchValidation])
+
+  const handleOpenFromValidationReport = useCallback(
+    (documentId: string, focusNodeId?: string) => {
+      if (onOpenValidatedDialogue) {
+        onOpenValidatedDialogue(documentId, focusNodeId)
+        return
+      }
+      const match = filteredDialogues.find(
+        (d) => toDocumentId(d.filename) === documentId
+      )
+      if (match) onSelectDialogue(match)
+      else {
+        onSelectDialogue({
+          filename: `${documentId}.json`,
+          file_path: '',
+          size_bytes: 0,
+          modified_time: new Date().toISOString(),
+        })
+      }
+    },
+    [filteredDialogues, onOpenValidatedDialogue, onSelectDialogue]
+  )
 
   const setDownloadOptions = useCallback((options: DownloadExportOptions) => {
     setDownloadOptionsState(options)
@@ -333,23 +546,54 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
   }
 
   return (
-    <div data-testid="unity-dialogue-list" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div
+      data-testid="unity-dialogue-list"
+      style={{ display: 'flex', flexDirection: 'column', height: '100%', minWidth: 0 }}
+    >
+      {/* Ecran 2e : « DIALOGUES — N ... nouveau », puis une ligne de recherche nue.
+          Le seul bouton plein de l'ecran est « Generer la suite » (inspecteur) :
+          la creation redevient un lien, sans rien perdre de sa fonction. */}
       <div
         style={{
-          padding: '0.5rem',
-          borderBottom: `1px solid ${theme.border.primary}`,
-          backgroundColor: theme.background.panelHeader,
+          padding: `${redesignSpacing.md}px ${redesignSpacing.md}px ${redesignSpacing.sm}px`,
+          borderBottom: `1px solid ${redesignHairline.standard}`,
         }}
       >
+        <div style={{ marginBottom: '0.45rem' }}>
+          <CollectionManager
+            collections={collections}
+            activeCollectionId={activeCollectionId}
+            isGuest={isGuest}
+            isLoading={collectionsLoading}
+            checkedCount={batch.checkedDocumentIds.size}
+            onSelect={handleSelectCollection}
+            onCreate={handleCreateCollection}
+            onUpdate={handleUpdateCollection}
+            onDelete={handleDeleteCollection}
+          />
+        </div>
         <div
           style={{
             display: 'flex',
-            flexWrap: 'wrap',
-            gap: '0.4rem',
-            marginBottom: '0.45rem',
-            alignItems: 'center',
+            gap: '0.6rem',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            marginBottom: `${redesignSpacing.sm}px`,
           }}
         >
+          <span
+            style={{
+              fontFamily: redesignFont.mono,
+              fontSize: '10px',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: redesignText.label,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Dialogues — {filteredCount}
+            {searchQuery ? ` / ${total}` : ''}
+          </span>
           <button
             type="button"
             data-testid="create-dialogue-button"
@@ -357,46 +601,50 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
             hidden={isGuest}
             onClick={() => void handleCreateDialogue()}
             style={{
-              padding: '0.45rem 0.65rem',
-              border: `1px solid ${theme.button.primary.background}`,
-              borderRadius: '6px',
-              backgroundColor: theme.button.primary.background,
-              color: theme.button.primary.color,
+              border: 'none',
+              background: 'none',
+              padding: 0,
+              fontSize: remSize('caption'),
+              color: redesignText.label,
               cursor: isCreating || isGuest ? 'not-allowed' : 'pointer',
               flexShrink: 0,
               display: isGuest ? 'none' : undefined,
             }}
           >
-            {isCreating ? 'Création…' : 'Nouveau'}
+            {isCreating ? 'création…' : 'nouveau'}
           </button>
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Rechercher… (/)"
+            placeholder="Chercher un dialogue…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
-              flex: '1 1 120px',
+              flex: '1 1 auto',
               minWidth: 0,
-              padding: '0.45rem 0.55rem',
-              fontSize: remSize('body'),
-              border: `1px solid ${theme.input.border}`,
-              borderRadius: '6px',
-              boxSizing: 'border-box',
-              backgroundColor: theme.input.background,
-              color: theme.input.color,
+              padding: 0,
+              fontSize: '13.5px',
+              border: 'none',
+              outline: 'none',
+              backgroundColor: 'transparent',
+              color: theme.text.primary,
             }}
           />
           <StyledSelect
             value={sortType}
             onChange={(e) => setSortType(e.target.value as typeof sortType)}
             style={{
-              padding: '0.45rem 0.5rem',
-              border: `1px solid ${theme.input.border}`,
-              borderRadius: '6px',
-              backgroundColor: theme.input.background,
-              color: theme.input.color,
-              fontSize: remSize('small'),
+              padding: 0,
+              border: 'none',
+              backgroundColor: 'transparent',
+              color: redesignText.label,
+              fontFamily: redesignFont.mono,
+              fontSize: '10px',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
               flexShrink: 0,
             }}
             wrapperStyle={{ width: 'auto', flexShrink: 0 }}
@@ -406,13 +654,259 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
             <option value="date-asc">Date (ancien)</option>
             <option value="name-asc">Nom (A-Z)</option>
             <option value="name-desc">Nom (Z-A)</option>
+            <option value="size-desc">Taille (grand)</option>
+            <option value="size-asc">Taille (petit)</option>
           </StyledSelect>
+          <button
+            type="button"
+            data-testid="unity-dialogue-filters-toggle"
+            onClick={() => setShowFilters((v) => !v)}
+            title="Filtrer par date de création ou par auteur"
+            style={{
+              flexShrink: 0,
+              border: 'none',
+              background: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              fontFamily: redesignFont.mono,
+              fontSize: '10px',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color:
+                showFilters || datePeriod !== 'all' || authorId
+                  ? redesignAccent.base
+                  : redesignText.label,
+              whiteSpace: 'nowrap',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3em',
+            }}
+          >
+            Filtres
+            <span aria-hidden="true" style={{ fontSize: SELECT_ARROW_FONT_SIZE, lineHeight: 1 }}>
+              {showFilters ? '▼' : '▶'}
+            </span>
+          </button>
         </div>
+
+        {showFilters && (
+          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+            <StyledSelect
+              data-testid="unity-dialogue-filter-period"
+              value={datePeriod}
+              onChange={(e) =>
+                setDatePeriod(e.target.value as DialogueDatePeriod)
+              }
+              style={{
+                padding: '0.4rem 0.5rem',
+                border: `1px solid ${theme.input.border}`,
+                borderRadius: '6px',
+                backgroundColor: theme.input.background,
+                color: theme.input.color,
+                fontSize: remSize('small'),
+              }}
+              wrapperStyle={{ flex: '1 1 0%', minWidth: 0 }}
+              title="Filtrer par date de création"
+            >
+              {(Object.keys(DIALOGUE_DATE_PERIOD_LABELS) as DialogueDatePeriod[]).map(
+                (key) => (
+                  <option key={key} value={key}>
+                    {DIALOGUE_DATE_PERIOD_LABELS[key]}
+                  </option>
+                )
+              )}
+            </StyledSelect>
+            <StyledSelect
+              data-testid="unity-dialogue-filter-author"
+              value={authorId ?? ''}
+              onChange={(e) => setAuthorId(e.target.value || null)}
+              style={{
+                padding: '0.4rem 0.5rem',
+                border: `1px solid ${theme.input.border}`,
+                borderRadius: '6px',
+                backgroundColor: theme.input.background,
+                color: theme.input.color,
+                fontSize: remSize('small'),
+              }}
+              wrapperStyle={{ flex: '1 1 0%', minWidth: 0 }}
+              title="Filtrer par auteur"
+            >
+              <option value="">Tous les auteurs</option>
+              {availableAuthors.map((author) => (
+                <option key={author.id} value={author.id}>
+                  {author.username}
+                </option>
+              ))}
+            </StyledSelect>
+          </div>
+        )}
+
+        {(hasActiveFilters || searchQuery.trim()) && (
+          <div
+            data-testid="unity-dialogue-active-filters"
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '0.35rem',
+              alignItems: 'center',
+              marginBottom: '0.35rem',
+            }}
+          >
+            {datePeriod !== 'all' && (
+              <Badge
+                data-testid="unity-dialogue-filter-badge-period"
+                variant="info"
+                size="sm"
+                onClick={() => setDatePeriod('all')}
+                title="Retirer le filtre date"
+              >
+                {DIALOGUE_DATE_PERIOD_LABELS[datePeriod]} ×
+              </Badge>
+            )}
+            {authorId && (
+              <Badge
+                data-testid="unity-dialogue-filter-badge-author"
+                variant="info"
+                size="sm"
+                onClick={() => setAuthorId(null)}
+                title="Retirer le filtre auteur"
+              >
+                {(
+                  availableAuthors.find((a) => a.id === authorId)?.username ??
+                  authorId
+                )}{' '}
+                ×
+              </Badge>
+            )}
+            {activeCollectionId && (
+              <Badge
+                data-testid="unity-dialogue-filter-badge-collection"
+                variant="info"
+                size="sm"
+                onClick={() => setActiveCollectionFilter(null)}
+                title="Retirer le filtre collection"
+              >
+                {(
+                  collections.find((c) => c.id === activeCollectionId)?.name ??
+                  'Collection'
+                )}{' '}
+                ×
+              </Badge>
+            )}
+            {hasActiveFilters && (
+              <button
+                type="button"
+                data-testid="unity-dialogue-filters-reset"
+                onClick={resetFilters}
+                style={{
+                  padding: '0.15rem 0.45rem',
+                  border: 'none',
+                  background: 'transparent',
+                  color: theme.text.secondary,
+                  cursor: 'pointer',
+                  fontSize: remSize('small'),
+                  textDecoration: 'underline',
+                }}
+              >
+                Réinitialiser
+              </button>
+            )}
+          </div>
+        )}
 
         <div style={{ fontSize: remSize('small'), color: theme.text.secondary }}>
           {filteredCount} dialogue{filteredCount !== 1 ? 's' : ''}
-          {searchQuery && ` (sur ${total} total)`}
+          {(searchQuery || hasActiveFilters) && ` (sur ${total} total)`}
         </div>
+
+        {!isGuest && batch.checkedDocumentIds.size > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '0.35rem',
+              alignItems: 'center',
+              marginTop: '0.4rem',
+            }}
+          >
+            <button
+              type="button"
+              data-testid="batch-validate-start"
+              disabled={batchValidation.isValidating || batch.isBatchExporting}
+              onClick={handleStartBatchValidate}
+              style={{
+                padding: '0.35rem 0.6rem',
+                border: `1px solid ${theme.border.primary}`,
+                borderRadius: '6px',
+                backgroundColor: theme.button.secondary.background,
+                color: theme.button.secondary.color,
+                cursor: 'pointer',
+                fontSize: remSize('small'),
+              }}
+            >
+              Valider en batch ({batch.checkedDocumentIds.size})
+            </button>
+          </div>
+        )}
+
+        {!isGuest && batch.checkedDocumentIds.size > 0 && collections.length > 0 && (
+          <div
+            data-testid="unity-dialogue-add-to-collection"
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '0.35rem',
+              alignItems: 'center',
+              marginTop: '0.4rem',
+            }}
+          >
+            <StyledSelect
+              data-testid="unity-dialogue-add-to-collection-select"
+              value={addToCollectionId}
+              onChange={(e) => setAddToCollectionId(e.target.value)}
+              style={{
+                padding: '0.35rem 0.45rem',
+                border: `1px solid ${theme.input.border}`,
+                borderRadius: '6px',
+                backgroundColor: theme.input.background,
+                color: theme.input.color,
+                fontSize: remSize('small'),
+              }}
+              wrapperStyle={{ width: 'auto', flex: '1 1 140px' }}
+              title="Ajouter la sélection à une collection"
+            >
+              <option value="">Ajouter à une collection…</option>
+              {collections.map((collection) => (
+                <option key={collection.id} value={collection.id}>
+                  {collection.icon ? `${collection.icon} ` : ''}
+                  {collection.name}
+                </option>
+              ))}
+            </StyledSelect>
+            <button
+              type="button"
+              data-testid="unity-dialogue-add-to-collection-submit"
+              disabled={!addToCollectionId || isAddingToCollection}
+              onClick={() => {
+                void handleAddCheckedToCollection()
+              }}
+              style={{
+                padding: '0.35rem 0.6rem',
+                border: `1px solid ${theme.button.primary.background}`,
+                borderRadius: '6px',
+                backgroundColor: theme.button.primary.background,
+                color: theme.button.primary.color,
+                cursor:
+                  !addToCollectionId || isAddingToCollection
+                    ? 'not-allowed'
+                    : 'pointer',
+                fontSize: remSize('small'),
+              }}
+            >
+              {isAddingToCollection ? 'Ajout…' : 'Ajouter'}
+            </button>
+          </div>
+        )}
       </div>
 
       {batch.batchSummary && (
@@ -432,10 +926,12 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '0.5rem', minHeight: 0 }}>
         {filteredDialogues.length === 0 ? (
           <div style={{ padding: '0.75rem', textAlign: 'center', fontSize: remSize('body'), color: theme.text.secondary }}>
-            {searchQuery ? 'Aucun dialogue trouvé' : 'Aucun dialogue Unity'}
+            {searchQuery.trim() || hasActiveFilters
+              ? 'Aucun dialogue trouvé'
+              : 'Aucun dialogue Unity'}
           </div>
         ) : (
-          filteredDialogues.map((dialogue) => {
+          paginatedDialogues.map((dialogue) => {
             const docId = toDocumentId(dialogue.filename)
             return (
             <UnityDialogueItem
@@ -456,11 +952,73 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
                   batch.toggleDocumentCheck(docId)
                 }
               }}
+              collections={collectionsByDocumentId.get(docId)?.map((c) => ({
+                id: c.id,
+                name: c.name,
+                icon: c.icon,
+              }))}
+              onCollectionClick={handleCollectionBadgeClick}
             />
             )
           })
         )}
       </div>
+      {totalPages > 1 && (
+        <div
+          data-testid="unity-dialogue-pagination"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '0.5rem',
+            padding: '0.5rem',
+            borderTop: `1px solid ${theme.border.primary}`,
+            backgroundColor: theme.background.panelHeader,
+            flexShrink: 0,
+          }}
+        >
+          <button
+            type="button"
+            data-testid="unity-dialogue-pagination-prev"
+            disabled={page <= 1}
+            onClick={() => setPage(page - 1)}
+            style={{
+              padding: '0.35rem 0.6rem',
+              border: `1px solid ${theme.border.primary}`,
+              borderRadius: '6px',
+              backgroundColor: theme.button.default.background,
+              color: theme.button.default.color,
+              cursor: page <= 1 ? 'not-allowed' : 'pointer',
+              opacity: page <= 1 ? 0.5 : 1,
+            }}
+          >
+            Précédent
+          </button>
+          <span
+            data-testid="unity-dialogue-pagination-indicator"
+            style={{ fontSize: remSize('small'), color: theme.text.secondary }}
+          >
+            Page {page} sur {totalPages} — Total : {filteredCount}
+          </span>
+          <button
+            type="button"
+            data-testid="unity-dialogue-pagination-next"
+            disabled={page >= totalPages}
+            onClick={() => setPage(page + 1)}
+            style={{
+              padding: '0.35rem 0.6rem',
+              border: `1px solid ${theme.border.primary}`,
+              borderRadius: '6px',
+              backgroundColor: theme.button.default.background,
+              color: theme.button.default.color,
+              cursor: page >= totalPages ? 'not-allowed' : 'pointer',
+              opacity: page >= totalPages ? 0.5 : 1,
+            }}
+          >
+            Suivant
+          </button>
+        </div>
+      )}
       {contextMenu && (
         <DialogueListContextMenu
           state={contextMenu}
@@ -528,10 +1086,12 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
               batchOptions={batch.batchOptions}
               onToggleSelectAll={batchMenuActions.onToggleSelectAll}
               onStartExport={handleStartBatchExport}
+              onStartValidate={handleStartBatchValidate}
               onStartPreview={() => void handleStartBatchPreview()}
               onCancelExport={batch.cancelBatchExport}
               onToggleOptions={() => batch.setShowOptionsPanel(false)}
               onOptionsChange={batch.setBatchOptions}
+              isBatchValidating={batchValidation.isValidating}
             />
           </div>
         </div>
@@ -578,10 +1138,26 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
           batchOptions={batch.batchOptions}
           onToggleSelectAll={batchMenuActions.onToggleSelectAll}
           onStartExport={handleStartBatchExport}
+          onStartValidate={handleStartBatchValidate}
           onStartPreview={() => void handleStartBatchPreview()}
           onCancelExport={batch.cancelBatchExport}
           onToggleOptions={() => batch.setShowOptionsPanel(true)}
           onOptionsChange={batch.setBatchOptions}
+          isBatchValidating={batchValidation.isValidating}
+        />
+      )}
+      {(batchValidation.isValidating || batchValidation.report) && (
+        <BatchValidationModal
+          open={showBatchValidationModal || batchValidation.isValidating || Boolean(batchValidation.report)}
+          isValidating={batchValidation.isValidating}
+          progress={batchValidation.progress}
+          report={batchValidation.report}
+          onCancel={batchValidation.cancelBatchValidation}
+          onClose={() => {
+            setShowBatchValidationModal(false)
+            batchValidation.dismissReport()
+          }}
+          onOpenDialogue={handleOpenFromValidationReport}
         />
       )}
       {showExportLogsPanel && (
@@ -615,5 +1191,4 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
       )}
     </div>
   )
-  }
-)
+})

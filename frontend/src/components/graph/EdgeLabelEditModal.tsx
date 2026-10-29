@@ -23,7 +23,7 @@ export const EdgeLabelEditModal = memo(function EdgeLabelEditModal({
   onCancel,
 }: EdgeLabelEditModalProps) {
   const [value, setValue] = useState(initialValue)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
   const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
   const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
 
@@ -93,7 +93,7 @@ export const EdgeLabelEditModal = memo(function EdgeLabelEditModal({
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
         style={{
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.elevated,
           padding: isNarrow ? '0.9rem' : '1.25rem',
           borderRadius: '8px',
           minWidth: isNarrow ? 'unset' : '320px',

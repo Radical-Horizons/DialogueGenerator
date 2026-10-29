@@ -3,9 +3,12 @@ description: >-
   Version produit semver (package.json, tags git, canvas versions) — quand et
   comment bumper maj/min/patch, sync app_version.py, tag vX.Y.Z. Apply when
   merging an epic PR, pushing to prod, bumping version, or updating release notes.
-alwaysApply: false
+paths:
+  - "package.json"
+  - "frontend/package.json"
+  - "api/app_version.py"
+  - "docs/releases/**"
 ---
-
 # Version produit (semver)
 
 - **Source de vérité** : `version` dans `package.json` racine → `npm run version:sync` propage vers `frontend/package.json` et `api/app_version.py`. Vérifier : `npm run verify:app-version`. **Ne pas** éditer `app_version.py` à la main.

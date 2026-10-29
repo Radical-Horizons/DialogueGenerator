@@ -10,8 +10,45 @@ const VALUES_SUMMARY_KEYS = [
   'Introduction',
   'résumé',
   'introduction',
+  // Dernier recours : les fiches synchronisées depuis Notion portent souvent un
+  // résumé généré sous ce nom, et rien d'autre d'exploitable en une ligne.
+  'Résumé IA',
 ] as const
 const MAX_SUMMARY_LENGTH = 120
+
+/**
+ * Clés de `sections` acceptées comme résumé, sous forme normalisée.
+ * Les shards Notion slugifient les titres (« Résumé de la fiche » →
+ * `re_sume__de_la_fiche`) : comparer les libellés bruts ne trouve jamais rien.
+ */
+const NORMALIZED_SUMMARY_SECTION_KEYS = [
+  'resumedelafiche',
+  'resume',
+  'introduction',
+] as const
+
+/** Minuscules, sans accents ni séparateurs — pour comparer un slug à un libellé. */
+function normalizeSectionKey(key: string): string {
+  return key
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+}
+
+/**
+ * Nettoie le markdown et les balises Notion résiduelles d'un extrait.
+ * Une `<mention-page url="…"/>` occupe 70 caractères pour zéro information
+ * lisible : sans ce nettoyage, l'aperçu d'une fiche peut n'être qu'une URL.
+ */
+function stripInlineMarkup(text: string): string {
+  return text
+    .replace(/<mention-page[^>]*\/?>/g, '…')
+    .replace(/<\/?[a-z][^>]*>/gi, '')
+    .replace(/\*\*/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
 
 /**
  * Indique si une chaîne ressemble au repr/sérialisation d'un bloc Notion (rich_text).
@@ -77,9 +114,25 @@ function getFirstMeaningfulStringFromObject(obj: Record<string, unknown>): strin
 }
 
 function sliceSummary(text: string): string {
-  const t = text.trim()
+  const t = stripInlineMarkup(text)
   if (!t) return ''
   return t.slice(0, MAX_SUMMARY_LENGTH) + (t.length > MAX_SUMMARY_LENGTH ? '…' : '')
+}
+
+/** Cherche un résumé dans `sections`, en comparant les clés normalisées. */
+function trySummaryFromNormalizedSections(
+  sections: Record<string, unknown>,
+): string | undefined {
+  const byNormalized = new Map<string, unknown>()
+  for (const [key, value] of Object.entries(sections)) {
+    const normalized = normalizeSectionKey(key)
+    if (!byNormalized.has(normalized)) byNormalized.set(normalized, value)
+  }
+  for (const wanted of NORMALIZED_SUMMARY_SECTION_KEYS) {
+    const text = extractTextFromGddValue(byNormalized.get(wanted))
+    if (text) return text
+  }
+  return undefined
 }
 
 function trySummaryFromValues(values: Record<string, unknown>): string | undefined {
@@ -137,6 +190,8 @@ export function getGddEntitySummary(data: Record<string, unknown> | undefined): 
   if (sections && typeof sections === 'object') {
     const intro = getNestedString(sections, 'Introduction') ?? getNestedString(sections, 'Résumé')
     if (intro) return sliceSummary(intro)
+    const fromSlug = trySummaryFromNormalizedSections(sections)
+    if (fromSlug) return sliceSummary(fromSlug)
   }
   const rawValues = data['values']
   if (rawValues && typeof rawValues === 'object' && !Array.isArray(rawValues)) {

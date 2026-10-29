@@ -157,7 +157,7 @@ $requiredFiles = @(
     "api/routers/dialogues.py",
     "api/routers/graph_generation.py",
     "api/routers/graph_validation.py",
-    "api/routers/context.py",
+    "api/routers/context_build.py",
     "api/routers/config.py"
 )
 

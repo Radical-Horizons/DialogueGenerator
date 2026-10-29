@@ -1,0 +1,69 @@
+{
+  "id": "5c922a49-e327-4780-aebe-73d28cc02989",
+  "name": "Statut démo",
+  "description": "",
+  "category": "Général",
+  "icon": "📋",
+  "metadata": {
+    "created": "2026-08-19T16:05:34.139136Z",
+    "modified": "2026-08-19T16:05:34.139136Z"
+  },
+  "configuration": {
+    "characters": [
+      "L'Éthérée",
+      "Uresaïr"
+    ],
+    "locations": [],
+    "region": "",
+    "subLocation": null,
+    "sceneType": "Generic",
+    "instructions": "Vessine confronte le patient.",
+    "fieldConfigs": null,
+    "contextSelections": {
+      "characters_full": [
+        "L'Éthérée",
+        "Uresaïr"
+      ],
+      "characters_excerpt": [],
+      "locations_full": [],
+      "locations_excerpt": [],
+      "items_full": [],
+      "items_excerpt": [],
+      "species_full": [],
+      "species_excerpt": [],
+      "communities_full": [],
+      "communities_excerpt": [],
+      "dialogues_examples": [],
+      "narrative_structures": [],
+      "chapters": [],
+      "scenes": []
+    },
+    "selectedRegion": null,
+    "selectedSubLocations": [],
+    "topP": null,
+    "reasoningEffort": null,
+    "maxCompletionTokens": null,
+    "maxChoices": null,
+    "llmModel": "gpt-5.6-terra",
+    "contextDroppingRules": {
+      "rules_profile": "strict",
+      "tolerance": null,
+      "mandatory_info": [],
+      "dialogue_type_overrides": {},
+      "schema_version": "1.0"
+    },
+    "llmProvider": "openai",
+    "temperature": null
+  },
+  "history": [
+    {
+      "at": "2026-08-19T16:05:34.139136Z",
+      "action": "created"
+    }
+  ],
+  "ownerId": "guest:58f130a5-599d-40a3-94b3-88dbb4a87ee5",
+  "visibility": "private",
+  "relation": null,
+  "ownerUsername": null,
+  "sharedByUsername": null
+}

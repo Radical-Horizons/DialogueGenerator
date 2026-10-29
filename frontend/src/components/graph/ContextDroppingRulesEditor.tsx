@@ -9,94 +9,111 @@ import * as graphAPI from '../../api/graph'
 import { getErrorMessage } from '../../types/errors'
 import type { ContextDroppingRules, DialogueTypeRuleOverride } from '../../types/graph'
 import { theme } from '../../theme'
+import { DEFAULT_CONTEXT_DROPPING_RULES } from '../../utils/contextDroppingOverlay'
 
-interface ContextDroppingRulesEditorProps {
-  onClose: () => void
+export interface ContextDroppingRulesEditorProps {
+  onClose?: () => void
+  /** true (défaut) : GET/PUT fichier global 4.10. false : valeur locale, jamais de PUT. */
+  persist?: boolean
+  value?: ContextDroppingRules
+  onChange?: (rules: ContextDroppingRules) => void
 }
 
-const DEFAULT_RULES: ContextDroppingRules = {
-  rules_profile: 'strict',
-  tolerance: null,
-  mandatory_info: [],
-  dialogue_type_overrides: {},
-  schema_version: '1.0',
-}
-
-export function ContextDroppingRulesEditor({ onClose }: ContextDroppingRulesEditorProps) {
-  const [rules, setRules] = useState<ContextDroppingRules>(DEFAULT_RULES)
+export function ContextDroppingRulesEditor({
+  onClose,
+  persist = true,
+  value,
+  onChange,
+}: ContextDroppingRulesEditorProps) {
+  const isControlled = persist === false
+  const [internalRules, setInternalRules] = useState<ContextDroppingRules>(
+    value ?? DEFAULT_CONTEXT_DROPPING_RULES,
+  )
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
 
-  // ── Chargement initial ────────────────────────────────────────────────────
+  const rules = isControlled ? (value ?? DEFAULT_CONTEXT_DROPPING_RULES) : internalRules
+
+  const setRules = (next: ContextDroppingRules) => {
+    if (isControlled) {
+      onChange?.(next)
+    } else {
+      setInternalRules(next)
+    }
+  }
 
   useEffect(() => {
+    if (isControlled) {
+      return
+    }
     setLoading(true)
     setError(null)
     graphAPI
       .getContextDroppingRules()
-      .then((r) => setRules(r))
+      .then((r) => setInternalRules(r))
       .catch((err) => setError(getErrorMessage(err)))
       .finally(() => setLoading(false))
-  }, [])
-
-  // ── Sauvegarde ────────────────────────────────────────────────────────────
+  }, [isControlled])
 
   const handleSave = useCallback(async () => {
     setSaving(true)
     setError(null)
     setSaved(false)
     try {
-      const updated = await graphAPI.putContextDroppingRules(rules)
-      setRules(updated)
+      const updated = await graphAPI.putContextDroppingRules(internalRules)
+      setInternalRules(updated)
       setSaved(true)
     } catch (err) {
       setError(getErrorMessage(err))
     } finally {
       setSaving(false)
     }
-  }, [rules])
+  }, [internalRules])
 
   // ── Helpers édition ───────────────────────────────────────────────────────
 
   const setProfile = (p: 'strict' | 'light') =>
-    setRules((r) => ({ ...r, rules_profile: p }))
+    setRules({ ...rules, rules_profile: p })
 
   const setTolerance = (v: string) => {
     const parsed = parseFloat(v)
-    setRules((r) => ({ ...r, tolerance: isNaN(parsed) ? null : Math.min(1, Math.max(0, parsed)) }))
+    setRules({
+      ...rules,
+      tolerance: isNaN(parsed) ? null : Math.min(1, Math.max(0, parsed)),
+    })
   }
 
   const addMandatoryInfo = (label: string) => {
     const trimmed = label.trim()
     if (!trimmed) return
-    setRules((r) => ({ ...r, mandatory_info: [...r.mandatory_info, trimmed] }))
+    setRules({ ...rules, mandatory_info: [...rules.mandatory_info, trimmed] })
   }
 
   const removeMandatoryInfo = (idx: number) =>
-    setRules((r) => ({ ...r, mandatory_info: r.mandatory_info.filter((_, i) => i !== idx) }))
+    setRules({ ...rules, mandatory_info: rules.mandatory_info.filter((_, i) => i !== idx) })
 
   const addTypeOverride = (dialogueType: string, override: DialogueTypeRuleOverride) => {
     const key = dialogueType.trim()
     if (!key) return
-    setRules((r) => ({
-      ...r,
-      dialogue_type_overrides: { ...r.dialogue_type_overrides, [key]: override },
-    }))
+    setRules({
+      ...rules,
+      dialogue_type_overrides: { ...rules.dialogue_type_overrides, [key]: override },
+    })
   }
 
-  const removeTypeOverride = (dialogueType: string) =>
-    setRules((r) => {
-      const next = { ...r.dialogue_type_overrides }
-      delete next[dialogueType]
-      return { ...r, dialogue_type_overrides: next }
-    })
+  const removeTypeOverride = (dialogueType: string) => {
+    const next = { ...rules.dialogue_type_overrides }
+    delete next[dialogueType]
+    setRules({ ...rules, dialogue_type_overrides: next })
+  }
 
   // ── Rendu ─────────────────────────────────────────────────────────────────
 
   return (
     <div
+      data-testid="context-dropping-rules-form"
       style={{
         background: theme.background.panel,
         border: `1px solid ${theme.border.primary}`,
@@ -225,7 +242,7 @@ export function ContextDroppingRulesEditor({ onClose }: ContextDroppingRulesEdit
         disabled={loading}
       />
 
-      {/* ── Actions ────────────────────────────────────────────────────────── */}
+      {!isControlled && (
       <div style={{ display: 'flex', gap: 8, marginTop: 16, justifyContent: 'flex-end' }}>
         <button
           onClick={onClose}
@@ -250,6 +267,7 @@ export function ContextDroppingRulesEditor({ onClose }: ContextDroppingRulesEdit
           {saving ? 'Sauvegarde…' : 'Sauvegarder'}
         </button>
       </div>
+      )}
     </div>
   )
 }

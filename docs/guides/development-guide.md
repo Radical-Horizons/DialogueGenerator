@@ -73,7 +73,26 @@ This will:
    - `OPENAI_API_KEY`: OpenAI API key (required for dialogue generation)
    - `JWT_SECRET_KEY`: Secret key for JWT tokens (change in production!)
    - `ENVIRONMENT`: `development` or `production`
-   - See `README_API.md` and `docs/SECURITY.md` for full list
+   - See `README_API.md` and `docs/guides/SECURITY.md` for full list
+
+### Authentication and SQLite (Epic 7)
+
+Default: **`DISABLE_AUTH=false`** — JWT required; the UI opens a **guest** session automatically (`POST /api/v1/auth/guest`) for read-only demo access. Use **Connexion** (`/login`) for `admin` or `writer` accounts.
+
+**Seed admin account** on first API boot:
+
+```bash
+# In .env
+ADMIN_PASSWORD=your-secure-password
+```
+
+Login as username `admin` with that password. Without `ADMIN_PASSWORD`, no account is created (startup warning); guest access still works.
+
+**Application database** (`data/app.db`): SQLite stores users, preferences, dialogue ownership index, shares, and audit logs. Migrations run automatically at startup. Unity JSON files remain the dialogue source of truth. Tests override via `APP_DATABASE` (see `tests/conftest.py`).
+
+**Test bypass**: pytest sets `DISABLE_AUTH=true` automatically. Do not use in production.
+
+Roles and security details: [`docs/guides/SECURITY.md`](SECURITY.md) · API contracts: [`docs/api/api-contracts-api.md`](../api/api-contracts-api.md).
 
 ### GDD Data Setup
 
@@ -479,7 +498,7 @@ See `.env.example` for full list of variables.
 ## Additional Resources
 
 - **API Documentation**: `README_API.md`
-- **Deployment Guide**: `docs/DEPLOYMENT.md`
-- **Security Guide**: `docs/SECURITY.md`
-- **Testing Guide**: `docs/TESTING.md`
-- **Development Troubleshooting**: `docs/DEVELOPMENT.md`
+- **Deployment Guide**: `docs/guides/DEPLOYMENT.md`
+- **Security Guide**: `docs/guides/SECURITY.md`
+- **Testing Guide**: `docs/guides/TESTING.md`
+- **Development Troubleshooting**: `docs/guides/DEVELOPMENT.md`

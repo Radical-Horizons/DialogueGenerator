@@ -1,0 +1,41 @@
+{
+  "Nom": "Sel de fond",
+  "values": {
+    "Connaissances Alteir": "80f070fe-8589-44f2-873f-767093460254",
+    "Date de création": "2026-07-26T22:12:00.000Z",
+    "Dernière modification": "2026-07-27T13:26:00.000Z",
+    "Lieux de présence": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+    "Niveau d’IA": "auto",
+    "Poids": "Moyen",
+    "Rareté": "Peu commun",
+    "Stackable": "oui",
+    "Taille": "Petit",
+    "Type": "Matériau",
+    "État": "Brouillon IA"
+  },
+  "sections": {
+    "re_sume": "Évaporite laissée dans les lits de torrents asséchés par la Grande Bifurcation. Frotté ou saupoudré, le sel de fond ramollit temporairement la matière minérale : c’est l’adjuvant de façonnage de toute la filière de l’enfûtage.",
+    "nature_mate_rielle": "- **Description visuelle :** Plaques lamellaires blanc-gris, aux reflets teintés selon le liquide qui les a déposées — cuivré pour le métal, ocre pour la terre, vert pâle pour le bois. Raffiné en poudre fine, dite « fleur de fond ».\n\t- **Sous-type :** Minéral (évaporite pré-Bifurcation).\n\t- **Rareté & volume :** Peu commun ; gisements localisés dans les lits morts, exploitation par raclage saisonnier.",
+    "origine___exploitation": "- **Origine :** Raclage des lits abandonnés lors de la démixtion de la Grande Bifurcation (an 47) : là où un torrent élémentaire a cessé de couler, son substrat salin est resté.\n\t- **Histoire longue :** premiers raclages riverains attestés en 63 AG, seize ans après la Bifurcation ; la « taille au sel » — frotter la pierre pour la sculpter comme de la cire — entre dans les ateliers des tailleurs de pierre en 219 AG ; le Concordat de 1822 le compte parmi les matières taxables ; les Vaideccans des Sources Chaudes en tirent leurs sècheries de sel minéral (3040–3110 AG). L’enfûtage de 2800 AG ajoute un débouché de masse à trois millénaires d’usages de chantier.\n\t- **Créé par / communauté liée :** Racleurs — équipes saisonnières itinérantes travaillant les lits morts par droit de raclage négocié district par district.\n\t- **Zone(s) de production :** Anciens lits des Rivières Pentagrammatiques, marges des quatre océans.",
+    "valeur___de_bouche_s": "- **Usage principal :** Adjuvant de mise en forme : une pierre ou une céramique frottée de sel de fond se laisse quelques heures travailler comme de la cire, puis reprend sa dureté. Sert au façonnage et au scellage des fûts de matite, aux joints de fours, aux reprises de maçonnerie.\n\t- **Valeur en Dc :** Moyenne, spéculative en période de grands chantiers.\n\t- **Zone(s) de demande :** Ateliers d’enfûtage, chantiers, carrières.",
+    "conditions___limites": "- **Stackable :** Oui.\n\t- **Périssabilité / stockage :** Perd sa vertu s’il est mouillé d’eau vraie ; se stocke au sec.\n\t- **Usage direct :** Le ramollissement ne vaut que pour la matière inerte ; sur les chairs organo-minérales vivantes, l’effet est douloureux et l’usage proscrit.",
+    "re_compenses_lie_es": "*Créer une ligne si ce matériau est donné comme récompense. Remplir surtout Situation, Chapitre, Récompenses, Quantité et 🏁Flags si nécessaire.*\n\t<database url=\"https://app.notion.com/p/3a96e4d21b4581b0a374f2dd4da8dc71\" inline=\"true\">Récompenses liées</database>",
+    "inventaires_pnj": "*Créer une ligne si un PNJ possède, stocke ou échange ce matériau. Remplir surtout Personnage, Type d'accès, Quantité et Contexte narratif.*\n\t<database url=\"https://app.notion.com/p/3a96e4d21b4581598414df1cf885abda\" inline=\"true\">Données liées</database>",
+    "flags_lie_s": "*Créer une ligne si le matériau doit être suivi comme état, stock critique ou déclencheur. Remplir surtout Identifiant, Type de valeur, Portée = **`Objet`** et Objets liés.*\n\t<database url=\"https://app.notion.com/p/3a96e4d21b4581c8a079cd718d3070f8\" inline=\"true\">Flags liés</database>",
+    "les_racleurs": "- **Nature :** Tradition multiséculaire (premiers raclages : 63 AG) — équipes saisonnières itinérantes, pas de réseau unifié, pas de guilde. Les équipes se forment par affinité de voisinage ou de parenté, se dissolvent après la saison, et se reforment l'année suivante.\n\t- **Pratique :** Raclage à genoux dans les dépôts lamellaires lors des basses eaux. Le droit de raclage est négocié district par district avec les autorités locales, souvent contre un quota reversé à la voirie ou aux fours municipaux.\n\t- **Savoir transmis :** Les « cartes de veines » — relevés oraux des plaques les plus riches, passés de main en main au sein d'une même équipe. Aucun écrit ; la connaissance meurt avec l'équipe si elle se disperse.\n\t- **Économie :** Vente directe aux ateliers d'enfûtage et aux chantiers ; pas d'intermédiaire marchand sauf en Grande Radiale, où des courtiers rachètent la fleur de fond à prix spéculatif avant les grands chantiers.\n\t- **Tension avec le dérèglement :** Les lits exploitables s'amenuisent à mesure que certains anciens torrents reprennent partiellement de l'activité — phénomène discret, interprété localement comme « mauvaise saison », mais dont les racleurs les plus expérimentés commencent à tenir le compte.",
+    "remarques_de_conception": "- Nom composé conservé tel quel (ponctuel, modèle « charbon de bois »). La propriété de ramollissement temporaire est un acquis de conception à préserver.\n\t- Piste écartée : en faire le contenant principal du feu vif — rôle arbitré au profit de la matite ; le sel de fond reste l'adjuvant qui permet de façonner et sceller.\n\t- Les racleurs sont intentionnellement non-structurés : contraste avec les Feutiers (réseau transrégional formalisé). Deux modèles d'organisation pour deux filières de la même industrie."
+  },
+  "section_titles": {
+    "re_sume": "Résumé",
+    "nature_mate_rielle": "Nature matérielle",
+    "origine___exploitation": "Origine & exploitation",
+    "valeur___de_bouche_s": "Valeur & débouchés",
+    "conditions___limites": "Conditions & limites",
+    "re_compenses_lie_es": "Récompenses liées",
+    "inventaires_pnj": "Inventaires PNJ",
+    "flags_lie_s": "Flags liés",
+    "les_racleurs": "Les racleurs",
+    "remarques_de_conception": "Remarques de conception"
+  },
+  "notion_page_id": "c81fa0e0-940d-427c-b05e-80172730c355"
+}

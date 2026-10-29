@@ -1,8 +1,6 @@
 ---
 description: Protocole Meta-Agent — Diagnostic par preuves, analyse contre-factuelle et évolution des règles (inspiré de Meta-Harness)
-alwaysApply: true
 ---
-
 # Protocole Meta-Agent
 
 Ce protocole impose une rigueur de diagnostic et d'auto-amélioration basée sur les preuves réelles du système (logs, terminaux, historique), plutôt que sur des suppositions.
@@ -35,7 +33,9 @@ Le "Harnais" de l'agent est constitué des fichiers `.claude/rules/*.md` et `CLA
 
 ## 4. Recherche Historique (Long-Horizon Context)
 
-- **Transcripts Passés** : Utiliser `python scripts/peek_cursor_transcript.py search "erreur ou pattern"` pour retrouver comment des problèmes similaires ont été résolus dans des sessions précédentes.
+- **Transcripts Claude Code** (source principale aujourd'hui) : `C:\Users\ecali\.claude\projects\F--Projets-DialogueGenerator\*.jsonl` — grep direct pour retrouver commandes lancées, refus de permission, correctifs passés.
+- **Archive Cursor** (pré-migration, gelée) : `python scripts/peek_cursor_transcript.py search "erreur ou pattern"`.
+- **Les deux d'un coup** : subagent `transcript-history-researcher`, qui couvre déjà les deux sources.
 - **10M Tokens de Contexte** : Ne pas hésiter à fouiller massivement le filesystem (logs, anciens fichiers, historiques) pour construire un diagnostic solide.
 
 ## 5. Commande de Diagnostic

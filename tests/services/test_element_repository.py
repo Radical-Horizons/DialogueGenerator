@@ -106,6 +106,36 @@ class TestElementRepository:
         
         assert result is not None
         assert result["Nom"] == "Uresaïr"
+
+    def test_get_by_name_historical_nom_comma_alias(self):
+        """Forme historique « Nom, alias » (presets / prompts Akthar)."""
+        gdd_data = GDDData(
+            characters=[
+                {
+                    "Nom": "Akthar-Neth Amatru",
+                    "values": {
+                        "Alias": "Grand-Père, Le Nœud Éternel, l\u2019Exégète",
+                    },
+                }
+            ]
+        )
+        repo = ElementRepository(gdd_data)
+
+        # Apostrophe typographique U+2019 (comme dans les sélections UI persistées)
+        result = repo.get_by_name(
+            ElementCategory.CHARACTERS,
+            "Akthar-Neth Amatru, l\u2019Exégète",
+        )
+        assert result is not None
+        assert result["Nom"] == "Akthar-Neth Amatru"
+
+        # Apostrophe droite aussi
+        result_ascii = repo.get_by_name(
+            ElementCategory.CHARACTERS,
+            "Akthar-Neth Amatru, l'Exégète",
+        )
+        assert result_ascii is not None
+        assert result_ascii["Nom"] == "Akthar-Neth Amatru"
     
     def test_get_all(self, repository):
         """Test de récupération de tous les éléments."""

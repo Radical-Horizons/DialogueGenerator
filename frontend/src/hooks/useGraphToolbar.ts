@@ -34,9 +34,9 @@ export interface UseGraphToolbarReturn {
   showValidationToolsDropdown: boolean
   setShowValidationToolsDropdown: (v: boolean | ((prev: boolean) => boolean)) => void
   showAIGenerationPanel: boolean
-  setShowAIGenerationPanel: (v: boolean) => void
+  setShowAIGenerationPanel: (v: boolean | ((prev: boolean) => boolean)) => void
   showExportFormatDialog: boolean
-  setShowExportFormatDialog: (v: boolean) => void
+  setShowExportFormatDialog: (v: boolean | ((prev: boolean) => boolean)) => void
   showValidationPanel: boolean
   setShowValidationPanel: (v: boolean | ((prev: boolean) => boolean)) => void
   showQualityLlmPanel: boolean
@@ -64,11 +64,11 @@ export interface UseGraphToolbarReturn {
   showCostBreakdown: boolean
   setShowCostBreakdown: (v: boolean | ((prev: boolean) => boolean)) => void
   showShortcutsTooltip: boolean
-  setShowShortcutsTooltip: (v: boolean) => void
+  setShowShortcutsTooltip: (v: boolean | ((prev: boolean) => boolean)) => void
   showSearchBar: boolean
   setShowSearchBar: (v: boolean | ((prev: boolean) => boolean)) => void
   showJumpToNodeModal: boolean
-  setShowJumpToNodeModal: (v: boolean) => void
+  setShowJumpToNodeModal: (v: boolean | ((prev: boolean) => boolean)) => void
   showFiltersPanel: boolean
   setShowFiltersPanel: (v: boolean | ((prev: boolean) => boolean)) => void
   layoutDirection: 'TB' | 'LR' | 'BT' | 'RL'

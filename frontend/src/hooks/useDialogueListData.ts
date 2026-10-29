@@ -1,6 +1,7 @@
 /**
  * Hook partagé qui charge la liste des dialogues Unity, expose la requête de
- * recherche, le tri configurable et la liste filtrée résultante.
+ * recherche, les filtres métadonnées (FR82), le tri configurable et la liste
+ * filtrée résultante.
  *
  * Story 17.7 — extrait de la logique précédemment dupliquée dans
  * `UnityDialogueList`, désormais consommée à la fois par cette liste
@@ -8,28 +9,83 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import * as unityDialoguesAPI from '../api/unityDialogues'
+import * as dialogueSearchAPI from '../api/dialogueSearch'
 import type { UnityDialogueMetadata } from '../types/api'
 import { getErrorMessage } from '../types/errors'
+import {
+  matchesDialogueDatePeriod,
+  type DialogueDatePeriod,
+} from '../utils/dialogueListFilters'
+import {
+  loadDialogueListSort,
+  saveDialogueListSort,
+  isDialogueListSortType,
+  type PersistedDialogueListSortType,
+} from '../utils/dialogueListSort'
+import { normalizeDialogueFilenameKey } from '../utils/formatDialogueTitle'
 
-export type DialogueListSortType =
-  | 'name-asc'
-  | 'name-desc'
-  | 'date-desc'
-  | 'date-asc'
+export type DialogueListSortType = PersistedDialogueListSortType
+
+export type { DialogueDatePeriod }
+
+export interface DialogueListAuthorOption {
+  id: string
+  username: string
+}
+
+/**
+ * Taille de page par défaut de la bibliothèque de dialogues (Story 8.1 / FR80).
+ */
+export const DIALOGUE_LIST_PAGE_SIZE = 50
 
 export interface UseDialogueListDataReturn {
   /** Dialogues bruts retournés par l'API (avant filtre / tri). */
   dialogues: UnityDialogueMetadata[]
-  /** Liste filtrée par `searchQuery` puis triée par `sortType`. */
+  /** Liste filtrée (search + période + auteur) puis triée. */
   filteredDialogues: UnityDialogueMetadata[]
+  /**
+   * Sous-ensemble de `filteredDialogues` correspondant à la page courante
+   * (Story 8.1). La pagination est appliquée après recherche et tri.
+   */
+  paginatedDialogues: UnityDialogueMetadata[]
   /** Nombre total de dialogues retournés par l'API. */
   total: number
-  /** Nombre de dialogues après application du filtre de recherche. */
+  /** Nombre de dialogues après application des filtres. */
   filteredCount: number
   searchQuery: string
   setSearchQuery: (query: string) => void
+  /** Preset de période de création (FR82). */
+  datePeriod: DialogueDatePeriod
+  setDatePeriod: (period: DialogueDatePeriod) => void
+  /** Owner_id sélectionné, ou `null` = tous (FR82). */
+  authorId: string | null
+  setAuthorId: (id: string | null) => void
+  /** Auteurs distincts dérivés des dialogues déjà visibles (post-RBAC). */
+  availableAuthors: DialogueListAuthorOption[]
+  /** True si période ≠ all, auteur sélectionné, ou collection active. */
+  hasActiveFilters: boolean
+  /** Remet période=all, auteur=tous et collection (ne touche pas à la recherche). */
+  resetFilters: () => void
+  /** Collection active pour filtrer la liste (FR84), ou null. */
+  activeCollectionId: string | null
+  /**
+   * Active un filtre collection avec ses `document_id` membres.
+   * Passer `null` pour désactiver.
+   */
+  setActiveCollectionFilter: (
+    collectionId: string | null,
+    documentIds?: readonly string[]
+  ) => void
   sortType: DialogueListSortType
   setSortType: (sort: DialogueListSortType) => void
+  /** Page courante (1-indexé), bornée à `[1, totalPages]`. */
+  page: number
+  /** Nombre total de pages pour la liste filtrée (>= 1). */
+  totalPages: number
+  /** Taille de page appliquée. */
+  pageSize: number
+  /** Change la page demandée (le hook la borne à `[1, totalPages]`). */
+  setPage: (page: number) => void
   isLoading: boolean
   error: string | null
   /** Re-fetch la liste depuis l'API ; les filtres / tri restent inchangés. */
@@ -46,9 +102,23 @@ export function useDialogueListData(): UseDialogueListDataReturn {
   const [dialogues, setDialogues] = useState<UnityDialogueMetadata[]>([])
   const [total, setTotal] = useState(0)
   const [searchQuery, setSearchQuery] = useState('')
-  const [sortType, setSortType] = useState<DialogueListSortType>('date-desc')
+  const [datePeriod, setDatePeriod] = useState<DialogueDatePeriod>('all')
+  const [authorId, setAuthorId] = useState<string | null>(null)
+  const [activeCollectionId, setActiveCollectionId] = useState<string | null>(
+    null
+  )
+  const [activeCollectionDocumentIds, setActiveCollectionDocumentIds] =
+    useState<ReadonlySet<string> | null>(null)
+  const [sortType, setSortTypeState] = useState<DialogueListSortType>(() =>
+    loadDialogueListSort()
+  )
+  const [page, setPage] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
+  const [serverSearchIds, setServerSearchIds] = useState<ReadonlySet<
+    string
+  > | null>(null)
 
   const refresh = useCallback(async () => {
     setIsLoading(true)
@@ -68,15 +138,118 @@ export function useDialogueListData(): UseDialogueListDataReturn {
     void refresh()
   }, [refresh])
 
+  // Debounce FR85 : n'appeler le FTS serveur qu'après pause de frappe.
+  useEffect(() => {
+    const handle = window.setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery.trim())
+    }, 300)
+    return () => window.clearTimeout(handle)
+  }, [searchQuery])
+
+  useEffect(() => {
+    if (!debouncedSearchQuery) {
+      setServerSearchIds(null)
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      try {
+        const response =
+          await dialogueSearchAPI.searchUnityDialogues(debouncedSearchQuery)
+        if (cancelled) return
+        setServerSearchIds(
+          new Set(
+            response.document_ids.map((id) =>
+              id.replace(/\.json$/i, '').toLowerCase()
+            )
+          )
+        )
+      } catch {
+        if (!cancelled) {
+          // Repli client si l'API search est indisponible.
+          setServerSearchIds(null)
+        }
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [debouncedSearchQuery])
+
+  const availableAuthors = useMemo(() => {
+    const byId = new Map<string, string>()
+    for (const dialogue of dialogues) {
+      if (!dialogue.owner_id) continue
+      // Inclure même sans username (compte disparu) : fallback sur l'id.
+      byId.set(
+        dialogue.owner_id,
+        dialogue.owner_username || dialogue.owner_id
+      )
+    }
+    return [...byId.entries()]
+      .map(([id, username]) => ({ id, username }))
+      .sort((a, b) =>
+        a.username.localeCompare(b.username, 'fr', { sensitivity: 'base' })
+      )
+  }, [dialogues])
+
+  // Si l'auteur sélectionné disparaît du corpus (refresh, partage retiré),
+  // lever le filtre pour éviter une liste vide « fantôme ».
+  useEffect(() => {
+    if (
+      authorId &&
+      !availableAuthors.some((author) => author.id === authorId)
+    ) {
+      setAuthorId(null)
+    }
+  }, [authorId, availableAuthors])
+
   const filteredDialogues = useMemo(() => {
     let result = dialogues
 
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase()
-      result = result.filter(
-        (dialogue) =>
-          dialogue.filename.toLowerCase().includes(query) ||
-          (dialogue.title && dialogue.title.toLowerCase().includes(query))
+      const trimmed = searchQuery.trim()
+      const serverReady =
+        serverSearchIds != null && trimmed === debouncedSearchQuery
+      if (serverReady) {
+        // FR85 : résultats FTS serveur (document_id), uniquement si debounce aligné.
+        result = result.filter((dialogue) =>
+          serverSearchIds.has(normalizeDialogueFilenameKey(dialogue.filename))
+        )
+      } else {
+        // Pendant le debounce / repli : filtre client FR81.
+        const query = trimmed.toLowerCase()
+        result = result.filter(
+          (dialogue) =>
+            dialogue.filename.toLowerCase().includes(query) ||
+            (dialogue.title?.toLowerCase().includes(query) ?? false) ||
+            (dialogue.speakers?.some((speaker) =>
+              speaker.toLowerCase().includes(query)
+            ) ??
+              false) ||
+            (dialogue.search_text?.includes(query) ?? false)
+        )
+      }
+    }
+
+    // Filtres métadonnées FR82 (ET avec la recherche).
+    if (datePeriod !== 'all') {
+      result = result.filter((dialogue) =>
+        matchesDialogueDatePeriod(
+          dialogue.created_at ?? dialogue.modified_time,
+          datePeriod
+        )
+      )
+    }
+    if (authorId) {
+      result = result.filter((dialogue) => dialogue.owner_id === authorId)
+    }
+
+    // Filtre collection FR84 (ET avec search / date / auteur).
+    if (activeCollectionId && activeCollectionDocumentIds) {
+      const memberIds = activeCollectionDocumentIds
+      result = result.filter((dialogue) =>
+        memberIds.has(normalizeDialogueFilenameKey(dialogue.filename))
       )
     }
 
@@ -99,6 +272,24 @@ export function useDialogueListData(): UseDialogueListDataReturn {
             new Date(a.modified_time).getTime() -
             new Date(b.modified_time).getTime()
           )
+        case 'size-desc':
+        case 'size-asc': {
+          // Nulls / absents en fin de liste ; départage stable par filename.
+          const aCount = a.node_count
+          const bCount = b.node_count
+          const aMissing = aCount == null
+          const bMissing = bCount == null
+          if (aMissing && bMissing) {
+            return a.filename.localeCompare(b.filename, 'fr')
+          }
+          if (aMissing) return 1
+          if (bMissing) return -1
+          const delta =
+            sortType === 'size-desc' ? bCount - aCount : aCount - bCount
+          return delta !== 0
+            ? delta
+            : a.filename.localeCompare(b.filename, 'fr')
+        }
         case 'date-desc':
         default:
           return (
@@ -107,17 +298,113 @@ export function useDialogueListData(): UseDialogueListDataReturn {
           )
       }
     })
-  }, [dialogues, searchQuery, sortType])
+  }, [
+    dialogues,
+    searchQuery,
+    debouncedSearchQuery,
+    serverSearchIds,
+    datePeriod,
+    authorId,
+    activeCollectionId,
+    activeCollectionDocumentIds,
+    sortType,
+  ])
+
+  // Revenir à la première page quand le filtre ou le tri change : la page
+  // courante n'a plus de sens sur un ensemble filtré différent.
+  useEffect(() => {
+    setPage(1)
+  }, [
+    searchQuery,
+    datePeriod,
+    authorId,
+    activeCollectionId,
+    activeCollectionDocumentIds,
+    sortType,
+  ])
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredDialogues.length / DIALOGUE_LIST_PAGE_SIZE)
+  )
+  // Borne la page demandée : après une suppression, `page` peut dépasser le
+  // nouveau nombre de pages.
+  const safePage = Math.min(Math.max(page, 1), totalPages)
+
+  const paginatedDialogues = useMemo(
+    () =>
+      filteredDialogues.slice(
+        (safePage - 1) * DIALOGUE_LIST_PAGE_SIZE,
+        safePage * DIALOGUE_LIST_PAGE_SIZE
+      ),
+    [filteredDialogues, safePage]
+  )
+
+  const setPageClamped = useCallback((next: number) => {
+    // Ignorer les valeurs non finies (NaN via un calcul amont) plutôt que de
+    // corrompre l'état de page.
+    if (!Number.isFinite(next)) return
+    setPage(Math.max(1, Math.floor(next)))
+  }, [])
+
+  const setSortType = useCallback((next: DialogueListSortType) => {
+    // Le <select> caste la value en string : ignorer toute valeur hors whitelist
+    // pour ne pas polluer le state ni localStorage.
+    if (!isDialogueListSortType(next)) return
+    setSortTypeState(next)
+    saveDialogueListSort(next)
+  }, [])
+
+  const hasActiveFilters =
+    datePeriod !== 'all' || authorId !== null || activeCollectionId !== null
+
+  const setActiveCollectionFilter = useCallback(
+    (collectionId: string | null, documentIds: readonly string[] = []) => {
+      if (!collectionId) {
+        setActiveCollectionId(null)
+        setActiveCollectionDocumentIds(null)
+        return
+      }
+      setActiveCollectionId(collectionId)
+      setActiveCollectionDocumentIds(
+        new Set(
+          documentIds.map((id) => id.replace(/\.json$/i, '').toLowerCase())
+        )
+      )
+    },
+    []
+  )
+
+  const resetFilters = useCallback(() => {
+    setDatePeriod('all')
+    setAuthorId(null)
+    setActiveCollectionId(null)
+    setActiveCollectionDocumentIds(null)
+  }, [])
 
   return {
     dialogues,
     filteredDialogues,
+    paginatedDialogues,
     total,
     filteredCount: filteredDialogues.length,
     searchQuery,
     setSearchQuery,
+    datePeriod,
+    setDatePeriod,
+    authorId,
+    setAuthorId,
+    availableAuthors,
+    hasActiveFilters,
+    resetFilters,
+    activeCollectionId,
+    setActiveCollectionFilter,
     sortType,
     setSortType,
+    page: safePage,
+    totalPages,
+    pageSize: DIALOGUE_LIST_PAGE_SIZE,
+    setPage: setPageClamped,
     isLoading,
     error,
     refresh,

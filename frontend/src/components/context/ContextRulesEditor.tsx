@@ -8,6 +8,7 @@ import { useContextRulesStore } from '../../store/contextRulesStore'
 import type { ContextRule, EntityTypeStr } from '../../types/api'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
+import { redesignControl, redesignRadius, redesignText } from '../../theme/redesignTokens'
 import { StyledSelect } from '../shared/StyledSelect'
 
 const ENTITY_TYPE_OPTIONS: { value: EntityTypeStr; label: string }[] = [
@@ -75,9 +76,9 @@ const RuleItem = memo(function RuleItem({
         style={{
           fontSize: remSize('caption'),
           padding: '1px 5px',
-          borderRadius: 3,
-          backgroundColor: rule.enabled ? '#2d6a4f' : theme.background.tertiary,
-          color: rule.enabled ? '#fff' : theme.text.secondary,
+          borderRadius: redesignRadius.chip,
+          backgroundColor: rule.enabled ? theme.state.success.background : theme.background.tertiary,
+          color: rule.enabled ? theme.state.success.color : theme.text.secondary,
         }}
       >
         {rule.enabled ? 'Actif' : 'Inactif'}
@@ -268,7 +269,7 @@ export function ContextRulesEditor() {
           borderBottom: `1px solid ${theme.border.primary}`,
         }}
       >
-        <span style={{ fontWeight: 600, color: theme.text.primary }}>⚙ Règles de sélection</span>
+        <span style={{ fontWeight: 600, color: theme.text.primary }}>Règles de sélection</span>
         <StyledSelect
           aria-label="Type de dialogue"
           value={selectedDialogueType}
@@ -283,15 +284,7 @@ export function ContextRulesEditor() {
         <button
           aria-label="Ajouter règle"
           onClick={() => setShowForm(v => !v)}
-          style={{
-            border: `1px solid ${theme.border.primary}`,
-            borderRadius: 3,
-            padding: '2px 8px',
-            cursor: 'pointer',
-            backgroundColor: theme.background.tertiary,
-            color: theme.text.primary,
-            fontSize: remSize('small'),
-          }}
+          style={{ ...actionBtnStyle, padding: '2px 8px', fontSize: remSize('small') }}
         >
           + Ajouter règle
         </button>
@@ -430,7 +423,7 @@ export function ContextRulesEditor() {
             ))}
             <button
               onClick={addCondition}
-              style={{ ...actionBtnStyle, backgroundColor: theme.background.tertiary, color: theme.text.secondary, fontSize: remSize('caption'), padding: '2px 6px', marginTop: '0.2rem' }}
+              style={{ ...actionBtnStyle, color: redesignText.secondary, fontSize: remSize('caption'), padding: '2px 6px', marginTop: '0.2rem' }}
             >
               + Condition
             </button>
@@ -463,17 +456,13 @@ export function ContextRulesEditor() {
               aria-label="Sauvegarder"
               onClick={() => void handleSubmit()}
               disabled={!isValid}
-              style={{
-                ...actionBtnStyle,
-                backgroundColor: isValid ? '#2d6a4f' : theme.background.tertiary,
-                color: isValid ? '#fff' : theme.text.secondary,
-              }}
+              style={{ ...actionBtnStyle, opacity: isValid ? 1 : 0.5, cursor: isValid ? 'pointer' : 'not-allowed' }}
             >
               Sauvegarder
             </button>
             <button
               onClick={() => { reset(); setShowForm(false) }}
-              style={{ ...actionBtnStyle, backgroundColor: theme.background.tertiary, color: theme.text.secondary }}
+              style={actionBtnStyle}
             >
               Annuler
             </button>
@@ -496,19 +485,22 @@ const iconBtnStyle: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '3px 6px',
-  backgroundColor: theme.background.primary,
-  border: `1px solid ${theme.border.primary}`,
-  borderRadius: 3,
+  backgroundColor: theme.input.background,
+  border: `1px solid ${redesignControl.inputBorder}`,
+  borderRadius: redesignRadius.control,
   color: theme.text.primary,
   fontSize: remSize('body'),
   boxSizing: 'border-box',
 }
 
+// Boutons secondaires : l'action pleine de l'écran reste « Générer ».
 const actionBtnStyle: React.CSSProperties = {
-  border: 'none',
-  borderRadius: 3,
+  border: `1px solid ${theme.button.default.border}`,
+  borderRadius: redesignRadius.control,
   padding: '3px 10px',
+  backgroundColor: 'transparent',
+  color: redesignText.body,
   cursor: 'pointer',
   fontSize: remSize('body'),
-  fontWeight: 600,
+  fontWeight: 500,
 }

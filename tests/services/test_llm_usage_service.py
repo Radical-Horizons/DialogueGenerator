@@ -263,6 +263,35 @@ def test_annotate_usage_updates_record(usage_service, mock_repository):
     assert updated.node_id == "node_456"
 
 
+def test_annotate_usage_sets_template_fields(usage_service, mock_repository):
+    """Annote le template appliqué (UUID ou slug pré-built) sur le record."""
+    existing_record = LLMUsageRecord(
+        request_id="req_to_annotate",
+        timestamp=datetime.now(UTC),
+        model_name="gpt-5.6-terra",
+        prompt_tokens=500,
+        completion_tokens=100,
+        total_tokens=600,
+        estimated_cost=0.003,
+        duration_ms=900,
+        success=True,
+        endpoint="generate-node",
+    )
+    mock_repository.get_by_request_id.return_value = existing_record
+
+    usage_service.annotate_usage(
+        "req_to_annotate",
+        "dialogue_123",
+        "node_456",
+        template_id="confrontation",
+        template_name="Confrontation",
+    )
+
+    updated = mock_repository.update.call_args[0][0]
+    assert updated.template_id == "confrontation"
+    assert updated.template_name == "Confrontation"
+
+
 def test_annotate_usage_not_found_logs_warning(usage_service, mock_repository):
     """Teste que annotate_usage gère silencieusement l'absence du record."""
     mock_repository.get_by_request_id.return_value = None

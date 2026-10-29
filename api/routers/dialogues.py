@@ -1,4 +1,5 @@
 """Router pour la génération de dialogues."""
+import asyncio
 import logging
 import os
 import re
@@ -9,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import Response
 
 from api.routers.auth import get_current_user
+from api.utils.job_ownership import job_owner_key
 from starlette.requests import Request
 from api.schemas.dialogue import (
     EstimateTokensRequest,
@@ -26,8 +28,18 @@ from api.schemas.dialogue import (
     BatchExportPreviewRequest,
     BatchExportPreviewResponse,
     BatchExportPreviewItemResponse,
+    DialogueMetadataResponse,
 )
 from pydantic import BaseModel, Field
+from api.schemas.batch_validation import (
+    BatchValidateJobCreateResponse,
+    BatchValidateJobRequest,
+    BatchValidateJobStatusResponse,
+    BatchValidateRequest,
+    BatchValidateResponse,
+    BatchValidationIssueResponse,
+    BatchValidationItemResponse,
+)
 from api.dependencies import (
     get_dialogue_generation_service,
     get_request_id,
@@ -39,6 +51,9 @@ from api.dependencies import (
     get_unity_dialogue_orchestrator,
     get_export_log_service,
     get_document_persistence_service,
+    get_dialogue_metadata_service,
+    get_batch_validation_service,
+    get_batch_validation_job_manager,
     get_llm_usage_service,
     require_non_guest,
 )
@@ -62,6 +77,12 @@ from services.document_persistence_service import (
 from services.document_id_validation import validate_document_id
 from services.unity_export_validation_service import validate_unity_export_document
 from services.batch_export_service import batch_export_documents
+from services.batch_validation_service import (
+    BATCH_VALIDATE_JOB_MIN,
+    BatchValidationReport,
+    BatchValidationService,
+)
+from api.services.batch_validation_job_manager import BatchValidationJobManager
 from services.export_log_recorder import (
     extract_validation_errors,
     record_unity_export_failure,
@@ -69,6 +90,10 @@ from services.export_log_recorder import (
 )
 from services.export_log_service import ExportLogService
 from services.llm_usage_service import LLMUsageService
+from services.dialogue_metadata_service import (
+    DialogueMetadataNotFoundError,
+    DialogueMetadataService,
+)
 from services.unity_export_validation_service import validate_persisted_document
 from services.unity_dialogue_download_service import (
     build_batch_download_zip,
@@ -119,6 +144,64 @@ def _require_dialogue_access(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": "dialogue_access_denied"},
+        ) from exc
+
+
+@router.get(
+    "/{document_id}/metadata",
+    response_model=DialogueMetadataResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_dialogue_metadata(
+    document_id: str,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    metadata_service: Annotated[
+        DialogueMetadataService,
+        Depends(get_dialogue_metadata_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> DialogueMetadataResponse:
+    """Retourne les métadonnées FR86 sans divulguer les dialogues inaccessibles."""
+    try:
+        resolved_id = validate_document_id(document_id)
+        configured_path = config_service.get_unity_dialogues_path()
+        persistence_service.require_access(
+            resolved_id,
+            current_user,
+            (
+                Path(configured_path) / f"{resolved_id}.json"
+                if configured_path
+                else None
+            ),
+        )
+        metadata = metadata_service.get_dialogue_metadata(resolved_id)
+        return DialogueMetadataResponse(
+            document_id=metadata.document_id,
+            name=metadata.name,
+            owner_id=metadata.owner_id,
+            owner_username=metadata.owner_username,
+            last_modified_by=metadata.last_modified_by,
+            last_modified_by_username=metadata.last_modified_by_username,
+            created_at=metadata.created_at,
+            updated_at=metadata.updated_at,
+            node_count=metadata.node_count,
+            total_cost_eur=metadata.total_cost_eur,
+            cost_per_node_eur=metadata.cost_per_node_eur,
+        )
+    except (
+        DialogueAccessDeniedError,
+        DialogueMetadataNotFoundError,
+        ValueError,
+    ) as exc:
+        raise NotFoundException(
+            resource_type="Dialogue",
+            resource_id=document_id,
+            request_id=request_id,
         ) from exc
 
 
@@ -235,12 +318,12 @@ def _build_prompt_from_request(
         scene_type=getattr(request_data, "scene_type", None),
     )
 
-    # 4. Construire le contexte GDD via ContextBuilder
-    if request_data.previous_dialogue_preview:
-        context_builder.set_previous_dialogue_context(request_data.previous_dialogue_preview)
-    
-    # Construire le contexte JSON au plafond de mesure ; le budget utilisateur s'applique au texte.
-    structured_context = context_builder.build_context_json(
+    # 4. Construire le contexte GDD via ContextBuilder (set dialogue précédent +
+    # build atomiques : ce ContextBuilder est un singleton partagé, et cette
+    # fonction s'exécute déjà dans un thread déporté par ses appelants — voir
+    # ContextBuilder.build_context_json_with_previous_dialogue).
+    structured_context = context_builder.build_context_json_with_previous_dialogue(
+        previous_dialogue_preview=request_data.previous_dialogue_preview,
         selected_elements=context_selections_dict,
         scene_instruction=scene_instruction,
         field_configs=request_data.field_configs,
@@ -310,7 +393,8 @@ async def preview_prompt(
     Returns:
         Prompt brut construit (format XML) et sa structure JSON.
     """
-    try:
+    def _run() -> PreviewPromptResponse:
+        """Corps synchrone déporté sur un thread (construction du prompt via ContextBuilder, bloquant)."""
         # Convertir PreviewPromptRequest en EstimateTokensRequest pour réutiliser la logique
         estimate_request = EstimateTokensRequest(
             context_selections=request_data.context_selections,
@@ -331,7 +415,7 @@ async def preview_prompt(
             organization_mode=request_data.organization_mode,
             in_game_flags=request_data.in_game_flags  # Ajouter les flags
         )
-        
+
         try:
             built, _structured_context = _build_prompt_from_request(estimate_request, dialogue_service, prompt_engine, skill_service, trait_service)
         except ValueError as xml_error:
@@ -351,7 +435,7 @@ async def preview_prompt(
                 )
             # Si pas de détails XML, re-lancer l'erreur originale
             raise
-        
+
         # Convertir structured_prompt en dict pour la réponse
         structured_prompt_dict = None
         if built.structured_prompt:
@@ -365,7 +449,9 @@ async def preview_prompt(
             prompt_hash=built.prompt_hash,
             structured_prompt=structured_prompt_dict
         )
-        
+
+    try:
+        return await asyncio.to_thread(_run)
     except ValidationException:
         # Re-raise les ValidationException telles quelles
         raise
@@ -412,7 +498,8 @@ async def estimate_tokens(
     Returns:
         Estimation du nombre de tokens et prompt brut réel.
     """
-    try:
+    def _run() -> EstimateTokensResponse:
+        """Corps synchrone déporté sur un thread (build prompt + métriques via ContextBuilder, bloquant)."""
         # Construire le prompt en réutilisant la fonction helper
         try:
             built, structured_context = _build_prompt_from_request(request_data, dialogue_service, prompt_engine, skill_service, trait_service)
@@ -433,10 +520,15 @@ async def estimate_tokens(
                 )
             # Si pas de détails XML, re-lancer l'erreur originale
             raise
-        
+
         context_builder = dialogue_service.context_builder
+        # Écriture verrouillée (set_previous_dialogue_context_locked) : cette
+        # fonction ne relit pas la valeur elle-même (metrics réutilise
+        # structured_context déjà construit via _build_prompt_from_request), mais
+        # l'écriture doit rester exclusive vis-à-vis des autres threads déportés
+        # qui posent/lisent le dialogue précédent sur ce ContextBuilder partagé.
         if request_data.previous_dialogue_preview:
-            context_builder.set_previous_dialogue_context(request_data.previous_dialogue_preview)
+            context_builder.set_previous_dialogue_context_locked(request_data.previous_dialogue_preview)
 
         metrics = compute_context_selection_token_metrics(
             context_builder,
@@ -454,7 +546,7 @@ async def estimate_tokens(
             if ctx_in_prompt > 0
             else metrics.context_tokens
         )
-        
+
         # Convertir structured_prompt en dict pour la réponse
         structured_prompt_dict = None
         if built.structured_prompt:
@@ -483,7 +575,9 @@ async def estimate_tokens(
             completion_tokens=completion_tokens,
             estimated_cost_eur=estimated_cost_eur,
         )
-        
+
+    try:
+        return await asyncio.to_thread(_run)
     except ValidationException:
         # Re-raise les ValidationException telles quelles
         raise
@@ -753,6 +847,251 @@ async def batch_export_unity_dialogues(
             message="Erreur lors de l'export batch Unity JSON",
             request_id=request_id,
         )
+
+
+def _batch_report_to_response(report: BatchValidationReport) -> BatchValidateResponse:
+    """Convertit le rapport métier en schéma HTTP."""
+    return BatchValidateResponse(
+        items=[
+            BatchValidationItemResponse(
+                document_id=item.document_id,
+                status=item.status,
+                issues=[
+                    BatchValidationIssueResponse(
+                        type=issue.type,
+                        message=issue.message,
+                        severity=issue.severity,
+                        source=issue.source,
+                        node_id=issue.node_id,
+                    )
+                    for issue in item.issues
+                ],
+                validated_at=item.validated_at,
+            )
+            for item in report.items
+        ],
+        cancelled=report.cancelled,
+        started_at=report.started_at,
+        finished_at=report.finished_at,
+        valid_count=report.valid_count,
+        invalid_count=report.invalid_count,
+        skipped_count=report.skipped_count,
+    )
+
+
+def _can_access_document(
+    document_id: str,
+    persistence_service: DocumentPersistenceService,
+    current_user: dict[str, object],
+    config_service: ConfigurationService,
+) -> bool:
+    """Indique si l'utilisateur peut lire le dialogue (sans lever 403).
+
+    Les IDs invalides ne sont pas traités comme un refus RBAC : le service
+    les classera en ``skipped``.
+    """
+    try:
+        resolved_id = validate_document_id(document_id)
+    except ValueError:
+        return True
+    try:
+        configured_path = config_service.get_unity_dialogues_path()
+        persistence_service.require_access(
+            resolved_id,
+            current_user,
+            (
+                Path(configured_path) / f"{resolved_id}.json"
+                if configured_path
+                else None
+            ),
+        )
+        return True
+    except DialogueAccessDeniedError:
+        return False
+
+
+@router.post(
+    "/batch-validate",
+    response_model=BatchValidateResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def batch_validate_dialogues(
+    request_data: BatchValidateRequest,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    batch_service: Annotated[
+        BatchValidationService,
+        Depends(get_batch_validation_service),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> BatchValidateResponse:
+    """Valide synchrone un petit lot (N < 20) — Story 8.8 / FR87."""
+    if len(request_data.document_ids) >= BATCH_VALIDATE_JOB_MIN:
+        raise ValidationException(
+            message=(
+                f"Utilisez POST /batch-validate/jobs pour N ≥ {BATCH_VALIDATE_JOB_MIN}"
+            ),
+            details={"count": len(request_data.document_ids)},
+            request_id=request_id,
+        )
+    report = batch_service.validate_batch(
+        request_data.document_ids,
+        can_access=lambda doc_id: _can_access_document(
+            doc_id,
+            persistence_service,
+            current_user,
+            config_service,
+        ),
+    )
+    return _batch_report_to_response(report)
+
+
+@router.post(
+    "/batch-validate/jobs",
+    response_model=BatchValidateJobCreateResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def start_batch_validate_job(
+    request_data: BatchValidateJobRequest,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    persistence_service: Annotated[
+        DocumentPersistenceService,
+        Depends(get_document_persistence_service),
+    ],
+    batch_service: Annotated[
+        BatchValidationService,
+        Depends(get_batch_validation_service),
+    ],
+    job_manager: Annotated[
+        BatchValidationJobManager,
+        Depends(get_batch_validation_job_manager),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> BatchValidateJobCreateResponse:
+    """Lance un job async de validation batch (N ≥ 20)."""
+    import asyncio
+
+    owner = job_owner_key(current_user)
+    job_id = job_manager.create_job(request_data.document_ids, owner)
+
+    def _run() -> None:
+        try:
+            report = batch_service.validate_batch(
+                request_data.document_ids,
+                can_access=lambda doc_id: _can_access_document(
+                    doc_id,
+                    persistence_service,
+                    current_user,
+                    config_service,
+                ),
+                should_cancel=lambda: job_manager.is_cancelled(job_id),
+                on_progress=lambda current, _total, _item: job_manager.set_progress(
+                    job_id, current
+                ),
+            )
+            payload = _batch_report_to_response(report).model_dump()
+            final_status = "cancelled" if report.cancelled else "completed"
+            job_manager.complete(job_id, status=final_status, report=payload)
+        except Exception as exc:  # noqa: BLE001
+            logger.exception(
+                "Job batch-validate %s échoué (request_id: %s)", job_id, request_id
+            )
+            job_manager.complete(job_id, status="error", error=str(exc))
+
+    async def _runner() -> None:
+        await asyncio.to_thread(_run)
+
+    task = asyncio.create_task(_runner())
+    job_manager.register_task(job_id, task)
+    return BatchValidateJobCreateResponse(
+        job_id=job_id,
+        status="queued",
+        total=len(request_data.document_ids),
+    )
+
+
+@router.get(
+    "/batch-validate/jobs/{job_id}",
+    response_model=BatchValidateJobStatusResponse,
+)
+async def get_batch_validate_job(
+    job_id: str,
+    job_manager: Annotated[
+        BatchValidationJobManager,
+        Depends(get_batch_validation_job_manager),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> BatchValidateJobStatusResponse:
+    """Retourne l'état / le rapport d'un job de validation batch."""
+    job = job_manager.get_job(job_id)
+    if job is None:
+        raise NotFoundException(
+            resource_type="BatchValidateJob",
+            resource_id=job_id,
+            request_id=request_id,
+        )
+    owner = job_owner_key(current_user)
+    if job.get("owner_username") != owner and current_user.get("role") != "admin":
+        raise NotFoundException(
+            resource_type="BatchValidateJob",
+            resource_id=job_id,
+            request_id=request_id,
+        )
+    report_payload = job.get("report")
+    report = (
+        BatchValidateResponse(**report_payload)
+        if isinstance(report_payload, dict)
+        else None
+    )
+    return BatchValidateJobStatusResponse(
+        job_id=job_id,
+        status=job["status"],
+        current=int(job.get("current") or 0),
+        total=int(job.get("total") or 0),
+        cancelled=bool(job.get("cancelled")),
+        error=job.get("error"),
+        report=report,
+    )
+
+
+@router.post(
+    "/batch-validate/jobs/{job_id}/cancel",
+    response_model=BatchValidateJobStatusResponse,
+)
+async def cancel_batch_validate_job(
+    job_id: str,
+    job_manager: Annotated[
+        BatchValidationJobManager,
+        Depends(get_batch_validation_job_manager),
+    ],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> BatchValidateJobStatusResponse:
+    """Annule un job de validation batch en cours."""
+    job = job_manager.get_job(job_id)
+    if job is None:
+        raise NotFoundException(
+            resource_type="BatchValidateJob",
+            resource_id=job_id,
+            request_id=request_id,
+        )
+    owner = job_owner_key(current_user)
+    if job.get("owner_username") != owner and current_user.get("role") != "admin":
+        raise NotFoundException(
+            resource_type="BatchValidateJob",
+            resource_id=job_id,
+            request_id=request_id,
+        )
+    job_manager.cancel_job(job_id)
+    return await get_batch_validate_job(
+        job_id, job_manager, current_user, request_id
+    )
 
 
 @router.get("/{document_id}/preview-export", response_model=ExportPreviewResponse)
@@ -1031,16 +1370,16 @@ async def get_raw_json_context(
     Returns:
         Structure JSON brute du contexte et hash du prompt.
     """
-    try:
+    def _run() -> RawJsonContextResponse:
+        """Corps synchrone déporté sur un thread (build contexte + prompt via ContextBuilder, bloquant)."""
         # Convertir ContextSelection en dict
         context_selections_dict = request_data.context_selections.to_service_dict()
-        
-        # Construire le contexte JSON (même logique que estimate-tokens)
+
+        # Construire le contexte JSON (même logique que estimate-tokens). Set +
+        # build atomiques (voir ContextBuilder.build_context_json_with_previous_dialogue).
         context_builder = dialogue_service.context_builder
-        if request_data.previous_dialogue_preview:
-            context_builder.set_previous_dialogue_context(request_data.previous_dialogue_preview)
-        
-        structured_context = context_builder.build_context_json(
+        structured_context = context_builder.build_context_json_with_previous_dialogue(
+            previous_dialogue_preview=request_data.previous_dialogue_preview,
             selected_elements=context_selections_dict,
             scene_instruction=request_data.user_instructions,
             field_configs=request_data.field_configs,
@@ -1049,19 +1388,19 @@ async def get_raw_json_context(
             include_dialogue_type=True,
             element_modes=context_selections_dict.get("_element_modes")
         )
-        
+
         # Construire le prompt pour obtenir le hash (services injectés)
         skills_list, attributes_list, traits_list = load_prompt_catalogs(
             skill_service, trait_service
         )
-        
+
         dramatis = resolve_scene_dramatis(
             player_character_id=request_data.player_character_id,
             npc_speaker_id=request_data.npc_speaker_id,
             context_selections=request_data.context_selections.model_dump(),
         )
         npc_speaker_id = dramatis.npc_speaker_id
-        
+
         context_text_for_prompt = cap_context_text_to_budget(
             context_builder.serialize_context_to_text(structured_context),
             request_data.max_context_tokens,
@@ -1086,18 +1425,20 @@ async def get_raw_json_context(
             max_context_tokens=request_data.max_context_tokens,
             llm_model_identifier=request_data.llm_model_identifier,
         )
-        
+
         built = prompt_engine.build_prompt(prompt_input)
         prompt_hash = built.prompt_hash
-        
+
         # Convertir structured_context en dict
         structured_context_dict = structured_context.model_dump() if hasattr(structured_context, 'model_dump') else structured_context
-        
+
         return RawJsonContextResponse(
             structured_context=structured_context_dict,
             prompt_hash=prompt_hash
         )
-        
+
+    try:
+        return await asyncio.to_thread(_run)
     except Exception as e:
         logger.exception(f"Erreur lors de la récupération du JSON brut (request_id: {request_id})")
         raise InternalServerException(

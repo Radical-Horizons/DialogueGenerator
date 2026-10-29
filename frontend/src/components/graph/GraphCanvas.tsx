@@ -4,10 +4,17 @@
  * Les handlers événementiels sont délégués à useReactFlowHandlers.
  */
 import { memo, useMemo, useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react'
+import type { CSSProperties } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import {
+  redesignFont,
+  redesignHairline,
+  redesignRadius,
+  redesignSurface,
+  redesignText,
+} from '../../theme/redesignTokens'
 import ReactFlow, {
   Background,
-  Controls,
   MiniMap,
   useReactFlow,
   type ReactFlowInstance,
@@ -28,13 +35,17 @@ import { useGraphStore } from '../../store/graphStore'
 import { useGraphViewStore } from '../../store/graphViewStore'
 import { useContextStore } from '../../store/contextStore'
 import { useAuthStore } from '../../store/authStore'
+import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { theme } from '../../theme'
 import { applyNodeFilters, applyEdgeFilters } from './graphFilterUtils'
 import { useReactFlowHandlers } from '../../hooks/useReactFlowHandlers'
 import {
-  edgeStrokeFromSource,
-  edgeStrokeFromSourceHandle,
+  canvasEdgeStroke,
+  EDGE_NEUTRAL_COLOR,
+  EDGE_STROKE_WIDTH,
+  highlightSelectedOutgoingEdges,
   stableChoiceEdgeId,
+  toRestingCanvasEdge,
 } from '../../utils/graphEdgeBuilders'
 import { useToast } from '../shared'
 import { getErrorMessage } from '../../types/errors'
@@ -49,6 +60,7 @@ import {
 import { GRAPH_VIEWPORT_INTERACTION_OPTIONS } from './graphViewportInteraction'
 import {
   computeGraphMinimapSizePx,
+  graphMinimapNodeColor,
   REACT_FLOW_MINIMAP_DEFAULT_HEIGHT,
   REACT_FLOW_MINIMAP_DEFAULT_WIDTH,
 } from './graphMinimapLayout'
@@ -90,6 +102,9 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
   useEffect(() => {
     if (!focusHeadId) return
     useGraphViewStore.getState().dequeueFocus()
+    // Seul un focus suivant annule le recentrage en attente. Pas de nettoyage d'effet :
+    // `dequeueFocus` fait passer `focusHeadId` à null, et ce re-rendu annulait le
+    // minuteur avant son échéance — sélection sans recentrage.
     if (fitViewTimeoutRef.current !== null) {
       window.clearTimeout(fitViewTimeoutRef.current)
       fitViewTimeoutRef.current = null
@@ -103,10 +118,13 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
         fitView({ nodes: [node], duration: 300, padding: 0.3 })
       }, 100)
     }
-    return () => {
-      if (fitViewTimeoutRef.current !== null) window.clearTimeout(fitViewTimeoutRef.current)
-    }
   }, [focusHeadId, getNode, fitView, setSelectedNodeInner, setHighlightedNodesInner])
+  useEffect(
+    () => () => {
+      if (fitViewTimeoutRef.current !== null) window.clearTimeout(fitViewTimeoutRef.current)
+    },
+    []
+  )
 
   const pendingFitViewNodeIds = useGraphViewStore((s) => s.pendingFitViewNodeIds)
   useEffect(() => {
@@ -139,6 +157,33 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
 })
 
 const DEFAULT_VIEWPORT: Viewport = { x: 0, y: 120, zoom: 1 }
+/** Bouton de la barrette de zoom (ecran 2e) : carre, sans contour propre. */
+const graphZoomBarButtonStyle: CSSProperties = {
+  width: 28,
+  height: '100%',
+  border: 'none',
+  background: 'none',
+  color: redesignText.secondary,
+  cursor: 'pointer',
+  fontSize: '13px',
+  lineHeight: 1,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}
+
+/** Entrée texte mono de la barrette (« AJUSTER », « CARTE »), séparée par un filet. */
+const graphZoomBarTextButtonStyle: CSSProperties = {
+  ...graphZoomBarButtonStyle,
+  width: 'auto',
+  padding: '0 10px',
+  borderLeft: `1px solid ${redesignHairline.standard}`,
+  fontFamily: redesignFont.mono,
+  fontSize: '10px',
+  letterSpacing: '0.09em',
+  textTransform: 'uppercase',
+}
+
 const SNAP_GRID: [number, number] = [15, 15]
 
 export const GraphCanvas = memo(function GraphCanvas() {
@@ -146,6 +191,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
     nodes: storeNodes,
     edges: storeEdges,
     graphFilters,
+    selectedNodeId,
     selectedNodeIds,
     validationErrors,
     highlightedNodeIds,
@@ -164,6 +210,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
       nodes: s.nodes,
       edges: s.edges,
       graphFilters: s.graphFilters,
+      selectedNodeId: s.selectedNodeId,
       selectedNodeIds: s.selectedNodeIds,
       validationErrors: s.validationErrors,
       highlightedNodeIds: s.highlightedNodeIds,
@@ -180,6 +227,8 @@ export const GraphCanvas = memo(function GraphCanvas() {
     }))
   )
   const isGuest = useAuthStore((s) => s.user?.role === 'guest')
+  const showGraphMinimap = useUiLayoutStore((s) => s.showGraphMinimap)
+  const toggleGraphMinimap = useUiLayoutStore((s) => s.toggleGraphMinimap)
 
   const visibleStoreNodes = useMemo(
     () => applyNodeFilters(storeNodes, graphFilters),
@@ -203,12 +252,8 @@ export const GraphCanvas = memo(function GraphCanvas() {
     }
     for (const [targetId, targetEdges] of edgesByTarget.entries()) {
       const preferred = [...targetEdges].sort((a, b) => a.id.localeCompare(b.id))[0]
-      const stroke = preferred.style?.stroke
-      const color =
-        (typeof stroke === 'string' ? stroke : undefined) ??
-        edgeStrokeFromSourceHandle(preferred.sourceHandle ?? undefined) ??
-        theme.text.secondary
-      byTarget.set(targetId, color)
+      // Couleur au repos, hors sélection : le handle d'un enfant ne s'allume pas quand son parent est sélectionné.
+      byTarget.set(targetId, canvasEdgeStroke(preferred, null))
     }
     return byTarget
   }, [visibleStoreEdges])
@@ -536,45 +581,27 @@ export const GraphCanvas = memo(function GraphCanvas() {
   }, [visibleStoreNodes, selectedNodeIds, validationErrors, highlightedNodeIds, highlightedCycleNodes, incomingEdgeColorByTarget])
 
   // Dériver edges du store — Story 2.9 FR30, ADR-008
-  const edges = useMemo(() => {
-    const brokenReferences = validationErrors.filter(
-      (err) => err.type === 'broken_reference' && err.target
-    )
-    const brokenTargets = new Set(brokenReferences.map((err) => err.target!))
-    const validEdges = visibleStoreEdges.filter((edge) => {
-      const sh = edge.sourceHandle
-      if (sh && /^choice-\d+$/.test(sh)) return false
-      return true
-    })
-    return validEdges.map((edge) => {
-      const sourceDerivedStroke = edgeStrokeFromSource({
-        sourceHandle: edge.sourceHandle ?? undefined,
-        connectionType: (edge.data as { edgeType?: string } | undefined)?.edgeType,
-        edgeLabel: typeof edge.label === 'string' ? edge.label : undefined,
-      })
-      const isBroken = brokenTargets.has(edge.target)
-      if (isBroken) {
-        return {
-          ...edge,
-          style: {
-            ...edge.style,
-            stroke: theme.state.error.border,
-            strokeDasharray: '8,4',
-            opacity: 0.5,
-          },
-          animated: false,
-        }
-      }
-      if (!sourceDerivedStroke) return edge
-      return {
-        ...edge,
-        style: {
-          ...edge.style,
-          stroke: sourceDerivedStroke,
-        },
-      }
-    })
-  }, [visibleStoreEdges, validationErrors])
+  const brokenEdgeTargets = useMemo(
+    () =>
+      new Set(
+        validationErrors
+          .filter((err) => err.type === 'broken_reference' && err.target)
+          .map((err) => err.target!)
+      ),
+    [validationErrors]
+  )
+  const restingEdges = useMemo(
+    () =>
+      visibleStoreEdges
+        .filter((edge) => !(edge.sourceHandle && /^choice-\d+$/.test(edge.sourceHandle)))
+        .map((edge) => toRestingCanvasEdge(edge, brokenEdgeTargets.has(edge.target))),
+    [visibleStoreEdges, brokenEdgeTargets]
+  )
+  // Écran 2e : le chemin sortant du nœud sélectionné passe à l'accent.
+  const edges = useMemo(
+    () => highlightSelectedOutgoingEdges(restingEdges, selectedNodeId, brokenEdgeTargets),
+    [restingEdges, selectedNodeId, brokenEdgeTargets]
+  )
 
   const nodeTypes: NodeTypes = useMemo(
     () => ({ dialogueNode: DialogueNode, testNode: TestNode, endNode: EndNode }),
@@ -585,15 +612,15 @@ export const GraphCanvas = memo(function GraphCanvas() {
     () => ({
       type: 'smoothstep' as const,
       animated: false,
-      style: { stroke: theme.text.secondary, strokeWidth: 2 },
+      style: { stroke: EDGE_NEUTRAL_COLOR, strokeWidth: EDGE_STROKE_WIDTH },
     }),
     []
   )
-  const reactFlowStyle = useMemo(() => ({ backgroundColor: theme.background.panel }), [])
+  const reactFlowStyle = useMemo(() => ({ backgroundColor: redesignSurface.canvas }), [])
   const minimapStyle = useMemo(
     () =>
       ({
-        backgroundColor: theme.background.secondary,
+        backgroundColor: redesignSurface.canvas,
         border: `1px solid ${theme.border.primary}`,
         width: minimapSize.width,
         height: minimapSize.height,
@@ -613,10 +640,8 @@ export const GraphCanvas = memo(function GraphCanvas() {
         edges={edges}
         fitView={false}
         defaultViewport={DEFAULT_VIEWPORT}
-        minZoom={0.1}
-        maxZoom={2}
         connectionRadius={48}
-        panActivationKeyCode="Space"
+        // minZoom, maxZoom et panActivationKeyCode proviennent de ce spread.
         {...GRAPH_VIEWPORT_INTERACTION_OPTIONS}
         onlyRenderVisibleElements={true}
         onMove={onMove}
@@ -656,37 +681,100 @@ export const GraphCanvas = memo(function GraphCanvas() {
         defaultEdgeOptions={defaultEdgeOptions}
         style={reactFlowStyle}
       >
-        <Background color={theme.text.secondary} gap={15} size={1} style={{ opacity: 0.2 }} />
-        {!isNarrowCanvas && <Controls />}
+        <Background color="rgba(255,255,255,0.055)" gap={22} size={1} />
+        {/* Écran 2e : « − 72 % + AJUSTER » sur une seule barrette, au lieu de la
+            pile de quatre pastilles de React Flow doublée d'un badge de zoom.
+            Mêmes actions, un seul objet à l'écran. En canvas étroit la barrette
+            garde son compteur mais perd ses boutons : 28 px n'est pas une cible
+            tactile (FR119), et le pincement fait le travail — y compris pour la vue
+            d'ensemble que donnerait « CARTE ». */}
         <div
-          aria-label="Zoom level"
-          style={{
-            position: 'absolute',
-            bottom: 48,
-            left: 12,
-            fontSize: 12,
-            color: theme.text.secondary,
-            backgroundColor: theme.background.secondary,
-            padding: '2px 6px',
-            borderRadius: 4,
-            border: `1px solid ${theme.border.primary}`,
-          }}
-        >
-          {Math.round(viewport.zoom * 100)}%
-        </div>
-        <MiniMap
-          nodeColor={(node) => {
-            switch (node.type) {
-              case 'dialogueNode': return '#4A90E2'
-              case 'testNode': return '#F5A623'
-              case 'endNode': return '#B8B8B8'
-              default: return '#4A90E2'
-            }
-          }}
-          nodeBorderRadius={8}
-          style={minimapStyle}
-          maskColor={`${theme.background.panel}80`}
-        />
+            data-testid="graph-zoom-bar"
+            aria-label="Zoom"
+            style={{
+              position: 'absolute',
+              bottom: 12,
+              left: 12,
+              zIndex: 5,
+              display: 'flex',
+              alignItems: 'center',
+              height: 30,
+              borderRadius: redesignRadius.control,
+              border: `1px solid ${theme.button.default.border}`,
+              backgroundColor: theme.background.primary,
+              overflow: 'hidden',
+            }}
+          >
+            {!isNarrowCanvas && (
+              <button
+                type="button"
+                aria-label="Dézoomer"
+                onClick={() => reactFlowInstanceRef.current?.zoomOut()}
+                style={graphZoomBarButtonStyle}
+              >
+                −
+              </button>
+            )}
+            <span
+              data-testid="graph-zoom-level"
+              style={{
+                fontFamily: redesignFont.mono,
+                fontSize: '10.5px',
+                letterSpacing: '0.06em',
+                color: redesignText.secondary,
+                padding: '0 6px',
+                minWidth: 44,
+                textAlign: 'center',
+              }}
+            >
+              {Math.round(viewport.zoom * 100)} %
+            </span>
+            {!isNarrowCanvas && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Zoomer"
+                  onClick={() => reactFlowInstanceRef.current?.zoomIn()}
+                  style={graphZoomBarButtonStyle}
+                >
+                  +
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    reactFlowInstanceRef.current?.fitView({ padding: 0.2, duration: 220 })
+                  }
+                  style={graphZoomBarTextButtonStyle}
+                >
+                  Ajuster
+                </button>
+                <button
+                  type="button"
+                  data-testid="graph-minimap-toggle"
+                  aria-pressed={showGraphMinimap}
+                  title={showGraphMinimap ? 'Masquer la carte du graphe' : 'Afficher la carte du graphe'}
+                  onClick={toggleGraphMinimap}
+                  style={{
+                    ...graphZoomBarTextButtonStyle,
+                    color: showGraphMinimap ? redesignText.strong : redesignText.secondary,
+                  }}
+                >
+                  Carte
+                </button>
+              </>
+            )}
+          </div>
+        {/* À la demande seulement : la maquette 2e n'a pas de minimap, et affichée
+            d'office elle recouvrait le coin bas-droit, où atterrissent les nœuds
+            générés, en y captant les clics. */}
+        {showGraphMinimap && (
+          <MiniMap
+            nodeColor={(node) => graphMinimapNodeColor(node.type)}
+            nodeBorderRadius={8}
+            style={minimapStyle}
+            maskColor={`${redesignSurface.canvas}80`}
+          />
+        )}
       </ReactFlow>
       {menu && (
         <NodeContextMenu

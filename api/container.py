@@ -22,6 +22,9 @@ from services.prompt_builder import PromptBuilder
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
+from services.template_service import TemplateService
+from services.template_ab_testing_service import TemplateABTestingService
+from api.services.template_ab_test_job_manager import TemplateABTestJobManager
 from services.dialogue_generation_service import DialogueGenerationService
 from services.llm_usage_service import LLMUsageService
 from services.export_log_service import ExportLogService
@@ -34,16 +37,32 @@ from services.repositories.sqlite.bootstrap import resolve_database_path
 from services.repositories.sqlite import (
     AppSettingsRepository,
     AuditLogsRepository,
+    CollectionsRepository,
     DatabaseConnection,
     DialogueSharesRepository,
     DialoguesIndexRepository,
+    DialoguesSearchRepository,
     UserRepository,
     UserSettingsRepository,
 )
+from services.repositories.sqlite.template_suggestion_usage_repository import (
+    TemplateSuggestionUsageRepository,
+)
 from services.audit_log_service import AuditLogService
+from services.collection_service import CollectionService
+from services.dialogue_index_service import DialogueIndexService
+from services.dialogue_metadata_service import DialogueMetadataService
+from services.batch_validation_service import BatchValidationService
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
+from services.template_access_service import TemplateAccessService
+from services.owned_item_access import OwnedItemAccessService
+from services.author_profile_service import AuthorProfileService
+from services.template_suggestion_service import TemplateSuggestionService
 from api.services.auth_service import AuthService
+from api.services.batch_validation_job_manager import BatchValidationJobManager
+from api.services.batch_node_generation_job_manager import BatchNodeGenerationJobManager
+from services.batch_node_generation_service import BatchNodeGenerationService
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +98,9 @@ class ServiceContainer:
         self._skill_catalog_service: Optional[SkillCatalogService] = None
         self._trait_catalog_service: Optional[TraitCatalogService] = None
         self._preset_service: Optional[PresetService] = None
+        self._template_service: Optional[TemplateService] = None
+        self._template_ab_testing_service: Optional[TemplateABTestingService] = None
+        self._template_ab_test_job_manager: Optional[TemplateABTestJobManager] = None
         self._dialogue_generation_service: Optional[DialogueGenerationService] = None
         self._llm_usage_service: Optional[LLMUsageService] = None
         self._export_log_service: Optional[ExportLogService] = None
@@ -98,10 +120,27 @@ class ServiceContainer:
         self._app_settings_repository: Optional[AppSettingsRepository] = None
         self._dialogues_index_repository: Optional[DialoguesIndexRepository] = None
         self._dialogue_shares_repository: Optional[DialogueSharesRepository] = None
+        self._collections_repository: Optional[CollectionsRepository] = None
+        self._collection_service: Optional[CollectionService] = None
+        self._dialogues_search_repository: Optional[DialoguesSearchRepository] = None
+        self._dialogue_index_service: Optional[DialogueIndexService] = None
+        self._dialogue_metadata_service: Optional[DialogueMetadataService] = None
+        self._batch_validation_service: Optional[BatchValidationService] = None
+        self._batch_validation_job_manager: Optional[BatchValidationJobManager] = None
+        self._batch_node_generation_service: Optional[BatchNodeGenerationService] = None
+        self._batch_node_generation_job_manager: Optional[
+            BatchNodeGenerationJobManager
+        ] = None
         self._audit_logs_repository: Optional[AuditLogsRepository] = None
         self._audit_log_service: Optional[AuditLogService] = None
         self._document_persistence_service: Optional[DocumentPersistenceService] = None
         self._dialogue_sharing_service: Optional[DialogueSharingService] = None
+        self._template_access_service: Optional[TemplateAccessService] = None
+        self._author_profile_service: Optional[AuthorProfileService] = None
+        self._template_suggestion_usage_repository: Optional[
+            TemplateSuggestionUsageRepository
+        ] = None
+        self._template_suggestion_service: Optional[TemplateSuggestionService] = None
         self._auth_service: Optional[AuthService] = None
         self._database_initialization_failed = database_initialization_failed
         self._database_lock = threading.RLock()
@@ -170,6 +209,116 @@ class ServiceContainer:
                 logger.info("DialogueSharesRepository initialisé dans le container.")
             return self._dialogue_shares_repository
 
+    def get_template_ab_testing_service(self) -> TemplateABTestingService:
+        """Retourne le service A/B testing de templates."""
+        with self._database_lock:
+            if self._template_ab_testing_service is None:
+                self._template_ab_testing_service = TemplateABTestingService(
+                    template_service=self.get_template_service(),
+                )
+                logger.info("TemplateABTestingService initialisé dans le container.")
+            return self._template_ab_testing_service
+
+    def get_template_ab_test_job_manager(self) -> TemplateABTestJobManager:
+        """Retourne le gestionnaire de jobs A/B templates."""
+        with self._database_lock:
+            if self._template_ab_test_job_manager is None:
+                self._template_ab_test_job_manager = TemplateABTestJobManager()
+                logger.info("TemplateABTestJobManager initialisé dans le container.")
+            return self._template_ab_test_job_manager
+
+    def get_collections_repository(self) -> CollectionsRepository:
+        """Retourne le repository des collections de dialogues."""
+        with self._database_lock:
+            if self._collections_repository is None:
+                self._collections_repository = CollectionsRepository(
+                    self.get_database_connection()
+                )
+                logger.info("CollectionsRepository initialisé dans le container.")
+            return self._collections_repository
+
+    def get_collection_service(self) -> CollectionService:
+        """Retourne le service métier des collections de dialogues."""
+        with self._database_lock:
+            if self._collection_service is None:
+                self._collection_service = CollectionService(
+                    collections_repository=self.get_collections_repository(),
+                    dialogues_index_repository=self.get_dialogues_index_repository(),
+                )
+                logger.info("CollectionService initialisé dans le container.")
+            return self._collection_service
+
+    def get_dialogues_search_repository(self) -> DialoguesSearchRepository:
+        """Retourne le repository FTS5 de recherche dialogues."""
+        with self._database_lock:
+            if self._dialogues_search_repository is None:
+                self._dialogues_search_repository = DialoguesSearchRepository(
+                    self.get_database_connection()
+                )
+                logger.info("DialoguesSearchRepository initialisé dans le container.")
+            return self._dialogues_search_repository
+
+    def get_dialogue_index_service(self) -> DialogueIndexService:
+        """Retourne le service d'indexation / recherche FTS."""
+        with self._database_lock:
+            if self._dialogue_index_service is None:
+                self._dialogue_index_service = DialogueIndexService(
+                    self.get_dialogues_search_repository()
+                )
+                logger.info("DialogueIndexService initialisé dans le container.")
+            return self._dialogue_index_service
+
+    def get_dialogue_metadata_service(self) -> DialogueMetadataService:
+        """Retourne le service d'agrégation des métadonnées dialogue."""
+        with self._database_lock:
+            if self._dialogue_metadata_service is None:
+                self._dialogue_metadata_service = DialogueMetadataService(
+                    dialogues_index_repository=self.get_dialogues_index_repository(),
+                    user_repository=self.get_user_repository(),
+                    llm_usage_service=self.get_llm_usage_service(),
+                    config_service=self.get_config_service(),
+                )
+                logger.info("DialogueMetadataService initialisé dans le container.")
+            return self._dialogue_metadata_service
+
+    def get_batch_validation_service(self) -> BatchValidationService:
+        """Retourne le service de validation batch FR87."""
+        with self._database_lock:
+            if self._batch_validation_service is None:
+                self._batch_validation_service = BatchValidationService(
+                    config_service=self.get_config_service(),
+                )
+                logger.info("BatchValidationService initialisé dans le container.")
+            return self._batch_validation_service
+
+    def get_batch_validation_job_manager(self) -> BatchValidationJobManager:
+        """Retourne le gestionnaire de jobs de validation batch."""
+        with self._database_lock:
+            if self._batch_validation_job_manager is None:
+                self._batch_validation_job_manager = BatchValidationJobManager()
+                logger.info("BatchValidationJobManager initialisé dans le container.")
+            return self._batch_validation_job_manager
+
+    def get_batch_node_generation_service(self) -> BatchNodeGenerationService:
+        """Retourne le service de génération batch multi-parents FR88."""
+        with self._database_lock:
+            if self._batch_node_generation_service is None:
+                self._batch_node_generation_service = BatchNodeGenerationService(
+                    orchestrator=self.get_graph_node_orchestrator(),
+                )
+                logger.info("BatchNodeGenerationService initialisé dans le container.")
+            return self._batch_node_generation_service
+
+    def get_batch_node_generation_job_manager(self) -> BatchNodeGenerationJobManager:
+        """Retourne le gestionnaire de jobs de génération batch FR88."""
+        with self._database_lock:
+            if self._batch_node_generation_job_manager is None:
+                self._batch_node_generation_job_manager = BatchNodeGenerationJobManager()
+                logger.info(
+                    "BatchNodeGenerationJobManager initialisé dans le container."
+                )
+            return self._batch_node_generation_job_manager
+
     def get_audit_logs_repository(self) -> AuditLogsRepository:
         """Retourne le repository append-only des journaux d'audit."""
         with self._database_lock:
@@ -198,6 +347,7 @@ class ServiceContainer:
                     self.get_dialogues_index_repository(),
                     self.get_dialogue_shares_repository(),
                     audit_log_service=self.get_audit_log_service(),
+                    dialogue_index_service=self.get_dialogue_index_service(),
                 )
                 logger.info("DocumentPersistenceService initialisé dans le container.")
             return self._document_persistence_service
@@ -215,6 +365,53 @@ class ServiceContainer:
                 )
                 logger.info("DialogueSharingService initialisé dans le container.")
             return self._dialogue_sharing_service
+
+    def get_template_access_service(self) -> TemplateAccessService:
+        """Retourne le service d'accès aux templates (propriété + statut)."""
+        with self._database_lock:
+            if self._template_access_service is None:
+                self._template_access_service = TemplateAccessService(
+                    user_repository=self.get_user_repository(),
+                )
+                logger.info("TemplateAccessService initialisé dans le container.")
+            return self._template_access_service
+
+    def get_item_access_service(self) -> OwnedItemAccessService:
+        """Service d'accès générique — même instance que celui des templates."""
+        return self.get_template_access_service()
+
+    def get_author_profile_service(self) -> AuthorProfileService:
+        """Retourne le service de persistance des profils d'auteur."""
+        with self._database_lock:
+            if self._author_profile_service is None:
+                self._author_profile_service = AuthorProfileService()
+                logger.info("AuthorProfileService initialisé dans le container.")
+            return self._author_profile_service
+
+    def get_template_suggestion_usage_repository(
+        self,
+    ) -> TemplateSuggestionUsageRepository:
+        """Retourne le repository des compteurs d'usage suggestions."""
+        with self._database_lock:
+            if self._template_suggestion_usage_repository is None:
+                self._template_suggestion_usage_repository = (
+                    TemplateSuggestionUsageRepository(self.get_database_connection())
+                )
+                logger.info(
+                    "TemplateSuggestionUsageRepository initialisé dans le container."
+                )
+            return self._template_suggestion_usage_repository
+
+    def get_template_suggestion_service(self) -> TemplateSuggestionService:
+        """Retourne le service de suggestions de templates."""
+        with self._database_lock:
+            if self._template_suggestion_service is None:
+                self._template_suggestion_service = TemplateSuggestionService(
+                    usage_repository=self.get_template_suggestion_usage_repository(),
+                    access_service=self.get_template_access_service(),
+                )
+                logger.info("TemplateSuggestionService initialisé dans le container.")
+            return self._template_suggestion_service
 
     def get_auth_service(self) -> AuthService:
         """Retourne le service d'authentification avec son repository injecté."""
@@ -387,6 +584,19 @@ class ServiceContainer:
             )
             logger.info("PresetService initialisé dans le container.")
         return self._preset_service
+
+    def get_template_service(self) -> TemplateService:
+        """Retourne le service de gestion des templates custom.
+
+        Returns:
+            Instance de TemplateService.
+        """
+        if self._template_service is None:
+            self._template_service = TemplateService(
+                preset_service=self.get_preset_service(),
+            )
+            logger.info("TemplateService initialisé dans le container.")
+        return self._template_service
     
     def get_dialogue_generation_service(self) -> DialogueGenerationService:
         """Retourne le service de génération de dialogues.
@@ -614,10 +824,21 @@ class ServiceContainer:
             self._app_settings_repository = None
             self._dialogues_index_repository = None
             self._dialogue_shares_repository = None
+            self._template_shares_repository = None
+            self._collections_repository = None
+            self._collection_service = None
+            self._dialogues_search_repository = None
+            self._dialogue_index_service = None
+            self._dialogue_metadata_service = None
+            self._batch_validation_service = None
+            self._batch_validation_job_manager = None
+            self._batch_node_generation_service = None
+            self._batch_node_generation_job_manager = None
             self._audit_logs_repository = None
             self._audit_log_service = None
             self._document_persistence_service = None
             self._dialogue_sharing_service = None
+            self._template_access_service = None
             self._auth_service = None
     
     def reset(self) -> None:
@@ -634,8 +855,10 @@ class ServiceContainer:
         self._skill_catalog_service = None
         self._trait_catalog_service = None
         self._preset_service = None
+        self._template_service = None
         self._dialogue_generation_service = None
         self._llm_usage_service = None
+        self._dialogue_metadata_service = None
         self._unity_generation_service = None
         self._graph_node_orchestrator = None
         self._dialogue_tree_expansion_service = None

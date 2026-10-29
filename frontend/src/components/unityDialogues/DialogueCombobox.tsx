@@ -23,6 +23,7 @@ import {
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
+import { redesignDisclosureArrow } from '../../theme/redesignTokens'
 import type { UnityDialogueMetadata } from '../../types/api'
 import { useDialogueListData } from '../../hooks/useDialogueListData'
 import { StyledSelect } from '../shared/StyledSelect'
@@ -86,10 +87,11 @@ export const DialogueCombobox = forwardRef<DialogueComboboxRef, DialogueCombobox
 
     useImperativeHandle(ref, () => ({ refresh }), [refresh])
 
+    const wasOpenRef = useRef(false)
+
     const close = useCallback(() => {
       setIsOpen(false)
       setActiveOptionIndex(null)
-      requestAnimationFrame(() => triggerRef.current?.focus())
     }, [])
 
     const handleItemClick = useCallback(
@@ -167,6 +169,18 @@ export const DialogueCombobox = forwardRef<DialogueComboboxRef, DialogueCombobox
         setActiveOptionIndex(null)
         requestAnimationFrame(() => searchInputRef.current?.focus())
       }
+    }, [isOpen])
+
+    // Restore trigger focus after close in layout (not rAF): panel unmount moves
+    // focus to body; sync restore avoids CI flakes where rAF lags the assertion.
+    useLayoutEffect(() => {
+      if (isOpen) {
+        wasOpenRef.current = true
+        return
+      }
+      if (!wasOpenRef.current) return
+      wasOpenRef.current = false
+      triggerRef.current?.focus()
     }, [isOpen])
 
     const filteredListSignature = useMemo(
@@ -292,7 +306,14 @@ export const DialogueCombobox = forwardRef<DialogueComboboxRef, DialogueCombobox
           >
             {triggerLabel}
           </span>
-          <span aria-hidden="true" style={{ fontSize: '0.65rem', opacity: 0.8 }}>
+          <span
+            aria-hidden="true"
+            style={{
+              fontSize: redesignDisclosureArrow.solid,
+              lineHeight: 1,
+              opacity: 0.8,
+            }}
+          >
             ▼
           </span>
         </button>
@@ -389,6 +410,8 @@ export const DialogueCombobox = forwardRef<DialogueComboboxRef, DialogueCombobox
                   <option value="date-asc">Date (ancien)</option>
                   <option value="name-asc">Nom (A-Z)</option>
                   <option value="name-desc">Nom (Z-A)</option>
+                  <option value="size-desc">Taille (grand)</option>
+                  <option value="size-asc">Taille (petit)</option>
                 </StyledSelect>
               </div>
 

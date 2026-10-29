@@ -4,7 +4,16 @@
  */
 import { useState } from 'react'
 import { theme } from '../../theme'
+import { redesignFont } from '../../theme/redesignTokens'
+import { formatCurrency, formatNumber, formatPercent } from '../../utils/formatCurrency'
 import type { EstimationResult } from '../../types/estimation'
+
+/** Estimation en euros (champs `*_cost_eur`) : « ≈ 0,0042 € ». */
+function formatEstimateEur(value: number): string {
+  return formatCurrency(value, 'EUR', { maximumFractionDigits: 4, approx: true })
+}
+
+const monoStyle = { fontFamily: redesignFont.mono } as const
 
 export interface EstimationBadgeProps {
   /** Résultat normalisé (tokens ; coût optionnel). */
@@ -36,7 +45,7 @@ export function EstimationBadge({
 
   const comparisonLabel =
     result?.cost_difference_pct != null && result.alternative_provider && result.provider
-      ? `${result.alternative_provider} : ${result.cost_difference_pct > 0 ? '+' : ''}${result.cost_difference_pct.toFixed(1)}% vs ${result.provider}`
+      ? `${result.alternative_provider} : ${formatPercent(result.cost_difference_pct, 1, { signed: true })} vs ${result.provider}`
       : null
 
   const totalTokens = result ? result.prompt_tokens + result.completion_tokens : 0
@@ -74,9 +83,9 @@ export function EstimationBadge({
           {state === 'loading' ? 'Estimation…' : 'Estimer le coût'}
         </button>
         {state === 'success' && result && (
-          <span style={{ fontSize: '0.85rem', color: theme.text.primary }}>
-            {hasCost && `~${result.estimated_cost_eur!.toFixed(4)} € · `}
-            {totalTokens.toLocaleString()} tokens
+          <span style={{ fontSize: '0.85rem', color: theme.text.primary, ...monoStyle }}>
+            {hasCost && `${formatEstimateEur(result.estimated_cost_eur!)} · `}
+            {formatNumber(totalTokens)} tokens
             {result.provider && ` · ${result.provider}`}
           </span>
         )}
@@ -86,10 +95,10 @@ export function EstimationBadge({
       </div>
 
       {state === 'success' && comparisonLabel && hasCost && (
-        <div style={{ fontSize: '0.8rem', color: theme.text.secondary ?? '#aaa' }}>
+        <div style={{ fontSize: '0.8rem', color: theme.text.secondary, ...monoStyle }}>
           {comparisonLabel}
           {result?.alternative_cost_eur != null && (
-            <span> ({result.alternative_cost_eur.toFixed(4)} €)</span>
+            <span> ({formatEstimateEur(result.alternative_cost_eur)})</span>
           )}
         </div>
       )}
@@ -102,7 +111,7 @@ export function EstimationBadge({
             style={{
               background: 'none',
               border: 'none',
-              color: theme.text.secondary ?? '#aaa',
+              color: theme.text.secondary,
               fontSize: '0.8rem',
               cursor: 'pointer',
               padding: 0,
@@ -116,9 +125,9 @@ export function EstimationBadge({
           {breakdownExpanded && (
             <div style={{ marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
               {result.per_node_breakdown.map((node, idx) => (
-                <div key={idx} style={{ fontSize: '0.78rem', color: theme.text.secondary ?? '#aaa' }}>
-                  Nœud {node.choice_index ?? idx} — {node.estimated_cost_eur.toFixed(4)} € ·{' '}
-                  {node.prompt_tokens + node.completion_tokens} tokens
+                <div key={idx} style={{ fontSize: '0.78rem', color: theme.text.secondary, ...monoStyle }}>
+                  Nœud {node.choice_index ?? idx} — {formatEstimateEur(node.estimated_cost_eur)} ·{' '}
+                  {formatNumber(node.prompt_tokens + node.completion_tokens)} tokens
                 </div>
               ))}
             </div>
@@ -128,7 +137,7 @@ export function EstimationBadge({
 
       {budgetWarning90 && !budgetExceeded && (
         <div style={{ fontSize: '0.8rem', color: theme.state.warning.color }}>
-          Budget atteint à 90% — vérifiez avant de générer.
+          Budget atteint à {formatPercent(90, 0)} — vérifiez avant de générer.
         </div>
       )}
       {budgetExceeded && (

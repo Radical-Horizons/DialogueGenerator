@@ -21,6 +21,7 @@ from core.llm.llm_client import ILLMClient
 from services.configuration_service import ConfigurationService
 # InteractionService supprimé - système obsolète
 from services.dialogue_generation_service import DialogueGenerationService
+from services.batch_validation_service import BatchValidationService
 from services.linked_selector import LinkedSelectorService
 # FileInteractionRepository supprimé - système obsolète
 from services.repositories.llm_usage_repository import FileLLMUsageRepository
@@ -38,8 +39,14 @@ from services.context_rule_service import ContextRuleService
 from services.context_dropping_rules_service import ContextDroppingRulesService
 from services.prompt_enricher import PromptEnricher
 from services.skill_catalog_service import SkillCatalogService
+from api.services.batch_validation_job_manager import BatchValidationJobManager
+from api.services.batch_node_generation_job_manager import BatchNodeGenerationJobManager
+from services.batch_node_generation_service import BatchNodeGenerationService
 from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
+from services.template_service import TemplateService
+from services.template_ab_testing_service import TemplateABTestingService
+from api.services.template_ab_test_job_manager import TemplateABTestJobManager
 from services.repositories.sqlite import (
     AppSettingsRepository,
     DatabaseConnection,
@@ -49,6 +56,13 @@ from services.repositories.sqlite import (
 )
 from services.document_persistence_service import DocumentPersistenceService
 from services.dialogue_sharing_service import DialogueSharingService
+from services.template_access_service import TemplateAccessService
+from services.owned_item_access import OwnedItemAccessService
+from services.author_profile_service import AuthorProfileService
+from services.template_suggestion_service import TemplateSuggestionService
+from services.collection_service import CollectionService
+from services.dialogue_index_service import DialogueIndexService
+from services.dialogue_metadata_service import DialogueMetadataService
 from services.audit_log_service import AuditLogService
 from constants import FilePaths, Defaults
 
@@ -113,6 +127,63 @@ def get_document_persistence_service(request: Request) -> DocumentPersistenceSer
 def get_dialogue_sharing_service(request: Request) -> DialogueSharingService:
     """Retourne le service de partage co-édition des dialogues."""
     return get_service_container(request).get_dialogue_sharing_service()
+
+
+def get_template_access_service(request: Request) -> TemplateAccessService:
+    """Retourne le service d'accès aux templates (propriété + statut)."""
+    return get_service_container(request).get_template_access_service()
+
+
+def get_item_access_service(request: Request) -> OwnedItemAccessService:
+    """Retourne le service d'accès générique (templates, profils d'auteur)."""
+    return get_service_container(request).get_item_access_service()
+
+
+def get_author_profile_service(request: Request) -> AuthorProfileService:
+    """Retourne le service de persistance des profils d'auteur."""
+    return get_service_container(request).get_author_profile_service()
+
+
+def get_template_suggestion_service(request: Request) -> TemplateSuggestionService:
+    """Retourne le service de suggestions de templates (Story 6.9)."""
+    return get_service_container(request).get_template_suggestion_service()
+
+
+def get_collection_service(request: Request) -> CollectionService:
+    """Retourne le service des collections de dialogues."""
+    return get_service_container(request).get_collection_service()
+
+
+def get_dialogue_index_service(request: Request) -> DialogueIndexService:
+    """Retourne le service d'indexation / recherche FTS des dialogues."""
+    return get_service_container(request).get_dialogue_index_service()
+
+
+def get_dialogue_metadata_service(request: Request) -> DialogueMetadataService:
+    """Retourne le service d'agrégation des métadonnées dialogue."""
+    return get_service_container(request).get_dialogue_metadata_service()
+
+
+def get_batch_validation_service(request: Request) -> BatchValidationService:
+    """Retourne le service de validation batch FR87."""
+    return get_service_container(request).get_batch_validation_service()
+
+
+def get_batch_validation_job_manager(request: Request) -> BatchValidationJobManager:
+    """Retourne le gestionnaire de jobs de validation batch."""
+    return get_service_container(request).get_batch_validation_job_manager()
+
+
+def get_batch_node_generation_service(request: Request) -> BatchNodeGenerationService:
+    """Retourne le service de génération batch multi-parents FR88."""
+    return get_service_container(request).get_batch_node_generation_service()
+
+
+def get_batch_node_generation_job_manager(
+    request: Request,
+) -> BatchNodeGenerationJobManager:
+    """Retourne le gestionnaire de jobs de génération batch FR88."""
+    return get_service_container(request).get_batch_node_generation_job_manager()
 
 
 def get_audit_log_service(request: Request) -> AuditLogService:
@@ -579,6 +650,51 @@ def get_preset_service(request: Request) -> PresetService:
     """
     container = get_service_container(request)
     return container.get_preset_service()
+
+
+def get_template_service(request: Request) -> TemplateService:
+    """Retourne le service de gestion des templates custom.
+
+    Utilise le ServiceContainer depuis app.state (système unifié).
+
+    Args:
+        request: La requête HTTP (injecté automatiquement par FastAPI).
+
+    Returns:
+        Instance de TemplateService.
+
+    Raises:
+        RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
+    """
+    container = get_service_container(request)
+    return container.get_template_service()
+
+
+
+def get_template_ab_testing_service(request: Request) -> TemplateABTestingService:
+    """Retourne le service A/B testing de templates.
+
+    Args:
+        request: La requête HTTP.
+
+    Returns:
+        Instance de TemplateABTestingService.
+    """
+    container = get_service_container(request)
+    return container.get_template_ab_testing_service()
+
+
+def get_template_ab_test_job_manager(request: Request) -> TemplateABTestJobManager:
+    """Retourne le gestionnaire de jobs A/B templates.
+
+    Args:
+        request: La requête HTTP.
+
+    Returns:
+        Instance de TemplateABTestJobManager.
+    """
+    container = get_service_container(request)
+    return container.get_template_ab_test_job_manager()
 
 
 def get_gdd_notion_sync_service(request: Request):

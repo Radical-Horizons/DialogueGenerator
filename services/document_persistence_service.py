@@ -22,6 +22,7 @@ from services.repositories.sqlite.dialogues_index_repository import (
 
 if TYPE_CHECKING:
     from services.audit_log_service import AuditLogService
+    from services.dialogue_index_service import DialogueIndexService
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +71,14 @@ class PersistedLayout:
     revision: int
 
 
+@dataclass(frozen=True)
+class DialogueListingIndexFields:
+    """Champs d'index utiles au listing bibliothèque (Story 8.1 / 8.3)."""
+
+    created_at: str | None
+    owner_id: str | None
+
+
 class DocumentPersistenceService:
     """Centralise RBAC, révisions, fichiers et index SQLite."""
 
@@ -78,11 +87,13 @@ class DocumentPersistenceService:
         repository: DialoguesIndexRepository,
         shares_repository: DialogueSharesRepository | None = None,
         audit_log_service: "AuditLogService | None" = None,
+        dialogue_index_service: "DialogueIndexService | None" = None,
     ) -> None:
         """Initialise le service avec l'index et les partages injectés."""
         self._repository = repository
         self._shares_repository = shares_repository
         self._audit_log_service = audit_log_service
+        self._dialogue_index_service = dialogue_index_service
         self._lock = threading.RLock()
 
     @staticmethod
@@ -231,6 +242,36 @@ class DocumentPersistenceService:
             current_user,
             document_path,
         ).can_read
+
+    def get_listing_index_fields(self, document_id: str) -> DialogueListingIndexFields:
+        """Retourne created_at et owner_id indexés en une seule lecture.
+
+        Args:
+            document_id: Identifiant du document (stem du fichier).
+
+        Returns:
+            Champs d'index ; ``created_at`` / ``owner_id`` à ``None`` si le
+            document n'est pas indexé (fichier historique).
+        """
+        entry = self._repository.find_by_document_id(document_id)
+        if entry is None:
+            return DialogueListingIndexFields(created_at=None, owner_id=None)
+        return DialogueListingIndexFields(
+            created_at=entry.created_at,
+            owner_id=entry.owner_id,
+        )
+
+    def get_created_at(self, document_id: str) -> str | None:
+        """Retourne la date de création indexée d'un document, si disponible.
+
+        Args:
+            document_id: Identifiant du document (stem du fichier).
+
+        Returns:
+            La date de création ISO issue de ``dialogues_index`` si le document
+            est indexé, sinon ``None`` (fichier historique non indexé).
+        """
+        return self.get_listing_index_fields(document_id).created_at
 
     @staticmethod
     def _read_revision(path: Path) -> int:
@@ -442,6 +483,14 @@ class DocumentPersistenceService:
                     document_id,
                 )
                 raise
+            if self._dialogue_index_service is not None:
+                try:
+                    self._dialogue_index_service.index_document(document_id, document)
+                except Exception:
+                    logger.exception(
+                        "Échec d'indexation FTS après écriture de %s",
+                        document_id,
+                    )
             if self._audit_log_service is not None:
                 self._audit_log_service.log_action(
                     action="dialogue.saved",
@@ -575,6 +624,14 @@ class DocumentPersistenceService:
                     document_id,
                 )
                 raise
+            if self._dialogue_index_service is not None:
+                try:
+                    self._dialogue_index_service.remove_document(document_id)
+                except Exception:
+                    logger.exception(
+                        "Échec de retrait FTS après suppression de %s",
+                        document_id,
+                    )
             if self._audit_log_service is not None:
                 self._audit_log_service.log_action(
                     action="dialogue.deleted",

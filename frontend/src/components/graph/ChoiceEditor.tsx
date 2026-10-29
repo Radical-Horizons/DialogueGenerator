@@ -92,7 +92,7 @@ export const ChoiceEditor = memo(function ChoiceEditor({
               }}
               title="Générer la suite pour ce choix"
             >
-              {isGenerating ? 'Génération...' : '✨ Générer'}
+              {isGenerating ? 'Génération...' : 'Générer'}
             </button>
           )}
           {onCreateEmptyNodeForChoice && !isConnected && (
@@ -110,7 +110,7 @@ export const ChoiceEditor = memo(function ChoiceEditor({
               }}
               title="Créer un nœud vide et le lier à ce choix"
             >
-              ➕ Nouveau nœud
+              Nœud vide
             </button>
           )}
           {onRemove && (
@@ -119,15 +119,15 @@ export const ChoiceEditor = memo(function ChoiceEditor({
               onClick={onRemove}
               style={{
                 padding: '0.25rem 0.5rem',
-                border: `1px solid ${theme.border.primary}`,
+                border: `1px solid ${theme.state.error.border}`,
                 borderRadius: 4,
-                backgroundColor: '#E74C3C',
-                color: 'white',
+                backgroundColor: theme.state.error.background,
+                color: theme.state.error.color,
                 cursor: 'pointer',
                 fontSize: '0.75rem',
               }}
             >
-              🗑️ Supprimer
+              Supprimer le choix
             </button>
           )}
         </div>

@@ -54,7 +54,7 @@ export function BatchValidationReportModal({
           width: '90%',
           maxWidth: '480px',
           maxHeight: '80vh',
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.elevated,
           borderRadius: '8px',
           boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)',
           display: 'flex',

@@ -4,9 +4,11 @@ description: >-
   champs essentiels ESSENTIAL_* / MINIMAL_FIELDS. Apply when editing context_field_detector,
   context_organizer, context_construction_service, ContextFieldSelector, contextConfigStore,
   or config API/schemas for GDD field tabs and essential-field UI.
-alwaysApply: false
+paths:
+  - "core/context/**"
+  - "services/context_*.py"
+  - "frontend/src/components/context/**"
 ---
-
 # Classification des champs GDD
 
 ## Deux critères distincts
@@ -26,4 +28,4 @@ Détection : `_is_metadata_field()` utilise d’abord `Introduction` si présent
 ## Usage
 
 - `is_metadata` : Filtrage onglets (Métadonnées vs Contexte)
-- `is_essential` : Indicateur "champ essentiel" (⭐) et boutons de sélection
+- `is_essential` : Indicateur "champ essentiel" (★) et boutons de sélection

@@ -2,8 +2,7 @@
  * E2E : changement de cible via le combobox (ConnectionTargetSelect) — flux « Nœud suivant ».
  *
  * Le panneau d’édition (`NodeEditorPanel`) n’est pas monté sur `/graph-editor` (standalone) :
- * le test passe par le Dashboard (onglet 📊 Éditeur de Graphe) comme les flux qui éditent
- * speaker / line depuis Playwright.
+ * le test passe par la section « Graphe » du Dashboard, puis « éditer » dans l'inspecteur.
  */
 import { test, expect, type Page, type Response } from '@playwright/test'
 
@@ -23,7 +22,12 @@ declare global {
   }
 }
 import { triggerGraphSave } from './trigger-graph-save'
-import { uniqueE2EDocumentId, seedDocumentWithRetry, openDashboardGraphTabAndSelectDocument } from './helpers'
+import {
+  uniqueE2EDocumentId,
+  seedDocumentWithRetry,
+  openDashboardGraphTabAndSelectDocument,
+  openNodeEditor,
+} from './helpers'
 import { E2E_MS, E2E_TEST_TIMEOUT_MS } from './timeouts'
 
 const API_BASE = process.env.API_BASE ?? 'http://127.0.0.1:4243'
@@ -158,9 +162,7 @@ test.describe('Graph — cible de connexion (dropdown)', () => {
     await canvasNodes.filter({ hasText: 'Ligne START sans choix' }).first().click()
 
     // NodeEditorPanel doit être monté pour le flush avant sauvegarde (handleSave → requestFlush).
-    const nodeTab = page.getByRole('button', { name: /^Édition de nœud$/ })
-    await expect(nodeTab).toBeVisible({ timeout: E2E_MS.graphField })
-    await nodeTab.click()
+    await openNodeEditor(page)
 
     await expect(page.locator('textarea[name="line"]')).toBeVisible({ timeout: E2E_MS.graphField })
 

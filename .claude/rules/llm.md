@@ -1,9 +1,11 @@
 ---
-description: LLM/OpenAI — invariants modèles, Responses API, sampling. Procédure : skill llm-model-update.
-globs: ["llm_client.py", "llm_client/**/*.py", "factories/**/*.py", "core/llm/**/*.py", "prompt_engine.py", "constants.py", "frontend/src/constants.ts", "config/**/llm*.json", "llm_config.json", "api/schemas/dialogue.py"]
-alwaysApply: false
+description: "LLM/OpenAI — invariants modèles, Responses API, sampling. Procédure : skill llm-model-update."
+paths:
+  - "core/llm/**"
+  - "factories/**"
+  - "constants.py"
+  - "config/llm_config.json"
 ---
-
 # LLM / OpenAI — invariants
 
 **Ajout ou migration de modèles** → skill **`/llm-model-update`** (`.claude/skills/llm-model-update/SKILL.md`). Ne pas improviser hors de ce workflow.

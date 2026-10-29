@@ -1,9 +1,8 @@
 ---
 description: Rappel responsive obligatoire sur frontend — renvoie vers le skill dialogue-frontend
-globs: ["frontend/**/*.{ts,tsx,css}"]
-alwaysApply: false
+paths:
+  - "frontend/**/*.{ts,tsx,css}"
 ---
-
 # UI responsive (frontend)
 
 **Déclencheur** : tout changement layout, chrome, modales, formulaires, toolbar, onglets ou panneaux dans `frontend/`.

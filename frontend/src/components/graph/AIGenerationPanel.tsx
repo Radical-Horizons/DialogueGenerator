@@ -355,9 +355,11 @@ export function AIGenerationPanel({
           </div>
         </div>
       )}
-      <div style={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
+      <div
+      data-testid="ai-generation-panel"
+      style={{
+      display: 'flex',
+      flexDirection: 'column',
       flex: 1,
       minHeight: 0,
       padding: '1rem',
@@ -773,6 +775,7 @@ export function AIGenerationPanel({
           Annuler
         </button>
         <button
+          data-testid="ai-generation-submit"
           onClick={handleGenerate}
           disabled={isGenerateDisabled()}
           style={{
@@ -795,10 +798,10 @@ export function AIGenerationPanel({
                 : 'Génération batch...'
               : 'Génération...')
             : generateAllChoices
-              ? `✨ Générer pour tous les choix (${batchAllNodesCount} nœud${batchAllNodesCount > 1 ? 's' : ''})`
+              ? `Générer pour tous les choix (${batchAllNodesCount} nœud${batchAllNodesCount > 1 ? 's' : ''})`
               : targetChoiceIndex !== null
-                ? `✨ Générer : ${getChoiceDisplayLabel(parentNodeId!, (parentNode!.data.choices as Array<{ text?: string; test?: unknown; choiceId?: string }>)[targetChoiceIndex] ?? {}, targetChoiceIndex, nodes, edges)}`
-                : '✨ Générer'
+                ? `Générer : ${getChoiceDisplayLabel(parentNodeId!, (parentNode!.data.choices as Array<{ text?: string; test?: unknown; choiceId?: string }>)[targetChoiceIndex] ?? {}, targetChoiceIndex, nodes, edges)}`
+                : 'Générer'
           }
         </button>
       </div>

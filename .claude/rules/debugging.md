@@ -1,6 +1,9 @@
 ---
 description: Debugging et niveaux de logs — quand utiliser les flags de verbosité
-alwaysApply: false
+paths:
+  - "scripts/dev.js"
+  - "api/main.py"
+  - "api/utils/log*.py"
 ---
 - **Commande par défaut**: `npm run dev` — console silencieuse (WARNING par défaut), logs détaillés dans fichiers `data/logs/`.
 - **Quand utiliser `npm run dev:debug` ou `npm run dev --debug`**:

@@ -1,15 +1,23 @@
 /**
  * Tests E2E pour la sélection multi-provider LLM (Story 0.3)
  */
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 
+import { openApp } from './helpers'
 import { E2E_MS } from './timeouts'
+
+/** Le sélecteur de modèle vit dans le tiroir de réglages replié sous le brief (1c). */
+async function openModelSettings(page: Page): Promise<void> {
+  const toggle = page.getByTestId('model-settings-summary-toggle')
+  await expect(toggle).toBeVisible({ timeout: E2E_MS.ui })
+  if ((await toggle.getAttribute('aria-expanded')) !== 'true') await toggle.click()
+  await page.locator('#model-select').waitFor({ state: 'visible', timeout: E2E_MS.ui })
+}
 
 test.describe('Multi-Provider LLM Selection', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/')
-    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.ui })
-    await page.locator('#model-select').waitFor({ state: 'visible', timeout: E2E_MS.ui })
+    await openApp(page)
+    await openModelSettings(page)
   })
 
   test('should display model selector', async ({ page }) => {
@@ -46,6 +54,11 @@ test.describe('Multi-Provider LLM Selection', () => {
 
   test('should persist model selection in localStorage', async ({ page }) => {
     const select = page.locator('#model-select')
+    // La liste des modèles arrive de l'API : la lire avant voyait < 2 options et sautait le test.
+    await page.waitForFunction(
+      () => ((document.querySelector('#model-select') as HTMLSelectElement)?.options?.length ?? 0) > 1,
+      { timeout: E2E_MS.graphField }
+    )
     const opts = await select
       .locator('option[value]')
       .evaluateAll((nodes: HTMLOptionElement[]) => nodes.map((o) => o.value).filter(Boolean))
@@ -55,8 +68,20 @@ test.describe('Multi-Provider LLM Selection', () => {
     }
     const valueToSelect = opts[1]
     await page.selectOption('#model-select', valueToSelect)
+    // Le brouillon s'écrit avec un debounce de 2 s (`useGenerationDraft`) : recharger avant
+    // perdait la sélection, et le test se sautait au lieu de vérifier la persistance.
+    await expect
+      .poll(
+        () =>
+          page.evaluate(() => {
+            const raw = localStorage.getItem('generation_draft')
+            return raw ? (JSON.parse(raw) as { llmModel?: string }).llmModel : null
+          }),
+        { timeout: E2E_MS.short }
+      )
+      .toBe(valueToSelect)
     await page.reload()
-    await page.locator('#model-select').waitFor({ state: 'visible', timeout: E2E_MS.ui })
+    await openModelSettings(page)
     await page.waitForFunction(
       () => (document.querySelector('#model-select') as HTMLSelectElement)?.options?.length > 0,
       { timeout: E2E_MS.medium }

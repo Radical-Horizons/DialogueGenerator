@@ -229,10 +229,10 @@ def setup_logging() -> None:
     if log_file_enabled:
         try:
             from api.utils.log_file_handler import DateRotatingFileHandler
-            from constants import FilePaths
-            
+            from constants import resolve_logs_dir
+
             # Configuration du dossier de logs
-            log_dir = os.getenv("LOG_DIR", str(FilePaths.LOGS_DIR))
+            log_dir = str(resolve_logs_dir())
             retention_days = int(os.getenv("LOG_RETENTION_DAYS", "30"))
             
             # Créer le handler de fichier (toujours en format JSON pour faciliter l'analyse)
