@@ -340,3 +340,18 @@ C'est un défaut du pré-enregistrement, et il est de mon fait : il ne fixait au
 propre au levier de voix. Sur la voix elle-même, le gain existe mais reste faible —
 `voice_fidelity` +0,29, soit à peu près une erreur standard à n = 24 — et le seul
 mouvement net est la distinction entre les voix (+0,54). Rien n'est dégradé.
+
+### Pré-enregistrement de la remesure de L2 (écrit avant le tirage)
+
+Décision de l'utilisateur : remesurer L2 avec un critère propre au levier de voix, plutôt
+que de garder ou retirer L2 sur un résultat déjà vu.
+
+- **Nouveau tirage indépendant** de L2, même configuration (n = 24). La décision porte sur
+  ce tirage **seul** ; le premier tirage n'est publié qu'à titre d'information, regroupé.
+- **Critère primaire** : `voice_fidelity` ≥ **+0,5** sur L1bis (5,42 → au moins 5,92).
+- **Garde-fous**, inchangés, plus l'oralité devenue garde-fou : aucune baisse > 0,4 de
+  `oral_naturalness`, `context_fidelity`, `voice_consistency`, `french_correctness` ;
+  aucune hausse > 0,4 de `ai_tics`, `overwriting`, `blandness`, `forced_exposition` ; la
+  recopie ne monte pas.
+- Limite assumée : L1bis est lui-même un tirage unique ; l'écart mesuré porte le bruit
+  des deux côtés.
