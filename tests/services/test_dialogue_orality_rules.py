@@ -96,3 +96,54 @@ def test_the_orality_rules_ask_each_panel_for_something_new() -> None:
     répétition d'un panneau à l'autre (platitude +0,46)."""
     assert "se répète" not in DIALOGUE_ORALITY_RULES
     assert "chaque réplique apporte du neuf" in DIALOGUE_ORALITY_RULES
+
+
+@pytest.mark.parametrize("allow_stage_directions", [True, False])
+def test_style_examples_reach_every_scene(allow_stage_directions: bool) -> None:
+    """L3 : les exemples « écrit / dit » suivent la consigne d'oralité, dans les deux modes."""
+    from services.dialogue_dramatic_progression import style_examples_block
+
+    block = style_examples_block()
+    assert "Dit (à viser)" in block
+    assert block in compose_generation_instructions(
+        "Scène.", is_start=True, allow_stage_directions=allow_stage_directions
+    )
+
+
+def test_style_examples_are_held_out_of_the_bench_suite() -> None:
+    """Un exemple tiré d'un cas mesuré ferait mesurer de la mémorisation : aucun
+    personnage déclaré par un cas de la suite n'y apparaît."""
+    from services.benchmark_suite_seed import default_suites
+    from services.dialogue_dramatic_progression import style_examples_block
+
+    block = style_examples_block().lower()
+    declared = {
+        name
+        for suite in default_suites()
+        for case in suite.cases
+        for name in (
+            *case.request.context_selections.characters_full,
+            *case.request.context_selections.characters_excerpt,
+            *case.request.context_selections.locations_excerpt,
+            *case.request.context_selections.species_excerpt,
+        )
+    }
+    assert declared
+    assert not [name for name in declared if name.lower() in block]
+
+
+def test_style_examples_carry_no_stage_direction() -> None:
+    """Valables en mode « sans » : l'audit du banc ne trouve rien à redire."""
+    from services.dialogue_dramatic_progression import style_examples_block
+
+    assert audit_prompt(
+        _PROMPT + style_examples_block(), fragment_mode=True, allow_stage_directions=False
+    ) == []
+    assert "*(" not in style_examples_block()
+
+
+def test_missing_style_examples_fall_back_to_l1bis(tmp_path) -> None:
+    """Sans fichier, le prompt redevient celui de L1bis au lieu d'échouer."""
+    from services.dialogue_dramatic_progression import style_examples_block
+
+    assert style_examples_block(tmp_path / "absent.json") == ""

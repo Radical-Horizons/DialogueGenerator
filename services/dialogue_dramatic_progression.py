@@ -5,7 +5,12 @@ didascalies en italique narrateur (compensation absence d'images in-game).
 """
 from __future__ import annotations
 
+import json
+import logging
+from pathlib import Path
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_PROGRESSION_MAX_DEPTH = 4
 
@@ -188,9 +193,47 @@ def global_constraints(*, allow_stage_directions: bool = True) -> str:
     Returns:
         Le bloc à concaténer aux instructions de scène.
     """
-    if allow_stage_directions:
-        return DIALOGUE_GENERATION_GLOBAL_CONSTRAINTS
-    return DIALOGUE_GENERATION_GLOBAL_CONSTRAINTS_NO_STAGE_DIRECTIONS
+    base = (
+        DIALOGUE_GENERATION_GLOBAL_CONSTRAINTS
+        if allow_stage_directions
+        else DIALOGUE_GENERATION_GLOBAL_CONSTRAINTS_NO_STAGE_DIRECTIONS
+    )
+    return base + style_examples_block()
+
+
+STYLE_EXAMPLES_PATH = Path(__file__).resolve().parent.parent / "config" / "dialogue_style_examples.json"
+"""Exemples « écrit / dit », en donnée versionnée : l'auteur les valide et les retouche
+sans toucher au code."""
+
+
+def style_examples_block(path: Path = STYLE_EXAMPLES_PATH) -> str:
+    """Exemples de passage de l'écrit au dit, à joindre aux contraintes partagées.
+
+    Les personnages et les scènes sont **hors du jeu de test** du banc, et anonymes :
+    un exemple tiré d'un cas mesuré ferait mesurer de la mémorisation, et un fait de
+    l'univers y deviendrait un fait à recopier. Ils ne portent aucune didascalie, ce
+    qui les rend valables dans les deux modes de narration.
+
+    Args:
+        path: Fichier JSON des exemples.
+
+    Returns:
+        Le bloc formaté, ou ``""`` si le fichier est absent ou illisible — le prompt
+        reste alors celui de L1bis, et l'avertissement le dit.
+    """
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.warning("Exemples de style illisibles (%s) : %s", path, exc)
+        return ""
+    lines = [f"\n\n{data.get('intro', '').strip()}\n"]
+    for example in data.get("examples", []):
+        lines.append(
+            f"- {example['situation']}\n"
+            f"  Écrit (à éviter) : « {example['ecrit']} »\n"
+            f"  Dit (à viser) : « {example['dit']} »\n"
+        )
+    return "".join(lines)
 
 
 def _resolve_beat_phase(

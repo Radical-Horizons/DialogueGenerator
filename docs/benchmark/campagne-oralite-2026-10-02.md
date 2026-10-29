@@ -378,3 +378,23 @@ configuration diffèrent de 0,46 sur la justesse de la voix et de 0,50 sur la
 distinction. À n = 24 et un tirage par palier, un écart inférieur à ~0,5 ne se
 distingue pas du hasard. Le seuil de +0,5 n'était donc pas trop sévère, il était au
 plancher. Le gain de L1bis sur l'oralité (+1,38) est, lui, près de trois fois au-dessus.
+
+## L3 — exemples écrit / dit (préparé, en attente de validation)
+
+Quatre paires dans `config/dialogue_style_examples.json`, jointes aux contraintes
+partagées après la consigne d'oralité (les deux chemins de génération les reçoivent).
+Personnages anonymes et scènes hors du jeu de test — un test le vérifie : un exemple
+tiré d'un cas mesuré ferait mesurer de la mémorisation. Trois paires sont transposées
+de répliques réellement ratées (refus à subordonnées en cascade, prix soudé par `;` et
+`:`, révélation en syntaxe nominale) ; la quatrième montre une étrangeté **tenue**, la
+règle produit du 2026-10-02. Aucune didascalie : valables dans les deux modes.
+
+**Ne part pas sans la validation de l'auteur.**
+
+### Pré-enregistrement de L3 (écrit avant la mesure)
+
+- Base : **L1bis** (L2 retiré). Même configuration, n = 24, juge J2.
+- **Critère primaire** : `oral_naturalness` ≥ **+0,5** sur L1bis (6,92 → au moins 7,42).
+- **Garde-fous** inchangés ; la **recopie** compte double ici : les exemples sont dans le
+  prompt, et une génération qui en reprend huit mots d'affilée se verra.
+- Leçon de L2 appliquée : un écart sous ~0,5 n'est pas lisible à ce n.

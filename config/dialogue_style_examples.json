@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "intro": "De l'écrit au dit — exemples de rythme, sur d'autres personnages et d'autres scènes. N'en reprends ni les mots ni les situations : ils montrent seulement comment une réplique écrite devient une réplique dite.",
+  "examples": [
+    {
+      "situation": "Une gardienne de pont refuse le passage à quelqu'un qui cache quelque chose.",
+      "ecrit": "Vous ne franchirez pas ce pont en emportant avec vous ce que vous refusez de me dire ; tant que vous prétendrez qu'il ne s'agit que d'un oubli, ma charge m'interdit de vous laisser passer, et c'est votre prochaine parole qui décidera de ce que nous y perdrons.",
+      "dit": "Non. Vous ne passez pas. Pas avec ce que vous gardez pour vous. Un oubli, vous dites ? Alors souvenez-vous. Je ne bouge pas d'ici."
+    },
+    {
+      "situation": "Un fondeur accepte un travail, mais pas contre de l'argent.",
+      "ecrit": "Ce que vous me demandez est à ma portée, mais aucune pièce ne paiera ce travail : j'exige en échange un souvenir dont la douleur vous tient encore ; l'événement vous restera, mais son poids, lui, deviendra le mien.",
+      "dit": "Je peux le faire. Gardez votre or, il ne m'intéresse pas. Je veux un souvenir. Un qui fait encore mal. Vous le garderez, ce souvenir. Il ne pèsera plus rien, c'est tout."
+    },
+    {
+      "situation": "Une archiviste découvre qu'un registre a été falsifié.",
+      "ecrit": "La falsification de ce registre, dont l'ampleur dépasse tout ce que mes prédécesseurs ont jamais consigné, constitue la preuve que la mémoire de cette ville repose sur une décision prise en son absence.",
+      "dit": "Ce registre est faux. Pas une page. Tout. Quelqu'un l'a réécrit… et toute la ville s'en souvient comme du vrai. Vous comprenez ce que ça veut dire ?"
+    },
+    {
+      "situation": "Un veilleur qui ne parle de lui qu'à la troisième personne. Ici, l'étrangeté est la voix : elle doit tenir de bout en bout.",
+      "ecrit": "Le veilleur ne dort pas. Je vous ai vu arriver, d'ailleurs, et je me suis demandé ce que vous cherchiez. Le veilleur sait attendre.",
+      "dit": "Le veilleur ne dort pas. Le veilleur vous a vu arriver. Il se demande ce que vous cherchez. Il peut attendre. Longtemps."
+    }
+  ]
+}
