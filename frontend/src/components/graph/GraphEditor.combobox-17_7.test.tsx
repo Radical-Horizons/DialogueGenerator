@@ -35,6 +35,18 @@ vi.mock('../../api/unityDialogues', () => ({
   previewUnityDialogue: vi.fn(),
 }))
 
+// Sans ce mock, l'appel réseau réel échoue après le démontage de jsdom et
+// UnityDialogueList fait un setState sur un environnement détruit (erreur non gérée en CI).
+vi.mock('../../api/collections', () => ({
+  listCollections: vi.fn().mockResolvedValue([]),
+  createCollection: vi.fn(),
+  updateCollection: vi.fn(),
+  deleteCollection: vi.fn(),
+  addDialoguesToCollection: vi.fn(),
+  removeDialoguesFromCollection: vi.fn(),
+  buildDocumentCollectionMap: () => new Map(),
+}))
+
 vi.mock('./GraphCanvas', () => ({
   GraphCanvas: () => <div data-testid="graph-canvas-mock" />,
 }))
