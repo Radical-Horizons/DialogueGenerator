@@ -97,3 +97,32 @@ def test_unparsable_arguments_are_refused() -> None:
     """Du bruit reste un échec : on ne doit pas inventer un verdict."""
     assert _deballe("ceci n'est pas du JSON") is None
     assert _deballe(json.dumps({"criteria": "pas du JSON non plus"})) is None
+
+
+def test_both_fallbacks_are_callable_from_an_instance(monkeypatch) -> None:
+    """Régression : la seconde méthode avait perdu son `@staticmethod` à l'insertion
+    de la première, qui en portait deux. Appelée depuis une instance — c'est ce que
+    fait le client —, elle levait `TypeError` : un verdict de juge perdu le
+    2026-10-29, et le rattrapage des `consequences` en liste cassé pour tous les
+    modèles OpenRouter. Le test précédent appelait la classe, et ne voyait rien.
+    """
+    from models.dialogue_structure.unity_dialogue_node import UnityDialogueGenerationResponse
+
+    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-test-not-a-real-key")
+    client = OpenRouterClient(api_key="sk-test-not-a-real-key", config={})
+    brut = json.dumps(
+        {
+            "title": "Titre",
+            "node": {
+                "line": "« Bonjour. »",
+                "consequences": [{"flag": "RENCONTRE"}],
+                "choices": [{"text": "« Salut. »"}],
+            },
+        },
+        ensure_ascii=False,
+    )
+
+    assert client._try_unwrap_stringified_payload(UnityDialogueGenerationResponse, brut) is None
+    normalise = client._try_normalize_unity_consequences(UnityDialogueGenerationResponse, brut)
+    assert normalise is not None
+    assert not isinstance(normalise.node.consequences, list)

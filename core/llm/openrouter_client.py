@@ -384,7 +384,6 @@ class OpenRouterClient(ILLMClient):
         self.last_usage_completion_tokens = int(completion_tokens)
 
     @staticmethod
-    @staticmethod
     def _try_unwrap_stringified_payload(
         response_model: Type[BaseModel],
         function_args_raw: Any,
@@ -443,6 +442,7 @@ class OpenRouterClient(ILLMClient):
         except ValidationError:
             return None
 
+    @staticmethod
     def _try_normalize_unity_consequences(
         response_model: Type[BaseModel],
         function_args_raw: Any,

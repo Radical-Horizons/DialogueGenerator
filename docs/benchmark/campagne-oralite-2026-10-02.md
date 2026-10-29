@@ -258,3 +258,43 @@ nôtre : la consigne dit que l'oral « se répète ». Hypothèse, non mesurée.
 
 La recopie reste marginale : une génération par palier, et ce sont des faits de la
 fiche, pas des formules signatures.
+
+### L1bis — corrigé puis remesuré (2026-10-29)
+
+Décision de l'utilisateur : corriger plutôt qu'assouplir le garde-fou. « Se répète »
+quitte la consigne ; une ligne demande que chaque panneau apporte du neuf (« une
+information, une concession, un prix, un refus »). Remesuré **contre B0**, mêmes règles.
+
+Run `20261029T190340-63ef06f8`, empreinte `902d7ff4dea0`. Dépense : **2,781 $**
+(0,075 $ de génération, 2,705 $ de notation, rejugement compris).
+
+| mesure | B0 | L1 | **L1bis** | règle | verdict |
+|---|---|---|---|---|---|
+| **oralité, brute** | 5,54 | 6,75 | **6,92** (+1,38) | ≥ +0,5 | ✅ |
+| verdicts excusés | 0 | 0 | 0 | stable | ✅ |
+| mots par phrase | 15,9 | 8,9 | **9,3** | en baisse | ✅ |
+| `;` `:` pour 100 mots | 2,92 | 0,06 | **0,17** | en baisse | ✅ |
+| `context_fidelity` | 6,96 | 6,96 | 6,96 | baisse ≤ 0,4 | ✅ |
+| `voice_fidelity` | 5,67 | 5,54 | 5,42 (−0,25) | baisse ≤ 0,4 | ✅ |
+| `voice_consistency` | 7,17 | 6,92 | 7,00 (−0,17) | baisse ≤ 0,4 | ✅ |
+| `french_correctness` | 8,88 | 8,96 | 8,75 (−0,13) | baisse ≤ 0,4 | ✅ |
+| `ai_tics` | 2,46 | 2,38 | 2,29 | hausse ≤ 0,4 | ✅ |
+| `overwriting` | 3,04 | 2,29 | 2,21 | hausse ≤ 0,4 | ✅ |
+| **`blandness`** | 2,33 | 2,79 | **2,58** (+0,25) | hausse ≤ 0,4 | ✅ |
+| `forced_exposition` | 2,88 | 2,75 | 2,58 | hausse ≤ 0,4 | ✅ |
+| recopie (générations) | 1 | 1 | 1 | ne monte pas | ✅ |
+
+**L1bis passe tous les critères pré-enregistrés.** Il devient la base de L2.
+
+À surveiller, hors garde-fous : `world_codes` 6,79 → 6,21 (−0,58) — des phrases plus
+courtes semblent porter moins de vocabulaire propre à l'univers — et la justesse de la
+voix qui reste à 5,4 : c'est la cible de L2. `zaehria-confrontation` reste le cas le
+moins oral (5,33) sans être excusé, la voix n'y atteignant pas 8.
+
+Un incident de mesure, et c'était un bogue : un verdict perdu sur
+`TypeError: _try_normalize_unity_consequences() takes 2 positional arguments but 3 were
+given`. En insérant le rattrapage des charges stringifiées le 2026-10-01, la nouvelle
+méthode s'était glissée entre le décorateur `@staticmethod` et la méthode existante.
+Celle-ci, appelée depuis une instance, levait `TypeError` : le rattrapage des
+`consequences` en liste était cassé **pour tous les modèles OpenRouter, en production**.
+Corrigé ; le test appelle désormais la méthode comme le client, depuis une instance.
