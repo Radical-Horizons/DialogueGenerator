@@ -1,6 +1,8 @@
 ## Epic 10: Gestion de session et sauvegarde
 
-Les utilisateurs peuvent sauvegarder leur travail automatiquement et récupérer leur session après crash. Le système gère auto-save (2min), session recovery, sauvegarde manuelle, détection changements non sauvegardés, et historique basique (MVP) ou détaillé (V2.0+).
+Les utilisateurs peuvent compter sur un travail persisté en continu et récupérer leur session après un crash. Le système gère la persistance immédiate (store → journal IndexedDB → backend, conforme ADR-006), la restauration de session, la synchronisation forcée, l'avertissement sur changements non acquittés, et l'historique basique (MVP) ou détaillé (V2.0+).
+
+> ⚠️ **Révision du 2026-10-29.** Cet epic a été rédigé **avant ADR-006** et en portait encore le vocabulaire : « auto-save 2 min », « sauvegarde manuelle », « changements non sauvegardés », `localStorage`. ADR-006 (`architecture/v10-architectural-decisions-adrs.md:478-530`) a supprimé le modèle brouillon/sauvegarde : chaque frappe part au store (≤100 ms), est journalisée en **IndexedDB** avec un `clientSeq`, puis poussée au backend ~50 ms plus tard. Les stories **10.2** et **10.4** ont été réécrites ; **10.1** porte un avertissement ciblé sur son mécanisme de stockage. FR95, FR97 et FR99 ont été reformulées dans le PRD.
 
 **FRs covered:** FR95-101 (auto-save, session recovery, sauvegarde manuelle, Git commit, détection changements, historique)
 
@@ -93,6 +95,9 @@ So that **je ne perds pas mon travail même si le navigateur se ferme accidentel
 **And** je peux quand même restaurer ou ignorer
 
 **Technical Requirements:**
+
+> ⚠️ **Mécanisme de stockage périmé (2026-10-29).** Les AC et exigences techniques ci-dessous décrivent `localStorage` et un backup « toutes les 30 secondes en plus de l'auto-save 2 min ». Le mécanisme réellement en place est le **journal IndexedDB** d'ADR-006 (`utils/graphJournal.ts`, par `documentId`, avec `clientSeq` / `ackSeq`), alimenté à chaque `markDirty` (`uiSlice.ts:313-328`) — donc à chaque modification, pas toutes les 30 secondes. **Le fond de la story (restaurer après crash) reste valable** ; c'est son plomberie qui est à réécrire au moment du découpage, en réutilisant le journal au lieu d'en créer un second.
+
 - Frontend : Hook `useSessionRecovery` avec détection session au démarrage (localStorage check)
 - Backup : Sauvegarde automatique état dialogue dans localStorage toutes les 30 secondes (en plus auto-save 2min)
 - Format : Structure JSON avec timestamp, dialogue_id, état complet (nodes, edges, metadata)
@@ -105,74 +110,58 @@ So that **je ne perds pas mon travail même si le navigateur se ferme accidentel
 
 ---
 
-### Story 10.2: Sauvegarder manuellement le progrès dialogue (FR97)
+### Story 10.2: Forcer une synchronisation immédiate du dialogue (FR97)
 
-> ⚠️ **AC non conformes à ADR-006 — signalé le 2026-10-07, non corrigé.** Relevé pendant la réécriture de la story 1.5 d'Epic 1. Epic 10 est en `backlog`, donc ce sont des specs non implémentées : le correctif est bon marché, mais il dépasse le périmètre de cette passe et n'a pas été arbitré.
+**Status:** backlog — **AC réécrites le 2026-10-29** (les précédentes contredisaient ADR-006)
+
+> ⚠️ **Ce que décrivait la version précédente, et pourquoi c'était faux.** Elle construisait la story autour d'un bouton « Sauvegarder », d'un timer d'auto-save à réinitialiser (« prochaine auto-save dans 2 min ») et de `localStorage`. Les trois contredisent **ADR-006** (`architecture/v10-architectural-decisions-adrs.md:478-530`) : pas de bouton « Sauvegarder » (`:493`, `:524`), pas de timer mais un debounce de **50 ms** (`useDialogueLoader.ts:436-450`), et un journal en **IndexedDB** par `documentId` avec `clientSeq` / `ackSeq` (`uiSlice.ts:313-328`, `utils/graphJournal.ts`), pas `localStorage`.
 >
-> Trois divergences avec **ADR-006** (`architecture/v10-architectural-decisions-adrs.md:478-530`) :
->
-> | AC | ADR-006 / code réel |
-> |---|---|
-> | « je clique sur **"Sauvegarder"** (bouton ou Ctrl+S) » | ADR-006 `:493` et `:524` : **« pas de bouton "Sauvegarder" »**, seulement un « Synchroniser maintenant » optionnel. En place aujourd'hui : `Ctrl+S` → flush + sync forcé (`useGraphToolbar.ts:260`), et `SaveStatusIndicator` à la place du bouton. |
-> | « le timer auto-save est réinitialisé (**prochaine auto-save dans 2min**) » | Il n'y a pas de timer : debounce **50 ms** après `markDirty` (`useDialogueLoader.ts:436-450`). Les « 2 min » viennent de la rédaction initiale de FR95, antérieure à ADR-006. |
-> | « les modifications restent dans **localStorage** » | Le journal est en **IndexedDB**, par `documentId`, avec `clientSeq` / `ackSeq` (`uiSlice.ts:313-328`, `utils/graphJournal.ts`). |
->
-> **FR97 lui-même** (« Users can manually save dialogue progress ») gagnerait à être reformulé : « forcer une synchronisation immédiate » plutôt que « sauvegarder », ou marqué *superseded by ADR-006*. À trancher avec l'équipe.
->
-> ✅ À l'actif de cette story : elle cite déjà correctement **NFR-R3** (Data Loss Prevention) — c'est Epic 18 qui citait NFR-R2 par erreur, pas celle-ci.
+> Relevé pendant la réécriture de la story 1.5 d'Epic 1. Epic 10 est en `backlog` : ce sont des specs non implémentées, donc la correction ne touche aucun code.
 
 As a **utilisateur éditant des dialogues**,
-I want **sauvegarder manuellement mon dialogue à tout moment**,
-So that **je peux contrôler quand mes modifications sont persistées et m'assurer que tout est sauvegardé avant de quitter**.
+I want **forcer l'envoi immédiat de mon dialogue au serveur sans attendre l'envoi automatique**,
+So that **je peux m'assurer que tout est bien arrivé avant de fermer, de partager un lien ou d'exporter**.
 
 **Acceptance Criteria:**
 
-**Given** j'ai modifié un dialogue
-**When** je clique sur "Sauvegarder" (bouton ou Ctrl+S)
-**Then** le dialogue est sauvegardé immédiatement
-**And** un message de confirmation s'affiche "Dialogue sauvegardé"
-**And** l'indicateur de statut passe à "Sauvegardé" (voir Story 10.4)
+**Given** j'ai modifié un dialogue et l'envoi automatique n'a pas encore été acquitté
+**When** je presse `Ctrl+S`
+**Then** le formulaire en cours d'édition est flushé vers le store, puis le document est poussé au backend sans attendre le debounce
+**And** aucun bouton « Sauvegarder » n'existe dans l'interface — c'est l'affordance « Synchroniser maintenant » autorisée par ADR-006 `:493`
 
-**Given** je sauvegarde manuellement
-**When** la sauvegarde réussit
-**Then** le timer auto-save est réinitialisé (prochaine auto-save dans 2min, voir Story 0.5)
-**And** l'indicateur "Sauvegardé il y a Xs" se met à jour
-**And** les modifications sont persistées dans le backend
+**Given** la synchronisation forcée réussit
+**When** l'acquittement serveur arrive
+**Then** `SaveStatusIndicator` passe à l'état **synchronisé** avec son `ackSeq` à jour
+**And** aucun message de confirmation modal n'est affiché — l'indicateur suffit, et c'est son rôle
 
-**Given** je sauvegarde manuellement pendant une génération LLM
-**When** la sauvegarde est lancée
-**Then** la sauvegarde attend la fin de la génération (pas de sauvegarde partielle)
-**And** un message s'affiche "Sauvegarde en attente - génération en cours"
-**And** la sauvegarde se déclenche automatiquement après la génération
+**Given** une génération LLM est en cours
+**When** je presse `Ctrl+S`
+**Then** la synchronisation attend la fin de la génération (pas d'envoi partiel)
+**And** l'interface le signale sans bloquer l'édition
 
-**Given** la sauvegarde manuelle échoue (erreur réseau, serveur down)
-**When** la sauvegarde est tentée
-**Then** un message d'erreur s'affiche "Échec sauvegarde - réessayer ?"
-**And** l'indicateur passe à "Erreur"
-**And** je peux réessayer la sauvegarde (bouton "Réessayer")
-**And** les modifications restent dans localStorage (pas perdues)
+**Given** la synchronisation échoue (réseau coupé, serveur indisponible, 409)
+**When** l'échec est constaté
+**Then** `SaveStatusIndicator` passe à l'état **erreur**, distinguable de l'état en attente
+**And** le travail reste intégralement dans le **journal IndexedDB** — rien n'est perdu (**NFR-R3**)
+**And** une nouvelle tentative est possible, manuelle ou automatique, et un 409 déclenche la résolution de révision d'ADR-008
 
-**Given** je sauvegarde plusieurs dialogues rapidement
-**When** je sauvegarde dialogue A puis dialogue B
-**Then** les deux sauvegardes sont traitées séquentiellement (pas de conflit)
-**And** chaque dialogue est sauvegardé avec succès
-**And** les indicateurs de statut sont mis à jour individuellement
+**Given** je presse `Ctrl+S` pendant qu'une synchronisation est déjà en cours
+**When** la seconde demande arrive
+**Then** elle attend la première au lieu de la doubler — l'ordre est garanti par le `clientSeq` monotone, et le serveur ignore tout `seq` inférieur ou égal à son `last_seq`
 
-**Given** je consulte le raccourci clavier
+**Given** je consulte l'aide clavier
 **When** je regarde les raccourcis disponibles
-**Then** Ctrl+S est listé comme "Sauvegarder dialogue"
-**And** le raccourci fonctionne depuis n'importe où dans l'éditeur (pas seulement focus input)
+**Then** `Ctrl+S` y figure sous un libellé qui dit ce qu'il fait — « Synchroniser maintenant », pas « Sauvegarder »
+**And** il fonctionne aussi depuis un champ de saisie (`ctrl+s` est dans `allowedInInputs`, `useKeyboardShortcuts.ts:148`)
 
 **Technical Requirements:**
-- Backend : Endpoint `/api/v1/dialogues/{id}` (PUT) pour sauvegarde manuelle (existant)
-- Service : `DialogueService.save_dialogue()` pour persistance dialogue
-- Frontend : Bouton "Sauvegarder" + raccourci clavier Ctrl+S (gestionnaire global)
-- Zustand store : `useDialogueStore` avec méthode `saveDialogue()` pour sauvegarde manuelle
-- Queue : Gérer queue sauvegardes si plusieurs dialogues ouverts (sauvegarde séquentielle)
-- Retry : Logique retry automatique en cas d'échec (3 tentatives, exponential backoff)
-- Tests : Unit (sauvegarde logique), Integration (API save), E2E (workflow sauvegarde manuelle)
+- Frontend : `useGraphToolbar.ts:260` (`Ctrl+S` → `handleSave`) et `useDialogueLoader.ts:481` (flush + attente de génération + push) — **déjà en place**, cette story les vérifie et corrige le libellé
+- Indicateur : `SaveStatusIndicator` (`components/shared/`) — `SyncStatusDisplay = 'synced' | 'offline' | 'error'`, `ackSeq`, `pendingCount`
+- Journal : `utils/graphJournal.ts` (IndexedDB par `documentId`, `snapshot.ackSeq` / `pending.seq`)
+- Backend : `PUT /api/v1/documents/{id}` avec `revision` ; 409 sur conflit (ADR-008)
+- Tests : Vitest sur l'ordre des `seq` et l'état de l'indicateur ; E2E sur `Ctrl+S` → rechargement → contenu présent
 
-**References:** FR97 (sauvegarde manuelle), Story 0.5 (auto-save), Story 10.4 (détection changements), NFR-R3 (Data Loss Prevention)
+**References:** FR97 (reformulée 2026-10-29), **ADR-006** (autosave immédiat, pas de bouton Sauvegarder), ADR-008 (revision, 409), Story 10.4 (avertissement avant navigation), **NFR-R3** (Data Loss Prevention)
 
 ---
 
@@ -234,63 +223,61 @@ So that **je peux versionner mes dialogues et collaborer avec l'équipe via Git*
 
 ---
 
-### Story 10.4: Détecter changements non sauvegardés et avertir avant navigation (FR99)
+### Story 10.4: Avertir avant de quitter si des changements ne sont pas encore acquittés (FR99)
+
+**Status:** backlog — **AC réécrites le 2026-10-29** (les précédentes contredisaient ADR-006)
+
+> ⚠️ **Ce que décrivait la version précédente, et pourquoi c'était faux.** Elle proposait un modal « Modifications non sauvegardées — Voulez-vous sauvegarder avant de quitter ? » avec les options **Sauvegarder / Ignorer / Annuler**, et prévenait que choisir « Ignorer » perd les modifications (« récupérables via session recovery si < 2 min »).
+>
+> Sous **ADR-006**, il n'existe aucune modification « non sauvegardée » : tout est déjà dans le store **et** dans le journal IndexedDB avant même l'envoi. Proposer « Ignorer » offrirait donc de **jeter du travail qui n'est pas en danger** — l'inverse de l'intention. Le vrai risque n'est pas la perte locale, c'est de partir en croyant le serveur à jour alors qu'il ne l'est pas.
 
 As a **utilisateur éditant des dialogues**,
-I want **être averti si j'ai des changements non sauvegardés avant de naviguer**,
-So that **je ne perds pas accidentellement mes modifications en quittant la page ou en changeant de dialogue**.
+I want **savoir, avant de quitter ou de changer de dialogue, si mes dernières modifications ont bien été acquittées par le serveur**,
+So that **je ne crois pas à tort que tout est en ligne — et que je sache que rien n'est perdu même si ce n'est pas le cas**.
 
 **Acceptance Criteria:**
 
-**Given** j'ai modifié un dialogue (ajout nœud, édition texte)
-**When** je tente de naviguer vers une autre page (changer dialogue, quitter éditeur)
-**Then** un warning modal s'affiche "Modifications non sauvegardées - Voulez-vous sauvegarder avant de quitter ?"
-**And** j'ai les options : "Sauvegarder", "Ignorer", "Annuler"
-
-**Given** je choisis "Sauvegarder"
-**When** la sauvegarde réussit
-**Then** la navigation se poursuit vers la page demandée
-**And** les modifications sont persistées
-
-**Given** je choisis "Ignorer"
-**When** je confirme
-**Then** la navigation se poursuit sans sauvegarder
-**And** les modifications non sauvegardées sont perdues (mais récupérables via session recovery si <2min)
-
-**Given** je choisis "Annuler"
-**When** je ferme le modal
-**Then** je reste sur la page actuelle
-**And** je peux continuer à éditer le dialogue
-
-**Given** j'ai des changements non sauvegardés
+**Given** j'édite un dialogue
 **When** je consulte l'interface
-**Then** un indicateur visuel s'affiche "Non sauvegardé" (badge orange, voir `SaveStatusIndicator` existant)
-**And** l'indicateur est visible dans la barre d'outils ou footer
+**Then** `SaveStatusIndicator` dit en permanence où j'en suis : **synchronisé**, **N changements en attente**, ou **erreur**
+**And** le libellé parle d'acquittement, **jamais** de « non sauvegardé »
 
-**Given** je ferme l'onglet du navigateur avec changements non sauvegardés
-**When** l'événement `beforeunload` est déclenché
-**Then** le navigateur affiche son propre warning "Êtes-vous sûr de vouloir quitter ?"
-**And** je peux annuler la fermeture pour sauvegarder
+**Given** des changements ne sont pas encore acquittés par le serveur
+**When** je change de dialogue ou quitte l'éditeur
+**Then** l'avertissement propose **Synchroniser maintenant** ou **Continuer** — **pas** « Ignorer »
+**And** il indique explicitement que le travail est conservé localement dans les deux cas
 
-**Given** je sauvegarde manuellement (Ctrl+S)
-**When** la sauvegarde réussit
-**Then** l'indicateur "Non sauvegardé" disparaît
-**And** l'avertissement de navigation ne s'affiche plus (jusqu'à nouvelle modification)
+**Given** je choisis « Synchroniser maintenant »
+**When** l'acquittement arrive
+**Then** la navigation se poursuit et l'indicateur est passé à synchronisé
 
-**Given** l'auto-save sauvegarde automatiquement (voir Story 0.5)
-**When** l'auto-save réussit
-**Then** l'indicateur "Non sauvegardé" disparaît
-**And** l'avertissement de navigation ne s'affiche plus
+**Given** je choisis « Continuer »
+**When** la navigation se poursuit
+**Then** **aucune modification n'est perdue** : le journal IndexedDB conserve l'état par `documentId`, et la synchronisation reprend au prochain chargement de ce document (**NFR-R3**)
+**And** l'avertissement le dit, au lieu de laisser croire à un abandon
+
+**Given** tout est acquitté
+**When** je navigue
+**Then** **aucun avertissement** ne s'affiche
+
+**Given** je ferme l'onglet avec des changements non acquittés
+**When** `beforeunload` se déclenche
+**Then** l'avertissement natif du navigateur s'affiche
+**And** il ne se déclenche **pas** si tout est acquitté — un avertissement systématique entraîne à l'ignorer
+
+**Given** je rouvre un document dont la synchronisation avait été interrompue
+**When** il se charge
+**Then** l'état est restauré depuis le journal (dernier snapshot acquitté + file en attente) et la synchronisation reprend, conformément à ADR-006
+**And** le parcours est couvert par un test E2E : éditer → couper le réseau → quitter → revenir → le contenu est là
 
 **Technical Requirements:**
-- Frontend : Hook `useUnsavedChangesWarning` avec détection navigation (React Router `useBlocker` ou `beforeunload`)
-- Détection : Flag `hasUnsavedChanges` dans `useDialogueStore` mis à jour à chaque modification
-- Modal : Composant `UnsavedChangesModal.tsx` avec options Sauvegarder/Ignorer/Annuler
-- Indicateur : Réutiliser `SaveStatusIndicator` (existant) avec statut "unsaved"
-- beforeunload : Gestionnaire `window.beforeunload` pour warning navigateur natif
-- Tests : Unit (détection changements), Integration (navigation warning), E2E (workflow navigation avec warning)
+- Détection : `hasUnsavedChanges` + `clientSeq` / `ackSeq` dans `useGraphStore` (`uiSlice.ts:313-328`) — à renommer en termes d'acquittement si la story touche le store
+- Indicateur : `SaveStatusIndicator` existant, **ne pas en créer un second**
+- Avertissement : deux actions seulement (Synchroniser / Continuer) ; `beforeunload` conditionné à l'existence de changements non acquittés
+- Journal : `utils/graphJournal.ts` — c'est lui qui rend « Continuer » sans danger
+- Tests : Vitest sur la condition d'affichage ; E2E sur le parcours hors-ligne → retour
 
-**References:** FR99 (détection changements non sauvegardés), Story 0.5 (auto-save), Story 10.2 (sauvegarde manuelle), NFR-R3 (Data Loss Prevention)
+**References:** FR99 (reformulée 2026-10-29), **ADR-006**, Story 10.1 (restauration de session), Story 10.2 (synchronisation forcée), **NFR-R3** (Data Loss Prevention)
 
 ---
 

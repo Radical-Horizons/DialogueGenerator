@@ -44,7 +44,7 @@ Les utilisateurs peuvent définir des variables et flags dans les dialogues pour
 
 ## Epic 10: Gestion de session et sauvegarde
 
-Les utilisateurs peuvent sauvegarder leur travail automatiquement et récupérer leur session après crash. Le système gère auto-save (2min), session recovery, sauvegarde manuelle, détection changements non sauvegardés, et historique basique (MVP) ou détaillé (V2.0+).
+Les utilisateurs peuvent compter sur un travail persisté en continu (store → journal IndexedDB → backend, conforme ADR-006) et récupérer leur session après un crash. Le système gère la restauration de session, la synchronisation forcée (`Ctrl+S`), l'avertissement sur changements non acquittés, et l'historique basique (MVP) ou détaillé (V2.0+).
 
 ## Epic 11: Onboarding et guidance
 

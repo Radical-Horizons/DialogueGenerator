@@ -40,7 +40,7 @@
   Les utilisateurs peuvent définir des variables et flags dans les dialogues pour créer des branches conditionnelles dynamiques. Le système permet conditions de visibilité, effets déclenchés par choix joueur, preview de scénarios, validation références, et intégration stats de jeu (V3.0+).
 
 - **Epic 10**: [Gestion de session et sauvegarde](epic-10.md)  
-  Les utilisateurs peuvent sauvegarder leur travail automatiquement et récupérer leur session après crash. Le système gère auto-save (2min), session recovery, sauvegarde manuelle, détection changements non sauvegardés, et historique basique (MVP) ou détaillé (V2.0+).
+  Les utilisateurs peuvent compter sur un travail persisté en continu (store → journal IndexedDB → backend, conforme ADR-006) et récupérer leur session après un crash. Le système gère la restauration de session, la synchronisation forcée (`Ctrl+S`), l'avertissement sur changements non acquittés, et l'historique basique (MVP) ou détaillé (V2.0+).
 
 - **Epic 11**: [Onboarding et guidance](epic-11.md)  
   Les nouveaux utilisateurs peuvent accéder à un wizard d'onboarding pour leur première création de dialogue. Le système fournit documentation in-app, tutoriels, aide contextuelle, dialogues d'exemple, et détection du niveau de compétence pour adapter l'UI (mode guidé vs mode avancé V1.5+). Inclut variantes optimisées pour persona Mathieu (détection automatique V1.0, wizard simplifié 4 étapes V1.0, assistance contextuelle renforcée V1.0, validation premier run <30min V1.0).

@@ -96,11 +96,11 @@
 **FR92:** Users can preview scenarios with different variable states  
 **FR93:** System can validate variable references (detect undefined variables)  
 **FR94:** Users can integrate game system stats (character attributes, reputation) (V3.0+)  
-**FR95:** System can auto-save user work every 2 minutes (V1.0+)  
+**FR95:** System persists user work continuously with **no explicit save action** — store on keystroke (≤100 ms), local journal (IndexedDB, `clientSeq`), then automatic push to the backend *(REWORDED 2026-10-29 — ADR-006 supersedes « every 2 minutes »)*  
 **FR96:** System can restore session after browser crash  
-**FR97:** Users can manually save dialogue progress  
+**FR97:** Users can **force an immediate synchronization** of the current dialogue (`Ctrl+S`) instead of waiting for the automatic push *(REWORDED 2026-10-29 — ADR-006 forbids a « Save » button; this is its optional « Synchroniser maintenant »)*  
 **FR98:** Users can commit dialogue changes to Git repository (manual workflow external)  
-**FR99:** System can detect unsaved changes and warn before navigation  
+**FR99:** System can detect changes **not yet acknowledged by the backend** and warn before leaving, without presenting them as lost work *(REWORDED 2026-10-29 — under ADR-006 nothing is ever unsaved locally)*  
 **FR100:** Users can view previous versions of dialogue (basic history MVP) *(NEW - Basic history)*  
 **FR101:** Users can view edit history for dialogue (detailed V2.0+)  
 **FR102:** New users can access wizard onboarding for first dialogue creation (V1.0+)  

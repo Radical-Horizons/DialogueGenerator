@@ -364,7 +364,9 @@ Vérification menée le 2026-10-07 contre le code, AC par AC.
 - **(a)** renommer l'entrée de menu en « Sélectionner » ou « Ouvrir dans l'inspecteur » — honnête, zéro code ;
 - **(b)** faire que `handleEdit` appelle aussi `requestNodeEdit(id)`, ce qui ouvrirait `NodeEditorPanel` directement — conforme à l'intention produit « écriture d'abord ».
 
-**Recommandation : (b)**, cohérent avec « écriture d'abord, lecture friendly ». ⚠️ À coordonner avec la **story 18.9** d'Epic 18, qui fait router `requestNodeEdit` vers l'édition **in-situ dans le nœud** plutôt que vers le panneau. Les deux doivent aboutir au même endroit, sinon « Éditer » et la création d'un nœud ouvrent deux surfaces différentes.
+**Décision (2026-10-29) : l'option (b), portée par la story 18.9 d'Epic 18.** Elle y a reçu une AC explicite.
+
+Pourquoi pas ici, et pourquoi pas tout de suite : (b) n'est pas un one-liner. L'effet qui honore `nodeEditRequest` (`GraphEditor.tsx:129-133`) ne dépend que de `[selectedNodeId]` et **vide la requête lui-même** — un clic droit sur le nœud **déjà sélectionné** ne déclencherait donc rien. Le faire marcher demande de restructurer cet effet, ce que la story 18.9 fait **déjà** pour router `requestNodeEdit` vers l'édition in-situ. Corriger en amont, ce serait corriger deux fois ; et l'option (a) — renommer l'entrée de menu — serait défaite par 18.9. Les deux chemins (« Éditer » et création d'un nœud) doivent aboutir au même endroit, et c'est 18.9 qui décide où.
 
 **Technical Requirements:**
 - Frontend : `NodeEditorPanel.tsx` (formulaires speaker / line / choices / metadata) ; `GraphInspectorNodeSummary.tsx` (vue lecture + actions « éditer ») ; bascule par `nodeInspectorEditing` dans `GraphEditor.tsx:128`

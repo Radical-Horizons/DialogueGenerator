@@ -245,7 +245,27 @@ Les AC de la **story 1.5** (`epic-01.md`) étaient non conformes à ADR-006 tout
 
 **FR5 est gardée** : elle est agnostique de canal, FR122/FR124/FR125 la raffinent.
 
-**FR97 et story 10.2 — signalés, non corrigés.** Un avertissement ADR-006 est posé dans `epic-10.md` : bouton « Sauvegarder », « prochaine auto-save dans 2 min » et `localStorage` (le journal est en IndexedDB) y divergent de l'architecture. Epic 10 est en `backlog`, donc ce sont des specs non implémentées et le correctif est bon marché — mais il dépasse le périmètre de cette passe. À l'actif de 10.2 : elle citait déjà correctement **NFR-R3**.
+### Epic 10 — corrigé le 2026-10-29
+
+Le signalement initial portait sur FR97 et la story 10.2. En ouvrant le dossier, **tout l'epic 10 était antérieur à ADR-006** et en portait encore le vocabulaire : « auto-save 2 min », « sauvegarde manuelle », « changements non sauvegardés », `localStorage`.
+
+| Objet | Correction |
+|---|---|
+| **FR95** « auto-save every 2 minutes » | Reformulée : persistance continue sans action d'enregistrement (store ≤100 ms → journal IndexedDB → backend). Les « 2 minutes » n'ont jamais été implémentées. |
+| **FR97** « manually save dialogue progress » | Reformulée : **forcer une synchronisation immédiate** (`Ctrl+S`). C'est le « Synchroniser maintenant » qu'ADR-006 autorise, pas un enregistrement de brouillon. |
+| **FR99** « detect unsaved changes » | Reformulée : détecter les changements **non acquittés par le backend**. Sous ADR-006 rien n'est jamais « non sauvegardé » localement. |
+| **Story 10.2** | **AC réécrites.** Plus de bouton « Sauvegarder », plus de timer à réinitialiser, journal IndexedDB au lieu de `localStorage`, ordre garanti par `clientSeq`, 409 renvoyé à ADR-008. |
+| **Story 10.4** | **AC réécrites.** Le modal proposait « Sauvegarder / Ignorer / Annuler » — or « Ignorer » offrait de **jeter du travail qui n'est pas en danger**, puisque le journal le conserve déjà. Remplacé par « Synchroniser maintenant / Continuer », et l'avertissement dit désormais que rien n'est perdu. Le vrai risque n'est pas la perte locale, c'est de partir en croyant le serveur à jour. |
+| **Story 10.1** | Avertissement ciblé : le fond (restaurer après crash) reste valable, sa plomberie `localStorage` + « backup toutes les 30 s » est à remplacer par le journal existant au découpage. Pas réécrite — ce serait anticiper son arbitrage. |
+| Header d'Epic 10, `epic-list.md`, `epic-index.md` | Descriptions alignées sur ADR-006. |
+
+À l'actif de 10.2 et 10.4 : elles citaient déjà correctement **NFR-R3**. C'est Epic 18 qui était l'intrus avec ses six NFR-R2.
+
+### Le bug du menu « Éditer » — assigné, pas corrigé à chaud
+
+`NodeContextMenu.handleEdit` (`:98-101`) ne fait que `setSelectedNode(id)` : l'entrée nommée « Éditer » n'ouvre pas l'éditeur. **Décision : l'option (b)** — appeler `requestNodeEdit(id)` — **portée par la story 18.9**, qui a reçu une AC explicite.
+
+Ce n'est pas un one-liner, et c'est la raison de ne pas l'avoir corrigé dans la foulée : l'effet qui honore `nodeEditRequest` (`GraphEditor.tsx:129-133`) ne dépend que de `[selectedNodeId]` et **vide la requête lui-même**, donc un clic droit sur le nœud **déjà sélectionné** ne déclencherait rien. Le faire marcher exige de restructurer cet effet — ce que 18.9 fait déjà pour router `requestNodeEdit` vers l'in-situ. Corriger en amont serait corriger deux fois ; renommer l'entrée serait défait par 18.9.
 
 ---
 

@@ -574,11 +574,20 @@ So that **écrire un nœud complet reste une séquence de frappe continue**.
 **And** `requestNodeEdit` (`useGraphToolbarMenuItems.tsx:124` → `GraphEditor.tsx:123-133`) route vers l'**in-situ** : le panneau ne s'ouvre **plus** automatiquement en édition
 **And** les tests existants de ce comportement (`graphViewStore.nodeEdit.test.ts`, `GraphEditor.combobox-17_7.test.tsx`) sont mis à jour, pas supprimés
 
+**Given** l'entrée « Éditer » du menu contextuel d'un nœud
+**When** je la clique
+**Then** elle ouvre réellement l'édition, via `requestNodeEdit(id)` — aujourd'hui `NodeContextMenu.handleEdit` (`:98-101`) ne fait que `setSelectedNode(id)`, donc un menu nommé « Éditer » qui n'édite pas
+**And** l'effet de `GraphEditor.tsx:129-133` est restructuré pour que la requête soit honorée **même quand le nœud est déjà sélectionné** : il ne dépend que de `[selectedNodeId]` et vide la requête lui-même, donc un clic droit sur le nœud courant est aujourd'hui un no-op
+**And** `__tests__/NodeContextMenu.test.tsx` AC #2 reçoit l'assertion `requestNodeEdit` (les deux existantes restent valables)
+**And** l'AC correspondante de la story 2.12 d'Epic 2 est mise à jour, pas contournée
+
+> Pourquoi ici et pas dans la story 1.5 d'Epic 1, où le bug a été trouvé : le correctif exige de restructurer l'effet que **cette** story restructure déjà pour router `requestNodeEdit` vers l'in-situ. Le corriger en amont serait le corriger deux fois, et un simple renommage de l'entrée de menu serait défait par cette story.
+
 **Given** l'aide clavier de la story 12.3
 **When** la chaîne de champs est livrée
 **Then** la dépendance est déclarée auprès d'Epic 12 et le contenu de l'aide est amendé — pas modifié en effet de bord
 
-**Dimensionnement :** 2 sessions. Le non-piégeage du focus dans un canvas React Flow est un chantier a11y à part entière.
+**Dimensionnement :** 2 sessions. Le non-piégeage du focus dans un canvas React Flow est un chantier a11y à part entière, et la restructuration de l'effet `nodeEditRequest` s'y ajoute.
 
 **References:** FR128, FR122, NFR-A1, UX-DR6, D5, Epic 14 (stories 14.1, 14.2), Epic 12 (story 12.3)
 
