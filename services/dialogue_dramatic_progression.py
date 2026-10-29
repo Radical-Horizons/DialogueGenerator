@@ -98,8 +98,10 @@ DIALOGUE_ORALITY_RULES = (
     "relue, coupe-la.\n"
     "- Pas de point-virgule ni de deux-points dans une réplique : à l'oral, on s'arrête "
     "et on repart.\n"
-    "- Les subordonnées en cascade sont de l'écrit. L'oral juxtapose, se reprend, se "
-    "répète, s'interrompt — quand la voix du personnage le veut, pas par principe.\n"
+    "- Les subordonnées en cascade sont de l'écrit. L'oral juxtapose, se reprend, "
+    "s'interrompt — quand la voix du personnage le veut, pas par principe.\n"
+    "- D'un panneau à l'autre, chaque réplique apporte du neuf : une information, une "
+    "concession, un prix, un refus. Ne repasse pas par le même mouvement.\n"
     "- Exception : quand la fiche du personnage prescrit une syntaxe singulière, la voix "
     "l'emporte, à condition d'être tenue sans faille d'un bout à l'autre du fragment. Une "
     "étrangeté constante est une voix ; une étrangeté intermittente est une erreur.\n"
@@ -111,6 +113,10 @@ Tirée de ce que le juge reprochait au run du 2026-10-01 : environ 40 commentair
 subordonnées empilées — et aucun ne reprochait la longueur des panneaux. L'exception
 applique la règle produit du 2026-10-02 : le jeu assume des personnages bizarres,
 pourvu que leur voix soit tenue.
+
+Première version mesurée le 2026-10-29 : oralité +1,21, mais platitude +0,46 — le juge
+reprochait la répétition d'un panneau à l'autre, et la consigne disait que l'oral « se
+répète ». Le mot est retiré, et une ligne demande que chaque panneau apporte du neuf.
 
 Elle vit dans les contraintes que `compose_generation_instructions` ajoute aux
 consignes de scène, parce que c'est le seul bloc que reçoivent **les deux** chemins :

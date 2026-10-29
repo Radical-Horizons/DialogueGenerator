@@ -89,3 +89,10 @@ async def test_graph_child_nodes_receive_the_orality_rules() -> None:
                 user_instructions="La suite.",
             )
     assert seen and DIALOGUE_ORALITY_RULES in seen[0]
+
+
+def test_the_orality_rules_ask_each_panel_for_something_new() -> None:
+    """Régression L1 : la consigne disait que l'oral « se répète », et le juge a puni la
+    répétition d'un panneau à l'autre (platitude +0,46)."""
+    assert "se répète" not in DIALOGUE_ORALITY_RULES
+    assert "chaque réplique apporte du neuf" in DIALOGUE_ORALITY_RULES
