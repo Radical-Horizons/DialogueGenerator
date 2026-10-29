@@ -653,3 +653,30 @@ async def test_a_reedited_grid_rejudges_instead_of_skipping(tmp_path: Path) -> N
     await harness.drain_judge()
 
     assert harness.judge_client.calls == 4, "chaque cellule doit être rejugée sous la nouvelle grille"
+
+
+@pytest.mark.asyncio
+async def test_purged_judge_errors_keep_their_cost(tmp_path: Path) -> None:
+    """Régression : purger un verdict en erreur effaçait le coût de l'appel.
+
+    La dépense se recalcule depuis les verdicts sur disque ; sans registre, le total
+    publié sous-comptait la dépense réelle, et le plafond ne tenait qu'une relance.
+    Constaté sur B0 le 2026-10-29 : 2,563 $ affichés pour 2,684 $ dépensés.
+    """
+    client = _FakeJudgeClient(cost=0.01, omit="french_correctness")
+    harness = _Harness(tmp_path, judge_client=client)
+    run_id = await harness.produce_run(case_ids=["cas-0", "cas-1"], models=[MODEL_A])
+    await harness.pass_service.start_pass(run_id, _config())
+    await harness.drain_judge()
+    assert harness.pass_service.get_pass_state(run_id, JUDGE_A).spent_usd == pytest.approx(0.02)
+
+    client._omit = None
+    await harness.pass_service.start_pass(run_id, _config())
+    await harness.drain_judge()
+    state = harness.pass_service.get_pass_state(run_id, JUDGE_A)
+    assert state.status == "completed"
+    assert state.spent_usd == pytest.approx(0.04), "deux appels en erreur et deux notations ont coûté"
+
+    await harness.pass_service.start_pass(run_id, _config())
+    await harness.drain_judge()
+    assert harness.pass_service.get_pass_state(run_id, JUDGE_A).spent_usd == pytest.approx(0.04)

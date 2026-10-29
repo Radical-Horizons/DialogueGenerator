@@ -144,3 +144,57 @@ B0 et le run du 2026-10-01 ne se comparent pas sur les notes du juge, même pour
 mesures sans juge — mots par phrase, jointures, ruptures — que B0 publiera à côté
 du tableau ci-dessus. C'est le seul effet de la phase 1 sur l'oralité qui soit
 mesurable.
+
+## B0 — ligne de base (2026-10-29)
+
+Run `20261029T174049-a0d1779a`, empreinte de consigne `f4b09c8d2e1a`.
+`openai/gpt-6-luna`, 8 cas × 3, sans didascalies, effort `medium` ; juge J2.
+24 générations valides, aucune troncature, **aucune observation de porte**.
+Dépense réelle : **2,758 $** (0,074 $ de génération, 2,684 $ de notation).
+
+| mesure | B0 |
+|---|---|
+| `oral_naturalness`, moyenne brute | **5,54** (σ 0,66 ; une note à 4, onze à 5, onze à 6, une à 7) |
+| `oral_naturalness`, hors excuses | 5,54 |
+| verdicts à oralité faible légitime | 0 |
+| `voice_fidelity` | 5,67 |
+| `voice_consistency` | 7,17 |
+| `context_fidelity` | 6,96 |
+| `french_correctness` | 8,88 |
+| `ai_tics` · `overwriting` · `blandness` · `forced_exposition` | 2,46 · 3,04 · 2,33 · 2,88 |
+| moyenne pondérée | 7,16 |
+
+Aucun verdict n'est excusé : la justesse de la voix n'atteint 8 sur aucun.
+
+**Le seul pont avec le 1ᵉʳ octobre, les mesures sans juge** : mots par phrase
+15,9 (16,7 avant), `;` `:` pour 100 mots 2,92 (2,76), ruptures 0,45 (0,79). La
+phase 1 n'a **pas** rendu `gpt-6-luna` plus oral, ce qui est attendu : elle
+corrigeait ce que le modèle recevait, pas ce qu'on lui demande.
+
+**Pourquoi la voix tombe à 5,67** (lecture des commentaires, hypothèse) : le juge
+voit désormais la voix entière de chaque fiche — les « modes de communication » de
+l'Ensevelie, le patois de Genka, les tics de Voknir, auparavant coupés en fin de
+fiche — et il note contre elle. Les trois notes les plus basses (4) disent la même
+chose : l'Ensevelie « tient un dialogue argumentatif parfaitement articulé » au lieu
+de sa « violence douce » sensorielle, Genka reste « sentencieux et abstrait », loin
+du patois de routes. La spécification de la voix est maintenant sous les yeux du
+modèle ; il ne l'applique pas. C'est la cible de L1 et de L2.
+
+| cas | oral brut | voix | cohérence |
+|---|---|---|---|
+| `akthar-interdit` | 6,33 | 6,33 | 7,67 |
+| `voknir-exposition-dedale` | 6,00 | 6,33 | 7,33 |
+| `voknir-premiere-rencontre` | 6,00 | 5,00 | 6,33 |
+| `genka-confrontation` | 5,67 | 6,67 | 7,67 |
+| `zaehria-marchandage` | 5,33 | 5,67 | 7,67 |
+| `ensevelie-revelation` | 5,00 | 4,33 | 6,67 |
+| `genka-marchandage` | 5,00 | 4,33 | 6,33 |
+| `zaehria-confrontation` | 5,00 | 6,67 | 7,67 |
+
+Deux incidents de mesure, traités :
+
+- **Une réponse du juge non conforme** (`branch_coherence` noté deux fois) : verdict
+  rejeté puis rejugé, n = 24 comme prévu.
+- **La purge des verdicts en erreur effaçait leur coût** : la passe affichait
+  2,563 $ pour 2,684 $ dépensés, et le plafond ne tenait qu'une relance. Corrigé
+  par un registre des coûts purgés, test à l'appui.

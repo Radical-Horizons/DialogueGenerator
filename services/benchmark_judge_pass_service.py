@@ -86,6 +86,45 @@ pas un doublement structurel : comparer demande plus de raisonnement que noter.
 Mesuré sur 50 duels : 2 770 en moyenne, **3 351 au maximum**, contre 800 estimés."""
 
 _PASS_STATE_NAME = "_pass.json"
+
+_DISCARDED_LEDGER_NAME = "_discarded.json"
+"""Coût des verdicts en erreur purgés avant un relancement.
+
+La purge est nécessaire — un `judge_error` garderait la cellule pour toujours — mais
+elle effaçait le coût de ces appels, alors facturés. La dépense étant recalculée
+depuis les verdicts sur disque, le plafond ne tenait qu'une relance : à la suivante,
+les coûts purgés avaient disparu, et le total publié sous-comptait la dépense réelle
+(constaté sur B0 le 2026-10-29 : 2,563 $ affichés pour 2,684 $ dépensés).
+"""
+
+
+def _is_bookkeeping(path: Path) -> bool:
+    """Fichier de suivi de la passe (état, registre), pas un verdict."""
+    return path.name.startswith("_")
+
+
+def _record_discarded_cost(directory: Path, cost: float) -> None:
+    """Ajoute au registre le coût d'un verdict qu'on s'apprête à purger.
+
+    Écrit **avant** la suppression : interrompue entre les deux, la passe compte un
+    coût deux fois plutôt que zéro — l'erreur sûre pour un plafond.
+    """
+    ledger = directory / _DISCARDED_LEDGER_NAME
+    raw = read_json_file(ledger, None)
+    raw = raw if isinstance(raw, dict) else {}
+    write_json_atomic(
+        ledger,
+        {
+            "cost_usd": round(float(raw.get("cost_usd", 0.0)) + float(cost or 0.0), 6),
+            "verdicts": int(raw.get("verdicts", 0)) + 1,
+        },
+    )
+
+
+def _discarded_cost(directory: Path) -> float:
+    """Coût cumulé des verdicts purgés de ce répertoire."""
+    raw = read_json_file(directory / _DISCARDED_LEDGER_NAME, None)
+    return float(raw.get("cost_usd", 0.0)) if isinstance(raw, dict) else 0.0
 """État de passe, logé parmi les verdicts mais exclu de leur relevé."""
 
 
@@ -282,7 +321,7 @@ class BenchmarkJudgePassService:
             return []
         verdicts: List[RubricVerdict] = []
         for path in sorted(root.glob("*/*.json")):
-            if path.name == _PASS_STATE_NAME:
+            if _is_bookkeeping(path):
                 continue
             raw = read_json_file(path, None)
             if raw is None:
@@ -330,10 +369,11 @@ class BenchmarkJudgePassService:
         if not directory.exists():
             return
         for path in directory.glob("*.json"):
-            if path.name == _PASS_STATE_NAME:
+            if _is_bookkeeping(path):
                 continue
             raw = read_json_file(path, None)
             if isinstance(raw, dict) and raw.get("status") == "judge_error":
+                _record_discarded_cost(directory, raw.get("cost_usd", 0.0))
                 try:
                     path.unlink()
                 except OSError as exc:
@@ -358,7 +398,8 @@ class BenchmarkJudgePassService:
                 verdict.cost_usd
                 for verdict in self.list_verdicts(run_id)
                 if verdict.judge_model == judge_model
-            ),
+            )
+            + _discarded_cost(self._verdicts_dir(run_id, judge_model)),
             6,
         )
 
@@ -717,7 +758,9 @@ class BenchmarkJudgePassService:
                                 1 for verdict in produced if verdict.status == "judge_error"
                             ),
                             "spent_usd": round(
-                                sum(verdict.cost_usd for verdict in produced), 6
+                                sum(verdict.cost_usd for verdict in produced)
+                                + _discarded_cost(verdict_dir),
+                                6,
                             ),
                         }
                     )
@@ -881,7 +924,7 @@ class BenchmarkPairwisePassService:
             return []
         verdicts: List[PairwiseVerdict] = []
         for path in sorted(root.glob("*/*.json")):
-            if path.name == _PASS_STATE_NAME:
+            if _is_bookkeeping(path):
                 continue
             raw = read_json_file(path, None)
             if raw is None:
@@ -916,7 +959,8 @@ class BenchmarkPairwisePassService:
                 verdict.cost_usd
                 for verdict in self.list_verdicts(run_id)
                 if verdict.judge_model == judge_model
-            ),
+            )
+            + _discarded_cost(self._duels_dir(run_id, judge_model)),
             6,
         )
 
@@ -967,10 +1011,11 @@ class BenchmarkPairwisePassService:
         if not directory.exists():
             return
         for path in directory.glob("*.json"):
-            if path.name == _PASS_STATE_NAME:
+            if _is_bookkeeping(path):
                 continue
             raw = read_json_file(path, None)
             if isinstance(raw, dict) and raw.get("status") == "judge_error":
+                _record_discarded_cost(directory, raw.get("cost_usd", 0.0))
                 try:
                     path.unlink()
                 except OSError as exc:
@@ -1239,7 +1284,10 @@ class BenchmarkPairwisePassService:
                             "judge_errors": sum(
                                 1 for v in produced if v.status == "judge_error"
                             ),
-                            "spent_usd": round(sum(v.cost_usd for v in produced), 6),
+                            "spent_usd": round(
+                                sum(v.cost_usd for v in produced) + _discarded_cost(duels_dir),
+                                6,
+                            ),
                         }
                     )
                     self._persist_state(final)
