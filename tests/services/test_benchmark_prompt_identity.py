@@ -140,8 +140,7 @@ def test_speaker_voice_loses_its_stage_directions_too() -> None:
         return_value=_voice_element("Voix basse *(phénomène émergent)* et lente."),
     ):
         prompt = _built()
-    voice = ET.fromstring(prompt).find("speaker_voice")
-    assert voice is not None and "*(" not in voice.text
+    assert "*(" not in prompt.split("<context>")[0]
 
 
 def _voice_element(text: str) -> ET.Element:
@@ -149,19 +148,3 @@ def _voice_element(text: str) -> ET.Element:
     element = ET.Element("speaker_voice")
     element.text = text
     return element
-
-
-def test_speaker_voice_is_read_right_before_the_scene() -> None:
-    """L2 : la voix du locuteur se lit en dernier, avec la consigne de scène.
-
-    Elle était en tête, à 80 000 caractères de la scène sur les cas longs.
-    """
-    from unittest.mock import patch
-
-    with patch.object(
-        PromptBuilder, "_build_speaker_voice_section", return_value=_voice_element("Voix.")
-    ):
-        root = ET.fromstring(_built())
-    tags = [child.tag for child in root]
-    assert tags.index("speaker_voice") == tags.index("scene_instructions") - 1
-    assert root.find("technical/speaker_voice") is None

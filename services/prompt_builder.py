@@ -9,7 +9,7 @@ from typing import Optional, TYPE_CHECKING, List, Dict, Any
 import xml.etree.ElementTree as ET
 
 from utils.xml_utils import sanitize_xml_text
-from services.gdd_prompt_text import cut_text, strip_stage_directions
+from services.gdd_prompt_text import strip_stage_directions
 from models.dialogue_structure.unity_dialogue_fragment import MAX_CHOICES as FRAGMENT_MAX_CHOICES
 from services.dialogue_dramatic_progression import (
     DIALOGUE_ORALITY_PROMPT_LINES,
@@ -34,10 +34,6 @@ def _strip_stage_directions_in_tree(element: ET.Element) -> None:
             node.text = strip_stage_directions(node.text)
         if node.tail:
             node.tail = strip_stage_directions(node.tail)
-
-
-SPEAKER_VOICE_MAX_CHARS = 8000
-"""Plafond du bloc `<speaker_voice>` : la voix entière d'une fiche réelle, exemples compris."""
 
 
 # Réserve tokens pour l’enveloppe XML plate (<context><gdd_context>) quand le XML hiérarchique dépasse le budget.
@@ -113,17 +109,7 @@ class PromptBuilder:
         vocab_elem = self._build_vocabulary_section(input)
         if vocab_elem is not None:
             root.append(vocab_elem)
-
-        # Section 2D : Voix du locuteur, juste avant la consigne de scène. Elle était en
-        # tête du prompt, à 80 000 caractères de la scène sur les cas longs ; le juge
-        # de B0 notait que le modèle avait la voix de la fiche sous les yeux et ne
-        # l'appliquait pas. Le bloc se lit désormais en dernier, avec la scène.
-        speaker_voice_elem = self._build_speaker_voice_section(input)
-        if speaker_voice_elem is not None:
-            if not getattr(input, "allow_stage_directions", True):
-                _strip_stage_directions_in_tree(speaker_voice_elem)
-            root.append(speaker_voice_elem)
-
+        
         # Section 3 : Instructions de scène
         scene_elem = self._build_scene_instructions_section(input)
         if scene_elem is not None:
@@ -288,13 +274,11 @@ class PromptBuilder:
             return None
 
         raw_content = "\n\n".join(voice_parts)
-        # Le bloc est hors budget de contexte : il a donc son propre plafond. Il valait
-        # 1 600 caractères et s'arrêtait avant les exemples de répliques, les gestes et
-        # ce dont le personnage refuse de parler — tout ce qui fait une voix au-delà de
-        # sa description. La section voix des fiches réelles fait de 3 000 à 10 600
-        # caractères (octobre 2026).
-        if len(raw_content) > SPEAKER_VOICE_MAX_CHARS:
-            raw_content = cut_text(raw_content, SPEAKER_VOICE_MAX_CHARS)
+        # Limiter à 400 tokens (≈ 1600 caractères) pour rester hors budget contexte
+        if len(raw_content) > 1600:
+            cut = raw_content[:1600]
+            last_nl = cut.rfind("\n")
+            raw_content = (cut[:last_nl] if last_nl > 1200 else cut) + "\n... (extrait)"
 
         voice_elem = ET.Element("speaker_voice")
         voice_elem.text = sanitize_xml_text(
@@ -313,6 +297,13 @@ class PromptBuilder:
         """
         technical_elem = ET.Element("technical")
         has_content = False
+
+        # SECTION VOIX DU SPEAKER — injectée avant la zone soumise au budget contexte
+        speaker_voice_elem = self._build_speaker_voice_section(input)
+        if speaker_voice_elem is not None:
+            technical_elem.append(speaker_voice_elem)
+            has_content = True
+        
         # INSTRUCTIONS DE GÉNÉRATION
         gen_elem = ET.SubElement(technical_elem, "generation_instructions")
         gen_parts = [
