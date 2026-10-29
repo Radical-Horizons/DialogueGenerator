@@ -298,3 +298,18 @@ méthode s'était glissée entre le décorateur `@staticmethod` et la méthode e
 Celle-ci, appelée depuis une instance, levait `TypeError` : le rattrapage des
 `consequences` en liste était cassé **pour tous les modèles OpenRouter, en production**.
 Corrigé ; le test appelle désormais la méthode comme le client, depuis une instance.
+
+## L2 — la voix au bon endroit (préparé, non mesuré)
+
+Depuis la phase 1, la section « VOIX ET STYLE » d'une fiche contient tous ses champs de
+voix : exemples de répliques, gestes et tics, champs lexicaux, rencontre initiale, ce
+dont le personnage refuse de parler, modes de communication. L2 fait deux choses :
+
+1. **Le bloc `<speaker_voice>` n'est plus coupé à 1 600 caractères** — il s'arrêtait
+   avant les exemples. Plafond 8 000 ; sur les huit cas, il tient entier sauf Akthar
+   (coupé à 7 400, refus compris).
+2. **Il se lit juste avant la consigne de scène**, au lieu d'ouvrir le prompt à 80 000
+   caractères d'elle. Hypothèse : la proximité de la consigne compte sur un prompt long.
+
+Le lore n'est ni coupé ni déplacé : la fiche entière reste au contexte, la fidélité se
+juge contre le même dossier qu'en B0.
