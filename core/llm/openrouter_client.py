@@ -14,6 +14,7 @@ from pydantic import BaseModel, ValidationError
 
 from core.llm.finish_reason import extract_finish_reason
 from core.llm.llm_client import ILLMClient
+from core.llm.system_prompt import default_system_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -76,10 +77,9 @@ class OpenRouterClient(ILLMClient):
         # `medium` et GLM ou Kimi au maximum de leur fournisseur, d'où dix fois
         # plus de tokens facturés sans que personne l'ait demandé.
         self.reasoning_effort = self.llm_config.get("reasoning_effort", None)
-        self.system_prompt_template = self.llm_config.get(
-            "system_prompt_template",
-            "Tu es un assistant expert en écriture de dialogues pour jeux de rôle (RPG).",
-        )
+        # Le message système vient de config/system_prompts/default.txt, le même que
+        # l'éditeur de l'UI affiche : une seule source pour la consigne envoyée.
+        self.system_prompt_template = default_system_prompt()
 
         self.usage_service = usage_service
         self.request_id = request_id or "unknown"

@@ -977,6 +977,7 @@ class BenchmarkRunService:
                                 problems = audit_prompt(
                                     record.raw_prompt,
                                     tool_schema=fragment_tool_schema_text(),
+                                    system_prompt=record.system_prompt or "",
                                     fragment_mode=True,
                                     allow_stage_directions=(
                                         run.identity.narration_mode == "avec"

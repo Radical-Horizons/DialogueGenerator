@@ -18,6 +18,7 @@ except ImportError:
 
 from core.llm.finish_reason import extract_finish_reason
 from core.llm.llm_client import ILLMClient
+from core.llm.system_prompt import default_system_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -63,10 +64,9 @@ class MistralClient(ILLMClient):
         self.temperature = self.llm_config.get("temperature", 0.7)
         self.max_tokens = self.llm_config.get("max_tokens", 32000)
 
-        self.system_prompt_template = self.llm_config.get(
-            "system_prompt_template",
-            "Tu es un assistant expert en écriture de dialogues pour jeux de rôle (RPG)."
-        )
+        # Le message système vient de config/system_prompts/default.txt, le même que
+        # l'éditeur de l'UI affiche : une seule source pour la consigne envoyée.
+        self.system_prompt_template = default_system_prompt()
 
         # Service de tracking (optionnel)
         self.usage_service = usage_service

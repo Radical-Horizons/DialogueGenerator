@@ -100,6 +100,7 @@ def audit_prompt(
     fragment_mode: bool,
     allow_stage_directions: bool,
     tool_schema: str = "",
+    system_prompt: str = "",
 ) -> List[str]:
     """Relève les contradictions entre un prompt assemblé et le run demandé.
 
@@ -110,6 +111,9 @@ def audit_prompt(
         tool_schema: Schéma JSON de l'outil de sortie. Une formulation interdite y
             compte autant que dans le prompt ; une formulation **requise**, non :
             le schéma ne porte pas la consigne.
+        system_prompt: Message système réellement envoyé. Il est lu par le modèle
+            comme le reste : l'ancien `default.txt`, devenu le message envoyé,
+            autorisait les didascalies dans tous les modes.
 
     Returns:
         Les contradictions, en clair. Liste vide si le prompt est cohérent —
@@ -119,7 +123,7 @@ def audit_prompt(
     if not prompt or not any(marker in prompt for marker in _ASSEMBLED_MARKERS):
         return []
 
-    read_by_model = f"{prompt}\n{tool_schema}"
+    read_by_model = f"{system_prompt}\n{prompt}\n{tool_schema}"
     problems: List[str] = []
     if fragment_mode:
         problems += [

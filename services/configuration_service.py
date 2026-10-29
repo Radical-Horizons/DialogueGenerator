@@ -22,6 +22,37 @@ CONFIG_DIR = DIALOGUE_GENERATOR_DIR / "config"
 # Chemin par défaut pour les dialogues Unity - toujours Assets/Dialogue depuis la racine du projet
 DEFAULT_UNITY_DIALOGUES_PATH = DIALOGUE_GENERATOR_DIR / "Assets" / "Dialogue"
 
+def read_default_system_prompt(prompts_metadata: Optional[Dict[str, Any]] = None) -> str:
+    """Lit le message système par défaut : celui que l'éditeur de l'UI affiche.
+
+    C'est aussi, désormais, celui que les clients LLM envoient. Jusqu'en octobre 2026
+    ils envoyaient `system_prompt_template` de `llm_config.json`, un autre texte —
+    « contenu textuel riche, chaque champ doit être développé » — pendant que l'UI
+    montrait celui-ci. Deux sources pour un même message : la consigne réellement
+    reçue par le modèle n'était lisible nulle part.
+
+    Args:
+        prompts_metadata: Métadonnées déjà chargées ; relues sur disque si absentes.
+
+    Returns:
+        Le texte du message système, ou ``""`` s'il est introuvable.
+    """
+    if prompts_metadata is None:
+        try:
+            prompts_metadata = json.loads(PROMPTS_METADATA_FILE_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            logger.error("Métadonnées de prompts illisibles (%s) : %s", PROMPTS_METADATA_FILE_PATH, exc)
+            return ""
+    file_name = prompts_metadata.get("system_prompts", {}).get("default", {}).get("file")
+    if not file_name:
+        return ""
+    try:
+        return (CONFIG_DIR / file_name).read_text(encoding="utf-8").strip()
+    except OSError as exc:
+        logger.error("Message système par défaut illisible (%s) : %s", file_name, exc)
+        return ""
+
+
 class ConfigurationService:
     def __init__(self):
         # Load app_config.json, with migration from ui_settings.json if needed
@@ -270,12 +301,7 @@ class ConfigurationService:
         Returns:
             The default system prompt string.
         """
-        default_meta = self.prompts_metadata.get("system_prompts", {}).get("default", {})
-        file_path = default_meta.get("file")
-        if file_path:
-            full_path = CONFIG_DIR / file_path
-            return self._load_text_file(full_path)
-        return ""
+        return read_default_system_prompt(self.prompts_metadata)
     
     def get_author_profile_templates(self) -> List[Dict[str, Any]]:
         """Gets the list of author profile templates.

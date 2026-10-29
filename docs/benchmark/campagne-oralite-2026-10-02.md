@@ -198,3 +198,25 @@ Deux incidents de mesure, traités :
 - **La purge des verdicts en erreur effaçait leur coût** : la passe affichait
   2,563 $ pour 2,684 $ dépensés, et le plafond ne tenait qu'une relance. Corrigé
   par un registre des coûts purgés, test à l'appui.
+
+## L1 — préparé, non mesuré
+
+Trois changements, mesurés ensemble par décision produit (longueur et oralité vont de
+pair) :
+
+1. **Une seule source pour le message système** : `config/system_prompts/default.txt`,
+   celui que l'éditeur de l'UI affiche, est désormais celui que les clients envoient.
+   La clé `system_prompt_template` de `llm_config.json` — « contenu textuel riche…
+   chaque champ doit être développé » — disparaît. Le nouveau texte ne décrit plus le
+   format (il autorisait les didascalies dans tous les modes) et l'audit lit
+   désormais le message système.
+2. **Un bloc « Oralité »** dans les contraintes partagées par les deux chemins de
+   génération (fragment d'ouverture et nœuds enfants du graphe) : une idée par phrase,
+   ni `;` ni `:` dans une réplique, pas de subordonnées en cascade, l'oral qui se
+   reprend quand la voix le veut ; exception pour une syntaxe singulière exigée par
+   la fiche, à condition qu'elle soit tenue sans faille.
+3. **La longueur du GDD, en mots** : une réplique vise 150 mots au plus, jamais plus de
+   300 — à la place de « 1 à 4 phrases ».
+
+Vérifié sans dépense sur les huit cas réels : bloc présent partout, ancienne règle
+absente, audit sans contradiction.

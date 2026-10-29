@@ -92,6 +92,42 @@ _BEAT_BY_PHASE = {
     ),
 }
 
+DIALOGUE_ORALITY_RULES = (
+    "\n\nOralité — ce texte sera dit à voix haute :\n"
+    "- Une idée par phrase. Une phrase se dit d'un souffle : si elle demande d'être "
+    "relue, coupe-la.\n"
+    "- Pas de point-virgule ni de deux-points dans une réplique : à l'oral, on s'arrête "
+    "et on repart.\n"
+    "- Les subordonnées en cascade sont de l'écrit. L'oral juxtapose, se reprend, se "
+    "répète, s'interrompt — quand la voix du personnage le veut, pas par principe.\n"
+    "- Exception : quand la fiche du personnage prescrit une syntaxe singulière, la voix "
+    "l'emporte, à condition d'être tenue sans faille d'un bout à l'autre du fragment. Une "
+    "étrangeté constante est une voix ; une étrangeté intermittente est une erreur.\n"
+)
+"""Consigne d'oralité, partagée par tous les chemins de génération.
+
+Tirée de ce que le juge reprochait au run du 2026-10-01 : environ 40 commentaires sur
+48 décrivaient des phrases d'une vingtaine de mots, soudées par `;` et `:`, aux
+subordonnées empilées — et aucun ne reprochait la longueur des panneaux. L'exception
+applique la règle produit du 2026-10-02 : le jeu assume des personnages bizarres,
+pourvu que leur voix soit tenue.
+
+Elle vit dans les contraintes que `compose_generation_instructions` ajoute aux
+consignes de scène, parce que c'est le seul bloc que reçoivent **les deux** chemins :
+le fragment d'ouverture (XML de `PromptEngine`) et la génération de nœuds enfants du
+graphe, qui contourne `PromptEngine`.
+"""
+
+DIALOGUE_LENGTH_RULE = (
+    "- Longueur : une réplique (`line`) vise 150 mots au plus, jamais plus de 300.\n"
+)
+"""Règle de longueur du GDD (fiche système Dialogues), exprimée en mots.
+
+Elle remplace « 1 à 4 phrases » (2026-10-02). Un plafond en **nombre de phrases**
+récompensait mécaniquement les phrases longues et soudées — le défaut même que le juge
+reprochait. La valeur est celle du GDD, décision produit du même jour.
+"""
+
 DIALOGUE_GENERATION_GLOBAL_CONSTRAINTS = (
     "\n\nContraintes de génération:\n"
     "- Format `line` : paroles « … » ; didascalies *italique* narrateur (3e pers.), hors guillemets.\n"
@@ -101,8 +137,10 @@ DIALOGUE_GENERATION_GLOBAL_CONSTRAINTS = (
     "- Flags / état durable → `consequences` en complément si besoin.\n"
     "- `choices.test` autorisé avec parcimonie quand le choix comporte risque, incertitude, "
     "pression sociale ou effort notable (format Attribut+Compétence:DD) ; éviter d'en mettre partout.\n"
-    "- 1 à 4 phrases (didascalie + réplique comptées ensemble) ; même tu/vous que le START.\n"
+    + DIALOGUE_LENGTH_RULE
+    + "- Didascalies comprises dans la longueur ; même tu/vous que le START.\n"
     "- Ne pas répéter formulations déjà dans l'historique.\n"
+    + DIALOGUE_ORALITY_RULES
 )
 
 
@@ -117,8 +155,10 @@ DIALOGUE_GENERATION_GLOBAL_CONSTRAINTS_NO_STAGE_DIRECTIONS = (
     "- `choices.test` autorisé avec parcimonie quand le choix comporte risque, "
     "incertitude, pression sociale ou effort notable (format Attribut+Compétence:DD) ; "
     "éviter d'en mettre partout.\n"
-    "- 1 à 4 phrases ; même tu/vous que le START.\n"
+    + DIALOGUE_LENGTH_RULE
+    + "- Même tu/vous que le START.\n"
     "- Ne pas répéter formulations déjà dans l'historique.\n"
+    + DIALOGUE_ORALITY_RULES
 )
 """Variante sans didascalies du bloc de contraintes.
 

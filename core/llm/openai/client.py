@@ -15,6 +15,7 @@ from core.llm.openai.reasoning_extractor import OpenAIReasoningExtractor
 from core.llm.openai.usage_tracker import OpenAIUsageTracker
 from core.llm.finish_reason import extract_finish_reason
 from core.llm.openai.stream_parser import OpenAIStreamParser, StreamChunk, StreamEventType
+from core.llm.system_prompt import default_system_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -65,10 +66,9 @@ class OpenAIClient(ILLMClient):
         self.reasoning_summary = self.llm_config.get("reasoning_summary", None)
         self.top_p = self.llm_config.get("top_p", None)
         
-        self.system_prompt_template = self.llm_config.get(
-            "system_prompt_template",
-            "Tu es un assistant expert en écriture de dialogues pour jeux de rôle (RPG)."
-        )
+        # Le message système vient de config/system_prompts/default.txt, le même que
+        # l'éditeur de l'UI affiche : une seule source pour la consigne envoyée.
+        self.system_prompt_template = default_system_prompt()
         
         # Service de tracking (optionnel)
         self.usage_service = usage_service

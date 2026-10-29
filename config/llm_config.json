@@ -5,7 +5,6 @@
   "default_model": "openai/gpt-5.6-terra",
   "temperature": 0.7,
   "max_tokens": 32000,
-  "system_prompt_template": "Tu es un assistant expert en écriture de dialogues pour jeux de rôle (RPG). Ton objectif est de générer des interactions de dialogue complètes et engageantes. Lorsque tu utilises la fonction 'generate_interaction', assure-toi de remplir chaque phase demandée (PNJ, PJ) avec un contenu textuel riche, pertinent pour le contexte fourni, et respectant la nature de l'élément (dialogue parlé, choix d'action/dialogue). Ne te contente pas de fournir une structure vide ou minimale ; chaque champ textuel doit être développé.",
   "fallback_chain": [
     "openai/gpt-5.6-terra",
     "mistralai/mistral-medium-3-5"
