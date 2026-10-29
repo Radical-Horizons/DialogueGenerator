@@ -355,3 +355,26 @@ que de garder ou retirer L2 sur un résultat déjà vu.
   recopie ne monte pas.
 - Limite assumée : L1bis est lui-même un tirage unique ; l'écart mesuré porte le bruit
   des deux côtés.
+
+### Remesure de L2 — échec, levier retiré
+
+Second tirage `20261029T211343-e946cbd5`, même empreinte que le premier
+(`d2de2afc4f78`). Dépense : **2,729 $**. 24 générations valides, aucune erreur de juge.
+
+| mesure | L1bis | L2, 1ᵉʳ tirage | **L2, 2ᵈ tirage** | L2, deux tirages (n = 48) |
+|---|---|---|---|---|
+| **`voice_fidelity`** | 5,42 | 5,71 | **5,25** | 5,48 |
+| `voice_distinction` | 5,62 | 6,17 | 5,67 | 5,92 |
+| `oral_naturalness` | 6,92 | 6,79 | 6,71 | 6,75 |
+| `voice_consistency` | 7,00 | 7,00 | 6,88 | 6,94 |
+| `context_fidelity` | 6,96 | 7,17 | 6,79 | 6,98 |
+
+**Critère pré-enregistré non atteint** : 5,25 au lieu d'au moins 5,92. Réunis, les deux
+tirages de L2 retombent sur L1bis. Le gain du premier tirage était du bruit.
+**L2 est retiré du code** (commit de retrait) ; L1bis reste la base.
+
+**Ce que cette remesure apprend sur l'instrument.** Deux tirages d'une **même**
+configuration diffèrent de 0,46 sur la justesse de la voix et de 0,50 sur la
+distinction. À n = 24 et un tirage par palier, un écart inférieur à ~0,5 ne se
+distingue pas du hasard. Le seuil de +0,5 n'était donc pas trop sévère, il était au
+plancher. Le gain de L1bis sur l'oralité (+1,38) est, lui, près de trois fois au-dessus.
