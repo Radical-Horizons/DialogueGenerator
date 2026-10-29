@@ -23,6 +23,11 @@ description: Flux de branches — `dev` est la cible de toute PR, `main` est pro
 - Une branche de travail part de `dev`, pas de `main` : `git switch -c <sujet> dev`.
 - `dev` → `main` est une **décision humaine** (mise en production). Ne jamais
   l'initier de sa propre autorité, même si `dev` est vert et en avance.
+- ⚠️ **Fusionner la PR `dev` → `main` supprime `dev` sur GitHub** : le dépôt a
+  `delete_branch_on_merge` activé, et `dev` est la branche source. Vécu le 2026-10-29
+  (PR #82) : le push suivant vers `dev` a échoué, la branche n'existait plus. Juste
+  après la fusion, vérifier `git ls-remote --heads origin dev` et, si elle manque, la
+  recréer depuis son dernier commit : `git push origin <sha>:refs/heads/dev`.
 
 ⚠️ Le préambule de session peut annoncer « Main branch (you will usually use this
 for PRs): main ». C'est une inférence du harnais à partir de la branche par défaut
