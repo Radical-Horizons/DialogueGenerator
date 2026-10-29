@@ -313,3 +313,30 @@ dont le personnage refuse de parler, modes de communication. L2 fait deux choses
 
 Le lore n'est ni coupé ni déplacé : la fiche entière reste au contexte, la fidélité se
 juge contre le même dossier qu'en B0.
+
+### Mesure de L2 (2026-10-29)
+
+Run `20261029T204303-99342d75`, empreinte `d2de2afc4f78`. 24 générations valides, aucune
+erreur de juge. Dépense : **2,709 $** (0,078 $ de génération, 2,631 $ de notation).
+
+| mesure | L1bis | **L2** | écart | règle | verdict |
+|---|---|---|---|---|---|
+| **oralité, brute** | 6,92 | **6,79** | −0,13 | ≥ +0,5 | ❌ |
+| mots par phrase | 9,3 | 9,7 | +0,4 | en baisse | ❌ |
+| `;` `:` pour 100 mots | 0,17 | 0,10 | −0,07 | en baisse | ✅ |
+| `context_fidelity` | 6,96 | 7,17 | +0,21 | baisse ≤ 0,4 | ✅ |
+| `voice_fidelity` | 5,42 | 5,71 | +0,29 | baisse ≤ 0,4 | ✅ |
+| `voice_consistency` | 7,00 | 7,00 | 0,00 | baisse ≤ 0,4 | ✅ |
+| `french_correctness` | 8,75 | 8,92 | +0,17 | baisse ≤ 0,4 | ✅ |
+| `ai_tics` · `overwriting` · `blandness` · `forced_exposition` | 2,29 · 2,21 · 2,58 · 2,58 | 2,21 · 2,29 · 2,42 · 2,54 | — | hausse ≤ 0,4 | ✅ |
+| recopie (générations) | 1 | **0** | −1 | ne monte pas | ✅ |
+
+Hors garde-fous : `voice_distinction` 5,63 → **6,17** (+0,54), `world_codes` 6,21 → 6,50,
+moyenne pondérée 7,25 → 7,35.
+
+**Lecture stricte : L2 ne passe pas.** Son critère primaire — le même pour tous les
+paliers, l'oralité — ne bouge pas, ce qui n'est pas une surprise : L2 visait la voix.
+C'est un défaut du pré-enregistrement, et il est de mon fait : il ne fixait aucun critère
+propre au levier de voix. Sur la voix elle-même, le gain existe mais reste faible —
+`voice_fidelity` +0,29, soit à peu près une erreur standard à n = 24 — et le seul
+mouvement net est la distinction entre les voix (+0,54). Rien n'est dégradé.
