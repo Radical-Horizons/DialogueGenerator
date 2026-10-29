@@ -30,10 +30,10 @@ Rule versioning : [`.claude/rules/app_versioning.md`](../../rules/app_versioning
 - [ ] 1. Identifier dernier tag prod + commits depuis
 - [ ] 2. Décider bump majeur / mineur / patch (jugement dev)
 - [ ] 3. Rédiger highlights canvas (synthèse des commits)
-- [ ] 4. Gate CI T3 si push main
-- [ ] 5. Bump semver + verify + commit
+- [ ] 4. Bump semver + verify sur une branche release/vX.Y.Z, PR vers main, fusion (CI verte)
+- [ ] 5. Gate T3 locale sur main à jour (le commit qui sera déployé)
 - [ ] 6. Mettre à jour canvas VERSIONS
-- [ ] 7. Push main + npm run deploy
+- [ ] 7. npm run deploy depuis main
 - [ ] 8. Health prod + tag git vX.Y.Z + push tag
 ```
 
@@ -101,9 +101,11 @@ Actions :
 
 ---
 
-## 4 — Gate CI (push `main`)
+## 4 — Gate CI T3 (avant deploy)
 
-Obligatoire avant push/deploy sur `main` — [`.claude/rules/ci_before_push.md`](../../rules/ci_before_push.md) :
+Plus de branche `dev` (2026-10-29) : `main` est protégée, le bump passe par une PR
+`release/vX.Y.Z` → `main` (voir étape 5). Une fois fusionnée, lancer la T3 sur `main` à
+jour — c'est ce commit-là qui part en prod — [`.claude/rules/ci_before_push.md`](../../rules/ci_before_push.md) :
 
 1. `npm run test:backend:full`
 2. `cd frontend && set VITEST_FULL=1&& npx vitest run --max-workers=2`
@@ -114,7 +116,10 @@ Alternative : `npm run test:ci:local` si documenté et vert.
 
 ---
 
-## 5 — Commit release (sur `main`)
+## 5 — Commit release (branche `release/vX.Y.Z`, PR vers `main`)
+
+`git switch -c release/vX.Y.Z origin/main`, bump, commit, `gh pr create --base main`,
+fusion quand la CI est verte.
 
 Message suggéré :
 

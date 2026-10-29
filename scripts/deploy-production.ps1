@@ -182,8 +182,10 @@ Write-Info "$fileCount fichiers à uploader"
 Write-Info "Upload en cours sur ${ServerUser}@${ServerHost}:${ServerPath}/frontend/dist/..."
 Write-Warning "Cela peut prendre quelques minutes..."
 
-$scpCommand = "scp -r `"$tempDir\*`" ${ServerUser}@${ServerHost}:${ServerPath}/frontend/dist/"
-Invoke-Expression $scpCommand
+# Liste explicite plutôt qu'un joker : lancé depuis Git Bash, le PATH donne le scp de Git,
+# qui ne développe pas "*" passé par PowerShell (stat local "...\*": No such file).
+$uploadItems = @(Get-ChildItem -Path $tempDir | ForEach-Object { $_.FullName })
+& scp -r @uploadItems "${ServerUser}@${ServerHost}:${ServerPath}/frontend/dist/"
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Échec de l'upload"

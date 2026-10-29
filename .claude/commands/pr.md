@@ -1,25 +1,22 @@
 ---
-description: Ouvre une PR vers dev (jamais main), avec la gate locale T2 et l'auto-merge optionnel.
+description: Ouvre une PR vers main, avec la gate locale T2 et l'auto-merge optionnel.
 argument-hint: "[titre optionnel] [auto pour activer l'auto-merge]"
 allowed-tools: Bash(git:*), Bash(gh:*), Bash(npm:*), Bash(npx:*)
 ---
 
-Ouvrir une pull request **vers `dev`**. Contexte utilisateur : $ARGUMENTS
+Ouvrir une pull request **vers `main`**. Contexte utilisateur : $ARGUMENTS
 
 ## État courant
 
 - Branche : !`git rev-parse --abbrev-ref HEAD`
 - Statut : !`git status --short`
-- Ce que la PR apportera : !`git rev-list --count origin/dev..HEAD` commit(s)
+- Ce que la PR apportera : !`git rev-list --count origin/main..HEAD` commit(s)
 
 ## La règle qui justifie cette commande
 
-`gh pr create` sans `--base` vise la branche **par défaut du dépôt**, qui est `main`.
-C'est ainsi que des PR partent vers la production par accident. **Toujours passer
-`--base dev`** — voir `.claude/rules/branching.md`.
-
-`dev` → `main` est une décision humaine de mise en production : cette commande ne
-l'ouvre jamais.
+Une seule branche longue, `main`, protégée : tout y entre par PR — voir
+`.claude/rules/branching.md`. Fusionner ne déploie rien ; la prod suit le dernier tag
+`vX.Y.Z` (`/prod-release`).
 
 ## Gate avant d'ouvrir
 
@@ -35,12 +32,12 @@ Seule dérogation : diff limité à `.claude/**`, `CLAUDE.md`, `AGENTS.md`, `doc
 
 ## Étapes
 
-1. Vérifier qu'on n'est **pas** sur `main` ni `dev`. Sinon : `git switch -c <sujet> dev`.
+1. Vérifier qu'on n'est **pas** sur `main`. Sinon : `git switch -c <sujet> origin/main`.
 2. Commiter et pousser la branche : `git push -u origin HEAD`.
-3. Ouvrir la PR — **`--base dev` obligatoire** :
+3. Ouvrir la PR :
 
    ```
-   gh pr create --base dev --head "$(git rev-parse --abbrev-ref HEAD)" --fill
+   gh pr create --base main --head "$(git rev-parse --abbrev-ref HEAD)" --fill
    ```
 
 4. Si l'utilisateur a demandé `auto` : `gh pr merge --auto --squash`.
@@ -49,8 +46,9 @@ Seule dérogation : diff limité à `.claude/**`, `CLAUDE.md`, `AGENTS.md`, `doc
 
 ## Ce que la CI couvre déjà
 
-Sur une PR vers `dev`, `ci.yml` lance **cinq jobs en parallèle** : lint + typecheck,
-pytest T2 (`not slow`), Vitest T2, PWA e2e, auth e2e. Environ 4 min de bout en bout.
+Sur une PR vers `main`, `ci.yml` lance **cinq jobs en parallèle** : lint + typecheck,
+pytest T2 (`not slow`), Vitest T2, PWA e2e, auth e2e. Environ 4 min de bout en bout. Après
+la fusion, le push `main` rejoue T3.
 
 C'est le **second** filet : elle ajoute les deux suites e2e, absentes de `test:premerge`.
 Une CI rouge sur une PR qui n'a pas passé T2 en local, c'est un aller-retour évitable.

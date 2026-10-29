@@ -9,6 +9,7 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const ROOT_PKG = path.join(ROOT, 'package.json');
 const FRONTEND_PKG = path.join(ROOT, 'frontend', 'package.json');
+const FRONTEND_LOCK = path.join(ROOT, 'frontend', 'package-lock.json');
 const APP_VERSION_PY = path.join(ROOT, 'api', 'app_version.py');
 
 const SEMVER_RE = /^\d+\.\d+\.\d+$/;
@@ -40,6 +41,18 @@ function main() {
     console.log(`sync-app-version: frontend/package.json -> ${version}`);
   } else {
     console.warn(`sync-app-version: absent, ignoré: ${FRONTEND_PKG}`);
+  }
+
+  // Sans cela, le prochain `npm install` du build de déploiement réécrit la version
+  // du lockfile et laisse une modification non commitée après chaque release.
+  if (fs.existsSync(FRONTEND_LOCK)) {
+    const lock = readJson(FRONTEND_LOCK);
+    lock.version = version;
+    if (lock.packages && lock.packages['']) {
+      lock.packages[''].version = version;
+    }
+    fs.writeFileSync(FRONTEND_LOCK, `${JSON.stringify(lock, null, 2)}\n`, 'utf8');
+    console.log(`sync-app-version: frontend/package-lock.json -> ${version}`);
   }
 
   const pyContent = `"""Version applicative DialogueGenerator (synchronisée depuis package.json racine).

@@ -73,12 +73,11 @@ description: Workflow — commandes essentielles, tests, déploiement, venv
 
 - **Version produit (semver)** : règle **`.claude/rules/app_versioning.md`** — PR epic = mineure, main direct = patch ; tags `vX.Y.Z` · `docs/releases/semver-and-tags.md` · rétro BMAD = section **Version livrée**. Procédure prod + canvas : `/prod-release`.
 
-- **Avant commit / PR — la gate dépend de la cible**, détail dans `.claude/rules/branching.md` :
-  - **PR vers `dev`** : **T2 obligatoire avant d'ouvrir** (`npm run test:premerge`, ~7 min sur le poste Windows, mesuré le 2026-09-30), plus typecheck si le frontend bouge et preuve UI si c'est visible. La CI de PR rejoue T2 et ajoute les deux suites e2e : second filet, pas premier. Commande : **`/pr`**.
-  - **Merge direct dans `dev`, sans PR** : **T2 obligatoire** (`npm run test:premerge`) — un push sur `dev` ne déclenche **aucune** CI.
-  - **Merge ou push vers `main`** : **T3** complet — `.claude/rules/ci_before_push.md`.
+- **Avant commit / PR** — une seule branche longue, `main` ; détail dans `.claude/rules/branching.md` :
+  - **PR vers `main`** : **T2 obligatoire avant d'ouvrir** (`npm run test:premerge`, ~7 min sur le poste Windows, mesuré le 2026-09-30), plus typecheck si le frontend bouge et preuve UI si c'est visible. La CI de PR rejoue T2 et ajoute les deux suites e2e : second filet, pas premier. Fusion quand elle est verte. Commande : **`/pr`**.
+  - **Déploiement** : **T3** complet — `.claude/rules/ci_before_push.md`.
 
-- **Avant `git push` vers `main`** (obligatoire agents) : suite CI T3 complète — voir **`.claude/rules/ci_before_push.md`**. Interdit de pousser sur `main` sans les trois jobs verts (backend full, Vitest `VITEST_FULL=1`, PWA). La commande `/commit` avec push suit la même gate.
+- **Push direct vers `main`** : normalement impossible (branche protégée, tout passe par PR). S'il le faut : suite CI T3 complète avant — voir **`.claude/rules/ci_before_push.md`**.
 
 - **Déploiement** : prod de référence = **VPS OVH** (`docs/deployment/PRODUCTION.md`, URL publique `demo.auto-diffusion.net`). `npm run deploy:build` / `npm run deploy:check` ; déploiement typique `npm run deploy`. Sur le serveur : `ENVIRONMENT=production`, `PUBLIC_ORIGIN` (ou `CORS_ORIGINS`), secrets JWT/OpenAI, etc. **Détail et pièges** : `.claude/rules/deployment.md`.
 
