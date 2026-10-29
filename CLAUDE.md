@@ -81,11 +81,13 @@ Grille complète : **`/test-tiers`**. Obligations agents et protocole Vitest : `
 
 **Quelle gate selon la cible** — détail : `.claude/rules/branching.md`.
 
-| Cible | Attendu |
+Une seule branche longue, `main` (protégée) ; plus de `dev` depuis le 2026-10-29.
+
+| Moment | Attendu |
 |---|---|
-| PR vers `dev` (**`/pr`**) | **T2** (`npm run test:premerge`, ~7 min) vert avant d'ouvrir + typecheck si le frontend bouge. La CI rejoue T2 et ajoute les e2e. |
-| Merge direct dans `dev` | **T2** — un push `dev` ne déclenche aucune CI |
-| Vers `main` | **T3** complet — `.claude/rules/ci_before_push.md` |
+| Ouvrir une PR vers `main` (**`/pr`**) | **T2** (`npm run test:premerge`, ~7 min) vert avant d'ouvrir + typecheck si le frontend bouge. La CI rejoue T2 et ajoute les e2e. |
+| Fusionner | CI de la PR verte ; `ci.yml` rejoue **T3** sur le push `main` |
+| Déployer | **T3** local complet — `.claude/rules/ci_before_push.md` |
 
 **Exécuter les tests, pas seulement les suggérer.** Ne jamais annoncer « vert » sans sortie de commande. Quand on te demande de corriger un test, **relance-le après le correctif** et montre la preuve.
 

@@ -1,5 +1,5 @@
 ---
-description: Gate obligatoire — suite CI complète avant tout push vers main
+description: "Gate obligatoire — suite CI complète avant un déploiement et avant tout push direct vers main"
 ---
 # CI avant push `main`
 
@@ -23,10 +23,15 @@ Alternative racine si disponible et documentée : `npm run test:ci:local` (doit 
 - **Ne pas push** tant que les **quatre** jobs ne sont pas verts.
 - Citer la sortie terminal (pass/fail) dans le résumé agent.
 
-## PR vs push direct
+## PR, push direct, déploiement
 
-- **PR vers `main`** : T2 acceptable en itération (`npm run test:premerge`) ; avant merge ou push final, appliquer la gate T3 ci-dessus.
-- **Push direct `main`** : T3 **toujours** avant push.
+Depuis l'abandon de `dev` (2026-10-29), toutes les PR vont vers `main` : un T3 local
+avant chaque fusion coûterait ~25 min par PR. Le partage est donc :
+
+- **PR vers `main`** : T2 local avant d'ouvrir (`npm run test:premerge`) et CI de la PR
+  verte avant de fusionner ; `ci.yml` rejoue T3 sur le push `main` qui suit.
+- **Déploiement** (`/prod-release`) : T3 local **toujours**, sur le commit déployé.
+- **Push direct `main`** (normalement impossible, branche protégée) : T3 **toujours** avant push.
 
 ## Relation avec `git_commit.md`
 

@@ -22,7 +22,7 @@
 
 Baseline : `v1.0.0` → `fe9c3374`. Doc complète : `docs/releases/semver-and-tags.md`.
 
-Prochaine epic mergée → **1.9.0**. Patches main entre deux epics → **1.8.5**, **1.8.6**, …
+Prochaine epic mergée → **1.10.0**. Patches main entre deux epics → **1.9.1**, **1.9.2**, …
 
 ```powershell
 git log --oneline --merges --grep="Epic" -20
