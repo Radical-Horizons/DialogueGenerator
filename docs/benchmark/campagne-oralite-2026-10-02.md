@@ -199,7 +199,7 @@ Deux incidents de mesure, traités :
   2,563 $ pour 2,684 $ dépensés, et le plafond ne tenait qu'une relance. Corrigé
   par un registre des coûts purgés, test à l'appui.
 
-## L1 — préparé, non mesuré
+## L1 — message système, oralité, longueur du GDD
 
 Trois changements, mesurés ensemble par décision produit (longueur et oralité vont de
 pair) :
@@ -220,3 +220,41 @@ pair) :
 
 Vérifié sans dépense sur les huit cas réels : bloc présent partout, ancienne règle
 absente, audit sans contradiction.
+
+### Mesure (2026-10-29)
+
+Run `20261029T183549-0460f9c9`, empreinte `51e6b8fa0e7c`. Même configuration que B0.
+24 générations valides, aucune porte, aucune troncature. Dépense : **2,650 $**
+(0,078 $ de génération, 2,572 $ de notation). Audit de cohérence passé sur le
+**vrai** message système.
+
+| mesure | B0 | L1 | écart | règle | verdict |
+|---|---|---|---|---|---|
+| **oralité, brute** | 5,54 | **6,75** | **+1,21** | ≥ +0,5 | ✅ |
+| oralité, hors excuses | 5,54 | 6,75 | +1,21 | ≥ +0,5 | ✅ |
+| verdicts excusés | 0 | 0 | = | stable | ✅ |
+| mots par phrase | 15,9 | **8,9** | −7,0 | en baisse | ✅ |
+| `;` `:` pour 100 mots | 2,92 | **0,06** | −2,86 | en baisse | ✅ |
+| `context_fidelity` | 6,96 | 6,96 | 0,00 | baisse ≤ 0,4 | ✅ |
+| `voice_fidelity` | 5,67 | 5,54 | −0,13 | baisse ≤ 0,4 | ✅ |
+| `voice_consistency` | 7,17 | 6,92 | −0,25 | baisse ≤ 0,4 | ✅ |
+| `french_correctness` | 8,88 | 8,96 | +0,08 | baisse ≤ 0,4 | ✅ |
+| `ai_tics` | 2,46 | 2,38 | −0,08 | hausse ≤ 0,4 | ✅ |
+| `overwriting` | 3,04 | 2,29 | −0,75 | hausse ≤ 0,4 | ✅ |
+| `forced_exposition` | 2,88 | 2,75 | −0,13 | hausse ≤ 0,4 | ✅ |
+| **`blandness`** | 2,33 | **2,79** | **+0,46** | hausse ≤ 0,4 | ❌ |
+| recopie (générations) | 1 | 1 | = | ne monte pas | ✅ |
+
+Hors garde-fous : `concision` 5,92 → 7,04, longueur moyenne des répliques 48 → 50 mots
+(le plafond relevé à 150 n'a pas allongé les panneaux), moyenne pondérée 7,16 → 7,23.
+
+**Lecture stricte : L1 ne passe pas.** Le critère primaire est franchi largement —
+plus du double du seuil, et confirmé par les mesures sans juge — mais un garde-fou
+l'est aussi, de 0,06. Ce qui manque n'est pas l'oralité, c'est la matière : les quatre
+notes de platitude à 4 reprochent toutes la **répétition d'un panneau à l'autre**
+(« même mouvement rhétorique répété », « la répétition de l'idée centrale dans presque
+chaque panneau sans gradation », « tournent en rond »). Cause plausible, et c'est la
+nôtre : la consigne dit que l'oral « se répète ». Hypothèse, non mesurée.
+
+La recopie reste marginale : une génération par palier, et ce sont des faits de la
+fiche, pas des formules signatures.
