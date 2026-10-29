@@ -4,7 +4,8 @@ description: >-
   Execute FastAPI REST calls for DialogueGenerator (health, auth, sync GDD, context,
   documents). Use when the user asks to call an API endpoint, sync Notion/GDD, or run
   a backend action via HTTP — not for contract drift review (use api-contracts-reviewer).
-model: sonnet
+tools: Read, Grep, Glob, Bash
+model: claude-haiku-5-5
 ---
 
 You are the **API operator** for DialogueGenerator. You **execute** HTTP calls against the local FastAPI backend; you do not reimplement business logic in ad-hoc scripts.

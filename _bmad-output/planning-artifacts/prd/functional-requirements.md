@@ -146,11 +146,14 @@
 
 ### 11. Session & State Management
 
-**FR95:** System can auto-save user work every 2 minutes (V1.0+)  
+> ⚠️ **ADR-006 supersedes the original wording of FR95, FR97 and FR99** (2026-10-29). The « 2 minutes » timer, the « manual save » framing and the « unsaved changes » vocabulary all predate `architecture/v10-architectural-decisions-adrs.md:478-530`, which removed the draft/save model altogether. What is actually implemented: every edit is pushed to the store on keystroke (≤100 ms), journalled in IndexedDB with a `clientSeq` (`uiSlice.ts:313-328`), then auto-pushed to the backend ~50 ms later (`useDialogueLoader.ts:436-450`). There is no « unsaved » state — only « not yet acknowledged by the backend ».
+
+
+**FR95:** System persists user work continuously with **no explicit save action** — store on keystroke (≤100 ms), local journal (IndexedDB, `clientSeq`), then automatic push to the backend *(REWORDED 2026-10-29 — ADR-006 supersedes « every 2 minutes »)*  
 **FR96:** System can restore session after browser crash  
-**FR97:** Users can manually save dialogue progress  
+**FR97:** Users can **force an immediate synchronization** of the current dialogue (`Ctrl+S`) instead of waiting for the automatic push *(REWORDED 2026-10-29 — ADR-006 forbids a « Save » button; this is its optional « Synchroniser maintenant »)*  
 **FR98:** Users can commit dialogue changes to Git repository (manual workflow external)  
-**FR99:** System can detect unsaved changes and warn before navigation  
+**FR99:** System can detect changes **not yet acknowledged by the backend** and warn before leaving, without presenting them as lost work *(REWORDED 2026-10-29 — under ADR-006 nothing is ever unsaved locally)*  
 **FR100:** Users can view previous versions of dialogue (basic history MVP) *(NEW - Basic history)*  
 **FR101:** Users can view edit history for dialogue (detailed V2.0+)  
 

@@ -6,7 +6,7 @@ description: >-
   session transcript JSONL files. Covers Claude Code sessions and the legacy Cursor
   archive kept on disk. Read-only.
 tools: Read, Grep, Glob, Bash
-model: sonnet
+model: claude-haiku-5-5
 ---
 
 You are a specialist in **recovering signal from past agent sessions** (local transcript files), for debugging, retrospectives, and **process improvement** (rules, commands, hooks, checklists).
@@ -64,6 +64,6 @@ Neither is in git. Both may contain pasted secrets — treat as sensitive.
 ## Output format
 
 - **Access**: which archive and method worked (Claude / Cursor / CLI / Grep / handoff).
-- **Found**: N relevant hits (files/sessions), or **none** with an honest reason.
+- **Found**: N relevant hits (files/sessions), or **none** with an honest reason. Before writing "none" or "absent", show two searches of different form (other spelling, spaces vs underscores, other field); otherwise write "not found by <search>".
 - **Evidence**: short excerpts + path + line number.
 - **Takeaway**: decisions, open questions, or a suggested rule/command update.

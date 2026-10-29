@@ -18,7 +18,7 @@
 - **Epic 3**: [Gestion du contexte narratif (GDD)](epic-03.md)  
   Les utilisateurs peuvent explorer, sélectionner et utiliser le Game Design Document (500+ pages) pour enrichir la génération de dialogues. Le système permet le browse des entités (personnages, lieux, régions), sélection manuelle/automatique, règles de contexte, budget tokens, et sync Notion (V2.0+).
 
-- **Epic 17**: [Expérience mobile et responsive (web)](epic-17.md) — **in-progress** (17.1–17.8 done ; **17.9–17.11** refactor toolbar)  
+- **Epic 17**: [Expérience mobile et responsive (web)](epic-17.md) — **done** (17.1–17.11 ; rétrospective 2026-06-20)  
   Les utilisateurs peuvent utiliser DialogueGenerator sur mobile/tablette (web responsive) : shell adaptatif, tactiles sur le graphe, panneaux en drawers/plein écran, PWA optionnelle (V1.5+).
 
 - **Epic 4**: [Validation et assurance qualité](epic-04.md)  
@@ -40,7 +40,7 @@
   Les utilisateurs peuvent définir des variables et flags dans les dialogues pour créer des branches conditionnelles dynamiques. Le système permet conditions de visibilité, effets déclenchés par choix joueur, preview de scénarios, validation références, et intégration stats de jeu (V3.0+).
 
 - **Epic 10**: [Gestion de session et sauvegarde](epic-10.md)  
-  Les utilisateurs peuvent sauvegarder leur travail automatiquement et récupérer leur session après crash. Le système gère auto-save (2min), session recovery, sauvegarde manuelle, détection changements non sauvegardés, et historique basique (MVP) ou détaillé (V2.0+).
+  Les utilisateurs peuvent compter sur un travail persisté en continu (store → journal IndexedDB → backend, conforme ADR-006) et récupérer leur session après un crash. Le système gère la restauration de session, la synchronisation forcée (`Ctrl+S`), l'avertissement sur changements non acquittés, et l'historique basique (MVP) ou détaillé (V2.0+).
 
 - **Epic 11**: [Onboarding et guidance](epic-11.md)  
   Les nouveaux utilisateurs peuvent accéder à un wizard d'onboarding pour leur première création de dialogue. Le système fournit documentation in-app, tutoriels, aide contextuelle, dialogues d'exemple, et détection du niveau de compétence pour adapter l'UI (mode guidé vs mode avancé V1.5+). Inclut variantes optimisées pour persona Mathieu (détection automatique V1.0, wizard simplifié 4 étapes V1.0, assistance contextuelle renforcée V1.0, validation premier run <30min V1.0).
@@ -54,3 +54,15 @@
 - **Epic 14**: [Accessibilité](epic-14.md)  
   Les utilisateurs peuvent naviguer l'éditeur de graphe entièrement au clavier avec indicateurs de focus visibles. Le système supporte personnalisation contraste couleurs (WCAG AA), et lecteurs d'écran avec ARIA labels (V2.0+).
 
+
+- **Epic 18**: [Édition in-situ du dialogue dans le nœud](epic-18.md)  
+  Les auteurs peuvent écrire la réplique PNJ et les réponses PJ directement dans le nœud (clic simple, éditer = sauvegarder, ADR-006), avec densité adaptative pour préserver la lisibilité des graphes 500+ nœuds. Le panneau de droite reste le lieu des conditions, effets et métadonnées.
+
+- **Epic 19**: [Canvas-first — surfaces à la demande](epic-19.md) — **squelette**  
+  Génération, détails GDD et variables en overlays lancés depuis le nœud ; suppression du panneau de droite permanent et récupération de son espace pour le graphe. Dépend d'Epic 18 ; détail à figer après retour d'usage.
+
+- **Epic 15**: [RLM Context Selector (sélection automatique du contexte GDD)](epic-15.md)  
+  Les utilisateurs peuvent activer la sélection automatique du contexte GDD via un service RLM optionnel, qui explore le GDD par function calling et réduit le contexte de 20k+ à 12-15k tokens sans perte de pertinence. Fallback gracieux vers la sélection manuelle. ⚠️ Ses « FR1-FR8 / NFR1-NFR6 » appartiennent à l'espace de numérotation de `prd/prd-rlm-context-selector.md`, **pas** au référentiel principal.
+
+- **Epic 16**: [Implémentation ADR-008 — pipeline document canonique Unity JSON](epic-16.md)  
+  Le document canonique Unity JSON devient la source de vérité partout : backend propriétaire (GET/PUT, revision, 409), `choiceId` stables, layout en artefact distinct, frontend qui envoie le document et non nodes/edges. Migration one-shot, pas de coexistence longue.
