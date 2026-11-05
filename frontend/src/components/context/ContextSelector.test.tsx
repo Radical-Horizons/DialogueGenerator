@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ContextSelector } from './ContextSelector'
 import * as contextAPI from '../../api/context'
@@ -311,6 +311,124 @@ describe('ContextSelector', () => {
     await waitFor(() => {
       const badges = screen.getAllByText(/^(Lieu|Personnage)$/)
       expect(badges[0]).toHaveTextContent('Lieu')
+    })
+  })
+
+  describe('recherche inter-onglets', () => {
+    const listedNames = () =>
+      within(screen.getByTestId('context-list-scroll'))
+        .getAllByRole('checkbox')
+        .map((box) => box.getAttribute('aria-label'))
+
+    beforeEach(() => {
+      vi.mocked(contextAPI.listCharacters).mockResolvedValue({
+        characters: [{ name: 'Alpha Place', data: {} }],
+        total: 1,
+        page: 1,
+        page_size: 50,
+        total_pages: 1,
+      })
+      vi.mocked(contextAPI.listLocations).mockResolvedValue({
+        locations: [{ name: 'Alpha Spot', data: {} }],
+        total: 1,
+        page: 1,
+        page_size: 50,
+        total_pages: 1,
+      })
+    })
+
+    async function searchAlpha(user: ReturnType<typeof userEvent.setup>) {
+      await waitFor(() => expect(screen.getByText('Alpha Place')).toBeInTheDocument())
+      await user.type(screen.getByLabelText(/rechercher dans le gdd/i), 'Alpha')
+      await waitFor(() =>
+        expect(listedNames()).toEqual(['Sélectionner Alpha Place', 'Sélectionner Alpha Spot'])
+      )
+    }
+
+    it('cocher une fiche d’un autre type ne change pas l’ordre de la liste', async () => {
+      const user = userEvent.setup()
+      render(<ContextSelector />)
+      await searchAlpha(user)
+
+      await user.click(screen.getByRole('checkbox', { name: 'Sélectionner Alpha Spot' }))
+
+      expect(mockToggleLocation).toHaveBeenCalledWith('Alpha Spot')
+      expect(listedNames()).toEqual(['Sélectionner Alpha Place', 'Sélectionner Alpha Spot'])
+    })
+
+    it('cliquer la rangée d’un autre type ouvre le détail sans changer l’ordre', async () => {
+      const user = userEvent.setup()
+      const onItemSelected = vi.fn()
+      const spot = { name: 'Alpha Spot', data: {} }
+      vi.mocked(contextAPI.getLocation).mockResolvedValue(spot)
+      render(<ContextSelector onItemSelected={onItemSelected} />)
+      await searchAlpha(user)
+
+      await user.click(screen.getByText(/Spot/))
+
+      await waitFor(() => expect(onItemSelected).toHaveBeenCalledWith(spot, 'lieux'))
+      expect(listedNames()).toEqual(['Sélectionner Alpha Place', 'Sélectionner Alpha Spot'])
+    })
+  })
+
+  describe('recherche dans tout le catalogue', () => {
+    const firstPage = {
+      characters: [{ name: 'Ureste', data: {} }],
+      total: 2,
+      page: 1,
+      page_size: 50,
+      total_pages: 2,
+    }
+
+    it('trouve une fiche hors de la page 1 alors qu’une autre correspond déjà', async () => {
+      const user = userEvent.setup()
+      let resolveCatalog: (value: typeof firstPage) => void = () => {}
+      vi.mocked(contextAPI.listCharacters).mockImplementation((params) =>
+        params
+          ? Promise.resolve(firstPage)
+          : new Promise((resolve) => {
+              resolveCatalog = resolve
+            })
+      )
+
+      render(<ContextSelector />)
+      await waitFor(() => expect(screen.getByText('Ureste')).toBeInTheDocument())
+
+      await user.type(screen.getByLabelText(/rechercher dans le gdd/i), 'Ures')
+
+      await waitFor(() => expect(contextAPI.listCharacters).toHaveBeenLastCalledWith())
+      expect(screen.getByRole('checkbox', { name: 'Sélectionner Ureste' })).toBeInTheDocument()
+
+      await act(async () => {
+        resolveCatalog({
+          ...firstPage,
+          characters: [
+            { name: 'Ureste', data: {} },
+            { name: 'Uresaïr', data: {} },
+          ],
+        })
+      })
+
+      expect(await screen.findByRole('checkbox', { name: 'Sélectionner Uresaïr' })).toBeInTheDocument()
+      expect(screen.getByRole('checkbox', { name: 'Sélectionner Ureste' })).toBeInTheDocument()
+    })
+
+    it('ne relance pas le chargement en boucle si le catalogue complet échoue', async () => {
+      const user = userEvent.setup()
+      vi.mocked(contextAPI.listCharacters).mockImplementation((params) =>
+        params ? Promise.resolve(firstPage) : Promise.reject(new Error('panne'))
+      )
+
+      render(<ContextSelector />)
+      await waitFor(() => expect(screen.getByText('Ureste')).toBeInTheDocument())
+
+      await user.type(screen.getByLabelText(/rechercher dans le gdd/i), 'Zzz')
+
+      expect(await screen.findByText(/aucun résultat/i)).toBeInTheDocument()
+      const wholeCatalogCalls = vi
+        .mocked(contextAPI.listCharacters)
+        .mock.calls.filter(([params]) => !params)
+      expect(wholeCatalogCalls).toHaveLength(1)
     })
   })
 

@@ -120,6 +120,16 @@ export function GenerationOptionsModal({
       setActiveTab(initialTab as TabId)
     }
   }, [isOpen, initialTab])
+
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
   const [previewText, setPreviewText] = useState<string>('')
   const [previewTokens, setPreviewTokens] = useState<number>(0)
   const [isLoadingPreview, setIsLoadingPreview] = useState(false)

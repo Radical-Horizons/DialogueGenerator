@@ -18,7 +18,6 @@ import { listItemSelectionStyle, listRowHairlineBorder, listRowHoverBackground }
 import { redesignAccent, redesignFont, redesignText } from '../../theme/redesignTokens'
 import { highlightText } from '../../utils/textHighlight'
 import { getGddEntitySummary } from '../../utils/gddSummary'
-import { useDebounce } from '../../hooks/useDebounce'
 import {
   ContextSearchControls,
   type ContextSortType,
@@ -67,12 +66,13 @@ interface ContextListProps {
   loadingMore?: boolean
   /**
    * Indique qu'il reste des pages non chargées côté parent.
-   * Requis pour que la recherche puisse demander le chargement des pages suivantes
-   * quand le match n'est pas encore dans le buffer local.
+   * Requis pour qu'un filtre actif puisse demander le reste du catalogue : le buffer
+   * local ne contient que les pages déjà chargées.
    */
   hasMore?: boolean
   /**
-   * Onglet actif : en recherche, ses résultats sont listés en premier.
+   * Onglet actif : en recherche, ses résultats sont listés en premier, sauf avec
+   * le tri « sélectionnés en premier », où seule la coche compte.
    */
   priorityEntityTab?: ContextEntityTab
   /** Masquer la barre recherche/tri (fournie au-dessus des onglets). */
@@ -150,7 +150,6 @@ export function ContextList({
   const isSortControlled = sortTypeControlled !== undefined
   const searchQueryRaw = isSearchControlled ? searchQueryControlled : searchQueryLocal
   const sortType = isSortControlled ? sortTypeControlled : sortTypeLocal
-  const debouncedSearch = useDebounce(searchQueryRaw, 300)
   const searchInputRefInternal = useRef<HTMLInputElement>(null)
   const searchInputRef = searchInputRefExternal ?? searchInputRefInternal
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -166,12 +165,15 @@ export function ContextList({
     [isItemSelected, selectedItems],
   )
 
+  const isSearching = searchQueryRaw.trim().length > 0
+
   const filteredItems = useMemo(() => {
     const query = searchQueryRaw.toLowerCase()
     let result = items.filter((item) => item.name.toLowerCase().includes(query))
+    const groupByTab = query && priorityEntityTab && sortType !== 'selected-first'
 
     result = [...result].sort((a, b) => {
-      if (query && priorityEntityTab) {
+      if (groupByTab) {
         const aPriority = a.entityTab === priorityEntityTab ? 0 : 1
         const bPriority = b.entityTab === priorityEntityTab ? 0 : 1
         if (aPriority !== bPriority) return aPriority - bPriority
@@ -191,21 +193,12 @@ export function ContextList({
     }
   }, [onScrollToBottom])
 
-  // Recherche client-side sur buffer paginé : si aucun match local mais d'autres pages
-  // existent, charger la suite (sinon "Aucun résultat" bloque le scroll infini).
+  // Le filtre est client-side sur un buffer paginé : un match local ne dit rien de ce
+  // que contiennent les pages suivantes. Dès qu'un filtre est actif, il faut la suite.
   useEffect(() => {
-    if (!debouncedSearch.trim()) return
-    if (filteredItems.length > 0) return
-    if (!hasMore || loadingMore || !onScrollToBottom) return
+    if (!isSearching || !hasMore || loadingMore || !onScrollToBottom) return
     onScrollToBottom()
-  }, [
-    debouncedSearch,
-    filteredItems.length,
-    hasMore,
-    loadingMore,
-    onScrollToBottom,
-    items.length,
-  ])
+  }, [isSearching, hasMore, loadingMore, onScrollToBottom])
 
   useEffect(() => {
     if (!showSearchBar) return

@@ -50,10 +50,10 @@ describe('étanchéité des états d’écran', () => {
     expect(state.optionCount).toBe(1)
   })
 
-  it('un run à une seule option ne déclenche pas la comparaison', () => {
+  it('un run à une seule option ne replie pas le rail 2b', () => {
     const request = { user_instructions: 'x' } as GenerateUnityDialogueRequest
     useGenerationOptionsStore.getState().startRun(1, request)
-    // `GenerationOptionsComparison` et le rail 2b se gardent sur `slots.length >= 2`.
+    // Le rail 2b se garde sur `slots.length >= 2` ; la vue de résultat, elle, vaut pour une option.
     expect(useGenerationOptionsStore.getState().slots.length).toBeLessThan(2)
   })
 })

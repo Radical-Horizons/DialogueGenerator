@@ -1,8 +1,31 @@
 /**
  * uiLayoutStore — onglet inspecteur (2e), mode écriture (2c), minimap du graphe.
  */
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { useUiLayoutStore } from './uiLayoutStore'
+
+describe('uiLayoutStore — section au démarrage', () => {
+  afterEach(() => {
+    window.history.replaceState(null, '', '/')
+  })
+
+  async function bootOn(url: string) {
+    window.history.replaceState(null, '', url)
+    vi.resetModules()
+    const { useUiLayoutStore: freshStore } = await import('./uiLayoutStore')
+    return freshStore.getState().centerPanelTab
+  }
+
+  it.each([
+    ['/', 'generation'],
+    ['/?section=edition', 'edition'],
+    ['/?section=graph&dialogue=a.json', 'graph'],
+    ['/?section=inconnue', 'generation'],
+    ['/admin?section=graph', 'generation'],
+  ])('%s démarre sur %s', async (url, expected) => {
+    expect(await bootOn(url)).toBe(expected)
+  })
+})
 
 describe('uiLayoutStore', () => {
   beforeEach(() => {

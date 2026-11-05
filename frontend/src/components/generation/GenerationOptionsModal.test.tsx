@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactElement } from 'react'
 import { GenerationOptionsModal } from './GenerationOptionsModal'
@@ -101,6 +101,22 @@ describe('GenerationOptionsModal', () => {
     } as ReturnType<typeof useContextConfigStore>)
 
     mockConfigAPI.getUnityDialoguesPath.mockResolvedValue({ path: '/test/path' })
+  })
+
+  it('se ferme sur Échap', () => {
+    renderWithQueryClient(<GenerationOptionsModal isOpen onClose={mockOnClose} />)
+
+    fireEvent.keyDown(window, { key: 'Escape' })
+
+    expect(mockOnClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('ignore Échap quand elle est fermée', () => {
+    renderWithQueryClient(<GenerationOptionsModal isOpen={false} onClose={mockOnClose} />)
+
+    fireEvent.keyDown(window, { key: 'Escape' })
+
+    expect(mockOnClose).not.toHaveBeenCalled()
   })
 
   it('ne devrait pas s\'afficher quand isOpen est false', () => {

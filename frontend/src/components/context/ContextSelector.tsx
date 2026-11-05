@@ -237,6 +237,7 @@ export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }
   const [communitiesPage, setCommunitiesPage] = useState(1)
   const [communitiesTotalPages, setCommunitiesTotalPages] = useState(1)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [catalogLoadFailed, setCatalogLoadFailed] = useState(false)
 
   const { 
     selections, 
@@ -347,8 +348,8 @@ export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }
     communitiesTotalPages,
   ])
 
-  /** Pendant une recherche inter-onglets, avance toutes les pages encore incomplètes. */
-  const loadMoreForSearch = useCallback(async () => {
+  /** Un filtre porte sur tout le GDD : sans `page`, l'API renvoie chaque catalogue en entier. */
+  const loadWholeCatalog = useCallback(async () => {
     if (loadingMore) return
     const canCharacters = charactersPage < charactersTotalPages
     const canLocations = locationsPage < locationsTotalPages
@@ -361,39 +362,44 @@ export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }
       const tasks: Promise<void>[] = []
       if (canCharacters) {
         tasks.push(
-          contextAPI.listCharacters({ page: charactersPage + 1, page_size: PAGE_SIZE }).then((res) => {
-            setCharacters((prev) => [...prev, ...res.characters])
-            setCharactersPage((p) => p + 1)
+          contextAPI.listCharacters().then((res) => {
+            setCharacters(res.characters)
+            setCharactersPage(1)
+            setCharactersTotalPages(1)
           }),
         )
       }
       if (canLocations) {
         tasks.push(
-          contextAPI.listLocations({ page: locationsPage + 1, page_size: PAGE_SIZE }).then((res) => {
-            setLocations((prev) => [...prev, ...res.locations])
-            setLocationsPage((p) => p + 1)
+          contextAPI.listLocations().then((res) => {
+            setLocations(res.locations)
+            setLocationsPage(1)
+            setLocationsTotalPages(1)
           }),
         )
       }
       if (canItems) {
         tasks.push(
-          contextAPI.listItems({ page: itemsPage + 1, page_size: PAGE_SIZE }).then((res) => {
-            setItems((prev) => [...prev, ...res.items])
-            setItemsPage((p) => p + 1)
+          contextAPI.listItems().then((res) => {
+            setItems(res.items)
+            setItemsPage(1)
+            setItemsTotalPages(1)
           }),
         )
       }
       if (canCommunities) {
         tasks.push(
-          contextAPI.listCommunities({ page: communitiesPage + 1, page_size: PAGE_SIZE }).then((res) => {
-            setCommunities((prev) => [...prev, ...res.communities])
-            setCommunitiesPage((p) => p + 1)
+          contextAPI.listCommunities().then((res) => {
+            setCommunities(res.communities)
+            setCommunitiesPage(1)
+            setCommunitiesTotalPages(1)
           }),
         )
       }
       await Promise.all(tasks)
     } catch (err) {
       setError(getErrorMessage(err))
+      setCatalogLoadFailed(true)
     } finally {
       setLoadingMore(false)
     }
@@ -445,9 +451,6 @@ export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }
 
   const handleItemClick = async (name: string, entityTab?: ContextEntityTab) => {
     const tab = (entityTab ?? activeTab) as TabType
-    if (tab !== activeTab) {
-      setActiveTab(tab)
-    }
     try {
       let item: ContextItem | { name: string; data: Record<string, unknown> } | null = null
       if (tab === 'characters') {
@@ -477,9 +480,6 @@ export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }
 
   const handleItemToggle = (name: string, entityTab?: ContextEntityTab) => {
     const tab = (entityTab ?? activeTab) as TabType
-    if (tab !== activeTab) {
-      setActiveTab(tab)
-    }
     const storeKey = STORE_TYPE_MAP[tab]
     const wasSelected = storeKey ? isElementSelected(storeKey, name) : false
 
@@ -557,6 +557,12 @@ export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }
   }, [characters, locations, items, species, communities, selections])
 
   const isSearching = searchQuery.trim().length > 0
+
+  // Sans ce verrou, un catalogue en panne serait redemandé à chaque rendu ; une nouvelle
+  // recherche retente sa chance.
+  useEffect(() => {
+    if (!isSearching) setCatalogLoadFailed(false)
+  }, [isSearching])
 
   const displayItems = useMemo(() => {
     if (!isSearching) {
@@ -960,9 +966,9 @@ export function ContextSelector({ onItemSelected, onLoadStateChange, headerEnd }
           onSearchQueryChange={setSearchQuery}
           sortType={sortType}
           onSortTypeChange={setSortType}
-          onScrollToBottom={isSearching ? loadMoreForSearch : loadMore}
+          onScrollToBottom={isSearching ? loadWholeCatalog : loadMore}
           loadingMore={loadingMore}
-          hasMore={isSearching ? hasMoreAny : hasMoreForActiveTab}
+          hasMore={isSearching ? hasMoreAny && !catalogLoadFailed : hasMoreForActiveTab}
         />
       </div>
 
