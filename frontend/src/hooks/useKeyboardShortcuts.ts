@@ -60,11 +60,19 @@ function matchesShortcut(event: KeyboardEvent, parsed: ReturnType<typeof parseSh
   // Sur Apple, le modificateur d'usage est Cmd : un raccourci declare `ctrl+k`
   // doit y repondre a Cmd+K, sinon le libelle « ⌘K » du chrome annonce un
   // raccourci qui n'existe pas. Voir `utils/platformShortcut.ts`.
-  if (parsed.ctrl && !(event.ctrlKey || (isApplePlatform() && event.metaKey))) return false
-  if (parsed.alt && !event.altKey) return false
-  if (parsed.shift && !event.shiftKey) return false
-  if (parsed.meta && !event.metaKey) return false
-  
+  const metaActsAsCtrl = isApplePlatform() && !parsed.meta
+  const ctrlHeld = event.ctrlKey || (metaActsAsCtrl && event.metaKey)
+  const metaHeld = event.metaKey && !metaActsAsCtrl
+
+  // Modificateurs exacts : sinon `ctrl+shift+z` déclenche `ctrl+z`, et `ctrl+s` le `s`
+  // de navigation. Maj fait exception sur chiffres et symboles : sur AZERTY elle sert à
+  // produire la touche elle-même (`1`, `/`), elle n'est pas un modificateur voulu.
+  const shiftIsSignificant = /^[a-z]$/.test(parsed.key) || parsed.key.length > 1
+  if (!!parsed.ctrl !== ctrlHeld) return false
+  if (!!parsed.alt !== event.altKey) return false
+  if (!!parsed.meta !== metaHeld) return false
+  if (parsed.shift ? !event.shiftKey : shiftIsSignificant && event.shiftKey) return false
+
   // Gérer les touches spéciales
   const eventKey = event.key.toLowerCase()
   if (parsed.key === 'enter' && eventKey !== 'enter') return false
@@ -85,8 +93,71 @@ function matchesShortcut(event: KeyboardEvent, parsed: ReturnType<typeof parseSh
 }
 
 /**
+ * Écouteur unique du registre global. Un écouteur par instance du hook déclencherait
+ * chaque raccourci autant de fois qu'il y a d'instances montées.
+ */
+function handleKeyDown(event: KeyboardEvent): void {
+  // Ignorer si l'utilisateur tape dans un input, textarea, ou contenteditable
+  const target = event.target as HTMLElement
+  const isInputElement =
+    target.tagName === 'INPUT' ||
+    target.tagName === 'TEXTAREA' ||
+    target.isContentEditable
+
+  // Certains raccourcis doivent fonctionner même dans les inputs (ex: Ctrl+S, Ctrl+E)
+  // Note: "/" n'est PAS autorisé dans les inputs car c'est un caractère normal de saisie
+  const allowedInInputs = ['ctrl+s', 'ctrl+e', 'ctrl+k', 'ctrl+shift+f', 'ctrl+alt+f', 'escape', 'ctrl+/']
+
+  const isAllowedInInput = allowedInInputs.some(allowed => {
+    const parsed = parseShortcut(allowed)
+    return matchesShortcut(event, parsed)
+  })
+
+  if (isInputElement && !isAllowedInInput) {
+    return // Ne pas intercepter les raccourcis dans les champs de saisie
+  }
+
+  // Parcourir tous les raccourcis enregistrés
+  for (const [key, registeredShortcuts] of globalRegistry.entries()) {
+    const parsed = parseShortcut(key)
+
+    if (matchesShortcut(event, parsed)) {
+      // Trouver le premier raccourci activé et prioritaire
+      for (const shortcut of registeredShortcuts) {
+        // Évaluer enabled dynamiquement si c'est une fonction, sinon utiliser la valeur statique
+        const isEnabled = typeof shortcut.enabled === 'function'
+          ? shortcut.enabled()
+          : shortcut.enabled !== false
+
+        if (isEnabled) {
+          if (shortcut.preventDefault !== false) {
+            event.preventDefault()
+          }
+          if (shortcut.stopPropagation) {
+            event.stopPropagation()
+          }
+
+          try {
+            shortcut.handler(event)
+          } catch (error) {
+            console.error('Erreur dans le handler de raccourci clavier:', error)
+          }
+
+          return // Arrêter après le premier handler exécuté
+        }
+      }
+    }
+  }
+}
+
+let mountedInstances = 0
+
+/**
  * Hook pour enregistrer des raccourcis clavier.
- * 
+ *
+ * Le registre ne garde qu'un relais par raccourci : `handler` et `enabled` sont lus sur
+ * le dernier rendu, jamais figés au montage.
+ *
  * @param shortcuts Liste des raccourcis à enregistrer
  * @param deps Dépendances pour recréer les handlers (comme useCallback)
  * 
@@ -121,80 +192,40 @@ export function useKeyboardShortcuts(
     // Utiliser les shortcuts depuis la ref pour avoir les dernières valeurs (mises à jour via le useEffect précédent)
     const currentShortcuts = shortcutsRef.current
     
-    currentShortcuts.forEach(shortcut => {
+    currentShortcuts.forEach((shortcut, index) => {
       const id = `${shortcut.key}:${shortcut.description}:${Math.random().toString(36).substring(7)}`
       registeredIds.push({ key: shortcut.key, id })
-      
+
       if (!globalRegistry.has(shortcut.key)) {
         globalRegistry.set(shortcut.key, [])
       }
+      const latest = () => shortcutsRef.current[index] ?? shortcut
       const registered = globalRegistry.get(shortcut.key)!
-      registered.push({ ...shortcut, id })
+      registered.push({
+        ...shortcut,
+        id,
+        handler: (event) => latest().handler(event),
+        enabled: () => {
+          const { enabled } = latest()
+          return typeof enabled === 'function' ? enabled() : enabled !== false
+        },
+      })
       // Trier par priorité (décroissante)
       registered.sort((a, b) => (b.priority || 0) - (a.priority || 0))
     })
-    
-    // Handler global
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Ignorer si l'utilisateur tape dans un input, textarea, ou contenteditable
-      const target = event.target as HTMLElement
-      const isInputElement = 
-        target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.isContentEditable
-      
-      // Certains raccourcis doivent fonctionner même dans les inputs (ex: Ctrl+S, Ctrl+E)
-      // Note: "/" n'est PAS autorisé dans les inputs car c'est un caractère normal de saisie
-      const allowedInInputs = ['ctrl+s', 'ctrl+e', 'ctrl+k', 'ctrl+shift+f', 'ctrl+alt+f', 'escape', 'ctrl+/']
-      
-      const isAllowedInInput = allowedInInputs.some(allowed => {
-        const parsed = parseShortcut(allowed)
-        return matchesShortcut(event, parsed)
-      })
-      
-      if (isInputElement && !isAllowedInInput) {
-        return // Ne pas intercepter les raccourcis dans les champs de saisie
-      }
-      
-      // Parcourir tous les raccourcis enregistrés
-      for (const [key, registeredShortcuts] of globalRegistry.entries()) {
-        const parsed = parseShortcut(key)
-        
-        if (matchesShortcut(event, parsed)) {
-          // Trouver le premier raccourci activé et prioritaire
-          for (const shortcut of registeredShortcuts) {
-            // Évaluer enabled dynamiquement si c'est une fonction, sinon utiliser la valeur statique
-            const isEnabled = typeof shortcut.enabled === 'function' 
-              ? shortcut.enabled() 
-              : shortcut.enabled !== false
-            
-            if (isEnabled) {
-              if (shortcut.preventDefault !== false) {
-                event.preventDefault()
-              }
-              if (shortcut.stopPropagation) {
-                event.stopPropagation()
-              }
-              
-              try {
-                shortcut.handler(event)
-              } catch (error) {
-                console.error('Erreur dans le handler de raccourci clavier:', error)
-              }
-              
-              return // Arrêter après le premier handler exécuté
-            }
-          }
-        }
-      }
+
+    if (mountedInstances === 0) {
+      window.addEventListener('keydown', handleKeyDown)
     }
-    
-    window.addEventListener('keydown', handleKeyDown)
-    
+    mountedInstances += 1
+
     // Nettoyer lors du démontage
     return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-      
+      mountedInstances -= 1
+      if (mountedInstances === 0) {
+        window.removeEventListener('keydown', handleKeyDown)
+      }
+
       // Retirer les raccourcis de cette instance par leur ID
       registeredIds.forEach(({ key, id }) => {
         const registered = globalRegistry.get(key)

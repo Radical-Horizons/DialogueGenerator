@@ -56,6 +56,7 @@ import { PromptBudgetBottomDrawer } from './PromptBudgetBottomDrawer'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { PROMPT_DRAWER_MAX_WIDTH_PX, VIEWPORT_DESKTOP_MIN_PX } from '../../theme/responsiveChrome'
 import { useGenerationOptionsStore } from '../../store/generationOptionsStore'
+import { readDialogueFromUrl, useDashboardUrlMirror } from '../../hooks/useDashboardUrlMirror'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
 type ContextLoadState = {
@@ -303,7 +304,15 @@ export function Dashboard() {
   // maquette) ; l'état vit donc dans le store, pas dans ce composant.
   const centerPanelTab = useUiLayoutStore((s) => s.centerPanelTab)
   const setCenterPanelTab = useUiLayoutStore((s) => s.setCenterPanelTab)
-  const [selectedDialogue, setSelectedDialogue] = useState<UnityDialogueMetadata | null>(null)
+  const [selectedDialogue, setSelectedDialogue] = useState<UnityDialogueMetadata | null>(() => {
+    const filename = centerPanelTab === 'edition' ? readDialogueFromUrl() : null
+    if (!filename) return null
+    return { filename, file_path: '', size_bytes: 0, modified_time: new Date().toISOString() }
+  })
+  /** Dialogue à rouvrir dans le graphe après F5, jusqu'à ce que le store en porte un. */
+  const [graphDialogueToRestore, setGraphDialogueToRestore] = useState<string | null>(() =>
+    centerPanelTab === 'graph' ? readDialogueFromUrl() : null
+  )
   const dialogueListRef = useRef<UnityDialogueListRef>(null)
   const unityDialogueEditorRef = useRef<UnityDialogueEditorHandle>(null)
   const [generatedEditorSaveState, setGeneratedEditorSaveState] = useState({
@@ -322,7 +331,27 @@ export function Dashboard() {
   const commandPalette = useCommandPalette()
   
   // État du graphe pour détecter si un nœud est sélectionné et si une génération est en cours
-  const { selectedNodeId, isGenerating: isGraphGenerating, applyUnityDocumentNodes } = useGraphStore()
+  const {
+    selectedNodeId,
+    isGenerating: isGraphGenerating,
+    applyUnityDocumentNodes,
+    dialogueMetadata,
+    documentId,
+  } = useGraphStore()
+  const graphDialogueFilename = dialogueMetadata?.filename?.trim() || documentId?.trim() || null
+
+  useEffect(() => {
+    if (graphDialogueFilename) setGraphDialogueToRestore(null)
+  }, [graphDialogueFilename])
+
+  useDashboardUrlMirror(
+    centerPanelTab,
+    centerPanelTab === 'edition'
+      ? selectedDialogue?.filename ?? null
+      : centerPanelTab === 'graph'
+        ? graphDialogueFilename ?? graphDialogueToRestore
+        : null
+  )
 
   const handleGeneratedDialogueContentChange = useCallback(
     (jsonContent: string) => {
@@ -371,6 +400,7 @@ export function Dashboard() {
     s.slots.length > 0 && s.slots.every((slot) => slot.status !== 'pending' && slot.status !== 'running')
   )
   const optionRunId = useGenerationOptionsStore((s) => s.runId)
+  const optionRunParked = useGenerationOptionsStore((s) => s.parkedRun !== null)
   /** FR120 : &lt; 1024px — panneaux latéraux en overlay drawer, pas en colonnes compressées */
   const useNarrowSidePanels = viewportMode !== 'desktop'
   const { bottomInsetPx: keyboardBottomInsetPx } = useMobileShellKeyboardComfort(useNarrowSidePanels)
@@ -932,6 +962,7 @@ export function Dashboard() {
   // Clé = identité du lot, pas sa taille : deux lots de 2 options à la suite doivent
   // replier le rail chacun leur tour. `slots.length` ne distingue pas ces deux runs.
   const lastForcedRailRunRef = useRef<number>(0)
+  const railForcedByRunRef = useRef(false)
   useEffect(() => {
     // 2a garde la colonne ouverte, verrouillée à 55 % : c'est seulement une fois
     // le lot tranché (2b) que la place revient à la comparaison.
@@ -941,6 +972,7 @@ export function Dashboard() {
     if (!expandedSizesRef.current && panelsRef.current) {
       expandedSizesRef.current = panelsRef.current.getSizes()
     }
+    railForcedByRunRef.current = true
     setIsLeftPanelCollapsed(true)
     applyCollapsedLayout(true, isRightPanelCollapsed)
   }, [
@@ -951,6 +983,15 @@ export function Dashboard() {
     applyCollapsedLayout,
     isRightPanelCollapsed,
   ])
+
+  // Lot rangé après « Garder » : le brief revient, la colonne GDD aussi. Seul un repli
+  // imposé par le lot est annulé, jamais celui décidé par l'utilisateur.
+  useEffect(() => {
+    if (!optionRunParked || !railForcedByRunRef.current) return
+    railForcedByRunRef.current = false
+    setIsLeftPanelCollapsed(false)
+    applyCollapsedLayout(false, isRightPanelCollapsed)
+  }, [optionRunParked, applyCollapsedLayout, isRightPanelCollapsed])
 
 
   // ── Mode écriture (écran 2c) ──────────────────────────────────────────────
@@ -980,7 +1021,8 @@ export function Dashboard() {
    * 2e : l'écran graphe n'a que trois zones — liste de dialogues, canvas, inspecteur.
    * Le contexte GDD et le panneau droit applicatif y feraient une quatrième et une
    * cinquième colonne, réduisant le canvas au quart de la place prévue. Ils se
-   * replient à l'entrée sur l'onglet et l'état d'avant est restauré à la sortie.
+   * replient à l'entrée sur l'onglet, une seule fois : les languettes doivent pouvoir
+   * les rouvrir. L'état d'avant est restauré à la sortie.
    */
   const graphPanelsBeforeRef = useRef<{ left: boolean; right: boolean } | null>(null)
   useEffect(() => {
@@ -994,8 +1036,6 @@ export function Dashboard() {
         if (!expandedSizesRef.current && panelsRef.current) {
           expandedSizesRef.current = panelsRef.current.getSizes()
         }
-      }
-      if (!isLeftPanelCollapsed || !isRightPanelCollapsed) {
         setIsLeftPanelCollapsed(true)
         setIsRightPanelCollapsed(true)
         applyCollapsedLayout(true, true)
@@ -1499,7 +1539,11 @@ export function Dashboard() {
               id: 'graph',
               label: 'Graphe',
               content: (
-                <GraphEditor />
+                <GraphEditor
+                  routeDialogueId={
+                    graphDialogueToRestore ? encodeURIComponent(graphDialogueToRestore) : undefined
+                  }
+                />
               ),
             },
           ]}
