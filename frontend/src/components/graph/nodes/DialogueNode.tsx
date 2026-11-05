@@ -1,7 +1,7 @@
 /**
  * Nœud personnalisé pour afficher un nœud de dialogue dans le graphe.
  */
-import { memo, useState, useCallback, useEffect } from 'react'
+import { memo, useState, useCallback, useEffect, type CSSProperties } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
 import { useGraphStore } from '../../../store/graphStore'
@@ -97,10 +97,10 @@ interface DialogueNodeData {
 // Zones de layout fixes pour éviter toute superposition (handles, lien prompt, tooltip)
 const NODE_WIDTH = 280
 const BOTTOM_ZONE_LINK_PX = 28 // au-dessus : "Voir le prompt" (28px depuis le bas)
-const BOTTOM_RESERVED_WITH_CHOICES = 52 // hasChoices : handles + lien
-const BOTTOM_RESERVED_SINGLE = 28 // pas de choix : handle + lien
+const BOTTOM_RESERVED_PX = 52 // handles + lien : le texte ne passe jamais sous « Voir le prompt »
 const CHOICE_TOOLTIP_BOTTOM_PX = 56 // tooltip au survol d’un choix au-dessus du lien
-const CONTENT_PADDING_TOP_WHEN_PENDING = 32 // pour ne pas passer sous Accepter/Régénérer/Rejeter
+/** Réserve de la rangée Rejeter / Régénérer / Accepter, gardée même boutons masqués : le texte ne saute pas. */
+const PENDING_ACTIONS_ROW_HEIGHT_PX = 44
 
 /**
  * Anneau d'un handle de choix porteur d'effets. Violet hors palette d'état : il ne signale ni
@@ -123,6 +123,35 @@ const SPEAKER_DOT_PALETTE = [
   '#8E44AD',
   '#D35400',
 ] as const
+
+/** Pastille de compteur (erreurs, avertissements) dans l'en-tête. */
+const nodeCountBadgeStyle: CSSProperties = {
+  width: 16,
+  height: 16,
+  borderRadius: '50%',
+  flexShrink: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontFamily: redesignFont.mono,
+  fontSize: '9.5px',
+  fontWeight: 700,
+}
+
+const pendingActionButtonStyle: CSSProperties = {
+  flex: '1 1 0',
+  minWidth: 0,
+  padding: '0 5px',
+  borderRadius: redesignRadius.control,
+  cursor: 'pointer',
+  fontSize: '11px',
+  fontWeight: 600,
+  whiteSpace: 'nowrap',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 4,
+}
 
 export const DialogueNode = memo(function DialogueNode({
   data,
@@ -414,109 +443,6 @@ export const DialogueNode = memo(function DialogueNode({
     >
       {/* Story 9.2 — l'indicateur conditions vit dans le pied mono (COND.), plus de badge flottant. */}
 
-      {/* Badge tag (Story 2.11 FR32) */}
-      {tag && (
-        <Badge
-          variant="neutral"
-          size="sm"
-          title={tag}
-          style={{
-            position: 'absolute',
-            top: 4,
-            left: 4,
-            zIndex: 10,
-            maxWidth: NODE_WIDTH - 32,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            backgroundColor: theme.background.primary,
-          }}
-        >
-          {tag}
-        </Badge>
-      )}
-      {/* Badge d'erreur */}
-      {hasErrors && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 4,
-            right: 4,
-            backgroundColor:
-              validationHighlightKind === 'content'
-                ? theme.state.warning.border
-                : validationHighlightKind === 'lore'
-                  ? theme.state.lore.border
-                  : theme.state.error.border,
-            color: 'white',
-            borderRadius: '50%',
-            width: 20,
-            height: 20,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.75rem',
-            fontWeight: 'bold',
-            zIndex: 10,
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
-          }}
-          title={errors.map((e) => e.message).join('\n')}
-        >
-          {errors.length}
-        </div>
-      )}
-      
-      {/* Badge d'avertissement */}
-      {gddContextStale && !gddStaleChecking && (
-        <div
-          data-testid="gdd-stale-badge"
-          role="status"
-          aria-live="polite"
-          style={{
-            position: 'absolute',
-            top: tag ? 26 : 4,
-            right: hasErrors || hasWarnings ? 30 : 4,
-            padding: '2px 6px',
-            borderRadius: 4,
-            fontSize: '0.65rem',
-            fontWeight: 700,
-            backgroundColor: theme.state.warning.background ?? 'rgba(255, 193, 7, 0.25)',
-            color: theme.state.warning.color,
-            border: `1px solid ${theme.state.warning.color}`,
-            zIndex: 9,
-            maxWidth: 120,
-            textAlign: 'center',
-            lineHeight: 1.2,
-          }}
-          title="GDD mis à jour depuis la génération — régénérer le nœud pour utiliser le lore à jour."
-        >
-          GDD↑
-        </div>
-      )}
-      {!hasErrors && hasWarnings && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 4,
-            right: 4,
-            backgroundColor: topologyStyle?.border ?? theme.state.warning.color,
-            color: 'black',
-            borderRadius: '50%',
-            width: 20,
-            height: 20,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.75rem',
-            fontWeight: 'bold',
-            zIndex: 10,
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
-          }}
-          title={warnings.map((w) => w.message).join('\n')}
-        >
-          {warnings.length}
-        </div>
-      )}
       {/* Input Handle (haut) */}
       <Handle
         type="target"
@@ -566,8 +492,49 @@ export const DialogueNode = memo(function DialogueNode({
         >
           {speaker}
         </span>
+        {tag && (
+          <Badge
+            variant="neutral"
+            size="sm"
+            title={tag}
+            style={{
+              maxWidth: 96,
+              minWidth: 0,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              backgroundColor: theme.background.primary,
+            }}
+          >
+            {tag}
+          </Badge>
+        )}
+        {gddContextStale && !gddStaleChecking && (
+          <span
+            data-testid="gdd-stale-badge"
+            role="status"
+            aria-live="polite"
+            style={{
+              fontFamily: redesignFont.mono,
+              fontSize: '9.5px',
+              fontWeight: 700,
+              letterSpacing: '0.04em',
+              lineHeight: 1.2,
+              padding: '1px 5px',
+              borderRadius: 4,
+              flexShrink: 0,
+              backgroundColor: theme.state.warning.background ?? 'rgba(255, 193, 7, 0.25)',
+              color: theme.state.warning.color,
+              border: `1px solid ${theme.state.warning.color}`,
+            }}
+            title="GDD mis à jour depuis la génération — régénérer le nœud pour utiliser le lore à jour."
+          >
+            GDD↑
+          </span>
+        )}
         {nodeStateLabel && (
           <span
+            data-testid="graph-node-state-label"
             style={{
               fontFamily: redesignFont.mono,
               fontSize: '9.5px',
@@ -580,16 +547,105 @@ export const DialogueNode = memo(function DialogueNode({
             {nodeStateLabel.text}
           </span>
         )}
+        {hasErrors && (
+          <span
+            data-testid="graph-node-error-count"
+            title={errors.map((e) => e.message).join('\n')}
+            style={{
+              ...nodeCountBadgeStyle,
+              backgroundColor:
+                validationHighlightKind === 'content'
+                  ? theme.state.warning.border
+                  : validationHighlightKind === 'lore'
+                    ? theme.state.lore.border
+                    : theme.state.error.border,
+              color: 'white',
+            }}
+          >
+            {errors.length}
+          </span>
+        )}
+        {!hasErrors && hasWarnings && (
+          <span
+            data-testid="graph-node-warning-count"
+            title={warnings.map((w) => w.message).join('\n')}
+            style={{
+              ...nodeCountBadgeStyle,
+              backgroundColor: topologyStyle?.border ?? theme.state.warning.color,
+              color: 'black',
+            }}
+          >
+            {warnings.length}
+          </span>
+        )}
       </div>
+
+      {isPending && (
+        <div
+          data-testid="graph-node-pending-actions"
+          style={{
+            height: PENDING_ACTIONS_ROW_HEIGHT_PX,
+            flexShrink: 0,
+            boxSizing: 'border-box',
+            padding: 9,
+            display: 'flex',
+            alignItems: 'stretch',
+            gap: 5,
+          }}
+        >
+          {(isHovered || selected) && !isProcessing && (
+            <>
+              <button
+                type="button"
+                onClick={handleReject}
+                style={{
+                  ...pendingActionButtonStyle,
+                  border: `1px solid ${theme.state.error.border}`,
+                  backgroundColor: theme.state.error.background,
+                  color: theme.state.error.color,
+                }}
+                title="Rejeter le nœud"
+              >
+                <span aria-hidden>✗</span>
+                <span>Rejeter</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleOpenRegenerateModal}
+                style={{
+                  ...pendingActionButtonStyle,
+                  border: `1px solid ${theme.state.pending.border}`,
+                  backgroundColor: theme.state.warning.background,
+                  color: theme.state.warning.color,
+                }}
+                title="Régénérer avec d'autres instructions"
+              >
+                <span aria-hidden>↻</span>
+                <span>Régénérer</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleAccept}
+                style={{
+                  ...pendingActionButtonStyle,
+                  border: `1px solid ${theme.state.accepted.border}`,
+                  backgroundColor: theme.state.success.background,
+                  color: theme.state.success.color,
+                }}
+                title="Accepter le nœud"
+              >
+                <span aria-hidden>✓</span>
+                <span>Accepter</span>
+              </button>
+            </>
+          )}
+        </div>
+      )}
       
       {/* Contenu (dialogue) — padding bas réservé pour handles + "Voir le prompt" */}
       <div
         style={{
           padding: '12px',
-          paddingTop:
-            isPending && (isHovered || selected)
-              ? CONTENT_PADDING_TOP_WHEN_PENDING
-              : 12,
           paddingBottom: 8,
           fontFamily: redesignFont.serif,
           fontSize: '12.5px',
@@ -608,7 +664,7 @@ export const DialogueNode = memo(function DialogueNode({
       <div
         style={{
           padding: '0 12px',
-          paddingBottom: hasChoices ? BOTTOM_RESERVED_WITH_CHOICES : BOTTOM_RESERVED_SINGLE,
+          paddingBottom: BOTTOM_RESERVED_PX,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -806,118 +862,6 @@ export const DialogueNode = memo(function DialogueNode({
         />
       )}
       
-      {/* Boutons Accept / Régénérer / Reject visibles au hover pour nœuds pending (Story 1.4, 1.10) */}
-      {isPending && (isHovered || selected) && !isProcessing && (
-        <>
-          <button
-            onClick={handleAccept}
-            disabled={isProcessing}
-            style={{
-              position: 'absolute',
-              top: 34,
-              right: 8,
-              padding: '0.4rem 0.6rem',
-              border: `1px solid ${theme.state.accepted.border}`,
-              borderRadius: '6px',
-              backgroundColor: theme.state.success.background,
-              color: theme.state.success.color,
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
-              zIndex: 15,
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.05)'
-              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.4)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)'
-              e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)'
-            }}
-            title="Accepter le nœud"
-          >
-            <span>✓</span>
-            <span>Accepter</span>
-          </button>
-          <button
-            onClick={handleReject}
-            disabled={isProcessing}
-            style={{
-              position: 'absolute',
-              top: 34,
-              left: 8,
-              padding: '0.4rem 0.6rem',
-              border: `1px solid ${theme.state.error.border}`,
-              borderRadius: '6px',
-              backgroundColor: theme.state.error.background,
-              color: theme.state.error.color,
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
-              zIndex: 15,
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.05)'
-              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.4)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)'
-              e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)'
-            }}
-            title="Rejeter le nœud"
-          >
-            <span>✗</span>
-            <span>Rejeter</span>
-          </button>
-          <button
-            onClick={handleOpenRegenerateModal}
-            disabled={isProcessing}
-            style={{
-              position: 'absolute',
-              top: 34,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              padding: '0.4rem 0.6rem',
-              border: `1px solid ${theme.state.pending.border}`,
-              borderRadius: '6px',
-              backgroundColor: theme.state.warning.background,
-              color: theme.state.warning.color,
-              cursor: 'pointer',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
-              zIndex: 15,
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateX(-50%) scale(1.05)'
-              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.4)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateX(-50%) scale(1)'
-              e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)'
-            }}
-            title="Régénérer avec d'autres instructions"
-          >
-            <span aria-hidden>↻</span>
-            <span>Régénérer</span>
-          </button>
-        </>
-      )}
-
       {/* Voir le prompt (Story 1.14) — zone dédiée au-dessus des handles, jamais superposé */}
       {(isHovered || selected) && (
         <button

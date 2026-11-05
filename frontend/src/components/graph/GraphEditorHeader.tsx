@@ -29,6 +29,8 @@ interface GraphEditorHeaderProps {
   /** Ouverture menu Actions (export) même en lecture seule invité. */
   canOpenGraphActions?: boolean
   isStandalone: boolean
+  /** Bureau : les outils du menu Qualités s'ouvrent dans l'inspecteur. */
+  inspectorAvailable?: boolean
   onBack?: () => void
   /** Story 9.4 — preview scénario mode VN. */
   scenarioPlaythroughActive?: boolean
@@ -50,6 +52,7 @@ export function GraphEditorHeader({
   canEditGraph,
   canOpenGraphActions,
   isStandalone,
+  inspectorAvailable = false,
   onBack,
   onToggleDialoguePreview,
   scenarioPlaythroughActive = false,
@@ -134,6 +137,7 @@ export function GraphEditorHeader({
   const { renderActionsMenuItems, renderQualityMenuItems } = useGraphToolbarMenuItems({
     chrome,
     hasActiveDialogue,
+    inspectorAvailable,
     showDialoguePreviewPanel: scenarioPlaythroughActive,
     onToggleDialoguePreview,
     nodes,

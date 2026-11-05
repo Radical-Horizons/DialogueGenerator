@@ -177,7 +177,7 @@ export function GraphInspector({ tabs, footer }: GraphInspectorProps) {
       ) : (
         <div style={{ flex: 1, minHeight: 0, paddingTop: 12 }}>
           <GraphInspectorEmpty>
-            Aucun onglet ouvert. Choisis Nœud, Santé, Qualité ou Coût ci-dessus.
+            Aucun onglet ouvert. Choisis Nœud, Santé, Qualité, Slop ou Coût ci-dessus.
           </GraphInspectorEmpty>
         </div>
       )}

@@ -77,6 +77,8 @@ const DEFAULT_SCENARIO_PLAYTHROUGH: ScenarioPlaythroughState = {
 export interface GraphViewState {
   // --- Instance React Flow ---
   reactFlowInstance: ReactFlowInstance | null
+  /** Conteneur du canvas : permet de placer un nœud dans la zone visible depuis la toolbar. */
+  canvasElement: HTMLElement | null
 
   // --- Focus / FitView (FIFO : plusieurs focusNode successifs ne s'écrasent pas) ---
   focusQueue: string[]
@@ -128,6 +130,7 @@ export interface GraphViewState {
   // --- Actions : instance ---
   /** `null` réinitialise la référence — l'état la porte déjà comme valeur initiale. */
   registerReactFlowInstance: (instance: ReactFlowInstance | null) => void
+  registerCanvasElement: (element: HTMLElement | null) => void
 
   // --- Actions : focus / fitView ---
   focusNode: (nodeId: string) => void
@@ -215,6 +218,7 @@ export interface GraphViewState {
 
 export const useGraphViewStore = create<GraphViewState>()((set) => ({
   reactFlowInstance: null,
+  canvasElement: null,
   focusQueue: [],
   pendingFitView: false,
   pendingFitViewNodeIds: null,
@@ -235,6 +239,7 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
   scenarioPlaythrough: { ...DEFAULT_SCENARIO_PLAYTHROUGH },
 
   registerReactFlowInstance: (instance) => set({ reactFlowInstance: instance }),
+  registerCanvasElement: (element) => set({ canvasElement: element }),
 
   focusNode: (nodeId) =>
     set((s) => ({

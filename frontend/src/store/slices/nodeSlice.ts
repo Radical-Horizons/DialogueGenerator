@@ -4,7 +4,7 @@
  * deleteNode, duplicateNode(s) (dédupliqués via cloneNodeData).
  */
 import type { StateCreator } from 'zustand'
-import type { Node } from 'reactflow'
+import type { Edge, Node } from 'reactflow'
 import type { GraphState } from '../types/graphState'
 import type { Choice } from '../../schemas/nodeEditorSchema'
 import type { RegenerationEntry } from '../../types/graph'
@@ -88,6 +88,24 @@ function cloneNodeData(
   delete data.testSuccessNode
   delete data.testCriticalSuccessNode
   return data
+}
+
+/**
+ * Ajoute au graphe les arêtes créées pour un nouveau dialogue (lien vers ses barres de test),
+ * sans reprendre le reste de la normalisation : les arêtes existantes restent intactes.
+ */
+function appendEdgesOfNewDialogueNode(
+  nodeId: string,
+  currentEdges: Edge[],
+  normalizedEdges: Edge[]
+): Edge[] {
+  const testBarPrefix = `test-node-${nodeId}-`
+  const knownEdgeIds = new Set(currentEdges.map((e) => e.id))
+  const newEdges = normalizedEdges.filter(
+    (e) =>
+      !knownEdgeIds.has(e.id) && (e.source === nodeId || e.source.startsWith(testBarPrefix))
+  )
+  return newEdges.length > 0 ? [...currentEdges, ...newEdges] : currentEdges
 }
 
 /**
@@ -459,7 +477,10 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
     runGraphTransaction(get, set, (state) => {
       const newNodes = [...state.nodes, node]
       const normalized = normalizeTestBars(newNodes, state.edges)
-      const edgesToSet = node.type === 'dialogueNode' ? state.edges : normalized.edges
+      const edgesToSet =
+        node.type === 'dialogueNode'
+          ? appendEdgesOfNewDialogueNode(node.id, state.edges, normalized.edges)
+          : normalized.edges
       return {
         nodes: normalized.nodes,
         edges: edgesToSet,
@@ -768,19 +789,21 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
     const state = get()
     let lastAddedId: string | null = null
 
-    nodeIds.forEach((id, index) => {
-      const originalNode = state.nodes.find((n) => n.id === id)
-      if (!originalNode || originalNode.type !== 'dialogueNode') return
+    state.runAsSingleUndoStep(() => {
+      nodeIds.forEach((id, index) => {
+        const originalNode = state.nodes.find((n) => n.id === id)
+        if (!originalNode || originalNode.type !== 'dialogueNode') return
 
-      const newId = `manual-${crypto.randomUUID()}`
-      const position = {
-        x: originalNode.position.x + DUPLICATE_OFFSET_STEP * (index + 1),
-        y: originalNode.position.y + DUPLICATE_OFFSET_STEP * (index + 1),
-      }
-      const data = cloneNodeData(originalNode.data as Record<string, unknown>, newId)
-      const newNode: Node = { id: newId, type: 'dialogueNode', position, data }
-      state.addNode(newNode)
-      lastAddedId = newId
+        const newId = `manual-${crypto.randomUUID()}`
+        const position = {
+          x: originalNode.position.x + DUPLICATE_OFFSET_STEP * (index + 1),
+          y: originalNode.position.y + DUPLICATE_OFFSET_STEP * (index + 1),
+        }
+        const data = cloneNodeData(originalNode.data as Record<string, unknown>, newId)
+        const newNode: Node = { id: newId, type: 'dialogueNode', position, data }
+        state.addNode(newNode)
+        lastAddedId = newId
+      })
     })
 
     if (lastAddedId != null) {

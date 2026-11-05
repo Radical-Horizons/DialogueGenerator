@@ -5,17 +5,15 @@ import { useCallback, type CSSProperties } from 'react'
 import type { Node, ReactFlowInstance } from 'reactflow'
 import { theme } from '../../theme'
 import { useGraphViewStore } from '../../store/graphViewStore'
-import {
-  MANUAL_NODE_OFFSET_X,
-  MANUAL_NODE_OFFSET_Y,
-  MANUAL_NODE_STEP,
-  MANUAL_NODE_STEP_Y,
-} from './graphToolbarConstants'
+import { useUiLayoutStore, type InspectorTab } from '../../store/uiLayoutStore'
+import { manualNodePositionInView } from '../../utils/manualNodePlacement'
 import type { GraphToolbarChromeTokens } from './graphToolbarTypes'
 
 export interface GraphToolbarMenuItemsParams {
   chrome: GraphToolbarChromeTokens
   hasActiveDialogue: boolean
+  /** Bureau : l'inspecteur est visible, les outils s'y ouvrent au lieu d'une fenêtre flottante. */
+  inspectorAvailable: boolean
   showDialoguePreviewPanel: boolean
   onToggleDialoguePreview?: () => void
   nodes: Node[]
@@ -72,6 +70,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
   const {
     chrome,
     hasActiveDialogue,
+    inspectorAvailable,
     showDialoguePreviewPanel,
     onToggleDialoguePreview,
     nodes,
@@ -104,6 +103,23 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
     showCostBreakdown,
   } = params
 
+  const inspectorTab = useUiLayoutStore((s) => s.inspectorTab)
+  const qualityActive = inspectorAvailable ? inspectorTab === 'quality' : showQualityLlmPanel
+  const slopActive = inspectorAvailable ? inspectorTab === 'slop' : showAiSlopPanel
+  const costActive = inspectorAvailable ? inspectorTab === 'cost' : showCostBreakdown
+
+  const openToolPanel = useCallback(
+    (tab: InspectorTab, setFloatingOpen: (next: (v: boolean) => boolean) => void) => {
+      setShowValidationToolsDropdown(false)
+      if (inspectorAvailable) {
+        useUiLayoutStore.getState().setInspectorTab(tab)
+      } else {
+        setFloatingOpen((v) => !v)
+      }
+    },
+    [inspectorAvailable, setShowValidationToolsDropdown]
+  )
+
   const renderActionsMenuItems = useCallback(() => {
     return (
       <>
@@ -114,23 +130,16 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
           onClick={() => {
             setShowActionsDropdown(false)
             const count = nodes.filter((n) => n.type === 'dialogueNode').length
-            const position = {
-              x: MANUAL_NODE_OFFSET_X + count * MANUAL_NODE_STEP,
-              y: MANUAL_NODE_OFFSET_Y + count * MANUAL_NODE_STEP_Y,
-            }
+            const position = manualNodePositionInView(
+              reactFlowInstance,
+              useGraphViewStore.getState().canvasElement,
+              count
+            )
             const node = createEmptyNode(position)
             addNode(node)
             // Avant la sélection : l'inspecteur lit la demande au changement de nœud.
             useGraphViewStore.getState().requestNodeEdit(node.id)
             setSelectedNode(node.id)
-            if (reactFlowInstance) {
-              requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                  const n = reactFlowInstance.getNode(node.id)
-                  if (n) reactFlowInstance.fitView({ nodes: [n], padding: 0.2, duration: 200 })
-                })
-              })
-            }
           }}
           style={dropdownItemStyle(chrome, false, false)}
           onMouseEnter={(e) => {
@@ -329,17 +338,15 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
         <button
           type="button"
           role="menuitem"
-          onClick={() => {
-            setShowValidationToolsDropdown(false)
-            setShowQualityLlmPanel((v) => !v)
-          }}
+          data-testid="btn-quality-llm"
+          onClick={() => openToolPanel('quality', setShowQualityLlmPanel)}
           disabled={!hasActiveDialogue}
-          style={dropdownItemStyle(chrome, showQualityLlmPanel, !hasActiveDialogue)}
+          style={dropdownItemStyle(chrome, qualityActive, !hasActiveDialogue)}
           onMouseEnter={(e) => {
             if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = showQualityLlmPanel
+            e.currentTarget.style.backgroundColor = qualityActive
               ? theme.button.default.background
               : 'transparent'
           }}
@@ -349,17 +356,15 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
         <button
           type="button"
           role="menuitem"
-          onClick={() => {
-            setShowValidationToolsDropdown(false)
-            setShowAiSlopPanel((v) => !v)
-          }}
+          data-testid="btn-ai-slop"
+          onClick={() => openToolPanel('slop', setShowAiSlopPanel)}
           disabled={!hasActiveDialogue}
-          style={dropdownItemStyle(chrome, showAiSlopPanel, !hasActiveDialogue)}
+          style={dropdownItemStyle(chrome, slopActive, !hasActiveDialogue)}
           onMouseEnter={(e) => {
             if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = showAiSlopPanel
+            e.currentTarget.style.backgroundColor = slopActive
               ? theme.button.default.background
               : 'transparent'
           }}
@@ -435,18 +440,15 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
           type="button"
           role="menuitem"
           data-testid="btn-cost-breakdown"
-          onClick={() => {
-            setShowValidationToolsDropdown(false)
-            setShowCostBreakdown((v) => !v)
-          }}
+          onClick={() => openToolPanel('cost', setShowCostBreakdown)}
           disabled={!hasActiveDialogue}
-          style={dropdownItemStyle(chrome, showCostBreakdown, !hasActiveDialogue)}
+          style={dropdownItemStyle(chrome, costActive, !hasActiveDialogue)}
           title="Afficher le breakdown des coûts LLM pour ce dialogue"
           onMouseEnter={(e) => {
             if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = showCostBreakdown
+            e.currentTarget.style.backgroundColor = costActive
               ? theme.button.default.background
               : 'transparent'
           }}
@@ -457,20 +459,21 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
     )
   }, [
     chrome,
+    costActive,
     handleToggleSchemaValidation,
     hasActiveDialogue,
     onToggleDialoguePreview,
+    openToolPanel,
+    qualityActive,
     setShowAiSlopPanel,
     setShowContextDroppingPanel,
     setShowCostBreakdown,
     setShowQualityLlmPanel,
     setShowValidationToolsDropdown,
-    showAiSlopPanel,
     showContextDroppingPanel,
-    showCostBreakdown,
     showDialoguePreviewPanel,
-    showQualityLlmPanel,
     showSchemaValidationPanel,
+    slopActive,
   ])
 
   return { renderActionsMenuItems, renderQualityMenuItems }

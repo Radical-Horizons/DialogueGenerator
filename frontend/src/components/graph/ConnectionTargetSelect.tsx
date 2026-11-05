@@ -60,6 +60,7 @@ export const ConnectionTargetSelect = memo(function ConnectionTargetSelect(
   const nodes = useGraphStore((s) => s.nodes)
   const connectNodes = useGraphStore((s) => s.connectNodes)
   const disconnectNodes = useGraphStore((s) => s.disconnectNodes)
+  const runAsSingleUndoStep = useGraphStore((s) => s.runAsSingleUndoStep)
 
   const excludeIds = useMemo((): string[] => {
     switch (props.variant) {
@@ -118,9 +119,11 @@ export const ConnectionTargetSelect = memo(function ConnectionTargetSelect(
         })
 
       if (!v) {
-        for (const e of nextEdgeIds()) {
-          disconnectNodes(e.id)
-        }
+        runAsSingleUndoStep(() => {
+          for (const e of nextEdgeIds()) {
+            disconnectNodes(e.id)
+          }
+        })
         return
       }
 
@@ -129,12 +132,14 @@ export const ConnectionTargetSelect = memo(function ConnectionTargetSelect(
         return
       }
 
-      for (const e of nexts) {
-        disconnectNodes(e.id)
-      }
-      connectNodes(dialogueNodeId, v, undefined, 'nextNode')
+      runAsSingleUndoStep(() => {
+        for (const e of nexts) {
+          disconnectNodes(e.id)
+        }
+        connectNodes(dialogueNodeId, v, undefined, 'nextNode')
+      })
     },
-    [props, connectNodes, disconnectNodes]
+    [props, connectNodes, disconnectNodes, runAsSingleUndoStep]
   )
 
   const applyTestTarget = useCallback(
@@ -158,13 +163,14 @@ export const ConnectionTargetSelect = memo(function ConnectionTargetSelect(
         return
       }
 
-      if (existing) {
-        disconnectNodes(existing.id)
-      }
-      const ct = TEST_CONNECTION_TYPE[handle]
-      connectNodes(testSourceNodeId, v, undefined, ct)
+      runAsSingleUndoStep(() => {
+        if (existing) {
+          disconnectNodes(existing.id)
+        }
+        connectNodes(testSourceNodeId, v, undefined, TEST_CONNECTION_TYPE[handle])
+      })
     },
-    [props, connectNodes, disconnectNodes]
+    [props, connectNodes, disconnectNodes, runAsSingleUndoStep]
   )
 
   const onChange = useCallback(

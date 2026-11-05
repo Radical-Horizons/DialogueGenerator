@@ -195,6 +195,50 @@ describe('graphStore - Auto-layout (Story 2.13 FR34)', () => {
       expect(new Set(yValues).size).toBeLessThanOrEqual(2)
     })
 
+    it('« Disposer » centre le parent au-dessus de ses enfants', async () => {
+      addDialogueNode('parent', { x: 140, y: 0 })
+      addDialogueNode('c1', { x: 0, y: 0 })
+      addDialogueNode('c2', { x: 0, y: 0 })
+      addDialogueNode('c3', { x: 0, y: 0 })
+      const store = useGraphStore.getState()
+      store.connectNodes('parent', 'c1', 0, 'choice')
+      store.connectNodes('parent', 'c2', 1, 'choice')
+      store.connectNodes('parent', 'c3', 2, 'choice')
+
+      await store.applyAutoLayout('dagre', 'TB')
+
+      const state = useGraphStore.getState()
+      const parent = state.nodes.find((n) => n.id === 'parent')!
+      const childXs = ['c1', 'c2', 'c3'].map(
+        (id) => state.nodes.find((n) => n.id === id)!.position.x
+      )
+      expect(parent.position.x).toBeCloseTo((Math.min(...childXs) + Math.max(...childXs)) / 2, 0)
+    })
+
+    it('« Disposer » survit au déplacement suivant en mode document SoT', async () => {
+      addDialogueNode('root', { x: 0, y: 0 })
+      addDialogueNode('leaf', { x: 0, y: 0 })
+      useGraphStore.getState().connectNodes('root', 'leaf', 0, 'choice')
+      useGraphStore.setState({
+        document: {
+          schemaVersion: '1.1.0',
+          nodes: [
+            { id: 'root', speaker: '', line: '', choices: [] },
+            { id: 'leaf', speaker: '', line: '', choices: [] },
+          ],
+        },
+        layout: { nodes: { root: { x: 0, y: 0 }, leaf: { x: 0, y: 0 } } },
+      })
+
+      await useGraphStore.getState().applyAutoLayout('dagre', 'TB')
+      const leafY = useGraphStore.getState().nodes.find((n) => n.id === 'leaf')!.position.y
+      expect(leafY).toBeGreaterThan(0)
+
+      useGraphStore.getState().updateNodePosition('root', { x: 500, y: 0 })
+
+      expect(useGraphStore.getState().nodes.find((n) => n.id === 'leaf')!.position.y).toBe(leafY)
+    })
+
     it('increases sibling fan amplitude from compact to large mode', async () => {
       addDialogueNode('parent', { x: 0, y: 0 })
       addDialogueNode('a', { x: 0, y: 0 })
