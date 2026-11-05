@@ -11,19 +11,14 @@ class GddContentFingerprintRequest(BaseModel):
 
     context_selections: Dict[str, Any] = Field(
         default_factory=dict,
-        description="Sélections de contexte (même forme que generate-node / estimate-tokens)",
+        description="Sélection brute du nœud (même forme que generate-node)",
     )
-    field_configs: Optional[Dict[str, List[str]]] = Field(
-        None,
-        description="Champs par type d'élément (optionnel, défauts ContextBuilder si absent)",
-    )
-    organization_mode: str = Field("narrative", description="Mode d'organisation du contexte")
 
 
 class GddContentFingerprintResponse(BaseModel):
-    """Réponse : empreinte SHA-256 du JSON de contexte structuré."""
+    """Réponse : empreinte du contenu des fiches sélectionnées."""
 
-    fingerprint: str = Field(..., description="Empreinte hex SHA-256")
+    fingerprint: str = Field(..., description="Empreinte versionnée, ex. v2:<sha256 hex>")
 
 
 class GddEntityHistoryEventPublic(BaseModel):

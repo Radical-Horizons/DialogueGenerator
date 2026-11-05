@@ -30,7 +30,7 @@ async def post_gdd_content_fingerprint(
     context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> GddContentFingerprintResponse:
-    """Calcule l'empreinte du contenu GDD pour une sélection (Story 3.9, détection stale)."""
+    """Calcule l'empreinte des fiches GDD d'une sélection (Story 3.9, détection stale)."""
     from services.gdd_context_fingerprint import compute_gdd_content_fingerprint
 
     try:
@@ -38,8 +38,6 @@ async def post_gdd_content_fingerprint(
             compute_gdd_content_fingerprint,
             context_builder,
             request_data.context_selections,
-            field_configs=request_data.field_configs,
-            organization_mode=request_data.organization_mode or "narrative",
         )
     except Exception as exc:
         logger.warning(

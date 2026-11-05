@@ -253,6 +253,38 @@ async def test_service_partial_failure_and_skip() -> None:
 
 
 @pytest.mark.asyncio
+async def test_service_fingerprints_raw_selection_not_enriched_context() -> None:
+    """L'empreinte suit le snapshot du nœud : sélection brute, sans la fiche tirée au sort."""
+    orchestrator = MagicMock()
+    orchestrator.generate = AsyncMock(
+        return_value=GenerationResult(
+            nodes=[{"id": "c-p1", "line": "ok"}],
+            suggested_connections=[],
+            parent_node_id="p1",
+            batch_count=1,
+        )
+    )
+    from services.batch_node_generation_service import (
+        BatchNodeGenerationService,
+        BatchParentInput,
+    )
+
+    raw_selection = {"characters_full": ["A"]}
+    fingerprint_for = MagicMock(return_value="v2:abc")
+    service = BatchNodeGenerationService(orchestrator=orchestrator)
+
+    report = await service.generate_batch(
+        [BatchParentInput("p1", {"choices": [{"text": "a"}]}, raw_selection)],
+        llm_client=MagicMock(),
+        enrich_context=lambda _parent, raw: {**raw, "characters_excerpt": ["Tirée au sort"]},
+        fingerprint_for=fingerprint_for,
+    )
+
+    fingerprint_for.assert_called_once_with(raw_selection)
+    assert report.items[0].context_gdd_content_fingerprint == "v2:abc"
+
+
+@pytest.mark.asyncio
 async def test_service_progress_detail_includes_choice_counters() -> None:
     """Progress detail FR88 : « Nœud i/N — j/k » pendant la génération des choix."""
     orchestrator = MagicMock()

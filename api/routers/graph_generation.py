@@ -257,7 +257,7 @@ async def generate_node(
         gdd_fp = await asyncio.to_thread(
             fingerprint_for_selections_safe,
             context_builder,
-            enriched_context,
+            request_data.context_selections,
         )
 
         return GenerateNodeResponse(
@@ -381,8 +381,8 @@ async def start_batch_generate_from_nodes_job(
                 )
                 return enriched
 
-            def fingerprint_for(enriched: Dict[str, Any]) -> Optional[str]:
-                return fingerprint_for_selections_safe(context_builder, enriched)
+            def fingerprint_for(selections: Dict[str, Any]) -> Optional[str]:
+                return fingerprint_for_selections_safe(context_builder, selections)
 
             report = await batch_service.generate_batch(
                 parents,
