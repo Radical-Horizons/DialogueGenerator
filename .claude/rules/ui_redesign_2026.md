@@ -111,6 +111,11 @@ Correspondance écran → code (point d'entrée) :
   `letter-spacing: 0.08em`, `box-shadow: inset 0 -1px 0` sur un `<span>` interne).
   Ne pas restyler une barre à la main — vécu en août 2026 sur la colonne de
   génération. Garde : `GenerationInputTabs.test.tsx` › « charte graphique ».
+- **Jamais un `set` Zustand par delta SSE.** `EventSource` livre tous les messages d'une
+  lecture réseau dans la même tâche, et chaque `set` y déclenche un rendu synchrone des
+  abonnés sans sélecteur, dont `Dashboard`. Dès que le rendu dépasse l'intervalle entre
+  deltas, plus aucune image : mesuré sur le build de prod (novembre 2026), 247 deltas à
+  25 ms, tâche unique de 9 s, zéro texte peint. Passer par `createChunkCoalescer`.
 - **`hidden` ne masque pas un élément qui porte un `display` inline.** La règle UA
   `[hidden] { display: none }` perd en spécificité. Calculer le `display`.
 - **`useNarrowInlineSize` : le `ResizeObserver` vit dans un effet**, pas dans la

@@ -15,6 +15,13 @@ describe('entityInitials', () => {
     expect(entityInitials('Uresaïr')).toBe('UR')
   })
 
+  it('n’affiche jamais l’apostrophe d’un mot élidé', () => {
+    expect(entityInitials('L’Éthérée')).toBe('LÉ')
+    expect(entityInitials("L'Éthérée")).toBe('LÉ')
+    expect(entityInitials("T'vok")).toBe('TV')
+    expect(entityInitials("L'Éthérée Noire")).toBe('LN')
+  })
+
   it('se limite à trois initiales', () => {
     expect(entityInitials('Anelis Halimar des Hauts Lampistes')).toBe('AHD')
   })

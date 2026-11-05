@@ -10,6 +10,7 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { GenerationPanel } from '../GenerationPanel'
 import { useGenerationStore } from '../../../store/generationStore'
+import { useGenerationOptionsStore } from '../../../store/generationOptionsStore'
 import { useContextStore } from '../../../store/contextStore'
 import { useGraphStore, type GraphState } from '../../../store/graphStore'
 import { useLLMStore } from '../../../store/llmStore'
@@ -684,6 +685,160 @@ describe('GenerationPanel - Tests Baseline', () => {
       const instructionsInput = screen.getByTestId('user-instructions-input')
       await user.type(instructionsInput, 'Instructions à réinitialiser')
       expect(instructionsInput).toBeInTheDocument()
+    }, 10000)
+  })
+
+  /**
+   * Recette du 2026-11-03. La vue de résultat vaut pour une option comme pour plusieurs,
+   * Interrompre reste disponible tant qu'une option écrit, et « Garder » rend le brief.
+   */
+  describe('Vue de résultat et sorties pendant le run', () => {
+    const RESULT = {
+      json_content: JSON.stringify([{ id: 'START', speaker: 'PNJ', line: 'Réplique finale.' }]),
+      title: 'Titre',
+    }
+
+    /** La comparaison lit le store avec des sélecteurs, le panneau sans : les deux doivent marcher. */
+    function useStoreState(overrides: Record<string, unknown>) {
+      const state = { ...buildMockGenerationStoreState(), ...overrides }
+      mockUseGenerationStore.mockImplementation(((selector?: (s: unknown) => unknown) =>
+        typeof selector === 'function' ? selector(state) : state) as never)
+      return state
+    }
+
+    function startSlots(count: number) {
+      useGenerationOptionsStore.getState().startRun(count, { user_instructions: 'x' } as never)
+      useGenerationOptionsStore.getState().updateSlot(0, { jobId: 'job-1', status: 'running' })
+    }
+
+    beforeEach(() => {
+      useGenerationOptionsStore.getState().clearRun()
+    })
+
+    afterEach(() => {
+      useGenerationOptionsStore.getState().clearRun()
+      mockUseGenerationStore.mockReset()
+      mockUseGenerationStore.mockReturnValue(
+        buildMockGenerationStoreState() as unknown as ReturnType<typeof useGenerationStore>
+      )
+    })
+
+    it('une option : le résultat prend le relais du streaming, sans disparaître', async () => {
+      startSlots(1)
+      useStoreState({
+        currentStep: 'Complete',
+        streamingContent: '{"title":"Titre"',
+        currentJobId: 'job-1',
+        unityDialogueResponse: RESULT,
+      })
+
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+
+      expect(useGenerationOptionsStore.getState().slots[0].status).toBe('completed')
+      expect(await screen.findByTestId('generation-options-comparison')).toBeInTheDocument()
+      expect(screen.getByText('Réplique finale.')).toBeInTheDocument()
+      expect(screen.queryByTestId('generation-streaming-inline')).not.toBeInTheDocument()
+    }, 10000)
+
+    it('la réponse du run précédent ne termine pas le run en cours', async () => {
+      startSlots(1)
+      useStoreState({
+        isGenerating: true,
+        currentStep: 'Generating',
+        currentJobId: 'job-1',
+        unityDialogueResponse: RESULT,
+      })
+
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+
+      expect(useGenerationOptionsStore.getState().slots[0].status).toBe('running')
+      expect(screen.getByTestId('generation-streaming-inline')).toBeInTheDocument()
+    }, 10000)
+
+    it('plusieurs options : Interrompre reste là pendant l’écriture', async () => {
+      startSlots(3)
+      useStoreState({ isGenerating: true, currentStep: 'Generating', currentJobId: 'job-1' })
+
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+
+      expect(screen.getByTestId('generation-options-comparison')).toBeInTheDocument()
+      expect(
+        within(screen.getByTestId('generation-streaming-inline')).getByText('Interrompre')
+      ).toBeInTheDocument()
+    }, 10000)
+
+    it('option 1 finie, les autres écrivent : Interrompre ne coupe que celles-là', async () => {
+      const user = userEvent.setup()
+      startSlots(2)
+      useGenerationOptionsStore
+        .getState()
+        .updateSlot(0, { status: 'completed', result: RESULT as never })
+      useGenerationOptionsStore.getState().updateSlot(1, { jobId: 'job-2', status: 'running' })
+      const state = useStoreState({ currentStep: 'Complete', currentJobId: 'job-1' })
+      mockDialoguesAPI.cancelGenerationJob = vi.fn().mockResolvedValue({ status: 'cancelled' })
+
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+
+      await user.click(
+        within(screen.getByTestId('generation-streaming-inline')).getByText('Interrompre')
+      )
+
+      await waitFor(() => {
+        expect(useGenerationOptionsStore.getState().slots[1].status).toBe('cancelled')
+      })
+      expect(mockDialoguesAPI.cancelGenerationJob).toHaveBeenCalledWith('job-2')
+      expect(mockDialoguesAPI.cancelGenerationJob).not.toHaveBeenCalledWith('job-1')
+      expect(state.setError).not.toHaveBeenCalled()
+      expect(useGenerationOptionsStore.getState().slots).toHaveLength(2)
+    }, 10000)
+
+    it('Interrompre sans aucune option prête ramène au brief', async () => {
+      const user = userEvent.setup()
+      startSlots(2)
+      useStoreState({ isGenerating: true, currentStep: 'Generating', currentJobId: 'job-1' })
+      mockDialoguesAPI.cancelGenerationJob = vi.fn().mockResolvedValue({ status: 'cancelled' })
+
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+
+      await user.click(
+        within(screen.getByTestId('generation-streaming-inline')).getByText('Interrompre')
+      )
+
+      await waitFor(() => expect(useGenerationOptionsStore.getState().slots).toEqual([]), {
+        timeout: 4000,
+      })
+    }, 10000)
+
+    it('« Garder » rend le brief et laisse le lot à un clic', async () => {
+      const user = userEvent.setup()
+      startSlots(2)
+      useGenerationOptionsStore
+        .getState()
+        .updateSlot(0, { status: 'completed', result: RESULT as never })
+      useGenerationOptionsStore
+        .getState()
+        .updateSlot(1, { status: 'completed', result: RESULT as never })
+      useStoreState({ unityDialogueResponse: RESULT })
+
+      render(<GenerationPanel />)
+      await waitForPanelReady()
+      expect(screen.getByTestId('generation-primary-action')).toHaveAttribute('hidden')
+
+      await user.click(await screen.findByTestId('option-keep-0'))
+
+      expect(screen.queryByTestId('generation-options-comparison')).not.toBeInTheDocument()
+      expect(screen.getByTestId('generation-primary-action')).not.toHaveAttribute('hidden')
+      expect(screen.getByTestId('kept-option-recall')).toHaveTextContent('OPTION 1 GARDÉE')
+
+      await user.click(screen.getByTestId('kept-option-reopen'))
+
+      expect(await screen.findByTestId('generation-options-comparison')).toBeInTheDocument()
+      expect(useGenerationOptionsStore.getState().keptIndex).toBe(0)
     }, 10000)
   })
 

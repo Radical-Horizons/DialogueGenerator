@@ -6,6 +6,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { useSSEStreaming } from '@/hooks/useSSEStreaming'
 import { useGenerationStore } from '@/store/generationStore'
+import { STREAM_FLUSH_INTERVAL_MS } from '@/utils/chunkCoalescer'
 
 // Mock EventSource pour éviter les appels réseau en test
 const mockClose = vi.fn()
@@ -162,7 +163,7 @@ describe('useSSEStreaming', () => {
   })
 
   it('should append chunk with empty string content', async () => {
-    const spy = vi.spyOn(useGenerationStore.getState(), 'appendChunk')
+    const spy = vi.spyOn(useGenerationStore.getState(), 'appendChunks')
     const { result } = renderHook(() => useSSEStreaming({}))
 
     await act(async () => {
@@ -175,9 +176,62 @@ describe('useSSEStreaming', () => {
         data: JSON.stringify({ type: 'chunk', content: '', sequence: 1 }),
       } as MessageEvent)
     })
+    act(() => result.current.disconnect())
 
-    expect(spy).toHaveBeenCalledWith('', 1)
+    expect(spy).toHaveBeenCalledWith([{ content: '', sequence: 1 }])
     spy.mockRestore()
+  })
+
+  it('regroupe les deltas : un rendu par intervalle, pas un par message', async () => {
+    useGenerationStore.getState().startGeneration('job')
+    const { result } = renderHook(() => useSSEStreaming({}))
+    await act(async () => {
+      result.current.connect('http://localhost/sse')
+    })
+    const updates = vi.fn()
+    const unsubscribe = useGenerationStore.subscribe(updates)
+
+    vi.useFakeTimers()
+    try {
+      const inst = MockEventSource.mock.results[0]?.value as MockEventSourceInstance
+      act(() => {
+        for (let sequence = 0; sequence < 50; sequence++) {
+          inst.onmessage!({
+            data: JSON.stringify({ type: 'chunk', content: 'x', sequence }),
+          } as MessageEvent)
+        }
+      })
+      expect(updates).not.toHaveBeenCalled()
+
+      act(() => {
+        vi.advanceTimersByTime(STREAM_FLUSH_INTERVAL_MS)
+      })
+      expect(updates).toHaveBeenCalledTimes(1)
+      expect(useGenerationStore.getState().streamingContent).toHaveLength(50)
+    } finally {
+      vi.useRealTimers()
+      unsubscribe()
+    }
+  })
+
+  it('livre les deltas en attente avant le résultat final', async () => {
+    useGenerationStore.getState().startGeneration('job')
+    const { result } = renderHook(() => useSSEStreaming({}))
+    await act(async () => {
+      result.current.connect('http://localhost/sse')
+    })
+
+    const inst = MockEventSource.mock.results[0]?.value as MockEventSourceInstance
+    await act(async () => {
+      inst.onmessage!({
+        data: JSON.stringify({ type: 'chunk', content: 'fin', sequence: 0 }),
+      } as MessageEvent)
+      inst.onmessage!({
+        data: JSON.stringify({ type: 'complete', result: { json_content: '{}' } }),
+      } as MessageEvent)
+    })
+
+    expect(useGenerationStore.getState().streamingContent).toBe('fin')
   })
 
   it('should ignore step events after complete (out-of-order)', async () => {

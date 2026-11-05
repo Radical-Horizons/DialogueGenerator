@@ -18,6 +18,12 @@ import {
   rebuildContextFromEntityCache,
 } from '../utils/structuredPromptMerge'
 
+/** Un delta du flux SSE ; `sequence` absent pour les flux non numérotés. */
+export interface StreamChunkItem {
+  content: string
+  sequence?: number
+}
+
 interface GenerationState {
   // Sélection de scène
   sceneSelection: SceneSelection
@@ -149,6 +155,8 @@ interface GenerationState {
   // Actions streaming (Task 2 - Story 0.2)
   startGeneration: (jobId: string) => void
   appendChunk: (chunk: string, sequence?: number) => void
+  /** Applique un lot de deltas en un seul `set`, donc en un seul rendu (voir `chunkCoalescer`). */
+  appendChunks: (chunks: StreamChunkItem[]) => void
   setStep: (step: 'Prompting' | 'Generating' | 'Validating' | 'Complete') => void
   interrupt: () => void
   minimize: () => void
@@ -475,51 +483,15 @@ export const useGenerationStore = create<GenerationState>((set) => ({
       lastProcessedSequence: -1,
     }),
 
-  appendChunk: (chunk, sequence) =>
-    set((state) => {
-      if (sequence === undefined || sequence === null) {
-        return { streamingContent: state.streamingContent + chunk }
-      }
+  appendChunk: (chunk, sequence) => set((state) => applyChunk(state, chunk, sequence)),
 
-      const expected = state.lastProcessedSequence + 1
-      if (sequence < expected) {
-        return state
-      }
-
-      if (sequence > expected) {
-        const newBuffer = new Map(state.chunkBuffer)
-        newBuffer.set(sequence, chunk)
-        let nextExpected = expected
-        let newContent = state.streamingContent
-        let lastAdded = state.lastProcessedSequence
-
-        const sortedSequences = Array.from(newBuffer.keys()).sort((a, b) => a - b)
-        for (const seq of sortedSequences) {
-          if (seq === nextExpected) {
-            newContent += newBuffer.get(seq)!
-            newBuffer.delete(seq)
-            lastAdded = seq
-            nextExpected++
-          } else if (seq < nextExpected) {
-            newBuffer.delete(seq)
-          } else {
-            break
-          }
-        }
-
-        return {
-          streamingContent: newContent,
-          chunkBuffer: newBuffer,
-          lastProcessedSequence: lastAdded,
-        }
-      }
-
-      return {
-        streamingContent: state.streamingContent + chunk,
-        ...(state.chunkBuffer.size > 0 ? { chunkBuffer: new Map<number, string>() } : {}),
-        lastProcessedSequence: sequence,
-      }
-    }),
+  appendChunks: (chunks) =>
+    set((state) =>
+      chunks.reduce<ChunkState>(
+        (acc, { content, sequence }) => applyChunk(acc, content, sequence),
+        state
+      )
+    ),
 
   setStep: (step) =>
     set({ currentStep: step }),
@@ -573,6 +545,56 @@ export const useGenerationStore = create<GenerationState>((set) => ({
   setInterrupting: (isInterrupting) =>
     set({ isInterrupting }),  // Task 4 - Story 0.8
 }))
+
+type ChunkState = Pick<
+  GenerationState,
+  'streamingContent' | 'chunkBuffer' | 'lastProcessedSequence'
+>
+
+function applyChunk(state: ChunkState, chunk: string, sequence?: number): ChunkState {
+  if (sequence === undefined || sequence === null) {
+    return { ...state, streamingContent: state.streamingContent + chunk }
+  }
+
+  const expected = state.lastProcessedSequence + 1
+  if (sequence < expected) {
+    return state
+  }
+
+  if (sequence > expected) {
+    const newBuffer = new Map(state.chunkBuffer)
+    newBuffer.set(sequence, chunk)
+    let nextExpected = expected
+    let newContent = state.streamingContent
+    let lastAdded = state.lastProcessedSequence
+
+    const sortedSequences = Array.from(newBuffer.keys()).sort((a, b) => a - b)
+    for (const seq of sortedSequences) {
+      if (seq === nextExpected) {
+        newContent += newBuffer.get(seq)!
+        newBuffer.delete(seq)
+        lastAdded = seq
+        nextExpected++
+      } else if (seq < nextExpected) {
+        newBuffer.delete(seq)
+      } else {
+        break
+      }
+    }
+
+    return {
+      streamingContent: newContent,
+      chunkBuffer: newBuffer,
+      lastProcessedSequence: lastAdded,
+    }
+  }
+
+  return {
+    streamingContent: state.streamingContent + chunk,
+    chunkBuffer: state.chunkBuffer.size > 0 ? new Map<number, string>() : state.chunkBuffer,
+    lastProcessedSequence: sequence,
+  }
+}
 
 /** Champs template à envoyer avec generate/regenerate (absents si aucun template chargé). */
 export function getAppliedTemplateLogFields(): {

@@ -82,12 +82,102 @@ describe('GenerationOptionsComparison', () => {
       slots: [],
       lastRequest: REQUEST,
       keptIndex: null,
+      parkedRun: null,
     })
   })
 
   it('ne rend rien hors run multi-options', () => {
     render(<GenerationOptionsComparison />)
     expect(screen.queryByTestId('generation-options-comparison')).toBeNull()
+  })
+
+  describe('une seule option', () => {
+    function startSingleOption(status: 'running' | 'completed') {
+      const result = makeResult('Réplique unique.')
+      useGenerationOptionsStore.getState().startRun(1, REQUEST)
+      useGenerationOptionsStore
+        .getState()
+        .updateSlot(0, { status, result: status === 'completed' ? result : null })
+    }
+
+    it('pendant l’écriture, laisse la colonne au bloc de streaming', () => {
+      startSingleOption('running')
+      render(<GenerationOptionsComparison streamingBlock={<div data-testid="bloc" />} />)
+
+      expect(screen.getByTestId('bloc')).toBeInTheDocument()
+      expect(screen.queryByTestId('generation-options-comparison')).toBeNull()
+    })
+
+    it('une fois prête, le résultat reste au centre avec Garder, Éditer et Variante', () => {
+      startSingleOption('completed')
+      render(<GenerationOptionsComparison />)
+
+      expect(screen.getByText('Réplique unique.')).toBeInTheDocument()
+      expect(screen.getByTestId('option-keep-0')).toBeInTheDocument()
+      expect(screen.getByTestId('option-edit-0')).toBeInTheDocument()
+      expect(screen.getByTestId('option-variant-0')).toBeInTheDocument()
+    })
+
+    it('n’affiche pas les outils qui n’ont de sens qu’à plusieurs', () => {
+      startSingleOption('completed')
+      useUiLayoutStore.setState({ optionsView: 'columns' })
+      render(<GenerationOptionsComparison />)
+
+      expect(screen.getByTestId('generation-options-comparison')).toHaveAttribute('data-view', 'list')
+      expect(screen.queryByTestId('options-view-columns')).toBeNull()
+      expect(screen.queryByTestId('options-collapse-all')).toBeNull()
+      expect(screen.queryByTestId('option-trait-0')).toBeNull()
+      expect(screen.queryByTestId('option-diagnostic-column')).toBeNull()
+      expect(screen.getByTestId('options-regenerate-all')).toHaveTextContent(/^Régénérer$/)
+    })
+  })
+
+  it('insère le bloc de streaming sous l’en-tête du lot et n’y met aucune rangée vide', () => {
+    useGenerationOptionsStore.getState().startRun(2, REQUEST)
+    useGenerationOptionsStore.getState().updateSlot(0, { status: 'running' })
+    render(<GenerationOptionsComparison streamingBlock={<div data-testid="bloc" />} />)
+
+    const section = screen.getByTestId('generation-options-comparison')
+    expect(section).toContainElement(screen.getByTestId('bloc'))
+    expect(screen.getByTestId('options-progress-label')).toHaveTextContent(
+      'OPTION 1 SUR 2 — EN ÉCRITURE'
+    )
+    expect(screen.queryByTestId('generation-option-0')).toBeNull()
+  })
+
+  it('montre les options déjà prêtes sous le texte qui arrive encore', () => {
+    useGenerationOptionsStore.getState().startRun(2, REQUEST)
+    useGenerationOptionsStore
+      .getState()
+      .updateSlot(0, { status: 'completed', result: makeResult('Déjà là.') })
+    useGenerationOptionsStore.getState().updateSlot(1, { status: 'running' })
+    render(<GenerationOptionsComparison streamingBlock={<div data-testid="bloc" />} />)
+
+    expect(screen.getByTestId('bloc')).toBeInTheDocument()
+    expect(screen.getByTestId('generation-option-0')).toBeInTheDocument()
+  })
+
+  it('« Garder » prévient le conteneur, qui range le lot', () => {
+    startTwoReadyOptions()
+    const onKept = vi.fn()
+    render(<GenerationOptionsComparison onKept={onKept} />)
+
+    fireEvent.click(screen.getByTestId('option-keep-0'))
+
+    expect(onKept).toHaveBeenCalledTimes(1)
+  })
+
+  it('Variante sur l’option affichée : le panneau suit le nouveau résultat', () => {
+    startTwoReadyOptions()
+    const { rerender } = render(<GenerationOptionsComparison />)
+
+    fireEvent.click(screen.getByTestId('option-variant-0'))
+    setUnityDialogueResponse.mockClear()
+    const replacement = makeResult('Réplique de la variante.')
+    useGenerationOptionsStore.getState().updateSlot(0, { status: 'completed', result: replacement })
+    rerender(<GenerationOptionsComparison />)
+
+    expect(setUnityDialogueResponse).toHaveBeenCalledWith(replacement)
   })
 
   it('affiche la progression EN ÉCRITURE puis À COMPARER', () => {

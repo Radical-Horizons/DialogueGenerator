@@ -21,6 +21,7 @@ import {
   redesignText,
 } from '../../theme/redesignTokens'
 import { ReasoningTraceViewer } from './ReasoningTraceViewer'
+import { isInterruptionNotice } from './generationOptionsChrome'
 import type { ReasoningTrace } from '../../types/api'
 
 /** Nom de l'animation du curseur de streaming (déclarée localement, pas de CSS global). */
@@ -282,14 +283,6 @@ export interface GenerationStreamingInlineProps {
   onMinimize: () => void
   /** Callback pour fermer le bloc (après complétion) */
   onClose: () => void
-}
-
-/**
- * Une interruption n'est pas un échec : le texte déjà streamé doit rester lisible,
- * contrairement à une vraie erreur de génération qui remplace le résultat.
- */
-function isInterruptionNotice(message: string): boolean {
-  return message.includes('Interruption') || message.includes('interrompue')
 }
 
 /**

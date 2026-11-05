@@ -7,7 +7,8 @@
  * Version améliorée avec error debouncing et callbacks personnalisés.
  */
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { useGenerationStore } from '../store/generationStore'
+import { useGenerationStore, type StreamChunkItem } from '../store/generationStore'
+import { createChunkCoalescer, type ChunkCoalescer } from '../utils/chunkCoalescer'
 
 export interface UseSSEStreamingOptions {
   /** Callback appelé lors de l'événement 'complete' avec le résultat */
@@ -92,10 +93,11 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
   const hasReceivedCompleteRef = useRef(false)  // FIX: Flag séparé pour ignorer step après complete
   const sseHasReceivedAnyMessageRef = useRef(false)
   const sseErrorDebounceTimerRef = useRef<number | null>(null)
+  const chunkCoalescerRef = useRef<ChunkCoalescer<StreamChunkItem> | null>(null)
   
   // Actions du store
   const {
-    appendChunk,
+    appendChunks,
     setStep,
     complete,
     setError: setStreamError,
@@ -119,6 +121,9 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
       setEventSource(null)
       setIsConnected(false)
     }
+    chunkCoalescerRef.current?.flush()
+    const chunkCoalescer = createChunkCoalescer<StreamChunkItem>(appendChunks)
+    chunkCoalescerRef.current = chunkCoalescer
     const es = new EventSource(streamUrl)
     // Désactiver la reconnexion automatique d'EventSource (fonctionnalité de génération multiple désactivée)
     // EventSource se reconnecte automatiquement par défaut, ce qui peut causer des générations multiples
@@ -139,7 +144,7 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
           case 'chunk':
             // Ne pas utiliser `if (data.content)` : les deltas vides sont valides.
             if (data.content !== undefined && data.content !== null) {
-              appendChunk(String(data.content), data.sequence)
+              chunkCoalescer.push({ content: String(data.content), sequence: data.sequence })
             }
             break
             
@@ -208,6 +213,8 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
               }
             }, 500) // Délai de 500ms pour laisser les événements en transit arriver
             
+            chunkCoalescer.flush()
+
             // Le résultat Unity JSON est dans data.result
             if (data.result) {
               setUnityDialogueResponse(data.result)
@@ -247,6 +254,7 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
             break
             
           case 'error':
+            chunkCoalescer.flush()
             if (data.message) {
               setStreamError(data.message)
               if (toast) {
@@ -305,6 +313,7 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
           return
         }
         console.error('Erreur EventSource')
+        chunkCoalescer.flush()
         const errorMsg = 'Erreur de connexion au serveur'
         setStreamError(errorMsg)
         setConnectionError(errorMsg)
@@ -333,9 +342,10 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
       setIsConnected(true)
       setConnectionError(null)
     }
-  }, [appendChunk, setStep, complete, setStreamError, setTokensUsed, setUnityDialogueResponse, setRawPrompt, onComplete, onMetadata, onError, setIsLoading, toast])
+  }, [appendChunks, setStep, complete, setStreamError, setTokensUsed, setUnityDialogueResponse, setRawPrompt, onComplete, onMetadata, onError, setIsLoading, toast])
 
   const disconnect = useCallback(() => {
+    chunkCoalescerRef.current?.flush()
     if (sseErrorDebounceTimerRef.current !== null) {
       window.clearTimeout(sseErrorDebounceTimerRef.current)
       sseErrorDebounceTimerRef.current = null
