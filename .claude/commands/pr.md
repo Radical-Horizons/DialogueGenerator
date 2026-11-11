@@ -14,7 +14,7 @@ Ouvrir une pull request **vers `main`**. Contexte utilisateur : $ARGUMENTS
 
 ## La règle qui justifie cette commande
 
-Une seule branche longue, `main`, protégée : tout y entre par PR — voir
+Une seule branche longue, `main` : tout y entre par PR, par convention — voir
 `.claude/rules/branching.md`. Fusionner ne déploie rien ; la prod suit le dernier tag
 `vX.Y.Z` (`/prod-release`).
 

@@ -1,5 +1,5 @@
 ---
-description: "Flux de branches — une seule branche longue, `main` (protégée) ; tout passe par une PR vers `main`"
+description: "Flux de branches — une seule branche longue, `main` (non protégée sur GitHub) ; tout passe par une PR vers `main`"
 ---
 # Flux de branches
 
@@ -12,7 +12,7 @@ décision de l'utilisateur : simplifier le process).
 
 | Branche | Rôle | Qui y écrit |
 |---|---|---|
-| `main` | Intégration. **Protégée** : on n'y pousse pas directement. | Uniquement des PR |
+| `main` | Intégration. On n'y pousse pas directement, par convention. | Uniquement des PR |
 | `<sujet>` / `epic/<n>-<slug>` | Un chantier ou une epic, **partant de `main`** | Les commits de la session |
 
 **Ce qui tourne en production, c'est le dernier tag `vX.Y.Z`**, pas `main`. Fusionner une
@@ -28,6 +28,10 @@ PR ne déploie rien ; le déploiement est une action à part, à la demande de l
   fusion. C'est voulu ; ne pas réutiliser son nom pour la suite.
 - Une branche qui vit longtemps diverge et rend la revue illusoire (`refonte-ui-2026` a
   compté 54 commits d'avance) : fusionner par tranches livrables.
+- ⚠️ `main` n'a **aucune** protection GitHub (choix de l'utilisateur, à ne pas proposer de
+  changer) : aucun contrôle n'est requis, donc `gh pr merge --auto` fusionne **sur-le-champ**,
+  sans attendre la CI. Vécu le 2026-11-11 (PR #85). Lire `gh pr checks` et ne fusionner
+  qu'une fois tout vert.
 
 ## Gate de tests
 

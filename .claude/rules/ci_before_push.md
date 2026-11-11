@@ -31,7 +31,7 @@ avant chaque fusion coûterait ~25 min par PR. Le partage est donc :
 - **PR vers `main`** : T2 local avant d'ouvrir (`npm run test:premerge`) et CI de la PR
   verte avant de fusionner ; `ci.yml` rejoue T3 sur le push `main` qui suit.
 - **Déploiement** (`/prod-release`) : T3 local **toujours**, sur le commit déployé.
-- **Push direct `main`** (normalement impossible, branche protégée) : T3 **toujours** avant push.
+- **Push direct `main`** (à éviter : rien ne l'interdit côté GitHub) : T3 **toujours** avant push.
 
 ## Relation avec `git_commit.md`
 
