@@ -189,7 +189,12 @@ jobs:
       - name: Install Playwright browser
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         timeout-minutes: 25
-        run: npx playwright install --with-deps chromium
+        # Le miroir apt d'Ubuntu tombe parfois plusieurs heures (vécu le 2026-11-11, code 100
+        # sur toutes les exécutions) ; ubuntu-latest embarque déjà les dépendances de Chromium.
+        run: |
+          if npx playwright install --with-deps chromium; then exit 0; fi
+          echo "::warning::Dépendances apt indisponibles : installation du navigateur seul"
+          npx playwright install chromium
 
       - name: Build frontend (PWA prod smoke)
         run: npm run build
@@ -249,7 +254,12 @@ jobs:
       - name: Install Playwright browser
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         timeout-minutes: 25
-        run: npx playwright install --with-deps chromium
+        # Le miroir apt d'Ubuntu tombe parfois plusieurs heures (vécu le 2026-11-11, code 100
+        # sur toutes les exécutions) ; ubuntu-latest embarque déjà les dépendances de Chromium.
+        run: |
+          if npx playwright install --with-deps chromium; then exit 0; fi
+          echo "::warning::Dépendances apt indisponibles : installation du navigateur seul"
+          npx playwright install chromium
 
       - name: Run auth Playwright smoke
         env:
