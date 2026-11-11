@@ -77,7 +77,7 @@ description: Workflow — commandes essentielles, tests, déploiement, venv
   - **PR vers `main`** : **T2 obligatoire avant d'ouvrir** (`npm run test:premerge`, ~7 min sur le poste Windows, mesuré le 2026-09-30), plus typecheck si le frontend bouge et preuve UI si c'est visible. La CI de PR rejoue T2 et ajoute les deux suites e2e : second filet, pas premier. Fusion quand elle est verte. Commande : **`/pr`**.
   - **Déploiement** : **T3** complet — `.claude/rules/ci_before_push.md`.
 
-- **Push direct vers `main`** : normalement impossible (branche protégée, tout passe par PR). S'il le faut : suite CI T3 complète avant — voir **`.claude/rules/ci_before_push.md`**.
+- **Push direct vers `main`** : à éviter, tout passe par PR par convention (la branche n'est pas protégée sur GitHub). S'il le faut : suite CI T3 complète avant — voir **`.claude/rules/ci_before_push.md`**.
 
 - **Déploiement** : prod de référence = **VPS OVH** (`docs/deployment/PRODUCTION.md`, URL publique `demo.auto-diffusion.net`). `npm run deploy:build` / `npm run deploy:check` ; déploiement typique `npm run deploy`. Sur le serveur : `ENVIRONMENT=production`, `PUBLIC_ORIGIN` (ou `CORS_ORIGINS`), secrets JWT/OpenAI, etc. **Détail et pièges** : `.claude/rules/deployment.md`.
 

@@ -103,7 +103,7 @@ Actions :
 
 ## 4 — Gate CI T3 (avant deploy)
 
-Plus de branche `dev` (2026-10-29) : `main` est protégée, le bump passe par une PR
+Plus de branche `dev` (2026-10-29) : le bump passe par une PR
 `release/vX.Y.Z` → `main` (voir étape 5). Une fois fusionnée, lancer la T3 sur `main` à
 jour — c'est ce commit-là qui part en prod — [`.claude/rules/ci_before_push.md`](../../rules/ci_before_push.md) :
 

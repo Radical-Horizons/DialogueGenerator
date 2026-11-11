@@ -81,7 +81,7 @@ Grille complète : **`/test-tiers`**. Obligations agents et protocole Vitest : `
 
 **Quelle gate selon la cible** — détail : `.claude/rules/branching.md`.
 
-Une seule branche longue, `main` (protégée) ; plus de `dev` depuis le 2026-10-29.
+Une seule branche longue, `main`, non protégée sur GitHub (choix assumé) : tout y entre par PR, par convention ; plus de `dev` depuis le 2026-10-29.
 
 | Moment | Attendu |
 |---|---|
