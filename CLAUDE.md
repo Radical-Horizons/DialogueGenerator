@@ -149,6 +149,7 @@ Boucle de dev non supervisée : **bmad-loop** (`bmad-loop run`, `bmad-loop tui`)
 
 ## Préférences utilisateur apprises
 
+- **Jamais de Ctrl+S ni de bouton « Sauvegarder »** (principe produit, 2026-11-11) : tout ce que l'auteur écrit se sauvegarde seul, au fil de la saisie et au changement de dialogue, de section ou de page, sans dialogue d'avertissement. L'état s'affiche en mono (« ENREGISTRÉ · 11:24 »). Là où l'écriture est impossible (invité, lecture seule), l'interface le dit au lieu de laisser éditer pour rien.
 - Ne jamais déléguer à l'API ou au LLM un comportement frontend déterministe ; si l'utilisateur a choisi une option et déclenche une génération IA, la connexion parent→nœud est la responsabilité du front, pas une suggestion d'API.
 - Exiger des **logs d'exécution** avant de proposer un correctif de bug ; ne jamais spéculer à partir du code seul.
 - Préférer des correctifs SOLID/KISS petits et ciblés plutôt qu'accumuler des gardes défensives issues de plusieurs hypothèses ; **revenir en arrière** sur le code d'une hypothèse rejetée avant d'en poursuivre une autre.
