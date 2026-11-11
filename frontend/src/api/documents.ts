@@ -42,6 +42,37 @@ export async function putDocument(
   return response.data
 }
 
+/** Limite navigateur du corps d'une requête `keepalive` (64 Kio, marge comprise). */
+export const KEEPALIVE_BODY_MAX_BYTES = 60_000
+
+/**
+ * Même PUT que {@link putDocument}, mais qui survit au déchargement de la page
+ * (`fetch` keepalive) : axios est annulé par le navigateur au rechargement.
+ * Renvoie `null` quand le corps dépasse la limite keepalive : l'appelant se replie sur axios.
+ * Une erreur HTTP est rejetée sous la forme `{ response: { status, data } }` d'axios.
+ */
+export async function putDocumentKeepalive(
+  documentId: string,
+  body: PutDocumentRequest
+): Promise<PutDocumentResponse | null> {
+  const payload = JSON.stringify(body)
+  if (new Blob([payload]).size > KEEPALIVE_BODY_MAX_BYTES) return null
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  const token = localStorage.getItem('access_token')
+  if (token) headers.Authorization = `Bearer ${token}`
+  const response = await fetch(
+    `${apiClient.defaults.baseURL ?? ''}/api/v1/documents/${encodeURIComponent(documentId)}`,
+    { method: 'PUT', headers, body: payload, keepalive: true, credentials: 'include' }
+  )
+  const data: unknown = await response.json().catch(() => null)
+  if (!response.ok) {
+    throw Object.assign(new Error(`HTTP ${response.status}`), {
+      response: { status: response.status, data },
+    })
+  }
+  return data as PutDocumentResponse
+}
+
 /**
  * Supprime le document canonique, son layout et ses sidecars.
  */

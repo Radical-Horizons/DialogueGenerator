@@ -19,7 +19,6 @@ interface GraphEditorHeaderProps {
   toolbar: UseGraphToolbarReturn
   hasActiveDialogue: boolean
   activeDialogueFilename: string | null
-  handleSave: () => Promise<void>
   onBatchTagApply: (tag: string) => void
   handleBatchValidateSelection: () => void
   handleBatchGenerateSelection?: () => void

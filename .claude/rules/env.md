@@ -32,3 +32,10 @@ masqué la nouvelle clé du `.env`. `OPENAI_API_KEY` a été retirée des variab
 des processus déjà lancés (Claude Desktop, terminaux ouverts, `npm run dev` lancé depuis eux)
 jusqu'à leur redémarrage. Diagnostic sans afficher de valeur :
 `[Environment]::GetEnvironmentVariable('OPENAI_API_KEY','User')` non vide ⇒ elle masque le `.env`.
+
+⚠️ **Un worktree sans `.env` hérite de celui du dépôt principal.** `load_dotenv()` sans
+chemin remonte les dossiers parents depuis `api/` ; un worktree vit sous
+`.claude/worktrees/<nom>/`, donc il trouve le `.env` de `F:\Projets\DialogueGenerator` et
+sa vraie `OPENAI_API_KEY`. Vécu le 2026-11-11 : un agent comptait sur `DummyLLMClient` dans
+son worktree et a déclenché deux vrais appels facturés. Pour une API locale sans dépense,
+lancer avec la clé vidée explicitement (`OPENAI_API_KEY=` dans l'environnement du processus).

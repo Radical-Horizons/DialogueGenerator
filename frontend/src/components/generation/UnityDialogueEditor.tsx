@@ -2,6 +2,11 @@
  * Éditeur Unity JSON pour dialogues (édition partielle + round-trip).
  * Permet d'éditer speaker, line, choices[].text, choices[].targetNode.
  * Préserve tous les autres champs en lecture seule.
+ *
+ * Un dialogue existant (`filename`) se sauvegarde seul : pause de saisie, renommage,
+ * démontage (changement de dialogue ou de section) et déchargement de la page.
+ * Sans `filename` (résultat de génération pas encore gardé), rien n'est écrit tant
+ * que le parent n'appelle pas `handleSave` : garder un résultat est une décision.
  */
 import { memo, useState, useEffect, useCallback, useMemo, useImperativeHandle, forwardRef, useRef, type ReactNode } from 'react'
 import * as documentsAPI from '../../api/documents'
@@ -15,8 +20,19 @@ import { InlineFieldError, fieldErrorBorder } from '../shared/InlineFieldError'
 import { AttributeSkillTestEditor } from '../graph/AttributeSkillTestEditor'
 import { TraitRequirementsEditor } from '../shared/TraitRequirementsEditor'
 import { useDialogueEditionNarrow } from '../unityDialogues/DialogueEditionNarrowContext'
-import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
-import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { useAuthStore } from '../../store/authStore'
+import {
+  EditableDialogueTitle,
+  EditorSaveStatusLabel,
+  ReadOnlyNotice,
+  UnityDialogueEditorActionsBar,
+} from './UnityDialogueEditorToolbar'
+import {
+  AUTOSAVE_DEBOUNCE_MS,
+  pickContinuationNodeId,
+  type EditorSaveState,
+  type UnityDialogueEditorAction,
+} from './UnityDialogueEditorLogic'
 import type {
   UnityDialogueNode,
   UnityDialogueChoice,
@@ -45,11 +61,17 @@ export interface UnityDialogueEditorProps {
    * Permet de synchroniser le graphStore avant une sauvegarde graphe (1ʳᵉ génération).
    */
   onContentChange?: (jsonContent: string) => void
-  /** Miroir isValid / isSaving pour un bouton Sauvegarder externe (ex. footer Dashboard). */
+  /** Miroir isValid / isSaving pour le bouton « Garder et continuer » du Dashboard. */
   onSaveStateChange?: (state: { isValid: boolean; isSaving: boolean }) => void
-  onCancel?: () => void
-  extraActions?: ReactNode
-  hideHeaderSaveButton?: boolean
+  /** Actions de la barre, dans l'ordre de priorité : ce qui ne tient pas passe dans « Autres ». */
+  actions?: UnityDialogueEditorAction[]
+  /**
+   * Ajoute « Générer la suite » : reçoit le nœud d'où repartir, une fois les
+   * modifications en cours enregistrées.
+   */
+  onGenerateContinuation?: (nodeId: string) => void
+  /** Notifié après l'enregistrement d'un nouveau titre (`document.title`). */
+  onRenamed?: (title: string) => void
   /**
    * Slot optionnel placé dans la zone titre du header (Story 17.7).
    * Utilisé en mode narrow pour héberger un sélecteur de dialogue (`DialogueCombobox`)
@@ -65,6 +87,8 @@ export interface UnityDialogueEditorProps {
 
 export interface UnityDialogueEditorHandle {
   handleSave: () => Promise<void>
+  /** Enregistre tout de suite ce qui attend la fin de la pause de saisie. */
+  flushSave: () => Promise<void>
   isValid: boolean
   isSaving: boolean
 }
@@ -86,26 +110,58 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
   onSave,
   onContentChange,
   onSaveStateChange,
-  onCancel,
-  extraActions,
-  hideHeaderSaveButton = false,
+  actions,
+  onGenerateContinuation,
+  onRenamed,
   headerSelector,
   focusNodeId,
 }, ref) {
   const toast = useToast()
   const isNarrow = useDialogueEditionNarrow()
   const chrome = isNarrow ? unityDialogueEditorChrome.narrow : unityDialogueEditorChrome.comfortable
-  const { ref: actionsRef, isNarrow: isActionsNarrowMeasured } = useNarrowInlineSize(520)
-  const isActionsNarrow = isNarrow && isActionsNarrowMeasured
+  const isGuest = useAuthStore((s) => s.user?.role === 'guest')
+  const documentId = filename?.replace(/\.json$/i, '') || null
+  const readOnly = !canEdit
+  const autoSaveEnabled = Boolean(documentId) && canEdit
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<DocumentFieldError[]>([])
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set())
+  const [saveState, setSaveState] = useState<EditorSaveState>({
+    status: 'idle',
+    lastSavedAt: null,
+    error: null,
+  })
+  const [displayTitle, setDisplayTitle] = useState(title)
   const revisionRef = useRef(documentRevision)
   const onContentChangeRef = useRef(onContentChange)
   onContentChangeRef.current = onContentChange
   const onSaveStateChangeRef = useRef(onSaveStateChange)
   onSaveStateChangeRef.current = onSaveStateChange
+  const onSaveRef = useRef(onSave)
+  onSaveRef.current = onSave
+  const onRenamedRef = useRef(onRenamed)
+  onRenamedRef.current = onRenamed
+  const documentRef = useRef(document)
+  documentRef.current = document
+  const documentIdRef = useRef(documentId)
+  documentIdRef.current = documentId
+  const autoSaveEnabledRef = useRef(autoSaveEnabled)
+  autoSaveEnabledRef.current = autoSaveEnabled
+  const toastRef = useRef(toast)
+  toastRef.current = toast
+  /** Édition locale pas encore écrite sur le serveur. */
+  const dirtyRef = useRef(false)
+  const renamedTitleRef = useRef<string | null>(null)
+  const lastEditedNodeIdRef = useRef<string | null>(null)
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const inFlightSaveRef = useRef<Promise<void> | null>(null)
+  const mountedRef = useRef(true)
+  const lastErrorToastRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    setDisplayTitle(title)
+  }, [title])
 
   // Parser et état local des nœuds
   const [nodes, setNodes] = useState<UnityDialogueNode[]>(() => {
@@ -123,7 +179,10 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
   const nodesRef = useRef(nodes)
   nodesRef.current = nodes
 
-  const emitContentChange = useCallback((nextNodes: UnityDialogueNode[]) => {
+  const commitNodes = useCallback((nextNodes: UnityDialogueNode[], editedNodeId: string) => {
+    nodesRef.current = nextNodes
+    dirtyRef.current = true
+    lastEditedNodeIdRef.current = editedNodeId
     onContentChangeRef.current?.(JSON.stringify(nextNodes))
   }, [])
 
@@ -149,7 +208,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
   }, [json_content])
 
   useEffect(() => {
-    revisionRef.current = documentRevision
+    revisionRef.current = Math.max(revisionRef.current, documentRevision)
   }, [documentRevision])
 
   // Validation légère pour UX uniquement (feedback immédiat)
@@ -182,11 +241,10 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
   const updateNode = useCallback((nodeId: string, updates: Partial<UnityDialogueNode>) => {
     setNodes((prev) => {
       const next = prev.map((node) => (node.id === nodeId ? { ...node, ...updates } : node))
-      nodesRef.current = next
-      emitContentChange(next)
+      commitNodes(next, nodeId)
       return next
     })
-  }, [emitContentChange])
+  }, [commitNodes])
 
   const firstFieldError = fieldErrors[0]
   const contentRef = useRef<HTMLDivElement>(null)
@@ -252,12 +310,11 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
           const cons = { ...(node.consequences ?? { flag: '' }), ...updates }
           return { ...node, consequences: cons }
         })
-        nodesRef.current = next
-        emitContentChange(next)
+        commitNodes(next, nodeId)
         return next
       })
       },
-    [clearFieldError, emitContentChange],
+    [clearFieldError, commitNodes],
   )
 
   // Mettre à jour le speaker d'un nœud
@@ -292,12 +349,11 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
           choices[choiceIndex] = { ...choices[choiceIndex], ...updates }
           return { ...node, choices }
         })
-        nodesRef.current = next
-        emitContentChange(next)
+        commitNodes(next, nodeId)
         return next
       })
       },
-    [clearFieldError, emitContentChange],
+    [clearFieldError, commitNodes],
   )
 
   // Ajouter un choix (par nodeId, pas par index)
@@ -310,12 +366,11 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
           choices.push({ text: '', targetNode: 'END' })
           return { ...node, choices }
         })
-        nodesRef.current = next
-        emitContentChange(next)
+        commitNodes(next, nodeId)
         return next
       })
       },
-    [emitContentChange]
+    [commitNodes]
   )
 
   // Supprimer un choix (par nodeId, pas par index)
@@ -327,15 +382,190 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
         choices.splice(choiceIndex, 1)
         return { ...node, choices: choices.length > 0 ? choices : undefined }
       })
-      nodesRef.current = next
-      emitContentChange(next)
+      commitNodes(next, nodeId)
       return next
     })
-  }, [emitContentChange])
+  }, [commitNodes])
 
+  const isValidRef = useRef(isValid)
+  isValidRef.current = isValid
+
+  const reportSaveError = useCallback((err: unknown, nodesSent: UnityDialogueNode[], silent: boolean) => {
+    const { fieldErrors: extracted } = extractValidationIssuesFromApiError(err, nodesSent)
+    const errorMessage = getErrorMessage(err)
+    if (!mountedRef.current) return
+    if (extracted.length > 0) {
+      setFieldErrors(extracted)
+      setError(null)
+    } else {
+      setError(errorMessage)
+      if (!silent || lastErrorToastRef.current !== errorMessage) {
+        toastRef.current(`Erreur lors de la sauvegarde: ${errorMessage}`, 'error')
+      }
+      lastErrorToastRef.current = errorMessage
+    }
+    setSaveState((prev) => ({ ...prev, status: 'error', error: errorMessage }))
+  }, [])
+
+  /**
+   * PUT du document existant, avec la validation export partagée par le graphe.
+   * `keepalive` : requête qui survit au déchargement de la page.
+   */
+  const saveExistingDocument = useCallback(
+    async ({ silent, keepalive = false }: { silent: boolean; keepalive?: boolean }): Promise<void> => {
+      const targetId = documentIdRef.current
+      if (!targetId) return
+      if (!isValidRef.current) {
+        if (mountedRef.current) setError('Corrigez les erreurs de validation avant de sauvegarder')
+        return
+      }
+      const nodesToSave = nodesRef.current
+      const titleToSave = renamedTitleRef.current
+      dirtyRef.current = false
+      if (mountedRef.current) {
+        setIsSaving(true)
+        setError(null)
+        setSaveState((prev) => ({ ...prev, status: 'saving' }))
+      }
+      const baseDocument = documentRef.current ?? {}
+      const body = {
+        document: {
+          ...baseDocument,
+          schemaVersion: String(baseDocument.schemaVersion ?? '1.2.0'),
+          ...(titleToSave !== null ? { title: titleToSave } : {}),
+          nodes: nodesToSave,
+        },
+        revision: revisionRef.current,
+        validationMode: 'export' as const,
+      }
+      try {
+        const response =
+          (keepalive ? await documentsAPI.putDocumentKeepalive(targetId, body) : null) ??
+          (await documentsAPI.putDocument(targetId, body))
+        revisionRef.current = response.revision
+        lastErrorToastRef.current = null
+        if (mountedRef.current) {
+          setFieldErrors([])
+          setSaveState({
+            status: dirtyRef.current ? 'pending' : 'saved',
+            lastSavedAt: Date.now(),
+            error: null,
+          })
+        }
+        if (titleToSave !== null && renamedTitleRef.current === titleToSave) {
+          onRenamedRef.current?.(titleToSave)
+        }
+        await onSaveRef.current?.(`${targetId}.json`, response.revision)
+        if (!silent) toastRef.current(`Dialogue sauvegardé: ${targetId}.json`, 'success', 5000)
+      } catch (err) {
+        dirtyRef.current = true
+        reportSaveError(err, nodesToSave, silent)
+        throw err
+      } finally {
+        if (mountedRef.current) setIsSaving(false)
+      }
+    },
+    [reportSaveError],
+  )
+
+  const clearAutoSaveTimer = useCallback(() => {
+    if (autoSaveTimerRef.current !== null) {
+      clearTimeout(autoSaveTimerRef.current)
+      autoSaveTimerRef.current = null
+    }
+  }, [])
+
+  /** Sauvegardes en série : jamais deux PUT concurrents sur la même révision. */
+  const flushSave = useCallback(async (): Promise<void> => {
+    clearAutoSaveTimer()
+    if (inFlightSaveRef.current) {
+      await inFlightSaveRef.current.catch(() => undefined)
+    }
+    if (!autoSaveEnabledRef.current || !dirtyRef.current) return
+    const pending = saveExistingDocument({ silent: true })
+    inFlightSaveRef.current = pending
+    try {
+      await pending
+    } finally {
+      if (inFlightSaveRef.current === pending) inFlightSaveRef.current = null
+    }
+  }, [clearAutoSaveTimer, saveExistingDocument])
+
+  const flushSaveRef = useRef(flushSave)
+  flushSaveRef.current = flushSave
+  const saveExistingDocumentRef = useRef(saveExistingDocument)
+  saveExistingDocumentRef.current = saveExistingDocument
+
+  useEffect(() => {
+    if (!autoSaveEnabled || !dirtyRef.current) return
+    setSaveState((prev) => (prev.status === 'pending' ? prev : { ...prev, status: 'pending' }))
+    clearAutoSaveTimer()
+    autoSaveTimerRef.current = setTimeout(() => {
+      autoSaveTimerRef.current = null
+      void flushSaveRef.current().catch(() => undefined)
+    }, AUTOSAVE_DEBOUNCE_MS)
+  }, [nodes, autoSaveEnabled, clearAutoSaveTimer])
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+      clearAutoSaveTimer()
+      if (autoSaveEnabledRef.current && dirtyRef.current) {
+        void flushSaveRef.current().catch(() => undefined)
+      }
+    }
+  }, [clearAutoSaveTimer])
+
+  useEffect(() => {
+    if (!autoSaveEnabled) return
+    const flushBeforeLeaving = () => {
+      if (!dirtyRef.current) return
+      clearAutoSaveTimer()
+      const send = () => saveExistingDocumentRef.current({ silent: true, keepalive: true })
+      const pending = inFlightSaveRef.current
+        ? inFlightSaveRef.current.catch(() => undefined).then(send)
+        : send()
+      void pending.catch(() => undefined)
+    }
+    const onVisibilityChange = () => {
+      if (window.document.visibilityState === 'hidden') flushBeforeLeaving()
+    }
+    window.addEventListener('pagehide', flushBeforeLeaving)
+    window.document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => {
+      window.removeEventListener('pagehide', flushBeforeLeaving)
+      window.document.removeEventListener('visibilitychange', onVisibilityChange)
+    }
+  }, [autoSaveEnabled, clearAutoSaveTimer])
+
+  const commitTitle = useCallback((nextTitle: string) => {
+    renamedTitleRef.current = nextTitle
+    dirtyRef.current = true
+    setDisplayTitle(nextTitle)
+    void flushSaveRef.current().catch(() => undefined)
+  }, [])
+
+  /**
+   * Sauvegarde explicite. Dialogue existant : même PUT que l'autosave, avec toast.
+   * Sans `filename` : création (« Garder et continuer » du Dashboard).
+   */
   const handleSave = useCallback(async (): Promise<void> => {
     if (!isValid) {
       setError('Corrigez les erreurs de validation avant de sauvegarder')
+      return
+    }
+    if (!canEdit) {
+      const message = "Vous n'avez pas la permission de modifier ce dialogue."
+      setError(message)
+      throw new Error(message)
+    }
+
+    if (documentId) {
+      clearAutoSaveTimer()
+      if (inFlightSaveRef.current) await inFlightSaveRef.current.catch(() => undefined)
+      dirtyRef.current = true
+      await saveExistingDocument({ silent: false })
       return
     }
 
@@ -343,124 +573,87 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
     setError(null)
     setFieldErrors([])
     const nodesToSave = nodesRef.current
+    const jsonContent = JSON.stringify(nodesToSave, null, 2)
 
     try {
-      if (!canEdit) {
-        throw new Error("Vous n'avez pas la permission de modifier ce dialogue.")
-      }
-
-      const jsonContent = JSON.stringify(nodesToSave, null, 2)
-      const documentId = filename?.replace(/\.json$/i, '')
-
-      // Première génération (pas encore de document) → POST unity/export.
       // Si le nom dérivé du titre existe déjà → réessayer avec _2, _3, … (pas d'écrasement).
-      if (!documentId) {
-        const dialogueTitle = title || 'Dialogue Unity'
-        const baseId = documentIdFromTitle(dialogueTitle)
-        const maxAttempts = 50
-        let lastError: unknown = null
-        for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-          const candidateId =
-            attempt === 1 ? baseId : documentIdWithNumericSuffix(baseId, attempt)
-          try {
-            const result = await dialoguesAPI.exportUnityDialogue({
-              json_content: jsonContent,
-              title: dialogueTitle,
-              filename: candidateId,
-            })
-            setFieldErrors([])
-            await onSave?.(result.filename, 1)
-            toast(
-              attempt === 1
-                ? `Dialogue sauvegardé: ${result.filename}`
-                : `Dialogue sauvegardé sous un nouveau nom: ${result.filename}`,
-              'success',
-              5000,
-            )
-            return
-          } catch (exportErr) {
-            lastError = exportErr
-            if (!isCanonicalRevisionConflict(exportErr)) {
-              throw exportErr
-            }
+      const dialogueTitle = title || 'Dialogue Unity'
+      const baseId = documentIdFromTitle(dialogueTitle)
+      const maxAttempts = 50
+      let lastError: unknown = null
+      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        const candidateId =
+          attempt === 1 ? baseId : documentIdWithNumericSuffix(baseId, attempt)
+        try {
+          const result = await dialoguesAPI.exportUnityDialogue({
+            json_content: jsonContent,
+            title: dialogueTitle,
+            filename: candidateId,
+          })
+          setFieldErrors([])
+          await onSave?.(result.filename, 1)
+          toast(
+            attempt === 1
+              ? `Dialogue sauvegardé: ${result.filename}`
+              : `Dialogue sauvegardé sous un nouveau nom: ${result.filename}`,
+            'success',
+            5000,
+          )
+          return
+        } catch (exportErr) {
+          lastError = exportErr
+          if (!isCanonicalRevisionConflict(exportErr)) {
+            throw exportErr
           }
         }
-        throw lastError instanceof Error
-          ? lastError
-          : new Error(
-              `Impossible de trouver un nom libre pour « ${baseId} » après ${maxAttempts} tentatives.`,
-            )
       }
-
-      // Dialogue existant → PUT documents
-      const canonicalDocument = {
-        ...(document ?? {}),
-        schemaVersion: String(document?.schemaVersion ?? '1.2.0'),
-        nodes: nodesToSave,
-      }
-      const response = await documentsAPI.putDocument(documentId, {
-        document: canonicalDocument,
-        revision: revisionRef.current,
-        validationMode: 'export',
-      })
-      revisionRef.current = response.revision
-      setFieldErrors([])
-      await onSave?.(`${documentId}.json`, response.revision)
-      toast(`Dialogue sauvegardé: ${documentId}.json`, 'success', 5000)
+      throw lastError instanceof Error
+        ? lastError
+        : new Error(
+            `Impossible de trouver un nom libre pour « ${baseId} » après ${maxAttempts} tentatives.`,
+          )
     } catch (err) {
-      const { fieldErrors: extracted } = extractValidationIssuesFromApiError(
-        err,
-        nodesToSave,
-      )
-      if (extracted.length > 0) {
-        setFieldErrors(extracted)
-        setError(null)
-      } else {
-        const errorMessage = getErrorMessage(err)
-        setError(errorMessage)
-        toast(`Erreur lors de la sauvegarde: ${errorMessage}`, 'error')
-      }
+      reportSaveError(err, nodesToSave, false)
       throw err
     } finally {
       setIsSaving(false)
     }
-  }, [canEdit, document, filename, isValid, onSave, title, toast])
+  }, [canEdit, clearAutoSaveTimer, documentId, isValid, onSave, reportSaveError, saveExistingDocument, title, toast])
 
-  // Exposer handleSave, isValid et isSaving via ref
   useImperativeHandle(ref, () => ({
     handleSave,
+    flushSave,
     isValid,
     isSaving,
-  }), [handleSave, isValid, isSaving])
+  }), [flushSave, handleSave, isValid, isSaving])
 
-  // Raccourcis clavier
-  useKeyboardShortcuts(
-    [
-      {
-        key: 'ctrl+s',
-        handler: (e) => {
-          e.preventDefault()
-          if (isValid && !isSaving) {
-            void handleSave().catch(() => undefined)
-          }
-        },
-        description: 'Sauvegarder le dialogue Unity',
-        enabled: isValid && !isSaving,
-      },
-      {
-        key: 'ctrl+e',
-        handler: (e) => {
-          e.preventDefault()
-          if (isValid && !isSaving) {
-            void handleSave().catch(() => undefined)
-          }
-        },
-        description: 'Exporter/Sauvegarder le dialogue Unity',
-        enabled: isValid && !isSaving,
-      },
-    ],
-    [isValid, isSaving, handleSave]
-  )
+  const handleGenerateContinuation = useCallback(async () => {
+    if (!onGenerateContinuation) return
+    const nodeId = pickContinuationNodeId(nodesRef.current, lastEditedNodeIdRef.current)
+    if (!nodeId) return
+    try {
+      await flushSave()
+    } catch {
+      return
+    }
+    onGenerateContinuation(nodeId)
+  }, [flushSave, onGenerateContinuation])
+
+  const toolbarActions = useMemo<UnityDialogueEditorAction[]>(() => {
+    const continuation: UnityDialogueEditorAction[] =
+      onGenerateContinuation && canEdit
+        ? [
+            {
+              id: 'continuation',
+              label: 'Générer la suite',
+              title: 'Ouvrir ce dialogue dans le graphe, sur sa dernière réplique, prêt à générer la suite',
+              testId: 'unity-dialogue-editor-continue',
+              onClick: () => void handleGenerateContinuation(),
+            },
+          ]
+        : []
+    return [...continuation, ...(actions ?? [])]
+  }, [actions, canEdit, handleGenerateContinuation, onGenerateContinuation])
 
   // Toggle collapse pour options avancées
   const toggleAdvanced = useCallback((nodeId: string) => {
@@ -519,6 +712,8 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
         data-testid="unity-dialogue-editor-toolbar"
         data-dialogue-edition-narrow={isNarrow ? 'true' : 'false'}
         style={{
+          position: 'relative',
+          zIndex: 2,
           flexShrink: 0,
           padding: chrome.headerPadding,
           borderBottom: `1px solid ${theme.border.primary}`,
@@ -528,10 +723,15 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
           gap: `${chrome.headerLayoutGapRem}rem`,
           alignItems: isNarrow ? 'stretch' : 'center',
           justifyContent: 'flex-start',
-          flexWrap: isNarrow ? 'nowrap' : 'wrap',
         }}
       >
-        <div style={{ minWidth: 0, flex: isNarrow ? undefined : '0 1 auto' }}>
+        <div
+          style={{
+            minWidth: 0,
+            flex: isNarrow ? undefined : '0 1 auto',
+            maxWidth: isNarrow ? undefined : '55%',
+          }}
+        >
           {headerSelector && (
             <div
               data-testid="unity-dialogue-editor-header-selector"
@@ -540,7 +740,10 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
               {headerSelector}
             </div>
           )}
-          <div
+          <EditableDialogueTitle
+            title={displayTitle || 'Éditeur de Dialogue Unity'}
+            editable={autoSaveEnabled}
+            onCommit={commitTitle}
             style={{
               margin: 0,
               color: theme.text.primary,
@@ -549,125 +752,32 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
               lineHeight: 1.25,
               wordBreak: 'break-word',
             }}
-          >
-            {title || 'Éditeur de Dialogue Unity'}
-          </div>
-          {subtitle && (
+          />
+          {(subtitle || autoSaveEnabled) && (
             <div
               style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'baseline',
+                columnGap: 9,
                 fontSize: `${chrome.subtitleFontRem}rem`,
                 color: theme.text.secondary,
                 marginTop: `${chrome.subtitleMarginTopRem}rem`,
               }}
             >
-              {subtitle}
+              {subtitle && <span>{subtitle}</span>}
+              {autoSaveEnabled && <EditorSaveStatusLabel state={saveState} />}
             </div>
           )}
         </div>
 
-        <div
-          style={{
-            // flex: 1 remplace le width:100% initial : le wrapper remplit l'espace restant
-            // après le titre (qui est flex: 0 1 auto), ce qui évite le shrink-wrap (≈222px)
-            // tout en laissant les boutons s'aligner à gauche via justifyContent: flex-start.
-            flex: isNarrow ? undefined : '1 1 auto',
-            width: isNarrow ? '100%' : undefined,
-            maxWidth: '100%',
-            minWidth: 0,
-            alignSelf: 'stretch',
-            display: 'block',
-          }}
-          ref={actionsRef}
-        >
-          <div
-            className="unity-dialogue-toolbar-actions"
-            data-actions-narrow={isActionsNarrow ? 'true' : 'false'}
-            style={{
-              display: isActionsNarrow ? 'grid' : 'flex',
-              gridTemplateColumns: isActionsNarrow ? 'minmax(0, 1fr) minmax(0, 1fr)' : undefined,
-              gridTemplateAreas: isActionsNarrow ? '"generate delete" "save cancel"' : undefined,
-              gap: `${chrome.toolbarGapRem}rem`,
-              alignItems: isActionsNarrow ? 'stretch' : 'center',
-              justifyItems: isActionsNarrow ? 'stretch' : undefined,
-              flexWrap: isActionsNarrow ? undefined : isNarrow ? 'wrap' : 'nowrap',
-              justifyContent: isActionsNarrow ? undefined : 'flex-start',
-              minWidth: 0,
-              width: '100%',
-              maxWidth: '100%',
-              overflowX: isActionsNarrow ? undefined : isNarrow ? undefined : 'auto',
-              overflowY: 'hidden',
-            }}
-          >
-            <span
-              aria-live="polite"
-              style={{
-                color: theme.state.error.color,
-                fontSize: `${chrome.subtitleFontRem}rem`,
-                alignSelf: 'center',
-              }}
-            >
-              {error ?? ''}
-            </span>
-            {extraActions}
-            {!hideHeaderSaveButton && (
-              <button
-                type="button"
-                onClick={() => void handleSave().catch(() => undefined)}
-                disabled={isSaving || !isValid || !canEdit}
-                style={{
-                  gridArea: isActionsNarrow ? 'save' : undefined,
-                  flexShrink: isActionsNarrow ? undefined : 0,
-                  padding: chrome.toolbarButtonPadding,
-                  minHeight: `${chrome.toolbarButtonMinHeightPx}px`,
-                  fontSize: `${chrome.toolbarButtonFontRem}rem`,
-                  fontWeight: 600,
-                  lineHeight: 1.25,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: 'none',
-                  borderRadius: '6px',
-                  backgroundColor: theme.button.primary.background,
-                  color: theme.button.primary.color,
-                  cursor: isSaving || !isValid || !canEdit ? 'not-allowed' : 'pointer',
-                  opacity: isSaving || !isValid || !canEdit ? 0.6 : 1,
-                  boxSizing: 'border-box',
-                  width: isActionsNarrow ? '100%' : undefined,
-                  minWidth: isActionsNarrow ? 0 : undefined,
-                }}
-              >
-                {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
-              </button>
-            )}
-            {onCancel && (
-              <button
-                onClick={onCancel}
-                style={{
-                  gridArea: isActionsNarrow ? 'cancel' : undefined,
-                  flexShrink: isActionsNarrow ? undefined : 0,
-                  padding: chrome.toolbarButtonPadding,
-                  minHeight: `${chrome.toolbarButtonMinHeightPx}px`,
-                  fontSize: `${chrome.toolbarButtonFontRem}rem`,
-                  fontWeight: chrome.toolbarButtonFontWeight,
-                  lineHeight: 1.25,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: `1px solid ${theme.button.default.border}`,
-                  borderRadius: '6px',
-                  backgroundColor: theme.button.default.background,
-                  color: theme.button.default.color,
-                  cursor: 'pointer',
-                  boxSizing: 'border-box',
-                  width: isActionsNarrow ? '100%' : undefined,
-                  minWidth: isActionsNarrow ? 0 : undefined,
-                }}
-              >
-                Annuler
-              </button>
-            )}
-          </div>
-        </div>
+        {toolbarActions.length > 0 && (
+          <UnityDialogueEditorActionsBar
+            actions={toolbarActions}
+            chrome={chrome}
+            stacked={isNarrow}
+          />
+        )}
       </div>
 
       {/* Contenu scrollable */}
@@ -686,9 +796,12 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
           scrollbarGutter: 'stable',
         }}
       >
+        {readOnly && <ReadOnlyNotice reason={isGuest ? 'guest' : 'permission'} />}
+
         {/* Erreurs non mappées à un champ */}
         {error && fieldErrors.length === 0 && (
           <div
+            role="alert"
             style={{
               padding: '0.75rem',
               marginBottom: '1rem',
@@ -764,6 +877,10 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                 </div>
               </div>
 
+              <fieldset
+                disabled={readOnly}
+                style={{ margin: 0, padding: 0, border: 'none', minWidth: 0 }}
+              >
               {/* Speaker (éditable) */}
               <div style={{ marginBottom: '1rem' }}>
                 <label
@@ -1190,7 +1307,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
               )}
 
               {/* Bouton ajouter choix */}
-              {(!node.choices || node.choices.length < 4) && (
+              {!readOnly && (!node.choices || node.choices.length < 4) && (
                 <div style={{ marginBottom: '1rem' }}>
                   <button
                     onClick={() => addChoice(node.id)}
@@ -1208,6 +1325,8 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                   </button>
                 </div>
               )}
+
+              </fieldset>
 
               {/* Options avancées (lecture seule) */}
               <div>

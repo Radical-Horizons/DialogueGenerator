@@ -17,7 +17,6 @@ describe('GraphEditorHeader - Desktop toolbar density', () => {
 
         hasActiveDialogue={true}
         activeDialogueFilename="test.json"
-        handleSave={async () => {}}
         onBatchTagApply={() => {}}
         handleBatchValidateSelection={() => {}}
         handleBatchDeleteSelection={() => {}}
@@ -48,7 +47,6 @@ describe('GraphEditorHeader - Desktop toolbar density', () => {
 
         hasActiveDialogue={true}
         activeDialogueFilename="test.json"
-        handleSave={async () => {}}
         onBatchTagApply={() => {}}
         handleBatchValidateSelection={() => {}}
         handleBatchDeleteSelection={() => {}}
@@ -92,7 +90,6 @@ describe('GraphEditorHeader - Desktop toolbar density', () => {
 
         hasActiveDialogue={true}
         activeDialogueFilename="test.json"
-        handleSave={async () => {}}
         onBatchTagApply={() => {}}
         handleBatchValidateSelection={() => {}}
         handleBatchDeleteSelection={() => {}}

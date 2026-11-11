@@ -1,14 +1,13 @@
 /**
  * Composant pour afficher et éditer un dialogue Unity.
  */
-import { useState, useEffect, useCallback, type ReactNode } from 'react'
+import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react'
 import * as documentsAPI from '../../api/documents'
 import { useGraphViewStore } from '../../store/graphViewStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
-import { unityDialogueEditorChrome } from '../../theme/responsiveChrome'
 import { UnityDialogueEditor } from '../generation/UnityDialogueEditor'
-import { useDialogueEditionNarrow } from './DialogueEditionNarrowContext'
+import type { UnityDialogueEditorAction } from '../generation/UnityDialogueEditorLogic'
 import { DialoguePermissionsPanel } from './DialoguePermissionsPanel'
 import { DialogueMetadataPanel } from './DialogueMetadataPanel'
 import { DialogueSharingModal } from './DialogueSharingModal'
@@ -20,7 +19,10 @@ interface UnityDialogueDetailsProps {
   filename: string
   onClose: () => void
   onDeleted?: () => void | Promise<void>
-  onGenerateContinuation?: (dialogueJson: string, dialogueTitle: string) => void
+  /** Repart du nœud donné dans le graphe (« Générer la suite »). */
+  onGenerateContinuation?: (target: { filename: string; nodeId: string }) => void
+  /** Après l'enregistrement d'un nouveau titre : la liste doit le refléter. */
+  onRenamed?: (title: string) => void | Promise<void>
   /**
    * Slot optionnel placé dans le header de l'éditeur (Story 17.7).
    * Forwardé vers `UnityDialogueEditor.headerSelector`.
@@ -33,15 +35,16 @@ export function UnityDialogueDetails({
   onClose,
   onDeleted,
   onGenerateContinuation,
+  onRenamed,
   headerSelector,
 }: UnityDialogueDetailsProps) {
-  const isNarrow = useDialogueEditionNarrow()
-  const tb = isNarrow ? unityDialogueEditorChrome.narrow : unityDialogueEditorChrome.comfortable
   const authUser = useAuthStore((state) => state.user)
   const userRole = authUser?.role
   const [jsonContent, setJsonContent] = useState<string>('')
   const [title, setTitle] = useState<string>('')
   const [isLoading, setIsLoading] = useState(true)
+  /** Dialogue dont l'état ci-dessous est le contenu : l'éditeur ne s'affiche que s'il correspond. */
+  const [loadedFilename, setLoadedFilename] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [document, setDocument] = useState<Record<string, unknown> | null>(null)
@@ -77,6 +80,7 @@ export function UnityDialogueDetails({
           ? response.document.title
           : formatDialogueTitle(filename)
       )
+      setLoadedFilename(filename)
       // Story 8.8 : consommer le focus différé après load (parcours bibliothèque).
       setFocusNodeId(consumePendingValidationFocus())
     } catch (err) {
@@ -100,7 +104,7 @@ export function UnityDialogueDetails({
     []
   )
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!confirm(`Êtes-vous sûr de vouloir supprimer "${filename}" ?`)) {
       return
     }
@@ -119,7 +123,62 @@ export function UnityDialogueDetails({
       setError(getErrorMessage(err))
       setIsDeleting(false)
     }
-  }
+  }, [filename, onClose, onDeleted])
+
+  const actions = useMemo<UnityDialogueEditorAction[]>(() => {
+    const list: UnityDialogueEditorAction[] = [
+      {
+        id: 'metadata',
+        label: 'Métadonnées dialogue',
+        testId: 'dialogue-metadata-open',
+        onClick: () => setMetadataPanelOpen(true),
+      },
+    ]
+    if (canManageShares) {
+      list.push({
+        id: 'share',
+        label: 'Partager',
+        testId: 'dialogue-share-open',
+        onClick: () => setShareModalOpen(true),
+      })
+    }
+    if (canViewPermissions) {
+      list.push({
+        id: 'permissions',
+        label: 'Permissions',
+        testId: 'dialogue-permissions-open',
+        onClick: () => setPermissionsPanelOpen(true),
+      })
+    }
+    list.push({
+      id: 'close',
+      label: 'Fermer le dialogue',
+      testId: 'dialogue-close',
+      overflowOnly: true,
+      onClick: onClose,
+    })
+    if (canDelete) {
+      list.push({
+        id: 'delete',
+        label: isDeleting ? 'Suppression...' : 'Supprimer',
+        testId: 'dialogue-delete',
+        overflowOnly: true,
+        danger: true,
+        disabled: isDeleting,
+        onClick: () => void handleDelete(),
+      })
+    }
+    return list
+  }, [canDelete, canManageShares, canViewPermissions, handleDelete, isDeleting, onClose])
+
+  const handleRenamed = useCallback(
+    (nextTitle: string) => {
+      setTitle(nextTitle)
+      setDocument((prev) => (prev ? { ...prev, title: nextTitle } : prev))
+      void onRenamed?.(nextTitle)
+    },
+    [onRenamed]
+  )
 
   if (isLoading) {
     return (
@@ -158,6 +217,14 @@ export function UnityDialogueDetails({
     )
   }
 
+  if (loadedFilename !== filename) {
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center', color: theme.text.secondary }}>
+        Chargement du dialogue...
+      </div>
+    )
+  }
+
   if (!jsonContent) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center', color: theme.text.secondary }}>
@@ -184,161 +251,23 @@ export function UnityDialogueDetails({
         onClose={() => setMetadataPanelOpen(false)}
       />
       <UnityDialogueEditor
+        key={filename}
         json_content={jsonContent}
         title={title}
         subtitle={filename}
-        filename={filename.replace('.json', '')}
+        filename={filename.replace(/\.json$/i, '')}
         document={document ?? undefined}
         documentRevision={revision}
         canEdit={canEdit}
         onSave={handleSave}
-        onCancel={onClose}
+        onRenamed={handleRenamed}
         headerSelector={headerSelector}
         focusNodeId={focusNodeId}
-        extraActions={
-          <>
-            <div style={{ width: isNarrow ? '100%' : undefined }}>
-              <button
-                type="button"
-                data-testid="dialogue-metadata-open"
-                onClick={() => setMetadataPanelOpen(true)}
-                style={{
-                  padding: tb.toolbarButtonPadding,
-                  minHeight: `${tb.toolbarButtonMinHeightPx}px`,
-                  border: `1px solid ${theme.button.secondary.border}`,
-                  borderRadius: '6px',
-                  backgroundColor: theme.button.secondary.background,
-                  color: theme.button.secondary.color,
-                  cursor: 'pointer',
-                  fontSize: `${tb.toolbarButtonFontRem}rem`,
-                  fontWeight: tb.toolbarButtonFontWeight,
-                  lineHeight: 1.25,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxSizing: 'border-box',
-                  width: isNarrow ? '100%' : undefined,
-                  minWidth: isNarrow ? 0 : undefined,
-                }}
-              >
-                Métadonnées dialogue
-              </button>
-            </div>
-            {canViewPermissions && (
-              <div style={{ width: isNarrow ? '100%' : undefined }}>
-                <button
-                  type="button"
-                  data-testid="dialogue-permissions-open"
-                  onClick={() => setPermissionsPanelOpen(true)}
-                  style={{
-                    padding: tb.toolbarButtonPadding,
-                    minHeight: `${tb.toolbarButtonMinHeightPx}px`,
-                    border: `1px solid ${theme.button.secondary.border}`,
-                    borderRadius: '6px',
-                    backgroundColor: theme.button.secondary.background,
-                    color: theme.button.secondary.color,
-                    cursor: 'pointer',
-                    fontSize: `${tb.toolbarButtonFontRem}rem`,
-                    fontWeight: tb.toolbarButtonFontWeight,
-                    lineHeight: 1.25,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxSizing: 'border-box',
-                    width: isNarrow ? '100%' : undefined,
-                    minWidth: isNarrow ? 0 : undefined,
-                  }}
-                >
-                  Permissions
-                </button>
-              </div>
-            )}
-            {canManageShares && (
-              <div style={{ gridArea: isNarrow ? 'share' : undefined, width: isNarrow ? '100%' : undefined }}>
-                <button
-                  type="button"
-                  data-testid="dialogue-share-open"
-                  onClick={() => setShareModalOpen(true)}
-                  style={{
-                    padding: tb.toolbarButtonPadding,
-                    minHeight: `${tb.toolbarButtonMinHeightPx}px`,
-                    border: `1px solid ${theme.button.secondary.border}`,
-                    borderRadius: '6px',
-                    backgroundColor: theme.button.secondary.background,
-                    color: theme.button.secondary.color,
-                    cursor: 'pointer',
-                    fontSize: `${tb.toolbarButtonFontRem}rem`,
-                    fontWeight: tb.toolbarButtonFontWeight,
-                    lineHeight: 1.25,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxSizing: 'border-box',
-                    width: isNarrow ? '100%' : undefined,
-                    minWidth: isNarrow ? 0 : undefined,
-                  }}
-                >
-                  Partager
-                </button>
-              </div>
-            )}
-            {onGenerateContinuation && (
-              <div style={{ gridArea: isNarrow ? 'generate' : undefined, width: isNarrow ? '100%' : undefined }}>
-                <button
-                  onClick={() => onGenerateContinuation(jsonContent, title)}
-                  style={{
-                    padding: tb.toolbarButtonPadding,
-                    minHeight: `${tb.toolbarButtonMinHeightPx}px`,
-                    border: `1px solid ${theme.button.secondary.border}`,
-                    borderRadius: '6px',
-                    backgroundColor: theme.button.secondary.background,
-                    color: theme.button.secondary.color,
-                    cursor: 'pointer',
-                    fontSize: `${tb.toolbarButtonFontRem}rem`,
-                    fontWeight: tb.toolbarButtonFontWeight,
-                    lineHeight: 1.25,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxSizing: 'border-box',
-                    width: isNarrow ? '100%' : undefined,
-                    minWidth: isNarrow ? 0 : undefined,
-                  }}
-                  title="Générer un dialogue qui suit celui-ci"
-                >
-                  Générer la suite
-                </button>
-              </div>
-            )}
-            {canDelete && <div style={{ gridArea: isNarrow ? 'delete' : undefined, width: isNarrow ? '100%' : undefined }}>
-              <button
-                onClick={handleDelete}
-                disabled={isDeleting}
-                style={{
-                  padding: tb.toolbarButtonPadding,
-                  minHeight: `${tb.toolbarButtonMinHeightPx}px`,
-                  // Destructif mais pas primaire : contour et texte d'erreur, pas de fond plein.
-                  border: `1px solid ${theme.state.error.border}`,
-                  borderRadius: '6px',
-                  backgroundColor: 'transparent',
-                  color: theme.state.error.color,
-                  cursor: isDeleting ? 'not-allowed' : 'pointer',
-                  opacity: isDeleting ? 0.6 : 1,
-                  fontSize: `${tb.toolbarButtonFontRem}rem`,
-                  fontWeight: tb.toolbarButtonFontWeight,
-                  lineHeight: 1.25,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxSizing: 'border-box',
-                  width: isNarrow ? '100%' : undefined,
-                  minWidth: isNarrow ? 0 : undefined,
-                }}
-              >
-                {isDeleting ? 'Suppression...' : 'Supprimer'}
-              </button>
-            </div>}
-          </>
+        actions={actions}
+        onGenerateContinuation={
+          onGenerateContinuation
+            ? (nodeId) => onGenerateContinuation({ filename, nodeId })
+            : undefined
         }
       />
     </div>

@@ -33,45 +33,25 @@ describe('UnityDialogueEditor save', () => {
     vi.useRealTimers()
   })
 
-  it('affiche le bouton Sauvegarder et n’autosauvegarde pas à la saisie', async () => {
-    vi.mocked(documentsAPI.putDocument).mockResolvedValue({ revision: 2 })
-    render(
-      <UnityDialogueEditor
-        json_content={jsonContent}
-        filename="manual"
-        document={{ schemaVersion: '1.2.0', nodes: [] }}
-        documentRevision={1}
-      />,
-    )
-
-    expect(screen.getByRole('button', { name: 'Sauvegarder' })).toBeInTheDocument()
-
-    fireEvent.change(screen.getByPlaceholderText('Texte du dialogue...'), {
-      target: { value: 'Updated manually' },
-    })
-    await act(async () => {
-      await Promise.resolve()
-    })
-
-    expect(documentsAPI.putDocument).not.toHaveBeenCalled()
-  })
-
   it('crée un nouveau dialogue via export quand filename est absent', async () => {
     vi.mocked(dialoguesAPI.exportUnityDialogue).mockResolvedValue({
       filename: 'Nouveau_dialogue.json',
       success: true,
     })
     const onSave = vi.fn()
+    const ref = createRef<UnityDialogueEditorHandle>()
     render(
       <UnityDialogueEditor
+        ref={ref}
         json_content={jsonContent}
         title="Nouveau dialogue"
-        hideHeaderSaveButton={false}
         onSave={onSave}
       />,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: 'Sauvegarder' }))
+    await act(async () => {
+      await ref.current!.handleSave()
+    })
     await waitFor(() => {
       expect(dialoguesAPI.exportUnityDialogue).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -105,15 +85,19 @@ describe('UnityDialogueEditor save', () => {
         success: true,
       })
     const onSave = vi.fn()
+    const ref = createRef<UnityDialogueEditorHandle>()
     render(
       <UnityDialogueEditor
+        ref={ref}
         json_content={jsonContent}
         title="Existant"
         onSave={onSave}
       />,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: 'Sauvegarder' }))
+    await act(async () => {
+      await ref.current!.handleSave()
+    })
     await waitFor(() => {
       expect(dialoguesAPI.exportUnityDialogue).toHaveBeenCalledTimes(2)
     })
@@ -205,7 +189,6 @@ describe('UnityDialogueEditor save', () => {
     render(
       <UnityDialogueEditor
         json_content={jsonContent}
-        hideHeaderSaveButton={true}
         onContentChange={onContentChange}
       />,
     )

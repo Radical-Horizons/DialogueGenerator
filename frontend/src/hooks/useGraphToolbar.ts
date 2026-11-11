@@ -108,7 +108,6 @@ export interface UseGraphToolbarReturn {
 export function useGraphToolbar(
   toast: UseToastFn,
   activeDialogueFilename: string | null,
-  handleSave: () => Promise<void>,
   isLoadingDialogue: boolean,
 ): UseGraphToolbarReturn {
   const [showAutoLayoutDropdown, setShowAutoLayoutDropdown] = useState(false)
@@ -159,7 +158,6 @@ export function useGraphToolbar(
     canUndo,
     canRedo,
     isLoading: isGraphLoading,
-    isSaving: isGraphSaving,
   } = useGraphStore()
 
   const aiGenerationNodeId = useGraphViewStore((s) => s.aiGenerationNodeId)
@@ -256,17 +254,6 @@ export function useGraphToolbar(
 
   useKeyboardShortcuts(
     [
-      {
-        key: 'ctrl+s',
-        handler: (e) => {
-          e.preventDefault()
-          if (activeDialogueFilename && !isGraphSaving && !isLoadingDialogue) {
-            void handleSave()
-          }
-        },
-        description: 'Sauvegarder',
-        enabled: !!activeDialogueFilename && !isGraphSaving && !isLoadingDialogue,
-      },
       {
         key: 'ctrl+g',
         handler: (e) => {
@@ -455,8 +442,6 @@ export function useGraphToolbar(
     ],
     [
       activeDialogueFilename,
-      isGraphSaving,
-      handleSave,
       selectedNodeId,
       isGraphLoading,
       isLoadingDialogue,

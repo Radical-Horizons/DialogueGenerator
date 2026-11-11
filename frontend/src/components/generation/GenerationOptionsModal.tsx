@@ -877,7 +877,6 @@ function ShortcutsTab() {
       { key: 'ctrl+k', description: 'Ouvrir la palette de commandes' },
       { key: '/', description: 'Filtrer dans le panneau de gauche' },
       { key: 'ctrl+e', description: 'Exporter le dialogue Unity' },
-      { key: 'ctrl+s', description: 'Sauvegarder le dialogue' },
       { key: 'ctrl+n', description: 'Nouveau dialogue (réinitialiser)' },
       { key: 'ctrl+,', description: 'Ouvrir les options' },
       { key: 'escape', description: 'Fermer les modals/panels' },

@@ -91,27 +91,27 @@ describe('UnityDialogueEditor — responsive narrow', () => {
     expect(deltaLeft).toBeLessThanOrEqual(2)
   })
 
-  it('desktop: ne bascule pas les actions en grille même si la mesure actions est étroite', () => {
+  it('desktop : la barre d’actions ne déborde pas, Supprimer et Fermer passent dans Autres', () => {
     render(
       <DialogueEditionNarrowProvider value={false}>
         <UnityDialogueEditor
           json_content={minimalJson}
           title="Lexique distance de sept enjambées et vérité qu’on n’écrit pas"
-          extraActions={
-            <>
-              <button>Générer la suite</button>
-              <button>Supprimer</button>
-            </>
-          }
-          onCancel={() => {}}
+          actions={[
+            { id: 'metadata', label: 'Métadonnées dialogue', onClick: () => {} },
+            { id: 'close', label: 'Fermer le dialogue', onClick: () => {}, overflowOnly: true },
+            { id: 'delete', label: 'Supprimer', onClick: () => {}, overflowOnly: true },
+          ]}
         />
       </DialogueEditionNarrowProvider>
     )
 
     const toolbar = screen.getByTestId('unity-dialogue-editor-toolbar')
-    const actions = toolbar.querySelector('.unity-dialogue-toolbar-actions')
+    const actions = toolbar.querySelector('.unity-dialogue-toolbar-actions') as HTMLElement | null
     expect(actions).not.toBeNull()
-    expect(actions!).toHaveAttribute('data-actions-narrow', 'false')
-    expect((actions as HTMLElement).style.flexWrap).toBe('nowrap')
+    expect(actions!.style.overflowX).toBe('')
+    expect(screen.getByRole('button', { name: 'Métadonnées dialogue' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Supprimer' })).not.toBeInTheDocument()
+    expect(screen.getByTestId('unity-dialogue-editor-more')).toBeInTheDocument()
   })
 })

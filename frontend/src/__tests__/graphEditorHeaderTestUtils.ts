@@ -38,7 +38,6 @@ export function mockNarrowToolbar(narrowToolbar: boolean): void {
 export const defaultGraphEditorHeaderProps = {
   hasActiveDialogue: true,
   activeDialogueFilename: 'test.json',
-  handleSave: async () => {},
   onBatchTagApply: () => {},
   handleBatchValidateSelection: () => {},
   handleBatchDeleteSelection: () => {},

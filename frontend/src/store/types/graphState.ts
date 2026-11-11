@@ -258,7 +258,8 @@ export interface GraphState {
   validateLoreExplicit: (contextSelections?: Record<string, unknown>) => Promise<void>
 
   // Persistence
-  saveDialogue: () => Promise<SaveGraphResponse>
+  /** `keepalive` : le PUT du document survit au déchargement de la page (F5, fermeture). */
+  saveDialogue: (options?: { keepalive?: boolean }) => Promise<SaveGraphResponse>
   exportToUnity: (opts?: { keepStatusForDraft?: boolean }) => string
 
   // Layout

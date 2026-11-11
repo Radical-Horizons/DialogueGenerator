@@ -24,7 +24,6 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
 
         hasActiveDialogue={true}
         activeDialogueFilename="test.json"
-        handleSave={async () => {}}
         onBatchTagApply={() => {}}
         handleBatchValidateSelection={() => {}}
         handleBatchDeleteSelection={() => {}}
@@ -44,7 +43,6 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
 
         hasActiveDialogue={true}
         activeDialogueFilename="test.json"
-        handleSave={async () => {}}
         onBatchTagApply={() => {}}
         handleBatchValidateSelection={() => {}}
         handleBatchDeleteSelection={() => {}}
@@ -63,7 +61,6 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
 
       hasActiveDialogue: true,
       activeDialogueFilename: 'test.json',
-      handleSave: async () => {},
       onBatchTagApply: () => {},
       handleBatchValidateSelection: () => {},
       handleBatchDeleteSelection: () => {},
@@ -105,7 +102,6 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
 
         hasActiveDialogue={true}
         activeDialogueFilename="test.json"
-        handleSave={async () => {}}
         onBatchTagApply={() => {}}
         handleBatchValidateSelection={() => {}}
         handleBatchDeleteSelection={() => {}}
@@ -134,7 +130,6 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
         toolbar={toolbar}
         hasActiveDialogue={true}
         activeDialogueFilename="test.json"
-        handleSave={async () => {}}
         onBatchTagApply={() => {}}
         handleBatchValidateSelection={() => {}}
         handleBatchDeleteSelection={() => {}}
@@ -207,7 +202,6 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
 
         hasActiveDialogue={true}
         activeDialogueFilename="test.json"
-        handleSave={async () => {}}
         onBatchTagApply={() => {}}
         handleBatchValidateSelection={() => {}}
         handleBatchDeleteSelection={() => {}}

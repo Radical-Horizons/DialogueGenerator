@@ -25,7 +25,7 @@ interface DialogueEditionTabContentProps {
   selectedDialogue: UnityDialogueMetadata | null
   setSelectedDialogue: Dispatch<SetStateAction<UnityDialogueMetadata | null>>
   dialogueListRef: RefObject<UnityDialogueListRef>
-  onGenerateContinuation: () => void
+  onGenerateContinuation: (target: { filename: string; nodeId: string }) => void
 }
 
 export function DialogueEditionTabContent({
@@ -79,6 +79,9 @@ export function DialogueEditionTabContent({
                 await dialogueListRef.current?.refresh()
               }}
               onGenerateContinuation={onGenerateContinuation}
+              onRenamed={async () => {
+                await dialogueListRef.current?.refresh()
+              }}
               headerSelector={
                 isDialogueEditionNarrow ? renderCombobox(selectedDialogue.filename) : undefined
               }
