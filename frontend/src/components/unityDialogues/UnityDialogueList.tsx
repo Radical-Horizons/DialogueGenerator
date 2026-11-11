@@ -176,15 +176,25 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
     refresh,
   }), [refresh])
 
+  // La réponse peut arriver après le démontage (changement de section, fin de test) :
+  // un setState sur un composant démonté, sous jsdom détruit, fait échouer la CI.
+  const isMountedRef = useRef(true)
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
+
   const refreshCollections = useCallback(async () => {
     setCollectionsLoading(true)
     try {
       const next = await collectionsAPI.listCollections()
-      setCollections(next)
+      if (isMountedRef.current) setCollections(next)
     } catch (err) {
-      toast(getErrorMessage(err), 'error')
+      if (isMountedRef.current) toast(getErrorMessage(err), 'error')
     } finally {
-      setCollectionsLoading(false)
+      if (isMountedRef.current) setCollectionsLoading(false)
     }
   }, [toast])
 
