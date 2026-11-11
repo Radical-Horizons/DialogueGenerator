@@ -404,7 +404,13 @@ async def stream_generation_with_billable_user(
         async for chunk in stream_generation(job_id, orchestrator, last_event_id):
             yield chunk
     finally:
-        reset_billable_user_id(var_token)
+        try:
+            reset_billable_user_id(var_token)
+        except ValueError:
+            # Client parti (F5, onglet fermé) : le générateur est finalisé dans un autre
+            # contexte, que le jeton ne peut pas restaurer. Ce contexte-là est abandonné,
+            # il n'y a rien à remettre en place.
+            logger.debug("Flux SSE %s fermé hors de son contexte d'origine", job_id)
 
 
 @router.post(

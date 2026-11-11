@@ -19,10 +19,11 @@
 | `v1.8.3` | 1.8.3 | — | patch main (OpenRouter + admin unifié) | `ecfa11ae` | 2026-07-23 |
 | `v1.8.4` | 1.8.4 | — | patch main (recherche GDD inter-onglets + sync) | `0fb49e8e` | 2026-07-25 |
 | `v1.9.0` | 1.9.0 | Epics 6 + 8 | PR #82 — refonte UI 2026, design system, options côte à côte | `c0829271` | 2026-10-29 |
+| `v1.9.1` | 1.9.1 | — | patch main — corrections de recette v1.9.0 (PR #84, #85, #87) | `993cbf88` | 2026-11-11 |
 
 Baseline : `v1.0.0` → `fe9c3374`. Doc complète : `docs/releases/semver-and-tags.md`.
 
-Prochaine epic mergée → **1.10.0**. Patches main entre deux epics → **1.9.1**, **1.9.2**, …
+Prochaine epic mergée → **1.10.0**. Patches main entre deux epics → **1.9.2**, **1.9.3**, …
 
 ```powershell
 git log --oneline --merges --grep="Epic" -20
