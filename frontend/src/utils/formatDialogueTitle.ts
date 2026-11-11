@@ -26,9 +26,21 @@ export function titleToDocumentId(title: string): string {
     .toLowerCase()
 }
 
-/** Normalise un identifiant de dialogue pour comparer stem, filename et metadata API. */
+/**
+ * Identifiant d'un dialogue tel que l'API le connaît : le nom du fichier sans
+ * `.json`, casse et accents intacts. C'est ce qui part vers le serveur
+ * (collections, export, validation) — le disque de prod est sensible à la casse.
+ */
+export function dialogueDocumentId(filename: string): string {
+  return filename.replace(/\.json$/i, '')
+}
+
+/**
+ * Clé de **comparaison** entre stem, filename et metadata API (casse et forme
+ * Unicode neutralisées). Ne jamais l'envoyer à l'API : `dialogueDocumentId`.
+ */
 export function normalizeDialogueFilenameKey(filename: string): string {
-  return filename.replace(/\.json$/i, '').toLowerCase()
+  return dialogueDocumentId(filename).normalize('NFC').toLowerCase()
 }
 
 /** Titre utilisateur cohérent entre liste, combobox et panneau détails. */

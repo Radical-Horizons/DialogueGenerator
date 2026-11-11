@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import io
 import json
+import unicodedata
 import zipfile
 from pathlib import Path
 from typing import Literal, Tuple
+from urllib.parse import quote
 
 from services.configuration_service import ConfigurationService
 from services.unity_persisted_document_io import resolve_unity_dir, safe_document_id
@@ -20,11 +22,25 @@ def content_disposition_attachment(filename: str) -> str:
         filename: Nom de fichier (basename attendu).
 
     Returns:
-        Valeur d'en-tête ``attachment; filename="..."`` sans guillemets ni sauts de ligne.
+        ``attachment; filename="<repli ASCII>"; filename*=UTF-8''<nom exact>``
+        (RFC 6266) : un en-tête HTTP n'admet que du latin-1, le nom exact —
+        accents, typographie, emoji — passe donc par ``filename*``.
     """
     safe_name = safe_export_filename(filename)
     header_value = safe_name.replace('"', "").replace("\r", "").replace("\n", "")
-    return f'attachment; filename="{header_value}"'
+    ascii_fallback = (
+        unicodedata.normalize("NFKD", header_value)
+        .encode("ascii", "ignore")
+        .decode("ascii")
+    )
+    if ascii_fallback == header_value:
+        return f'attachment; filename="{header_value}"'
+    if not ascii_fallback.removesuffix(".json").strip("_ -"):
+        ascii_fallback = "dialogue.json"
+    return (
+        f'attachment; filename="{ascii_fallback}"; '
+        f"filename*=UTF-8''{quote(header_value, safe='')}"
+    )
 
 
 def safe_export_filename(filename: str) -> str:

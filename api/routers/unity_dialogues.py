@@ -22,7 +22,7 @@ from services.unity_dialogue_search_fields import (
     count_edges as _count_edges,
     count_nodes as _count_nodes,
     extract_speakers_and_text as _extract_speakers_and_text,
-    extract_title_from_nodes as _extract_title_from_json,
+    extract_document_title as _extract_document_title,
 )
 from services.configuration_service import ConfigurationService
 from services.document_persistence_service import (
@@ -318,7 +318,7 @@ async def list_unity_dialogues(
                         else None
                     )
                     if isinstance(nodes_for_title, list):
-                        title = _extract_title_from_json(nodes_for_title)
+                        title = _extract_document_title(json_data)
                         speakers, search_text = _extract_speakers_and_text(
                             nodes_for_title
                         )
@@ -619,6 +619,7 @@ async def read_unity_dialogue(
                 current_user,
             )
             json_data = persisted.document
+            title = _extract_document_title(json_data)
             json_content = json.dumps(json_data, ensure_ascii=False, indent=2)
             
             # Valider que c'est du JSON valide ; accepter liste ou document canonique (schemaVersion + nodes)
@@ -639,9 +640,6 @@ async def read_unity_dialogue(
                     details={"filename": filename, "json_error": str(e)},
                     request_id=request_id
                 )
-            
-            # Extraire un titre potentiel
-            title = _extract_title_from_json(json_data)
             
             stat = file_path.stat()
             

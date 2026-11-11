@@ -3,6 +3,7 @@
  */
 import apiClient from './client'
 import { API_TIMEOUTS } from '../constants'
+import { normalizeDialogueFilenameKey } from '../utils/formatDialogueTitle'
 
 export interface DialogueCollection {
   id: string
@@ -102,8 +103,7 @@ export function buildDocumentCollectionMap(
   const map = new Map<string, DialogueCollection[]>()
   for (const collection of collections) {
     for (const documentId of collection.dialogue_ids) {
-      // Aligné sur `normalizeDialogueFilenameKey` (casse) pour les badges.
-      const key = documentId.replace(/\.json$/i, '').toLowerCase()
+      const key = normalizeDialogueFilenameKey(documentId)
       const existing = map.get(key)
       if (existing) {
         existing.push(collection)

@@ -402,4 +402,54 @@ describe('UnityDialogueList', () => {
       )
     })
   })
+
+  it('range un dialogue sous son identifiant exact, majuscule et accent compris', async () => {
+    const user = userEvent.setup()
+    mockList.mockResolvedValue({
+      dialogues: [
+        {
+          filename: 'La_carte_refusée.json',
+          file_path: '/data/La_carte_refusée.json',
+          modified_time: '2026-04-08T12:00:00.000Z',
+          size_bytes: 1024,
+          title: 'La carte refusée',
+          share_count: 0,
+          capabilities: {
+            can_read: true,
+            can_edit: true,
+            can_delete: true,
+            is_owner: true,
+          },
+        },
+      ],
+      total: 1,
+    })
+    vi.mocked(collectionsAPI.listCollections).mockResolvedValue([
+      {
+        id: 'col-1',
+        name: 'Chapitre 1',
+        description: null,
+        icon: null,
+        owner_id: 'admin',
+        created_at: '2026-04-08T12:00:00.000Z',
+        updated_at: '2026-04-08T12:00:00.000Z',
+        dialogue_ids: [],
+      },
+    ])
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+
+    await user.click(await screen.findByTestId('unity-dialogue-item-checkbox'))
+    await user.selectOptions(
+      await screen.findByTestId('unity-dialogue-add-to-collection-select'),
+      'col-1'
+    )
+    await user.click(screen.getByTestId('unity-dialogue-add-to-collection-submit'))
+
+    await waitFor(() => {
+      expect(collectionsAPI.addDialoguesToCollection).toHaveBeenCalledWith(
+        'col-1',
+        ['La_carte_refusée']
+      )
+    })
+  })
 })
