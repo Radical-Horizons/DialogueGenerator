@@ -1,7 +1,7 @@
 /**
  * État de disposition de l'UI (refonte 2026).
  *
- * `inspectorTab` remplace les booléens indépendants `showValidationPanel`,
+ * Sur bureau, `inspectorTab` remplace les booléens indépendants `showValidationPanel`,
  * `showQualityLlmPanel`, `showAiSlopPanel`, `showSchemaValidationPanel` et
  * `showCostBreakdown` de `useGraphToolbar` : un seul onglet actif à la fois, donc
  * plus aucun empilement de panneaux au-dessus du canvas (écran 2e du handoff).
@@ -11,13 +11,26 @@
 import { create } from 'zustand'
 
 /** Onglets de l'inspecteur droit de l'éditeur de graphe. */
-export type InspectorTab = 'node' | 'health' | 'quality' | 'cost'
+export type InspectorTab = 'node' | 'health' | 'quality' | 'slop' | 'cost'
 
 /** Sections applicatives, présentées dans la barre supérieure (écran 1c). */
 export type CenterPanelTab = 'generation' | 'edition' | 'graph'
 
 /** Affichage des options d'un résultat (écran 2b) : une dépliée, ou toutes côte à côte. */
 export type OptionsView = 'list' | 'columns'
+
+/** Paramètre d'adresse qui porte la section active (cf. `useDashboardUrlMirror`). */
+export const SECTION_URL_PARAM = 'section'
+
+/**
+ * L'adresse ne se lit qu'à la création du store : c'est elle qui fait revenir F5 sur la
+ * même section, dès le premier rendu. Ensuite le store fait foi et l'adresse le recopie.
+ */
+function sectionFromUrl(): CenterPanelTab {
+  if (window.location.pathname !== '/') return 'generation'
+  const section = new URLSearchParams(window.location.search).get(SECTION_URL_PARAM)
+  return section === 'edition' || section === 'graph' ? section : 'generation'
+}
 
 interface UiLayoutState {
   /**
@@ -57,7 +70,7 @@ interface UiLayoutState {
 }
 
 export const useUiLayoutStore = create<UiLayoutState>()((set) => ({
-  centerPanelTab: 'generation',
+  centerPanelTab: sectionFromUrl(),
   setCenterPanelTab: (tab) => set({ centerPanelTab: tab }),
 
   inspectorTab: 'node',

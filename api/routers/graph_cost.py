@@ -48,7 +48,11 @@ def fingerprint_for_selections_safe(
     context_builder: ContextBuilder,
     selections: dict,
 ) -> Optional[str]:
-    """Empreinte du contexte GDD pour les sélections ; None si vide ou erreur."""
+    """Empreinte des fiches GDD sélectionnées ; None si vide ou erreur.
+
+    Prend la sélection brute du front : c'est elle que le nœud garde en snapshot et que le
+    contrôle de péremption reprend, pas le contexte enrichi pour la génération.
+    """
     if not selections:
         return None
     try:

@@ -14,21 +14,6 @@ vi.mock('../api/client', () => ({
   },
 }))
 
-vi.mock('../store/contextConfigStore', () => {
-  const contextConfigMockState = {
-    fieldConfigs: {} as Record<string, string[]>,
-    essentialFields: {} as Record<string, string[]>,
-    organization: 'narrative' as const,
-  }
-  function useContextConfigStore<T>(selector: (s: typeof contextConfigMockState) => T): T {
-    return selector(contextConfigMockState)
-  }
-  Object.assign(useContextConfigStore, {
-    getState: () => contextConfigMockState,
-  })
-  return { useContextConfigStore }
-})
-
 import { useGddStaleIndicator } from './useGddStaleIndicator'
 
 describe('useGddStaleIndicator', () => {
@@ -63,5 +48,36 @@ describe('useGddStaleIndicator', () => {
     await waitFor(() => expect(result.current.checking).toBe(false), { timeout: 4000 })
     expect(result.current.stale).toBe(true)
     expect(apiPost).toHaveBeenCalled()
+  })
+
+  it('n’envoie que le snapshot : l’empreinte ignore les réglages d’affichage du contexte', async () => {
+    const snapshot = { characters_full: ['X'] }
+    apiPost.mockResolvedValue({ data: { fingerprint: 'v2:aaaa' } })
+    const { result } = renderHook(() =>
+      useGddStaleIndicator({
+        id: 'n1',
+        contextGddContentFingerprint: 'v2:aaaa',
+        gddContextSelectionsSnapshot: snapshot,
+      }),
+    )
+    await waitFor(() => expect(result.current.checking).toBe(false), { timeout: 4000 })
+    expect(result.current.stale).toBe(false)
+    expect(apiPost).toHaveBeenCalledWith('/api/v1/context/gdd-content-fingerprint', {
+      context_selections: snapshot,
+    })
+  })
+
+  it('ne compare pas une empreinte de l’ancien calcul à une empreinte versionnée', async () => {
+    const snapshot = { characters_full: ['X'] }
+    apiPost.mockResolvedValue({ data: { fingerprint: 'v2:bbbb' } })
+    const { result } = renderHook(() =>
+      useGddStaleIndicator({
+        id: 'n1',
+        contextGddContentFingerprint: 'a'.repeat(64),
+        gddContextSelectionsSnapshot: snapshot,
+      }),
+    )
+    await waitFor(() => expect(result.current.checking).toBe(false), { timeout: 4000 })
+    expect(result.current.stale).toBe(false)
   })
 })

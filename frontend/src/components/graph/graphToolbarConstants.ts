@@ -18,6 +18,8 @@ export const MANUAL_NODE_OFFSET_Y = 100
 export const MANUAL_NODE_STEP = 40
 /** Pas vertical entre nœuds manuels successifs (plus serré que l’axe X). */
 export const MANUAL_NODE_STEP_Y = MANUAL_NODE_STEP / 2
+/** Longueur de l'escalier de nœuds manuels : au-delà, il repart du centre de la vue. */
+export const MANUAL_NODE_CASCADE_LENGTH = 6
 
 /** Au-dessus des modales graphe (10001) : tooltip raccourcis en portail. */
 export const GRAPH_SHORTCUTS_TOOLTIP_Z = 10050

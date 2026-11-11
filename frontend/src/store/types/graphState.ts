@@ -277,6 +277,8 @@ export interface GraphState {
   canRedo: () => boolean
   _pushUndoSnapshot: () => void
   clearUndoHistory: () => void
+  /** Exécute plusieurs mutations synchrones comme une seule étape de Ctrl+Z. */
+  runAsSingleUndoStep: (action: () => void) => void
 
   // Recherche (Story 2.7 - FR28)
   setHighlightedNodes: (nodeIds: string[]) => void

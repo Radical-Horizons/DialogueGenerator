@@ -343,7 +343,7 @@ async def regenerate_node(
         gdd_fp = await asyncio.to_thread(
             fingerprint_for_selections_safe,
             context_builder,
-            enriched_context,
+            request_data.context_selections,
         )
         return RegenerateNodeResponse(
             node=new_node,

@@ -199,16 +199,11 @@ export function useGenerationHandlers(
 
       // Multi-options (écran 2b) : N-1 jobs parallèles supplémentaires, plafonnés.
       // L'option 1 reste le stream principal ; les autres se résolvent en arrière-plan.
-      const { optionCount, startRun, updateSlot, clearRun } =
-        useGenerationOptionsStore.getState()
-      if (optionCount > 1) {
-        startRun(optionCount, request)
-        updateSlot(0, { jobId: job.job_id, status: 'running' })
-        for (let i = 1; i < optionCount; i++) {
-          void launchBackgroundOption(i, request, costEstimate)
-        }
-      } else {
-        clearRun()
+      const { optionCount, startRun, updateSlot } = useGenerationOptionsStore.getState()
+      startRun(optionCount, request)
+      updateSlot(0, { jobId: job.job_id, status: 'running' })
+      for (let i = 1; i < optionCount; i++) {
+        void launchBackgroundOption(i, request, costEstimate)
       }
     } catch (err) {
       const axiosErr = err as APIError
@@ -284,6 +279,7 @@ export function useGenerationHandlers(
     setError(null)
     setIsDirty(false)
     setUnityDialogueResponse(null)
+    useGenerationOptionsStore.getState().clearRun()
     toast('Formulaire réinitialisé', 'info')
   }, [setUserInstructions, setError, setIsDirty, setUnityDialogueResponse, toast])
 
@@ -299,6 +295,7 @@ export function useGenerationHandlers(
     setMaxChoices(null)
     setNarrativeTags([])
     setUnityDialogueResponse(null)
+    useGenerationOptionsStore.getState().clearRun()
     clearSelections()
     toast('Tout a été réinitialisé', 'info')
   }, [

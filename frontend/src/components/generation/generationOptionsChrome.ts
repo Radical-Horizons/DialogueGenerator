@@ -21,6 +21,14 @@ export const STATUS_LABELS: Record<GenerationOptionSlot['status'], string> = {
   cancelled: 'ANNULÉE',
 }
 
+/**
+ * Une interruption n'est pas un échec : le texte déjà streamé doit rester lisible,
+ * contrairement à une vraie erreur de génération qui remplace le résultat.
+ */
+export function isInterruptionNotice(message: string): boolean {
+  return message.includes('Interruption') || message.includes('interrompue')
+}
+
 export function statusColor(status: GenerationOptionSlot['status'], kept: boolean): string {
   if (kept) return redesignAccent.base
   switch (status) {

@@ -47,6 +47,7 @@ paths:
 - **Undo/redo et auto-layout** :
   - L'historique undo/redo est géré via `undoSlice` (`undoStack` / `redoStack`, `_pushUndoSnapshot`, `undo`, `redo`) avec limite stricte à 50 snapshots.
   - On ne pousse un snapshot qu'aux **entrées de transactions** (add/delete/connect/disconnect/move stop…), jamais sur chaque frame de drag (utiliser le throttling existant).
+  - **Une action utilisateur = un Ctrl+Z.** Plusieurs mutations pour une seule action passent par `runAsSingleUndoStep` (synchrone). `nodeDragThreshold` reste > 0 sur `<ReactFlow>` : à 0, `onNodeDragStart` part au mousedown et chaque clic pousse un snapshot.
   - **Layout** : `layoutSlice.applyAutoLayout` avec algorithme `dagre` utilise **dagre côté client** (`utils/dagreLayout`) pour un recalcul local rapide ; les **autres** algorithmes passent par `POST /graph/calculate-layout`. La **génération de nœuds** peut aussi appliquer dagre client pour lisibilité immédiate. Ne pas dupliquer une troisième variante sans aligner tests et epics.
 
 - **Performances et UX (NFR-P1/P4, NFR-SC3, NFR-A1)** :

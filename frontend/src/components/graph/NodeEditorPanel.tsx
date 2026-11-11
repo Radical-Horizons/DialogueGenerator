@@ -445,13 +445,12 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     const choices = (parentAfterSync?.data?.choices || []) as Choice[]
     const currentChoice = choices[choiceIndex]
     const oldTargetNode = currentChoice?.targetNode
-    if (oldTargetNode && oldTargetNode !== 'END') {
-      const stableId = (currentChoice as Choice & { choiceId?: string })?.choiceId ?? `__idx_${choiceIndex}`
-      const edgeId = stableChoiceEdgeId(selectedNodeId, stableId)
-      if (state.edges.some((e) => e.id === edgeId)) {
-        disconnectNodes(edgeId)
-      }
-    }
+    const stableId = (currentChoice as Choice & { choiceId?: string })?.choiceId ?? `__idx_${choiceIndex}`
+    const oldEdgeId = stableChoiceEdgeId(selectedNodeId, stableId)
+    const replacesExistingEdge =
+      Boolean(oldTargetNode) &&
+      oldTargetNode !== 'END' &&
+      state.edges.some((e) => e.id === oldEdgeId)
     const pos = parentAfterSync?.position ?? selectedNode.position
     const parentNode = parentAfterSync ?? selectedNode
     const position = {
@@ -468,8 +467,11 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       }),
     }
     const node = createEmptyNode(position)
-    addNode(node)
-    connectNodes(selectedNodeId, node.id, choiceIndex)
+    state.runAsSingleUndoStep(() => {
+      if (replacesExistingEdge) disconnectNodes(oldEdgeId)
+      addNode(node)
+      connectNodes(selectedNodeId, node.id, choiceIndex)
+    })
     setSelectedNode(node.id)
   }, [selectedNodeId, selectedNode, nodeType, form, updateNode, createEmptyNode, addNode, connectNodes, disconnectNodes, setSelectedNode])
   

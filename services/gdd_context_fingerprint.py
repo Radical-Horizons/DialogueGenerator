@@ -1,4 +1,4 @@
-"""Empreinte du contenu GDD utilisé pour une sélection de contexte (Story 3.9 FR19)."""
+"""Empreinte du contenu des fiches GDD d'une sélection de contexte (Story 3.9 FR19)."""
 from __future__ import annotations
 
 import hashlib
@@ -7,12 +7,13 @@ import logging
 import threading
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Set, Tuple
+
+from services.element_resolver import ElementResolver
 
 logger = logging.getLogger(__name__)
 
-# Plafond tokens pour l'empreinte (aligné génération : évite charge excessive tout en couvrant le contenu).
-_FINGERPRINT_MAX_CONTEXT_TOKENS = 200_000
+GDD_FINGERPRINT_VERSION = "v2"
 
 _FINGERPRINT_CACHE_LOCK = threading.Lock()
 _FINGERPRINT_CACHE: Dict[str, Tuple[float, str]] = {}
@@ -21,10 +22,10 @@ _FINGERPRINT_CACHE_MAX_ENTRIES = 512
 
 
 def structured_context_fingerprint(structured: Dict[str, Any]) -> str:
-    """Calcule une empreinte SHA-256 stable du contexte structuré.
+    """Calcule une empreinte SHA-256 stable d'un contenu JSON.
 
     Args:
-        structured: Résultat de ``ContextBuilder.build_context_json``.
+        structured: Contenu à empreindre ; l'ordre des clés est sans effet.
 
     Returns:
         Chaîne hexadécimale SHA-256.
@@ -89,44 +90,75 @@ def clear_gdd_content_fingerprint_cache() -> None:
         _FINGERPRINT_CACHE.clear()
 
 
+def selected_gdd_element_names(context_selections: Dict[str, Any]) -> Dict[str, List[str]]:
+    """Extrait les fiches GDD désignées par une sélection de contexte.
+
+    Le mode (complet ou extrait) ne compte pas : une fiche sélectionnée reste la même fiche.
+    Les protagonistes et le lieu de scène en font partie, car le prompt les inclut toujours.
+
+    Args:
+        context_selections: Sélections telles que le front les envoie.
+
+    Returns:
+        Noms triés par clé de catégorie (``characters``, ``locations``…).
+    """
+    selected: Dict[str, Set[str]] = {}
+
+    def add(category: str, raw_name: Any) -> None:
+        if isinstance(raw_name, str) and raw_name.strip():
+            selected.setdefault(category, set()).add(raw_name.strip())
+
+    for key, value in context_selections.items():
+        category = key.removesuffix("_full").removesuffix("_excerpt")
+        if category in ElementResolver.CATEGORY_TO_ELEMENT_CATEGORY and isinstance(value, list):
+            for name in value:
+                add(category, name)
+
+    protagonists = context_selections.get("scene_protagonists") or context_selections.get(
+        "_scene_protagonists"
+    )
+    if isinstance(protagonists, dict):
+        for name in protagonists.values():
+            add("characters", name)
+
+    scene_location = context_selections.get("scene_location") or context_selections.get(
+        "_scene_location"
+    )
+    if isinstance(scene_location, dict):
+        for key in ("lieu", "sous_lieu"):
+            add("locations", scene_location.get(key))
+
+    return {category: sorted(names) for category, names in selected.items()}
+
+
 def compute_gdd_content_fingerprint(
     context_builder: Any,
     context_selections: Dict[str, Any],
-    *,
-    field_configs: Optional[Dict[str, List[str]]] = None,
-    organization_mode: str = "narrative",
-    element_modes: Optional[Dict[str, Any]] = None,
 ) -> str:
-    """Construit le JSON de contexte puis son empreinte (même pipeline que génération).
+    """Calcule l'empreinte du contenu des fiches GDD sélectionnées.
+
+    Ne dépend que de ces fiches : ni des champs retenus pour le prompt, ni du mode
+    d'organisation, ni de l'ordre de sélection. L'appelant passe la sélection **brute** du
+    front, celle que le nœud garde en snapshot, et non le contexte enrichi d'une génération,
+    qui contient une fiche tirée au sort.
 
     Recharge les fichiers GDD via ``load_gdd_files()`` pour refléter le disque courant.
 
     Args:
         context_builder: Instance ``ContextBuilder``.
-        context_selections: Sélections brutes (peuvent contenir ``_element_modes``).
-        field_configs: Champs par type (optionnel).
-        organization_mode: Mode d'organisation du contexte.
-        element_modes: Modes par élément si non fournis dans les sélections.
+        context_selections: Sélections brutes du front.
 
     Returns:
-        Empreinte SHA-256 hex.
-
-    Raises:
-        RuntimeError: Si le context builder n'est pas initialisé après chargement.
+        Empreinte ``v2:<sha256>`` ; le préfixe distingue les empreintes de l'ancien calcul,
+        que le contrôle de péremption ne doit pas comparer.
     """
+    names_by_category = selected_gdd_element_names(context_selections)
     repo = _repo_root_for_fingerprint_cache(context_builder)
     inv = _gdd_invalidation_token(repo)
     cache_basis = json.dumps(
-        {
-            "sel": context_selections,
-            "fc": field_configs,
-            "org": organization_mode,
-            "em": element_modes,
-            "inv": inv,
-        },
+        {"names": names_by_category, "inv": inv},
         sort_keys=True,
         ensure_ascii=False,
-        default=str,
     )
     cache_key = hashlib.sha256(cache_basis.encode("utf-8")).hexdigest()
     now = time.monotonic()
@@ -139,22 +171,11 @@ def compute_gdd_content_fingerprint(
                 return cached_fp
 
     context_builder.load_gdd_files()
-    payload = dict(context_selections) if isinstance(context_selections, dict) else {}
-    modes = element_modes
-    if "_element_modes" in payload:
-        extracted = payload.pop("_element_modes", None)
-        if modes is None and isinstance(extracted, dict):
-            modes = extracted
-    structured = context_builder.build_context_json(
-        selected_elements=payload,
-        scene_instruction="",
-        field_configs=field_configs,
-        organization_mode=organization_mode,
-        max_tokens=_FINGERPRINT_MAX_CONTEXT_TOKENS,
-        include_dialogue_type=True,
-        element_modes=modes,
-    )
-    fp = structured_context_fingerprint(structured)
+    records = {
+        category: {name: context_builder.get_element_record(category, name) for name in names}
+        for category, names in names_by_category.items()
+    }
+    fp = f"{GDD_FINGERPRINT_VERSION}:{structured_context_fingerprint(records)}"
     with _FINGERPRINT_CACHE_LOCK:
         _FINGERPRINT_CACHE[cache_key] = (now + _FINGERPRINT_CACHE_TTL_SEC, fp)
     return fp

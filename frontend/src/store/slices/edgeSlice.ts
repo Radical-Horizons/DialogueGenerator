@@ -18,6 +18,7 @@ import {
 } from '../../utils/graphEdgeBuilders'
 import { runGraphTransaction } from '../utils/runGraphTransaction'
 import { graphDevWarn } from '../../utils/graphDevLog'
+import { isConnectionAllowed } from '../../utils/graphConnectionRules'
 
 export type EdgeSlice = Pick<
   GraphState,
@@ -33,6 +34,11 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
     sourceHandle?: string,
     txOptions?: { skipUndo?: boolean; skipMarkDirty?: boolean }
   ) => {
+    if (!isConnectionAllowed(sourceId, targetId)) {
+      graphDevWarn('[Graph] Ignoring connection of a node to itself', { sourceId, targetId })
+      return
+    }
+
     let actualSourceHandle = sourceHandle
     if (!actualSourceHandle && connectionType.startsWith('test-')) {
       actualSourceHandle = connectionType.replace('test-', '')

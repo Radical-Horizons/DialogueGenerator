@@ -97,16 +97,18 @@ describe('GraphQualityLlmPanel', () => {
 
   it('affiche loading puis score et un critère après succès API', async () => {
     seedStoreOneDialogueNode()
+    let resolveEvaluation!: (value: EvaluateDialogueQualityResponse) => void
     vi.mocked(graphAPI.evaluateDialogueQuality).mockImplementation(
       () =>
         new Promise((resolve) => {
-          setTimeout(() => resolve(makeResponse(7)), 20)
+          resolveEvaluation = resolve
         })
     )
     const user = userEvent.setup()
     render(<GraphQualityLlmPanel onClose={() => undefined} />)
     await user.click(screen.getByTestId('graph-quality-llm-evaluate'))
     expect(screen.getByRole('button', { name: /Évaluation/i })).toBeDisabled()
+    resolveEvaluation(makeResponse(7))
     expect(await screen.findByText(/Score global : 7/)).toBeInTheDocument()
     expect(screen.getByTestId('quality-criterion-narrative_coherence')).toBeInTheDocument()
   })

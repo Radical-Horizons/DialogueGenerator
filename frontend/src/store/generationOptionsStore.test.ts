@@ -14,8 +14,11 @@ import {
   MAX_GENERATION_OPTIONS,
   cancelBackgroundOptions,
   launchBackgroundOption,
+  markMainOptionCancelled,
+  releaseRunIfEmpty,
   useGenerationOptionsStore,
 } from './generationOptionsStore'
+import { STREAM_FLUSH_INTERVAL_MS } from '../utils/chunkCoalescer'
 
 /** Faux EventSource contrôlable depuis les tests. */
 class FakeEventSource {
@@ -47,8 +50,10 @@ describe('generationOptionsStore', () => {
     useGenerationOptionsStore.setState({
       optionCount: 1,
       slots: [],
+      liveText: {},
       lastRequest: null,
       keptIndex: null,
+      parkedRun: null,
     })
   })
 
@@ -174,5 +179,112 @@ describe('generationOptionsStore', () => {
     useGenerationOptionsStore.getState().clearRun()
 
     expect(FakeEventSource.instances[0].readyState).toBe(2)
+  })
+
+  it('une option d’arrière-plan écrit son texte sans toucher aux slots', async () => {
+    vi.mocked(dialoguesAPI.createGenerationJob).mockResolvedValue({
+      job_id: 'job-bg',
+      stream_url: '/stream',
+      status: 'queued',
+    })
+    useGenerationOptionsStore.getState().startRun(2, REQUEST)
+    await launchBackgroundOption(1, REQUEST)
+    const slotsBefore = useGenerationOptionsStore.getState().slots
+
+    vi.useFakeTimers()
+    try {
+      FakeEventSource.instances[0].emit({ type: 'chunk', content: '{"title"', sequence: 0 })
+      FakeEventSource.instances[0].emit({ type: 'chunk', content: ':"T"', sequence: 1 })
+      vi.advanceTimersByTime(STREAM_FLUSH_INTERVAL_MS)
+    } finally {
+      vi.useRealTimers()
+    }
+
+    expect(useGenerationOptionsStore.getState().liveText[1]).toBe('{"title":"T"')
+    expect(useGenerationOptionsStore.getState().slots).toBe(slotsBefore)
+  })
+
+  it('une option annulée pendant la création de son job ne démarre pas', async () => {
+    let resolveJob!: (job: { job_id: string; stream_url: string; status: string }) => void
+    vi.mocked(dialoguesAPI.createGenerationJob).mockReturnValue(
+      new Promise((resolve) => {
+        resolveJob = resolve
+      }) as ReturnType<typeof dialoguesAPI.createGenerationJob>
+    )
+    useGenerationOptionsStore.getState().startRun(2, REQUEST)
+    const pending = launchBackgroundOption(1, REQUEST)
+
+    cancelBackgroundOptions()
+    resolveJob({ job_id: 'job-tardif', stream_url: '/stream', status: 'queued' })
+    await pending
+
+    expect(useGenerationOptionsStore.getState().slots[1].status).toBe('cancelled')
+    expect(FakeEventSource.instances).toHaveLength(0)
+    expect(dialoguesAPI.cancelGenerationJob).toHaveBeenCalledWith('job-tardif')
+  })
+
+  it('Interrompre coupe aussi l’option 1 relancée en Variante', async () => {
+    vi.mocked(dialoguesAPI.createGenerationJob).mockResolvedValue({
+      job_id: 'job-variante',
+      stream_url: '/stream',
+      status: 'queued',
+    })
+    useGenerationOptionsStore.getState().startRun(1, REQUEST)
+    await launchBackgroundOption(0, REQUEST)
+
+    cancelBackgroundOptions()
+
+    expect(useGenerationOptionsStore.getState().slots[0].status).toBe('cancelled')
+    expect(FakeEventSource.instances[0].readyState).toBe(2)
+    expect(dialoguesAPI.cancelGenerationJob).toHaveBeenCalledWith('job-variante')
+  })
+
+  it('markMainOptionCancelled n’écrase pas une option déjà terminée', () => {
+    useGenerationOptionsStore.getState().startRun(1, REQUEST)
+    useGenerationOptionsStore.getState().updateSlot(0, { status: 'completed' })
+
+    markMainOptionCancelled()
+
+    expect(useGenerationOptionsStore.getState().slots[0].status).toBe('completed')
+  })
+
+  it('parkRun range le lot, restoreRun le rend avec l’option gardée', () => {
+    const store = useGenerationOptionsStore.getState()
+    store.startRun(2, REQUEST)
+    store.updateSlot(0, { status: 'completed' })
+    store.setKeptIndex(0)
+
+    useGenerationOptionsStore.getState().parkRun()
+    expect(useGenerationOptionsStore.getState().slots).toEqual([])
+    expect(useGenerationOptionsStore.getState().parkedRun?.keptIndex).toBe(0)
+
+    useGenerationOptionsStore.getState().restoreRun()
+    const state = useGenerationOptionsStore.getState()
+    expect(state.slots).toHaveLength(2)
+    expect(state.keptIndex).toBe(0)
+    expect(state.parkedRun).toBeNull()
+  })
+
+  it('un nouveau lot oublie le lot rangé', () => {
+    const store = useGenerationOptionsStore.getState()
+    store.startRun(2, REQUEST)
+    store.parkRun()
+
+    useGenerationOptionsStore.getState().startRun(1, REQUEST)
+
+    expect(useGenerationOptionsStore.getState().parkedRun).toBeNull()
+  })
+
+  it('releaseRunIfEmpty vide un lot sans résultat et garde un lot qui en a un', () => {
+    const store = useGenerationOptionsStore.getState()
+    store.startRun(2, REQUEST)
+    store.updateSlot(0, { status: 'cancelled' })
+    releaseRunIfEmpty()
+    expect(useGenerationOptionsStore.getState().slots).toEqual([])
+
+    useGenerationOptionsStore.getState().startRun(2, REQUEST)
+    useGenerationOptionsStore.getState().updateSlot(1, { status: 'completed' })
+    releaseRunIfEmpty()
+    expect(useGenerationOptionsStore.getState().slots).toHaveLength(2)
   })
 })

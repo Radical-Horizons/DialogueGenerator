@@ -1,9 +1,11 @@
 /**
  * Compare l'empreinte GDD stockée sur le nœud à l'empreinte courante (Story 3.9 FR19).
+ *
+ * L'empreinte ne couvre que le contenu des fiches du snapshot : les réglages d'affichage du
+ * contexte (champs, organisation) n'y entrent pas et ne doivent pas relancer le contrôle.
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { postGddContentFingerprint } from '../api/gddContextStale'
-import { useContextConfigStore } from '../store/contextConfigStore'
 
 const FINGERPRINT_DEBOUNCE_MS = 280
 
@@ -13,25 +15,22 @@ export interface GddStaleNodeDataRef {
   gddContextSelectionsSnapshot?: unknown
 }
 
+function fingerprintVersion(fingerprint: string): string {
+  const separatorIndex = fingerprint.indexOf(':')
+  return separatorIndex === -1 ? '' : fingerprint.slice(0, separatorIndex)
+}
+
+/** Deux empreintes de versions différentes ne se comparent pas : elles diffèrent toujours. */
+function isStaleFingerprint(stored: string, current: string): boolean {
+  return fingerprintVersion(stored) === fingerprintVersion(current) && stored !== current
+}
+
 export function useGddStaleIndicator(nodeData: GddStaleNodeDataRef): {
   stale: boolean
   checking: boolean
 } {
   const [stale, setStale] = useState(false)
   const [checking, setChecking] = useState(false)
-
-  const fieldConfigs = useContextConfigStore((s) => s.fieldConfigs)
-  const essentialFields = useContextConfigStore((s) => s.essentialFields)
-  const organization = useContextConfigStore((s) => s.organization)
-  const configRevision = useMemo(
-    () =>
-      JSON.stringify({
-        organization,
-        fieldConfigs,
-        essentialFields,
-      }),
-    [organization, fieldConfigs, essentialFields]
-  )
 
   useEffect(() => {
     const fp = nodeData.contextGddContentFingerprint
@@ -54,19 +53,11 @@ export function useGddStaleIndicator(nodeData: GddStaleNodeDataRef): {
     const timer = window.setTimeout(() => {
       void (async () => {
         try {
-          const { fieldConfigs, essentialFields, organization } = useContextConfigStore.getState()
-          const field_configs: Record<string, string[]> = {}
-          for (const [elementType, fields] of Object.entries(fieldConfigs)) {
-            const essential = essentialFields[elementType] || []
-            field_configs[elementType] = [...new Set([...essential, ...fields])]
-          }
           const { fingerprint } = await postGddContentFingerprint({
             context_selections: snap as Record<string, unknown>,
-            field_configs: Object.keys(field_configs).length > 0 ? field_configs : undefined,
-            organization_mode: organization,
           })
           if (!cancelled) {
-            setStale(fingerprint !== fp)
+            setStale(isStaleFingerprint(fp, fingerprint))
           }
         } catch (err) {
           if (import.meta.env.DEV) {
@@ -87,12 +78,7 @@ export function useGddStaleIndicator(nodeData: GddStaleNodeDataRef): {
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [
-    nodeData.id,
-    nodeData.contextGddContentFingerprint,
-    nodeData.gddContextSelectionsSnapshot,
-    configRevision,
-  ])
+  }, [nodeData.id, nodeData.contextGddContentFingerprint, nodeData.gddContextSelectionsSnapshot])
 
   return { stale, checking }
 }

@@ -7,6 +7,7 @@ import type { GraphState } from '../types/graphState'
 import * as graphAPI from '../../api/graph'
 import { documentToGraph } from '../../utils/documentToGraph'
 import { normalizeTestBars } from '../../utils/graphNormalizers'
+import { syncDocAndLayout } from '../../utils/syncDocLayout'
 
 export type LayoutSlice = Pick<
   GraphState,
@@ -25,7 +26,13 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
           direction: direction as 'TB' | 'LR' | 'BT' | 'RL',
           spacingMode: state.layoutSpacingMode,
         })
-        set({ nodes: layoutedNodes })
+        // `layout` est la source des positions projetées : sans ce sync, le déplacement
+        // suivant rejoue les anciennes positions et annule la disposition.
+        const synced =
+          state.document != null && state.layout != null
+            ? syncDocAndLayout(layoutedNodes, state.edges, state.layout as Record<string, unknown>)
+            : null
+        set({ nodes: layoutedNodes, ...(synced ?? {}) })
         get().markDirty()
         return
       }

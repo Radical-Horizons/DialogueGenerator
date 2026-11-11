@@ -718,6 +718,20 @@ class ContextBuilder:
             return None
         return self._gdd_data_accessor.get_quest_details_by_name(name)
 
+    def get_element_record(self, category_key: str, name: str) -> dict | None:
+        """Récupère la fiche GDD brute d'un élément par clé de catégorie de sélection.
+
+        Args:
+            category_key: Clé de sélection sans suffixe de mode (``characters``, ``locations``…).
+            name: Nom de l'élément.
+
+        Returns:
+            La fiche, ou ``None`` si elle n'existe pas ou si le GDD n'est pas chargé.
+        """
+        if self._element_resolver is None:
+            return None
+        return self._element_resolver.resolve_element_data(category_key, name)
+
     def set_previous_dialogue_context(self, preview_text: Optional[str]) -> None:
         """Définit le contexte du dialogue précédent (texte formaté Unity JSON).
 

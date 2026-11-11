@@ -3,7 +3,7 @@
  * 
  * Composant refactorisé utilisant des hooks métier et composants UI extraits.
  */
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'
 import * as configAPI from '../../api/config'
 import * as dialoguesAPI from '../../api/dialogues'
 import { useGenerationStore } from '../../store/generationStore'
@@ -16,9 +16,12 @@ import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import {
   MAX_GENERATION_OPTIONS,
   cancelBackgroundOptions,
+  markMainOptionCancelled,
+  releaseRunIfEmpty,
   useGenerationOptionsStore,
 } from '../../store/generationOptionsStore'
 import { GenerationOptionsComparison } from './GenerationOptionsComparison'
+import { isInterruptionNotice } from './generationOptionsChrome'
 import { useAuthorProfile } from '../../hooks/useAuthorProfile'
 import { theme } from '../../theme'
 import type { LLMModelResponse } from '../../types/api'
@@ -448,11 +451,26 @@ export function GenerationPanel() {
   // Valeurs déjà déstructurées du store plus haut : pas de seconde souscription, et
   // surtout pas de sélecteur — les mocks de test qui renvoient le store entier
   // rendraient un sélecteur inopérant ici (cf. `useGenerationRunActive`).
-  const runActive = isGenerating || isInterrupting
   const [briefExpandedDuringRun, setBriefExpandedDuringRun] = useState(false)
   const optionCount = useGenerationOptionsStore((s) => s.optionCount)
   const optionSlots = useGenerationOptionsStore((s) => s.slots)
-  const comparisonActive = optionSlots.length >= 2
+  const parkedRun = useGenerationOptionsStore((s) => s.parkedRun)
+  const writingSlot = optionSlots.find((s) => s.status === 'running' || s.status === 'pending')
+  const runActive = isGenerating || isInterrupting || writingSlot !== undefined
+  /**
+   * Le flux principal a fini (ou ne tourne pas : « Variante ») et une autre option
+   * écrit encore : c'est elle que le bloc de streaming suit, et c'est son job qu'on coupe.
+   */
+  const backgroundWriting = !isGenerating && !isInterrupting && writingSlot !== undefined
+  const writingSlotIndex = backgroundWriting ? writingSlot.index : null
+  const backgroundText = useGenerationOptionsStore((s) =>
+    writingSlotIndex === null ? '' : (s.liveText[writingSlotIndex] ?? '')
+  )
+  /** Le résultat occupe la colonne : à plusieurs options dès le départ, à une seule quand elle est prête. */
+  const comparisonActive =
+    optionSlots.length >= 2 || optionSlots.some((s) => s.status === 'completed')
+  /** À une seule option, le texte reste dans la colonne de lecture : pas de saut à la fin du flux. */
+  const comparisonWide = optionSlots.length >= 2
   /**
    * Le brief se range dès qu'autre chose occupe la colonne : le texte qui arrive
    * (2a) ou les options à trancher (2b). Il reste rappelable d'un lien — c'est un
@@ -466,31 +484,40 @@ export function GenerationPanel() {
   /** 2c : chips de ton, flags et réglages se condensent dans la barre de pied. */
   const showFormExtras = showGenerationForm && !writingMode
 
-  // Multi-options : l'option 1 est le stream principal — quand il aboutit (ou échoue),
-  // refléter son état dans le slot 0 de la comparaison.
-  useEffect(() => {
-    if (optionSlots.length < 2) return
+  // L'option 1 est le stream principal — quand il aboutit (ou échoue), refléter son état
+  // dans le slot 0. Avant le paint : à une seule option, le texte passe sans image vide du
+  // bloc de streaming à la vue de résultat. `currentStep` et non la seule réponse : celle
+  // du run précédent est encore dans le store au démarrage du suivant. `jobId` : le slot 0
+  // relancé en « Variante » n'appartient plus au flux principal.
+  useLayoutEffect(() => {
     const slot0 = optionSlots.find((s) => s.index === 0)
-    if (!slot0 || slot0.status !== 'running') return
-    if (unityDialogueResponse) {
+    if (!slot0 || slot0.status !== 'running' || slot0.jobId !== currentJobId) return
+    if (currentStep === 'Complete' && unityDialogueResponse) {
       useGenerationOptionsStore
         .getState()
         .updateSlot(0, { status: 'completed', result: unityDialogueResponse })
     } else if (streamingError) {
       useGenerationOptionsStore.getState().updateSlot(0, { status: 'error', error: streamingError })
     }
-  }, [optionSlots, unityDialogueResponse, streamingError])
+  }, [optionSlots, currentJobId, currentStep, unityDialogueResponse, streamingError])
 
   /**
    * Interruption de la génération en cours : annulation du job puis remise à zéro de l'état SSE.
    * Comportement inchangé depuis la modale de progression (Story 0.8).
    */
   const handleInterruptGeneration = useCallback(async () => {
-    // Afficher "Interruption en cours..."
-    setInterrupting(true)
-
     // Multi-options : annuler aussi les jobs d'arrière-plan (2b).
     cancelBackgroundOptions()
+
+    if (backgroundWriting) {
+      // Le flux principal est terminé : il n'y a ni job à annuler ni avis à laisser en place.
+      releaseRunIfEmpty()
+      return
+    }
+
+    // Afficher "Interruption en cours..."
+    setInterrupting(true)
+    markMainOptionCancelled()
 
     // Appeler l'API de cancel avec le job_id avec timeout de 10s
     if (currentJobId) {
@@ -532,8 +559,10 @@ export function GenerationPanel() {
       interrupt()
       resetStreamingState()
       setIsLoading(false)
+      releaseRunIfEmpty()
     }, 2000)
   }, [
+    backgroundWriting,
     currentJobId,
     closeEventSource,
     interrupt,
@@ -549,6 +578,7 @@ export function GenerationPanel() {
    */
   const handleKeepPartialGeneration = useCallback(async () => {
     cancelBackgroundOptions()
+    markMainOptionCancelled()
     if (currentJobId) {
       await dialoguesAPI.cancelGenerationJob(currentJobId).catch((err) => {
         console.warn('Erreur lors de l\'annulation du job:', err)
@@ -564,6 +594,37 @@ export function GenerationPanel() {
     resetStreamingState()
     setIsLoading(false)
   }, [closeEventSource, resetStreamingState])
+
+  /**
+   * « Garder » tranche : ce qui écrit encore s'arrête, le lot se range et le brief revient.
+   * L'option gardée reste à droite (« Dialogue généré ») et le lot reste rappelable.
+   */
+  const handleOptionKept = useCallback(() => {
+    cancelBackgroundOptions()
+    if (isGenerating) {
+      markMainOptionCancelled()
+      if (currentJobId) {
+        void dialoguesAPI.cancelGenerationJob(currentJobId).catch((err) => {
+          console.warn('Erreur lors de l\'annulation du job:', err)
+        })
+      }
+      closeEventSource()
+      resetStreamingState()
+      setIsLoading(false)
+    }
+    useGenerationOptionsStore.getState().parkRun()
+  }, [isGenerating, currentJobId, closeEventSource, resetStreamingState])
+
+  // « Garder et continuer » (panneau droit) sauvegarde puis vide la réponse : même sortie
+  // que « Garder », sinon la comparaison survit à un résultat déjà écrit.
+  const previousResponseRef = useRef(unityDialogueResponse)
+  useEffect(() => {
+    const emptied = previousResponseRef.current != null && unityDialogueResponse == null
+    previousResponseRef.current = unityDialogueResponse
+    if (emptied && comparisonActive && !runActive) {
+      useGenerationOptionsStore.getState().parkRun()
+    }
+  }, [unityDialogueResponse, comparisonActive, runActive])
 
   /** Même garde que l'ancien bouton du pied : génération, estimation, catalogue GDD. */
   const isGeneratePrimaryDisabled =
@@ -609,17 +670,17 @@ export function GenerationPanel() {
           // Mode écriture : largeur fixe de la maquette. Sinon : marges flexibles
           // plafonnées, la colonne prend le reste — sur un écran large, une largeur
           // fixe rejetterait le texte au milieu d'un vide qui grandit sans fin.
-          maxWidth: isGenerationNarrow || comparisonActive
+          maxWidth: isGenerationNarrow || comparisonWide
             ? undefined
             : writingMode
               ? redesignReadingColumn.writingMode
               : undefined,
           paddingLeft:
-            isGenerationNarrow || comparisonActive || writingMode
+            isGenerationNarrow || comparisonWide || writingMode
               ? undefined
               : redesignReadingColumn.sideGutter,
           paddingRight:
-            isGenerationNarrow || comparisonActive || writingMode
+            isGenerationNarrow || comparisonWide || writingMode
               ? undefined
               : redesignReadingColumn.sideGutter,
           marginLeft: isGenerationNarrow ? undefined : 'auto',
@@ -631,43 +692,88 @@ export function GenerationPanel() {
             le repère qui ne bouge pas pendant que le reste se transforme. */}
         <SceneSelectionWidget />
 
-        {/* Progression du streaming : dans le flux de l'écran, plus de modale (Story 0.2 → refonte UI) */}
-        <GenerationStreamingInline
-          isActive={
-            // 2b : dès qu'un lot d'options est là, la comparaison porte le résultat —
-            // laisser le bloc de streaming au-dessus ferait un doublon vide.
-            !comparisonActive &&
-            (isGenerating ||
-              currentStep === 'Complete' ||
-              Boolean(streamingError) ||
-              isInterrupting)
-          }
-          content={streamingContent}
-          currentStep={currentStep}
-          isMinimized={isMinimized}
-          error={streamingError}
-          isInterrupting={isInterrupting}
-          reasoningTrace={unityDialogueResponse?.reasoning_trace ?? null}
-          onInterrupt={() => {
-            void handleInterruptGeneration()
-          }}
-          onKeepPartial={() => {
-            void handleKeepPartialGeneration()
-          }}
-          onMinimize={minimize}
-          onClose={handleCloseStreaming}
-        />
-
-        {/* Comparaison des options (écran 2b) — rendue dès qu'un run multi-options existe. */}
+        {/* Comparaison des options (écran 2b). Le bloc de streaming (2a) s'y insère sous
+            l'en-tête « OPTION n SUR N » : à plusieurs options, il garde le texte et les
+            sorties (Interrompre, ÉCHAP) pendant que les options arrivent. */}
         <GenerationOptionsComparison
           onEditKept={() => {
             // « Éditer » garde l'option puis ouvre l'onglet Édition, seule surface
             // d'édition du dialogue généré.
             useGenerationActionsStore.getState().actions?.handlePreview?.()
           }}
+          onKept={handleOptionKept}
           briefExpanded={briefExpandedDuringRun}
           onEditBrief={() => setBriefExpandedDuringRun((v) => !v)}
+          streamingBlock={
+            <GenerationStreamingInline
+              isActive={
+                runActive ||
+                // Une vraie erreur a sa rangée dans la comparaison ; l'avis d'interruption,
+                // lui, porte le texte conservé.
+                (Boolean(streamingError) &&
+                  (!comparisonActive || isInterruptionNotice(streamingError ?? ''))) ||
+                (currentStep === 'Complete' && !comparisonActive && !parkedRun)
+              }
+              content={backgroundWriting ? backgroundText : streamingContent}
+              currentStep={backgroundWriting ? 'Generating' : currentStep}
+              isMinimized={isMinimized}
+              error={backgroundWriting ? null : streamingError}
+              isInterrupting={isInterrupting}
+              reasoningTrace={backgroundWriting ? null : (unityDialogueResponse?.reasoning_trace ?? null)}
+              onInterrupt={() => {
+                void handleInterruptGeneration()
+              }}
+              onKeepPartial={
+                backgroundWriting
+                  ? undefined
+                  : () => {
+                      void handleKeepPartialGeneration()
+                    }
+              }
+              onMinimize={minimize}
+              onClose={handleCloseStreaming}
+            />
+          }
         />
+
+      {/* Le lot rangé par « Garder » reste à un clic : l'option gardée, elle, est à droite. */}
+      {parkedRun && !runActive && !comparisonActive && (
+        <div
+          data-testid="kept-option-recall"
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'flex-end',
+            gap: 9,
+            marginBottom: 14,
+            fontSize: '12px',
+            color: redesignText.muted,
+          }}
+        >
+          <span style={{ fontFamily: redesignFont.mono, fontSize: '10px', letterSpacing: '0.12em' }}>
+            {parkedRun.keptIndex === null
+              ? 'RÉSULTAT GARDÉ'
+              : parkedRun.slots.length > 1
+                ? `OPTION ${parkedRun.keptIndex + 1} GARDÉE`
+                : 'OPTION GARDÉE'}
+          </span>
+          <button
+            type="button"
+            data-testid="kept-option-reopen"
+            onClick={() => useGenerationOptionsStore.getState().restoreRun()}
+            style={{
+              border: 'none',
+              background: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              color: redesignText.secondary,
+              fontSize: '12px',
+            }}
+          >
+            {parkedRun.slots.length > 1 ? 'revoir les options' : 'revoir le résultat'}
+          </button>
+        </div>
+      )}
 
       {/* 2a : pendant le run, le brief se replie en une ligne avec son coût. */}
       {runActive && !briefExpandedDuringRun && (

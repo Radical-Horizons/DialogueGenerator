@@ -185,6 +185,7 @@ const graphZoomBarTextButtonStyle: CSSProperties = {
 }
 
 const SNAP_GRID: [number, number] = [15, 15]
+const NODE_DRAG_THRESHOLD_PX = 2
 
 export const GraphCanvas = memo(function GraphCanvas() {
   const {
@@ -300,6 +301,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
   useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
+    useGraphViewStore.getState().registerCanvasElement(el)
     const measure = () => {
       setIsNarrowCanvas(el.clientWidth < GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX)
       const next = computeGraphMinimapSizePx(el.clientWidth, el.clientHeight)
@@ -310,6 +312,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
     ro.observe(el)
     return () => {
       ro.disconnect()
+      useGraphViewStore.getState().registerCanvasElement(null)
     }
   }, [])
 
@@ -340,6 +343,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
     onConnect,
     onConnectStart,
     onConnectEnd,
+    isValidConnection,
     onNodeDragStart,
     onNodeDragStop,
     handleEdgeLabelConfirm,
@@ -365,12 +369,14 @@ export const GraphCanvas = memo(function GraphCanvas() {
     const currentChoice = choices[choiceIndexFromDrop]
     const stableId = currentChoice?.choiceId ?? `__idx_${choiceIndexFromDrop}`
     const edgeId = stableChoiceEdgeId(dropChoiceMenu.sourceNodeId, stableId)
-    if (currentChoice?.targetNode && currentChoice.targetNode !== 'END' && state.edges.some((e) => e.id === edgeId)) {
-      disconnectNodes(edgeId)
-    }
     const node = createEmptyNode(dropChoiceMenu.position)
-    addNode(node)
-    connectNodes(dropChoiceMenu.sourceNodeId, node.id, choiceIndexFromDrop, 'choice', dropChoiceMenu.sourceHandleId)
+    state.runAsSingleUndoStep(() => {
+      if (currentChoice?.targetNode && currentChoice.targetNode !== 'END' && state.edges.some((e) => e.id === edgeId)) {
+        disconnectNodes(edgeId)
+      }
+      addNode(node)
+      connectNodes(dropChoiceMenu.sourceNodeId, node.id, choiceIndexFromDrop, 'choice', dropChoiceMenu.sourceHandleId)
+    })
     setSelectedNode(node.id)
     setDropChoiceMenu(null)
   }, [dropChoiceMenu, choiceIndexFromDrop, createEmptyNode, addNode, connectNodes, disconnectNodes, setSelectedNode])
@@ -661,6 +667,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
         onConnect={onConnect}
         onConnectStart={onConnectStart}
         onConnectEnd={onConnectEnd}
+        isValidConnection={isValidConnection}
         onNodeClick={onNodeClick}
         onNodeDoubleClick={onNodeDoubleClick}
         onNodeContextMenu={onNodeContextMenu}
@@ -668,6 +675,8 @@ export const GraphCanvas = memo(function GraphCanvas() {
         onPaneClick={onPaneClick}
         onNodeDragStart={onNodeDragStartWrapped}
         onNodeDragStop={onNodeDragStop}
+        // À 0, React Flow lance le « drag » au mousedown : un simple clic poussait un snapshot.
+        nodeDragThreshold={NODE_DRAG_THRESHOLD_PX}
         nodesDraggable={!isGuest}
         nodesConnectable={!isGuest}
         elementsSelectable

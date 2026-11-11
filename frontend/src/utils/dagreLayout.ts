@@ -51,7 +51,7 @@ function estimateDialogueNodeHeight(node: Node, fallback: number): number {
   const contentHeight = estimatedTextLines * 20
   const titleHeight = estimatedTitleLines * 18
   const choicesHeight = choicesCount > 0 ? 16 : 0
-  const footerReservedHeight = choicesCount > 0 ? 52 : 28
+  const footerReservedHeight = 52
   const pendingActionsHeight = node.data?.status === 'pending' ? 44 : 0
 
   return Math.max(fallback, 78 + titleHeight + contentHeight + choicesHeight + footerReservedHeight + pendingActionsHeight)
@@ -122,7 +122,8 @@ export function calculateDagreLayout(
     nodesep: nodeSpacing.x,
     ranksep: nodeSpacing.y,
     edgesep: Math.max(40, Math.round(nodeSpacing.x / 2)),
-    align: 'UL', // Alignement haut-gauche
+    // Sans `align`, dagre équilibre ses quatre alignements et centre chaque parent sur ses
+    // enfants ; avec 'UL', le parent reste collé au premier enfant et la rangée part à droite.
     ranker: 'network-simplex',
   })
 

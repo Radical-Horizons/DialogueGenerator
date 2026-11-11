@@ -18,7 +18,9 @@ import { subscribeUserSettingsHydration } from '../../hooks/useUserSettingsSync'
 import { toGraphNodePayloads, toGraphEdgePayloads } from '../../utils/graphPayload'
 
 interface GraphAiSlopPanelProps {
-  onClose: () => void
+  /** `inspector` : rendu nu dans l'inspecteur de graphe (écran 2e), sans chrome flottant. */
+  variant?: 'floating' | 'inspector'
+  onClose?: () => void
 }
 
 function kindLabel(k: AiSlopOccurrenceItem['kind']): string {
@@ -34,7 +36,7 @@ function kindLabel(k: AiSlopOccurrenceItem['kind']): string {
   }
 }
 
-export function GraphAiSlopPanel({ onClose }: GraphAiSlopPanelProps) {
+export function GraphAiSlopPanel({ variant = 'floating', onClose }: GraphAiSlopPanelProps) {
   const nodes = useGraphStore((s) => s.nodes)
   const edges = useGraphStore((s) => s.edges)
   const jumpToNode = useGraphStore((s) => s.jumpToNode)
@@ -99,6 +101,7 @@ export function GraphAiSlopPanel({ onClose }: GraphAiSlopPanelProps) {
 
   return (
     <GraphToolFloatingShell
+      variant={variant}
       title={<strong>AI slop</strong>}
       onClose={onClose}
       dataTestId="graph-ai-slop-panel"
@@ -184,12 +187,19 @@ export function GraphAiSlopPanel({ onClose }: GraphAiSlopPanelProps) {
           padding: '0.5rem 1rem',
           borderRadius: 6,
           border: `1px solid ${theme.border.primary}`,
+          // Dans l'inspecteur, le seul bouton plein de l'écran est « Générer la suite ».
           backgroundColor:
             loading || nodes.length === 0
               ? theme.state.hover.background
-              : theme.button.primary.background,
+              : variant === 'inspector'
+                ? 'transparent'
+                : theme.button.primary.background,
           color:
-            loading || nodes.length === 0 ? theme.text.secondary : theme.button.primary.color,
+            loading || nodes.length === 0
+              ? theme.text.secondary
+              : variant === 'inspector'
+                ? theme.text.primary
+                : theme.button.primary.color,
           cursor: loading || nodes.length === 0 ? 'not-allowed' : 'pointer',
           marginBottom: '0.75rem',
         }}

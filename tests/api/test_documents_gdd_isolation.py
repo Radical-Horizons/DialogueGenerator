@@ -53,7 +53,7 @@ def test_document_get_and_gdd_fingerprint_paths_do_not_invoke_llm(tmp_path: Path
     mock_config.get_unity_dialogues_path.return_value = tmp_path
 
     mock_cb = MagicMock()
-    mock_cb.build_context_json.return_value = {"stub": True}
+    mock_cb.get_element_record.return_value = {"Nom": "X"}
 
     app.dependency_overrides[get_llm_client] = lambda: mock_llm
     app.dependency_overrides[get_config_service] = lambda: mock_config

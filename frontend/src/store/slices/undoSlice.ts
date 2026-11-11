@@ -8,10 +8,19 @@ import type { GraphState, GraphSnapshot } from '../types/graphState'
 
 const MAX_UNDO_SNAPSHOTS = 50
 
+/** Profondeur de `runAsSingleUndoStep` : tant qu'elle est non nulle, le snapshot est déjà pris. */
+let undoStepDepth = 0
+
 /** Actions uniquement — `undoStack` / `redoStack` viennent de `initialState`. */
 export type UndoSlice = Pick<
   GraphState,
-  'undo' | 'redo' | 'canUndo' | 'canRedo' | '_pushUndoSnapshot' | 'clearUndoHistory'
+  | 'undo'
+  | 'redo'
+  | 'canUndo'
+  | 'canRedo'
+  | '_pushUndoSnapshot'
+  | 'clearUndoHistory'
+  | 'runAsSingleUndoStep'
 >
 
 function cloneSnapshot(state: {
@@ -88,6 +97,7 @@ export const createUndoSlice: StateCreator<GraphState, [], [], UndoSlice> = (set
   canRedo: () => get().redoStack.length > 0,
 
   _pushUndoSnapshot: () => {
+    if (undoStepDepth > 0) return
     const state = get()
     const snapshot = cloneSnapshot(state)
     let nextUndo = [...state.undoStack, snapshot]
@@ -96,4 +106,14 @@ export const createUndoSlice: StateCreator<GraphState, [], [], UndoSlice> = (set
   },
 
   clearUndoHistory: () => set({ undoStack: [], redoStack: [] }),
+
+  runAsSingleUndoStep: (action) => {
+    get()._pushUndoSnapshot()
+    undoStepDepth += 1
+    try {
+      action()
+    } finally {
+      undoStepDepth -= 1
+    }
+  },
 })

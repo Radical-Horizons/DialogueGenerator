@@ -5,8 +5,6 @@ import apiClient from './client'
 
 export interface GddContentFingerprintBody {
   context_selections: Record<string, unknown>
-  field_configs?: Record<string, string[]>
-  organization_mode?: string
 }
 
 export async function postGddContentFingerprint(

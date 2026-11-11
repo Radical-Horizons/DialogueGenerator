@@ -11,7 +11,7 @@ from api.dependencies import get_context_builder
 @pytest.fixture
 def client_with_mock_builder():
     mock_cb = MagicMock()
-    mock_cb.build_context_json.return_value = {"stub": True}
+    mock_cb.get_element_record.return_value = {"Nom": "X"}
 
     app.dependency_overrides[get_context_builder] = lambda: mock_cb
     yield TestClient(app), mock_cb
@@ -30,9 +30,11 @@ def test_post_gdd_content_fingerprint(client_with_mock_builder) -> None:
     assert r.status_code == 200
     body = r.json()
     assert "fingerprint" in body
-    assert len(body["fingerprint"]) == 64
+    version, digest = body["fingerprint"].split(":")
+    assert version == "v2"
+    assert len(digest) == 64
     mock_cb.load_gdd_files.assert_called()
-    mock_cb.build_context_json.assert_called()
+    mock_cb.get_element_record.assert_called_once_with("characters", "X")
 
 
 def test_get_gdd_entity_history_unknown_entity_404(tmp_path, monkeypatch) -> None:

@@ -9,7 +9,7 @@ paths:
 - **Types**: `frontend/src/types/api.ts` alignés sur les schémas backend Pydantic. Générer depuis OpenAPI si possible.
 - **State Management**: Zustand (`frontend/src/store/`) pour auth et état global. Éviter prop drilling excessif.
 - **Composants**: Structure modulaire (`components/layout/`, `components/auth/`, `components/generation/`), réutilisables et testables.
-- **Routing**: React Router (`react-router-dom`) pour navigation, routes protégées avec `ProtectedRoute`.
+- **Routing**: React Router (`react-router-dom`) pour navigation, routes protégées avec `ProtectedRoute`. Sur `/`, section et dialogue ouverts sont dans l'adresse (`?section=edition|graph&dialogue=…`, rien en Générer) : lue une seule fois au démarrage (`uiLayoutStore`, état initial de `Dashboard`), puis recopiée depuis l'état par `useDashboardUrlMirror`. C'est ce qui fait revenir F5 au même endroit.
 - **Authentification**: JWT stocké en localStorage (access_token), refresh automatique via intercepteur axios, déconnexion propre.
 - **UX**: États loading/error/empty gérés, messages d'erreur utilisateur-friendly, pas de secrets exposés.
 - **Tests**: Tests unitaires composants (React Testing Library), tests hooks, mocks pour API client.

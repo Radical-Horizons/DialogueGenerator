@@ -7,8 +7,11 @@
  *
  * « Garder » pousse l'option dans le résultat courant, « Variante » relance cette
  * seule option (Story 1.10 recâblée), « Régénérer les N » relance tout le lot.
+ *
+ * Une génération à une seule option passe par la même vue dès qu'elle est prête :
+ * le résultat reste au centre, sans les outils de comparaison qui n'y ont pas de sens.
  */
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { theme } from '../../theme'
 import {
   redesignAccent,
@@ -31,6 +34,7 @@ import {
 } from '../../store/generationOptionsStore'
 import { useGenerationStore } from '../../store/generationStore'
 import { useContextStore } from '../../store/contextStore'
+import type { GenerateUnityDialogueRequest } from '../../types/api'
 import {
   computeOptionDiagnostics,
   formatOptionMeta,
@@ -283,6 +287,10 @@ function OptionDiagnosticColumn({
 export interface GenerationOptionsComparisonProps {
   /** Ouvre l'option gardée dans l'éditeur (action « Éditer » de la maquette). */
   onEditKept?: () => void
+  /** Une option vient d'être gardée : le conteneur décide de la suite de l'écran. */
+  onKept?: () => void
+  /** Bloc de streaming (2a), rendu sous l'en-tête du lot — ou seul hors comparaison. */
+  streamingBlock?: ReactNode
   /**
    * Redéploie le brief, rangé tant qu'on compare (écran 2b). Absent = le
    * conteneur ne gère pas ce repli et l'action n'est pas proposée.
@@ -294,6 +302,8 @@ export interface GenerationOptionsComparisonProps {
 
 export function GenerationOptionsComparison({
   onEditKept,
+  onKept,
+  streamingBlock,
   onEditBrief,
   briefExpanded = false,
 }: GenerationOptionsComparisonProps = {}) {
@@ -316,7 +326,8 @@ export function GenerationOptionsComparison({
   const { ref: sectionRef, isNarrow } = useNarrowInlineSize(
     OPTIONS_COLUMNS_LABEL_WIDTH_PX + Math.max(slots.length, 2) * OPTIONS_COLUMN_MIN_WIDTH_PX
   )
-  const columnsAvailable = !isNarrow
+  const singleOption = slots.length === 1
+  const columnsAvailable = !isNarrow && !singleOption
   const view: OptionsView = columnsAvailable ? optionsView : 'list'
 
   const diagnostics = useMemo(
@@ -327,6 +338,9 @@ export function GenerationOptionsComparison({
   const doneCount = slots.filter((s) => s.status === 'completed').length
   const runningIndex = slots.findIndex((s) => s.status === 'running' || s.status === 'pending')
   const allSettled = slots.length > 0 && runningIndex === -1
+  // 2a : tant qu'aucune option n'a abouti, seul le texte qui arrive occupe la colonne.
+  const showOptionRows =
+    !streamingBlock || allSettled || slots.some((s) => s.status === 'completed' || s.status === 'error')
 
   const firstReadyIndex = slots.findIndex((s) => s.status === 'completed')
   const openIndex =
@@ -362,24 +376,31 @@ export function GenerationOptionsComparison({
     setUnityDialogueResponse(target)
   }, [keptIndex, openIndex, slots, panelResponse, setUnityDialogueResponse])
 
-  if (slots.length < 2) return null
+  if (slots.length < 2 && doneCount === 0) return <>{streamingBlock}</>
 
   const handleKeep = (slot: GenerationOptionSlot) => {
     if (!slot.result) return
     useGenerationOptionsStore.getState().setKeptIndex(slot.index)
     setUnityDialogueResponse(slot.result)
+    onKept?.()
+  }
+
+  const relaunch = (slot: GenerationOptionSlot, request: GenerateUnityDialogueRequest) => {
+    // Le panneau affichait cette option : il doit suivre sa relance.
+    if (slot.result && slot.result.json_content === panelResponse?.json_content) {
+      syncedPanelJsonRef.current = slot.result.json_content
+    }
+    void launchBackgroundOption(slot.index, request)
   }
 
   const handleVariant = (slot: GenerationOptionSlot) => {
     if (!lastRequest) return
-    void launchBackgroundOption(slot.index, lastRequest)
+    relaunch(slot, lastRequest)
   }
 
   const handleRegenerateAll = () => {
     if (!lastRequest) return
-    for (const slot of slots) {
-      void launchBackgroundOption(slot.index, lastRequest)
-    }
+    for (const slot of slots) relaunch(slot, lastRequest)
   }
 
   const openDiag = openIndex != null ? diagnostics[openIndex] : null
@@ -411,13 +432,15 @@ export function GenerationOptionsComparison({
             data-testid="options-progress-label"
             style={{ ...monoLabelStyle, color: allSettled ? redesignText.label : redesignAccent.text }}
           >
-            {allSettled
-              ? `${doneCount} OPTION${doneCount > 1 ? 'S' : ''} SUR ${slots.length} — À COMPARER`
-              : `OPTION ${runningIndex + 1} SUR ${slots.length} — EN ÉCRITURE`}
+            {singleOption
+              ? 'RÉSULTAT'
+              : allSettled
+                ? `${doneCount} OPTION${doneCount > 1 ? 'S' : ''} SUR ${slots.length} — À COMPARER`
+                : `OPTION ${runningIndex + 1} SUR ${slots.length} — EN ÉCRITURE`}
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ display: 'flex', gap: 5 }}>
-              {slots.map((slot) => (
+              {!singleOption && slots.map((slot) => (
                 <span
                   key={slot.index}
                   data-testid={`option-trait-${slot.index}`}
@@ -439,7 +462,11 @@ export function GenerationOptionsComparison({
               data-testid="options-regenerate-all"
               onClick={handleRegenerateAll}
               disabled={!lastRequest || !allSettled}
-              title={`Relancer les ${slots.length} options (coût ×${slots.length})`}
+              title={
+                singleOption
+                  ? 'Relancer la génération avec la même requête'
+                  : `Relancer les ${slots.length} options (coût ×${slots.length})`
+              }
               style={{
                 ...ghostButtonStyle,
                 height: 28,
@@ -449,7 +476,7 @@ export function GenerationOptionsComparison({
                 opacity: lastRequest && allSettled ? 1 : 0.5,
               }}
             >
-              Régénérer les {slots.length}
+              {singleOption ? 'Régénérer' : `Régénérer les ${slots.length}`}
             </button>
             {onEditBrief && (
               <button
@@ -468,7 +495,7 @@ export function GenerationOptionsComparison({
                 {briefExpanded ? 'ranger le brief' : 'modifier le brief'}
               </button>
             )}
-            {view === 'list' && (
+            {view === 'list' && !singleOption && (
               <button
                 type="button"
                 data-testid="options-collapse-all"
@@ -512,7 +539,9 @@ export function GenerationOptionsComparison({
           </span>
         </div>
 
-        {view === 'columns' && (
+        {streamingBlock}
+
+        {showOptionRows && view === 'columns' && (
           <GenerationOptionsColumns
             slots={slots}
             diagnostics={diagnostics}
@@ -527,7 +556,7 @@ export function GenerationOptionsComparison({
         )}
 
         {/* Options : une seule dépliée, les autres en une ligne. */}
-        {view === 'list' && (
+        {showOptionRows && view === 'list' && (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           {slots.map((slot) => {
             const diag = diagnostics[slot.index] ?? diagnostics[0]
@@ -687,7 +716,7 @@ export function GenerationOptionsComparison({
       </div>
 
       {/* Diagnostic de l'option ouverte — en vue côte à côte, ses critères sont les rangées. */}
-      {view === 'list' && openIndex != null && openDiag && slots[openIndex]?.status === 'completed' && (
+      {view === 'list' && !singleOption && openIndex != null && openDiag && slots[openIndex]?.status === 'completed' && (
         <OptionDiagnosticColumn diag={openDiag} optionNumber={openIndex + 1} />
       )}
     </section>

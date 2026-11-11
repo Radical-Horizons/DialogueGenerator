@@ -6,6 +6,7 @@ import { useState, useRef, useCallback, useEffect, type RefObject } from 'react'
 import type { Connection, Node, NodeChange, EdgeChange } from 'reactflow'
 import { useGraphStore } from '../store/graphStore'
 import { getChoiceIndexFromSourceHandle } from '../utils/choiceHandleIndex'
+import { isConnectionAllowed } from '../utils/graphConnectionRules'
 import { useGraphViewStore } from '../store/graphViewStore'
 import { collectOutgoingDescendantIds } from '../utils/collectOutgoingDescendantIds'
 import { resolveReactFlowNodeIdUnderPointer } from '../utils/resolveReactFlowNodeIdUnderPointer'
@@ -46,10 +47,14 @@ export interface UseReactFlowHandlersReturn {
   onConnect: (connection: Connection) => void
   onConnectStart: (event: React.MouseEvent | React.TouchEvent, params: { nodeId: string | null; handleId: string | null }) => void
   onConnectEnd: (event: MouseEvent | TouchEvent) => void
+  isValidConnection: (connection: Connection) => boolean
   onNodeDragStart: (event: React.MouseEvent, node: Node) => void
   onNodeDragStop: (event: React.MouseEvent, node: Node) => void
   handleEdgeLabelConfirm: (newText: string) => void
 }
+
+const isValidConnection = (connection: Connection): boolean =>
+  isConnectionAllowed(connection.source, connection.target)
 
 function isChoiceHandle(handleId: string | null): boolean {
   if (!handleId) return false
@@ -83,6 +88,7 @@ export function useReactFlowHandlers(
     deleteNode,
     disconnectNodes,
     updateChoiceEdgeLabel,
+    runAsSingleUndoStep,
   } = useGraphStore()
 
   useEffect(() => {
@@ -144,11 +150,11 @@ export function useReactFlowHandlers(
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
       const dimensionUpdates: Record<string, { width: number; height: number }> = {}
+      const removedIds = changes.flatMap((c) => (c.type === 'remove' && c.id ? [c.id] : []))
+      if (removedIds.length > 0) {
+        runAsSingleUndoStep(() => removedIds.forEach((id) => deleteNode(id)))
+      }
       for (const change of changes) {
-        if (change.type === 'remove' && change.id) {
-          deleteNode(change.id)
-          continue
-        }
         if (change.type === 'select' && change.id !== undefined) {
           const state = useGraphStore.getState()
           const currentIds = state.selectedNodeIds
@@ -219,6 +225,7 @@ export function useReactFlowHandlers(
     },
     [
       deleteNode,
+      runAsSingleUndoStep,
       setSelectedNodes,
       updateNodePosition,
       updateNodeDimensionsBatch,
@@ -238,12 +245,14 @@ export function useReactFlowHandlers(
 
   const onConfirmDeleteEdges = useCallback(() => {
     if (!edgeIdsToDelete || edgeIdsToDelete.length === 0) return
-    for (const id of edgeIdsToDelete) {
-      disconnectNodes(id, true)
-    }
+    runAsSingleUndoStep(() => {
+      for (const id of edgeIdsToDelete) {
+        disconnectNodes(id, true)
+      }
+    })
     markDirty()
     setEdgeIdsToDelete(null)
-  }, [edgeIdsToDelete, disconnectNodes, markDirty])
+  }, [edgeIdsToDelete, disconnectNodes, markDirty, runAsSingleUndoStep])
 
   const onCancelDeleteEdges = useCallback(() => {
     setEdgeIdsToDelete(null)
@@ -325,7 +334,8 @@ export function useReactFlowHandlers(
       const targetUnderPointer = container
         ? resolveReactFlowNodeIdUnderPointer(event, container)
         : null
-      if (targetUnderPointer && targetUnderPointer !== pending.sourceNodeId) {
+      if (targetUnderPointer === pending.sourceNodeId) return
+      if (targetUnderPointer) {
         onConnect({
           source: pending.sourceNodeId,
           target: targetUnderPointer,
@@ -448,6 +458,7 @@ export function useReactFlowHandlers(
     onConnect,
     onConnectStart,
     onConnectEnd,
+    isValidConnection,
     onNodeDragStart,
     onNodeDragStop,
     handleEdgeLabelConfirm,

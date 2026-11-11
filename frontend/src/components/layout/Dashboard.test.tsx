@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event'
 import { useShellKeyboardFocusScroller } from '../../hooks/useShellKeyboardFocusScroller'
 import { BrowserRouter } from 'react-router-dom'
 import { useGenerationStore } from '../../store/generationStore'
+import { useGenerationOptionsStore } from '../../store/generationOptionsStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useContextStore } from '../../store/contextStore'
 import { useUiLayoutStore } from '../../store/uiLayoutStore'
@@ -42,7 +43,17 @@ vi.mock('../generation/GenerationPanel', () => ({
 }))
 
 vi.mock('../graph/GraphEditor', () => ({
-  GraphEditor: () => <div data-testid="graph-editor">Graph Editor</div>,
+  GraphEditor: ({ routeDialogueId }: { routeDialogueId?: string }) => (
+    <div data-testid="graph-editor" data-route-dialogue={routeDialogueId ?? ''}>
+      Graph Editor
+    </div>
+  ),
+}))
+
+vi.mock('../unityDialogues/UnityDialogueDetails', () => ({
+  UnityDialogueDetails: ({ filename }: { filename: string }) => (
+    <div data-testid="unity-dialogue-details">{filename}</div>
+  ),
 }))
 
 vi.mock('../context/ContextSelector', async () => {
@@ -125,6 +136,7 @@ describe('Dashboard', () => {
   beforeEach(async () => {
     // La section active est un etat de store partage : chaque test repart de 1c.
     useUiLayoutStore.getState().setCenterPanelTab('generation')
+    window.history.replaceState(null, '', '/')
     vi.clearAllMocks()
     mockContextSelectorState.loadState = {
       isLoading: false,
@@ -207,6 +219,153 @@ describe('Dashboard', () => {
     })
     expect(screen.getByTestId('right-panel-tab-details')).toBeInTheDocument()
     expect(screen.getByTestId('right-panel-tab-prompt')).toHaveAttribute('aria-selected', 'true')
+  })
+
+  describe('adresse : F5 revient sur la section et le dialogue', () => {
+    function renderDashboard() {
+      render(
+        <BrowserRouter>
+          <Dashboard />
+        </BrowserRouter>
+      )
+    }
+
+    it('garde l’adresse nue en Générer et recopie la section sinon', async () => {
+      renderDashboard()
+      expect(window.location.search).toBe('')
+
+      await goToSection('graph')
+      await waitFor(() => expect(window.location.search).toBe('?section=graph'))
+
+      await goToSection('generation')
+      await waitFor(() => expect(window.location.search).toBe(''))
+    })
+
+    it('rouvre en Éditer le dialogue porté par l’adresse', async () => {
+      window.history.replaceState(null, '', '/?section=edition&dialogue=Rencontre+%C3%A0+Nef.json')
+      useUiLayoutStore.getState().setCenterPanelTab('edition')
+
+      renderDashboard()
+
+      expect(await screen.findByTestId('unity-dialogue-details')).toHaveTextContent(
+        'Rencontre à Nef.json'
+      )
+      expect(window.location.search).toBe('?section=edition&dialogue=Rencontre+%C3%A0+Nef.json')
+    })
+
+    it('demande au graphe de rouvrir le dialogue, sans le perdre de l’adresse avant la fin du chargement', async () => {
+      window.history.replaceState(null, '', '/?section=graph&dialogue=Rencontre+%C3%A0+Nef.json')
+      useUiLayoutStore.getState().setCenterPanelTab('graph')
+
+      renderDashboard()
+
+      expect(await screen.findByTestId('graph-editor')).toHaveAttribute(
+        'data-route-dialogue',
+        encodeURIComponent('Rencontre à Nef.json')
+      )
+      expect(window.location.search).toBe('?section=graph&dialogue=Rencontre+%C3%A0+Nef.json')
+    })
+
+    it('ignore le dialogue de l’adresse en Générer', async () => {
+      window.history.replaceState(null, '', '/?dialogue=Perime.json')
+
+      renderDashboard()
+
+      await waitFor(() => expect(window.location.search).toBe(''))
+    })
+  })
+
+  describe('lot d’options : colonne GDD', () => {
+    afterEach(() => {
+      act(() => useGenerationOptionsStore.getState().clearRun())
+    })
+
+    it('rouvre la colonne repliée par le lot quand « Garder » le range', async () => {
+      render(
+        <BrowserRouter>
+          <Dashboard />
+        </BrowserRouter>
+      )
+      expect(screen.getByTestId('context-selector')).toBeInTheDocument()
+
+      act(() => {
+        useGenerationOptionsStore.setState({
+          runId: 4242,
+          slots: [0, 1].map((index) => ({
+            index,
+            jobId: null,
+            status: 'completed' as const,
+            result: null,
+            error: null,
+          })),
+        })
+      })
+      await waitFor(() => expect(screen.queryByTestId('context-selector')).toBeNull())
+
+      act(() => useGenerationOptionsStore.getState().parkRun())
+
+      await waitFor(() => expect(screen.getByTestId('context-selector')).toBeInTheDocument())
+    })
+  })
+
+  describe('section Graphe (2e) : repli automatique', () => {
+    function renderDashboard() {
+      render(
+        <BrowserRouter>
+          <Dashboard />
+        </BrowserRouter>
+      )
+    }
+
+    async function settle() {
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 20))
+      })
+    }
+
+    it('replie les panneaux à l’entrée', async () => {
+      renderDashboard()
+      expect(screen.getByTestId('context-selector')).toBeInTheDocument()
+
+      await goToSection('graph')
+
+      await waitFor(() => expect(screen.queryByTestId('context-selector')).toBeNull())
+      expect(screen.queryByTestId('right-panel-tablist')).toBeNull()
+    })
+
+    it('la languette GDD déplie le panneau et le laisse ouvert', async () => {
+      const user = userEvent.setup()
+      renderDashboard()
+      await goToSection('graph')
+      await waitFor(() => expect(screen.queryByTestId('context-selector')).toBeNull())
+
+      await user.click(getOpenLeftPanelButton())
+      await settle()
+
+      expect(screen.getByTestId('context-selector')).toBeInTheDocument()
+    })
+
+    it('la languette Détails déplie le panneau et le laisse ouvert', async () => {
+      const user = userEvent.setup()
+      renderDashboard()
+      await goToSection('graph')
+      await waitFor(() => expect(screen.queryByTestId('right-panel-tablist')).toBeNull())
+
+      await user.click(getOpenRightPanelButton())
+      await settle()
+
+      expect(screen.getByTestId('right-panel-tablist')).toBeInTheDocument()
+    })
+
+    it('restaure les panneaux à la sortie de la section', async () => {
+      renderDashboard()
+      await goToSection('graph')
+      await waitFor(() => expect(screen.queryByTestId('context-selector')).toBeNull())
+
+      await goToSection('generation')
+
+      expect(await screen.findByTestId('context-selector')).toBeInTheDocument()
+    })
   })
 
   it('affiche le panneau de sélection de contexte à gauche', () => {

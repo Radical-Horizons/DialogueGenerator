@@ -76,6 +76,29 @@ describe('ContextList', () => {
     expect(badges[1]).toHaveTextContent('Lieu')
   })
 
+  it('« sélectionnés en premier » passe avant le type de fiche pendant une recherche', () => {
+    render(
+      <ContextList
+        {...defaultProps}
+        items={[
+          { name: 'Taluan', entityTab: 'characters', entityTypeLabel: 'Personnage', data: {} },
+          { name: 'Talide', entityTab: 'characters', entityTypeLabel: 'Personnage', data: {} },
+          { name: 'Taluo', entityTab: 'locations', entityTypeLabel: 'Lieu', data: {} },
+          { name: 'Talas', entityTab: 'locations', entityTypeLabel: 'Lieu', data: {} },
+        ]}
+        selectedItems={['Taluan', 'Taluo']}
+        priorityEntityTab="characters"
+        sortType="selected-first"
+        searchQuery="Tal"
+      />
+    )
+
+    const ordered = screen
+      .getAllByRole('checkbox')
+      .map((box) => box.getAttribute('aria-label')?.replace('Sélectionner ', ''))
+    expect(ordered).toEqual(['Taluan', 'Taluo', 'Talas', 'Talide'])
+  })
+
   it('affiche le badge type en recherche, et le masque dans la liste filtrée', () => {
     // Ecran 1c : la liste est deja filtree par onglet, le type y serait redondant.
     // En recherche, les resultats traversent les categories : le type redevient utile.
@@ -152,6 +175,23 @@ describe('ContextList', () => {
 
     expect(screen.getByText('Taluo')).toBeInTheDocument()
     expect(screen.queryByText(/aucun résultat/i)).not.toBeInTheDocument()
+  })
+
+  it('demande la suite du catalogue dès la frappe, même si le tampon contient déjà un résultat', () => {
+    const onScrollToBottom = vi.fn()
+    render(
+      <ContextList
+        {...defaultProps}
+        items={[{ name: 'Ureste', data: {} }]}
+        onScrollToBottom={onScrollToBottom}
+        hasMore
+      />
+    )
+
+    fireEvent.change(screen.getByPlaceholderText(/rechercher/i), { target: { value: 'Ures' } })
+
+    expect(onScrollToBottom).toHaveBeenCalled()
+    expect(screen.getByRole('checkbox', { name: 'Sélectionner Ureste' })).toBeInTheDocument()
   })
 
   it('n\'appelle pas onScrollToBottom en boucle si hasMore est false', () => {

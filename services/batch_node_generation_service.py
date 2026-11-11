@@ -183,7 +183,7 @@ class BatchNodeGenerationService:
             max_choices: Plafond de choix enfants.
             choices_mode: ``free`` ou ``capped``.
             enrich_context: Enrichissement scène (dramatis) par parent.
-            fingerprint_for: Empreinte GDD optionnelle après enrichissement.
+            fingerprint_for: Empreinte GDD optionnelle, calculée sur la sélection brute.
             should_cancel: Callback d'annulation entre parents.
             on_progress: ``(current, total, detail)`` après chaque parent.
 
@@ -245,7 +245,7 @@ class BatchNodeGenerationService:
                     progress_callback=_choice_progress if on_progress else None,
                 )
                 fp = (
-                    await asyncio.to_thread(fingerprint_for, enriched)
+                    await asyncio.to_thread(fingerprint_for, raw_ctx)
                     if fingerprint_for
                     else None
                 )

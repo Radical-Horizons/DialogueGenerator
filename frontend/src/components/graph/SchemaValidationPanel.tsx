@@ -3,12 +3,15 @@
  */
 import { useState } from 'react'
 import { theme } from '../../theme'
+import { redesignMonoLabelStyle, redesignText } from '../../theme/redesignTokens'
 import { GraphToolFloatingShell } from './GraphToolFloatingShell'
 import { SchemaValidationIssueList } from './SchemaValidationIssueList'
 import { UnitySchemaReferencePanel } from './UnitySchemaReferencePanel'
 import type { SchemaValidationIssue } from '../../types/graph'
 
 interface SchemaValidationPanelProps {
+  /** `inspector` : rendu nu dans l'onglet SANTÉ de l'inspecteur (écran 2e). */
+  variant?: 'floating' | 'inspector'
   isOpen: boolean
   isLoading: boolean
   isValid: boolean
@@ -46,6 +49,7 @@ function buildStructuredErrors(
 }
 
 export function SchemaValidationPanel({
+  variant = 'floating',
   isOpen,
   isLoading,
   isValid,
@@ -69,6 +73,7 @@ export function SchemaValidationPanel({
   return (
     <>
       <GraphToolFloatingShell
+        variant={variant}
         title={<strong>Validation schéma Unity</strong>}
         onClose={onClose}
         dataTestId="schema-validation-panel"
@@ -87,6 +92,19 @@ export function SchemaValidationPanel({
           padding: '0 4px',
         }}
       >
+        {variant === 'inspector' && (
+          <div
+            style={{
+              ...redesignMonoLabelStyle,
+              fontSize: '9.5px',
+              color: redesignText.label,
+              marginBottom: 9,
+            }}
+          >
+            Validation schéma Unity
+          </div>
+        )}
+
         {isLoading && (
           <div
             data-testid="schema-loading-indicator"

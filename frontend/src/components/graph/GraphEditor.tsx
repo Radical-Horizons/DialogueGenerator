@@ -67,6 +67,9 @@ import {
 import type { UnityDialogueMetadata } from '../../types/api'
 import { usageDialogueId } from '../../utils/usageDialogueId'
 
+/** Marge des outils sans cadre propre dans l'inspecteur (valeurs des rangées 2e). */
+const GRAPH_INSPECTOR_TOOL_PADDING = { padding: '0 18px 12px' } as const
+
 interface GraphEditorProps {
   mode?: 'embedded' | 'standalone'
   routeDialogueId?: string
@@ -264,6 +267,24 @@ export function GraphEditor({
         .length
     : 0
 
+  const schemaValidationPanelProps = {
+    isLoading: schemaValidationLoading,
+    isValid: schemaValidationIsValid,
+    errors: schemaValidationErrors,
+    errorCount: schemaValidationErrorCount,
+    warnings: schemaValidationWarnings,
+    structuredErrors: schemaValidationStructuredErrors,
+    onClose: handleToggleSchemaValidation,
+    onIssueClick: handleSchemaIssueClick,
+  }
+
+  /** Le menu Qualités et l'export ouvrent ce résultat : sur bureau, il vit dans SANTÉ. */
+  useEffect(() => {
+    if (showSchemaValidationPanel && !isGraphEditorNarrow) {
+      useUiLayoutStore.getState().setInspectorTab('health')
+    }
+  }, [showSchemaValidationPanel, isGraphEditorNarrow])
+
   const inspectorTabs: GraphInspectorTabDef[] = [
     {
       id: 'node',
@@ -301,24 +322,47 @@ export function GraphEditor({
       id: 'health',
       label: 'Santé',
       count: healthIssueCount,
-      content:
-        graphValidationErrors.length > 0 || loreExplicitValidationSummary ? (
-          <GraphValidationPanel
-            validationErrors={graphValidationErrors}
-            loreExplicitSummary={loreExplicitValidationSummary}
-            loreDialogueScopeKey={loreDialogueScopeKey}
-            variant="inspector"
-          />
-        ) : (
-          <GraphInspectorEmpty>
-            Aucune erreur ni contradiction détectée sur ce dialogue.
-          </GraphInspectorEmpty>
-        ),
+      content: (
+        <>
+          {showSchemaValidationPanel ? (
+            <div style={GRAPH_INSPECTOR_TOOL_PADDING}>
+              <SchemaValidationPanel variant="inspector" isOpen {...schemaValidationPanelProps} />
+            </div>
+          ) : null}
+          {graphValidationErrors.length > 0 || loreExplicitValidationSummary ? (
+            <div style={GRAPH_INSPECTOR_TOOL_PADDING}>
+              <GraphValidationPanel
+                validationErrors={graphValidationErrors}
+                loreExplicitSummary={loreExplicitValidationSummary}
+                loreDialogueScopeKey={loreDialogueScopeKey}
+                variant="inspector"
+              />
+            </div>
+          ) : (
+            <GraphInspectorEmpty>
+              Aucune erreur ni contradiction détectée sur ce dialogue.
+            </GraphInspectorEmpty>
+          )}
+        </>
+      ),
     },
     {
       id: 'quality',
       label: 'Qualité',
-      content: <GraphQualityLlmPanel variant="inspector" />,
+      content: (
+        <div style={GRAPH_INSPECTOR_TOOL_PADDING}>
+          <GraphQualityLlmPanel variant="inspector" />
+        </div>
+      ),
+    },
+    {
+      id: 'slop',
+      label: 'Slop',
+      content: (
+        <div style={GRAPH_INSPECTOR_TOOL_PADDING}>
+          <GraphAiSlopPanel variant="inspector" />
+        </div>
+      ),
     },
     {
       id: 'cost',
@@ -398,6 +442,7 @@ export function GraphEditor({
           canEditGraph={canEditGraph}
           canOpenGraphActions={canOpenGraphActions}
           isStandalone={isStandalone}
+          inspectorAvailable={!isGraphEditorNarrow}
           onBack={onBack}
           scenarioPlaythroughActive={scenarioPlaythroughActive}
           onToggleScenarioPlaythrough={handleToggleDialoguePreview}
@@ -540,7 +585,7 @@ export function GraphEditor({
               </>
             )}
             {/* Validation, qualité, slop et coût vivent désormais dans l'inspecteur
-                (onglets SANTÉ / QUALITÉ / COÛT) — voir `inspectorTabs` plus haut.
+                (onglets SANTÉ / QUALITÉ / SLOP / COÛT) — voir `inspectorTabs` plus haut.
                 En colonne étroite, l'inspecteur n'a pas la place : ils restent en overlay. */}
             {isGraphEditorNarrow && showValidationOverlay && (
               <GraphValidationPanel
@@ -570,14 +615,7 @@ export function GraphEditor({
             )}
             <SchemaValidationPanel
               isOpen={isGraphEditorNarrow && showSchemaValidationPanel}
-              isLoading={schemaValidationLoading}
-              isValid={schemaValidationIsValid}
-              errors={schemaValidationErrors}
-              errorCount={schemaValidationErrorCount}
-              warnings={schemaValidationWarnings}
-              structuredErrors={schemaValidationStructuredErrors}
-              onClose={handleToggleSchemaValidation}
-              onIssueClick={handleSchemaIssueClick}
+              {...schemaValidationPanelProps}
             />
             {isGraphEditorNarrow && showCostBreakdown && activeDialogueFilename && (
               <DialogueCostModal
