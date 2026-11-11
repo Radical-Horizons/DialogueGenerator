@@ -124,13 +124,9 @@ def _file_creation_time(stat_result: object) -> str:
     Returns:
         Date de création approximative au format ISO-8601 UTC.
     """
-    from datetime import timezone
+    from services.document_persistence_service import file_creation_time_iso
 
-    birthtime = getattr(stat_result, "st_birthtime", None)
-    ctime = getattr(stat_result, "st_ctime", 0.0)
-    mtime = getattr(stat_result, "st_mtime", ctime)
-    timestamp = birthtime if birthtime is not None else min(ctime, mtime)
-    return datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()
+    return file_creation_time_iso(stat_result)
 
 
 def _nodes_of(json_data: Any) -> list:
@@ -347,11 +343,19 @@ async def list_unity_dialogues(
                         document_id,
                         index_error,
                     )
-                created_at = (
-                    _normalize_iso(indexed_created_at, assume_utc=True)
+                recorded_created_at = (
+                    None
                     if indexed_created_at
-                    else _file_creation_time(stat)
+                    else persistence_service.read_recorded_created_at(
+                        json_file.parent, document_id
+                    )
                 )
+                if indexed_created_at:
+                    created_at = _normalize_iso(indexed_created_at, assume_utc=True)
+                elif recorded_created_at:
+                    created_at = _normalize_iso(recorded_created_at, assume_utc=True)
+                else:
+                    created_at = _file_creation_time(stat)
                 if owner_id:
                     if owner_id not in owner_username_cache:
                         try:

@@ -87,3 +87,51 @@ def test_read_document_cannot_observe_new_blob_with_old_revision(
 
     assert persisted.document["title"] == "after"
     assert persisted.revision == 2
+
+
+def test_unindexed_document_keeps_its_creation_date_across_writes(
+    isolated_app_database: DatabaseConnection,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Un document hors index garde sa date de création malgré la réécriture du fichier.
+
+    L'écriture atomique remplace le fichier et remet sa date système à zéro : avec
+    l'enregistrement automatique, chaque frappe aurait « recréé » le dialogue.
+    """
+    import services.document_persistence_service as persistence_module
+
+    (tmp_path / "historique.json").write_text(
+        '{"schemaVersion": "1.2.0", "title": "Historique", "nodes": []}',
+        encoding="utf-8",
+    )
+    original_date = "2026-06-24T23:28:00+00:00"
+    monkeypatch.setattr(
+        persistence_module, "file_creation_time_iso", lambda _stat: original_date
+    )
+    admin = {"id": "admin-1", "username": "admin", "role": "admin", "is_active": True}
+    service = DocumentPersistenceService(
+        DialoguesIndexRepository(isolated_app_database)
+    )
+
+    service.write_document(
+        tmp_path,
+        "historique",
+        {"schemaVersion": "1.2.0", "title": "Historique v2", "nodes": []},
+        1,
+        admin,
+    )
+    monkeypatch.setattr(
+        persistence_module,
+        "file_creation_time_iso",
+        lambda _stat: "2026-11-11T16:02:00+00:00",
+    )
+    service.write_document(
+        tmp_path,
+        "historique",
+        {"schemaVersion": "1.2.0", "title": "Historique v3", "nodes": []},
+        2,
+        admin,
+    )
+
+    assert service.read_recorded_created_at(tmp_path, "historique") == original_date

@@ -27,6 +27,25 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def file_creation_time_iso(stat_result: os.stat_result) -> str:
+    """Retourne une date de création fichier ISO UTC.
+
+    Utilise ``st_birthtime`` quand la plateforme l'expose ; sinon le plus ancien de
+    ``st_ctime`` / ``st_mtime`` (``st_ctime`` n'est pas la date de création sous Linux).
+
+    Args:
+        stat_result: Résultat de ``Path.stat()``.
+
+    Returns:
+        Date de création approximative au format ISO-8601 UTC.
+    """
+    birthtime = getattr(stat_result, "st_birthtime", None)
+    ctime = getattr(stat_result, "st_ctime", 0.0)
+    mtime = getattr(stat_result, "st_mtime", ctime)
+    timestamp = birthtime if birthtime is not None else min(ctime, mtime)
+    return datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()
+
+
 class DialogueAccessDeniedError(PermissionError):
     """Signale qu'un utilisateur ne possède pas le dialogue demandé."""
 
@@ -261,6 +280,31 @@ class DocumentPersistenceService:
             owner_id=entry.owner_id,
         )
 
+    @staticmethod
+    def read_recorded_created_at(base_dir: Path, document_id: str) -> str | None:
+        """Retourne la date de création conservée dans le sidecar ``.meta``.
+
+        Un document non indexé n'a que son fichier pour dater sa création ; or chaque
+        écriture le remplace (écriture atomique) et remet sa date système à zéro. Le
+        sidecar garde donc la date d'origine, relevée avant la première réécriture.
+
+        Args:
+            base_dir: Dossier des documents.
+            document_id: Identifiant du document (stem du fichier).
+
+        Returns:
+            Date ISO conservée, ou ``None`` si le sidecar n'en porte pas.
+        """
+        meta_path = base_dir / f"{document_id}.meta"
+        if not meta_path.exists():
+            return None
+        try:
+            payload = json.loads(meta_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            return None
+        created_at = payload.get("created_at") if isinstance(payload, dict) else None
+        return created_at if isinstance(created_at, str) and created_at else None
+
     def get_created_at(self, document_id: str) -> str | None:
         """Retourne la date de création indexée d'un document, si disponible.
 
@@ -285,16 +329,15 @@ class DocumentPersistenceService:
             return 1
 
     @staticmethod
-    def _meta_bytes(revision: int) -> bytes:
-        """Sérialise un sidecar de révision."""
-        return json.dumps(
-            {
-                "revision": revision,
-                "updated_at": datetime.now(timezone.utc).isoformat(),
-            },
-            ensure_ascii=False,
-            indent=2,
-        ).encode("utf-8")
+    def _meta_bytes(revision: int, created_at: str | None = None) -> bytes:
+        """Sérialise un sidecar de révision, avec la date de création si connue."""
+        payload: dict[str, object] = {
+            "revision": revision,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        }
+        if created_at:
+            payload["created_at"] = created_at
+        return json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
 
     @staticmethod
     def _document_bytes(document: dict[str, object]) -> bytes:
@@ -431,6 +474,14 @@ class DocumentPersistenceService:
                     )
                 new_revision = 1
 
+            created_at = self.read_recorded_created_at(base_dir, document_id)
+            if created_at is None:
+                created_at = (
+                    file_creation_time_iso(document_path.stat())
+                    if existed
+                    else datetime.now(timezone.utc).isoformat()
+                )
+
             snapshot_paths = [meta_path, sequence_path]
             if not create_only:
                 snapshot_paths.insert(0, document_path)
@@ -462,7 +513,7 @@ class DocumentPersistenceService:
                     created_document = True
                 else:
                     self._replace_file(document_path, self._document_bytes(document))
-                self._replace_file(meta_path, self._meta_bytes(new_revision))
+                self._replace_file(meta_path, self._meta_bytes(new_revision, created_at))
                 if sequence is not None:
                     self._replace_file(sequence_path, f"{sequence}\n".encode("utf-8"))
                 if entry is not None:
