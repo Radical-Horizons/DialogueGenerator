@@ -236,6 +236,8 @@ class MockEventSource {
     this.readyState = this.CLOSED
   }
 
+  addEventListener() {}
+
   simulateMessage(data: string) {
     if (this.onmessage) {
       const event = new MessageEvent('message', { data })

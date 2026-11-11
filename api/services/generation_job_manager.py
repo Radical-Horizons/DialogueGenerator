@@ -8,10 +8,24 @@ utiliser un seul worker process pour l'API ou un magasin partagé (non implémen
 import uuid
 import asyncio
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Any, Optional, Literal
+from typing import AsyncIterator, Dict, Any, List, Optional, Literal, Tuple
 import logging
 
 logger = logging.getLogger(__name__)
+
+TERMINAL_STATUSES = ("completed", "error", "cancelled")
+TERMINAL_EVENT_TYPES = ("complete", "error")
+CANCELLED_EVENT: Dict[str, Any] = {
+    "type": "error",
+    "message": "Génération annulée",
+    "code": "cancelled",
+}
+
+
+def has_terminal_event(job: Dict[str, Any]) -> bool:
+    """Indique si le journal du job contient déjà son événement final (complete/error)."""
+    events = job.get("events") or []
+    return bool(events) and events[-1].get("type") in TERMINAL_EVENT_TYPES
 
 
 class GenerationJobManager:
@@ -51,6 +65,8 @@ class GenerationJobManager:
             'error': None,
             'cancelled': False,
             'done_event': asyncio.Event(),
+            'events': [],
+            'events_signal': None,
             'created_at': now.isoformat(),
             'updated_at': now.isoformat(),
             'expires_at': (now + timedelta(seconds=self._ttl_seconds)).isoformat(),
@@ -92,8 +108,82 @@ class GenerationJobManager:
             done_event = job.get('done_event')
             if isinstance(done_event, asyncio.Event):
                 done_event.set()
-        
+        self._wake_followers(job)
+
         logger.info(f"Job {job_id} status updated to {status}", extra={'job_id': job_id, 'status': status})
+
+    def append_event(self, job_id: str, payload: Dict[str, Any]) -> None:
+        """Ajoute un événement SSE au journal du job et réveille les flux qui le suivent.
+
+        Le journal est ce qui découple la génération de la connexion : un client qui
+        recharge la page rejoue le journal puis suit la suite, sans relancer l'appel LLM.
+
+        Args:
+            job_id: Identifiant du job.
+            payload: Événement sérialisable JSON (``{"type": ..., ...}``).
+        """
+        job = self._jobs.get(job_id)
+        if not job:
+            logger.warning(f"Attempted to append event to non-existent job {job_id}")
+            return
+        if has_terminal_event(job):
+            logger.debug(
+                "Événement ignoré, journal clos", extra={'job_id': job_id, 'type': payload.get('type')}
+            )
+            return
+        job.setdefault('events', []).append(payload)
+        self._wake_followers(job)
+
+    @staticmethod
+    def _wake_followers(job: Dict[str, Any]) -> None:
+        """Réveille les flux en attente d'un nouvel événement ou d'un changement de statut."""
+        signal = job.get('events_signal')
+        job['events_signal'] = None
+        if isinstance(signal, asyncio.Event):
+            signal.set()
+
+    async def follow_events(
+        self,
+        job_id: str,
+        start_index: int = 0,
+        idle_timeout: Optional[float] = None,
+    ) -> AsyncIterator[Optional[Tuple[int, Dict[str, Any]]]]:
+        """Rejoue le journal d'un job à partir de ``start_index`` puis suit les nouveaux événements.
+
+        S'arrête quand le job est terminal et que tout le journal a été livré. Se
+        désabonner (client parti) n'a aucun effet sur la génération elle-même.
+
+        Args:
+            job_id: Identifiant du job.
+            start_index: Premier index à livrer (``Last-Event-ID`` + 1 à la reconnexion).
+            idle_timeout: Si fourni, ``None`` est produit après ce délai sans événement,
+                pour que le flux émette un battement de cœur.
+
+        Yields:
+            Couples ``(index, événement)``, ou ``None`` après ``idle_timeout`` d'inactivité.
+        """
+        index = max(0, start_index)
+        while True:
+            job = self._jobs.get(job_id)
+            if job is None:
+                return
+            events: List[Dict[str, Any]] = job.setdefault('events', [])
+            while index < len(events):
+                yield index, events[index]
+                index += 1
+            if job.get('status') in TERMINAL_STATUSES:
+                return
+            signal = job.get('events_signal')
+            if not isinstance(signal, asyncio.Event):
+                signal = asyncio.Event()
+                job['events_signal'] = signal
+            if idle_timeout is None:
+                await signal.wait()
+                continue
+            try:
+                await asyncio.wait_for(signal.wait(), timeout=idle_timeout)
+            except asyncio.TimeoutError:
+                yield None
     
     def cancel_job(self, job_id: str) -> bool:
         """
@@ -124,7 +214,8 @@ class GenerationJobManager:
         job['cancelled'] = True
         job['status'] = 'cancelled'
         job['updated_at'] = now.isoformat()
-        
+        self.append_event(job_id, dict(CANCELLED_EVENT))
+
         task = self._tasks.get(job_id)
         if task and not task.done():
             task.cancel()

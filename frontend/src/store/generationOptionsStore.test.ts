@@ -11,6 +11,7 @@ vi.mock('../api/dialogues', () => ({
 
 import * as dialoguesAPI from '../api/dialogues'
 import {
+  BACKGROUND_RECONNECT_GRACE_MS,
   MAX_GENERATION_OPTIONS,
   cancelBackgroundOptions,
   launchBackgroundOption,
@@ -19,14 +20,24 @@ import {
   useGenerationOptionsStore,
 } from './generationOptionsStore'
 import { STREAM_FLUSH_INTERVAL_MS } from '../utils/chunkCoalescer'
+import { clearPersistedRun, readPersistedRun } from '../utils/generationRunSession'
+import { SSE_HEARTBEAT_EVENT, SSE_STALL_TIMEOUT_MS } from '../utils/sseStallWatchdog'
 
 /** Faux EventSource contrôlable depuis les tests. */
 class FakeEventSource {
+  static CONNECTING = 0
+  static OPEN = 1
+  static CLOSED = 2
   static instances: FakeEventSource[] = []
   url: string
   readyState = 0
   onmessage: ((e: { data: string }) => void) | null = null
   onerror: (() => void) | null = null
+  onopen: (() => void) | null = null
+  listeners: Record<string, () => void> = {}
+  addEventListener(type: string, fn: () => void) {
+    this.listeners[type] = fn
+  }
   constructor(url: string) {
     this.url = url
     FakeEventSource.instances.push(this)
@@ -286,5 +297,64 @@ describe('generationOptionsStore', () => {
     useGenerationOptionsStore.getState().updateSlot(1, { status: 'completed' })
     releaseRunIfEmpty()
     expect(useGenerationOptionsStore.getState().slots).toHaveLength(2)
+  })
+
+  describe('serveur coupé', () => {
+    async function runningBackgroundOption(): Promise<FakeEventSource> {
+      vi.mocked(dialoguesAPI.createGenerationJob).mockResolvedValue({
+        job_id: 'job-coupe',
+        stream_url: '/stream-coupe',
+        status: 'queued',
+      })
+      useGenerationOptionsStore.getState().startRun(2, REQUEST)
+      await launchBackgroundOption(1, REQUEST)
+      return FakeEventSource.instances[0]
+    }
+
+    afterEach(() => {
+      vi.useRealTimers()
+      clearPersistedRun()
+    })
+
+    it("une option dont le serveur ne répond plus passe en erreur au bout du délai, le lot n'est pas bloqué", async () => {
+      const es = await runningBackgroundOption()
+      vi.useFakeTimers()
+      es.onerror?.()
+      vi.advanceTimersByTime(BACKGROUND_RECONNECT_GRACE_MS - 1)
+      expect(useGenerationOptionsStore.getState().slots[1].status).toBe('running')
+      vi.advanceTimersByTime(1)
+      const slot = useGenerationOptionsStore.getState().slots[1]
+      expect(slot.status).toBe('error')
+      expect(slot.error).toBe('Connexion au serveur perdue')
+      expect(es.readyState).toBe(FakeEventSource.CLOSED)
+    })
+
+    it('une reconnexion réussie garde l’option en cours', async () => {
+      const es = await runningBackgroundOption()
+      vi.useFakeTimers()
+      es.onerror?.()
+      es.onopen?.()
+      vi.advanceTimersByTime(BACKGROUND_RECONNECT_GRACE_MS + 1_000)
+      expect(useGenerationOptionsStore.getState().slots[1].status).toBe('running')
+    })
+
+    it('flux muet (proxy qui garde la connexion, API tombée) : l’option passe en erreur', async () => {
+      vi.useFakeTimers()
+      const es = await runningBackgroundOption()
+      vi.advanceTimersByTime(SSE_STALL_TIMEOUT_MS - 1_000)
+      es.listeners[SSE_HEARTBEAT_EVENT]()
+      vi.advanceTimersByTime(SSE_STALL_TIMEOUT_MS - 1_000)
+      expect(useGenerationOptionsStore.getState().slots[1].status).toBe('running')
+      vi.advanceTimersByTime(1_000)
+      expect(useGenerationOptionsStore.getState().slots[1]).toMatchObject({
+        status: 'error',
+        error: 'Connexion au serveur perdue',
+      })
+    })
+
+    it('le job de l’option est gardé pour une reprise après rechargement', async () => {
+      await runningBackgroundOption()
+      expect(readPersistedRun()?.jobs[1]).toEqual({ jobId: 'job-coupe', streamUrl: '/stream-coupe' })
+    })
   })
 })

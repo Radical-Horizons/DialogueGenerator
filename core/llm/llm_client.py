@@ -1,6 +1,7 @@
 # DialogueGenerator/llm_client.py
 import asyncio
 import logging
+import os
 from abc import ABC, abstractmethod
 from typing import List, Optional, Type, Union, Dict, Any
 from pydantic import BaseModel, ValidationError
@@ -40,10 +41,33 @@ class ILLMClient(ABC):
                 self.client.close() # Pour les clients synchrones si jamais ils sont utilisés dans l'interface
         pass
 
+DUMMY_LLM_DELAY_ENV = "DUMMY_LLM_DELAY_SECONDS"
+
+
+def _dummy_delay_from_env() -> float:
+    """Délai factice lu dans ``DUMMY_LLM_DELAY_SECONDS`` (0 si absent ou invalide).
+
+    Permet de reproduire en local une génération qui dure, sans clé API.
+    """
+    raw = os.environ.get(DUMMY_LLM_DELAY_ENV, "").strip()
+    if not raw:
+        return 0.0
+    try:
+        return max(0.0, float(raw))
+    except ValueError:
+        logger.warning("%s invalide (%r), délai ignoré.", DUMMY_LLM_DELAY_ENV, raw)
+        return 0.0
+
+
 class DummyLLMClient(ILLMClient):
-    def __init__(self, delay_seconds: float = 0.0):
+    def __init__(self, delay_seconds: Optional[float] = None):
+        """Client factice, sans réseau.
+
+        Args:
+            delay_seconds: Délai par variante ; ``None`` lit ``DUMMY_LLM_DELAY_SECONDS``.
+        """
         super().__init__()
-        self.delay_seconds = delay_seconds
+        self.delay_seconds = _dummy_delay_from_env() if delay_seconds is None else delay_seconds
         self.last_call_cost: float = 0.0
         self.last_usage_prompt_tokens: int = 0
         self.last_usage_completion_tokens: int = 0

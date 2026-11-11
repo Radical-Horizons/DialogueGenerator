@@ -9,6 +9,19 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useGenerationStore, type StreamChunkItem } from '../store/generationStore'
 import { createChunkCoalescer, type ChunkCoalescer } from '../utils/chunkCoalescer'
+import { isPageUnloading } from '../utils/pageUnload'
+import { createStallWatchdog, SSE_HEARTBEAT_EVENT, type StallWatchdog } from '../utils/sseStallWatchdog'
+
+/** Avant tout message : la connexion n'a jamais tenu, inutile de faire attendre. */
+export const SSE_CONNECT_ERROR_DEBOUNCE_MS = 600
+/**
+ * Après des messages : `EventSource` se reconnecte seul et le serveur reprend au dernier
+ * `id` reçu. Au-delà de ce délai sans reprise, on rend la main à l'utilisateur.
+ */
+export const SSE_RECONNECT_GRACE_MS = 10_000
+export const SSE_CONNECT_ERROR_MESSAGE = 'Erreur de connexion au serveur'
+export const SSE_CONNECTION_LOST_MESSAGE =
+  'Connexion au serveur perdue : la génération n’a pas abouti. Relancez-la quand le serveur répond.'
 
 export interface UseSSEStreamingOptions {
   /** Callback appelé lors de l'événement 'complete' avec le résultat */
@@ -94,6 +107,7 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
   const sseHasReceivedAnyMessageRef = useRef(false)
   const sseErrorDebounceTimerRef = useRef<number | null>(null)
   const chunkCoalescerRef = useRef<ChunkCoalescer<StreamChunkItem> | null>(null)
+  const stallWatchdogRef = useRef<StallWatchdog | null>(null)
   
   // Actions du store
   const {
@@ -121,6 +135,7 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
       setEventSource(null)
       setIsConnected(false)
     }
+    stallWatchdogRef.current?.stop()
     chunkCoalescerRef.current?.flush()
     const chunkCoalescer = createChunkCoalescer<StreamChunkItem>(appendChunks)
     chunkCoalescerRef.current = chunkCoalescer
@@ -135,6 +150,11 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
     sseHasReceivedAnyMessageRef.current = false
 
     const handleMessage = async (event: MessageEvent) => {
+      stall.kick()
+      if (sseErrorDebounceTimerRef.current !== null) {
+        window.clearTimeout(sseErrorDebounceTimerRef.current)
+        sseErrorDebounceTimerRef.current = null
+      }
       try {
         const data = JSON.parse(event.data)
         sseHasReceivedAnyMessageRef.current = true
@@ -194,8 +214,13 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
           }
             
           case 'complete':
+            // Un résultat ne se charge qu'une fois, même si le journal est rejoué.
+            if (hasReceivedCompleteRef.current) {
+              break
+            }
             // FIX: Marquer IMMÉDIATEMENT qu'on a reçu complete pour ignorer les step suivants
             hasReceivedCompleteRef.current = true
+            stall.stop()
             // FIX: Marquer comme fermé mais NE PAS fermer immédiatement pour laisser les événements en transit arriver
             // (Certains événements comme 'step: Validating' peuvent arriver après 'complete' à cause du buffering)
             closedByClientRef.current = true
@@ -254,6 +279,7 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
             break
             
           case 'error':
+            stall.stop()
             chunkCoalescer.flush()
             if (data.message) {
               setStreamError(data.message)
@@ -286,65 +312,78 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
       void handleMessage(event)
     }
     
+    const failConnection = () => {
+      stall.stop()
+      if (sseErrorDebounceTimerRef.current !== null) {
+        window.clearTimeout(sseErrorDebounceTimerRef.current)
+        sseErrorDebounceTimerRef.current = null
+      }
+      chunkCoalescer.flush()
+      const errorMsg = sseHasReceivedAnyMessageRef.current
+        ? SSE_CONNECTION_LOST_MESSAGE
+        : SSE_CONNECT_ERROR_MESSAGE
+      console.error('Erreur EventSource :', errorMsg)
+      setStreamError(errorMsg)
+      setConnectionError(errorMsg)
+      setIsConnected(false)
+      onError?.(errorMsg)
+      toast?.(errorMsg, 'error')
+      setIsLoading?.(false)
+      closedByClientRef.current = true
+      es.close()
+      if (eventSourceRef.current === es) {
+        eventSourceRef.current = null
+        setEventSource(null)
+      }
+    }
+
     es.onerror = () => {
-      if (closedByClientRef.current || es.readyState === EventSource.CLOSED) {
+      if (closedByClientRef.current || isPageUnloading()) {
         return
       }
-      
-      // Error debouncing : EventSource déclenche souvent onerror lors d'une fermeture "normale"
-      // (EOF côté serveur → tentative de reconnexion). Pour éviter un faux toast juste
-      // avant un événement "complete", on débounce l'erreur et on l'annule si la
-      // génération se termine.
+      // CLOSED : le navigateur a renoncé (réponse non SSE, 401, 404…). Ne rien faire
+      // laissait l'écran en « génération » indéfiniment après un redémarrage du serveur.
+      if (es.readyState === EventSource.CLOSED) {
+        failConnection()
+        return
+      }
+      // CONNECTING : `EventSource` réessaie seul et le serveur reprend au dernier `id`
+      // reçu ; on ne tranche qu'au bout du délai, annulé par tout message ou réouverture.
       if (sseErrorDebounceTimerRef.current !== null) {
         return
       }
-
+      const delay = sseHasReceivedAnyMessageRef.current
+        ? SSE_RECONNECT_GRACE_MS
+        : SSE_CONNECT_ERROR_DEBOUNCE_MS
       sseErrorDebounceTimerRef.current = window.setTimeout(() => {
         sseErrorDebounceTimerRef.current = null
-
-        if (closedByClientRef.current || es.readyState === EventSource.CLOSED) {
-          return
+        if (!closedByClientRef.current) {
+          failConnection()
         }
-
-        // Si on a déjà reçu des messages, c'est probablement un close/reconnect transitoire.
-        // On évite d'alarmer l'utilisateur avec un toast "erreur serveur" dans ce cas.
-        if (sseHasReceivedAnyMessageRef.current) {
-          console.debug('EventSource error after messages; ignoring toast.')
-          return
-        }
-        console.error('Erreur EventSource')
-        chunkCoalescer.flush()
-        const errorMsg = 'Erreur de connexion au serveur'
-        setStreamError(errorMsg)
-        setConnectionError(errorMsg)
-        setIsConnected(false)
-        
-        if (onError) {
-          onError(errorMsg)
-        }
-        
-        if (toast) {
-          toast(errorMsg, 'error')
-        }
-        
-        if (setIsLoading) {
-          setIsLoading(false)
-        }
-        
-        closedByClientRef.current = true
-        es.close()
-        eventSourceRef.current = null
-        setEventSource(null)
-      }, 600)
+      }, delay)
     }
 
+    const stall = createStallWatchdog(() => {
+      if (eventSourceRef.current === es && !closedByClientRef.current && !isPageUnloading()) {
+        failConnection()
+      }
+    })
+    stallWatchdogRef.current = stall
+    es.addEventListener(SSE_HEARTBEAT_EVENT, stall.kick)
+
     es.onopen = () => {
+      stall.kick()
+      if (sseErrorDebounceTimerRef.current !== null) {
+        window.clearTimeout(sseErrorDebounceTimerRef.current)
+        sseErrorDebounceTimerRef.current = null
+      }
       setIsConnected(true)
       setConnectionError(null)
     }
   }, [appendChunks, setStep, complete, setStreamError, setTokensUsed, setUnityDialogueResponse, setRawPrompt, onComplete, onMetadata, onError, setIsLoading, toast])
 
   const disconnect = useCallback(() => {
+    stallWatchdogRef.current?.stop()
     chunkCoalescerRef.current?.flush()
     if (sseErrorDebounceTimerRef.current !== null) {
       window.clearTimeout(sseErrorDebounceTimerRef.current)

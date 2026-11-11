@@ -310,6 +310,25 @@ describe('GenerationStreamingInline', () => {
     expect(screen.getByTestId('generation-streaming-inline')).toBeInTheDocument()
   })
 
+  // Serveur coupé : rien à interrompre, l'utilisateur referme et peut relancer.
+  it('après un échec, propose de fermer le bloc au lieu d’interrompre', () => {
+    const onClose = vi.fn()
+    render(
+      <GenerationStreamingInline
+        {...createDefaultProps({
+          content: 'Contenu partiel',
+          error: 'Connexion au serveur perdue : la génération n’a pas abouti.',
+          onClose,
+        })}
+      />
+    )
+
+    expect(screen.getByTestId('streaming-step-label')).toHaveTextContent('ÉCHEC')
+    expect(screen.queryByTestId('streaming-interrupt')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByTestId('streaming-close'))
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
   // Matrice I/O, ligne 1 : interruption pendant le streaming → le texte écrit est conservé.
   it('keeps the already streamed text while interrupting', () => {
     render(

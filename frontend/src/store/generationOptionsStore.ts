@@ -14,6 +14,9 @@ import { create } from 'zustand'
 import * as dialoguesAPI from '../api/dialogues'
 import type { GenerateUnityDialogueRequest, GenerateUnityDialogueResponse } from '../types/api'
 import { createChunkCoalescer } from '../utils/chunkCoalescer'
+import { persistRunJob } from '../utils/generationRunSession'
+import { isPageUnloading } from '../utils/pageUnload'
+import { createStallWatchdog, SSE_HEARTBEAT_EVENT } from '../utils/sseStallWatchdog'
 
 /** Plafond dur du nombre d'appels LLM parallèles par génération. */
 export const MAX_GENERATION_OPTIONS = 4
@@ -53,7 +56,8 @@ interface GenerationOptionsState {
   parkedRun: { slots: GenerationOptionSlot[]; keptIndex: number | null } | null
 
   setOptionCount: (n: number) => void
-  startRun: (count: number, request: GenerateUnityDialogueRequest) => void
+  /** `request` nul à la reprise après rechargement : la requête n'est pas gardée, « Variante » se désactive. */
+  startRun: (count: number, request: GenerateUnityDialogueRequest | null) => void
   updateSlot: (index: number, patch: Partial<Omit<GenerationOptionSlot, 'index'>>) => void
   appendLiveText: (index: number, text: string) => void
   setKeptIndex: (index: number | null) => void
@@ -185,10 +189,49 @@ export async function launchBackgroundOption(
     return
   }
 
-  updateSlot(index, { jobId: job.job_id, status: 'running' })
+  persistRunJob(
+    index,
+    { jobId: job.job_id, streamUrl: job.stream_url },
+    useGenerationOptionsStore.getState().slots.length,
+  )
+  attachBackgroundOption(index, job)
+}
+
+/** Délai laissé à `EventSource` pour se reconnecter avant de déclarer l'option perdue. */
+export const BACKGROUND_RECONNECT_GRACE_MS = 10_000
+
+/**
+ * Suit le flux d'une option dont le job existe déjà : à la création, ou à la reprise
+ * après rechargement (le serveur rejoue alors le journal depuis le début).
+ */
+export function attachBackgroundOption(
+  index: number,
+  job: { job_id: string; stream_url: string },
+): void {
+  const launchRunId = useGenerationOptionsStore.getState().runId
+  const isStale = (): boolean => useGenerationOptionsStore.getState().runId !== launchRunId
+
+  closeBackgroundSource(index)
+  useGenerationOptionsStore.getState().updateSlot(index, { jobId: job.job_id, status: 'running' })
 
   const es = new EventSource(job.stream_url)
   backgroundSources.set(index, es)
+  let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+  const clearReconnectTimer = (): void => {
+    if (reconnectTimer !== null) {
+      clearTimeout(reconnectTimer)
+      reconnectTimer = null
+    }
+  }
+  const failSlot = (message: string): void => {
+    clearReconnectTimer()
+    stall.stop()
+    const slot = useGenerationOptionsStore.getState().slots.find((s) => s.index === index)
+    if (slot && (slot.status === 'running' || slot.status === 'pending')) {
+      useGenerationOptionsStore.getState().updateSlot(index, { status: 'error', error: message })
+    }
+    closeBackgroundSource(index)
+  }
 
   const liveChunks = createChunkCoalescer<string>((texts) => {
     if (backgroundSources.get(index) === es) {
@@ -196,7 +239,20 @@ export async function launchBackgroundOption(
     }
   })
 
+  const stall = createStallWatchdog(() => {
+    if (backgroundSources.get(index) === es && !isPageUnloading()) {
+      failSlot('Connexion au serveur perdue')
+    }
+  })
+  es.addEventListener(SSE_HEARTBEAT_EVENT, stall.kick)
+  es.onopen = () => {
+    clearReconnectTimer()
+    stall.kick()
+  }
+
   es.onmessage = (event) => {
+    clearReconnectTimer()
+    stall.kick()
     if (isStale()) {
       closeBackgroundSource(index)
       return
@@ -232,20 +288,27 @@ export async function launchBackgroundOption(
   }
 
   es.onerror = () => {
+    if (isPageUnloading()) return
     if (isStale()) {
+      clearReconnectTimer()
       closeBackgroundSource(index)
       return
     }
-    // Une fermeture serveur après `complete` déclenche onerror : ne signaler que si
-    // le slot n'est pas déjà terminal.
-    const slot = useGenerationOptionsStore.getState().slots.find((s) => s.index === index)
-    if (slot && (slot.status === 'running' || slot.status === 'pending')) {
-      if (es.readyState === EventSource.CLOSED) {
-        useGenerationOptionsStore
-          .getState()
-          .updateSlot(index, { status: 'error', error: 'Connexion au stream perdue' })
-        closeBackgroundSource(index)
-      }
+    // Une fermeture serveur après `complete` déclenche onerror : `failSlot` ignore un
+    // slot déjà terminal.
+    if (es.readyState === EventSource.CLOSED) {
+      failSlot('Connexion au stream perdue')
+      return
+    }
+    // Serveur injoignable : `EventSource` réessaie, mais l'option ne doit pas rester
+    // « en cours » indéfiniment — sinon le lot ne se termine jamais.
+    if (reconnectTimer === null) {
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = null
+        if (backgroundSources.get(index) === es) {
+          failSlot('Connexion au serveur perdue')
+        }
+      }, BACKGROUND_RECONNECT_GRACE_MS)
     }
   }
 }

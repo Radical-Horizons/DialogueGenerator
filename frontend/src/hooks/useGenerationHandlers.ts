@@ -16,6 +16,7 @@ import {
   useGenerationOptionsStore,
 } from '../store/generationOptionsStore'
 import { CONTEXT_TOKENS_LIMITS } from '../constants'
+import { startPersistedRun } from '../utils/generationRunSession'
 import {
   applyGenerationConfigFixes,
   fixesFromApiValidationDetails,
@@ -192,6 +193,8 @@ export function useGenerationHandlers(
         llmModelIdentifier: request.llm_model_identifier ?? undefined,
       }
       const job = await dialoguesAPI.createGenerationJob(request, costEstimate)
+      const { optionCount, startRun, updateSlot } = useGenerationOptionsStore.getState()
+      startPersistedRun(optionCount, { jobId: job.job_id, streamUrl: job.stream_url })
 
       disconnectSSE()
       startGeneration(job.job_id)
@@ -199,7 +202,6 @@ export function useGenerationHandlers(
 
       // Multi-options (écran 2b) : N-1 jobs parallèles supplémentaires, plafonnés.
       // L'option 1 reste le stream principal ; les autres se résolvent en arrière-plan.
-      const { optionCount, startRun, updateSlot } = useGenerationOptionsStore.getState()
       startRun(optionCount, request)
       updateSlot(0, { jobId: job.job_id, status: 'running' })
       for (let i = 1; i < optionCount; i++) {

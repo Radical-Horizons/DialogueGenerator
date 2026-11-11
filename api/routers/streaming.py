@@ -21,13 +21,17 @@ import asyncio
 from typing import Annotated, AsyncGenerator, Dict, Any, NamedTuple, Optional
 from urllib.parse import quote_plus
 
-from fastapi import APIRouter, Depends, Request, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Header, Request, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from api.routers.auth import get_current_user
 from api.schemas.generation_jobs import GenerationJobCreate, GenerationJobResponse, GenerationJobStatus
-from api.services.generation_job_manager import get_job_manager
+from api.services.generation_job_manager import (
+    CANCELLED_EVENT,
+    get_job_manager,
+    has_terminal_event,
+)
 from api.services.auth_service import AuthService
 from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
 from api.dependencies import get_auth_service, get_unity_dialogue_orchestrator, require_non_guest
@@ -152,6 +156,28 @@ async def authenticate_sse_stream(
 # Constante pour timeout d'annulation (10 secondes) - Story 0.8
 CANCEL_TIMEOUT_SECONDS = 10
 
+# Les jobs vivent en mémoire : un job inconnu est presque toujours un job perdu au redémarrage.
+GENERATION_LOST_MESSAGE = (
+    "Génération introuvable : le serveur a redémarré depuis son lancement, elle est perdue."
+)
+
+
+# Un proxy (Vite en dev, nginx en prod) peut garder la connexion du navigateur ouverte
+# alors que l'API est tombée : sans battement, le client attendrait indéfiniment.
+SSE_HEARTBEAT_SECONDS = 5.0
+SSE_HEARTBEAT = "event: ping\ndata: {}\n\n"
+
+
+def _parse_last_event_id(raw: Optional[str]) -> Optional[int]:
+    """Lit l'en-tête ``Last-Event-ID`` envoyé par ``EventSource`` à la reconnexion."""
+    if raw is None:
+        return None
+    try:
+        value = int(raw.strip())
+    except ValueError:
+        return None
+    return value if value >= 0 else None
+
 
 def _calculate_duration(job: Dict[str, Any]) -> float:
     """Calcule la durée d'un job en secondes.
@@ -179,104 +205,61 @@ def _calculate_duration(job: Dict[str, Any]) -> float:
         return 0.0
 
 
-async def stream_generation(job_id: str, orchestrator: UnityDialogueOrchestrator) -> AsyncGenerator[str, None]:
-    """Générateur async pour streamer la génération Unity Dialogue.
-    
-    Pattern :
-        - Yield des chunks SSE au format strict : `data: {...}\n\n`
-        - Vérifie le flag cancelled à chaque étape
-        - Envoie des événements step, metadata, complete, error
-    
+def _sse(payload: Dict[str, Any], event_id: Optional[int] = None) -> str:
+    """Formate un événement SSE ; ``id`` permet la reprise via ``Last-Event-ID``."""
+    data = json.dumps(payload, ensure_ascii=False)
+    if event_id is None:
+        return f"data: {data}\n\n"
+    return f"id: {event_id}\ndata: {data}\n\n"
+
+
+async def run_generation(job_id: str, orchestrator: UnityDialogueOrchestrator) -> None:
+    """Exécute la génération d'un job et écrit chaque événement dans son journal.
+
+    Tourne dans sa propre tâche, indépendante des connexions SSE : un rechargement de
+    page ferme le flux, pas la génération. Seule l'annulation explicite l'arrête.
+
     Args:
-        job_id: ID du job à streamer.
+        job_id: ID du job à exécuter.
         orchestrator: Orchestrateur Unity injecté via dépendance.
-        
-    Yields:
-        Chunks SSE au format `data: {...}\n\n`.
     """
+    from datetime import datetime, timezone
+    from api.schemas.dialogue import GenerateUnityDialogueRequest
+
     job_manager = get_job_manager()
     job = job_manager.get_job(job_id)
-    
     if not job:
-        yield f'data: {json.dumps({"type": "error", "message": "Job introuvable"})}\n\n'
-        return
-    
-    from datetime import datetime, timezone
-    
-    st_initial = job.get("status")
-    if st_initial == "completed":
-        logger.warning(f"Job {job_id} déjà complété, arrêt du stream")
-        yield f'data: {json.dumps({"type": "error", "message": "Job déjà complété"})}\n\n'
-        return
-    if st_initial in ("error", "cancelled"):
-        yield (
-            f'data: {json.dumps({"type": "error", "message": f"Job en état terminal: {st_initial}"})}\n\n'
-        )
         return
 
-    claimed = await job_manager.try_claim_stream_job(job_id)
-    if not claimed:
-        job_refresh = job_manager.get_job(job_id)
-        st_now = job_refresh.get("status") if job_refresh else None
-        if st_now == "running":
-            msg = "Un flux SSE est déjà actif pour ce job"
-        elif st_now == "completed":
-            msg = "Job déjà complété"
-        else:
-            msg = "Impossible de démarrer le flux pour ce job"
-        logger.warning(
-            "Stream non réservé pour job %s (statut=%s)",
-            job_id,
-            st_now,
-            extra={"job_id": job_id, "status": st_now},
-        )
-        yield f'data: {json.dumps({"type": "error", "message": msg})}\n\n'
-        return
-
+    current_step = "queued"
     try:
-        current_task = asyncio.current_task()
-        if current_task is not None:
-            job_manager.register_task(job_id, current_task)
-        
-        # Construire request_data depuis job params
-        from api.schemas.dialogue import GenerateUnityDialogueRequest
-        
-        # Construire request_data depuis job params
         request_data = GenerateUnityDialogueRequest(**job['params'])
-        
-        # Stocker l'étape actuelle pour les logs (initialiser à "queued" pour logs plus précis)
-        current_step = "queued"
-        
-        # Streamer les événements
+
         async for event in orchestrator.generate_with_events(
             request_data,
             check_cancelled=lambda: job_manager.is_cancelled(job_id)
         ):
-            # Convertir GenerationEvent en SSE
             if event.type == 'chunk':
-                chunk_content = event.data.get("content", "")
+                payload: Dict[str, Any] = {"type": "chunk", "content": event.data.get("content", "")}
                 chunk_sequence = event.data.get("sequence", None)
-                payload = {"type": "chunk", "content": chunk_content}
                 if chunk_sequence is not None:
                     payload["sequence"] = chunk_sequence
-                yield f'data: {json.dumps(payload, ensure_ascii=False)}\n\n'
+                job_manager.append_event(job_id, payload)
                 await asyncio.sleep(0)
             elif event.type == 'step':
                 current_step = event.data.get("step", "unknown")
-                yield f'data: {json.dumps({"type": "step", "step": current_step})}\n\n'
+                job_manager.append_event(job_id, {"type": "step", "step": current_step})
             elif event.type == 'metadata':
                 meta: Dict[str, Any] = {"type": "metadata", **event.data}
                 if event.data.get("used_fallback"):
                     meta["used_fallback"] = True
                     meta["fallback_from"] = event.data.get("fallback_from", "")
                     meta["fallback_to"] = event.data.get("fallback_to", "")
-                yield f'data: {json.dumps(meta)}\n\n'
+                job_manager.append_event(job_id, meta)
             elif event.type == 'complete':
-                # Stocker résultat dans job
                 job_manager.update_status(job_id, "completed", result=event.data['result'])
-                yield f'data: {json.dumps({"type": "complete", "result": event.data["result"]})}\n\n'
-                
-                # Log cleanup automatique après génération normale
+                job_manager.append_event(job_id, {"type": "complete", "result": event.data["result"]})
+
                 duration_seconds = _calculate_duration(job)
                 now = datetime.now(timezone.utc)
                 logger.info(
@@ -289,8 +272,7 @@ async def stream_generation(job_id: str, orchestrator: UnityDialogueOrchestrator
                         'status': 'completed'
                     }
                 )
-                # IMPORTANT: Arrêter le stream après complete pour éviter les générations multiples
-                # (Fonctionnalité de génération multiple désactivée - repoussée à la prochaine version)
+                # Une seule génération par job (génération multiple repoussée).
                 return
             elif event.type == 'error':
                 error_code = event.data.get("code")
@@ -298,17 +280,25 @@ async def stream_generation(job_id: str, orchestrator: UnityDialogueOrchestrator
                     job_manager.update_status(job_id, "cancelled", error=event.data['message'])
                 else:
                     job_manager.update_status(job_id, "error", error=event.data['message'])
-                yield f'data: {json.dumps({"type": "error", "message": event.data["message"]})}\n\n'
+                error_payload: Dict[str, Any] = {"type": "error", "message": event.data["message"]}
+                if error_code:
+                    error_payload["code"] = error_code
+                job_manager.append_event(job_id, error_payload)
                 return
-        
+
+        if not has_terminal_event(job):
+            job_manager.update_status(job_id, "error", error="Génération terminée sans résultat")
+            job_manager.append_event(
+                job_id, {"type": "error", "message": "Génération terminée sans résultat"}
+            )
+
     except asyncio.CancelledError:
-        # Calculer durée et métadonnées pour logs d'annulation
         duration_seconds = _calculate_duration(job)
         now = datetime.now(timezone.utc)
-        
+
         job_manager.update_status(job_id, "cancelled", error="Génération annulée")
-        
-        # Log détaillé avec métadonnées
+        job_manager.append_event(job_id, dict(CANCELLED_EVENT))
+
         logger.info(
             f"Génération annulée par utilisateur - job_id: {job_id}, durée: {duration_seconds:.2f}s, "
             f"étape: {current_step or 'unknown'}, timestamp: {now.isoformat()}",
@@ -320,24 +310,80 @@ async def stream_generation(job_id: str, orchestrator: UnityDialogueOrchestrator
                 'status': 'cancelled'
             }
         )
-        
-        yield f'data: {json.dumps({"type": "error", "message": "Génération annulée", "code": "cancelled"})}\n\n'
-        return
+        raise
     except Exception as e:
         logger.exception(f"Error streaming job {job_id}: {e}")
         job_manager.update_status(job_id, "error", error=str(e))
-        yield f'data: {json.dumps({"type": "error", "message": str(e)})}\n\n'
+        job_manager.append_event(job_id, {"type": "error", "message": str(e)})
     finally:
-        # Vérifier que la tâche est enregistrée avant de la désenregistrer
-        # La tâche peut ne pas être enregistrée si une exception se produit avant register_task()
         if job_id in job_manager._tasks:
             job_manager.unregister_task(job_id)
+
+
+async def stream_generation(
+    job_id: str,
+    orchestrator: UnityDialogueOrchestrator,
+    last_event_id: Optional[int] = None,
+) -> AsyncGenerator[str, None]:
+    """Flux SSE d'un job : démarre la génération au premier abonné, puis suit son journal.
+
+    Le journal est rejoué depuis le début (ou depuis ``last_event_id`` + 1 quand
+    ``EventSource`` se reconnecte), si bien qu'un client revenu après un F5 retrouve
+    le texte déjà produit puis la suite, ou le résultat si le job a fini entre-temps.
+    Fermer ce flux n'arrête pas la génération.
+
+    Args:
+        job_id: ID du job à streamer.
+        orchestrator: Orchestrateur Unity injecté via dépendance.
+        last_event_id: Dernier événement reçu par le client (en-tête ``Last-Event-ID``).
+
+    Yields:
+        Chunks SSE au format ``id: N`` puis ``data: {...}``.
+    """
+    job_manager = get_job_manager()
+    job = job_manager.get_job(job_id)
+
+    if not job:
+        yield _sse({"type": "error", "message": GENERATION_LOST_MESSAGE, "code": "not_found"})
+        return
+
+    if job.get("status") == "queued":
+        claimed = await job_manager.try_claim_stream_job(job_id)
+        if claimed:
+            task = asyncio.create_task(run_generation(job_id, orchestrator))
+            job_manager.register_task(job_id, task)
+        elif job.get("status") == "queued":
+            logger.warning(
+                "Stream non réservé pour job %s (statut=%s)",
+                job_id,
+                job.get("status"),
+                extra={"job_id": job_id, "status": job.get("status")},
+            )
+            yield _sse({"type": "error", "message": "Impossible de démarrer le flux pour ce job"})
+            return
+
+    start_index = 0 if last_event_id is None else last_event_id + 1
+    async for item in job_manager.follow_events(
+        job_id, start_index, idle_timeout=SSE_HEARTBEAT_SECONDS
+    ):
+        if item is None:
+            yield SSE_HEARTBEAT
+            continue
+        index, payload = item
+        yield _sse(payload, index)
+
+    job_now = job_manager.get_job(job_id)
+    if job_now is not None and not has_terminal_event(job_now):
+        status_now = job_now.get("status")
+        message = job_now.get("error") or f"Job en état terminal: {status_now}"
+        yield _sse({"type": "error", "message": message, "code": status_now})
 
 
 async def stream_generation_with_billable_user(
     job_id: str,
     orchestrator: UnityDialogueOrchestrator,
     billable_user_id: str,
+    last_event_id: Optional[int] = None,
 ) -> AsyncGenerator[str, None]:
     """Enveloppe ``stream_generation`` avec le bon ``get_billable_user_id()`` pour le flux SSE.
 
@@ -348,13 +394,14 @@ async def stream_generation_with_billable_user(
         job_id: Identifiant du job.
         orchestrator: Orchestrateur Unity.
         billable_user_id: Même identifiant que pour la création du job (username ou id).
+        last_event_id: Dernier événement reçu par le client, pour la reprise.
 
     Yields:
         Chunks SSE identiques à ``stream_generation``.
     """
     var_token = push_billable_user_id(billable_user_id)
     try:
-        async for chunk in stream_generation(job_id, orchestrator):
+        async for chunk in stream_generation(job_id, orchestrator, last_event_id):
             yield chunk
     finally:
         reset_billable_user_id(var_token)
@@ -422,27 +469,33 @@ async def stream_job(
     job_id: str,
     stream_auth: Annotated[SSEStreamAuth, Depends(authenticate_sse_stream)],
     orchestrator: Annotated[UnityDialogueOrchestrator, Depends(_get_stream_orchestrator)],
+    last_event_id: Annotated[Optional[str], Header(alias="Last-Event-ID")] = None,
 ) -> StreamingResponse:
     """Endpoint SSE pour streamer la génération d'un job.
-    
+
+    Un job inconnu répond quand même en SSE, par un événement ``error`` : un
+    ``EventSource`` ne lit pas le corps d'un 404, et l'utilisateur doit savoir que
+    sa génération a été perdue (redémarrage du serveur) plutôt que voir un échec muet.
+
     Args:
         job_id: ID du job à streamer.
-        
+        last_event_id: En-tête envoyé par ``EventSource`` à la reconnexion.
+
     Returns:
         StreamingResponse avec chunks SSE.
     """
     job_manager = get_job_manager()
     job = job_manager.get_job(job_id)
 
-    if not job:
-        raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
-
-    _ensure_stream_allowed_for_job(job, stream_auth)
+    if job:
+        _ensure_stream_allowed_for_job(job, stream_auth)
 
     billable_uid = _job_owner_label(stream_auth.user) or "user"
 
     return StreamingResponse(
-        stream_generation_with_billable_user(job_id, orchestrator, billable_uid),
+        stream_generation_with_billable_user(
+            job_id, orchestrator, billable_uid, _parse_last_event_id(last_event_id)
+        ),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",

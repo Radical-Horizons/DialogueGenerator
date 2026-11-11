@@ -57,6 +57,7 @@ class NoopEventSource {
   onmessage: unknown = null
   onerror: unknown = null
   readyState = 0
+  addEventListener() {}
   close() {}
 }
 
