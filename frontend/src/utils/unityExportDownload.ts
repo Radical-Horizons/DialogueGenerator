@@ -8,7 +8,7 @@ import {
 import { triggerBlobDownloadAsync, downloadWithProgress } from './downloadBlob'
 import type { DownloadExportOptions } from './downloadExportOptions'
 import { resolveDownloadExportFilename } from './downloadExportOptions'
-import { normalizeDialogueFilenameKey } from './formatDialogueTitle'
+import { dialogueDocumentId } from './formatDialogueTitle'
 
 async function resolveDownloadFilenameFromBlob(
   options: DownloadExportOptions,
@@ -57,7 +57,7 @@ export async function downloadAllExportedFiles(
   onLoadingChange(true)
   try {
     for (const filename of exportedFilenames) {
-      const documentId = normalizeDialogueFilenameKey(filename)
+      const documentId = dialogueDocumentId(filename)
       const blob = await downloadUnityDialogue(documentId)
       const downloadFilename = await resolveDownloadFilenameFromBlob(options, filename, blob)
       await triggerBlobDownloadAsync({

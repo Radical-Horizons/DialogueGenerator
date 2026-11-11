@@ -5,10 +5,16 @@
 import { useEffect, useState, type CSSProperties, type FormEvent } from 'react'
 import type { DialogueCollection } from '../../api/collections'
 import { theme } from '../../theme'
-import { redesignRadius } from '../../theme/redesignTokens'
+import {
+  redesignAccent,
+  redesignControl,
+  redesignRadius,
+  redesignSpacing,
+} from '../../theme/redesignTokens'
 import { remSize } from '../../theme/uiTypography'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { StyledSelect } from '../shared/StyledSelect'
+import { COLLECTION_ICON_PALETTE } from './collectionIconPalette'
 
 export interface CollectionManagerProps {
   collections: DialogueCollection[]
@@ -411,28 +417,10 @@ export function CollectionManager({
                 }}
               />
             </label>
-            <label style={{ fontSize: remSize('small'), color: theme.text.secondary }}>
-              Icône emoji (optionnel)
-              <input
-                data-testid="collection-form-icon"
-                value={form.icon}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, icon: e.target.value }))
-                }
-                maxLength={16}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  marginTop: '0.25rem',
-                  padding: '0.4rem',
-                  boxSizing: 'border-box',
-                  backgroundColor: theme.input.background,
-                  color: theme.input.color,
-                  border: `1px solid ${theme.input.border}`,
-                  borderRadius: redesignRadius.control,
-                }}
-              />
-            </label>
+            <CollectionIconPicker
+              value={form.icon}
+              onChange={(icon) => setForm((prev) => ({ ...prev, icon }))}
+            />
             {formError && (
               <div
                 data-testid="collection-form-error"
@@ -516,6 +504,75 @@ export function CollectionManager({
           setDeleteError(null)
         }}
       />
+    </div>
+  )
+}
+
+interface CollectionIconPickerProps {
+  value: string
+  onChange: (icon: string) => void
+}
+
+/**
+ * Choix d'icône parmi la palette, plus « aucune ». Une icône déjà enregistrée
+ * hors palette reste proposée (et sélectionnée) pour ne pas être perdue à l'édition.
+ */
+function CollectionIconPicker({ value, onChange }: CollectionIconPickerProps) {
+  const current = value.trim()
+  const options: Array<{ icon: string; label: string }> = [
+    { icon: '', label: 'Aucune icône' },
+    ...COLLECTION_ICON_PALETTE,
+  ]
+  if (current && !COLLECTION_ICON_PALETTE.some((option) => option.icon === current)) {
+    options.push({ icon: current, label: `Icône actuelle ${current}` })
+  }
+  return (
+    <div style={{ fontSize: remSize('small'), color: theme.text.secondary }}>
+      <span id="collection-form-icon-label">Icône (optionnel)</span>
+      <div
+        role="radiogroup"
+        aria-labelledby="collection-form-icon-label"
+        data-testid="collection-form-icon"
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: redesignSpacing.xs,
+          marginTop: redesignSpacing.xs,
+        }}
+      >
+        {options.map((option) => {
+          const selected = option.icon === current
+          return (
+            <button
+              key={option.icon || 'none'}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              aria-label={option.label}
+              title={option.label}
+              data-testid={`collection-icon-option-${option.icon || 'none'}`}
+              onClick={() => onChange(option.icon)}
+              style={{
+                width: '2rem',
+                height: '2rem',
+                padding: 0,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxSizing: 'border-box',
+                border: `1px solid ${selected ? redesignAccent.base : redesignControl.border}`,
+                borderRadius: redesignRadius.control,
+                backgroundColor: selected ? redesignAccent.selectedBg : 'transparent',
+                color: theme.text.secondary,
+                fontSize: option.icon ? '1rem' : remSize('small'),
+                cursor: 'pointer',
+              }}
+            >
+              {option.icon || '∅'}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }

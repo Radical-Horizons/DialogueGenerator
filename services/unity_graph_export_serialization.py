@@ -3,14 +3,19 @@ from __future__ import annotations
 
 import json
 import re
+import unicodedata
 from typing import Any, Dict, List, Optional, Tuple
 
 from services.graph_conversion_service import GraphConversionService
 
 
 def sanitize_dialogue_title_for_filename(title: str) -> str:
-    """Normalise le titre métadonnées en base de nom de fichier (sans extension)."""
-    sanitized = re.sub(r"[^\w\s-]", "", title)
+    """Normalise le titre métadonnées en base de nom de fichier (sans extension).
+
+    NFC d'abord : en NFD, l'accent est un caractère combinant que la classe de
+    mots de la regex rejette, « refusée » deviendrait « refusee ».
+    """
+    sanitized = re.sub(r"[^\w\s-]", "", unicodedata.normalize("NFC", title))
     return re.sub(r"[-\s]+", "_", sanitized)
 
 

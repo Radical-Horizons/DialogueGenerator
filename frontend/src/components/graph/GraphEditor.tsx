@@ -107,7 +107,6 @@ export function GraphEditor({
     isLoadingDialogue,
     activeDialogueFilename,
     hasActiveDialogue,
-    handleSave,
     dialogueListRef,
   } = useDialogueLoader(toast, routeTarget)
 
@@ -135,7 +134,7 @@ export function GraphEditor({
     setNodeInspectorEditing(nodeEditRequest != null && nodeEditRequest === selectedNodeId)
   }, [selectedNodeId])
 
-  const toolbar = useGraphToolbar(toast, activeDialogueFilename, handleSave, isLoadingDialogue)
+  const toolbar = useGraphToolbar(toast, activeDialogueFilename, isLoadingDialogue)
   const { ref: workspaceRef, isNarrow: isWorkspaceNarrow } = useNarrowInlineSize(
     GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX,
     { measureParentClientWidth: true }
@@ -433,7 +432,6 @@ export function GraphEditor({
           toolbar={toolbar}
           hasActiveDialogue={hasActiveDialogue}
           activeDialogueFilename={activeDialogueFilename}
-          handleSave={handleSave}
           onBatchTagApply={handleBatchTagSelection}
           handleBatchValidateSelection={handleBatchValidateSelection}
           handleBatchGenerateSelection={() => void startBatchGenerate()}

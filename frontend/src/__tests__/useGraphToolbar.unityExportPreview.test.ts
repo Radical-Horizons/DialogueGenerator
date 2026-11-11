@@ -22,7 +22,6 @@ vi.mock('../api/graph', () => ({
 }))
 
 const toastMock = vi.fn()
-const handleSaveMock = vi.fn().mockResolvedValue(undefined)
 
 const VALID_NODE_ID = 'node-a1b2c3d4e5f6789012345678abcdef01'
 
@@ -77,7 +76,7 @@ describe('useGraphToolbar handlePreviewExport (Story 5.5)', () => {
     })
 
     const { result } = renderHook(() =>
-      useGraphToolbar(toastMock, 'test_preview.json', handleSaveMock, false),
+      useGraphToolbar(toastMock, 'test_preview.json', false),
     )
 
     await act(async () => {
@@ -107,7 +106,7 @@ describe('useGraphToolbar handlePreviewExport (Story 5.5)', () => {
     })
 
     const { result } = renderHook(() =>
-      useGraphToolbar(toastMock, 'test_preview.json', handleSaveMock, false),
+      useGraphToolbar(toastMock, 'test_preview.json', false),
     )
 
     await act(async () => {
@@ -142,7 +141,7 @@ describe('useGraphToolbar handlePreviewExport (Story 5.5)', () => {
     })
 
     const { result } = renderHook(() =>
-      useGraphToolbar(toastMock, 'test_preview.json', handleSaveMock, false),
+      useGraphToolbar(toastMock, 'test_preview.json', false),
     )
 
     await act(async () => {

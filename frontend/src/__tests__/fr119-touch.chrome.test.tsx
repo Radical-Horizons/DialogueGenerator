@@ -181,7 +181,6 @@ describe('FR119 touch targets — chrome', () => {
 
           hasActiveDialogue={true}
           activeDialogueFilename="f.json"
-          handleSave={async () => {}}
           onBatchTagApply={() => {}}
           handleBatchValidateSelection={() => {}}
           handleBatchDeleteSelection={() => {}}
@@ -208,7 +207,6 @@ describe('FR119 touch targets — chrome', () => {
 
           hasActiveDialogue={true}
           activeDialogueFilename="f.json"
-          handleSave={async () => {}}
           onBatchTagApply={() => {}}
           handleBatchValidateSelection={() => {}}
           handleBatchDeleteSelection={() => {}}

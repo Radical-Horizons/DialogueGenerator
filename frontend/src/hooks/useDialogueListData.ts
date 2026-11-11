@@ -160,7 +160,7 @@ export function useDialogueListData(): UseDialogueListDataReturn {
         setServerSearchIds(
           new Set(
             response.document_ids.map((id) =>
-              id.replace(/\.json$/i, '').toLowerCase()
+              normalizeDialogueFilenameKey(id)
             )
           )
         )
@@ -368,7 +368,7 @@ export function useDialogueListData(): UseDialogueListDataReturn {
       setActiveCollectionId(collectionId)
       setActiveCollectionDocumentIds(
         new Set(
-          documentIds.map((id) => id.replace(/\.json$/i, '').toLowerCase())
+          documentIds.map((id) => normalizeDialogueFilenameKey(id))
         )
       )
     },

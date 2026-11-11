@@ -9,6 +9,7 @@ import { useTokenEstimation } from './useTokenEstimation'
 import { useGenerationValidation } from './useGenerationValidation'
 import { useSSEStreaming } from './useSSEStreaming'
 import { useGenerationHandlers } from './useGenerationHandlers'
+import { useGenerationResume } from './useGenerationResume'
 import { useGraphStore } from '../store/graphStore'
 import { titleToDocumentId } from '../utils/formatDialogueTitle'
 import type { ContextSelection, LLMModelResponse, ReasoningEffort } from '../types/api'
@@ -149,6 +150,11 @@ export function useGenerationOrchestrator(
       }
     },
     setIsLoading: options.setIsLoading,
+    toast: options.toast,
+  })
+  useGenerationResume({
+    connectSSE: sse.connect,
+    setError: options.setError,
     toast: options.toast,
   })
   const handlers = useGenerationHandlers({

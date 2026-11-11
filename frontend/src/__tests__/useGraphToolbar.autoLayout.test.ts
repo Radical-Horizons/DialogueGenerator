@@ -16,13 +16,11 @@ vi.mock('../api/graph', () => ({
 }))
 
 const toastMock = vi.fn()
-const handleSaveMock = vi.fn().mockResolvedValue(undefined)
 
 describe('useGraphToolbar - handleAutoLayout (Story 2.13)', () => {
   beforeEach(() => {
     useGraphStore.getState().resetGraph()
     toastMock.mockClear()
-    handleSaveMock.mockClear()
   })
 
   it('handleAutoLayout(direction) calls store.applyAutoLayout("dagre", direction)', async () => {
@@ -30,7 +28,7 @@ describe('useGraphToolbar - handleAutoLayout (Story 2.13)', () => {
     const applySpy = vi.spyOn(store, 'applyAutoLayout').mockResolvedValue(undefined)
 
     const { result } = renderHook(() =>
-      useGraphToolbar(toastMock, 'test.json', handleSaveMock, false)
+      useGraphToolbar(toastMock, 'test.json', false)
     )
 
     await act(async () => {
@@ -46,7 +44,7 @@ describe('useGraphToolbar - handleAutoLayout (Story 2.13)', () => {
     const applySpy = vi.spyOn(store, 'applyAutoLayout').mockResolvedValue(undefined)
 
     const { result } = renderHook(() =>
-      useGraphToolbar(toastMock, 'test.json', handleSaveMock, false)
+      useGraphToolbar(toastMock, 'test.json', false)
     )
 
     await act(async () => {

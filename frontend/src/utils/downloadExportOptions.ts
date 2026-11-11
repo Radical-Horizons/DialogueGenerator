@@ -4,7 +4,7 @@
  * Préfixe clés localStorage : ``dg-export-*`` (distinct de batchExportOptions).
  */
 import { buildUnityExportFilename } from '../components/graph/graphEditorStandalone'
-import { normalizeDialogueFilenameKey } from './formatDialogueTitle'
+import { dialogueDocumentId } from './formatDialogueTitle'
 
 export type BatchDownloadFormat = 'zip' | 'individual'
 
@@ -91,7 +91,7 @@ export function resolveDownloadExportFilename({
   title,
   jsonContent,
 }: ResolveDownloadExportFilenameParams): string {
-  const documentId = normalizeDialogueFilenameKey(sourceFilename)
+  const documentId = dialogueDocumentId(sourceFilename)
   if (strategy === 'preserve') {
     return buildUnityExportFilename(sourceFilename)
   }

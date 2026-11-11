@@ -362,7 +362,7 @@ async def test_stream_generation_with_billable_user_sets_context_during_stream(m
 
     seen_during_inner: list[str] = []
 
-    async def fake_stream_generation(_job_id: str, _orchestrator):
+    async def fake_stream_generation(_job_id: str, _orchestrator, _last_event_id=None):
         seen_during_inner.append(get_billable_user_id())
         yield 'data: {"type":"complete","result":{}}\n\n'
 

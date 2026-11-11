@@ -22,7 +22,7 @@ from services.unity_dialogue_search_fields import (
     count_edges as _count_edges,
     count_nodes as _count_nodes,
     extract_speakers_and_text as _extract_speakers_and_text,
-    extract_title_from_nodes as _extract_title_from_json,
+    extract_document_title as _extract_document_title,
 )
 from services.configuration_service import ConfigurationService
 from services.document_persistence_service import (
@@ -124,13 +124,9 @@ def _file_creation_time(stat_result: object) -> str:
     Returns:
         Date de création approximative au format ISO-8601 UTC.
     """
-    from datetime import timezone
+    from services.document_persistence_service import file_creation_time_iso
 
-    birthtime = getattr(stat_result, "st_birthtime", None)
-    ctime = getattr(stat_result, "st_ctime", 0.0)
-    mtime = getattr(stat_result, "st_mtime", ctime)
-    timestamp = birthtime if birthtime is not None else min(ctime, mtime)
-    return datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()
+    return file_creation_time_iso(stat_result)
 
 
 def _nodes_of(json_data: Any) -> list:
@@ -318,7 +314,7 @@ async def list_unity_dialogues(
                         else None
                     )
                     if isinstance(nodes_for_title, list):
-                        title = _extract_title_from_json(nodes_for_title)
+                        title = _extract_document_title(json_data)
                         speakers, search_text = _extract_speakers_and_text(
                             nodes_for_title
                         )
@@ -347,11 +343,19 @@ async def list_unity_dialogues(
                         document_id,
                         index_error,
                     )
-                created_at = (
-                    _normalize_iso(indexed_created_at, assume_utc=True)
+                recorded_created_at = (
+                    None
                     if indexed_created_at
-                    else _file_creation_time(stat)
+                    else persistence_service.read_recorded_created_at(
+                        json_file.parent, document_id
+                    )
                 )
+                if indexed_created_at:
+                    created_at = _normalize_iso(indexed_created_at, assume_utc=True)
+                elif recorded_created_at:
+                    created_at = _normalize_iso(recorded_created_at, assume_utc=True)
+                else:
+                    created_at = _file_creation_time(stat)
                 if owner_id:
                     if owner_id not in owner_username_cache:
                         try:
@@ -619,6 +623,7 @@ async def read_unity_dialogue(
                 current_user,
             )
             json_data = persisted.document
+            title = _extract_document_title(json_data)
             json_content = json.dumps(json_data, ensure_ascii=False, indent=2)
             
             # Valider que c'est du JSON valide ; accepter liste ou document canonique (schemaVersion + nodes)
@@ -639,9 +644,6 @@ async def read_unity_dialogue(
                     details={"filename": filename, "json_error": str(e)},
                     request_id=request_id
                 )
-            
-            # Extraire un titre potentiel
-            title = _extract_title_from_json(json_data)
             
             stat = file_path.stat()
             

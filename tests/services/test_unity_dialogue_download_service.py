@@ -12,6 +12,7 @@ import pytest
 from services.configuration_service import ConfigurationService
 from services.unity_dialogue_download_service import (
     build_batch_download_zip,
+    content_disposition_attachment,
     read_document_download_payload,
     safe_export_filename,
 )
@@ -94,3 +95,31 @@ class TestBuildBatchDownloadZip:
         with zipfile.ZipFile(BytesIO(zip_bytes)) as archive:
             info = archive.getinfo("doc_a.json")
             assert info.compress_type == zipfile.ZIP_STORED
+
+
+@pytest.mark.unit
+class TestContentDispositionAttachment:
+    """En-tête de pièce jointe encodable en latin-1, nom exact en ``filename*``."""
+
+    def test_ascii_name_keeps_plain_filename(self) -> None:
+        """Un nom ASCII reste sous la forme historique."""
+        assert content_disposition_attachment("quest_arc") == (
+            'attachment; filename="quest_arc.json"'
+        )
+
+    def test_unicode_name_travels_in_filename_star(self) -> None:
+        """Accents, typographie et emoji : repli ASCII + nom exact encodé RFC 5987."""
+        header = content_disposition_attachment("L’Épée_«_brisée_»_—_🐉")
+
+        header.encode("latin-1")
+        assert header.startswith('attachment; filename="LEpee__brisee___')
+        assert (
+            "filename*=UTF-8''L%E2%80%99%C3%89p%C3%A9e_%C2%AB_bris%C3%A9e_%C2%BB_"
+            "%E2%80%94_%F0%9F%90%89.json"
+        ) in header
+
+    def test_name_without_ascii_letters_falls_back_to_dialogue(self) -> None:
+        """Sans aucune lettre ASCII, le repli reste un nom utilisable."""
+        header = content_disposition_attachment("🐉")
+
+        assert header.startswith('attachment; filename="dialogue.json"; ')

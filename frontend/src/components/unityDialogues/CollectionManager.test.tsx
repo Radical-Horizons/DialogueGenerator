@@ -4,6 +4,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { CollectionManager } from './CollectionManager'
+import { COLLECTION_ICON_PALETTE } from './collectionIconPalette'
 import type { DialogueCollection } from '../../api/collections'
 
 const SAMPLE: DialogueCollection = {
@@ -83,5 +84,72 @@ describe('CollectionManager', () => {
 
     expect(screen.getByTestId('collection-select-c1')).toHaveTextContent('Chapitre 1 (1)')
     expect(screen.getByTestId('collection-select-c1').textContent).not.toContain('📁')
+  })
+
+  it('choisit l’icône dans une palette, sans saisie libre', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    render(
+      <CollectionManager
+        collections={[]}
+        activeCollectionId={null}
+        onSelect={vi.fn()}
+        onCreate={onCreate}
+        onUpdate={vi.fn()}
+        onDelete={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByTestId('collection-create-button'))
+    const group = screen.getByRole('radiogroup', { name: 'Icône (optionnel)' })
+    expect(group.querySelector('input')).toBeNull()
+    expect(screen.getAllByRole('radio')).toHaveLength(COLLECTION_ICON_PALETTE.length + 1)
+    expect(screen.getByRole('radio', { name: 'Aucune icône' })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    )
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Combat' }))
+    expect(screen.getByRole('radio', { name: 'Combat' })).toHaveAttribute('aria-checked', 'true')
+    fireEvent.change(screen.getByTestId('collection-form-name'), {
+      target: { value: 'Duels' },
+    })
+    fireEvent.click(screen.getByTestId('collection-form-submit'))
+    await waitFor(() => {
+      expect(onCreate).toHaveBeenCalledWith({
+        name: 'Duels',
+        description: null,
+        icon: '⚔️',
+      })
+    })
+  })
+
+  it('conserve une icône enregistrée hors palette et permet de la retirer', async () => {
+    const onUpdate = vi.fn().mockResolvedValue(undefined)
+    render(
+      <CollectionManager
+        collections={[{ ...SAMPLE, icon: '🐉' }]}
+        activeCollectionId="c1"
+        onSelect={vi.fn()}
+        onCreate={vi.fn()}
+        onUpdate={onUpdate}
+        onDelete={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByTestId('collection-edit-c1'))
+    expect(screen.getByRole('radio', { name: 'Icône actuelle 🐉' })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    )
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Aucune icône' }))
+    fireEvent.click(screen.getByTestId('collection-form-submit'))
+    await waitFor(() => {
+      expect(onUpdate).toHaveBeenCalledWith('c1', {
+        name: 'Chapitre 1',
+        description: null,
+        icon: null,
+      })
+    })
   })
 })

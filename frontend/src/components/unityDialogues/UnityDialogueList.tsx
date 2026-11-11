@@ -952,7 +952,7 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
                   batch.toggleDocumentCheck(docId)
                 }
               }}
-              collections={collectionsByDocumentId.get(docId)?.map((c) => ({
+              collections={collectionsByDocumentId.get(normalizeDialogueFilenameKey(dialogue.filename))?.map((c) => ({
                 id: c.id,
                 name: c.name,
                 icon: c.icon,

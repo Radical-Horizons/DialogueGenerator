@@ -277,6 +277,23 @@ describe('graphStore - document SoT load/save', () => {
       )
     })
 
+    it('garde le titre du document (renommé depuis Éditer) quand le graphe enregistre', async () => {
+      vi.mocked(documentsAPI.getDocument).mockResolvedValue({
+        document: { ...sampleDocument, title: 'La carte acceptée' },
+        schemaVersion: '1.1.0',
+        revision: 1,
+      })
+      vi.mocked(documentsAPI.getLayout).mockResolvedValue({ layout: sampleLayout, revision: 1 })
+      vi.mocked(documentsAPI.putDocument).mockResolvedValue({ revision: 2 })
+      vi.mocked(documentsAPI.putLayout).mockResolvedValue({ revision: 2 })
+      const { loadDialogueByDocumentId, saveDialogue } = useGraphStore.getState()
+      await loadDialogueByDocumentId('test-doc')
+      await saveDialogue()
+      expect(vi.mocked(documentsAPI.putDocument).mock.calls[0][1].document.title).toBe(
+        'La carte acceptée',
+      )
+    })
+
     it('reconstruit le layout sauvegardé depuis les positions courantes, même si state.layout est stale', async () => {
       vi.mocked(documentsAPI.getDocument).mockResolvedValue({
         document: sampleDocument,

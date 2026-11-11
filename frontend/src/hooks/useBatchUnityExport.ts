@@ -19,7 +19,7 @@ import {
   loadBatchExportOptions,
   saveBatchExportOptions,
 } from '../utils/batchExportOptions'
-import { normalizeDialogueFilenameKey } from '../utils/formatDialogueTitle'
+import { dialogueDocumentId } from '../utils/formatDialogueTitle'
 
 export interface BatchExportProgress {
   current: number
@@ -54,7 +54,7 @@ export interface UseBatchUnityExportResult {
 }
 
 function toDocumentId(filename: string): string {
-  return normalizeDialogueFilenameKey(filename)
+  return dialogueDocumentId(filename)
 }
 
 /**

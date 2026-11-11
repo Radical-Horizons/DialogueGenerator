@@ -103,6 +103,11 @@ export interface GraphViewState {
 
   // --- AI generation panel ---
   aiGenerationNodeId: string | null
+  /**
+   * « Générer la suite » depuis la section Éditer : dialogue à ouvrir dans le graphe,
+   * puis nœud sur lequel ouvrir la génération. Consommé par `useDialogueLoader`.
+   */
+  continuationRequest: { filename: string; nodeId: string } | null
 
   // --- Flush editor protocol ---
   flushRequested: boolean
@@ -161,6 +166,8 @@ export interface GraphViewState {
   // --- Actions : AI generation ---
   openAIGeneration: (nodeId: string) => void
   closeAIGeneration: () => void
+  requestContinuation: (filename: string, nodeId: string) => void
+  clearContinuationRequest: () => void
 
   // --- Actions : flush editor protocol ---
   requestFlush: () => void
@@ -227,6 +234,7 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
   contextMenuRequest: null,
   promptViewerNodeId: null,
   aiGenerationNodeId: null,
+  continuationRequest: null,
   flushRequested: false,
   flushCompleted: false,
   saveRequested: false,
@@ -275,6 +283,8 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
 
   openAIGeneration: (nodeId) => set({ aiGenerationNodeId: nodeId }),
   closeAIGeneration: () => set({ aiGenerationNodeId: null }),
+  requestContinuation: (filename, nodeId) => set({ continuationRequest: { filename, nodeId } }),
+  clearContinuationRequest: () => set({ continuationRequest: null }),
 
   requestFlush: () => set({ flushRequested: true, flushCompleted: false }),
   confirmFlush: () => set({ flushRequested: false, flushCompleted: true }),

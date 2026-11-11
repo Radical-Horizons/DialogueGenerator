@@ -423,7 +423,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
     return true
   },
 
-  saveDialogue: () => {
+  saveDialogue: (options) => {
     const performSave = async (): Promise<SaveGraphResponse> => {
       let saveOperationSeq = 0
       set((current) => {
@@ -451,6 +451,9 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
 
       const snap = get()
       const doc = graphToDocument(snap.nodes, snap.edges) as unknown as Record<string, unknown>
+      // Le titre se renomme depuis Éditer : le graphe ne le porte pas mais ne doit pas l'effacer.
+      const documentTitle = (state.document as Record<string, unknown>).title
+      if (typeof documentTitle === 'string' && documentTitle.trim()) doc.title = documentTitle
       applyBindingsToDocument(doc, snap.dialogueFlagBindings ?? [])
       if (documentRequiresChoiceIdMigration(doc)) {
         const error = new Error("Ce dialogue doit être migré avec l'outil de migration choiceId.")
@@ -479,11 +482,14 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
       }
 
       try {
-        const docRes = await documentsAPI.putDocument(documentId, {
+        const docBody = {
           document: doc,
           revision: state.documentRevision ?? 1,
-          validationMode: 'export',
-        })
+          validationMode: 'export' as const,
+        }
+        const docRes =
+          (options?.keepalive ? await documentsAPI.putDocumentKeepalive(documentId, docBody) : null) ??
+          (await documentsAPI.putDocument(documentId, docBody))
         if (!isActiveSave()) {
           return { success: true, filename: documentId } as SaveGraphResponse
         }

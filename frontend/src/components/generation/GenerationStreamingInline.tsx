@@ -401,6 +401,9 @@ export function GenerationStreamingInline({
   }
   // Le curseur ne clignote que tant que du texte peut encore arriver.
   const isStreamingText = currentStep !== 'Complete' && !error && !isInterrupting
+  /** Échec (serveur, connexion) : plus rien à interrompre, seulement à refermer. */
+  const failed = !!error && !isInterruptionNotice(error)
+  const isOver = currentStep === 'Complete' || failed
 
   if (!isActive) return null
 
@@ -487,16 +490,18 @@ export function GenerationStreamingInline({
             ...redesignMonoLabelStyle,
             fontSize: '10px',
             letterSpacing: '0.12em',
-            color: currentStep === 'Complete' ? redesignText.label : redesignAccent.text,
+            color: isOver ? redesignText.label : redesignAccent.text,
           }}
         >
           {isInterrupting
             ? 'INTERRUPTION…'
-            : currentStep === 'Complete'
-              ? 'TERMINÉ'
-              : `${stepLabels[currentStep] ?? currentStep}…`}
+            : failed
+              ? 'ÉCHEC'
+              : currentStep === 'Complete'
+                ? 'TERMINÉ'
+                : `${stepLabels[currentStep] ?? currentStep}…`}
         </span>
-        {currentStep !== 'Complete' && (
+        {!isOver && (
           <button
             type="button"
             onClick={onMinimize}
@@ -735,17 +740,19 @@ export function GenerationStreamingInline({
           flexShrink: 0,
         }}
       >
-        {currentStep === 'Complete' ? (
+        {isOver ? (
           <button
             type="button"
+            data-testid="streaming-close"
             onClick={onClose}
             style={{
               alignSelf: 'flex-end',
               padding: '0.5rem 1rem',
-              border: 'none',
+              // Après un échec, « Générer » redevient l'action principale : un seul bouton plein.
+              border: failed ? `1px solid ${theme.button.default.border}` : 'none',
               borderRadius: `${redesignRadius.control}px`,
-              backgroundColor: redesignAccent.fill,
-              color: theme.button.primary.color,
+              backgroundColor: failed ? 'transparent' : redesignAccent.fill,
+              color: failed ? theme.text.primary : theme.button.primary.color,
               fontWeight: 600,
               cursor: 'pointer',
             }}

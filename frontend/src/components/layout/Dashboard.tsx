@@ -31,6 +31,7 @@ import { useContextStore } from '../../store/contextStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useContextConfigStore } from '../../store/contextConfigStore'
 import { useGraphStore } from '../../store/graphStore'
+import { useGraphViewStore } from '../../store/graphViewStore'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { useCommandPalette } from '../../hooks/useCommandPalette'
 import { useViewportMode } from '../../hooks/useViewportMode'
@@ -630,7 +631,6 @@ export function Dashboard() {
                       ref={unityDialogueEditorRef}
                       json_content={unityDialogueResponse.json_content}
                       title={unityDialogueResponse.title}
-                      hideHeaderSaveButton={true}
                       onContentChange={handleGeneratedDialogueContentChange}
                       onSaveStateChange={setGeneratedEditorSaveState}
                       onSave={() => {
@@ -731,7 +731,7 @@ export function Dashboard() {
                         : 0.6,
                     boxSizing: 'border-box',
                   }}
-                  title="Garder et continuer (Ctrl+S)"
+                  title="Enregistrer ce résultat comme nouveau dialogue"
                 >
                   {generatedEditorSaveState.isSaving ? 'Sauvegarde...' : 'Garder et continuer'}
                 </button>
@@ -1529,8 +1529,9 @@ export function Dashboard() {
                   selectedDialogue={selectedDialogue}
                   setSelectedDialogue={setSelectedDialogue}
                   dialogueListRef={dialogueListRef}
-                  onGenerateContinuation={() => {
-                    setCenterPanelTab('generation')
+                  onGenerateContinuation={({ filename, nodeId }) => {
+                    useGraphViewStore.getState().requestContinuation(filename, nodeId)
+                    setCenterPanelTab('graph')
                   }}
                 />
               ),

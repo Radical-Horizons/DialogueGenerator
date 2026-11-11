@@ -45,6 +45,15 @@ def extract_title_from_nodes(nodes: list[Any]) -> str | None:
     return None
 
 
+def extract_document_title(document: Any) -> str | None:
+    """Titre affichable : ``title`` du document s'il est renseigné, sinon la 1re réplique."""
+    if isinstance(document, dict):
+        title = document.get("title")
+        if isinstance(title, str) and title.strip():
+            return title.strip()
+    return extract_title_from_nodes(_as_nodes(document))
+
+
 def count_nodes(document: Any) -> int | None:
     """Compte les nœuds dict d'un document Unity."""
     nodes = _as_nodes(document)
@@ -112,7 +121,7 @@ def extract_search_fields(document: Any) -> UnitySearchFields:
     nodes = _as_nodes(document)
     speakers, search_text = extract_speakers_and_text(nodes)
     return UnitySearchFields(
-        title=extract_title_from_nodes(nodes),
+        title=extract_document_title(document),
         speakers=speakers,
         search_text=search_text,
         node_count=count_nodes(document),

@@ -354,4 +354,40 @@ describe('useDialogueLoader', () => {
     expect(result.current.selectedDialogue).toBeNull()
     expect(resetGraphMock).toHaveBeenCalled()
   })
+
+  describe('quitter la page (pas de sauvegarde manuelle)', () => {
+    function fireBeforeUnload(): Event {
+      const event = new Event('beforeunload', { cancelable: true })
+      window.dispatchEvent(event)
+      return event
+    }
+
+    it("ne demande jamais confirmation, même si l'autosave n'a pas encore abouti", () => {
+      const saveDialogueMock = vi.fn().mockResolvedValue({ filename: 'd.json' })
+      useGraphStore.setState({ hasUnsavedChanges: true, saveDialogue: saveDialogueMock })
+      const { unmount } = renderHook(() => useDialogueLoader(toastMock, null))
+
+      expect(fireBeforeUnload().defaultPrevented).toBe(false)
+      unmount()
+    })
+
+    it('enregistre en keepalive ce qui reste en quittant la page', async () => {
+      const saveDialogueMock = vi.fn().mockResolvedValue({ filename: 'd.json' })
+      useGraphStore.setState({
+        hasUnsavedChanges: true,
+        isLoading: false,
+        isGenerating: false,
+        saveDialogue: saveDialogueMock,
+      })
+      const { unmount } = renderHook(() => useDialogueLoader(toastMock, null))
+
+      window.dispatchEvent(new Event('pagehide'))
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0))
+      })
+
+      expect(saveDialogueMock).toHaveBeenCalledWith({ keepalive: true })
+      unmount()
+    })
+  })
 })

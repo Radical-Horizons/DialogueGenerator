@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import logging
-import re
 from pathlib import Path
 from typing import Annotated, Optional
 
@@ -50,15 +49,10 @@ from services.unity_export_preview_service import preview_graph_export
 from services.unity_graph_export_serialization import (
     export_filename_from_title,
     graph_to_unity_json_content,
+    sanitize_dialogue_title_for_filename,
 )
 
 logger = logging.getLogger(__name__)
-
-
-def _sanitize_dialogue_title_for_filename(title: str) -> str:
-    """Normalise le titre métadonnées en base de nom de fichier (sans extension)."""
-    sanitized = re.sub(r"[^\w\s-]", "", title)
-    return re.sub(r"[-\s]+", "_", sanitized)
 
 
 router = APIRouter()
@@ -152,7 +146,7 @@ async def save_graph(
             request_data.edges,
         )
 
-        sanitized_title = _sanitize_dialogue_title_for_filename(request_data.metadata.title)
+        sanitized_title = sanitize_dialogue_title_for_filename(request_data.metadata.title)
         filename = f"{sanitized_title}.json"
 
         extra: dict = {}

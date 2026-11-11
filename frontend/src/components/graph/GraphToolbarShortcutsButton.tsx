@@ -191,12 +191,6 @@ export function GraphToolbarShortcutsButton({
               </li>
               <li>
                 <kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>
-                  Ctrl+S
-                </kbd>{' '}
-                : sauvegarder
-              </li>
-              <li>
-                <kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>
                   Suppr
                 </kbd>{' '}
                 : supprimer le nœud sélectionné ; sur une connexion (edge) : confirmation puis suppression

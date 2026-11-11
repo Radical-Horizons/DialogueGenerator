@@ -280,7 +280,57 @@ export function useDialogueLoader(
     incrementLoadSeq,
   ])
 
+  const continuationRequest = useGraphViewStore((s) => s.continuationRequest)
+  const dispatchedContinuationRef = useRef<typeof continuationRequest>(null)
   useEffect(() => {
+    if (!continuationRequest) {
+      dispatchedContinuationRef.current = null
+      return
+    }
+    const wanted = normalizeDialogueFilenameKey(continuationRequest.filename)
+    if (dispatchedContinuationRef.current !== continuationRequest) {
+      dispatchedContinuationRef.current = continuationRequest
+      const state = useGraphStore.getState()
+      const loaded = state.dialogueMetadata?.filename ?? state.documentId ?? null
+      // Éditer vient d'écrire ce dialogue : la copie déjà chargée dans le graphe est périmée.
+      if (loaded && normalizeDialogueFilenameKey(loaded) === wanted && !state.hasUnsavedChanges) {
+        resetGraph()
+      }
+      setSelectedDialogue({
+        filename: continuationRequest.filename,
+        file_path: '',
+        size_bytes: 0,
+        modified_time: new Date().toISOString(),
+      })
+      return
+    }
+    const loaded = dialogueMetadata.filename || documentId
+    if (
+      isLoadingDialogue ||
+      isGraphLoading ||
+      !loaded ||
+      normalizeDialogueFilenameKey(loaded) !== wanted
+    ) {
+      return
+    }
+    const view = useGraphViewStore.getState()
+    view.clearContinuationRequest()
+    view.openAIGeneration(continuationRequest.nodeId)
+    view.focusNode(continuationRequest.nodeId)
+  }, [
+    continuationRequest,
+    selectedDialogue,
+    isLoadingDialogue,
+    isGraphLoading,
+    dialogueMetadata.filename,
+    documentId,
+    resetGraph,
+  ])
+
+  useEffect(() => {
+    // Ni sauvegarde manuelle ni avertissement (principe produit) : en quittant la page,
+    // le PUT part en `keepalive` pour survivre au déchargement, que le navigateur
+    // annulerait sinon.
     const flushAndPersist = () => {
       useGraphViewStore.getState().requestFlush()
       window.setTimeout(() => {
@@ -290,7 +340,7 @@ export function useDialogueLoader(
           !state.isLoading &&
           !state.isGenerating
         ) {
-          void saveDialogue().catch((error) => {
+          void saveDialogue({ keepalive: true }).catch((error) => {
             console.error('Sauvegarde automatique de cycle de vie:', error)
           })
         }

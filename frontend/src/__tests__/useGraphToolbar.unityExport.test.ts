@@ -22,7 +22,6 @@ vi.mock('../api/graph', () => ({
 }))
 
 const toastMock = vi.fn()
-const handleSaveMock = vi.fn().mockResolvedValue(undefined)
 
 const VALID_NODE_ID = 'node-a1b2c3d4e5f6789012345678abcdef01'
 
@@ -63,7 +62,6 @@ describe('useGraphToolbar handleExportUnity (Story 5.1)', () => {
     useGraphStore.getState().resetGraph()
     useGraphViewStore.getState().registerReactFlowInstance(null)
     toastMock.mockClear()
-    handleSaveMock.mockClear()
     vi.mocked(graphAPI.validateSchema).mockReset()
     vi.mocked(graphAPI.saveGraphAndWrite).mockReset()
   })
@@ -77,7 +75,7 @@ describe('useGraphToolbar handleExportUnity (Story 5.1)', () => {
     })
 
     const { result } = renderHook(() =>
-      useGraphToolbar(toastMock, 'test_export.json', handleSaveMock, false)
+      useGraphToolbar(toastMock, 'test_export.json', false)
     )
 
     await act(async () => {
@@ -96,7 +94,7 @@ describe('useGraphToolbar handleExportUnity (Story 5.1)', () => {
     const focusSpy = vi.spyOn(useGraphViewStore.getState(), 'focusNode')
 
     const { result } = renderHook(() =>
-      useGraphToolbar(toastMock, 'test_export.json', handleSaveMock, false)
+      useGraphToolbar(toastMock, 'test_export.json', false)
     )
 
     act(() => {
@@ -125,7 +123,7 @@ describe('useGraphToolbar handleExportUnity (Story 5.1)', () => {
     })
 
     const { result } = renderHook(() =>
-      useGraphToolbar(toastMock, 'test_export.json', handleSaveMock, false)
+      useGraphToolbar(toastMock, 'test_export.json', false)
     )
 
     await act(async () => {
@@ -154,7 +152,7 @@ describe('useGraphToolbar handleExportUnity (Story 5.1)', () => {
     })
 
     const { result } = renderHook(() =>
-      useGraphToolbar(toastMock, 'test_export.json', handleSaveMock, false)
+      useGraphToolbar(toastMock, 'test_export.json', false)
     )
 
     await act(async () => {
@@ -188,7 +186,7 @@ describe('useGraphToolbar handleExportUnity (Story 5.1)', () => {
     })
 
     const { result } = renderHook(() =>
-      useGraphToolbar(toastMock, 'test_export.json', handleSaveMock, false)
+      useGraphToolbar(toastMock, 'test_export.json', false)
     )
 
     await act(async () => {
