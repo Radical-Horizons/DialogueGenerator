@@ -21,6 +21,8 @@ import { AttributeSkillTestEditor } from '../graph/AttributeSkillTestEditor'
 import { TraitRequirementsEditor } from '../shared/TraitRequirementsEditor'
 import { useDialogueEditionNarrow } from '../unityDialogues/DialogueEditionNarrowContext'
 import { useAuthStore } from '../../store/authStore'
+import { useGraphViewStore } from '../../store/graphViewStore'
+import { normalizeDialogueFilenameKey } from '../../utils/formatDialogueTitle'
 import {
   EditableDialogueTitle,
   EditorSaveStatusLabel,
@@ -73,6 +75,11 @@ export interface UnityDialogueEditorProps {
   /** Notifié après l'enregistrement d'un nouveau titre (`document.title`). */
   onRenamed?: (title: string) => void
   /**
+   * Le graphe vient d'enregistrer ce dialogue alors qu'aucune saisie n'attend ici :
+   * le parent recharge le document (contenu + révision).
+   */
+  onSavedElsewhere?: () => void
+  /**
    * Slot optionnel placé dans la zone titre du header (Story 17.7).
    * Utilisé en mode narrow pour héberger un sélecteur de dialogue (`DialogueCombobox`)
    * — le mode desktop conserve la liste latérale et n'utilise pas ce slot.
@@ -113,6 +120,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
   actions,
   onGenerateContinuation,
   onRenamed,
+  onSavedElsewhere,
   headerSelector,
   focusNodeId,
 }, ref) {
@@ -142,6 +150,8 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
   onSaveRef.current = onSave
   const onRenamedRef = useRef(onRenamed)
   onRenamedRef.current = onRenamed
+  const onSavedElsewhereRef = useRef(onSavedElsewhere)
+  onSavedElsewhereRef.current = onSavedElsewhere
   const documentRef = useRef(document)
   documentRef.current = document
   const documentIdRef = useRef(documentId)
@@ -444,6 +454,9 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
           (await documentsAPI.putDocument(targetId, body))
         revisionRef.current = response.revision
         lastErrorToastRef.current = null
+        useGraphViewStore
+          .getState()
+          .notifyDocumentSaved({ documentId: targetId, revision: response.revision, source: 'edition' })
         if (mountedRef.current) {
           setFieldErrors([])
           setSaveState({
@@ -493,6 +506,27 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
 
   const flushSaveRef = useRef(flushSave)
   flushSaveRef.current = flushSave
+
+  const documentSaved = useGraphViewStore((s) => s.documentSaved)
+  useEffect(() => {
+    if (!documentSaved || documentSaved.source !== 'graph' || !documentId) return
+    if (
+      normalizeDialogueFilenameKey(documentSaved.documentId) !== normalizeDialogueFilenameKey(documentId) ||
+      documentSaved.revision <= revisionRef.current
+    ) {
+      return
+    }
+    if (dirtyRef.current || inFlightSaveRef.current) {
+      revisionRef.current = documentSaved.revision
+      toastRef.current(
+        "Le graphe vient d'enregistrer ce dialogue pendant votre saisie : votre version va le remplacer.",
+        'warning',
+        8000,
+      )
+      return
+    }
+    onSavedElsewhereRef.current?.()
+  }, [documentSaved, documentId])
   const saveExistingDocumentRef = useRef(saveExistingDocument)
   saveExistingDocumentRef.current = saveExistingDocument
 

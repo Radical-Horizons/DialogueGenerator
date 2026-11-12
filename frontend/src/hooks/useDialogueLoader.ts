@@ -16,14 +16,20 @@ import type { UnityDialogueListRef } from '../components/unityDialogues/UnityDia
 import type { UseToastFn } from '../components/shared'
 import { normalizeDialogueFilenameKey } from '../utils/formatDialogueTitle'
 import { consumePendingValidationFocus } from '../utils/pendingValidationFocus'
+import { DELETED_DIALOGUE_MESSAGE, isDeletedDocumentError } from '../store/slices/persistenceSlice'
 
 interface RouteTarget {
   normalizedDialogueId: string
   decodedDialogueId: string
 }
 
-/** Circuit breaker: backoff après 4xx non-409 pour éviter la boucle d'autosave. */
-const AUTOSAVE_4XX_BACKOFF_MS = 10_000
+/** Délai avant de relancer une sauvegarde après une erreur passagère (réseau, 5xx, 409). */
+const AUTOSAVE_TRANSIENT_RETRY_MS = 3000
+
+const TRANSIENT_ERROR_CODES = new Set(['ERR_NETWORK', 'ECONNABORTED', 'ETIMEDOUT', 'ECONNREFUSED'])
+
+const EDITION_SAVED_WHILE_DIRTY_WARNING =
+  "Ce dialogue vient d'être enregistré depuis l'onglet Édition pendant une modification en cours dans le graphe : la version du graphe va le remplacer."
 
 const MISSING_CHOICE_ID_INFO =
   'Choix sans identifiant stable — ouvert quand même. La prochaine sauvegarde les écrira.'
@@ -46,6 +52,19 @@ function isMissingChoiceIdError(error: unknown): boolean {
     (status === 422 || status === 400) &&
     response?.data?.error?.code === 'missing_choice_id'
   )
+}
+
+/**
+ * Réseau, 5xx, 409, 408, 429 : relancer après un délai a un sens. Un 4xx de validation ou de
+ * droits, ou une erreur locale, se reproduira à l'identique : on attend la prochaine modification.
+ */
+function isTransientSaveError(error: unknown): boolean {
+  const status = (error as ApiErrorShape)?.response?.status
+  if (typeof status === 'number') {
+    return status >= 500 || status === 409 || status === 408 || status === 429
+  }
+  const code = (error as { code?: unknown })?.code
+  return error instanceof TypeError || (typeof code === 'string' && TRANSIENT_ERROR_CODES.has(code))
 }
 
 function shouldFallbackToUnityRaw(error: unknown): boolean {
@@ -99,6 +118,8 @@ export function useDialogueLoader(
   const activeDialogueFilenameRef = useRef<string | null>(null)
   const lastNetworkErrorRef = useRef<{ message: string; timestamp: number } | null>(null)
   const saveRetryBlockedUntilRef = useRef<number>(0)
+  /** Échec non passager : pas de relance avant une nouvelle modification de ce dialogue. */
+  const failedSaveRef = useRef<{ documentId: string; clientSeq: number } | null>(null)
   const [autosaveRetryTick, setAutosaveRetryTick] = useState(0)
 
   const {
@@ -167,11 +188,57 @@ export function useDialogueLoader(
     if (!dialogueDeleted) return
     useGraphViewStore.getState().clearDialogueDeleted()
     dialogueListRef.current?.refresh()
-    if (selectedDialogue?.filename === dialogueDeleted) {
+    const state = useGraphStore.getState()
+    const loaded = state.dialogueMetadata?.filename ?? state.documentId ?? null
+    const deletedKey = normalizeDialogueFilenameKey(dialogueDeleted)
+    const isSelected =
+      !!selectedDialogue?.filename &&
+      normalizeDialogueFilenameKey(selectedDialogue.filename) === deletedKey
+    if (isSelected || (!!loaded && normalizeDialogueFilenameKey(loaded) === deletedKey)) {
       setSelectedDialogue(null)
       resetGraphAndTemplateSession()
     }
   }, [dialogueDeleted, selectedDialogue?.filename, resetGraphAndTemplateSession])
+
+  const documentSaved = useGraphViewStore((s) => s.documentSaved)
+  useEffect(() => {
+    if (!documentSaved || documentSaved.source !== 'edition') return
+    const state = useGraphStore.getState()
+    const loadedId = state.documentId ?? state.dialogueMetadata?.filename ?? null
+    if (
+      !loadedId ||
+      normalizeDialogueFilenameKey(loadedId) !== normalizeDialogueFilenameKey(documentSaved.documentId) ||
+      (state.documentRevision ?? 0) >= documentSaved.revision
+    ) {
+      return
+    }
+    if (state.hasUnsavedChanges || state.isSaving || state.isGenerating || state.isLoading) {
+      toast(EDITION_SAVED_WHILE_DIRTY_WARNING, 'warning', 8000)
+      return
+    }
+    const selectedNodeId = state.selectedNodeId
+    const loadSeq = incrementLoadSeq()
+    void (async () => {
+      try {
+        await loadDialogueByDocumentId(loadedId)
+      } catch (err) {
+        if (useGraphStore.getState().activeLoadSeq === loadSeq) {
+          toast(`Rechargement du dialogue impossible: ${getErrorMessage(err)}`, 'error')
+        }
+        return
+      }
+      const next = useGraphStore.getState()
+      if (next.activeLoadSeq !== loadSeq) return
+      if (selectedNodeId && next.nodes.some((node) => node.id === selectedNodeId)) {
+        next.setSelectedNode(selectedNodeId)
+      }
+      try {
+        await validateGraph()
+      } catch (err) {
+        console.error('Erreur lors de la validation après rechargement:', err)
+      }
+    })()
+  }, [documentSaved, incrementLoadSeq, loadDialogueByDocumentId, validateGraph, toast])
 
   useEffect(() => {
     if (!selectedDialogue) {
@@ -187,6 +254,7 @@ export function useDialogueLoader(
       }
       loadInFlightRef.current = true
       setIsLoadingDialogue(true)
+      const previousSelection = prevSelectedDialogueRef.current
       prevSelectedDialogueRef.current = selectedDialogue
 
       const state = useGraphStore.getState()
@@ -205,6 +273,9 @@ export function useDialogueLoader(
       if (!(await saveBeforeLeaving())) {
         loadInFlightRef.current = false
         setIsLoadingDialogue(false)
+        // Le graphe montre toujours l'ancien dialogue : la sélection doit le dire aussi.
+        prevSelectedDialogueRef.current = previousSelection
+        setSelectedDialogue(previousSelection)
         return
       }
 
@@ -411,6 +482,9 @@ export function useDialogueLoader(
       if (!(await saveBeforeLeaving())) {
         loadInFlightRef.current = false
         setIsLoadingDialogue(false)
+        const graph = useGraphStore.getState()
+        const displayed = graph.dialogueMetadata?.filename || graph.documentId
+        if (displayed) useGraphViewStore.getState().requestRouteDialogueRevert(displayed)
         return
       }
       const loadSeq = incrementLoadSeq()
@@ -503,6 +577,10 @@ export function useDialogueLoader(
     ) {
       return
     }
+    const failedSave = failedSaveRef.current
+    if (failedSave && failedSave.documentId === storeFilename && failedSave.clientSeq === clientSeq) {
+      return
+    }
     const blockedForMs = saveRetryBlockedUntilRef.current - Date.now()
     if (blockedForMs > 0) {
       const retryId = setTimeout(() => setAutosaveRetryTick((tick) => tick + 1), blockedForMs)
@@ -510,14 +588,22 @@ export function useDialogueLoader(
     }
 
     const timeoutId = setTimeout(() => {
-      saveDialogue().then(notifySaveOutcome).catch((err) => {
-        const status = (err as { response?: { status?: number } })?.response?.status
-        if (typeof status === 'number' && status >= 400 && status < 500 && status !== 409) {
-          saveRetryBlockedUntilRef.current = Date.now() + AUTOSAVE_4XX_BACKOFF_MS
+      const attemptedSeq = useGraphStore.getState().clientSeq
+      saveDialogue().then((response) => {
+        failedSaveRef.current = null
+        notifySaveOutcome(response)
+      }).catch((err) => {
+        if (isTransientSaveError(err)) {
+          failedSaveRef.current = null
+          saveRetryBlockedUntilRef.current = Date.now() + AUTOSAVE_TRANSIENT_RETRY_MS
         } else {
-          saveRetryBlockedUntilRef.current = Date.now() + 3000
+          failedSaveRef.current = { documentId: storeFilename, clientSeq: attemptedSeq }
         }
         setAutosaveRetryTick((tick) => tick + 1)
+        if (isDeletedDocumentError(err)) {
+          toast(DELETED_DIALOGUE_MESSAGE, 'error')
+          return
+        }
         const errorMessage = getErrorMessage(err)
         const isNetworkError =
           errorMessage.includes('connexion au serveur') ||
