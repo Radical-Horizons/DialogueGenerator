@@ -103,5 +103,5 @@ class TestDocumentsVisibilityConditions:
 
         bad = _doc_with_visibility()
         bad["nodes"][0]["visibilityConditions"]["items"][0]["flagId"] = "NOPE"
-        r = client.put(f"/api/v1/documents/{doc_id}", json={"document": bad, "revision": 2})
+        r = client.put(f"/api/v1/documents/{doc_id}", json={"document": bad, "revision": 2, "validationMode": "export"})
         assert r.status_code == 422

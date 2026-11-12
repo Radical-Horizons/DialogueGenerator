@@ -107,9 +107,15 @@ function revisionConflictOf(error: unknown): number | null {
   return response?.status === 409 && typeof revision === 'number' ? revision : null
 }
 
+function conflictDocumentOf(error: unknown): Record<string, unknown> | undefined {
+  const document = (error as { response?: { data?: { document?: unknown } } })?.response?.data
+    ?.document
+  return document && typeof document === 'object' ? (document as Record<string, unknown>) : undefined
+}
+
 /** Auteur unique : le graphe ouvert l'emporte sur une révision serveur plus récente. */
 async function putOverwritingRevisionConflict<T>(
-  put: (revision: number) => Promise<T>,
+  put: (revision: number, serverDocument?: Record<string, unknown>) => Promise<T>,
   revision: number,
 ): Promise<{ result: T; conflicted: boolean }> {
   try {
@@ -117,7 +123,7 @@ async function putOverwritingRevisionConflict<T>(
   } catch (error) {
     const serverRevision = revisionConflictOf(error)
     if (serverRevision === null) throw error
-    return { result: await put(serverRevision), conflicted: true }
+    return { result: await put(serverRevision, conflictDocumentOf(error)), conflicted: true }
   }
 }
 
@@ -502,7 +508,10 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         )
       }
 
-      const putDocumentAt = async (revision: number) => {
+      const putDocumentAt = async (revision: number, serverDocument?: Record<string, unknown>) => {
+        // Le graphe ne porte pas le titre : sur conflit, celui du serveur (renommé dans Édition) prime.
+        const serverTitle = serverDocument?.title
+        if (typeof serverTitle === 'string' && serverTitle.trim()) doc.title = serverTitle
         // Brouillon : une saisie en cours (condition à moitié remplie) ne doit pas faire refuser
         // toute la persistance ; l'export Unity garde sa propre validation stricte.
         const body = { document: doc, revision, validationMode: 'draft' as const }

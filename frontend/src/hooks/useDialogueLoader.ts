@@ -29,7 +29,7 @@ const MISSING_CHOICE_ID_INFO =
   'Choix sans identifiant stable — ouvert quand même. La prochaine sauvegarde les écrira.'
 
 const REPLACED_NEWER_VERSION_INFO =
-  'Une version plus récente de ce dialogue a été remplacée par celle du graphe'
+  "Ce dialogue avait été modifié ailleurs (onglet Édition ou autre onglet) : ces modifications ont été remplacées par celles du graphe, seul le titre a été conservé"
 
 type ApiErrorShape = {
   response?: { status?: number; data?: { error?: { code?: string } } }

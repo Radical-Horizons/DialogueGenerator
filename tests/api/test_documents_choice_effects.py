@@ -135,7 +135,7 @@ class TestDocumentsChoiceEffects:
         bad["nodes"][0]["choices"][0]["choiceEffects"] = [
             {"kind": "set_bool", "flagId": "EF_CNT", "value": True}
         ]
-        r = client.put(f"/api/v1/documents/{doc_id}", json={"document": bad, "revision": 2})
+        r = client.put(f"/api/v1/documents/{doc_id}", json={"document": bad, "revision": 2, "validationMode": "export"})
         assert r.status_code == 422
 
     def test_put_rejects_counter_overflow_after_apply(self, client, mock_config_service, tmp_path):
@@ -149,7 +149,7 @@ class TestDocumentsChoiceEffects:
         bad["nodes"][0]["choices"][0]["choiceEffects"] = [
             {"kind": "adjust_counter", "flagId": "EF_CNT", "operator": "+=", "value": 100}
         ]
-        r = client.put(f"/api/v1/documents/{doc_id}", json={"document": bad, "revision": 2})
+        r = client.put(f"/api/v1/documents/{doc_id}", json={"document": bad, "revision": 2, "validationMode": "export"})
         assert r.status_code == 422
 
     def test_put_rejects_enum_value_not_in_catalog(self, client, mock_config_service, tmp_path):
@@ -163,7 +163,7 @@ class TestDocumentsChoiceEffects:
         bad["nodes"][0]["choices"][0]["choiceEffects"] = [
             {"kind": "set_enum", "flagId": "EF_ENUM", "value": "zorg"}
         ]
-        r = client.put(f"/api/v1/documents/{doc_id}", json={"document": bad, "revision": 2})
+        r = client.put(f"/api/v1/documents/{doc_id}", json={"document": bad, "revision": 2, "validationMode": "export"})
         assert r.status_code == 422
 
     def test_put_rejects_reputation_delta_out_of_gdd_bounds(self, client, mock_config_service, tmp_path):
@@ -182,5 +182,56 @@ class TestDocumentsChoiceEffects:
                 "delta": 99,
             }
         ]
-        r = client.put(f"/api/v1/documents/{doc_id}", json={"document": bad, "revision": 2})
+        r = client.put(f"/api/v1/documents/{doc_id}", json={"document": bad, "revision": 2, "validationMode": "export"})
         assert r.status_code == 422
+
+
+class TestDocumentsIncompleteFlagAtomsDraft:
+    """Autosave du graphe : une condition ou un effet sans flag choisi ne bloque pas la persistance."""
+
+    def _incomplete_doc(self) -> dict:
+        doc = _doc_valid_effects()
+        choice = doc["nodes"][0]["choices"][0]
+        choice["choiceEffects"] = [{"kind": "set_bool", "flagId": "", "value": True}]
+        choice["visibilityConditions"] = {
+            "combinator": "AND",
+            "items": [{"kind": "flag_bool", "flagId": "", "equals": True}],
+        }
+        doc["nodes"][1]["line"] = "Texte écrit ailleurs pendant la saisie"
+        return doc
+
+    def _seed(self, mock_config_service, tmp_path, doc_id: str) -> None:
+        base = {"schemaVersion": "1.2.0", "nodes": [{"id": "START", "line": "Hello", "nextNode": "END"}]}
+        (tmp_path / f"{doc_id}.json").write_text(json.dumps(base), encoding="utf-8")
+        (tmp_path / f"{doc_id}.meta").write_text(json.dumps({"revision": 2}), encoding="utf-8")
+        mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+
+    def test_draft_persists_and_reports_incomplete_atoms(self, client, mock_config_service, tmp_path):
+        doc_id = "fx-draft-incomplete"
+        self._seed(mock_config_service, tmp_path, doc_id)
+
+        r = client.put(
+            f"/api/v1/documents/{doc_id}",
+            json={"document": self._incomplete_doc(), "revision": 2, "validationMode": "draft"},
+        )
+
+        assert r.status_code == 200, r.text
+        codes = {e["code"]: e["path"] for e in r.json()["validationReport"]}
+        assert codes["invalid_visibility_condition"] == "nodes[0].choices[0].visibilityConditions"
+        assert codes["invalid_choice_effect"] == "nodes[0].choices[0].choiceEffects[0]"
+        persisted = json.loads((tmp_path / f"{doc_id}.json").read_text(encoding="utf-8"))
+        assert persisted["nodes"][1]["line"] == "Texte écrit ailleurs pendant la saisie"
+
+    def test_export_still_rejects_incomplete_atoms(self, client, mock_config_service, tmp_path):
+        doc_id = "fx-export-incomplete"
+        self._seed(mock_config_service, tmp_path, doc_id)
+
+        r = client.put(
+            f"/api/v1/documents/{doc_id}",
+            json={"document": self._incomplete_doc(), "revision": 2, "validationMode": "export"},
+        )
+
+        assert r.status_code == 422
+        persisted = json.loads((tmp_path / f"{doc_id}.json").read_text(encoding="utf-8"))
+        assert persisted["nodes"][0]["line"] == "Hello"
+        assert "choices" not in persisted["nodes"][0]

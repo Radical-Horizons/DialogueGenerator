@@ -78,6 +78,36 @@ describe('saveDialogue — conflit de révision', () => {
     expect(response.replacedNewerVersion).toBe(true)
   })
 
+  it("409 document : le renvoi garde le titre du serveur (renommé dans Édition), pas le titre périmé du graphe", async () => {
+    vi.mocked(documentsAPI.getDocument).mockResolvedValue({
+      document: { ...sampleDocument, title: 'Ancien titre' },
+      schemaVersion: '1.1.0',
+      revision: 3,
+    })
+    vi.mocked(documentsAPI.getLayout).mockResolvedValue({ layout: { nodes: {} }, revision: 2 })
+    await useGraphStore.getState().loadDialogueByDocumentId('doc')
+    useGraphStore.getState().updateNode('START', { data: { line: 'Modifié', speaker: 'NPC' } })
+    vi.mocked(documentsAPI.putDocument)
+      .mockRejectedValueOnce({
+        response: {
+          status: 409,
+          data: { revision: 9, document: { ...sampleDocument, title: 'Titre renommé dans Édition' } },
+        },
+        message: 'HTTP 409',
+      })
+      .mockResolvedValueOnce({ revision: 10 })
+    vi.mocked(documentsAPI.putLayout).mockResolvedValue({ revision: 3 })
+
+    await useGraphStore.getState().saveDialogue()
+
+    const resent = vi.mocked(documentsAPI.putDocument).mock.calls[1][1]
+    expect(resent.document.title).toBe('Titre renommé dans Édition')
+    expect((resent.document.nodes as Array<{ line?: string }>)[0].line).toBe('Modifié')
+    expect((useGraphStore.getState().document as Record<string, unknown>).title).toBe(
+      'Titre renommé dans Édition',
+    )
+  })
+
   it('409 sur le layout : reprend la révision layout du serveur et relance une fois', async () => {
     await loadDirtyDialogue()
     vi.mocked(documentsAPI.putDocument).mockResolvedValue({ revision: 4 })
