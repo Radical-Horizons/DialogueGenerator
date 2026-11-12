@@ -10,6 +10,7 @@ import { memo, useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useForm, FormProvider, useFormContext, useFieldArray, Controller, type FieldErrors } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useShallow } from 'zustand/react/shallow'
+import type { Node } from 'reactflow'
 import { useGraphStore } from '../../store/graphStore'
 import { useGraphViewStore } from '../../store/graphViewStore'
 import { useContextStore } from '../../store/contextStore'
@@ -50,6 +51,7 @@ import {
   mergeNodeFormIntoStoreData,
   mergeDialogueNodeFormIntoStoreData,
   connectionFingerprintFromNodeData,
+  textFingerprintFromNodeData,
   applyStoreConnectionFieldsToDialogueFormChoices,
   applyLinearNextNodeFromGraphEdges,
 } from '../../utils/mergeNodeEditorForm'
@@ -60,6 +62,38 @@ import { ConnectionTargetSelect } from './ConnectionTargetSelect'
 import { useEstimation } from '../../hooks/useEstimation'
 import { EstimationBadge } from '../estimation'
 import { serializeDialogueNodesForApi } from '../../utils/dialoguePathContext'
+
+function formValuesFromNode(
+  nodeType: string,
+  node: Node
+): DialogueNodeData | TestNodeData | EndNodeData {
+  const data = node.data
+  if (nodeType === 'dialogueNode') {
+    return {
+      id: node.id,
+      title: (data.title as string) ?? '',
+      speaker: data.speaker || '',
+      line: data.line || '',
+      visibilityConditions: data.visibilityConditions as
+        | DialogueNodeData['visibilityConditions']
+        | undefined,
+      choices: (data.choices || []) as Choice[],
+      nextNode: data.nextNode || '',
+    }
+  }
+  if (nodeType === 'testNode') {
+    return {
+      id: node.id,
+      test: data.test || '',
+      line: data.line || '',
+      criticalFailureNode: data.criticalFailureNode || '',
+      failureNode: data.failureNode || '',
+      successNode: data.successNode || '',
+      criticalSuccessNode: data.criticalSuccessNode || '',
+    }
+  }
+  return { id: node.id }
+}
 
 export const NodeEditorPanel = memo(function NodeEditorPanel() {
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId)
@@ -177,6 +211,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
   const flushCurrentFormToStoreRef = useRef<() => void>(() => {})
   /** Dernière empreinte des champs « connexion » du nœud sélectionné (évite resync inutile + boucles). */
   const prevConnectionFingerprintRef = useRef<string>('')
+  const lastSeenStoreTextRef = useRef<string>('')
 
   const DEBOUNCE_MS = 100
 
@@ -261,42 +296,35 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     previousSelectedNodeIdRef.current = currentId
 
     if (selectionChanged && selectedNode?.data) {
-      if (nodeType === 'dialogueNode') {
-        const choices = (selectedNode.data.choices || []) as Choice[]
-        
-        reset({
-          id: selectedNode.id,
-          title: (selectedNode.data.title as string) ?? '',
-          speaker: selectedNode.data.speaker || '',
-          line: selectedNode.data.line || '',
-          visibilityConditions: selectedNode.data.visibilityConditions as
-            | DialogueNodeData['visibilityConditions']
-            | undefined,
-          choices,
-          nextNode: selectedNode.data.nextNode || '',
-        })
-      } else if (nodeType === 'testNode') {
-        reset({
-          id: selectedNode.id,
-          test: selectedNode.data.test || '',
-          line: selectedNode.data.line || '',
-          criticalFailureNode: selectedNode.data.criticalFailureNode || '',
-          failureNode: selectedNode.data.failureNode || '',
-          successNode: selectedNode.data.successNode || '',
-          criticalSuccessNode: selectedNode.data.criticalSuccessNode || '',
-        })
-      } else {
-        reset({
-          id: selectedNode.id,
-        })
-      }
+      reset(formValuesFromNode(nodeType, selectedNode))
       prevConnectionFingerprintRef.current = connectionFingerprintFromNodeData(
         nodeType,
         selectedNode.data as Record<string, unknown>
       )
     } else if (selectionChanged) {
       prevConnectionFingerprintRef.current = ''
+    } else if (selectedNode?.data) {
+      // Écriture externe (undo, génération) : le formulaire ne suit que s'il n'a pas de saisie
+      // en attente, sinon le prochain flush réécrirait l'ancien texte par-dessus le store.
+      const storeText = textFingerprintFromNodeData(
+        nodeType,
+        selectedNode.data as Record<string, unknown>
+      )
+      const formText = textFingerprintFromNodeData(
+        nodeType,
+        form.getValues() as Record<string, unknown>
+      )
+      if (storeText !== formText && formText === lastSeenStoreTextRef.current) {
+        reset(formValuesFromNode(nodeType, selectedNode))
+        prevConnectionFingerprintRef.current = connectionFingerprintFromNodeData(
+          nodeType,
+          selectedNode.data as Record<string, unknown>
+        )
+      }
     }
+    lastSeenStoreTextRef.current = selectedNode?.data
+      ? textFingerprintFromNodeData(nodeType, selectedNode.data as Record<string, unknown>)
+      : ''
   }, [selectedNodeId, selectedNode, nodeType, reset, form, updateNode])
 
   // Même nœud sélectionné : le store peut mettre à jour les connexions (génération, edges) sans resélection.

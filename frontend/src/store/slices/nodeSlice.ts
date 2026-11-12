@@ -5,7 +5,7 @@
  */
 import type { StateCreator } from 'zustand'
 import type { Edge, Node } from 'reactflow'
-import type { GraphState } from '../types/graphState'
+import type { GraphState, GraphSnapshot } from '../types/graphState'
 import type { Choice } from '../../schemas/nodeEditorSchema'
 import type { RegenerationEntry } from '../../types/graph'
 import {
@@ -430,6 +430,56 @@ function updateDialogueNodeDirectly(
   }
 }
 
+/**
+ * Une pause de saisie au moins aussi longue clôt l'étape d'undo en cours (story 18.4) :
+ * coalescer évite qu'une minute de frappe vide les 50 snapshots de l'historique structurel.
+ */
+const UNDO_COALESCE_WINDOW_MS = 1000
+
+/** Forme comparable d'une valeur : ordre des clés ignoré, absent / null / '' équivalents. */
+function canonicalValue(value: unknown): unknown {
+  if (value === undefined || value === null || value === '') return ''
+  if (Array.isArray(value)) return value.map(canonicalValue)
+  if (typeof value === 'object') {
+    const entries = Object.entries(value as Record<string, unknown>)
+      .map(([k, v]) => [k, canonicalValue(v)] as const)
+      .filter(([, v]) => v !== '')
+      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+    return Object.fromEntries(entries)
+  }
+  return value
+}
+
+function sameValue(a: unknown, b: unknown): boolean {
+  return JSON.stringify(canonicalValue(a)) === JSON.stringify(canonicalValue(b))
+}
+
+/** Champs que `updates` modifie réellement sur `node` (`data.<champ>` pour les données). */
+function changedFieldKeys(node: Node, updates: Partial<Node>): string[] {
+  const changed: string[] = []
+  for (const [key, value] of Object.entries(updates)) {
+    if (key === 'data' && value !== null && typeof value === 'object') {
+      const before = (node.data ?? {}) as Record<string, unknown>
+      for (const [field, next] of Object.entries(value as Record<string, unknown>)) {
+        if (!sameValue(before[field], next)) changed.push(`data.${field}`)
+      }
+    } else if (!sameValue((node as unknown as Record<string, unknown>)[key], value)) {
+      changed.push(key)
+    }
+  }
+  return changed.sort()
+}
+
+/**
+ * Rafale de saisie en cours : tant qu'elle dure, ses écritures partagent la même étape d'undo.
+ * Liée au snapshot qu'elle a poussé : un undo ou une autre transaction la clôt d'office.
+ */
+let lastFieldEdit: { key: string; at: number; snapshot: GraphSnapshot | undefined } | null = null
+
+function topUndoSnapshot(state: GraphState): GraphSnapshot | undefined {
+  return state.undoStack[state.undoStack.length - 1]
+}
+
 // ---------------------------------------------------------------------------
 // Slice
 // ---------------------------------------------------------------------------
@@ -459,16 +509,18 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
   syncMissingDisplayNames: (nodeIds: string[]) => {
     const updated: string[] = []
     const state = get()
-    for (const nodeId of nodeIds) {
-      const node = state.nodes.find((n) => n.id === nodeId)
-      if (!node?.data || typeof node.data !== 'object') continue
-      const data = node.data as Record<string, unknown>
-      if (nodeHasStructuralDisplayName(data)) continue
-      const displayName = deriveAutoDisplayName(node)
-      if (!displayName.trim()) continue
-      get().updateNode(nodeId, { data: { ...data, displayName } }, true)
-      updated.push(nodeId)
-    }
+    state.runAsSingleUndoStep(() => {
+      for (const nodeId of nodeIds) {
+        const node = state.nodes.find((n) => n.id === nodeId)
+        if (!node?.data || typeof node.data !== 'object') continue
+        const data = node.data as Record<string, unknown>
+        if (nodeHasStructuralDisplayName(data)) continue
+        const displayName = deriveAutoDisplayName(node)
+        if (!displayName.trim()) continue
+        get().updateNode(nodeId, { data: { ...data, displayName } }, true)
+        updated.push(nodeId)
+      }
+    })
     if (updated.length > 0) get().markDirty()
     return updated
   },
@@ -505,32 +557,45 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
     return node
   },
 
-  // Hors runGraphTransaction : éditions texte très fréquentes saturerait la pile undo ;
-  // les opérations discrètes (add/delete/connect) passent par des transactions.
   updateNode: (nodeId: string, updates: Partial<Node>, skipMarkDirty = false) => {
-    set((state) => {
-      const node = state.nodes.find((n) => n.id === nodeId)
-      if (!node) return state
+    const node = get().nodes.find((n) => n.id === nodeId)
+    if (!node) return
+    const changed = changedFieldKeys(node, updates)
+    const editKey = `${nodeId}:${changed.join(',')}`
+    const now = Date.now()
+    const continuesBurst =
+      changed.length === 0 ||
+      (lastFieldEdit !== null &&
+        lastFieldEdit.key === editKey &&
+        now - lastFieldEdit.at < UNDO_COALESCE_WINDOW_MS &&
+        lastFieldEdit.snapshot === topUndoSnapshot(get()))
 
-      // Branche 1 : mode document SoT
-      if (state.document != null && state.layout != null) {
-        const result =
-          node.type === 'testNode'
-            ? updateTestNodeInDocumentSoT(nodeId, updates, state)
-            : updateDialogueNodeInDocumentSoT(nodeId, updates, state)
-        if (result === null) return state
-        return result
-      }
+    runGraphTransaction(
+      get,
+      set,
+      (state) => {
+        // Branche 1 : mode document SoT
+        if (state.document != null && state.layout != null) {
+          const result =
+            node.type === 'testNode'
+              ? updateTestNodeInDocumentSoT(nodeId, updates, state)
+              : updateDialogueNodeInDocumentSoT(nodeId, updates, state)
+          return result ?? {}
+        }
+        // Branche 2 : TestNode direct
+        if (node.type === 'testNode') {
+          const result = updateTestNodeDirectly(nodeId, updates, state)
+          return result === state ? {} : result
+        }
+        // Branche 3 : DialogueNode direct
+        return updateDialogueNodeDirectly(nodeId, updates, state)
+      },
+      { skipUndo: continuesBurst, skipMarkDirty, skipSyncDoc: true },
+    )
 
-      // Branche 2 : TestNode direct
-      if (node.type === 'testNode') {
-        return updateTestNodeDirectly(nodeId, updates, state)
-      }
-
-      // Branche 3 : DialogueNode direct
-      return updateDialogueNodeDirectly(nodeId, updates, state)
-    })
-    if (!skipMarkDirty) get().markDirty()
+    if (changed.length > 0) {
+      lastFieldEdit = { key: editKey, at: now, snapshot: topUndoSnapshot(get()) }
+    }
   },
 
   deleteNode: (nodeId: string, skipMarkDirty = false, skipPushUndoSnapshot = false) => {
@@ -757,13 +822,15 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
   batchTagNodes: (nodeIds: string[], tag: string) => {
     const state = get()
     let updatedCount = 0
-    for (const nodeId of nodeIds) {
-      const node = state.nodes.find((n) => n.id === nodeId)
-      if (!node) continue
-      const currentData = (node.data ?? {}) as Record<string, unknown>
-      get().updateNode(nodeId, { data: { ...currentData, tag } }, true)
-      updatedCount += 1
-    }
+    state.runAsSingleUndoStep(() => {
+      for (const nodeId of nodeIds) {
+        const node = state.nodes.find((n) => n.id === nodeId)
+        if (!node) continue
+        const currentData = (node.data ?? {}) as Record<string, unknown>
+        get().updateNode(nodeId, { data: { ...currentData, tag } }, true)
+        updatedCount += 1
+      }
+    })
     if (updatedCount > 0) get().markDirty()
   },
 
