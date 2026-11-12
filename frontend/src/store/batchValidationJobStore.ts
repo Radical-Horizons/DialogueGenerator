@@ -10,6 +10,12 @@ import {
   type BatchValidateReport,
 } from '../api/batchValidation'
 import { toastManager } from '../components/shared/Toast'
+import {
+  MAX_TRANSIENT_POLL_FAILURES,
+  TRANSIENT_POLL_DELAY_MS,
+  isTransientPollError,
+  pollErrorMessage,
+} from './batchJobPolling'
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -65,17 +71,41 @@ export const useBatchValidationJobStore = create<BatchValidationJobState>(
       })
 
       void (async () => {
-        try {
-          while (generation === pollGeneration) {
-            const status = await getBatchValidateJob(jobId)
+        let failures = 0
+        while (generation === pollGeneration) {
+          let status: BatchValidateJobStatus
+          try {
+            status = await getBatchValidateJob(jobId)
+            failures = 0
+          } catch (err) {
             if (generation !== pollGeneration) return
-            set({
-              status: status.status,
-              current: status.current,
-              total: status.total,
-              error: status.error ?? null,
-            })
-            if (
+            if (isTransientPollError(err) && failures < MAX_TRANSIENT_POLL_FAILURES) {
+              failures += 1
+              await sleep(TRANSIENT_POLL_DELAY_MS)
+              continue
+            }
+            const message = pollErrorMessage(err, 'Erreur polling validation batch')
+            set({ isPolling: false, status: 'error', error: message })
+            toastManager.show(message, 'error', 8000)
+            return
+          }
+          if (generation !== pollGeneration) return
+          set({
+            status: status.status,
+            current: status.current,
+            total: status.total,
+            error: status.error ?? null,
+          })
+          if (status.status === 'interrupted') {
+            set({ report: status.report ?? null, isPolling: false })
+            toastManager.show(
+              'Validation interrompue par un redémarrage du serveur. Relancez-la : les dialogues déjà validés sont conservés.',
+              'warning',
+              8000
+            )
+            return
+          }
+          if (
               status.status === 'completed' ||
               status.status === 'cancelled' ||
               status.status === 'error'
@@ -103,13 +133,6 @@ export const useBatchValidationJobStore = create<BatchValidationJobState>(
               return
             }
             await sleep(800)
-          }
-        } catch (err) {
-          if (generation !== pollGeneration) return
-          const message =
-            err instanceof Error ? err.message : 'Erreur polling validation batch'
-          set({ isPolling: false, status: 'error', error: message })
-          toastManager.show(message, 'error', 8000)
         }
       })()
     },

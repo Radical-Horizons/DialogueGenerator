@@ -28,7 +28,7 @@ export type BatchValidateReport = {
 
 export type BatchValidateJobStatus = {
   job_id: string
-  status: 'queued' | 'running' | 'completed' | 'cancelled' | 'error'
+  status: 'queued' | 'running' | 'completed' | 'cancelled' | 'error' | 'interrupted'
   current: number
   total: number
   cancelled: boolean

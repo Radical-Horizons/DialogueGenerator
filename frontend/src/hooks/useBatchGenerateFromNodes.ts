@@ -125,6 +125,7 @@ export function useBatchGenerateFromNodes(
   const jobTotal = useBatchNodeGenerationJobStore((s) => s.total)
   const jobDetail = useBatchNodeGenerationJobStore((s) => s.detail)
   const jobReport = useBatchNodeGenerationJobStore((s) => s.report)
+  const jobStatus = useBatchNodeGenerationJobStore((s) => s.status)
   const pendingApplyReport = useBatchNodeGenerationJobStore((s) => s.pendingApplyReport)
   const startPolling = useBatchNodeGenerationJobStore((s) => s.startPolling)
   const cancelActiveJob = useBatchNodeGenerationJobStore((s) => s.cancelActiveJob)
@@ -321,7 +322,7 @@ export function useBatchGenerateFromNodes(
   )
 
   const runJob = useCallback(
-    async (parentIds: string[]) => {
+    async (parentIds: string[], resumeJobId?: string) => {
       const specs: BatchGenerateParentSpec[] = []
       for (const id of parentIds) {
         const spec = buildParentSpec(id)
@@ -333,7 +334,8 @@ export function useBatchGenerateFromNodes(
         return
       }
       // Si après filtre introuvables on est sous le seuil job, basculer en séquentiel
-      if (specs.length < BATCH_GENERATE_JOB_MIN) {
+      // (jamais pour une reprise : le serveur détient les parents déjà générés).
+      if (specs.length < BATCH_GENERATE_JOB_MIN && !resumeJobId) {
         await runSequential(specs.map((s) => s.parent_node_id))
         return
       }
@@ -346,8 +348,13 @@ export function useBatchGenerateFromNodes(
         parents: specs,
         dialogue_nodes: serializeDialogueNodesForApi(state.nodes),
         choices_mode: 'capped',
+        ...(resumeJobId ? { resume_job_id: resumeJobId } : {}),
       })
-      setProgress({ current: 0, total: created.total, detail: 'Job démarré' })
+      setProgress({
+        current: 0,
+        total: created.total,
+        detail: resumeJobId ? 'Reprise du lot' : 'Job démarré',
+      })
       startPolling(created.job_id)
       // Relais vers `jobIsPolling` : ce hook n'est plus "local" une fois le
       // job accepté par le serveur — évite que `isGenerating` reste bloqué
@@ -388,14 +395,36 @@ export function useBatchGenerateFromNodes(
     [runJob, runSequential, toast, isGeneratingLocal, jobIsPolling]
   )
 
+  const resumeInterruptedJob = useCallback(async () => {
+    const { jobId, report: partial } = useBatchNodeGenerationJobStore.getState()
+    const parentIds = partial?.items.map((i) => i.parent_node_id) ?? []
+    if (!jobId || parentIds.length === 0) return
+    if (submittingRef.current || jobIsPolling) return
+    submittingRef.current = true
+    setIsGeneratingLocal(true)
+    try {
+      await runJob(parentIds, jobId)
+    } catch (err) {
+      toast(getErrorMessage(err), 'error')
+      setIsGeneratingLocal(false)
+    } finally {
+      submittingRef.current = false
+    }
+  }, [jobIsPolling, runJob, toast])
+
+  /** « Réessayer les échecs », ou « Reprendre » quand le lot a été interrompu. */
   const retryFailedParents = useCallback(async () => {
+    if (jobStatus === 'interrupted') {
+      await resumeInterruptedJob()
+      return
+    }
     const failed =
       report?.items
         .filter((i) => i.status === 'error')
         .map((i) => i.parent_node_id) || []
     if (failed.length === 0) return
     await startBatchGenerate(failed)
-  }, [report, startBatchGenerate])
+  }, [jobStatus, report, resumeInterruptedJob, startBatchGenerate])
 
   return {
     isGenerating,

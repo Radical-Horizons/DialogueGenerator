@@ -42,7 +42,7 @@ export type BatchGenerateReport = {
 
 export type BatchGenerateJobStatus = {
   job_id: string
-  status: 'queued' | 'running' | 'completed' | 'cancelled' | 'error'
+  status: 'queued' | 'running' | 'completed' | 'cancelled' | 'error' | 'interrupted'
   current: number
   total: number
   detail: string
@@ -68,6 +68,8 @@ export type StartBatchGenerateJobRequest = {
   system_prompt_override?: string
   max_choices?: number | null
   choices_mode?: 'free' | 'capped'
+  /** Job interrompu à reprendre : les parents déjà générés ne sont pas refacturés. */
+  resume_job_id?: string
 }
 
 export async function startBatchGenerateFromNodesJob(
