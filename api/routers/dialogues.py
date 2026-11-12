@@ -5,11 +5,12 @@ import os
 import re
 import json
 from pathlib import Path
-from typing import Annotated, Dict, Any
+from typing import Annotated, Dict, Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import Response
 
 from api.routers.auth import get_current_user
+from api.utils.batch_job_resume import resolve_resume_job_id
 from api.utils.job_ownership import job_owner_key
 from starlette.requests import Request
 from api.schemas.dialogue import (
@@ -79,6 +80,7 @@ from services.unity_export_validation_service import validate_unity_export_docum
 from services.batch_export_service import batch_export_documents
 from services.batch_validation_service import (
     BATCH_VALIDATE_JOB_MIN,
+    BatchValidationItem,
     BatchValidationReport,
     BatchValidationService,
 )
@@ -849,33 +851,52 @@ async def batch_export_unity_dialogues(
         )
 
 
+def _batch_item_to_response(item: BatchValidationItem) -> BatchValidationItemResponse:
+    """Convertit un résultat de validation en schéma HTTP."""
+    return BatchValidationItemResponse(
+        document_id=item.document_id,
+        status=item.status,
+        issues=[
+            BatchValidationIssueResponse(
+                type=issue.type,
+                message=issue.message,
+                severity=issue.severity,
+                source=issue.source,
+                node_id=issue.node_id,
+            )
+            for issue in item.issues
+        ],
+        validated_at=item.validated_at,
+    )
+
+
+def _merge_validation_report(
+    items: list[BatchValidationItemResponse],
+    cancelled: bool,
+    started_at: str,
+    finished_at: str,
+) -> BatchValidateResponse:
+    """Rapport HTTP à partir d'items déjà convertis (lot complet, repris ou interrompu)."""
+    return BatchValidateResponse(
+        items=items,
+        cancelled=cancelled,
+        started_at=started_at,
+        finished_at=finished_at,
+        valid_count=sum(1 for i in items if i.status == "valid"),
+        invalid_count=sum(1 for i in items if i.status == "invalid"),
+        skipped_count=sum(
+            1 for i in items if i.status in ("skipped", "cancelled", "denied")
+        ),
+    )
+
+
 def _batch_report_to_response(report: BatchValidationReport) -> BatchValidateResponse:
     """Convertit le rapport métier en schéma HTTP."""
-    return BatchValidateResponse(
-        items=[
-            BatchValidationItemResponse(
-                document_id=item.document_id,
-                status=item.status,
-                issues=[
-                    BatchValidationIssueResponse(
-                        type=issue.type,
-                        message=issue.message,
-                        severity=issue.severity,
-                        source=issue.source,
-                        node_id=issue.node_id,
-                    )
-                    for issue in item.issues
-                ],
-                validated_at=item.validated_at,
-            )
-            for item in report.items
-        ],
-        cancelled=report.cancelled,
-        started_at=report.started_at,
-        finished_at=report.finished_at,
-        valid_count=report.valid_count,
-        invalid_count=report.invalid_count,
-        skipped_count=report.skipped_count,
+    return _merge_validation_report(
+        [_batch_item_to_response(item) for item in report.items],
+        report.cancelled,
+        report.started_at,
+        report.finished_at,
     )
 
 
@@ -977,12 +998,30 @@ async def start_batch_validate_job(
     import asyncio
 
     owner = job_owner_key(current_user)
-    job_id = job_manager.create_job(request_data.document_ids, owner)
+    document_ids = list(request_data.document_ids)
+    resumed_job_id = resolve_resume_job_id(
+        job_manager,
+        resume_job_id=request_data.resume_job_id,
+        item_ids=document_ids,
+        current_user=current_user,
+        resource_type="BatchValidateJob",
+        request_id=request_id,
+    )
+    done: dict[str, BatchValidationItemResponse] = {}
+    if resumed_job_id:
+        for doc_id, raw in job_manager.checkpointed_items(resumed_job_id).items():
+            if raw.get("status") in ("valid", "invalid") and doc_id in document_ids:
+                done[doc_id] = BatchValidationItemResponse(**raw)
+        job_id = resumed_job_id
+        job_manager.prepare_resume(job_id, document_ids)
+    else:
+        job_id = job_manager.create_job(document_ids, owner)
+    remaining = [doc_id for doc_id in document_ids if doc_id not in done]
 
     def _run() -> None:
         try:
-            report = batch_service.validate_batch(
-                request_data.document_ids,
+            run = batch_service.validate_batch(
+                remaining,
                 can_access=lambda doc_id: _can_access_document(
                     doc_id,
                     persistence_service,
@@ -991,11 +1030,26 @@ async def start_batch_validate_job(
                 ),
                 should_cancel=lambda: job_manager.is_cancelled(job_id),
                 on_progress=lambda current, _total, _item: job_manager.set_progress(
-                    job_id, current
+                    job_id, current + len(done)
+                ),
+                on_item=lambda item: job_manager.record_item(
+                    job_id,
+                    item.document_id,
+                    _batch_item_to_response(item).model_dump(),
                 ),
             )
-            payload = _batch_report_to_response(report).model_dump()
-            final_status = "cancelled" if report.cancelled else "completed"
+            fresh = {
+                item.document_id: _batch_item_to_response(item) for item in run.items
+            }
+            merged = [
+                done.get(doc_id) or fresh[doc_id]
+                for doc_id in document_ids
+                if doc_id in done or doc_id in fresh
+            ]
+            payload = _merge_validation_report(
+                merged, run.cancelled, run.started_at, run.finished_at
+            ).model_dump()
+            final_status = "cancelled" if run.cancelled else "completed"
             job_manager.complete(job_id, status=final_status, report=payload)
         except Exception as exc:  # noqa: BLE001
             logger.exception(
@@ -1044,11 +1098,23 @@ async def get_batch_validate_job(
             request_id=request_id,
         )
     report_payload = job.get("report")
-    report = (
-        BatchValidateResponse(**report_payload)
-        if isinstance(report_payload, dict)
-        else None
-    )
+    if isinstance(report_payload, dict):
+        report: Optional[BatchValidateResponse] = BatchValidateResponse(**report_payload)
+    elif job["status"] == "interrupted":
+        checkpoints = job.get("items") or {}
+        report = _merge_validation_report(
+            [
+                BatchValidationItemResponse(**checkpoints[doc_id])
+                if isinstance(checkpoints.get(doc_id), dict)
+                else BatchValidationItemResponse(document_id=doc_id, status="cancelled")
+                for doc_id in job.get("document_ids") or []
+            ],
+            False,
+            str(job.get("created_at") or ""),
+            "",
+        )
+    else:
+        report = None
     return BatchValidateJobStatusResponse(
         job_id=job_id,
         status=job["status"],

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from dataclasses import asdict
 from typing import Annotated, Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, status
@@ -42,6 +43,7 @@ from api.schemas.batch_node_generation import (
 )
 from api.schemas.graph import GenerateNodeRequest, GenerateNodeResponse, SuggestedConnection
 from api.services.batch_node_generation_job_manager import BatchNodeGenerationJobManager
+from api.utils.batch_job_resume import resolve_resume_job_id
 from api.utils.job_ownership import job_owner_key
 from constants import Defaults
 from core.context.context_builder import ContextBuilder
@@ -51,6 +53,7 @@ from services.batch_node_generation_service import (
     BatchNodeGenerationReport,
     BatchNodeGenerationService,
     BatchParentInput,
+    BatchParentResult,
 )
 from services.configuration_service import ConfigurationService
 from services.cost_governance_service import CostGovernanceService
@@ -157,6 +160,32 @@ def _report_to_response(report: BatchNodeGenerationReport) -> BatchGenerateFromN
         error_count=report.error_count,
         skipped_count=report.skipped_count,
         total_nodes_generated=report.total_nodes_generated,
+    )
+
+
+def _interrupted_report(job: dict[str, Any]) -> BatchGenerateFromNodesReport:
+    """Rapport partiel d'un job coupé par un redémarrage : acquis + non traités."""
+    checkpoints = job.get("items") or {}
+    items: list[BatchParentResult] = []
+    for parent_id in job.get("parent_ids") or []:
+        raw = checkpoints.get(parent_id)
+        if isinstance(raw, dict):
+            items.append(BatchParentResult(**raw))
+        else:
+            items.append(
+                BatchParentResult(
+                    parent_node_id=parent_id,
+                    status="cancelled",
+                    warning="Non traité : lot interrompu par un redémarrage du serveur",
+                )
+            )
+    return _report_to_response(
+        BatchNodeGenerationReport(
+            items=items,
+            cancelled=False,
+            started_at=str(job.get("created_at") or ""),
+            finished_at="",
+        )
     )
 
 
@@ -330,16 +359,21 @@ async def start_batch_generate_from_nodes_job(
             details={"count": parent_count},
             request_id=request_id,
         )
-    _check_batch_budget_or_raise(
-        parent_count,
-        request_data.llm_model_identifier,
-        pricing_service,
-        cost_service,
-        request_id,
-    )
-
     parent_ids = [p.parent_node_id for p in request_data.parents]
-    job_id = job_manager.create_job(parent_ids, _owner_key(current_user))
+    resumed_job_id = resolve_resume_job_id(
+        job_manager,
+        resume_job_id=request_data.resume_job_id,
+        item_ids=parent_ids,
+        current_user=current_user,
+        resource_type="BatchGenerateJob",
+        request_id=request_id,
+    )
+    # Seuls les succès sont acquis : erreurs et skips repassent à la reprise.
+    done: Dict[str, BatchParentResult] = {}
+    if resumed_job_id:
+        for parent_id, raw in job_manager.checkpointed_items(resumed_job_id).items():
+            if raw.get("status") == "ok" and parent_id in parent_ids:
+                done[parent_id] = BatchParentResult(**raw)
 
     parents = [
         BatchParentInput(
@@ -351,7 +385,28 @@ async def start_batch_generate_from_nodes_job(
             player_character_id=p.player_character_id,
         )
         for p in request_data.parents
+        if p.parent_node_id not in done
     ]
+    if parents:
+        _check_batch_budget_or_raise(
+            len(parents),
+            request_data.llm_model_identifier,
+            pricing_service,
+            cost_service,
+            request_id,
+        )
+
+    if resumed_job_id:
+        job_id = resumed_job_id
+        job_manager.prepare_resume(job_id, parent_ids)
+        logger.info(
+            "Reprise du job batch-generate %s : %d parent(s) acquis, %d restant(s)",
+            job_id,
+            len(done),
+            len(parents),
+        )
+    else:
+        job_id = job_manager.create_job(parent_ids, _owner_key(current_user))
 
     model_id = request_data.llm_model_identifier
     dialogue_nodes = request_data.dialogue_nodes
@@ -384,7 +439,8 @@ async def start_batch_generate_from_nodes_job(
             def fingerprint_for(selections: Dict[str, Any]) -> Optional[str]:
                 return fingerprint_for_selections_safe(context_builder, selections)
 
-            report = await batch_service.generate_batch(
+            offset = len(done)
+            run = await batch_service.generate_batch(
                 parents,
                 llm_client=llm_client,
                 dialogue_nodes=dialogue_nodes,
@@ -395,8 +451,23 @@ async def start_batch_generate_from_nodes_job(
                 fingerprint_for=fingerprint_for,
                 should_cancel=lambda: job_manager.is_cancelled(job_id),
                 on_progress=lambda current, _total, detail: job_manager.set_progress(
-                    job_id, current, detail
+                    job_id, current + offset, detail
                 ),
+                on_item=lambda item: job_manager.record_item(
+                    job_id, item.parent_node_id, asdict(item)
+                ),
+            )
+            fresh = {item.parent_node_id: item for item in run.items}
+            merged = [
+                done.get(pid) or fresh[pid]
+                for pid in parent_ids
+                if pid in done or pid in fresh
+            ]
+            report = BatchNodeGenerationReport(
+                items=merged,
+                cancelled=run.cancelled,
+                started_at=run.started_at,
+                finished_at=run.finished_at,
             )
             payload = _report_to_response(report).model_dump(by_alias=True)
             if document_id and report.total_nodes_generated > 0:
@@ -449,11 +520,14 @@ async def get_batch_generate_from_nodes_job(
         )
     _assert_job_owner(job, current_user, job_id, request_id)
     report_payload = job.get("report")
-    report = (
-        BatchGenerateFromNodesReport(**report_payload)
-        if isinstance(report_payload, dict)
-        else None
-    )
+    if isinstance(report_payload, dict):
+        report: Optional[BatchGenerateFromNodesReport] = BatchGenerateFromNodesReport(
+            **report_payload
+        )
+    elif job["status"] == "interrupted":
+        report = _interrupted_report(job)
+    else:
+        report = None
     return BatchGenerateJobStatusResponse(
         job_id=job_id,
         status=job["status"],

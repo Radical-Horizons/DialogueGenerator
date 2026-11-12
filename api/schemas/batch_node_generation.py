@@ -42,6 +42,13 @@ class BatchGenerateFromNodesJobRequest(BaseModel):
     system_prompt_override: Optional[str] = None
     max_choices: Optional[int] = None
     choices_mode: Optional[Literal["free", "capped"]] = None
+    resume_job_id: Optional[str] = Field(
+        None,
+        description=(
+            "Job interrompu à reprendre : les parents déjà générés avec succès "
+            "ne sont ni régénérés ni refacturés"
+        ),
+    )
 
 
 class SuggestedConnectionPayload(BaseModel):
@@ -98,7 +105,9 @@ class BatchGenerateJobStatusResponse(BaseModel):
     """État / rapport d'un job de génération batch."""
 
     job_id: str
-    status: Literal["queued", "running", "completed", "cancelled", "error"]
+    status: Literal[
+        "queued", "running", "completed", "cancelled", "error", "interrupted"
+    ]
     current: int = 0
     total: int = 0
     detail: str = ""

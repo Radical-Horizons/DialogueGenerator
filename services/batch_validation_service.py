@@ -405,8 +405,12 @@ class BatchValidationService:
         can_access: Callable[[str], bool],
         should_cancel: Optional[Callable[[], bool]] = None,
         on_progress: Optional[Callable[[int, int, BatchValidationItem], None]] = None,
+        on_item: Optional[Callable[[BatchValidationItem], None]] = None,
     ) -> BatchValidationReport:
-        """Valide une liste de dialogues séquentiellement."""
+        """Valide une liste de dialogues séquentiellement.
+
+        ``on_item`` reçoit chaque résultat dès qu'il est connu (point de reprise).
+        """
         started_at = _now_iso()
         items: list[BatchValidationItem] = []
         cancelled = False
@@ -431,6 +435,8 @@ class BatchValidationService:
                 allowed = False
             item = self.validate_one(document_id, access_allowed=allowed)
             items.append(item)
+            if on_item:
+                on_item(item)
             if on_progress:
                 on_progress(index + 1, total, item)
 
