@@ -36,8 +36,8 @@ describe('putKeepalive — quota partagé', () => {
       revision: 1,
     })
 
-    await expect(layoutPut).resolves.toBeNull()
     expect(fetch).toHaveBeenCalledTimes(1)
+    await expect(layoutPut).resolves.toBeNull()
 
     pending[0](new Response(JSON.stringify({ revision: 2 }), { status: 200 }))
     await expect(documentPut).resolves.toEqual({ revision: 2 })

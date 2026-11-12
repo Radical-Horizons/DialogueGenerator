@@ -75,14 +75,17 @@ describe('saveDialogue — stabilité', () => {
 
     const closing = useGraphStore.getState().saveDialogue({ keepalive: true })
 
-    expect(documentsAPI.putDocumentKeepalive).toHaveBeenCalledTimes(1)
-    const [, body] = vi.mocked(documentsAPI.putDocumentKeepalive).mock.calls[0]
-    expect(body.revision).toBe(4)
-    expect((body.document.nodes as Array<{ line?: string }>)[0].line).toBe('Dernière frappe')
-    expect(vi.mocked(documentsAPI.putLayoutKeepalive).mock.calls[0][1].revision).toBe(2)
-
-    resolveInFlight({ revision: 4 })
-    await Promise.all([inFlight, closing])
+    try {
+      expect(documentsAPI.putDocumentKeepalive).toHaveBeenCalledTimes(1)
+      const [, body] = vi.mocked(documentsAPI.putDocumentKeepalive).mock.calls[0]
+      expect(body.revision).toBe(4)
+      expect((body.document.nodes as Array<{ line?: string }>)[0].line).toBe('Dernière frappe')
+      expect(vi.mocked(documentsAPI.putLayoutKeepalive).mock.calls[0][1].revision).toBe(2)
+    } finally {
+      vi.mocked(documentsAPI.putLayout).mockResolvedValue({ revision: 3 })
+      resolveInFlight({ revision: 4 })
+      await Promise.allSettled([inFlight, closing])
+    }
     expect(documentsAPI.putLayout).not.toHaveBeenCalled()
     expect(useGraphStore.getState().documentRevision).toBe(5)
     expect(useGraphStore.getState().layoutRevision).toBe(3)

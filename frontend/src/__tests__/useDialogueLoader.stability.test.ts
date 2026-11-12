@@ -41,6 +41,13 @@ async function advance(ms: number) {
   })
 }
 
+/** Laisse React rejouer ses effets entre deux pas, comme le ferait le navigateur. */
+async function advanceInSteps(ms: number, step = 500) {
+  for (let elapsed = 0; elapsed < ms; elapsed += step) {
+    await advance(step)
+  }
+}
+
 describe('useDialogueLoader — stabilité', () => {
   beforeEach(() => {
     toastMock.mockReset()
@@ -69,7 +76,7 @@ describe('useDialogueLoader — stabilité', () => {
 
     await advance(100)
     expect(saveDialogueMock).toHaveBeenCalledTimes(1)
-    await advance(60_000)
+    await advanceInSteps(60_000)
     expect(saveDialogueMock).toHaveBeenCalledTimes(1)
 
     act(() => {
@@ -92,9 +99,7 @@ describe('useDialogueLoader — stabilité', () => {
     dirtyDialogueState(saveDialogueMock)
     renderHook(() => useDialogueLoader(toastMock, null))
 
-    await advance(100)
-    await advance(3_500)
-    await advance(100)
+    await advanceInSteps(4_000)
     expect(saveDialogueMock).toHaveBeenCalledTimes(2)
   })
 
@@ -104,8 +109,7 @@ describe('useDialogueLoader — stabilité', () => {
     dirtyDialogueState(saveDialogueMock)
     renderHook(() => useDialogueLoader(toastMock, null))
 
-    await advance(100)
-    await advance(30_000)
+    await advanceInSteps(30_000)
 
     expect(saveDialogueMock).toHaveBeenCalledTimes(1)
     expect(toastMock).toHaveBeenCalledWith(DELETED_DIALOGUE_MESSAGE, 'error')
