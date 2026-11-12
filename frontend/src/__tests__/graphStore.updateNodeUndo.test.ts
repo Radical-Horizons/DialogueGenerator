@@ -4,6 +4,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import type { Node } from 'reactflow'
 import { useGraphStore } from '../store/graphStore'
+import { documentToGraph } from '../utils/documentToGraph'
 
 vi.mock('../api/graph', () => ({
   loadGraph: vi.fn().mockResolvedValue({
@@ -120,5 +121,68 @@ describe('graphStore - updateNode undo coalescing (story 18.4)', () => {
     expect(useGraphStore.getState().undoStack).toHaveLength(1)
     useGraphStore.getState().undo()
     expect(lineOf('n1')).toBe('Bonjour')
+  })
+})
+
+describe('graphStore - updateNode writes nothing the store would not keep', () => {
+  function load(withDocumentSoT: boolean) {
+    const document = {
+      schemaVersion: '1.1.0',
+      nodes: [
+        {
+          id: 'd1',
+          speaker: 'PNJ',
+          line: 'Bonjour',
+          choices: [{ choiceId: 'c1', text: 'Forcer', test: 'Dex:10', testSuccessNode: 'd2' }],
+        },
+        { id: 'd2', speaker: 'PNJ', line: 'Suite' },
+        { id: 'd3', speaker: 'PNJ', line: 'À supprimer' },
+      ],
+    }
+    const layout = { nodes: {} }
+    const { nodes, edges } = documentToGraph(document, layout)
+    useGraphStore.getState().resetGraph()
+    useGraphStore.setState({
+      nodes,
+      edges,
+      document: withDocumentSoT ? document : null,
+      layout: withDocumentSoT ? layout : null,
+      undoStack: [],
+      redoStack: [],
+      hasUnsavedChanges: false,
+    })
+  }
+
+  it.each([
+    ['document SoT', true],
+    ['direct', false],
+  ])('a TestNode line the store rebuilds from the choice is not an undo step (%s)', (_mode, doc) => {
+    load(doc)
+    useGraphStore.getState().deleteNode('d3')
+    useGraphStore.getState().undo()
+    expect(useGraphStore.getState().redoStack).toHaveLength(1)
+
+    const testNode = useGraphStore.getState().nodes.find((n) => n.type === 'testNode')!
+    useGraphStore.getState().updateNode(testNode.id, {
+      data: { ...testNode.data, line: 'Texte jamais conservé' },
+    })
+
+    expect(useGraphStore.getState().undoStack).toHaveLength(0)
+    expect(useGraphStore.getState().redoStack).toHaveLength(1)
+  })
+
+  it('node-level visibility conditions are kept in document SoT and undoable', () => {
+    load(true)
+    const conditions = { items: [{ kind: 'flag', flag: 'met_guard', value: true }] }
+    const d1 = useGraphStore.getState().nodes.find((n) => n.id === 'd1')!
+    useGraphStore.getState().updateNode('d1', { data: { ...d1.data, visibilityConditions: conditions } })
+
+    const stored = () =>
+      useGraphStore.getState().nodes.find((n) => n.id === 'd1')!.data.visibilityConditions
+    expect(stored()).toEqual(conditions)
+    expect(useGraphStore.getState().undoStack).toHaveLength(1)
+
+    useGraphStore.getState().undo()
+    expect(stored()).toBeUndefined()
   })
 })

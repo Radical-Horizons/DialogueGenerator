@@ -184,6 +184,7 @@ function updateDialogueNodeInDocumentSoT(
     if (data.speaker !== undefined) docNode.speaker = data.speaker
     if (data.nextNode !== undefined) docNode.nextNode = data.nextNode
     if (data.choices !== undefined) docNode.choices = data.choices
+    if (data.visibilityConditions !== undefined) docNode.visibilityConditions = data.visibilityConditions
   }
 
   const docChoices = docNode.choices as unknown[] | undefined
@@ -436,16 +437,20 @@ function updateDialogueNodeDirectly(
  */
 const UNDO_COALESCE_WINDOW_MS = 1000
 
-/** Forme comparable d'une valeur : ordre des clés ignoré, absent / null / '' équivalents. */
+/**
+ * Forme comparable d'une valeur : ordre des clés ignoré ; absent, null, '', NaN, [], {} et
+ * `{ items: [] }` équivalents — ce sont les défauts que le formulaire ajoute à des données brutes.
+ */
 function canonicalValue(value: unknown): unknown {
   if (value === undefined || value === null || value === '') return ''
-  if (Array.isArray(value)) return value.map(canonicalValue)
+  if (typeof value === 'number' && Number.isNaN(value)) return ''
+  if (Array.isArray(value)) return value.length === 0 ? '' : value.map(canonicalValue)
   if (typeof value === 'object') {
     const entries = Object.entries(value as Record<string, unknown>)
       .map(([k, v]) => [k, canonicalValue(v)] as const)
       .filter(([, v]) => v !== '')
       .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
-    return Object.fromEntries(entries)
+    return entries.length === 0 ? '' : Object.fromEntries(entries)
   }
   return value
 }
@@ -468,6 +473,49 @@ function changedFieldKeys(node: Node, updates: Partial<Node>): string[] {
     }
   }
   return changed.sort()
+}
+
+const byId = (a: { id: string }, b: { id: string }) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
+
+/**
+ * Ce qu'un undo restaurerait : sert à reconnaître une écriture qui ne change rien d'effectif.
+ * L'ordre des tableaux est ignoré : la reprojection du document range les TestNodes à part.
+ */
+function graphContentKey(nodes: Node[], edges: Edge[], document: unknown): string {
+  return JSON.stringify(
+    canonicalValue({
+      nodes: nodes.map((n) => ({ id: n.id, type: n.type, data: n.data })).sort(byId),
+      edges: edges
+        .map((e) => ({
+          id: e.id,
+          source: e.source,
+          target: e.target,
+          sourceHandle: e.sourceHandle,
+          targetHandle: e.targetHandle,
+        }))
+        .sort(byId),
+      document,
+    })
+  )
+}
+
+function computeNodeUpdate(
+  node: Node,
+  updates: Partial<Node>,
+  state: GraphState
+): Partial<GraphState> {
+  if (state.document != null && state.layout != null) {
+    const result =
+      node.type === 'testNode'
+        ? updateTestNodeInDocumentSoT(node.id, updates, state)
+        : updateDialogueNodeInDocumentSoT(node.id, updates, state)
+    return result ?? {}
+  }
+  if (node.type === 'testNode') {
+    const result = updateTestNodeDirectly(node.id, updates, state)
+    return result === state ? {} : result
+  }
+  return updateDialogueNodeDirectly(node.id, updates, state)
 }
 
 /**
@@ -558,44 +606,39 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
   },
 
   updateNode: (nodeId: string, updates: Partial<Node>, skipMarkDirty = false) => {
-    const node = get().nodes.find((n) => n.id === nodeId)
+    const state = get()
+    const node = state.nodes.find((n) => n.id === nodeId)
     if (!node) return
     const changed = changedFieldKeys(node, updates)
+    if (changed.length === 0) return
+    const patch = computeNodeUpdate(node, updates, state)
+    // Le flush du panneau réécrit en continu des valeurs que le store ne conserve pas (défauts
+    // du formulaire, ligne d'un TestNode reconstruite depuis le choix) : sans changement effectif,
+    // ni étape d'undo, ni redo vidé, ni document marqué modifié.
+    const touchesNodeOutsideData = changed.some((key) => !key.startsWith('data.'))
+    if (
+      !touchesNodeOutsideData &&
+      graphContentKey(patch.nodes ?? state.nodes, patch.edges ?? state.edges, patch.document ?? state.document) ===
+        graphContentKey(state.nodes, state.edges, state.document)
+    ) {
+      return
+    }
+
     const editKey = `${nodeId}:${changed.join(',')}`
     const now = Date.now()
     const continuesBurst =
-      changed.length === 0 ||
-      (lastFieldEdit !== null &&
-        lastFieldEdit.key === editKey &&
-        now - lastFieldEdit.at < UNDO_COALESCE_WINDOW_MS &&
-        lastFieldEdit.snapshot === topUndoSnapshot(get()))
+      lastFieldEdit !== null &&
+      lastFieldEdit.key === editKey &&
+      now - lastFieldEdit.at < UNDO_COALESCE_WINDOW_MS &&
+      lastFieldEdit.snapshot === topUndoSnapshot(state)
 
-    runGraphTransaction(
-      get,
-      set,
-      (state) => {
-        // Branche 1 : mode document SoT
-        if (state.document != null && state.layout != null) {
-          const result =
-            node.type === 'testNode'
-              ? updateTestNodeInDocumentSoT(nodeId, updates, state)
-              : updateDialogueNodeInDocumentSoT(nodeId, updates, state)
-          return result ?? {}
-        }
-        // Branche 2 : TestNode direct
-        if (node.type === 'testNode') {
-          const result = updateTestNodeDirectly(nodeId, updates, state)
-          return result === state ? {} : result
-        }
-        // Branche 3 : DialogueNode direct
-        return updateDialogueNodeDirectly(nodeId, updates, state)
-      },
-      { skipUndo: continuesBurst, skipMarkDirty, skipSyncDoc: true },
-    )
+    runGraphTransaction(get, set, () => patch, {
+      skipUndo: continuesBurst,
+      skipMarkDirty,
+      skipSyncDoc: true,
+    })
 
-    if (changed.length > 0) {
-      lastFieldEdit = { key: editKey, at: now, snapshot: topUndoSnapshot(get()) }
-    }
+    lastFieldEdit = { key: editKey, at: now, snapshot: topUndoSnapshot(get()) }
   },
 
   deleteNode: (nodeId: string, skipMarkDirty = false, skipPushUndoSnapshot = false) => {
