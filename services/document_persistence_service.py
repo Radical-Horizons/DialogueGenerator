@@ -468,10 +468,8 @@ class DocumentPersistenceService:
                         f"Écriture refusée pour le dialogue {document_id}"
                     )
                 if client_revision != 1:
-                    raise DialogueRevisionConflictError(
-                        payload={"schemaVersion": "1.1.0", "nodes": []},
-                        revision=1,
-                    )
+                    # Une révision > 1 désigne un document qui a existé : il a été supprimé.
+                    raise DialogueNotFoundError(document_id)
                 new_revision = 1
 
             created_at = self.read_recorded_created_at(base_dir, document_id)

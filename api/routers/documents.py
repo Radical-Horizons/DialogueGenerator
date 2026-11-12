@@ -736,6 +736,12 @@ async def put_document(
         )
     except DialogueAccessDeniedError:
         _raise_access_denied(document_id)
+    except DialogueNotFoundError:
+        raise NotFoundException(
+            resource_type="Document",
+            resource_id=document_id,
+            request_id=request_id,
+        )
     except (APIException, ValidationException, NotFoundException):
         raise
     except Exception as e:
