@@ -74,7 +74,7 @@ async function createDialogueFromGraphSection(page: Page, title: string): Promis
 /** `pick` s'exécute dans la page : il ne doit rien capturer du scope du test. */
 async function readStore<T>(page: Page, pick: (api: GraphStoreE2E) => T): Promise<T> {
   const store = await page.evaluateHandle(() => {
-    const api = (window as unknown as { __graphStoreE2E?: GraphStoreE2E }).__graphStoreE2E
+    const api = (globalThis as unknown as { __graphStoreE2E?: GraphStoreE2E }).__graphStoreE2E
     if (!api) throw new Error('window.__graphStoreE2E absent — Vite doit tourner en dev.')
     return api
   })
@@ -91,11 +91,37 @@ async function addManualNode(page: Page, graphEditor: Locator): Promise<{ id: st
   await page.getByTestId('btn-new-manual-node').click()
   const inspector = page.getByTestId('graph-inspector')
   await expect(inspector.locator('input[name="speaker"]')).toBeVisible({ timeout: E2E_MS.graphField })
-  // Un nœud neuf n'hérite d'aucun choix du nœud édité juste avant (formulaire réinitialisé).
-  await expect(inspector.getByText('Choix (0)', { exact: true })).toBeVisible()
   const id = await readStore(page, (api) => api.getState().selectedNodeId)
   expect(id, 'le nœud créé doit être sélectionné').toBeTruthy()
+  await expectNoInheritedChoices(page, inspector, id as string)
   return { id: id as string, inspector }
+}
+
+const INHERITED_CHOICES_WINDOW_MS = 1_000
+const INHERITED_CHOICES_SAMPLE_MS = 100
+
+/**
+ * Un nœud neuf n'hérite d'aucun choix du nœud édité juste avant. La fuite arrive après le premier
+ * rendu (~600 ms : push debouncé du formulaire précédent), donc une assertion auto-attendue sur
+ * « Choix (0) » passerait avant elle : on échantillonne le store sur une fenêtre fixe.
+ */
+async function expectNoInheritedChoices(page: Page, inspector: Locator, nodeId: string): Promise<void> {
+  const samples: string[][] = []
+  for (let elapsed = 0; elapsed <= INHERITED_CHOICES_WINDOW_MS; elapsed += INHERITED_CHOICES_SAMPLE_MS) {
+    const choices = await page.evaluate((id) => {
+      const api = (globalThis as unknown as { __graphStoreE2E?: GraphStoreE2E }).__graphStoreE2E
+      if (!api) throw new Error('window.__graphStoreE2E absent — Vite doit tourner en dev.')
+      const node = api.getState().nodes.find((n) => n.id === id)
+      return (node?.data.choices ?? []).map((c) => `${c.text ?? ''}>${c.targetNode}`)
+    }, nodeId)
+    samples.push(choices)
+    await page.waitForTimeout(INHERITED_CHOICES_SAMPLE_MS)
+  }
+  expect(
+    samples.filter((s) => s.length > 0),
+    `le nœud neuf ${nodeId} ne doit recevoir aucun choix du nœud précédent`,
+  ).toEqual([])
+  await expect(inspector.getByText('Choix (0)', { exact: true })).toBeVisible()
 }
 
 async function writeNodeText(inspector: Locator, speaker: string, line: string): Promise<void> {
@@ -204,9 +230,10 @@ test.describe('Graphe — parcours d\'écriture complet', { tag: '@smoke' }, () 
       )
       .toEqual({ lines: Object.values(LINES).sort(), links: expectedLinks.sort() })
 
-    await expect(graphEditor.getByTestId('graph-save-status-mono')).toHaveText(/^ENREGISTRÉ/, {
-      timeout: E2E_MS.savePut,
-    })
+    // Pas l'indicateur visuel : à 1280 px la barre passe en mode étroit et n'affiche pas le libellé mono.
+    await expect
+      .poll(() => readStore(page, (api) => api.getState().hasUnsavedChanges), { timeout: E2E_MS.savePut })
+      .toBe(false)
     const persistedBeforeReload = await readPersistedDocument(request, documentId)
     expect(persistedBeforeReload.title).toBe(title)
 
