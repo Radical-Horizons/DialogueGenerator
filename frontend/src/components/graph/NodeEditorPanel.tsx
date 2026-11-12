@@ -95,7 +95,16 @@ function formValuesFromNode(
   return { id: node.id }
 }
 
-export const NodeEditorPanel = memo(function NodeEditorPanel() {
+interface NodeEditorPanelProps {
+  /** Place le curseur en fin de réplique dès que le champ existe, puis appelle `onLineFocused`. */
+  focusLine?: boolean
+  onLineFocused?: () => void
+}
+
+export const NodeEditorPanel = memo(function NodeEditorPanel({
+  focusLine = false,
+  onLineFocused,
+}: NodeEditorPanelProps) {
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId)
   const selectedNode = useGraphStore(
     useShallow((s) => s.nodes.find((n) => n.id === s.selectedNodeId) ?? null)
@@ -335,6 +344,18 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       ? textFingerprintFromNodeData(nodeType, selectedNode.data as Record<string, unknown>)
       : ''
   }, [selectedNodeId, selectedNode, nodeType, reset, form, updateNode])
+
+  const lineFieldRef = useRef<HTMLTextAreaElement | null>(null)
+  const hasLineField = selectedNode != null && (nodeType === 'dialogueNode' || nodeType === 'testNode')
+  useEffect(() => {
+    if (!focusLine || !hasLineField) return
+    const field = lineFieldRef.current
+    if (!field) return
+    field.focus()
+    const end = field.value.length
+    field.setSelectionRange(end, end)
+    onLineFocused?.()
+  }, [focusLine, hasLineField, onLineFocused])
 
   // Même nœud sélectionné : le store peut mettre à jour les connexions (génération, edges) sans resélection.
   useEffect(() => {
@@ -750,6 +771,10 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             <label style={editableFieldLabelStyle()}>Dialogue</label>
             <textarea
               {...lineRegister}
+              ref={(el) => {
+                lineRegister.ref(el)
+                lineFieldRef.current = el
+              }}
               onChange={(e) => {
                 void lineRegister.onChange(e)
                 if (selectedNodeId) clearValidationFieldError(selectedNodeId, 'line')

@@ -62,6 +62,7 @@ from services.template_suggestion_service import TemplateSuggestionService
 from api.services.auth_service import AuthService
 from api.services.batch_validation_job_manager import BatchValidationJobManager
 from api.services.batch_node_generation_job_manager import BatchNodeGenerationJobManager
+from api.services.in_memory_batch_job_manager import batch_jobs_dir
 from services.batch_node_generation_service import BatchNodeGenerationService
 
 logger = logging.getLogger(__name__)
@@ -295,7 +296,9 @@ class ServiceContainer:
         """Retourne le gestionnaire de jobs de validation batch."""
         with self._database_lock:
             if self._batch_validation_job_manager is None:
-                self._batch_validation_job_manager = BatchValidationJobManager()
+                self._batch_validation_job_manager = BatchValidationJobManager(
+                    storage_path=batch_jobs_dir() / "batch_validation_jobs.json",
+                )
                 logger.info("BatchValidationJobManager initialisé dans le container.")
             return self._batch_validation_job_manager
 
@@ -313,7 +316,9 @@ class ServiceContainer:
         """Retourne le gestionnaire de jobs de génération batch FR88."""
         with self._database_lock:
             if self._batch_node_generation_job_manager is None:
-                self._batch_node_generation_job_manager = BatchNodeGenerationJobManager()
+                self._batch_node_generation_job_manager = BatchNodeGenerationJobManager(
+                    storage_path=batch_jobs_dir() / "batch_node_generation_jobs.json",
+                )
                 logger.info(
                     "BatchNodeGenerationJobManager initialisé dans le container."
                 )

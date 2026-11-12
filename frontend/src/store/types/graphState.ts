@@ -77,6 +77,8 @@ export interface GraphState {
   layout: Record<string, unknown> | null
   documentRevision: number | null
   layoutRevision: number | null
+  /** Le document existe sur le serveur (lu ou déjà écrit) : l'autosave ne doit jamais le recréer. */
+  documentPersisted: boolean
 
   /** Story 9.1 — liaisons catalogue ↔ valeurs initiales persistées dans le document. */
   dialogueFlagBindings: DialogueFlagBinding[]
@@ -122,6 +124,7 @@ export interface GraphState {
     documentRevision: number
     layoutRevision: number
     loadSeq: number
+    documentPersisted?: boolean
   }) => boolean
   addNode: (node: Node) => void
   /** Crée un nœud vide (sans LLM). Story 1.6 - FR6. */
@@ -343,6 +346,7 @@ export const initialState = {
   layout: null as Record<string, unknown> | null,
   documentRevision: null as number | null,
   layoutRevision: null as number | null,
+  documentPersisted: false,
   dialogueFlagBindings: [] as DialogueFlagBinding[],
   graphFilters: {} as GraphFilters,
   layoutSpacingMode: 'normal' as GraphLayoutSpacingMode,

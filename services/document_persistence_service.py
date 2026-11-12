@@ -427,8 +427,13 @@ class DocumentPersistenceService:
         current_user: Mapping[str, object],
         sequence: int | None = None,
         create_only: bool = False,
+        must_exist: bool = False,
     ) -> int:
-        """Écrit document, révision et séquence puis indexe après succès fichier."""
+        """Écrit document, révision et séquence puis indexe après succès fichier.
+
+        ``must_exist`` : le client édite un document qu'il a lu sur le serveur ; s'il a
+        disparu (supprimé), lever ``DialogueNotFoundError`` plutôt que le recréer.
+        """
         with self._lock:
             document_path = base_dir / f"{document_id}.json"
             meta_path = base_dir / f"{document_id}.meta"
@@ -467,11 +472,9 @@ class DocumentPersistenceService:
                     raise DialogueAccessDeniedError(
                         f"Écriture refusée pour le dialogue {document_id}"
                     )
-                if client_revision != 1:
-                    raise DialogueRevisionConflictError(
-                        payload={"schemaVersion": "1.1.0", "nodes": []},
-                        revision=1,
-                    )
+                if must_exist or client_revision != 1:
+                    # Une révision > 1 désigne un document qui a existé : il a été supprimé.
+                    raise DialogueNotFoundError(document_id)
                 new_revision = 1
 
             created_at = self.read_recorded_created_at(base_dir, document_id)

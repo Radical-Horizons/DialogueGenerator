@@ -74,22 +74,34 @@ vi.mock('../store/contextStore', () => ({
   },
 }))
 
+const jobStoreOverrides: Record<string, unknown> = {}
+
+function jobStoreState(): Record<string, unknown> {
+  return {
+    jobId: null,
+    status: null,
+    isPolling: false,
+    current: 0,
+    total: 0,
+    detail: '',
+    report: null,
+    pendingApplyReport: null,
+    startPolling,
+    cancelActiveJob: vi.fn(),
+    clearPendingApply: vi.fn(),
+    dismissReport: vi.fn(),
+    ...jobStoreOverrides,
+  }
+}
+
 vi.mock('../store/batchNodeGenerationJobStore', () => ({
-  useBatchNodeGenerationJobStore: (selector?: (s: Record<string, unknown>) => unknown) => {
-    const state = {
-      isPolling: false,
-      current: 0,
-      total: 0,
-      detail: '',
-      report: null,
-      pendingApplyReport: null,
-      startPolling,
-      cancelActiveJob: vi.fn(),
-      clearPendingApply: vi.fn(),
-      dismissReport: vi.fn(),
-    }
-    return selector ? selector(state) : state
-  },
+  useBatchNodeGenerationJobStore: Object.assign(
+    (selector?: (s: Record<string, unknown>) => unknown) => {
+      const state = jobStoreState()
+      return selector ? selector(state) : state
+    },
+    { getState: () => jobStoreState() }
+  ),
 }))
 
 describe('useBatchGenerateFromNodes', () => {
@@ -97,6 +109,7 @@ describe('useBatchGenerateFromNodes', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    for (const key of Object.keys(jobStoreOverrides)) delete jobStoreOverrides[key]
     graphState.selectedNodeIds = ['a', 'b', 'c']
     graphState.nodes = defaultNodes
     graphState.dialogueMetadata = { filename: 'demo.json', node_count: 3, edge_count: 0 }
@@ -245,5 +258,51 @@ describe('useBatchGenerateFromNodes', () => {
     })
 
     expect(batchApi.startBatchGenerateFromNodesJob).toHaveBeenCalledTimes(1)
+  })
+
+  it('« Reprendre » un lot interrompu reposte le même lot avec resume_job_id, sans boucle locale', async () => {
+    const ids = Array.from({ length: 10 }, (_, i) => `n${i}`)
+    graphState.nodes = ids.map((id) => ({
+      id,
+      type: 'dialogueNode',
+      position: { x: 0, y: 0 },
+      data: { choices: [{ text: '1' }] },
+    }))
+    Object.assign(jobStoreOverrides, {
+      jobId: 'job-interrupted',
+      status: 'interrupted',
+      report: {
+        items: ids.map((id, i) => ({
+          parent_node_id: id,
+          status: i < 4 ? 'ok' : 'cancelled',
+          nodes: i < 4 ? [{ id: `child-${id}` }] : [],
+          suggested_connections: [],
+        })),
+        cancelled: false,
+        started_at: 't0',
+        finished_at: '',
+        ok_count: 4,
+        error_count: 0,
+        skipped_count: 6,
+        total_nodes_generated: 4,
+      },
+    })
+    vi.mocked(batchApi.startBatchGenerateFromNodesJob).mockResolvedValue({
+      job_id: 'job-interrupted',
+      status: 'queued',
+      total: 10,
+    })
+
+    const { result } = renderHook(() => useBatchGenerateFromNodes(toast))
+    await act(async () => {
+      await result.current.retryFailedParents()
+    })
+
+    const body = vi.mocked(batchApi.startBatchGenerateFromNodesJob).mock.calls[0][0]
+    expect(body.resume_job_id).toBe('job-interrupted')
+    expect(body.parents.map((p) => p.parent_node_id)).toEqual(ids)
+    expect(startPolling).toHaveBeenCalledWith('job-interrupted')
+    expect(generateFromNode).not.toHaveBeenCalled()
+    expect(applyGenerateNodeResponse).not.toHaveBeenCalled()
   })
 })

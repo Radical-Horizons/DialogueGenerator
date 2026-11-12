@@ -82,9 +82,7 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
     skipMarkDirty?: boolean,
     pushUndoSnapshot?: boolean
   ) => {
-    if (pushUndoSnapshot) get()._pushUndoSnapshot()
-    const state = get()
-    const node = state.nodes.find((n) => n.id === nodeId)
+    const node = get().nodes.find((n) => n.id === nodeId)
     const positionChanged =
       !node ||
       Math.abs(node.position.x - position.x) > 0.1 ||
@@ -92,6 +90,8 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
 
     // Guard: skip store update entirely if position hasn't changed to prevent StoreUpdater loops.
     if (!positionChanged) return
+    if (pushUndoSnapshot) get()._pushUndoSnapshot()
+    const state = get()
 
     // Mode document SoT : mettre à jour le layout (pas le document) puis recalculer la projection
     if (state.document != null && state.layout != null) {

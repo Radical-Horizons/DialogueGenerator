@@ -74,6 +74,12 @@ const DEFAULT_SCENARIO_PLAYTHROUGH: ScenarioPlaythroughState = {
   transientMessage: null,
 }
 
+export interface DocumentSavedSignal {
+  documentId: string
+  revision: number
+  source: 'graph' | 'edition'
+}
+
 export interface GraphViewState {
   // --- Instance React Flow ---
   reactFlowInstance: ReactFlowInstance | null
@@ -116,6 +122,15 @@ export interface GraphViewState {
 
   // --- Dialogue deleted notification ---
   dialogueDeleted: string | null
+
+  /**
+   * Dernier enregistrement d'un document par le graphe ou par la section Éditer :
+   * l'autre vue recharge sa copie (ou prévient si elle a une saisie en cours).
+   */
+  documentSaved: DocumentSavedSignal | null
+
+  /** Le graphe n'a pas pu quitter ce dialogue : l'URL doit revenir dessus. */
+  routeDialogueRevert: string | null
 
   /** Story 9.2 — valeurs simulées pour prévisualiser visibilité (flags / réputation). */
   visibilityEvalState: VisibilityEvalState
@@ -180,6 +195,10 @@ export interface GraphViewState {
   notifyDialogueDeleted: (filename: string) => void
   clearDialogueDeleted: () => void
 
+  notifyDocumentSaved: (signal: DocumentSavedSignal) => void
+  requestRouteDialogueRevert: (filename: string) => void
+  clearRouteDialogueRevert: () => void
+
   setVisibilityEvalFlag: (flagId: string, value: boolean | number | string) => void
   setVisibilityEvalReputation: (axisId: string, factionId: string, value: number) => void
   clearVisibilityEvalState: () => void
@@ -239,6 +258,8 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
   flushCompleted: false,
   saveRequested: false,
   dialogueDeleted: null,
+  documentSaved: null,
+  routeDialogueRevert: null,
   visibilityEvalState: { flags: {}, reputation: {} },
   dialoguePreviewActive: false,
   previewEffectHistory: [],
@@ -294,6 +315,10 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
 
   notifyDialogueDeleted: (filename) => set({ dialogueDeleted: filename }),
   clearDialogueDeleted: () => set({ dialogueDeleted: null }),
+
+  notifyDocumentSaved: (signal) => set({ documentSaved: signal }),
+  requestRouteDialogueRevert: (filename) => set({ routeDialogueRevert: filename }),
+  clearRouteDialogueRevert: () => set({ routeDialogueRevert: null }),
 
   setVisibilityEvalFlag: (flagId, value) =>
     set((s) => ({

@@ -10,6 +10,12 @@ import {
   type BatchGenerateReport,
 } from '../api/batchNodeGeneration'
 import { toastManager } from '../components/shared/Toast'
+import {
+  MAX_TRANSIENT_POLL_FAILURES,
+  TRANSIENT_POLL_DELAY_MS,
+  isTransientPollError,
+  pollErrorMessage,
+} from './batchJobPolling'
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -76,18 +82,48 @@ export const useBatchNodeGenerationJobStore = create<BatchNodeGenerationJobState
       })
 
       void (async () => {
-        try {
-          while (generation === pollGeneration) {
-            const status = await getBatchGenerateFromNodesJob(jobId)
+        let failures = 0
+        while (generation === pollGeneration) {
+          let status: BatchGenerateJobStatus
+          try {
+            status = await getBatchGenerateFromNodesJob(jobId)
+            failures = 0
+          } catch (err) {
             if (generation !== pollGeneration) return
-            set({
-              status: status.status,
-              current: status.current,
-              total: status.total,
-              detail: status.detail || '',
-              error: status.error ?? null,
-            })
-            if (
+            if (isTransientPollError(err) && failures < MAX_TRANSIENT_POLL_FAILURES) {
+              failures += 1
+              set({ detail: 'Serveur injoignable, nouvelle tentative…' })
+              await sleep(TRANSIENT_POLL_DELAY_MS)
+              continue
+            }
+            const message = pollErrorMessage(err, 'Erreur polling génération batch')
+            set({ isPolling: false, status: 'error', error: message })
+            toastManager.show(message, 'error', 8000)
+            return
+          }
+          if (generation !== pollGeneration) return
+          set({
+            status: status.status,
+            current: status.current,
+            total: status.total,
+            detail: status.detail || '',
+            error: status.error ?? null,
+          })
+          if (status.status === 'interrupted') {
+            // Rien n'est appliqué au graphe : la reprise renverra le rapport
+            // complet (acquis + restants), appliqué une seule fois.
+            const report = status.report ?? null
+            set({ report, isPolling: false, pendingApplyReport: null })
+            toastManager.show(
+              `Génération interrompue par un redémarrage du serveur (${
+                report?.ok_count ?? 0
+              }/${status.total} nœuds de départ acquis). « Reprendre » relance les restants.`,
+              'warning',
+              8000
+            )
+            return
+          }
+          if (
               status.status === 'completed' ||
               status.status === 'cancelled' ||
               status.status === 'error'
@@ -125,13 +161,6 @@ export const useBatchNodeGenerationJobStore = create<BatchNodeGenerationJobState
               return
             }
             await sleep(800)
-          }
-        } catch (err) {
-          if (generation !== pollGeneration) return
-          const message =
-            err instanceof Error ? err.message : 'Erreur polling génération batch'
-          set({ isPolling: false, status: 'error', error: message })
-          toastManager.show(message, 'error', 8000)
         }
       })()
     },

@@ -109,6 +109,10 @@ def isolated_local_state(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
     monkeypatch.setattr(
         "services.gdd_entity_history._HISTORY_ROOT", tmp_path / ".pytest-entity-history"
     )
+    monkeypatch.setattr(
+        "api.services.in_memory_batch_job_manager._BATCH_JOBS_DIR",
+        tmp_path / ".pytest-batch-jobs",
+    )
 
 
 @pytest.fixture

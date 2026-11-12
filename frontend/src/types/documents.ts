@@ -22,6 +22,8 @@ export interface PutDocumentRequest {
   revision: number
   validationMode?: 'draft' | 'export'
   createOnly?: boolean
+  /** Le document a été lu sur le serveur : supprimé entre-temps → 404, jamais recréé. */
+  mustExist?: boolean
 }
 
 export interface PutDocumentResponse {

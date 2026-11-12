@@ -42,28 +42,41 @@ export async function putDocument(
   return response.data
 }
 
-/** Limite navigateur du corps d'une requête `keepalive` (64 Kio, marge comprise). */
+/**
+ * Limite navigateur des corps `keepalive` (64 Kio, marge comprise). La spec Fetch la
+ * partage entre toutes les requêtes keepalive en vol : au-delà, `fetch` lève un TypeError.
+ */
 export const KEEPALIVE_BODY_MAX_BYTES = 60_000
+
+let keepaliveBytesInFlight = 0
 
 /**
  * PUT qui survit au déchargement de la page (`fetch` keepalive) : axios est annulé
  * par le navigateur au rechargement.
- * Renvoie `null` quand le corps dépasse la limite keepalive : l'appelant se replie sur axios.
+ * Renvoie `null` quand le corps ne tient pas dans le quota keepalive restant :
+ * l'appelant se replie sur axios. Le quota est réservé dès l'appel, de façon synchrone.
  * Une erreur HTTP est rejetée sous la forme `{ response: { status, data } }` d'axios.
  */
 async function putKeepalive<T>(path: string, body: unknown): Promise<T | null> {
   const payload = JSON.stringify(body)
-  if (new Blob([payload]).size > KEEPALIVE_BODY_MAX_BYTES) return null
+  const size = new Blob([payload]).size
+  if (keepaliveBytesInFlight + size > KEEPALIVE_BODY_MAX_BYTES) return null
+  keepaliveBytesInFlight += size
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   const token = localStorage.getItem('access_token')
   if (token) headers.Authorization = `Bearer ${token}`
-  const response = await fetch(`${apiClient.defaults.baseURL ?? ''}${path}`, {
-    method: 'PUT',
-    headers,
-    body: payload,
-    keepalive: true,
-    credentials: 'include',
-  })
+  let response: Response
+  try {
+    response = await fetch(`${apiClient.defaults.baseURL ?? ''}${path}`, {
+      method: 'PUT',
+      headers,
+      body: payload,
+      keepalive: true,
+      credentials: 'include',
+    })
+  } finally {
+    keepaliveBytesInFlight -= size
+  }
   const data: unknown = await response.json().catch(() => null)
   if (!response.ok) {
     throw Object.assign(new Error(`HTTP ${response.status}`), {

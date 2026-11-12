@@ -48,6 +48,10 @@ class BatchValidateJobRequest(BaseModel):
     """Requête job async (N ≥ 20)."""
 
     document_ids: List[str] = Field(..., min_length=20, max_length=500)
+    resume_job_id: Optional[str] = Field(
+        None,
+        description="Job interrompu à reprendre : les dialogues déjà validés sont conservés",
+    )
 
 
 class BatchValidateJobCreateResponse(BaseModel):
@@ -62,7 +66,9 @@ class BatchValidateJobStatusResponse(BaseModel):
     """État d'un job de validation batch."""
 
     job_id: str
-    status: Literal["queued", "running", "completed", "cancelled", "error"]
+    status: Literal[
+        "queued", "running", "completed", "cancelled", "error", "interrupted"
+    ]
     current: int = 0
     total: int = 0
     cancelled: bool = False

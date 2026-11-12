@@ -104,6 +104,8 @@ data/app.db-wal
 data/app.db-shm
 data/llm_usage/
 data/notion_cache/
+# État des jobs batch FR87/FR88 (reprise après redémarrage), propre à chaque serveur.
+data/batch_jobs/
 # Benchmarks : runs = sortie locale (plusieurs Mo) ; criteria/ et suites/ sont semés
 # au démarrage (marqueur .seeded), comme data/presets/ — régénérables, non versionnés.
 data/benchmarks/

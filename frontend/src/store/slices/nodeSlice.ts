@@ -565,8 +565,9 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
         if (nodeHasStructuralDisplayName(data)) continue
         const displayName = deriveAutoDisplayName(node)
         if (!displayName.trim()) continue
+        const nodesBefore = get().nodes
         get().updateNode(nodeId, { data: { ...data, displayName } }, true)
-        updated.push(nodeId)
+        if (get().nodes !== nodesBefore) updated.push(nodeId)
       }
     })
     if (updated.length > 0) get().markDirty()
@@ -870,8 +871,9 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
         const node = state.nodes.find((n) => n.id === nodeId)
         if (!node) continue
         const currentData = (node.data ?? {}) as Record<string, unknown>
+        const nodesBefore = get().nodes
         get().updateNode(nodeId, { data: { ...currentData, tag } }, true)
-        updatedCount += 1
+        if (get().nodes !== nodesBefore) updatedCount += 1
       }
     })
     if (updatedCount > 0) get().markDirty()

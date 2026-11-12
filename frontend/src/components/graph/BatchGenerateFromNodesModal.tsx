@@ -4,6 +4,7 @@
 import { theme } from '../../theme'
 import type { BatchGenerateProgress } from '../../hooks/useBatchGenerateFromNodes'
 import type { BatchGenerateReport } from '../../api/batchNodeGeneration'
+import { useBatchNodeGenerationJobStore } from '../../store/batchNodeGenerationJobStore'
 
 export interface BatchGenerateFromNodesModalProps {
   open: boolean
@@ -24,9 +25,12 @@ export function BatchGenerateFromNodesModal({
   onCancel,
   onRetryFailed,
 }: BatchGenerateFromNodesModalProps) {
+  const interrupted = useBatchNodeGenerationJobStore((s) => s.status === 'interrupted')
+
   if (!open) return null
 
   const failedCount = report?.error_count ?? 0
+  const pendingCount = report ? report.items.length - report.ok_count : 0
   const summary =
     report &&
     `${report.total_nodes_generated} nœuds générés depuis ${report.ok_count} nœuds de départ`
@@ -115,7 +119,18 @@ export function BatchGenerateFromNodesModal({
 
         {report && !isGenerating && (
           <div data-testid="batch-generate-report">
-            <p style={{ margin: '0 0 0.5rem', fontWeight: 600 }}>{summary}</p>
+            {interrupted ? (
+              <p
+                data-testid="batch-generate-interrupted"
+                style={{ margin: '0 0 0.5rem', color: theme.state.warning.color }}
+              >
+                Lot interrompu par un redémarrage du serveur : {report.ok_count} nœud(s) de
+                départ déjà générés, {pendingCount} restant(s). Rien n’a encore été ajouté au
+                graphe ; « Reprendre » ne relance que les restants.
+              </p>
+            ) : (
+              <p style={{ margin: '0 0 0.5rem', fontWeight: 600 }}>{summary}</p>
+            )}
             {report.cancelled && (
               <p style={{ margin: '0 0 0.5rem', color: theme.state.warning.color }}>Lot annulé (partiel conservé).</p>
             )}
@@ -147,7 +162,24 @@ export function BatchGenerateFromNodesModal({
               ))}
             </ul>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {failedCount > 0 && (
+              {interrupted && (
+                <button
+                  type="button"
+                  data-testid="batch-generate-resume"
+                  onClick={() => void onRetryFailed()}
+                  style={{
+                    padding: '0.4rem 0.8rem',
+                    borderRadius: 6,
+                    border: `1px solid ${theme.border.primary}`,
+                    background: theme.button.primary?.background || theme.button.default.background,
+                    color: theme.button.primary?.color || theme.button.default.color,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Reprendre
+                </button>
+              )}
+              {failedCount > 0 && !interrupted && (
                 <button
                   type="button"
                   data-testid="batch-generate-retry"

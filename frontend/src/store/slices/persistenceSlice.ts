@@ -114,6 +114,25 @@ function conflictDocumentOf(error: unknown): Record<string, unknown> | undefined
 }
 
 /** Auteur unique : le graphe ouvert l'emporte sur une révision serveur plus récente. */
+/** Diagnostics FR94 du rapport : conseils non bloquants, pas des erreurs de saisie. */
+const NON_BLOCKING_REPORT_CODES = new Set(['social_system_confusion', 'reputation_palier_runtime_only'])
+
+function blockingDraftReport(response: { validationReport?: Array<{ code?: string }> }) {
+  return {
+    ...response,
+    validationReport: (response.validationReport ?? []).filter(
+      (row) => !NON_BLOCKING_REPORT_CODES.has(row.code ?? ''),
+    ),
+  }
+}
+
+export const DELETED_DIALOGUE_MESSAGE =
+  "Ce dialogue a été supprimé : les modifications du graphe ne sont plus enregistrées. Ouvrez un autre dialogue."
+
+export function isDeletedDocumentError(error: unknown): boolean {
+  return (error as { response?: { status?: number } })?.response?.status === 404
+}
+
 async function putOverwritingRevisionConflict<T>(
   put: (revision: number, serverDocument?: Record<string, unknown>) => Promise<T>,
   revision: number,
@@ -140,6 +159,25 @@ export type PersistenceSlice = Pick<
 >
 
 let saveQueue: Promise<void> | null = null
+
+/** Révision envoyée par chaque PUT en vol : celle qu'une sauvegarde keepalive doit attendre + 1. */
+const revisionsInFlight: { document: number | null; layout: number | null } = {
+  document: null,
+  layout: null,
+}
+
+async function trackRevisionInFlight<T>(
+  stage: 'document' | 'layout',
+  revision: number,
+  put: () => Promise<T>,
+): Promise<T> {
+  revisionsInFlight[stage] = revision
+  try {
+    return await put()
+  } finally {
+    if (revisionsInFlight[stage] === revision) revisionsInFlight[stage] = null
+  }
+}
 
 export const createPersistenceSlice: StateCreator<GraphState, [], [], PersistenceSlice> = (
   set,
@@ -372,6 +410,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         documentRevision: docResponse.revision,
         layoutRevision: (layoutResponse as { revision: number }).revision ?? 1,
         loadSeq,
+        documentPersisted: true,
       })
       get().normalizeEdgeColors({ skipMarkDirty: true })
     } catch (error: unknown) {
@@ -423,6 +462,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
       documentId: rest.documentId,
       documentRevision: rest.documentRevision,
       layoutRevision: rest.layoutRevision,
+      documentPersisted: rest.documentPersisted ?? false,
       dialogueFlagBindings: parseBindingsFromDocument(rest.document as Record<string, unknown>),
       isLoading: false,
       isSaving: false,
@@ -451,7 +491,9 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
   },
 
   saveDialogue: (options) => {
-    const performSave = async (): Promise<SaveGraphResponse> => {
+    const performSave = async (
+      expectedRevisions?: { document: number; layout: number },
+    ): Promise<SaveGraphResponse> => {
       let saveOperationSeq = 0
       set((current) => {
         saveOperationSeq = current.activeSaveSeq + 1
@@ -514,45 +556,55 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         if (typeof serverTitle === 'string' && serverTitle.trim()) doc.title = serverTitle
         // Brouillon : une saisie en cours (condition à moitié remplie) ne doit pas faire refuser
         // toute la persistance ; l'export Unity garde sa propre validation stricte.
-        const body = { document: doc, revision, validationMode: 'draft' as const }
-        return (
+        const body = {
+          document: doc,
+          revision,
+          validationMode: 'draft' as const,
+          ...(state.documentPersisted ? { mustExist: true } : {}),
+        }
+        return trackRevisionInFlight('document', revision, async () =>
           (options?.keepalive ? await documentsAPI.putDocumentKeepalive(documentId, body) : null) ??
-          (await documentsAPI.putDocument(documentId, body))
+          (await documentsAPI.putDocument(documentId, body)),
         )
       }
       const putLayoutAt = async (revision: number) => {
         const body = { layout: layoutPayload, revision }
-        return (
+        return trackRevisionInFlight('layout', revision, async () =>
           (options?.keepalive ? await documentsAPI.putLayoutKeepalive(documentId, body) : null) ??
-          (await documentsAPI.putLayout(documentId, body))
+          (await documentsAPI.putLayout(documentId, body)),
         )
       }
+      const documentRevision = expectedRevisions?.document ?? state.documentRevision ?? 1
+      const layoutRevision = expectedRevisions?.layout ?? state.layoutRevision ?? 1
       let failedStage: 'document' | 'layout' = 'document'
+      // Le document réserve le quota keepalive avant le layout : c'est lui qu'on ne doit jamais perdre.
+      const documentPut = putOverwritingRevisionConflict(putDocumentAt, documentRevision)
+      void documentPut.catch(() => undefined)
       // En quittant la page, plus rien ne s'exécute après la réponse du document : le layout part en même temps.
       const earlyLayout = options?.keepalive
-        ? putOverwritingRevisionConflict(putLayoutAt, state.layoutRevision ?? 1)
+        ? putOverwritingRevisionConflict(putLayoutAt, layoutRevision)
         : null
       void earlyLayout?.catch(() => undefined)
 
       try {
-        const { result: docRes, conflicted: replacedNewerVersion } =
-          await putOverwritingRevisionConflict(putDocumentAt, state.documentRevision ?? 1)
+        const { result: docRes, conflicted: replacedNewerVersion } = await documentPut
         if (!isActiveSave()) {
           return { success: true, filename: documentId } as SaveGraphResponse
         }
         set({
           document: doc,
           documentRevision: docRes.revision,
+          documentPersisted: true,
         })
         failedStage = 'layout'
         const { result: layoutRes } = await (earlyLayout ??
-          putOverwritingRevisionConflict(putLayoutAt, state.layoutRevision ?? 1))
+          putOverwritingRevisionConflict(putLayoutAt, layoutRevision))
         if (!isActiveSave()) {
           return { success: true, filename: documentId } as SaveGraphResponse
         }
         const hasNewerChanges = get().clientSeq !== snap.clientSeq
         const { fieldErrors: draftFieldErrors } = extractValidationIssuesFromApiError(
-          { response: { data: docRes } },
+          { response: { data: blockingDraftReport(docRes) } },
           unityNodesFromGraph(snap),
           snap.nodes,
         )
@@ -568,6 +620,9 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
           lastSavedAt: Date.now(),
           syncStatus: 'synced',
         })
+        useGraphViewStore
+          .getState()
+          .notifyDocumentSaved({ documentId, revision: docRes.revision, source: 'graph' })
         try {
           await journalAcknowledgeSnapshot(documentId, {
             nodes: snap.nodes,
@@ -588,6 +643,10 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         if (!isActiveSave()) {
           throw error
         }
+        if (isDeletedDocumentError(error)) {
+          set({ isSaving: false, lastSaveError: DELETED_DIALOGUE_MESSAGE, syncStatus: 'error' })
+          throw error
+        }
         const serverRevision = revisionConflictOf(error)
         if (serverRevision !== null) {
           set(
@@ -605,8 +664,26 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         throw error
       }
     }
-    const saveOperation = saveQueue ? saveQueue.then(performSave) : performSave()
-    const queueTail = saveOperation.then(
+    const previousQueue = saveQueue
+    let saveOperation: Promise<SaveGraphResponse>
+    if (options?.keepalive && previousQueue) {
+      // En quittant la page, rien ne s'exécutera après la sauvegarde en vol : on part tout de suite,
+      // sur les révisions qu'elle produira.
+      const current = get()
+      saveOperation = performSave({
+        document:
+          revisionsInFlight.document !== null
+            ? revisionsInFlight.document + 1
+            : (current.documentRevision ?? 1),
+        layout:
+          revisionsInFlight.layout !== null
+            ? revisionsInFlight.layout + 1
+            : (current.layoutRevision ?? 1),
+      })
+    } else {
+      saveOperation = previousQueue ? previousQueue.then(() => performSave()) : performSave()
+    }
+    const queueTail = Promise.all([previousQueue, saveOperation]).then(
       () => undefined,
       () => undefined,
     )

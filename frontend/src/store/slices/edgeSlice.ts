@@ -345,6 +345,12 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
     if (sourceNodeIndex === -1) return
     const choicesSnapshot = (preState.nodes[sourceNodeIndex].data?.choices ?? []) as Choice[]
     if (choiceIndex >= choicesSnapshot.length) return
+    if (
+      choicesSnapshot[choiceIndex].text === newText &&
+      edge.label === truncateChoiceLabel(newText, choiceIndex)
+    ) {
+      return
+    }
 
     runGraphTransaction(get, set, (state) => {
       const sourceIdx = state.nodes.findIndex((n) => n.id === sourceId)

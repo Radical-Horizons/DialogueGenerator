@@ -371,10 +371,10 @@ class TestPutDocument:
         assert (tmp_path / "new-doc.meta").exists()
         assert json.loads((tmp_path / "new-doc.json").read_text(encoding="utf-8")) == doc
 
-    def test_put_document_new_wrong_revision_returns_409(
+    def test_put_document_absent_with_revision_above_1_returns_404(
         self, client, mock_config_service, tmp_path
     ):
-        """Création (fichier absent) : revision doit être 1, aligné sur PUT layout (409 sinon)."""
+        """Document absent mais révision > 1 : il a été supprimé. 404, jamais une invitation à le recréer."""
         tmp_path.mkdir(parents=True, exist_ok=True)
         mock_config_service.get_unity_dialogues_path.return_value = tmp_path
         doc = _doc_v1_1_0()
@@ -384,10 +384,54 @@ class TestPutDocument:
             json={"document": doc, "revision": 2},
         )
 
-        assert response.status_code == 409
-        body = response.json()
-        assert body["revision"] == 1
+        assert response.status_code == 404
         assert not (tmp_path / "brand-new-id.json").exists()
+
+    def test_put_document_deleted_then_stale_save_returns_404_without_resurrecting(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Autosave du graphe après suppression du dialogue : 404, le fichier n'est pas recréé."""
+        tmp_path.mkdir(parents=True, exist_ok=True)
+        mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+        doc = _doc_v1_1_0()
+        assert client.put("/api/v1/documents/gone", json={"document": doc, "revision": 1}).status_code == 200
+        assert client.put("/api/v1/documents/gone", json={"document": doc, "revision": 1}).status_code == 200
+        assert client.delete("/api/v1/documents/gone").status_code == 204
+
+        response = client.put("/api/v1/documents/gone", json={"document": doc, "revision": 2})
+
+        assert response.status_code == 404
+        assert not (tmp_path / "gone.json").exists()
+
+    def test_put_document_must_exist_deleted_at_revision_1_returns_404(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Supprimé encore en révision 1 : avec mustExist, l'autosave ne le recrée pas."""
+        tmp_path.mkdir(parents=True, exist_ok=True)
+        mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+        doc = _doc_v1_1_0()
+        assert client.put("/api/v1/documents/gone1", json={"document": doc, "revision": 1}).status_code == 200
+        assert client.delete("/api/v1/documents/gone1").status_code == 204
+
+        response = client.put(
+            "/api/v1/documents/gone1",
+            json={"document": doc, "revision": 1, "mustExist": True},
+        )
+
+        assert response.status_code == 404
+        assert not (tmp_path / "gone1.json").exists()
+
+    def test_put_document_without_must_exist_still_creates_at_revision_1(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Première sauvegarde d'un dialogue chargé depuis un JSON Unity brut : création permise."""
+        tmp_path.mkdir(parents=True, exist_ok=True)
+        mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+
+        response = client.put("/api/v1/documents/fresh", json={"document": _doc_v1_1_0(), "revision": 1})
+
+        assert response.status_code == 200
+        assert (tmp_path / "fresh.json").exists()
 
     def test_put_document_nodes_edges_payload_rejected_400(
         self, client, mock_config_service, tmp_path

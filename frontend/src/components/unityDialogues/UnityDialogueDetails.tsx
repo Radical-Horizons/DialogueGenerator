@@ -97,6 +97,23 @@ export function UnityDialogueDetails({
     void loadDialogue()
   }, [loadDialogue])
 
+  /** Recharge sans écran de chargement : l'éditeur reste monté et reprend contenu et révision. */
+  const reloadSavedElsewhere = useCallback(async () => {
+    try {
+      const response = await documentsAPI.getDocument(filename.replace(/\.json$/i, ''))
+      setDocument(response.document)
+      setRevision(response.revision)
+      setJsonContent(
+        JSON.stringify(Array.isArray(response.document.nodes) ? response.document.nodes : [], null, 2)
+      )
+      if (typeof response.document.title === 'string' && response.document.title.trim()) {
+        setTitle(response.document.title)
+      }
+    } catch (err) {
+      console.error('Rechargement du dialogue enregistré par le graphe:', err)
+    }
+  }, [filename])
+
   const handleSave = useCallback(
     async (_savedFilename: string, savedRevision: number) => {
       setRevision(savedRevision)
@@ -261,6 +278,7 @@ export function UnityDialogueDetails({
         canEdit={canEdit}
         onSave={handleSave}
         onRenamed={handleRenamed}
+        onSavedElsewhere={() => void reloadSavedElsewhere()}
         headerSelector={headerSelector}
         focusNodeId={focusNodeId}
         actions={actions}

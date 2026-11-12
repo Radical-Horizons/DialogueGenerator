@@ -708,6 +708,7 @@ async def put_document(
             body.revision,
             current_user,
             create_only=body.createOnly,
+            must_exist=body.mustExist,
         )
 
         logger.info(f"PUT document {doc_id} revision={new_revision} mode={validation_mode} (request_id: {request_id})")
@@ -736,6 +737,12 @@ async def put_document(
         )
     except DialogueAccessDeniedError:
         _raise_access_denied(document_id)
+    except DialogueNotFoundError:
+        raise NotFoundException(
+            resource_type="Document",
+            resource_id=document_id,
+            request_id=request_id,
+        )
     except (APIException, ValidationException, NotFoundException):
         raise
     except Exception as e:

@@ -71,6 +71,9 @@ class BatchParentResult:
     context_gdd_content_fingerprint: Optional[str] = None
 
 
+ItemCallback = Callable[[BatchParentResult], None]
+
+
 @dataclass
 class BatchNodeGenerationReport:
     """Rapport complet d'un lot de génération multi-parents."""
@@ -172,6 +175,9 @@ class BatchNodeGenerationService:
         ] = None,
         should_cancel: Optional[CancelCallback] = None,
         on_progress: Optional[ProgressCallback] = None,
+        on_item: Optional[ItemCallback] = None,
+        label_offset: int = 0,
+        label_total: Optional[int] = None,
     ) -> BatchNodeGenerationReport:
         """Génère séquentiellement pour chaque parent (échec partiel toléré).
 
@@ -186,6 +192,11 @@ class BatchNodeGenerationService:
             fingerprint_for: Empreinte GDD optionnelle, calculée sur la sélection brute.
             should_cancel: Callback d'annulation entre parents.
             on_progress: ``(current, total, detail)`` après chaque parent.
+            on_item: Point de reprise, appelé avec le résultat de chaque parent
+                traité — c'est ce qui rend un lot interrompu reprenable.
+            label_offset: Parents déjà acquis lors d'une reprise : décale le
+                « Nœud n/N » affiché pour suivre le lot complet.
+            label_total: Taille du lot complet affichée (défaut : ``len(parents)``).
 
         Returns:
             Rapport agrégé (items par parent + compteurs).
@@ -193,6 +204,7 @@ class BatchNodeGenerationService:
         started = _now_iso()
         items: List[BatchParentResult] = []
         total = len(parents)
+        shown_total = label_total if label_total is not None else total
         cancelled = False
 
         for index, parent in enumerate(parents):
@@ -209,11 +221,8 @@ class BatchNodeGenerationService:
                 break
 
             free_choices = _count_free_choices(parent.parent_node_content)
-            detail = (
-                f"Nœud {index + 1}/{total} — 0/{free_choices}"
-                if free_choices > 0
-                else f"Nœud {index + 1}/{total}"
-            )
+            shown = f"Nœud {index + 1 + label_offset}/{shown_total}"
+            detail = f"{shown} — 0/{free_choices}" if free_choices > 0 else shown
             if on_progress:
                 on_progress(index, total, detail)
 
@@ -222,7 +231,7 @@ class BatchNodeGenerationService:
                     on_progress(
                         index,
                         total,
-                        f"Nœud {index + 1}/{total} — {completed}/{choice_total}",
+                        f"{shown} — {completed}/{choice_total}",
                     )
 
             try:
@@ -290,8 +299,10 @@ class BatchNodeGenerationService:
                     )
                 )
 
+            if on_item:
+                on_item(items[-1])
             if on_progress:
-                on_progress(index + 1, total, f"Nœud {index + 1}/{total} terminé")
+                on_progress(index + 1, total, f"{shown} terminé")
 
         return BatchNodeGenerationReport(
             items=items,

@@ -41,11 +41,11 @@ describe('useDialogueLoader — autosave fiable', () => {
     vi.restoreAllMocks()
   })
 
-  it('relance la sauvegarde à la fin du délai de blocage, sans attendre une nouvelle édition', async () => {
+  it('erreur serveur passagère : relance à la fin du délai de blocage, sans attendre une nouvelle édition', async () => {
     vi.useFakeTimers()
     const saveDialogueMock = vi
       .fn()
-      .mockRejectedValueOnce(Object.assign(new Error('Bad request'), { response: { status: 400 } }))
+      .mockRejectedValueOnce(Object.assign(new Error('Unavailable'), { response: { status: 503 } }))
       .mockResolvedValue({ success: true, filename: 'dial' })
     dirtyDialogueState(saveDialogueMock)
 
@@ -57,7 +57,7 @@ describe('useDialogueLoader — autosave fiable', () => {
     expect(saveDialogueMock).toHaveBeenCalledTimes(1)
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(10_500)
+      await vi.advanceTimersByTimeAsync(3_500)
     })
     await act(async () => {
       await vi.advanceTimersByTimeAsync(100)

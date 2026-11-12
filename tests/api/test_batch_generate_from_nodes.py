@@ -355,3 +355,35 @@ def test_batch_generate_job_idor_cross_user(
         assert cancel.status_code == 404
     finally:
         app.dependency_overrides[get_current_user] = lambda: _user()
+
+
+@pytest.mark.asyncio
+async def test_service_progress_detail_counts_the_whole_batch_on_resume() -> None:
+    """Reprise d'un lot : « Nœud n/N » suit le lot complet, pas les seuls parents restants."""
+    orchestrator = MagicMock()
+
+    async def _gen(**kwargs: Any) -> GenerationResult:
+        return GenerationResult(
+            nodes=[{"id": "c1", "line": "ok"}],
+            suggested_connections=[],
+            parent_node_id=kwargs["parent_node_id"],
+            batch_count=1,
+        )
+
+    orchestrator.generate = AsyncMock(side_effect=_gen)
+    from services.batch_node_generation_service import (
+        BatchNodeGenerationService,
+        BatchParentInput,
+    )
+
+    details: list[str] = []
+    service = BatchNodeGenerationService(orchestrator=orchestrator)
+    await service.generate_batch(
+        [BatchParentInput("p5", {}, {}), BatchParentInput("p6", {}, {})],
+        llm_client=MagicMock(),
+        on_progress=lambda _c, _t, detail: details.append(detail),
+        label_offset=4,
+        label_total=6,
+    )
+    assert details[0] == "Nœud 5/6"
+    assert details[-1] == "Nœud 6/6 terminé"

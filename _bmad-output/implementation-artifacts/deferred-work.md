@@ -136,19 +136,21 @@
 #   BatchNodeGenerationJobManager — résout aussi la duplication job-manager
 #   signalée en revue).
 
-- source_spec: `_bmad-output/implementation-artifacts/spec-8-9-generer-batch-noeuds-depart-fr88.md`
-  summary: Persistance/reprise des jobs batch (validation FR87 + génération FR88) — actuellement en mémoire process pur.
-  evidence: |
-    Revue sécurité PR #68 (2026-08-11) — un redémarrage serveur en cours de job
-    (validation ou génération) fait disparaître silencieusement l'entrée : le
-    client qui poll reçoit un 404 nu, sans distinction avec un job inexistant,
-    et sans indication qu'un lot de 10-500 items a été interrompu à mi-parcours.
-    Sans risque de perte de données pour la validation (idempotente, lecture
-    seule), mais la génération mute l'état du graphe par parent sans
-    checkpoint de ce qui a déjà réussi — un retry naïf après crash peut
-    dupliquer des nœuds déjà générés pour les parents traités avant le crash.
-    Nécessite un store durable (SQLite) + reprise/reconciliation au niveau
-    service, hors scope d'un correctif ciblé pré-merge.
+# RESOLVED 2026-11-12 — état des jobs persisté en JSON atomique
+#   (data/batch_jobs/*.json, InMemoryBatchJobManager(storage_path=…)) à chaque
+#   transition et à chaque item terminé (on_item = point de reprise par
+#   parent/document) ; au démarrage, un job queued/running devient
+#   ``interrupted`` sans relance automatique (aucune dépense LLM implicite) ;
+#   le polling renvoie ``interrupted`` + rapport partiel (id inconnu = 404,
+#   autre propriétaire = 404) ; reprise via ``resume_job_id`` ou en repostant
+#   le même lot : seuls les parents restants sont générés et comptés par le
+#   cost gate, 409 si le job tourne encore ; front : polling tolérant aux
+#   pannes passagères, modale « Lot interrompu » + bouton « Reprendre », le
+#   rapport fusionné n'est appliqué qu'une fois (pas de nœud en double).
+#   JSON plutôt que SQLite : états courts (TTL 1 h), imbriqués, sans requête,
+#   même procédé que les autres états locaux. Tests :
+#   tests/api/test_batch_jobs_restart.py, batchNodeGenerationJobStore.test.ts.
+# - source_spec: spec-8-9 … Persistance/reprise des jobs batch (FR87 + FR88)
 - source_spec: `_bmad-output/implementation-artifacts/spec-8-1-lister-tous-les-dialogues-fr80.md`
   summary: Extraire `list_unity_dialogues` (api/routers/unity_dialogues.py) vers un service de listing dédié.
   evidence: |
