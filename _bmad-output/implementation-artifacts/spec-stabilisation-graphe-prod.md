@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 title: Stabilisation du parcours graphe avant écriture en prod (v1.9.2)
 date: 2026-11-12
 ---
@@ -45,9 +45,16 @@ Génération par lot, Ctrl+J, lot 2 de la charte, UI des cycles, reprise du jour
   - **choix fantômes** : un nœud créé juste après un nœud à choix héritait de ses choix (`texte>undefined`) — le flush du formulaire (debounce, `requestFlush`/`onSubmit`, démontage) visait la sélection courante au lieu du nœud dont le formulaire porte les valeurs (`formNodeIdRef` dans `NodeEditorPanel`) ;
   - **titre effacé** : toute mutation du graphe reconstruisait le document depuis les nœuds seuls (`syncDocAndLayout`) et l'autosave enregistrait un dialogue sans `title` — les champs de tête du document sont désormais conservés.
 
-## Reste ouvert (deferred)
+- 2026-11-12 (v1.9.3) : fragilités restantes résolues :
+  - graphe ↔ onglet Édition : signal `graphViewStore.documentSaved` ; l'autre vue recharge si elle n'a rien en cours, sinon avertit ;
+  - fermeture d'onglet pendant une sauvegarde en vol : le keepalive part tout de suite, sur la révision que la sauvegarde en vol produira ; quota keepalive partagé réservé (document d'abord) ;
+  - 4xx déterministe : plus de relance en boucle, relance à la modification suivante ;
+  - dialogue supprimé : 404 au lieu d'une résurrection (révision > 1, et `mustExist` dès que le document a été lu ou écrit) ;
+  - échec de la sauvegarde avant changement de dialogue par l'URL : l'URL revient au dialogue affiché ;
+  - diagnostics FR94 non bloquants exclus des erreurs de champ ;
+  - génération / validation par lot persistées (`data/batch_jobs/`), statut `interrupted` après redémarrage, reprise sans doublon ;
+  - 18.9 : « Éditer » et « Nouveau nœud » ouvrent l'onglet NŒUD, curseur dans la réplique ; une action sans changement ne pousse plus d'étape d'undo.
 
-- 409 du document : le graphe ouvert l'emporte ; une modification faite en parallèle dans l'onglet Édition est écrasée (toast informatif). Vraie résolution : signal de rechargement depuis Édition.
-- Fermeture d'onglet pendant une sauvegarde déjà en vol : la sauvegarde keepalive attend derrière et peut ne pas partir.
-- Autosave en 4xx déterministe : relance toutes les 10 s sans plafond.
-- 18.9 : bascule d'onglet inspecteur et focus du formulaire sur « Éditer ».
+## Hors périmètre (dépend de stories non livrées)
+
+- 18.9, Tab/Échap dans la chaîne de champs : décrit pour l'édition in-situ dans le nœud (stories 18.5–18.7 et 14.1–14.2, en backlog).

@@ -46,6 +46,13 @@ class PutDocumentRequest(BaseModel):
         default=False,
         description="Refuse atomiquement toute création si le document existe déjà.",
     )
+    mustExist: bool = Field(
+        default=False,
+        description=(
+            "Refuse toute création : le client édite un document déjà persisté. "
+            "Un document supprimé entre-temps donne 404 au lieu d'être recréé."
+        ),
+    )
 
 
 class PutDocumentResponse(BaseModel):

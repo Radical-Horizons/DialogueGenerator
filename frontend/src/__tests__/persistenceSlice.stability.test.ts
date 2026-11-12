@@ -151,4 +151,15 @@ describe('saveDialogue — stabilité', () => {
       source: 'graph',
     })
   })
+
+  it('document lu sur le serveur : l’autosave envoie mustExist, un dialogue supprimé n’est jamais recréé', async () => {
+    await loadDirtyDialogue()
+    vi.mocked(documentsAPI.putDocument).mockResolvedValue({ revision: 4 })
+    vi.mocked(documentsAPI.putLayout).mockResolvedValue({ revision: 3 })
+
+    await useGraphStore.getState().saveDialogue()
+
+    const [, body] = vi.mocked(documentsAPI.putDocument).mock.calls[0]
+    expect(body).toMatchObject({ mustExist: true })
+  })
 })

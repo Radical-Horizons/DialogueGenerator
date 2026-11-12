@@ -410,6 +410,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         documentRevision: docResponse.revision,
         layoutRevision: (layoutResponse as { revision: number }).revision ?? 1,
         loadSeq,
+        documentPersisted: true,
       })
       get().normalizeEdgeColors({ skipMarkDirty: true })
     } catch (error: unknown) {
@@ -461,6 +462,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
       documentId: rest.documentId,
       documentRevision: rest.documentRevision,
       layoutRevision: rest.layoutRevision,
+      documentPersisted: rest.documentPersisted ?? false,
       dialogueFlagBindings: parseBindingsFromDocument(rest.document as Record<string, unknown>),
       isLoading: false,
       isSaving: false,
@@ -554,7 +556,12 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         if (typeof serverTitle === 'string' && serverTitle.trim()) doc.title = serverTitle
         // Brouillon : une saisie en cours (condition à moitié remplie) ne doit pas faire refuser
         // toute la persistance ; l'export Unity garde sa propre validation stricte.
-        const body = { document: doc, revision, validationMode: 'draft' as const }
+        const body = {
+          document: doc,
+          revision,
+          validationMode: 'draft' as const,
+          ...(state.documentPersisted ? { mustExist: true } : {}),
+        }
         return trackRevisionInFlight('document', revision, async () =>
           (options?.keepalive ? await documentsAPI.putDocumentKeepalive(documentId, body) : null) ??
           (await documentsAPI.putDocument(documentId, body)),
@@ -587,6 +594,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         set({
           document: doc,
           documentRevision: docRes.revision,
+          documentPersisted: true,
         })
         failedStage = 'layout'
         const { result: layoutRes } = await (earlyLayout ??
