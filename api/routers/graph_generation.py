@@ -456,6 +456,8 @@ async def start_batch_generate_from_nodes_job(
                 on_item=lambda item: job_manager.record_item(
                     job_id, item.parent_node_id, asdict(item)
                 ),
+                label_offset=offset,
+                label_total=len(parent_ids),
             )
             fresh = {item.parent_node_id: item for item in run.items}
             merged = [
