@@ -108,12 +108,26 @@ export const createUndoSlice: StateCreator<GraphState, [], [], UndoSlice> = (set
   clearUndoHistory: () => set({ undoStack: [], redoStack: [] }),
 
   runAsSingleUndoStep: (action) => {
+    const before = get()
     get()._pushUndoSnapshot()
+    const pushed = get()
     undoStepDepth += 1
     try {
       action()
     } finally {
       undoStepDepth -= 1
+    }
+    // Une action qui ne touche pas le graphe n'est pas une étape : on rend la pile undo et le redo.
+    const after = get()
+    if (
+      pushed.undoStack !== before.undoStack &&
+      after.undoStack === pushed.undoStack &&
+      after.nodes === before.nodes &&
+      after.edges === before.edges &&
+      after.document === before.document &&
+      after.layout === before.layout
+    ) {
+      set({ undoStack: before.undoStack, redoStack: before.redoStack })
     }
   },
 })

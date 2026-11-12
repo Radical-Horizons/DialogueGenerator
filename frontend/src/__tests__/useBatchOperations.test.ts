@@ -166,4 +166,25 @@ describe('useBatchOperations', () => {
       3000
     )
   })
+
+  it('handleBatchTagSelection avec un tag déjà posé ne crée pas d’étape d’undo et garde le redo', () => {
+    const { result } = renderHook(() => useBatchOperations(toastMock))
+    act(() => result.current.handleBatchTagSelection('À réviser'))
+    useGraphStore.getState().clearUndoHistory()
+    useGraphStore.getState().addNode({
+      id: 'n3',
+      type: 'dialogueNode',
+      position: { x: 0, y: 100 },
+      data: { id: 'n3', line: 'Extra' },
+    })
+    useGraphStore.getState().undo()
+    useGraphStore.setState({ hasUnsavedChanges: false })
+
+    act(() => result.current.handleBatchTagSelection('À réviser'))
+
+    const state = useGraphStore.getState()
+    expect(state.undoStack).toHaveLength(0)
+    expect(state.redoStack).toHaveLength(1)
+    expect(state.hasUnsavedChanges).toBe(false)
+  })
 })
