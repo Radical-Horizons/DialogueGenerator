@@ -100,6 +100,27 @@ function applySaveFieldValidationErrors(
   return { fieldErrors, userMessage }
 }
 
+function revisionConflictOf(error: unknown): number | null {
+  const response = (error as { response?: { status?: number; data?: { revision?: unknown } } })
+    ?.response
+  const revision = response?.data?.revision
+  return response?.status === 409 && typeof revision === 'number' ? revision : null
+}
+
+/** Auteur unique : le graphe ouvert l'emporte sur une révision serveur plus récente. */
+async function putOverwritingRevisionConflict<T>(
+  put: (revision: number) => Promise<T>,
+  revision: number,
+): Promise<{ result: T; conflicted: boolean }> {
+  try {
+    return { result: await put(revision), conflicted: false }
+  } catch (error) {
+    const serverRevision = revisionConflictOf(error)
+    if (serverRevision === null) throw error
+    return { result: await put(serverRevision), conflicted: true }
+  }
+}
+
 export type PersistenceSlice = Pick<
   GraphState,
   | 'loadDialogue'
@@ -481,15 +502,32 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         )
       }
 
+      const putDocumentAt = async (revision: number) => {
+        // Brouillon : une saisie en cours (condition à moitié remplie) ne doit pas faire refuser
+        // toute la persistance ; l'export Unity garde sa propre validation stricte.
+        const body = { document: doc, revision, validationMode: 'draft' as const }
+        return (
+          (options?.keepalive ? await documentsAPI.putDocumentKeepalive(documentId, body) : null) ??
+          (await documentsAPI.putDocument(documentId, body))
+        )
+      }
+      const putLayoutAt = async (revision: number) => {
+        const body = { layout: layoutPayload, revision }
+        return (
+          (options?.keepalive ? await documentsAPI.putLayoutKeepalive(documentId, body) : null) ??
+          (await documentsAPI.putLayout(documentId, body))
+        )
+      }
+      let failedStage: 'document' | 'layout' = 'document'
+      // En quittant la page, plus rien ne s'exécute après la réponse du document : le layout part en même temps.
+      const earlyLayout = options?.keepalive
+        ? putOverwritingRevisionConflict(putLayoutAt, state.layoutRevision ?? 1)
+        : null
+      void earlyLayout?.catch(() => undefined)
+
       try {
-        const docBody = {
-          document: doc,
-          revision: state.documentRevision ?? 1,
-          validationMode: 'export' as const,
-        }
-        const docRes =
-          (options?.keepalive ? await documentsAPI.putDocumentKeepalive(documentId, docBody) : null) ??
-          (await documentsAPI.putDocument(documentId, docBody))
+        const { result: docRes, conflicted: replacedNewerVersion } =
+          await putOverwritingRevisionConflict(putDocumentAt, state.documentRevision ?? 1)
         if (!isActiveSave()) {
           return { success: true, filename: documentId } as SaveGraphResponse
         }
@@ -497,14 +535,18 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
           document: doc,
           documentRevision: docRes.revision,
         })
-        const layoutRes = await documentsAPI.putLayout(documentId, {
-          layout: layoutPayload,
-          revision: state.layoutRevision ?? 1,
-        })
+        failedStage = 'layout'
+        const { result: layoutRes } = await (earlyLayout ??
+          putOverwritingRevisionConflict(putLayoutAt, state.layoutRevision ?? 1))
         if (!isActiveSave()) {
           return { success: true, filename: documentId } as SaveGraphResponse
         }
         const hasNewerChanges = get().clientSeq !== snap.clientSeq
+        const { fieldErrors: draftFieldErrors } = extractValidationIssuesFromApiError(
+          { response: { data: docRes } },
+          unityNodesFromGraph(snap),
+          snap.nodes,
+        )
         set({
           document: doc,
           layout: layoutPayload,
@@ -513,7 +555,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
           isSaving: false,
           hasUnsavedChanges: hasNewerChanges,
           lastSaveError: null,
-          documentFieldErrors: [],
+          documentFieldErrors: draftFieldErrors,
           lastSavedAt: Date.now(),
           syncStatus: 'synced',
         })
@@ -532,19 +574,18 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         } catch (validationError) {
           console.error('Validation après sauvegarde:', validationError)
         }
-        return { success: true, filename: documentId } as SaveGraphResponse
+        return { success: true, filename: documentId, replacedNewerVersion } as SaveGraphResponse
       } catch (error) {
         if (!isActiveSave()) {
           throw error
         }
-        const conflict = error as {
-          response?: { status?: number; data?: { revision?: number } }
-        }
-        if (
-          conflict.response?.status === 409 &&
-          typeof conflict.response.data?.revision === 'number'
-        ) {
-          set({ layoutRevision: conflict.response.data.revision })
+        const serverRevision = revisionConflictOf(error)
+        if (serverRevision !== null) {
+          set(
+            failedStage === 'document'
+              ? { documentRevision: serverRevision }
+              : { layoutRevision: serverRevision },
+          )
         }
         const { fieldErrors, userMessage } = applySaveFieldValidationErrors(get, set, error)
         set({
