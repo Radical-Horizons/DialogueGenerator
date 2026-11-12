@@ -50,6 +50,7 @@ export function runGraphTransaction(
       nodes,
       edges,
       state.layout as Record<string, unknown>,
+      state.document as Record<string, unknown>,
     )
     set({ ...patch, nodes, edges, document, layout })
   } else {

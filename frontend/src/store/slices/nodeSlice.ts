@@ -946,7 +946,8 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
         const { document, layout } = syncDocAndLayout(
           nodes,
           s.edges,
-          next.layout as Record<string, unknown>
+          next.layout as Record<string, unknown>,
+          next.document as Record<string, unknown>
         )
         return { ...next, document, layout }
       }

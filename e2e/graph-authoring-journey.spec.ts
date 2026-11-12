@@ -289,6 +289,9 @@ test.describe('Graphe — parcours d\'écriture complet', { tag: '@smoke' }, () 
       .poll(() => readStore(page, (api) => api.getState().hasUnsavedChanges), { timeout: E2E_MS.savePut })
       .toBe(false)
 
+    // Une pause d'au moins 1 s clôt l'étape d'annulation (nodeSlice UNDO_COALESCE_WINDOW_MS) :
+    // sans elle, la réécriture se fond dans la même rafale que la saisie initiale.
+    await page.waitForTimeout(1200)
     const lineField = node.inspector.locator('textarea[name="line"]')
     await lineField.fill('Texte réécrit')
     await lineField.press('Tab')

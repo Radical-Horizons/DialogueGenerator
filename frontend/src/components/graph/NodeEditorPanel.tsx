@@ -206,19 +206,24 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
   const isFlushingRef = useRef(false)
   const previousSelectedNodeIdRef = useRef<string | null>(null)
   const debouncePushRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const selectedNodeIdRef = useRef<string | null>(selectedNodeId ?? null)
   const nodeTypeRef = useRef(nodeType)
   const flushCurrentFormToStoreRef = useRef<() => void>(() => {})
   /** Dernière empreinte des champs « connexion » du nœud sélectionné (évite resync inutile + boucles). */
   const prevConnectionFingerprintRef = useRef<string>('')
   const lastSeenStoreTextRef = useRef<string>('')
+  /**
+   * Nœud dont le formulaire contient réellement les valeurs. La sélection peut le devancer (« Nouveau
+   * nœud » sélectionné avant d'exister dans le store, démontage après un rendu sur la nouvelle
+   * sélection) : un flush vers un autre nœud lui ferait hériter du texte et des choix de l'ancien.
+   */
+  const formNodeIdRef = useRef<string | null>(null)
 
   const DEBOUNCE_MS = 100
 
-  selectedNodeIdRef.current = selectedNodeId ?? null
   nodeTypeRef.current = nodeType
 
   const flushFormToStore = useCallback((nodeId: string, targetNodeType: string) => {
+    if (formNodeIdRef.current !== nodeId) return
     const state = useGraphStore.getState()
     const node = state.nodes.find((n) => n.id === nodeId)
     if (!node?.data) return
@@ -236,9 +241,10 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
   }, [form, updateNode])
 
   flushCurrentFormToStoreRef.current = () => {
-    const currentId = selectedNodeIdRef.current
-    if (!currentId) return
-    flushFormToStore(currentId, nodeTypeRef.current)
+    const formNodeId = formNodeIdRef.current
+    if (!formNodeId) return
+    const formNode = useGraphStore.getState().nodes.find((n) => n.id === formNodeId)
+    flushFormToStore(formNodeId, formNode?.type ?? nodeTypeRef.current)
   }
 
   useEffect(() => {
@@ -280,7 +286,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       const values = form.getValues()
       const state = useGraphStore.getState()
       const prevNode = state.nodes.find((n) => n.id === prevId)
-      if (prevNode?.data) {
+      if (prevNode?.data && formNodeIdRef.current === prevId) {
         const prevNodeType = prevNode.type ?? 'dialogueNode'
         let merged = mergeNodeFormIntoStoreData(prevNodeType, prevNode.data as Record<string, unknown>, values)
         if (prevNodeType === 'dialogueNode') {
@@ -295,14 +301,17 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     }
     previousSelectedNodeIdRef.current = currentId
 
-    if (selectionChanged && selectedNode?.data) {
+    const awaitingReset = currentId != null && formNodeIdRef.current !== currentId
+    if ((selectionChanged || awaitingReset) && selectedNode?.data) {
       reset(formValuesFromNode(nodeType, selectedNode))
       prevConnectionFingerprintRef.current = connectionFingerprintFromNodeData(
         nodeType,
         selectedNode.data as Record<string, unknown>
       )
+      formNodeIdRef.current = currentId
     } else if (selectionChanged) {
       prevConnectionFingerprintRef.current = ''
+      formNodeIdRef.current = null
     } else if (selectedNode?.data) {
       // Écriture externe (undo, génération) : le formulaire ne suit que s'il n'a pas de saisie
       // en attente, sinon le prochain flush réécrirait l'ancien texte par-dessus le store.
@@ -330,6 +339,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
   // Même nœud sélectionné : le store peut mettre à jour les connexions (génération, edges) sans resélection.
   useEffect(() => {
     if (!selectedNodeId || !selectedNode?.data) return
+    if (formNodeIdRef.current !== selectedNodeId) return
     const fp = connectionFingerprintFromNodeData(
       nodeType,
       selectedNode.data as Record<string, unknown>
@@ -364,7 +374,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
   }, [selectedNodeId, selectedNode, nodeType, form, setValue])
 
   const onSubmit = useCallback((data: DialogueNodeData | TestNodeData | EndNodeData) => {
-    if (!selectedNodeId) return
+    if (!selectedNodeId || formNodeIdRef.current !== selectedNodeId) return
     if (nodeType === 'dialogueNode') {
       const line = (data as DialogueNodeData).line ?? ''
       if (typeof line === 'string' && line.trim() === '') {
