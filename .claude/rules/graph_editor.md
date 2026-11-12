@@ -5,6 +5,9 @@ paths:
   - "frontend/src/store/**"
 ---
 - **Invariant éditeur de nœud** : au changement de sélection dans `NodeEditorPanel`, flush le formulaire avec **`mergeNodeFormIntoStoreData()`** / **`mergeDialogueNodeFormIntoStoreData()`** (`frontend/src/utils/mergeNodeEditorForm.ts`), pas un spread `{ ...nodeData, ...formValues }` — sinon `choices[i].targetNode` (rempli par `connectNodes` / `edgeSlice`) peut être écrasé, et `choice.test` peut être effacé si le champ formulaire est vide alors que le store l'a encore. Détails du flux dans `CLAUDE.md` (Learned Workspace Facts).
+  - **Le formulaire ne s'écrit que dans le nœud dont il porte les valeurs** (`formNodeIdRef`), jamais dans `selectedNodeId` : la sélection peut le devancer (« Nouveau nœud » sélectionné avant d'être rendu, `requestFlush`/`onSubmit`, démontage). Vécu le 2026-11-12 : un nœud créé juste après un nœud à choix en héritait les choix (`texte>undefined`). Garde : `NodeEditorPanel.newNodeNoInheritedChoices.test.tsx` et `e2e/graph-authoring-journey.spec.ts`.
+
+- **Document ↔ graphe** : le graphe ne porte que les nœuds. Toute reconstruction du document depuis le graphe (`syncDocAndLayout`) reçoit le document courant et en garde les champs de tête (titre…). Vécu le 2026-11-12 : chaque ajout de nœud effaçait le `title`, et l'autosave enregistrait un dialogue sans titre.
 
 - **Validation inline à la sauvegarde** :
   - Échec PUT/save → `persistenceSlice.applySaveFieldValidationErrors` remplit `documentFieldErrors` (`uiSlice`) depuis `structured_errors` API.
