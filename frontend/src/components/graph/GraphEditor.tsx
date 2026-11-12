@@ -129,18 +129,31 @@ export function GraphEditor({
    * du menu contextuel) ouvre le formulaire, y compris sur le nœud déjà sélectionné.
    */
   const [nodeInspectorEditing, setNodeInspectorEditing] = useState(false)
+  const [focusNodeLine, setFocusNodeLine] = useState(false)
+  /** Éditer, c'est pouvoir écrire tout de suite : onglet NŒUD visible, curseur dans la réplique. */
+  const openNodeEditor = useCallback(() => {
+    useUiLayoutStore.getState().setInspectorTab('node')
+    setNodeInspectorEditing(true)
+    setFocusNodeLine(true)
+  }, [])
+  const handleNodeLineFocused = useCallback(() => setFocusNodeLine(false), [])
   const nodeEditRequest = useGraphViewStore((s) => s.nodeEditRequest)
   useEffect(() => {
     const { nodeEditRequest, clearNodeEditRequest } = useGraphViewStore.getState()
     if (nodeEditRequest != null) clearNodeEditRequest()
-    setNodeInspectorEditing(nodeEditRequest != null && nodeEditRequest === selectedNodeId)
-  }, [selectedNodeId])
+    if (nodeEditRequest != null && nodeEditRequest === selectedNodeId) {
+      openNodeEditor()
+    } else {
+      setNodeInspectorEditing(false)
+      setFocusNodeLine(false)
+    }
+  }, [selectedNodeId, openNodeEditor])
   // Une demande visant un autre nœud attend sa sélection : l'effet ci-dessus la traitera.
   useEffect(() => {
     if (nodeEditRequest == null || nodeEditRequest !== selectedNodeId) return
     useGraphViewStore.getState().clearNodeEditRequest()
-    setNodeInspectorEditing(true)
-  }, [nodeEditRequest, selectedNodeId])
+    openNodeEditor()
+  }, [nodeEditRequest, selectedNodeId, openNodeEditor])
 
   const toolbar = useGraphToolbar(toast, activeDialogueFilename, isLoadingDialogue)
   const { ref: workspaceRef, isNarrow: isWorkspaceNarrow } = useNarrowInlineSize(
@@ -307,13 +320,13 @@ export function GraphEditor({
           {/* 2e : vue lecture par défaut ; « éditer » ouvre le formulaire complet,
               qui reste la seule surface d'édition du graphe. */}
           {nodeInspectorEditing ? (
-            <NodeEditorPanel />
+            <NodeEditorPanel focusLine={focusNodeLine} onLineFocused={handleNodeLineFocused} />
           ) : (
             <GraphInspectorNodeSummary
               node={selectedGraphNode}
               errorCount={selectedNodeErrorCount}
               warningCount={selectedNodeWarningCount}
-              onEdit={() => setNodeInspectorEditing(true)}
+              onEdit={openNodeEditor}
               onShowHealth={() => useUiLayoutStore.getState().setInspectorTab('health')}
             />
           )}

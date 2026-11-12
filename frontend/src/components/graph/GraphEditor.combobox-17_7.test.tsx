@@ -141,7 +141,9 @@ vi.mock('../../store/graphViewStore', () => ({
 }))
 
 vi.mock('./NodeEditorPanel', () => ({
-  NodeEditorPanel: () => <div data-testid="node-editor-panel-mock" />,
+  NodeEditorPanel: ({ focusLine }: { focusLine?: boolean }) => (
+    <div data-testid="node-editor-panel-mock" data-focus-line={String(Boolean(focusLine))} />
+  ),
 }))
 
 vi.mock('./GraphInspectorNodeSummary', () => ({
@@ -305,7 +307,7 @@ describe('GraphEditor — inspecteur du nœud sélectionné (2e)', () => {
     mockGraphView.nodeEditRequest = 'n1'
     render(<GraphEditor />)
 
-    expect(await screen.findByTestId('node-editor-panel-mock')).toBeInTheDocument()
+    expect(await screen.findByTestId('node-editor-panel-mock')).toHaveAttribute('data-focus-line', 'true')
     expect(screen.queryByTestId('node-summary-mock')).not.toBeInTheDocument()
     expect(mockGraphView.clearNodeEditRequest).toHaveBeenCalled()
   })
@@ -319,6 +321,19 @@ describe('GraphEditor — inspecteur du nœud sélectionné (2e)', () => {
 
     expect(await screen.findByTestId('node-editor-panel-mock')).toBeInTheDocument()
     expect(mockGraphView.clearNodeEditRequest).toHaveBeenCalled()
+  })
+
+  it('« Éditer » depuis un autre onglet ramène sur NŒUD et place le curseur dans la réplique', async () => {
+    useUiLayoutStore.setState({ inspectorTab: 'health' })
+    const { rerender } = render(<GraphEditor />)
+    expect(screen.queryByTestId('node-summary-mock')).not.toBeInTheDocument()
+
+    mockGraphView.nodeEditRequest = 'n1'
+    rerender(<GraphEditor />)
+
+    const panel = await screen.findByTestId('node-editor-panel-mock')
+    expect(useUiLayoutStore.getState().inspectorTab).toBe('node')
+    expect(panel).toHaveAttribute('data-focus-line', 'true')
   })
 
   it('une demande pour un autre nœud laisse la lecture', async () => {
