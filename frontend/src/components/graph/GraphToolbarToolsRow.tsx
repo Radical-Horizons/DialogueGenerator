@@ -38,22 +38,27 @@ export function GraphToolbarToolsGroup(props: GraphToolbarToolsRowProps) {
   const actionsMenuEnabled = props.canOpenGraphActions ?? canEditGraph
 
   // Ordre maquette 2e : Nœud · Disposer · Jouer · Actions ▾ · Qualités ▾ · Rech. · ?
+  // En étroit, Nœud et Jouer vivent déjà dans la rangée d'actions : ne pas les répéter ici.
   return (
     <>
-      <GraphToolbarFocusNodeButton
-        isNarrowToolbar={isNarrowToolbar}
-        chromeStyles={chromeStyles}
-        selectedNodeId={selectedNodeId}
-        hasActiveDialogue={hasActiveDialogue}
-      />
+      {!isNarrowToolbar && (
+        <GraphToolbarFocusNodeButton
+          isNarrowToolbar={false}
+          chromeStyles={chromeStyles}
+          selectedNodeId={selectedNodeId}
+          hasActiveDialogue={hasActiveDialogue}
+        />
+      )}
       <GraphToolbarLayoutDropdown {...props} />
-      <GraphToolbarPlaythroughButton
-        isNarrowToolbar={isNarrowToolbar}
-        chromeStyles={chromeStyles}
-        hasActiveDialogue={hasActiveDialogue}
-        active={Boolean(props.scenarioPlaythroughActive)}
-        onToggle={props.onToggleScenarioPlaythrough}
-      />
+      {!isNarrowToolbar && (
+        <GraphToolbarPlaythroughButton
+          isNarrowToolbar={false}
+          chromeStyles={chromeStyles}
+          hasActiveDialogue={hasActiveDialogue}
+          active={Boolean(props.scenarioPlaythroughActive)}
+          onToggle={props.onToggleScenarioPlaythrough}
+        />
+      )}
       {!isNarrowToolbar && (
         <GraphActionsDropdown
           canEditGraph={canEditGraph}

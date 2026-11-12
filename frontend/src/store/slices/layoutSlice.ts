@@ -30,7 +30,12 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
         // suivant rejoue les anciennes positions et annule la disposition.
         const synced =
           state.document != null && state.layout != null
-            ? syncDocAndLayout(layoutedNodes, state.edges, state.layout as Record<string, unknown>)
+            ? syncDocAndLayout(
+                layoutedNodes,
+                state.edges,
+                state.layout as Record<string, unknown>,
+                state.document as Record<string, unknown>
+              )
             : null
         set({ nodes: layoutedNodes, ...(synced ?? {}) })
         get().markDirty()

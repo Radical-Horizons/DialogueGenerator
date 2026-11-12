@@ -59,6 +59,8 @@ export interface SaveGraphResponse {
   json_content: string
   ack_seq?: number
   last_seq?: number
+  /** Un 409 a été écrasé : une version serveur plus récente a été remplacée par le graphe. */
+  replacedNewerVersion?: boolean
 }
 
 export interface ExportPreviewResponse {

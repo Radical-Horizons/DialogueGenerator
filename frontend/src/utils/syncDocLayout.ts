@@ -34,14 +34,18 @@ export function mergeLayoutWithNodePositions(
  * @param nodes - Nœuds ReactFlow courants
  * @param edges - Edges ReactFlow courants
  * @param currentLayout - Layout actuel (contient les positions persistées)
+ * @param currentDocument - Document actuel : ses champs de tête (titre…) sont conservés, le graphe
+ *   ne portant que les nœuds
  * @returns `{ document, layout }` prêts à être écrits dans le store
  */
 export function syncDocAndLayout(
   nodes: Node[],
   edges: Edge[],
-  currentLayout: Record<string, unknown>
+  currentLayout: Record<string, unknown>,
+  currentDocument?: Record<string, unknown> | null
 ): { document: Record<string, unknown>; layout: Record<string, unknown> } {
-  const doc = graphToDocument(nodes, edges) as unknown as Record<string, unknown>
+  const projected = graphToDocument(nodes, edges) as unknown as Record<string, unknown>
+  const doc = currentDocument ? { ...currentDocument, ...projected } : projected
   const newLayout = mergeLayoutWithNodePositions(currentLayout, nodes)
   return { document: doc, layout: newLayout }
 }

@@ -32,7 +32,8 @@ export function GraphToolbarFocusNodeButton({
       title="Recentrer sur le nœud sélectionné (double-clic sur un nœud)"
       aria-label="Recentrer sur le nœud sélectionné"
     >
-      {isNarrowToolbar ? <span aria-hidden>◎</span> : <span>Nœud</span>}
+      {isNarrowToolbar && <span aria-hidden>◎</span>}
+      <span>Nœud</span>
     </button>
   )
 }

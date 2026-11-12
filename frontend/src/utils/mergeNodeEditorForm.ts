@@ -174,6 +174,30 @@ export function connectionFingerprintFromNodeData(
 }
 
 /**
+ * Empreinte des champs texte saisis dans le panneau. Même forme pour les données store et
+ * les valeurs formulaire : les deux se comparent directement (vide et absent sont égaux).
+ */
+export function textFingerprintFromNodeData(
+  nodeType: string,
+  values: Record<string, unknown>
+): string {
+  const text = (v: unknown) => (typeof v === 'string' ? v : '')
+  if (nodeType === 'testNode') {
+    return JSON.stringify({ test: text(values.test), line: text(values.line) })
+  }
+  if (nodeType === 'dialogueNode') {
+    const choices = (values.choices || []) as Choice[]
+    return JSON.stringify({
+      title: text(values.title),
+      speaker: text(values.speaker),
+      line: text(values.line),
+      choices: choices.map((c) => text(c.text)),
+    })
+  }
+  return ''
+}
+
+/**
  * Applique les champs de connexion du store sur les valeurs form (dialogue).
  */
 export function applyStoreConnectionFieldsToDialogueFormChoices(

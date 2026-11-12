@@ -11,6 +11,7 @@ import * as unityDialoguesAPI from '../api/unityDialogues'
 import { getErrorMessage } from '../types/errors'
 import { API_TIMEOUTS } from '../constants'
 import type { UnityDialogueMetadata } from '../types/api'
+import type { SaveGraphResponse } from '../types/graph'
 import type { UnityDialogueListRef } from '../components/unityDialogues/UnityDialogueList'
 import type { UseToastFn } from '../components/shared'
 import { normalizeDialogueFilenameKey } from '../utils/formatDialogueTitle'
@@ -26,6 +27,9 @@ const AUTOSAVE_4XX_BACKOFF_MS = 10_000
 
 const MISSING_CHOICE_ID_INFO =
   'Choix sans identifiant stable — ouvert quand même. La prochaine sauvegarde les écrira.'
+
+const REPLACED_NEWER_VERSION_INFO =
+  "Ce dialogue avait été modifié ailleurs (onglet Édition ou autre onglet) : ces modifications ont été remplacées par celles du graphe, seul le titre a été conservé"
 
 type ApiErrorShape = {
   response?: { status?: number; data?: { error?: { code?: string } } }
@@ -95,9 +99,11 @@ export function useDialogueLoader(
   const activeDialogueFilenameRef = useRef<string | null>(null)
   const lastNetworkErrorRef = useRef<{ message: string; timestamp: number } | null>(null)
   const saveRetryBlockedUntilRef = useRef<number>(0)
+  const [autosaveRetryTick, setAutosaveRetryTick] = useState(0)
 
   const {
     nodes,
+    clientSeq,
     dialogueMetadata,
     loadDialogueByDocumentId,
     loadDialogueFromRawJson,
@@ -116,6 +122,32 @@ export function useDialogueLoader(
     resetGraph()
     useGenerationStore.getState().clearTemplateSession()
   }, [resetGraph])
+
+  const notifySaveOutcome = useCallback(
+    (response: SaveGraphResponse | undefined) => {
+      if (response?.replacedNewerVersion) toast(REPLACED_NEWER_VERSION_INFO, 'info')
+    },
+    [toast],
+  )
+
+  /** Enregistre le dialogue ouvert avant d'en charger un autre ; `false` si l'enregistrement a échoué. */
+  const saveBeforeLeaving = useCallback(async (): Promise<boolean> => {
+    useGraphViewStore.getState().requestFlush()
+    await new Promise<void>((resolve) => {
+      window.setTimeout(resolve, 0)
+    })
+    const state = useGraphStore.getState()
+    const currentFilename = state.dialogueMetadata?.filename ?? state.documentId ?? null
+    if (!state.hasUnsavedChanges || !currentFilename) return true
+    try {
+      notifySaveOutcome(await saveDialogue())
+      return true
+    } catch (err) {
+      console.error('Erreur sauvegarde avant chargement:', err)
+      toast(`Impossible de sauvegarder avant changement: ${getErrorMessage(err)}`, 'error')
+      return false
+    }
+  }, [saveDialogue, notifySaveOutcome, toast])
 
   // Ne pas utiliser ?? seul : une chaîne vide sur selectedDialogue bloquait le repli documentId (E2E / liste).
   const activeDialogueFilename =
@@ -157,39 +189,23 @@ export function useDialogueLoader(
       setIsLoadingDialogue(true)
       prevSelectedDialogueRef.current = selectedDialogue
 
-      let state = useGraphStore.getState()
+      const state = useGraphStore.getState()
       const currentFilename = state.dialogueMetadata?.filename ?? state.documentId ?? null
       const isSameDialogue =
         !!currentFilename &&
         !!targetFilename &&
         normalizeDialogueFilenameKey(currentFilename) === normalizeDialogueFilenameKey(targetFilename)
-      
+
       if (isSameDialogue) {
         setIsLoadingDialogue(false)
         loadInFlightRef.current = false
         return
       }
 
-      useGraphViewStore.getState().requestFlush()
-      await new Promise<void>((resolve) => {
-        window.setTimeout(resolve, 0)
-      })
-      state = useGraphStore.getState()
-      const leavingDirty =
-        state.hasUnsavedChanges &&
-        !!currentFilename &&
-        !isSameDialogue
-
-      if (leavingDirty) {
-        try {
-          await saveDialogue()
-        } catch (err) {
-          console.error('Erreur sauvegarde avant chargement:', err)
-          toast(`Impossible de sauvegarder avant changement: ${getErrorMessage(err)}`, 'error')
-          loadInFlightRef.current = false
-          setIsLoadingDialogue(false)
-          return
-        }
+      if (!(await saveBeforeLeaving())) {
+        loadInFlightRef.current = false
+        setIsLoadingDialogue(false)
+        return
       }
 
       const loadSeq = incrementLoadSeq()
@@ -274,7 +290,7 @@ export function useDialogueLoader(
     selectedDialogue,
     loadDialogueByDocumentId,
     loadDialogueFromRawJson,
-    saveDialogue,
+    saveBeforeLeaving,
     validateGraph,
     toast,
     incrementLoadSeq,
@@ -329,33 +345,32 @@ export function useDialogueLoader(
 
   useEffect(() => {
     // Ni sauvegarde manuelle ni avertissement (principe produit) : en quittant la page,
-    // le PUT part en `keepalive` pour survivre au déchargement, que le navigateur
+    // les PUT partent en `keepalive` pour survivre au déchargement, que le navigateur
     // annulerait sinon.
-    const flushAndPersist = () => {
-      useGraphViewStore.getState().requestFlush()
-      window.setTimeout(() => {
-        const state = useGraphStore.getState()
-        if (
-          state.hasUnsavedChanges &&
-          !state.isLoading &&
-          !state.isGenerating
-        ) {
-          void saveDialogue({ keepalive: true }).catch((error) => {
-            console.error('Sauvegarde automatique de cycle de vie:', error)
-          })
-        }
-      }, 0)
-    }
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        flushAndPersist()
+    const persistWithKeepalive = () => {
+      const state = useGraphStore.getState()
+      if (state.hasUnsavedChanges && !state.isLoading && !state.isGenerating) {
+        void saveDialogue({ keepalive: true }).catch((error) => {
+          console.error('Sauvegarde automatique de cycle de vie:', error)
+        })
       }
     }
+    // La page se décharge : un minuteur risquerait de ne jamais s'exécuter.
+    const handlePageHide = () => {
+      useGraphViewStore.getState().requestFlush()
+      persistWithKeepalive()
+    }
+    // Onglet masqué mais vivant : on laisse au panneau nœud un tick pour vider son formulaire.
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'hidden') return
+      useGraphViewStore.getState().requestFlush()
+      window.setTimeout(persistWithKeepalive, 0)
+    }
     document.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('pagehide', flushAndPersist)
+    window.addEventListener('pagehide', handlePageHide)
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
-      window.removeEventListener('pagehide', flushAndPersist)
+      window.removeEventListener('pagehide', handlePageHide)
     }
   }, [saveDialogue])
 
@@ -391,9 +406,14 @@ export function useDialogueLoader(
       if (loadInFlightRef.current && activeDialogueFilenameRef.current?.replace(/\.json$/i, '') === routeTarget.normalizedDialogueId) {
         return
       }
-      const loadSeq = incrementLoadSeq()
       loadInFlightRef.current = true
       setIsLoadingDialogue(true)
+      if (!(await saveBeforeLeaving())) {
+        loadInFlightRef.current = false
+        setIsLoadingDialogue(false)
+        return
+      }
+      const loadSeq = incrementLoadSeq()
 
       try {
         const docIdsToTry = /\.json$/i.test(routeTarget.decodedDialogueId)
@@ -453,6 +473,7 @@ export function useDialogueLoader(
     routeTarget,
     loadDialogueByDocumentId,
     loadDialogueFromRawJson,
+    saveBeforeLeaving,
     validateGraph,
     toast,
     incrementLoadSeq,
@@ -482,16 +503,21 @@ export function useDialogueLoader(
     ) {
       return
     }
-    if (Date.now() < saveRetryBlockedUntilRef.current) return
+    const blockedForMs = saveRetryBlockedUntilRef.current - Date.now()
+    if (blockedForMs > 0) {
+      const retryId = setTimeout(() => setAutosaveRetryTick((tick) => tick + 1), blockedForMs)
+      return () => clearTimeout(retryId)
+    }
 
     const timeoutId = setTimeout(() => {
-      saveDialogue().catch((err) => {
+      saveDialogue().then(notifySaveOutcome).catch((err) => {
         const status = (err as { response?: { status?: number } })?.response?.status
         if (typeof status === 'number' && status >= 400 && status < 500 && status !== 409) {
           saveRetryBlockedUntilRef.current = Date.now() + AUTOSAVE_4XX_BACKOFF_MS
         } else {
           saveRetryBlockedUntilRef.current = Date.now() + 3000
         }
+        setAutosaveRetryTick((tick) => tick + 1)
         const errorMessage = getErrorMessage(err)
         const isNetworkError =
           errorMessage.includes('connexion au serveur') ||
@@ -523,8 +549,11 @@ export function useDialogueLoader(
     isGraphSaving,
     isLoadingDialogue,
     isGenerating,
-    nodes,
+    nodes.length,
+    clientSeq,
+    autosaveRetryTick,
     saveDialogue,
+    notifySaveOutcome,
     toast,
   ])
 
@@ -590,6 +619,7 @@ export function useDialogueLoader(
       }
       useGraphViewStore.getState().resetFlush()
       const saveResponse = await saveDialogue()
+      notifySaveOutcome(saveResponse)
       const state = useGraphStore.getState()
       const errors = state.validationErrors.filter((e) => e.severity === 'error')
       const warnings = state.validationErrors.filter((e) => e.severity === 'warning')
@@ -618,7 +648,7 @@ export function useDialogueLoader(
     } finally {
       setIsLoadingDialogue(false)
     }
-  }, [activeDialogueFilename, saveDialogue, toast])
+  }, [activeDialogueFilename, saveDialogue, notifySaveOutcome, toast])
 
   const saveRequested = useGraphViewStore((s) => s.saveRequested)
   useEffect(() => {

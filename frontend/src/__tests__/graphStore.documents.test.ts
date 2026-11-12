@@ -265,7 +265,7 @@ describe('graphStore - document SoT load/save', () => {
             nodes: expect.any(Array),
           }),
           revision: 1,
-          validationMode: 'export',
+          validationMode: 'draft',
         }),
       )
       expect(documentsAPI.putLayout).toHaveBeenCalledWith(

@@ -124,13 +124,18 @@ vi.mock('../../store/graphStore', () => ({
 }))
 
 /** Demande d'édition directe posée par la création manuelle d'un nœud. */
-const mockGraphView = { nodeEditRequest: null as string | null, clearNodeEditRequest: vi.fn() }
+const mockGraphView = {
+  nodeEditRequest: null as string | null,
+  clearNodeEditRequest: vi.fn(),
+  scenarioPlaythrough: { active: false, showGraphPeek: false },
+}
 vi.mock('../../store/graphViewStore', () => ({
   useGraphViewStore: Object.assign(
-    vi.fn(() => ({
-      showFiltersPanel: false,
-      setShowFiltersPanel: vi.fn(),
-    })),
+    vi.fn((selector?: (s: typeof mockGraphView) => unknown) =>
+      selector
+        ? selector(mockGraphView)
+        : { showFiltersPanel: false, setShowFiltersPanel: vi.fn() },
+    ),
     { getState: () => mockGraphView },
   ),
 }))
@@ -302,6 +307,17 @@ describe('GraphEditor — inspecteur du nœud sélectionné (2e)', () => {
 
     expect(await screen.findByTestId('node-editor-panel-mock')).toBeInTheDocument()
     expect(screen.queryByTestId('node-summary-mock')).not.toBeInTheDocument()
+    expect(mockGraphView.clearNodeEditRequest).toHaveBeenCalled()
+  })
+
+  it('« Éditer » sur le nœud déjà sélectionné ouvre l’édition (Story 18.9)', async () => {
+    const { rerender } = render(<GraphEditor />)
+    expect(await screen.findByTestId('node-summary-mock')).toBeInTheDocument()
+
+    mockGraphView.nodeEditRequest = 'n1'
+    rerender(<GraphEditor />)
+
+    expect(await screen.findByTestId('node-editor-panel-mock')).toBeInTheDocument()
     expect(mockGraphView.clearNodeEditRequest).toHaveBeenCalled()
   })
 

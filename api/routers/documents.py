@@ -637,25 +637,27 @@ async def put_document(
                     request_id=request_id,
                 )
 
+        # En draft, une condition ou un effet à moitié saisi (flagId vide) ne doit pas
+        # faire refuser l'autosave de tout le graphe : l'erreur passe dans le rapport.
+        draft_catalog_issues: list[dict[str, str]] = []
         if isinstance(doc, dict):
-            try:
-                visibility_condition_validation_service.validate_document(doc)
-            except ValueError as exc:
-                raise ValidationException(
-                    message=str(exc),
-                    details={"field": "visibilityConditions"},
-                    request_id=request_id,
-                )
-
-        if isinstance(doc, dict):
-            try:
-                choice_effect_validation_service.validate_document(doc)
-            except ValueError as exc:
-                raise ValidationException(
-                    message=str(exc),
-                    details={"field": "choiceEffects"},
-                    request_id=request_id,
-                )
+            for field, code, validator in (
+                ("visibilityConditions", "invalid_visibility_condition", visibility_condition_validation_service),
+                ("choiceEffects", "invalid_choice_effect", choice_effect_validation_service),
+            ):
+                try:
+                    validator.validate_document(doc)
+                except ValueError as exc:
+                    if validation_mode != "draft":
+                        raise ValidationException(
+                            message=str(exc),
+                            details={"field": field},
+                            request_id=request_id,
+                        )
+                    message = str(exc)
+                    draft_catalog_issues.append(
+                        {"code": code, "message": message, "path": message.split(":", 1)[0]}
+                    )
 
         # Validation export unifiée (normalise choiceId, flags, targetNode, puis schéma + GDD)
         export_validation = validate_unity_export_document(doc)
@@ -669,6 +671,7 @@ async def put_document(
             }
             for e in errors_structured
         ]
+        validation_report.extend(draft_catalog_issues)
         if isinstance(doc, dict):
             validation_report.extend(validate_document_social_systems(doc))
 

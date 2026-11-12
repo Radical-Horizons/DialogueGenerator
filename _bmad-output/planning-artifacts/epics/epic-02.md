@@ -650,7 +650,7 @@ So that **je peux accéder rapidement aux opérations courantes sans naviguer da
 
 **Given** je sélectionne "Éditer" dans le menu contextuel
 **When** l'option est cliquée
-**Then** le panneau d'édition s'ouvre pour ce nœud (voir Story 1.5)
+**Then** le panneau d'édition s'ouvre pour ce nœud (voir Story 1.5), y compris s'il était déjà sélectionné (Story 18.9)
 **And** le menu contextuel se ferme
 
 **Given** je sélectionne "Dupliquer" dans le menu contextuel
@@ -671,7 +671,7 @@ So that **je peux accéder rapidement aux opérations courantes sans naviguer da
 **Technical Requirements:**
 - Frontend : **CRÉER** composant `ContextMenu.tsx` dans `frontend/src/components/graph/` — menu custom avec position absolue calculée depuis l'event clic droit
 - Handlers : **ÉTENDRE** `GraphCanvas.tsx` — ajouter `onNodeContextMenu` et `onPaneContextMenu` props sur `<ReactFlow>` + état local `contextMenuState` (nodeId, position x/y)
-- Actions "Éditer" : `setSelectedNode(nodeId)` **existant** (ouvre automatiquement `NodeEditorPanel`)
+- Actions "Éditer" : `requestNodeEdit(nodeId)` puis `setSelectedNode(nodeId)` — `setSelectedNode` seul n'ouvre que la vue lecture et ne fait rien sur le nœud déjà sélectionné (corrigé en Story 18.9)
 - Actions "Supprimer" : `setShowDeleteNodeConfirm(true)` **existant** dans le store
 - Actions "Dupliquer" : dispatch event `open-ai-generation-panel` **existant** ou action dédiée selon Story 1.7
 - Actions "Voir prompt" : dépend de Story 1.14 (prompt transparency)

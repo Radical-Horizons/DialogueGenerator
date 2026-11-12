@@ -93,4 +93,14 @@ describe('runGraphTransaction', () => {
     runGraphTransaction(get, set, () => ({ nodes: state.nodes }), { skipSyncDoc: true })
     expect((setArg as Record<string, unknown>).document).toBeUndefined()
   })
+
+  it('garde le titre du document : le graphe ne porte que les nœuds', () => {
+    state = createMockState({
+      document: { schemaVersion: '1.2.0', title: 'Épreuve à l’Auberge', nodes: [] },
+      layout: {},
+    })
+    runGraphTransaction(get, set, () => ({ nodes: state.nodes }))
+    expect((state.document as Record<string, unknown>).title).toBe('Épreuve à l’Auberge')
+    expect(Array.isArray((state.document as Record<string, unknown>).nodes)).toBe(true)
+  })
 })

@@ -600,7 +600,8 @@ export const createGenerationSlice: StateCreator<
         ? syncDocAndLayout(
             normalized.nodes,
             normalized.edges,
-            stateAfterConnections.layout as Record<string, unknown>
+            stateAfterConnections.layout as Record<string, unknown>,
+            stateAfterConnections.document as Record<string, unknown>
           )
         : null
       set({
@@ -675,7 +676,12 @@ export const createGenerationSlice: StateCreator<
       )
       const synced =
         currentState.document != null && currentState.layout != null
-          ? syncDocAndLayout(nextNodes, currentState.edges, currentState.layout as Record<string, unknown>)
+          ? syncDocAndLayout(
+              nextNodes,
+              currentState.edges,
+              currentState.layout as Record<string, unknown>,
+              currentState.document as Record<string, unknown>
+            )
           : null
       return {
         nodes: nextNodes,
@@ -696,7 +702,12 @@ export const createGenerationSlice: StateCreator<
         )
         const synced =
           currentState.document != null && currentState.layout != null
-            ? syncDocAndLayout(nextNodes, currentState.edges, currentState.layout as Record<string, unknown>)
+            ? syncDocAndLayout(
+              nextNodes,
+              currentState.edges,
+              currentState.layout as Record<string, unknown>,
+              currentState.document as Record<string, unknown>
+            )
             : null
         return {
           nodes: nextNodes,
@@ -801,7 +812,7 @@ export const createGenerationSlice: StateCreator<
         const layout = s.layout
         const synced =
           doc != null && layout != null
-            ? syncDocAndLayout(nextNodes, nextEdges, layout as Record<string, unknown>)
+            ? syncDocAndLayout(nextNodes, nextEdges, layout as Record<string, unknown>, doc as Record<string, unknown>)
             : null
         return {
           nodes: nextNodes,
@@ -883,7 +894,8 @@ export const createGenerationSlice: StateCreator<
           const { document, layout } = syncDocAndLayout(
             updatedNodes,
             updatedEdges,
-            nextState.layout as Record<string, unknown>
+            nextState.layout as Record<string, unknown>,
+            nextState.document as Record<string, unknown>
           )
           return { ...nextState, document, layout }
         }
