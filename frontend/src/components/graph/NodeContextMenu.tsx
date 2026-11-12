@@ -37,6 +37,7 @@ export function NodeContextMenu({
   }, [id, duplicateNode, onClose])
 
   const handleEdit = useCallback(() => {
+    useGraphViewStore.getState().requestNodeEdit(id)
     setSelectedNode(id)
     onClose()
   }, [id, setSelectedNode, onClose])

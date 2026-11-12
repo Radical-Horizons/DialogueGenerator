@@ -125,14 +125,22 @@ export function GraphEditor({
   /**
    * 2e : l'onglet NŒUD s'ouvre en lecture ; « éditer » bascule sur le formulaire.
    * Changer de nœud ramène la lecture — on regarde d'abord, on modifie ensuite.
-   * Exception : un nœud qui vient d'être créé vide s'ouvre en édition (`nodeEditRequest`).
+   * Exception : une demande d'édition (`nodeEditRequest` — nœud créé à la main, « Éditer »
+   * du menu contextuel) ouvre le formulaire, y compris sur le nœud déjà sélectionné.
    */
   const [nodeInspectorEditing, setNodeInspectorEditing] = useState(false)
+  const nodeEditRequest = useGraphViewStore((s) => s.nodeEditRequest)
   useEffect(() => {
     const { nodeEditRequest, clearNodeEditRequest } = useGraphViewStore.getState()
     if (nodeEditRequest != null) clearNodeEditRequest()
     setNodeInspectorEditing(nodeEditRequest != null && nodeEditRequest === selectedNodeId)
   }, [selectedNodeId])
+  // Une demande visant un autre nœud attend sa sélection : l'effet ci-dessus la traitera.
+  useEffect(() => {
+    if (nodeEditRequest == null || nodeEditRequest !== selectedNodeId) return
+    useGraphViewStore.getState().clearNodeEditRequest()
+    setNodeInspectorEditing(true)
+  }, [nodeEditRequest, selectedNodeId])
 
   const toolbar = useGraphToolbar(toast, activeDialogueFilename, isLoadingDialogue)
   const { ref: workspaceRef, isNarrow: isWorkspaceNarrow } = useNarrowInlineSize(

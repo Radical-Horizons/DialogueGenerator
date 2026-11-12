@@ -2,7 +2,7 @@
  * Story 2.12 (FR33): Actions contextuelles sur nœuds — menu clic droit.
  * Task 1.1 + Task 4.1 : Tests unitaires NodeContextMenu.
  * AC #1 : bouton "Éditer" présent en première position avant "Générer".
- * AC #2 : clic "Éditer" appelle setSelectedNode(id) et onClose().
+ * AC #2 : clic "Éditer" appelle setSelectedNode(id), requestNodeEdit(id) et onClose().
  * AC #4.4 : non-régression — options existantes toujours présentes.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -10,6 +10,7 @@ import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ReactFlowProvider } from 'reactflow'
 import { NodeContextMenu } from '../components/graph/NodeContextMenu'
+import { useGraphViewStore } from '../store/graphViewStore'
 
 const mockSetSelectedNode = vi.fn()
 const mockDuplicateNode = vi.fn()
@@ -65,6 +66,15 @@ describe('NodeContextMenu — Story 2.12', () => {
 
     expect(mockSetSelectedNode).toHaveBeenCalledWith('node-xyz')
     expect(onClose).toHaveBeenCalled()
+  })
+
+  it('AC #2 (Story 18.9) : clic "Éditer" demande l’édition du nœud via requestNodeEdit', () => {
+    useGraphViewStore.getState().clearNodeEditRequest()
+    renderMenu('node-xyz')
+
+    fireEvent.click(screen.getByText('Éditer').closest('button')!)
+
+    expect(useGraphViewStore.getState().nodeEditRequest).toBe('node-xyz')
   })
 
   it('AC #1 : "Éditer" apparaît avant "Générer" dans le DOM', () => {
