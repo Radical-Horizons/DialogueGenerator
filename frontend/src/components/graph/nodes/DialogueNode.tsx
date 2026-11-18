@@ -32,6 +32,7 @@ import {
   GRAPH_TOPOLOGY_WARNING_STYLES,
 } from '../../../utils/graphStructuralValidation'
 import { reconstructNodePromptFromGraph } from '../../../utils/graphPromptPreview'
+import { formatNodeLinePreview } from '../../../utils/nodeLinePreview'
 import {
   CHOICE_EDGE_COLOR,
   EDGE_NEUTRAL_COLOR,
@@ -220,9 +221,6 @@ export const DialogueNode = memo(function DialogueNode({
     gddContextSelectionsSnapshot: data.gddContextSelectionsSnapshot,
   })
 
-  // Tronquer le texte pour l'aperçu
-  const truncatedLine = line.length > 100 ? `${line.substring(0, 100)}...` : line
-  
   // Handlers pour accept/reject avec prévention du double-clic
   const [isProcessing, setIsProcessing] = useState(false)
   
@@ -657,7 +655,7 @@ export const DialogueNode = memo(function DialogueNode({
           minHeight: 0,
         }}
       >
-        {line ? (truncatedLine.startsWith('«') ? truncatedLine : `« ${truncatedLine} »`) : null}
+        {line ? formatNodeLinePreview(line) : null}
       </div>
 
       {/* Pied maquette 2e : compteur de réponses mono — au-dessus de la zone handles/lien. */}

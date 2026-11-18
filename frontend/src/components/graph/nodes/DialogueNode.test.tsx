@@ -131,6 +131,19 @@ describe('DialogueNode — actions d’un nœud à valider', () => {
     expect(parseInt(link.style.bottom, 10)).toBeLessThan(parseInt(footer.style.paddingBottom, 10))
   })
 
+  it('n’ajoute pas de guillemets autour d’une réplique ouverte par une didascalie', () => {
+    const line = '*Il se tourne vers vous.* « Salutation. »'
+    renderPendingNode({ data: { line } })
+
+    expect(screen.getByText(line)).toBeInTheDocument()
+  })
+
+  it('met entre guillemets une réplique nue', () => {
+    renderPendingNode({ data: { line: 'Bonjour.' } })
+
+    expect(screen.getByText('« Bonjour. »')).toBeInTheDocument()
+  })
+
   it('n’affiche pas de rangée sur un nœud validé', () => {
     renderPendingNode({ selected: true, data: { status: 'accepted' } })
 
