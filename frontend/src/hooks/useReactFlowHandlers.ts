@@ -73,6 +73,8 @@ export function useReactFlowHandlers(
   const pendingChoiceConnectionRef = useRef<PendingChoiceConnection | null>(null)
   const dragStartPositionsRef = useRef<Record<string, { x: number; y: number }> | null>(null)
   const dragGroupModeRef = useRef<DragGroupMode>(null)
+  /** Multi-sélection : nœud saisi et barres de test emportées sans être sélectionnées. */
+  const multiDragRef = useRef<{ primaryId: string; followerIds: string[] } | null>(null)
   const positionRafRef = useRef<number | null>(null)
   const pendingPositionsRef = useRef<Record<string, { x: number; y: number }>>({})
 
@@ -196,6 +198,19 @@ export function useReactFlowHandlers(
 
           if (!isDragging && groupMode === 'with-children') {
             continue
+          }
+
+          const multiDrag = multiDragRef.current
+          if (isDragging && groupMode === 'multi' && groupStarts && multiDrag?.primaryId === change.id) {
+            const origin = groupStarts[change.id]
+            if (origin) {
+              const dx = change.position.x - origin.x
+              const dy = change.position.y - origin.y
+              for (const id of multiDrag.followerIds) {
+                const s = groupStarts[id]
+                if (s) schedulePositionUpdate(id, { x: s.x + dx, y: s.y + dy })
+              }
+            }
           }
 
           if (isDragging) {
@@ -365,8 +380,17 @@ export function useReactFlowHandlers(
           const n = nodes.find((nd) => nd.id === id)
           if (n) positions[id] = { x: n.position.x, y: n.position.y }
         }
+        // Les barres de test suivent leur parent, comme au glisser simple.
+        const followerIds = edges
+          .filter((e) => ids.includes(e.source) && e.target.startsWith('test-node-') && !ids.includes(e.target))
+          .map((e) => e.target)
+        for (const id of followerIds) {
+          const n = nodes.find((nd) => nd.id === id)
+          if (n) positions[id] = { x: n.position.x, y: n.position.y }
+        }
         dragStartPositionsRef.current = positions
         dragGroupModeRef.current = 'multi'
+        multiDragRef.current = { primaryId: node.id, followerIds: [...new Set(followerIds)] }
         return
       }
 
@@ -377,7 +401,8 @@ export function useReactFlowHandlers(
         node.id.startsWith('test-node-') ||
         node.id.startsWith('test:')
       if (event.ctrlKey || isTestNode) {
-        dragStartPositionsRef.current = null
+        const start = nodes.find((nd) => nd.id === node.id)?.position
+        dragStartPositionsRef.current = start ? { [node.id]: { x: start.x, y: start.y } } : null
         dragGroupModeRef.current = null
         return
       }
@@ -408,9 +433,9 @@ export function useReactFlowHandlers(
       if (startPositions && ids.length > 1 && ids.includes(node.id)) {
         const dx = node.position.x - startPositions[node.id].x
         const dy = node.position.y - startPositions[node.id].y
-        for (const id of ids) {
+        for (const id of Object.keys(startPositions)) {
           const start = startPositions[id]
-          if (start) updateNodePosition(id, { x: start.x + dx, y: start.y + dy }, true)
+          updateNodePosition(id, { x: start.x + dx, y: start.y + dy }, true)
         }
         markDirty()
       } else if (
@@ -426,10 +451,21 @@ export function useReactFlowHandlers(
         }
         markDirty()
       } else {
-        updateNodePosition(node.id, node.position, undefined, false)
+        // Les frames du glisser ont déjà posé la position (sans marquer) : au lâcher,
+        // updateNodePosition la voit inchangée, c'est donc ici qu'on marque à sauvegarder.
+        updateNodePosition(node.id, node.position, true)
+        const start = startPositions?.[node.id]
+        if (
+          !start ||
+          Math.abs(start.x - node.position.x) > 0.1 ||
+          Math.abs(start.y - node.position.y) > 0.1
+        ) {
+          markDirty()
+        }
       }
       dragStartPositionsRef.current = null
       dragGroupModeRef.current = null
+      multiDragRef.current = null
     },
     [updateNodePosition, markDirty]
   )

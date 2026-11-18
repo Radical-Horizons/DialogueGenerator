@@ -574,7 +574,8 @@ export const createGenerationSlice: StateCreator<
       }
       let normalized = normalizeTestBars(
         stateAfterConnections.nodes,
-        stateAfterConnections.edges
+        stateAfterConnections.edges,
+        stateAfterConnections.layout as { nodes?: Record<string, { x: number; y: number }> } | null
       )
       const outgoingFromParentCount = normalized.edges.filter(
         (edge) => edge.source === parentNodeId

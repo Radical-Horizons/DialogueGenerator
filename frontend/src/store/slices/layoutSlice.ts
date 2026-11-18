@@ -7,7 +7,7 @@ import type { GraphState } from '../types/graphState'
 import * as graphAPI from '../../api/graph'
 import { documentToGraph } from '../../utils/documentToGraph'
 import { normalizeTestBars } from '../../utils/graphNormalizers'
-import { syncDocAndLayout } from '../../utils/syncDocLayout'
+import { mergeLayoutWithNodePositions, syncDocAndLayout } from '../../utils/syncDocLayout'
 
 export type LayoutSlice = Pick<
   GraphState,
@@ -22,10 +22,14 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
       if (algorithm === 'dagre') {
         get()._pushUndoSnapshot()
         const { calculateDagreLayout } = await import('../../utils/dagreLayout')
-        const layoutedNodes = calculateDagreLayout(state.nodes, state.edges, {
-          direction: direction as 'TB' | 'LR' | 'BT' | 'RL',
-          spacingMode: state.layoutSpacingMode,
-        })
+        // Comme au chargement : après dagre, les barres de test se réalignent sous leur parent.
+        const layoutedNodes = normalizeTestBars(
+          calculateDagreLayout(state.nodes, state.edges, {
+            direction: direction as 'TB' | 'LR' | 'BT' | 'RL',
+            spacingMode: state.layoutSpacingMode,
+          }),
+          state.edges
+        ).nodes
         // `layout` est la source des positions projetées : sans ce sync, le déplacement
         // suivant rejoue les anciennes positions et annule la disposition.
         const synced =
@@ -105,7 +109,11 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
         state.document,
         newLayout as { nodes?: Record<string, { x: number; y: number }> }
       )
-      const normalized = normalizeTestBars(projectedNodes, projectedEdges)
+      const normalized = normalizeTestBars(
+        projectedNodes,
+        projectedEdges,
+        newLayout as { nodes?: Record<string, { x: number; y: number }> }
+      )
 
       // Conserver la ref edges si seule la position a changé (évite scintillement des étiquettes)
       const newIds = new Set(normalized.edges.map((e) => e.id))
@@ -121,7 +129,11 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
             ? normalized.edges
             : state.edges
 
-      set({ layout: newLayout, nodes: normalized.nodes, edges: edgesToSet })
+      set({
+        layout: mergeLayoutWithNodePositions(newLayout, normalized.nodes),
+        nodes: normalized.nodes,
+        edges: edgesToSet,
+      })
       if (!skipMarkDirty) get().markDirty()
       return
     }

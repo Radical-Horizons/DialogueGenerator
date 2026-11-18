@@ -9,6 +9,7 @@ import {
   GRAPH_TEST_NODE_WIDTH,
   siblingBranchOffset,
 } from './graphNodeLayout'
+import { formatNodeLinePreview } from './nodeLinePreview'
 
 export type DagreDirection = 'TB' | 'LR' | 'BT' | 'RL'
 export type DagreSpacingMode = 'compact' | 'normal' | 'large'
@@ -36,25 +37,31 @@ const SPACING_BY_MODE: Record<DagreSpacingMode, { x: number; y: number }> = {
   large: { x: 170, y: 320 },
 }
 
-function estimateDialogueNodeHeight(node: Node, fallback: number): number {
-  const data = (node.data ?? {}) as {
-    line?: string
-    title?: string
-    choices?: Array<unknown>
-  }
-  const lineLength = typeof data.line === 'string' ? data.line.trim().length : 0
-  const titleLength = typeof data.title === 'string' ? data.title.trim().length : 0
-  const choicesCount = Array.isArray(data.choices) ? data.choices.length : 0
+/** Carte 2e mesurée dans l'app : en-tête, pied et marges, puis 12,5 px × 1,45 par ligne sur 256 px utiles. */
+const DIALOGUE_NODE_CHROME_PX = 101
+const DIALOGUE_NODE_LINE_PX = 18
+const DIALOGUE_NODE_CHARS_PER_LINE = 40
 
-  const estimatedTitleLines = titleLength > 0 ? Math.max(1, Math.ceil(titleLength / 26)) : 0
-  const estimatedTextLines = Math.max(1, Math.ceil(lineLength / 30))
-  const contentHeight = estimatedTextLines * 20
-  const titleHeight = estimatedTitleLines * 18
-  const choicesHeight = choicesCount > 0 ? 16 : 0
-  const footerReservedHeight = 52
+function estimateDialogueNodeHeight(node: Node, fallback: number): number {
+  const data = (node.data ?? {}) as { line?: string }
+  // La carte n'affiche qu'un aperçu tronqué de la réplique (le titre tient sur une ligne
+  // d'en-tête) : estimer sur la réplique entière gonflait chaque rang de plusieurs centaines
+  // de px à l'ouverture d'un dialogue importé, avant toute mesure du DOM.
+  const preview = typeof data.line === 'string' ? formatNodeLinePreview(data.line.trim()) : ''
+  // `pre-wrap` : chaque saut de ligne (didascalie puis réplique) ouvre une nouvelle ligne.
+  const textLines = preview
+    .split('\n')
+    .reduce(
+      (total, segment) =>
+        total + Math.max(1, Math.ceil(segment.length / DIALOGUE_NODE_CHARS_PER_LINE)),
+      0
+    )
   const pendingActionsHeight = node.data?.status === 'pending' ? 44 : 0
 
-  return Math.max(fallback, 78 + titleHeight + contentHeight + choicesHeight + footerReservedHeight + pendingActionsHeight)
+  return Math.max(
+    fallback,
+    DIALOGUE_NODE_CHROME_PX + textLines * DIALOGUE_NODE_LINE_PX + pendingActionsHeight
+  )
 }
 
 function getDefaultNodeWidth(node: Node, fallback: number): number {

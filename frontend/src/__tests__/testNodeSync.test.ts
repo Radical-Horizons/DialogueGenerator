@@ -186,8 +186,8 @@ describe('testNodeSync', () => {
       expect(result.testNode).not.toBeNull()
       expect(result.testNode?.data.test).toBe('Force+Combat:10')
       expect(result.testNode?.data.failureNode).toBe('node-failure')
-      expect(result.testNode?.position.x).toBe(140)
-      expect(result.testNode?.position.y).toBeGreaterThan(200)
+      // Position préservée : la barre a pu être déplacée à la main
+      expect(result.testNode?.position).toEqual({ x: 400, y: 300 })
     })
 
     it('should place a new test bar below a tall parent without overlap', () => {

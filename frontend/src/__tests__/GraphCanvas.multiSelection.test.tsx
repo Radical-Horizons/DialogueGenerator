@@ -236,6 +236,78 @@ describe('GraphCanvas multi-selection (Story 2.10)', () => {
     expect(state.nodes.find((n) => n.id === 'node-cs')?.position).toEqual({ x: 150, y: 120 })
   })
 
+  it('une multi-sélection de parents emporte leurs barres de test non sélectionnées', async () => {
+    const bar = 'test-node-p-choice-0'
+    useGraphStore.setState({
+      nodes: [
+        { id: 'p', type: 'dialogueNode', position: { x: 0, y: 0 }, data: { id: 'p' } },
+        { id: 'q', type: 'dialogueNode', position: { x: 400, y: 0 }, data: { id: 'q' } },
+        { id: bar, type: 'testNode', position: { x: 40, y: 220 }, data: { id: bar, test: 'Force:8' } },
+      ],
+      edges: [{ id: 'e-p-bar', source: 'p', target: bar, type: 'smoothstep' }],
+      selectedNodeIds: ['p', 'q'],
+    })
+
+    render(React.createElement(GraphCanvas))
+
+    await act(async () => {
+      const onNodeDragStart = capturedReactFlowProps?.onNodeDragStart as
+        | ((event: { ctrlKey?: boolean }, node: { id: string }) => void)
+        | undefined
+      const onNodeDragStop = capturedReactFlowProps?.onNodeDragStop as
+        | ((event: unknown, node: { id: string; position: { x: number; y: number } }) => void)
+        | undefined
+      onNodeDragStart?.({}, { id: 'p' })
+      onNodeDragStop?.({}, { id: 'p', position: { x: 100, y: 50 } })
+    })
+
+    const state = useGraphStore.getState()
+    expect(state.nodes.find((n) => n.id === 'q')?.position).toEqual({ x: 500, y: 50 })
+    expect(state.nodes.find((n) => n.id === bar)?.position).toEqual({ x: 140, y: 270 })
+  })
+
+  it('un nœud glissé seul est marqué à sauvegarder, même si les frames ont déjà posé sa position', async () => {
+    const testNodeId = 'test-node-START-choice-0'
+    useGraphStore.setState({
+      nodes: [
+        {
+          id: testNodeId,
+          type: 'testNode',
+          position: { x: 0, y: 0 },
+          data: { id: testNodeId, test: 'Raison+Diplomatie:8' },
+        },
+      ],
+      edges: [],
+      selectedNodeIds: [],
+      hasUnsavedChanges: false,
+    })
+
+    render(React.createElement(GraphCanvas))
+
+    await act(async () => {
+      const onNodeDragStart = capturedReactFlowProps?.onNodeDragStart as
+        | ((event: { ctrlKey?: boolean }, node: { id: string; type?: string }) => void)
+        | undefined
+      const onNodesChange = capturedReactFlowProps?.onNodesChange as
+        | ((changes: unknown[]) => void)
+        | undefined
+      const onNodeDragStop = capturedReactFlowProps?.onNodeDragStop as
+        | ((event: unknown, node: { id: string; position: { x: number; y: number } }) => void)
+        | undefined
+      onNodeDragStart?.({}, { id: testNodeId, type: 'testNode' })
+      onNodesChange?.([
+        { type: 'position', id: testNodeId, position: { x: 80, y: 60 }, dragging: true },
+      ])
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(undefined)))
+      expect(useGraphStore.getState().hasUnsavedChanges).toBe(false)
+      onNodeDragStop?.({}, { id: testNodeId, position: { x: 80, y: 60 } })
+    })
+
+    const state = useGraphStore.getState()
+    expect(state.nodes.find((n) => n.id === testNodeId)?.position).toEqual({ x: 80, y: 60 })
+    expect(state.hasUnsavedChanges).toBe(true)
+  })
+
   it('normalise en mémoire la couleur des edges legacy selon le handle source parent', async () => {
     useGraphStore.setState({
       nodes: [

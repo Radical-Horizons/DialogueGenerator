@@ -9,6 +9,10 @@ import { graphToDocument, buildLayoutFromNodes, type LayoutPositions } from './d
  * Fusionne un layout existant avec les positions courantes des nœuds.
  * Les positions calculées depuis `nodes` priment toujours pour éviter
  * qu'un layout stale écrase la géométrie réellement affichée.
+ *
+ * Les barres de test absentes de `nodes` sont retirées : leur position est indexée par
+ * index de choix, et une position orpheline ferait passer une barre réapparue pour une
+ * barre déplacée à la main (superposée à sa voisine au lieu d'être réalignée).
  */
 export function mergeLayoutWithNodePositions(
   currentLayout: Record<string, unknown> | LayoutPositions | null | undefined,
@@ -18,13 +22,23 @@ export function mergeLayoutWithNodePositions(
   const layoutNodes = currentLayout?.['nodes'] as
     | Record<string, { x: number; y: number }>
     | undefined
+  const presentIds = new Set(nodes.map((node) => node.id))
+  const keptPositions = Object.fromEntries(
+    Object.entries(layoutNodes ?? {}).filter(
+      ([id]) => !isTestBarLayoutKey(id) || presentIds.has(id)
+    )
+  )
   return {
     ...(currentLayout ?? {}),
     nodes: {
-      ...(layoutNodes ?? {}),
+      ...keptPositions,
       ...newPositions.nodes,
     },
   }
+}
+
+function isTestBarLayoutKey(id: string): boolean {
+  return id.startsWith('test-node-') || id.startsWith('test:')
 }
 
 /**

@@ -228,8 +228,10 @@ connectNodes('test-node-dialogue-1-choice-0', 'node-success', undefined, 'test-s
 
 ### Positions TestNode
 
-- **Préservées** : Les positions des TestNodes sont préservées lors de la synchronisation
-- **Nouveau TestNode** : Position calculée automatiquement (à droite du DialogueNode)
+- **Préservées** : une barre dont le layout porte la position reste où l'auteur l'a posée (`normalizeTestBars(nodes, edges, layout)`), y compris après une édition du parent ou une connexion de résultat.
+- **Réalignement** : dès qu'une barre du dialogue n'a pas de position stockée (test ajouté), tout le groupe se recentre sous le parent ; même chose après « Disposer » / dagre (appel sans layout).
+- **Layout élagué** : `mergeLayoutWithNodePositions` retire les clés `test-node-*` des barres disparues — sinon une barre réapparue (test retiré puis remis, choix réordonnés) passerait pour déplacée et se superposerait à sa voisine.
+- **Glisser** : une barre se glisse seule ; une multi-sélection de parents emporte leurs barres (`useReactFlowHandlers`).
 
 ## Références
 

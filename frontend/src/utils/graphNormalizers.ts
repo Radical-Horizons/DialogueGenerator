@@ -4,7 +4,11 @@
  */
 import type { Node, Edge } from 'reactflow'
 import type { Choice } from '../schemas/nodeEditorSchema'
-import { repositionTestNodesUnderDialogue, syncTestNodeFromChoice } from './testNodeSync'
+import {
+  repositionTestNodesUnderDialogue,
+  syncTestNodeFromChoice,
+  type StoredNodePositions,
+} from './testNodeSync'
 
 export const VALID_NODE_TYPES = ['dialogueNode', 'testNode', 'endNode'] as const
 
@@ -64,8 +68,15 @@ export function normalizeChoiceHandleInEdges(edges: Edge[], nodes: Node[]): Edge
  *
  * Règle : Pour chaque DialogueNode avec choix ayant un test,
  * un TestBar doit exister. Si le choix n'a plus de test, le TestBar doit être supprimé.
+ *
+ * @param layout - Layout persisté. Fourni, il fait foi pour les barres qu'il positionne déjà
+ *   (déplacement manuel) ; absent, les barres sont recentrées sous leur parent (après dagre).
  */
-export function normalizeTestBars(nodes: Node[], edges: Edge[]): { nodes: Node[]; edges: Edge[] } {
+export function normalizeTestBars(
+  nodes: Node[],
+  edges: Edge[],
+  layout?: { nodes?: StoredNodePositions } | null,
+): { nodes: Node[]; edges: Edge[] } {
   const normalizedNodes: Node[] = [...nodes]
   let currentEdges = [...edges]
 
@@ -107,7 +118,7 @@ export function normalizeTestBars(nodes: Node[], edges: Edge[]): { nodes: Node[]
       }
     })
 
-    repositionTestNodesUnderDialogue(node, choices, testNodesToKeep)
+    repositionTestNodesUnderDialogue(node, choices, testNodesToKeep, layout?.nodes)
 
     if (dialogueNodeModified) {
       nodesToUpdate.set(node.id, {

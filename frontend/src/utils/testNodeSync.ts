@@ -141,19 +141,46 @@ export function getParentChoiceForTestNode(
   }
 }
 
+/** Positions persistées du layout, indexées par id de nœud. */
+export type StoredNodePositions = Record<string, { x: number; y: number }>
+
+function hasStoredTestPosition(
+  stored: StoredNodePositions,
+  dialogueNodeId: string,
+  choice: Choice,
+  choiceIndex: number,
+): boolean {
+  const choiceId = (choice as Choice & { choiceId?: string }).choiceId ?? `__idx_${choiceIndex}`
+  const position =
+    stored[`test-node-${dialogueNodeId}-choice-${choiceIndex}`] ?? stored[`test:${choiceId}`]
+  return typeof position?.x === 'number' && typeof position?.y === 'number'
+}
+
 /**
  * Recalcule les positions X/Y de toutes les barres de test sous un dialogue,
  * centrées sur l'axe du parent (évite le décalage progressif à l'ajout incrémental).
+ *
+ * Quand le layout porte la position de chaque barre du dialogue, elles restent où
+ * l'auteur les a posées : seule l'apparition d'une barre sans position réaligne le groupe.
  */
 export function repositionTestNodesUnderDialogue(
   dialogueNode: Node,
   choices: Choice[],
   testNodesToKeep: Map<string, Node>,
+  storedPositions?: StoredNodePositions | null,
 ): void {
   const testedIndices = choices
     .map((choice, index) => (choice?.test ? index : -1))
     .filter((index) => index >= 0)
   if (testedIndices.length === 0) {
+    return
+  }
+  if (
+    storedPositions &&
+    testedIndices.every((index) =>
+      hasStoredTestPosition(storedPositions, dialogueNode.id, choices[index], index)
+    )
+  ) {
     return
   }
 
@@ -248,7 +275,7 @@ export function syncTestNodeFromChoice(
       parentHeight: getLayoutNodeHeight(dialogueNode),
     }),
   }
-  const testNodePosition = defaultNewPosition
+  const testNodePosition = existingTestNode?.position ?? defaultNewPosition
 
   const testNode: Node = {
     id: testNodeId,

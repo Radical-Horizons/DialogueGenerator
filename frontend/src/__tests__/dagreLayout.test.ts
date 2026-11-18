@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Edge, Node } from 'reactflow'
 import {
   calculateDagreLayout,
+  getLayoutNodeHeight,
   redistributeSiblingBranches,
 } from '../utils/dagreLayout'
 
@@ -132,5 +133,45 @@ describe('dagreLayout', () => {
       .map((node) => node.position.y)
 
     expect(new Set(childYValues).size).toBeGreaterThan(1)
+  })
+})
+
+describe('dagreLayout — hauteur estimée avant mesure', () => {
+  const card = (id: string, line: string): Node => ({
+    id,
+    type: 'dialogueNode',
+    position: { x: 0, y: 0 },
+    data: { id, line, choices: [{}, {}] },
+  })
+
+  it("estime la carte sur l'aperçu affiché, pas sur la réplique entière", () => {
+    const longLine = 'Le Dédale respire et ses murs se souviennent. '.repeat(20)
+    expect(getLayoutNodeHeight(card('long', longLine))).toBe(
+      getLayoutNodeHeight(card('preview', longLine.slice(0, 100)))
+    )
+    expect(getLayoutNodeHeight(card('long', longLine))).toBeLessThanOrEqual(200)
+  })
+
+  it("une longue réplique n'écarte plus les rangs de dagre", () => {
+    const longLine = 'Le Dédale respire et ses murs se souviennent. '.repeat(20)
+    const nodes = [card('a', longLine), card('b', longLine)]
+    const edges: Edge[] = [{ id: 'a-b', source: 'a', target: 'b' }]
+    const [a, b] = calculateDagreLayout(nodes, edges, { direction: 'TB', spacingMode: 'normal' })
+    expect(b.position.y - a.position.y).toBeLessThan(500)
+  })
+})
+
+describe('dagreLayout — sauts de ligne de la réplique', () => {
+  it('une didascalie suivie de la réplique compte ses lignes séparément', () => {
+    const node = (line: string): Node => ({
+      id: 'n',
+      type: 'dialogueNode',
+      position: { x: 0, y: 0 },
+      data: { id: 'n', line },
+    })
+    const reply = '« Les cartes… ce sont les cartes ! Elles échappent à la perception. »'
+    expect(getLayoutNodeHeight(node(`*Il se lève.*\n\n${reply}`))).toBeGreaterThan(
+      getLayoutNodeHeight(node(`*Il se lève.* ${reply}`))
+    )
   })
 })
