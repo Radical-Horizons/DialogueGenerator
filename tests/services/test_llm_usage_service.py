@@ -48,7 +48,9 @@ def test_track_usage(usage_service, mock_repository, mock_pricing_service):
     mock_pricing_service.calculate_cost.assert_called_once_with(
         model_name="gpt-5.6-terra",
         prompt_tokens=1000,
-        completion_tokens=500
+        completion_tokens=500,
+        cached_tokens=0,
+        cache_write_tokens=0,
     )
     
     # Vérifier que le repository a été appelé

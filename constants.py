@@ -116,7 +116,13 @@ class ModelNames:
     MODELS_WITHOUT_CUSTOM_TEMPERATURE = [
         GPT_5_6_SOL, GPT_5_6_TERRA, GPT_5_6_LUNA, GPT_5_6,
     ]
-    
+
+    # Point de coupure de cache explicite (``prompt_cache_breakpoint``) : GPT-5.6 et suivants
+    # (doc prompt caching). Voir core/llm/openai/prompt_cache.py.
+    MODELS_WITH_EXPLICIT_CACHE_BREAKPOINTS: frozenset[str] = frozenset(
+        {GPT_5_6_SOL, GPT_5_6_TERRA, GPT_5_6_LUNA, GPT_5_6}
+    )
+
     # Tous les tiers 5.6 supportent structured outputs (doc officielle)
     MODELS_WITH_STRUCTURED_OUTPUT_ISSUES: list[str] = []
 

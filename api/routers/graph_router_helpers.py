@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
+import random
 from typing import Any, Optional
 
 from factories.llm_factory import LLMClientFactory
@@ -20,7 +23,12 @@ def resolve_and_enrich_graph_context(
     npc_speaker_id: Optional[str] = None,
     context_builder: Optional[Any] = None,
 ) -> tuple[SceneDramatis, dict]:
-    """Résout PJ/PNJ et enrichit le contexte GDD pour la génération graphe."""
+    """Résout PJ/PNJ et enrichit le contexte GDD pour la génération graphe.
+
+    La fiche figurante tirée au hasard dépend de la scène (sélection, PNJ, PJ) et non plus
+    de l'appel : tous les nœuds d'un dialogue partagent le même contexte, donc le même
+    début de prompt, que le cache du fournisseur relit au lieu de le refacturer.
+    """
     character_catalog = None
     if context_builder is not None:
         character_catalog = context_builder.get_characters_names()
@@ -29,11 +37,18 @@ def resolve_and_enrich_graph_context(
         npc_speaker_id=npc_speaker_id,
         context_selections=context_selections,
     )
+    scene_key = json.dumps(
+        [context_selections, dramatis.npc_speaker_id, dramatis.player_character_id],
+        sort_keys=True,
+        ensure_ascii=False,
+        default=str,
+    )
     enriched = enrich_context_selections_for_scene(
         context_selections,
         dramatis,
         character_catalog=character_catalog,
         random_excerpt_count=1,
+        rng=random.Random(hashlib.sha256(scene_key.encode("utf-8")).hexdigest()),
     )
     enriched_dict = enriched.model_dump() if hasattr(enriched, "model_dump") else dict(enriched)
     return dramatis, enriched_dict

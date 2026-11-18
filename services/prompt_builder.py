@@ -298,9 +298,9 @@ class PromptBuilder:
         # COMPÉTENCES DISPONIBLES
         if input.skills_list:
             skills_elem = ET.SubElement(technical_elem, "available_skills")
-            skills_text = ", ".join(input.skills_list[:80])
-            if len(input.skills_list) > 80:
-                skills_text += f" (et {len(input.skills_list) - 80} autres compétences)"
+            # Liste entière (~900 tokens pour 197 compétences) : coupée à 80, elle s'arrêtait à
+            # la lettre E et le LLM inventait les tests d'Orientation, d'Intimidation, etc.
+            skills_text = ", ".join(input.skills_list)
             skills_content = (
                 f"Compétences disponibles (identifiants sans espace): {skills_text}\n"
                 "Utilisez exactement ces identifiants après le « + » (format: Caractéristique+Compétence:DD)."
@@ -311,9 +311,7 @@ class PromptBuilder:
         # TRAITS DISPONIBLES
         if input.traits_list:
             traits_elem = ET.SubElement(technical_elem, "available_traits")
-            traits_text = ", ".join(input.traits_list[:30])
-            if len(input.traits_list) > 30:
-                traits_text += f" (et {len(input.traits_list) - 30} autres traits)"
+            traits_text = ", ".join(input.traits_list)
             traits_content = f"Traits disponibles: {traits_text}\nUtilise ces traits dans traitRequirements des choix (format: [{{'trait': 'NomTrait', 'minValue': 5}}]).\nLes traits peuvent être positifs (ex: 'Courageux') ou négatifs (ex: 'Lâche')."
             traits_elem.text = escape_xml_text(traits_content)
             has_content = True

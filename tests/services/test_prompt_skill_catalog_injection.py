@@ -41,3 +41,7 @@ def test_technical_section_includes_attributes_and_space_free_skills() -> None:
     for skill_id in skills[:20]:
         assert " " not in skill_id, f"identifiant compétence avec espace: {skill_id!r}"
         assert re.fullmatch(r"[^\s:+]+", skill_id), skill_id
+
+    # Catalogue entier : coupé à 80, il s'arrêtait à la lettre E (2026-11-19).
+    assert skills[-1] in xml_text
+    assert "autres compétences" not in xml_text

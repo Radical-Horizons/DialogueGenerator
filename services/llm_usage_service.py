@@ -55,6 +55,8 @@ class LLMUsageService:
         response: Optional[str] = None,
         fallback_from: Optional[str] = None,
         fallback_reason: Optional[str] = None,
+        cached_tokens: int = 0,
+        cache_write_tokens: int = 0,
     ) -> None:
         """Enregistre un appel LLM.
         
@@ -75,6 +77,8 @@ class LLMUsageService:
             response: Réponse brute du LLM (optionnel, Story 1.15).
             fallback_from: model_id du provider initial en échec (optionnel, Story 1.16).
             fallback_reason: Raison de l'échec du provider initial (optionnel, Story 1.16).
+            cached_tokens: Part de ``prompt_tokens`` relue depuis le cache du fournisseur.
+            cache_write_tokens: Part de ``prompt_tokens`` écrite dans ce cache.
         """
         try:
             from api.middleware.billable_user_context import get_billable_user_id
@@ -85,7 +89,9 @@ class LLMUsageService:
                 estimated_cost = self.pricing_service.calculate_cost(
                     model_name=model_name,
                     prompt_tokens=prompt_tokens,
-                    completion_tokens=completion_tokens
+                    completion_tokens=completion_tokens,
+                    cached_tokens=cached_tokens,
+                    cache_write_tokens=cache_write_tokens,
                 )
             else:
                 estimated_cost = 0.0
@@ -98,6 +104,8 @@ class LLMUsageService:
                 prompt_tokens=prompt_tokens,
                 completion_tokens=completion_tokens,
                 total_tokens=total_tokens,
+                cached_tokens=cached_tokens,
+                cache_write_tokens=cache_write_tokens,
                 estimated_cost=estimated_cost,
                 duration_ms=duration_ms,
                 success=success,

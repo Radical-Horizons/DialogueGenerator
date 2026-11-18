@@ -15,6 +15,8 @@ class LLMUsageRecord(BaseModel):
     prompt_tokens: int = Field(..., ge=0, description="Nombre de tokens dans le prompt")
     completion_tokens: int = Field(..., ge=0, description="Nombre de tokens dans la réponse")
     total_tokens: int = Field(..., ge=0, description="Nombre total de tokens")
+    cached_tokens: int = Field(default=0, ge=0, description="Part du prompt relue depuis le cache fournisseur")
+    cache_write_tokens: int = Field(default=0, ge=0, description="Part du prompt écrite dans le cache fournisseur")
     estimated_cost: float = Field(..., ge=0.0, description="Coût estimé en USD")
     duration_ms: int = Field(..., ge=0, description="Durée de l'appel en millisecondes")
     success: bool = Field(..., description="Indique si l'appel a réussi")

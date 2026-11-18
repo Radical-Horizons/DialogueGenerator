@@ -68,3 +68,28 @@ def test_evaluate_dialogue_quality_llm_failure_returns_error(client: TestClient)
         assert "timeout" in msg.lower()
     finally:
         app.dependency_overrides.pop(get_llm_quality_judge_service, None)
+
+
+def test_successful_evaluation_is_not_tracked_by_the_route(client: TestClient) -> None:
+    """Le client LLM enregistre l'usage : la route ne le refait pas (budget compté une fois)."""
+    from api.dependencies import get_llm_usage_service
+
+    usage_service = MagicMock()
+    mock_service = MagicMock(spec=LLMQualityJudgeService)
+    mock_service.evaluate_graph = AsyncMock(
+        return_value=EvaluateDialogueQualityResponse(
+            overall_score=7, score_variance_note="±1", model_id="dummy", provider="dummy"
+        )
+    )
+    app.dependency_overrides[get_llm_quality_judge_service] = lambda: mock_service
+    app.dependency_overrides[get_llm_usage_service] = lambda: usage_service
+    try:
+        r = client.post(
+            "/api/v1/unity-dialogues/graph/evaluate-dialogue-quality",
+            json=_minimal_graph(),
+        )
+        assert r.status_code == 200, r.text
+        usage_service.track_usage.assert_not_called()
+    finally:
+        app.dependency_overrides.pop(get_llm_quality_judge_service, None)
+        app.dependency_overrides.pop(get_llm_usage_service, None)

@@ -8,6 +8,9 @@ from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
+# Coefficients du cache de prompt, gardés quand l'admin modifie le prix d'un modèle.
+_CACHE_RATE_KEYS: tuple[str, ...] = ("cached_input_rate", "cache_write_rate")
+
 # Chemin vers le fichier de configuration des prix
 PRICING_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "llm_pricing.json"
 
@@ -93,15 +96,19 @@ class LLMPricingService:
         self,
         model_name: str,
         prompt_tokens: int,
-        completion_tokens: int
+        completion_tokens: int,
+        cached_tokens: int = 0,
+        cache_write_tokens: int = 0,
     ) -> float:
         """Calcule le coût estimé d'un appel LLM.
-        
+
         Args:
             model_name: Nom du modèle utilisé.
-            prompt_tokens: Nombre de tokens dans le prompt (input).
+            prompt_tokens: Nombre de tokens dans le prompt (input), cache compris.
             completion_tokens: Nombre de tokens dans la réponse (output).
-            
+            cached_tokens: Part de ``prompt_tokens`` relue depuis le cache.
+            cache_write_tokens: Part de ``prompt_tokens`` écrite en cache.
+
         Returns:
             Coût estimé en USD. Retourne 0.0 si le modèle n'est pas trouvé.
         """
@@ -123,9 +130,19 @@ class LLMPricingService:
         
         input_price_per_1M = pricing.get("input_price_per_1M", 0.0)
         output_price_per_1M = pricing.get("output_price_per_1M", 0.0)
-        
-        # Calcul: (tokens / 1_000_000) * prix_par_1M
-        input_cost = (prompt_tokens / 1_000_000) * input_price_per_1M
+        # Coefficients du prix d'entrée (doc OpenAI prompt caching) ; 1,0 sans tarif de cache.
+        cached_price_per_1M = input_price_per_1M * pricing.get("cached_input_rate", 1.0)
+        write_price_per_1M = input_price_per_1M * pricing.get("cache_write_rate", 1.0)
+
+        # Lecture et écriture de cache sont des parts de prompt_tokens, à leur propre tarif.
+        cached = max(0, min(cached_tokens, prompt_tokens))
+        written = max(0, min(cache_write_tokens, prompt_tokens - cached))
+        ordinary = prompt_tokens - cached - written
+        input_cost = (
+            ordinary * input_price_per_1M
+            + cached * cached_price_per_1M
+            + written * write_price_per_1M
+        ) / 1_000_000
         output_cost = (completion_tokens / 1_000_000) * output_price_per_1M
         
         total_cost = input_cost + output_cost
@@ -184,6 +201,11 @@ class LLMPricingService:
             entry["description"] = description
         elif isinstance(models.get(model_name), dict) and "description" in models[model_name]:
             entry["description"] = models[model_name]["description"]
+        previous = models.get(model_name)
+        if isinstance(previous, dict):
+            for rate_key in _CACHE_RATE_KEYS:
+                if rate_key in previous:
+                    entry[rate_key] = previous[rate_key]
 
         models[model_name] = entry
         self._pricing_config["last_updated"] = date.today().isoformat()
