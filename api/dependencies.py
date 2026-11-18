@@ -468,6 +468,19 @@ def get_unity_dialogue_orchestrator(
     return container.get_unity_dialogue_orchestrator(request_id=request_id)
 
 
+def get_graph_prompt_context_factory(request: Request) -> "GraphPromptContextFactory":
+    """Retourne la fabrique de contexte GDD des prompts du graphe via le container.
+
+    Args:
+        request: La requête HTTP.
+
+    Returns:
+        Fabrique partagée avec ``GraphNodeOrchestrator``.
+    """
+    container = get_service_container(request)
+    return container.get_graph_prompt_context_factory()
+
+
 def get_graph_node_orchestrator(request: Request) -> "GraphNodeOrchestrator":
     """Retourne l'orchestrateur de nœuds de graphe via le container.
 

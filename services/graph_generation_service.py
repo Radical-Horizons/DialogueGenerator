@@ -4,7 +4,11 @@ import logging
 from typing import List, Dict, Any, Optional, Callable, Tuple
 
 from models.dialogue_structure.unity_dialogue_node import UnityDialogueChoiceContent
-from services.dialogue_path_context import build_enriched_generation_prompt
+from services.dialogue_path_context import (
+    build_ancestor_path_steps,
+    build_enriched_generation_prompt,
+)
+from services.graph_prompt_context import PromptRenderer
 from services.unity_dialogue_generation_service import (
     UnityDialogueGenerationService,
     generate_stable_node_id,
@@ -74,6 +78,7 @@ class GraphGenerationService:
         dialogue_nodes: Optional[List[Dict[str, Any]]] = None,
         player_choice_label: str = "PJ",
         choices_mode: ChoicesMode = "capped",
+        render_prompt: Optional[PromptRenderer] = None,
     ) -> Dict[str, Any]:
         """Génère la suite pour chaque choix du parent sans cible (ou END).
 
@@ -84,10 +89,12 @@ class GraphGenerationService:
         Args:
             parent_node: Nœud parent avec choix (format Unity JSON).
             instructions: Instructions pour guider la génération.
-            context: Contexte GDD (non utilisé directement ici, mais peut être passé au prompt).
+            context: Sélection GDD enrichie (le contexte rendu arrive par ``render_prompt``).
             llm_client: Client LLM pour la génération.
             system_prompt_override: Surcharge du system prompt (optionnel).
             max_choices: Nombre maximum de choix pour chaque nœud généré (optionnel).
+            render_prompt: Enveloppe chaque corps dans le prompt complet (contexte GDD,
+                catalogues) ; sans lui, le corps part seul.
 
         Returns:
             Dictionnaire avec ``nodes``, ``connections`` (SuggestedConnection), compteurs batch.
@@ -122,6 +129,10 @@ class GraphGenerationService:
             parent_id,
         )
 
+        path_steps = (
+            build_ancestor_path_steps(dialogue_nodes, str(parent_id)) if dialogue_nodes else []
+        )
+
         llm_max_choices: Optional[int]
         if max_choices == 0:
             llm_max_choices = 0
@@ -154,6 +165,9 @@ class GraphGenerationService:
                         parent_speaker=parent_speaker,
                         parent_line=parent_line,
                         system_prompt_override=system_prompt_override,
+                        path_steps=path_steps or None,
+                        player_choice_label=player_choice_label,
+                        render_prompt=render_prompt,
                     )
                     nodes = result.get("nodes") or []
                     conns_raw = result.get("connections") or []
@@ -201,10 +215,15 @@ class GraphGenerationService:
                 choice_text=choice_text,
                 player_choice_label=player_choice_label,
             )
+            prompt = (
+                render_prompt(enriched_instructions, llm_max_choices)
+                if render_prompt
+                else enriched_instructions
+            )
             try:
                 response = await self.generation_service.generate_dialogue_node(
                     llm_client=llm_client,
-                    prompt=enriched_instructions,
+                    prompt=prompt,
                     system_prompt_override=system_prompt_override,
                     max_choices=llm_max_choices,
                 )

@@ -232,7 +232,7 @@ def _check_explicit_mechanics(
                     "dans les choix de ce nœud (mode strict)."
                 ),
                 suggestion=(
-                    "Ajoutez un test du type « Raison+Rhétorique:8 » et/ou "
+                    "Ajoutez un test du type « Sociabilité+Rhétorique:8 » et/ou "
                     "influenceDelta / respectDelta numériques dans le JSON des choix."
                 ),
                 severity="warning",

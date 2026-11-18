@@ -655,6 +655,11 @@ export const createGenerationSlice: StateCreator<
         console.log(`Génération batch: ${response.batch_count} nœud(s) généré(s)`)
       }
 
+      if (response.warnings?.length) {
+        const { toastManager } = await import('../../components/shared/Toast')
+        toastManager.show(response.warnings.join('\n'), 'warning', 8000)
+      }
+
       return { nodeId: firstNodeId ?? null, batchInfo }
     } catch (error: unknown) {
       console.error('Erreur lors de l\'application de la génération:', error)

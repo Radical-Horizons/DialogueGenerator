@@ -12,9 +12,10 @@ Modes de génération gérés :
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from core.llm.llm_client import ILLMClient
 from models.dialogue_structure.unity_dialogue_node import UnityDialogueChoiceContent
@@ -27,17 +28,18 @@ from services.dialogue_path_context import (
     infer_child_generation_depth,
 )
 from services.dialogue_dramatic_progression import (
-    DIALOGUE_ORALITY_PROMPT_LINES,
     compose_generation_instructions,
     DEFAULT_NODE_SCENE_INSTRUCTIONS,
 )
 from services.graph_generation_service import GraphGenerationService
+from services.graph_prompt_context import GraphPromptContextFactory, PromptRenderer
 from services.unity_dialogue_generation_service import (
     UnityDialogueGenerationService,
     generate_stable_node_id,
 )
 from services.unity_node_validation_service import (
     ChoicesMode,
+    find_off_catalog_tests,
     infer_choices_mode,
     validate_enriched_node,
 )
@@ -67,6 +69,7 @@ class GenerationResult:
     connected_choices_count: Optional[int] = None
     failed_choices_count: Optional[int] = None
     total_choices_count: Optional[int] = None
+    warnings: List[str] = field(default_factory=list)
 
 
 def _resolve_instructions(raw: Optional[str]) -> str:
@@ -105,6 +108,47 @@ def _resolve_path_steps(
         return None
     steps = build_ancestor_path_steps(dialogue_nodes, parent_node_id)
     return steps or None
+
+
+def _split_test_node_id(node_id: str) -> Optional[Tuple[str, int]]:
+    """``test-node-<dialogue>-choice-<i>`` → (id du nœud de dialogue, index du choix)."""
+    if not node_id.startswith("test-node-"):
+        return None
+    parts = node_id[len("test-node-"):].split("-choice-")
+    if len(parts) != 2:
+        return None
+    try:
+        return parts[0], int(parts[1])
+    except ValueError:
+        return None
+
+
+def _tested_choice_text(
+    dialogue_nodes: Optional[List[Dict[str, Any]]],
+    dialogue_node_id: str,
+    choice_index: int,
+) -> str:
+    """Texte du choix testé, lu sur le nœud de dialogue (le TestNode n'en garde qu'une copie)."""
+    for node in dialogue_nodes or []:
+        if str(node.get("id")) != dialogue_node_id:
+            continue
+        choices = node.get("choices") or []
+        if 0 <= choice_index < len(choices):
+            return str(choices[choice_index].get("text") or "")
+    return ""
+
+
+def _resolve_npc_speaker(
+    npc_speaker_id: Optional[str],
+    context_selections: Optional[Dict[str, Any]],
+    parent_node_content: Dict[str, Any],
+) -> str:
+    """PNJ de la scène : explicite, sinon protagoniste B du contexte enrichi, sinon speaker parent."""
+    if npc_speaker_id:
+        return npc_speaker_id
+    protagonists = (context_selections or {}).get("scene_protagonists") or {}
+    from_context = protagonists.get("personnage_b") if isinstance(protagonists, dict) else None
+    return str(from_context or parent_node_content.get("speaker") or "PNJ")
 
 
 def _build_enriched_instructions(
@@ -146,13 +190,41 @@ class GraphNodeOrchestrator:
 
     Args:
         generation_service: Service de génération Unity (créé si ``None``).
+        prompt_context_factory: Résout contexte GDD et catalogues. Sans lui, le prompt
+            se réduit à l'historique et aux instructions (tests unitaires).
     """
 
     def __init__(
         self,
         generation_service: Optional[UnityDialogueGenerationService] = None,
+        prompt_context_factory: Optional[GraphPromptContextFactory] = None,
     ) -> None:
         self._generation_service = generation_service or UnityDialogueGenerationService()
+        self._prompt_context_factory = prompt_context_factory
+
+    async def _build_prompt_renderer(
+        self,
+        *,
+        context_selections: Optional[Dict[str, Any]],
+        npc_speaker_id: str,
+        player_character_id: str,
+        scene_instruction: str,
+        narrative_tags: Optional[List[str]],
+        llm_model_identifier: Optional[str],
+    ) -> Optional[PromptRenderer]:
+        """Contexte GDD + catalogues résolus une fois pour tous les appels de la requête."""
+        if self._prompt_context_factory is None or not context_selections:
+            return None
+        prompt_context = await asyncio.to_thread(
+            self._prompt_context_factory.build,
+            context_selections,
+            npc_speaker_id=npc_speaker_id,
+            player_character_id=player_character_id,
+            scene_instruction=scene_instruction,
+            narrative_tags=narrative_tags,
+            llm_model_identifier=llm_model_identifier,
+        )
+        return prompt_context.render
 
     async def generate(
         self,
@@ -171,15 +243,23 @@ class GraphNodeOrchestrator:
         max_depth: Optional[int] = None,
         choices_mode: Optional[ChoicesMode] = None,
         progress_callback: Optional[Callable[[int, int], None]] = None,
+        npc_speaker_id: Optional[str] = None,
+        narrative_tags: Optional[List[str]] = None,
+        llm_model_identifier: Optional[str] = None,
     ) -> GenerationResult:
         """Point d'entrée unique – dispatche vers le bon mode de génération.
+
+        ``context_selections`` (sélection enrichie pour la scène) est rendu en contexte
+        GDD + catalogues dans chaque prompt, comme pour le flux « Générer ».
 
         Raises:
             ValueError: Paramètres incohérents (pas de choix pour batch, index invalide…).
         """
         parent_choices: list = parent_node_content.get("choices", [])
         raw_instructions = _resolve_instructions(user_instructions)
-        path_steps = _resolve_path_steps(dialogue_nodes, parent_node_id)
+        test_node_ref = _split_test_node_id(parent_node_id)
+        history_parent_id = test_node_ref[0] if test_node_ref else parent_node_id
+        path_steps = _resolve_path_steps(dialogue_nodes, history_parent_id)
         instructions = compose_generation_instructions(
             raw_instructions,
             depth=infer_child_generation_depth(path_steps),
@@ -188,76 +268,102 @@ class GraphNodeOrchestrator:
         )
         choice_label = player_character_id or DEFAULT_PLAYER_CHARACTER
         effective_choices_mode = infer_choices_mode(choices_mode, max_choices)
-
-        if generate_all_choices:
-            return await self._generate_batch(
-                llm_client=llm_client,
-                parent_node_id=parent_node_id,
-                parent_node_content=parent_node_content,
-                parent_choices=parent_choices,
-                instructions=instructions,
-                context_selections=context_selections or {},
-                system_prompt_override=system_prompt_override,
-                max_choices=max_choices,
-                dialogue_nodes=dialogue_nodes,
-                player_choice_label=choice_label,
-                choices_mode=effective_choices_mode,
-                progress_callback=progress_callback,
-            )
-
-        parent_speaker = parent_node_content.get("speaker", "PNJ")
-        parent_line = parent_node_content.get("line", "")
-
-        is_test_node = (
-            parent_node_content.get("type") == "testNode"
-            or (not parent_choices and parent_node_content.get("test") is not None)
-            or parent_node_id.startswith("test-node-")
+        render_prompt = await self._build_prompt_renderer(
+            context_selections=context_selections,
+            npc_speaker_id=_resolve_npc_speaker(
+                npc_speaker_id, context_selections, parent_node_content
+            ),
+            player_character_id=choice_label,
+            scene_instruction=raw_instructions,
+            narrative_tags=narrative_tags,
+            llm_model_identifier=llm_model_identifier,
         )
 
-        if is_test_node and not parent_choices:
-            result = await self._generate_from_test_node(
-                llm_client=llm_client,
-                parent_node_id=parent_node_id,
-                parent_node_content=parent_node_content,
-                instructions=instructions,
-                system_prompt_override=system_prompt_override,
-            )
-            if result is not None:
-                return result
+        async def dispatch() -> GenerationResult:
+            if generate_all_choices:
+                return await self._generate_batch(
+                    llm_client=llm_client,
+                    parent_node_id=parent_node_id,
+                    parent_node_content=parent_node_content,
+                    parent_choices=parent_choices,
+                    instructions=instructions,
+                    context_selections=context_selections or {},
+                    system_prompt_override=system_prompt_override,
+                    max_choices=max_choices,
+                    dialogue_nodes=dialogue_nodes,
+                    player_choice_label=choice_label,
+                    choices_mode=effective_choices_mode,
+                    progress_callback=progress_callback,
+                    render_prompt=render_prompt,
+                )
 
-        if target_choice_index is not None and parent_choices:
-            return await self._generate_for_choice(
+            parent_speaker = parent_node_content.get("speaker", "PNJ")
+            parent_line = parent_node_content.get("line", "")
+
+            is_test_node = (
+                parent_node_content.get("type") == "testNode"
+                or (not parent_choices and parent_node_content.get("test") is not None)
+                or parent_node_id.startswith("test-node-")
+            )
+
+            if is_test_node and not parent_choices:
+                result = await self._generate_from_test_node(
+                    llm_client=llm_client,
+                    parent_node_id=parent_node_id,
+                    parent_node_content=parent_node_content,
+                    instructions=instructions,
+                    system_prompt_override=system_prompt_override,
+                    dialogue_nodes=dialogue_nodes,
+                    path_steps=path_steps,
+                    player_choice_label=choice_label,
+                    render_prompt=render_prompt,
+                )
+                if result is not None:
+                    return result
+
+            if target_choice_index is not None and parent_choices:
+                return await self._generate_for_choice(
+                    llm_client=llm_client,
+                    parent_node_id=parent_node_id,
+                    parent_choices=parent_choices,
+                    parent_speaker=parent_speaker,
+                    parent_line=parent_line,
+                    target_choice_index=target_choice_index,
+                    instructions=instructions,
+                    system_prompt_override=system_prompt_override,
+                    max_choices=max_choices,
+                    dialogue_nodes=dialogue_nodes,
+                    player_choice_label=choice_label,
+                    choices_mode=effective_choices_mode,
+                    path_steps=path_steps,
+                    render_prompt=render_prompt,
+                )
+
+            if target_choice_index is not None and not parent_choices:
+                raise ValueError("Aucun choix disponible pour la génération d'un choix spécifique.")
+
+            return await self._generate_normal(
                 llm_client=llm_client,
                 parent_node_id=parent_node_id,
                 parent_choices=parent_choices,
                 parent_speaker=parent_speaker,
                 parent_line=parent_line,
-                target_choice_index=target_choice_index,
                 instructions=instructions,
                 system_prompt_override=system_prompt_override,
                 max_choices=max_choices,
+                target_choice_index=target_choice_index,
                 dialogue_nodes=dialogue_nodes,
                 player_choice_label=choice_label,
                 choices_mode=effective_choices_mode,
+                path_steps=path_steps,
+                render_prompt=render_prompt,
             )
 
-        if target_choice_index is not None and not parent_choices:
-            raise ValueError("Aucun choix disponible pour la génération d'un choix spécifique.")
-
-        return await self._generate_normal(
-            llm_client=llm_client,
-            parent_node_id=parent_node_id,
-            parent_choices=parent_choices,
-            parent_speaker=parent_speaker,
-            parent_line=parent_line,
-            instructions=instructions,
-            system_prompt_override=system_prompt_override,
-            max_choices=max_choices,
-            target_choice_index=target_choice_index,
-            dialogue_nodes=dialogue_nodes,
-            player_choice_label=choice_label,
-            choices_mode=effective_choices_mode,
-        )
+        result = await dispatch()
+        result.warnings = [
+            warning for node in result.nodes for warning in find_off_catalog_tests(node)
+        ]
+        return result
 
     # ------------------------------------------------------------------
     # Modes de génération
@@ -278,6 +384,7 @@ class GraphNodeOrchestrator:
         player_choice_label: str = DEFAULT_PLAYER_CHARACTER,
         choices_mode: ChoicesMode = "capped",
         progress_callback: Optional[Callable[[int, int], None]] = None,
+        render_prompt: Optional[PromptRenderer] = None,
     ) -> GenerationResult:
         if not parent_choices:
             raise ValueError("Aucun choix disponible pour la génération batch.")
@@ -295,6 +402,7 @@ class GraphNodeOrchestrator:
             dialogue_nodes=dialogue_nodes,
             player_choice_label=player_choice_label,
             choices_mode=choices_mode,
+            render_prompt=render_prompt,
         )
 
         generated_nodes = batch_result["nodes"]
@@ -327,25 +435,25 @@ class GraphNodeOrchestrator:
         parent_node_content: Dict[str, Any],
         instructions: str,
         system_prompt_override: Optional[str],
+        dialogue_nodes: Optional[List[Dict[str, Any]]] = None,
+        path_steps: Optional[List[DialoguePathStep]] = None,
+        player_choice_label: str = DEFAULT_PLAYER_CHARACTER,
+        render_prompt: Optional[PromptRenderer] = None,
     ) -> Optional[GenerationResult]:
-        """Retourne ``None`` si l'ID du test-node n'est pas parseable (fallback normal)."""
+        """Retourne ``None`` si l'ID du test-node n'est pas parseable (fallback normal).
+
+        ``path_steps`` est le chemin jusqu'au nœud de dialogue qui porte le choix testé.
+        """
         test_node_id = parent_node_id
-        if not test_node_id.startswith("test-node-"):
+        test_node_ref = _split_test_node_id(test_node_id)
+        if test_node_ref is None:
+            if test_node_id.startswith("test-node-"):
+                logger.warning(
+                    "Impossible d'extraire parent_id et choice_index depuis TestNode ID %s",
+                    test_node_id,
+                )
             return None
-
-        parts = test_node_id.replace("test-node-", "").split("-choice-")
-        if len(parts) != 2:
-            return None
-
-        parent_dialogue_id, choice_index_str = parts
-        try:
-            choice_index = int(choice_index_str)
-        except (ValueError, IndexError):
-            logger.warning(
-                "Impossible d'extraire parent_id et choice_index depuis TestNode ID %s",
-                test_node_id,
-            )
-            return None
+        parent_dialogue_id, choice_index = test_node_ref
 
         test_value = parent_node_content.get("test")
         if not test_value:
@@ -361,9 +469,10 @@ class GraphNodeOrchestrator:
             or parent_node_content.get("line")
             or ""
         )
+        tested_choice_text = _tested_choice_text(dialogue_nodes, parent_dialogue_id, choice_index)
 
         choice_content = UnityDialogueChoiceContent.model_validate(
-            {"text": "", "test": test_value}
+            {"text": tested_choice_text, "test": test_value}
         )
         result = await self._generation_service.generate_nodes_for_choice_with_test(
             llm_client=llm_client,
@@ -374,6 +483,9 @@ class GraphNodeOrchestrator:
             parent_speaker=parent_speaker,
             parent_line=parent_line,
             system_prompt_override=system_prompt_override,
+            path_steps=path_steps,
+            player_choice_label=player_choice_label,
+            render_prompt=render_prompt,
         )
 
         generated_nodes = result["nodes"]
@@ -408,6 +520,8 @@ class GraphNodeOrchestrator:
         dialogue_nodes: Optional[List[Dict[str, Any]]] = None,
         player_choice_label: str = DEFAULT_PLAYER_CHARACTER,
         choices_mode: ChoicesMode = "capped",
+        path_steps: Optional[List[DialoguePathStep]] = None,
+        render_prompt: Optional[PromptRenderer] = None,
     ) -> GenerationResult:
         if not (0 <= target_choice_index < len(parent_choices)):
             raise ValueError(f"Index de choix invalide: {target_choice_index}.")
@@ -426,6 +540,9 @@ class GraphNodeOrchestrator:
                 parent_line=parent_line,
                 instructions=instructions,
                 system_prompt_override=system_prompt_override,
+                path_steps=path_steps,
+                player_choice_label=player_choice_label,
+                render_prompt=render_prompt,
             )
 
         choice_text = choice_data.get("text", "")
@@ -436,6 +553,7 @@ class GraphNodeOrchestrator:
             choice_text=choice_text,
             dialogue_nodes=dialogue_nodes,
             parent_node_id=parent_node_id,
+            path_steps=path_steps,
             player_choice_label=player_choice_label,
         )
         return await self._generate_and_enrich(
@@ -447,6 +565,7 @@ class GraphNodeOrchestrator:
             max_choices=max_choices,
             target_choice_index=target_choice_index,
             choices_mode=choices_mode,
+            render_prompt=render_prompt,
         )
 
     async def _generate_choice_with_test(
@@ -460,6 +579,9 @@ class GraphNodeOrchestrator:
         parent_line: str,
         instructions: str,
         system_prompt_override: Optional[str],
+        path_steps: Optional[List[DialoguePathStep]] = None,
+        player_choice_label: str = DEFAULT_PLAYER_CHARACTER,
+        render_prompt: Optional[PromptRenderer] = None,
     ) -> GenerationResult:
         choice_content = UnityDialogueChoiceContent.model_validate(choice_data)
         result = await self._generation_service.generate_nodes_for_choice_with_test(
@@ -471,6 +593,9 @@ class GraphNodeOrchestrator:
             parent_speaker=parent_speaker,
             parent_line=parent_line,
             system_prompt_override=system_prompt_override,
+            path_steps=path_steps,
+            player_choice_label=player_choice_label,
+            render_prompt=render_prompt,
         )
 
         generated_nodes = result["nodes"]
@@ -507,6 +632,8 @@ class GraphNodeOrchestrator:
         dialogue_nodes: Optional[List[Dict[str, Any]]] = None,
         player_choice_label: str = DEFAULT_PLAYER_CHARACTER,
         choices_mode: ChoicesMode = "capped",
+        path_steps: Optional[List[DialoguePathStep]] = None,
+        render_prompt: Optional[PromptRenderer] = None,
     ) -> GenerationResult:
         enriched = _build_enriched_instructions(
             parent_speaker,
@@ -514,6 +641,7 @@ class GraphNodeOrchestrator:
             instructions,
             dialogue_nodes=dialogue_nodes,
             parent_node_id=parent_node_id,
+            path_steps=path_steps,
             player_choice_label=player_choice_label,
         )
         return await self._generate_and_enrich(
@@ -525,6 +653,7 @@ class GraphNodeOrchestrator:
             max_choices=max_choices,
             target_choice_index=target_choice_index,
             choices_mode=choices_mode,
+            render_prompt=render_prompt,
         )
 
     # ------------------------------------------------------------------
@@ -542,6 +671,7 @@ class GraphNodeOrchestrator:
         max_choices: Optional[int],
         target_choice_index: Optional[int],
         choices_mode: ChoicesMode = "capped",
+        render_prompt: Optional[PromptRenderer] = None,
     ) -> GenerationResult:
         """Génération standard + enrichissement IDs + construction des connexions."""
         if max_choices == 0:
@@ -551,9 +681,14 @@ class GraphNodeOrchestrator:
         else:
             llm_max_choices = max_choices
 
+        prompt = (
+            render_prompt(enriched_instructions, llm_max_choices)
+            if render_prompt
+            else enriched_instructions
+        )
         response = await self._generation_service.generate_dialogue_node(
             llm_client=llm_client,
-            prompt=enriched_instructions,
+            prompt=prompt,
             system_prompt_override=system_prompt_override,
             max_choices=llm_max_choices,
         )

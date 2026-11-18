@@ -254,6 +254,9 @@ async def generate_node(
             dialogue_nodes=request_data.dialogue_nodes,
             player_character_id=dramatis.player_character_id,
             choices_mode=request_data.choices_mode,
+            npc_speaker_id=dramatis.npc_speaker_id,
+            narrative_tags=request_data.narrative_tags,
+            llm_model_identifier=request_data.llm_model_identifier,
         )
 
         suggested_connections = [
@@ -300,6 +303,7 @@ async def generate_node(
             failed_choices_count=result.failed_choices_count,
             total_choices_count=result.total_choices_count,
             context_gdd_content_fingerprint=gdd_fp,
+            warnings=result.warnings or None,
         )
 
     except ValueError as e:

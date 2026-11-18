@@ -304,6 +304,7 @@ class DialogueTreeExpansionService:
                             generate_all_choices=True,
                             dialogue_nodes=list(node_registry.values()),
                             player_character_id=dramatis.player_character_id,
+                            npc_speaker_id=dramatis.npc_speaker_id,
                             max_depth=max_depth,
                             choices_mode=effective_choices_mode,
                         )

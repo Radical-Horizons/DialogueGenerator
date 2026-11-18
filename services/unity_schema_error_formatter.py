@@ -25,7 +25,7 @@ def format_test_pattern_error(instance: Any) -> str:
     """
     value = str(instance).strip() if instance is not None else ""
     base = (
-        "Format attendu : Attribut+Compétence:DD (ex. Raison+Rhétorique:8). "
+        "Format attendu : Attribut+Compétence:DD (ex. Sociabilité+Rhétorique:8). "
         "L'attribut et la compétence ne doivent contenir ni espace, ni « : », ni « + »."
     )
     if not value:

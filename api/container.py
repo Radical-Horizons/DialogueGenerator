@@ -107,6 +107,7 @@ class ServiceContainer:
         self._export_log_service: Optional[ExportLogService] = None
         self._unity_generation_service: Optional[UnityDialogueGenerationService] = None
         self._graph_node_orchestrator: Optional["GraphNodeOrchestrator"] = None
+        self._graph_prompt_context_factory: Optional["GraphPromptContextFactory"] = None
         self._dialogue_tree_expansion_service: Optional["DialogueTreeExpansionService"] = None
         self._linked_selector_service: Optional[LinkedSelectorService] = None
         self._notion_import_service: Optional[NotionImportService] = None
@@ -662,13 +663,27 @@ class ServiceContainer:
         """
         if self._graph_node_orchestrator is None:
             from services.graph_node_orchestrator import GraphNodeOrchestrator
-            
+
             unity_service = self.get_unity_dialogue_generation_service()
             self._graph_node_orchestrator = GraphNodeOrchestrator(
-                generation_service=unity_service
+                generation_service=unity_service,
+                prompt_context_factory=self.get_graph_prompt_context_factory(),
             )
             logger.info("GraphNodeOrchestrator initialisé dans le container.")
         return self._graph_node_orchestrator
+
+    def get_graph_prompt_context_factory(self) -> "GraphPromptContextFactory":
+        """Contexte GDD + catalogues des prompts du graphe (mêmes services que « Générer »)."""
+        if self._graph_prompt_context_factory is None:
+            from services.graph_prompt_context import GraphPromptContextFactory
+
+            self._graph_prompt_context_factory = GraphPromptContextFactory(
+                context_builder=self.get_context_builder(),
+                prompt_engine=self.get_prompt_engine(),
+                skill_service=self.get_skill_catalog_service(),
+                trait_service=self.get_trait_catalog_service(),
+            )
+        return self._graph_prompt_context_factory
 
     def get_dialogue_tree_expansion_service(self) -> "DialogueTreeExpansionService":
         """Retourne le service d'expansion BFS de dialogues complets."""

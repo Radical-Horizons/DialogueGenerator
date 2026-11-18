@@ -193,6 +193,10 @@ class GenerateNodeResponse(BaseModel):
         None,
         description="Nombre total de choix sur le nœud parent"
     )
+    warnings: Optional[List[str]] = Field(
+        None,
+        description="Avertissements non bloquants (ex. test hors catalogue caractéristiques/compétences)",
+    )
 
 
 class ValidateGraphRequest(BaseModel):
