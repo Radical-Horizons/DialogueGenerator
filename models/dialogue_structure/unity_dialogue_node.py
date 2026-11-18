@@ -38,7 +38,7 @@ class UnityDialogueChoiceContent(BaseModel):
             "(ex. *[Lui tend la main.]*)."
         ),
     )
-    test: Optional[str] = Field(None, description="Format: AttributeType+SkillId:DD (ex: 'Raison+Rhétorique:8')")
+    test: Optional[str] = Field(None, description="Format: AttributeType+SkillId:DD (ex: 'Sociabilité+Rhétorique:8')")
     testCriticalFailureNode: Optional[str] = Field(None, description="ID du nœud cible en cas d'échec critique (score < DD - 5)")
     testFailureNode: Optional[str] = Field(None, description="ID du nœud cible en cas d'échec (score >= DD - 5 et < DD)")
     testSuccessNode: Optional[str] = Field(None, description="ID du nœud cible en cas de réussite (score >= DD et < DD + 5)")
@@ -80,7 +80,7 @@ class UnityDialogueNodeContent(BaseModel):
     )
     test: Optional[str] = Field(
         None, 
-        description="Format: AttributeType+SkillId:DD (ex: 'Raison+Rhétorique:8'). La compétence est obligatoire."
+        description="Format: AttributeType+SkillId:DD (ex: 'Sociabilité+Rhétorique:8'). La compétence est obligatoire."
     )
     consequences: Optional[UnityDialogueConsequencesContent] = Field(None, description="Flags narratifs à activer")
     isLongRest: Optional[bool] = Field(None, description="Si true, déclenche un repos long")

@@ -2,7 +2,7 @@
 import asyncio
 import logging
 import uuid
-from typing import List, Dict, Any, Optional
+from typing import Callable, List, Dict, Any, Optional
 
 from models.dialogue_structure.unity_dialogue_node import (
     UnityDialogueGenerationResponse,
@@ -10,6 +10,7 @@ from models.dialogue_structure.unity_dialogue_node import (
     UnityDialogueChoiceContent
 )
 from core.llm.llm_client import ILLMClient
+from services.dialogue_path_context import DialoguePathStep, format_path_history_lines
 from services.document_choice_id_service import stable_choice_id
 from services.unity_export_normalizer import normalize_unity_export_document
 
@@ -302,12 +303,15 @@ class UnityDialogueGenerationService:
         instructions: str,
         parent_speaker: str = "PNJ",
         parent_line: str = "",
-        system_prompt_override: Optional[str] = None
+        system_prompt_override: Optional[str] = None,
+        path_steps: Optional[List[DialoguePathStep]] = None,
+        player_choice_label: str = "PJ",
+        render_prompt: Optional[Callable[[str, Optional[int]], str]] = None,
     ) -> Dict[str, Any]:
         """Génère 4 nœuds pour un choix avec attribut test.
-        
+
         AC: #1, #3 - Génération de 4 réponses (échec critique, échec, réussite, réussite critique).
-        
+
         Args:
             llm_client: Client LLM pour la génération.
             choice_content: Contenu du choix avec attribut test.
@@ -317,7 +321,10 @@ class UnityDialogueGenerationService:
             parent_speaker: Speaker du nœud parent.
             parent_line: Ligne de dialogue du nœud parent.
             system_prompt_override: Surcharge du system prompt (optionnel).
-            
+            path_steps: Chemin START → nœud parent ; remplace le seul parent immédiat.
+            player_choice_label: Nom du PJ dans l'historique.
+            render_prompt: Enveloppe le corps dans le prompt complet (contexte GDD, catalogues).
+
         Returns:
             Dictionnaire contenant:
             - "nodes": Liste de 4 nœuds enrichis (critical-failure, failure, success, critical-success)
@@ -366,14 +373,20 @@ class UnityDialogueGenerationService:
             }
         ]
         
+        if path_steps:
+            history_block = "\n".join(format_path_history_lines(path_steps, player_choice_label))
+            choice_header = "Réponse du joueur (choix testé):"
+        else:
+            history_block = f"Contexte précédent:\n{parent_speaker}: {parent_line}"
+            choice_header = "Réponse du joueur:"
+
         # Générer les 4 nœuds en parallèle (réduit le temps total vs 4 appels séquentiels)
         async def generate_one(
             result_context: Dict[str, str],
         ) -> tuple[str, List[Dict[str, Any]]]:
-            enriched_prompt = f"""Contexte précédent:
-{parent_speaker}: {parent_line}
+            enriched_prompt = f"""{history_block}
 
-Réponse du joueur:
+{choice_header}
 {choice_content.text}
 
 Test d'attribut: {choice_content.test} (DD={dd})
@@ -384,9 +397,10 @@ Résultat du test: {result_context["label"]}
 Instructions pour la suite:
 {instructions}
 """
+            prompt = render_prompt(enriched_prompt, None) if render_prompt else enriched_prompt
             response = await self.generate_dialogue_node(
                 llm_client=llm_client,
-                prompt=enriched_prompt,
+                prompt=prompt,
                 system_prompt_override=system_prompt_override,
                 max_choices=None,
             )

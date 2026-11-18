@@ -303,6 +303,8 @@ async def regenerate_node(
             generate_all_choices=False,
             dialogue_nodes=request_data.dialogue_nodes,
             player_character_id=dramatis.player_character_id,
+            npc_speaker_id=dramatis.npc_speaker_id,
+            llm_model_identifier=request_data.llm_model_identifier,
         )
 
         if not result.nodes:

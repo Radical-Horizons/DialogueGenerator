@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import logging
@@ -13,11 +14,14 @@ from fastapi import APIRouter, Depends, status
 from api.dependencies import (
     get_config_service,
     get_context_builder,
+    get_graph_prompt_context_factory,
     get_llm_pricing_service,
     get_llm_usage_service,
     get_request_id,
     get_token_estimation_service,
 )
+from api.routers.graph_router_helpers import resolve_and_enrich_graph_context
+from services.graph_prompt_context import GraphPromptContextFactory
 from api.exceptions import InternalServerException
 from api.schemas.graph import (
     EstimateCostPerNodeBreakdown,
@@ -72,29 +76,48 @@ def _build_representative_prompt_for_estimate(
     parent_node_id: Optional[str] = None,
     dialogue_nodes: Optional[list] = None,
     player_choice_label: str = PlayableCharacters.DEFAULT_PLAYER,
+    prompt_context_factory: Optional[GraphPromptContextFactory] = None,
+    context_builder: Optional[ContextBuilder] = None,
+    npc_speaker_id: Optional[str] = None,
+    narrative_tags: Optional[list[str]] = None,
+    model_id: Optional[str] = None,
+    max_choices: Optional[int] = None,
 ) -> str:
-    """Construit un prompt représentatif pour l'estimation (sans appel LLM)."""
-    context_blob = json.dumps(context_selections, ensure_ascii=False) if context_selections else ""
-    if dialogue_nodes and parent_node_id:
-        from services.dialogue_path_context import build_enriched_generation_prompt
+    """Construit un prompt représentatif pour l'estimation (sans appel LLM).
 
-        prompt_body = build_enriched_generation_prompt(
-            nodes=dialogue_nodes,
-            parent_node_id=parent_node_id,
-            parent_speaker=str(parent_node_content.get("speaker") or "PNJ"),
-            parent_line=str(parent_node_content.get("line") or ""),
-            user_instructions=user_instructions or "",
-            player_choice_label=player_choice_label,
-        )
-        return f"{context_blob}\n\n{prompt_body}" if context_blob else prompt_body
+    Avec ``prompt_context_factory``, c'est le prompt réellement envoyé par
+    ``generate-node`` : fiches GDD, catalogues et historique. Sans elle, repli sur
+    l'historique précédé des seuls noms sélectionnés (sous-estimation).
+    """
+    from services.dialogue_path_context import build_enriched_generation_prompt
 
-    parent_speaker = parent_node_content.get("speaker", "PNJ")
-    parent_line = parent_node_content.get("line", "")
-    return (
-        f"{context_blob}\n\n"
-        f"Contexte précédent:\n{parent_speaker}: {parent_line}\n\n"
-        f"Instructions pour la suite:\n{user_instructions or ''}"
+    prompt_body = build_enriched_generation_prompt(
+        nodes=dialogue_nodes if parent_node_id else None,
+        parent_node_id=parent_node_id or "",
+        parent_speaker=str(parent_node_content.get("speaker") or "PNJ"),
+        parent_line=str(parent_node_content.get("line") or ""),
+        user_instructions=user_instructions or "",
+        player_choice_label=player_choice_label,
     )
+    if prompt_context_factory is not None:
+        dramatis, enriched = resolve_and_enrich_graph_context(
+            context_selections or {},
+            player_character_id=player_choice_label,
+            npc_speaker_id=npc_speaker_id,
+            context_builder=context_builder,
+        )
+        prompt_context = prompt_context_factory.build(
+            enriched,
+            npc_speaker_id=dramatis.npc_speaker_id,
+            player_character_id=dramatis.player_character_id,
+            scene_instruction=user_instructions or "",
+            narrative_tags=narrative_tags,
+            llm_model_identifier=model_id,
+        )
+        return prompt_context.render(prompt_body, max_choices)
+
+    context_blob = json.dumps(context_selections, ensure_ascii=False) if context_selections else ""
+    return f"{context_blob}\n\n{prompt_body}" if context_blob else prompt_body
 
 
 def _resolve_model_and_provider(
@@ -140,9 +163,9 @@ def _batch_count_from_request(request_data: EstimateCostRequest) -> int:
 _estimate_cost_cache: TTLCache[str, dict] = TTLCache(maxsize=200, ttl=60)
 
 
-def _estimate_cost_cache_key(representative_prompt: str, model_id: str, batch_count: int) -> str:
-    """Clé de cache pour estimate-cost."""
-    blob = f"{representative_prompt}|{model_id}|{batch_count}"
+def _estimate_cost_cache_key(request_payload: str, model_id: str, batch_count: int) -> str:
+    """Clé de cache pour estimate-cost : la requête, pas le prompt (coûteux à construire)."""
+    blob = f"{request_payload}|{model_id}|{batch_count}"
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 
@@ -174,36 +197,50 @@ async def estimate_cost(
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     token_service: Annotated[TokenEstimationService, Depends(get_token_estimation_service)],
     pricing_service: Annotated[LLMPricingService, Depends(get_llm_pricing_service)],
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    prompt_context_factory: Annotated[
+        GraphPromptContextFactory, Depends(get_graph_prompt_context_factory)
+    ],
     request_id: Annotated[str, Depends(get_request_id)] = None,
 ) -> EstimateCostResponse:
     """Estime le coût LLM avant génération (pas d'appel LLM).
 
-    Construit un prompt représentatif, estime les tokens et calcule le coût
-    via TokenEstimationService + LLMPricingService.
+    Construit le prompt que ``generate-node`` enverrait (contexte GDD, catalogues,
+    historique), estime les tokens et calcule le coût via TokenEstimationService +
+    LLMPricingService.
     """
     try:
         model_id, provider = _resolve_model_and_provider(
             request_data.llm_model_identifier,
             config_service,
         )
+        batch_count = _batch_count_from_request(request_data)
+        cache_key = _estimate_cost_cache_key(
+            request_data.model_dump_json(), model_id, batch_count
+        )
+        cached = _estimate_cost_cache.get(cache_key)
+        if cached is not None:
+            return EstimateCostResponse(**cached)
         dramatis = resolve_scene_dramatis(
             player_character_id=request_data.player_character_id,
             npc_speaker_id=request_data.npc_speaker_id,
             context_selections=request_data.context_selections,
         )
-        representative_prompt = _build_representative_prompt_for_estimate(
+        representative_prompt = await asyncio.to_thread(
+            _build_representative_prompt_for_estimate,
             request_data.parent_node_content,
             request_data.user_instructions,
             request_data.context_selections,
             parent_node_id=request_data.parent_node_id,
             dialogue_nodes=request_data.dialogue_nodes,
             player_choice_label=dramatis.player_character_id,
+            prompt_context_factory=prompt_context_factory,
+            context_builder=context_builder,
+            npc_speaker_id=dramatis.npc_speaker_id,
+            narrative_tags=request_data.narrative_tags,
+            model_id=model_id,
+            max_choices=request_data.max_choices,
         )
-        batch_count = _batch_count_from_request(request_data)
-        cache_key = _estimate_cost_cache_key(representative_prompt, model_id, batch_count)
-        cached = _estimate_cost_cache.get(cache_key)
-        if cached is not None:
-            return EstimateCostResponse(**cached)
         prompt_tokens, completion_tokens_per_node = token_service.estimate_tokens(
             representative_prompt, model_id
         )

@@ -165,6 +165,8 @@ export interface GenerateNodeResponse {
   total_choices_count?: number
   /** Empreinte SHA-256 du contexte GDD au moment de la génération (Story 3.9). */
   context_gdd_content_fingerprint?: string | null
+  /** Avertissements non bloquants (ex. test hors catalogue caractéristiques/compétences). */
+  warnings?: string[] | null
 }
 
 export interface RegenerateNodeRequest {

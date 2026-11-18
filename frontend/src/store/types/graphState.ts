@@ -233,6 +233,7 @@ export interface GraphState {
       total_choices_count?: number | null
       batch_count?: number | null
       context_gdd_content_fingerprint?: string | null
+      warnings?: string[] | null
     },
     options?: Record<string, unknown>
   ) => Promise<{

@@ -2,18 +2,21 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import re
 from datetime import datetime, timezone
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from api.dependencies import (
     get_config_service,
+    get_context_builder,
     get_dialogue_tree_expansion_service,
     get_document_persistence_service,
+    get_graph_prompt_context_factory,
     get_llm_pricing_service,
     get_llm_usage_service,
     get_request_id,
@@ -31,7 +34,10 @@ from api.schemas.graph import (
     ExpandTreeResponse,
     SchemaValidationIssueDetail,
 )
+from constants import PlayableCharacters
+from core.context.context_builder import ContextBuilder
 from services.configuration_service import ConfigurationService
+from services.graph_prompt_context import GraphPromptContextFactory
 from services.dialogue_tree_expansion_service import (
     DialogueTreeExpansionService,
     TreeExpansionError,
@@ -71,14 +77,27 @@ def _estimate_tree_cost_usd(
     config_service: ConfigurationService,
     token_service: TokenEstimationService,
     pricing_service: LLMPricingService,
+    prompt_context_factory: Optional[GraphPromptContextFactory] = None,
+    context_builder: Optional[ContextBuilder] = None,
 ) -> float:
-    """Estime le coût USD total pour une expansion complète."""
+    """Estime le coût USD total pour une expansion complète.
+
+    Chaque appel enfant porte le contexte GDD et les catalogues : le prompt
+    représentatif est construit comme celui de ``generate-node``.
+    """
     model_id = request_data.llm_model_identifier
-    context_dict = request_data.context_selections.to_service_dict()
     representative_prompt = _build_representative_prompt_for_estimate(
         {"speaker": "PNJ", "line": "Ligne représentative pour estimation."},
         request_data.user_instructions,
-        context_dict,
+        request_data.context_selections.model_dump(),
+        player_choice_label=(
+            request_data.player_character_id or PlayableCharacters.DEFAULT_PLAYER
+        ),
+        prompt_context_factory=prompt_context_factory,
+        context_builder=context_builder,
+        npc_speaker_id=request_data.npc_speaker_id,
+        model_id=model_id,
+        max_choices=request_data.max_choices,
     )
     prompt_tokens, completion_tokens_per_node = token_service.estimate_tokens(
         representative_prompt,
@@ -171,6 +190,10 @@ async def expand_tree(
     usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
     token_service: Annotated[TokenEstimationService, Depends(get_token_estimation_service)],
     pricing_service: Annotated[LLMPricingService, Depends(get_llm_pricing_service)],
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    prompt_context_factory: Annotated[
+        GraphPromptContextFactory, Depends(get_graph_prompt_context_factory)
+    ],
     persistence_service: Annotated[
         DocumentPersistenceService,
         Depends(get_document_persistence_service),
@@ -213,11 +236,14 @@ async def expand_tree(
                 )
 
         if request_data.dry_run:
-            cost_usd = _estimate_tree_cost_usd(
+            cost_usd = await asyncio.to_thread(
+                _estimate_tree_cost_usd,
                 request_data=request_data,
                 config_service=config_service,
                 token_service=token_service,
                 pricing_service=pricing_service,
+                prompt_context_factory=prompt_context_factory,
+                context_builder=context_builder,
             )
             return ExpandTreeResponse(
                 document={"schemaVersion": "1.2.0", "nodes": []},

@@ -5,9 +5,13 @@ Aligne génération graphe / expand-tree sur le pipeline standalone
 """
 from __future__ import annotations
 
-from typing import Any, Dict, List, Literal, Optional, Sequence
+import logging
+from functools import lru_cache
+from typing import AbstractSet, Any, Dict, List, Literal, Optional, Sequence, Tuple
 
 from services.json_renderer.unity_json_renderer import UnityJsonRenderer
+
+logger = logging.getLogger(__name__)
 
 ChoicesMode = Literal["free", "capped"]
 
@@ -91,13 +95,69 @@ def validate_enriched_nodes(
         raise UnityNodeValidationError(f"{prefix}{'; '.join(errors)}")
 
 
+@lru_cache(maxsize=1)
+def _skill_check_catalog_ids() -> Tuple[frozenset[str], frozenset[str]]:
+    """(caractéristiques, compétences) du catalogue Unity, lus une fois par processus."""
+    from services.skill_check_catalog import (
+        load_attribute_ids_for_prompt,
+        load_skill_ids_for_prompt,
+    )
+
+    return frozenset(load_attribute_ids_for_prompt()), frozenset(load_skill_ids_for_prompt())
+
+
+def find_off_catalog_tests(
+    node: Dict[str, Any],
+    *,
+    attribute_ids: Optional[AbstractSet[str]] = None,
+    skill_ids: Optional[AbstractSet[str]] = None,
+) -> List[str]:
+    """Signale les tests dont la caractéristique ou la compétence n'existe pas.
+
+    Le format ``Caractéristique+Compétence:DD`` est garanti par le schéma ; les
+    identifiants, non. Un test hors catalogue reste exportable mais ne se résoudra pas
+    dans Unity : c'est un avertissement, pas une erreur.
+
+    Args:
+        node: Nœud Unity enrichi.
+        attribute_ids: Caractéristiques admises (défaut : les 8 du catalogue).
+        skill_ids: Compétences admises (défaut : ``SkillCatalog.csv`` ; vide = non vérifié).
+
+    Returns:
+        Un message par identifiant inconnu, dans l'ordre des choix.
+    """
+    if attribute_ids is None or skill_ids is None:
+        default_attributes, default_skills = _skill_check_catalog_ids()
+        attribute_ids = default_attributes if attribute_ids is None else attribute_ids
+        skill_ids = default_skills if skill_ids is None else skill_ids
+
+    label = str(node.get("id", "?"))
+    warnings: List[str] = []
+    for index, choice in enumerate(node.get("choices") or []):
+        test = str((choice or {}).get("test") or "").strip()
+        if not test:
+            continue
+        attribute, _, skill = test.split(":", 1)[0].partition("+")
+        if attribute not in attribute_ids:
+            warnings.append(
+                f"Nœud '{label}', choix {index} : caractéristique « {attribute} » "
+                f"hors catalogue (test « {test} »)."
+            )
+        if skill and skill_ids and skill not in skill_ids:
+            warnings.append(
+                f"Nœud '{label}', choix {index} : compétence « {skill} » "
+                f"hors catalogue (test « {test} »)."
+            )
+    return warnings
+
+
 def validate_enriched_node(
     node: Dict[str, Any],
     *,
     max_choices: Optional[int] = None,
     choices_mode: ChoicesMode = "capped",
     context_label: Optional[str] = None,
-) -> None:
+) -> List[str]:
     """Structure + nombre de choix pour un nœud enrichi unique.
 
     Args:
@@ -105,6 +165,9 @@ def validate_enriched_node(
         max_choices: Plafond de choix pour cette génération (``0`` = feuille).
         choices_mode: Mode capped ou free (voir ``validate_choice_count``).
         context_label: Libellé pour les messages d'erreur.
+
+    Returns:
+        Avertissements non bloquants (tests hors catalogue), déjà journalisés.
 
     Raises:
         UnityNodeValidationError: Si structure ou choix invalides.
@@ -120,6 +183,10 @@ def validate_enriched_node(
         choices_mode=choices_mode,
         node_label=label,
     )
+    warnings = find_off_catalog_tests(node)
+    for warning in warnings:
+        logger.warning("Test hors catalogue : %s", warning)
+    return warnings
 
 
 def infer_choices_mode(

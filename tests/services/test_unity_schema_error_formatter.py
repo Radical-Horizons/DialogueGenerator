@@ -20,7 +20,7 @@ class TestUnitySchemaErrorFormatter:
         """Régression : pas de regex brute ; l'espace est expliqué."""
         msg = format_test_pattern_error("Raison+Déplacement silencieux:9")
         assert "Attribut+Compétence:DD" in msg
-        assert "Raison+Rhétorique:8" in msg
+        assert "Sociabilité+Rhétorique:8" in msg
         assert "Déplacement silencieux" in msg
         assert "espace" in msg
         assert "^" not in msg
