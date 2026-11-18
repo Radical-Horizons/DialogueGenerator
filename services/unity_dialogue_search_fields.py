@@ -45,6 +45,19 @@ def extract_title_from_nodes(nodes: list[Any]) -> str | None:
     return None
 
 
+def extract_explicit_title(document: Any) -> str | None:
+    """Titre posé sur le document (``title``), sans repli sur une réplique.
+
+    La bibliothèque s'en sert pour afficher un vrai titre, et retombe sur le nom du
+    dialogue quand il n'y en a pas — plutôt que sur le début du premier nœud.
+    """
+    if isinstance(document, dict):
+        title = document.get("title")
+        if isinstance(title, str) and title.strip():
+            return title.strip()
+    return None
+
+
 def extract_document_title(document: Any) -> str | None:
     """Titre affichable : ``title`` du document s'il est renseigné, sinon la 1re réplique."""
     if isinstance(document, dict):

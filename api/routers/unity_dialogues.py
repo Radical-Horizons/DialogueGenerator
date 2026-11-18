@@ -23,6 +23,7 @@ from services.unity_dialogue_search_fields import (
     count_nodes as _count_nodes,
     extract_speakers_and_text as _extract_speakers_and_text,
     extract_document_title as _extract_document_title,
+    extract_explicit_title as _extract_explicit_title,
 )
 from services.configuration_service import ConfigurationService
 from services.document_persistence_service import (
@@ -314,7 +315,7 @@ async def list_unity_dialogues(
                         else None
                     )
                     if isinstance(nodes_for_title, list):
-                        title = _extract_document_title(json_data)
+                        title = _extract_explicit_title(json_data)
                         speakers, search_text = _extract_speakers_and_text(
                             nodes_for_title
                         )

@@ -133,6 +133,37 @@ class TestUnityDialoguesList:
         assert "modified_time" in data["dialogues"][0]
         assert "size_bytes" in data["dialogues"][0]
     
+    def test_list_dialogues_title_is_the_document_title_not_the_first_line(
+        self, client: TestClient, mock_config_service, sample_unity_file, tmp_path: Path
+    ):
+        """GIVEN un dialogue avec `title` et un autre sans
+        WHEN je liste les dialogues
+        THEN le titre est celui du document, et reste vide sans titre (le front affiche alors
+        le nom du dialogue, pas le début de la première réplique)"""
+        # GIVEN
+        unity_dir = tmp_path / "unity_dialogues"
+        titled = unity_dir / "voknir_atelier.json"
+        titled.write_text(
+            json.dumps(
+                {
+                    "schemaVersion": "1.1.0",
+                    "title": "Voknir — L'Atelier du Cartographe",
+                    "nodes": [{"id": "START", "speaker": "Voknir", "line": "*Il se grave la peau.*"}],
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+
+        # WHEN
+        response = client.get("/api/v1/unity-dialogues")
+
+        # THEN
+        assert response.status_code == 200
+        by_name = {d["filename"]: d for d in response.json()["dialogues"]}
+        assert by_name["voknir_atelier.json"]["title"] == "Voknir — L'Atelier du Cartographe"
+        assert by_name["test_dialogue.json"]["title"] is None
+
     def test_list_dialogues_unity_path_not_configured(
         self, client: TestClient, mock_config_service
     ):
