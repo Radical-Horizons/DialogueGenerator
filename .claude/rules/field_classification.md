@@ -29,3 +29,13 @@ Détection : `_is_metadata_field()` utilise d’abord `Introduction` si présent
 
 - `is_metadata` : Filtrage onglets (Métadonnées vs Contexte)
 - `is_essential` : Indicateur "champ essentiel" (★) et boutons de sélection
+
+## Ce qui n'entre jamais dans le prompt
+
+- **Propriétés de production** (`values.Actes effectifs`, `Date de création`, `Slug`, `Niveau d’IA`, `Référence visuelle`…) : liste `_ADMIN_VALUE_KEYS` de `services/context_serializer/deduplicator.py`. Une nouvelle propriété Notion de suivi s'y ajoute.
+- **Balisage Notion** dans les valeurs : `services/context_value_cleaner.py`, appelé par `ContextOrganizer._extract_field_value`. Images, pièces jointes, bases intégrées et URL disparaissent ; mentions et champs relation deviennent des noms via l'index global des relations.
+- L'index des relations doit être passé à **tout** `ContextOrganizer`, cache de précompilation compris : sans lui, les UUID sortent bruts. Tout changement du rendu d'une fiche bumpe `SCHEMA_VERSION` de `services/gdd_context_precompile.py`.
+
+## Budget du contexte
+
+Au-delà de `max_context_tokens`, `services/context_budget_allocator.py` répartit le budget avant la troncature : PNJ qui parle, PJ, lieux et exemples de dialogue d'abord (partage max-min), le reste ensuite ; chaque fiche trop longue est coupée par la fin. Avant (2026-11-18), la première fiche longue mangeait tout le budget.

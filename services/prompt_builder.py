@@ -11,7 +11,8 @@ import xml.etree.ElementTree as ET
 from utils.xml_utils import escape_xml_text
 from services.dialogue_dramatic_progression import DIALOGUE_ORALITY_PROMPT_LINES
 from services.prompt_xml_parsers import build_narrative_guides_xml, build_vocabulary_xml
-from services.context_truncator import ContextTruncator, cap_context_text_to_budget
+from services.context_budget_allocator import allocate_context_budget
+from services.context_truncator import ContextTruncator, cap_context_text_to_budget, get_shared_truncator
 from services.context_serializer.text_serializer import TextSerializer
 
 # Réserve tokens pour l’enveloppe XML plate (<context><gdd_context>) quand le XML hiérarchique dépasse le budget.
@@ -403,7 +404,16 @@ class PromptBuilder:
                     )
 
                 cb = self._context_builder
-                context_root = cb._context_serializer.serialize_to_xml(input.structured_context)
+                max_tok = input.max_context_tokens
+                structured_context = input.structured_context
+                if max_tok is not None and max_tok > 0:
+                    structured_context = allocate_context_budget(
+                        structured_context,
+                        max_tok,
+                        priority_names=(input.npc_speaker_id, input.player_character_id),
+                        count_tokens=get_shared_truncator().count_tokens,
+                    )
+                context_root = cb._context_serializer.serialize_to_xml(structured_context)
 
                 if context_root is None:
                     raise ValueError("serialize_context_to_xml a retourné None")
@@ -412,9 +422,8 @@ class PromptBuilder:
                     logger.warning(f"Élément XML inattendu: {context_root.tag}, attendu 'context'")
                     raise ValueError(f"Tag XML inattendu: {context_root.tag}")
 
-                max_tok = input.max_context_tokens
                 if max_tok is not None and max_tok > 0:
-                    text_ser = cb.serialize_context_to_text(input.structured_context)
+                    text_ser = cb.serialize_context_to_text(structured_context)
                     capped_text = self._cap_gdd_context_text(text_ser, max_tok, input)
                     trunc = ContextTruncator()
                     xml_tok = trunc.count_tokens(

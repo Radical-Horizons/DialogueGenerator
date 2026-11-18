@@ -9,6 +9,7 @@ import pytest
 
 from models.prompt_structure import PromptMetadata, PromptStructure
 from services.gdd_context_precompile import (
+    SCHEMA_VERSION,
     PrecompiledFicheVariant,
     compute_content_hash,
     load_variant,
@@ -126,7 +127,7 @@ def test_write_manifest(repo_root: Path) -> None:
     assert manifest_path.is_file()
     data = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert data["entity_count"] == 3
-    assert data["schema_version"] == 2
+    assert data["schema_version"] == SCHEMA_VERSION
 
 
 def test_variant_cache_key_format() -> None:
