@@ -407,9 +407,10 @@ class PromptBuilder:
                 max_tok = input.max_context_tokens
                 structured_context = input.structured_context
                 if max_tok is not None and max_tok > 0:
+                    # Cible nette de l'enveloppe : la forme plate ne doit plus rien couper ensuite.
                     structured_context = allocate_context_budget(
                         structured_context,
-                        max_tok,
+                        max(1, max_tok - _XML_CONTEXT_ENVELOPE_TOKEN_RESERVE),
                         priority_names=(input.npc_speaker_id, input.player_character_id),
                         count_tokens=get_shared_truncator().count_tokens,
                     )

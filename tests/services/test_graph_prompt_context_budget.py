@@ -9,9 +9,11 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Optional
 
 import pytest
 
+from constants import Defaults
 from core.context.context_builder import ContextBuilder
 from core.prompt.prompt_engine import PromptEngine
 from services.graph_prompt_context import GraphPromptContextFactory
@@ -72,9 +74,9 @@ def prompt_context_factory(tmp_path: Path) -> GraphPromptContextFactory:
     context_builder = ContextBuilder(gdd_categories_path=categories, gdd_import_path=import_dir)
     context_builder.load_gdd_files()
     # Même branchement que ServiceContainer._inject_relation_index_into_context_builder.
-    context_builder._context_construction_service._relation_index = build_global_relation_index(
-        categories
-    )
+    construction = context_builder._context_construction_service
+    assert construction is not None
+    construction._relation_index = build_global_relation_index(categories)
     prompt_engine = PromptEngine(
         context_builder=context_builder,
         prompt_builder=PromptBuilder(context_builder=context_builder),
@@ -84,8 +86,8 @@ def prompt_context_factory(tmp_path: Path) -> GraphPromptContextFactory:
     )
 
 
-def render_prompt(factory: GraphPromptContextFactory, max_context_tokens: int) -> str:
-    """Prompt complet d'un nœud de graphe pour la scène PNJ / PJ / lieu."""
+def render_prompt(factory: GraphPromptContextFactory, max_context_tokens: Optional[int] = None) -> str:
+    """Prompt complet d'un nœud de graphe (budget par défaut si ``max_context_tokens`` est None)."""
     context = factory.build(
         {
             "characters_full": [NPC],
@@ -96,7 +98,7 @@ def render_prompt(factory: GraphPromptContextFactory, max_context_tokens: int) -
         npc_speaker_id=NPC,
         player_character_id=PLAYER,
         scene_instruction="Continue la scène.",
-        max_context_tokens=max_context_tokens,
+        max_context_tokens=Defaults.CONTEXT_TOKENS if max_context_tokens is None else max_context_tokens,
     )
     return context.render("Instructions pour la suite:\nContinue la scène.", None)
 
@@ -112,6 +114,17 @@ def test_long_npc_sheet_leaves_room_for_player_and_location(
     assert "L'archiviste compte la marche 0 et la note." in prompt
     assert "L'archiviste compte la marche 1499 et la note." not in prompt
     assert "(extrait)" in prompt
+
+
+def test_default_budget_keeps_a_long_sheet_whole(
+    prompt_context_factory: GraphPromptContextFactory,
+) -> None:
+    """Sans budget explicite, une fiche d'environ 15 000 tokens passe entière (défaut 40 000)."""
+    prompt = render_prompt(prompt_context_factory)
+
+    assert "L'archiviste compte la marche 1499 et la note." in prompt
+    assert PLAYER_MARKER in prompt and LOCATION_MARKER in prompt
+    assert "(extrait)" not in prompt
 
 
 def test_notion_noise_never_reaches_the_prompt(
