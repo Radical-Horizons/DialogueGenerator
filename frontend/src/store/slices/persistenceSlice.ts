@@ -56,9 +56,10 @@ function normalizeGraphForLoad(
   nodes: Node[],
   edges: Edge[],
   get: () => GraphState,
-  shouldAutoLayout: boolean,
+  layoutPositions: { nodes?: Record<string, { x: number; y: number }> } | undefined,
 ): { nodes: Node[]; edges: Edge[] } {
-  let normalized = normalizeTestBars(nodes, edges)
+  const shouldAutoLayout = !hasLayoutPositions(layoutPositions)
+  let normalized = normalizeTestBars(nodes, edges, shouldAutoLayout ? null : layoutPositions)
   if (shouldAutoLayout && normalized.nodes.length > 1) {
     const layoutedNodes = calculateDagreLayout(normalized.nodes, normalized.edges, {
       direction: 'TB',
@@ -229,7 +230,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         nodes,
         edges,
         get,
-        !hasLayoutPositions(savedPositions ? { nodes: savedPositions } : undefined),
+        savedPositions ? { nodes: savedPositions } : undefined,
       )
       const document = graphToDocument(normalized.nodes, normalized.edges) as unknown as Record<
         string,
@@ -295,7 +296,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         projectedNodes,
         projectedEdges,
         get,
-        !hasLayoutPositions(layoutPositions),
+        layoutPositions,
       )
       const layoutBlob = mergeLayoutWithNodePositions(serverLayout, normalized.nodes)
       const nodeCount = normalized.nodes.filter((n) => n.type !== 'testNode').length
@@ -390,7 +391,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         projectedNodes,
         projectedEdges,
         get,
-        !hasLayoutPositions(layoutPositions),
+        layoutPositions,
       )
       const hydratedLayout = mergeLayoutWithNodePositions(layoutBlob, normalized.nodes)
       const nodeCount = normalized.nodes.filter((n) => n.type !== 'testNode').length

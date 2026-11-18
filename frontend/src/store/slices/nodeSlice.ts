@@ -10,6 +10,7 @@ import type { Choice } from '../../schemas/nodeEditorSchema'
 import type { RegenerationEntry } from '../../types/graph'
 import {
   getParentChoiceForTestNode,
+  repositionTestNodesUnderDialogue,
   syncTestNodeFromChoice,
   syncChoiceFromTestNode,
 } from '../../utils/testNodeSync'
@@ -17,7 +18,7 @@ import { truncateChoiceLabel } from '../../utils/graphEdgeBuilders'
 import { normalizeTestBars } from '../../utils/graphNormalizers'
 import { runGraphTransaction } from '../utils/runGraphTransaction'
 import { documentToGraph } from '../../utils/documentToGraph'
-import { syncDocAndLayout } from '../../utils/syncDocLayout'
+import { mergeLayoutWithNodePositions, syncDocAndLayout } from '../../utils/syncDocLayout'
 import { applyLinearNextNodeFromGraphEdges } from '../../utils/mergeNodeEditorForm'
 import { pruneGraphValidationDiagnostics } from '../../utils/pruneGraphValidationDiagnostics'
 import {
@@ -146,9 +147,10 @@ function updateTestNodeInDocumentSoT(
 
   const layoutPositions = state.layout as { nodes?: Record<string, { x: number; y: number }> }
   const { nodes: projectedNodes, edges: projectedEdges } = documentToGraph(doc, layoutPositions)
-  const normalized = normalizeTestBars(projectedNodes, projectedEdges)
+  const normalized = normalizeTestBars(projectedNodes, projectedEdges, layoutPositions)
   return {
     document: doc,
+    layout: mergeLayoutWithNodePositions(state.layout, normalized.nodes),
     nodes: normalized.nodes,
     edges: normalized.edges,
     dialogueMetadata: {
@@ -202,9 +204,10 @@ function updateDialogueNodeInDocumentSoT(
 
   const layoutPositions = state.layout as { nodes?: Record<string, { x: number; y: number }> }
   const { nodes: projectedNodes, edges: projectedEdges } = documentToGraph(doc, layoutPositions)
-  const normalized = normalizeTestBars(projectedNodes, projectedEdges)
+  const normalized = normalizeTestBars(projectedNodes, projectedEdges, layoutPositions)
   return {
     document: doc,
+    layout: mergeLayoutWithNodePositions(state.layout, normalized.nodes),
     nodes: normalized.nodes,
     edges: normalized.edges,
     dialogueMetadata: {
@@ -374,6 +377,32 @@ function updateDialogueNodeDirectly(
       }
     }
   })
+
+  // Sans layout pour trancher, une barre apparue ou disparue réaligne le groupe ; sinon
+  // chaque barre garde sa position (déplacement manuel).
+  const barIdsOf = (list: Node[]) =>
+    list
+      .filter((n) => n.type === 'testNode' && n.id.startsWith(`test-node-${nodeId}-choice-`))
+      .map((n) => n.id)
+      .sort()
+      .join('|')
+  const dialogueNodeForBars = newNodes.find((n) => n.id === nodeId)
+  if (dialogueNodeForBars && barIdsOf(state.nodes) !== barIdsOf(newNodes)) {
+    const bars = new Map(
+      newNodes
+        .filter((n) => n.type === 'testNode' && n.id.startsWith(`test-node-${nodeId}-choice-`))
+        .map((n) => [n.id, n] as const)
+    )
+    repositionTestNodesUnderDialogue(
+      dialogueNodeForBars,
+      (dialogueNodeForBars.data.choices || []) as Choice[],
+      bars
+    )
+    for (let i = 0; i < newNodes.length; i++) {
+      const moved = bars.get(newNodes[i].id)
+      if (moved) newNodes[i] = moved
+    }
+  }
 
   // Mettre à jour le label des edges choix → targetNode si le texte du choix change
   const dialogueNodeAfter = newNodes.find((n) => n.id === nodeId)
@@ -577,7 +606,11 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
   addNode: (node: Node) => {
     runGraphTransaction(get, set, (state) => {
       const newNodes = [...state.nodes, node]
-      const normalized = normalizeTestBars(newNodes, state.edges)
+      const normalized = normalizeTestBars(
+        newNodes,
+        state.edges,
+        state.layout as { nodes?: Record<string, { x: number; y: number }> } | null
+      )
       const edgesToSet =
         node.type === 'dialogueNode'
           ? appendEdgesOfNewDialogueNode(node.id, state.edges, normalized.edges)
