@@ -3,7 +3,7 @@
  */
 import { create } from 'zustand'
 import { listLLMModels } from '../api/config'
-import { normalizeModelId } from '../constants'
+import { MODEL_NAMES, normalizeModelId } from '../constants'
 
 interface LLMModel {
   api_identifier: string;
@@ -25,7 +25,7 @@ interface LLMStore {
   loadModels: () => Promise<void>;
 }
 
-const rawStoredModel = localStorage.getItem('llm-model') || 'gpt-5.6-terra'
+const rawStoredModel = localStorage.getItem('llm-model') || MODEL_NAMES.STANDARD
 const initialModel = normalizeModelId(rawStoredModel)
 if (initialModel !== rawStoredModel) {
   localStorage.setItem('llm-model', initialModel)

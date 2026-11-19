@@ -18,8 +18,8 @@ vi.mock('../../api/config')
 const mockListLLMModels = vi.mocked(listLLMModels)
 
 const MODELS = [
-  { model_identifier: 'gpt-5.6-sol', display_name: 'GPT-5.6 Sol', client_type: 'openai', max_tokens: 32000 },
-  { model_identifier: 'gpt-5.6-terra', display_name: 'GPT-5.6 Terra', client_type: 'openai', max_tokens: 32000 },
+  { model_identifier: 'gpt-6.2-astra', display_name: 'GPT-6.2 Astra', client_type: 'openai', max_tokens: 32000 },
+  { model_identifier: 'gpt-6.2-sol', display_name: 'GPT-6.2 Sol', client_type: 'openai', max_tokens: 32000 },
   { model_identifier: 'mistral-small', display_name: 'Mistral Small', client_type: 'mistral', max_tokens: 32000 },
 ]
 
@@ -41,20 +41,20 @@ function renderPicker(
 /** Les modèles arrivent par un effet asynchrone : rien n'est cliquable avant. */
 async function openMenu(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByTestId('model-effort-pill'))
-  await screen.findByTestId('model-option-gpt-5.6-terra')
+  await screen.findByTestId('model-option-gpt-6.2-sol')
 }
 
 describe('ModelEffortPicker', () => {
   beforeEach(() => {
     mockListLLMModels.mockResolvedValue({ models: MODELS, total: MODELS.length })
-    useLLMStore.setState({ model: 'gpt-5.6-terra', provider: 'openai', availableModels: [] })
+    useLLMStore.setState({ model: 'gpt-6.2-sol', provider: 'openai', availableModels: [] })
   })
 
   it('affiche le modèle courant et son niveau de raisonnement', async () => {
     renderPicker({ reasoningEffort: 'high' })
 
     const pill = screen.getByTestId('model-effort-pill')
-    await waitFor(() => expect(pill).toHaveTextContent('GPT-5.6 Terra'))
+    await waitFor(() => expect(pill).toHaveTextContent('GPT-6.2 Sol'))
     expect(screen.getByTestId('model-effort-pill-effort')).toHaveTextContent('élevé')
   })
 
@@ -71,14 +71,14 @@ describe('ModelEffortPicker', () => {
     renderPicker()
     await openMenu(user)
 
-    expect(screen.getByTestId('model-option-gpt-5.6-sol')).toHaveTextContent(
+    expect(screen.getByTestId('model-option-gpt-6.2-astra')).toHaveTextContent(
       'Le plus capable — tâches complexes'
     )
-    expect(screen.getByTestId('model-option-gpt-5.6-terra')).toHaveAttribute(
+    expect(screen.getByTestId('model-option-gpt-6.2-sol')).toHaveAttribute(
       'aria-checked',
       'true'
     )
-    expect(screen.getByTestId('model-option-gpt-5.6-sol')).toHaveAttribute(
+    expect(screen.getByTestId('model-option-gpt-6.2-astra')).toHaveAttribute(
       'aria-checked',
       'false'
     )
@@ -108,7 +108,17 @@ describe('ModelEffortPicker', () => {
     expect(screen.queryByTestId('model-effort-submenu-trigger')).toBeNull()
   })
 
+  it('ne propose pas « aucun » pour un modèle qui le refuse (GPT-6.2)', async () => {
+    const user = userEvent.setup()
+    renderPicker({ reasoningEffort: 'medium' })
+    await openMenu(user)
+    await user.click(screen.getByTestId('model-effort-submenu-trigger'))
+    await screen.findByTestId('effort-option-low')
+    expect(screen.queryByTestId('effort-option-none')).toBeNull()
+  })
+
   it('remonte le niveau choisi, et `null` pour « aucun »', async () => {
+    useLLMStore.setState({ model: 'gpt-6-luna' })
     const user = userEvent.setup()
     const { onReasoningEffortChange } = renderPicker({ reasoningEffort: 'high' })
     await openMenu(user)

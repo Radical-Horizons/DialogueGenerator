@@ -5,71 +5,80 @@
  */
 
 /**
- * Noms des modèles OpenAI utilisés dans l'application.
- * 
- * Source de vérité unique pour tous les identifiants de modèles côté frontend.
- * Ces constantes doivent correspondre à ModelNames dans constants.py côté backend.
+ * Noms des modèles LLM utilisés dans l'application.
  *
- * Famille GPT-5.6 : Sol = flagship, Terra = équilibre, Luna = volume/coût.
+ * Miroir de `ModelNames` (constants.py). Le code vise des rôles (`FLAGSHIP`, `STANDARD`,
+ * `MID`, `ECONOMY`) : changer de famille ne touche que ce bloc et la config backend.
+ * Famille courante (doc OpenAI, 2026-11-19) : GPT-6.2 Astra, GPT-6.2 Sol, GPT-6.1 Terra, GPT-6 Luna.
  */
 export const MODEL_NAMES = {
-  /** GPT-5.6 Sol — flagship */
+  GPT_6_2_ASTRA: 'gpt-6.2-astra',
+  GPT_6_2_SOL: 'gpt-6.2-sol',
+  GPT_6_1_TERRA: 'gpt-6.1-terra',
+  GPT_6_LUNA: 'gpt-6-luna',
+  FLAGSHIP: 'gpt-6.2-astra',
+  STANDARD: 'gpt-6.2-sol',
+  MID: 'gpt-6.1-terra',
+  ECONOMY: 'gpt-6-luna',
+  MISTRAL_LARGE_4: 'mistral-large-4',
+  /** Famille précédente, migrée par `LEGACY_MODEL_ID_MAP` */
   GPT_5_6_SOL: 'gpt-5.6-sol',
-  /** GPT-5.6 Terra — équilibre intelligence/coût */
   GPT_5_6_TERRA: 'gpt-5.6-terra',
-  /** GPT-5.6 Luna — volume / coût */
   GPT_5_6_LUNA: 'gpt-5.6-luna',
-  /** Alias API OpenAI gpt-5.6 → Sol */
   GPT_5_6: 'gpt-5.6',
-  /** @deprecated Alias → Sol */
-  GPT_5_4: 'gpt-5.6-sol',
-  /** @deprecated Alias → Terra */
-  GPT_5_2: 'gpt-5.6-terra',
-  /** @deprecated Alias → Sol */
-  GPT_5_2_PRO: 'gpt-5.6-sol',
-  /** @deprecated Alias → Sol */
-  GPT_5_2_THINKING: 'gpt-5.6-sol',
-  /** @deprecated Alias → Luna */
-  GPT_5_MINI: 'gpt-5.6-luna',
-  /** @deprecated Alias → Luna */
-  GPT_5_NANO: 'gpt-5.6-luna',
+  /** @deprecated Alias → rôle courant */
+  GPT_5_4: 'gpt-6.2-astra',
+  /** @deprecated Alias → rôle courant */
+  GPT_5_2: 'gpt-6.2-sol',
+  /** @deprecated Alias → rôle courant */
+  GPT_5_2_PRO: 'gpt-6.2-astra',
+  /** @deprecated Alias → rôle courant */
+  GPT_5_2_THINKING: 'gpt-6.2-astra',
+  /** @deprecated Alias → rôle courant */
+  GPT_5_MINI: 'gpt-6-luna',
+  /** @deprecated Alias → rôle courant */
+  GPT_5_NANO: 'gpt-6-luna',
 } as const
 
 /**
- * Anciens slugs API → famille GPT-5.6 (presets, localStorage, draft).
+ * Anciens slugs → slug courant de même rôle (presets, localStorage, draft).
  * Doit correspondre à ``ModelNames.LEGACY_MODEL_ID_MAP`` dans constants.py.
  */
 export const LEGACY_MODEL_ID_MAP: Readonly<Record<string, string>> = {
-  'gpt-5.4': MODEL_NAMES.GPT_5_6_SOL,
-  'gpt-5.2': MODEL_NAMES.GPT_5_6_TERRA,
-  'gpt-5.2-pro': MODEL_NAMES.GPT_5_6_SOL,
-  'gpt-5.2-thinking': MODEL_NAMES.GPT_5_6_SOL,
-  'gpt-5-mini': MODEL_NAMES.GPT_5_6_LUNA,
-  'gpt-5-nano': MODEL_NAMES.GPT_5_6_LUNA,
-  'gpt-5.6': MODEL_NAMES.GPT_5_6_SOL,
+  'gpt-5.6-sol': MODEL_NAMES.FLAGSHIP,
+  'gpt-5.6': MODEL_NAMES.FLAGSHIP,
+  'gpt-5.6-terra': MODEL_NAMES.STANDARD,
+  'gpt-5.6-luna': MODEL_NAMES.ECONOMY,
+  'gpt-5.4': MODEL_NAMES.FLAGSHIP,
+  'gpt-5.2': MODEL_NAMES.STANDARD,
+  'gpt-5.2-pro': MODEL_NAMES.FLAGSHIP,
+  'gpt-5.2-thinking': MODEL_NAMES.FLAGSHIP,
+  'gpt-5-mini': MODEL_NAMES.ECONOMY,
+  'gpt-5-nano': MODEL_NAMES.ECONOMY,
+  'labs-mistral-small-creative': MODEL_NAMES.STANDARD,
 }
 
-/** Mappe un identifiant legacy vers le slug GPT-5.6 courant (miroir Python). */
+/** Mappe un identifiant legacy vers le slug courant de même rôle (miroir Python). */
 export function normalizeModelId(modelId: string): string {
   return LEGACY_MODEL_ID_MAP[modelId] ?? modelId
 }
 
 /** Modèles avec sélecteur reasoning.effort dans le panneau génération. */
 export const REASONING_EFFORT_MODELS = [
-  MODEL_NAMES.GPT_5_6_SOL,
-  MODEL_NAMES.GPT_5_6_TERRA,
-  MODEL_NAMES.GPT_5_6_LUNA,
+  MODEL_NAMES.GPT_6_2_ASTRA,
+  MODEL_NAMES.GPT_6_2_SOL,
+  MODEL_NAMES.GPT_6_1_TERRA,
+  MODEL_NAMES.GPT_6_LUNA,
 ] as const
 
-/**
- * Modèles frontier : effort none … max (tous les tiers GPT-5.6).
- * Doc : none | low | medium | high | xhigh | max
- */
-export const FULL_REASONING_EFFORT_MODELS = [
-  MODEL_NAMES.GPT_5_6_SOL,
-  MODEL_NAMES.GPT_5_6_TERRA,
-  MODEL_NAMES.GPT_5_6_LUNA,
-] as const
+/** Modèles à raisonnement complet (effort none … max selon le modèle). */
+export const FULL_REASONING_EFFORT_MODELS = REASONING_EFFORT_MODELS
+
+/** `reasoning.effort = none` refusé (fiches GPT-6.2) : le niveau « Aucun » n'est pas proposé. */
+export const MODELS_WITHOUT_REASONING_NONE: readonly string[] = [
+  MODEL_NAMES.GPT_6_2_ASTRA,
+  MODEL_NAMES.GPT_6_2_SOL,
+]
 
 /**
  * Niveaux de raisonnement, du plus rapide au plus coûteux.
@@ -87,6 +96,13 @@ export const REASONING_EFFORT_OPTIONS = [
   { value: 'max', short: 'max', label: 'Maximum', hint: "Qualité d'abord" },
 ] as const
 
+/** Niveaux proposés pour un modèle (sans « Aucun » quand le modèle le refuse). */
+export function reasoningEffortOptionsFor(model: string): ReadonlyArray<(typeof REASONING_EFFORT_OPTIONS)[number]> {
+  return MODELS_WITHOUT_REASONING_NONE.includes(normalizeModelId(model))
+    ? REASONING_EFFORT_OPTIONS.filter((o) => o.value !== 'none')
+    : REASONING_EFFORT_OPTIONS
+}
+
 /** Libellé compact d'un niveau de raisonnement (résumés, pastille). */
 export const REASONING_EFFORT_SHORT_LABELS: Readonly<Record<string, string>> = {
   ...Object.fromEntries(REASONING_EFFORT_OPTIONS.map((o) => [o.value, o.short])),
@@ -97,21 +113,24 @@ export const REASONING_EFFORT_SHORT_LABELS: Readonly<Record<string, string>> = {
 /**
  * Une ligne de description par modèle, pour le sélecteur compact.
  *
- * Reprend les tiers documentés dans `constants.py` (« Sol = flagship,
- * Terra = équilibre, Luna = volume/coût ») — ne pas inventer d'autre promesse
+ * Reprend le positionnement des fiches OpenAI — ne pas inventer d'autre promesse
  * ici : c'est le backend qui fait foi sur ce que vaut un modèle.
  */
 export const MODEL_TIER_DESCRIPTIONS: Readonly<Record<string, string>> = {
-  [MODEL_NAMES.GPT_5_6_SOL]: 'Le plus capable — tâches complexes',
-  [MODEL_NAMES.GPT_5_6_TERRA]: 'Équilibre qualité / coût',
-  [MODEL_NAMES.GPT_5_6_LUNA]: 'Le plus rapide et le moins cher',
+  [MODEL_NAMES.GPT_6_2_ASTRA]: 'Le plus capable — tâches complexes',
+  [MODEL_NAMES.GPT_6_2_SOL]: 'Usage courant — équilibre qualité / coût',
+  [MODEL_NAMES.GPT_6_1_TERRA]: 'Moins cher',
+  [MODEL_NAMES.GPT_6_LUNA]: 'Le plus rapide et le moins cher',
 }
 
 /**
- * Modèle par défaut à utiliser.
- * Doit correspondre à Defaults.MODEL_ID dans constants.py.
+ * Modèle par défaut des générations interactives (graphe, nœud, page Générer).
+ * Doit correspondre à `default_model` de config/llm_config.json. Le modèle économique
+ * (`Defaults.MODEL_ID`) reste celui des générations en volume (expansion d'arbre).
+ * Choix du 2026-11-19 : GPT-6.2 Sol jugé à l'aveugle 7,3/10 sur Voknir, contre 6,8 pour
+ * GPT-6 Luna, pour ≈ 0,04 $ le nœud.
  */
-export const DEFAULT_MODEL = MODEL_NAMES.GPT_5_6_LUNA
+export const DEFAULT_MODEL = MODEL_NAMES.STANDARD
 
 /**
  * Cible tactile minimale (HIG / WCAG 2.5.5) — chrome shell & toolbar graphe (Story 17.2 FR119).

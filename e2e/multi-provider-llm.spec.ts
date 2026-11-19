@@ -42,14 +42,14 @@ test.describe('Multi-Provider LLM Selection', () => {
       () => (document.querySelector('#model-select') as HTMLSelectElement)?.options?.length ?? 0 > 0,
       { timeout: E2E_MS.graphField }
     )
-    const mistral = page.locator('#model-select option[value="labs-mistral-small-creative"]')
+    const mistral = page.locator('#model-select option[value="mistral-large-4"]')
     if ((await mistral.count()) === 0) {
-      test.skip(true, 'Option labs-mistral-small-creative absente')
+      test.skip(true, 'Option mistral-large-4 absente')
     }
-    await page.selectOption('#model-select', 'labs-mistral-small-creative')
+    await page.selectOption('#model-select', 'mistral-large-4')
 
     const selectedValue = await page.inputValue('#model-select')
-    expect(selectedValue).toBe('labs-mistral-small-creative')
+    expect(selectedValue).toBe('mistral-large-4')
   })
 
   test('should persist model selection in localStorage', async ({ page }) => {
@@ -99,11 +99,11 @@ test.describe('Multi-Provider LLM Selection', () => {
       () => (document.querySelector('#model-select') as HTMLSelectElement)?.options?.length ?? 0 > 0,
       { timeout: E2E_MS.graphField }
     )
-    const mistral = page.locator('#model-select option[value="labs-mistral-small-creative"]')
+    const mistral = page.locator('#model-select option[value="mistral-large-4"]')
     if ((await mistral.count()) === 0) {
-      test.skip(true, 'Option labs-mistral-small-creative absente')
+      test.skip(true, 'Option mistral-large-4 absente')
     }
-    await page.selectOption('#model-select', 'labs-mistral-small-creative')
+    await page.selectOption('#model-select', 'mistral-large-4')
     const selectedValue = await page.inputValue('#model-select')
     expect(selectedValue).toBeTruthy()
     const select = page.locator('#model-select')
@@ -112,7 +112,7 @@ test.describe('Multi-Provider LLM Selection', () => {
   })
 
   test.skip('should generate dialogue with Mistral (requires API key)', async ({ page }) => {
-    await page.selectOption('#model-select', 'labs-mistral-small-creative')
+    await page.selectOption('#model-select', 'mistral-large-4')
     await page.fill('#user-instructions', 'Test generation with Mistral')
     await page.click('button:has-text("Générer")')
     await page.waitForSelector('[data-testid="generation-progress"]', { timeout: E2E_MS.short })
@@ -121,7 +121,7 @@ test.describe('Multi-Provider LLM Selection', () => {
   })
 
   test.skip('should handle Mistral API error gracefully (requires invalid key)', async ({ page }) => {
-    await page.selectOption('#model-select', 'labs-mistral-small-creative')
+    await page.selectOption('#model-select', 'mistral-large-4')
     await page.click('button:has-text("Générer")')
     const errorMessage = page.locator('.error-message')
     await expect(errorMessage).toBeVisible({ timeout: E2E_MS.ui })

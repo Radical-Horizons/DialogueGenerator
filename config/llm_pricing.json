@@ -1,5 +1,38 @@
 {
   "models": {
+    "gpt-6.2-astra": {
+      "input_price_per_1M": 8.0,
+      "output_price_per_1M": 40.0,
+      "description": "GPT-6.2 Astra — le plus capable (doc OpenAI 2026-11-17) : structured outputs, effort sans « none », 128k sortie, 1,05M contexte",
+      "cached_input_rate": 0.05,
+      "cache_write_rate": 1.25
+    },
+    "gpt-6.2-sol": {
+      "input_price_per_1M": 2.0,
+      "output_price_per_1M": 10.0,
+      "description": "GPT-6.2 Sol — usage courant (doc OpenAI 2026-11-17) : structured outputs, effort sans « none », 128k sortie, 1,05M contexte",
+      "cached_input_rate": 0.05,
+      "cache_write_rate": 1.25
+    },
+    "gpt-6.1-terra": {
+      "input_price_per_1M": 1.0,
+      "output_price_per_1M": 5.0,
+      "description": "GPT-6.1 Terra — moins cher (doc OpenAI 2026-10-26)",
+      "cached_input_rate": 0.05,
+      "cache_write_rate": 1.25
+    },
+    "gpt-6-luna": {
+      "input_price_per_1M": 0.1,
+      "output_price_per_1M": 0.5,
+      "description": "GPT-6 Luna — volume / coût (doc OpenAI 2026-09-22) : effort none–max, défaut medium",
+      "cached_input_rate": 0.1,
+      "cache_write_rate": 1.25
+    },
+    "mistral-large-4": {
+      "input_price_per_1M": 0.7,
+      "output_price_per_1M": 2.1,
+      "description": "Mistral Large 4 (GA 2026-11-05) — secours de la chaîne de repli, structured outputs"
+    },
     "gpt-5.6-sol": {
       "input_price_per_1M": 5.0,
       "output_price_per_1M": 30.0,

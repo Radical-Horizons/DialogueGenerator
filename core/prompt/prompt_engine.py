@@ -13,6 +13,7 @@ from utils.xml_utils import (
     create_xml_document,
     extract_text_from_element
 )
+from constants import ModelNames
 
 logger = logging.getLogger(__name__)
 
@@ -181,7 +182,7 @@ class PromptEngine:
         # Fallback: prompt minimal si le chargement échoue
         return "Tu es un dialoguiste expert en jeux de rôle narratifs."
 
-    def _count_tokens(self, text: str, model_name: str = "gpt-5.6-terra") -> int:
+    def _count_tokens(self, text: str, model_name: str = ModelNames.STANDARD) -> int:
         """Compte les tokens du prompt final (aligné sur ``TokenEstimationService`` / ``ContextTruncator``)."""
         from services.token_estimation_service import count_prompt_tokens_for_model
 
@@ -338,7 +339,7 @@ class PromptEngine:
         # Créer le document XML complet avec déclaration
         full_prompt = create_xml_document(root)
         
-        count_model = input.llm_model_identifier or "gpt-5.6-terra"
+        count_model = input.llm_model_identifier or ModelNames.STANDARD
         num_tokens = self._count_tokens(full_prompt, count_model)
         prompt_hash = hashlib.sha256(full_prompt.encode('utf-8')).hexdigest()
         

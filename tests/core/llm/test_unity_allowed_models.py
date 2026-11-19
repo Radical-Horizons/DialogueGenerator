@@ -9,8 +9,8 @@ from constants import ModelNames
 from core.llm.unity_allowed_models import get_unity_structured_output_allowed_models
 
 
-def test_unity_allowed_includes_gpt56_and_openrouter(tmp_path: Path) -> None:
-    """Les modèles openrouter du catalogue rejoignent la whitelist GPT-5.6."""
+def test_unity_allowed_includes_current_openai_and_openrouter(tmp_path: Path) -> None:
+    """Les modèles openrouter du catalogue rejoignent la whitelist des modèles OpenAI courants."""
     config_path = tmp_path / "llm_config.json"
     config_path.write_text(
         json.dumps(
@@ -22,7 +22,7 @@ def test_unity_allowed_includes_gpt56_and_openrouter(tmp_path: Path) -> None:
                         "client_type": "openrouter",
                     },
                     {
-                        "api_identifier": "gpt-5.6-terra",
+                        "api_identifier": "gpt-6.2-sol",
                         "client_type": "openai",
                     },
                 ]
@@ -31,9 +31,8 @@ def test_unity_allowed_includes_gpt56_and_openrouter(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     allowed = get_unity_structured_output_allowed_models(config_path)
-    assert ModelNames.GPT_5_6_SOL in allowed
-    assert ModelNames.GPT_5_6_TERRA in allowed
-    assert ModelNames.GPT_5_6_LUNA in allowed
+    for model in ModelNames.CURRENT_OPENAI_MODELS:
+        assert model in allowed
     assert "aion-labs/aion-2.0" in allowed
 
 

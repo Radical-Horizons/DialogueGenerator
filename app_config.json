@@ -1,41 +1,41 @@
 {
     "api_key_env_var": "OPENAI_API_KEY",
     "mistral_api_key_env_var": "MISTRAL_API_KEY",
-    "default_model": "gpt-5.6-terra",
+    "default_model": "gpt-6.2-sol",
     "temperature": 0.7,
     "max_tokens": 2000,
     "available_models": [
         {
-            "api_identifier": "gpt-5.6-sol",
-            "display_name": "GPT-5.6 Sol",
+            "api_identifier": "gpt-6.2-astra",
+            "display_name": "GPT-6.2 Astra",
             "client_type": "openai",
             "parameters": {
                 "default_temperature": 0.7,
-                "max_tokens": 4096
+                "max_tokens": 32000
             }
         },
         {
-            "api_identifier": "gpt-5.6-terra",
-            "display_name": "GPT-5.6 Terra",
+            "api_identifier": "gpt-6.2-sol",
+            "display_name": "GPT-6.2 Sol",
             "client_type": "openai",
             "parameters": {
                 "default_temperature": 0.7,
-                "max_tokens": 4096
+                "max_tokens": 32000
             }
         },
         {
-            "api_identifier": "gpt-5.6-luna",
-            "display_name": "GPT-5.6 Luna",
+            "api_identifier": "gpt-6.1-terra",
+            "display_name": "GPT-6.1 Terra",
             "client_type": "openai",
             "parameters": {
                 "default_temperature": 0.7,
-                "max_tokens": 4096
+                "max_tokens": 32000
             }
         },
         {
-            "api_identifier": "labs-mistral-small-creative",
-            "display_name": "Mistral Small Creative",
-            "client_type": "mistral",
+            "api_identifier": "gpt-6-luna",
+            "display_name": "GPT-6 Luna",
+            "client_type": "openai",
             "parameters": {
                 "default_temperature": 0.7,
                 "max_tokens": 32000

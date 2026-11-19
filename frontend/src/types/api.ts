@@ -442,7 +442,7 @@ export interface UnityDialoguesPathResponse {
 
 // Unity Dialogue
 /**
- * Effort de raisonnement GPT-5.6 — miroir du Literal backend défini dans
+ * Effort de raisonnement (GPT-5.6 / GPT-6.x) — miroir du Literal backend défini dans
  * `api/schemas/dialogue.py`. Inclut `max`, que le sélecteur de GenerationPanel propose.
  */
 export type ReasoningEffort = 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | 'max'

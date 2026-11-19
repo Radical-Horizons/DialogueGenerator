@@ -17,7 +17,7 @@ import { useLLMStore } from '../../store/llmStore'
 import {
   MODEL_TIER_DESCRIPTIONS,
   REASONING_EFFORT_MODELS,
-  REASONING_EFFORT_OPTIONS,
+  reasoningEffortOptionsFor,
   REASONING_EFFORT_SHORT_LABELS,
 } from '../../constants'
 import {
@@ -369,7 +369,7 @@ export function ModelEffortPicker({
           <div
             style={{ height: 1, backgroundColor: redesignHairline.standard, margin: '5px 0' }}
           />
-          {REASONING_EFFORT_OPTIONS.map((option) => {
+          {reasoningEffortOptionsFor(model).map((option) => {
             const selected = option.value === currentEffort
             return (
               <button

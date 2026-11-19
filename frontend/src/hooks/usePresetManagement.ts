@@ -152,7 +152,7 @@ export interface UsePresetManagementOptions {
   llmModel?: string
   /** Setter pour llmModel - optionnel */
   setLlmModel?: (value: string) => void
-  /** Température snapshotée (non envoyée à GPT-5.6). */
+  /** Température snapshotée (non envoyée aux modèles GPT actuels). */
   temperature?: number | null
   setTemperature?: (value: number | null) => void
 }

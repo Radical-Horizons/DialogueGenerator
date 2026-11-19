@@ -486,7 +486,7 @@ class TemplateABTestingService:
                 context_selections=context,
                 max_depth=max_depth,
                 max_choices=max_choices,
-                llm_model_identifier=ModelNames.GPT_5_6_LUNA,
+                llm_model_identifier=ModelNames.ECONOMY,
                 title=f"A/B {template_name} #{index + 1}",
                 scene_type=config.sceneType or None,
                 include_narrative_guides=True,

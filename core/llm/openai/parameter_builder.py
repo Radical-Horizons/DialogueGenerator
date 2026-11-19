@@ -150,6 +150,15 @@ class OpenAIParameterBuilder:
                     f"reasoning.effort='minimal' (legacy) pour {model_name} → 'low'."
                 )
                 reasoning_config["effort"] = "low"
+            elif (
+                reasoning_effort == "none"
+                and ModelNames.normalize_model_id(model_name)
+                in ModelNames.MODELS_WITHOUT_REASONING_NONE
+            ):
+                logger.info(
+                    f"reasoning.effort='none' refusé par {model_name} → 'low' (guide OpenAI)."
+                )
+                reasoning_config["effort"] = "low"
             else:
                 reasoning_config["effort"] = reasoning_effort
             
@@ -218,7 +227,7 @@ class OpenAIParameterBuilder:
         Returns:
             True si temperature doit être incluse, False sinon.
         """
-        if ModelNames.is_gpt_5_6_family(model_name):
+        if ModelNames.is_reasoning_family(model_name):
             logger.debug(
                 f"Temperature omise pour {model_name} (GPT-5.6 : paramètre non supporté). "
                 f"Utiliser reasoning.effort / text.verbosity."
