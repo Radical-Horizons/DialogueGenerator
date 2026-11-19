@@ -141,18 +141,39 @@ class OpenAIResponseParser:
         variant_index: int = 1,
     ) -> Tuple[Optional[str], Optional[str], bool]:
         """Extrait le texte simple depuis response.output.
-        
+
+        La Responses API rend le texte libre dans des items ``type == "message"`` dont les
+        parties ``type == "output_text"`` portent ``.text`` (ce que joint aussi la propriété
+        ``Response.output_text`` du SDK). Le type ``"text"`` reste lu pour compatibilité.
+
         Args:
             output_items: Liste des items dans response.output.
             variant_index: Index de la variante (pour logging).
-            
+
         Returns:
             Tuple (text_output, error_message, success):
             - text_output: Texte extrait si succès, None sinon
             - error_message: Message d'erreur si échec, None sinon
             - success: True si succès, False sinon
         """
-        # Chercher l'item avec type="text"
+        message_parts: List[str] = []
+        for item in output_items:
+            if getattr(item, "type", None) != "message":
+                continue
+            for part in getattr(item, "content", None) or []:
+                if getattr(part, "type", None) == "output_text":
+                    text = getattr(part, "text", None)
+                    if text:
+                        message_parts.append(str(text))
+        message_text = "".join(message_parts).strip()
+        if message_text:
+            logger.info(
+                f"Variante {variant_index} générée avec succès "
+                f"(texte simple, Responses API)."
+            )
+            return message_text, None, True
+
+        # Compatibilité : item type="text"
         for item in output_items:
             if getattr(item, "type", None) == "text":
                 text_output = getattr(item, "text", None) or getattr(item, "content", None)

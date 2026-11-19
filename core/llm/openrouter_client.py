@@ -13,6 +13,7 @@ from openai import APIError, AsyncOpenAI
 from pydantic import BaseModel, ValidationError
 
 from core.llm.llm_client import ILLMClient
+from core.llm.tracking_format import STRUCTURED_OUTPUT_INSTRUCTION_SUFFIX
 
 logger = logging.getLogger(__name__)
 
@@ -119,9 +120,7 @@ class OpenRouterClient(ILLMClient):
             else self.system_prompt_template
         )
         if response_model:
-            system_message_content += (
-                " Tu DOIS utiliser la fonction 'generate_interaction' pour formater ta réponse."
-            )
+            system_message_content += STRUCTURED_OUTPUT_INSTRUCTION_SUFFIX
 
         messages: List[Dict[str, Any]] = [{"role": "system", "content": system_message_content}]
         if previous_dialogue_context:

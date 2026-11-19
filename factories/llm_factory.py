@@ -238,3 +238,45 @@ class LLMClientFactory:
             usage_service=usage_service,
             request_id=request_id,
         ) 
+
+def create_llm_client_with_configured_fallback(
+    model_identifier: str,
+    config_service: Any,
+    usage_service: Optional[Any],
+    request_id: Optional[str],
+    endpoint: Optional[str] = None,
+) -> ILLMClient:
+    """Client LLM avec la chaîne de repli configurée quand le modèle en est la tête.
+
+    Args:
+        model_identifier: Identifiant du modèle principal demandé.
+        config_service: Configuration LLM (``get_llm_fallback_chain``, ``get_llm_config``,
+            ``get_available_llm_models``).
+        usage_service: Suivi d'usage partagé (coût, budget, provenance).
+        request_id: ID de la requête pour le tracking.
+        endpoint: Libellé d'usage (ex. ``ai_conversation``).
+
+    Returns:
+        ``FallbackLLMClient`` si ``fallback_chain`` commence par ce modèle, sinon un client simple.
+    """
+    fallback_chain = config_service.get_llm_fallback_chain()
+    if not isinstance(fallback_chain, list):
+        fallback_chain = []
+    if len(fallback_chain) >= 2 and fallback_chain[0] == model_identifier:
+        return LLMClientFactory.create_client_with_fallback(
+            primary_model_id=model_identifier,
+            fallback_model_ids=fallback_chain[1:],
+            config=config_service.get_llm_config(),
+            available_models=config_service.get_available_llm_models(),
+            usage_service=usage_service,
+            request_id=request_id,
+            endpoint=endpoint,
+        )
+    return LLMClientFactory.create_client(
+        model_id=model_identifier,
+        config=config_service.get_llm_config(),
+        available_models=config_service.get_available_llm_models(),
+        usage_service=usage_service,
+        request_id=request_id,
+        endpoint=endpoint,
+    )

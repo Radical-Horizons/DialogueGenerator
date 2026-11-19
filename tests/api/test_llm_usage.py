@@ -464,6 +464,7 @@ def test_get_context_relevance_and_history(client, tmp_path):
     t1 = t0 + timedelta(seconds=2)
     r1 = LLMUsageRecord(
         request_id="hr1",
+        call_id="hc1",
         timestamp=t0,
         model_name="m",
         prompt_tokens=1,
@@ -481,6 +482,7 @@ def test_get_context_relevance_and_history(client, tmp_path):
     )
     r2 = LLMUsageRecord(
         request_id="hr2",
+        call_id="hc2",
         timestamp=t1,
         model_name="m",
         prompt_tokens=1,
@@ -499,8 +501,8 @@ def test_get_context_relevance_and_history(client, tmp_path):
     repository.save(r1)
     repository.save(r2)
     usage = LLMUsageService(repository=repository, pricing_service=LLMPricingService())
-    usage.compute_and_persist_context_relevance("hr1")
-    usage.compute_and_persist_context_relevance("hr2")
+    usage.compute_and_persist_context_relevance("hc1")
+    usage.compute_and_persist_context_relevance("hc2")
     app.dependency_overrides[get_llm_usage_service] = lambda: usage
     try:
         detail = client.get(
@@ -554,6 +556,7 @@ def test_get_context_section_usage_200(client, tmp_path):
     response_json = json.dumps({"line": "TokenUsageAPI speaks", "choices": []})
     record = LLMUsageRecord(
         request_id="req_cu1",
+        call_id="call_cu1",
         timestamp=datetime.now(UTC),
         model_name="m",
         prompt_tokens=1,
@@ -571,8 +574,8 @@ def test_get_context_section_usage_200(client, tmp_path):
     )
     repository.save(record)
     usage = LLMUsageService(repository=repository, pricing_service=LLMPricingService())
-    usage.compute_and_persist_context_relevance("req_cu1")
-    updated = repository.get_by_request_id("req_cu1")
+    usage.compute_and_persist_context_relevance("call_cu1")
+    updated = repository.get_by_call_id("call_cu1")
     assert updated is not None
     assert updated.context_section_usage is not None
 

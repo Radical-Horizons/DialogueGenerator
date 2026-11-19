@@ -16,6 +16,7 @@ from fastapi import APIRouter, Depends, status
 from api.dependencies import (
     get_config_service,
     get_context_builder,
+    get_document_persistence_service,
     get_graph_node_orchestrator,
     get_llm_usage_service,
     get_request_id,
@@ -26,7 +27,8 @@ from api.exceptions import (
     NotFoundException,
     ValidationException,
 )
-from api.routers.graph_cost import fingerprint_for_selections_safe, try_compute_context_relevance
+from api.routers.auth import get_current_user
+from api.routers.graph_cost import fingerprint_for_selections_safe
 from api.schemas.graph import (
     AcceptNodeRequest,
     NodePromptResponse,
@@ -38,9 +40,15 @@ from api.schemas.graph import (
 from core.context.context_builder import ContextBuilder
 from services.configuration_service import ConfigurationService
 from services.dialogue_path_context import build_enriched_generation_prompt
+from services.document_persistence_service import DocumentPersistenceService
 from services.graph_node_orchestrator import GraphNodeOrchestrator
+from services.llm_call_provenance import collect_node_provenance
 from services.llm_usage_service import LLMUsageService
-from api.routers.graph_router_helpers import create_llm_client_for_router, resolve_and_enrich_graph_context
+from api.routers.graph_router_helpers import (
+    annotate_generated_nodes,
+    create_llm_client_for_router,
+    resolve_and_enrich_graph_context,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -271,6 +279,10 @@ async def regenerate_node(
     orchestrator: Annotated[GraphNodeOrchestrator, Depends(get_graph_node_orchestrator)],
     usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
     context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    persistence_service: Annotated[
+        DocumentPersistenceService, Depends(get_document_persistence_service)
+    ],
     request_id: Annotated[str, Depends(get_request_id)] = None,
 ) -> RegenerateNodeResponse:
     """Régénère un nœud avec de nouvelles instructions (Story 1.10)."""
@@ -291,21 +303,22 @@ async def regenerate_node(
             context_builder=context_builder,
         )
 
-        result = await orchestrator.generate(
-            llm_client=llm_client,
-            parent_node_id=request_data.parent_node_id,
-            parent_node_content=request_data.parent_node_content,
-            user_instructions=request_data.new_instructions,
-            context_selections=enriched_context,
-            system_prompt_override=request_data.system_prompt_override,
-            max_choices=None,
-            target_choice_index=request_data.via_choice_index,
-            generate_all_choices=False,
-            dialogue_nodes=request_data.dialogue_nodes,
-            player_character_id=dramatis.player_character_id,
-            npc_speaker_id=dramatis.npc_speaker_id,
-            llm_model_identifier=request_data.llm_model_identifier,
-        )
+        with collect_node_provenance() as provenance:
+            result = await orchestrator.generate(
+                llm_client=llm_client,
+                parent_node_id=request_data.parent_node_id,
+                parent_node_content=request_data.parent_node_content,
+                user_instructions=request_data.new_instructions,
+                context_selections=enriched_context,
+                system_prompt_override=request_data.system_prompt_override,
+                max_choices=None,
+                target_choice_index=request_data.via_choice_index,
+                generate_all_choices=False,
+                dialogue_nodes=request_data.dialogue_nodes,
+                player_character_id=dramatis.player_character_id,
+                npc_speaker_id=dramatis.npc_speaker_id,
+                llm_model_identifier=request_data.llm_model_identifier,
+            )
 
         if not result.nodes:
             raise InternalServerException(
@@ -314,6 +327,7 @@ async def regenerate_node(
             )
 
         new_node = dict(result.nodes[0])
+        generated_node_id = str(new_node.get("id") or "")
         new_node["id"] = node_id
 
         suggested_connections = [
@@ -334,14 +348,19 @@ async def regenerate_node(
             request_data.parent_node_id,
             request_id,
         )
-        usage_service.annotate_usage(
-            request_id,
+        await asyncio.to_thread(
+            annotate_generated_nodes,
+            usage_service,
+            persistence_service,
+            current_user,
+            provenance,
+            [result.nodes[0]],
             request_data.dialogue_id,
-            str(node_id),
             template_id=request_data.template_id,
             template_name=request_data.template_name,
+            renamed_ids={generated_node_id: str(node_id)},
+            compute_relevance=True,
         )
-        try_compute_context_relevance(usage_service, request_id)
         gdd_fp = await asyncio.to_thread(
             fingerprint_for_selections_safe,
             context_builder,

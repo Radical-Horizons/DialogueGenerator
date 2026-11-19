@@ -35,6 +35,7 @@ from services.context_rule_service import ContextRuleService
 from services.context_dropping_rules_service import ContextDroppingRulesService
 from services.repositories.sqlite.bootstrap import resolve_database_path
 from services.repositories.sqlite import (
+    AIConversationsRepository,
     AppSettingsRepository,
     AuditLogsRepository,
     CollectionsRepository,
@@ -50,6 +51,12 @@ from services.repositories.sqlite.template_suggestion_usage_repository import (
 )
 from services.audit_log_service import AuditLogService
 from services.collection_service import CollectionService
+from services.ai_conversation_service import (
+    AIConversationService,
+    DialogueNodeSubjectResolver,
+    build_default_llm_client_factory,
+)
+from services.cost_governance_service import CostGovernanceService
 from services.dialogue_index_service import DialogueIndexService
 from services.dialogue_metadata_service import DialogueMetadataService
 from services.batch_validation_service import BatchValidationService
@@ -124,6 +131,8 @@ class ServiceContainer:
         self._dialogue_shares_repository: Optional[DialogueSharesRepository] = None
         self._collections_repository: Optional[CollectionsRepository] = None
         self._collection_service: Optional[CollectionService] = None
+        self._ai_conversations_repository: Optional[AIConversationsRepository] = None
+        self._ai_conversation_service: Optional[AIConversationService] = None
         self._dialogues_search_repository: Optional[DialoguesSearchRepository] = None
         self._dialogue_index_service: Optional[DialogueIndexService] = None
         self._dialogue_metadata_service: Optional[DialogueMetadataService] = None
@@ -249,6 +258,46 @@ class ServiceContainer:
                 )
                 logger.info("CollectionService initialisé dans le container.")
             return self._collection_service
+
+    def get_ai_conversations_repository(self) -> AIConversationsRepository:
+        """Retourne le repository des conversations IA."""
+        with self._database_lock:
+            if self._ai_conversations_repository is None:
+                self._ai_conversations_repository = AIConversationsRepository(
+                    self.get_database_connection()
+                )
+                logger.info("AIConversationsRepository initialisé dans le container.")
+            return self._ai_conversations_repository
+
+    def get_ai_conversation_service(self) -> AIConversationService:
+        """Retourne le service des conversations IA (sujet ``dialogue_node`` enregistré)."""
+        with self._database_lock:
+            if self._ai_conversation_service is None:
+                usage_service = self.get_llm_usage_service()
+                config_service = self.get_config_service()
+                cost_governance = getattr(usage_service, "cost_governance_service", None)
+                if not isinstance(cost_governance, CostGovernanceService):
+                    from api.dependencies import get_cost_budget_repository
+
+                    cost_governance = CostGovernanceService(get_cost_budget_repository())
+                self._ai_conversation_service = AIConversationService(
+                    repository=self.get_ai_conversations_repository(),
+                    usage_service=usage_service,
+                    cost_governance_service=cost_governance,
+                    config_service=config_service,
+                    llm_client_factory=build_default_llm_client_factory(
+                        config_service, usage_service
+                    ),
+                    resolvers=[
+                        DialogueNodeSubjectResolver(
+                            self.get_document_persistence_service(),
+                            usage_service,
+                            config_service,
+                        )
+                    ],
+                )
+                logger.info("AIConversationService initialisé dans le container.")
+            return self._ai_conversation_service
 
     def get_dialogues_search_repository(self) -> DialoguesSearchRepository:
         """Retourne le repository FTS5 de recherche dialogues."""
@@ -847,6 +896,8 @@ class ServiceContainer:
             self._template_shares_repository = None
             self._collections_repository = None
             self._collection_service = None
+            self._ai_conversations_repository = None
+            self._ai_conversation_service = None
             self._dialogues_search_repository = None
             self._dialogue_index_service = None
             self._dialogue_metadata_service = None

@@ -139,6 +139,7 @@ class OpenAIParameterBuilder:
             
         Returns:
             Dictionnaire avec la configuration reasoning, ou vide si pas de reasoning.
+            Famille GPT-5.6 / GPT-6.x sans effort ni summary : ``{"summary": "auto"}``.
         """
         reasoning_config = {}
         
@@ -191,7 +192,12 @@ class OpenAIParameterBuilder:
                     f"Utilisation de 'auto' à la place (les résumés 'detailed' nécessitent une organisation OpenAI vérifiée)."
                 )
                 reasoning_config["summary"] = "auto"
-        
+        elif ModelNames.is_reasoning_family(model_name):
+            # Sans effort ni summary : on demande quand même le résumé lisible du raisonnement
+            # (seule trace de réflexion qu'une conversation sur le nœud pourra rejouer).
+            # L'effort reste omis : défaut de l'API inchangé.
+            reasoning_config["summary"] = "auto"
+
         if reasoning_config:
             logger.info(
                 f"Utilisation de reasoning pour {model_name} (Responses API): "

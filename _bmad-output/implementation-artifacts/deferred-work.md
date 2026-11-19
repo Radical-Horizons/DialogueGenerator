@@ -328,3 +328,9 @@
 - source_spec: `_bmad-output/planning-artifacts/epics/epic-06.md`
   summary: Retirer les schémas Pydantic orphelins du marketplace et faire remonter les erreurs des routeurs templates/profils via `api/exceptions.py`.
   evidence: Neuf classes de `api/schemas/template.py` (partage nominatif, marketplace) n'ont plus d'appelant ; `VALID_SOURCES` accepte encore `"marketplace"`. Les deux routeurs lèvent des `HTTPException` brutes, donc leurs 500 ne remontent pas à Sentry et perdent leur code structuré — ce qui a retardé la détection de deux bloquants.
+- source_spec: `_bmad-output/implementation-artifacts/spec-ai-conversation-noeud-dialogue.md`
+  summary: Relier à leur dialogue les nœuds générés avant que celui-ci ait un nom de fichier (START de « Générer », brouillon non sauvegardé), pour qu'on puisse discuter avec l'IA qui les a produits.
+  evidence: Le front n'envoie `dialogue_id` que si `dialogueMetadata.filename` existe (`frontend/src/store/slices/generationSlice.ts:248`) et « Générer » crée START avant que le dialogue existe : aucun record n'est annoté, la conversation renvoie 404 `generation_trace_not_found`. À traiter avec le front (renvoyer les `call_id` par nœud et les rattacher à la première sauvegarde).
+- source_spec: `_bmad-output/implementation-artifacts/spec-ai-conversation-noeud-dialogue.md`
+  summary: Sous `DISABLE_AUTH=true`, l'admin factice `{"id": "1"}` n'existe pas dans `users` : créer une conversation IA (comme une collection) lève une `IntegrityError` de clé étrangère, donc un 500.
+  evidence: `ai_conversations.owner_id` et `collections.owner_id` référencent `users(id)` avec `foreign_keys=ON` ; `get_current_user` renvoie l'id `"1"` sans jeton quand l'auth est désactivée (`api/routers/auth.py:143-149`). Dev uniquement, défaut applicatif `DISABLE_AUTH=false`.

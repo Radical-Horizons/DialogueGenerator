@@ -11,6 +11,7 @@ from models.dialogue_structure.unity_dialogue_node import (
 )
 from core.llm.llm_client import ILLMClient
 from services.dialogue_path_context import DialoguePathStep, format_path_history_lines
+from services.llm_call_provenance import capture_llm_calls, link_nodes_to_calls
 from services.document_choice_id_service import stable_choice_id
 from services.generated_markup_cleanup import tidy_choice_action_markup
 from services.unity_export_normalizer import normalize_unity_export_document
@@ -399,18 +400,21 @@ Instructions pour la suite:
 {instructions}
 """
             prompt = render_prompt(enriched_prompt, None) if render_prompt else enriched_prompt
-            response = await self.generate_dialogue_node(
-                llm_client=llm_client,
-                prompt=prompt,
-                system_prompt_override=system_prompt_override,
-                max_choices=None,
-            )
+            # Capture posée dans la tâche de gather : chaque issue retrouve son propre appel.
+            with capture_llm_calls() as llm_calls:
+                response = await self.generate_dialogue_node(
+                    llm_client=llm_client,
+                    prompt=prompt,
+                    system_prompt_override=system_prompt_override,
+                    max_choices=None,
+                )
             node_id = generate_stable_node_id()
             enriched = self.enrich_with_ids(
                 content=response,
                 start_id=node_id,
                 display_name_override=result_context["label"],
             )
+            link_nodes_to_calls([node["id"] for node in enriched or []], llm_calls)
             return node_id, enriched or []
 
         results = await asyncio.gather(

@@ -1,14 +1,32 @@
 """Service de tracking de l'utilisation des LLM."""
 import logging
 import time
+from dataclasses import dataclass
 from datetime import date, datetime, UTC
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from uuid import uuid4
 
 from models.llm_usage import LLMUsageRecord
+from services.llm_call_provenance import report_llm_call
 from services.llm_pricing_service import LLMPricingService
 from services.repositories.llm_usage_repository import ILLMUsageRepository
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class NodeGenerationLookup:
+    """Record de génération d'un nœud, et fiabilité de son lien au nœud."""
+
+    record: Optional[LLMUsageRecord]
+    legacy_ambiguous: bool = False
+    """Record antérieur à ``call_id`` dont la requête a fait d'autres appels : l'ancien
+    ``update()`` a pu y recopier l'appel d'un nœud voisin, le lien n'est pas fiable."""
+
+
+def _aware(moment: datetime) -> datetime:
+    """Rend comparables les horodatages anciens (naïfs) et récents (UTC)."""
+    return moment if moment.tzinfo is not None else moment.replace(tzinfo=UTC)
 
 
 class LLMUsageService:
@@ -57,8 +75,12 @@ class LLMUsageService:
         fallback_reason: Optional[str] = None,
         cached_tokens: int = 0,
         cache_write_tokens: int = 0,
-    ) -> None:
-        """Enregistre un appel LLM.
+    ) -> Optional[str]:
+        """Enregistre un appel LLM sous un ``call_id`` unique.
+
+        Un appel réussi est signalé à la capture de provenance en cours
+        (:func:`services.llm_call_provenance.report_llm_call`), pour que le nœud qu'il
+        produit puisse être annoté sur ce record précis.
         
         Args:
             request_id: ID de la requête API.
@@ -79,6 +101,9 @@ class LLMUsageService:
             fallback_reason: Raison de l'échec du provider initial (optionnel, Story 1.16).
             cached_tokens: Part de ``prompt_tokens`` relue depuis le cache du fournisseur.
             cache_write_tokens: Part de ``prompt_tokens`` écrite dans ce cache.
+
+        Returns:
+            Le ``call_id`` du record persisté, ou None si l'enregistrement a échoué.
         """
         try:
             from api.middleware.billable_user_context import get_billable_user_id
@@ -96,9 +121,10 @@ class LLMUsageService:
             else:
                 estimated_cost = 0.0
             
-            # Créer l'enregistrement
+            call_id = uuid4().hex
             record = LLMUsageRecord(
                 request_id=request_id,
+                call_id=call_id,
                 timestamp=datetime.now(UTC),
                 model_name=model_name,
                 prompt_tokens=prompt_tokens,
@@ -123,6 +149,8 @@ class LLMUsageService:
             
             # Sauvegarder
             self.repository.save(record)
+            if success:
+                report_llm_call(call_id)
             
             # Mettre à jour le budget si le service de cost governance est disponible
             if self.cost_governance_service and success:
@@ -141,9 +169,11 @@ class LLMUsageService:
                 f"{total_tokens} tokens, ${estimated_cost:.6f}, "
                 f"{duration_ms}ms, success={success}"
             )
+            return call_id
         except Exception as e:
             # Ne pas faire échouer l'appel LLM si le tracking échoue
             logger.error(f"Erreur lors de l'enregistrement de l'usage LLM: {e}", exc_info=True)
+            return None
     
     def get_usage_history(
         self,
@@ -186,48 +216,114 @@ class LLMUsageService:
         
         return records
     
-    def annotate_usage(
+    def annotate_call(
         self,
-        request_id: str,
+        call_id: str,
         dialogue_id: str,
         node_id: str,
         template_id: Optional[str] = None,
         template_name: Optional[str] = None,
     ) -> None:
-        """Annote post-hoc un enregistrement existant avec le contexte dialogue/nœud.
-        
-        Retrouve l'enregistrement par request_id et met à jour dialogue_id/node_id.
-        Si le record n'est pas trouvé, log un warning sans lever d'exception.
-        
+        """Annote post-hoc le record d'un appel LLM avec le dialogue et le nœud qu'il a produit.
+
+        Le record est désigné par son ``call_id`` : les autres appels de la même requête
+        restent intacts. Record introuvable : warning, sans lever d'exception.
+
         Args:
-            request_id: ID de la requête LLM déjà trackée.
+            call_id: Identifiant de l'appel LLM déjà tracké.
             dialogue_id: ID du dialogue à associer.
             node_id: ID du nœud généré à associer.
             template_id: Template appliqué (UUID ou slug), optionnel.
             template_name: Nom snapshoté du template, optionnel.
         """
+        self.annotate_calls(
+            [(call_id, node_id)],
+            dialogue_id,
+            template_id=template_id,
+            template_name=template_name,
+        )
+
+    def annotate_calls(
+        self,
+        annotations: Sequence[Tuple[str, str]],
+        dialogue_id: str,
+        template_id: Optional[str] = None,
+        template_name: Optional[str] = None,
+    ) -> List[str]:
+        """Annote plusieurs appels en lot : un parcours de lecture, une écriture par fichier du jour.
+
+        Args:
+            annotations: Paires ``(call_id, node_id)``.
+            dialogue_id: ID du dialogue à associer.
+            template_id: Template appliqué (UUID ou slug), optionnel.
+            template_name: Nom snapshoté du template, optionnel.
+
+        Returns:
+            Les ``call_id`` retrouvés et soumis à l'écriture, dans l'ordre reçu.
+        """
+        if not annotations:
+            return []
         try:
-            record = self.repository.get_by_request_id(request_id)
-            if record is None:
-                logger.warning(
-                    f"annotate_usage: record introuvable pour request_id='{request_id}', no-op."
-                )
-                return
-            record.dialogue_id = dialogue_id
-            record.node_id = node_id
-            if template_id is not None:
-                record.template_id = template_id
-                record.template_name = template_name
-            self.repository.update(record)
+            records = self.repository.get_by_call_ids([call_id for call_id, _ in annotations])
+            annotated: List[str] = []
+            to_update: List[LLMUsageRecord] = []
+            for call_id, node_id in annotations:
+                record = records.get(call_id)
+                if record is None:
+                    logger.warning(
+                        f"annotate_calls: record introuvable pour call_id='{call_id}', no-op."
+                    )
+                    continue
+                record.dialogue_id = dialogue_id
+                record.node_id = node_id
+                if template_id is not None:
+                    record.template_id = template_id
+                    record.template_name = template_name
+                to_update.append(record)
+                annotated.append(call_id)
+            self.repository.update_many(to_update)
             logger.debug(
-                f"annotate_usage: request_id='{request_id}' annoté → "
-                f"dialogue='{dialogue_id}', node='{node_id}', template='{template_id}'"
+                "annotate_calls: %d appel(s) annoté(s) → dialogue='%s', template='%s'",
+                len(annotated),
+                dialogue_id,
+                template_id,
             )
+            return annotated
         except Exception as e:
             logger.error(
-                f"annotate_usage: erreur pour request_id='{request_id}': {e}",
+                f"annotate_calls: erreur pour dialogue='{dialogue_id}': {e}",
                 exc_info=True,
             )
+            return []
+
+    def find_node_generation_record(
+        self,
+        dialogue_ids: Iterable[str],
+        node_id: str,
+    ) -> NodeGenerationLookup:
+        """Record de génération le plus récent d'un nœud, en un seul parcours de l'historique.
+
+        Args:
+            dialogue_ids: Formes acceptées de l'identifiant du dialogue (``D`` et ``D.json``).
+            node_id: Nœud généré.
+
+        Returns:
+            Le record retenu (ou None) et l'indication d'un lien legacy peu fiable.
+        """
+        accepted = set(dialogue_ids)
+        records = self.repository.get_all()
+        candidates = [
+            r
+            for r in records
+            if r.dialogue_id in accepted and r.node_id == node_id and not r.deleted
+        ]
+        if not candidates:
+            return NodeGenerationLookup(record=None)
+        chosen = max(candidates, key=lambda r: _aware(r.timestamp))
+        legacy_ambiguous = chosen.call_id is None and any(
+            r is not chosen and r.request_id == chosen.request_id for r in records
+        )
+        return NodeGenerationLookup(record=chosen, legacy_ambiguous=legacy_ambiguous)
 
     _USD_TO_EUR_RATE: float = 0.92
 
@@ -437,38 +533,60 @@ class LLMUsageService:
         """Retourne l’enregistrement d’usage LLM pour un couple dialogue / nœud."""
         return self.repository.get_by_dialogue_and_node(dialogue_id, node_id)
 
-    def compute_and_persist_context_relevance(self, request_id: str) -> None:
+    def get_record_by_call_id(self, call_id: str) -> Optional[LLMUsageRecord]:
+        """Retourne le record d'un appel LLM précis, ou None.
+
+        Args:
+            call_id: Identifiant unique de l'appel.
+        """
+        return self.repository.get_by_call_id(call_id)
+
+    def compute_and_persist_context_relevance(self, call_id: str) -> None:
         """Calcule pertinence + usage par section et met à jour l’enregistrement (3.6 / 3.7).
 
         Ne lève pas d’exception vers l’appelant : les erreurs sont loguées uniquement.
 
         Args:
-            request_id: Identifiant de la requête LLM déjà persistée.
+            call_id: Identifiant de l'appel LLM déjà persisté.
+        """
+        self.compute_and_persist_context_relevance_many([call_id])
+
+    def compute_and_persist_context_relevance_many(self, call_ids: Sequence[str]) -> None:
+        """Pertinence + usage par section pour plusieurs appels, persistés en lot.
+
+        Ne lève pas d’exception vers l’appelant : les erreurs sont loguées uniquement.
+
+        Args:
+            call_ids: Identifiants des appels LLM déjà persistés.
         """
         from services.context_relevance_scoring import compute_context_relevance_result
         from services.context_section_usage_scoring import (
             compute_context_section_usage_result,
         )
 
+        if not call_ids:
+            return
         try:
-            record = self.repository.get_by_request_id(request_id)
-            if record is None or not record.success:
-                return
-            if not record.prompt or not record.response:
-                return
-            relevance = compute_context_relevance_result(
-                record.prompt, record.response, request_id=request_id
-            )
-            section_usage = compute_context_section_usage_result(
-                record.prompt, record.response, request_id=request_id
-            )
-            record.context_relevance = relevance
-            record.context_section_usage = section_usage
-            self.repository.update(record)
+            records = self.repository.get_by_call_ids(call_ids)
+            to_update: List[LLMUsageRecord] = []
+            for call_id in call_ids:
+                record = records.get(call_id)
+                if record is None or not record.success:
+                    continue
+                if not record.prompt or not record.response:
+                    continue
+                record.context_relevance = compute_context_relevance_result(
+                    record.prompt, record.response, request_id=record.request_id
+                )
+                record.context_section_usage = compute_context_section_usage_result(
+                    record.prompt, record.response, request_id=record.request_id
+                )
+                to_update.append(record)
+            self.repository.update_many(to_update)
         except Exception as e:
             logger.error(
-                "compute_and_persist_context_relevance: échec pour request_id=%s: %s",
-                request_id,
+                "compute_and_persist_context_relevance: échec pour call_ids=%s: %s",
+                list(call_ids),
                 e,
                 exc_info=True,
             )

@@ -480,6 +480,89 @@ Tous les routes ci-dessous exigent un **JWT** (`Authorization: Bearer …`), com
 
 ---
 
+## Conversations IA (`/api/v1/ai-conversations`)
+
+Discuter avec l'IA qui a produit un nœud (« pourquoi ce choix ? »). Back-end générique à
+**sujets enfichables** ; premier sujet : `dialogue_node`. Étude et architecture :
+`docs/architecture/conversations-ia.md` ; logique : `services/ai_conversation_service.py` ;
+schémas : `api/schemas/ai_conversations.py`. JWT requis.
+
+**Règles** : une conversation est **privée** à son auteur (celle d'un autre ⇒ `404`).
+L'accès au dialogue (`DocumentPersistenceService.require_access`) est revérifié à la
+création, à chaque lecture et à chaque message. Invité ⇒ `403` sur toute écriture.
+À la création, la génération est **copiée** (instantané) : une régénération du nœud ou la
+rotation des journaux d'usage ne change pas une conversation existante. Le modèle reçoit
+les instructions d'origine (sans la consigne d'appel de fonction), les messages d'origine,
+sa sortie exacte (message assistant), une note de l'application — avec, s'il est lisible
+dans le dialogue, le nœud tel qu'il est aujourd'hui (l'auteur a pu le retoucher) — puis
+l'historique ; la question est le prompt du tour. Plafond : **40 messages** par conversation.
+Les tours d'une même conversation sont joués l'un après l'autre (deux questions simultanées :
+la seconde attend la première et la voit dans son contexte).
+
+| Méthode | Chemin | Rôle |
+|--------|--------|------|
+| `POST` | `/ai-conversations` | Crée une conversation → `201` + `AIConversationResponse` |
+| `GET` | `/ai-conversations` | Liste les conversations de l'utilisateur (filtres `subject_kind`, `dialogue_id`, `node_id` ; `node_id` exige `dialogue_id`) → `AIConversationSummaryResponse[]` |
+| `GET` | `/ai-conversations/{id}` | Détail : instantané de génération + messages |
+| `POST` | `/ai-conversations/{id}/messages` | Pose une question → `201` + `{user_message, assistant_message}` |
+| `DELETE` | `/ai-conversations/{id}` | Supprime → `204` (n'exige pas l'accès au dialogue) |
+
+**Corps `POST /ai-conversations`** :
+
+```json
+{
+  "subject": {"kind": "dialogue_node", "dialogue_id": "mon_dialogue", "node_id": "node-…"},
+  "llm_model_identifier": null
+}
+```
+
+`subject` est une union discriminée sur `kind`. `dialogue_id` accepte la forme avec ou sans
+`.json` ; la trace est cherchée sous les deux, la plus récente gagne. Un record antérieur au
+suivi par appel (`call_id` absent) dont la requête a produit d'autres appels n'est pas rejoué
+(lien nœud → génération non fiable) ⇒ `404 generation_trace_not_found`.
+
+Modèle : celui demandé (normalisé ; refusé s'il n'est pas configuré ⇒ `422 unknown_model`),
+sinon celui de la génération (normalisé) s'il est encore configuré, sinon `default_model`. Si
+le modèle de la conversation est retiré de la configuration, chaque tour utilise
+`default_model` (le `model_name` du message assistant indique le modèle réellement utilisé).
+La chaîne de repli (`fallback_chain`) s'applique comme pour la génération du graphe.
+
+**Réponse (`AIConversationResponse`)** : `id`, `subject`, `title`, `model_name`,
+`generation` (`output_text` = arguments de l'appel de fonction ou texte produit,
+`reasoning_summary` = résumé lisible du raisonnement s'il a été fourni, `model_name` d'origine,
+`generated_at`, `request_id`, `call_id`), `messages[]` (`id`, `position`, `role`
+`user`\|`assistant`, `content`, `reasoning_summary`, `llm_call_id`, `model_name`, `cost_usd`,
+`created_at`), `created_at`, `updated_at`.
+
+**Corps `POST /ai-conversations/{id}/messages`** : `{"content": "Pourquoi ce ton ?"}` (1–4000
+caractères, non blanc). La paire question/réponse n'est persistée que si le modèle répond.
+
+**Erreurs** (enveloppe standard `{"error": {"code", "message", "details", "request_id"}}`) :
+
+| Statut | `error.code` | Cas |
+|--------|--------------|-----|
+| `403` | `dialogue_access_denied` | Pas (ou plus) d'accès en lecture au dialogue |
+| `403` | `AUTHORIZATION_ERROR` | Session invitée sur une écriture |
+| `404` | `generation_trace_not_found` | Nœud sans génération exploitable (écrit à la main, record absent, en échec ou sortie vide) ; rien n'est créé |
+| `404` | `NOT_FOUND` | Conversation absente ou d'un autre utilisateur |
+| `409` | `conversation_full` | 40 messages atteints ; aucun appel LLM |
+| `422` | `unknown_model` | `llm_model_identifier` absent de la configuration ; rien n'est créé |
+| `422` | `VALIDATION_ERROR` | Sujet inconnu ou invalide, contenu vide ou trop long |
+| `429` | `QUOTA_EXCEEDED` | Budget LLM dépassé (`details.percentage`, `details.estimated_cost`) ; aucun appel LLM |
+| `502` | `llm_error` | Client LLM impossible à créer, réponse en erreur (`Erreur…`, indisponibilité Mistral / OpenRouter), vide, ou appel non enregistré par un client qui trace son usage ; aucun message persisté |
+| `503` | `ALL_LLM_PROVIDERS_UNAVAILABLE` | Chaîne de repli épuisée |
+
+**Traçabilité nœud → appel LLM** : chaque appel LLM a un `call_id` unique dans
+`data/llm_usage/` ; generate-node, regenerate, jobs batch (parent par parent, au fil du lot)
+et expand-tree annotent chaque nœud renvoyé sur **son** appel
+(`GET /llm-usage/dialogue/{dialogue_id}/generation-logs`). L'annotation n'a lieu que si
+l'utilisateur peut **éditer** le dialogue visé (`require_edit`) : sinon la génération est
+servie normalement mais rien n'est rattaché au dialogue (le record annoté est ce qu'une
+conversation rejoue, instructions comprises). Les modèles GPT-5.6 / GPT-6.x reçoivent
+`reasoning.summary: "auto"` par défaut.
+
+---
+
 ## Validation rules — context dropping (`/api/v1/validation/rules`)
 
 Persistance des **règles** utilisées par défaut lors d’un `POST .../detect-context-dropping` (priorité : champs fournis dans la requête > fichier persisté > défauts). Implémentation : `services/context_dropping_rules_service.py` → fichier `data/validation-rules/context-dropping.json` (UTF-8, créé au besoin).

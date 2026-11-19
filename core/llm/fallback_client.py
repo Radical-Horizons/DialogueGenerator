@@ -106,9 +106,24 @@ class FallbackLLMClient(ILLMClient):
         self.last_call_cost: float = 0.0
         self.last_usage_prompt_tokens: int = 0
         self.last_usage_completion_tokens: int = 0
+        self._last_client: Optional[object] = None
+
+    @property
+    def tracks_usage(self) -> bool:
+        """Le dernier appel a-t-il été fait par un client qui trace son usage ?
+
+        Sans clé API, la fabrique rend des ``DummyLLMClient`` qui ne tracent rien : la
+        chaîne a beau avoir un suivi d'usage, aucun appel n'est alors enregistré.
+        """
+        if self._usage_service is None:
+            return False
+        if self._last_client is None:
+            return True
+        return getattr(self._last_client, "usage_service", None) is not None
 
     def _sync_last_usage_from(self, client: object) -> None:
         """Copie last_* du client effectif (OpenAI, Mistral, etc.) pour l'orchestrateur SSE."""
+        self._last_client = client
         self.last_call_cost = float(getattr(client, "last_call_cost", 0.0) or 0.0)
         self.last_usage_prompt_tokens = int(getattr(client, "last_usage_prompt_tokens", 0) or 0)
         self.last_usage_completion_tokens = int(getattr(client, "last_usage_completion_tokens", 0) or 0)

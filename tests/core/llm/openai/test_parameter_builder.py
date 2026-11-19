@@ -51,12 +51,40 @@ class TestOpenAIParameterBuilder:
         assert tool_choice["tools"][0]["name"] == "generate_interaction"
 
     def test_build_reasoning_config_none_effort(self):
-        """Test construction reasoning config avec effort=None."""
+        """Famille GPT-5.6 sans effort ni summary : résumé lisible demandé, effort omis."""
         config = OpenAIParameterBuilder.build_reasoning_config(
             "gpt-5.6-terra", None, None
         )
-        
+
+        assert config == {"summary": "auto"}
+
+    def test_build_reasoning_config_none_effort_outside_reasoning_family(self):
+        """Hors famille GPT-5.6/6.x : rien n'est ajouté quand ni effort ni summary ne sont fournis."""
+        config = OpenAIParameterBuilder.build_reasoning_config(
+            "gpt-4o", None, None
+        )
+
         assert config == {}
+
+    @pytest.mark.parametrize("model_name", ["gpt-6.2-sol", "gpt-6-luna", "gpt-6.2-astra"])
+    def test_build_responses_params_gpt6_requests_reasoning_summary_by_default(
+        self, model_name: str
+    ) -> None:
+        """GPT-6.x sans effort ni summary : ``reasoning == {"summary": "auto"}``, ni temperature ni top_p."""
+        params = OpenAIParameterBuilder.build_responses_params(
+            model_name=model_name,
+            messages=[{"role": "user", "content": "Test"}],
+            response_model=TestParameterModel,
+            max_tokens=1500,
+            temperature=0.7,
+            reasoning_effort=None,
+            reasoning_summary=None,
+            top_p=0.9,
+        )
+
+        assert params["reasoning"] == {"summary": "auto"}
+        assert "temperature" not in params
+        assert "top_p" not in params
 
     def test_build_reasoning_config_medium_effort(self):
         """Test construction reasoning config avec effort=medium."""

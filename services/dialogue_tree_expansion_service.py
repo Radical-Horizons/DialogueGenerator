@@ -11,6 +11,7 @@ from api.schemas.dialogue import ContextSelection, GenerateUnityDialogueRequest
 from core.llm.llm_client import ILLMClient
 from services.document_choice_id_service import ensure_document_choice_ids
 from services.graph_node_orchestrator import GraphNodeOrchestrator
+from services.llm_call_provenance import capture_llm_calls, link_nodes_to_calls
 from services.scene_dramatis import enrich_context_selections_for_scene, resolve_scene_dramatis
 from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
 from services.unity_node_validation_service import (
@@ -255,9 +256,11 @@ class DialogueTreeExpansionService:
             organization_mode=organization_mode,
             max_context_tokens=effective_max_context,
         )
-        start_response = await unity_orchestrator.generate(start_request)
+        with capture_llm_calls() as start_calls:
+            start_response = await unity_orchestrator.generate(start_request)
         start_nodes = _parse_nodes_from_unity_json(start_response.json_content)
         start_node = _find_start_node(start_nodes)
+        link_nodes_to_calls([start_node.get("id")], start_calls)
         _truncate_choices(start_node, max_choices)
         validate_enriched_node(
             start_node,

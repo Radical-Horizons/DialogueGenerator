@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, List, Literal, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Literal, Optional, Union
 
 from core.llm.llm_client import ILLMClient
 from services.graph_node_orchestrator import GenerationResult, GraphNodeOrchestrator
@@ -71,7 +72,8 @@ class BatchParentResult:
     context_gdd_content_fingerprint: Optional[str] = None
 
 
-ItemCallback = Callable[[BatchParentResult], None]
+# Peut être une coroutine : elle est alors attendue avant le parent suivant.
+ItemCallback = Callable[[BatchParentResult], Union[None, Awaitable[None]]]
 
 
 @dataclass
@@ -193,7 +195,8 @@ class BatchNodeGenerationService:
             should_cancel: Callback d'annulation entre parents.
             on_progress: ``(current, total, detail)`` après chaque parent.
             on_item: Point de reprise, appelé avec le résultat de chaque parent
-                traité — c'est ce qui rend un lot interrompu reprenable.
+                traité — c'est ce qui rend un lot interrompu reprenable. Une coroutine
+                est attendue avant de passer au parent suivant.
             label_offset: Parents déjà acquis lors d'une reprise : décale le
                 « Nœud n/N » affiché pour suivre le lot complet.
             label_total: Taille du lot complet affichée (défaut : ``len(parents)``).
@@ -300,7 +303,9 @@ class BatchNodeGenerationService:
                 )
 
             if on_item:
-                on_item(items[-1])
+                outcome = on_item(items[-1])
+                if inspect.isawaitable(outcome):
+                    await outcome
             if on_progress:
                 on_progress(index + 1, total, f"{shown} terminé")
 

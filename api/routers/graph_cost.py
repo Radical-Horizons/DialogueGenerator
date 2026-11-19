@@ -31,7 +31,6 @@ from api.schemas.graph import (
 from core.context.context_builder import ContextBuilder
 from services.configuration_service import ConfigurationService
 from services.llm_pricing_service import LLMPricingService
-from services.llm_usage_service import LLMUsageService
 from services.token_estimation_service import TokenEstimationService
 from constants import PlayableCharacters
 from services.scene_dramatis import resolve_scene_dramatis
@@ -181,21 +180,6 @@ def _estimate_cost_cache_key(request_payload: str, model_id: str, batch_count: i
     """Clé de cache pour estimate-cost : la requête, pas le prompt (coûteux à construire)."""
     blob = f"{request_payload}|{model_id}|{batch_count}"
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()
-
-
-def try_compute_context_relevance(
-    usage_service: LLMUsageService,
-    request_id: str,
-) -> None:
-    """Calcule la pertinence contexte sans impacter la réponse HTTP (Story 3.6)."""
-    try:
-        usage_service.compute_and_persist_context_relevance(request_id)
-    except Exception as exc:
-        logger.warning(
-            "Pertinence contexte non enregistrée (request_id=%s): %s",
-            request_id,
-            exc,
-        )
 
 
 router = APIRouter()

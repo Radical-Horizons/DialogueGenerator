@@ -124,3 +124,69 @@ class TestOpenAIResponseParser:
         
         assert success is True
         assert parsed == "Hello"
+
+
+def _sdk_text_response(*texts_per_message: list[str]):
+    """Vraie réponse SDK Responses : un item de raisonnement puis des messages ``output_text``."""
+    from openai.types.responses import (
+        Response,
+        ResponseOutputMessage,
+        ResponseOutputText,
+        ResponseReasoningItem,
+    )
+    from openai.types.responses.response_reasoning_item import Summary
+
+    output: list = [
+        ResponseReasoningItem(
+            id="rs_1",
+            type="reasoning",
+            summary=[Summary(type="summary_text", text="Je réfléchis.")],
+        )
+    ]
+    for index, texts in enumerate(texts_per_message):
+        output.append(
+            ResponseOutputMessage(
+                id=f"msg_{index}",
+                type="message",
+                role="assistant",
+                status="completed",
+                content=[ResponseOutputText(type="output_text", text=t, annotations=[]) for t in texts],
+            )
+        )
+    return Response(
+        id="resp_1",
+        created_at=0.0,
+        model="gpt-6.2-sol",
+        object="response",
+        parallel_tool_calls=True,
+        tool_choice="auto",
+        tools=[],
+        output=output,
+    )
+
+
+def test_extract_text_output_reads_sdk_message_output_text() -> None:
+    """Texte libre réel : items ``message`` / parties ``output_text`` joints (comme ``Response.output_text``)."""
+    response = _sdk_text_response(["Bonjour ", "voyageur."], [" Suite."])
+
+    text, error, success = OpenAIResponseParser.extract_text_output(response.output)
+
+    assert success is True
+    assert error is None
+    assert text == response.output_text.strip() == "Bonjour voyageur. Suite."
+
+
+def test_parse_response_without_model_on_sdk_response() -> None:
+    """parse_response sans response_model sur une vraie réponse SDK rend le texte."""
+    parsed, error, success = OpenAIResponseParser.parse_response(
+        _sdk_text_response(["Réponse libre."]), None, "gpt-6.2-sol"
+    )
+    assert (parsed, error, success) == ("Réponse libre.", None, True)
+
+
+def test_extract_text_output_only_reasoning_is_empty() -> None:
+    """Raisonnement sans message : réponse vide (échec explicite, pas de texte inventé)."""
+    text, error, success = OpenAIResponseParser.extract_text_output(_sdk_text_response().output)
+    assert text is None
+    assert success is False
+    assert error is not None

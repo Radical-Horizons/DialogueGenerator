@@ -17,6 +17,7 @@ except ImportError:
     from mistralai.models import SDKError, ChatCompletionResponse
 
 from core.llm.llm_client import ILLMClient
+from core.llm.tracking_format import STRUCTURED_OUTPUT_INSTRUCTION_SUFFIX
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +108,7 @@ class MistralClient(ILLMClient):
 
         system_message_content = user_system_prompt_override if user_system_prompt_override else self.system_prompt_template
         if response_model:
-            system_message_content += " Tu DOIS utiliser la fonction 'generate_interaction' pour formater ta réponse."
+            system_message_content += STRUCTURED_OUTPUT_INSTRUCTION_SUFFIX
 
         messages = [{"role": "system", "content": system_message_content}]
         if previous_dialogue_context:

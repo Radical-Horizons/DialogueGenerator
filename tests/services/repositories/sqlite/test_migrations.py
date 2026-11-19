@@ -21,6 +21,7 @@ EXPECTED_MIGRATION_VERSIONS = [
     ("010",),
     ("011",),
     ("012",),
+    ("013",),
 ]
 
 
@@ -86,6 +87,8 @@ def test_lifespan_creates_and_reuses_application_database(tmp_path: Path) -> Non
                 "dialogues_search_meta",
                 "dialogues_search_fts",
                 "template_suggestion_usage",
+                "ai_conversations",
+                "ai_conversation_messages",
             } <= tables
             assert migration_versions == EXPECTED_MIGRATION_VERSIONS
             assert dialogue_foreign_keys == {

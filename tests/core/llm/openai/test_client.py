@@ -350,3 +350,66 @@ class TestOpenAIClient:
             assert len(results) == 1
             assert isinstance(results[0], str)
             assert "Erreur" in results[0] or "error" in results[0].lower()
+
+@pytest.mark.asyncio
+async def test_generate_variants_text_mode_with_real_sdk_response(tmp_path) -> None:
+    """Texte libre réel (message / output_text) : texte rendu, usage tracké en succès."""
+    from openai.types.responses import (
+        Response,
+        ResponseOutputMessage,
+        ResponseOutputText,
+        ResponseUsage,
+    )
+    from openai.types.responses.response_usage import InputTokensDetails, OutputTokensDetails
+
+    from services.llm_call_provenance import capture_llm_calls
+    from services.llm_pricing_service import LLMPricingService
+    from services.llm_usage_service import LLMUsageService
+    from services.repositories.llm_usage_repository import FileLLMUsageRepository
+
+    usage = LLMUsageService(
+        repository=FileLLMUsageRepository(storage_dir=str(tmp_path)),
+        pricing_service=LLMPricingService(),
+    )
+    client = OpenAIClient(
+        api_key="sk-test-not-used",
+        config={"default_model": "gpt-6.2-sol", "max_tokens": 1000},
+        usage_service=usage,
+        request_id="req-text",
+        endpoint="ai_conversation",
+    )
+    response = Response(
+        id="resp_1",
+        created_at=0.0,
+        model="gpt-6.2-sol",
+        object="response",
+        parallel_tool_calls=True,
+        tool_choice="auto",
+        tools=[],
+        output=[
+            ResponseOutputMessage(
+                id="msg_1",
+                type="message",
+                role="assistant",
+                status="completed",
+                content=[ResponseOutputText(type="output_text", text="Parce que.", annotations=[])],
+            )
+        ],
+        usage=ResponseUsage(
+            input_tokens=10,
+            output_tokens=3,
+            total_tokens=13,
+            input_tokens_details=InputTokensDetails(cached_tokens=0),
+            output_tokens_details=OutputTokensDetails(reasoning_tokens=0),
+        ),
+    )
+
+    with patch.object(client, "_make_api_call_with_protection", AsyncMock(return_value=response)):
+        with capture_llm_calls() as calls:
+            results = await client.generate_variants("Pourquoi ?", k=1, response_model=None)
+
+    assert results == ["Parce que."]
+    assert len(calls) == 1
+    record = usage.get_record_by_call_id(calls[0])
+    assert record is not None and record.success is True
+    assert record.endpoint == "ai_conversation"

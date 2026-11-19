@@ -12,10 +12,12 @@ import time
 from datetime import datetime, UTC
 from typing import Any, Dict, List, Optional, Tuple
 
+from core.llm.tracking_format import TRACKED_PROMPT_INPUT_MARKER
+
 SCORING_METHOD = "keyword_overlap_v2"
 MIN_OVERLAP_TOKEN_LEN = 4
 LOW_SCORE_THRESHOLD_PERCENT = 30.0
-INPUT_MARKER = "\n\n--- Input ---\n"
+INPUT_MARKER = TRACKED_PROMPT_INPUT_MARKER
 
 # Types normalisés pour le breakdown (clés API stables).
 SECTION_SPECS: List[Tuple[str, re.Pattern[str]]] = [
