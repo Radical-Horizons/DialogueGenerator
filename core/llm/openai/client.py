@@ -10,6 +10,7 @@ from openai import AsyncOpenAI, APIError
 
 from core.llm.llm_client import ILLMClient
 from core.llm.openai.parameter_builder import OpenAIParameterBuilder
+from core.llm.openai.prompt_cache import build_user_message
 from core.llm.openai.response_parser import OpenAIResponseParser
 from core.llm.openai.reasoning_extractor import OpenAIReasoningExtractor
 from core.llm.openai.usage_tracker import OpenAIUsageTracker
@@ -139,14 +140,14 @@ class OpenAIClient(ILLMClient):
         if previous_dialogue_context:
             messages.extend(previous_dialogue_context)
         messages.append({"role": "user", "content": prompt})
-        
+
         logger.debug(f"Messages envoyés au LLM (input, sans system): {messages}")
         logger.debug(f"Instructions système (séparées): {system_message_content[:100]}...")
-        
+
         # Construire les paramètres pour Responses API
         responses_params = OpenAIParameterBuilder.build_responses_params(
             model_name=self.model_name,
-            messages=messages,
+            messages=messages[:-1] + [build_user_message(prompt, self.model_name)],
             response_model=response_model,
             max_tokens=self.max_tokens,
             temperature=self.temperature,
@@ -155,10 +156,10 @@ class OpenAIClient(ILLMClient):
             instructions=system_message_content,
             top_p=self.top_p,
         )
-        
+
         # Prompt complet pour le tracking (Story 1.15)
         full_prompt_str = f"{system_message_content}\n\n--- Input ---\n{json.dumps(messages, ensure_ascii=False)}"
-        
+
         # Générer k variantes
         for i in range(k):
             start_time = time.time()
@@ -168,6 +169,8 @@ class OpenAIClient(ILLMClient):
             prompt_tokens = 0
             completion_tokens = 0
             total_tokens = 0
+            cached_tokens = 0
+            cache_write_tokens = 0
 
             try:
                 logger.info(f"Début de la génération de la variante {i+1}/{k} pour le prompt.")
@@ -194,7 +197,9 @@ class OpenAIClient(ILLMClient):
                 prompt_tokens = usage_metrics["prompt_tokens"]
                 completion_tokens = usage_metrics["completion_tokens"]
                 total_tokens = usage_metrics["total_tokens"]
-                
+                cached_tokens = usage_metrics["cached_tokens"]
+                cache_write_tokens = usage_metrics["cache_write_tokens"]
+
                 # Extraire le reasoning trace
                 self.reasoning_trace = await OpenAIReasoningExtractor.extract_and_notify_reasoning(
                     response, i + 1, self.reasoning_callback, self.model_name
@@ -245,6 +250,8 @@ class OpenAIClient(ILLMClient):
                             error_message=error_message,
                             prompt=full_prompt_str,
                             response=raw_response_str,
+                            cached_tokens=cached_tokens,
+                            cache_write_tokens=cache_write_tokens,
                         )
                         if success:
                             self.last_usage_prompt_tokens = prompt_tokens
@@ -253,6 +260,8 @@ class OpenAIClient(ILLMClient):
                                 model_name=self.model_name,
                                 prompt_tokens=prompt_tokens,
                                 completion_tokens=completion_tokens,
+                                cached_tokens=cached_tokens,
+                                cache_write_tokens=cache_write_tokens,
                             )
                         else:
                             self.last_call_cost = 0.0
@@ -263,7 +272,7 @@ class OpenAIClient(ILLMClient):
                             f"Erreur lors du tracking de l'usage LLM: {tracking_error}",
                             exc_info=True
                         )
-        
+
         return generated_results
 
     async def generate_variants_streaming(
@@ -309,7 +318,7 @@ class OpenAIClient(ILLMClient):
         # Construire les paramètres pour Responses API avec streaming
         responses_params = OpenAIParameterBuilder.build_responses_params(
             model_name=self.model_name,
-            messages=messages,
+            messages=messages[:-1] + [build_user_message(prompt, self.model_name)],
             response_model=response_model,
             max_tokens=self.max_tokens,
             temperature=self.temperature,
@@ -449,12 +458,16 @@ class OpenAIClient(ILLMClient):
                         prompt_tokens = 0
                         completion_tokens = 0
                         total_tokens = 0
+                        cached_tokens = 0
+                        cache_write_tokens = 0
 
                         if completed_response:
                             usage_metrics = OpenAIUsageTracker.extract_usage_metrics(completed_response)
                             prompt_tokens = usage_metrics["prompt_tokens"]
                             completion_tokens = usage_metrics["completion_tokens"]
                             total_tokens = usage_metrics["total_tokens"]
+                            cached_tokens = usage_metrics["cached_tokens"]
+                            cache_write_tokens = usage_metrics["cache_write_tokens"]
 
                         if completed_response is None and not success:
                             logger.debug(
@@ -474,6 +487,8 @@ class OpenAIClient(ILLMClient):
                                 error_message=error_message,
                                 prompt=full_prompt_str,
                                 response=raw_response_str,
+                                cached_tokens=cached_tokens,
+                                cache_write_tokens=cache_write_tokens,
                             )
                             if success:
                                 self.last_usage_prompt_tokens = prompt_tokens
@@ -482,6 +497,8 @@ class OpenAIClient(ILLMClient):
                                     model_name=self.model_name,
                                     prompt_tokens=prompt_tokens,
                                     completion_tokens=completion_tokens,
+                                    cached_tokens=cached_tokens,
+                                    cache_write_tokens=cache_write_tokens,
                                 )
                             else:
                                 self.last_call_cost = 0.0

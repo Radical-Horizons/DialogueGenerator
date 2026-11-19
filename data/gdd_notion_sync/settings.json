@@ -585,6 +585,22 @@
       "kind": "page",
       "notion_id": "21993c24-8a06-4303-b8a3-4e413d0d4fcb",
       "category_file": "Évaluation_des_aspects_culturels_d'Alteir.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "756ca883-2b59-475b-97df-487a3cfad88d",
+      "category_file": "Qualités.json",
+      "notion_data_source_ids": [
+        "0fa253e8-7a21-4b8b-8679-cd488658ef3b"
+      ]
+    },
+    {
+      "kind": "database",
+      "notion_id": "7ba7ba08-7b37-4d0d-a607-d0f39cac6a20",
+      "category_file": "Défauts.json",
+      "notion_data_source_ids": [
+        "267fb722-add0-49ce-be69-c865d3fa42f2"
+      ]
     }
   ],
   "included_categories": [
@@ -596,6 +612,7 @@
     "Compétences.json",
     "Compétences_de_perso.json",
     "Dialogues.json",
+    "Défauts.json",
     "Espèces.json",
     "Feuilles_de_perso.json",
     "Flags.json",
@@ -608,6 +625,7 @@
     "Objets.json",
     "Personas.json",
     "Personnages.json",
+    "Qualités.json",
     "Règnes_et_classes.json",
     "Scènes.json",
     "Structure_Narrative.json",

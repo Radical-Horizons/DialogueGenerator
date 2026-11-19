@@ -3,22 +3,30 @@
     "gpt-5.6-sol": {
       "input_price_per_1M": 5.0,
       "output_price_per_1M": 30.0,
-      "description": "GPT-5.6 Sol — flagship (doc OpenAI) : structured outputs, reasoning none–max, 128k sortie, 1.05M contexte"
+      "description": "GPT-5.6 Sol — flagship (doc OpenAI) : structured outputs, reasoning none–max, 128k sortie, 1.05M contexte",
+      "cached_input_rate": 0.1,
+      "cache_write_rate": 1.25
     },
     "gpt-5.6": {
       "input_price_per_1M": 5.0,
       "output_price_per_1M": 30.0,
-      "description": "Alias gpt-5.6 → gpt-5.6-sol"
+      "description": "Alias gpt-5.6 → gpt-5.6-sol",
+      "cached_input_rate": 0.1,
+      "cache_write_rate": 1.25
     },
     "gpt-5.6-terra": {
-      "input_price_per_1M": 2.5,
-      "output_price_per_1M": 15.0,
-      "description": "GPT-5.6 Terra — équilibre intelligence/coût (doc OpenAI)"
+      "input_price_per_1M": 2.0,
+      "output_price_per_1M": 12.0,
+      "description": "GPT-5.6 Terra — équilibre intelligence/coût (doc OpenAI)",
+      "cached_input_rate": 0.1,
+      "cache_write_rate": 1.25
     },
     "gpt-5.6-luna": {
-      "input_price_per_1M": 1.0,
-      "output_price_per_1M": 6.0,
-      "description": "GPT-5.6 Luna — volume / coût (doc OpenAI)"
+      "input_price_per_1M": 0.2,
+      "output_price_per_1M": 1.2,
+      "description": "GPT-5.6 Luna — volume / coût (doc OpenAI)",
+      "cached_input_rate": 0.1,
+      "cache_write_rate": 1.25
     },
     "gpt-4o": {
       "input_price_per_1M": 2.5,
@@ -56,6 +64,6 @@
       "description": "Aion 2.0 (OpenRouter)"
     }
   },
-  "last_updated": "2026-07-23",
-  "note": "Les prix sont en USD par million de tokens. Taux de conversion USD→EUR : 0.92 (constante dans graph.py, à mettre à jour périodiquement). Sources : developers.openai.com/api/docs/models/gpt-5.6-{sol,terra,luna} ; openrouter.ai/aion-labs/aion-2.0."
+  "last_updated": "2026-11-19",
+  "note": "Les prix sont en USD par million de tokens. Cache de prompt GPT-5.6 : cached_input_rate (lecture, 0,1) et cache_write_rate (écriture TTL 30 min, 1,25) multiplient le prix d'entrée (developers.openai.com/api/docs/guides/prompt-caching). gpt-5.6-sol est facturé 4 / 20 en promotion jusqu'au 2026-11-30 ; le prix suivant n'étant pas publié, 5 / 30 est conservé (budget surestimé plutôt que sous-estimé). Taux de conversion USD→EUR : 0.92 (constante dans graph.py, à mettre à jour périodiquement). Sources : developers.openai.com/api/docs/pricing ; developers.openai.com/api/docs/models/gpt-5.6 ; openrouter.ai/aion-labs/aion-2.0."
 }

@@ -12,6 +12,60 @@ logger = logging.getLogger(__name__)
 _METADATA_FIELD_PREFIXES: tuple[str, ...] = ("section_titles.",)
 _METADATA_ROOT_KEYS: frozenset[str] = frozenset({"section_titles", "notion_page_id"})
 
+# Propriétés Notion de suivi de production (``values.<clé>``, clé en minuscules, apostrophe
+# droite) : planning, révision, assets, comptes internes. Elles ne disent rien de ce qu'un
+# personnage ou un lieu est, et coûtaient des milliers de tokens par fiche.
+_ADMIN_VALUE_KEYS: frozenset[str] = frozenset({
+    "actes effectifs",
+    "actes prévus",
+    "assets",
+    "assets (preview)",
+    "chapitres",
+    "chapitres le concernant",
+    "date de création",
+    "date de création de la fiche",
+    "date vérification",
+    "dernière modification",
+    "dialogues",
+    "dialogues liés",
+    "enstatus",
+    "feuilles de perso",
+    "frstatus",
+    "id",
+    "identifiant de ligne",
+    "implémenté ?",
+    "inventaires pnj",
+    "map",
+    "maps",
+    "musiques",
+    "niveau d'ia",
+    "niveau de production",
+    "ordre",
+    "patterns",
+    "portraits",
+    "présence dans les chapitres",
+    "présence dans les scènes",
+    "qualité",
+    "rangs de communauté",
+    "référence visuelle",
+    "références visuelles",
+    "références visuelles des éléments originaux",
+    "relation assets",
+    "scènes",
+    "slug",
+    "version",
+    "état",
+    "état des connaissances",
+})
+
+
+def _is_admin_value_path(path: str) -> bool:
+    """True si ``path`` désigne une propriété Notion de suivi de production."""
+    if not path.startswith("values."):
+        return False
+    key = path[len("values.") :].strip().lower().replace("’", "'")
+    return key in _ADMIN_VALUE_KEYS
+
 
 class FieldDeduplicator:
     """Détecte et déduplique les champs avant la sérialisation."""
@@ -70,7 +124,8 @@ class FieldDeduplicator:
         if isinstance(value, (list, dict)):
             import json
             return json.dumps(value, sort_keys=True, ensure_ascii=False)
-        return str(value).strip().lower()
+        # Espaces repliés : Notion rend le même texte avec des retraits différents d'un champ à l'autre.
+        return " ".join(str(value).split()).lower()
     
     def detect_duplicates(self, element_data: Dict[str, Any]) -> Dict[str, List[str]]:
         """Détecte les champs qui contiennent un contenu identique.
@@ -147,7 +202,7 @@ class FieldDeduplicator:
     @staticmethod
     def _is_metadata_field_path(path: str) -> bool:
         """True si le chemin ne doit pas alimenter le contexte narratif."""
-        if path in _METADATA_ROOT_KEYS:
+        if path in _METADATA_ROOT_KEYS or _is_admin_value_path(path):
             return True
         return any(path.startswith(prefix) for prefix in _METADATA_FIELD_PREFIXES)
 

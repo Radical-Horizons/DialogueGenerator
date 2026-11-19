@@ -9,13 +9,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 UNITY = ROOT / "data" / "UnityData"
 SKILLS_JSON = ROOT / "data" / "GDD_categories" / "Compétences.json"
-TRAITS_JSON = (
-    ROOT
-    / "data"
-    / "GDD_categories"
-    / "systemes_de_jeu"
-    / "Traits_de_caractere_946f4ed8-52b4-4e1d-b8d0-91e2d5d350d3.json"
-)
+# Bases canoniques des traits (page Notion « Traits de caractère », § 1) : chaque qualité
+# pointe vers son défaut opposé ; la paire forme un axe signé.
+QUALITIES_JSON = ROOT / "data" / "GDD_categories" / "Qualités.json"
+FLAWS_JSON = ROOT / "data" / "GDD_categories" / "Défauts.json"
 
 
 def gen_skills() -> int:
@@ -49,47 +46,40 @@ def _axis_token(positive: str, negative: str) -> str:
     return f"{compact(positive)}_{compact(negative)}"
 
 
-def gen_traits() -> int:
-    """Axes bipolaires documentés + paires seed pour le prompt LLM."""
+def _normalized_id(raw: object) -> str:
+    """UUID Notion sans tirets ni casse, pour comparer les relations."""
+    return str(raw or "").replace("-", "").strip().lower()
+
+
+def trait_pairs(qualities: list[dict], flaws: list[dict]) -> list[tuple[str, str, str]]:
+    """Axes ``(qualité, défaut, sphère)`` des bases Notion Qualités / Défauts.
+
+    Une qualité sans défaut opposé (ou l'inverse) forme un axe à un seul pôle : la base
+    reste la référence, l'axe incomplet se complète dans Notion.
+    """
+    flaw_by_id = {_normalized_id(f.get("notion_page_id")): f for f in flaws if isinstance(f, dict)}
+    paired_flaws: set[str] = set()
     pairs: list[tuple[str, str, str]] = []
-    if TRAITS_JSON.exists():
-        data = json.loads(TRAITS_JSON.read_text(encoding="utf-8"))
-        text = str((data.get("values") or {}).get("2__axes_bipolaires") or "")
-        def _cell(raw: str) -> str:
-            return re.sub(r"[*]+", "", raw).strip()
+    for quality in qualities:
+        if not isinstance(quality, dict) or not str(quality.get("Nom") or "").strip():
+            continue
+        opposite_id = _normalized_id((quality.get("values") or {}).get("Défaut opposé"))
+        flaw = flaw_by_id.get(opposite_id)
+        if flaw:
+            paired_flaws.add(opposite_id)
+        pairs.append((str(quality["Nom"]).strip(), str((flaw or {}).get("Nom") or "").strip(), "Caractère"))
+    for flaw_id, flaw in flaw_by_id.items():
+        if flaw_id not in paired_flaws and str(flaw.get("Nom") or "").strip():
+            pairs.append(("", str(flaw["Nom"]).strip(), "Caractère"))
+    pairs.sort(key=lambda p: (p[0] or p[1]).casefold())
+    return pairs
 
-        for axe, neg, pos in re.findall(
-            r"<tr>\s*<td>\s*([^<]+?)\s*</td>\s*<td>\s*([^<]+?)\s*</td>\s*<td>\s*([^<]+?)\s*</td>",
-            text,
-            flags=re.IGNORECASE,
-        ):
-            axe_l, neg_l, pos_l = _cell(axe), _cell(neg), _cell(pos)
-            if not axe_l or axe_l.casefold() == "axe":
-                continue
-            if pos_l.casefold().startswith("pôle +") or neg_l.casefold().startswith("pôle"):
-                continue
-            # Table: Axe | Pôle -100 | Pôle +100
-            pairs.append((pos_l, neg_l, "Caractère"))
 
-    # Seed minimal si parsing vide / complément utile pour prompts
-    seed = [
-        ("Courage", "Lâcheté", "Caractère"),
-        ("Empathie", "Cruauté", "Caractère"),
-        ("Prudence", "Imprudence", "Caractère"),
-        ("Discrétion", "Indiscrétion", "Caractère"),
-        ("Stabilité", "Instabilité", "Caractère"),
-        ("Diplomate", "Provocateur", "Social"),
-        ("Loyal", "Traître", "Moral"),
-        ("Honnête", "Menteur", "Moral"),
-        ("Généreux", "Avare", "Moral"),
-        ("Patient", "Impulsif", "Caractère"),
-    ]
-    seen = {(p.casefold(), n.casefold()) for p, n, _ in pairs}
-    for pos, neg, sphere in seed:
-        key = (pos.casefold(), neg.casefold())
-        if key not in seen:
-            pairs.append((pos, neg, sphere))
-            seen.add(key)
+def gen_traits() -> int:
+    """Axes de caractère depuis les bases Notion Qualités et Défauts (synchronisées)."""
+    qualities = json.loads(QUALITIES_JSON.read_text(encoding="utf-8"))
+    flaws = json.loads(FLAWS_JSON.read_text(encoding="utf-8"))
+    pairs = trait_pairs(qualities, flaws)
 
     out = UNITY / "TraitCatalog.csv"
     with out.open("w", encoding="utf-8", newline="") as handle:

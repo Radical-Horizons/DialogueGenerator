@@ -1,0 +1,266 @@
+[
+  {
+    "Nom": "Tolérante",
+    "values": {
+      "Défaut opposé": "c8464634-6daa-491f-8ee3-4544a7d67478",
+      "Personnages porteurs": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31"
+    },
+    "sections": {},
+    "notion_page_id": "277c0b9b-8990-42c7-a870-28ef30dc9fe0"
+  },
+  {
+    "Nom": "Tempérée",
+    "values": {
+      "Défaut opposé": "b5380629-9a76-411d-a13f-c10833b11d8e",
+      "Personnages porteurs": "1c36e4d2-1b45-8095-8449-d7d1749e69ad, 2b72ae6a-99e3-4d59-a30a-df6ecfe5d0e6"
+    },
+    "sections": {},
+    "notion_page_id": "7a64130b-73ff-4ce9-86d8-006e68514739"
+  },
+  {
+    "Nom": "Sincère",
+    "values": {
+      "Défaut opposé": "b28fe580-24df-4f37-8ab9-f7936ac57706"
+    },
+    "sections": {},
+    "notion_page_id": "7c763faf-51c7-4145-928f-04d38395f559"
+  },
+  {
+    "Nom": "Respectueuse",
+    "values": {
+      "Défaut opposé": "d6d9d4ef-098e-4203-abc9-07fd623602a1"
+    },
+    "sections": {},
+    "notion_page_id": "aaa517d0-b0e1-43fb-adcc-dd3264f8d6b1"
+  },
+  {
+    "Nom": "Responsable",
+    "values": {
+      "Défaut opposé": "1b82d492-31fc-4cfd-b177-ea28cffa6ae9",
+      "Personnages porteurs": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41, 1ae6e4d2-1b45-80ef-84e8-fb114d0136ed"
+    },
+    "sections": {},
+    "notion_page_id": "50239c15-1a4d-47ef-b2be-24ee33ccc8eb"
+  },
+  {
+    "Nom": "Rigoureuse",
+    "values": {
+      "Défaut opposé": "38ffe371-e852-476a-9b00-7c155a42b403",
+      "Personnages porteurs": "06ed3d91-4c09-4c7c-bb38-8cad4db51ba5, 1996e4d2-1b45-80c4-9c73-ddac6322e9bd, 1a16e4d2-1b45-8015-b262-cb7e5d0f01a8, 1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41, 1ae6e4d2-1b45-8032-b738-f27c2d471393, 1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c, 1ae6e4d2-1b45-8087-b3ee-f0f29b53a279, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1b36e4d2-1b45-8081-ab37-c4b33c4f51b1, 1c06e4d2-1b45-80d6-bafd-eeb1a8395c2f, 1c36e4d2-1b45-80f2-8124-e9ddf8d9359e, 208c6783-0f82-4e30-a263-f6d38e2b6b85, 22e6e4d2-1b45-80ee-875e-d9f219970f06, 2f46e4d2-1b45-8054-b997-e9fe5c9da656, 31e6e4d2-1b45-80bb-9d3c-cc78c2782622, 3276e4d2-1b45-80f1-a87e-ffb93f4a7212, 3cea202e-d477-4326-bd0d-dcbd65e9bedb, 8fefb411-8033-4e06-afdd-9d186937ee2a, b5922a18-76ae-49b5-807c-b5ef963a14cf, d79db510-a670-43d6-96aa-f8b600f3b356, ec7da632-19b5-4d59-bd18-20a5bd5805d9, f38a4a8a-2a9b-4349-9d9a-3669e7863321, f1365719-cfda-4d75-82e1-df6129d02041"
+    },
+    "sections": {},
+    "notion_page_id": "195a60b9-9114-4d47-ab84-dd2878428f81"
+  },
+  {
+    "Nom": "Prudente",
+    "values": {
+      "Défaut opposé": "900c5b21-775f-49f3-aa27-e466a64b805e",
+      "Personnages porteurs": "1996e4d2-1b45-80a5-a7ae-e9d43372323f, 1a16e4d2-1b45-8015-b262-cb7e5d0f01a8, 1c36e4d2-1b45-8095-8449-d7d1749e69ad, 2286e4d2-1b45-8094-94b7-c021f47fc005, 2286e4d2-1b45-80f8-a703-dce94ea5a27b, 31d6e4d2-1b45-80c7-a993-c76e1bdfbbca, 3cea202e-d477-4326-bd0d-dcbd65e9bedb, 5bade1fc-762e-4b57-92ef-3ab0ef05bfea"
+    },
+    "sections": {},
+    "notion_page_id": "7276d412-f7dc-4dad-88e4-6f50786f5f14"
+  },
+  {
+    "Nom": "Posée",
+    "values": {
+      "Défaut opposé": "2146ebdc-4f7b-4965-bb70-c223f76ca997",
+      "Personnages porteurs": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1, 1d95df62-504c-4349-b8ec-63893118af51, 21ce11c5-e354-4ff9-b504-5acf991b0b6b, 3236e4d2-1b45-808b-9b5c-e761e396c416, 571d7129-d962-446f-a3d8-303f19256366"
+    },
+    "sections": {},
+    "notion_page_id": "28f45b3a-580f-468e-97d3-a593c81d2e01"
+  },
+  {
+    "Nom": "Persévérante",
+    "values": {
+      "Défaut opposé": "86b2ecfe-3bb4-4e5f-8b51-1684ee2db7e2",
+      "Personnages porteurs": "1996e4d2-1b45-8043-9847-ef675478f485, 1996e4d2-1b45-80fa-97db-fe99255e6c0c, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1a96e4d2-1b45-8077-b534-dae9777c6a12, 1ae6e4d2-1b45-8032-b738-f27c2d471393, 1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c, 1ae6e4d2-1b45-8087-b3ee-f0f29b53a279, 1ae6e4d2-1b45-80ef-84e8-fb114d0136ed, 1b36e4d2-1b45-8081-ab37-c4b33c4f51b1, 1b46e4d2-1b45-8081-992e-febbfed44a5d, 1bc6e4d2-1b45-8013-831b-e5a42c40dd2f, 1c36e4d2-1b45-80f2-8124-e9ddf8d9359e, 1c76e4d2-1b45-805a-b457-e64ae338d6f9, 1c76e4d2-1b45-80af-8225-ecdd35b8e367, 22e6e4d2-1b45-8077-a1a6-dea94ef159a4, 2f46e4d2-1b45-8054-b997-e9fe5c9da656, 3256e4d2-1b45-80f4-9eeb-de67c6d8955b, 3276e4d2-1b45-80f1-a87e-ffb93f4a7212, 892f2fd2-fbe3-4878-a05d-8d608b01e6bf, dfe78783-9d63-424a-ad5c-aa7726bf6394, f0105182-324b-4626-86c3-a78edbb3d2b6, f38a4a8a-2a9b-4349-9d9a-3669e7863321"
+    },
+    "sections": {},
+    "notion_page_id": "892fdf2c-0ceb-44d4-8192-062c0f482adb"
+  },
+  {
+    "Nom": "Patiente",
+    "values": {
+      "Défaut opposé": "306dee17-bbc2-493c-9b0a-5e6b96523668",
+      "Personnages porteurs": "06ed3d91-4c09-4c7c-bb38-8cad4db51ba5, 0dd7fd03-023b-450a-ab2f-8ea9eac8c11d, 1a16e4d2-1b45-8015-b262-cb7e5d0f01a8, 1a96e4d2-1b45-8077-b534-dae9777c6a12, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1bc6e4d2-1b45-8013-831b-e5a42c40dd2f, 1c06e4d2-1b45-80d6-bafd-eeb1a8395c2f, 1c36e4d2-1b45-8095-8449-d7d1749e69ad, 1c76e4d2-1b45-805a-b457-e64ae338d6f9, 208c6783-0f82-4e30-a263-f6d38e2b6b85, 2286e4d2-1b45-80cd-bf22-d2fadf218fb2, 2286e4d2-1b45-80db-b5ea-c9a4c9ba305b, 22e6e4d2-1b45-8077-a1a6-dea94ef159a4, 2448c3aa-ecab-4afd-9b4e-36d86c0abfef, 2cc6e4d2-1b45-8062-9d49-f252d825bc90, 31e6e4d2-1b45-80bb-9d3c-cc78c2782622, 7c77f813-ac8d-403a-b36b-0db35cda59c6, 8fefb411-8033-4e06-afdd-9d186937ee2a, c52842f2-acd5-42ec-8ffd-92dfb319dfb9, f1365719-cfda-4d75-82e1-df6129d02041, eb2168a8-5bf3-4348-85c4-64bb0a1df94d, c3a2f9da-4afc-412f-a891-b4e5aaa57795"
+    },
+    "sections": {},
+    "notion_page_id": "a57dbb57-c9d0-48d1-aacc-ebd77c66d3bb"
+  },
+  {
+    "Nom": "Ouverte",
+    "values": {
+      "Défaut opposé": "a2788bf9-bdc4-4fb9-a114-a9729d587dd0",
+      "Personnages porteurs": "5a02a16c-f725-4279-bb11-2f6079a22a51"
+    },
+    "sections": {},
+    "notion_page_id": "51b30042-8c54-4411-984e-412220f2bef4"
+  },
+  {
+    "Nom": "Organisée",
+    "values": {
+      "Défaut opposé": "01623f2a-c827-4455-91dc-13c14eb0b6be",
+      "Personnages porteurs": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41, 1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1d56e4d2-1b45-80e1-a1a9-e96243eb1712, 2286e4d2-1b45-80f8-a703-dce94ea5a27b, 2f46e4d2-1b45-8054-b997-e9fe5c9da656, 3236e4d2-1b45-808b-9b5c-e761e396c416, 3256e4d2-1b45-80f4-9eeb-de67c6d8955b, 3276e4d2-1b45-80f1-a87e-ffb93f4a7212, 3cea202e-d477-4326-bd0d-dcbd65e9bedb, c59d928f-a26b-47cd-8806-343e0dff8b28"
+    },
+    "sections": {},
+    "notion_page_id": "86772ae2-f02d-4315-a0d2-a0cd53cbe17c"
+  },
+  {
+    "Nom": "Modeste",
+    "values": {
+      "Défaut opposé": "cc90eb8b-7402-4d4d-82b7-3f538cd1b758"
+    },
+    "sections": {},
+    "notion_page_id": "0e1bba1a-866d-4668-9441-7b618e3364c2"
+  },
+  {
+    "Nom": "Loyale",
+    "values": {
+      "Défaut opposé": "a6214df7-b44b-43d0-a114-5e52a49ac876",
+      "Personnages porteurs": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd, 1d95df62-504c-4349-b8ec-63893118af51, 2286e4d2-1b45-80db-b5ea-c9a4c9ba305b, 3256e4d2-1b45-80f4-9eeb-de67c6d8955b, 7c77f813-ac8d-403a-b36b-0db35cda59c6, d79db510-a670-43d6-96aa-f8b600f3b356, dfe78783-9d63-424a-ad5c-aa7726bf6394"
+    },
+    "sections": {},
+    "notion_page_id": "f9a2d16a-351a-4127-8fdf-c4ebb2b2fb62"
+  },
+  {
+    "Nom": "Idéaliste",
+    "values": {
+      "Défaut opposé": "d8d39c3c-3ee2-48a2-8202-2796b1822ff4",
+      "Personnages porteurs": "892f2fd2-fbe3-4878-a05d-8d608b01e6bf"
+    },
+    "sections": {},
+    "notion_page_id": "ba2c1cb3-777c-49bd-8fd6-a1c200296480"
+  },
+  {
+    "Nom": "Lucide",
+    "values": {
+      "Défaut opposé": "50b80540-4a20-42b1-b01d-1cd49a2cc579",
+      "Personnages porteurs": "1b76e4d2-1b45-8076-8f2c-dc910ac92b7a, 1d56e4d2-1b45-80e1-a1a9-e96243eb1712, 208c6783-0f82-4e30-a263-f6d38e2b6b85, 2b72ae6a-99e3-4d59-a30a-df6ecfe5d0e6, 2cc6e4d2-1b45-8062-9d49-f252d825bc90, 3236e4d2-1b45-808b-9b5c-e761e396c416, 571d7129-d962-446f-a3d8-303f19256366, 5bade1fc-762e-4b57-92ef-3ab0ef05bfea, 7c77f813-ac8d-403a-b36b-0db35cda59c6, aa2bb51d-fa8e-412d-b469-4afddec26fbe, d79db510-a670-43d6-96aa-f8b600f3b356, ec7da632-19b5-4d59-bd18-20a5bd5805d9, c52842f2-acd5-42ec-8ffd-92dfb319dfb9, f1365719-cfda-4d75-82e1-df6129d02041, eb2168a8-5bf3-4348-85c4-64bb0a1df94d"
+    },
+    "sections": {},
+    "notion_page_id": "56d88365-8a53-4791-ba5e-9ac3def134a0"
+  },
+  {
+    "Nom": "Ingénieuse",
+    "values": {
+      "Défaut opposé": "ed56b898-edd4-4568-923b-11ebd1bed5d2",
+      "Personnages porteurs": "1996e4d2-1b45-80a5-a7ae-e9d43372323f, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1a96e4d2-1b45-8077-b534-dae9777c6a12, 1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1, 1bc6e4d2-1b45-8013-831b-e5a42c40dd2f, 31d6e4d2-1b45-80c7-a993-c76e1bdfbbca, 8fefb411-8033-4e06-afdd-9d186937ee2a, aab147fa-ca93-45eb-8462-9747f3601298, f38a4a8a-2a9b-4349-9d9a-3669e7863321"
+    },
+    "sections": {},
+    "notion_page_id": "bb1091c9-60a9-47ed-9e7a-b558ad8cf260"
+  },
+  {
+    "Nom": "Humble",
+    "values": {
+      "Défaut opposé": "2b9bc344-4a82-44b2-9652-9d1ec7324a98",
+      "Personnages porteurs": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c, 2286e4d2-1b45-80db-b5ea-c9a4c9ba305b"
+    },
+    "sections": {},
+    "notion_page_id": "d88e7953-4a94-4852-84e8-1502cb325859"
+  },
+  {
+    "Nom": "Honnête",
+    "values": {
+      "Défaut opposé": "d54ed3d3-3aeb-4df1-b396-b68c92523a23",
+      "Personnages porteurs": "1886e4d2-1b45-80bb-b913-d5392af85620, 1b76e4d2-1b45-8076-8f2c-dc910ac92b7a, 2b72ae6a-99e3-4d59-a30a-df6ecfe5d0e6, ec7da632-19b5-4d59-bd18-20a5bd5805d9"
+    },
+    "sections": {},
+    "notion_page_id": "f5c2b3a4-8eaf-48e1-855e-8a3bef32ce82"
+  },
+  {
+    "Nom": "Généreuse",
+    "values": {
+      "Défaut opposé": "585ea922-1d22-4aac-b69b-98710d9913ce",
+      "Personnages porteurs": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7"
+    },
+    "sections": {},
+    "notion_page_id": "43829b0e-3b8a-49c9-8353-c40de6073210"
+  },
+  {
+    "Nom": "Energique",
+    "values": {
+      "Défaut opposé": "b945774a-e3e0-4bf4-851d-eacec7140780",
+      "Personnages porteurs": "1b46e4d2-1b45-8081-992e-febbfed44a5d, 5a02a16c-f725-4279-bb11-2f6079a22a51"
+    },
+    "sections": {},
+    "notion_page_id": "2012d4af-810b-4e71-a4b4-706eff8b76ff"
+  },
+  {
+    "Nom": "Fiable",
+    "values": {
+      "Défaut opposé": "117f89ac-dce0-4562-80ba-59a640374f25",
+      "Personnages porteurs": "06ed3d91-4c09-4c7c-bb38-8cad4db51ba5, 0dd7fd03-023b-450a-ab2f-8ea9eac8c11d, 1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1, f0105182-324b-4626-86c3-a78edbb3d2b6"
+    },
+    "sections": {},
+    "notion_page_id": "56dd03aa-2570-46dd-83c7-e7b8402023c2"
+  },
+  {
+    "Nom": "Empathique",
+    "values": {
+      "Défaut opposé": "8adf6e71-e871-4072-9c52-e2ab002a3d20",
+      "Personnages porteurs": "1886e4d2-1b45-80bb-b913-d5392af85620, 1996e4d2-1b45-8043-9847-ef675478f485, 1996e4d2-1b45-80c4-9c73-ddac6322e9bd, 1996e4d2-1b45-80fa-97db-fe99255e6c0c, 1c36e4d2-1b45-8095-8449-d7d1749e69ad, 2286e4d2-1b45-80cd-bf22-d2fadf218fb2, 2286e4d2-1b45-80db-b5ea-c9a4c9ba305b, 22e6e4d2-1b45-80ee-875e-d9f219970f06, 31e6e4d2-1b45-80bb-9d3c-cc78c2782622, aab147fa-ca93-45eb-8462-9747f3601298"
+    },
+    "sections": {},
+    "notion_page_id": "b2b73b31-7b3d-4474-abf4-d295ecb4fd2a"
+  },
+  {
+    "Nom": "Discrète",
+    "values": {
+      "Défaut opposé": "2d9dcabb-6a78-4ffa-a5bb-e35892f01b3d",
+      "Personnages porteurs": "0dd7fd03-023b-450a-ab2f-8ea9eac8c11d, 1996e4d2-1b45-80a5-a7ae-e9d43372323f, 1bc6e4d2-1b45-8013-831b-e5a42c40dd2f, 1c06e4d2-1b45-80d6-bafd-eeb1a8395c2f, 1c36e4d2-1b45-80f2-8124-e9ddf8d9359e, aab147fa-ca93-45eb-8462-9747f3601298, b5922a18-76ae-49b5-807c-b5ef963a14cf, c52842f2-acd5-42ec-8ffd-92dfb319dfb9"
+    },
+    "sections": {},
+    "notion_page_id": "f9815f24-5531-45cc-a5cf-ba5d41254803"
+  },
+  {
+    "Nom": "Diplomate",
+    "values": {
+      "Défaut opposé": "9726af3e-8924-45b8-8d3e-80e52c21f378",
+      "Personnages porteurs": "571d7129-d962-446f-a3d8-303f19256366"
+    },
+    "sections": {},
+    "notion_page_id": "91fe3a2d-5c08-4b03-bd09-0d4f2b269b7a"
+  },
+  {
+    "Nom": "Conciliante",
+    "values": {
+      "Défaut opposé": "fab3c424-7913-4f29-872d-5d6425fa2242"
+    },
+    "sections": {},
+    "notion_page_id": "21fa13c9-2d25-4a9f-9d88-bbe4a1c95ce6"
+  },
+  {
+    "Nom": "Détachée",
+    "values": {
+      "Défaut opposé": "3a6a1d78-462a-4244-96e6-14dcff64b23a",
+      "Personnages porteurs": "1c76e4d2-1b45-805a-b457-e64ae338d6f9, 21ce11c5-e354-4ff9-b504-5acf991b0b6b, 2448c3aa-ecab-4afd-9b4e-36d86c0abfef, c3a2f9da-4afc-412f-a891-b4e5aaa57795"
+    },
+    "sections": {},
+    "notion_page_id": "1bf35a33-d01e-4ae7-b65a-c5e45a5b342b"
+  },
+  {
+    "Nom": "Décent",
+    "values": {
+      "Défaut opposé": "af3ebdb8-4dbf-49df-b155-8d2e420abd17"
+    },
+    "sections": {},
+    "notion_page_id": "8f02c892-704e-4703-b3c1-a9ebb7115143"
+  },
+  {
+    "Nom": "Courageuse",
+    "values": {
+      "Défaut opposé": "4457284a-321b-4113-961e-367d81fef071",
+      "Personnages porteurs": "1886e4d2-1b45-80bb-b913-d5392af85620, 1996e4d2-1b45-80fa-97db-fe99255e6c0c, 1a16e4d2-1b45-8093-89ad-eae2e28f9b31, 1ae6e4d2-1b45-80ef-84e8-fb114d0136ed, 1b36e4d2-1b45-8081-ab37-c4b33c4f51b1, 1d56e4d2-1b45-80e1-a1a9-e96243eb1712, 1d95df62-504c-4349-b8ec-63893118af51, 2286e4d2-1b45-8094-94b7-c021f47fc005, 22e6e4d2-1b45-8077-a1a6-dea94ef159a4, 22e6e4d2-1b45-80ee-875e-d9f219970f06, 892f2fd2-fbe3-4878-a05d-8d608b01e6bf, dfe78783-9d63-424a-ad5c-aa7726bf6394"
+    },
+    "sections": {},
+    "notion_page_id": "91e340b1-0b83-4c41-ae79-85420ac189d4"
+  },
+  {
+    "Nom": "Confiante",
+    "values": {
+      "Défaut opposé": "e4186966-aae5-4e9b-8b09-b1e0f4c3ddfe"
+    },
+    "sections": {},
+    "notion_page_id": "ae0bbed6-2ce8-4762-8fa2-0195c15691a8"
+  }
+]

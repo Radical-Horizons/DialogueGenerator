@@ -26,7 +26,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 2
+# 3 : valeurs nettoyées du balisage Notion et propriétés de production retirées (2026-11-18).
+SCHEMA_VERSION = 3
 _PRECOMPILE_ROOT = Path("data") / ".gdd_context_precompile"
 _ORGANIZATION_MODES = ("narrative", "default", "minimal")
 _ELEMENT_MODES = ("full", "excerpt")
@@ -333,7 +334,7 @@ def _compile_single_variant(
 
     from services.context_organizer import ContextOrganizer
 
-    organizer = ContextOrganizer()
+    organizer = ContextOrganizer(relation_index=construction._relation_index)
     context_item = construction._build_context_item(
         element_data=element_data,
         element_type=element_type,

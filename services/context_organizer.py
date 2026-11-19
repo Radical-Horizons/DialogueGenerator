@@ -312,11 +312,12 @@ class ContextOrganizer:
         
         return self._organize_default(element_data, element_type, minimal_fields, field_labels_map, element_mode, truncation_map)
     
-    def _extract_field_value(self, data: Dict, path: str) -> Optional[any]:
-        """Extrait la valeur d'un champ depuis un chemin."""
+    def _extract_field_value(self, data: Dict, path: str) -> Optional[Any]:
+        """Extrait la valeur d'un champ, nettoyée du balisage Notion (None si plus rien d'utile)."""
+        from services.context_value_cleaner import clean_context_value
         from services.gdd_sections_split import extract_gdd_field_value
 
-        return extract_gdd_field_value(data, path)
+        return clean_context_value(extract_gdd_field_value(data, path), self._relation_index)
     
     def _resolve_notion_ids(self, value: str) -> str:
         """Remplace les UUID Notion par leur Nom si disponible dans l'index.

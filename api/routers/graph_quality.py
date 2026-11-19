@@ -45,6 +45,8 @@ from api.routers.graph_router_helpers import create_llm_client_for_router
 
 logger = logging.getLogger(__name__)
 
+_QUALITY_ENDPOINT = "/api/v1/unity-dialogues/graph/evaluate-dialogue-quality"
+
 
 def _ai_slop_options_to_data(
     options: Optional[AiSlopDetectionOptions],
@@ -267,42 +269,23 @@ async def evaluate_dialogue_quality(
 
     t0 = time.perf_counter()
     try:
+        # Le client enregistre lui-même l'usage et le coût de l'appel ; un second
+        # track_usage ici comptait chaque évaluation deux fois dans le budget (2026-11-19).
         llm_client = create_llm_client_for_router(
             primary_model,
             config_service,
             usage_service,
             request_id,
+            endpoint=_QUALITY_ENDPOINT,
         )
 
-        result = await judge_service.evaluate_graph(
+        return await judge_service.evaluate_graph(
             nodes=request_data.nodes,
             edges=request_data.edges,
             llm_client=llm_client,
             config_service=config_service,
             model_id=primary_model,
         )
-        duration_ms = int((time.perf_counter() - t0) * 1000)
-        pt = int(getattr(llm_client, "last_usage_prompt_tokens", 0) or 0)
-        ct = int(getattr(llm_client, "last_usage_completion_tokens", 0) or 0)
-        try:
-            usage_service.track_usage(
-                request_id=request_id,
-                model_name=primary_model,
-                prompt_tokens=pt,
-                completion_tokens=ct,
-                total_tokens=pt + ct,
-                duration_ms=max(1, duration_ms),
-                success=True,
-                endpoint="/api/v1/unity-dialogues/graph/evaluate-dialogue-quality",
-                k_variants=1,
-            )
-        except Exception as track_exc:
-            logger.warning(
-                "track_usage juge qualité ignoré (request_id=%s): %s",
-                request_id,
-                track_exc,
-            )
-        return result
     except ValueError as exc:
         logger.warning(
             "Évaluation qualité: validation graphe (request_id=%s): %s",
@@ -330,7 +313,7 @@ async def evaluate_dialogue_quality(
                 total_tokens=0,
                 duration_ms=max(1, duration_ms),
                 success=False,
-                endpoint="/api/v1/unity-dialogues/graph/evaluate-dialogue-quality",
+                endpoint=_QUALITY_ENDPOINT,
                 k_variants=1,
                 error_message=str(exc),
             )

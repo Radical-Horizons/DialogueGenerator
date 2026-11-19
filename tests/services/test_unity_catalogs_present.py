@@ -1,4 +1,5 @@
 """Catalogues Unity versionnés (Skill / Trait) — smoke de présence et chargement."""
+import json
 from pathlib import Path
 
 from services.skill_check_catalog import load_skill_entries
@@ -18,12 +19,18 @@ def test_skill_catalog_csv_present_and_loads() -> None:
     assert "Rhétorique" in ids
 
 
-def test_trait_catalog_csv_present_and_loads() -> None:
-    """TraitCatalog.csv versionné se charge avec des axes bipolaires."""
+def test_trait_catalog_matches_notion_qualities_and_flaws() -> None:
+    """TraitCatalog.csv reprend exactement les bases Notion Qualités et Défauts.
+
+    Le Notion fait autorité (page « Traits de caractère ») : pas de trait inventé, pas
+    de trait oublié. Régénérer avec ``python -m scripts.generate_unity_catalogs_from_gdd``.
+    """
     path = UNITY / "TraitCatalog.csv"
     assert path.is_file(), f"absent: {path}"
-    traits = TraitCatalogService(path).load_traits()
-    assert len(traits) >= 5
-    labels = TraitCatalogService(path).get_trait_labels()
-    assert "Courage" in labels
-    assert "Lâcheté" in labels
+    gdd = ROOT / "data" / "GDD_categories"
+    notion_names = {
+        record["Nom"]
+        for name in ("Qualités.json", "Défauts.json")
+        for record in json.loads((gdd / name).read_text(encoding="utf-8"))
+    }
+    assert set(TraitCatalogService(path).get_trait_labels()) == notion_names

@@ -116,7 +116,13 @@ class ModelNames:
     MODELS_WITHOUT_CUSTOM_TEMPERATURE = [
         GPT_5_6_SOL, GPT_5_6_TERRA, GPT_5_6_LUNA, GPT_5_6,
     ]
-    
+
+    # Point de coupure de cache explicite (``prompt_cache_breakpoint``) : GPT-5.6 et suivants
+    # (doc prompt caching). Voir core/llm/openai/prompt_cache.py.
+    MODELS_WITH_EXPLICIT_CACHE_BREAKPOINTS: frozenset[str] = frozenset(
+        {GPT_5_6_SOL, GPT_5_6_TERRA, GPT_5_6_LUNA, GPT_5_6}
+    )
+
     # Tous les tiers 5.6 supportent structured outputs (doc officielle)
     MODELS_WITH_STRUCTURED_OUTPUT_ISSUES: list[str] = []
 
@@ -149,7 +155,10 @@ class PlayableCharacters:
 
 
 class Defaults:
-    CONTEXT_TOKENS = 10000  # Plancher produit aligné MIN_CONTEXT_TOKENS (contexte LLM utilisable)
+    # Budget du bloc contexte GDD quand la requête n'en fixe pas (graphe, expand-tree, API).
+    # 10 000 jusqu'au 2026-11-18 (on avait confondu défaut et plancher) : la fiche du PNJ
+    # remplissait seule le budget. 40 000 = petit contexte pour les modèles actuels.
+    CONTEXT_TOKENS = 40000
     VARIANTS_COUNT = 2
     TEMPERATURE = 0.7
     MODEL_ID = ModelNames.GPT_5_6_LUNA  # Défaut économique (volume / expand-tree)

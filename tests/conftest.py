@@ -113,6 +113,11 @@ def isolated_local_state(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
         "api.services.in_memory_batch_job_manager._BATCH_JOBS_DIR",
         tmp_path / ".pytest-batch-jobs",
     )
+    # Fiches compilées : un test sur GDD factice y déposait ses fiches, et un run suivant
+    # relisait une version compilée par un autre code (vécu le 2026-11-18).
+    monkeypatch.setattr(
+        "services.gdd_context_precompile._PRECOMPILE_ROOT", tmp_path / ".pytest-gdd-precompile"
+    )
 
 
 @pytest.fixture
