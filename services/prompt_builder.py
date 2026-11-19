@@ -18,6 +18,15 @@ from services.context_serializer.text_serializer import TextSerializer
 # Réserve tokens pour l’enveloppe XML plate (<context><gdd_context>) quand le XML hiérarchique dépasse le budget.
 _XML_CONTEXT_ENVELOPE_TOKEN_RESERVE = 96
 
+# Les fiches listent des « expressions courantes » ; sans cette ligne collée à la fiche, le
+# modèle en place une par réplique (vécu sur Voknir le 2026-11-19 : la même maxime dans deux
+# issues sur quatre d'un test, générées en parallèle sans se voir).
+SPEAKER_VOICE_TICS_RULE = (
+    "Expressions courantes, maximes et jurons de cette fiche : des tics rares, une au plus par "
+    "scène et seulement quand le moment l'appelle. La plupart des répliques n'en ont aucune ; "
+    "jamais une formule déjà présente dans le dialogue."
+)
+
 if TYPE_CHECKING:
     from core.prompt.prompt_engine import PromptInput
     from core.context.context_builder import ContextBuilder
@@ -125,9 +134,9 @@ class PromptBuilder:
         # RÈGLES DE PRIORITÉ (toujours présentes car essentielles)
         priority_text = (
             "En cas de conflit entre les instructions, l'ordre de priorité est :\n"
-            "1. Instructions de scène (<scene_instructions>) — prévalent sur tout\n"
-            "2. Directives d'auteur (<author_directives>) — modulent le style global\n"
-            "3. Règles de génération (<generation_instructions>) et system prompt"
+            "1. Instructions de scène (section scene_instructions) — prévalent sur tout\n"
+            "2. Directives d'auteur (section author_directives) — modulent le style global\n"
+            "3. Règles de génération (section generation_instructions) et system prompt"
         )
         if priority_text.strip():
             priority_elem = ET.SubElement(contract_elem, "priority_rules")
@@ -237,6 +246,7 @@ class PromptBuilder:
         voice_elem = ET.Element("speaker_voice")
         voice_elem.text = escape_xml_text(
             f"Voix du PNJ {npc_name} — à respecter dans toutes les répliques `line` :\n{raw_content}"
+            f"\n\n{SPEAKER_VOICE_TICS_RULE}"
         )
         return voice_elem
 

@@ -6,6 +6,7 @@ import type { Node } from 'reactflow'
 import type { GraphState } from '../types/graphState'
 import type { Choice } from '../../schemas/nodeEditorSchema'
 import { serializeDialogueNodesForApi } from '../../utils/dialoguePathContext'
+import { resolveGraphGenerationDramatis } from '../../utils/sceneDramatis'
 import * as graphAPI from '../../api/graph'
 import { markNodeDeleted } from '../../api/llmUsage'
 import { normalizeTestBars } from '../../utils/graphNormalizers'
@@ -207,10 +208,17 @@ export const createGenerationSlice: StateCreator<
           : {}
       const maxChoices =
         typeof options.max_choices === 'number' ? options.max_choices : null
-      const npcSpeakerId =
-        typeof options.npc_speaker_id === 'string' ? options.npc_speaker_id : undefined
-      const playerCharacterId =
-        typeof options.player_character_id === 'string' ? options.player_character_id : undefined
+      const dramatis = resolveGraphGenerationDramatis({
+        nodes: state.nodes,
+        parentNodeId,
+        contextSelections,
+        playerCharacterId:
+          typeof options.player_character_id === 'string' ? options.player_character_id : undefined,
+        npcSpeakerId:
+          typeof options.npc_speaker_id === 'string' ? options.npc_speaker_id : undefined,
+      })
+      const npcSpeakerId = dramatis.npcSpeakerId !== 'PNJ' ? dramatis.npcSpeakerId : undefined
+      const playerCharacterId = dramatis.playerCharacterId
       const systemPromptOverride =
         typeof options.system_prompt_override === 'string'
           ? options.system_prompt_override
@@ -756,13 +764,23 @@ export const createGenerationSlice: StateCreator<
           ? (snap as Record<string, unknown>)
           : {}
 
-      const regenProtagonists = regenSelections.scene_protagonists as
-        | { personnage_a?: string; personnage_b?: string }
-        | undefined
-      const regenPlayerId =
-        typeof regenProtagonists?.personnage_a === 'string'
-          ? regenProtagonists.personnage_a
-          : undefined
+      const regenDramatis = resolveGraphGenerationDramatis({
+        nodes: state.nodes,
+        parentNodeId: parentNode.id,
+        contextSelections: regenSelections,
+      })
+      const regenPlayerId = regenDramatis.playerCharacterId
+      // L'endpoint de régénération lit le PNJ dans scene_protagonists (pas de champ dédié).
+      const regenContext =
+        regenDramatis.npcSpeakerId !== 'PNJ'
+          ? {
+              ...regenSelections,
+              scene_protagonists: {
+                personnage_a: regenDramatis.playerCharacterId,
+                personnage_b: regenDramatis.npcSpeakerId,
+              },
+            }
+          : regenSelections
 
       const overlay = useGenerationStore.getState().contextDroppingRulesOverlay
       const response = await graphAPI.regenerateNode(nodeId, {
@@ -771,7 +789,7 @@ export const createGenerationSlice: StateCreator<
         preserve_connections: true,
         parent_node_id: parentNode.id,
         parent_node_content: parentNode.data as Record<string, unknown>,
-        context_selections: regenSelections,
+        context_selections: regenContext,
         via_choice_index,
         player_character_id: regenPlayerId,
         dialogue_nodes: serializeDialogueNodesForApi(state.nodes),

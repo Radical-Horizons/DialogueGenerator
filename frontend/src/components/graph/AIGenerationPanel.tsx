@@ -21,7 +21,10 @@ import {
   getChoiceDisplayLabel,
 } from '../../utils/graphChoiceLabels'
 import { serializeDialogueNodesForApi } from '../../utils/dialoguePathContext'
-import { resolveDramatisFromSelections } from '../../utils/sceneDramatis'
+import {
+  resolveDramatisFromSelections,
+  resolveGraphGenerationDramatis,
+} from '../../utils/sceneDramatis'
 import { useGenerationStore } from '../../store/generationStore'
 
 interface AIGenerationPanelProps {
@@ -235,18 +238,21 @@ export function AIGenerationPanel({
   // Payload pour l'estimation de coût (aligné sur GenerateNodeRequest).
   // useMemo évite de recréer l'objet à chaque render (référence stable pour useEffect dans le badge).
   // Doit être avant tout return conditionnel (règles des hooks React).
+  const sceneDramatis = useMemo(
+    () =>
+      resolveGraphGenerationDramatis({
+        nodes,
+        parentNodeId,
+        contextSelections: selections as unknown as Record<string, unknown>,
+        sceneSelection,
+      }),
+    [nodes, parentNodeId, selections, sceneSelection]
+  )
+
   const estimateRequest = useMemo(
     () => {
       if (!parentNodeId || !parentNode) return null
-      const allCharacters = [
-        ...(selections.characters_full || []),
-        ...(selections.characters_excerpt || []),
-      ]
-      const dramatis = resolveDramatisFromSelections({
-        sceneSelection,
-        sceneProtagonists: selections.scene_protagonists,
-        contextCharacters: allCharacters,
-      })
+      const dramatis = sceneDramatis
       return {
         parent_node_id: parentNodeId,
         parent_node_content: (parentNode.data ?? {}) as Record<string, unknown>,
@@ -261,7 +267,7 @@ export function AIGenerationPanel({
         player_character_id: dramatis.playerCharacterId,
       }
     },
-    [parentNodeId, parentNode, userInstructions, selections, sceneSelection, maxChoices, llmModel, targetChoiceIndex, generateAllChoices, nodes]
+    [parentNodeId, parentNode, userInstructions, selections, sceneDramatis, maxChoices, llmModel, targetChoiceIndex, generateAllChoices, nodes]
   )
   
   if (!parentNodeId || !parentNode) {
@@ -724,6 +730,9 @@ export function AIGenerationPanel({
           Contexte sélectionné
         </div>
         <div>
+          <div data-testid="ai-generation-scene-dramatis" style={{ color: theme.text.primary, marginBottom: '0.25rem' }}>
+            Scène : {sceneDramatis.npcSpeakerId} (PNJ) · {sceneDramatis.playerCharacterId} (PJ)
+          </div>
           {(selections.characters_full?.length || 0) + (selections.characters_excerpt?.length || 0) > 0 && (
             <div>Personnages: {(selections.characters_full?.length || 0) + (selections.characters_excerpt?.length || 0)}</div>
           )}
@@ -737,7 +746,7 @@ export function AIGenerationPanel({
            (selections.locations_full?.length || 0) + (selections.locations_excerpt?.length || 0) === 0 && 
            (selections.items_full?.length || 0) + (selections.items_excerpt?.length || 0) === 0 && (
             <div style={{ fontStyle: 'italic' }}>
-              Aucun contexte sélectionné. Utilisez le panneau de gauche pour sélectionner des éléments.
+              Fiches de la scène envoyées d’office (PNJ complète, PJ en extrait). Le panneau de gauche ajoute un lieu ou d’autres fiches.
             </div>
           )}
         </div>

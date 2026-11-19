@@ -62,6 +62,7 @@ import { ConnectionTargetSelect } from './ConnectionTargetSelect'
 import { useEstimation } from '../../hooks/useEstimation'
 import { EstimationBadge } from '../estimation'
 import { serializeDialogueNodesForApi } from '../../utils/dialoguePathContext'
+import { resolveGraphGenerationDramatis } from '../../utils/sceneDramatis'
 
 function formValuesFromNode(
   nodeType: string,
@@ -660,20 +661,25 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
   // Hooks appelés unconditionnellement pour respecter les Rules of Hooks (ordre stable entre rendus).
   const choices = watch('choices') as Choice[] | undefined
 
-  const graphEstimateRequest = useMemo(
-    () =>
-      selectedNodeId && selectedNode
-        ? {
-            parent_node_id: selectedNodeId,
-            parent_node_content: (selectedNode.data ?? {}) as Record<string, unknown>,
-            user_instructions: userInstructions.trim() || 'Ecris la réponse du PNJ à ce que dit le PJ',
-            context_selections: selections as unknown as Record<string, unknown>,
-            llm_model_identifier: llmModel,
-            dialogue_nodes: serializeDialogueNodesForApi(graphNodes),
-          }
-        : null,
-    [selectedNodeId, selectedNode, userInstructions, selections, llmModel, graphNodes]
-  )
+  const graphEstimateRequest = useMemo(() => {
+    if (!selectedNodeId || !selectedNode) return null
+    const contextSelections = selections as unknown as Record<string, unknown>
+    const dramatis = resolveGraphGenerationDramatis({
+      nodes: graphNodes,
+      parentNodeId: selectedNodeId,
+      contextSelections,
+    })
+    return {
+      parent_node_id: selectedNodeId,
+      parent_node_content: (selectedNode.data ?? {}) as Record<string, unknown>,
+      user_instructions: userInstructions.trim() || 'Ecris la réponse du PNJ à ce que dit le PJ',
+      context_selections: contextSelections,
+      llm_model_identifier: llmModel,
+      dialogue_nodes: serializeDialogueNodesForApi(graphNodes),
+      npc_speaker_id: dramatis.npcSpeakerId !== 'PNJ' ? dramatis.npcSpeakerId : undefined,
+      player_character_id: dramatis.playerCharacterId,
+    }
+  }, [selectedNodeId, selectedNode, userInstructions, selections, llmModel, graphNodes])
   const { result: estimationResult, state: estimationState, error: estimationError, runEstimate, budgetExceeded, budgetWarning90 } = useEstimation({
     type: 'graph',
     request: graphEstimateRequest,

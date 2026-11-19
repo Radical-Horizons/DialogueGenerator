@@ -89,7 +89,11 @@ def _build_representative_prompt_for_estimate(
     ``generate-node`` : fiches GDD, catalogues et historique. Sans elle, repli sur
     l'historique précédé des seuls noms sélectionnés (sous-estimation).
     """
-    from services.dialogue_path_context import build_enriched_generation_prompt
+    from services.dialogue_path_context import (
+        ancestor_path_node_ids,
+        build_enriched_generation_prompt,
+        format_dialogue_reference,
+    )
 
     prompt_body = build_enriched_generation_prompt(
         nodes=dialogue_nodes if parent_node_id else None,
@@ -99,6 +103,15 @@ def _build_representative_prompt_for_estimate(
         user_instructions=user_instructions or "",
         player_choice_label=player_choice_label,
     )
+    if parent_node_id:
+        prompt_body = (
+            format_dialogue_reference(
+                dialogue_nodes,
+                ancestor_path_node_ids(dialogue_nodes, parent_node_id),
+                player_choice_label=player_choice_label,
+            )
+            + prompt_body
+        )
     if prompt_context_factory is not None:
         dramatis, enriched = resolve_and_enrich_graph_context(
             context_selections or {},
@@ -114,7 +127,8 @@ def _build_representative_prompt_for_estimate(
             narrative_tags=narrative_tags,
             llm_model_identifier=model_id,
         )
-        return prompt_context.render(prompt_body, max_choices)
+        system_prompt = prompt_context_factory.default_system_prompt()
+        return f"{system_prompt}\n\n{prompt_context.render(prompt_body, max_choices)}"
 
     context_blob = json.dumps(context_selections, ensure_ascii=False) if context_selections else ""
     return f"{context_blob}\n\n{prompt_body}" if context_blob else prompt_body

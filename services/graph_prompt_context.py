@@ -98,6 +98,13 @@ class GraphPromptContextFactory:
         self._skill_service = skill_service
         self._trait_service = trait_service
 
+    def default_system_prompt(self) -> str:
+        """System prompt du flux « Générer » (``config/system_prompts``), pour le graphe aussi.
+
+        Sans lui, le graphe retombait sur le gabarit générique de ``llm_config.json``.
+        """
+        return self._prompt_engine.system_prompt_template
+
     def build(
         self,
         context_selections: Dict[str, Any],

@@ -151,6 +151,83 @@ def build_ancestor_path_steps(
     return steps
 
 
+DIALOGUE_REFERENCE_MAX_CHARS = 40000
+DIALOGUE_REFERENCE_HEADER = (
+    "Reste du dialogue déjà écrit (autres branches, hors chemin courant) — faits établis et "
+    "ton de référence : ne pas les contredire, ne pas en recopier les formules."
+)
+
+
+def format_dialogue_reference(
+    nodes: Optional[List[Dict[str, Any]]],
+    exclude_ids: set[str],
+    player_choice_label: str = "PJ",
+    max_chars: int = DIALOGUE_REFERENCE_MAX_CHARS,
+) -> str:
+    """Les nœuds hors du chemin courant, en lecture compacte.
+
+    Un prolongement ne voit sinon que sa branche : il contredit ce que les branches
+    sœurs ont établi (vécu sur Voknir, 2026-11-19 : « je vous guiderai » alors que trois
+    autres branches posent qu'il en est incapable).
+
+    Args:
+        nodes: Tous les nœuds du dialogue (format Unity JSON).
+        exclude_ids: Nœuds déjà présents dans l'historique du chemin.
+        player_choice_label: Nom du PJ pour les choix.
+        max_chars: Plafond du bloc ; les nœuds au-delà sont comptés, pas cités.
+
+    Returns:
+        Bloc texte terminé par une ligne vide, ou ``""`` s'il n'y a rien d'autre.
+    """
+    if not nodes:
+        return ""
+    lines: List[str] = []
+    used = 0
+    omitted = 0
+    for node in nodes:
+        node_id = str(node.get("id") or "")
+        line = str(node.get("line") or "").strip()
+        if not node_id or node_id in exclude_ids or not line:
+            continue
+        block = [f"{node.get('speaker') or 'PNJ'}: {line}"]
+        for choice in node.get("choices") or []:
+            text = str(choice.get("text") or "").strip()
+            if text:
+                block.append(f"  {player_choice_label}: {text}")
+        chunk = "\n".join(block)
+        if used + len(chunk) > max_chars:
+            omitted += 1
+            continue
+        lines.append(chunk)
+        used += len(chunk)
+    if not lines:
+        return ""
+    if omitted:
+        lines.append(f"(… {omitted} nœud(s) non cités, faute de place)")
+    return "\n".join([DIALOGUE_REFERENCE_HEADER, *lines, "", ""])
+
+
+def ancestor_path_node_ids(
+    nodes: Optional[List[Dict[str, Any]]],
+    target_node_id: str,
+) -> set[str]:
+    """IDs des nœuds du chemin START → cible (cible incluse), ceux de l'historique."""
+    if not nodes:
+        return set()
+    nodes_by_id, parent_map = _build_parent_map(nodes)
+    current = str(target_node_id)
+    if current not in nodes_by_id:
+        return set()
+    ids = {current}
+    while current in parent_map:
+        parent_id = str(parent_map[current].parent.get("id") or "")
+        if not parent_id or parent_id in ids:
+            break
+        ids.add(parent_id)
+        current = parent_id
+    return ids
+
+
 def infer_child_generation_depth(
     path_steps: Optional[List[DialoguePathStep]],
 ) -> int:
