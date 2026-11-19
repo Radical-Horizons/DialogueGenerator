@@ -56,7 +56,13 @@ Ce dossier contient les **catalogues de référence Unity** (fichiers CSV) :
 
 Ces fichiers sont utilisés par l'application pour valider et référencer les traits, compétences et drapeaux lors de la génération de dialogues.
 
-**⚠️ Maintenance manuelle requise** : Ces fichiers CSV doivent être mis à jour manuellement si le système Unity change (ajout de nouveaux traits, compétences, drapeaux).
+**Le Notion fait autorité.** `TraitCatalog.csv` et `SkillCatalog.csv` se régénèrent depuis le GDD synchronisé :
+1. Synchroniser les bases Notion `Compétences.json`, `Qualités.json` et `Défauts.json` (API `POST /api/v1/gdd-notion-sync/sync?category_file=…`).
+2. `python -m scripts.generate_unity_catalogs_from_gdd`.
+
+Un trait est une entrée des bases **Qualités** ou **Défauts** ; la relation « Défaut opposé » forme l'axe. On n'ajoute pas de trait à la main dans le CSV : on l'ajoute dans Notion. `tests/services/test_unity_catalogs_present.py` vérifie que le catalogue colle aux bases synchronisées.
+
+`FlagCatalog.csv` reste à maintenir à la main.
 
 ### Export des Dialogues Unity JSON
 
