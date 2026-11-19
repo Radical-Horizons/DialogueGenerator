@@ -399,7 +399,10 @@ async def test_generate_variants_text_mode_with_real_sdk_response(tmp_path) -> N
             input_tokens=10,
             output_tokens=3,
             total_tokens=13,
-            input_tokens_details=InputTokensDetails(cached_tokens=0),
+            # cache_write_tokens est requis par le SDK 3.x (CI) et toléré en champ libre par le 2.x.
+            input_tokens_details=InputTokensDetails.model_validate(
+                {"cached_tokens": 0, "cache_write_tokens": 0}
+            ),
             output_tokens_details=OutputTokensDetails(reasoning_tokens=0),
         ),
     )
