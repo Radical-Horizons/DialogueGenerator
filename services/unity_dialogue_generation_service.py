@@ -12,6 +12,7 @@ from models.dialogue_structure.unity_dialogue_node import (
 from core.llm.llm_client import ILLMClient
 from services.dialogue_path_context import DialoguePathStep, format_path_history_lines
 from services.document_choice_id_service import stable_choice_id
+from services.generated_markup_cleanup import tidy_choice_action_markup
 from services.unity_export_normalizer import normalize_unity_export_document
 
 logger = logging.getLogger(__name__)
@@ -518,7 +519,7 @@ Instructions pour la suite:
             for choice_index, choice_content in enumerate(node_content.choices):
                 choice_dict: Dict[str, Any] = {
                     "choiceId": stable_choice_id(start_id, choice_index),
-                    "text": choice_content.text,
+                    "text": tidy_choice_action_markup(choice_content.text),
                     "targetNode": "END"  # Placeholder temporaire : sera mis à jour si on génère la suite
                 }
                 
