@@ -136,3 +136,21 @@ async def test_orchestrator_sends_reference_and_house_system_prompt() -> None:
     assert prompt.index(DIALOGUE_REFERENCE_HEADER) < prompt.index("Historique du dialogue")
     assert "incapable de vous guider" in prompt
     assert "retournement (aveu" not in prompt
+
+
+def test_cost_estimate_counts_what_generate_node_sends() -> None:
+    """L'estimation mesure aussi le reste du dialogue et le system prompt maison."""
+    from api.routers.graph_cost import _build_representative_prompt_for_estimate
+
+    prompt = _build_representative_prompt_for_estimate(
+        {"speaker": VOKNIR, "line": "« C'est l'atelier qui le déplace. »"},
+        "Suite",
+        {"characters_full": [VOKNIR]},
+        parent_node_id="node-leaf",
+        dialogue_nodes=NODES,
+        player_choice_label="Uresaïr",
+        prompt_context_factory=_FakeFactory(),  # type: ignore[arg-type]
+        npc_speaker_id=VOKNIR,
+    )
+    assert prompt.startswith("SYSTEM MAISON")
+    assert "incapable de vous guider" in prompt
