@@ -17,7 +17,6 @@ import type { LLMModelResponse } from '../types/api'
 
 /** Modèles acceptés par ``GenerateUnityDialogueRequest`` (structured output Unity). */
 export const UNITY_STRUCTURED_OUTPUT_MODELS = [
-  MODEL_NAMES.GPT_6_2_ASTRA,
   MODEL_NAMES.GPT_6_2_SOL,
   MODEL_NAMES.GPT_6_1_TERRA,
   MODEL_NAMES.GPT_6_LUNA,

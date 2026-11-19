@@ -10,6 +10,7 @@ import * as dialoguesAPI from '../../api/dialogues'
 import { getErrorMessage } from '../../types/errors'
 import { useToast } from '../shared'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
+import { DialogueLineText } from '../shared/DialogueLineText'
 
 interface UnityNode {
   id: string
@@ -316,7 +317,7 @@ export const UnityDialogueViewer = memo(function UnityDialogueViewer({
                         wordWrap: 'break-word',
                       }}
                     >
-                      {node.line}
+                      <DialogueLineText text={node.line} />
                     </div>
                   </div>
                 )}
@@ -354,7 +355,7 @@ export const UnityDialogueViewer = memo(function UnityDialogueViewer({
                               lineHeight: '1.5',
                             }}
                           >
-                            {choice.text}
+                            <DialogueLineText text={choice.text} />
                           </div>
                           {(choice.targetNode || choice.test || choice.condition || choice.traitRequirements || choice.influenceDelta !== undefined || choice.respectDelta !== undefined) && (
                             <div

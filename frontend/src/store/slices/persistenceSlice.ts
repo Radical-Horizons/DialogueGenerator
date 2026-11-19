@@ -16,6 +16,7 @@ import {
   ensureValidNode,
   normalizeChoiceHandleInEdges,
   normalizeTestBars,
+  normalizeTestBarsAfterLayout,
   documentRequiresChoiceIdMigration,
 } from '../../utils/graphNormalizers'
 import {
@@ -65,7 +66,7 @@ function normalizeGraphForLoad(
       direction: 'TB',
       spacingMode: get().layoutSpacingMode,
     })
-    normalized = normalizeTestBars(layoutedNodes, normalized.edges)
+    normalized = normalizeTestBarsAfterLayout(layoutedNodes, normalized.edges)
   }
   return normalized
 }

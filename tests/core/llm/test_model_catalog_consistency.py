@@ -22,7 +22,7 @@ CONFIGURED = [m["api_identifier"] for m in LLM_CONFIG["available_models"]]
 
 def test_roles_point_to_configured_models() -> None:
     """Chaque rôle et chaque défaut désigne un modèle proposé par la config."""
-    for model in (ModelNames.FLAGSHIP, ModelNames.STANDARD, ModelNames.MID, ModelNames.ECONOMY):
+    for model in (ModelNames.STANDARD, ModelNames.MID, ModelNames.ECONOMY):
         assert model in CONFIGURED
     assert LLM_CONFIG["default_model"] in CONFIGURED
     assert Defaults.MODEL_ID in CONFIGURED
@@ -49,7 +49,8 @@ def test_no_legacy_slug_is_still_offered() -> None:
     ("legacy", "current"),
     [
         ("gpt-5.6-terra", ModelNames.STANDARD),
-        ("gpt-5.6-sol", ModelNames.FLAGSHIP),
+        ("gpt-5.6-sol", ModelNames.STANDARD),
+        ("gpt-6.2-astra", ModelNames.STANDARD),
         ("gpt-5.6-luna", ModelNames.ECONOMY),
         ("labs-mistral-small-creative", ModelNames.STANDARD),
     ],

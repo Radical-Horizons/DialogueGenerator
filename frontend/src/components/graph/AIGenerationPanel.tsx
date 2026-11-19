@@ -26,6 +26,7 @@ import {
   resolveGraphGenerationDramatis,
 } from '../../utils/sceneDramatis'
 import { useGenerationStore } from '../../store/generationStore'
+import { DialogueLineText } from '../shared/DialogueLineText'
 
 interface AIGenerationPanelProps {
   parentNodeId: string | null
@@ -419,12 +420,10 @@ export function AIGenerationPanel({
               padding: '0.5rem',
               backgroundColor: theme.background.panel,
               borderRadius: '4px',
-              maxHeight: '80px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}>
-              "{parentNode.data.line.substring(0, 150)}
-              {parentNode.data.line.length > 150 ? '...' : ''}"
+              whiteSpace: 'pre-wrap',
+            }}
+            data-testid="ai-generation-parent-line">
+              <DialogueLineText text={parentNode.data.line} />
             </div>
           )}
         </div>

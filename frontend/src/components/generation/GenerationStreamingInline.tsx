@@ -23,6 +23,7 @@ import {
 import { ReasoningTraceViewer } from './ReasoningTraceViewer'
 import { isInterruptionNotice } from './generationOptionsChrome'
 import type { ReasoningTrace } from '../../types/api'
+import { DIALOGUE_NARRATION_COLOR } from '../shared/DialogueLineText'
 
 /** Nom de l'animation du curseur de streaming (déclarée localement, pas de CSS global). */
 const STREAMING_CURSOR_ANIMATION = 'generation-streaming-blink'
@@ -252,7 +253,10 @@ function renderStreamingLineHtml(text: string): string {
 
   return escaped
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(
+      /\s*\*([^*]+)\*\s*/g,
+      `<em style="display:block;color:${DIALOGUE_NARRATION_COLOR}">$1</em>`
+    )
     .replace(/_([^_]+)_/g, '<em>$1</em>')
     .replace(/\n/g, '<br/>')
 }
