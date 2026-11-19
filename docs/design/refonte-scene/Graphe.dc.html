@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Graphe de la scène</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 1440px; height: 900px; display: flex; flex-direction: column; overflow: hidden; background: #17171b; color: #dcdce4; font-family: 'Instrument Sans', system-ui, sans-serif">
+
+  <header style="height: 48px; flex: none; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) 380px minmax(0, 1fr); align-items: center; gap: 20px; padding: 0 20px; border-bottom: 1px solid rgba(255,255,255,0.06)">
+    <div style="display: flex; align-items: baseline; gap: 20px; min-width: 0">
+      <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1; color: #f2f2f5; white-space: nowrap">Dialogue<span style="font-style: italic; color: #4f7fff">Generator</span></span>
+      <nav aria-label="Fil d'Ariane" style="display: flex; align-items: baseline; gap: 9px; min-width: 0">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #84848f; white-space: nowrap">TOUTES LES SCÈNES</span>
+        <span style="color: #84848f">/</span>
+        <span style="font-size: 13px; color: #f2f2f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Rencontre avec le forgeron itinérant</span>
+      </nav>
+    </div>
+    <button type="button" style="height: 32px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border-radius: 6px; border: 1px solid #2e2e36; background: #1c1c22; color: #8a8a95; font-family: inherit; font-size: 12.5px; cursor: pointer">Rechercher, aller à, demander…<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: #84848f">CTRL+K</span></button>
+    <div style="display: flex; justify-content: flex-end">
+      <span aria-label="Compte" style="width: 27px; height: 27px; border-radius: 99px; background: #2a2a33; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #dcdce4">A</span>
+    </div>
+  </header>
+
+  <div style="flex: 1; min-height: 0; display: flex">
+    <aside aria-label="Classeur replié" style="width: 56px; flex: none; box-sizing: border-box; border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; align-items: center; gap: 9px; padding: 14px 0">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4f7fff">4</span>
+      <span aria-hidden="true" style="width: 20px; height: 1px; background: rgba(255,255,255,0.12)"></span>
+      <a href="Main.dc.html" title="Rencontre avec le forgeron itinérant" style="width: 26px; height: 26px; box-sizing: border-box; border-radius: 6px; border: 1px solid rgba(79,127,255,0.4); background: rgba(79,127,255,0.1); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #a9c3ff; text-decoration: none">FI</a>
+      <a href="#" title="Rencontre dans les plis d'ossements" style="width: 26px; height: 26px; box-sizing: border-box; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #9a9aa4; text-decoration: none">PO</a>
+      <a href="#" title="Rencontre initiale avec Korga l'Effritée" style="width: 26px; height: 26px; box-sizing: border-box; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #9a9aa4; text-decoration: none">KE</a>
+      <a href="#" title="Voknir — L'Atelier du Cartographe" style="width: 26px; height: 26px; box-sizing: border-box; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #9a9aa4; text-decoration: none">AC</a>
+      <span style="flex: 1"></span>
+      <button type="button" aria-label="Déplier le classeur" style="width: 44px; height: 44px; border: none; background: transparent; color: #84848f; font-size: 16px; cursor: pointer">›</button>
+    </aside>
+
+    <main aria-label="Scène" style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+      <div style="flex: none; height: 44px; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 0 20px; border-bottom: 1px solid rgba(255,255,255,0.06)">
+        <nav aria-label="Vue de la scène" style="display: flex; border: 1px solid #2e2e36; border-radius: 6px; overflow: hidden">
+          <a href="Main.dc.html" style="height: 26px; display: flex; align-items: center; padding: 0 11px; color: #9a9aa4; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-decoration: none">SCRIPT</a>
+          <a href="#" aria-current="page" style="height: 26px; display: flex; align-items: center; padding: 0 11px; border-left: 1px solid #2e2e36; background: #2a2a33; color: #f2f2f5; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-decoration: none">GRAPHE</a>
+          <a href="Jouer.dc.html" style="height: 26px; display: flex; align-items: center; padding: 0 11px; border-left: 1px solid #2e2e36; color: #9a9aa4; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-decoration: none">JOUER</a>
+        </nav>
+        <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 18px; color: #f2f2f5; white-space: nowrap">Rencontre avec le forgeron itinérant</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: #84848f; white-space: nowrap">GRISH T'VOK · URESAÏR</span>
+        <span aria-hidden="true" style="width: 1px; height: 20px; background: rgba(255,255,255,0.09)"></span>
+        <div style="display: flex; gap: 5px">
+          <button type="button" aria-label="Annuler CTRL+Z" style="width: 28px; height: 28px; border: 1px solid #2e2e36; border-radius: 6px; background: transparent; color: #dcdce4; font-size: 14px; cursor: pointer">↶</button>
+          <button type="button" aria-label="Rétablir CTRL+Y" style="width: 28px; height: 28px; border: 1px solid #2e2e36; border-radius: 6px; background: transparent; color: #dcdce4; font-size: 14px; cursor: pointer">↷</button>
+        </div>
+        <button type="button" style="height: 44px; padding: 0 7px; border: none; background: transparent; color: #dcdce4; font-family: inherit; font-size: 12.5px; cursor: pointer">Disposer ▾</button>
+        <button type="button" style="height: 44px; padding: 0 7px; border: none; background: transparent; color: #dcdce4; font-family: inherit; font-size: 12.5px; cursor: pointer">Actions ▾</button>
+        <span style="flex: 1"></span>
+        <div role="group" aria-label="Lentille" style="display: flex; align-items: center; gap: 9px">
+          <div style="display: flex; border: 1px solid #2e2e36; border-radius: 6px; overflow: hidden">
+            <button type="button" aria-pressed="{{texte}}" onClick="{{setTexte}}" style="height: 26px; padding: 0 11px; border: none; background: {{texteBg}}; color: {{texteColor}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; cursor: pointer">TEXTE</button>
+            <button type="button" aria-pressed="{{tech}}" onClick="{{setTech}}" style="height: 26px; padding: 0 11px; border: none; border-left: 1px solid #2e2e36; background: {{techBg}}; color: {{techColor}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; cursor: pointer">TECHNIQUE</button>
+          </div>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: #84848f">ALT</span>
+        </div>
+      </div>
+
+      <div ref="{{setCanvas}}" aria-label="Graphe du dialogue" style="flex: 1; min-height: 0; position: relative; overflow: hidden; background-color: #101013; background-image: radial-gradient(rgba(255,255,255,0.055) 1px, transparent 1px); background-size: 22px 22px">
+
+        <div aria-hidden="true" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; pointer-events: none; z-index: 0">
+          <sc-if value="{{hasEdges}}" hint-placeholder-val="{{false}}">
+            <sc-for list="{{edges}}" as="e" hint-placeholder-count="0">
+              <svg width="1384" height="780" style="position: absolute; left: 0; top: 0; overflow: visible">
+                <path d="{{e.d}}" style="fill: none; stroke: {{e.color}}; stroke-width: {{e.w}}px; stroke-dasharray: {{e.dash}}"></path>
+              </svg>
+            </sc-for>
+          </sc-if>
+        </div>
+
+        <sc-for list="{{columns}}" as="col" hint-placeholder-count="3">
+          <div style="position: absolute; left: {{col.x}}px; top: {{col.y}}px; width: 360px; display: flex; flex-direction: column; gap: 56px; z-index: 1">
+            <sc-for list="{{col.nodes}}" as="n" hint-placeholder-count="2">
+
+              <sc-if value="{{n.isGhost}}" hint-placeholder-val="{{false}}">
+                <section data-node="{{n.id}}" aria-label="Suite à écrire" style="position: relative; width: 300px; box-sizing: border-box; border: 1px dashed rgba(255,255,255,0.24); border-radius: 8px; background: rgba(31,31,38,0.55); padding: 11px 14px 13px; display: flex; flex-direction: column; gap: 9px">
+                  <span data-in="{{n.id}}" aria-hidden="true" style="position: absolute; left: -6px; top: 14px; width: 10px; height: 10px; box-sizing: border-box; border-radius: 99px; background: #101013; border: 1.5px dashed rgba(255,255,255,0.55)"></span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.08em; color: #9a9aa4">{{n.label}}</span>
+                  <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 15.5px; line-height: 1.4; color: #8a8a95"><span aria-hidden="true" style="display: inline-block; width: 1.5px; height: 16px; margin-right: 3px; vertical-align: -3px; background: #4f7fff"></span>Écrire la réplique de Grish…</p>
+                  <div style="display: flex; align-items: center; gap: 9px">
+                    <button type="button" style="height: 28px; display: flex; align-items: center; gap: 7px; padding: 0 10px; border: 1px solid #2e2e36; border-radius: 6px; background: transparent; color: #dcdce4; font-family: inherit; font-size: 12px; cursor: pointer">Générer<span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #9a9aa4">CTRL+↵</span></button>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.05em; color: #8a8a95">≈ 12 500 TOKENS</span>
+                  </div>
+                </section>
+              </sc-if>
+
+              <sc-if value="{{n.isCard}}" hint-placeholder-val="{{true}}">
+                <article data-node="{{n.id}}" aria-label="{{n.aria}}" onClick="{{n.select}}" style="position: relative; width: 360px; box-sizing: border-box; background: #1f1f26; border: 1px solid {{n.border}}; border-radius: 8px; box-shadow: {{n.shadow}}">
+                  <span data-in="{{n.id}}" aria-hidden="true" style="position: absolute; left: -6px; top: 10px; width: 10px; height: 10px; box-sizing: border-box; border-radius: 99px; background: #101013; border: 1.5px solid rgba(255,255,255,0.55)"></span>
+                  <div style="display: flex; align-items: center; gap: 9px; padding: 7px 11px; background: {{n.headBg}}; border-bottom: 1px solid rgba(255,255,255,0.06); border-radius: 7px 7px 0 0; cursor: grab">
+                    <sc-if value="{{n.isSel}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="font-size: 12px; line-height: 1; color: #9a9aa4; letter-spacing: -2px">⋮⋮</span></sc-if>
+                    <span aria-hidden="true" style="width: 6px; height: 6px; flex: none; border-radius: 99px; background: #5fb8ac"></span>
+                    <span style="flex: 1; min-width: 0; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.09em; color: {{n.spkColor}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">GRISH T'VOK · {{n.titleUp}}</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.06em; color: {{n.stateColor}}; white-space: nowrap">{{n.stateLabel}}</span>
+                  </div>
+                  <sc-if value="{{tech}}" hint-placeholder-val="{{false}}">
+                    <div style="display: flex; align-items: baseline; gap: 9px; padding: 7px 14px; border-bottom: 1px solid rgba(255,255,255,0.06)">
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #8a8a95; white-space: nowrap">{{n.rawId}}</span>
+                    </div>
+                    <div style="padding: 9px 14px 10px"><p style="margin: 0; font-size: 12.5px; line-height: 19px; max-height: 38px; color: #8a8a95; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">{{n.plain}}</p></div>
+                  </sc-if>
+                  <sc-if value="{{texte}}" hint-placeholder-val="{{true}}">
+                    <div style="padding: 12px 14px 13px; display: flex; flex-direction: column; gap: 9px">
+                      <sc-for list="{{n.paras}}" as="p" hint-placeholder-count="1">
+                        <sc-if value="{{p.dir}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 13px; line-height: 1.55; font-style: italic; color: #9a9aa4">{{p.text}}</p></sc-if>
+                        <sc-if value="{{p.say}}" hint-placeholder-val="{{true}}"><p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 16px; line-height: 1.42; color: #f0efe9"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 13px; color: #9a9aa4">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p></sc-if>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                  <ol aria-label="Réponses" style="list-style: none; margin: 0; padding: 0">
+                    <sc-for list="{{n.responses}}" as="r" hint-placeholder-count="2">
+                      <li style="position: relative; display: grid; grid-template-columns: 22px minmax(0, 1fr); column-gap: 9px; padding: 9px 18px 10px 14px; border-top: 1px solid rgba(255,255,255,0.06)">
+                        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 20px; color: #8a8a95">{{r.num}}</span>
+                        <div style="min-width: 0">
+                          <sc-if value="{{r.empty}}" hint-placeholder-val="{{false}}">
+                            <p style="margin: 0; display: flex; justify-content: space-between; font-size: 13px; line-height: 20px; font-style: italic; color: #8a8a95">Réponse vide<span style="font-family: 'IBM Plex Mono', monospace; font-style: normal; font-size: 9.5px; letter-spacing: 0.06em; color: #f5a623">▲ À ÉCRIRE</span></p>
+                          </sc-if>
+                          <sc-if value="{{r.full}}" hint-placeholder-val="{{true}}">
+                            <sc-if value="{{texte}}" hint-placeholder-val="{{true}}"><p style="margin: 0; font-size: 13.5px; line-height: 1.5; color: #dcdce4">{{r.text}}</p></sc-if>
+                            <sc-if value="{{tech}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 13px; line-height: 1.5; color: #dcdce4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.text}}</p></sc-if>
+                            <sc-if value="{{r.hasChips}}" hint-placeholder-val="{{false}}">
+                              <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px">
+                                <sc-for list="{{r.chips}}" as="c" hint-placeholder-count="1"><button type="button" data-anchor="{{c.anchor}}" onClick="{{c.open}}" style="height: 20px; padding: 0 7px; border-radius: 99px; border: 1px solid rgba(255,255,255,0.12); background: transparent; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; color: #8a8a95; cursor: pointer; white-space: nowrap">{{c.label}}</button></sc-for>
+                              </div>
+                            </sc-if>
+                          </sc-if>
+                          <sc-if value="{{r.isTest}}" hint-placeholder-val="{{false}}">
+                            <div style="margin-top: 7px; display: flex; flex-direction: column; gap: 3px">
+                              <sc-for list="{{r.outcomes}}" as="o" hint-placeholder-count="2">
+                                <div style="position: relative; display: flex; align-items: center; justify-content: flex-end; gap: 7px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; line-height: 18px">
+                                  <span style="color: #8a8a95">{{o.note}}</span>
+                                  <span style="color: {{o.color}}">{{o.label}}</span>
+                                  <span data-port="{{o.port}}" aria-hidden="true" style="position: absolute; right: -24px; top: 4px; width: 10px; height: 10px; box-sizing: border-box; border-radius: 99px; background: #101013; border: 1.5px {{o.line}} {{o.edge}}"></span>
+                                </div>
+                              </sc-for>
+                            </div>
+                          </sc-if>
+                          <sc-if value="{{r.isPending}}" hint-placeholder-val="{{false}}">
+                            <p style="margin: 7px 0 0; display: flex; justify-content: flex-end; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; color: #9a9aa4">{{r.pending}}</p>
+                          </sc-if>
+                        </div>
+                        <sc-if value="{{r.hasPort}}" hint-placeholder-val="{{false}}">
+                          <span data-port="{{r.port}}" aria-hidden="true" style="position: absolute; right: -6px; top: 50%; margin-top: -5px; width: 10px; height: 10px; box-sizing: border-box; border-radius: 99px; background: #101013; border: 1.5px {{r.portLine}} {{r.portColor}}"></span>
+                        </sc-if>
+                      </li>
+                    </sc-for>
+                  </ol>
+                  <sc-if value="{{tech}}" hint-placeholder-val="{{false}}">
+                    <dl style="margin: 0; padding: 8px 14px 10px; border-top: 1px solid rgba(255,255,255,0.06); display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 3px 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.5">
+                      <dt style="font-size: 9px; letter-spacing: 0.08em; color: #8a8a95; line-height: 16.5px">ENTRÉE</dt><dd style="margin: 0; color: #dcdce4">toujours atteignable</dd>
+                      <dt style="font-size: 9px; letter-spacing: 0.08em; color: #8a8a95; line-height: 16.5px">POSE</dt><dd style="margin: 0; color: #dcdce4">{{n.flag}}</dd>
+                    </dl>
+                  </sc-if>
+                </article>
+              </sc-if>
+
+            </sc-for>
+          </div>
+        </sc-for>
+
+        <sc-if value="{{pop.open}}" hint-placeholder-val="{{false}}">
+          <section aria-label="Test de compétence" style="position: absolute; left: {{pop.x}}px; top: {{pop.y}}px; width: 340px; z-index: 5; box-sizing: border-box; background: #1f1f26; border: 1px solid #4a4a54; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.4), 0 18px 40px rgba(0,0,0,0.45); padding: 14px; display: flex; flex-direction: column; gap: 9px">
+            <div style="display: flex; align-items: center; justify-content: space-between">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #9a9aa4">TEST — RÉPONSE 01 DE L'OUVERTURE</span>
+              <button type="button" onClick="{{closePop}}" style="border: none; background: transparent; padding: 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: #9a9aa4; cursor: pointer">ÉCHAP</button>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px">
+              <label style="display: flex; flex-direction: column; gap: 5px; font-size: 11.5px; color: #9a9aa4">Caractéristique
+                <select style="height: 30px; border-radius: 6px; border: 1px solid #6a6a78; background: #1c1c22; color: #dcdce4; font-family: inherit; font-size: 12.5px; padding: 0 5px"><option>Raison</option><option>Force</option></select>
+              </label>
+              <label style="display: flex; flex-direction: column; gap: 5px; font-size: 11.5px; color: #9a9aa4">Compétence
+                <select style="height: 30px; border-radius: 6px; border: 1px solid #6a6a78; background: #1c1c22; color: #dcdce4; font-family: inherit; font-size: 12.5px; padding: 0 5px"><option>Artisanat</option><option>Commandement</option></select>
+              </label>
+              <label style="display: flex; flex-direction: column; gap: 5px; font-size: 11.5px; color: #9a9aa4">Difficulté
+                <input type="number" value="12" style="height: 30px; box-sizing: border-box; border-radius: 6px; border: 1px solid #6a6a78; background: #1c1c22; color: #dcdce4; font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 0 9px">
+              </label>
+            </div>
+            <div style="height: 1px; background: rgba(255,255,255,0.09)"></div>
+            <div style="display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 7px 9px; align-items: baseline; font-size: 12px">
+              <span style="color: #9a9aa4">Trait requis</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #dcdce4">Empathique ≥ 5</span><button type="button" style="border: none; background: transparent; padding: 0; font-family: inherit; font-size: 11.5px; color: #9a9aa4; cursor: pointer">modifier</button>
+              <span style="color: #9a9aa4">Respect</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #dcdce4">+1</span><button type="button" style="border: none; background: transparent; padding: 0; font-family: inherit; font-size: 11.5px; color: #9a9aa4; cursor: pointer">modifier</button>
+              <span style="color: #9a9aa4">Condition</span><span style="color: #dcdce4">toujours visible</span><button type="button" style="border: none; background: transparent; padding: 0; font-family: inherit; font-size: 11.5px; color: #9a9aa4; cursor: pointer">+ ajouter</button>
+              <span style="color: #9a9aa4">Effets</span><span style="color: #dcdce4">aucun</span><button type="button" style="border: none; background: transparent; padding: 0; font-family: inherit; font-size: 11.5px; color: #9a9aa4; cursor: pointer">+ ajouter</button>
+            </div>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.05em; color: #9a9aa4">4 ISSUES · CHACUNE SA SUITE · ENREGISTRÉ AU FIL DE LA SAISIE</span>
+          </section>
+        </sc-if>
+
+        <div style="position: absolute; right: 20px; bottom: 148px; z-index: 3; display: flex; align-items: center; height: 30px; border: 1px solid #2e2e36; border-radius: 6px; background: rgba(18,18,20,0.9); font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; color: #dcdce4">
+          <button type="button" aria-label="Dézoomer" style="width: 30px; height: 28px; border: none; background: transparent; color: #dcdce4; cursor: pointer">−</button>
+          <span style="padding: 0 5px">100 % · ÉCRIRE</span>
+          <button type="button" aria-label="Zoomer" style="width: 30px; height: 28px; border: none; background: transparent; color: #dcdce4; cursor: pointer">+</button>
+          <span aria-hidden="true" style="width: 1px; height: 18px; background: #2e2e36"></span>
+          <button type="button" style="height: 28px; padding: 0 9px; border: none; background: transparent; color: #dcdce4; font-family: inherit; font-size: inherit; letter-spacing: inherit; cursor: pointer">AJUSTER</button>
+        </div>
+
+        <div aria-label="Carte du graphe" style="position: absolute; right: 20px; bottom: 20px; z-index: 3; width: 196px; height: 118px; box-sizing: border-box; border: 1px solid #2e2e36; border-radius: 6px; background: rgba(18,18,20,0.92); padding: 9px">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: #84848f">CARTE · 19 RÉPLIQUES</span>
+          <svg aria-hidden="true" width="176" height="80" style="display: block; margin-top: 5px">
+            <rect x="2" y="30" width="22" height="9" rx="2" style="fill: #4f7fff"></rect>
+            <rect x="46" y="4" width="22" height="7" rx="2" style="fill: #4a4a54"></rect>
+            <rect x="46" y="16" width="22" height="7" rx="2" style="fill: #4a4a54"></rect>
+            <rect x="46" y="28" width="22" height="7" rx="2" style="fill: #4a4a54"></rect>
+            <rect x="46" y="40" width="22" height="7" rx="2" style="fill: #4a4a54"></rect>
+            <rect x="46" y="52" width="22" height="7" rx="2" style="fill: #4a4a54"></rect>
+            <rect x="46" y="64" width="22" height="7" rx="2" style="fill: #4a4a54"></rect>
+            <rect x="90" y="10" width="22" height="7" rx="2" style="fill: #4a4a54"></rect>
+            <rect x="90" y="22" width="22" height="7" rx="2" style="fill: #4a4a54"></rect>
+            <rect x="90" y="46" width="22" height="7" rx="2" style="fill: #4a4a54"></rect>
+            <rect x="90" y="58" width="22" height="7" rx="2" style="fill: #4a4a54"></rect>
+            <rect x="0.5" y="0.5" width="96" height="60" rx="3" style="fill: none; stroke: #8fb0ff; stroke-width: 1px"></rect>
+          </svg>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer aria-label="État de la scène" style="height: 28px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 20px; padding: 0 20px; border-top: 1px solid rgba(255,255,255,0.06); font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; color: #8a8a95">
+    <span style="display: flex; align-items: center; gap: 7px"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: #27ae60"></span>ENREGISTRÉ · 11:24</span>
+    <button type="button" style="display: flex; align-items: center; gap: 7px; border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: #ff6b6b; cursor: pointer"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: #ff6b6b"></span>3 ERREURS</button>
+    <button type="button" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: #8a8a95; cursor: pointer">CONTEXTE · 2 FICHES</button>
+    <span>≈ 12 500 TOKENS / NŒUD</span>
+    <button type="button" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: #8a8a95; cursor: pointer">GPT-6.2 SOL ▴</button>
+    <span style="flex: 1"></span>
+    <span>CLIC DANS LE TEXTE : ÉCRIRE · EN-TÊTE : DÉPLACER · ALT : TECHNIQUE</span>
+    <button type="button" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: #8a8a95; cursor: pointer">? RACCOURCIS</button>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"lens":{"editor":"enum","options":["texte","technique"],"default":"texte"},"popover":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const p0 = props || this.props || {};
+    this.state = { lens: p0.lens === 'technique' ? 'technique' : 'texte', selected: 'START', pop: p0.popover ? 'start-test' : null, popXY: null, edges: [] };
+    this.canvasEl = null;
+    this.setCanvas = (el) => { this.canvasEl = el; };
+    this.raf = 0;
+    this.scheduleMeasure = () => {
+      if (this.raf) return;
+      this.raf = requestAnimationFrame(() => { this.raf = 0; this.measure(); });
+    };
+    this.OUT = [
+      { key: 'ec', label: 'É. CRIT', color: '#ff6b6b', edge: '#c0392b' },
+      { key: 'ko', label: 'ÉCHEC', color: '#ff6b6b', edge: '#e74c3c' },
+      { key: 'ok', label: 'RÉUSSITE', color: '#27ae60', edge: '#27ae60' },
+      { key: 'rc', label: 'R. CRIT', color: '#3d9bff', edge: '#0088ff' }
+    ];
+    this.N = {
+      'START': { title: 'Ouverture', st: null, flag: 'MetGrish',
+        line: "Ah. Une présence qui marche sur le monde sans y laisser d'empreinte. Je m'appelle Grish T'vok, caravane-atelier ambulante, collectionneur de choses qui ont mal tourné. *Il incline légèrement sa masse, des étincelles s'échappant d'une trappe de son torse.* Vos anneaux de lumière et cette distance rituelle... pas commun. Je n'ai guère d'oreille pour les prophéties, mais j'entends la matière. Si vos objets pleurent, je peux les écouter et tenter d'en recoudre la mélodie. Et si vous portez des fissures qui se taisent, je ne les brise pas, je les arrange. Dites, Maîtresse, acceptez-vous qu'un Moribandon touche ce qui vous entoure ?",
+        ch: [
+          { t: "Dans la tapisserie de l'existence, vos outils peuvent-ils suturer les fissures sans effacer ce qu'elles portent? Je n'offre pas ma mémoire, mais je cherche une réparation qui respecte les cicatrices.", test: 'Raison+Artisanat:12', tr: [['Empathique', 5]], resp: 1, out: ['9db0', '36c5', '@', '@'], anchor: 'start-test' },
+          { t: "Je ne cherche pas de confidences. Répare cette caravane, et je te rendrai un service : un artefact scellé, pas de questions. Est-ce que tu sais travailler avec des reliques anciennes ?", test: 'Raison+Artisanat:14', tr: [['Loyal', 5]], inf: 1, out: [null, null, null, null] },
+          { t: "Garde tes mains pour tes villages. Je n'ai nul besoin d'un charlatan des déchets. Pars, avant que je ne te rende ta misère.", test: 'Force+Commandement:11', tr: [['Orgueilleuse', 5]], inf: -1, resp: -1, out: ['@', '@', '@', '@'] },
+          { t: '' }
+        ] },
+      '9db0': { title: 'Échec critique', st: 'accepted', flag: '—',
+        line: "Ha. Vous parlerez de respect, et c'est justement lorsque l'on quémande des soins qu'on découvre les véritables prix. *Il pose sa main massive sur votre anneau de lumière ; des étincelles meurent comme des lucioles écrasées.* Vous ne m'offrez pas votre mémoire, mais vous m'offrez votre confiance. Vous aviez le choix de laisser la cicatrice exister — je l'aurais honorée. Mais votre phrase est un refus timide déguisé en demande. Très bien. Si vous refusez la couture que je sais faire, je ne laisse plus les choses à moitié.\n\nRegardez.",
+        ch: [
+          { t: 'Arrachez votre main — reprenez le contrôle par la force !', test: 'Force+Athlétisme:13', tr: [['Empathique', 5]], inf: -2, resp: -3, out: ['ghost', null, null, null] },
+          { t: "Plaidez! Expliquez que vous vouliez préserver la cicatrice — demandez qu'il refasse doucement.", test: 'Charisme+Rhétorique:14', tr: [['Loyal', 5]], resp: -1, out: [null, null, null, null] },
+          { t: 'Restez immobile et laissez-le finir. Si quelque chose doit être perdu, apprenez de la douleur.', test: 'Force+Commandement:11', tr: [['Orgueilleuse', 5]], inf: 1, resp: 1, out: [null, null, null, null] },
+          { t: '' }
+        ] },
+      '36c5': { title: 'Échec', st: 'accepted', flag: '—',
+        line: "Hmpf. Vous avez une façon de parler qui caresse les tissus sans toucher la corde qui les tient — beau, mais dangereux. J'ai tendu mes doigts au murmure des objets ; quand je recouds, je réarrange la trame.",
+        ch: [
+          { t: "J'accepte le compromis. Restaurez la fonction, que la mémoire soit préservée autant que possible.", resp: 1 }
+        ] }
+    };
+    this.layout = [
+      { x: 36, y: 24, ids: ['START'] },
+      { x: 466, y: 24, ids: ['9db0', '36c5'] },
+      { x: 926, y: 150, ids: ['ghost-1'] }
+    ];
+  }
+
+  componentDidMount() {
+    this.scheduleMeasure();
+    this.t1 = setTimeout(() => this.measure(), 400);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => this.scheduleMeasure());
+    if (typeof ResizeObserver !== 'undefined' && this.canvasEl) {
+      this.ro = new ResizeObserver(() => this.scheduleMeasure());
+      this.ro.observe(this.canvasEl);
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.ro) this.ro.disconnect();
+    if (this.raf) cancelAnimationFrame(this.raf);
+    clearTimeout(this.t1);
+  }
+
+  componentDidUpdate() {
+    const sig = this.state.lens + '|' + this.state.pop + '|' + this.state.selected + '|' + this.props.lens + '|' + this.props.popover;
+    if (this.lastSig !== sig) {
+      if (this.lastProps !== undefined && this.lastProps !== this.props.lens + '|' + this.props.popover) {
+        this.lastProps = this.props.lens + '|' + this.props.popover;
+        this.setState({ lens: this.props.lens === 'technique' ? 'technique' : 'texte', pop: this.props.popover ? 'start-test' : null });
+      }
+      if (this.lastProps === undefined) this.lastProps = this.props.lens + '|' + this.props.popover;
+      this.lastSig = sig;
+      this.scheduleMeasure();
+    }
+  }
+
+  measure() {
+    const root = this.canvasEl;
+    if (!root) return;
+    const rr = root.getBoundingClientRect();
+    if (!rr.width) return;
+    const s = rr.width / root.offsetWidth || 1;
+    const W = root.offsetWidth;
+    const H = root.offsetHeight;
+    const at = (el) => {
+      const r = el.getBoundingClientRect();
+      return { x: ((r.left + r.right) / 2 - rr.left) / s, y: ((r.top + r.bottom) / 2 - rr.top) / s, top: (r.top - rr.top) / s, bottom: (r.bottom - rr.top) / s, left: (r.left - rr.left) / s };
+    };
+    if (this.ro) root.querySelectorAll('[data-node]').forEach((el) => this.ro.observe(el));
+    const edges = [];
+    root.querySelectorAll('[data-port]').forEach((el) => {
+      const target = el.getAttribute('data-target');
+      const id = el.getAttribute('data-port');
+      const spec = this.portSpec[id];
+      if (!spec) return;
+      const p1 = at(el);
+      let p2;
+      if (spec.to === '@') p2 = { x: W + 40, y: p1.y + (spec.dy || 0) };
+      else if (spec.to) {
+        const b = root.querySelector('[data-in="' + spec.to + '"]');
+        if (!b) return;
+        p2 = at(b);
+      } else return;
+      const x1 = p1.x + 4;
+      const x2 = p2.x - 4;
+      const dx = Math.max(40, Math.abs(x2 - x1) * 0.5);
+      edges.push({ src: spec.src, color: spec.color || null, dash: spec.dash || 'none', d: 'M' + x1.toFixed(1) + ',' + p1.y.toFixed(1) + ' C' + (x1 + dx).toFixed(1) + ',' + p1.y.toFixed(1) + ' ' + (x2 - dx).toFixed(1) + ',' + p2.y.toFixed(1) + ' ' + x2.toFixed(1) + ',' + p2.y.toFixed(1) });
+      return target;
+    });
+    let popXY = null;
+    if (this.state.pop) {
+      const anchor = root.querySelector('[data-anchor="' + this.state.pop + '"]');
+      if (anchor) {
+        const a = at(anchor);
+        const x = Math.min(Math.max(12, a.left - 40), W - 352);
+        let y = a.bottom + 9;
+        if (y + 300 > H) y = Math.max(12, a.top - 9 - 300);
+        popXY = { x: Math.round(x), y: Math.round(y) };
+      }
+    }
+    const sig = JSON.stringify([edges, popXY]);
+    if (sig !== this.lastEdges) {
+      this.lastEdges = sig;
+      this.setState({ edges: edges, popXY: popXY });
+    }
+  }
+
+  segs(text) {
+    const out = [];
+    const re = /\*([^*]+)\*/g;
+    let last = 0;
+    let m;
+    while ((m = re.exec(text))) {
+      const before = text.slice(last, m.index).trim();
+      if (before) out.push({ t: before, it: false, rm: true });
+      out.push({ t: m[1].trim(), it: true, rm: false });
+      last = re.lastIndex;
+    }
+    const rest = text.slice(last).trim();
+    if (rest) out.push({ t: rest, it: false, rm: true });
+    return out.map((s, i) => Object.assign({}, s, { t: i < out.length - 1 ? s.t + ' ' : s.t }));
+  }
+
+  renderVals() {
+    const tech = this.state.lens === 'technique';
+    const sel = this.state.selected;
+    this.portSpec = {};
+    const openPop = (anchor) => (ev) => {
+      if (ev && ev.stopPropagation) ev.stopPropagation();
+      if (anchor) this.setState({ pop: this.state.pop === anchor ? null : anchor });
+    };
+    const sign = (v) => (v > 0 ? '+' + v : '−' + Math.abs(v));
+    let ghostCount = 0;
+    const card = (id) => {
+      if (id.indexOf('ghost') === 0) {
+        return { isGhost: true, isCard: false, id: id, label: 'SUITE DE LA RÉPONSE 01 · É. CRIT' };
+      }
+      const n = this.N[id];
+      const isSel = id === sel;
+      const responses = n.ch.map((c, i) => {
+        const empty = !c.t;
+        const chips = [];
+        (c.tr || []).forEach((x) => chips.push({ label: x[0].toUpperCase() + ' ≥ ' + x[1], anchor: '', open: openPop(null) }));
+        if (c.test) {
+          const m = /^([^+]+)\+([^:]+):(\d+)$/.exec(c.test);
+          chips.push({ label: 'TEST ' + (m ? m[2].toUpperCase() + ' · DD ' + m[3] : c.test), anchor: c.anchor || '', open: openPop(c.anchor || null) });
+        }
+        if (c.resp) chips.push({ label: 'RESPECT ' + sign(c.resp), anchor: '', open: openPop(null) });
+        if (c.inf) chips.push({ label: 'INFLUENCE ' + sign(c.inf), anchor: '', open: openPop(null) });
+        const outs = c.out || [];
+        const anyOut = outs.some((x) => x);
+        const port = id + ':' + i;
+        let outcomes = [];
+        let isPending = false;
+        let pending = '';
+        if (c.test && anyOut) {
+          outcomes = this.OUT.map((o, oi) => {
+            const target = outs[oi];
+            const p = port + ':' + o.key;
+            const writable = !target;
+            if (target === 'ghost') this.portSpec[p] = { src: id, to: 'ghost-1', color: '#8fb0ff', dash: '4 4' };
+            else if (target === '@') this.portSpec[p] = { src: id, to: '@', dy: (oi - 1.5) * 18, color: o.edge };
+            else if (target) this.portSpec[p] = { src: id, to: target, color: o.edge };
+            return {
+              label: o.label, color: o.color, edge: writable ? 'rgba(255,255,255,0.4)' : o.edge,
+              line: writable || target === 'ghost' ? 'dashed' : 'solid',
+              note: target === 'ghost' ? 'EN ÉCRITURE' : writable ? '+ SUITE' : '',
+              port: p
+            };
+          });
+        } else if (c.test) {
+          isPending = true;
+          pending = '4 ISSUES À ÉCRIRE  +';
+        }
+        const hasPort = !empty && !c.test;
+        if (hasPort) {
+          ghostCount += 1;
+        }
+        return {
+          num: String(i + 1).padStart(2, '0'),
+          empty: empty, full: !empty, text: c.t,
+          chips: chips, hasChips: chips.length > 0,
+          isTest: Boolean(c.test) && anyOut, outcomes: outcomes,
+          isPending: isPending, pending: pending,
+          hasPort: hasPort, port: port, portLine: 'dashed', portColor: 'rgba(255,255,255,0.4)'
+        };
+      });
+      const paras = n.line.split(/\n\s*\n/).map((raw) => {
+        const p = raw.trim();
+        const whole = /^\*[^*]+\*$/.test(p);
+        return whole ? { dir: true, say: false, text: p.replace(/\*/g, ''), segs: [] } : { dir: false, say: true, text: '', segs: this.segs(p) };
+      });
+      return {
+        isGhost: false, isCard: true, id: id, rawId: id === 'START' ? 'START' : 'node-' + id + '…',
+        aria: 'Grish T\'vok — ' + n.title,
+        isSel: isSel,
+        titleUp: n.title.toUpperCase(),
+        stateLabel: isSel ? 'SÉLECTIONNÉ' : n.st === 'accepted' ? 'VALIDÉ' : '',
+        stateColor: isSel ? '#a9c3ff' : '#27ae60',
+        spkColor: isSel ? '#a9c3ff' : '#9a9aa4',
+        border: isSel ? '#4f7fff' : '#4a4a54',
+        shadow: isSel ? '0 0 0 3px rgba(79,127,255,0.18), 0 2px 10px rgba(0,0,0,0.4)' : '0 2px 10px rgba(0,0,0,0.4)',
+        headBg: isSel ? '#1a3a5a' : '#2a2a33',
+        plain: n.line.replace(/\*/g, ''),
+        paras: paras,
+        flag: n.flag,
+        responses: responses,
+        select: () => this.setState({ selected: id })
+      };
+    };
+    const columns = this.layout.map((c) => ({ x: c.x, y: c.y, nodes: c.ids.map(card) }));
+    const edges = this.state.edges.map((e) => ({
+      d: e.d,
+      dash: e.dash,
+      color: e.color ? e.color : e.src === sel ? '#4f7fff' : 'rgba(255,255,255,0.34)',
+      w: e.src === sel ? 2 : 1.5
+    }));
+    const p = this.state.popXY;
+    return {
+      tech: tech, texte: !tech,
+      texteBg: tech ? 'transparent' : '#2a2a33', texteColor: tech ? '#9a9aa4' : '#f2f2f5',
+      techBg: tech ? '#2a2a33' : 'transparent', techColor: tech ? '#f2f2f5' : '#9a9aa4',
+      setTexte: () => this.setState({ lens: 'texte' }),
+      setTech: () => this.setState({ lens: 'technique' }),
+      setCanvas: this.setCanvas,
+      columns: columns,
+      edges: edges,
+      hasEdges: edges.length > 0,
+      pop: { open: Boolean(this.state.pop && p), x: p ? p.x : 0, y: p ? p.y : 0 },
+      closePop: (ev) => { if (ev && ev.stopPropagation) ev.stopPropagation(); this.setState({ pop: null }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

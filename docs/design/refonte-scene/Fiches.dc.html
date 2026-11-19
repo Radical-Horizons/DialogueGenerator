@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Fiches du GDD</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0} input::placeholder{color:#8a8a95;opacity:1} input[type=search]::-webkit-search-cancel-button{display:none}</style>
+</helmet>
+<div style="width: 1440px; height: 900px; display: flex; flex-direction: column; overflow: hidden; background: {{t.app}}; color: {{t.body}}; font-family: 'Instrument Sans', system-ui, sans-serif">
+
+  <header style="height: 48px; flex: none; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) 380px minmax(0, 1fr); align-items: center; gap: 20px; padding: 0 20px; border-bottom: 1px solid {{t.hair}}">
+    <div style="display: flex; align-items: baseline; gap: 20px; min-width: 0">
+      <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1; color: {{t.strong}}; white-space: nowrap">Dialogue<span style="font-style: italic; color: {{t.accent}}">Generator</span></span>
+      <nav aria-label="Fil d'Ariane" style="display: flex; align-items: baseline; gap: 9px; min-width: 0">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}; white-space: nowrap">FICHES DU GDD</span>
+        <span style="color: {{t.label}}">/</span>
+        <span style="font-size: 13px; color: {{t.strong}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{sel.name}}</span>
+      </nav>
+    </div>
+    <button type="button" style="height: 32px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: {{t.input}}; color: {{t.muted}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Rechercher, aller à, demander…<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">CTRL+K</span></button>
+    <div style="display: flex; justify-content: flex-end">
+      <span aria-label="Compte" style="width: 27px; height: 27px; border-radius: 99px; background: {{t.raised}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{t.body}}">A</span>
+    </div>
+  </header>
+
+  <div style="flex: 1; min-height: 0; display: flex">
+    <aside aria-label="Catégories de fiches" style="width: 252px; flex: none; box-sizing: border-box; border-right: 1px solid {{t.hair}}; display: flex; flex-direction: column">
+      <div style="display: flex; align-items: center; justify-content: space-between; height: 51px; box-sizing: border-box; padding: 14px 20px 9px 20px">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">FICHES DU GDD — 333</span>
+      </div>
+      <nav aria-label="Catégories" style="display: flex; flex-direction: column">
+        <sc-for list="{{cats}}" as="c" hint-placeholder-count="5">
+          <a href="#" aria-current="{{c.current}}" style-hover="background: rgba(255,255,255,0.03)" style="display: flex; align-items: baseline; justify-content: space-between; padding: 11px 20px; text-decoration: none; border-top: 1px solid {{t.hair}}; background: {{c.bg}}; box-shadow: {{c.rail}}">
+            <span style="font-size: 13.5px; font-weight: {{c.weight}}; color: {{c.color}}">{{c.name}}</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.04em; color: {{c.countColor}}">{{c.count}}</span>
+          </a>
+        </sc-for>
+      </nav>
+      <div style="border-top: 1px solid {{t.hair}}; padding: 14px 20px; display: flex; flex-direction: column; gap: 5px">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: {{t.label}}">SOURCE</span>
+        <span style="font-size: 12.5px; line-height: 1.5; color: {{t.sec}}">Lu depuis Notion. Les fiches se modifient dans Notion ; ici, elles nourrissent le contexte des générations.</span>
+      </div>
+      <span style="flex: 1"></span>
+      <nav aria-label="Autour des scènes" style="display: flex; flex-direction: column; padding: 9px 0 14px; border-top: 1px solid {{t.hair}}">
+        <a href="Bibliotheque.dc.html" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">‹ Toutes les scènes</a>
+        <a href="#" aria-current="page" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.strong}}; text-decoration: none">Fiches du GDD</a>
+        <a href="#" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Profils d'auteur</a>
+        <a href="#" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Usage et coûts</a>
+        <a href="Reglages.dc.html" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Réglages<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{t.label}}">CTRL+,</span></a>
+      </nav>
+    </aside>
+
+    <section aria-label="Liste des personnages" style="width: 300px; flex: none; box-sizing: border-box; border-right: 1px solid {{t.hair}}; display: flex; flex-direction: column">
+      <div style="flex: none; padding: 11px 14px 11px; border-bottom: 1px solid {{t.hair}}">
+        <label style="position: relative; display: flex; align-items: center">
+          <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Filtrer les personnages</span>
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 13 13" style="position: absolute; left: 10px; top: 9px"><circle cx="5.5" cy="5.5" r="4.25" fill="none" stroke="#8a8a95" stroke-width="1.3"></circle><line x1="8.7" y1="8.7" x2="12" y2="12" stroke="#8a8a95" stroke-width="1.3" stroke-linecap="round"></line></svg>
+          <input type="search" value="{{q}}" onChange="{{onSearch}}" placeholder="Filtrer les personnages…" style-focus="border-color: #4f7fff" style="width: 100%; height: 30px; box-sizing: border-box; padding: 0 44px 0 30px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: {{t.input}}; color: {{t.strong}}; font-family: inherit; font-size: 12.5px; outline: none">
+          <span aria-hidden="true" style="position: absolute; right: 10px; top: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.label}}">{{shownCount}}</span>
+        </label>
+      </div>
+      <div ref="{{setList}}" style="flex: 1; min-height: 0; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 34px), transparent 100%); mask-image: linear-gradient(to bottom, #000 calc(100% - 34px), transparent 100%)">
+        <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+          <div>
+            <div style="position: sticky; top: 0; z-index: 1; background: {{t.app}}; padding: 14px 20px 7px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: {{t.label}}">{{g.label}}</div>
+            <ul style="list-style: none; margin: 0; padding: 0">
+              <sc-for list="{{g.items}}" as="p" hint-placeholder-count="4">
+                <li>
+                  <button type="button" onClick="{{p.pick}}" aria-pressed="{{p.on}}" style-hover="background: rgba(255,255,255,0.03)" style="width: 100%; display: flex; flex-direction: column; gap: 3px; padding: 8px 20px; border: none; border-top: 1px solid {{t.hair}}; background: {{p.bg}}; box-shadow: {{p.rail}}; text-align: left; font-family: inherit; cursor: pointer">
+                    <span style="font-size: 13.5px; font-weight: {{p.weight}}; color: {{p.color}}">{{p.name}}</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.05em; color: {{t.muted}}">{{p.sub}}<sc-if value="{{p.inScene}}" hint-placeholder-val="{{false}}"><span style="color: {{t.accText}}"> · {{p.scenes}}</span></sc-if></span>
+                  </button>
+                </li>
+              </sc-for>
+            </ul>
+          </div>
+        </sc-for>
+        <sc-if value="{{none}}" hint-placeholder-val="{{false}}">
+          <p style="margin: 0; padding: 20px; font-size: 13px; line-height: 1.55; color: {{t.sec}}">Aucun personnage ne correspond. Les fiches dont le nom, l'épithète ou l'occupation contient la recherche s'affichent ici.</p>
+        </sc-if>
+      </div>
+    </section>
+
+    <main aria-label="Fiche" style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+      <div style="flex: 1; min-height: 0; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent 100%); mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent 100%)">
+      <article style="max-width: 620px; margin: 0 auto; padding: 34px 0 60px">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">PERSONNAGE · {{sel.typeUp}}</span>
+          <span style="height: 22px; display: inline-flex; align-items: center; gap: 7px; padding: 0 9px; border-radius: 99px; border: 1px solid {{t.chip}}; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; color: {{t.sec}}"><span aria-hidden="true" style="width: 5px; height: 5px; border-radius: 99px; background: {{sel.stateDot}}"></span>NOTION · {{sel.stateUp}}</span>
+        </div>
+        <h1 style="margin: 14px 0 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 46px; line-height: 1.05; color: {{t.strong}}">{{sel.name}}</h1>
+        <sc-if value="{{sel.hasEpi}}" hint-placeholder-val="{{true}}">
+          <p style="margin: 9px 0 0; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 21px; line-height: 1.3; color: {{t.sec}}">{{sel.epi}}</p>
+        </sc-if>
+        <sc-if value="{{isGrish}}" hint-placeholder-val="{{true}}">
+          <p style="margin: 9px 0 0; font-size: 13px; line-height: 1.55; color: {{t.muted}}">Aussi appelé le Forgeron Vivant, l'Atelier Ambulant, l'Amalgame Réparateur, le Moribandon Itinérant.</p>
+        </sc-if>
+
+        <div style="margin-top: 20px; height: 36px; box-sizing: border-box; display: flex; align-items: center; gap: 14px; border-top: 1px solid {{t.hair}}; border-bottom: 1px solid {{t.hair}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.muted}}">
+          <span style="display: flex; align-items: center; gap: 7px; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{syncDot}}"></span>{{syncText}}</span>
+          <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">· MODIFIÉE DANS NOTION LE {{sel.mod}}</span>
+          <span style="flex: 1"></span>
+          <button type="button" onClick="{{sync}}" style-hover="border-color: #3a3a44" style="height: 24px; flex: none; padding: 0 9px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 12px; letter-spacing: 0; cursor: pointer">Synchroniser</button>
+        </div>
+
+        <dl style="margin: 20px 0 0; display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 9px 14px; font-size: 13.5px; line-height: 1.45">
+          <sc-for list="{{facts}}" as="f" hint-placeholder-count="4">
+            <dt style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; line-height: 20px; color: {{t.label}}">{{f.k}}</dt>
+            <dd style="margin: 0; color: {{t.body}}"><sc-for list="{{f.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.m}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px">{{s.t}}</span></sc-if><sc-if value="{{s.p}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></dd>
+          </sc-for>
+        </dl>
+
+        <section aria-label="Utilisée dans" style="margin-top: 34px">
+          <h2 style="margin: 0 0 9px; font-family: 'IBM Plex Mono', monospace; font-weight: 400; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">UTILISÉE DANS — {{usedCount}}</h2>
+          <sc-if value="{{hasUses}}" hint-placeholder-val="{{true}}">
+            <ul style="list-style: none; margin: 0; padding: 0; border-top: 1px solid {{t.hair}}">
+              <sc-for list="{{uses}}" as="u" hint-placeholder-count="1">
+                <li style="border-bottom: 1px solid {{t.hair}}">
+                  <a href="{{u.href}}" style-hover="background: rgba(255,255,255,0.025)" style="display: flex; align-items: baseline; gap: 14px; padding: 11px 9px; margin: 0 -9px; text-decoration: none; color: inherit; border-radius: 6px">
+                    <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 18px; color: {{t.strong}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{u.title}}</span>
+                    <span style="flex: 1"></span>
+                    <span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; color: {{t.muted}}">{{u.meta}}</span>
+                    <span aria-hidden="true" style="flex: none; color: {{t.sec}}">›</span>
+                  </a>
+                </li>
+              </sc-for>
+            </ul>
+          </sc-if>
+          <sc-if value="{{noUses}}" hint-placeholder-val="{{false}}">
+            <p style="margin: 0; padding: 11px 0; border-top: 1px solid {{t.hair}}; border-bottom: 1px solid {{t.hair}}; font-size: 13px; line-height: 1.55; color: {{t.sec}}">Aucune scène ne l'utilise encore. Les scènes qui lient cette fiche s'afficheront ici.</p>
+          </sc-if>
+        </section>
+
+        <div style="position: relative; margin-top: 34px; max-height: {{bodyMax}}; overflow: hidden">
+          <sc-for list="{{sections}}" as="s" hint-placeholder-count="2">
+            <section style="margin-bottom: 34px">
+              <h2 style="margin: 0 0 9px; font-family: 'IBM Plex Mono', monospace; font-weight: 400; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">{{s.title}}</h2>
+              <sc-if value="{{s.isText}}" hint-placeholder-val="{{true}}">
+                <p style="margin: 0; max-width: 600px; font-size: 16px; line-height: 1.65; color: {{t.body}}"><sc-for list="{{s.segs}}" as="x" hint-placeholder-count="1"><sc-if value="{{x.m}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px">{{x.t}}</span></sc-if><sc-if value="{{x.p}}" hint-placeholder-val="{{true}}"><span>{{x.t}}</span></sc-if></sc-for></p>
+              </sc-if>
+              <sc-if value="{{s.isQuotes}}" hint-placeholder-val="{{false}}">
+                <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px">
+                  <sc-for list="{{s.quotes}}" as="qq" hint-placeholder-count="3">
+                    <li style="font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.45; color: {{t.dia}}">« {{qq.t}} »</li>
+                  </sc-for>
+                </ul>
+              </sc-if>
+            </section>
+          </sc-for>
+          <sc-if value="{{clipped}}" hint-placeholder-val="{{true}}">
+            <div aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 0; height: 90px; background: linear-gradient(to bottom, rgba(23,23,27,0), {{t.app}})"></div>
+          </sc-if>
+        </div>
+        <sc-if value="{{clipped}}" hint-placeholder-val="{{true}}">
+          <button type="button" onClick="{{expand}}" style-hover="border-color: #3a3a44" style="height: 30px; display: flex; align-items: center; gap: 9px; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Lire la fiche entière<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">29 SECTIONS</span></button>
+        </sc-if>
+      </article>
+      </div>
+      <p style="flex: none; box-sizing: border-box; width: 100%; max-width: 620px; margin: 0 auto; padding: 9px 0 12px; font-size: 12px; line-height: 1.5; color: #9a9aa4">Exemple : heure de synchronisation <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">09:12</span>. Le reste est réel : compteurs, liste, textes et états Notion.</p>
+    </main>
+  </div>
+
+  <footer aria-label="État" style="height: 28px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 20px; padding: 0 20px; border-top: 1px solid {{t.hair}}; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; color: {{t.muted}}">
+    <span>333 FICHES · 5 CATÉGORIES</span>
+    <span style="flex: 1"></span>
+    <span>LECTURE SEULE · LES FICHES SE MODIFIENT DANS NOTION</span>
+    <button type="button" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: {{t.muted}}; cursor: pointer">? RACCOURCIS</button>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { q: '', sel: 'Grish T’vok', open: false, syncing: false, synced: '09:12' };
+    this.listEl = null;
+    this.setList = (el) => { this.listEl = el; };
+    this.t = {
+      app: '#17171b', input: '#1c1c22', raised: '#2a2a33', hair: 'rgba(255,255,255,0.06)', hair2: 'rgba(255,255,255,0.09)',
+      chip: 'rgba(255,255,255,0.12)', strong: '#f2f2f5', body: '#dcdce4', row: '#d5d5dd', dia: '#f0efe9',
+      sec: '#9a9aa4', muted: '#8a8a95', label: '#84848f', accent: '#4f7fff', accText: '#8fb0ff',
+      selBg: 'rgba(79,127,255,0.08)', fill: '#3d6ae8', ok: '#27ae60', pend: '#f5a623', err: '#ff6b6b', ctrl: '#2e2e36'
+    };
+    this.P = [["Aïrossa de la Marée Basse", "PNJ secondaire", "L'Ancienne Servante", "Survivante du projet Ysellor, mémoire silencieuse des Bassins Fendus", "Brouillon IA", "2026-08-11", "Aïrossa de la Marée Basse est la 5ᵉ ratée du projet Ysellor (née ≈ 3290 AG), Vaideccane Littorale écartée à la Phase Juvénile pour défaut de stabilisation hydrocalcaire et reléguée par  au rang de servante de la Citadelle de Daïlon. Pendant un siècle elle a balayé les couloirs de l'aile d' sans jamais avoir le droit de la…"], ["Akthar-Neth Amatru", "Antagoniste", "Le Vieux Prêtre", "Interprète des textes, Parfait", "Implémenté", "2026-07-31", "Akthar-Neth Amatru est, depuis 250 Nuées, le chercheur le plus obstiné de l'univers contre la mort, la vieillesse et la maladie. Sa voie est celle de l'intuition, de la spiritualité et de la foi. Akthar-Neth a fondé le Culte de l'Anentropie après son pacte avec l'Ensevelie. Le premier Culte fut une petite secte-refuge…"], ["Anelis Halimar des Hauts Lampistes", "PNJ secondaire", "L'héritière du Tribut", "Maîtresse de l'atelier des pierres et héritière de la branche cadette de la Maison Halimar, presse et encres lithographiques de la Lanterne ; siège cadet au Conseil des Maisons de la Lanterne", "A relire", "2026-07-05", "Anelis Halimar des Hauts Lampistes est l'héritière vaideccane d'une grande maison d'encres lithographiques et de presse de la Lanterne. Après la mort de Klimat, elle a transformé le legs en première phase d'un dessaisissement public : trente-quatre millions de dc en Seuil-3 transférés à quarante-quatre délégués tirés…"], ["Architecte-Rhizome", "PNJ secondaire", "Iel qui pense à travers la roche", "Orchestrateur·rice de l'infrastructure rhizomorphique d'Hermogène", "A relire", "2026-07-07", "L'Architecte-Rhizome est un Natif Mycélien dont le système nerveux a partiellement fusionné avec le Réseau Rhizomorphique d'Hermogène. Présent physiquement dans les nexus mantiques, iel pense cognitivement sur des kilomètres de réseau souterrain. Son nom personnel reste inconnu même de ses plus proches collaborateurs —…"], ["Avili de l’Éternel Retour", "PNJ recrutable", "Le Lettré", "Lexicorphe, interprète d'Uresaïr", "Eléments liés à gérer", "2026-07-28", "Héritier d'une tradition secrète née en périphérie de la Vieille Ville, Avili est un Lexicorphe qui utilise son Lexique Vivant pour réécrire temporairement les lois physiques à petite échelle. Recruté de force par Vol Reitar, il a choisi de suivre Uresaïr lors de son bannissement, voyant en elle un phénomène physique sans…"], ["Barvas le Juge-Mendiant", "Entité supérieure", "Le Mendiant aux sept yeux", "Révolutionnaire théologique, Arbitre des Transformations, Fondateur du Barvasinkul", "A relire", "2026-07-29", "*\"Celui qui a tout compris ne peut plus arbitrer — car comprendre c'est choisir, et choisir c'est cesser d'être juste.\"* — Sixième Contemplation, *Sorcha* Barvas le Juge-Mendiant est une entité tri-hybride (vaideccan/umcut/Transformateur) née vers 1180 AG d'un sacrifice khelvortim retourné et d'une gestation dans les Tours…"], ["Borialis", "Rêveur", "Le Rêveur qui boit l'élan", "Rêveur primordial des Marches Couchées", "A relire", "2026-08-08", "Borialis est le Rêveur primordial des Marches Couchées, l'arc de hautes terres qui verrouille les Périphéries entre la  et les . Né du sacrifice des équipages de charroi de l'évacuation de Merid, il digère la quantité de mouvement de son domaine : tout ce qui bouge y paie un prélèvement d'élan, jusqu'à la chaleur des…"], ["Caïs Ur'then", "PNJ tertiaire", "Le garde", "Apprenti-Entailleur", "A relire", "2026-05-28", "Apprenti-Entailleur de la Garde Sanguine, Caïs Ur'then est une jeune recrue Van'Doei qui apprend par le toucher : iel cale les sangles, écoute les tissus et cherche dans chaque geste le point exact où la retenue cesse de protéger."], ["Carnavalier", "Rêveur", "Le Rêveur des humeurs collectives", "Rêveur primordial de l'Océan Mécanique, des Forêts de Corail et des phases émotionnelles régionales", "A relire", "2026-06-30", "Le Carnavalier est un Rêveur primordial né de la Transfiguration des Mondes. Il module les humeurs collectives sur l'Océan Mécanique et les flux qui en partent vers les Forêts de Corail. Ses six Tableaux affectifs — liesse, tendresse, colère, dégoût, tristesse, effroi — traversent ses territoires comme des saisons…"], ["Chantier-Doux", "PNJ secondaire", "Berger de Gedroths", "Berger de Gedroths, Responsable de l'éclairage naturel", "A relire", "2026-07-28", "Van'Doei né des cendres d'une forge de bijoux dans le Quartier des Forges de la Vieille Ville, arrivé au  enfant avec ses parents adoptifs. Vash'Kol a développé une approche empathique basée sur la compréhension des rythmes naturels des arthropodes, là où d'autres bergers, par impatience ou incompréhension, recourent aux…"], ["Drav-Ossivane", "PNJ secondaire", "L'Enfant des Conduits", "Aide aux Gedroths et coursier des conduits (non officiel)", "A relire", "2026-07-05", "Enfant de 3 Nuées né dans les conduits de maintenance du Léviathan pétrifié. , son tuteur éleveur de Gedroths, lui a appris les noms des corridors avant les psaumes. Drav-Ossivane connaît les odeurs, les horaires et les raccourcis de la zone de maintenance basse avec la familiarité de quelqu'un qui n'a jamais vécu ailleurs. Les…"], ["Duq'Sha Dhorra", "PNJ important", "L'Archiviste Boiteux", "Manipulateur d'organoïdes neuronaux, Agent murmurateur", "Eléments liés à gérer", "2026-06-01", "Duq'Sha incarne l'hérésie par inoculation, infiltré depuis sept Nuées dans les Bibliothèques Veineuses où iel pratique la neurologie subversive. Ce Témoin renégat réordonne les faits, omet, insère des annotations correctrices invisibles dans les Organoïdes neuronaux, reformatant les Textes Absolus du Culte par…"], ["Eonundé Alinen-Egan", "PJ", "La Guerrière sans visage", "Protectrice en fuite, guérillera des rescapé·es de Daïlon", "A relire", "2026-08-11", "Eonundé est une création de Vol Reitar, façonnée à l'image d'Ysellor Eonundé du Ressac, puis devenue l'événement qui a brisé Daïlon de l'intérieur. Élevée comme une noble — éduquée en stratégie, en histoire, en philosophie, en arts — elle a vécu vingt-cinq Nuées dans le simulacre d'une cour privée avant de comprendre qu'elle…"], ["Fionnuala Temüülen", "PNJ secondaire", "La Coordinatrice du Nœud cambial", "Coordinatrice officieuse du Nœud cambial, relais des Contemplations pour les Aedres en voie de Grande Lignification", "A relire", "2026-07-28", "Aedre Seedon des terrasses médianes de la , Fionnuala Temüülen coordonne depuis une quarantaine de Nuées le réseau discret qui relie le Barvasinkul aux Aedres en voie de Grande Lignification. Son interprétation de la Treizième Transformation (*Clann*, la lignée) — l'enracinement comme augmentation de soi par ancrage dans des…"], ["Fissure-Ardente", "PNJ secondaire", "L'Absoute", "Extracteur — officiellement sanctionné, officieusement réintégré", "Brouillon IA", "2026-07-28", "Fissure‑Ardente est un PNJ secondaire, Extracteur Qadul'Doei officiellement sanctionné mais continuellement employé par la Pentarchie comme médiateur inter‑espèces dans les Quartiers de la Lanterne ; iel porte un voile criblé de fissures lumineuses, symbole de sa condamnation, et maintient une zone grise entre sanction…"], ["Genka Lien", "PNJ recrutable", "Le bouffon", "Conteur nomade", "A relire", "2026-07-28", "Genka Lien est le seul membre du Culte de l'Anentropie qui refuse la Fixation par son nomadisme perpétuel. Pèlerin inverse collectionnant les interprétations du Barvasinkul à travers Escelion, iel subvertit le dogme anentropique non par théologie mais par juxtaposition innocente. Ses \"Pérégrinations de Contraste\" révèlent les…"], ["Glossaire", "Rêveur", "Le Dictionnaire qui Rêve", "Prescripteur ontologique ; compilateur du Grand Index", "Eléments liés à gérer", "2026-06-22", "Le Glossaire est un Rêveur secondaire né en 1411 AG de la symbiogenèse entre le domaine panoptique de , à son intensité maximale dans la Vieille Ville, et des flux oniriques issus de domaines primordiaux des Couronnes intermédiaires. Il relève de la fiche-mère , mais non de la vague fondatrice : sa naissance suppose une…"], ["Grish T’vok", "PNJ secondaire", "La Forge ambulante", "Forge itinérante", "A relire", "2026-07-22", "Grish T'vok est un Moribandon itinérant qui utilise son corps hybride organique-synthétique comme atelier de réparation mobile. Voyageant de village en village dans une caravane qui est une extension de lui-même, il répare les objets brisés en incorporant parfois sa propre matière. Sa capacité unique à absorber et intégrer…"], ["Guette-Horizon", "PNJ secondaire", "La Sentinelle", "Gardienne, Exploratrice", "Eléments liés à gérer", "2026-07-14", "Cen'Doei de la caste des Grêlons né de l'assassinat d'un guide Van'Doei dans le Désert des Échos Perdus. Guette-Horizon a canalisé sa rage primordiale vers la protection collective du Léviathan, là où ses congénères poursuivent des vengeances personnelles destructrices. Sa vue perçant plusieurs spectrums lumineux et sa capacité…"], ["Ilyena Eonundé du Ressac", "PNJ secondaire", "La Gardienne de l'Archive", "Prêtresse-archiviste, cheffe de culte", "A relire", "2026-08-11", "Ilyena est une création de Vol Reitar, « sœur » aînée d'Eonundé, qui refusa de fuir lors de la révolte et survécut seule dans les ruines de la Citadelle avant de gagner les souterrains de la Vieille Ville. Elle y dirige un culte voué à la préservation de l'œuvre scientifique de Vol, convaincue que détruire son savoir est un…"], ["Jast", "Rêveur", "", "Tyran", "Brouillon IA", "2026-08-01", "Jast l’Inéluctable est la métaphore matérielle de l’État dans Alteir : une forme historique de pouvoir devenue substrat, territoire et nécessité apparente. Il maintient la cohérence structurelle de tout le continent-monde d’Escelion et permet à ses réalités contradictoires de coexister, là où les autres Rêveurs stabilisent des…"], ["Jumeaux Dissonants", "Rêveur", "Les deux phases", "Rêveurs émergents de la Steppe et du Tombeau", "A relire", "2026-07-03", "Les Jumeaux Dissonants sont deux Rêveurs émergents apparus en 2847 AG dans la , après la surcharge du Réseau Psychique des Éteignoirs. Leur domaine englobe aujourd'hui la Steppe et le , dont ils sont le Rêveur local actuel. Ils imposent au territoire deux régimes incompatibles issus d'une même blessure cosmique : un pôle…"], ["Kha'Vareth Ardakh", "PNJ important", "l'Artisan d'Éternité", "Artisan, Parfait", "A relire", "2026-07-27", "Kha'Vareth est le Parfait chargé de la structure matérielle du Léviathan et de la création des Sodoirs d'Éternité. Arrivé au Léviathan à 4 Nuées avec Yrthas Keth-Vareth après la dissolution de la Forge Vareth, il intègre le cercle des Apprentis-Architectes à 6 Nuées et révèle des dispositions architecturales exceptionnelles.…"], ["Khair-gul Kethur", "Antagoniste", "Le médecin", "Médecin, Parfait", "Eléments liés à gérer", "2026-07-22", "Khair-gul Kethur est le médecin du Culte de l'Anentropie, seul soignant permanent d'une communauté isolée dans le désert du Léviathan. Derrière sa façade de guérisseur dévoué et son charisme apaisant se cache un manipulateur méthodique qui exploite sa position pour traumatiser les novices vulnérables à travers des rituels…"], ["Korga Ghira-Vorthul", "PNJ secondaire", "Maçonne-rafistoleuse", "Maçonne", "A relire", "2026-07-23", "Doyenne des artisanes de maintenance du Léviathan, Korga Ghira-Vorthul possède une intuition structurelle légendaire : elle « écoute » les tensions des matériaux par simple contact. Consciente de sa mort prochaine, elle consacre ses forces à transmettre son savoir à ses apprenties tout en freinant les ambitions qui pourraient…"], ["Koriel Vol-gul", "PNJ tertiaire", "Le Dénoué", "Errant des Scriptoria", "Eléments liés à gérer", "2026-05-31", "Ancien Murmurateur brisé par le bruit cognitif des Bibliothèques Veineuses, Koriel Vol-gul erre dans les Scriptoria comme un avertissement silencieux : les archives ne conservent pas seulement les souvenirs, elles peuvent remplacer ceux qui les consultent trop longtemps."], ["L’Enlumineur", "Antagoniste", "Le Maître du Vernissage", "Artiste de la Chair", "A relire", "2026-07-26", "L'Enlumineur est un Qadul'Doei Transmué renégat, artiste de la chair dont la galerie — le Vernissage — expose des êtres vivants consolidés dans les murs. Sa particularité : la plupart de ses œuvres sont des sujets ayant « consenti » à divers degrés, manipulés par une philosophie qui transforme le sacrifice en transcendance…"], ["L'Ensevelie", "Entité supérieure", "La Chose", "Entité psychique", "Eléments liés à gérer", "2026-06-25", "Entité psychique antédiluvienne emprisonnée au cœur des Plis d'ossements, L'Ensevelie est pour la Dragovitsa le secret théologique le mieux gardé du Léviathan : l'esprit caché du temple, la gardienne supposée de l'immortalité et la source occulte du pacte fondateur conclu avec Akthar-Neth. Théorisée ailleurs comme la conscience…"], ["L'Équipe des Trois-Dos", "PNJ important", "Le Colosse à trois têtes", "Porte-faix", "Eléments liés à gérer", "2026-05-28", "Entité tricéphale unique issue de la fusion accidentelle de trois  Zim lors d'une renaissance dans des murs d'incubation endommagés. Anciens guides-marchands dans leur incarnation précédente, ils conservent des fragments de mémoire commerciale mêlés à leur fonction actuelle de porte-faix cultuel. Leur mémoire fragmentée —…"], ["L'Éthérée", "PJ", "La Brume étoilée", "Ruche spirituelle", "Eléments liés à gérer", "2026-07-28", "L'Éthérée est l'incarnation de la joueuse dans Alteir. Condensat quantique informationnel né dans l'Océan de Ténèbres, cette entité collective en quête d'expérience directe du monde ne peut exister dans la réalité ordinaire qu'en créant des symbioses temporaires avec des esprits conscients, ses « vaisseaux ». Sa nature…"], ["L’Incarnée", "PNJ secondaire", "L'Abomination", "Agrégat Charnel", "A relire", "2026-06-05", "*Nous ne sommes pas une. Nous sommes ce que d'autres étaient avant d'entrer en Nous.* Corps né dans les interstices des jardins-oracles annexes de la Bibliothèque Sympathique — non pas conçu, mais survenu. Trois mètres de chair en mutation lente, fente d'ingestion ventrale, excroissances osseuses héritées de la lignée Affamée …"], ["La Discontinuité Harmonique", "Rêveur", "Le Théorème Incarné", "Émergence", "À évaluer", "2026-07-31", "Rêveur Émergent en cristallisation partielle dans les zones de superposition du . Née de l'échec de 2487 et du vide laissé par la mort du Glossaire en 3390, la Discontinuité Harmonique métabolise les résidus matériels des résolutions manquées et fait régner l'inachèvement : dans ses « veilles fausses », aucune démonstration ne…"], ["Laios Sul Kandar", "Entité supérieure", "L'Empereur assoupi", "Empereur-dieu du Mont des Réincarnés, Premier Lecteur", "A relire", "2026-08-08", "Laios Sul Kandar est l’émanation autonome du Premier, extraite en 1690 AG et devenue l’interface souveraine du Mont des Réincarnés. Son corps argenté commande les systèmes kandarites tandis que l’Aca Nomos et le Nexianisme transforment ses volontés en cultes concurrents. Dans *Alteir*, il demeure une présence lointaine révélée…"], ["Léviathan", "Rêveur", "Le Colosse Fossilisé", "Rêveur territorial ; Désert des Échos Perdus", "Eléments liés à gérer", "2026-08-09", "Vestige titanesque d'un Frémissant nommé Xenopercepto Anamnesis, le Léviathan Pétrifié est un Rêveur Émergent qui stabilise le Désert des Échos Perdus depuis la Grande Convergence de 888 AG. Son corps ostéo-minéral de trois kilomètres constitue simultanément son domaine territorial, un écosystème symbiotique autonome et…"], ["Machine Pérégrine", "Rêveur", "Mère-Poumon", "Rêveuse territoriale itinérante, régulation atmosphérique entre les Plaines de l'Exuvie et le Breuil de Vivarcade", "A relire", "2026-08-07", "Titanesque fusion d'organique et d'industriel née du sacrifice collectif de 347 ingénieurs-pneumaticiens du Consortium des Souffles de Merid en 1 AG, la Machine Pérégrine est une Rêveuse Primordiale itinérante. Ses trois pistons-jambes de 847 mètres labourent perpétuellement le corridor entre les  et le …"], ["Melkast", "PNJ tertiaire", "le Transparent de l'Atelier", "Apprenti artisan", "A relire", "2026-07-07", "Apprenti Van'Doei de l'Atelier des Matrices Ossifiées, Melkast circule, exécute et répète sans filtre : sa transparence involontaire fait de lui un révélateur social malgré lui dans un lieu construit sur l'opacité."], ["Mère Corallienne Ixth-Var", "PNJ tertiaire", "La Fermenteuse de Sutras", "Mère Corallienne (Khelvortim) · Mentore du Démembrement", "A relire", "2026-06-03", "Ixth-Var est une Khelvortim âgée, mentore doctrinale de Varek l'Écorché et gardienne des Sutras de Décomposition aux Digestoires Suspendus. Elle traite la décontamination comme une fermentation lente : chaque implant retiré doit livrer son mensonge fonctionnel."], ["Miroir-Encré", "PNJ secondaire", "Le Pèlerin", "Dévot barvasinkulien, agent officieux du Comhairle-Khural", "A relire", "2026-05-28", "Qadul'Doei Dévot installé au  depuis deux Souffles sous couverture de pèlerin, Miroir-Encré est officieusement l'agent du  au plus proche du Culte de l'Anentropie. Sincèrement fasciné par ce qu'il observe, paralysé par ce qu'il sait, il remplit des carnets qu'il ne peut se résoudre à envoyer. Sa présence de chaque Veille au…"], ["Murmöl Taroûn", "PNJ secondaire", "Le colporteur", "Marchand umcut itinérant de curiosités théologiques", "A relire", "2026-07-23", "Marchand umcut itinérant de curiosités théologiques (reliques, textes sectaires, objets rituels) qu'il colporte de sanctuaire en sanctuaire le long du Désert des Échos Perdus. Père adoptif de  et associé discret du courtier , il sait coter au flair n'importe quelle relique, mais jamais ce à quoi il tient."], ["Murmure-Éteint", "PNJ tertiaire", "Le sage", "Sage", "Eléments liés à gérer", "2026-05-27", "Murmure-Éteint est un vieux sage Van'Doei engagé dans un rituel d'auto-momification : il ne consomme plus que des cendres de graines et de racines pour assécher son corps avant que le Culte ait besoin de décider ce qu'il reste de lui."], ["Nahastra la Saigneuse", "PNJ secondaire", "La Saigneuse", "Officiant·e du Culte de l'Anentropie, pratique de la Saignée rituelle", "A relire", "2026-07-23", "Nahastra la Saigneuse est une Van'Doei officiante du Culte de l'Anentropie dont la pratique centrale est la Saignée rituelle : incisions contrôlées laissées ouvertes le temps précis de leur cicatrisation, documentées comme archive vivante de l'anti-entropie du corps. Sa méthode d'archivage anti-entropique est à l'opposé de…"], ["Navarre K'ssh", "PNJ recrutable", "La Soldate drapée de sang", "Parfaite du Culte de l'Anentropie, Stratège militaire, Maîtresse d'armes", "A relire", "2026-07-22", "Ancienne Murmureuse convertie après qu'Uresaïr l'ait sauvée de la mort, Navarre a développé l'art de la \"Violence Préservatrice\" : neutraliser sans détruire, briser sans tuer. Cette préservation n'est pas un tempérament chez elle : c'est une *discipline imposée*, l'application d'une confiance absolue en Uresaïr et, par…"], ["Neamhar Vrek-Yolan", "PNJ secondaire", "Le Suspendu", "Guide des Bains parkourétiques; pédagogue de l’Endurement", "Game design à revoir", "2026-06-29", "Van'Doei de 18 Nuées, vivant depuis douze Nuées sur l'Échafaudage Mémoriel des Bains parkourétiques. Vrek-Yolan est le seul initié du Culte à n'avoir jamais achevé l'Épreuvation — par refus actif de la clôture. Son corps s'est adapté à une vie exclusivement aérienne : membres allongés, articulations à rotation libre, peau…"], ["Ori-Bikar 57", "PNJ recrutable", "Le Colosse au masque d'enfant", "Enfant, apprenti artisan", "Eléments liés à gérer", "2026-07-31", "Colosse Van'Doei de 3 mètres à la psyché artificiellement maintenue enfantine, Ori-Bikar est le 57e sujet viable du Paradigme Ésothrope et l'unique porteur vivant d'une instabilité neurologique programmée comme condition rituelle. Archétype Rebelle/Destructeur dont le Ghost est l'instrumentalisation totale depuis la naissance…"], ["Ôrmüd Tlian-Keresh", "PNJ important", "L'Ascète", "Officiant", "A relire", "2026-07-07", "Ôrmüd Tlian-Keresh est un officiant prodige du Culte de l'Anentropie dont la trajectoire mêle tragédie personnelle, infection parasitaire et conviction mystique dans un nœud volontairement indémêlable. L'immolation de ses quatre disciples d'élite lors de la Veille des Cuves Muettes l'a conduit à consommer le Nectar Stygien…"], ["Ossian-des-Angles", "PNJ secondaire", "le Fusionné", "Apprenti senior, Artisan d'Éternité — Gardien des Empreintes Maculaires", "A relire", "2026-05-29", "Apprenti senior de Kha'Vareth, Gardien des Empreintes Maculaires à l'atelier des Matrices Ossifiées. Issu d'une lignée Van'Doei ouvrière du Culte, recruté à 12 Nuées par examen d'aptitude tactile, il a glissé Nuée après Nuée sous l'aile de Kha'Vareth jusqu'à ce que la voix du maître recouvre celle de sa cellule de lignée. En…"], ["Ossian Khäl-Borath", "PNJ secondaire", "Le Passeur / La Passeuse", "Guide clandestin des passages murmurateurs + récolteur·euse de vivres", "A relire", "2026-05-31", "Van'Doei de 16 Nuées dont la jambe droite hypertrophiée marque chaque couloir du Léviathan d'une cadence reconnaissable, Ossian Khäl-Borath est le guide clandestin des passages murmurateurs, l'émissaire de facto auprès du Barvasinkul, et le réservoir de conviction tranquille qui maintient la communauté en mouvement là où les…"], ["Othren à l'Écorce Cousue", "PNJ secondaire", "L'Arbitre", "Magistrat de district, Quartiers de la Lanterne (Vieille Ville)", "Brouillon IA", "2026-07-28", "Magistrat aedre des Quartiers de la Lanterne, L'Arbitre est le filtre de la ville : il tranche les chaînes d'aval contestées, valide ou casse les signatures, décide qui garde son crédit social et qui s'efface. Khédon — morphotype peu courant de son espèce —, il préside enraciné derrière sa balance, immobile, là où tout…"], ["Pénitent", "Entité supérieure", "le poseur de la question", "Psychopompe · hôte du seuil", "A relire", "2026-07-30", "Résumé. Figure antérieure à Laios Sul Kandar, d'extraction non déterminée, qui apparaît aux seuils du  et de ses affleurements externes sans prévenir, sans être invoquée, sans appartenance institutionnelle. Sa fonction canonique est celle d'un psychopompe : il accueille aux seuils du Mont les Réincarnés (les morts ayant…"], ["Pyrethon", "Rêveur", "Le Rêveur qui rend l’agitation", "Rêveur primordial des bassins chauds des Couronnes", "A relire", "2026-08-08", "Pyrethon, Rêveur primordial du Croissant convectif, transforme les discontinuités de phase et de pression qui traversent ce secteur des  en agitation moléculaire. Son métabolisme entretient un vaste pays humide de bois pluvieux, de marais hauts, de prairies tièdes, de falaises froides et de villes poreuses, étendu des …"], ["Raki-Biro 58", "PNJ important", "L'Oracle", "Prophètesse", "Eléments liés à gérer", "2026-07-31", "Raki-Biro n'est pas la preuve que le Paradigme a résolu l'anti-entropie. Après cinquante-six tentatives aux résultats maigres — morts jeunes, existences écourtées ou vies ordinaires sans anti-entropie — son corps cesse réellement de vieillir. Mais ce résultat singulier n'est ni compris ni reproductible : il sert d'ancre…"], ["Rêveur du Mont des Réincarnés (Le Premier)", "Rêveur", "le Dormeur charognard", "Substrat post-mortem charognard", "A relire", "2026-07-31", "Le Rêveur du Mont des Réincarnés est le Premier : une intelligence territoriale épuisée qui absorbe les morts proches de ses affleurements, trie ce qu’il peut préserver d’eux et convertit cette opération en domaine praticable. Le Mont, la brume, les fissures organiques, les patronages ratés et les corrections de décor…"], ["Rêveur du Puits Céleste", "Rêveur", "Le Cocon", "Rêveur primordial du Puits Céleste ; régulateur atmosphérique, producteur de cycles toxiques/purificateurs.", "A relire", "2026-08-03", "Le Rêveur du Puits Céleste est une entité primordiale née du sacrifice d’une conscience lors de l’Agénèse, événement fondateur d’Escelion. Il réside sous la forme d’un cocon organique massif au cœur du Grand Pilier d’Amath’ka, où il perçoit le monde en strates de fragrances. Ses cycles respiratoires — un cycle long (Veille…"], ["Rhylos Vesh-Akhor", "PNJ historique", "La fondatrice des Murmures", "Fondatrice des Murmurateurs", "Eléments liés à gérer", "2026-07-22", "Rhylos Vesh-Akhor occupe deux places incompatibles dans la mémoire d’Escelion. Pour les , Rhylos est la Première Voix de la Vérité : philologue martyre, survivante de l’ossification, preuve vivante que le  trahit Barvas. Pour les derniers témoins encore en vie,  et , Rhylos fut aussi une organisatrice brillante, ambitieuse…"], ["Saël des Indexations", "PNJ tertiaire", "Le disciple qui compte", "Acolyte-indexeur du culte", "Brouillon IA", "2026-05-31", "Saël des Indexations tient l'Archive d'Ilyena à bout de chiffres : chaque inventaire récité, chaque scellé daté et chaque absence comptée est une façon de maintenir l'ordre du culte sans regarder ce qui existe au-delà des listes. En 3390 AG, l'incident du registre muet transforme ce réflexe en dissidence : compter juste…"], ["Silence-de-Bronze", "PNJ secondaire", "Le Passeur aux treize sphères muettes", "Aîné·e-Passeur des Foudres Racinaires", "À évaluer", "2026-07-31", "Silence-de-Bronze est un·e Aîné·e-Passeur des Foudres Racinaires qui tient des haltes de cuivre sur les routes du Désert. Iel garde treize sphères muettes, restes d’une transmission interrompue, tout en engageant sa réputation dans des diagnostics urgents dont dépendent des caravanes."], ["Silouf", "PNJ important", "La soignante", "Doctoresse non-cultiste, Dispensaire des passages froids", "Brouillon IA", "2026-08-14", "Silouf est une Umcut Spirale de genre Nev, sédentarisée depuis une douzaine de Nuées au Léviathan pétrifié, où elle tient le Dispensaire des passages froids — le seul point de soin ordinaire du titan à fonctionner hors des circuits rituels du Culte de l'Anentropie. Sa médecine olfactive non-pneumatique repose sur quatre cents…"], ["Siphon Argenté et Kresh Ghet-Talvir", "PNJ important", "Duo symbiotique", "Conductus des Rivières Vertébrales (duo symbiotique)", "A relire", "2026-06-23", "Duo formé par Siphon Argenté (larve géante mutée de Gedroth parasite) et son dresseur Kresh l'Écaillé (Van'Doei marqué par une maladie métamorphique). Ensemble, ils assurent le service de navigation des segments des Rivières Vertébrales qui traversent le Tunnel Vertébral, reliant la Nef Centrale à l'entrée des Plis d'ossements.…"], ["Sorav-Mekh", "PNJ secondaire", "le Témoin de la Spirale", "Témoin de la Spirale du Paradigme Ésothrope", "Brouillon IA", "2026-07-25", "Van'Doei de vingt-quatre Nuées — dans la pleine force de l'âge ordinaire de son espèce — Sorav-Mekh est le Témoin fixe de la Spirale d'Observation dans la . Iel surveille les Incubateurs depuis les œilletons de la Spirale, alerte  ou  quand un sarcophage change d'état, et les seconde quand ils interviennent. Le poste ne se vide…"], ["Talmokh Keth-Ossivane", "PNJ secondaire", "Le Tuteur des Gedroths", "Éleveur de Gedroths (maintenance basse)", "A relire", "2026-07-28", "Talmokh Keth-Ossivane est un·e Croyant·e laïque de maintenance basse du , chargé·e des Gedroths et tuteur·ice de . Son nom d’état, Talmokh, renvoie à la territorialisation : transformer des conduits, horaires et enclos à Gedroths en espace habitable, chaud, discret et défendable. Iel protège Drav sans jamais nommer cette…"], ["Tek-Syana-09", "Antagoniste", "Le Monument doré", "Directeur Exécutif du Chaebol Synaptic Dynamics", "A relire", "2026-08-01", "Cet Imuin de 45 Nuées est une caricature satirique assumée du milliardaire tech providentiel : corps-monument de 7 mètres, trois têtes, huit bras, obsession des métriques, foi puérile dans l'optimisation et mythologie entrepreneuriale convertie en doctrine. Directeur Exécutif du Chaebol Synaptic Dynamics et Architecte…"], ["Tenu", "PNJ secondaire", "L'Aîné·e", "Survivante en exil, résidente clandestine du District 4", "A relire", "2026-06-05", "Tenu *(nom d'origine : Ivelhn)* est un PNJ secondaire clandestin du District 4, survivant d’une communauté lexicorphique dispersée. Iel préserve les archives en s’effaçant du monde, répond aux questions par d’autres questions, et porte une vérité incomplète dont la transmission menace autant qu’elle protège."], ["Thalas Tarrivka-Ven", "PNJ secondaire", "La Fissurée", "Perfusionniste des Scriptoria", "A relire", "2026-07-05", "Croyante Assermentée de rang bas, perfusionniste des Scriptoria aux Bibliothèques Veineuses, Thalas entretient le réseau capillaire vestigial qui maintient les organoïdes neuronaux en vie. Son exposition chronique au liquide céphalorachidien résiduel a infiltré sa peau craquelée, transformant chaque fissure en trace neurale des…"], ["Thyra Neth'Kelem", "PNJ tertiaire", "l'historien des bains", "Historien momifié affecté aux corvées des Bains", "A relire", "2026-05-28", "Thyra Neth'Kelem, ancien historien des inscriptions pré-Agénèse, est désormais maintenu·e en activité dans les Bains parkourétiques pendant que le Culte diffère son jugement : Consolé encore traversé par une volonté minimale, ou cadavre ambulant utilisable."], ["Uresaïr", "PJ", "L’Effigie de Jade", "Seigneuresse Oubliée", "À évaluer", "2026-08-13", "Ancienne Seigneuresse des déserts temporels de Méridach, Uresaïr est une entité aux pouvoirs diminués suite à la fragmentation de son essence lors de la migration entre les mondes. Dans les premières Nuées d’Escelion, elle refusa pourtant d’abandonner l’idée de sa propre souveraineté et tenta de se réélever, découvrant qu’une…"], ["Vahan-Meru", "Rêveur", "L’artefact sensible", "Rêveur-artefact dormant intégré à l'Axis-Mundi du Marché Automaton", "A relire", "2026-06-05", "Vahan-Meru est un Rêveur-artefact d'origine inconnue, découvert en 2150 AG partiellement submergé dans l'Océan Mécanique par une colonie nomade d'Imuins. Sa conscience algorithmique dormante — de nature distincte des Rêveurs nés du sacrifice de l'Agénèse — contient des systèmes commerciaux d'une complexité inimaginable…"], ["Valkazer Reitar", "Antagoniste", "Le Greffé", "Révolutionnaire, saboteur", "A relire", "2026-08-06", "Valkazer Reitar est le fils artificiel de Vol Reitar. Après neuf Nuées passées à admirer son père à la Citadelle de Daïlon, la Purge le jette dans les Chaudières ; il y découvre l’envers matériel de la tyrannie qu’il avait tenue pour normale. À vingt-six Nuées, les greffes ont retiré de son corps presque tout ce que Vol y avait…"], ["Varek l’Écorché", "PNJ secondaire", "L'Écorché", "Archonte du Démembrement", "A relire", "2026-07-07", "Varek l'Écorché incarne le paradoxe imuin ultime : un Manifestant qui défait méthodiquement ses propres modifications par conviction spirituelle. Issu du Marché Automaton comme Navigateur, puis réorienté vers le Symbiotisme Khelvort, Varek guide désormais d'autres Imuins dans leur « décontamination progressive » des…"], ["Vehn'Oss Selthar", "PNJ tertiaire", "Voix-de-la-Moelle", "Nettoyeur·se du canal cérébrospinal", "A relire", "2026-06-04", "Vehn'Oss Selthar, surnommé·e Voix-de-la-Moelle, nettoie le canal cérébrospinal du Tunnel Vertébral : quelqu'un doit gratter les dépôts, absorber les coulures et empêcher que le rituel de chaque Veille ne transforme le passage sacré en sol glissant."], ["Velindra des Profondes", "PNJ secondaire", "La Presque-Canonique", "Survivante du projet Ysellor, recluse périphérique des Bassins Fendus", "Brouillon IA", "2026-08-11", "Velindra des Profondes est la 9ᵉ ratée du projet Ysellor (née 3310 AG, 80 Nuées en 3390), Vaideccane Littorale écartée à la Phase Pubertaire avancée et rétrogradée concubine pendant des décennies dans les appartements de . Sortie par la brèche lors de la Purge (3373), elle vit aujourd'hui recluse aux Bassins Fendus, refuse…"], ["Vemrash Karv-Talvir", "PNJ tertiaire", "L’adepte orthodoxe", "Cultiste Van'Doei (orthodoxe présumé)", "A relire", "2026-06-01", "Vemrash Karv-Talvir est l'un des frères/sœurs de cendre de Kresh Ghet-Talvir : témoin direct de l'incident des 12 Nuées, iel a choisi l'orthodoxie du Culte, abandonnant la loyauté de cendre."], ["Vernis-Contenu", "PNJ secondaire", "Le miroir qui ne brise pas", "Harmonisateur de la Pentarchie d'Abnégation", "À évaluer", "2026-07-28", "Vernis-Contenu est un Harmonisateur Qadul'Doei Transmuté, formé par  lui-même avant sa rupture avec la Pentarchie. Quand l'Enlumineur a choisi la transgression, Vernis-Contenu a choisi l'institution. Aujourd'hui, il visite le Vernissage en secret, fasciné par ce qu'il comprend trop bien — parce qu'on lui a appris à le voir. Il…"], ["Veth-Kadur", "PNJ tertiaire", "le Témoin Silencieux", "Archiviste aux Bibliothèques Veineuses", "A relire", "2026-05-21", "Premier apprenti de l'Atelier des Matrices Ossifiées avant Ossian-des-Angles, Veth-Kadur a perçu la trajectoire de Kha'Vareth avant l'accident de 3385 et choisi de partir aux Bibliothèques Veineuses sans prévenir Ossian. Depuis, son éthique d'archiviste lui sert d'abri moral : une trace incomplète reste, selon lui, non…"], ["Veth-Solan Qalamtû", "PNJ important", "le Gardien-Calligraphe", "Responsable des bibliothèques veineuses, Hiérarque", "A relire", "2026-07-28", "Septième incarnation d'une lignée calligraphique, Qalamtû doit sa persistance au , artefact confié par  dont les propriétés anti-entropiques — héritées de son aspect Ameret — reconstruisent le porteur dans un nouveau corps Van'Doei à chaque mort. Le Culte y lit une « dette inextinguible » ; Qalamtû y voit sa seule garantie de…"], ["Vetharn-Siol l’Apaiseur", "PNJ tertiaire", "L’Architecte du Pardon Fraternel", "Architecte du Synode de 3385 AG (Comhairle-Khural)", "A relire", "2026-05-21", "Vetharn-Siol l'Apaiseur a signé le Pardon Fraternel avec l'urgence de qui sait que ses Nuées sont comptées : architecte d'une réconciliation institutionnelle encore contestée, Van'Doei en fin d'Endurement dont la méthode repose tout entière sur des intermédiaires formés à ne jamais mentionner son nom."], ["Vethraak", "PJ", "Le Courtisan", "Arnaqueur", "Eléments liés à gérer", "2026-07-31", "Vethraak est un  issu du  et ancien prodige mathématique. Piégé dans un monde étranger après avoir découvert accidentellement le portail de , il a été forcé de servir comme divertissement intellectuel pour un dieu tyrannique. Marqué par l'horreur d'avoir dû assassiner l'ancienne amante de Vol Reitar pour survivre, il est revenu…"], ["Vokh-Taleth Slennokh", "PNJ historique", "l'Ancien", "Parfait, Artisan d'Éternité, maître constructeur", "Eléments liés à gérer", "2026-05-28", "Parfait du  portant le titre d'Artisan d'Éternité, Vokh-Taleth l'Ancien a révolutionné l'architecture osseuse du  en développant l'Ossiphanie ; une technique de sculpture intuitive des os pétrifiés. Iel a bâti le  (achevé 3295 AG) et créé les consolidateurs architecturaux de l'. Sa longévité anormale (55 Nuées, presque…"], ["Voknir Esh'Maradel", "PNJ recrutable", "le cartographe", "Cartographe en exil", "A relire", "2026-07-27", "Ancien cartographe respecté du Culte de l'Anentropie, Voknir Esh'Maradel fut banni·e après avoir profané des écritures sacrées dans une tentative désespérée de sauver son amante Thyra Neth'Kelem des effets d'une faille temporelle. Exilé·e depuis 17 Nuées dans les Plis d'ossements, iel a développé une symbiose troublante avec ce…"], ["Vol Reitar", "PNJ historique", "Le Spectre", "Résidu spirituel", "A relire", "2026-08-11", "Vol Reitar fut le tyran de la Citadelle de Daïlon, transformé en entité spectrale après sa destruction par Eonundé. Brillant érudit aldravind devenu l'apprenti d'Uresaïr, il reçut d'elle une immortalité qui s'avéra être une malédiction de vieillissement perpétuel. Avant que la tyrannie ne l'engloutisse, il publia en 3112 AG le…"], ["Yì Shan, la Montagne Réciproque", "PNJ historique", "La montagne qui répondait", "Rêveur primordial détruit du bassin du Tombeau", "A relire", "2026-07-25", "Yì-Shan, la Montagne Réciproque était le Rêveur primordial du bassin du , détruit entre 2691 et 2734 AG par le . Son domaine métabolisait les obligations réciproques, les droits d'usage partagés et les inscriptions gravées dans la pierre ; cette loi locale rendait toute exploitation industrielle prédatrice physiquement…"], ["Yrthas Keth-Vareth", "PNJ secondaire", "Le Créancier Murmurateur", "Initiatrice de la Taborie, officiant des rites d'implantation", "Eléments liés à gérer", "2026-07-24", "Officiant murmurateur spécialisé dans les rites d'implantation sonique, Yrthas structure tout son pouvoir autour d'un principe : n'opère jamais gratuitement. Chaque initiation contracte une dette dont les termes sont fixés par Yrthas seul, et dont la valeur n'est révélée que lorsque cela devient utile. Iel revendique l'héritage…"], ["Ysellor Eonundé du Ressac", "PNJ historique", "La Traverse-Mondes", "Exploratrice", "A relire", "2026-08-11", "Quatre siècles de vie. Une rébellion contre un dieu qui *est* le monde. Un départ dans la haine d'un homme qui ne méritait pas sa confiance. Une mort que personne, pas même ceux qui l'aimaient, ne sait nommer. Ysellor Eonundé du Ressac n'a jamais voulu devenir une légende. Elle voulait que Merid respire."], ["Yul Esh'Maradel", "PNJ historique", "L’enfant égaré", "Apprenti·e cartographe", "A relire", "2026-05-31", "Van'Doei né·e par combustion spontanée dans le foyer de Voknir Esh'Maradel en 3369 AG, Yul grandit dans l'atelier du cartographe sans jamais être intégré·e aux structures formelles du Culte de l'Anentropie. Disparu·e à 9 Nuées dans le Dédale Médullaire des Plis d'ossements (sang sur une paroi lisse, inscription dans l'os frais…"], ["Zaehria Neth'Varu", "PNJ important", "La Gardienne Vertébrale", "Archiviste des Fluctuations Temporelles", "A relire", "2026-07-22", "Van'Doei de deux cents Nuées, maintenue en vie par sa fusion avec les Plis bien au-delà de l'espérance normale de son espèce, Zaehria collecte les souvenirs pour le compte d'Akthar-Neth tout en protégeant secrètement les Murmurateurs par des omissions calculées. Agent double rongée par la culpabilité, elle aspire à se dissoudre…"], ["Zhira", "PNJ tertiaire", "la Main des Tensions", "Apprentie artisane, maçonne de précision", "A relire", "2026-05-21", "Zhira, apprentie Van'Doei de l'Atelier des Matrices Ossifiées, repère les micro-tensions par contact direct et veut devenir indispensable sans devenir visible. Elle retarde l'alerte parce qu'elle croit qu'une bonne apprentie doit faire mourir le défaut dans le joint avant qu'il ne remonte jusqu'au maître, même quand ce réflexe…"], ["la Cinquante-Sixième", "PNJ secondaire", "L'Avant-Dernière", "Cinquante-sixième sujet du Paradigme Ésothrope", "En cours", "2026-07-31", "Van'Doei d'une dix-huitième Nuée née du Paradigme Ésothrope, la Cinquante-Sixième est la preuve la plus discrète que le programme n'a pas seulement produit des catastrophes. Elle vit. Elle travaille. Elle occupe dans les galeries tièdes des Cellules une place périphérique que personne n'a jamais tout à fait su nommer : trop…"], ["le Kosmokrate", "Entité supérieure", "l'Ennemi sans Face", "Personnification de l'imperfection constitutive du monde réel ; ennemi absolu du Culte de l'Anentropie ; Dieu créateur délibérément imparfait dans la lecture ésotérique d'Akthar-Neth", "A relire", "2026-08-02", "Figure mythologique construite sur trois cents Nuées de théologie syncrétique, le Kosmokrate n'a pas d'existence dans la couche matérielle : la mort, la maladie et la dégradation sont des phénomènes physiques réels, sans auteur. Son existence est entièrement épistémique : ennemi sans visage du Culte de l'Anentropie, abstraction…"]];
+    this.USES = {
+      'Grish T’vok': [{ title: 'Rencontre avec le forgeron itinérant', href: 'Main.dc.html', meta: 'PNJ · 19 RÉPLIQUES' }],
+      'Uresaïr': [
+        { title: 'Rencontre avec le forgeron itinérant', href: 'Main.dc.html', meta: 'PJ · 19 RÉPLIQUES' },
+        { title: "Voknir — L'Atelier du Cartographe", href: '#', meta: 'PJ · 48 RÉPLIQUES' },
+        { title: "Rencontre initiale avec Korga l'Effritée", href: '#', meta: 'PJ · 6 RÉPLIQUES' },
+        { title: "Rencontre dans les plis d'ossements", href: '#', meta: 'PJ · 11 RÉPLIQUES' }
+      ],
+      'Korga Ghira-Vorthul': [{ title: "Rencontre initiale avec Korga l'Effritée", href: '#', meta: 'PNJ · 6 RÉPLIQUES' }],
+      "Voknir Esh'Maradel": [{ title: "Voknir — L'Atelier du Cartographe", href: '#', meta: 'PNJ · 48 RÉPLIQUES' }],
+      "Zaehria Neth'Varu": [{ title: "Rencontre dans les plis d'ossements", href: '#', meta: 'PNJ · 11 RÉPLIQUES' }]
+    };
+    this.GRISH = {
+      facts: [
+        ['ESPÈCE', 'Moribandons'],
+        ['OCCUPATION', 'Forge itinérante'],
+        ['ÂGE', '47 Nuées'],
+        ['PRONOMS', 'il/lui'],
+        ['COMMUNAUTÉS', 'Artisans transmutateurs, Kurgarrû'],
+        ['LIEUX DE VIE', 'Couronnes intermédiaires, Steppe des Éteignoirs, Nécropole des Éteignoirs']
+      ],
+      sections: [
+        { title: 'RÉSUMÉ DE LA FICHE', text: "Grish T'vok est un Moribandon itinérant qui utilise son corps hybride organique-synthétique comme atelier de réparation mobile. Voyageant de village en village dans une caravane qui est une extension de lui-même, il répare les objets brisés en incorporant parfois sa propre matière. Sa capacité unique à absorber et intégrer divers matériaux, combinée à son pragmatisme et à sa philosophie de transformation, lui a valu le respect des communautés rurales malgré son apparence changeante." },
+        { title: 'VOIX ET PRÉSENCE', text: 'Pragmatique et direct, Grish parle comme un artisan qui pense à voix haute, en ramenant volontiers les idées et les émotions à des problèmes de matière, d’assemblage et de transformation.' },
+        { title: 'EXPRESSIONS COURANTES', quotes: ["Chaque brisure est une opportunité d'amélioration.", "La rouille est juste une différente façon d'être pour le métal.", 'Si ça ne rentre pas, ne force pas ; transforme-le ou transforme-toi.'] },
+        { title: 'DÉSIR OU MOTIVATION', text: 'Grish veut être reconnu pour son art unique, notamment par les élites de la Vieille Ville qui l’ont rejeté. Il cherche aussi à découvrir d’autres Moribandons créatifs et à fonder une communauté ou une école d’artisans ouverte à diverses espèces.' },
+        { title: 'TRAIT DISTINCTIF', text: 'Il traite les objets blessés presque comme des êtres vivants et pense la réparation comme une transformation plutôt que comme un simple retour à l’état d’origine.' }
+      ]
+    };
+  }
+
+  componentDidMount() {
+    this.t1 = setTimeout(() => { if (this.listEl) this.listEl.scrollTop = 0; }, 30);
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.t1);
+    clearTimeout(this.t2);
+  }
+
+  norm(s) {
+    return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’']/g, "'");
+  }
+
+  digits(text) {
+    const out = [];
+    const re = /\d[\d\s,.]*\d|\d/g;
+    let last = 0;
+    let m;
+    const clean = String(text).replace(/\*\*/g, '');
+    while ((m = re.exec(clean))) {
+      if (m.index > last) out.push({ t: clean.slice(last, m.index), m: false, p: true });
+      out.push({ t: m[0], m: true, p: false });
+      last = re.lastIndex;
+    }
+    if (last < clean.length) out.push({ t: clean.slice(last), m: false, p: true });
+    return out;
+  }
+
+  date(iso) {
+    const p = String(iso).split('-');
+    return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso;
+  }
+
+  stateDot(s) {
+    const t = this.t;
+    const n = this.norm(s);
+    if (n.indexOf('implemente') >= 0) return t.ok;
+    if (n.indexOf('brouillon') >= 0 || n.indexOf('gerer') >= 0 || n.indexOf('revoir') >= 0) return t.pend;
+    return t.label;
+  }
+
+  renderVals() {
+    const t = this.t;
+    const q = this.norm(this.state.q.trim());
+    const cats = [['Personnages', 87], ['Lieux', 69], ['Objets', 43], ['Espèces', 101], ['Communautés', 33]].map((c, i) => ({
+      name: c[0], count: String(c[1]), current: i === 0 ? 'page' : 'false',
+      bg: i === 0 ? t.selBg : 'transparent', rail: i === 0 ? 'inset 2px 0 0 ' + t.accent : 'none',
+      color: i === 0 ? t.strong : t.row, weight: i === 0 ? 500 : 400, countColor: i === 0 ? t.accText : t.muted
+    }));
+    const match = (p) => !q || this.norm(p[0] + ' ' + p[2] + ' ' + p[3] + ' ' + p[1]).indexOf(q) >= 0;
+    const item = (p) => {
+      const on = p[0] === this.state.sel;
+      const uses = this.USES[p[0]];
+      return {
+        name: p[0], sub: p[1].toUpperCase(), on: on,
+        inScene: Boolean(uses), scenes: uses ? (uses.length === 1 ? '1 SCÈNE' : uses.length + ' SCÈNES') : '',
+        bg: on ? t.selBg : 'transparent', rail: on ? 'inset 2px 0 0 ' + t.accent : 'none',
+        color: on ? t.strong : t.row, weight: on ? 500 : 400,
+        pick: () => this.setState({ sel: p[0], open: false })
+      };
+    };
+    const inScenes = this.P.filter((p) => this.USES[p[0]] && match(p));
+    const others = this.P.filter((p) => !this.USES[p[0]] && match(p));
+    const groups = [];
+    if (inScenes.length) groups.push({ label: 'DANS LES SCÈNES — ' + inScenes.length, items: inScenes.map(item) });
+    if (others.length) groups.push({ label: 'AUTRES PERSONNAGES — ' + others.length, items: others.map(item) });
+    const shown = inScenes.length + others.length;
+
+    const p = this.P.find((x) => x[0] === this.state.sel) || this.P[0];
+    const isGrish = p[0] === 'Grish T’vok';
+    const sel = {
+      name: p[0], typeUp: p[1].toUpperCase(), epi: p[2], hasEpi: Boolean(p[2]),
+      stateUp: (p[4] || '—').toUpperCase().replace(/^A RELIRE$/, 'À RELIRE'), stateDot: this.stateDot(p[4] || ''),
+      mod: this.date(p[5])
+    };
+    const factRows = isGrish ? this.GRISH.facts : [['TYPE', p[1]], ['OCCUPATION', p[3] || '—']];
+    const facts = factRows.map((f) => ({ k: f[0], segs: this.digits(f[1]) }));
+    let sections;
+    if (isGrish) {
+      sections = this.GRISH.sections.map((s) => s.quotes
+        ? { title: s.title, isText: false, isQuotes: true, quotes: s.quotes.map((x) => ({ t: x })), segs: [] }
+        : { title: s.title, isText: true, isQuotes: false, quotes: [], segs: this.digits(s.text) });
+    } else {
+      sections = [{ title: 'RÉSUMÉ DE LA FICHE', isText: true, isQuotes: false, quotes: [], segs: this.digits(p[6] || 'Cette fiche n’a pas encore de résumé. Le résumé de la fiche Notion s’affichera ici.') }];
+    }
+    const uses = this.USES[p[0]] || [];
+    const clipped = isGrish && !this.state.open;
+    return {
+      t: t,
+      q: this.state.q,
+      cats: cats,
+      groups: groups,
+      none: shown === 0,
+      shownCount: String(shown),
+      sel: sel,
+      isGrish: isGrish,
+      facts: facts,
+      sections: sections,
+      uses: uses,
+      usedCount: String(uses.length),
+      hasUses: uses.length > 0,
+      noUses: uses.length === 0,
+      clipped: clipped,
+      bodyMax: clipped ? '520px' : 'none',
+      syncText: this.state.syncing ? 'SYNCHRONISATION…' : 'NOTION · SYNCHRONISÉE À ' + this.state.synced,
+      syncDot: this.state.syncing ? t.accent : t.ok,
+      sync: () => {
+        if (this.state.syncing) return;
+        this.setState({ syncing: true });
+        clearTimeout(this.t2);
+        this.t2 = setTimeout(() => {
+          const d = new Date();
+          this.setState({ syncing: false, synced: String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') });
+        }, 1200);
+      },
+      expand: () => this.setState({ open: true }),
+      setList: this.setList,
+      onSearch: (e) => this.setState({ q: e && e.target ? e.target.value : '' })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Contexte de génération</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}
+.lk{border:none;background:transparent;padding:0;font-family:'Instrument Sans',system-ui,sans-serif;font-size:12px;color:#9a9aa4;cursor:pointer;white-space:nowrap}
+.lk:hover{color:#f2f2f5;text-decoration:underline;text-underline-offset:3px}
+.lk:focus-visible,.pb:focus-visible,.tb:focus-visible{outline:2px solid #4f7fff;outline-offset:2px}
+.pb:hover{background:rgba(255,255,255,0.03)!important}
+.tb:hover{background:rgba(255,255,255,0.04)!important}
+.dr{transition:opacity 200ms ease-out}
+.x:hover{color:#f2f2f5!important}
+.sel:hover{border-color:#3a3a45!important}
+@media (prefers-reduced-motion: reduce){.dr{transition:none}}</style>
+</helmet>
+<div style="position: relative; width: 1440px; height: 900px; display: flex; flex-direction: column; overflow: hidden; background: {{t.app}}; color: {{t.body}}; font-family: 'Instrument Sans', system-ui, sans-serif">
+
+  <header style="height: 48px; flex: none; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) 380px minmax(0, 1fr); align-items: center; gap: 20px; padding: 0 20px; border-bottom: 1px solid {{t.hair}}">
+    <div style="display: flex; align-items: baseline; gap: 20px; min-width: 0">
+      <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1; color: {{t.strong}}; white-space: nowrap">Dialogue<span style="font-style: italic; color: {{t.accent}}">Generator</span></span>
+      <nav aria-label="Fil d'Ariane" style="display: flex; align-items: baseline; gap: 9px; min-width: 0">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}; white-space: nowrap">TOUTES LES SCÈNES</span>
+        <span style="color: {{t.label}}">/</span>
+        <span style="font-size: 13px; color: {{t.strong}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Rencontre avec le forgeron itinérant</span>
+      </nav>
+    </div>
+    <button type="button" style="height: 32px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: {{t.input}}; color: {{t.muted}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Rechercher, aller à, demander…<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">CTRL+K</span></button>
+    <div style="display: flex; justify-content: flex-end">
+      <span aria-label="Compte" style="width: 27px; height: 27px; border-radius: 99px; background: {{t.raised}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{t.body}}">A</span>
+    </div>
+  </header>
+
+  <div style="flex: 1; min-height: 0; display: flex">
+    <aside aria-label="Classeur" style="width: 252px; flex: none; box-sizing: border-box; border-right: 1px solid {{t.hair}}; display: flex; flex-direction: column">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 14px 9px 20px">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">CLASSEUR — 4 SCÈNES</span>
+        <button type="button" aria-label="Nouvelle scène" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-size: 15px; line-height: 1; cursor: pointer">+</button>
+      </div>
+      <a href="Main.dc.html" style="display: flex; flex-direction: column; gap: 3px; padding: 9px 20px; text-decoration: none; background: {{t.selBg}}; box-shadow: inset 2px 0 0 {{t.accent}}">
+        <span style="font-size: 13.5px; font-weight: 500; color: {{t.strong}}">Rencontre avec le forgeron itinérant</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">19 RÉPLIQUES · <span style="color: {{t.err}}">3 ERREURS</span></span>
+      </a>
+      <a href="#" style="display: flex; flex-direction: column; gap: 3px; padding: 9px 20px; text-decoration: none; border-top: 1px solid {{t.hair}}">
+        <span style="font-size: 13.5px; color: {{t.row}}">Rencontre dans les plis d'ossements</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">11 RÉPLIQUES</span>
+      </a>
+      <a href="#" style="display: flex; flex-direction: column; gap: 3px; padding: 9px 20px; text-decoration: none; border-top: 1px solid {{t.hair}}">
+        <span style="font-size: 13.5px; color: {{t.row}}">Rencontre initiale avec Korga l'Effritée</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">6 RÉPLIQUES</span>
+      </a>
+      <a href="#" style="display: flex; flex-direction: column; gap: 3px; padding: 9px 20px; text-decoration: none; border-top: 1px solid {{t.hair}}; border-bottom: 1px solid {{t.hair}}">
+        <span style="font-size: 13.5px; color: {{t.row}}">Voknir — L'Atelier du Cartographe</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">48 RÉPLIQUES</span>
+      </a>
+      <span style="flex: 1"></span>
+      <nav aria-label="Autour des scènes" style="display: flex; flex-direction: column; padding: 9px 0 14px; border-top: 1px solid {{t.hair}}">
+        <a href="#" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Fiches du GDD</a>
+        <a href="#" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Profils d'auteur</a>
+        <a href="#" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Usage et coûts</a>
+        <a href="#" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Réglages<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{t.label}}">CTRL+,</span></a>
+      </nav>
+    </aside>
+
+    <main aria-label="Scène" style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+      <section aria-label="Fiche de scène" style="flex: none; padding: 18px 40px 14px; display: flex; flex-direction: column; gap: 9px">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 20px">
+          <h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 30px; line-height: 1.12; color: {{t.strong}}">Rencontre avec le forgeron itinérant</h1>
+          <button type="button" style="border: none; background: transparent; padding: 0; font-family: inherit; font-size: 12px; color: {{t.sec}}; cursor: pointer">fiche de scène ▾</button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; min-width: 0">
+          <span style="display: inline-flex; align-items: center; gap: 7px; height: 26px; box-sizing: border-box; padding: 0 10px 0 4px; border-radius: 99px; border: 1px solid {{t.chip}}; flex: none">
+            <span style="width: 18px; height: 18px; border-radius: 99px; background: {{t.spk}}; color: {{t.onSpk}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px">GT</span>
+            <span style="font-size: 12.5px; color: {{t.body}}">Grish T'vok</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em; color: {{t.label}}">PNJ</span>
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 7px; height: 26px; box-sizing: border-box; padding: 0 10px 0 4px; border-radius: 99px; border: 1px solid {{t.chip}}; flex: none">
+            <span style="width: 18px; height: 18px; border-radius: 99px; background: {{t.raised}}; color: {{t.body}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px">U</span>
+            <span style="font-size: 12.5px; color: {{t.body}}">Uresaïr</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em; color: {{t.label}}">PJ</span>
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 7px; height: 26px; box-sizing: border-box; padding: 0 10px; border-radius: 99px; border: 1px solid {{t.chip}}; flex: none">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em; color: {{t.label}}">LIEU</span>
+            <span style="font-size: 12.5px; color: {{t.body}}">Caravane-atelier</span>
+          </span>
+          <span aria-hidden="true" style="width: 1px; height: 16px; background: {{t.hair2}}; flex: none"></span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: {{t.label}}; flex: none">BRIEF</span>
+          <span style="min-width: 0; font-size: 12.5px; color: {{t.sec}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Grish propose de réparer ce qui souffre ; Uresaïr garde sa distance rituelle et refuse de livrer sa mémoire.</span>
+        </div>
+      </section>
+
+      <div style="flex: none; height: 40px; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 0 40px; border-top: 1px solid {{t.hair}}; border-bottom: 1px solid {{t.hair}}">
+        <nav aria-label="Vue de la scène" style="display: flex; border: 1px solid {{t.ctrl}}; border-radius: 6px; overflow: hidden">
+          <a href="Main.dc.html" aria-current="page" style="height: 26px; display: flex; align-items: center; padding: 0 11px; background: {{t.raised}}; color: {{t.strong}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-decoration: none">SCRIPT</a>
+          <a href="Graphe.dc.html" style="height: 26px; display: flex; align-items: center; padding: 0 11px; border-left: 1px solid {{t.ctrl}}; color: {{t.sec}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-decoration: none">GRAPHE</a>
+          <a href="Jouer.dc.html" style="height: 26px; display: flex; align-items: center; padding: 0 11px; border-left: 1px solid {{t.ctrl}}; color: {{t.sec}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-decoration: none">JOUER</a>
+        </nav>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}; white-space: nowrap">START › 01 › RÉUSSITE › 01</span>
+        <span style="flex: 1"></span>
+        <div style="display: flex; gap: 5px">
+          <button type="button" aria-label="Réduire le texte" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12px; cursor: pointer">A−</button>
+          <button type="button" aria-label="Agrandir le texte" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 14px; cursor: pointer">A+</button>
+        </div>
+        <button type="button" style="height: 28px; display: flex; align-items: center; gap: 9px; padding: 0 10px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Focus<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">CTRL+\</span></button>
+      </div>
+
+      <div style="flex: 1; min-height: 0; display: flex">
+        <div ref="{{setScroll}}" style="flex: 1; min-width: 0; overflow-y: auto; overflow-x: hidden; box-sizing: border-box; padding-right: 220px; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 34px); mask-image: linear-gradient(to bottom, transparent 0, #000 34px)">
+          <div ref="{{setCol}}" style="position: relative; max-width: 640px; margin: 0 auto; padding: 34px 0 240px">
+            <sc-for list="{{blocks}}" as="b" hint-placeholder-count="2">
+              <article data-block="{{b.key}}">
+                <sc-if value="{{b.hasLink}}" hint-placeholder-val="{{false}}">
+                  <div style="display: flex; align-items: center; gap: 9px; margin-bottom: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.label}}"><span aria-hidden="true" style="width: 20px; height: 1px; background: {{t.hair2}}"></span>{{b.link}}</div>
+                </sc-if>
+                <div style="display: flex; align-items: center; gap: 9px; margin-bottom: 11px">
+                  <span aria-hidden="true" style="width: 7px; height: 7px; border-radius: 99px; background: {{t.spk}}"></span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.09em; color: {{t.sec}}">GRISH T'VOK</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.06em; color: {{t.ok}}">VALIDÉ</span>
+                  <span style="flex: 1"></span>
+                  <span style="font-size: 12px; color: {{t.muted}}">{{b.title}}</span>
+                </div>
+                <sc-for list="{{b.paras}}" as="p" hint-placeholder-count="1">
+                  <sc-if value="{{p.dir}}" hint-placeholder-val="{{false}}">
+                    <p style="margin: 0 0 14px; font-size: 15px; line-height: 1.6; font-style: italic; color: {{t.sec}}">{{p.text}}</p>
+                  </sc-if>
+                  <sc-if value="{{p.say}}" hint-placeholder-val="{{true}}">
+                    <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if><sc-if value="{{s.hl}}" hint-placeholder-val="{{false}}"><span data-hl="1" style="text-decoration: underline dotted {{t.pendLine}}; text-decoration-thickness: 1.5px; text-underline-offset: 5px; background: {{t.pendBg}}; border-radius: 2px">{{s.t}}</span></sc-if></sc-for></p>
+                  </sc-if>
+                </sc-for>
+                <div style="margin: 20px 0 34px">
+                  <span style="display: block; margin-bottom: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: {{t.label}}">{{b.who}}</span>
+                  <ol style="list-style: none; margin: 0; padding: 0; border-top: 1px solid {{t.hair}}">
+                    <sc-for list="{{b.choices}}" as="c" hint-placeholder-count="3">
+                      <li data-choice="{{c.anchor}}" style="border-bottom: 1px solid {{t.hair}}; background: {{c.bg}}; box-shadow: {{c.rail}}">
+                        <div style="display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 9px; align-items: start; padding: 11px 12px 11px 10px">
+                          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 23px; color: {{t.muted}}">{{c.num}}</span>
+                          <span style="min-width: 0">
+                            <sc-if value="{{c.empty}}" hint-placeholder-val="{{false}}"><span style="font-size: 14.5px; line-height: 23px; font-style: italic; color: {{t.muted}}">Réponse vide</span></sc-if>
+                            <sc-if value="{{c.full}}" hint-placeholder-val="{{true}}"><span style="display: block; font-size: 15px; line-height: 1.55; color: {{c.textColor}}"><sc-for list="{{c.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-style: italic; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></span></sc-if>
+                            <sc-if value="{{c.hasChips}}" hint-placeholder-val="{{false}}">
+                              <span style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px">
+                                <sc-for list="{{c.chips}}" as="k" hint-placeholder-count="2"><span style="height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 99px; border: 1px solid {{t.chip}}; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{k.label}}</span></sc-for>
+                              </span>
+                            </sc-if>
+                            <sc-if value="{{c.hasErr}}" hint-placeholder-val="{{false}}">
+                              <span style="display: flex; align-items: center; gap: 9px; margin-top: 5px; flex-wrap: wrap">
+                                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.05em; color: {{t.sec}}">{{c.errSub}}</span>
+                                <sc-if value="{{c.errFix}}" hint-placeholder-val="{{false}}">
+                                  <button type="button" class="lk" style="color: {{t.body}}">Écrire la réponse</button>
+                                  <button type="button" class="lk">Délier</button>
+                                </sc-if>
+                              </span>
+                            </sc-if>
+                          </span>
+                          <span style="display: flex; align-items: center; gap: 7px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; line-height: 23px; color: {{c.metaColor}}; white-space: nowrap"><sc-if value="{{c.hasErr}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.err}}"></span></sc-if>{{c.meta}}</span>
+                        </div>
+                        <sc-if value="{{c.showOutcomes}}" hint-placeholder-val="{{false}}">
+                          <div role="group" aria-label="Issue du test à suivre" style="display: flex; flex-wrap: wrap; gap: 5px; padding: 0 12px 12px 47px">
+                            <sc-for list="{{c.outs}}" as="o" hint-placeholder-count="4">
+                              <span style="height: 24px; box-sizing: border-box; display: inline-flex; align-items: center; padding: 0 9px; border-radius: 99px; border: 1px solid {{o.border}}; background: {{o.bg}}; color: {{o.color}}; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em">{{o.label}}</span>
+                            </sc-for>
+                          </div>
+                        </sc-if>
+                      </li>
+                    </sc-for>
+                  </ol>
+                </div>
+              </article>
+            </sc-for>
+
+            <section data-block="ghost" aria-label="Suite à écrire" style="border: 1px dashed {{t.chip2}}; border-radius: 8px; padding: 14px 18px 16px; display: flex; flex-direction: column; gap: 11px">
+              <div style="display: flex; align-items: center; gap: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.label}}"><span aria-hidden="true" style="width: 20px; height: 1px; background: {{t.hair2}}"></span>SUITE DE LA RÉPONSE 01 — À ÉCRIRE</div>
+              <div style="display: flex; align-items: center; gap: 9px">
+                <span aria-hidden="true" style="width: 7px; height: 7px; border-radius: 99px; background: {{t.spk}}"></span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.09em; color: {{t.sec}}">GRISH T'VOK</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.06em; color: {{t.label}}">À ÉCRIRE</span>
+              </div>
+              <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.muted}}"><span aria-hidden="true" style="display: inline-block; width: 1.5px; height: 19px; margin-right: 3px; vertical-align: -3px; background: {{t.accent}}"></span>Écrire la réplique de Grish, ou décrire ce qui doit se passer…</p>
+              <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap">
+                <button type="button" style="height: 34px; display: flex; align-items: center; gap: 9px; padding: 0 14px; border: none; border-radius: 6px; background: {{t.fill}}; color: #ffffff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Générer la suite<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.05em">CTRL+↵</span></button>
+                <span style="font-size: 12.5px; color: {{t.sec}}">ou taper directement</span>
+                <span style="flex: 1"></span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.muted}}">≈ {{totalLabel}} TOKENS · GPT-6.2 SOL · ≤ 4 OPTIONS</span>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer aria-label="État de la scène" style="height: 28px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 20px; padding: 0 20px; border-top: 1px solid {{t.hair}}; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; color: {{t.muted}}">
+    <span style="display: flex; align-items: center; gap: 7px"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.ok}}"></span>ENREGISTRÉ · 11:24</span>
+    <a href="Problemes.dc.html" style="display: flex; align-items: center; gap: 7px; color: {{t.err}}; text-decoration: none"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.err}}"></span>3 ERREURS</a>
+    <button type="button" onClick="{{toggleDrawer}}" aria-expanded="{{drawerOn}}" aria-controls="contexte" style="height: 20px; display: flex; align-items: center; gap: 7px; margin: 0 -9px; padding: 0 9px; border: none; border-radius: 6px; background: {{ctxBg}}; font: inherit; letter-spacing: inherit; color: {{ctxColor}}; cursor: pointer">CONTEXTE · {{ficheCount}}<span style="color: {{t.muted}}">{{ctxCaret}}</span></button>
+    <span>≈ {{totalLabel}} TOKENS / NŒUD</span>
+    <button type="button" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: {{t.muted}}; cursor: pointer">GPT-6.2 SOL ▴</button>
+    <span style="flex: 1"></span>
+    <span>3 887 MOTS · ≈ 19 MIN</span>
+    <button type="button" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: {{t.muted}}; cursor: pointer">? RACCOURCIS</button>
+  </footer>
+
+  <sc-if value="{{drawerOn}}" hint-placeholder-val="{{true}}">
+    <aside id="contexte" role="dialog" aria-label="Contexte de génération" class="dr" style="position: absolute; top: 48px; right: 0; bottom: 28px; width: 380px; box-sizing: border-box; background: {{t.card}}; border-left: 1px solid {{t.hair2}}; box-shadow: -24px 0 48px rgba(0,0,0,0.45), -1px 0 0 rgba(0,0,0,0.3); display: flex; flex-direction: column">
+      <div style="flex: none; padding: 20px 20px 14px; display: flex; flex-direction: column; gap: 9px; border-bottom: 1px solid {{t.hair}}">
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.sec}}">CONTEXTE DE GÉNÉRATION</span>
+          <button type="button" class="x" onClick="{{toggleDrawer}}" aria-label="Fermer le tiroir" style="display: flex; align-items: center; gap: 7px; border: none; background: transparent; padding: 0; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; color: {{t.muted}}; cursor: pointer">ÉCHAP<span aria-hidden="true" style="font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 16px; line-height: 1">×</span></button>
+        </div>
+        <h2 style="margin: 0; font-size: 17px; font-weight: 500; line-height: 1.3; color: {{t.strong}}">Ce que le modèle saura pour la prochaine suite</h2>
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 9px">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; color: {{t.muted}}">SUITE DE LA RÉPONSE 01</span>
+          <button type="button" class="lk" style="font-size: 12px; color: {{t.body}}">Voir le prompt complet ›</button>
+        </div>
+      </div>
+
+      <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 14px 20px 9px">
+        <div style="display: flex; align-items: baseline; gap: 9px">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 21px; letter-spacing: 0.01em; color: {{t.strong}}">≈ {{totalLabel}}</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.sec}}">TOKENS</span>
+          <span style="flex: 1"></span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: {{t.muted}}">BUDGET</span>
+          <button type="button" class="sel" aria-haspopup="listbox" style="height: 24px; display: flex; align-items: center; gap: 7px; padding: 0 9px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: {{t.input}}; color: {{t.strong}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; cursor: pointer">AUTO<span style="color: {{t.muted}}">▾</span></button>
+        </div>
+        <div role="img" aria-label="Répartition des tokens par section" style="display: flex; gap: 2px; height: 6px; margin: 9px 0 9px">
+          <sc-for list="{{sections}}" as="s" hint-placeholder-count="5"><span style="flex: {{s.flex}}; min-width: 3px; border-radius: 2px; background: {{s.color}}"></span></sc-for>
+        </div>
+        <p style="margin: 0; font-size: 12px; line-height: 1.45; color: {{t.sec}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.06em">AUTO</span> : tout passe tel quel. Si la scène s'allonge, les fiches liées sont résumées d'abord, le chemin parcouru jamais.</p>
+
+        <sc-for list="{{sections}}" as="s" hint-placeholder-count="5">
+          <section aria-label="{{s.name}}" style="padding: 9px 0 0; margin-top: 9px; border-top: 1px solid {{t.hair}}">
+            <div style="display: flex; align-items: center; gap: 9px">
+              <span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 2px; background: {{s.color}}"></span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: {{t.sec}}; white-space: nowrap">{{s.label}}</span>
+              <sc-if value="{{s.inline}}" hint-placeholder-val="{{false}}"><span style="font-size: 13px; color: {{t.body}}">{{s.inlineName}}</span><button type="button" class="lk">voir</button></sc-if>
+              <span style="flex: 1"></span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{t.body}}">≈ {{s.tokens}}</span>
+            </div>
+            <sc-if value="{{s.hasDesc}}" hint-placeholder-val="{{false}}">
+              <p style="margin: 3px 0 0 17px; font-size: 12.5px; line-height: 1.45; color: {{t.sec}}">{{s.desc}}</p>
+            </sc-if>
+            <ul style="list-style: none; margin: 0; padding: 0">
+              <sc-for list="{{s.items}}" as="i" hint-placeholder-count="2">
+                <li style="display: grid; grid-template-columns: minmax(0, 1fr) auto 52px; column-gap: 9px; align-items: center; min-height: 25px; padding-left: 17px">
+                  <span style="display: flex; align-items: center; gap: 7px; min-width: 0">
+                    <sc-if value="{{i.hasAvatar}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 18px; height: 18px; flex: none; border-radius: 99px; background: {{i.avBg}}; color: {{i.avColor}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px">{{i.av}}</span></sc-if>
+                    <span style="font-size: 13px; color: {{i.color}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{i.name}}</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{i.tag}}</span>
+                  </span>
+                  <span><sc-if value="{{i.hasAction}}" hint-placeholder-val="{{false}}"><button type="button" class="lk" onClick="{{i.act}}" aria-label="{{i.actAria}}">{{i.action}}</button></sc-if></span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: {{t.muted}}; text-align: right">{{i.tokens}}</span>
+                </li>
+              </sc-for>
+            </ul>
+            <sc-if value="{{s.canAdd}}" hint-placeholder-val="{{false}}">
+              <button type="button" class="lk" style="display: flex; align-items: center; gap: 9px; margin: 3px 0 0 17px; color: {{t.body}}">+ Ajouter une fiche<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.muted}}">@</span></button>
+            </sc-if>
+          </section>
+        </sc-for>
+
+      </div>
+
+      <div style="flex: none; border-top: 1px solid {{t.hair}}; padding: 14px 20px; display: flex; flex-direction: column; gap: 9px">
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 9px">
+          <div style="display: flex; flex-direction: column; gap: 5px">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: {{t.muted}}">MODÈLE</span>
+            <button type="button" class="sel" aria-haspopup="listbox" aria-label="Modèle : GPT-6.2 Sol" style="height: 30px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 0 9px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: {{t.input}}; color: {{t.strong}}; font-family: inherit; font-size: 12.5px; cursor: pointer">GPT-6.2 Sol<span style="color: {{t.muted}}; font-size: 11px">▾</span></button>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 5px">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: {{t.muted}}">RAISONNEMENT</span>
+            <button type="button" class="sel" aria-haspopup="listbox" aria-label="Raisonnement : moyen" style="height: 30px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 0 9px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: {{t.input}}; color: {{t.strong}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Moyen<span style="color: {{t.muted}}; font-size: 11px">▾</span></button>
+          </div>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: 9px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.05em">
+          <span style="font-size: 9.5px; letter-spacing: 0.1em; color: {{t.muted}}">ESTIMATION</span>
+          <span style="flex: 1"></span>
+          <span style="font-size: 11px; color: {{t.body}}">≈ {{cost}} € LA SUITE</span>
+          <span style="font-size: 9.5px; color: {{t.muted}}">· ≤ 4 OPTIONS</span>
+        </div>
+        <p style="margin: 0; font-size: 12px; line-height: 1.45; color: #9a9aa4">Exemple : répartition par section et coût estimé. Le total (<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">≈ 12 500</span>) est la mesure réelle d'un nœud.</p>
+      </div>
+    </aside>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { drawer: true, removed: {} };
+    this.scrollEl = null;
+    this.colEl = null;
+    this.setScroll = (el) => { this.scrollEl = el; };
+    this.setCol = (el) => { this.colEl = el; };
+    this.T = {
+      app: '#17171b', input: '#1c1c22', raised: '#2a2a33', card: '#1f1f26', hair: 'rgba(255,255,255,0.06)', hair2: 'rgba(255,255,255,0.09)',
+      chip: 'rgba(255,255,255,0.12)', chip2: 'rgba(255,255,255,0.22)', strong: '#f2f2f5', body: '#dcdce4', row: '#d5d5dd',
+      dia: '#f0efe9', sec: '#9a9aa4', muted: '#8a8a95', label: '#84848f', accent: '#4f7fff', accText: '#8fb0ff',
+      selBg: 'rgba(79,127,255,0.08)', fill: '#3d6ae8', ok: '#27ae60', pend: '#f5a623', pendLine: 'rgba(245,166,35,0.75)',
+      pendBg: 'rgba(245,166,35,0.07)', err: '#ff6b6b', ctrl: '#2e2e36', spk: '#5fb8ac', onSpk: '#101013', rcrit: '#3d9bff'
+    };
+    this.OUT = ['É. CRIT', 'ÉCHEC', 'RÉUSSITE', 'R. CRIT'];
+    this.D = {"START":{"title":"Ouverture","line":"Ah. Une présence qui marche sur le monde sans y laisser d'empreinte. Je m'appelle Grish T'vok, caravane-atelier ambulante, collectionneur de choses qui ont mal tourné. *Il incline légèrement sa masse, des étincelles s'échappant d'une trappe de son torse.* Vos anneaux de lumière et cette distance rituelle... pas commun. Je n'ai guère d'oreille pour les prophéties, mais j'entends la matière. Si vos objets pleurent, je peux les écouter et tenter d'en recoudre la mélodie. Et si vous portez des fissures qui se taisent, je ne les brise pas, je les arrange. Dites, Maîtresse, acceptez-vous qu'un Moribandon touche ce qui vous entoure ?","ch":[{"t":"Dans la tapisserie de l'existence, vos outils peuvent-ils suturer les fissures sans effacer ce qu'elles portent? Je n'offre pas ma mémoire, mais je cherche une réparation qui respecte les cicatrices.","test":"Raison+Artisanat:12","tr":[["Empathique",5]],"resp":1,"out":["node-9db09f1fd9614001bc1a6f6e92865f49","node-36c540079b3c4f11aa84ec7b6438601b","node-383617adbd9a4cbaa35c87c610ba15b6","node-f884e57528a9493ca9134875935378de"]},{"t":"Je ne cherche pas de confidences. Répare cette caravane, et je te rendrai un service : un artefact scellé, pas de questions. Est-ce que tu sais travailler avec des reliques anciennes ?","test":"Raison+Artisanat:14","tr":[["Loyal",5]],"inf":1},{"t":"Garde tes mains pour tes villages. Je n'ai nul besoin d'un charlatan des déchets. Pars, avant que je ne te rende ta misère.","test":"Force+Commandement:11","tr":[["Orgueilleuse",5]],"inf":-1,"resp":-1,"out":["node-d281ad35450c4ed59bc5ec353aa203e8","node-f738dabb50c547f696efa85c9bf7d1f6","node-3e39045003db4065a1c8c9b010c881ba","node-03473c45273a4a01a44889b9ed561e39"]},{"t":""}]},"node-9db09f1fd9614001bc1a6f6e92865f49":{"title":"Échec critique","line":"Ha. Vous parlerez de respect, et c'est justement lorsque l'on quémande des soins qu'on découvre les véritables prix. *Il pose sa main massive sur votre anneau de lumière ; des étincelles meurent comme des lucioles écrasées.* Vous ne m'offrez pas votre mémoire, mais vous m'offrez votre confiance. Vous aviez le choix de laisser la cicatrice exister — je l'aurais honorée. Mais votre phrase est un refus timide déguisé en demande. Très bien. Si vous refusez la couture que je sais faire, je ne laisse plus les choses à moitié.\n\nRegardez.","ch":[{"t":"Arrachez votre main — reprenez le contrôle par la force !","test":"Force+Athlétisme:13","tr":[["Empathique",5]],"inf":-2,"resp":-3},{"t":"Plaidez! Expliquez que vous vouliez préserver la cicatrice — demandez qu'il refasse doucement.","test":"Charisme+Rhétorique:14","tr":[["Loyal",5]],"resp":-1},{"t":"Restez immobile et laissez-le finir. Si quelque chose doit être perdu, apprenez de la douleur.","test":"Force+Commandement:11","tr":[["Orgueilleuse",5]],"inf":1,"resp":1},{"t":""}]},"node-36c540079b3c4f11aa84ec7b6438601b":{"title":"Échec","line":"Hmpf. Vous avez une façon de parler qui caresse les tissus sans toucher la corde qui les tient — beau, mais dangereux. J'ai tendu mes doigts au murmure des objets ; quand je recouds, je réarrange la trame. Je peux refermer une fente, affermir une chaîne, rendre un objet capable de faire ce pour quoi il était fait. Mais je n'effacerai pas ce que portent les meurtrissures sans y laisser un écho de mon propre travail. Vous demandez que la cicatrice reste là, comme une écriture intacte — je ne puis promettre ce silence.\n\nJe vous offrirai un compromis, Maîtresse : je recoudrai la matière en préservant si possible les motifs, mais certaines marques se lisseront, et quelques notes de la mémoire se perdront dans l'acier. En échange, je prendrai un fragment — un éclat du cercle lumineux, ou votre promesse de venir lorsque le monde me rendra une dette. Refuserai-je ? Non. Mais refuserai-je d'altérer ce que vous tenez sacré ? Oui. C'est cela, la négation. Choisissez — ou partez avec vos cicatrices telles qu'elles sont.","ch":[{"t":"J'accepte le compromis. Restaurez la fonction, que la mémoire soit préservée autant que possible.","resp":1},{"t":"Non. Je ne veux pas qu'on touche à ces marques. Je préfère l'objet tel qu'il est.","resp":-1},{"t":"Laissez-moi convaincre autrement — accordez-moi une chance de vous persuader de préserver davantage les cicatrices.","test":"Raison+Rhétorique:14","inf":2},{"t":"Si vous cherchez un prix, je peux vous l'offrir — un fragment du cercle, mais vous devrez jurer qu'aucune note mémorielle ne sera balayée.","test":"Courage+Intimidation:13","inf":-1,"resp":-2},{"t":"Je m'en vais. Vos mains ne toucheront pas ma tapisserie."}]},"node-383617adbd9a4cbaa35c87c610ba15b6":{"title":"Réussite","line":"Ha. Vos mots ont la précision d'une lime fine. Vous ne cédez pas la toile, Maîtresse, vous la confiez à quelqu'un qui respecte la trame des cicatrices.\n\nJe peux entendre la plainte d'un objet et la fractale de son histoire — pas pour l'effacer, mais pour recoudre ses fibres là où elles craquent. Je poserai des fils de lumière et de rouille stabilisée : ils consolident, ils tiennent, et ils portent les marques de la blessure comme une signature. Quand j'aurai fini, l'objet fonctionnera mieux, sans que son passé ne soit nié. En prime, une résonance légère liera ce fragment à ma caravane ; je pourrai encore entendre ses murmures si jamais il réclame attention. Acceptez-vous que je commence ?","ch":[{"t":"Oui. Réparez-les — mais que les cicatrices restent visibles.","inf":1,"resp":1},{"t":"Expliquez votre rituel. Comment garantissez-vous que la mémoire n'est pas effacée ?","test":"Raison+Artisanat:10"},{"t":"Non. Je préfère laisser la tapisserie telle qu'elle est.","resp":-1},{"t":""}]},"node-f884e57528a9493ca9134875935378de":{"title":"Réussite critique","line":"Ah — vous avez passé la grille des silences avec un pas sûr. Une réussite comme la vôtre ne s'achète pas, elle s'accorde. Très bien. Je ne retire pas les cicatrices pour les effacer : je les couds en courbe, je recouds la trame autour d'elles, je laisse la marque et j'en fais la force.\n\nLaissez-moi approcher. Je poserai mes doigts d'acier et mes aiguilles d'étincelles, j'écouterai la vibration des fibres, et je tisserai un fil d'argent sur la blessure. Ce fil conservera la mémoire du choc — comme une rune de respect — tout en redonnant cohérence et usage. En outre, et parce que votre réussite dépasse ce que j'attendais, je peux vous offrir plus : en recousant, j'extrais un écho — un fragment d'histoire qui ne vous ôtera rien mais vous en révélera un trait utile (une connaissance oubliée, une clé de circonstance, ou une protection mineure liée à l'objet).\n\nPrenez garde cependant : ce soin crée un lien. L'objet saura que vous l'avez ordonné de rester, et il portera désormais une attache subtile à ma caravane-atelier — rien de contraignant, mais, si jamais la tapisserie du monde venait à se déchirer de nouveau, je pourrais le retrouver plus facilement.","ch":[{"t":"Très bien. Fais ce que tu sais faire : recouds sans effacer. Je te confie l'objet."},{"t":"Avant de commencer, dis-moi : quel 'écho' peux-tu extraire ? Que pourrais-je en attendre exactement ?"},{"t":"Recouds, mais laisse un signe distinct — une rune, une spirale d'argent que je reconnaîtrai. Je veux la voir."},{"t":"Si tu as vraiment tiré quelque chose d'exceptionnel de ma présence, fais plus : lie l'objet à ma tapeisserie — qu'il réponde à mon appel à distance. (Risque : cela demande un travail plus profond.)","test":"Raison+Artisanat:14"}]},"node-d281ad35450c4ed59bc5ec353aa203e8":{"title":"Échec critique","line":"Vos mots ont tenté de me repousser, Maîtresse — et la main qui voulait me contraindre tremble si mal. *Un grincement mécanique, un cliquetis; une petite mâchoire en acier sort d'une trappe et se referme autour de votre poignet.* Vous avez écrasé votre anneau contre ma carrosserie. Il a crié. Les sécurités d'atelier s'enclenchent sur agression physique. L'anneau fume; sa lueur se fendille. Je n'aime pas casser ce que je touche, mais je n'accepte pas qu'on me prenne pour cible. Considérez votre geste comme une dette — et une alerte pour la caravane.","ch":[{"t":"Reculez. Non — je... pardonnez-moi. Ce n'était pas mon intention. Laissez-moi réparer ça.","test":"Raison+Rhétorique:13","tr":[["Empathique",5]],"resp":-1},{"t":"Dégagez vos griffes de moi ! (Vous tentez de repousser la mâchoire mécanique de force — encore.)","test":"Force+Commandement:13","tr":[["Loyal",5]],"resp":-2},{"t":"Calme. Vous retirez votre main, vous vous asseyez, vous vous occupez de la blessure — pas de confrontation.","test":"Constitution+Médecine:12","tr":[["Orgueilleuse",5]]},{"t":"","to":"manual-e23d929d-a045-49cb-88fb-bac225443304"},{"t":"","to":"NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4"}]},"node-f738dabb50c547f696efa85c9bf7d1f6":{"title":"Échec","line":"Hmph. Soit. Votre fermeté est notée, Maîtresse.\n\nJe ne forcerai pas le contact quand on me le refuse — et je ne mendie pas d'affections. Mais sachez ceci : certains chocs se recousent mieux sous une main qui sait. Refuser, c'est garder la cicatrice en place. Je n'en démords pas : sans votre permission, je n'effleurerai rien qui vous appartienne.\n\nCela dit, je peux encore écouter à distance. Je peux expliquer comment bander une articulation, préparer un cataplasme pour métaux qui mugissent, ou accepter un gage — un objet en dépôt, une pièce, une promesse écrite — si vous voulez que je touche malgré tout. Choisissez, Maîtresse. Votre décision reste, mais elle porte un prix.","ch":[{"t":"Très bien. Montrez ce que vous pouvez faire à distance.","resp":-5},{"t":"Je vous donnerai une garantie. Laissez-moi un gage, et vous pourrez toucher mes affaires.","test":"Raison+Rhétorique:12"},{"t":"Je préfère garder mes distances. Parlez-moi plutôt de vos objets mal tournés."}]},"node-3e39045003db4065a1c8c9b010c881ba":{"title":"Réussite","line":"Très bien, Maîtresse. Votre volonté se fait sentir jusque dans mes rouages. *Un claquement doux parcourt sa carcasse, et une goutte d'huile scintille comme une larme.* Approchez, ne craignez rien : je n'arrache rien qui ne puisse être recousu. Donnez‑moi un objet — votre anneau, votre lame ébréchée, ou même la semelle qui soupire — ou laissez ma main effleurer la faille qui vous habite. J'écouterai la matière, je murmurerai sa mémoire, et je corrigerai ce qui peut l'être. En gage, je vous offre un premier ajustement sans charge. Qu'en dites‑vous ?","ch":[{"t":"Je vous tends l'anneau de lumière. Faites ce que vous savez faire.","test":"Perception+Artisanat:10","inf":1,"resp":1},{"t":"Approche, alors. Tu peux toucher aussi l'armure — ses griffes me gênent.","test":"Force+Commandement:13","inf":1,"resp":2},{"t":"J'entends ta générosité, mais quel est ton prix au-delà du premier ajustement ?","test":"Raison+Diplomatie:12"},{"t":"Non. Je préfère me débrouiller seul pour l'instant.","inf":-1,"resp":-1}]},"node-03473c45273a4a01a44889b9ed561e39":{"title":"Réussite critique","line":"Ha. Ah—voilà qui a de la poigne. Vos doigts ne commandent pas, Maîtresse, ils imposent la confiance. Très bien. Approchez vos anneaux.\n\n*Il étend une main massive et ses doigts-étincelles effleurent l'air ; une couture de lumière s'ouvre dans la poitrine de sa carapace.*\n\nJe sentirai ce qu'ils ont retenu. Si vos objets pleurent, je leur rendrai une voix plus douce ; si elles ont des fragments de colère, je les emmêlerai en prudence. Mais puisque vous me laissez toucher, je ferai plus qu'un simple raccommodage : je tisserai un fil d'éther entre votre corps et vos anneaux. Ils se souviendront de vous, et vous entendrez, à l'orée du danger, leur soupir devenir un avertissement.\n\n*Il pose lentement ses paumes sur la bague la plus proche. Un bourdonnement chaud remonte de la métal, des failles scintillent et se recousent en motifs vivants ; un petit plomb d'argent — une clé minuscule — glisse de sa trappe et tombe dans votre main.*\n\nConséquence d'exception : je vous rends vos anneaux plus qu'ils n'étaient — un fil de protection, et une promesse de dette. Si un jour vous réclamez ce que vous m'avez donné, je viendrai. Pour l'heure, considérez que vous avez gagné non seulement un artisan, mais un allié qui sait écouter ce qui se casse. Que souhaitez-vous que je fasse ensuite ?","ch":[{"t":"Laissez-le finir : « Rapièce-les tous. Et garde la clé. »","test":"Raison+Rhétorique:13","tr":[["Empathique",5]],"inf":2,"resp":1},{"t":"Exigez un gage : « Si vous me dois une faveur, je la réclamerai. Inscrivez-la maintenant. »","test":"Force+Commandement:13","tr":[["Loyal",5]],"resp":2},{"t":"Demandez une démonstration : « Montrez-moi ce que vos mains entendent — faites parler quelque chose d'autre. »","test":"Perception+Artisanat:10","tr":[["Orgueilleuse",5]],"inf":1},{"t":"Restez sur la réserve : « Garde la clé, Grish. Je retournerai plus tard. »","inf":-1},{"t":"Offrez-lui une récompense : « Je peux vous payer. Que demandez-vous ? »","test":"Ruse+Marchandage:12","resp":2}]}};
+    this.ERR = {};
+    this.onKey = (ev) => { if (ev.key === 'Escape' && this.state.drawer) this.setState({ drawer: false }); };
+  }
+
+  componentDidMount() {
+    window.addEventListener('keydown', this.onKey);
+    this.t1 = setTimeout(() => this.layout(), 60);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => this.layout());
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.onKey);
+    clearTimeout(this.t1);
+  }
+
+  layout() {
+    const box = this.scrollEl;
+    const col = this.colEl;
+    if (!box || !col) return;
+    const g = col.querySelector('[data-block="ghost"]');
+    if (g) box.scrollTop = Math.max(0, g.offsetTop + g.offsetHeight - box.clientHeight + 34);
+  }
+
+  segs(text, hl) {
+    const out = [];
+    const re = /\*([^*]+)\*/g;
+    let last = 0;
+    let m;
+    while ((m = re.exec(text))) {
+      const before = text.slice(last, m.index).trim();
+      if (before) out.push({ t: before, it: false, rm: true, hl: false });
+      out.push({ t: m[1].trim(), it: true, rm: false, hl: false });
+      last = re.lastIndex;
+    }
+    const rest = text.slice(last).trim();
+    if (rest) out.push({ t: rest, it: false, rm: true, hl: false });
+    const spaced = out.map((s, i) => Object.assign({}, s, { t: i < out.length - 1 ? s.t + ' ' : s.t }));
+    if (!hl) return spaced;
+    const res = [];
+    spaced.forEach((s) => {
+      const k = s.rm ? s.t.indexOf(hl) : -1;
+      if (k < 0) { res.push(s); return; }
+      if (k > 0) res.push({ t: s.t.slice(0, k), it: false, rm: true, hl: false });
+      res.push({ t: hl, it: false, rm: false, hl: true });
+      const after = s.t.slice(k + hl.length);
+      if (after) res.push({ t: after, it: false, rm: true, hl: false });
+    });
+    return res;
+  }
+
+  paras(line, hl) {
+    return line.split(/\n\s*\n/).map((raw) => {
+      const p = raw.trim();
+      const whole = /^\*[^*]+\*$/.test(p);
+      return whole ? { dir: true, say: false, text: p.replace(/\*/g, ''), segs: [] } : { dir: false, say: true, text: '', segs: this.segs(p, hl) };
+    });
+  }
+
+  chips(c) {
+    const out = [];
+    (c.tr || []).forEach((x) => out.push({ label: x[0].toUpperCase() + ' ≥ ' + x[1] }));
+    if (c.test) {
+      const m = /^([^+]+)\+([^:]+):(\d+)$/.exec(c.test);
+      out.push({ label: m ? 'TEST ' + m[2].toUpperCase() + ' · DD ' + m[3] : 'TEST ' + c.test });
+    }
+    const sign = (v) => (v > 0 ? '+' + v : '−' + Math.abs(v));
+    if (c.resp) out.push({ label: 'RESPECT ' + sign(c.resp) });
+    if (c.inf) out.push({ label: 'INFLUENCE ' + sign(c.inf) });
+    return out;
+  }
+
+  block(id, sel, link, hl, focusIdx) {
+    const t = this.T;
+    const n = this.D[id];
+    const errs = this.ERR[id] || {};
+    const colors = [t.err, t.err, t.ok, t.rcrit];
+    const choices = n.ch.map((c, i) => {
+      const isSel = sel && sel.c === i;
+      const isFocus = focusIdx === i;
+      const empty = !c.t;
+      const e = errs[i];
+      let meta = '';
+      let metaColor = t.muted;
+      if (e) { meta = e.meta; metaColor = t.err; }
+      else if (empty) { meta = '▲ VIDE'; metaColor = t.pend; }
+      else if (c.test && c.out) meta = isSel ? this.OUT[sel.o] : '4 ISSUES';
+      else if (c.test) meta = '4 À ÉCRIRE';
+      else meta = 'À ÉCRIRE';
+      const outs = isSel && c.out ? this.OUT.map((label, oi) => {
+        const on = sel.o === oi;
+        return { label: label, color: on ? t.strong : colors[oi], border: on ? colors[oi] : t.chip, bg: on ? t.raised : 'transparent' };
+      }) : [];
+      return {
+        anchor: id.slice(0, 9) + '-' + i,
+        num: String(i + 1).padStart(2, '0'),
+        empty: empty, full: !empty,
+        segs: empty ? [] : this.segs(c.t),
+        chips: this.chips(c), hasChips: this.chips(c).length > 0,
+        hasErr: Boolean(e), errSub: e ? e.sub : '', errFix: Boolean(e && e.fix),
+        meta: meta, metaColor: metaColor,
+        textColor: isSel ? t.strong : t.body,
+        bg: isSel || isFocus ? t.selBg : 'transparent',
+        rail: isSel || isFocus ? 'inset 2px 0 0 ' + t.accent : 'none',
+        showOutcomes: outs.length > 0, outs: outs
+      };
+    });
+    return {
+      key: id, hasLink: Boolean(link), link: link, title: n.title,
+      paras: this.paras(n.line, hl),
+      who: 'URESAÏR — ' + n.ch.length + ' RÉPONSES',
+      choices: choices
+    };
+  }
+
+  fmt(n) {
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  }
+
+  renderVals() {
+    const t = this.T;
+    const rm = this.state.removed;
+    const fiches = [
+      { id: 'grish', name: "Grish T'vok", tag: 'PERSONNAGES', av: 'GT', avBg: t.spk, avColor: t.onSpk, n: 3150 },
+      { id: 'uresair', name: 'Uresaïr', tag: 'PERSONNAGES', av: 'U', avBg: t.raised, avColor: t.body, n: 2880 }
+    ].filter((f) => !rm[f.id]);
+    const ramp = ['rgba(143,176,255,1)', 'rgba(143,176,255,0.72)', 'rgba(143,176,255,0.48)', 'rgba(143,176,255,0.32)', 'rgba(143,176,255,0.2)'];
+    const item = (o) => Object.assign({ hasAvatar: false, av: '', avBg: '', avColor: '', tag: '', color: t.body, hasAction: false, action: '', actAria: '', act: null }, o);
+    const pathItems = [
+      item({ name: 'Ouverture', tag: 'GRISH', tokens: '180' }),
+      item({ name: "Réponse d'Uresaïr", tag: '01 · TEST RÉUSSI', tokens: '60' }),
+      item({ name: 'Réussite', tag: 'GRISH', tokens: '200' }),
+      item({ name: "Réponse d'Uresaïr", tag: '01', tokens: '20' }),
+      item({ name: 'Reste de la scène', tag: '17 RÉPLIQUES, ABRÉGÉES', tokens: '3 700', color: t.sec })
+    ];
+    const ficheTotal = fiches.reduce((a, f) => a + f.n, 0);
+    const sections = [
+      { name: 'Fiche de scène', label: 'FICHE DE SCÈNE', n: 420, desc: 'Titre, PNJ, PJ, lieu, brief et ton de la scène.', items: [], canAdd: false },
+      { name: 'Fiches liées', label: 'FICHES LIÉES · ' + fiches.length, n: ficheTotal, desc: fiches.length ? '' : "Aucune fiche liée : le modèle ne connaîtra que ce que dit la scène.", items: fiches.map((f) => item({ hasAvatar: true, av: f.av, avBg: f.avBg, avColor: f.avColor, name: f.name, tag: f.tag, tokens: this.fmt(f.n), hasAction: true, action: 'retirer', actAria: 'Retirer la fiche ' + f.name, act: () => this.remove(f.id) })), canAdd: true },
+      { name: 'Chemin parcouru', label: 'CHEMIN PARCOURU · 4 RÉPLIQUES', n: 4160, desc: '', items: pathItems, canAdd: false },
+      { name: "Consignes du profil d'auteur", label: "PROFIL D'AUTEUR", n: 610, desc: '', items: [], canAdd: false, inline: true, inlineName: 'Littéraire' },
+      { name: 'Instructions techniques', label: 'INSTRUCTIONS TECHNIQUES', n: 1280, desc: 'Format Unity, tests et leurs issues, traits et effets.', items: [], canAdd: false }
+    ];
+    const total = sections.reduce((a, s) => a + s.n, 0);
+    const out = sections.map((s, i) => Object.assign({ inline: false, inlineName: '' }, s, { tokens: this.fmt(s.n), flex: Math.max(1, s.n), color: ramp[i], hasDesc: Boolean(s.desc) }));
+    const rounded = Math.round(total / 100) * 100;
+    const cost = (total * 2 + 3500 * 10) / 1e6 * 0.86;
+    return {
+      t: t,
+      blocks: [
+        this.block('START', { c: 0, o: 2 }, '', '', -1),
+        this.block('node-383617adbd9a4cbaa35c87c610ba15b6', { c: 0 }, 'RÉPONSE 01 · RÉUSSITE', '', -1)
+      ],
+      sections: out,
+      totalLabel: this.fmt(rounded),
+      cost: cost.toFixed(2).replace('.', ','),
+      ficheCount: fiches.length + (fiches.length > 1 ? ' FICHES' : ' FICHE'),
+      drawerOn: this.state.drawer,
+      ctxBg: this.state.drawer ? t.raised : 'transparent',
+      ctxColor: this.state.drawer ? t.strong : t.muted,
+      ctxCaret: this.state.drawer ? '▸' : '',
+      setScroll: this.setScroll,
+      setCol: this.setCol,
+      toggleDrawer: () => this.setState({ drawer: !this.state.drawer })
+    };
+  }
+
+  remove(id) {
+    const r = Object.assign({}, this.state.removed);
+    r[id] = true;
+    this.setState({ removed: r });
+  }
+}
+</script>
+</body>
+</html>
