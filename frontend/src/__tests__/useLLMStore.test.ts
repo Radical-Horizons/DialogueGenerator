@@ -35,7 +35,7 @@ describe('useLLMStore', () => {
     const { result } = renderHook(() => useLLMStore());
     act(() => {
       result.current.setProvider('openai');
-      result.current.setModel('gpt-5.6-terra');
+      result.current.setModel('gpt-6.2-sol');
       result.current.setAvailableModels([]);
     });
   });
@@ -44,7 +44,7 @@ describe('useLLMStore', () => {
     const { result } = renderHook(() => useLLMStore());
 
     expect(result.current.provider).toBe('openai');
-    expect(result.current.model).toBe('gpt-5.6-terra');
+    expect(result.current.model).toBe('gpt-6.2-sol');
     expect(result.current.availableModels).toEqual([]);
   });
 
@@ -62,10 +62,10 @@ describe('useLLMStore', () => {
     const { result } = renderHook(() => useLLMStore());
 
     act(() => {
-      result.current.setModel('labs-mistral-small-creative');
+      result.current.setModel('mistral-large-4');
     });
 
-    expect(result.current.model).toBe('labs-mistral-small-creative');
+    expect(result.current.model).toBe('mistral-large-4');
   });
 
   it('should set available models', () => {
@@ -73,13 +73,13 @@ describe('useLLMStore', () => {
 
     const models = [
       {
-        api_identifier: 'gpt-5.6-terra',
-        display_name: 'GPT-5.6 Terra',
+        api_identifier: 'gpt-6.2-sol',
+        display_name: 'GPT-6.2 Sol',
         client_type: 'openai' as const,
         parameters: { default_temperature: 0.7, max_tokens: 4096 },
       },
       {
-        api_identifier: 'labs-mistral-small-creative',
+        api_identifier: 'mistral-large-4',
         display_name: 'Mistral Small Creative',
         client_type: 'mistral' as const,
         parameters: { default_temperature: 0.7, max_tokens: 32000 },
@@ -107,21 +107,21 @@ describe('useLLMStore', () => {
     const { result } = renderHook(() => useLLMStore());
 
     act(() => {
-      result.current.setModel('labs-mistral-small-creative');
+      result.current.setModel('mistral-large-4');
     });
 
-    expect(localStorage.getItem('llm-model')).toBe('labs-mistral-small-creative');
+    expect(localStorage.getItem('llm-model')).toBe('mistral-large-4');
   });
 
-  it('should normalize legacy gpt-5.4 to gpt-5.6-sol on setModel', () => {
+  it('should normalize legacy gpt-5.4 to gpt-6.2-astra on setModel', () => {
     const { result } = renderHook(() => useLLMStore());
 
     act(() => {
       result.current.setModel('gpt-5.4');
     });
 
-    expect(result.current.model).toBe('gpt-5.6-sol');
-    expect(localStorage.getItem('llm-model')).toBe('gpt-5.6-sol');
+    expect(result.current.model).toBe('gpt-6.2-astra');
+    expect(localStorage.getItem('llm-model')).toBe('gpt-6.2-astra');
   });
 
   it('should persist and retrieve provider from localStorage', () => {
@@ -143,13 +143,13 @@ describe('useLLMStore', () => {
 
     // Définir un modèle
     act(() => {
-      result.current.setModel('labs-mistral-small-creative');
+      result.current.setModel('mistral-large-4');
     });
 
     // Vérifier que le localStorage a été mis à jour
-    expect(localStorage.getItem('llm-model')).toBe('labs-mistral-small-creative');
+    expect(localStorage.getItem('llm-model')).toBe('mistral-large-4');
     // Vérifier que l'état a été mis à jour
-    expect(result.current.model).toBe('labs-mistral-small-creative');
+    expect(result.current.model).toBe('mistral-large-4');
   });
 
   it('should load models from API', async () => {
@@ -157,13 +157,13 @@ describe('useLLMStore', () => {
     const mockApiResponse = {
       models: [
         {
-          model_identifier: 'gpt-5.6-terra',
-          display_name: 'GPT-5.6 Terra',
+          model_identifier: 'gpt-6.2-sol',
+          display_name: 'GPT-6.2 Sol',
           client_type: 'openai',
           max_tokens: 4096,
         },
         {
-          model_identifier: 'labs-mistral-small-creative',
+          model_identifier: 'mistral-large-4',
           display_name: 'Mistral Small Creative',
           client_type: 'mistral',
           max_tokens: 32000,
@@ -174,13 +174,13 @@ describe('useLLMStore', () => {
 
     const expectedModels = [
       {
-        api_identifier: 'gpt-5.6-terra',
-        display_name: 'GPT-5.6 Terra',
+        api_identifier: 'gpt-6.2-sol',
+        display_name: 'GPT-6.2 Sol',
         client_type: 'openai' as const,
         parameters: { default_temperature: 0.7, max_tokens: 4096 },
       },
       {
-        api_identifier: 'labs-mistral-small-creative',
+        api_identifier: 'mistral-large-4',
         display_name: 'Mistral Small Creative',
         client_type: 'mistral' as const,
         parameters: { default_temperature: 0.7, max_tokens: 32000 },

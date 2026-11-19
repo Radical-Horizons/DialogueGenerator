@@ -332,8 +332,8 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--password", default=os.environ.get("API_PASSWORD", "admin123"))
     parser.add_argument(
         "--model",
-        default=ModelNames.GPT_5_6_LUNA,
-        help=f"Modèle LLM (expand-tree : {ModelNames.GPT_5_6_LUNA} uniquement)",
+        default=ModelNames.ECONOMY,
+        help=f"Modèle LLM (expand-tree : {ModelNames.ECONOMY} uniquement)",
     )
     parser.add_argument(
         "--choices-mode",

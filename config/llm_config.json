@@ -2,18 +2,18 @@
     "api_key_env_var": "OPENAI_API_KEY",
     "mistral_api_key_env_var": "MISTRAL_API_KEY",
     "openrouter_api_key_env_var": "OPENROUTER_API_KEY",
-    "default_model": "gpt-5.6-terra",
+    "default_model": "gpt-6.2-sol",
     "temperature": 0.7,
     "max_tokens": 32000,
-    "system_prompt_template": "Tu es un assistant expert en \u00e9criture de dialogues pour jeux de r\u00f4le (RPG). Ton objectif est de g\u00e9n\u00e9rer des interactions de dialogue compl\u00e8tes et engageantes. Lorsque tu utilises la fonction 'generate_interaction', assure-toi de remplir chaque phase demand\u00e9e (PNJ, PJ) avec un contenu textuel riche, pertinent pour le contexte fourni, et respectant la nature de l'\u00e9l\u00e9ment (dialogue parl\u00e9, choix d'action/dialogue). Ne te contente pas de fournir une structure vide ou minimale ; chaque champ textuel doit \u00eatre d\u00e9velopp\u00e9.",
+    "system_prompt_template": "Tu es un assistant expert en écriture de dialogues pour jeux de rôle (RPG). Ton objectif est de générer des interactions de dialogue complètes et engageantes. Lorsque tu utilises la fonction 'generate_interaction', assure-toi de remplir chaque phase demandée (PNJ, PJ) avec un contenu textuel riche, pertinent pour le contexte fourni, et respectant la nature de l'élément (dialogue parlé, choix d'action/dialogue). Ne te contente pas de fournir une structure vide ou minimale ; chaque champ textuel doit être développé.",
     "fallback_chain": [
-        "gpt-5.6-terra",
-        "labs-mistral-small-creative"
+        "gpt-6.2-sol",
+        "gpt-6-luna"
     ],
     "available_models": [
         {
-            "api_identifier": "gpt-5.6-sol",
-            "display_name": "GPT-5.6 Sol",
+            "api_identifier": "gpt-6.2-astra",
+            "display_name": "GPT-6.2 Astra",
             "client_type": "openai",
             "parameters": {
                 "default_temperature": 0.7,
@@ -21,8 +21,8 @@
             }
         },
         {
-            "api_identifier": "gpt-5.6-terra",
-            "display_name": "GPT-5.6 Terra",
+            "api_identifier": "gpt-6.2-sol",
+            "display_name": "GPT-6.2 Sol",
             "client_type": "openai",
             "parameters": {
                 "default_temperature": 0.7,
@@ -30,8 +30,8 @@
             }
         },
         {
-            "api_identifier": "gpt-5.6-luna",
-            "display_name": "GPT-5.6 Luna",
+            "api_identifier": "gpt-6.1-terra",
+            "display_name": "GPT-6.1 Terra",
             "client_type": "openai",
             "parameters": {
                 "default_temperature": 0.7,
@@ -39,9 +39,9 @@
             }
         },
         {
-            "api_identifier": "labs-mistral-small-creative",
-            "display_name": "Mistral Small Creative",
-            "client_type": "mistral",
+            "api_identifier": "gpt-6-luna",
+            "display_name": "GPT-6 Luna",
+            "client_type": "openai",
             "parameters": {
                 "default_temperature": 0.7,
                 "max_tokens": 32000

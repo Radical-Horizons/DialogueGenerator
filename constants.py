@@ -57,91 +57,114 @@ def resolve_logs_dir() -> Path:
     return Path(override) if override else _REPO_ROOT / FilePaths.LOGS_DIR
 
 class ModelNames:
-    """Noms des modèles OpenAI utilisés dans l'application.
-    
+    """Noms des modèles LLM utilisés dans l'application.
+
     Source de vérité unique pour tous les identifiants de modèles.
     Utiliser ces constantes au lieu de strings codées en dur.
 
-    Famille GPT-5.6 (doc OpenAI) : Sol = flagship, Terra = équilibre, Luna = volume/coût.
+    Le code applicatif vise des **rôles** (``FLAGSHIP``, ``STANDARD``, ``MID``, ``ECONOMY``)
+    plutôt qu'une génération : changer de famille ne touche que ce bloc, la config et les prix.
+    Famille courante (doc OpenAI, 2026-11-19) : GPT-6.2 Astra (le plus capable), GPT-6.2 Sol
+    (usage courant), GPT-6.1 Terra (moins cher), GPT-6 Luna (volume / coût).
     """
-    # GPT-5.6 — tiers durables (developers.openai.com/api/docs/models/gpt-5.6-*)
+    # GPT-6.x — developers.openai.com/api/docs/models/{slug}
+    GPT_6_2_ASTRA = "gpt-6.2-astra"
+    GPT_6_2_SOL = "gpt-6.2-sol"
+    GPT_6_1_TERRA = "gpt-6.1-terra"
+    GPT_6_LUNA = "gpt-6-luna"
+
+    FLAGSHIP = GPT_6_2_ASTRA
+    STANDARD = GPT_6_2_SOL
+    MID = GPT_6_1_TERRA
+    ECONOMY = GPT_6_LUNA
+
+    # GPT-5.6 — famille précédente, migrée vers les rôles ci-dessus (LEGACY_MODEL_ID_MAP)
     GPT_5_6_SOL = "gpt-5.6-sol"
     GPT_5_6_TERRA = "gpt-5.6-terra"
     GPT_5_6_LUNA = "gpt-5.6-luna"
-    # Alias API OpenAI : gpt-5.6 → Sol
     GPT_5_6 = "gpt-5.6"
 
-    # Alias de code (mêmes valeurs que les slugs 5.6) — préférer GPT_5_6_*
-    GPT_5_4 = GPT_5_6_SOL
-    GPT_5_2 = GPT_5_6_TERRA
-    GPT_5_2_PRO = GPT_5_6_SOL
-    GPT_5_2_THINKING = GPT_5_6_SOL
-    GPT_5_MINI = GPT_5_6_LUNA
-    GPT_5_NANO = GPT_5_6_LUNA
-    
+    # Alias de code historiques — préférer les rôles
+    GPT_5_4 = FLAGSHIP
+    GPT_5_2 = STANDARD
+    GPT_5_2_PRO = FLAGSHIP
+    GPT_5_2_THINKING = FLAGSHIP
+    GPT_5_MINI = ECONOMY
+    GPT_5_NANO = ECONOMY
+
     # Modèles obsolètes (pour référence)
     GPT_4_TURBO = "gpt-4-turbo"
     GPT_3_5_TURBO = "gpt-3.5-turbo"
-    
+
     # Modèle de test
     DUMMY = "dummy"
 
     # OpenRouter — seed Aion 2.0
     AION_2_0 = "aion-labs/aion-2.0"
 
-    # Anciens slugs API → famille 5.6 (presets, localStorage, tests)
+    # Mistral Large 4 (docs.mistral.ai/models/mistral-large-4-0) : hors catalogue tant que
+    # l'abonnement Mistral ne le donne pas (403 « tier_not_allowed », 429 sur les autres, 2026-11-19).
+    MISTRAL_LARGE_4 = "mistral-large-4"
+
+    # Anciens slugs → rôle courant (presets, localStorage, réglages enregistrés, tests).
+    # Par rôle, pas par nom : 5.6 Terra était le défaut équilibré, son successeur est 6.2 Sol.
     LEGACY_MODEL_ID_MAP: dict[str, str] = {
-        "gpt-5.4": GPT_5_6_SOL,
-        "gpt-5.2": GPT_5_6_TERRA,
-        "gpt-5.2-pro": GPT_5_6_SOL,
-        "gpt-5.2-thinking": GPT_5_6_SOL,
-        "gpt-5-mini": GPT_5_6_LUNA,
-        "gpt-5-nano": GPT_5_6_LUNA,
-        "gpt-5.6": GPT_5_6_SOL,
+        "gpt-5.6-sol": FLAGSHIP,
+        "gpt-5.6": FLAGSHIP,
+        "gpt-5.6-terra": STANDARD,
+        "gpt-5.6-luna": ECONOMY,
+        "gpt-5.4": FLAGSHIP,
+        "gpt-5.2": STANDARD,
+        "gpt-5.2-pro": FLAGSHIP,
+        "gpt-5.2-thinking": FLAGSHIP,
+        "gpt-5-mini": ECONOMY,
+        "gpt-5-nano": ECONOMY,
+        # Retiré par Mistral le 2026-04-30 ; pas de remplaçant accessible avec l'abonnement actuel
+        "labs-mistral-small-creative": STANDARD,
     }
 
     @classmethod
     def normalize_model_id(cls, model_id: str) -> str:
-        """Mappe un identifiant legacy vers le slug GPT-5.6 courant."""
+        """Mappe un identifiant legacy vers le slug courant de même rôle."""
         return cls.LEGACY_MODEL_ID_MAP.get(model_id, model_id)
-    
+
+    CURRENT_OPENAI_MODELS: tuple[str, ...] = (GPT_6_2_ASTRA, GPT_6_2_SOL, GPT_6_1_TERRA, GPT_6_LUNA)
+
     # Liste des modèles qui nécessitent max_completion_tokens (au lieu de max_tokens)
     MODELS_USING_MAX_COMPLETION_TOKENS = [
-        GPT_5_6_SOL, GPT_5_6_TERRA, GPT_5_6_LUNA, GPT_5_6,
-    ]
-    
-    # GPT-5.6 Responses API : temperature / top_p rejetés (400 Unsupported parameter).
-    # Preuve runtime 2026-07-17 + doc : omit effort → défaut medium.
-    # Contrôler la « créativité » via reasoning.effort / text.verbosity, pas temperature.
-    MODELS_WITHOUT_CUSTOM_TEMPERATURE = [
-        GPT_5_6_SOL, GPT_5_6_TERRA, GPT_5_6_LUNA, GPT_5_6,
+        *CURRENT_OPENAI_MODELS, GPT_5_6_SOL, GPT_5_6_TERRA, GPT_5_6_LUNA, GPT_5_6,
     ]
 
-    # Point de coupure de cache explicite (``prompt_cache_breakpoint``) : GPT-5.6 et suivants
-    # (doc prompt caching). Voir core/llm/openai/prompt_cache.py.
+    # temperature / top_p jamais envoyés : rejetés par GPT-5.6 (400, preuve runtime 2026-07-17),
+    # à omettre pour GPT-6.x (guide latest-model, migration). Omettre l'effort → défaut medium.
+    MODELS_WITHOUT_CUSTOM_TEMPERATURE = [
+        *CURRENT_OPENAI_MODELS, GPT_5_6_SOL, GPT_5_6_TERRA, GPT_5_6_LUNA, GPT_5_6,
+    ]
+
+    # reasoning.effort « none » refusé (fiches modèles GPT-6.2) : ramené à « low ».
+    MODELS_WITHOUT_REASONING_NONE: frozenset[str] = frozenset({GPT_6_2_ASTRA, GPT_6_2_SOL})
+
+    # Point de coupure de cache explicite (``prompt_cache_breakpoint``). Voir
+    # core/llm/openai/prompt_cache.py.
     MODELS_WITH_EXPLICIT_CACHE_BREAKPOINTS: frozenset[str] = frozenset(
-        {GPT_5_6_SOL, GPT_5_6_TERRA, GPT_5_6_LUNA, GPT_5_6}
+        {*CURRENT_OPENAI_MODELS, GPT_5_6_SOL, GPT_5_6_TERRA, GPT_5_6_LUNA, GPT_5_6}
     )
 
-    # Tous les tiers 5.6 supportent structured outputs (doc officielle)
+    # Tous les modèles courants supportent structured outputs (fiches officielles)
     MODELS_WITH_STRUCTURED_OUTPUT_ISSUES: list[str] = []
 
-    UNITY_STRUCTURED_OUTPUT_MODELS = (
-        GPT_5_6_SOL,
-        GPT_5_6_TERRA,
-        GPT_5_6_LUNA,
-    )
+    UNITY_STRUCTURED_OUTPUT_MODELS = CURRENT_OPENAI_MODELS
+
+    @classmethod
+    def is_reasoning_family(cls, model_name: str) -> bool:
+        """True pour les familles à raisonnement sans temperature : GPT-5.6 et GPT-6.x."""
+        normalized = cls.normalize_model_id(model_name).lower()
+        return normalized.startswith(("gpt-5.6", "gpt-6"))
 
     @classmethod
     def is_gpt_5_6_family(cls, model_name: str) -> bool:
-        """True si le slug appartient à la famille GPT-5.6 (Sol/Terra/Luna/alias)."""
-        normalized = cls.normalize_model_id(model_name).lower()
-        return "gpt-5.6" in normalized or normalized in {
-            cls.GPT_5_6_SOL,
-            cls.GPT_5_6_TERRA,
-            cls.GPT_5_6_LUNA,
-            cls.GPT_5_6,
-        }
+        """Ancien nom de :meth:`is_reasoning_family`, gardé pour les appels existants."""
+        return cls.is_reasoning_family(model_name)
 
 class PlayableCharacters:
     """PJ jouables Alteir — source de vérité partagée backend/frontend."""
@@ -161,7 +184,7 @@ class Defaults:
     CONTEXT_TOKENS = 40000
     VARIANTS_COUNT = 2
     TEMPERATURE = 0.7
-    MODEL_ID = ModelNames.GPT_5_6_LUNA  # Défaut économique (volume / expand-tree)
+    MODEL_ID = ModelNames.ECONOMY  # Défaut économique (volume / expand-tree)
     MAX_TOKENS_FOR_CONTEXT_BUILDING = 32000
     SAVE_SETTINGS_DELAY_MS = 1000
     MAIN_SPLITTER_STRETCH_FACTOR_LEFT_PANEL = 1

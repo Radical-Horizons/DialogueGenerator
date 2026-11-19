@@ -588,7 +588,7 @@ def test_ab_test_feedback_while_running_rejected(ab_client: TestClient) -> None:
 
 
 def test_ab_test_expand_uses_luna(ab_client: TestClient) -> None:
-    """expand est appelé avec gpt-5.6-luna."""
+    """expand est appelé avec le modèle économique (gpt-6-luna)."""
     expansion = app.dependency_overrides[get_dialogue_tree_expansion_service]()
     id_a = _create_custom(ab_client, name="Luna A")
     id_b = _create_custom(ab_client, name="Luna B")
@@ -604,5 +604,5 @@ def test_ab_test_expand_uses_luna(ab_client: TestClient) -> None:
     assert created.status_code == 202, created.text
     assert expansion.expand.await_count >= 1
     kwargs = expansion.expand.await_args.kwargs
-    assert kwargs["llm_model_identifier"] == "gpt-5.6-luna"
+    assert kwargs["llm_model_identifier"] == "gpt-6-luna"
     assert kwargs["allow_partial"] is False

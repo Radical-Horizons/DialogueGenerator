@@ -28,7 +28,7 @@ class TestLLMClientFactory:
         """Test qu'un DummyLLMClient est retourné si le modèle n'est pas trouvé."""
         config = {"api_key_env_var": "OPENAI_API_KEY"}
         available_models = [
-            {"api_identifier": "gpt-5.6-terra", "display_name": "GPT-5.2"}
+            {"api_identifier": "gpt-6.2-sol", "display_name": "GPT-5.2"}
         ]
         
         client = LLMClientFactory.create_client(
@@ -43,11 +43,11 @@ class TestLLMClientFactory:
         """Test qu'un DummyLLMClient est retourné si api_key_env_var n'est pas défini."""
         config = {}  # Pas de api_key_env_var
         available_models = [
-            {"api_identifier": "gpt-5.6-terra", "display_name": "GPT-5.2", "client_type": "openai"}
+            {"api_identifier": "gpt-6.2-sol", "display_name": "GPT-5.2", "client_type": "openai"}
         ]
         
         client = LLMClientFactory.create_client(
-            model_id="gpt-5.6-terra",
+            model_id="gpt-6.2-sol",
             config=config,
             available_models=available_models
         )
@@ -58,12 +58,12 @@ class TestLLMClientFactory:
         """Test qu'un DummyLLMClient est retourné si la clé API n'est pas dans l'environnement."""
         config = {"api_key_env_var": "OPENAI_API_KEY"}
         available_models = [
-            {"api_identifier": "gpt-5.6-terra", "display_name": "GPT-5.2", "client_type": "openai"}
+            {"api_identifier": "gpt-6.2-sol", "display_name": "GPT-5.2", "client_type": "openai"}
         ]
         
         with patch.dict(os.environ, {}, clear=True):
             client = LLMClientFactory.create_client(
-                model_id="gpt-5.6-terra",
+                model_id="gpt-6.2-sol",
                 config=config,
                 available_models=available_models
             )
@@ -83,7 +83,7 @@ class TestLLMClientFactory:
         }
         available_models = [
             {
-                "api_identifier": "gpt-5.6-luna",
+                "api_identifier": "gpt-6-luna",
                 "display_name": "GPT-4o Mini",
                 "client_type": "openai"
             }
@@ -91,7 +91,7 @@ class TestLLMClientFactory:
         
         with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key-123"}):
             client = LLMClientFactory.create_client(
-                model_id="gpt-5.6-luna",
+                model_id="gpt-6-luna",
                 config=config,
                 available_models=available_models
             )
@@ -100,7 +100,7 @@ class TestLLMClientFactory:
         mock_openai_client_class.assert_called_once()
         call_kwargs = mock_openai_client_class.call_args[1]
         assert call_kwargs["api_key"] == "test-key-123"
-        assert call_kwargs["config"]["default_model"] == "gpt-5.6-luna"
+        assert call_kwargs["config"]["default_model"] == "gpt-6-luna"
         assert call_kwargs["config"]["temperature"] == 0.7
     
     @patch('factories.llm_factory.OpenAIClient')
@@ -116,7 +116,7 @@ class TestLLMClientFactory:
         }
         available_models = [
             {
-                "api_identifier": "gpt-5.6-terra",
+                "api_identifier": "gpt-6.2-sol",
                 "display_name": "GPT-4o",
                 "client_type": "openai",
                 "parameters": {
@@ -128,13 +128,13 @@ class TestLLMClientFactory:
         
         with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key-456"}):
             client = LLMClientFactory.create_client(
-                model_id="gpt-5.6-terra",
+                model_id="gpt-6.2-sol",
                 config=config,
                 available_models=available_models
             )
         
         call_kwargs = mock_openai_client_class.call_args[1]
-        assert call_kwargs["config"]["default_model"] == "gpt-5.6-terra"
+        assert call_kwargs["config"]["default_model"] == "gpt-6.2-sol"
         assert call_kwargs["config"]["temperature"] == 0.8  # Du paramètre du modèle
         assert call_kwargs["config"]["max_tokens"] == 3000  # Du paramètre du modèle
     
@@ -143,7 +143,7 @@ class TestLLMClientFactory:
         config = {"api_key_env_var": "OPENAI_API_KEY"}
         available_models = [
             {
-                "model_identifier": "gpt-5.6-luna",  # Pas d'api_identifier
+                "model_identifier": "gpt-6-luna",  # Pas d'api_identifier
                 "display_name": "GPT-4o Mini",
                 "client_type": "openai"
             }
@@ -153,20 +153,20 @@ class TestLLMClientFactory:
             with patch('factories.llm_factory.OpenAIClient') as mock_openai:
                 mock_openai.return_value = MagicMock()
                 client = LLMClientFactory.create_client(
-                    model_id="gpt-5.6-luna",
+                    model_id="gpt-6-luna",
                     config=config,
                     available_models=available_models
                 )
         
         call_kwargs = mock_openai.call_args[1]
-        assert call_kwargs["config"]["default_model"] == "gpt-5.6-luna"
+        assert call_kwargs["config"]["default_model"] == "gpt-6-luna"
     
     def test_create_client_default_client_type_openai(self):
         """Test que client_type par défaut est 'openai'."""
         config = {"api_key_env_var": "OPENAI_API_KEY"}
         available_models = [
             {
-                "api_identifier": "gpt-5.6-luna",
+                "api_identifier": "gpt-6-luna",
                 "display_name": "GPT-4o Mini"
                 # Pas de client_type, devrait utiliser "openai" par défaut
             }
@@ -176,7 +176,7 @@ class TestLLMClientFactory:
             with patch('factories.llm_factory.OpenAIClient') as mock_openai:
                 mock_openai.return_value = MagicMock()
                 client = LLMClientFactory.create_client(
-                    model_id="gpt-5.6-luna",
+                    model_id="gpt-6-luna",
                     config=config,
                     available_models=available_models
                 )
@@ -192,7 +192,7 @@ class TestLLMClientFactory:
         config = {"api_key_env_var": "OPENAI_API_KEY"}
         available_models = [
             {
-                "api_identifier": "gpt-5.6-luna",
+                "api_identifier": "gpt-6-luna",
                 "display_name": "GPT-4o Mini",
                 "client_type": "openai"
             }
@@ -200,7 +200,7 @@ class TestLLMClientFactory:
         
         with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}):
             client = LLMClientFactory.create_client(
-                model_id="gpt-5.6-luna",
+                model_id="gpt-6-luna",
                 config=config,
                 available_models=available_models
             )
@@ -240,7 +240,7 @@ class TestLLMClientFactory:
         }
         available_models = [
             {
-                "api_identifier": "labs-mistral-small-creative",
+                "api_identifier": "mistral-large-4",
                 "display_name": "Mistral Small Creative",
                 "client_type": "mistral"
             }
@@ -248,7 +248,7 @@ class TestLLMClientFactory:
         
         with patch.dict(os.environ, {"MISTRAL_API_KEY": "test-mistral-key"}):
             client = LLMClientFactory.create_client(
-                model_id="labs-mistral-small-creative",
+                model_id="mistral-large-4",
                 config=config,
                 available_models=available_models
             )
@@ -257,7 +257,7 @@ class TestLLMClientFactory:
         mock_mistral_client_class.assert_called_once()
         call_kwargs = mock_mistral_client_class.call_args[1]
         assert call_kwargs["api_key"] == "test-mistral-key"
-        assert call_kwargs["config"]["default_model"] == "labs-mistral-small-creative"
+        assert call_kwargs["config"]["default_model"] == "mistral-large-4"
 
     @patch('factories.llm_factory.MistralClient')
     def test_create_mistral_client_with_model_parameters(self, mock_mistral_client_class):
@@ -272,7 +272,7 @@ class TestLLMClientFactory:
         }
         available_models = [
             {
-                "api_identifier": "labs-mistral-small-creative",
+                "api_identifier": "mistral-large-4",
                 "display_name": "Mistral Small Creative",
                 "client_type": "mistral",
                 "parameters": {
@@ -284,13 +284,13 @@ class TestLLMClientFactory:
         
         with patch.dict(os.environ, {"MISTRAL_API_KEY": "test-mistral-key-456"}):
             client = LLMClientFactory.create_client(
-                model_id="labs-mistral-small-creative",
+                model_id="mistral-large-4",
                 config=config,
                 available_models=available_models
             )
         
         call_kwargs = mock_mistral_client_class.call_args[1]
-        assert call_kwargs["config"]["default_model"] == "labs-mistral-small-creative"
+        assert call_kwargs["config"]["default_model"] == "mistral-large-4"
         assert call_kwargs["config"]["temperature"] == 0.7  # Du paramètre du modèle
         assert call_kwargs["config"]["max_tokens"] == 32000  # Du paramètre du modèle
 
@@ -299,7 +299,7 @@ class TestLLMClientFactory:
         config = {}  # Pas de mistral_api_key_env_var
         available_models = [
             {
-                "api_identifier": "labs-mistral-small-creative",
+                "api_identifier": "mistral-large-4",
                 "display_name": "Mistral Small Creative",
                 "client_type": "mistral"
             }
@@ -318,7 +318,7 @@ class TestLLMClientFactory:
         config = {"mistral_api_key_env_var": "MISTRAL_API_KEY"}
         available_models = [
             {
-                "api_identifier": "labs-mistral-small-creative",
+                "api_identifier": "mistral-large-4",
                 "display_name": "Mistral Small Creative",
                 "client_type": "mistral"
             }
@@ -326,7 +326,7 @@ class TestLLMClientFactory:
         
         with patch.dict(os.environ, {}, clear=True):
             client = LLMClientFactory.create_client(
-                model_id="labs-mistral-small-creative",
+                model_id="mistral-large-4",
                 config=config,
                 available_models=available_models
             )
@@ -341,7 +341,7 @@ class TestLLMClientFactory:
         config = {"mistral_api_key_env_var": "MISTRAL_API_KEY"}
         available_models = [
             {
-                "api_identifier": "labs-mistral-small-creative",
+                "api_identifier": "mistral-large-4",
                 "display_name": "Mistral Small Creative",
                 "client_type": "mistral",
             }
@@ -349,7 +349,7 @@ class TestLLMClientFactory:
 
         with patch.dict(os.environ, {"MISTRAL_API_KEY": "test-key"}):
             client = LLMClientFactory.create_client(
-                model_id="labs-mistral-small-creative",
+                model_id="mistral-large-4",
                 config=config,
                 available_models=available_models,
             )

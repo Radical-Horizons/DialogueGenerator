@@ -17,7 +17,7 @@ from api.schemas.dialogue import (
     PrecomputedEntityTokensResponse,
     PrecomputedEntityTokenRow,
 )
-from constants import Defaults
+from constants import Defaults, ModelNames
 from models.prompt_structure import PromptMetadata, PromptSection, PromptStructure
 from services.context_token_budget import compute_context_selection_token_metrics
 from services.context_truncator import cap_context_text_to_budget
@@ -123,7 +123,7 @@ def _build_lightweight_prompt_structure(
 
     sections: List[PromptSection] = []
     prompt_overhead_tokens = 0
-    model_id = request_data.llm_model_identifier or "gpt-5.6-terra"
+    model_id = request_data.llm_model_identifier or ModelNames.STANDARD
     for build_section, section_type, title in section_specs:
         elem = build_section(prompt_input)
         if elem is None:

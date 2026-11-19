@@ -46,7 +46,7 @@ import {
   DEFAULT_MODEL,
   API_TIMEOUTS,
   REASONING_EFFORT_MODELS,
-  REASONING_EFFORT_OPTIONS,
+  reasoningEffortOptionsFor,
   REASONING_EFFORT_SHORT_LABELS,
 } from '../../constants'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
@@ -993,7 +993,7 @@ export function GenerationPanel() {
                       justifyContent: 'center',
                       padding: 0,
                     }}
-                    title="Contrôle la profondeur de raisonnement GPT-5.6 (none → max). Plus élevé = meilleure qualité mais plus lent et plus coûteux."
+                    title="Contrôle la profondeur de raisonnement (none → max selon le modèle). Plus élevé = meilleure qualité mais plus lent et plus coûteux."
                   >
                     ?
                   </button>
@@ -1019,7 +1019,7 @@ export function GenerationPanel() {
                 }}
               >
                 <>
-                  {REASONING_EFFORT_OPTIONS.map((option) => (
+                  {reasoningEffortOptionsFor(llmModel).map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.hint ? `${option.label} (${option.hint.toLowerCase()})` : option.label}
                     </option>
@@ -1132,7 +1132,7 @@ export function GenerationPanel() {
               color: theme.text.tertiary 
             }}>
               {topP === null ? (
-                'Non utilisé — GPT-5.6 n\'accepte ni temperature ni top_p ; régler le niveau de raisonnement.'
+                'Non utilisé — les modèles GPT actuels n\'acceptent ni temperature ni top_p ; régler le niveau de raisonnement.'
               ) : topP < 0.3 ? (
                 'Focalisé (réponses plus déterministes)'
               ) : topP > 0.7 ? (

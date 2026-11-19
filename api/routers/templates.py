@@ -340,7 +340,7 @@ def _schedule_ab_job(
     """Enregistre le job mémoire et planifie ``run_ab_test``."""
     job_manager.create_job(test_id, total=total)
     generation_client = create_llm_client_for_router(
-        ModelNames.GPT_5_6_LUNA,
+        ModelNames.ECONOMY,
         config_service,
         usage_service,
         request_id,
