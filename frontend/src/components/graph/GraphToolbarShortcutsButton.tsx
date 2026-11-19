@@ -3,7 +3,9 @@ import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { theme } from '../../theme'
 import { NODE_DRAG_TOOLTIP } from './nodeDragTooltip'
+import { formatShortcut } from '../../hooks/useKeyboardShortcuts'
 import {
+  GRAPH_SHORTCUT_KEYS,
   GRAPH_SHORTCUTS_TOOLTIP_ESTIMATE_WIDTH_PX,
   GRAPH_SHORTCUTS_TOOLTIP_GAP_PX,
   GRAPH_SHORTCUTS_TOOLTIP_Z,
@@ -167,25 +169,25 @@ export function GraphToolbarShortcutsButton({
               <li style={{ whiteSpace: 'normal' }}>{NODE_DRAG_TOOLTIP}</li>
               <li>
                 <kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>
-                  Ctrl+F
+                  {formatShortcut(GRAPH_SHORTCUT_KEYS.search)}
                 </kbd>{' '}
                 : rechercher dans le graphe
               </li>
               <li>
                 <kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>
-                  Ctrl+Shift+F
+                  {formatShortcut(GRAPH_SHORTCUT_KEYS.filters)}
                 </kbd>{' '}
                 : filtres du graphe (types, speakers)
               </li>
               <li>
                 <kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>
-                  Ctrl+J
+                  {formatShortcut(GRAPH_SHORTCUT_KEYS.jumpToNode)}
                 </kbd>{' '}
                 : aller à un nœud (Jump to Node)
               </li>
               <li>
                 <kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>
-                  Ctrl+G
+                  {formatShortcut(GRAPH_SHORTCUT_KEYS.aiGeneration)}
                 </kbd>{' '}
                 : ouvrir la génération IA
               </li>
@@ -197,7 +199,7 @@ export function GraphToolbarShortcutsButton({
               </li>
               <li>
                 <kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>
-                  Ctrl+0
+                  {formatShortcut(GRAPH_SHORTCUT_KEYS.fitView)}
                 </kbd>{' '}
                 : Fit View (tout le graphe visible)
               </li>
