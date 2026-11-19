@@ -36,6 +36,10 @@ describe('truncateChoiceLabel', () => {
     expect(truncateChoiceLabel('A', 0)).toBe('A')
   })
 
+  it("retire les astérisques de narration de l'étiquette", () => {
+    expect(truncateChoiceLabel('*[Vous attendez.]* « Oui. »', 0)).toBe('[Vous attendez.] « Oui. »')
+  })
+
   it('should truncate to 30 chars + "..." when longer than max length', () => {
     const long = 'A'.repeat(40)
     expect(truncateChoiceLabel(long, 0)).toBe('A'.repeat(30) + '...')

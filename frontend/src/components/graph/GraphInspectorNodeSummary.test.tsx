@@ -32,6 +32,26 @@ describe('GraphInspectorNodeSummary', () => {
     expect(screen.getByText('3 — dont 2 avec test ou coût')).toBeInTheDocument()
   })
 
+  it('donne le texte entier de chaque réponse, que les étiquettes des fils tronquent', () => {
+    const longChoice =
+      "(Empathique +9) « Montre-moi où tu l'as perdu. Peut-être puis-je percevoir des traces que tu as manquées. »"
+    render(
+      <GraphInspectorNodeSummary
+        node={makeNode({
+          choices: [{ text: longChoice }, { text: 'Tester', test: 'Volonté+Sang-froid:12' }],
+        })}
+        errorCount={0}
+        warningCount={0}
+        onEdit={noop}
+        onShowHealth={noop}
+      />
+    )
+    const items = screen.getByTestId('graph-inspector-choice-list').querySelectorAll('li')
+    expect(items).toHaveLength(2)
+    expect(items[0].textContent).toBe(longChoice)
+    expect(items[1].textContent).toContain('test Volonté+Sang-froid:12')
+  })
+
   it('distingue une fin de dialogue d’un enchaînement direct', () => {
     const { rerender } = render(
       <GraphInspectorNodeSummary

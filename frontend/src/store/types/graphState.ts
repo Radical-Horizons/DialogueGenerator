@@ -150,7 +150,8 @@ export interface GraphState {
   connectNodes: (
     sourceId: string,
     targetId: string,
-    choiceIndex?: number,
+    /** `null` (sérialisation API de « pas de choix ») équivaut à l'absence d'index. */
+    choiceIndex?: number | null,
     connectionType?: string,
     sourceHandle?: string,
     /** Batch génération : un snapshot undo + markDirty une fois pour tout le lot. */

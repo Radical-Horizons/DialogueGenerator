@@ -62,18 +62,17 @@ class ModelNames:
     Source de vérité unique pour tous les identifiants de modèles.
     Utiliser ces constantes au lieu de strings codées en dur.
 
-    Le code applicatif vise des **rôles** (``FLAGSHIP``, ``STANDARD``, ``MID``, ``ECONOMY``)
-    plutôt qu'une génération : changer de famille ne touche que ce bloc, la config et les prix.
-    Famille courante (doc OpenAI, 2026-11-19) : GPT-6.2 Astra (le plus capable), GPT-6.2 Sol
-    (usage courant), GPT-6.1 Terra (moins cher), GPT-6 Luna (volume / coût).
+    Le code applicatif vise des **rôles** (``STANDARD``, ``MID``, ``ECONOMY``) plutôt qu'une
+    génération : changer de famille ne touche que ce bloc, la config et les prix.
+    Famille courante (doc OpenAI, 2026-11-19) : GPT-6.2 Sol (usage courant, le plus capable
+    proposé), GPT-6.1 Terra (moins cher), GPT-6 Luna (volume / coût). GPT-6.2 Astra a été retiré
+    du catalogue le 2026-11-19 (décision produit) : plus de rôle ``FLAGSHIP``.
     """
     # GPT-6.x — developers.openai.com/api/docs/models/{slug}
-    GPT_6_2_ASTRA = "gpt-6.2-astra"
     GPT_6_2_SOL = "gpt-6.2-sol"
     GPT_6_1_TERRA = "gpt-6.1-terra"
     GPT_6_LUNA = "gpt-6-luna"
 
-    FLAGSHIP = GPT_6_2_ASTRA
     STANDARD = GPT_6_2_SOL
     MID = GPT_6_1_TERRA
     ECONOMY = GPT_6_LUNA
@@ -85,10 +84,10 @@ class ModelNames:
     GPT_5_6 = "gpt-5.6"
 
     # Alias de code historiques — préférer les rôles
-    GPT_5_4 = FLAGSHIP
+    GPT_5_4 = STANDARD
     GPT_5_2 = STANDARD
-    GPT_5_2_PRO = FLAGSHIP
-    GPT_5_2_THINKING = FLAGSHIP
+    GPT_5_2_PRO = STANDARD
+    GPT_5_2_THINKING = STANDARD
     GPT_5_MINI = ECONOMY
     GPT_5_NANO = ECONOMY
 
@@ -108,15 +107,17 @@ class ModelNames:
 
     # Anciens slugs → rôle courant (presets, localStorage, réglages enregistrés, tests).
     # Par rôle, pas par nom : 5.6 Terra était le défaut équilibré, son successeur est 6.2 Sol.
+    # Les anciens slugs « haut de gamme » retombent sur STANDARD depuis le retrait d'Astra.
     LEGACY_MODEL_ID_MAP: dict[str, str] = {
-        "gpt-5.6-sol": FLAGSHIP,
-        "gpt-5.6": FLAGSHIP,
+        "gpt-6.2-astra": STANDARD,
+        "gpt-5.6-sol": STANDARD,
+        "gpt-5.6": STANDARD,
         "gpt-5.6-terra": STANDARD,
         "gpt-5.6-luna": ECONOMY,
-        "gpt-5.4": FLAGSHIP,
+        "gpt-5.4": STANDARD,
         "gpt-5.2": STANDARD,
-        "gpt-5.2-pro": FLAGSHIP,
-        "gpt-5.2-thinking": FLAGSHIP,
+        "gpt-5.2-pro": STANDARD,
+        "gpt-5.2-thinking": STANDARD,
         "gpt-5-mini": ECONOMY,
         "gpt-5-nano": ECONOMY,
         # Retiré par Mistral le 2026-04-30 ; pas de remplaçant accessible avec l'abonnement actuel
@@ -128,7 +129,7 @@ class ModelNames:
         """Mappe un identifiant legacy vers le slug courant de même rôle."""
         return cls.LEGACY_MODEL_ID_MAP.get(model_id, model_id)
 
-    CURRENT_OPENAI_MODELS: tuple[str, ...] = (GPT_6_2_ASTRA, GPT_6_2_SOL, GPT_6_1_TERRA, GPT_6_LUNA)
+    CURRENT_OPENAI_MODELS: tuple[str, ...] = (GPT_6_2_SOL, GPT_6_1_TERRA, GPT_6_LUNA)
 
     # Liste des modèles qui nécessitent max_completion_tokens (au lieu de max_tokens)
     MODELS_USING_MAX_COMPLETION_TOKENS = [
@@ -142,7 +143,7 @@ class ModelNames:
     ]
 
     # reasoning.effort « none » refusé (fiches modèles GPT-6.2) : ramené à « low ».
-    MODELS_WITHOUT_REASONING_NONE: frozenset[str] = frozenset({GPT_6_2_ASTRA, GPT_6_2_SOL})
+    MODELS_WITHOUT_REASONING_NONE: frozenset[str] = frozenset({GPT_6_2_SOL})
 
     # Point de coupure de cache explicite (``prompt_cache_breakpoint``). Voir
     # core/llm/openai/prompt_cache.py.

@@ -50,6 +50,7 @@ import {
   redesignSurface,
   redesignText as redesignTextTokens,
 } from '../../../theme/redesignTokens'
+import { DialogueLineText } from '../../shared/DialogueLineText'
 
 const redesignTextBody = redesignTextTokens.body
 
@@ -655,7 +656,7 @@ export const DialogueNode = memo(function DialogueNode({
           minHeight: 0,
         }}
       >
-        {line ? formatNodeLinePreview(line) : null}
+        {line ? <DialogueLineText text={formatNodeLinePreview(line)} /> : null}
       </div>
 
       {/* Pied maquette 2e : compteur de réponses mono — au-dessus de la zone handles/lien. */}

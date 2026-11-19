@@ -9,7 +9,7 @@ import { serializeDialogueNodesForApi } from '../../utils/dialoguePathContext'
 import { resolveGraphGenerationDramatis } from '../../utils/sceneDramatis'
 import * as graphAPI from '../../api/graph'
 import { markNodeDeleted } from '../../api/llmUsage'
-import { normalizeTestBars } from '../../utils/graphNormalizers'
+import { normalizeTestBars, normalizeTestBarsAfterLayout } from '../../utils/graphNormalizers'
 import { syncDocAndLayout } from '../../utils/syncDocLayout'
 import {
   childNodeTopLeftX,
@@ -68,11 +68,13 @@ function simpleHash(s: string): string {
 }
 
 /** API peut renvoyer from_node/to_node (noms Pydantic) au lieu de from/to (alias). */
-function normalizedConn(conn: { from?: string; to?: string; from_node?: string; to_node?: string; via_choice_index?: number; connection_type: string }) {
+function normalizedConn(conn: { from?: string; to?: string; from_node?: string; to_node?: string; via_choice_index?: number | null; connection_type: string }) {
   return {
     from: conn.from ?? conn.from_node ?? '',
     to: conn.to ?? conn.to_node ?? '',
-    via_choice_index: conn.via_choice_index,
+    // Pydantic sérialise None en null : seul un entier désigne un choix.
+    via_choice_index:
+      typeof conn.via_choice_index === 'number' ? conn.via_choice_index : undefined,
     connection_type: conn.connection_type,
   }
 }
@@ -601,7 +603,7 @@ export const createGenerationSlice: StateCreator<
           parentNodeId,
           parentNode.position
         )
-        normalized = normalizeTestBars(anchoredNodes, normalized.edges)
+        normalized = normalizeTestBarsAfterLayout(anchoredNodes, normalized.edges)
       }
       const isDocumentSoT =
         stateAfterConnections.document != null && stateAfterConnections.layout != null
@@ -751,11 +753,17 @@ export const createGenerationSlice: StateCreator<
     set({ isGenerating: true })
     try {
       const dialogueId = state.dialogueMetadata.filename || 'current'
+      // Les arêtes de choix portent `choiceIndex` (documentToGraph, buildChoiceEdge) ;
+      // `via_choice_index` n'existe que dans les connexions renvoyées par l'API.
+      const incomingData = incomingEdge?.data as
+        | { choiceIndex?: unknown; via_choice_index?: unknown }
+        | undefined
       const via_choice_index =
-        incomingEdge?.data != null &&
-        typeof (incomingEdge.data as { via_choice_index?: number }).via_choice_index === 'number'
-          ? (incomingEdge.data as { via_choice_index: number }).via_choice_index
-          : undefined
+        typeof incomingData?.choiceIndex === 'number'
+          ? incomingData.choiceIndex
+          : typeof incomingData?.via_choice_index === 'number'
+            ? incomingData.via_choice_index
+            : undefined
 
       const existingData = node.data as Record<string, unknown>
       const snap = existingData.gddContextSelectionsSnapshot

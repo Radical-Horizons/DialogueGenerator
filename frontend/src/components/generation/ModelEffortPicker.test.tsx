@@ -18,8 +18,8 @@ vi.mock('../../api/config')
 const mockListLLMModels = vi.mocked(listLLMModels)
 
 const MODELS = [
-  { model_identifier: 'gpt-6.2-astra', display_name: 'GPT-6.2 Astra', client_type: 'openai', max_tokens: 32000 },
   { model_identifier: 'gpt-6.2-sol', display_name: 'GPT-6.2 Sol', client_type: 'openai', max_tokens: 32000 },
+  { model_identifier: 'gpt-6-luna', display_name: 'GPT-6 Luna', client_type: 'openai', max_tokens: 32000 },
   { model_identifier: 'mistral-small', display_name: 'Mistral Small', client_type: 'mistral', max_tokens: 32000 },
 ]
 
@@ -71,14 +71,14 @@ describe('ModelEffortPicker', () => {
     renderPicker()
     await openMenu(user)
 
-    expect(screen.getByTestId('model-option-gpt-6.2-astra')).toHaveTextContent(
-      'Le plus capable — tâches complexes'
+    expect(screen.getByTestId('model-option-gpt-6-luna')).toHaveTextContent(
+      'Le plus rapide et le moins cher'
     )
     expect(screen.getByTestId('model-option-gpt-6.2-sol')).toHaveAttribute(
       'aria-checked',
       'true'
     )
-    expect(screen.getByTestId('model-option-gpt-6.2-astra')).toHaveAttribute(
+    expect(screen.getByTestId('model-option-gpt-6-luna')).toHaveAttribute(
       'aria-checked',
       'false'
     )

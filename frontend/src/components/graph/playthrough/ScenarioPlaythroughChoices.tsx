@@ -4,6 +4,7 @@
 import type { PlaythroughChoicePresentation } from '../../../utils/scenarioPlaythroughEngine'
 import { theme } from '../../../theme'
 import { playthroughChrome } from './playthroughChrome'
+import { DialogueLineText } from '../../shared/DialogueLineText'
 
 export interface ScenarioPlaythroughChoicesProps {
   choices: PlaythroughChoicePresentation[]
@@ -107,7 +108,9 @@ export function ScenarioPlaythroughChoices({
             }}
           >
             <span style={{ fontWeight: 600, marginRight: 8 }}>{choice.index + 1}.</span>
-            {choice.text}
+            <span style={{ display: 'inline-block', verticalAlign: 'top' }}>
+              <DialogueLineText text={choice.text} />
+            </span>
             {choice.status === 'untested' ? (
               <span
                 style={{

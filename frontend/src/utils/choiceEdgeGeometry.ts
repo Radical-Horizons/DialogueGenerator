@@ -26,6 +26,8 @@ export const TEST_RESULT_LABEL_STAGGER_PX = 24
 export interface ChoiceEdgeData {
   edgeType?: string
   choiceIndex?: number
+  /** Texte entier du choix (l'étiquette affichée est tronquée). */
+  choiceText?: string
 }
 
 function clamp(value: number, min: number, max: number): number {

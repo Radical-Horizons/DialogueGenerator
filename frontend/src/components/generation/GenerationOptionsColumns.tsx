@@ -29,6 +29,7 @@ import {
   keepButtonStyle,
   statusColor,
 } from './generationOptionsChrome'
+import { DialogueLineText } from '../shared/DialogueLineText'
 
 export interface GenerationOptionsColumnsProps {
   slots: GenerationOptionSlot[]
@@ -183,7 +184,7 @@ export function GenerationOptionsColumns({
               </span>
             )}
             <span style={{ fontFamily: redesignFont.serif, fontSize: '14.5px', lineHeight: 1.5, color: redesignText.dialogue }}>
-              {diag.line ?? '—'}
+              {diag.line ? <DialogueLineText text={diag.line} /> : '—'}
             </span>
           </span>
         ))}
@@ -211,7 +212,9 @@ export function GenerationOptionsColumns({
                     <span style={{ fontFamily: redesignFont.mono, fontSize: '10.5px', color: redesignText.label, flexShrink: 0 }}>
                       {String(choice.index + 1).padStart(2, '0')}
                     </span>
-                    <span style={{ fontSize: '12.5px', lineHeight: 1.45, color: redesignText.body }}>{choice.text}</span>
+                    <span style={{ fontSize: '12.5px', lineHeight: 1.45, color: redesignText.body }}>
+                      <DialogueLineText text={choice.text} />
+                    </span>
                   </span>
                   {choice.tag && (
                     <span

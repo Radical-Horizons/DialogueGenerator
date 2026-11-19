@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MODEL_NAMES, normalizeModelId } from '../constants'
+import { DEFAULT_MODEL, MODEL_NAMES, normalizeModelId } from '../constants'
 import {
   detectGenerationConfigFixes,
   normalizeMaxCompletionTokensForApi,
@@ -11,14 +11,18 @@ describe('generationConfigNormalization', () => {
     expect(normalizeMaxCompletionTokensForApi(60_000)).toBe(60_000)
   })
 
-  it('normalise gpt-5.4 legacy vers gpt-6.2-astra', () => {
-    expect(normalizeModelId('gpt-5.4')).toBe(MODEL_NAMES.GPT_6_2_ASTRA)
+  it('normalise gpt-5.4 legacy vers gpt-6.2-sol', () => {
+    expect(normalizeModelId('gpt-5.4')).toBe(MODEL_NAMES.GPT_6_2_SOL)
+  })
+
+  it('migre gpt-6.2-astra (retiré du catalogue) vers le modèle par défaut', () => {
+    expect(normalizeModelId('gpt-6.2-astra')).toBe(DEFAULT_MODEL)
   })
 
   it('ne propose pas de correctif pour le littéral gpt-5.4 si sol est disponible', () => {
     const fixes = detectGenerationConfigFixes(
       { maxContextTokens: 300_000, maxCompletionTokens: 60_000, llmModel: 'gpt-5.4' },
-      [{ model_identifier: MODEL_NAMES.GPT_6_2_ASTRA, display_name: 'GPT-6.2 Astra', client_type: 'openai', max_tokens: 128_000 }],
+      [{ model_identifier: MODEL_NAMES.GPT_6_2_SOL, display_name: 'GPT-6.2 Sol', client_type: 'openai', max_tokens: 128_000 }],
     )
     expect(fixes.filter((f) => f.field === 'llmModel')).toHaveLength(0)
   })
@@ -31,12 +35,15 @@ describe('generationConfigNormalization', () => {
     expect(fixes).toHaveLength(0)
   })
 
-  it('ne propose pas de correctif pour gpt-6.2-astra (structured output Unity)', () => {
+  it('ne propose pas de correctif pour un réglage enregistré sur gpt-6.2-astra', () => {
     const fixes = detectGenerationConfigFixes(
-      { maxContextTokens: 300_000, maxCompletionTokens: 60_000, llmModel: MODEL_NAMES.GPT_5_4 },
-      [{ model_identifier: MODEL_NAMES.GPT_5_4, display_name: 'GPT-6.2 Astra', client_type: 'openai', max_tokens: 128_000 }],
+      { maxContextTokens: 300_000, maxCompletionTokens: 60_000, llmModel: 'gpt-6.2-astra' },
+      [{ model_identifier: MODEL_NAMES.GPT_6_2_SOL, display_name: 'GPT-6.2 Sol', client_type: 'openai', max_tokens: 128_000 }],
     )
     expect(fixes).toHaveLength(0)
+    expect(resolveModelForUnityGeneration('gpt-6.2-astra', [
+      { model_identifier: MODEL_NAMES.GPT_6_2_SOL, display_name: 'GPT-6.2 Sol', client_type: 'openai', max_tokens: 128_000 },
+    ])).toBe(MODEL_NAMES.GPT_6_2_SOL)
   })
 
   it('propose un correctif modèle si Mistral sélectionné pour Unity', () => {

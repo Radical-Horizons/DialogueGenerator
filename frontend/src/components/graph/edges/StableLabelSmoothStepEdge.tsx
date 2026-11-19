@@ -2,12 +2,15 @@
  * Edge smoothstep avec label mémoïsé pour éviter le scintillement
  * pendant le déplacement des nœuds : seul le wrapper de position est mis à jour.
  */
-import { memo, useRef, useLayoutEffect, useState } from 'react'
+import { memo, useMemo, useRef, useLayoutEffect, useState } from 'react'
 import {
   getSmoothStepPath,
   BaseEdge,
+  Position,
+  useStore,
   type SmoothStepEdgeProps,
 } from 'reactflow'
+import { routeSmoothStepEdge, type RoutingBox } from '../../../utils/edgeRouting'
 import { theme } from '../../../theme'
 import { useGraphViewStore } from '../../../store/graphViewStore'
 import {
@@ -16,6 +19,8 @@ import {
   type ChoiceEdgeData,
 } from '../../../utils/choiceEdgeGeometry'
 
+/** Valeur par défaut de l'option `offset` de `getSmoothStepPath` (React Flow 11). */
+const DEFAULT_SMOOTH_STEP_OFFSET = 20
 const defaultLabelBgPadding: [number, number] = [4, 8]
 const defaultLabelBgBorderRadius = 4
 
@@ -89,6 +94,8 @@ const MemoizedLabelContent = memo(function MemoizedLabelContent({
 function StableLabelSmoothStepEdgeComponent(props: SmoothStepEdgeProps) {
   const {
     id,
+    source,
+    target,
     sourceX,
     sourceY,
     sourcePosition,
@@ -117,6 +124,21 @@ function StableLabelSmoothStepEdgeComponent(props: SmoothStepEdgeProps) {
   const mergedPathOptions =
     choicePathOpts != null ? { ...pathOptions, ...choicePathOpts } : pathOptions
 
+  const nodeInternals = useStore((state) => state.nodeInternals)
+  const offset = mergedPathOptions?.offset ?? DEFAULT_SMOOTH_STEP_OFFSET
+  const routedCenter = useMemo(() => {
+    if (sourcePosition !== Position.Bottom || targetPosition !== Position.Top) return {}
+    const obstacles: RoutingBox[] = []
+    nodeInternals.forEach((node) => {
+      if (node.id === source || node.id === target || node.hidden) return
+      const position = node.positionAbsolute ?? node.position
+      if (!node.width || !node.height) return
+      obstacles.push({ x: position.x, y: position.y, width: node.width, height: node.height })
+    })
+    return routeSmoothStepEdge({ sourceX, sourceY, targetX, targetY, offset, obstacles })
+  }, [nodeInternals, source, target, sourceX, sourceY, targetX, targetY, offset, sourcePosition, targetPosition])
+  const isRerouted = routedCenter.centerX != null || routedCenter.centerY != null
+
   const [path, pathLabelX, pathLabelY] = getSmoothStepPath({
     sourceX,
     sourceY,
@@ -125,18 +147,29 @@ function StableLabelSmoothStepEdgeComponent(props: SmoothStepEdgeProps) {
     targetY,
     targetPosition,
     ...mergedPathOptions,
+    ...routedCenter,
   })
 
-  const { x: labelX, y: labelY } = resolveSmoothStepLabelPosition({
-    edgeType: edgeData?.edgeType,
-    choiceIndex: edgeData?.choiceIndex,
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-    pathLabelX,
-    pathLabelY,
-  })
+  // Un fil qui remonte (renvoi) longe un couloir étroit entre deux colonnes : son étiquette
+  // y déborderait sur les nœuds voisins. Elle se pose sur le tronçon horizontal qui part
+  // sous la source, dans l'intervalle libre entre deux rangées.
+  const goesUp = sourceY + offset >= targetY - offset
+  const upwardCorridorX = routedCenter.centerX ?? (sourceX + targetX) / 2
+  // Un fil descendant détourné ne suit plus la diagonale source → cible : étiquette sur le tracé.
+  const { x: labelX, y: labelY } = goesUp
+    ? { x: (sourceX + upwardCorridorX) / 2, y: sourceY + offset }
+    : isRerouted
+    ? { x: pathLabelX, y: pathLabelY }
+    : resolveSmoothStepLabelPosition({
+        edgeType: edgeData?.edgeType,
+        choiceIndex: edgeData?.choiceIndex,
+        sourceX,
+        sourceY,
+        targetX,
+        targetY,
+        pathLabelX,
+        pathLabelY,
+      })
 
   return (
     <>
@@ -161,6 +194,8 @@ function StableLabelSmoothStepEdgeComponent(props: SmoothStepEdgeProps) {
             cursor: edgeData?.edgeType === 'choice' ? 'pointer' : undefined,
           }}
         >
+          {/* L'étiquette est tronquée : le survol donne la réponse entière. */}
+          {edgeData?.choiceText ? <title>{edgeData.choiceText}</title> : null}
           <MemoizedLabelContent
             label={label}
             labelStyle={labelStyle}

@@ -135,7 +135,11 @@ describe('DialogueNode — actions d’un nœud à valider', () => {
     const line = '*Il se tourne vers vous.* « Salutation. »'
     renderPendingNode({ data: { line } })
 
-    expect(screen.getByText(line)).toBeInTheDocument()
+    // Narration en italique grisé, parole à la ligne, sans guillemets ajoutés autour.
+    const narration = screen.getByText('Il se tourne vers vous.')
+    expect(narration).toHaveAttribute('data-segment', 'narration')
+    expect(narration).toHaveStyle({ fontStyle: 'italic' })
+    expect(screen.getByText('« Salutation. »')).toHaveAttribute('data-segment', 'speech')
   })
 
   it('met entre guillemets une réplique nue', () => {
