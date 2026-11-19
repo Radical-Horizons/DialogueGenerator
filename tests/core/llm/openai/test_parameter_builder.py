@@ -66,7 +66,7 @@ class TestOpenAIParameterBuilder:
 
         assert config == {}
 
-    @pytest.mark.parametrize("model_name", ["gpt-6.2-sol", "gpt-6-luna", "gpt-6.2-astra"])
+    @pytest.mark.parametrize("model_name", ["gpt-6.2-sol", "gpt-6.1-terra", "gpt-6-luna"])
     def test_build_responses_params_gpt6_requests_reasoning_summary_by_default(
         self, model_name: str
     ) -> None:
