@@ -746,7 +746,7 @@ export function AIGenerationPanel({
            (selections.locations_full?.length || 0) + (selections.locations_excerpt?.length || 0) === 0 && 
            (selections.items_full?.length || 0) + (selections.items_excerpt?.length || 0) === 0 && (
             <div style={{ fontStyle: 'italic' }}>
-              Aucun contexte sélectionné. Utilisez le panneau de gauche pour sélectionner des éléments.
+              Fiches de la scène envoyées d’office (PNJ complète, PJ en extrait). Le panneau de gauche ajoute un lieu ou d’autres fiches.
             </div>
           )}
         </div>
