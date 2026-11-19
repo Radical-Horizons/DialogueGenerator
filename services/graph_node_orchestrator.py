@@ -22,8 +22,10 @@ from models.dialogue_structure.unity_dialogue_node import UnityDialogueChoiceCon
 from constants import PlayableCharacters
 from services.dialogue_path_context import (
     DialoguePathStep,
+    ancestor_path_node_ids,
     build_ancestor_path_steps,
     build_enriched_generation_prompt,
+    format_dialogue_reference,
     format_generation_prompt,
     infer_child_generation_depth,
 )
@@ -185,6 +187,21 @@ def _build_enriched_instructions(
     )
 
 
+def _with_dialogue_reference(
+    render_prompt: Optional[PromptRenderer],
+    reference: str,
+) -> Optional[PromptRenderer]:
+    """Préfixe chaque corps de prompt par le reste du dialogue (avant l'historique)."""
+    if not reference:
+        return render_prompt
+
+    def render(body: str, max_choices: Optional[int]) -> str:
+        full_body = reference + body
+        return render_prompt(full_body, max_choices) if render_prompt else full_body
+
+    return render
+
+
 class GraphNodeOrchestrator:
     """Orchestre la génération de nœuds selon le mode demandé.
 
@@ -265,6 +282,7 @@ class GraphNodeOrchestrator:
             depth=infer_child_generation_depth(path_steps),
             max_depth=max_depth,
             is_leaf=max_choices == 0,
+            interactive=max_depth is None,
         )
         choice_label = player_character_id or DEFAULT_PLAYER_CHARACTER
         effective_choices_mode = infer_choices_mode(choices_mode, max_choices)
@@ -278,6 +296,16 @@ class GraphNodeOrchestrator:
             narrative_tags=narrative_tags,
             llm_model_identifier=llm_model_identifier,
         )
+        render_prompt = _with_dialogue_reference(
+            render_prompt,
+            format_dialogue_reference(
+                dialogue_nodes,
+                ancestor_path_node_ids(dialogue_nodes, history_parent_id),
+                player_choice_label=choice_label,
+            ),
+        )
+        if system_prompt_override is None and self._prompt_context_factory is not None:
+            system_prompt_override = self._prompt_context_factory.default_system_prompt()
 
         async def dispatch() -> GenerationResult:
             if generate_all_choices:

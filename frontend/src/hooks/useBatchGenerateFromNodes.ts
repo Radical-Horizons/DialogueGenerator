@@ -17,6 +17,7 @@ import { useContextStore } from '../store/contextStore'
 import { useGraphStore } from '../store/graphStore'
 import { getErrorMessage } from '../types/errors'
 import { serializeDialogueNodesForApi } from '../utils/dialoguePathContext'
+import { resolveGraphGenerationDramatis } from '../utils/sceneDramatis'
 
 export interface BatchGenerateProgress {
   current: number
@@ -87,19 +88,22 @@ function summarizeLocal(items: BatchGenerateParentItem[], cancelled: boolean): B
 }
 
 function buildParentSpec(parentId: string): BatchGenerateParentSpec | null {
-  const node = useGraphStore.getState().nodes.find((n) => n.id === parentId)
+  const nodes = useGraphStore.getState().nodes
+  const node = nodes.find((n) => n.id === parentId)
   if (!node) return null
   const selections = resolveContextForParent(node)
-  const chars = [
-    ...((selections.characters_full as string[]) || []),
-    ...((selections.characters_excerpt as string[]) || []),
-  ]
+  const dramatis = resolveGraphGenerationDramatis({
+    nodes,
+    parentNodeId: parentId,
+    contextSelections: selections,
+  })
   return {
     parent_node_id: parentId,
     parent_node_content: { ...(node.data as Record<string, unknown>) },
     context_selections: selections,
     user_instructions: '',
-    npc_speaker_id: chars[0],
+    npc_speaker_id: dramatis.npcSpeakerId !== 'PNJ' ? dramatis.npcSpeakerId : undefined,
+    player_character_id: dramatis.playerCharacterId,
   }
 }
 

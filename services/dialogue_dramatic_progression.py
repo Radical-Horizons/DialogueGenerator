@@ -20,14 +20,20 @@ DIALOGUE_ORALITY_PROMPT_LINES: tuple[str, ...] = (
     "- Paroles du PNJ entre guillemets français « … » ; au nœud START, fixer tu ou vous "
     "dès la première réplique (cohérent sur tout le sous-arbre ; s'appuyer sur la fiche voix "
     "du PNJ et les instructions de scène).",
-    "- Didascalies autorisées : *en italique* (markdown *…*), voix narrateur à la 3e personne, "
-    "hors guillemets, phrases courtes et claires (gestes, lieu, réaction visible). "
+    "- Didascalies autorisées : *en italique* (markdown *…*), hors guillemets, phrases courtes "
+    "et claires (gestes, lieu, réaction visible). Le narrateur désigne le PNJ à la 3e personne "
+    "et le PJ à la 2e personne (« vous ») ; jamais « le PJ », « le joueur » ni « le personnage ». "
     "Compensent l'absence d'images en jeu.",
-    "- Exemple : *Voknir pose la Carte sur l'autel.* « Donne-moi ta main. Le prix est fixé. »",
+    "- Exemple : *Voknir pose la Carte sur l'autel et vous tend la main.* « Donne-moi ta main. "
+    "Le prix est fixé. »",
     "- Interdit dans les guillemets : commentaire de ses propres gestes à la 1re personne "
     "(« je plante », « j'attends que tu… ») — mettre le geste en *italique* narrateur.",
-    "- Événements mécaniques (flag, état durable) → aussi `consequences` si pertinent.",
-    "- `choices.text` = réplique PJ entre guillemets « … », ou *[action]* en italique crochets.",
+    "- `consequences` (flag) : seulement pour un fait durable qui change la suite du jeu "
+    "(alliance, rupture, promesse, découverte majeure). La plupart des nœuds n'en ont pas.",
+    "- `choices.text` = réplique PJ entre guillemets « … », ou action en italique crochets "
+    "à la 2e personne : *[Vous …]*.",
+    "- Effets de choix (`influenceDelta`, `respectDelta`, forçage) : seulement sur les choix qui "
+    "engagent vraiment la relation ; les autres n'en portent pas.",
     "- Pas d'acquiescement vide en ouverture (« Très bien », « Vous l'avez demandé »).",
     "- Langage clair au premier passage.",
 )
@@ -54,6 +60,11 @@ _BEAT_BY_PHASE = {
     "pivot": (
         "Beat dramatique (pivot) : retournement (aveu, trahison, offre, rupture)."
     ),
+    "suite": (
+        "Progression : fais avancer la scène d'un pas dans la continuité de ce qui précède "
+        "(une information, une émotion ou une décision). Pas de retournement ni de révélation "
+        "qui ne découle de ce qui est établi."
+    ),
     "cloture": (
         "Beat dramatique (clôture) : trancher (accord, rupture, promesse). Pas de report."
     ),
@@ -61,13 +72,21 @@ _BEAT_BY_PHASE = {
 
 DIALOGUE_GENERATION_GLOBAL_CONSTRAINTS = (
     "\n\nContraintes de génération:\n"
-    "- Format `line` : paroles « … » ; didascalies *italique* narrateur (3e pers.), hors guillemets.\n"
+    "- Le dialogue déjà écrit fait foi : même personne grammaticale pour le PJ, même tu/vous "
+    "entre PJ et PNJ, mêmes conventions d'écriture ; ne contredire aucun fait qu'il établit. "
+    "S'il diverge d'une fiche (nom, pronom, apparence, état du personnage), suivre le dialogue.\n"
+    "- Format `line` : paroles « … » ; didascalies *italique* hors guillemets, PNJ à la 3e personne, "
+    "PJ à la 2e (« vous »).\n"
     "- Didascalies : claires, concises ; pas de jargon opaque ni rituel commenté dans les guillemets.\n"
     "- Interdit : acquiescements vides (« Très bien », « Vous l'avez demandé ») en ouverture.\n"
-    "- `choices.text` : « réplique PJ » ou *[geste]* ; pas synopsis d'intention.\n"
-    "- Flags / état durable → `consequences` en complément si besoin.\n"
+    "- `choices.text` : « réplique PJ » ou *[Vous …]* ; pas synopsis d'intention.\n"
+    "- `consequences` seulement pour un fait durable qui change la suite ; la plupart des nœuds "
+    "n'en ont pas.\n"
+    "- Expressions courantes de la fiche voix : rares (la plupart des répliques n'en ont aucune), "
+    "jamais une formule déjà employée dans le dialogue.\n"
     "- `choices.test` autorisé avec parcimonie quand le choix comporte risque, incertitude, "
-    "pression sociale ou effort notable (format Attribut+Compétence:DD) ; éviter d'en mettre partout.\n"
+    "pression sociale ou effort notable (format Attribut+Compétence:DD) ; éviter d'en mettre partout. "
+    "Jamais un test qui rejoue la compétence que le PJ vient de rater sur ce chemin.\n"
     "- 1 à 4 phrases (didascalie + réplique comptées ensemble) ; même tu/vous que le START.\n"
     "- Ne pas répéter formulations déjà dans l'historique.\n"
 )
@@ -128,15 +147,23 @@ def compose_generation_instructions(
     include_global_constraints: bool = True,
     include_beat: bool = True,
     scene_type: Optional[str] = None,
+    interactive: bool = False,
 ) -> str:
-    """Assemble consignes utilisateur, beat à la volée et contraintes globales."""
+    """Assemble consignes utilisateur, beat à la volée et contraintes globales.
+
+    ``interactive`` : nœud demandé par l'auteur dans le graphe, hors arbre planifié. La
+    profondeur ne dit alors rien de l'arc ; le beat par profondeur imposerait un retournement
+    à chaque nœud au-delà de la profondeur 3. On donne une consigne de progression à la place.
+    """
     parts: list[str] = []
     base = (base_instructions or "").strip()
     if not base:
         base = DEFAULT_NODE_SCENE_INSTRUCTIONS
     parts.append(base)
 
-    if include_beat:
+    if include_beat and interactive and not is_start and not is_leaf:
+        parts.append(_BEAT_BY_PHASE["suite"])
+    elif include_beat:
         parts.append(
             beat_instruction_for(
                 depth=depth,
