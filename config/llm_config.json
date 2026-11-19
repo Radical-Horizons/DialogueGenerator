@@ -12,15 +12,6 @@
     ],
     "available_models": [
         {
-            "api_identifier": "gpt-6.2-astra",
-            "display_name": "GPT-6.2 Astra",
-            "client_type": "openai",
-            "parameters": {
-                "default_temperature": 0.7,
-                "max_tokens": 32000
-            }
-        },
-        {
             "api_identifier": "gpt-6.2-sol",
             "display_name": "GPT-6.2 Sol",
             "client_type": "openai",

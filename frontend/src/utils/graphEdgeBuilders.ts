@@ -158,7 +158,11 @@ export function truncateChoiceLabel(
   choiceText: string | undefined,
   choiceIndex: number
 ): string {
-  const text = choiceText ?? `Choix ${choiceIndex + 1}`
+  // Les astérisques de narration sont du balisage : l'étiquette ne montre que le texte.
+  const text = (choiceText ?? `Choix ${choiceIndex + 1}`)
+    .replace(/(?<!\*)\*(?!\*)/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
   return text.length > CHOICE_LABEL_MAX_LENGTH
     ? `${text.substring(0, CHOICE_LABEL_MAX_LENGTH)}...`
     : text

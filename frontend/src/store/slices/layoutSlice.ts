@@ -6,7 +6,7 @@ import type { Node } from 'reactflow'
 import type { GraphState } from '../types/graphState'
 import * as graphAPI from '../../api/graph'
 import { documentToGraph } from '../../utils/documentToGraph'
-import { normalizeTestBars } from '../../utils/graphNormalizers'
+import { normalizeTestBars, normalizeTestBarsAfterLayout } from '../../utils/graphNormalizers'
 import { mergeLayoutWithNodePositions, syncDocAndLayout } from '../../utils/syncDocLayout'
 
 export type LayoutSlice = Pick<
@@ -22,8 +22,8 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
       if (algorithm === 'dagre') {
         get()._pushUndoSnapshot()
         const { calculateDagreLayout } = await import('../../utils/dagreLayout')
-        // Comme au chargement : après dagre, les barres de test se réalignent sous leur parent.
-        const layoutedNodes = normalizeTestBars(
+        // Comme au chargement : les barres de test gardent la place que dagre leur donne.
+        const layoutedNodes = normalizeTestBarsAfterLayout(
           calculateDagreLayout(state.nodes, state.edges, {
             direction: direction as 'TB' | 'LR' | 'BT' | 'RL',
             spacingMode: state.layoutSpacingMode,

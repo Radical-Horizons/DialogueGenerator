@@ -48,6 +48,7 @@ import {
   monoLabelStyle,
   statusColor,
 } from './generationOptionsChrome'
+import { DialogueLineText } from '../shared/DialogueLineText'
 
 /** Noms de toutes les fiches GDD envoyées au modèle, toutes catégories confondues. */
 function useSentEntityNames(): string[] {
@@ -83,7 +84,7 @@ function OpenOptionBody({ diag }: { diag: OptionDiagnostics }) {
         </span>
       )}
       {diag.line && (
-        <span
+        <div
           style={{
             fontFamily: redesignFont.serif,
             fontSize: '16.5px',
@@ -91,8 +92,8 @@ function OpenOptionBody({ diag }: { diag: OptionDiagnostics }) {
             color: redesignText.dialogue,
           }}
         >
-          {diag.line}
-        </span>
+          <DialogueLineText text={diag.line} />
+        </div>
       )}
       {diag.stageDirection && (
         <span style={{ fontSize: '13.5px', lineHeight: 1.6, color: redesignText.secondary }}>
@@ -123,7 +124,7 @@ function OpenOptionBody({ diag }: { diag: OptionDiagnostics }) {
                 {String(choice.index + 1).padStart(2, '0')}
               </span>
               <span style={{ fontSize: '14px', lineHeight: 1.5, color: redesignText.body, flex: 1 }}>
-                {choice.text}
+                <DialogueLineText text={choice.text} />
               </span>
               {choice.tag && (
                 <span

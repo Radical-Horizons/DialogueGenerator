@@ -10,6 +10,7 @@ import {
   siblingBranchOffset,
 } from './graphNodeLayout'
 import { formatNodeLinePreview } from './nodeLinePreview'
+import { splitDialogueLine } from './dialogueLineSegments'
 
 export type DagreDirection = 'TB' | 'LR' | 'BT' | 'RL'
 export type DagreSpacingMode = 'compact' | 'normal' | 'large'
@@ -48,9 +49,9 @@ function estimateDialogueNodeHeight(node: Node, fallback: number): number {
   // d'en-tête) : estimer sur la réplique entière gonflait chaque rang de plusieurs centaines
   // de px à l'ouverture d'un dialogue importé, avant toute mesure du DOM.
   const preview = typeof data.line === 'string' ? formatNodeLinePreview(data.line.trim()) : ''
-  // `pre-wrap` : chaque saut de ligne (didascalie puis réplique) ouvre une nouvelle ligne.
-  const textLines = preview
-    .split('\n')
+  // Chaque passage narration/parole (`DialogueLineText`) et chaque saut de ligne ouvre une ligne.
+  const textLines = splitDialogueLine(preview)
+    .flatMap((segment) => segment.text.split('\n'))
     .reduce(
       (total, segment) =>
         total + Math.max(1, Math.ceil(segment.length / DIALOGUE_NODE_CHARS_PER_LINE)),
@@ -96,6 +97,82 @@ function getDagreDirection(direction: DagreDirection): 'TB' | 'LR' | 'BT' | 'RL'
 
 export function resolveDagreNodeSpacing(mode: DagreSpacingMode): { x: number; y: number } {
   return SPACING_BY_MODE[mode]
+}
+
+/** En deçà, la cible d'un renvoi est une sortie partagée : elle reste sous ses sources. */
+const RETURN_TARGET_MIN_DESCENDANTS = 3
+
+function breadthFirstDepths(nodes: Node[], edges: Edge[]): Map<string, number> {
+  const successors = new Map<string, string[]>()
+  const incoming = new Set<string>()
+  for (const edge of edges) {
+    const list = successors.get(edge.source) ?? []
+    list.push(edge.target)
+    successors.set(edge.source, list)
+    incoming.add(edge.target)
+  }
+  const depths = new Map<string, number>()
+  const visit = (rootId: string) => {
+    if (depths.has(rootId)) return
+    depths.set(rootId, 0)
+    const queue = [rootId]
+    for (let head = 0; head < queue.length; head++) {
+      const current = queue[head]
+      const depth = depths.get(current) ?? 0
+      for (const next of successors.get(current) ?? []) {
+        if (depths.has(next)) continue
+        depths.set(next, depth + 1)
+        queue.push(next)
+      }
+    }
+  }
+  nodes.filter((node) => !incoming.has(node.id)).forEach((node) => visit(node.id))
+  // Composantes sans racine (tout en boucle) : on part du premier nœud écrit.
+  nodes.forEach((node) => visit(node.id))
+  return depths
+}
+
+function countDescendants(nodeId: string, successors: Map<string, string[]>): number {
+  const seen = new Set<string>([nodeId])
+  const stack = [nodeId]
+  while (stack.length > 0) {
+    const current = stack.pop() as string
+    for (const next of successors.get(current) ?? []) {
+      if (seen.has(next)) continue
+      seen.add(next)
+      stack.push(next)
+    }
+  }
+  return seen.size - 1
+}
+
+/**
+ * Renvois vers un nœud déjà atteint plus haut (« retour au dialogue principal », boucle) :
+ * classés comme liens descendants, ils tireraient leur cible — et toute la suite qui en
+ * part — sous la branche qui y revient. Ils sont tracés mais ne comptent pas dans les rangs.
+ */
+export function findReturnEdges(nodes: Node[], edges: Edge[]): Set<string> {
+  const depths = breadthFirstDepths(nodes, edges)
+  const successors = new Map<string, string[]>()
+  for (const edge of edges) {
+    const list = successors.get(edge.source) ?? []
+    list.push(edge.target)
+    successors.set(edge.source, list)
+  }
+  const descendantCounts = new Map<string, number>()
+  const returnEdgeIds = new Set<string>()
+  for (const edge of edges) {
+    const sourceDepth = depths.get(edge.source)
+    const targetDepth = depths.get(edge.target)
+    if (sourceDepth == null || targetDepth == null || targetDepth >= sourceDepth) continue
+    if (!descendantCounts.has(edge.target)) {
+      descendantCounts.set(edge.target, countDescendants(edge.target, successors))
+    }
+    if ((descendantCounts.get(edge.target) ?? 0) >= RETURN_TARGET_MIN_DESCENDANTS) {
+      returnEdgeIds.add(edge.id)
+    }
+  }
+  return returnEdgeIds
 }
 
 /**
@@ -144,8 +221,15 @@ export function calculateDagreLayout(
     })
   })
 
-  // Ajouter les edges au graphe Dagre
-  edges.forEach((edge) => {
+  // Une cible absente du canvas (`END`) deviendrait un nœud fantôme au dernier rang,
+  // qui entraînerait ses sources tout en bas du graphe.
+  const nodeIds = new Set(nodes.map((node) => node.id))
+  const layoutEdges = edges.filter(
+    (edge) => edge.source !== edge.target && nodeIds.has(edge.source) && nodeIds.has(edge.target)
+  )
+  const returnEdgeIds = findReturnEdges(nodes, layoutEdges)
+  layoutEdges.forEach((edge) => {
+    if (returnEdgeIds.has(edge.id)) return
     dagreGraph.setEdge(edge.source, edge.target)
   })
 

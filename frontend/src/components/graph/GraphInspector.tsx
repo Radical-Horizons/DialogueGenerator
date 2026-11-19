@@ -16,6 +16,7 @@ import {
   redesignText,
 } from '../../theme/redesignTokens'
 import { useUiLayoutStore, type InspectorTab } from '../../store/uiLayoutStore'
+import { DialogueLineText } from '../shared/DialogueLineText'
 
 /** Largeur fixe de l'inspecteur (2e). */
 export const GRAPH_INSPECTOR_WIDTH_PX = 300
@@ -229,7 +230,7 @@ export function GraphInspectorNodeHeading({
         {nodeLabel}
       </span>
       {line ? (
-        <span
+        <div
           style={{
             fontFamily: redesignFont.serif,
             fontSize: '14.5px',
@@ -237,8 +238,8 @@ export function GraphInspectorNodeHeading({
             color: redesignText.dialogue,
           }}
         >
-          {line}
-        </span>
+          <DialogueLineText text={line} />
+        </div>
       ) : null}
     </div>
   )

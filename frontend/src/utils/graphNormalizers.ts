@@ -142,6 +142,22 @@ export function normalizeTestBars(
   return { nodes: finalNodes, edges: currentEdges }
 }
 
+/**
+ * `normalizeTestBars` après un calcul de disposition : les barres gardent la place que
+ * dagre leur a donnée dans la rangée de leurs frères. Recollées sous le parent, elles
+ * barraient le départ des autres choix du même nœud.
+ */
+export function normalizeTestBarsAfterLayout(
+  nodes: Node[],
+  edges: Edge[],
+): { nodes: Node[]; edges: Edge[] } {
+  const positions: StoredNodePositions = {}
+  for (const node of nodes) {
+    positions[node.id] = { x: node.position.x, y: node.position.y }
+  }
+  return normalizeTestBars(nodes, edges, { nodes: positions })
+}
+
 /** Compare deux versions semver simples ``major.minor.patch`` (suffixe ignoré). */
 function semverTuple(version: string): [number, number, number] | null {
   const trimmed = version.trim()

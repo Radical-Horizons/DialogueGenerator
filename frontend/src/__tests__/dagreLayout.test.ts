@@ -170,8 +170,10 @@ describe('dagreLayout — sauts de ligne de la réplique', () => {
       data: { id: 'n', line },
     })
     const reply = '« Les cartes… ce sont les cartes ! Elles échappent à la perception. »'
-    expect(getLayoutNodeHeight(node(`*Il se lève.*\n\n${reply}`))).toBeGreaterThan(
-      getLayoutNodeHeight(node(`*Il se lève.* ${reply}`))
-    )
+    // La carte met toujours la parole à la ligne après la narration (`DialogueLineText`),
+    // que l'auteur ait écrit le saut de ligne ou non.
+    const withBreak = getLayoutNodeHeight(node(`*Il se lève.*\n\n${reply}`), 0)
+    expect(getLayoutNodeHeight(node(`*Il se lève.* ${reply}`), 0)).toBe(withBreak)
+    expect(withBreak).toBeGreaterThan(getLayoutNodeHeight(node(reply), 0))
   })
 })

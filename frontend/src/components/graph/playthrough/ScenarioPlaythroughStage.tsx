@@ -4,6 +4,7 @@
 import type { PlaythroughStep } from '../../../utils/scenarioPlaythroughEngine'
 import { theme } from '../../../theme'
 import { playthroughChrome } from './playthroughChrome'
+import { DialogueLineText } from '../../shared/DialogueLineText'
 
 export interface ScenarioPlaythroughStageProps {
   step: PlaythroughStep | null
@@ -107,7 +108,7 @@ export function ScenarioPlaythroughStage({ step, transientMessage }: ScenarioPla
             whiteSpace: 'pre-wrap',
           }}
         >
-          {line}
+          <DialogueLineText text={line} />
         </p>
       </div>
     </div>

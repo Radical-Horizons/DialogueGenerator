@@ -15,6 +15,7 @@ import { formatCost } from '../../utils/formatCurrency'
 import { formatVisibilityConditionsSummary } from '../../utils/visibilityConditions'
 import type { VisibilityConditionsBlock } from '../../types/visibilityConditions'
 import { GraphInspectorRow } from './GraphInspector'
+import { DialogueLineText } from '../shared/DialogueLineText'
 
 interface NodeChoiceLike {
   text?: string
@@ -117,11 +118,49 @@ export function GraphInspectorNodeSummary({
           ? data.nextNode
             ? 'Aucune — le nœud enchaîne directement.'
             : 'Aucune — le dialogue se termine ici.'
-          : `${choices.length}${
-              mechanicalChoices.length > 0
-                ? ` — dont ${mechanicalChoices.length} avec test ou coût`
-                : ''
-            }`}
+          : (
+              <>
+                {`${choices.length}${
+                  mechanicalChoices.length > 0
+                    ? ` — dont ${mechanicalChoices.length} avec test ou coût`
+                    : ''
+                }`}
+                {/* Les étiquettes des fils sont tronquées : le texte entier se lit ici. */}
+                <ol
+                  data-testid="graph-inspector-choice-list"
+                  style={{
+                    margin: '9px 0 0',
+                    paddingLeft: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '5px',
+                  }}
+                >
+                  {choices.map((choice, index) => (
+                    <li
+                      key={index}
+                      style={{ fontSize: '13px', lineHeight: 1.45, whiteSpace: 'pre-wrap' }}
+                    >
+                      {choice.text?.trim() ? <DialogueLineText text={choice.text} /> : (
+                        <span style={{ color: redesignText.secondary }}>(réponse vide)</span>
+                      )}
+                      {choice.test && (
+                        <span
+                          style={{
+                            marginLeft: '5px',
+                            fontFamily: redesignFont.mono,
+                            fontSize: '11px',
+                            color: redesignText.secondary,
+                          }}
+                        >
+                          · test {choice.test}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              </>
+            )}
       </GraphInspectorRow>
 
       <GraphInspectorRow label="Flags posés" action={<RowAction label="éditer" onClick={onEdit} />}>

@@ -320,7 +320,10 @@ export function GraphEditor({
           {/* 2e : vue lecture par défaut ; « éditer » ouvre le formulaire complet,
               qui reste la seule surface d'édition du graphe. */}
           {nodeInspectorEditing ? (
-            <NodeEditorPanel focusLine={focusNodeLine} onLineFocused={handleNodeLineFocused} />
+            // Même gouttière que l'en-tête et la vue lecture : sinon les champs collent au bord.
+            <div data-testid="graph-inspector-node-editor" style={{ padding: '0 18px 14px' }}>
+              <NodeEditorPanel focusLine={focusNodeLine} onLineFocused={handleNodeLineFocused} />
+            </div>
           ) : (
             <GraphInspectorNodeSummary
               node={selectedGraphNode}
@@ -675,6 +678,8 @@ export function GraphEditor({
                   onClick={(e) => e.stopPropagation()}
                 >
                   <AIGenerationPanel
+                    // Remonté par nœud : le choix ciblé et le mode ne suivent pas la sélection.
+                    key={selectedNodeId ?? 'none'}
                     parentNodeId={selectedNodeId}
                     onClose={() => setShowAIGenerationPanel(false)}
                     onGenerated={() => {

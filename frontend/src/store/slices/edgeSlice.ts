@@ -29,11 +29,15 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
   connectNodes: (
     sourceId: string,
     targetId: string,
-    choiceIndex?: number,
+    rawChoiceIndex?: number | null,
     connectionType: string = 'default',
     sourceHandle?: string,
     txOptions?: { skipUndo?: boolean; skipMarkDirty?: boolean }
   ) => {
+    // L'API sérialise l'absence de choix en `null` : seul un entier désigne un choix.
+    // Vécu le 2026-11-19 : « Générer la suite » d'une feuille posait une arête de choix
+    // fantôme (`choice:__idx_null`) au lieu de `nextNode`, et le nœud restait orphelin.
+    const choiceIndex = typeof rawChoiceIndex === 'number' ? rawChoiceIndex : undefined
     if (!isConnectionAllowed(sourceId, targetId)) {
       graphDevWarn('[Graph] Ignoring connection of a node to itself', { sourceId, targetId })
       return
@@ -187,6 +191,14 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
             }
           }
         } else if (connectionType === 'nextNode') {
+          // Un nœud n'a qu'une suite : l'ancienne arête partirait sinon vers un nœud
+          // que le document ne référence plus.
+          const previousNext = sourceNode.data?.nextNode as string | undefined
+          if (previousNext && previousNext !== targetId) {
+            newEdges = newEdges.filter(
+              (e) => !(e.source === sourceId && e.target === previousNext && !e.sourceHandle)
+            )
+          }
           updatedNodes[sourceNodeIndex] = {
             ...sourceNode,
             data: { ...sourceNode.data, nextNode: targetId },
