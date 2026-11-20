@@ -61,6 +61,7 @@ from services.owned_item_access import OwnedItemAccessService
 from services.author_profile_service import AuthorProfileService
 from services.template_suggestion_service import TemplateSuggestionService
 from services.collection_service import CollectionService
+from services.ai_conversation_service import AIConversationService
 from services.dialogue_index_service import DialogueIndexService
 from services.dialogue_metadata_service import DialogueMetadataService
 from services.audit_log_service import AuditLogService
@@ -152,6 +153,11 @@ def get_template_suggestion_service(request: Request) -> TemplateSuggestionServi
 def get_collection_service(request: Request) -> CollectionService:
     """Retourne le service des collections de dialogues."""
     return get_service_container(request).get_collection_service()
+
+
+def get_ai_conversation_service(request: Request) -> AIConversationService:
+    """Retourne le service des conversations IA."""
+    return get_service_container(request).get_ai_conversation_service()
 
 
 def get_dialogue_index_service(request: Request) -> DialogueIndexService:

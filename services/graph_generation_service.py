@@ -9,6 +9,7 @@ from services.dialogue_path_context import (
     build_enriched_generation_prompt,
 )
 from services.graph_prompt_context import PromptRenderer
+from services.llm_call_provenance import capture_llm_calls, link_nodes_to_calls
 from services.unity_dialogue_generation_service import (
     UnityDialogueGenerationService,
     generate_stable_node_id,
@@ -221,12 +222,14 @@ class GraphGenerationService:
                 else enriched_instructions
             )
             try:
-                response = await self.generation_service.generate_dialogue_node(
-                    llm_client=llm_client,
-                    prompt=prompt,
-                    system_prompt_override=system_prompt_override,
-                    max_choices=llm_max_choices,
-                )
+                # Capture posée dans la tâche du choix : appels concurrents, liens distincts.
+                with capture_llm_calls() as llm_calls:
+                    response = await self.generation_service.generate_dialogue_node(
+                        llm_client=llm_client,
+                        prompt=prompt,
+                        system_prompt_override=system_prompt_override,
+                        max_choices=llm_max_choices,
+                    )
 
                 start_id = generate_stable_node_id()
                 enriched_nodes = self.generation_service.enrich_with_ids(
@@ -260,6 +263,7 @@ class GraphGenerationService:
                     max_choices=None if choices_mode == "free" and max_choices not in (0, None) else max_choices,
                     choices_mode="free" if choices_mode == "free" and max_choices not in (0, None) else choices_mode,
                 )
+                link_nodes_to_calls([generated_node["id"]], llm_calls)
                 connection = {
                     "from": parent_id,
                     "to": generated_node["id"],

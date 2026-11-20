@@ -1,5 +1,10 @@
 """Repositories et primitives SQLite de l'application."""
 
+from services.repositories.sqlite.ai_conversations_repository import (
+    AIConversationEntry,
+    AIConversationMessageEntry,
+    AIConversationsRepository,
+)
 from services.repositories.sqlite.app_settings_repository import AppSettingsRepository
 from services.repositories.sqlite.audit_logs_repository import (
     AuditLogEntry,
@@ -30,6 +35,9 @@ from services.repositories.sqlite.user_repository import UserRepository
 from services.repositories.sqlite.user_settings_repository import UserSettingsRepository
 
 __all__ = [
+    "AIConversationEntry",
+    "AIConversationMessageEntry",
+    "AIConversationsRepository",
     "AppSettingsRepository",
     "AuditLogEntry",
     "AuditLogListResult",

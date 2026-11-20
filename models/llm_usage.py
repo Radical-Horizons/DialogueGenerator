@@ -10,6 +10,14 @@ class LLMUsageRecord(BaseModel):
     Représente un appel LLM avec toutes les métriques associées.
     """
     request_id: str = Field(..., description="ID de la requête API")
+    call_id: Optional[str] = Field(
+        default=None,
+        description=(
+            "Identifiant unique de l'appel LLM. Une requête peut faire plusieurs appels "
+            "(choix avec test, tous les choix) : c'est lui, pas request_id, qui désigne un record. "
+            "Absent des records antérieurs à son introduction."
+        ),
+    )
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC), description="Horodatage de l'appel")
     model_name: str = Field(..., description="Modèle utilisé (ex: gpt-4o, gpt-4-turbo)")
     prompt_tokens: int = Field(..., ge=0, description="Nombre de tokens dans le prompt")

@@ -34,6 +34,7 @@ from services.dialogue_dramatic_progression import (
     DEFAULT_NODE_SCENE_INSTRUCTIONS,
 )
 from services.graph_generation_service import GraphGenerationService
+from services.llm_call_provenance import capture_llm_calls, link_nodes_to_calls
 from services.graph_prompt_context import GraphPromptContextFactory, PromptRenderer
 from services.unity_dialogue_generation_service import (
     UnityDialogueGenerationService,
@@ -714,18 +715,20 @@ class GraphNodeOrchestrator:
             if render_prompt
             else enriched_instructions
         )
-        response = await self._generation_service.generate_dialogue_node(
-            llm_client=llm_client,
-            prompt=prompt,
-            system_prompt_override=system_prompt_override,
-            max_choices=llm_max_choices,
-        )
+        with capture_llm_calls() as llm_calls:
+            response = await self._generation_service.generate_dialogue_node(
+                llm_client=llm_client,
+                prompt=prompt,
+                system_prompt_override=system_prompt_override,
+                max_choices=llm_max_choices,
+            )
 
         enriched_nodes = self._generation_service.enrich_with_ids(
             content=response,
             start_id=generate_stable_node_id(),
         )
         generated_node = enriched_nodes[0]
+        link_nodes_to_calls([generated_node["id"]], llm_calls)
         pre_truncate_free = choices_mode == "free" and max_choices not in (0, None)
         validate_enriched_node(
             generated_node,

@@ -15,6 +15,7 @@ from api.dependencies import (
     get_config_service,
     get_context_builder,
     get_cost_governance_service,
+    get_document_persistence_service,
     get_graph_node_orchestrator,
     get_llm_pricing_service,
     get_llm_usage_service,
@@ -31,8 +32,12 @@ from api.exceptions import (
 from api.middleware.billable_user_context import get_billable_user_id
 from api.middleware.cost_governance import DEFAULT_COMPLETION_TOKENS, DEFAULT_PROMPT_TOKENS
 from api.routers.auth import get_current_user
-from api.routers.graph_cost import fingerprint_for_selections_safe, try_compute_context_relevance
-from api.routers.graph_router_helpers import create_llm_client_for_router, resolve_and_enrich_graph_context
+from api.routers.graph_cost import fingerprint_for_selections_safe
+from api.routers.graph_router_helpers import (
+    annotate_generated_nodes,
+    create_llm_client_for_router,
+    resolve_and_enrich_graph_context,
+)
 from api.schemas.batch_node_generation import (
     BatchGenerateFromNodesJobRequest,
     BatchGenerateFromNodesReport,
@@ -57,7 +62,9 @@ from services.batch_node_generation_service import (
 )
 from services.configuration_service import ConfigurationService
 from services.cost_governance_service import CostGovernanceService
+from services.document_persistence_service import DocumentPersistenceService
 from services.graph_node_orchestrator import GraphNodeOrchestrator
+from services.llm_call_provenance import collect_node_provenance
 from services.llm_pricing_service import LLMPricingService
 from services.llm_usage_service import LLMUsageService
 
@@ -217,6 +224,9 @@ async def generate_node(
     orchestrator: Annotated[GraphNodeOrchestrator, Depends(get_graph_node_orchestrator)],
     usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
     context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    persistence_service: Annotated[
+        DocumentPersistenceService, Depends(get_document_persistence_service)
+    ],
     request_id: Annotated[str, Depends(get_request_id)] = None,
 ) -> GenerateNodeResponse:
     """Génère un nœud en contexte (extension de /generate/unity-dialogue).
@@ -241,23 +251,24 @@ async def generate_node(
             context_builder=context_builder,
         )
 
-        result = await orchestrator.generate(
-            llm_client=llm_client,
-            parent_node_id=request_data.parent_node_id,
-            parent_node_content=request_data.parent_node_content,
-            user_instructions=request_data.user_instructions,
-            context_selections=enriched_context,
-            system_prompt_override=request_data.system_prompt_override,
-            max_choices=request_data.max_choices,
-            target_choice_index=request_data.target_choice_index,
-            generate_all_choices=request_data.generate_all_choices,
-            dialogue_nodes=request_data.dialogue_nodes,
-            player_character_id=dramatis.player_character_id,
-            choices_mode=request_data.choices_mode,
-            npc_speaker_id=dramatis.npc_speaker_id,
-            narrative_tags=request_data.narrative_tags,
-            llm_model_identifier=request_data.llm_model_identifier,
-        )
+        with collect_node_provenance() as provenance:
+            result = await orchestrator.generate(
+                llm_client=llm_client,
+                parent_node_id=request_data.parent_node_id,
+                parent_node_content=request_data.parent_node_content,
+                user_instructions=request_data.user_instructions,
+                context_selections=enriched_context,
+                system_prompt_override=request_data.system_prompt_override,
+                max_choices=request_data.max_choices,
+                target_choice_index=request_data.target_choice_index,
+                generate_all_choices=request_data.generate_all_choices,
+                dialogue_nodes=request_data.dialogue_nodes,
+                player_character_id=dramatis.player_character_id,
+                choices_mode=request_data.choices_mode,
+                npc_speaker_id=dramatis.npc_speaker_id,
+                narrative_tags=request_data.narrative_tags,
+                llm_model_identifier=request_data.llm_model_identifier,
+            )
 
         suggested_connections = [
             SuggestedConnection(**conn) for conn in result.suggested_connections
@@ -271,20 +282,18 @@ async def generate_node(
         )
 
         if request_data.dialogue_id and result.nodes:
-            first_node_id = (
-                result.nodes[0].get("id")
-                if isinstance(result.nodes[0], dict)
-                else getattr(result.nodes[0], "id", None)
+            await asyncio.to_thread(
+                annotate_generated_nodes,
+                usage_service,
+                persistence_service,
+                _current_user,
+                provenance,
+                result.nodes,
+                request_data.dialogue_id,
+                template_id=request_data.template_id,
+                template_name=request_data.template_name,
+                compute_relevance=True,
             )
-            if first_node_id:
-                usage_service.annotate_usage(
-                    request_id,
-                    request_data.dialogue_id,
-                    str(first_node_id),
-                    template_id=request_data.template_id,
-                    template_name=request_data.template_name,
-                )
-                try_compute_context_relevance(usage_service, request_id)
 
         gdd_fp = await asyncio.to_thread(
             fingerprint_for_selections_safe,
@@ -345,6 +354,9 @@ async def start_batch_generate_from_nodes_job(
     pricing_service: Annotated[LLMPricingService, Depends(get_llm_pricing_service)],
     cost_service: Annotated[CostGovernanceService, Depends(get_cost_governance_service)],
     current_user: Annotated[dict[str, object], Depends(get_current_user)],
+    persistence_service: Annotated[
+        DocumentPersistenceService, Depends(get_document_persistence_service)
+    ],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> BatchGenerateJobCreateResponse:
     """Lance un job async de génération multi-parents (N ≥ 10) — Story 8.9 / FR88."""
@@ -444,25 +456,44 @@ async def start_batch_generate_from_nodes_job(
                 return fingerprint_for_selections_safe(context_builder, selections)
 
             offset = len(done)
-            run = await batch_service.generate_batch(
-                parents,
-                llm_client=llm_client,
-                dialogue_nodes=dialogue_nodes,
-                system_prompt_override=system_prompt_override,
-                max_choices=max_choices,
-                choices_mode=choices_mode,
-                enrich_context=enrich_context,
-                fingerprint_for=fingerprint_for,
-                should_cancel=lambda: job_manager.is_cancelled(job_id),
-                on_progress=lambda current, _total, detail: job_manager.set_progress(
-                    job_id, current + offset, detail
-                ),
-                on_item=lambda item: job_manager.record_item(
-                    job_id, item.parent_node_id, asdict(item)
-                ),
-                label_offset=offset,
-                label_total=len(parent_ids),
-            )
+            # Posé dans la tâche du job (et non dans la requête qui l'a créée).
+            with collect_node_provenance() as provenance:
+
+                async def on_item(item: BatchParentResult) -> None:
+                    """Point de reprise, puis annotation des nœuds de ce parent.
+
+                    Annoter parent par parent : un job coupé (erreur, redémarrage) garde
+                    le lien nœud → appel de tout ce qu'il a déjà livré.
+                    """
+                    job_manager.record_item(job_id, item.parent_node_id, asdict(item))
+                    if document_id and item.status == "ok" and item.nodes:
+                        await asyncio.to_thread(
+                            annotate_generated_nodes,
+                            usage_service,
+                            persistence_service,
+                            current_user,
+                            provenance,
+                            item.nodes,
+                            document_id,
+                        )
+
+                run = await batch_service.generate_batch(
+                    parents,
+                    llm_client=llm_client,
+                    dialogue_nodes=dialogue_nodes,
+                    system_prompt_override=system_prompt_override,
+                    max_choices=max_choices,
+                    choices_mode=choices_mode,
+                    enrich_context=enrich_context,
+                    fingerprint_for=fingerprint_for,
+                    should_cancel=lambda: job_manager.is_cancelled(job_id),
+                    on_progress=lambda current, _total, detail: job_manager.set_progress(
+                        job_id, current + offset, detail
+                    ),
+                    on_item=on_item,
+                    label_offset=offset,
+                    label_total=len(parent_ids),
+                )
             fresh = {item.parent_node_id: item for item in run.items}
             merged = [
                 done.get(pid) or fresh[pid]
@@ -476,15 +507,6 @@ async def start_batch_generate_from_nodes_job(
                 finished_at=run.finished_at,
             )
             payload = _report_to_response(report).model_dump(by_alias=True)
-            if document_id and report.total_nodes_generated > 0:
-                for item in report.items:
-                    if item.status == "ok" and item.nodes:
-                        nid = item.nodes[0].get("id")
-                        if nid:
-                            usage_service.annotate_usage(
-                                request_id, document_id, str(nid)
-                            )
-                            break
             final_status = "cancelled" if report.cancelled else "completed"
             job_manager.complete(job_id, status=final_status, report=payload)
         except Exception as exc:  # noqa: BLE001

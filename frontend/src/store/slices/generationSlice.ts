@@ -880,7 +880,7 @@ export const createGenerationSlice: StateCreator<
     try {
       await graphAPI.rejectNode(dialogueId, nodeId)
       // Marquer le nœud comme supprimé dans l'historique des coûts (AC#5)
-      markNodeDeleted(nodeId).catch((err) => {
+      markNodeDeleted(nodeId, dialogueId).catch((err) => {
         console.warn('mark-node-deleted non-critique:', err)
       })
     } catch (err) {

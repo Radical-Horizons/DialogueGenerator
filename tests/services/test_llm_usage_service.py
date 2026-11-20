@@ -9,8 +9,10 @@ from models.llm_usage import LLMUsageRecord
 
 @pytest.fixture
 def mock_repository():
-    """Crée un repository mock."""
-    return Mock()
+    """Crée un repository mock (``update_many_written`` rend ce qu'on lui confie)."""
+    repository = Mock()
+    repository.update_many_written.side_effect = lambda records: list(records)
+    return repository
 
 
 @pytest.fixture
@@ -125,9 +127,9 @@ def test_track_usage_with_error(usage_service, mock_repository):
     usage_service.track_usage(
         request_id="req_456",
         model_name="gpt-5.6-terra",
-        prompt_tokens=1000,
+        prompt_tokens=0,
         completion_tokens=0,
-        total_tokens=1000,
+        total_tokens=0,
         duration_ms=1000,
         success=False,
         endpoint="generate/variants",
@@ -138,7 +140,7 @@ def test_track_usage_with_error(usage_service, mock_repository):
     saved_record = mock_repository.save.call_args[0][0]
     assert saved_record.success is False
     assert saved_record.error_message == "API Error"
-    # Story 1.15 AC#5: coût 0€ pour génération échouée
+    # Story 1.15 AC#5 : une erreur API ne rend aucun token, donc 0 €
     assert saved_record.estimated_cost == 0.0
 
 
@@ -241,10 +243,11 @@ def test_track_usage_backwards_compatible_no_dialogue_context(usage_service, moc
     assert saved_record.node_id is None
 
 
-def test_annotate_usage_updates_record(usage_service, mock_repository):
-    """Teste que annotate_usage met à jour un enregistrement existant par request_id."""
+def test_annotate_call_updates_record(usage_service, mock_repository):
+    """annotate_call met à jour le record désigné par son call_id."""
     existing_record = LLMUsageRecord(
         request_id="req_to_annotate",
+        call_id="call_to_annotate",
         timestamp=datetime.now(UTC),
         model_name="gpt-5.6-terra",
         prompt_tokens=500,
@@ -255,20 +258,21 @@ def test_annotate_usage_updates_record(usage_service, mock_repository):
         success=True,
         endpoint="generate-node",
     )
-    mock_repository.get_by_request_id.return_value = existing_record
+    mock_repository.get_by_call_ids.return_value = {"call_to_annotate": existing_record}
     
-    usage_service.annotate_usage("req_to_annotate", "dialogue_123", "node_456")
+    usage_service.annotate_call("call_to_annotate", "dialogue_123", "node_456")
     
-    mock_repository.get_by_request_id.assert_called_once_with("req_to_annotate")
-    updated = mock_repository.update.call_args[0][0]
+    mock_repository.get_by_call_ids.assert_called_once_with(["call_to_annotate"])
+    updated = mock_repository.update_many_written.call_args[0][0][0]
     assert updated.dialogue_id == "dialogue_123"
     assert updated.node_id == "node_456"
 
 
-def test_annotate_usage_sets_template_fields(usage_service, mock_repository):
+def test_annotate_call_sets_template_fields(usage_service, mock_repository):
     """Annote le template appliqué (UUID ou slug pré-built) sur le record."""
     existing_record = LLMUsageRecord(
         request_id="req_to_annotate",
+        call_id="call_to_annotate",
         timestamp=datetime.now(UTC),
         model_name="gpt-5.6-terra",
         prompt_tokens=500,
@@ -279,29 +283,29 @@ def test_annotate_usage_sets_template_fields(usage_service, mock_repository):
         success=True,
         endpoint="generate-node",
     )
-    mock_repository.get_by_request_id.return_value = existing_record
+    mock_repository.get_by_call_ids.return_value = {"call_to_annotate": existing_record}
 
-    usage_service.annotate_usage(
-        "req_to_annotate",
+    usage_service.annotate_call(
+        "call_to_annotate",
         "dialogue_123",
         "node_456",
         template_id="confrontation",
         template_name="Confrontation",
     )
 
-    updated = mock_repository.update.call_args[0][0]
+    updated = mock_repository.update_many_written.call_args[0][0][0]
     assert updated.template_id == "confrontation"
     assert updated.template_name == "Confrontation"
 
 
-def test_annotate_usage_not_found_logs_warning(usage_service, mock_repository):
-    """Teste que annotate_usage gère silencieusement l'absence du record."""
-    mock_repository.get_by_request_id.return_value = None
+def test_annotate_call_not_found_logs_warning(usage_service, mock_repository):
+    """annotate_call gère silencieusement l'absence du record."""
+    mock_repository.get_by_call_ids.return_value = {}
     
     # Ne doit pas lever d'exception
-    usage_service.annotate_usage("req_unknown", "dialogue_123", "node_456")
+    usage_service.annotate_call("call_unknown", "dialogue_123", "node_456")
     
-    mock_repository.update.assert_not_called()
+    mock_repository.update_many_written.assert_called_once_with([])
 
 
 def test_get_dialogue_costs_aggregation(usage_service, mock_repository):
@@ -398,7 +402,7 @@ def test_mark_node_deleted_found(usage_service, mock_repository):
 
     found = usage_service.mark_node_deleted("node_xyz")
 
-    mock_repository.mark_node_deleted.assert_called_once_with("node_xyz")
+    mock_repository.mark_node_deleted.assert_called_once_with("node_xyz", None)
     assert found is True
 
 
@@ -461,3 +465,157 @@ def test_get_all_dialogues_costs_sorted(usage_service, mock_repository):
     # Vérifier la conversion USD→EUR
     assert abs(results[0]["total_cost_eur"] - 0.092) < 1e-6  # 0.1 * 0.92
 
+
+
+def _track(service: LLMUsageService, *, prompt: str, success: bool = True) -> str:
+    """Trace un appel minimal et retourne son call_id."""
+    call_id = service.track_usage(
+        request_id="req_multi",
+        model_name="gpt-6.2-sol",
+        prompt_tokens=10,
+        completion_tokens=5,
+        total_tokens=15,
+        duration_ms=1,
+        success=success,
+        endpoint="graph/generate-node",
+        prompt=prompt,
+        response='{"line": "réponse"}',
+    )
+    assert call_id is not None
+    return call_id
+
+
+def test_track_usage_assigns_unique_call_id_and_reports_success(usage_service, mock_repository):
+    """Chaque appel reçoit un call_id unique ; seul un succès est signalé à la capture."""
+    from services.llm_call_provenance import capture_llm_calls
+
+    with capture_llm_calls() as calls:
+        ok_id = _track(usage_service, prompt="a")
+        failed_id = _track(usage_service, prompt="b", success=False)
+
+    saved = [c.args[0] for c in mock_repository.save.call_args_list]
+    assert [r.call_id for r in saved] == [ok_id, failed_id]
+    assert ok_id != failed_id
+    assert calls == [ok_id]
+
+
+def test_annotate_call_on_file_repository_keeps_other_call(tmp_path):
+    """Avec le vrai dépôt fichier : annoter un appel ne touche pas l'autre appel de la requête."""
+    from services.repositories.llm_usage_repository import FileLLMUsageRepository
+
+    service = LLMUsageService(
+        repository=FileLLMUsageRepository(storage_dir=str(tmp_path)),
+        pricing_service=LLMPricingService(),
+    )
+    first = _track(service, prompt="prompt 1")
+    second = _track(service, prompt="prompt 2")
+
+    service.annotate_call(first, "Dialogue_A", "NODE_1")
+    service.annotate_call(second, "Dialogue_A", "NODE_2")
+
+    logs = service.get_generation_logs("Dialogue_A")
+    assert logs["total_count"] == 2
+    by_node = {e["node_id"]: e for e in logs["entries"]}
+    assert by_node["NODE_1"]["prompt"] == "prompt 1"
+    assert by_node["NODE_2"]["prompt"] == "prompt 2"
+
+
+def test_compute_and_persist_context_relevance_targets_call(tmp_path):
+    """La pertinence est calculée et persistée sur l'appel désigné, pas sur son voisin."""
+    from services.repositories.llm_usage_repository import FileLLMUsageRepository
+
+    service = LLMUsageService(
+        repository=FileLLMUsageRepository(storage_dir=str(tmp_path)),
+        pricing_service=LLMPricingService(),
+    )
+    first = _track(service, prompt="### Personnages\nTokenA.\n\n--- Input ---\n[]")
+    second = _track(service, prompt="### Personnages\nTokenB.\n\n--- Input ---\n[]")
+
+    service.compute_and_persist_context_relevance(second)
+
+    assert service.get_record_by_call_id(second).context_relevance is not None
+    assert service.get_record_by_call_id(first).context_relevance is None
+
+
+def _node_record(
+    *,
+    call_id: str | None,
+    request_id: str,
+    dialogue_id: str | None,
+    node_id: str | None,
+    seconds: int,
+    deleted: bool = False,
+) -> LLMUsageRecord:
+    """Record annoté sur (dialogue, nœud) à un instant donné."""
+    return LLMUsageRecord(
+        request_id=request_id,
+        call_id=call_id,
+        timestamp=datetime(2026, 11, 19, 10, 0, seconds, tzinfo=UTC),
+        model_name="gpt-6.2-sol",
+        prompt_tokens=1,
+        completion_tokens=1,
+        total_tokens=2,
+        estimated_cost=0.0,
+        duration_ms=1,
+        success=True,
+        endpoint="graph/generate-node",
+        dialogue_id=dialogue_id,
+        node_id=node_id,
+        deleted=deleted,
+    )
+
+
+def test_find_node_generation_record_single_scan_both_id_forms(usage_service, mock_repository):
+    """Un seul parcours ; D et D.json cherchés ; le plus récent non supprimé gagne."""
+    mock_repository.get_all.return_value = [
+        _node_record(call_id="c1", request_id="r1", dialogue_id="D", node_id="N", seconds=1),
+        _node_record(call_id="c2", request_id="r2", dialogue_id="D.json", node_id="N", seconds=2),
+        _node_record(call_id="c3", request_id="r3", dialogue_id="D", node_id="N", seconds=3, deleted=True),
+        _node_record(call_id="c4", request_id="r4", dialogue_id="E", node_id="N", seconds=4),
+    ]
+
+    lookup = usage_service.find_node_generation_record(("D", "D.json"), "N")
+
+    assert lookup.record is not None and lookup.record.call_id == "c2"
+    assert lookup.legacy_ambiguous is False
+    mock_repository.get_all.assert_called_once_with()
+    assert usage_service.find_node_generation_record(("D",), "ABSENT").record is None
+
+
+def test_find_node_generation_record_flags_legacy_multi_call_request(usage_service, mock_repository):
+    """Record sans call_id dont la requête a d'autres appels : lien signalé comme peu fiable."""
+    mock_repository.get_all.return_value = [
+        _node_record(call_id=None, request_id="legacy", dialogue_id="D", node_id="N", seconds=1),
+        _node_record(call_id=None, request_id="legacy", dialogue_id="D", node_id="M", seconds=1),
+        _node_record(call_id=None, request_id="alone", dialogue_id="D", node_id="P", seconds=1),
+    ]
+    assert usage_service.find_node_generation_record(("D",), "N").legacy_ambiguous is True
+    assert usage_service.find_node_generation_record(("D",), "P").legacy_ambiguous is False
+
+
+def test_annotate_calls_batches_reads_and_writes(usage_service, mock_repository):
+    """Annotation en lot : une lecture groupée, une écriture groupée, appels introuvables ignorés."""
+    first = _node_record(call_id="c1", request_id="r", dialogue_id=None, node_id=None, seconds=1)
+    second = _node_record(call_id="c2", request_id="r", dialogue_id=None, node_id=None, seconds=2)
+    mock_repository.get_by_call_ids.return_value = {"c1": first, "c2": second}
+
+    annotated = usage_service.annotate_calls([("c1", "N1"), ("c2", "N2"), ("c3", "N3")], "D")
+
+    assert annotated == ["c1", "c2"]
+    mock_repository.get_by_call_ids.assert_called_once_with(["c1", "c2", "c3"])
+    written = mock_repository.update_many_written.call_args[0][0]
+    assert [(r.call_id, r.dialogue_id, r.node_id) for r in written] == [("c1", "D", "N1"), ("c2", "D", "N2")]
+
+
+def test_annotate_calls_reports_only_records_actually_written(usage_service, mock_repository):
+    """Un record que le dépôt n'a pas réécrit (cible ambiguë) n'est pas annoncé comme annoté.
+
+    Les ``call_id`` rendus alimentent le calcul de pertinence et la provenance des nœuds :
+    annoncer un appel non écrit attacherait un nœud à une génération qui ne le porte pas.
+    """
+    first = _node_record(call_id="c1", request_id="r", dialogue_id=None, node_id=None, seconds=1)
+    second = _node_record(call_id="c2", request_id="r", dialogue_id=None, node_id=None, seconds=2)
+    mock_repository.get_by_call_ids.return_value = {"c1": first, "c2": second}
+    mock_repository.update_many_written.side_effect = lambda records: [r for r in records if r.call_id == "c2"]
+
+    assert usage_service.annotate_calls([("c1", "N1"), ("c2", "N2")], "D") == ["c2"]

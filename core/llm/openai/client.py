@@ -9,6 +9,11 @@ from pydantic import BaseModel
 from openai import AsyncOpenAI, APIError
 
 from core.llm.llm_client import ILLMClient
+from core.llm.tracking_format import (
+    STRUCTURED_OUTPUT_INSTRUCTION_SUFFIX,
+    TRACKED_PROMPT_INPUT_MARKER,
+    format_tracked_prompt,
+)
 from core.llm.openai.parameter_builder import OpenAIParameterBuilder
 from core.llm.openai.prompt_cache import build_user_message
 from core.llm.openai.response_parser import OpenAIResponseParser
@@ -18,6 +23,13 @@ from core.llm.openai.stream_parser import OpenAIStreamParser, StreamChunk, Strea
 from constants import ModelNames
 
 logger = logging.getLogger(__name__)
+
+# Réexportés ici pour les imports existants ; la source est ``core/llm/tracking_format.py``.
+__all__ = [
+    "OpenAIClient",
+    "STRUCTURED_OUTPUT_INSTRUCTION_SUFFIX",
+    "TRACKED_PROMPT_INPUT_MARKER",
+]
 
 
 class OpenAIClient(ILLMClient):
@@ -131,9 +143,7 @@ class OpenAIClient(ILLMClient):
             user_system_prompt_override if user_system_prompt_override else self.system_prompt_template
         )
         if response_model:
-            system_message_content += (
-                " Tu DOIS utiliser la fonction 'generate_interaction' pour formater ta réponse."
-            )
+            system_message_content += STRUCTURED_OUTPUT_INSTRUCTION_SUFFIX
         
         # Construire les messages (sans system message si on utilise instructions séparé)
         # Le system message sera passé via le paramètre instructions
@@ -159,7 +169,9 @@ class OpenAIClient(ILLMClient):
         )
 
         # Prompt complet pour le tracking (Story 1.15)
-        full_prompt_str = f"{system_message_content}\n\n--- Input ---\n{json.dumps(messages, ensure_ascii=False)}"
+        full_prompt_str = format_tracked_prompt(
+            system_message_content, json.dumps(messages, ensure_ascii=False)
+        )
 
         # Générer k variantes
         for i in range(k):
@@ -303,9 +315,7 @@ class OpenAIClient(ILLMClient):
             user_system_prompt_override if user_system_prompt_override else self.system_prompt_template
         )
         if response_model:
-            system_message_content += (
-                " Tu DOIS utiliser la fonction 'generate_interaction' pour formater ta réponse."
-            )
+            system_message_content += STRUCTURED_OUTPUT_INSTRUCTION_SUFFIX
         
         # Construire les messages (sans system message)
         messages: List[Dict[str, Any]] = []
@@ -331,7 +341,9 @@ class OpenAIClient(ILLMClient):
         )
         
         # Prompt complet pour le tracking (Story 1.15)
-        full_prompt_str = f"{system_message_content}\n\n--- Input ---\n{json.dumps(messages, ensure_ascii=False)}"
+        full_prompt_str = format_tracked_prompt(
+            system_message_content, json.dumps(messages, ensure_ascii=False)
+        )
         
         # Générer k variantes avec streaming
         for i in range(k):

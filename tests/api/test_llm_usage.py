@@ -377,6 +377,42 @@ def test_mark_node_deleted_endpoint(client, dialogue_records):
         app.dependency_overrides.pop(get_llm_usage_service, None)
 
 
+
+def test_mark_node_deleted_endpoint_scoped_to_dialogue(client, tmp_path):
+    """``dialogue_id`` borne la marque : le ``NODE_START`` d'un autre dialogue reste actif."""
+    repo = FileLLMUsageRepository(storage_dir=str(tmp_path))
+    for index, dialogue in enumerate(("Alpha", "Beta")):
+        repo.save(
+            LLMUsageRecord(
+                request_id=f"req_{index}",
+                call_id=f"call_{index}",
+                timestamp=datetime.now(UTC),
+                model_name="gpt-6.2-sol",
+                prompt_tokens=10,
+                completion_tokens=5,
+                total_tokens=15,
+                estimated_cost=0.001,
+                duration_ms=100,
+                success=True,
+                endpoint="generate-node",
+                dialogue_id=dialogue,
+                node_id="NODE_START",
+            )
+        )
+    test_service = LLMUsageService(repository=repo, pricing_service=LLMPricingService())
+    app.dependency_overrides[get_llm_usage_service] = lambda: test_service
+    try:
+        response = client.post(
+            "/api/v1/llm-usage/nodes/NODE_START/mark-deleted",
+            params={"dialogue_id": "Alpha.json"},
+        )
+        assert response.status_code == 200
+        assert response.json()["found"] is True
+        deleted = {r.dialogue_id: r.deleted for r in repo.get_all()}
+        assert deleted == {"Alpha": True, "Beta": False}
+    finally:
+        app.dependency_overrides.pop(get_llm_usage_service, None)
+
 def test_get_all_dialogues_costs_endpoint(client, dialogue_records):
     """Teste l'endpoint GET /api/v1/llm-usage/dialogues/costs."""
     test_service = LLMUsageService(
@@ -464,6 +500,7 @@ def test_get_context_relevance_and_history(client, tmp_path):
     t1 = t0 + timedelta(seconds=2)
     r1 = LLMUsageRecord(
         request_id="hr1",
+        call_id="hc1",
         timestamp=t0,
         model_name="m",
         prompt_tokens=1,
@@ -481,6 +518,7 @@ def test_get_context_relevance_and_history(client, tmp_path):
     )
     r2 = LLMUsageRecord(
         request_id="hr2",
+        call_id="hc2",
         timestamp=t1,
         model_name="m",
         prompt_tokens=1,
@@ -499,8 +537,8 @@ def test_get_context_relevance_and_history(client, tmp_path):
     repository.save(r1)
     repository.save(r2)
     usage = LLMUsageService(repository=repository, pricing_service=LLMPricingService())
-    usage.compute_and_persist_context_relevance("hr1")
-    usage.compute_and_persist_context_relevance("hr2")
+    usage.compute_and_persist_context_relevance("hc1")
+    usage.compute_and_persist_context_relevance("hc2")
     app.dependency_overrides[get_llm_usage_service] = lambda: usage
     try:
         detail = client.get(
@@ -554,6 +592,7 @@ def test_get_context_section_usage_200(client, tmp_path):
     response_json = json.dumps({"line": "TokenUsageAPI speaks", "choices": []})
     record = LLMUsageRecord(
         request_id="req_cu1",
+        call_id="call_cu1",
         timestamp=datetime.now(UTC),
         model_name="m",
         prompt_tokens=1,
@@ -571,8 +610,8 @@ def test_get_context_section_usage_200(client, tmp_path):
     )
     repository.save(record)
     usage = LLMUsageService(repository=repository, pricing_service=LLMPricingService())
-    usage.compute_and_persist_context_relevance("req_cu1")
-    updated = repository.get_by_request_id("req_cu1")
+    usage.compute_and_persist_context_relevance("call_cu1")
+    updated = repository.get_by_call_id("call_cu1")
     assert updated is not None
     assert updated.context_section_usage is not None
 

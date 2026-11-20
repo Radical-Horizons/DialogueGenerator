@@ -27,7 +27,10 @@ from api.exceptions import InternalServerException, ValidationException
 from api.routers.documents import _resolve_document_base
 from api.routers.auth import get_current_user
 from api.routers.graph_cost import _build_representative_prompt_for_estimate
-from api.routers.graph_router_helpers import create_llm_client_for_router
+from api.routers.graph_router_helpers import (
+    annotate_generated_nodes,
+    create_llm_client_for_router,
+)
 from api.schemas.graph import (
     ExpandTreeParentFailureDetail,
     ExpandTreeRequest,
@@ -48,6 +51,7 @@ from services.document_persistence_service import (
     DialogueAccessDeniedError,
     DocumentPersistenceService,
 )
+from services.llm_call_provenance import collect_node_provenance
 from services.llm_pricing_service import LLMPricingService
 from services.llm_usage_service import LLMUsageService
 from services.token_estimation_service import TokenEstimationService
@@ -267,24 +271,25 @@ async def expand_tree(
         )
 
         try:
-            result = await expansion_service.expand(
-                unity_orchestrator=unity_orchestrator,
-                llm_client=llm_client,
-                user_instructions=request_data.user_instructions,
-                context_selections=request_data.context_selections,
-                max_depth=request_data.max_depth,
-                max_choices=request_data.max_choices,
-                npc_speaker_id=request_data.npc_speaker_id,
-                player_character_id=request_data.player_character_id,
-                llm_model_identifier=llm_model,
-                title=request_data.title,
-                scene_type=request_data.scene_type,
-                include_narrative_guides=request_data.include_narrative_guides,
-                organization_mode=request_data.organization_mode,
-                max_context_tokens=request_data.max_context_tokens,
-                choices_mode=request_data.choices_mode,
-                allow_partial=request_data.allow_partial,
-            )
+            with collect_node_provenance() as provenance:
+                result = await expansion_service.expand(
+                    unity_orchestrator=unity_orchestrator,
+                    llm_client=llm_client,
+                    user_instructions=request_data.user_instructions,
+                    context_selections=request_data.context_selections,
+                    max_depth=request_data.max_depth,
+                    max_choices=request_data.max_choices,
+                    npc_speaker_id=request_data.npc_speaker_id,
+                    player_character_id=request_data.player_character_id,
+                    llm_model_identifier=llm_model,
+                    title=request_data.title,
+                    scene_type=request_data.scene_type,
+                    include_narrative_guides=request_data.include_narrative_guides,
+                    organization_mode=request_data.organization_mode,
+                    max_context_tokens=request_data.max_context_tokens,
+                    choices_mode=request_data.choices_mode,
+                    allow_partial=request_data.allow_partial,
+                )
         except TreeExpansionError as exc:
             details: dict = {
                 "failed_parent_details": [
@@ -308,8 +313,10 @@ async def expand_tree(
             request_id=request_id,
         )
 
+        annotated_dialogue_id = document_id
         if request_data.persist:
             base_dir, doc_id = _resolve_document_base(document_id, config_service, request_id)
+            annotated_dialogue_id = doc_id
             if (base_dir / f"{doc_id}.json").exists():
                 try:
                     persistence_service.require_edit(
@@ -337,6 +344,16 @@ async def expand_tree(
                 current_user,
                 create_only=True,
             )
+
+        await asyncio.to_thread(
+            annotate_generated_nodes,
+            usage_service,
+            persistence_service,
+            current_user,
+            provenance,
+            result.document.get("nodes") or [],
+            annotated_dialogue_id,
+        )
 
         logger.info(
             "expand-tree terminé: %s nœuds, %s appels LLM, doc=%s (request_id=%s)",

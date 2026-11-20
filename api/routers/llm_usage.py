@@ -467,6 +467,7 @@ async def mark_node_deleted(
     request: Request,
     usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
     request_id: Annotated[str, Depends(get_request_id)],
+    dialogue_id: Annotated[Optional[str], Query(max_length=205)] = None,
 ) -> dict:
     """Marque un nœud comme supprimé dans l'historique des coûts (AC#5).
 
@@ -478,6 +479,8 @@ async def mark_node_deleted(
         request: La requête HTTP.
         usage_service: Service de tracking injecté.
         request_id: ID de la requête.
+        dialogue_id: Dialogue du nœud (optionnel) : sans lui, un nœud homonyme d'un
+            autre dialogue est aussi marqué.
 
     Returns:
         Confirmation avec found=True si le record a été mis à jour.
@@ -486,7 +489,7 @@ async def mark_node_deleted(
         InternalServerException: Si la mise à jour échoue.
     """
     try:
-        found = usage_service.mark_node_deleted(node_id)
+        found = usage_service.mark_node_deleted(node_id, dialogue_id)
         return {"success": True, "node_id": node_id, "found": found}
     except Exception as e:
         logger.exception(

@@ -88,6 +88,7 @@ def test_llm_usage_compute_and_persist(tmp_path) -> None:
     )
     record = LLMUsageRecord(
         request_id="req-persist",
+        call_id="call-persist",
         timestamp=datetime.now(UTC),
         model_name="test-model",
         prompt_tokens=10,
@@ -104,8 +105,8 @@ def test_llm_usage_compute_and_persist(tmp_path) -> None:
         response=json.dumps({"line": "AlphaTokenForPersist speaks", "choices": []}),
     )
     repo.save(record)
-    usage.compute_and_persist_context_relevance("req-persist")
-    updated = repo.get_by_request_id("req-persist")
+    usage.compute_and_persist_context_relevance("call-persist")
+    updated = repo.get_by_call_id("call-persist")
     assert updated is not None
     assert updated.context_relevance is not None
     assert updated.context_relevance["score_percent"] >= 0.0

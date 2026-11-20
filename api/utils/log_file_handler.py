@@ -2,6 +2,7 @@
 import os
 import json
 import logging
+import threading
 from pathlib import Path
 from datetime import date, datetime, timedelta, timezone
 from typing import Any, Dict, Optional
@@ -41,6 +42,10 @@ class DateRotatingFileHandler(BaseRotatingHandler):
         self.current_date: Optional[date] = None
         self.current_file_path: Optional[Path] = None
         self._file_handle = None
+        # Le handler signale ses propres incidents via `logging`, donc vers lui-même.
+        self._emitting = threading.local()
+        # Fichier dont l'ouverture a échoué : pas de nouvel essai avant la rotation.
+        self._unopenable_path: Optional[Path] = None
         
         # Créer le dossier s'il n'existe pas
         try:
@@ -111,8 +116,9 @@ class DateRotatingFileHandler(BaseRotatingHandler):
                 try:
                     with open(self.current_file_path, 'r', encoding=self.encoding) as f:
                         json.load(f)  # Vérifier que c'est du JSON valide
-                except (json.JSONDecodeError, IOError):
-                    # Fichier corrompu, le recréer
+                except ValueError:
+                    # Fichier corrompu (JSON ou encodage), le recréer. Un fichier illisible
+                    # parce que verrouillé n'est pas corrompu : OSError va au bloc externe.
                     logging.getLogger(__name__).warning(
                         f"Fichier de log corrompu, recréation: {self.current_file_path}"
                     )
@@ -123,10 +129,12 @@ class DateRotatingFileHandler(BaseRotatingHandler):
             if not self.current_file_path.exists():
                 self.current_file_path.touch()
             self._file_handle = open(self.current_file_path, 'r+b')
+            self._unopenable_path = None
             
         except IOError as e:
             logging.getLogger(__name__).error(f"Impossible d'ouvrir le fichier de log {self.current_file_path}: {e}")
             self._file_handle = None
+            self._unopenable_path = self.current_file_path
     
     def _close_current_file(self) -> None:
         """Ferme le fichier de log actuel."""
@@ -144,12 +152,20 @@ class DateRotatingFileHandler(BaseRotatingHandler):
         Args:
             record: Le record de log à écrire.
         """
+        # Ses propres avertissements (fichier corrompu, verrouillé) reviennent ici par
+        # `logging` : sans cette garde, _open_file → warning → emit → _open_file… jusqu'à
+        # la récursion maximale, à chaque enregistrement. Vécu le 2026-11-20 : deux pytest
+        # concurrents partageant LOG_DIR, l'un verrouillait le fichier, l'autre semblait figé.
+        # L'avertissement atteint toujours les autres handlers (console, caplog).
+        if getattr(self._emitting, "active", False):
+            return
+        self._emitting.active = True
         try:
             # Vérifier si rotation nécessaire
             self._rotate_if_needed()
             
-            # Si le fichier n'est pas ouvert, essayer de l'ouvrir
-            if not self._file_handle:
+            # Si le fichier n'est pas ouvert, essayer de l'ouvrir (une fois par fichier)
+            if not self._file_handle and self._unopenable_path != self.current_file_path:
                 self._open_file()
             
             # Si toujours pas de fichier, fallback vers console
@@ -173,6 +189,8 @@ class DateRotatingFileHandler(BaseRotatingHandler):
                 print(f"Erreur lors de l'écriture du log: {e}", file=sys.stderr)
             except Exception:
                 pass  # Dernier recours, ignorer
+        finally:
+            self._emitting.active = False
     
     def _format_record(self, record: logging.LogRecord) -> Dict[str, Any]:
         """Formate un record de log en dictionnaire JSON.

@@ -166,3 +166,260 @@ def test_load_old_json_without_prompt_response(repository, tmp_path):
     assert getattr(records[0], "prompt", None) is None
     assert getattr(records[0], "response", None) is None
 
+
+
+def _call_record(
+    sample_record: LLMUsageRecord,
+    *,
+    call_id: str,
+    prompt: str,
+    tokens: int,
+    cost: float,
+    offset_seconds: int = 0,
+) -> LLMUsageRecord:
+    """Record d'un appel d'une requête multi-appels (même request_id que ``sample_record``)."""
+    record = sample_record.model_copy()
+    record.call_id = call_id
+    record.prompt = prompt
+    record.response = f"réponse de {call_id}"
+    record.prompt_tokens = tokens
+    record.total_tokens = tokens + record.completion_tokens
+    record.estimated_cost = cost
+    record.timestamp = sample_record.timestamp + timedelta(seconds=offset_seconds)
+    return record
+
+
+def test_update_targets_call_id_and_keeps_sibling_records(
+    repository: FileLLMUsageRepository, sample_record: LLMUsageRecord
+) -> None:
+    """Deux appels sous le même request_id : annoter l'un laisse l'autre intact (pas de doublon)."""
+    first = _call_record(sample_record, call_id="call-1", prompt="prompt 1", tokens=111, cost=0.011)
+    second = _call_record(
+        sample_record, call_id="call-2", prompt="prompt 2", tokens=222, cost=0.022, offset_seconds=1
+    )
+    repository.save(first)
+    repository.save(second)
+
+    annotated = repository.get_by_call_id("call-1")
+    assert annotated is not None
+    annotated.dialogue_id = "Dialogue_A"
+    annotated.node_id = "NODE_1"
+    repository.update(annotated)
+
+    records = {r.call_id: r for r in repository.get_all()}
+    assert len(repository.get_all()) == 2
+    assert records["call-1"].node_id == "NODE_1"
+    untouched = records["call-2"]
+    assert untouched.node_id is None
+    assert untouched.prompt == "prompt 2"
+    assert untouched.response == "réponse de call-2"
+    assert untouched.prompt_tokens == 222
+    assert untouched.estimated_cost == 0.022
+
+
+def test_get_by_call_id(repository: FileLLMUsageRepository, sample_record: LLMUsageRecord) -> None:
+    """get_by_call_id retrouve l'appel précis ; inconnu ou vide ⇒ None."""
+    repository.save(_call_record(sample_record, call_id="call-x", prompt="p", tokens=1, cost=0.0))
+    found = repository.get_by_call_id("call-x")
+    assert found is not None and found.prompt == "p"
+    assert repository.get_by_call_id("call-unknown") is None
+    assert repository.get_by_call_id("") is None
+
+
+def test_update_legacy_record_by_request_id_and_timestamp(
+    repository: FileLLMUsageRepository, sample_record: LLMUsageRecord
+) -> None:
+    """Record sans call_id : retrouvé par (request_id, timestamp) quand une seule entrée correspond."""
+    other = sample_record.model_copy()
+    other.timestamp = sample_record.timestamp + timedelta(seconds=5)
+    other.prompt = "autre appel"
+    repository.save(sample_record)
+    repository.save(other)
+
+    legacy = next(r for r in repository.get_all() if r.prompt != "autre appel")
+    legacy.node_id = "NODE_LEGACY"
+    repository.update(legacy)
+
+    records = repository.get_all()
+    assert len(records) == 2
+    assert {r.node_id for r in records} == {"NODE_LEGACY", None}
+    assert next(r for r in records if r.node_id is None).prompt == "autre appel"
+
+
+def test_update_identical_legacy_copies_are_all_replaced(
+    repository: FileLLMUsageRepository, sample_record: LLMUsageRecord
+) -> None:
+    """Copies identiques laissées par l'ancien update() : toutes remplacées, update() rend True."""
+    repository.save(sample_record)
+    repository.save(sample_record.model_copy())
+
+    target = repository.get_all()[0]
+    target.node_id = "NODE_COPIES"
+    assert repository.update(target) is True
+
+    records = repository.get_all()
+    assert len(records) == 2
+    assert all(r.node_id == "NODE_COPIES" for r in records)
+
+
+def test_update_non_identical_legacy_ambiguity_is_refused(
+    repository: FileLLMUsageRepository, sample_record: LLMUsageRecord
+) -> None:
+    """Deux records legacy de même (request_id, timestamp) mais différents : rien n'est écrit."""
+    other = sample_record.model_copy()
+    other.prompt = "autre prompt"
+    repository.save(sample_record)
+    repository.save(other)
+
+    target = repository.get_all()[0]
+    target.node_id = "NODE_AMBIGUOUS"
+    assert repository.update(target) is False
+    assert all(r.node_id is None for r in repository.get_all())
+
+
+def test_mark_node_deleted_reports_real_write(
+    repository: FileLLMUsageRepository, sample_record: LLMUsageRecord
+) -> None:
+    """mark_node_deleted rend True quand l'écriture a lieu, False quand la cible est ambiguë."""
+    copies = sample_record.model_copy()
+    copies.node_id = "NODE_COPIES"
+    repository.save(copies)
+    repository.save(copies.model_copy())
+    assert repository.mark_node_deleted("NODE_COPIES") is True
+    assert all(r.deleted for r in repository.get_all())
+
+    ambiguous_a = sample_record.model_copy()
+    ambiguous_a.request_id = "req_ambiguous"
+    ambiguous_a.node_id = "NODE_AMBIGUOUS"
+    ambiguous_b = ambiguous_a.model_copy()
+    ambiguous_b.prompt = "différent"
+    repository.save(ambiguous_a)
+    repository.save(ambiguous_b)
+    assert repository.mark_node_deleted("NODE_AMBIGUOUS") is False
+
+
+def test_update_many_loads_and_saves_each_daily_file_once(
+    repository: FileLLMUsageRepository,
+    sample_record: LLMUsageRecord,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Annotation en lot : un seul chargement/écriture par fichier du jour, les deux records réécrits."""
+    first = _call_record(sample_record, call_id="call-1", prompt="p1", tokens=1, cost=0.0)
+    second = _call_record(sample_record, call_id="call-2", prompt="p2", tokens=2, cost=0.0)
+    repository.save(first)
+    repository.save(second)
+
+    found = repository.get_by_call_ids(["call-1", "call-2", "call-unknown"])
+    assert set(found) == {"call-1", "call-2"}
+    for call_id, record in found.items():
+        record.node_id = f"NODE_{call_id}"
+
+    saves: list[object] = []
+    original_save = repository._save_records_for_date
+    monkeypatch.setattr(
+        repository,
+        "_save_records_for_date",
+        lambda target_date, records: (saves.append(target_date), original_save(target_date, records)),
+    )
+    assert repository.update_many(found.values()) == 2
+    assert len(saves) == 1
+    assert {r.node_id for r in repository.get_all()} == {"NODE_call-1", "NODE_call-2"}
+
+
+def test_concurrent_saves_and_annotations_lose_no_record(
+    repository: FileLLMUsageRepository, sample_record: LLMUsageRecord
+) -> None:
+    """Sauvegardes et annotations concurrentes (boucle + threads) : aucun record perdu.
+
+    Chaque écriture relit puis réécrit tout le fichier du jour ; avant le verrou, une
+    annotation lancée par ``asyncio.to_thread`` pendant qu'un appel LLM était tracé
+    réécrivait l'ancien contenu et faisait disparaître le nouvel enregistrement.
+    """
+    import threading
+
+    seeds = [
+        _call_record(sample_record, call_id=f"seed-{i}", prompt=f"s{i}", tokens=1, cost=0.0)
+        for i in range(20)
+    ]
+    for seed in seeds:
+        repository.save(seed)
+
+    def save_many(prefix: str) -> None:
+        for i in range(40):
+            repository.save(
+                _call_record(sample_record, call_id=f"{prefix}-{i}", prompt="p", tokens=1, cost=0.0)
+            )
+
+    def annotate_many() -> None:
+        for seed in seeds:
+            found = repository.get_by_call_ids([seed.call_id])[seed.call_id]
+            found.node_id = f"NODE_{seed.call_id}"
+            repository.update_many([found])
+
+    threads = [
+        threading.Thread(target=save_many, args=("a",)),
+        threading.Thread(target=save_many, args=("b",)),
+        threading.Thread(target=annotate_many),
+    ]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    records = repository.get_all()
+    assert len(records) == 20 + 80
+    annotated = {r.call_id for r in records if r.node_id}
+    assert annotated == {seed.call_id for seed in seeds}
+
+
+def test_unreadable_day_file_is_set_aside_not_overwritten(
+    repository: FileLLMUsageRepository, sample_record: LLMUsageRecord, tmp_path: Path
+) -> None:
+    """Un fichier du jour illisible est mis de côté : la sauvegarde suivante ne l'écrase pas."""
+    day_file = tmp_path / f"usage_{sample_record.timestamp.date().isoformat()}.json"
+    day_file.write_text('{"date": "x", "records": [ {"request_id": ', encoding="utf-8")
+
+    repository.save(sample_record)
+
+    set_aside = list(tmp_path.glob(f"{day_file.name}.corrupt-*"))
+    assert len(set_aside) == 1
+    assert set_aside[0].read_text(encoding="utf-8").startswith('{"date": "x"')
+    assert len(repository.get_all()) == 1
+
+
+def test_mark_node_deleted_marks_every_generation_of_the_node_in_its_dialogue(
+    repository: FileLLMUsageRepository, sample_record: LLMUsageRecord
+) -> None:
+    """Un nœud régénéré a deux records : les deux sont marqués, pas l'homonyme d'un autre dialogue."""
+    first = _call_record(sample_record, call_id="gen-1", prompt="v1", tokens=1, cost=0.0)
+    regenerated = _call_record(
+        sample_record, call_id="gen-2", prompt="v2", tokens=1, cost=0.0, offset_seconds=5
+    )
+    other_dialogue = _call_record(sample_record, call_id="gen-3", prompt="x", tokens=1, cost=0.0)
+    for record, dialogue in ((first, "D"), (regenerated, "D.json"), (other_dialogue, "E")):
+        record.dialogue_id = dialogue
+        record.node_id = "NODE_1"
+        repository.save(record)
+
+    assert repository.mark_node_deleted("NODE_1", dialogue_id="D") is True
+
+    by_call = {r.call_id: r for r in repository.get_all()}
+    assert by_call["gen-1"].deleted and by_call["gen-2"].deleted
+    assert not by_call["gen-3"].deleted
+
+
+def test_update_many_written_omits_ambiguous_targets(
+    repository: FileLLMUsageRepository, sample_record: LLMUsageRecord
+) -> None:
+    """Seuls les records réellement réécrits sont rendus (cible en double ⇒ absente)."""
+    good = _call_record(sample_record, call_id="call-ok", prompt="p", tokens=1, cost=0.0)
+    duplicated = _call_record(sample_record, call_id="call-dup", prompt="p", tokens=1, cost=0.0)
+    repository.save(good)
+    repository.save(duplicated)
+    repository.save(duplicated.model_copy())
+
+    good.node_id = "NODE_OK"
+    duplicated.node_id = "NODE_DUP"
+    written = repository.update_many_written([good, duplicated])
+
+    assert [r.call_id for r in written] == ["call-ok"]
