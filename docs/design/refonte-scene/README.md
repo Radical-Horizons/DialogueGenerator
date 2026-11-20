@@ -1,10 +1,12 @@
 # Refonte « Scène » — handoff de design
 
-**Statut : proposition du 2026-11-20, non validée.** Rien n'est implémenté. Si elle est validée, elle se réalise par
-l'epic BMAD [`epic-20.md`](../../../_bmad-output/planning-artifacts/epics/epic-20.md) ; l'architecture associée est dans
-[`docs/architecture/refonte-scene-architecture.md`](../../architecture/refonte-scene-architecture.md).
+**Statut : validée le 2026-11-20, prioritaire.** Elle se réalise par l'epic BMAD
+[`epic-20.md`](../../../_bmad-output/planning-artifacts/epics/epic-20.md), qui passe devant les autres epics ;
+l'architecture associée est dans [`docs/architecture/refonte-scene-architecture.md`](../../architecture/refonte-scene-architecture.md).
 
 - **Canvas de design** (privé) : <https://claude.ai/artifact/VynbrAeNhQULRXhbnVnTDW>
+- **Canvas « Ambiance »** (privé) : <https://claude.ai/artifact/GVZfj6RsZqGQGwEg8X5SxN> — teintes de lieu, portraits
+  et couvertures sur le Script et l'accueil, avec les images du dossier Alteir (story 20.20, architecture A16).
 - **Prototypes locaux** : ce dossier. Configuration `design-refonte-scene` de `.claude/launch.json`
   (`python -m http.server 8973 --directory docs/design/refonte-scene`), puis `http://localhost:8973/Main.dc.html`.
   `support.js` doit rester à côté des `.dc.html`.
@@ -126,7 +128,9 @@ Chaque board dit en pied ce qui est un exemple (coûts, heures, textes généré
 | **Tiroir Lot** | Portée, coût total, progression, reprise, revue en série. | jobs FR87/FR88, `BatchGenerateFromNodesModal` |
 | **Puce mécanique** | Trait, test, respect, influence, fin ; clic (cible 24 px) → popover d'édition ancré. | `ChoiceEditor`, `AttributeSkillTestEditor`, `ConditionEditor`, `EffectEditor` |
 | **Barre d'état** | Enregistrement, problèmes, contexte, tokens, modèle, mots, lot en cours. | `SaveStatusIndicator`, `GraphHealthBadge`, `EstimationBadge` |
-| **Tiroir temporaire** | 380 px, ÉCHAP ferme : Contexte, Versions, Lot. | colonne droite, `ContextDetail` |
+| **Tiroir temporaire** | 380 px, ÉCHAP ferme : Contexte, Versions, Lot, Discussion. | colonne droite, `ContextDetail` |
+| **Tiroir Discussion** | Discuter avec l'IA d'une réplique (« Pourquoi ? ») ou poser une question depuis la palette : génération d'origine en diff, résumé de réflexion, limite affichée, messages avec leur coût. | nouveau ; back-end PR #103 (architecture A15) |
+| **Ambiance** | Teinte de lieu sur les fonds, portraits en puce (28 px) et en marge (44 px), couvertures à l'accueil. | nouveau (architecture A16) |
 | **Palette** | Recherche + commandes avec raccourcis. | `CommandPalette` (étendue) |
 | **Note de marge** | Relecture à la demande (qualité, slop, langue). | `GraphQualityLlmPanel`, `GraphAiSlopPanel` |
 
@@ -231,7 +235,8 @@ jet, et un clic ou une sélection rend la pleine opacité.
 
 - **Maquette 2026** : la charte reste ; 1c, 2a, 2b, 2e sont absorbés (page Générer → fiche + Script ; 2a/2b →
   emplacement ; 2e → Graphe).
-- **Epic 18 (édition in-situ, backlog, ~16 sessions)** : **fondation, avec trois écarts nommés**.
+- **Epic 18 (édition in-situ)** : **intégrée à l'epic 20** (tranche 1 bis : 18.4–18.9 et 18.11 ; 18.10 dans 20.18 ;
+  18.1 à 18.3 remplacées). Elle reste la fondation, avec trois écarts nommés.
   - Reprises : D1 (clic simple), D2 (ÉCHAP), **D4 (`<textarea>`) intact** — la réplique entière passe en texte brut à
     l'entrée, aucun éditeur de blocs —, D5 (widget composite), 18.4 (annulation transactionnelle).
   - Écart 1 : **largeur 360 px** au lieu de 280 (mesuré : la réplique d'ouverture de Grish en Instrument Serif 16 px
@@ -257,3 +262,6 @@ jet, et un clic ou une sélection rend la pleine opacité.
 5. **Monnaie** — garder la règle actuelle (estimation en €, dépense en $) ou tout afficher en euros avec un taux fixé
    dans les réglages.
 6. **Thème Papier** — livré en option, Nuit par défaut.
+7. **Notes d'intention** — l'IA noterait à la génération pourquoi elle écrit ce qu'elle écrit (seul « pourquoi »
+   fiable, ≈ 0,001–0,002 $ par nœud). Recommandé : expérience mesurée à l'aveugle d'abord (story 20.23), activation
+   seulement si la qualité ne baisse pas.

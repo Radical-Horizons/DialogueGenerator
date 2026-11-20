@@ -1,5 +1,5 @@
 ---
-description: "Refonte Scène (proposition 2026-11-20) — où sont la maquette, l'architecture et l'epic, et comment s'en servir"
+description: "Refonte Scène (validée le 2026-11-20, Epic 20 prioritaire) — où sont la maquette, l'architecture et l'epic, et comment s'en servir"
 paths:
   - "docs/design/refonte-scene/**"
   - "docs/architecture/refonte-scene-architecture.md"
@@ -11,9 +11,11 @@ paths:
 
 ## Statut
 
-**Proposition du 2026-11-20, en attente de validation par l'auteur.** Tant que `epic-20.md` porte le statut
-« proposition », la maquette 2026 (`docs/design/refonte-ui-2026/`, règle `ui_redesign_2026.md`) reste la cible du code
-en production. Ne pas implémenter un écran Scène sans story Epic 20 créée.
+**Validée le 2026-11-20 ; l'epic 20 est prioritaire et passe devant les autres.** Pour chaque écran qu'elle couvre,
+la refonte Scène remplace la maquette 2026 (`docs/design/refonte-ui-2026/`, règle `ui_redesign_2026.md`), dont la
+charte (couleurs, polices, filets, un seul bouton bleu) reste valable. Un écran pas encore repris par une story livrée
+garde son code actuel. Ne pas implémenter un écran Scène sans sa story Epic 20 créée (`bmad-create-story`).
+Epic 18 est intégrée à l'epic 20 (tranche 1 bis) ; Epic 19 est remplacée.
 
 ## Sources de vérité
 
@@ -25,6 +27,8 @@ en production. Ne pas implémenter un écran Scène sans story Epic 20 créée.
 | Découpage | `_bmad-output/planning-artifacts/epics/epic-20.md` |
 | Recherche (sources) | `_bmad-output/planning-artifacts/research/ux-refonte-scene-2026-11-19.md` |
 | Canvas | <https://claude.ai/artifact/VynbrAeNhQULRXhbnVnTDW> |
+| Ambiance (teintes de lieu, portraits, couvertures) | canvas <https://claude.ai/artifact/GVZfj6RsZqGQGwEg8X5SxN>, architecture A16, story 20.20 |
+| Discussion avec l'IA (front de la PR #103) | architecture A15, stories 20.21–20.23, `docs/architecture/conversations-ia.md` |
 
 Ouvrir les prototypes : configuration `design-refonte-scene` de `.claude/launch.json` (port 8973), puis
 `http://localhost:8973/Main.dc.html`.

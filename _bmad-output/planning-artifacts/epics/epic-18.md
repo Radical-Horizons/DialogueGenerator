@@ -1,6 +1,6 @@
 ## Epic 18: Édition in-situ du dialogue dans le nœud
 
-**Status:** backlog — stories **18.1–18.11**
+**Status:** **intégrée à Epic 20 le 2026-11-20** (prioritaire). 18.4, 18.5, 18.6, 18.7, 18.8, 18.9 et 18.11 forment la tranche 1 bis d'Epic 20, avec leurs critères ci-dessous ; 18.10 rejoint la story 20.18 ; 18.1 et 18.2 sont remplacées par les cartes de texte (20.7, 20.8) ; 18.3 devient inutile (panneau de droite en lecture seule derrière son drapeau). Écarts tranchés par la refonte : carte de 360 px (plan B : 280 px), D3 rouverte par les paliers de zoom. Ancien statut : backlog — stories **18.1–18.11**
 **Révisée le 2026-10-01** après audit d'implementation readiness ([rapport](../implementation-readiness-report-2026-10-01.md)). La première rédaction portait 8 bloquants, dont une décision de cadrage appuyée sur une bibliothèque absente du projet. Les corrections sont tracées en fin de fichier.
 
 Les auteurs peuvent lire et écrire le dialogue complet — **réplique PNJ et réponses PJ** — directement dans le nœud sur le canvas, par **simple clic dans le texte**, sans ouvrir le panneau de droite et **sans aucune action d'enregistrement**. Le panneau de droite reste disponible pour ce qui ne tient pas dans un nœud (conditions de visibilité, effets, skill checks, métadonnées).

@@ -1,6 +1,6 @@
 ## Epic 19: Canvas-first — surfaces à la demande, récupération de l'espace graphe
 
-**Status:** backlog — **squelette assumé.** Objectif, périmètre et dépendance figés ; découpage en stories **volontairement différé**.
+**Status:** **remplacée par Epic 20 le 2026-11-20** (FR129–FR130 couvertes par FR133, FR137 et la story 20.15). Ancien statut : backlog — **squelette assumé.** Objectif, périmètre et dépendance figés ; découpage en stories **volontairement différé**.
 
 Les auteurs lancent la **génération**, les **détails GDD** et les **variables / systèmes de jeu** en overlays appelés **depuis le nœud lui-même**. Le panneau de droite permanent disparaît et sa largeur revient au graphe.
 

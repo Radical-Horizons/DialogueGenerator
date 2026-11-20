@@ -133,6 +133,21 @@
 **FR128:** In-situ editing is operable by keyboard (Tab chain across the node's fields, visible focus) and by touch on narrow viewports *(NEW - Édition in-situ)*  
 **FR129:** Users can open node generation, GDD context details and game variables as overlays launched from the node itself, so that the permanent right-hand panel is no longer required to author a dialogue *(NEW - Canvas-first, Epic 19)*  
 **FR130:** Users can collapse or remove the permanent right-hand panel and recover its width for the graph canvas, with no loss of access to any of its functions *(NEW - Canvas-first, Epic 19 — **PROVISOIRE** : "collapse" et "remove" décrivent deux produits différents ; l'exigence n'est pas testable avant arbitrage, prévu après retour d'usage d'Epic 18)*
+**FR131:** A scene carries a scene sheet (NPCs, PC, place, brief, tones, author profile, linked entries) stored in the document; every generation in the scene uses it *(NEW - Refonte Scène, Epic 20)*
+**FR132:** Script view: users read and write one path of the scene continuously, choosing the followed response and test outcome, with a path thread and counters *(NEW - Refonte Scène, Epic 20)*
+**FR133:** A "to write" slot sits at the end of every response without a continuation, in Script and Graph: type or generate (Ctrl+Enter), with estimated, committed and actual cost *(NEW - Refonte Scène, Epic 20)*
+**FR134:** Generated options are browsed in place (‹ 1/N ›): keep, retry, variant, reject; generated text stays marked until the first edit *(NEW - Refonte Scène, Epic 20)*
+**FR135:** Rewriting a selected passage (Ctrl+K) is shown as an inline diff: accept (Tab), word by word (Ctrl+→), reject (Escape) *(NEW - Refonte Scène, Epic 20)*
+**FR136:** Graph with text cards, left-to-right flow, one port per response, 4 outputs per test, off-screen links through the gutter; three zoom tiers (write, read, locate) *(NEW - Refonte Scène, Epic 20)*
+**FR137:** Status bar: save state, problems, context, tokens, model, words, running batch; each item opens its detail in place *(NEW - Refonte Scène, Epic 20)*
+**FR138:** Computable diagnostics recomputed continuously and marked in place; on-demand LLM review (quality, slop, language) as margin notes *(NEW - Refonte Scène, Epic 20)*
+**FR139:** Paper theme, line size, reading measure and Focus mode adjustable without a save action *(NEW - Refonte Scène, Epic 20)*
+**FR140:** Versions of a line can be viewed as diffs and restored; variants and provenance persist across sessions *(NEW - Refonte Scène, Epic 20)*
+**FR141:** Users fill the empty continuations of a scope (response, line, level, scene) in batch, with total estimated cost first, then review them in sequence *(NEW - Refonte Scène, Epic 20)*
+**FR142:** Mechanics chips (traits, skills, flags) only accept values from the Unity catalogues, with autocompletion and global rename *(NEW - Refonte Scène, Epic 20)*
+**FR143:** A scene takes the tint of its place and shows its characters' portraits and a cover, without tinting body text or the action blue; a scene without images stays complete *(NEW - Refonte Scène, Epic 20)*
+**FR144:** On a generated line, users open a discussion with the AI that wrote it: original context and output, reasoning summary when available, questions and answers with their cost *(NEW - Refonte Scène, Epic 20; back-end PR #103)*
+**FR145:** From the command palette, users ask a question about the interface or the GDD and get a sourced answer in the same discussion drawer *(NEW - Refonte Scène, Epic 20)*
 
 ### NonFunctional Requirements
 
@@ -291,7 +306,10 @@ Exigences de conception issues de la spec UX (`ux-design-specification/`), de la
 - FR122-128 → Epic 18: Édition in-situ du dialogue dans le nœud
 
 **Canvas-first (surfaces à la demande):**
-- FR129-130 → Epic 19: Canvas-first — surfaces à la demande, récupération de l'espace graphe
+- FR129-130 → Epic 19 (remplacée le 2026-11-20) : couvertes par Epic 20 (FR133, FR137, story 20.15)
+
+**Refonte « Scène » (prioritaire):**
+- FR131-145 → Epic 20: Refonte « Scène » — une scène, un texte, trois vues
 
 **NFR Coverage** (mise à jour 2026-10-01 — la version précédente omettait les Epics 16 à 19 et ne mentionnait jamais NFR-R3) :
 
