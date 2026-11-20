@@ -9,6 +9,7 @@ import { useGraphStore } from '../store/graphStore'
 import { useGraphViewStore } from '../store/graphViewStore'
 import { exportGraphToPNG, exportGraphToSVG } from '../utils/graphExport'
 import { useKeyboardShortcuts } from './useKeyboardShortcuts'
+import { GRAPH_SHORTCUT_KEYS } from '../components/graph/graphToolbarConstants'
 import { getErrorMessage } from '../types/errors'
 import type { UseToastFn } from '../components/shared'
 import type { GraphLayoutSpacingMode } from '../store/types/graphState'
@@ -255,7 +256,7 @@ export function useGraphToolbar(
   useKeyboardShortcuts(
     [
       {
-        key: 'ctrl+g',
+        key: GRAPH_SHORTCUT_KEYS.aiGeneration,
         handler: (e) => {
           e.preventDefault()
           if (selectedNodeId && !isGraphLoading && !isLoadingDialogue && activeDialogueFilename) {
@@ -266,7 +267,7 @@ export function useGraphToolbar(
         enabled: !!selectedNodeId && !isGraphLoading && !isLoadingDialogue && !!activeDialogueFilename,
       },
       {
-        key: 'ctrl+j',
+        key: GRAPH_SHORTCUT_KEYS.jumpToNode,
         handler: (e) => {
           e.preventDefault()
           setShowJumpToNodeModal(true)
@@ -287,7 +288,7 @@ export function useGraphToolbar(
         enabled: () => !!useGraphStore.getState().selectedNodeId,
       },
       {
-        key: 'ctrl+shift+f',
+        key: GRAPH_SHORTCUT_KEYS.search,
         handler: (e) => {
           e.preventDefault()
           setShowSearchBar((v) => {
@@ -299,7 +300,7 @@ export function useGraphToolbar(
         enabled: true,
       },
       {
-        key: 'ctrl+alt+f',
+        key: GRAPH_SHORTCUT_KEYS.filters,
         handler: (e) => {
           e.preventDefault()
           setShowFiltersPanel((v) => !v)
@@ -335,7 +336,7 @@ export function useGraphToolbar(
         enabled: () => !isLoadingDialogue && useGraphStore.getState().canRedo(),
       },
       {
-        key: 'ctrl+0',
+        key: GRAPH_SHORTCUT_KEYS.fitView,
         handler: (e) => {
           e.preventDefault()
           if (reactFlowInstance) reactFlowInstance.fitView({ padding: 0.2, duration: 200 })

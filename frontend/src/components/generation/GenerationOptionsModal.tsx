@@ -17,6 +17,7 @@ import { theme } from '../../theme'
 import { StyledSelect } from '../shared/StyledSelect'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
 import { getAllShortcuts, formatShortcut } from '../../hooks/useKeyboardShortcuts'
+import { collectHelpShortcuts, type ShortcutHelpEntry } from '../shared/generalShortcuts'
 import * as configAPI from '../../api/config'
 import { type BudgetResponse } from '../../api/costs'
 import {
@@ -866,37 +867,10 @@ function GeneralTab({
  * Onglet affichant les raccourcis clavier disponibles.
  */
 function ShortcutsTab() {
-  const [shortcuts, setShortcuts] = useState<Array<{ key: string; description: string }>>([])
+  const [shortcuts, setShortcuts] = useState<ShortcutHelpEntry[]>([])
 
   useEffect(() => {
-    // Récupérer les raccourcis dynamiques enregistrés
-    const dynamicShortcuts = getAllShortcuts()
-    const defaultShortcuts = [
-      { key: 'ctrl+enter', description: 'Générer un dialogue' },
-      { key: 'alt+s', description: 'Échanger les personnages (swap)' },
-      { key: 'ctrl+k', description: 'Ouvrir la palette de commandes' },
-      { key: '/', description: 'Filtrer dans le panneau de gauche' },
-      { key: 'ctrl+e', description: 'Exporter le dialogue Unity' },
-      { key: 'ctrl+n', description: 'Nouveau dialogue (réinitialiser)' },
-      { key: 'ctrl+,', description: 'Ouvrir les options' },
-      { key: 'escape', description: 'Fermer les modals/panels' },
-      { key: 'ctrl+/', description: 'Afficher l\'aide des raccourcis' },
-      { key: 'ctrl+1', description: 'Naviguer vers Dashboard' },
-      { key: 'ctrl+2', description: 'Naviguer vers Dialogues Unity' },
-      { key: 'ctrl+3', description: 'Naviguer vers Usage/Statistiques' },
-    ]
-    
-    const combined = [...defaultShortcuts, ...dynamicShortcuts]
-    
-    // Dédupliquer par key (garder la première occurrence)
-    const unique = new Map<string, { key: string; description: string }>()
-    combined.forEach(s => {
-      if (!unique.has(s.key)) {
-        unique.set(s.key, s)
-      }
-    })
-    
-    setShortcuts(Array.from(unique.values()).sort((a, b) => a.key.localeCompare(b.key)))
+    setShortcuts(collectHelpShortcuts(getAllShortcuts()).sort((a, b) => a.key.localeCompare(b.key)))
   }, [])
 
   return (
