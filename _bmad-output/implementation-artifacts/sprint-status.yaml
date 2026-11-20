@@ -236,10 +236,11 @@ development_status:
   15-5-mode-override-lock: backlog
   15-6-fallback-gracieux-tests-e2e: backlog
   epic-15-retrospective: optional
+  # 2026-11-20 : epic-18 intégrée à epic-20 (tranche 1 bis : 18-4 à 18-9, 18-11 ; 18-10 dans 20-18 ; 18-1 à 18-3 remplacées)
   epic-18: backlog
-  18-1-densite-adaptative-replique-integrale-et-titre-rendu-fr123: backlog
-  18-2-reponses-pj-affichees-en-lignes-dans-le-noeud-fr124: backlog
-  18-3-synchro-descendante-store-vers-panneau-sur-les-champs-texte-fr127: backlog
+  18-1-densite-adaptative-replique-integrale-et-titre-rendu-fr123: backlog  # remplacée par epic-20
+  18-2-reponses-pj-affichees-en-lignes-dans-le-noeud-fr124: backlog  # remplacée par epic-20
+  18-3-synchro-descendante-store-vers-panneau-sur-les-champs-texte-fr127: backlog  # remplacée par epic-20
   18-4-annulation-updatenode-transactionnel-et-coalescence-undo-fr126: backlog
   18-5-editer-la-replique-pnj-dans-le-noeud-fr122-fr126: backlog
   18-6-editer-le-texte-des-reponses-pj-dans-le-noeud-fr124-fr126: backlog
@@ -249,7 +250,34 @@ development_status:
   18-10-edition-in-situ-au-tactile-sur-viewport-etroit-fr128: backlog
   18-11-non-regression-perf-export-selection-multiple-noeuds-pending: backlog
   epic-18-retrospective: optional
-  epic-19: backlog
+  epic-19: backlog  # remplacée par epic-20 (2026-11-20)
+  # Epic 20 — Refonte « Scène », prioritaire (validée le 2026-11-20). Ordre d'exécution : tranche 1 et tranche 1 bis
+  # (stories 18-x ci-dessus) en parallèle, puis tranches 2, 3, 4. Détail : planning-artifacts/epics/epic-20.md
+  epic-20: backlog
+  20-1-conversion-texte-blocs-et-export-golden-en-ci: backlog
+  20-2-preuve-de-performance-cartes-360-flux-lr-paliers: backlog
+  20-3-tokens-en-variables-css-theme-nuit: backlog
+  20-4-fiche-de-scene-dans-le-document-fr131: backlog
+  20-5-enveloppe-entete-classeur-barre-de-vue-barre-detat-fr137: backlog
+  20-6-vue-script-fr132: backlog
+  20-7-graphe-cartes-de-texte-et-flux-gauche-droite-fr136: backlog
+  20-8-tests-en-sorties-et-liens-hors-champ-fr136: backlog
+  20-9-lentille-technique-et-popovers-ancres-fr136: backlog
+  20-10-etats-transverses: backlog
+  20-11-emplacement-a-ecrire-et-options-sur-place-fr133-fr134: backlog
+  20-12-remplir-et-revoir-en-serie-fr141: backlog
+  20-13-reecrire-une-selection-fr135: backlog
+  20-14-diagnostics-relecture-aide-clavier-fr138: backlog
+  20-21-discuter-dune-replique-avec-lia-fr144: backlog
+  20-22-demander-depuis-la-palette-interface-et-gdd-fr145: backlog
+  20-15-retrait-du-panneau-de-droite: backlog
+  20-16-papier-taille-mesure-focus-fr139: backlog
+  20-17-journal-dedition-versions-variantes-provenance-fr140: backlog
+  20-18-telephone-tactile-et-petits-gestes: backlog
+  20-19-mecanique-tiree-des-catalogues-fr142: backlog
+  20-20-ambiance-teinte-de-lieu-portraits-couvertures-fr143: backlog
+  20-23-notes-dintention-experience-mesuree-fr144: backlog
+  epic-20-retrospective: optional
 
 action_items:
   - epic: 7

@@ -1,6 +1,6 @@
 # Refonte « Scène » — architecture et migration
 
-**Statut : proposition du 2026-11-20, non validée.** Compagnon technique de
+**Statut : validée le 2026-11-20, prioritaire** (epic 20, démarrée tout de suite). Compagnon technique de
 [`docs/design/refonte-scene/README.md`](../design/refonte-scene/README.md). Epic proposée :
 [`epic-20.md`](../../_bmad-output/planning-artifacts/epics/epic-20.md).
 
@@ -50,6 +50,9 @@ PNJ et le PJ à partir du graphe.
   `T’vok`, plus un locuteur vide sur une réplique ajoutée à la main) et proposées à l'auteur, jamais réécrites sans lui.
 - Additif : un document sans `scene` reste valide ; à l'ouverture, la fiche est **déduite une fois** par
   `resolveGraphGenerationDramatis`, montrée dans la fiche pour correction, puis enregistrée (migration paresseuse).
+- **Une scène est enregistrée dès sa création** (ALT+N crée le document avant toute génération). Effet de bord voulu :
+  la première réplique générée est rattachée à son appel LLM, ce qui lève la limite « nœud START de Générer sans
+  dialogue » de la PR #103 (`docs/architecture/conversations-ia.md`).
 - Toute génération (premier nœud, suite, lot, réécriture) lit la fiche. Le `contextStore` global garde le catalogue
   GDD et les sélections **hors scène** (page Fiches du GDD) ; ses lecteurs dans le chemin de génération sont à
   inventorier en story 20.4 (critère : plus aucun appel de génération ne lit les sélections globales).
@@ -185,6 +188,46 @@ Pendant la tranche 2, `GraphInspector` et `NodeEditorPanel` restent montables de
 (`uiLayoutStore.legacyInspector`, défaut : faux) avec un compteur local d'ouvertures. Le retrait définitif (story
 20.15) n'a lieu qu'après un mois d'usage avec un compteur à zéro, ou sur décision de l'auteur.
 
+### A15 — Conversations avec l'IA : intégration front (PR #103)
+
+**Socle.** La PR #103 livre le back-end : `POST/GET/DELETE /api/v1/ai-conversations`, `POST …/{id}/messages`, sujets
+enfichables (`dialogue_node` d'abord), instantané de la génération (contexte, sortie, résumé de réflexion quand OpenAI
+le fournit), nœud tel qu'il est aujourd'hui, budget, 40 messages, tours en série, invité en lecture seule. Limite
+mesurée : l'IA ne relit pas son raisonnement brut ; une explication après coup est une reconstruction.
+
+**Décision front.** Une seule surface, le **tiroir Discussion** (tiroir temporaire de 380 px, même famille que
+Contexte, Versions et Lot ; ÉCHAP ferme ; jamais de panneau permanent), avec trois entrées :
+
+| Entrée | Sujet | Où | Story |
+|---|---|---|---|
+| « Pourquoi ? » sur une réplique générée | `dialogue_node` (livré) | marge du bloc (Script), pied de carte (Graphe), palette | 20.21 |
+| « Demander » depuis la palette | `ui_help`, `gdd_query` (résolveurs à écrire) | CTRL+K « Rechercher, aller à, demander… » | 20.22 |
+| « Signaler un problème » | `code_assist` | menu « ? » | **hors epic** : epic à part (agent de code isolé, PR, revue humaine, jamais d'exécution depuis l'API de prod) |
+
+Ordre du tiroir pour une réplique : (1) ce qui a été généré, en diff avec la réplique actuelle (composant de Versions,
+A12), modèle et date ; (2) le résumé de réflexion, replié, quand il existe ; (3) la ligne fixe sur la limite de
+reconstruction ; (4) le fil de messages, chaque réponse avec son coût réel (`cost_usd`) ; (5) le champ, verrouillé
+pendant un tour. Une réplique qui a des discussions porte une marque « ◆ n » dans sa marge ; le tiroir Versions les
+liste. Les conversations restent côté serveur (SQLite de la PR #103), pas dans le journal d'édition.
+
+**Notes d'intention (option C de l'étude).** Seule source d'un « pourquoi » fiable, mais elle change le contrat de
+génération. Décision : expérience mesurée d'abord (story 20.23, juge à l'aveugle sur 20 suites) ; si la qualité tient,
+l'intention est rangée dans le journal d'édition (A12), jamais exportée, et montrée en tête du tiroir.
+
+### A16 — Ambiance : teintes de lieu et images
+
+- **Teintes** : une table de huit ambiances (même clarté et même saturation en OKLCH, hors de la zone du bleu
+  d'action), choisie par lieu dans la fiche de scène ; publiée en variables CSS (A8), déclinée en Papier à clarté 0,50.
+  Elles ne touchent que les fonds (bandeau, zone de lecture), les points et les puces de lieu, jamais le texte courant.
+- **Images** : portraits et illustrations de lieu copiés à la synchro Notion (les URL de fichiers Notion expirent),
+  retouchés une seule fois à l'import (même désaturation et assombrissement pour toutes, fondus intégrés), stockés avec
+  les fiches en WebP (portrait 192 px, couverture 960 × 540, 200 Ko au plus) et servis par l'API avec cache long.
+  Aucun filtre, masque, flou ni animation CSS en direct.
+- **Repli** : sans portrait, pastille de couleur avec initiales ; sans lieu illustré, portrait du PNJ sur la teinte du
+  lieu ; sans rien, « lieu et portrait à renseigner ».
+- **Graphe** : médaillon de 20 px au palier « écrire » seulement ; rien aux paliers « lire » et « situer ».
+- Maquettes : canvas « Ambiance » <https://claude.ai/artifact/GVZfj6RsZqGQGwEg8X5SxN> (deux écrans, notés 8,1/10).
+
 ### A11 (pari) — Document collaboratif (Yjs)
 
 Gains : sauvegarde, annulation par auteur, hors ligne et co-édition sans 409. Coût : refonte de la persistance. **Ne
@@ -194,17 +237,18 @@ co-édition actuelle (partage, permissions) montre ce besoin.
 ## 3. Ordre et dépendances
 
 ```
-Epic 18 (≈ 16 sessions, prérequis de la tranche 2)
-Tranche 1 — fondation, en parallèle d'Epic 18 (rien de visible ne casse)        ≈ 5 sessions   20.1–20.3
+Tranche 1 — fondation, tout de suite                                             ≈ 5 sessions   20.1–20.3
   A3 conversion + fixtures CI · preuve de perf A10 · A8 variables CSS
+Tranche 1 bis — fondation d'écriture (stories d'Epic 18), en parallèle           ≈ 12 sessions  18.4–18.9, 18.11
+  A2 champ unique · annulation transactionnelle · clavier composite · indicateur d'enregistrement
 Tranche 2 — la scène                                                             ≈ 15 sessions  20.4–20.10
   A1 fiche → enveloppe → A4 Script → A9 cartes et flux LR → tests en sorties → lentille et popovers → états
   A14 panneau derrière un drapeau
-Tranche 3 — l'IA dans le texte                                                    ≈ 10 sessions  20.11–20.15
-  A5 emplacement et options · A13 lots · rewrite-span · A6 diagnostics et aide clavier · retrait du panneau
-Tranche 4 — confort                                                              ≈ 8 sessions   20.16–20.19
-  Papier, Focus, mesure · A12 journal (versions, variantes, provenance) · téléphone · A7 catalogues
-Chemin critique : Epic 18 puis tranches 2 → 3 → 4 ≈ 49 sessions (tranche 1 en parallèle d'Epic 18).
+Tranche 3 — l'IA dans le texte                                                    ≈ 15 sessions  20.11–20.15, 20.21, 20.22
+  A5 emplacement et options · A13 lots · rewrite-span · A6 diagnostics · A15 discussions · retrait du panneau
+Tranche 4 — confort                                                              ≈ 15 sessions  20.16–20.20, 20.23
+  Papier, Focus · A12 journal · téléphone et tactile · A7 catalogues · A16 ambiance · notes d'intention
+Chemin critique : tranche 1 bis → 2 → 3 → 4 ≈ 57 sessions (tranche 1 en parallèle de la tranche 1 bis).
 ```
 
 ## 4. Risques et parades
