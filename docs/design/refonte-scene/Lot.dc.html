@@ -82,21 +82,21 @@
         </div>
         <div style="display: flex; align-items: center; gap: 9px; min-width: 0">
           <span style="display: inline-flex; align-items: center; gap: 7px; height: 26px; box-sizing: border-box; padding: 0 10px 0 4px; border-radius: 99px; border: 1px solid {{t.chip}}; flex: none">
-            <span style="width: 18px; height: 18px; border-radius: 99px; background: {{t.spk}}; color: {{t.onSpk}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px">GT</span>
+            <span style="width: 18px; height: 18px; border-radius: 99px; background: {{t.spk}}; color: {{t.onSpk}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px">GT</span>
             <span style="font-size: 12.5px; color: {{t.body}}">Grish T'vok</span>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em; color: {{t.label}}">PNJ</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.label}}">PNJ</span>
           </span>
           <span style="display: inline-flex; align-items: center; gap: 7px; height: 26px; box-sizing: border-box; padding: 0 10px 0 4px; border-radius: 99px; border: 1px solid {{t.chip}}; flex: none">
-            <span style="width: 18px; height: 18px; border-radius: 99px; background: {{t.raised}}; color: {{t.body}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px">U</span>
+            <span style="width: 18px; height: 18px; border-radius: 99px; background: {{t.raised}}; color: {{t.body}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px">U</span>
             <span style="font-size: 12.5px; color: {{t.body}}">Uresaïr</span>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em; color: {{t.label}}">PJ</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.label}}">PJ</span>
           </span>
           <span style="display: inline-flex; align-items: center; gap: 7px; height: 26px; box-sizing: border-box; padding: 0 10px; border-radius: 99px; border: 1px solid {{t.chip}}; flex: none">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em; color: {{t.label}}">LIEU</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.label}}">LIEU</span>
             <span style="font-size: 12.5px; color: {{t.body}}">Caravane-atelier</span>
           </span>
           <span aria-hidden="true" style="width: 1px; height: 16px; background: {{t.hair2}}; flex: none"></span>
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: {{t.label}}; flex: none">BRIEF</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}; flex: none">BRIEF</span>
           <span style="min-width: 0; font-size: 12.5px; color: {{t.sec}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Grish propose de réparer ce qui souffre ; Uresaïr garde sa distance rituelle et refuse de livrer sa mémoire.</span>
         </div>
       </section>
@@ -130,7 +130,7 @@
                     <div style="display: flex; align-items: center; gap: 9px; margin-bottom: 11px">
                       <span aria-hidden="true" style="width: 7px; height: 7px; border-radius: 99px; background: {{t.spk}}"></span>
                       <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.09em; color: {{t.sec}}">GRISH T'VOK</span>
-                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.06em; color: {{t.ok}}">{{b.status}}</span>
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.ok}}">{{b.status}}</span>
                       <span style="flex: 1"></span>
                       <span style="font-size: 12px; color: {{t.muted}}">{{b.title}}</span>
                     </div>
@@ -143,7 +143,7 @@
                       </sc-if>
                     </sc-for>
                     <div data-scroll="{{b.key}}" style="margin: 20px 0 34px">
-                      <span style="display: block; margin-bottom: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: {{t.label}}">{{b.who}}</span>
+                      <span style="display: block; margin-bottom: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">{{b.who}}</span>
                       <ol style="list-style: none; margin: 0; padding: 0; border-top: 1px solid {{t.hair}}">
                         <sc-for list="{{b.choices}}" as="c" hint-placeholder-count="3">
                           <li style="border-bottom: 1px solid {{t.hair}}; background: {{c.bg}}; box-shadow: {{c.rail}}">
@@ -154,16 +154,16 @@
                                 <sc-if value="{{c.full}}" hint-placeholder-val="{{true}}"><span style="display: block; font-size: 15px; line-height: 1.55; color: {{c.textColor}}">{{c.text}}</span></sc-if>
                                 <sc-if value="{{c.hasChips}}" hint-placeholder-val="{{false}}">
                                   <span style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px">
-                                    <sc-for list="{{c.chips}}" as="k" hint-placeholder-count="2"><span style="height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 99px; border: 1px solid {{t.chip}}; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{k.label}}</span></sc-for>
+                                    <sc-for list="{{c.chips}}" as="k" hint-placeholder-count="2"><span style="height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 99px; border: 1px solid {{t.chip}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{k.label}}</span></sc-for>
                                   </span>
                                 </sc-if>
                               </span>
-                              <span style="display: flex; align-items: center; gap: 7px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; line-height: 23px; color: {{c.metaColor}}; white-space: nowrap"><sc-if value="{{c.dotLot}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.accent}}"></span></sc-if><sc-if value="{{c.dotNow}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" class="pulse" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.accent}}"></span></sc-if><sc-if value="{{c.dotPend}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.pend}}"></span></sc-if>{{c.meta}}</span>
+                              <span style="display: flex; align-items: center; gap: 7px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; line-height: 23px; color: {{c.metaColor}}; white-space: nowrap"><sc-if value="{{c.dotLot}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.accent}}"></span></sc-if><sc-if value="{{c.dotNow}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" class="pulse" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.accent}}"></span></sc-if><sc-if value="{{c.dotPend}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.pend}}"></span></sc-if>{{c.meta}}</span>
                             </div>
                             <sc-if value="{{c.showOutcomes}}" hint-placeholder-val="{{false}}">
                               <div role="group" aria-label="État des quatre issues" style="display: flex; flex-wrap: wrap; gap: 5px; padding: 0 12px 12px 47px">
                                 <sc-for list="{{c.outs}}" as="o" hint-placeholder-count="4">
-                                  <span title="{{o.title}}" style="height: 24px; box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; padding: 0 9px; border-radius: 99px; border: 1px {{o.bstyle}} {{o.border}}; background: {{o.bg}}; color: {{o.color}}; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em">{{o.label}}</span>
+                                  <span title="{{o.title}}" style="height: 24px; box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; padding: 0 9px; border-radius: 99px; border: 1px {{o.bstyle}} {{o.border}}; background: {{o.bg}}; color: {{o.color}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em">{{o.label}}</span>
                                 </sc-for>
                               </div>
                             </sc-if>
@@ -200,36 +200,36 @@
                 <sc-if value="{{rvHasItem}}" hint-placeholder-val="{{true}}">
                   <div style="max-width: 680px; margin: 0 auto; padding: 9px 0 5px">
                     <div style="display: flex; flex-direction: column; gap: 7px; padding-bottom: 14px; border-bottom: 1px solid {{t.hair}}">
-                      <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 16px; line-height: 1.5; color: {{t.sec}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.09em; color: {{t.label}}">GRISH   </span>{{rv.parentEnd}}</p>
+                      <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 16px; line-height: 1.5; color: {{t.sec}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.09em; color: {{t.label}}">GRISH   </span>{{rv.parentEnd}}</p>
                       <div style="display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: baseline">
-                        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.09em; color: {{t.label}}">URESAÏR</span>
+                        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.09em; color: {{t.label}}">URESAÏR</span>
                         <span style="min-width: 0; font-size: 14.5px; line-height: 1.6">
                           <sc-if value="{{rv.respFull}}" hint-placeholder-val="{{true}}"><span style="color: {{t.body}}">{{rv.resp}}</span></sc-if>
                           <sc-if value="{{rv.respEmpty}}" hint-placeholder-val="{{false}}"><span style="font-style: italic; color: {{t.muted}}">Réponse vide</span></sc-if>
-                          <sc-if value="{{rv.hasTest}}" hint-placeholder-val="{{true}}"><span style="display: inline-flex; gap: 5px; margin-left: 9px; vertical-align: 1px"><span style="height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 99px; border: 1px solid {{t.chip}}; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{rv.test}}</span><span style="height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 99px; border: 1px solid {{rv.outColor}}; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; color: {{rv.outColor}}; white-space: nowrap">{{rv.out}}</span></span></sc-if>
+                          <sc-if value="{{rv.hasTest}}" hint-placeholder-val="{{true}}"><span style="display: inline-flex; gap: 5px; margin-left: 9px; vertical-align: 1px"><span style="height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 99px; border: 1px solid {{t.chip}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{rv.test}}</span><span style="height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 99px; border: 1px solid {{rv.outColor}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{rv.outColor}}; white-space: nowrap">{{rv.out}}</span></span></sc-if>
                         </span>
                       </div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 9px; margin: 14px 0 9px">
                       <span aria-hidden="true" style="width: 7px; height: 7px; border-radius: 99px; background: {{t.spk}}"></span>
                       <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.09em; color: {{t.sec}}">GRISH T'VOK</span>
-                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.06em; color: {{rv.stColor}}">{{rv.stLabel}}</span>
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{rv.stColor}}">{{rv.stLabel}}</span>
                       <span style="flex: 1"></span>
-                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.05em; color: {{t.muted}}">{{rv.meta}}</span>
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.muted}}">{{rv.meta}}</span>
                     </div>
                     <sc-if value="{{rv.hasGen}}" hint-placeholder-val="{{true}}">
                       <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 22px; line-height: 1.5; color: {{t.dia}}; opacity: {{rv.op}}"><sc-for list="{{rv.segs}}" as="s" hint-placeholder-count="2"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 16px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p>
                       <div style="margin-top: 14px; opacity: {{rv.op}}">
-                        <span style="display: block; margin-bottom: 7px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: {{t.label}}">{{rv.who}}</span>
+                        <span style="display: block; margin-bottom: 7px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">{{rv.who}}</span>
                         <ol style="list-style: none; margin: 0; padding: 0; border-top: 1px solid {{t.hair}}">
                           <sc-for list="{{rv.choices}}" as="c" hint-placeholder-count="3">
                             <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 9px; align-items: baseline; padding: 6px 12px 6px 10px; border-bottom: 1px solid {{t.hair}}">
                               <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{t.muted}}">{{c.num}}</span>
                               <span style="min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 9px; row-gap: 5px">
                                 <span style="font-size: 14.5px; line-height: 1.45; color: {{t.body}}">{{c.text}}</span>
-                                <sc-for list="{{c.chips}}" as="k" hint-placeholder-count="1"><span style="height: 18px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 99px; border: 1px solid {{t.chip}}; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{k.label}}</span></sc-for>
+                                <sc-for list="{{c.chips}}" as="k" hint-placeholder-count="1"><span style="height: 18px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 99px; border: 1px solid {{t.chip}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{k.label}}</span></sc-for>
                               </span>
-                              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{c.meta}}</span>
+                              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{c.meta}}</span>
                             </li>
                           </sc-for>
                         </ol>
@@ -267,10 +267,10 @@
           </sc-if>
 
           <div style="flex: none; display: flex; align-items: center; gap: 14px; padding: 9px 40px 11px; max-width: {{stripMax}}; box-sizing: border-box">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: {{t.label}}; flex: none">ÉTAT</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}; flex: none">ÉTAT</span>
             <div role="group" aria-label="État de la maquette" style="display: flex; flex: none; border: 1px solid {{t.ctrl}}; border-radius: 6px; overflow: hidden">
               <sc-for list="{{etats}}" as="e" hint-placeholder-count="3">
-                <button type="button" aria-pressed="{{e.on}}" onClick="{{e.pick}}" style="height: 24px; padding: 0 9px; border: none; border-left: {{e.sep}}; background: {{e.bg}}; color: {{e.color}}; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.08em; white-space: nowrap; cursor: pointer">{{e.label}}</button>
+                <button type="button" aria-pressed="{{e.on}}" onClick="{{e.pick}}" style="height: 24px; padding: 0 9px; border: none; border-left: {{e.sep}}; background: {{e.bg}}; color: {{e.color}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; white-space: nowrap; cursor: pointer">{{e.label}}</button>
               </sc-for>
             </div>
             <p style="margin: 0; min-width: 0; font-size: 12px; line-height: 1.45; color: #9a9aa4">Exemple : coût et durée par suite, heures, avancement du lot, textes des répliques générées. Les comptes de suites viennent de la scène réelle.</p>
@@ -285,14 +285,14 @@
                 <span aria-hidden="true" style="margin-top: 4px; width: 9px; height: 9px; border-radius: 99px; background: {{t.accent}}"></span>
                 <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
                   <span style="font-size: 12.5px; color: {{t.strong}}">Ouverture</span>
-                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.04em; color: {{t.muted}}">RÉPONSE 01 SUR 4</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">RÉPONSE 01 SUR 4</span>
                 </span>
               </li>
               <li style="display: grid; grid-template-columns: 14px minmax(0, 1fr); column-gap: 9px">
                 <span aria-hidden="true" style="margin-top: 4px; width: 9px; height: 9px; border-radius: 99px; background: {{t.accent}}"></span>
                 <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
                   <span style="font-size: 12.5px; color: {{t.strong}}">Réussite</span>
-                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.04em; color: {{t.muted}}">{{filReussite}}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">{{filReussite}}</span>
                 </span>
               </li>
             </ol>
@@ -304,7 +304,7 @@
             </dl>
 
             <sc-if value="{{filTrigger}}" hint-placeholder-val="{{true}}">
-              <button type="button" class="lk" onClick="{{openDrawer}}" aria-expanded="{{drawerOn}}" style="display: flex; align-items: center; justify-content: space-between; color: {{t.body}}">Remplir les suites ›<span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.05em; color: {{t.label}}">CTRL+MAJ+↵</span></button>
+              <button type="button" class="lk" onClick="{{openDrawer}}" aria-expanded="{{drawerOn}}" style="display: flex; align-items: center; justify-content: space-between; color: {{t.body}}">Remplir les suites ›<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">CTRL+MAJ+↵</span></button>
             </sc-if>
 
             <sc-if value="{{filLot}}" hint-placeholder-val="{{false}}">
@@ -325,19 +325,19 @@
                 </sc-if>
                 <div style="display: flex; gap: 9px; flex-wrap: wrap">
                   <sc-if value="{{canStop}}" hint-placeholder-val="{{true}}"><button type="button" class="ob" onClick="{{stop}}" style="height: 28px; padding: 0 10px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Interrompre</button></sc-if>
-                  <sc-if value="{{canResume}}" hint-placeholder-val="{{false}}"><button type="button" class="ob" onClick="{{resume}}" style="height: 28px; display: flex; align-items: center; gap: 7px; padding: 0 10px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Reprendre<span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.05em; color: {{t.label}}">{{restLabel}}</span></button></sc-if>
+                  <sc-if value="{{canResume}}" hint-placeholder-val="{{false}}"><button type="button" class="ob" onClick="{{resume}}" style="height: 28px; display: flex; align-items: center; gap: 7px; padding: 0 10px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Reprendre<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">{{restLabel}}</span></button></sc-if>
                   <button type="button" class="lk" onClick="{{openDrawer}}" style="font-size: 12px">Détail ›</button>
                 </div>
               </section>
             </sc-if>
 
             <span style="flex: 1"></span>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.05em; line-height: 1.5; color: {{t.label}}">{{hint1}}<br>CTRL+CLIC · OUVRIR DANS LE GRAPHE</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; line-height: 1.5; color: {{t.label}}">{{hint1}}<br>CTRL+CLIC · OUVRIR DANS LE GRAPHE</span>
           </sc-if>
 
           <sc-if value="{{review}}" hint-placeholder-val="{{false}}">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">{{queueTitle}}</span>
-            <div style="display: flex; flex-direction: column; gap: 5px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.05em; color: {{t.sec}}">
+            <div style="display: flex; flex-direction: column; gap: 5px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.sec}}">
               <span style="display: flex; align-items: center; gap: 7px"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.pend}}"></span>{{qPend}}</span>
               <span style="display: flex; align-items: center; gap: 7px"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.ok}}"></span>{{qKept}}</span>
               <span style="display: flex; align-items: center; gap: 7px"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.err}}"></span>{{qRej}}</span>
@@ -346,17 +346,17 @@
               <sc-for list="{{queue}}" as="q" hint-placeholder-count="6">
                 <li data-q="{{q.mark}}" style="border-bottom: 1px solid {{t.hair}}">
                   <button type="button" class="qi" onClick="{{q.pick}}" aria-current="{{q.cur}}" style="width: 100%; display: grid; grid-template-columns: 22px minmax(0, 1fr) 8px; column-gap: 7px; align-items: center; padding: 6px 20px 6px 18px; border: none; background: {{q.bg}}; box-shadow: {{q.rail}}; text-align: left; font-family: inherit; color: inherit; cursor: pointer">
-                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: {{t.muted}}">{{q.n}}</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{t.muted}}">{{q.n}}</span>
                     <span style="display: flex; flex-direction: column; gap: 1px; min-width: 0">
                       <span style="font-size: 12.5px; color: {{q.tcolor}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{q.title}}</span>
-                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.04em; color: {{t.muted}}; white-space: nowrap">{{q.sub}}</span>
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}; white-space: nowrap">{{q.sub}}</span>
                     </span>
                     <span aria-label="{{q.aria}}" style="width: 6px; height: 6px; border-radius: 99px; background: {{q.dot}}"></span>
                   </button>
                 </li>
               </sc-for>
             </ol>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.05em; line-height: 1.6; color: {{t.label}}">J / K · PASSER<br>G · GARDER   R · REJETER</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; line-height: 1.6; color: {{t.label}}">J / K · PASSER<br>G · GARDER   R · REJETER</span>
           </sc-if>
         </aside>
       </div>
@@ -370,7 +370,7 @@
     <span>≈ 12 500 TOKENS / RÉPLIQUE</span>
     <button type="button" class="sb" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: {{t.muted}}; cursor: pointer">GPT-6.2 SOL ▴</button>
     <sc-if value="{{sbIdle}}" hint-placeholder-val="{{true}}">
-      <button type="button" onClick="{{toggleDrawer}}" aria-expanded="{{drawerOn}}" aria-controls="lot" style="height: 20px; display: flex; align-items: center; gap: 9px; margin: 0 -9px; padding: 0 9px; border: none; border-radius: 6px; background: {{sbBg}}; font: inherit; letter-spacing: inherit; color: {{sbColor}}; cursor: pointer">209 SUITES À ÉCRIRE<span style="font-size: 9.5px; color: {{t.label}}">CTRL+MAJ+↵</span><span style="color: {{t.muted}}">{{sbCaret}}</span></button>
+      <button type="button" onClick="{{toggleDrawer}}" aria-expanded="{{drawerOn}}" aria-controls="lot" style="height: 20px; display: flex; align-items: center; gap: 9px; margin: 0 -9px; padding: 0 9px; border: none; border-radius: 6px; background: {{sbBg}}; font: inherit; letter-spacing: inherit; color: {{sbColor}}; cursor: pointer">209 SUITES À ÉCRIRE<span style="font-size: 10px; color: {{t.label}}">CTRL+MAJ+↵</span><span style="color: {{t.muted}}">{{sbCaret}}</span></button>
     </sc-if>
     <sc-if value="{{sbLot}}" hint-placeholder-val="{{false}}">
       <span style="display: flex; align-items: center; gap: 9px">
@@ -397,7 +397,7 @@
       <div style="flex: none; padding: 20px 20px 14px; display: flex; flex-direction: column; gap: 9px; border-bottom: 1px solid {{t.hair}}">
         <div style="display: flex; align-items: center; justify-content: space-between">
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{dLabelColor}}">{{dLabel}}</span>
-          <button type="button" class="x" onClick="{{closeDrawer}}" aria-label="Fermer le tiroir" style="display: flex; align-items: center; gap: 7px; border: none; background: transparent; padding: 0; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; color: {{t.muted}}; cursor: pointer">ÉCHAP<span aria-hidden="true" style="font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 16px; line-height: 1">×</span></button>
+          <button type="button" class="x" onClick="{{closeDrawer}}" aria-label="Fermer le tiroir" style="display: flex; align-items: center; gap: 7px; border: none; background: transparent; padding: 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}; cursor: pointer">ÉCHAP<span aria-hidden="true" style="font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 16px; line-height: 1">×</span></button>
         </div>
         <h2 style="margin: 0; font-size: 17px; font-weight: 500; line-height: 1.3; color: {{t.strong}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 400">{{dNum}}</span> {{dTitle}}</h2>
         <p style="margin: 0; font-size: 12.5px; line-height: 1.45; color: {{t.sec}}"><sc-for list="{{dSub}}" as="m" hint-placeholder-count="1"><sc-if value="{{m.n}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 0.9em">{{m.t}}</span></sc-if><sc-if value="{{m.w}}" hint-placeholder-val="{{true}}"><span>{{m.t}}</span></sc-if></sc-for></p>
@@ -406,8 +406,8 @@
       <sc-if value="{{dSet}}" hint-placeholder-val="{{true}}">
         <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 14px 20px 14px">
           <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 5px">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: {{t.sec}}">PORTÉE</span>
-            <span style="display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.06em; color: {{t.muted}}"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.accent}}"></span>MARQUÉES DANS LE SCRIPT</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.sec}}">PORTÉE</span>
+            <span style="display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.accent}}"></span>MARQUÉES DANS LE SCRIPT</span>
           </div>
           <div role="radiogroup" aria-label="Portée du lot" style="display: flex; flex-direction: column; margin: 0 -9px">
             <sc-for list="{{scopes}}" as="sc" hint-placeholder-count="4">
@@ -415,14 +415,14 @@
                 <input class="inp" type="radio" name="portee" checked="{{sc.on}}" onChange="{{sc.pick}}">
                 <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
                   <span style="font-size: 13.5px; line-height: 1.35; color: {{sc.color}}"><sc-for list="{{sc.name}}" as="m" hint-placeholder-count="1"><sc-if value="{{m.n}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 0.9em">{{m.t}}</span></sc-if><sc-if value="{{m.w}}" hint-placeholder-val="{{true}}"><span>{{m.t}}</span></sc-if></sc-for></span>
-                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.05em; color: {{t.muted}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{sc.sub}}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.muted}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{sc.sub}}</span>
                 </span>
                 <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; line-height: 18px; color: {{sc.color}}; white-space: nowrap">{{sc.n}}<span style="color: {{t.muted}}">{{sc.of}}</span></span>
               </label>
             </sc-for>
           </div>
 
-          <div style="margin: 14px 0 5px; padding-top: 14px; border-top: 1px solid {{t.hair}}; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: {{t.sec}}">AFFINER</div>
+          <div style="margin: 14px 0 5px; padding-top: 14px; border-top: 1px solid {{t.hair}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.sec}}">AFFINER</div>
           <div style="display: flex; flex-direction: column; margin: 0 -9px">
             <sc-for list="{{filters}}" as="f" hint-placeholder-count="2">
               <label class="opt" style="display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; column-gap: 11px; align-items: start; padding: 7px 9px; border-radius: 6px; cursor: pointer; opacity: {{f.op}}">
@@ -454,17 +454,17 @@
         </div>
 
         <div style="flex: none; border-top: 1px solid {{t.hair}}; padding: 14px 20px; display: flex; flex-direction: column; gap: 9px">
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: {{t.sec}}">CE QUI PARTIRA</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.sec}}">CE QUI PARTIRA</span>
           <dl style="margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: 5px 14px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.04em">
-            <dt style="font-size: 9.5px; letter-spacing: 0.1em; color: {{t.muted}}">SUITES</dt>
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">SUITES</dt>
             <dd style="margin: 0; font-size: 11px; color: {{t.strong}}">{{sumN}}<span style="color: {{t.muted}}">{{sumParents}}</span></dd>
-            <dt style="font-size: 9.5px; letter-spacing: 0.1em; color: {{t.muted}}">TOKENS</dt>
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">TOKENS</dt>
             <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{sumTokens}}<span style="color: {{t.muted}}">{{sumTokDetail}}</span></dd>
-            <dt style="font-size: 9.5px; letter-spacing: 0.1em; color: {{t.muted}}">COÛT</dt>
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">COÛT</dt>
             <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{sumCost}}<span style="color: {{t.muted}}">  EXEMPLE</span></dd>
-            <dt style="font-size: 9.5px; letter-spacing: 0.1em; color: {{t.muted}}">DURÉE</dt>
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">DURÉE</dt>
             <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{sumTime}}<span style="color: {{t.muted}}">  EXEMPLE</span></dd>
-            <dt style="font-size: 9.5px; letter-spacing: 0.1em; color: {{t.muted}}">MODÈLE</dt>
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">MODÈLE</dt>
             <dd style="margin: 0"><button type="button" class="ob" aria-haspopup="listbox" aria-label="Modèle : GPT-6.2 Sol" style="height: 24px; display: inline-flex; align-items: center; gap: 9px; padding: 0 9px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: {{t.input}}; color: {{t.strong}}; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 12px; letter-spacing: 0; cursor: pointer">GPT-6.2 Sol<span style="color: {{t.muted}}; font-size: 10px">▾</span></button></dd>
           </dl>
           <p style="margin: 0; font-size: 12px; line-height: 1.5; color: {{t.sec}}">Une suite à la fois, un seul job. Chaque réplique arrive <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.pend}}; white-space: nowrap">À VALIDER</span>. Fermer l'app n'arrête rien ; après un redémarrage, la reprise ne refait que le reste.</p>
@@ -481,8 +481,8 @@
         <div style="flex: none; padding: 14px 20px 0; display: flex; flex-direction: column; gap: 9px">
           <span role="progressbar" aria-label="Avancement du lot" aria-valuemin="0" aria-valuemax="{{lotTotal}}" aria-valuenow="{{lotDone}}" style="height: 4px; border-radius: 2px; background: {{t.hair2}}; display: flex; overflow: hidden"><span style="width: {{lotPct}}; background: {{lotBar}}"></span></span>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: {{t.sec}}">{{dParentsLabel}}</span>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.06em; color: {{t.muted}}">ÉCRITES / DANS LE LOT</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.sec}}">{{dParentsLabel}}</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}">ÉCRITES / DANS LE LOT</span>
           </div>
         </div>
         <ol style="flex: 1; min-height: 0; overflow-y: auto; list-style: none; margin: 0; padding: 5px 20px 9px">
@@ -494,7 +494,7 @@
               <sc-if value="{{pa.wait}}" hint-placeholder-val="{{true}}"><span aria-label="En attente" style="width: 7px; height: 7px; box-sizing: border-box; border-radius: 99px; border: 1.5px solid {{t.chip2}}"></span></sc-if>
               <span style="display: flex; flex-direction: column; gap: 1px; min-width: 0">
                 <span style="font-size: 13px; color: {{pa.color}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{pa.title}}</span>
-                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.04em; color: {{t.muted}}">{{pa.via}}</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">{{pa.via}}</span>
               </span>
               <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: {{pa.color}}">{{pa.count}}</span>
             </li>
@@ -502,13 +502,13 @@
         </ol>
         <div style="flex: none; border-top: 1px solid {{t.hair}}; padding: 14px 20px; display: flex; flex-direction: column; gap: 9px">
           <dl style="margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: 5px 14px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.04em">
-            <dt style="font-size: 9.5px; letter-spacing: 0.1em; color: {{t.muted}}">À VALIDER</dt>
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">À VALIDER</dt>
             <dd style="margin: 0; font-size: 11px; color: {{t.pend}}">{{pendingCount}}</dd>
-            <dt style="font-size: 9.5px; letter-spacing: 0.1em; color: {{t.muted}}">TOKENS</dt>
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">TOKENS</dt>
             <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{lotTokDone}}<span style="color: {{t.muted}}">{{lotTokAll}}</span></dd>
-            <dt style="font-size: 9.5px; letter-spacing: 0.1em; color: {{t.muted}}">COÛT</dt>
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">COÛT</dt>
             <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{lotCostDone}}<span style="color: {{t.muted}}">{{lotCostAll}}</span></dd>
-            <dt style="font-size: 9.5px; letter-spacing: 0.1em; color: {{t.muted}}">RESTE</dt>
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">RESTE</dt>
             <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{lotRestTime}}</dd>
           </dl>
           <sc-if value="{{canResume}}" hint-placeholder-val="{{false}}">
@@ -855,10 +855,10 @@ class Component extends DCLogic {
       let meta = '';
       let metaColor = t.muted;
       if (empty) {
-        meta = pending ? '▲ VIDE · À VALIDER' : '▲ VIDE';
+        meta = pending ? '▲ RÉPONSE VIDE · À VALIDER' : '▲ RÉPONSE VIDE';
         metaColor = t.pend;
       } else if (c.test) {
-        if (written === 4) meta = isSel ? this.OUT[opt.out] : '4 ISSUES';
+        if (written === 4) meta = isSel ? this.OUT[opt.out] : '4 ISSUES · 4 ÉCRITES';
         else {
           const parts = ['4 ISSUES'];
           if (written) parts.push(written + (written > 1 ? ' ÉCRITES' : ' ÉCRITE'));
@@ -871,7 +871,7 @@ class Component extends DCLogic {
         }
       } else {
         const s0 = sts[0];
-        if (s0 === 'written') meta = '→ SUITE';
+        if (s0 === 'written') meta = 'SUITE ÉCRITE';
         else if (s0 === 'pending') { meta = 'À VALIDER'; metaColor = t.pend; }
         else if (s0 === 'now') { meta = 'EN COURS'; metaColor = t.accText; }
         else meta = 'SUITE À ÉCRIRE';
@@ -968,7 +968,7 @@ class Component extends DCLogic {
     const dl = (v, on) => (v > 0 ? '−' + v : '—');
     const filters = [
       { name: 'Ignorer les réponses vides', sub: "Sans réponse écrite, rien à prolonger.", on: s.sel.noEmpty, v: calc.dEmpty, toggle: () => setSel({ noEmpty: !self.state.sel.noEmpty }) },
-      { name: 'Ignorer les répliques jamais atteintes', sub: "Huit répliques sans chemin depuis l'Ouverture.", on: s.sel.noOrph, v: calc.dOrph, toggle: () => setSel({ noOrph: !self.state.sel.noOrph }) }
+      { name: 'Ignorer les répliques jamais atteintes', sub: "Huit répliques sans chemin depuis l'Ouverture ; 5 emplacements tombent sous les deux filtres.", on: s.sel.noOrph, v: calc.dOrph, toggle: () => setSel({ noOrph: !self.state.sel.noOrph }) }
     ].map((f) => Object.assign(f, { delta: dl(f.v), dColor: f.on && f.v ? t.body : t.muted, op: f.v ? 1 : 0.55 }));
     const depths = [0, 1, 2].map((d, i) => {
       const on = s.sel.depth === d;

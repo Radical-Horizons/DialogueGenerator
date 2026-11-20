@@ -32,9 +32,10 @@ Ouvrir les prototypes : configuration `design-refonte-scene` de `.claude/launch.
 ## Invariants
 
 - **Epic 18 est la fondation** : champ `<textarea>` (D4, intact : toute la réplique passe en texte brut à l'entrée,
-  aucun éditeur de blocs), clic simple (D1), ÉCHAP sort (D2), widget composite (D5). La refonte ne rouvre que la
-  largeur de carte (360 px au lieu de 280) et D3 (texte lisible hors sélection par paliers de zoom) — écarts au § 14
-  du README, tranchés par la story 20.2 (preuve de perf) ; si elle échoue, **plan B** : 280 px et D3 inchangée.
+  aucun éditeur de blocs), clic simple (D1), ÉCHAP sort (D2), widget composite (D5). La refonte ne rouvre que trois
+  points : largeur de carte (360 px au lieu de 280), D3 (texte lisible hors sélection par paliers de zoom) et la
+  hauteur maximale de carte (réplique bornée à 12 lignes, réponses jamais coupées) — écarts au § 14 du README,
+  tranchés par la story 20.2 (preuve de perf) ; si elle échoue, **plan B** : 280 px et D3 inchangée.
 - **Raccourcis en CTRL**, jamais ⌘ (utilisateur sous Windows). Le README du design system écrit encore ⌘ : traduire.
   Ni ALT seul (menus du navigateur sous Windows : la lentille est sur L), ni CTRL+1–9 (onglets : les vues sont sur
   ALT+1/2/3), ni CTRL+N (nouvelle fenêtre : nouvelle scène sur ALT+N).

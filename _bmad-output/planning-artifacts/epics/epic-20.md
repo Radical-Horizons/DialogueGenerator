@@ -1,6 +1,6 @@
 ## Epic 20: Refonte « Scène » — une scène, un texte, trois vues
 
-**Status:** proposition — **en attente de validation par l'auteur** (2026-11-20). À la validation : reporter FR131–FR141
+**Status:** proposition — **en attente de validation par l'auteur** (2026-11-20). À la validation : reporter FR131–FR142
 dans `requirements-inventory.md`, passer Epic 19 en *superseded*, puis `bmad-create-story` story par story, une
 session dédiée par story (les tailles ci-dessous sont en sessions de développement).
 
@@ -43,6 +43,7 @@ panneau ; voir à tout moment ce qui reste à écrire et ce que le modèle saura
 | **FR139** | Thème Papier, taille des répliques, mesure de lecture et mode Focus réglables sans enregistrement. | 20.16 |
 | **FR140** | Versions d'une réplique consultables en diff et restaurables ; variantes et provenance conservées d'une session à l'autre. | 20.17 |
 | **FR141** | Remplir en série les suites vides d'une portée (réponse, réplique, niveau, scène) avec coût total estimé avant, puis les revoir en série. | 20.12 |
+| **FR142** | Les puces mécaniques (traits, compétences, flags) ne prennent que des valeurs des catalogues Unity, avec autocomplétion et renommage partout. | 20.19 |
 
 FR129 et FR130 (Epic 19) sont couvertes par FR133, FR137 et le retrait du panneau (20.15).
 
@@ -113,7 +114,7 @@ de valeurs. (A8, NFR-A2)
 - **Given** les écrans déjà sur `redesignTokens` (88 fichiers au 2026-11-20), **When** ils lisent `var(--…)`,
   **Then** les captures avant / après des écrans 1c, 2a–2e sont identiques au pixel près (tolérance antialiasing).
 
-### Tranche 2 — la scène (après Epic 18, ≈ 14 sessions)
+### Tranche 2 — la scène (après Epic 18, ≈ 15 sessions)
 
 #### Story 20.4 : Fiche de scène dans le document — 2 sessions
 
@@ -129,10 +130,11 @@ parle jamais avec le PNJ d'une autre scène. (FR131, A1, README § 7 « Fiche de
   PNJ et PJ de la fiche de A (test de non-régression du 2026-11-19).
 - **Given** l'inventaire des lecteurs de `contextStore` dans le chemin de génération, **Then** plus aucun appel de
   génération ne lit les sélections globales (test qui échoue si l'un d'eux le fait).
-- **Given** le chargeur Unity, **When** on exporte, **Then** soit il ignore la clé `scene` (vérifié sur un vrai
-  import), soit l'export la retire — et les fixtures 20.1 restent identiques.
+- **Given** un document avec `scene`, **When** on exporte vers Unity, **Then** la clé est retirée (A1 : le contrat
+  publié la permettrait à la racine, mais le chargeur C# n'est pas dans le dépôt) et les fixtures 20.1 restent
+  identiques.
 
-#### Story 20.5 : Enveloppe — en-tête, classeur, barre de vue, barre d'état — 3 sessions
+#### Story 20.5 : Enveloppe — en-tête, classeur, barre de vue, barre d'état — 4 sessions
 
 **En tant qu'** auteur, **je veux** un seul écran par scène, **afin de** ne plus passer de Générer à Éditer à
 Graphe. (FR137, A14, README § 4, § 7, § 8, § 12, boards `Main`, `Bibliotheque`)
@@ -172,8 +174,14 @@ README § 7 « Carte de réplique », boards `Graphe`, `Carte`, `Paliers`)
   droite (dagre `LR`) et les positions précédentes sont conservées dans le layout (retour possible).
 - **Given** une carte au palier « écrire », **Then** elle fait 360 px (ou 280 px si plan B), réplique bornée à
   12 lignes avec fondu « LIRE TOUT », défilement interne une fois sélectionnée, un port par réponse.
-- **Given** les paliers « lire » (≈ 40–75 %) et « situer » (< 40 %), **Then** les cartes passent à 3 lignes puis au
+- **Given** les paliers « lire » (≈ 40–75 %) et « situer » (< 40 %), **Then** les cartes passent à 2 lignes puis au
   titre seul, et les répliques jamais atteintes sont encadrées au palier « situer ».
+- **Given** une carte plus haute que l'écran, **Then** ses réponses ne sont jamais coupées (chacune porte un port) ;
+  la sélectionner la fait défiler en vue, et le palier « lire » la montre entière (écart 3 à Epic 18, README § 14).
+- **Given** un chemin suivi en Script, **When** on passe en Graphe (ALT+2), **Then** la dernière réplique du chemin est
+  sélectionnée et centrée ; **given** une carte sélectionnée en Graphe, **when** on passe en Script (ALT+1), **then**
+  le Script montre le chemin le plus court de l'ouverture jusqu'à elle (une seule source : l'état d'interface du
+  chemin, A4).
 - **Given** le graphe le plus grand des fixtures, **Then** NFR-P1 tient (harnais étendu en 20.2).
 
 #### Story 20.8 : Tests en sorties et liens hors champ — 1,5 session
@@ -205,8 +213,10 @@ README § 7 « Carte de réplique », boards `Graphe`, `Carte`, `Paliers`)
 
 - **Given** une session invitée, **Then** le Script et le Graphe sont en lecture avec le bandeau « lecture seule —
   se connecter pour écrire » ; aucun champ n'accepte de frappe (règle `guest_first_auth.md`).
-- **Given** un 409 à l'enregistrement, **Then** la révision serveur est adoptée, une relance faite, et le toast dit ce
-  qui a été fusionné ; rien n'est perdu (test e2e).
+- **Given** un 409 à l'enregistrement, **Then** le comportement existant (v1.9.3) s'applique : la révision serveur est
+  adoptée et le document local renvoyé une fois (le dernier qui écrit l'emporte, pas de fusion fine) ; le toast
+  « VERSION PLUS RÉCENTE ADOPTÉE · SAISIE RÉAPPLIQUÉE » dit que la frappe locale a été renvoyée sur la nouvelle
+  révision ; rien de ce qui est tapé n'est perdu (test e2e). Une vraie fusion serait une story à part, hors epic.
 - **Given** une génération en erreur (délai, refus du modèle), **Then** le texte déjà reçu est gardé, la raison et le
   coût engagé restent visibles, Réessayer et « Garder ce qui est écrit » sont proposés.
 - **Given** un budget atteint, **Then** Générer est éteint **avant** l'appel avec sa raison ; l'écriture à la main
@@ -215,7 +225,7 @@ README § 7 « Carte de réplique », boards `Graphe`, `Carte`, `Paliers`)
   board `Etats` (filets sans spinner ; un seul bouton « Nouvelle scène » ; un point de couleur par locuteur et la
   réponse qui dit qui parle ensuite).
 
-### Tranche 3 — l'IA dans le texte (≈ 9 sessions)
+### Tranche 3 — l'IA dans le texte (≈ 10 sessions)
 
 #### Story 20.11 : Emplacement à écrire et options sur place — 3 sessions
 
@@ -235,13 +245,15 @@ README § 7 « Carte de réplique », boards `Graphe`, `Carte`, `Paliers`)
 - **Then** `AIGenerationPanel`, `GenerationProgressModal` et la page Générer sont retirés (lignes README § 13
   cochées).
 
-#### Story 20.12 : Remplir et revoir en série — 2 sessions
+#### Story 20.12 : Remplir et revoir en série — 3 sessions
 
 **En tant qu'** auteur, **je veux** remplir toutes les suites d'un niveau d'un coup puis les revoir, **afin de**
 tenir l'arbre exponentiel. (FR141, A13, README § 7 « Tiroir Lot », board `Lot`)
 
 - **Given** une portée (réponse, réplique, niveau, scène), **Then** le tiroir Lot affiche le nombre d'emplacements,
-  les exclusions (réponses vides, répliques jamais atteintes) et le coût total estimé **avant** tout appel.
+  les exclusions (réponses vides, répliques jamais atteintes, qui se recouvrent sur 5 emplacements dans la scène du
+  forgeron) et le coût total estimé **avant** tout appel ; les portées sont calculées côté serveur à partir des jobs
+  FR87/FR88.
 - **Given** un lot lancé, **Then** la progression vit dans la barre d'état ; on continue d'écrire pendant le lot.
 - **Given** un redémarrage du serveur pendant le lot, **Then** le job est `interrupted` et « Reprendre » ne refait
   que les parents restants (FR87/FR88).
@@ -282,11 +294,12 @@ board `Problemes`, `Gestes`)
 - **Given** la table README § 13, **Then** chaque ligne est cochée avec le test e2e qui la couvre.
 - Si la condition n'est pas remplie, la story attend ; elle ne bloque pas la tranche 4.
 
-### Tranche 4 — confort (≈ 7 sessions)
+### Tranche 4 — confort (≈ 8 sessions)
 
 #### Story 20.16 : Papier, taille, mesure, Focus — 2 sessions
 
-(FR139, A8, README § 9, § 10, boards `Papier`, `Focus`, `Reglages`)
+**En tant qu'** auteur, **je veux** régler la page comme un traitement de texte, **afin de** lire et écrire
+longtemps sans fatigue, de jour comme de nuit. (FR139, A8, README § 9, § 10, boards `Papier`, `Focus`, `Reglages`)
 
 - **Given** Réglages › Apparence, **Then** Nuit / Papier / suivre le système, taille 16–24 px, mesure 64 / 72 / 80,
   densité et mouvement s'appliquent sans bouton Enregistrer.
@@ -296,18 +309,21 @@ board `Problemes`, `Gestes`)
   opacité.
 - **Given** `prefers-reduced-motion`, **Then** aucune transition.
 
-#### Story 20.17 : Journal d'édition — versions, variantes, provenance — 2 sessions
+#### Story 20.17 : Journal d'édition — versions, variantes, provenance — 3 sessions
 
-(FR140, FR134, A12, boards `Versions`, `Gestes`)
+**En tant qu'** auteur, **je veux** retrouver d'une session à l'autre les versions, variantes et la provenance de mes
+répliques, **afin de** revenir en arrière sans rien perdre. (FR140, FR134, A12, boards `Versions`, `Gestes`)
 
-- **Given** `GET/PUT /api/v1/documents/{id}/journal` avec `revision`/409, **Then** versions, variantes, provenance et
-  notes écartées sont persistées à côté du layout, jamais lues par l'export (fixtures 20.1 inchangées).
+- **Given** `GET/PUT /api/v1/documents/{id}/journal` avec sa propre `revision`/409, **Then** versions, variantes,
+  provenance et notes écartées sont persistées à côté du layout, jamais lues par l'export (fixtures 20.1 inchangées),
+  et une écriture du journal ne fait pas monter la révision du document.
 - **Given** une réplique, **When** on ouvre Versions, **Then** chaque version est en diff ; « Restaurer » crée une
   nouvelle version (rien n'est perdu).
 - **Given** plus de 20 versions, **Then** les plus anciennes sont résumées (texte seul).
 
 #### Story 20.18 : Téléphone et petits gestes — 2 sessions
 
+**En tant qu'** auteur, **je veux** relire et jouer une scène au téléphone, et que chaque geste risqué se rattrape.
 (README § 9, § 12, boards `Mobile`, `Gestes`, Epic 17)
 
 - **Given** une largeur < 768 px, **Then** Script et Jouer sont utilisables au toucher (cibles ≥ 44 px), le graphe en
@@ -317,7 +333,8 @@ board `Problemes`, `Gestes`)
 
 #### Story 20.19 : Mécanique tirée des catalogues — 1 session
 
-(A7, board `Technique`)
+**En tant qu'** auteur, **je veux** ne choisir que des traits, compétences et flags qui existent dans le jeu, **afin
+qu'**une faute de frappe ne casse pas un test dans Unity. (FR142, A7, board `Technique`)
 
 - **Given** un popover de puce, **Then** traits, compétences et flags sont autocomplétés depuis `data/UnityData/*.csv` ;
   une valeur inconnue est refusée avec la raison.
@@ -330,11 +347,11 @@ board `Problemes`, `Gestes`)
 |---|---|---|
 | Epic 18 | ≈ 16 | maintenant |
 | Tranche 1 (20.1–20.3) | ≈ 5 | maintenant, en parallèle d'Epic 18 |
-| Tranche 2 (20.4–20.10) | ≈ 14 | après Epic 18 **et** 20.2 |
-| Tranche 3 (20.11–20.15) | ≈ 9 | après 20.6 et 20.8 |
-| Tranche 4 (20.16–20.19) | ≈ 7 | après 20.3 ; 20.17 après 20.11 |
+| Tranche 2 (20.4–20.10) | ≈ 15 | après Epic 18 **et** 20.2 |
+| Tranche 3 (20.11–20.15) | ≈ 10 | après 20.6 et 20.8 |
+| Tranche 4 (20.16–20.19) | ≈ 8 | après 20.3 ; 20.17 après 20.11 |
 
-Chemin critique : Epic 18 → tranche 2 → tranche 3 → tranche 4 ≈ **46 sessions**, la tranche 1 se faisant pendant
+Chemin critique : Epic 18 → tranche 2 → tranche 3 → tranche 4 ≈ **49 sessions**, la tranche 1 se faisant pendant
 Epic 18. Les tailles sont des estimations, à recaler après les deux premières stories.
 
 ### Garde-fous

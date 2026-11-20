@@ -120,7 +120,7 @@ Chaque board dit en pied ce qui est un exemple (coûts, heures, textes généré
 | **Classeur** | Scènes par collection, état mono, liens annexes ; rail. | `UnityDialogueList`, `DialogueCombobox` |
 | **Fiche de scène** | Titre, distribution, brief avec `@`, tons, profil ; compacte en une ligne. | `GenerationPanel`, `SceneSelectionWidget`, `ContextSelector` |
 | **Bloc de script** | Locuteur, réplique serif, didascalies, réponses avec puces et état. | `UnityDialogueEditor`, `GenerationOptionsComparison` |
-| **Carte de réplique** | Même contenu en 360 px, réplique bornée (12 lignes, défilement interne une fois sélectionnée), ports par réponse et par issue. | `DialogueNode` ; `TestNode` et `EndNode` deviennent des sorties |
+| **Carte de réplique** | Même contenu en 360 px, réplique bornée (12 lignes, défilement interne une fois sélectionnée), réponses jamais coupées, ports par réponse et par issue. | `DialogueNode` ; `TestNode` et `EndNode` deviennent des sorties |
 | **Champ d'écriture** | Le `<textarea>` d'Epic 18 (D4) : à l'entrée dans une réplique, **toute la réplique** passe en texte brut avec ses `*…*` ; à la sortie elle redevient mise en forme. | Epic 18.5–18.7 |
 | **Emplacement à écrire** | Au bout de toute réponse sans suite : taper ou Générer CTRL+↵ ; ligne « TRACE ▸ » dépliable pendant l'écriture. | `AIGenerationPanel`, `GenerationProgressModal`, trace de raisonnement |
 | **Tiroir Lot** | Portée, coût total, progression, reprise, revue en série. | jobs FR87/FR88, `BatchGenerateFromNodesModal` |
@@ -140,7 +140,7 @@ Chaque board dit en pied ce qui est un exemple (coûts, heures, textes généré
 | CTRL+↵ | Générer la suite dans l'emplacement actif | existe en page Générer |
 | CTRL+K | Palette ; sur une sélection : consigne de réécriture | surchargeable par la page (usage courant : Linear, Slack) |
 | ALT+1 / 2 / 3 | Vue Script / Graphe / Jouer | **pas CTRL+1–3** : CTRL+1–9 changent d'onglet dans les navigateurs |
-| CTRL+\ | Mode Focus | existe : `Dashboard.tsx:1085` (mode écriture) |
+| CTRL+\ | Mode Focus | existe : `frontend/src/components/layout/Dashboard.tsx:1085` (mode écriture) |
 | L | Lentille Technique, hors champ de texte | **pas ALT** : sous Windows, ALT relâché seul donne la main aux menus du navigateur (barre de menus de Firefox, menu de Chrome et d'Edge) |
 | TAB (vue Script) | Suite vide suivante | en Graphe, TAB reste la navigation entre nœuds (Epic 14.1) |
 | CTRL+Z / CTRL+Y | Annuler / rétablir, frappes regroupées | Epic 18.4 |
@@ -231,13 +231,16 @@ jet, et un clic ou une sélection rend la pleine opacité.
 
 - **Maquette 2026** : la charte reste ; 1c, 2a, 2b, 2e sont absorbés (page Générer → fiche + Script ; 2a/2b →
   emplacement ; 2e → Graphe).
-- **Epic 18 (édition in-situ, backlog, ~16 sessions)** : **fondation, avec deux écarts nommés**.
+- **Epic 18 (édition in-situ, backlog, ~16 sessions)** : **fondation, avec trois écarts nommés**.
   - Reprises : D1 (clic simple), D2 (ÉCHAP), **D4 (`<textarea>`) intact** — la réplique entière passe en texte brut à
-    l'entrée, aucun éditeur de blocs —, D5 (widget composite), 18.4 (annulation transactionnelle), géométrie « max
-    440 px, scroll interne » (la réplique est bornée à 12 lignes, les réponses restent visibles).
+    l'entrée, aucun éditeur de blocs —, D5 (widget composite), 18.4 (annulation transactionnelle).
   - Écart 1 : **largeur 360 px** au lieu de 280 (mesuré : la réplique d'ouverture de Grish en Instrument Serif 16 px
     fait 19 lignes à 280 px, 14 à 360 px ; le nœud actuel tient en 14 lignes parce qu'il descend à 12,5 px).
   - Écart 2 : **D3 rouverte** — texte lisible hors sélection via les paliers (`Paliers`), conditionné à la preuve 20.2.
+  - Écart 3 : **pas de hauteur maximale de carte** (Epic 18 : 440 px et défilement interne). Seule la réplique est
+    bornée (12 lignes, défilement interne une fois sélectionnée) ; les réponses ne sont jamais coupées, parce que
+    chacune porte le port de son lien. Une carte peut donc dépasser l'écran à 100 % : la sélectionner la fait défiler
+    en vue, et le palier « lire » la montre entière.
 - **Epic 19 (squelette)** : **remplacée**. Elle demandait un retour d'usage d'Epic 18 et la réversibilité. Réponse :
   le panneau de droite reste disponible **derrière un drapeau** pendant toute la tranche 2 ; il n'est retiré qu'en
   tranche 3, après un mois d'usage du Script et du Graphe sans recours au panneau (mesuré par un compteur d'ouverture).

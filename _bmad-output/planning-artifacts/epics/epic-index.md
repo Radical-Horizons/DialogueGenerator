@@ -62,7 +62,7 @@
   Génération, détails GDD et variables en overlays lancés depuis le nœud ; suppression du panneau de droite permanent et récupération de son espace pour le graphe. Dépend d'Epic 18 ; détail à figer après retour d'usage. **Serait remplacée par Epic 20 si celle-ci est validée.**
 
 - **Epic 20**: [Refonte « Scène » — une scène, un texte, trois vues](epic-20.md) — **proposition, en attente de validation**  
-  Une scène porte sa fiche (distribution, contexte) et s'ouvre en trois vues : Script, Graphe à texte complet, Jouer. L'IA devient un geste dans le texte, la technique passe en puces et en barre d'état, le panneau de droite disparaît. 19 stories en 4 tranches (≈ 35 sessions, chemin critique ≈ 46 avec Epic 18) ; Epic 18 bloquante pour la tranche 2.
+  Une scène porte sa fiche (distribution, contexte) et s'ouvre en trois vues : Script, Graphe à texte complet, Jouer. L'IA devient un geste dans le texte, la technique passe en puces et en barre d'état, le panneau de droite disparaît. 19 stories en 4 tranches (≈ 38 sessions, chemin critique ≈ 49 avec Epic 18) ; Epic 18 bloquante pour la tranche 2.
 
 - **Epic 15**: [RLM Context Selector (sélection automatique du contexte GDD)](epic-15.md)  
   Les utilisateurs peuvent activer la sélection automatique du contexte GDD via un service RLM optionnel, qui explore le GDD par function calling et réduit le contexte de 20k+ à 12-15k tokens sans perte de pertinence. Fallback gracieux vers la sélection manuelle. ⚠️ Ses « FR1-FR8 / NFR1-NFR6 » appartiennent à l'espace de numérotation de `prd/prd-rlm-context-selector.md`, **pas** au référentiel principal.

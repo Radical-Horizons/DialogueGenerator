@@ -53,8 +53,11 @@ PNJ et le PJ à partir du graphe.
 - Toute génération (premier nœud, suite, lot, réécriture) lit la fiche. Le `contextStore` global garde le catalogue
   GDD et les sélections **hors scène** (page Fiches du GDD) ; ses lecteurs dans le chemin de génération sont à
   inventorier en story 20.4 (critère : plus aucun appel de génération ne lit les sélections globales).
-- ⚠ À vérifier avant la story : le chargeur Unity ignore-t-il une clé de tête inconnue ? Sinon, l'export retire
-  `scene` (comme il retire déjà les métadonnées éditeur des nœuds).
+- **Export : `scene` est retirée.** Vérifié le 2026-11-20 sur le contrat publié
+  (`docs/JsonDocUnity/Documentation/dialogue-format.schema.json`) : la racine n'a pas d'`additionalProperties`, donc
+  une clé de tête en plus y est permise, alors que tous les objets imbriqués l'interdisent. Le chargeur C# n'est pas
+  dans ce dépôt ; plutôt que de parier sur lui, l'export retire `scene` comme il retire déjà les métadonnées éditeur
+  des nœuds. Coût nul, export identique (fixtures 20.1).
 
 ### A2 — Une seule surface d'édition, qui écrit directement dans le store
 
@@ -149,8 +152,10 @@ la main, notes de relecture ignorées : rien de cela n'est du dialogue Unity, et
 `status`, `regenerationHistory`, `lastGenerationInstructions` vivent déjà dans les nœuds comme métadonnées éditeur).
 
 **Décision.** Un **journal d'édition** par dialogue, artefact distinct comme le layout (ADR-008) :
-`journal/<dialogueId>.json` à côté de `Layouts/`, lu et écrit par `GET/PUT /api/v1/documents/{id}/journal` avec la
-même `revision`/409 que le document.
+`journal/<dialogueId>.json` à côté de `Layouts/`, lu et écrit par `GET/PUT /api/v1/documents/{id}/journal`. Le
+journal a **son propre compteur `revision`** et son propre 409 (même protocole que le document : révision serveur
+adoptée, une relance) : écrire une version ne fait jamais monter la révision du document, donc ne provoque aucun
+conflit sur le texte.
 
 ```json
 { "revision": 12, "entries": {
@@ -192,14 +197,14 @@ co-édition actuelle (partage, permissions) montre ce besoin.
 Epic 18 (≈ 16 sessions, prérequis de la tranche 2)
 Tranche 1 — fondation, en parallèle d'Epic 18 (rien de visible ne casse)        ≈ 5 sessions   20.1–20.3
   A3 conversion + fixtures CI · preuve de perf A10 · A8 variables CSS
-Tranche 2 — la scène                                                             ≈ 14 sessions  20.4–20.10
+Tranche 2 — la scène                                                             ≈ 15 sessions  20.4–20.10
   A1 fiche → enveloppe → A4 Script → A9 cartes et flux LR → tests en sorties → lentille et popovers → états
   A14 panneau derrière un drapeau
-Tranche 3 — l'IA dans le texte                                                    ≈ 9 sessions   20.11–20.15
+Tranche 3 — l'IA dans le texte                                                    ≈ 10 sessions  20.11–20.15
   A5 emplacement et options · A13 lots · rewrite-span · A6 diagnostics et aide clavier · retrait du panneau
-Tranche 4 — confort                                                              ≈ 7 sessions   20.16–20.19
+Tranche 4 — confort                                                              ≈ 8 sessions   20.16–20.19
   Papier, Focus, mesure · A12 journal (versions, variantes, provenance) · téléphone · A7 catalogues
-Chemin critique : Epic 18 puis tranches 2 → 3 → 4 ≈ 46 sessions (tranche 1 en parallèle d'Epic 18).
+Chemin critique : Epic 18 puis tranches 2 → 3 → 4 ≈ 49 sessions (tranche 1 en parallèle d'Epic 18).
 ```
 
 ## 4. Risques et parades
@@ -219,7 +224,7 @@ Chemin critique : Epic 18 puis tranches 2 → 3 → 4 ≈ 46 sessions (tranche 1
 | Mesure | Aujourd'hui (2026-11-19) | Cible |
 |---|---|---|
 | Largeur du graphe à 1 440 px | ≈ 720 px (mesuré sur capture) | 1 188 px classeur ouvert, 1 384 px replié |
-| Texte lisible dans le graphe sans ouvrir de panneau | tronqué (« carav… ») | réplique sur 12 lignes au palier « écrire », 3 au palier « lire », entière en défilant ou en vue Script |
+| Texte lisible dans le graphe sans ouvrir de panneau | tronqué (« carav… ») | réplique sur 12 lignes au palier « écrire », 2 au palier « lire », entière en défilant ou en vue Script |
 | Répliques jamais atteintes visibles | non (8 sur 19 dans la scène du forgeron) | encadrées au palier « situer », comptées dans PROBLÈMES |
 | Clics pour corriger une réponse depuis le graphe | sélectionner, « éditer », trouver le champ, taper (≥ 3) | 1 clic dans le texte |
 | Décompte affiché pour 19 répliques | « 67 NŒUDS » | « 19 RÉPLIQUES » |
