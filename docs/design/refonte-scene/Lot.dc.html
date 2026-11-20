@@ -1,0 +1,1231 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Remplir les suites</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}
+.lk{border:none;background:transparent;padding:0;font-family:'Instrument Sans',system-ui,sans-serif;font-size:12px;color:#9a9aa4;cursor:pointer;white-space:nowrap}
+.lk:hover{color:#f2f2f5;text-decoration:underline;text-underline-offset:3px}
+.lk:focus-visible,.ob:focus-visible,.qi:focus-visible,.opt:focus-visible,.sb:focus-visible,.seg:focus-visible{outline:2px solid #4f7fff;outline-offset:2px}
+.ob:hover{background:rgba(255,255,255,0.04)!important}
+.opt:hover{background:rgba(255,255,255,0.025)}
+.qi:hover{background:rgba(255,255,255,0.03)}
+.sb:hover{color:#f2f2f5!important}
+.x:hover{color:#f2f2f5!important}
+.fill:hover{background:#4a76f0!important}
+.inp{margin:3px 0 0;width:14px;height:14px;accent-color:#4f7fff;color-scheme:dark;cursor:pointer}
+.pulse{animation:lotpulse 1.4s ease-out infinite}
+@keyframes lotpulse{50%{opacity:0.3}}
+@media (prefers-reduced-motion: reduce){.pulse{animation:none}}</style>
+</helmet>
+<div style="position: relative; width: 1440px; height: 900px; display: flex; flex-direction: column; overflow: hidden; background: {{t.app}}; color: {{t.body}}; font-family: 'Instrument Sans', system-ui, sans-serif">
+
+  <header style="height: 48px; flex: none; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) 380px minmax(0, 1fr); align-items: center; gap: 20px; padding: 0 20px; border-bottom: 1px solid {{t.hair}}">
+    <div style="display: flex; align-items: baseline; gap: 20px; min-width: 0">
+      <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1; color: {{t.strong}}; white-space: nowrap">Dialogue<span style="font-style: italic; color: {{t.accent}}">Generator</span></span>
+      <nav aria-label="Fil d'Ariane" style="display: flex; align-items: baseline; gap: 9px; min-width: 0">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}; white-space: nowrap">TOUTES LES SCÈNES</span>
+        <span style="color: {{t.label}}">/</span>
+        <span style="font-size: 13px; color: {{t.strong}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Rencontre avec le forgeron itinérant</span>
+      </nav>
+    </div>
+    <button type="button" style="height: 32px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: {{t.input}}; color: {{t.muted}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Rechercher, aller à, demander…<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">CTRL+K</span></button>
+    <div style="display: flex; justify-content: flex-end">
+      <span aria-label="Compte" style="width: 27px; height: 27px; border-radius: 99px; background: {{t.raised}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{t.body}}">A</span>
+    </div>
+  </header>
+
+  <div style="flex: 1; min-height: 0; display: flex">
+    <aside aria-label="Classeur" style="width: 252px; flex: none; box-sizing: border-box; border-right: 1px solid {{t.hair}}; display: flex; flex-direction: column">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 14px 9px 20px">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">CLASSEUR — 4 SCÈNES</span>
+        <button type="button" aria-label="Nouvelle scène" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-size: 15px; line-height: 1; cursor: pointer">+</button>
+      </div>
+      <a href="Main.dc.html" aria-current="page" style="display: flex; flex-direction: column; gap: 3px; padding: 9px 20px; text-decoration: none; background: {{t.selBg}}; box-shadow: inset 2px 0 0 {{t.accent}}">
+        <span style="font-size: 13.5px; font-weight: 500; color: {{t.strong}}">Rencontre avec le forgeron itinérant</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">19 RÉPLIQUES · <span style="color: {{t.err}}">3 ERREURS</span></span>
+        <sc-if value="{{hasClasseurLot}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{lotColor}}">{{classeurLot}}</span></sc-if>
+      </a>
+      <a href="#" style="display: flex; flex-direction: column; gap: 3px; padding: 9px 20px; text-decoration: none; border-top: 1px solid {{t.hair}}">
+        <span style="font-size: 13.5px; color: {{t.row}}">Rencontre dans les plis d'ossements</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">11 RÉPLIQUES</span>
+      </a>
+      <a href="#" style="display: flex; flex-direction: column; gap: 3px; padding: 9px 20px; text-decoration: none; border-top: 1px solid {{t.hair}}">
+        <span style="font-size: 13.5px; color: {{t.row}}">Rencontre initiale avec Korga l'Effritée</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">6 RÉPLIQUES</span>
+      </a>
+      <a href="#" style="display: flex; flex-direction: column; gap: 3px; padding: 9px 20px; text-decoration: none; border-top: 1px solid {{t.hair}}; border-bottom: 1px solid {{t.hair}}">
+        <span style="font-size: 13.5px; color: {{t.row}}">Voknir — L'Atelier du Cartographe</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">48 RÉPLIQUES</span>
+      </a>
+      <span style="flex: 1"></span>
+      <nav aria-label="Autour des scènes" style="display: flex; flex-direction: column; padding: 9px 0 14px; border-top: 1px solid {{t.hair}}">
+        <a href="#" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Fiches du GDD</a>
+        <a href="#" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Profils d'auteur</a>
+        <a href="#" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Usage et coûts</a>
+        <a href="#" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Réglages<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{t.label}}">CTRL+,</span></a>
+      </nav>
+    </aside>
+
+    <main aria-label="Scène" style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+      <section aria-label="Fiche de scène" style="flex: none; padding: 18px 40px 14px; display: flex; flex-direction: column; gap: 9px">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 20px">
+          <h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 30px; line-height: 1.12; color: {{t.strong}}">Rencontre avec le forgeron itinérant</h1>
+          <button type="button" style="border: none; background: transparent; padding: 0; font-family: inherit; font-size: 12px; color: {{t.sec}}; cursor: pointer">fiche de scène ▾</button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; min-width: 0">
+          <span style="display: inline-flex; align-items: center; gap: 7px; height: 26px; box-sizing: border-box; padding: 0 10px 0 4px; border-radius: 99px; border: 1px solid {{t.chip}}; flex: none">
+            <span style="width: 18px; height: 18px; border-radius: 99px; background: {{t.spk}}; color: {{t.onSpk}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px">GT</span>
+            <span style="font-size: 12.5px; color: {{t.body}}">Grish T'vok</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.label}}">PNJ</span>
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 7px; height: 26px; box-sizing: border-box; padding: 0 10px 0 4px; border-radius: 99px; border: 1px solid {{t.chip}}; flex: none">
+            <span style="width: 18px; height: 18px; border-radius: 99px; background: {{t.raised}}; color: {{t.body}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px">U</span>
+            <span style="font-size: 12.5px; color: {{t.body}}">Uresaïr</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.label}}">PJ</span>
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 7px; height: 26px; box-sizing: border-box; padding: 0 10px; border-radius: 99px; border: 1px solid {{t.chip}}; flex: none">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.label}}">LIEU</span>
+            <span style="font-size: 12.5px; color: {{t.body}}">Caravane-atelier</span>
+          </span>
+          <span aria-hidden="true" style="width: 1px; height: 16px; background: {{t.hair2}}; flex: none"></span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}; flex: none">BRIEF</span>
+          <span style="min-width: 0; font-size: 12.5px; color: {{t.sec}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Grish propose de réparer ce qui souffre ; Uresaïr garde sa distance rituelle et refuse de livrer sa mémoire.</span>
+        </div>
+      </section>
+
+      <div style="flex: none; height: 40px; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 0 40px; border-top: 1px solid {{t.hair}}; border-bottom: 1px solid {{t.hair}}">
+        <nav aria-label="Vue de la scène" style="display: flex; border: 1px solid {{t.ctrl}}; border-radius: 6px; overflow: hidden">
+          <a href="Main.dc.html" aria-current="page" title="Script — ALT+1" style="height: 26px; display: flex; align-items: center; padding: 0 11px; background: {{t.raised}}; color: {{t.strong}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-decoration: none">SCRIPT</a>
+          <a href="Graphe.dc.html" title="Graphe — ALT+2" style="height: 26px; display: flex; align-items: center; padding: 0 11px; border-left: 1px solid {{t.ctrl}}; color: {{t.sec}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-decoration: none">GRAPHE</a>
+          <a href="Jouer.dc.html" title="Jouer — ALT+3" style="height: 26px; display: flex; align-items: center; padding: 0 11px; border-left: 1px solid {{t.ctrl}}; color: {{t.sec}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-decoration: none">JOUER</a>
+        </nav>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}; white-space: nowrap">START › 01 › RÉUSSITE</span>
+        <span style="flex: 1"></span>
+        <div style="display: flex; gap: 5px">
+          <button type="button" aria-label="Réduire le texte" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12px; cursor: pointer">A−</button>
+          <button type="button" aria-label="Agrandir le texte" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 14px; cursor: pointer">A+</button>
+        </div>
+        <button type="button" style="height: 28px; display: flex; align-items: center; gap: 9px; padding: 0 10px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Focus<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">CTRL+\</span></button>
+      </div>
+
+      <div style="flex: 1; min-height: 0; display: flex">
+        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+
+          <sc-if value="{{showScript}}" hint-placeholder-val="{{true}}">
+            <div ref="{{setScroll}}" style="flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 64px, #000 calc(100% - 24px), transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, #000 64px, #000 calc(100% - 24px), transparent 100%)">
+              <div style="position: relative; max-width: 640px; margin: 0 auto; padding: 34px 0 260px">
+                <sc-for list="{{blocks}}" as="b" hint-placeholder-count="2">
+                  <article data-block="{{b.key}}">
+                    <sc-if value="{{b.hasLink}}" hint-placeholder-val="{{false}}">
+                      <div style="display: flex; align-items: center; gap: 9px; margin-bottom: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.label}}"><span aria-hidden="true" style="width: 20px; height: 1px; background: {{t.hair2}}"></span>{{b.link}}</div>
+                    </sc-if>
+                    <div style="display: flex; align-items: center; gap: 9px; margin-bottom: 11px">
+                      <span aria-hidden="true" style="width: 7px; height: 7px; border-radius: 99px; background: {{t.spk}}"></span>
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.09em; color: {{t.sec}}">GRISH T'VOK</span>
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.ok}}">{{b.status}}</span>
+                      <span style="flex: 1"></span>
+                      <span style="font-size: 12px; color: {{t.muted}}">{{b.title}}</span>
+                    </div>
+                    <sc-for list="{{b.paras}}" as="p" hint-placeholder-count="1">
+                      <sc-if value="{{p.dir}}" hint-placeholder-val="{{false}}">
+                        <p style="margin: 0 0 14px; font-size: 15px; line-height: 1.6; font-style: italic; color: {{t.sec}}">{{p.text}}</p>
+                      </sc-if>
+                      <sc-if value="{{p.say}}" hint-placeholder-val="{{true}}">
+                        <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p>
+                      </sc-if>
+                    </sc-for>
+                    <div data-scroll="{{b.key}}" style="margin: 20px 0 34px">
+                      <span style="display: block; margin-bottom: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">{{b.who}}</span>
+                      <ol style="list-style: none; margin: 0; padding: 0; border-top: 1px solid {{t.hair}}">
+                        <sc-for list="{{b.choices}}" as="c" hint-placeholder-count="3">
+                          <li style="border-bottom: 1px solid {{t.hair}}; background: {{c.bg}}; box-shadow: {{c.rail}}">
+                            <div style="display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 9px; align-items: start; padding: 11px 12px 11px 10px">
+                              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 23px; color: {{t.muted}}">{{c.num}}</span>
+                              <span style="min-width: 0">
+                                <sc-if value="{{c.empty}}" hint-placeholder-val="{{false}}"><span style="font-size: 14.5px; line-height: 23px; font-style: italic; color: {{t.muted}}">Réponse vide</span></sc-if>
+                                <sc-if value="{{c.full}}" hint-placeholder-val="{{true}}"><span style="display: block; font-size: 15px; line-height: 1.55; color: {{c.textColor}}">{{c.text}}</span></sc-if>
+                                <sc-if value="{{c.hasChips}}" hint-placeholder-val="{{false}}">
+                                  <span style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px">
+                                    <sc-for list="{{c.chips}}" as="k" hint-placeholder-count="2"><span style="height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 99px; border: 1px solid {{t.chip}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{k.label}}</span></sc-for>
+                                  </span>
+                                </sc-if>
+                              </span>
+                              <span style="display: flex; align-items: center; gap: 7px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; line-height: 23px; color: {{c.metaColor}}; white-space: nowrap"><sc-if value="{{c.dotLot}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.accent}}"></span></sc-if><sc-if value="{{c.dotNow}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" class="pulse" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.accent}}"></span></sc-if><sc-if value="{{c.dotPend}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.pend}}"></span></sc-if>{{c.meta}}</span>
+                            </div>
+                            <sc-if value="{{c.showOutcomes}}" hint-placeholder-val="{{false}}">
+                              <div role="group" aria-label="État des quatre issues" style="display: flex; flex-wrap: wrap; gap: 5px; padding: 0 12px 12px 47px">
+                                <sc-for list="{{c.outs}}" as="o" hint-placeholder-count="4">
+                                  <span title="{{o.title}}" style="height: 24px; box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; padding: 0 9px; border-radius: 99px; border: 1px {{o.bstyle}} {{o.border}}; background: {{o.bg}}; color: {{o.color}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em">{{o.label}}</span>
+                                </sc-for>
+                              </div>
+                            </sc-if>
+                          </li>
+                        </sc-for>
+                      </ol>
+                    </div>
+                  </article>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{review}}" hint-placeholder-val="{{false}}">
+            <section aria-label="Revue en série" style="flex: 1; min-height: 0; display: flex; flex-direction: column">
+              <div style="flex: none; display: flex; align-items: center; gap: 9px; padding: 9px 40px; border-bottom: 1px solid {{t.hair}}; background: {{bannerBg}}">
+                <span aria-hidden="true" style="width: 6px; height: 6px; flex: none; border-radius: 99px; background: {{lotColor}}"></span>
+                <span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{lotColor}}">{{bannerLabel}}</span>
+                <span style="min-width: 0; font-size: 12.5px; color: {{t.sec}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis"><sc-for list="{{bannerText}}" as="m" hint-placeholder-count="1"><sc-if value="{{m.n}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 0.9em">{{m.t}}</span></sc-if><sc-if value="{{m.w}}" hint-placeholder-val="{{true}}"><span>{{m.t}}</span></sc-if></sc-for></span>
+                <span style="flex: 1"></span>
+                <sc-if value="{{canResume}}" hint-placeholder-val="{{false}}"><button type="button" class="lk" onClick="{{resume}}" style="color: {{t.body}}">Reprendre le lot</button></sc-if>
+              </div>
+              <div style="flex: none; padding: 11px 40px 5px">
+                <div style="max-width: 680px; margin: 0 auto; display: flex; align-items: center; gap: 14px">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">REVUE EN SÉRIE</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.04em; color: {{t.strong}}">{{rvPos}}</span>
+                  <span role="img" aria-label="{{rvBarAria}}" style="width: 64px; height: 3px; border-radius: 2px; background: {{t.hair2}}; display: flex; overflow: hidden"><span style="width: {{rvKeptPct}}; background: {{t.ok}}"></span><span style="width: {{rvRejPct}}; background: {{t.err}}"></span></span>
+                  <span style="min-width: 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.sec}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{rv.path}}</span>
+                  <span style="flex: 1"></span>
+                  <button type="button" class="lk" onClick="{{closeReview}}" style="display: flex; align-items: center; gap: 9px">Revenir au script<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">ÉCHAP</span></button>
+                </div>
+              </div>
+              <div ref="{{setRvBody}}" style="flex: 1; min-height: 0; overflow-y: auto; padding: 0 40px">
+                <sc-if value="{{rvHasItem}}" hint-placeholder-val="{{true}}">
+                  <div style="max-width: 680px; margin: 0 auto; padding: 9px 0 5px">
+                    <div style="display: flex; flex-direction: column; gap: 7px; padding-bottom: 14px; border-bottom: 1px solid {{t.hair}}">
+                      <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 16px; line-height: 1.5; color: {{t.sec}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.09em; color: {{t.label}}">GRISH   </span>{{rv.parentEnd}}</p>
+                      <div style="display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: baseline">
+                        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.09em; color: {{t.label}}">URESAÏR</span>
+                        <span style="min-width: 0; font-size: 14.5px; line-height: 1.6">
+                          <sc-if value="{{rv.respFull}}" hint-placeholder-val="{{true}}"><span style="color: {{t.body}}">{{rv.resp}}</span></sc-if>
+                          <sc-if value="{{rv.respEmpty}}" hint-placeholder-val="{{false}}"><span style="font-style: italic; color: {{t.muted}}">Réponse vide</span></sc-if>
+                          <sc-if value="{{rv.hasTest}}" hint-placeholder-val="{{true}}"><span style="display: inline-flex; gap: 5px; margin-left: 9px; vertical-align: 1px"><span style="height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 99px; border: 1px solid {{t.chip}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{rv.test}}</span><span style="height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 99px; border: 1px solid {{rv.outColor}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{rv.outColor}}; white-space: nowrap">{{rv.out}}</span></span></sc-if>
+                        </span>
+                      </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 9px; margin: 14px 0 9px">
+                      <span aria-hidden="true" style="width: 7px; height: 7px; border-radius: 99px; background: {{t.spk}}"></span>
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.09em; color: {{t.sec}}">GRISH T'VOK</span>
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{rv.stColor}}">{{rv.stLabel}}</span>
+                      <span style="flex: 1"></span>
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.muted}}">{{rv.meta}}</span>
+                    </div>
+                    <sc-if value="{{rv.hasGen}}" hint-placeholder-val="{{true}}">
+                      <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 22px; line-height: 1.5; color: {{t.dia}}; opacity: {{rv.op}}"><sc-for list="{{rv.segs}}" as="s" hint-placeholder-count="2"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 16px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p>
+                      <div style="margin-top: 14px; opacity: {{rv.op}}">
+                        <span style="display: block; margin-bottom: 7px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">{{rv.who}}</span>
+                        <ol style="list-style: none; margin: 0; padding: 0; border-top: 1px solid {{t.hair}}">
+                          <sc-for list="{{rv.choices}}" as="c" hint-placeholder-count="3">
+                            <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 9px; align-items: baseline; padding: 6px 12px 6px 10px; border-bottom: 1px solid {{t.hair}}">
+                              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{t.muted}}">{{c.num}}</span>
+                              <span style="min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 9px; row-gap: 5px">
+                                <span style="font-size: 14.5px; line-height: 1.45; color: {{t.body}}">{{c.text}}</span>
+                                <sc-for list="{{c.chips}}" as="k" hint-placeholder-count="1"><span style="height: 18px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 99px; border: 1px solid {{t.chip}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{k.label}}</span></sc-for>
+                              </span>
+                              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{c.meta}}</span>
+                            </li>
+                          </sc-for>
+                        </ol>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{rv.noGen}}" hint-placeholder-val="{{false}}">
+                      <p style="margin: 0; font-size: 14px; line-height: 1.5; font-style: italic; color: {{t.muted}}">Texte d'exemple non rédigé pour cette réplique : seules les huit premières de la file en ont un dans la maquette.</p>
+                    </sc-if>
+                  </div>
+                </sc-if>
+                <sc-if value="{{rvAllDone}}" hint-placeholder-val="{{false}}">
+                  <div style="max-width: 680px; margin: 0 auto; padding: 34px 0; display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.ok}}">TOUT EST REVU</span>
+                    <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 23px; line-height: 1.4; color: {{t.dia}}">Les répliques du lot sont revues. Celles gardées font partie de la scène ; les emplacements rejetés redeviennent des suites à écrire.</p>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; color: {{t.sec}}">{{rvDoneLine}}</span>
+                    <button type="button" class="ob" onClick="{{closeReview}}" style="height: 32px; display: flex; align-items: center; gap: 9px; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Revenir au script<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">ÉCHAP</span></button>
+                  </div>
+                </sc-if>
+              </div>
+              <sc-if value="{{rvHasItem}}" hint-placeholder-val="{{true}}">
+                <div style="flex: none; padding: 9px 40px; border-top: 1px solid {{t.hair}}">
+                  <div style="max-width: 680px; margin: 0 auto; display: flex; align-items: center; gap: 9px">
+                    <button type="button" class="fill" onClick="{{keep}}" style="height: 34px; display: flex; align-items: center; gap: 9px; padding: 0 14px; border: none; border-radius: 6px; background: {{t.fill}}; color: #ffffff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Garder<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.05em; opacity: 0.85">G</span></button>
+                    <button type="button" class="ob" onClick="{{reject}}" style="height: 34px; display: flex; align-items: center; gap: 9px; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Rejeter<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">R</span></button>
+                    <button type="button" class="ob" style="height: 34px; display: flex; align-items: center; gap: 9px; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Réécrire<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">CTRL+K</span></button>
+                    <span style="flex: 1"></span>
+                    <span style="font-size: 12px; color: {{t.muted}}">Clic dans le texte pour corriger</span>
+                    <span aria-hidden="true" style="width: 1px; height: 16px; background: {{t.hair2}}"></span>
+                    <button type="button" class="ob" onClick="{{prev}}" aria-label="Réplique précédente, touche K" style="height: 34px; display: flex; align-items: center; gap: 7px; padding: 0 10px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; cursor: pointer">‹ K</button>
+                    <button type="button" class="ob" onClick="{{next}}" aria-label="Réplique suivante, touche J" style="height: 34px; display: flex; align-items: center; gap: 7px; padding: 0 10px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; cursor: pointer">J ›</button>
+                  </div>
+                </div>
+              </sc-if>
+            </section>
+          </sc-if>
+
+          <div style="flex: none; display: flex; align-items: center; gap: 14px; padding: 9px 40px 11px; max-width: {{stripMax}}; box-sizing: border-box">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}; flex: none">ÉTAT</span>
+            <div role="group" aria-label="État de la maquette" style="display: flex; flex: none; border: 1px solid {{t.ctrl}}; border-radius: 6px; overflow: hidden">
+              <sc-for list="{{etats}}" as="e" hint-placeholder-count="3">
+                <button type="button" aria-pressed="{{e.on}}" onClick="{{e.pick}}" style="height: 24px; padding: 0 9px; border: none; border-left: {{e.sep}}; background: {{e.bg}}; color: {{e.color}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; white-space: nowrap; cursor: pointer">{{e.label}}</button>
+              </sc-for>
+            </div>
+            <p style="margin: 0; min-width: 0; font-size: 12px; line-height: 1.45; color: #9a9aa4">Exemple : coût et durée par suite, heures, avancement du lot, textes des répliques générées. Les comptes de suites viennent de la scène réelle.</p>
+          </div>
+        </div>
+
+        <aside aria-label="{{filAria}}" style="width: 220px; flex: none; box-sizing: border-box; padding: {{filPad}}; border-left: 1px solid {{t.hair}}; display: flex; flex-direction: column; gap: 14px; overflow: hidden">
+          <sc-if value="{{showScript}}" hint-placeholder-val="{{true}}">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">FIL — CHEMIN SUIVI</span>
+            <ol style="list-style: none; margin: 0; padding: 0">
+              <li style="display: grid; grid-template-columns: 14px minmax(0, 1fr); column-gap: 9px; padding-bottom: 12px">
+                <span aria-hidden="true" style="margin-top: 4px; width: 9px; height: 9px; border-radius: 99px; background: {{t.accent}}"></span>
+                <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                  <span style="font-size: 12.5px; color: {{t.strong}}">Ouverture</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">RÉPONSE 01 SUR 4</span>
+                </span>
+              </li>
+              <li style="display: grid; grid-template-columns: 14px minmax(0, 1fr); column-gap: 9px">
+                <span aria-hidden="true" style="margin-top: 4px; width: 9px; height: 9px; border-radius: 99px; background: {{t.accent}}"></span>
+                <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                  <span style="font-size: 12.5px; color: {{t.strong}}">Réussite</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">{{filReussite}}</span>
+                </span>
+              </li>
+            </ol>
+            <span aria-hidden="true" style="height: 1px; flex: none; background: {{t.hair}}"></span>
+            <dl style="margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em">
+              <sc-for list="{{stats}}" as="st" hint-placeholder-count="5">
+                <dt style="color: {{t.label}}">{{st.k}}</dt><dd style="margin: 0; text-align: right; color: {{st.color}}">{{st.v}}</dd>
+              </sc-for>
+            </dl>
+
+            <sc-if value="{{filTrigger}}" hint-placeholder-val="{{true}}">
+              <button type="button" class="lk" onClick="{{openDrawer}}" aria-expanded="{{drawerOn}}" style="display: flex; align-items: center; justify-content: space-between; color: {{t.body}}">Remplir les suites ›<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">CTRL+MAJ+↵</span></button>
+            </sc-if>
+
+            <sc-if value="{{filLot}}" hint-placeholder-val="{{false}}">
+              <section aria-label="Lot" style="display: flex; flex-direction: column; gap: 9px; padding-top: 14px; border-top: 1px solid {{t.hair}}">
+                <div style="display: flex; align-items: center; gap: 7px">
+                  <sc-if value="{{lotPulse}}" hint-placeholder-val="{{true}}"><span aria-hidden="true" class="pulse" style="width: 6px; height: 6px; border-radius: 99px; background: {{lotColor}}"></span></sc-if>
+                  <sc-if value="{{lotStill}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{lotColor}}"></span></sc-if>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{lotColor}}">{{lotLabel}}</span>
+                </div>
+                <div style="display: flex; align-items: baseline; gap: 7px">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 19px; color: {{t.strong}}">{{lotDone}}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{t.muted}}">/ {{lotTotal}} SUITES</span>
+                </div>
+                <span role="progressbar" aria-valuemin="0" aria-valuemax="{{lotTotal}}" aria-valuenow="{{lotDone}}" style="height: 3px; border-radius: 2px; background: {{t.hair2}}; display: flex; overflow: hidden"><span style="width: {{lotPct}}; background: {{lotBar}}"></span></span>
+                <span style="font-size: 12px; line-height: 1.45; color: {{t.sec}}"><sc-for list="{{lotLine}}" as="m" hint-placeholder-count="1"><sc-if value="{{m.n}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 0.9em">{{m.t}}</span></sc-if><sc-if value="{{m.w}}" hint-placeholder-val="{{true}}"><span>{{m.t}}</span></sc-if></sc-for></span>
+                <sc-if value="{{hasPending}}" hint-placeholder-val="{{true}}">
+                  <button type="button" class="lk" onClick="{{openReview}}" style="white-space: normal; text-align: left; line-height: 1.45; color: {{t.body}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{t.pend}}">{{pendingCount}}</span> {{pendingWord}} — revoir en série ›</button>
+                </sc-if>
+                <div style="display: flex; gap: 9px; flex-wrap: wrap">
+                  <sc-if value="{{canStop}}" hint-placeholder-val="{{true}}"><button type="button" class="ob" onClick="{{stop}}" style="height: 28px; padding: 0 10px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Interrompre</button></sc-if>
+                  <sc-if value="{{canResume}}" hint-placeholder-val="{{false}}"><button type="button" class="ob" onClick="{{resume}}" style="height: 28px; display: flex; align-items: center; gap: 7px; padding: 0 10px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Reprendre<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">{{restLabel}}</span></button></sc-if>
+                  <button type="button" class="lk" onClick="{{openDrawer}}" style="font-size: 12px">Détail ›</button>
+                </div>
+              </section>
+            </sc-if>
+
+            <span style="flex: 1"></span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; line-height: 1.5; color: {{t.label}}">{{hint1}}<br>CTRL+CLIC · OUVRIR DANS LE GRAPHE</span>
+          </sc-if>
+
+          <sc-if value="{{review}}" hint-placeholder-val="{{false}}">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">{{queueTitle}}</span>
+            <div style="display: flex; flex-direction: column; gap: 5px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.sec}}">
+              <span style="display: flex; align-items: center; gap: 7px"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.pend}}"></span>{{qPend}}</span>
+              <span style="display: flex; align-items: center; gap: 7px"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.ok}}"></span>{{qKept}}</span>
+              <span style="display: flex; align-items: center; gap: 7px"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.err}}"></span>{{qRej}}</span>
+            </div>
+            <ol ref="{{setQueue}}" aria-label="File de revue" style="position: relative; flex: 1; min-height: 0; overflow-y: auto; list-style: none; margin: 0 -20px; padding: 0; border-top: 1px solid {{t.hair}}">
+              <sc-for list="{{queue}}" as="q" hint-placeholder-count="6">
+                <li data-q="{{q.mark}}" style="border-bottom: 1px solid {{t.hair}}">
+                  <button type="button" class="qi" onClick="{{q.pick}}" aria-current="{{q.cur}}" style="width: 100%; display: grid; grid-template-columns: 22px minmax(0, 1fr) 8px; column-gap: 7px; align-items: center; padding: 6px 20px 6px 18px; border: none; background: {{q.bg}}; box-shadow: {{q.rail}}; text-align: left; font-family: inherit; color: inherit; cursor: pointer">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{t.muted}}">{{q.n}}</span>
+                    <span style="display: flex; flex-direction: column; gap: 1px; min-width: 0">
+                      <span style="font-size: 12.5px; color: {{q.tcolor}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{q.title}}</span>
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}; white-space: nowrap">{{q.sub}}</span>
+                    </span>
+                    <span aria-label="{{q.aria}}" style="width: 6px; height: 6px; border-radius: 99px; background: {{q.dot}}"></span>
+                  </button>
+                </li>
+              </sc-for>
+            </ol>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; line-height: 1.6; color: {{t.label}}">J / K · PASSER<br>G · GARDER   R · REJETER</span>
+          </sc-if>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <footer aria-label="État de la scène" style="height: 28px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 20px; padding: 0 20px; border-top: 1px solid {{t.hair}}; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; color: {{t.muted}}; white-space: nowrap">
+    <span style="display: flex; align-items: center; gap: 7px"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.ok}}"></span>ENREGISTRÉ · 11:24</span>
+    <a href="Problemes.dc.html" style="display: flex; align-items: center; gap: 7px; color: {{t.err}}; text-decoration: none"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.err}}"></span>3 ERREURS</a>
+    <a href="Contexte.dc.html" style="color: {{t.muted}}; text-decoration: none">CONTEXTE · 2 FICHES</a>
+    <span>≈ 12 500 TOKENS / RÉPLIQUE</span>
+    <button type="button" class="sb" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: {{t.muted}}; cursor: pointer">GPT-6.2 SOL ▴</button>
+    <sc-if value="{{sbIdle}}" hint-placeholder-val="{{true}}">
+      <button type="button" onClick="{{toggleDrawer}}" aria-expanded="{{drawerOn}}" aria-controls="lot" style="height: 20px; display: flex; align-items: center; gap: 9px; margin: 0 -9px; padding: 0 9px; border: none; border-radius: 6px; background: {{sbBg}}; font: inherit; letter-spacing: inherit; color: {{sbColor}}; cursor: pointer">209 SUITES À ÉCRIRE<span style="font-size: 10px; color: {{t.label}}">CTRL+MAJ+↵</span><span style="color: {{t.muted}}">{{sbCaret}}</span></button>
+    </sc-if>
+    <sc-if value="{{sbLot}}" hint-placeholder-val="{{false}}">
+      <span style="display: flex; align-items: center; gap: 9px">
+        <button type="button" onClick="{{toggleDrawer}}" aria-expanded="{{drawerOn}}" aria-controls="lot" style="height: 20px; display: flex; align-items: center; gap: 9px; margin: 0 -9px 0 -9px; padding: 0 9px; border: none; border-radius: 6px; background: {{sbBg}}; font: inherit; letter-spacing: inherit; color: {{sbLotColor}}; cursor: pointer">
+          <sc-if value="{{lotPulse}}" hint-placeholder-val="{{true}}"><span aria-hidden="true" class="pulse" style="width: 6px; height: 6px; border-radius: 99px; background: {{lotColor}}"></span></sc-if>
+          <sc-if value="{{lotStill}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{lotColor}}"></span></sc-if>
+          {{sbLotLabel}}
+          <sc-if value="{{lotPulse}}" hint-placeholder-val="{{true}}"><span role="progressbar" aria-label="Avancement du lot" aria-valuemin="0" aria-valuemax="{{lotTotal}}" aria-valuenow="{{lotDone}}" style="width: 64px; height: 3px; border-radius: 2px; background: {{t.hair2}}; display: flex; overflow: hidden"><span style="width: {{lotPct}}; background: {{lotBar}}"></span></span>
+          <span style="color: {{t.muted}}">{{sbLotRest}}</span></sc-if>
+        </button>
+        <span style="color: {{t.label}}">·</span>
+        <sc-if value="{{canStop}}" hint-placeholder-val="{{true}}"><button type="button" class="sb" onClick="{{stop}}" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: {{t.body}}; cursor: pointer">INTERROMPRE</button></sc-if>
+        <sc-if value="{{canResume}}" hint-placeholder-val="{{false}}"><button type="button" class="sb" onClick="{{resume}}" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: {{t.strong}}; cursor: pointer">REPRENDRE</button></sc-if>
+        <sc-if value="{{canReviewSb}}" hint-placeholder-val="{{false}}"><button type="button" class="sb" onClick="{{openReview}}" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: {{t.body}}; cursor: pointer">REVOIR</button></sc-if>
+      </span>
+    </sc-if>
+    <span style="flex: 1"></span>
+    <span>3 887 MOTS · ≈ 19 MIN</span>
+    <button type="button" class="sb" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: {{t.muted}}; cursor: pointer">? RACCOURCIS</button>
+  </footer>
+
+  <sc-if value="{{drawerOn}}" hint-placeholder-val="{{true}}">
+    <aside id="lot" role="dialog" aria-label="Remplir les suites" style="position: absolute; top: 48px; right: 0; bottom: 28px; width: 380px; box-sizing: border-box; background: {{t.card}}; border-left: 1px solid {{t.hair2}}; box-shadow: -24px 0 48px rgba(0,0,0,0.45), -1px 0 0 rgba(0,0,0,0.3); display: flex; flex-direction: column">
+      <div style="flex: none; padding: 20px 20px 14px; display: flex; flex-direction: column; gap: 9px; border-bottom: 1px solid {{t.hair}}">
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{dLabelColor}}">{{dLabel}}</span>
+          <button type="button" class="x" onClick="{{closeDrawer}}" aria-label="Fermer le tiroir" style="display: flex; align-items: center; gap: 7px; border: none; background: transparent; padding: 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}; cursor: pointer">ÉCHAP<span aria-hidden="true" style="font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 16px; line-height: 1">×</span></button>
+        </div>
+        <h2 style="margin: 0; font-size: 17px; font-weight: 500; line-height: 1.3; color: {{t.strong}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 400">{{dNum}}</span> {{dTitle}}</h2>
+        <p style="margin: 0; font-size: 12.5px; line-height: 1.45; color: {{t.sec}}"><sc-for list="{{dSub}}" as="m" hint-placeholder-count="1"><sc-if value="{{m.n}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 0.9em">{{m.t}}</span></sc-if><sc-if value="{{m.w}}" hint-placeholder-val="{{true}}"><span>{{m.t}}</span></sc-if></sc-for></p>
+      </div>
+
+      <sc-if value="{{dSet}}" hint-placeholder-val="{{true}}">
+        <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 14px 20px 14px">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 5px">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.sec}}">PORTÉE</span>
+            <span style="display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.accent}}"></span>MARQUÉES DANS LE SCRIPT</span>
+          </div>
+          <div role="radiogroup" aria-label="Portée du lot" style="display: flex; flex-direction: column; margin: 0 -9px">
+            <sc-for list="{{scopes}}" as="sc" hint-placeholder-count="4">
+              <label class="opt" style="display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; column-gap: 11px; align-items: start; padding: 7px 9px; border-radius: 6px; background: {{sc.bg}}; cursor: pointer">
+                <input class="inp" type="radio" name="portee" checked="{{sc.on}}" onChange="{{sc.pick}}">
+                <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                  <span style="font-size: 13.5px; line-height: 1.35; color: {{sc.color}}"><sc-for list="{{sc.name}}" as="m" hint-placeholder-count="1"><sc-if value="{{m.n}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 0.9em">{{m.t}}</span></sc-if><sc-if value="{{m.w}}" hint-placeholder-val="{{true}}"><span>{{m.t}}</span></sc-if></sc-for></span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.muted}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{sc.sub}}</span>
+                </span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; line-height: 18px; color: {{sc.color}}; white-space: nowrap">{{sc.n}}<span style="color: {{t.muted}}">{{sc.of}}</span></span>
+              </label>
+            </sc-for>
+          </div>
+
+          <div style="margin: 14px 0 5px; padding-top: 14px; border-top: 1px solid {{t.hair}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.sec}}">AFFINER</div>
+          <div style="display: flex; flex-direction: column; margin: 0 -9px">
+            <sc-for list="{{filters}}" as="f" hint-placeholder-count="2">
+              <label class="opt" style="display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; column-gap: 11px; align-items: start; padding: 7px 9px; border-radius: 6px; cursor: pointer; opacity: {{f.op}}">
+                <input class="inp" type="checkbox" checked="{{f.on}}" onChange="{{f.toggle}}">
+                <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                  <span style="font-size: 13.5px; line-height: 1.35; color: {{t.body}}">{{f.name}}</span>
+                  <span style="font-size: 12px; line-height: 1.4; color: {{t.sec}}">{{f.sub}}</span>
+                </span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; line-height: 18px; color: {{f.dColor}}; white-space: nowrap">{{f.delta}}</span>
+              </label>
+            </sc-for>
+            <div class="opt" style="display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; column-gap: 11px; align-items: start; padding: 7px 9px; border-radius: 6px; opacity: {{depthOp}}">
+              <input class="inp" id="lot-depth" type="checkbox" checked="{{depthOn}}" onChange="{{toggleDepth}}">
+              <span style="display: flex; flex-direction: column; gap: 5px; min-width: 0">
+                <label for="lot-depth" style="font-size: 13.5px; line-height: 1.35; color: {{t.body}}; cursor: pointer">Profondeur maximale</label>
+                <span style="display: flex; align-items: center; gap: 9px">
+                  <span role="radiogroup" aria-label="Niveau maximal du parent" style="display: flex; border: 1px solid {{t.ctrl}}; border-radius: 6px; overflow: hidden">
+                    <sc-for list="{{depths}}" as="d" hint-placeholder-count="3">
+                      <button type="button" class="seg" role="radio" aria-checked="{{d.on}}" aria-label="{{d.aria}}" onClick="{{d.pick}}" style="height: 22px; min-width: 28px; padding: 0 7px; border: none; border-left: {{d.sep}}; background: {{d.bg}}; color: {{d.color}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; cursor: pointer">{{d.label}}</button>
+                    </sc-for>
+                  </span>
+                  <span style="font-size: 12px; color: {{t.sec}}">niveau du parent</span>
+                </span>
+              </span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; line-height: 18px; color: {{depthDColor}}; white-space: nowrap">{{depthDelta}}</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="flex: none; border-top: 1px solid {{t.hair}}; padding: 14px 20px; display: flex; flex-direction: column; gap: 9px">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.sec}}">CE QUI PARTIRA</span>
+          <dl style="margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: 5px 14px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.04em">
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">SUITES</dt>
+            <dd style="margin: 0; font-size: 11px; color: {{t.strong}}">{{sumN}}<span style="color: {{t.muted}}">{{sumParents}}</span></dd>
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">TOKENS</dt>
+            <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{sumTokens}}<span style="color: {{t.muted}}">{{sumTokDetail}}</span></dd>
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">COÛT</dt>
+            <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{sumCost}}<span style="color: {{t.muted}}">  EXEMPLE</span></dd>
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">DURÉE</dt>
+            <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{sumTime}}<span style="color: {{t.muted}}">  EXEMPLE</span></dd>
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">MODÈLE</dt>
+            <dd style="margin: 0"><button type="button" class="ob" aria-haspopup="listbox" aria-label="Modèle : GPT-6.2 Sol" style="height: 24px; display: inline-flex; align-items: center; gap: 9px; padding: 0 9px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: {{t.input}}; color: {{t.strong}}; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 12px; letter-spacing: 0; cursor: pointer">GPT-6.2 Sol<span style="color: {{t.muted}}; font-size: 10px">▾</span></button></dd>
+          </dl>
+          <p style="margin: 0; font-size: 12px; line-height: 1.5; color: {{t.sec}}">Une suite à la fois, un seul job. Chaque réplique arrive <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.pend}}; white-space: nowrap">À VALIDER</span>. Fermer l'app n'arrête rien ; après un redémarrage, la reprise ne refait que le reste.</p>
+          <sc-if value="{{canGo}}" hint-placeholder-val="{{true}}">
+            <button type="button" class="fill" onClick="{{go}}" style="height: 38px; margin-top: 5px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border: none; border-radius: 6px; background: {{t.fill}}; color: #ffffff; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer"><span><sc-for list="{{goLabel}}" as="m" hint-placeholder-count="1"><sc-if value="{{m.n}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 0.9em">{{m.t}}</span></sc-if><sc-if value="{{m.w}}" hint-placeholder-val="{{true}}"><span>{{m.t}}</span></sc-if></sc-for></span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.05em; opacity: 0.85">CTRL+↵</span></button>
+          </sc-if>
+          <sc-if value="{{cantGo}}" hint-placeholder-val="{{false}}">
+            <button type="button" disabled="disabled" aria-disabled="true" style="height: 38px; margin-top: 5px; padding: 0 14px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.muted}}; font-family: inherit; font-size: 13px; text-align: left; cursor: not-allowed">Aucune suite dans cette portée : élargir ou retirer un filtre.</button>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{dLot}}" hint-placeholder-val="{{false}}">
+        <div style="flex: none; padding: 14px 20px 0; display: flex; flex-direction: column; gap: 9px">
+          <span role="progressbar" aria-label="Avancement du lot" aria-valuemin="0" aria-valuemax="{{lotTotal}}" aria-valuenow="{{lotDone}}" style="height: 4px; border-radius: 2px; background: {{t.hair2}}; display: flex; overflow: hidden"><span style="width: {{lotPct}}; background: {{lotBar}}"></span></span>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.sec}}">{{dParentsLabel}}</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}">ÉCRITES / DANS LE LOT</span>
+          </div>
+        </div>
+        <ol style="flex: 1; min-height: 0; overflow-y: auto; list-style: none; margin: 0; padding: 5px 20px 9px">
+          <sc-for list="{{parents}}" as="pa" hint-placeholder-count="6">
+            <li style="display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; column-gap: 9px; align-items: center; padding: 6px 0; border-bottom: 1px solid {{t.hair}}">
+              <sc-if value="{{pa.ok}}" hint-placeholder-val="{{false}}"><span aria-label="Terminée" style="font-size: 12px; line-height: 1; color: {{t.ok}}">✓</span></sc-if>
+              <sc-if value="{{pa.now}}" hint-placeholder-val="{{false}}"><span aria-label="En cours" class="pulse" style="width: 7px; height: 7px; border-radius: 99px; background: {{t.accent}}"></span></sc-if>
+              <sc-if value="{{pa.cut}}" hint-placeholder-val="{{false}}"><span aria-label="Interrompue" style="width: 7px; height: 7px; border-radius: 99px; background: {{t.pend}}"></span></sc-if>
+              <sc-if value="{{pa.wait}}" hint-placeholder-val="{{true}}"><span aria-label="En attente" style="width: 7px; height: 7px; box-sizing: border-box; border-radius: 99px; border: 1.5px solid {{t.chip2}}"></span></sc-if>
+              <span style="display: flex; flex-direction: column; gap: 1px; min-width: 0">
+                <span style="font-size: 13px; color: {{pa.color}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{pa.title}}</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">{{pa.via}}</span>
+              </span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: {{pa.color}}">{{pa.count}}</span>
+            </li>
+          </sc-for>
+        </ol>
+        <div style="flex: none; border-top: 1px solid {{t.hair}}; padding: 14px 20px; display: flex; flex-direction: column; gap: 9px">
+          <dl style="margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: 5px 14px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.04em">
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">À VALIDER</dt>
+            <dd style="margin: 0; font-size: 11px; color: {{t.pend}}">{{pendingCount}}</dd>
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">TOKENS</dt>
+            <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{lotTokDone}}<span style="color: {{t.muted}}">{{lotTokAll}}</span></dd>
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">COÛT</dt>
+            <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{lotCostDone}}<span style="color: {{t.muted}}">{{lotCostAll}}</span></dd>
+            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">RESTE</dt>
+            <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{lotRestTime}}</dd>
+          </dl>
+          <sc-if value="{{canResume}}" hint-placeholder-val="{{false}}">
+            <button type="button" class="fill" onClick="{{resume}}" style="height: 38px; margin-top: 5px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border: none; border-radius: 6px; background: {{t.fill}}; color: #ffffff; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer"><span><sc-for list="{{resumeLabel}}" as="m" hint-placeholder-count="1"><sc-if value="{{m.n}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 0.9em">{{m.t}}</span></sc-if><sc-if value="{{m.w}}" hint-placeholder-val="{{true}}"><span>{{m.t}}</span></sc-if></sc-for></span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.05em; opacity: 0.85">CTRL+↵</span></button>
+          </sc-if>
+          <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap">
+            <sc-if value="{{canStop}}" hint-placeholder-val="{{true}}"><button type="button" class="ob" onClick="{{stop}}" style="height: 30px; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Interrompre</button></sc-if>
+            <sc-if value="{{hasPending}}" hint-placeholder-val="{{true}}"><button type="button" class="lk" onClick="{{openReview}}" style="color: {{t.body}}">Revoir en série ›</button></sc-if>
+            <sc-if value="{{canAbandon}}" hint-placeholder-val="{{false}}"><button type="button" class="lk" onClick="{{abandon}}">Abandonner le lot</button></sc-if>
+          </div>
+        </div>
+      </sc-if>
+    </aside>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"etat":{"editor":"enum","options":["reglage","cours","interrompu"],"default":"reglage"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const p0 = props || this.props || {};
+    this.T = {
+      app: '#17171b', input: '#1c1c22', raised: '#2a2a33', card: '#1f1f26', hair: 'rgba(255,255,255,0.06)', hair2: 'rgba(255,255,255,0.09)',
+      chip: 'rgba(255,255,255,0.12)', chip2: 'rgba(255,255,255,0.22)', strong: '#f2f2f5', body: '#dcdce4', row: '#d5d5dd',
+      dia: '#f0efe9', sec: '#9a9aa4', muted: '#8a8a95', label: '#84848f', accent: '#4f7fff', accText: '#8fb0ff',
+      selBg: 'rgba(79,127,255,0.08)', fill: '#3d6ae8', ok: '#27ae60', pend: '#f5a623', pendLine: 'rgba(245,166,35,0.55)',
+      pendBg: 'rgba(245,166,35,0.06)', err: '#ff6b6b', ctrl: '#2e2e36', spk: '#5fb8ac', onSpk: '#101013', rcrit: '#3d9bff',
+      accLine: 'rgba(79,127,255,0.5)'
+    };
+    this.OUT = ['É. CRIT', 'ÉCHEC', 'RÉUSSITE', 'R. CRIT'];
+    this.OUTC = [this.T.err, this.T.err, this.T.ok, this.T.rcrit];
+    this.PER_SUITE = 12500;
+    this.COST = 0.0516;
+    this.SECS = 12;
+
+    // Emplacements de suite réels de la scène (Assets/Dialogue/rencontre_avec_le_forgeron_itinérant.json),
+    // nœuds dans l'ordre de lecture (niveaux 0, 1, 2 puis jamais atteints). s = [réponse, issue (-1 : pas de test), vide].
+    this.RAW = [{"id":"START","title":"Ouverture","lv":0,"s":[[1,0,0],[1,1,0],[1,2,0],[1,3,0],[3,-1,1]]},{"id":"node-9db0","title":"Échec critique","lv":1,"s":[[0,0,0],[0,1,0],[0,2,0],[0,3,0],[1,0,0],[1,1,0],[1,2,0],[1,3,0],[2,0,0],[2,1,0],[2,2,0],[2,3,0],[3,-1,1]]},{"id":"node-36c5","title":"Échec","lv":1,"s":[[0,-1,0],[1,-1,0],[2,0,0],[2,1,0],[2,2,0],[2,3,0],[3,0,0],[3,1,0],[3,2,0],[3,3,0],[4,-1,0]]},{"id":"node-3836","title":"Réussite","lv":1,"s":[[0,-1,0],[1,0,0],[1,1,0],[1,2,0],[1,3,0],[2,-1,0],[3,-1,1]]},{"id":"node-f884","title":"Réussite critique","lv":1,"s":[[0,-1,0],[1,-1,0],[2,-1,0],[3,0,0],[3,1,0],[3,2,0],[3,3,0]]},{"id":"node-d281","title":"Échec critique","lv":1,"s":[[0,0,0],[0,1,0],[0,2,0],[0,3,0],[1,0,0],[1,1,0],[1,2,0],[1,3,0],[2,0,0],[2,1,0],[2,2,0],[2,3,0]]},{"id":"node-f738","title":"Échec","lv":1,"s":[[0,-1,0],[1,0,0],[1,1,0],[1,2,0],[1,3,0],[2,-1,0]]},{"id":"node-3e39","title":"Réussite","lv":1,"s":[[0,0,0],[0,1,0],[0,2,0],[0,3,0],[1,0,0],[1,1,0],[1,2,0],[1,3,0],[2,0,0],[2,1,0],[2,2,0],[2,3,0],[3,-1,0]]},{"id":"node-0347","title":"Réussite critique","lv":1,"s":[[0,0,0],[0,1,0],[0,2,0],[0,3,0],[1,0,0],[1,1,0],[1,2,0],[1,3,0],[2,0,0],[2,1,0],[2,2,0],[2,3,0],[3,-1,0],[4,0,0],[4,1,0],[4,2,0],[4,3,0]]},{"id":"manual-e2","title":"Réplique vide","lv":2,"s":[[0,0,1],[0,1,1],[0,2,1],[0,3,1],[1,0,1],[1,1,1],[1,2,1],[1,3,1],[2,0,1],[2,1,1],[2,2,1],[2,3,1],[3,0,1],[3,1,1],[3,2,1],[3,3,1],[4,-1,1]]},{"id":"NODE_node","title":"Sans titre","lv":2,"s":[[0,0,0],[0,1,0],[0,2,0],[0,3,0],[1,0,0],[1,1,0],[1,2,0],[1,3,0],[2,0,0],[2,1,0],[2,2,0],[2,3,0],[3,0,0],[3,1,0],[3,2,0],[3,3,0],[4,-1,0]]},{"id":"node-333f","title":"Échec critique","lv":-1,"s":[[1,0,0],[1,1,0],[1,2,0],[1,3,0],[2,0,0],[2,1,0],[2,2,0],[2,3,0],[3,0,1],[3,1,1],[3,2,1],[3,3,1],[4,-1,1]]},{"id":"node-0e16","title":"Échec","lv":-1,"s":[[0,0,0],[0,1,0],[0,2,0],[0,3,0],[1,0,0],[1,1,0],[1,2,0],[1,3,0],[2,0,0],[2,1,0],[2,2,0],[2,3,0],[3,0,0],[3,1,0],[3,2,0],[3,3,0]]},{"id":"node-ba49","title":"Réussite","lv":-1,"s":[[0,-1,0],[1,-1,0],[2,-1,0],[3,-1,0]]},{"id":"node-1dcd","title":"Réussite critique","lv":-1,"s":[[0,0,0],[0,1,0],[0,2,0],[0,3,0],[1,0,0],[1,1,0],[1,2,0],[1,3,0],[2,0,0],[2,1,0],[2,2,0],[2,3,0],[3,0,0],[3,1,0],[3,2,0],[3,3,0]]},{"id":"node-f33f","title":"Échec critique","lv":-1,"s":[[0,0,0],[0,1,0],[0,2,0],[0,3,0],[1,0,0],[1,1,0],[1,2,0],[1,3,0],[2,0,0],[2,1,0],[2,2,0],[2,3,0],[3,-1,0]]},{"id":"node-2747","title":"Échec","lv":-1,"s":[[0,0,0],[0,1,0],[0,2,0],[0,3,0],[1,-1,0],[2,0,0],[2,1,0],[2,2,0],[2,3,0],[3,-1,0]]},{"id":"node-5201","title":"Réussite","lv":-1,"s":[[0,-1,0],[1,-1,0],[2,-1,0]]},{"id":"node-e0d7","title":"Réussite critique","lv":-1,"s":[[0,0,0],[0,1,0],[0,2,0],[0,3,0],[1,-1,0],[2,0,0],[2,1,0],[2,2,0],[2,3,0]]}];
+    this.VIA = { 'START': 'NIVEAU 0', 'node-9db0': 'RÉP. 01 › É. CRIT', 'node-36c5': 'RÉP. 01 › ÉCHEC', 'node-3836': 'RÉP. 01 › RÉUSSITE', 'node-f884': 'RÉP. 01 › R. CRIT', 'node-d281': 'RÉP. 03 › É. CRIT', 'node-f738': 'RÉP. 03 › ÉCHEC', 'node-3e39': 'RÉP. 03 › RÉUSSITE', 'node-0347': 'RÉP. 03 › R. CRIT', 'manual-e2': 'RÉP. 03 › É. CRIT › 04', 'NODE_node': 'RÉP. 03 › É. CRIT › 05' };
+    this.TITLE = {};
+    this.SLOTS = [];
+    this.BYKEY = {};
+    this.RAW.forEach((n) => {
+      this.TITLE[n.id] = n.title;
+      n.s.forEach((s) => {
+        const x = { nid: n.id, lv: n.lv, r: s[0], o: s[1], e: s[2] === 1, key: n.id + '|' + s[0] + '|' + s[1] };
+        this.SLOTS.push(x);
+        this.BYKEY[x.key] = x;
+      });
+    });
+
+    this.D = {
+      'START': { title: 'Ouverture', st: '',
+        line: "Ah. Une présence qui marche sur le monde sans y laisser d'empreinte. Je m'appelle Grish T'vok, caravane-atelier ambulante, collectionneur de choses qui ont mal tourné. *Il incline légèrement sa masse, des étincelles s'échappant d'une trappe de son torse.* Vos anneaux de lumière et cette distance rituelle... pas commun. Je n'ai guère d'oreille pour les prophéties, mais j'entends la matière. Si vos objets pleurent, je peux les écouter et tenter d'en recoudre la mélodie. Et si vous portez des fissures qui se taisent, je ne les brise pas, je les arrange. Dites, Maîtresse, acceptez-vous qu'un Moribandon touche ce qui vous entoure ?",
+        ch: [
+          { t: "Dans la tapisserie de l'existence, vos outils peuvent-ils suturer les fissures sans effacer ce qu'elles portent? Je n'offre pas ma mémoire, mais je cherche une réparation qui respecte les cicatrices.", test: 'Raison+Artisanat:12', tr: [['Empathique', 5]], resp: 1 },
+          { t: "Je ne cherche pas de confidences. Répare cette caravane, et je te rendrai un service : un artefact scellé, pas de questions. Est-ce que tu sais travailler avec des reliques anciennes ?", test: 'Raison+Artisanat:14', tr: [['Loyal', 5]], inf: 1 },
+          { t: "Garde tes mains pour tes villages. Je n'ai nul besoin d'un charlatan des déchets. Pars, avant que je ne te rende ta misère.", test: 'Force+Commandement:11', tr: [['Orgueilleuse', 5]], inf: -1, resp: -1 },
+          { t: '' }
+        ] },
+      'node-3836': { title: 'Réussite', st: 'VALIDÉ',
+        line: "Ha. Vos mots ont la précision d'une lime fine. Vous ne cédez pas la toile, Maîtresse, vous la confiez à quelqu'un qui respecte la trame des cicatrices.\n\nJe peux entendre la plainte d'un objet et la fractale de son histoire — pas pour l'effacer, mais pour recoudre ses fibres là où elles craquent. Je poserai des fils de lumière et de rouille stabilisée : ils consolident, ils tiennent, et ils portent les marques de la blessure comme une signature. Quand j'aurai fini, l'objet fonctionnera mieux, sans que son passé ne soit nié. En prime, une résonance légère liera ce fragment à ma caravane ; je pourrai encore entendre ses murmures si jamais il réclame attention. Acceptez-vous que je commence ?",
+        ch: [
+          { t: 'Oui. Réparez-les — mais que les cicatrices restent visibles.', inf: 1, resp: 1 },
+          { t: "Expliquez votre rituel. Comment garantissez-vous que la mémoire n'est pas effacée ?", test: 'Raison+Artisanat:10' },
+          { t: "Non. Je préfère laisser la tapisserie telle qu'elle est.", resp: -1 },
+          { t: '' }
+        ] }
+    };
+
+    // Contexte réel des parents pour la revue : fin de la réplique et réponses d'Uresaïr.
+    this.P = {
+      'START': { end: "Dites, Maîtresse, acceptez-vous qu'un Moribandon touche ce qui vous entoure ?" },
+      'node-3836': { end: "Je pourrai encore entendre ses murmures si jamais il réclame attention. Acceptez-vous que je commence ?" },
+      'node-9db0': { end: "Si vous refusez la couture que je sais faire, je ne laisse plus les choses à moitié. Regardez.",
+        ch: [{ t: 'Arrachez votre main — reprenez le contrôle par la force !', test: 'Force+Athlétisme:13' }, { t: "Plaidez! Expliquez que vous vouliez préserver la cicatrice — demandez qu'il refasse doucement.", test: 'Charisme+Rhétorique:14' }, { t: 'Restez immobile et laissez-le finir. Si quelque chose doit être perdu, apprenez de la douleur.', test: 'Force+Commandement:11' }, { t: '' }] },
+      'node-36c5': { end: "Choisissez — ou partez avec vos cicatrices telles qu'elles sont.",
+        ch: [{ t: "J'accepte le compromis. Restaurez la fonction, que la mémoire soit préservée autant que possible." }, { t: "Non. Je ne veux pas qu'on touche à ces marques. Je préfère l'objet tel qu'il est." }, { t: 'Laissez-moi convaincre autrement — accordez-moi une chance de vous persuader de préserver davantage les cicatrices.', test: 'Raison+Rhétorique:14' }, { t: "Si vous cherchez un prix, je peux vous l'offrir — un fragment du cercle, mais vous devrez jurer qu'aucune note mémorielle ne sera balayée.", test: 'Courage+Intimidation:13' }, { t: "Je m'en vais. Vos mains ne toucheront pas ma tapisserie." }] },
+      'node-f884': { end: "Si jamais la tapisserie du monde venait à se déchirer de nouveau, je pourrais le retrouver plus facilement.",
+        ch: [{ t: "Très bien. Fais ce que tu sais faire : recouds sans effacer. Je te confie l'objet." }, { t: "Avant de commencer, dis-moi : quel 'écho' peux-tu extraire ? Que pourrais-je en attendre exactement ?" }, { t: "Recouds, mais laisse un signe distinct — une rune, une spirale d'argent que je reconnaîtrai. Je veux la voir." }, { t: "Si tu as vraiment tiré quelque chose d'exceptionnel de ma présence, fais plus : lie l'objet à ma tapisserie — qu'il réponde à mon appel à distance.", test: 'Raison+Artisanat:14' }] },
+      'node-d281': { end: 'Considérez votre geste comme une dette — et une alerte pour la caravane.',
+        ch: [{ t: "Reculez. Non — je... pardonnez-moi. Ce n'était pas mon intention. Laissez-moi réparer ça.", test: 'Raison+Rhétorique:13' }, { t: 'Dégagez vos griffes de moi ! (Vous tentez de repousser la mâchoire mécanique de force — encore.)', test: 'Force+Commandement:13' }, { t: 'Calme. Vous retirez votre main, vous vous asseyez, vous vous occupez de la blessure — pas de confrontation.', test: 'Constitution+Médecine:12' }, { t: '' }, { t: '' }] },
+      'node-f738': { end: 'Choisissez, Maîtresse. Votre décision reste, mais elle porte un prix.',
+        ch: [{ t: 'Très bien. Montrez ce que vous pouvez faire à distance.' }, { t: 'Je vous donnerai une garantie. Laissez-moi un gage, et vous pourrez toucher mes affaires.', test: 'Raison+Rhétorique:12' }, { t: 'Je préfère garder mes distances. Parlez-moi plutôt de vos objets mal tournés.' }] },
+      'node-3e39': { end: "En gage, je vous offre un premier ajustement sans charge. Qu'en dites-vous ?",
+        ch: [{ t: "Je vous tends l'anneau de lumière. Faites ce que vous savez faire.", test: 'Perception+Artisanat:10' }, { t: "Approche, alors. Tu peux toucher aussi l'armure — ses griffes me gênent.", test: 'Force+Commandement:13' }, { t: "J'entends ta générosité, mais quel est ton prix au-delà du premier ajustement ?", test: 'Raison+Diplomatie:12' }, { t: "Non. Je préfère me débrouiller seul pour l'instant." }] },
+      'node-0347': { end: 'Que souhaitez-vous que je fasse ensuite ?',
+        ch: [{ t: 'Laissez-le finir : « Rapièce-les tous. Et garde la clé. »', test: 'Raison+Rhétorique:13' }, { t: 'Exigez un gage : « Si vous me dois une faveur, je la réclamerai. Inscrivez-la maintenant. »', test: 'Force+Commandement:13' }, { t: "Demandez une démonstration : « Montrez-moi ce que vos mains entendent — faites parler quelque chose d'autre. »", test: 'Perception+Artisanat:10' }, { t: 'Restez sur la réserve : « Garde la clé, Grish. Je retournerai plus tard. »' }, { t: 'Offrez-lui une récompense : « Je peux vous payer. Que demandez-vous ? »', test: 'Ruse+Marchandage:12' }] }
+    };
+    this.P['START'].ch = this.D['START'].ch;
+    this.P['node-3836'].ch = this.D['node-3836'].ch;
+
+    // Exemple : répliques générées par le lot (inventées pour la maquette).
+    this.GEN = {
+      'START|1|0': { line: "*Une trappe de son torse claque, net, comme une porte qu'on referme au nez d'un mendiant.* Pas de questions ? Alors pas de réponses non plus, Maîtresse. Vous me tendez une relique comme on tend une pièce sale, et vous appelez ça un service. Je sens d'ici ce que vous portez : ça ne dort pas, ça attend. Et je ne recouds pas ce qui attend.",
+        ch: [{ t: "Il n'attend rien. Tu entends mal.", test: 'Courage+Intimidation:13', resp: -1 }, { t: "Alors dis-moi ce qu'il attend, toi qui entends tout.", test: 'Raison+Arcane:14' }, { t: 'Soit. Je trouverai un autre artisan.', inf: -1 }] },
+      'START|1|1': { line: "Des reliques anciennes ? *Un cliquetis sec traverse sa carcasse ; une trappe s'entrouvre, puis se referme.* J'en ai recousu plus que vous n'en avez porté, Maîtresse. Mais vous me parlez comme on parle à un établi : répare, et tais-toi. Je n'ouvre pas ce que je ne peux pas écouter. Montrez-le-moi d'abord. S'il pleure, je saurai quoi en faire. S'il se tait, gardez-le : certaines choses se ferment pour de bonnes raisons.",
+        ch: [{ t: "Le voici. Écoute-le, mais ne l'ouvre pas.", resp: 1 }, { t: "Tu n'as pas à savoir ce qu'il contient. Ton travail, c'est la caravane.", test: 'Force+Commandement:13', inf: -1 }, { t: 'Certaines choses se ferment pour de bonnes raisons… comme toi ?', test: 'Perception+Investigation:12' }] },
+      'START|1|2': { line: "Ha. Une Maîtresse qui marchande avant de saluer. *Il fait rouler une épaule ; de la rouille tombe en pluie fine.* Oui, je travaille les reliques. Elles sont têtues, elles mordent, elles mentent sur leur âge. Votre artefact, je peux le garder dans l'atelier sans l'ouvrir. Mais la caravane ne se répare pas en un soir : il me faut trois nuits, et votre parole que rien de ce que vous me confiez ne réveillera mes chaudières.",
+        ch: [{ t: 'Tu as ma parole.', resp: 1 }, { t: "Trois nuits, c'est trop. Une seule.", test: 'Ruse+Marchandage:12' }] },
+      'START|1|3': { line: "Ah. *Les étincelles de son torse s'apaisent, presque respectueuses.* Vous savez ce que vous demandez, Maîtresse : une relique ancienne ne se répare pas, elle se convainc. Gardez-la scellée — ce qui dort sous cette cire n'aime pas les curieux. Je remettrai ma caravane d'aplomb, et quand vous me confierez votre artefact, je ne poserai pas une question. J'écouterai seulement. Les choses anciennes finissent toujours par parler à qui sait se taire.",
+        ch: [{ t: 'Alors commence. Je reviendrai à la nuit.', inf: 1 }, { t: 'Si elle te parle, tu me répéteras chaque mot.', test: 'Force+Commandement:13', resp: -1 }, { t: 'Et si elle te dit de ne pas me la rendre ?', test: 'Charisme+Rhétorique:12' }] },
+      'node-9db0|0|0': { line: "*Votre main glisse ; l'anneau racle contre l'acier et une gerbe d'étincelles vous mord le poignet.* Non ! Ne tirez pas — vous déchirez ce que je tenais ensemble ! *Le fil de lumière se rompt avec un son de corde cassée.* Voilà ce que coûte la force, Maîtresse. La cicatrice est ouverte, maintenant, et elle ne se taira plus.",
+        ch: [{ t: 'Referme-la. Tout de suite.', test: 'Force+Commandement:14' }, { t: "C'est toi qui l'as ouverte.", resp: -2 }] },
+      'node-9db0|0|1': { line: "*Vous tirez ; il serre. Un instant, aucun des deux ne cède.* Lâchez, Maîtresse. Je ne vous retiens pas, je retiens la couture. *Il desserre enfin les doigts, et le fil de lumière pend entre vous comme une promesse rompue.* La voilà à moitié faite. Ni réparée, ni laissée en paix.",
+        ch: [{ t: 'Finis-la, alors.', inf: 1 }, { t: "Laisse-la ainsi. Je m'en accommoderai." }] },
+      'node-9db0|0|2': { line: "*D'un geste sec, vous libérez votre main ; il recule d'un pas, ses trappes cliquetant.* Bien. Vous savez encore dire non avec le corps. Je ne recommencerai pas sans votre permission. Mais la couture attend, Maîtresse — et une couture qui attend s'impatiente.",
+        ch: [{ t: 'Demande, cette fois.', resp: 1 }, { t: 'Elle attendra.' }] },
+      'node-9db0|0|3': { line: "*Vous arrachez votre main si vivement que l'anneau chante — une note pure, intacte.* Oh. *Grish se fige.* Vous avez fait ce que je n'osais pas : vous l'avez réveillé sans le briser. Écoutez-le, Maîtresse. Il ne pleure plus. Il vous appelle.",
+        ch: [{ t: "Qu'est-ce qu'il dit ?", test: 'Raison+Arcane:12' }, { t: 'Ne t\'approche plus de lui.', resp: -1 }] }
+    };
+
+    this.DEF = { scope: 'scene', noEmpty: true, noOrph: true, depthOn: false, depth: 1 };
+    this.state = this.initial(p0.etat);
+    this.scrollEl = null;
+    this.queueEl = null;
+    this.rvBodyEl = null;
+    this.setScroll = (el) => { this.scrollEl = el; };
+    this.setQueue = (el) => { this.queueEl = el; };
+    this.setRvBody = (el) => { this.rvBodyEl = el; };
+    this.onKey = (ev) => this.key(ev);
+  }
+
+  initial(e) {
+    const sel = Object.assign({}, this.DEF);
+    if (e === 'cours') return { etat: 'cours', drawer: false, review: false, done: 12, rv: {}, cur: 0, sel: sel, lotSel: Object.assign({}, this.DEF), reason: '', start: 11 * 3600 + 21 * 60 + 36 };
+    if (e === 'interrompu') return { etat: 'interrompu', drawer: false, review: true, done: 31, rv: { 0: 'kept', 1: 'kept', 2: 'rejected' }, cur: 3, sel: sel, lotSel: Object.assign({}, this.DEF), reason: 'restart', start: 10 * 3600 + 46 * 60 };
+    return { etat: 'reglage', drawer: true, review: false, done: 0, rv: {}, cur: 0, sel: sel, lotSel: Object.assign({}, this.DEF), reason: '', start: 0 };
+  }
+
+  componentDidMount() {
+    window.addEventListener('keydown', this.onKey);
+    this.reduce = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.lastPropEtat = this.props.etat;
+    this.lastView = this.viewKey();
+    this.lastCur = this.state.cur;
+    this.t1 = setTimeout(() => this.layout(), 60);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => this.layout());
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.onKey);
+    clearTimeout(this.t1);
+    clearInterval(this.timer);
+  }
+
+  componentDidUpdate() {
+    const pe = this.props.etat;
+    if (this.lastPropEtat !== pe) {
+      this.lastPropEtat = pe;
+      this.setEtat(pe);
+      return;
+    }
+    const v = this.viewKey();
+    if (this.lastView !== v) {
+      this.lastView = v;
+      this.layout();
+    }
+    if (this.lastCur !== this.state.cur) {
+      this.lastCur = this.state.cur;
+      this.centerQueue();
+      if (this.rvBodyEl) this.rvBodyEl.scrollTop = 0;
+    }
+  }
+
+  viewKey() {
+    return this.state.etat + '|' + this.state.review + '|' + this.state.drawer;
+  }
+
+  layout() {
+    this.centerQueue();
+    const box = this.scrollEl;
+    if (!box || this.state.review) return;
+    if (this.state.etat === 'cours') {
+      const a = box.querySelector('[data-scroll="START"]');
+      if (a) box.scrollTop = Math.max(0, a.offsetTop - 70);
+      return;
+    }
+    const b = box.querySelector('[data-scroll="node-3836"]');
+    if (b) box.scrollTop = Math.max(0, b.offsetTop + b.offsetHeight - box.clientHeight + 40);
+  }
+
+  centerQueue() {
+    const q = this.queueEl;
+    if (!q) return;
+    const el = q.querySelector('[data-q="cur"]');
+    if (el) q.scrollTop = Math.max(0, el.offsetTop - q.clientHeight / 2 + el.offsetHeight / 2);
+  }
+
+  setEtat(e) {
+    clearInterval(this.timer);
+    this.setState(this.initial(e));
+  }
+
+  key(ev) {
+    const s = this.state;
+    if (ev.key === 'Escape') {
+      if (s.drawer) { this.setState({ drawer: false }); return; }
+      if (s.review) { this.setState({ review: false }); }
+      return;
+    }
+    if (ev.ctrlKey && ev.shiftKey && ev.key === 'Enter') { ev.preventDefault(); this.toggleDrawer(); return; }
+    if (ev.ctrlKey && ev.key === 'Enter' && s.drawer) {
+      ev.preventDefault();
+      if (s.etat === 'reglage') this.go();
+      else if (s.etat === 'interrompu') this.resume();
+      return;
+    }
+    if (!s.review || ev.ctrlKey || ev.altKey || ev.metaKey) return;
+    const k = ev.key.toLowerCase();
+    if (k === 'j') this.move(1);
+    else if (k === 'k') this.move(-1);
+    else if (k === 'g') this.mark('kept');
+    else if (k === 'r') this.mark('rejected');
+  }
+
+  toggleDrawer() {
+    const open = !this.state.drawer;
+    this.setState({ drawer: open, review: open ? false : this.state.review });
+  }
+
+  compute(sel) {
+    const inScope = this.SLOTS.filter((x) => sel.scope === 'scene' || (sel.scope === 'niveau1' && x.lv === 1) || (sel.scope === 'replique' && x.nid === 'node-3836') || (sel.scope === 'issues' && x.nid === 'node-3836' && x.r === 1));
+    const dEmpty = inScope.filter((x) => x.e).length;
+    const a1 = sel.noEmpty ? inScope.filter((x) => !x.e) : inScope;
+    const dOrph = a1.filter((x) => x.lv < 0).length;
+    const a2 = sel.noOrph ? a1.filter((x) => x.lv >= 0) : a1;
+    const dDepth = a2.filter((x) => x.lv < 0 || x.lv > sel.depth).length;
+    const fin = sel.depthOn ? a2.filter((x) => x.lv >= 0 && x.lv <= sel.depth) : a2;
+    return { raw: inScope.length, dEmpty: dEmpty, dOrph: dOrph, dDepth: dDepth, fin: fin };
+  }
+
+  fmt(n) {
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  }
+
+  euro(n) {
+    return '≈ ' + n.toFixed(2).replace('.', ',') + ' €';
+  }
+
+  dur(sec) {
+    if (sec <= 0) return '—';
+    if (sec < 60) return '≈ ' + sec + ' S';
+    const m = Math.round(sec / 60);
+    if (m < 60) return '≈ ' + m + ' MIN';
+    return '≈ ' + Math.floor(m / 60) + ' H ' + String(m % 60).padStart(2, '0');
+  }
+
+  clock(sec) {
+    const h = Math.floor(sec / 3600) % 24;
+    const m = Math.floor(sec / 60) % 60;
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+  }
+
+  mix(text) {
+    const out = [];
+    const re = /\d+(?:[ :,.]\d+)*/g;
+    let last = 0;
+    let m;
+    while ((m = re.exec(text))) {
+      if (m.index > last) out.push({ t: text.slice(last, m.index), n: false, w: true });
+      out.push({ t: m[0], n: true, w: false });
+      last = re.lastIndex;
+    }
+    if (last < text.length) out.push({ t: text.slice(last), n: false, w: true });
+    return out;
+  }
+
+  pad(n) {
+    return String(n).padStart(2, '0');
+  }
+
+  segs(text) {
+    const out = [];
+    const re = /\*([^*]+)\*/g;
+    let last = 0;
+    let m;
+    while ((m = re.exec(text))) {
+      const before = text.slice(last, m.index).trim();
+      if (before) out.push({ t: before, it: false, rm: true });
+      out.push({ t: m[1].trim(), it: true, rm: false });
+      last = re.lastIndex;
+    }
+    const rest = text.slice(last).trim();
+    if (rest) out.push({ t: rest, it: false, rm: true });
+    return out.map((s, i) => Object.assign({}, s, { t: i < out.length - 1 ? s.t + ' ' : s.t }));
+  }
+
+  paras(line) {
+    return line.split(/\n\s*\n/).map((raw) => {
+      const p = raw.trim();
+      const whole = /^\*[^*]+\*$/.test(p);
+      return whole ? { dir: true, say: false, text: p.replace(/\*/g, ''), segs: [] } : { dir: false, say: true, text: '', segs: this.segs(p) };
+    });
+  }
+
+  chips(c) {
+    const out = [];
+    (c.tr || []).forEach((x) => out.push({ label: x[0].toUpperCase() + ' ≥ ' + x[1] }));
+    if (c.test) out.push({ label: this.testLabel(c.test) });
+    const sign = (v) => (v > 0 ? '+' + v : '−' + Math.abs(v));
+    if (c.resp) out.push({ label: 'RESPECT ' + sign(c.resp) });
+    if (c.inf) out.push({ label: 'INFLUENCE ' + sign(c.inf) });
+    return out;
+  }
+
+  testLabel(test) {
+    const m = /^([^+]+)\+([^:]+):(\d+)$/.exec(test);
+    return m ? 'TEST ' + m[2].toUpperCase() + ' · DD ' + m[3] : 'TEST ' + test;
+  }
+
+  // Statut d'un emplacement : written, todo, lot (dans la portée ou en file), now, pending.
+  st(key) {
+    const c = this.ctx;
+    const slot = this.BYKEY[key];
+    if (!slot) return 'written';
+    if (c.mode === 'sel') return c.inSel[key] ? 'lot' : 'todo';
+    const i = c.lotIdx[key];
+    if (i === undefined) return 'todo';
+    if (i < c.done) {
+      const r = c.rv[i];
+      if (r === 'kept') return 'written';
+      if (r === 'rejected') return 'todo';
+      return 'pending';
+    }
+    if (i === c.done && c.running) return 'now';
+    return 'lot';
+  }
+
+  block(id, opt) {
+    const t = this.T;
+    const n = this.D[id];
+    const choices = n.ch.map((c, i) => {
+      const empty = !c.t;
+      const isSel = opt.sel === i;
+      const isFocus = opt.focus === i;
+      const keys = c.test ? [0, 1, 2, 3].map((o) => id + '|' + i + '|' + o) : [id + '|' + i + '|-1'];
+      const sts = keys.map((k) => this.st(k));
+      const cnt = (v) => sts.filter((x) => x === v).length;
+      const written = cnt('written');
+      const pending = cnt('pending');
+      const now = cnt('now');
+      const lot = cnt('lot');
+      let meta = '';
+      let metaColor = t.muted;
+      if (empty) {
+        meta = pending ? '▲ RÉPONSE VIDE · À VALIDER' : '▲ RÉPONSE VIDE';
+        metaColor = t.pend;
+      } else if (c.test) {
+        if (written === 4) meta = isSel ? this.OUT[opt.out] : '4 ISSUES · 4 ÉCRITES';
+        else {
+          const parts = ['4 ISSUES'];
+          if (written) parts.push(written + (written > 1 ? ' ÉCRITES' : ' ÉCRITE'));
+          if (pending) parts.push(pending + ' À VALIDER');
+          if (now) parts.push('1 EN COURS');
+          if (!written && !pending && !now) parts.push('À ÉCRIRE');
+          meta = parts.join(' · ');
+          if (pending) metaColor = t.pend;
+          else if (now) metaColor = t.accText;
+        }
+      } else {
+        const s0 = sts[0];
+        if (s0 === 'written') meta = 'SUITE ÉCRITE';
+        else if (s0 === 'pending') { meta = 'À VALIDER'; metaColor = t.pend; }
+        else if (s0 === 'now') { meta = 'EN COURS'; metaColor = t.accText; }
+        else meta = 'SUITE À ÉCRIRE';
+      }
+      if (lot && !now && metaColor === t.muted) metaColor = t.accText;
+      const showOutcomes = Boolean(c.test) && (isSel || isFocus || pending > 0 || now > 0 || (written > 0 && written < 4));
+      const outs = showOutcomes ? sts.map((s, oi) => {
+        const base = { label: this.OUT[oi], title: '', bstyle: 'solid', bg: 'transparent' };
+        if (s === 'written') {
+          const on = isSel && opt.out === oi;
+          return Object.assign(base, { title: 'Écrite', color: on ? t.strong : this.OUTC[oi], border: on ? this.OUTC[oi] : t.chip, bg: on ? t.raised : 'transparent' });
+        }
+        if (s === 'pending') return Object.assign(base, { title: 'À valider', color: t.pend, border: t.pendLine, bg: t.pendBg });
+        if (s === 'now') return Object.assign(base, { title: 'En cours de génération', color: t.accText, border: t.accent, bg: t.selBg });
+        if (s === 'lot') return Object.assign(base, { title: 'Dans le lot', color: t.accText, border: t.accLine, bstyle: 'dashed' });
+        return Object.assign(base, { title: 'À écrire', color: t.muted, border: t.chip2, bstyle: 'dashed' });
+      }) : [];
+      return {
+        num: this.pad(i + 1),
+        empty: empty, full: !empty, text: c.t,
+        chips: this.chips(c), hasChips: this.chips(c).length > 0,
+        meta: meta, metaColor: metaColor,
+        dotLot: lot > 0 && !now && !pending, dotNow: now > 0, dotPend: pending > 0 && !now,
+        textColor: isSel || isFocus ? t.strong : t.body,
+        bg: isSel || isFocus ? t.selBg : 'transparent',
+        rail: isSel || isFocus ? 'inset 2px 0 0 ' + t.accent : 'none',
+        showOutcomes: showOutcomes, outs: outs
+      };
+    });
+    return {
+      key: id, hasLink: Boolean(opt.link), link: opt.link, title: n.title, status: n.st,
+      paras: this.paras(n.line),
+      who: 'URESAÏR — ' + n.ch.length + ' RÉPONSES',
+      choices: choices
+    };
+  }
+
+  queueItem(slot, i) {
+    const s = this.state;
+    const r = s.rv[i] || 'pending';
+    const title = this.TITLE[slot.nid] || 'Sans titre';
+    return { slot: slot, i: i, status: r, title: title, sub: 'RÉP. ' + this.pad(slot.r + 1) + (slot.o >= 0 ? ' · ' + this.OUT[slot.o] : '') };
+  }
+
+  renderVals() {
+    const t = this.T;
+    const s = this.state;
+    const isA = s.etat === 'reglage';
+    const isB = s.etat === 'cours';
+    const isC = s.etat === 'interrompu';
+    const isT = s.etat === 'termine';
+    const calc = this.compute(s.sel);
+    const lot = this.compute(s.lotSel).fin;
+    const lotIdx = {};
+    lot.forEach((x, i) => { lotIdx[x.key] = i; });
+    const inSel = {};
+    calc.fin.forEach((x) => { inSel[x.key] = true; });
+    this.ctx = { mode: isA ? 'sel' : 'lot', inSel: inSel, lotIdx: lotIdx, done: s.done, rv: s.rv, running: isB };
+
+    const blocks = [
+      this.block('START', { sel: 0, out: 2, focus: -1, link: '' }),
+      this.block('node-3836', { sel: -1, out: -1, focus: 1, link: 'RÉPONSE 01 · RÉUSSITE' })
+    ];
+
+    const total = lot.length;
+    const done = Math.min(s.done, total);
+    const queue = lot.slice(0, done).map((slot, i) => this.queueItem(slot, i));
+    const nKept = queue.filter((q) => q.status === 'kept').length;
+    const nRej = queue.filter((q) => q.status === 'rejected').length;
+    const nPend = queue.length - nKept - nRej;
+    const rest = total - done;
+    const lotColor = isC ? t.pend : isT ? t.ok : t.accent;
+
+    // Tiroir, réglage
+    const self = this;
+    const setSel = (patch) => self.setState({ sel: Object.assign({}, self.state.sel, patch) });
+    const scopeDefs = [
+      { id: 'issues', name: 'Les issues de cette réponse', sub: 'RÉUSSITE › RÉP. 02 · TEST ARTISANAT DD 10' },
+      { id: 'replique', name: 'Les suites de cette réplique', sub: 'RÉUSSITE · NIVEAU 1 · 4 RÉPONSES' },
+      { id: 'niveau1', name: 'Tout le niveau 1', sub: "8 RÉPLIQUES JUSTE APRÈS L'OUVERTURE" },
+      { id: 'scene', name: 'Toute la scène', sub: '19 RÉPLIQUES · TOUS LES NIVEAUX' }
+    ];
+    const scopes = scopeDefs.map((d) => {
+      const c = this.compute(Object.assign({}, s.sel, { scope: d.id }));
+      const on = s.sel.scope === d.id;
+      return {
+        name: this.mix(d.name), sub: d.sub, on: on,
+        n: String(c.fin.length), of: c.fin.length !== c.raw ? ' / ' + c.raw : '',
+        color: on ? t.strong : t.body,
+        bg: on ? 'rgba(255,255,255,0.035)' : 'transparent',
+        pick: () => setSel({ scope: d.id })
+      };
+    });
+    const dl = (v, on) => (v > 0 ? '−' + v : '—');
+    const filters = [
+      { name: 'Ignorer les réponses vides', sub: "Sans réponse écrite, rien à prolonger.", on: s.sel.noEmpty, v: calc.dEmpty, toggle: () => setSel({ noEmpty: !self.state.sel.noEmpty }) },
+      { name: 'Ignorer les répliques jamais atteintes', sub: "Huit répliques sans chemin depuis l'Ouverture ; 5 emplacements tombent sous les deux filtres.", on: s.sel.noOrph, v: calc.dOrph, toggle: () => setSel({ noOrph: !self.state.sel.noOrph }) }
+    ].map((f) => Object.assign(f, { delta: dl(f.v), dColor: f.on && f.v ? t.body : t.muted, op: f.v ? 1 : 0.55 }));
+    const depths = [0, 1, 2].map((d, i) => {
+      const on = s.sel.depth === d;
+      return {
+        label: String(d), on: on, aria: "Jusqu'au niveau " + d,
+        sep: i ? '1px solid ' + t.ctrl : 'none',
+        bg: on ? t.raised : 'transparent',
+        color: on ? t.strong : t.sec,
+        pick: () => setSel({ depth: d, depthOn: true })
+      };
+    });
+    const n = calc.fin.length;
+    const parentsN = Object.keys(calc.fin.reduce((a, x) => { a[x.nid] = 1; return a; }, {})).length;
+
+    // Tiroir, lot
+    const groups = [];
+    lot.forEach((x, i) => {
+      let g = groups[groups.length - 1];
+      if (!g || g.nid !== x.nid) { g = { nid: x.nid, total: 0, done: 0, first: i }; groups.push(g); }
+      g.total += 1;
+      if (i < done) g.done += 1;
+    });
+    const curNid = done < total ? lot[done].nid : '';
+    const parents = groups.map((g) => {
+      const complete = g.done === g.total;
+      const isCur = !complete && g.nid === curNid;
+      return {
+        title: this.TITLE[g.nid] || 'Sans titre', via: this.VIA[g.nid] || 'JAMAIS ATTEINTE',
+        count: g.done + ' / ' + g.total,
+        ok: complete, now: isCur && isB, cut: isCur && isC, wait: !complete && !(isCur && (isB || isC)),
+        color: complete ? t.body : isCur ? t.strong : t.sec
+      };
+    });
+    const curSlot = done < total ? lot[done] : null;
+    const curLabel = curSlot ? (this.TITLE[curSlot.nid] || 'Sans titre') + ' › réponse ' + this.pad(curSlot.r + 1) + (curSlot.o >= 0 ? ' · ' + this.OUT[curSlot.o].toLowerCase() : '') : '';
+    const reasonText = s.reason === 'user' ? 'Interrompu à la main à ' + this.clock(s.start + done * this.SECS) + '.' : 'Le serveur a redémarré à 10:52.';
+    let lotLine = '';
+    if (isB) lotLine = 'En cours : ' + curLabel + '.';
+    else if (isC) lotLine = reasonText + ' La reprise ne refait que le reste.';
+    else if (isT) lotLine = 'Toutes les suites du lot sont écrites.';
+
+    // Revue
+    const cur = s.cur;
+    const item = cur >= 0 && cur < queue.length ? queue[cur] : null;
+    let rv = { path: '', parentEnd: '', resp: '', respFull: true, respEmpty: false, hasTest: false, test: '', out: '', outColor: t.muted, stLabel: '', stColor: t.pend, meta: '', hasGen: false, noGen: false, segs: [], who: '', choices: [], op: 1 };
+    if (item) {
+      const sl = item.slot;
+      const p = this.P[sl.nid];
+      const respSrc = p && p.ch ? p.ch[sl.r] : null;
+      const gen = this.GEN[sl.key];
+      const outName = sl.o >= 0 ? this.OUT[sl.o] : '';
+      const st = item.status;
+      rv = {
+        path: (this.TITLE[sl.nid] || 'Sans titre').toUpperCase() + ' › RÉPONSE ' + this.pad(sl.r + 1) + (outName ? ' · ' + outName : ''),
+        parentEnd: p ? '« …' + p.end + ' »' : 'Réplique hors de cet aperçu.',
+        resp: respSrc && respSrc.t ? respSrc.t : '',
+        respFull: Boolean(respSrc && respSrc.t), respEmpty: !(respSrc && respSrc.t),
+        hasTest: Boolean(respSrc && respSrc.test), test: respSrc && respSrc.test ? this.testLabel(respSrc.test) : '',
+        out: outName, outColor: sl.o >= 0 ? this.OUTC[sl.o] : t.muted,
+        stLabel: st === 'kept' ? 'GARDÉE' : st === 'rejected' ? "REJETÉE — L'EMPLACEMENT REDEVIENT À ÉCRIRE" : 'À VALIDER',
+        stColor: st === 'kept' ? t.ok : st === 'rejected' ? t.err : t.pend,
+        meta: 'GÉNÉRÉE PAR LE LOT À ' + this.clock(s.start + (cur + 1) * this.SECS),
+        hasGen: Boolean(gen), noGen: !gen,
+        segs: gen ? this.segs(gen.line) : [],
+        who: gen ? 'URESAÏR — ' + gen.ch.length + ' RÉPONSES PROPOSÉES' : '',
+        choices: gen ? gen.ch.map((c, i) => ({ num: this.pad(i + 1), text: c.t, chips: this.chips(c), meta: c.test ? '4 ISSUES · À ÉCRIRE' : 'SUITE À ÉCRIRE' })) : [],
+        op: st === 'rejected' ? 0.45 : 1
+      };
+    }
+    const queueRows = queue.map((q) => {
+      const isCur = q.i === cur;
+      const dot = q.status === 'kept' ? t.ok : q.status === 'rejected' ? t.err : t.pend;
+      return {
+        n: this.pad(q.i + 1), title: q.title, sub: q.sub, dot: dot,
+        aria: q.status === 'kept' ? 'Gardée' : q.status === 'rejected' ? 'Rejetée' : 'À valider',
+        mark: isCur ? 'cur' : 'q' + q.i, cur: isCur ? 'true' : 'false',
+        tcolor: isCur ? t.strong : q.status === 'pending' ? t.body : t.sec,
+        bg: isCur ? t.selBg : 'transparent',
+        rail: isCur ? 'inset 2px 0 0 ' + t.accent : 'none',
+        pick: () => self.setState({ cur: q.i })
+      };
+    });
+    const reviewed = nKept + nRej;
+    const qLen = Math.max(1, queue.length);
+
+    const etats = [['reglage', 'RÉGLAGE'], ['cours', 'EN COURS'], ['interrompu', 'INTERROMPU + REVUE']].map((e, i) => {
+      const on = s.etat === e[0] || (e[0] === 'cours' && isT);
+      return { label: e[1], on: on, sep: i ? '1px solid ' + t.ctrl : 'none', bg: on ? t.raised : 'transparent', color: on ? t.strong : t.sec, pick: () => self.setEtat(e[0]) };
+    });
+
+    const drawerOn = s.drawer;
+    const stats = [
+      { k: 'RÉPLIQUES', v: '19', color: t.body },
+      { k: 'MOTS', v: '3 887', color: t.body },
+      { k: 'LECTURE', v: '≈ 19 MIN', color: t.body },
+      isA ? { k: 'SUITES À ÉCRIRE', v: '209', color: t.body } : { k: 'À VALIDER', v: String(nPend), color: nPend ? t.pend : t.body },
+      { k: 'RÉPONSES VIDES', v: '12', color: t.pend }
+    ];
+
+    let dLabel = 'REMPLIR LES SUITES';
+    let dNum = '209';
+    let dTitle = 'suites à écrire dans la scène';
+    let dSub = "Chaque réponse attend sa suite, chaque test en attend quatre ; chaque suite écrite en ouvrira d'autres.";
+    if (isB) { dLabel = 'LOT EN COURS'; dNum = done + ' / ' + total; dTitle = 'suites écrites'; dSub = lotLine; }
+    if (isC) { dLabel = 'LOT INTERROMPU'; dNum = done + ' / ' + total; dTitle = 'suites écrites'; dSub = reasonText + ' Les suites déjà écrites ne sont ni refaites ni refacturées : la reprise ne fait que les ' + rest + ' restantes.'; }
+    if (isT) { dLabel = 'LOT TERMINÉ'; dNum = total + ' / ' + total; dTitle = 'suites écrites'; dSub = 'Le lot est fini. Les répliques attendent la revue en série.'; }
+
+    return {
+      t: t,
+      blocks: blocks,
+      showScript: !s.review, review: s.review,
+      filAria: s.review ? 'File de revue' : 'Fil de la lecture',
+      filPad: s.review ? '20px 20px 14px' : '34px 20px 20px',
+      filReussite: isA ? '4 RÉPONSES · 7 SUITES À ÉCRIRE' : '4 RÉPONSES',
+      stats: stats,
+      filTrigger: isA,
+      filLot: !isA,
+      hint1: isA ? 'TAB · SUITE VIDE SUIVANTE' : 'TAB · À VALIDER SUIVANTE',
+      hasClasseurLot: !isA,
+      classeurLot: isB ? 'LOT · ' + done + ' / ' + total : isC ? 'LOT INTERROMPU · ' + done + ' / ' + total : 'LOT TERMINÉ · ' + nPend + ' À VALIDER',
+
+      lotColor: lotColor, lotBar: isC ? t.pend : isT ? t.ok : t.accent,
+      lotPulse: isB, lotStill: !isB,
+      lotLabel: isB ? 'LOT EN COURS' : isC ? 'LOT INTERROMPU' : 'LOT TERMINÉ',
+      lotDone: String(done), lotTotal: String(total),
+      lotPct: (total ? (done / total) * 100 : 0).toFixed(1) + '%',
+      lotLine: this.mix(lotLine),
+      hasPending: nPend > 0, pendingCount: String(nPend),
+      pendingWord: nPend > 1 ? 'répliques à valider' : 'réplique à valider',
+      canStop: isB, canResume: isC, canAbandon: isC, canReviewSb: isT && nPend > 0,
+      restLabel: rest + ' SUITES',
+      resumeLabel: this.mix('Reprendre — ' + rest + (rest > 1 ? ' suites' : ' suite')),
+
+      sbIdle: isA, sbLot: !isA,
+      sbBg: drawerOn ? t.raised : 'transparent',
+      sbColor: drawerOn ? t.strong : t.muted,
+      sbCaret: drawerOn ? '▸' : '',
+      sbLotColor: isC ? t.pend : drawerOn ? t.strong : t.body,
+      sbLotLabel: isB ? 'LOT · ' + done + ' / ' + total : isC ? 'LOT INTERROMPU — ' + done + ' / ' + total : 'LOT TERMINÉ — ' + total + ' / ' + total,
+      sbLotRest: isB ? this.dur(rest * this.SECS) : isC ? rest + ' RESTANTES' : nPend + ' À VALIDER',
+
+      drawerOn: drawerOn,
+      dSet: isA, dLot: !isA,
+      dLabel: dLabel, dLabelColor: isC ? t.pend : t.sec,
+      dNum: dNum, dTitle: dTitle, dSub: this.mix(dSub),
+      scopes: scopes, filters: filters, depths: depths,
+      depthOn: s.sel.depthOn,
+      depthDelta: dl(calc.dDepth), depthDColor: s.sel.depthOn && calc.dDepth ? t.body : t.muted,
+      depthOp: s.sel.scope === 'scene' || s.sel.scope === 'niveau1' ? 1 : 0.55,
+      toggleDepth: () => setSel({ depthOn: !self.state.sel.depthOn }),
+      sumN: String(n), sumParents: n ? '  SOUS ' + parentsN + (parentsN > 1 ? ' RÉPLIQUES' : ' RÉPLIQUE') : '',
+      sumTokens: '≈ ' + this.fmt(n * this.PER_SUITE), sumTokDetail: n ? '  · ' + n + ' × ≈ 12 500' : '',
+      sumCost: this.euro(n * this.COST), sumTime: this.dur(n * this.SECS),
+      canGo: n > 0, cantGo: n === 0,
+      goLabel: this.mix('Générer ' + n + (n > 1 ? ' suites' : ' suite')),
+      dParentsLabel: 'RÉPLIQUES DU LOT — ' + groups.length,
+      parents: parents,
+      lotTokDone: '≈ ' + this.fmt(done * this.PER_SUITE), lotTokAll: '  SUR ≈ ' + this.fmt(total * this.PER_SUITE),
+      lotCostDone: this.euro(done * this.COST), lotCostAll: '  SUR ' + this.euro(total * this.COST),
+      lotRestTime: isT ? '—' : this.dur(rest * this.SECS) + (isC ? ' À LA REPRISE' : ''),
+
+      bannerBg: isC ? t.pendBg : 'transparent',
+      bannerLabel: isB ? 'LOT EN COURS · ' + done + ' / ' + total : isC ? 'LOT INTERROMPU · ' + done + ' / ' + total : 'LOT TERMINÉ · ' + total + ' / ' + total,
+      bannerText: this.mix(isB ? 'Les nouvelles répliques rejoignent la file au fil du lot.' : isC ? reasonText + ' La reprise ne refait que les ' + rest + ' suites restantes.' : 'Toutes les suites du lot sont écrites.'),
+      rvPos: item ? this.pad(cur + 1) + ' / ' + this.pad(queue.length) : this.pad(queue.length) + ' / ' + this.pad(queue.length),
+      rvKeptPct: (nKept / qLen * 100).toFixed(1) + '%', rvRejPct: (nRej / qLen * 100).toFixed(1) + '%',
+      rvBarAria: reviewed + ' revues sur ' + queue.length,
+      rvHasItem: Boolean(item), rvAllDone: !item,
+      rvDoneLine: nKept + (nKept > 1 ? ' GARDÉES' : ' GARDÉE') + ' · ' + nRej + (nRej > 1 ? ' REJETÉES' : ' REJETÉE'),
+      rv: rv,
+      queueTitle: 'FILE DE REVUE — ' + queue.length,
+      qPend: nPend + ' À VALIDER', qKept: nKept + (nKept > 1 ? ' GARDÉES' : ' GARDÉE'), qRej: nRej + (nRej > 1 ? ' REJETÉES' : ' REJETÉE'),
+      queue: queueRows,
+
+      etats: etats,
+      stripMax: drawerOn ? '808px' : 'none',
+      setScroll: this.setScroll, setQueue: this.setQueue, setRvBody: this.setRvBody,
+      toggleDrawer: () => self.toggleDrawer(),
+      openDrawer: () => self.setState({ drawer: true, review: false }),
+      closeDrawer: () => self.setState({ drawer: false }),
+      openReview: () => self.openReview(),
+      closeReview: () => self.setState({ review: false }),
+      keep: () => self.mark('kept'),
+      reject: () => self.mark('rejected'),
+      prev: () => self.move(-1),
+      next: () => self.move(1),
+      go: () => self.go(),
+      stop: () => self.stop(),
+      resume: () => self.resume(),
+      abandon: () => self.setEtat('reglage')
+    };
+  }
+
+  lotLen() {
+    return this.compute(this.state.lotSel).fin.length;
+  }
+
+  openReview() {
+    const s = this.state;
+    const len = Math.min(s.done, this.lotLen());
+    let c = -1;
+    for (let i = 0; i < len; i += 1) { if (!s.rv[i]) { c = i; break; } }
+    this.setState({ review: true, drawer: false, cur: c });
+  }
+
+  move(d) {
+    const len = Math.min(this.state.done, this.lotLen());
+    if (!len) return;
+    const c = this.state.cur < 0 ? (d > 0 ? 0 : len - 1) : Math.max(0, Math.min(len - 1, this.state.cur + d));
+    this.setState({ cur: c });
+  }
+
+  mark(v) {
+    const s = this.state;
+    const len = Math.min(s.done, this.lotLen());
+    if (s.cur < 0 || s.cur >= len) return;
+    const rv = Object.assign({}, s.rv);
+    rv[s.cur] = v;
+    let nx = -1;
+    for (let k = 1; k <= len; k += 1) {
+      const i = (s.cur + k) % len;
+      if (!rv[i]) { nx = i; break; }
+    }
+    this.setState({ rv: rv, cur: nx });
+  }
+
+  go() {
+    const sel = Object.assign({}, this.state.sel);
+    if (!this.compute(sel).fin.length) return;
+    clearInterval(this.timer);
+    this.setState({ etat: 'cours', drawer: false, review: false, done: 0, rv: {}, cur: 0, lotSel: sel, reason: '', start: 11 * 3600 + 24 * 60 });
+    this.tick();
+  }
+
+  stop() {
+    clearInterval(this.timer);
+    this.setState({ etat: 'interrompu', reason: 'user', drawer: false });
+  }
+
+  resume() {
+    clearInterval(this.timer);
+    this.setState({ etat: 'cours', drawer: false, review: false, reason: '' });
+    this.tick();
+  }
+
+  tick() {
+    if (this.reduce) return;
+    this.timer = setInterval(() => {
+      const total = this.lotLen();
+      const d = this.state.done + 1;
+      if (d >= total) {
+        clearInterval(this.timer);
+        this.setState({ done: total, etat: 'termine' });
+      } else this.setState({ done: d });
+    }, 2400);
+  }
+}
+</script>
+</body>
+</html>

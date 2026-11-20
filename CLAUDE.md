@@ -35,6 +35,7 @@ premier fichier. Voir `.claude/rules/claude_harness_authoring.md`.
 | `api/schemas/**`, validation Unity, erreurs inline graphe | `.claude/rules/api_validation_errors.md` |
 | `frontend/**` (général) | `.claude/rules/frontend.md` |
 | **Refonte UI 2026** — tout écran de la maquette (1c, 2a–2e), branche `refonte-ui-2026` | `.claude/rules/ui_redesign_2026.md` — ⚠️ **lire le HTML de `docs/design/refonte-ui-2026/` avant de coder** |
+| **Refonte « Scène »** (proposition 2026-11-20, Epic 20) — scène, vue Script, graphe à texte complet, barre d'état | `.claude/rules/ui_refonte_scene.md` — ⚠️ proposition non validée : la maquette 2026 reste la cible tant qu'Epic 20 n'est pas validée |
 | `frontend/**/*.{ts,tsx,css}` — layout, mobile, tactile | `.claude/rules/responsive_frontend.md` + skill `dialogue-frontend` |
 | `frontend/src/components/graph/**`, `graphStore.ts`, `*Slice.ts` | `.claude/rules/graph_editor.md` |
 | `testNodeSync.ts`, `TestNode.tsx` | `.claude/rules/testnode_sync.md` |

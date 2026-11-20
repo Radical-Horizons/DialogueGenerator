@@ -8,6 +8,18 @@
       "port": 3000
     },
     {
+      "name": "dialogue-generator-dev-sans-llm",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["-e", "process.env.OPENAI_API_KEY='sk-local-sans-appel';process.env.DEV_FAST_STARTUP='1';require('./scripts/dev.js')"],
+      "port": 3000
+    },
+    {
+      "name": "design-refonte-scene",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8973", "--directory", "docs/design/refonte-scene"],
+      "port": 8973
+    },
+    {
       "name": "design-refs",
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "8972", "--directory", "docs/design/refonte-ui-2026"],
