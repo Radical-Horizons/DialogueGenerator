@@ -43,7 +43,7 @@
         </sc-for>
       </nav>
       <div style="border-top: 1px solid {{t.hair}}; padding: 14px 20px; display: flex; flex-direction: column; gap: 5px">
-        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: {{t.label}}">SOURCE</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}">SOURCE</span>
         <span style="font-size: 12.5px; line-height: 1.5; color: {{t.sec}}">Lu depuis Notion. Les fiches se modifient dans Notion ; ici, elles nourrissent le contexte des générations.</span>
       </div>
       <span style="flex: 1"></span>
@@ -68,13 +68,13 @@
       <div ref="{{setList}}" style="flex: 1; min-height: 0; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 34px), transparent 100%); mask-image: linear-gradient(to bottom, #000 calc(100% - 34px), transparent 100%)">
         <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
           <div>
-            <div style="position: sticky; top: 0; z-index: 1; background: {{t.app}}; padding: 14px 20px 7px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: {{t.label}}">{{g.label}}</div>
+            <div style="position: sticky; top: 0; z-index: 1; background: {{t.app}}; padding: 14px 20px 7px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">{{g.label}}</div>
             <ul style="list-style: none; margin: 0; padding: 0">
               <sc-for list="{{g.items}}" as="p" hint-placeholder-count="4">
                 <li>
                   <button type="button" onClick="{{p.pick}}" aria-pressed="{{p.on}}" style-hover="background: rgba(255,255,255,0.03)" style="width: 100%; display: flex; flex-direction: column; gap: 3px; padding: 8px 20px; border: none; border-top: 1px solid {{t.hair}}; background: {{p.bg}}; box-shadow: {{p.rail}}; text-align: left; font-family: inherit; cursor: pointer">
                     <span style="font-size: 13.5px; font-weight: {{p.weight}}; color: {{p.color}}">{{p.name}}</span>
-                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.05em; color: {{t.muted}}">{{p.sub}}<sc-if value="{{p.inScene}}" hint-placeholder-val="{{false}}"><span style="color: {{t.accText}}"> · {{p.scenes}}</span></sc-if></span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.muted}}">{{p.sub}}<sc-if value="{{p.inScene}}" hint-placeholder-val="{{false}}"><span style="color: {{t.accText}}"> · {{p.scenes}}</span></sc-if></span>
                   </button>
                 </li>
               </sc-for>
@@ -92,7 +92,7 @@
       <article style="max-width: 620px; margin: 0 auto; padding: 34px 0 60px">
         <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px">
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">PERSONNAGE · {{sel.typeUp}}</span>
-          <span style="height: 22px; display: inline-flex; align-items: center; gap: 7px; padding: 0 9px; border-radius: 99px; border: 1px solid {{t.chip}}; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; color: {{t.sec}}"><span aria-hidden="true" style="width: 5px; height: 5px; border-radius: 99px; background: {{sel.stateDot}}"></span>NOTION · {{sel.stateUp}}</span>
+          <span style="height: 22px; display: inline-flex; align-items: center; gap: 7px; padding: 0 9px; border-radius: 99px; border: 1px solid {{t.chip}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.sec}}"><span aria-hidden="true" style="width: 5px; height: 5px; border-radius: 99px; background: {{sel.stateDot}}"></span>NOTION · {{sel.stateUp}}</span>
         </div>
         <h1 style="margin: 14px 0 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 46px; line-height: 1.05; color: {{t.strong}}">{{sel.name}}</h1>
         <sc-if value="{{sel.hasEpi}}" hint-placeholder-val="{{true}}">
@@ -111,7 +111,7 @@
 
         <dl style="margin: 20px 0 0; display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 9px 14px; font-size: 13.5px; line-height: 1.45">
           <sc-for list="{{facts}}" as="f" hint-placeholder-count="4">
-            <dt style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; line-height: 20px; color: {{t.label}}">{{f.k}}</dt>
+            <dt style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; line-height: 20px; color: {{t.label}}">{{f.k}}</dt>
             <dd style="margin: 0; color: {{t.body}}"><sc-for list="{{f.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.m}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px">{{s.t}}</span></sc-if><sc-if value="{{s.p}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></dd>
           </sc-for>
         </dl>
@@ -125,7 +125,7 @@
                   <a href="{{u.href}}" style-hover="background: rgba(255,255,255,0.025)" style="display: flex; align-items: baseline; gap: 14px; padding: 11px 9px; margin: 0 -9px; text-decoration: none; color: inherit; border-radius: 6px">
                     <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 18px; color: {{t.strong}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{u.title}}</span>
                     <span style="flex: 1"></span>
-                    <span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; color: {{t.muted}}">{{u.meta}}</span>
+                    <span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}">{{u.meta}}</span>
                     <span aria-hidden="true" style="flex: none; color: {{t.sec}}">›</span>
                   </a>
                 </li>

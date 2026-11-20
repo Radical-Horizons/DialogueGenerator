@@ -83,7 +83,7 @@
               <span style="display: flex; align-items: center; gap: 9px">
                 <span aria-hidden="true" style="width: 12px; height: 12px; box-sizing: border-box; border-radius: 99px; border: 1.5px solid {{th.dotBorder}}; background: {{th.dotFill}}; box-shadow: {{th.dotInner}}"></span>
                 <span style="font-size: 13.5px; color: {{th.labelColor}}">{{th.name}}</span>
-                <sc-if value="{{th.hasHint}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; color: {{t.label}}">{{th.hint}}</span></sc-if>
+                <sc-if value="{{th.hasHint}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.label}}">{{th.hint}}</span></sc-if>
               </span>
             </button>
           </sc-for>
@@ -128,7 +128,7 @@
         <section aria-labelledby="lbl-motion" style="display: grid; grid-template-columns: 200px minmax(0, 1fr); column-gap: 20px; align-items: center; padding: 18px 0 18px 20px; border-top: 1px solid {{t.hair}}">
           <div style="display: flex; flex-direction: column; gap: 5px">
             <span id="lbl-motion" style="font-size: 14px; font-weight: 500; color: {{t.strong}}">Mouvement réduit</span>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.05em; line-height: 1.5; color: {{t.label}}">{{motionState}}</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; line-height: 1.5; color: {{t.label}}">{{motionState}}</span>
           </div>
           <div role="radiogroup" aria-labelledby="lbl-motion" style="display: flex; justify-self: start; border: 1px solid {{t.ctrl}}; border-radius: 6px; overflow: hidden">
             <sc-for list="{{motions}}" as="mo" hint-placeholder-count="2">
@@ -143,33 +143,31 @@
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">APERÇU — RÉPLIQUE DE GRISH T'VOK, RÉPONSE 03 · RÉUSSITE</span>
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}">{{summary}}</span>
         </div>
-        <div style="flex: 1; min-height: 0; position: relative; box-sizing: border-box; border: 1px solid {{t.hair2}}; border-radius: 8px; overflow: hidden; padding: 20px 34px; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent)">
-          <div class="rg-anim" style="position: relative; max-width: {{measurePx}}px; margin: 0 auto">
-            <span aria-hidden="true" style="position: absolute; top: -20px; bottom: -400px; left: -20px; width: 1px; background: {{t.hair}}"></span>
-            <span aria-hidden="true" style="position: absolute; top: -20px; bottom: -400px; right: -20px; width: 1px; background: {{t.hair}}"></span>
-            <span aria-hidden="true" style="position: absolute; top: 0; right: -20px; transform: translateX(100%); padding-left: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.05em; color: {{t.label}}; white-space: nowrap">← {{measureLabel}} →</span>
+        <div style="flex: 1; min-height: 0; position: relative; box-sizing: border-box; border: 1px solid {{t.hair2}}; border-radius: 8px; overflow: hidden; padding: 0 34px; background: repeating-linear-gradient(135deg, transparent 0 9px, {{t.hair}} 9px 10px); -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent)">
+          <div class="rg-anim" style="position: relative; max-width: {{measurePx}}px; min-height: 100%; margin: 0 auto; padding: 20px 20px 0; background: {{t.app}}; border-left: 1px solid {{t.hair2}}; border-right: 1px solid {{t.hair2}}">
+                                    <span aria-hidden="true" style="position: absolute; top: 20px; right: -1px; transform: translateX(100%); padding: 2px 7px; background: {{t.app}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}; white-space: nowrap">← {{measureLabel}} →</span>
             <div style="display: flex; align-items: center; gap: 9px; margin-bottom: {{gapSm}}px">
               <span aria-hidden="true" style="width: 7px; height: 7px; border-radius: 99px; background: {{t.spk}}"></span>
               <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.09em; color: {{t.sec}}">GRISH T'VOK</span>
-              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.06em; color: {{t.ok}}">VALIDÉ</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.ok}}">VALIDÉ</span>
             </div>
             <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: {{fs}}px; line-height: {{lh}}; color: {{t.dia}}">Très bien, Maîtresse. Votre volonté se fait sentir jusque dans mes rouages. <span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: {{dirFs}}px; color: {{t.sec}}">Un claquement doux parcourt sa carcasse, et une goutte d'huile scintille comme une larme.</span> Approchez, ne craignez rien : je n'arrache rien qui ne puisse être recousu.</p>
-            <span style="display: block; margin: {{gapMd}}px 0 {{gapSm}}px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: {{t.label}}">URESAÏR — 4 RÉPONSES</span>
+            <span style="display: block; margin: {{gapMd}}px 0 {{gapSm}}px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">URESAÏR — 4 RÉPONSES</span>
             <ol style="list-style: none; margin: 0; padding: 0; border-top: 1px solid {{t.hair}}">
               <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 9px; padding: {{rowPad}}px 12px {{rowPad}}px 10px; border-bottom: 1px solid {{t.hair}}">
                 <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 23px; color: {{t.muted}}">01</span>
                 <span style="font-size: 15px; line-height: 1.55; color: {{t.body}}">Je vous tends l'anneau de lumière. Faites ce que vous savez faire.</span>
-                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; line-height: 23px; color: {{t.muted}}">4 À ÉCRIRE</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; line-height: 23px; color: {{t.muted}}">4 ISSUES · À ÉCRIRE</span>
               </li>
               <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 9px; padding: {{rowPad}}px 12px {{rowPad}}px 10px; border-bottom: 1px solid {{t.hair}}">
                 <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 23px; color: {{t.muted}}">02</span>
                 <span style="font-size: 15px; line-height: 1.55; color: {{t.body}}">Approche, alors. Tu peux toucher aussi l'armure — ses griffes me gênent.</span>
-                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; line-height: 23px; color: {{t.muted}}">4 À ÉCRIRE</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; line-height: 23px; color: {{t.muted}}">4 ISSUES · À ÉCRIRE</span>
               </li>
               <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 9px; padding: {{rowPad}}px 12px {{rowPad}}px 10px; border-bottom: 1px solid {{t.hair}}">
                 <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 23px; color: {{t.muted}}">03</span>
                 <span style="font-size: 15px; line-height: 1.55; color: {{t.body}}">J'entends ta générosité, mais quel est ton prix au-delà du premier ajustement ?</span>
-                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; line-height: 23px; color: {{t.muted}}">4 À ÉCRIRE</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; line-height: 23px; color: {{t.muted}}">4 ISSUES · À ÉCRIRE</span>
               </li>
             </ol>
           </div>
@@ -231,8 +229,7 @@ class Component extends DCLogic {
     this.setState(Object.assign({ saving: true }, patch));
     clearTimeout(this.tSave);
     this.tSave = setTimeout(() => {
-      const d = new Date();
-      this.setState({ saving: false, saved: String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') });
+      this.setState({ saving: false, saved: '11:25' });
     }, 450);
   }
 
@@ -292,7 +289,6 @@ class Component extends DCLogic {
     const navDefs = [
       ['Apparence', (eff === 'nuit' ? 'NUIT' : 'PAPIER') + ' · ' + fs + ' PX · ' + this.state.measure + ' CAR.'],
       ['Modèles et budget', 'GPT-6.2 SOL'],
-      ["Profils d'auteur", ''],
       ['Notion et GDD', '333 FICHES'],
       ['Raccourcis', ''],
       ['Compte', '']

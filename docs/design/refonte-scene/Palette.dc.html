@@ -21,7 +21,7 @@
       <div style="height: 54px; flex: none; display: flex; align-items: center; gap: 14px; padding: 0 14px 0 20px; border-bottom: 1px solid {{t.hair2}}">
         <svg aria-hidden="true" width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#9a9aa4" stroke-width="1.4"><circle cx="6.5" cy="6.5" r="5"></circle><path d="M10.2 10.2 L14 14"></path></svg>
         <input class="dc-q" ref="{{setInput}}" role="combobox" aria-expanded="true" aria-controls="dc-results" aria-label="Chercher une scène, une réplique, une fiche ou une commande" spellCheck="false" autoComplete="off" value="{{query}}" onChange="{{onQuery}}" placeholder="Chercher une scène, une réplique, une fiche, ou taper > pour une commande" style="flex: 1; min-width: 0; height: 100%; border: none; background: transparent; color: {{t.strong}}; font-family: inherit; font-size: 16px; caret-color: {{t.accent}}">
-        <span style="flex: none; height: 22px; display: flex; align-items: center; padding: 0 7px; border-radius: 6px; border: 1px solid {{t.ctrl}}; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; color: {{t.sec}}">ÉCHAP</span>
+        <span style="flex: none; height: 22px; display: flex; align-items: center; padding: 0 7px; border-radius: 6px; border: 1px solid {{t.ctrl}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.sec}}">ÉCHAP</span>
       </div>
 
       <div id="dc-results" role="listbox" aria-label="Résultats" style="max-height: 680px; overflow-y: auto; padding: 0 0 9px">
@@ -30,7 +30,7 @@
         </sc-if>
         <sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
           <div role="group" aria-label="{{g.label}}">
-            <div style="height: 27px; box-sizing: border-box; display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; padding: 0 20px 6px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: {{t.muted}}">
+            <div style="height: 27px; box-sizing: border-box; display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; padding: 0 20px 6px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.muted}}">
               <span>{{g.label}}</span>
               <span style="letter-spacing: 0.06em">{{g.count}}</span>
             </div>
@@ -53,7 +53,7 @@
                 </sc-if>
                 <span style="flex: none; display: flex; align-items: baseline; gap: 9px; white-space: nowrap">
                   <sc-if value="{{r.hasSub}}" hint-placeholder-val="{{true}}"><span style="font-size: 12px; color: {{t.sec}}">{{r.sub}}</span></sc-if>
-                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; color: {{r.mcolor}}">{{r.meta}}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{r.mcolor}}">{{r.meta}}</span>
                   <sc-if value="{{r.on}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{t.accText}}">↵</span></sc-if>
                 </span>
               </div>
@@ -62,7 +62,7 @@
         </sc-for>
       </div>
 
-      <div style="height: 36px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 0 20px; border-top: 1px solid {{t.hair2}}; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.08em; color: {{t.muted}}">
+      <div style="height: 36px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 0 20px; border-top: 1px solid {{t.hair2}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.muted}}">
         <span><span style="color: {{t.body}}">↑↓</span> NAVIGUER · <span style="color: {{t.body}}">↵</span> OUVRIR · <span style="color: {{t.body}}">TAB</span> ACTIONS · <span style="color: {{t.body}}">ÉCHAP</span> FERMER</span>
         <span style="flex: 1"></span>
         <span>{{total}}</span>
@@ -112,9 +112,9 @@ class Component extends DCLogic {
     this.CMDS = [
       { name: 'Générer la suite', key: 'CTRL+↵' },
       { name: 'Aller à une réplique', key: 'CTRL+J' },
-      { name: 'Vue Script', key: 'CTRL+1' },
-      { name: 'Vue Graphe', key: 'CTRL+2' },
-      { name: 'Jouer', key: 'CTRL+3' },
+      { name: 'Vue Script', key: 'ALT+1' },
+      { name: 'Vue Graphe', key: 'ALT+2' },
+      { name: 'Jouer', key: 'ALT+3' },
       { name: 'Mode focus', key: 'CTRL+\\' },
       { name: 'Thème Papier', key: '' }
     ];

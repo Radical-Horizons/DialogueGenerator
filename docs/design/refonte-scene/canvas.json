@@ -1,39 +1,267 @@
 {
   "v": 3,
-  "createdOnFiles": { "v": 1, "at": "2026-11-19T23:30:00Z" },
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-19T23:30:00Z"
+  },
   "title": "Refonte Scène — DialogueGenerator",
-  "launch": { "view": "canvas", "page": "ecrire" },
+  "launch": {
+    "view": "canvas",
+    "page": "ecrire"
+  },
   "pages": [
-    { "id": "ecrire", "name": "Écrire" },
-    { "id": "graphe", "name": "Graphe" },
-    { "id": "verifier", "name": "Jouer et vérifier" },
-    { "id": "autour", "name": "Autour de la scène" },
-    { "id": "confort", "name": "Confort" },
-    { "id": "avant", "name": "Avant / après" }
+    {
+      "id": "ecrire",
+      "name": "Écrire"
+    },
+    {
+      "id": "graphe",
+      "name": "Graphe"
+    },
+    {
+      "id": "verifier",
+      "name": "Jouer et vérifier"
+    },
+    {
+      "id": "autour",
+      "name": "Autour de la scène"
+    },
+    {
+      "id": "confort",
+      "name": "Confort"
+    },
+    {
+      "id": "avant",
+      "name": "Avant / après"
+    }
   ],
   "boards": {
-    "Main.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 900, "title": "Script — lire et écrire la scène", "page": "ecrire", "is_interactive": true },
-    "Graphe.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 900, "title": "Graphe — cartes à texte complet", "page": "graphe", "is_interactive": true },
-    "Technique.dc.html": { "x": 1520, "y": 0, "w": 1440, "h": 900, "title": "Graphe — lentille Technique et test ouvert", "page": "graphe", "is_interactive": true },
-    "Carte.dc.html": { "x": 0, "y": 1020, "w": 1440, "h": 860, "title": "Anatomie d'une carte", "page": "graphe" },
-    "Papier.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 900, "title": "Thème Papier", "page": "confort" },
-    "Focus.dc.html": { "x": 1520, "y": 0, "w": 1440, "h": 900, "title": "Mode focus", "page": "confort" },
-    "Avant.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 1060, "title": "Même scène, avant et après", "page": "avant" },
-    "Bibliotheque.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 900, "title": "Accueil — les scènes", "page": "autour", "is_interactive": true },
-    "Fiches.dc.html": { "x": 1520, "y": 0, "w": 1440, "h": 900, "title": "Fiches du GDD", "page": "autour", "is_interactive": true },
-    "Reglages.dc.html": { "x": 0, "y": 1020, "w": 1440, "h": 900, "title": "Réglages — Apparence", "page": "autour", "is_interactive": true },
-    "Gestes.dc.html": { "x": 0, "y": 1020, "w": 1440, "h": 900, "title": "Petits gestes", "page": "confort", "is_interactive": true },
-    "Mobile.dc.html": { "x": 1520, "y": 1020, "w": 900, "h": 900, "title": "Téléphone — Script et Jouer", "page": "confort" },
-    "Fiche.dc.html": { "x": 1520, "y": 0, "w": 1440, "h": 900, "title": "Nouvelle scène — la fiche", "page": "ecrire", "is_interactive": true },
-    "Generer.dc.html": { "x": 0, "y": 1020, "w": 1440, "h": 900, "title": "Générer dans le texte", "page": "ecrire", "is_interactive": true },
-    "Reecrire.dc.html": { "x": 1520, "y": 1020, "w": 1440, "h": 900, "title": "Réécrire une sélection", "page": "ecrire", "is_interactive": true },
-    "Palette.dc.html": { "x": 0, "y": 2040, "w": 1440, "h": 900, "title": "CTRL+K — chercher, aller, faire", "page": "ecrire", "is_interactive": true },
-    "Jouer.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 900, "title": "Jouer la scène", "page": "verifier", "is_interactive": true },
-    "Problemes.dc.html": { "x": 1520, "y": 0, "w": 1440, "h": 900, "title": "Santé de la scène, sans panneau", "page": "verifier", "is_interactive": true },
-    "Contexte.dc.html": { "x": 0, "y": 1020, "w": 1440, "h": 900, "title": "Ce que le modèle saura", "page": "verifier", "is_interactive": true },
-    "Versions.dc.html": { "x": 1520, "y": 1020, "w": 1440, "h": 900, "title": "Versions d'une réplique", "page": "verifier", "is_interactive": true }
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Script — lire et écrire la scène",
+      "page": "ecrire",
+      "is_interactive": true
+    },
+    "Graphe.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Graphe — cartes à texte complet",
+      "page": "graphe",
+      "is_interactive": true
+    },
+    "Technique.dc.html": {
+      "x": 1520,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Graphe — lentille Technique et test ouvert",
+      "page": "graphe",
+      "is_interactive": true
+    },
+    "Carte.dc.html": {
+      "x": 0,
+      "y": 1020,
+      "w": 1440,
+      "h": 860,
+      "title": "Anatomie d'une carte",
+      "page": "graphe"
+    },
+    "Papier.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Thème Papier",
+      "page": "confort"
+    },
+    "Focus.dc.html": {
+      "x": 1520,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Mode focus",
+      "page": "confort"
+    },
+    "Avant.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1060,
+      "title": "Même scène, avant et après",
+      "page": "avant"
+    },
+    "Bibliotheque.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Accueil — les scènes",
+      "page": "autour",
+      "is_interactive": true
+    },
+    "Fiches.dc.html": {
+      "x": 1520,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Fiches du GDD",
+      "page": "autour",
+      "is_interactive": true
+    },
+    "Reglages.dc.html": {
+      "x": 0,
+      "y": 1020,
+      "w": 1440,
+      "h": 900,
+      "title": "Réglages — Apparence",
+      "page": "autour",
+      "is_interactive": true
+    },
+    "Gestes.dc.html": {
+      "x": 0,
+      "y": 1020,
+      "w": 1440,
+      "h": 900,
+      "title": "Petits gestes",
+      "page": "confort",
+      "is_interactive": true
+    },
+    "Mobile.dc.html": {
+      "x": 1520,
+      "y": 1020,
+      "w": 900,
+      "h": 900,
+      "title": "Téléphone — Script et Jouer",
+      "page": "confort"
+    },
+    "Fiche.dc.html": {
+      "x": 1520,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Nouvelle scène — la fiche",
+      "page": "ecrire",
+      "is_interactive": true
+    },
+    "Generer.dc.html": {
+      "x": 0,
+      "y": 1020,
+      "w": 1440,
+      "h": 900,
+      "title": "Générer dans le texte",
+      "page": "ecrire",
+      "is_interactive": true
+    },
+    "Reecrire.dc.html": {
+      "x": 1520,
+      "y": 1020,
+      "w": 1440,
+      "h": 900,
+      "title": "Réécrire une sélection",
+      "page": "ecrire",
+      "is_interactive": true
+    },
+    "Palette.dc.html": {
+      "x": 0,
+      "y": 2040,
+      "w": 1440,
+      "h": 900,
+      "title": "CTRL+K — chercher, aller, faire",
+      "page": "ecrire",
+      "is_interactive": true
+    },
+    "Jouer.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Jouer la scène",
+      "page": "verifier",
+      "is_interactive": true
+    },
+    "Problemes.dc.html": {
+      "x": 1520,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Santé de la scène, sans panneau",
+      "page": "verifier",
+      "is_interactive": true
+    },
+    "Contexte.dc.html": {
+      "x": 0,
+      "y": 1020,
+      "w": 1440,
+      "h": 900,
+      "title": "Ce que le modèle saura",
+      "page": "verifier",
+      "is_interactive": true
+    },
+    "Versions.dc.html": {
+      "x": 1520,
+      "y": 1020,
+      "w": 1440,
+      "h": 900,
+      "title": "Versions d'une réplique",
+      "page": "verifier",
+      "is_interactive": true
+    },
+    "Paliers.dc.html": {
+      "x": 1520,
+      "y": 1020,
+      "w": 1440,
+      "h": 900,
+      "title": "Dézoomer sans perdre le fil — paliers lire et situer",
+      "page": "graphe"
+    },
+    "Lot.dc.html": {
+      "x": 1520,
+      "y": 2040,
+      "w": 1440,
+      "h": 900,
+      "title": "Remplir et revoir en série",
+      "page": "ecrire",
+      "is_interactive": true
+    },
+    "Etats.dc.html": {
+      "x": 0,
+      "y": 2040,
+      "w": 1440,
+      "h": 1000,
+      "title": "Les états qui comptent",
+      "page": "verifier"
+    }
   },
-  "order": ["Main.dc.html", "Graphe.dc.html", "Technique.dc.html", "Carte.dc.html", "Papier.dc.html", "Focus.dc.html", "Avant.dc.html", "Bibliotheque.dc.html", "Fiches.dc.html", "Reglages.dc.html", "Gestes.dc.html", "Mobile.dc.html", "Fiche.dc.html", "Generer.dc.html", "Reecrire.dc.html", "Palette.dc.html", "Jouer.dc.html", "Problemes.dc.html", "Contexte.dc.html", "Versions.dc.html"],
+  "order": [
+    "Main.dc.html",
+    "Graphe.dc.html",
+    "Technique.dc.html",
+    "Carte.dc.html",
+    "Papier.dc.html",
+    "Focus.dc.html",
+    "Avant.dc.html",
+    "Bibliotheque.dc.html",
+    "Fiches.dc.html",
+    "Reglages.dc.html",
+    "Gestes.dc.html",
+    "Mobile.dc.html",
+    "Fiche.dc.html",
+    "Generer.dc.html",
+    "Reecrire.dc.html",
+    "Palette.dc.html",
+    "Jouer.dc.html",
+    "Problemes.dc.html",
+    "Contexte.dc.html",
+    "Versions.dc.html",
+    "Paliers.dc.html",
+    "Lot.dc.html",
+    "Etats.dc.html"
+  ],
   "notes": {},
   "designSystems": [
     {

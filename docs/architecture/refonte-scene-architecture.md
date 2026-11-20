@@ -34,19 +34,25 @@ PNJ et le PJ à partir du graphe.
   "schemaVersion": "…",
   "title": "Rencontre avec le forgeron itinérant",
   "scene": {
-    "npcIds": ["Grish T'vok"], "pcId": "Uresaïr", "placeId": null,
+    "npcs": [{ "entryId": "1b46e4d2-1b45-8081-992e-febbfed44a5d", "name": "Grish T'vok" }],
+    "pc": { "entryId": "…", "name": "Uresaïr" }, "place": null,
     "brief": "…", "tones": ["tension", "intime"], "authorProfileId": "…",
-    "linkedEntries": [{ "category": "Personnages", "name": "Grish T'vok" }],
+    "linkedEntries": [{ "category": "Personnages", "entryId": "…" }],
     "contextBudget": "auto"
   },
   "dialogueFlags": [], "nodes": []
 }
 ```
 
+- **Identifiant stable** : `entryId` = le `notion_page_id` de la fiche du GDD (présent dans chaque fichier, ex.
+  `personnages/Grish_T_vok_1b46e4d2-….json`) ; `name` n'est qu'un libellé. Le `speaker` des nœuds reste une chaîne
+  (format Unity) ; à la migration, ses graphies sont rapprochées de la fiche (le forgeron en a deux, `T'vok` et
+  `T’vok`, plus un locuteur vide sur une réplique ajoutée à la main) et proposées à l'auteur, jamais réécrites sans lui.
 - Additif : un document sans `scene` reste valide ; à l'ouverture, la fiche est **déduite une fois** par
-  `resolveGraphGenerationDramatis` puis enregistrée (migration paresseuse, pas de script).
-- Toute génération (premier nœud, suite, lot, réécriture) lit la fiche ; le store global de contexte devient un
-  simple cache de catalogue GDD.
+  `resolveGraphGenerationDramatis`, montrée dans la fiche pour correction, puis enregistrée (migration paresseuse).
+- Toute génération (premier nœud, suite, lot, réécriture) lit la fiche. Le `contextStore` global garde le catalogue
+  GDD et les sélections **hors scène** (page Fiches du GDD) ; ses lecteurs dans le chemin de génération sont à
+  inventorier en story 20.4 (critère : plus aucun appel de génération ne lit les sélections globales).
 - ⚠ À vérifier avant la story : le chargeur Unity ignore-t-il une clé de tête inconnue ? Sinon, l'export retire
   `scene` (comme il retire déjà les métadonnées éditeur des nœuds).
 
@@ -67,12 +73,20 @@ retirés, et avec eux le protocole flush/confirmFlush.
 **Problème.** Les conventions vivent dans la chaîne : `*…*` pour les didascalies, `*[Vous …]*` pour les actions du PJ,
 préfixes « (Test d'intimidation DD9) ». Le correctif v1.10.1 (« `* [Vous …]*` recollé ») montre la fragilité.
 
-**Décision.** Une **couche de conversion pure** `line ↔ blocs` (`didascalie`, `réplique`, segments en ligne) :
-- l'affichage (carte, script, jouer) rend les blocs ; le champ en écriture montre le texte brut de **la ligne
-  active** seulement (modèle « aperçu vivant », comme Highland : on ne réécrit jamais le texte de l'auteur) ;
+**Décision.** Une **couche de conversion pure** `line → blocs` (`didascalie`, `réplique`, segments en ligne), pour
+**l'affichage seulement** :
+- l'affichage (carte, script, jouer) rend les blocs ;
+- **l'écriture reste le `<textarea>` d'Epic 18 (D4), un par réplique** : à l'entrée dans une réplique, **toute la
+  réplique** passe en texte brut avec ses `*…*` ; à la sortie, elle redevient mise en forme. Pas d'éditeur de blocs,
+  pas de champ par paragraphe : sélection, flèches, collage et annulation restent ceux d'un `<textarea>` (option
+  écartée : « seul le paragraphe actif en brut », qui aurait exigé un éditeur de blocs — sélection entre paragraphes,
+  collage multi-paragraphes, coalescence d'annulation — et contredit D4) ;
 - **aucun changement de stockage** : la chaîne Unity reste la donnée ;
-- test aller-retour `parse(serialize(x)) === x` sur **tous** les dialogues de `Assets/Dialogue/` (36 fichiers, 623
-  réponses au 2026-11-19) avant toute story d'affichage.
+- test aller-retour `serialize(parse(x)) === x` exécuté **en CI** sur des fixtures committées
+  (`tests/fixtures/unity_dialogues/`, à créer en story 20.1 : 4 dialogues copiés de `Assets/Dialogue/`, dont l'import
+  Notion de Voknir pour ses conventions hors modèle, plus `data/interactions/rencontre_dans_la_nef_centrale_unity.json`
+  déjà versionné), et en contrôle supplémentaire local sur les 36 dialogues de `Assets/Dialogue/` (dossier ignoré par
+  git, présent seulement sur le poste de l'auteur).
 
 ### A4 — La vue Script est une projection, pas une donnée
 
@@ -96,8 +110,10 @@ parent → nouveau nœud reste faite par le front (`connectNodes` dans `generati
 - **Calculables** (réponse vide, suite manquante, nœud jamais atteint, test sans issue) : recalculés dans le front sur
   changement du document, avec un délai de 300 ms, sans appel réseau → popover « PROBLÈMES » et marques en place.
 - **Validation serveur** (schéma Unity, lore) : à l'enregistrement, comme aujourd'hui (`structured_errors`).
-- **Jugements LLM** (qualité, slop) : à la demande seulement (« Relecture »), résultats en notes de marge. Aucun
-  jugement simulé par heuristique (règle « diagnostic : uniquement du calculable »).
+- **Jugements LLM** (qualité, slop, langue : accords, fautes probables) : à la demande seulement (« Relecture »),
+  résultats en notes de marge et dans un groupe « RELECTURE » séparé du popover, daté de la dernière passe. Aucun
+  jugement simulé par heuristique (règle « diagnostic : uniquement du calculable ») ; une faute n'est pas un
+  avertissement permanent.
 
 ### A7 — Mécanique tirée des catalogues
 
@@ -107,8 +123,8 @@ Traits, compétences et flags proviennent de `FlagCatalog.csv`, `SkillCatalog.cs
 ### A8 — Thèmes par variables CSS
 
 Les tokens (`redesignTokens.ts`) sont publiés en variables CSS sur `:root` (`[data-theme="papier"]` pour Papier) ;
-les styles inline lisent `var(--…)`. Coût : migration mécanique des ~73 fichiers déjà sur `redesignTokens`, les ~181
-encore sur `theme.ts` suivent écran par écran. Bénéfice annexe : `:hover`, `:focus-visible` et media queries
+les styles inline lisent `var(--…)`. Coût : migration mécanique des fichiers déjà sur `redesignTokens` (88 par grep,
+tests compris, au 2026-11-20) ; les 197 encore sur `theme.ts` suivent écran par écran. Bénéfice annexe : `:hover`, `:focus-visible` et media queries
 redeviennent possibles sans contournement.
 
 ### A9 — Graphe : flux gauche → droite, cartes 360 px, tests en sorties
@@ -126,6 +142,44 @@ Trois paliers (écrire ≥ 100 %, lire 40–75 %, situer < 40 %) calculés **à 
 ⚠ À prouver : rendu ≤ 1 s sur 500 nœuds (NFR-P1) et aucune image > 16 ms pendant un zoom — prototype en story 20.2
 avant la livraison.
 
+### A12 — Journal d'édition : ce qui n'est pas du dialogue
+
+**Problème.** Provenance du texte généré (« jusqu'à la première retouche »), variantes `‹ 2/3 ›`, versions retouchées à
+la main, notes de relecture ignorées : rien de cela n'est du dialogue Unity, et rien n'a de place aujourd'hui (seuls
+`status`, `regenerationHistory`, `lastGenerationInstructions` vivent déjà dans les nœuds comme métadonnées éditeur).
+
+**Décision.** Un **journal d'édition** par dialogue, artefact distinct comme le layout (ADR-008) :
+`journal/<dialogueId>.json` à côté de `Layouts/`, lu et écrit par `GET/PUT /api/v1/documents/{id}/journal` avec la
+même `revision`/409 que le document.
+
+```json
+{ "revision": 12, "entries": {
+  "node-3836…": {
+    "versions":   [{ "at": "…", "by": "llm|auteur", "model": "gpt-6.2-sol", "text": "…" }],
+    "variants":   [{ "id": "v2", "text": "…", "kept": false }],
+    "provenance": [{ "start": 0, "end": 212, "source": "llm" }],
+    "dismissed":  [{ "rule": "tournure-frequente", "span": "comme une …" }]
+  } } }
+```
+
+- Jamais lu par l'export Unity (aucun changement d'export) ; les champs éditeur déjà présents dans les nœuds y migrent
+  à terme, en option.
+- Plafond : 20 versions par réplique, les plus anciennes résumées (texte seul).
+- Provenance recalculée à chaque frappe : une plage retouchée sort de la provenance « llm ».
+
+### A13 — Lots : réutiliser les jobs existants
+
+Le tiroir Lot (`Lot.dc.html`) s'appuie sur les jobs de lot persistés (`data/batch_jobs/*.json`, FR87/FR88) : un seul
+worker, un job interrompu au redémarrage, reprise des seuls parents restants. Ajouts : portée par niveau ou par
+scène, exclusions (réponses vides, répliques jamais atteintes), coût total estimé avant (`estimate-cost` × N),
+progression dans la barre d'état, revue en série des « à valider ».
+
+### A14 — Réversibilité du retrait du panneau
+
+Pendant la tranche 2, `GraphInspector` et `NodeEditorPanel` restent montables derrière un drapeau
+(`uiLayoutStore.legacyInspector`, défaut : faux) avec un compteur local d'ouvertures. Le retrait définitif (story
+20.15) n'a lieu qu'après un mois d'usage avec un compteur à zéro, ou sur décision de l'auteur.
+
 ### A11 (pari) — Document collaboratif (Yjs)
 
 Gains : sauvegarde, annulation par auteur, hors ligne et co-édition sans 409. Coût : refonte de la persistance. **Ne
@@ -135,33 +189,38 @@ co-édition actuelle (partage, permissions) montre ce besoin.
 ## 3. Ordre et dépendances
 
 ```
-Tranche 1 — fondation (rien de visible ne casse)
-  A3 conversion texte ↔ blocs + aller-retour        A8 variables CSS (Nuit seul)
-Tranche 2 — la scène (Epic 18 livrée avant)
-  A1 fiche de scène → A4 vue Script → A2 retrait des formulaires
-  A9 + A10 graphe LR, cartes 360, paliers
-Tranche 3 — l'IA dans le texte
-  A5 emplacement à écrire, options ‹ 1/4 ›, rewrite-span     A6 diagnostics continus
-Tranche 4 — confort
-  thème Papier, Focus, versions, gestes, mobile              A7 catalogues
+Epic 18 (≈ 16 sessions, prérequis de la tranche 2)
+Tranche 1 — fondation, en parallèle d'Epic 18 (rien de visible ne casse)        ≈ 5 sessions   20.1–20.3
+  A3 conversion + fixtures CI · preuve de perf A10 · A8 variables CSS
+Tranche 2 — la scène                                                             ≈ 14 sessions  20.4–20.10
+  A1 fiche → enveloppe → A4 Script → A9 cartes et flux LR → tests en sorties → lentille et popovers → états
+  A14 panneau derrière un drapeau
+Tranche 3 — l'IA dans le texte                                                    ≈ 9 sessions   20.11–20.15
+  A5 emplacement et options · A13 lots · rewrite-span · A6 diagnostics et aide clavier · retrait du panneau
+Tranche 4 — confort                                                              ≈ 7 sessions   20.16–20.19
+  Papier, Focus, mesure · A12 journal (versions, variantes, provenance) · téléphone · A7 catalogues
+Chemin critique : Epic 18 puis tranches 2 → 3 → 4 ≈ 46 sessions (tranche 1 en parallèle d'Epic 18).
 ```
 
 ## 4. Risques et parades
 
 | Risque | Parade |
 |---|---|
-| L'export Unity change sans qu'on le voie | Test golden : export de chaque dialogue d'`Assets/Dialogue/` avant / après chaque tranche, comparaison octet par octet |
-| Perte de fonction en retirant un écran | Table « où va chaque fonction » du README § 12, vérifiée par story ; un test e2e par parcours |
-| Perf du graphe avec des cartes plus hautes | A10 prouvé avant livraison ; `onlyRenderVisibleElements` conservé |
+| L'export Unity change sans qu'on le voie | Test golden en CI sur les fixtures committées (4 scènes) avant / après chaque tranche, comparaison octet par octet ; contrôle local en plus sur les 36 dialogues de `Assets/Dialogue/` (non versionnés) |
+| Perte de fonction en retirant un écran | Table « où va chaque fonction » (README § 13), vérifiée par story ; un test e2e par parcours ; panneau derrière un drapeau (A14) |
+| Perf du graphe avec des cartes plus hautes | Preuve 20.2 avant engagement ; `onlyRenderVisibleElements` conservé ; **plan B** : cartes 280 px et dépliage à la sélection (Epic 18 D3), le texte complet restant dans la vue Script |
 | Conflit TAB (suite vide en Script, navigation entre nœuds en Graphe, Epic 14.1) | TAB n'a ce sens qu'en vue Script ; aide clavier générée depuis une seule table |
-| Fiche de scène mal déduite à la migration | Déduction visible et corrigeable dans la fiche ; jamais silencieuse |
+| Raccourcis captés par le navigateur sous Windows (ALT seul, CTRL+1–9, CTRL+N) | Choix L, ALT+1/2/3, ALT+N ; vérification Chrome, Edge, Firefox et PWA en critère d'acceptation |
+| Fiche de scène mal déduite, graphies de locuteur multiples | Déduction et rapprochement visibles et corrigeables dans la fiche ; jamais silencieux |
+| Journal d'édition qui grossit | Plafond de 20 versions par réplique, résumé au-delà |
 
 ## 5. Comment on saura que c'est gagné
 
 | Mesure | Aujourd'hui (2026-11-19) | Cible |
 |---|---|---|
-| Largeur du graphe à 1 440 px | ≈ 720 px (mesuré sur capture) | 1 384 px (classeur en rail) |
-| Texte lisible dans le graphe sans ouvrir de panneau | tronqué (« carav… ») | complet au palier « écrire » |
+| Largeur du graphe à 1 440 px | ≈ 720 px (mesuré sur capture) | 1 188 px classeur ouvert, 1 384 px replié |
+| Texte lisible dans le graphe sans ouvrir de panneau | tronqué (« carav… ») | réplique sur 12 lignes au palier « écrire », 3 au palier « lire », entière en défilant ou en vue Script |
+| Répliques jamais atteintes visibles | non (8 sur 19 dans la scène du forgeron) | encadrées au palier « situer », comptées dans PROBLÈMES |
 | Clics pour corriger une réponse depuis le graphe | sélectionner, « éditer », trouver le champ, taper (≥ 3) | 1 clic dans le texte |
 | Décompte affiché pour 19 répliques | « 67 NŒUDS » | « 19 RÉPLIQUES » |
 | Suites à écrire visibles | non | compteur + TAB |

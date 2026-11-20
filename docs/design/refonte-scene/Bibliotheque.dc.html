@@ -62,7 +62,7 @@
             <h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 34px; line-height: 1; color: {{t.strong}}">Scènes</h1>
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.label}}; white-space: nowrap">4 SCÈNES · 84 RÉPLIQUES · 363 SUITES À ÉCRIRE</span>
           </div>
-          <button type="button" style-focus-visible="outline: 2px solid #8fb0ff; outline-offset: 2px" style="height: 34px; flex: none; display: flex; align-items: center; gap: 9px; padding: 0 14px; border: none; border-radius: 6px; background: {{t.fill}}; color: #ffffff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Nouvelle scène<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.05em">CTRL+N</span></button>
+          <button type="button" style-focus-visible="outline: 2px solid #8fb0ff; outline-offset: 2px" style="height: 34px; flex: none; display: flex; align-items: center; gap: 9px; padding: 0 14px; border: none; border-radius: 6px; background: {{t.fill}}; color: #ffffff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Nouvelle scène<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.05em">ALT+N</span></button>
         </div>
 
         <a href="Main.dc.html" style-hover="border-color: rgba(255,255,255,0.18)" style="height: 44px; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 0 14px; border: 1px solid {{t.hair2}}; border-radius: 8px; text-decoration: none; color: inherit">
@@ -84,9 +84,9 @@
         <button type="button" style-hover="border-color: #3a3a44" style="height: 30px; flex: none; white-space: nowrap; display: flex; align-items: center; gap: 7px; padding: 0 10px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.sec}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Collection<span style="color: {{t.body}}">toutes</span><span aria-hidden="true" style="font-size: 10px; color: {{t.label}}">▾</span></button>
         <button type="button" style-hover="border-color: #3a3a44" style="height: 30px; flex: none; white-space: nowrap; display: flex; align-items: center; gap: 7px; padding: 0 10px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.sec}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Personnage<span style="color: {{t.body}}">tous</span><span aria-hidden="true" style="font-size: 10px; color: {{t.label}}">▾</span></button>
         <span aria-hidden="true" style="width: 1px; height: 16px; margin: 0 5px; background: {{t.hair2}}"></span>
-        <span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: {{t.label}}">ÉTAT</span>
+        <span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}">ÉTAT</span>
         <sc-for list="{{chips}}" as="c" hint-placeholder-count="3">
-          <button type="button" onClick="{{c.toggle}}" aria-pressed="{{c.on}}" style="height: 26px; display: flex; align-items: center; gap: 7px; padding: 0 10px; border-radius: 99px; border: 1px solid {{c.border}}; background: {{c.bg}}; color: {{c.color}}; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; white-space: nowrap; flex: none; cursor: pointer"><span aria-hidden="true" style="width: 5px; height: 5px; border-radius: 99px; background: {{c.dot}}"></span>{{c.label}}<span style="color: {{c.countColor}}">{{c.count}}</span></button>
+          <button type="button" onClick="{{c.toggle}}" aria-pressed="{{c.on}}" style="height: 26px; display: flex; align-items: center; gap: 7px; padding: 0 10px; border-radius: 99px; border: 1px solid {{c.border}}; background: {{c.bg}}; color: {{c.color}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; white-space: nowrap; flex: none; cursor: pointer"><span aria-hidden="true" style="width: 5px; height: 5px; border-radius: 99px; background: {{c.dot}}"></span>{{c.label}}<span style="color: {{c.countColor}}">{{c.count}}</span></button>
         </sc-for>
         <span style="flex: 1"></span>
         <button type="button" style="height: 30px; flex: none; display: flex; align-items: center; gap: 7px; padding: 0 2px; border: none; background: transparent; color: {{t.sec}}; font-family: inherit; font-size: 12.5px; white-space: nowrap; cursor: pointer">Tri<span style="color: {{t.body}}">récentes d'abord</span><span aria-hidden="true" style="font-size: 10px; color: {{t.label}}">▾</span></button>
@@ -110,9 +110,9 @@
                 <span aria-label="Distribution" style="display: flex; flex-direction: column; gap: 9px; padding-top: 2px">
                   <sc-for list="{{r.cast}}" as="p" hint-placeholder-count="2">
                     <span style="display: flex; align-items: center; gap: 9px; min-width: 0">
-                      <span aria-hidden="true" style="width: 20px; height: 20px; flex: none; border-radius: 99px; background: {{p.bg}}; color: {{p.fg}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px">{{p.ini}}</span>
+                      <span aria-hidden="true" style="width: 20px; height: 20px; flex: none; border-radius: 99px; background: {{p.bg}}; color: {{p.fg}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px">{{p.ini}}</span>
                       <span style="min-width: 0; font-size: 12.5px; color: {{t.body}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{p.name}}</span>
-                      <span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em; color: {{t.label}}">{{p.role}}</span>
+                      <span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.label}}">{{p.role}}</span>
                     </span>
                   </sc-for>
                 </span>
