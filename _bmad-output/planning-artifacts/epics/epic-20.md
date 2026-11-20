@@ -1,8 +1,9 @@
 ## Epic 20: Refonte « Scène » — une scène, un texte, trois vues
 
-**Status:** proposition — **en attente de validation par l'auteur** (2026-11-20). À la validation : reporter FR131–FR142
-dans `requirements-inventory.md`, passer Epic 19 en *superseded*, puis `bmad-create-story` story par story, une
-session dédiée par story (les tailles ci-dessous sont en sessions de développement).
+**Status:** **validée le 2026-11-20, prioritaire** — malgré son numéro, l'epic 20 passe devant les autres et démarre
+tout de suite. FR131–FR145 sont reportées dans `requirements-inventory.md` ; Epic 19 est remplacée ; les stories
+d'Epic 18 utiles à la refonte sont intégrées ici (tranche 1 bis). Chaque story se prépare avec `bmad-create-story` et
+se code dans une session dédiée (les tailles ci-dessous sont en sessions de développement).
 
 Les auteurs ouvrent une **scène** plutôt qu'une section. La scène porte sa distribution et son contexte, se lit et
 s'écrit comme un scénario (SCRIPT), se structure dans un graphe dont les cartes portent le texte (GRAPHE), et se joue
@@ -18,9 +19,14 @@ s'écrit comme un scénario (SCRIPT), se structure dans un graphe dont les carte
 rapport de readiness du 2026-10-01 : des UX-DR définies et certifiées par la même epic forment une traçabilité
 circulaire).
 
-**Dépendances :** **Epic 18 bloquante pour la tranche 2** (le `<textarea>` in-situ, D1–D5, est l'unique surface
-d'écriture) · Epic 16 (document canonique, `choiceId`, harnais `e2e/perf-document-load.spec.ts`) · Epic 14 (focus,
-ARIA, TAB entre nœuds) · Epic 17 (responsive, tiroirs) · jobs de lot FR87/FR88.
+**Dépendances :** Epic 16 (document canonique, `choiceId`, harnais `e2e/perf-document-load.spec.ts`) · Epic 14
+(focus, ARIA, TAB entre nœuds) · Epic 17 (responsive, tiroirs) · jobs de lot FR87/FR88 · PR #103 (conversations IA,
+back-end) pour 20.21.
+**Intègre Epic 18** : le `<textarea>` in-situ (D1–D5) reste l'unique surface d'écriture, mais ses stories ne passent
+plus avant dans une epic séparée. Celles dont la refonte a besoin forment la **tranche 1 bis** (18.4, 18.5, 18.6,
+18.7, 18.8, 18.9, 18.11, avec leurs critères d'origine) ; 18.10 (tactile) rejoint 20.18 ; 18.1 et 18.2 sont
+remplacées par 20.7 et 20.8 (cartes de texte) ; 18.3 (synchro vers le panneau) devient inutile : tant que le panneau
+de droite reste derrière son drapeau (A14), ses champs de texte sont en lecture seule.
 **Remplace :** Epic 19 (squelette) — réversibilité assurée par A14, retour d'usage par le compteur de 20.15.
 
 **Valeur utilisateur :** lire et écrire une scène entière sans quitter le texte, ni changer d'écran, ni ouvrir de
@@ -44,6 +50,9 @@ panneau ; voir à tout moment ce qui reste à écrire et ce que le modèle saura
 | **FR140** | Versions d'une réplique consultables en diff et restaurables ; variantes et provenance conservées d'une session à l'autre. | 20.17 |
 | **FR141** | Remplir en série les suites vides d'une portée (réponse, réplique, niveau, scène) avec coût total estimé avant, puis les revoir en série. | 20.12 |
 | **FR142** | Les puces mécaniques (traits, compétences, flags) ne prennent que des valeurs des catalogues Unity, avec autocomplétion et renommage partout. | 20.19 |
+| **FR143** | Une scène prend la teinte de son lieu et montre les portraits de ses personnages et une couverture, sans toucher au texte ni au bleu d'action ; une scène sans image reste complète. | 20.20 |
+| **FR144** | Sur une réplique générée, l'auteur ouvre une discussion avec l'IA qui l'a écrite : contexte et réponse d'origine, résumé de réflexion quand il existe, questions et réponses avec leur coût. | 20.21, 20.23 |
+| **FR145** | Depuis la palette, l'auteur pose une question sur l'interface ou sur le GDD et reçoit une réponse sourcée dans le même tiroir de discussion. | 20.22 |
 
 FR129 et FR130 (Epic 19) sont couvertes par FR133, FR137 et le retrait du panneau (20.15).
 
@@ -69,7 +78,7 @@ FR129 et FR130 (Epic 19) sont couvertes par FR133, FR137 et le retrait du pannea
 
 ---
 
-### Tranche 1 — fondation, en parallèle d'Epic 18 (≈ 5 sessions)
+### Tranche 1 — fondation, tout de suite (≈ 5 sessions)
 
 Rien de neuf ne se voit encore ; rien ne casse.
 
@@ -114,7 +123,23 @@ de valeurs. (A8, NFR-A2)
 - **Given** les écrans déjà sur `redesignTokens` (88 fichiers au 2026-11-20), **When** ils lisent `var(--…)`,
   **Then** les captures avant / après des écrans 1c, 2a–2e sont identiques au pixel près (tolérance antialiasing).
 
-### Tranche 2 — la scène (après Epic 18, ≈ 15 sessions)
+### Tranche 1 bis — fondation d'écriture, reprise d'Epic 18 (≈ 12 sessions)
+
+Les stories gardent leur numéro et leurs critères dans `epic-18.md` ; seuls changent l'ordre et deux points tranchés
+par la refonte : la carte mesure 360 px (ou 280 px si le plan B de 20.2 s'applique) et le dépliage suit les paliers
+de zoom (D3 rouverte).
+
+| Story | Rôle dans la refonte | Sessions |
+|---|---|---|
+| 18.4 Annulation transactionnelle | Toute frappe dans le Script et le Graphe | 2 |
+| 18.5 Réplique dans le champ (`<textarea>`, D1, D2, D4) | Le champ unique d'écriture | 3 |
+| 18.6 Texte des réponses | Idem, pour les réponses | 1 |
+| 18.7 Locuteur et titre | En-tête du bloc et de la carte | 1 |
+| 18.8 Indicateur d'enregistrement | Barre d'état (20.5) | 1 |
+| 18.9 Clavier, widget composite (D5) | Carte et bloc au clavier | 2 |
+| 18.11 Non-régression | Perf, export, sélection multiple | 1,5 |
+
+### Tranche 2 — la scène (après la tranche 1 bis, ≈ 15 sessions)
 
 #### Story 20.4 : Fiche de scène dans le document — 2 sessions
 
@@ -225,7 +250,7 @@ README § 7 « Carte de réplique », boards `Graphe`, `Carte`, `Paliers`)
   board `Etats` (filets sans spinner ; un seul bouton « Nouvelle scène » ; un point de couleur par locuteur et la
   réponse qui dit qui parle ensuite).
 
-### Tranche 3 — l'IA dans le texte (≈ 10 sessions)
+### Tranche 3 — l’IA dans le texte (≈ 15 sessions)
 
 #### Story 20.11 : Emplacement à écrire et options sur place — 3 sessions
 
@@ -284,6 +309,39 @@ board `Problemes`, `Gestes`)
 - **Given** chaque raccourci du README § 8, **Then** il est vérifié dans Chrome, Edge et Firefox en onglet et en PWA
   installée, sous Windows ; un raccourci capté par le navigateur est remplacé avant la fusion.
 
+#### Story 20.21 : Discuter d'une réplique avec l'IA — 2 sessions
+
+**En tant qu'** auteur, **je veux** demander à l'IA pourquoi elle a écrit une réplique, **afin de** comprendre ses
+choix avant de garder, retoucher ou régénérer. (FR144, A15, PR #103, README § 7 « Tiroir temporaire »)
+
+- **Given** une réplique générée et rattachée à son appel, **When** l'auteur choisit « Pourquoi ? » dans la marge du
+  bloc, au pied de la carte ou dans la palette, **Then** le tiroir Discussion (380 px, ÉCHAP ferme) s'ouvre et crée
+  la conversation (`POST /api/v1/ai-conversations`, sujet `dialogue_node`).
+- **Then** le tiroir montre d'abord ce qui a été généré : la sortie d'origine en diff avec la réplique actuelle, le
+  modèle, la date, et le résumé de réflexion replié quand OpenAI l'a fourni (avec « souvent en anglais »).
+- **Then** une ligne fixe dit la limite mesurée : l'IA relit son contexte et sa réponse, pas son raisonnement ; ses
+  explications sont une reconstruction.
+- **Given** une question envoyée, **Then** le champ se verrouille jusqu'à la réponse (tours en série), le coût estimé
+  s'affiche avant (≈ 0,03 $ le premier tour, ≈ 0,005 $ ensuite, chiffres de l'étude) et le coût réel de chaque message
+  après (`cost_usd`).
+- **Given** une réplique sans appel rattaché (écrite à la main, générée avant le traçage), **Then** « Pourquoi ? » est
+  grisé avec sa raison ; **given** un invité, **then** les discussions existantes se lisent et le champ est verrouillé ;
+  **given** un budget atteint (429), 40 messages ou une erreur du modèle (502), **then** l'état s'affiche comme sur le
+  board `Etats`.
+- **Given** une réplique qui a des discussions, **Then** une marque « ◆ n » apparaît dans sa marge et le tiroir
+  Versions les liste.
+
+#### Story 20.22 : Demander depuis la palette — interface et GDD — 3 sessions
+
+**En tant qu'** auteur, **je veux** poser une question sur l'outil ou sur le lore sans quitter la scène. (FR145, A15)
+
+- **Given** la palette (CTRL+K, « Rechercher, aller à, demander… »), **When** l'auteur tape une question et choisit
+  « Demander », **Then** le tiroir Discussion s'ouvre sur un sujet `ui_help` (guides `docs/guides/` + description de
+  l'écran courant envoyée par le front) ou `gdd_query` (extraits trouvés par `ContextBuilder`).
+- **Then** chaque réponse cite ses sources (guide, fiche du GDD) en liens cliquables ; le coût suit la règle de 20.21.
+- Back-end : deux résolveurs de sujet sur le socle de la PR #103, avec leurs tests ; aucune exécution de code ni accès
+  aux secrets.
+
 #### Story 20.15 : Retrait du panneau de droite — 0,5 session, à date
 
 **En tant qu'** auteur, **je veux** que l'ancien panneau disparaisse quand plus rien n'en dépend. (A2, A14)
@@ -294,7 +352,7 @@ board `Problemes`, `Gestes`)
 - **Given** la table README § 13, **Then** chaque ligne est cochée avec le test e2e qui la couvre.
 - Si la condition n'est pas remplie, la story attend ; elle ne bloque pas la tranche 4.
 
-### Tranche 4 — confort (≈ 8 sessions)
+### Tranche 4 — confort (≈ 15 sessions)
 
 #### Story 20.16 : Papier, taille, mesure, Focus — 2 sessions
 
@@ -321,13 +379,14 @@ répliques, **afin de** revenir en arrière sans rien perdre. (FR140, FR134, A12
   nouvelle version (rien n'est perdu).
 - **Given** plus de 20 versions, **Then** les plus anciennes sont résumées (texte seul).
 
-#### Story 20.18 : Téléphone et petits gestes — 2 sessions
+#### Story 20.18 : Téléphone, tactile et petits gestes — 4 sessions (intègre 18.10)
 
 **En tant qu'** auteur, **je veux** relire et jouer une scène au téléphone, et que chaque geste risqué se rattrape.
 (README § 9, § 12, boards `Mobile`, `Gestes`, Epic 17)
 
 - **Given** une largeur < 768 px, **Then** Script et Jouer sont utilisables au toucher (cibles ≥ 44 px), le graphe en
   lecture, la barre d'état réduite.
+- **Given** une tablette (768–1024 px), **Then** l'édition in-situ au toucher suit les critères de 18.10.
 - **Given** une suppression, **Then** un toast d'annulation de 6 s ; **given** un état vide, **then** il dit quoi
   faire.
 
@@ -339,20 +398,56 @@ qu'**une faute de frappe ne casse pas un test dans Unity. (FR142, A7, board `Tec
 - **Given** un popover de puce, **Then** traits, compétences et flags sont autocomplétés depuis `data/UnityData/*.csv` ;
   une valeur inconnue est refusée avec la raison.
 
+#### Story 20.20 : Ambiance — teinte de lieu, portraits, couvertures — 3 sessions
+
+**En tant qu'** auteur, **je veux** que chaque scène ait la couleur de son lieu et les visages de ses personnages,
+**afin d'**avoir envie d'y écrire, sans que l'outil perde son unité. (FR143, A16, canvas « Ambiance »
+<https://claude.ai/artifact/GVZfj6RsZqGQGwEg8X5SxN>)
+
+- **Given** une fiche de scène avec un lieu, **Then** la scène prend la teinte du lieu (huit teintes de même clarté et
+  saturation, hors de la zone du bleu d'action) sur le fond du bandeau et de la zone de lecture, le point du lieu au
+  classeur et la puce de lieu ; aucun texte courant n'est teinté ; le bleu reste seul pour l'action et la sélection.
+- **Given** un personnage qui a un portrait, **Then** il apparaît dans la puce de la fiche (28 px), dans la marge de
+  ses répliques (44 px) et sur les cartes de l'accueil ; sinon une pastille de couleur avec initiales.
+- **Given** l'accueil, **Then** chaque scène a une couverture : illustration du lieu, sinon portrait du PNJ sur la
+  teinte du lieu, sinon pastille « lieu et portrait à renseigner » ; la vue Liste reste disponible pour les gros
+  classeurs.
+- **Given** une image importée, **Then** elle est copiée à la synchro Notion (les URL de fichiers Notion expirent),
+  retouchée une fois (même désaturation et assombrissement pour toutes), exportée en WebP (portrait 192 px, couverture
+  960 × 540, 200 Ko au plus) et servie par l'API ; aucun filtre, masque, flou ni animation CSS en direct.
+- **Given** le graphe de 500 répliques, **Then** NFR-P1 tient avec l'ambiance (harnais de 20.2) ; un effet qui coûte
+  plus de 5 % est retiré ; au palier « écrire » seulement un médaillon de 20 px par carte, rien aux paliers « lire »
+  et « situer ».
+- **Given** le thème Papier, **Then** les mêmes teintes à clarté 0,50 tiennent 4,5:1 (calculé : braise `#8e5224`
+  5,5:1, ardoise `#2b6d7c` 5,2:1, cendre `#6a6257` 5,4:1).
+
+#### Story 20.23 : Notes d'intention — expérience mesurée — 1 session
+
+**En tant qu'** auteur, **je veux** savoir si l'IA peut noter son intention au moment où elle écrit, **afin d'**avoir un
+« pourquoi » fiable plutôt qu'une reconstruction. (FR144, option C de `docs/architecture/conversations-ia.md`)
+
+- **Given** 20 suites générées avec et sans champ d'intention (≈ 100–200 tokens de plus, ≈ 0,001–0,002 $ par nœud),
+  **When** un juge les note à l'aveugle comme pour le choix de GPT-6.2 Sol, **Then** l'intention n'est activée par
+  défaut que si la qualité ne baisse pas ; elle est alors rangée dans le journal d'édition (A12), jamais exportée, et
+  montrée en tête du tiroir Discussion comme « intention déclarée à la génération ».
+
 ---
 
 ### Chemin critique et tailles
 
 | Bloc | Sessions | Peut commencer |
 |---|---|---|
-| Epic 18 | ≈ 16 | maintenant |
-| Tranche 1 (20.1–20.3) | ≈ 5 | maintenant, en parallèle d'Epic 18 |
-| Tranche 2 (20.4–20.10) | ≈ 15 | après Epic 18 **et** 20.2 |
-| Tranche 3 (20.11–20.15) | ≈ 10 | après 20.6 et 20.8 |
-| Tranche 4 (20.16–20.19) | ≈ 8 | après 20.3 ; 20.17 après 20.11 |
+| Tranche 1 (20.1–20.3) | ≈ 5 | **maintenant** |
+| Tranche 1 bis (18.4, 18.5, 18.6, 18.7, 18.8, 18.9, 18.11) | ≈ 12 | **maintenant**, en parallèle de la tranche 1 |
+| Tranche 2 (20.4–20.10) | ≈ 15 | après la tranche 1 bis **et** 20.2 |
+| Tranche 3 (20.11–20.15, 20.21, 20.22) | ≈ 15 | après 20.6 et 20.8 ; 20.21 après la fusion de la PR #103 |
+| Tranche 4 (20.16–20.20, 20.23) | ≈ 15 | après 20.3 ; 20.17 et 20.23 après 20.11 ; 20.20 après 20.4 |
 
-Chemin critique : Epic 18 → tranche 2 → tranche 3 → tranche 4 ≈ **49 sessions**, la tranche 1 se faisant pendant
-Epic 18. Les tailles sont des estimations, à recaler après les deux premières stories.
+Chemin critique : tranche 1 bis → tranche 2 → tranche 3 → tranche 4 ≈ **57 sessions**, la tranche 1 se faisant
+pendant la tranche 1 bis. Les tailles sont des estimations, à recaler après les deux premières stories.
+
+**Par où commencer (trois sessions en parallèle, sans fichier commun)** : 20.2 (la preuve de fluidité décide du plan
+B), 20.1 (conversion et fixtures d'export) et 18.4 (annulation transactionnelle, dont tout le reste dépend).
 
 ### Garde-fous
 
