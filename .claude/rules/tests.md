@@ -121,6 +121,21 @@ racine (`context_builder.py`…) matchait le basename et masquait donc aussi
 scan vide : accompagner tout filtre d'un test qui vérifie que le vrai code est
 toujours couvert.
 
+### Un pytest muet n'est pas un pytest lent
+
+- **Jamais deux pytest en même temps** sur le poste, worktrees compris : `tests/conftest.py`
+  impose un `LOG_DIR` commun, et deux processus s'y disputent le fichier du jour.
+- **Pas de `| tail` ni de sortie bufferisée** sur un run long : rediriger vers un fichier
+  avec `PYTHONUNBUFFERED=1`, sinon un run figé et un run lent se ressemblent.
+- **Rien d'écrit au bout de 2 minutes** (ni « collected ») : vider la pile tout de suite,
+  ne pas attendre. Script lancé avec `.venv/Scripts/python.exe -u` :
+  `faulthandler.dump_traceback_later(60, exit=True, file=open("tmp/stack.txt", "w"))`
+  puis `pytest.main([... , "-s"])` — sans `-s`, la capture de pytest avale la pile.
+
+Vécu le 2026-11-20 : ~50 minutes d'attente sur des runs figés avant collecte. La pile
+montrait `DateRotatingFileHandler` qui se relançait lui-même en boucle sur un fichier
+verrouillé (corrigé, voir `.claude/rules/logging.md`) ; elle était lisible en une commande.
+
 ## Quand tester
 
 - **Après modification backend** : ciblé T1 → fichier ou `-k` ; large → `npm run test:backend:fast` ; complet → `pytest tests/` (T3)
