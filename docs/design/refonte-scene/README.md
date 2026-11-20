@@ -5,8 +5,11 @@
 l'architecture associée est dans [`docs/architecture/refonte-scene-architecture.md`](../../architecture/refonte-scene-architecture.md).
 
 - **Canvas de design** (privé) : <https://claude.ai/artifact/VynbrAeNhQULRXhbnVnTDW>
-- **Canvas « Ambiance »** (privé) : <https://claude.ai/artifact/GVZfj6RsZqGQGwEg8X5SxN> — teintes de lieu, portraits
-  et couvertures sur le Script et l'accueil, avec les images du dossier Alteir (story 20.20, architecture A16).
+- **Ambiance** (story 20.20, architecture A16) : board `Ambiance` de ce dossier — teintes de lieu, portraits et
+  couvertures sur le Script et l'accueil, dans les deux thèmes, et le réglage qui la réduit. Images validées, déjà
+  retouchées, en WebP dans [`ambiance/`](ambiance/) (portraits 192 px, couvertures 960 × 540, bandeaux à fondu
+  transparent). Le canvas privé d'origine (<https://claude.ai/artifact/GVZfj6RsZqGQGwEg8X5SxN>, deux écrans notés
+  8,1/10) n'est plus qu'une archive : le board le reprend.
 - **Prototypes locaux** : ce dossier. Configuration `design-refonte-scene` de `.claude/launch.json`
   (`python -m http.server 8973 --directory docs/design/refonte-scene`), puis `http://localhost:8973/Main.dc.html`.
   `support.js` doit rester à côté des `.dc.html`.
@@ -58,7 +61,7 @@ Mesuré le 2026-11-19 sur le dialogue généré « Rencontre avec le forgeron it
 │  ─────────                                     │  Barre de vue : SCRIPT · GRAPHE · JOUER (même place dans les 3 vues)
 │  Fiches du GDD · Profils d'auteur              │  Vue active
 │  Usage et coûts · Réglages                     │
-└ Barre d'état 28 px : ENREGISTRÉ · PROBLÈMES · CONTEXTE · TOKENS / RÉPLIQUE · MODÈLE ··· MOTS · LECTURE · ? RACCOURCIS
+└ Barre d'état 28 px : ENREGISTRÉ · PROBLÈMES · CONTEXTE · TOKENS / RÉPLIQUE · MODÈLE · LOT (pendant un lot) ··· MOTS · LECTURE · ? RACCOURCIS
 ```
 
 Le classeur et la fiche gardent le même état d'une vue à l'autre : changer de vue ne déplace rien sous le curseur.
@@ -83,6 +86,8 @@ Largeur du graphe à 1 440 px : **1 188 px** classeur ouvert, **1 384 px** class
 | `Contexte` | **Ce que le modèle saura** : tokens par section, budget AUTO, modèle. | retirer |
 | `Versions` | **Versions d'une réplique** : diff, restaurer sans rien perdre. | restaurer |
 | `Etats` | **Les états qui comptent** : invité, erreur, budget atteint, conflit 409, chargement, classeur vide, deux PNJ. | — |
+| `Discussion` | **Discuter d'une réplique avec l'IA** (stories 20.21, 20.22, A15) : « Pourquoi ? » dans la marge, tiroir de 380 px avec la génération d'origine en diff, le résumé de réflexion ou la mention de son absence, la limite de reconstruction, les échanges et leur coût, la limite de 40 messages ; question au GDD depuis CTRL+K. Props `theme`, `etat` (`conversation`, `premier`, `invite`, `lecture`, `budget`, `plein`, `erreur`, `sans-generation`, `palette`, `gdd`). | Pourquoi ?, envoyer (CTRL+↵), replier, CTRL+K, ÉCHAP |
+| `Ambiance` | **Ambiance** (story 20.20, A16) : teinte du lieu sur les fonds, portraits en puce (28 px) et en marge (44 px), couvertures à l'accueil, réglage Pleine / Réduite / Aucune. Images dans `ambiance/`. Props `ecran` (`script`, `accueil`, `reglage`), `theme`, `niveau`, `teinte` (8 teintes). | fil d'Ariane → accueil, scène → Script, Réglages, thème, niveau |
 | `Bibliotheque` | **Accueil** : scènes, état, reprise. | filtres |
 | `Fiches` | **Fiches du GDD** (333, comptées sur disque), « utilisée dans », synchro Notion. | filtre |
 | `Reglages` | **Réglages › Apparence** : thème, taille, mesure, densité, mouvement, sans Enregistrer. | oui |
@@ -108,7 +113,8 @@ Chaque board dit en pied ce qui est un exemple (coûts, heures, textes généré
   sont sous des réponses vides, 79 sous les 8 répliques jamais atteintes. Restent **105** emplacements utiles (réponse
   écrite, réplique atteinte) : 4 sous l'ouverture, 84 au niveau 1, 17 au niveau 2 — ce que propose le tiroir Lot
   (`Lot`) avec ses deux filtres par défaut.
-- **Mots (3 887)** : suites de lettres ou chiffres (`\w+`) dans les répliques et les réponses ; lecture = mots / 200
+- **Mots (3 887)** : suites de lettres ou chiffres (`/[\p{L}\p{N}_]+/gu`, pas `\w+` : en JavaScript `\w` ignore les
+  lettres accentuées et « Uresaïr » compterait deux mots) dans les répliques et les réponses ; lecture = mots / 200
   par minute.
 - **Monnaie** : une estimation est affichée en **euros**, comme la renvoie `estimate-cost` (`estimated_cost_eur`) ; une
   dépense engagée ou réelle en **dollars**, comme le journal d'usage. La règle vient du design system (« dans la devise
@@ -123,8 +129,8 @@ Chaque board dit en pied ce qui est un exemple (coûts, heures, textes généré
 | **Fiche de scène** | Titre, distribution, brief avec `@`, tons, profil ; compacte en une ligne. | `GenerationPanel`, `SceneSelectionWidget`, `ContextSelector` |
 | **Bloc de script** | Locuteur, réplique serif, didascalies, réponses avec puces et état. | `UnityDialogueEditor`, `GenerationOptionsComparison` |
 | **Carte de réplique** | Même contenu en 360 px, réplique bornée (12 lignes, défilement interne une fois sélectionnée), réponses jamais coupées, ports par réponse et par issue. | `DialogueNode` ; `TestNode` et `EndNode` deviennent des sorties |
-| **Champ d'écriture** | Le `<textarea>` d'Epic 18 (D4) : à l'entrée dans une réplique, **toute la réplique** passe en texte brut avec ses `*…*` ; à la sortie elle redevient mise en forme. | Epic 18.5–18.7 |
-| **Emplacement à écrire** | Au bout de toute réponse sans suite : taper ou Générer CTRL+↵ ; ligne « TRACE ▸ » dépliable pendant l'écriture. | `AIGenerationPanel`, `GenerationProgressModal`, trace de raisonnement |
+| **Champ d'écriture** | Le `<textarea>` d'Epic 18 (D4) : à l'entrée dans une réplique, **toute la réplique** passe en texte brut avec ses `*…*` ; à la sortie elle redevient mise en forme. | Epic 18.5a–18.7 |
+| **Emplacement à écrire** | Au bout de toute réponse sans suite : taper ou Générer CTRL+↵ ; ligne « TRACE ▸ » dépliable pendant l'écriture. | `AIGenerationPanel`, `GenerationStreamingInline`, trace de raisonnement |
 | **Tiroir Lot** | Portée, coût total, progression, reprise, revue en série. | jobs FR87/FR88, `BatchGenerateFromNodesModal` |
 | **Puce mécanique** | Trait, test, respect, influence, fin ; clic (cible 24 px) → popover d'édition ancré. | `ChoiceEditor`, `AttributeSkillTestEditor`, `ConditionEditor`, `EffectEditor` |
 | **Barre d'état** | Enregistrement, problèmes, contexte, tokens, modèle, mots, lot en cours. | `SaveStatusIndicator`, `GraphHealthBadge`, `EstimationBadge` |
@@ -211,32 +217,37 @@ jet, et un clic ou une sélection rend la pleine opacité.
 
 ## 13. Rien ne se perd : où va chaque fonction actuelle
 
-| Aujourd'hui | Demain |
-|---|---|
-| Page Générer (scène, brief, onglets Brief/Flags/Templates, réglages LLM) | Fiche de scène ; flags dans la fiche (« fiche ▾ › Flags ») ; profil d'auteur dans la fiche ; modèle et raisonnement dans la barre d'état et le tiroir Contexte |
-| « Sauvegarder ce brief comme template » | « fiche ▾ › Enregistrer comme profil d'auteur » |
-| Colonne Contexte GDD | Fiche (PNJ, PJ, `@`), tiroir Contexte, écran Fiches du GDD ; règles de contexte dans Réglages › Notion et GDD |
-| Colonne droite (Prompt, Dialogue, Détails, Trace) | Tiroir Contexte (« voir le prompt »), emplacement à écrire (en direct + « TRACE ▸ »), aperçu de fiche, Versions |
-| Options ×N, comparaison Liste / Côte à côte | `‹ 1/4 ›` dans l'emplacement + « comparer les 4 côte à côte » (vue 2b conservée) |
-| Section Éditer (liste, métadonnées, partage, permissions, suppression) | Classeur ; Script ; « fiche ▾ » (métadonnées, partage, permissions, supprimer) |
-| Titre et locuteur d'un nœud | En-tête du bloc et de la carte, éditables (Epic 18.7) |
-| Graphe : inspecteur 5 onglets, panneaux flottants | Nœud → la carte ; Santé → barre d'état ; Qualité, Slop → relecture en marge ; Coût → barre d'état ; simulation, règles de contexte, systèmes de jeu : fenêtres ponctuelles inchangées |
-| Nœud de test, nœud Fin | Sorties de la réponse (4 issues), puce ■ FIN |
-| Sélection multiple, opérations par lot, génération de lot | Lasso du graphe + barre de lot ; tiroir Lot (`Lot`) |
-| Accepter / Rejeter / Régénérer, historique, Voir le prompt | Pied de carte « à valider », revue en série, Versions, Contexte |
-| Tags de nœud, badge GDD↑, COND. | Puces ; lentille Technique |
-| Export PNG/SVG, export Unity, filtres, CTRL+J, carte | Menu Actions ▾ et palette ; inchangés |
-| Aperçu de scénario (P) | Vue Jouer |
-| `/usage`, Profils d'auteur | Écrans existants, dans l'enveloppe Scène ; **non redessinés dans cette proposition** |
-| Options, Admin | Réglages (navigation gauche) ; Admin inchangé |
-| Mode écriture (CTRL+\) | Mode Focus (même raccourci) |
+La colonne « Story » dit qui livre le déplacement ; « Test e2e » se coche (☐ → ☑, avec le nom de la spec) quand un
+parcours le prouve. Le retrait du panneau de droite (20.15) attend une colonne entièrement cochée.
+
+| Aujourd'hui | Demain | Story | Test e2e |
+|---|---|---|---|
+| Page Générer (scène, brief, onglets Brief/Flags/Templates, réglages LLM) | Fiche de scène ; flags dans la fiche (« fiche de scène ▾ › Flags ») ; profil d'auteur dans la fiche ; modèle et raisonnement dans la barre d'état et le tiroir Contexte | 20.4, 20.5, 20.25 | ☐ |
+| « Sauvegarder ce brief comme template » | « fiche de scène ▾ › Enregistrer comme profil d'auteur » | 20.4 | ☐ |
+| Colonne Contexte GDD | Fiche (PNJ, PJ, `@`), tiroir Contexte, écran Fiches du GDD ; règles de contexte dans Réglages › Notion et GDD | 20.4, 20.25 | ☐ |
+| Colonne droite (Prompt, Dialogue, Détails, Trace) | Tiroir Contexte (« voir le prompt »), emplacement à écrire (en direct + « TRACE ▸ »), aperçu de fiche, Versions | 20.25, 20.11, 20.17 | ☐ |
+| Options ×N, comparaison Liste / Côte à côte | `‹ 1/4 ›` dans l'emplacement + « comparer les 4 côte à côte » (vue 2b conservée) | 20.11 | ☐ |
+| Section Éditer (liste, métadonnées, partage, permissions, suppression) | Classeur ; Script ; « fiche de scène ▾ » (métadonnées, partage, permissions, supprimer) | 20.4, 20.5, 20.15 | ☐ |
+| Titre et locuteur d'un nœud | En-tête du bloc et de la carte, éditables (Epic 18.7) | 18.7 | ☐ |
+| Graphe : inspecteur 5 onglets, panneaux flottants | Nœud → la carte ; Santé → barre d'état ; Qualité, Slop → relecture en marge ; Coût → barre d'état ; simulation, règles de contexte, systèmes de jeu : fenêtres ponctuelles inchangées | 20.7, 20.9, 20.14, 20.5 | ☐ |
+| Nœud de test, nœud Fin | Sorties de la réponse (4 issues), puce ■ FIN | 20.8 | ☐ |
+| Sélection multiple, opérations par lot, génération de lot | Lasso du graphe + barre de lot ; tiroir Lot (`Lot`) | 20.12, 18.11 | ☐ |
+| Accepter / Rejeter / Régénérer, historique, Voir le prompt | Pied de carte « à valider », revue en série, Versions, Contexte | 20.7, 20.12, 20.17, 20.25 | ☐ |
+| Tags de nœud, badge GDD↑, COND. | Puces ; lentille Technique | 20.9 | ☐ |
+| Export PNG/SVG, export Unity, filtres, CTRL+J, carte | Menu Actions ▾ et palette ; inchangés | 20.5, 20.1 | ☐ |
+| Aperçu de scénario (P) | Vue Jouer | 20.24 | ☐ |
+| `/usage`, Profils d'auteur | Écrans existants, dans l'enveloppe Scène ; **non redessinés dans cette proposition** | 20.5 | ☐ |
+| Options, Admin | Réglages (navigation gauche) ; Admin inchangé | 20.5, 20.16 | ☐ |
+| Mode écriture (CTRL+\) | Mode Focus (même raccourci) | 20.16 | ☐ |
 
 ## 14. Articulation avec l'existant
 
 - **Maquette 2026** : la charte reste ; 1c, 2a, 2b, 2e sont absorbés (page Générer → fiche + Script ; 2a/2b →
   emplacement ; 2e → Graphe).
-- **Epic 18 (édition in-situ)** : **intégrée à l'epic 20** (tranche 1 bis : 18.4–18.9 et 18.11 ; 18.10 dans 20.18 ;
-  18.1 à 18.3 remplacées). Elle reste la fondation, avec trois écarts nommés.
+- **Epic 18 (édition in-situ)** : **intégrée à l'epic 20**. Tranche 1 bis : 18.4 (reste à faire), 18.5a (champ seul,
+  testé hors graphe) et 18.8 ; 18.5b, 18.6, 18.7, 18.9 et 18.11 passent en tranche 2, après 20.6 et 20.7, parce
+  qu'elles s'écrivent contre le bloc de script et la carte ; 18.10 dans 20.18 ; 18.1 à 18.3 remplacées. Elle reste la
+  fondation, avec trois écarts nommés.
   - Reprises : D1 (clic simple), D2 (ÉCHAP), **D4 (`<textarea>`) intact** — la réplique entière passe en texte brut à
     l'entrée, aucun éditeur de blocs —, D5 (widget composite), 18.4 (annulation transactionnelle).
   - Écart 1 : **largeur 360 px** au lieu de 280 (mesuré : la réplique d'ouverture de Grish en Instrument Serif 16 px
@@ -250,18 +261,21 @@ jet, et un clic ou une sélection rend la pleine opacité.
   le panneau de droite reste disponible **derrière un drapeau** pendant toute la tranche 2 ; il n'est retiré qu'en
   tranche 3, après un mois d'usage du Script et du Graphe sans recours au panneau (mesuré par un compteur d'ouverture).
 
-## 15. Décisions à prendre (avec recommandation)
+## 15. Décisions (état au 2026-11-20)
 
-1. **Cartes de 360 px** — recommandé (mesure ci-dessus).
-2. **Graphe de gauche à droite** — recommandé : le lien part de la phrase, plus d'étiquette de lien. Coût : une
+1. **Cartes de 360 px** — **prise**, sous réserve de la preuve 20.2 (mesure ci-dessus).
+2. **Graphe de gauche à droite** — **prise** : le lien part de la phrase, plus d'étiquette de lien. Coût : une
    redisposition par dialogue, positions précédentes conservées.
-3. **Paliers de zoom** — calculés à la fin du zoom, une valeur dans le store, carte en écriture exemptée, hauteur par
+3. **Paliers de zoom** — **prise** : trois paliers contigus, écrire ≥ 75 %, lire ≥ 40 % et < 75 %, situer < 40 % (A10) ;
+   calculés à la fin du zoom, une valeur dans le store, carte en écriture exemptée, hauteur par
    palier connue de la disposition. **Plan B si la preuve 20.2 échoue** : cartes de 280 px et dépliage à la sélection
    (Epic 18 D3 inchangée), le texte complet restant lisible dans la vue Script.
-4. **Tests en sorties** — recommandé (le nœud de test est déjà une vue dérivée, `testNodeSync.ts`).
-5. **Monnaie** — garder la règle actuelle (estimation en €, dépense en $) ou tout afficher en euros avec un taux fixé
+4. **Tests en sorties** — **prise** (le nœud de test est déjà une vue dérivée, `testNodeSync.ts`).
+5. **Monnaie** — **ouverte** ; d'ici là, la règle actuelle s'applique (§ 6). Options : garder la règle actuelle (estimation en €, dépense en $) ou tout afficher en euros avec un taux fixé
    dans les réglages.
-6. **Thème Papier** — livré en option, Nuit par défaut.
+6. **Thème Papier** — **prise** : livré en option, Nuit par défaut (20.16).
 7. **Notes d'intention** — l'IA noterait à la génération pourquoi elle écrit ce qu'elle écrit (seul « pourquoi »
-   fiable, ≈ 0,001–0,002 $ par nœud). Recommandé : expérience mesurée à l'aveugle d'abord (story 20.23), activation
+   fiable, ≈ 0,001–0,002 $ par nœud). **Prise** : expérience mesurée à l'aveugle d'abord (story 20.23), activation
    seulement si la qualité ne baisse pas.
+8. **Insertion par « / » dans une carte** (montrée par le board `Carte`) — **hors epic 20** : aucune story ne la porte ;
+   le board la garde comme piste, à reprendre si l'usage du Script et du Graphe la réclame.

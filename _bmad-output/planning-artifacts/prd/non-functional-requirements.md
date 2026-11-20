@@ -6,6 +6,11 @@
 
 **Requirement:** System must render dialogue graphs with 500+ nodes in <1 second.
 
+> **Epic 20 (décision du 2026-11-20).** Pour la refonte « Scène », le seuil mesuré est celui d'ADR-008
+> (`docs/architecture/adr-008-perf-targets.md`, palier confort : p95 load < 3 s sous 500 nœuds, p95 drag < 200 ms,
+> p95 frappe < 100 ms), mesuré en local sur le poste Windows de l'auteur avec `PERF_STRICT=1` ; voir `epics/epic-20.md`,
+> « Seuils de mesure ».
+
 **Rationale:** User Journey Marc - workflow itératif nécessite graph fluide. Performance dégradée = friction workflow critique.
 
 **Measurement:**
@@ -309,7 +314,7 @@
 **Acceptance Criteria:**
 - Graph editor: Tab navigation (nodes), Arrow keys (move), Enter/Space (select), Escape (cancel)
 - Forms: Tab navigation, Enter submit, Escape cancel
-- Keyboard shortcuts: Ctrl+G (generate), Ctrl+S (save), Ctrl+Z (undo) (FR111)
+- Keyboard shortcuts: generate (Ctrl+Enter in the "to write" slot, Epic 20), Ctrl+Z / Ctrl+Y (undo / redo) (FR111). No save shortcut: everything saves itself (ADR-006; product rule "never Ctrl+S nor a Save button", 2026-11-11)
 - Focus indicators: Visible focus states (outline, highlight)
 
 ---

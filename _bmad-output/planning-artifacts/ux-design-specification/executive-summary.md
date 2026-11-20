@@ -1,5 +1,13 @@
 # Executive Summary
 
+> ⚠️ **Remplacée le 2026-11-20 pour tout écran repris par l'epic 20 (refonte « Scène »).** Font foi :
+> [`docs/design/refonte-scene/README.md`](../../../docs/design/refonte-scene/README.md) (écrans, composants,
+> raccourcis, table « où va chaque fonction »), les boards `docs/design/refonte-scene/*.dc.html`,
+> [`docs/architecture/refonte-scene-architecture.md`](../../../docs/architecture/refonte-scene-architecture.md)
+> (A1–A16) et [`epic-20.md`](../epics/epic-20.md). En cas de contradiction, la refonte l'emporte. Restent valables :
+> la charte de `design-system-foundation.md` (couleurs, polices, filets, un seul bouton bleu) et les exigences
+> d'accessibilité générales. Ce document est conservé pour l'historique ; ne pas en tirer de critère d'acceptation.
+
 ## Project Vision
 
 DialogueGenerator est un outil de génération assistée par IA pour dialogues arborescents (type Disco Elysium), permettant aux auteurs de générer des dialogues complets (centaines de nœuds) en ≤1H. L'éditeur de graphe est le **point critique de l'UI** : interface complexe avec contraintes d'espace importantes (panneaux latéraux réduisent l'espace du canvas).

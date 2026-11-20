@@ -74,10 +74,16 @@ Les utilisateurs peuvent activer la sélection automatique du contexte GDD via u
 
 Le document canonique Unity JSON devient la source de vérité partout : backend propriétaire (GET/PUT par id, revision, 409), `choiceId` stables, layout en artefact sidecar, frontend qui envoie le document et non nodes/edges. Migration one-shot, format strict v1.1.0, pas de coexistence longue. Voir [epic-16.md](epic-16.md).
 
-## Epic 18: Édition in-situ du dialogue dans le nœud
+## Epic 18: Édition in-situ du dialogue dans le nœud — **intégrée à Epic 20 (2026-11-20)**
 
-Les auteurs peuvent lire et écrire le dialogue complet — réplique PNJ et réponses PJ — **directement dans le nœud sur le canvas**, par simple clic dans le texte, sans ouvrir le panneau de droite et sans action d'enregistrement (ADR-006 : éditer = sauvegarder). Densité **adaptative** : le nœud résume par défaut (maquette 2026 inchangée) et déplie réplique + réponses à la sélection ou au-delà d'un seuil de zoom. Le panneau de droite reste disponible pour ce qui ne tient pas dans un nœud (conditions, effets, skill checks, métadonnées). Voir [epic-18.md](epic-18.md).
+Les auteurs peuvent lire et écrire le dialogue complet — réplique PNJ et réponses PJ — **directement dans le nœud sur le canvas**, par simple clic dans le texte, sans ouvrir le panneau de droite et sans action d'enregistrement (ADR-006 : éditer = sauvegarder). Le panneau de droite reste disponible pour ce qui ne tient pas dans un nœud (conditions, effets, skill checks, métadonnées). Voir [epic-18.md](epic-18.md).
 
-## Epic 19: Canvas-first — surfaces à la demande (squelette)
+⚠️ Depuis le 2026-11-20, ses stories utiles sont reprises par Epic 20 : 18.4 (reste à faire), 18.8 et 18.5a en tranche 1 bis ; 18.5b, 18.6, 18.7, 18.9 et 18.11 en tranche 2, réécrites contre la carte et le bloc de script ; 18.10 dans 20.18 ; 18.1, 18.2 et 18.3 remplacées. Le « seuil de zoom » de la première rédaction est supprimé ; la lisibilité hors sélection passe par les paliers de zoom d'Epic 20 (écrire, lire, situer).
 
-Les auteurs lancent la génération, les détails GDD et les variables depuis **le nœud lui-même**, en overlays appelés à la demande ; le panneau de droite permanent disparaît et sa largeur revient au graphe. **Dépend d'Epic 18** — on ne retire pas le panneau tant que l'édition quotidienne en dépend. Volontairement laissée en squelette : son détail dépend du retour d'usage d'Epic 18. Voir [epic-19.md](epic-19.md).
+## Epic 19: Canvas-first — surfaces à la demande (squelette) — **remplacée par Epic 20 (2026-11-20)**
+
+Les auteurs lancent la génération, les détails GDD et les variables depuis **le nœud lui-même**, en overlays appelés à la demande ; le panneau de droite permanent disparaît et sa largeur revient au graphe. Remplacée par Epic 20 : FR129 et FR130 sont couvertes par FR133, FR137 et le retrait du panneau (story 20.15). Voir [epic-19.md](epic-19.md).
+
+## Epic 20: Refonte « Scène » — une scène, un texte, trois vues — **validée le 2026-11-20, prioritaire**
+
+Une scène porte sa fiche (distribution, contexte) et s'ouvre en trois vues : Script, Graphe à cartes de texte, Jouer. L'IA devient un geste dans le texte (génération, lots, réécriture, discussion avec l'IA), la technique passe en puces et en barre d'état, le panneau de droite disparaît. Malgré son numéro, elle passe devant les autres epics. Intègre les stories utiles d'Epic 18 (tranche 1 bis) et remplace Epic 19. Voir [epic-20.md](epic-20.md).

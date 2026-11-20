@@ -1,5 +1,13 @@
 # Component Strategy
 
+> ⚠️ **Remplacée le 2026-11-20 pour tout écran repris par l'epic 20 (refonte « Scène »).** Font foi :
+> [`docs/design/refonte-scene/README.md`](../../../docs/design/refonte-scene/README.md) (écrans, composants,
+> raccourcis, table « où va chaque fonction »), les boards `docs/design/refonte-scene/*.dc.html`,
+> [`docs/architecture/refonte-scene-architecture.md`](../../../docs/architecture/refonte-scene-architecture.md)
+> (A1–A16) et [`epic-20.md`](../epics/epic-20.md). En cas de contradiction, la refonte l'emporte. Restent valables :
+> la charte de `design-system-foundation.md` (couleurs, polices, filets, un seul bouton bleu) et les exigences
+> d'accessibilité générales. Ce document est conservé pour l'historique ; ne pas en tirer de critère d'acceptation.
+
 ## Design System Components
 
 **Composants disponibles (déjà implémentés) :**

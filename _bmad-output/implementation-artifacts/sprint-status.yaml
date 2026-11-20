@@ -38,7 +38,7 @@ project: DialogueGenerator
 project_key: dialogue-generator
 tracking_system: file-system
 story_location: '{project-root}/_bmad-output/implementation-artifacts'
-last_updated: '2026-08-17T23:50:00+02:00'
+last_updated: '2026-11-20T00:00:00+01:00'
 development_status:
   # Flat list (not nested YAML): each epic block = epic → stories → retrospective, then the NEXT epic starts.
   # Order = delivery sequence (see epic-list.md): 0 → 16 → 1–3 → 17 → 4–15 — not strict epic ID sort.
@@ -191,6 +191,62 @@ development_status:
   9-5-valider-références-variables-détecter-variables-non-définies-fr93: done
   9-6-intégrer-stats-systèmes-de-jeu-attributs-personnage-réputation-v30-fr94: done
   epic-9-retrospective: done
+  # ── Epic 20 — Refonte « Scène », PRIORITAIRE (validée le 2026-11-20) ─────────────────────────────────────────
+  # Placée en tête des blocs backlog pour que « create the next story » tombe sur elle. Ordre = ordre d'exécution,
+  # révisé le 2026-11-20 après le contrôle de readiness (planning-artifacts/implementation-readiness-report-2026-11-20.md).
+  # Les stories 18-x reprises d'Epic 18 sont listées ici, à leur place dans l'ordre ; le bloc epic-18 plus bas ne garde
+  # que les stories remplacées. Détail : planning-artifacts/epics/epic-20.md et epic-18.md.
+  epic-20: backlog
+  # Tranche 1 — fondation, maintenant
+  20-1-conversion-texte-blocs-et-export-golden-en-ci: backlog
+  20-2-preuve-de-performance-cartes-360-flux-lr-paliers: backlog
+  20-3-tokens-en-variables-css-theme-nuit: backlog
+  # Tranche 1 bis — fondation d'écriture (Epic 18), maintenant, en parallèle de la tranche 1
+  18-4-annulation-updatenode-transactionnel-et-coalescence-undo-fr126: backlog  # partiel livré (61462f0a8, graphStore.updateNodeUndo.test.ts) : reste CTRL+Z/CTRL+Y dans un champ, allowedInInputs, annonce lecteur d'écran, mesure des clones
+  18-8-indicateur-de-synchronisation-et-annonce-accessible-ux-dr4: backlog
+  18-5a-champ-decriture-seul-teste-hors-graphe-fr122-fr126: backlog  # après 20-1 (positions start/end de parse)
+  # Tranche 2 — la scène, après 20-2 et la tranche 1 bis (20-4 dès la fin de 20-1)
+  20-4-fiche-de-scene-dans-le-document-fr131: backlog
+  20-5-enveloppe-entete-classeur-barre-de-vue-barre-detat-fr137: backlog
+  20-25-tiroir-contexte-fiches-du-gdd-palette: backlog
+  20-6-vue-script-fr132: backlog
+  20-7-graphe-cartes-de-texte-et-flux-gauche-droite-fr136: backlog
+  18-5b-monter-le-champ-dans-le-bloc-et-la-carte-verrouiller-le-panneau-fr122-fr127: backlog  # remplace 18-5 (découpée en 18-5a / 18-5b)
+  18-6-editer-le-texte-des-reponses-pj-dans-le-noeud-fr124-fr126: backlog
+  18-7-editer-le-speaker-et-le-titre-dans-le-noeud-fr125-fr126: backlog
+  20-8-tests-en-sorties-et-liens-hors-champ-fr136: backlog
+  18-9-clavier-pattern-composite-focus-visible-curseur-a-la-creation-fr128: backlog  # absorbe 14-1 et 14-2 pour le graphe et le Script
+  20-9-lentille-technique-et-popovers-ancres-fr136: backlog
+  18-11-non-regression-perf-export-selection-multiple-noeuds-pending: backlog
+  20-10-etats-transverses: backlog
+  20-24-jouer-fr146: backlog
+  # Tranche 3 — l'IA dans le texte
+  20-11-emplacement-a-ecrire-et-options-sur-place-fr133-fr134: backlog
+  20-12-remplir-et-revoir-en-serie-fr141: backlog
+  20-13-reecrire-une-selection-fr135: backlog
+  20-14-diagnostics-relecture-aide-clavier-fr138: backlog
+  20-21-discuter-dune-replique-avec-lia-fr144: backlog
+  20-22-demander-depuis-la-palette-interface-et-gdd-fr145: backlog
+  20-15-retrait-du-panneau-de-droite: backlog  # à date : un mois d'usage et compteur à zéro, ou décision de l'auteur
+  # Tranche 4 — confort
+  20-16-papier-taille-mesure-focus-fr139: backlog
+  20-17-journal-dedition-versions-variantes-provenance-fr140: backlog
+  20-18-telephone-tactile-et-petits-gestes: backlog  # intègre 18-10
+  20-19-mecanique-tiree-des-catalogues-fr142: backlog
+  20-20-ambiance-teinte-de-lieu-portraits-couvertures-fr143: backlog
+  20-23-notes-dintention-experience-mesuree-fr144: backlog  # après 20-17
+  epic-20-retrospective: optional
+  # ── Epic 18 — intégrée à epic-20 le 2026-11-20 ───────────────────────────────────────────────────────────────
+  # Ses stories actives (18-4, 18-8, 18-5a, 18-5b, 18-6, 18-7, 18-9, 18-11) sont dans le bloc epic-20 ci-dessus.
+  # Le fichier n'a pas de statut « remplacée » (statuts valides : backlog, ready-for-dev, in-progress, review, done) :
+  # les stories remplacées passent en done avec un commentaire, pour que create-story ne les reprenne pas.
+  epic-18: backlog
+  18-1-densite-adaptative-replique-integrale-et-titre-rendu-fr123: done  # remplacée par 20-7 et 20-8, non implémentée
+  18-2-reponses-pj-affichees-en-lignes-dans-le-noeud-fr124: done  # remplacée par 20-7 et 20-8, non implémentée
+  18-3-synchro-descendante-store-vers-panneau-sur-les-champs-texte-fr127: done  # remplacée par le critère de verrouillage de 18-5b, non implémentée
+  18-10-edition-in-situ-au-tactile-sur-viewport-etroit-fr128: done  # intégrée à 20-18, non implémentée ici
+  epic-18-retrospective: optional
+  epic-19: backlog  # remplacée par epic-20 (2026-11-20) ; aucune story
   epic-10: backlog
   tech-debt-e2e-datetime-helper: backlog
   10-1-restaurer-session-après-crash-navigateur-fr96: backlog
@@ -236,48 +292,6 @@ development_status:
   15-5-mode-override-lock: backlog
   15-6-fallback-gracieux-tests-e2e: backlog
   epic-15-retrospective: optional
-  # 2026-11-20 : epic-18 intégrée à epic-20 (tranche 1 bis : 18-4 à 18-9, 18-11 ; 18-10 dans 20-18 ; 18-1 à 18-3 remplacées)
-  epic-18: backlog
-  18-1-densite-adaptative-replique-integrale-et-titre-rendu-fr123: backlog  # remplacée par epic-20
-  18-2-reponses-pj-affichees-en-lignes-dans-le-noeud-fr124: backlog  # remplacée par epic-20
-  18-3-synchro-descendante-store-vers-panneau-sur-les-champs-texte-fr127: backlog  # remplacée par epic-20
-  18-4-annulation-updatenode-transactionnel-et-coalescence-undo-fr126: backlog
-  18-5-editer-la-replique-pnj-dans-le-noeud-fr122-fr126: backlog
-  18-6-editer-le-texte-des-reponses-pj-dans-le-noeud-fr124-fr126: backlog
-  18-7-editer-le-speaker-et-le-titre-dans-le-noeud-fr125-fr126: backlog
-  18-8-indicateur-de-synchronisation-et-annonce-accessible-ux-dr4: backlog
-  18-9-clavier-pattern-composite-focus-visible-curseur-a-la-creation-fr128: backlog
-  18-10-edition-in-situ-au-tactile-sur-viewport-etroit-fr128: backlog
-  18-11-non-regression-perf-export-selection-multiple-noeuds-pending: backlog
-  epic-18-retrospective: optional
-  epic-19: backlog  # remplacée par epic-20 (2026-11-20)
-  # Epic 20 — Refonte « Scène », prioritaire (validée le 2026-11-20). Ordre d'exécution : tranche 1 et tranche 1 bis
-  # (stories 18-x ci-dessus) en parallèle, puis tranches 2, 3, 4. Détail : planning-artifacts/epics/epic-20.md
-  epic-20: backlog
-  20-1-conversion-texte-blocs-et-export-golden-en-ci: backlog
-  20-2-preuve-de-performance-cartes-360-flux-lr-paliers: backlog
-  20-3-tokens-en-variables-css-theme-nuit: backlog
-  20-4-fiche-de-scene-dans-le-document-fr131: backlog
-  20-5-enveloppe-entete-classeur-barre-de-vue-barre-detat-fr137: backlog
-  20-6-vue-script-fr132: backlog
-  20-7-graphe-cartes-de-texte-et-flux-gauche-droite-fr136: backlog
-  20-8-tests-en-sorties-et-liens-hors-champ-fr136: backlog
-  20-9-lentille-technique-et-popovers-ancres-fr136: backlog
-  20-10-etats-transverses: backlog
-  20-11-emplacement-a-ecrire-et-options-sur-place-fr133-fr134: backlog
-  20-12-remplir-et-revoir-en-serie-fr141: backlog
-  20-13-reecrire-une-selection-fr135: backlog
-  20-14-diagnostics-relecture-aide-clavier-fr138: backlog
-  20-21-discuter-dune-replique-avec-lia-fr144: backlog
-  20-22-demander-depuis-la-palette-interface-et-gdd-fr145: backlog
-  20-15-retrait-du-panneau-de-droite: backlog
-  20-16-papier-taille-mesure-focus-fr139: backlog
-  20-17-journal-dedition-versions-variantes-provenance-fr140: backlog
-  20-18-telephone-tactile-et-petits-gestes: backlog
-  20-19-mecanique-tiree-des-catalogues-fr142: backlog
-  20-20-ambiance-teinte-de-lieu-portraits-couvertures-fr143: backlog
-  20-23-notes-dintention-experience-mesuree-fr144: backlog
-  epic-20-retrospective: optional
 
 action_items:
   - epic: 7

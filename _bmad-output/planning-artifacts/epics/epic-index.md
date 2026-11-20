@@ -55,14 +55,14 @@
   Les utilisateurs peuvent naviguer l'éditeur de graphe entièrement au clavier avec indicateurs de focus visibles. Le système supporte personnalisation contraste couleurs (WCAG AA), et lecteurs d'écran avec ARIA labels (V2.0+).
 
 
-- **Epic 18**: [Édition in-situ du dialogue dans le nœud](epic-18.md)  
-  Les auteurs peuvent écrire la réplique PNJ et les réponses PJ directement dans le nœud (clic simple, éditer = sauvegarder, ADR-006), avec densité adaptative pour préserver la lisibilité des graphes 500+ nœuds. Le panneau de droite reste le lieu des conditions, effets et métadonnées.
+- **Epic 18**: [Édition in-situ du dialogue dans le nœud](epic-18.md) — **intégrée à Epic 20 (2026-11-20)**  
+  Les auteurs peuvent écrire la réplique PNJ et les réponses PJ directement dans le nœud (clic simple, éditer = sauvegarder, ADR-006). Reprise par Epic 20 : 18.4 (reste), 18.8 et 18.5a en tranche 1 bis ; 18.5b, 18.6, 18.7, 18.9, 18.11 en tranche 2 ; 18.10 dans 20.18 ; 18.1, 18.2, 18.3 remplacées.
 
 - **Epic 19**: [Canvas-first — surfaces à la demande](epic-19.md) — **squelette**  
   Génération, détails GDD et variables en overlays lancés depuis le nœud ; suppression du panneau de droite permanent et récupération de son espace pour le graphe. Dépend d'Epic 18 ; détail à figer après retour d'usage. **Remplacée par Epic 20 (2026-11-20).**
 
 - **Epic 20**: [Refonte « Scène » — une scène, un texte, trois vues](epic-20.md) — **validée le 2026-11-20, prioritaire : on y travaille en premier**
-  Une scène porte sa fiche (distribution, contexte) et s'ouvre en trois vues : Script, Graphe à texte, Jouer. L'IA devient un geste dans le texte (génération, lots, réécriture, discussion avec l'IA), la technique passe en puces et en barre d'état, le panneau de droite disparaît, la scène prend la couleur de son lieu et les visages de ses personnages. 23 stories en 4 tranches, plus les 7 stories d'Epic 18 reprises en tranche 1 bis (≈ 57 sessions sur le chemin critique).
+  Une scène porte sa fiche (distribution, contexte) et s'ouvre en trois vues : Script, Graphe à texte, Jouer. L'IA devient un geste dans le texte (génération, lots, réécriture, discussion avec l'IA), la technique passe en puces et en barre d'état, le panneau de droite disparaît, la scène prend la couleur de son lieu et les visages de ses personnages. 25 stories en 4 tranches (dont 20.24 Jouer et 20.25 Contexte / Fiches / palette, ajoutées le 2026-11-20 après le contrôle de readiness), plus 8 stories d'Epic 18 : 18.4 (reste), 18.8 et 18.5a en tranche 1 bis, 18.5b, 18.6, 18.7, 18.9 et 18.11 en tranche 2 (≈ 64 sessions sur le chemin critique).
 
 - **Epic 15**: [RLM Context Selector (sélection automatique du contexte GDD)](epic-15.md)  
   Les utilisateurs peuvent activer la sélection automatique du contexte GDD via un service RLM optionnel, qui explore le GDD par function calling et réduit le contexte de 20k+ à 12-15k tokens sans perte de pertinence. Fallback gracieux vers la sélection manuelle. ⚠️ Ses « FR1-FR8 / NFR1-NFR6 » appartiennent à l'espace de numérotation de `prd/prd-rlm-context-selector.md`, **pas** au référentiel principal.
