@@ -324,3 +324,102 @@ def test_update_many_loads_and_saves_each_daily_file_once(
     assert repository.update_many(found.values()) == 2
     assert len(saves) == 1
     assert {r.node_id for r in repository.get_all()} == {"NODE_call-1", "NODE_call-2"}
+
+
+def test_concurrent_saves_and_annotations_lose_no_record(
+    repository: FileLLMUsageRepository, sample_record: LLMUsageRecord
+) -> None:
+    """Sauvegardes et annotations concurrentes (boucle + threads) : aucun record perdu.
+
+    Chaque écriture relit puis réécrit tout le fichier du jour ; avant le verrou, une
+    annotation lancée par ``asyncio.to_thread`` pendant qu'un appel LLM était tracé
+    réécrivait l'ancien contenu et faisait disparaître le nouvel enregistrement.
+    """
+    import threading
+
+    seeds = [
+        _call_record(sample_record, call_id=f"seed-{i}", prompt=f"s{i}", tokens=1, cost=0.0)
+        for i in range(20)
+    ]
+    for seed in seeds:
+        repository.save(seed)
+
+    def save_many(prefix: str) -> None:
+        for i in range(40):
+            repository.save(
+                _call_record(sample_record, call_id=f"{prefix}-{i}", prompt="p", tokens=1, cost=0.0)
+            )
+
+    def annotate_many() -> None:
+        for seed in seeds:
+            found = repository.get_by_call_ids([seed.call_id])[seed.call_id]
+            found.node_id = f"NODE_{seed.call_id}"
+            repository.update_many([found])
+
+    threads = [
+        threading.Thread(target=save_many, args=("a",)),
+        threading.Thread(target=save_many, args=("b",)),
+        threading.Thread(target=annotate_many),
+    ]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    records = repository.get_all()
+    assert len(records) == 20 + 80
+    annotated = {r.call_id for r in records if r.node_id}
+    assert annotated == {seed.call_id for seed in seeds}
+
+
+def test_unreadable_day_file_is_set_aside_not_overwritten(
+    repository: FileLLMUsageRepository, sample_record: LLMUsageRecord, tmp_path: Path
+) -> None:
+    """Un fichier du jour illisible est mis de côté : la sauvegarde suivante ne l'écrase pas."""
+    day_file = tmp_path / f"usage_{sample_record.timestamp.date().isoformat()}.json"
+    day_file.write_text('{"date": "x", "records": [ {"request_id": ', encoding="utf-8")
+
+    repository.save(sample_record)
+
+    set_aside = list(tmp_path.glob(f"{day_file.name}.corrupt-*"))
+    assert len(set_aside) == 1
+    assert set_aside[0].read_text(encoding="utf-8").startswith('{"date": "x"')
+    assert len(repository.get_all()) == 1
+
+
+def test_mark_node_deleted_marks_every_generation_of_the_node_in_its_dialogue(
+    repository: FileLLMUsageRepository, sample_record: LLMUsageRecord
+) -> None:
+    """Un nœud régénéré a deux records : les deux sont marqués, pas l'homonyme d'un autre dialogue."""
+    first = _call_record(sample_record, call_id="gen-1", prompt="v1", tokens=1, cost=0.0)
+    regenerated = _call_record(
+        sample_record, call_id="gen-2", prompt="v2", tokens=1, cost=0.0, offset_seconds=5
+    )
+    other_dialogue = _call_record(sample_record, call_id="gen-3", prompt="x", tokens=1, cost=0.0)
+    for record, dialogue in ((first, "D"), (regenerated, "D.json"), (other_dialogue, "E")):
+        record.dialogue_id = dialogue
+        record.node_id = "NODE_1"
+        repository.save(record)
+
+    assert repository.mark_node_deleted("NODE_1", dialogue_id="D") is True
+
+    by_call = {r.call_id: r for r in repository.get_all()}
+    assert by_call["gen-1"].deleted and by_call["gen-2"].deleted
+    assert not by_call["gen-3"].deleted
+
+
+def test_update_many_written_omits_ambiguous_targets(
+    repository: FileLLMUsageRepository, sample_record: LLMUsageRecord
+) -> None:
+    """Seuls les records réellement réécrits sont rendus (cible en double ⇒ absente)."""
+    good = _call_record(sample_record, call_id="call-ok", prompt="p", tokens=1, cost=0.0)
+    duplicated = _call_record(sample_record, call_id="call-dup", prompt="p", tokens=1, cost=0.0)
+    repository.save(good)
+    repository.save(duplicated)
+    repository.save(duplicated.model_copy())
+
+    good.node_id = "NODE_OK"
+    duplicated.node_id = "NODE_DUP"
+    written = repository.update_many_written([good, duplicated])
+
+    assert [r.call_id for r in written] == ["call-ok"]

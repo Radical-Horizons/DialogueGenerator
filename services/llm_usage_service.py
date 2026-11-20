@@ -109,8 +109,11 @@ class LLMUsageService:
             from api.middleware.billable_user_context import get_billable_user_id
 
             billable_uid = get_billable_user_id()
-            # Calculer le coût estimé (0€ pour génération échouée, Story 1.15 AC#5)
-            if success:
+            # Coût des tokens facturés, succès ou non. Une erreur API ne rend aucun token :
+            # 0 € (Story 1.15 AC#5). Une réponse reçue puis inexploitable (refusée, tronquée,
+            # mal formée) est facturée par le fournisseur, et l'ignorer fausse le budget sur
+            # les appels les plus chers (max_output_tokens atteint).
+            if prompt_tokens > 0 or completion_tokens > 0:
                 estimated_cost = self.pricing_service.calculate_cost(
                     model_name=model_name,
                     prompt_tokens=prompt_tokens,
@@ -152,8 +155,9 @@ class LLMUsageService:
             if success:
                 report_llm_call(call_id)
             
-            # Mettre à jour le budget si le service de cost governance est disponible
-            if self.cost_governance_service and success:
+            # Mettre à jour le budget dès que l'appel a été facturé : une réponse reçue mais
+            # inexploitable (refus, tronquée, mal formée) coûte autant qu'une réussie.
+            if self.cost_governance_service and estimated_cost > 0:
                 try:
                     self.cost_governance_service.update_budget(
                         user_id=billable_uid,
@@ -259,13 +263,13 @@ class LLMUsageService:
             template_name: Nom snapshoté du template, optionnel.
 
         Returns:
-            Les ``call_id`` retrouvés et soumis à l'écriture, dans l'ordre reçu.
+            Les ``call_id`` effectivement écrits, dans l'ordre reçu (une cible introuvable
+            ou ambiguë n'y figure pas : le nœud n'a alors pas de provenance enregistrée).
         """
         if not annotations:
             return []
         try:
             records = self.repository.get_by_call_ids([call_id for call_id, _ in annotations])
-            annotated: List[str] = []
             to_update: List[LLMUsageRecord] = []
             for call_id, node_id in annotations:
                 record = records.get(call_id)
@@ -280,8 +284,8 @@ class LLMUsageService:
                     record.template_id = template_id
                     record.template_name = template_name
                 to_update.append(record)
-                annotated.append(call_id)
-            self.repository.update_many(to_update)
+            written = self.repository.update_many_written(to_update)
+            annotated = [record.call_id for record in written if record.call_id]
             logger.debug(
                 "annotate_calls: %d appel(s) annoté(s) → dialogue='%s', template='%s'",
                 len(annotated),
@@ -327,20 +331,22 @@ class LLMUsageService:
 
     _USD_TO_EUR_RATE: float = 0.92
 
-    def mark_node_deleted(self, node_id: str) -> bool:
+    def mark_node_deleted(self, node_id: str, dialogue_id: Optional[str] = None) -> bool:
         """Marque un nœud comme supprimé dans l'historique des coûts.
-        
-        Retrouve le record correspondant par node_id et passe deleted=True.
-        Si le record n'est pas trouvé, log un warning sans lever d'exception.
-        
+
+        Passe deleted=True sur tous les records encore actifs du nœud (un nœud régénéré
+        en a plusieurs). Si aucun record n'est trouvé, log un warning sans lever d'exception.
+
         Args:
             node_id: ID du nœud supprimé du graphe.
-            
+            dialogue_id: Limite aux records de ce dialogue (recommandé : les ``node_id``
+                ne sont uniques que dans un dialogue).
+
         Returns:
-            True si le record a été trouvé et mis à jour, False sinon.
+            True si au moins un record a été mis à jour, False sinon.
         """
         try:
-            found = self.repository.mark_node_deleted(node_id)
+            found = self.repository.mark_node_deleted(node_id, dialogue_id)
             if not found:
                 logger.warning(
                     f"mark_node_deleted: aucun record trouvé pour node_id='{node_id}', no-op."

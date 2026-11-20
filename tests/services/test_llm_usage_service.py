@@ -9,8 +9,10 @@ from models.llm_usage import LLMUsageRecord
 
 @pytest.fixture
 def mock_repository():
-    """Crée un repository mock."""
-    return Mock()
+    """Crée un repository mock (``update_many_written`` rend ce qu'on lui confie)."""
+    repository = Mock()
+    repository.update_many_written.side_effect = lambda records: list(records)
+    return repository
 
 
 @pytest.fixture
@@ -125,9 +127,9 @@ def test_track_usage_with_error(usage_service, mock_repository):
     usage_service.track_usage(
         request_id="req_456",
         model_name="gpt-5.6-terra",
-        prompt_tokens=1000,
+        prompt_tokens=0,
         completion_tokens=0,
-        total_tokens=1000,
+        total_tokens=0,
         duration_ms=1000,
         success=False,
         endpoint="generate/variants",
@@ -138,7 +140,7 @@ def test_track_usage_with_error(usage_service, mock_repository):
     saved_record = mock_repository.save.call_args[0][0]
     assert saved_record.success is False
     assert saved_record.error_message == "API Error"
-    # Story 1.15 AC#5: coût 0€ pour génération échouée
+    # Story 1.15 AC#5 : une erreur API ne rend aucun token, donc 0 €
     assert saved_record.estimated_cost == 0.0
 
 
@@ -261,7 +263,7 @@ def test_annotate_call_updates_record(usage_service, mock_repository):
     usage_service.annotate_call("call_to_annotate", "dialogue_123", "node_456")
     
     mock_repository.get_by_call_ids.assert_called_once_with(["call_to_annotate"])
-    updated = mock_repository.update_many.call_args[0][0][0]
+    updated = mock_repository.update_many_written.call_args[0][0][0]
     assert updated.dialogue_id == "dialogue_123"
     assert updated.node_id == "node_456"
 
@@ -291,7 +293,7 @@ def test_annotate_call_sets_template_fields(usage_service, mock_repository):
         template_name="Confrontation",
     )
 
-    updated = mock_repository.update_many.call_args[0][0][0]
+    updated = mock_repository.update_many_written.call_args[0][0][0]
     assert updated.template_id == "confrontation"
     assert updated.template_name == "Confrontation"
 
@@ -303,7 +305,7 @@ def test_annotate_call_not_found_logs_warning(usage_service, mock_repository):
     # Ne doit pas lever d'exception
     usage_service.annotate_call("call_unknown", "dialogue_123", "node_456")
     
-    mock_repository.update_many.assert_called_once_with([])
+    mock_repository.update_many_written.assert_called_once_with([])
 
 
 def test_get_dialogue_costs_aggregation(usage_service, mock_repository):
@@ -400,7 +402,7 @@ def test_mark_node_deleted_found(usage_service, mock_repository):
 
     found = usage_service.mark_node_deleted("node_xyz")
 
-    mock_repository.mark_node_deleted.assert_called_once_with("node_xyz")
+    mock_repository.mark_node_deleted.assert_called_once_with("node_xyz", None)
     assert found is True
 
 
@@ -601,5 +603,19 @@ def test_annotate_calls_batches_reads_and_writes(usage_service, mock_repository)
 
     assert annotated == ["c1", "c2"]
     mock_repository.get_by_call_ids.assert_called_once_with(["c1", "c2", "c3"])
-    written = mock_repository.update_many.call_args[0][0]
+    written = mock_repository.update_many_written.call_args[0][0]
     assert [(r.call_id, r.dialogue_id, r.node_id) for r in written] == [("c1", "D", "N1"), ("c2", "D", "N2")]
+
+
+def test_annotate_calls_reports_only_records_actually_written(usage_service, mock_repository):
+    """Un record que le dépôt n'a pas réécrit (cible ambiguë) n'est pas annoncé comme annoté.
+
+    Les ``call_id`` rendus alimentent le calcul de pertinence et la provenance des nœuds :
+    annoncer un appel non écrit attacherait un nœud à une génération qui ne le porte pas.
+    """
+    first = _node_record(call_id="c1", request_id="r", dialogue_id=None, node_id=None, seconds=1)
+    second = _node_record(call_id="c2", request_id="r", dialogue_id=None, node_id=None, seconds=2)
+    mock_repository.get_by_call_ids.return_value = {"c1": first, "c2": second}
+    mock_repository.update_many_written.side_effect = lambda records: [r for r in records if r.call_id == "c2"]
+
+    assert usage_service.annotate_calls([("c1", "N1"), ("c2", "N2")], "D") == ["c2"]

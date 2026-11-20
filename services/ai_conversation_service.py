@@ -386,6 +386,18 @@ class DialogueNodeSubjectResolver:
         except DialogueAccessDeniedError as exc:
             raise SubjectAccessDeniedError("dialogue_access_denied", str(exc)) from exc
 
+    def _require_edit(self, dialogue_id: str, current_user: Mapping[str, object]) -> None:
+        """Droit d'édition, traduit en erreur de sujet.
+
+        Ouvrir une conversation copie dans la graine le prompt de la génération : ses
+        instructions et le contexte GDD envoyés par l'auteur. Un simple lecteur d'un
+        dialogue partagé n'y a pas accès, comme pour l'annotation des nœuds générés.
+        """
+        try:
+            self._persistence.require_edit(dialogue_id, current_user)
+        except DialogueAccessDeniedError as exc:
+            raise SubjectAccessDeniedError("dialogue_access_denied", str(exc)) from exc
+
     def check_access(
         self,
         subject: Mapping[str, Any],
@@ -431,7 +443,7 @@ class DialogueNodeSubjectResolver:
     ) -> ConversationSeed:
         """Graine : la génération du nœud rejouée en texte, plus la note de l'application."""
         dialogue_id, node_id = self._normalize(subject)
-        self._require_access(dialogue_id, current_user)
+        self._require_edit(dialogue_id, current_user)
         lookup = self._usage.find_node_generation_record(
             (dialogue_id, f"{dialogue_id}.json"), node_id
         )
@@ -876,7 +888,8 @@ class AIConversationService:
                 exc,
                 exc_info=True,
             )
-            raise ConversationLLMError(f"Le modèle n'a pas pu répondre : {exc}") from exc
+            # Le détail (erreur du fournisseur, identifiants de requête) reste dans les logs.
+            raise ConversationLLMError("Le modèle n'a pas pu répondre.") from exc
 
         answer = variants[0] if variants else None
         unusable = (

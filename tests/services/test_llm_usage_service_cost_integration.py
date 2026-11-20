@@ -60,8 +60,40 @@ def test_track_usage_updates_budget(temp_budget_file, temp_usage_dir):
     assert updated_status["percentage"] > 0.0  # Le pourcentage devrait être > 0
 
 
-def test_track_usage_does_not_update_budget_on_failure(temp_budget_file, temp_usage_dir):
-    """Teste que track_usage ne met pas à jour le budget si success=False."""
+def test_track_usage_counts_billed_failure_in_budget(temp_budget_file, temp_usage_dir):
+    """Un appel en échec mais facturé (réponse reçue puis inexploitable) compte dans le budget.
+
+    Avant la PR #103, seul ``success=True`` mettait le budget à jour : une réponse tronquée,
+    refusée ou mal formée était payée sans être comptée.
+    """
+    usage_repository = FileLLMUsageRepository(storage_dir=str(temp_usage_dir))
+    budget_repository = FileCostBudgetRepository(storage_file=str(temp_budget_file))
+    cost_service = CostGovernanceService(repository=budget_repository)
+    usage_service = LLMUsageService(
+        repository=usage_repository,
+        cost_governance_service=cost_service
+    )
+    cost_service.update_quota("default_user", 100.0)
+    initial_amount = cost_service.get_budget_status("default_user")["amount"]
+
+    usage_service.track_usage(
+        request_id="req_test_billed_fail",
+        model_name="gpt-5.6-luna",
+        prompt_tokens=1000,
+        completion_tokens=200,
+        total_tokens=1200,
+        duration_ms=1000,
+        success=False,
+        endpoint="test/endpoint",
+        k_variants=1,
+        error_message="Réponse tronquée par l'API",
+    )
+
+    assert cost_service.get_budget_status("default_user")["amount"] > initial_amount
+
+
+def test_track_usage_does_not_update_budget_on_unbilled_failure(temp_budget_file, temp_usage_dir):
+    """Un échec sans aucun token (erreur API avant réponse) ne touche pas au budget."""
     # Créer les repositories
     usage_repository = FileLLMUsageRepository(storage_dir=str(temp_usage_dir))
     budget_repository = FileCostBudgetRepository(storage_file=str(temp_budget_file))
@@ -84,17 +116,17 @@ def test_track_usage_does_not_update_budget_on_failure(temp_budget_file, temp_us
     usage_service.track_usage(
         request_id="req_test_fail",
         model_name="gpt-5.6-luna",
-        prompt_tokens=1000,
+        prompt_tokens=0,
         completion_tokens=0,
-        total_tokens=1000,
+        total_tokens=0,
         duration_ms=1000,
         success=False,  # Échec
         endpoint="test/endpoint",
         k_variants=1,
         error_message="API Error"
     )
-    
-    # Vérifier que le budget n'a PAS été mis à jour (success=False)
+
+    # Vérifier que le budget n'a PAS été mis à jour (rien n'a été facturé)
     updated_status = cost_service.get_budget_status("default_user")
     assert updated_status["amount"] == initial_amount  # Le montant ne devrait pas changer
 

@@ -157,15 +157,25 @@ class OpenAIResponseParser:
             - success: True si succès, False sinon
         """
         message_parts: List[str] = []
+        refusals: List[str] = []
         for item in output_items:
             if getattr(item, "type", None) != "message":
                 continue
             for part in getattr(item, "content", None) or []:
-                if getattr(part, "type", None) == "output_text":
+                part_type = getattr(part, "type", None)
+                if part_type == "output_text":
                     text = getattr(part, "text", None)
                     if text:
                         message_parts.append(str(text))
+                elif part_type == "refusal":
+                    refusal = getattr(part, "refusal", None)
+                    if refusal:
+                        refusals.append(str(refusal))
         message_text = "".join(message_parts).strip()
+        if not message_text and refusals:
+            error_msg = f"Le modèle a refusé de répondre (variante {variant_index}) : {refusals[0]}"
+            logger.warning(error_msg)
+            return None, error_msg, False
         if message_text:
             logger.info(
                 f"Variante {variant_index} générée avec succès "
@@ -213,11 +223,23 @@ class OpenAIResponseParser:
             - success: True si succès, False sinon
         """
         output_items = getattr(response, "output", None) or []
-        
+
         # Debug: types d'items output
         output_types = [getattr(it, "type", None) for it in output_items]
         logger.debug(f"Types d'items dans output: {output_types}")
-        
+
+        # Réponse coupée (max_output_tokens atteint, raisonnement compris) : son texte est
+        # tronqué, il ne doit pas passer pour une réponse complète.
+        if getattr(response, "status", None) == "incomplete":
+            details = getattr(response, "incomplete_details", None)
+            reason = getattr(details, "reason", None) if details is not None else None
+            error_msg = (
+                f"Réponse tronquée par l'API (variante {variant_index}"
+                f"{', ' + str(reason) if reason else ''})"
+            )
+            logger.warning(error_msg)
+            return None, error_msg, False
+
         if response_model:
             # Structured output attendu
             parsed_output, error_message, success = (

@@ -190,3 +190,35 @@ def test_extract_text_output_only_reasoning_is_empty() -> None:
     assert text is None
     assert success is False
     assert error is not None
+
+
+def test_extract_text_output_reports_sdk_refusal() -> None:
+    """Un message fait d'un seul refus (``refusal``) est un échec, avec le motif du modèle."""
+    from openai.types.responses import ResponseOutputMessage, ResponseOutputRefusal
+
+    refusal = ResponseOutputMessage(
+        id="msg_r",
+        type="message",
+        role="assistant",
+        status="completed",
+        content=[ResponseOutputRefusal(type="refusal", refusal="Je ne peux pas aider.")],
+    )
+
+    text, error, success = OpenAIResponseParser.extract_text_output([refusal])
+
+    assert (text, success) == (None, False)
+    assert error is not None and "Je ne peux pas aider." in error
+
+
+def test_parse_response_incomplete_is_failure_even_with_text() -> None:
+    """``status == "incomplete"`` (max_output_tokens) : le texte coupé n'est pas une réponse."""
+    from openai.types.responses.response import IncompleteDetails
+
+    response = _sdk_text_response(["Début de réponse coup"])
+    response.status = "incomplete"
+    response.incomplete_details = IncompleteDetails(reason="max_output_tokens")
+
+    parsed, error, success = OpenAIResponseParser.parse_response(response, None, "gpt-6.2-sol")
+
+    assert (parsed, success) == (None, False)
+    assert error is not None and "max_output_tokens" in error

@@ -377,6 +377,42 @@ def test_mark_node_deleted_endpoint(client, dialogue_records):
         app.dependency_overrides.pop(get_llm_usage_service, None)
 
 
+
+def test_mark_node_deleted_endpoint_scoped_to_dialogue(client, tmp_path):
+    """``dialogue_id`` borne la marque : le ``NODE_START`` d'un autre dialogue reste actif."""
+    repo = FileLLMUsageRepository(storage_dir=str(tmp_path))
+    for index, dialogue in enumerate(("Alpha", "Beta")):
+        repo.save(
+            LLMUsageRecord(
+                request_id=f"req_{index}",
+                call_id=f"call_{index}",
+                timestamp=datetime.now(UTC),
+                model_name="gpt-6.2-sol",
+                prompt_tokens=10,
+                completion_tokens=5,
+                total_tokens=15,
+                estimated_cost=0.001,
+                duration_ms=100,
+                success=True,
+                endpoint="generate-node",
+                dialogue_id=dialogue,
+                node_id="NODE_START",
+            )
+        )
+    test_service = LLMUsageService(repository=repo, pricing_service=LLMPricingService())
+    app.dependency_overrides[get_llm_usage_service] = lambda: test_service
+    try:
+        response = client.post(
+            "/api/v1/llm-usage/nodes/NODE_START/mark-deleted",
+            params={"dialogue_id": "Alpha.json"},
+        )
+        assert response.status_code == 200
+        assert response.json()["found"] is True
+        deleted = {r.dialogue_id: r.deleted for r in repo.get_all()}
+        assert deleted == {"Alpha": True, "Beta": False}
+    finally:
+        app.dependency_overrides.pop(get_llm_usage_service, None)
+
 def test_get_all_dialogues_costs_endpoint(client, dialogue_records):
     """Teste l'endpoint GET /api/v1/llm-usage/dialogues/costs."""
     test_service = LLMUsageService(

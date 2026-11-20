@@ -2,6 +2,8 @@
 import json
 import logging
 import os
+import threading
+import time
 from datetime import datetime, date
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Protocol
@@ -115,6 +117,18 @@ class ILLMUsageRepository(Protocol):
         """
         ...
 
+    def update_many_written(self, records: Iterable[LLMUsageRecord]) -> List[LLMUsageRecord]:
+        """Comme :meth:`update_many`, mais rend les enregistrements effectivement réécrits.
+
+        Args:
+            records: Enregistrements modifiés.
+
+        Returns:
+            Les enregistrements écrits, dans l'ordre reçu (les cibles introuvables ou
+            ambiguës en sont absentes).
+        """
+        ...
+
     def get_by_dialogue_id(self, dialogue_id: str) -> List[LLMUsageRecord]:
         """Récupère tous les enregistrements associés à un dialogue.
         
@@ -142,14 +156,15 @@ class ILLMUsageRepository(Protocol):
         """
         ...
 
-    def mark_node_deleted(self, node_id: str) -> bool:
-        """Marque comme supprimé l'enregistrement associé à un nœud.
-        
+    def mark_node_deleted(self, node_id: str, dialogue_id: Optional[str] = None) -> bool:
+        """Marque comme supprimés tous les enregistrements encore actifs d'un nœud.
+
         Args:
             node_id: ID du nœud supprimé.
-            
+            dialogue_id: Limite aux enregistrements de ce dialogue (``D`` ou ``D.json``).
+
         Returns:
-            True si un enregistrement a été trouvé et mis à jour, False sinon.
+            True si au moins un enregistrement a été réécrit, False sinon.
         """
         ...
 
@@ -177,6 +192,10 @@ class FileLLMUsageRepository:
         """
         self.storage_dir = Path(storage_dir)
         os.makedirs(self.storage_dir, exist_ok=True)
+        # Chaque écriture relit puis réécrit tout le fichier du jour. Les appels LLM sont
+        # tracés depuis la boucle d'événements et les annotations depuis des threads
+        # (asyncio.to_thread) : sans ce verrou, une écriture en écrase une autre.
+        self._lock = threading.RLock()
         logger.info(f"FileLLMUsageRepository initialisé avec le dossier: {self.storage_dir.absolute()}")
     
     def _get_file_path(self, target_date: date) -> Path:
@@ -201,27 +220,57 @@ class FileLLMUsageRepository:
             Liste des enregistrements pour cette date.
         """
         file_path = self._get_file_path(target_date)
-        
-        if not file_path.exists():
-            return []
-        
+
+        with self._lock:
+            if not file_path.exists():
+                return []
+
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+
+                records = []
+                for record_data in data.get("records", []):
+                    # Convertir le timestamp string en datetime
+                    if isinstance(record_data.get("timestamp"), str):
+                        record_data["timestamp"] = datetime.fromisoformat(
+                            record_data["timestamp"].replace('Z', '+00:00')
+                        )
+                    records.append(LLMUsageRecord(**record_data))
+
+                return records
+            except (json.JSONDecodeError, KeyError, ValueError) as e:
+                self._quarantine(file_path, e)
+                return []
+
+    def _quarantine(self, file_path: Path, error: Exception) -> None:
+        """Met de côté un fichier du jour illisible au lieu de le laisser écraser.
+
+        Rendre ``[]`` sans rien faire faisait réécrire le fichier par la sauvegarde
+        suivante avec ce seul nouvel enregistrement : la journée entière était perdue.
+        Le fichier renommé (``…json.corrupt-<horodatage>``) reste récupérable à la main.
+
+        Args:
+            file_path: Fichier illisible.
+            error: Erreur de lecture rencontrée.
+        """
+        quarantined = file_path.with_name(f"{file_path.name}.corrupt-{int(time.time() * 1000)}")
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            
-            records = []
-            for record_data in data.get("records", []):
-                # Convertir le timestamp string en datetime
-                if isinstance(record_data.get("timestamp"), str):
-                    record_data["timestamp"] = datetime.fromisoformat(
-                        record_data["timestamp"].replace('Z', '+00:00')
-                    )
-                records.append(LLMUsageRecord(**record_data))
-            
-            return records
-        except (json.JSONDecodeError, KeyError, ValueError) as e:
-            logger.error(f"Erreur lors du chargement de {file_path}: {e}")
-            return []
+            os.replace(file_path, quarantined)
+            logger.error(
+                "Fichier d'usage illisible %s (%s) : mis de côté sous %s",
+                file_path,
+                error,
+                quarantined.name,
+            )
+        except OSError as move_error:
+            logger.error(
+                "Fichier d'usage illisible %s (%s), et impossible de le mettre de côté : %s",
+                file_path,
+                error,
+                move_error,
+            )
+            raise
     
     def _save_records_for_date(self, target_date: date, records: List[LLMUsageRecord]) -> None:
         """Sauvegarde les enregistrements pour une date donnée.
@@ -240,31 +289,56 @@ class FileLLMUsageRepository:
             "records": records_data
         }
         
-        try:
-            with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2, ensure_ascii=False, default=str)
-            logger.debug(f"Enregistrements sauvegardés dans {file_path} ({len(records)} enregistrements)")
-        except IOError as e:
-            logger.error(f"Erreur lors de la sauvegarde dans {file_path}: {e}")
-            raise
-    
+        temp_path = file_path.with_name(f"{file_path.name}.tmp")
+        with self._lock:
+            try:
+                # Écriture atomique : un lecteur voit l'ancien fichier complet ou le
+                # nouveau, jamais un fichier tronqué en cours d'écriture.
+                with open(temp_path, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, indent=2, ensure_ascii=False, default=str)
+                self._replace_with_retry(temp_path, file_path)
+                logger.debug(f"Enregistrements sauvegardés dans {file_path} ({len(records)} enregistrements)")
+            except IOError as e:
+                logger.error(f"Erreur lors de la sauvegarde dans {file_path}: {e}")
+                raise
+
+    @staticmethod
+    def _replace_with_retry(source: Path, target: Path, attempts: int = 5) -> None:
+        """``os.replace`` avec quelques reprises : sous Windows, un lecteur d'un autre
+        processus qui tient le fichier ouvert fait échouer le remplacement.
+
+        Args:
+            source: Fichier temporaire complet.
+            target: Fichier du jour à remplacer.
+            attempts: Nombre d'essais avant d'abandonner.
+        """
+        for attempt in range(attempts):
+            try:
+                os.replace(source, target)
+                return
+            except PermissionError:
+                if attempt == attempts - 1:
+                    raise
+                time.sleep(0.05 * (attempt + 1))
+
     def save(self, record: LLMUsageRecord) -> None:
         """Sauvegarde un enregistrement d'utilisation.
-        
+
         Args:
             record: L'enregistrement à sauvegarder.
         """
         # Extraire la date du timestamp
         record_date = record.timestamp.date()
-        
-        # Charger les enregistrements existants pour cette date
-        existing_records = self._load_records_for_date(record_date)
-        
-        # Ajouter le nouvel enregistrement
-        existing_records.append(record)
-        
-        # Sauvegarder
-        self._save_records_for_date(record_date, existing_records)
+
+        with self._lock:
+            # Charger les enregistrements existants pour cette date
+            existing_records = self._load_records_for_date(record_date)
+
+            # Ajouter le nouvel enregistrement
+            existing_records.append(record)
+
+            # Sauvegarder
+            self._save_records_for_date(record_date, existing_records)
     
     def get_by_date_range(
         self,
@@ -426,32 +500,45 @@ class FileLLMUsageRepository:
             Nombre d'enregistrements réécrits (les cibles introuvables ou ambiguës sont
             ignorées avec un warning).
         """
+        return len(self.update_many_written(records))
+
+    def update_many_written(self, records: Iterable[LLMUsageRecord]) -> List[LLMUsageRecord]:
+        """Comme :meth:`update_many`, mais rend les enregistrements effectivement réécrits.
+
+        Args:
+            records: Enregistrements modifiés à persister.
+
+        Returns:
+            Les enregistrements écrits, dans l'ordre reçu.
+        """
+        ordered = list(records)
         by_date: Dict[date, List[LLMUsageRecord]] = {}
-        for record in records:
+        for record in ordered:
             by_date.setdefault(record.timestamp.date(), []).append(record)
 
-        updated = 0
-        for record_date, day_records in by_date.items():
-            existing_records = self._load_records_for_date(record_date)
-            changed = False
-            for record in day_records:
-                indices = self._target_indices(existing_records, record)
-                if indices is None:
-                    logger.warning(
-                        "update(): cible introuvable ou ambiguë pour call_id=%r request_id=%r "
-                        "dans %s — rien n'est modifié.",
-                        record.call_id,
-                        record.request_id,
-                        record_date,
-                    )
-                    continue
-                for index in indices:
-                    existing_records[index] = record
-                updated += 1
-                changed = True
-            if changed:
-                self._save_records_for_date(record_date, existing_records)
-        return updated
+        written_ids: set[int] = set()
+        with self._lock:
+            for record_date, day_records in by_date.items():
+                existing_records = self._load_records_for_date(record_date)
+                changed = False
+                for record in day_records:
+                    indices = self._target_indices(existing_records, record)
+                    if indices is None:
+                        logger.warning(
+                            "update(): cible introuvable ou ambiguë pour call_id=%r request_id=%r "
+                            "dans %s — rien n'est modifié.",
+                            record.call_id,
+                            record.request_id,
+                            record_date,
+                        )
+                        continue
+                    for index in indices:
+                        existing_records[index] = record
+                    written_ids.add(id(record))
+                    changed = True
+                if changed:
+                    self._save_records_for_date(record_date, existing_records)
+        return [record for record in ordered if id(record) in written_ids]
 
     def update(self, record: LLMUsageRecord) -> bool:
         """Remplace l'entrée qui désigne le même appel LLM, dans le fichier de son jour.
@@ -498,24 +585,36 @@ class FileLLMUsageRepository:
                 return record
         return None
 
-    def mark_node_deleted(self, node_id: str) -> bool:
-        """Marque comme supprimé l'enregistrement associé à un nœud.
-        
-        Cherche dans tous les fichiers le record avec node_id correspondant
-        et passe son champ deleted à True.
-        
+    def mark_node_deleted(self, node_id: str, dialogue_id: Optional[str] = None) -> bool:
+        """Marque comme supprimés tous les enregistrements encore actifs d'un nœud.
+
+        Un nœud régénéré a plusieurs enregistrements : n'en marquer qu'un laissait
+        l'ancienne génération active, et une conversation sur un nœud recréé sous le même
+        identifiant expliquait alors une génération qui n'était plus la sienne.
+
         Args:
             node_id: ID du nœud supprimé.
-            
+            dialogue_id: Limite aux enregistrements de ce dialogue (``D`` ou ``D.json``) ;
+                sans lui, un ``node_id`` homonyme d'un autre dialogue serait aussi marqué.
+
         Returns:
-            True si un enregistrement a été trouvé et mis à jour, False sinon.
+            True si au moins un enregistrement a été réécrit, False sinon.
         """
-        all_records = self.get_all()
-        for record in all_records:
-            if record.node_id == node_id and not record.deleted:
+        accepted: Optional[set[str]] = None
+        if dialogue_id:
+            base = dialogue_id[:-5] if dialogue_id.endswith(".json") else dialogue_id
+            accepted = {base, f"{base}.json"}
+        with self._lock:
+            targets = [
+                record
+                for record in self.get_all()
+                if record.node_id == node_id
+                and not record.deleted
+                and (accepted is None or record.dialogue_id in accepted)
+            ]
+            for record in targets:
                 record.deleted = True
-                return self.update(record)
-        return False
+            return bool(self.update_many_written(targets))
 
     def get_all_by_dialogue_ids(self) -> Dict[str, List[LLMUsageRecord]]:
         """Récupère tous les enregistrements groupés par dialogue_id.

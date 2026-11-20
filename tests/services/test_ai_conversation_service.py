@@ -56,6 +56,7 @@ class FakeDialogueAccess:
 
     def __init__(self) -> None:
         self.readers: Set[Tuple[str, str]] = set()
+        self.read_only: Set[Tuple[str, str]] = set()
         self.documents: Dict[str, Dict[str, Any]] = {}
         self.read_dirs: List[Path] = []
 
@@ -63,6 +64,12 @@ class FakeDialogueAccess:
         """Lève comme ``DocumentPersistenceService.require_access``."""
         if (str(current_user.get("id")), document_id) not in self.readers:
             raise DialogueAccessDeniedError(f"Accès refusé au dialogue {document_id}")
+
+    def require_edit(self, document_id: str, current_user: Mapping[str, object]) -> None:
+        """Lève comme ``DocumentPersistenceService.require_edit`` : lecteur sans droit d'écriture."""
+        self.require_access(document_id, current_user)
+        if (str(current_user.get("id")), document_id) in self.read_only:
+            raise DialogueAccessDeniedError(f"Écriture refusée pour le dialogue {document_id}")
 
     def read_document(
         self, base_dir: Path, document_id: str, current_user: Mapping[str, object]
@@ -356,6 +363,15 @@ def test_create_rejects_invalid_subject(harness: Harness) -> None:
 
 def test_create_denied_without_dialogue_access(harness: Harness) -> None:
     """Sans accès au dialogue ⇒ SubjectAccessDeniedError (code dialogue_access_denied)."""
+    with pytest.raises(SubjectAccessDeniedError) as excinfo:
+        harness.service.create(WRITER_B, _subject())
+    assert excinfo.value.code == "dialogue_access_denied"
+
+
+def test_create_denied_for_read_only_reader(harness: Harness) -> None:
+    """Un lecteur d'un dialogue partagé ne rejoue pas le prompt de l'auteur : création refusée."""
+    harness.access.readers.add(("writer-b", "D"))
+    harness.access.read_only.add(("writer-b", "D"))
     with pytest.raises(SubjectAccessDeniedError) as excinfo:
         harness.service.create(WRITER_B, _subject())
     assert excinfo.value.code == "dialogue_access_denied"

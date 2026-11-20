@@ -292,3 +292,40 @@ def test_un_tableau_vraiment_corrompu_est_signale(handler, tmp_log_dir, caplog):
     assert any("non refermé" in message for message in caplog.messages), (
         "la réinitialisation doit laisser une trace : une perte silencieuse est indétectable"
     )
+
+
+def test_fichier_verrouille_ne_fait_pas_boucler_le_handler(handler, tmp_log_dir, monkeypatch):
+    """Fichier du jour corrompu et non supprimable (verrou Windows) : ni boucle, ni relance.
+
+    Le handler signale l'incident par ``logging`` ; attaché au logger racine comme dans
+    l'app, ce signalement lui revenait : _open_file → warning → emit → _open_file… jusqu'à
+    la récursion maximale, et ce pour chaque enregistrement. Vécu le 2026-11-20 : deux
+    pytest concurrents partageaient LOG_DIR et l'un semblait figé avant même de collecter.
+    """
+    root = logging.getLogger()
+    root.addHandler(handler)
+    try:
+        handler._close_current_file()
+        log_path = tmp_log_dir / f"logs_{date.today().isoformat()}.json"
+        log_path.write_bytes(b'[{"message": "tronqu')
+
+        def verrouille(self, *args, **kwargs):
+            raise PermissionError(32, "fichier utilisé par un autre processus")
+
+        ouvertures: list[int] = []
+        ouvrir = handler._open_file
+
+        def ouverture_comptee() -> None:
+            ouvertures.append(1)
+            ouvrir()
+
+        monkeypatch.setattr(Path, "unlink", verrouille)
+        monkeypatch.setattr(handler, "_open_file", ouverture_comptee)
+
+        root.warning("premier enregistrement")
+        root.warning("second enregistrement")
+
+        assert len(ouvertures) == 1, "un échec d'ouverture ne se retente qu'à la rotation"
+        assert log_path.read_bytes() == b'[{"message": "tronqu', "le fichier d'autrui reste intact"
+    finally:
+        root.removeHandler(handler)

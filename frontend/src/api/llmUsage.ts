@@ -152,9 +152,16 @@ export async function getAllDialoguesCosts(): Promise<AllDialoguesCostResponse> 
 
 /**
  * Marque un nœud comme supprimé dans l'historique des coûts (AC#5).
+ *
+ * Le `dialogueId` borne la marque à ce dialogue : les identifiants de nœud
+ * (`NODE_START`…) se répètent d'un dialogue à l'autre.
  */
-export async function markNodeDeleted(nodeId: string): Promise<void> {
-  await apiClient.post(`/api/v1/llm-usage/nodes/${encodeURIComponent(nodeId)}/mark-deleted`)
+export async function markNodeDeleted(nodeId: string, dialogueId?: string): Promise<void> {
+  await apiClient.post(
+    `/api/v1/llm-usage/nodes/${encodeURIComponent(nodeId)}/mark-deleted`,
+    null,
+    dialogueId ? { params: { dialogue_id: dialogueId } } : undefined,
+  )
 }
 
 /**
