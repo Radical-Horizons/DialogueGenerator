@@ -1,5 +1,13 @@
 # Visual Design Foundation
 
+> ⚠️ **Remplacée le 2026-11-20 pour tout écran repris par l'epic 20 (refonte « Scène »).** Font foi :
+> [`docs/design/refonte-scene/README.md`](../../../docs/design/refonte-scene/README.md) (écrans, composants,
+> raccourcis, table « où va chaque fonction »), les boards `docs/design/refonte-scene/*.dc.html`,
+> [`docs/architecture/refonte-scene-architecture.md`](../../../docs/architecture/refonte-scene-architecture.md)
+> (A1–A16) et [`epic-20.md`](../epics/epic-20.md). En cas de contradiction, la refonte l'emporte. Restent valables :
+> la charte de `design-system-foundation.md` (couleurs, polices, filets, un seul bouton bleu) et les exigences
+> d'accessibilité générales. Ce document est conservé pour l'historique ; ne pas en tirer de critère d'acceptation.
+
 > **Obsolète pour les couleurs, la typographie et l'espacement** (2026-09-27). Ces valeurs datent de
 > janvier 2026, avant la refonte UI : fond `#1a1a1a`, accent `#007bff`, police système, grille de 4 px.
 > Référence actuelle : `design-system-foundation.md`, l'artifact design system et

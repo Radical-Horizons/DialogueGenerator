@@ -1,5 +1,8 @@
 # Product Requirements Document - DialogueGenerator
 
+> **Exigences au-delà de FR117.** `functional-requirements.md` s'arrête à FR117. FR118 à FR146 (Epics 17, 18, 19 et 20)
+> n'existent que dans [`epics/requirements-inventory.md`](../epics/requirements-inventory.md), qui fait foi pour elles.
+
 ## Table of Contents
 
 - [Product Requirements Document - DialogueGenerator](#table-of-contents)

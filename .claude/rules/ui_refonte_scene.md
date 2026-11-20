@@ -6,6 +6,10 @@ paths:
   - "_bmad-output/planning-artifacts/epics/epic-20.md"
   - "frontend/src/components/layout/**"
   - "frontend/src/components/graph/**"
+  - "frontend/src/components/generation/**"
+  - "frontend/src/theme/**"
+  - "frontend/src/utils/**"
+  - "frontend/src/store/**"
 ---
 # Refonte « Scène »
 
@@ -15,7 +19,8 @@ paths:
 la refonte Scène remplace la maquette 2026 (`docs/design/refonte-ui-2026/`, règle `ui_redesign_2026.md`), dont la
 charte (couleurs, polices, filets, un seul bouton bleu) reste valable. Un écran pas encore repris par une story livrée
 garde son code actuel. Ne pas implémenter un écran Scène sans sa story Epic 20 créée (`bmad-create-story`).
-Epic 18 est intégrée à l'epic 20 (tranche 1 bis) ; Epic 19 est remplacée.
+Epic 18 est intégrée à l'epic 20 (18.4, 18.8, 18.5a en tranche 1 bis ; 18.5b, 18.6, 18.7, 18.9, 18.11 en
+tranche 2) ; Epic 19 est remplacée. Seuils de mesure : section « Seuils de mesure » d'`epic-20.md` (ADR-008).
 
 ## Sources de vérité
 
@@ -36,7 +41,9 @@ Ouvrir les prototypes : configuration `design-refonte-scene` de `.claude/launch.
 ## Invariants
 
 - **Epic 18 est la fondation** : champ `<textarea>` (D4, intact : toute la réplique passe en texte brut à l'entrée,
-  aucun éditeur de blocs), clic simple (D1), ÉCHAP sort (D2), widget composite (D5). La refonte ne rouvre que trois
+  aucun éditeur de blocs), clic simple qui pose le curseur à la position cliquée (D1, sans la règle des deux clics),
+  ÉCHAP sort (D2), widget composite (D5). Un seul écrivain du texte : dès qu'un champ in-situ écrit (18.5b),
+  `NodeEditorPanel` et `UnityDialogueEditor` passent en lecture seule pour le texte (A14). La refonte ne rouvre que trois
   points : largeur de carte (360 px au lieu de 280), D3 (texte lisible hors sélection par paliers de zoom) et la
   hauteur maximale de carte (réplique bornée à 12 lignes, réponses jamais coupées) — écarts au § 14 du README,
   tranchés par la story 20.2 (preuve de perf) ; si elle échoue, **plan B** : 280 px et D3 inchangée.

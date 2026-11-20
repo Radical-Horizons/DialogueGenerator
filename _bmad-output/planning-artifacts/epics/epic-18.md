@@ -1,6 +1,11 @@
 ## Epic 18: Édition in-situ du dialogue dans le nœud
 
-**Status:** **intégrée à Epic 20 le 2026-11-20** (prioritaire). 18.4, 18.5, 18.6, 18.7, 18.8, 18.9 et 18.11 forment la tranche 1 bis d'Epic 20, avec leurs critères ci-dessous ; 18.10 rejoint la story 20.18 ; 18.1 et 18.2 sont remplacées par les cartes de texte (20.7, 20.8) ; 18.3 devient inutile (panneau de droite en lecture seule derrière son drapeau). Écarts tranchés par la refonte : carte de 360 px (plan B : 280 px), D3 rouverte par les paliers de zoom. Ancien statut : backlog — stories **18.1–18.11**
+**Status:** **intégrée à Epic 20 le 2026-11-20** (prioritaire), **reséquencée le même jour** après le contrôle de readiness (`implementation-readiness-report-2026-11-20.md`, constats B1, B2, C3–C5, C16) :
+- **tranche 1 bis d'Epic 20, maintenant** : 18.4 (reste à faire seulement, le regroupement par rafales est livré), 18.8, et **18.5a** (composant de champ seul, testé hors graphe) ;
+- **tranche 2 d'Epic 20, après 20.6 et 20.7** : 18.5b (montage du champ dans le bloc de script et la carte, et verrouillage du panneau), 18.6, 18.7, 18.9 et 18.11, critères réécrits ci-dessous contre la carte (palier « écrire », 360 px ou 280 px plan B) et le bloc de script ;
+- 18.10 rejoint la story 20.18 ; 18.1 et 18.2 sont remplacées par les cartes de texte (20.7, 20.8) ; 18.3 n'est pas codée, sa garantie devient le critère de verrouillage de 18.5b (constat B2).
+
+Écarts tranchés par la refonte : carte de 360 px (plan B : 280 px), D3 rouverte par les paliers de zoom, pas de hauteur maximale de carte (réplique bornée à 12 lignes, réponses jamais coupées). **Là où un critère de cette epic contredit le README de la refonte (`docs/design/refonte-scene/README.md`, § 8 et board `Carte`) ou l'epic 20, ce sont ces derniers qui font foi.** Ancien statut : backlog — stories **18.1–18.11**
 **Révisée le 2026-10-01** après audit d'implementation readiness ([rapport](../implementation-readiness-report-2026-10-01.md)). La première rédaction portait 8 bloquants, dont une décision de cadrage appuyée sur une bibliothèque absente du projet. Les corrections sont tracées en fin de fichier.
 
 Les auteurs peuvent lire et écrire le dialogue complet — **réplique PNJ et réponses PJ** — directement dans le nœud sur le canvas, par **simple clic dans le texte**, sans ouvrir le panneau de droite et **sans aucune action d'enregistrement**. Le panneau de droite reste disponible pour ce qui ne tient pas dans un nœud (conditions de visibilité, effets, skill checks, métadonnées).
@@ -42,6 +47,8 @@ Le double-clic est déjà attribué **quatre** fois : focus nœud avec `fitView`
 **Le clic simple n'est pas libre pour autant** — il porte déjà la sélection (`useReactFlowHandlers.ts:252-258`) et, selon `ux-consistency-patterns.md:104`, l'alimentation du panneau. Arbitrage : le clic dans le texte **sélectionne le nœud et place le curseur**, et **n'ouvre pas** le panneau en édition. Si le panneau est déjà ouvert, il suit la sélection en vue résumée.
 
 **Nœud non sélectionné** (interaction D1 × D3) : cliquer un nœud en densité résumé le sélectionne et le déplie — le texte se reflow, la position de clic ne désigne plus rien. **Premier clic** = sélection + dépliage, curseur **en fin de réplique**. **Second clic** = placement du curseur à l'endroit cliqué. Ne pas tenter de projeter la position du premier clic sur le texte reflowé.
+
+> ⚠️ **Remplacé le 2026-11-20 par la refonte « Scène »** (README § 8, board `Carte`, constat C3) : sur la carte au palier « écrire » et dans le bloc de script, **un clic pose le curseur** à la position correspondante dans le texte brut, projetée grâce aux positions `start`/`end` des blocs de `parse` (story 20.1). La règle des deux clics ci-dessus ne vaut plus.
 
 **Guillemets :** `DialogueNode.tsx:604` ajoute `« … »` **au rendu**, pas dans la donnée. Ils restent **hors de la zone éditable** — gratuit avec D4.
 
@@ -91,6 +98,8 @@ Note : `isInputDOMNode` de React Flow 11.11.4 protège les deux aussi bien (`has
 
 ### D5 — Clavier : pattern composite ARIA. `Tab` reste à Epic 14
 
+> **Mise à jour 2026-11-20 (constat C4).** Epic 14 n'est pas attendue : `Tab` entre nœuds (14.1) et les tokens de focus (14.2) sont livrés par la story 18.9 pour le graphe et la vue Script, et 14.1/14.2 sont absorbées pour ce périmètre. Le pattern ci-dessous reste valable.
+
 > ⚠️ **Correction.** La première rédaction attribuait `Tab` aux champs du nœud, alors que la story 14.1 l'attribue à la navigation **entre** nœuds. Son AC de sortie invoquait « un nœud explicitement en édition » — un état que D1 et D2 suppriment précisément. Le conflit était réel et non résolu.
 
 **Arbitrage — le nœud est un *composite widget* au sens ARIA :**
@@ -125,6 +134,8 @@ Ce n'est **pas** un retour au mode édition : le texte est toujours enregistré 
 ---
 
 ### Story 18.1: Densité adaptative, réplique intégrale et titre rendu (FR123)
+
+> **Remplacée le 2026-11-20 par les stories 20.7 et 20.8** (cartes de texte, paliers de zoom). Non implémentée ; conservée pour l'historique.
 
 As a **auteur de dialogues**,
 I want **voir la réplique PNJ en entier et le titre du nœud que je travaille, sans que le graphe entier devienne illisible**,
@@ -175,6 +186,8 @@ So that **je peux juger le texte sans ouvrir le panneau de droite ni survoler qu
 
 ### Story 18.2: Réponses PJ affichées en lignes dans le nœud (FR124 — lecture)
 
+> **Remplacée le 2026-11-20 par les stories 20.7 et 20.8** (réponses jamais coupées, un port par réponse, 4 issues en sorties). Non implémentée ; conservée pour l'historique.
+
 As a **auteur de dialogues**,
 I want **lire le texte de chaque réponse joueur directement dans le nœud déplié**,
 So that **je peux juger la cohérence réplique ↔ réponses d'un seul regard, sans survoler les pastilles une par une**.
@@ -221,6 +234,8 @@ So that **je peux juger la cohérence réplique ↔ réponses d'un seul regard, 
 ---
 
 ### Story 18.3: Synchro descendante store → panneau sur les champs texte (FR127)
+
+> **Remplacée le 2026-11-20 (constat B2 du contrôle de readiness).** Pas de synchro descendante à construire : dès qu'un champ in-situ écrit (story 18.5b), les champs de texte de `NodeEditorPanel` et de `UnityDialogueEditor` passent en lecture seule et leur flush n'écrit plus ces champs. Les scénarios A, B, C ci-dessous restent la base du **test de régression** exigé par 18.5b. Note : le commit `61462f0a8` (2026-11-12) a déjà livré une resynchronisation panneau ← store (`NodeEditorPanel.storeTextResync.test.tsx`).
 
 As a **auteur de dialogues**,
 I want **que ce que j'écris dans le nœud ne soit jamais écrasé par le panneau de droite**,
@@ -284,6 +299,13 @@ So that **l'absence de bouton Annuler ne me laisse pas sans filet**.
 
 **Objectif US (vérification existant):** `updateNode` (`nodeSlice.ts:489`) fait un `set()` nu + `markDirty()`. Contrairement à `addNode` (`:459`), `deleteNode` (`:516`) et tout `edgeSlice`, il ne passe **pas** par `runGraphTransaction` et ne pousse **aucun** `_pushUndoSnapshot`. Les éditions de champ ne sont pas dans la pile undo — ni avant, ni après cette epic, sans cette story.
 
+> ✅ **État au 2026-11-20 — le cœur est livré.** Le commit `61462f0a8` (2026-11-12) fait passer `updateNode` par `runGraphTransaction` et regroupe les frappes par rafales d'une seconde (`UNDO_COALESCE_WINDOW_MS`, `nodeSlice.ts:467`) ; c'est testé par `frontend/src/__tests__/graphStore.updateNodeUndo.test.ts`, dont « 30 s of continuous typing does not consume the undo history ». Les deux premiers critères ci-dessous sont donc **remplis** : ne pas les recoder, ne pas re-tester la coalescence.
+>
+> **Reste à faire (tranche 1 bis d'Epic 20, 1 session)** :
+> 1. CTRL+Z et CTRL+Y **dans un champ** : `allowedInInputs` (`useKeyboardShortcuts.ts:109`) ne contient ni `ctrl+z` ni `ctrl+y` ; trancher entre les y ajouter (en vérifiant l'effet sur les `<textarea>` du panneau) et une gestion par le champ avec `stopPropagation`. Test composant : après l'undo du store, le champ affiche le texte restauré et la frappe suivante part de ce texte (pas de l'ancien DOM).
+> 2. L'annonce au lecteur d'écran (NVDA sous Windows en référence) d'un undo qui restaure du texte.
+> 3. La mesure du nombre de clones par minute de frappe, consignée.
+
 **Acceptance Criteria:**
 
 **Given** une édition de champ (réplique, speaker, titre, texte de réponse)
@@ -310,13 +332,124 @@ So that **l'absence de bouton Annuler ne me laisse pas sans filet**.
 **When** il s'applique
 **Then** le changement est annoncé au lecteur d'écran (UX-DR9) — un undo dans un champ sans mode est l'opération la plus désorientante pour qui ne voit pas l'écran
 
-**Dimensionnement :** 2 sessions.
+**Given** `Ctrl+Y` dans un champ in-situ
+**When** une annulation vient d'être faite
+**Then** le rétablissement du store s'applique, avec la même règle que `Ctrl+Z`
 
-**References:** FR126, NFR-R3, NFR-A3, UX-DR9, ADR-006, D2, garde-fou 6
+**Dimensionnement :** 2 sessions à l'origine ; **1 session** pour le reste à faire (estimation).
+
+**References:** FR126, NFR-R3, NFR-A3, UX-DR9, ADR-006, D2, garde-fou 6, commit `61462f0a8`
 
 ---
 
-### Story 18.5: Éditer la réplique PNJ dans le nœud (FR122, FR126)
+### Story 18.5a: Champ d'écriture seul, testé hors graphe (FR122, FR126) — tranche 1 bis d'Epic 20
+
+As a **auteur de dialogues**,
+I want **un champ d'écriture unique, sûr et accessible, avant de le poser dans la carte et dans le Script**,
+So that **l'écriture in-situ se construise sans attendre la nouvelle géométrie de la carte**.
+
+**Objectif US :** découpage du 2026-11-20 (readiness, B1 et C3). Le composant est livré **seul**, testé en Vitest/RTL hors graphe ; il n'est monté ni dans `DialogueNode` ni dans le Script (c'est 18.5b, en tranche 2). Après 20.1, dont il utilise `parse` et les positions `start`/`end`. Le README de la refonte (§ 7 « Champ d'écriture », § 8) et le board `Carte` font foi.
+
+**Acceptance Criteria:**
+
+**Given** le composant
+**When** il est implémenté
+**Then** c'est un **`<textarea>` auto-grandissant non contrôlé** (D4), pas un `contentEditable`
+**And** coller depuis un traitement de texte insère du **texte plat**
+**And** la position du curseur survit au re-render provoqué par la frappe
+
+**Given** une réplique mise en forme (blocs de `parse`, didascalies `*…*`)
+**When** on entre dans le champ
+**Then** **toute la réplique** passe en texte brut avec ses `*…*` (D4, README § 7 et § 8, architecture A3)
+**And** à la sortie, elle redevient mise en forme (`DialogueLineText` sur `parse`)
+**And** quitter le champ **sans frappe** n'écrit rien (aucun `updateNode` : test avec espion, P0 du plan de test)
+
+**Given** un clic à un endroit du texte rendu
+**When** le champ se monte
+**Then** **un seul clic** pose le curseur à la position correspondante dans le texte brut, projetée par les positions `start`/`end` des blocs de `parse` (story 20.1) — guillemets d'affichage et retours à la ligne des didascalies compris
+**And** la règle des deux clics de D1 ne s'applique pas (README § 8 et board `Carte` font foi)
+
+**Given** une frappe
+**When** elle est enregistrée
+**Then** la valeur part au store en **≤ 100 ms** (ADR-006) par un patch mono-champ (`updateNode(id, {data:{line}})`, garde-fou 3), sans brouillon local
+
+**Given** `Échap` dans le champ
+**When** il est pressé
+**Then** la saisie est conservée, le focus quitte le champ et revient à son conteneur, et l'événement est `stopPropagation` (D2)
+
+**Given** `Ctrl+Z` / `Ctrl+Y` dans le champ
+**When** ils sont pressés
+**Then** l'annulation et le rétablissement du store s'appliquent (story 18.4), et le champ affiche le texte restauré
+
+**Given** le pointeur dans le champ
+**When** on sélectionne, fait un clic droit, double-clique, survole ou tourne la molette
+**Then** la sélection ne déplace rien (`nodrag`), la molette fait défiler sans zoomer (`nowheel`), le clic droit ouvre le menu natif, le double-clic sélectionne un mot, aucune infobulle ne s'affiche au-dessus du texte (garde-fou 7)
+**And** `Backspace` / `Suppr` effacent un caractère, jamais le nœud — test de régression explicite
+
+**Given** une session invité, le mode playthrough ou l'aperçu de dialogue
+**When** le composant est rendu
+**Then** aucun champ n'est monté : le texte est rendu en lecture, sans affordance d'édition (`isGuest` passé en propriété)
+
+**Given** un champ vide
+**When** il est rendu
+**Then** il porte un placeholder qui dit ce qui s'y écrit (UX-DR10)
+
+**Given** un lecteur d'écran (NVDA sous Windows)
+**When** le focus entre dans le champ
+**Then** il porte un rôle et un nom accessibles (UX-DR8)
+
+**Dimensionnement :** 1,5 session (estimation).
+
+**References:** FR122, FR126, NFR-P4, NFR-R3, NFR-A3, ADR-006, UX-DR8, UX-DR10, D2, D4, story 20.1, README refonte § 7, § 8, board `Carte`, garde-fous 3, 4 et 7
+
+---
+
+### Story 18.5b: Monter le champ dans le bloc de script et la carte, verrouiller le panneau (FR122, FR126, FR127) — tranche 2 d'Epic 20
+
+As a **auteur de dialogues**,
+I want **cliquer dans une réplique du Script ou d'une carte et écrire aussitôt**,
+So that **je corrige une ligne en une seconde, sans panneau**.
+
+**Objectif US :** après 20.6 (bloc de script) et 20.7 (carte). C'est la **première** story qui met un champ in-situ en service : elle porte donc le verrouillage qui remplace 18.3 (constat B2).
+
+**Acceptance Criteria:**
+
+**Given** un bloc de script, ou une carte au palier « écrire »
+**When** je clique une fois dans la réplique
+**Then** le champ de 18.5a se monte, curseur à la position cliquée, et je peux écrire
+**And** le panneau de droite ne s'ouvre pas en édition (D1)
+
+**Given** une carte au palier « lire » ou « situer », ou plusieurs cartes sélectionnées
+**When** je clique ou fais un lasso
+**Then** aucun champ n'est monté (la carte se sélectionne ; un lasso sur dix cartes ne monte aucun champ)
+
+**Given** `NodeEditorPanel` monté (drapeau `legacyInspector` ou état actuel)
+**When** un champ in-situ est en service
+**Then** ses champs `line`, `speaker`, `title` et `choices[].text` sont **en lecture seule** et son flush n'écrit **aucun** de ces champs
+**And** un test de régression couvre les scénarios A, B, C de 18.3 (boucle d'écrasement, flush au démontage, sauvegarde depuis un formulaire périmé) : aucune saisie in-situ n'est écrasée
+**And** `choices[N].targetNode` reste préservé par le flush des champs non textuels (conditions, effets, tests)
+
+**Given** l'onglet Éditer (`UnityDialogueEditor`)
+**When** un champ in-situ est en service
+**Then** la même règle s'applique : texte, réponses, locuteur et titre en lecture seule, lien « écrire dans la scène » vers le Script ; retrait en 20.15
+
+**Given** une carte dont le texte dépasse 12 lignes
+**When** le champ est monté
+**Then** il défile à l'intérieur de la carte, sans en changer la largeur (360 px, ou 280 px plan B)
+
+**Given** le survol de la zone de réplique
+**When** aucun champ n'est monté
+**Then** une affordance discrète apparaît (curseur texte, filet), sans dégrader la lisibilité (UX-DR2)
+
+**Dimensionnement :** 1,5 session (estimation).
+
+**References:** FR122, FR126, FR127, NFR-R3, ADR-006, A14, D1, story 18.5a, stories 20.6 et 20.7, scénarios A/B/C de 18.3
+
+---
+
+### Story 18.5: Éditer la réplique PNJ dans le nœud (FR122, FR126) — **découpée le 2026-11-20 en 18.5a et 18.5b**
+
+> Les critères ci-dessous sont la rédaction d'origine, gardée pour l'historique. Ils sont repris et corrigés par 18.5a et 18.5b ; là où ils divergent (« densité dépliée », règle des deux clics), 18.5a et 18.5b font foi.
 
 As a **auteur de dialogues**,
 I want **cliquer dans la réplique affichée dans le nœud et écrire directement, sans bouton ni bascule**,
@@ -400,11 +533,13 @@ As a **auteur de dialogues**,
 I want **écrire le texte de chaque réponse joueur directement sur sa ligne dans le nœud**,
 So that **j'écris une réplique et ses réponses d'un seul geste, au même endroit**.
 
+> **Tranche 2 d'Epic 20, après 18.5b.** Critères réécrits le 2026-11-20 : les réponses ne sont plus les « lignes » de 18.2 (remplacée) mais celles du bloc de script (20.6) et de la carte (20.7), jamais coupées, un port chacune.
+
 **Acceptance Criteria:**
 
-**Given** un nœud déplié avec N réponses
-**When** je clique dans le texte d'une réponse
-**Then** le curseur s'y place et je peux écrire, selon les mêmes règles qu'en 18.5
+**Given** un bloc de script, ou une carte au palier « écrire », avec N réponses
+**When** je clique une fois dans le texte d'une réponse
+**Then** le champ de 18.5a s'y monte, curseur à la position cliquée, et je peux écrire, selon les mêmes règles qu'en 18.5a et 18.5b
 
 **Given** que je modifie le texte d'une réponse
 **When** la valeur est poussée au store
@@ -414,7 +549,7 @@ So that **j'écris une réplique et ses réponses d'un seul geste, au même endr
 
 **Given** une réponse portant un `test` (skill check)
 **When** j'édite son texte
-**Then** la barre de test dérivée garde son **identifiant** et ses **quatre arêtes de résultat** pendant toute la frappe
+**Then** la barre de test dérivée garde son **identifiant** et ses **quatre arêtes de résultat** pendant toute la frappe (après 20.8 : les quatre handles d'issue de la réponse et leurs `test*Node`)
 **And** `updateDialogueNodeDirectly` (`nodeSlice.ts:292-340`) reconstruit les TestNodes sans les recréer — conformité `.claude/rules/testnode_sync.md`
 **And** un test de régression couvre la frappe continue sur un choix porteur de test
 
@@ -429,18 +564,22 @@ So that **j'écris une réplique et ses réponses d'un seul geste, au même endr
 **And** le champ porte `aria-invalid` et un `aria-describedby` pointant le message (UX-DR11)
 
 **Given** un nœud sans réponse (`nextNode` simple)
-**When** il est déplié
-**Then** aucune ligne de réponse n'est affichée et l'indicateur `SUITE →` est conservé
+**When** sa carte ou son bloc est rendu
+**Then** aucune réponse n'est affichée et l'indicateur `SUITE →` est conservé
+
+**Given** une frappe continue dans une réponse du **bloc de script**
+**When** elle est poussée au store
+**Then** les mêmes garanties de liens s'appliquent (`choiceId`, ordre, `targetNode`, `test*Node`) : c'est le même champ, avec le même test
 
 **Given** un document exporté vers Unity après édition in-situ
 **When** la validation de schéma s'exécute
 **Then** le document reste conforme v1.1.0 et `choiceId` est présent sur chaque réponse (ADR-008)
 
-**Modes lecture seule :** les exclusions de 18.5 s'appliquent identiquement.
+**Modes lecture seule :** les exclusions de 18.5a s'appliquent identiquement.
 
-**Dimensionnement :** 1 session, si 18.5 a posé un composant de champ réutilisable.
+**Dimensionnement :** 1 session, le composant de champ étant posé par 18.5a.
 
-**References:** FR124, FR126, ADR-008, UX-DR11, `testnode_sync`, garde-fou 3, story 18.5
+**References:** FR124, FR126, ADR-008, UX-DR11, `testnode_sync`, garde-fou 3, stories 18.5a, 18.5b, 20.6, 20.7
 
 ---
 
@@ -450,17 +589,21 @@ As a **auteur de dialogues**,
 I want **corriger qui parle et le titre du nœud sans quitter le canvas**,
 So that **renommer un locuteur ne me coûte pas un aller-retour vers le panneau**.
 
-**Prérequis :** le titre doit être **rendu** dans le nœud — c'est un livrable de 18.1, pas de celle-ci.
+**Prérequis :** ~~le titre doit être rendu dans le nœud — livrable de 18.1~~. **Révisé le 2026-11-20** : 18.1 est remplacée ; le titre et le locuteur sont rendus dans l'en-tête de la carte (20.7) et du bloc de script (20.6). Tranche 2 d'Epic 20, après 18.5b.
 
 **Acceptance Criteria:**
 
-**Given** un nœud seul sélectionné
-**When** je clique sur le nom du locuteur dans l'en-tête
-**Then** je peux l'éditer sur place, selon les mêmes règles qu'en 18.5
+**Given** l'en-tête d'un bloc de script, ou d'une carte au palier « écrire »
+**When** je clique sur le nom du locuteur
+**Then** je peux l'éditer sur place, selon les mêmes règles qu'en 18.5a et 18.5b
 
-**Given** un nœud seul sélectionné
-**When** je clique sur le titre rendu dans l'en-tête
-**Then** je peux l'éditer sur place, selon les mêmes règles qu'en 18.5
+**Given** l'en-tête d'un bloc de script, ou d'une carte au palier « écrire »
+**When** je clique sur le titre
+**Then** je peux l'éditer sur place, selon les mêmes règles qu'en 18.5a et 18.5b
+
+**Given** une fiche de scène livrée (20.4)
+**When** j'édite le locuteur
+**Then** il est autocomplété depuis la distribution de la fiche (graphies rapprochées) ; une valeur hors fiche reste permise
 
 **Given** le speaker rendu en capitales (`text-transform: uppercase`, `DialogueNode.tsx:557`)
 **When** je saisis en minuscules
@@ -481,9 +624,9 @@ So that **renommer un locuteur ne me coûte pas un aller-retour vers le panneau*
 **When** il dépasse la largeur du nœud
 **Then** l'ellipse est conservée en affichage, et le champ montre la valeur complète pendant l'édition
 
-**Dimensionnement :** 1 session, si 18.1 a rendu le titre.
+**Dimensionnement :** 1 session, le titre étant rendu par 20.6 et 20.7.
 
-**References:** FR125, FR126, garde-fou 3, stories 18.1 et 18.5, `epic-01.md:311-314`
+**References:** FR125, FR126, garde-fou 3, stories 18.5a, 18.5b, 20.4, 20.6, 20.7, `epic-01.md:311-314`
 
 ---
 
@@ -493,6 +636,8 @@ As a **auteur de dialogues**,
 I want **un signal permanent et honnête me disant que mon texte est enregistré**,
 So that **l'absence de bouton « Enregistrer » ne se traduise pas par un doute permanent**.
 
+> **Tranche 1 bis d'Epic 20 (2026-11-20).** Aucune dépendance de géométrie : l'indicateur vit aujourd'hui dans l'en-tête du graphe et rejoindra la barre d'état en 20.5 sans changer de composant. Lecteur d'écran de référence : NVDA sous Windows.
+>
 > ⚠️ **Story fortement réduite.** La première rédaction la présentait comme un chantier neuf. **L'essentiel existe déjà** : `SaveStatusIndicator.tsx` porte `SyncStatusDisplay = 'synced' | 'offline' | 'error'`, `ackSeq` et `pendingCount` ; `graphJournal.ts` implémente le journal IndexedDB avec `snapshot.ackSeq` / `pending.seq` ; la maquette le dessine déjà (`README.md:104-105`, `etats-2a-2e.dc.html:102` → `ENREGISTRÉ · 11:24`). **Vérifier et compléter, ne pas recréer** — un second indicateur concurrent serait une régression.
 
 **Contexte de l'arbitrage :** ADR-006 supprime le bouton Enregistrer, et c'est la bonne décision. Mais `responsive-design-accessibility.md:35` fixe la cible du projet à **WCAG 2.1 niveau A**, et **3.2.2 *On Input* est de niveau A** — pas « l'esprit » d'un critère AA optionnel. L'arbitrage reste défendable (3.2.2 interdit un *changement de contexte* sur saisie ; un autosave sans déplacement de focus n'en est pas un), mais il se paie. **Cette story est la contrepartie non négociable de D2**, avec la story 18.4.
@@ -537,12 +682,23 @@ So that **écrire un nœud complet reste une séquence de frappe continue**.
 
 **Objectif US (référence Articy):** Articy:draft X place le curseur **avant même le premier clic** et enchaîne les champs au `Tab`. C'est le gain de friction le plus élevé et le moins cher de l'epic. Mais `Tab` est chez nous une ressource partagée avec Epic 14 — d'où D5.
 
+> **Tranche 2 d'Epic 20, après 18.5b–18.7 et 20.8 ; révisée le 2026-11-20 (constats B1, C4).** « Nœud » se lit « carte » (20.7) ; « déplié » se lit « au palier écrire ». **Epic 14 n'est plus attendue** : cette story livre elle-même `Tab` entre cartes (14.1) et les tokens de focus (14.2) pour le graphe et la vue Script ; 14.1 et 14.2 sont absorbées pour ce périmètre. Aucun traitement de `Tab` entre nœuds n'existe aujourd'hui dans `frontend/src/components/graph` (vérifié par le contrôle de readiness).
+
 **Acceptance Criteria:**
 
 **Given** le focus sur le canvas
 **When** je presse `Tab` ou `Shift+Tab`
-**Then** le focus navigue **entre nœuds**, exactement comme le prévoit la story 14.1 — **un nœud = un seul arrêt de tabulation**
+**Then** le focus navigue **entre cartes** — **une carte = un seul arrêt de tabulation** — dans un ordre stable, documenté et testé (proposition à confirmer à la création : rang du flux gauche → droite, puis ordre vertical) ; cette story implémente ce comportement (absorbe 14.1)
+**And** une carte hors du champ visible est amenée en vue quand elle reçoit le focus
 **And** les champs in-situ **ne sont pas** dans l'ordre de tabulation global : ils ne piègent jamais le focus
+
+**Given** les tokens de focus
+**When** une carte, un champ ou une puce reçoit le focus
+**Then** l'anneau utilise des tokens de focus ajoutés à `redesignTokens.ts` (absorbe 14.2), visibles en Nuit comme en Papier (contraste ≥ 3:1 sur le fond adjacent), et uniquement en `:focus-visible`
+
+**Given** la vue Script
+**When** je presse `Tab` hors champ
+**Then** le focus va à la suite vide suivante (20.6) ; ce sens de `Tab` n'existe qu'en Script
 
 **Given** le focus sur un nœud (wrapper), seul sélectionné
 **When** je presse `Enter`
@@ -561,16 +717,16 @@ So that **écrire un nœud complet reste une séquence de frappe continue**.
 
 **Given** un champ focalisé
 **When** il reçoit le focus
-**Then** l'indicateur de focus est **visible** et utilise les tokens de la story 14.2 — dépendance déclarée, Epic 14 est en `backlog` (UX-DR6)
+**Then** l'indicateur de focus est **visible** et utilise les tokens de focus posés par cette story (UX-DR6)
 
-**Given** le focus qui arrive sur un nœud en densité résumé
-**When** j'entre dans la chaîne
-**Then** le nœud se déplie **à l'entrée explicite dans la chaîne**, pas à la réception du focus sur le wrapper
+**Given** le focus qui arrive sur une carte au palier « lire » ou « situer »
+**When** j'entre dans la chaîne (`Enter`)
+**Then** la carte passe au palier « écrire » **à l'entrée explicite dans la chaîne**, pas à la réception du focus sur le wrapper
 **And** ce choix satisfait **WCAG 3.2.1 *On Focus* (niveau A)** : recevoir le focus ne change pas le contexte
 
 **Given** que je crée un nœud manuellement ou par drag depuis un handle de réponse
-**When** le nœud apparaît
-**Then** il est seul sélectionné, déplié, et le **curseur est déjà dans la réplique** — je peux écrire sans aucun clic
+**When** la carte apparaît
+**Then** elle est seule sélectionnée, au palier « écrire », et le **curseur est déjà dans la réplique** — je peux écrire sans aucun clic
 **And** `requestNodeEdit` (`useGraphToolbarMenuItems.tsx:124` → `GraphEditor.tsx:123-133`) route vers l'**in-situ** : le panneau ne s'ouvre **plus** automatiquement en édition
 **And** les tests existants de ce comportement (`graphViewStore.nodeEdit.test.ts`, `GraphEditor.combobox-17_7.test.tsx`) sont mis à jour, pas supprimés
 
@@ -587,9 +743,9 @@ So that **écrire un nœud complet reste une séquence de frappe continue**.
 **When** la chaîne de champs est livrée
 **Then** la dépendance est déclarée auprès d'Epic 12 et le contenu de l'aide est amendé — pas modifié en effet de bord
 
-**Dimensionnement :** 2 sessions. Le non-piégeage du focus dans un canvas React Flow est un chantier a11y à part entière, et la restructuration de l'effet `nodeEditRequest` s'y ajoute.
+**Dimensionnement :** 2 sessions. Le non-piégeage du focus dans un canvas React Flow est un chantier a11y à part entière, et la restructuration de l'effet `nodeEditRequest` s'y ajoute. ⚠️ L'absorption de 14.1 et 14.2 peut porter la story au-delà ; à recaler à sa création.
 
-**References:** FR128, FR122, NFR-A1, UX-DR6, D5, Epic 14 (stories 14.1, 14.2), Epic 12 (story 12.3)
+**References:** FR128, FR122, NFR-A1, UX-DR6, D5, Epic 14 (stories 14.1, 14.2, absorbées pour ce périmètre), Epic 12 (story 12.3), stories 18.5a, 18.5b, 20.6, 20.7
 
 ---
 
@@ -599,6 +755,8 @@ As a **auteur travaillant sur tablette**,
 I want **corriger une réplique ou une réponse au doigt**,
 So that **je puisse éditer un dialogue hors de mon bureau**.
 
+> **Intégrée à la story 20.18 (2026-11-20).** L'arithmétique des cibles ci-dessous (440 × 280 px) est à refaire sur la carte de la refonte ; preuve par émulation Playwright (375 px et 768 px), appareil réel vérifié par Marc en fin de tranche.
+>
 > ⚠️ **Story requalifiée.** La première rédaction annonçait « sans ouvrir un panneau plein écran ». **La prémisse était fausse** : sur viewport étroit, l'inspecteur n'est pas monté (`GraphEditor.tsx:533` → `{!isGraphEditorNarrow && <GraphInspector …>}`), et `NodeEditorPanel` n'est monté nulle part ailleurs dans l'écran graphe. **Il n'existe aujourd'hui aucune surface d'édition de nœud sur narrow.** Cette story n'évite donc pas un panneau — elle est le **seul** chemin d'édition sur tablette, et comble un trou laissé par Epic 17. Sa valeur est plus haute qu'annoncé, et sa priorité s'en trouve relevée.
 
 **Acceptance Criteria:**
@@ -642,32 +800,34 @@ I want **que l'édition in-situ ne casse rien de ce qui marche aujourd'hui**,
 So that **le gain d'ergonomie ne se paie pas en régressions ailleurs**.
 
 > **Story nouvelle.** Elle rassemble les angles morts que l'audit a trouvés et que les stories fonctionnelles ne couvraient pas.
+>
+> **Tranche 2 d'Epic 20, après 18.9 ; réécrite le 2026-11-20 (constat C5).** Les critères de la première rédaction reposaient sur la densité résumé / dépliée de D3, que la refonte remplace par les paliers de zoom (architecture A9, A10).
 
 **Acceptance Criteria:**
 
-**Given** le harnais de la story 16.6 (`e2e/perf-document-load.spec.ts`)
-**When** je l'exécute sur la fixture confort et la borne stress
-**Then** **p95 load, p95 drag et p95 frappe** respectent les seuils de `docs/architecture/adr-008-perf-targets.md`
-**And** les mesures avant / après l'epic sont consignées — NFR-P1 et NFR-P4 sont **mesurées, pas affirmées**
+**Given** le harnais de la story 16.6 (`e2e/perf-document-load.spec.ts`), étendu en 20.2
+**When** je l'exécute sur la fixture de 500 répliques, `PERF_STRICT=1`, sur le poste Windows de l'auteur
+**Then** **p95 load < 3 s, p95 drag < 200 ms et p95 frappe < 100 ms** (palier confort de `docs/architecture/adr-008-perf-targets.md`)
+**And** les mesures avant / après sont consignées (poste, navigateur) — NFR-P1 et NFR-P4 sont **mesurées, pas affirmées**
 
-**Given** plusieurs nœuds sélectionnés (`multiSelectionKeyCode="Shift"`, `selectionOnDrag`)
+**Given** plusieurs cartes sélectionnées (`multiSelectionKeyCode="Shift"`, `selectionOnDrag`)
 **When** la sélection est multiple
-**Then** **aucun** nœud ne se déplie et aucun champ éditable n'est monté (D3)
-**And** un test couvre le lasso sur dix nœuds
+**Then** **aucun** champ éditable n'est monté (la question « déplier » ne se pose plus : le palier ne dépend pas de la sélection)
+**And** un test couvre le lasso sur dix cartes
 
 **Given** un export PNG ou SVG du graphe
-**When** un nœud est sélectionné et déplié
-**Then** l'export est produit en densité **résumé**, sans anneau de focus ni curseur
+**When** une carte est en écriture
+**Then** l'export est produit **à un palier nommé**, choisi et écrit à la création de la story, sans anneau de focus, sans champ ni curseur
 **And** `graphExport.ts` exclut l'état d'édition comme il exclut déjà `controls` et `minimap`
 
 **Given** un auto-layout dagre ou un placement de nœud généré
-**When** un nœud est déplié au moment du calcul
-**Then** la hauteur de référence est celle de la densité **résumé**
-**And** la hauteur dépliée mesurée au DOM (`layoutSlice.ts:152-177`, préférée par `dagreLayout.ts:69-72`) ne fuit pas dans le layout ni dans `childNodeTopLeftY` (`graphNodeLayout.ts:76-85`)
+**When** il est calculé
+**Then** la hauteur de référence d'une carte est la **hauteur connue de son palier courant** (A9, A10), y compris pour une carte en écriture (palier « écrire »)
+**And** la hauteur d'une carte en cours de défilement interne ou de frappe, mesurée au DOM (`layoutSlice.ts:152-177`, préférée par `dagreLayout.ts:69-72`), ne fuit pas dans le layout ni dans `childNodeTopLeftY` (`graphNodeLayout.ts:76-85`)
 
-**Given** un nœud `pending` (généré, non accepté)
-**When** il est sélectionné et déplié
-**Then** les trois boutons d'overlay (`DialogueNode.tsx:810-919`, `top: 34`) et `CONTENT_PADDING_TOP_WHEN_PENDING` ne recouvrent pas la zone éditable
+**Given** une carte `pending` (générée, non acceptée)
+**When** elle est en écriture
+**Then** son pied « à valider » (Garder, Régénérer, Rejeter, story 20.7) ne recouvre pas la zone éditable
 **And** le comportement attendu est spécifié : édition autorisée ou non sur un nœud pending
 
 **Given** la correction orthographique du navigateur
@@ -678,13 +838,15 @@ So that **le gain d'ergonomie ne se paie pas en régressions ailleurs**.
 **When** la story est livrée
 **Then** le RTL est **explicitement hors périmètre** de cette epic, et la raison est écrite — `left: ${leftPercent}%` + `translateX(-50%)` (`:780-782`) et la chaîne de champs s'inverseraient
 
-**Dimensionnement :** 1 à 2 sessions.
+**Dimensionnement :** 1 à 2 sessions (1,5 retenue dans le chemin critique d'Epic 20).
 
-**References:** NFR-P1, NFR-P4, story 16.6, D3, garde-fou 8
+**References:** NFR-P1, NFR-P4, story 16.6, story 20.2, architecture A9 et A10, garde-fou 8
 
 ---
 
 ## Séquençage
+
+> ⚠️ **Remplacé le 2026-11-20** par le séquençage d'Epic 20 (`epic-20.md`, tranches 1 bis et 2) : 18.4 (reste), 18.8 et 18.5a maintenant ; 18.5b, 18.6, 18.7, 18.9 et 18.11 après 20.6 et 20.7 ; 18.1, 18.2, 18.3 remplacées ; 18.10 dans 20.18. Le schéma ci-dessous est la rédaction d'origine.
 
 ```
 18.1  Densité adaptative + réplique intégrale + titre rendu

@@ -124,13 +124,15 @@
 **FR120:** Users can access context selection and node detail panels on narrow viewports via mobile-appropriate patterns (drawers, full-screen panels, or explicit tabs) *(NEW - Narrow panels)*  
 **FR121:** Users can install the web app as a PWA (home screen icon / install prompt) where the browser supports it (V1.5+) *(NEW - PWA)*
 
-**FR122:** Users can edit a node's NPC dialogue line directly on the canvas node (in-situ): a single click into the text of an already-selected node places the caret; a first click on an unselected node selects and expands it *(NEW - Édition in-situ)*  
-**FR123:** Nodes display the full dialogue line (no 100-character truncation) **in expanded density** (single-selected node), with adaptive height bounded by a maximum (440px) and internal scrolling beyond it; summary density keeps the compact rendering *(NEW - Édition in-situ)*  
-**FR124:** Users can read and edit the text of each player response (choice) as a row inside the canvas node, preserving `choiceId` and row order *(NEW - Édition in-situ)*  
-**FR125:** Users can edit the speaker and the node title in-situ on the canvas node *(NEW - Édition in-situ)*  
-**FR126:** In-situ edits are persisted with no explicit save action ("edit = save"), pushed to the store within <=100ms per ADR-006; Escape leaves the field (the text is already saved) and Ctrl+Z reverts a coalesced edit unit via a transactional undo path *(NEW - Édition in-situ)*  
-**FR127:** In-situ editing and the right-hand detail panel stay bidirectionally consistent - one single source of truth (store), no competing flush, no last-writer-wins race *(NEW - Édition in-situ)*  
-**FR128:** In-situ editing is operable by keyboard (Tab chain across the node's fields, visible focus) and by touch on narrow viewports *(NEW - Édition in-situ)*  
+> **Révisé le 2026-11-20** (readiness, constat C16) : FR122–FR128 sont réécrites sur la carte de texte et les paliers de zoom d'Epic 20 ; Epic 18 est intégrée à Epic 20. Les formulations d'origine (« first click … selects and expands », « 440px … summary density », « bidirectionally consistent ») sont remplacées.
+
+**FR122:** Users can edit a node's NPC dialogue line in-situ, in the Script block and on the graph card at the "write" zoom tier: a single click into the text places the caret at the matching position in the raw text (the whole line switches to raw text with its `*…*` on entry and back to formatted text on exit) *(NEW - Édition in-situ; Epic 20, stories 18.5a, 18.5b)*  
+**FR123:** Graph cards display the dialogue line without 100-character truncation, by zoom tier: up to 12 lines at "write" (internal scrolling once selected, no maximum card height, responses never cut), 2 lines at "read", title only at "locate"; the full line is always readable in the Script view *(NEW - Édition in-situ; Epic 20, story 20.7)*  
+**FR124:** Users can read (cards and Script blocks) and edit the text of each player response in-situ, preserving `choiceId`, order, `targetNode` and test outcomes *(NEW - Édition in-situ; Epic 20, stories 20.7 (read), 18.6 (edit))*  
+**FR125:** Users can edit the speaker and the node title in-situ, in the header of the card and of the Script block *(NEW - Édition in-situ; Epic 20, story 18.7)*  
+**FR126:** In-situ edits are persisted with no explicit save action ("edit = save"), pushed to the store within <=100ms per ADR-006; Escape leaves the field (the text is already saved) and Ctrl+Z reverts a coalesced edit unit via a transactional undo path *(NEW - Édition in-situ; Epic 20, stories 18.4, 18.5a, 18.8)*  
+**FR127:** As soon as an in-situ field writes, the legacy writers of the same text (`NodeEditorPanel`, `UnityDialogueEditor`) show `line`, `speaker`, `title` and `choices[].text` read-only and never write them back: one single writer, no competing flush, no last-writer-wins race *(NEW - Édition in-situ; Epic 20, story 18.5b, A14, story 20.5)*  
+**FR128:** In-situ editing is operable by keyboard (one Tab stop per card, Enter enters the field chain, Escape leaves it, visible focus) and by touch on tablets and phones *(NEW - Édition in-situ; Epic 20, stories 18.9 (keyboard), 20.18 (touch))*  
 **FR129:** Users can open node generation, GDD context details and game variables as overlays launched from the node itself, so that the permanent right-hand panel is no longer required to author a dialogue *(NEW - Canvas-first, Epic 19)*  
 **FR130:** Users can collapse or remove the permanent right-hand panel and recover its width for the graph canvas, with no loss of access to any of its functions *(NEW - Canvas-first, Epic 19 — **PROVISOIRE** : "collapse" et "remove" décrivent deux produits différents ; l'exigence n'est pas testable avant arbitrage, prévu après retour d'usage d'Epic 18)*
 **FR131:** A scene carries a scene sheet (NPCs, PC, place, brief, tones, author profile, linked entries) stored in the document; every generation in the scene uses it *(NEW - Refonte Scène, Epic 20)*
@@ -138,8 +140,8 @@
 **FR133:** A "to write" slot sits at the end of every response without a continuation, in Script and Graph: type or generate (Ctrl+Enter), with estimated, committed and actual cost *(NEW - Refonte Scène, Epic 20)*
 **FR134:** Generated options are browsed in place (‹ 1/N ›): keep, retry, variant, reject; generated text stays marked until the first edit *(NEW - Refonte Scène, Epic 20)*
 **FR135:** Rewriting a selected passage (Ctrl+K) is shown as an inline diff: accept (Tab), word by word (Ctrl+→), reject (Escape) *(NEW - Refonte Scène, Epic 20)*
-**FR136:** Graph with text cards, left-to-right flow, one port per response, 4 outputs per test, off-screen links through the gutter; three zoom tiers (write, read, locate) *(NEW - Refonte Scène, Epic 20)*
-**FR137:** Status bar: save state, problems, context, tokens, model, words, running batch; each item opens its detail in place *(NEW - Refonte Scène, Epic 20)*
+**FR136:** Graph with text cards, left-to-right flow, one port per response, 4 outputs per test, off-screen links through the gutter; three contiguous zoom tiers (write ≥ 75 %, read 40–75 %, locate < 40 %) *(NEW - Refonte Scène, Epic 20)*
+**FR137:** Status bar: save state, problems, context, tokens per line, model, words, reading time, "? shortcuts" help, and the running batch while one runs; each item opens its detail in place *(NEW - Refonte Scène, Epic 20)*
 **FR138:** Computable diagnostics recomputed continuously and marked in place; on-demand LLM review (quality, slop, language) as margin notes *(NEW - Refonte Scène, Epic 20)*
 **FR139:** Paper theme, line size, reading measure and Focus mode adjustable without a save action *(NEW - Refonte Scène, Epic 20)*
 **FR140:** Versions of a line can be viewed as diffs and restored; variants and provenance persist across sessions *(NEW - Refonte Scène, Epic 20)*
@@ -148,6 +150,7 @@
 **FR143:** A scene takes the tint of its place and shows its characters' portraits and a cover, without tinting body text or the action blue; a scene without images stays complete *(NEW - Refonte Scène, Epic 20)*
 **FR144:** On a generated line, users open a discussion with the AI that wrote it: original context and output, reasoning summary when available, questions and answers with their cost *(NEW - Refonte Scène, Epic 20; back-end PR #103)*
 **FR145:** From the command palette, users ask a question about the interface or the GDD and get a sourced answer in the same discussion drawer *(NEW - Refonte Scène, Epic 20)*
+**FR146:** Play view: users play the scene from its opening line, see why a choice is locked, force a test outcome, follow the game state and step back from a choice *(NEW - Refonte Scène, Epic 20, story 20.24; replaces the scenario preview "P")*
 
 ### NonFunctional Requirements
 
@@ -303,13 +306,13 @@ Exigences de conception issues de la spec UX (`ux-design-specification/`), de la
 - FR118-121 → Epic 17: Expérience mobile et responsive (web)
 
 **Édition in-situ des nœuds:**
-- FR122-128 → Epic 18: Édition in-situ du dialogue dans le nœud
+- FR122-128 → Epic 20 (Epic 18 intégrée le 2026-11-20) : FR122 → 18.5a, 18.5b ; FR123 → 20.7 ; FR124 → 20.7 (lecture), 18.6 (édition) ; FR125 → 18.7 ; FR126 → 18.4, 18.5a, 18.8 ; FR127 → 18.5b (critère de verrouillage, constat B2), A14, 20.5 ; FR128 → 18.9 (clavier), 20.18 (tactile)
 
 **Canvas-first (surfaces à la demande):**
 - FR129-130 → Epic 19 (remplacée le 2026-11-20) : couvertes par Epic 20 (FR133, FR137, story 20.15)
 
 **Refonte « Scène » (prioritaire):**
-- FR131-145 → Epic 20: Refonte « Scène » — une scène, un texte, trois vues
+- FR131-146 → Epic 20: Refonte « Scène » — une scène, un texte, trois vues (FR146 vue Jouer → story 20.24)
 
 **NFR Coverage** (mise à jour 2026-10-01 — la version précédente omettait les Epics 16 à 19 et ne mentionnait jamais NFR-R3) :
 

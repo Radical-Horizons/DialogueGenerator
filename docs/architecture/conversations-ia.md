@@ -138,5 +138,9 @@ réflexion n'est revenu sur cette génération.
 | Questions sur l'interface (`ui_help`) | Guides `docs/guides/` + description de l'écran courant fournie par le front | Aucun accès au code nécessaire |
 | Assistance qui corrige le code (`code_assist`) | La conversation produit un **ticket** (constat, reproduction) confié à un agent de code **isolé** (worktree ou agent cloud) qui ouvre une PR | Jamais d'exécution de code ni d'accès aux secrets depuis l'API de prod ; jamais de push direct ; revue humaine obligatoire |
 
-Front (étape suivante) : panneau « Discuter avec l'IA » sur le nœud, affichage du résumé de
-réflexion, et décision sur l'option C.
+Front (étape suivante) : pas de panneau sur le nœud. La refonte « Scène » ouvre la discussion
+dans le **tiroir Discussion** (tiroir temporaire de 380 px, ÉCHAP ferme), depuis « Pourquoi ? » dans
+la marge d'une réplique, au pied d'une carte ou dans la palette : décision A15 de
+[`refonte-scene-architecture.md`](refonte-scene-architecture.md), stories 20.21 (discussion sur une
+réplique, résumé de réflexion), 20.22 (questions sur l'interface et le GDD) et 20.23 (option C,
+expérience mesurée), board `docs/design/refonte-scene/Discussion.dc.html`.

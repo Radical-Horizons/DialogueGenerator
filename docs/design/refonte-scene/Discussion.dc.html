@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Discuter d'une réplique avec l'IA</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}
+.lk{border:none;background:transparent;padding:0;font-family:'Instrument Sans',system-ui,sans-serif;font-size:12px;cursor:pointer;white-space:nowrap}
+.lk:hover{color:var(--ds-strong)!important;text-decoration:underline;text-underline-offset:3px}
+.lk:focus-visible,.pb:focus-visible,.tb:focus-visible,.vb:focus-visible,.x:focus-visible{outline:2px solid var(--ds-accent);outline-offset:2px}
+.x:hover{color:var(--ds-strong)!important}
+.vb:hover{border-color:var(--ds-chip2)!important}
+.tb:hover{background:var(--ds-hover)!important}
+.dq::placeholder{color:var(--ds-muted)}.dq:focus{outline:none}
+.dr{animation:dsin 200ms ease-out}@keyframes dsin{from{opacity:0}to{opacity:1}}
+.dc-pal{animation:dsin 140ms ease-out}
+.ds-pulse{animation:dspulse 1.2s ease-out infinite}@keyframes dspulse{0%,100%{opacity:1}50%{opacity:0.25}}
+@media (prefers-reduced-motion: reduce){.dr,.dc-pal,.ds-pulse{animation:none}}</style>
+</helmet>
+<div style="position: relative; width: 1440px; height: 900px; display: flex; flex-direction: column; overflow: hidden; background: {{t.app}}; color: {{t.body}}; font-family: 'Instrument Sans', system-ui, sans-serif; --ds-strong: {{t.strong}}; --ds-accent: {{t.accent}}; --ds-chip2: {{t.chip2}}; --ds-hover: {{t.hover}}; --ds-muted: {{t.muted}}">
+
+  <header style="height: 48px; flex: none; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) 380px minmax(0, 1fr); align-items: center; gap: 20px; padding: 0 20px; border-bottom: 1px solid {{t.hair}}">
+    <div style="display: flex; align-items: baseline; gap: 20px; min-width: 0">
+      <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1; color: {{t.strong}}; white-space: nowrap">Dialogue<span style="font-style: italic; color: {{t.accent}}">Generator</span></span>
+      <nav aria-label="Fil d'Ariane" style="display: flex; align-items: baseline; gap: 9px; min-width: 0">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}; white-space: nowrap">TOUTES LES SCÈNES</span>
+        <span style="color: {{t.label}}">/</span>
+        <span style="font-size: 13px; color: {{t.strong}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Rencontre avec le forgeron itinérant</span>
+      </nav>
+    </div>
+    <button type="button" onClick="{{openPalette}}" style="height: 32px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: {{t.input}}; color: {{t.muted}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Rechercher, aller à, demander…<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">CTRL+K</span></button>
+    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 14px">
+      <sc-if value="{{isGuest}}" hint-placeholder-val="{{false}}">
+        <a href="#" style="font-size: 12.5px; color: {{t.accText}}; text-decoration: none">Connexion</a>
+      </sc-if>
+      <span aria-label="Compte" style="width: 27px; height: 27px; border-radius: 99px; background: {{t.raised}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{t.body}}">{{accountInitial}}</span>
+    </div>
+  </header>
+
+  <div style="flex: 1; min-height: 0; display: flex">
+    <aside aria-label="Classeur" style="width: 252px; flex: none; box-sizing: border-box; border-right: 1px solid {{t.hair}}; display: flex; flex-direction: column">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 14px 9px 20px">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">CLASSEUR — 4 SCÈNES</span>
+        <button type="button" aria-label="Nouvelle scène" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-size: 15px; line-height: 1; cursor: pointer">+</button>
+      </div>
+      <a href="Main.dc.html" style="display: flex; flex-direction: column; gap: 3px; padding: 9px 20px; text-decoration: none; background: {{t.selBg}}; box-shadow: inset 2px 0 0 {{t.accent}}">
+        <span style="font-size: 13.5px; font-weight: 500; color: {{t.strong}}">Rencontre avec le forgeron itinérant</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">19 RÉPLIQUES · <span style="color: {{t.err}}">3 ERREURS</span></span>
+      </a>
+      <a href="#" style="display: flex; flex-direction: column; gap: 3px; padding: 9px 20px; text-decoration: none; border-top: 1px solid {{t.hair}}">
+        <span style="font-size: 13.5px; color: {{t.row}}">Rencontre dans les plis d'ossements</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">11 RÉPLIQUES</span>
+      </a>
+      <a href="#" style="display: flex; flex-direction: column; gap: 3px; padding: 9px 20px; text-decoration: none; border-top: 1px solid {{t.hair}}">
+        <span style="font-size: 13.5px; color: {{t.row}}">Rencontre initiale avec Korga l'Effritée</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">6 RÉPLIQUES</span>
+      </a>
+      <a href="#" style="display: flex; flex-direction: column; gap: 3px; padding: 9px 20px; text-decoration: none; border-top: 1px solid {{t.hair}}; border-bottom: 1px solid {{t.hair}}">
+        <span style="font-size: 13.5px; color: {{t.row}}">Voknir — L'Atelier du Cartographe</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">48 RÉPLIQUES</span>
+      </a>
+      <span style="flex: 1"></span>
+      <nav aria-label="Autour des scènes" style="display: flex; flex-direction: column; padding: 9px 0 14px; border-top: 1px solid {{t.hair}}">
+        <a href="Fiches.dc.html" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Fiches du GDD</a>
+        <a href="#" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Profils d'auteur</a>
+        <a href="#" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Usage et coûts</a>
+        <a href="Reglages.dc.html" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Réglages<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{t.label}}">CTRL+,</span></a>
+      </nav>
+    </aside>
+
+    <main aria-label="Scène" style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+      <section aria-label="Fiche de scène" style="flex: none; padding: 18px 40px 14px; display: flex; flex-direction: column; gap: 9px">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 20px">
+          <h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 30px; line-height: 1.12; color: {{t.strong}}">Rencontre avec le forgeron itinérant</h1>
+          <button type="button" style="border: none; background: transparent; padding: 0; font-family: inherit; font-size: 12px; color: {{t.sec}}; cursor: pointer">fiche de scène ▾</button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; min-width: 0">
+          <span style="display: inline-flex; align-items: center; gap: 7px; height: 26px; box-sizing: border-box; padding: 0 10px 0 4px; border-radius: 99px; border: 1px solid {{t.chip}}; flex: none">
+            <span style="width: 18px; height: 18px; border-radius: 99px; background: {{t.spk}}; color: {{t.onSpk}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px">GT</span>
+            <span style="font-size: 12.5px; color: {{t.body}}">Grish T'vok</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.label}}">PNJ</span>
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 7px; height: 26px; box-sizing: border-box; padding: 0 10px 0 4px; border-radius: 99px; border: 1px solid {{t.chip}}; flex: none">
+            <span style="width: 18px; height: 18px; border-radius: 99px; background: {{t.raised}}; color: {{t.body}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px">U</span>
+            <span style="font-size: 12.5px; color: {{t.body}}">Uresaïr</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.label}}">PJ</span>
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 7px; height: 26px; box-sizing: border-box; padding: 0 10px; border-radius: 99px; border: 1px solid {{t.chip}}; flex: none">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.label}}">LIEU</span>
+            <span style="font-size: 12.5px; color: {{t.body}}">Caravane-atelier</span>
+          </span>
+          <span aria-hidden="true" style="width: 1px; height: 16px; background: {{t.hair2}}; flex: none"></span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}; flex: none">BRIEF</span>
+          <span style="min-width: 0; font-size: 12.5px; color: {{t.sec}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Grish propose de réparer ce qui souffre ; Uresaïr garde sa distance rituelle et refuse de livrer sa mémoire.</span>
+        </div>
+      </section>
+
+      <div style="flex: none; height: 40px; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 0 40px; border-top: 1px solid {{t.hair}}; border-bottom: 1px solid {{t.hair}}">
+        <nav aria-label="Vue de la scène" style="display: flex; border: 1px solid {{t.ctrl}}; border-radius: 6px; overflow: hidden">
+          <a href="Main.dc.html" aria-current="page" style="height: 26px; display: flex; align-items: center; padding: 0 11px; background: {{t.raised}}; color: {{t.strong}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-decoration: none">SCRIPT</a>
+          <a href="Graphe.dc.html" style="height: 26px; display: flex; align-items: center; padding: 0 11px; border-left: 1px solid {{t.ctrl}}; color: {{t.sec}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-decoration: none">GRAPHE</a>
+          <a href="Jouer.dc.html" style="height: 26px; display: flex; align-items: center; padding: 0 11px; border-left: 1px solid {{t.ctrl}}; color: {{t.sec}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-decoration: none">JOUER</a>
+        </nav>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}; white-space: nowrap">START › 01 › RÉUSSITE</span>
+        <span style="flex: 1"></span>
+        <div style="display: flex; gap: 5px">
+          <button type="button" aria-label="Réduire le texte" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12px; cursor: pointer">A−</button>
+          <button type="button" aria-label="Agrandir le texte" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 14px; cursor: pointer">A+</button>
+        </div>
+        <button type="button" style="height: 28px; display: flex; align-items: center; gap: 9px; padding: 0 10px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Focus<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">CTRL+\</span></button>
+      </div>
+
+      <div style="flex: 1; min-height: 0; display: flex">
+        <div ref="{{setScroll}}" style="flex: 1; min-width: 0; overflow-y: auto; overflow-x: hidden; box-sizing: border-box; padding-right: 220px; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 34px); mask-image: linear-gradient(to bottom, transparent 0, #000 34px)">
+          <div ref="{{setCol}}" style="position: relative; max-width: 640px; margin: 0 auto; padding: 34px 0 240px">
+            <sc-for list="{{blocks}}" as="b" hint-placeholder-count="2">
+              <article data-block="{{b.key}}">
+                <sc-if value="{{b.hasLink}}" hint-placeholder-val="{{false}}">
+                  <div style="display: flex; align-items: center; gap: 9px; margin-bottom: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.label}}"><span aria-hidden="true" style="width: 20px; height: 1px; background: {{t.hair2}}"></span>{{b.link}}</div>
+                </sc-if>
+                <div style="margin: {{b.wm}}; padding: {{b.wp}}; background: {{b.wbg}}; box-shadow: {{b.wsh}}">
+                  <div style="display: flex; align-items: center; gap: 9px; margin-bottom: 11px">
+                    <span aria-hidden="true" style="width: 7px; height: 7px; border-radius: 99px; background: {{t.spk}}"></span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.09em; color: {{t.sec}}">GRISH T'VOK</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.ok}}">VALIDÉ</span>
+                    <span style="flex: 1"></span>
+                    <span style="font-size: 12px; color: {{t.muted}}">{{b.title}}</span>
+                    <sc-if value="{{b.hasWhy}}" hint-placeholder-val="{{false}}">
+                      <sc-if value="{{b.whyOn}}" hint-placeholder-val="{{true}}">
+                        <button type="button" class="vb" onClick="{{b.openWhy}}" aria-expanded="{{b.drawerOpen}}" aria-controls="discussion" style="height: 22px; display: flex; align-items: center; gap: 7px; padding: 0 9px; border-radius: 99px; border: 1px solid {{b.whyBorder}}; background: {{b.whyBg}}; color: {{b.whyColor}}; font-family: inherit; font-size: 12px; cursor: pointer">Pourquoi ?<sc-if value="{{b.hasMark}}" hint-placeholder-val="{{true}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{b.markColor}}">◆ {{b.markCount}}</span></sc-if></button>
+                      </sc-if>
+                      <sc-if value="{{b.whyOff}}" hint-placeholder-val="{{false}}">
+                        <button type="button" aria-disabled="true" aria-describedby="why-off" style="height: 22px; display: flex; align-items: center; padding: 0 9px; border-radius: 99px; border: 1px dashed {{t.chip}}; background: transparent; color: {{t.label}}; font-family: inherit; font-size: 12px; cursor: not-allowed">Pourquoi ?</button>
+                      </sc-if>
+                    </sc-if>
+                  </div>
+                  <sc-if value="{{b.showOffNote}}" hint-placeholder-val="{{false}}">
+                    <div id="why-off" role="note" style="display: flex; flex-direction: column; gap: 5px; margin: 0 0 14px; padding: 11px 14px; border: 1px solid {{t.hair2}}; border-radius: 8px; background: {{t.card}}">
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.sec}}">POURQUOI ? INDISPONIBLE · AUCUNE GÉNÉRATION RATTACHÉE</span>
+                      <span style="font-size: 13px; line-height: 1.5; color: {{t.body}}">Cette réplique a été générée avant le suivi par appel (19 novembre) : rien ne dit quelle génération l'a produite. Même chose pour une réplique écrite à la main, ou pour l'ouverture créée par « Générer » avant que la scène existe.</span>
+                    </div>
+                  </sc-if>
+                  <sc-for list="{{b.paras}}" as="p" hint-placeholder-count="1">
+                    <sc-if value="{{p.dir}}" hint-placeholder-val="{{false}}">
+                      <p style="margin: 0 0 14px; font-size: 15px; line-height: 1.6; font-style: italic; color: {{t.sec}}">{{p.text}}</p>
+                    </sc-if>
+                    <sc-if value="{{p.say}}" hint-placeholder-val="{{true}}">
+                      <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p>
+                    </sc-if>
+                  </sc-for>
+                </div>
+                <div style="margin: 20px 0 34px">
+                  <span style="display: block; margin-bottom: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">{{b.who}}</span>
+                  <ol style="list-style: none; margin: 0; padding: 0; border-top: 1px solid {{t.hair}}">
+                    <sc-for list="{{b.choices}}" as="c" hint-placeholder-count="3">
+                      <li style="border-bottom: 1px solid {{t.hair}}; background: {{c.bg}}; box-shadow: {{c.rail}}">
+                        <div style="display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 9px; align-items: start; padding: 11px 12px 11px 10px">
+                          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 23px; color: {{t.muted}}">{{c.num}}</span>
+                          <span style="min-width: 0">
+                            <sc-if value="{{c.empty}}" hint-placeholder-val="{{false}}"><span style="font-size: 14.5px; line-height: 23px; font-style: italic; color: {{t.muted}}">Réponse vide</span></sc-if>
+                            <sc-if value="{{c.full}}" hint-placeholder-val="{{true}}"><span style="display: block; font-size: 15px; line-height: 1.55; color: {{c.textColor}}">{{c.text}}</span></sc-if>
+                            <sc-if value="{{c.hasChips}}" hint-placeholder-val="{{false}}">
+                              <span style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px">
+                                <sc-for list="{{c.chips}}" as="k" hint-placeholder-count="2"><span style="height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 99px; border: 1px solid {{t.chip}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{k.label}}</span></sc-for>
+                              </span>
+                            </sc-if>
+                          </span>
+                          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; line-height: 23px; color: {{c.metaColor}}; white-space: nowrap">{{c.meta}}</span>
+                        </div>
+                        <sc-if value="{{c.showOutcomes}}" hint-placeholder-val="{{false}}">
+                          <div role="group" aria-label="Issue du test suivie" style="display: flex; flex-wrap: wrap; gap: 5px; padding: 0 12px 12px 47px">
+                            <sc-for list="{{c.outs}}" as="o" hint-placeholder-count="4">
+                              <span style="height: 24px; box-sizing: border-box; display: inline-flex; align-items: center; padding: 0 9px; border-radius: 99px; border: 1px solid {{o.border}}; background: {{o.bg}}; color: {{o.color}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em">{{o.label}}</span>
+                            </sc-for>
+                          </div>
+                        </sc-if>
+                      </li>
+                    </sc-for>
+                  </ol>
+                </div>
+              </article>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer aria-label="État de la scène" style="height: 28px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 20px; padding: 0 20px; border-top: 1px solid {{t.hair}}; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; color: {{t.muted}}">
+    <sc-if value="{{canEdit}}" hint-placeholder-val="{{true}}">
+      <span style="display: flex; align-items: center; gap: 7px"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.ok}}"></span>ENREGISTRÉ · 11:24</span>
+    </sc-if>
+    <sc-if value="{{readOnly}}" hint-placeholder-val="{{false}}">
+      <span style="display: flex; align-items: center; gap: 7px; color: {{t.body}}"><span aria-hidden="true" style="width: 6px; height: 6px; box-sizing: border-box; border-radius: 99px; border: 1.5px solid {{t.sec}}"></span>LECTURE SEULE</span>
+    </sc-if>
+    <a href="Problemes.dc.html" style="display: flex; align-items: center; gap: 7px; color: {{t.err}}; text-decoration: none"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.err}}"></span>3 ERREURS</a>
+    <a href="Contexte.dc.html" style="color: {{t.muted}}; text-decoration: none">CONTEXTE · 2 FICHES</a>
+    <span>≈ 12 500 TOKENS / RÉPLIQUE</span>
+    <button type="button" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: {{t.muted}}; cursor: pointer">GPT-6.2 SOL ▴</button>
+    <span style="flex: 1"></span>
+    <span>3 887 MOTS · ≈ 19 MIN</span>
+    <button type="button" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: {{t.muted}}; cursor: pointer">? RACCOURCIS</button>
+  </footer>
+
+  <sc-if value="{{drawerOn}}" hint-placeholder-val="{{true}}">
+    <aside id="discussion" role="dialog" aria-label="{{drawerAria}}" class="dr" style="position: absolute; top: 48px; right: 0; bottom: 28px; width: 380px; box-sizing: border-box; background: {{t.card}}; border-left: 1px solid {{t.hair2}}; box-shadow: {{t.drawerShadow}}; display: flex; flex-direction: column">
+      <div style="flex: none; padding: 20px 20px 14px; display: flex; flex-direction: column; gap: 9px; border-bottom: 1px solid {{t.hair}}">
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.sec}}">{{kindLabel}}</span>
+          <button type="button" class="x" onClick="{{closeDrawer}}" aria-label="Fermer le tiroir" style="display: flex; align-items: center; gap: 7px; border: none; background: transparent; padding: 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}; cursor: pointer">ÉCHAP<span aria-hidden="true" style="font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 16px; line-height: 1">×</span></button>
+        </div>
+        <h2 style="margin: 0; font-size: 17px; font-weight: 500; line-height: 1.3; color: {{t.strong}}">{{title}}</h2>
+        <span style="display: flex; align-items: center; gap: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}"><sc-if value="{{isNode}}" hint-placeholder-val="{{true}}"><span aria-hidden="true" style="width: 7px; height: 7px; border-radius: 99px; background: {{t.spk}}"></span></sc-if>{{subline}}</span>
+      </div>
+
+      <div ref="{{setBody}}" style="flex: 1; min-height: 0; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 20px), transparent 100%); mask-image: linear-gradient(to bottom, #000 calc(100% - 20px), transparent 100%)">
+
+        <sc-if value="{{showLock}}" hint-placeholder-val="{{false}}">
+          <section role="note" style="margin: 20px; display: flex; flex-direction: column; gap: 9px; padding: 14px 16px; border: 1px solid {{t.hair2}}; border-radius: 8px">
+            <span style="display: flex; align-items: center; gap: 9px">
+              <svg aria-hidden="true" width="10" height="12" viewBox="0 0 10 12" fill="none" stroke="{{t.sec}}" stroke-width="1.2"><rect x="1" y="5.5" width="8" height="5.5" rx="1"></rect><path d="M3 5.5V3.6a2 2 0 0 1 4 0v1.9"></path></svg>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.sec}}">{{lockLabel}}</span>
+            </span>
+            <span style="font-size: 13.5px; line-height: 1.55; color: {{t.body}}">{{lockText}}</span>
+            <span style="font-size: 12.5px; line-height: 1.5; color: {{t.sec}}">{{lockHint}}</span>
+            <sc-if value="{{lockHasLink}}" hint-placeholder-val="{{true}}">
+              <a href="#" style="align-self: flex-start; font-size: 12.5px; color: {{t.accText}}; text-decoration: none">{{lockLink}}</a>
+            </sc-if>
+          </section>
+          <p style="margin: 0 20px; font-size: 12.5px; line-height: 1.5; color: {{t.sec}}">Le texte de la réplique et ses versions restent lisibles dans la scène ; seul l'échange avec le modèle est fermé.</p>
+        </sc-if>
+
+        <sc-if value="{{showTrace}}" hint-placeholder-val="{{true}}">
+          <section aria-label="Ce qui a été généré" style="padding: 14px 20px 14px; border-bottom: 1px solid {{t.hair}}; display: flex; flex-direction: column; gap: 7px">
+            <button type="button" class="tb" onClick="{{toggleDiff}}" aria-expanded="{{diffOpen}}" style="display: flex; align-items: baseline; gap: 9px; margin: 0 -8px; padding: 2px 8px; border: none; border-radius: 4px; background: transparent; text-align: left; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.sec}}; cursor: pointer"><span aria-hidden="true" style="width: 9px">{{diffChevron}}</span>CE QUI A ÉTÉ GÉNÉRÉ<span style="flex: 1"></span><span style="letter-spacing: 0.04em; color: {{t.muted}}">−{{delCount}} · <span style="color: {{t.accText}}">+{{insCount}}</span> MOTS DEPUIS</span></button>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.muted}}">GPT-6.2 SOL · OPTION 1 SUR 4 · COMPARÉE À L'ACTUELLE</span>
+            <sc-if value="{{diffOpen}}" hint-placeholder-val="{{true}}">
+              <span style="display: flex; align-items: center; gap: 9px; font-size: 12px; color: {{t.muted}}"><del style="color: {{t.muted}}; text-decoration-color: {{t.delLine}}">barré</del>retiré depuis<span aria-hidden="true">·</span><ins style="text-decoration: none; padding: 0 3px; border-radius: 2px; background: {{t.insBg}}; color: {{t.dia}}">teinté</ins>ajouté depuis</span>
+              <div style="max-height: {{diffMax}}px; overflow-y: auto; padding-top: 5px; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent 100%); mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent 100%)">
+                <sc-for list="{{diffParas}}" as="p" hint-placeholder-count="2">
+                  <p style="margin: 0 0 11px; font-family: 'Instrument Serif', Georgia, serif; font-size: 15.5px; line-height: 1.5; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="3"><sc-if value="{{s.eq}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if><sc-if value="{{s.del}}" hint-placeholder-val="{{false}}"><del style="color: {{t.muted}}; opacity: 0.8; text-decoration-color: {{t.delLine}}">{{s.t}}</del></sc-if><sc-if value="{{s.ins}}" hint-placeholder-val="{{false}}"><ins style="text-decoration: none; padding: 0 2px; border-radius: 2px; background: {{t.insBg}}; color: {{t.strong}}">{{s.t}}</ins></sc-if></sc-for></p>
+                </sc-for>
+              </div>
+            </sc-if>
+          </section>
+
+          <section aria-label="Résumé de réflexion" style="padding: 12px 20px; border-bottom: 1px solid {{t.hair}}; display: flex; flex-direction: column; gap: 7px">
+            <sc-if value="{{hasRefl}}" hint-placeholder-val="{{true}}">
+              <button type="button" class="tb" onClick="{{toggleRefl}}" aria-expanded="{{reflOpen}}" style="display: flex; align-items: baseline; gap: 9px; margin: 0 -8px; padding: 2px 8px; border: none; border-radius: 4px; background: transparent; text-align: left; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.sec}}; cursor: pointer"><span aria-hidden="true" style="width: 9px">{{reflChevron}}</span>RÉSUMÉ DE RÉFLEXION<span style="flex: 1"></span><span style="letter-spacing: 0.04em; color: {{t.muted}}">OPENAI · EN ANGLAIS</span></button>
+              <sc-if value="{{reflOpen}}" hint-placeholder-val="{{false}}">
+                <p lang="en" style="margin: 0; padding: 9px 12px; border-radius: 6px; background: {{t.raised2}}; font-size: 13px; line-height: 1.55; font-style: italic; color: {{t.body}}">Grish should accept the condition the player set (repair without erasing the scars) and tie it to what the sheet says of him: he repairs by giving some of his own matter, and the caravan is part of his body. Keep « Maîtresse », keep the craft vocabulary, end on a question so the player keeps the choice.</p>
+              </sc-if>
+            </sc-if>
+            <sc-if value="{{noRefl}}" hint-placeholder-val="{{false}}">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.sec}}">PAS DE RÉSUMÉ DE RÉFLEXION</span>
+              <span style="font-size: 12.5px; line-height: 1.5; color: {{t.sec}}">OpenAI n'en a pas fourni pour cette génération. Il n'arrive qu'environ une fois sur cinq dans nos mesures, et jamais quand le modèle n'a pas raisonné.</span>
+            </sc-if>
+          </section>
+
+          <p role="note" style="margin: 0; padding: 11px 20px; display: flex; gap: 9px; border-bottom: 1px solid {{t.hair}}; font-size: 12.5px; line-height: 1.5; color: {{t.body}}"><span aria-hidden="true" style="flex: none; margin-top: 6px; width: 6px; height: 6px; box-sizing: border-box; border-radius: 99px; border: 1.5px solid {{t.sec}}"></span><span>L'IA relit son contexte et sa réponse, pas son raisonnement : ses explications sont une reconstruction.</span></p>
+        </sc-if>
+
+        <sc-if value="{{showSources}}" hint-placeholder-val="{{false}}">
+          <section aria-label="Extraits envoyés au modèle" style="padding: 14px 20px; border-bottom: 1px solid {{t.hair}}; display: flex; flex-direction: column; gap: 7px">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.sec}}">EXTRAITS ENVOYÉS AU MODÈLE · 2 FICHES</span>
+            <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column">
+              <li style="display: flex; align-items: baseline; gap: 9px; padding: 5px 0"><a href="Fiches.dc.html" style="font-size: 13.5px; color: {{t.accText}}; text-decoration: none">Moribandons</a><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}">ESPÈCES</span></li>
+              <li style="display: flex; align-items: baseline; gap: 9px; padding: 5px 0"><a href="Fiches.dc.html" style="font-size: 13.5px; color: {{t.accText}}; text-decoration: none">Grish T'vok</a><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}">PERSONNAGES</span></li>
+            </ul>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{showEarlier}}" hint-placeholder-val="{{false}}">
+          <div style="display: flex; align-items: center; gap: 9px; padding: 14px 20px 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.label}}"><span aria-hidden="true" style="width: 20px; height: 1px; background: {{t.hair2}}"></span>38 MESSAGES PLUS HAUT</div>
+        </sc-if>
+
+        <sc-if value="{{showEmpty}}" hint-placeholder-val="{{false}}">
+          <div style="padding: 20px; display: flex; flex-direction: column; gap: 11px">
+            <span style="font-size: 13.5px; line-height: 1.55; color: {{t.sec}}">Demandez ce qui vous intrigue : un mot, un passage, ce qui vient des fiches ou de la réplique précédente.</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 7px">
+              <sc-for list="{{suggestions}}" as="g" hint-placeholder-count="3">
+                <button type="button" class="vb" onClick="{{g.pick}}" style="height: 28px; padding: 0 11px; border-radius: 99px; border: 1px solid {{t.chip}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">{{g.label}}</button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <ol aria-label="Échanges" style="list-style: none; margin: 0; padding: 6px 0 20px">
+          <sc-for list="{{msgs}}" as="m" hint-placeholder-count="2">
+            <li style="padding: 11px 20px 3px; display: flex; flex-direction: column; gap: 5px">
+              <span style="display: flex; align-items: baseline; gap: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{m.whoColor}}">{{m.who}}<span style="flex: 1"></span><span style="color: {{t.muted}}">{{m.meta}}</span></span>
+              <sc-if value="{{m.me}}" hint-placeholder-val="{{true}}">
+                <p style="margin: 0; padding: 8px 12px; border-radius: 8px; background: {{t.raised2}}; font-size: 13.5px; line-height: 1.5; color: {{t.strong}}">{{m.text}}</p>
+              </sc-if>
+              <sc-if value="{{m.ai}}" hint-placeholder-val="{{false}}">
+                <sc-for list="{{m.paras}}" as="q" hint-placeholder-count="1">
+                  <p style="margin: 0 0 5px; font-size: 13.5px; line-height: 1.55; color: {{t.body}}">{{q.t}}</p>
+                </sc-for>
+                <sc-if value="{{m.hasSources}}" hint-placeholder-val="{{false}}">
+                  <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 5px">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.label}}">SOURCES</span>
+                    <sc-for list="{{m.sources}}" as="r" hint-placeholder-count="2"><a href="Fiches.dc.html" style="height: 24px; box-sizing: border-box; display: inline-flex; align-items: center; gap: 7px; padding: 0 9px; border-radius: 99px; border: 1px solid {{t.chip}}; font-size: 12px; color: {{t.accText}}; text-decoration: none">{{r.name}}<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}">{{r.cat}}</span></a></sc-for>
+                  </span>
+                </sc-if>
+              </sc-if>
+            </li>
+          </sc-for>
+        </ol>
+
+        <sc-if value="{{pending}}" hint-placeholder-val="{{false}}">
+          <div role="status" style="margin: -14px 20px 20px; display: flex; align-items: center; gap: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.body}}"><span aria-hidden="true" class="ds-pulse" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.accent}}"></span>GPT-6.2 SOL RÉPOND…</div>
+        </sc-if>
+
+        <sc-if value="{{showError}}" hint-placeholder-val="{{false}}">
+          <div role="alert" style="margin: -8px 20px 20px; display: flex; flex-direction: column; gap: 5px; padding-top: 11px; border-top: 1px solid {{t.hair}}">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.err}}">ÉCHEC · LE MODÈLE N'A PAS RÉPONDU</span>
+            <span style="font-size: 13px; line-height: 1.5; color: {{t.body}}">Le modèle n'a pas pu répondre. Votre question est remise dans le champ : vous pouvez réessayer ou la reformuler.</span>
+          </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{showField}}" hint-placeholder-val="{{true}}">
+        <div style="flex: none; border-top: 1px solid {{t.hair}}; padding: 14px 20px; display: flex; flex-direction: column; gap: 9px">
+          <sc-if value="{{showBudget}}" hint-placeholder-val="{{false}}">
+            <div role="status" style="display: flex; flex-direction: column; gap: 7px">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.pend}}">BUDGET MENSUEL ATTEINT · 100 %</span>
+              <span aria-hidden="true" style="height: 2px; border-radius: 2px; background: {{t.pend}}; opacity: 0.85"></span>
+              <span style="font-size: 12.5px; line-height: 1.5; color: {{t.sec}}">Plafond de <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">20,00 $</span> consommé : aucun appel avant le <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">1</span>er décembre. L'échange reste lisible. Le changer dans les <a href="Reglages.dc.html" style="color: {{t.accText}}; text-decoration: none">réglages du budget</a>.</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{showFull}}" hint-placeholder-val="{{false}}">
+            <div role="status" style="display: flex; flex-direction: column; gap: 7px">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.body}}">LIMITE ATTEINTE · 40 / 40 MESSAGES</span>
+              <span style="font-size: 12.5px; line-height: 1.5; color: {{t.sec}}">Cette discussion reste lisible. Pour continuer, en ouvrir une nouvelle : elle repart de la génération, sans cet échange.</span>
+              <button type="button" class="vb" style="align-self: flex-start; height: 32px; display: flex; align-items: center; padding: 0 14px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 13px; cursor: pointer">Nouvelle discussion</button>
+            </div>
+          </sc-if>
+          <label style="display: block">
+            <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{fieldLabel}}</span>
+            <textarea class="dq" ref="{{setField}}" rows="2" value="{{draft}}" onChange="{{onDraft}}" onKeyDown="{{onFieldKey}}" readOnly="{{fieldLocked}}" aria-disabled="{{fieldLocked}}" placeholder="{{placeholder}}" style="display: block; width: 100%; box-sizing: border-box; min-height: 58px; resize: none; padding: 9px 12px; border-radius: 6px; border: 1px solid {{fieldBorder}}; background: {{fieldBg}}; color: {{fieldColor}}; font-family: inherit; font-size: 13.5px; line-height: 1.5; caret-color: {{t.accent}}"></textarea>
+          </label>
+          <div style="display: flex; align-items: center; gap: 14px">
+            <button type="button" onClick="{{send}}" aria-disabled="{{sendOff}}" style="height: 32px; flex: none; display: flex; align-items: center; gap: 9px; padding: 0 14px; border: none; border-radius: 6px; background: {{sendBg}}; color: {{sendColor}}; font-family: inherit; font-size: 13px; font-weight: 600; cursor: {{sendCursor}}">{{sendLabel}}<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.05em; color: {{sendKeyColor}}">CTRL+↵</span></button>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; line-height: 1.5; color: {{t.muted}}">{{costLine}}<br>{{countLine}}</span>
+          </div>
+          <p style="margin: 0; font-size: 12px; line-height: 1.45; color: {{t.sec}}">{{footNote}}</p>
+        </div>
+      </sc-if>
+      <sc-if value="{{noteLocked}}" hint-placeholder-val="{{false}}">
+        <p style="flex: none; margin: 0; padding: 14px 20px; border-top: 1px solid {{t.hair}}; font-size: 12px; line-height: 1.45; color: {{t.sec}}">{{footNote}}</p>
+      </sc-if>
+    </aside>
+  </sc-if>
+
+  <sc-if value="{{paletteOn}}" hint-placeholder-val="{{false}}">
+    <div onClick="{{closePalette}}" aria-hidden="true" style="position: absolute; inset: 0; background: {{t.scrim}}"></div>
+    <div role="dialog" aria-modal="true" aria-label="Chercher, aller à, demander" class="dc-pal" style="position: absolute; left: 380px; top: 56px; width: 680px; box-sizing: border-box; display: flex; flex-direction: column; background: {{t.card}}; border: 1px solid {{t.chip}}; border-radius: 10px; box-shadow: {{t.palShadow}}; overflow: hidden">
+      <div style="height: 54px; flex: none; display: flex; align-items: center; gap: 14px; padding: 0 14px 0 20px; border-bottom: 1px solid {{t.hair2}}">
+        <svg aria-hidden="true" width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="{{t.sec}}" stroke-width="1.4"><circle cx="6.5" cy="6.5" r="5"></circle><path d="M10.2 10.2 L14 14"></path></svg>
+        <input class="dq" role="combobox" aria-expanded="true" aria-controls="ds-results" aria-label="Chercher, aller à ou demander" spellCheck="false" autoComplete="off" value="Que sait-on des Moribandons ?" readOnly="true" style="flex: 1; min-width: 0; height: 100%; border: none; background: transparent; color: {{t.strong}}; font-family: inherit; font-size: 16px; caret-color: {{t.accent}}">
+        <span style="flex: none; height: 22px; display: flex; align-items: center; padding: 0 7px; border-radius: 6px; border: 1px solid {{t.ctrl}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.sec}}">ÉCHAP</span>
+      </div>
+      <div id="ds-results" role="listbox" aria-label="Résultats" style="padding: 0 0 9px">
+        <div role="group" aria-label="Demander">
+          <div style="height: 27px; box-sizing: border-box; display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; padding: 0 20px 6px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.muted}}"><span>DEMANDER</span><span style="letter-spacing: 0.06em">LA QUESTION PART TELLE QUE TAPÉE</span></div>
+          <div role="option" aria-selected="true" onClick="{{askGdd}}" style="min-height: 44px; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 6px 20px; background: {{t.selBg2}}; box-shadow: inset 2px 0 0 {{t.accent}}; cursor: pointer">
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13.5px; color: {{t.strong}}">Demander au GDD</span><span style="font-size: 12px; color: {{t.sec}}">Le modèle répond à partir des fiches trouvées, et les cite.</span></span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}">FICHES</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{t.accText}}">↵</span>
+          </div>
+          <div role="option" aria-selected="false" style="min-height: 44px; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 6px 20px; cursor: pointer">
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13.5px; color: {{t.body}}">Demander comment faire dans l'outil</span><span style="font-size: 12px; color: {{t.sec}}">Le modèle répond à partir des guides et de l'écran ouvert.</span></span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}">GUIDES</span>
+          </div>
+        </div>
+        <div role="group" aria-label="Fiches du GDD">
+          <div style="height: 27px; box-sizing: border-box; display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; padding: 0 20px 6px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.muted}}"><span>FICHES DU GDD</span><span style="letter-spacing: 0.06em">1</span></div>
+          <div role="option" aria-selected="false" style="height: 31px; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 0 20px; cursor: pointer">
+            <span style="flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 9px; white-space: nowrap; overflow: hidden"><span style="flex: none; font-size: 13.5px; color: {{t.body}}"><mark style="background: {{t.hl}}; color: {{t.strong}}; padding: 0 1px">Moribandons</mark></span><span style="min-width: 0; font-size: 12.5px; color: {{t.sec}}; overflow: hidden; text-overflow: ellipsis">créatures artificielles plasmodiques nées d'un programme de recyclage écologique</span></span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}">ESPÈCES</span>
+          </div>
+        </div>
+        <div role="group" aria-label="Commandes">
+          <div style="height: 27px; box-sizing: border-box; display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; padding: 0 20px 6px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.muted}}"><span>COMMANDES</span><span style="letter-spacing: 0.06em">TAPER > POUR LES SEULES COMMANDES</span></div>
+          <div role="option" aria-selected="false" style="height: 31px; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 0 20px; cursor: pointer">
+            <span style="flex: 1; min-width: 0; font-size: 13.5px; color: {{t.body}}">Pourquoi cette réplique ? <span style="color: {{t.sec}}">— Réussite, réplique sélectionnée</span></span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.sec}}">◆ 1</span>
+          </div>
+        </div>
+      </div>
+      <div style="height: 36px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 0 20px; border-top: 1px solid {{t.hair2}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.muted}}">
+        <span><span style="color: {{t.body}}">↑↓</span> NAVIGUER · <span style="color: {{t.body}}">↵</span> DEMANDER · <span style="color: {{t.body}}">ÉCHAP</span> FERMER</span>
+        <span style="flex: 1"></span>
+        <span>COÛT AFFICHÉ DANS LE TIROIR AVANT L'ENVOI</span>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{noteFloating}}" hint-placeholder-val="{{false}}">
+    <div aria-hidden="true" style="position: absolute; left: 252px; right: 0; bottom: 28px; height: 110px; background: {{t.fade}}; pointer-events: none"></div>
+    <p style="position: absolute; left: 292px; right: 260px; bottom: 44px; margin: 0; font-size: 12px; line-height: 1.5; color: {{t.sec}}">{{footNote}}</p>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["nuit","papier"],"default":"nuit"},"etat":{"editor":"enum","options":["conversation","premier","invite","lecture","budget","plein","erreur","sans-generation","palette","gdd"],"default":"conversation"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const p0 = props || this.props || {};
+    this.ID = 'node-3836';
+    this.scrollEl = null;
+    this.colEl = null;
+    this.bodyEl = null;
+    this.fieldEl = null;
+    this.setScroll = (el) => { this.scrollEl = el; };
+    this.setCol = (el) => { this.colEl = el; };
+    this.setBody = (el) => { this.bodyEl = el; };
+    this.setField = (el) => { this.fieldEl = el; };
+    this.T = {
+      nuit: {
+        app: '#17171b', input: '#1c1c22', raised: '#2a2a33', raised2: 'rgba(255,255,255,0.05)', card: '#1f1f26', hair: 'rgba(255,255,255,0.06)', hair2: 'rgba(255,255,255,0.09)',
+        chip: 'rgba(255,255,255,0.12)', chip2: 'rgba(255,255,255,0.22)', strong: '#f2f2f5', body: '#dcdce4', row: '#d5d5dd',
+        dia: '#f0efe9', sec: '#9a9aa4', muted: '#8a8a95', label: '#84848f', accent: '#4f7fff', accText: '#8fb0ff',
+        selBg: 'rgba(79,127,255,0.08)', selBg2: 'rgba(79,127,255,0.10)', insBg: 'rgba(79,127,255,0.2)', delLine: 'rgba(154,154,164,0.8)', hl: 'rgba(143,176,255,0.26)',
+        fill: '#3d6ae8', ok: '#27ae60', pend: '#f5a623', err: '#ff6b6b', ctrl: '#2e2e36', spk: '#5fb8ac', onSpk: '#101013', rcrit: '#3d9bff',
+        hover: 'rgba(255,255,255,0.04)', scrim: 'rgba(8,8,11,0.64)', fade: 'linear-gradient(to bottom, rgba(23,23,27,0), rgba(23,23,27,0.96) 55%)',
+        drawerShadow: '-24px 0 48px rgba(0,0,0,0.45), -1px 0 0 rgba(0,0,0,0.3)', palShadow: '0 28px 72px rgba(0,0,0,0.6)'
+      },
+      papier: {
+        app: '#f5f2ea', input: '#fbfaf6', raised: '#ebe6da', raised2: '#efebe1', card: '#fbfaf6', hair: 'rgba(28,25,20,0.08)', hair2: 'rgba(28,25,20,0.13)',
+        chip: 'rgba(28,25,20,0.16)', chip2: 'rgba(28,25,20,0.30)', strong: '#1b1916', body: '#2c2924', row: '#2c2924',
+        dia: '#1f1c18', sec: '#5c574d', muted: '#625d53', label: '#6b665b', accent: '#2f5bd3', accText: '#2a52c0',
+        selBg: 'rgba(47,91,211,0.08)', selBg2: 'rgba(47,91,211,0.10)', insBg: 'rgba(47,91,211,0.14)', delLine: 'rgba(92,87,77,0.8)', hl: 'rgba(47,91,211,0.16)',
+        fill: '#2f5bd3', ok: '#1d7a44', pend: '#9a5b06', err: '#b83232', ctrl: '#d6d0c3', spk: '#1f7a72', onSpk: '#ffffff', rcrit: '#1f5fbf',
+        hover: 'rgba(28,25,20,0.04)', scrim: 'rgba(27,25,22,0.30)', fade: 'linear-gradient(to bottom, rgba(245,242,234,0), rgba(245,242,234,0.96) 55%)',
+        drawerShadow: '-18px 0 40px rgba(28,25,20,0.12), -1px 0 0 rgba(28,25,20,0.05)', palShadow: '0 24px 64px rgba(28,25,20,0.22)'
+      }
+    };
+    this.OUT = ['É. CRIT', 'ÉCHEC', 'RÉUSSITE', 'R. CRIT'];
+    this.START = {
+      title: 'Ouverture',
+      line: "Ah. Une présence qui marche sur le monde sans y laisser d'empreinte. Je m'appelle Grish T'vok, caravane-atelier ambulante, collectionneur de choses qui ont mal tourné. *Il incline légèrement sa masse, des étincelles s'échappant d'une trappe de son torse.* Vos anneaux de lumière et cette distance rituelle... pas commun. Je n'ai guère d'oreille pour les prophéties, mais j'entends la matière. Si vos objets pleurent, je peux les écouter et tenter d'en recoudre la mélodie. Et si vous portez des fissures qui se taisent, je ne les brise pas, je les arrange. Dites, Maîtresse, acceptez-vous qu'un Moribandon touche ce qui vous entoure ?",
+      ch: [
+        { t: "Dans la tapisserie de l'existence, vos outils peuvent-ils suturer les fissures sans effacer ce qu'elles portent? Je n'offre pas ma mémoire, mais je cherche une réparation qui respecte les cicatrices.", test: 'Raison+Artisanat:12', tr: [['Empathique', 5]], resp: 1, out: true },
+        { t: "Je ne cherche pas de confidences. Répare cette caravane, et je te rendrai un service : un artefact scellé, pas de questions. Est-ce que tu sais travailler avec des reliques anciennes ?", test: 'Raison+Artisanat:14', tr: [['Loyal', 5]], inf: 1 },
+        { t: "Garde tes mains pour tes villages. Je n'ai nul besoin d'un charlatan des déchets. Pars, avant que je ne te rende ta misère.", test: 'Force+Commandement:11', tr: [['Orgueilleuse', 5]], inf: -1, resp: -1, out: true },
+        { t: '' }
+      ]
+    };
+    this.REAL = "Ha. Vos mots ont la précision d'une lime fine. Vous ne cédez pas la toile, Maîtresse, vous la confiez à quelqu'un qui respecte la trame des cicatrices.\n\nJe peux entendre la plainte d'un objet et la fractale de son histoire — pas pour l'effacer, mais pour recoudre ses fibres là où elles craquent. Je poserai des fils de lumière et de rouille stabilisée : ils consolident, ils tiennent, et ils portent les marques de la blessure comme une signature. Quand j'aurai fini, l'objet fonctionnera mieux, sans que son passé ne soit nié. En prime, une résonance légère liera ce fragment à ma caravane ; je pourrai encore entendre ses murmures si jamais il réclame attention. Acceptez-vous que je commence ?";
+    const v2 = "Ha. Vos mots ont la précision d'une lime fine, et la patience de celle qui sait ce que coûte une entaille. Vous ne cédez pas la toile, Maîtresse ; vous la confiez, avec prudence, à quelqu'un qui respecte la trame des cicatrices et le silence qu'elles gardent.\n\nJe peux entendre la plainte d'un objet, la longue fractale de son histoire, les années déposées dans ses fibres comme la poussière d'un atelier fermé — pas pour l'effacer, jamais pour l'effacer, mais pour recoudre ses fibres là où elles craquent et chantent faux. Je poserai des fils de lumière et de rouille stabilisée : ils consolident, ils tiennent, ils apaisent, et ils portent les marques de la blessure comme une signature que l'on montre sans honte. Quand j'aurai fini, l'objet fonctionnera mieux qu'au premier jour, sans que son passé ne soit nié ni oublié. En prime, une résonance légère liera ce fragment à ma caravane ; je pourrai encore entendre ses murmures, de loin, si jamais il réclame attention. Acceptez-vous que je commence ?";
+    this.GEN = v2.replace('la toile, Maîtresse ;', 'la toile, voyageuse ;').replace("que l'on montre sans honte", 'dont on ne rougit pas');
+    this.NODE = {
+      title: 'Réussite',
+      ch: [
+        { t: 'Oui. Réparez-les — mais que les cicatrices restent visibles.', inf: 1, resp: 1 },
+        { t: "Expliquez votre rituel. Comment garantissez-vous que la mémoire n'est pas effacée ?", test: 'Raison+Artisanat:10' },
+        { t: "Non. Je préfère laisser la tapisserie telle qu'elle est.", resp: -1 },
+        { t: '' }
+      ]
+    };
+    this.Q1 = "Pourquoi « fils de lumière et de rouille stabilisée » ? Rien dans la scène ne parle de rouille.";
+    this.A1 = [
+      "Ça vient de la fiche de Grish T'vok : il répare les objets « en incorporant parfois sa propre matière », et sa caravane est une extension de lui-même. La rouille stabilisée, c'est son corps mis dans la réparation ; la lumière répond aux anneaux d'Uresaïr, nommés dans l'ouverture.",
+      "Ce lien entre les deux, je le reconstruis : je relis le contexte et la réplique de 11:02, pas le raisonnement qui les a produits."
+    ];
+    this.Q2 = "Et la résonance avec la caravane ? Le brief ne la demandait pas.";
+    this.A2 = [
+      "Non, le brief ne la demandait pas. Elle prolonge la même ligne de la fiche : si la caravane fait partie de Grish, ce qu'il y coud garde un lien avec elle.",
+      "Vous l'avez gardée dans votre version. Si vous la retirez, la réponse 01 (« que les cicatrices restent visibles ») tient toujours : rien d'autre dans la scène n'en dépend."
+    ];
+    this.Q3 = "Pourquoi finir sur une question ?";
+    this.A3 = [
+      "Le contexte de la génération demande de laisser le choix au joueur à la fin de chaque réplique ; la question « Acceptez-vous que je commence ? » lui rend la main avant le rituel.",
+      "C'est une lecture du contexte, pas un souvenir de 11:02."
+    ];
+    this.GDDQ = 'Que sait-on des Moribandons ?';
+    this.GDDA = [
+      "Ce sont des créatures artificielles plasmodiques, nées d'un programme de recyclage écologique des Raephon dans les Plaines Rouillées, devenues une espèce à part entière à l'extinction de leurs créateurs.",
+      "Leur corps, asymétrique et sans organe vital central, se reconfigure sans cesse : leur identité tient à leur composition plus qu'à leur forme. Ils transforment les composés toxiques en énergie et absorbent les matériaux qu'ils traversent.",
+      "Grish T'vok en est un : il répare les objets en y mettant parfois sa propre matière."
+    ];
+    this.state = {
+      etat: this.norm(p0.etat),
+      diffOpen: p0.etat === 'premier',
+      reflOpen: p0.etat === 'conversation',
+      draft: p0.etat === 'erreur' ? this.Q3 : '',
+      extra: [],
+      pending: false,
+      palette: p0.etat === 'palette',
+      drawer: p0.etat !== 'palette' && p0.etat !== 'sans-generation'
+    };
+    this.onKey = (ev) => {
+      if ((ev.ctrlKey || ev.metaKey) && (ev.key === 'k' || ev.key === 'K')) { ev.preventDefault(); this.setState({ palette: true }); return; }
+      if (ev.key !== 'Escape') return;
+      if (this.state.palette) this.setState({ palette: false });
+      else if (this.state.drawer) this.setState({ drawer: false });
+    };
+  }
+
+  norm(e) {
+    const ok = ['conversation', 'premier', 'invite', 'lecture', 'budget', 'plein', 'erreur', 'sans-generation', 'palette', 'gdd'];
+    return ok.indexOf(e) >= 0 ? e : 'conversation';
+  }
+
+  componentDidMount() {
+    window.addEventListener('keydown', this.onKey);
+    this.lastPropEtat = this.props.etat;
+    this.t1 = setTimeout(() => this.layout(), 60);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => this.layout());
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.onKey);
+    clearTimeout(this.t1);
+    clearTimeout(this.t2);
+  }
+
+  componentDidUpdate() {
+    const pe = this.props.etat;
+    if (this.lastPropEtat !== pe) {
+      this.lastPropEtat = pe;
+      const e = pe === 'palette' ? 'conversation' : this.norm(pe);
+      this.setState({ etat: e, diffOpen: e === 'premier', reflOpen: e === 'conversation', extra: [], pending: false, draft: e === 'erreur' ? this.Q3 : '', palette: pe === 'palette', drawer: pe !== 'palette' && pe !== 'sans-generation' });
+      setTimeout(() => this.layout(), 40);
+    }
+    const n = this.state.extra.length + (this.state.pending ? 1 : 0);
+    if (this.lastExtra !== n) {
+      this.lastExtra = n;
+      if (n > 0 && this.bodyEl) this.bodyEl.scrollTop = this.bodyEl.scrollHeight;
+    }
+  }
+
+  layout() {
+    const box = this.scrollEl;
+    const col = this.colEl;
+    if (!box || !col) return;
+    const a = col.querySelector('[data-block="' + this.ID + '"]');
+    if (a) box.scrollTop = Math.max(0, a.offsetTop - 20);
+    const e = this.state.etat;
+    if (this.bodyEl && (e === 'erreur' || e === 'budget' || e === 'plein')) this.bodyEl.scrollTop = this.bodyEl.scrollHeight;
+  }
+
+  segs(text) {
+    const out = [];
+    const re = /\*([^*]+)\*/g;
+    let last = 0;
+    let m;
+    while ((m = re.exec(text))) {
+      const before = text.slice(last, m.index).trim();
+      if (before) out.push({ t: before, it: false, rm: true });
+      out.push({ t: m[1].trim(), it: true, rm: false });
+      last = re.lastIndex;
+    }
+    const rest = text.slice(last).trim();
+    if (rest) out.push({ t: rest, it: false, rm: true });
+    return out.map((s, i) => Object.assign({}, s, { t: i < out.length - 1 ? s.t + ' ' : s.t }));
+  }
+
+  paras(line) {
+    return line.split(/\n\s*\n/).map((raw) => {
+      const p = raw.trim();
+      const whole = /^\*[^*]+\*$/.test(p);
+      return whole ? { dir: true, say: false, text: p.replace(/\*/g, ''), segs: [] } : { dir: false, say: true, text: '', segs: this.segs(p) };
+    });
+  }
+
+  chips(c) {
+    const out = [];
+    (c.tr || []).forEach((x) => out.push({ label: x[0].toUpperCase() + ' ≥ ' + x[1] }));
+    if (c.test) {
+      const m = /^([^+]+)\+([^:]+):(\d+)$/.exec(c.test);
+      out.push({ label: m ? 'TEST ' + m[2].toUpperCase() + ' · DD ' + m[3] : 'TEST ' + c.test });
+    }
+    const sign = (v) => (v > 0 ? '+' + v : '−' + Math.abs(v));
+    if (c.resp) out.push({ label: 'RESPECT ' + sign(c.resp) });
+    if (c.inf) out.push({ label: 'INFLUENCE ' + sign(c.inf) });
+    return out;
+  }
+
+  choiceRows(list, selIdx, t) {
+    const colors = [t.err, t.err, t.ok, t.rcrit];
+    return list.map((c, i) => {
+      const isSel = selIdx === i;
+      const empty = !c.t;
+      let meta = 'SUITE À ÉCRIRE';
+      let metaColor = t.muted;
+      if (empty) { meta = '▲ RÉPONSE VIDE'; metaColor = t.pend; }
+      else if (c.test && c.out) meta = isSel ? 'RÉUSSITE' : '4 ISSUES · 4 ÉCRITES';
+      else if (c.test) meta = '4 ISSUES · À ÉCRIRE';
+      const outs = isSel && c.out ? this.OUT.map((label, oi) => {
+        const on = oi === 2;
+        return { label: label, color: on ? t.strong : colors[oi], border: on ? colors[oi] : t.chip, bg: on ? t.raised : 'transparent' };
+      }) : [];
+      const chips = this.chips(c);
+      return {
+        num: String(i + 1).padStart(2, '0'),
+        empty: empty, full: !empty, text: c.t,
+        chips: chips, hasChips: chips.length > 0,
+        meta: meta, metaColor: metaColor,
+        textColor: isSel ? t.strong : t.body,
+        bg: isSel ? t.selBg : 'transparent',
+        rail: isSel ? 'inset 2px 0 0 ' + t.accent : 'none',
+        showOutcomes: outs.length > 0, outs: outs
+      };
+    });
+  }
+
+  words(text) {
+    return (text.match(/\S+/g) || []).filter((w) => /[\wÀ-ÿ]/.test(w)).length;
+  }
+
+  diff(a, b) {
+    const tok = (s) => s.replace(/\n\s*\n/g, ' ¶ ').match(/\S+\s*/g) || [];
+    const A = tok(a);
+    const B = tok(b);
+    const n = A.length;
+    const m = B.length;
+    const key = (x) => x.trim().toLowerCase().replace(/[.,;:!?…«»"]+/g, '') || x.trim();
+    const L = [];
+    for (let i = 0; i <= n; i += 1) L.push(new Array(m + 1).fill(0));
+    for (let i = n - 1; i >= 0; i -= 1) {
+      for (let j = m - 1; j >= 0; j -= 1) {
+        L[i][j] = key(A[i]) === key(B[j]) ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+      }
+    }
+    const ops = [];
+    let i = 0;
+    let j = 0;
+    while (i < n && j < m) {
+      if (key(A[i]) === key(B[j])) { ops.push(['eq', B[j]]); i += 1; j += 1; }
+      else if (L[i + 1][j] >= L[i][j + 1]) { ops.push(['del', A[i]]); i += 1; }
+      else { ops.push(['ins', B[j]]); j += 1; }
+    }
+    while (i < n) { ops.push(['del', A[i]]); i += 1; }
+    while (j < m) { ops.push(['ins', B[j]]); j += 1; }
+    const paras = [[]];
+    let dels = 0;
+    let adds = 0;
+    ops.forEach((op) => {
+      const k = op[0];
+      const x = op[1];
+      if (x.trim() === '¶') { if (k !== 'del') paras.push([]); return; }
+      const isWord = /[\wÀ-ÿ]/.test(x);
+      if (k === 'del' && isWord) dels += 1;
+      if (k === 'ins' && isWord) adds += 1;
+      const cur = paras[paras.length - 1];
+      const last = cur[cur.length - 1];
+      if (last && last.k === k) last.t += x;
+      else cur.push({ k: k, t: x });
+    });
+    const out = paras.filter((p) => p.length).map((p) => {
+      const segs = [];
+      p.forEach((s) => {
+        if (s.k === 'eq') { segs.push({ t: s.t, eq: true, del: false, ins: false }); return; }
+        const body = s.t.replace(/\s+$/, '');
+        const tail = s.t.slice(body.length);
+        segs.push({ t: body, eq: false, del: s.k === 'del', ins: s.k === 'ins' });
+        if (tail) segs.push({ t: ' ', eq: true, del: false, ins: false });
+      });
+      return { segs: segs };
+    });
+    return { paras: out, dels: dels, adds: adds };
+  }
+
+  me(text, time, t) {
+    return { me: true, ai: false, who: 'VOUS', whoColor: t.sec, meta: time, text: text, paras: [], hasSources: false, sources: [] };
+  }
+
+  ai(paras, meta, t, sources) {
+    return { me: false, ai: true, who: 'GPT-6.2 SOL', whoColor: t.sec, meta: meta, text: '', paras: paras.map((x) => ({ t: x })), hasSources: Boolean(sources), sources: sources || [] };
+  }
+
+  send(text) {
+    const q = (text || '').trim();
+    if (!q || this.state.pending) return;
+    const e = this.state.etat;
+    if (['invite', 'lecture', 'budget', 'plein'].indexOf(e) >= 0) return;
+    if (e === 'erreur') {
+      this.setState({ etat: 'conversation', extra: [{ q: q }], draft: '', pending: true });
+    } else {
+      this.setState({ extra: this.state.extra.concat([{ q: q }]), draft: '', pending: true });
+    }
+    clearTimeout(this.t2);
+    this.t2 = setTimeout(() => {
+      const ex = this.state.extra.slice();
+      if (ex.length) ex[ex.length - 1] = Object.assign({}, ex[ex.length - 1], { a: true });
+      this.setState({ extra: ex, pending: false });
+    }, 1500);
+  }
+
+  renderVals() {
+    const t = this.T[this.props.theme === 'papier' ? 'papier' : 'nuit'];
+    const e = this.state.etat;
+    const drawer = this.state.drawer;
+    const isGdd = e === 'gdd';
+    const offWhy = e === 'sans-generation';
+    const guest = e === 'invite';
+    const reader = e === 'lecture';
+    const locked = guest || reader;
+
+    const sBlock = {
+      key: 'START', hasLink: false, link: '', title: this.START.title,
+      paras: this.paras(this.START.line), who: 'URESAÏR — 4 RÉPONSES',
+      choices: this.choiceRows(this.START.ch, 0, t),
+      wm: '0', wp: '0', wbg: 'transparent', wsh: 'none',
+      hasWhy: false, whyOn: false, whyOff: false, showOffNote: false, hasMark: false
+    };
+    const nodeActive = drawer && !isGdd;
+    const hasMark = !offWhy && !locked;
+    const markCount = '1';
+    const nBlock = {
+      key: this.ID, hasLink: true, link: 'RÉPONSE 01 · RÉUSSITE', title: this.NODE.title,
+      paras: this.paras(this.REAL), who: 'URESAÏR — 4 RÉPONSES',
+      choices: this.choiceRows(this.NODE.ch, -1, t),
+      wm: '0 -14px', wp: '14px 14px 1px', wbg: t.selBg, wsh: 'inset 2px 0 0 ' + t.accent,
+      hasWhy: true, whyOn: !offWhy, whyOff: offWhy, showOffNote: offWhy,
+      drawerOpen: nodeActive, hasMark: hasMark, markCount: markCount,
+      whyBorder: nodeActive ? t.accent : t.chip, whyBg: nodeActive ? t.raised : 'transparent', whyColor: nodeActive ? t.strong : t.body,
+      markColor: nodeActive ? t.accText : t.muted,
+      openWhy: () => this.setState({ drawer: !(this.state.drawer && this.state.etat !== 'gdd'), etat: this.state.etat === 'gdd' ? 'conversation' : this.state.etat, palette: false })
+    };
+
+    const d = this.diff(this.GEN, this.REAL);
+    const msgs = [];
+    let used = 0;
+    if (isGdd) {
+      msgs.push(this.me(this.GDDQ, '11:40', t));
+      msgs.push(this.ai(this.GDDA, '11:40 · COÛT NON MESURÉ', t, [{ name: 'Moribandons', cat: 'ESPÈCES' }, { name: "Grish T'vok", cat: 'PERSONNAGES' }]));
+      used = 2;
+    } else if (e === 'plein') {
+      msgs.push(this.me(this.Q3, '12:52', t));
+      msgs.push(this.ai(this.A3, '12:52 · 0,005 $', t));
+      used = 40;
+    } else if (e === 'conversation' || e === 'budget' || e === 'erreur') {
+      msgs.push(this.me(this.Q1, '11:31', t));
+      msgs.push(this.ai(this.A1, '11:31 · 0,03 $', t));
+      msgs.push(this.me(this.Q2, '11:33', t));
+      msgs.push(this.ai(this.A2, '11:33 · 0,005 $', t));
+      used = 4;
+    }
+    this.state.extra.forEach((x) => {
+      msgs.push(this.me(x.q, '11:41', t));
+      used += 1;
+      if (x.a) {
+        msgs.push(this.ai(isGdd
+          ? ["Les fiches trouvées n'en disent pas plus que ce qui précède ; je ne complète pas ce qu'elles ne disent pas."]
+          : ["Je relis le contexte et la réplique, pas mon raisonnement de 11:02 : ce qui suit est une reconstruction.", "Dans le contexte envoyé, ce passage s'appuie sur la fiche de Grish T'vok et sur le brief de la scène ; le reste reprend les mots de la réponse 01 d'Uresaïr."],
+          '11:41 · 0,005 $', t, isGdd ? [{ name: 'Moribandons', cat: 'ESPÈCES' }] : null));
+        used += 1;
+      }
+    });
+    if (e === 'erreur') used = 4;
+
+    const fieldLocked = locked || e === 'budget' || e === 'plein' || this.state.pending;
+    const showField = !locked;
+    const draft = this.state.draft;
+    const firstTurn = e === 'premier' && msgs.length === 0;
+    let costLine = 'PROCHAIN TOUR ≈ 0,005 $';
+    if (firstTurn) costLine = 'PREMIER TOUR ≈ 0,03 $';
+    if (isGdd) costLine = 'COÛT ESTIMÉ ICI AVANT L\'ENVOI';
+    if (e === 'budget') costLine = 'BLOQUÉ AVANT L\'APPEL';
+    if (e === 'plein') costLine = 'AUCUN NOUVEAU TOUR ICI';
+    if (this.state.pending) costLine = 'CHAMP VERROUILLÉ JUSQU\'À LA RÉPONSE';
+    const sendOff = fieldLocked;
+    let sendLabel = 'Envoyer';
+    if (e === 'erreur') sendLabel = 'Réessayer';
+
+    let kindLabel = 'DISCUSSION · RÉPLIQUE';
+    let title = 'Pourquoi cette réplique ?';
+    let subline = "GRISH T'VOK · RÉUSSITE · GÉNÉRÉE À 11:02";
+    if (isGdd) { kindLabel = 'QUESTION AU GDD'; title = this.GDDQ; subline = 'SUJET GDD · 2 FICHES TROUVÉES · GPT-6.2 SOL'; }
+
+    let lockLabel = '';
+    let lockText = '';
+    let lockHint = '';
+    let lockLink = '';
+    if (guest) {
+      lockLabel = 'LECTURE SEULE · MODE INVITÉ';
+      lockText = "Discuter avec l'IA demande un compte : la discussion rejoue la génération de cette réplique, avec les consignes et le contexte de son auteur.";
+      lockHint = "Un invité lit la scène ; il n'ouvre pas de discussion.";
+      lockLink = 'Se connecter pour discuter';
+    }
+    if (reader) {
+      lockLabel = 'LECTURE SEULE · SCÈNE PARTAGÉE';
+      lockText = "Vous pouvez lire cette scène, pas la modifier. Ouvrir une discussion rejoue le prompt de la génération (consignes et contexte de l'auteur) : il faut le droit de modifier la scène.";
+      lockHint = 'Demandez ce droit à la personne qui vous a partagé la scène.';
+      lockLink = '';
+    }
+
+    const notes = {
+      conversation: "Exemple : échanges, heures, texte de 11:02 (1re version du board Versions), résumé de réflexion. Coûts : ordre de grandeur de conversations-ia.md. Réplique actuelle réelle.",
+      premier: "Exemple : texte de 11:02 et heures. Coût du premier tour : ordre de grandeur de conversations-ia.md. Le résumé manque environ quatre fois sur cinq : le tiroir le dit.",
+      invite: "Le back-end refuse d'ouvrir une discussion à un invité (require_non_guest) et une discussion est privée à son auteur : un invité n'en a donc aucune à relire.",
+      lecture: "Le back-end exige le droit de modifier le dialogue pour ouvrir une discussion (_require_edit, 403 dialogue_access_denied) : le tiroir dit pourquoi au lieu d'afficher l'erreur.",
+      budget: "Exemple : plafond 20,00 $ (comme le board Etats). Réponse 429 QUOTA_EXCEEDED : bloqué avant l'appel, jamais après.",
+      plein: "40 messages par discussion (MAX_CONVERSATION_MESSAGES, 409 conversation_full) : 20 questions, 20 réponses. Échange affiché : exemple.",
+      erreur: "Réponse 502 llm_error : message générique, jamais le texte brut de l'erreur ; la question revient dans le champ. Échanges : exemple.",
+      'sans-generation': "Réel pour cette scène : générée avant le suivi par appel du 19 novembre, aucune de ses répliques n'a de génération rattachée. Les autres états montrent une réplique générée après.",
+      palette: "Exemple : question tapée dans la palette. Les sujets GDD et aide (gdd_query, ui_help) sont à écrire (story 20.22) ; le coût n'est pas encore mesuré, d'où l'absence de chiffre.",
+      gdd: "Réponse rédigée pour la planche d'après les fiches réelles Moribandons et Grish T'vok. Sujet gdd_query à écrire (story 20.22) : coût non mesuré, aucun chiffre affiché."
+    };
+    const noteKey = this.state.palette ? 'palette' : e;
+
+    return {
+      t: t,
+      blocks: [sBlock, nBlock],
+      isGuest: guest,
+      accountInitial: guest ? '?' : 'A',
+      canEdit: !locked,
+      readOnly: locked,
+      drawerOn: drawer,
+      drawerAria: isGdd ? 'Question au GDD' : 'Discussion sur la réplique',
+      paletteOn: this.state.palette,
+      kindLabel: kindLabel,
+      title: title,
+      subline: subline,
+      isNode: !isGdd,
+      showLock: locked,
+      lockLabel: lockLabel, lockText: lockText, lockHint: lockHint, lockLink: lockLink, lockHasLink: Boolean(lockLink),
+      showTrace: !locked && !isGdd,
+      showSources: isGdd,
+      diffOpen: this.state.diffOpen,
+      diffChevron: this.state.diffOpen ? '▾' : '▸',
+      diffMax: e === 'premier' ? 196 : 128,
+      diffParas: d.paras,
+      delCount: String(d.dels),
+      insCount: String(d.adds),
+      hasRefl: e === 'conversation' || e === 'erreur',
+      noRefl: !(e === 'conversation' || e === 'erreur'),
+      reflOpen: this.state.reflOpen,
+      reflChevron: this.state.reflOpen ? '▾' : '▸',
+      showEarlier: e === 'plein',
+      showEmpty: firstTurn && !this.state.pending,
+      suggestions: ['Qu\'est-ce qui vient des fiches ?', 'Pourquoi « Maîtresse » ?', 'Pourquoi finir sur une question ?'].map((g) => ({ label: g, pick: () => this.send(g) })),
+      msgs: msgs,
+      pending: this.state.pending,
+      showError: e === 'erreur',
+      showField: showField,
+      showBudget: e === 'budget',
+      showFull: e === 'plein',
+      fieldLabel: isGdd ? 'Question au GDD' : "Question à l'IA sur cette réplique",
+      draft: draft,
+      fieldLocked: fieldLocked,
+      fieldBorder: fieldLocked ? t.hair2 : t.ctrl,
+      fieldBg: fieldLocked ? 'transparent' : t.input,
+      fieldColor: fieldLocked ? t.muted : t.strong,
+      placeholder: fieldLocked ? (e === 'budget' ? 'Budget atteint : envoi impossible' : e === 'plein' ? 'Limite atteinte : envoi impossible' : '') : (isGdd ? 'Poser une autre question au GDD…' : 'Demander à l\'IA, à propos de cette réplique…'),
+      sendOff: sendOff,
+      sendLabel: sendLabel,
+      sendBg: sendOff ? t.raised : t.fill,
+      sendColor: sendOff ? t.muted : '#ffffff',
+      sendKeyColor: sendOff ? t.label : '#ffffff',
+      sendCursor: sendOff ? 'not-allowed' : 'pointer',
+      costLine: costLine,
+      countLine: used + ' / 40 MESSAGES',
+      footNote: notes[noteKey],
+      noteFloating: !drawer || this.state.palette,
+      noteLocked: drawer && !this.state.palette && locked,
+      setScroll: this.setScroll,
+      setCol: this.setCol,
+      setBody: this.setBody,
+      setField: this.setField,
+      onDraft: (ev) => this.setState({ draft: ev && ev.target ? ev.target.value : '' }),
+      onFieldKey: (ev) => { if ((ev.ctrlKey || ev.metaKey) && ev.key === 'Enter') { ev.preventDefault(); this.send(draft); } },
+      send: () => this.send(draft),
+      toggleDiff: () => this.setState({ diffOpen: !this.state.diffOpen }),
+      toggleRefl: () => this.setState({ reflOpen: !this.state.reflOpen }),
+      closeDrawer: () => this.setState({ drawer: false }),
+      openPalette: () => this.setState({ palette: true }),
+      closePalette: () => this.setState({ palette: false }),
+      askGdd: () => this.setState({ palette: false, drawer: true, etat: 'gdd', extra: [], pending: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

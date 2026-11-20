@@ -6,6 +6,11 @@ paths:
 ---
 # Refonte UI 2026 — la maquette est dans le dépôt
 
+> ⚠️ **Remplacée écran par écran par la refonte « Scène »** (validée le 2026-11-20, Epic 20 prioritaire). Pour tout
+> écran repris par une story de l'epic 20, la source de vérité est `docs/design/refonte-scene/README.md`, ses boards
+> et la règle `.claude/rules/ui_refonte_scene.md`. Cette maquette ne vaut plus que pour sa charte (couleurs, polices,
+> filets, un seul bouton bleu) et pour les écrans qu'aucune story livrée de l'epic 20 n'a encore repris.
+
 ## Source de vérité
 
 `docs/design/refonte-ui-2026/` :
