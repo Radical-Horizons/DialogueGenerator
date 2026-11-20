@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { theme } from '../../theme'
 import { getAllShortcuts, formatShortcut } from '../../hooks/useKeyboardShortcuts'
+import { GENERAL_SHORTCUTS, collectHelpShortcuts, type ShortcutHelpEntry } from './generalShortcuts'
 import {
   redesignFont,
   redesignHairline,
@@ -29,39 +30,12 @@ export interface KeyboardShortcutsHelpProps {
   onClose: () => void
 }
 
-const DEFAULT_SHORTCUTS = [
-  { key: 'ctrl+enter', description: 'Générer un dialogue' },
-  { key: 'alt+s', description: 'Échanger les personnages (swap)' },
-  { key: 'ctrl+k', description: 'Ouvrir la palette de commandes' },
-  { key: '/', description: 'Filtrer dans le panneau de gauche' },
-  { key: 'ctrl+e', description: 'Exporter le dialogue Unity' },
-  { key: 'ctrl+n', description: 'Nouveau dialogue (réinitialiser)' },
-  { key: 'ctrl+,', description: 'Ouvrir les options' },
-  { key: 'escape', description: 'Fermer les modals/panels' },
-  { key: 'ctrl+/', description: 'Afficher cette aide' },
-  { key: 'ctrl+1', description: 'Naviguer vers Dashboard' },
-  { key: 'ctrl+2', description: 'Naviguer vers Dialogues Unity' },
-  { key: 'ctrl+3', description: 'Naviguer vers Usage/Statistiques' },
-]
-
 export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelpProps) {
-  const [shortcuts, setShortcuts] = useState(DEFAULT_SHORTCUTS)
+  const [shortcuts, setShortcuts] = useState<readonly ShortcutHelpEntry[]>(GENERAL_SHORTCUTS)
 
   useEffect(() => {
     if (isOpen) {
-      // Récupérer les raccourcis dynamiques enregistrés
-      const dynamicShortcuts = getAllShortcuts()
-      const combined = [...DEFAULT_SHORTCUTS, ...dynamicShortcuts]
-      
-      // Dédupliquer par key (garder la première occurrence)
-      const unique = new Map<string, { key: string; description: string }>()
-      combined.forEach(s => {
-        if (!unique.has(s.key)) {
-          unique.set(s.key, s)
-        }
-      })
-      
-      setShortcuts(Array.from(unique.values()))
+      setShortcuts(collectHelpShortcuts(getAllShortcuts()))
     }
   }, [isOpen])
 

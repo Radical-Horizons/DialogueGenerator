@@ -41,7 +41,8 @@ vi.mock('../utils/graphExport', () => ({
   exportGraphToSVG: vi.fn(),
 }))
 
-vi.mock('../hooks/useKeyboardShortcuts', () => ({
+vi.mock('../hooks/useKeyboardShortcuts', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../hooks/useKeyboardShortcuts')>()),
   useKeyboardShortcuts: () => undefined,
 }))
 

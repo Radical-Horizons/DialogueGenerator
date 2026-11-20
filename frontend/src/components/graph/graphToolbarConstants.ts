@@ -21,6 +21,20 @@ export const MANUAL_NODE_STEP_Y = MANUAL_NODE_STEP / 2
 /** Longueur de l'escalier de nœuds manuels : au-delà, il repart du centre de la vue. */
 export const MANUAL_NODE_CASCADE_LENGTH = 6
 
+/**
+ * Touches des raccourcis du graphe : `useGraphToolbar` les enregistre, l'aide « ? » et les
+ * infobulles les affichent via `formatShortcut`. Une seule source, sinon l'aide diverge
+ * (elle annonçait Ctrl+F alors que la recherche était sur Ctrl+Shift+F). Ctrl+F reste au
+ * navigateur.
+ */
+export const GRAPH_SHORTCUT_KEYS = {
+  search: 'ctrl+shift+f',
+  filters: 'ctrl+alt+f',
+  jumpToNode: 'ctrl+j',
+  aiGeneration: 'ctrl+g',
+  fitView: 'ctrl+0',
+} as const
+
 /** Au-dessus des modales graphe (10001) : tooltip raccourcis en portail. */
 export const GRAPH_SHORTCUTS_TOOLTIP_Z = 10050
 export const GRAPH_SHORTCUTS_TOOLTIP_GAP_PX = 6

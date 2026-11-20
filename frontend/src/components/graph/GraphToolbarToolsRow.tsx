@@ -10,9 +10,13 @@ import { GraphToolbarShortcutsButton } from './GraphToolbarShortcutsButton'
 import { GraphToolbarLayoutDropdown } from './GraphToolbarLayoutDropdown'
 import { GraphToolbarQualityDropdown } from './GraphToolbarQualityDropdown'
 import { graphToolbarTextEntryStyle } from './graphToolbarTextEntry'
+import { GRAPH_SHORTCUT_KEYS } from './graphToolbarConstants'
+import { formatShortcut } from '../../hooks/useKeyboardShortcuts'
 import type { GraphToolbarToolsRowProps } from './graphToolbarTypes'
 
 export type { GraphToolbarToolsRowProps } from './graphToolbarTypes'
+
+const SEARCH_BUTTON_TITLE = `Rechercher dans le graphe (${formatShortcut(GRAPH_SHORTCUT_KEYS.search)})`
 
 /** Groupe layout + dropdowns + raccourcis (confort ou embarqué narrow status row). */
 export function GraphToolbarToolsGroup(props: GraphToolbarToolsRowProps) {
@@ -94,7 +98,7 @@ export function GraphToolbarToolsGroup(props: GraphToolbarToolsRowProps) {
             active: showSearchBar,
             muted: true,
           })}
-          title="Rechercher dans le graphe (Ctrl+F)"
+          title={SEARCH_BUTTON_TITLE}
           aria-label="Rechercher"
         >
           Rech.
@@ -209,10 +213,10 @@ export function GraphToolbarToolsRow(props: GraphToolbarToolsRowProps) {
               alignItems: 'center',
               gap: '0.35rem',
             }}
-            title="Rechercher dans le graphe (Ctrl+F)"
+            title={SEARCH_BUTTON_TITLE}
             aria-label="Rechercher"
           >
-            
+
             Recherche
           </button>
         )}
