@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Bibliothèque des scènes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0} input::placeholder{color:#8a8a95;opacity:1} input[type=search]::-webkit-search-cancel-button{display:none}</style>
+</helmet>
+<div style="width: 1440px; height: 900px; display: flex; flex-direction: column; overflow: hidden; background: {{t.app}}; color: {{t.body}}; font-family: 'Instrument Sans', system-ui, sans-serif">
+
+  <header style="height: 48px; flex: none; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) 380px minmax(0, 1fr); align-items: center; gap: 20px; padding: 0 20px; border-bottom: 1px solid {{t.hair}}">
+    <div style="display: flex; align-items: baseline; gap: 20px; min-width: 0">
+      <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1; color: {{t.strong}}; white-space: nowrap">Dialogue<span style="font-style: italic; color: {{t.accent}}">Generator</span></span>
+    </div>
+    <button type="button" style="height: 32px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: {{t.input}}; color: {{t.muted}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Rechercher, aller à, demander…<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">CTRL+K</span></button>
+    <div style="display: flex; justify-content: flex-end">
+      <span aria-label="Compte" style="width: 27px; height: 27px; border-radius: 99px; background: {{t.raised}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{t.body}}">A</span>
+    </div>
+  </header>
+
+  <div style="flex: 1; min-height: 0; display: flex">
+    <aside aria-label="Classeur" style="width: 252px; flex: none; box-sizing: border-box; border-right: 1px solid {{t.hair}}; display: flex; flex-direction: column">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 14px 9px 20px">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">CLASSEUR — 4 SCÈNES</span>
+        <button type="button" aria-label="Nouvelle scène" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-size: 15px; line-height: 1; cursor: pointer">+</button>
+      </div>
+      <a href="Main.dc.html" style-hover="background: rgba(255,255,255,0.03)" style="display: flex; flex-direction: column; gap: 3px; padding: 9px 20px; text-decoration: none; border-top: 1px solid {{t.hair}}">
+        <span style="font-size: 13.5px; color: {{t.row}}">Rencontre avec le forgeron itinérant</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">19 RÉPLIQUES · <span style="color: {{t.err}}">3 ERREURS</span></span>
+      </a>
+      <a href="#" style-hover="background: rgba(255,255,255,0.03)" style="display: flex; flex-direction: column; gap: 3px; padding: 9px 20px; text-decoration: none; border-top: 1px solid {{t.hair}}">
+        <span style="font-size: 13.5px; color: {{t.row}}">Rencontre dans les plis d'ossements</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">11 RÉPLIQUES</span>
+      </a>
+      <a href="#" style-hover="background: rgba(255,255,255,0.03)" style="display: flex; flex-direction: column; gap: 3px; padding: 9px 20px; text-decoration: none; border-top: 1px solid {{t.hair}}">
+        <span style="font-size: 13.5px; color: {{t.row}}">Rencontre initiale avec Korga l'Effritée</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">6 RÉPLIQUES</span>
+      </a>
+      <a href="#" style-hover="background: rgba(255,255,255,0.03)" style="display: flex; flex-direction: column; gap: 3px; padding: 9px 20px; text-decoration: none; border-top: 1px solid {{t.hair}}; border-bottom: 1px solid {{t.hair}}">
+        <span style="font-size: 13.5px; color: {{t.row}}">Voknir — L'Atelier du Cartographe</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">48 RÉPLIQUES</span>
+      </a>
+      <span style="flex: 1"></span>
+      <nav aria-label="Autour des scènes" style="display: flex; flex-direction: column; padding: 9px 0 14px; border-top: 1px solid {{t.hair}}">
+        <a href="Fiches.dc.html" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Fiches du GDD</a>
+        <a href="#" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Profils d'auteur</a>
+        <a href="#" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Usage et coûts</a>
+        <a href="Reglages.dc.html" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Réglages<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{t.label}}">CTRL+,</span></a>
+      </nav>
+    </aside>
+
+    <main aria-label="Bibliothèque des scènes" style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+      <section style="flex: none; padding: 26px 40px 20px; display: flex; flex-direction: column; gap: 20px">
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 20px">
+          <div style="display: flex; align-items: baseline; gap: 20px; min-width: 0">
+            <h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 34px; line-height: 1; color: {{t.strong}}">Scènes</h1>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.label}}; white-space: nowrap">4 SCÈNES · 84 RÉPLIQUES · 363 SUITES À ÉCRIRE</span>
+          </div>
+          <button type="button" style-focus-visible="outline: 2px solid #8fb0ff; outline-offset: 2px" style="height: 34px; flex: none; display: flex; align-items: center; gap: 9px; padding: 0 14px; border: none; border-radius: 6px; background: {{t.fill}}; color: #ffffff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Nouvelle scène<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.05em">ALT+N</span></button>
+        </div>
+
+        <a href="Main.dc.html" style-hover="border-color: rgba(255,255,255,0.18)" style="height: 44px; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 0 14px; border: 1px solid {{t.hair2}}; border-radius: 8px; text-decoration: none; color: inherit">
+          <span aria-hidden="true" style="width: 6px; height: 6px; flex: none; border-radius: 99px; background: {{t.accent}}"></span>
+          <span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">REPRENDRE</span>
+          <span style="min-width: 0; font-size: 13.5px; color: {{t.sec}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis"><span style="color: {{t.strong}}">Rencontre avec le forgeron itinérant</span> — réponse <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px">01</span> · Réussite, suite à écrire</span>
+          <span style="flex: 1"></span>
+          <span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}">LAISSÉE À 11:24</span>
+          <span aria-hidden="true" style="flex: none; font-size: 15px; color: {{t.sec}}">›</span>
+        </a>
+      </section>
+
+      <div role="toolbar" aria-label="Filtrer et trier" style="flex: none; height: 48px; box-sizing: border-box; display: flex; align-items: center; gap: 9px; padding: 0 40px; border-top: 1px solid {{t.hair}}; border-bottom: 1px solid {{t.hair}}">
+        <label style="position: relative; display: flex; align-items: center; width: 210px; flex: none">
+          <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Filtrer les scènes</span>
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 13 13" style="position: absolute; left: 10px; top: 8px"><circle cx="5.5" cy="5.5" r="4.25" fill="none" stroke="#8a8a95" stroke-width="1.3"></circle><line x1="8.7" y1="8.7" x2="12" y2="12" stroke="#8a8a95" stroke-width="1.3" stroke-linecap="round"></line></svg>
+          <input type="search" value="{{q}}" onChange="{{onSearch}}" placeholder="Titre, personnage, réplique…" style-focus="border-color: #4f7fff" style="width: 100%; height: 30px; box-sizing: border-box; padding: 0 10px 0 30px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: {{t.input}}; color: {{t.strong}}; font-family: inherit; font-size: 12.5px; outline: none">
+        </label>
+        <button type="button" style-hover="border-color: #3a3a44" style="height: 30px; flex: none; white-space: nowrap; display: flex; align-items: center; gap: 7px; padding: 0 10px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.sec}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Collection<span style="color: {{t.body}}">toutes</span><span aria-hidden="true" style="font-size: 10px; color: {{t.label}}">▾</span></button>
+        <button type="button" style-hover="border-color: #3a3a44" style="height: 30px; flex: none; white-space: nowrap; display: flex; align-items: center; gap: 7px; padding: 0 10px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.sec}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Personnage<span style="color: {{t.body}}">tous</span><span aria-hidden="true" style="font-size: 10px; color: {{t.label}}">▾</span></button>
+        <span aria-hidden="true" style="width: 1px; height: 16px; margin: 0 5px; background: {{t.hair2}}"></span>
+        <span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}">ÉTAT</span>
+        <sc-for list="{{chips}}" as="c" hint-placeholder-count="3">
+          <button type="button" onClick="{{c.toggle}}" aria-pressed="{{c.on}}" style="height: 26px; display: flex; align-items: center; gap: 7px; padding: 0 10px; border-radius: 99px; border: 1px solid {{c.border}}; background: {{c.bg}}; color: {{c.color}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; white-space: nowrap; flex: none; cursor: pointer"><span aria-hidden="true" style="width: 5px; height: 5px; border-radius: 99px; background: {{c.dot}}"></span>{{c.label}}<span style="color: {{c.countColor}}">{{c.count}}</span></button>
+        </sc-for>
+        <span style="flex: 1"></span>
+        <button type="button" style="height: 30px; flex: none; display: flex; align-items: center; gap: 7px; padding: 0 2px; border: none; background: transparent; color: {{t.sec}}; font-family: inherit; font-size: 12.5px; white-space: nowrap; cursor: pointer">Tri<span style="color: {{t.body}}">récentes d'abord</span><span aria-hidden="true" style="font-size: 10px; color: {{t.label}}">▾</span></button>
+      </div>
+
+      <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 0 40px">
+        <ol aria-label="Scènes" style="list-style: none; margin: 0; padding: 0">
+          <sc-for list="{{rows}}" as="r" hint-placeholder-count="4">
+            <li style="border-bottom: 1px solid {{t.hair}}">
+              <a href="{{r.href}}" style-hover="background: rgba(255,255,255,0.025)" style-focus-visible="outline: 2px solid #4f7fff; outline-offset: -2px" style="display: grid; grid-template-columns: minmax(0, 1fr) 210px; column-gap: 34px; padding: 20px 14px 20px 14px; margin: 0 -14px; text-decoration: none; color: inherit; border-radius: 6px">
+                <span style="display: flex; flex-direction: column; gap: 9px; min-width: 0">
+                  <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 20px; line-height: 1.2; color: {{t.strong}}">{{r.title}}</span>
+                  <sc-if value="{{r.isSpeech}}" hint-placeholder-val="{{true}}">
+                    <span style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; max-width: 760px; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 16.5px; line-height: 1.5; color: {{t.sec}}">« {{r.excerpt}} »</span>
+                  </sc-if>
+                  <sc-if value="{{r.isDir}}" hint-placeholder-val="{{false}}">
+                    <span style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; max-width: 760px; font-style: italic; font-size: 14px; line-height: 1.6; color: {{t.sec}}">{{r.excerpt}}</span>
+                  </sc-if>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; line-height: 1.6; color: {{t.muted}}"><sc-for list="{{r.meta}}" as="m" hint-placeholder-count="3"><span style="color: {{m.color}}; white-space: nowrap">{{m.t}}</span><sc-if value="{{m.sep}}" hint-placeholder-val="{{true}}"><span style="color: {{t.label}}"> · </span></sc-if></sc-for></span>
+                </span>
+                <span aria-label="Distribution" style="display: flex; flex-direction: column; gap: 9px; padding-top: 2px">
+                  <sc-for list="{{r.cast}}" as="p" hint-placeholder-count="2">
+                    <span style="display: flex; align-items: center; gap: 9px; min-width: 0">
+                      <span aria-hidden="true" style="width: 20px; height: 20px; flex: none; border-radius: 99px; background: {{p.bg}}; color: {{p.fg}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px">{{p.ini}}</span>
+                      <span style="min-width: 0; font-size: 12.5px; color: {{t.body}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{p.name}}</span>
+                      <span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.label}}">{{p.role}}</span>
+                    </span>
+                  </sc-for>
+                </span>
+              </a>
+            </li>
+          </sc-for>
+        </ol>
+        <sc-if value="{{empty}}" hint-placeholder-val="{{false}}">
+          <div style="padding: 34px 0; display: flex; flex-direction: column; gap: 9px; max-width: 520px">
+            <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 20px; color: {{t.strong}}">Aucune scène ne correspond.</span>
+            <span style="font-size: 13.5px; line-height: 1.55; color: {{t.sec}}">Les scènes qui répondent à la recherche et aux filtres s'affichent ici. Retirer un filtre, ou créer une nouvelle scène.</span>
+            <button type="button" onClick="{{reset}}" style="align-self: flex-start; margin-top: 5px; height: 30px; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Retirer les filtres</button>
+          </div>
+        </sc-if>
+      </div>
+
+      <p style="flex: none; margin: 0; padding: 9px 40px 12px; font-size: 12px; line-height: 1.5; color: #9a9aa4">Exemple : reprise à <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">11:24</span>, filtre des collections, absence d'erreur de validation sur les trois autres scènes (non vérifiée). Le reste est réel.</p>
+    </main>
+  </div>
+
+  <footer aria-label="État de l'atelier" style="height: 28px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 20px; padding: 0 20px; border-top: 1px solid {{t.hair}}; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; color: {{t.muted}}">
+    <span>4 SCÈNES · 84 RÉPLIQUES</span>
+    <a href="Fiches.dc.html" style="color: {{t.muted}}; text-decoration: none">GDD · 333 FICHES</a>
+    <button type="button" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: {{t.muted}}; cursor: pointer">GPT-6.2 SOL ▴</button>
+    <span style="flex: 1"></span>
+    <span>{{shown}}</span>
+    <button type="button" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: {{t.muted}}; cursor: pointer">? RACCOURCIS</button>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { q: '', f: { valider: false, problemes: false, suites: false } };
+    this.t = {
+      app: '#17171b', input: '#1c1c22', raised: '#2a2a33', hair: 'rgba(255,255,255,0.06)', hair2: 'rgba(255,255,255,0.09)',
+      chip: 'rgba(255,255,255,0.12)', strong: '#f2f2f5', body: '#dcdce4', row: '#d5d5dd', dia: '#f0efe9',
+      sec: '#9a9aa4', muted: '#8a8a95', label: '#84848f', accent: '#4f7fff', accText: '#8fb0ff',
+      selBg: 'rgba(79,127,255,0.08)', fill: '#3d6ae8', ok: '#27ae60', pend: '#f5a623', err: '#ff6b6b',
+      ctrl: '#2e2e36', spk: '#5fb8ac', onSpk: '#101013'
+    };
+    const U = { ini: 'U', name: 'Uresaïr', role: 'PJ', npc: false };
+    this.S = [
+      { title: 'Rencontre avec le forgeron itinérant', href: 'Main.dc.html', order: 0,
+        cast: [{ ini: 'GT', name: "Grish T'vok", role: 'PNJ', npc: true }, U],
+        dir: false,
+        excerpt: "Ah. Une présence qui marche sur le monde sans y laisser d'empreinte. Je m'appelle Grish T'vok, caravane-atelier ambulante, collectionneur de choses qui ont mal tourné.",
+        lines: 19, valider: 2, suites: 209, vides: 12, erreurs: 3, mod: "MODIFIÉE AUJOURD'HUI · 11:24" },
+      { title: "Voknir — L'Atelier du Cartographe", href: '#', order: 1,
+        cast: [{ ini: 'VE', name: "Voknir Esh'Maradel", role: 'PNJ', npc: true }, U],
+        dir: true,
+        excerpt: 'Voknir est agenouillé, presque immobile, il se grave lentement la peau, un liquide noir suinte.',
+        lines: 48, valider: 48, suites: 6, vides: 0, erreurs: 0, mod: 'MODIFIÉE IL Y A 2 JOURS' },
+      { title: "Rencontre initiale avec Korga l'Effritée", href: '#', order: 2,
+        cast: [{ ini: 'KE', name: "Korga l'Effritée", role: 'PNJ', npc: true }, U],
+        dir: false,
+        excerpt: "Seigneuresse. Pardonnez l'outrage de mes mains, mais j'ai les oreilles pleines de pierre et très peu de patience pour les discours. Cette voûte que je frappe là, elle cache un vide d'une quinzaine de centimètres…",
+        lines: 6, valider: 1, suites: 55, vides: 0, erreurs: 0, mod: 'MODIFIÉE IL Y A 8 MOIS' },
+      { title: "Rencontre dans les plis d'ossements", href: '#', order: 3,
+        cast: [{ ini: 'ZN', name: "Zaehria Neth'Varu", role: 'PNJ', npc: true }, U],
+        dir: false,
+        excerpt: "Vous êtes arrivée par la marche des Sourdines, ou du moins vos empreintes l'ont tenté. Selon les irrigations actuelles, votre résonance a frotté trois substrats différents avant d'atteindre ma paroi.",
+        lines: 11, valider: 1, suites: 93, vides: 3, erreurs: 0, mod: 'MODIFIÉE IL Y A 8 MOIS' }
+    ];
+  }
+
+  norm(s) {
+    return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’']/g, "'");
+  }
+
+  renderVals() {
+    const t = this.t;
+    const f = this.state.f;
+    const q = this.norm(this.state.q.trim());
+    const n2 = (v) => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    const keep = this.S.filter((s) => {
+      if (f.valider && !s.valider) return false;
+      if (f.problemes && !s.erreurs) return false;
+      if (f.suites && !s.suites) return false;
+      if (q) {
+        const hay = this.norm([s.title, s.excerpt].concat(s.cast.map((c) => c.name)).join(' '));
+        if (hay.indexOf(q) < 0) return false;
+      }
+      return true;
+    });
+    const rows = keep.map((s) => {
+      const meta = [{ t: s.lines + ' RÉPLIQUES', color: t.body }];
+      if (s.valider) meta.push({ t: n2(s.valider) + ' À VALIDER', color: t.pend });
+      if (s.suites) meta.push({ t: n2(s.suites) + ' SUITES À ÉCRIRE', color: t.muted });
+      if (s.vides) meta.push({ t: s.vides + ' RÉPONSES VIDES', color: t.muted });
+      if (s.erreurs) meta.push({ t: s.erreurs + ' ERREURS', color: t.err });
+      meta.push({ t: s.mod, color: t.muted });
+      return {
+        title: s.title, href: s.href,
+        isSpeech: !s.dir, isDir: s.dir, excerpt: s.excerpt,
+        meta: meta.map((m, i) => Object.assign({}, m, { sep: i < meta.length - 1 })),
+        cast: s.cast.map((c) => ({ ini: c.ini, name: c.name, role: c.role, bg: c.npc ? t.spk : t.raised, fg: c.npc ? t.onSpk : t.body }))
+      };
+    });
+    const defs = [
+      { k: 'valider', label: 'À VALIDER', dot: t.pend, count: this.S.filter((s) => s.valider).length },
+      { k: 'problemes', label: 'AVEC PROBLÈMES', dot: t.err, count: this.S.filter((s) => s.erreurs).length },
+      { k: 'suites', label: 'SUITES À ÉCRIRE', dot: t.label, count: this.S.filter((s) => s.suites).length }
+    ];
+    const chips = defs.map((d) => {
+      const on = Boolean(f[d.k]);
+      return {
+        label: d.label, count: String(d.count), on: on, dot: d.dot,
+        border: on ? t.accent : t.chip, bg: on ? t.selBg : 'transparent',
+        color: on ? t.strong : t.sec, countColor: on ? t.accText : t.label,
+        toggle: () => { const nf = Object.assign({}, this.state.f); nf[d.k] = !nf[d.k]; this.setState({ f: nf }); }
+      };
+    });
+    return {
+      t: t,
+      q: this.state.q,
+      chips: chips,
+      rows: rows,
+      empty: rows.length === 0,
+      shown: rows.length === this.S.length ? 'TOUTES LES SCÈNES AFFICHÉES' : rows.length + ' SUR 4 AFFICHÉES',
+      onSearch: (e) => this.setState({ q: e && e.target ? e.target.value : '' }),
+      reset: () => this.setState({ q: '', f: { valider: false, problemes: false, suites: false } })
+    };
+  }
+}
+</script>
+</body>
+</html>

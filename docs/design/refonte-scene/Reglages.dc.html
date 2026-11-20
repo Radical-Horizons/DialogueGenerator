@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Réglages — Apparence</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0} .rg-range{-webkit-appearance:none;appearance:none;height:20px;background:transparent;margin:0;cursor:pointer} .rg-range::-webkit-slider-runnable-track{height:2px;border-radius:2px;background:var(--rg-track)} .rg-range::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;margin-top:-7px;border-radius:99px;background:var(--rg-thumb);border:2px solid var(--rg-app)} .rg-range:focus-visible{outline:2px solid #4f7fff;outline-offset:4px} .rg-anim{transition:max-width 160ms ease-out, opacity 160ms ease-out} @media (prefers-reduced-motion: reduce){.rg-anim{transition:none}}</style>
+</helmet>
+<div style="width: 1440px; height: 900px; display: flex; flex-direction: column; overflow: hidden; background: {{t.app}}; color: {{t.body}}; font-family: 'Instrument Sans', system-ui, sans-serif; --rg-track: {{t.chip2}}; --rg-thumb: {{t.accent}}; --rg-app: {{t.app}}">
+
+  <header style="height: 48px; flex: none; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) 380px minmax(0, 1fr); align-items: center; gap: 20px; padding: 0 20px; border-bottom: 1px solid {{t.hair}}">
+    <div style="display: flex; align-items: baseline; gap: 20px; min-width: 0">
+      <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1; color: {{t.strong}}; white-space: nowrap">Dialogue<span style="font-style: italic; color: {{t.accent}}">Generator</span></span>
+      <nav aria-label="Fil d'Ariane" style="display: flex; align-items: baseline; gap: 9px; min-width: 0">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}; white-space: nowrap">RÉGLAGES</span>
+        <span style="color: {{t.label}}">/</span>
+        <span style="font-size: 13px; color: {{t.strong}}; white-space: nowrap">Apparence</span>
+      </nav>
+    </div>
+    <button type="button" style="height: 32px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: {{t.input}}; color: {{t.muted}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Rechercher, aller à, demander…<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">CTRL+K</span></button>
+    <div style="display: flex; justify-content: flex-end">
+      <span aria-label="Compte" style="width: 27px; height: 27px; border-radius: 99px; background: {{t.raised}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{t.body}}">A</span>
+    </div>
+  </header>
+
+  <div style="flex: 1; min-height: 0; display: flex">
+    <aside aria-label="Sections des réglages" style="width: 252px; flex: none; box-sizing: border-box; border-right: 1px solid {{t.hair}}; display: flex; flex-direction: column">
+      <div style="height: 51px; box-sizing: border-box; display: flex; align-items: center; padding: 14px 20px 9px">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">RÉGLAGES</span>
+      </div>
+      <nav aria-label="Réglages" style="display: flex; flex-direction: column; border-bottom: 1px solid {{t.hair}}">
+        <sc-for list="{{nav}}" as="n" hint-placeholder-count="6">
+          <a href="#" aria-current="{{n.current}}" style="display: flex; flex-direction: column; gap: 3px; padding: 9px 20px; text-decoration: none; border-top: 1px solid {{t.hair}}; background: {{n.bg}}; box-shadow: {{n.rail}}">
+            <span style="font-size: 13.5px; font-weight: {{n.weight}}; color: {{n.color}}">{{n.name}}</span>
+            <sc-if value="{{n.hasSub}}" hint-placeholder-val="{{true}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: {{t.muted}}">{{n.sub}}</span></sc-if>
+          </a>
+        </sc-for>
+      </nav>
+      <span style="flex: 1"></span>
+      <nav aria-label="Autour des scènes" style="display: flex; flex-direction: column; padding: 9px 0 14px; border-top: 1px solid {{t.hair}}">
+        <a href="Bibliotheque.dc.html" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">‹ Toutes les scènes</a>
+        <a href="Fiches.dc.html" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Fiches du GDD</a>
+        <a href="#" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Profils d'auteur</a>
+        <a href="#" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.sec}}; text-decoration: none">Usage et coûts</a>
+        <a href="#" aria-current="page" style="display: flex; justify-content: space-between; padding: 7px 20px; font-size: 13px; color: {{t.strong}}; text-decoration: none">Réglages<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{t.label}}">CTRL+,</span></a>
+      </nav>
+    </aside>
+
+    <main aria-label="Apparence" style="flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 26px 40px 0">
+      <div style="flex: none; display: flex; align-items: baseline; gap: 20px">
+        <h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 34px; line-height: 1; color: {{t.strong}}">Apparence</h1>
+        <span style="font-size: 13px; color: {{t.sec}}">Chaque réglage s'applique aussitôt et s'enregistre seul.</span>
+      </div>
+
+      <section aria-labelledby="lbl-theme" style="flex: none; margin-top: 20px; display: grid; grid-template-columns: 240px minmax(0, 1fr); column-gap: 20px; padding: 20px 0; border-top: 1px solid {{t.hair}}">
+        <div style="display: flex; flex-direction: column; gap: 5px">
+          <span id="lbl-theme" style="font-size: 14px; font-weight: 500; color: {{t.strong}}">Thème</span>
+          <span style="font-size: 12.5px; line-height: 1.5; color: {{t.sec}}">Nuit pour les longues sessions, Papier pour relire en plein jour.</span>
+        </div>
+        <div role="radiogroup" aria-labelledby="lbl-theme" style="display: flex; gap: 20px">
+          <sc-for list="{{themes}}" as="th" hint-placeholder-count="3">
+            <button type="button" role="radio" aria-checked="{{th.on}}" onClick="{{th.pick}}" style-focus-visible="outline: 2px solid #4f7fff; outline-offset: 3px" style="display: flex; flex-direction: column; gap: 9px; padding: 0; border: none; background: transparent; text-align: left; font-family: inherit; cursor: pointer">
+              <span aria-hidden="true" style="position: relative; display: block; width: 204px; height: 118px; box-sizing: border-box; border-radius: 8px; overflow: hidden; border: 1px solid {{th.frame}}; box-shadow: {{th.ring}}; background: {{th.bgA}}">
+                <span style="position: absolute; inset: 0; background: {{th.bgB}}; clip-path: {{th.clip}}"></span>
+                <span style="position: absolute; left: 0; right: 0; top: 0; height: 14px; border-bottom: 1px solid {{th.hairA}}"></span>
+                <span style="position: absolute; left: 0; top: 14px; bottom: 0; width: 42px; border-right: 1px solid {{th.hairA}}"></span>
+                <span style="position: absolute; left: 7px; top: 22px; width: 26px; height: 3px; border-radius: 2px; background: {{th.accA}}"></span>
+                <span style="position: absolute; left: 7px; top: 30px; width: 22px; height: 3px; border-radius: 2px; background: {{th.lineA}}; opacity: 0.45"></span>
+                <span style="position: absolute; left: 7px; top: 38px; width: 28px; height: 3px; border-radius: 2px; background: {{th.lineA}}; opacity: 0.45"></span>
+                <span style="position: absolute; left: 58px; top: 26px; font-family: 'Instrument Serif', Georgia, serif; font-size: 15px; line-height: 1; color: {{th.textA}}">Ha. Vos mots</span>
+                <span style="position: absolute; left: 58px; top: 48px; width: 120px; height: 4px; border-radius: 2px; background: {{th.lineA}}; opacity: 0.55"></span>
+                <span style="position: absolute; left: 58px; top: 58px; width: 104px; height: 4px; border-radius: 2px; background: {{th.lineB}}; opacity: 0.55"></span>
+                <span style="position: absolute; left: 58px; top: 68px; width: 116px; height: 4px; border-radius: 2px; background: {{th.lineB}}; opacity: 0.55"></span>
+                <span style="position: absolute; left: 58px; top: 86px; width: 128px; height: 16px; box-sizing: border-box; border-radius: 4px; border: 1px solid {{th.hairB}}"></span>
+                <span style="position: absolute; left: 58px; top: 86px; width: 2px; height: 16px; background: {{th.accB}}"></span>
+              </span>
+              <span style="display: flex; align-items: center; gap: 9px">
+                <span aria-hidden="true" style="width: 12px; height: 12px; box-sizing: border-box; border-radius: 99px; border: 1.5px solid {{th.dotBorder}}; background: {{th.dotFill}}; box-shadow: {{th.dotInner}}"></span>
+                <span style="font-size: 13.5px; color: {{th.labelColor}}">{{th.name}}</span>
+                <sc-if value="{{th.hasHint}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.label}}">{{th.hint}}</span></sc-if>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+
+      <div style="flex: none; display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid {{t.hair}}">
+        <section aria-labelledby="lbl-size" style="display: grid; grid-template-columns: 240px minmax(0, 1fr); column-gap: 20px; align-items: center; padding: 18px 20px 18px 0; border-right: 1px solid {{t.hair}}">
+          <div style="display: flex; flex-direction: column; gap: 5px">
+            <label id="lbl-size" for="rg-size" style="font-size: 14px; font-weight: 500; color: {{t.strong}}">Taille des répliques</label>
+            <span style="font-size: 12.5px; line-height: 1.5; color: {{t.sec}}">Aussi depuis la scène : A− / A+.</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 9px">
+            <span aria-hidden="true" style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{t.label}}">16</span>
+            <input id="rg-size" class="rg-range" type="range" min="16" max="24" step="1" value="{{fs}}" onChange="{{onSize}}" aria-valuetext="{{fsText}}" style="flex: 1; min-width: 0">
+            <span aria-hidden="true" style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{t.label}}">24</span>
+            <output for="rg-size" style="width: 48px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{t.strong}}">{{fsText}}</output>
+          </div>
+        </section>
+        <section aria-labelledby="lbl-measure" style="display: grid; grid-template-columns: 200px minmax(0, 1fr); column-gap: 20px; align-items: center; padding: 18px 0 18px 20px">
+          <div style="display: flex; flex-direction: column; gap: 5px">
+            <span id="lbl-measure" style="font-size: 14px; font-weight: 500; color: {{t.strong}}">Mesure de lecture</span>
+            <span style="font-size: 12.5px; line-height: 1.5; color: {{t.sec}}">Caractères par ligne au plus.</span>
+          </div>
+          <div role="radiogroup" aria-labelledby="lbl-measure" style="display: flex; justify-self: start; border: 1px solid {{t.ctrl}}; border-radius: 6px; overflow: hidden">
+            <sc-for list="{{measures}}" as="m" hint-placeholder-count="3">
+              <button type="button" role="radio" aria-checked="{{m.on}}" onClick="{{m.pick}}" style="height: 30px; padding: 0 14px; border: none; border-left: {{m.sep}}; background: {{m.bg}}; color: {{m.color}}; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.04em; cursor: pointer">{{m.label}}</button>
+            </sc-for>
+          </div>
+        </section>
+        <section aria-labelledby="lbl-density" style="display: grid; grid-template-columns: 240px minmax(0, 1fr); column-gap: 20px; align-items: center; padding: 18px 20px 18px 0; border-top: 1px solid {{t.hair}}; border-right: 1px solid {{t.hair}}">
+          <div style="display: flex; flex-direction: column; gap: 5px">
+            <span id="lbl-density" style="font-size: 14px; font-weight: 500; color: {{t.strong}}">Densité</span>
+            <span style="font-size: 12.5px; line-height: 1.5; color: {{t.sec}}">Espace autour des réponses et des listes.</span>
+          </div>
+          <div role="radiogroup" aria-labelledby="lbl-density" style="display: flex; justify-self: start; border: 1px solid {{t.ctrl}}; border-radius: 6px; overflow: hidden">
+            <sc-for list="{{densities}}" as="d" hint-placeholder-count="2">
+              <button type="button" role="radio" aria-checked="{{d.on}}" onClick="{{d.pick}}" style="height: 30px; padding: 0 14px; border: none; border-left: {{d.sep}}; background: {{d.bg}}; color: {{d.color}}; font-family: inherit; font-size: 12.5px; cursor: pointer">{{d.label}}</button>
+            </sc-for>
+          </div>
+        </section>
+        <section aria-labelledby="lbl-motion" style="display: grid; grid-template-columns: 200px minmax(0, 1fr); column-gap: 20px; align-items: center; padding: 18px 0 18px 20px; border-top: 1px solid {{t.hair}}">
+          <div style="display: flex; flex-direction: column; gap: 5px">
+            <span id="lbl-motion" style="font-size: 14px; font-weight: 500; color: {{t.strong}}">Mouvement réduit</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; line-height: 1.5; color: {{t.label}}">{{motionState}}</span>
+          </div>
+          <div role="radiogroup" aria-labelledby="lbl-motion" style="display: flex; justify-self: start; border: 1px solid {{t.ctrl}}; border-radius: 6px; overflow: hidden">
+            <sc-for list="{{motions}}" as="mo" hint-placeholder-count="2">
+              <button type="button" role="radio" aria-checked="{{mo.on}}" onClick="{{mo.pick}}" style="height: 30px; padding: 0 14px; border: none; border-left: {{mo.sep}}; background: {{mo.bg}}; color: {{mo.color}}; font-family: inherit; font-size: 12.5px; white-space: nowrap; cursor: pointer">{{mo.label}}</button>
+            </sc-for>
+          </div>
+        </section>
+      </div>
+
+      <section aria-label="Aperçu" style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 9px; padding-top: 20px; border-top: 1px solid {{t.hair}}">
+        <div style="flex: none; display: flex; align-items: baseline; justify-content: space-between">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">APERÇU — RÉPLIQUE DE GRISH T'VOK, RÉPONSE 03 · RÉUSSITE</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}">{{summary}}</span>
+        </div>
+        <div style="flex: 1; min-height: 0; position: relative; box-sizing: border-box; border: 1px solid {{t.hair2}}; border-radius: 8px; overflow: hidden; padding: 0 34px; background: repeating-linear-gradient(135deg, transparent 0 9px, {{t.hair}} 9px 10px); -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent)">
+          <div class="rg-anim" style="position: relative; max-width: {{measurePx}}px; min-height: 100%; margin: 0 auto; padding: 20px 20px 0; background: {{t.app}}; border-left: 1px solid {{t.hair2}}; border-right: 1px solid {{t.hair2}}">
+                                    <span aria-hidden="true" style="position: absolute; top: 20px; right: -1px; transform: translateX(100%); padding: 2px 7px; background: {{t.app}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}; white-space: nowrap">← {{measureLabel}} →</span>
+            <div style="display: flex; align-items: center; gap: 9px; margin-bottom: {{gapSm}}px">
+              <span aria-hidden="true" style="width: 7px; height: 7px; border-radius: 99px; background: {{t.spk}}"></span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.09em; color: {{t.sec}}">GRISH T'VOK</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.ok}}">VALIDÉ</span>
+            </div>
+            <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: {{fs}}px; line-height: {{lh}}; color: {{t.dia}}">Très bien, Maîtresse. Votre volonté se fait sentir jusque dans mes rouages. <span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: {{dirFs}}px; color: {{t.sec}}">Un claquement doux parcourt sa carcasse, et une goutte d'huile scintille comme une larme.</span> Approchez, ne craignez rien : je n'arrache rien qui ne puisse être recousu.</p>
+            <span style="display: block; margin: {{gapMd}}px 0 {{gapSm}}px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">URESAÏR — 4 RÉPONSES</span>
+            <ol style="list-style: none; margin: 0; padding: 0; border-top: 1px solid {{t.hair}}">
+              <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 9px; padding: {{rowPad}}px 12px {{rowPad}}px 10px; border-bottom: 1px solid {{t.hair}}">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 23px; color: {{t.muted}}">01</span>
+                <span style="font-size: 15px; line-height: 1.55; color: {{t.body}}">Je vous tends l'anneau de lumière. Faites ce que vous savez faire.</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; line-height: 23px; color: {{t.muted}}">4 ISSUES · À ÉCRIRE</span>
+              </li>
+              <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 9px; padding: {{rowPad}}px 12px {{rowPad}}px 10px; border-bottom: 1px solid {{t.hair}}">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 23px; color: {{t.muted}}">02</span>
+                <span style="font-size: 15px; line-height: 1.55; color: {{t.body}}">Approche, alors. Tu peux toucher aussi l'armure — ses griffes me gênent.</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; line-height: 23px; color: {{t.muted}}">4 ISSUES · À ÉCRIRE</span>
+              </li>
+              <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 9px; padding: {{rowPad}}px 12px {{rowPad}}px 10px; border-bottom: 1px solid {{t.hair}}">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 23px; color: {{t.muted}}">03</span>
+                <span style="font-size: 15px; line-height: 1.55; color: {{t.body}}">J'entends ta générosité, mais quel est ton prix au-delà du premier ajustement ?</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; line-height: 23px; color: {{t.muted}}">4 ISSUES · À ÉCRIRE</span>
+              </li>
+            </ol>
+          </div>
+        </div>
+        <p style="flex: none; margin: 0; padding: 0 0 12px; font-size: 12px; line-height: 1.5; color: {{noteColor}}">Exemple : heure d'enregistrement <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">11:24</span>. La réplique et les réponses sont réelles (scène du forgeron, extrait).</p>
+      </section>
+    </main>
+  </div>
+
+  <footer aria-label="État" style="height: 28px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 20px; padding: 0 20px; border-top: 1px solid {{t.hair}}; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; color: {{t.muted}}">
+    <span role="status" style="display: flex; align-items: center; gap: 7px"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{saveDot}}"></span>{{saveText}}</span>
+    <span>{{summaryShort}}</span>
+    <span style="flex: 1"></span>
+    <button type="button" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: {{t.muted}}; cursor: pointer">? RACCOURCIS</button>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { theme: 'nuit', fs: 19, measure: 72, density: 'confort', motion: 'systeme', saving: false, saved: '11:24', avg: 0.4 };
+    this.T = {
+      nuit: {
+        app: '#17171b', input: '#1c1c22', raised: '#2a2a33', hair: 'rgba(255,255,255,0.06)', hair2: 'rgba(255,255,255,0.09)',
+        chip: 'rgba(255,255,255,0.12)', chip2: 'rgba(255,255,255,0.22)', strong: '#f2f2f5', body: '#dcdce4', row: '#d5d5dd',
+        dia: '#f0efe9', sec: '#9a9aa4', muted: '#8a8a95', label: '#84848f', accent: '#4f7fff', accText: '#8fb0ff',
+        selBg: 'rgba(79,127,255,0.08)', fill: '#3d6ae8', ok: '#27ae60', pend: '#f5a623', err: '#ff6b6b', ctrl: '#2e2e36', spk: '#5fb8ac'
+      },
+      papier: {
+        app: '#f5f2ea', input: '#fbfaf6', raised: '#ebe6da', hair: 'rgba(28,25,20,0.08)', hair2: 'rgba(28,25,20,0.13)',
+        chip: 'rgba(28,25,20,0.16)', chip2: 'rgba(28,25,20,0.30)', strong: '#1b1916', body: '#2c2924', row: '#2c2924',
+        dia: '#1f1c18', sec: '#5c574d', muted: '#625d53', label: '#6b665b', accent: '#2f5bd3', accText: '#2a52c0',
+        selBg: 'rgba(47,91,211,0.08)', fill: '#2f5bd3', ok: '#1d7a44', pend: '#9a5b06', err: '#b83232', ctrl: '#d6d0c3', spk: '#1f7a72'
+      }
+    };
+  }
+
+  componentDidMount() {
+    const measure = () => {
+      try {
+        const c = document.createElement('canvas').getContext('2d');
+        c.font = "100px 'Instrument Serif'";
+        const s = "Très bien, Maîtresse. Votre volonté se fait sentir jusque dans mes rouages. Approchez, ne craignez rien : je n'arrache rien qui ne puisse être recousu.";
+        const w = c.measureText(s).width / s.length / 100;
+        if (w > 0.2 && w < 0.8) this.setState({ avg: w });
+      } catch (e) { /* mesure par défaut */ }
+    };
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+    this.mq = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+    this.dq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.tSave);
+  }
+
+  change(patch) {
+    this.setState(Object.assign({ saving: true }, patch));
+    clearTimeout(this.tSave);
+    this.tSave = setTimeout(() => {
+      this.setState({ saving: false, saved: '11:25' });
+    }, 450);
+  }
+
+  renderVals() {
+    const sysDark = this.dq ? this.dq.matches : true;
+    const sysReduce = this.mq ? this.mq.matches : false;
+    const eff = this.state.theme === 'systeme' ? (sysDark ? 'nuit' : 'papier') : this.state.theme;
+    const t = this.T[eff];
+    const N = this.T.nuit;
+    const P = this.T.papier;
+    const seg = (on, i) => ({
+      sep: i === 0 ? 'none' : '1px solid ' + t.ctrl,
+      bg: on ? t.raised : 'transparent',
+      color: on ? t.strong : t.sec
+    });
+    const themeDefs = [
+      { k: 'nuit', name: 'Nuit', a: N, b: N, clip: 'none' },
+      { k: 'papier', name: 'Papier', a: P, b: P, clip: 'none' },
+      { k: 'systeme', name: 'Suivre le système', a: N, b: P, clip: 'polygon(62% 0, 100% 0, 100% 100%, 38% 100%)', hint: sysDark ? 'NUIT EN CE MOMENT' : 'PAPIER EN CE MOMENT' }
+    ];
+    const themes = themeDefs.map((d) => {
+      const on = this.state.theme === d.k;
+      return {
+        name: d.name, on: on, hasHint: Boolean(d.hint), hint: d.hint || '',
+        bgA: d.a.app, bgB: d.b.app, clip: d.k === 'systeme' ? d.clip : 'inset(0 0 0 100%)',
+        hairA: d.k === 'papier' ? P.hair2 : 'rgba(255,255,255,0.10)',
+        hairB: d.k === 'nuit' ? 'rgba(255,255,255,0.14)' : P.chip,
+        textA: d.k === 'papier' ? P.dia : N.dia,
+        lineA: d.k === 'papier' ? P.body : N.body,
+        lineB: d.k === 'nuit' ? N.body : P.body,
+        accA: d.k === 'papier' ? P.accent : N.accent,
+        accB: d.k === 'nuit' ? N.accent : P.accent,
+        frame: on ? t.accent : t.hair2,
+        ring: on ? '0 0 0 1px ' + t.accent : 'none',
+        dotBorder: on ? t.accent : t.chip2,
+        dotFill: on ? t.accent : 'transparent',
+        dotInner: on ? 'inset 0 0 0 2px ' + t.app : 'none',
+        labelColor: on ? t.strong : t.body,
+        pick: () => this.change({ theme: d.k })
+      };
+    });
+    const measures = [64, 72, 80].map((m, i) => {
+      const on = this.state.measure === m;
+      return Object.assign({ label: m + ' CAR.', on: on, pick: () => this.change({ measure: m }) }, seg(on, i));
+    });
+    const densities = [['confort', 'Confortable'], ['compact', 'Compacte']].map((d, i) => {
+      const on = this.state.density === d[0];
+      return Object.assign({ label: d[1], on: on, pick: () => this.change({ density: d[0] }) }, seg(on, i));
+    });
+    const motions = [['systeme', 'Suivre le système'], ['toujours', 'Toujours réduire']].map((d, i) => {
+      const on = this.state.motion === d[0];
+      return Object.assign({ label: d[1], on: on, pick: () => this.change({ motion: d[0] }) }, seg(on, i));
+    });
+    const reduce = this.state.motion === 'toujours' || sysReduce;
+    const compact = this.state.density === 'compact';
+    const fs = this.state.fs;
+    const navDefs = [
+      ['Apparence', (eff === 'nuit' ? 'NUIT' : 'PAPIER') + ' · ' + fs + ' PX · ' + this.state.measure + ' CAR.'],
+      ['Modèles et budget', 'GPT-6.2 SOL'],
+      ['Notion et GDD', '333 FICHES'],
+      ['Raccourcis', ''],
+      ['Compte', '']
+    ];
+    const nav = navDefs.map((n, i) => ({
+      name: n[0], sub: n[1], hasSub: Boolean(n[1]), current: i === 0 ? 'page' : 'false',
+      bg: i === 0 ? t.selBg : 'transparent', rail: i === 0 ? 'inset 2px 0 0 ' + t.accent : 'none',
+      color: i === 0 ? t.strong : t.row, weight: i === 0 ? 500 : 400
+    }));
+    const themeName = this.state.theme === 'systeme' ? 'SYSTÈME (' + (eff === 'nuit' ? 'NUIT' : 'PAPIER') + ')' : eff.toUpperCase();
+    return {
+      t: t,
+      noteColor: eff === 'nuit' ? '#9a9aa4' : t.sec,
+      nav: nav,
+      themes: themes,
+      measures: measures,
+      densities: densities,
+      motions: motions,
+      fs: fs,
+      fsText: fs + ' PX',
+      dirFs: Math.round(fs * 0.79),
+      lh: compact ? 1.5 : 1.6,
+      rowPad: compact ? 6 : 11,
+      gapSm: compact ? 7 : 11,
+      gapMd: compact ? 14 : 20,
+      measurePx: Math.round(this.state.measure * this.state.avg * fs),
+      measureLabel: this.state.measure + ' CAR.',
+      motionState: reduce
+        ? (this.state.motion === 'toujours' ? 'AUCUNE ANIMATION' : 'SYSTÈME : RÉDUCTION DEMANDÉE')
+        : 'SYSTÈME : AUCUNE DEMANDE',
+      summary: fs + ' PX · ' + this.state.measure + ' CAR. · ' + (compact ? 'COMPACTE' : 'CONFORTABLE'),
+      summaryShort: 'THÈME ' + themeName + ' · RÉPLIQUES ' + fs + ' PX',
+      saveText: this.state.saving ? 'ENREGISTREMENT…' : 'ENREGISTRÉ · ' + this.state.saved,
+      saveDot: this.state.saving ? t.accent : t.ok,
+      onSize: (e) => this.change({ fs: Number(e && e.target ? e.target.value : 19) })
+    };
+  }
+}
+</script>
+</body>
+</html>

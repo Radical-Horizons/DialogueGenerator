@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Avant et après</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 1440px; height: 1060px; box-sizing: border-box; padding: 34px; display: flex; flex-direction: column; gap: 20px; background: #17171b; color: #dcdce4; font-family: 'Instrument Sans', system-ui, sans-serif; overflow: hidden">
+  <div style="display: flex; align-items: baseline; justify-content: space-between">
+    <h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 33px; line-height: 1.12; color: #f2f2f5">Même scène, même écran de 1 440 px</h1>
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #84848f">« RENCONTRE AVEC LE FORGERON ITINÉRANT » · 19 RÉPLIQUES</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 34px">
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 9px">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #84848f">AUJOURD'HUI — GRAPHE ZOOMÉ À 200 %</span>
+      <img src="captures/avant-04-graphe-zoom.png" alt="L'éditeur actuel : la réplique d'ouverture s'arrête sur « carav… », la carte n'annonce que « 4 RÉPONSES », un nœud de test chevauche la carte suivante, le texte complet est dans le panneau de droite." style="width: 669px; height: 418px; object-fit: cover; object-position: top left; border-radius: 6px; border: 1px solid rgba(255,255,255,0.09)">
+      <figcaption style="font-size: 13px; line-height: 1.5; color: #9a9aa4">La réplique s'arrête sur « carav… », les réponses tiennent en « 4 RÉPONSES », un nœud de test chevauche la carte suivante. Le texte entier est à droite, dans un panneau de 300 px.</figcaption>
+    </figure>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 9px">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #84848f">PROPOSÉ — VUE GRAPHE, PALIER « ÉCRIRE »</span>
+      <img src="captures/apres-graphe.png" alt="La proposition : la réplique d'ouverture entière dans la carte, les quatre réponses écrites en entier avec leurs puces, les quatre issues du test en sorties colorées, une suite en cours d'écriture reliée en pointillé." style="width: 669px; height: 418px; object-fit: cover; object-position: top left; border-radius: 6px; border: 1px solid rgba(255,255,255,0.09)">
+      <figcaption style="font-size: 13px; line-height: 1.5; color: #9a9aa4">La réplique entière, les réponses en entier avec leurs puces, les 4 issues du test en sorties colorées, la suite manquante en pointillé. Plus de panneau de droite.</figcaption>
+    </figure>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 9px">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #84848f">AUJOURD'HUI — PAGE GÉNÉRER</span>
+      <img src="captures/avant-01-generer.png" alt="La page Générer actuelle : colonne de fiches GDD à gauche, brief vide au centre, colonne Prompt à droite, bouton Générer le premier nœud en bas." style="width: 669px; height: 418px; object-fit: cover; object-position: top left; border-radius: 6px; border: 1px solid rgba(255,255,255,0.09)">
+      <figcaption style="font-size: 13px; line-height: 1.5; color: #9a9aa4">Trois colonnes et trois sections (Générer, Éditer, Graphe) pour un même dialogue ; le contexte GDD est global, pas propre à la scène.</figcaption>
+    </figure>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 9px">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #84848f">PROPOSÉ — VUE SCRIPT</span>
+      <img src="captures/apres-script.png" alt="La proposition : la scène ouverte en vue Script, fiche compacte en haut, réplique de Grish en serif, réponses d'Uresaïr avec leurs puces, issue Réussite suivie, fil du chemin et compteurs à droite, barre d'état en bas." style="width: 669px; height: 418px; object-fit: cover; object-position: top left; border-radius: 6px; border: 1px solid rgba(255,255,255,0.09)">
+      <figcaption style="font-size: 13px; line-height: 1.5; color: #9a9aa4">La scène se lit comme un scénario ; la fiche porte la distribution ; le fil dit où l'on est et ce qui reste (209 suites, 12 réponses vides).</figcaption>
+    </figure>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.09); font-size: 13px; line-height: 1.5; color: #9a9aa4">
+    <p style="margin: 0"><span style="display: block; margin-bottom: 5px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #f2f2f5">≈ 720 → 1 188 PX</span>de largeur de graphe à 1 440 px, classeur ouvert (1 384 replié) ; mesure de gauche prise sur la capture.</p>
+    <p style="margin: 0"><span style="display: block; margin-bottom: 5px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #f2f2f5">67 NŒUDS → 19 RÉPLIQUES</span>les tests deviennent des sorties de la réponse.</p>
+    <p style="margin: 0"><span style="display: block; margin-bottom: 5px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #f2f2f5">3 SECTIONS → 1 SCÈNE</span>Script, Graphe, Jouer sur le même document.</p>
+    <p style="margin: 0"><span style="display: block; margin-bottom: 5px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #f2f2f5">≥ 3 GESTES → 1 CLIC</span>pour corriger une réponse depuis le graphe.</p>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1060}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
