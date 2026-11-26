@@ -1,0 +1,11 @@
+# Surcharge projet DialogueGenerator pour bmad-dev-auto (BMAD 6.10, dans .claude/skills/), le skill que
+# bmad-loop lance à chaque story : bmad-loop le cherche dans l'arborescence du dépôt, pas dans le plugin.
+# Mêmes consignes que bmad-build.toml ; elles sont dans .claude/rules/ui_refonte_scene.md (« Coder une story »).
+
+[workflow]
+
+persistent_facts = [
+  "file:{project-root}/.claude/rules/ui_refonte_scene.md",
+  "file:{project-root}/docs/design/refonte-scene/README.md",
+  "file:{project-root}/docs/architecture/refonte-scene-architecture.md",
+]

@@ -192,7 +192,7 @@ development_status:
   9-6-intégrer-stats-systèmes-de-jeu-attributs-personnage-réputation-v30-fr94: done
   epic-9-retrospective: done
   # ── Epic 20 — Refonte « Scène », PRIORITAIRE (validée le 2026-11-20) ─────────────────────────────────────────
-  # Placée en tête des blocs backlog pour que « create the next story » tombe sur elle. Ordre = ordre d'exécution,
+  # Placée en tête des blocs backlog pour que bmad-loop (et « la prochaine story ») tombe sur elle. Ordre = ordre d'exécution,
   # révisé le 2026-11-20 après le contrôle de readiness (planning-artifacts/implementation-readiness-report-2026-11-20.md).
   # Les stories 18-x reprises d'Epic 18 sont listées ici, à leur place dans l'ordre ; le bloc epic-18 plus bas ne garde
   # que les stories remplacées. Détail : planning-artifacts/epics/epic-20.md et epic-18.md.
@@ -239,7 +239,7 @@ development_status:
   # ── Epic 18 — intégrée à epic-20 le 2026-11-20 ───────────────────────────────────────────────────────────────
   # Ses stories actives (18-4, 18-8, 18-5a, 18-5b, 18-6, 18-7, 18-9, 18-11) sont dans le bloc epic-20 ci-dessus.
   # Le fichier n'a pas de statut « remplacée » (statuts valides : backlog, ready-for-dev, in-progress, review, done) :
-  # les stories remplacées passent en done avec un commentaire, pour que create-story ne les reprenne pas.
+  # les stories remplacées passent en done avec un commentaire, pour que bmad-loop ne les reprenne pas.
   epic-18: backlog
   18-1-densite-adaptative-replique-integrale-et-titre-rendu-fr123: done  # remplacée par 20-7 et 20-8, non implémentée
   18-2-reponses-pj-affichees-en-lignes-dans-le-noeud-fr124: done  # remplacée par 20-7 et 20-8, non implémentée
@@ -296,7 +296,7 @@ development_status:
 action_items:
   - epic: 7
     action: "Questions pré-US en français clair (options concrètes ; jargon en note technique)"
-    owner: "Amelia / create-story"
+    owner: "Amelia / bmad-build"
     status: open
   - epic: 7
     action: "Validation manuelle par lots / fin d’epic (pas d’obligation par US)"

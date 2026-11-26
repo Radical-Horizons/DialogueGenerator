@@ -1,21 +1,16 @@
-# Surcharge projet DialogueGenerator pour le skill bmad-create-story.
+# Surcharge projet DialogueGenerator pour bmad-create-story (cycle BMAD 6.10, remplacé par bmad-build).
 #
-# Le skill charge {planning_artifacts}/*ux*/*.md et *architecture*/*.md, donc la spec
-# ux-design-specification/ (antérieure) et planning-artifacts/architecture/ (v10), mais
-# ni le README de la refonte « Scène » ni son architecture. Sans cette surcharge, une
-# story de l'epic 20 reçoit comme contexte UX trois colonnes, un panneau droit permanent,
-# AIGenerationPanel en modale et Ctrl+S (contrôle de readiness du 2026-11-20, constat B3).
+# Gardée tant que le skill reste installé : il charge {planning_artifacts}/*ux*/*.md et *architecture*/*.md, donc
+# la spec ux-design-specification/ et planning-artifacts/architecture/ (v10), remplacées par la refonte « Scène »
+# (readiness du 2026-11-20, constat B3). Consignes : .claude/rules/ui_refonte_scene.md (« Coder une story »),
+# partagées avec bmad-build.toml et bmad-dev-auto.toml.
 #
 # Les tableaux persistent_facts s'ajoutent à ceux du skill (project-context.md reste chargé).
 
 [workflow]
 
 persistent_facts = [
+  "file:{project-root}/.claude/rules/ui_refonte_scene.md",
   "file:{project-root}/docs/design/refonte-scene/README.md",
   "file:{project-root}/docs/architecture/refonte-scene-architecture.md",
-  "file:{project-root}/.claude/rules/ui_refonte_scene.md",
-  "Pour toute story de l'epic 20 (refonte « Scène »), et pour les stories d'Epic 18 qu'elle reprend (18.4, 18.5a, 18.5b, 18.6, 18.7, 18.8, 18.9, 18.11), la spécification UX de _bmad-output/planning-artifacts/ux-design-specification/ est REMPLACÉE : n'en tirer aucun critère d'acceptation. Font foi docs/design/refonte-scene/README.md, ses boards docs/design/refonte-scene/*.dc.html, docs/architecture/refonte-scene-architecture.md (A1–A16) et _bmad-output/planning-artifacts/epics/epic-20.md. Seule la charte de design-system-foundation.md reste valable (couleurs, polices, filets, un seul bouton bleu). Le dossier planning-artifacts/architecture/ (v10) ne porte aucune décision de la refonte.",
-  "Seuils de l'epic 20 : ceux de la section « Seuils de mesure » d'epic-20.md (ADR-008 pour le chargement, la frappe et le glisser ; p95 des images ≤ 16 ms et aucune tâche > 50 ms pour le zoom). Ne pas en inventer d'autres.",
-  "Raccourcis toujours en CTRL (utilisateur sous Windows), jamais avec le symbole Commande de macOS ; ni ALT seul, ni CTRL+1–9, ni CTRL+N.",
-  "Avant d'écrire une story : vérifier dans le code ce qui est déjà livré (ex. 18.4 : regroupement des frappes livré par le commit 61462f0a8, testé dans frontend/src/__tests__/graphStore.updateNodeUndo.test.ts) et partir du plan de test _bmad-output/test-artifacts/test-design-epic-20.md (couverture existante, risques, P0).",
 ]
