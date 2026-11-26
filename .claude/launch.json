@@ -4,13 +4,13 @@
     {
       "name": "dialogue-generator-dev",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["scripts/dev.js"],
+      "runtimeArgs": ["scripts/dev.js", "--no-browser"],
       "port": 3000
     },
     {
       "name": "dialogue-generator-dev-sans-llm",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["-e", "process.env.OPENAI_API_KEY='sk-local-sans-appel';process.env.DEV_FAST_STARTUP='1';require('./scripts/dev.js')"],
+      "runtimeArgs": ["-e", "process.env.OPENAI_API_KEY='sk-local-sans-appel';process.env.DEV_FAST_STARTUP='1';process.env.DEV_NO_BROWSER='1';require('./scripts/dev.js')"],
       "port": 3000
     },
     {

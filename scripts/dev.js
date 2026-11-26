@@ -18,6 +18,12 @@ const frontendOnly = args.includes('--frontend') || args.includes('--front');
 const stopOnly = args.includes('--stop');
 const fastStartup =
   args.includes('--fast') || process.env.DEV_FAST_STARTUP === '1';
+// Un agent Claude Code vérifie l'UI dans son propre navigateur : ouvrir Chrome
+// sur le poste de l'utilisateur ne sert à rien et lui vole le focus.
+const skipBrowser =
+  args.includes('--no-browser') ||
+  process.env.DEV_NO_BROWSER === '1' ||
+  Boolean(process.env.CLAUDECODE);
 
 const printRedactedConfig =
   args.includes('--print-config') ||
@@ -174,6 +180,9 @@ function findChromePath() {
 
 // Fonction pour ouvrir le navigateur
 function openBrowser(url) {
+  if (skipBrowser) {
+    return;
+  }
   try {
     if (process.platform === 'win32') {
       const chromePath = findChromePath();
@@ -337,7 +346,9 @@ async function handleAll() {
     console.log('   - Vérifiez la console du navigateur (F12) pour les erreurs');
     console.log('   - Vérifiez que le WebSocket HMR est connecté (onglet Network > WS)');
     console.log('   - Utilisez \'npm run dev:clean\' pour forcer un rebuild complet\n');
-    console.log('🌐 Ouverture du navigateur...\n');
+    if (!skipBrowser) {
+      console.log('🌐 Ouverture du navigateur...\n');
+    }
 
     openBrowser(frontendUrl);
     devStartupTiming.mark('browser_launch_scheduled');
