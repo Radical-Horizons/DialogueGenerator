@@ -48,7 +48,7 @@ tranche 2) ; Epic 19 est remplacée. Seuils de mesure : section « Seuils de mes
 | Découpage | `_bmad-output/planning-artifacts/epics/epic-20.md` |
 | Recherche (sources) | `_bmad-output/planning-artifacts/research/ux-refonte-scene-2026-11-19.md` |
 | Canvas | <https://claude.ai/artifact/VynbrAeNhQULRXhbnVnTDW> |
-| Ambiance (teintes de lieu, portraits, couvertures) | canvas <https://claude.ai/artifact/GVZfj6RsZqGQGwEg8X5SxN>, architecture A16, story 20.20 |
+| Ambiance (teintes de lieu, portraits, couvertures) | board `docs/design/refonte-scene/Ambiance.dc.html` (aussi sur le canvas), architecture A16, story 20.20 |
 | Discussion avec l'IA (front de la PR #103) | architecture A15, stories 20.21–20.23, `docs/architecture/conversations-ia.md` |
 
 Ouvrir les prototypes : configuration `design-refonte-scene` de `.claude/launch.json` (port 8973), puis
