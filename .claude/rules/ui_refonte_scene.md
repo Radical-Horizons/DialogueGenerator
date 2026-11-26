@@ -18,9 +18,25 @@ paths:
 **Validée le 2026-11-20 ; l'epic 20 est prioritaire et passe devant les autres.** Pour chaque écran qu'elle couvre,
 la refonte Scène remplace la maquette 2026 (`docs/design/refonte-ui-2026/`, règle `ui_redesign_2026.md`), dont la
 charte (couleurs, polices, filets, un seul bouton bleu) reste valable. Un écran pas encore repris par une story livrée
-garde son code actuel. Ne pas implémenter un écran Scène sans sa story Epic 20 créée (`bmad-create-story`).
+garde son code actuel. Ne pas implémenter un écran Scène hors d'une story Epic 20 menée par `bmad-build`
+(voir « Coder une story » ci-dessous).
 Epic 18 est intégrée à l'epic 20 (18.4, 18.8, 18.5a en tranche 1 bis ; 18.5b, 18.6, 18.7, 18.9, 18.11 en
 tranche 2) ; Epic 19 est remplacée. Seuils de mesure : section « Seuils de mesure » d'`epic-20.md` (ADR-008).
+
+## Coder une story
+
+- **Une session par story, un seul skill** : `bmad-build` (plugin `bmad-method`) lit la story dans `epic-20.md`, écrit
+  sa spec, la fait approuver, implémente, relit et met `sprint-status.yaml` à jour. Il n'y a plus de fichier de story
+  préparé à part : `bmad-create-story` et `bmad-dev-story` sont l'ancien cycle (BMAD 6.10). Sans surveillance :
+  `bmad-loop run` (skill `bmad-dev-auto`). Détail : section BMAD de `CLAUDE.md`.
+- **La spec UX de `_bmad-output/planning-artifacts/ux-design-specification/` est remplacée** pour l'epic 20 et les
+  stories d'Epic 18 qu'elle reprend : n'en tirer aucun critère. Seule la charte de `design-system-foundation.md`
+  reste valable. Le dossier `planning-artifacts/architecture/` (v10) ne porte aucune décision de la refonte.
+- **Avant d'écrire la spec** : vérifier dans le code ce qui est déjà livré (ex. 18.4 : regroupement des frappes,
+  commit `61462f0a8`, `frontend/src/__tests__/graphStore.updateNodeUndo.test.ts`) et partir du plan de test
+  `_bmad-output/test-artifacts/test-design-epic-20.md` (couverture existante, risques, P0).
+- Ces consignes sont injectées dans `bmad-build`, `bmad-dev-auto` et `bmad-create-story` par
+  `_bmad/custom/<skill>.toml` (`persistent_facts`, qui chargent ce fichier).
 
 ## Sources de vérité
 

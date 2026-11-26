@@ -2,8 +2,9 @@
 
 **Status:** **validée le 2026-11-20, prioritaire** — malgré son numéro, l'epic 20 passe devant les autres et démarre
 tout de suite. FR131–FR145 sont reportées dans `requirements-inventory.md` ; Epic 19 est remplacée ; les stories
-d'Epic 18 utiles à la refonte sont intégrées ici (tranche 1 bis). Chaque story se prépare avec `bmad-create-story` et
-se code dans une session dédiée (les tailles ci-dessous sont en sessions de développement).
+d'Epic 18 utiles à la refonte sont intégrées ici (tranche 1 bis). Chaque story se code dans une session dédiée avec
+`bmad-build`, qui écrit sa spec, la fait approuver, implémente et relit d'un seul tenant ; sans surveillance,
+`bmad-loop run` (les tailles ci-dessous sont en sessions de développement).
 
 Les auteurs ouvrent une **scène** plutôt qu'une section. La scène porte sa distribution et son contexte, se lit et
 s'écrit comme un scénario (SCRIPT), se structure dans un graphe dont les cartes portent le texte (GRAPHE), et se joue

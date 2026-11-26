@@ -433,7 +433,7 @@ Principe du dépôt : tout ce qui est unitaire, composant ou API tourne à chaqu
 
 ### Risques sur le plan
 
-- **`sprint-status.yaml` en retard sur le code** (18.3, 18.4 partiellement livrées) : une story recréée « from scratch » dupliquerait du code et des tests. *Contingence :* chaque `bmad-create-story` de la tranche 1 bis part de l'inventaire ci-dessus.
+- **`sprint-status.yaml` en retard sur le code** (18.3, 18.4 partiellement livrées) : une story recréée « from scratch » dupliquerait du code et des tests. *Contingence :* chaque spec `bmad-build` de la tranche 1 bis part de l'inventaire ci-dessus.
 - **Estimations de sessions non recalées** (l'epic le dit) : *contingence :* recaler ce plan après 20.1 et 20.2.
 
 ---

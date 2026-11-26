@@ -1,0 +1,17 @@
+# Surcharge projet DialogueGenerator pour bmad-build (plugin bmad-method 6.13), le skill qui code une story
+# d'un seul tenant : spec, approbation, implémentation, revue, sprint-status.
+#
+# Sans elle, une story de l'epic 20 tire son contexte UX de ux-design-specification/ (trois colonnes, panneau
+# droit permanent, Ctrl+S), remplacée par la refonte « Scène » (readiness du 2026-11-20, constat B3).
+# Les consignes elles-mêmes sont dans .claude/rules/ui_refonte_scene.md (« Coder une story ») : une seule
+# copie pour bmad-build, bmad-dev-auto et bmad-create-story.
+#
+# Les tableaux persistent_facts s'ajoutent à ceux du skill (project-context.md reste chargé).
+
+[workflow]
+
+persistent_facts = [
+  "file:{project-root}/.claude/rules/ui_refonte_scene.md",
+  "file:{project-root}/docs/design/refonte-scene/README.md",
+  "file:{project-root}/docs/architecture/refonte-scene-architecture.md",
+]

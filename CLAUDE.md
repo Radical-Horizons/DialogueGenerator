@@ -128,11 +128,18 @@ Spécialistes dans `.claude/agents/`. Invocables via l'outil `Agent` avec leur `
 
 ## BMAD
 
-BMAD est installé pour Claude Code (`_bmad/_config/manifest.yaml` → `ides: [claude-code]`). Les skills vivent dans `.claude/skills/bmad-*` et se déclenchent naturellement ou via `/nom-du-skill`. Point d'entrée en cas de doute : **`/bmad-help`**.
+Deux générations cohabitent (état au 2026-11-26) :
 
-Boucle de dev non supervisée : **bmad-loop** (`bmad-loop run`, `bmad-loop tui`). Config : `.bmad-loop/policy.toml`. Prérequis installés : `psmux` (multiplexeur Windows) et le CLI `claude`. Le worktree doit être **propre** avant `bmad-loop run`.
+| Source | Version | Ce qu'on en utilise |
+|---|---|---|
+| Plugins utilisateur `bmad-method` et `bmad-toolbox` | 6.13.0-next | **`bmad-build`** : coder une story d'un seul tenant (spec, approbation, implémentation, revue, `sprint-status`). Aussi `bmad-spec`, `bmad-walkthrough`, `bmad-review`. |
+| Installation classique `_bmad/` + `.claude/skills/bmad-*` | 6.10.1-next.20 | Les autres modules (TEA, BMB, CIS, WDS, `bmad-loop`) et **`bmad-dev-auto`**, que lance la boucle |
 
-⚠️ Ne jamais écrire à la main sous `_bmad/` : l'installeur BMAD en est propriétaire et régénère tout. Les surcharges durables vont dans `_bmad/custom/` (un fichier `<nom-du-skill>.toml` par skill surchargé).
+- **Story d'epic → `bmad-build`.** `bmad-create-story` puis `bmad-dev-story` sont l'ancien cycle : la 6.13 les a retirés, ne plus les recommander. Le catalogue `_bmad/_config/bmad-help.csv` (lu par `/bmad-help`) les donne encore comme parcours obligatoire de la phase 4 : l'ignorer sur ce point.
+- **`_bmad/scripts/`** vient du `setup` 6.13 (`render_skill.py`, dont dépend `bmad-build`) ; les skills 6.10 fonctionnent avec (vérifié le 2026-11-26). ⚠️ Sous Windows, `setup.py` 6.13.0-next échoue en `WinError 183` (`replace_dir` renomme `_bmad` vers un dossier que `mkdtemp` vient de créer) : le relancer via un lanceur qui retire ce dossier avant le renommage.
+- Boucle non supervisée : **bmad-loop** (`bmad-loop run`, `bmad-loop tui`, préflight `bmad-loop validate`). Config : `.bmad-loop/policy.toml` (gitignoré, à copier dans un worktree). Prérequis : `psmux` et le CLI `claude`. Le worktree doit être **propre**. La boucle cherche son skill de dev dans **`.claude/skills/`** (`bmad-build-auto`, sinon `bmad-dev-auto`) : le plugin ne la concerne pas.
+
+⚠️ Ne jamais écrire à la main sous `_bmad/` : l'installeur BMAD en est propriétaire et régénère tout. Les surcharges durables vont dans `_bmad/custom/` (un fichier `<nom-du-skill>.toml` par skill surchargé). Epic 20 : `bmad-build.toml`, `bmad-dev-auto.toml` et `bmad-create-story.toml` chargent la même règle `ui_refonte_scene.md`.
 
 **Brownfield** : le dépôt a déjà ~259 fichiers pytest, ~231 Vitest et 20 specs Playwright. La contrainte « ne pas regénérer de tests déjà couverts » est injectée via `_bmad/custom/bmad-testarch-automate.toml` (`persistent_facts`) — elle remplace l'ancienne règle `tea_automate_brownfield.md`, devenue caduque quand les workflows TEA sont passés en skills.
 
