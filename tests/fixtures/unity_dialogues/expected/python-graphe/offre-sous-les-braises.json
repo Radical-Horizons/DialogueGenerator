@@ -1,0 +1,100 @@
+{
+  "schemaVersion": "1.1.0",
+  "nodes": [
+    {
+      "id": "START",
+      "speaker": "Grish T’vok",
+      "line": "*Dans test l’arrière-salle de la taverne, la caravane de Grish bloque presque la porte ; une odeur de cuivre chauffé couvre celle de la bière froide.* « Ne touche pas à la bourse sur la table. Elle est pour qui accepte de traverser les Marais de Verre avant l’aube et de rapporter une caisse que personne ne doit voir. Si tu demandes ce qu’elle contient, le prix double. »",
+      "consequences": {
+        "flag": "GRISH_MISSION_SECRETE_PROPOSEE",
+        "description": "Grish T’vok confie à Uresaïr l’existence d’un transport clandestin et dangereux à travers les Marais de Verre."
+      },
+      "choices": [
+        {
+          "choiceId": "choice_START_0",
+          "text": "« Je test prends la caisse, mais je veux savoir qui la cherche. »",
+          "choiceEffects": [],
+          "test": "Sociabilité+Affaires:10",
+          "targetNode": "END"
+        },
+        {
+          "choiceId": "choice_START_1",
+          "text": "« Garde ton secret. Dis-moi seulement ce qui rend cette route si dangereuse. »",
+          "choiceEffects": [],
+          "targetNode": "node-5af292b19b22489abb344657d5fb4e8e"
+        },
+        {
+          "choiceId": "choice_START_2",
+          "text": "« Si la caisse est assez précieuse pour exiger le silence, elle mérite aussi mon tarif. »",
+          "traitRequirements": [
+            {
+              "trait": "Orgueilleux",
+              "minValue": 5
+            }
+          ],
+          "choiceEffects": [],
+          "test": "Sociabilité+Affaires:12",
+          "targetNode": "END"
+        },
+        {
+          "choiceId": "choice_START_3",
+          "text": "*[Uresaïr fait glisser la bourse vers Grish sans y toucher.]* « Trouve quelqu’un d’assez désespéré pour vendre son ignorance. »",
+          "traitRequirements": [
+            {
+              "trait": "Lucide",
+              "minValue": 5
+            }
+          ],
+          "choiceEffects": [],
+          "targetNode": "END"
+        }
+      ]
+    },
+    {
+      "id": "node-5af292b19b22489abb344657d5fb4e8e",
+      "speaker": "Grish T’vok",
+      "line": "*Grish referme brusquement les doigts sur la bourse ; au-dehors, un cri métallique résonne contre les volets.* « La route n’est pas dangereuse : elle est surveillée. Les Marais se souviennent de ceux qui les traversent, et cette nuit, quelqu’un s’attend à nous voir arriver. Je peux te donner un guide et une carte, mais la caisse devra repartir avec moi — ou tu peux prendre la bourse et accepter que je fasse disparaître ton nom avant l’aube. »",
+      "isLongRest": false,
+      "choices": [
+        {
+          "choiceId": "choice_node-5af292b19b22489abb344657d5fb4e8e_0",
+          "text": "« Donne-moi la carte et le nom de celui qui nous attend. Si tu me condamnes, je veux au moins savoir pour qui je risque ma peau. »",
+          "allowInfluenceForcing": false,
+          "influenceDelta": 1,
+          "respectDelta": 0,
+          "choiceEffects": [],
+          "test": "Perception+Investigation:8",
+          "targetNode": "END"
+        },
+        {
+          "choiceId": "choice_node-5af292b19b22489abb344657d5fb4e8e_1",
+          "text": "« Je prends la bourse, mais la caisse reste à moi. Tu négocies avec un voleur, pas avec ton fantôme. »",
+          "allowInfluenceForcing": true,
+          "influenceThreshold": 3,
+          "influenceDelta": 0,
+          "respectDelta": 2,
+          "choiceEffects": [],
+          "test": "Présence+Intimidation:9",
+          "targetNode": "END"
+        },
+        {
+          "choiceId": "choice_node-5af292b19b22489abb344657d5fb4e8e_2",
+          "text": "« Je ne transporterai rien pour quelqu’un qui refuse de dire ce qu’il met entre mes mains. Trouve un autre inconscient. »",
+          "allowInfluenceForcing": false,
+          "influenceDelta": -1,
+          "respectDelta": 1,
+          "choiceEffects": [],
+          "targetNode": "END"
+        },
+        {
+          "choiceEffects": [],
+          "text": "*[Uresaïr fait glisser la bourse vers Grish sans y toucher.]* « Trouve quelqu’un d’assez désespéré pour vendre son ignorance. »",
+          "choiceId": "choice_node-5af292b19b22489abb344657d5fb4e8e_3",
+          "targetNode": "END"
+        }
+      ],
+      "displayName": "*Grish referme brusquement les doigts sur la bourse ; au-dehors, un cri métallique résonne contre les volets.* « La route n’est pas dangereuse : elle est surveillée. Les Marais se souviennent de ceux qui les traversent, et cette nuit, quelqu’un s’attend à nous voir arriver. Je peux te donner un guide et une carte, mais la caisse devra repartir avec moi — ou tu peux prendre la bourse et accepter que je fasse disparaître ton nom avant l’aube. »"
+    }
+  ],
+  "title": "Dialogue Unity"
+}

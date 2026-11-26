@@ -1,0 +1,3 @@
+# Copies octet pour octet des dialogues sources : deux d'entre eux sont en CRLF,
+# la règle racine (eol=lf) les réécrirait au commit.
+*.json -text

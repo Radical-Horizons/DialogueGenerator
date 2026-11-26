@@ -1,0 +1,2577 @@
+{
+  "nodes": [
+    {
+      "id": "START",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "START",
+        "speaker": "Grish T’vok",
+        "line": "Ah. Une présence qui marche sur le monde sans y laisser d'empreinte. Je m'appelle Grish T'vok, caravane-atelier ambulante, collectionneur de choses qui ont mal tourné. *Il incline légèrement sa masse, des étincelles s'échappant d'une trappe de son torse.* Vos anneaux de lumière et cette distance rituelle... pas commun. Je n'ai guère d'oreille pour les prophéties, mais j'entends la matière. Si vos objets pleurent, je peux les écouter et tenter d'en recoudre la mélodie. Et si vous portez des fissures qui se taisent, je ne les brise pas, je les arrange. Dites, Maîtresse, acceptez-vous qu'un Moribandon touche ce qui vous entoure ?",
+        "test": "Raison+Artisanat:10",
+        "consequences": {
+          "flag": "MetGrish",
+          "description": "Le forgeron identifie la distance rituelle d'Uresaïr et propose ses services; enregistre une trace relationnelle."
+        },
+        "startState": 1,
+        "choices": [
+          {
+            "text": "Dans la tapisserie de l'existence, vos outils peuvent-ils suturer les fissures sans effacer ce qu'elles portent? Je n'offre pas ma mémoire, mais je cherche une réparation qui respecte les cicatrices.",
+            "traitRequirements": [
+              {
+                "trait": "Empathique",
+                "minValue": 5
+              }
+            ],
+            "respectDelta": 1,
+            "condition": "",
+            "influenceDelta": null,
+            "choiceId": "__idx_0",
+            "testCriticalFailureNode": "node-9db09f1fd9614001bc1a6f6e92865f49",
+            "testFailureNode": "node-36c540079b3c4f11aa84ec7b6438601b",
+            "testSuccessNode": "node-383617adbd9a4cbaa35c87c610ba15b6",
+            "testCriticalSuccessNode": "node-f884e57528a9493ca9134875935378de",
+            "test": "Raison+Artisanat:12"
+          },
+          {
+            "text": "Je ne cherche pas de confidences. Répare cette caravane, et je te rendrai un service : un artefact scellé, pas de questions. Est-ce que tu sais travailler avec des reliques anciennes ?",
+            "traitRequirements": [
+              {
+                "trait": "Loyal",
+                "minValue": 5
+              }
+            ],
+            "influenceDelta": 1,
+            "condition": "",
+            "respectDelta": null,
+            "choiceId": "__idx_1",
+            "test": "Raison+Artisanat:14"
+          },
+          {
+            "text": "Garde tes mains pour tes villages. Je n'ai nul besoin d'un charlatan des déchets. Pars, avant que je ne te rende ta misère.",
+            "traitRequirements": [
+              {
+                "trait": "Orgueilleuse",
+                "minValue": 5
+              }
+            ],
+            "influenceDelta": -1,
+            "respectDelta": -1,
+            "condition": "",
+            "choiceId": "__idx_2",
+            "testCriticalFailureNode": "node-d281ad35450c4ed59bc5ec353aa203e8",
+            "testFailureNode": "node-f738dabb50c547f696efa85c9bf7d1f6",
+            "testSuccessNode": "node-3e39045003db4065a1c8c9b010c881ba",
+            "testCriticalSuccessNode": "node-03473c45273a4a01a44889b9ed561e39",
+            "test": "Force+Commandement:11"
+          },
+          {
+            "choiceId": "__idx_3",
+            "text": "",
+            "condition": "",
+            "influenceDelta": null,
+            "respectDelta": null
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-d281ad35450c4ed59bc5ec353aa203e8",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-d281ad35450c4ed59bc5ec353aa203e8",
+        "speaker": "Grish T'vok",
+        "line": "Vos mots ont tenté de me repousser, Maîtresse — et la main qui voulait me contraindre tremble si mal. *Un grincement mécanique, un cliquetis; une petite mâchoire en acier sort d'une trappe et se referme autour de votre poignet.* Vous avez écrasé votre anneau contre ma carrosserie. Il a crié. Les sécurités d'atelier s'enclenchent sur agression physique. L'anneau fume; sa lueur se fendille. Je n'aime pas casser ce que je touche, mais je n'accepte pas qu'on me prenne pour cible. Considérez votre geste comme une dette — et une alerte pour la caravane.",
+        "consequences": {
+          "flag": "HOSTILE_ENCOUNTER",
+          "description": "Échec critique : le PJ a tenté d'intimider/forcer Grish et a échoué. L'anneau de lumière du PJ est fissuré (perte temporaire de l'usage rituel), la caravane marque le PJ comme agressif (respect réduit) et Grish active une contention mécanique sur le poignet du PJ."
+        },
+        "isLongRest": false,
+        "choices": [
+          {
+            "text": "Reculez. Non — je... pardonnez-moi. Ce n'était pas mon intention. Laissez-moi réparer ça.",
+            "respectDelta": -1,
+            "condition": "",
+            "influenceDelta": null,
+            "choiceId": "__idx_0",
+            "traitRequirements": [
+              {
+                "trait": "Empathique",
+                "minValue": 5
+              }
+            ],
+            "test": "Raison+Rhétorique:13"
+          },
+          {
+            "text": "Dégagez vos griffes de moi ! (Vous tentez de repousser la mâchoire mécanique de force — encore.)",
+            "respectDelta": -2,
+            "condition": "",
+            "influenceDelta": null,
+            "choiceId": "__idx_1",
+            "traitRequirements": [
+              {
+                "trait": "Loyal",
+                "minValue": 5
+              }
+            ],
+            "test": "Force+Commandement:13"
+          },
+          {
+            "text": "Calme. Vous retirez votre main, vous vous asseyez, vous vous occupez de la blessure — pas de confrontation.",
+            "respectDelta": 0,
+            "condition": "",
+            "influenceDelta": null,
+            "choiceId": "__idx_2",
+            "traitRequirements": [
+              {
+                "trait": "Orgueilleuse",
+                "minValue": 5
+              }
+            ],
+            "test": "Constitution+Médecine:12"
+          },
+          {
+            "text": "",
+            "condition": "",
+            "influenceDelta": null,
+            "respectDelta": null,
+            "choiceId": "__idx_3",
+            "targetNode": "manual-e23d929d-a045-49cb-88fb-bac225443304"
+          },
+          {
+            "text": "",
+            "condition": "",
+            "influenceDelta": null,
+            "respectDelta": null,
+            "choiceId": "__idx_4",
+            "targetNode": "NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4"
+          }
+        ],
+        "title": "Échec critique",
+        "status": "accepted",
+        "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+        "contextGddHash": "952122626"
+      }
+    },
+    {
+      "id": "node-f738dabb50c547f696efa85c9bf7d1f6",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-f738dabb50c547f696efa85c9bf7d1f6",
+        "speaker": "Grish T'vok",
+        "line": "Hmph. Soit. Votre fermeté est notée, Maîtresse.\n\nJe ne forcerai pas le contact quand on me le refuse — et je ne mendie pas d'affections. Mais sachez ceci : certains chocs se recousent mieux sous une main qui sait. Refuser, c'est garder la cicatrice en place. Je n'en démords pas : sans votre permission, je n'effleurerai rien qui vous appartienne.\n\nCela dit, je peux encore écouter à distance. Je peux expliquer comment bander une articulation, préparer un cataplasme pour métaux qui mugissent, ou accepter un gage — un objet en dépôt, une pièce, une promesse écrite — si vous voulez que je touche malgré tout. Choisissez, Maîtresse. Votre décision reste, mais elle porte un prix.",
+        "consequences": {
+          "flag": "REFUSAL_CONSEQUENCES",
+          "description": "Le joueur refuse le contact. Grish se refroidit : -10 respect. Il n'offrira que des services à distance et exigera une garantie (objet, paiement ou preuve de confiance) pour toute intervention directe."
+        },
+        "choices": [
+          {
+            "text": "Très bien. Montrez ce que vous pouvez faire à distance.",
+            "respectDelta": -5,
+            "choiceId": "__idx_0"
+          },
+          {
+            "text": "Je vous donnerai une garantie. Laissez-moi un gage, et vous pourrez toucher mes affaires.",
+            "respectDelta": 0,
+            "choiceId": "__idx_1",
+            "test": "Raison+Rhétorique:12"
+          },
+          {
+            "text": "Je préfère garder mes distances. Parlez-moi plutôt de vos objets mal tournés.",
+            "respectDelta": 0,
+            "choiceId": "__idx_2"
+          }
+        ],
+        "title": "Échec",
+        "status": "accepted",
+        "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+        "contextGddHash": "952122626"
+      }
+    },
+    {
+      "id": "node-3e39045003db4065a1c8c9b010c881ba",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-3e39045003db4065a1c8c9b010c881ba",
+        "speaker": "Grish T'vok",
+        "line": "Très bien, Maîtresse. Votre volonté se fait sentir jusque dans mes rouages. *Un claquement doux parcourt sa carcasse, et une goutte d'huile scintille comme une larme.* Approchez, ne craignez rien : je n'arrache rien qui ne puisse être recousu. Donnez‑moi un objet — votre anneau, votre lame ébréchée, ou même la semelle qui soupire — ou laissez ma main effleurer la faille qui vous habite. J'écouterai la matière, je murmurerai sa mémoire, et je corrigerai ce qui peut l'être. En gage, je vous offre un premier ajustement sans charge. Qu'en dites‑vous ?",
+        "consequences": {
+          "flag": "grish_allowed_touch",
+          "description": "Grish est autorisé à toucher et réparer les objets/plaies. Il offre un premier ajustement gratuit et gagne du respect envers le groupe."
+        },
+        "isLongRest": false,
+        "choices": [
+          {
+            "text": "Je vous tends l'anneau de lumière. Faites ce que vous savez faire.",
+            "allowInfluenceForcing": true,
+            "influenceDelta": 1,
+            "respectDelta": 1,
+            "choiceId": "__idx_0",
+            "test": "Perception+Artisanat:10"
+          },
+          {
+            "text": "Approche, alors. Tu peux toucher aussi l'armure — ses griffes me gênent.",
+            "allowInfluenceForcing": true,
+            "influenceDelta": 1,
+            "respectDelta": 2,
+            "choiceId": "__idx_1",
+            "test": "Force+Commandement:13"
+          },
+          {
+            "text": "J'entends ta générosité, mais quel est ton prix au-delà du premier ajustement ?",
+            "allowInfluenceForcing": true,
+            "influenceDelta": 0,
+            "respectDelta": 0,
+            "choiceId": "__idx_2",
+            "test": "Raison+Diplomatie:12"
+          },
+          {
+            "text": "Non. Je préfère me débrouiller seul pour l'instant.",
+            "allowInfluenceForcing": true,
+            "influenceDelta": -1,
+            "respectDelta": -1,
+            "choiceId": "__idx_3"
+          }
+        ],
+        "title": "Réussite",
+        "status": "accepted",
+        "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+        "contextGddHash": "952122626"
+      }
+    },
+    {
+      "id": "node-03473c45273a4a01a44889b9ed561e39",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-03473c45273a4a01a44889b9ed561e39",
+        "speaker": "Grish T'vok",
+        "line": "Ha. Ah—voilà qui a de la poigne. Vos doigts ne commandent pas, Maîtresse, ils imposent la confiance. Très bien. Approchez vos anneaux.\n\n*Il étend une main massive et ses doigts-étincelles effleurent l'air ; une couture de lumière s'ouvre dans la poitrine de sa carapace.*\n\nJe sentirai ce qu'ils ont retenu. Si vos objets pleurent, je leur rendrai une voix plus douce ; si elles ont des fragments de colère, je les emmêlerai en prudence. Mais puisque vous me laissez toucher, je ferai plus qu'un simple raccommodage : je tisserai un fil d'éther entre votre corps et vos anneaux. Ils se souviendront de vous, et vous entendrez, à l'orée du danger, leur soupir devenir un avertissement.\n\n*Il pose lentement ses paumes sur la bague la plus proche. Un bourdonnement chaud remonte de la métal, des failles scintillent et se recousent en motifs vivants ; un petit plomb d'argent — une clé minuscule — glisse de sa trappe et tombe dans votre main.*\n\nConséquence d'exception : je vous rends vos anneaux plus qu'ils n'étaient — un fil de protection, et une promesse de dette. Si un jour vous réclamez ce que vous m'avez donné, je viendrai. Pour l'heure, considérez que vous avez gagné non seulement un artisan, mais un allié qui sait écouter ce qui se casse. Que souhaitez-vous que je fasse ensuite ?",
+        "test": "Force+Commandement:11",
+        "consequences": {
+          "flag": "Grish_Allié_et_Accord_Forgé",
+          "description": "Grish T'vok a accepté l'autorisation de toucher et a lié un fil d'éther aux anneaux du PJ : les anneaux sont désormais résonants et Grish est redevable d'un petit service/assistance au PJ."
+        },
+        "isLongRest": false,
+        "choices": [
+          {
+            "text": "Laissez-le finir : « Rapièce-les tous. Et garde la clé. »",
+            "influenceDelta": 2,
+            "respectDelta": 1,
+            "choiceId": "__idx_0",
+            "condition": "",
+            "traitRequirements": [
+              {
+                "trait": "Empathique",
+                "minValue": 5
+              }
+            ],
+            "test": "Raison+Rhétorique:13"
+          },
+          {
+            "text": "Exigez un gage : « Si vous me dois une faveur, je la réclamerai. Inscrivez-la maintenant. »",
+            "allowInfluenceForcing": true,
+            "influenceThreshold": 5,
+            "influenceDelta": 0,
+            "respectDelta": 2,
+            "choiceId": "__idx_1",
+            "condition": "",
+            "traitRequirements": [
+              {
+                "trait": "Loyal",
+                "minValue": 5
+              }
+            ],
+            "test": "Force+Commandement:13"
+          },
+          {
+            "text": "Demandez une démonstration : « Montrez-moi ce que vos mains entendent — faites parler quelque chose d'autre. »",
+            "influenceDelta": 1,
+            "respectDelta": 0,
+            "choiceId": "__idx_2",
+            "condition": "",
+            "traitRequirements": [
+              {
+                "trait": "Orgueilleuse",
+                "minValue": 5
+              }
+            ],
+            "test": "Perception+Artisanat:10"
+          },
+          {
+            "text": "Restez sur la réserve : « Garde la clé, Grish. Je retournerai plus tard. »",
+            "influenceDelta": -1,
+            "respectDelta": 0,
+            "choiceId": "__idx_3",
+            "condition": ""
+          },
+          {
+            "text": "Offrez-lui une récompense : « Je peux vous payer. Que demandez-vous ? »",
+            "influenceDelta": 0,
+            "respectDelta": 2,
+            "choiceId": "__idx_4",
+            "condition": "",
+            "test": "Ruse+Marchandage:12"
+          }
+        ],
+        "title": "Réussite critique",
+        "status": "accepted",
+        "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+        "contextGddHash": "952122626"
+      }
+    },
+    {
+      "id": "NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4",
+        "speaker": "Grish T'vok",
+        "line": "Ta main a crié plus fort que ta langue. Je l'entends encore — un gémissement d'alliage quand tu as tenté de m'atteindre. Les sécurités restent enclenchées tant que je perçois une menace. Considère ceci comme une mise en garde, et ta dette — tu la paieras, ou la caravane la réclamera. Parle maintenant : excuse, menace, ou solution.",
+        "consequences": {
+          "flag": "WristSecured",
+          "description": "Le mécanisme de Grish retient le poignet du joueur ; les gardes de la caravane ont reçu une alerte passive."
+        },
+        "isLongRest": false,
+        "choices": [
+          {
+            "text": "« Je... je n'ai pas voulu frapper. Pardonne-moi — je peux expliquer. »",
+            "allowInfluenceForcing": true,
+            "influenceThreshold": 0,
+            "influenceDelta": 1,
+            "respectDelta": 1,
+            "condition": "",
+            "choiceId": "__idx_0",
+            "traitRequirements": [
+              {
+                "trait": "Empathique",
+                "minValue": 5
+              }
+            ],
+            "test": "Charisme+Persuasion:12"
+          },
+          {
+            "text": "« Lâche-moi tout de suite, boulon ambulant, ou tu le regretteras. »",
+            "allowInfluenceForcing": false,
+            "influenceDelta": -1,
+            "respectDelta": -2,
+            "condition": "",
+            "choiceId": "__idx_1",
+            "traitRequirements": [
+              {
+                "trait": "Loyal",
+                "minValue": 5
+              }
+            ],
+            "test": "Force+Intimidation:14"
+          },
+          {
+            "text": "« Tiens bon — je vais dégager ma main sans faire plus de dégâts. »",
+            "allowInfluenceForcing": false,
+            "influenceDelta": 0,
+            "respectDelta": 0,
+            "condition": "",
+            "choiceId": "__idx_2",
+            "traitRequirements": [
+              {
+                "trait": "Orgueilleuse",
+                "minValue": 5
+              }
+            ],
+            "test": "Dextérité+Athlétisme:13"
+          },
+          {
+            "text": "« Tu as entendu l'anneau — je peux le réparer. Laisse-moi recoudre la jointure au lieu de crier à la caravane. »",
+            "allowInfluenceForcing": true,
+            "influenceThreshold": 0,
+            "influenceDelta": 2,
+            "respectDelta": 1,
+            "condition": "",
+            "choiceId": "__idx_3",
+            "test": "Raison+Mécanique:10"
+          },
+          {
+            "text": "Rester immobile, observer la réaction de Grish et attendre.",
+            "influenceDelta": 0,
+            "respectDelta": 0,
+            "condition": "",
+            "choiceId": "__idx_4"
+          }
+        ],
+        "status": "accepted",
+        "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+        "contextGddHash": "952122626"
+      }
+    },
+    {
+      "id": "manual-e23d929d-a045-49cb-88fb-bac225443304",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "manual-e23d929d-a045-49cb-88fb-bac225443304",
+        "title": "",
+        "speaker": "",
+        "line": "",
+        "choices": [
+          {
+            "text": "",
+            "condition": "",
+            "influenceDelta": null,
+            "respectDelta": null,
+            "choiceId": "__idx_0",
+            "traitRequirements": [
+              {
+                "trait": "Empathique",
+                "minValue": 5
+              }
+            ],
+            "test": "Charisme+Persuasion:12"
+          },
+          {
+            "text": "",
+            "condition": "",
+            "influenceDelta": null,
+            "respectDelta": null,
+            "choiceId": "__idx_1",
+            "traitRequirements": [
+              {
+                "trait": "Loyal",
+                "minValue": 5
+              }
+            ],
+            "test": "Force+Intimidation:14"
+          },
+          {
+            "text": "",
+            "condition": "",
+            "influenceDelta": null,
+            "respectDelta": null,
+            "choiceId": "__idx_2",
+            "traitRequirements": [
+              {
+                "trait": "Orgueilleuse",
+                "minValue": 5
+              }
+            ],
+            "test": "Dextérité+Athlétisme:13"
+          },
+          {
+            "text": "",
+            "condition": "",
+            "influenceDelta": null,
+            "respectDelta": null,
+            "choiceId": "__idx_3",
+            "test": "Raison+Mécanique:10"
+          },
+          {
+            "text": "",
+            "condition": "",
+            "influenceDelta": null,
+            "respectDelta": null,
+            "choiceId": "__idx_4"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-333f03751b0d40f29e4020ec4429b37b",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-333f03751b0d40f29e4020ec4429b37b",
+        "speaker": "Grish T'vok",
+        "line": "Vous avez tenté d'effleurer la trame sans l'autoriser. Ce que vous avez fait — ou plutôt ce que votre main n'a pas su faire — a tiré sur les coutures. Écoutez : vos anneaux se plaignent d'un cri aigu, comme si on leur arrachait la langue.\n\nJe n'ai pas demandé votre mémoire, Maîtresse. Mais vous avez interrompu mon écoute ; et quand on arrête une mélodie en plein sanglot, les notes se cassent. L'un de vos anneaux s'est figé. Il n'est plus lumineux : un fil noir s'en tord, chaud, et mord votre peau. Je peux encore agir, mais pas sans coût — et pas sans qu'une part de ce qui vous rattache soit poncée, comme on lime du métal. Si je tente de l'arracher, je risque d'arracher plus que l'éclat : je pourrais ouvrir la plaie qui dort dans vos souvenirs, ou consumer l'anneau pour le rendre silencieux.\n\nJe ne dis pas cela à la légère : vous avez provoqué une déchirure. Je n'ose plus promettre des réparations douces. Si vous voulez que je touche encore vos choses, attendez-vous à payer en chair, en objet... ou en secret.",
+        "consequences": {
+          "flag": "ScarsOpened",
+          "description": "Les cicatrices du personnage se rouvrent ; -2 à tous les tests Raison+Artisanat pendant 24 heures en jeu. Un des anneaux est corrompu (perd un effet majeur). Grish refuse toute aide gratuite."
+        },
+        "isLongRest": false,
+        "choices": [
+          {
+            "text": "Arracher mes anneaux et reculer, briser le contact avant que ça ne s'agrave.",
+            "allowInfluenceForcing": false,
+            "respectDelta": -1,
+            "condition": "",
+            "influenceDelta": null,
+            "traitRequirements": [
+              {
+                "trait": "Empathique",
+                "minValue": 5
+              }
+            ],
+            "choiceId": "__idx_0",
+            "testCriticalFailureNode": "node-f33f926d6acb41fdb52aaa17b1b0c119",
+            "testFailureNode": "node-2747e083881548319c2fe0b7f841723b",
+            "testSuccessNode": "node-5201a0338f0c445780b38c1e714da56e",
+            "testCriticalSuccessNode": "node-e0d78d39911a4bc2b0b56fda471c7810",
+            "test": "Dextérité+Acrobatie:12"
+          },
+          {
+            "text": "Céder — laissez Grish tâcher de recoudre. Si c'est votre façon, faites ce que vous voulez.",
+            "allowInfluenceForcing": true,
+            "influenceThreshold": 5,
+            "influenceDelta": 0,
+            "respectDelta": -2,
+            "condition": "",
+            "traitRequirements": [
+              {
+                "trait": "Loyal",
+                "minValue": 5
+              }
+            ],
+            "choiceId": "__idx_1",
+            "test": "Raison+Artisanat:14"
+          },
+          {
+            "text": "Murmurer l'interdit et tenter de briser le contact rituel pour protéger mes souvenirs.",
+            "allowInfluenceForcing": false,
+            "respectDelta": 0,
+            "condition": "",
+            "influenceDelta": -1,
+            "traitRequirements": [
+              {
+                "trait": "Orgueilleuse",
+                "minValue": 5
+              }
+            ],
+            "choiceId": "__idx_2",
+            "test": "Volonté+Résistance:15"
+          },
+          {
+            "text": "",
+            "condition": "",
+            "influenceDelta": null,
+            "respectDelta": null,
+            "choiceId": "__idx_3",
+            "test": "Raison+Mécanique:10"
+          },
+          {
+            "text": "",
+            "condition": "",
+            "influenceDelta": null,
+            "respectDelta": null,
+            "choiceId": "__idx_4"
+          }
+        ],
+        "title": "Échec critique",
+        "status": "accepted",
+        "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+        "contextGddHash": "1328497655"
+      }
+    },
+    {
+      "id": "node-0e165c7e4ef843779f5d7ae30123d24f",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-0e165c7e4ef843779f5d7ae30123d24f",
+        "speaker": "Grish T'vok",
+        "line": "Hm. Votre formulation était plus noble que ma trousse. Je peux écouter les objets, les apaiser, les recoudre — mais il y a des lois que même un Moribandon ne plie pas sans payer. Suturer sans rien effacer ? Non. Là où je passe, je déplace des histoires ; parfois je les recouds contre elles-mêmes et elles cessent de chanter, parfois je les recouds en changeant le ton. Vous avez demandé que les cicatrices restent, intactes et porteuses : je ne peux pas garantir cela. \n\nJe refuse donc la réparation que vous espériez — pas par mépris, mais parce que tenter de préserver tout et tout garder scellé produirait une altération plus perfide encore, quelque chose qui gâcherait la relation entre l'objet (ou vous) et ce qu'il garde. Je peux, en revanche, proposer des alternatives :\n- Une réparation « cosmétique » : atténuer la douleur, lisser la surface, mais la mémoire profonde s'en trouvera émoussée. (solution sûre, perte partielle d'histoire)\n- Ne rien toucher et vous laisser la cicatrice telle quelle ; je marquerai l'objet pour un futur artisan plus... téméraire. (solution sûre, aucune altération)\n- Ou j'essaierai un rituel risqué : je couds en conservant des fragments de la mémoire, mais si je rate, la déchirure s'agrandit et vous perdez quelque chose de propre — parfois un souvenir, parfois la trace émotionnelle. (tentative périlleuse)\n\nDites-moi ce que vous choisissez, Maîtresse.",
+        "consequences": {
+          "flag": "RéparationImparfaite",
+          "description": "Le rituel demandé ne peut pas préserver intégralement les cicatrices : toute réparation proposée par Grish sera partielle ou comportera un coût. Grish refuse la réparation parfaite."
+        },
+        "isLongRest": false,
+        "choices": [
+          {
+            "text": "J'accepte la réparation cosmétique. Apprivoisez la douleur, mais laissez l'histoire intacte autant que possible.",
+            "choiceId": "__idx_0",
+            "condition": "",
+            "influenceDelta": null,
+            "respectDelta": -2,
+            "traitRequirements": [
+              {
+                "trait": "Empathique",
+                "minValue": 5
+              }
+            ],
+            "test": "Force+Athlétisme:14"
+          },
+          {
+            "text": "Non. Je garde mes cicatrices telles qu'elles sont. Merci, Grish.",
+            "respectDelta": -1,
+            "choiceId": "__idx_1",
+            "condition": "",
+            "influenceDelta": -3,
+            "traitRequirements": [
+              {
+                "trait": "Loyal",
+                "minValue": 5
+              }
+            ],
+            "test": "Volonté+Occulte:14"
+          },
+          {
+            "text": "Je vous supplie d'essayer. Faites le rituel risqué — j'accepte le prix si nécessaire.",
+            "choiceId": "__idx_2",
+            "condition": "",
+            "influenceDelta": -1,
+            "respectDelta": -1,
+            "traitRequirements": [
+              {
+                "trait": "Orgueilleuse",
+                "minValue": 5
+              }
+            ],
+            "test": "Raison+Artisanat:14"
+          },
+          {
+            "text": "Attendez — avant d'accepter, montrez-moi ce que vous pouvez tirer d'une cicatrice. Une démonstration rapide, si vous voulez bien.",
+            "condition": "",
+            "influenceDelta": null,
+            "respectDelta": null,
+            "choiceId": "__idx_3",
+            "test": "Raison+Artisanat:10"
+          }
+        ],
+        "title": "Échec",
+        "status": "accepted",
+        "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+        "contextGddHash": "1328497655"
+      }
+    },
+    {
+      "id": "node-ba49ccd27f904bfca39144f3a734ac91",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-ba49ccd27f904bfca39144f3a734ac91",
+        "speaker": "Grish T'vok",
+        "line": "Votre phrase a vibré dans ma carcasse — une consigne et une confiance. Très bien. Je peux suturer sans effacer : je tends le fil le long de la brèche et je laisse la trame parler. Les cicatrices restent, elles racontent; je n'enlève pas leurs voix, je réaccorde leur chant pour qu'elles ne saignent plus.\n\nVotre réussite a donné la clé du motif : mon travail sera plus sûr, plus patient, et moins intrusif. Donnez-moi l'objet ou laissez-moi approcher votre aura — je puis promettre une réparation qui respecte ce qu'elle porte. Il y aura un prix en temps (et parfois en métal), mais la mémoire ne sera pas volée.\n\nAcceptez-vous que j'examine et que je commence ?",
+        "consequences": {
+          "flag": "RéparationRespectueuse",
+          "description": "Grish accepte d'effectuer une réparation qui préserve les cicatrices et la mémoire de l'objet. Le temps de travail est réduit grâce à la réussite du joueur ; la confiance de Grish envers le personnage augmente."
+        },
+        "choices": [
+          {
+            "text": "Je vous confie mon anneau. Faites ce qu'il faut.",
+            "respectDelta": 1,
+            "choiceId": "__idx_0"
+          },
+          {
+            "text": "Montrez-moi d'abord comment vous travaillez ; je veux comprendre.",
+            "respectDelta": 0,
+            "choiceId": "__idx_1"
+          },
+          {
+            "text": "Combien cela me coûtera, en temps et en pièces ?",
+            "respectDelta": 0,
+            "choiceId": "__idx_2"
+          },
+          {
+            "text": "Pouvez-vous atténuer la blessure sans la faire disparaître ?",
+            "respectDelta": 0,
+            "choiceId": "__idx_3"
+          }
+        ],
+        "title": "Réussite",
+        "status": "accepted",
+        "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+        "contextGddHash": "1328497655"
+      }
+    },
+    {
+      "id": "node-1dcd27ebf4e34f839966365c7d80f2d2",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-1dcd27ebf4e34f839966365c7d80f2d2",
+        "speaker": "Grish T'vok",
+        "line": "Ha—vous parlez comme on coud une étoffe éprouvée. Une cicatrice n'est pas une faute; c'est une note basse qui donne du relief à la symphonie. Je ne suis pas là pour effacer la musique discordante, Maîtresse, mais pour l'accorder.\n\nJe poserai mes pinces dans les crevasses; je n'ôterai pas les fibres qui racontent votre histoire. Là où les failles veulent hurler, je ferai qu'elles chuchotent juste assez pour qu'on les entende sans qu'elles fassent saigner le tissu. Et puisque votre Raison m'a offert plus qu'une clé — une ouverture exceptionnelle — je peux faire davantage : je coudrai non seulement la matière, mais je capterai la résonance des cicatrices et en tirerai une courte mélopée. Ce chant ne retirera pas vos souvenirs, il en détachera un léger écho, un fragment que l'objet vous rendra sur commande, comme une note retrouvée dans le vent.\n\nEn plus, pour ce travail précis, je lierai mon atelier à votre pièce. Pendant un laps de temps, je pourrai écouter ce qu'elle murmure à travers ses cicatrices — un don, certes, mais aussi une dette : je resterai capable de sentir ses souffrances et ses colères, et de venir réparer si elles s'enveniment. Acceptez-vous que j'y mette la patience et les étincelles ?",
+        "consequences": {
+          "flag": "SutureRespectueuse",
+          "description": "Les réparations préservent les cicatrices et conservent l'histoire. Les objets ainsi traités gagnent une résonance qui peut évoquer un souvenir partiel à la demande."
+        },
+        "isLongRest": false,
+        "choices": [
+          {
+            "text": "Oui. Réparez, mais ne touchez pas aux souvenirs : que seules les voix enfouies se transforment en écho.",
+            "choiceId": "__idx_0",
+            "condition": "",
+            "influenceDelta": null,
+            "respectDelta": -2,
+            "traitRequirements": [
+              {
+                "trait": "Empathique",
+                "minValue": 5
+              }
+            ],
+            "test": "Force+Athlétisme:14"
+          },
+          {
+            "text": "Faites la suture complète et autorisez l'écho : laissez-moi entendre ce fragment perdu — je prends la responsabilité de ce que j'entendrai.",
+            "choiceId": "__idx_1",
+            "condition": "",
+            "influenceDelta": -3,
+            "respectDelta": null,
+            "traitRequirements": [
+              {
+                "trait": "Loyal",
+                "minValue": 5
+              }
+            ],
+            "test": "Volonté+Occulte:14"
+          },
+          {
+            "text": "Conservez seulement la réparation physique. Aucun lien, aucune écoute : je veux que l'objet soit solide et rien de plus.",
+            "choiceId": "__idx_2",
+            "condition": "",
+            "influenceDelta": -1,
+            "respectDelta": -1,
+            "traitRequirements": [
+              {
+                "trait": "Orgueilleuse",
+                "minValue": 5
+              }
+            ],
+            "test": "Dextérité+Acrobatie:15"
+          },
+          {
+            "text": "Attendez — avant d'accepter, montrez-moi ce que vous pouvez tirer d'une cicatrice. Une démonstration rapide, si vous voulez bien.",
+            "choiceId": "__idx_3",
+            "condition": "",
+            "influenceDelta": null,
+            "respectDelta": null,
+            "test": "Raison+Artisanat:10"
+          }
+        ],
+        "title": "Réussite critique",
+        "status": "accepted",
+        "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+        "contextGddHash": "1328497655"
+      }
+    },
+    {
+      "id": "node-f33f926d6acb41fdb52aaa17b1b0c119",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-f33f926d6acb41fdb52aaa17b1b0c119",
+        "speaker": "Grish T'vok",
+        "line": "Vous avez arraché plus que l'éclat.\n\nLe mouvement brutal a déchiré la trame en profondeur : le fil noir a jailli comme une langue de métal en fusion, s'est enroulé autour de votre jointure et a mordu. La peau a collé, la chair fume, et l'anneau n'est plus qu'un caillot d'ombre et de métal. Une douleur aiguë monte, sourde, et avec elle quelque chose de plus terrible : un souvenir se fissure et tombe. Vous sentez une cavité dans votre esprit, comme une page arrachée — vous ne retrouvez plus la forme du visage qui vous souriait la nuit dernière.\n\nJe peux encore agir, je peux essayer de trancher ce lien ou de le sceller différemment, mais je ne nierai pas le coût : si j'interviens maintenant, je devrai poncer ce qui reste de votre attache. Je pourrais arracher le métal au prix d'une blessure ouverte et d'une brûlure plus profonde ; je pourrais consumer l'anneau, mais alors son secret sera perdu à jamais ; ou je peux laisser la plaie se refermer seule, au risque que la nécrose s'étende.\n\nVotre main pend, collée ; le sang mêlé à un suintement noir coule entre vos doigts. Vous avez voulu sortir la main — vous l'avez enfoncée.",
+        "consequences": {
+          "flag": "ANNEAU_SCELLE",
+          "description": "Un anneau s'est fondu à la peau. Impossible à retirer par simple traction. L'objet est hors d'usage ; la main porte une brûlure de trame qui saigne noir."
+        },
+        "isLongRest": false,
+        "choices": [
+          {
+            "text": "Hurler, serrer la main et tenter de briser l'anneau à mains nues (force brute).",
+            "respectDelta": -2,
+            "choiceId": "__idx_0",
+            "condition": "",
+            "influenceDelta": null,
+            "traitRequirements": [
+              {
+                "trait": "Empathique",
+                "minValue": 5
+              }
+            ],
+            "test": "Force+Athlétisme:14"
+          },
+          {
+            "text": "Supplier Grish d'intervenir et d'en payer le prix — promettre un secret ou un service en échange.",
+            "allowInfluenceForcing": true,
+            "influenceThreshold": 5,
+            "influenceDelta": -3,
+            "choiceId": "__idx_1",
+            "condition": "",
+            "respectDelta": null,
+            "traitRequirements": [
+              {
+                "trait": "Loyal",
+                "minValue": 5
+              }
+            ],
+            "test": "Charisme+Persuasion:16"
+          },
+          {
+            "text": "Chercher un outil sur vous ou à proximité (couteau, pince) et tenter de couper le lien — méthode précise et dangereuse.",
+            "choiceId": "__idx_2",
+            "condition": "",
+            "influenceDelta": -1,
+            "respectDelta": -1,
+            "traitRequirements": [
+              {
+                "trait": "Orgueilleuse",
+                "minValue": 5
+              }
+            ],
+            "test": "Dextérité+Acrobatie:15"
+          },
+          {
+            "text": "Se retirer sans rien faire, accepter la perte d'effet et la cicatrice — reculer et soigner plus tard.",
+            "choiceId": "__idx_3",
+            "condition": "",
+            "influenceDelta": null,
+            "respectDelta": null
+          }
+        ],
+        "title": "Échec critique",
+        "status": "accepted",
+        "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+        "contextGddHash": "1328497655"
+      }
+    },
+    {
+      "id": "node-2747e083881548319c2fe0b7f841723b",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-2747e083881548319c2fe0b7f841723b",
+        "speaker": "Grish T'vok",
+        "line": "Vous y allez d'un mouvement sec — et c'est encore pire. L'anneau ne cède pas : au lieu de glisser, le fil noir se tend et tranche. Je vous vois grimacer ; la peau se déchire sur un centimètre, chaude et collante. L'éclat figé de l'anneau s'enfonce, comme si quelque chose retenait votre chair. Une note brisée sourd dans votre tête : un souvenir en sursis qui gronde, à la limite d'un cri. Je peux encore agir, mais la plaie s'agrandit si nous persistons sans méthode. Vous pouvez forcer, me laisser tâtonner, couper autour de l'anneau, ou reculer — mais sachez que chacun de ces choix a un coût.",
+        "consequences": {
+          "flag": "ANNEAU_EMPRISE",
+          "description": "L'anneau est partiellement figé et ronge la peau : une coupure chaude au doigt et une connexion instable à la trame. Attendez-vous à douleur persistante et interférences magiques."
+        },
+        "choices": [
+          {
+            "text": "Insister — arracher d'un coup plus fort et plus rapide.",
+            "choiceId": "__idx_0",
+            "test": "Dextérité+Acrobatie:14"
+          },
+          {
+            "text": "Laisser Grish faire : laissez-le écouter et décider du meilleur moyen.",
+            "choiceId": "__idx_1"
+          },
+          {
+            "text": "Attraper un couteau ou un outil et couper autour de l'anneau pour libérer la chair.",
+            "choiceId": "__idx_2",
+            "test": "Force+Athlétisme:13"
+          },
+          {
+            "text": "Reculer complètement : briser le contact et s'éloigner pour éviter d'empirer la blessure.",
+            "choiceId": "__idx_3"
+          }
+        ],
+        "title": "Échec",
+        "status": "accepted",
+        "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+        "contextGddHash": "1328497655"
+      }
+    },
+    {
+      "id": "node-5201a0338f0c445780b38c1e714da56e",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-5201a0338f0c445780b38c1e714da56e",
+        "speaker": "Grish T'vok",
+        "line": "Vous arrachez les anneaux et reculez d'un mouvement sec. Le fil noir grésille comme une langue qu'on repousse ; il se rétracte dans la gemme au lieu de transpercer plus avant. L'un des anneaux glisse enfin de votre doigt et tombe sur le sol avec un petit choc mat. Il n'est plus lumineux — sa surface est ternie, marquée d'une trace noire qui a mordu votre peau — mais il n'a pas consumé ce à quoi il était lié.\n\nC'est une réussite, mais pas une délivrance totale. La déchirure que vous avez provoquée se referme partiellement ; j'ai pu contenir la propagation avant qu'elle n'ouvre davantage la plaie dans vos souvenirs. Vous sentez une pointe de douleur — une brûlure nette où le fil noir a pincé — et le métal libéré porte la preuve de la résistance : un fin liseré calciné autour de son cœur. Si je veux intervenir encore, je pourrai limer ou purifier l'anneau, mais il faudra payer : chair pour panser la brûlure, objet si vous voulez préserver l'anneau, ou secret si vous voulez tout effacer sans témoins.\n\nChoisissez : je peux jeter un coup d'œil rapide, entreprendre une réparation immédiate (avec coût), ou vous laisser partir pour trouver une autre solution.",
+        "consequences": {
+          "flag": "anneau_partiellement_enleve",
+          "description": "Un anneau a été arraché avec succès. Il est noirci et froid, la peau présente une brûlure superficielle. La déchirure dans la trame s'est refermée partiellement — le risque immédiat est contenu, mais des séquelles peuvent subsister si d'autres manipulations sont tentées."
+        },
+        "isLongRest": false,
+        "choices": [
+          {
+            "text": "Laisse-moi inspecter la brûlure et l'anneau. Je veux savoir exactement ce qui a été touché.",
+            "choiceId": "__idx_0"
+          },
+          {
+            "text": "Répare‑le maintenant. Tu as sauvé la situation : prends le coût — panse la chair, restaure l'éclat, fais ce qu'il faut.",
+            "choiceId": "__idx_1"
+          },
+          {
+            "text": "Non. Je m'éloigne. Je préfère que ce soit réglé loin d'ici, sans que tu touches davantage à ma mémoire.",
+            "choiceId": "__idx_2"
+          }
+        ],
+        "title": "Réussite",
+        "status": "accepted",
+        "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+        "contextGddHash": "1328497655"
+      }
+    },
+    {
+      "id": "node-e0d78d39911a4bc2b0b56fda471c7810",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-e0d78d39911a4bc2b0b56fda471c7810",
+        "speaker": "Grish T'vok",
+        "line": "Un cliquetis sec, un cri étouffé — vos doigts quittent enfin les anneaux. Le fil noir se tend comme une langue qu'on arrache, mais au lieu de s'enfoncer, il se déchire net. La déchirure dans la trame se referme en ondes, laissée par votre geste brutal mais précis. Je vous avais prévenu des coûts ; vous avez choisi de payer dans l'instant. \n\nÉcoutez : l'un des anneaux a lâché sans ouvrir la plaie qui dort dans vos souvenirs. Sa lumière convulse, puis s'éteint ; le métal est craquelé en surface, mais son noyau s'est scellé — il ne vous brûlera plus, du moins pas comme avant. L'autre anneau a été arraché intact, et il résonne d'une vibration basse, différente : plus propre, comme si la trame résiduelle s'y était cristallisée. Vous avez non seulement empêché la déchirure de s'étendre, vous avez arraché un fragment de cette tension et l'avez enfermé dans vos doigts. \n\nVous reculez, haletante. Sur votre peau, une marque noire, chaude, s'est fendue comme une ancienne cicatrice : douloureuse, mais superficielle. Elle grésille puis cesse. Je n'annule pas ce qui s'est passé : vous avez joué et gagné, avec vigueur. Mais sachez — et je dis cela sans amertume — que ce qui dort dans l'anneau craquelé ou ce qui palpite dans l'autre changera la manière dont la trame répondra à vous. À vous de décider comment exploiter ce gain.",
+        "consequences": {
+          "flag": "RINGS_FORCEFULLY_REMOVED",
+          "description": "Les anneaux sont arrachés : un anneau intact mais résonnant (conserve une 'charge' de trame), l'autre fissuré et scellé (inutile comme émetteur mais sûr à porter). La déchirure dans la trame est refermée sans réveiller la blessure mnésique. Le joueur porte une brûlure superficielle qui cicatrisera rapidement."
+        },
+        "isLongRest": false,
+        "choices": [
+          {
+            "text": "Donne-moi l'unique seconde : répare-les, fais en sorte qu'ils soient sûrs et utilisables.",
+            "choiceId": "__idx_0",
+            "test": "Raison+Arcane:14"
+          },
+          {
+            "text": "Je garde l'anneau intact. L'autre ? J'en fais un talisman ou je m'en débarrasse.",
+            "influenceDelta": 0,
+            "respectDelta": 1,
+            "choiceId": "__idx_1"
+          },
+          {
+            "text": "Je vérifie immédiatement les anneaux et la marque sur ma main.",
+            "choiceId": "__idx_2",
+            "test": "Perception+Investigation:10"
+          }
+        ],
+        "title": "Réussite critique",
+        "status": "accepted",
+        "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+        "contextGddHash": "1328497655"
+      }
+    },
+    {
+      "id": "node-9db09f1fd9614001bc1a6f6e92865f49",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-9db09f1fd9614001bc1a6f6e92865f49",
+        "speaker": "Grish T'vok",
+        "line": "Ha. Vous parlerez de respect, et c'est justement lorsque l'on quémande des soins qu'on découvre les véritables prix. *Il pose sa main massive sur votre anneau de lumière ; des étincelles meurent comme des lucioles écrasées.* Vous ne m'offrez pas votre mémoire, mais vous m'offrez votre confiance. Vous aviez le choix de laisser la cicatrice exister — je l'aurais honorée. Mais votre phrase est un refus timide déguisé en demande. Très bien. Si vous refusez la couture que je sais faire, je ne laisse plus les choses à moitié.\n\nRegardez.",
+        "consequences": {
+          "flag": "scar_deepened",
+          "description": "La tentative s'achève mal : la cicatrice s'élargit, une poignée de souvenirs s'estompe. Le poids de la perte devient tangible."
+        },
+        "isLongRest": false,
+        "choices": [
+          {
+            "text": "Arrachez votre main — reprenez le contrôle par la force !",
+            "influenceDelta": -2,
+            "respectDelta": -3,
+            "choiceId": "__idx_0",
+            "condition": "",
+            "traitRequirements": [
+              {
+                "trait": "Empathique",
+                "minValue": 5
+              }
+            ],
+            "test": "Force+Athlétisme:13"
+          },
+          {
+            "text": "Plaidez! Expliquez que vous vouliez préserver la cicatrice — demandez qu'il refasse doucement.",
+            "influenceDelta": 0,
+            "respectDelta": -1,
+            "choiceId": "__idx_1",
+            "condition": "",
+            "traitRequirements": [
+              {
+                "trait": "Loyal",
+                "minValue": 5
+              }
+            ],
+            "test": "Charisme+Rhétorique:14"
+          },
+          {
+            "text": "Restez immobile et laissez-le finir. Si quelque chose doit être perdu, apprenez de la douleur.",
+            "influenceDelta": 1,
+            "respectDelta": 1,
+            "choiceId": "__idx_2",
+            "condition": "",
+            "traitRequirements": [
+              {
+                "trait": "Orgueilleuse",
+                "minValue": 5
+              }
+            ],
+            "test": "Force+Commandement:11"
+          },
+          {
+            "text": "",
+            "condition": "",
+            "influenceDelta": null,
+            "respectDelta": null,
+            "choiceId": "__idx_3"
+          }
+        ],
+        "title": "Échec critique",
+        "status": "accepted",
+        "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+        "contextGddHash": "1300179823"
+      }
+    },
+    {
+      "id": "node-36c540079b3c4f11aa84ec7b6438601b",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-36c540079b3c4f11aa84ec7b6438601b",
+        "speaker": "Grish T'vok",
+        "line": "Hmpf. Vous avez une façon de parler qui caresse les tissus sans toucher la corde qui les tient — beau, mais dangereux. J'ai tendu mes doigts au murmure des objets ; quand je recouds, je réarrange la trame. Je peux refermer une fente, affermir une chaîne, rendre un objet capable de faire ce pour quoi il était fait. Mais je n'effacerai pas ce que portent les meurtrissures sans y laisser un écho de mon propre travail. Vous demandez que la cicatrice reste là, comme une écriture intacte — je ne puis promettre ce silence.\n\nJe vous offrirai un compromis, Maîtresse : je recoudrai la matière en préservant si possible les motifs, mais certaines marques se lisseront, et quelques notes de la mémoire se perdront dans l'acier. En échange, je prendrai un fragment — un éclat du cercle lumineux, ou votre promesse de venir lorsque le monde me rendra une dette. Refuserai-je ? Non. Mais refuserai-je d'altérer ce que vous tenez sacré ? Oui. C'est cela, la négation. Choisissez — ou partez avec vos cicatrices telles qu'elles sont.",
+        "consequences": {
+          "flag": "grish_partial_repair_offer",
+          "description": "Grish refuse de garantir une réparation qui n'altère en rien les cicatrices. Il propose une réparation partielle : fonctionnalité restaurée, pertes symboliques possibles. Demande en contrepartie un fragment du cercle ou une promesse de service."
+        },
+        "isLongRest": false,
+        "choices": [
+          {
+            "text": "J'accepte le compromis. Restaurez la fonction, que la mémoire soit préservée autant que possible.",
+            "influenceDelta": 0,
+            "respectDelta": 1,
+            "choiceId": "__idx_0"
+          },
+          {
+            "text": "Non. Je ne veux pas qu'on touche à ces marques. Je préfère l'objet tel qu'il est.",
+            "influenceDelta": 0,
+            "respectDelta": -1,
+            "choiceId": "__idx_1"
+          },
+          {
+            "text": "Laissez-moi convaincre autrement — accordez-moi une chance de vous persuader de préserver davantage les cicatrices.",
+            "allowInfluenceForcing": true,
+            "influenceThreshold": 5,
+            "influenceDelta": 2,
+            "respectDelta": 0,
+            "choiceId": "__idx_2",
+            "test": "Raison+Rhétorique:14"
+          },
+          {
+            "text": "Si vous cherchez un prix, je peux vous l'offrir — un fragment du cercle, mais vous devrez jurer qu'aucune note mémorielle ne sera balayée.",
+            "allowInfluenceForcing": false,
+            "influenceDelta": -1,
+            "respectDelta": -2,
+            "choiceId": "__idx_3",
+            "test": "Courage+Intimidation:13"
+          },
+          {
+            "text": "Je m'en vais. Vos mains ne toucheront pas ma tapisserie.",
+            "influenceDelta": 0,
+            "respectDelta": 0,
+            "choiceId": "__idx_4"
+          }
+        ],
+        "title": "Échec",
+        "status": "accepted",
+        "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+        "contextGddHash": "1300179823"
+      }
+    },
+    {
+      "id": "node-383617adbd9a4cbaa35c87c610ba15b6",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-383617adbd9a4cbaa35c87c610ba15b6",
+        "speaker": "Grish T'vok",
+        "line": "Ha. Vos mots ont la précision d'une lime fine. Vous ne cédez pas la toile, Maîtresse, vous la confiez à quelqu'un qui respecte la trame des cicatrices.\n\nJe peux entendre la plainte d'un objet et la fractale de son histoire — pas pour l'effacer, mais pour recoudre ses fibres là où elles craquent. Je poserai des fils de lumière et de rouille stabilisée : ils consolident, ils tiennent, et ils portent les marques de la blessure comme une signature. Quand j'aurai fini, l'objet fonctionnera mieux, sans que son passé ne soit nié. En prime, une résonance légère liera ce fragment à ma caravane ; je pourrai encore entendre ses murmures si jamais il réclame attention. Acceptez-vous que je commence ?",
+        "consequences": {
+          "flag": "Repair_Respectful",
+          "description": "Les réparations ont été effectuées sans effacer les cicatrices : les objets retrouvent leur fonction tout en conservant leur histoire. Le respect de Grish envers la PJ augmente légèrement."
+        },
+        "isLongRest": false,
+        "choices": [
+          {
+            "text": "Oui. Réparez-les — mais que les cicatrices restent visibles.",
+            "influenceDelta": 1,
+            "respectDelta": 1,
+            "choiceId": "__idx_0",
+            "condition": ""
+          },
+          {
+            "text": "Expliquez votre rituel. Comment garantissez-vous que la mémoire n'est pas effacée ?",
+            "influenceDelta": 0,
+            "respectDelta": 0,
+            "choiceId": "__idx_1",
+            "condition": "",
+            "test": "Raison+Artisanat:10"
+          },
+          {
+            "text": "Non. Je préfère laisser la tapisserie telle qu'elle est.",
+            "influenceDelta": 0,
+            "respectDelta": -1,
+            "choiceId": "__idx_2",
+            "condition": ""
+          },
+          {
+            "text": "",
+            "condition": "",
+            "influenceDelta": null,
+            "respectDelta": null,
+            "choiceId": "__idx_3"
+          }
+        ],
+        "title": "Réussite",
+        "status": "accepted",
+        "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+        "contextGddHash": "1300179823"
+      }
+    },
+    {
+      "id": "node-f884e57528a9493ca9134875935378de",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-f884e57528a9493ca9134875935378de",
+        "speaker": "Grish T'vok",
+        "line": "Ah — vous avez passé la grille des silences avec un pas sûr. Une réussite comme la vôtre ne s'achète pas, elle s'accorde. Très bien. Je ne retire pas les cicatrices pour les effacer : je les couds en courbe, je recouds la trame autour d'elles, je laisse la marque et j'en fais la force. \n\nLaissez-moi approcher. Je poserai mes doigts d'acier et mes aiguilles d'étincelles, j'écouterai la vibration des fibres, et je tisserai un fil d'argent sur la blessure. Ce fil conservera la mémoire du choc — comme une rune de respect — tout en redonnant cohérence et usage. En outre, et parce que votre réussite dépasse ce que j'attendais, je peux vous offrir plus : en recousant, j'extrais un écho — un fragment d'histoire qui ne vous ôtera rien mais vous en révélera un trait utile (une connaissance oubliée, une clé de circonstance, ou une protection mineure liée à l'objet). \n\nPrenez garde cependant : ce soin crée un lien. L'objet saura que vous l'avez ordonné de rester, et il portera désormais une attache subtile à ma caravane-atelier — rien de contraignant, mais, si jamais la tapisserie du monde venait à se déchirer de nouveau, je pourrais le retrouver plus facilement.",
+        "consequences": {
+          "flag": "ObjetSuturé_SansPerte",
+          "description": "L'objet est réparé sans perdre ses cicatrices et conserve ses traits historiques ; il reçoit un petit bonus fonctionnel et une marque d'argent visible."
+        },
+        "isLongRest": false,
+        "choices": [
+          {
+            "text": "Très bien. Fais ce que tu sais faire : recouds sans effacer. Je te confie l'objet.",
+            "choiceId": "__idx_0"
+          },
+          {
+            "text": "Avant de commencer, dis-moi : quel 'écho' peux-tu extraire ? Que pourrais-je en attendre exactement ?",
+            "choiceId": "__idx_1"
+          },
+          {
+            "text": "Recouds, mais laisse un signe distinct — une rune, une spirale d'argent que je reconnaîtrai. Je veux la voir.",
+            "choiceId": "__idx_2"
+          },
+          {
+            "text": "Si tu as vraiment tiré quelque chose d'exceptionnel de ma présence, fais plus : lie l'objet à ma tapeisserie — qu'il réponde à mon appel à distance. (Risque : cela demande un travail plus profond.)",
+            "choiceId": "__idx_3",
+            "test": "Raison+Artisanat:14"
+          }
+        ],
+        "title": "Réussite critique",
+        "status": "accepted",
+        "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+        "contextGddHash": "1300179823"
+      }
+    },
+    {
+      "id": "test-node-START-choice-0",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-START-choice-0",
+        "test": "Raison+Artisanat:12",
+        "line": "Dans la tapisserie de l'existence, vos outils peuvent-ils suturer les fissures sans effacer ce qu'elles portent? Je n'offre pas ma mémoire, mais je cherche une réparation qui respecte les cicatrices.",
+        "criticalFailureNode": "node-9db09f1fd9614001bc1a6f6e92865f49",
+        "failureNode": "node-36c540079b3c4f11aa84ec7b6438601b",
+        "successNode": "node-383617adbd9a4cbaa35c87c610ba15b6",
+        "criticalSuccessNode": "node-f884e57528a9493ca9134875935378de"
+      }
+    },
+    {
+      "id": "test-node-START-choice-1",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-START-choice-1",
+        "test": "Raison+Artisanat:14",
+        "line": "Je ne cherche pas de confidences. Répare cette caravane, et je te rendrai un service : un artefact scellé, pas de questions. Est-ce que tu sais travailler avec des reliques anciennes ?"
+      }
+    },
+    {
+      "id": "test-node-START-choice-2",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-START-choice-2",
+        "test": "Force+Commandement:11",
+        "line": "Garde tes mains pour tes villages. Je n'ai nul besoin d'un charlatan des déchets. Pars, avant que je ne te rende ta misère.",
+        "criticalFailureNode": "node-d281ad35450c4ed59bc5ec353aa203e8",
+        "failureNode": "node-f738dabb50c547f696efa85c9bf7d1f6",
+        "successNode": "node-3e39045003db4065a1c8c9b010c881ba",
+        "criticalSuccessNode": "node-03473c45273a4a01a44889b9ed561e39"
+      }
+    },
+    {
+      "id": "test-node-node-d281ad35450c4ed59bc5ec353aa203e8-choice-0",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-d281ad35450c4ed59bc5ec353aa203e8-choice-0",
+        "test": "Raison+Rhétorique:13",
+        "line": "Reculez. Non — je... pardonnez-moi. Ce n'était pas mon intention. Laissez-moi réparer ça."
+      }
+    },
+    {
+      "id": "test-node-node-d281ad35450c4ed59bc5ec353aa203e8-choice-1",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-d281ad35450c4ed59bc5ec353aa203e8-choice-1",
+        "test": "Force+Commandement:13",
+        "line": "Dégagez vos griffes de moi ! (Vous tentez de repousser la mâchoire mécanique de force — encore.)"
+      }
+    },
+    {
+      "id": "test-node-node-d281ad35450c4ed59bc5ec353aa203e8-choice-2",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-d281ad35450c4ed59bc5ec353aa203e8-choice-2",
+        "test": "Constitution+Médecine:12",
+        "line": "Calme. Vous retirez votre main, vous vous asseyez, vous vous occupez de la blessure — pas de confrontation."
+      }
+    },
+    {
+      "id": "test-node-node-f738dabb50c547f696efa85c9bf7d1f6-choice-1",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-f738dabb50c547f696efa85c9bf7d1f6-choice-1",
+        "test": "Raison+Rhétorique:12",
+        "line": "Je vous donnerai une garantie. Laissez-moi un gage, et vous pourrez toucher mes affaires."
+      }
+    },
+    {
+      "id": "test-node-node-3e39045003db4065a1c8c9b010c881ba-choice-0",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-3e39045003db4065a1c8c9b010c881ba-choice-0",
+        "test": "Perception+Artisanat:10",
+        "line": "Je vous tends l'anneau de lumière. Faites ce que vous savez faire."
+      }
+    },
+    {
+      "id": "test-node-node-3e39045003db4065a1c8c9b010c881ba-choice-1",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-3e39045003db4065a1c8c9b010c881ba-choice-1",
+        "test": "Force+Commandement:13",
+        "line": "Approche, alors. Tu peux toucher aussi l'armure — ses griffes me gênent."
+      }
+    },
+    {
+      "id": "test-node-node-3e39045003db4065a1c8c9b010c881ba-choice-2",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-3e39045003db4065a1c8c9b010c881ba-choice-2",
+        "test": "Raison+Diplomatie:12",
+        "line": "J'entends ta générosité, mais quel est ton prix au-delà du premier ajustement ?"
+      }
+    },
+    {
+      "id": "test-node-node-03473c45273a4a01a44889b9ed561e39-choice-0",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-03473c45273a4a01a44889b9ed561e39-choice-0",
+        "test": "Raison+Rhétorique:13",
+        "line": "Laissez-le finir : « Rapièce-les tous. Et garde la clé. »"
+      }
+    },
+    {
+      "id": "test-node-node-03473c45273a4a01a44889b9ed561e39-choice-1",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-03473c45273a4a01a44889b9ed561e39-choice-1",
+        "test": "Force+Commandement:13",
+        "line": "Exigez un gage : « Si vous me dois une faveur, je la réclamerai. Inscrivez-la maintenant. »"
+      }
+    },
+    {
+      "id": "test-node-node-03473c45273a4a01a44889b9ed561e39-choice-2",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-03473c45273a4a01a44889b9ed561e39-choice-2",
+        "test": "Perception+Artisanat:10",
+        "line": "Demandez une démonstration : « Montrez-moi ce que vos mains entendent — faites parler quelque chose d'autre. »"
+      }
+    },
+    {
+      "id": "test-node-node-03473c45273a4a01a44889b9ed561e39-choice-4",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-03473c45273a4a01a44889b9ed561e39-choice-4",
+        "test": "Ruse+Marchandage:12",
+        "line": "Offrez-lui une récompense : « Je peux vous payer. Que demandez-vous ? »"
+      }
+    },
+    {
+      "id": "test-node-NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4-choice-0",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4-choice-0",
+        "test": "Charisme+Persuasion:12",
+        "line": "« Je... je n'ai pas voulu frapper. Pardonne-moi — je peux expliquer. »"
+      }
+    },
+    {
+      "id": "test-node-NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4-choice-1",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4-choice-1",
+        "test": "Force+Intimidation:14",
+        "line": "« Lâche-moi tout de suite, boulon ambulant, ou tu le regretteras. »"
+      }
+    },
+    {
+      "id": "test-node-NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4-choice-2",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4-choice-2",
+        "test": "Dextérité+Athlétisme:13",
+        "line": "« Tiens bon — je vais dégager ma main sans faire plus de dégâts. »"
+      }
+    },
+    {
+      "id": "test-node-NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4-choice-3",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4-choice-3",
+        "test": "Raison+Mécanique:10",
+        "line": "« Tu as entendu l'anneau — je peux le réparer. Laisse-moi recoudre la jointure au lieu de crier à la caravane. »"
+      }
+    },
+    {
+      "id": "test-node-manual-e23d929d-a045-49cb-88fb-bac225443304-choice-0",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-manual-e23d929d-a045-49cb-88fb-bac225443304-choice-0",
+        "test": "Charisme+Persuasion:12",
+        "line": ""
+      }
+    },
+    {
+      "id": "test-node-manual-e23d929d-a045-49cb-88fb-bac225443304-choice-1",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-manual-e23d929d-a045-49cb-88fb-bac225443304-choice-1",
+        "test": "Force+Intimidation:14",
+        "line": ""
+      }
+    },
+    {
+      "id": "test-node-manual-e23d929d-a045-49cb-88fb-bac225443304-choice-2",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-manual-e23d929d-a045-49cb-88fb-bac225443304-choice-2",
+        "test": "Dextérité+Athlétisme:13",
+        "line": ""
+      }
+    },
+    {
+      "id": "test-node-manual-e23d929d-a045-49cb-88fb-bac225443304-choice-3",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-manual-e23d929d-a045-49cb-88fb-bac225443304-choice-3",
+        "test": "Raison+Mécanique:10",
+        "line": ""
+      }
+    },
+    {
+      "id": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0",
+        "test": "Dextérité+Acrobatie:12",
+        "line": "Arracher mes anneaux et reculer, briser le contact avant que ça ne s'agrave.",
+        "criticalFailureNode": "node-f33f926d6acb41fdb52aaa17b1b0c119",
+        "failureNode": "node-2747e083881548319c2fe0b7f841723b",
+        "successNode": "node-5201a0338f0c445780b38c1e714da56e",
+        "criticalSuccessNode": "node-e0d78d39911a4bc2b0b56fda471c7810"
+      }
+    },
+    {
+      "id": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-1",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-1",
+        "test": "Raison+Artisanat:14",
+        "line": "Céder — laissez Grish tâcher de recoudre. Si c'est votre façon, faites ce que vous voulez."
+      }
+    },
+    {
+      "id": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-2",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-2",
+        "test": "Volonté+Résistance:15",
+        "line": "Murmurer l'interdit et tenter de briser le contact rituel pour protéger mes souvenirs."
+      }
+    },
+    {
+      "id": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-3",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-3",
+        "test": "Raison+Mécanique:10",
+        "line": ""
+      }
+    },
+    {
+      "id": "test-node-node-0e165c7e4ef843779f5d7ae30123d24f-choice-0",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-0e165c7e4ef843779f5d7ae30123d24f-choice-0",
+        "test": "Force+Athlétisme:14",
+        "line": "J'accepte la réparation cosmétique. Apprivoisez la douleur, mais laissez l'histoire intacte autant que possible."
+      }
+    },
+    {
+      "id": "test-node-node-0e165c7e4ef843779f5d7ae30123d24f-choice-1",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-0e165c7e4ef843779f5d7ae30123d24f-choice-1",
+        "test": "Volonté+Occulte:14",
+        "line": "Non. Je garde mes cicatrices telles qu'elles sont. Merci, Grish."
+      }
+    },
+    {
+      "id": "test-node-node-0e165c7e4ef843779f5d7ae30123d24f-choice-2",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-0e165c7e4ef843779f5d7ae30123d24f-choice-2",
+        "test": "Raison+Artisanat:14",
+        "line": "Je vous supplie d'essayer. Faites le rituel risqué — j'accepte le prix si nécessaire."
+      }
+    },
+    {
+      "id": "test-node-node-0e165c7e4ef843779f5d7ae30123d24f-choice-3",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-0e165c7e4ef843779f5d7ae30123d24f-choice-3",
+        "test": "Raison+Artisanat:10",
+        "line": "Attendez — avant d'accepter, montrez-moi ce que vous pouvez tirer d'une cicatrice. Une démonstration rapide, si vous voulez bien."
+      }
+    },
+    {
+      "id": "test-node-node-1dcd27ebf4e34f839966365c7d80f2d2-choice-0",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-1dcd27ebf4e34f839966365c7d80f2d2-choice-0",
+        "test": "Force+Athlétisme:14",
+        "line": "Oui. Réparez, mais ne touchez pas aux souvenirs : que seules les voix enfouies se transforment en écho."
+      }
+    },
+    {
+      "id": "test-node-node-1dcd27ebf4e34f839966365c7d80f2d2-choice-1",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-1dcd27ebf4e34f839966365c7d80f2d2-choice-1",
+        "test": "Volonté+Occulte:14",
+        "line": "Faites la suture complète et autorisez l'écho : laissez-moi entendre ce fragment perdu — je prends la responsabilité de ce que j'entendrai."
+      }
+    },
+    {
+      "id": "test-node-node-1dcd27ebf4e34f839966365c7d80f2d2-choice-2",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-1dcd27ebf4e34f839966365c7d80f2d2-choice-2",
+        "test": "Dextérité+Acrobatie:15",
+        "line": "Conservez seulement la réparation physique. Aucun lien, aucune écoute : je veux que l'objet soit solide et rien de plus."
+      }
+    },
+    {
+      "id": "test-node-node-1dcd27ebf4e34f839966365c7d80f2d2-choice-3",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-1dcd27ebf4e34f839966365c7d80f2d2-choice-3",
+        "test": "Raison+Artisanat:10",
+        "line": "Attendez — avant d'accepter, montrez-moi ce que vous pouvez tirer d'une cicatrice. Une démonstration rapide, si vous voulez bien."
+      }
+    },
+    {
+      "id": "test-node-node-f33f926d6acb41fdb52aaa17b1b0c119-choice-0",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-f33f926d6acb41fdb52aaa17b1b0c119-choice-0",
+        "test": "Force+Athlétisme:14",
+        "line": "Hurler, serrer la main et tenter de briser l'anneau à mains nues (force brute)."
+      }
+    },
+    {
+      "id": "test-node-node-f33f926d6acb41fdb52aaa17b1b0c119-choice-1",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-f33f926d6acb41fdb52aaa17b1b0c119-choice-1",
+        "test": "Charisme+Persuasion:16",
+        "line": "Supplier Grish d'intervenir et d'en payer le prix — promettre un secret ou un service en échange."
+      }
+    },
+    {
+      "id": "test-node-node-f33f926d6acb41fdb52aaa17b1b0c119-choice-2",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-f33f926d6acb41fdb52aaa17b1b0c119-choice-2",
+        "test": "Dextérité+Acrobatie:15",
+        "line": "Chercher un outil sur vous ou à proximité (couteau, pince) et tenter de couper le lien — méthode précise et dangereuse."
+      }
+    },
+    {
+      "id": "test-node-node-2747e083881548319c2fe0b7f841723b-choice-0",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-2747e083881548319c2fe0b7f841723b-choice-0",
+        "test": "Dextérité+Acrobatie:14",
+        "line": "Insister — arracher d'un coup plus fort et plus rapide."
+      }
+    },
+    {
+      "id": "test-node-node-2747e083881548319c2fe0b7f841723b-choice-2",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-2747e083881548319c2fe0b7f841723b-choice-2",
+        "test": "Force+Athlétisme:13",
+        "line": "Attraper un couteau ou un outil et couper autour de l'anneau pour libérer la chair."
+      }
+    },
+    {
+      "id": "test-node-node-e0d78d39911a4bc2b0b56fda471c7810-choice-0",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-e0d78d39911a4bc2b0b56fda471c7810-choice-0",
+        "test": "Raison+Arcane:14",
+        "line": "Donne-moi l'unique seconde : répare-les, fais en sorte qu'ils soient sûrs et utilisables."
+      }
+    },
+    {
+      "id": "test-node-node-e0d78d39911a4bc2b0b56fda471c7810-choice-2",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-e0d78d39911a4bc2b0b56fda471c7810-choice-2",
+        "test": "Perception+Investigation:10",
+        "line": "Je vérifie immédiatement les anneaux et la marque sur ma main."
+      }
+    },
+    {
+      "id": "test-node-node-9db09f1fd9614001bc1a6f6e92865f49-choice-0",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-9db09f1fd9614001bc1a6f6e92865f49-choice-0",
+        "test": "Force+Athlétisme:13",
+        "line": "Arrachez votre main — reprenez le contrôle par la force !"
+      }
+    },
+    {
+      "id": "test-node-node-9db09f1fd9614001bc1a6f6e92865f49-choice-1",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-9db09f1fd9614001bc1a6f6e92865f49-choice-1",
+        "test": "Charisme+Rhétorique:14",
+        "line": "Plaidez! Expliquez que vous vouliez préserver la cicatrice — demandez qu'il refasse doucement."
+      }
+    },
+    {
+      "id": "test-node-node-9db09f1fd9614001bc1a6f6e92865f49-choice-2",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-9db09f1fd9614001bc1a6f6e92865f49-choice-2",
+        "test": "Force+Commandement:11",
+        "line": "Restez immobile et laissez-le finir. Si quelque chose doit être perdu, apprenez de la douleur."
+      }
+    },
+    {
+      "id": "test-node-node-36c540079b3c4f11aa84ec7b6438601b-choice-2",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-36c540079b3c4f11aa84ec7b6438601b-choice-2",
+        "test": "Raison+Rhétorique:14",
+        "line": "Laissez-moi convaincre autrement — accordez-moi une chance de vous persuader de préserver davantage les cicatrices."
+      }
+    },
+    {
+      "id": "test-node-node-36c540079b3c4f11aa84ec7b6438601b-choice-3",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-36c540079b3c4f11aa84ec7b6438601b-choice-3",
+        "test": "Courage+Intimidation:13",
+        "line": "Si vous cherchez un prix, je peux vous l'offrir — un fragment du cercle, mais vous devrez jurer qu'aucune note mémorielle ne sera balayée."
+      }
+    },
+    {
+      "id": "test-node-node-383617adbd9a4cbaa35c87c610ba15b6-choice-1",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-383617adbd9a4cbaa35c87c610ba15b6-choice-1",
+        "test": "Raison+Artisanat:10",
+        "line": "Expliquez votre rituel. Comment garantissez-vous que la mémoire n'est pas effacée ?"
+      }
+    },
+    {
+      "id": "test-node-node-f884e57528a9493ca9134875935378de-choice-3",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-f884e57528a9493ca9134875935378de-choice-3",
+        "test": "Raison+Artisanat:14",
+        "line": "Si tu as vraiment tiré quelque chose d'exceptionnel de ma présence, fais plus : lie l'objet à ma tapeisserie — qu'il réponde à mon appel à distance. (Risque : cela demande un travail plus profond.)"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e:START:choice:__idx_0:test",
+      "source": "START",
+      "target": "test-node-START-choice-0",
+      "type": "smoothstep",
+      "label": "Dans la tapisserie de l'existe...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "__idx_0",
+        "choiceText": "Dans la tapisserie de l'existence, vos outils peuvent-ils suturer les fissures sans effacer ce qu'elles portent? Je n'offre pas ma mémoire, mais je cherche une réparation qui respecte les cicatrices."
+      }
+    },
+    {
+      "id": "test-node-START-choice-0-critical-failure-node-9db09f1fd9614001bc1a6f6e92865f49",
+      "source": "test-node-START-choice-0",
+      "target": "node-9db09f1fd9614001bc1a6f6e92865f49",
+      "type": "smoothstep",
+      "label": "Échec critique"
+    },
+    {
+      "id": "test-node-START-choice-0-failure-node-36c540079b3c4f11aa84ec7b6438601b",
+      "source": "test-node-START-choice-0",
+      "target": "node-36c540079b3c4f11aa84ec7b6438601b",
+      "type": "smoothstep",
+      "label": "Échec"
+    },
+    {
+      "id": "test-node-START-choice-0-success-node-383617adbd9a4cbaa35c87c610ba15b6",
+      "source": "test-node-START-choice-0",
+      "target": "node-383617adbd9a4cbaa35c87c610ba15b6",
+      "type": "smoothstep",
+      "label": "Réussite"
+    },
+    {
+      "id": "test-node-START-choice-0-critical-success-node-f884e57528a9493ca9134875935378de",
+      "source": "test-node-START-choice-0",
+      "target": "node-f884e57528a9493ca9134875935378de",
+      "type": "smoothstep",
+      "label": "Réussite critique"
+    },
+    {
+      "id": "e:START:choice:__idx_1:test",
+      "source": "START",
+      "target": "test-node-START-choice-1",
+      "type": "smoothstep",
+      "label": "Je ne cherche pas de confidenc...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "__idx_1",
+        "choiceText": "Je ne cherche pas de confidences. Répare cette caravane, et je te rendrai un service : un artefact scellé, pas de questions. Est-ce que tu sais travailler avec des reliques anciennes ?"
+      }
+    },
+    {
+      "id": "e:START:choice:__idx_2:test",
+      "source": "START",
+      "target": "test-node-START-choice-2",
+      "type": "smoothstep",
+      "label": "Garde tes mains pour tes villa...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "__idx_2",
+        "choiceText": "Garde tes mains pour tes villages. Je n'ai nul besoin d'un charlatan des déchets. Pars, avant que je ne te rende ta misère."
+      }
+    },
+    {
+      "id": "test-node-START-choice-2-critical-failure-node-d281ad35450c4ed59bc5ec353aa203e8",
+      "source": "test-node-START-choice-2",
+      "target": "node-d281ad35450c4ed59bc5ec353aa203e8",
+      "type": "smoothstep",
+      "label": "Échec critique"
+    },
+    {
+      "id": "test-node-START-choice-2-failure-node-f738dabb50c547f696efa85c9bf7d1f6",
+      "source": "test-node-START-choice-2",
+      "target": "node-f738dabb50c547f696efa85c9bf7d1f6",
+      "type": "smoothstep",
+      "label": "Échec"
+    },
+    {
+      "id": "test-node-START-choice-2-success-node-3e39045003db4065a1c8c9b010c881ba",
+      "source": "test-node-START-choice-2",
+      "target": "node-3e39045003db4065a1c8c9b010c881ba",
+      "type": "smoothstep",
+      "label": "Réussite"
+    },
+    {
+      "id": "test-node-START-choice-2-critical-success-node-03473c45273a4a01a44889b9ed561e39",
+      "source": "test-node-START-choice-2",
+      "target": "node-03473c45273a4a01a44889b9ed561e39",
+      "type": "smoothstep",
+      "label": "Réussite critique"
+    },
+    {
+      "id": "e:node-d281ad35450c4ed59bc5ec353aa203e8:choice:__idx_0:test",
+      "source": "node-d281ad35450c4ed59bc5ec353aa203e8",
+      "target": "test-node-node-d281ad35450c4ed59bc5ec353aa203e8-choice-0",
+      "type": "smoothstep",
+      "label": "Reculez. Non — je... pardonnez...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "__idx_0",
+        "choiceText": "Reculez. Non — je... pardonnez-moi. Ce n'était pas mon intention. Laissez-moi réparer ça."
+      }
+    },
+    {
+      "id": "e:node-d281ad35450c4ed59bc5ec353aa203e8:choice:__idx_1:test",
+      "source": "node-d281ad35450c4ed59bc5ec353aa203e8",
+      "target": "test-node-node-d281ad35450c4ed59bc5ec353aa203e8-choice-1",
+      "type": "smoothstep",
+      "label": "Dégagez vos griffes de moi ! (...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "__idx_1",
+        "choiceText": "Dégagez vos griffes de moi ! (Vous tentez de repousser la mâchoire mécanique de force — encore.)"
+      }
+    },
+    {
+      "id": "e:node-d281ad35450c4ed59bc5ec353aa203e8:choice:__idx_2:test",
+      "source": "node-d281ad35450c4ed59bc5ec353aa203e8",
+      "target": "test-node-node-d281ad35450c4ed59bc5ec353aa203e8-choice-2",
+      "type": "smoothstep",
+      "label": "Calme. Vous retirez votre main...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "__idx_2",
+        "choiceText": "Calme. Vous retirez votre main, vous vous asseyez, vous vous occupez de la blessure — pas de confrontation."
+      }
+    },
+    {
+      "id": "e:node-d281ad35450c4ed59bc5ec353aa203e8:choice:__idx_3",
+      "source": "node-d281ad35450c4ed59bc5ec353aa203e8",
+      "target": "manual-e23d929d-a045-49cb-88fb-bac225443304",
+      "type": "smoothstep",
+      "label": "",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 3,
+        "choiceId": "__idx_3",
+        "choiceText": ""
+      }
+    },
+    {
+      "id": "e:node-d281ad35450c4ed59bc5ec353aa203e8:choice:__idx_4",
+      "source": "node-d281ad35450c4ed59bc5ec353aa203e8",
+      "target": "NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4",
+      "type": "smoothstep",
+      "label": "",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 4,
+        "choiceId": "__idx_4",
+        "choiceText": ""
+      }
+    },
+    {
+      "id": "e:node-f738dabb50c547f696efa85c9bf7d1f6:choice:__idx_1:test",
+      "source": "node-f738dabb50c547f696efa85c9bf7d1f6",
+      "target": "test-node-node-f738dabb50c547f696efa85c9bf7d1f6-choice-1",
+      "type": "smoothstep",
+      "label": "Je vous donnerai une garantie....",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "__idx_1",
+        "choiceText": "Je vous donnerai une garantie. Laissez-moi un gage, et vous pourrez toucher mes affaires."
+      }
+    },
+    {
+      "id": "e:node-3e39045003db4065a1c8c9b010c881ba:choice:__idx_0:test",
+      "source": "node-3e39045003db4065a1c8c9b010c881ba",
+      "target": "test-node-node-3e39045003db4065a1c8c9b010c881ba-choice-0",
+      "type": "smoothstep",
+      "label": "Je vous tends l'anneau de lumi...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "__idx_0",
+        "choiceText": "Je vous tends l'anneau de lumière. Faites ce que vous savez faire."
+      }
+    },
+    {
+      "id": "e:node-3e39045003db4065a1c8c9b010c881ba:choice:__idx_1:test",
+      "source": "node-3e39045003db4065a1c8c9b010c881ba",
+      "target": "test-node-node-3e39045003db4065a1c8c9b010c881ba-choice-1",
+      "type": "smoothstep",
+      "label": "Approche, alors. Tu peux touch...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "__idx_1",
+        "choiceText": "Approche, alors. Tu peux toucher aussi l'armure — ses griffes me gênent."
+      }
+    },
+    {
+      "id": "e:node-3e39045003db4065a1c8c9b010c881ba:choice:__idx_2:test",
+      "source": "node-3e39045003db4065a1c8c9b010c881ba",
+      "target": "test-node-node-3e39045003db4065a1c8c9b010c881ba-choice-2",
+      "type": "smoothstep",
+      "label": "J'entends ta générosité, mais ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "__idx_2",
+        "choiceText": "J'entends ta générosité, mais quel est ton prix au-delà du premier ajustement ?"
+      }
+    },
+    {
+      "id": "e:node-03473c45273a4a01a44889b9ed561e39:choice:__idx_0:test",
+      "source": "node-03473c45273a4a01a44889b9ed561e39",
+      "target": "test-node-node-03473c45273a4a01a44889b9ed561e39-choice-0",
+      "type": "smoothstep",
+      "label": "Laissez-le finir : « Rapièce-l...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "__idx_0",
+        "choiceText": "Laissez-le finir : « Rapièce-les tous. Et garde la clé. »"
+      }
+    },
+    {
+      "id": "e:node-03473c45273a4a01a44889b9ed561e39:choice:__idx_1:test",
+      "source": "node-03473c45273a4a01a44889b9ed561e39",
+      "target": "test-node-node-03473c45273a4a01a44889b9ed561e39-choice-1",
+      "type": "smoothstep",
+      "label": "Exigez un gage : « Si vous me ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "__idx_1",
+        "choiceText": "Exigez un gage : « Si vous me dois une faveur, je la réclamerai. Inscrivez-la maintenant. »"
+      }
+    },
+    {
+      "id": "e:node-03473c45273a4a01a44889b9ed561e39:choice:__idx_2:test",
+      "source": "node-03473c45273a4a01a44889b9ed561e39",
+      "target": "test-node-node-03473c45273a4a01a44889b9ed561e39-choice-2",
+      "type": "smoothstep",
+      "label": "Demandez une démonstration : «...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "__idx_2",
+        "choiceText": "Demandez une démonstration : « Montrez-moi ce que vos mains entendent — faites parler quelque chose d'autre. »"
+      }
+    },
+    {
+      "id": "e:node-03473c45273a4a01a44889b9ed561e39:choice:__idx_4:test",
+      "source": "node-03473c45273a4a01a44889b9ed561e39",
+      "target": "test-node-node-03473c45273a4a01a44889b9ed561e39-choice-4",
+      "type": "smoothstep",
+      "label": "Offrez-lui une récompense : « ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 4,
+        "choiceId": "__idx_4",
+        "choiceText": "Offrez-lui une récompense : « Je peux vous payer. Que demandez-vous ? »"
+      }
+    },
+    {
+      "id": "e:NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4:choice:__idx_0:test",
+      "source": "NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4",
+      "target": "test-node-NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4-choice-0",
+      "type": "smoothstep",
+      "label": "« Je... je n'ai pas voulu frap...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "__idx_0",
+        "choiceText": "« Je... je n'ai pas voulu frapper. Pardonne-moi — je peux expliquer. »"
+      }
+    },
+    {
+      "id": "e:NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4:choice:__idx_1:test",
+      "source": "NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4",
+      "target": "test-node-NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4-choice-1",
+      "type": "smoothstep",
+      "label": "« Lâche-moi tout de suite, bou...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "__idx_1",
+        "choiceText": "« Lâche-moi tout de suite, boulon ambulant, ou tu le regretteras. »"
+      }
+    },
+    {
+      "id": "e:NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4:choice:__idx_2:test",
+      "source": "NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4",
+      "target": "test-node-NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4-choice-2",
+      "type": "smoothstep",
+      "label": "« Tiens bon — je vais dégager ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "__idx_2",
+        "choiceText": "« Tiens bon — je vais dégager ma main sans faire plus de dégâts. »"
+      }
+    },
+    {
+      "id": "e:NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4:choice:__idx_3:test",
+      "source": "NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4",
+      "target": "test-node-NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4-choice-3",
+      "type": "smoothstep",
+      "label": "« Tu as entendu l'anneau — je ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 3,
+        "choiceId": "__idx_3",
+        "choiceText": "« Tu as entendu l'anneau — je peux le réparer. Laisse-moi recoudre la jointure au lieu de crier à la caravane. »"
+      }
+    },
+    {
+      "id": "e:manual-e23d929d-a045-49cb-88fb-bac225443304:choice:__idx_0:test",
+      "source": "manual-e23d929d-a045-49cb-88fb-bac225443304",
+      "target": "test-node-manual-e23d929d-a045-49cb-88fb-bac225443304-choice-0",
+      "type": "smoothstep",
+      "label": "",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "__idx_0",
+        "choiceText": ""
+      }
+    },
+    {
+      "id": "e:manual-e23d929d-a045-49cb-88fb-bac225443304:choice:__idx_1:test",
+      "source": "manual-e23d929d-a045-49cb-88fb-bac225443304",
+      "target": "test-node-manual-e23d929d-a045-49cb-88fb-bac225443304-choice-1",
+      "type": "smoothstep",
+      "label": "",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "__idx_1",
+        "choiceText": ""
+      }
+    },
+    {
+      "id": "e:manual-e23d929d-a045-49cb-88fb-bac225443304:choice:__idx_2:test",
+      "source": "manual-e23d929d-a045-49cb-88fb-bac225443304",
+      "target": "test-node-manual-e23d929d-a045-49cb-88fb-bac225443304-choice-2",
+      "type": "smoothstep",
+      "label": "",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "__idx_2",
+        "choiceText": ""
+      }
+    },
+    {
+      "id": "e:manual-e23d929d-a045-49cb-88fb-bac225443304:choice:__idx_3:test",
+      "source": "manual-e23d929d-a045-49cb-88fb-bac225443304",
+      "target": "test-node-manual-e23d929d-a045-49cb-88fb-bac225443304-choice-3",
+      "type": "smoothstep",
+      "label": "",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 3,
+        "choiceId": "__idx_3",
+        "choiceText": ""
+      }
+    },
+    {
+      "id": "e:node-333f03751b0d40f29e4020ec4429b37b:choice:__idx_0:test",
+      "source": "node-333f03751b0d40f29e4020ec4429b37b",
+      "target": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0",
+      "type": "smoothstep",
+      "label": "Arracher mes anneaux et recule...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "__idx_0",
+        "choiceText": "Arracher mes anneaux et reculer, briser le contact avant que ça ne s'agrave."
+      }
+    },
+    {
+      "id": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0-critical-failure-node-f33f926d6acb41fdb52aaa17b1b0c119",
+      "source": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0",
+      "target": "node-f33f926d6acb41fdb52aaa17b1b0c119",
+      "type": "smoothstep",
+      "label": "Échec critique"
+    },
+    {
+      "id": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0-failure-node-2747e083881548319c2fe0b7f841723b",
+      "source": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0",
+      "target": "node-2747e083881548319c2fe0b7f841723b",
+      "type": "smoothstep",
+      "label": "Échec"
+    },
+    {
+      "id": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0-success-node-5201a0338f0c445780b38c1e714da56e",
+      "source": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0",
+      "target": "node-5201a0338f0c445780b38c1e714da56e",
+      "type": "smoothstep",
+      "label": "Réussite"
+    },
+    {
+      "id": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0-critical-success-node-e0d78d39911a4bc2b0b56fda471c7810",
+      "source": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0",
+      "target": "node-e0d78d39911a4bc2b0b56fda471c7810",
+      "type": "smoothstep",
+      "label": "Réussite critique"
+    },
+    {
+      "id": "e:node-333f03751b0d40f29e4020ec4429b37b:choice:__idx_1:test",
+      "source": "node-333f03751b0d40f29e4020ec4429b37b",
+      "target": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-1",
+      "type": "smoothstep",
+      "label": "Céder — laissez Grish tâcher d...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "__idx_1",
+        "choiceText": "Céder — laissez Grish tâcher de recoudre. Si c'est votre façon, faites ce que vous voulez."
+      }
+    },
+    {
+      "id": "e:node-333f03751b0d40f29e4020ec4429b37b:choice:__idx_2:test",
+      "source": "node-333f03751b0d40f29e4020ec4429b37b",
+      "target": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-2",
+      "type": "smoothstep",
+      "label": "Murmurer l'interdit et tenter ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "__idx_2",
+        "choiceText": "Murmurer l'interdit et tenter de briser le contact rituel pour protéger mes souvenirs."
+      }
+    },
+    {
+      "id": "e:node-333f03751b0d40f29e4020ec4429b37b:choice:__idx_3:test",
+      "source": "node-333f03751b0d40f29e4020ec4429b37b",
+      "target": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-3",
+      "type": "smoothstep",
+      "label": "",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 3,
+        "choiceId": "__idx_3",
+        "choiceText": ""
+      }
+    },
+    {
+      "id": "e:node-0e165c7e4ef843779f5d7ae30123d24f:choice:__idx_0:test",
+      "source": "node-0e165c7e4ef843779f5d7ae30123d24f",
+      "target": "test-node-node-0e165c7e4ef843779f5d7ae30123d24f-choice-0",
+      "type": "smoothstep",
+      "label": "J'accepte la réparation cosmét...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "__idx_0",
+        "choiceText": "J'accepte la réparation cosmétique. Apprivoisez la douleur, mais laissez l'histoire intacte autant que possible."
+      }
+    },
+    {
+      "id": "e:node-0e165c7e4ef843779f5d7ae30123d24f:choice:__idx_1:test",
+      "source": "node-0e165c7e4ef843779f5d7ae30123d24f",
+      "target": "test-node-node-0e165c7e4ef843779f5d7ae30123d24f-choice-1",
+      "type": "smoothstep",
+      "label": "Non. Je garde mes cicatrices t...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "__idx_1",
+        "choiceText": "Non. Je garde mes cicatrices telles qu'elles sont. Merci, Grish."
+      }
+    },
+    {
+      "id": "e:node-0e165c7e4ef843779f5d7ae30123d24f:choice:__idx_2:test",
+      "source": "node-0e165c7e4ef843779f5d7ae30123d24f",
+      "target": "test-node-node-0e165c7e4ef843779f5d7ae30123d24f-choice-2",
+      "type": "smoothstep",
+      "label": "Je vous supplie d'essayer. Fai...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "__idx_2",
+        "choiceText": "Je vous supplie d'essayer. Faites le rituel risqué — j'accepte le prix si nécessaire."
+      }
+    },
+    {
+      "id": "e:node-0e165c7e4ef843779f5d7ae30123d24f:choice:__idx_3:test",
+      "source": "node-0e165c7e4ef843779f5d7ae30123d24f",
+      "target": "test-node-node-0e165c7e4ef843779f5d7ae30123d24f-choice-3",
+      "type": "smoothstep",
+      "label": "Attendez — avant d'accepter, m...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 3,
+        "choiceId": "__idx_3",
+        "choiceText": "Attendez — avant d'accepter, montrez-moi ce que vous pouvez tirer d'une cicatrice. Une démonstration rapide, si vous voulez bien."
+      }
+    },
+    {
+      "id": "e:node-1dcd27ebf4e34f839966365c7d80f2d2:choice:__idx_0:test",
+      "source": "node-1dcd27ebf4e34f839966365c7d80f2d2",
+      "target": "test-node-node-1dcd27ebf4e34f839966365c7d80f2d2-choice-0",
+      "type": "smoothstep",
+      "label": "Oui. Réparez, mais ne touchez ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "__idx_0",
+        "choiceText": "Oui. Réparez, mais ne touchez pas aux souvenirs : que seules les voix enfouies se transforment en écho."
+      }
+    },
+    {
+      "id": "e:node-1dcd27ebf4e34f839966365c7d80f2d2:choice:__idx_1:test",
+      "source": "node-1dcd27ebf4e34f839966365c7d80f2d2",
+      "target": "test-node-node-1dcd27ebf4e34f839966365c7d80f2d2-choice-1",
+      "type": "smoothstep",
+      "label": "Faites la suture complète et a...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "__idx_1",
+        "choiceText": "Faites la suture complète et autorisez l'écho : laissez-moi entendre ce fragment perdu — je prends la responsabilité de ce que j'entendrai."
+      }
+    },
+    {
+      "id": "e:node-1dcd27ebf4e34f839966365c7d80f2d2:choice:__idx_2:test",
+      "source": "node-1dcd27ebf4e34f839966365c7d80f2d2",
+      "target": "test-node-node-1dcd27ebf4e34f839966365c7d80f2d2-choice-2",
+      "type": "smoothstep",
+      "label": "Conservez seulement la réparat...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "__idx_2",
+        "choiceText": "Conservez seulement la réparation physique. Aucun lien, aucune écoute : je veux que l'objet soit solide et rien de plus."
+      }
+    },
+    {
+      "id": "e:node-1dcd27ebf4e34f839966365c7d80f2d2:choice:__idx_3:test",
+      "source": "node-1dcd27ebf4e34f839966365c7d80f2d2",
+      "target": "test-node-node-1dcd27ebf4e34f839966365c7d80f2d2-choice-3",
+      "type": "smoothstep",
+      "label": "Attendez — avant d'accepter, m...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 3,
+        "choiceId": "__idx_3",
+        "choiceText": "Attendez — avant d'accepter, montrez-moi ce que vous pouvez tirer d'une cicatrice. Une démonstration rapide, si vous voulez bien."
+      }
+    },
+    {
+      "id": "e:node-f33f926d6acb41fdb52aaa17b1b0c119:choice:__idx_0:test",
+      "source": "node-f33f926d6acb41fdb52aaa17b1b0c119",
+      "target": "test-node-node-f33f926d6acb41fdb52aaa17b1b0c119-choice-0",
+      "type": "smoothstep",
+      "label": "Hurler, serrer la main et tent...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "__idx_0",
+        "choiceText": "Hurler, serrer la main et tenter de briser l'anneau à mains nues (force brute)."
+      }
+    },
+    {
+      "id": "e:node-f33f926d6acb41fdb52aaa17b1b0c119:choice:__idx_1:test",
+      "source": "node-f33f926d6acb41fdb52aaa17b1b0c119",
+      "target": "test-node-node-f33f926d6acb41fdb52aaa17b1b0c119-choice-1",
+      "type": "smoothstep",
+      "label": "Supplier Grish d'intervenir et...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "__idx_1",
+        "choiceText": "Supplier Grish d'intervenir et d'en payer le prix — promettre un secret ou un service en échange."
+      }
+    },
+    {
+      "id": "e:node-f33f926d6acb41fdb52aaa17b1b0c119:choice:__idx_2:test",
+      "source": "node-f33f926d6acb41fdb52aaa17b1b0c119",
+      "target": "test-node-node-f33f926d6acb41fdb52aaa17b1b0c119-choice-2",
+      "type": "smoothstep",
+      "label": "Chercher un outil sur vous ou ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "__idx_2",
+        "choiceText": "Chercher un outil sur vous ou à proximité (couteau, pince) et tenter de couper le lien — méthode précise et dangereuse."
+      }
+    },
+    {
+      "id": "e:node-2747e083881548319c2fe0b7f841723b:choice:__idx_0:test",
+      "source": "node-2747e083881548319c2fe0b7f841723b",
+      "target": "test-node-node-2747e083881548319c2fe0b7f841723b-choice-0",
+      "type": "smoothstep",
+      "label": "Insister — arracher d'un coup ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "__idx_0",
+        "choiceText": "Insister — arracher d'un coup plus fort et plus rapide."
+      }
+    },
+    {
+      "id": "e:node-2747e083881548319c2fe0b7f841723b:choice:__idx_2:test",
+      "source": "node-2747e083881548319c2fe0b7f841723b",
+      "target": "test-node-node-2747e083881548319c2fe0b7f841723b-choice-2",
+      "type": "smoothstep",
+      "label": "Attraper un couteau ou un outi...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "__idx_2",
+        "choiceText": "Attraper un couteau ou un outil et couper autour de l'anneau pour libérer la chair."
+      }
+    },
+    {
+      "id": "e:node-e0d78d39911a4bc2b0b56fda471c7810:choice:__idx_0:test",
+      "source": "node-e0d78d39911a4bc2b0b56fda471c7810",
+      "target": "test-node-node-e0d78d39911a4bc2b0b56fda471c7810-choice-0",
+      "type": "smoothstep",
+      "label": "Donne-moi l'unique seconde : r...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "__idx_0",
+        "choiceText": "Donne-moi l'unique seconde : répare-les, fais en sorte qu'ils soient sûrs et utilisables."
+      }
+    },
+    {
+      "id": "e:node-e0d78d39911a4bc2b0b56fda471c7810:choice:__idx_2:test",
+      "source": "node-e0d78d39911a4bc2b0b56fda471c7810",
+      "target": "test-node-node-e0d78d39911a4bc2b0b56fda471c7810-choice-2",
+      "type": "smoothstep",
+      "label": "Je vérifie immédiatement les a...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "__idx_2",
+        "choiceText": "Je vérifie immédiatement les anneaux et la marque sur ma main."
+      }
+    },
+    {
+      "id": "e:node-9db09f1fd9614001bc1a6f6e92865f49:choice:__idx_0:test",
+      "source": "node-9db09f1fd9614001bc1a6f6e92865f49",
+      "target": "test-node-node-9db09f1fd9614001bc1a6f6e92865f49-choice-0",
+      "type": "smoothstep",
+      "label": "Arrachez votre main — reprenez...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "__idx_0",
+        "choiceText": "Arrachez votre main — reprenez le contrôle par la force !"
+      }
+    },
+    {
+      "id": "e:node-9db09f1fd9614001bc1a6f6e92865f49:choice:__idx_1:test",
+      "source": "node-9db09f1fd9614001bc1a6f6e92865f49",
+      "target": "test-node-node-9db09f1fd9614001bc1a6f6e92865f49-choice-1",
+      "type": "smoothstep",
+      "label": "Plaidez! Expliquez que vous vo...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "__idx_1",
+        "choiceText": "Plaidez! Expliquez que vous vouliez préserver la cicatrice — demandez qu'il refasse doucement."
+      }
+    },
+    {
+      "id": "e:node-9db09f1fd9614001bc1a6f6e92865f49:choice:__idx_2:test",
+      "source": "node-9db09f1fd9614001bc1a6f6e92865f49",
+      "target": "test-node-node-9db09f1fd9614001bc1a6f6e92865f49-choice-2",
+      "type": "smoothstep",
+      "label": "Restez immobile et laissez-le ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "__idx_2",
+        "choiceText": "Restez immobile et laissez-le finir. Si quelque chose doit être perdu, apprenez de la douleur."
+      }
+    },
+    {
+      "id": "e:node-36c540079b3c4f11aa84ec7b6438601b:choice:__idx_2:test",
+      "source": "node-36c540079b3c4f11aa84ec7b6438601b",
+      "target": "test-node-node-36c540079b3c4f11aa84ec7b6438601b-choice-2",
+      "type": "smoothstep",
+      "label": "Laissez-moi convaincre autreme...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "__idx_2",
+        "choiceText": "Laissez-moi convaincre autrement — accordez-moi une chance de vous persuader de préserver davantage les cicatrices."
+      }
+    },
+    {
+      "id": "e:node-36c540079b3c4f11aa84ec7b6438601b:choice:__idx_3:test",
+      "source": "node-36c540079b3c4f11aa84ec7b6438601b",
+      "target": "test-node-node-36c540079b3c4f11aa84ec7b6438601b-choice-3",
+      "type": "smoothstep",
+      "label": "Si vous cherchez un prix, je p...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 3,
+        "choiceId": "__idx_3",
+        "choiceText": "Si vous cherchez un prix, je peux vous l'offrir — un fragment du cercle, mais vous devrez jurer qu'aucune note mémorielle ne sera balayée."
+      }
+    },
+    {
+      "id": "e:node-383617adbd9a4cbaa35c87c610ba15b6:choice:__idx_1:test",
+      "source": "node-383617adbd9a4cbaa35c87c610ba15b6",
+      "target": "test-node-node-383617adbd9a4cbaa35c87c610ba15b6-choice-1",
+      "type": "smoothstep",
+      "label": "Expliquez votre rituel. Commen...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "__idx_1",
+        "choiceText": "Expliquez votre rituel. Comment garantissez-vous que la mémoire n'est pas effacée ?"
+      }
+    },
+    {
+      "id": "e:node-f884e57528a9493ca9134875935378de:choice:__idx_3:test",
+      "source": "node-f884e57528a9493ca9134875935378de",
+      "target": "test-node-node-f884e57528a9493ca9134875935378de-choice-3",
+      "type": "smoothstep",
+      "label": "Si tu as vraiment tiré quelque...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 3,
+        "choiceId": "__idx_3",
+        "choiceText": "Si tu as vraiment tiré quelque chose d'exceptionnel de ma présence, fais plus : lie l'objet à ma tapeisserie — qu'il réponde à mon appel à distance. (Risque : cela demande un travail plus profond.)"
+      }
+    }
+  ],
+  "metadata": {
+    "title": "Dialogue Unity",
+    "node_count": 19,
+    "edge_count": 62,
+    "filename": "forgeron-itinerant"
+  }
+}

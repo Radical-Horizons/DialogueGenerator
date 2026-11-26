@@ -1,0 +1,11 @@
+HTTP 422: {
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "details": {
+      "validation_errors": [
+        "Erreur schéma Unity : champ 'id' — '01fed77f-c38e-419b-957f-6c1801baf91e' is not valid under any of the given schemas"
+      ]
+    },
+    "message": "Le document Unity est invalide."
+  }
+}

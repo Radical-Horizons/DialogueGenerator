@@ -1,0 +1,2473 @@
+{
+  "nodes": [
+    {
+      "id": "START",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "START",
+        "displayName": "Voknir se grave la peau",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*Voknir est agenouillé, presque immobile, il se grave lentement la peau, un liquide noir suinte.*",
+        "choices": [
+          {
+            "text": "*[Vous pénétrez dans l'atelier.]* « Salutation, cartographe. »",
+            "targetNode": "node-accueil",
+            "choiceEffects": [],
+            "choiceId": "choice_START_0"
+          },
+          {
+            "text": "*[Vous restez sur le seuil de l'atelier et attendez que Voknir termine sa scarification.]* (+1H)",
+            "targetNode": "node-attente",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Patient",
+                "minValue": 3
+              }
+            ],
+            "choiceId": "choice_START_1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-accueil",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-accueil",
+        "displayName": "Voknir se prosterne",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*Surpris, le vieux Van'Doei se tourne vers vous. Incrédule, l'espace d'un instant, il comprend soudain qui vous êtes et se jette à vos pieds.*\n« Oh Théomaque ! Les saints Substrats soient avec vous ! Je vous en prie, ayez pitié de mon humble habitat, ces lieux sont indignes de votre auguste présence ! »",
+        "choices": [
+          {
+            "text": "*[Vous ne prêtez guère attention à l'adorateur à vos pieds et le dépassez pour pénétrer dans son atelier.]* « Je dois m'en aller. Mon séjour ici ne m'a pas apporté la quiétude que j'espérais. » *[Des symboles mathématiques tapissent les murs face à vous.]* « Dois-je voir dans ces équations un chemin pour atteindre mon objectif ? »",
+            "targetNode": "node-equations",
+            "choiceEffects": [],
+            "choiceId": "choice_node-accueil_0"
+          },
+          {
+            "text": "« Détrompez-vous, cartographe, votre atelier est précisément le lieu que je cherchais. »",
+            "targetNode": "node-respect-1",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Respectueux",
+                "minValue": 2
+              }
+            ],
+            "choiceId": "choice_node-accueil_1"
+          },
+          {
+            "text": "« Arrête ce cirque, vieillard, je n'ai pas le temps pour ces inepties ! Mon séjour ici n'a que trop duré ! »",
+            "targetNode": "node-autoritaire",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Autoritaire",
+                "minValue": 3
+              }
+            ],
+            "choiceId": "choice_node-accueil_2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-equations",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-equations",
+        "displayName": "Équations obsolètes",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« Non, n'y prêtez pas attention, ô maîtresse du temps, elles n'ont plus de sens. Les murs bougent. Ce qui était démontré jadis n'a plus lieu d'être. »",
+        "choices": [
+          {
+            "text": "« Tu dois bien avoir un moyen de t'orienter, néanmoins. »",
+            "targetNode": "node-cicatrices-douce",
+            "choiceEffects": [],
+            "choiceId": "choice_node-equations_0"
+          },
+          {
+            "text": "(Test d'intimidation DD9) « Ne me mens pas, Van Doei hérétique, nul n'ignore l'objet de tes recherches. »",
+            "choiceEffects": [],
+            "test": "Volonté+Intimidation:9",
+            "testCriticalSuccessNode": "node-cicatrices-peur",
+            "testSuccessNode": "node-cicatrices-peur",
+            "testFailureNode": "node-cicatrices-douce",
+            "testCriticalFailureNode": "node-cicatrices-douce",
+            "choiceId": "choice_node-equations_1"
+          },
+          {
+            "text": "« Dans ce cas, tu ne me sers à rien. »",
+            "targetNode": "END",
+            "choiceEffects": [],
+            "choiceId": "choice_node-equations_2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-cicatrices-douce",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-cicatrices-douce",
+        "displayName": "Les murs sont des brouillons",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« Les murs ne sont que des brouillons, seule ma chair compte. »\n*À ces mots, il dévoile une partie de son torse et les sinueuses scarifications qui le modèlent.*",
+        "choices": [
+          {
+            "text": "(Idéaliste +5) *[Vous faites un pas en avant et les cicatrices du Van'Doei se métamorphosent sous vos yeux. Vous apercevez les lignes aériennes d'un pont enjambant tout le labyrinthe.]* « Fascinante perspective. Une carte vivante et… modulaire. Tu es bien celui qu'il me faut. Montre-moi la sortie ! »",
+            "targetNode": "node-pont",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Idéaliste",
+                "minValue": 5
+              }
+            ],
+            "choiceId": "choice_node-cicatrices-douce_0"
+          },
+          {
+            "text": "(Cynique +5) *[Les cicatrices du Van'Doei se métamorphosent sous vos yeux. Vous entrapercevez une crevasse purulente et, révulsée, faites un pas en arrière.]*",
+            "targetNode": "node-cynique",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Cynique",
+                "minValue": 5
+              }
+            ],
+            "choiceId": "choice_node-cicatrices-douce_1"
+          },
+          {
+            "text": "(Test d'Orientation DD15) *[Le corps du vieux Van'Doei est parcouru d'innombrables cicatrices, elles ressemblent à une carte mais échappent à toute logique. Vous essayez de faire le lien avec vos connaissances des Plis.]*",
+            "choiceEffects": [],
+            "test": "Intelligence+Orientation:15",
+            "testCriticalSuccessNode": "node-orient-ok",
+            "testSuccessNode": "node-orient-ok",
+            "testFailureNode": "node-orient-ko",
+            "testCriticalFailureNode": "node-orient-ko",
+            "choiceId": "choice_node-cicatrices-douce_2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-cicatrices-peur",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-cicatrices-peur",
+        "displayName": "Les tentacules se ratatinent",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*Les tentacules de la main hypertrophiée de Voknir se ratatinent sur elles-mêmes.*\n« Je n'oserai pas, déesse, je vous conjure de me croire. Les murs ne sont que des brouillons, seule ma chair compte. »\n*À ces mots, il dévoile une partie de son torse et les sinueuses scarifications qui le modèlent.*",
+        "choices": [
+          {
+            "text": "(Idéaliste +5) *[Vous faites un pas en avant et les cicatrices du Van'Doei se métamorphosent sous vos yeux. Vous apercevez les lignes aériennes d'un pont enjambant tout le labyrinthe.]* « Fascinante perspective. Une carte vivante et… modulaire. Tu es bien celui qu'il me faut. Montre-moi la sortie ! »",
+            "targetNode": "node-pont",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Idéaliste",
+                "minValue": 5
+              }
+            ],
+            "choiceId": "choice_node-cicatrices-peur_0"
+          },
+          {
+            "text": "(Cynique +5) *[Les cicatrices du Van'Doei se métamorphosent sous vos yeux. Vous entrapercevez une crevasse purulente et, révulsée, faites un pas en arrière.]*",
+            "targetNode": "node-cynique",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Cynique",
+                "minValue": 5
+              }
+            ],
+            "choiceId": "choice_node-cicatrices-peur_1"
+          },
+          {
+            "text": "(Test d'Orientation DD15) *[Le corps du vieux Van'Doei est parcouru d'innombrables cicatrices, elles ressemblent à une carte mais échappent à toute logique. Vous essayez de faire le lien avec vos connaissances des Plis.]*",
+            "choiceEffects": [],
+            "test": "Intelligence+Orientation:15",
+            "testCriticalSuccessNode": "node-orient-ok",
+            "testSuccessNode": "node-orient-ok",
+            "testFailureNode": "node-orient-ko",
+            "testCriticalFailureNode": "node-orient-ko",
+            "choiceId": "choice_node-cicatrices-peur_2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-pont",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-pont",
+        "displayName": "L'encre remonte à sa source",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« J'en serais incapable, ô Théomaque. Les cartes sont perturbées et divergent sans cesse. L'encre remonte jusqu'à sa source… »",
+        "choices": [
+          {
+            "text": "*[Écouter la suite.]*",
+            "targetNode": "node-craquement",
+            "choiceEffects": [],
+            "choiceId": "choice_node-pont_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-cynique",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-cynique",
+        "displayName": "Les cartes se dérobent",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« Les cartes… ce sont les cartes ! Elles ne sont pas ce qu'elles paraissent être, elles se dérobent. »",
+        "choices": [
+          {
+            "text": "« Je n'ai nullement besoin de prouver ma valeur par des épreuves superflues. Je me passerai de ton aide. »",
+            "targetNode": "END",
+            "choiceEffects": [],
+            "choiceId": "choice_node-cynique_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-orient-ok",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-orient-ok",
+        "displayName": "Un passage se devine",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*Vous parvenez à relier les cicatrices à certains couloirs et devinez vaguement un passage à travers le labyrinthe.*\n« Oh Immortelle, je sens que vous percevez le sens de mes cartes ! Hélas, je suis incapable de vous guider. Les cartes sont perturbées et divergent sans cesse. L'encre remonte jusqu'à sa source… »",
+        "choices": [
+          {
+            "text": "*[Écouter la suite.]*",
+            "targetNode": "node-craquement",
+            "choiceEffects": [],
+            "choiceId": "choice_node-orient-ok_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-orient-ko",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-orient-ko",
+        "displayName": "Un vieux fou exhibitionniste ?",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*Les scarifications ne font aucun sens. N'est-ce qu'un vieux fou exhibitionniste ?*\n« Les cartes… ce sont les cartes ! Elles échappent à la perception, elles se dérobent. »"
+      }
+    },
+    {
+      "id": "node-craquement",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-craquement",
+        "displayName": "Craquement et fissure",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*Un craquement particulièrement sonore fait vibrer les meubles de l'atelier. Le cartographe se détourne d'Uresaïr pour faire face aux murs d'équations.*\n« Non, non, non ! Je te l'ai déjà dit cent fois ! Les équations murales ne tiennent pas compte de la chair ! Il existe des interstices entre les os. »\n*Nouveau craquement, suivi de l'apparition d'une fissure face au cartographe. Elle balafre le mur en zigzaguant comme un éclair avant de s'arrêter brutalement. Voknir approche pour observer les symboles qu'elle pointe.*",
+        "choices": [
+          {
+            "text": "(Autoritaire) « Je n'ai pas le temps, vieux fou. Explique-moi comment sortir d'ici ! »",
+            "targetNode": "node-pas-le-temps",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Autoritaire",
+                "minValue": 1
+              }
+            ],
+            "choiceId": "choice_node-craquement_0"
+          },
+          {
+            "text": "(Curieuse) « Qu'est-ce donc ? »",
+            "targetNode": "node-acariane",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Curieux",
+                "minValue": 1
+              }
+            ],
+            "choiceId": "choice_node-craquement_1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-pas-le-temps",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-pas-le-temps",
+        "displayName": "Pas en mon pouvoir",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*Voknir sursaute et se détourne du mur.*\n« Je ne demanderais pas mieux, mais ce n'est pas en mon pouvoir. Les cartes s'altèrent trop rapidement. Ce n'est pas normal ! Je crains qu'elles ne soient déjà plus qu'une réminiscence du passé ou une probabilité du futur. »",
+        "choices": [
+          {
+            "text": "« Va pour le futur ! Je saurai l'anticiper. Viens ! »",
+            "targetNode": "END",
+            "choiceEffects": [],
+            "choiceId": "choice_node-pas-le-temps_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-acariane",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-acariane",
+        "displayName": "L'équation d'Acariane",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« L'équation d'Acariane… La distorsion temporelle est inversement proportionnelle à la distance entre sa source et sa cible. Mais cela n'a jamais pu être prouvé. »\n*Il réfléchit, puis sort d'une étagère une fiole contenant un filament noir.*\n« Vous rappelez-vous de votre présent, Seigneuresse ? C'était il y a bien des années… »",
+        "choices": [
+          {
+            "text": "« Je n'ai pas le temps, vieux fou. Explique-moi comment sortir d'ici ! »",
+            "targetNode": "node-pas-le-temps",
+            "choiceEffects": [],
+            "choiceId": "choice_node-acariane_0"
+          },
+          {
+            "text": "« Je ne suis pas du genre à oublier. C'est bien là mon problème… »",
+            "targetNode": "node-noeud-convergence",
+            "choiceEffects": [],
+            "choiceId": "choice_node-acariane_1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-noeud-convergence",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-noeud-convergence",
+        "displayName": "Le nœud de convergence",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« Je l'ai nommé nœud de convergence. Grâce à lui, nous avons entrevu un chemin de traverse qui, bien qu'infiniment plus long en distance, devait théoriquement se révéler plus court en temps. Mais il aurait fallu deux nœuds, et je n'ai jamais osé vous en demander une autre… »",
+        "choices": [
+          {
+            "text": "« Je n'ai pas le temps, vieux fou. Explique-moi comment sortir d'ici ! »",
+            "targetNode": "node-pas-le-temps",
+            "choiceEffects": [],
+            "choiceId": "choice_node-noeud-convergence_0"
+          },
+          {
+            "text": "« Je l'avais ramassé pour toi. Je n'accepte aucune offrande, mais je suis néanmoins ouverte aux échanges. J'ai une fois goûté à une de tes baies des sables. C'était… revigorant. »",
+            "targetNode": "node-deuxieme-noeud",
+            "choiceEffects": [],
+            "choiceId": "choice_node-noeud-convergence_1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-deuxieme-noeud",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-deuxieme-noeud",
+        "displayName": "Un deuxième nœud ?",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« Je suis flatté de l'apprendre. Si je puis me permettre, ô Théomaque, pensez-vous que vous pourriez trouver un deuxième nœud de convergence ? »\n*Un craquement soudain résonne dans l'atelier tandis qu'une étagère entière glisse d'elle-même sur plusieurs centimètres. Voknir se retourne un bref instant, mais décide de l'ignorer.*",
+        "choices": [
+          {
+            "text": "« C'est possible, mais je ne peux te le promettre et l'endroit est loin d'ici. Proche du Nexus Synaptique… »",
+            "targetNode": "node-cache-ensevelie",
+            "choiceEffects": [],
+            "choiceId": "choice_node-deuxieme-noeud_0"
+          },
+          {
+            "text": "« Il semble que ton atelier ait quelque chose à dire. »",
+            "targetNode": "node-atelier-parle",
+            "choiceEffects": [],
+            "choiceId": "choice_node-deuxieme-noeud_1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-cache-ensevelie",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-cache-ensevelie",
+        "displayName": "La cache de l'Ensevelie",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« La cache de l'Ensevelie ? »",
+        "choices": [
+          {
+            "text": "« En effet. Et je puis t'y conduire. »",
+            "targetNode": "node-fin-nexus",
+            "choiceEffects": [],
+            "choiceId": "choice_node-cache-ensevelie_0"
+          },
+          {
+            "text": "« En effet, mais je n'ai nul désir de retourner sur mes pas. Je n'ai pas de temps à perdre. »",
+            "targetNode": "node-refus-nexus",
+            "choiceEffects": [],
+            "choiceId": "choice_node-cache-ensevelie_1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-fin-nexus",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-fin-nexus",
+        "displayName": "En route vers le Nexus",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*En accompagnant Voknir jusqu'au Nexus Synaptique, Uresaïr acquiert un bonus de sympathie.*",
+        "consequences": {
+          "flag": "VOKNIR_SYMPATHIE_BONUS",
+          "description": "Bonus de sympathie auprès de Voknir pour l'avoir accompagné jusqu'au Nexus Synaptique."
+        }
+      }
+    },
+    {
+      "id": "node-refus-nexus",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-refus-nexus",
+        "displayName": "Un temps trop précieux",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« Bien sûr, ô Théomaque, votre temps est bien trop précieux pour suivre une piste aussi dépourvue de résultats tangibles. »\n*Un nouveau craquement fait bondir Voknir, qui se tourne vers le fond de l'atelier et réplique, rageur :*\n« Oh, mais cela suffit ! Vois dans quelle position embarrassante tu me places vis-à-vis de notre hôte ! Les nœuds sont ce qu'ils sont : des nœuds ! Et tu t'imagines sans doute qu'en les détricotant, ils deviendraient subitement des boussoles temporelles ? Quelle folie ! »",
+        "choices": [
+          {
+            "text": "« C'est toi qui es complètement fou. J'ai eu tort de venir te consulter. »",
+            "targetNode": "END",
+            "choiceEffects": [],
+            "choiceId": "choice_node-refus-nexus_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-atelier-parle",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-atelier-parle",
+        "displayName": "Maître chez soi",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« Il n'a rien à dire ! Je suis encore maître chez moi… après vous, du moins. »",
+        "choices": [
+          {
+            "text": "« Je n'ai pas le temps, vieux fou. Explique-moi comment sortir d'ici ! »",
+            "targetNode": "node-pas-le-temps",
+            "choiceEffects": [],
+            "choiceId": "choice_node-atelier-parle_0"
+          },
+          {
+            "text": "« À ta guise, cartographe ! Un fil du temps, tu dis ? C'est possible, mais je ne peux te le promettre et l'endroit est loin d'ici. Proche du Nexus Synaptique… »",
+            "targetNode": "node-cache-ensevelie",
+            "choiceEffects": [],
+            "choiceId": "choice_node-atelier-parle_1"
+          },
+          {
+            "text": "« Je n'apprécie guère les arrogants, cartographe ! Toute aide est bonne à prendre. Écoute ce qu'il a à dire ! »",
+            "targetNode": "node-ecoute-atelier",
+            "choiceEffects": [],
+            "choiceId": "choice_node-atelier-parle_2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-ecoute-atelier",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-ecoute-atelier",
+        "displayName": "L'oreille contre l'armoire",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« Votre sagesse illumine ma misérable existence. »\n*Il se dirige vers l'armoire et, se penchant légèrement, pose son oreille sur le bois. C'est alors que son regard se pose sur quelque chose derrière vous et il écarquille les yeux de surprise.*\n« Déplacez-vous d'un pas, Seigneuresse. »",
+        "choices": [
+          {
+            "text": "« À qui crois-tu donc t'adresser ainsi, vieillard ? Je n'ai pas le temps pour ces inepties. Explique-moi comment sortir d'ici ! »",
+            "targetNode": "node-pas-le-temps",
+            "choiceEffects": [],
+            "choiceId": "choice_node-ecoute-atelier_0"
+          },
+          {
+            "text": "*[Vous vous déplacez d'un pas sur le côté.]*",
+            "targetNode": "node-angles-morts",
+            "choiceEffects": [],
+            "choiceId": "choice_node-ecoute-atelier_1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-angles-morts",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-angles-morts",
+        "displayName": "Angles morts spatiaux",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« Incroyable. Vous générez des angles morts spatiaux. C'est donc cela qui affectait mes propres lignes de sang… Maîtresse du temps et de l'espace… Vous êtes la quintessence de l'Anentropie. Je comprends pourquoi l'Exégète refuse de vous laisser partir. »",
+        "choices": [
+          {
+            "text": "« Vraiment ? Et tu es là pour y veiller ? »",
+            "targetNode": "node-voknir-guide",
+            "choiceEffects": [],
+            "choiceId": "choice_node-angles-morts_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-voknir-guide",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-voknir-guide",
+        "displayName": "Voknir se met en route",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« Non ! Je méprise ce tyran autant que j'ai foi en vous. J'entrevois à présent un moyen de vous guider. Votre présence rend le deuxième nœud superflu. Suivez-moi, ô Théomaque. »"
+      }
+    },
+    {
+      "id": "node-respect-1",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-respect-1",
+        "displayName": "Mon atelier ?",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« Mon atelier ? »",
+        "choices": [
+          {
+            "text": "« Afin de pouvoir m'entretenir avec toi. »",
+            "targetNode": "node-respect-2",
+            "choiceEffects": [],
+            "choiceId": "choice_node-respect-1_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-respect-2",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-respect-2",
+        "displayName": "Un atelier syphonné",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« Ah… je vois. Oui ! Vous faites bien. Je vous déconseille de vous adresser directement à lui… »\n*Il se rapproche pour ajouter en murmurant :*\n« Entre nous, il est complètement syphoné. Pas plus tard que hier… ou au fragment dernier peut-être… il s'est mis en tête de revoir la disposition des meubles. Comment voulez-vous que je travaille sur un bureau qui se déplace constamment d'un bout à l'autre de la pièce ? »",
+        "choices": [
+          {
+            "text": "« Votre bureau bouge tout seul ? »",
+            "targetNode": "node-respect-3",
+            "choiceEffects": [],
+            "choiceId": "choice_node-respect-2_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-respect-3",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-respect-3",
+        "displayName": "C'est l'atelier qui le déplace",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« Hé bien, non, je viens de vous le dire, c'est l'atelier qui le déplace. »"
+      }
+    },
+    {
+      "id": "node-autoritaire",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-autoritaire",
+        "displayName": "Quitter les Plis ?",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*Voknir se relève, surpris, et son regard se pose furtivement sur quelque chose derrière Uresaïr. Il n'en souffle rien et se détourne pour mettre un peu d'ordre dans ses affaires.*\n« Vous souhaitez quitter les Plis ? »",
+        "choices": [
+          {
+            "text": "« Je souhaite quitter le Léviathan ! »",
+            "targetNode": "END",
+            "choiceEffects": [],
+            "choiceId": "choice_node-autoritaire_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-attente",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-attente",
+        "displayName": "Le grattement de l'outil",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*Le silence s'installe, ponctué uniquement par le grattement méthodique de l'outil de Voknir sur sa peau. Concentré, il ne prête pas attention à vous. Ses lèvres murmurent des équations inaudibles. Un liquide noir suinte le long de son bras hypertrophié, dessinant des géométries qui semblent pulser faiblement, comme s'ils répondaient aux distorsions du Dédale.*",
+        "choices": [
+          {
+            "text": "(Test d'Orientation DD12) *[Étudier les scarifications de Voknir pour en déduire la structure du Dédale.]* (+1H)",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Patient",
+                "minValue": 5
+              }
+            ],
+            "test": "Intelligence+Orientation:12",
+            "testCriticalSuccessNode": "node-scar-ok",
+            "testSuccessNode": "node-scar-ok",
+            "testFailureNode": "node-scar-ko",
+            "testCriticalFailureNode": "node-scar-ko",
+            "choiceId": "choice_node-attente_0"
+          },
+          {
+            "text": "*[Observer l'atelier lui-même pendant que Voknir travaille.]* (+1H)",
+            "targetNode": "node-observer",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Patient",
+                "minValue": 4
+              },
+              {
+                "trait": "Curieux",
+                "minValue": 4
+              }
+            ],
+            "choiceId": "choice_node-attente_1"
+          },
+          {
+            "text": "*[Vous en avez assez d'attendre, vous décidez d'interrompre Voknir avant qu'il ne termine.]* « Cela suffit. Je n'ai pas le temps d'attendre que tu achèves tes mutilations rituelles. »",
+            "targetNode": "node-interrompre",
+            "choiceEffects": [],
+            "choiceId": "choice_node-attente_2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-scar-ko",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-scar-ko",
+        "displayName": "Un fouillis incompréhensible",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*Les scarifications restent un fouillis incompréhensible. Vous ne parvenez pas à en tirer de sens cohérent.*",
+        "choices": [
+          {
+            "text": "*[Écouter la suite.]*",
+            "targetNode": "node-accueil",
+            "choiceEffects": [],
+            "choiceId": "choice_node-scar-ko_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-scar-ok",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-scar-ok",
+        "displayName": "Les cartes d'un Dédale différent",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*En observant attentivement, vous commencez à reconnaître des motifs familiers. Les lignes sur son avant-bras droit correspondent aux couloirs que vous avez traversés. Celles sur son épaule gauche esquissent le Carrefour Trichotomique. Et sur son torse… un réseau complexe qui doit représenter les zones que vous n'avez pas encore explorées.*\n*Vous remarquez quelque chose d'étrange : certaines scarifications plus anciennes, presque effacées, ne correspondent à aucune structure actuelle. Comme si le Dédale avait changé depuis qu'il les avait gravées. Vos mouvements attirent enfin son attention.*\n*(sursautant)* « Oh ! Vous ici ! Oh Théomaque ! Les saints Substrats soient avec vous ! »",
+        "choices": [
+          {
+            "text": "*(ignorant ses superlatifs)* « Tes anciennes cartes… elles montrent un labyrinthe différent. Les Plis se reconfigurent ? »",
+            "targetNode": "node-dedale-respire",
+            "choiceEffects": [],
+            "choiceId": "choice_node-scar-ok_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-dedale-respire",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-dedale-respire",
+        "displayName": "Le Dédale respire",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*(lève la tête, surpris)* « Vous le voyez ! Oui, oui ! Le Dédale n'est pas statique. Il respire avec le Léviathan. C'est pourquoi les équations murales sont obsolètes — elles capturent des états passés. Seule la chair peut suivre les transformations en temps réel. »\n*Il désigne une série de lignes récentes sur son bras.*\n« Voyez-vous celle-ci ? Elle n'existait pas il y a trois cycles. Un nouveau passage s'est ouvert près de l'Amphithéâtre des Échos. Les Murmurateurs l'utilisent pour leurs rassemblements secrets. »",
+        "choices": [
+          {
+            "text": "(Test de Sensibilité paranormale DD18) *[Vous redoublez d'attention pour observer ce qui se dessine devant vos yeux.]* (+1H)",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Patient",
+                "minValue": 5
+              }
+            ],
+            "test": "Perception+Sensibilitéparanormale:18",
+            "testCriticalSuccessNode": "node-para-ok",
+            "testSuccessNode": "node-para-ok",
+            "testFailureNode": "node-para-ko",
+            "testCriticalFailureNode": "node-para-ko",
+            "choiceId": "choice_node-dedale-respire_0"
+          },
+          {
+            "text": "« Les Murmurateurs ? »",
+            "targetNode": "node-murmurateurs",
+            "choiceEffects": [],
+            "choiceId": "choice_node-dedale-respire_1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-para-ko",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-para-ko",
+        "displayName": "Rien d'inhabituel",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*Vous ne percevez rien d'inhabituel, seulement un vieux Van'Doei mutilant sa propre chair dans une quête obsessionnelle. Le temps passe lentement.*",
+        "choices": [
+          {
+            "text": "*[Écouter la suite.]*",
+            "targetNode": "node-accueil",
+            "choiceEffects": [],
+            "choiceId": "choice_node-para-ko_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-para-ok",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-para-ok",
+        "displayName": "Une symbiose avec l'atelier",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*Vous percevez des filaments éthérés reliant les scarifications de Voknir aux parois de l'atelier. Ces connexions pulsent en synchronie avec les craquements de la structure, révélant une symbiose plus profonde que vous ne l'imaginiez. Voknir n'est pas simplement dans l'atelier — il semble en faire partie, et l'atelier fait partie de lui.*\n*(sans lever les yeux)* « Vous l'entendez, n'est-ce pas ? L'atelier. Il est insupportable mais il se révèle parfois utile… malgré tout. »\n*Le vieillard crache ces mots avec un certain dédain, comme s'il refusait de se l'avouer à lui-même.*",
+        "choices": [
+          {
+            "text": "« Cette fusion… elle doit être douloureuse. Tu t'es perdu dans ton obsession. »",
+            "targetNode": "node-fusion",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Empathie",
+                "minValue": 5
+              }
+            ],
+            "choiceId": "choice_node-para-ok_0"
+          },
+          {
+            "text": "« Tu te racontes des histoires. L'atelier ne parle pas — tu projettes simplement tes désirs sur des craquements aléatoires. »",
+            "targetNode": "node-atelier-cynique",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Cynique",
+                "minValue": 5
+              }
+            ],
+            "choiceId": "choice_node-para-ok_1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-atelier-cynique",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-atelier-cynique",
+        "displayName": "Des cartes folles mais justes",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*(sourire amer)* « Peut-être avez-vous raison. Peut-être suis-je devenu fou dans ma solitude. Mais mes cartes fonctionnent, Théomaque. Folles ou non, elles révèlent la vérité des Plis. »\n*Il achève sa scarification et nettoie son outil.*\n« Voilà. C'est terminé. »",
+        "choices": [
+          {
+            "text": "*[Écouter la suite.]*",
+            "targetNode": "node-accueil",
+            "choiceEffects": [],
+            "choiceId": "choice_node-atelier-cynique_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-fusion",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-fusion",
+        "displayName": "Il ne restait que les cartes",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*(sa main tremble légèrement)* « Perdu ? Peut-être. Ou peut-être suis-je devenu exactement ce que je devais être. Après… après qu'ils… »\n*Il s'interrompt, confus, puis reprend.*\n« Non, attendez. Les cartes. Oui. Il ne me restait que les cartes. Elles… elles parlent, vous savez. Elles me parlent quand tout le reste… quand les autres… »\n*Il se tait brusquement, semblant avoir oublié ce qu'il disait. Ses doigts reprennent leur travail de gravure de façon presque mécanique.*",
+        "choices": [
+          {
+            "text": "« Les autres ? De qui parles-tu ? »",
+            "targetNode": "node-thaira",
+            "choiceEffects": [],
+            "choiceId": "choice_node-fusion_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-thaira",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-thaira",
+        "displayName": "Une femme, dans les Bains",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*Il cligne des yeux plusieurs fois, comme s'il émergeait d'un brouillard.*\n« Qui ? Ah… Il y avait… quelqu'un. Oui. Une femme. Son nom… »\n*Il fronce les sourcils, cherchant dans sa mémoire défaillante.*\n« Thaïra ? Non… si, enfin peut-être. »\n*Son regard se perd dans le vague.*\n« Elle a… elle a disparu. Ou bien était-ce moi qui… Non. J'ai essayé… j'ai modifié les équations. Ils m'ont banni pour ça. »\n*Il rit doucement, un rire désabusé.*\n« Ou était-ce pour autre chose ? Les raisons se mélangent toutes dans ma tête. »",
+        "choices": [
+          {
+            "text": "« Et où est-elle maintenant ? »",
+            "targetNode": "node-bains",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Empathie",
+                "minValue": 5
+              }
+            ],
+            "choiceId": "choice_node-thaira_0"
+          },
+          {
+            "text": "« Le Culte transforme la souffrance en dévotion. N'est-ce pas là son principe ? »",
+            "targetNode": "node-insensible",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Insensible",
+                "minValue": 5
+              }
+            ],
+            "choiceId": "choice_node-thaira_1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-bains",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-bains",
+        "displayName": "Quelque part dans les Bains",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*(hésite longuement, cherchant ses mots)* « Le Médecin-Ascétique m'a dit… ou l'atelier me l'a murmuré… Quelque part dans les Bains. »\n*Sa voix devient plus distante.*\n« Je ne sais plus, je ne veux plus y penser, pitié… »\n*Il touche machinalement une ancienne cicatrice sur son torse, comme s'il essayait de se raccrocher à quelque chose de tangible.*"
+      }
+    },
+    {
+      "id": "node-insensible",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-insensible",
+        "displayName": "Vous parlez comme eux",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*(se raidit)* « Vous parlez comme eux. Comme ceux qui m'ont brisé. »\n*Il se détourne et reprend sa scarification avec des gestes brusques, presque violents.*\n« Je n'ai plus rien à vous dire, Théomaque. Laissez-moi, je vous en prie. »",
+        "consequences": {
+          "flag": "VOKNIR_QUETE_ECHEC",
+          "description": "Échec de la quête : Voknir rompt la conversation."
+        }
+      }
+    },
+    {
+      "id": "node-murmurateurs",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-murmurateurs",
+        "displayName": "Les Murmurateurs",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*(avec un détachement presque clinique)* « Leurs mouvements créent des perturbations fascinantes dans les géométries. Je les documente comme je documente tout le reste — les fissures, les échos, les pulsations du Léviathan. »\n*Il désigne une série de scarifications complexes sur son épaule.*\n« Voyez-vous ces entrelacs ? Ils apparaissent uniquement quand plusieurs personnes se déplacent en synchronie. Les Murmurateurs produisent des motifs… différents. Plus chaotiques que les processions du Culte. »",
+        "choices": [
+          {
+            "text": "(Croyances DD10) « Mais tu es toujours un croyant de l'Anentropie. Ne devrais-tu pas les dénoncer ? »",
+            "choiceEffects": [],
+            "test": "Intelligence+Croyances:10",
+            "testCriticalSuccessNode": "node-denoncer",
+            "testSuccessNode": "node-denoncer",
+            "testFailureNode": "node-denoncer",
+            "testCriticalFailureNode": "node-denoncer",
+            "choiceId": "choice_node-murmurateurs_0"
+          },
+          {
+            "text": "« Ces motifs « différents » des Murmurateurs — que révèlent-ils ? »",
+            "targetNode": "node-motifs",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Curieux",
+                "minValue": 3
+              }
+            ],
+            "choiceId": "choice_node-murmurateurs_1"
+          },
+          {
+            "text": "« L'indifférence face à l'hérésie est complice de l'hérésie. »",
+            "targetNode": "node-intolerant",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Intolérant",
+                "minValue": 4
+              }
+            ],
+            "choiceId": "choice_node-murmurateurs_2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-denoncer",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-denoncer",
+        "displayName": "Cartographe, pas Gardien",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*Il semble momentanément confus par la question.*\n« Dénoncer ? Je suis cartographe, Théomaque, pas Gardien. Mon bannissement m'a libéré de ces… obligations. »\n*Il touche son torse.*\n« Les cartes ne se soucient pas de qui crée les distorsions. Elles les enregistrent, c'est tout. »\n*Après un silence :*\n« Et puis… l'Exégète connaît déjà leurs mouvements. Il doit bien le savoir. Le Léviathan parle à ceux qui l'écoutent. »",
+        "choices": [
+          {
+            "text": "« Donc tu restes fidèle au Culte, malgré tout ce qu'ils t'ont fait ? »",
+            "targetNode": "node-fidele",
+            "choiceEffects": [],
+            "choiceId": "choice_node-denoncer_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-fidele",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-fidele",
+        "displayName": "Mon Endurement à moi",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*Il hésite, cherchant ses mots.*\n« Fidèle ? Je… je crois toujours que l'entropie doit être combattue. Que la Fixation est la voie. Mais eux… »\n*Sa voix devient amère.*\n« Ils ont transformé la vérité en instrument de pouvoir. L'Exégète utilise même vous, Théomaque, pour ses propres fins. »\n*Il reprend sa gravure avec des gestes nerveux.*\n« Je sers encore la doctrine, à ma façon. En cartographiant les Plis, je préserve leur connaissance. C'est mon Endurement à moi. »",
+        "choices": [
+          {
+            "text": "*[Écouter la suite.]*",
+            "targetNode": "node-accueil",
+            "choiceEffects": [],
+            "choiceId": "choice_node-fidele_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-motifs",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-motifs",
+        "displayName": "Des spirales plutôt que des lignes",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« Ah ! Vous voyez ! Oui, oui… »\n*Son excitation revient.*\n« Les orthodoxes créent des géométries… rigides. Prévisibles. Mais les Murmurateurs se déplacent comme s'ils cherchaient quelque chose, explorant, testant les limites. »\n*Il trace dans l'air avec son outil.*\n« Leurs chemins forment des spirales plutôt que des lignes droites. Des patterns qui ressemblent aux équations d'Acariane que je vous montrais — celles sur les distorsions temporelles. »\n*Son regard devient distant.*\n« Parfois je me demande s'ils ne comprennent pas quelque chose que j'ai manqué. Mais peu importe. Les cartes enregistrent tout. La vérité émergera d'elle-même, qu'on le veuille ou non. »",
+        "choices": [
+          {
+            "text": "*[Écouter la suite.]*",
+            "targetNode": "node-accueil",
+            "choiceEffects": [],
+            "choiceId": "choice_node-motifs_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-intolerant",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-intolerant",
+        "displayName": "Les cartes ne peuvent pas mentir",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*(se recroqueville légèrement)* « Je… je ne suis qu'un cartographe. Je n'ai plus le droit de juger qui que ce soit depuis mon bannissement. »\n*Sa voix tremble.*\n« Et mes cartes… elles doivent rester objectives. Si je commence à effacer certaines lignes, à ignorer certaines distorsions par idéologie, alors tout mon travail devient mensonge. »\n*Il vous regarde avec une supplication pathétique.*\n« Vous comprenez ? Les cartes ne peuvent pas mentir. Elles sont tout ce qui me reste d'honnête. »",
+        "choices": [
+          {
+            "text": "*[Écouter la suite.]*",
+            "targetNode": "node-accueil",
+            "choiceEffects": [],
+            "choiceId": "choice_node-intolerant_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-observer",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-observer",
+        "displayName": "Fioles et figurine d'enfant",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*Vous détournez votre attention de Voknir pour examiner l'environnement. Les étagères ploient sous des fioles contenant des liquides étranges — certaines avec des filaments lumineux, d'autres avec ce qui ressemble à des fragments de temporalité solidifiée. Des instruments chirurgicaux pendent aux murs, certains encore maculés d'encre noire.*\n*Sur une table basse, vous remarquez un objet qui détonne : une petite figurine de pierre représentant un enfant Van'Doei. À côté, un message griffonné sur un fragment d'os : « Les angles mentent, père-cartographe. »*",
+        "choices": [
+          {
+            "text": "« Cette figurine… c'est l'œuvre de quelqu'un qui te connaît bien. »",
+            "targetNode": "node-yul",
+            "choiceEffects": [],
+            "choiceId": "choice_node-observer_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-yul",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-yul",
+        "displayName": "Yul, le fils disparu",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*(sa main se crispe sur son outil, le liquide noir coule plus abondamment)* « Yul. C'est… mon fils. Enfin, il était… Non, il est… »\n*Il se tait, confus.*\n« Il a disparu. Il y a combien de Nuées déjà ? Trois ? Cinq ? Comme le temps passe… »\n*Il fixe la figurine, ses tentacules se rétractant légèrement.*\n« Il est venu me voir. Voulait comprendre mon travail. Ou bien… c'était pour me ramener. Oui. Me ramener au temple. »\n*Il secoue la tête, agacé par sa propre confusion.*\n« Pourquoi n'est-il jamais arrivé ? Je lui avais donné les cartes. Les bonnes cartes ! »\n*Il reprend son travail de gravure avec des gestes saccadés.*\n« Ce message… « Les angles mentent, père-cartographe. » Il l'a compris, au moins. »",
+        "choices": [
+          {
+            "text": "« Tu portes trop de pertes, cartographe. Et pourtant tu persistes. »",
+            "targetNode": "node-pertes",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Empathie",
+                "minValue": 7
+              }
+            ],
+            "choiceId": "choice_node-yul_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-pertes",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-pertes",
+        "displayName": "Que me reste-t-il d'autre ?",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "« Que me reste-t-il d'autre ? Si j'arrête de cartographier, leurs disparitions n'auront aucun sens. Si je perce les secrets des Plis… je leur montrerai à tous, à tout le Culte, que j'avais raison ! »",
+        "choices": [
+          {
+            "text": "« Montre-moi où tu l'as perdu. Peut-être puis-je percevoir des traces que tu as manquées. »",
+            "targetNode": "node-trace-enfant",
+            "choiceEffects": [],
+            "traitRequirements": [
+              {
+                "trait": "Empathie",
+                "minValue": 9
+              }
+            ],
+            "choiceId": "choice_node-pertes_0"
+          },
+          {
+            "text": "« L'espoir est parfois plus cruel que l'acceptation. »",
+            "targetNode": "node-espoir",
+            "choiceEffects": [],
+            "choiceId": "choice_node-pertes_1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-trace-enfant",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-trace-enfant",
+        "displayName": "Vers la Confluence",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*(un éclair d'espoir traverse son regard)* « Vraiment ? Vous feriez cela ? »\n*Il pose son outil et se lève précipitamment.*\n« C'était près de la Confluence, là où les flux temporels se croisent. Suivez-moi ! »",
+        "consequences": {
+          "flag": "QUETE_TRACE_ENFANT_PERDU",
+          "description": "Mène vers la quête secondaire « La Trace de l'Enfant Perdu »."
+        }
+      }
+    },
+    {
+      "id": "node-espoir",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-espoir",
+        "displayName": "Tout ce qui me reste",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*(se recroqueville légèrement)* « Peut-être. Mais c'est tout ce qui me reste. »",
+        "choices": [
+          {
+            "text": "*[Écouter la suite.]*",
+            "targetNode": "node-accueil",
+            "choiceEffects": [],
+            "choiceId": "choice_node-espoir_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-interrompre",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-interrompre",
+        "displayName": "La carte est incomplète",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*(sursaute, l'outil glisse et entaille plus profondément sa peau)* « Non, non ! La carte est incomplète ! Si je ne termine pas, les correspondances seront fausses ! »\n*Il presse sa main contre la blessure, le liquide noir et du sang clair se mélangent.*\n« Vous ne comprenez pas — chaque ligne doit être à sa place exacte, sinon je ne peux pas vous guider ! »",
+        "choices": [
+          {
+            "text": "« Alors termine rapidement. »",
+            "targetNode": "node-termine-vite",
+            "choiceEffects": [],
+            "choiceId": "choice_node-interrompre_0"
+          },
+          {
+            "text": "« Tant pis. Je trouverai mon chemin seule. »",
+            "targetNode": "END",
+            "choiceEffects": [],
+            "choiceId": "choice_node-interrompre_1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node-termine-vite",
+      "type": "dialogueNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "node-termine-vite",
+        "displayName": "Une carte imparfaite",
+        "speaker": "Voknir Esh'Maradel",
+        "line": "*Voknir travaille avec des gestes précipités et moins assurés. Après quelques minutes, il pose son outil, essoufflé.*\n« Voilà. Ce n'est pas parfait, mais… cela devra faire. »",
+        "consequences": {
+          "flag": "VOKNIR_INDICATIONS_IMPRECISES",
+          "description": "Malus : les indications de Voknir seront moins précises lors de la traversée du Dédale."
+        },
+        "choices": [
+          {
+            "text": "*[Écouter la suite.]*",
+            "targetNode": "node-accueil",
+            "choiceEffects": [],
+            "choiceId": "choice_node-termine-vite_0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "test-node-node-equations-choice-1",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-equations-choice-1",
+        "test": "Volonté+Intimidation:9",
+        "line": "(Test d'intimidation DD9) « Ne me mens pas, Van Doei hérétique, nul n'ignore l'objet de tes recherches. »",
+        "criticalFailureNode": "node-cicatrices-douce",
+        "failureNode": "node-cicatrices-douce",
+        "successNode": "node-cicatrices-peur",
+        "criticalSuccessNode": "node-cicatrices-peur"
+      }
+    },
+    {
+      "id": "test-node-node-cicatrices-douce-choice-2",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-cicatrices-douce-choice-2",
+        "test": "Intelligence+Orientation:15",
+        "line": "(Test d'Orientation DD15) *[Le corps du vieux Van'Doei est parcouru d'innombrables cicatrices, elles ressemblent à une carte mais échappent à toute logique. Vous essayez de faire le lien avec vos connaissances des Plis.]*",
+        "criticalFailureNode": "node-orient-ko",
+        "failureNode": "node-orient-ko",
+        "successNode": "node-orient-ok",
+        "criticalSuccessNode": "node-orient-ok"
+      }
+    },
+    {
+      "id": "test-node-node-cicatrices-peur-choice-2",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-cicatrices-peur-choice-2",
+        "test": "Intelligence+Orientation:15",
+        "line": "(Test d'Orientation DD15) *[Le corps du vieux Van'Doei est parcouru d'innombrables cicatrices, elles ressemblent à une carte mais échappent à toute logique. Vous essayez de faire le lien avec vos connaissances des Plis.]*",
+        "criticalFailureNode": "node-orient-ko",
+        "failureNode": "node-orient-ko",
+        "successNode": "node-orient-ok",
+        "criticalSuccessNode": "node-orient-ok"
+      }
+    },
+    {
+      "id": "test-node-node-attente-choice-0",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-attente-choice-0",
+        "test": "Intelligence+Orientation:12",
+        "line": "(Test d'Orientation DD12) *[Étudier les scarifications de Voknir pour en déduire la structure du Dédale.]* (+1H)",
+        "criticalFailureNode": "node-scar-ko",
+        "failureNode": "node-scar-ko",
+        "successNode": "node-scar-ok",
+        "criticalSuccessNode": "node-scar-ok"
+      }
+    },
+    {
+      "id": "test-node-node-dedale-respire-choice-0",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-dedale-respire-choice-0",
+        "test": "Perception+Sensibilitéparanormale:18",
+        "line": "(Test de Sensibilité paranormale DD18) *[Vous redoublez d'attention pour observer ce qui se dessine devant vos yeux.]* (+1H)",
+        "criticalFailureNode": "node-para-ko",
+        "failureNode": "node-para-ko",
+        "successNode": "node-para-ok",
+        "criticalSuccessNode": "node-para-ok"
+      }
+    },
+    {
+      "id": "test-node-node-murmurateurs-choice-0",
+      "type": "testNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "id": "test-node-node-murmurateurs-choice-0",
+        "test": "Intelligence+Croyances:10",
+        "line": "(Croyances DD10) « Mais tu es toujours un croyant de l'Anentropie. Ne devrais-tu pas les dénoncer ? »",
+        "criticalFailureNode": "node-denoncer",
+        "failureNode": "node-denoncer",
+        "successNode": "node-denoncer",
+        "criticalSuccessNode": "node-denoncer"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e:START:choice:choice_START_0",
+      "source": "START",
+      "target": "node-accueil",
+      "type": "smoothstep",
+      "label": "[Vous pénétrez dans l'atelier....",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_START_0",
+        "choiceText": "*[Vous pénétrez dans l'atelier.]* « Salutation, cartographe. »"
+      }
+    },
+    {
+      "id": "e:START:choice:choice_START_1",
+      "source": "START",
+      "target": "node-attente",
+      "type": "smoothstep",
+      "label": "[Vous restez sur le seuil de l...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_START_1",
+        "choiceText": "*[Vous restez sur le seuil de l'atelier et attendez que Voknir termine sa scarification.]* (+1H)"
+      }
+    },
+    {
+      "id": "e:node-accueil:choice:choice_node-accueil_0",
+      "source": "node-accueil",
+      "target": "node-equations",
+      "type": "smoothstep",
+      "label": "[Vous ne prêtez guère attentio...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-accueil_0",
+        "choiceText": "*[Vous ne prêtez guère attention à l'adorateur à vos pieds et le dépassez pour pénétrer dans son atelier.]* « Je dois m'en aller. Mon séjour ici ne m'a pas apporté la quiétude que j'espérais. » *[Des symboles mathématiques tapissent les murs face à vous.]* « Dois-je voir dans ces équations un chemin pour atteindre mon objectif ? »"
+      }
+    },
+    {
+      "id": "e:node-accueil:choice:choice_node-accueil_1",
+      "source": "node-accueil",
+      "target": "node-respect-1",
+      "type": "smoothstep",
+      "label": "« Détrompez-vous, cartographe,...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-accueil_1",
+        "choiceText": "« Détrompez-vous, cartographe, votre atelier est précisément le lieu que je cherchais. »"
+      }
+    },
+    {
+      "id": "e:node-accueil:choice:choice_node-accueil_2",
+      "source": "node-accueil",
+      "target": "node-autoritaire",
+      "type": "smoothstep",
+      "label": "« Arrête ce cirque, vieillard,...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "choice_node-accueil_2",
+        "choiceText": "« Arrête ce cirque, vieillard, je n'ai pas le temps pour ces inepties ! Mon séjour ici n'a que trop duré ! »"
+      }
+    },
+    {
+      "id": "e:node-equations:choice:choice_node-equations_0",
+      "source": "node-equations",
+      "target": "node-cicatrices-douce",
+      "type": "smoothstep",
+      "label": "« Tu dois bien avoir un moyen ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-equations_0",
+        "choiceText": "« Tu dois bien avoir un moyen de t'orienter, néanmoins. »"
+      }
+    },
+    {
+      "id": "e:node-equations:choice:choice_node-equations_1:test",
+      "source": "node-equations",
+      "target": "test-node-node-equations-choice-1",
+      "type": "smoothstep",
+      "label": "(Test d'intimidation DD9) « Ne...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-equations_1",
+        "choiceText": "(Test d'intimidation DD9) « Ne me mens pas, Van Doei hérétique, nul n'ignore l'objet de tes recherches. »"
+      }
+    },
+    {
+      "id": "test-node-node-equations-choice-1-critical-failure-node-cicatrices-douce",
+      "source": "test-node-node-equations-choice-1",
+      "target": "node-cicatrices-douce",
+      "type": "smoothstep",
+      "label": "Échec critique"
+    },
+    {
+      "id": "test-node-node-equations-choice-1-failure-node-cicatrices-douce",
+      "source": "test-node-node-equations-choice-1",
+      "target": "node-cicatrices-douce",
+      "type": "smoothstep",
+      "label": "Échec"
+    },
+    {
+      "id": "test-node-node-equations-choice-1-success-node-cicatrices-peur",
+      "source": "test-node-node-equations-choice-1",
+      "target": "node-cicatrices-peur",
+      "type": "smoothstep",
+      "label": "Réussite"
+    },
+    {
+      "id": "test-node-node-equations-choice-1-critical-success-node-cicatrices-peur",
+      "source": "test-node-node-equations-choice-1",
+      "target": "node-cicatrices-peur",
+      "type": "smoothstep",
+      "label": "Réussite critique"
+    },
+    {
+      "id": "e:node-equations:choice:choice_node-equations_2",
+      "source": "node-equations",
+      "target": "END",
+      "type": "smoothstep",
+      "label": "« Dans ce cas, tu ne me sers à...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "choice_node-equations_2",
+        "choiceText": "« Dans ce cas, tu ne me sers à rien. »"
+      }
+    },
+    {
+      "id": "e:node-cicatrices-douce:choice:choice_node-cicatrices-douce_0",
+      "source": "node-cicatrices-douce",
+      "target": "node-pont",
+      "type": "smoothstep",
+      "label": "(Idéaliste +5) [Vous faites un...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-cicatrices-douce_0",
+        "choiceText": "(Idéaliste +5) *[Vous faites un pas en avant et les cicatrices du Van'Doei se métamorphosent sous vos yeux. Vous apercevez les lignes aériennes d'un pont enjambant tout le labyrinthe.]* « Fascinante perspective. Une carte vivante et… modulaire. Tu es bien celui qu'il me faut. Montre-moi la sortie ! »"
+      }
+    },
+    {
+      "id": "e:node-cicatrices-douce:choice:choice_node-cicatrices-douce_1",
+      "source": "node-cicatrices-douce",
+      "target": "node-cynique",
+      "type": "smoothstep",
+      "label": "(Cynique +5) [Les cicatrices d...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-cicatrices-douce_1",
+        "choiceText": "(Cynique +5) *[Les cicatrices du Van'Doei se métamorphosent sous vos yeux. Vous entrapercevez une crevasse purulente et, révulsée, faites un pas en arrière.]*"
+      }
+    },
+    {
+      "id": "e:node-cicatrices-douce:choice:choice_node-cicatrices-douce_2:test",
+      "source": "node-cicatrices-douce",
+      "target": "test-node-node-cicatrices-douce-choice-2",
+      "type": "smoothstep",
+      "label": "(Test d'Orientation DD15) [Le ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "choice_node-cicatrices-douce_2",
+        "choiceText": "(Test d'Orientation DD15) *[Le corps du vieux Van'Doei est parcouru d'innombrables cicatrices, elles ressemblent à une carte mais échappent à toute logique. Vous essayez de faire le lien avec vos connaissances des Plis.]*"
+      }
+    },
+    {
+      "id": "test-node-node-cicatrices-douce-choice-2-critical-failure-node-orient-ko",
+      "source": "test-node-node-cicatrices-douce-choice-2",
+      "target": "node-orient-ko",
+      "type": "smoothstep",
+      "label": "Échec critique"
+    },
+    {
+      "id": "test-node-node-cicatrices-douce-choice-2-failure-node-orient-ko",
+      "source": "test-node-node-cicatrices-douce-choice-2",
+      "target": "node-orient-ko",
+      "type": "smoothstep",
+      "label": "Échec"
+    },
+    {
+      "id": "test-node-node-cicatrices-douce-choice-2-success-node-orient-ok",
+      "source": "test-node-node-cicatrices-douce-choice-2",
+      "target": "node-orient-ok",
+      "type": "smoothstep",
+      "label": "Réussite"
+    },
+    {
+      "id": "test-node-node-cicatrices-douce-choice-2-critical-success-node-orient-ok",
+      "source": "test-node-node-cicatrices-douce-choice-2",
+      "target": "node-orient-ok",
+      "type": "smoothstep",
+      "label": "Réussite critique"
+    },
+    {
+      "id": "e:node-cicatrices-peur:choice:choice_node-cicatrices-peur_0",
+      "source": "node-cicatrices-peur",
+      "target": "node-pont",
+      "type": "smoothstep",
+      "label": "(Idéaliste +5) [Vous faites un...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-cicatrices-peur_0",
+        "choiceText": "(Idéaliste +5) *[Vous faites un pas en avant et les cicatrices du Van'Doei se métamorphosent sous vos yeux. Vous apercevez les lignes aériennes d'un pont enjambant tout le labyrinthe.]* « Fascinante perspective. Une carte vivante et… modulaire. Tu es bien celui qu'il me faut. Montre-moi la sortie ! »"
+      }
+    },
+    {
+      "id": "e:node-cicatrices-peur:choice:choice_node-cicatrices-peur_1",
+      "source": "node-cicatrices-peur",
+      "target": "node-cynique",
+      "type": "smoothstep",
+      "label": "(Cynique +5) [Les cicatrices d...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-cicatrices-peur_1",
+        "choiceText": "(Cynique +5) *[Les cicatrices du Van'Doei se métamorphosent sous vos yeux. Vous entrapercevez une crevasse purulente et, révulsée, faites un pas en arrière.]*"
+      }
+    },
+    {
+      "id": "e:node-cicatrices-peur:choice:choice_node-cicatrices-peur_2:test",
+      "source": "node-cicatrices-peur",
+      "target": "test-node-node-cicatrices-peur-choice-2",
+      "type": "smoothstep",
+      "label": "(Test d'Orientation DD15) [Le ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "choice_node-cicatrices-peur_2",
+        "choiceText": "(Test d'Orientation DD15) *[Le corps du vieux Van'Doei est parcouru d'innombrables cicatrices, elles ressemblent à une carte mais échappent à toute logique. Vous essayez de faire le lien avec vos connaissances des Plis.]*"
+      }
+    },
+    {
+      "id": "test-node-node-cicatrices-peur-choice-2-critical-failure-node-orient-ko",
+      "source": "test-node-node-cicatrices-peur-choice-2",
+      "target": "node-orient-ko",
+      "type": "smoothstep",
+      "label": "Échec critique"
+    },
+    {
+      "id": "test-node-node-cicatrices-peur-choice-2-failure-node-orient-ko",
+      "source": "test-node-node-cicatrices-peur-choice-2",
+      "target": "node-orient-ko",
+      "type": "smoothstep",
+      "label": "Échec"
+    },
+    {
+      "id": "test-node-node-cicatrices-peur-choice-2-success-node-orient-ok",
+      "source": "test-node-node-cicatrices-peur-choice-2",
+      "target": "node-orient-ok",
+      "type": "smoothstep",
+      "label": "Réussite"
+    },
+    {
+      "id": "test-node-node-cicatrices-peur-choice-2-critical-success-node-orient-ok",
+      "source": "test-node-node-cicatrices-peur-choice-2",
+      "target": "node-orient-ok",
+      "type": "smoothstep",
+      "label": "Réussite critique"
+    },
+    {
+      "id": "e:node-pont:choice:choice_node-pont_0",
+      "source": "node-pont",
+      "target": "node-craquement",
+      "type": "smoothstep",
+      "label": "[Écouter la suite.]",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-pont_0",
+        "choiceText": "*[Écouter la suite.]*"
+      }
+    },
+    {
+      "id": "e:node-cynique:choice:choice_node-cynique_0",
+      "source": "node-cynique",
+      "target": "END",
+      "type": "smoothstep",
+      "label": "« Je n'ai nullement besoin de ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-cynique_0",
+        "choiceText": "« Je n'ai nullement besoin de prouver ma valeur par des épreuves superflues. Je me passerai de ton aide. »"
+      }
+    },
+    {
+      "id": "e:node-orient-ok:choice:choice_node-orient-ok_0",
+      "source": "node-orient-ok",
+      "target": "node-craquement",
+      "type": "smoothstep",
+      "label": "[Écouter la suite.]",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-orient-ok_0",
+        "choiceText": "*[Écouter la suite.]*"
+      }
+    },
+    {
+      "id": "e:node-craquement:choice:choice_node-craquement_0",
+      "source": "node-craquement",
+      "target": "node-pas-le-temps",
+      "type": "smoothstep",
+      "label": "(Autoritaire) « Je n'ai pas le...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-craquement_0",
+        "choiceText": "(Autoritaire) « Je n'ai pas le temps, vieux fou. Explique-moi comment sortir d'ici ! »"
+      }
+    },
+    {
+      "id": "e:node-craquement:choice:choice_node-craquement_1",
+      "source": "node-craquement",
+      "target": "node-acariane",
+      "type": "smoothstep",
+      "label": "(Curieuse) « Qu'est-ce donc ? ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-craquement_1",
+        "choiceText": "(Curieuse) « Qu'est-ce donc ? »"
+      }
+    },
+    {
+      "id": "e:node-pas-le-temps:choice:choice_node-pas-le-temps_0",
+      "source": "node-pas-le-temps",
+      "target": "END",
+      "type": "smoothstep",
+      "label": "« Va pour le futur ! Je saurai...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-pas-le-temps_0",
+        "choiceText": "« Va pour le futur ! Je saurai l'anticiper. Viens ! »"
+      }
+    },
+    {
+      "id": "e:node-acariane:choice:choice_node-acariane_0",
+      "source": "node-acariane",
+      "target": "node-pas-le-temps",
+      "type": "smoothstep",
+      "label": "« Je n'ai pas le temps, vieux ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-acariane_0",
+        "choiceText": "« Je n'ai pas le temps, vieux fou. Explique-moi comment sortir d'ici ! »"
+      }
+    },
+    {
+      "id": "e:node-acariane:choice:choice_node-acariane_1",
+      "source": "node-acariane",
+      "target": "node-noeud-convergence",
+      "type": "smoothstep",
+      "label": "« Je ne suis pas du genre à ou...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-acariane_1",
+        "choiceText": "« Je ne suis pas du genre à oublier. C'est bien là mon problème… »"
+      }
+    },
+    {
+      "id": "e:node-noeud-convergence:choice:choice_node-noeud-convergence_0",
+      "source": "node-noeud-convergence",
+      "target": "node-pas-le-temps",
+      "type": "smoothstep",
+      "label": "« Je n'ai pas le temps, vieux ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-noeud-convergence_0",
+        "choiceText": "« Je n'ai pas le temps, vieux fou. Explique-moi comment sortir d'ici ! »"
+      }
+    },
+    {
+      "id": "e:node-noeud-convergence:choice:choice_node-noeud-convergence_1",
+      "source": "node-noeud-convergence",
+      "target": "node-deuxieme-noeud",
+      "type": "smoothstep",
+      "label": "« Je l'avais ramassé pour toi....",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-noeud-convergence_1",
+        "choiceText": "« Je l'avais ramassé pour toi. Je n'accepte aucune offrande, mais je suis néanmoins ouverte aux échanges. J'ai une fois goûté à une de tes baies des sables. C'était… revigorant. »"
+      }
+    },
+    {
+      "id": "e:node-deuxieme-noeud:choice:choice_node-deuxieme-noeud_0",
+      "source": "node-deuxieme-noeud",
+      "target": "node-cache-ensevelie",
+      "type": "smoothstep",
+      "label": "« C'est possible, mais je ne p...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-deuxieme-noeud_0",
+        "choiceText": "« C'est possible, mais je ne peux te le promettre et l'endroit est loin d'ici. Proche du Nexus Synaptique… »"
+      }
+    },
+    {
+      "id": "e:node-deuxieme-noeud:choice:choice_node-deuxieme-noeud_1",
+      "source": "node-deuxieme-noeud",
+      "target": "node-atelier-parle",
+      "type": "smoothstep",
+      "label": "« Il semble que ton atelier ai...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-deuxieme-noeud_1",
+        "choiceText": "« Il semble que ton atelier ait quelque chose à dire. »"
+      }
+    },
+    {
+      "id": "e:node-cache-ensevelie:choice:choice_node-cache-ensevelie_0",
+      "source": "node-cache-ensevelie",
+      "target": "node-fin-nexus",
+      "type": "smoothstep",
+      "label": "« En effet. Et je puis t'y con...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-cache-ensevelie_0",
+        "choiceText": "« En effet. Et je puis t'y conduire. »"
+      }
+    },
+    {
+      "id": "e:node-cache-ensevelie:choice:choice_node-cache-ensevelie_1",
+      "source": "node-cache-ensevelie",
+      "target": "node-refus-nexus",
+      "type": "smoothstep",
+      "label": "« En effet, mais je n'ai nul d...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-cache-ensevelie_1",
+        "choiceText": "« En effet, mais je n'ai nul désir de retourner sur mes pas. Je n'ai pas de temps à perdre. »"
+      }
+    },
+    {
+      "id": "e:node-refus-nexus:choice:choice_node-refus-nexus_0",
+      "source": "node-refus-nexus",
+      "target": "END",
+      "type": "smoothstep",
+      "label": "« C'est toi qui es complètemen...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-refus-nexus_0",
+        "choiceText": "« C'est toi qui es complètement fou. J'ai eu tort de venir te consulter. »"
+      }
+    },
+    {
+      "id": "e:node-atelier-parle:choice:choice_node-atelier-parle_0",
+      "source": "node-atelier-parle",
+      "target": "node-pas-le-temps",
+      "type": "smoothstep",
+      "label": "« Je n'ai pas le temps, vieux ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-atelier-parle_0",
+        "choiceText": "« Je n'ai pas le temps, vieux fou. Explique-moi comment sortir d'ici ! »"
+      }
+    },
+    {
+      "id": "e:node-atelier-parle:choice:choice_node-atelier-parle_1",
+      "source": "node-atelier-parle",
+      "target": "node-cache-ensevelie",
+      "type": "smoothstep",
+      "label": "« À ta guise, cartographe ! Un...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-atelier-parle_1",
+        "choiceText": "« À ta guise, cartographe ! Un fil du temps, tu dis ? C'est possible, mais je ne peux te le promettre et l'endroit est loin d'ici. Proche du Nexus Synaptique… »"
+      }
+    },
+    {
+      "id": "e:node-atelier-parle:choice:choice_node-atelier-parle_2",
+      "source": "node-atelier-parle",
+      "target": "node-ecoute-atelier",
+      "type": "smoothstep",
+      "label": "« Je n'apprécie guère les arro...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "choice_node-atelier-parle_2",
+        "choiceText": "« Je n'apprécie guère les arrogants, cartographe ! Toute aide est bonne à prendre. Écoute ce qu'il a à dire ! »"
+      }
+    },
+    {
+      "id": "e:node-ecoute-atelier:choice:choice_node-ecoute-atelier_0",
+      "source": "node-ecoute-atelier",
+      "target": "node-pas-le-temps",
+      "type": "smoothstep",
+      "label": "« À qui crois-tu donc t'adress...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-ecoute-atelier_0",
+        "choiceText": "« À qui crois-tu donc t'adresser ainsi, vieillard ? Je n'ai pas le temps pour ces inepties. Explique-moi comment sortir d'ici ! »"
+      }
+    },
+    {
+      "id": "e:node-ecoute-atelier:choice:choice_node-ecoute-atelier_1",
+      "source": "node-ecoute-atelier",
+      "target": "node-angles-morts",
+      "type": "smoothstep",
+      "label": "[Vous vous déplacez d'un pas s...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-ecoute-atelier_1",
+        "choiceText": "*[Vous vous déplacez d'un pas sur le côté.]*"
+      }
+    },
+    {
+      "id": "e:node-angles-morts:choice:choice_node-angles-morts_0",
+      "source": "node-angles-morts",
+      "target": "node-voknir-guide",
+      "type": "smoothstep",
+      "label": "« Vraiment ? Et tu es là pour ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-angles-morts_0",
+        "choiceText": "« Vraiment ? Et tu es là pour y veiller ? »"
+      }
+    },
+    {
+      "id": "e:node-respect-1:choice:choice_node-respect-1_0",
+      "source": "node-respect-1",
+      "target": "node-respect-2",
+      "type": "smoothstep",
+      "label": "« Afin de pouvoir m'entretenir...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-respect-1_0",
+        "choiceText": "« Afin de pouvoir m'entretenir avec toi. »"
+      }
+    },
+    {
+      "id": "e:node-respect-2:choice:choice_node-respect-2_0",
+      "source": "node-respect-2",
+      "target": "node-respect-3",
+      "type": "smoothstep",
+      "label": "« Votre bureau bouge tout seul...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-respect-2_0",
+        "choiceText": "« Votre bureau bouge tout seul ? »"
+      }
+    },
+    {
+      "id": "e:node-autoritaire:choice:choice_node-autoritaire_0",
+      "source": "node-autoritaire",
+      "target": "END",
+      "type": "smoothstep",
+      "label": "« Je souhaite quitter le Lévia...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-autoritaire_0",
+        "choiceText": "« Je souhaite quitter le Léviathan ! »"
+      }
+    },
+    {
+      "id": "e:node-attente:choice:choice_node-attente_0:test",
+      "source": "node-attente",
+      "target": "test-node-node-attente-choice-0",
+      "type": "smoothstep",
+      "label": "(Test d'Orientation DD12) [Étu...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-attente_0",
+        "choiceText": "(Test d'Orientation DD12) *[Étudier les scarifications de Voknir pour en déduire la structure du Dédale.]* (+1H)"
+      }
+    },
+    {
+      "id": "test-node-node-attente-choice-0-critical-failure-node-scar-ko",
+      "source": "test-node-node-attente-choice-0",
+      "target": "node-scar-ko",
+      "type": "smoothstep",
+      "label": "Échec critique"
+    },
+    {
+      "id": "test-node-node-attente-choice-0-failure-node-scar-ko",
+      "source": "test-node-node-attente-choice-0",
+      "target": "node-scar-ko",
+      "type": "smoothstep",
+      "label": "Échec"
+    },
+    {
+      "id": "test-node-node-attente-choice-0-success-node-scar-ok",
+      "source": "test-node-node-attente-choice-0",
+      "target": "node-scar-ok",
+      "type": "smoothstep",
+      "label": "Réussite"
+    },
+    {
+      "id": "test-node-node-attente-choice-0-critical-success-node-scar-ok",
+      "source": "test-node-node-attente-choice-0",
+      "target": "node-scar-ok",
+      "type": "smoothstep",
+      "label": "Réussite critique"
+    },
+    {
+      "id": "e:node-attente:choice:choice_node-attente_1",
+      "source": "node-attente",
+      "target": "node-observer",
+      "type": "smoothstep",
+      "label": "[Observer l'atelier lui-même p...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-attente_1",
+        "choiceText": "*[Observer l'atelier lui-même pendant que Voknir travaille.]* (+1H)"
+      }
+    },
+    {
+      "id": "e:node-attente:choice:choice_node-attente_2",
+      "source": "node-attente",
+      "target": "node-interrompre",
+      "type": "smoothstep",
+      "label": "[Vous en avez assez d'attendre...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "choice_node-attente_2",
+        "choiceText": "*[Vous en avez assez d'attendre, vous décidez d'interrompre Voknir avant qu'il ne termine.]* « Cela suffit. Je n'ai pas le temps d'attendre que tu achèves tes mutilations rituelles. »"
+      }
+    },
+    {
+      "id": "e:node-scar-ko:choice:choice_node-scar-ko_0",
+      "source": "node-scar-ko",
+      "target": "node-accueil",
+      "type": "smoothstep",
+      "label": "[Écouter la suite.]",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-scar-ko_0",
+        "choiceText": "*[Écouter la suite.]*"
+      }
+    },
+    {
+      "id": "e:node-scar-ok:choice:choice_node-scar-ok_0",
+      "source": "node-scar-ok",
+      "target": "node-dedale-respire",
+      "type": "smoothstep",
+      "label": "(ignorant ses superlatifs) « T...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-scar-ok_0",
+        "choiceText": "*(ignorant ses superlatifs)* « Tes anciennes cartes… elles montrent un labyrinthe différent. Les Plis se reconfigurent ? »"
+      }
+    },
+    {
+      "id": "e:node-dedale-respire:choice:choice_node-dedale-respire_0:test",
+      "source": "node-dedale-respire",
+      "target": "test-node-node-dedale-respire-choice-0",
+      "type": "smoothstep",
+      "label": "(Test de Sensibilité paranorma...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-dedale-respire_0",
+        "choiceText": "(Test de Sensibilité paranormale DD18) *[Vous redoublez d'attention pour observer ce qui se dessine devant vos yeux.]* (+1H)"
+      }
+    },
+    {
+      "id": "test-node-node-dedale-respire-choice-0-critical-failure-node-para-ko",
+      "source": "test-node-node-dedale-respire-choice-0",
+      "target": "node-para-ko",
+      "type": "smoothstep",
+      "label": "Échec critique"
+    },
+    {
+      "id": "test-node-node-dedale-respire-choice-0-failure-node-para-ko",
+      "source": "test-node-node-dedale-respire-choice-0",
+      "target": "node-para-ko",
+      "type": "smoothstep",
+      "label": "Échec"
+    },
+    {
+      "id": "test-node-node-dedale-respire-choice-0-success-node-para-ok",
+      "source": "test-node-node-dedale-respire-choice-0",
+      "target": "node-para-ok",
+      "type": "smoothstep",
+      "label": "Réussite"
+    },
+    {
+      "id": "test-node-node-dedale-respire-choice-0-critical-success-node-para-ok",
+      "source": "test-node-node-dedale-respire-choice-0",
+      "target": "node-para-ok",
+      "type": "smoothstep",
+      "label": "Réussite critique"
+    },
+    {
+      "id": "e:node-dedale-respire:choice:choice_node-dedale-respire_1",
+      "source": "node-dedale-respire",
+      "target": "node-murmurateurs",
+      "type": "smoothstep",
+      "label": "« Les Murmurateurs ? »",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-dedale-respire_1",
+        "choiceText": "« Les Murmurateurs ? »"
+      }
+    },
+    {
+      "id": "e:node-para-ko:choice:choice_node-para-ko_0",
+      "source": "node-para-ko",
+      "target": "node-accueil",
+      "type": "smoothstep",
+      "label": "[Écouter la suite.]",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-para-ko_0",
+        "choiceText": "*[Écouter la suite.]*"
+      }
+    },
+    {
+      "id": "e:node-para-ok:choice:choice_node-para-ok_0",
+      "source": "node-para-ok",
+      "target": "node-fusion",
+      "type": "smoothstep",
+      "label": "« Cette fusion… elle doit être...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-para-ok_0",
+        "choiceText": "« Cette fusion… elle doit être douloureuse. Tu t'es perdu dans ton obsession. »"
+      }
+    },
+    {
+      "id": "e:node-para-ok:choice:choice_node-para-ok_1",
+      "source": "node-para-ok",
+      "target": "node-atelier-cynique",
+      "type": "smoothstep",
+      "label": "« Tu te racontes des histoires...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-para-ok_1",
+        "choiceText": "« Tu te racontes des histoires. L'atelier ne parle pas — tu projettes simplement tes désirs sur des craquements aléatoires. »"
+      }
+    },
+    {
+      "id": "e:node-atelier-cynique:choice:choice_node-atelier-cynique_0",
+      "source": "node-atelier-cynique",
+      "target": "node-accueil",
+      "type": "smoothstep",
+      "label": "[Écouter la suite.]",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-atelier-cynique_0",
+        "choiceText": "*[Écouter la suite.]*"
+      }
+    },
+    {
+      "id": "e:node-fusion:choice:choice_node-fusion_0",
+      "source": "node-fusion",
+      "target": "node-thaira",
+      "type": "smoothstep",
+      "label": "« Les autres ? De qui parles-t...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-fusion_0",
+        "choiceText": "« Les autres ? De qui parles-tu ? »"
+      }
+    },
+    {
+      "id": "e:node-thaira:choice:choice_node-thaira_0",
+      "source": "node-thaira",
+      "target": "node-bains",
+      "type": "smoothstep",
+      "label": "« Et où est-elle maintenant ? ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-thaira_0",
+        "choiceText": "« Et où est-elle maintenant ? »"
+      }
+    },
+    {
+      "id": "e:node-thaira:choice:choice_node-thaira_1",
+      "source": "node-thaira",
+      "target": "node-insensible",
+      "type": "smoothstep",
+      "label": "« Le Culte transforme la souff...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-thaira_1",
+        "choiceText": "« Le Culte transforme la souffrance en dévotion. N'est-ce pas là son principe ? »"
+      }
+    },
+    {
+      "id": "e:node-murmurateurs:choice:choice_node-murmurateurs_0:test",
+      "source": "node-murmurateurs",
+      "target": "test-node-node-murmurateurs-choice-0",
+      "type": "smoothstep",
+      "label": "(Croyances DD10) « Mais tu es ...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-murmurateurs_0",
+        "choiceText": "(Croyances DD10) « Mais tu es toujours un croyant de l'Anentropie. Ne devrais-tu pas les dénoncer ? »"
+      }
+    },
+    {
+      "id": "test-node-node-murmurateurs-choice-0-critical-failure-node-denoncer",
+      "source": "test-node-node-murmurateurs-choice-0",
+      "target": "node-denoncer",
+      "type": "smoothstep",
+      "label": "Échec critique"
+    },
+    {
+      "id": "test-node-node-murmurateurs-choice-0-failure-node-denoncer",
+      "source": "test-node-node-murmurateurs-choice-0",
+      "target": "node-denoncer",
+      "type": "smoothstep",
+      "label": "Échec"
+    },
+    {
+      "id": "test-node-node-murmurateurs-choice-0-success-node-denoncer",
+      "source": "test-node-node-murmurateurs-choice-0",
+      "target": "node-denoncer",
+      "type": "smoothstep",
+      "label": "Réussite"
+    },
+    {
+      "id": "test-node-node-murmurateurs-choice-0-critical-success-node-denoncer",
+      "source": "test-node-node-murmurateurs-choice-0",
+      "target": "node-denoncer",
+      "type": "smoothstep",
+      "label": "Réussite critique"
+    },
+    {
+      "id": "e:node-murmurateurs:choice:choice_node-murmurateurs_1",
+      "source": "node-murmurateurs",
+      "target": "node-motifs",
+      "type": "smoothstep",
+      "label": "« Ces motifs « différents » de...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-murmurateurs_1",
+        "choiceText": "« Ces motifs « différents » des Murmurateurs — que révèlent-ils ? »"
+      }
+    },
+    {
+      "id": "e:node-murmurateurs:choice:choice_node-murmurateurs_2",
+      "source": "node-murmurateurs",
+      "target": "node-intolerant",
+      "type": "smoothstep",
+      "label": "« L'indifférence face à l'héré...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 2,
+        "choiceId": "choice_node-murmurateurs_2",
+        "choiceText": "« L'indifférence face à l'hérésie est complice de l'hérésie. »"
+      }
+    },
+    {
+      "id": "e:node-denoncer:choice:choice_node-denoncer_0",
+      "source": "node-denoncer",
+      "target": "node-fidele",
+      "type": "smoothstep",
+      "label": "« Donc tu restes fidèle au Cul...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-denoncer_0",
+        "choiceText": "« Donc tu restes fidèle au Culte, malgré tout ce qu'ils t'ont fait ? »"
+      }
+    },
+    {
+      "id": "e:node-fidele:choice:choice_node-fidele_0",
+      "source": "node-fidele",
+      "target": "node-accueil",
+      "type": "smoothstep",
+      "label": "[Écouter la suite.]",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-fidele_0",
+        "choiceText": "*[Écouter la suite.]*"
+      }
+    },
+    {
+      "id": "e:node-motifs:choice:choice_node-motifs_0",
+      "source": "node-motifs",
+      "target": "node-accueil",
+      "type": "smoothstep",
+      "label": "[Écouter la suite.]",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-motifs_0",
+        "choiceText": "*[Écouter la suite.]*"
+      }
+    },
+    {
+      "id": "e:node-intolerant:choice:choice_node-intolerant_0",
+      "source": "node-intolerant",
+      "target": "node-accueil",
+      "type": "smoothstep",
+      "label": "[Écouter la suite.]",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-intolerant_0",
+        "choiceText": "*[Écouter la suite.]*"
+      }
+    },
+    {
+      "id": "e:node-observer:choice:choice_node-observer_0",
+      "source": "node-observer",
+      "target": "node-yul",
+      "type": "smoothstep",
+      "label": "« Cette figurine… c'est l'œuvr...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-observer_0",
+        "choiceText": "« Cette figurine… c'est l'œuvre de quelqu'un qui te connaît bien. »"
+      }
+    },
+    {
+      "id": "e:node-yul:choice:choice_node-yul_0",
+      "source": "node-yul",
+      "target": "node-pertes",
+      "type": "smoothstep",
+      "label": "« Tu portes trop de pertes, ca...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-yul_0",
+        "choiceText": "« Tu portes trop de pertes, cartographe. Et pourtant tu persistes. »"
+      }
+    },
+    {
+      "id": "e:node-pertes:choice:choice_node-pertes_0",
+      "source": "node-pertes",
+      "target": "node-trace-enfant",
+      "type": "smoothstep",
+      "label": "« Montre-moi où tu l'as perdu....",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-pertes_0",
+        "choiceText": "« Montre-moi où tu l'as perdu. Peut-être puis-je percevoir des traces que tu as manquées. »"
+      }
+    },
+    {
+      "id": "e:node-pertes:choice:choice_node-pertes_1",
+      "source": "node-pertes",
+      "target": "node-espoir",
+      "type": "smoothstep",
+      "label": "« L'espoir est parfois plus cr...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-pertes_1",
+        "choiceText": "« L'espoir est parfois plus cruel que l'acceptation. »"
+      }
+    },
+    {
+      "id": "e:node-espoir:choice:choice_node-espoir_0",
+      "source": "node-espoir",
+      "target": "node-accueil",
+      "type": "smoothstep",
+      "label": "[Écouter la suite.]",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-espoir_0",
+        "choiceText": "*[Écouter la suite.]*"
+      }
+    },
+    {
+      "id": "e:node-interrompre:choice:choice_node-interrompre_0",
+      "source": "node-interrompre",
+      "target": "node-termine-vite",
+      "type": "smoothstep",
+      "label": "« Alors termine rapidement. »",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-interrompre_0",
+        "choiceText": "« Alors termine rapidement. »"
+      }
+    },
+    {
+      "id": "e:node-interrompre:choice:choice_node-interrompre_1",
+      "source": "node-interrompre",
+      "target": "END",
+      "type": "smoothstep",
+      "label": "« Tant pis. Je trouverai mon c...",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 1,
+        "choiceId": "choice_node-interrompre_1",
+        "choiceText": "« Tant pis. Je trouverai mon chemin seule. »"
+      }
+    },
+    {
+      "id": "e:node-termine-vite:choice:choice_node-termine-vite_0",
+      "source": "node-termine-vite",
+      "target": "node-accueil",
+      "type": "smoothstep",
+      "label": "[Écouter la suite.]",
+      "data": {
+        "edgeType": "choice",
+        "choiceIndex": 0,
+        "choiceId": "choice_node-termine-vite_0",
+        "choiceText": "*[Écouter la suite.]*"
+      }
+    }
+  ],
+  "metadata": {
+    "title": "Dialogue Unity",
+    "node_count": 48,
+    "edge_count": 91,
+    "filename": "voknir-atelier-cartographe"
+  }
+}
