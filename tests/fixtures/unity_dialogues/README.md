@@ -32,17 +32,18 @@ Un fichier par chemin et par entrée, car les chemins diffèrent déjà entre eu
 
 | Chemin | Test | Code exercé |
 |---|---|---|
-| `front-canonique` | Vitest | `loadDialogueFromRawJson` (layout en 404) puis `exportToUnity` (`documentToGraph → graphToDocument`) : export d'un document qui a un `documentId` |
+| `front-canonique` | Vitest | `loadDialogueFromRawJson` (layout en 404) puis `exportToUnity` (`documentToGraph → graphToDocument`) : projection graphe → document, celle que l'autosave persiste ; n'est plus le fichier téléchargé (voir `python-apercu`) |
 | `front-invite` | Vitest | vrai `useUnityExport` en session invitée : `JSON.stringify(state.document)` |
 | `front-payload` | Vitest | corps que le vrai `useUnityExport` passe à `saveGraphAndWrite` (capturé sur le mock) pour le dialogue chargé, `documentId` remis à `null`, positions mises à `{x: 0, y: 0}` |
 | `python-graphe` | pytest | `POST /api/v1/unity-dialogues/graph/save-and-write` (vraie route, `TestClient`, dossier Unity temporaire) avec `expected/front-payload/<fixture>.json` pour corps : `json_content` de la réponse 2xx, sinon `.error.txt` |
 | `python-lot` | pytest | `export_persisted_document` (export par lot, `skip_validation=True`), réécrit sur place |
+| `python-lot-valide` | pytest | le même avec la validation de schéma Unity, défaut de `POST /dialogues/batch-export` |
+| `python-apercu` | pytest | `preview_persisted_document` (`GET /dialogues/{id}/preview-export`) : ce que télécharge « Exporter », depuis le menu ou l'aperçu, pour un dialogue qui a un `documentId`, après sauvegarde par révision ; un document refusé par le schéma est figé en `.error.txt` |
 
 `<fixture>.json` contient la sortie telle quelle ; si le chemin rejette l'entrée,
 `<fixture>.error.txt` fige l'erreur : `Type: message`, ou pour `python-graphe`
-`HTTP <statut>: <corps JSON>` (clés triées, sans `request_id` ni chemin local). Aujourd'hui la
-route refuse en 422 le forgeron, les Plis d'ossements et la Nef centrale (ids de nœud hors
-schéma) ; ces trois `.error.txt` sont ce que l'utilisateur obtient. Une défaillance du banc
+`HTTP <statut>: <corps JSON>` (clés triées, sans `request_id` ni chemin local). Seule la Nef
+centrale est refusée (id uuid nu, voir plus bas). Une défaillance du banc
 (mock, validation bloquée, corps `front-payload` absent) fait échouer le test sans rien
 figer ; si `front-payload` devient un `.error.txt`, un ancien attendu `python-graphe` fait
 échouer le pytest (retiré en mode mise à jour).
@@ -59,24 +60,37 @@ pose `metadata.title = "Dialogue Unity"` : c'est le titre que `python-graphe` é
 toutes les fixtures acceptées (en production, `save-and-write` ne reçoit que des dialogues sans
 `documentId`, avec leur propre titre).
 
-## Figé, défauts compris
+## Figé : ce qui est voulu, ce qui reste
 
-Les attendus ont été générés depuis le code du 2026-11-26 (`ad67bb836`), sans le modifier.
-Ils figent aussi les défauts actuels. Ceux qui sont réels, avec leur cause, sont dans
-`_bmad-output/implementation-artifacts/deferred-work.md` (source : spec 20-1a). En bref :
+Générés d'abord depuis le code du 2026-11-26 (`ad67bb836`) sans le modifier, les attendus
+ont été régénérés par la PR des écarts d'export (`fix/export-unity-golden-ecarts`) :
 
-- `python-graphe` refuse en 422 trois fixtures sur cinq (ids hors schéma) ; `validate-schema`
-  les refuse aussi, donc « Exporter » est bloqué pour elles quel que soit le chemin ;
-- `python-graphe` perd toutes les issues des choix testés (6 sur Voknir ; le défaut touche
-  aussi le forgeron et les Plis, masqué par le refus) : `buildGraphApiPayload` n'envoie pas
-  le `sourceHandle` des arêtes ;
-- un choix à la fois testé et ciblé garde sa cible par le lot, la perd par `front-canonique`,
-  et reçoit `END` par `python-graphe` ;
-- les chemins Python normalisent (flags en majuscules, lettres accentuées perdues, choix
-  vides `__idx_N` retirés même s'ils portent un test, `null` et `condition` vides retirés,
-  `targetNode: "END"` sur les choix testés) ; les chemins front ne le font pas ;
-- métadonnées éditeur et `title` : gardées par le lot, en partie par le front, retirées par
-  `python-graphe`.
+- ids `NODE_…` de l'ancien générateur (`NODE_START_CHOICE_3`…) acceptés par le schéma :
+  le forgeron et les Plis d'ossements s'exportent (`python-graphe` passe de `.error.txt` à
+  `.json`) ;
+- `front-payload` porte le `sourceHandle` des arêtes : `python-graphe` rend les issues des
+  choix testés comme le lot ;
+- flags translittérés (`RéparationImparfaite` → `REPARATIONIMPARFAITE`, plus
+  `R_PARATIONIMPARFAITE`) ;
+- « Exporter » d'un dialogue enregistré sert `python-apercu`, identique octet pour octet à
+  `python-lot` et `python-lot-valide`.
+
+Voulu, figé tel quel :
+
+- **Nef centrale refusée** : artefact de l'ancien stockage `data/interactions/` (obsolète),
+  un seul nœud à id uuid dont `line` contient tout le dialogue en chaîne JSON. Le refus
+  vient de l'id ; l'exporter produirait un nœud illisible dans Unity.
+- **Choix testé et ciblé** : les 4 issues routent le choix, sa `targetNode` n'est qu'un
+  champ requis par le schéma (`END`). Le lot garde la cible d'un fichier source jamais
+  réédité parce qu'il réécrit le document tel quel (`preserve_source_fields`).
+- **Choix vides `__idx_N` retirés même testés** : sans texte ni cible, ils feraient des
+  boutons vides dans Unity ; la Santé signale le nœud (« contenu vide »).
+- **`front-invite` non normalisé** : un invité n'a pas accès à `preview-export` (lecture
+  réservée au propriétaire) ; il télécharge le document tel qu'il est stocké.
+
+Reste ouvert (`deferred-work.md`) : métadonnées éditeur (`status`, `contextGddHash`…)
+retirées par `python-graphe`, gardées par le lot et l'aperçu, à ramener à une seule liste
+avant 20.4.
 
 Corriger un de ces écarts se fait dans une PR à part, qui régénère les attendus et dit
 pourquoi dans sa description. Un attendu ne s'écrit jamais à la main.

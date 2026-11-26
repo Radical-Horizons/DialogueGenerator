@@ -49,7 +49,7 @@ _VALID_GRAPH = {
     "metadata": {"title": "Export Log Test", "node_count": 2, "edge_count": 1},
 }
 
-_INVALID_NODE_ID = "NODE_LEGACY_INVALID"
+_INVALID_NODE_ID = "LEGACY_INVALID_SANS_PREFIXE"
 
 _INVALID_GRAPH = {
     "nodes": [
@@ -96,7 +96,7 @@ _INVALID_DOCUMENT = {
     "schemaVersion": "1.2.0",
     "nodes": [
         {
-            "id": "NODE_LEGACY_INVALID",
+            "id": "LEGACY_INVALID_SANS_PREFIXE",
             "line": "Id nœud hors schéma",
             "nextNode": "END",
         },

@@ -3,6 +3,7 @@
  */
 import { useCallback } from 'react'
 import * as graphAPI from '../api/graph'
+import { previewUnityDialogueExport } from '../api/dialogues'
 import { useGraphStore } from '../store/graphStore'
 import { useAuthStore } from '../store/authStore'
 import type { UseToastFn } from '../components/shared'
@@ -26,6 +27,28 @@ export interface UnityExportSchemaState {
   setSchemaValidationErrorCount: (count: number) => void
   setSchemaValidationWarnings: (warnings: SchemaValidationIssue[]) => void
   setSchemaValidationStructuredErrors: (errors: SchemaValidationIssue[]) => void
+}
+
+/**
+ * Export d'un dialogue déjà enregistré, partagé par « Export Unity » et l'aperçu.
+ *
+ * `save-and-write` refuse un document existant (409 `canonical_revision_required`,
+ * ADR-008) : on persiste par le chemin de l'autosave (PUT /documents/{id}, révision
+ * optimiste), puis on sert le rendu serveur du document sauvegardé, normalisé comme
+ * l'export par lot (`exportToUnity` ne normalise rien : choix testés sans
+ * `targetNode`, flags bruts — golden 20.1).
+ *
+ * @param documentId - Document ouvert.
+ * @param filename - Nom affiché du dialogue, s'il en a un.
+ * @returns Contenu JSON Unity et nom de fichier proposé.
+ */
+export async function exportPersistedUnityDocument(
+  documentId: string,
+  filename: string | undefined,
+): Promise<{ jsonContent: string; filename: string }> {
+  await useGraphStore.getState().saveDialogue()
+  const preview = await previewUnityDialogueExport(documentId)
+  return { jsonContent: preview.json_content, filename: filename || `${documentId}.json` }
 }
 
 /**
@@ -97,14 +120,10 @@ export function useUnityExport(
       }
 
       if (state.documentId) {
-        // Document canonique déjà présent sur disque : POST /graph/save-and-write
-        // refuse systématiquement (409 canonical_revision_required — ADR-008,
-        // `require_edit` + révision optimiste). Persister via le même chemin que
-        // l'autosave (PUT /documents/{id}, révision-aware) puis servir le JSON
-        // Unity local (`exportToUnity`, déjà aligné avec le document sauvegardé).
-        await useGraphStore.getState().saveDialogue()
-        const jsonContent = useGraphStore.getState().exportToUnity()
-        const filename = state.dialogueMetadata.filename || `${state.documentId}.json`
+        const { jsonContent, filename } = await exportPersistedUnityDocument(
+          state.documentId,
+          state.dialogueMetadata.filename,
+        )
         registerSuccessfulExport(jsonContent, filename)
         toast(`Dialogue exporté : ${filename}`, 'success', 3000)
         return

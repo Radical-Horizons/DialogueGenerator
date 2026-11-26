@@ -16,7 +16,7 @@ import {
   isUnityPathUnavailableError,
 } from '../utils/graphApiErrors'
 import { getErrorMessage } from '../types/errors'
-import type { UnityExportSchemaState } from './useUnityExport'
+import { exportPersistedUnityDocument, type UnityExportSchemaState } from './useUnityExport'
 import type { UseUnityExportDownloadResult } from './useUnityExportDownload'
 import type { ExportPreviewModalMode } from '../components/unityDialogues/ExportPreviewModal'
 
@@ -190,9 +190,16 @@ export function useUnityExportPreview(
 
     setIsExportingFromPreview(true)
     try {
-      const response = await graphAPI.saveGraphAndWrite(payload)
-      registerSuccessfulExport(response.json_content, response.filename)
-      toast(`Dialogue exporté : ${response.filename}`, 'success', 3000)
+      // Un dialogue enregistré passe par le même chemin qu'« Export Unity » :
+      // save-and-write le refuserait en 409 canonical_revision_required.
+      const { jsonContent, filename } = payload.document_id
+        ? await exportPersistedUnityDocument(payload.document_id, payload.metadata?.filename)
+        : await graphAPI.saveGraphAndWrite(payload).then((r) => ({
+            jsonContent: r.json_content,
+            filename: r.filename,
+          }))
+      registerSuccessfulExport(jsonContent, filename)
+      toast(`Dialogue exporté : ${filename}`, 'success', 3000)
       setPreviewOpen(false)
       validatedPayloadRef.current = null
       setSinglePreview(null)

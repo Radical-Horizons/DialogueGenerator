@@ -21,6 +21,8 @@ export type GraphApiEdgePayload = {
   id: string
   source: string
   target: string
+  /** Issue d'un nœud de test (`success`…) ou `choice:…` : seul moyen pour le serveur de rendre les `test*Node`. */
+  sourceHandle?: string
   type?: string
   label?: string
   data?: Record<string, unknown>
@@ -52,6 +54,7 @@ export function buildGraphApiPayload(nodes: Node[], edges: Edge[]): GraphApiPayl
       id: e.id,
       source: e.source,
       target: e.target,
+      sourceHandle: e.sourceHandle ?? undefined,
       type: e.type,
       label: typeof e.label === 'string' ? e.label : undefined,
       data: e.data as Record<string, unknown> | undefined,

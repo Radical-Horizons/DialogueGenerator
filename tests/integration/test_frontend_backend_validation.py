@@ -188,7 +188,7 @@ class TestBackendValidationUnityDialogue:
         """
         # GIVEN: JSON Unity invalide (id nœud hors schéma v1.2.0)
         invalid_json = """[
-            {"id": "NODE_LEGACY_INVALID", "line": "Test", "nextNode": "END"}
+            {"id": "LEGACY_INVALID_SANS_PREFIXE", "line": "Test", "nextNode": "END"}
         ]"""
         
         request_data = {
@@ -227,7 +227,7 @@ class TestBackendValidationUnityDialogue:
         """
         # GIVEN: JSON Unity avec id nœud hors schéma
         invalid_json = """[
-            {"id": "NODE_LEGACY_INVALID", "line": "Test", "nextNode": "END"}
+            {"id": "LEGACY_INVALID_SANS_PREFIXE", "line": "Test", "nextNode": "END"}
         ]"""
         
         request_data = {
@@ -251,7 +251,7 @@ class TestBackendValidationUnityDialogue:
         # Vérifier que le message mentionne la référence invalide (dans message ou details)
         error_obj = error_data["error"]
         error_text = f"{error_obj.get('message', '')} {str(error_obj.get('details', {}))}"
-        assert "id" in error_text.lower() or "schéma" in error_text.lower() or "NODE_LEGACY_INVALID" in error_text
+        assert "id" in error_text.lower() or "schéma" in error_text.lower() or "LEGACY_INVALID_SANS_PREFIXE" in error_text
 
 
 class TestPydanticValidators:

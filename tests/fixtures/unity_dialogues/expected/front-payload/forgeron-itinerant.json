@@ -1837,6 +1837,7 @@
       "id": "e:START:choice:__idx_0:test",
       "source": "START",
       "target": "test-node-START-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "Dans la tapisserie de l'existe...",
       "data": {
@@ -1850,6 +1851,7 @@
       "id": "test-node-START-choice-0-critical-failure-node-9db09f1fd9614001bc1a6f6e92865f49",
       "source": "test-node-START-choice-0",
       "target": "node-9db09f1fd9614001bc1a6f6e92865f49",
+      "sourceHandle": "critical-failure",
       "type": "smoothstep",
       "label": "Échec critique"
     },
@@ -1857,6 +1859,7 @@
       "id": "test-node-START-choice-0-failure-node-36c540079b3c4f11aa84ec7b6438601b",
       "source": "test-node-START-choice-0",
       "target": "node-36c540079b3c4f11aa84ec7b6438601b",
+      "sourceHandle": "failure",
       "type": "smoothstep",
       "label": "Échec"
     },
@@ -1864,6 +1867,7 @@
       "id": "test-node-START-choice-0-success-node-383617adbd9a4cbaa35c87c610ba15b6",
       "source": "test-node-START-choice-0",
       "target": "node-383617adbd9a4cbaa35c87c610ba15b6",
+      "sourceHandle": "success",
       "type": "smoothstep",
       "label": "Réussite"
     },
@@ -1871,6 +1875,7 @@
       "id": "test-node-START-choice-0-critical-success-node-f884e57528a9493ca9134875935378de",
       "source": "test-node-START-choice-0",
       "target": "node-f884e57528a9493ca9134875935378de",
+      "sourceHandle": "critical-success",
       "type": "smoothstep",
       "label": "Réussite critique"
     },
@@ -1878,6 +1883,7 @@
       "id": "e:START:choice:__idx_1:test",
       "source": "START",
       "target": "test-node-START-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Je ne cherche pas de confidenc...",
       "data": {
@@ -1891,6 +1897,7 @@
       "id": "e:START:choice:__idx_2:test",
       "source": "START",
       "target": "test-node-START-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "Garde tes mains pour tes villa...",
       "data": {
@@ -1904,6 +1911,7 @@
       "id": "test-node-START-choice-2-critical-failure-node-d281ad35450c4ed59bc5ec353aa203e8",
       "source": "test-node-START-choice-2",
       "target": "node-d281ad35450c4ed59bc5ec353aa203e8",
+      "sourceHandle": "critical-failure",
       "type": "smoothstep",
       "label": "Échec critique"
     },
@@ -1911,6 +1919,7 @@
       "id": "test-node-START-choice-2-failure-node-f738dabb50c547f696efa85c9bf7d1f6",
       "source": "test-node-START-choice-2",
       "target": "node-f738dabb50c547f696efa85c9bf7d1f6",
+      "sourceHandle": "failure",
       "type": "smoothstep",
       "label": "Échec"
     },
@@ -1918,6 +1927,7 @@
       "id": "test-node-START-choice-2-success-node-3e39045003db4065a1c8c9b010c881ba",
       "source": "test-node-START-choice-2",
       "target": "node-3e39045003db4065a1c8c9b010c881ba",
+      "sourceHandle": "success",
       "type": "smoothstep",
       "label": "Réussite"
     },
@@ -1925,6 +1935,7 @@
       "id": "test-node-START-choice-2-critical-success-node-03473c45273a4a01a44889b9ed561e39",
       "source": "test-node-START-choice-2",
       "target": "node-03473c45273a4a01a44889b9ed561e39",
+      "sourceHandle": "critical-success",
       "type": "smoothstep",
       "label": "Réussite critique"
     },
@@ -1932,6 +1943,7 @@
       "id": "e:node-d281ad35450c4ed59bc5ec353aa203e8:choice:__idx_0:test",
       "source": "node-d281ad35450c4ed59bc5ec353aa203e8",
       "target": "test-node-node-d281ad35450c4ed59bc5ec353aa203e8-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "Reculez. Non — je... pardonnez...",
       "data": {
@@ -1945,6 +1957,7 @@
       "id": "e:node-d281ad35450c4ed59bc5ec353aa203e8:choice:__idx_1:test",
       "source": "node-d281ad35450c4ed59bc5ec353aa203e8",
       "target": "test-node-node-d281ad35450c4ed59bc5ec353aa203e8-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Dégagez vos griffes de moi ! (...",
       "data": {
@@ -1958,6 +1971,7 @@
       "id": "e:node-d281ad35450c4ed59bc5ec353aa203e8:choice:__idx_2:test",
       "source": "node-d281ad35450c4ed59bc5ec353aa203e8",
       "target": "test-node-node-d281ad35450c4ed59bc5ec353aa203e8-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "Calme. Vous retirez votre main...",
       "data": {
@@ -1971,6 +1985,7 @@
       "id": "e:node-d281ad35450c4ed59bc5ec353aa203e8:choice:__idx_3",
       "source": "node-d281ad35450c4ed59bc5ec353aa203e8",
       "target": "manual-e23d929d-a045-49cb-88fb-bac225443304",
+      "sourceHandle": "choice:__idx_3",
       "type": "smoothstep",
       "label": "",
       "data": {
@@ -1984,6 +1999,7 @@
       "id": "e:node-d281ad35450c4ed59bc5ec353aa203e8:choice:__idx_4",
       "source": "node-d281ad35450c4ed59bc5ec353aa203e8",
       "target": "NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4",
+      "sourceHandle": "choice:__idx_4",
       "type": "smoothstep",
       "label": "",
       "data": {
@@ -1997,6 +2013,7 @@
       "id": "e:node-f738dabb50c547f696efa85c9bf7d1f6:choice:__idx_1:test",
       "source": "node-f738dabb50c547f696efa85c9bf7d1f6",
       "target": "test-node-node-f738dabb50c547f696efa85c9bf7d1f6-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Je vous donnerai une garantie....",
       "data": {
@@ -2010,6 +2027,7 @@
       "id": "e:node-3e39045003db4065a1c8c9b010c881ba:choice:__idx_0:test",
       "source": "node-3e39045003db4065a1c8c9b010c881ba",
       "target": "test-node-node-3e39045003db4065a1c8c9b010c881ba-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "Je vous tends l'anneau de lumi...",
       "data": {
@@ -2023,6 +2041,7 @@
       "id": "e:node-3e39045003db4065a1c8c9b010c881ba:choice:__idx_1:test",
       "source": "node-3e39045003db4065a1c8c9b010c881ba",
       "target": "test-node-node-3e39045003db4065a1c8c9b010c881ba-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Approche, alors. Tu peux touch...",
       "data": {
@@ -2036,6 +2055,7 @@
       "id": "e:node-3e39045003db4065a1c8c9b010c881ba:choice:__idx_2:test",
       "source": "node-3e39045003db4065a1c8c9b010c881ba",
       "target": "test-node-node-3e39045003db4065a1c8c9b010c881ba-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "J'entends ta générosité, mais ...",
       "data": {
@@ -2049,6 +2069,7 @@
       "id": "e:node-03473c45273a4a01a44889b9ed561e39:choice:__idx_0:test",
       "source": "node-03473c45273a4a01a44889b9ed561e39",
       "target": "test-node-node-03473c45273a4a01a44889b9ed561e39-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "Laissez-le finir : « Rapièce-l...",
       "data": {
@@ -2062,6 +2083,7 @@
       "id": "e:node-03473c45273a4a01a44889b9ed561e39:choice:__idx_1:test",
       "source": "node-03473c45273a4a01a44889b9ed561e39",
       "target": "test-node-node-03473c45273a4a01a44889b9ed561e39-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Exigez un gage : « Si vous me ...",
       "data": {
@@ -2075,6 +2097,7 @@
       "id": "e:node-03473c45273a4a01a44889b9ed561e39:choice:__idx_2:test",
       "source": "node-03473c45273a4a01a44889b9ed561e39",
       "target": "test-node-node-03473c45273a4a01a44889b9ed561e39-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "Demandez une démonstration : «...",
       "data": {
@@ -2088,6 +2111,7 @@
       "id": "e:node-03473c45273a4a01a44889b9ed561e39:choice:__idx_4:test",
       "source": "node-03473c45273a4a01a44889b9ed561e39",
       "target": "test-node-node-03473c45273a4a01a44889b9ed561e39-choice-4",
+      "sourceHandle": "choice:__idx_4",
       "type": "smoothstep",
       "label": "Offrez-lui une récompense : « ...",
       "data": {
@@ -2101,6 +2125,7 @@
       "id": "e:NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4:choice:__idx_0:test",
       "source": "NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4",
       "target": "test-node-NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "« Je... je n'ai pas voulu frap...",
       "data": {
@@ -2114,6 +2139,7 @@
       "id": "e:NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4:choice:__idx_1:test",
       "source": "NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4",
       "target": "test-node-NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "« Lâche-moi tout de suite, bou...",
       "data": {
@@ -2127,6 +2153,7 @@
       "id": "e:NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4:choice:__idx_2:test",
       "source": "NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4",
       "target": "test-node-NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "« Tiens bon — je vais dégager ...",
       "data": {
@@ -2140,6 +2167,7 @@
       "id": "e:NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4:choice:__idx_3:test",
       "source": "NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4",
       "target": "test-node-NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4-choice-3",
+      "sourceHandle": "choice:__idx_3",
       "type": "smoothstep",
       "label": "« Tu as entendu l'anneau — je ...",
       "data": {
@@ -2153,6 +2181,7 @@
       "id": "e:manual-e23d929d-a045-49cb-88fb-bac225443304:choice:__idx_0:test",
       "source": "manual-e23d929d-a045-49cb-88fb-bac225443304",
       "target": "test-node-manual-e23d929d-a045-49cb-88fb-bac225443304-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "",
       "data": {
@@ -2166,6 +2195,7 @@
       "id": "e:manual-e23d929d-a045-49cb-88fb-bac225443304:choice:__idx_1:test",
       "source": "manual-e23d929d-a045-49cb-88fb-bac225443304",
       "target": "test-node-manual-e23d929d-a045-49cb-88fb-bac225443304-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "",
       "data": {
@@ -2179,6 +2209,7 @@
       "id": "e:manual-e23d929d-a045-49cb-88fb-bac225443304:choice:__idx_2:test",
       "source": "manual-e23d929d-a045-49cb-88fb-bac225443304",
       "target": "test-node-manual-e23d929d-a045-49cb-88fb-bac225443304-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "",
       "data": {
@@ -2192,6 +2223,7 @@
       "id": "e:manual-e23d929d-a045-49cb-88fb-bac225443304:choice:__idx_3:test",
       "source": "manual-e23d929d-a045-49cb-88fb-bac225443304",
       "target": "test-node-manual-e23d929d-a045-49cb-88fb-bac225443304-choice-3",
+      "sourceHandle": "choice:__idx_3",
       "type": "smoothstep",
       "label": "",
       "data": {
@@ -2205,6 +2237,7 @@
       "id": "e:node-333f03751b0d40f29e4020ec4429b37b:choice:__idx_0:test",
       "source": "node-333f03751b0d40f29e4020ec4429b37b",
       "target": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "Arracher mes anneaux et recule...",
       "data": {
@@ -2218,6 +2251,7 @@
       "id": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0-critical-failure-node-f33f926d6acb41fdb52aaa17b1b0c119",
       "source": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0",
       "target": "node-f33f926d6acb41fdb52aaa17b1b0c119",
+      "sourceHandle": "critical-failure",
       "type": "smoothstep",
       "label": "Échec critique"
     },
@@ -2225,6 +2259,7 @@
       "id": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0-failure-node-2747e083881548319c2fe0b7f841723b",
       "source": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0",
       "target": "node-2747e083881548319c2fe0b7f841723b",
+      "sourceHandle": "failure",
       "type": "smoothstep",
       "label": "Échec"
     },
@@ -2232,6 +2267,7 @@
       "id": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0-success-node-5201a0338f0c445780b38c1e714da56e",
       "source": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0",
       "target": "node-5201a0338f0c445780b38c1e714da56e",
+      "sourceHandle": "success",
       "type": "smoothstep",
       "label": "Réussite"
     },
@@ -2239,6 +2275,7 @@
       "id": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0-critical-success-node-e0d78d39911a4bc2b0b56fda471c7810",
       "source": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-0",
       "target": "node-e0d78d39911a4bc2b0b56fda471c7810",
+      "sourceHandle": "critical-success",
       "type": "smoothstep",
       "label": "Réussite critique"
     },
@@ -2246,6 +2283,7 @@
       "id": "e:node-333f03751b0d40f29e4020ec4429b37b:choice:__idx_1:test",
       "source": "node-333f03751b0d40f29e4020ec4429b37b",
       "target": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Céder — laissez Grish tâcher d...",
       "data": {
@@ -2259,6 +2297,7 @@
       "id": "e:node-333f03751b0d40f29e4020ec4429b37b:choice:__idx_2:test",
       "source": "node-333f03751b0d40f29e4020ec4429b37b",
       "target": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "Murmurer l'interdit et tenter ...",
       "data": {
@@ -2272,6 +2311,7 @@
       "id": "e:node-333f03751b0d40f29e4020ec4429b37b:choice:__idx_3:test",
       "source": "node-333f03751b0d40f29e4020ec4429b37b",
       "target": "test-node-node-333f03751b0d40f29e4020ec4429b37b-choice-3",
+      "sourceHandle": "choice:__idx_3",
       "type": "smoothstep",
       "label": "",
       "data": {
@@ -2285,6 +2325,7 @@
       "id": "e:node-0e165c7e4ef843779f5d7ae30123d24f:choice:__idx_0:test",
       "source": "node-0e165c7e4ef843779f5d7ae30123d24f",
       "target": "test-node-node-0e165c7e4ef843779f5d7ae30123d24f-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "J'accepte la réparation cosmét...",
       "data": {
@@ -2298,6 +2339,7 @@
       "id": "e:node-0e165c7e4ef843779f5d7ae30123d24f:choice:__idx_1:test",
       "source": "node-0e165c7e4ef843779f5d7ae30123d24f",
       "target": "test-node-node-0e165c7e4ef843779f5d7ae30123d24f-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Non. Je garde mes cicatrices t...",
       "data": {
@@ -2311,6 +2353,7 @@
       "id": "e:node-0e165c7e4ef843779f5d7ae30123d24f:choice:__idx_2:test",
       "source": "node-0e165c7e4ef843779f5d7ae30123d24f",
       "target": "test-node-node-0e165c7e4ef843779f5d7ae30123d24f-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "Je vous supplie d'essayer. Fai...",
       "data": {
@@ -2324,6 +2367,7 @@
       "id": "e:node-0e165c7e4ef843779f5d7ae30123d24f:choice:__idx_3:test",
       "source": "node-0e165c7e4ef843779f5d7ae30123d24f",
       "target": "test-node-node-0e165c7e4ef843779f5d7ae30123d24f-choice-3",
+      "sourceHandle": "choice:__idx_3",
       "type": "smoothstep",
       "label": "Attendez — avant d'accepter, m...",
       "data": {
@@ -2337,6 +2381,7 @@
       "id": "e:node-1dcd27ebf4e34f839966365c7d80f2d2:choice:__idx_0:test",
       "source": "node-1dcd27ebf4e34f839966365c7d80f2d2",
       "target": "test-node-node-1dcd27ebf4e34f839966365c7d80f2d2-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "Oui. Réparez, mais ne touchez ...",
       "data": {
@@ -2350,6 +2395,7 @@
       "id": "e:node-1dcd27ebf4e34f839966365c7d80f2d2:choice:__idx_1:test",
       "source": "node-1dcd27ebf4e34f839966365c7d80f2d2",
       "target": "test-node-node-1dcd27ebf4e34f839966365c7d80f2d2-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Faites la suture complète et a...",
       "data": {
@@ -2363,6 +2409,7 @@
       "id": "e:node-1dcd27ebf4e34f839966365c7d80f2d2:choice:__idx_2:test",
       "source": "node-1dcd27ebf4e34f839966365c7d80f2d2",
       "target": "test-node-node-1dcd27ebf4e34f839966365c7d80f2d2-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "Conservez seulement la réparat...",
       "data": {
@@ -2376,6 +2423,7 @@
       "id": "e:node-1dcd27ebf4e34f839966365c7d80f2d2:choice:__idx_3:test",
       "source": "node-1dcd27ebf4e34f839966365c7d80f2d2",
       "target": "test-node-node-1dcd27ebf4e34f839966365c7d80f2d2-choice-3",
+      "sourceHandle": "choice:__idx_3",
       "type": "smoothstep",
       "label": "Attendez — avant d'accepter, m...",
       "data": {
@@ -2389,6 +2437,7 @@
       "id": "e:node-f33f926d6acb41fdb52aaa17b1b0c119:choice:__idx_0:test",
       "source": "node-f33f926d6acb41fdb52aaa17b1b0c119",
       "target": "test-node-node-f33f926d6acb41fdb52aaa17b1b0c119-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "Hurler, serrer la main et tent...",
       "data": {
@@ -2402,6 +2451,7 @@
       "id": "e:node-f33f926d6acb41fdb52aaa17b1b0c119:choice:__idx_1:test",
       "source": "node-f33f926d6acb41fdb52aaa17b1b0c119",
       "target": "test-node-node-f33f926d6acb41fdb52aaa17b1b0c119-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Supplier Grish d'intervenir et...",
       "data": {
@@ -2415,6 +2465,7 @@
       "id": "e:node-f33f926d6acb41fdb52aaa17b1b0c119:choice:__idx_2:test",
       "source": "node-f33f926d6acb41fdb52aaa17b1b0c119",
       "target": "test-node-node-f33f926d6acb41fdb52aaa17b1b0c119-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "Chercher un outil sur vous ou ...",
       "data": {
@@ -2428,6 +2479,7 @@
       "id": "e:node-2747e083881548319c2fe0b7f841723b:choice:__idx_0:test",
       "source": "node-2747e083881548319c2fe0b7f841723b",
       "target": "test-node-node-2747e083881548319c2fe0b7f841723b-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "Insister — arracher d'un coup ...",
       "data": {
@@ -2441,6 +2493,7 @@
       "id": "e:node-2747e083881548319c2fe0b7f841723b:choice:__idx_2:test",
       "source": "node-2747e083881548319c2fe0b7f841723b",
       "target": "test-node-node-2747e083881548319c2fe0b7f841723b-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "Attraper un couteau ou un outi...",
       "data": {
@@ -2454,6 +2507,7 @@
       "id": "e:node-e0d78d39911a4bc2b0b56fda471c7810:choice:__idx_0:test",
       "source": "node-e0d78d39911a4bc2b0b56fda471c7810",
       "target": "test-node-node-e0d78d39911a4bc2b0b56fda471c7810-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "Donne-moi l'unique seconde : r...",
       "data": {
@@ -2467,6 +2521,7 @@
       "id": "e:node-e0d78d39911a4bc2b0b56fda471c7810:choice:__idx_2:test",
       "source": "node-e0d78d39911a4bc2b0b56fda471c7810",
       "target": "test-node-node-e0d78d39911a4bc2b0b56fda471c7810-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "Je vérifie immédiatement les a...",
       "data": {
@@ -2480,6 +2535,7 @@
       "id": "e:node-9db09f1fd9614001bc1a6f6e92865f49:choice:__idx_0:test",
       "source": "node-9db09f1fd9614001bc1a6f6e92865f49",
       "target": "test-node-node-9db09f1fd9614001bc1a6f6e92865f49-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "Arrachez votre main — reprenez...",
       "data": {
@@ -2493,6 +2549,7 @@
       "id": "e:node-9db09f1fd9614001bc1a6f6e92865f49:choice:__idx_1:test",
       "source": "node-9db09f1fd9614001bc1a6f6e92865f49",
       "target": "test-node-node-9db09f1fd9614001bc1a6f6e92865f49-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Plaidez! Expliquez que vous vo...",
       "data": {
@@ -2506,6 +2563,7 @@
       "id": "e:node-9db09f1fd9614001bc1a6f6e92865f49:choice:__idx_2:test",
       "source": "node-9db09f1fd9614001bc1a6f6e92865f49",
       "target": "test-node-node-9db09f1fd9614001bc1a6f6e92865f49-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "Restez immobile et laissez-le ...",
       "data": {
@@ -2519,6 +2577,7 @@
       "id": "e:node-36c540079b3c4f11aa84ec7b6438601b:choice:__idx_2:test",
       "source": "node-36c540079b3c4f11aa84ec7b6438601b",
       "target": "test-node-node-36c540079b3c4f11aa84ec7b6438601b-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "Laissez-moi convaincre autreme...",
       "data": {
@@ -2532,6 +2591,7 @@
       "id": "e:node-36c540079b3c4f11aa84ec7b6438601b:choice:__idx_3:test",
       "source": "node-36c540079b3c4f11aa84ec7b6438601b",
       "target": "test-node-node-36c540079b3c4f11aa84ec7b6438601b-choice-3",
+      "sourceHandle": "choice:__idx_3",
       "type": "smoothstep",
       "label": "Si vous cherchez un prix, je p...",
       "data": {
@@ -2545,6 +2605,7 @@
       "id": "e:node-383617adbd9a4cbaa35c87c610ba15b6:choice:__idx_1:test",
       "source": "node-383617adbd9a4cbaa35c87c610ba15b6",
       "target": "test-node-node-383617adbd9a4cbaa35c87c610ba15b6-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Expliquez votre rituel. Commen...",
       "data": {
@@ -2558,6 +2619,7 @@
       "id": "e:node-f884e57528a9493ca9134875935378de:choice:__idx_3:test",
       "source": "node-f884e57528a9493ca9134875935378de",
       "target": "test-node-node-f884e57528a9493ca9134875935378de-choice-3",
+      "sourceHandle": "choice:__idx_3",
       "type": "smoothstep",
       "label": "Si tu as vraiment tiré quelque...",
       "data": {

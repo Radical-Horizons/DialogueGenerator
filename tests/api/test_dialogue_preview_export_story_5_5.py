@@ -90,7 +90,7 @@ class TestGraphPreviewExport:
 
     def test_invalid_graph_returns_schema_valid_false(self):
         """Id nœud hors schéma v1.2.0 → schema_valid false."""
-        invalid_id = "NODE_LEGACY_INVALID"
+        invalid_id = "LEGACY_INVALID_SANS_PREFIXE"
         invalid_graph = {
             **_VALID_GRAPH,
             "nodes": [

@@ -479,7 +479,7 @@ class TestPutDocumentDraftVsExport:
         """Document avec id nœud hors schéma (non auto-healable)."""
         return {
             "schemaVersion": "1.2.0",
-            "nodes": [{"id": "NODE_LEGACY_INVALID", "line": "Hello", "nextNode": "END"}],
+            "nodes": [{"id": "LEGACY_INVALID_SANS_PREFIXE", "line": "Hello", "nextNode": "END"}],
         }
 
     def test_put_draft_mode_auto_heals_missing_choice_id(

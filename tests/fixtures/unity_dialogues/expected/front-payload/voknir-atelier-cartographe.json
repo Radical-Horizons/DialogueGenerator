@@ -1428,6 +1428,7 @@
       "id": "e:START:choice:choice_START_0",
       "source": "START",
       "target": "node-accueil",
+      "sourceHandle": "choice:choice_START_0",
       "type": "smoothstep",
       "label": "[Vous pénétrez dans l'atelier....",
       "data": {
@@ -1441,6 +1442,7 @@
       "id": "e:START:choice:choice_START_1",
       "source": "START",
       "target": "node-attente",
+      "sourceHandle": "choice:choice_START_1",
       "type": "smoothstep",
       "label": "[Vous restez sur le seuil de l...",
       "data": {
@@ -1454,6 +1456,7 @@
       "id": "e:node-accueil:choice:choice_node-accueil_0",
       "source": "node-accueil",
       "target": "node-equations",
+      "sourceHandle": "choice:choice_node-accueil_0",
       "type": "smoothstep",
       "label": "[Vous ne prêtez guère attentio...",
       "data": {
@@ -1467,6 +1470,7 @@
       "id": "e:node-accueil:choice:choice_node-accueil_1",
       "source": "node-accueil",
       "target": "node-respect-1",
+      "sourceHandle": "choice:choice_node-accueil_1",
       "type": "smoothstep",
       "label": "« Détrompez-vous, cartographe,...",
       "data": {
@@ -1480,6 +1484,7 @@
       "id": "e:node-accueil:choice:choice_node-accueil_2",
       "source": "node-accueil",
       "target": "node-autoritaire",
+      "sourceHandle": "choice:choice_node-accueil_2",
       "type": "smoothstep",
       "label": "« Arrête ce cirque, vieillard,...",
       "data": {
@@ -1493,6 +1498,7 @@
       "id": "e:node-equations:choice:choice_node-equations_0",
       "source": "node-equations",
       "target": "node-cicatrices-douce",
+      "sourceHandle": "choice:choice_node-equations_0",
       "type": "smoothstep",
       "label": "« Tu dois bien avoir un moyen ...",
       "data": {
@@ -1506,6 +1512,7 @@
       "id": "e:node-equations:choice:choice_node-equations_1:test",
       "source": "node-equations",
       "target": "test-node-node-equations-choice-1",
+      "sourceHandle": "choice:choice_node-equations_1",
       "type": "smoothstep",
       "label": "(Test d'intimidation DD9) « Ne...",
       "data": {
@@ -1519,6 +1526,7 @@
       "id": "test-node-node-equations-choice-1-critical-failure-node-cicatrices-douce",
       "source": "test-node-node-equations-choice-1",
       "target": "node-cicatrices-douce",
+      "sourceHandle": "critical-failure",
       "type": "smoothstep",
       "label": "Échec critique"
     },
@@ -1526,6 +1534,7 @@
       "id": "test-node-node-equations-choice-1-failure-node-cicatrices-douce",
       "source": "test-node-node-equations-choice-1",
       "target": "node-cicatrices-douce",
+      "sourceHandle": "failure",
       "type": "smoothstep",
       "label": "Échec"
     },
@@ -1533,6 +1542,7 @@
       "id": "test-node-node-equations-choice-1-success-node-cicatrices-peur",
       "source": "test-node-node-equations-choice-1",
       "target": "node-cicatrices-peur",
+      "sourceHandle": "success",
       "type": "smoothstep",
       "label": "Réussite"
     },
@@ -1540,6 +1550,7 @@
       "id": "test-node-node-equations-choice-1-critical-success-node-cicatrices-peur",
       "source": "test-node-node-equations-choice-1",
       "target": "node-cicatrices-peur",
+      "sourceHandle": "critical-success",
       "type": "smoothstep",
       "label": "Réussite critique"
     },
@@ -1547,6 +1558,7 @@
       "id": "e:node-equations:choice:choice_node-equations_2",
       "source": "node-equations",
       "target": "END",
+      "sourceHandle": "choice:choice_node-equations_2",
       "type": "smoothstep",
       "label": "« Dans ce cas, tu ne me sers à...",
       "data": {
@@ -1560,6 +1572,7 @@
       "id": "e:node-cicatrices-douce:choice:choice_node-cicatrices-douce_0",
       "source": "node-cicatrices-douce",
       "target": "node-pont",
+      "sourceHandle": "choice:choice_node-cicatrices-douce_0",
       "type": "smoothstep",
       "label": "(Idéaliste +5) [Vous faites un...",
       "data": {
@@ -1573,6 +1586,7 @@
       "id": "e:node-cicatrices-douce:choice:choice_node-cicatrices-douce_1",
       "source": "node-cicatrices-douce",
       "target": "node-cynique",
+      "sourceHandle": "choice:choice_node-cicatrices-douce_1",
       "type": "smoothstep",
       "label": "(Cynique +5) [Les cicatrices d...",
       "data": {
@@ -1586,6 +1600,7 @@
       "id": "e:node-cicatrices-douce:choice:choice_node-cicatrices-douce_2:test",
       "source": "node-cicatrices-douce",
       "target": "test-node-node-cicatrices-douce-choice-2",
+      "sourceHandle": "choice:choice_node-cicatrices-douce_2",
       "type": "smoothstep",
       "label": "(Test d'Orientation DD15) [Le ...",
       "data": {
@@ -1599,6 +1614,7 @@
       "id": "test-node-node-cicatrices-douce-choice-2-critical-failure-node-orient-ko",
       "source": "test-node-node-cicatrices-douce-choice-2",
       "target": "node-orient-ko",
+      "sourceHandle": "critical-failure",
       "type": "smoothstep",
       "label": "Échec critique"
     },
@@ -1606,6 +1622,7 @@
       "id": "test-node-node-cicatrices-douce-choice-2-failure-node-orient-ko",
       "source": "test-node-node-cicatrices-douce-choice-2",
       "target": "node-orient-ko",
+      "sourceHandle": "failure",
       "type": "smoothstep",
       "label": "Échec"
     },
@@ -1613,6 +1630,7 @@
       "id": "test-node-node-cicatrices-douce-choice-2-success-node-orient-ok",
       "source": "test-node-node-cicatrices-douce-choice-2",
       "target": "node-orient-ok",
+      "sourceHandle": "success",
       "type": "smoothstep",
       "label": "Réussite"
     },
@@ -1620,6 +1638,7 @@
       "id": "test-node-node-cicatrices-douce-choice-2-critical-success-node-orient-ok",
       "source": "test-node-node-cicatrices-douce-choice-2",
       "target": "node-orient-ok",
+      "sourceHandle": "critical-success",
       "type": "smoothstep",
       "label": "Réussite critique"
     },
@@ -1627,6 +1646,7 @@
       "id": "e:node-cicatrices-peur:choice:choice_node-cicatrices-peur_0",
       "source": "node-cicatrices-peur",
       "target": "node-pont",
+      "sourceHandle": "choice:choice_node-cicatrices-peur_0",
       "type": "smoothstep",
       "label": "(Idéaliste +5) [Vous faites un...",
       "data": {
@@ -1640,6 +1660,7 @@
       "id": "e:node-cicatrices-peur:choice:choice_node-cicatrices-peur_1",
       "source": "node-cicatrices-peur",
       "target": "node-cynique",
+      "sourceHandle": "choice:choice_node-cicatrices-peur_1",
       "type": "smoothstep",
       "label": "(Cynique +5) [Les cicatrices d...",
       "data": {
@@ -1653,6 +1674,7 @@
       "id": "e:node-cicatrices-peur:choice:choice_node-cicatrices-peur_2:test",
       "source": "node-cicatrices-peur",
       "target": "test-node-node-cicatrices-peur-choice-2",
+      "sourceHandle": "choice:choice_node-cicatrices-peur_2",
       "type": "smoothstep",
       "label": "(Test d'Orientation DD15) [Le ...",
       "data": {
@@ -1666,6 +1688,7 @@
       "id": "test-node-node-cicatrices-peur-choice-2-critical-failure-node-orient-ko",
       "source": "test-node-node-cicatrices-peur-choice-2",
       "target": "node-orient-ko",
+      "sourceHandle": "critical-failure",
       "type": "smoothstep",
       "label": "Échec critique"
     },
@@ -1673,6 +1696,7 @@
       "id": "test-node-node-cicatrices-peur-choice-2-failure-node-orient-ko",
       "source": "test-node-node-cicatrices-peur-choice-2",
       "target": "node-orient-ko",
+      "sourceHandle": "failure",
       "type": "smoothstep",
       "label": "Échec"
     },
@@ -1680,6 +1704,7 @@
       "id": "test-node-node-cicatrices-peur-choice-2-success-node-orient-ok",
       "source": "test-node-node-cicatrices-peur-choice-2",
       "target": "node-orient-ok",
+      "sourceHandle": "success",
       "type": "smoothstep",
       "label": "Réussite"
     },
@@ -1687,6 +1712,7 @@
       "id": "test-node-node-cicatrices-peur-choice-2-critical-success-node-orient-ok",
       "source": "test-node-node-cicatrices-peur-choice-2",
       "target": "node-orient-ok",
+      "sourceHandle": "critical-success",
       "type": "smoothstep",
       "label": "Réussite critique"
     },
@@ -1694,6 +1720,7 @@
       "id": "e:node-pont:choice:choice_node-pont_0",
       "source": "node-pont",
       "target": "node-craquement",
+      "sourceHandle": "choice:choice_node-pont_0",
       "type": "smoothstep",
       "label": "[Écouter la suite.]",
       "data": {
@@ -1707,6 +1734,7 @@
       "id": "e:node-cynique:choice:choice_node-cynique_0",
       "source": "node-cynique",
       "target": "END",
+      "sourceHandle": "choice:choice_node-cynique_0",
       "type": "smoothstep",
       "label": "« Je n'ai nullement besoin de ...",
       "data": {
@@ -1720,6 +1748,7 @@
       "id": "e:node-orient-ok:choice:choice_node-orient-ok_0",
       "source": "node-orient-ok",
       "target": "node-craquement",
+      "sourceHandle": "choice:choice_node-orient-ok_0",
       "type": "smoothstep",
       "label": "[Écouter la suite.]",
       "data": {
@@ -1733,6 +1762,7 @@
       "id": "e:node-craquement:choice:choice_node-craquement_0",
       "source": "node-craquement",
       "target": "node-pas-le-temps",
+      "sourceHandle": "choice:choice_node-craquement_0",
       "type": "smoothstep",
       "label": "(Autoritaire) « Je n'ai pas le...",
       "data": {
@@ -1746,6 +1776,7 @@
       "id": "e:node-craquement:choice:choice_node-craquement_1",
       "source": "node-craquement",
       "target": "node-acariane",
+      "sourceHandle": "choice:choice_node-craquement_1",
       "type": "smoothstep",
       "label": "(Curieuse) « Qu'est-ce donc ? ...",
       "data": {
@@ -1759,6 +1790,7 @@
       "id": "e:node-pas-le-temps:choice:choice_node-pas-le-temps_0",
       "source": "node-pas-le-temps",
       "target": "END",
+      "sourceHandle": "choice:choice_node-pas-le-temps_0",
       "type": "smoothstep",
       "label": "« Va pour le futur ! Je saurai...",
       "data": {
@@ -1772,6 +1804,7 @@
       "id": "e:node-acariane:choice:choice_node-acariane_0",
       "source": "node-acariane",
       "target": "node-pas-le-temps",
+      "sourceHandle": "choice:choice_node-acariane_0",
       "type": "smoothstep",
       "label": "« Je n'ai pas le temps, vieux ...",
       "data": {
@@ -1785,6 +1818,7 @@
       "id": "e:node-acariane:choice:choice_node-acariane_1",
       "source": "node-acariane",
       "target": "node-noeud-convergence",
+      "sourceHandle": "choice:choice_node-acariane_1",
       "type": "smoothstep",
       "label": "« Je ne suis pas du genre à ou...",
       "data": {
@@ -1798,6 +1832,7 @@
       "id": "e:node-noeud-convergence:choice:choice_node-noeud-convergence_0",
       "source": "node-noeud-convergence",
       "target": "node-pas-le-temps",
+      "sourceHandle": "choice:choice_node-noeud-convergence_0",
       "type": "smoothstep",
       "label": "« Je n'ai pas le temps, vieux ...",
       "data": {
@@ -1811,6 +1846,7 @@
       "id": "e:node-noeud-convergence:choice:choice_node-noeud-convergence_1",
       "source": "node-noeud-convergence",
       "target": "node-deuxieme-noeud",
+      "sourceHandle": "choice:choice_node-noeud-convergence_1",
       "type": "smoothstep",
       "label": "« Je l'avais ramassé pour toi....",
       "data": {
@@ -1824,6 +1860,7 @@
       "id": "e:node-deuxieme-noeud:choice:choice_node-deuxieme-noeud_0",
       "source": "node-deuxieme-noeud",
       "target": "node-cache-ensevelie",
+      "sourceHandle": "choice:choice_node-deuxieme-noeud_0",
       "type": "smoothstep",
       "label": "« C'est possible, mais je ne p...",
       "data": {
@@ -1837,6 +1874,7 @@
       "id": "e:node-deuxieme-noeud:choice:choice_node-deuxieme-noeud_1",
       "source": "node-deuxieme-noeud",
       "target": "node-atelier-parle",
+      "sourceHandle": "choice:choice_node-deuxieme-noeud_1",
       "type": "smoothstep",
       "label": "« Il semble que ton atelier ai...",
       "data": {
@@ -1850,6 +1888,7 @@
       "id": "e:node-cache-ensevelie:choice:choice_node-cache-ensevelie_0",
       "source": "node-cache-ensevelie",
       "target": "node-fin-nexus",
+      "sourceHandle": "choice:choice_node-cache-ensevelie_0",
       "type": "smoothstep",
       "label": "« En effet. Et je puis t'y con...",
       "data": {
@@ -1863,6 +1902,7 @@
       "id": "e:node-cache-ensevelie:choice:choice_node-cache-ensevelie_1",
       "source": "node-cache-ensevelie",
       "target": "node-refus-nexus",
+      "sourceHandle": "choice:choice_node-cache-ensevelie_1",
       "type": "smoothstep",
       "label": "« En effet, mais je n'ai nul d...",
       "data": {
@@ -1876,6 +1916,7 @@
       "id": "e:node-refus-nexus:choice:choice_node-refus-nexus_0",
       "source": "node-refus-nexus",
       "target": "END",
+      "sourceHandle": "choice:choice_node-refus-nexus_0",
       "type": "smoothstep",
       "label": "« C'est toi qui es complètemen...",
       "data": {
@@ -1889,6 +1930,7 @@
       "id": "e:node-atelier-parle:choice:choice_node-atelier-parle_0",
       "source": "node-atelier-parle",
       "target": "node-pas-le-temps",
+      "sourceHandle": "choice:choice_node-atelier-parle_0",
       "type": "smoothstep",
       "label": "« Je n'ai pas le temps, vieux ...",
       "data": {
@@ -1902,6 +1944,7 @@
       "id": "e:node-atelier-parle:choice:choice_node-atelier-parle_1",
       "source": "node-atelier-parle",
       "target": "node-cache-ensevelie",
+      "sourceHandle": "choice:choice_node-atelier-parle_1",
       "type": "smoothstep",
       "label": "« À ta guise, cartographe ! Un...",
       "data": {
@@ -1915,6 +1958,7 @@
       "id": "e:node-atelier-parle:choice:choice_node-atelier-parle_2",
       "source": "node-atelier-parle",
       "target": "node-ecoute-atelier",
+      "sourceHandle": "choice:choice_node-atelier-parle_2",
       "type": "smoothstep",
       "label": "« Je n'apprécie guère les arro...",
       "data": {
@@ -1928,6 +1972,7 @@
       "id": "e:node-ecoute-atelier:choice:choice_node-ecoute-atelier_0",
       "source": "node-ecoute-atelier",
       "target": "node-pas-le-temps",
+      "sourceHandle": "choice:choice_node-ecoute-atelier_0",
       "type": "smoothstep",
       "label": "« À qui crois-tu donc t'adress...",
       "data": {
@@ -1941,6 +1986,7 @@
       "id": "e:node-ecoute-atelier:choice:choice_node-ecoute-atelier_1",
       "source": "node-ecoute-atelier",
       "target": "node-angles-morts",
+      "sourceHandle": "choice:choice_node-ecoute-atelier_1",
       "type": "smoothstep",
       "label": "[Vous vous déplacez d'un pas s...",
       "data": {
@@ -1954,6 +2000,7 @@
       "id": "e:node-angles-morts:choice:choice_node-angles-morts_0",
       "source": "node-angles-morts",
       "target": "node-voknir-guide",
+      "sourceHandle": "choice:choice_node-angles-morts_0",
       "type": "smoothstep",
       "label": "« Vraiment ? Et tu es là pour ...",
       "data": {
@@ -1967,6 +2014,7 @@
       "id": "e:node-respect-1:choice:choice_node-respect-1_0",
       "source": "node-respect-1",
       "target": "node-respect-2",
+      "sourceHandle": "choice:choice_node-respect-1_0",
       "type": "smoothstep",
       "label": "« Afin de pouvoir m'entretenir...",
       "data": {
@@ -1980,6 +2028,7 @@
       "id": "e:node-respect-2:choice:choice_node-respect-2_0",
       "source": "node-respect-2",
       "target": "node-respect-3",
+      "sourceHandle": "choice:choice_node-respect-2_0",
       "type": "smoothstep",
       "label": "« Votre bureau bouge tout seul...",
       "data": {
@@ -1993,6 +2042,7 @@
       "id": "e:node-autoritaire:choice:choice_node-autoritaire_0",
       "source": "node-autoritaire",
       "target": "END",
+      "sourceHandle": "choice:choice_node-autoritaire_0",
       "type": "smoothstep",
       "label": "« Je souhaite quitter le Lévia...",
       "data": {
@@ -2006,6 +2056,7 @@
       "id": "e:node-attente:choice:choice_node-attente_0:test",
       "source": "node-attente",
       "target": "test-node-node-attente-choice-0",
+      "sourceHandle": "choice:choice_node-attente_0",
       "type": "smoothstep",
       "label": "(Test d'Orientation DD12) [Étu...",
       "data": {
@@ -2019,6 +2070,7 @@
       "id": "test-node-node-attente-choice-0-critical-failure-node-scar-ko",
       "source": "test-node-node-attente-choice-0",
       "target": "node-scar-ko",
+      "sourceHandle": "critical-failure",
       "type": "smoothstep",
       "label": "Échec critique"
     },
@@ -2026,6 +2078,7 @@
       "id": "test-node-node-attente-choice-0-failure-node-scar-ko",
       "source": "test-node-node-attente-choice-0",
       "target": "node-scar-ko",
+      "sourceHandle": "failure",
       "type": "smoothstep",
       "label": "Échec"
     },
@@ -2033,6 +2086,7 @@
       "id": "test-node-node-attente-choice-0-success-node-scar-ok",
       "source": "test-node-node-attente-choice-0",
       "target": "node-scar-ok",
+      "sourceHandle": "success",
       "type": "smoothstep",
       "label": "Réussite"
     },
@@ -2040,6 +2094,7 @@
       "id": "test-node-node-attente-choice-0-critical-success-node-scar-ok",
       "source": "test-node-node-attente-choice-0",
       "target": "node-scar-ok",
+      "sourceHandle": "critical-success",
       "type": "smoothstep",
       "label": "Réussite critique"
     },
@@ -2047,6 +2102,7 @@
       "id": "e:node-attente:choice:choice_node-attente_1",
       "source": "node-attente",
       "target": "node-observer",
+      "sourceHandle": "choice:choice_node-attente_1",
       "type": "smoothstep",
       "label": "[Observer l'atelier lui-même p...",
       "data": {
@@ -2060,6 +2116,7 @@
       "id": "e:node-attente:choice:choice_node-attente_2",
       "source": "node-attente",
       "target": "node-interrompre",
+      "sourceHandle": "choice:choice_node-attente_2",
       "type": "smoothstep",
       "label": "[Vous en avez assez d'attendre...",
       "data": {
@@ -2073,6 +2130,7 @@
       "id": "e:node-scar-ko:choice:choice_node-scar-ko_0",
       "source": "node-scar-ko",
       "target": "node-accueil",
+      "sourceHandle": "choice:choice_node-scar-ko_0",
       "type": "smoothstep",
       "label": "[Écouter la suite.]",
       "data": {
@@ -2086,6 +2144,7 @@
       "id": "e:node-scar-ok:choice:choice_node-scar-ok_0",
       "source": "node-scar-ok",
       "target": "node-dedale-respire",
+      "sourceHandle": "choice:choice_node-scar-ok_0",
       "type": "smoothstep",
       "label": "(ignorant ses superlatifs) « T...",
       "data": {
@@ -2099,6 +2158,7 @@
       "id": "e:node-dedale-respire:choice:choice_node-dedale-respire_0:test",
       "source": "node-dedale-respire",
       "target": "test-node-node-dedale-respire-choice-0",
+      "sourceHandle": "choice:choice_node-dedale-respire_0",
       "type": "smoothstep",
       "label": "(Test de Sensibilité paranorma...",
       "data": {
@@ -2112,6 +2172,7 @@
       "id": "test-node-node-dedale-respire-choice-0-critical-failure-node-para-ko",
       "source": "test-node-node-dedale-respire-choice-0",
       "target": "node-para-ko",
+      "sourceHandle": "critical-failure",
       "type": "smoothstep",
       "label": "Échec critique"
     },
@@ -2119,6 +2180,7 @@
       "id": "test-node-node-dedale-respire-choice-0-failure-node-para-ko",
       "source": "test-node-node-dedale-respire-choice-0",
       "target": "node-para-ko",
+      "sourceHandle": "failure",
       "type": "smoothstep",
       "label": "Échec"
     },
@@ -2126,6 +2188,7 @@
       "id": "test-node-node-dedale-respire-choice-0-success-node-para-ok",
       "source": "test-node-node-dedale-respire-choice-0",
       "target": "node-para-ok",
+      "sourceHandle": "success",
       "type": "smoothstep",
       "label": "Réussite"
     },
@@ -2133,6 +2196,7 @@
       "id": "test-node-node-dedale-respire-choice-0-critical-success-node-para-ok",
       "source": "test-node-node-dedale-respire-choice-0",
       "target": "node-para-ok",
+      "sourceHandle": "critical-success",
       "type": "smoothstep",
       "label": "Réussite critique"
     },
@@ -2140,6 +2204,7 @@
       "id": "e:node-dedale-respire:choice:choice_node-dedale-respire_1",
       "source": "node-dedale-respire",
       "target": "node-murmurateurs",
+      "sourceHandle": "choice:choice_node-dedale-respire_1",
       "type": "smoothstep",
       "label": "« Les Murmurateurs ? »",
       "data": {
@@ -2153,6 +2218,7 @@
       "id": "e:node-para-ko:choice:choice_node-para-ko_0",
       "source": "node-para-ko",
       "target": "node-accueil",
+      "sourceHandle": "choice:choice_node-para-ko_0",
       "type": "smoothstep",
       "label": "[Écouter la suite.]",
       "data": {
@@ -2166,6 +2232,7 @@
       "id": "e:node-para-ok:choice:choice_node-para-ok_0",
       "source": "node-para-ok",
       "target": "node-fusion",
+      "sourceHandle": "choice:choice_node-para-ok_0",
       "type": "smoothstep",
       "label": "« Cette fusion… elle doit être...",
       "data": {
@@ -2179,6 +2246,7 @@
       "id": "e:node-para-ok:choice:choice_node-para-ok_1",
       "source": "node-para-ok",
       "target": "node-atelier-cynique",
+      "sourceHandle": "choice:choice_node-para-ok_1",
       "type": "smoothstep",
       "label": "« Tu te racontes des histoires...",
       "data": {
@@ -2192,6 +2260,7 @@
       "id": "e:node-atelier-cynique:choice:choice_node-atelier-cynique_0",
       "source": "node-atelier-cynique",
       "target": "node-accueil",
+      "sourceHandle": "choice:choice_node-atelier-cynique_0",
       "type": "smoothstep",
       "label": "[Écouter la suite.]",
       "data": {
@@ -2205,6 +2274,7 @@
       "id": "e:node-fusion:choice:choice_node-fusion_0",
       "source": "node-fusion",
       "target": "node-thaira",
+      "sourceHandle": "choice:choice_node-fusion_0",
       "type": "smoothstep",
       "label": "« Les autres ? De qui parles-t...",
       "data": {
@@ -2218,6 +2288,7 @@
       "id": "e:node-thaira:choice:choice_node-thaira_0",
       "source": "node-thaira",
       "target": "node-bains",
+      "sourceHandle": "choice:choice_node-thaira_0",
       "type": "smoothstep",
       "label": "« Et où est-elle maintenant ? ...",
       "data": {
@@ -2231,6 +2302,7 @@
       "id": "e:node-thaira:choice:choice_node-thaira_1",
       "source": "node-thaira",
       "target": "node-insensible",
+      "sourceHandle": "choice:choice_node-thaira_1",
       "type": "smoothstep",
       "label": "« Le Culte transforme la souff...",
       "data": {
@@ -2244,6 +2316,7 @@
       "id": "e:node-murmurateurs:choice:choice_node-murmurateurs_0:test",
       "source": "node-murmurateurs",
       "target": "test-node-node-murmurateurs-choice-0",
+      "sourceHandle": "choice:choice_node-murmurateurs_0",
       "type": "smoothstep",
       "label": "(Croyances DD10) « Mais tu es ...",
       "data": {
@@ -2257,6 +2330,7 @@
       "id": "test-node-node-murmurateurs-choice-0-critical-failure-node-denoncer",
       "source": "test-node-node-murmurateurs-choice-0",
       "target": "node-denoncer",
+      "sourceHandle": "critical-failure",
       "type": "smoothstep",
       "label": "Échec critique"
     },
@@ -2264,6 +2338,7 @@
       "id": "test-node-node-murmurateurs-choice-0-failure-node-denoncer",
       "source": "test-node-node-murmurateurs-choice-0",
       "target": "node-denoncer",
+      "sourceHandle": "failure",
       "type": "smoothstep",
       "label": "Échec"
     },
@@ -2271,6 +2346,7 @@
       "id": "test-node-node-murmurateurs-choice-0-success-node-denoncer",
       "source": "test-node-node-murmurateurs-choice-0",
       "target": "node-denoncer",
+      "sourceHandle": "success",
       "type": "smoothstep",
       "label": "Réussite"
     },
@@ -2278,6 +2354,7 @@
       "id": "test-node-node-murmurateurs-choice-0-critical-success-node-denoncer",
       "source": "test-node-node-murmurateurs-choice-0",
       "target": "node-denoncer",
+      "sourceHandle": "critical-success",
       "type": "smoothstep",
       "label": "Réussite critique"
     },
@@ -2285,6 +2362,7 @@
       "id": "e:node-murmurateurs:choice:choice_node-murmurateurs_1",
       "source": "node-murmurateurs",
       "target": "node-motifs",
+      "sourceHandle": "choice:choice_node-murmurateurs_1",
       "type": "smoothstep",
       "label": "« Ces motifs « différents » de...",
       "data": {
@@ -2298,6 +2376,7 @@
       "id": "e:node-murmurateurs:choice:choice_node-murmurateurs_2",
       "source": "node-murmurateurs",
       "target": "node-intolerant",
+      "sourceHandle": "choice:choice_node-murmurateurs_2",
       "type": "smoothstep",
       "label": "« L'indifférence face à l'héré...",
       "data": {
@@ -2311,6 +2390,7 @@
       "id": "e:node-denoncer:choice:choice_node-denoncer_0",
       "source": "node-denoncer",
       "target": "node-fidele",
+      "sourceHandle": "choice:choice_node-denoncer_0",
       "type": "smoothstep",
       "label": "« Donc tu restes fidèle au Cul...",
       "data": {
@@ -2324,6 +2404,7 @@
       "id": "e:node-fidele:choice:choice_node-fidele_0",
       "source": "node-fidele",
       "target": "node-accueil",
+      "sourceHandle": "choice:choice_node-fidele_0",
       "type": "smoothstep",
       "label": "[Écouter la suite.]",
       "data": {
@@ -2337,6 +2418,7 @@
       "id": "e:node-motifs:choice:choice_node-motifs_0",
       "source": "node-motifs",
       "target": "node-accueil",
+      "sourceHandle": "choice:choice_node-motifs_0",
       "type": "smoothstep",
       "label": "[Écouter la suite.]",
       "data": {
@@ -2350,6 +2432,7 @@
       "id": "e:node-intolerant:choice:choice_node-intolerant_0",
       "source": "node-intolerant",
       "target": "node-accueil",
+      "sourceHandle": "choice:choice_node-intolerant_0",
       "type": "smoothstep",
       "label": "[Écouter la suite.]",
       "data": {
@@ -2363,6 +2446,7 @@
       "id": "e:node-observer:choice:choice_node-observer_0",
       "source": "node-observer",
       "target": "node-yul",
+      "sourceHandle": "choice:choice_node-observer_0",
       "type": "smoothstep",
       "label": "« Cette figurine… c'est l'œuvr...",
       "data": {
@@ -2376,6 +2460,7 @@
       "id": "e:node-yul:choice:choice_node-yul_0",
       "source": "node-yul",
       "target": "node-pertes",
+      "sourceHandle": "choice:choice_node-yul_0",
       "type": "smoothstep",
       "label": "« Tu portes trop de pertes, ca...",
       "data": {
@@ -2389,6 +2474,7 @@
       "id": "e:node-pertes:choice:choice_node-pertes_0",
       "source": "node-pertes",
       "target": "node-trace-enfant",
+      "sourceHandle": "choice:choice_node-pertes_0",
       "type": "smoothstep",
       "label": "« Montre-moi où tu l'as perdu....",
       "data": {
@@ -2402,6 +2488,7 @@
       "id": "e:node-pertes:choice:choice_node-pertes_1",
       "source": "node-pertes",
       "target": "node-espoir",
+      "sourceHandle": "choice:choice_node-pertes_1",
       "type": "smoothstep",
       "label": "« L'espoir est parfois plus cr...",
       "data": {
@@ -2415,6 +2502,7 @@
       "id": "e:node-espoir:choice:choice_node-espoir_0",
       "source": "node-espoir",
       "target": "node-accueil",
+      "sourceHandle": "choice:choice_node-espoir_0",
       "type": "smoothstep",
       "label": "[Écouter la suite.]",
       "data": {
@@ -2428,6 +2516,7 @@
       "id": "e:node-interrompre:choice:choice_node-interrompre_0",
       "source": "node-interrompre",
       "target": "node-termine-vite",
+      "sourceHandle": "choice:choice_node-interrompre_0",
       "type": "smoothstep",
       "label": "« Alors termine rapidement. »",
       "data": {
@@ -2441,6 +2530,7 @@
       "id": "e:node-interrompre:choice:choice_node-interrompre_1",
       "source": "node-interrompre",
       "target": "END",
+      "sourceHandle": "choice:choice_node-interrompre_1",
       "type": "smoothstep",
       "label": "« Tant pis. Je trouverai mon c...",
       "data": {
@@ -2454,6 +2544,7 @@
       "id": "e:node-termine-vite:choice:choice_node-termine-vite_0",
       "source": "node-termine-vite",
       "target": "node-accueil",
+      "sourceHandle": "choice:choice_node-termine-vite_0",
       "type": "smoothstep",
       "label": "[Écouter la suite.]",
       "data": {

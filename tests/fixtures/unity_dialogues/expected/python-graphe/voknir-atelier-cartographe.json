@@ -82,6 +82,10 @@
           "choiceEffects": [],
           "test": "Volonté+Intimidation:9",
           "choiceId": "choice_node-equations_1",
+          "testCriticalFailureNode": "node-cicatrices-douce",
+          "testFailureNode": "node-cicatrices-douce",
+          "testSuccessNode": "node-cicatrices-peur",
+          "testCriticalSuccessNode": "node-cicatrices-peur",
           "targetNode": "END"
         },
         {
@@ -127,6 +131,10 @@
           "choiceEffects": [],
           "test": "Intelligence+Orientation:15",
           "choiceId": "choice_node-cicatrices-douce_2",
+          "testCriticalFailureNode": "node-orient-ko",
+          "testFailureNode": "node-orient-ko",
+          "testSuccessNode": "node-orient-ok",
+          "testCriticalSuccessNode": "node-orient-ok",
           "targetNode": "END"
         }
       ]
@@ -166,6 +174,10 @@
           "choiceEffects": [],
           "test": "Intelligence+Orientation:15",
           "choiceId": "choice_node-cicatrices-peur_2",
+          "testCriticalFailureNode": "node-orient-ko",
+          "testFailureNode": "node-orient-ko",
+          "testSuccessNode": "node-orient-ok",
+          "testCriticalSuccessNode": "node-orient-ok",
           "targetNode": "END"
         }
       ]
@@ -499,6 +511,10 @@
           ],
           "test": "Intelligence+Orientation:12",
           "choiceId": "choice_node-attente_0",
+          "testCriticalFailureNode": "node-scar-ko",
+          "testFailureNode": "node-scar-ko",
+          "testSuccessNode": "node-scar-ok",
+          "testCriticalSuccessNode": "node-scar-ok",
           "targetNode": "END"
         },
         {
@@ -570,6 +586,10 @@
           ],
           "test": "Perception+Sensibilitéparanormale:18",
           "choiceId": "choice_node-dedale-respire_0",
+          "testCriticalFailureNode": "node-para-ko",
+          "testFailureNode": "node-para-ko",
+          "testSuccessNode": "node-para-ok",
+          "testCriticalSuccessNode": "node-para-ok",
           "targetNode": "END"
         },
         {
@@ -713,6 +733,10 @@
           "choiceEffects": [],
           "test": "Intelligence+Croyances:10",
           "choiceId": "choice_node-murmurateurs_0",
+          "testCriticalFailureNode": "node-denoncer",
+          "testFailureNode": "node-denoncer",
+          "testSuccessNode": "node-denoncer",
+          "testCriticalSuccessNode": "node-denoncer",
           "targetNode": "END"
         },
         {

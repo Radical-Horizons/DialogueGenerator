@@ -187,6 +187,7 @@
       "id": "e:START:choice:choice_START_0:test",
       "source": "START",
       "target": "test-node-START-choice-0",
+      "sourceHandle": "choice:choice_START_0",
       "type": "smoothstep",
       "label": "« Je test prends la caisse, ma...",
       "data": {
@@ -200,6 +201,7 @@
       "id": "e:START:choice:choice_START_1",
       "source": "START",
       "target": "node-5af292b19b22489abb344657d5fb4e8e",
+      "sourceHandle": "choice:choice_START_1",
       "type": "smoothstep",
       "label": "« Garde ton secret. Dis-moi se...",
       "data": {
@@ -213,6 +215,7 @@
       "id": "e:START:choice:choice_START_2:test",
       "source": "START",
       "target": "test-node-START-choice-2",
+      "sourceHandle": "choice:choice_START_2",
       "type": "smoothstep",
       "label": "« Si la caisse est assez préci...",
       "data": {
@@ -226,6 +229,7 @@
       "id": "e:START:choice:choice_START_3",
       "source": "START",
       "target": "END",
+      "sourceHandle": "choice:choice_START_3",
       "type": "smoothstep",
       "label": "[Uresaïr fait glisser la bours...",
       "data": {
@@ -239,6 +243,7 @@
       "id": "e:node-5af292b19b22489abb344657d5fb4e8e:choice:choice_node-5af292b19b22489abb344657d5fb4e8e_0:test",
       "source": "node-5af292b19b22489abb344657d5fb4e8e",
       "target": "test-node-node-5af292b19b22489abb344657d5fb4e8e-choice-0",
+      "sourceHandle": "choice:choice_node-5af292b19b22489abb344657d5fb4e8e_0",
       "type": "smoothstep",
       "label": "« Donne-moi la carte et le nom...",
       "data": {
@@ -252,6 +257,7 @@
       "id": "e:node-5af292b19b22489abb344657d5fb4e8e:choice:choice_node-5af292b19b22489abb344657d5fb4e8e_1:test",
       "source": "node-5af292b19b22489abb344657d5fb4e8e",
       "target": "test-node-node-5af292b19b22489abb344657d5fb4e8e-choice-1",
+      "sourceHandle": "choice:choice_node-5af292b19b22489abb344657d5fb4e8e_1",
       "type": "smoothstep",
       "label": "« Je prends la bourse, mais la...",
       "data": {
@@ -265,6 +271,7 @@
       "id": "e:node-5af292b19b22489abb344657d5fb4e8e:choice:choice_node-5af292b19b22489abb344657d5fb4e8e_2",
       "source": "node-5af292b19b22489abb344657d5fb4e8e",
       "target": "END",
+      "sourceHandle": "choice:choice_node-5af292b19b22489abb344657d5fb4e8e_2",
       "type": "smoothstep",
       "label": "« Je ne transporterai rien pou...",
       "data": {
@@ -278,6 +285,7 @@
       "id": "e:node-5af292b19b22489abb344657d5fb4e8e:choice:choice_node-5af292b19b22489abb344657d5fb4e8e_3",
       "source": "node-5af292b19b22489abb344657d5fb4e8e",
       "target": "END",
+      "sourceHandle": "choice:choice_node-5af292b19b22489abb344657d5fb4e8e_3",
       "type": "smoothstep",
       "label": "[Uresaïr fait glisser la bours...",
       "data": {

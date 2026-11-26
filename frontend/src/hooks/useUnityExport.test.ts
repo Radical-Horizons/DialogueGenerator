@@ -11,6 +11,9 @@ vi.mock('../api/graph', () => ({
   validateSchema: vi.fn(),
   saveGraphAndWrite: vi.fn(),
 }))
+vi.mock('../api/dialogues', () => ({
+  previewUnityDialogueExport: vi.fn(),
+}))
 vi.mock('../utils/buildGraphApiPayload', () => ({
   buildGraphSchemaApiPayload: vi.fn(() => ({ nodes: [], edges: [] })),
 }))
@@ -19,6 +22,7 @@ vi.mock('../components/graph/graphEditorStandalone', () => ({
 }))
 
 import * as graphAPI from '../api/graph'
+import { previewUnityDialogueExport } from '../api/dialogues'
 import { useGraphStore } from '../store/graphStore'
 import { useUnityExport, type UnityExportSchemaState } from './useUnityExport'
 
@@ -36,6 +40,7 @@ const toast = vi.fn()
 const registerSuccessfulExport = vi.fn()
 const saveDialogue = vi.fn()
 const EXPORTED = '{"schemaVersion":"1.1.0","nodes":[]}'
+const SERVER_RENDERED = '{"schemaVersion":"1.1.0","nodes":[{"id":"START","line":"rendu serveur"}]}'
 
 function setGraph(documentId: string | null) {
   useGraphStore.setState({
@@ -63,6 +68,7 @@ describe('useUnityExport', () => {
       warnings: [],
       structured_errors: [],
     } as never)
+    vi.mocked(previewUnityDialogueExport).mockResolvedValue({ json_content: SERVER_RENDERED } as never)
   })
 
   it('document existant : sauvegarde par révision, sans save-and-write (régression 409 canonical_revision_required)', async () => {
@@ -74,8 +80,28 @@ describe('useUnityExport', () => {
 
     expect(saveDialogue).toHaveBeenCalledTimes(1)
     expect(graphAPI.saveGraphAndWrite).not.toHaveBeenCalled()
-    expect(registerSuccessfulExport).toHaveBeenCalledWith(EXPORTED, 'scene_a')
+    expect(registerSuccessfulExport).toHaveBeenCalledWith(SERVER_RENDERED, 'scene_a')
     expect(toast).toHaveBeenCalledWith('Dialogue exporté : scene_a', 'success', 3000)
+  })
+
+  it('document existant : le fichier servi est le rendu serveur normalisé du document sauvegardé, pas exportToUnity (golden 20.1)', async () => {
+    const order: string[] = []
+    saveDialogue.mockImplementation(async () => {
+      order.push('save')
+      return { success: true, filename: 'scene_a' }
+    })
+    vi.mocked(previewUnityDialogueExport).mockImplementation(async () => {
+      order.push('preview')
+      return { json_content: SERVER_RENDERED } as never
+    })
+    setGraph('scene_a')
+
+    const result = renderExport()
+    await act(() => result.current.handleExportUnity())
+
+    expect(order).toEqual(['save', 'preview'])
+    expect(previewUnityDialogueExport).toHaveBeenCalledWith('scene_a')
+    expect(registerSuccessfulExport).not.toHaveBeenCalledWith(EXPORTED, expect.anything())
   })
 
   it('graphe neuf : save-and-write crée le document', async () => {
