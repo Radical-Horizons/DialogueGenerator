@@ -337,9 +337,8 @@ README § 7 « Carte de réplique », boards `Graphe`, `Carte`, `Paliers`)
 - **Given** une réplique dont l'entrée porte une condition de visibilité, **Then** son port d'entrée est marqué « ? »
   (board `Carte`, zone 2) avec un nom accessible qui dit la condition.
 - **Given** l'insertion par « / » en début de ligne (board `Carte` : réplique, didascalie, réponse, test, couper la
-  carte, générer la suite), **Then** elle n'est **pas** dans cette story : c'est un menu à part entière dans un
-  `<textarea>` (D4). Avant de créer 20.7, Marc tranche entre une story dédiée en tranche 4 et le retrait du geste du
-  board.
+  carte, générer la suite), **Then** elle est **hors epic 20** (README § 15, décision 8) : c'est un menu à part
+  entière dans un `<textarea>` (D4), aucune story ne la porte et le board la garde comme piste.
 - **Given** l'ancienne route Graphe, **Then** elle redirige vers la vue Graphe de la scène (table de 20.5).
 - **Given** une carte plus haute que l'écran, **Then** ses réponses ne sont jamais coupées (chacune porte un port) ;
   la sélectionner la fait défiler en vue, et le palier « lire » la montre entière (écart 3 à Epic 18, README § 14).
@@ -655,7 +654,7 @@ qu'**une faute de frappe ne casse pas un test dans Unity. (FR142, A7, board `Tec
 
 **En tant qu'** auteur, **je veux** que chaque scène ait la couleur de son lieu et les visages de ses personnages,
 **afin d'**avoir envie d'y écrire, sans que l'outil perde son unité. (FR143, A16, board
-`docs/design/refonte-scene/Ambiance.dc.html`, canvas « Ambiance » <https://claude.ai/artifact/GVZfj6RsZqGQGwEg8X5SxN>)
+`docs/design/refonte-scene/Ambiance.dc.html`, repris sur le canvas de la refonte)
 
 **Dépendances** : après 20.4 (lieu et distribution dans la fiche), 20.5 (cartes de l'Accueil), 20.6 (marge des
 répliques du Script), 20.3 (variables CSS) et 20.16 (thème Papier ; sinon le critère Papier ci-dessous attend 20.16).
