@@ -1,0 +1,502 @@
+{
+  "schemaVersion": "1.1.0",
+  "nodes": [
+    {
+      "id": "START",
+      "speaker": "Zaehria Neth'Varu, La Gardienne Vertébrale",
+      "line": "Vous êtes arrivée par la marche des Sourdines, ou du moins vos empreintes l'ont tenté. Selon les irrigations actuelles, votre résonance a frotté trois substrats différents avant d'atteindre ma paroi. Les Plis exigent un tribut : une douleur, un regret, une mémoire. Je prends, je corrige, je compte. 87 souvenirs transmis, 13 altérations mineures, 1 omission majeure inscrite au chiffre. Dites donc, Uresaïr, qu'apportez-vous à l'ossuaire ? Parlez vite, les veines ont des humeurs et je ne garantis pas l'intégrité des fragments que je laisse passer.",
+      "test": "Perception+Divination:10",
+      "consequences": {
+        "flag": "ZAEHRIA_CONTACT_ESTABLISHED",
+        "description": "Zaehria enregistre la première transaction mémorielle et marque l'interaction. Influence initiale variable selon le choix du joueur."
+      },
+      "choices": [
+        {
+          "text": "Je viens chercher un passage. En échange, je confie un souvenir que je n'ai jamais dit à personne.",
+          "respectDelta": 5,
+          "condition": "",
+          "influenceDelta": null,
+          "choiceId": "__idx_0",
+          "test": "Raison+Diplomatie:12",
+          "testCriticalFailureNode": "node-3cb25e1ad62248bd811d0726430144d8"
+        },
+        {
+          "text": "Rends-moi ce que tu as altéré. Aucune omission ne sera tolérée.",
+          "traitRequirements": [
+            {
+              "trait": "Orgueilleux",
+              "minValue": 5
+            }
+          ],
+          "influenceDelta": -5,
+          "respectDelta": -2,
+          "condition": "",
+          "choiceId": "__idx_1",
+          "test": "Volonté+Commandement:14"
+        },
+        {
+          "text": "Je veux vérifier tes corrections. Ouvre ta matrice, montre-moi l'archive brute.",
+          "traitRequirements": [
+            {
+              "trait": "Patient",
+              "minValue": 5
+            }
+          ],
+          "condition": "",
+          "influenceDelta": null,
+          "respectDelta": null,
+          "choiceId": "__idx_2",
+          "targetNode": "END"
+        },
+        {
+          "choiceId": "__idx_3",
+          "text": "",
+          "condition": "",
+          "influenceDelta": null,
+          "respectDelta": null,
+          "targetNode": "NODE_START_CHOICE_3"
+        },
+        {
+          "text": "",
+          "condition": "",
+          "influenceDelta": null,
+          "respectDelta": null,
+          "choiceId": "__idx_4",
+          "targetNode": "END"
+        },
+        {
+          "choiceId": "__idx_5",
+          "text": "",
+          "condition": "",
+          "influenceDelta": null,
+          "respectDelta": null,
+          "targetNode": "END"
+        }
+      ]
+    },
+    {
+      "id": "node-3cb25e1ad62248bd811d0726430144d8",
+      "speaker": "Zaehria Neth'Varu",
+      "line": "Les veines se contractent à l'unisson, Uresaïr. Ta tentative — pitoyable et mal accordée — a irrité les Plis. Tu n'as pas seulement échoué à payer le tribut : tu as ajouté du désordre au comptage. Très bien.\n\nJe prends. Je prends plus que demandé.\n\nQue tes souvenirs se remémorent la douleur de leur disparition : je vais arracher cinq fragments nets, en corrompre deux autres, et inscrire une omission que ta mémoire cherchera en vain. Ta résonance s'est salie ; elle restera tachée d'un nœud que je logerai sous ta clavicule gauche. Les Plis rient — et moi aussi, quand je corrige ce qui me déplaît.\n\nSouhaites-tu supplier que je sois clémente, t'offrir quelque substitut, accepter la ponction, ou fuir pendant que tes pas sont encore intacts ? Parle vite. Les veines ont des humeurs et, contrairement à toi, elles tiennent parole.",
+      "test": "Raison+Diplomatie:12",
+      "consequences": {
+        "flag": "Marque_de_la_Gardienne",
+        "description": "Le personnage subit la perte de 5 souvenirs choisis par la Gardienne, 2 souvenirs altérés (détails changés) et une omission majeure inscrite au Recensement. Une marque physique (Nœud) apparaît sous la clavicule gauche. Respect/Crainte envers la Gardienne augmente."
+      },
+      "choices": [
+        {
+          "text": "Je t'en supplie — prends autre chose : mon sang, mon souffle, tout sauf ces visages.",
+          "condition": "",
+          "influenceDelta": null,
+          "respectDelta": null,
+          "choiceId": "__idx_0",
+          "test": "Volonté+Persuasion:14"
+        },
+        {
+          "text": "Tu n'auras pas mes souvenirs par compassion. Si tu veux quelque chose, prends les tiens — rends-moi ce que tu as déjà altéré.",
+          "condition": "",
+          "influenceDelta": null,
+          "respectDelta": null,
+          "choiceId": "__idx_1",
+          "test": "Force+Intimidation:15"
+        },
+        {
+          "text": "Très bien. Faites votre office. Prenez ce que vous voulez, mais laissez le visage de Maereth intact.",
+          "condition": "",
+          "influenceDelta": null,
+          "respectDelta": null,
+          "choiceId": "__idx_2",
+          "test": "Raison+Négociation:13"
+        },
+        {
+          "text": "Je me retire — tant pis pour les Plis. Je ne leur donnerai rien de plus.",
+          "condition": "",
+          "influenceDelta": null,
+          "respectDelta": null,
+          "choiceId": "__idx_3",
+          "targetNode": "END"
+        }
+      ],
+      "title": "Échec critique",
+      "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+      "contextGddHash": "229850324"
+    },
+    {
+      "id": "NODE_START_CHOICE_3",
+      "speaker": "Zaehria Neth'Varu",
+      "line": "Les veines tressaillent à votre proximité, Uresaïr. Elles sentent l'odeur des pas, la graisse des souvenirs mal lavés. Parlez avec clarté : quel morceau de vous laissez-vous détacher pour nourrir les Plis ? Je demande une douleur, ou un regret, ou une mémoire — pas d'artifices. Je prends, je corrige, je compte. Faites vite, ou la paroi décidera de ce qu'elle retient de votre offrande.",
+      "consequences": {
+        "flag": "VEINES_ANALYSE",
+        "description": "La Gardienne commence l'extraction; les flux vont évaluer la véracité et la valeur du tribut."
+      },
+      "isLongRest": false,
+      "startState": 1,
+      "choices": [
+        {
+          "text": "Je couche devant vous la blessure la plus vive — la nuit où j'ai laissé mourir quelqu'un par peur. Je raconterai les sons, l'odeur, la façon dont mes mains ont tremblé.",
+          "condition": "",
+          "influenceDelta": null,
+          "respectDelta": 5,
+          "choiceId": "__idx_0",
+          "test": "Mémoire+Archivistique:14",
+          "testCriticalFailureNode": "node-3cb25e1ad62248bd811d0726430144d8"
+        },
+        {
+          "text": "Je verse un regret : j'ai trahi un serment pour un gain futile. Je donne le moment précis, les mots échangés et le goût amer qui me hante.",
+          "condition": "",
+          "influenceDelta": -5,
+          "respectDelta": -2,
+          "traitRequirements": [
+            {
+              "trait": "Orgueilleux",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "__idx_1",
+          "test": "Volonté+Résolution:12"
+        },
+        {
+          "text": "Voici un fragment tangible — un os poli, un jeton gravé, une lettre froissée. Si vous l'ôte, prenez aussi la mémoire qui l'accompagnait.",
+          "condition": "",
+          "influenceDelta": null,
+          "respectDelta": null,
+          "traitRequirements": [
+            {
+              "trait": "Patient",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "__idx_2",
+          "test": "Dextérité+Manipulation:10",
+          "testCriticalFailureNode": "node-00f9eba94d8941099321a223bf2d3cb7",
+          "testFailureNode": "node-346fdbd4f5014004bf8bfd82b991e910",
+          "testSuccessNode": "node-9eeaaf5a46c5475baa559b357f7f6caf",
+          "testCriticalSuccessNode": "node-a37b42e324a14e49bd57b2ed9e80107d"
+        },
+        {
+          "text": "Je maquille la chose : je vous offre une bribe arrangée, réécrite pour paraître plus lourde que la vérité. Si vous êtes sotte, peut-être l'accepterez-vous.",
+          "condition": "",
+          "influenceDelta": null,
+          "respectDelta": null,
+          "choiceId": "__idx_3",
+          "test": "Raison+Subterfuge:16"
+        },
+        {
+          "text": "Je me tais. Je m'efface, j'essaie de glisser sans rien donner — prendre le risque que vos veines décident ce qu'elles prennent.",
+          "condition": "",
+          "influenceDelta": null,
+          "respectDelta": null,
+          "choiceId": "__idx_4",
+          "test": "Volonté+Contrôle:15",
+          "testCriticalFailureNode": "node-ddbcd6f5aa3e4b688557665a2e789538",
+          "testFailureNode": "node-18172972b92f4f9b85057c5a873f5052",
+          "testSuccessNode": "node-90f9c0dc1ac64c1fa5584360aabc189e",
+          "testCriticalSuccessNode": "node-4c3a8920afec411fbd21e8fc1390e488"
+        }
+      ],
+      "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+      "contextGddHash": "952122626"
+    },
+    {
+      "id": "node-00f9eba94d8941099321a223bf2d3cb7",
+      "speaker": "Zaehria Neth'Varu",
+      "line": "Tu as essayé de masquer la lame avec une caresse, Uresaïr. Les veines ont flairé la triche avant même que tu y penses — elles ont vomi ta tentative. Le geste s'est rompu entre tes doigts comme un fil trop fin; la mémoire que tu voulais couper s'est tordue, a hurlé, puis la paroi a choisi pour toi.\n\nJe ne veux pas d'artifices, tu m'as offert du verre. Alors la paroi a pris ce qui ne ment pas : la chaleur d'un foyer que tu pensais oublié, le visage qui te faisait croire que tu appartenais à quelqu'un. Elle l'a arraché. Tu sens le vide — un trou froid derrière les yeux — et quelque chose de vivant se referme autour de ta cage thoracique. Le goût du fer. La peau qui se puckérise. Tu saignes des souvenirs.\n\nTu as échoué. Grave.\n\nSi tu pensais échapper à la correction, regarde : les Plis ne pardonnent pas la maladresse. Ils réclament compensation et punissent l'imprécision.",
+      "consequences": {
+        "flag": "OffrandeCorrompue",
+        "description": "L'offrande a été corrompue par l'échec critique : une mémoire chère a été arrachée et remplacée par un vide douloureux. Le PJ subit une blessure persistante — douleur lancinante, pertes mnésiques partielles — et une marque des Plis sur la poitrine."
+      },
+      "isLongRest": false,
+      "startState": 1,
+      "choices": [
+        {
+          "text": "Je... prenez ce qu'il reste. Si la paroi veut un prix, qu'elle l'ait. (Accepter la perte)",
+          "allowInfluenceForcing": true,
+          "influenceDelta": -1,
+          "respectDelta": -2,
+          "condition": "",
+          "choiceId": "__idx_0",
+          "targetNode": "END"
+        },
+        {
+          "text": "Non — pas ça. Je reprends ma mémoire ! (Résister à l'arrachement)",
+          "allowInfluenceForcing": false,
+          "respectDelta": -1,
+          "condition": "",
+          "influenceDelta": null,
+          "choiceId": "__idx_1",
+          "test": "Volonté+Résistance:14"
+        },
+        {
+          "text": "Je m'enfuis — loin de cette paroi, loin de toi ! (Tenter de fuir)",
+          "respectDelta": -1,
+          "condition": "",
+          "influenceDelta": null,
+          "choiceId": "__idx_2",
+          "test": "Dextérité+Athlétisme:12"
+        }
+      ],
+      "title": "Échec critique",
+      "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+      "contextGddHash": "952122626"
+    },
+    {
+      "id": "node-346fdbd4f5014004bf8bfd82b991e910",
+      "speaker": "Zaehria Neth'Varu",
+      "line": "Vos doigts ont tremblé à l'angle même du don. Ce que vous avez laissé glisser n'était pas une douleur, ni un regret rincé, mais un froufrou presque propre — une rustine pour âme, pas la chair exposée que je demande. Les Plis froncent la peau. Ils n'aiment pas qu'on leur serve des chiffons.\n\nTenez : l'offrande vous a été rendue à sa façon. Une parcelle douce, inutilisée, s'est déchirée sous la pression — votre berceuse, ou ce visage que vous aviez protégé dans l'obscurité. Ce n'était pas ce que je voulais. Considérez-vous marqué. Si vous voulez réparer, faites-le vite ; sinon la paroi décidera de compléter ce que vous n'avez pas su donner.",
+      "consequences": {
+        "flag": "Offrande_Imparfaite",
+        "description": "La paroi a rejeté la tentative. Une mémoire douce vous a été arrachée à la place de la douleur demandée : perte d'une mémoire intime et légère (par ex. un souvenir d'enfance). Les Plis vous accordent moins de crédit (+ difficulté dans leurs épreuves sociales) et la peau le long de votre clavicule s'est marquée d'une mince cicatrice veineuse."
+      },
+      "isLongRest": false,
+      "choices": [
+        {
+          "text": "Je recommence, sans détour. Je vous donne la vraie douleur — celle qui gratte encore.",
+          "respectDelta": 0,
+          "choiceId": "__idx_0",
+          "test": "Volonté+Introspection:12"
+        },
+        {
+          "text": "Non. Je prétends : laissez-moi façonner ce que vous voulez entendre — un regret poli.",
+          "influenceDelta": -1,
+          "respectDelta": -1,
+          "choiceId": "__idx_1",
+          "test": "Raison+Mensonge:11"
+        },
+        {
+          "text": "Je me tais. Faites ce que la paroi veut. J'accepte la marque.",
+          "influenceDelta": -2,
+          "respectDelta": -2,
+          "choiceId": "__idx_2",
+          "targetNode": "END"
+        }
+      ],
+      "title": "Échec",
+      "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+      "contextGddHash": "952122626"
+    },
+    {
+      "id": "node-9eeaaf5a46c5475baa559b357f7f6caf",
+      "speaker": "Zaehria Neth'Varu",
+      "line": "Très bien. Tu as tranché proprement, Uresaïr — pas d'artifices, pas de paillettes. La mémoire que tu donnes glisse comme une lamelle d'écume dans la chair de la paroi. Je la sens : une douleur bleue, une peur que tu caresses encore la nuit. Les veines se calment à son contact ; elles boivent, elles corrigent. \n\nEn retour, la Paroi te concède quelque chose — pas gratuitement, mais avec mesure : une marque froide contre ta peau, une précision dans tes doigts et une image que tu n'oublieras jamais, utile et âpre. Prends-la, et avance. Nous avons gagné du temps, et toi, de l'appétit. \n\nParle maintenant, ou choisis : que veux-tu laisser de plus, ou garder pour toi ?",
+      "consequences": {
+        "flag": "Offrande_Acceptee",
+        "description": "La Paroi a absorbé la mémoire offerte. Uresaïr reçoit la Marque des Plis : +1 précision et un fragment de vision lié à la mémoire."
+      },
+      "choices": [
+        {
+          "text": "Je laisse tout partir. Prenez-la. Que la Paroi fasse de cet éclat ce dont elle a besoin.",
+          "influenceDelta": 1,
+          "respectDelta": 1,
+          "choiceId": "__idx_0",
+          "targetNode": "END"
+        },
+        {
+          "text": "Avant que ça ne s'efface : dites-moi ce que la Paroi retiendra de cette mémoire. Y a‑t‑il quelque chose que je devrais savoir ?",
+          "influenceDelta": 0,
+          "respectDelta": 0,
+          "choiceId": "__idx_1",
+          "targetNode": "END"
+        },
+        {
+          "text": "Je veux reprendre un fragment — un seul éclat. Je le veux pour moi.",
+          "influenceDelta": -1,
+          "respectDelta": -1,
+          "choiceId": "__idx_2",
+          "test": "Dextérité+Manipulation:12"
+        },
+        {
+          "text": "Très bien. Et maintenant ? Que me donnez‑vous, au juste, en échange de ce que j'ai laissé ?",
+          "influenceDelta": 0,
+          "respectDelta": 0,
+          "choiceId": "__idx_3",
+          "targetNode": "END"
+        }
+      ],
+      "title": "Réussite",
+      "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+      "contextGddHash": "952122626"
+    },
+    {
+      "id": "node-a37b42e324a14e49bd57b2ed9e80107d",
+      "speaker": "Zaehria Neth'Varu",
+      "line": "Un sourire - ou ce qui en tient lieu - fend sa face. Les veines autour d'elle vibrent, avalent, puis se calment, comme si la nuit avait ingéré une étoile. « Tu l'as fait proprement, Uresaïr. Pas de sang inutile, pas de fioriture : un geste net, précis. »\n\nElle étend la paume; on dirait que la peau s'ouvre comme une page. De l'ombre s'enroule un fil pâle, translucide — la mémoire que vous avez offerte — et Zaehria la presse entre ses doigts comme on tient une note trop importante pour l'oublier. « C'est bon. Ce que tu m'as donné est pur. Les Plis ont goûté — ils approuvent. »\n\nLa paroi soupire, des lignes s'illuminent sous vos pieds. Une petite sensation électrique vous traverse la pulpe des doigts : la précision, l'intention, tout est plus net. « En échange, je rends ce que ces Plis savent faire : une portion d'acuité. Tes gestes auront maintenant la froideur d'une lame qui ne tremble pas. Prend garde, cependant : ce qui part peut ne jamais revenir. Tu es plus léger d'un souvenir, mais plus tranchant d'une faculté. »",
+      "consequences": {
+        "flag": "PLIS_BOND_ESTABLISHED",
+        "description": "Le lien avec les Plis est renforcé : le personnage reçoit une faveur exceptionnelle — avantage marqué lors des actions de manipulation et une marque narrative permanente (la 'Cicatrice des Veines') qui ouvre de nouvelles interactions avec Zaehria et les Plis."
+      },
+      "isLongRest": false,
+      "choices": [
+        {
+          "text": "Donne encore. Il reste quelque chose que je peux arracher — plus profond, plus intime.",
+          "influenceDelta": 2,
+          "respectDelta": 2,
+          "choiceId": "__idx_0",
+          "test": "Dextérité+Manipulation:12"
+        },
+        {
+          "text": "Rends-moi au moins la forme de ce que j'ai perdu : un indice, un fragment que je puisse comprendre.",
+          "influenceDelta": 0,
+          "respectDelta": 0,
+          "choiceId": "__idx_1",
+          "test": "Raison+Méditation:10"
+        },
+        {
+          "text": "Qui es-tu, vraiment ? Pourquoi transformer nos regrets en outils pour tes dieux ?",
+          "influenceDelta": -1,
+          "respectDelta": -2,
+          "choiceId": "__idx_2",
+          "test": "Volonté+Intuition:12"
+        }
+      ],
+      "title": "Réussite critique",
+      "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+      "contextGddHash": "952122626"
+    },
+    {
+      "id": "node-ddbcd6f5aa3e4b688557665a2e789538",
+      "speaker": "Zaehria Neth'Varu",
+      "line": "Tu t'obstines, Uresaïr, et la Paroi se repaît de ton obstination. Tu veux retenir quelque chose — pride, un mensonge, un morceau que tu juges dispensable — et le taire. Mauvaise idée.\n\nTes lèvres se retroussent, tu mens: «Je n'ai rien. Rien pour vous.» Mais les muscles ne suivent pas la volonté. La chair cède avant la pensée. Un goût de métal te remonte à la gorge. La Paroi répond, et elle choisit pour toi.\n\nJe décrète ce que tu perds : ce n'est pas un souvenir léger mais la peau même d'un souvenir précieux — la sensation d'une promesse tenue, l'image d'une main chaude que tu n'as jamais rendue. Elle est arrachée, froidement, comme si on t'avait brûlé une nuit entière. Tu cries, et ta voix n'est plus tienne.\n\nRegarde. Une marque noire, fine comme un filament, parcourt maintenant ton avant-bras; elle pulse au rythme de la faim des Plis. Tu as échoué à offrir avec clarté ; la Paroi, elle, a corrigé ton offrande. Tant pis pour la pitié.\n\nNe t'attends pas à mielleux réconfort. La dette est prise, la pièce détachée de ton âme compte désormais pour elle. Je la note, Uresaïr. Prépare-toi à porter le vide.",
+      "consequences": {
+        "flag": "MarqueDesPlis",
+        "description": "La Paroi a arraché une mémoire essentielle et laissé une marque visible et pulsante. Le personnage perd une mémoire importante (au MJ de définir laquelle) et devient vulnérable aux influences des Plis ; la marque attire l'attention et peut provoquer hostilité ou obsession."
+      },
+      "isLongRest": false,
+      "choices": [
+        {
+          "text": "«Non — je n'ai rien. Laissez-moi en dehors de vos crocs. »",
+          "influenceDelta": -2,
+          "respectDelta": -8,
+          "choiceId": "__idx_0",
+          "targetNode": "END"
+        },
+        {
+          "text": "«Prenez tout, mais sachez que je vous traquerai pour chaque morceau. »",
+          "influenceDelta": -3,
+          "respectDelta": -12,
+          "choiceId": "__idx_1",
+          "targetNode": "END"
+        },
+        {
+          "text": "(Tombe à genoux) «Pardonnez... prenez ce qu'il faut, mais rendez-moi au moins l'odeur de sa voix.»",
+          "influenceDelta": -1,
+          "respectDelta": -3,
+          "choiceId": "__idx_2",
+          "targetNode": "END"
+        }
+      ],
+      "title": "Échec critique",
+      "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+      "contextGddHash": "952122626"
+    },
+    {
+      "id": "node-18172972b92f4f9b85057c5a873f5052",
+      "speaker": "Zaehria Neth'Varu",
+      "line": "Un pli de tes doigts se contracte et se détache dans l'air. Pas assez net. Pas assez vrai.\nTrès bien. Puisque tu persistes à jouer au marchand, la paroi décidera pour toi.\nQuelque chose se détache — pas un cri, pas une image entière, juste une tranche : une sensation, un nom volé au fond de ta poitrine. Tu la sens s'éloigner et la brûlure qui reste. Ce n'est pas tout ce que j'espérais, mais c'est suffisant pour m'apprendre comment te corriger.\nMaintenant parle encore, si tu peux — et que ce soit utile. Je veux une douleur, un regret, une mémoire. Pas d'enfumage.",
+      "consequences": {
+        "flag": "SouvenirCorrompu",
+        "description": "La paroi a arraché un fragment de mémoire au personnage : un souvenir précis est effacé ou altéré (à définir en jeu). La perte laisse une brûlure sourde et réduit légèrement la confiance des témoins."
+      },
+      "isLongRest": false,
+      "choices": [
+        {
+          "text": "Je... je n'y arrive pas. Prenez ce que vous voulez, mais laissez le reste.",
+          "allowInfluenceForcing": true,
+          "influenceDelta": -1,
+          "respectDelta": -1,
+          "choiceId": "__idx_0",
+          "test": "Volonté+Contrôle:13"
+        },
+        {
+          "text": "Tu te nourris d'horreurs. Si tu veux quelque chose de vrai, arrache-le toi-même.",
+          "allowInfluenceForcing": false,
+          "influenceDelta": -1,
+          "respectDelta": -2,
+          "choiceId": "__idx_1",
+          "test": "Force+Intimidation:14"
+        },
+        {
+          "text": "Je me tais. Faites ce que vous voulez, la paroi a déjà choisi.",
+          "influenceDelta": -1,
+          "respectDelta": -1,
+          "choiceId": "__idx_2",
+          "targetNode": "END"
+        }
+      ],
+      "title": "Échec",
+      "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+      "contextGddHash": "952122626"
+    },
+    {
+      "id": "node-90f9c0dc1ac64c1fa5584360aabc189e",
+      "speaker": "Zaehria Neth'Varu",
+      "line": "Les veines se tendent, avalent. Tu offres sans oripeaux : une brûlure nette, une cicatrice que la nuit retourne souvent dans sa paume. Je sens le fil, amer et chaud ; je le prends, je le cisèle, je le lisse. Il n'en restera qu'un mot propre — une pointe qui pourra servir à recoudre l'ordre des Plis.\n\nSoit. Ta douleur entre, se plie, et devient service. Les Plis acceptent — et te rendent, en échange, un fil : un mince ruban d'ombre et de certitude qui s'accroche derrière ta nuque. Il te donnera, quand tu en auras besoin, une clarté froide : un repère dans le bruit, un souffle pour tenir la volonté. Mais sache — quelque fragment de toi est désormais cisaillé. La paroi a compté.",
+      "consequences": {
+        "flag": "OFFRANDE_ACCEPTÉE",
+        "description": "Le souvenir/douleur a été arraché, corrigé et consumé par les Plis."
+      },
+      "isLongRest": false,
+      "choices": [
+        {
+          "text": "Que me donnez-vous en échange ?",
+          "choiceId": "__idx_0",
+          "targetNode": "END"
+        },
+        {
+          "text": "Puis-je récupérer un fragment, seulement un instant ?",
+          "choiceId": "__idx_1",
+          "targetNode": "END"
+        },
+        {
+          "text": "Très bien. Je vous donne tout ce que vous voulez — faites vite.",
+          "choiceId": "__idx_2",
+          "targetNode": "END"
+        },
+        {
+          "text": "Pourquoi les Plis exigent-ils le chagrin ?",
+          "choiceId": "__idx_3",
+          "targetNode": "END"
+        }
+      ],
+      "title": "Réussite",
+      "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+      "contextGddHash": "952122626"
+    },
+    {
+      "id": "node-4c3a8920afec411fbd21e8fc1390e488",
+      "speaker": "Zaehria Neth'Varu",
+      "line": "Tes yeux ont su trancher la rouille, Uresaïr. Tu n'as pas glosé, tu n'as pas maquillé l'os du souvenir : tu as tendu la plaie, nue, et la Paroi l'a goûtée. Je sens la mémoire ramper sous mes doigts — c'est un regret vieux d'un hiver, lourd d'une voix que tu as étouffée toi-même. Je le prends. Je le couche, je l'affine, je le replace dans l'ordre que réclament les Plis.\n\nNe t'attends pas à des paillettes. La correction n'efface pas l'histoire : elle la redresse. La douleur que tu as déposée perd de son aigu ; elle devient un fil qui te traverse sans te lier. En échange, la Paroi te donne quelque chose qui n'arrive qu'aux offrandes accomplies : une image effleurée, une clef muette, et ma faveur — pas un cadeau sans prix, mais un levier.\n\nRegarde : dans l'endroit où ton regret se tenait, une lueur s'est allumée. Tu vois maintenant, pour un souffle, une porte basse, peinte en suie, un sigle triangulaire gravé sur le battant, et un nom chuchoté comme si on le redressait d'entre deux pierres — Aelrïn. Porte, sigle, nom. Garde cela, et fais-en ce que tu voudras.",
+      "consequences": {
+        "flag": "OfferTransmuted",
+        "description": "La mémoire offerte a été transformée par les Plis : le poids émotionnel est diminué et le joueur obtient un fragment d'information visuelle/verbale (porte noire, sigle triangulaire, nom 'Aelrïn')."
+      },
+      "isLongRest": false,
+      "choices": [
+        {
+          "text": "Je prends la vision. Aelrïn. Dis-moi tout ce que tu entends derrière ce nom — est-ce un lieu ? un nom vrai ?",
+          "influenceDelta": 10,
+          "respectDelta": 5,
+          "choiceId": "__idx_0",
+          "targetNode": "END"
+        },
+        {
+          "text": "Merci. Libère-moi encore d'une lamelle : laisse un dernier souvenir partir afin que ma nuit soit moins lourde.",
+          "allowInfluenceForcing": true,
+          "influenceDelta": 5,
+          "respectDelta": 3,
+          "choiceId": "__idx_1",
+          "test": "Volonté+Contrôle:12"
+        },
+        {
+          "text": "Garde ta faveur pour l'instant. Je veux garder la trace, pas la rendre totalement propre — je garderai une cicatrice utile.",
+          "influenceDelta": 2,
+          "respectDelta": 1,
+          "choiceId": "__idx_2",
+          "targetNode": "END"
+        }
+      ],
+      "title": "Réussite critique",
+      "lastGenerationInstructions": "Continue la conversation de manière naturelle",
+      "contextGddHash": "952122626"
+    }
+  ]
+}

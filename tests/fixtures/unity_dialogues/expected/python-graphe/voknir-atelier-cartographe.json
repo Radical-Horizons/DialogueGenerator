@@ -1,0 +1,924 @@
+{
+  "schemaVersion": "1.1.0",
+  "nodes": [
+    {
+      "id": "START",
+      "displayName": "Voknir se grave la peau",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*Voknir est agenouillé, presque immobile, il se grave lentement la peau, un liquide noir suinte.*",
+      "choices": [
+        {
+          "text": "*[Vous pénétrez dans l'atelier.]* « Salutation, cartographe. »",
+          "choiceEffects": [],
+          "choiceId": "choice_START_0",
+          "targetNode": "node-accueil"
+        },
+        {
+          "text": "*[Vous restez sur le seuil de l'atelier et attendez que Voknir termine sa scarification.]* (+1H)",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Patient",
+              "minValue": 3
+            }
+          ],
+          "choiceId": "choice_START_1",
+          "targetNode": "node-attente"
+        }
+      ]
+    },
+    {
+      "id": "node-accueil",
+      "displayName": "Voknir se prosterne",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*Surpris, le vieux Van'Doei se tourne vers vous. Incrédule, l'espace d'un instant, il comprend soudain qui vous êtes et se jette à vos pieds.*\n« Oh Théomaque ! Les saints Substrats soient avec vous ! Je vous en prie, ayez pitié de mon humble habitat, ces lieux sont indignes de votre auguste présence ! »",
+      "choices": [
+        {
+          "text": "*[Vous ne prêtez guère attention à l'adorateur à vos pieds et le dépassez pour pénétrer dans son atelier.]* « Je dois m'en aller. Mon séjour ici ne m'a pas apporté la quiétude que j'espérais. » *[Des symboles mathématiques tapissent les murs face à vous.]* « Dois-je voir dans ces équations un chemin pour atteindre mon objectif ? »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-accueil_0",
+          "targetNode": "node-equations"
+        },
+        {
+          "text": "« Détrompez-vous, cartographe, votre atelier est précisément le lieu que je cherchais. »",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Respectueux",
+              "minValue": 2
+            }
+          ],
+          "choiceId": "choice_node-accueil_1",
+          "targetNode": "node-respect-1"
+        },
+        {
+          "text": "« Arrête ce cirque, vieillard, je n'ai pas le temps pour ces inepties ! Mon séjour ici n'a que trop duré ! »",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Autoritaire",
+              "minValue": 3
+            }
+          ],
+          "choiceId": "choice_node-accueil_2",
+          "targetNode": "node-autoritaire"
+        }
+      ]
+    },
+    {
+      "id": "node-equations",
+      "displayName": "Équations obsolètes",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« Non, n'y prêtez pas attention, ô maîtresse du temps, elles n'ont plus de sens. Les murs bougent. Ce qui était démontré jadis n'a plus lieu d'être. »",
+      "choices": [
+        {
+          "text": "« Tu dois bien avoir un moyen de t'orienter, néanmoins. »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-equations_0",
+          "targetNode": "node-cicatrices-douce"
+        },
+        {
+          "text": "(Test d'intimidation DD9) « Ne me mens pas, Van Doei hérétique, nul n'ignore l'objet de tes recherches. »",
+          "choiceEffects": [],
+          "test": "Volonté+Intimidation:9",
+          "choiceId": "choice_node-equations_1",
+          "targetNode": "END"
+        },
+        {
+          "text": "« Dans ce cas, tu ne me sers à rien. »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-equations_2",
+          "targetNode": "END"
+        }
+      ]
+    },
+    {
+      "id": "node-cicatrices-douce",
+      "displayName": "Les murs sont des brouillons",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« Les murs ne sont que des brouillons, seule ma chair compte. »\n*À ces mots, il dévoile une partie de son torse et les sinueuses scarifications qui le modèlent.*",
+      "choices": [
+        {
+          "text": "(Idéaliste +5) *[Vous faites un pas en avant et les cicatrices du Van'Doei se métamorphosent sous vos yeux. Vous apercevez les lignes aériennes d'un pont enjambant tout le labyrinthe.]* « Fascinante perspective. Une carte vivante et… modulaire. Tu es bien celui qu'il me faut. Montre-moi la sortie ! »",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Idéaliste",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "choice_node-cicatrices-douce_0",
+          "targetNode": "node-pont"
+        },
+        {
+          "text": "(Cynique +5) *[Les cicatrices du Van'Doei se métamorphosent sous vos yeux. Vous entrapercevez une crevasse purulente et, révulsée, faites un pas en arrière.]*",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Cynique",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "choice_node-cicatrices-douce_1",
+          "targetNode": "node-cynique"
+        },
+        {
+          "text": "(Test d'Orientation DD15) *[Le corps du vieux Van'Doei est parcouru d'innombrables cicatrices, elles ressemblent à une carte mais échappent à toute logique. Vous essayez de faire le lien avec vos connaissances des Plis.]*",
+          "choiceEffects": [],
+          "test": "Intelligence+Orientation:15",
+          "choiceId": "choice_node-cicatrices-douce_2",
+          "targetNode": "END"
+        }
+      ]
+    },
+    {
+      "id": "node-cicatrices-peur",
+      "displayName": "Les tentacules se ratatinent",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*Les tentacules de la main hypertrophiée de Voknir se ratatinent sur elles-mêmes.*\n« Je n'oserai pas, déesse, je vous conjure de me croire. Les murs ne sont que des brouillons, seule ma chair compte. »\n*À ces mots, il dévoile une partie de son torse et les sinueuses scarifications qui le modèlent.*",
+      "choices": [
+        {
+          "text": "(Idéaliste +5) *[Vous faites un pas en avant et les cicatrices du Van'Doei se métamorphosent sous vos yeux. Vous apercevez les lignes aériennes d'un pont enjambant tout le labyrinthe.]* « Fascinante perspective. Une carte vivante et… modulaire. Tu es bien celui qu'il me faut. Montre-moi la sortie ! »",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Idéaliste",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "choice_node-cicatrices-peur_0",
+          "targetNode": "node-pont"
+        },
+        {
+          "text": "(Cynique +5) *[Les cicatrices du Van'Doei se métamorphosent sous vos yeux. Vous entrapercevez une crevasse purulente et, révulsée, faites un pas en arrière.]*",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Cynique",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "choice_node-cicatrices-peur_1",
+          "targetNode": "node-cynique"
+        },
+        {
+          "text": "(Test d'Orientation DD15) *[Le corps du vieux Van'Doei est parcouru d'innombrables cicatrices, elles ressemblent à une carte mais échappent à toute logique. Vous essayez de faire le lien avec vos connaissances des Plis.]*",
+          "choiceEffects": [],
+          "test": "Intelligence+Orientation:15",
+          "choiceId": "choice_node-cicatrices-peur_2",
+          "targetNode": "END"
+        }
+      ]
+    },
+    {
+      "id": "node-pont",
+      "displayName": "L'encre remonte à sa source",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« J'en serais incapable, ô Théomaque. Les cartes sont perturbées et divergent sans cesse. L'encre remonte jusqu'à sa source… »",
+      "choices": [
+        {
+          "text": "*[Écouter la suite.]*",
+          "choiceEffects": [],
+          "choiceId": "choice_node-pont_0",
+          "targetNode": "node-craquement"
+        }
+      ]
+    },
+    {
+      "id": "node-cynique",
+      "displayName": "Les cartes se dérobent",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« Les cartes… ce sont les cartes ! Elles ne sont pas ce qu'elles paraissent être, elles se dérobent. »",
+      "choices": [
+        {
+          "text": "« Je n'ai nullement besoin de prouver ma valeur par des épreuves superflues. Je me passerai de ton aide. »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-cynique_0",
+          "targetNode": "END"
+        }
+      ]
+    },
+    {
+      "id": "node-orient-ok",
+      "displayName": "Un passage se devine",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*Vous parvenez à relier les cicatrices à certains couloirs et devinez vaguement un passage à travers le labyrinthe.*\n« Oh Immortelle, je sens que vous percevez le sens de mes cartes ! Hélas, je suis incapable de vous guider. Les cartes sont perturbées et divergent sans cesse. L'encre remonte jusqu'à sa source… »",
+      "choices": [
+        {
+          "text": "*[Écouter la suite.]*",
+          "choiceEffects": [],
+          "choiceId": "choice_node-orient-ok_0",
+          "targetNode": "node-craquement"
+        }
+      ]
+    },
+    {
+      "id": "node-orient-ko",
+      "displayName": "Un vieux fou exhibitionniste ?",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*Les scarifications ne font aucun sens. N'est-ce qu'un vieux fou exhibitionniste ?*\n« Les cartes… ce sont les cartes ! Elles échappent à la perception, elles se dérobent. »"
+    },
+    {
+      "id": "node-craquement",
+      "displayName": "Craquement et fissure",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*Un craquement particulièrement sonore fait vibrer les meubles de l'atelier. Le cartographe se détourne d'Uresaïr pour faire face aux murs d'équations.*\n« Non, non, non ! Je te l'ai déjà dit cent fois ! Les équations murales ne tiennent pas compte de la chair ! Il existe des interstices entre les os. »\n*Nouveau craquement, suivi de l'apparition d'une fissure face au cartographe. Elle balafre le mur en zigzaguant comme un éclair avant de s'arrêter brutalement. Voknir approche pour observer les symboles qu'elle pointe.*",
+      "choices": [
+        {
+          "text": "(Autoritaire) « Je n'ai pas le temps, vieux fou. Explique-moi comment sortir d'ici ! »",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Autoritaire",
+              "minValue": 1
+            }
+          ],
+          "choiceId": "choice_node-craquement_0",
+          "targetNode": "node-pas-le-temps"
+        },
+        {
+          "text": "(Curieuse) « Qu'est-ce donc ? »",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Curieux",
+              "minValue": 1
+            }
+          ],
+          "choiceId": "choice_node-craquement_1",
+          "targetNode": "node-acariane"
+        }
+      ]
+    },
+    {
+      "id": "node-pas-le-temps",
+      "displayName": "Pas en mon pouvoir",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*Voknir sursaute et se détourne du mur.*\n« Je ne demanderais pas mieux, mais ce n'est pas en mon pouvoir. Les cartes s'altèrent trop rapidement. Ce n'est pas normal ! Je crains qu'elles ne soient déjà plus qu'une réminiscence du passé ou une probabilité du futur. »",
+      "choices": [
+        {
+          "text": "« Va pour le futur ! Je saurai l'anticiper. Viens ! »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-pas-le-temps_0",
+          "targetNode": "END"
+        }
+      ]
+    },
+    {
+      "id": "node-acariane",
+      "displayName": "L'équation d'Acariane",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« L'équation d'Acariane… La distorsion temporelle est inversement proportionnelle à la distance entre sa source et sa cible. Mais cela n'a jamais pu être prouvé. »\n*Il réfléchit, puis sort d'une étagère une fiole contenant un filament noir.*\n« Vous rappelez-vous de votre présent, Seigneuresse ? C'était il y a bien des années… »",
+      "choices": [
+        {
+          "text": "« Je n'ai pas le temps, vieux fou. Explique-moi comment sortir d'ici ! »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-acariane_0",
+          "targetNode": "node-pas-le-temps"
+        },
+        {
+          "text": "« Je ne suis pas du genre à oublier. C'est bien là mon problème… »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-acariane_1",
+          "targetNode": "node-noeud-convergence"
+        }
+      ]
+    },
+    {
+      "id": "node-noeud-convergence",
+      "displayName": "Le nœud de convergence",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« Je l'ai nommé nœud de convergence. Grâce à lui, nous avons entrevu un chemin de traverse qui, bien qu'infiniment plus long en distance, devait théoriquement se révéler plus court en temps. Mais il aurait fallu deux nœuds, et je n'ai jamais osé vous en demander une autre… »",
+      "choices": [
+        {
+          "text": "« Je n'ai pas le temps, vieux fou. Explique-moi comment sortir d'ici ! »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-noeud-convergence_0",
+          "targetNode": "node-pas-le-temps"
+        },
+        {
+          "text": "« Je l'avais ramassé pour toi. Je n'accepte aucune offrande, mais je suis néanmoins ouverte aux échanges. J'ai une fois goûté à une de tes baies des sables. C'était… revigorant. »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-noeud-convergence_1",
+          "targetNode": "node-deuxieme-noeud"
+        }
+      ]
+    },
+    {
+      "id": "node-deuxieme-noeud",
+      "displayName": "Un deuxième nœud ?",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« Je suis flatté de l'apprendre. Si je puis me permettre, ô Théomaque, pensez-vous que vous pourriez trouver un deuxième nœud de convergence ? »\n*Un craquement soudain résonne dans l'atelier tandis qu'une étagère entière glisse d'elle-même sur plusieurs centimètres. Voknir se retourne un bref instant, mais décide de l'ignorer.*",
+      "choices": [
+        {
+          "text": "« C'est possible, mais je ne peux te le promettre et l'endroit est loin d'ici. Proche du Nexus Synaptique… »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-deuxieme-noeud_0",
+          "targetNode": "node-cache-ensevelie"
+        },
+        {
+          "text": "« Il semble que ton atelier ait quelque chose à dire. »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-deuxieme-noeud_1",
+          "targetNode": "node-atelier-parle"
+        }
+      ]
+    },
+    {
+      "id": "node-cache-ensevelie",
+      "displayName": "La cache de l'Ensevelie",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« La cache de l'Ensevelie ? »",
+      "choices": [
+        {
+          "text": "« En effet. Et je puis t'y conduire. »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-cache-ensevelie_0",
+          "targetNode": "node-fin-nexus"
+        },
+        {
+          "text": "« En effet, mais je n'ai nul désir de retourner sur mes pas. Je n'ai pas de temps à perdre. »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-cache-ensevelie_1",
+          "targetNode": "node-refus-nexus"
+        }
+      ]
+    },
+    {
+      "id": "node-fin-nexus",
+      "displayName": "En route vers le Nexus",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*En accompagnant Voknir jusqu'au Nexus Synaptique, Uresaïr acquiert un bonus de sympathie.*",
+      "consequences": {
+        "flag": "VOKNIR_SYMPATHIE_BONUS",
+        "description": "Bonus de sympathie auprès de Voknir pour l'avoir accompagné jusqu'au Nexus Synaptique."
+      }
+    },
+    {
+      "id": "node-refus-nexus",
+      "displayName": "Un temps trop précieux",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« Bien sûr, ô Théomaque, votre temps est bien trop précieux pour suivre une piste aussi dépourvue de résultats tangibles. »\n*Un nouveau craquement fait bondir Voknir, qui se tourne vers le fond de l'atelier et réplique, rageur :*\n« Oh, mais cela suffit ! Vois dans quelle position embarrassante tu me places vis-à-vis de notre hôte ! Les nœuds sont ce qu'ils sont : des nœuds ! Et tu t'imagines sans doute qu'en les détricotant, ils deviendraient subitement des boussoles temporelles ? Quelle folie ! »",
+      "choices": [
+        {
+          "text": "« C'est toi qui es complètement fou. J'ai eu tort de venir te consulter. »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-refus-nexus_0",
+          "targetNode": "END"
+        }
+      ]
+    },
+    {
+      "id": "node-atelier-parle",
+      "displayName": "Maître chez soi",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« Il n'a rien à dire ! Je suis encore maître chez moi… après vous, du moins. »",
+      "choices": [
+        {
+          "text": "« Je n'ai pas le temps, vieux fou. Explique-moi comment sortir d'ici ! »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-atelier-parle_0",
+          "targetNode": "node-pas-le-temps"
+        },
+        {
+          "text": "« À ta guise, cartographe ! Un fil du temps, tu dis ? C'est possible, mais je ne peux te le promettre et l'endroit est loin d'ici. Proche du Nexus Synaptique… »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-atelier-parle_1",
+          "targetNode": "node-cache-ensevelie"
+        },
+        {
+          "text": "« Je n'apprécie guère les arrogants, cartographe ! Toute aide est bonne à prendre. Écoute ce qu'il a à dire ! »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-atelier-parle_2",
+          "targetNode": "node-ecoute-atelier"
+        }
+      ]
+    },
+    {
+      "id": "node-ecoute-atelier",
+      "displayName": "L'oreille contre l'armoire",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« Votre sagesse illumine ma misérable existence. »\n*Il se dirige vers l'armoire et, se penchant légèrement, pose son oreille sur le bois. C'est alors que son regard se pose sur quelque chose derrière vous et il écarquille les yeux de surprise.*\n« Déplacez-vous d'un pas, Seigneuresse. »",
+      "choices": [
+        {
+          "text": "« À qui crois-tu donc t'adresser ainsi, vieillard ? Je n'ai pas le temps pour ces inepties. Explique-moi comment sortir d'ici ! »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-ecoute-atelier_0",
+          "targetNode": "node-pas-le-temps"
+        },
+        {
+          "text": "*[Vous vous déplacez d'un pas sur le côté.]*",
+          "choiceEffects": [],
+          "choiceId": "choice_node-ecoute-atelier_1",
+          "targetNode": "node-angles-morts"
+        }
+      ]
+    },
+    {
+      "id": "node-angles-morts",
+      "displayName": "Angles morts spatiaux",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« Incroyable. Vous générez des angles morts spatiaux. C'est donc cela qui affectait mes propres lignes de sang… Maîtresse du temps et de l'espace… Vous êtes la quintessence de l'Anentropie. Je comprends pourquoi l'Exégète refuse de vous laisser partir. »",
+      "choices": [
+        {
+          "text": "« Vraiment ? Et tu es là pour y veiller ? »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-angles-morts_0",
+          "targetNode": "node-voknir-guide"
+        }
+      ]
+    },
+    {
+      "id": "node-voknir-guide",
+      "displayName": "Voknir se met en route",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« Non ! Je méprise ce tyran autant que j'ai foi en vous. J'entrevois à présent un moyen de vous guider. Votre présence rend le deuxième nœud superflu. Suivez-moi, ô Théomaque. »"
+    },
+    {
+      "id": "node-respect-1",
+      "displayName": "Mon atelier ?",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« Mon atelier ? »",
+      "choices": [
+        {
+          "text": "« Afin de pouvoir m'entretenir avec toi. »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-respect-1_0",
+          "targetNode": "node-respect-2"
+        }
+      ]
+    },
+    {
+      "id": "node-respect-2",
+      "displayName": "Un atelier syphonné",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« Ah… je vois. Oui ! Vous faites bien. Je vous déconseille de vous adresser directement à lui… »\n*Il se rapproche pour ajouter en murmurant :*\n« Entre nous, il est complètement syphoné. Pas plus tard que hier… ou au fragment dernier peut-être… il s'est mis en tête de revoir la disposition des meubles. Comment voulez-vous que je travaille sur un bureau qui se déplace constamment d'un bout à l'autre de la pièce ? »",
+      "choices": [
+        {
+          "text": "« Votre bureau bouge tout seul ? »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-respect-2_0",
+          "targetNode": "node-respect-3"
+        }
+      ]
+    },
+    {
+      "id": "node-respect-3",
+      "displayName": "C'est l'atelier qui le déplace",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« Hé bien, non, je viens de vous le dire, c'est l'atelier qui le déplace. »"
+    },
+    {
+      "id": "node-autoritaire",
+      "displayName": "Quitter les Plis ?",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*Voknir se relève, surpris, et son regard se pose furtivement sur quelque chose derrière Uresaïr. Il n'en souffle rien et se détourne pour mettre un peu d'ordre dans ses affaires.*\n« Vous souhaitez quitter les Plis ? »",
+      "choices": [
+        {
+          "text": "« Je souhaite quitter le Léviathan ! »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-autoritaire_0",
+          "targetNode": "END"
+        }
+      ]
+    },
+    {
+      "id": "node-attente",
+      "displayName": "Le grattement de l'outil",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*Le silence s'installe, ponctué uniquement par le grattement méthodique de l'outil de Voknir sur sa peau. Concentré, il ne prête pas attention à vous. Ses lèvres murmurent des équations inaudibles. Un liquide noir suinte le long de son bras hypertrophié, dessinant des géométries qui semblent pulser faiblement, comme s'ils répondaient aux distorsions du Dédale.*",
+      "choices": [
+        {
+          "text": "(Test d'Orientation DD12) *[Étudier les scarifications de Voknir pour en déduire la structure du Dédale.]* (+1H)",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Patient",
+              "minValue": 5
+            }
+          ],
+          "test": "Intelligence+Orientation:12",
+          "choiceId": "choice_node-attente_0",
+          "targetNode": "END"
+        },
+        {
+          "text": "*[Observer l'atelier lui-même pendant que Voknir travaille.]* (+1H)",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Patient",
+              "minValue": 4
+            },
+            {
+              "trait": "Curieux",
+              "minValue": 4
+            }
+          ],
+          "choiceId": "choice_node-attente_1",
+          "targetNode": "node-observer"
+        },
+        {
+          "text": "*[Vous en avez assez d'attendre, vous décidez d'interrompre Voknir avant qu'il ne termine.]* « Cela suffit. Je n'ai pas le temps d'attendre que tu achèves tes mutilations rituelles. »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-attente_2",
+          "targetNode": "node-interrompre"
+        }
+      ]
+    },
+    {
+      "id": "node-scar-ko",
+      "displayName": "Un fouillis incompréhensible",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*Les scarifications restent un fouillis incompréhensible. Vous ne parvenez pas à en tirer de sens cohérent.*",
+      "choices": [
+        {
+          "text": "*[Écouter la suite.]*",
+          "choiceEffects": [],
+          "choiceId": "choice_node-scar-ko_0",
+          "targetNode": "node-accueil"
+        }
+      ]
+    },
+    {
+      "id": "node-scar-ok",
+      "displayName": "Les cartes d'un Dédale différent",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*En observant attentivement, vous commencez à reconnaître des motifs familiers. Les lignes sur son avant-bras droit correspondent aux couloirs que vous avez traversés. Celles sur son épaule gauche esquissent le Carrefour Trichotomique. Et sur son torse… un réseau complexe qui doit représenter les zones que vous n'avez pas encore explorées.*\n*Vous remarquez quelque chose d'étrange : certaines scarifications plus anciennes, presque effacées, ne correspondent à aucune structure actuelle. Comme si le Dédale avait changé depuis qu'il les avait gravées. Vos mouvements attirent enfin son attention.*\n*(sursautant)* « Oh ! Vous ici ! Oh Théomaque ! Les saints Substrats soient avec vous ! »",
+      "choices": [
+        {
+          "text": "*(ignorant ses superlatifs)* « Tes anciennes cartes… elles montrent un labyrinthe différent. Les Plis se reconfigurent ? »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-scar-ok_0",
+          "targetNode": "node-dedale-respire"
+        }
+      ]
+    },
+    {
+      "id": "node-dedale-respire",
+      "displayName": "Le Dédale respire",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*(lève la tête, surpris)* « Vous le voyez ! Oui, oui ! Le Dédale n'est pas statique. Il respire avec le Léviathan. C'est pourquoi les équations murales sont obsolètes — elles capturent des états passés. Seule la chair peut suivre les transformations en temps réel. »\n*Il désigne une série de lignes récentes sur son bras.*\n« Voyez-vous celle-ci ? Elle n'existait pas il y a trois cycles. Un nouveau passage s'est ouvert près de l'Amphithéâtre des Échos. Les Murmurateurs l'utilisent pour leurs rassemblements secrets. »",
+      "choices": [
+        {
+          "text": "(Test de Sensibilité paranormale DD18) *[Vous redoublez d'attention pour observer ce qui se dessine devant vos yeux.]* (+1H)",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Patient",
+              "minValue": 5
+            }
+          ],
+          "test": "Perception+Sensibilitéparanormale:18",
+          "choiceId": "choice_node-dedale-respire_0",
+          "targetNode": "END"
+        },
+        {
+          "text": "« Les Murmurateurs ? »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-dedale-respire_1",
+          "targetNode": "node-murmurateurs"
+        }
+      ]
+    },
+    {
+      "id": "node-para-ko",
+      "displayName": "Rien d'inhabituel",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*Vous ne percevez rien d'inhabituel, seulement un vieux Van'Doei mutilant sa propre chair dans une quête obsessionnelle. Le temps passe lentement.*",
+      "choices": [
+        {
+          "text": "*[Écouter la suite.]*",
+          "choiceEffects": [],
+          "choiceId": "choice_node-para-ko_0",
+          "targetNode": "node-accueil"
+        }
+      ]
+    },
+    {
+      "id": "node-para-ok",
+      "displayName": "Une symbiose avec l'atelier",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*Vous percevez des filaments éthérés reliant les scarifications de Voknir aux parois de l'atelier. Ces connexions pulsent en synchronie avec les craquements de la structure, révélant une symbiose plus profonde que vous ne l'imaginiez. Voknir n'est pas simplement dans l'atelier — il semble en faire partie, et l'atelier fait partie de lui.*\n*(sans lever les yeux)* « Vous l'entendez, n'est-ce pas ? L'atelier. Il est insupportable mais il se révèle parfois utile… malgré tout. »\n*Le vieillard crache ces mots avec un certain dédain, comme s'il refusait de se l'avouer à lui-même.*",
+      "choices": [
+        {
+          "text": "« Cette fusion… elle doit être douloureuse. Tu t'es perdu dans ton obsession. »",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Empathie",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "choice_node-para-ok_0",
+          "targetNode": "node-fusion"
+        },
+        {
+          "text": "« Tu te racontes des histoires. L'atelier ne parle pas — tu projettes simplement tes désirs sur des craquements aléatoires. »",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Cynique",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "choice_node-para-ok_1",
+          "targetNode": "node-atelier-cynique"
+        }
+      ]
+    },
+    {
+      "id": "node-atelier-cynique",
+      "displayName": "Des cartes folles mais justes",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*(sourire amer)* « Peut-être avez-vous raison. Peut-être suis-je devenu fou dans ma solitude. Mais mes cartes fonctionnent, Théomaque. Folles ou non, elles révèlent la vérité des Plis. »\n*Il achève sa scarification et nettoie son outil.*\n« Voilà. C'est terminé. »",
+      "choices": [
+        {
+          "text": "*[Écouter la suite.]*",
+          "choiceEffects": [],
+          "choiceId": "choice_node-atelier-cynique_0",
+          "targetNode": "node-accueil"
+        }
+      ]
+    },
+    {
+      "id": "node-fusion",
+      "displayName": "Il ne restait que les cartes",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*(sa main tremble légèrement)* « Perdu ? Peut-être. Ou peut-être suis-je devenu exactement ce que je devais être. Après… après qu'ils… »\n*Il s'interrompt, confus, puis reprend.*\n« Non, attendez. Les cartes. Oui. Il ne me restait que les cartes. Elles… elles parlent, vous savez. Elles me parlent quand tout le reste… quand les autres… »\n*Il se tait brusquement, semblant avoir oublié ce qu'il disait. Ses doigts reprennent leur travail de gravure de façon presque mécanique.*",
+      "choices": [
+        {
+          "text": "« Les autres ? De qui parles-tu ? »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-fusion_0",
+          "targetNode": "node-thaira"
+        }
+      ]
+    },
+    {
+      "id": "node-thaira",
+      "displayName": "Une femme, dans les Bains",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*Il cligne des yeux plusieurs fois, comme s'il émergeait d'un brouillard.*\n« Qui ? Ah… Il y avait… quelqu'un. Oui. Une femme. Son nom… »\n*Il fronce les sourcils, cherchant dans sa mémoire défaillante.*\n« Thaïra ? Non… si, enfin peut-être. »\n*Son regard se perd dans le vague.*\n« Elle a… elle a disparu. Ou bien était-ce moi qui… Non. J'ai essayé… j'ai modifié les équations. Ils m'ont banni pour ça. »\n*Il rit doucement, un rire désabusé.*\n« Ou était-ce pour autre chose ? Les raisons se mélangent toutes dans ma tête. »",
+      "choices": [
+        {
+          "text": "« Et où est-elle maintenant ? »",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Empathie",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "choice_node-thaira_0",
+          "targetNode": "node-bains"
+        },
+        {
+          "text": "« Le Culte transforme la souffrance en dévotion. N'est-ce pas là son principe ? »",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Insensible",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "choice_node-thaira_1",
+          "targetNode": "node-insensible"
+        }
+      ]
+    },
+    {
+      "id": "node-bains",
+      "displayName": "Quelque part dans les Bains",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*(hésite longuement, cherchant ses mots)* « Le Médecin-Ascétique m'a dit… ou l'atelier me l'a murmuré… Quelque part dans les Bains. »\n*Sa voix devient plus distante.*\n« Je ne sais plus, je ne veux plus y penser, pitié… »\n*Il touche machinalement une ancienne cicatrice sur son torse, comme s'il essayait de se raccrocher à quelque chose de tangible.*"
+    },
+    {
+      "id": "node-insensible",
+      "displayName": "Vous parlez comme eux",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*(se raidit)* « Vous parlez comme eux. Comme ceux qui m'ont brisé. »\n*Il se détourne et reprend sa scarification avec des gestes brusques, presque violents.*\n« Je n'ai plus rien à vous dire, Théomaque. Laissez-moi, je vous en prie. »",
+      "consequences": {
+        "flag": "VOKNIR_QUETE_ECHEC",
+        "description": "Échec de la quête : Voknir rompt la conversation."
+      }
+    },
+    {
+      "id": "node-murmurateurs",
+      "displayName": "Les Murmurateurs",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*(avec un détachement presque clinique)* « Leurs mouvements créent des perturbations fascinantes dans les géométries. Je les documente comme je documente tout le reste — les fissures, les échos, les pulsations du Léviathan. »\n*Il désigne une série de scarifications complexes sur son épaule.*\n« Voyez-vous ces entrelacs ? Ils apparaissent uniquement quand plusieurs personnes se déplacent en synchronie. Les Murmurateurs produisent des motifs… différents. Plus chaotiques que les processions du Culte. »",
+      "choices": [
+        {
+          "text": "(Croyances DD10) « Mais tu es toujours un croyant de l'Anentropie. Ne devrais-tu pas les dénoncer ? »",
+          "choiceEffects": [],
+          "test": "Intelligence+Croyances:10",
+          "choiceId": "choice_node-murmurateurs_0",
+          "targetNode": "END"
+        },
+        {
+          "text": "« Ces motifs « différents » des Murmurateurs — que révèlent-ils ? »",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Curieux",
+              "minValue": 3
+            }
+          ],
+          "choiceId": "choice_node-murmurateurs_1",
+          "targetNode": "node-motifs"
+        },
+        {
+          "text": "« L'indifférence face à l'hérésie est complice de l'hérésie. »",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Intolérant",
+              "minValue": 4
+            }
+          ],
+          "choiceId": "choice_node-murmurateurs_2",
+          "targetNode": "node-intolerant"
+        }
+      ]
+    },
+    {
+      "id": "node-denoncer",
+      "displayName": "Cartographe, pas Gardien",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*Il semble momentanément confus par la question.*\n« Dénoncer ? Je suis cartographe, Théomaque, pas Gardien. Mon bannissement m'a libéré de ces… obligations. »\n*Il touche son torse.*\n« Les cartes ne se soucient pas de qui crée les distorsions. Elles les enregistrent, c'est tout. »\n*Après un silence :*\n« Et puis… l'Exégète connaît déjà leurs mouvements. Il doit bien le savoir. Le Léviathan parle à ceux qui l'écoutent. »",
+      "choices": [
+        {
+          "text": "« Donc tu restes fidèle au Culte, malgré tout ce qu'ils t'ont fait ? »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-denoncer_0",
+          "targetNode": "node-fidele"
+        }
+      ]
+    },
+    {
+      "id": "node-fidele",
+      "displayName": "Mon Endurement à moi",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*Il hésite, cherchant ses mots.*\n« Fidèle ? Je… je crois toujours que l'entropie doit être combattue. Que la Fixation est la voie. Mais eux… »\n*Sa voix devient amère.*\n« Ils ont transformé la vérité en instrument de pouvoir. L'Exégète utilise même vous, Théomaque, pour ses propres fins. »\n*Il reprend sa gravure avec des gestes nerveux.*\n« Je sers encore la doctrine, à ma façon. En cartographiant les Plis, je préserve leur connaissance. C'est mon Endurement à moi. »",
+      "choices": [
+        {
+          "text": "*[Écouter la suite.]*",
+          "choiceEffects": [],
+          "choiceId": "choice_node-fidele_0",
+          "targetNode": "node-accueil"
+        }
+      ]
+    },
+    {
+      "id": "node-motifs",
+      "displayName": "Des spirales plutôt que des lignes",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« Ah ! Vous voyez ! Oui, oui… »\n*Son excitation revient.*\n« Les orthodoxes créent des géométries… rigides. Prévisibles. Mais les Murmurateurs se déplacent comme s'ils cherchaient quelque chose, explorant, testant les limites. »\n*Il trace dans l'air avec son outil.*\n« Leurs chemins forment des spirales plutôt que des lignes droites. Des patterns qui ressemblent aux équations d'Acariane que je vous montrais — celles sur les distorsions temporelles. »\n*Son regard devient distant.*\n« Parfois je me demande s'ils ne comprennent pas quelque chose que j'ai manqué. Mais peu importe. Les cartes enregistrent tout. La vérité émergera d'elle-même, qu'on le veuille ou non. »",
+      "choices": [
+        {
+          "text": "*[Écouter la suite.]*",
+          "choiceEffects": [],
+          "choiceId": "choice_node-motifs_0",
+          "targetNode": "node-accueil"
+        }
+      ]
+    },
+    {
+      "id": "node-intolerant",
+      "displayName": "Les cartes ne peuvent pas mentir",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*(se recroqueville légèrement)* « Je… je ne suis qu'un cartographe. Je n'ai plus le droit de juger qui que ce soit depuis mon bannissement. »\n*Sa voix tremble.*\n« Et mes cartes… elles doivent rester objectives. Si je commence à effacer certaines lignes, à ignorer certaines distorsions par idéologie, alors tout mon travail devient mensonge. »\n*Il vous regarde avec une supplication pathétique.*\n« Vous comprenez ? Les cartes ne peuvent pas mentir. Elles sont tout ce qui me reste d'honnête. »",
+      "choices": [
+        {
+          "text": "*[Écouter la suite.]*",
+          "choiceEffects": [],
+          "choiceId": "choice_node-intolerant_0",
+          "targetNode": "node-accueil"
+        }
+      ]
+    },
+    {
+      "id": "node-observer",
+      "displayName": "Fioles et figurine d'enfant",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*Vous détournez votre attention de Voknir pour examiner l'environnement. Les étagères ploient sous des fioles contenant des liquides étranges — certaines avec des filaments lumineux, d'autres avec ce qui ressemble à des fragments de temporalité solidifiée. Des instruments chirurgicaux pendent aux murs, certains encore maculés d'encre noire.*\n*Sur une table basse, vous remarquez un objet qui détonne : une petite figurine de pierre représentant un enfant Van'Doei. À côté, un message griffonné sur un fragment d'os : « Les angles mentent, père-cartographe. »*",
+      "choices": [
+        {
+          "text": "« Cette figurine… c'est l'œuvre de quelqu'un qui te connaît bien. »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-observer_0",
+          "targetNode": "node-yul"
+        }
+      ]
+    },
+    {
+      "id": "node-yul",
+      "displayName": "Yul, le fils disparu",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*(sa main se crispe sur son outil, le liquide noir coule plus abondamment)* « Yul. C'est… mon fils. Enfin, il était… Non, il est… »\n*Il se tait, confus.*\n« Il a disparu. Il y a combien de Nuées déjà ? Trois ? Cinq ? Comme le temps passe… »\n*Il fixe la figurine, ses tentacules se rétractant légèrement.*\n« Il est venu me voir. Voulait comprendre mon travail. Ou bien… c'était pour me ramener. Oui. Me ramener au temple. »\n*Il secoue la tête, agacé par sa propre confusion.*\n« Pourquoi n'est-il jamais arrivé ? Je lui avais donné les cartes. Les bonnes cartes ! »\n*Il reprend son travail de gravure avec des gestes saccadés.*\n« Ce message… « Les angles mentent, père-cartographe. » Il l'a compris, au moins. »",
+      "choices": [
+        {
+          "text": "« Tu portes trop de pertes, cartographe. Et pourtant tu persistes. »",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Empathie",
+              "minValue": 7
+            }
+          ],
+          "choiceId": "choice_node-yul_0",
+          "targetNode": "node-pertes"
+        }
+      ]
+    },
+    {
+      "id": "node-pertes",
+      "displayName": "Que me reste-t-il d'autre ?",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "« Que me reste-t-il d'autre ? Si j'arrête de cartographier, leurs disparitions n'auront aucun sens. Si je perce les secrets des Plis… je leur montrerai à tous, à tout le Culte, que j'avais raison ! »",
+      "choices": [
+        {
+          "text": "« Montre-moi où tu l'as perdu. Peut-être puis-je percevoir des traces que tu as manquées. »",
+          "choiceEffects": [],
+          "traitRequirements": [
+            {
+              "trait": "Empathie",
+              "minValue": 9
+            }
+          ],
+          "choiceId": "choice_node-pertes_0",
+          "targetNode": "node-trace-enfant"
+        },
+        {
+          "text": "« L'espoir est parfois plus cruel que l'acceptation. »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-pertes_1",
+          "targetNode": "node-espoir"
+        }
+      ]
+    },
+    {
+      "id": "node-trace-enfant",
+      "displayName": "Vers la Confluence",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*(un éclair d'espoir traverse son regard)* « Vraiment ? Vous feriez cela ? »\n*Il pose son outil et se lève précipitamment.*\n« C'était près de la Confluence, là où les flux temporels se croisent. Suivez-moi ! »",
+      "consequences": {
+        "flag": "QUETE_TRACE_ENFANT_PERDU",
+        "description": "Mène vers la quête secondaire « La Trace de l'Enfant Perdu »."
+      }
+    },
+    {
+      "id": "node-espoir",
+      "displayName": "Tout ce qui me reste",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*(se recroqueville légèrement)* « Peut-être. Mais c'est tout ce qui me reste. »",
+      "choices": [
+        {
+          "text": "*[Écouter la suite.]*",
+          "choiceEffects": [],
+          "choiceId": "choice_node-espoir_0",
+          "targetNode": "node-accueil"
+        }
+      ]
+    },
+    {
+      "id": "node-interrompre",
+      "displayName": "La carte est incomplète",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*(sursaute, l'outil glisse et entaille plus profondément sa peau)* « Non, non ! La carte est incomplète ! Si je ne termine pas, les correspondances seront fausses ! »\n*Il presse sa main contre la blessure, le liquide noir et du sang clair se mélangent.*\n« Vous ne comprenez pas — chaque ligne doit être à sa place exacte, sinon je ne peux pas vous guider ! »",
+      "choices": [
+        {
+          "text": "« Alors termine rapidement. »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-interrompre_0",
+          "targetNode": "node-termine-vite"
+        },
+        {
+          "text": "« Tant pis. Je trouverai mon chemin seule. »",
+          "choiceEffects": [],
+          "choiceId": "choice_node-interrompre_1",
+          "targetNode": "END"
+        }
+      ]
+    },
+    {
+      "id": "node-termine-vite",
+      "displayName": "Une carte imparfaite",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "*Voknir travaille avec des gestes précipités et moins assurés. Après quelques minutes, il pose son outil, essoufflé.*\n« Voilà. Ce n'est pas parfait, mais… cela devra faire. »",
+      "consequences": {
+        "flag": "VOKNIR_INDICATIONS_IMPRECISES",
+        "description": "Malus : les indications de Voknir seront moins précises lors de la traversée du Dédale."
+      },
+      "choices": [
+        {
+          "text": "*[Écouter la suite.]*",
+          "choiceEffects": [],
+          "choiceId": "choice_node-termine-vite_0",
+          "targetNode": "node-accueil"
+        }
+      ]
+    }
+  ],
+  "title": "Dialogue Unity"
+}
