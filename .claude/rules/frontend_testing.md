@@ -25,7 +25,7 @@ paths:
   4. Tests unitaires : commandes et contraintes agent → **`workflow.md`**. En local humain : `cd frontend && npm test` ou rapports JSON selon scripts du `package.json`.
   5. Tests E2E : `npm run test:e2e` (si serveurs lancés, tests critiques)
 - **Script automatisé**: `.\scripts\test-frontend.ps1` (build + lint + tests unitaires), `.\scripts\test-frontend.ps1 -E2E` (inclut E2E).
-- **MCP Browser** (si disponible): Pour inspection visuelle, vérifier console logs, network requests, après avoir lancé `npm run dev`.
+- **Navigateur intégré** (`mcp__Claude_Browser__*`) : inspection visuelle, console, requêtes réseau, après `preview_start {name: "dialogue-generator-dev"}` — voir « Preuve UI » dans `.claude/rules/workflow.md`.
 - **Quand tester**:
   - Après modification composants : build + lint + tests unitaires
   - Avant commit : `.\scripts\test-frontend.ps1` ou `npm run test:frontend`
