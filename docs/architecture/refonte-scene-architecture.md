@@ -272,8 +272,8 @@ l'intention est rangée dans le journal d'édition (A12), jamais exportée, et m
 - **Repli** : sans portrait, pastille de couleur avec initiales ; sans lieu illustré, portrait du PNJ sur la teinte du
   lieu ; sans rien, « lieu et portrait à renseigner ».
 - **Graphe** : médaillon de 20 px au palier « écrire » seulement ; rien aux paliers « lire » et « situer ».
-- Maquettes : board `docs/design/refonte-scene/Ambiance.dc.html` et canvas « Ambiance »
-  <https://claude.ai/artifact/GVZfj6RsZqGQGwEg8X5SxN> (deux écrans, notés 8,1/10).
+- Maquettes : board `docs/design/refonte-scene/Ambiance.dc.html`, repris sur le canvas de la refonte
+  <https://claude.ai/artifact/VynbrAeNhQULRXhbnVnTDW>.
 
 ### A11 (pari) — Document collaboratif (Yjs)
 
