@@ -5,7 +5,7 @@
  */
 import { memo } from 'react'
 import { redesignText } from '../../theme/redesignTokens'
-import { splitDialogueLine } from '../../utils/dialogueLineSegments'
+import { parseDialogueLine, visibleDialogueBlocks } from '../../utils/dialogueLineBlocks'
 
 export const DIALOGUE_NARRATION_COLOR = redesignText.secondary
 
@@ -19,19 +19,19 @@ export const DialogueLineText = memo(function DialogueLineText({
 }) {
   return (
     <>
-      {splitDialogueLine(text).map((segment, index) => (
+      {visibleDialogueBlocks(parseDialogueLine(text)).map((block) => (
         <span
-          key={index}
-          data-segment={segment.kind}
+          key={block.start}
+          data-segment={block.kind}
           style={{
             display: 'block',
             whiteSpace: 'pre-wrap',
-            ...(segment.kind === 'narration'
+            ...(block.kind === 'narration'
               ? { fontStyle: 'italic', color: narrationColor }
               : null),
           }}
         >
-          {segment.text}
+          {block.text}
         </span>
       ))}
     </>

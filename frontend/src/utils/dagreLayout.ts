@@ -10,7 +10,7 @@ import {
   siblingBranchOffset,
 } from './graphNodeLayout'
 import { formatNodeLinePreview } from './nodeLinePreview'
-import { splitDialogueLine } from './dialogueLineSegments'
+import { parseDialogueLine, visibleDialogueBlocks } from './dialogueLineBlocks'
 
 export type DagreDirection = 'TB' | 'LR' | 'BT' | 'RL'
 export type DagreSpacingMode = 'compact' | 'normal' | 'large'
@@ -50,8 +50,8 @@ function estimateDialogueNodeHeight(node: Node, fallback: number): number {
   // de px à l'ouverture d'un dialogue importé, avant toute mesure du DOM.
   const preview = typeof data.line === 'string' ? formatNodeLinePreview(data.line.trim()) : ''
   // Chaque passage narration/parole (`DialogueLineText`) et chaque saut de ligne ouvre une ligne.
-  const textLines = splitDialogueLine(preview)
-    .flatMap((segment) => segment.text.split('\n'))
+  const textLines = visibleDialogueBlocks(parseDialogueLine(preview))
+    .flatMap((block) => block.text.split('\n'))
     .reduce(
       (total, segment) =>
         total + Math.max(1, Math.ceil(segment.length / DIALOGUE_NODE_CHARS_PER_LINE)),

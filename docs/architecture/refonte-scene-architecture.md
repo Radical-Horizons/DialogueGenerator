@@ -105,9 +105,10 @@ préfixes « (Test d'intimidation DD9) ». Le correctif v1.10.1 (« `* [Vous …
 - **aucun changement de stockage** : la chaîne Unity reste la donnée ;
 - chaque bloc porte ses positions `start` / `end` dans la chaîne source : clic → curseur dans le texte brut (18.5a),
   diff de réécriture (20.13), provenance par plage (A12) ;
-- `parse` remplace (ou fonde) `splitDialogueLine` (`frontend/src/utils/dialogueLineSegments.ts`), qui n'est pas
-  réversible (`trim()` par segment) et garde en narration la suite d'un `*` non fermé ; `DialogueLineText` et
-  l'estimation de hauteur de dagre passent sur `parse`, et un `*` non fermé reste du texte (story 20.1) ;
+- `parseDialogueLine` (`frontend/src/utils/dialogueLineBlocks.ts`) a remplacé `splitDialogueLine` (story 20.1), qui
+  n'était pas réversible (`trim()` par segment) et gardait en narration la suite d'un `*` non fermé ;
+  `DialogueLineText` et l'estimation de hauteur de dagre passent sur `parseDialogueLine`, et un `*` non fermé reste du
+  texte ;
 - test aller-retour `serialize(parse(x)) === x` exécuté **en CI** sur des fixtures committées
   (`tests/fixtures/unity_dialogues/`, à créer en story 20.1 : 4 dialogues copiés de `Assets/Dialogue/`, dont l'import
   Notion de Voknir pour ses conventions hors modèle, plus `data/interactions/rencontre_dans_la_nef_centrale_unity.json`

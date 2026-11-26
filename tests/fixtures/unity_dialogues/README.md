@@ -26,6 +26,10 @@ normalisation `eol=lf` du dépôt : le forgeron et les Plis d'ossements sont en 
 Toute nouvelle entrée déposée dans `inputs/` est prise d'office par les deux tests ; sans
 attendu, ils échouent en demandant `UPDATE_GOLDEN=1`.
 
+`frontend/src/__tests__/dialogueLineRoundTrip.test.ts` lit aussi ces entrées : chaque `line`
+et texte de réponse doit survivre à l'aller-retour réplique ↔ blocs. Le même contrôle sur
+`Assets/Dialogue/` (hors CI) : `node scripts/dialogue-roundtrip-local.cjs [--source <dossier>]`.
+
 ## Attendus (`expected/<chemin>/`)
 
 Un fichier par chemin et par entrée, car les chemins diffèrent déjà entre eux :
