@@ -175,5 +175,21 @@ describe('dagreLayout — sauts de ligne de la réplique', () => {
     const withBreak = getLayoutNodeHeight(node(`*Il se lève.*\n\n${reply}`), 0)
     expect(getLayoutNodeHeight(node(`*Il se lève.* ${reply}`), 0)).toBe(withBreak)
     expect(withBreak).toBeGreaterThan(getLayoutNodeHeight(node(reply), 0))
+    // L'espace entre deux didascalies est un bloc sans texte : il n'ouvre pas de ligne.
+    expect(getLayoutNodeHeight(node('*Il se lève.* *Il sort.*'), 0)).toBe(
+      getLayoutNodeHeight(node('*Il se lève.* « Il sort. »'), 0)
+    )
+  })
+
+  it("un `*` non fermé n'ouvre pas de passage : la réplique tient sur la même ligne", () => {
+    const node = (line: string): Node => ({
+      id: 'n',
+      type: 'dialogueNode',
+      position: { x: 0, y: 0 },
+      data: { id: 'n', line },
+    })
+    const oneLine = getLayoutNodeHeight(node('« Oui. »'), 0)
+    expect(getLayoutNodeHeight(node('« Oui. » *Il pose'), 0)).toBe(oneLine)
+    expect(getLayoutNodeHeight(node('« Oui. » *Il pose*'), 0)).toBeGreaterThan(oneLine)
   })
 })

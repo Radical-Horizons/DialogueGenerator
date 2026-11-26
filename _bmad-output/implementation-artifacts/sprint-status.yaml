@@ -198,7 +198,7 @@ development_status:
   # que les stories remplacées. Détail : planning-artifacts/epics/epic-20.md et epic-18.md.
   epic-20: in-progress
   # Tranche 1 — fondation, maintenant
-  20-1-conversion-texte-blocs-et-export-golden-en-ci: review  # volet 1 golden (spec-20-1a) ; volet 2 parse/serialize différé
+  20-1-conversion-texte-blocs-et-export-golden-en-ci: done  # volet 1 golden (spec-20-1a) ; volet 2 parse/serialize (spec-20-1b)
   20-2-preuve-de-performance-cartes-360-flux-lr-paliers: backlog
   20-3-tokens-en-variables-css-theme-nuit: backlog
   # Tranche 1 bis — fondation d'écriture (Epic 18), maintenant, en parallèle de la tranche 1
