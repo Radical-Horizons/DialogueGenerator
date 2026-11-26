@@ -1,12 +1,15 @@
 """Golden de l'export Unity, chemins Python (Story 20.1, risque R-01).
 
-Deux chemins, comparés au texte de ``tests/fixtures/unity_dialogues/expected/<chemin>/<fixture>.json``
+Quatre chemins, comparés au texte de ``tests/fixtures/unity_dialogues/expected/<chemin>/<fixture>.json``
 (ou ``.error.txt`` si le chemin rejette l'entrée) :
 
 - ``python-graphe`` : ``POST /api/v1/unity-dialogues/graph/save-and-write`` (vraie route,
   validation de schéma comprise) sur le corps que le front lui envoie, figé par Vitest dans
   ``expected/front-payload/`` ; un refus HTTP est figé dans ``.error.txt`` ;
-- ``python-lot`` : ``export_persisted_document`` (export par lot) sur la fixture d'entrée.
+- ``python-lot`` : ``export_persisted_document`` (export par lot) sur la fixture d'entrée ;
+- ``python-lot-valide`` : le même, validation comprise (défaut de ``POST /dialogues/batch-export``) ;
+- ``python-apercu`` : ``preview_persisted_document``, le rendu de ``GET /dialogues/{id}/preview-export``
+  que télécharge « Exporter » pour un dialogue enregistré (``useUnityExport``).
 
 Les attendus figent le comportement actuel, défauts compris : un écart est une
 régression, ou un changement de contrat qui se régénère dans une PR à part
@@ -25,6 +28,7 @@ import pytest
 
 from services.batch_export_service import export_persisted_document
 from services.configuration_service import ConfigurationService
+from services.unity_export_preview_service import preview_persisted_document
 
 GOLDEN_ROOT = Path(__file__).resolve().parents[1] / "fixtures" / "unity_dialogues"
 INPUTS_DIR = GOLDEN_ROOT / "inputs"
@@ -110,18 +114,45 @@ def render_python_graph(raw: str, fixture: str, work_dir: Path) -> str:
     return str(response.json()["json_content"])
 
 
-def render_python_lot(raw: str, fixture: str, work_dir: Path) -> str:
-    """Export par lot d'un document persisté, réécrit sur place dans ``work_dir``."""
+def _persist(raw: str, fixture: str, work_dir: Path) -> ConfigurationService:
+    """Dépose la fixture comme document persisté de ``work_dir`` (dossier Unity)."""
     work_dir.mkdir(parents=True, exist_ok=True)
     (work_dir / f"{fixture}.json").write_bytes(raw.encode("utf-8"))
-    config = _config_for(work_dir)
+    return _config_for(work_dir)
+
+
+def render_python_lot(raw: str, fixture: str, work_dir: Path) -> str:
+    """Export par lot d'un document persisté, sans validation, réécrit sur place."""
+    config = _persist(raw, fixture, work_dir)
     file_path, _name = export_persisted_document(config, fixture, skip_validation=True)
     return file_path.read_bytes().decode("utf-8")
+
+
+def render_python_lot_validated(raw: str, fixture: str, work_dir: Path) -> str:
+    """Export par lot avec la validation de schéma Unity (défaut de la route)."""
+    config = _persist(raw, fixture, work_dir)
+    file_path, _name = export_persisted_document(config, fixture, skip_validation=False)
+    return file_path.read_bytes().decode("utf-8")
+
+
+def render_python_preview(raw: str, fixture: str, work_dir: Path) -> str:
+    """Rendu ``preview-export`` d'un document persisté, servi par « Exporter ».
+
+    Un document que le schéma refuse est figé en erreur : la route le sert quand même,
+    mais ``useUnityExport`` a déjà bloqué l'export sur ``validate-schema``.
+    """
+    config = _persist(raw, fixture, work_dir)
+    result = preview_persisted_document(config, fixture)
+    if not result.schema_valid:
+        raise ValueError("; ".join(result.errors))
+    return result.json_content
 
 
 PATHS: dict[str, Callable[[str, str, Path], str]] = {
     "python-graphe": render_python_graph,
     "python-lot": render_python_lot,
+    "python-lot-valide": render_python_lot_validated,
+    "python-apercu": render_python_preview,
 }
 
 

@@ -114,6 +114,35 @@ class TestUnityExportNormalizer:
         assert result.is_valid is True, result.errors
         assert doc["nodes"][0]["consequences"]["flag"] == "FLAG_RENCONTRE_VALKAZER_INIT"
 
+    def test_flag_accents_are_transliterated_not_erased(self) -> None:
+        """Régression golden 20.1 : une lettre accentuée devient sa lettre de base.
+
+        Avant : ``RéparationImparfaite`` → ``R_PARATIONIMPARFAITE`` (lettre effacée).
+        """
+        doc = {
+            "schemaVersion": "1.2.0",
+            "nodes": [
+                {
+                    "id": "START",
+                    "line": "Rencontre",
+                    "consequences": {"flag": "Grish_Allié_et_Accord_Forgé"},
+                    "choices": [
+                        {
+                            "choiceId": "c0",
+                            "text": "Suite",
+                            "targetNode": "END",
+                            "condition": "NOT RéparationImparfaite",
+                        }
+                    ],
+                }
+            ],
+        }
+        result = validate_unity_export_document(doc)
+        assert result.is_valid is True, result.errors
+        node = doc["nodes"][0]
+        assert node["consequences"]["flag"] == "GRISH_ALLIE_ET_ACCORD_FORGE"
+        assert node["choices"][0]["condition"] == "NOT REPARATIONIMPARFAITE"
+
     def test_removes_empty_visibility_conditions_blocks(self) -> None:
         """Régression : formulaire graphe sans condition ne persiste pas un bloc vide."""
         doc = {

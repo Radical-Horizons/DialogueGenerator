@@ -218,7 +218,7 @@
       "line": "Ha. Ah—voilà qui a de la poigne. Vos doigts ne commandent pas, Maîtresse, ils imposent la confiance. Très bien. Approchez vos anneaux.\n\n*Il étend une main massive et ses doigts-étincelles effleurent l'air ; une couture de lumière s'ouvre dans la poitrine de sa carapace.*\n\nJe sentirai ce qu'ils ont retenu. Si vos objets pleurent, je leur rendrai une voix plus douce ; si elles ont des fragments de colère, je les emmêlerai en prudence. Mais puisque vous me laissez toucher, je ferai plus qu'un simple raccommodage : je tisserai un fil d'éther entre votre corps et vos anneaux. Ils se souviendront de vous, et vous entendrez, à l'orée du danger, leur soupir devenir un avertissement.\n\n*Il pose lentement ses paumes sur la bague la plus proche. Un bourdonnement chaud remonte de la métal, des failles scintillent et se recousent en motifs vivants ; un petit plomb d'argent — une clé minuscule — glisse de sa trappe et tombe dans votre main.*\n\nConséquence d'exception : je vous rends vos anneaux plus qu'ils n'étaient — un fil de protection, et une promesse de dette. Si un jour vous réclamez ce que vous m'avez donné, je viendrai. Pour l'heure, considérez que vous avez gagné non seulement un artisan, mais un allié qui sait écouter ce qui se casse. Que souhaitez-vous que je fasse ensuite ?",
       "test": "Force+Commandement:11",
       "consequences": {
-        "flag": "GRISH_ALLI_ET_ACCORD_FORG",
+        "flag": "GRISH_ALLIE_ET_ACCORD_FORGE",
         "description": "Grish T'vok a accepté l'autorisation de toucher et a lié un fil d'éther aux anneaux du PJ : les anneaux sont désormais résonants et Grish est redevable d'un petit service/assistance au PJ."
       },
       "isLongRest": false,
@@ -441,7 +441,7 @@
       "speaker": "Grish T'vok",
       "line": "Hm. Votre formulation était plus noble que ma trousse. Je peux écouter les objets, les apaiser, les recoudre — mais il y a des lois que même un Moribandon ne plie pas sans payer. Suturer sans rien effacer ? Non. Là où je passe, je déplace des histoires ; parfois je les recouds contre elles-mêmes et elles cessent de chanter, parfois je les recouds en changeant le ton. Vous avez demandé que les cicatrices restent, intactes et porteuses : je ne peux pas garantir cela. \n\nJe refuse donc la réparation que vous espériez — pas par mépris, mais parce que tenter de préserver tout et tout garder scellé produirait une altération plus perfide encore, quelque chose qui gâcherait la relation entre l'objet (ou vous) et ce qu'il garde. Je peux, en revanche, proposer des alternatives :\n- Une réparation « cosmétique » : atténuer la douleur, lisser la surface, mais la mémoire profonde s'en trouvera émoussée. (solution sûre, perte partielle d'histoire)\n- Ne rien toucher et vous laisser la cicatrice telle quelle ; je marquerai l'objet pour un futur artisan plus... téméraire. (solution sûre, aucune altération)\n- Ou j'essaierai un rituel risqué : je couds en conservant des fragments de la mémoire, mais si je rate, la déchirure s'agrandit et vous perdez quelque chose de propre — parfois un souvenir, parfois la trace émotionnelle. (tentative périlleuse)\n\nDites-moi ce que vous choisissez, Maîtresse.",
       "consequences": {
-        "flag": "R_PARATIONIMPARFAITE",
+        "flag": "REPARATIONIMPARFAITE",
         "description": "Le rituel demandé ne peut pas préserver intégralement les cicatrices : toute réparation proposée par Grish sera partielle ou comportera un coût. Grish refuse la réparation parfaite."
       },
       "isLongRest": false,
@@ -504,7 +504,7 @@
       "speaker": "Grish T'vok",
       "line": "Votre phrase a vibré dans ma carcasse — une consigne et une confiance. Très bien. Je peux suturer sans effacer : je tends le fil le long de la brèche et je laisse la trame parler. Les cicatrices restent, elles racontent; je n'enlève pas leurs voix, je réaccorde leur chant pour qu'elles ne saignent plus.\n\nVotre réussite a donné la clé du motif : mon travail sera plus sûr, plus patient, et moins intrusif. Donnez-moi l'objet ou laissez-moi approcher votre aura — je puis promettre une réparation qui respecte ce qu'elle porte. Il y aura un prix en temps (et parfois en métal), mais la mémoire ne sera pas volée.\n\nAcceptez-vous que j'examine et que je commence ?",
       "consequences": {
-        "flag": "R_PARATIONRESPECTUEUSE",
+        "flag": "REPARATIONRESPECTUEUSE",
         "description": "Grish accepte d'effectuer une réparation qui préserve les cicatrices et la mémoire de l'objet. Le temps de travail est réduit grâce à la réussite du joueur ; la confiance de Grish envers le personnage augmente."
       },
       "choices": [
@@ -923,7 +923,7 @@
       "speaker": "Grish T'vok",
       "line": "Ah — vous avez passé la grille des silences avec un pas sûr. Une réussite comme la vôtre ne s'achète pas, elle s'accorde. Très bien. Je ne retire pas les cicatrices pour les effacer : je les couds en courbe, je recouds la trame autour d'elles, je laisse la marque et j'en fais la force. \n\nLaissez-moi approcher. Je poserai mes doigts d'acier et mes aiguilles d'étincelles, j'écouterai la vibration des fibres, et je tisserai un fil d'argent sur la blessure. Ce fil conservera la mémoire du choc — comme une rune de respect — tout en redonnant cohérence et usage. En outre, et parce que votre réussite dépasse ce que j'attendais, je peux vous offrir plus : en recousant, j'extrais un écho — un fragment d'histoire qui ne vous ôtera rien mais vous en révélera un trait utile (une connaissance oubliée, une clé de circonstance, ou une protection mineure liée à l'objet). \n\nPrenez garde cependant : ce soin crée un lien. L'objet saura que vous l'avez ordonné de rester, et il portera désormais une attache subtile à ma caravane-atelier — rien de contraignant, mais, si jamais la tapisserie du monde venait à se déchirer de nouveau, je pourrais le retrouver plus facilement.",
       "consequences": {
-        "flag": "OBJETSUTUR_SANSPERTE",
+        "flag": "OBJETSUTURE_SANSPERTE",
         "description": "L'objet est réparé sans perdre ses cicatrices et conserve ses traits historiques ; il reçoit un petit bonus fonctionnel et une marque d'argent visible."
       },
       "isLongRest": false,

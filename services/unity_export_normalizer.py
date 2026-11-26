@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import copy
 import re
+import unicodedata
 from typing import Any, Dict, List, Union
 
 from services.document_choice_id_service import ensure_document_choice_ids
@@ -45,7 +46,11 @@ def _normalize_unity_flag_token(raw: str) -> str:
     if _UNITY_FLAG_TOKEN.match(body):
         return not_prefix + body
 
-    slug = re.sub(r"[^A-Za-z0-9_]+", "_", body)
+    # Translittérer d'abord : sinon la lettre accentuée disparaît (« RéparationImparfaite » → R_PARATIONIMPARFAITE).
+    ascii_body = (
+        unicodedata.normalize("NFKD", body).encode("ascii", "ignore").decode("ascii")
+    )
+    slug = re.sub(r"[^A-Za-z0-9_]+", "_", ascii_body)
     slug = re.sub(r"_+", "_", slug).strip("_").upper()
     if not slug:
         return raw

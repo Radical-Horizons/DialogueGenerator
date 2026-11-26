@@ -52,7 +52,7 @@ _VALID_GRAPH = {
     "metadata": {"title": "Export Test", "node_count": 2, "edge_count": 1},
 }
 
-_INVALID_NODE_ID = "NODE_LEGACY_INVALID"
+_INVALID_NODE_ID = "LEGACY_INVALID_SANS_PREFIXE"
 
 _INVALID_GRAPH = {
     "nodes": [

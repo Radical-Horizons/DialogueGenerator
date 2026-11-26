@@ -365,3 +365,44 @@ class TestUnitySchemaV1_1_0:
             is_valid, errors = validate_unity_json(document)
         assert is_valid, f"Document v1.2.0 avec id stable et title attendu valide ; erreurs : {errors}"
         assert errors == []
+
+    @pytest.mark.parametrize(
+        ("node_id", "accepted"),
+        [
+            ("NODE_START_CHOICE_3", True),
+            ("NODE_node-d281ad35450c4ed59bc5ec353aa203e8_CHOICE_4", True),
+            ("NODE_START_CHILD", True),
+            ("01fed77f-c38e-419b-957f-6c1801baf91e", False),
+            ("test-node-START-choice-0", False),
+            ("node_sans_tiret", False),
+        ],
+    )
+    def test_node_id_legacy_generator_format(
+        self, real_schema_path: Path, node_id: str, accepted: bool
+    ) -> None:
+        """Les ids ``NODE_…`` de l'ancien générateur restent exportables (golden 20.1).
+
+        Le forgeron et les Plis d'ossements étaient bloqués à l'export par un seul nœud
+        ``NODE_…_CHOICE_N`` ; on ne réécrit pas l'id d'un dialogue écrit, le schéma
+        l'accepte. Un uuid nu ou un id de nœud de test (dérivé du graphe) reste refusé.
+        """
+        if not real_schema_path.exists():
+            pytest.skip("Schéma dialogue-format.schema.json absent")
+        document = {
+            "schemaVersion": "1.2.0",
+            "nodes": [
+                {
+                    "id": "START",
+                    "line": "Bonjour",
+                    "choices": [{"choiceId": "c0", "text": "Suite", "targetNode": node_id}],
+                },
+                {"id": node_id, "line": "Réponse"},
+            ],
+        }
+        with patch("api.utils.unity_schema_validator._SCHEMA_PATH", real_schema_path):
+            import api.utils.unity_schema_validator
+            api.utils.unity_schema_validator._schema_cache = None
+            is_valid, errors = validate_unity_json(document)
+        assert is_valid is accepted, errors
+        if not accepted:
+            assert any(node_id in e for e in errors), errors

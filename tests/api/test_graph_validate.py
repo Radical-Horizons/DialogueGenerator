@@ -48,7 +48,7 @@ class TestValidateSchemaEndpoint:
 
     def test_invalid_node_id_detected(self):
         """Id nœud hors schéma v1.2.0 → is_valid False."""
-        invalid_id = "NODE_LEGACY_INVALID"
+        invalid_id = "LEGACY_INVALID_SANS_PREFIXE"
         invalid_node = {
             "id": invalid_id,
             "type": "dialogueNode",

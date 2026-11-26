@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://alteir.game/dialogue-format.schema.json",
   "title": "Alteir Dialogue JSON Format",
-  "description": "Format JSON pour les dialogues du jeu Alteir. v1.2.0 : id = identifiant stable unique non éditable (préfixe node- ou manual- + alphanum/tirets/underscores). title = libellé éditable. Pseudo-nœud END : seule exception, nœud virtuel de fin ; si référencé (nextNode ou targetNode = \"END\"), il n'a pas besoin d'être présent dans nodes. FR94 (Story 9.6) : skillCheck, effortCost, reputation_fr94, reputation_delta_fr94, faction_title — aligné sur frontend/src/types et services/game_systems_*.py. Source canonique : docs/resources/ ; copie miroir docs/JsonDocUnity/Documentation/.",
+  "description": "Format JSON pour les dialogues du jeu Alteir. v1.2.0 : id = identifiant stable unique non éditable (préfixe node- ou manual- + alphanum/tirets/underscores ; NODE_… accepté pour les dialogues écrits par l'ancien générateur). title = libellé éditable. Pseudo-nœud END : seule exception, nœud virtuel de fin ; si référencé (nextNode ou targetNode = \"END\"), il n'a pas besoin d'être présent dans nodes. FR94 (Story 9.6) : skillCheck, effortCost, reputation_fr94, reputation_delta_fr94, faction_title — aligné sur frontend/src/types et services/game_systems_*.py. Source canonique : docs/resources/ ; copie miroir docs/JsonDocUnity/Documentation/.",
   "version": "1.2.0",
   "type": "object",
   "required": ["schemaVersion", "nodes"],
@@ -260,11 +260,12 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "Identifiant stable et unique du nœud, non éditable. Préfixe node- ou manual- (ex. node-abc123, manual-uuid). Exception : END pour le pseudo-nœud de fin.",
+            "description": "Identifiant stable et unique du nœud, non éditable. Préfixe node- ou manual- (ex. node-abc123, manual-uuid). Exceptions : START, END pour le pseudo-nœud de fin, et NODE_… (ex. NODE_START_CHOICE_3), format de l'ancien générateur gardé dans les dialogues déjà écrits ; aucun nouveau nœud ne le reçoit.",
             "oneOf": [
               { "const": "END" },
               { "const": "START" },
-              { "pattern": "^(node|manual)-[a-zA-Z0-9_-]+$" }
+              { "pattern": "^(node|manual)-[a-zA-Z0-9_-]+$" },
+              { "pattern": "^NODE_[a-zA-Z0-9_-]+$" }
             ],
             "examples": ["node-start", "node-a1b2c3d4e5f6", "manual-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "END"]
           },

@@ -57,7 +57,7 @@ class TestValidateDocumentSchemaEndpoint:
             "schemaVersion": "1.2.0",
             "nodes": [
                 {
-                    "id": "NODE_LEGACY_INVALID",
+                    "id": "LEGACY_INVALID_SANS_PREFIXE",
                     "line": "Bad",
                     "nextNode": "END",
                 }

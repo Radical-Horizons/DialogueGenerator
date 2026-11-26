@@ -865,6 +865,7 @@
       "id": "e:START:choice:__idx_0:test",
       "source": "START",
       "target": "test-node-START-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "Je viens chercher un passage. ...",
       "data": {
@@ -878,6 +879,7 @@
       "id": "test-node-START-choice-0-critical-failure-node-3cb25e1ad62248bd811d0726430144d8",
       "source": "test-node-START-choice-0",
       "target": "node-3cb25e1ad62248bd811d0726430144d8",
+      "sourceHandle": "critical-failure",
       "type": "smoothstep",
       "label": "Échec critique"
     },
@@ -885,6 +887,7 @@
       "id": "e:START:choice:__idx_1:test",
       "source": "START",
       "target": "test-node-START-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Rends-moi ce que tu as altéré....",
       "data": {
@@ -898,6 +901,7 @@
       "id": "e:START:choice:__idx_3",
       "source": "START",
       "target": "NODE_START_CHOICE_3",
+      "sourceHandle": "choice:__idx_3",
       "type": "smoothstep",
       "label": "",
       "data": {
@@ -911,6 +915,7 @@
       "id": "e:node-3cb25e1ad62248bd811d0726430144d8:choice:__idx_0:test",
       "source": "node-3cb25e1ad62248bd811d0726430144d8",
       "target": "test-node-node-3cb25e1ad62248bd811d0726430144d8-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "Je t'en supplie — prends autre...",
       "data": {
@@ -924,6 +929,7 @@
       "id": "e:node-3cb25e1ad62248bd811d0726430144d8:choice:__idx_1:test",
       "source": "node-3cb25e1ad62248bd811d0726430144d8",
       "target": "test-node-node-3cb25e1ad62248bd811d0726430144d8-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Tu n'auras pas mes souvenirs p...",
       "data": {
@@ -937,6 +943,7 @@
       "id": "e:node-3cb25e1ad62248bd811d0726430144d8:choice:__idx_2:test",
       "source": "node-3cb25e1ad62248bd811d0726430144d8",
       "target": "test-node-node-3cb25e1ad62248bd811d0726430144d8-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "Très bien. Faites votre office...",
       "data": {
@@ -950,6 +957,7 @@
       "id": "e:NODE_START_CHOICE_3:choice:__idx_0:test",
       "source": "NODE_START_CHOICE_3",
       "target": "test-node-NODE_START_CHOICE_3-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "Je couche devant vous la bless...",
       "data": {
@@ -963,6 +971,7 @@
       "id": "test-node-NODE_START_CHOICE_3-choice-0-critical-failure-node-3cb25e1ad62248bd811d0726430144d8",
       "source": "test-node-NODE_START_CHOICE_3-choice-0",
       "target": "node-3cb25e1ad62248bd811d0726430144d8",
+      "sourceHandle": "critical-failure",
       "type": "smoothstep",
       "label": "Échec critique"
     },
@@ -970,6 +979,7 @@
       "id": "e:NODE_START_CHOICE_3:choice:__idx_1:test",
       "source": "NODE_START_CHOICE_3",
       "target": "test-node-NODE_START_CHOICE_3-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Je verse un regret : j'ai trah...",
       "data": {
@@ -983,6 +993,7 @@
       "id": "e:NODE_START_CHOICE_3:choice:__idx_2:test",
       "source": "NODE_START_CHOICE_3",
       "target": "test-node-NODE_START_CHOICE_3-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "Voici un fragment tangible — u...",
       "data": {
@@ -996,6 +1007,7 @@
       "id": "test-node-NODE_START_CHOICE_3-choice-2-critical-failure-node-00f9eba94d8941099321a223bf2d3cb7",
       "source": "test-node-NODE_START_CHOICE_3-choice-2",
       "target": "node-00f9eba94d8941099321a223bf2d3cb7",
+      "sourceHandle": "critical-failure",
       "type": "smoothstep",
       "label": "Échec critique"
     },
@@ -1003,6 +1015,7 @@
       "id": "test-node-NODE_START_CHOICE_3-choice-2-failure-node-346fdbd4f5014004bf8bfd82b991e910",
       "source": "test-node-NODE_START_CHOICE_3-choice-2",
       "target": "node-346fdbd4f5014004bf8bfd82b991e910",
+      "sourceHandle": "failure",
       "type": "smoothstep",
       "label": "Échec"
     },
@@ -1010,6 +1023,7 @@
       "id": "test-node-NODE_START_CHOICE_3-choice-2-success-node-9eeaaf5a46c5475baa559b357f7f6caf",
       "source": "test-node-NODE_START_CHOICE_3-choice-2",
       "target": "node-9eeaaf5a46c5475baa559b357f7f6caf",
+      "sourceHandle": "success",
       "type": "smoothstep",
       "label": "Réussite"
     },
@@ -1017,6 +1031,7 @@
       "id": "test-node-NODE_START_CHOICE_3-choice-2-critical-success-node-a37b42e324a14e49bd57b2ed9e80107d",
       "source": "test-node-NODE_START_CHOICE_3-choice-2",
       "target": "node-a37b42e324a14e49bd57b2ed9e80107d",
+      "sourceHandle": "critical-success",
       "type": "smoothstep",
       "label": "Réussite critique"
     },
@@ -1024,6 +1039,7 @@
       "id": "e:NODE_START_CHOICE_3:choice:__idx_3:test",
       "source": "NODE_START_CHOICE_3",
       "target": "test-node-NODE_START_CHOICE_3-choice-3",
+      "sourceHandle": "choice:__idx_3",
       "type": "smoothstep",
       "label": "Je maquille la chose : je vous...",
       "data": {
@@ -1037,6 +1053,7 @@
       "id": "e:NODE_START_CHOICE_3:choice:__idx_4:test",
       "source": "NODE_START_CHOICE_3",
       "target": "test-node-NODE_START_CHOICE_3-choice-4",
+      "sourceHandle": "choice:__idx_4",
       "type": "smoothstep",
       "label": "Je me tais. Je m'efface, j'ess...",
       "data": {
@@ -1050,6 +1067,7 @@
       "id": "test-node-NODE_START_CHOICE_3-choice-4-critical-failure-node-ddbcd6f5aa3e4b688557665a2e789538",
       "source": "test-node-NODE_START_CHOICE_3-choice-4",
       "target": "node-ddbcd6f5aa3e4b688557665a2e789538",
+      "sourceHandle": "critical-failure",
       "type": "smoothstep",
       "label": "Échec critique"
     },
@@ -1057,6 +1075,7 @@
       "id": "test-node-NODE_START_CHOICE_3-choice-4-failure-node-18172972b92f4f9b85057c5a873f5052",
       "source": "test-node-NODE_START_CHOICE_3-choice-4",
       "target": "node-18172972b92f4f9b85057c5a873f5052",
+      "sourceHandle": "failure",
       "type": "smoothstep",
       "label": "Échec"
     },
@@ -1064,6 +1083,7 @@
       "id": "test-node-NODE_START_CHOICE_3-choice-4-success-node-90f9c0dc1ac64c1fa5584360aabc189e",
       "source": "test-node-NODE_START_CHOICE_3-choice-4",
       "target": "node-90f9c0dc1ac64c1fa5584360aabc189e",
+      "sourceHandle": "success",
       "type": "smoothstep",
       "label": "Réussite"
     },
@@ -1071,6 +1091,7 @@
       "id": "test-node-NODE_START_CHOICE_3-choice-4-critical-success-node-4c3a8920afec411fbd21e8fc1390e488",
       "source": "test-node-NODE_START_CHOICE_3-choice-4",
       "target": "node-4c3a8920afec411fbd21e8fc1390e488",
+      "sourceHandle": "critical-success",
       "type": "smoothstep",
       "label": "Réussite critique"
     },
@@ -1078,6 +1099,7 @@
       "id": "e:node-00f9eba94d8941099321a223bf2d3cb7:choice:__idx_1:test",
       "source": "node-00f9eba94d8941099321a223bf2d3cb7",
       "target": "test-node-node-00f9eba94d8941099321a223bf2d3cb7-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Non — pas ça. Je reprends ma m...",
       "data": {
@@ -1091,6 +1113,7 @@
       "id": "e:node-00f9eba94d8941099321a223bf2d3cb7:choice:__idx_2:test",
       "source": "node-00f9eba94d8941099321a223bf2d3cb7",
       "target": "test-node-node-00f9eba94d8941099321a223bf2d3cb7-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "Je m'enfuis — loin de cette pa...",
       "data": {
@@ -1104,6 +1127,7 @@
       "id": "e:node-346fdbd4f5014004bf8bfd82b991e910:choice:__idx_0:test",
       "source": "node-346fdbd4f5014004bf8bfd82b991e910",
       "target": "test-node-node-346fdbd4f5014004bf8bfd82b991e910-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "Je recommence, sans détour. Je...",
       "data": {
@@ -1117,6 +1141,7 @@
       "id": "e:node-346fdbd4f5014004bf8bfd82b991e910:choice:__idx_1:test",
       "source": "node-346fdbd4f5014004bf8bfd82b991e910",
       "target": "test-node-node-346fdbd4f5014004bf8bfd82b991e910-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Non. Je prétends : laissez-moi...",
       "data": {
@@ -1130,6 +1155,7 @@
       "id": "e:node-9eeaaf5a46c5475baa559b357f7f6caf:choice:__idx_2:test",
       "source": "node-9eeaaf5a46c5475baa559b357f7f6caf",
       "target": "test-node-node-9eeaaf5a46c5475baa559b357f7f6caf-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "Je veux reprendre un fragment ...",
       "data": {
@@ -1143,6 +1169,7 @@
       "id": "e:node-a37b42e324a14e49bd57b2ed9e80107d:choice:__idx_0:test",
       "source": "node-a37b42e324a14e49bd57b2ed9e80107d",
       "target": "test-node-node-a37b42e324a14e49bd57b2ed9e80107d-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "Donne encore. Il reste quelque...",
       "data": {
@@ -1156,6 +1183,7 @@
       "id": "e:node-a37b42e324a14e49bd57b2ed9e80107d:choice:__idx_1:test",
       "source": "node-a37b42e324a14e49bd57b2ed9e80107d",
       "target": "test-node-node-a37b42e324a14e49bd57b2ed9e80107d-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Rends-moi au moins la forme de...",
       "data": {
@@ -1169,6 +1197,7 @@
       "id": "e:node-a37b42e324a14e49bd57b2ed9e80107d:choice:__idx_2:test",
       "source": "node-a37b42e324a14e49bd57b2ed9e80107d",
       "target": "test-node-node-a37b42e324a14e49bd57b2ed9e80107d-choice-2",
+      "sourceHandle": "choice:__idx_2",
       "type": "smoothstep",
       "label": "Qui es-tu, vraiment ? Pourquoi...",
       "data": {
@@ -1182,6 +1211,7 @@
       "id": "e:node-18172972b92f4f9b85057c5a873f5052:choice:__idx_0:test",
       "source": "node-18172972b92f4f9b85057c5a873f5052",
       "target": "test-node-node-18172972b92f4f9b85057c5a873f5052-choice-0",
+      "sourceHandle": "choice:__idx_0",
       "type": "smoothstep",
       "label": "Je... je n'y arrive pas. Prene...",
       "data": {
@@ -1195,6 +1225,7 @@
       "id": "e:node-18172972b92f4f9b85057c5a873f5052:choice:__idx_1:test",
       "source": "node-18172972b92f4f9b85057c5a873f5052",
       "target": "test-node-node-18172972b92f4f9b85057c5a873f5052-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Tu te nourris d'horreurs. Si t...",
       "data": {
@@ -1208,6 +1239,7 @@
       "id": "e:node-4c3a8920afec411fbd21e8fc1390e488:choice:__idx_1:test",
       "source": "node-4c3a8920afec411fbd21e8fc1390e488",
       "target": "test-node-node-4c3a8920afec411fbd21e8fc1390e488-choice-1",
+      "sourceHandle": "choice:__idx_1",
       "type": "smoothstep",
       "label": "Merci. Libère-moi encore d'une...",
       "data": {

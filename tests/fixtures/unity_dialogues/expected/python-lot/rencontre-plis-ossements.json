@@ -405,7 +405,7 @@
       "speaker": "Zaehria Neth'Varu",
       "line": "Les veines se tendent, avalent. Tu offres sans oripeaux : une brûlure nette, une cicatrice que la nuit retourne souvent dans sa paume. Je sens le fil, amer et chaud ; je le prends, je le cisèle, je le lisse. Il n'en restera qu'un mot propre — une pointe qui pourra servir à recoudre l'ordre des Plis.\n\nSoit. Ta douleur entre, se plie, et devient service. Les Plis acceptent — et te rendent, en échange, un fil : un mince ruban d'ombre et de certitude qui s'accroche derrière ta nuque. Il te donnera, quand tu en auras besoin, une clarté froide : un repère dans le bruit, un souffle pour tenir la volonté. Mais sache — quelque fragment de toi est désormais cisaillé. La paroi a compté.",
       "consequences": {
-        "flag": "OFFRANDE_ACCEPT_E",
+        "flag": "OFFRANDE_ACCEPTEE",
         "description": "Le souvenir/douleur a été arraché, corrigé et consumé par les Plis."
       },
       "isLongRest": false,
