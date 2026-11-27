@@ -263,13 +263,17 @@ parcours le prouve. Le retrait du panneau de droite (20.15) attend une colonne e
 
 ## 15. Décisions (état au 2026-11-20)
 
-1. **Cartes de 360 px** — **prise**, sous réserve de la preuve 20.2 (mesure ci-dessus).
+1. **Cartes de 360 px** — **prise**, sur la mesure de longueur de ligne ci-dessus (§ 14, écart 1). Confirmée à part
+   par la preuve de performance 20.2 le 2026-11-27 : seuils d'`epic-20.md` tenus à 500 répliques, sur le prototype
+   derrière son drapeau (sans nœuds de test), avec peu de marge sur le glisser en vue ajustée.
 2. **Graphe de gauche à droite** — **prise** : le lien part de la phrase, plus d'étiquette de lien. Coût : une
    redisposition par dialogue, positions précédentes conservées.
 3. **Paliers de zoom** — **prise** : trois paliers contigus, écrire ≥ 75 %, lire ≥ 40 % et < 75 %, situer < 40 % (A10) ;
    calculés à la fin du zoom, une valeur dans le store, carte en écriture exemptée, hauteur par
    palier connue de la disposition. **Plan B si la preuve 20.2 échoue** : cartes de 280 px et dépliage à la sélection
-   (Epic 18 D3 inchangée), le texte complet restant lisible dans la vue Script.
+   (Epic 18 D3 inchangée), le texte complet restant lisible dans la vue Script. **Plan B non retenu** : la preuve
+   20.2 tient les seuils à 360 px
+   (`_bmad-output/implementation-artifacts/spec-20-2-preuve-performance-cartes-360.md`).
 4. **Tests en sorties** — **prise** (le nœud de test est déjà une vue dérivée, `testNodeSync.ts`).
 5. **Monnaie** — **ouverte** ; d'ici là, la règle actuelle s'applique (§ 6). Options : garder la règle actuelle (estimation en €, dépense en $) ou tout afficher en euros avec un taux fixé
    dans les réglages.

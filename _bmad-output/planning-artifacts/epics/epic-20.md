@@ -347,6 +347,14 @@ README § 7 « Carte de réplique », boards `Graphe`, `Carte`, `Paliers`)
   le Script montre le chemin le plus court de l'ouverture jusqu'à elle (une seule source : l'état d'interface du
   chemin, A4).
 - **Given** le graphe le plus grand des fixtures, **Then** NFR-P1 tient (harnais étendu en 20.2).
+- **Given** le graphe de 500 répliques de 20.2, **Then** p95 glisser < 200 ms et p95 frappe < 100 ms
+  (`npm run test:perf:graph`, `PERF_STRICT=1`), jugés selon le « Protocole de mesure » de
+  `spec-20-2-preuve-performance-cartes-360.md`. Ce critère se mesure **sans nœuds de test** : il se juge donc une fois
+  que 20.8 les a retirés, et 20.8 le rejoue. 20.2 n'a tenu ces seuils que dans ce cas (avec les nœuds de test
+  actuels, le glisser prend 7 à 10 s), sur le prototype, en sortant du chemin du glisser et de la frappe : la
+  reprojection du document, le journal local, la validation d'après enregistrement, les positions du glisser (hors du
+  store du graphe jusqu'au lâcher), la reconstruction des nœuds inchangés du canvas (réutilisés) et la copie
+  d'annulation coûteuse (ses `## Implementation Notes`) : le graphe réel doit en faire autant.
 
 #### Story 20.8 : Tests en sorties et liens hors champ — 1,5 session
 

@@ -8,6 +8,8 @@ import { useGraphStore } from '../store/graphStore'
 import { getChoiceIndexFromSourceHandle } from '../utils/choiceHandleIndex'
 import { isConnectionAllowed } from '../utils/graphConnectionRules'
 import { useGraphViewStore } from '../store/graphViewStore'
+import { useUiLayoutStore } from '../store/uiLayoutStore'
+import { isTextCardsWorkingLayout } from '../utils/syncDocLayout'
 import { collectOutgoingDescendantIds } from '../utils/collectOutgoingDescendantIds'
 import { resolveReactFlowNodeIdUnderPointer } from '../utils/resolveReactFlowNodeIdUnderPointer'
 
@@ -63,6 +65,17 @@ function isChoiceHandle(handleId: string | null): boolean {
   return false
 }
 
+/**
+ * Prototype 20.2 sans nœuds de test : pendant le glisser, les positions restent hors du store
+ * du graphe (`graphViewStore.dragPositions`), qui les reçoit en une fois au lâcher.
+ */
+function usesDragOverlay(): boolean {
+  return (
+    isTextCardsWorkingLayout(useGraphStore.getState().layout) &&
+    !useUiLayoutStore.getState().textCardsTestBars
+  )
+}
+
 export function useReactFlowHandlers(
   fitViewRequestedAfterDimensionsRef: React.MutableRefObject<boolean>,
   options?: UseReactFlowHandlersOptions
@@ -77,12 +90,18 @@ export function useReactFlowHandlers(
   const multiDragRef = useRef<{ primaryId: string; followerIds: string[] } | null>(null)
   const positionRafRef = useRef<number | null>(null)
   const pendingPositionsRef = useRef<Record<string, { x: number; y: number }>>({})
+  /**
+   * Vrai seulement entre `onNodeDragStart` et `onNodeDragStop`, qui écrit l'overlay dans le
+   * store. Tout autre déplacement (rectangle de sélection, flèches) écrit le store aussitôt.
+   */
+  const overlayDragRef = useRef(false)
 
   const {
     setSelectedNode,
     setSelectedNodes,
     clearSelection,
     updateNodePosition,
+    moveNodes,
     updateNodeDimensionsBatch,
     markDirty,
     _pushUndoSnapshot,
@@ -99,6 +118,7 @@ export function useReactFlowHandlers(
         cancelAnimationFrame(positionRafRef.current)
         positionRafRef.current = null
       }
+      useGraphViewStore.getState().setDragPositions(null)
     }
   }, [])
 
@@ -131,9 +151,15 @@ export function useReactFlowHandlers(
   const flushPositionUpdate = useCallback(() => {
     const pendingEntries = Object.entries(pendingPositionsRef.current)
     if (pendingEntries.length > 0) {
+      const pending = pendingPositionsRef.current
       pendingPositionsRef.current = {}
-      for (const [nodeId, position] of pendingEntries) {
-        updateNodePosition(nodeId, position, true)
+      if (overlayDragRef.current) {
+        const view = useGraphViewStore.getState()
+        view.setDragPositions({ ...view.dragPositions, ...pending })
+      } else {
+        for (const [nodeId, position] of pendingEntries) {
+          updateNodePosition(nodeId, position, true)
+        }
       }
     }
     positionRafRef.current = null
@@ -369,6 +395,7 @@ export function useReactFlowHandlers(
   const onNodeDragStart = useCallback(
     (event: React.MouseEvent, node: Node) => {
       _pushUndoSnapshot()
+      overlayDragRef.current = usesDragOverlay()
       const state = useGraphStore.getState()
       const ids = state.selectedNodeIds
       const nodes = state.nodes
@@ -430,30 +457,38 @@ export function useReactFlowHandlers(
       const startPositions = dragStartPositionsRef.current
       const groupMode = dragGroupModeRef.current
       const ids = useGraphStore.getState().selectedNodeIds
-      if (startPositions && ids.length > 1 && ids.includes(node.id)) {
-        const dx = node.position.x - startPositions[node.id].x
-        const dy = node.position.y - startPositions[node.id].y
-        for (const id of Object.keys(startPositions)) {
-          const start = startPositions[id]
-          updateNodePosition(id, { x: start.x + dx, y: start.y + dy }, true)
+      const overlay = overlayDragRef.current
+      overlayDragRef.current = false
+      /** Positions finales : une écriture par nœud, ou une seule pour tout le groupe. */
+      const commit = (moves: Record<string, { x: number; y: number }>) => {
+        if (overlay) {
+          moveNodes(moves)
+          useGraphViewStore.getState().setDragPositions(null)
+          return
         }
+        for (const [id, position] of Object.entries(moves)) updateNodePosition(id, position, true)
+      }
+      const movedGroup = (starts: Record<string, { x: number; y: number }>) => {
+        const dx = node.position.x - starts[node.id].x
+        const dy = node.position.y - starts[node.id].y
+        return Object.fromEntries(
+          Object.entries(starts).map(([id, start]) => [id, { x: start.x + dx, y: start.y + dy }])
+        )
+      }
+      if (startPositions && ids.length > 1 && ids.includes(node.id)) {
+        commit(movedGroup(startPositions))
         markDirty()
       } else if (
         groupMode === 'with-children' &&
         startPositions &&
         startPositions[node.id]
       ) {
-        const dx = node.position.x - startPositions[node.id].x
-        const dy = node.position.y - startPositions[node.id].y
-        for (const id of Object.keys(startPositions)) {
-          const start = startPositions[id]
-          updateNodePosition(id, { x: start.x + dx, y: start.y + dy }, true)
-        }
+        commit(movedGroup(startPositions))
         markDirty()
       } else {
         // Les frames du glisser ont déjà posé la position (sans marquer) : au lâcher,
         // updateNodePosition la voit inchangée, c'est donc ici qu'on marque à sauvegarder.
-        updateNodePosition(node.id, node.position, true)
+        commit({ [node.id]: node.position })
         const start = startPositions?.[node.id]
         if (
           !start ||
@@ -467,7 +502,7 @@ export function useReactFlowHandlers(
       dragGroupModeRef.current = null
       multiDragRef.current = null
     },
-    [updateNodePosition, markDirty]
+    [updateNodePosition, moveNodes, markDirty]
   )
 
   const handleEdgeLabelConfirm = useCallback(

@@ -187,6 +187,11 @@ export interface GraphState {
     skipMarkDirty?: boolean,
     pushUndoSnapshot?: boolean
   ) => void
+  /**
+   * Pose plusieurs positions en une écriture, sans reprojeter le document ni marquer modifié :
+   * réservé au prototype de cartes sans nœuds de test (Story 20.2).
+   */
+  moveNodes: (positions: Record<string, { x: number; y: number }>) => void
   updateNodeDimensions: (
     nodeId: string,
     dimensions: { width: number; height: number }

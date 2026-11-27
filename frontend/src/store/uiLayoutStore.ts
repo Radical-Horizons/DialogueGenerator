@@ -32,7 +32,38 @@ function sectionFromUrl(): CenterPanelTab {
   return section === 'edition' || section === 'graph' ? section : 'generation'
 }
 
+/** Drapeaux du prototype de cartes de texte (Story 20.2), lus à la création du store. */
+export const TEXT_CARDS_STORAGE_KEY = 'ui.textCardsPrototype'
+export const TEXT_CARDS_TEST_BARS_STORAGE_KEY = 'ui.textCardsTestBars'
+
+function readStoredFlag(key: string): boolean {
+  try {
+    return window.localStorage.getItem(key) === '1'
+  } catch {
+    return false
+  }
+}
+
+function writeStoredFlag(key: string, on: boolean): void {
+  try {
+    if (on) window.localStorage.setItem(key, '1')
+    else window.localStorage.removeItem(key)
+  } catch {
+    // Stockage indisponible : le drapeau ne vaut que pour la session.
+  }
+}
+
 interface UiLayoutState {
+  /**
+   * Prototype de la preuve de performance 20.2 : cartes de texte de 360 px, flux gauche →
+   * droite, paliers de zoom. Désactivé par défaut ; sans bouton, il se pose dans
+   * `localStorage` puis se prend au rechargement.
+   */
+  textCardsPrototype: boolean
+  setTextCardsPrototype: (on: boolean) => void
+  /** Mesure d'information 20.2 : garder les nœuds de test actuels sur le canvas du prototype. */
+  textCardsTestBars: boolean
+  setTextCardsTestBars: (on: boolean) => void
   /**
    * Section active. Dans la maquette la navigation vit dans la barre supérieure,
    * à côté du logo — pas au-dessus de la colonne de lecture. L'état est donc
@@ -70,6 +101,17 @@ interface UiLayoutState {
 }
 
 export const useUiLayoutStore = create<UiLayoutState>()((set) => ({
+  textCardsPrototype: readStoredFlag(TEXT_CARDS_STORAGE_KEY),
+  setTextCardsPrototype: (on) => {
+    writeStoredFlag(TEXT_CARDS_STORAGE_KEY, on)
+    set({ textCardsPrototype: on })
+  },
+  textCardsTestBars: readStoredFlag(TEXT_CARDS_TEST_BARS_STORAGE_KEY),
+  setTextCardsTestBars: (on) => {
+    writeStoredFlag(TEXT_CARDS_TEST_BARS_STORAGE_KEY, on)
+    set({ textCardsTestBars: on })
+  },
+
   centerPanelTab: sectionFromUrl(),
   setCenterPanelTab: (tab) => set({ centerPanelTab: tab }),
 

@@ -11,7 +11,19 @@ import * as graphAPI from '../../api/graph'
 import * as documentsAPI from '../../api/documents'
 import { documentToGraph, graphToDocument, buildLayoutFromNodes } from '../../utils/documentToGraph'
 import { calculateDagreLayout } from '../../utils/dagreLayout'
-import { mergeLayoutWithNodePositions } from '../../utils/syncDocLayout'
+import {
+  createQuietTask,
+  queueJournalAck,
+  QUIET_WORK_DELAY_MS,
+} from '../../utils/quietWork'
+import {
+  isTextCardsWorkingLayout,
+  mergeLayoutWithNodePositions,
+  toPersistedLayout,
+  toTextCardsWorkingLayout,
+} from '../../utils/syncDocLayout'
+import { calculateTextCardLayout } from '../../utils/textCardLayout'
+import { useUiLayoutStore } from '../uiLayoutStore'
 import {
   ensureValidNode,
   normalizeChoiceHandleInEdges,
@@ -58,14 +70,23 @@ function normalizeGraphForLoad(
   edges: Edge[],
   get: () => GraphState,
   layoutPositions: { nodes?: Record<string, { x: number; y: number }> } | undefined,
+  // Vrai seulement si le layout de l'appelant range ces positions à part (prototype 20.2) :
+  // une disposition `LR` ne doit jamais finir sous la clé des positions `TB`.
+  textCards = false,
 ): { nodes: Node[]; edges: Edge[] } {
   const shouldAutoLayout = !hasLayoutPositions(layoutPositions)
   let normalized = normalizeTestBars(nodes, edges, shouldAutoLayout ? null : layoutPositions)
   if (shouldAutoLayout && normalized.nodes.length > 1) {
-    const layoutedNodes = calculateDagreLayout(normalized.nodes, normalized.edges, {
-      direction: 'TB',
-      spacingMode: get().layoutSpacingMode,
-    })
+    const spacingMode = get().layoutSpacingMode
+    const layoutedNodes = textCards
+      ? calculateTextCardLayout(normalized.nodes, normalized.edges, {
+          spacingMode,
+          showTestBars: useUiLayoutStore.getState().textCardsTestBars,
+        })
+      : calculateDagreLayout(normalized.nodes, normalized.edges, {
+          direction: 'TB',
+          spacingMode,
+        })
     normalized = normalizeTestBarsAfterLayout(layoutedNodes, normalized.edges)
   }
   return normalized
@@ -161,6 +182,9 @@ export type PersistenceSlice = Pick<
 >
 
 let saveQueue: Promise<void> | null = null
+
+/** Prototype 20.2 : la validation qui suit un enregistrement attend une pause. */
+const quietValidation = createQuietTask(QUIET_WORK_DELAY_MS)
 
 /** Révision envoyée par chaque PUT en vol : celle qu'une sauvegarde keepalive doit attendre + 1. */
 const revisionsInFlight: { document: number | null; layout: number | null } = {
@@ -284,12 +308,14 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
       try {
         const layoutRes = await documentsAPI.getLayout(documentId)
         serverLayout = (layoutRes?.layout ?? {}) as Record<string, unknown>
-        const nodes = serverLayout.nodes as Record<string, { x: number; y: number }> | undefined
-        if (nodes && typeof nodes === 'object' && Object.keys(nodes).length > 0) {
-          layoutPositions = { nodes }
-        }
       } catch {
         // Fallback sessionStorage removed as per plan
+      }
+      const textCards = useUiLayoutStore.getState().textCardsPrototype
+      if (textCards) serverLayout = toTextCardsWorkingLayout(serverLayout)
+      const storedNodes = serverLayout.nodes as Record<string, { x: number; y: number }> | undefined
+      if (storedNodes && typeof storedNodes === 'object' && Object.keys(storedNodes).length > 0) {
+        layoutPositions = { nodes: storedNodes }
       }
 
       const { nodes: projectedNodes, edges: projectedEdges } = documentToGraph(doc, layoutPositions)
@@ -298,6 +324,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         projectedEdges,
         get,
         layoutPositions,
+        textCards,
       )
       const layoutBlob = mergeLayoutWithNodePositions(serverLayout, normalized.nodes)
       const nodeCount = normalized.nodes.filter((n) => n.type !== 'testNode').length
@@ -381,7 +408,9 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         }),
       ])
       const doc = docResponse.document as Record<string, unknown>
-      const layoutBlob = (layoutResponse?.layout ?? {}) as Record<string, unknown>
+      const textCards = useUiLayoutStore.getState().textCardsPrototype
+      const serverLayout = (layoutResponse?.layout ?? {}) as Record<string, unknown>
+      const layoutBlob = textCards ? toTextCardsWorkingLayout(serverLayout) : serverLayout
       const layoutPositions = layoutBlob?.nodes
         ? {
             nodes: layoutBlob.nodes as Record<string, { x: number; y: number }>,
@@ -393,11 +422,13 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         projectedEdges,
         get,
         layoutPositions,
+        textCards,
       )
       const hydratedLayout = mergeLayoutWithNodePositions(layoutBlob, normalized.nodes)
       const nodeCount = normalized.nodes.filter((n) => n.type !== 'testNode').length
 
-      get().applyLoadResult({
+      const layoutRevision = (layoutResponse as { revision: number }).revision ?? 1
+      const applied = get().applyLoadResult({
         nodes: normalized.nodes,
         edges: normalized.edges,
         document: doc,
@@ -410,11 +441,25 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         },
         documentId,
         documentRevision: docResponse.revision,
-        layoutRevision: (layoutResponse as { revision: number }).revision ?? 1,
+        layoutRevision,
         loadSeq,
         documentPersisted: true,
       })
       get().normalizeEdgeColors({ skipMarkDirty: true })
+      // Prototype 20.2 : la disposition `LR` qui vient d'être calculée se range tout de
+      // suite, sans réécrire le document, pour que l'ouverture suivante la reprenne.
+      const hasStoredPositions = hasLayoutPositions(layoutPositions)
+      if (applied && textCards && !hasStoredPositions) {
+        void documentsAPI
+          .putLayout(documentId, {
+            layout: toPersistedLayout(hydratedLayout),
+            revision: layoutRevision,
+          })
+          .then(({ revision }) => {
+            if (get().activeLoadSeq === loadSeq) set({ layoutRevision: revision })
+          })
+          .catch((error: unknown) => console.warn('Disposition LR non enregistrée:', error))
+      }
     } catch (error: unknown) {
       if (get().activeLoadSeq !== loadSeq) return
       console.error('Erreur chargement document:', error)
@@ -570,7 +615,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         )
       }
       const putLayoutAt = async (revision: number) => {
-        const body = { layout: layoutPayload, revision }
+        const body = { layout: toPersistedLayout(layoutPayload), revision }
         return trackRevisionInFlight('layout', revision, async () =>
           (options?.keepalive ? await documentsAPI.putLayoutKeepalive(documentId, body) : null) ??
           (await documentsAPI.putLayout(documentId, body)),
@@ -625,20 +670,42 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         useGraphViewStore
           .getState()
           .notifyDocumentSaved({ documentId, revision: docRes.revision, source: 'graph' })
-        try {
-          await journalAcknowledgeSnapshot(documentId, {
-            nodes: snap.nodes,
-            edges: snap.edges,
-            metadata: snap.dialogueMetadata,
-            ackSeq: snap.clientSeq,
-          })
-        } catch (journalError) {
-          console.warn('Journal save acknowledgement:', journalError)
+        const acknowledged = {
+          nodes: snap.nodes,
+          edges: snap.edges,
+          metadata: snap.dialogueMetadata,
+          ackSeq: snap.clientSeq,
         }
-        try {
-          await get().validateGraph()
-        } catch (validationError) {
-          console.error('Validation après sauvegarde:', validationError)
+        const validateAfterSave = async () => {
+          try {
+            await get().validateGraph()
+          } catch (validationError) {
+            console.error('Validation après sauvegarde:', validationError)
+          }
+        }
+        if (isTextCardsWorkingLayout(layoutPayload)) {
+          // Prototype 20.2 : ni le journal ni la validation ne retiennent la saisie.
+          queueJournalAck(documentId, acknowledged)
+          quietValidation.schedule(() => {
+            // La saisie a repris (le prochain enregistrement replanifie), ou le graphe a été
+            // vidé ou remplacé : ne rien lancer.
+            const current = get()
+            const currentId = current.documentId ?? current.dialogueMetadata.filename ?? null
+            if (
+              current.activeLoadSeq === saveLoadSeq &&
+              currentId === documentId &&
+              !current.hasUnsavedChanges
+            ) {
+              void validateAfterSave()
+            }
+          })
+        } else {
+          try {
+            await journalAcknowledgeSnapshot(documentId, acknowledged)
+          } catch (journalError) {
+            console.warn('Journal save acknowledgement:', journalError)
+          }
+          await validateAfterSave()
         }
         return { success: true, filename: documentId, replacedNewerVersion } as SaveGraphResponse
       } catch (error) {

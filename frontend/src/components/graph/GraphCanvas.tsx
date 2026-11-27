@@ -24,6 +24,11 @@ import ReactFlow, {
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 import { DialogueNode, TestNode, EndNode } from './nodes'
+import { TextCardNode } from './nodes/TextCardNode'
+import { TextCardCanvasEffects } from './textCardCanvas'
+import { useZoomTierMoveHandlers } from '../../hooks/useZoomTierMoveHandlers'
+import { toTextCardEdges } from '../../utils/textCardLayout'
+import { isTextCardsWorkingLayout } from '../../utils/syncDocLayout'
 import { StableLabelSmoothStepEdge } from './edges/StableLabelSmoothStepEdge'
 import { NodeContextMenu } from './NodeContextMenu'
 import { PaneContextMenu } from './PaneContextMenu'
@@ -66,6 +71,7 @@ import {
 } from './graphMinimapLayout'
 import { GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX } from '../../theme/responsiveChrome'
 import { getValidationHighlightKind } from '../../utils/graphStructuralValidation'
+import { reuseUnchanged, sameSetOr, type ReuseCache } from '../../utils/reuseUnchanged'
 
 /** Module-level so React keeps the same component identity across GraphCanvas re-renders. */
 const GraphCanvasInner = memo(function GraphCanvasInner() {
@@ -230,15 +236,21 @@ export const GraphCanvas = memo(function GraphCanvas() {
   const isGuest = useAuthStore((s) => s.user?.role === 'guest')
   const showGraphMinimap = useUiLayoutStore((s) => s.showGraphMinimap)
   const toggleGraphMinimap = useUiLayoutStore((s) => s.toggleGraphMinimap)
+  const textCards = useUiLayoutStore((s) => s.textCardsPrototype)
+  const textCardsTestBars = useUiLayoutStore((s) => s.textCardsTestBars)
+  const zoomTierHandlers = useZoomTierMoveHandlers()
 
   const visibleStoreNodes = useMemo(
     () => applyNodeFilters(storeNodes, graphFilters),
     [storeNodes, graphFilters]
   )
-  const visibleStoreNodeIds = useMemo(
-    () => new Set(visibleStoreNodes.map((n) => n.id)),
-    [visibleStoreNodes]
-  )
+  const previousNodeIdsRef = useRef<Set<string> | null>(null)
+  const visibleStoreNodeIds = useMemo(() => {
+    const ids = new Set(visibleStoreNodes.map((n) => n.id))
+    // Prototype 20.2 : mêmes nœuds visibles, mêmes liens visibles.
+    previousNodeIdsRef.current = textCards ? sameSetOr(previousNodeIdsRef.current, ids) : ids
+    return previousNodeIdsRef.current
+  }, [textCards, visibleStoreNodes])
   const visibleStoreEdges = useMemo(
     () => applyEdgeFilters(storeEdges, visibleStoreNodeIds),
     [storeEdges, visibleStoreNodeIds]
@@ -537,8 +549,14 @@ export const GraphCanvas = memo(function GraphCanvas() {
   }
 
   // Dériver nodes du store avec enrichissement (validation, highlight, sélection)
+  const enrichedCacheRef = useRef<ReuseCache<ReactFlowNode, ReactFlowNode>>(new WeakMap())
   const nodes = useMemo(() => {
-    return visibleStoreNodes.map((node) => {
+    // Prototype 20.2 : les issues de test sont des ports de la carte, les barres sortent.
+    const canvasNodes =
+      textCards && !textCardsTestBars
+        ? visibleStoreNodes.filter((node) => node.type !== 'testNode')
+        : visibleStoreNodes
+    const enrich = (node: (typeof canvasNodes)[number]) => {
       const nodeErrors = validationErrors.filter((err) => err.node_id === node.id)
       const errors = nodeErrors.filter((err) => err.severity === 'error')
       const warnings = nodeErrors.filter((err) => err.severity === 'warning')
@@ -583,8 +601,38 @@ export const GraphCanvas = memo(function GraphCanvas() {
           incomingEdgeColor: incomingEdgeColorByTarget.get(node.id),
         },
       }
-    })
-  }, [visibleStoreNodes, selectedNodeIds, validationErrors, highlightedNodeIds, highlightedCycleNodes, incomingEdgeColorByTarget])
+    }
+    if (!textCards) return canvasNodes.map(enrich)
+    // Prototype 20.2 : une sélection ou un déplacement ne reconstruit que les nœuds touchés,
+    // les autres cartes ne se redessinent pas.
+    return canvasNodes.map((node) =>
+      reuseUnchanged(
+        enrichedCacheRef.current,
+        node,
+        [
+          selectedNodeIds.includes(node.id),
+          highlightedNodeIds.includes(node.id),
+          highlightedCycleNodes.includes(node.id),
+          validationErrors,
+          incomingEdgeColorByTarget.get(node.id),
+        ],
+        () => enrich(node)
+      )
+    )
+  }, [textCards, textCardsTestBars, visibleStoreNodes, selectedNodeIds, validationErrors, highlightedNodeIds, highlightedCycleNodes, incomingEdgeColorByTarget])
+
+  // Prototype 20.2 : positions du glisser en cours, posées par-dessus les nœuds déjà dérivés.
+  // Seuls les nœuds déplacés changent d'identité, donc seules leurs cartes se redessinent.
+  const dragPositions = useGraphViewStore((s) => s.dragPositions)
+  const shownNodes = useMemo(
+    () =>
+      dragPositions
+        ? nodes.map((node) =>
+            dragPositions[node.id] ? { ...node, position: dragPositions[node.id] } : node
+          )
+        : nodes,
+    [nodes, dragPositions]
+  )
 
   // Dériver edges du store — Story 2.9 FR30, ADR-008
   const brokenEdgeTargets = useMemo(
@@ -604,14 +652,24 @@ export const GraphCanvas = memo(function GraphCanvas() {
     [visibleStoreEdges, brokenEdgeTargets]
   )
   // Écran 2e : le chemin sortant du nœud sélectionné passe à l'accent.
+  // Projeter avant d'accentuer : en prototype, les liens d'issue ne partent de la réplique
+  // sélectionnée qu'une fois projetés.
+  const canvasEdges = useMemo(
+    () => (textCards ? toTextCardEdges(restingEdges, textCardsTestBars) : restingEdges),
+    [textCards, textCardsTestBars, restingEdges]
+  )
   const edges = useMemo(
-    () => highlightSelectedOutgoingEdges(restingEdges, selectedNodeId, brokenEdgeTargets),
-    [restingEdges, selectedNodeId, brokenEdgeTargets]
+    () => highlightSelectedOutgoingEdges(canvasEdges, selectedNodeId, brokenEdgeTargets),
+    [canvasEdges, selectedNodeId, brokenEdgeTargets]
   )
 
   const nodeTypes: NodeTypes = useMemo(
-    () => ({ dialogueNode: DialogueNode, testNode: TestNode, endNode: EndNode }),
-    []
+    () => ({
+      dialogueNode: textCards ? TextCardNode : DialogueNode,
+      testNode: TestNode,
+      endNode: EndNode,
+    }),
+    [textCards]
   )
   const edgeTypes = useMemo(() => ({ smoothstep: StableLabelSmoothStepEdge }), [])
   const defaultEdgeOptions = useMemo(
@@ -634,15 +692,17 @@ export const GraphCanvas = memo(function GraphCanvas() {
     [minimapSize.height, minimapSize.width]
   )
 
-  const onMove = (_event: unknown, newViewport: Viewport) => {
+  const onMove = (event: unknown, newViewport: Viewport) => {
     setViewport(newViewport)
+    if (textCards) zoomTierHandlers.onGestureMove(event)
   }
 
   return (
     <div ref={ref} style={{ width: '100%', height: '100%', position: 'relative' }}>
       <GraphCanvasInner />
+      {textCards && <TextCardCanvasEffects gestureRef={zoomTierHandlers.gestureRef} />}
       <ReactFlow
-        nodes={nodes}
+        nodes={shownNodes}
         edges={edges}
         fitView={false}
         defaultViewport={DEFAULT_VIEWPORT}
@@ -651,6 +711,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
         {...GRAPH_VIEWPORT_INTERACTION_OPTIONS}
         onlyRenderVisibleElements={true}
         onMove={onMove}
+        onMoveEnd={textCards ? zoomTierHandlers.onGestureEnd : undefined}
         onMoveStart={() => {
           longPress.cancelForViewportInteraction()
         }}
@@ -802,7 +863,10 @@ export const GraphCanvas = memo(function GraphCanvas() {
             setPaneMenu(null)
           }}
           onAutoLayout={() => {
-            applyAutoLayout('dagre', 'TB')
+            // La direction suit le layout ouvert, pas le drapeau : `LR` ne s'écrit que là où
+            // les positions `TB` sont mises de côté.
+            const { layout } = useGraphStore.getState()
+            applyAutoLayout('dagre', isTextCardsWorkingLayout(layout) ? 'LR' : 'TB')
             setPaneMenu(null)
           }}
           onClose={() => setPaneMenu(null)}

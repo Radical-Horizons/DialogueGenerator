@@ -5,6 +5,8 @@
 import type { StateCreator } from 'zustand'
 import type { Node, Edge } from 'reactflow'
 import type { GraphState, GraphSnapshot } from '../types/graphState'
+import { cloneJson } from '../../utils/cloneJson'
+import { isTextCardsWorkingLayout } from '../../utils/syncDocLayout'
 
 const MAX_UNDO_SNAPSHOTS = 50
 
@@ -29,15 +31,15 @@ function cloneSnapshot(state: {
   document: Record<string, unknown> | null
   layout: Record<string, unknown> | null
 }): GraphSnapshot {
+  // Prototype 20.2 : même copie, sans repasser par le texte JSON.
+  const clone = isTextCardsWorkingLayout(state.layout)
+    ? cloneJson
+    : <T>(value: T) => JSON.parse(JSON.stringify(value)) as T
   return {
-    nodes: state.nodes.map((n) => ({ ...n, data: JSON.parse(JSON.stringify(n.data)) })),
+    nodes: state.nodes.map((n) => ({ ...n, data: clone(n.data) })),
     edges: state.edges.map((e) => ({ ...e })),
-    document: state.document
-      ? (JSON.parse(JSON.stringify(state.document)) as Record<string, unknown>)
-      : null,
-    layout: state.layout
-      ? (JSON.parse(JSON.stringify(state.layout)) as Record<string, unknown>)
-      : null,
+    document: state.document ? clone(state.document) : null,
+    layout: state.layout ? clone(state.layout) : null,
   }
 }
 

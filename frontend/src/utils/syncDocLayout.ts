@@ -37,6 +37,40 @@ export function mergeLayoutWithNodePositions(
   }
 }
 
+/** Marque un layout en mémoire dont `nodes` porte les positions gauche → droite. */
+const TEXT_CARDS_LAYOUT_MARKER = 'textCardsPrototype'
+
+/**
+ * Prototype 20.2 : tout le store lit `layout.nodes`. À l'ouverture, on y met les positions
+ * gauche → droite (`nodesLR` côté serveur) et on garde de côté les positions haut → bas,
+ * que `toPersistedLayout` remet à leur place avant tout enregistrement.
+ */
+export function toTextCardsWorkingLayout(
+  persisted: Record<string, unknown>
+): Record<string, unknown> {
+  const { nodes, nodesLR, ...rest } = persisted
+  return {
+    ...rest,
+    nodes: nodesLR ?? {},
+    nodesTB: nodes ?? {},
+    [TEXT_CARDS_LAYOUT_MARKER]: true,
+  }
+}
+
+export function isTextCardsWorkingLayout(
+  layout: Record<string, unknown> | null | undefined
+): boolean {
+  return layout?.[TEXT_CARDS_LAYOUT_MARKER] === true
+}
+
+/** Inverse de `toTextCardsWorkingLayout` ; un layout ordinaire est rendu tel quel. */
+export function toPersistedLayout(layout: Record<string, unknown>): Record<string, unknown> {
+  if (!isTextCardsWorkingLayout(layout)) return layout
+  const { nodes, nodesTB, ...rest } = layout
+  delete rest[TEXT_CARDS_LAYOUT_MARKER]
+  return { ...rest, nodes: nodesTB ?? {}, nodesLR: nodes ?? {} }
+}
+
 function isTestBarLayoutKey(id: string): boolean {
   return id.startsWith('test-node-') || id.startsWith('test:')
 }
