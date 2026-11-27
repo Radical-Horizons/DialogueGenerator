@@ -13,6 +13,15 @@ epic peut contenir des stories d'un autre numéro, qui en font partie.
 en entier. Utilise la clé complète pour `sprint-status.yaml`. Les sous-agents que le
 workflow demande sont autorisés.
 
+**Contraintes du poste.** Des modèles IA y tournent presque toujours : aucune mesure ni
+vérification ne doit supposer un PC au repos, et ne tue aucun processus qui n'est pas à toi.
+N'ouvre jamais de fenêtre de navigateur (navigateur intégré ou Playwright headless).
+
+**Rendre la main.** La session parente est réveillée à chaque fin de ton tour. Lance les
+tests et autres commandes longues **au premier plan** (délai de 10 min) plutôt qu'en
+arrière-plan, et ne termine pas ton tour avant `PRÊT`, `QUESTION` ou `BLOQUÉ` si tu peux
+l'éviter.
+
 **Approbation (mode validation).** À chaque arrêt de `bmad-build` (approbation de spec,
 question ouverte, découpage, arbre sale), termine ton tour en posant la question et ses
 options dès les premières lignes. La session parente la relaiera à l'utilisateur. Si
@@ -46,6 +55,11 @@ serveur lancé autrement doit avoir `OPENAI_API_KEY` vidée.
 toucher aux autres lignes : ce statut n'atteindra `main` qu'à la fusion. Commit, push,
 puis `gh pr create --base main`. **Ne fusionne pas**, la session parente vérifie et
 fusionne. N'attends pas la CI.
+
+L'utilisateur veut que la boucle soit réveillée quand la CI échoue : après `gh pr create`,
+lis `mcp__ccd_pr__get_status` ; si `monitor.auto_fix` est faux, active-le avec
+`mcp__ccd_pr__set_monitor`. Réveillée par un échec : corrige, pousse, et rends compte de
+nouveau avec la même première ligne.
 
 **4. Rendre compte.** La première ligne de ton dernier message est exactement l'une de :
 

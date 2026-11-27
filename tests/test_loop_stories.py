@@ -156,3 +156,27 @@ def test_journal_sets_and_clears_fields(tmp_path: Path) -> None:
 
     assert data == {"20-2-perf": {"session": "local_1"}}
     assert loop.journal_update(path, None, []) == data
+
+
+def _run(conclusion: str, status: str = "completed") -> dict:
+    """Exécution de CI minimale."""
+    return {"status": status, "conclusion": conclusion}
+
+
+@pytest.mark.parametrize(
+    ("runs", "expected"),
+    [
+        # Vécu sur la PR 119 : exécution fantôme du bot à côté de la vraie CI verte.
+        ([_run("action_required"), _run("success")], "verte"),
+        ([_run("action_required")], "absente"),
+        ([], "absente"),
+        ([_run("success"), _run("", "in_progress")], "en-cours"),
+        ([_run("success"), _run("failure")], "rouge"),
+        ([_run("failure"), _run("", "queued")], "rouge"),
+        ([_run("cancelled"), _run("success")], "verte"),
+        ([_run("cancelled")], "absente"),
+    ],
+)
+def test_ci_verdict(runs: list[dict], expected: str) -> None:
+    """Le verdict ignore ce qui n'a jamais démarré et ne cache aucun échec."""
+    assert loop.ci_verdict(runs) == expected

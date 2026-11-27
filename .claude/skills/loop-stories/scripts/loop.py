@@ -160,6 +160,49 @@ def verify(branch: str, key: str, base: str) -> dict:
     return {"ok": not problems, "problems": problems, "specs": specs, "files": len(changed)}
 
 
+def ci_verdict(runs: list[dict]) -> str:
+    """Verdict des exécutions de CI d'un même commit.
+
+    `action_required` n'est pas une attente : GitHub crée ces exécutions pour un
+    push du bot et ne les démarre jamais.
+    """
+    live = [r for r in runs if r.get("conclusion") not in ("action_required", "skipped")]
+    done = [r["conclusion"] for r in live if r["status"] == "completed"]
+    if any(c not in ("success", "neutral", "cancelled") for c in done):
+        return "rouge"
+    if len(done) < len(live):
+        return "en-cours"
+    return "verte" if "success" in done else "absente"
+
+
+def gh_json(*args: str) -> dict | list:
+    """Exécute gh et rend son JSON ; lève LoopError en cas d'échec."""
+    result = subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8")
+    if result.returncode != 0:
+        raise LoopError(f"gh {' '.join(args)} : {result.stderr.strip()}")
+    return json.loads(result.stdout)
+
+
+def ci(pr: str) -> dict:
+    """État de la CI sur le dernier commit d'une PR, lu dans les exécutions.
+
+    La liste de contrôles de la PR ne suffit pas : une CI relancée par
+    `workflow_dispatch` n'y apparaît pas.
+    """
+    view = gh_json("pr", "view", pr, "--json", "headRefOid,mergeable")
+    head = view["headRefOid"]
+    fields = "status,conclusion,event,url"
+    runs = gh_json("run", "list", "--workflow", "ci.yml", "--commit", head, "--json", fields)
+    verdict = ci_verdict(runs)
+    return {
+        "ok": verdict == "verte",
+        "verdict": verdict,
+        "head": head,
+        "mergeable": view["mergeable"],
+        "runs": runs,
+    }
+
+
 def journal_path() -> Path:
     """Emplacement du journal de la boucle."""
     # Dans le .git commun : partagé entre worktrees, jamais commité, ne salit rien.
@@ -198,6 +241,9 @@ def main(argv: list[str] | None = None) -> int:
     check.add_argument("key")
     check.add_argument("--base", default="origin/main")
 
+    checks = commands.add_parser("ci", help="CI du dernier commit d'une PR")
+    checks.add_argument("pr")
+
     journal = commands.add_parser("journal", help="lire, ou écrire champ=valeur")
     journal.add_argument("key", nargs="?")
     journal.add_argument("pairs", nargs="*")
@@ -210,6 +256,8 @@ def main(argv: list[str] | None = None) -> int:
             result = build_queue(board, args.epic, args.limit, known)
         elif args.command == "verify":
             result = verify(args.branch, args.key, args.base)
+        elif args.command == "ci":
+            result = ci(args.pr)
         else:
             result = journal_update(journal_path(), args.key, args.pairs)
     except LoopError as exc:
