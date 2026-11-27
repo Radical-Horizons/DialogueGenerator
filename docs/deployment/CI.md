@@ -56,7 +56,7 @@ Une PR mixte code + doc lance bien la CI. **Attention** : si `Backend (pytest)`,
 
 | Workflow | Déclencheur | Rôle |
 |----------|-------------|------|
-| `pr-merge-main-prefer-head-data.yml` | Push sur PR vers `main` | Merge `main`, arbitre conflits `data/` en faveur de la PR, relance CI |
+| `pr-merge-main-prefer-head-data.yml` | Push sur PR vers `main` | Ne pousse qu'en cas de conflit `data/` avec `main` (arbitré pour la PR), puis relance la CI |
 | `pr-diff-gdd-split.yml` | Ouverture / push PR | Commente le diff séparé GDD vs code |
 
 Détails et invariants : `.claude/rules/github_automation.md`.

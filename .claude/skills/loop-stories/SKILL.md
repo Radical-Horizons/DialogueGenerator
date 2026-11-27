@@ -38,6 +38,7 @@ vaut ni déploiement, ni `push --force`.
 | `$B journal <clé> champ=valeur …` | écrire ; `champ=` efface |
 | `$B queue --ref <ref> [--epic N] [--limit N]` | prochaines stories, dans l'ordre du fichier |
 | `$B verify <branche> <clé> --base origin/main` | contrôle de livraison, code 1 si incomplet |
+| `$B ci <n° de PR>` | CI du dernier commit : `verte`, `rouge`, `en-cours` ou `absente` |
 
 Champs d'une story : `etat` (`en-cours`, `a-fusionner`, `fusionnee`, `bloquee`),
 `session`, `branche`, `base` (SHA de départ), `pr`, `corrections`. Entrée `_boucle` :
@@ -100,6 +101,9 @@ mots de l'utilisateur. Lui dire de répondre ici plutôt que dans la session fil
 répond là-bas, l'application ne te réveillera pas et il devra écrire « continue la
 boucle ».
 
+**La session attend un sous-agent ou une commande en arrière-plan** (son dernier message le
+dit) : une ligne à l'utilisateur, aucun outil, terminer le tour. Elle reprendra seule.
+
 **Aucune des lignes `PRÊT` / `QUESTION` / `BLOQUÉ`** (session interrompue, limite d'usage,
 arrêt interne de `bmad-build`) : lire la fin de la session. Travail à finir : le lui
 demander (compte comme une correction). Cause hors de sa portée : le dire et s'arrêter.
@@ -111,14 +115,15 @@ demander (compte comme une correction). Cause hors de sa portée : le dire et s'
    de la story du dessous compterait pour celle-ci.
 2. Lire dans la spec le `Review Triage Log` et le diff `--stat`. Relever ce qui a été
    reporté dans `deferred-work.md`.
-3. CI : `mcp__ccd_pr__get_status` avec le `session_id` de la fille. **Verte** = au moins un
-   contrôle, tous réussis. Zéro contrôle (un workflow a pu pousser une fusion de `main` sur
-   la branche) : lire une fois `gh run list --branch <branche> --limit 5`.
+3. CI : `ci <n°>`, qui lit les exécutions du dernier commit. **Ne pas juger sur les compteurs
+   de `get_status`** : une CI relancée par un workflow n'y figure pas, et des exécutions
+   `action_required` y restent « en attente » pour toujours. `absente` n'est acceptable que si
+   tout le diff est dans les `paths-ignore` de `ci.yml` ; sinon le signaler.
 
 | Constat | Suite |
 |---|---|
 | `verify` ok, CI verte, fusionnable, rien en attente dessous | `gh pr merge <n> --merge`, `etat=fusionnee`, `faites` + 1, story suivante |
-| `verify` ok, CI en attente | `etat=a-fusionner`, `faites` + 1, story suivante empilée sur sa branche |
+| `verify` ok, CI `en-cours` | `etat=a-fusionner`, `faites` + 1, story suivante empilée sur sa branche |
 | `verify` en échec, CI rouge ou conflit | correction (ci-dessous) |
 
 - **Jamais de fusion d'une story empilée avant que celle du dessous soit `fusionnee`** : sa
@@ -126,6 +131,8 @@ demander (compte comme une correction). Cause hors de sa portée : le dire et s'
 - **Commit de fusion, jamais squash**, pour la même raison.
 - **Ne pas attendre la CI** : aucun `gh pr checks --watch`, aucune boucle d'attente. Les PR
   en attente se traitent au réveil suivant, la plus ancienne d'abord.
+- **Échec de CI** : l'Auto-fix de la session de la story la réveille, et la fin de son tour te
+  réveille. Si elle l'a déjà corrigé, reprendre à `verify` ; sinon, correction.
 - **Une seule PR en attente sous la story en cours.** À la deuxième, s'arrêter.
 - Fusion refusée par les permissions : le dire tout de suite, sans chercher d'autre voie.
 
@@ -146,6 +153,8 @@ n'est **pas** fusionné et que `/loop-stories` le reprendra.
 
 ## Limites à annoncer, pas à contourner
 
+- **Une CI verte ne réveille personne.** La dernière PR d'une série reste à fusionner si sa
+  CI tourne encore : le dire, « continue la boucle » la fusionne.
 - Après beaucoup de réveils sans message de l'utilisateur, ou après un tour interrompu,
   l'application attend qu'il écrive. « continue la boucle » reprend depuis le journal.
 - Les sessions filles héritent du mode de permission de cette conversation : en mode

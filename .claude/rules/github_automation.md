@@ -10,7 +10,7 @@ de fichier.
 | Déclencheur | Workflow | Effet |
 |---|---|---|
 | PR vers `main`, push sur `main`, `workflow_dispatch` | `ci.yml` | Backend pytest, Vitest, ESLint, `tsc --noEmit`. T2 sur PR, T3 sur push `main`. |
-| Push sur une PR vers `main` | `pr-merge-main-prefer-head-data.yml` | Merge `main`, arbitre les conflits `data/` en faveur de la PR. |
+| Push sur une PR vers `main` | `pr-merge-main-prefer-head-data.yml` | Ne pousse que si fusionner `main` crée un conflit `data/`, arbitré en faveur de la PR. |
 | Ouverture / push d'une PR | `pr-diff-gdd-split.yml` | Commente le diff séparé GDD vs code. **Informatif** : ni correctif ni réponse attendus — lire la colonne « hors GDD », ignorer l'autre (`.claude/rules/git_commit.md`). |
 
 Il n'y a plus de branche `dev` (2026-10-29) : toutes les PR ciblent `main`, qui est la
@@ -31,6 +31,12 @@ sur le HEAD d'**avant** le merge et le commit réellement mergé ne serait jamai
 retirer le déclencheur `workflow_dispatch` de `ci.yml`, ni l'étape de relais. Corollaire :
 les steps de test de `ci.yml` sont conditionnés par `github.event_name != 'push'` pour le
 tier T2, pas par `== 'pull_request'` — sinon un run relancé n'exécuterait rien.
+
+⚠️ Pour un push du bot, GitHub crée quand même sur la PR des exécutions `pull_request` en
+`action_required`, qui ne démarrent jamais : la PR paraît « en attente » alors que la CI
+relancée est verte et invisible dans ses contrôles (vécu le 2026-11-27, PR #119). D'où deux
+choses : ne pousser que lorsque c'est indispensable, et juger la CI sur les exécutions du
+dernier commit (`gh run list --workflow ci.yml --commit <sha>`).
 
 **2. La famille `pull_request` s'exécute depuis la branche de la PR.** `pull_request`,
 `pull_request_review` et `pull_request_review_comment` lisent le fichier de workflow présent
