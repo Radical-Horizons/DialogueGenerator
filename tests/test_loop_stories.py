@@ -1,4 +1,4 @@
-"""Partie déterministe du skill `boucle-stories`."""
+"""Partie déterministe du skill `loop-stories`."""
 
 import importlib.util
 import subprocess
@@ -7,11 +7,11 @@ from pathlib import Path
 
 import pytest
 
-SCRIPT = Path(__file__).resolve().parents[1] / ".claude/skills/boucle-stories/scripts/boucle.py"
-SPEC = importlib.util.spec_from_file_location("boucle", SCRIPT)
+SCRIPT = Path(__file__).resolve().parents[1] / ".claude/skills/loop-stories/scripts/loop.py"
+SPEC = importlib.util.spec_from_file_location("loop_stories", SCRIPT)
 assert SPEC is not None and SPEC.loader is not None
-boucle = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(boucle)
+loop = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(loop)
 
 BOARD = """development_status:
   epic-6: done
@@ -30,7 +30,7 @@ BOARD = """development_status:
 
 def test_queue_follows_the_block_not_the_prefix() -> None:
     """Le bloc epic-20 garde ses stories 18-x, dans l'ordre."""
-    queue = boucle.build_queue(BOARD)
+    queue = loop.build_queue(BOARD)
 
     assert queue["epic"] == 20
     assert [s["key"] for s in queue["next"]] == ["20-2-perf", "18-4-annulation"]
@@ -40,7 +40,7 @@ def test_queue_follows_the_block_not_the_prefix() -> None:
 
 def test_queue_limit_keeps_the_total() -> None:
     """La limite ne masque pas le reste à faire."""
-    queue = boucle.build_queue(BOARD, epic=20, limit=1)
+    queue = loop.build_queue(BOARD, epic=20, limit=1)
 
     assert len(queue["next"]) == 1
     assert queue["remaining"] == 2
@@ -50,7 +50,7 @@ def test_queue_never_offers_a_story_already_launched() -> None:
     """Une story au journal n'est pas relancée, même `backlog` sur la ref."""
     journal = {"20-2-perf": {"etat": "bloquee"}, "_boucle": {"max": "3"}}
 
-    queue = boucle.build_queue(BOARD, journal=journal)
+    queue = loop.build_queue(BOARD, journal=journal)
 
     assert [s["key"] for s in queue["next"]] == ["18-4-annulation"]
     assert queue["launched"] == {"20-2-perf": "bloquee"}
@@ -58,8 +58,8 @@ def test_queue_never_offers_a_story_already_launched() -> None:
 
 def test_queue_rejects_unknown_epic() -> None:
     """Un epic absent est une erreur."""
-    with pytest.raises(boucle.BoucleError):
-        boucle.build_queue(BOARD, epic=99)
+    with pytest.raises(loop.LoopError):
+        loop.build_queue(BOARD, epic=99)
 
 
 @pytest.mark.parametrize(
@@ -73,9 +73,9 @@ def test_queue_rejects_unknown_epic() -> None:
 )
 def test_spec_pattern(key: str, name: str, expected: bool) -> None:
     """Une story ne prend pas la spec d'une voisine."""
-    path = f"{boucle.ARTIFACTS}/{name}"
+    path = f"{loop.ARTIFACTS}/{name}"
 
-    assert bool(boucle.spec_pattern(key).match(path)) is expected
+    assert bool(loop.spec_pattern(key).match(path)) is expected
 
 
 Repo = tuple[Callable[..., None], Callable[[str, str], None], Callable[[str], None]]
@@ -99,7 +99,7 @@ def repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Repo:
         run("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-m", message)
 
     run("init", "-b", "main")
-    write(boucle.STATUS_PATH, BOARD)
+    write(loop.STATUS_PATH, BOARD)
     commit("base")
     run("switch", "-c", "story")
     return run, write, commit
@@ -108,22 +108,22 @@ def repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Repo:
 def test_verify_accepts_a_delivered_story(repo: Repo) -> None:
     """Livraison complète et poussée : aucun problème."""
     run, write, commit = repo
-    write(boucle.STATUS_PATH, BOARD.replace("20-2-perf: backlog", "20-2-perf: done"))
-    write(f"{boucle.ARTIFACTS}/spec-20-2-perf.md", "---\nstatus: 'done'\n---\n")
+    write(loop.STATUS_PATH, BOARD.replace("20-2-perf: backlog", "20-2-perf: done"))
+    write(f"{loop.ARTIFACTS}/spec-20-2-perf.md", "---\nstatus: 'done'\n---\n")
     write("frontend/perf.ts", "export {}\n")
     commit("livraison")
     run("update-ref", "refs/remotes/origin/story", "HEAD")
 
-    assert boucle.verify("story", "20-2-perf", "main")["problems"] == []
+    assert loop.verify("story", "20-2-perf", "main")["problems"] == []
 
 
 def test_verify_lists_every_missing_proof(repo: Repo) -> None:
     """Chaque preuve manquante est listée."""
     _, write, commit = repo
-    write(f"{boucle.ARTIFACTS}/spec-20-2-perf.md", "---\nstatus: in-review\n---\n")
+    write(f"{loop.ARTIFACTS}/spec-20-2-perf.md", "---\nstatus: in-review\n---\n")
     commit("à moitié")
 
-    result = boucle.verify("story", "20-2-perf", "main")
+    result = loop.verify("story", "20-2-perf", "main")
 
     assert result["ok"] is False
     assert len(result["problems"]) == 4
@@ -132,8 +132,8 @@ def test_verify_lists_every_missing_proof(repo: Repo) -> None:
 def test_verify_reads_the_pushed_branch_with_accented_names(repo: Repo) -> None:
     """Locale en retard sur origin et nom de spec accentué : livraison valable."""
     run, write, commit = repo
-    write(boucle.STATUS_PATH, BOARD.replace("20-2-perf: backlog", "20-2-perf: done"))
-    write(f"{boucle.ARTIFACTS}/spec-20-2-qualité.md", "---\nstatus: done\n---\n")
+    write(loop.STATUS_PATH, BOARD.replace("20-2-perf: backlog", "20-2-perf: done"))
+    write(f"{loop.ARTIFACTS}/spec-20-2-qualité.md", "---\nstatus: done\n---\n")
     write("frontend/perf.ts", "export {}\n")
     commit("livraison")
     write("fusion-de-main.txt", "x\n")
@@ -141,18 +141,18 @@ def test_verify_reads_the_pushed_branch_with_accented_names(repo: Repo) -> None:
     run("update-ref", "refs/remotes/origin/story", "HEAD")
     run("reset", "--hard", "HEAD~1")
 
-    result = boucle.verify("story", "20-2-perf", "main")
+    result = loop.verify("story", "20-2-perf", "main")
 
     assert result["problems"] == []
-    assert result["specs"] == [f"{boucle.ARTIFACTS}/spec-20-2-qualité.md"]
+    assert result["specs"] == [f"{loop.ARTIFACTS}/spec-20-2-qualité.md"]
 
 
 def test_journal_sets_and_clears_fields(tmp_path: Path) -> None:
     """Écrit, efface et relit le journal."""
     path = tmp_path / "journal.json"
 
-    boucle.journal_update(path, "20-2-perf", ["session=local_1", "pr=7"])
-    data = boucle.journal_update(path, "20-2-perf", ["pr="])
+    loop.journal_update(path, "20-2-perf", ["session=local_1", "pr=7"])
+    data = loop.journal_update(path, "20-2-perf", ["pr="])
 
     assert data == {"20-2-perf": {"session": "local_1"}}
-    assert boucle.journal_update(path, None, []) == data
+    assert loop.journal_update(path, None, []) == data
