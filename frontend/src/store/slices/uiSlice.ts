@@ -12,6 +12,8 @@ import * as graphAPI from '../../api/graph'
 import {
   setPending as journalSetPending,
 } from '../../utils/graphJournal'
+import { queueJournalPending } from '../../utils/quietWork'
+import { isTextCardsWorkingLayout } from '../../utils/syncDocLayout'
 import { useGraphViewStore } from '../graphViewStore'
 import { nodeTargetDisplayLabel } from '../../utils/nodeTargetLabel'
 import { visibleCycleHighlightNodeIds } from '../../utils/graphValidationSummary'
@@ -318,12 +320,18 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
     const state = get()
     const docId = state.documentId ?? state.dialogueMetadata.filename ?? null
     if (docId) {
-      journalSetPending(docId, {
+      const pending = {
         nodes: state.nodes,
         edges: state.edges,
         metadata: state.dialogueMetadata,
         seq: state.clientSeq,
-      }).catch((e) => console.warn('Journal setPending:', e))
+      }
+      // Prototype 20.2 : écrire le journal bloquait le fil à chaque frappe ; il attend une pause.
+      if (isTextCardsWorkingLayout(state.layout)) {
+        queueJournalPending(docId, pending)
+      } else {
+        journalSetPending(docId, pending).catch((e) => console.warn('Journal setPending:', e))
+      }
     }
   },
 

@@ -8,7 +8,7 @@
  */
 import { test, expect, type Page } from '@playwright/test'
 import { triggerGraphSave } from './trigger-graph-save'
-import { uniqueE2EDocumentId, openDashboardGraphTabAndSelectDocument } from './helpers'
+import { uniqueE2EDocumentId, openDashboardGraphTabAndSelectDocument, openNodeEditor } from './helpers'
 import { E2E_MS, E2E_TEST_TIMEOUT_MS } from './timeouts'
 
 const API_BASE = 'http://127.0.0.1:4243'
@@ -173,7 +173,7 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
 
     // Cliquer sur le premier nœud pour l'éditer
     await page.locator('.react-flow__node').first().click()
-    await expect(page.locator('input[name="speaker"]')).toBeVisible({ timeout: E2E_MS.medium })
+    await openNodeEditor(page)
 
     // Remplir les champs — l'UI doit refléter immédiatement les nouvelles valeurs
     await page.locator('input[name="speaker"]').fill(speakerVal)
@@ -213,7 +213,7 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
 
     // Cliquer sur le premier nœud pour l'éditer
     await page.locator('.react-flow__node').first().click()
-    await expect(page.locator('input[name="speaker"]')).toBeVisible({ timeout: E2E_MS.medium })
+    await openNodeEditor(page)
 
     // Vérifier qu'il y a des arêtes en partant du nœud
     const edgeBefore = page.locator('.react-flow__edge')
@@ -249,7 +249,7 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
 
     const countBefore = await page.locator('.react-flow__node').count()
     await page.locator('.react-flow__node').first().click()
-    await expect(page.locator('input[name="speaker"]')).toBeVisible({ timeout: E2E_MS.medium })
+    await openNodeEditor(page)
 
     // Chercher un bouton Dupliquer (bouton direct ou menu contextuel)
     let duplicated = false

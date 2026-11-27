@@ -12,6 +12,12 @@ import * as documentsAPI from '../../api/documents'
 import { documentToGraph, graphToDocument, buildLayoutFromNodes } from '../../utils/documentToGraph'
 import { calculateDagreLayout } from '../../utils/dagreLayout'
 import {
+  createQuietTask,
+  queueJournalAck,
+  QUIET_WORK_DELAY_MS,
+} from '../../utils/quietWork'
+import {
+  isTextCardsWorkingLayout,
   mergeLayoutWithNodePositions,
   toPersistedLayout,
   toTextCardsWorkingLayout,
@@ -176,6 +182,9 @@ export type PersistenceSlice = Pick<
 >
 
 let saveQueue: Promise<void> | null = null
+
+/** Prototype 20.2 : la validation qui suit un enregistrement attend une pause. */
+const quietValidation = createQuietTask(QUIET_WORK_DELAY_MS)
 
 /** Révision envoyée par chaque PUT en vol : celle qu'une sauvegarde keepalive doit attendre + 1. */
 const revisionsInFlight: { document: number | null; layout: number | null } = {
@@ -661,20 +670,42 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         useGraphViewStore
           .getState()
           .notifyDocumentSaved({ documentId, revision: docRes.revision, source: 'graph' })
-        try {
-          await journalAcknowledgeSnapshot(documentId, {
-            nodes: snap.nodes,
-            edges: snap.edges,
-            metadata: snap.dialogueMetadata,
-            ackSeq: snap.clientSeq,
-          })
-        } catch (journalError) {
-          console.warn('Journal save acknowledgement:', journalError)
+        const acknowledged = {
+          nodes: snap.nodes,
+          edges: snap.edges,
+          metadata: snap.dialogueMetadata,
+          ackSeq: snap.clientSeq,
         }
-        try {
-          await get().validateGraph()
-        } catch (validationError) {
-          console.error('Validation après sauvegarde:', validationError)
+        const validateAfterSave = async () => {
+          try {
+            await get().validateGraph()
+          } catch (validationError) {
+            console.error('Validation après sauvegarde:', validationError)
+          }
+        }
+        if (isTextCardsWorkingLayout(layoutPayload)) {
+          // Prototype 20.2 : ni le journal ni la validation ne retiennent la saisie.
+          queueJournalAck(documentId, acknowledged)
+          quietValidation.schedule(() => {
+            // La saisie a repris (le prochain enregistrement replanifie), ou le graphe a été
+            // vidé ou remplacé : ne rien lancer.
+            const current = get()
+            const currentId = current.documentId ?? current.dialogueMetadata.filename ?? null
+            if (
+              current.activeLoadSeq === saveLoadSeq &&
+              currentId === documentId &&
+              !current.hasUnsavedChanges
+            ) {
+              void validateAfterSave()
+            }
+          })
+        } else {
+          try {
+            await journalAcknowledgeSnapshot(documentId, acknowledged)
+          } catch (journalError) {
+            console.warn('Journal save acknowledgement:', journalError)
+          }
+          await validateAfterSave()
         }
         return { success: true, filename: documentId, replacedNewerVersion } as SaveGraphResponse
       } catch (error) {

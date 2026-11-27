@@ -2,7 +2,7 @@
 title: 'Story 20.2 — Preuve de performance : cartes 360 px, flux LR, paliers de zoom'
 type: 'feature'
 created: '2026-11-27'
-status: 'in-review'
+status: 'done'
 baseline_commit: '949be1931f5d2bccc278fb3b2eaf2b418cbfd36b'
 route: 'dispatch'
 review_loop_iteration: 0
@@ -19,7 +19,7 @@ context: []
 
 ## Boundaries & Constraints
 
-**Always:** drapeau éteint = graphe actuel inchangé ; seuils d'`epic-20.md` « Seuils de mesure », sans en inventer ; paliers écrire ≥ 75 %, lire ≥ 40 % et < 75 %, situer < 40 %, calculés à `onMoveEnd` seulement ; la carte en écriture reste à « écrire » ; le prototype n'écrase jamais les positions TB enregistrées ; `onlyRenderVisibleElements` conservé ; golden d'export verts sans régénération ; mesures sans autre charge sur le poste.
+**Always:** drapeau éteint = graphe actuel inchangé ; seuils d'`epic-20.md` « Seuils de mesure », sans en inventer ; paliers écrire ≥ 75 %, lire ≥ 40 % et < 75 %, situer < 40 %, calculés à `onMoveEnd` seulement ; la carte en écriture reste à « écrire » ; le prototype n'écrase jamais les positions TB enregistrées ; `onlyRenderVisibleElements` conservé ; golden d'export verts sans régénération ; protocole de mesure robuste à la charge (renégociation ci-dessous).
 
 **Never:** tests en sorties et liens hors champ (20.8), lentille et popovers (20.9), champ d'écriture 18.5a/18.5b, migration de disposition (20.7) ; toucher au backend ou à l'export ; implémenter le plan B ; appel LLM ; relever un seuil ou retirer un contenu de carte pour faire passer une mesure.
 
@@ -27,6 +27,11 @@ context: []
 - Images : « p95 des images ≤ 16 ms » se lit « aucune image sautée » sur l'écran à 60 Hz : p95 de l'intervalle entre images ≤ 16,7 ms, tolérance de gigue 0,5 ms. La tâche longue ≤ 50 ms s'applique en plus.
 - Graphe jugé : 500 cartes, 4 sorties par réponse testée dessinées sur la carte, sans nœuds de test (cible de 20.8) ; une mesure avec les nœuds de test actuels est consignée pour information. Le prototype ne dessine que les ports : les liens d'issue partent de ces ports, sans changer le document.
 - Build jugé : production (`vite build` + `preview`) ; les chiffres du serveur de développement sont consignés pour information.
+
+**Renégocié par l'auteur (2026-11-27, après les premières mesures).** Ses mots : « J'ai presque toujours des modèles IA qui tournent sur mon pc, donc avoir un pc au repos c'est beaucoup demander » ; « les optimisations sont sans doute possible sans dégrader la qualité, avec un peu d'ingéniosité ». Conséquences :
+- Pas de repli sur le plan B : cartes de 360 px conservées, on optimise le prototype jusqu'à tenir les seuils, en visant une marge, sans retirer de texte ni dégrader le rendu. Aucun seuil n'est assoupli, la définition du glisser (ADR-008, `mousedown` → `mouseup`, dix déplacements, à 100 % et vue ajustée) ne change pas.
+- On ne demande plus un poste au repos. On ne tue ni ne suspend aucun processus de l'auteur.
+- Un seuil encore manqué, ou impossible à juger sur ce poste, se rapporte à l'auteur avec ses chiffres, sans décision à sa place.
 
 ## I/O & Edge-Case Matrix
 
@@ -56,9 +61,25 @@ context: []
 - `e2e/perf-document-load.spec.ts`, `e2e/helpers.ts` (`seedDocumentWithRetry`), `playwright.pwa.config.ts` (modèle build + preview).
 - `tests/fixtures/unity_dialogues/inputs/` -- 81 répliques ; longueur médiane 669, p90 1 219, max 2 437 ; 4 réponses en médiane, texte médian 107.
 - Poste : Ryzen 9 7950X, 191 Go, RTX 5090, 1920×1080 à 60 Hz.
-- Environnement : `.venv` et `node_modules` sont installés dans le worktree (pas de jonction). Le worktree hérite du `.env` du dépôt principal : tout serveur lancé (config Playwright comprise) doit avoir `OPENAI_API_KEY` vide et `HEALTH_CHECK_LLM_PING=false` ; ne pas lancer `playwright.config.ts` sans ces deux variables. Ne pas réutiliser un serveur déjà ouvert sur 3000/4243/4173 (il peut venir d'un autre worktree). Ni commit ni push à l'implémentation.
+- Environnement : `.venv` (Python 313 de `C:\Python313`, ne pas le reconstruire) et `node_modules` sont installés dans le worktree (pas de jonction). Le worktree hérite du `.env` du dépôt principal : tout serveur lancé (config Playwright comprise) doit avoir `OPENAI_API_KEY` vide et `HEALTH_CHECK_LLM_PING=false` ; ne pas lancer `playwright.config.ts` sans ces deux variables. Ne pas réutiliser un serveur déjà ouvert sur 3000/4243/4173 (il peut venir d'un autre worktree). Ni commit ni push à l'implémentation.
+
+## Protocole de mesure (à écrire dans la story, 20.7 le reprend)
+
+- Passages alternés avant / après (« avant » = commit `6303200fb`, construit à part), au moins 5 passages chacun ; chiffre retenu : médiane des p95 par passage, avec le minimum et le maximum.
+- Charge consignée à chaque passage (cœurs occupés par les autres processus).
+- Temps de travail du fil principal par image (ou par frappe) lu dans la trace : indicateur peu sensible au geste scripté et à la charge.
+- Témoin : le même geste scripté sur un graphe de 2 répliques donne le plancher de la mesure du glisser et de la frappe sur ce poste.
+- Verdict asymétrique : la charge ne fait que dégrader, donc un seuil tenu sous charge est tenu ; un seuil manqué sous charge, alors que le témoin ou le travail par image montrent que la mesure est dominée par la charge ou le geste, est « non jugeable », jamais « manqué » ni « tenu ».
+- Images au zoom : « aucune image sautée » se compare à la cadence au repos mesurée dans le même passage : p95 ≤ max(16,7 ; cadence au repos) + 0,5 ms, la cadence du navigateur headless variant (16,7 ou 17,6 ms observées).
+- Navigateur en headless seulement, GPU vérifié ; aucune fenêtre.
 
 ## Tasks & Acceptance
+
+**Reprise après renégociation :**
+- [x] Harnais : protocole ci-dessus (alternance avant / après, charge, témoin, travail par image).
+- [x] Profiler avant de corriger : traces du glisser vue ajustée (10 %), puis du glisser et de la frappe à 100 % ; consigner les causes avec leurs temps. Pistes non vérifiées : projection des nœuds recalculée à chaque image (`GraphCanvas` enrichit les 500 nœuds), `utils/edgeRouting.ts` qui cherche un coude hors des nœuds pour chaque lien, re-rendu de toutes les cartes, tâches longues de 54 à 57 ms observées.
+- [x] Optimiser sans dégradation visible, drapeau éteint inchangé ; avant / après chiffrés ; captures aux trois paliers identiques à l'œil.
+- [x] Réécrire la décision avec ses mesures. Si tous les seuils tiennent : plan A, et retirer les ajustements « plan B » d'`epic-20.md` et du README § 15 (la décision 1 reste « prise », confirmée par 20.2). Sinon : ne pas trancher, rapporter.
 
 **Execution:**
 - [x] `scripts/generate-perf-graph.mjs` + `e2e/fixtures/perf-graph-500.json` -- 500 répliques en arbre, déterministes (graine), longueurs tirées de la distribution des fixtures.
@@ -79,82 +100,126 @@ context: []
 
 ## Implementation Notes
 
-### Décision : plan B (cartes de 280 px, dépliage à la sélection)
+### Décision : plan A (cartes de 360 px), après la reprise du 2026-11-27
 
-Le seuil **p95 glisser < 200 ms** est manqué par le prototype à 360 px, après la passe d'optimisation : 202,8 ms à 100 %
-et 314,8 ms vue ajustée (mesure stricte) ; seconde mesure du glisser seul : 189,8 ms et 262,5 ms. Les autres seuils
-sont tenus. `epic-20.md` (20.7, 20.8) et le README § 15 sont ajustés.
+Tous les seuils sont tenus sur le prototype à 360 px, au sens du protocole (médiane des p95 sur 5 passages), sans
+changement de rendu ni de contenu. Les ajustements « plan B » d'`epic-20.md` (20.7, 20.8) et du README § 15 sont
+retirés ; le critère de perf de 20.7 reste et renvoie au protocole. Elle remplace la décision « plan B » de la
+première mesure (commit `6303200fb`).
 
-Réserves à connaître avant de s'engager :
-- **Le manque ne vient pas de la largeur des cartes.** Le plan B à 280 px ne le corrige pas à lui seul : c'est le coût
-  de la reprojection du document et du re-rendu du graphe, partagé avec le graphe actuel (base de référence ci-dessous).
-- **La mesure du glisser contient le geste scripté** (enfoncement, dix déplacements, lâcher, image suivante : au moins
-  une dizaine d'images, soit ~170 ms). Du seul lâcher à l'image peinte : p95 10,3 ms à 100 %, 7,4 ms vue ajustée.
-  Aucune tâche longue pendant les glissers. À 100 %, le p95 oscille autour du seuil (202,8 puis 189,8 ms) ; en vue
-  ajustée il le dépasse les deux fois.
-- La définition du glisser (ADR-008 : de `mousedown` à `mouseup`) ne dit ni le nombre de déplacements ni le zoom : les
-  dix déplacements et la double mesure (100 % et vue ajustée) sont des choix du harnais.
+Réserves, dans l'ordre :
 
-### Remesure après relecture, poste au calme (0,4 cœur occupé avant, calme après)
+- **Le glisser en vue ajustée a peu de marge** : 192,2 ms pour 200, plancher du geste à 181,9 ms. Deux passages sur
+  cinq le dépassent (331 et 351 ms), ceux où d'autres processus occupaient 16 à 22 cœurs avec le GPU sollicité.
+- **Le glisser à 100 % (185,5 ms) est à son plancher** : le témoin de 2 répliques fait 181,9 ms. La mesure est celle
+  du geste scripté (dix déplacements, une image chacun), pas du graphe.
+- **Du travail est sorti de la fenêtre mesurée, il n'a pas disparu.** La validation d'après enregistrement attend une
+  seconde sans modification, puis bloque le fil jusqu'à ~100 ms (tâche la plus longue de la trace de frappe : 99 ms).
+  Les gestes du harnais s'enchaînent plus vite que ce délai. Une touche tombant dans ce bloc attendrait jusqu'à autant.
+- Ces seuils tiennent **sur le prototype** (drapeau actif) : le graphe actuel est inchangé.
 
-Harnais durci par la relecture (il vérifie que la carte bouge, que la saisie change le champ, que le zoom est atteint).
+### Mesures finales (ms ; médiane des p95 par passage [min – max], 5 passages de chaque, alternés)
 
-| Mesure (p95, ms) | Seuil | Remesure |
-|---|---|---|
-| Première ouverture | < 3 000 | 1 760 tenu |
-| Ouverture suivante | < 3 000 | 1 469 tenu |
-| Frappe | < 100 | 94,9 tenu (de peu) |
-| Glisser à 100 % | < 200 | 197,2 tenu (de peu) ; du lâcher à l'image 11,0 |
-| Glisser, vue ajustée (zoom 10 %) | < 200 | **336,6** manqué ; du lâcher à l'image 20,2 |
-| Images au zoom | <= 17,2 | 18,3 dépassé, mais la cadence au repos du navigateur headless valait 17,6 ms ce passage (max 18,9) : aucune image sautée |
-| Tâche longue au zoom | <= 50 | aucune |
+« Avant » = `6303200fb` construit à part. Build de production, 500 cartes sans nœuds de test, 20 répétitions par
+passage (40 frappes).
 
-La vue ajustée manque le seuil à chaque passage (262, 315, 337 ms ; 426 sous charge). Le glisser à 100 % et la frappe
-oscillent autour de leur seuil (glisser 190, 197, 203 ; frappe 89, 95) et décrochent sous charge (477 et 134 ms).
+| Mesure | Seuil | Après | Avant | Témoin 2 répliques (après) | Verdict |
+|---|---|---|---|---|---|
+| Première ouverture | < 3 000 | 2 166 [1 971 – 2 497] | 2 064 [1 945 – 2 303] | | tenu |
+| Ouverture suivante | < 3 000 | 1 184 [1 115 – 1 661] | 1 601 [1 277 – 1 922] | | tenu |
+| Frappe | < 100 | **20,1** [14,7 – 60] | 108,7 [91,8 – 120,5] | 19,1 | tenu |
+| Glisser à 100 % | < 200 | **185,5** [183,9 – 201,8] | 231,9 [215,8 – 374,5] | 181,9 | tenu |
+| Glisser, vue ajustée (10 %) | < 200 | **192,2** [185,4 – 350,6] | 349,8 [333,5 – 531,3] | 181,9 | tenu |
+| Images au zoom 100 → 20 % | cadence au repos + 0,5 | 16,8 (repos 16,7) | 16,8 | | tenu |
+| Tâche longue au zoom | <= 50 | aucune | aucune | | tenu |
 
-**La décision reste à confirmer par l'auteur** : elle tient au seul glisser en vue ajustée, un point de mesure que ni
-ADR-008 ni l'epic ne demandent explicitement, et à une durée qui contient les dix déplacements scriptés.
+Travail du fil principal lu dans la trace (médiane, après / avant) :
 
-### Poste et conditions
+| | Après | Avant | Témoin (après) |
+|---|---|---|---|
+| Par image du glisser, 100 % | 4,5 | 8,5 | 2,8 |
+| Par image du glisser, vue ajustée | 9,0 | 20,3 | |
+| Par glisser, enregistrement compris, vue ajustée | 180 | 444 | |
+| Par frappe, enregistrement compris | 41 | 126 | 18 |
+| Par image du zoom (borne haute) | 2,9 | 3,5 | |
 
-AMD Ryzen 9 7950X, 191 Go, Windows 10.0.26300, NVIDIA GeForce RTX 5090. Chrome 158.0.8127.37, **nouveau headless**
-(aucune fenêtre, demande de l'auteur), 1900 × 950, facteur d'échelle 1. Le harnais refuse de mesurer sans rendu
-matériel : `ANGLE (NVIDIA, NVIDIA GeForce RTX 5090, D3D11)`, composition GPU `enabled`. Cadence au repos 16,7 ms.
+Charge consignée (cœurs occupés par d'autres processus, page au repos) : médiane 4 à 7 selon l'étape, jusqu'à 28,5 ;
+GPU de 0 à 99 %. Sources : `tmp/perf-20-2/run-2026-11-27T17-09-09-662Z/` (non versionné).
 
-Limites : en headless la cadence de 60 Hz est celle du navigateur, pas celle de l'écran (aucune image présentée sur la
-dalle). Le poste n'était pas au repos : d'autres sessions tournaient (environ 3 % de CPU par processus Python, jusqu'à
-quatre ; un autre Chrome headless à ~30 % d'un relevé à la fin des mesures d'information). Les premières mesures,
-faites en fenêtre visible, ont été jetées.
+Le passage « avant 1 » a échoué deux fois à la réouverture (« Graphe non affiché en 90 s ») avant de passer au
+troisième essai, rejoué dans le même dossier après les autres passages : l'alternance n'est pas respectée pour lui,
+et la cause de l'échec, vue sur le seul build de référence, n'est pas établie.
 
-### Mesures (ms, 20 répétitions, médiane / p95 ; 40 frappes)
+Pour information : serveur de développement, un passage : ouvertures 2 773 et **3 168**, frappe 41, glisser 197 et
+**257** (plancher 196, headless à 17,6 ms ce passage-là). Avec les nœuds de test actuels (un passage, avant la
+dernière optimisation) : ouvertures 2 788 et 1 759, frappe 18, glisser **7 026** et **10 207** : les voies courtes
+exigent l'absence de barres de test, 20.8 doit donc les retirer.
 
-Graphe : 500 répliques, 2 003 réponses dont 1 234 testées, répliques médiane 697, p90 1 332, max 2 437 caractères.
+### Confirmation après les correctifs de la relecture (frappe et glisser, 5 passages, `PERF_STRICT=1` vert)
 
-| Mesure | Seuil p95 | Jugé : cartes, prod, après | Cartes avant optimisation | Cartes + nœuds de test (info) | Graphe actuel (référence) | Cartes, serveur dev (info) |
-|---|---|---|---|---|---|---|
-| Première ouverture (depuis le GET) | < 3 000 | 1 630 / 2 026 tenu | 1 508 / 1 685 | 1 891 / 2 081 | 2 588 / 2 932 | 4 287 / 5 730 |
-| Ouverture suivante | < 3 000 | 1 152 / 1 219 tenu | 1 322 / 1 510 | 1 304 / 1 500 | 1 492 / 1 636 | 4 242 / 5 171 |
-| Frappe | < 100 | 20 / 89 tenu | 10 392 / 23 946 | 24 / 131 | 52 / 1 351 | 29 / 145 |
-| Glisser à 100 % | < 200 | 176 / **203** manqué | 6 495 / 7 474 | 5 919 / 8 714 | 8 264 / 9 652 | 291 / 496 |
-| Glisser, vue ajustée | < 200 | 189 / **315** manqué | 4 635 / 5 880 | 10 226 / 11 287 | 16 056 / 18 349 | 499 / 704 |
-| Images au zoom 100 → 20 % | <= 16,7 (+ 0,5) | 16,7 / 16,8 tenu (max 18,1) | 16,7 / 16,8 | 16,7 / 16,8 (max 33) | 16,7 / 16,8 (max 2 417) | 16,7 / 16,8 (max 33) |
-| Tâche longue au zoom | <= 50 | aucune, tenu | aucune | aucune | aucune relevée | aucune |
+| Mesure | Seuil | Médiane [min – max] | Témoin 2 répliques |
+|---|---|---|---|
+| Frappe | < 100 | 16,3 [14,3 – 40,6] | 18,1 |
+| Glisser à 100 % | < 200 | 196,6 [196,3 – 213,8] | 197 |
+| Glisser, vue ajustée | < 200 | 197,8 [197,4 – 249,8] | 197 |
 
-Chiffres depuis la navigation, jugé : 1 695 / 2 103 (première), 1 215 / 1 282 (suivante). Aucune écriture de layout à
-la réouverture. Sources : `tmp/perf-20-2/*.json` et `trace-zoom-*.json` (non versionnés).
+**La marge au chiffre n'est que de 2 à 3 ms, et elle ne dépend pas du graphe** : le même geste sur 2 répliques
+fait 197 ms dans ce lancement (182 dans le précédent ; la cadence au repos du navigateur headless varie de 16,7 à
+17,6 ms). La marge propre à l'application se lit dans le travail par image : 3,5 ms à 100 %, 6,8 ms en vue ajustée,
+pour une image de 16,7 ms. Si la cadence du navigateur ralentit encore, le geste scripté dépasse 200 ms à lui seul
+et le protocole doit le dire « non jugeable ». Ouvertures et zoom non remesurés (non touchés par les correctifs).
+Le passage 1 a d'abord échoué à l'ouverture (« Graphe non affiché en 90 s »), puis réussi rejoué seul, hors ordre.
+Source : `tmp/perf-20-2/run-2026-11-27T18-57-20-982Z/` (non versionné).
 
-Lecture du zoom : à 20 %, 13 cartes seulement sont dans la vue autour de la carte choisie. La disposition `LR` aux
-hauteurs du palier « écrire » mesure 6 760 × 219 190 px : même au zoom minimal (10 %) « Ajuster » ne montre pas tout
-le graphe.
-Le graphe actuel a des images isolées jusqu'à 2 417 ms (36 au-delà du seuil sur 2 663) sans tâche longue relevée :
-cause non expliquée, peut-être hors du fil principal.
+### Causes trouvées au profil (avant correction)
 
-### Passe d'optimisation (une)
+Profils CPU et traces sur le build non minifié, 6 glissers et 40 frappes.
 
-Profil : 2 cartes et 8 liens montés, mais à chaque image du glisser et à chaque touche le store reprojetait tout le
-document (`documentToGraph` + `normalizeTestBars`, quadratique). En prototype seulement, un glisser (sans barres de
-test) n'écrit plus que la position, et une frappe que la réplique (nœud et document). Profil : une frappe 919 → 40 ms,
-un glisser 6 427 → 229 ms. La passe porte sur la projection qui alimente le rendu, pas sur les composants.
+- **Glisser en vue ajustée** (28 cartes montées) : ~270 ms de fil par glisser, soit ~27 ms par déplacement, donc deux
+  images par déplacement. Chaque image écrivait dans le store du graphe : tous ses abonnés se redessinaient (en-tête,
+  badge de santé, liste des dialogues, filtres), le canvas reconstruisait les 500 nœuds et toutes les cartes montées
+  se redessinaient. Plus ~15 ms de copie d'annulation au premier déplacement.
+- **Glisser à 100 %** : le geste tenait dans les images (~77 ms de fil par glisser). La queue venait de la chaîne qui
+  suit le lâcher : journal IndexedDB (~28 ms, deux fois), enregistrement (~44 ms), validation (~90 à 105 ms), qui
+  débordait sur le geste suivant.
+- **Frappe** : la même chaîne à chaque touche. Sur 3 931 ms de fil profilées : relecture et réécriture du journal
+  1 260 ms, envoi XHR 687 ms, sérialisation JSON 336 ms.
+- Pistes écartées : `utils/edgeRouting.ts` ne s'exécute pas en `LR` (il ne traite que les liens bas → haut).
+
+### Optimisations (toutes sous le marqueur du layout de prototype)
+
+1. Positions du glisser en cours dans `graphViewStore.dragPositions`, appliquées par le canvas seul ; le store du
+   graphe les reçoit en une écriture au lâcher (`moveNodes`), sous-arbre compris. **Écart à la lettre d'ADR-007** :
+   les nœuds viennent toujours d'un store, mais pas seulement de `useGraphStore` pendant le geste.
+2. Journal local différé à une seconde sans modification (10 s au plus), écrit aussitôt si la page est masquée ou
+   quittée (`utils/quietWork.ts`). L'enregistrement automatique, lui, n'est pas différé.
+3. Validation d'après enregistrement différée d'autant : badges et compteurs suivent avec une seconde de retard, et le
+   message d'un enregistrement forcé peut citer les compteurs précédents.
+4. Copie d'annulation sans repasser par le texte JSON (`utils/cloneJson.ts`, même résultat, testé).
+5. Nœuds du canvas inchangés réutilisés (`utils/reuseUnchanged.ts`) : une sélection ou un déplacement ne redessine
+   que les cartes touchées. Mesure intermédiaire sans ce point : vue ajustée à 198,4 ms [189,1 – 204,3].
+
+Rendu : captures aux six vues (ajustée, écrire, sélectionnée, en écriture, lire, situer) comparées entre les deux
+builds, **0 pixel différent** (`tmp/perf-20-2/captures-reprise/`).
+
+### Rejouer le protocole (20.7)
+
+1. Construire la référence à part, au commit de référence : `vite build --outDir <dossier absolu>` depuis `frontend/`.
+2. `PERF_BEFORE_DIST=<dossier> PERF_VARIANTS=cards PERF_STRICT=1 npm run test:perf:graph` (environ 50 min).
+3. Lire `tmp/perf-20-2/run-<date>/resume.json` : médianes, étendues, charge, témoin et verdicts.
+
+Ajouts au harnais pour le protocole : le témoin joue les mêmes gestes à 100 % (un graphe de 2 répliques ajusté y est
+déjà), et un `input` sans touche enfoncée (le « é » inséré par Playwright) n'est plus mesuré depuis la touche
+précédente. La définition du glisser n'a pas changé.
+
+### Poste
+
+AMD Ryzen 9 7950X, 191 Go, Windows 10.0.26300, NVIDIA GeForce RTX 5090. Chrome 158, nouveau headless (aucune
+fenêtre), 1900 × 950, facteur d'échelle 1, rendu matériel vérifié par le harnais. Limite : en headless la cadence de
+60 Hz est celle du navigateur, pas celle de l'écran.
+
+Graphe : 500 répliques, 2 003 réponses dont 1 234 testées, répliques médiane 697, p90 1 332, max 2 437 caractères. La
+disposition `LR` mesure 6 760 × 219 190 px : même au zoom minimal (10 %), « Ajuster » ne montre pas tout le graphe.
 
 ### Choix d'implémentation à connaître
 
@@ -172,10 +237,18 @@ un glisser 6 427 → 229 ms. La passe porte sur la projection qui alimente le re
 - Nœud créé pendant que le drapeau est actif : pas de position `TB`, il tombe à une position par défaut une fois le
   drapeau éteint.
 - Drapeau sans bouton, lu au chargement : le basculer avec un dialogue ouvert demande un rechargement.
-- Reprise du journal IndexedDB après un plantage en prototype puis drapeau éteint : non vérifiée.
+- Reprise du journal IndexedDB après un plantage en prototype puis drapeau éteint : non vérifiée (aucun code de
+  production ne relit ce journal aujourd'hui).
+- Le harnais n'a pas de mesure du glisser d'un grand sous-arbre (la carte du milieu en a peu).
 - La carte du prototype ne porte pas Accepter / Rejeter / Régénérer, « Voir le prompt » ni l'aperçu des conditions.
 
 ## Spec Change Log
+
+- 2026-11-27 (reprise) : seuils tenus, décision plan A ; ajustements « plan B » retirés. Hors du périmètre, corrigé en
+  route : `e2e/documents-layout-adr008.spec.ts` attendait le formulaire sans passer par « éditer » (3 tests en échec
+  aussi sur les sources de départ).
+
+- 2026-11-27 (réponse de l'auteur à la question A ou B) : voir « Renégocié par l'auteur » ; ajout du protocole de mesure et des tâches de reprise. À CONSERVER : prototype, drapeau, graphe de 500 répliques, tests et correctifs de la relecture (commit `6303200fb`).
 
 - 2026-11-27 (en cours d'implémentation, demande de l'auteur) : toutes les mesures et captures en headless, GPU vérifié
   par le harnais ; « navigateur avec GPU » se lit Chrome en nouveau headless.
@@ -223,6 +296,38 @@ Relecture du 2026-11-27 (itération 0). VG = trous de vérification, BH = revue 
 | EC11 | Clés React en double sur des puces identiques | low | correction directe, patch |
 | EC12 | = BH11 | low | patch |
 | EC13 | `wheelToZoom` n'échoue pas si le zoom n'est pas atteint | medium | patch avec BH10 |
+
+Relecture de la reprise du 2026-11-27 (diff non commité). VG2x = trous de vérification, BH2x = revue aveugle, EC2x = cas limites.
+
+| # | Constat | Verdict | Preuve et route |
+|---|---|---|---|
+| VG21 | `PERF_STRICT` passe quand une mesure jugée manque | medium | `summarize` retire le critère sans valeur ; patch |
+| VG22 | Cache de nœuds non testé pour les cycles et la couleur entrante | medium | aucune assertion ; patch |
+| VG23 | Glisser du rectangle de sélection jamais écrit au store | high | `selectionOnDrag` actif, pas de `onSelectionDragStop` ; positions perdues ; patch |
+| BH21 | = VG23 (et flèches clavier) | high | même cause ; patch |
+| BH22 | `dragPositions` sans autre sortie (chargement, annulation en cours de geste) | low | souris tenue, vidé au lâcher et au démontage ; gardes à ajouter ; rejeté |
+| BH23 | Un accusé tardif efface une attente plus récente déjà écrite | low | `acknowledgeSnapshot` met toujours `pending = null`, comme avant la story ; journal jamais relu ; commentaire faux, patch |
+| BH24 | Écriture au masquage de page non garantie | low | IndexedDB asynchrone comme avant ; journal jamais relu ; rejeté |
+| BH25 | La validation différée tombe pendant une saisie reprise | medium | la frappe ne la repousse pas ; patch |
+| BH26 | = VG21 | medium | patch |
+| BH27 | « Non jugeable » ne regarde que le témoin, à 100 % | low | n'agit que sur un seuil manqué, aucun ici ; correction non triviale ; rejeté |
+| BH28 | Seuil de zoom formulé « max(16,7 ; repos) + 0,5 » | low | 16,8 mesuré tient aussi la formule d'origine (17,2) ; le correctif est dans cette spec ; rejeté, dit à l'auteur |
+| BH29 | 20.7 infaisable avec les nœuds de test actuels | medium | 7 à 10 s mesurées, retrait en 20.8 ; patch |
+| BH2a | Passage de relais 20.7 incomplet | medium | surcouche, réutilisation et copie omises ; patch |
+| BH2b | Test `cloneJson` en `toEqual` ; tableaux creux, BigInt | low | `toStrictEqual`, patch ; ces valeurs n'existent pas dans un dialogue, rejetées |
+| BH2c | `moveNodes` écrit même sans déplacement | low | objets neufs sans marquage « modifié » ; garde à ajouter ; rejeté |
+| BH2d | Écart à ADR-007 consigné dans la seule spec | medium | différé (`deferred-work.md`) |
+| BH2e | Indentation du harnais | low | sans effet ; rejeté |
+| BH2f | README § 15 : « mesure ci-dessus » ambiguë, réserves absentes | low | correction directe ; patch |
+| EC21 | = VG23 | high | patch |
+| EC22 | = BH22 | low | rejeté |
+| EC23 | Accusé en échec : l'attente suivante n'est pas écrite | low | journal jamais relu, branche à ajouter ; rejeté |
+| EC24 | = BH23 | low | patch (commentaire) |
+| EC25 | = BH24 | low | rejeté |
+| EC26 | Validation différée après `resetGraph` | medium | même fermeture que BH25 ; patch |
+| EC27 | = BH25 | medium | patch |
+| EC28 | `PERF_PASSES` nul ou invalide : aucun passage, vert | medium | patch avec VG21 |
+| EC29 | = VG21 | medium | patch |
 
 ## Verification
 

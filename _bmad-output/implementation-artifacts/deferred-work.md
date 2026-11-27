@@ -384,7 +384,20 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-20-2-preuve-performance-cartes-360.md`
   summary: Propager la décision de la story 20.2 à `.claude/rules/ui_refonte_scene.md`, à A9 de `docs/architecture/refonte-scene-architecture.md` et au plan de tests de l'epic 20, une fois confirmée par l'auteur.
   evidence: Ces trois documents décrivent encore les cartes de 360 px comme attendues ; la règle est injectée dans chaque build de l'epic 20.
+  status: sans objet — la reprise de 20.2 conclut au plan A (360 px), ce que ces documents décrivent déjà.
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-20-2-preuve-performance-cartes-360.md`
   summary: La story 20.7 doit retirer ou reprendre le prototype 20.2 (carte 360 px, drapeaux localStorage, clés `nodesLR`, voies courtes `patchLineOnly` et glisser).
-  evidence: Code livré derrière un drapeau sans interface ; les voies courtes doublent la synchronisation document et layout, et des `nodesLR` peuvent exister dans des layouts enregistrés.
+  evidence: Code livré derrière un drapeau sans interface ; les voies courtes doublent la synchronisation document et layout, et des `nodesLR` peuvent exister dans des layouts enregistrés. La reprise de 20.2 y ajoute, sous le même marqueur, les positions du glisser hors du store (`graphViewStore.dragPositions`), le journal et la validation différés (`utils/quietWork.ts`), la copie d'annulation (`utils/cloneJson.ts`) et la réutilisation des nœuds du canvas (`utils/reuseUnchanged.ts`).
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-2-preuve-performance-cartes-360.md`
+  summary: Le journal IndexedDB du graphe (ADR-006) n'est relu par aucun code de production ; chaque modification y lit puis réécrit tout le graphe.
+  evidence: `readDocument` de `frontend/src/utils/graphJournal.ts` n'est appelé que par son test ; au profil de 20.2, ces écritures pesaient 28 à 50 ms de fil principal par modification à 500 répliques (hors prototype, inchangé).
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-2-preuve-performance-cartes-360.md`
+  summary: (non vérifié) Le harnais de perf échoue par intermittence à l'ouverture du premier passage (« Graphe non affiché en 90 s »).
+  evidence: 2 échecs sur 4 essais du passage « avant 1 » (build de référence), puis 1 sur le passage « après 1 » du build mesuré ; jamais aux passages 2 à 5. La page reste sur la liste des dialogues, sans canvas. Reste à établir si c'est le harnais (serveur froid) ou l'ouverture par `/graph-editor/{id}`.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-2-preuve-performance-cartes-360.md`
+  summary: Pendant un glisser, le prototype tient les positions hors de `useGraphStore` ; la story 20.7 doit confirmer ou annuler cet écart à ADR-007.
+  evidence: `graphViewStore.dragPositions`, appliquées par `GraphCanvas` seul et écrites au lâcher par `moveNodes` ; l'écart n'est consigné que dans la spec de la story 20.2.

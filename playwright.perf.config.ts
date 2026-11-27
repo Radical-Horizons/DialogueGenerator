@@ -7,12 +7,18 @@
  * (clé vidée, ping désactivé).
  *
  *   PERF_STRICT=1 npx playwright test -c playwright.perf.config.ts
+ *
+ * Comparaison avant / après : construire la référence à part (`vite build --outDir <dossier>`
+ * dans un arbre au commit de référence) puis ajouter `PERF_BEFORE_DIST=<dossier absolu>`.
  */
 import { defineConfig, devices } from '@playwright/test'
 
 const useDevServer = process.env.PERF_TARGET === 'dev'
 const frontendPort = useDevServer ? 3000 : 4173
 process.env.PERF_HARNESS = '1'
+// Posé par le processus principal, hérité par les workers : un dossier de résultats par lancement.
+process.env.PERF_RUN_ID ??= new Date().toISOString().replace(/[:.]/g, '-')
+const beforeDist = process.env.PERF_BEFORE_DIST
 
 export default defineConfig({
   testDir: './e2e',
@@ -77,5 +83,17 @@ export default defineConfig({
       timeout: 300_000,
       env: { VITE_API_BASE_URL: '' },
     },
+    ...(beforeDist
+      ? [
+          {
+            command: `npm run preview -- --host 0.0.0.0 --port 4174 --strictPort --outDir "${beforeDist}"`,
+            cwd: 'frontend',
+            url: 'http://localhost:4174/index.html',
+            reuseExistingServer: false,
+            timeout: 120_000,
+            env: { VITE_API_BASE_URL: '' },
+          },
+        ]
+      : []),
   ],
 })

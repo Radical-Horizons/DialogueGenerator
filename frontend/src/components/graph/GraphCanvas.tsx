@@ -71,6 +71,7 @@ import {
 } from './graphMinimapLayout'
 import { GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX } from '../../theme/responsiveChrome'
 import { getValidationHighlightKind } from '../../utils/graphStructuralValidation'
+import { reuseUnchanged, sameSetOr, type ReuseCache } from '../../utils/reuseUnchanged'
 
 /** Module-level so React keeps the same component identity across GraphCanvas re-renders. */
 const GraphCanvasInner = memo(function GraphCanvasInner() {
@@ -243,10 +244,13 @@ export const GraphCanvas = memo(function GraphCanvas() {
     () => applyNodeFilters(storeNodes, graphFilters),
     [storeNodes, graphFilters]
   )
-  const visibleStoreNodeIds = useMemo(
-    () => new Set(visibleStoreNodes.map((n) => n.id)),
-    [visibleStoreNodes]
-  )
+  const previousNodeIdsRef = useRef<Set<string> | null>(null)
+  const visibleStoreNodeIds = useMemo(() => {
+    const ids = new Set(visibleStoreNodes.map((n) => n.id))
+    // Prototype 20.2 : mêmes nœuds visibles, mêmes liens visibles.
+    previousNodeIdsRef.current = textCards ? sameSetOr(previousNodeIdsRef.current, ids) : ids
+    return previousNodeIdsRef.current
+  }, [textCards, visibleStoreNodes])
   const visibleStoreEdges = useMemo(
     () => applyEdgeFilters(storeEdges, visibleStoreNodeIds),
     [storeEdges, visibleStoreNodeIds]
@@ -545,13 +549,14 @@ export const GraphCanvas = memo(function GraphCanvas() {
   }
 
   // Dériver nodes du store avec enrichissement (validation, highlight, sélection)
+  const enrichedCacheRef = useRef<ReuseCache<ReactFlowNode, ReactFlowNode>>(new WeakMap())
   const nodes = useMemo(() => {
     // Prototype 20.2 : les issues de test sont des ports de la carte, les barres sortent.
     const canvasNodes =
       textCards && !textCardsTestBars
         ? visibleStoreNodes.filter((node) => node.type !== 'testNode')
         : visibleStoreNodes
-    return canvasNodes.map((node) => {
+    const enrich = (node: (typeof canvasNodes)[number]) => {
       const nodeErrors = validationErrors.filter((err) => err.node_id === node.id)
       const errors = nodeErrors.filter((err) => err.severity === 'error')
       const warnings = nodeErrors.filter((err) => err.severity === 'warning')
@@ -596,8 +601,38 @@ export const GraphCanvas = memo(function GraphCanvas() {
           incomingEdgeColor: incomingEdgeColorByTarget.get(node.id),
         },
       }
-    })
+    }
+    if (!textCards) return canvasNodes.map(enrich)
+    // Prototype 20.2 : une sélection ou un déplacement ne reconstruit que les nœuds touchés,
+    // les autres cartes ne se redessinent pas.
+    return canvasNodes.map((node) =>
+      reuseUnchanged(
+        enrichedCacheRef.current,
+        node,
+        [
+          selectedNodeIds.includes(node.id),
+          highlightedNodeIds.includes(node.id),
+          highlightedCycleNodes.includes(node.id),
+          validationErrors,
+          incomingEdgeColorByTarget.get(node.id),
+        ],
+        () => enrich(node)
+      )
+    )
   }, [textCards, textCardsTestBars, visibleStoreNodes, selectedNodeIds, validationErrors, highlightedNodeIds, highlightedCycleNodes, incomingEdgeColorByTarget])
+
+  // Prototype 20.2 : positions du glisser en cours, posées par-dessus les nœuds déjà dérivés.
+  // Seuls les nœuds déplacés changent d'identité, donc seules leurs cartes se redessinent.
+  const dragPositions = useGraphViewStore((s) => s.dragPositions)
+  const shownNodes = useMemo(
+    () =>
+      dragPositions
+        ? nodes.map((node) =>
+            dragPositions[node.id] ? { ...node, position: dragPositions[node.id] } : node
+          )
+        : nodes,
+    [nodes, dragPositions]
+  )
 
   // Dériver edges du store — Story 2.9 FR30, ADR-008
   const brokenEdgeTargets = useMemo(
@@ -667,7 +702,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
       <GraphCanvasInner />
       {textCards && <TextCardCanvasEffects gestureRef={zoomTierHandlers.gestureRef} />}
       <ReactFlow
-        nodes={nodes}
+        nodes={shownNodes}
         edges={edges}
         fitView={false}
         defaultViewport={DEFAULT_VIEWPORT}

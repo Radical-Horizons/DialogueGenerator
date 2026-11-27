@@ -89,6 +89,12 @@ export interface GraphViewState {
   /** Carte dont le texte brut est en cours de saisie ; elle reste au palier « écrire ». */
   writingNodeId: string | null
   setWritingNode: (nodeId: string | null) => void
+  /**
+   * Positions du glisser en cours. Elles vivent ici, hors du store du graphe, pour que seul le
+   * canvas se redessine à chaque image ; le store du graphe les reçoit en une fois au lâcher.
+   */
+  dragPositions: Record<string, { x: number; y: number }> | null
+  setDragPositions: (positions: Record<string, { x: number; y: number }> | null) => void
 
   // --- Instance React Flow ---
   reactFlowInstance: ReactFlowInstance | null
@@ -256,6 +262,8 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
   setZoomTier: (tier) => set({ zoomTier: tier }),
   writingNodeId: null,
   setWritingNode: (nodeId) => set({ writingNodeId: nodeId }),
+  dragPositions: null,
+  setDragPositions: (positions) => set({ dragPositions: positions }),
 
   reactFlowInstance: null,
   canvasElement: null,

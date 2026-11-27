@@ -16,7 +16,11 @@ import { useUiLayoutStore } from '../uiLayoutStore'
 
 export type LayoutSlice = Pick<
   GraphState,
-  'applyAutoLayout' | 'updateNodePosition' | 'updateNodeDimensions' | 'updateNodeDimensionsBatch'
+  | 'applyAutoLayout'
+  | 'updateNodePosition'
+  | 'moveNodes'
+  | 'updateNodeDimensions'
+  | 'updateNodeDimensionsBatch'
 >
 
 export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = (set, get) => ({
@@ -113,13 +117,7 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
     // Prototype 20.2 sans barres de test : rien d'autre ne dépend de la position, et
     // reprojeter tout le document à chaque image du glisser coûtait ~250 ms à 500 répliques.
     if (isTextCardsWorkingLayout(state.layout) && !useUiLayoutStore.getState().textCardsTestBars) {
-      set({
-        nodes: state.nodes.map((n) => (n.id === nodeId ? { ...n, position } : n)),
-        layout: {
-          ...state.layout,
-          nodes: { ...(state.layout?.nodes as Record<string, unknown>), [nodeId]: position },
-        },
-      })
+      get().moveNodes({ [nodeId]: position })
       if (!skipMarkDirty) get().markDirty()
       return
     }
@@ -170,6 +168,17 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
       nodes: state.nodes.map((n) => (n.id === nodeId ? { ...n, position } : n)),
     })
     if (!skipMarkDirty) get().markDirty()
+  },
+
+  moveNodes: (positions) => {
+    const state = get()
+    set({
+      nodes: state.nodes.map((n) => (positions[n.id] ? { ...n, position: positions[n.id] } : n)),
+      layout: {
+        ...state.layout,
+        nodes: { ...(state.layout?.nodes as Record<string, unknown>), ...positions },
+      },
+    })
   },
 
   updateNodeDimensions: (nodeId: string, dimensions: { width: number; height: number }) => {

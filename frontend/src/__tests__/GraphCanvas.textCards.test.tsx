@@ -145,6 +145,55 @@ describe('GraphCanvas — prototype cartes de texte (Story 20.2)', () => {
     expect(useGraphViewStore.getState().zoomTier).toBe('read')
   })
 
+  it('une sélection ne reconstruit que les nœuds touchés, une validation tous les concernés', () => {
+    renderCanvas()
+    const [start, other] = captured.nodes
+    const edges = captured.edges
+
+    act(() => useGraphStore.getState().setSelectedNode('START'))
+    expect(captured.nodes[0]).not.toBe(start)
+    expect(captured.nodes[0].selected).toBe(true)
+    expect(captured.nodes[1]).toBe(other)
+    expect(captured.edges.map((e) => e.id)).toEqual(edges.map((e) => e.id))
+
+    act(() =>
+      useGraphStore.setState({
+        validationErrors: [
+          { type: 'missing_display_name', node_id: 'node-a', message: 'x', severity: 'error' },
+        ],
+      })
+    )
+    expect(captured.nodes[1].data.validationErrors).toHaveLength(1)
+    act(() => useGraphStore.setState({ highlightedNodeIds: ['node-a'] }))
+    expect(captured.nodes[1].data.isHighlighted).toBe(true)
+
+    act(() => useGraphStore.setState({ highlightedCycleNodes: ['START'] }))
+    expect(captured.nodes[0].style?.border).toBe('3px solid orange')
+    act(() => useGraphStore.setState({ highlightedCycleNodes: [] }))
+    expect(captured.nodes[0].style?.border).toBeUndefined()
+
+    const storeEdges = useGraphStore.getState().edges
+    const color = captured.nodes[1].data.incomingEdgeColor
+    expect(color).toBeDefined()
+    act(() => useGraphStore.setState({ edges: storeEdges.filter((e) => e.target !== 'node-a') }))
+    expect(captured.nodes[1].data.incomingEdgeColor).toBeUndefined()
+    act(() => useGraphStore.setState({ edges: storeEdges }))
+    expect(captured.nodes[1].data.incomingEdgeColor).toBe(color)
+  })
+
+  it('les positions du glisser en cours ne changent que les nœuds déplacés', () => {
+    renderCanvas()
+    const before = captured.nodes
+    act(() => useGraphViewStore.getState().setDragPositions({ START: { x: 42, y: 24 } }))
+
+    expect(captured.nodes[0]).toMatchObject({ id: 'START', position: { x: 42, y: 24 } })
+    expect(captured.nodes[0].data).toBe(before[0].data)
+    expect(captured.nodes[1]).toBe(before[1])
+
+    act(() => useGraphViewStore.getState().setDragPositions(null))
+    expect(captured.nodes).toBe(before)
+  })
+
   it("changer de nœud, de dialogue ou rouvrir l'inspecteur met fin à l'écriture", () => {
     useGraphStore.setState({ documentId: 'premier' })
     renderCanvas()

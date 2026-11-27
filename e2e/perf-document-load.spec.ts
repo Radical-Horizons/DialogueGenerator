@@ -2,11 +2,12 @@
  * ADR-008 perf (Story 16.6 AC5) : p95 load document + projection + affichage.
  * Optionnel en CI (peut être exclu si flaky). Seuils : docs/architecture/adr-008-perf-targets.md
  */
+import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { test, expect } from '@playwright/test'
-import type { Locator, Page } from '@playwright/test'
+import type { Browser, Locator, Page } from '@playwright/test'
 import { uniqueE2EDocumentId, seedDocumentWithRetry, matchDocumentJsonGetResponse } from './helpers'
 import { E2E_MS, E2E_TEST_TIMEOUT_MS } from './timeouts'
 
@@ -72,7 +73,11 @@ test.describe('ADR-008 Perf (Story 16.6)', () => {
 
 /**
  * Story 20.2 : graphe de 500 répliques. Lancé par `playwright.perf.config.ts` seulement.
- * Seuils : `epic-20.md` « Seuils de mesure ». `PERF_VARIANTS` choisit les variantes.
+ * Seuils : `epic-20.md` « Seuils de mesure ». Protocole robuste à la charge du poste :
+ * passages alternés avant / après (`PERF_BEFORE_DIST` = build de référence), `PERF_PASSES`
+ * passages de chaque, charge consignée, témoin de 2 répliques joué avec le même geste, travail
+ * du fil principal lu dans la trace. Le résumé retient la médiane des p95 par passage.
+ * `PERF_VARIANTS` choisit les variantes, `PERF_STEPS` les étapes.
  */
 const PERF_500 = {
   loadMs: 3000,
@@ -83,8 +88,19 @@ const PERF_500 = {
   longTaskMs: 50,
 }
 const REPS = Number(process.env.PERF_REPS ?? 20)
+const PASSES = Number(process.env.PERF_PASSES ?? 5)
+if (!Number.isInteger(PASSES) || PASSES < 1) {
+  throw new Error(`PERF_PASSES doit être un entier positif, reçu « ${process.env.PERF_PASSES} »`)
+}
 const OUT_DIR = path.join('tmp', 'perf-20-2')
-/** `PERF_STEPS=load,zoom,typing,drag` : mesure par morceaux, cumulée dans le même fichier. */
+const RUN_DIR = path.join(OUT_DIR, `run-${process.env.PERF_RUN_ID ?? 'local'}`)
+const TRACE_CATEGORIES = [
+  'devtools.timeline',
+  'disabled-by-default-devtools.timeline',
+  'toplevel',
+  'blink.user_timing',
+]
+/** `PERF_STEPS=load,zoom,typing,drag` : ne mesurer que certaines étapes. */
 const STEPS = process.env.PERF_STEPS?.split(',')
 const wants = (step: string) => STEPS == null || STEPS.includes(step)
 
@@ -168,8 +184,15 @@ async function openAndTime(page: Page, documentId: string, variant: Variant) {
                 else resolve({ fromGetMs: end - get.startTime, fromNavigationMs: end })
               }, 0)
             )
-          } else if (performance.now() > deadline) reject(new Error('Graphe non affiché en 90 s'))
-          else requestAnimationFrame(check)
+          } else if (performance.now() > deadline) {
+            // L'état au moment de l'abandon, pour dire ce qui manquait.
+            reject(
+              new Error(
+                `Graphe non affiché en 90 s (zoom ${match?.[1]}, carte ${node != null}, ` +
+                  `palier ${node?.dataset.tier}, page « ${document.body.innerText.slice(0, 300)} »)`
+              )
+            )
+          } else requestAnimationFrame(check)
         }
         check()
       }),
@@ -219,12 +242,15 @@ async function installLatencyProbe(page: Page, startEvent: string, endEvent: str
       new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) store.__longTasks.push(entry.duration)
       }).observe({ type: 'longtask' })
-      let start = 0
+      let start: number | null = null
       window.addEventListener(startEvent, (e) => (start = e.timeStamp), true)
       window.addEventListener(
         endEvent,
         (event) => {
+          // `é` est inséré sans touche enfoncée : le mesurer depuis la précédente le fausserait.
+          if (start === null) return
           const from = start
+          start = null
           const ended = event.timeStamp
           requestAnimationFrame(() =>
             setTimeout(() => {
@@ -343,22 +369,234 @@ async function measureDrags(page: Page, card: Locator) {
   }
 }
 
+/** Cœurs occupés (page au repos : le fait d'autres processus) et charge du GPU. */
+async function machineLoad(page: Page) {
+  const sample = () =>
+    os.cpus().reduce(
+      (sum, cpu) => {
+        const total = Object.values(cpu.times).reduce((a, b) => a + b, 0)
+        return { total: sum.total + total, idle: sum.idle + cpu.times.idle }
+      },
+      { total: 0, idle: 0 }
+    )
+  const before = sample()
+  await page.waitForTimeout(2000)
+  const after = sample()
+  const busy = 1 - (after.idle - before.idle) / (after.total - before.total)
+  let gpuPercent: number | null = null
+  try {
+    gpuPercent = Number(
+      execFileSync('nvidia-smi', ['--query-gpu=utilization.gpu', '--format=csv,noheader,nounits'])
+        .toString()
+        .split('\n')[0]
+    )
+  } catch {
+    // Pas de GPU NVIDIA : la charge GPU n'est pas consignée.
+  }
+  return { busyCores: Math.round(busy * os.cpus().length * 10) / 10, gpuPercent }
+}
+
+interface TraceEvent {
+  name: string
+  cat: string
+  ph: string
+  pid: number
+  tid: number
+  ts: number
+  dur?: number
+  args?: { data?: { type?: string } }
+}
+
+/**
+ * Travail du fil principal de la page pendant `action`, lu dans la trace : total, et part
+ * tombant entre `mousedown` et `mouseup` (le glisser lui-même, sans l'enregistrement qui suit).
+ */
+async function mainThreadWork(
+  browser: Browser,
+  page: Page,
+  name: string,
+  action: () => Promise<void>
+) {
+  const file = path.join(RUN_DIR, `trace-${name}.json`)
+  await browser.startTracing(page, { path: file, categories: TRACE_CATEGORIES })
+  await page.evaluate(() => performance.mark('perf-start'))
+  await action()
+  await page.evaluate(() => performance.mark('perf-end'))
+  await browser.stopTracing()
+  const events = (JSON.parse(fs.readFileSync(file, 'utf-8')) as { traceEvents: TraceEvent[] })
+    .traceEvents
+  const mark = (markName: string) =>
+    events.find((e) => e.name === markName && e.cat.includes('blink.user_timing'))!
+  const start = mark('perf-start')
+  const end = mark('perf-end')
+  const main = events.filter(
+    (e) => e.pid === start.pid && e.tid === start.tid && e.ts >= start.ts && e.ts <= end.ts
+  )
+  const tasks = main.filter((e) => e.name === 'RunTask' && e.ph === 'X')
+  const inputs = (type: string) =>
+    main.filter((e) => e.name === 'EventDispatch' && e.args?.data?.type === type)
+  const ups = inputs('mouseup')
+  const gestures = inputs('mousedown').map((down) => [
+    down.ts,
+    ups.find((up) => up.ts > down.ts)?.ts ?? down.ts,
+  ])
+  const sum = (list: TraceEvent[]) => list.reduce((total, e) => total + (e.dur ?? 0), 0) / 1000
+  return {
+    totalMs: sum(tasks),
+    inGestureMs: sum(tasks.filter((t) => gestures.some(([a, b]) => t.ts >= a && t.ts <= b))),
+    longestTaskMs: Math.max(0, ...tasks.map((t) => (t.dur ?? 0) / 1000)),
+  }
+}
+
+const round1 = (value: number) => Math.round(value * 10) / 10
+
+/** Cadence au repos du navigateur, sur la page mesurée. */
+async function idleCadence(page: Page): Promise<number> {
+  return page.evaluate(
+    () =>
+      new Promise<number>((resolve) => {
+        const values: number[] = []
+        let last = 0
+        const loop = (at: number) => {
+          if (last) values.push(at - last)
+          last = at
+          if (values.length < 120) requestAnimationFrame(loop)
+          else resolve(values.sort((a, b) => a - b)[60])
+        }
+        requestAnimationFrame(loop)
+      })
+  )
+}
+
+/** Témoin : les deux premières répliques du graphe, reliées, sans test. */
+function witnessDocument(fixture: Record<string, unknown>): Record<string, unknown> {
+  type Node = { id: string; choices?: Array<Record<string, unknown>> }
+  const [first, second] = fixture.nodes as Node[]
+  const choices = (first.choices ?? []).map((choice, index) => {
+    const kept = Object.fromEntries(
+      Object.entries(choice).filter(([key]) => !key.startsWith('test') && key !== 'targetNode')
+    )
+    return index === 0 ? { ...kept, targetNode: second.id } : kept
+  })
+  return {
+    ...fixture,
+    nodes: [
+      { ...first, choices },
+      { ...second, choices: [] },
+    ],
+  }
+}
+
+async function openWitness(page: Page, documentId: string) {
+  await page.goto('about:blank')
+  await page.goto(`/graph-editor/${encodeURIComponent(documentId)}`)
+  await expect(page.locator(CARD).first()).toBeVisible({ timeout: E2E_MS.graphLoad })
+  await page.waitForTimeout(1500)
+}
+
+/** Met le curseur dans le texte d'une carte (prototype) ou dans l'inspecteur (graphe actuel). */
+async function startTyping(page: Page, card: Locator, textCards: boolean): Promise<Locator> {
+  const field = textCards
+    ? card.getByTestId('text-card-editor')
+    : page.getByTestId('graph-inspector').locator('textarea[name="line"]')
+  if (textCards) {
+    await card.getByTestId('text-card-line').click({ position: { x: 20, y: 10 } })
+    await expect(field).toBeFocused()
+  } else {
+    await card.click({ position: { x: 100, y: 12 } })
+    await page
+      .getByTestId('graph-inspector-node-summary')
+      .getByRole('button', { name: 'éditer' })
+      .first()
+      .click()
+    await field.click()
+  }
+  await page.waitForTimeout(500)
+  return field
+}
+
+const TYPED = 'Une suite tapée au clavier pour la mesure. '
+
+async function measureTyping(page: Page, field: Locator) {
+  const valueBefore = await field.inputValue()
+  await installLatencyProbe(page, 'keydown', 'input')
+  await page.keyboard.type(TYPED.slice(0, Math.max(REPS * 2, 20)), { delay: 90 })
+  await page.waitForTimeout(1000)
+  const typing = await readProbe(page)
+  await expect(field, 'la frappe a changé le champ').not.toHaveValue(valueBefore)
+  return {
+    latency: stats(typing.latencies),
+    longestTaskMs: Math.round(Math.max(0, ...typing.longTasks)),
+  }
+}
+
+const TRACED_DRAGS = 6
+
+/** Travail du fil principal de quelques glissers : par image du geste, et au total. */
+async function dragWork(browser: Browser, page: Page, card: Locator, name: string) {
+  const work = await mainThreadWork(browser, page, name, async () => {
+    for (let i = 0; i < TRACED_DRAGS; i++) await dragCard(page, card, i % 2 === 0 ? 1 : -1)
+    await page.waitForTimeout(1500)
+  })
+  return {
+    /** Un glisser compte dix déplacements, donc dix images. */
+    perFrameMs: round1(work.inGestureMs / TRACED_DRAGS / 10),
+    totalPerDragMs: round1(work.totalMs / TRACED_DRAGS),
+    longestTaskMs: Math.round(work.longestTaskMs),
+  }
+}
+
+/** Travail du fil principal par frappe, enregistrement automatique compris. */
+async function typingWork(browser: Browser, page: Page, name: string) {
+  const keys = 'abcdefghij klmnopqrs'
+  const work = await mainThreadWork(browser, page, name, async () => {
+    await page.keyboard.type(keys, { delay: 90 })
+    await page.waitForTimeout(2500)
+  })
+  return {
+    perKeyMs: round1(work.totalMs / keys.length),
+    longestTaskMs: Math.round(work.longestTaskMs),
+  }
+}
+
+type Build = 'avant' | 'apres'
+const BUILD_URL: Record<Build, string | undefined> = {
+  apres: undefined,
+  avant: 'http://localhost:4174',
+}
+
 test.describe('Perf graphe 500 répliques (Story 20.2)', () => {
   test.skip(!process.env.PERF_HARNESS, 'Mesure locale : npm run test:perf:graph')
   test.setTimeout(45 * 60_000)
 
   const selected = process.env.PERF_VARIANTS?.split(',')
 
-  for (const variant of VARIANTS) {
-    test(`500 répliques — ${variant.name}`, async ({ page, request, browser }, testInfo) => {
+  const runs: Array<{ variant: Variant; build: Build; pass: number }> = []
+  const judgedVariant = VARIANTS[0]
+  const builds: Build[] = process.env.PERF_BEFORE_DIST ? ['avant', 'apres'] : ['apres']
+  for (let pass = 1; pass <= PASSES; pass++) {
+    // Ordre inversé un passage sur deux : une charge qui monte ne pèse pas toujours du même côté.
+    for (const build of pass % 2 === 1 ? builds : [...builds].reverse()) {
+      runs.push({ variant: judgedVariant, build, pass })
+    }
+  }
+  for (const variant of VARIANTS.slice(1)) runs.push({ variant, build: 'apres', pass: 1 })
+
+  for (const { variant, build, pass } of runs) {
+    test.describe(`${variant.name}, ${build}, passage ${pass}`, () => {
+      if (BUILD_URL[build]) test.use({ baseURL: BUILD_URL[build] })
+
+    test(`500 répliques — ${variant.name} ${build} ${pass}`, async ({ page, request, browser }, testInfo) => {
       test.skip(selected != null && !selected.includes(variant.name), 'Variante non demandée')
       const documentId = `e2e-perf500-${variant.name}`
+      const witnessId = `e2e-perf2-${variant.name}`
+      const runName = `${variant.name}-${build}-${pass}`
       const fixture = JSON.parse(
         fs.readFileSync(path.join('e2e', 'fixtures', 'perf-graph-500.json'), 'utf-8')
       ) as Record<string, unknown>
       const documentUrl = `${API_BASE}/api/v1/documents/${documentId}`
       const target = process.env.PERF_TARGET === 'dev' ? 'dev' : 'prod'
-      fs.mkdirSync(OUT_DIR, { recursive: true })
+      fs.mkdirSync(RUN_DIR, { recursive: true })
 
       await page.addInitScript(
         ({ textCards, testBars }) => {
@@ -417,12 +655,11 @@ test.describe('Perf graphe 500 répliques (Story 20.2)', () => {
         machine: `${os.cpus()[0].model.trim()}, ${Math.round(os.totalmem() / 2 ** 30)} Go, ${os.release()}`,
         ...environment,
       }
-      const outFile = path.join(OUT_DIR, `${variant.name}-${target}.json`)
-      if (STEPS && fs.existsSync(outFile)) {
-        // Les étapes déjà mesurées restent ; l'en-tête est celui du run en cours.
-        Object.assign(results, JSON.parse(fs.readFileSync(outFile, 'utf-8')), { ...results })
-      }
+      Object.assign(results, { build, pass })
+      const outFile = path.join(RUN_DIR, `${runName}-${target}.json`)
       const save = () => fs.writeFileSync(outFile, JSON.stringify(results, null, 2))
+      const loads: Record<string, unknown> = {}
+      results.load = loads
 
       const reseed = async () => {
         await request.delete(documentUrl)
@@ -430,6 +667,7 @@ test.describe('Perf graphe 500 répliques (Story 20.2)', () => {
       }
 
       try {
+        loads.start = await machineLoad(page)
         if (!wants('load')) {
           // Sans l'étape de chargement : un document neuf, ouvert une fois pour le disposer.
           await reseed()
@@ -496,6 +734,8 @@ test.describe('Perf graphe 500 répliques (Story 20.2)', () => {
           await openAndTime(page, documentId, variant)
           await page.waitForTimeout(2000)
           await zoomToWorkingView(page)
+          loads.zoom = await machineLoad(page)
+          const zoomIdleFrameMs = await idleCadence(page)
           const frames: number[] = []
           const settleFrames: number[] = []
           const longTasks: number[] = []
@@ -520,6 +760,7 @@ test.describe('Perf graphe 500 répliques (Story 20.2)', () => {
             await wheelToZoom(page, 1)
           }
           results.zoom = {
+            idleFrameMs: zoomIdleFrameMs,
             frameMs: stats(frames),
             perRepetitionP95: stats(perRepetitionP95),
             framesOverThreshold: frames.filter((f) => f > PERF_500.frameMs).length,
@@ -531,9 +772,12 @@ test.describe('Perf graphe 500 répliques (Story 20.2)', () => {
             settleFrameMs: stats(settleFrames),
             settleLongestTaskMs: Math.round(Math.max(0, ...settleLongTasks)),
           }
-          await browser.startTracing(page, { path: path.join(OUT_DIR, `trace-zoom-${variant.name}-${target}.json`) })
-          await zoomOutGesture(page)
-          await browser.stopTracing()
+          let tracedFrames = 0
+          const zoomWork = await mainThreadWork(browser, page, `zoom-${runName}`, async () => {
+            tracedFrames = (await zoomOutGesture(page)).frames.length
+          })
+          // La fenêtre tracée contient la pose qui suit le geste, d'où une borne haute.
+          results.zoomWork = { perFrameMs: round1(zoomWork.totalMs / Math.max(1, tracedFrames)) }
           await wheelToZoom(page, 1)
           save()
         }
@@ -543,33 +787,10 @@ test.describe('Perf graphe 500 répliques (Story 20.2)', () => {
           await openAndTime(page, documentId, variant)
           await page.waitForTimeout(1500)
           const card = await zoomToWorkingView(page)
-          const field = variant.textCards
-            ? card.getByTestId('text-card-editor')
-            : page.getByTestId('graph-inspector').locator('textarea[name="line"]')
-          if (variant.textCards) {
-            await card.getByTestId('text-card-line').click({ position: { x: 20, y: 10 } })
-            await expect(field).toBeFocused()
-          } else {
-            await card.click({ position: { x: 100, y: 12 } })
-            await page
-              .getByTestId('graph-inspector-node-summary')
-              .getByRole('button', { name: 'éditer' })
-              .first()
-              .click()
-            await field.click()
-          }
-          await page.waitForTimeout(500)
-          const valueBefore = await field.inputValue()
-          await installLatencyProbe(page, 'keydown', 'input')
-          const typed = 'Une suite tapée au clavier pour la mesure. '.slice(0, Math.max(REPS * 2, 20))
-          await page.keyboard.type(typed, { delay: 90 })
-          await page.waitForTimeout(1000)
-          const typing = await readProbe(page)
-          await expect(field, 'la frappe a changé le champ').not.toHaveValue(valueBefore)
-          results.typing = {
-            latency: stats(typing.latencies),
-            longestTaskMs: Math.round(Math.max(0, ...typing.longTasks)),
-          }
+          const field = await startTyping(page, card, variant.textCards)
+          loads.typing = await machineLoad(page)
+          results.typing = await measureTyping(page, field)
+          results.typingWork = await typingWork(browser, page, `frappe-${runName}`)
           save()
         }
         if (wants('drag')) {
@@ -578,50 +799,188 @@ test.describe('Perf graphe 500 répliques (Story 20.2)', () => {
           await openAndTime(page, documentId, variant)
           await page.waitForTimeout(1500)
           const working = await zoomToWorkingView(page)
+          loads.drag = await machineLoad(page)
           results.dragAtZoom100 = await measureDrags(page, working)
+          results.dragWorkAtZoom100 = await dragWork(browser, page, working, `glisser100-${runName}`)
           await page.goto('about:blank')
           await openAndTime(page, documentId, variant)
           await page.waitForTimeout(1500)
           const fitted = await centralCard(page)
-          results.dragAtFit = await measureDrags(
-            page,
-            page.locator(`.react-flow__node[data-id="${fitted.id}"] ${CARD}`)
-          )
+          const fittedCard = page.locator(`.react-flow__node[data-id="${fitted.id}"] ${CARD}`)
+          results.dragAtFit = await measureDrags(page, fittedCard)
+          results.dragWorkAtFit = await dragWork(browser, page, fittedCard, `glisser-vue-${runName}`)
           save()
         }
+        if (variant.textCards && (wants('typing') || wants('drag'))) {
+          // Témoin : les mêmes gestes sur 2 répliques, le plancher de la mesure sur ce poste.
+          await page.goto('about:blank')
+          await request.delete(`${API_BASE}/api/v1/documents/${witnessId}`)
+          await seedDocumentWithRetry(request, API_BASE, witnessId, witnessDocument(fixture))
+          const witness: Record<string, unknown> = {}
+          results.witness = witness
+          if (wants('typing')) {
+            await openWitness(page, witnessId)
+            const card = await zoomToWorkingView(page)
+            const field = await startTyping(page, card, true)
+            witness.typing = await measureTyping(page, field)
+            witness.typingWork = await typingWork(browser, page, `temoin-frappe-${runName}`)
+          }
+          if (wants('drag')) {
+            await openWitness(page, witnessId)
+            const card = await zoomToWorkingView(page)
+            witness.drag = await measureDrags(page, card)
+            witness.dragWork = await dragWork(browser, page, card, `temoin-glisser-${runName}`)
+          }
+          save()
+        }
+        loads.end = await machineLoad(page)
       } finally {
         save()
         await testInfo.attach('mesures', { body: JSON.stringify(results, null, 2) })
         console.log(JSON.stringify(results, null, 2))
         await page.goto('about:blank')
         await request.delete(documentUrl)
+        await request.delete(`${API_BASE}/api/v1/documents/${witnessId}`)
       }
 
-      if (process.env.PERF_STRICT === '1' && variant.judged && target === 'prod') {
-        const r = results as unknown as {
-          firstOpen?: { fromGet: { p95: number } }
-          nextOpen?: { fromGet: { p95: number } }
-          typing?: { latency: { p95: number } }
-          dragAtZoom100?: { latency: { p95: number } }
-          dragAtFit?: { latency: { p95: number } }
-          zoom?: { frameMs: { p95: number }; longestTaskMs: number }
-        }
-        const below = (value: number | undefined, limit: number, label: string) =>
-          expect.soft(value ?? Number.POSITIVE_INFINITY, label).toBeLessThanOrEqual(limit)
-        if (wants('load')) {
-          below(r.firstOpen?.fromGet.p95, PERF_500.loadMs, 'p95 première ouverture (ms)')
-          below(r.nextOpen?.fromGet.p95, PERF_500.loadMs, 'p95 ouverture suivante (ms)')
-        }
-        if (wants('zoom')) {
-          below(r.zoom?.frameMs.p95, PERF_500.frameMs, 'p95 intervalle entre images au zoom (ms)')
-          below(r.zoom?.longestTaskMs, PERF_500.longTaskMs, 'tâche la plus longue au zoom (ms)')
-        }
-        if (wants('typing')) below(r.typing?.latency.p95, PERF_500.keyMs, 'p95 frappe (ms)')
-        if (wants('drag')) {
-          below(r.dragAtZoom100?.latency.p95, PERF_500.dragMs, 'p95 glisser à 100 % (ms)')
-          below(r.dragAtFit?.latency.p95, PERF_500.dragMs, 'p95 glisser, vue ajustée (ms)')
-        }
-      }
+    })
     })
   }
+
+  test('résumé des passages et verdicts', async ({ browserName }, testInfo) => {
+    void browserName
+    const target = process.env.PERF_TARGET === 'dev' ? 'dev' : 'prod'
+    const judged = selected == null || selected.includes(judgedVariant.name)
+    const summary = summarize(target, judged)
+    fs.mkdirSync(RUN_DIR, { recursive: true })
+    fs.writeFileSync(path.join(RUN_DIR, 'resume.json'), JSON.stringify(summary, null, 2))
+    await testInfo.attach('resume', { body: JSON.stringify(summary, null, 2) })
+    console.log(JSON.stringify(summary, null, 2))
+    if (process.env.PERF_STRICT === '1' && target === 'prod') {
+      for (const verdict of summary.verdicts) {
+        expect
+          .soft(
+            verdict.verdict,
+            `${verdict.label} : ${verdict.value} (seuil ${verdict.limit}, ${verdict.passes}/${PASSES} passages)`
+          )
+          .toBe('tenu')
+      }
+    }
+  })
 })
+
+type PassResult = Record<string, unknown>
+
+const read = (result: PassResult, dotted: string): number | undefined => {
+  let value: unknown = result
+  for (const key of dotted.split('.')) value = (value as Record<string, unknown> | undefined)?.[key]
+  return typeof value === 'number' ? value : undefined
+}
+
+/** Médiane, minimum et maximum d'une valeur sur les passages. */
+function across(results: PassResult[], pick: (r: PassResult) => number | undefined) {
+  const values = results
+    .map(pick)
+    .filter((v): v is number => v !== undefined)
+    .sort((a, b) => a - b)
+  if (values.length === 0) return null
+  const middle = values.length >> 1
+  const median = values.length % 2 ? values[middle] : (values[middle - 1] + values[middle]) / 2
+  return { passes: values.length, median: round1(median), min: values[0], max: values[values.length - 1] }
+}
+
+const SUMMARY_KEYS = [
+  'firstOpen.fromGet.p95',
+  'nextOpen.fromGet.p95',
+  'typing.latency.p95',
+  'typing.longestTaskMs',
+  'typingWork.perKeyMs',
+  'typingWork.longestTaskMs',
+  'dragAtZoom100.latency.p95',
+  'dragAtZoom100.releaseToPaint.p95',
+  'dragWorkAtZoom100.perFrameMs',
+  'dragWorkAtZoom100.totalPerDragMs',
+  'dragAtFit.latency.p95',
+  'dragAtFit.releaseToPaint.p95',
+  'dragWorkAtFit.perFrameMs',
+  'dragWorkAtFit.totalPerDragMs',
+  'zoom.frameMs.p95',
+  'zoom.idleFrameMs',
+  'zoom.longestTaskMs',
+  'zoomWork.perFrameMs',
+  'witness.typing.latency.p95',
+  'witness.typingWork.perKeyMs',
+  'witness.drag.latency.p95',
+  'witness.dragWork.perFrameMs',
+  'load.start.busyCores',
+  'load.start.gpuPercent',
+  'load.zoom.busyCores',
+  'load.typing.busyCores',
+  'load.drag.busyCores',
+  'load.drag.gpuPercent',
+  'load.end.busyCores',
+]
+
+/** Écart entre le p95 des images et la limite du passage (cadence au repos comprise). */
+function zoomExcess(result: PassResult): number | undefined {
+  const p95 = read(result, 'zoom.frameMs.p95')
+  const idle = read(result, 'zoom.idleFrameMs')
+  if (p95 === undefined || idle === undefined) return undefined
+  return round1(p95 - (Math.max(16.7, idle) + 0.5))
+}
+
+/** `judged` : la variante jugée fait partie du lancement (`PERF_VARIANTS`). */
+function summarize(target: string, judged: boolean) {
+  const files = fs.existsSync(RUN_DIR)
+    ? fs.readdirSync(RUN_DIR).filter((f) => f.endsWith(`-${target}.json`) && !f.startsWith('trace-'))
+    : []
+  const all = files.map((f) => JSON.parse(fs.readFileSync(path.join(RUN_DIR, f), 'utf-8')) as PassResult)
+  const groups: Record<string, PassResult[]> = {}
+  for (const result of all) (groups[`${result.variant}-${result.build}`] ??= []).push(result)
+  const table = Object.fromEntries(
+    Object.entries(groups).map(([name, results]) => [
+      name,
+      {
+        ...Object.fromEntries(SUMMARY_KEYS.map((key) => [key, across(results, (r) => read(r, key))])),
+        'zoom.excessMs': across(results, zoomExcess),
+      },
+    ])
+  )
+  const results = groups['cards-apres'] ?? []
+  type Criterion = [string, string, (r: PassResult) => number | undefined, number, string?]
+  const criteria: Criterion[] = [
+    ['load', 'p95 première ouverture (ms)', (r) => read(r, 'firstOpen.fromGet.p95'), PERF_500.loadMs],
+    ['load', 'p95 ouverture suivante (ms)', (r) => read(r, 'nextOpen.fromGet.p95'), PERF_500.loadMs],
+    ['typing', 'p95 frappe (ms)', (r) => read(r, 'typing.latency.p95'), PERF_500.keyMs, 'witness.typing.latency.p95'],
+    ['drag', 'p95 glisser à 100 % (ms)', (r) => read(r, 'dragAtZoom100.latency.p95'), PERF_500.dragMs, 'witness.drag.latency.p95'],
+    ['drag', 'p95 glisser, vue ajustée (ms)', (r) => read(r, 'dragAtFit.latency.p95'), PERF_500.dragMs, 'witness.drag.latency.p95'],
+    ['zoom', 'images au zoom : excès sur la limite du passage (ms)', zoomExcess, 0],
+    ['zoom', 'tâche la plus longue au zoom (ms)', (r) => read(r, 'zoom.longestTaskMs'), PERF_500.longTaskMs],
+  ]
+  const expected = criteria.filter(([step]) => judged && wants(step))
+  const verdicts = expected.map(([, label, pick, limit, witnessKey]) => {
+    const value = across(results, pick)
+    const witness = witnessKey ? across(results, (r) => read(r, witnessKey)) : null
+    // Asymétrie du protocole : tenu sous charge est tenu ; dépassé quand le témoin dépasse
+    // déjà le seuil n'est pas jugeable. Sans tous les passages, rien n'est jugé.
+    const verdict =
+      !value || value.passes < PASSES
+        ? 'non mesuré'
+        : value.median <= limit
+          ? 'tenu'
+          : witness && witness.median > limit
+            ? 'non jugeable'
+            : 'dépassé'
+    return {
+      label,
+      limit,
+      passes: value?.passes ?? 0,
+      value: value?.median ?? null,
+      min: value?.min ?? null,
+      max: value?.max ?? null,
+      witness,
+      verdict,
+    }
+  })
+  return { runDir: RUN_DIR, passes: PASSES, repetitions: REPS, table, verdicts }
+}
