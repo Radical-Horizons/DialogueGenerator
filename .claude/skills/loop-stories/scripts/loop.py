@@ -17,6 +17,8 @@ from pathlib import Path
 
 ARTIFACTS = "_bmad-output/implementation-artifacts"
 STATUS_PATH = f"{ARTIFACTS}/sprint-status.yaml"
+# Ancien nom du skill, gardé exprès : une série commencée sous ce nom doit rester visible,
+# sinon sa story en cours serait relancée dans une deuxième session.
 JOURNAL_NAME = "boucle-stories.json"
 
 EPIC_LINE = re.compile(r"^\s+epic-(\d+):\s*([a-z-]+)")
@@ -27,15 +29,15 @@ ACTIONABLE = {"backlog", "ready-for-dev"}
 INTERRUPTED = {"in-progress", "review"}
 
 
-class BoucleError(Exception):
+class LoopError(Exception):
     """Erreur à montrer telle quelle à l'orchestrateur."""
 
 
 def git(*args: str) -> str:
-    """Exécute git et rend sa sortie ; lève BoucleError en cas d'échec."""
+    """Exécute git et rend sa sortie ; lève LoopError en cas d'échec."""
     result = subprocess.run(["git", *args], capture_output=True, text=True, encoding="utf-8")
     if result.returncode != 0:
-        raise BoucleError(f"git {' '.join(args)} : {result.stderr.strip()}")
+        raise LoopError(f"git {' '.join(args)} : {result.stderr.strip()}")
     return result.stdout
 
 
@@ -67,9 +69,9 @@ def build_queue(
     if epic is None:
         epic = next((n for n, b in blocks.items() if b["status"] == "in-progress"), None)
         if epic is None:
-            raise BoucleError("aucun epic `in-progress` : préciser --epic")
+            raise LoopError("aucun epic `in-progress` : préciser --epic")
     if epic not in blocks:
-        raise BoucleError(f"epic-{epic} absent de {STATUS_PATH}")
+        raise LoopError(f"epic-{epic} absent de {STATUS_PATH}")
     stories = blocks[epic]["stories"]
     # Une story lancée reste `backlog` hors de sa branche : seul le journal le sait,
     # et la relancer ouvrirait une deuxième session sur le même travail.
@@ -97,7 +99,7 @@ def spec_pattern(key: str) -> re.Pattern[str]:
     """Motif des fichiers de spec d'une story."""
     match = STORY_KEY.match(key)
     if not match:
-        raise BoucleError(f"clé de story illisible : {key}")
+        raise LoopError(f"clé de story illisible : {key}")
     epic, num = match.groups()
     # Une story découpée en cours de route donne spec-20-1a / spec-20-1b pour 20-1.
     suffix = "" if num[-1].isalpha() else "[a-z]?"
@@ -172,7 +174,7 @@ def journal_update(path: Path, key: str | None, pairs: list[str]) -> dict:
         for pair in pairs:
             name, sep, value = pair.partition("=")
             if not sep:
-                raise BoucleError(f"attendu champ=valeur, reçu : {pair}")
+                raise LoopError(f"attendu champ=valeur, reçu : {pair}")
             if value:
                 entry[name] = value
             else:
@@ -210,7 +212,7 @@ def main(argv: list[str] | None = None) -> int:
             result = verify(args.branch, args.key, args.base)
         else:
             result = journal_update(journal_path(), args.key, args.pairs)
-    except BoucleError as exc:
+    except LoopError as exc:
         print(f"erreur : {exc}", file=sys.stderr)
         return 2
 
