@@ -1,6 +1,6 @@
 ---
-name: boucle-stories
-description: Enchaîner des stories BMAD depuis Claude Desktop, une session visible par story (bmad-build, tests, PR), cette conversation vérifiant et fusionnant entre deux. Alternative à bmad-loop avec suivi en direct. À utiliser quand l'utilisateur tape /boucle-stories ou demande d'enchaîner, dérouler ou faire les prochaines stories d'un epic, de lancer la boucle de stories, ou de reprendre la boucle ("continue la boucle", "où en est la boucle ?"). Pas pour coder une seule story ici même (bmad-build).
+name: loop-stories
+description: Enchaîner des stories BMAD depuis Claude Desktop, une session visible par story (bmad-build, tests, PR), cette conversation vérifiant et fusionnant entre deux. Alternative à bmad-loop avec suivi en direct. À utiliser quand l'utilisateur tape /loop-stories ou demande d'enchaîner, dérouler ou faire les prochaines stories d'un epic, de lancer la boucle de stories, ou de reprendre la boucle ("continue la boucle", "où en est la boucle ?"). Pas pour coder une seule story ici même (bmad-build).
 ---
 
 # Boucle de stories
@@ -15,10 +15,11 @@ et s'arrêter ; ne pas se rabattre sur des sous-agents.
 
 ## Arguments
 
-`/boucle-stories [epic=N] [max=N] [auto]`
+`/loop-stories [nombre] [epic=N] [auto]`
 
-- `epic` : par défaut le premier epic `in-progress`.
-- `max` : stories à enchaîner, **3** par défaut.
+- `nombre` : un entier seul (`/loop-stories 1`), le nombre de stories à enchaîner. **Sans
+  nombre : toutes les stories restantes de l'epic.**
+- `epic=N` : par défaut le premier epic `in-progress`.
 - `auto` : l'utilisateur approuve d'avance les specs sans question ouverte. Sans ce mot,
   chaque spec attend son accord.
 
@@ -28,7 +29,7 @@ vaut ni déploiement, ni `push --force`.
 
 ## Script
 
-`B="uv run --no-project python .claude/skills/boucle-stories/scripts/boucle.py"`
+`B="uv run --no-project python .claude/skills/loop-stories/scripts/loop.py"`
 (écrire la commande en entier à chaque appel : le shell ne garde pas les variables).
 
 | Commande | Rôle |
@@ -40,7 +41,8 @@ vaut ni déploiement, ni `push --force`.
 
 Champs d'une story : `etat` (`en-cours`, `a-fusionner`, `fusionnee`, `bloquee`),
 `session`, `branche`, `base` (SHA de départ), `pr`, `corrections`. Entrée `_boucle` :
-`epic`, `max`, `mode` (`validation` ou `auto`), `faites`, écrite au démarrage d'une série.
+`epic`, `max` (le nombre demandé ; vide = tout l'epic), `mode` (`validation` ou `auto`),
+`faites`, écrite au démarrage d'une série.
 `queue` ne propose jamais une clé qui porte un `etat` : elle la rend dans `launched`. Pour
 relancer une story sur décision de l'utilisateur, effacer son `etat`. Écris le journal à
 chaque changement : c'est lui, pas ta mémoire, qui permet de reprendre après une compaction
@@ -64,11 +66,12 @@ ou dans une autre conversation.
 `git fetch origin` d'abord (après une fusion, `origin/main` local est périmé), puis la ref
 de départ :
 
-- aucune PR en attente : `git branch -f boucle-base origin/main`, ref `boucle-base` ;
+- aucune PR en attente : `git branch -f loop-base origin/main`, ref `loop-base` ;
 - une PR en attente de CI : la branche de cette story (la suivante s'empile dessus).
 
 `queue --ref <ref>`, prendre la première de `next`. Au premier passage, annoncer en
-quelques lignes les stories prévues et le mode, sans attendre de confirmation.
+quelques lignes le mode, combien de stories sont prévues (`remaining` si aucun nombre n'est
+donné) et les premières, sans attendre de confirmation.
 
 Lire le `comment` de la story. S'il pose une **condition** (une date, une décision de
 l'auteur, un compteur), demander avant de lancer.
@@ -134,11 +137,12 @@ plus** par story ; ensuite `etat=bloquee` et arrêt.
 
 ## 5. S'arrêter
 
-Arrêt quand `max` est atteint, que l'epic n'a plus de story (proposer la rétrospective),
+Arrêt quand le nombre demandé est atteint, que l'epic n'a plus de story (proposer la
+rétrospective),
 qu'une story est `bloquee`, qu'une condition ou une question attend l'utilisateur.
 
 Rendre alors un tableau : story, session (lien), PR, état, reports. Dire clairement ce qui
-n'est **pas** fusionné et que `/boucle-stories` le reprendra.
+n'est **pas** fusionné et que `/loop-stories` le reprendra.
 
 ## Limites à annoncer, pas à contourner
 
