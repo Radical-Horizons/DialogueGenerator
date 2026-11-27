@@ -18,7 +18,7 @@ import { truncateChoiceLabel } from '../../utils/graphEdgeBuilders'
 import { normalizeTestBars } from '../../utils/graphNormalizers'
 import { runGraphTransaction } from '../utils/runGraphTransaction'
 import { documentToGraph } from '../../utils/documentToGraph'
-import { mergeLayoutWithNodePositions, syncDocAndLayout } from '../../utils/syncDocLayout'
+import { isTextCardsWorkingLayout, mergeLayoutWithNodePositions, syncDocAndLayout } from '../../utils/syncDocLayout'
 import { applyLinearNextNodeFromGraphEdges } from '../../utils/mergeNodeEditorForm'
 import { pruneGraphValidationDiagnostics } from '../../utils/pruneGraphValidationDiagnostics'
 import {
@@ -461,6 +461,23 @@ function updateDialogueNodeDirectly(
 }
 
 /**
+ * Prototype 20.2 : une frappe dans une carte ne touche que la réplique. On l'écrit dans le
+ * nœud et dans le document sans reprojeter le graphe ni comparer tout son contenu.
+ */
+function patchLineOnly(nodeId: string, line: unknown, state: GraphState): Partial<GraphState> {
+  const doc = state.document as Record<string, unknown>
+  return {
+    document: {
+      ...doc,
+      nodes: (doc.nodes as Record<string, unknown>[]).map((n) =>
+        n.id === nodeId ? { ...n, line } : n
+      ),
+    },
+    nodes: state.nodes.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, line } } : n)),
+  }
+}
+
+/**
  * Une pause de saisie au moins aussi longue clôt l'étape d'undo en cours (story 18.4) :
  * coalescer évite qu'une minute de frappe vide les 50 snapshots de l'historique structurel.
  */
@@ -645,12 +662,20 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
     if (!node) return
     const changed = changedFieldKeys(node, updates)
     if (changed.length === 0) return
-    const patch = computeNodeUpdate(node, updates, state)
+    const lineOnly =
+      changed.join() === 'data.line' &&
+      node.type === 'dialogueNode' &&
+      state.document != null &&
+      isTextCardsWorkingLayout(state.layout)
+    const patch = lineOnly
+      ? patchLineOnly(nodeId, (updates.data as Record<string, unknown>).line, state)
+      : computeNodeUpdate(node, updates, state)
     // Le flush du panneau réécrit en continu des valeurs que le store ne conserve pas (défauts
     // du formulaire, ligne d'un TestNode reconstruite depuis le choix) : sans changement effectif,
     // ni étape d'undo, ni redo vidé, ni document marqué modifié.
     const touchesNodeOutsideData = changed.some((key) => !key.startsWith('data.'))
     if (
+      !lineOnly &&
       !touchesNodeOutsideData &&
       graphContentKey(patch.nodes ?? state.nodes, patch.edges ?? state.edges, patch.document ?? state.document) ===
         graphContentKey(state.nodes, state.edges, state.document)

@@ -7,7 +7,12 @@ import type { GraphState } from '../types/graphState'
 import * as graphAPI from '../../api/graph'
 import { documentToGraph } from '../../utils/documentToGraph'
 import { normalizeTestBars, normalizeTestBarsAfterLayout } from '../../utils/graphNormalizers'
-import { mergeLayoutWithNodePositions, syncDocAndLayout } from '../../utils/syncDocLayout'
+import {
+  isTextCardsWorkingLayout,
+  mergeLayoutWithNodePositions,
+  syncDocAndLayout,
+} from '../../utils/syncDocLayout'
+import { useUiLayoutStore } from '../uiLayoutStore'
 
 export type LayoutSlice = Pick<
   GraphState,
@@ -23,13 +28,21 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
         get()._pushUndoSnapshot()
         const { calculateDagreLayout } = await import('../../utils/dagreLayout')
         // Comme au chargement : les barres de test gardent la place que dagre leur donne.
-        const layoutedNodes = normalizeTestBarsAfterLayout(
-          calculateDagreLayout(state.nodes, state.edges, {
-            direction: direction as 'TB' | 'LR' | 'BT' | 'RL',
-            spacingMode: state.layoutSpacingMode,
-          }),
-          state.edges
-        ).nodes
+        // Un layout du prototype (20.2) se redispose toujours en cartes, gauche → droite.
+        const disposed = isTextCardsWorkingLayout(state.layout)
+          ? (await import('../../utils/textCardLayout')).calculateTextCardLayout(
+              state.nodes,
+              state.edges,
+              {
+                spacingMode: state.layoutSpacingMode,
+                showTestBars: useUiLayoutStore.getState().textCardsTestBars,
+              }
+            )
+          : calculateDagreLayout(state.nodes, state.edges, {
+              direction: direction as 'TB' | 'LR' | 'BT' | 'RL',
+              spacingMode: state.layoutSpacingMode,
+            })
+        const layoutedNodes = normalizeTestBarsAfterLayout(disposed, state.edges).nodes
         // `layout` est la source des positions projetées : sans ce sync, le déplacement
         // suivant rejoue les anciennes positions et annule la disposition.
         const synced =
@@ -96,6 +109,20 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
     if (!positionChanged) return
     if (pushUndoSnapshot) get()._pushUndoSnapshot()
     const state = get()
+
+    // Prototype 20.2 sans barres de test : rien d'autre ne dépend de la position, et
+    // reprojeter tout le document à chaque image du glisser coûtait ~250 ms à 500 répliques.
+    if (isTextCardsWorkingLayout(state.layout) && !useUiLayoutStore.getState().textCardsTestBars) {
+      set({
+        nodes: state.nodes.map((n) => (n.id === nodeId ? { ...n, position } : n)),
+        layout: {
+          ...state.layout,
+          nodes: { ...(state.layout?.nodes as Record<string, unknown>), [nodeId]: position },
+        },
+      })
+      if (!skipMarkDirty) get().markDirty()
+      return
+    }
 
     // Mode document SoT : mettre à jour le layout (pas le document) puis recalculer la projection
     if (state.document != null && state.layout != null) {

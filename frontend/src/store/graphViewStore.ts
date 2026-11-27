@@ -27,6 +27,7 @@ import {
   type PlaythroughStateSnapshot,
 } from '../utils/scenarioPlaythroughEngine'
 import type { Edge, Node } from 'reactflow'
+import type { ZoomTier } from '../utils/zoomTiers'
 
 /** Catalogue flags pour clamp preview (Story 9.4) — réglé par DialoguePreviewPanel. */
 export type PreviewCatalogMap = Record<string, FlagDefinition>
@@ -81,6 +82,14 @@ export interface DocumentSavedSignal {
 }
 
 export interface GraphViewState {
+  // --- Prototype cartes de texte (Story 20.2) ---
+  /** Palier de zoom courant, posé à la fin d'un mouvement et non à chaque image. */
+  zoomTier: ZoomTier
+  setZoomTier: (tier: ZoomTier) => void
+  /** Carte dont le texte brut est en cours de saisie ; elle reste au palier « écrire ». */
+  writingNodeId: string | null
+  setWritingNode: (nodeId: string | null) => void
+
   // --- Instance React Flow ---
   reactFlowInstance: ReactFlowInstance | null
   /** Conteneur du canvas : permet de placer un nœud dans la zone visible depuis la toolbar. */
@@ -243,6 +252,11 @@ export interface GraphViewState {
 }
 
 export const useGraphViewStore = create<GraphViewState>()((set) => ({
+  zoomTier: 'write',
+  setZoomTier: (tier) => set({ zoomTier: tier }),
+  writingNodeId: null,
+  setWritingNode: (nodeId) => set({ writingNodeId: nodeId }),
+
   reactFlowInstance: null,
   canvasElement: null,
   focusQueue: [],

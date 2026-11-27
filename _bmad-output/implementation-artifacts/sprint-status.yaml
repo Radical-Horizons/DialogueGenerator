@@ -38,7 +38,7 @@ project: DialogueGenerator
 project_key: dialogue-generator
 tracking_system: file-system
 story_location: '{project-root}/_bmad-output/implementation-artifacts'
-last_updated: '2026-11-26T00:00:00+01:00'
+last_updated: '2026-11-27T00:00:00+01:00'
 development_status:
   # Flat list (not nested YAML): each epic block = epic → stories → retrospective, then the NEXT epic starts.
   # Order = delivery sequence (see epic-list.md): 0 → 16 → 1–3 → 17 → 4–15 — not strict epic ID sort.
@@ -199,7 +199,7 @@ development_status:
   epic-20: in-progress
   # Tranche 1 — fondation, maintenant
   20-1-conversion-texte-blocs-et-export-golden-en-ci: done  # volet 1 golden (spec-20-1a) ; volet 2 parse/serialize (spec-20-1b)
-  20-2-preuve-de-performance-cartes-360-flux-lr-paliers: backlog
+  20-2-preuve-de-performance-cartes-360-flux-lr-paliers: in-progress
   20-3-tokens-en-variables-css-theme-nuit: backlog
   # Tranche 1 bis — fondation d'écriture (Epic 18), maintenant, en parallèle de la tranche 1
   18-4-annulation-updatenode-transactionnel-et-coalescence-undo-fr126: backlog  # partiel livré (61462f0a8, graphStore.updateNodeUndo.test.ts) : reste CTRL+Z/CTRL+Y dans un champ, allowedInInputs, annonce lecteur d'écran, mesure des clones

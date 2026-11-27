@@ -380,3 +380,11 @@
   summary: (non vérifié, medium si vrai) « Exporter depuis l'aperçu » d'un dialogue déjà enregistré enverrait `document_id` à `save-and-write`, qui répond 409 `canonical_revision_required`.
   evidence: `frontend/src/hooks/useUnityExportPreview.ts:102-106` et `:193` n'ont pas la branche `documentId` de `useUnityExport.ts:98-110` ; route `api/routers/graph_io.py:277-283`. À trancher en lançant l'aperçu sur un dialogue persisté.
   status: done (PR `fix/export-unity-golden-ecarts`) — reproduit dans l'app (409 `canonical_revision_required` affiché brut) ; l'aperçu passe par `exportPersistedUnityDocument` comme « Export Unity » (test `useUnityExportPreview.test.ts`).
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-2-preuve-performance-cartes-360.md`
+  summary: Propager la décision de la story 20.2 à `.claude/rules/ui_refonte_scene.md`, à A9 de `docs/architecture/refonte-scene-architecture.md` et au plan de tests de l'epic 20, une fois confirmée par l'auteur.
+  evidence: Ces trois documents décrivent encore les cartes de 360 px comme attendues ; la règle est injectée dans chaque build de l'epic 20.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-2-preuve-performance-cartes-360.md`
+  summary: La story 20.7 doit retirer ou reprendre le prototype 20.2 (carte 360 px, drapeaux localStorage, clés `nodesLR`, voies courtes `patchLineOnly` et glisser).
+  evidence: Code livré derrière un drapeau sans interface ; les voies courtes doublent la synchronisation document et layout, et des `nodesLR` peuvent exister dans des layouts enregistrés.

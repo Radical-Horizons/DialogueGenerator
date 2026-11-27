@@ -21,6 +21,10 @@ export interface DagreLayoutOptions {
   nodeWidth?: number
   nodeHeight?: number
   nodeSpacing?: { x: number; y: number }
+  /** Taille imposée par nœud, prioritaire sur les mesures du DOM. */
+  nodeSize?: (node: Node) => { width: number; height: number }
+  /** `false` : pas de décalage des frères (en `LR`, il fait se chevaucher des cartes hautes). */
+  redistributeSiblings?: boolean
 }
 
 export interface RedistributeSiblingBranchOptions {
@@ -196,7 +200,14 @@ export function calculateDagreLayout(
     nodeHeight = DEFAULT_NODE_HEIGHT,
     spacingMode = 'normal',
     nodeSpacing = resolveDagreNodeSpacing(spacingMode),
+    nodeSize,
+    redistributeSiblings = true,
   } = options
+  const sizeOf = (node: Node) =>
+    nodeSize?.(node) ?? {
+      width: getDefaultNodeWidth(node, nodeWidth),
+      height: getDefaultNodeHeight(node, nodeHeight),
+    }
 
   // Créer un nouveau graphe Dagre
   const dagreGraph = new dagre.graphlib.Graph()
@@ -213,12 +224,7 @@ export function calculateDagreLayout(
 
   // Ajouter les nœuds au graphe Dagre
   nodes.forEach((node) => {
-    const width = getDefaultNodeWidth(node, nodeWidth)
-    const height = getDefaultNodeHeight(node, nodeHeight)
-    dagreGraph.setNode(node.id, {
-      width,
-      height,
-    })
+    dagreGraph.setNode(node.id, sizeOf(node))
   })
 
   // Une cible absente du canvas (`END`) deviendrait un nœud fantôme au dernier rang,
@@ -239,9 +245,8 @@ export function calculateDagreLayout(
   // Convertir les positions Dagre en positions ReactFlow
   const layoutedNodes = nodes.map((node) => {
     const dagreNode = dagreGraph.node(node.id)
-    const width = getDefaultNodeWidth(node, nodeWidth)
-    const height = getDefaultNodeHeight(node, nodeHeight)
-    
+    const { width, height } = sizeOf(node)
+
     // Dagre retourne les positions avec le centre du nœud comme référence
     // ReactFlow utilise le coin supérieur gauche
     const position = {
@@ -255,7 +260,9 @@ export function calculateDagreLayout(
     }
   })
 
-  return redistributeSiblingBranches(layoutedNodes, edges, direction, spacingMode)
+  return redistributeSiblings
+    ? redistributeSiblingBranches(layoutedNodes, edges, direction, spacingMode)
+    : layoutedNodes
 }
 
 function getMainAxisPosition(node: Node, direction: DagreDirection): number {
