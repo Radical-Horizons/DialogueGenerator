@@ -31,11 +31,14 @@ const TRANSIENT_ERROR_CODES = new Set(['ERR_NETWORK', 'ECONNABORTED', 'ETIMEDOUT
 const EDITION_SAVED_WHILE_DIRTY_WARNING =
   "Ce dialogue vient d'être enregistré depuis l'onglet Édition pendant une modification en cours dans le graphe : la version du graphe va le remplacer."
 
+/** Pause de saisie avant de relire la bibliothèque après un renommage. */
+const TITLE_LIST_REFRESH_MS = 1000
+
 const MISSING_CHOICE_ID_INFO =
   'Choix sans identifiant stable — ouvert quand même. La prochaine sauvegarde les écrira.'
 
 const REPLACED_NEWER_VERSION_INFO =
-  "Ce dialogue avait été modifié ailleurs (onglet Édition ou autre onglet) : ces modifications ont été remplacées par celles du graphe, seuls le titre et une fiche de scène que vous n'avez pas touchée ont été conservés"
+  "Ce dialogue avait été modifié ailleurs (onglet Édition ou autre onglet) : ces modifications ont été remplacées par celles du graphe, seuls le titre et la fiche de scène que vous n'avez pas modifiés ici ont été conservés"
 
 type ApiErrorShape = {
   response?: { status?: number; data?: { error?: { code?: string } } }
@@ -105,6 +108,8 @@ export interface UseDialogueLoaderReturn {
 export function useDialogueLoader(
   toast: UseToastFn,
   routeTarget: RouteTarget | null,
+  /** Le dialogue affiché vient d'être supprimé (l'adresse ne doit plus le désigner). */
+  onActiveDialogueDeleted?: () => void,
 ): UseDialogueLoaderReturn {
   const [selectedDialogue, setSelectedDialogue] = useState<UnityDialogueMetadata | null>(null)
   const [isLoadingDialogue, setIsLoadingDialogue] = useState(false)
@@ -116,6 +121,9 @@ export function useDialogueLoader(
   const prevSelectedDialogueRef = useRef<UnityDialogueMetadata | null>(null)
   const loadInFlightRef = useRef(false)
   const activeDialogueFilenameRef = useRef<string | null>(null)
+  const onActiveDialogueDeletedRef = useRef(onActiveDialogueDeleted)
+  onActiveDialogueDeletedRef.current = onActiveDialogueDeleted
+  const titleRefreshTimerRef = useRef<number | null>(null)
   const lastNetworkErrorRef = useRef<{ message: string; timestamp: number } | null>(null)
   const saveRetryBlockedUntilRef = useRef<number>(0)
   /** Échec non passager : pas de relance avant une nouvelle modification de ce dialogue. */
@@ -132,6 +140,9 @@ export function useDialogueLoader(
     validateGraph,
     hasUnsavedChanges,
     sceneDirty,
+    titleDirty,
+    flagsDirty,
+    isDeletingDocument,
     documentId,
     isLoading: isGraphLoading,
     isSaving: isGraphSaving,
@@ -148,8 +159,20 @@ export function useDialogueLoader(
   const notifySaveOutcome = useCallback(
     (response: SaveGraphResponse | undefined) => {
       if (response?.replacedNewerVersion) toast(REPLACED_NEWER_VERSION_INFO, 'info')
+      if (response?.titleChanged) {
+        if (titleRefreshTimerRef.current !== null) window.clearTimeout(titleRefreshTimerRef.current)
+        titleRefreshTimerRef.current = window.setTimeout(() => {
+          void dialogueListRef.current?.refresh()
+        }, TITLE_LIST_REFRESH_MS)
+      }
     },
     [toast],
+  )
+  useEffect(
+    () => () => {
+      if (titleRefreshTimerRef.current !== null) window.clearTimeout(titleRefreshTimerRef.current)
+    },
+    [],
   )
 
   /** Enregistre le dialogue ouvert avant d'en charger un autre ; `false` si l'enregistrement a échoué. */
@@ -198,6 +221,7 @@ export function useDialogueLoader(
     if (isSelected || (!!loaded && normalizeDialogueFilenameKey(loaded) === deletedKey)) {
       setSelectedDialogue(null)
       resetGraphAndTemplateSession()
+      onActiveDialogueDeletedRef.current?.()
     }
   }, [dialogueDeleted, selectedDialogue?.filename, resetGraphAndTemplateSession])
 
@@ -570,8 +594,9 @@ export function useDialogueLoader(
       !storeFilename ||
       isSelectionChanging ||
       !hasUnsavedChanges ||
-      // Un graphe vide ne s'écrit pas, sauf si la fiche de scène a changé.
-      (nodes.length === 0 && !sceneDirty) ||
+      // Un graphe vide ne s'écrit pas, sauf si la fiche, le titre ou les flags ont changé.
+      (nodes.length === 0 && !sceneDirty && !titleDirty && !flagsDirty) ||
+      isDeletingDocument ||
       isGraphLoading ||
       isGraphSaving ||
       isLoadingDialogue ||
@@ -639,6 +664,9 @@ export function useDialogueLoader(
     isGenerating,
     nodes.length,
     sceneDirty,
+    titleDirty,
+    flagsDirty,
+    isDeletingDocument,
     clientSeq,
     autosaveRetryTick,
     saveDialogue,

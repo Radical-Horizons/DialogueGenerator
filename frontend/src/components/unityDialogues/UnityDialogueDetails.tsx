@@ -3,7 +3,6 @@
  */
 import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react'
 import * as documentsAPI from '../../api/documents'
-import { useGraphViewStore } from '../../store/graphViewStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
 import { UnityDialogueEditor } from '../generation/UnityDialogueEditor'
@@ -14,6 +13,7 @@ import { DialogueSharingModal } from './DialogueSharingModal'
 import { useAuthStore } from '../../store/authStore'
 import { formatDialogueTitle } from '../../utils/formatDialogueTitle'
 import { consumePendingValidationFocus } from '../../utils/pendingValidationFocus'
+import { deleteDialogueAndNotify } from '../../utils/dialogueDeletion'
 
 interface UnityDialogueDetailsProps {
   filename: string
@@ -128,9 +128,7 @@ export function UnityDialogueDetails({
 
     setIsDeleting(true)
     try {
-      await documentsAPI.deleteDocument(filename.replace(/\.json$/i, ''))
-      // Notifier tous les consommateurs (ex. éditeur de graphe) pour synchroniser liste + canvas
-      useGraphViewStore.getState().notifyDialogueDeleted(filename)
+      await deleteDialogueAndNotify(filename)
       // Rafraîchir la liste puis fermer : attendre le refresh pour que la liste soit à jour avant de fermer le panneau
       if (onDeleted) {
         await Promise.resolve(onDeleted())

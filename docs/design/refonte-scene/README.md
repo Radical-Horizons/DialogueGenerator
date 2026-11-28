@@ -230,12 +230,12 @@ parcours le prouve. Le retrait du panneau de droite (20.15) attend les lignes qu
 
 | Aujourd'hui | Demain | Story | Test e2e |
 |---|---|---|---|
-| Page Générer (scène, brief, onglets Brief/Flags/Templates, réglages LLM) | Fiche de scène ; flags dans « fiche de scène ▾ › Flags » ; templates par « fiche de scène ▾ › Appliquer un template… » ; profil d'auteur (voix d'écriture) dans la fiche ; modèle et raisonnement dans la barre d'état et le tiroir Contexte ; autres réglages dans Réglages et l'écran des voix et templates | 20.4, 20.5, 20.25, 20.27 | ☐ |
-| « Sauvegarder ce brief comme template » | « fiche de scène ▾ › Enregistrer comme template » | 20.4 | ☐ |
+| Page Générer (scène, brief, onglets Brief/Flags/Templates, réglages LLM) | Fiche de scène ; flags dans « fiche de scène ▾ › Flags du dialogue » ; templates par « fiche de scène ▾ › Appliquer un template… » ; profil d'auteur (voix d'écriture) dans la fiche ; modèle et raisonnement dans la barre d'état et le tiroir Contexte ; autres réglages dans Réglages et l'écran des voix et templates | 20.4, 20.5, 20.25, 20.27 | ☐ |
+| « Sauvegarder ce brief comme template » | « fiche de scène ▾ › Enregistrer comme template » (distribution, lieu, brief, fiches liées) ; « Appliquer un template… » les remplace | 20.4 | ☐ |
 | Colonne Contexte GDD | Fiche (PNJ, PJ, `@`), tiroir Contexte, écran Fiches du GDD ; règles de contexte dans Réglages › Notion et GDD | 20.4, 20.25, 20.27 | ☐ |
 | Colonne droite (Prompt, Dialogue, Détails, Trace) | Tiroir Contexte (« voir le prompt »), emplacement à écrire (en direct + « TRACE ▸ »), aperçu de fiche, Versions | 20.25, 20.11, 20.17 | ☐ |
 | Options ×N, comparaison Liste / Côte à côte | `‹ 1/4 ›` dans l'emplacement + « comparer les 4 côte à côte » (vue 2b conservée) | 20.11 | ☐ |
-| Section Éditer (liste, métadonnées, partage, permissions, suppression) | Classeur ; Script ; « fiche de scène ▾ » (métadonnées, partage, permissions, supprimer) | 20.4, 20.5, 20.15 | ☐ |
+| Section Éditer (liste, métadonnées, partage, permissions, suppression) | Classeur ; Script ; titre dans la fiche ; « fiche de scène ▾ » (métadonnées, partage, permissions, supprimer) | 20.4, 20.5, 20.15 | ☐ |
 | Titre et locuteur d'un nœud | En-tête du bloc et de la carte, éditables (Epic 18.7) | 18.7 | ☐ |
 | Graphe : inspecteur 5 onglets, panneaux flottants | Nœud → la carte ; Santé → barre d'état ; Qualité, Slop → relecture en marge ; Coût → « Actions ▾ » ; simulation, règles de contexte, systèmes de jeu : fenêtres ponctuelles inchangées, ouvertes depuis « Actions ▾ » | 20.7, 20.9, 20.14, 20.5 | ☐ |
 | Nœud de test, nœud Fin | Sorties de la réponse (4 issues), puce ■ FIN | 20.8 | ☐ |

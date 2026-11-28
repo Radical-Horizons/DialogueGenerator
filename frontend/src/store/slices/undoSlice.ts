@@ -43,6 +43,20 @@ function cloneSnapshot(state: {
   }
 }
 
+/** Le titre n'est pas un geste du graphe : annuler ne doit pas revenir sur un renommage. */
+function restoreDocument(
+  snapshot: Record<string, unknown> | null,
+  current: Record<string, unknown> | null,
+): Record<string, unknown> | null {
+  if (!snapshot) return null
+  const restored = JSON.parse(JSON.stringify(snapshot)) as Record<string, unknown>
+  if (current) {
+    if (current.title === undefined) delete restored.title
+    else restored.title = current.title
+  }
+  return restored
+}
+
 export const createUndoSlice: StateCreator<GraphState, [], [], UndoSlice> = (set, get) => ({
   undo: () => {
     const state = get()
@@ -59,9 +73,7 @@ export const createUndoSlice: StateCreator<GraphState, [], [], UndoSlice> = (set
       edges: restoredEdges,
       undoStack: state.undoStack.slice(0, -1),
       redoStack: [...state.redoStack, redoSnapshot],
-      document: snapshot.document
-        ? (JSON.parse(JSON.stringify(snapshot.document)) as Record<string, unknown>)
-        : null,
+      document: restoreDocument(snapshot.document, state.document),
       layout: snapshot.layout
         ? (JSON.parse(JSON.stringify(snapshot.layout)) as Record<string, unknown>)
         : null,
@@ -84,9 +96,7 @@ export const createUndoSlice: StateCreator<GraphState, [], [], UndoSlice> = (set
       edges: [...snapshot.edges],
       undoStack: [...state.undoStack, undoSnapshot],
       redoStack: state.redoStack.slice(0, -1),
-      document: snapshot.document
-        ? (JSON.parse(JSON.stringify(snapshot.document)) as Record<string, unknown>)
-        : null,
+      document: restoreDocument(snapshot.document, state.document),
       layout: snapshot.layout
         ? (JSON.parse(JSON.stringify(snapshot.layout)) as Record<string, unknown>)
         : null,

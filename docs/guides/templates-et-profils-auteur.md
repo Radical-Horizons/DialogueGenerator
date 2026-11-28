@@ -164,6 +164,15 @@ un découpage d'écran.
 Enregistrer un template se fait **depuis l'onglet Brief** (`BriefTemplateSaver`), sous la
 zone de saisie : c'est le brief qui est capturé, et le bouton le dit.
 
+La **fiche de scène** du graphe en est la seconde porte (`SceneSheetMenu`, story 20.4) :
+« Enregistrer comme template » garde distribution, lieu, brief et fiches liées (ni tons ni
+profil), sous la forme que cet onglet recharge ; « Appliquer un template… » remplace ces
+quatre champs de la scène ouverte et ignore les réglages de modèle. À l'enregistrement, le
+serveur retire de `characters` et `locations` les noms absents du GDD : un personnage libre
+n'est donc plus dans la distribution. Un lieu libre est aussi porté par `subLocation`, d'où la
+fiche le reprend tel quel ; la page Générer, elle, le signale comme référence obsolète avant de
+charger, puis l'ignore. Conversion : `frontend/src/utils/sceneTemplate.ts`.
+
 Le profil d'auteur vit dans le tiroir (`AuthorProfilePanel`). Sa **valeur active** — le texte
 envoyé au LLM — reste en `localStorage` : ce n'est pas un objet, c'est l'état d'un champ, au
 même titre que le brief en cours de frappe. Seuls les profils **nommés** sont des objets serveur.

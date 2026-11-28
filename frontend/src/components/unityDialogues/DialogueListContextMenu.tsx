@@ -3,14 +3,13 @@
  */
 import { useCallback, useEffect, useState, type CSSProperties } from 'react'
 
-import * as unityDialoguesAPI from '../../api/unityDialogues'
-import { useGraphViewStore } from '../../store/graphViewStore'
 import { useGraphStore } from '../../store/graphStore'
 import { theme } from '../../theme'
 import type { UnityDialogueMetadata } from '../../types/api'
 import { getErrorMessage } from '../../types/errors'
 import { clampContextMenuToViewport } from '../../utils/contextMenuPlacement'
 import { getDialogueDisplayTitle } from '../../utils/formatDialogueTitle'
+import { confirmDialogueDeletion, deleteDialogueAndNotify } from '../../utils/dialogueDeletion'
 
 export interface DialogueListContextMenuState {
   dialogue: UnityDialogueMetadata
@@ -74,17 +73,11 @@ export function DialogueListContextMenu({
     const deletesOpenDirtyDialogue =
       hasUnsavedChanges &&
       openDocumentId?.replace(/\.json$/i, '') === dialogueId
-    const warning = deletesOpenDirtyDialogue
-      ? ' Les modifications non sauvegardées seront perdues.'
-      : ''
-    if (!window.confirm(`Supprimer le dialogue « ${title} » ?${warning} Cette action est irréversible.`)) {
-      return
-    }
+    if (!confirmDialogueDeletion(title, deletesOpenDirtyDialogue)) return
     setIsDeleting(true)
     setError(null)
     try {
-      await unityDialoguesAPI.deleteUnityDialogue(dialogue.filename)
-      useGraphViewStore.getState().notifyDialogueDeleted(dialogue.filename)
+      await deleteDialogueAndNotify(dialogue.filename)
       if (onDeleted) {
         await Promise.resolve(onDeleted())
       }
