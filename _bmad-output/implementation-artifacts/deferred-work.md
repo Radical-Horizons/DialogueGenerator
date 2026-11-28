@@ -401,3 +401,15 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-20-2-preuve-performance-cartes-360.md`
   summary: Pendant un glisser, le prototype tient les positions hors de `useGraphStore` ; la story 20.7 doit confirmer ou annuler cet écart à ADR-007.
   evidence: `graphViewStore.dragPositions`, appliquées par `GraphCanvas` seul et écrites au lâcher par `moveNodes` ; l'écart n'est consigné que dans la spec de la story 20.2.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-3-tokens-en-variables-css-theme-nuit.md`
+  summary: Couleurs encore en dur, à passer en tokens avec la story 20.16 (thème Papier) ; tant qu'elles le restent, un second jeu de valeurs sous `:root[data-theme="…"]` ne les change pas.
+  evidence: Au 2026-11-28, 394 littéraux (`#…`, `rgb(`) hors tests et hors `tokenValues.ts` dans 97 fichiers de `frontend/src` : 8 feuilles CSS (172, surtout `usage/*.css`, `ExportLogsPanel.css`, `index.css`), 85 composants (166), `theme.ts` (50, dont le fond de l'app `#17171b`, repris aussi par `index.css` et `App.css`) et 3 autres fichiers (6, dont les 4 couleurs des issues de test, `TEST_RESULT_EDGE_COLORS` dans `utils/graphEdgeBuilders.ts`). Redéfinir `--dg-surface-base` ne change donc pas le fond des écrans 1c et 2e. Hors de ce compte, les concaténations d'alpha sur `theme.ts` (`ContextSelectionBudgetBar`, `GenerationPanelControls`) casseraient avec des `var()`.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-3-tokens-en-variables-css-theme-nuit.md`
+  summary: L'export PNG/SVG du graphe n'embarque pas les polices de l'app en production, sauf quand une `<style>` d'un composant est montée par hasard.
+  evidence: `html-to-image` 1.11.13 (`embed-webfonts.js`, `getCSSRules`) ne peut pas lire la feuille Google Fonts (autre origine) et insère les `@font-face` dans la première feuille en ligne, sinon dans `styleSheets[0]`, où l'insertion échoue : l'image sort en Georgia et police système. Mesuré sur le build de production en rendant la feuille des tokens visible (9 787 pixels d'écart, polices de l'app). 20.3 garde le comportement (feuille adoptée). Correctif probable : passer `fontEmbedCSS` calculé par l'app, ou héberger les polices.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-3-tokens-en-variables-css-theme-nuit.md`
+  summary: Des documents désignent encore `redesignTokens.ts` comme siège des valeurs ; depuis 20.3 elles sont dans `theme/tokenValues.ts`.
+  evidence: `epic-18.md` (ajouter les tokens de focus « dans `redesignTokens.ts` » créerait une valeur non publiée), `design-system-foundation.md` (ligne 21), `.claude/rules/ui_redesign_2026.md`, `docs/design/refonte-scene/README.md` § 10. Différé : la correction touche une règle d'agent.

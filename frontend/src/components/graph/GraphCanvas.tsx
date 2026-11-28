@@ -842,7 +842,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
             nodeColor={(node) => graphMinimapNodeColor(node.type)}
             nodeBorderRadius={8}
             style={minimapStyle}
-            maskColor={`${redesignSurface.canvas}80`}
+            maskColor={redesignSurface.canvasMask}
           />
         )}
       </ReactFlow>
