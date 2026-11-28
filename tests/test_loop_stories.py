@@ -56,6 +56,18 @@ def test_queue_never_offers_a_story_already_launched() -> None:
     assert queue["launched"] == {"20-2-perf": "bloquee"}
 
 
+def test_queue_reports_lots_left_to_build() -> None:
+    """Une story découpée reste à finir, même quand son premier lot est fusionné."""
+    journal = {
+        "20-6-script": {"etat": "fusionnee", "lot": "A", "lots_restants": "B,C"},
+        "20-1-texte": {"etat": "fusionnee"},
+    }
+
+    queue = loop.build_queue(BOARD, journal=journal)
+
+    assert queue["a_finir"] == {"20-6-script": "B,C"}
+
+
 def test_queue_rejects_unknown_epic() -> None:
     """Un epic absent est une erreur."""
     with pytest.raises(loop.LoopError):
@@ -115,6 +127,19 @@ def test_verify_accepts_a_delivered_story(repo: Repo) -> None:
     run("update-ref", "refs/remotes/origin/story", "HEAD")
 
     assert loop.verify("story", "20-2-perf", "main")["problems"] == []
+
+
+@pytest.mark.parametrize(("status", "ok"), [("in-progress", True), ("done", False)])
+def test_verify_intermediate_lot_keeps_the_story_open(repo: Repo, status: str, ok: bool) -> None:
+    """Avant le dernier lot, la story ne doit pas sortir de la file."""
+    run, write, commit = repo
+    write(loop.STATUS_PATH, BOARD.replace("20-2-perf: backlog", f"20-2-perf: {status}"))
+    write(f"{loop.ARTIFACTS}/spec-20-2a-perf.md", "---\nstatus: done\n---\n")
+    write("frontend/perf.ts", "export {}\n")
+    commit("lot A")
+    run("update-ref", "refs/remotes/origin/story", "HEAD")
+
+    assert loop.verify("story", "20-2-perf", "main", intermediate=True)["ok"] is ok
 
 
 def test_verify_lists_every_missing_proof(repo: Repo) -> None:

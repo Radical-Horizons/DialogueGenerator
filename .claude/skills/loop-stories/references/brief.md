@@ -1,7 +1,8 @@
 # Brief d'une session de story
 
 La session fille ne voit que ce texte. Remplir les `<…>`, garder **un seul** des deux
-paragraphes « Approbation ».
+paragraphes « Approbation », et « Lot d'une story découpée » seulement à partir du
+deuxième lot.
 
 ---
 
@@ -12,6 +13,11 @@ epic peut contenir des stories d'un autre numéro, qui en font partie.
 **1. Construire.** Invoque le skill `bmad-method:bmad-build` avec la clé `<clé>` et suis-le
 en entier. Utilise la clé complète pour `sprint-status.yaml`. Les sous-agents que le
 workflow demande sont autorisés.
+
+**Lot d'une story découpée.** La story est déjà découpée ; les lots <livrés> sont faits
+(<PR>). Construis le seul lot <lot> : « <contenu noté dans `deferred-work.md`> ». Ne code
+aucun des lots suivants (<restants, ou « aucun »>), et retire de `deferred-work.md` ce que
+tu livres.
 
 **Contraintes du poste.** Des modèles IA y tournent presque toujours : aucune mesure ni
 vérification ne doit supposer un PC au repos, et ne tue aucun processus qui n'est pas à toi.
@@ -52,7 +58,9 @@ Aucun appel LLM facturé : un worktree hérite du `.env` du dépôt principal, d
 serveur lancé autrement doit avoir `OPENAI_API_KEY` vidée.
 
 **3. Livrer.** Passe la story à `done` dans `sprint-status.yaml` (et `last_updated`), sans
-toucher aux autres lignes : ce statut n'atteindra `main` qu'à la fusion. Commit, push,
+toucher aux autres lignes : ce statut n'atteindra `main` qu'à la fusion. **S'il reste des
+lots** à la story après le tien, laisse-la `in-progress` et note chaque lot restant, avec
+son contenu, dans `deferred-work.md`. Commit, push,
 puis `gh pr create --base main`. **Ne fusionne pas**, la session parente vérifie et
 fusionne. N'attends pas la CI.
 
@@ -66,6 +74,8 @@ nouveau avec la même première ligne.
 - `PRÊT <clé> <url de la PR>`
 - `QUESTION <clé> : <la question>`
 - `BLOQUÉ <clé> : <la cause, avec la sortie qui la prouve>`
+
+Story découpée : la deuxième ligne est `LOTS RESTANTS : <noms, ou « aucun »>`.
 
 Ensuite, en quelques lignes : ce qui a été fait, les tests exécutés et leur résultat, ce
 qui a été reporté. N'ouvre pas d'autre session et n'envoie pas de message à la parente :
