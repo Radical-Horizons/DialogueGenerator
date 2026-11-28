@@ -5,7 +5,6 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useGraphStore } from '../../store/graphStore'
 import { useGraphViewStore } from '../../store/graphViewStore'
-import { useContextStore } from '../../store/contextStore'
 import { useToast } from '../shared'
 import { useCostGovernance } from '../../hooks/useCostGovernance'
 import { ConfirmDialog } from '../shared'
@@ -21,11 +20,8 @@ import {
   getChoiceDisplayLabel,
 } from '../../utils/graphChoiceLabels'
 import { serializeDialogueNodesForApi } from '../../utils/dialoguePathContext'
-import {
-  resolveDramatisFromSelections,
-  resolveGraphGenerationDramatis,
-} from '../../utils/sceneDramatis'
-import { useGenerationStore } from '../../store/generationStore'
+import { composeSceneInstructions } from '../../utils/sceneSheet'
+import { useSceneGeneration } from '../../hooks/useSceneSheet'
 import { DialogueLineText } from '../shared/DialogueLineText'
 
 interface AIGenerationPanelProps {
@@ -40,8 +36,7 @@ export function AIGenerationPanel({
   onGenerated,
 }: AIGenerationPanelProps) {
   const { generateFromNode, isGenerating, nodes, edges } = useGraphStore()
-  const { selections } = useContextStore()
-  const sceneSelection = useGenerationStore((state) => state.sceneSelection)
+  const sceneGeneration = useSceneGeneration(parentNodeId)
   const toast = useToast()
   const { checkBudget } = useCostGovernance()
   
@@ -83,9 +78,6 @@ export function AIGenerationPanel({
     return countExpandedBatchNodesForChoices(unc)
   }, [parentNode])
 
-  // Les sélections sont déjà au bon format (ContextSelection)
-  // Pas besoin de conversion, utiliser directement selections
-  
   // Handler pour générer le nœud
   const handleGenerate = useCallback(async () => {
     if (!parentNodeId) {
@@ -117,18 +109,6 @@ export function AIGenerationPanel({
       return
     }
     
-    // Déterminer le speaker NPC (premier personnage sélectionné en full ou excerpt)
-    const allCharacters = [
-      ...(selections.characters_full || []),
-      ...(selections.characters_excerpt || []),
-    ]
-    const dramatis = resolveDramatisFromSelections({
-      sceneSelection,
-      sceneProtagonists: selections.scene_protagonists,
-      contextCharacters: allCharacters,
-    })
-    const npcSpeakerId = dramatis.npcSpeakerId !== 'PNJ' ? dramatis.npcSpeakerId : undefined
-    
     // Si les instructions sont vides, on utilisera un texte par défaut côté backend
     const finalInstructions = userInstructions.trim() || "Ecris la réponse du PNJ à ce que dit le PJ"
     
@@ -150,10 +130,7 @@ export function AIGenerationPanel({
           parentNodeId,
           finalInstructions,
           {
-            context_selections: selections,
             max_choices: maxChoices,
-            npc_speaker_id: npcSpeakerId,
-            player_character_id: dramatis.playerCharacterId,
             narrative_tags: narrativeTags.length > 0 ? narrativeTags : undefined,
             llm_model_identifier: llmModel,
             target_choice_index: targetChoiceIndex ?? null,
@@ -212,8 +189,6 @@ export function AIGenerationPanel({
     maxChoices,
     narrativeTags,
     llmModel,
-    selections,
-    sceneSelection,
     generateFromNode,
     toast,
     onGenerated,
@@ -239,38 +214,29 @@ export function AIGenerationPanel({
   // Payload pour l'estimation de coût (aligné sur GenerateNodeRequest).
   // useMemo évite de recréer l'objet à chaque render (référence stable pour useEffect dans le badge).
   // Doit être avant tout return conditionnel (règles des hooks React).
-  const sceneDramatis = useMemo(
-    () =>
-      resolveGraphGenerationDramatis({
-        nodes,
-        parentNodeId,
-        contextSelections: selections as unknown as Record<string, unknown>,
-        sceneSelection,
-      }),
-    [nodes, parentNodeId, selections, sceneSelection]
-  )
-
   const estimateRequest = useMemo(
     () => {
       if (!parentNodeId || !parentNode) return null
-      const dramatis = sceneDramatis
       return {
         parent_node_id: parentNodeId,
         parent_node_content: (parentNode.data ?? {}) as Record<string, unknown>,
-        user_instructions: userInstructions.trim() || 'Ecris la réponse du PNJ à ce que dit le PJ',
-        context_selections: selections as unknown as Record<string, unknown>,
+        user_instructions: composeSceneInstructions(
+          sceneGeneration.brief,
+          userInstructions.trim() || 'Ecris la réponse du PNJ à ce que dit le PJ',
+        ),
+        context_selections: sceneGeneration.contextSelections as unknown as Record<string, unknown>,
         max_choices: maxChoices ?? undefined,
         llm_model_identifier: llmModel,
         target_choice_index: targetChoiceIndex ?? undefined,
         generate_all_choices: generateAllChoices,
         dialogue_nodes: serializeDialogueNodesForApi(nodes),
-        npc_speaker_id: dramatis.npcSpeakerId !== 'PNJ' ? dramatis.npcSpeakerId : undefined,
-        player_character_id: dramatis.playerCharacterId,
+        npc_speaker_id: sceneGeneration.npcSpeakerId,
+        player_character_id: sceneGeneration.playerCharacterId,
       }
     },
-    [parentNodeId, parentNode, userInstructions, selections, sceneDramatis, maxChoices, llmModel, targetChoiceIndex, generateAllChoices, nodes]
+    [parentNodeId, parentNode, userInstructions, sceneGeneration, maxChoices, llmModel, targetChoiceIndex, generateAllChoices, nodes]
   )
-  
+
   if (!parentNodeId || !parentNode) {
     return (
       <div style={{ padding: '1rem', color: theme.text.secondary }}>
@@ -717,8 +683,8 @@ export function AIGenerationPanel({
         </div>
       </div>
       
-      {/* Info contexte */}
-      <div style={{ 
+      {/* Info contexte : lue dans la fiche de scène */}
+      <div style={{
         padding: '0.75rem',
         backgroundColor: theme.background.secondary,
         borderRadius: '6px',
@@ -726,31 +692,20 @@ export function AIGenerationPanel({
         color: theme.text.secondary,
       }}>
         <div style={{ fontWeight: 'bold', marginBottom: '0.25rem', color: theme.text.primary }}>
-          Contexte sélectionné
+          Contexte de la scène
         </div>
-        <div>
-          <div data-testid="ai-generation-scene-dramatis" style={{ color: theme.text.primary, marginBottom: '0.25rem' }}>
-            Scène : {sceneDramatis.npcSpeakerId} (PNJ) · {sceneDramatis.playerCharacterId} (PJ)
-          </div>
-          {(selections.characters_full?.length || 0) + (selections.characters_excerpt?.length || 0) > 0 && (
-            <div>Personnages: {(selections.characters_full?.length || 0) + (selections.characters_excerpt?.length || 0)}</div>
-          )}
-          {(selections.locations_full?.length || 0) + (selections.locations_excerpt?.length || 0) > 0 && (
-            <div>Lieux: {(selections.locations_full?.length || 0) + (selections.locations_excerpt?.length || 0)}</div>
-          )}
-          {(selections.items_full?.length || 0) + (selections.items_excerpt?.length || 0) > 0 && (
-            <div>Objets: {(selections.items_full?.length || 0) + (selections.items_excerpt?.length || 0)}</div>
-          )}
-          {(selections.characters_full?.length || 0) + (selections.characters_excerpt?.length || 0) === 0 && 
-           (selections.locations_full?.length || 0) + (selections.locations_excerpt?.length || 0) === 0 && 
-           (selections.items_full?.length || 0) + (selections.items_excerpt?.length || 0) === 0 && (
-            <div style={{ fontStyle: 'italic' }}>
-              Fiches de la scène envoyées d’office (PNJ complète, PJ en extrait). Le panneau de gauche ajoute un lieu ou d’autres fiches.
-            </div>
-          )}
+        <div data-testid="ai-generation-scene-dramatis" style={{ color: theme.text.primary, marginBottom: '0.25rem' }}>
+          Scène : {sceneGeneration.npcSpeakerId ?? 'à préciser'} (PNJ) · {sceneGeneration.playerCharacterId} (PJ)
+        </div>
+        {sceneGeneration.contextSelections.scene_location ? (
+          <div>Lieu : {String(sceneGeneration.contextSelections.scene_location.lieu)}</div>
+        ) : null}
+        {sceneGeneration.brief ? <div>Brief envoyé avec la consigne.</div> : null}
+        <div style={{ fontStyle: 'italic' }}>
+          La fiche de scène, en tête du graphe, fixe les personnages, le lieu, le brief et les fiches liées ; le serveur peut joindre un figurant.
         </div>
       </div>
-      
+
       {/* Estimation coût (Story 1.11) */}
       <CostEstimationBadge
         estimateRequest={estimateRequest}

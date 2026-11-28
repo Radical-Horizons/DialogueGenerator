@@ -39,7 +39,7 @@ PNJ et le PJ à partir du graphe.
     "npcs": [{ "entryId": "1b46e4d2-1b45-8081-992e-febbfed44a5d", "name": "Grish T'vok" }],
     "pc": { "entryId": "…", "name": "Uresaïr" }, "place": null,
     "brief": "…", "tones": ["tension", "intime"], "authorProfileId": "…",
-    "linkedEntries": [{ "category": "Personnages", "entryId": "…" }],
+    "linkedEntries": [{ "category": "items", "name": "…", "mode": "full", "entryId": "…" }],
     "contextBudget": "auto"
   },
   "dialogueFlags": [], "nodes": []
@@ -50,8 +50,12 @@ PNJ et le PJ à partir du graphe.
   `personnages/Grish_T_vok_1b46e4d2-….json`) ; `name` n'est qu'un libellé. Le `speaker` des nœuds reste une chaîne
   (format Unity) ; à la migration, ses graphies sont rapprochées de la fiche (le forgeron en a deux, `T'vok` et
   `T’vok`, plus un locuteur vide sur une réplique ajoutée à la main) et proposées à l'auteur, jamais réécrites sans lui.
-- Additif : un document sans `scene` reste valide ; à l'ouverture, la fiche est **déduite une fois** par
-  `resolveGraphGenerationDramatis`, montrée dans la fiche pour correction, puis enregistrée (migration paresseuse).
+- `linkedEntries` (story 20.4) : `category` est la clé de base de `ContextSelection` (`characters`, `locations`,
+  `items`…), `mode` vaut `full` ou `excerpt` (absent pour les catégories sans mode), `name` est obligatoire : le serveur
+  de génération résout les fiches par leur nom.
+- Additif : un document sans `scene` reste valide ; à l'ouverture, la fiche est **déduite** du seul dialogue
+  (`deduceSceneSheet`), montrée pour correction, puis enregistrée au premier geste de l'auteur ou à la première
+  génération (migration paresseuse).
 - **Une scène est enregistrée dès sa création** (ALT+N crée le document avant toute génération). Effet de bord voulu :
   la première réplique générée est rattachée à son appel LLM, ce qui lève la limite « nœud START de Générer sans
   dialogue » de la PR #103 (`docs/architecture/conversations-ia.md`).

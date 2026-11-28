@@ -158,6 +158,28 @@ describe('UnityDialogueEditor save', () => {
     expect(settled).toBe(true)
   })
 
+  it('n’envoie jamais la fiche de scène lue avec le document (le serveur garde la sienne)', async () => {
+    vi.mocked(documentsAPI.putDocument).mockResolvedValue({ revision: 2 })
+    const ref = createRef<UnityDialogueEditorHandle>()
+    render(
+      <UnityDialogueEditor
+        ref={ref}
+        json_content={jsonContent}
+        filename="fiche"
+        document={{ schemaVersion: '1.2.0', nodes: [], scene: { brief: 'Copie périmée' } }}
+        documentRevision={1}
+      />,
+    )
+
+    await act(async () => {
+      await ref.current!.handleSave()
+    })
+
+    const body = vi.mocked(documentsAPI.putDocument).mock.calls[0][1]
+    expect(body.document).not.toHaveProperty('scene')
+    expect(body.document.nodes).toHaveLength(1)
+  })
+
   it('propage un échec du callback post-save', async () => {
     vi.mocked(documentsAPI.putDocument).mockResolvedValue({ revision: 4 })
     const onSave = vi.fn().mockRejectedValue(new Error('reload failed'))

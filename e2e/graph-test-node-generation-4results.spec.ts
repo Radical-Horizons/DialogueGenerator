@@ -195,19 +195,28 @@ test.describe('Génération depuis TestNode - 4 résultats connectés (UI)', () 
     // Après génération, le canvas peut zoomer sur un seul nœud + onlyRenderVisibleElements → peu de
     // `.react-flow__node` dans le DOM. Demander le fit via le store de vue E2E évite une dépendance
     // au focus clavier du menu contextuel.
-    await page.evaluate(() => {
-      const api = (
-        window as unknown as {
-          __graphViewStoreE2E?: { getState: () => { requestFitView: () => void } }
-        }
-      ).__graphViewStoreE2E
-      if (!api) throw new Error('Graph view store E2E absent')
-      api.getState().requestFitView()
-    })
+    const requestFitView = () =>
+      page.evaluate(() => {
+        const api = (
+          window as unknown as {
+            __graphViewStoreE2E?: { getState: () => { requestFitView: () => void } }
+          }
+        ).__graphViewStoreE2E
+        if (!api) throw new Error('Graph view store E2E absent')
+        api.getState().requestFitView()
+      })
 
     // Les ids DOM peuvent différer des ids logiques mockés — on valide sur le nombre de nœuds ajoutés.
+    // L'app recentre elle-même sur le nœud généré (~400 ms) : un fit demandé avant la fin de ce
+    // recentrage est écrasé, on le redemande jusqu'à ce qu'il l'emporte.
     await expect
-      .poll(async () => flowNodes.count(), { timeout: E2E_MS.pollNodes })
+      .poll(
+        async () => {
+          await requestFitView()
+          return flowNodes.count()
+        },
+        { timeout: E2E_MS.pollNodes },
+      )
       .toBeGreaterThanOrEqual(nodeCountBeforeGen + 4)
 
     await expect

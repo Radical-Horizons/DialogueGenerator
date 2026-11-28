@@ -158,5 +158,61 @@ describe('GraphEditor autosave (ADR-006)', () => {
 
     expect(saveDialogueMock).toHaveBeenCalled()
   })
+
+  it('monte la fiche de scène en tête du dialogue ouvert', async () => {
+    useGraphStore.setState({ documentId: 'doc', saveDialogue: vi.fn(), hasUnsavedChanges: false })
+
+    const { getByTestId } = render(
+      React.createElement(QueryClientProvider, { client: makeQueryClient() },
+        React.createElement(GraphEditor)
+      )
+    )
+    await act(async () => {
+      await vi.runAllTimersAsync()
+    })
+
+    expect(useGraphStore.getState().documentId).toBeTruthy()
+    expect(getByTestId('scene-sheet')).toBeInTheDocument()
+  })
+
+  it('un dialogue sans nœud s’enregistre quand sa fiche de scène change, et seulement alors', async () => {
+    const saveDialogueMock: GraphState['saveDialogue'] = vi
+      .fn()
+      .mockResolvedValue({ success: true, filename: 'doc' } as SaveGraphResponse)
+    useGraphStore.setState({
+      saveDialogue: saveDialogueMock,
+      validateGraph: vi.fn().mockResolvedValue(undefined),
+    })
+
+    render(
+      React.createElement(QueryClientProvider, { client: makeQueryClient() },
+        React.createElement(GraphEditor)
+      )
+    )
+    await act(async () => {
+      await Promise.resolve()
+      await Promise.resolve()
+      await vi.runAllTimersAsync()
+    })
+    // Le chargement enregistre d'abord ce qui restait en attente : hors sujet ici.
+    vi.mocked(saveDialogueMock).mockClear()
+
+    // Écriture puis avance dans deux `act` : l'effet doit avoir armé son minuteur.
+    await act(async () => {
+      useGraphStore.setState({ nodes: [], edges: [], hasUnsavedChanges: true })
+    })
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(250)
+    })
+    expect(saveDialogueMock).not.toHaveBeenCalled()
+
+    await act(async () => {
+      useGraphStore.setState({ sceneDirty: true })
+    })
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(250)
+    })
+    expect(saveDialogueMock).toHaveBeenCalled()
+  })
 })
 

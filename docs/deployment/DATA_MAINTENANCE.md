@@ -7,6 +7,7 @@ Pour des raisons de déploiement en production, les dossiers suivants ne sont **
 - `data/GDD_categories/` : Contient les fichiers JSON des catégories GDD (personnages, lieux, objets, etc.)
 - `data/UnityData/` : Contient les catalogues de référence Unity (TraitCatalog.csv, SkillCatalog.csv, FlagCatalog.csv)
 - `Assets/Dialogue/` : Contient les dialogues Unity JSON exportés (dossier réel, plus de lien symbolique)
+- `Assets/Scenes/` : Contient les fiches de scène (`{id}.scene.json`), voir ci-dessous
 
 ## ⚠️ Important : comment le GDD est alimenté
 
@@ -74,6 +75,15 @@ Les **dialogues Unity JSON générés** sont exportés vers un **chemin configur
 **⚠️ Problème d'export à résoudre** : Le dossier `Assets/Dialogue/` n'est plus un lien symbolique mais un dossier réel. L'export automatique vers Unity doit être revu pour fonctionner correctement en production. Voir Epic 1 pour les améliorations prévues.
 
 **Action manuelle actuelle** : Les dialogues exportés dans `Assets/Dialogue/` doivent être copiés manuellement vers le projet Unity si nécessaire.
+
+### Fiches de scène (`Assets/Scenes/`)
+
+Chaque dialogue peut avoir une **fiche de scène** (PNJ, PJ, lieu, brief, fiches liées), rangée dans `Assets/Scenes/{id}.scene.json`, à côté de `Assets/Dialogue/` et jamais dedans.
+
+- Elle s'écrit, se restaure et se supprime avec le document (`services/document_persistence_service.py`) ; l'API la rend sous la clé `scene` du document.
+- Elle **ne se copie pas** vers le projet Unity : aucun export ne la contient.
+- Elle est ignorée par git, comme les dialogues : l'**inclure dans les sauvegardes** du serveur avec `Assets/Dialogue/` et `Assets/Layouts/`.
+- Renommer ou copier un dialogue à la main sur le disque impose de faire de même avec sa fiche.
 
 ### Schéma JSON Unity
 

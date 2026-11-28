@@ -414,3 +414,30 @@
   summary: Des documents désignent encore `redesignTokens.ts` comme siège des valeurs ; depuis 20.3 elles sont dans `theme/tokenValues.ts`.
   evidence: `epic-18.md` (ajouter les tokens de focus « dans `redesignTokens.ts` » créerait une valeur non publiée), `design-system-foundation.md` (ligne 21), `.claude/rules/ui_redesign_2026.md`, `docs/design/refonte-scene/README.md` § 10. Différé : la correction touche une règle d'agent.
   status: done — corrigé le 2026-11-28, aussi dans `visual-design-foundation.md`, `refonte-scene-architecture.md` (A8) et `project-context.md`.
+
+- source_spec: none
+  summary: Story 20.4, lot B — fiche complète du board `Fiche` : brief avec mention `@` et aperçu de la fiche du GDD (fiches liées), tons, profil d'auteur, premier emplacement à écrire sous la fiche d'une scène neuve (son geste « Générer » arrive en 20.11). La story 20.4 reste `in-progress` tant que B et C ne sont pas livrés.
+  evidence: Découpée le 2026-11-28, découpage approuvé par l'auteur (story estimée à 3 sessions, trois livrables fusionnables à part). Après la fusion du lot A, dans sa propre session ; même composant que C, donc pas en parallèle.
+- source_spec: none
+  summary: Story 20.4, lot C — menu « fiche de scène ▾ » (README § 13) : Flags du dialogue, « Enregistrer comme profil d'auteur », métadonnées, partage, permissions, supprimer (confirmation actuelle gardée), en réutilisant les composants existants.
+  evidence: Découpée le 2026-11-28 avec le lot B ; après le lot B.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-4a-fiche-de-scene-document-et-generation.md`
+  summary: En lot par job, le contexte noté sur les nœuds créés est recalculé à l'application du rapport, pas celui envoyé au lancement.
+  evidence: `contextForParent` (`useBatchGenerateFromNodes.ts`) relit la fiche à l'application ; une fiche modifiée entre-temps fausse `gddContextSelectionsSnapshot` et l'indicateur « GDD périmé ». Le même recalcul existait avec la colonne globale.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-4a-fiche-de-scene-document-et-generation.md`
+  summary: Le serveur ajoute un figurant en extrait à chaque génération du graphe : la fiche de scène n'est pas la seule source de fiches.
+  evidence: `services/scene_dramatis.py` (`random_excerpt_count=1`) ; il choisit aussi un jouable quand aucun PNJ n'est donné. Hors périmètre : la story interdisait de changer le prompt côté serveur.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-4a-fiche-de-scene-document-et-generation.md`
+  summary: L'analyse manuelle de context dropping et la validation lore lisent toujours la colonne Contexte GDD.
+  evidence: `GraphContextDroppingPanel.tsx` envoie les sélections globales alors que l'analyse automatique après génération juge sur la fiche de scène ; les deux peuvent se contredire. À trancher avec le tiroir Contexte (20.25).
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-4a-fiche-de-scene-document-et-generation.md`
+  summary: Mettre à jour le fait « PJ/PNJ d'une génération du graphe » de CLAUDE.md après la fusion de la fiche de scène.
+  evidence: Il impose `resolveGraphGenerationDramatis`, supprimé ; la source est désormais `buildSceneGeneration` / `useSceneGeneration` (fiche de scène).
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-4a-fiche-de-scene-document-et-generation.md`
+  summary: Toute sauvegarde d'un dialogue peut retirer sans le dire des réponses à test dont le texte est vide (risque de perte de données).
+  evidence: Le `PUT` valide avec `normalize_unity_export_document(in_place=True)` puis écrit le document modifié. Sur `forgeron-itinerant.json`, le nœud ajouté à la main (`manual-e23d929d…`) a quatre réponses à test sans texte : après un seul geste sur la fiche (ou n'importe quelle autre modification), elles ont disparu du fichier avec leur barre de test. Chemin inchangé par la story 20.4.

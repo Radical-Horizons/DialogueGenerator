@@ -17,6 +17,7 @@ import { AIGenerationPanel } from './AIGenerationPanel'
 import { DeleteNodeConfirmModal } from './DeleteNodeConfirmModal'
 import { GraphEditorHeader } from './GraphEditorHeader'
 import { GraphContextBreadcrumb } from './GraphContextBreadcrumb'
+import { SceneSheetBar } from '../scene/SceneSheetBar'
 import { ExportDownloadBanner } from '../unityDialogues/ExportDownloadBanner'
 import { BatchExportProgressBanner } from '../unityDialogues/BatchExportProgressBanner'
 import { ExportPreviewModal } from '../unityDialogues/ExportPreviewModal'
@@ -479,6 +480,8 @@ export function GraphEditor({
             ) : undefined
           }
         />
+
+        <SceneSheetBar />
 
         <GraphContextBreadcrumb />
 

@@ -38,7 +38,6 @@ import { GenerationLoaderContent } from './GenerationLoaderContent'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { useGraphStore } from '../../store/graphStore'
 import { useGraphViewStore } from '../../store/graphViewStore'
-import { useContextStore } from '../../store/contextStore'
 import { useAuthStore } from '../../store/authStore'
 import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { theme } from '../../theme'
@@ -55,7 +54,6 @@ import {
 import { useToast } from '../shared'
 import { getErrorMessage } from '../../types/errors'
 import { DEFAULT_MODEL } from '../../constants'
-import { resolveDramatisFromSelections } from '../../utils/sceneDramatis'
 import { getChoiceIndexFromSourceHandle } from '../../utils/choiceHandleIndex'
 import { clampContextMenuToViewport } from '../../utils/contextMenuPlacement'
 import {
@@ -284,9 +282,6 @@ export const GraphCanvas = memo(function GraphCanvas() {
     position: { x: number; y: number } | undefined
   } | null>(null)
   const reactFlowInstanceRef = useRef<ReactFlowInstance | null>(null)
-  const { selections } = useContextStore()
-  const selectionsRef = useRef(selections)
-  selectionsRef.current = selections
   const toast = useToast()
   const [viewport, setViewport] = useState<Viewport>(DEFAULT_VIEWPORT)
   const ref = useRef<HTMLDivElement>(null)
@@ -396,21 +391,8 @@ export const GraphCanvas = memo(function GraphCanvas() {
   const handleDropChoiceGenerate = useCallback(async () => {
     if (!dropChoiceMenu || choiceIndexFromDrop === undefined) return
     try {
-      const sel = selectionsRef.current
-      const allCharacters = [
-        ...(sel.characters_full || []),
-        ...(sel.characters_excerpt || []),
-      ]
-      const dramatis = resolveDramatisFromSelections({
-        sceneProtagonists: sel.scene_protagonists,
-        contextCharacters: allCharacters,
-      })
-      const npcSpeakerId = dramatis.npcSpeakerId !== 'PNJ' ? dramatis.npcSpeakerId : undefined
       const instructions = 'Continue la conversation de manière naturelle'
       const result = await generateFromNode(dropChoiceMenu.sourceNodeId, instructions, {
-        context_selections: sel,
-        npc_speaker_id: npcSpeakerId,
-        player_character_id: dramatis.playerCharacterId,
         llm_model_identifier: DEFAULT_MODEL,
         target_choice_index: choiceIndexFromDrop,
       })
@@ -429,21 +411,8 @@ export const GraphCanvas = memo(function GraphCanvas() {
     async (testNodeId: string) => {
       setShowContextMenuGenerationLoader(true)
       try {
-        const sel = selectionsRef.current
-        const allCharacters = [
-          ...(sel.characters_full || []),
-          ...(sel.characters_excerpt || []),
-        ]
-        const dramatis = resolveDramatisFromSelections({
-          sceneProtagonists: sel.scene_protagonists,
-          contextCharacters: allCharacters,
-        })
-        const npcSpeakerId = dramatis.npcSpeakerId !== 'PNJ' ? dramatis.npcSpeakerId : undefined
         const instructions = 'Continue la conversation de manière naturelle'
         const result = await generateFromNode(testNodeId, instructions, {
-          context_selections: sel,
-          npc_speaker_id: npcSpeakerId,
-          player_character_id: dramatis.playerCharacterId,
           llm_model_identifier: DEFAULT_MODEL,
         })
         toast('Nœud généré avec succès', 'success', 2000)

@@ -17,6 +17,7 @@ describe('sceneDramatis', () => {
 
   it('forbids L’Éthérée as NPC', () => {
     expect(isForbiddenNpc("L'Éthérée")).toBe(true)
+    expect(isForbiddenNpc('L’Éthérée')).toBe(true)
     expect(isValidNpc("L'Éthérée", 'Uresaïr')).toBe(false)
   })
 

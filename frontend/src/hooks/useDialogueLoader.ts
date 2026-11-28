@@ -35,7 +35,7 @@ const MISSING_CHOICE_ID_INFO =
   'Choix sans identifiant stable — ouvert quand même. La prochaine sauvegarde les écrira.'
 
 const REPLACED_NEWER_VERSION_INFO =
-  "Ce dialogue avait été modifié ailleurs (onglet Édition ou autre onglet) : ces modifications ont été remplacées par celles du graphe, seul le titre a été conservé"
+  "Ce dialogue avait été modifié ailleurs (onglet Édition ou autre onglet) : ces modifications ont été remplacées par celles du graphe, seuls le titre et une fiche de scène que vous n'avez pas touchée ont été conservés"
 
 type ApiErrorShape = {
   response?: { status?: number; data?: { error?: { code?: string } } }
@@ -131,6 +131,7 @@ export function useDialogueLoader(
     saveDialogue,
     validateGraph,
     hasUnsavedChanges,
+    sceneDirty,
     documentId,
     isLoading: isGraphLoading,
     isSaving: isGraphSaving,
@@ -569,7 +570,8 @@ export function useDialogueLoader(
       !storeFilename ||
       isSelectionChanging ||
       !hasUnsavedChanges ||
-      nodes.length === 0 ||
+      // Un graphe vide ne s'écrit pas, sauf si la fiche de scène a changé.
+      (nodes.length === 0 && !sceneDirty) ||
       isGraphLoading ||
       isGraphSaving ||
       isLoadingDialogue ||
@@ -636,6 +638,7 @@ export function useDialogueLoader(
     isLoadingDialogue,
     isGenerating,
     nodes.length,
+    sceneDirty,
     clientSeq,
     autosaveRetryTick,
     saveDialogue,

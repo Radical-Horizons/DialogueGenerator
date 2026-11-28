@@ -57,6 +57,7 @@ from services.document_persistence_service import (
     DialogueNotFoundError,
     DialogueRevisionConflictError,
     DocumentPersistenceService,
+    SCENE_KEY,
 )
 from services.document_id_validation import validate_document_id
 
@@ -74,6 +75,11 @@ def _capabilities_response(
         can_delete=capabilities.can_delete,
         is_owner=capabilities.is_owner,
     )
+
+
+def _with_scene(document: dict, scene: dict | None) -> dict:
+    """Remet la fiche de scène dans le document renvoyé au client (contrat HTTP)."""
+    return document if scene is None else {**document, SCENE_KEY: scene}
 
 
 def _raise_access_denied(document_id: str) -> None:
@@ -283,7 +289,7 @@ async def get_document(
 
         logger.info(f"GET document {doc_id} revision={revision} (request_id: {request_id})")
         return DocumentGetResponse(
-            document=document,
+            document=_with_scene(document, persisted.scene),
             schemaVersion=schema_version,
             revision=revision,
             capabilities=_capabilities_response(persisted.capabilities),
@@ -618,6 +624,18 @@ async def put_document(
                     request_id=request_id,
                 )
 
+        # La fiche de scène sort du corps avant la validation d'export, qui la retirerait.
+        has_scene = isinstance(doc, dict) and SCENE_KEY in doc
+        scene = doc.pop(SCENE_KEY) if has_scene else None
+        if scene is not None and not isinstance(scene, dict):
+            raise APIException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                code="INVALID_SCENE_SHEET",
+                message="La fiche de scène (scene) doit être un objet ou null.",
+                details={"field": SCENE_KEY},
+                request_id=request_id,
+            )
+
         # Mode validation : header X-Validation-Mode override body.validationMode
         validation_mode = (x_validation_mode or body.validationMode or "draft").strip().lower()
         if validation_mode not in ("draft", "export"):
@@ -704,7 +722,7 @@ async def put_document(
         new_revision = persistence_service.write_document(
             base_dir,
             doc_id,
-            doc,
+            {**doc, SCENE_KEY: scene} if has_scene else doc,
             body.revision,
             current_user,
             create_only=body.createOnly,
@@ -720,7 +738,7 @@ async def put_document(
     except DialogueRevisionConflictError as exc:
         schema_ver = str(exc.payload.get("schemaVersion") or "1.1.0")
         payload = DocumentGetResponse(
-            document=exc.payload,
+            document=_with_scene(exc.payload, exc.scene),
             schemaVersion=schema_ver,
             revision=exc.revision,
             capabilities=_capabilities_response(

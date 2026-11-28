@@ -5,6 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useBatchGenerateFromNodes } from './useBatchGenerateFromNodes'
 import * as batchApi from '../api/batchNodeGeneration'
+import { SCENE_DEFAULT_INSTRUCTION } from '../utils/sceneSheet'
 
 vi.mock('../api/batchNodeGeneration', async () => {
   const actual = await vi.importActual<typeof import('../api/batchNodeGeneration')>(
@@ -49,6 +50,8 @@ const graphState = {
   dialogueMetadata: { filename: 'demo.json', node_count: 3, edge_count: 0 },
   generateFromNode,
   applyGenerateNodeResponse,
+  scene: null as Record<string, unknown> | null,
+  ensureSceneStored: vi.fn(),
 }
 
 vi.mock('../store/graphStore', () => ({
@@ -59,19 +62,6 @@ vi.mock('../store/graphStore', () => ({
       getState: () => graphState,
     }
   ),
-}))
-
-vi.mock('../store/contextStore', () => ({
-  useContextStore: {
-    getState: () => ({
-      selections: {
-        characters_full: [],
-        characters_excerpt: [],
-        locations_full: [],
-        locations_excerpt: [],
-      },
-    }),
-  },
 }))
 
 const jobStoreOverrides: Record<string, unknown> = {}
@@ -113,6 +103,7 @@ describe('useBatchGenerateFromNodes', () => {
     graphState.selectedNodeIds = ['a', 'b', 'c']
     graphState.nodes = defaultNodes
     graphState.dialogueMetadata = { filename: 'demo.json', node_count: 3, edge_count: 0 }
+    graphState.scene = null
     generateFromNode.mockResolvedValue({
       nodeId: 'new-1',
       batchInfo: {
@@ -220,6 +211,46 @@ describe('useBatchGenerateFromNodes', () => {
     expect(batchApi.startBatchGenerateFromNodesJob).toHaveBeenCalled()
     expect(startPolling).toHaveBeenCalledWith('job-1')
     expect(generateFromNode).not.toHaveBeenCalled()
+  })
+
+  it('job serveur : chaque parent porte la fiche de scène et le brief, pas l’instantané du nœud', async () => {
+    const ids = Array.from({ length: 10 }, (_, i) => `n${i}`)
+    graphState.nodes = ids.map((id) => ({
+      id,
+      type: 'dialogueNode',
+      position: { x: 0, y: 0 },
+      data: {
+        choices: [{ text: '1' }],
+        gddContextSelectionsSnapshot: { characters_full: ['Ancien PNJ'] },
+      },
+    })) as typeof defaultNodes
+    graphState.scene = {
+      npcs: [{ name: 'PNJ de la fiche', entryId: null }],
+      pc: { name: 'Uresaïr', entryId: null },
+      place: { name: 'Lieu de la fiche', entryId: null },
+      brief: 'Il demande une réparation.',
+      linkedEntries: [],
+    }
+    vi.mocked(batchApi.startBatchGenerateFromNodesJob).mockResolvedValue({
+      job_id: 'job-1',
+      status: 'queued',
+      total: 10,
+    })
+
+    const { result } = renderHook(() => useBatchGenerateFromNodes(toast))
+    await act(async () => {
+      await result.current.startBatchGenerate(ids)
+    })
+
+    expect(graphState.ensureSceneStored).toHaveBeenCalled()
+    const [first] = vi.mocked(batchApi.startBatchGenerateFromNodesJob).mock.calls[0][0].parents
+    expect(first.npc_speaker_id).toBe('PNJ de la fiche')
+    expect(first.player_character_id).toBe('Uresaïr')
+    expect(first.context_selections.scene_location).toEqual({ lieu: 'Lieu de la fiche' })
+    expect(first.context_selections.characters_full).toEqual(['PNJ de la fiche'])
+    expect(first.user_instructions).toBe(
+      `Brief de la scène : Il demande une réparation.\n\n${SCENE_DEFAULT_INSTRUCTION}`,
+    )
   })
 
   it('ignores a second startBatchGenerate call fired while the first job creation is in flight (anti double-clic)', async () => {

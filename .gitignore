@@ -136,6 +136,8 @@ data/UnityData/*
 Assets/Dialogue/*.json
 # Layouts (positions nœuds, générés / locaux)
 Assets/Layouts/*.layout.json
+# Fiches de scène (distribution et contexte d'un dialogue, jamais exportées)
+Assets/Scenes/*.scene.json
 # Unity / éditeur meta
 *.meta
 
