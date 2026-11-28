@@ -8,6 +8,12 @@ from services.dialogue_path_context import (
     build_ancestor_path_steps,
     build_enriched_generation_prompt,
 )
+from services.graph_choice_slots import (
+    TEST_OUTCOMES,
+    choice_has_test,
+    count_open_slots,
+    open_test_outcomes,
+)
 from services.graph_prompt_context import PromptRenderer
 from services.llm_call_provenance import capture_llm_calls, link_nodes_to_calls
 from services.unity_dialogue_generation_service import (
@@ -20,24 +26,13 @@ from core.llm.llm_client import ILLMClient
 logger = logging.getLogger(__name__)
 
 
-def _choice_has_nonempty_test(choice: Dict[str, Any]) -> bool:
-    tv = choice.get("test")
-    return tv is not None and (not isinstance(tv, str) or str(tv).strip())
-
-
 def _build_test_outcome_connections(
     source_test_node_id: str,
     connection_data: Dict[str, Any],
 ) -> List[Dict[str, Any]]:
-    """Construit les 4 connexions test-* depuis l'ID du TestNode (graphe)."""
-    mappings: List[Tuple[str, str]] = [
-        ("testCriticalFailureNode", "critical-failure"),
-        ("testFailureNode", "failure"),
-        ("testSuccessNode", "success"),
-        ("testCriticalSuccessNode", "critical-success"),
-    ]
+    """Construit les connexions test-* des issues générées, depuis l'ID du TestNode."""
     connections: List[Dict[str, Any]] = []
-    for field_name, handle_id in mappings:
+    for field_name, handle_id in TEST_OUTCOMES:
         target_node_id = connection_data.get(field_name)
         if target_node_id:
             connections.append(
@@ -54,7 +49,8 @@ def _build_test_outcome_connections(
 class GraphGenerationService:
     """Service pour générer des nœuds de dialogue en batch.
 
-    Pour chaque choix sans cible (ou END) : 4 nœuds si le choix a un test, sinon 1 nœud.
+    Pour chaque choix sans cible (ou END) : un nœud par issue de test encore vide si le
+    choix a un test, sinon 1 nœud.
     Gère les IDs et les connexions (``choice`` ou ``test-*`` depuis le TestNode).
     """
     
@@ -83,9 +79,9 @@ class GraphGenerationService:
     ) -> Dict[str, Any]:
         """Génère la suite pour chaque choix du parent sans cible (ou END).
 
-        Un choix avec attribut ``test`` non vide produit 4 nœuds (issues de test) et des
-        connexions ``test-*`` depuis le TestNode ; les autres choix : un nœud et une
-        connexion ``choice`` depuis le parent.
+        Un choix avec attribut ``test`` non vide produit un nœud par issue **vide** et
+        des connexions ``test-*`` depuis le TestNode (une issue déjà écrite n'est jamais
+        régénérée) ; les autres choix : un nœud et une connexion ``choice`` depuis le parent.
 
         Args:
             parent_node: Nœud parent avec choix (format Unity JSON).
@@ -103,12 +99,11 @@ class GraphGenerationService:
         parent_id = parent_node.get("id", "UNKNOWN")
         parent_choices = parent_node.get("choices", [])
         
-        # Filtrer les choix sans targetNode (ou avec "END")
+        # Ne garder que les choix avec au moins un emplacement à écrire
         choices_to_generate = []
         connected_choices_count = 0
         for i, choice in enumerate(parent_choices):
-            target_node = choice.get("targetNode")
-            if not target_node or target_node == "END":
+            if count_open_slots(choice):
                 choices_to_generate.append((i, choice))
             else:
                 connected_choices_count += 1
@@ -154,7 +149,7 @@ class GraphGenerationService:
             parent_speaker = parent_node.get("speaker", "PNJ")
             parent_line = parent_node.get("line", "")
 
-            if _choice_has_nonempty_test(choice):
+            if choice_has_test(choice):
                 try:
                     choice_content = UnityDialogueChoiceContent.model_validate(choice)
                     result = await self.generation_service.generate_nodes_for_choice_with_test(
@@ -169,6 +164,7 @@ class GraphGenerationService:
                         path_steps=path_steps or None,
                         player_choice_label=player_choice_label,
                         render_prompt=render_prompt,
+                        outcomes=open_test_outcomes(choice),
                     )
                     nodes = result.get("nodes") or []
                     conns_raw = result.get("connections") or []
@@ -193,7 +189,7 @@ class GraphGenerationService:
                     return (choice_index, nodes, connections, None)
                 except Exception as e:
                     logger.error(
-                        "Erreur génération 4 nœuds (test) choix %s parent %s: %s",
+                        "Erreur génération des issues de test, choix %s parent %s: %s",
                         choice_index,
                         parent_id,
                         e,

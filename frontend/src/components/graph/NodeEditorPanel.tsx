@@ -39,7 +39,11 @@ import {
   type Choice,
 } from '../../schemas/nodeEditorSchema'
 import { stableChoiceEdgeId } from '../../utils/graphEdgeBuilders'
-import { countExpandedBatchNodesForChoices } from '../../utils/graphChoiceLabels'
+import {
+  choiceHasOpenSlot,
+  countExpandedBatchNodesForChoices,
+  type SlotChoice,
+} from '../../utils/graphChoiceLabels'
 import {
   childNodeTopLeftX,
   childNodeTopLeftY,
@@ -607,10 +611,9 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
 
       const st = useGraphStore.getState()
       const dialogueParent = st.nodes.find((n) => n.id === selectedNodeId)
-      const unc = (
-        (dialogueParent?.data?.choices as Array<{ targetNode?: string; test?: unknown }> | undefined) ?? []
-      ).filter((c) => !c.targetNode || c.targetNode === 'END')
-      const batchTotal = countExpandedBatchNodesForChoices(unc)
+      const batchTotal = countExpandedBatchNodesForChoices(
+        dialogueParent?.data?.choices as SlotChoice[] | undefined
+      )
       if (batchTotal > 0) {
         setBatchProgress({ current: 0, total: batchTotal })
       }
@@ -1096,11 +1099,9 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
                     {isGenerating ? 'Génération...' : 'Générer la suite (nextNode)'}
                   </button>
                   
-                  {/* Bouton "Générer pour tous les choix" si plusieurs choix sans targetNode */}
+                  {/* Bouton "Générer pour tous les choix" si plusieurs choix ont une suite à écrire */}
                   {(() => {
-                    const unconnectedChoices = (choices || []).filter(
-                      (choice: Choice) => !choice.targetNode || choice.targetNode === 'END'
-                    )
+                    const unconnectedChoices = ((choices || []) as SlotChoice[]).filter(choiceHasOpenSlot)
                     const batchNodeTotal = countExpandedBatchNodesForChoices(unconnectedChoices)
                     return unconnectedChoices.length > 1 ? (
                       <button

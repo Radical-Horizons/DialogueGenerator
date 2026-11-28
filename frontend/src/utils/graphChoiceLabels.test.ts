@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import type { Edge, Node } from 'reactflow'
 import {
   choiceHasNonemptyTest,
+  choiceHasOpenSlot,
   countExpandedBatchNodesForChoices,
   getChoiceDisplayLabel,
 } from './graphChoiceLabels'
@@ -15,6 +16,22 @@ describe('graphChoiceLabels', () => {
       { targetNode: 'NODE_A' },
     ]
     expect(countExpandedBatchNodesForChoices(choices)).toBe(4 + 4 + 1)
+  })
+
+  it('ne compte que les issues de test encore vides (une issue écrite n’est pas repayée)', () => {
+    const written = {
+      test: 'X:8',
+      testCriticalFailureNode: 'N_CF',
+      testFailureNode: 'N_F',
+      testSuccessNode: 'N_S',
+      testCriticalSuccessNode: 'N_CS',
+    }
+    const half = { test: 'Y:10', testFailureNode: 'END', testSuccessNode: 'N_S2' }
+
+    expect(choiceHasOpenSlot(written)).toBe(false)
+    expect(choiceHasOpenSlot(half)).toBe(true)
+    expect(countExpandedBatchNodesForChoices([written])).toBe(0)
+    expect(countExpandedBatchNodesForChoices([written, half, { targetNode: 'END' }])).toBe(3 + 1)
   })
 
   it('getChoiceDisplayLabel uses edge label when choice.text empty', () => {

@@ -2,7 +2,7 @@
 import asyncio
 import logging
 import uuid
-from typing import Callable, List, Dict, Any, Optional
+from typing import Any, Callable, Collection, Dict, List, Optional
 
 from models.dialogue_structure.unity_dialogue_node import (
     UnityDialogueGenerationResponse,
@@ -10,6 +10,7 @@ from models.dialogue_structure.unity_dialogue_node import (
     UnityDialogueChoiceContent
 )
 from core.llm.llm_client import ILLMClient
+from services.graph_choice_slots import TEST_OUTCOMES
 from services.dialogue_path_context import DialoguePathStep, format_path_history_lines
 from services.llm_call_provenance import capture_llm_calls, link_nodes_to_calls
 from services.document_choice_id_service import stable_choice_id
@@ -309,8 +310,9 @@ class UnityDialogueGenerationService:
         path_steps: Optional[List[DialoguePathStep]] = None,
         player_choice_label: str = "PJ",
         render_prompt: Optional[Callable[[str, Optional[int]], str]] = None,
+        outcomes: Optional[Collection[str]] = None,
     ) -> Dict[str, Any]:
-        """Génère 4 nœuds pour un choix avec attribut test.
+        """Génère les nœuds d'issues d'un choix avec attribut test (4 par défaut).
 
         AC: #1, #3 - Génération de 4 réponses (échec critique, échec, réussite, réussite critique).
 
@@ -326,16 +328,19 @@ class UnityDialogueGenerationService:
             path_steps: Chemin START → nœud parent ; remplace le seul parent immédiat.
             player_choice_label: Nom du PJ dans l'historique.
             render_prompt: Enveloppe le corps dans le prompt complet (contexte GDD, catalogues).
+            outcomes: Issues à écrire (``critical-failure``, ``failure``, ``success``,
+                ``critical-success``) ; ``None`` = les quatre.
 
         Returns:
             Dictionnaire contenant:
-            - "nodes": Liste de 4 nœuds enrichis (critical-failure, failure, success, critical-success)
-            - "connections": Liste avec une connexion contenant les 4 champs test*Node
+            - "nodes": Un nœud enrichi par issue demandée, dans l'ordre critical-failure,
+              failure, success, critical-success
+            - "connections": Liste avec une connexion contenant les champs test*Node écrits
         """
         if not choice_content.test:
             raise ValueError("Le choix doit avoir un attribut test pour générer 4 nœuds")
         
-        logger.info(f"Génération de 4 nœuds pour choix avec test: {choice_content.test}")
+        logger.info(f"Génération des issues pour choix avec test: {choice_content.test}")
         
         # Extraire DD du test (format: Attribut+Compétence:DD)
         try:
@@ -375,6 +380,9 @@ class UnityDialogueGenerationService:
             }
         ]
         
+        if outcomes is not None:
+            result_contexts = [rc for rc in result_contexts if rc["name"] in outcomes]
+
         if path_steps:
             history_block = "\n".join(format_path_history_lines(path_steps, player_choice_label))
             choice_header = "Réponse du joueur (choix testé):"
@@ -427,17 +435,13 @@ Instructions pour la suite:
             node_ids[result_context["name"]] = node_id
             generated_nodes.extend(enriched)
 
-        # Créer la connexion avec les 4 champs
-        connection = {
-            "from": parent_node_id,
-            "choice_index": choice_index,
-            "testCriticalFailureNode": node_ids["critical-failure"],
-            "testFailureNode": node_ids["failure"],
-            "testSuccessNode": node_ids["success"],
-            "testCriticalSuccessNode": node_ids["critical-success"]
-        }
-        
-        logger.info(f"Génération terminée: 4 nœuds créés pour choix avec test")
+        # Créer la connexion avec les seules issues écrites
+        connection = {"from": parent_node_id, "choice_index": choice_index}
+        for field_name, outcome in TEST_OUTCOMES:
+            if outcome in node_ids:
+                connection[field_name] = node_ids[outcome]
+
+        logger.info(f"Génération terminée: {len(generated_nodes)} nœud(s) pour choix avec test")
         return {
             "nodes": generated_nodes,
             "connections": [connection]

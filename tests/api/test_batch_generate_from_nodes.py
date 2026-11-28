@@ -14,8 +14,10 @@ from api.dependencies import (
     get_config_service,
     get_context_builder,
     get_cost_governance_service,
+    get_graph_prompt_context_factory,
     get_llm_pricing_service,
     get_llm_usage_service,
+    get_token_estimation_service,
 )
 from api.main import app
 from api.routers.auth import get_current_user
@@ -60,6 +62,11 @@ def batch_gen_client() -> Iterator[tuple[TestClient, MagicMock, BatchNodeGenerat
     context_builder.get_characters_names.return_value = []
     pricing_service = MagicMock()
     pricing_service.calculate_cost.return_value = 0.01
+    factory = MagicMock()
+    factory.default_system_prompt.return_value = "système"
+    factory.build.return_value.render.return_value = "prompt"
+    token_service = MagicMock()
+    token_service.estimate_tokens.return_value = (12_500, 800)
     cost_service = MagicMock()
     cost_service.check_budget.return_value = {
         "allowed": True,
@@ -74,6 +81,8 @@ def batch_gen_client() -> Iterator[tuple[TestClient, MagicMock, BatchNodeGenerat
     app.dependency_overrides[get_batch_node_generation_job_manager] = lambda: job_manager
     app.dependency_overrides[get_llm_pricing_service] = lambda: pricing_service
     app.dependency_overrides[get_cost_governance_service] = lambda: cost_service
+    app.dependency_overrides[get_graph_prompt_context_factory] = lambda: factory
+    app.dependency_overrides[get_token_estimation_service] = lambda: token_service
     app.dependency_overrides[get_current_user] = lambda: _user()
     try:
         yield TestClient(app), batch_service, job_manager
@@ -152,8 +161,9 @@ def test_job_budget_check_uses_real_parent_count_not_spoofed_header(
 
     assert pricing_service.calculate_cost.called
     _, kwargs = pricing_service.calculate_cost.call_args
-    assert kwargs["prompt_tokens"] == 5000 * real_parent_count
-    assert kwargs["completion_tokens"] == 1000 * real_parent_count
+    # Deux choix vides par parent = deux emplacements, chacun au prompt complet.
+    assert kwargs["prompt_tokens"] == 12_500 * 2 * real_parent_count
+    assert kwargs["completion_tokens"] == 800 * 2 * real_parent_count
 
 
 def test_job_blocked_when_budget_exceeded(

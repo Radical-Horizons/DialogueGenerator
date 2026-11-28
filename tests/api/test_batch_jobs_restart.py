@@ -26,8 +26,10 @@ from api.dependencies import (
     get_context_builder,
     get_cost_governance_service,
     get_document_persistence_service,
+    get_graph_prompt_context_factory,
     get_llm_pricing_service,
     get_llm_usage_service,
+    get_token_estimation_service,
 )
 from api.main import app
 from api.routers.auth import get_current_user
@@ -103,6 +105,11 @@ def generation_api() -> Iterator[dict[str, Any]]:
     context_builder.get_characters_names.return_value = []
     pricing = MagicMock()
     pricing.calculate_cost.return_value = 0.01
+    factory = MagicMock()
+    factory.default_system_prompt.return_value = "système"
+    factory.build.return_value.render.return_value = "prompt"
+    tokens = MagicMock()
+    tokens.estimate_tokens.return_value = (12_500, 800)
     cost = MagicMock()
     cost.check_budget.return_value = {"allowed": True, "percentage": 0.0, "warning": None}
     deps: dict[str, Any] = {
@@ -117,6 +124,8 @@ def generation_api() -> Iterator[dict[str, Any]]:
         lambda: BatchNodeGenerationService(orchestrator=orchestrator)
     )
     app.dependency_overrides[get_llm_pricing_service] = lambda: pricing
+    app.dependency_overrides[get_graph_prompt_context_factory] = lambda: factory
+    app.dependency_overrides[get_token_estimation_service] = lambda: tokens
     app.dependency_overrides[get_cost_governance_service] = lambda: cost
     app.dependency_overrides[get_current_user] = lambda: _user()
     try:
@@ -224,7 +233,8 @@ async def test_resume_regenerates_only_remaining_parents(
     ]
     assert sorted(generated_for) == sorted(set(PARENT_IDS) - set(done))
     _, cost_kwargs = generation_api["pricing"].calculate_cost.call_args
-    assert cost_kwargs["prompt_tokens"] == 5000 * (len(PARENT_IDS) - len(done))
+    # Un choix vide par parent restant = un emplacement au prompt complet.
+    assert cost_kwargs["prompt_tokens"] == 12_500 * (len(PARENT_IDS) - len(done))
 
     items = final["report"]["items"]
     assert [i["parent_node_id"] for i in items] == PARENT_IDS
