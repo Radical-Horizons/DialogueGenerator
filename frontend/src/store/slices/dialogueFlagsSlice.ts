@@ -22,7 +22,7 @@ export const createDialogueFlagsSlice: StateCreator<
   dialogueFlagBindings: [],
 
   setDialogueFlagBindings: (bindings: DialogueFlagBinding[]) => {
-    set({ dialogueFlagBindings: [...bindings] })
+    set({ dialogueFlagBindings: [...bindings], flagsDirty: true })
     get().markDirty()
   },
 
@@ -31,13 +31,14 @@ export const createDialogueFlagsSlice: StateCreator<
     const i = cur.findIndex((b) => b.flagId === binding.flagId)
     if (i >= 0) cur[i] = binding
     else cur.push(binding)
-    set({ dialogueFlagBindings: cur })
+    set({ dialogueFlagBindings: cur, flagsDirty: true })
     get().markDirty()
   },
 
   removeDialogueFlagBinding: (flagId: string) => {
     set({
       dialogueFlagBindings: get().dialogueFlagBindings.filter((b) => b.flagId !== flagId),
+      flagsDirty: true,
     })
     get().markDirty()
   },

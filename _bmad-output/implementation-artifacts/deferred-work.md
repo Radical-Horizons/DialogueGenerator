@@ -415,11 +415,6 @@
   evidence: `epic-18.md` (ajouter les tokens de focus « dans `redesignTokens.ts` » créerait une valeur non publiée), `design-system-foundation.md` (ligne 21), `.claude/rules/ui_redesign_2026.md`, `docs/design/refonte-scene/README.md` § 10. Différé : la correction touche une règle d'agent.
   status: done — corrigé le 2026-11-28, aussi dans `visual-design-foundation.md`, `refonte-scene-architecture.md` (A8) et `project-context.md`.
 
-- source_spec: none
-  summary: Story 20.4, lot C — menu « fiche de scène ▾ » (README § 13) : Flags du dialogue, « Enregistrer comme profil d'auteur », métadonnées, partage, permissions, supprimer (confirmation actuelle gardée), en réutilisant les composants existants.
-  evidence: Découpée le 2026-11-28 avec le lot B ; après le lot B.
-  note: lot B livré avec « profil d'auteur » = voix d'écriture (décision de l'auteur), alors que le README § 13 fait d'« Enregistrer comme profil d'auteur » le successeur de « Sauvegarder ce brief comme template » : à trancher avant de coder ce geste.
-
 - source_spec: `_bmad-output/implementation-artifacts/spec-20-4a-fiche-de-scene-document-et-generation.md`
   summary: En lot par job, le contexte noté sur les nœuds créés est recalculé à l'application du rapport, pas celui envoyé au lancement.
   evidence: `contextForParent` (`useBatchGenerateFromNodes.ts`) relit la fiche à l'application ; une fiche modifiée entre-temps fausse `gddContextSelectionsSnapshot` et l'indicateur « GDD périmé ». Le même recalcul existait avec la colonne globale.
@@ -447,3 +442,23 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-20-4b-fiche-de-scene-complete.md`
   summary: `test_un_tableau_vraiment_corrompu_est_signale` échoue sous Python 3.13.5 (venv neuf d'un worktree).
   evidence: Échec reproduit sur la base propre ; 9/9 sous le venv du dépôt principal (3.13.3) et sous 3.11.0, version de la CI. Cause supposée, non vérifiée : l'avertissement émis depuis `emit` (`api/utils/log_file_handler.py`) est écarté par la garde anti-récursion de `logging`, donc perdu aussi en usage réel sous cette version.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-4c-menu-fiche-de-scene.md`
+  summary: Voix et templates sans écran après 20.11 — la fiche choisit une voix, garde et applique un template, mais créer ou modifier une voix, renommer, partager ou supprimer un template ne se fait que depuis la page Générer.
+  evidence: `AuthorProfilePanel` (tiroir de la page Générer) et `PresetSelector` (onglet Templates) sont les seuls écrans de gestion ; leur donner une place avant de retirer la page Générer.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-4c-menu-fiche-de-scene.md`
+  summary: Un dialogue supprimé depuis le graphe (bibliothèque ou fiche) reste sélectionné dans la section Éditer, qui affiche alors une erreur de lecture.
+  evidence: Seul `useDialogueLoader` écoute `dialogueDeleted` ; `selectedDialogue` de `Dashboard.tsx` n'est pas vidé. Antérieur au lot C pour la suppression par la bibliothèque.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-4c-menu-fiche-de-scene.md`
+  summary: Sur un 409, le graphe remplace les flags du serveur par les siens même quand l'auteur ne les a pas touchés ici.
+  evidence: `putDocumentAt` (`persistenceSlice.ts`) garde le titre et la fiche du serveur quand ils ne sont pas modifiés ici, pas `dialogueFlags`. Antérieur au lot C ; `flagsDirty` permettrait la même garde.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-4c-menu-fiche-de-scene.md`
+  summary: Un template perd les personnages absents du GDD (PNJ ou PJ en nom libre).
+  evidence: `services/template_service.py` retire les références inconnues de `characters` et `locations` à l'écriture. Le lieu libre est gardé par la fiche dans `subLocation` ; garder les personnages demande de changer l'API des templates.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-4c-menu-fiche-de-scene.md`
+  summary: L'état « ENREGISTRÉ · HH:MM » de l'en-tête du graphe est rogné à 1440 px avec la bibliothèque ouverte.
+  evidence: Vu au navigateur : l'en-tête dépasse son conteneur d'environ 80 px (`graph-save-status-mono`). Antérieur au lot C.

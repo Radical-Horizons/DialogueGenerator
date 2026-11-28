@@ -21,6 +21,11 @@ export const GraphEditorPage = memo(function GraphEditorPage() {
     [navigate]
   )
 
+  const leaveDeletedDialogue = useCallback(
+    () => navigate('/graph-editor', { replace: true }),
+    [navigate]
+  )
+
   const routeDialogueRevert = useGraphViewStore((s) => s.routeDialogueRevert)
   useEffect(() => {
     if (!routeDialogueRevert) return
@@ -42,6 +47,7 @@ export const GraphEditorPage = memo(function GraphEditorPage() {
         routeDialogueId={dialogueId}
         onBack={() => navigate('/')}
         onDialogueSelected={showDialogueInUrl}
+        onActiveDialogueDeleted={leaveDeletedDialogue}
       />
     </div>
   )

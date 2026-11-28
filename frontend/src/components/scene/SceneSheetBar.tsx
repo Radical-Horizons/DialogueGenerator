@@ -3,7 +3,7 @@
  *
  * Repliée en une ligne, dépliée d'office pour une scène sans réplique ; elle se corrige sur
  * place et s'enregistre seule avec le dialogue. Sa distribution, ses fiches, ses tons et son
- * profil sont les seuls envoyés aux générations.
+ * profil sont les seuls envoyés aux générations. Le reste est dans « fiche de scène ▾ ».
  */
 import { useCallback, useEffect, useMemo, useState, type CSSProperties, type FormEvent } from 'react'
 import { useGraphStore } from '../../store/graphStore'
@@ -37,6 +37,8 @@ import { SceneBriefField } from './SceneBriefField'
 import { SceneContextLine } from './SceneContextLine'
 import { SceneEntryPreview, type ScenePreviewTarget } from './SceneEntryPreview'
 import { SceneProfileField } from './SceneProfileField'
+import { SceneSheetMenu } from './SceneSheetMenu'
+import { SceneTitleField } from './SceneTitleField'
 import { SceneToneChips } from './SceneToneChips'
 import {
   SCENE_CATEGORY_LABELS,
@@ -218,6 +220,7 @@ function SceneSheetPanel({ documentId }: { documentId: string }) {
         >
           {expanded ? 'replier la fiche ▴' : 'déplier la fiche ▾'}
         </button>
+        <SceneSheetMenu documentId={documentId} title={title} readOnly={readOnly} />
       </div>
 
       {expanded ? (
@@ -347,18 +350,7 @@ function SceneSheetFields({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: redesignSpacing.md }}>
-      <h2
-        style={{
-          margin: `${redesignSpacing.sm}px 0 0`,
-          fontFamily: redesignFont.serif,
-          fontWeight: 400,
-          fontSize: '33px',
-          lineHeight: 1.12,
-          color: redesignText.strong,
-        }}
-      >
-        {title}
-      </h2>
+      <SceneTitleField title={title} readOnly={readOnly} />
 
       <div role="group" aria-label="Distribution" style={rowStyle}>
         {sheet.npcs.map((npc) => (

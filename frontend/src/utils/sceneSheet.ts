@@ -397,7 +397,7 @@ export interface SceneGeneration {
   authorProfileId: string | null
 }
 
-function emptySelection(): ContextSelection {
+export function emptySelection(): ContextSelection {
   return {
     characters_full: [],
     characters_excerpt: [],
@@ -421,7 +421,7 @@ type SelectionListKey = Exclude<
   'scene_protagonists' | 'scene_location' | 'generation_settings'
 >
 
-function selectionKeyOf(entry: SceneLinkedEntry): SelectionListKey | null {
+export function selectionKeyOf(entry: SceneLinkedEntry): SelectionListKey | null {
   if ((CATEGORIES_WITH_MODE as readonly string[]).includes(entry.category)) {
     const mode = entry.mode === 'excerpt' ? 'excerpt' : 'full'
     return `${entry.category}_${mode}` as SelectionListKey

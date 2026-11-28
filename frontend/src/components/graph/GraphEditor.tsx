@@ -77,6 +77,7 @@ interface GraphEditorProps {
   routeDialogueId?: string
   onBack?: () => void
   onDialogueSelected?: (filename: string) => void
+  onActiveDialogueDeleted?: () => void
 }
 
 export function GraphEditor({
@@ -84,6 +85,7 @@ export function GraphEditor({
   routeDialogueId,
   onBack,
   onDialogueSelected,
+  onActiveDialogueDeleted,
 }: GraphEditorProps) {
   const isStandalone = mode === 'standalone'
   const toast = useToast()
@@ -110,7 +112,7 @@ export function GraphEditor({
     activeDialogueFilename,
     hasActiveDialogue,
     dialogueListRef,
-  } = useDialogueLoader(toast, routeTarget)
+  } = useDialogueLoader(toast, routeTarget, onActiveDialogueDeleted)
 
   const {
     nodes,
