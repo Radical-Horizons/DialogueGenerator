@@ -4,41 +4,30 @@ Règle : aucun écart entre la maquette et la story ; la maquette prime, sauf si
 corrections sans choix sont dans `epic-20.md`, `epic-18.md`, le README de la maquette et l'architecture. Ce qui reste
 est ici.
 
-## À trancher
+## Questions : Q1 à Q5 tranchées le 2026-11-28, Q6 ouverte
 
-**Q1. Texte tapé dans l'emplacement à écrire (20.11).** Le board dit « Écrire la réplique de Grish, ou décrire ce qui
-doit se passer… », et tout s'enregistre à la frappe.
-- a (recommandé) : c'est la réplique ; la consigne a un champ distinct.
-- b : texte + CTRL+↵ = consigne, sinon réplique à la sortie du champ.
-- c : une bascule explicite.
+L'auteur a répondu « ok pour tes 5 recommandations ». Les réponses sont inscrites dans les stories.
 
-**Q2. Travaux serveur que la maquette suppose (20.8, 20.11, 20.12, 20.24).** Le graphe ne diffuse ni texte ni trace ;
-une issue de test ne se génère pas seule ; les lots travaillent par parent (10 à 100) et leurs résultats ne se
-retrouvent pas après fermeture ; Jouer ignore traits, respect, influence et flags.
-- a (recommandé) : les faire, en lots ajoutés aux stories (tailles à relever).
-- b : retirer des boards ce qui n'est pas servi.
+**Q1. Texte tapé dans l'emplacement à écrire — tranché le 2026-11-28 (20.11).** C'est la réplique ; la consigne a un
+champ distinct.
 
-**Q3. Test dans Jouer (20.24).** Le board tire un dé (1 et 20 critiques) ; le code compare score et difficulté.
-- a : dé comme sur le board, si c'est la règle du jeu.
-- b (recommandé tant que la règle manque) : score contre difficulté.
+**Q2. Travaux serveur que la maquette suppose — tranché le 2026-11-28.** Ils sont faits, en lots ajoutés : issue de
+test générée seule (20.8), texte et trace en direct avec interruption (20.11), lots par emplacement retrouvés au
+rechargement et arrivant À VALIDER (20.12), Jouer avec traits, respect, influence et flags (20.24). Estimation :
+≈ +13 sessions avec Q4 et Q5, soit ≈ 77 sur le chemin critique.
 
-**Q4. Deux écrans de la maquette sans story, à faire avant 20.11.** L'« Accueil » tient en une phrase, et les fonctions
-de liste actuelles (collections, export et validation par lot, journal d'export) n'y sont pas ; seuls les « Réglages ›
-Apparence » ont une story, et les autres onglets d'options, la gestion des voix et des templates, et des réglages de la
-page Générer n'ont pas de destination.
-- a (recommandé) : créer les stories « Accueil » et « Réglages ».
-- b : répartir en critères dans 20.5, 20.16 et 20.25.
-- c : abandonner des fonctions, une par une et par écrit.
+**Q3. Test dans Jouer — tranché le 2026-11-28 (20.24).** Score comparé à la difficulté, comme le code ; pas de dé.
+La règle du jeu n'a pas été donnée : à revoir si elle l'est.
 
-**Q5. Fonctions actuelles que la maquette ignore.** Suggestions, pertinence, usage des sections, comparaison et
-optimisation du contexte (20.25) ; tiroir de réglage de la partie, couverture des choix testés et raccourcis de
-l'aperçu jouable (20.24).
-- a (recommandé) : rien ne disparaît sans votre accord ; garder « État de la partie » éditable et la marque « testé ».
-- b : abandon assumé, inscrit au README § 13.
+**Q4. Écrans sans story — tranché le 2026-11-28.** Stories 20.26 « Accueil » et 20.27 « Réglages », avant 20.11.
 
-**Q6. Non urgent.** Source des images d'Ambiance (18 fiches seulement ont une URL, ni Grish ni Uresaïr : recommandé,
-dépôt manuel par fiche) ; guides d'auteur pour l'aide de 20.22 (recommandé : livrer la question au GDD seule) ; juge
-des notes d'intention de 20.23 (recommandé : juge LLM à l'aveugle puis votre échantillon, seuil 0,3 point sur 10).
+**Q5. Fonctions actuelles que la maquette ignore — tranché le 2026-11-28.** Rien ne disparaît sans décision écrite
+(20.24, 20.25).
+
+**Q6. Ouverte, non urgente.** Source des images d'Ambiance (18 fiches seulement ont une URL, ni Grish ni Uresaïr :
+recommandé, dépôt manuel par fiche) ; guides d'auteur pour l'aide de 20.22 (recommandé : livrer la question au GDD
+seule) ; juge des notes d'intention de 20.23 (recommandé : juge LLM à l'aveugle puis votre échantillon, seuil 0,3 point
+sur 10).
 
 ## Tranché sans vous (vous pouvez revenir dessus)
 
@@ -71,13 +60,15 @@ Autres choix :
 | `Fiche` | « Salutation / première rencontre » et sa consigne sont un template, pas une voix : mettre une voix ; menu « Enregistrer comme template » et « Appliquer un template… » ; montrer le prix à côté des tokens |
 | `Main` | Texte d'une réponse = champ, pas un bouton ; didascalie à la ligne ; sélecteur d'issue sur un test non écrit ; prix dans l'emplacement ; légende TAB « suites vides » |
 | `Gestes` | Provenance permanente (pas sur L, pas « Tout voir ») ; toast mais confirmation pour une scène |
-| `Generer` | Ligne « TRACE ▸ » absente ; libellé de l'emplacement après Q1 ; ÉCHAP replie |
+| `Generer` | Ligne « TRACE ▸ » absente ; libellé de l'emplacement (le texte est la réplique) et champ de consigne distinct ; ÉCHAP replie |
+| `Jouer` | Retirer le dé (« JET », 1 et 20 critiques) : score comparé à la difficulté |
+| `Main`, `Fiche`, `Reecrire` | Emplacement : le texte tapé est la réplique, la consigne a son champ |
 | `Graphe` | Port sur la ligne « 4 ISSUES · À ÉCRIRE » ; « Influence » dans le popover ; puce « ■ FIN » ; « + Réponse » et « + » mécanique |
 | `Carte` | Retirer « / INSÉRER » (hors epic) ; « + Réponse » |
 | `Lot` | Retirer la durée (aucune source) ; montrer la barre de lot de sélection |
 | `Contexte` | PNJ et PJ non retirables ; retirer « résumées d'abord » tant que le résumé n'existe pas |
 | `Palette` | Retirer « TAB ACTIONS » (aucune action définie) |
-| `Bibliotheque`, `Ambiance` | Dire lequel est Liste et lequel Couvertures ; accueil sans sélection multiple (Q4) |
+| `Bibliotheque`, `Ambiance` | Dire lequel est Liste et lequel Couvertures ; ajouter la sélection multiple, les collections et les filtres date et auteur (20.26) |
 | `Reglages` | Section Ambiance absente |
 | `Versions`, `Discussion` | Liste des discussions dans Versions |
 | `Technique` | Renommage « partout » et valeur inconnue non dessinés |
@@ -91,7 +82,7 @@ Autres choix :
 - Un enregistrement retire les réponses de test sans texte (déjà noté ; carte de correction proposée).
 - La régénération peut écrire dans un autre dialogue (déjà noté ; carte proposée).
 - Un test déjà rempli semble régénéré et repayé par un lot (`services/graph_generation_service.py`, filtre sur
-  `targetNode`).
+  `targetNode`) ; une session le corrige depuis le 2026-11-28, avec le budget des lots (prérequis de 20.12).
 - Le contrôle de budget des lots compte un forfait de 6 000 tokens par parent contre ≈ 12 500 par nœud.
 - Le serveur ajoute un figurant au hasard à chaque génération (`scene_dramatis.py`) : l'aperçu du prompt le montrera.
 - Seule une génération d’un nœud unique arrive `pending` : un lot arrive accepté (`generationSlice.ts`).

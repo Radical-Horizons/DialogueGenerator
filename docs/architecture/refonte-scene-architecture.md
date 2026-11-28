@@ -60,7 +60,7 @@ PNJ et le PJ à partir du graphe.
   la première réplique générée est rattachée à son appel LLM, ce qui lève la limite « nœud START de Générer sans
   dialogue » de la PR #103 (`docs/architecture/conversations-ia.md`).
 - Toute génération (premier nœud, suite, lot, réécriture) lit la fiche. Le `contextStore` global garde le catalogue
-  GDD et les sélections **hors scène** (page Fiches du GDD) ; ses lecteurs dans le chemin de génération sont à
+  GDD et les sélections **hors scène** (page Générer, jusqu'à son retrait ; l'écran Fiches est en lecture seule) ; ses lecteurs dans le chemin de génération sont à
   inventorier en story 20.4 (critère : plus aucun appel de génération ne lit les sélections globales).
 - **Export : `scene` est retirée.** Vérifié le 2026-11-20 sur le contrat publié
   (`docs/JsonDocUnity/Documentation/dialogue-format.schema.json`) : la racine n'a pas d'`additionalProperties`, donc
@@ -136,6 +136,10 @@ vides) se dérivent du document en une passe.
 
 Toutes passent par l'estimation (`…/graph/estimate-cost`) avant l'appel et affichent le coût engagé pendant. La connexion
 parent → nouveau nœud reste faite par le front (`connectNodes` dans `generationSlice`), jamais déléguée à l'API.
+
+Ajouts décidés le 2026-11-28 : dans l'emplacement, le texte tapé est la réplique et la consigne a un champ distinct ;
+`generate-node` sait n'écrire qu'une issue d'une réponse à test (20.8) ; le graphe diffuse texte et trace en direct,
+avec interruption (20.11).
 
 ### A6 — Diagnostics continus
 
@@ -214,7 +218,9 @@ conflit sur le texte.
 ### A13 — Lots : réutiliser les jobs existants
 
 Le tiroir Lot (`Lot.dc.html`) s'appuie sur les jobs de lot persistés (`data/batch_jobs/*.json`, FR87/FR88) : un seul
-worker, un job interrompu au redémarrage, reprise des seuls parents restants. Ajouts : portée par niveau ou par
+worker, un job interrompu au redémarrage. Ajouts (20.12) : le job travaille par emplacement (parent, réponse, issue),
+sans plancher, reprend les seuls emplacements restants, applique ses résultats au fil de l'eau (À VALIDER) et se
+retrouve au rechargement ; portée par niveau ou par
 scène, exclusions (réponses vides, répliques jamais atteintes), coût total estimé avant (`estimate-cost` × N),
 progression dans la barre d'état, revue en série des « à valider ».
 
@@ -301,15 +307,15 @@ Tranche 1 — fondation, tout de suite                                          
   A3 conversion + fixtures CI · preuve de perf A10 · A8 variables CSS
 Tranche 1 bis — fondation d'écriture (stories d'Epic 18), en parallèle           ≈ 3,5 sessions 18.4 (reste), 18.8, 18.5a
   annulation dans le champ · indicateur d'enregistrement · composant de champ seul (A2, A3)
-Tranche 2 — la scène                                                             ≈ 28 sessions  20.4–20.10, 20.24, 20.25,
+Tranche 2 — la scène                                                             ≈ 37 sessions  20.4–20.10, 20.24–20.27,
   A1 fiche → enveloppe → Contexte/Fiches/palette → A4 Script → A9 cartes et flux LR    18.5b, 18.6, 18.7, 18.9, 18.11
-  → champ monté, réponses, en-têtes → tests en sorties → clavier → lentille et popovers → états → Jouer
+  → champ monté, réponses, en-têtes → tests en sorties → clavier → lentille et popovers → états → Jouer → Accueil → Réglages
   A14 panneau derrière un drapeau, un seul écrivain du texte dès 18.5b
-Tranche 3 — l'IA dans le texte                                                    ≈ 16 sessions  20.11–20.15, 20.21, 20.22
+Tranche 3 — l'IA dans le texte                                                    ≈ 20 sessions  20.11–20.15, 20.21, 20.22
   A5 emplacement et options · A13 lots · rewrite-span · A6 diagnostics · A15 discussions · retrait du panneau
 Tranche 4 — confort                                                              ≈ 14,5 sessions 20.16–20.20, 20.23
   Papier, Focus · A12 journal · téléphone et tactile · A7 catalogues · A16 ambiance · notes d'intention
-Chemin critique : tranche 1 → 2 → 3 → 4 ≈ 64 sessions (tranche 1 bis en parallèle de la tranche 1 ; détail et
+Chemin critique : tranche 1 → 2 → 3 → 4 ≈ 77 sessions (tranche 1 bis en parallèle de la tranche 1 ; détail et
 écart avec les 57 de la première rédaction : epic-20.md, « Chemin critique et tailles »).
 ```
 

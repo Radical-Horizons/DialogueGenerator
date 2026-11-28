@@ -81,7 +81,7 @@ Largeur du graphe à 1 440 px : **1 188 px** classeur ouvert, **1 384 px** class
 | `Technique` | **Lentille Technique** + éditeur de test ancré. | idem |
 | `Paliers` | **Lire (≈ 60 %) et situer (≈ 30 %)** sur la vraie structure, répliques jamais atteintes encadrées. | — |
 | `Carte` | **Anatomie d'une carte** en écriture (texte brut de la réplique entière, D4). | — |
-| `Jouer` | **Jouer** : choix verrouillés expliqués, issue forçable, état de la partie, retour d'un choix. | partie |
+| `Jouer` | **Jouer** : choix verrouillés expliqués, issue calculée (score contre difficulté, sans dé, § 15) puis forçable, état de la partie, retour d'un choix. | partie |
 | `Problemes` | **Santé** : popover de la barre d'état, marques en place, relecture (à la demande) en marge. | ÉCHAP |
 | `Contexte` | **Ce que le modèle saura** : tokens par section, budget AUTO, modèle. | retirer |
 | `Versions` | **Versions d'une réplique** : diff, restaurer sans rien perdre. | restaurer |
@@ -132,7 +132,7 @@ Chaque board dit en pied ce qui est un exemple (coûts, heures, textes généré
 | **Bloc de script** | Locuteur, réplique serif, didascalies, réponses avec puces et état. | `UnityDialogueEditor`, `GenerationOptionsComparison` |
 | **Carte de réplique** | Même contenu en 360 px, réplique bornée (12 lignes, défilement interne une fois sélectionnée), réponses jamais coupées, ports par réponse et par issue. | `DialogueNode` ; `TestNode` et `EndNode` deviennent des sorties |
 | **Champ d'écriture** | Le `<textarea>` d'Epic 18 (D4) : à l'entrée dans une réplique, **toute la réplique** passe en texte brut avec ses `*…*` ; à la sortie elle redevient mise en forme. | Epic 18.5a–18.7 |
-| **Emplacement à écrire** | Au bout de toute réponse sans suite : taper ou Générer CTRL+↵ ; ligne « TRACE ▸ » dépliable pendant l'écriture. | `AIGenerationPanel`, `GenerationStreamingInline`, trace de raisonnement |
+| **Emplacement à écrire** | Au bout de toute réponse sans suite : taper (c'est la réplique) ou Générer CTRL+↵, avec la consigne dans un champ distinct ; ligne « TRACE ▸ » dépliable pendant l'écriture. | `AIGenerationPanel`, `GenerationStreamingInline`, trace de raisonnement |
 | **Tiroir Lot** | Portée, coût total, progression, reprise, revue en série. | jobs FR87/FR88, `BatchGenerateFromNodesModal` |
 | **Puce mécanique** | Trait, test, respect, influence, fin ; clic sur une puce ou sur « + » (cible 24 px) → un popover d'édition ancré, unique pour la réponse. | `ChoiceEditor`, `AttributeSkillTestEditor`, `ConditionEditor`, `EffectEditor` |
 | **Barre d'état** | Enregistrement, problèmes, contexte, tokens, modèle, mots, lot en cours. | `SaveStatusIndicator`, `GraphHealthBadge`, `EstimationBadge` |
@@ -230,9 +230,9 @@ parcours le prouve. Le retrait du panneau de droite (20.15) attend les lignes qu
 
 | Aujourd'hui | Demain | Story | Test e2e |
 |---|---|---|---|
-| Page Générer (scène, brief, onglets Brief/Flags/Templates, réglages LLM) | Fiche de scène ; flags dans « fiche de scène ▾ › Flags » ; templates par « fiche de scène ▾ › Appliquer un template… » ; profil d'auteur (voix d'écriture) dans la fiche ; modèle et raisonnement dans la barre d'état et le tiroir Contexte ; autres réglages : à placer (story « Réglages » à décider) | 20.4, 20.5, 20.25 | ☐ |
+| Page Générer (scène, brief, onglets Brief/Flags/Templates, réglages LLM) | Fiche de scène ; flags dans « fiche de scène ▾ › Flags » ; templates par « fiche de scène ▾ › Appliquer un template… » ; profil d'auteur (voix d'écriture) dans la fiche ; modèle et raisonnement dans la barre d'état et le tiroir Contexte ; autres réglages dans Réglages et l'écran des voix et templates | 20.4, 20.5, 20.25, 20.27 | ☐ |
 | « Sauvegarder ce brief comme template » | « fiche de scène ▾ › Enregistrer comme template » | 20.4 | ☐ |
-| Colonne Contexte GDD | Fiche (PNJ, PJ, `@`), tiroir Contexte, écran Fiches du GDD ; règles de contexte dans Réglages › Notion et GDD | 20.4, 20.25 | ☐ |
+| Colonne Contexte GDD | Fiche (PNJ, PJ, `@`), tiroir Contexte, écran Fiches du GDD ; règles de contexte dans Réglages › Notion et GDD | 20.4, 20.25, 20.27 | ☐ |
 | Colonne droite (Prompt, Dialogue, Détails, Trace) | Tiroir Contexte (« voir le prompt »), emplacement à écrire (en direct + « TRACE ▸ »), aperçu de fiche, Versions | 20.25, 20.11, 20.17 | ☐ |
 | Options ×N, comparaison Liste / Côte à côte | `‹ 1/4 ›` dans l'emplacement + « comparer les 4 côte à côte » (vue 2b conservée) | 20.11 | ☐ |
 | Section Éditer (liste, métadonnées, partage, permissions, suppression) | Classeur ; Script ; « fiche de scène ▾ » (métadonnées, partage, permissions, supprimer) | 20.4, 20.5, 20.15 | ☐ |
@@ -244,8 +244,10 @@ parcours le prouve. Le retrait du panneau de droite (20.15) attend les lignes qu
 | Tags de nœud, badge GDD↑, COND. | Puces ; lentille Technique | 20.9 | ☐ |
 | Export PNG/SVG, export Unity, filtres, CTRL+J, carte | « Actions ▾ » dans la barre de vue des trois vues, et palette ; inchangés | 20.5, 20.1 | ☐ |
 | Aperçu de scénario (P) | Vue Jouer | 20.24 | ☐ |
-| `/usage`, Profils d'auteur | Écrans existants, dans l'enveloppe Scène ; **non redessinés dans cette proposition** | 20.5 | ☐ |
-| Options, Admin | Réglages (navigation gauche) ; Admin inchangé | 20.5, 20.16 | ☐ |
+| `/usage`, Profils d'auteur | `/usage` : écran existant dans l'enveloppe Scène ; Profils d'auteur : écran des voix et des templates, à créer ; **non redessinés dans cette proposition** | 20.5, 20.27 | ☐ |
+| Liste des dialogues : collections, export et validation par lot, journal d'export, filtres date et auteur | Accueil | 20.26 | ☐ |
+| Colonne Contexte (suggestions, pertinence, usage, comparaison, optimisation) et aperçu jouable (réglage de la partie, choix testés), hors maquette | Gardés : tiroir Contexte, écran Fiches, vue Jouer | 20.25, 20.24 | ☐ |
+| Options, Admin | Réglages (navigation gauche, cinq sections) ; Admin inchangé | 20.27, 20.16 | ☐ |
 | Mode écriture (CTRL+\) | Mode Focus (même raccourci) | 20.16 | ☐ |
 
 ## 14. Articulation avec l'existant
@@ -291,3 +293,11 @@ parcours le prouve. Le retrait du panneau de droite (20.15) attend les lignes qu
    seulement si la qualité ne baisse pas.
 8. **Insertion par « / » dans une carte** (montrée par le board `Carte`) — **hors epic 20** : aucune story ne la porte ;
    le board la garde comme piste, à reprendre si l'usage du Script et du Graphe la réclame.
+9. **Texte tapé dans l'emplacement** — **prise** (2026-11-28) : c'est la réplique ; la consigne a un champ distinct.
+10. **Promesses de la maquette que le serveur ne tenait pas** — **prise** (2026-11-28) : elles sont construites (texte
+    et trace en direct, issue de test générée seule, lots par emplacement retrouvés au rechargement, Jouer avec traits,
+    respect, influence et flags).
+11. **Test dans Jouer** — **prise** (2026-11-28) : score comparé à la difficulté, pas de dé ; à revoir si la règle du
+    jeu est donnée.
+12. **Accueil et Réglages** — **prise** (2026-11-28) : deux stories (20.26, 20.27) avant 20.11.
+13. **Fonctions actuelles hors maquette** — **prise** (2026-11-28) : rien ne disparaît sans décision écrite.

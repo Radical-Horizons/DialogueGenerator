@@ -67,7 +67,8 @@ FR129 et FR130 (Epic 19) sont couvertes par FR133, FR137 et le retrait du pannea
 
 **Fonctions du README § 13 sans FR propre** : le tiroir Contexte, l'écran Fiches du GDD, la palette étendue et le menu
 « fiche de scène ▾ » (« fiche ▾ » au README § 13 ; le libellé du board fait foi) sont portés par 20.25 et 20.4 ; ils
-servent FR131, FR133 et FR137.
+servent FR131, FR133 et FR137. L'Accueil (20.26) et les Réglages (20.27), ajoutés le 2026-11-28, n'ont pas de FR
+propre non plus.
 
 ### NFR touchées
 
@@ -199,9 +200,9 @@ réponses jamais coupées : écart 3, README § 14).
 
 Les autres stories reprises d'Epic 18 passent en tranche 2 (ci-dessous), après 20.6 et 20.7.
 
-### Tranche 2 — la scène (après 20.2 et la tranche 1 bis, ≈ 28 sessions)
+### Tranche 2 — la scène (après 20.2 et la tranche 1 bis, ≈ 37 sessions)
 
-Ordre : 20.4 → 20.5 → 20.25 → 20.6 → 20.7 → 18.5b → 18.6 → 18.7 → 20.8 → 18.9 → 20.9 → 18.11 → 20.10 → 20.24. Les
+Ordre : 20.4 → 20.5 → 20.25 → 20.6 → 20.7 → 18.5b → 18.6 → 18.7 → 20.8 → 18.9 → 20.9 → 18.11 → 20.10 → 20.24 → 20.26 → 20.27. Les
 stories d'Epic 18 de cette tranche (18.5b, 18.6, 18.7, 18.9, 18.11 : 7 sessions) sont décrites dans `epic-18.md`, avec
 leurs critères réécrits contre la carte et le bloc de script.
 
@@ -267,19 +268,16 @@ Graphe. (FR137, A14, README § 4, § 7, § 8, § 12, boards `Main`, `Bibliothequ
   jusqu'à 20.16 ; le classeur se replie aussi à la main.
 - **Given** la table des raccourcis (`generalShortcuts.ts`), **Then** `ctrl+n`, `ctrl+1` à `ctrl+4` et `ctrl+/` sont
   retirés ou remplacés (README § 8) ; Alt+S reste jusqu'au retrait de la page Générer.
-- **Given** aucune scène ouverte, **Then** l'Accueil s'affiche (board `Bibliotheque`, nom retenu : « Accueil », comme
-  README § 5 et 20.20).
-- À TRANCHER AVEC L'AUTEUR : créer avant 20.11 une story « Accueil » (reprise, recherche, filtres, compteurs par
-  scène, plus la sélection multiple, les collections, l'export et la validation par lot et le journal d'export de la
-  liste actuelle) et une story « Réglages » (onglets d'options actuels, modèles et budget, voix et templates).
-  Recommandation : oui, les deux.
+- **Given** aucune scène ouverte, **Then** l'Accueil s'affiche (nom retenu : « Accueil », comme README § 5 et 20.20) :
+  ici sous une forme provisoire (scènes et « Nouvelle scène »), l'écran du board `Bibliotheque` venant de 20.26. La
+  liste actuelle (`/unity-dialogues`) et la modale Options restent ouvertes jusqu'à 20.26 et 20.27.
 - **Given** ALT+N, **Then** une scène est créée **et enregistrée** (document créé côté serveur, `create_only`) avant
   toute génération : la première réplique générée pourra être rattachée à son appel (A1, prérequis de « Pourquoi ? »
   sur l'ouverture, 20.21). Son identifiant est neutre et stable, son titre libre.
 - **Given** les routes actuelles (`/`, `/unity-dialogues`, `/graph-editor(/:id)` ; Générer et Éditer sont des onglets
   de `/` sans URL propre), **Then** chacune reste ouverte, avec un lien vers la même scène, jusqu'à la story qui la
   remplace, puis redirige : `/graph-editor` → vue Graphe en 20.7, onglet Générer → Script en 20.11, onglet Éditer →
-  Script en 20.15 ; aucune URL ne mène à une page blanche. La table est posée ici, chaque story l'active.
+  Script en 20.15, `/unity-dialogues` → Accueil en 20.26 ; aucune URL ne mène à une page blanche. La table est posée ici, chaque story l'active.
 - **Given** le drapeau `uiLayoutStore.legacyInspector`, **When** il est vrai, **Then** l'ancien panneau de droite reste
   montable et chaque ouverture incrémente un compteur local (A14). Sa valeur par défaut reste **vraie** tant que la
   carte et le bloc ne portent pas l'écriture du texte (18.5b, 18.6, 18.7) et la technique (popovers de 20.9) ; elle
@@ -292,7 +290,7 @@ Graphe. (FR137, A14, README § 4, § 7, § 8, § 12, boards `Main`, `Bibliothequ
   ses champs passent en lecture seule au même rythme, avec un lien « écrire dans la scène » vers le Script ; il est
   retiré en 20.15.
 
-#### Story 20.25 : Tiroir Contexte, écran Fiches du GDD, palette — 3 sessions
+#### Story 20.25 : Tiroir Contexte, écran Fiches du GDD, palette — 3,5 sessions (estimation)
 
 **En tant qu'** auteur, **je veux** voir ce que le modèle saura et retrouver le GDD sans la page Générer, **afin
 que** son retrait (20.11) ne me fasse perdre aucune fonction. (FR131, FR133, FR137, README § 7, § 13, boards
@@ -311,15 +309,16 @@ Estimation à recaler à la création de la story. Placée avant 20.11, qui reti
 - **Given** le classeur, **When** on ouvre « Fiches du GDD », **Then** l'écran du board `Fiches` liste les fiches
   comptées sur disque, en lecture seule (aucune sélection), avec l'état de la synchro Notion, « Synchroniser » par
   fiche (`sync-entity` existe) et « UTILISÉE DANS » (endpoint à créer).
-- **Given** Réglages, **Then** une section « Notion et GDD » porte les règles de contexte aujourd'hui dans la colonne
-  Contexte GDD (README § 13).
+- **Given** les règles de contexte aujourd'hui dans la colonne Contexte GDD, **Then** elles s'ouvrent depuis le tiroir
+  Contexte jusqu'à 20.27, qui les range dans Réglages › Notion et GDD (README § 13).
 - **Given** CTRL+K, **Then** la palette du board `Palette` cherche scènes, répliques, fiches et commandes, chaque
   commande avec son raccourci (table unique `generalShortcuts.ts`) ; sans sélection de texte seulement (sur une
   sélection, CTRL+K est la réécriture de 20.13). Les commandes d'une story non livrée sont masquées ; la recherche
   plein texte du GDD demande un endpoint à créer ; le champ d'en-tête ne dit pas « demander » avant 20.22.
-- À TRANCHER AVEC L'AUTEUR : les fonctions de la colonne Contexte que la maquette ignore (suggestions, pertinence,
-  usage des sections, comparaison, optimisation). Recommandation : rien ne disparaît sans décision écrite ;
-  l'historique d'une fiche va à l'écran Fiches, le mode complet / extrait au tiroir.
+- **Given** les fonctions actuelles de la colonne Contexte que la maquette ignore, **Then** aucune ne disparaît
+  (décision de l'auteur, 2026-11-28) : suggestions, pertinence, usage des sections, comparaison, optimisation et mode
+  complet / extrait vont au tiroir Contexte, l'historique d'une fiche à l'écran Fiches, en réutilisant les composants
+  existants, chacune couverte par un test.
 - **Given** le README § 13, **Then** les lignes « Colonne Contexte GDD » et « Colonne droite (Prompt…) » sont
   couvertes, chacune avec la spec e2e qui le prouve.
 
@@ -394,7 +393,7 @@ README § 7 « Carte de réplique », boards `Graphe`, `Carte`, `Paliers`)
   store du graphe jusqu'au lâcher), la reconstruction des nœuds inchangés du canvas (réutilisés) et la copie
   d'annulation coûteuse (ses `## Implementation Notes`) : le graphe réel doit en faire autant.
 
-#### Story 20.8 : Tests en sorties et liens hors champ — 1,5 session
+#### Story 20.8 : Tests en sorties et liens hors champ — 2,5 sessions (estimation)
 
 **En tant qu'** auteur, **je veux** voir les 4 issues d'un test comme sorties de la réponse. (FR136, A9, board
 `Graphe`)
@@ -411,7 +410,10 @@ README § 7 « Carte de réplique », boards `Graphe`, `Carte`, `Paliers`)
 - **Given** une issue sans suite, **Then** elle porte « À ÉCRIRE » ; jusqu'à 20.11 elle ouvre le panneau de génération
   actuel.
 - **Given** un test sans aucune suite, **Then** il tient en une ligne « 4 ISSUES · À ÉCRIRE » qui garde un port : il
-  génère les 4 issues d'un coup (coût annoncé) ; ensuite chaque issue se génère seule (travail serveur, 20.11).
+  génère les 4 issues d'un coup (coût annoncé) ; ensuite chaque issue se génère seule (lot serveur ci-dessous).
+- **Lot serveur** (ajouté le 2026-11-28) : `generate-node` accepte une issue précise d'une réponse à test et n'écrit
+  qu'elle (aujourd'hui une réponse à test produit toujours 4 nœuds et `GenerateNodeRequest` n'a pas de paramètre
+  d'issue) ; une issue déjà écrite n'est ni écrasée ni repayée ; tests pytest.
 - **Given** une réponse que l'auteur déclare « fin voulue », **Then** une métadonnée d'éditeur, retirée à l'export,
   la marque « ■ FIN » ; elle sort des comptes « à écrire » et des lots. `END` posé par défaut reste « à écrire ».
 - **Given** le début de la story, **Then** une fixture golden avec une issue à `END` existe (`deferred-work.md`).
@@ -459,7 +461,7 @@ README § 7 « Carte de réplique », boards `Graphe`, `Carte`, `Paliers`)
   board `Etats` (filets sans spinner ; un seul bouton « Nouvelle scène » ; un point de couleur par locuteur et la
   réponse qui dit qui parle ensuite).
 
-#### Story 20.24 : Jouer — 2 sessions
+#### Story 20.24 : Jouer — 3,5 sessions (estimation)
 
 **En tant qu'** auteur, **je veux** jouer ma scène comme le joueur la vivra, **afin de** vérifier les choix, les tests
 et les conditions sans quitter la scène. (FR146, README § 4, § 8, § 13 « Aperçu de scénario (P) → Vue Jouer », board
@@ -469,18 +471,21 @@ Estimation à recaler à la création de la story. Après 20.5 (barre de vue) et
 
 - **Given** une scène, **When** on passe en JOUER (ALT+3), **Then** la partie démarre à l'ouverture, répliques mises
   en forme par `parse` (20.1), sans champ d'écriture monté ; le moteur est celui de l'aperçu de scénario existant
-  (`scenarioPlaythroughEngine.ts`, `useScenarioPlaythrough.ts`), réutilisé et non réécrit.
+  (`scenarioPlaythroughEngine.ts`, `useScenarioPlaythrough.ts`), réutilisé et étendu, non réécrit.
 - **Given** un choix verrouillé par une condition, **Then** il est affiché grisé avec sa raison en clair (variable et
   valeur attendue), comme sur le board `Jouer`.
-- **Given** une réponse à test jouée, **Then** l'issue suit le comportement actuel de l'aperçu de scénario (FR94,
-  `graphViewStore.previewGameSystemsState`) et l'auteur peut ensuite la remplacer (É. CRIT, ÉCHEC, RÉUSSITE,
-  R. CRIT) : l'issue tirée est barrée, la partie recalculée.
-- À TRANCHER AVEC L'AUTEUR : dé tiré comme sur le board (JET, 1 et 20 critiques) ou score comparé à la difficulté
-  comme le code actuel ; la règle du jeu manque. Recommandation : à défaut de règle, score contre difficulté.
-- À TRANCHER AVEC L'AUTEUR : le board montre traits, respect, influence et flag d'ouverture, que le moteur actuel
-  ignore. Recommandation : étendre le moteur (lot ajouté à la story).
-- À TRANCHER AVEC L'AUTEUR : le tiroir de réglage de la partie, la couverture des choix non testés et les raccourcis
-  de l'aperçu actuel, absents du board. Recommandation : « État de la partie » éditable et marque « testé ».
+- **Given** une réponse à test jouée, **Then** l'issue se calcule en comparant le score à la difficulté, comme le code
+  actuel (`skillChecks.ts`, FR94, `graphViewStore.previewGameSystemsState`) : **pas de dé** (le « JET » et les 1 et 20
+  critiques du board ne sont pas repris ; l'auteur n'a pas donné la règle du jeu, à revoir s'il la donne). Score et
+  difficulté sont affichés, et l'auteur peut ensuite remplacer l'issue (É. CRIT, ÉCHEC, RÉUSSITE, R. CRIT) : l'issue
+  calculée est barrée, la partie recalculée.
+- **Lot moteur** (ajouté le 2026-11-28) : le moteur ignore aujourd'hui `traitRequirements`, `respectDelta`,
+  `influenceDelta` et `consequences.flag` ; il les simule comme sur le board (traits du PJ saisissables, respect et
+  influence envers le PNJ distincts de la réputation, flag posé à l'ouverture), avec ses tests.
+- **Given** l'aperçu de scénario actuel, **Then** rien de ce qu'il offre ne disparaît, même absent du board (décision
+  de l'auteur, 2026-11-28) : « État de la partie » **éditable** (flags, attributs, issue forcée ; D ouvre son tiroir),
+  marque « testé » sur les choix déjà joués et liste des choix non testés, aller à la réplique (J) et au graphe (G) par
+  « Ouvrir dans le script / le graphe », continuer un nœud sans réponse.
 - **Given** une partie en cours, **Then** l'état de la partie (flags, variables, réputation) est visible à côté ;
   RETOUR ARRIÈRE revient d'un choix, R rejoue depuis l'ouverture sans confirmation, 1–9 choisissent (README § 8) ;
   « PARTIE · n CHOIX », la trace des choix, « Ouvrir dans le script » (CTRL+CLIC), le rail repliable et les messages
@@ -492,19 +497,76 @@ Estimation à recaler à la création de la story. Après 20.5 (barre de vue) et
 - **Given** l'ancien bouton « Aperçu de scénario (P) », **Then** il ouvre la vue Jouer ; la ligne correspondante du
   README § 13 est couverte par une spec e2e.
 
-### Tranche 3 — l’IA dans le texte (≈ 16 sessions)
+#### Story 20.26 : Accueil — 3 sessions (estimation)
 
-#### Story 20.11 : Emplacement à écrire et options sur place — 3 sessions
+**En tant qu'** auteur, **je veux** retrouver mes scènes et reprendre où j'en étais, **sans** perdre ce que la liste
+actuelle sait faire. (README § 5, § 13, boards `Bibliotheque`, `Ambiance` écran `accueil`)
+
+Ajoutée le 2026-11-28 (décision de l'auteur). Après 20.5 ; avant 20.11. Les couvertures viennent de 20.20.
+
+- **Given** aucune scène ouverte, **Then** l'Accueil s'affiche comme sur le board `Bibliotheque` : « Scènes », les
+  totaux « n SCÈNES · n RÉPLIQUES · n SUITES À ÉCRIRE », « Nouvelle scène ALT+N », et par scène son titre, un
+  extrait, ses comptes (répliques, à valider, suites à écrire, réponses vides), sa date et sa distribution ; un filtre
+  sans résultat dit « Aucune scène ne correspond » avec « Retirer les filtres ».
+- **Given** une scène déjà ouverte sur ce poste, **Then** « REPRENDRE » la nomme avec la réponse et l'issue où l'auteur
+  l'a laissée et l'heure (la date hors du jour même) ; ↵ y revient. La position est gardée en `localStorage` (A4),
+  jamais dans le document.
+- **Given** la barre de filtres, **Then** elle porte la recherche « Titre, personnage, réplique… », Collection,
+  Personnage, les états (à valider, suites à écrire, avec leurs comptes) et le tri (« récentes d'abord » par défaut),
+  plus les filtres **date** et **auteur** de la liste actuelle. « Avec problèmes » et le compte d'erreurs arrivent avec
+  20.14 et sont absents d'ici là.
+- **Lot serveur** : la liste rend les agrégats par scène (aujourd'hui `UnityDialogueMetadata` donne `node_count` et les
+  locuteurs, mais ni suites à écrire, ni réponses vides, ni à valider, ni extrait), tenus à jour à l'enregistrement,
+  avec un test miroir si le front les calcule aussi (A6).
+- **Given** les fonctions de la liste actuelle (`UnityDialogueList`), **Then** aucune ne disparaît : collections (créer,
+  modifier, supprimer, ajouter la sélection, filtrer), sélection multiple avec sa barre d'actions, export par lot et
+  ses options de téléchargement, aperçu d'export, validation par lot avec ouverture de la réplique fautive, journal
+  d'export ; en réutilisant les composants existants, specs e2e migrées.
+- **Given** un invité, **Then** l'écran est en lecture (`guest_first_auth.md`) ; `/unity-dialogues` redirige vers
+  l'Accueil (table de 20.5) et la ligne du README § 13 est cochée.
+
+#### Story 20.27 : Réglages — 3 sessions (estimation)
+
+**En tant qu'** auteur, **je veux** retrouver chaque réglage à une place, **afin que** le retrait de la page Générer
+et de la modale Options ne me fasse rien perdre. (README § 13, boards `Reglages`, `Etats`)
+
+Ajoutée le 2026-11-28 (décision de l'auteur). Après 20.5 et 20.25 ; avant 20.11.
+
+- **Given** Réglages (CTRL+, ou le classeur), **Then** les sections du board sont là — Apparence, Modèles et budget,
+  Notion et GDD, Raccourcis, Compte —, chaque réglage s'applique et s'enregistre seul, sans bouton Enregistrer ;
+  Apparence n'apparaît qu'avec 20.16 ; l'Administration reste inchangée, liée depuis Compte.
+- **Given** les onglets actuels de la modale Options, **Then** chacun a sa place et la modale est retirée : Général
+  (budget, organisation du prompt), Prompts, Usage IA et Logs → Modèles et budget ; Notion, Contexte, Métadonnées et
+  Vocabulaire & Guides → Notion et GDD ; Raccourcis → Raccourcis (table unique `generalShortcuts.ts`) ; mot de passe et
+  Déconnexion → Compte. Un test couvre chaque fonction déplacée.
+- **Given** un « réglages du budget » (boards `Etats`, `Discussion`), **Then** il ouvre Modèles et budget, qui porte
+  aussi le modèle par défaut.
+- **Given** l'entrée « Profils d'auteur » du classeur, **Then** un écran dans la même coque gère les **voix**
+  d'écriture (créer, modifier, supprimer, partagée ou privée) et les **templates** (renommer, modifier, partager,
+  supprimer, versions et restauration, suggestions, essai A/B), avec les composants existants ; invité en lecture.
+- **Given** les réglages de la page Générer sans autre destination, **Then** règles du jeu, prompt système, nombre de
+  réponses (libre ou plafonné) et longueur maximale vont à Modèles et budget, et les générations de la scène les
+  lisent (aujourd'hui celles du graphe ne les connaissent pas ; test d'inventaire comme en 20.4) ; région et sous-lieu
+  vont au lieu de la fiche de scène.
+- **Given** le README § 13, **Then** les lignes « Options, Admin » et « Profils d'auteur » sont couvertes, avec leur
+  spec e2e.
+
+### Tranche 3 — l’IA dans le texte (≈ 20 sessions)
+
+#### Story 20.11 : Emplacement à écrire et options sur place — 5 sessions (estimation)
 
 **En tant qu'** auteur, **je veux** générer la suite là où elle manque. (FR133, FR134, A5, README § 7, boards
 `Generer`, `Gestes`)
 
 - **Given** une réponse ou une issue sans suite, en Script ou en Graphe, **Then** un emplacement « à écrire »
   l'attend ; on peut y taper directement.
-- À TRANCHER AVEC L'AUTEUR : le texte tapé est-il la réplique ou la consigne (le board dit « Écrire la réplique…, ou
-  décrire ce qui doit se passer… ») ? Recommandation : c'est la réplique ; la consigne a un champ distinct.
-- À TRANCHER AVEC L'AUTEUR : le graphe ne diffuse rien aujourd'hui (ni texte en direct, ni trace, ni interruption) et
-  ne génère pas une issue de test seule. Recommandation : faire ces travaux serveur, en lot ajouté avant l'interface.
+- **Given** un texte tapé dans l'emplacement, **Then** c'est **la réplique**, créée et enregistrée comme telle, sans
+  appel ; la consigne au modèle a un **champ distinct**, jointe à l'appel de CTRL+↵ et jamais écrite dans le document
+  (le libellé du board, « Écrire la réplique…, ou décrire ce qui doit se passer… », est ambigu ; tranché par l'auteur le
+  2026-11-28).
+- **Lot serveur** (ajouté le 2026-11-28, avant l'interface) : le graphe diffuse le texte et la trace de raisonnement en
+  direct et accepte l'interruption, en gardant le texte reçu et le coût engagé (aujourd'hui seul le flux de la page
+  Générer diffuse, `api/routers/streaming.py`) ; tests pytest du contrat. La génération d'une issue seule vient de 20.8.
 - **Given** l'emplacement actif, **When** on presse CTRL+↵, **Then** le coût estimé s'affiche avant (tokens et €,
   `estimate-cost`), le texte s'écrit en direct, le coût engagé pendant et réel après (en $) au même endroit ; aucun
   appel ne part avant CTRL+↵, et un double CTRL+↵ ne déclenche qu'un appel (test avec espion sur le client API). Une
@@ -535,12 +597,12 @@ Estimation à recaler à la création de la story. Après 20.5 (barre de vue) et
   `GenerationProgressModal`, disparue) et la page Générer sont retirés, une fois leurs destinations livrées (20.4,
   20.25 et cette story) ; l'ancien onglet Générer redirige vers le Script (table de 20.5) ; lignes README § 13
   cochées. Les réglages de la page sans destination (templates, nombre de réponses et mode, longueur maximale, règles
-  du jeu, prompt système, région et sous-lieu) doivent en avoir une avant ce retrait (story « Réglages », 20.5).
+  du jeu, prompt système, région et sous-lieu) en ont une avant ce retrait (20.27, livrée avant, qui gère aussi les voix et les templates).
 - **Given** les specs `e2e/graph-node-generation.spec.ts` et `e2e/graph-authoring-journey.spec.ts` (@smoke), qui
   passent par `AIGenerationPanel`, **Then** elles sont migrées vers l'emplacement à écrire dans la même PR, sur client
   factice ou avec budget restauré dans `finally`, pas supprimées.
 
-#### Story 20.12 : Remplir et revoir en série — 3 sessions
+#### Story 20.12 : Remplir et revoir en série — 5 sessions (estimation)
 
 **En tant qu'** auteur, **je veux** remplir toutes les suites d'un niveau d'un coup puis les revoir, **afin de**
 tenir l'arbre exponentiel. (FR141, A13, README § 7 « Tiroir Lot », board `Lot`)
@@ -554,10 +616,13 @@ tenir l'arbre exponentiel. (FR141, A13, README § 7 « Tiroir Lot », board `Lot
   suites « MARQUÉES DANS LE SCRIPT », modèle et tokens, « Interrompre » et « Abandonner le lot » ; les fins voulues
   sont exclues. La barre de lot de la sélection multiple actuelle (supprimer, taguer, valider) reste.
 - **Given** un lot, **Then** chaque réplique créée arrive À VALIDER.
-- À TRANCHER AVEC L'AUTEUR : les jobs actuels travaillent par parent (10 à 100), sans portée ni filtre par réponse ou
-  issue, et leurs résultats ne se retrouvent pas après fermeture de l'application. Recommandation : job par
-  emplacement, retrouvé au rechargement, appliqué au fil de l'eau. À vérifier d'abord : un test déjà rempli semble
-  régénéré et repayé (`graph_generation_service.py`, filtre sur `targetNode`).
+- **Lot serveur** (ajouté le 2026-11-28) : le job travaille par **emplacement** (parent, réponse, issue) et non par
+  parent, sans le plancher de 10 parents ; il porte les portées et les filtres ; ses résultats sont appliqués au fil de
+  l'eau, arrivent À VALIDER et sont retrouvés au rechargement — fermer l'application n'arrête ni ne perd rien
+  (aujourd'hui l'identifiant du job n'est pas persisté et les nœuds ne sont posés qu'à la fin).
+- **Prérequis** : les deux défauts relevés à l'audit sont corrigés avant — un test déjà rempli ne doit être ni
+  régénéré ni repayé (`graph_generation_service.py`), et le contrôle de budget des lots ne doit plus compter un forfait
+  par parent. Une session y travaille depuis le 2026-11-28.
 - **Given** les exclusions, **Then** elles ont une seule définition : le serveur les calcule et le front les affiche
   telles quelles ; si le front doit les calculer aussi (diagnostics A6), un test miroir garde les deux alignés, comme
   `services/dialogue_path_context.py` et `frontend/src/utils/dialoguePathContext.ts`.
@@ -567,7 +632,7 @@ tenir l'arbre exponentiel. (FR141, A13, README § 7 « Tiroir Lot », board `Lot
   (emplacements × `estimate-cost`), pas sur le forfait actuel par parent.
 - **Given** un lot lancé, **Then** la progression vit dans la barre d'état ; on continue d'écrire pendant le lot.
 - **Given** un redémarrage du serveur pendant le lot, **Then** le job est `interrupted` et « Reprendre » ne refait
-  que les parents restants (FR87/FR88).
+  que les emplacements restants (FR87/FR88, étendus ci-dessus).
 - **Given** un lot fini, **When** on ouvre la revue en série, **Then** J / K / G / R parcourent, gardent, rejettent ;
   « TAB · À VALIDER SUIVANTE », « Réécrire CTRL+K » (réplique entière) et la correction au clic y sont disponibles.
 - Les tests recalculent les comptes de la scène du forgeron, jamais recopiés du README.
@@ -683,7 +748,7 @@ board `docs/design/refonte-scene/Discussion.dc.html`, états `palette` et `gdd`,
 **En tant qu'** auteur, **je veux** que l'ancien panneau disparaisse quand plus rien n'en dépend. (A2, A14)
 
 - **Given** un mois d'usage depuis la fin de la tranche 2 **et** un compteur d'ouvertures à zéro (ou décision de
-  l'auteur), **Then** `GraphInspector`, `NodeEditorPanel` (et le protocole flush) et `UnityDialogueEditor` sont
+  l'auteur), 20.26 étant livrée (les fonctions de liste de la section Éditer y sont), **Then** `GraphInspector`, `NodeEditorPanel` (et le protocole flush) et `UnityDialogueEditor` sont
   retirés ; l'ancien onglet Éditer redirige vers le Script (table de 20.5) ; les fenêtres ponctuelles (simulation,
   règles de contexte, systèmes de jeu) s'ouvrent depuis « Actions ▾ ».
 - **Given** la table README § 13, **Then** chaque ligne dont la fonction dépend du panneau ou de l'onglet Éditer est
@@ -820,15 +885,17 @@ Après 20.17 : l'intention se range dans le journal d'édition, que 20.17 livre.
 |---|---|---|
 | Tranche 1 (20.1–20.3) | ≈ 5 | **maintenant** |
 | Tranche 1 bis (18.4 reste, 18.8, 18.5a) | ≈ 3,5 | **maintenant**, en parallèle de la tranche 1 |
-| Tranche 2 (20.4–20.10, 20.24, 20.25, et 18.5b, 18.6, 18.7, 18.9, 18.11) | ≈ 28 | après la tranche 1 bis **et** 20.2 ; 20.4 dès la fin de 20.1 ; 18.5b après 20.6 et 20.7 |
-| Tranche 3 (20.11–20.15, 20.21, 20.22) | ≈ 16 | après 20.6, 20.8 et 20.25 ; 20.21 : PR #103 déjà fusionnée |
+| Tranche 2 (20.4–20.10, 20.24, 20.25, 20.26, 20.27, et 18.5b, 18.6, 18.7, 18.9, 18.11) | ≈ 37 | après la tranche 1 bis **et** 20.2 ; 20.4 dès la fin de 20.1 ; 18.5b après 20.6 et 20.7 |
+| Tranche 3 (20.11–20.15, 20.21, 20.22) | ≈ 20 | après 20.6, 20.8, 20.25, 20.26 et 20.27 ; 20.21 : PR #103 déjà fusionnée |
 | Tranche 4 (20.16–20.20, 20.23) | ≈ 14,5 | après 20.3 ; 20.17 après 20.11 et 20.21 ; 20.23 après 20.17 (l'intention se range dans le journal) ; 20.20 après 20.4, 20.5, 20.6 et 20.16 |
 
-Chemin critique : tranche 1 → tranche 2 → tranche 3 → tranche 4 ≈ **64 sessions** (≈ 61 si 20.4 se fait pendant la
+Chemin critique : tranche 1 → tranche 2 → tranche 3 → tranche 4 ≈ **77 sessions** (≈ 74 si 20.4 se fait pendant la
 tranche 1), la tranche 1 bis se faisant pendant la tranche 1. Écart avec les 57 de la première rédaction : stories
 ajoutées (20.24 Jouer, 20.25 Contexte / Fiches / palette), 20.4 portée à 3 sessions (interface de la fiche), 20.14 à
-2,5 (relecture « langue »), 20.19 à 1,5 (renommage) ; 18.4 réduite à son reste. Les tailles sont des estimations, à
-recaler après les deux premières stories.
+2,5 (relecture « langue »), 20.19 à 1,5 (renommage) ; 18.4 réduite à son reste. Le 2026-11-28, les réponses de l'auteur à
+l'audit de la maquette ajoutent ≈ 13 sessions : travaux serveur et moteur (20.8 +1, 20.11 +2, 20.12 +2, 20.24 +1,5),
+fonctions actuelles gardées (20.25 +0,5), stories 20.26 et 20.27 (+6). Les tailles sont des estimations, à recaler
+après les deux premières stories.
 
 **Par où commencer (trois sessions en parallèle, sans fichier commun)** : 20.2 (la preuve de fluidité décide du plan
 B), 20.1 (conversion et fixtures d'export) et 18.4 (reste à faire de l'annulation). Puis 18.8, 20.3, 18.5a, et 20.4
