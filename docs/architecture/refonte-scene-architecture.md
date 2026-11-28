@@ -150,8 +150,9 @@ Traits, compétences et flags proviennent de `FlagCatalog.csv`, `SkillCatalog.cs
 
 ### A8 — Thèmes par variables CSS
 
-Les tokens (`redesignTokens.ts`) sont publiés en variables CSS sur `:root` (`[data-theme="papier"]` pour Papier) ;
-les styles inline lisent `var(--…)`. Coût : migration mécanique des fichiers déjà sur `redesignTokens` (88 par grep,
+Les tokens (valeurs dans `theme/tokenValues.ts`, lus par `redesignTokens.ts`) sont publiés en variables CSS sur
+`:root` (`[data-theme="papier"]` pour Papier) ; les styles inline lisent `var(--…)` pour les couleurs et l'ombre,
+le reste demeure littéral (story 20.3). Coût : migration mécanique des fichiers déjà sur `redesignTokens` (88 par grep,
 tests compris, au 2026-11-20) ; les 197 encore sur `theme.ts` suivent écran par écran. Bénéfice annexe : `:hover`, `:focus-visible` et media queries
 redeviennent possibles sans contournement.
 
