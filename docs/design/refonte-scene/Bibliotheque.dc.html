@@ -62,7 +62,13 @@
             <h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 34px; line-height: 1; color: {{t.strong}}">Scènes</h1>
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.label}}; white-space: nowrap">4 SCÈNES · 84 RÉPLIQUES · 363 SUITES À ÉCRIRE</span>
           </div>
-          <button type="button" style-focus-visible="outline: 2px solid #8fb0ff; outline-offset: 2px" style="height: 34px; flex: none; display: flex; align-items: center; gap: 9px; padding: 0 14px; border: none; border-radius: 6px; background: {{t.fill}}; color: #ffffff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Nouvelle scène<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.05em">ALT+N</span></button>
+          <div style="display: flex; align-items: center; gap: 18px">
+            <div role="group" aria-label="Affichage" style="display: flex; border: 1px solid {{t.ctrl}}; border-radius: 6px; overflow: hidden">
+              <button type="button" aria-pressed="false" style="height: 30px; padding: 0 11px; border: none; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; cursor: pointer; background: transparent; color: {{t.sec}}">COUVERTURES</button>
+              <button type="button" aria-pressed="true" style="height: 30px; padding: 0 11px; border: none; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; cursor: pointer; border-left: 1px solid {{t.ctrl}}; background: {{t.raised}}; color: {{t.strong}}">LISTE</button>
+            </div>
+            <button type="button" style-focus-visible="outline: 2px solid #8fb0ff; outline-offset: 2px" style="height: 34px; flex: none; display: flex; align-items: center; gap: 9px; padding: 0 14px; border: none; border-radius: 6px; background: {{t.fill}}; color: #ffffff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Nouvelle scène<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.05em">ALT+N</span></button>
+          </div>
         </div>
 
         <a href="Main.dc.html" style-hover="border-color: rgba(255,255,255,0.18)" style="height: 44px; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 0 14px; border: 1px solid {{t.hair2}}; border-radius: 8px; text-decoration: none; color: inherit">
@@ -129,7 +135,7 @@
         </sc-if>
       </div>
 
-      <p style="flex: none; margin: 0; padding: 9px 40px 12px; font-size: 12px; line-height: 1.5; color: #9a9aa4">Exemple : reprise à <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">11:24</span>, filtre des collections, absence d'erreur de validation sur les trois autres scènes (non vérifiée). Le reste est réel.</p>
+      <p style="flex: none; margin: 0; padding: 9px 40px 12px; font-size: 12px; line-height: 1.5; color: #9a9aa4">Exemple : reprise à <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">11:24</span>, filtre des collections, absence d'erreur de validation sur les trois autres scènes (non vérifiée). Le reste est réel. Vue Liste de l'accueil ; Couvertures, le défaut, est le board <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">Ambiance</span>.</p>
     </main>
   </div>
 

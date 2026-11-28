@@ -23,6 +23,13 @@ garde son code actuel. Ne pas implémenter un écran Scène hors d'une story Epi
 Epic 18 est intégrée à l'epic 20 (18.4, 18.8, 18.5a en tranche 1 bis ; 18.5b, 18.6, 18.7, 18.9, 18.11 en
 tranche 2) ; Epic 19 est remplacée. Seuils de mesure : section « Seuils de mesure » d'`epic-20.md` (ADR-008).
 
+## Maquette et story
+
+**Aucun écart entre la maquette et la story** (décision de l'auteur, 2026-11-28). En cas d'écart,
+**la maquette prime**, sauf si elle est manifestement moins bonne : le dire alors à l'auteur avec la
+raison. Dans les deux cas, corriger le texte resté faux (story, README ou board) au lieu de laisser
+les deux versions. Un écart se cherche **avant** d'écrire la spec.
+
 ## Coder une story
 
 - **Une session par story, un seul skill** : `bmad-build` (plugin `bmad-method`) lit la story dans `epic-20.md`, écrit

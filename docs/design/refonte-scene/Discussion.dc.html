@@ -151,7 +151,7 @@
                       <p style="margin: 0 0 14px; font-size: 15px; line-height: 1.6; font-style: italic; color: {{t.sec}}">{{p.text}}</p>
                     </sc-if>
                     <sc-if value="{{p.say}}" hint-placeholder-val="{{true}}">
-                      <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p>
+                      <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="display: block; font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p>
                     </sc-if>
                   </sc-for>
                 </div>
@@ -762,8 +762,8 @@ class Component extends DCLogic {
     const showField = !locked;
     const draft = this.state.draft;
     const firstTurn = e === 'premier' && msgs.length === 0;
-    let costLine = 'PROCHAIN TOUR ≈ 0,005 $';
-    if (firstTurn) costLine = 'PREMIER TOUR ≈ 0,03 $';
+    let costLine = '≈ 13 000 TOKENS · ≈ 0,005 €';
+    if (firstTurn) costLine = '≈ 13 000 TOKENS · ≈ 0,03 €';
     if (isGdd) costLine = 'COÛT ESTIMÉ ICI AVANT L\'ENVOI';
     if (e === 'budget') costLine = 'BLOQUÉ AVANT L\'APPEL';
     if (e === 'plein') costLine = 'AUCUN NOUVEAU TOUR ICI';
@@ -795,8 +795,8 @@ class Component extends DCLogic {
     }
 
     const notes = {
-      conversation: "Exemple : échanges, heures, texte de 11:02 (1re version du board Versions), résumé de réflexion. Coûts : ordre de grandeur de conversations-ia.md. Réplique actuelle réelle.",
-      premier: "Exemple : texte de 11:02 et heures. Coût du premier tour : ordre de grandeur de conversations-ia.md. Le résumé manque environ quatre fois sur cinq : le tiroir le dit.",
+      conversation: "Exemple : échanges, heures, texte de 11:02 (1re version du board Versions), résumé de réflexion. Coûts et tokens : ordre de grandeur de conversations-ia.md. Réplique actuelle réelle.",
+      premier: "Exemple : texte de 11:02 et heures. Coût et tokens du premier tour : ordre de grandeur de conversations-ia.md. Le résumé manque environ quatre fois sur cinq : le tiroir le dit.",
       invite: "Le back-end refuse d'ouvrir une discussion à un invité (require_non_guest) et une discussion est privée à son auteur : un invité n'en a donc aucune à relire.",
       lecture: "Le back-end exige le droit de modifier le dialogue pour ouvrir une discussion (_require_edit, 403 dialogue_access_denied) : le tiroir dit pourquoi au lieu d'afficher l'erreur.",
       budget: "Exemple : plafond 20,00 $ (comme le board Etats). Réponse 429 QUOTA_EXCEEDED : bloqué avant l'appel, jamais après.",

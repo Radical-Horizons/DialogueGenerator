@@ -366,7 +366,8 @@ So that **l'écriture in-situ se construise sans attendre la nouvelle géométri
 
 **Given** un clic à un endroit du texte rendu
 **When** le champ se monte
-**Then** **un seul clic** pose le curseur à la position correspondante dans le texte brut, projetée par les positions `start`/`end` des blocs de `parse` (story 20.1) — guillemets d'affichage et retours à la ligne des didascalies compris
+**Then** **un seul clic** pose le curseur à la position correspondante dans le texte brut, projetée par les positions `start`/`end` des blocs de `parse` (story 20.1) — retours à la ligne des didascalies compris
+**And** le champ monté dit « TEXTE BRUT · ÉCHAP POUR SORTIR » et la carte « EN ÉCRITURE » (board `Carte`)
 **And** la règle des deux clics de D1 ne s'applique pas (README § 8 et board `Carte` font foi)
 
 **Given** une frappe
@@ -425,13 +426,17 @@ So that **je corrige une ligne en une seconde, sans panneau**.
 
 **Given** `NodeEditorPanel` monté (drapeau `legacyInspector` ou état actuel)
 **When** un champ in-situ est en service
-**Then** ses champs `line`, `speaker`, `title` et `choices[].text` sont **en lecture seule** et son flush n'écrit **aucun** de ces champs
+**Then** son champ `line` est **en lecture seule** et son flush ne l'écrit plus (`choices[].text` suit en 18.6, `speaker` et `title` en 18.7 : aucun champ ne se verrouille avant que son champ in-situ existe)
 **And** un test de régression couvre les scénarios A, B, C de 18.3 (boucle d'écrasement, flush au démontage, sauvegarde depuis un formulaire périmé) : aucune saisie in-situ n'est écrasée
 **And** `choices[N].targetNode` reste préservé par le flush des champs non textuels (conditions, effets, tests)
 
 **Given** l'onglet Éditer (`UnityDialogueEditor`)
 **When** un champ in-situ est en service
-**Then** la même règle s'applique : texte, réponses, locuteur et titre en lecture seule, lien « écrire dans la scène » vers le Script ; retrait en 20.15
+**Then** la même règle s'applique, au même rythme, avec le lien « écrire dans la scène » vers le Script ; retrait en 20.15
+
+**Given** `requestNodeEdit` (« Nouveau nœud », « Écrire la première réplique » de la fiche de scène)
+**When** le champ in-situ est en service
+**Then** la demande route vers le champ, jamais vers un panneau verrouillé
 
 **Given** une carte dont le texte dépasse 12 lignes
 **When** le champ est monté
@@ -540,6 +545,11 @@ So that **j'écris une réplique et ses réponses d'un seul geste, au même endr
 **Given** un bloc de script, ou une carte au palier « écrire », avec N réponses
 **When** je clique une fois dans le texte d'une réponse
 **Then** le champ de 18.5a s'y monte, curseur à la position cliquée, et je peux écrire, selon les mêmes règles qu'en 18.5a et 18.5b
+**And** `choices[].text` passe en lecture seule dans `NodeEditorPanel` et l'onglet Éditer
+
+**Given** la liste des réponses d'un bloc ou d'une carte
+**When** je veux en ajouter ou en retirer une
+**Then** « + Réponse » est sous la liste ; la suppression apparaît au survol ou au focus de la réponse, avec toast d'annulation, sans modale
 
 **Given** que je modifie le texte d'une réponse
 **When** la valeur est poussée au store
@@ -553,19 +563,14 @@ So that **j'écris une réplique et ses réponses d'un seul geste, au même endr
 **And** `updateDialogueNodeDirectly` (`nodeSlice.ts:292-340`) reconstruit les TestNodes sans les recréer — conformité `.claude/rules/testnode_sync.md`
 **And** un test de régression couvre la frappe continue sur un choix porteur de test
 
-**Given** une réponse connectée dont j'édite le texte
-**When** l'étiquette de l'arête est recalculée
-**Then** elle suit le nouveau texte via `truncateChoiceLabel` (`graphEdgeBuilders.ts:157-165`, 30 caractères max) sans que l'arête soit recréée
-
 **Given** une réponse dont le texte devient vide
 **When** je quitte le champ
 **Then** la réponse **n'est pas supprimée** et son `choiceId` est conservé
-**And** le nœud la signale par l'indicateur de validation existant (Epic 4, FR37)
-**And** le champ porte `aria-invalid` et un `aria-describedby` pointant le message (UX-DR11)
+**And** elle porte « ▲ RÉPONSE VIDE » : un avertissement, pas une erreur de saisie (board `Carte`), relié au champ par `aria-describedby` (UX-DR11)
 
 **Given** un nœud sans réponse (`nextNode` simple)
 **When** sa carte ou son bloc est rendu
-**Then** aucune réponse n'est affichée et l'indicateur `SUITE →` est conservé
+**Then** aucune réponse n'est affichée
 
 **Given** une frappe continue dans une réponse du **bloc de script**
 **When** elle est poussée au store
@@ -596,6 +601,7 @@ So that **renommer un locuteur ne me coûte pas un aller-retour vers le panneau*
 **Given** l'en-tête d'un bloc de script, ou d'une carte au palier « écrire »
 **When** je clique sur le nom du locuteur
 **Then** je peux l'éditer sur place, selon les mêmes règles qu'en 18.5a et 18.5b
+**And** `speaker` et `title` passent en lecture seule dans `NodeEditorPanel` et l'onglet Éditer
 
 **Given** l'en-tête d'un bloc de script, ou d'une carte au palier « écrire »
 **When** je clique sur le titre
@@ -607,7 +613,7 @@ So that **renommer un locuteur ne me coûte pas un aller-retour vers le panneau*
 
 **Given** le speaker rendu en capitales (`text-transform: uppercase`, `DialogueNode.tsx:557`)
 **When** je saisis en minuscules
-**Then** le comportement est tranché et documenté : l'affichage reste en capitales et la **donnée conserve la casse saisie**, ou la saisie est normalisée — mais pas un écart silencieux entre ce qu'on voit et ce qu'on stocke
+**Then** l'affichage reste en capitales et la **donnée conserve la casse saisie** (board `Carte`)
 
 **Given** que je modifie le locuteur ou le titre
 **When** la valeur est poussée au store
@@ -646,12 +652,12 @@ So that **l'absence de bouton « Enregistrer » ne se traduise pas par un doute 
 
 **Given** l'éditeur de graphe ouvert
 **When** aucune modification n'est en attente
-**Then** `SaveStatusIndicator` affiche l'état **synchronisé**, visible sans action — **composant existant, réutilisé**
+**Then** l'indicateur existant (`GraphSaveStatusIndicator`, libellés mono) affiche « ENREGISTRÉ · hh:mm », visible sans action — **composant réutilisé, pas un second**
 
 **Given** que je viens de saisir du texte in-situ
 **When** les modifications sont en cours d'envoi
-**Then** l'indicateur passe en **en attente** avec le nombre de changements en file (`pendingCount`)
-**And** revient à synchronisé à l'acquittement (`ackSeq`, ADR-006)
+**Then** il affiche « ENREGISTREMENT… », sans compte de changements (le compteur actuel ne vaut que 0 ou 1)
+**And** revient à « ENREGISTRÉ · hh:mm » à l'acquittement (`ackSeq`, ADR-006) ; hors ligne, « HORS LIGNE — MODIFICATIONS GARDÉES » (board `Gestes`)
 
 **Given** une erreur de synchronisation (hors-ligne, 409, erreur serveur)
 **When** l'envoi échoue
@@ -663,10 +669,8 @@ So that **l'absence de bouton « Enregistrer » ne se traduise pas par un doute 
 **Then** les états informatifs sont annoncés via `aria-live="polite"`, **agrégés** et non émis à chaque frappe
 **And** l'état **erreur** est annoncé en `assertive` / `role="alert"` — conforme à `epic-14.md:316-317` et `component-strategy.md:171`, et **non en `polite`** comme le prévoyait la première rédaction
 
-**Given** ADR-006 qui autorise explicitement un bouton optionnel « Synchroniser maintenant »
-**When** la story est implémentée
-**Then** la décision de le placer ou non est **prise explicitement**, pas écartée par omission
-**And** si elle est négative, le motif est écrit — c'est la mitigation la moins chère du doute « où est mon bouton Enregistrer », et elle est déjà permise par l'ADR
+**Given** le principe produit (2026-11-11 : tout se sauvegarde seul)
+**Then** aucun bouton « Synchroniser maintenant » ni « Enregistrer » n'est ajouté
 
 **Dimensionnement :** 1 session (vérification + complétion + ARIA).
 
@@ -688,7 +692,7 @@ So that **écrire un nœud complet reste une séquence de frappe continue**.
 
 **Given** le focus sur le canvas
 **When** je presse `Tab` ou `Shift+Tab`
-**Then** le focus navigue **entre cartes** — **une carte = un seul arrêt de tabulation** — dans un ordre stable, documenté et testé (proposition à confirmer à la création : rang du flux gauche → droite, puis ordre vertical) ; cette story implémente ce comportement (absorbe 14.1)
+**Then** le focus navigue **entre cartes** — **une carte = un seul arrêt de tabulation** — dans un ordre stable, documenté et testé (rang du flux gauche → droite, puis ordre vertical) ; cette story implémente ce comportement (absorbe 14.1)
 **And** une carte hors du champ visible est amenée en vue quand elle reçoit le focus
 **And** les champs in-situ **ne sont pas** dans l'ordre de tabulation global : ils ne piègent jamais le focus
 
@@ -727,7 +731,7 @@ So that **écrire un nœud complet reste une séquence de frappe continue**.
 **Given** que je crée un nœud manuellement ou par drag depuis un handle de réponse
 **When** la carte apparaît
 **Then** elle est seule sélectionnée, au palier « écrire », et le **curseur est déjà dans la réplique** — je peux écrire sans aucun clic
-**And** `requestNodeEdit` (`useGraphToolbarMenuItems.tsx:124` → `GraphEditor.tsx:123-133`) route vers l'**in-situ** : le panneau ne s'ouvre **plus** automatiquement en édition
+**And** `requestNodeEdit` (routé vers l'in-situ depuis 18.5b) le reste : le panneau ne s'ouvre pas en édition
 **And** les tests existants de ce comportement (`graphViewStore.nodeEdit.test.ts`, `GraphEditor.combobox-17_7.test.tsx`) sont mis à jour, pas supprimés
 
 **Given** l'entrée « Éditer » du menu contextuel d'un nœud
@@ -785,7 +789,7 @@ So that **je puisse éditer un dialogue hors de mon bureau**.
 
 **Given** un viewport étroit
 **When** j'ai fini de saisir
-**Then** un moyen **évident et visible** de quitter l'édition existe (appui hors champ, bouton de validation), sans dépendre d'une touche `Échap`
+**Then** un moyen **évident et visible** de quitter l'édition existe (appui hors champ, bouton « Terminé » qui ferme le champ, sans rien « enregistrer » de plus), sans dépendre d'une touche `Échap`
 
 **Dimensionnement :** 2 sessions.
 
@@ -817,22 +821,22 @@ So that **le gain d'ergonomie ne se paie pas en régressions ailleurs**.
 
 **Given** un export PNG ou SVG du graphe
 **When** une carte est en écriture
-**Then** l'export est produit **à un palier nommé**, choisi et écrit à la création de la story, sans anneau de focus, sans champ ni curseur
+**Then** l'export est produit au palier « écrire », sans anneau de focus, sans champ ni curseur
 **And** `graphExport.ts` exclut l'état d'édition comme il exclut déjà `controls` et `minimap`
 
 **Given** un auto-layout dagre ou un placement de nœud généré
 **When** il est calculé
-**Then** la hauteur de référence d'une carte est la **hauteur connue de son palier courant** (A9, A10), y compris pour une carte en écriture (palier « écrire »)
+**Then** la hauteur de référence d'une carte est sa **hauteur au palier « écrire »** (A9, A10) : les cartes ne bougent pas d'un palier à l'autre (board `Paliers`)
 **And** la hauteur d'une carte en cours de défilement interne ou de frappe, mesurée au DOM (`layoutSlice.ts:152-177`, préférée par `dagreLayout.ts:69-72`), ne fuit pas dans le layout ni dans `childNodeTopLeftY` (`graphNodeLayout.ts:76-85`)
 
 **Given** une carte `pending` (générée, non acceptée)
 **When** elle est en écriture
 **Then** son pied « à valider » (Garder, Régénérer, Rejeter, story 20.7) ne recouvre pas la zone éditable
-**And** le comportement attendu est spécifié : édition autorisée ou non sur un nœud pending
+**And** l'édition est autorisée sur une carte pending (board `Carte`), qui reste À VALIDER après retouche
 
 **Given** la correction orthographique du navigateur
 **When** un champ in-situ est rendu
-**Then** le réglage `spellcheck` est décidé explicitement — le lore (« Uresaïr », « Valkazer ») produirait sinon un soulignement rouge permanent sur l'écran principal
+**Then** `spellcheck` est désactivé — le lore (« Uresaïr », « Valkazer ») produirait sinon un soulignement rouge permanent sur l'écran principal (la relecture de 20.14 couvre la langue)
 
 **Given** l'internationalisation
 **When** la story est livrée

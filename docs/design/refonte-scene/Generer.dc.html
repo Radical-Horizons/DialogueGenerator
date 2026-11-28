@@ -123,7 +123,7 @@
                       <p style="margin: 0 0 14px; font-size: 15px; line-height: 1.6; font-style: italic; color: {{t.sec}}">{{p.text}}</p>
                     </sc-if>
                     <sc-if value="{{p.say}}" hint-placeholder-val="{{true}}">
-                      <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p>
+                      <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="display: block; margin: 3px 0; font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p>
                     </sc-if>
                   </sc-for>
                   <div data-k="{{b.respKey}}" style="margin: 20px 0 34px">
@@ -164,9 +164,9 @@
                     <div style="display: flex; align-items: center; gap: 9px; margin-bottom: 11px; height: 24px">
                       <span aria-hidden="true" style="width: 7px; height: 7px; border-radius: 99px; background: {{t.spk}}"></span>
                       <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.09em; color: {{t.sec}}">GRISH T'VOK</span>
-                      <span style="margin-left: 5px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.accText}}">OPTION 2 SUR 4 — EN ÉCRITURE</span>
+                      <span style="margin-left: 5px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.accText}}">EN ÉCRITURE</span>
                       <span aria-hidden="true" style="display: flex; gap: 5px">
-                        <sc-for list="{{bars}}" as="br" hint-placeholder-count="4"><span style="position: relative; width: 16px; height: 2px; background: {{t.chip}}; overflow: hidden"><span class="dc-bar" style="position: absolute; left: 0; top: 0; bottom: 0; width: {{br.w}}px; background: {{t.accent}}; transition: width 200ms ease-out"></span></span></sc-for>
+                        <sc-for list="{{bars}}" as="br" hint-placeholder-count="1"><span style="position: relative; width: 16px; height: 2px; background: {{t.chip}}; overflow: hidden"><span class="dc-bar" style="position: absolute; left: 0; top: 0; bottom: 0; width: {{br.w}}px; background: {{t.accent}}; transition: width 200ms ease-out"></span></span></sc-for>
                       </span>
                       <span style="flex: 1"></span>
                       <span style="font-size: 12px; color: {{t.muted}}">Suite de « Oui. Réparez-les… »</span>
@@ -174,7 +174,11 @@
                     <sc-for list="{{streamParas}}" as="sp" hint-placeholder-count="2">
                       <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.dia}}">{{sp.text}}<sc-if value="{{sp.last}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" class="dc-caret" style="display: inline-block; width: 1.5px; height: 19px; margin-left: 2px; vertical-align: -3px; background: {{t.accent}}"></span></sc-if></p>
                     </sc-for>
-                    <div style="display: flex; align-items: center; gap: 9px; margin-top: 20px">
+                    <div style="margin-top: 5px">
+                      <button type="button" aria-expanded="{{traceOpen}}" onClick="{{toggleTrace}}" style="height: 24px; border: none; background: transparent; padding: 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.muted}}; cursor: pointer">TRACE {{traceChevron}}</button>
+                      <sc-if value="{{traceOpen}}" hint-placeholder-val="{{false}}"><p style="margin: 3px 0 0; padding-left: 11px; border-left: 1px solid {{t.hair2}}; font-size: 12.5px; line-height: 1.55; font-style: italic; color: {{t.sec}}">The player accepted on one condition. Keep the scars visible, name the silver thread, keep the craft vocabulary and wait for her permission before touching.</p></sc-if>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 9px; margin-top: 11px">
                       <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.muted}}"><span style="color: {{t.body}}">{{received}}</span> / ≈ 4 000 TOKENS REÇUS · 0,01 $ ENGAGÉS</span>
                       <span style="flex: 1"></span>
                       <button type="button" onClick="{{keepWritten}}" style="height: 30px; display: flex; align-items: center; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Garder ce qui est écrit</button>
@@ -205,7 +209,7 @@
                         <p style="margin: 0 0 14px; font-size: 15px; line-height: 1.6; font-style: italic; color: {{t.genSec}}"><span style="background: {{t.gen}}; padding: 2px 0; -webkit-box-decoration-break: clone; box-decoration-break: clone">{{p.text}}</span></p>
                       </sc-if>
                       <sc-if value="{{p.say}}" hint-placeholder-val="{{true}}">
-                        <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.genText}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.genSec}}; background: {{t.gen}}; padding: 2px 0; -webkit-box-decoration-break: clone; box-decoration-break: clone">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span style="background: {{t.gen}}; padding: 2px 0; -webkit-box-decoration-break: clone; box-decoration-break: clone">{{s.t}}</span></sc-if></sc-for></p>
+                        <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.genText}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="display: block; width: fit-content; margin: 3px 0; font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.genSec}}; background: {{t.gen}}; padding: 2px 0; -webkit-box-decoration-break: clone; box-decoration-break: clone">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span style="background: {{t.gen}}; padding: 2px 0; -webkit-box-decoration-break: clone; box-decoration-break: clone">{{s.t}}</span></sc-if></sc-for></p>
                       </sc-if>
                     </sc-for>
                     <div style="display: flex; align-items: center; gap: 9px; margin: 0 0 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.label}}">
@@ -231,10 +235,21 @@
                       <button type="button" style="height: 32px; display: flex; align-items: center; gap: 9px; padding: 0 14px; border: none; border-radius: 6px; background: {{t.fill}}; color: #ffffff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Garder<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.05em; opacity: 0.85">↵</span></button>
                       <button type="button" onClick="{{retry}}" style="height: 32px; display: flex; align-items: center; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Réessayer</button>
                       <button type="button" style="height: 32px; display: flex; align-items: center; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Variante</button>
-                      <button type="button" style="height: 32px; display: flex; align-items: center; gap: 9px; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Rejeter<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">ÉCHAP</span></button>
+                      <button type="button" style="height: 32px; display: flex; align-items: center; gap: 9px; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Rejeter</button>
                       <span style="flex: 1"></span>
                       <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.muted}}">GÉNÉRÉ EN 11 S · 0,02 $</span>
                     </div>
+                    <p style="margin: 9px 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">RÉESSAYER OU VARIANTE ≈ 0,05 € · ÉCHAP REPLIE SANS REJETER · CTRL+Z RETIRE TOUT</p>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{replie}}" hint-placeholder-val="{{false}}">
+                  <div style="display: flex; align-items: center; gap: 9px; padding: 11px 14px; border: 1px dashed {{t.chip2}}; border-radius: 8px">
+                    <span aria-hidden="true" style="width: 7px; height: 7px; border-radius: 99px; background: {{t.spk}}"></span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.09em; color: {{t.sec}}">GRISH T'VOK</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.accText}}">4 OPTIONS REPLIÉES · GARDÉES</span>
+                    <span style="flex: 1"></span>
+                    <button type="button" onClick="{{showOptions}}" style="height: 30px; display: flex; align-items: center; gap: 9px; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Rouvrir<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{t.label}}">↵</span></button>
                   </div>
                 </sc-if>
               </section>
@@ -245,8 +260,9 @@
             <div role="group" aria-label="État de la maquette" style="display: flex; flex: none; border: 1px solid {{t.ctrl}}; border-radius: 6px; overflow: hidden">
               <button type="button" aria-pressed="{{writing}}" onClick="{{showWriting}}" style="height: 24px; padding: 0 9px; border: none; background: {{wBg}}; color: {{wColor}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; cursor: pointer">EN ÉCRITURE</button>
               <button type="button" aria-pressed="{{options}}" onClick="{{showOptions}}" style="height: 24px; padding: 0 9px; border: none; border-left: 1px solid {{t.ctrl}}; background: {{oBg}}; color: {{oColor}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; cursor: pointer">OPTIONS</button>
+              <button type="button" aria-pressed="{{replie}}" onClick="{{showFolded}}" style="height: 24px; padding: 0 9px; border: none; border-left: 1px solid {{t.ctrl}}; background: {{rBg}}; color: {{rColor}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; cursor: pointer">REPLIÉES</button>
             </div>
-            <p style="margin: 0; min-width: 0; font-size: 12px; line-height: 1.5; color: {{t.sec}}">Exemple : options = quatre répliques réelles de Grish (forgeron-path.json) ; durée, coûts, tokens inventés.</p>
+            <p style="margin: 0; min-width: 0; font-size: 12px; line-height: 1.5; color: {{t.sec}}">Exemple : options = quatre répliques réelles de Grish (forgeron-path.json) ; obtenues après trois « Variante » ; durée, coûts, tokens et trace inventés.</p>
           </div>
         </div>
 
@@ -301,7 +317,7 @@
   </footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"etat":{"editor":"enum","options":["ecriture","options"],"default":"ecriture"},"$preview":{"width":1440,"height":900}}'>
+<script type="text/x-dc" data-dc-script data-props='{"etat":{"editor":"enum","options":["ecriture","options","replie"],"default":"ecriture"},"$preview":{"width":1440,"height":900}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -366,12 +382,18 @@ class Component extends DCLogic {
     this.stream = this.OPTS[1].line;
     this.streamEnd = this.stream.indexOf('et je tisserai') + 'et je tisserai'.length;
     this.streamStart = Math.floor(this.stream.indexOf('Laissez-moi') * 0.62);
-    this.state = { etat: p0.etat === 'options' ? 'options' : 'ecriture', pos: this.streamStart, opt: 0 };
+    this.state = { etat: p0.etat === 'options' || p0.etat === 'replie' ? p0.etat : 'ecriture', pos: this.streamStart, opt: 0, trace: false };
+    this.onKey = (ev) => {
+      if (ev.key === 'Escape' && this.state.etat === 'options') this.setState({ etat: 'replie' });
+      else if (ev.key === 'Escape' && this.state.etat === 'ecriture') clearInterval(this.timer);
+      else if (ev.key === 'Enter' && this.state.etat === 'replie') this.setState({ etat: 'options' });
+    };
     this.scrollEl = null;
     this.setScroll = (el) => { this.scrollEl = el; };
   }
 
   componentDidMount() {
+    window.addEventListener('keydown', this.onKey);
     this.reduce = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.lastEtat = this.state.etat;
     this.lastOpt = this.state.opt;
@@ -382,6 +404,7 @@ class Component extends DCLogic {
   }
 
   componentWillUnmount() {
+    window.removeEventListener('keydown', this.onKey);
     clearTimeout(this.t1);
     clearInterval(this.timer);
   }
@@ -390,7 +413,7 @@ class Component extends DCLogic {
     const pe = this.props.etat;
     if (this.lastPropEtat !== pe) {
       this.lastPropEtat = pe;
-      this.setState({ etat: pe === 'options' ? 'options' : 'ecriture' });
+      this.setState({ etat: pe === 'options' || pe === 'replie' ? pe : 'ecriture' });
     }
     if (this.lastPos !== this.state.pos) {
       this.lastPos = this.state.pos;
@@ -431,10 +454,10 @@ class Component extends DCLogic {
   scrollToGen() {
     const box = this.scrollEl;
     if (!box) return;
-    if (this.state.etat === 'ecriture') {
+    if (this.state.etat !== 'options') {
       const r = box.querySelector('[data-k="resp-reussite"]');
       if (r) box.scrollTop = Math.max(0, r.offsetTop - 48);
-      this.followStream();
+      if (this.state.etat === 'ecriture') this.followStream();
       return;
     }
     const g = box.querySelector('[data-k="gen"]');
@@ -485,6 +508,8 @@ class Component extends DCLogic {
   renderVals() {
     const t = this.t;
     const writing = this.state.etat === 'ecriture';
+    const replie = this.state.etat === 'replie';
+    const options = this.state.etat === 'options';
     const colors = [t.err, t.err, t.ok, t.rcrit];
     const blocks = this.NODES.map((n) => {
       const choices = n.ch.map((c, i) => {
@@ -528,8 +553,7 @@ class Component extends DCLogic {
     const streamParas = sp.map((x, i) => ({ text: x.trim(), last: i === sp.length - 1 }));
     const frac = (pos - this.streamStart) / Math.max(1, this.streamEnd - this.streamStart);
     const received = this.fmt(1640 + Math.round(300 * frac));
-    const done2 = Math.round(16 * (pos / this.stream.length));
-    const bars = [16, done2, 0, 0].map((w) => ({ w: w }));
+    const bars = [{ w: Math.round(16 * (pos / this.stream.length)) }];
 
     const oi = this.state.opt;
     const o = this.OPTS[oi];
@@ -551,8 +575,15 @@ class Component extends DCLogic {
       t: t,
       blocks: blocks,
       writing: writing,
-      options: !writing,
-      crumbTail: writing ? 'EN ÉCRITURE' : 'OPTION ' + (oi + 1) + ' SUR 4',
+      options: options,
+      replie: replie,
+      traceOpen: this.state.trace,
+      traceChevron: this.state.trace ? '▾' : '▸',
+      toggleTrace: () => this.setState({ trace: !this.state.trace }),
+      showFolded: () => this.setState({ etat: 'replie' }),
+      rBg: replie ? t.raised : 'transparent',
+      rColor: replie ? t.strong : t.sec,
+      crumbTail: writing ? 'EN ÉCRITURE' : replie ? 'OPTIONS REPLIÉES' : 'OPTION ' + (oi + 1) + ' SUR 4',
       streamParas: streamParas,
       received: received,
       bars: bars,
@@ -568,12 +599,12 @@ class Component extends DCLogic {
       showOptions: () => this.setState({ etat: 'options' }),
       wBg: writing ? t.raised : 'transparent',
       wColor: writing ? t.strong : t.sec,
-      oBg: writing ? 'transparent' : t.raised,
-      oColor: writing ? t.sec : t.strong,
-      filName: writing ? 'En écriture' : '4 options à trier',
-      filSub: writing ? 'OPTION 2 SUR 4' : 'OPTION ' + (oi + 1) + ' AFFICHÉE',
-      filHint1: writing ? 'ÉCHAP · INTERROMPRE' : '‹ › · CHANGER D’OPTION',
-      filHint2: writing ? 'CTRL+Z · TOUT RETIRER' : '↵ · GARDER CETTE OPTION',
+      oBg: options ? t.raised : 'transparent',
+      oColor: options ? t.strong : t.sec,
+      filName: writing ? 'En écriture' : replie ? '4 options repliées' : '4 options à trier',
+      filSub: writing ? '1 OPTION' : replie ? '4 OPTIONS GARDÉES' : 'OPTION ' + (oi + 1) + ' AFFICHÉE',
+      filHint1: writing ? 'ÉCHAP · INTERROMPRE' : replie ? '↵ · ROUVRIR' : 'ÉCHAP · REPLIER LES OPTIONS',
+      filHint2: writing || replie ? 'CTRL+Z · TOUT RETIRER' : '↵ · GARDER CETTE OPTION',
       setScroll: this.setScroll
     };
   }

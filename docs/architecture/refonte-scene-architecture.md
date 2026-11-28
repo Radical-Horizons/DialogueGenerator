@@ -60,7 +60,7 @@ PNJ et le PJ à partir du graphe.
   la première réplique générée est rattachée à son appel LLM, ce qui lève la limite « nœud START de Générer sans
   dialogue » de la PR #103 (`docs/architecture/conversations-ia.md`).
 - Toute génération (premier nœud, suite, lot, réécriture) lit la fiche. Le `contextStore` global garde le catalogue
-  GDD et les sélections **hors scène** (page Fiches du GDD) ; ses lecteurs dans le chemin de génération sont à
+  GDD et les sélections **hors scène** (page Générer, jusqu'à son retrait ; l'écran Fiches est en lecture seule) ; ses lecteurs dans le chemin de génération sont à
   inventorier en story 20.4 (critère : plus aucun appel de génération ne lit les sélections globales).
 - **Export : `scene` est retirée.** Vérifié le 2026-11-20 sur le contrat publié
   (`docs/JsonDocUnity/Documentation/dialogue-format.schema.json`) : la racine n'a pas d'`additionalProperties`, donc
@@ -121,8 +121,8 @@ préfixes « (Test d'intimidation DD9) ». Le correctif v1.10.1 (« `* [Vous …
 
 ### A4 — La vue Script est une projection, pas une donnée
 
-Le Script affiche le chemin suivi (`[{choiceIndex, outcome}]`), stocké dans l'état d'interface (par scène, en
-mémoire locale de session), jamais dans le document. Les compteurs du fil (répliques, mots, suites à écrire, réponses
+Le Script affiche le chemin suivi (`[{choiceIndex, outcome}]`), stocké dans l'état d'interface (par scène, gardé en
+`localStorage` pour la reprise depuis l'Accueil), jamais dans le document. Les compteurs du fil (répliques, mots, suites à écrire, réponses
 vides) se dérivent du document en une passe.
 
 ### A5 — Une primitive d'IA, trois points d'entrée
@@ -137,12 +137,17 @@ vides) se dérivent du document en une passe.
 Toutes passent par l'estimation (`…/graph/estimate-cost`) avant l'appel et affichent le coût engagé pendant. La connexion
 parent → nouveau nœud reste faite par le front (`connectNodes` dans `generationSlice`), jamais déléguée à l'API.
 
+Ajouts décidés le 2026-11-28 : dans l'emplacement, le texte tapé est la réplique et la consigne a un champ distinct ;
+`generate-node` sait n'écrire qu'une issue d'une réponse à test (20.8) ; le graphe diffuse texte et trace en direct,
+avec interruption (20.11).
+
 ### A6 — Diagnostics continus
 
-- **Calculables** (réponse vide, suite manquante, nœud jamais atteint, test sans issue) : recalculés dans le front sur
-  changement du document, avec un délai de 300 ms, sans appel réseau → popover « PROBLÈMES » et marques en place.
+- **Calculables** (avertissements : réponse vide, nœud jamais atteint ; suites et issues à écrire en simples
+  compteurs) : recalculés dans le front sur changement du document, avec un délai de 300 ms, sans appel réseau → popover « PROBLÈMES » et marques en place.
 - **Validation serveur** (schéma Unity, lore) : à l'enregistrement, comme aujourd'hui (`structured_errors`).
-- **Jugements LLM** (qualité, slop, langue : accords, fautes probables) : à la demande seulement (« Relecture »),
+- **Jugement LLM** (une relecture : qualité et langue, ancrée sur le passage ; le slop heuristique s'y joint sans
+  coût) : à la demande seulement (« Relecture »),
   résultats en notes de marge et dans un groupe « RELECTURE » séparé du popover, daté de la dernière passe. Aucun
   jugement simulé par heuristique (règle « diagnostic : uniquement du calculable ») ; une faute n'est pas un
   avertissement permanent.
@@ -162,7 +167,10 @@ redeviennent possibles sans contournement.
 
 ### A9 — Graphe : flux gauche → droite, cartes 360 px, tests en sorties
 
-- `dagre` passe en `rankdir: 'LR'` ; hauteur de carte connue par palier de zoom (A10) pour éviter les chevauchements.
+- `dagre` passe en `rankdir: 'LR'` ; la disposition se calcule sur la hauteur au palier « écrire » (les cartes ne
+  bougent pas d'un palier à l'autre, A10).
+- Une « fin voulue » est une métadonnée d'éditeur sur la réponse, retirée à l'export ; `END` posé par défaut reste une
+  suite à écrire.
 - Les `TestNode` cessent d'être rendus (ils sont déjà dérivés, `testNodeSync.ts`) : leurs 4 issues deviennent des
   handles de la réponse ; l'export n'en dépend pas.
 - Migration : une redisposition par dialogue à la première ouverture, positions précédentes conservées dans le layout
@@ -193,7 +201,8 @@ conflit sur le texte.
 ```json
 { "revision": 12, "entries": {
   "node-3836…": {
-    "versions":   [{ "at": "…", "by": "llm|auteur", "model": "gpt-6.2-sol", "text": "…" }],
+    "versions":   [{ "at": "…", "by": "llm|auteur", "kind": "generee|retouchee|regeneree|restauree",
+                     "model": "gpt-6.2-sol", "instruction": "…", "optionRank": 1, "restoredFrom": "…", "text": "…" }],
     "variants":   [{ "id": "v2", "text": "…", "kept": false }],
     "provenance": [{ "start": 0, "end": 212, "source": "llm" }],
     "dismissed":  [{ "rule": "tournure-frequente", "span": "comme une …" }]
@@ -202,13 +211,16 @@ conflit sur le texte.
 
 - Jamais lu par l'export Unity (aucun changement d'export) ; les champs éditeur déjà présents dans les nœuds y migrent
   à terme, en option.
+- Une version naît à la sortie du champ si le texte a changé, et à chaque génération, régénération et restauration.
 - Plafond : 20 versions par réplique, les plus anciennes résumées (texte seul).
 - Provenance recalculée à chaque frappe : une plage retouchée sort de la provenance « llm ».
 
 ### A13 — Lots : réutiliser les jobs existants
 
 Le tiroir Lot (`Lot.dc.html`) s'appuie sur les jobs de lot persistés (`data/batch_jobs/*.json`, FR87/FR88) : un seul
-worker, un job interrompu au redémarrage, reprise des seuls parents restants. Ajouts : portée par niveau ou par
+worker, un job interrompu au redémarrage. Ajouts (20.12) : le job travaille par emplacement (parent, réponse, issue),
+sans plancher, reprend les seuls emplacements restants, applique ses résultats au fil de l'eau (À VALIDER) et se
+retrouve au rechargement ; portée par niveau ou par
 scène, exclusions (réponses vides, répliques jamais atteintes), coût total estimé avant (`estimate-cost` × N),
 progression dans la barre d'état, revue en série des « à valider ».
 
@@ -221,10 +233,10 @@ technique (popovers de 20.9), puis passe à **faux** avec 20.9 — sinon un aute
 entre 20.5 et 18.5b. Le retrait définitif (story 20.15) n'a lieu qu'après un mois d'usage avec un compteur à zéro, ou
 sur décision de l'auteur.
 
-**Un seul écrivain du texte** (constat B2 du contrôle de readiness, garantie qui remplace la story 18.3) : dès qu'un
-champ in-situ est en service (18.5b), `NodeEditorPanel` monté (drapeau `legacyInspector` ou état actuel) a ses champs
-`line`, `speaker`, `title` et `choices[].text` en lecture seule, et son flush n'écrit aucun de ces champs ; un test de
-régression couvre les scénarios A, B, C de 18.3. Même règle pour l'onglet Éditer (`UnityDialogueEditor`), consultable
+**Un seul écrivain du texte** (constat B2 du contrôle de readiness, garantie qui remplace la story 18.3) : chaque champ
+de `NodeEditorPanel` passe en lecture seule, et son flush ne l'écrit plus, quand son champ in-situ entre en service —
+`line` (18.5b), `choices[].text` (18.6), `speaker` et `title` (18.7) ; un test de régression couvre les scénarios A,
+B, C de 18.3. Même règle pour l'onglet Éditer (`UnityDialogueEditor`), consultable
 en lecture seule jusqu'à son retrait (20.15).
 
 ### A15 — Conversations avec l'IA : intégration front (PR #103)
@@ -274,6 +286,8 @@ l'intention est rangée dans le journal d'édition (A12), jamais exportée, et m
   retouchés une seule fois à l'import (même désaturation et assombrissement pour toutes, fondus intégrés), stockés avec
   les fiches en WebP (portrait 192 px, couverture 960 × 540, 200 Ko au plus) et servis par l'API avec cache long.
   Aucun filtre, masque, flou ni animation CSS en direct.
+- **Couverture** : une illustration propre à la scène prime sur celle du lieu. La source des images reste à décider
+  (peu de fiches Notion en portent).
 - **Repli** : sans portrait, pastille de couleur avec initiales ; sans lieu illustré, portrait du PNJ sur la teinte du
   lieu ; sans rien, « lieu et portrait à renseigner ».
 - **Graphe** : médaillon de 20 px au palier « écrire » seulement ; rien aux paliers « lire » et « situer ».
@@ -293,15 +307,15 @@ Tranche 1 — fondation, tout de suite                                          
   A3 conversion + fixtures CI · preuve de perf A10 · A8 variables CSS
 Tranche 1 bis — fondation d'écriture (stories d'Epic 18), en parallèle           ≈ 3,5 sessions 18.4 (reste), 18.8, 18.5a
   annulation dans le champ · indicateur d'enregistrement · composant de champ seul (A2, A3)
-Tranche 2 — la scène                                                             ≈ 28 sessions  20.4–20.10, 20.24, 20.25,
+Tranche 2 — la scène                                                             ≈ 37 sessions  20.4–20.10, 20.24–20.27,
   A1 fiche → enveloppe → Contexte/Fiches/palette → A4 Script → A9 cartes et flux LR    18.5b, 18.6, 18.7, 18.9, 18.11
-  → champ monté, réponses, en-têtes → tests en sorties → clavier → lentille et popovers → états → Jouer
+  → champ monté, réponses, en-têtes → tests en sorties → clavier → lentille et popovers → états → Jouer → Accueil → Réglages
   A14 panneau derrière un drapeau, un seul écrivain du texte dès 18.5b
-Tranche 3 — l'IA dans le texte                                                    ≈ 16 sessions  20.11–20.15, 20.21, 20.22
+Tranche 3 — l'IA dans le texte                                                    ≈ 20 sessions  20.11–20.15, 20.21, 20.22
   A5 emplacement et options · A13 lots · rewrite-span · A6 diagnostics · A15 discussions · retrait du panneau
 Tranche 4 — confort                                                              ≈ 14,5 sessions 20.16–20.20, 20.23
   Papier, Focus · A12 journal · téléphone et tactile · A7 catalogues · A16 ambiance · notes d'intention
-Chemin critique : tranche 1 → 2 → 3 → 4 ≈ 64 sessions (tranche 1 bis en parallèle de la tranche 1 ; détail et
+Chemin critique : tranche 1 → 2 → 3 → 4 ≈ 77 sessions (tranche 1 bis en parallèle de la tranche 1 ; détail et
 écart avec les 57 de la première rédaction : epic-20.md, « Chemin critique et tailles »).
 ```
 

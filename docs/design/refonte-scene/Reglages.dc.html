@@ -58,7 +58,7 @@
         <span style="font-size: 13px; color: {{t.sec}}">Chaque réglage s'applique aussitôt et s'enregistre seul.</span>
       </div>
 
-      <section aria-labelledby="lbl-theme" style="flex: none; margin-top: 20px; display: grid; grid-template-columns: 240px minmax(0, 1fr); column-gap: 20px; padding: 20px 0; border-top: 1px solid {{t.hair}}">
+      <section aria-labelledby="lbl-theme" style="flex: none; margin-top: 14px; display: grid; grid-template-columns: 240px minmax(0, 1fr); column-gap: 20px; padding: 14px 0; border-top: 1px solid {{t.hair}}">
         <div style="display: flex; flex-direction: column; gap: 5px">
           <span id="lbl-theme" style="font-size: 14px; font-weight: 500; color: {{t.strong}}">Thème</span>
           <span style="font-size: 12.5px; line-height: 1.5; color: {{t.sec}}">Nuit pour les longues sessions, Papier pour relire en plein jour.</span>
@@ -85,6 +85,25 @@
                 <span style="font-size: 13.5px; color: {{th.labelColor}}">{{th.name}}</span>
                 <sc-if value="{{th.hasHint}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.label}}">{{th.hint}}</span></sc-if>
               </span>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+
+      <section aria-labelledby="lbl-amb" style="flex: none; display: grid; grid-template-columns: 240px minmax(0, 1fr); column-gap: 20px; padding: 14px 0; border-top: 1px solid {{t.hair}}">
+        <div style="display: flex; flex-direction: column; gap: 5px">
+          <span id="lbl-amb" style="font-size: 14px; font-weight: 500; color: {{t.strong}}">Ambiance</span>
+          <span style="font-size: 12.5px; line-height: 1.5; color: {{t.sec}}">La couleur du lieu et les visages des personnages. Le texte n'est jamais teinté.</span>
+        </div>
+        <div role="radiogroup" aria-labelledby="lbl-amb" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px">
+          <sc-for list="{{levels}}" as="lv" hint-placeholder-count="3">
+            <button type="button" role="radio" aria-checked="{{lv.on}}" onClick="{{lv.pick}}" style="display: flex; flex-direction: column; gap: 5px; padding: 9px 14px; box-sizing: border-box; border-radius: 8px; border: 1px solid {{lv.frame}}; box-shadow: {{lv.ring}}; background: {{lv.bg}}; text-align: left; font-family: inherit; cursor: pointer">
+              <span style="display: flex; align-items: center; gap: 9px">
+                <span aria-hidden="true" style="width: 12px; height: 12px; box-sizing: border-box; border-radius: 99px; border: 1.5px solid {{lv.dotBorder}}; background: {{lv.dotFill}}; box-shadow: {{lv.dotInner}}"></span>
+                <span style="font-size: 13.5px; font-weight: 500; color: {{lv.labelColor}}">{{lv.label}}</span>
+              </span>
+              <span style="font-size: 12.5px; line-height: 1.5; color: {{t.sec}}">{{lv.desc}}</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}">{{lv.weight}}</span>
             </button>
           </sc-for>
         </div>
@@ -151,7 +170,7 @@
               <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.09em; color: {{t.sec}}">GRISH T'VOK</span>
               <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.ok}}">VALIDÉ</span>
             </div>
-            <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: {{fs}}px; line-height: {{lh}}; color: {{t.dia}}">Très bien, Maîtresse. Votre volonté se fait sentir jusque dans mes rouages. <span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: {{dirFs}}px; color: {{t.sec}}">Un claquement doux parcourt sa carcasse, et une goutte d'huile scintille comme une larme.</span> Approchez, ne craignez rien : je n'arrache rien qui ne puisse être recousu.</p>
+            <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: {{fs}}px; line-height: {{lh}}; color: {{t.dia}}">Très bien, Maîtresse. Votre volonté se fait sentir jusque dans mes rouages. <span style="display: block; margin: 3px 0; font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: {{dirFs}}px; color: {{t.sec}}">Un claquement doux parcourt sa carcasse, et une goutte d'huile scintille comme une larme.</span> Approchez, ne craignez rien : je n'arrache rien qui ne puisse être recousu.</p>
             <span style="display: block; margin: {{gapMd}}px 0 {{gapSm}}px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">URESAÏR — 4 RÉPONSES</span>
             <ol style="list-style: none; margin: 0; padding: 0; border-top: 1px solid {{t.hair}}">
               <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 9px; padding: {{rowPad}}px 12px {{rowPad}}px 10px; border-bottom: 1px solid {{t.hair}}">
@@ -172,7 +191,7 @@
             </ol>
           </div>
         </div>
-        <p style="flex: none; margin: 0; padding: 0 0 12px; font-size: 12px; line-height: 1.5; color: {{noteColor}}">Exemple : heure d'enregistrement <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">11:24</span>. La réplique et les réponses sont réelles (scène du forgeron, extrait).</p>
+        <p style="flex: none; margin: 0; padding: 0 0 12px; font-size: 12px; line-height: 1.5; color: {{noteColor}}">Exemple : heure d'enregistrement <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">11:24</span>. La réplique et les réponses sont réelles (scène du forgeron, extrait). L'effet de l'ambiance est montré sur le board <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">Ambiance</span>.</p>
       </section>
     </main>
   </div>
@@ -189,7 +208,7 @@
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { theme: 'nuit', fs: 19, measure: 72, density: 'confort', motion: 'systeme', saving: false, saved: '11:24', avg: 0.4 };
+    this.state = { theme: 'nuit', fs: 19, measure: 72, density: 'confort', motion: 'systeme', niveau: 'pleine', saving: false, saved: '11:24', avg: 0.4 };
     this.T = {
       nuit: {
         app: '#17171b', input: '#1c1c22', raised: '#2a2a33', hair: 'rgba(255,255,255,0.06)', hair2: 'rgba(255,255,255,0.09)',
@@ -283,6 +302,20 @@ class Component extends DCLogic {
       const on = this.state.motion === d[0];
       return Object.assign({ label: d[1], on: on, pick: () => this.change({ motion: d[0] }) }, seg(on, i));
     });
+    const levels = [
+      ['pleine', 'Pleine', "Teinte du lieu, portraits en puce et en marge, couvertures à l'accueil.", 'IMAGES WEBP · 5 À 65 KO CHACUNE'],
+      ['reduite', 'Réduite', "Teinte du lieu et pastilles d'initiales : aucune image chargée.", 'AUCUNE IMAGE'],
+      ['aucune', 'Aucune', "L'interface seule, sans teinte ni image, comme une scène sans lieu.", 'AUCUNE TEINTE · AUCUNE IMAGE']
+    ].map((d) => {
+      const on = this.state.niveau === d[0];
+      return {
+        label: d[1], desc: d[2], weight: d[3], on: on,
+        frame: on ? t.accent : t.hair2, ring: on ? '0 0 0 1px ' + t.accent : 'none', bg: on ? t.selBg : 'transparent',
+        dotBorder: on ? t.accent : t.chip2, dotFill: on ? t.accent : 'transparent', dotInner: on ? 'inset 0 0 0 2px ' + t.app : 'none',
+        labelColor: on ? t.strong : t.body,
+        pick: () => this.change({ niveau: d[0] })
+      };
+    });
     const reduce = this.state.motion === 'toujours' || sysReduce;
     const compact = this.state.density === 'compact';
     const fs = this.state.fs;
@@ -307,6 +340,7 @@ class Component extends DCLogic {
       measures: measures,
       densities: densities,
       motions: motions,
+      levels: levels,
       fs: fs,
       fsText: fs + ' PX',
       dirFs: Math.round(fs * 0.79),
@@ -320,7 +354,7 @@ class Component extends DCLogic {
         ? (this.state.motion === 'toujours' ? 'AUCUNE ANIMATION' : 'SYSTÈME : RÉDUCTION DEMANDÉE')
         : 'SYSTÈME : AUCUNE DEMANDE',
       summary: fs + ' PX · ' + this.state.measure + ' CAR. · ' + (compact ? 'COMPACTE' : 'CONFORTABLE'),
-      summaryShort: 'THÈME ' + themeName + ' · RÉPLIQUES ' + fs + ' PX',
+      summaryShort: 'THÈME ' + themeName + ' · RÉPLIQUES ' + fs + ' PX · AMBIANCE ' + { pleine: 'PLEINE', reduite: 'RÉDUITE', aucune: 'AUCUNE' }[this.state.niveau],
       saveText: this.state.saving ? 'ENREGISTREMENT…' : 'ENREGISTRÉ · ' + this.state.saved,
       saveDot: this.state.saving ? t.accent : t.ok,
       onSize: (e) => this.change({ fs: Number(e && e.target ? e.target.value : 19) })

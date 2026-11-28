@@ -220,6 +220,8 @@ development_status:
   18-11-non-regression-perf-export-selection-multiple-noeuds-pending: backlog
   20-10-etats-transverses: backlog
   20-24-jouer-fr146: backlog
+  20-26-accueil-scenes-reprise-et-fonctions-de-liste: backlog  # avant 20-11
+  20-27-reglages-voix-et-templates: backlog  # avant 20-11
   # Tranche 3 — l'IA dans le texte
   20-11-emplacement-a-ecrire-et-options-sur-place-fr133-fr134: backlog
   20-12-remplir-et-revoir-en-serie-fr141: backlog

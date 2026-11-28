@@ -81,7 +81,7 @@ Largeur du graphe à 1 440 px : **1 188 px** classeur ouvert, **1 384 px** class
 | `Technique` | **Lentille Technique** + éditeur de test ancré. | idem |
 | `Paliers` | **Lire (≈ 60 %) et situer (≈ 30 %)** sur la vraie structure, répliques jamais atteintes encadrées. | — |
 | `Carte` | **Anatomie d'une carte** en écriture (texte brut de la réplique entière, D4). | — |
-| `Jouer` | **Jouer** : choix verrouillés expliqués, issue forçable, état de la partie, retour d'un choix. | partie |
+| `Jouer` | **Jouer** : choix verrouillés expliqués, issue calculée (score contre difficulté, sans dé, § 15) puis forçable, état de la partie, retour d'un choix. | partie |
 | `Problemes` | **Santé** : popover de la barre d'état, marques en place, relecture (à la demande) en marge. | ÉCHAP |
 | `Contexte` | **Ce que le modèle saura** : tokens par section, budget AUTO, modèle. | retirer |
 | `Versions` | **Versions d'une réplique** : diff, restaurer sans rien perdre. | restaurer |
@@ -102,7 +102,9 @@ Chaque board dit en pied ce qui est un exemple (coûts, heures, textes généré
 
 | Libellé | Sens |
 |---|---|
-| `SUITE À ÉCRIRE` | Réponse sans réplique suivante. |
+| `SUITE À ÉCRIRE` | Réponse sans réplique suivante, `END` par défaut compris, et sans fin voulue. |
+| `SUITE ÉCRITE` · `4 ISSUES · 4 ÉCRITES` | Réponse (ou test) dont la suite existe. |
+| `■ FIN` | Fin voulue par l'auteur : métadonnée d'éditeur, retirée à l'export, exclue des comptes et des lots. |
 | `4 ISSUES · À ÉCRIRE` | Réponse à test dont aucune des 4 issues n'a de suite. |
 | `4 ISSUES · 2 ÉCRITES` | Réponse à test dont 2 issues sur 4 ont leur suite. |
 | `▲ RÉPONSE VIDE` | Réponse sans texte (avertissement calculé). |
@@ -110,14 +112,14 @@ Chaque board dit en pied ce qui est un exemple (coûts, heures, textes généré
 | `À VALIDER` · `VALIDÉ` · `EN ÉCRITURE` | État éditeur de la réplique (`status`), ou carte où l'on tape. |
 
 - **Emplacements de suite (209)** : une issue de test sans suite compte 1, une réponse sans suite compte 1 ; 25 des 209
-  sont sous des réponses vides, 79 sous les 8 répliques jamais atteintes. Restent **105** emplacements utiles (réponse
+  sont sous des réponses vides, 79 de plus sous les 8 répliques jamais atteintes. Restent **105** emplacements utiles (réponse
   écrite, réplique atteinte) : 4 sous l'ouverture, 84 au niveau 1, 17 au niveau 2 — ce que propose le tiroir Lot
   (`Lot`) avec ses deux filtres par défaut.
 - **Mots (3 887)** : suites de lettres ou chiffres (`/[\p{L}\p{N}_]+/gu`, pas `\w+` : en JavaScript `\w` ignore les
   lettres accentuées et « Uresaïr » compterait deux mots) dans les répliques et les réponses ; lecture = mots / 200
   par minute.
-- **Monnaie** : une estimation est affichée en **euros**, comme la renvoie `estimate-cost` (`estimated_cost_eur`) ; une
-  dépense engagée ou réelle en **dollars**, comme le journal d'usage. La règle vient du design system (« dans la devise
+- **Monnaie** : une estimation est affichée en tokens et en **euros**, comme la renvoie `estimate-cost`
+  (`estimated_cost_eur`), discussions comprises ; une dépense engagée ou réelle en **dollars**, comme le journal d'usage. La règle vient du design system (« dans la devise
   que le champ contient vraiment ») ; l'unifier demanderait un taux de change (§ 15, question 5).
 
 ## 7. Composants
@@ -130,9 +132,9 @@ Chaque board dit en pied ce qui est un exemple (coûts, heures, textes généré
 | **Bloc de script** | Locuteur, réplique serif, didascalies, réponses avec puces et état. | `UnityDialogueEditor`, `GenerationOptionsComparison` |
 | **Carte de réplique** | Même contenu en 360 px, réplique bornée (12 lignes, défilement interne une fois sélectionnée), réponses jamais coupées, ports par réponse et par issue. | `DialogueNode` ; `TestNode` et `EndNode` deviennent des sorties |
 | **Champ d'écriture** | Le `<textarea>` d'Epic 18 (D4) : à l'entrée dans une réplique, **toute la réplique** passe en texte brut avec ses `*…*` ; à la sortie elle redevient mise en forme. | Epic 18.5a–18.7 |
-| **Emplacement à écrire** | Au bout de toute réponse sans suite : taper ou Générer CTRL+↵ ; ligne « TRACE ▸ » dépliable pendant l'écriture. | `AIGenerationPanel`, `GenerationStreamingInline`, trace de raisonnement |
+| **Emplacement à écrire** | Au bout de toute réponse sans suite : taper (c'est la réplique) ou Générer CTRL+↵, avec la consigne dans un champ distinct ; ligne « TRACE ▸ » dépliable pendant l'écriture. | `AIGenerationPanel`, `GenerationStreamingInline`, trace de raisonnement |
 | **Tiroir Lot** | Portée, coût total, progression, reprise, revue en série. | jobs FR87/FR88, `BatchGenerateFromNodesModal` |
-| **Puce mécanique** | Trait, test, respect, influence, fin ; clic (cible 24 px) → popover d'édition ancré. | `ChoiceEditor`, `AttributeSkillTestEditor`, `ConditionEditor`, `EffectEditor` |
+| **Puce mécanique** | Trait, test, respect, influence, fin ; clic sur une puce ou sur « + » (cible 24 px) → un popover d'édition ancré, unique pour la réponse. | `ChoiceEditor`, `AttributeSkillTestEditor`, `ConditionEditor`, `EffectEditor` |
 | **Barre d'état** | Enregistrement, problèmes, contexte, tokens, modèle, mots, lot en cours. | `SaveStatusIndicator`, `GraphHealthBadge`, `EstimationBadge` |
 | **Tiroir temporaire** | 380 px, ÉCHAP ferme : Contexte, Versions, Lot, Discussion. | colonne droite, `ContextDetail` |
 | **Tiroir Discussion** | Discuter avec l'IA d'une réplique (« Pourquoi ? ») ou poser une question depuis la palette : génération d'origine en diff, résumé de réflexion, limite affichée, messages avec leur coût. | nouveau ; back-end PR #103 (architecture A15) |
@@ -146,7 +148,12 @@ Chaque board dit en pied ce qui est un exemple (coûts, heures, textes généré
 |---|---|---|
 | Clic dans le texte | Curseur ; toute la réplique passe en texte brut ; sauvegarde au fil de la saisie | Epic 18 D1, D4 |
 | Clic sur l'en-tête d'une carte | Sélection ; glisser = déplacer | zones `nodrag`/`nowheel` sur le texte |
-| ÉCHAP | Sort du texte / ferme le popover ou tiroir le plus proche | `stopPropagation` (Epic 18 D2) |
+| ÉCHAP | Sort du texte / ferme le popover ou tiroir le plus proche, puis le Focus | `stopPropagation` (Epic 18 D2) |
+| ÉCHAP sur une génération | Pendant : interrompre ; après : replier les options sans les rejeter | « Rejeter » est un bouton |
+| ↵ sur des options | Garder la courante | CTRL+Z retire tout |
+| CTRL+→ (diff de réécriture) | Accepter le changement suivant | TAB accepte tout |
+| CTRL+MAJ+↵ | Remplir les suites (tiroir Lot) | board `Lot` |
+| CTRL+CLIC (Script, Jouer) | Ouvrir dans le graphe / le script | boards `Main`, `Jouer` |
 | CTRL+↵ | Générer la suite dans l'emplacement actif | existe en page Générer |
 | CTRL+K | Palette ; sur une sélection : consigne de réécriture | surchargeable par la page (usage courant : Linear, Slack) |
 | ALT+1 / 2 / 3 | Vue Script / Graphe / Jouer | **pas CTRL+1–3** : CTRL+1–9 changent d'onglet dans les navigateurs |
@@ -157,8 +164,8 @@ Chaque board dit en pied ce qui est un exemple (coûts, heures, textes généré
 | CTRL+J · CTRL+, | Aller à une réplique · Réglages | existent |
 | ALT+N | Nouvelle scène | **pas CTRL+N** (nouvelle fenêtre, non interceptable) |
 | ? | Aide clavier cherchable, générée depuis la table des raccourcis | corrige l'aide actuelle |
-| Jouer : 1–4, RETOUR ARRIÈRE, R | Choisir, revenir d'un choix, rejouer | existe dans l'aperçu de scénario |
-| Revue en série : J / K, G, R | Suivante / précédente, garder, rejeter | — |
+| Jouer : 1–9, RETOUR ARRIÈRE, R | Choisir, revenir d'un choix, rejouer | existe dans l'aperçu de scénario |
+| Revue en série : J / K, G, R, TAB | Suivante / précédente, garder, rejeter, à valider suivante | — |
 
 ⚠ Chaque raccourci est à vérifier dans Chrome, Edge et Firefox en onglet, et en PWA installée (critère de la story 20.14).
 
@@ -218,26 +225,29 @@ jet, et un clic ou une sélection rend la pleine opacité.
 ## 13. Rien ne se perd : où va chaque fonction actuelle
 
 La colonne « Story » dit qui livre le déplacement ; « Test e2e » se coche (☐ → ☑, avec le nom de la spec) quand un
-parcours le prouve. Le retrait du panneau de droite (20.15) attend une colonne entièrement cochée.
+parcours le prouve. Le retrait du panneau de droite (20.15) attend les lignes qui dépendent du panneau ou de l'onglet
+Éditer.
 
 | Aujourd'hui | Demain | Story | Test e2e |
 |---|---|---|---|
-| Page Générer (scène, brief, onglets Brief/Flags/Templates, réglages LLM) | Fiche de scène ; flags dans la fiche (« fiche de scène ▾ › Flags du dialogue ») ; profil d'auteur dans la fiche ; modèle et raisonnement dans la barre d'état et le tiroir Contexte | 20.4, 20.5, 20.25 | ☐ |
+| Page Générer (scène, brief, onglets Brief/Flags/Templates, réglages LLM) | Fiche de scène ; flags dans « fiche de scène ▾ › Flags du dialogue » ; templates par « fiche de scène ▾ › Appliquer un template… » ; profil d'auteur (voix d'écriture) dans la fiche ; modèle et raisonnement dans la barre d'état et le tiroir Contexte ; autres réglages dans Réglages et l'écran des voix et templates | 20.4, 20.5, 20.25, 20.27 | ☐ |
 | « Sauvegarder ce brief comme template » | « fiche de scène ▾ › Enregistrer comme template » (distribution, lieu, brief, fiches liées) ; « Appliquer un template… » les remplace | 20.4 | ☐ |
-| Colonne Contexte GDD | Fiche (PNJ, PJ, `@`), tiroir Contexte, écran Fiches du GDD ; règles de contexte dans Réglages › Notion et GDD | 20.4, 20.25 | ☐ |
+| Colonne Contexte GDD | Fiche (PNJ, PJ, `@`), tiroir Contexte, écran Fiches du GDD ; règles de contexte dans Réglages › Notion et GDD | 20.4, 20.25, 20.27 | ☐ |
 | Colonne droite (Prompt, Dialogue, Détails, Trace) | Tiroir Contexte (« voir le prompt »), emplacement à écrire (en direct + « TRACE ▸ »), aperçu de fiche, Versions | 20.25, 20.11, 20.17 | ☐ |
 | Options ×N, comparaison Liste / Côte à côte | `‹ 1/4 ›` dans l'emplacement + « comparer les 4 côte à côte » (vue 2b conservée) | 20.11 | ☐ |
 | Section Éditer (liste, métadonnées, partage, permissions, suppression) | Classeur ; Script ; titre dans la fiche ; « fiche de scène ▾ » (métadonnées, partage, permissions, supprimer) | 20.4, 20.5, 20.15 | ☐ |
 | Titre et locuteur d'un nœud | En-tête du bloc et de la carte, éditables (Epic 18.7) | 18.7 | ☐ |
-| Graphe : inspecteur 5 onglets, panneaux flottants | Nœud → la carte ; Santé → barre d'état ; Qualité, Slop → relecture en marge ; Coût → barre d'état ; simulation, règles de contexte, systèmes de jeu : fenêtres ponctuelles inchangées | 20.7, 20.9, 20.14, 20.5 | ☐ |
+| Graphe : inspecteur 5 onglets, panneaux flottants | Nœud → la carte ; Santé → barre d'état ; Qualité, Slop → relecture en marge ; Coût → « Actions ▾ » ; simulation, règles de contexte, systèmes de jeu : fenêtres ponctuelles inchangées, ouvertes depuis « Actions ▾ » | 20.7, 20.9, 20.14, 20.5 | ☐ |
 | Nœud de test, nœud Fin | Sorties de la réponse (4 issues), puce ■ FIN | 20.8 | ☐ |
-| Sélection multiple, opérations par lot, génération de lot | Lasso du graphe + barre de lot ; tiroir Lot (`Lot`) | 20.12, 18.11 | ☐ |
+| Sélection multiple, opérations par lot, génération de lot | Lasso du graphe + barre de lot actuelle ; tiroir Lot (`Lot`) | 20.12, 18.11 | ☐ |
 | Accepter / Rejeter / Régénérer, historique, Voir le prompt | Pied de carte « à valider », revue en série, Versions, Contexte | 20.7, 20.12, 20.17, 20.25 | ☐ |
 | Tags de nœud, badge GDD↑, COND. | Puces ; lentille Technique | 20.9 | ☐ |
-| Export PNG/SVG, export Unity, filtres, CTRL+J, carte | Menu Actions ▾ et palette ; inchangés | 20.5, 20.1 | ☐ |
+| Export PNG/SVG, export Unity, filtres, CTRL+J, carte | « Actions ▾ » dans la barre de vue des trois vues, et palette ; inchangés | 20.5, 20.1 | ☐ |
 | Aperçu de scénario (P) | Vue Jouer | 20.24 | ☐ |
-| `/usage`, Profils d'auteur | Écrans existants, dans l'enveloppe Scène ; **non redessinés dans cette proposition** | 20.5 | ☐ |
-| Options, Admin | Réglages (navigation gauche) ; Admin inchangé | 20.5, 20.16 | ☐ |
+| `/usage`, Profils d'auteur | `/usage` : écran existant dans l'enveloppe Scène ; Profils d'auteur : écran des voix et des templates, à créer ; **non redessinés dans cette proposition** | 20.5, 20.27 | ☐ |
+| Liste des dialogues : collections, export et validation par lot, journal d'export, filtres date et auteur | Accueil | 20.26 | ☐ |
+| Colonne Contexte (suggestions, pertinence, usage, comparaison, optimisation) et aperçu jouable (réglage de la partie, choix testés), hors maquette | Gardés : tiroir Contexte, écran Fiches, vue Jouer | 20.25, 20.24 | ☐ |
+| Options, Admin | Réglages (navigation gauche, cinq sections) ; Admin inchangé | 20.27, 20.16 | ☐ |
 | Mode écriture (CTRL+\) | Mode Focus (même raccourci) | 20.16 | ☐ |
 
 ## 14. Articulation avec l'existant
@@ -269,8 +279,8 @@ parcours le prouve. Le retrait du panneau de droite (20.15) attend une colonne e
 2. **Graphe de gauche à droite** — **prise** : le lien part de la phrase, plus d'étiquette de lien. Coût : une
    redisposition par dialogue, positions précédentes conservées.
 3. **Paliers de zoom** — **prise** : trois paliers contigus, écrire ≥ 75 %, lire ≥ 40 % et < 75 %, situer < 40 % (A10) ;
-   calculés à la fin du zoom, une valeur dans le store, carte en écriture exemptée, hauteur par
-   palier connue de la disposition. **Plan B si la preuve 20.2 échoue** : cartes de 280 px et dépliage à la sélection
+   calculés à la fin du zoom, une valeur dans le store, carte en écriture exemptée ; la disposition se calcule sur
+   la hauteur au palier « écrire » et les cartes ne bougent pas d'un palier à l'autre (board `Paliers`). **Plan B si la preuve 20.2 échoue** : cartes de 280 px et dépliage à la sélection
    (Epic 18 D3 inchangée), le texte complet restant lisible dans la vue Script. **Plan B non retenu** : la preuve
    20.2 tient les seuils à 360 px
    (`_bmad-output/implementation-artifacts/spec-20-2-preuve-performance-cartes-360.md`).
@@ -283,3 +293,11 @@ parcours le prouve. Le retrait du panneau de droite (20.15) attend une colonne e
    seulement si la qualité ne baisse pas.
 8. **Insertion par « / » dans une carte** (montrée par le board `Carte`) — **hors epic 20** : aucune story ne la porte ;
    le board la garde comme piste, à reprendre si l'usage du Script et du Graphe la réclame.
+9. **Texte tapé dans l'emplacement** — **prise** (2026-11-28) : c'est la réplique ; la consigne a un champ distinct.
+10. **Promesses de la maquette que le serveur ne tenait pas** — **prise** (2026-11-28) : elles sont construites (texte
+    et trace en direct, issue de test générée seule, lots par emplacement retrouvés au rechargement, Jouer avec traits,
+    respect, influence et flags).
+11. **Test dans Jouer** — **prise** (2026-11-28) : score comparé à la difficulté, pas de dé ; à revoir si la règle du
+    jeu est donnée.
+12. **Accueil et Réglages** — **prise** (2026-11-28) : deux stories (20.26, 20.27) avant 20.11.
+13. **Fonctions actuelles hors maquette** — **prise** (2026-11-28) : rien ne disparaît sans décision écrite.
