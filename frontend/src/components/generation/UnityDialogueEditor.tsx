@@ -437,7 +437,9 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
         setError(null)
         setSaveState((prev) => ({ ...prev, status: 'saving' }))
       }
-      const baseDocument = documentRef.current ?? {}
+      // La fiche de scène s'écrit dans le graphe : la renvoyer d'ici l'écraserait d'une copie.
+      const baseDocument: Record<string, unknown> = { ...(documentRef.current ?? {}) }
+      delete baseDocument.scene
       const body = {
         document: {
           ...baseDocument,

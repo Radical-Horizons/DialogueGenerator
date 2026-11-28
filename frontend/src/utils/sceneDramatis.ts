@@ -30,8 +30,8 @@ export function isPlayableCharacter(name: string | null | undefined): boolean {
 
 export function isForbiddenNpc(name: string | null | undefined): boolean {
   if (!name?.trim()) return false
-  const key = normalizeCharacterName(name)
-  return FORBIDDEN_NPC_NAMES.some((f) => normalizeCharacterName(f) === key)
+  const key = speakerKey(name)
+  return FORBIDDEN_NPC_NAMES.some((f) => speakerKey(f) === key)
 }
 
 export function isValidNpc(name: string | null | undefined, playerId: string): boolean {
@@ -130,7 +130,7 @@ export interface DramatisGraphNode {
   data?: Record<string, unknown> | null
 }
 
-function isDialogueGraphNode(node: DramatisGraphNode): boolean {
+export function isDialogueGraphNode(node: DramatisGraphNode): boolean {
   if (node.type === 'dialogueNode') return true
   if (node.type) return false
   return typeof node.data?.line === 'string'
@@ -187,29 +187,37 @@ function countMentions(haystack: string, key: string): number {
   return haystack.match(pattern)?.length ?? 0
 }
 
-function sameCharacter(a: string, b: string): boolean {
-  return normalizeCharacterName(a) === normalizeCharacterName(b)
+/** Clé de comparaison d'un locuteur : casse, accents, apostrophes et espaces neutralisés. */
+export function speakerKey(name: unknown): string {
+  if (typeof name !== 'string') return ''
+  return normalizeCharacterName(name.replace(/[‘’ʼ`]/g, "'").replace(/\s+/g, ' '))
+}
+
+/** PJ et PNJ que le dialogue permet de lire ; `null` quand il ne le dit pas. */
+export interface DialogueDramatis {
+  playerCharacterId: string | null
+  npcSpeakerId: string | null
 }
 
 /**
- * PJ et PNJ d'une génération dans le graphe, lus dans le dialogue ouvert.
+ * PJ et PNJ lus dans le seul dialogue, sans repli.
  *
- * Le panneau de contexte est global : il garde la scène de la page « Générer »
- * (ex. L'Éthérée & Uresaïr) quand on ouvre un autre dialogue. Le dialogue, lui,
- * dit qui parle : le PNJ est le locuteur du nœud parent (à défaut le plus fréquent),
- * le PJ est le personnage jouable que ses répliques nomment le plus. `fallback`
- * (scène du panneau) ne sert que pour ce que le dialogue ne permet pas de trancher.
+ * Le PNJ est le locuteur du nœud parent (à défaut le plus fréquent), le PJ est le
+ * personnage jouable que les répliques et réponses nomment le plus.
  */
-export function resolveDialogueDramatis(options: {
+export function readDialogueDramatis(options: {
   nodes: DramatisGraphNode[]
   parentNodeId: string | null | undefined
-  fallback: SceneDramatis
-}): SceneDramatis {
-  const { nodes, parentNodeId, fallback } = options
+  /** PNJ déjà connu (fiche de scène) : il remplace la lecture des locuteurs. */
+  npcSpeakerId?: string | null
+  /** Autres personnages que le PJ ne peut pas être. */
+  notPlayer?: string[]
+}): DialogueDramatis {
+  const { nodes, parentNodeId } = options
   const dialogueNodes = nodes.filter(isDialogueGraphNode)
-  const parent = findParentDialogueNode(nodes, parentNodeId)
 
-  let npc = validDialogueSpeaker(parent?.data?.speaker)
+  let npc: string | null = options.npcSpeakerId?.trim() || null
+  if (!npc) npc = validDialogueSpeaker(findParentDialogueNode(nodes, parentNodeId)?.data?.speaker)
   if (!npc) {
     const counts = new Map<string, number>()
     for (const node of dialogueNodes) {
@@ -224,7 +232,6 @@ export function resolveDialogueDramatis(options: {
       }
     }
   }
-  if (!npc) return fallback
 
   const corpus = normalizeCharacterName(
     dialogueNodes
@@ -235,82 +242,16 @@ export function resolveDialogueDramatis(options: {
       .join('\n')
       .replace(/[’`]/g, "'"),
   )
+  const excluded = new Set([npc, ...(options.notPlayer ?? [])].map(speakerKey))
   let player: string | null = null
   let bestMentions = 0
   for (const candidate of PLAYABLE_CHARACTERS) {
-    if (sameCharacter(candidate, npc)) continue
+    if (excluded.has(speakerKey(candidate))) continue
     const mentions = countMentions(corpus, mentionKey(candidate))
     if (mentions > bestMentions) {
       bestMentions = mentions
       player = candidate
     }
   }
-  if (!player) {
-    const fromPanel = fallback.playerCharacterId
-    if (fromPanel && isPlayableCharacter(fromPanel) && !sameCharacter(fromPanel, npc)) {
-      player = fromPanel
-    } else {
-      player =
-        [DEFAULT_PLAYER_CHARACTER, ...PLAYABLE_CHARACTERS].find((p) => !sameCharacter(p, npc as string)) ??
-        DEFAULT_PLAYER_CHARACTER
-    }
-  }
   return { playerCharacterId: player, npcSpeakerId: npc }
-}
-
-function stringList(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : []
-}
-
-/**
- * PJ/PNJ à envoyer pour une génération du graphe : la scène du panneau (et les valeurs
- * explicites éventuelles) sert de repli, le dialogue ouvert a le dernier mot.
- */
-export function resolveGraphGenerationDramatis(options: {
-  nodes: DramatisGraphNode[]
-  parentNodeId: string | null | undefined
-  contextSelections?: Record<string, unknown> | null
-  sceneSelection?: { characterA: string | null; characterB: string | null } | null
-  playerCharacterId?: string | null
-  npcSpeakerId?: string | null
-}): SceneDramatis {
-  const selections = options.contextSelections ?? {}
-  const rawProtagonists = selections.scene_protagonists
-  const sceneProtagonists =
-    rawProtagonists && typeof rawProtagonists === 'object' && !Array.isArray(rawProtagonists)
-      ? (rawProtagonists as { personnage_a?: string; personnage_b?: string })
-      : null
-  const fallback = resolveSceneDramatis({
-    playerCharacterId:
-      options.playerCharacterId ??
-      options.sceneSelection?.characterA ??
-      sceneProtagonists?.personnage_a,
-    npcSpeakerId:
-      options.npcSpeakerId ?? options.sceneSelection?.characterB ?? sceneProtagonists?.personnage_b,
-    sceneProtagonists,
-    contextCharacters: [
-      ...stringList(selections.characters_full),
-      ...stringList(selections.characters_excerpt),
-    ],
-  })
-  return resolveDialogueDramatis({
-    nodes: options.nodes,
-    parentNodeId: options.parentNodeId,
-    fallback,
-  })
-}
-
-export function resolveDramatisFromSelections(options: {
-  sceneSelection?: { characterA: string | null; characterB: string | null } | null
-  sceneProtagonists?: { personnage_a?: string; personnage_b?: string } | null
-  contextCharacters?: string[]
-}): SceneDramatis {
-  return resolveSceneDramatis({
-    playerCharacterId:
-      options.sceneSelection?.characterA ?? options.sceneProtagonists?.personnage_a,
-    npcSpeakerId:
-      options.sceneSelection?.characterB ?? options.sceneProtagonists?.personnage_b,
-    sceneProtagonists: options.sceneProtagonists,
-    contextCharacters: options.contextCharacters,
-  })
 }

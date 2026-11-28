@@ -47,6 +47,7 @@ import {
   type DocumentFieldError,
 } from '../../utils/documentValidationFieldErrors'
 import { acknowledgeSnapshot as journalAcknowledgeSnapshot } from '../../utils/graphJournal'
+import { parseSceneSheet, type SceneSheet } from '../../utils/sceneSheet'
 
 function unityNodesFromGraph(state: GraphState): Array<{ id?: string }> {
   const doc = graphToDocument(state.nodes, state.edges) as {
@@ -134,6 +135,15 @@ function conflictDocumentOf(error: unknown): Record<string, unknown> | undefined
   const document = (error as { response?: { data?: { document?: unknown } } })?.response?.data
     ?.document
   return document && typeof document === 'object' ? (document as Record<string, unknown>) : undefined
+}
+
+/** La fiche de scène ne reste pas dans `document` : les exports en partent. */
+function splitScene(source: Record<string, unknown>): {
+  document: Record<string, unknown>
+  scene: SceneSheet | null
+} {
+  const { scene, ...document } = source
+  return { document, scene: parseSceneSheet(scene) }
 }
 
 /** Auteur unique : le graphe ouvert l'emporte sur une révision serveur plus récente. */
@@ -299,9 +309,11 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
       } catch {
         throw new Error('Contenu JSON invalide')
       }
-      const doc: Record<string, unknown> = Array.isArray(parsed)
-        ? { schemaVersion: '1.1.0', nodes: parsed }
-        : (parsed as Record<string, unknown>)
+      const { document: doc, scene } = splitScene(
+        Array.isArray(parsed)
+          ? { schemaVersion: '1.1.0', nodes: parsed }
+          : (parsed as Record<string, unknown>),
+      )
 
       let layoutPositions: { nodes: Record<string, { x: number; y: number }> } | undefined
       let serverLayout: Record<string, unknown> = {}
@@ -344,6 +356,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         documentRevision: 1,
         layoutRevision: 1,
         loadSeq,
+        scene,
       })
       get().normalizeEdgeColors({ skipMarkDirty: true })
     } catch (error) {
@@ -407,7 +420,9 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
           throw err
         }),
       ])
-      const doc = docResponse.document as Record<string, unknown>
+      const { document: doc, scene } = splitScene(
+        docResponse.document as Record<string, unknown>,
+      )
       const textCards = useUiLayoutStore.getState().textCardsPrototype
       const serverLayout = (layoutResponse?.layout ?? {}) as Record<string, unknown>
       const layoutBlob = textCards ? toTextCardsWorkingLayout(serverLayout) : serverLayout
@@ -444,6 +459,8 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         layoutRevision,
         loadSeq,
         documentPersisted: true,
+        scene,
+        canEditDocument: docResponse.capabilities?.can_edit ?? true,
       })
       get().normalizeEdgeColors({ skipMarkDirty: true })
       // Prototype 20.2 : la disposition `LR` qui vient d'être calculée se range tout de
@@ -510,6 +527,9 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
       documentRevision: rest.documentRevision,
       layoutRevision: rest.layoutRevision,
       documentPersisted: rest.documentPersisted ?? false,
+      scene: rest.scene ?? null,
+      sceneDirty: false,
+      canEditDocument: rest.canEditDocument ?? true,
       dialogueFlagBindings: parseBindingsFromDocument(rest.document as Record<string, unknown>),
       isLoading: false,
       isSaving: false,
@@ -601,10 +621,14 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         // Le graphe ne porte pas le titre : sur conflit, celui du serveur (renommé dans Édition) prime.
         const serverTitle = serverDocument?.title
         if (typeof serverTitle === 'string' && serverTitle.trim()) doc.title = serverTitle
+        // Fiche non touchée ici : celle du serveur est gardée (absente du PUT) et adoptée.
+        if (serverDocument && !snap.sceneDirty && !get().sceneDirty && isActiveSave()) {
+          set({ scene: parseSceneSheet(serverDocument.scene) })
+        }
         // Brouillon : une saisie en cours (condition à moitié remplie) ne doit pas faire refuser
         // toute la persistance ; l'export Unity garde sa propre validation stricte.
         const body = {
-          document: doc,
+          document: snap.sceneDirty ? { ...doc, scene: snap.scene } : doc,
           revision,
           validationMode: 'draft' as const,
           ...(state.documentPersisted ? { mustExist: true } : {}),
@@ -642,6 +666,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
           document: doc,
           documentRevision: docRes.revision,
           documentPersisted: true,
+          ...(snap.sceneDirty && get().scene === snap.scene ? { sceneDirty: false } : {}),
         })
         failedStage = 'layout'
         const { result: layoutRes } = await (earlyLayout ??

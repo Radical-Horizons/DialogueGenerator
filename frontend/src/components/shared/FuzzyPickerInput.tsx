@@ -28,6 +28,8 @@ export interface FuzzyPickerInputProps {
   id?: string
   value: string
   onChange: (value: string) => void
+  /** Suggestion choisie (clic ou Entrée) ; à défaut elle passe par `onChange`. */
+  onSelect?: (id: string) => void
   options: FuzzyPickerOption[]
   placeholder?: string
   disabled?: boolean
@@ -40,6 +42,7 @@ export const FuzzyPickerInput = memo(function FuzzyPickerInput({
   id,
   value,
   onChange,
+  onSelect,
   options,
   placeholder,
   disabled = false,
@@ -105,10 +108,11 @@ export const FuzzyPickerInput = memo(function FuzzyPickerInput({
 
   const selectSuggestion = useCallback(
     (id: string) => {
-      onChange(id)
+      const choose = onSelect ?? onChange
+      choose(id)
       setIsOpen(false)
     },
-    [onChange],
+    [onChange, onSelect],
   )
 
   const inputStyle: CSSProperties = {

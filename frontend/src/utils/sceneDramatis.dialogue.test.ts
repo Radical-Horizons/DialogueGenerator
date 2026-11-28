@@ -2,8 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   type DramatisGraphNode,
   findParentDialogueNode,
-  resolveDialogueDramatis,
-  resolveGraphGenerationDramatis,
+  readDialogueDramatis,
 } from './sceneDramatis'
 
 const VOKNIR = "Voknir Esh'Maradel"
@@ -43,13 +42,10 @@ const voknirNodes: DramatisGraphNode[] = [
   { id: 'END', type: 'endNode', data: {} },
 ]
 
-/** Scène restée dans le panneau de contexte depuis la page « Générer ». */
-const panelScene = { playerCharacterId: "L'Éthérée", npcSpeakerId: 'Uresaïr' }
-
-describe('resolveDialogueDramatis — le dialogue ouvert dit qui parle', () => {
-  it('Voknir : PNJ = locuteur du parent, PJ = jouable nommé dans le dialogue (pas le panneau)', () => {
+describe('readDialogueDramatis — le dialogue ouvert dit qui parle, sans repli', () => {
+  it('Voknir : PNJ = locuteur du parent, PJ = jouable nommé dans le dialogue', () => {
     expect(
-      resolveDialogueDramatis({ nodes: voknirNodes, parentNodeId: 'node-autoritaire', fallback: panelScene }),
+      readDialogueDramatis({ nodes: voknirNodes, parentNodeId: 'node-autoritaire' }),
     ).toEqual({ playerCharacterId: 'Uresaïr', npcSpeakerId: VOKNIR })
   })
 
@@ -59,28 +55,24 @@ describe('resolveDialogueDramatis — le dialogue ouvert dit qui parle', () => {
     ).toBe('node-craquement')
     expect(findParentDialogueNode(voknirNodes, 'test:c-craq-0')?.id).toBe('node-craquement')
     expect(
-      resolveDialogueDramatis({
+      readDialogueDramatis({
         nodes: voknirNodes,
         parentNodeId: 'test-node-node-craquement-choice-0',
-        fallback: panelScene,
       }),
     ).toEqual({ playerCharacterId: 'Uresaïr', npcSpeakerId: VOKNIR })
   })
 
-  it('aucun jouable nommé : le PJ du panneau sert de repli', () => {
+  it('aucun jouable nommé : pas de PJ inventé', () => {
     const nodes: DramatisGraphNode[] = [
       { id: 'START', type: 'dialogueNode', data: { speaker: 'Laios Sul Kandar', line: '« Tu cherches une route. »' } },
     ]
-    expect(
-      resolveDialogueDramatis({
-        nodes,
-        parentNodeId: 'START',
-        fallback: { playerCharacterId: 'Vethraak', npcSpeakerId: 'Uresaïr' },
-      }),
-    ).toEqual({ playerCharacterId: 'Vethraak', npcSpeakerId: 'Laios Sul Kandar' })
+    expect(readDialogueDramatis({ nodes, parentNodeId: 'START' })).toEqual({
+      playerCharacterId: null,
+      npcSpeakerId: 'Laios Sul Kandar',
+    })
   })
 
-  it('un jouable peut être le PNJ du dialogue (Uresaïr face à L’Éthérée), jamais aussi le PJ', () => {
+  it('un jouable peut être le PNJ du dialogue, jamais aussi le PJ', () => {
     const nodes: DramatisGraphNode[] = [
       {
         id: 'START',
@@ -88,13 +80,10 @@ describe('resolveDialogueDramatis — le dialogue ouvert dit qui parle', () => {
         data: { speaker: 'Uresaïr', line: '*Dans les os creux, Uresaïr se tait.* « Approche. »' },
       },
     ]
-    const dramatis = resolveDialogueDramatis({
-      nodes,
-      parentNodeId: 'START',
-      fallback: { playerCharacterId: 'Uresaïr', npcSpeakerId: 'Akthar-Neth Amatru' },
+    expect(readDialogueDramatis({ nodes, parentNodeId: 'START' })).toEqual({
+      playerCharacterId: null,
+      npcSpeakerId: 'Uresaïr',
     })
-    expect(dramatis.npcSpeakerId).toBe('Uresaïr')
-    expect(dramatis.playerCharacterId).toBe("L'Éthérée")
   })
 
   it('L’Éthérée n’est jamais PNJ ; parent sans locuteur → locuteur le plus fréquent', () => {
@@ -103,28 +92,23 @@ describe('resolveDialogueDramatis — le dialogue ouvert dit qui parle', () => {
       { id: 'b', type: 'dialogueNode', data: { speaker: VOKNIR, line: '« Uresaïr ! »' } },
       { id: 'manual', type: 'dialogueNode', data: { speaker: '', line: '' } },
     ]
-    expect(
-      resolveDialogueDramatis({ nodes, parentNodeId: 'manual', fallback: panelScene }),
-    ).toEqual({ playerCharacterId: 'Uresaïr', npcSpeakerId: VOKNIR })
+    expect(readDialogueDramatis({ nodes, parentNodeId: 'manual' })).toEqual({
+      playerCharacterId: 'Uresaïr',
+      npcSpeakerId: VOKNIR,
+    })
   })
 
-  it('dialogue sans locuteur exploitable : la scène du panneau reste inchangée', () => {
+  it('PNJ imposé par la fiche : il n’est pas relu, et n’est jamais pris pour PJ', () => {
+    expect(
+      readDialogueDramatis({ nodes: voknirNodes, parentNodeId: 'START', npcSpeakerId: 'Uresaïr' }),
+    ).toEqual({ playerCharacterId: null, npcSpeakerId: 'Uresaïr' })
+  })
+
+  it('dialogue sans locuteur exploitable : rien', () => {
     const nodes: DramatisGraphNode[] = [{ id: 'START', type: 'dialogueNode', data: { speaker: 'PNJ', line: '' } }]
-    expect(resolveDialogueDramatis({ nodes, parentNodeId: 'START', fallback: panelScene })).toEqual(panelScene)
-  })
-})
-
-describe('resolveGraphGenerationDramatis', () => {
-  it('le dialogue l’emporte sur la sélection du panneau et les valeurs explicites', () => {
-    expect(
-      resolveGraphGenerationDramatis({
-        nodes: voknirNodes,
-        parentNodeId: 'START',
-        contextSelections: { characters_full: ["L'Éthérée", 'Uresaïr'] },
-        sceneSelection: { characterA: "L'Éthérée", characterB: 'Uresaïr' },
-        npcSpeakerId: 'Uresaïr',
-        playerCharacterId: "L'Éthérée",
-      }),
-    ).toEqual({ playerCharacterId: 'Uresaïr', npcSpeakerId: VOKNIR })
+    expect(readDialogueDramatis({ nodes, parentNodeId: 'START' })).toEqual({
+      playerCharacterId: null,
+      npcSpeakerId: null,
+    })
   })
 })

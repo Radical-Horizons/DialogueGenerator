@@ -26,6 +26,31 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# La fiche de scène voyage avec le document dans le contrat HTTP, jamais dans son fichier :
+# le fichier du dialogue est celui qui part dans le jeu.
+SCENE_KEY = "scene"
+SCENE_DIRECTORY = "Scenes"
+
+
+def scene_sheet_path(base_dir: Path, document_id: str) -> Path:
+    """Chemin du compagnon de fiche de scène, frère du dossier des dialogues.
+
+    Args:
+        base_dir: Dossier des documents (``Assets/Dialogue``).
+        document_id: Identifiant du document (stem du fichier).
+
+    Returns:
+        ``<base_dir>/../Scenes/{document_id}.scene.json``.
+    """
+    return base_dir.parent / SCENE_DIRECTORY / f"{document_id}.scene.json"
+
+
+def without_scene(document: dict[str, object]) -> dict[str, object]:
+    """Retourne le document sans sa fiche de scène, sans modifier l'original."""
+    if SCENE_KEY not in document:
+        return document
+    return {key: value for key, value in document.items() if key != SCENE_KEY}
+
 
 def file_creation_time_iso(stat_result: os.stat_result) -> str:
     """Retourne une date de création fichier ISO UTC.
@@ -60,6 +85,7 @@ class DialogueRevisionConflictError(Exception):
 
     payload: dict[str, object]
     revision: int
+    scene: dict[str, object] | None = None
 
 
 @dataclass(frozen=True)
@@ -80,6 +106,7 @@ class PersistedDocument:
     revision: int
     was_legacy_list: bool
     capabilities: DialogueCapabilities
+    scene: dict[str, object] | None = None
 
 
 @dataclass(frozen=True)
@@ -386,6 +413,21 @@ class DocumentPersistenceService:
             else:
                 self._replace_file(path, content)
 
+    @staticmethod
+    def _read_scene(path: Path) -> dict[str, object] | None:
+        """Lit la fiche de scène ; ``None`` si absente ou illisible."""
+        if not path.exists():
+            return None
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (ValueError, OSError):
+            logger.warning("Fiche de scène illisible : %s", path, exc_info=True)
+            return None
+        if not isinstance(payload, dict):
+            logger.warning("Fiche de scène ignorée (objet attendu) : %s", path)
+            return None
+        return payload
+
     def read_document(
         self,
         base_dir: Path,
@@ -412,10 +454,11 @@ class DocumentPersistenceService:
             if not isinstance(document, dict):
                 raise ValueError("Le document persisté doit être un objet ou une liste")
             return PersistedDocument(
-                document=document,
+                document=without_scene(document),
                 revision=self._read_revision(base_dir / f"{document_id}.meta"),
                 was_legacy_list=was_legacy_list,
                 capabilities=capabilities,
+                scene=self._read_scene(scene_sheet_path(base_dir, document_id)),
             )
 
     def write_document(
@@ -433,7 +476,19 @@ class DocumentPersistenceService:
 
         ``must_exist`` : le client édite un document qu'il a lu sur le serveur ; s'il a
         disparu (supprimé), lever ``DialogueNotFoundError`` plutôt que le recréer.
+
+        La clé ``scene`` est rangée dans le compagnon ``Scenes/{id}.scene.json`` et
+        retirée du fichier du dialogue : absente, la fiche est inchangée ; ``None``,
+        elle est supprimée. Une création sans fiche efface un compagnon orphelin.
+
+        Raises:
+            ValueError: ``scene`` n'est ni un objet ni ``None``.
         """
+        has_scene = SCENE_KEY in document
+        scene = document.get(SCENE_KEY)
+        if scene is not None and not isinstance(scene, dict):
+            raise ValueError("La fiche de scène doit être un objet")
+        document = without_scene(document)
         with self._lock:
             document_path = base_dir / f"{document_id}.json"
             meta_path = base_dir / f"{document_id}.meta"
@@ -452,6 +507,7 @@ class DocumentPersistenceService:
                         raise DialogueRevisionConflictError(
                             payload=current.document,
                             revision=current.revision,
+                            scene=current.scene,
                         )
                     raise DialogueRevisionConflictError(
                         payload={"schemaVersion": "1.1.0", "nodes": []},
@@ -465,6 +521,7 @@ class DocumentPersistenceService:
                     raise DialogueRevisionConflictError(
                         payload=current.document,
                         revision=current.revision,
+                        scene=current.scene,
                     )
                 new_revision = current_revision + 1
             else:
@@ -485,7 +542,8 @@ class DocumentPersistenceService:
                     else datetime.now(timezone.utc).isoformat()
                 )
 
-            snapshot_paths = [meta_path, sequence_path]
+            scene_path = scene_sheet_path(base_dir, document_id)
+            snapshot_paths = [meta_path, sequence_path, scene_path]
             if not create_only:
                 snapshot_paths.insert(0, document_path)
             snapshot = self._snapshot(snapshot_paths)
@@ -512,10 +570,15 @@ class DocumentPersistenceService:
                         raise DialogueRevisionConflictError(
                             payload=current.document,
                             revision=current.revision,
+                            scene=current.scene,
                         ) from exc
                     created_document = True
                 else:
                     self._replace_file(document_path, self._document_bytes(document))
+                if scene is not None:
+                    self._replace_file(scene_path, self._document_bytes(scene))
+                elif has_scene or not existed:
+                    scene_path.unlink(missing_ok=True)
                 self._replace_file(meta_path, self._meta_bytes(new_revision, created_at))
                 if sequence is not None:
                     self._replace_file(sequence_path, f"{sequence}\n".encode("utf-8"))
@@ -648,7 +711,7 @@ class DocumentPersistenceService:
         document_id: str,
         current_user: Mapping[str, object],
     ) -> None:
-        """Supprime document, révisions, layout, séquence et index en compensation."""
+        """Supprime document, révisions, layout, séquence, fiche et index en compensation."""
         with self._lock:
             document_path = document_base_dir / f"{document_id}.json"
             self.require_delete(document_id, current_user, document_path)
@@ -658,6 +721,7 @@ class DocumentPersistenceService:
                 document_path,
                 document_base_dir / f"{document_id}.meta",
                 document_base_dir / f"{document_id}.seq",
+                scene_sheet_path(document_base_dir, document_id),
             ]
             if layout_base_dir is not None:
                 paths.extend(

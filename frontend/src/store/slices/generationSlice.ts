@@ -6,7 +6,9 @@ import type { Node } from 'reactflow'
 import type { GraphState } from '../types/graphState'
 import type { Choice } from '../../schemas/nodeEditorSchema'
 import { serializeDialogueNodesForApi } from '../../utils/dialoguePathContext'
-import { resolveGraphGenerationDramatis } from '../../utils/sceneDramatis'
+import { buildSceneGeneration, composeSceneInstructions } from '../../utils/sceneSheet'
+import { effectiveSceneSheet } from './sceneSlice'
+import { useSceneCatalogStore } from '../sceneCatalogStore'
 import * as graphAPI from '../../api/graph'
 import { markNodeDeleted } from '../../api/llmUsage'
 import { normalizeTestBars, normalizeTestBarsAfterLayout } from '../../utils/graphNormalizers'
@@ -204,23 +206,17 @@ export const createGenerationSlice: StateCreator<
         }
       }
 
-      const contextSelections =
-        typeof options.context_selections === 'object' && options.context_selections != null
-          ? (options.context_selections as Record<string, unknown>)
-          : {}
-      const maxChoices =
-        typeof options.max_choices === 'number' ? options.max_choices : null
-      const dramatis = resolveGraphGenerationDramatis({
+      // La fiche de scène est la seule source de PNJ, PJ, lieu, brief et fiches.
+      get().ensureSceneStored()
+      const generation = buildSceneGeneration({
+        sheet: effectiveSceneSheet(get()),
         nodes: state.nodes,
         parentNodeId,
-        contextSelections,
-        playerCharacterId:
-          typeof options.player_character_id === 'string' ? options.player_character_id : undefined,
-        npcSpeakerId:
-          typeof options.npc_speaker_id === 'string' ? options.npc_speaker_id : undefined,
+        characters: useSceneCatalogStore.getState().characters,
       })
-      const npcSpeakerId = dramatis.npcSpeakerId !== 'PNJ' ? dramatis.npcSpeakerId : undefined
-      const playerCharacterId = dramatis.playerCharacterId
+      const contextSelections = generation.contextSelections as unknown as Record<string, unknown>
+      const maxChoices =
+        typeof options.max_choices === 'number' ? options.max_choices : null
       const systemPromptOverride =
         typeof options.system_prompt_override === 'string'
           ? options.system_prompt_override
@@ -255,11 +251,14 @@ export const createGenerationSlice: StateCreator<
         {
           parent_node_id: parentNodeId,
           parent_node_content: normalizedContent,
-          user_instructions: withAntiDropClause(instructions, overlay),
+          user_instructions: withAntiDropClause(
+            composeSceneInstructions(generation.brief, instructions),
+            overlay,
+          ),
           context_selections: contextSelections,
           max_choices: maxChoices,
-          npc_speaker_id: npcSpeakerId,
-          player_character_id: playerCharacterId,
+          npc_speaker_id: generation.npcSpeakerId,
+          player_character_id: generation.playerCharacterId,
           system_prompt_override: systemPromptOverride,
           narrative_tags: narrativeTags,
           llm_model_identifier: llmModelIdentifier,
@@ -766,40 +765,29 @@ export const createGenerationSlice: StateCreator<
             : undefined
 
       const existingData = node.data as Record<string, unknown>
-      const snap = existingData.gddContextSelectionsSnapshot
-      const regenSelections =
-        typeof snap === 'object' && snap !== null && !Array.isArray(snap)
-          ? (snap as Record<string, unknown>)
-          : {}
-
-      const regenDramatis = resolveGraphGenerationDramatis({
+      get().ensureSceneStored()
+      const generation = buildSceneGeneration({
+        sheet: effectiveSceneSheet(get()),
         nodes: state.nodes,
         parentNodeId: parentNode.id,
-        contextSelections: regenSelections,
+        characters: useSceneCatalogStore.getState().characters,
       })
-      const regenPlayerId = regenDramatis.playerCharacterId
       // L'endpoint de régénération lit le PNJ dans scene_protagonists (pas de champ dédié).
-      const regenContext =
-        regenDramatis.npcSpeakerId !== 'PNJ'
-          ? {
-              ...regenSelections,
-              scene_protagonists: {
-                personnage_a: regenDramatis.playerCharacterId,
-                personnage_b: regenDramatis.npcSpeakerId,
-              },
-            }
-          : regenSelections
+      const regenSelections = generation.contextSelections as unknown as Record<string, unknown>
 
       const overlay = useGenerationStore.getState().contextDroppingRulesOverlay
       const response = await graphAPI.regenerateNode(nodeId, {
         dialogue_id: dialogueId,
-        new_instructions: withAntiDropClause(newInstructions, overlay),
+        new_instructions: withAntiDropClause(
+          composeSceneInstructions(generation.brief, newInstructions),
+          overlay,
+        ),
         preserve_connections: true,
         parent_node_id: parentNode.id,
         parent_node_content: parentNode.data as Record<string, unknown>,
-        context_selections: regenContext,
+        context_selections: regenSelections,
         via_choice_index,
-        player_character_id: regenPlayerId,
+        player_character_id: generation.playerCharacterId,
         dialogue_nodes: serializeDialogueNodesForApi(state.nodes),
         ...getAppliedTemplateLogFields(),
       })
@@ -814,7 +802,7 @@ export const createGenerationSlice: StateCreator<
         typeof response.context_gdd_content_fingerprint === 'string' &&
         response.context_gdd_content_fingerprint.length > 0
           ? response.context_gdd_content_fingerprint
-          : (existingData.contextGddContentFingerprint as string | undefined)
+          : undefined
 
       const newData = {
         ...response.node,
@@ -822,11 +810,9 @@ export const createGenerationSlice: StateCreator<
         status: 'pending' as const,
         lastGenerationInstructions: newInstructions,
         regenerationHistory,
-        contextGddHash: existingData.contextGddHash ?? (response.node as Record<string, unknown>).contextGddHash,
+        contextGddHash: simpleHash(JSON.stringify(regenSelections)),
         ...(regenFp !== undefined && { contextGddContentFingerprint: regenFp }),
-        ...(existingData.gddContextSelectionsSnapshot !== undefined && {
-          gddContextSelectionsSnapshot: existingData.gddContextSelectionsSnapshot,
-        }),
+        gddContextSelectionsSnapshot: regenSelections,
       }
 
       set((s) => {

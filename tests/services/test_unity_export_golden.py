@@ -443,3 +443,28 @@ def test_http_rejection_text_drops_request_id_and_unity_dir(tmp_path: Path) -> N
     assert text.startswith("HTTP 422: {")
     assert "abc" not in text and "request_id" not in text
     assert str(tmp_path) not in text and "<unity_dir>" in text
+
+
+SCENE_PATHS = ("python-apercu", "python-lot", "python-lot-valide")
+
+
+def _dict_fixtures() -> list[str]:
+    """Fixtures au format document : seules elles peuvent porter ``scene``."""
+    return [name for name in fixture_names() if isinstance(json.loads(read_input(name)), dict)]
+
+
+@pytest.mark.p0
+@pytest.mark.unit
+@pytest.mark.parametrize("path_name", SCENE_PATHS)
+@pytest.mark.parametrize("fixture", _dict_fixtures())
+def test_unity_export_drops_scene_sheet(fixture: str, path_name: str, tmp_path: Path) -> None:
+    """Un document portant ``scene`` s'exporte comme sans elle : attendus inchangés."""
+    document = json.loads(read_input(fixture))
+    document["scene"] = {"brief": "Jamais exporté", "npcs": [{"entryId": None, "name": "X"}]}
+    raw = json.dumps(document, ensure_ascii=False, indent=2)
+
+    extension, actual = render(path_name, raw, fixture, tmp_path)
+
+    assert "Jamais exporté" not in actual
+    message = compare_with_golden(path_name, fixture, extension, actual)
+    assert message is None, message

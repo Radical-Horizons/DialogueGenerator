@@ -21,6 +21,7 @@ import { createGenerationSlice } from './slices/generationSlice'
 import { createLayoutSlice } from './slices/layoutSlice'
 import { createUISlice } from './slices/uiSlice'
 import { createDialogueFlagsSlice } from './slices/dialogueFlagsSlice'
+import { createSceneSlice } from './slices/sceneSlice'
 
 export const useGraphStore = create<GraphState>()((...args) => ({
   ...initialState,
@@ -31,6 +32,7 @@ export const useGraphStore = create<GraphState>()((...args) => ({
   ...createGenerationSlice(...args),
   ...createLayoutSlice(...args),
   ...createDialogueFlagsSlice(...args),
+  ...createSceneSlice(...args),
   ...createUISlice(...args),
 }))
 

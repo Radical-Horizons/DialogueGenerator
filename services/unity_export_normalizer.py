@@ -1,7 +1,8 @@
 """Normalisation des documents Unity avant validation/export (Epic 5 retro T1).
 
 Retire les emplacements de choix vides (``__idx_N``), les champs ``null`` rejetés
-par le schéma JSON et les chaînes legacy vides (``condition``, ``test``).
+par le schéma JSON et les chaînes legacy vides (``condition``, ``test``), ainsi que
+la fiche de scène (``scene``), métadonnée d'auteur qui ne part pas dans le jeu.
 Ajoute ``choiceId`` manquants et ``targetNode`` par défaut (``END``) pour l'export graphe.
 """
 from __future__ import annotations
@@ -168,6 +169,7 @@ def normalize_unity_export_document(
         Document normalisé (copie profonde par défaut).
     """
     doc = document if in_place else copy.deepcopy(document)
+    doc.pop("scene", None)
     ensure_document_choice_ids(doc, in_place=True)
     nodes = doc.get("nodes")
     if isinstance(nodes, list):

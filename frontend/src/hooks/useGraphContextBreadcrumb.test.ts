@@ -1,5 +1,5 @@
 /**
- * Fil d'Ariane graphe — segments contexte › dialogue › nœud.
+ * Fil d'Ariane graphe — segments PNJ de la scène › dialogue › nœud.
  */
 import { describe, it, expect, beforeEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
@@ -9,24 +9,10 @@ import { useGraphStore } from '../store/graphStore'
 
 describe('useGraphContextBreadcrumb', () => {
   beforeEach(() => {
-    useContextStore.setState({
-      selections: {
-        characters_full: ['Akthar-Neth Amatru'],
-        characters_excerpt: [],
-        locations_full: [],
-        locations_excerpt: [],
-        items_full: [],
-        items_excerpt: [],
-        species_full: [],
-        species_excerpt: [],
-        communities_full: [],
-        communities_excerpt: [],
-        dialogues_examples: [],
-        narrative_structures: [],
-        chapters: [],
-        scenes: [],
-      },
-    })
+    useGraphStore.getState().resetGraph()
+    useContextStore.setState((s) => ({
+      selections: { ...s.selections, characters_full: ['Personnage de la colonne'] },
+    }))
     useGraphStore.setState({
       dialogueMetadata: {
         title: 'Révision imprévue auprès de la seigneurie',
@@ -46,20 +32,23 @@ describe('useGraphContextBreadcrumb', () => {
     })
   })
 
-  it('compose les trois segments du fil d’Ariane', () => {
+  it('montre le PNJ du dialogue, jamais les personnages de la colonne', () => {
     const { result } = renderHook(() => useGraphContextBreadcrumb())
-    expect(result.current.contextLabel).toBe('Akthar-Neth Amatru')
+    expect(result.current.contextLabel).toBe('Avili')
     expect(result.current.dialogueLabel).toBe('Révision imprévue auprès de la seigneurie')
     expect(result.current.nodeLabel).toBe('Entrée')
   })
 
-  it('affiche (+N) quand plusieurs personnages sont sélectionnés', () => {
-    useContextStore.setState((s) => ({
-      selections: {
-        ...s.selections,
-        characters_full: ['Alice', 'Bob', 'Charlie'],
+  it('suit la fiche enregistrée, avec (+N) pour les autres PNJ', () => {
+    useGraphStore.setState({
+      scene: {
+        npcs: ['Alice', 'Bob', 'Charlie'].map((name) => ({ name, entryId: null })),
+        pc: null,
+        place: null,
+        brief: '',
+        linkedEntries: [],
       },
-    }))
+    })
     const { result } = renderHook(() => useGraphContextBreadcrumb())
     expect(result.current.contextLabel).toBe('Alice (+2)')
   })

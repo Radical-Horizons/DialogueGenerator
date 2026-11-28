@@ -6,6 +6,7 @@ import type { Node, Edge } from 'reactflow'
 import type { SaveGraphResponse, ValidationErrorDetail } from '../../types/graph'
 import type { DialogueFlagBinding } from '../../types/dialogueFlags'
 import type { DocumentFieldError } from '../../utils/documentValidationFieldErrors'
+import type { SceneSheet } from '../../utils/sceneSheet'
 
 /** Story 2.14 FR35: snapshot du graphe pour undo/redo (incl. SoT document + layout). */
 export interface GraphSnapshot {
@@ -80,6 +81,19 @@ export interface GraphState {
   /** Le document existe sur le serveur (lu ou déjà écrit) : l'autosave ne doit jamais le recréer. */
   documentPersisted: boolean
 
+  /** Fiche de scène enregistrée, hors de `document` ; `null` : à déduire du dialogue. */
+  scene: SceneSheet | null
+  /** La fiche a changé ici : le prochain PUT la porte, sinon le serveur garde la sienne. */
+  sceneDirty: boolean
+  /** Droit d'écriture annoncé par le serveur à la lecture. */
+  canEditDocument: boolean
+  /** Geste de l'auteur sur la fiche ; sans effet en lecture seule. */
+  updateScene: (change: (sheet: SceneSheet) => SceneSheet) => void
+  /** Enregistre la fiche déduite (première génération). Sans effet si elle existe. */
+  ensureSceneStored: () => void
+  /** Réécrit le locuteur des répliques en une seule étape de Ctrl+Z. */
+  rewriteSpeakers: (nodeIds: string[], speaker: string) => void
+
   /** Story 9.1 — liaisons catalogue ↔ valeurs initiales persistées dans le document. */
   dialogueFlagBindings: DialogueFlagBinding[]
   setDialogueFlagBindings: (bindings: DialogueFlagBinding[]) => void
@@ -125,6 +139,8 @@ export interface GraphState {
     layoutRevision: number
     loadSeq: number
     documentPersisted?: boolean
+    scene?: SceneSheet | null
+    canEditDocument?: boolean
   }) => boolean
   addNode: (node: Node) => void
   /** Crée un nœud vide (sans LLM). Story 1.6 - FR6. */
@@ -354,6 +370,9 @@ export const initialState = {
   documentRevision: null as number | null,
   layoutRevision: null as number | null,
   documentPersisted: false,
+  scene: null as SceneSheet | null,
+  sceneDirty: false,
+  canEditDocument: true,
   dialogueFlagBindings: [] as DialogueFlagBinding[],
   graphFilters: {} as GraphFilters,
   layoutSpacingMode: 'normal' as GraphLayoutSpacingMode,

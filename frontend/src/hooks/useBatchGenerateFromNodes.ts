@@ -13,11 +13,12 @@ import {
 } from '../api/batchNodeGeneration'
 import type { UseToastFn } from '../components/shared'
 import { useBatchNodeGenerationJobStore } from '../store/batchNodeGenerationJobStore'
-import { useContextStore } from '../store/contextStore'
 import { useGraphStore } from '../store/graphStore'
+import { effectiveSceneSheet } from '../store/slices/sceneSlice'
+import { useSceneCatalogStore } from '../store/sceneCatalogStore'
 import { getErrorMessage } from '../types/errors'
 import { serializeDialogueNodesForApi } from '../utils/dialoguePathContext'
-import { resolveGraphGenerationDramatis } from '../utils/sceneDramatis'
+import { buildSceneGeneration, composeSceneInstructions } from '../utils/sceneSheet'
 
 export interface BatchGenerateProgress {
   current: number
@@ -47,14 +48,19 @@ function hasUnconnectedChoice(node: Node | undefined): boolean {
   })
 }
 
-function resolveContextForParent(node: Node | undefined): Record<string, unknown> {
-  const snap = node?.data?.gddContextSelectionsSnapshot
-  if (snap && typeof snap === 'object') {
-    return JSON.parse(JSON.stringify(snap)) as Record<string, unknown>
-  }
-  return {
-    ...useContextStore.getState().selections,
-  } as unknown as Record<string, unknown>
+/** Contexte, PNJ, PJ et brief d'un parent du lot : ceux de la fiche de scène. */
+function sceneGenerationFor(parentId: string) {
+  const state = useGraphStore.getState()
+  return buildSceneGeneration({
+    sheet: effectiveSceneSheet(state),
+    nodes: state.nodes,
+    parentNodeId: parentId,
+    characters: useSceneCatalogStore.getState().characters,
+  })
+}
+
+function contextForParent(parentId: string): Record<string, unknown> {
+  return sceneGenerationFor(parentId).contextSelections as unknown as Record<string, unknown>
 }
 
 function emptyLocalReport(partial: Partial<BatchGenerateReport> = {}): BatchGenerateReport {
@@ -91,19 +97,14 @@ function buildParentSpec(parentId: string): BatchGenerateParentSpec | null {
   const nodes = useGraphStore.getState().nodes
   const node = nodes.find((n) => n.id === parentId)
   if (!node) return null
-  const selections = resolveContextForParent(node)
-  const dramatis = resolveGraphGenerationDramatis({
-    nodes,
-    parentNodeId: parentId,
-    contextSelections: selections,
-  })
+  const generation = sceneGenerationFor(parentId)
   return {
     parent_node_id: parentId,
     parent_node_content: { ...(node.data as Record<string, unknown>) },
-    context_selections: selections,
-    user_instructions: '',
-    npc_speaker_id: dramatis.npcSpeakerId !== 'PNJ' ? dramatis.npcSpeakerId : undefined,
-    player_character_id: dramatis.playerCharacterId,
+    context_selections: generation.contextSelections as unknown as Record<string, unknown>,
+    user_instructions: composeSceneInstructions(generation.brief, ''),
+    npc_speaker_id: generation.npcSpeakerId,
+    player_character_id: generation.playerCharacterId,
   }
 }
 
@@ -154,7 +155,6 @@ export function useBatchGenerateFromNodes(
       const apply = useGraphStore.getState().applyGenerateNodeResponse
       for (const item of pendingApplyReport.items) {
         if (item.status !== 'ok' || !item.nodes?.length) continue
-        const node = useGraphStore.getState().nodes.find((n) => n.id === item.parent_node_id)
         try {
           await apply(
             item.parent_node_id,
@@ -169,7 +169,7 @@ export function useBatchGenerateFromNodes(
               batch_count: item.nodes.length,
             },
             {
-              context_selections: resolveContextForParent(node),
+              context_selections: contextForParent(item.parent_node_id),
               instructions: '',
               generate_all_choices: true,
             }
@@ -250,10 +250,8 @@ export function useBatchGenerateFromNodes(
           continue
         }
 
-        const contextSelections = resolveContextForParent(node)
         try {
           const result = await generateFromNode(parentId, '', {
-            context_selections: contextSelections,
             generate_all_choices: true,
             choices_mode: 'capped',
             onBatchProgress: (j: number, k: number) => {
@@ -327,6 +325,7 @@ export function useBatchGenerateFromNodes(
 
   const runJob = useCallback(
     async (parentIds: string[], resumeJobId?: string) => {
+      useGraphStore.getState().ensureSceneStored()
       const specs: BatchGenerateParentSpec[] = []
       for (const id of parentIds) {
         const spec = buildParentSpec(id)
@@ -443,4 +442,4 @@ export function useBatchGenerateFromNodes(
   }
 }
 
-export { emptyLocalReport, hasUnconnectedChoice, resolveContextForParent }
+export { emptyLocalReport, hasUnconnectedChoice }

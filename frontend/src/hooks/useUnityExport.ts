@@ -112,7 +112,10 @@ export function useUnityExport(
           return
         }
         const filename = state.dialogueMetadata.filename || 'dialogue_export.json'
-        const jsonContent = JSON.stringify(doc, null, 2)
+        // La fiche de scène est une métadonnée d'auteur : elle ne s'exporte pas.
+        const exported: Record<string, unknown> = { ...doc }
+        delete exported.scene
+        const jsonContent = JSON.stringify(exported, null, 2)
         registerSuccessfulExport(jsonContent, filename)
         await downloadUnityExport(jsonContent, filename)
         toast(`Dialogue exporté (invité) : ${filename}`, 'success', 3000)

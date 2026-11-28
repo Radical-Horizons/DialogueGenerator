@@ -71,6 +71,9 @@ def _format_json_utf8(raw_content: str) -> str:
         data = json.loads(raw_content)
     except json.JSONDecodeError as exc:
         raise ValueError(f"Fichier JSON exporté invalide: {exc}") from exc
+    # Un fichier posé à la main peut porter la fiche de scène : elle ne part jamais.
+    if isinstance(data, dict):
+        data.pop("scene", None)
     return json.dumps(data, ensure_ascii=False, indent=2)
 
 

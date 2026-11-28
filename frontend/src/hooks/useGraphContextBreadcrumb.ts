@@ -1,13 +1,13 @@
 /**
- * Segments fil d'Ariane graphe : contexte GDD › dialogue › nœud.
+ * Segments fil d'Ariane graphe : PNJ de la scène › dialogue › nœud.
  */
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
-import { useContextStore } from '../store/contextStore'
 import { useGraphStore } from '../store/graphStore'
+import { useSceneSheet } from './useSceneSheet'
 
 export interface GraphContextBreadcrumbSegments {
-  /** Premier personnage sélectionné (+N si plusieurs). */
+  /** Premier PNJ de la fiche de scène (+N si plusieurs). */
   contextLabel: string | null
   /** Titre du dialogue ouvert. */
   dialogueLabel: string | null
@@ -19,9 +19,7 @@ export interface GraphContextBreadcrumbSegments {
  * Construit les segments du fil d'Ariane pour l'éditeur de graphe.
  */
 export function useGraphContextBreadcrumb(): GraphContextBreadcrumbSegments {
-  const characters = useContextStore(
-    useShallow((s) => [...s.selections.characters_full, ...s.selections.characters_excerpt])
-  )
+  const { sheet } = useSceneSheet()
   const dialogueMetadata = useGraphStore((s) => s.dialogueMetadata)
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId)
   const selectedNode = useGraphStore(
@@ -29,10 +27,10 @@ export function useGraphContextBreadcrumb(): GraphContextBreadcrumbSegments {
   )
 
   const contextLabel = useMemo(() => {
-    if (characters.length === 0) return null
-    if (characters.length === 1) return characters[0]
-    return `${characters[0]} (+${characters.length - 1})`
-  }, [characters])
+    const [first, ...others] = sheet.npcs
+    if (!first) return null
+    return others.length > 0 ? `${first.name} (+${others.length})` : first.name
+  }, [sheet])
 
   const dialogueLabel = useMemo(() => {
     const title = dialogueMetadata.title?.trim()

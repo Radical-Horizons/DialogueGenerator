@@ -72,8 +72,19 @@ const schemaState: UnityExportSchemaState = {
   setSchemaValidationStructuredErrors: vi.fn(),
 }
 
+/** Fiche de scène ajoutée à l'entrée pour vérifier qu'aucun chemin ne l'exporte. */
+let injectedScene: Record<string, unknown> | null = null
+
+/** Fixtures au format document : seules elles peuvent porter `scene`. */
+const DOCUMENT_FIXTURES = FIXTURES.filter(
+  (name) => !Array.isArray(JSON.parse(readFileSync(join(INPUTS_DIR, `${name}.json`), 'utf-8'))),
+)
+
 async function loadFixture(fixture: string): Promise<void> {
-  const raw = readFileSync(join(INPUTS_DIR, `${fixture}.json`), 'utf-8')
+  let raw = readFileSync(join(INPUTS_DIR, `${fixture}.json`), 'utf-8')
+  if (injectedScene) {
+    raw = JSON.stringify({ ...(JSON.parse(raw) as object), scene: injectedScene })
+  }
   await useGraphStore.getState().loadDialogueFromRawJson(raw, fixture)
 }
 
@@ -226,6 +237,24 @@ describe('p0 — golden export Unity (chemins front)', () => {
       expect(compareWithGolden(EXPECTED_DIR, pathName, fixture, extension, text, UPDATE)).toBeNull()
     })
   }
+
+  describe('document portant une fiche de scène : sorties identiques', () => {
+    afterEach(() => {
+      injectedScene = null
+    })
+
+    for (const pathName of Object.keys(PATHS).sort()) {
+      it.each(DOCUMENT_FIXTURES)(`%s / ${pathName} sans scene`, async (fixture) => {
+        injectedScene = { brief: 'Jamais exporté', npcs: [{ name: 'X', entryId: null }] }
+
+        const { extension, text } = await render(pathName, fixture)
+
+        expect(useGraphStore.getState().scene?.brief).toBe('Jamais exporté')
+        expect(text).not.toContain('Jamais exporté')
+        expect(compareWithGolden(EXPECTED_DIR, pathName, fixture, extension, text)).toBeNull()
+      })
+    }
+  })
 
   it('fait échouer un export invité bloqué par la validation au lieu de le figer', async () => {
     vi.mocked(graphAPI.validateSchema).mockResolvedValue({

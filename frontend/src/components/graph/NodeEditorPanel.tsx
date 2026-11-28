@@ -13,7 +13,6 @@ import { useShallow } from 'zustand/react/shallow'
 import type { Node } from 'reactflow'
 import { useGraphStore } from '../../store/graphStore'
 import { useGraphViewStore } from '../../store/graphViewStore'
-import { useContextStore } from '../../store/contextStore'
 import { InlineFieldError, fieldErrorBorder } from '../shared/InlineFieldError'
 import { useToast } from '../shared'
 import { theme } from '../../theme'
@@ -62,7 +61,8 @@ import { ConnectionTargetSelect } from './ConnectionTargetSelect'
 import { useEstimation } from '../../hooks/useEstimation'
 import { EstimationBadge } from '../estimation'
 import { serializeDialogueNodesForApi } from '../../utils/dialoguePathContext'
-import { resolveGraphGenerationDramatis } from '../../utils/sceneDramatis'
+import { composeSceneInstructions } from '../../utils/sceneSheet'
+import { useSceneGeneration } from '../../hooks/useSceneSheet'
 
 function formValuesFromNode(
   nodeType: string,
@@ -128,7 +128,6 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
   const validationFieldErrors = useMemo(() => documentFieldErrors ?? [], [documentFieldErrors])
   const firstValidationFieldError = validationFieldErrors[0]
   const clearValidationFieldError = clearDocumentFieldError ?? (() => {})
-  const { selections } = useContextStore()
   const toast = useToast()
   const [showGenerationOptions, setShowGenerationOptions] = useState(false)
   const [userInstructions, setUserInstructions] = useState('')
@@ -136,8 +135,6 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
   const [availableModels, setAvailableModels] = useState<LLMModelResponse[]>([])
   const [batchProgress, setBatchProgress] = useState<{ current: number; total: number } | null>(null)
   /** Valeurs lues au moment de l'appel API (évite closures périmées pendant await generateFromNode). */
-  const selectionsRef = useRef(selections)
-  selectionsRef.current = selections
   const llmModelRef = useRef(llmModel)
   llmModelRef.current = llmModel
   const userInstructionsRef = useRef(userInstructions)
@@ -154,6 +151,17 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
       })
   }, [])
   
+  /**
+   * Nœud dont les listes (choix, conditions) peuvent être montées. Montées pendant que le
+   * formulaire porte encore le nœud précédent, elles se réenregistrent avec ses valeurs dès
+   * qu'une écriture du store (mesure du nouveau nœud) force un rendu avant que le `reset`
+   * soit appliqué : le nouveau nœud héritait alors des choix du précédent.
+   */
+  const [listsNodeId, setListsNodeId] = useState<string | null>(() =>
+    selectedNode?.data ? selectedNodeId : null,
+  )
+  const listsReady = selectedNodeId != null && listsNodeId === selectedNodeId
+
   useEffect(() => {
     const first = firstValidationFieldError
     if (!first || first.nodeId !== selectedNodeId) return
@@ -164,7 +172,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
     el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
     const focusable = el.querySelector<HTMLElement>('input, textarea, select')
     focusable?.focus()
-  }, [firstValidationFieldError, selectedNodeId])
+  }, [firstValidationFieldError, selectedNodeId, listsReady])
   
   const nodeType = selectedNode?.type || 'dialogueNode'
 
@@ -227,7 +235,6 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
    * sélection) : un flush vers un autre nœud lui ferait hériter du texte et des choix de l'ancien.
    */
   const formNodeIdRef = useRef<string | null>(null)
-
   const DEBOUNCE_MS = 100
 
   nodeTypeRef.current = nodeType
@@ -319,9 +326,11 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
         selectedNode.data as Record<string, unknown>
       )
       formNodeIdRef.current = currentId
+      setListsNodeId(currentId)
     } else if (selectionChanged) {
       prevConnectionFingerprintRef.current = ''
       formNodeIdRef.current = null
+      setListsNodeId(null)
     } else if (selectedNode?.data) {
       // Écriture externe (undo, génération) : le formulaire ne suit que s'il n'a pas de saisie
       // en attente, sinon le prochain flush réécrirait l'ancien texte par-dessus le store.
@@ -460,16 +469,10 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
       // Si les instructions sont vides, on utilisera un texte par défaut côté backend
       const finalInstructions =
         userInstructionsRef.current.trim() || "Ecris la réponse du PNJ à ce que dit le PJ"
-      const sel = selectionsRef.current
-      const allCharsForNpc = [...(sel.characters_full || []), ...(sel.characters_excerpt || [])]
-      const npcFromSel = allCharsForNpc.length > 0 ? allCharsForNpc[0] : undefined
-
       const generationResult = await generateFromNode(
         selectedNodeId,
         finalInstructions,
         {
-          context_selections: sel,
-          npc_speaker_id: npcFromSel,
           llm_model_identifier: llmModelRef.current,
           choices_mode: 'capped',
         }
@@ -544,16 +547,10 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
       userInstructionsRef.current.trim() || 'Continue la conversation de manière naturelle'
     
     try {
-      const sel = selectionsRef.current
-      const allChars = [...(sel.characters_full || []), ...(sel.characters_excerpt || [])]
-      const npcSpeakerId = allChars.length > 0 ? allChars[0] : undefined
-      
       const generationResult = await generateFromNode(
         selectedNodeId,
         instructions,
         {
-          context_selections: sel,
-          npc_speaker_id: npcSpeakerId,
           llm_model_identifier: llmModelRef.current,
           target_choice_index: choiceIndex,
           choices_mode: 'capped',
@@ -580,12 +577,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
     const instructions =
       userInstructionsRef.current.trim() || 'Continue la conversation de manière naturelle'
     try {
-      const sel = selectionsRef.current
-      const allChars = [...(sel.characters_full || []), ...(sel.characters_excerpt || [])]
-      const npcSpeakerId = allChars.length > 0 ? allChars[0] : undefined
       const generationResult = await generateFromNode(selectedNodeId, instructions, {
-        context_selections: sel,
-        npc_speaker_id: npcSpeakerId,
         llm_model_identifier: llmModelRef.current,
         choices_mode: 'capped',
       })
@@ -609,10 +601,6 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
     }
     
     try {
-      const sel = selectionsRef.current
-      const allChars = [...(sel.characters_full || []), ...(sel.characters_excerpt || [])]
-      const npcSpeakerId = allChars.length > 0 ? allChars[0] : undefined
-      
       // Si les instructions sont vides, on utilisera un texte par défaut côté backend
       const finalInstructions =
         userInstructionsRef.current.trim() || "Ecris la réponse du PNJ à ce que dit le PJ"
@@ -631,8 +619,6 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
         selectedNodeId,
         finalInstructions,
         {
-          context_selections: sel,
-          npc_speaker_id: npcSpeakerId,
           llm_model_identifier: llmModelRef.current,
           generate_all_choices: true,
           choices_mode: 'capped',
@@ -661,25 +647,23 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
   // Hooks appelés unconditionnellement pour respecter les Rules of Hooks (ordre stable entre rendus).
   const choices = watch('choices') as Choice[] | undefined
 
+  const sceneGeneration = useSceneGeneration(selectedNodeId)
   const graphEstimateRequest = useMemo(() => {
     if (!selectedNodeId || !selectedNode) return null
-    const contextSelections = selections as unknown as Record<string, unknown>
-    const dramatis = resolveGraphGenerationDramatis({
-      nodes: graphNodes,
-      parentNodeId: selectedNodeId,
-      contextSelections,
-    })
     return {
       parent_node_id: selectedNodeId,
       parent_node_content: (selectedNode.data ?? {}) as Record<string, unknown>,
-      user_instructions: userInstructions.trim() || 'Ecris la réponse du PNJ à ce que dit le PJ',
-      context_selections: contextSelections,
+      user_instructions: composeSceneInstructions(
+        sceneGeneration.brief,
+        userInstructions.trim() || 'Ecris la réponse du PNJ à ce que dit le PJ',
+      ),
+      context_selections: sceneGeneration.contextSelections as unknown as Record<string, unknown>,
       llm_model_identifier: llmModel,
       dialogue_nodes: serializeDialogueNodesForApi(graphNodes),
-      npc_speaker_id: dramatis.npcSpeakerId !== 'PNJ' ? dramatis.npcSpeakerId : undefined,
-      player_character_id: dramatis.playerCharacterId,
+      npc_speaker_id: sceneGeneration.npcSpeakerId,
+      player_character_id: sceneGeneration.playerCharacterId,
     }
-  }, [selectedNodeId, selectedNode, userInstructions, selections, llmModel, graphNodes])
+  }, [selectedNodeId, selectedNode, userInstructions, sceneGeneration, llmModel, graphNodes])
   const { result: estimationResult, state: estimationState, error: estimationError, runEstimate, budgetExceeded, budgetWarning90 } = useEstimation({
     type: 'graph',
     request: graphEstimateRequest,
@@ -848,7 +832,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
           )}
 
         {/* Story 9.2 — conditions de visibilité (nœud) */}
-        {nodeType === 'dialogueNode' && selectedNodeId && (
+        {nodeType === 'dialogueNode' && listsReady && (
           <ConditionEditor variant="node" />
         )}
         
@@ -984,7 +968,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
         )}
 
         {/* Choix (pour dialogue nodes) */}
-        {nodeType === 'dialogueNode' && (
+        {nodeType === 'dialogueNode' && listsReady && (
           <ChoicesEditor
             onGenerateForChoice={handleGenerateForChoice}
             onCreateEmptyNodeForChoice={handleCreateEmptyNodeForChoice}
