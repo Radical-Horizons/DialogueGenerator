@@ -28,7 +28,7 @@ function defaultInitialForFlag(def: FlagDefinition): boolean | number | string {
   return false
 }
 
-export function DialogueFlagsPanel() {
+export function DialogueFlagsPanel({ readOnly = false }: { readOnly?: boolean }) {
   const dialogueFlagBindings = useGraphStore((s) => s.dialogueFlagBindings)
   const upsertDialogueFlagBinding = useGraphStore((s) => s.upsertDialogueFlagBinding)
   const removeDialogueFlagBinding = useGraphStore((s) => s.removeDialogueFlagBinding)
@@ -112,7 +112,9 @@ export function DialogueFlagsPanel() {
         Variables et flags
       </h3>
       <p style={{ color: theme.text.secondary, fontSize: '0.85rem', marginBottom: '0.75rem' }}>
-        Catalogue filtrable — liaisons persistées avec le document dialogue.
+        {readOnly
+          ? 'Lecture seule — liaisons persistées avec le document dialogue.'
+          : 'Catalogue filtrable — liaisons persistées avec le document dialogue.'}
       </p>
       {loadErr && (
         <div role="alert" style={{ color: theme.state.error.color, marginBottom: '0.5rem' }}>
@@ -138,101 +140,107 @@ export function DialogueFlagsPanel() {
           ))}
         </div>
       )}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
-        <input
-          type="search"
-          placeholder="Recherche id, label, tags…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          aria-label="Recherche catalogue flags"
-          style={{ flex: '1 1 160px', minWidth: 140, padding: '0.35rem 0.5rem' }}
-        />
-        <label style={{ color: theme.text.secondary, fontSize: '0.85rem' }}>
-          Type{' '}
-          <select
-            value={semanticFilter}
-            onChange={(e) => setSemanticFilter(e.target.value)}
-            aria-label="Filtrer par type"
-            style={{ marginLeft: '0.35rem' }}
+      {!readOnly && (
+        <>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+            <input
+              type="search"
+              placeholder="Recherche id, label, tags…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Recherche catalogue flags"
+              style={{ flex: '1 1 160px', minWidth: 140, padding: '0.35rem 0.5rem' }}
+            />
+            <label style={{ color: theme.text.secondary, fontSize: '0.85rem' }}>
+              Type{' '}
+              <select
+                value={semanticFilter}
+                onChange={(e) => setSemanticFilter(e.target.value)}
+                aria-label="Filtrer par type"
+                style={{ marginLeft: '0.35rem' }}
+              >
+                <option value="">(tous)</option>
+                {FLAG_SEMANTIC_FILTERS.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label style={{ color: theme.text.secondary, fontSize: '0.85rem' }}>
+              Portée{' '}
+              <select
+                value={scopeFilter}
+                onChange={(e) => setScopeFilter(e.target.value)}
+                aria-label="Filtrer par portée"
+                style={{ marginLeft: '0.35rem' }}
+              >
+                <option value="">(toutes)</option>
+                {FLAG_SCOPE_FILTERS.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div
+            style={{
+              maxHeight: 180,
+              overflowY: 'auto',
+              border: `1px solid ${theme.border.primary}`,
+              borderRadius: 4,
+              marginBottom: '0.75rem',
+              fontSize: '0.85rem',
+            }}
           >
-            <option value="">(tous)</option>
-            {FLAG_SEMANTIC_FILTERS.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label style={{ color: theme.text.secondary, fontSize: '0.85rem' }}>
-          Portée{' '}
-          <select
-            value={scopeFilter}
-            onChange={(e) => setScopeFilter(e.target.value)}
-            aria-label="Filtrer par portée"
-            style={{ marginLeft: '0.35rem' }}
-          >
-            <option value="">(toutes)</option>
-            {FLAG_SCOPE_FILTERS.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <div
-        style={{
-          maxHeight: 180,
-          overflowY: 'auto',
-          border: `1px solid ${theme.border.primary}`,
-          borderRadius: 4,
-          marginBottom: '0.75rem',
-          fontSize: '0.85rem',
-        }}
-      >
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ backgroundColor: theme.background.secondary }}>
-              <th style={{ textAlign: 'left', padding: '0.35rem' }}>Flag</th>
-              <th style={{ textAlign: 'left', padding: '0.35rem' }}>Type</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {filteredCatalog.map((def) => (
-              <tr key={def.id}>
-                <td style={{ padding: '0.35rem' }}>
-                  <strong>{def.label}</strong>
-                  <div
-                    style={{
-                      color: theme.text.secondary,
-                      fontFamily: 'monospace',
-                      fontSize: '0.75rem',
-                    }}
-                  >
-                    {def.id}
-                  </div>
-                </td>
-                <td style={{ padding: '0.35rem' }}>{def.semanticType ?? def.type}</td>
-                <td style={{ padding: '0.35rem', textAlign: 'right' }}>
-                  <button
-                    type="button"
-                    onClick={() => addFlag(def)}
-                    disabled={!def.semanticType || def.semanticType === 'unsupported'}
-                  >
-                    Ajouter
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ backgroundColor: theme.background.secondary }}>
+                  <th style={{ textAlign: 'left', padding: '0.35rem' }}>Flag</th>
+                  <th style={{ textAlign: 'left', padding: '0.35rem' }}>Type</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {filteredCatalog.map((def) => (
+                  <tr key={def.id}>
+                    <td style={{ padding: '0.35rem' }}>
+                      <strong>{def.label}</strong>
+                      <div
+                        style={{
+                          color: theme.text.secondary,
+                          fontFamily: 'monospace',
+                          fontSize: '0.75rem',
+                        }}
+                      >
+                        {def.id}
+                      </div>
+                    </td>
+                    <td style={{ padding: '0.35rem' }}>{def.semanticType ?? def.type}</td>
+                    <td style={{ padding: '0.35rem', textAlign: 'right' }}>
+                      <button
+                        type="button"
+                        onClick={() => addFlag(def)}
+                        disabled={!def.semanticType || def.semanticType === 'unsupported'}
+                      >
+                        Ajouter
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
       <div>
         <h4 style={{ fontSize: '0.9rem', marginBottom: '0.35rem' }}>Liaisons du dialogue</h4>
         {bindingRows.length === 0 ? (
           <div style={{ color: theme.text.secondary, fontStyle: 'italic', fontSize: '0.85rem' }}>
-            Aucune liaison. Ajoutez des flags depuis le catalogue ci-dessus.
+            {readOnly
+              ? 'Aucune liaison.'
+              : 'Aucune liaison. Ajoutez des flags depuis le catalogue ci-dessus.'}
           </div>
         ) : (
           <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
@@ -251,9 +259,11 @@ export function DialogueFlagsPanel() {
                     <strong>{def?.label ?? binding.flagId}</strong>{' '}
                     <span style={{ color: theme.text.secondary }}>({binding.type})</span>
                   </span>
-                  <button type="button" onClick={() => removeDialogueFlagBinding(binding.flagId)}>
-                    Retirer
-                  </button>
+                  {!readOnly && (
+                    <button type="button" onClick={() => removeDialogueFlagBinding(binding.flagId)}>
+                      Retirer
+                    </button>
+                  )}
                 </div>
                 {binding.type === 'bool' && (
                   <label
@@ -267,6 +277,7 @@ export function DialogueFlagsPanel() {
                     <span>Valeur initiale</span>
                     <input
                       type="checkbox"
+                      disabled={readOnly}
                       checked={Boolean(binding.initialValue)}
                       onChange={(e) =>
                         upsertDialogueFlagBinding({
@@ -296,6 +307,7 @@ export function DialogueFlagsPanel() {
                     )}
                     <input
                       type="number"
+                      disabled={readOnly}
                       value={typeof binding.initialValue === 'number' ? binding.initialValue : 0}
                       min={def?.minValue != null ? Number(def.minValue) : undefined}
                       max={def?.maxValue != null ? Number(def.maxValue) : undefined}
@@ -335,6 +347,7 @@ export function DialogueFlagsPanel() {
                     </span>
                     <span>Valeur initiale</span>
                     <select
+                      disabled={readOnly}
                       value={String(binding.initialValue)}
                       onChange={(e) =>
                         upsertDialogueFlagBinding({

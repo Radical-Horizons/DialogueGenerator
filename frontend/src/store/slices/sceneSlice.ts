@@ -15,7 +15,7 @@ import {
 
 export type SceneSlice = Pick<
   GraphState,
-  'updateScene' | 'ensureSceneStored' | 'rewriteSpeakers'
+  'updateScene' | 'ensureSceneStored' | 'rewriteSpeakers' | 'setDocumentTitle'
 >
 
 /** Fiche enregistrée, ou déduite du dialogue tant qu'il n'en a pas. */
@@ -57,6 +57,16 @@ export const createSceneSlice: StateCreator<GraphState, [], [], SceneSlice> = (s
     const deduced = effectiveSceneSheet(state)
     if (deduced.npcs.length === 0 && !deduced.pc) return
     get().updateScene((sheet) => sheet)
+  },
+
+  setDocumentTitle: (title) => {
+    const state = get()
+    if (isReadOnly(state) || !state.document) return
+    const document = { ...state.document }
+    if (title === null) delete document.title
+    else document.title = title
+    set({ document, titleDirty: true })
+    get().markDirty()
   },
 
   rewriteSpeakers: (nodeIds, speaker) => {

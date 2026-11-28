@@ -189,6 +189,7 @@ export type PersistenceSlice = Pick<
   | 'exportToUnity'
   | 'incrementLoadSeq'
   | 'applyLoadResult'
+  | 'setDeletingDocument'
 >
 
 let saveQueue: Promise<void> | null = null
@@ -461,6 +462,8 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         documentPersisted: true,
         scene,
         canEditDocument: docResponse.capabilities?.can_edit ?? true,
+        canDeleteDocument: docResponse.capabilities?.can_delete ?? false,
+        isDocumentOwner: docResponse.capabilities?.is_owner ?? false,
       })
       get().normalizeEdgeColors({ skipMarkDirty: true })
       // Prototype 20.2 : la disposition `LR` qui vient d'être calculée se range tout de
@@ -484,6 +487,8 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
       throw error
     }
   },
+
+  setDeletingDocument: (deleting) => set({ isDeletingDocument: deleting }),
 
   incrementLoadSeq: () => {
     let nextSeq = 0
@@ -530,6 +535,11 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
       scene: rest.scene ?? null,
       sceneDirty: false,
       canEditDocument: rest.canEditDocument ?? true,
+      canDeleteDocument: rest.canDeleteDocument ?? false,
+      isDocumentOwner: rest.isDocumentOwner ?? false,
+      titleDirty: false,
+      flagsDirty: false,
+      isDeletingDocument: false,
       dialogueFlagBindings: parseBindingsFromDocument(rest.document as Record<string, unknown>),
       isLoading: false,
       isSaving: false,
@@ -587,7 +597,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
 
       const snap = get()
       const doc = graphToDocument(snap.nodes, snap.edges) as unknown as Record<string, unknown>
-      // Le titre se renomme depuis Éditer : le graphe ne le porte pas mais ne doit pas l'effacer.
+      // Le graphe ne porte pas le titre (Éditer, fiche de scène) mais ne doit pas l'effacer.
       const documentTitle = (state.document as Record<string, unknown>).title
       if (typeof documentTitle === 'string' && documentTitle.trim()) doc.title = documentTitle
       applyBindingsToDocument(doc, snap.dialogueFlagBindings ?? [])
@@ -617,10 +627,36 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
         )
       }
 
+      const titleOf = (source: unknown) => (source as Record<string, unknown> | null)?.title
+      /** Titre retapé pendant le PUT : la copie envoyée ne doit pas l'écraser dans le store. */
+      const savedDocument = (): Record<string, unknown> => {
+        const latest = titleOf(get().document)
+        if (latest === titleOf(state.document)) return doc
+        const next = { ...doc, title: latest }
+        if (latest === undefined) delete next.title
+        return next
+      }
+      /** Titre, fiche et flags envoyés ici et inchangés depuis : ils ne sont plus en attente. */
+      const settledHeader = (): Partial<GraphState> => ({
+        ...(snap.titleDirty && titleOf(get().document) === titleOf(state.document)
+          ? { titleDirty: false }
+          : {}),
+        ...(snap.flagsDirty && get().dialogueFlagBindings === snap.dialogueFlagBindings
+          ? { flagsDirty: false }
+          : {}),
+        ...(snap.sceneDirty && get().scene === snap.scene ? { sceneDirty: false } : {}),
+      })
       const putDocumentAt = async (revision: number, serverDocument?: Record<string, unknown>) => {
-        // Le graphe ne porte pas le titre : sur conflit, celui du serveur (renommé dans Édition) prime.
+        // Titre non touché ici : sur conflit, celui du serveur (renommé dans Édition) prime.
         const serverTitle = serverDocument?.title
-        if (typeof serverTitle === 'string' && serverTitle.trim()) doc.title = serverTitle
+        if (
+          !snap.titleDirty &&
+          !get().titleDirty &&
+          typeof serverTitle === 'string' &&
+          serverTitle.trim()
+        ) {
+          doc.title = serverTitle
+        }
         // Fiche non touchée ici : celle du serveur est gardée (absente du PUT) et adoptée.
         if (serverDocument && !snap.sceneDirty && !get().sceneDirty && isActiveSave()) {
           set({ scene: parseSceneSheet(serverDocument.scene) })
@@ -663,10 +699,10 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
           return { success: true, filename: documentId } as SaveGraphResponse
         }
         set({
-          document: doc,
+          ...settledHeader(),
+          document: savedDocument(),
           documentRevision: docRes.revision,
           documentPersisted: true,
-          ...(snap.sceneDirty && get().scene === snap.scene ? { sceneDirty: false } : {}),
         })
         failedStage = 'layout'
         const { result: layoutRes } = await (earlyLayout ??
@@ -681,7 +717,7 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
           snap.nodes,
         )
         set({
-          document: doc,
+          document: savedDocument(),
           layout: layoutPayload,
           documentRevision: docRes.revision,
           layoutRevision: layoutRes.revision,
@@ -732,7 +768,12 @@ export const createPersistenceSlice: StateCreator<GraphState, [], [], Persistenc
           }
           await validateAfterSave()
         }
-        return { success: true, filename: documentId, replacedNewerVersion } as SaveGraphResponse
+        return {
+          success: true,
+          filename: documentId,
+          replacedNewerVersion,
+          titleChanged: snap.titleDirty,
+        } as SaveGraphResponse
       } catch (error) {
         if (!isActiveSave()) {
           throw error

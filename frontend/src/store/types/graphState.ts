@@ -87,6 +87,19 @@ export interface GraphState {
   sceneDirty: boolean
   /** Droit d'écriture annoncé par le serveur à la lecture. */
   canEditDocument: boolean
+  /** Droit de suppression annoncé par le serveur ; faux tant qu'il ne l'a pas dit. */
+  canDeleteDocument: boolean
+  /** Le dialogue ouvert appartient à la session (partage). */
+  isDocumentOwner: boolean
+  /** Le titre a été écrit ici : il prime sur celui du serveur à la sauvegarde. */
+  titleDirty: boolean
+  /** Les flags ont changé : une scène sans réplique doit quand même s'enregistrer. */
+  flagsDirty: boolean
+  /** Suppression en cours : l'autosave attend, le fichier ne doit plus être écrit. */
+  isDeletingDocument: boolean
+  setDeletingDocument: (deleting: boolean) => void
+  /** Titre du dialogue ; `null` le retire. Sans effet en lecture seule. */
+  setDocumentTitle: (title: string | null) => void
   /** Geste de l'auteur sur la fiche ; sans effet en lecture seule. */
   updateScene: (change: (sheet: SceneSheet) => SceneSheet) => void
   /** Enregistre la fiche déduite (première génération). Sans effet si elle existe. */
@@ -141,6 +154,8 @@ export interface GraphState {
     documentPersisted?: boolean
     scene?: SceneSheet | null
     canEditDocument?: boolean
+    canDeleteDocument?: boolean
+    isDocumentOwner?: boolean
   }) => boolean
   addNode: (node: Node) => void
   /** Crée un nœud vide (sans LLM). Story 1.6 - FR6. */
@@ -373,6 +388,11 @@ export const initialState = {
   scene: null as SceneSheet | null,
   sceneDirty: false,
   canEditDocument: true,
+  canDeleteDocument: false,
+  isDocumentOwner: false,
+  titleDirty: false,
+  flagsDirty: false,
+  isDeletingDocument: false,
   dialogueFlagBindings: [] as DialogueFlagBinding[],
   graphFilters: {} as GraphFilters,
   layoutSpacingMode: 'normal' as GraphLayoutSpacingMode,

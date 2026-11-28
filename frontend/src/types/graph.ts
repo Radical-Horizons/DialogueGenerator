@@ -61,6 +61,8 @@ export interface SaveGraphResponse {
   last_seq?: number
   /** Un 409 a été écrasé : une version serveur plus récente a été remplacée par le graphe. */
   replacedNewerVersion?: boolean
+  /** Cet enregistrement portait un nouveau titre : la bibliothèque est à rafraîchir. */
+  titleChanged?: boolean
 }
 
 export interface ExportPreviewResponse {
