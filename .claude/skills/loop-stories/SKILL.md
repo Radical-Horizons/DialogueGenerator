@@ -18,7 +18,8 @@ et s'arrêter ; ne pas se rabattre sur des sous-agents.
 `/loop-stories [nombre] [epic=N] [auto]`
 
 - `nombre` : un entier seul (`/loop-stories 1`), le nombre de stories à enchaîner. **Sans
-  nombre : toutes les stories restantes de l'epic.**
+  nombre : toutes les stories restantes de l'epic.** Une story se compte entière :
+  découpée, elle ne vaut un qu'avec son dernier lot (« Story découpée »).
 - `epic=N` : par défaut le premier epic `in-progress`.
 - `auto` : l'utilisateur approuve d'avance les specs sans question ouverte. Sans ce mot,
   chaque spec attend son accord.
@@ -37,11 +38,12 @@ vaut ni déploiement, ni `push --force`.
 | `$B journal` | état de la boucle (partagé entre sessions et worktrees) |
 | `$B journal <clé> champ=valeur …` | écrire ; `champ=` efface |
 | `$B queue --ref <ref> [--epic N] [--limit N]` | prochaines stories, dans l'ordre du fichier |
-| `$B verify <branche> <clé> --base origin/main` | contrôle de livraison, code 1 si incomplet |
+| `$B verify <branche> <clé> --base origin/main` | contrôle de livraison, code 1 si incomplet ; `--lot-intermediaire` s'il reste des lots |
 | `$B ci <n° de PR>` | CI du dernier commit : `verte`, `rouge`, `en-cours` ou `absente` |
 
 Champs d'une story : `etat` (`en-cours`, `a-fusionner`, `fusionnee`, `bloquee`),
-`session`, `branche`, `base` (SHA de départ), `pr`, `corrections`. Entrée `_boucle` :
+`session`, `branche`, `base` (SHA de départ), `pr`, `corrections`, et pour une story
+découpée `lot` (celui en cours) et `lots_restants` (pas encore lancés). Entrée `_boucle` :
 `epic`, `max` (le nombre demandé ; vide = tout l'epic), `mode` (`validation` ou `auto`),
 `faites`, écrite au démarrage d'une série.
 `queue` ne propose jamais une clé qui porte un `etat` : elle la rend dans `launched`. Pour
@@ -70,7 +72,8 @@ de départ :
 - aucune PR en attente : `git branch -f loop-base origin/main`, ref `loop-base` ;
 - une PR en attente de CI : la branche de cette story (la suivante s'empile dessus).
 
-`queue --ref <ref>`, prendre la première de `next`. Au premier passage, annoncer en
+`queue --ref <ref>`. Si `a_finir` n'est pas vide, lancer le lot suivant de cette story ;
+sinon prendre la première de `next`. Au premier passage, annoncer en
 quelques lignes le mode, combien de stories sont prévues (`remaining` si aucun nombre n'est
 donné) et les premières, sans attendre de confirmation.
 
@@ -89,6 +92,23 @@ L'application te réveille quand la session finit son tour. Ne rien sonder entre
 
 Si l'application refuse le démarrage (tour ouvert par un message d'une autre session),
 proposer la carte `own_initiative` avec le même brief et le dire.
+
+## Story découpée
+
+Une story découpée (par `bmad-build`, avec l'accord de l'utilisateur) se livre **en
+entier** : un lot par session et par PR, l'un après l'autre, jusqu'au dernier. Le nombre
+demandé n'arrête jamais la boucle entre deux lots ; seul l'utilisateur peut en abandonner.
+
+- Au découpage : noter `lot=A lots_restants=B,C` et le dire à la session en cours.
+- Tant qu'il reste des lots : `verify … --lot-intermediaire` (la story reste `in-progress`),
+  « story suivante » veut dire « lot suivant » et `faites` ne bouge pas. Le dernier lot
+  passe la story à `done` et compte un.
+- Lot suivant : une fois le précédent `fusionnee`, ou `a-fusionner` et la nouvelle session
+  empilée sur sa branche. Dans ce second cas, recopier d'abord sa `pr`, sa `branche` et sa
+  `session` sous la clé `<clé>#<lot>` avec `etat=a-fusionner`.
+- En le lançant : `lot=<suivant>`, `lots_restants` sans lui, `etat=en-cours`, et vider
+  `pr=`, `branche=`, `corrections=`.
+- Un lot redécoupé : ajouter les nouveaux à `lots_restants`.
 
 ## 4. Au réveil
 
@@ -144,11 +164,11 @@ plus** par story ; ensuite `etat=bloquee` et arrêt.
 
 ## 5. S'arrêter
 
-Arrêt quand le nombre demandé est atteint, que l'epic n'a plus de story (proposer la
+Arrêt quand le nombre demandé de stories entières est atteint, que l'epic n'a plus de story (proposer la
 rétrospective),
 qu'une story est `bloquee`, qu'une condition ou une question attend l'utilisateur.
 
-Rendre alors un tableau : story, session (lien), PR, état, reports. Dire clairement ce qui
+Rendre alors un tableau : story (et lot), session (lien), PR, état, reports. Dire clairement ce qui
 n'est **pas** fusionné et que `/loop-stories` le reprendra.
 
 ## Limites à annoncer, pas à contourner

@@ -77,8 +77,13 @@ def build_queue(
     # et la relancer ouvrirait une deuxième session sur le même travail.
     launched = {key: e["etat"] for key, e in (journal or {}).items() if e.get("etat")}
     todo = [s for s in stories if s["status"] in ACTIONABLE and s["key"] not in launched]
+    # Une story découpée n'est finie qu'avec son dernier lot : ceux qui restent passent
+    # avant toute nouvelle story.
+    entries = {s["key"]: (journal or {}).get(s["key"], {}) for s in stories}
+    unfinished = {key: e["lots_restants"] for key, e in entries.items() if e.get("lots_restants")}
     return {
         "epic": epic,
+        "a_finir": unfinished,
         "interrupted": [s for s in stories if s["status"] in INTERRUPTED],
         "next": todo[:limit] if limit else todo,
         "remaining": len(todo),
@@ -120,7 +125,7 @@ def succeeds(*args: str) -> bool:
     return subprocess.run(["git", *args], capture_output=True).returncode == 0
 
 
-def verify(branch: str, key: str, base: str) -> dict:
+def verify(branch: str, key: str, base: str, intermediate: bool = False) -> dict:
     """Contrôle ce qu'une session fille affirme avoir livré, sans la croire."""
     problems: list[str] = []
     # La référence livrée est la branche distante : un workflow peut y pousser une
@@ -141,8 +146,10 @@ def verify(branch: str, key: str, base: str) -> dict:
     changed = [path for path in diff.split("\0") if path]
 
     status = story_status(git("show", f"{delivered}:{STATUS_PATH}"), key)
-    if status != "done":
-        problems.append(f"sprint-status : {key} est `{status}`, attendu `done`")
+    # Avant son dernier lot, une story marquée `done` sortirait de la file inachevée.
+    expected = "in-progress" if intermediate else "done"
+    if status != expected:
+        problems.append(f"sprint-status : {key} est `{status}`, attendu `{expected}`")
 
     pattern = spec_pattern(key)
     specs = [path for path in changed if pattern.match(path)]
@@ -240,6 +247,7 @@ def main(argv: list[str] | None = None) -> int:
     check.add_argument("branch")
     check.add_argument("key")
     check.add_argument("--base", default="origin/main")
+    check.add_argument("--lot-intermediaire", action="store_true", dest="intermediate")
 
     checks = commands.add_parser("ci", help="CI du dernier commit d'une PR")
     checks.add_argument("pr")
@@ -255,7 +263,7 @@ def main(argv: list[str] | None = None) -> int:
             known = journal_update(journal_path(), None, [])
             result = build_queue(board, args.epic, args.limit, known)
         elif args.command == "verify":
-            result = verify(args.branch, args.key, args.base)
+            result = verify(args.branch, args.key, args.base, args.intermediate)
         elif args.command == "ci":
             result = ci(args.pr)
         else:
