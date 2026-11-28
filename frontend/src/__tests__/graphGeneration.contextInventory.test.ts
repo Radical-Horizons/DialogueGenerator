@@ -19,6 +19,8 @@ const GRAPH_GENERATION_FILES = [
   'store/slices/generationSlice.ts',
   'store/slices/sceneSlice.ts',
   'store/sceneCatalogStore.ts',
+  'store/sceneProfileStore.ts',
+  'components/scene/SceneContextLine.tsx',
   'utils/sceneSheet.ts',
 ]
 

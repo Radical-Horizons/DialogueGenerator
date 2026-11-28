@@ -18,6 +18,7 @@ import { DeleteNodeConfirmModal } from './DeleteNodeConfirmModal'
 import { GraphEditorHeader } from './GraphEditorHeader'
 import { GraphContextBreadcrumb } from './GraphContextBreadcrumb'
 import { SceneSheetBar } from '../scene/SceneSheetBar'
+import { SceneFirstSlot } from '../scene/SceneFirstSlot'
 import { ExportDownloadBanner } from '../unityDialogues/ExportDownloadBanner'
 import { BatchExportProgressBanner } from '../unityDialogues/BatchExportProgressBanner'
 import { ExportPreviewModal } from '../unityDialogues/ExportPreviewModal'
@@ -599,6 +600,7 @@ export function GraphEditor({
                   <ReactFlowProvider>
                     <GraphCanvas />
                   </ReactFlowProvider>
+                  <SceneFirstSlot />
                 </div>
                 {!isGraphEditorNarrow && <GraphInspector tabs={inspectorTabs} footer={inspectorFooter} />}
                 </div>

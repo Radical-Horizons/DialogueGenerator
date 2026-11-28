@@ -19,6 +19,13 @@ vi.mock('../api/batchNodeGeneration', async () => {
   }
 })
 
+vi.mock('../api/authorProfiles', () => ({
+  listAuthorProfilesApi: vi.fn().mockResolvedValue([]),
+  listPrebuiltAuthorProfilesApi: vi.fn().mockResolvedValue([
+    { id: 'sobre', name: 'Sobre', description: '', content: 'Sois sobre.' },
+  ]),
+}))
+
 const generateFromNode = vi.fn()
 const applyGenerateNodeResponse = vi.fn()
 const startPolling = vi.fn()
@@ -230,6 +237,8 @@ describe('useBatchGenerateFromNodes', () => {
       place: { name: 'Lieu de la fiche', entryId: null },
       brief: 'Il demande une réparation.',
       linkedEntries: [],
+      tones: ['tension'],
+      authorProfileId: 'sobre',
     }
     vi.mocked(batchApi.startBatchGenerateFromNodesJob).mockResolvedValue({
       job_id: 'job-1',
@@ -243,7 +252,10 @@ describe('useBatchGenerateFromNodes', () => {
     })
 
     expect(graphState.ensureSceneStored).toHaveBeenCalled()
-    const [first] = vi.mocked(batchApi.startBatchGenerateFromNodesJob).mock.calls[0][0].parents
+    const body = vi.mocked(batchApi.startBatchGenerateFromNodesJob).mock.calls[0][0]
+    expect(body.narrative_tags).toEqual(['tension'])
+    expect(body.author_profile).toBe('Sois sobre.')
+    const [first] = body.parents
     expect(first.npc_speaker_id).toBe('PNJ de la fiche')
     expect(first.player_character_id).toBe('Uresaïr')
     expect(first.context_selections.scene_location).toEqual({ lieu: 'Lieu de la fiche' })

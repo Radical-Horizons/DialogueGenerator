@@ -228,6 +228,7 @@ class GraphNodeOrchestrator:
         player_character_id: str,
         scene_instruction: str,
         narrative_tags: Optional[List[str]],
+        author_profile: Optional[str],
         llm_model_identifier: Optional[str],
     ) -> Optional[PromptRenderer]:
         """Contexte GDD + catalogues résolus une fois pour tous les appels de la requête."""
@@ -240,6 +241,7 @@ class GraphNodeOrchestrator:
             player_character_id=player_character_id,
             scene_instruction=scene_instruction,
             narrative_tags=narrative_tags,
+            author_profile=author_profile,
             llm_model_identifier=llm_model_identifier,
         )
         return prompt_context.render
@@ -264,6 +266,7 @@ class GraphNodeOrchestrator:
         npc_speaker_id: Optional[str] = None,
         narrative_tags: Optional[List[str]] = None,
         llm_model_identifier: Optional[str] = None,
+        author_profile: Optional[str] = None,
     ) -> GenerationResult:
         """Point d'entrée unique – dispatche vers le bon mode de génération.
 
@@ -295,6 +298,7 @@ class GraphNodeOrchestrator:
             player_character_id=choice_label,
             scene_instruction=raw_instructions,
             narrative_tags=narrative_tags,
+            author_profile=author_profile,
             llm_model_identifier=llm_model_identifier,
         )
         render_prompt = _with_dialogue_reference(

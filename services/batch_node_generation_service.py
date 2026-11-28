@@ -180,6 +180,8 @@ class BatchNodeGenerationService:
         on_item: Optional[ItemCallback] = None,
         label_offset: int = 0,
         label_total: Optional[int] = None,
+        narrative_tags: Optional[List[str]] = None,
+        author_profile: Optional[str] = None,
     ) -> BatchNodeGenerationReport:
         """Génère séquentiellement pour chaque parent (échec partiel toléré).
 
@@ -200,6 +202,8 @@ class BatchNodeGenerationService:
             label_offset: Parents déjà acquis lors d'une reprise : décale le
                 « Nœud n/N » affiché pour suivre le lot complet.
             label_total: Taille du lot complet affichée (défaut : ``len(parents)``).
+            narrative_tags: Tons de la scène, communs à tous les parents.
+            author_profile: Directives d'auteur de la scène, communes à tous les parents.
 
         Returns:
             Rapport agrégé (items par parent + compteurs).
@@ -255,6 +259,8 @@ class BatchNodeGenerationService:
                     player_character_id=parent.player_character_id,
                     choices_mode=choices_mode,  # type: ignore[arg-type]
                     progress_callback=_choice_progress if on_progress else None,
+                    narrative_tags=narrative_tags,
+                    author_profile=author_profile,
                 )
                 fp = (
                     await asyncio.to_thread(fingerprint_for, raw_ctx)

@@ -317,6 +317,8 @@ async def regenerate_node(
                 dialogue_nodes=request_data.dialogue_nodes,
                 player_character_id=dramatis.player_character_id,
                 npc_speaker_id=dramatis.npc_speaker_id,
+                narrative_tags=request_data.narrative_tags,
+                author_profile=request_data.author_profile,
                 llm_model_identifier=request_data.llm_model_identifier,
             )
 

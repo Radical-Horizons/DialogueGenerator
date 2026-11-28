@@ -42,7 +42,11 @@ export interface SceneSheet {
   place: SceneRef | null
   brief: string
   linkedEntries: SceneLinkedEntry[]
-  /** Champs sans interface ici (`tones`, `authorProfileId`, `contextBudget`) : conservés. */
+  /** Tons cochés ; lus par `sceneTones`. */
+  tones?: string[]
+  /** Profil d'auteur (voix d'écriture) ; lu par `sceneAuthorProfileId`. */
+  authorProfileId?: string | null
+  /** Champs sans interface ici (`contextBudget`) : conservés. */
   [key: string]: unknown
 }
 
@@ -241,11 +245,156 @@ export function findSpeakerIssues(nodes: DramatisGraphNode[], sheet: SceneSheet)
   }
 }
 
+/** Tons proposés par la fiche ; l'auteur peut en ajouter d'autres. */
+export const SCENE_TONES = [
+  'tension',
+  'intime',
+  'humour',
+  'révélation',
+  'menace',
+  'solennel',
+  'dramatique',
+] as const
+
+export function sceneTones(sheet: SceneSheet): string[] {
+  return Array.isArray(sheet.tones)
+    ? sheet.tones.filter((tone): tone is string => typeof tone === 'string' && tone.trim() !== '')
+    : []
+}
+
+export function sceneAuthorProfileId(sheet: SceneSheet): string | null {
+  return typeof sheet.authorProfileId === 'string' && sheet.authorProfileId
+    ? sheet.authorProfileId
+    : null
+}
+
+export function toggleSceneTone(sheet: SceneSheet, tone: string): SceneSheet {
+  const tones = sceneTones(sheet)
+  return {
+    ...sheet,
+    tones: tones.includes(tone) ? tones.filter((item) => item !== tone) : [...tones, tone],
+  }
+}
+
+/** Ton saisi librement : sans `#` (le prompt le pose) ni doublon à la casse près. */
+export function addSceneTone(sheet: SceneSheet, raw: string): SceneSheet {
+  const typed = raw.replace(/^[#\s]+/, '').replace(/\s+/g, ' ').trim()
+  if (!typed) return sheet
+  const lower = typed.toLocaleLowerCase('fr')
+  const tones = sceneTones(sheet)
+  if (tones.some((tone) => tone.toLocaleLowerCase('fr') === lower)) return sheet
+  const known = SCENE_TONES.find((tone) => tone === lower)
+  return { ...sheet, tones: [...tones, known ?? typed] }
+}
+
+/** Catégories qu'une mention `@` peut citer. */
+export type MentionCategory = (typeof CATEGORIES_WITH_MODE)[number]
+
+export interface BriefSegment {
+  /** Texte tel qu'écrit, `@` compris pour une mention. */
+  text: string
+  /** Position dans le brief (UTF-16). */
+  start: number
+  /** Nom de la fiche citée ; `null` pour du texte. */
+  mention: string | null
+}
+
+const WORD_CHAR = /[\p{L}\p{N}_]/u
+
+/** Même longueur que l'entrée : seules la casse et la forme de l'apostrophe sont ignorées. */
+function foldForMention(text: string): string {
+  return text.replace(/[‘’ʼ]/g, "'").toLowerCase()
+}
+
+/** Nom connu le plus long écrit juste après le `@` placé en `at`. */
+function mentionAt(text: string, at: number, names: string[]): string | null {
+  if (at > 0 && WORD_CHAR.test(text[at - 1])) return null
+  let best: string | null = null
+  for (const name of names) {
+    if (!name || (best && name.length <= best.length)) continue
+    const end = at + 1 + name.length
+    if (end > text.length) continue
+    if (foldForMention(text.slice(at + 1, end)) !== foldForMention(name)) continue
+    if (end < text.length && WORD_CHAR.test(text[end])) continue
+    best = name
+  }
+  return best
+}
+
+/** Brief découpé en texte et mentions ; un `@` sans fiche reste du texte. */
+export function splitBriefMentions(brief: string, names: string[]): BriefSegment[] {
+  const segments: BriefSegment[] = []
+  let textStart = 0
+  let at = brief.indexOf('@')
+  while (at >= 0) {
+    const name = mentionAt(brief, at, names)
+    if (name) {
+      if (at > textStart) {
+        segments.push({ text: brief.slice(textStart, at), start: textStart, mention: null })
+      }
+      textStart = at + 1 + name.length
+      segments.push({ text: brief.slice(at, textStart), start: at, mention: name })
+    }
+    at = brief.indexOf('@', name ? textStart : at + 1)
+  }
+  if (textStart < brief.length) {
+    segments.push({ text: brief.slice(textStart), start: textStart, mention: null })
+  }
+  return segments
+}
+
+/** Le modèle reçoit le nom cité, sans son `@`. */
+export function stripBriefMentions(brief: string, names: string[]): string {
+  return splitBriefMentions(brief, names)
+    .map((segment) => (segment.mention ? segment.text.slice(1) : segment.text))
+    .join('')
+}
+
+/** Mention en cours de saisie devant le curseur : position du `@` et texte cherché. */
+export function findMentionQuery(
+  text: string,
+  caret: number,
+  names: string[],
+): { start: number; query: string } | null {
+  const before = text.slice(0, caret)
+  const start = before.lastIndexOf('@')
+  if (start < 0 || (start > 0 && WORD_CHAR.test(before[start - 1]))) return null
+  const query = before.slice(start + 1)
+  if (!query || query.length > 40 || query.includes('\n') || /^\s/.test(query)) return null
+  const written = mentionAt(text, start, names)
+  if (written) {
+    const end = start + 1 + written.length
+    // Curseur dans une mention déjà écrite : choisir doublerait la fin du nom.
+    if (caret < end) return null
+    // Au-delà : le nom est écrit, sauf si la saisie en commence un plus long.
+    if (caret > end) {
+      const typed = speakerKey(query) + (/\s$/.test(query) ? ' ' : '')
+      const longer = names.some(
+        (name) => name.length > written.length && speakerKey(name).startsWith(typed),
+      )
+      if (!longer) return null
+    }
+  }
+  return { start, query }
+}
+
+/** Noms que la fiche porte déjà : ses mentions restent reconnues sans catalogue. */
+export function sheetEntryNames(sheet: SceneSheet): string[] {
+  return [
+    ...sheet.npcs.map((npc) => npc.name),
+    sheet.pc?.name,
+    sheet.place?.name,
+    ...sheet.linkedEntries.map((entry) => entry.name),
+  ].filter((name): name is string => typeof name === 'string' && name.trim() !== '')
+}
+
 export interface SceneGeneration {
   contextSelections: ContextSelection
   npcSpeakerId: string | undefined
   playerCharacterId: string
   brief: string
+  narrativeTags: string[] | undefined
+  authorProfileId: string | null
 }
 
 function emptySelection(): ContextSelection {
@@ -303,8 +452,10 @@ export function buildSceneGeneration(options: {
   parentNodeId: string | null | undefined
   /** Catalogue GDD : un locuteur écrit sous un alias désigne le PNJ de la fiche. */
   characters: GddCatalogEntry[]
+  /** Autres noms du GDD citables dans le brief. */
+  mentionNames?: string[]
 }): SceneGeneration {
-  const { sheet, nodes, parentNodeId, characters } = options
+  const { sheet, nodes, parentNodeId, characters, mentionNames = [] } = options
   const npcNames = sheet.npcs.map((npc) => npc.name.trim()).filter(Boolean)
   const parent = findParentDialogueNode(nodes, parentNodeId)
   const speaker = parent ? speakerOf(parent).trim() : ''
@@ -358,11 +509,18 @@ export function buildSceneGeneration(options: {
   }
   selections.scene_protagonists = { personnage_a: pc, ...(npc ? { personnage_b: npc } : {}) }
 
+  const tones = sceneTones(sheet)
   return {
     contextSelections: selections,
     npcSpeakerId: npc,
     playerCharacterId: pc,
-    brief: sheet.brief.trim(),
+    brief: stripBriefMentions(sheet.brief, [
+      ...sheetEntryNames(sheet),
+      ...characters.map((entry) => entry.name),
+      ...mentionNames,
+    ]).trim(),
+    narrativeTags: tones.length > 0 ? tones : undefined,
+    authorProfileId: sceneAuthorProfileId(sheet),
   }
 }
 
@@ -375,6 +533,26 @@ export function composeSceneInstructions(brief: string, instructions: string): s
 
 function linkedKey(category: string, name: string): string {
   return `${category}:${speakerKey(name)}`
+}
+
+/** Fiche citée par une mention : ajoutée en mode complet, sauf PNJ, PJ, lieu et doublon. */
+export function addMentionedEntry(
+  sheet: SceneSheet,
+  category: MentionCategory,
+  name: string,
+  entryId: string | null,
+): SceneSheet {
+  const held = [
+    ...sheet.npcs.map((npc) => linkedKey('characters', npc.name)),
+    ...(sheet.pc ? [linkedKey('characters', sheet.pc.name)] : []),
+    ...(sheet.place ? [linkedKey('locations', sheet.place.name)] : []),
+    ...sheet.linkedEntries.map((entry) => linkedKey(entry.category, entry.name)),
+  ]
+  if (held.includes(linkedKey(category, name))) return sheet
+  return {
+    ...sheet,
+    linkedEntries: [...sheet.linkedEntries, { category, name, mode: 'full', entryId }],
+  }
 }
 
 /**

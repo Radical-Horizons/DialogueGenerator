@@ -113,10 +113,10 @@ function getFirstMeaningfulStringFromObject(obj: Record<string, unknown>): strin
   return undefined
 }
 
-function sliceSummary(text: string): string {
+function sliceSummary(text: string, maxLength: number): string {
   const t = stripInlineMarkup(text)
   if (!t) return ''
-  return t.slice(0, MAX_SUMMARY_LENGTH) + (t.length > MAX_SUMMARY_LENGTH ? '…' : '')
+  return t.slice(0, maxLength) + (t.length > maxLength ? '…' : '')
 }
 
 /** Cherche un résumé dans `sections`, en comparant les clés normalisées. */
@@ -171,12 +171,16 @@ function excerptFirstLineFromGeneral(general: string): string | undefined {
   return undefined
 }
 
-export function getGddEntitySummary(data: Record<string, unknown> | undefined): string {
+export function getGddEntitySummary(
+  data: Record<string, unknown> | undefined,
+  maxLength: number = MAX_SUMMARY_LENGTH,
+): string {
   if (!data || typeof data !== 'object') return ''
+  const slice = (text: string) => sliceSummary(text, maxLength)
   for (const key of SUMMARY_KEYS) {
     const val = data[key]
     const text = extractTextFromGddValue(val)
-    if (text) return sliceSummary(text)
+    if (text) return slice(text)
   }
   const introObj = data['Introduction'] ?? data['introduction']
   if (introObj && typeof introObj === 'object' && !Array.isArray(introObj) && introObj !== null) {
@@ -184,27 +188,27 @@ export function getGddEntitySummary(data: Record<string, unknown> | undefined): 
       getNestedString(introObj, 'Résumé de la fiche') ??
       getNestedString(introObj, 'Résumé') ??
       getFirstMeaningfulStringFromObject(introObj as Record<string, unknown>)
-    if (fromIntro) return sliceSummary(fromIntro)
+    if (fromIntro) return slice(fromIntro)
   }
   const sections = data['sections'] as Record<string, unknown> | undefined
   if (sections && typeof sections === 'object') {
     const intro = getNestedString(sections, 'Introduction') ?? getNestedString(sections, 'Résumé')
-    if (intro) return sliceSummary(intro)
+    if (intro) return slice(intro)
     const fromSlug = trySummaryFromNormalizedSections(sections)
-    if (fromSlug) return sliceSummary(fromSlug)
+    if (fromSlug) return slice(fromSlug)
   }
   const rawValues = data['values']
   if (rawValues && typeof rawValues === 'object' && !Array.isArray(rawValues)) {
     const fromVals = trySummaryFromValues(rawValues as Record<string, unknown>)
-    if (fromVals) return sliceSummary(fromVals)
+    if (fromVals) return slice(fromVals)
   }
   if (sections && typeof sections === 'object') {
     const gen = sections['_general']
     if (typeof gen === 'string' && gen.trim()) {
       const fromMd = trySummaryFromGeneralMarkdown(gen)
-      if (fromMd) return sliceSummary(fromMd)
+      if (fromMd) return slice(fromMd)
       const line = excerptFirstLineFromGeneral(gen)
-      if (line) return sliceSummary(line)
+      if (line) return slice(line)
     }
   }
   return ''

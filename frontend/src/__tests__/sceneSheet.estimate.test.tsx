@@ -9,6 +9,7 @@ import { AIGenerationPanel } from '../components/graph/AIGenerationPanel'
 import { NodeEditorPanel } from '../components/graph/NodeEditorPanel'
 import { useGraphStore } from '../store/graphStore'
 import { useContextStore } from '../store/contextStore'
+import { useSceneProfileStore } from '../store/sceneProfileStore'
 
 const captured = vi.hoisted(() => ({
   badge: null as Record<string, unknown> | null,
@@ -37,6 +38,12 @@ vi.mock('../hooks/useEstimation', () => ({
 vi.mock('../hooks/useCostGovernance', () => ({
   useCostGovernance: () => ({ checkBudget: vi.fn(), isBlocked: false }),
 }))
+vi.mock('../api/authorProfiles', () => ({
+  listAuthorProfilesApi: vi.fn().mockResolvedValue([]),
+  listPrebuiltAuthorProfilesApi: vi.fn().mockResolvedValue([
+    { id: 'sobre', name: 'Sobre', description: '', content: 'Sois sobre.' },
+  ]),
+}))
 vi.mock('../api/config', () => ({
   listLLMModels: vi.fn().mockResolvedValue({ models: [], total: 0 }),
 }))
@@ -49,6 +56,8 @@ const node: Node = {
 }
 
 const SHEET_REQUEST = {
+  narrative_tags: ['tension'],
+  author_profile: 'Sois sobre.',
   npc_speaker_id: 'PNJ de la fiche',
   player_character_id: 'Vethraak',
   user_instructions:
@@ -65,6 +74,12 @@ beforeEach(() => {
   captured.badge = null
   captured.editor = null
   useGraphStore.getState().resetGraph()
+  useSceneProfileStore.setState({
+    voices: [
+      { id: 'sobre', name: 'Sobre', description: '', content: 'Sois sobre.', prebuilt: true },
+    ],
+    status: 'ready',
+  })
   useContextStore.setState((state) => ({
     selections: { ...state.selections, characters_full: ['Personnage de la colonne'] },
   }))
@@ -77,6 +92,8 @@ beforeEach(() => {
       place: { name: 'Sous un pont', entryId: null },
       brief: 'Un marché.',
       linkedEntries: [],
+      tones: ['tension'],
+      authorProfileId: 'sobre',
     },
   })
 })

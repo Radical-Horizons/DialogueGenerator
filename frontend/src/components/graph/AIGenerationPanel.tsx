@@ -21,7 +21,9 @@ import {
 } from '../../utils/graphChoiceLabels'
 import { serializeDialogueNodesForApi } from '../../utils/dialoguePathContext'
 import { composeSceneInstructions } from '../../utils/sceneSheet'
-import { useSceneGeneration } from '../../hooks/useSceneSheet'
+import { useSceneGeneration, useSceneSheet } from '../../hooks/useSceneSheet'
+import { SceneToneChips } from '../scene/SceneToneChips'
+import { useSceneReadOnly } from '../../hooks/useSceneReadOnly'
 import { DialogueLineText } from '../shared/DialogueLineText'
 
 interface AIGenerationPanelProps {
@@ -37,6 +39,8 @@ export function AIGenerationPanel({
 }: AIGenerationPanelProps) {
   const { generateFromNode, isGenerating, nodes, edges } = useGraphStore()
   const sceneGeneration = useSceneGeneration(parentNodeId)
+  const { sheet } = useSceneSheet()
+  const sceneReadOnly = useSceneReadOnly()
   const toast = useToast()
   const { checkBudget } = useCostGovernance()
   
@@ -47,14 +51,11 @@ export function AIGenerationPanel({
   const [llmModel, setLlmModel] = useState<string>(DEFAULT_MODEL)
   const [maxChoices, setMaxChoices] = useState<number | null>(null)
   const [availableModels, setAvailableModels] = useState<LLMModelResponse[]>([])
-  const [narrativeTags, setNarrativeTags] = useState<string[]>([])
   const [targetChoiceIndex, setTargetChoiceIndex] = useState<number | null>(null)
   const [generateAllChoices, setGenerateAllChoices] = useState(false)
   const [batchProgress, setBatchProgress] = useState<{ current: number; total: number } | null>(null)
   const [budgetExceededByEstimate, setBudgetExceededByEstimate] = useState(false)
   
-  const availableNarrativeTags = ['tension', 'humour', 'dramatique', 'intime', 'révélation']
-
   // Charger les modèles disponibles
   useEffect(() => {
     configAPI.listLLMModels()
@@ -131,7 +132,6 @@ export function AIGenerationPanel({
           finalInstructions,
           {
             max_choices: maxChoices,
-            narrative_tags: narrativeTags.length > 0 ? narrativeTags : undefined,
             llm_model_identifier: llmModel,
             target_choice_index: targetChoiceIndex ?? null,
             generate_all_choices: generateAllChoices,
@@ -187,7 +187,6 @@ export function AIGenerationPanel({
     userInstructions,
     generationMode,
     maxChoices,
-    narrativeTags,
     llmModel,
     generateFromNode,
     toast,
@@ -232,6 +231,8 @@ export function AIGenerationPanel({
         dialogue_nodes: serializeDialogueNodesForApi(nodes),
         npc_speaker_id: sceneGeneration.npcSpeakerId,
         player_character_id: sceneGeneration.playerCharacterId,
+        narrative_tags: sceneGeneration.narrativeTags,
+        author_profile: sceneGeneration.authorProfile,
       }
     },
     [parentNodeId, parentNode, userInstructions, sceneGeneration, maxChoices, llmModel, targetChoiceIndex, generateAllChoices, nodes]
@@ -645,44 +646,20 @@ export function AIGenerationPanel({
         />
       </div>
       
-      {/* Tags narratifs */}
+      {/* Tons : ceux de la fiche de scène, cochés ici comme là-haut. */}
       <div>
-        <label style={{ 
+        <span style={{
           display: 'block',
           marginBottom: '0.5rem',
           fontSize: '0.9rem',
           fontWeight: 'bold',
           color: theme.text.primary,
         }}>
-          Tags narratifs (optionnel)
-        </label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-          {availableNarrativeTags.map((tag) => (
-            <button
-              key={tag}
-              onClick={() => {
-                setNarrativeTags((prev) =>
-                  prev.includes(tag)
-                    ? prev.filter((t) => t !== tag)
-                    : [...prev, tag]
-                )
-              }}
-              style={{
-                padding: '0.25rem 0.75rem',
-                border: `1px solid ${narrativeTags.includes(tag) ? theme.button.primary.background : theme.input.border}`,
-                borderRadius: '4px',
-                backgroundColor: narrativeTags.includes(tag) ? theme.button.primary.background : theme.input.background,
-                color: narrativeTags.includes(tag) ? theme.button.primary.color : theme.input.color,
-                cursor: 'pointer',
-                fontSize: '0.8rem',
-              }}
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
+          Ton de la scène
+        </span>
+        <SceneToneChips sheet={sheet} readOnly={sceneReadOnly} />
       </div>
-      
+
       {/* Info contexte : lue dans la fiche de scène */}
       <div style={{
         padding: '0.75rem',
@@ -702,7 +679,7 @@ export function AIGenerationPanel({
         ) : null}
         {sceneGeneration.brief ? <div>Brief envoyé avec la consigne.</div> : null}
         <div style={{ fontStyle: 'italic' }}>
-          La fiche de scène, en tête du graphe, fixe les personnages, le lieu, le brief et les fiches liées ; le serveur peut joindre un figurant.
+          La fiche de scène, en tête du graphe, fixe les personnages, le lieu, le brief, les fiches liées, les tons et le profil d’auteur ; le serveur peut joindre un figurant.
         </div>
       </div>
 

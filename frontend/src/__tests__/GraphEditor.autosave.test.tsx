@@ -175,6 +175,34 @@ describe('GraphEditor autosave (ADR-006)', () => {
     expect(getByTestId('scene-sheet')).toBeInTheDocument()
   })
 
+  it('un dialogue sans réplique propose la première, jusqu’à ce qu’elle existe', async () => {
+    useGraphStore.setState({
+      saveDialogue: vi.fn().mockResolvedValue({ success: true, filename: 'doc' }),
+      validateGraph: vi.fn().mockResolvedValue(undefined),
+    })
+    const { queryByRole } = render(
+      React.createElement(QueryClientProvider, { client: makeQueryClient() },
+        React.createElement(GraphEditor)
+      )
+    )
+    await act(async () => {
+      await vi.runAllTimersAsync()
+    })
+    const slot = () => queryByRole('region', { name: 'Première réplique à écrire' })
+
+    await act(async () => {
+      useGraphStore.setState({ nodes: [], edges: [], hasUnsavedChanges: false })
+    })
+    expect(slot()).toBeInTheDocument()
+
+    await act(async () => {
+      useGraphStore.setState({
+        nodes: [{ id: 'START', type: 'dialogueNode', position: { x: 0, y: 0 }, data: { id: 'START', speaker: 'PNJ', line: '', choices: [] } }],
+      })
+    })
+    expect(slot()).not.toBeInTheDocument()
+  })
+
   it('un dialogue sans nœud s’enregistre quand sa fiche de scène change, et seulement alors', async () => {
     const saveDialogueMock: GraphState['saveDialogue'] = vi
       .fn()

@@ -40,6 +40,8 @@ class BatchGenerateFromNodesJobRequest(BaseModel):
     )
     llm_model_identifier: Optional[str] = Field(None, description="Modèle LLM")
     system_prompt_override: Optional[str] = None
+    narrative_tags: Optional[List[str]] = Field(None, description="Tags narratifs")
+    author_profile: Optional[str] = Field(None, description="Directives d'auteur de la scène")
     max_choices: Optional[int] = None
     choices_mode: Optional[Literal["free", "capped"]] = None
     resume_job_id: Optional[str] = Field(
