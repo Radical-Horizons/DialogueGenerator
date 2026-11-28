@@ -139,7 +139,7 @@
                         <p style="margin: 0 0 14px; font-size: 15px; line-height: 1.6; font-style: italic; color: {{t.sec}}">{{p.text}}</p>
                       </sc-if>
                       <sc-if value="{{p.say}}" hint-placeholder-val="{{true}}">
-                        <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p>
+                        <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="display: block; font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p>
                       </sc-if>
                     </sc-for>
                     <div data-scroll="{{b.key}}" style="margin: 20px 0 34px">
@@ -218,7 +218,7 @@
                       <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.muted}}">{{rv.meta}}</span>
                     </div>
                     <sc-if value="{{rv.hasGen}}" hint-placeholder-val="{{true}}">
-                      <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 22px; line-height: 1.5; color: {{t.dia}}; opacity: {{rv.op}}"><sc-for list="{{rv.segs}}" as="s" hint-placeholder-count="2"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 16px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p>
+                      <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 22px; line-height: 1.5; color: {{t.dia}}; opacity: {{rv.op}}"><sc-for list="{{rv.segs}}" as="s" hint-placeholder-count="2"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="display: block; font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 16px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p>
                       <div style="margin-top: 14px; opacity: {{rv.op}}">
                         <span style="display: block; margin-bottom: 7px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.label}}">{{rv.who}}</span>
                         <ol style="list-style: none; margin: 0; padding: 0; border-top: 1px solid {{t.hair}}">
@@ -266,14 +266,26 @@
             </section>
           </sc-if>
 
-          <div style="flex: none; display: flex; align-items: center; gap: 14px; padding: 9px 40px 11px; max-width: {{stripMax}}; box-sizing: border-box">
+          <div style="flex: none; display: flex; flex-direction: column">
+            <div aria-label="Barre de lot de la sélection, au graphe" style="display: flex; flex-direction: column; gap: 5px; padding: 5px 40px 0; white-space: nowrap">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}">AU GRAPHE · SÉLECTION MULTIPLE, BARRE CONSERVÉE</span>
+              <div style="display: flex; align-items: center; gap: 9px">
+                <span style="font-size: 12px; color: {{t.body}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">3</span> nœuds sélectionnés</span>
+                <button type="button" style="height: 24px; padding: 0 9px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12px; white-space: nowrap; cursor: pointer">Tagger sélection</button>
+                <button type="button" style="height: 24px; padding: 0 9px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12px; white-space: nowrap; cursor: pointer">Valider sélection</button>
+                <button type="button" style="height: 24px; padding: 0 9px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12px; white-space: nowrap; cursor: pointer">Générer batch depuis sélection</button>
+                <button type="button" style="height: 24px; padding: 0 9px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.err}}; font-family: inherit; font-size: 12px; white-space: nowrap; cursor: pointer">Supprimer sélection</button>
+              </div>
+            </div>
+            <div style="flex: none; display: flex; align-items: center; gap: 14px; padding: 9px 40px 11px; max-width: {{stripMax}}; box-sizing: border-box">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}; flex: none">ÉTAT</span>
             <div role="group" aria-label="État de la maquette" style="display: flex; flex: none; border: 1px solid {{t.ctrl}}; border-radius: 6px; overflow: hidden">
               <sc-for list="{{etats}}" as="e" hint-placeholder-count="3">
                 <button type="button" aria-pressed="{{e.on}}" onClick="{{e.pick}}" style="height: 24px; padding: 0 9px; border: none; border-left: {{e.sep}}; background: {{e.bg}}; color: {{e.color}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; white-space: nowrap; cursor: pointer">{{e.label}}</button>
               </sc-for>
             </div>
-            <p style="margin: 0; min-width: 0; font-size: 12px; line-height: 1.45; color: #9a9aa4">Exemple : coût et durée par suite, heures, avancement du lot, textes des répliques générées. Les comptes de suites viennent de la scène réelle.</p>
+            <p style="margin: 0; min-width: 0; font-size: 12px; line-height: 1.45; color: #9a9aa4">Exemple : coût par suite, heures, avancement du lot, textes des répliques générées, sélection de trois nœuds. Les comptes de suites viennent de la scène réelle.</p>
+          </div>
           </div>
         </div>
 
@@ -462,8 +474,6 @@
             <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{sumTokens}}<span style="color: {{t.muted}}">{{sumTokDetail}}</span></dd>
             <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">COÛT</dt>
             <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{sumCost}}<span style="color: {{t.muted}}">  EXEMPLE</span></dd>
-            <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">DURÉE</dt>
-            <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{sumTime}}<span style="color: {{t.muted}}">  EXEMPLE</span></dd>
             <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">MODÈLE</dt>
             <dd style="margin: 0"><button type="button" class="ob" aria-haspopup="listbox" aria-label="Modèle : GPT-6.2 Sol" style="height: 24px; display: inline-flex; align-items: center; gap: 9px; padding: 0 9px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: {{t.input}}; color: {{t.strong}}; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 12px; letter-spacing: 0; cursor: pointer">GPT-6.2 Sol<span style="color: {{t.muted}}; font-size: 10px">▾</span></button></dd>
           </dl>
@@ -509,7 +519,7 @@
             <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">COÛT</dt>
             <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{lotCostDone}}<span style="color: {{t.muted}}">{{lotCostAll}}</span></dd>
             <dt style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">RESTE</dt>
-            <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{lotRestTime}}</dd>
+            <dd style="margin: 0; font-size: 11px; color: {{t.body}}">{{lotRest}}</dd>
           </dl>
           <sc-if value="{{canResume}}" hint-placeholder-val="{{false}}">
             <button type="button" class="fill" onClick="{{resume}}" style="height: 38px; margin-top: 5px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border: none; border-radius: 6px; background: {{t.fill}}; color: #ffffff; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer"><span><sc-for list="{{resumeLabel}}" as="m" hint-placeholder-count="1"><sc-if value="{{m.n}}" hint-placeholder-val="{{false}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 0.9em">{{m.t}}</span></sc-if><sc-if value="{{m.w}}" hint-placeholder-val="{{true}}"><span>{{m.t}}</span></sc-if></sc-for></span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.05em; opacity: 0.85">CTRL+↵</span></button>
@@ -747,14 +757,6 @@ class Component extends DCLogic {
 
   euro(n) {
     return '≈ ' + n.toFixed(2).replace('.', ',') + ' €';
-  }
-
-  dur(sec) {
-    if (sec <= 0) return '—';
-    if (sec < 60) return '≈ ' + sec + ' S';
-    const m = Math.round(sec / 60);
-    if (m < 60) return '≈ ' + m + ' MIN';
-    return '≈ ' + Math.floor(m / 60) + ' H ' + String(m % 60).padStart(2, '0');
   }
 
   clock(sec) {
@@ -1108,7 +1110,7 @@ class Component extends DCLogic {
       sbCaret: drawerOn ? '▸' : '',
       sbLotColor: isC ? t.pend : drawerOn ? t.strong : t.body,
       sbLotLabel: isB ? 'LOT · ' + done + ' / ' + total : isC ? 'LOT INTERROMPU — ' + done + ' / ' + total : 'LOT TERMINÉ — ' + total + ' / ' + total,
-      sbLotRest: isB ? this.dur(rest * this.SECS) : isC ? rest + ' RESTANTES' : nPend + ' À VALIDER',
+      sbLotRest: isB || isC ? rest + ' RESTANTES' : nPend + ' À VALIDER',
 
       drawerOn: drawerOn,
       dSet: isA, dLot: !isA,
@@ -1121,14 +1123,14 @@ class Component extends DCLogic {
       toggleDepth: () => setSel({ depthOn: !self.state.sel.depthOn }),
       sumN: String(n), sumParents: n ? '  SOUS ' + parentsN + (parentsN > 1 ? ' RÉPLIQUES' : ' RÉPLIQUE') : '',
       sumTokens: '≈ ' + this.fmt(n * this.PER_SUITE), sumTokDetail: n ? '  · ' + n + ' × ≈ 12 500' : '',
-      sumCost: this.euro(n * this.COST), sumTime: this.dur(n * this.SECS),
+      sumCost: this.euro(n * this.COST),
       canGo: n > 0, cantGo: n === 0,
       goLabel: this.mix('Générer ' + n + (n > 1 ? ' suites' : ' suite')),
       dParentsLabel: 'RÉPLIQUES DU LOT — ' + groups.length,
       parents: parents,
       lotTokDone: '≈ ' + this.fmt(done * this.PER_SUITE), lotTokAll: '  SUR ≈ ' + this.fmt(total * this.PER_SUITE),
       lotCostDone: this.euro(done * this.COST), lotCostAll: '  SUR ' + this.euro(total * this.COST),
-      lotRestTime: isT ? '—' : this.dur(rest * this.SECS) + (isC ? ' À LA REPRISE' : ''),
+      lotRest: isT ? '—' : rest + ' SUITES' + (isC ? ' À LA REPRISE' : ''),
 
       bannerBg: isC ? t.pendBg : 'transparent',
       bannerLabel: isB ? 'LOT EN COURS · ' + done + ' / ' + total : isC ? 'LOT INTERROMPU · ' + done + ' / ' + total : 'LOT TERMINÉ · ' + total + ' / ' + total,

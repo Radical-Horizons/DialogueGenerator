@@ -24,7 +24,7 @@
       <span aria-hidden="true" style="width: 20px; height: 20px; flex: none; border-radius: 99px; background: {{t.spk}}; color: {{t.onSpk}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px">GT</span>
       <span aria-hidden="true" style="width: 20px; height: 20px; flex: none; margin-left: -14px; box-shadow: 0 0 0 2px {{t.app}}; border-radius: 99px; background: {{t.raised}}; color: {{t.body}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px">U</span>
       <span style="flex: 1; min-width: 0; font-size: 13px; color: {{t.sec}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis"><span style="color: {{t.body}}">Grish T'vok</span> · Uresaïr · Caravane-atelier</span>
-      <span style="flex: none; font-size: 12px; color: {{t.sec}}">fiche ▾</span>
+      <span style="flex: none; font-size: 12px; color: {{t.sec}}">fiche de scène ▾</span>
     </button>
     <div style="flex: none; padding: 9px 14px 9px">
       <nav aria-label="Vue de la scène" style="display: grid; grid-template-columns: 1fr 1fr 1fr; border: 1px solid {{t.ctrl}}; border-radius: 6px; overflow: hidden">
@@ -66,7 +66,7 @@
         <section aria-label="Suite à écrire" style="margin-top: 20px; border: 1px dashed {{t.chip2}}; border-radius: 8px; padding: 14px 14px 14px; display: flex; flex-direction: column; gap: 11px">
           <div style="display: flex; align-items: center; gap: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.label}}"><span aria-hidden="true" style="width: 14px; height: 1px; background: {{t.hair2}}"></span>SUITE DE LA RÉPONSE {{ghostNum}} — À ÉCRIRE</div>
           <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.5; color: {{t.muted}}"><span aria-hidden="true" style="display: inline-block; width: 1.5px; height: 19px; margin-right: 3px; vertical-align: -3px; background: {{t.accent}}"></span>Écrire la réplique de Grish…</p>
-          <button type="button" style="height: 44px; display: flex; align-items: center; justify-content: center; gap: 9px; border: none; border-radius: 6px; background: {{t.fill}}; color: #ffffff; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Générer la suite<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.05em; opacity: 0.85">≈ 12 500 TOKENS</span></button>
+          <button type="button" style="height: 44px; display: flex; align-items: center; justify-content: center; gap: 9px; border: none; border-radius: 6px; background: {{t.fill}}; color: #ffffff; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Générer la suite<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.05em; opacity: 0.85">≈ 12 500 TOKENS · ≈ 0,05 €</span></button>
         </section>
       </article>
     </div>
@@ -82,7 +82,7 @@
     <div style="height: 52px; flex: none; display: flex; align-items: center; gap: 5px; padding: 0 4px">
       <a href="Bibliotheque.dc.html" aria-label="Toutes les scènes" style="width: 44px; height: 44px; flex: none; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: {{t.body}}; font-size: 22px; text-decoration: none">‹</a>
       <span style="flex: 1; min-width: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.1; color: {{t.strong}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Rencontre avec le forgeron itinérant</span>
-      <button type="button" onClick="{{restart}}" aria-label="Recommencer l'essai" style="width: 44px; height: 44px; flex: none; border: none; border-radius: 6px; background: transparent; color: {{t.body}}; font-size: 18px; cursor: pointer">↺</button>
+      <button type="button" onClick="{{restart}}" aria-label="Rejouer la partie" style="width: 44px; height: 44px; flex: none; border: none; border-radius: 6px; background: transparent; color: {{t.body}}; font-size: 18px; cursor: pointer">↺</button>
     </div>
     <div style="flex: none; padding: 9px 14px 0; border-top: 1px solid {{t.hair}}">
       <nav aria-label="Vue de la scène" style="display: grid; grid-template-columns: 1fr 1fr 1fr; border: 1px solid {{t.ctrl}}; border-radius: 6px; overflow: hidden">
@@ -115,7 +115,7 @@
           <span style="flex: 1"></span>
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.ok}}">COMMANDEMENT · RÉUSSITE</span>
         </div>
-        <p data-para="b" style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.55; color: {{t.dia}}">Très bien, Maîtresse. Votre volonté se fait sentir jusque dans mes rouages. <span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">Un claquement doux parcourt sa carcasse, et une goutte d'huile scintille comme une larme.</span> Approchez, ne craignez rien : je n'arrache rien qui ne puisse être recousu. Donnez-moi un objet — votre anneau, votre lame ébréchée, ou même la semelle qui soupire — ou laissez ma main effleurer la faille qui vous habite. J'écouterai la matière, je murmurerai sa mémoire, et je corrigerai ce qui peut l'être. En gage, je vous offre un premier ajustement sans charge. Qu'en dites-vous ?</p>
+        <p data-para="b" style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.55; color: {{t.dia}}">Très bien, Maîtresse. Votre volonté se fait sentir jusque dans mes rouages. <span style="display: block; margin: 3px 0; font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">Un claquement doux parcourt sa carcasse, et une goutte d'huile scintille comme une larme.</span> Approchez, ne craignez rien : je n'arrache rien qui ne puisse être recousu. Donnez-moi un objet — votre anneau, votre lame ébréchée, ou même la semelle qui soupire — ou laissez ma main effleurer la faille qui vous habite. J'écouterai la matière, je murmurerai sa mémoire, et je corrigerai ce qui peut l'être. En gage, je vous offre un premier ajustement sans charge. Qu'en dites-vous ?</p>
 
         <sc-if value="{{picked}}" hint-placeholder-val="{{false}}">
           <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 14px">
@@ -124,7 +124,7 @@
               <span style="font-size: 15px; line-height: 1.5; color: {{t.body}}">{{pickedText}}</span>
             </div>
             <div style="border: 1px dashed {{t.chip2}}; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 11px">
-              <span style="font-size: 14px; line-height: 1.55; color: {{t.sec}}">La suite de cette réponse n'est pas encore écrite. L'essai reprendra ici quand elle le sera.</span>
+              <span style="font-size: 14px; line-height: 1.55; color: {{t.sec}}">La suite de cette réponse n'est pas encore écrite. La partie reprendra ici quand elle le sera.</span>
               <a href="#" style="height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid {{t.ctrl}}; color: {{t.body}}; font-size: 14px; text-decoration: none">Écrire la suite dans le script</a>
               <button type="button" onClick="{{restart}}" style="height: 44px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 14px; cursor: pointer">Choisir une autre réponse</button>
             </div>
@@ -147,14 +147,14 @@
         </sc-for>
       </div>
     </sc-if>
-    <footer aria-label="État de l'essai" style="height: 44px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 0 14px; border-top: 1px solid {{t.hair}}; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; color: {{t.muted}}">
-      <span>ESSAI · N'ÉCRIT RIEN DANS LA SCÈNE</span>
+    <footer aria-label="État de la partie" style="height: 44px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 0 14px; border-top: 1px solid {{t.hair}}; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; color: {{t.muted}}">
+      <span>PARTIE · N'ÉCRIT RIEN DANS LA SCÈNE</span>
       <span style="flex: 1"></span>
-      <span>ÉTAPE 2</span>
+      <span>1 CHOIX</span>
     </footer>
   </section>
 
-  <p style="position: absolute; left: 40px; right: 40px; top: 866px; margin: 0; font-size: 12px; line-height: 1.5; color: #9a9aa4">Exemple : heure <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">11:24</span>. Répliques, réponses, tests et effets réels (scène du forgeron, réponse <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">03</span>, issues Échec et Réussite).</p>
+  <p style="position: absolute; left: 40px; right: 40px; top: 866px; margin: 0; font-size: 12px; line-height: 1.5; color: #9a9aa4">Exemple : coût estimé, heure <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">11:24</span>. Répliques, réponses, tests et effets réels (scène du forgeron, réponse <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">03</span>, issues Échec et Réussite).</p>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":900,"height":900}}'>

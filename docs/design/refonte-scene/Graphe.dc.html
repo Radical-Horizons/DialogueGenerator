@@ -120,9 +120,9 @@
                   <span data-in="{{n.id}}" aria-hidden="true" style="position: absolute; left: -6px; top: 14px; width: 10px; height: 10px; box-sizing: border-box; border-radius: 99px; background: #101013; border: 1.5px dashed rgba(255,255,255,0.55)"></span>
                   <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: #9a9aa4">{{n.label}}</span>
                   <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 15.5px; line-height: 1.4; color: #8a8a95"><span aria-hidden="true" style="display: inline-block; width: 1.5px; height: 16px; margin-right: 3px; vertical-align: -3px; background: #4f7fff"></span>Écrire la réplique de Grish…</p>
-                  <div style="display: flex; align-items: center; gap: 9px">
+                  <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 5px 9px">
                     <button type="button" style="height: 28px; display: flex; align-items: center; gap: 7px; padding: 0 10px; border: 1px solid #2e2e36; border-radius: 6px; background: transparent; color: #dcdce4; font-family: inherit; font-size: 12px; cursor: pointer">Générer<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #9a9aa4">CTRL+↵</span></button>
-                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: #8a8a95">≈ 12 500 TOKENS</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: #8a8a95">≈ 12 500 TOKENS · ≈ 0,05 €</span>
                   </div>
                 </section>
               </sc-if>
@@ -147,7 +147,7 @@
                     <div class="nowheel" style="max-height: {{n.bodyMax}}px; overflow-y: {{n.bodyOverflow}}; padding: 12px 14px 13px; display: flex; flex-direction: column; gap: 9px">
                       <sc-for list="{{n.paras}}" as="p" hint-placeholder-count="1">
                         <sc-if value="{{p.dir}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 13px; line-height: 1.55; font-style: italic; color: #9a9aa4">{{p.text}}</p></sc-if>
-                        <sc-if value="{{p.say}}" hint-placeholder-val="{{true}}"><p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 16px; line-height: 1.42; color: #f0efe9"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 13px; color: #9a9aa4">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p></sc-if>
+                        <sc-if value="{{p.say}}" hint-placeholder-val="{{true}}"><p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 16px; line-height: 1.42; color: #f0efe9"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="display: block; margin: 3px 0; font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 13px; color: #9a9aa4">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p></sc-if>
                       </sc-for>
                     </div>
                     <sc-if value="{{n.showFade}}" hint-placeholder-val="{{false}}">
@@ -169,6 +169,7 @@
                             <sc-if value="{{r.hasChips}}" hint-placeholder-val="{{false}}">
                               <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px">
                                 <sc-for list="{{r.chips}}" as="c" hint-placeholder-count="1"><button type="button" data-anchor="{{c.anchor}}" onClick="{{c.open}}" style="height: 24px; padding: 0 8px; border-radius: 99px; border: 1px solid rgba(255,255,255,0.12); background: transparent; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.06em; color: #8a8a95; cursor: pointer; white-space: nowrap">{{c.label}}</button></sc-for>
+                                <button type="button" aria-label="Ajouter une mécanique" onClick="{{r.add}}" style="width: 24px; height: 24px; padding: 0; border-radius: 99px; border: 1px dashed rgba(255,255,255,0.24); background: transparent; color: #9a9aa4; font-family: inherit; font-size: 13px; line-height: 1; cursor: pointer">+</button>
                               </div>
                             </sc-if>
                           </sc-if>
@@ -184,7 +185,7 @@
                             </div>
                           </sc-if>
                           <sc-if value="{{r.isPending}}" hint-placeholder-val="{{false}}">
-                            <p style="margin: 7px 0 0; display: flex; justify-content: flex-end; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: #9a9aa4">{{r.pending}}</p>
+                            <p style="position: relative; margin: 7px 0 0; display: flex; justify-content: flex-end; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; line-height: 18px; color: #9a9aa4">{{r.pending}}<span aria-hidden="true" style="position: absolute; right: -24px; top: 4px; width: 10px; height: 10px; box-sizing: border-box; border-radius: 99px; background: #101013; border: 1.5px dashed rgba(255,255,255,0.4)"></span></p>
                           </sc-if>
                         </div>
                         <sc-if value="{{r.hasPort}}" hint-placeholder-val="{{false}}">
@@ -193,6 +194,7 @@
                       </li>
                     </sc-for>
                   </ol>
+                  <button type="button" style="display: block; width: 100%; height: 30px; padding: 0 14px 0 45px; border: none; border-top: 1px solid rgba(255,255,255,0.06); background: transparent; text-align: left; font-family: inherit; font-size: 12.5px; color: #9a9aa4; cursor: pointer">+ Réponse</button>
                   <sc-if value="{{tech}}" hint-placeholder-val="{{false}}">
                     <dl style="margin: 0; padding: 8px 14px 10px; border-top: 1px solid rgba(255,255,255,0.06); display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 3px 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.5">
                       <dt style="font-size: 10px; letter-spacing: 0.08em; color: #8a8a95; line-height: 16.5px">ENTRÉE</dt><dd style="margin: 0; color: #dcdce4">toujours atteignable</dd>
@@ -207,9 +209,9 @@
         </sc-for>
 
         <sc-if value="{{pop.open}}" hint-placeholder-val="{{false}}">
-          <section aria-label="Test de compétence" style="position: absolute; left: {{pop.x}}px; top: {{pop.y}}px; width: 340px; z-index: 5; box-sizing: border-box; background: #1f1f26; border: 1px solid #4a4a54; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.4), 0 18px 40px rgba(0,0,0,0.45); padding: 14px; display: flex; flex-direction: column; gap: 9px">
+          <section aria-label="Mécaniques de la réponse" style="position: absolute; left: {{pop.x}}px; top: {{pop.y}}px; width: 340px; z-index: 5; box-sizing: border-box; background: #1f1f26; border: 1px solid #4a4a54; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.4), 0 18px 40px rgba(0,0,0,0.45); padding: 14px; display: flex; flex-direction: column; gap: 9px">
             <div style="display: flex; align-items: center; justify-content: space-between">
-              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #9a9aa4">TEST — RÉPONSE 01 DE L'OUVERTURE</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #9a9aa4">MÉCANIQUES — RÉPONSE 01, OUVERTURE</span>
               <button type="button" onClick="{{closePop}}" style="border: none; background: transparent; padding: 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: #9a9aa4; cursor: pointer">ÉCHAP</button>
             </div>
             <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px">
@@ -225,8 +227,10 @@
             </div>
             <div style="height: 1px; background: rgba(255,255,255,0.09)"></div>
             <div style="display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 7px 9px; align-items: baseline; font-size: 12px">
-              <span style="color: #9a9aa4">Trait requis</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #dcdce4">Empathique ≥ 5</span><button type="button" style="border: none; background: transparent; padding: 0; font-family: inherit; font-size: 11.5px; color: #9a9aa4; cursor: pointer">modifier</button>
+              <sc-if value="{{pop.known}}" hint-placeholder-val="{{true}}"><span style="color: #9a9aa4">Trait requis</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #dcdce4">Empathique ≥ 5</span><button type="button" style="border: none; background: transparent; padding: 0; font-family: inherit; font-size: 11.5px; color: #9a9aa4; cursor: pointer">modifier</button></sc-if>
+              <sc-if value="{{pop.unknown}}" hint-placeholder-val="{{false}}"><span style="color: #9a9aa4">Trait requis</span><input aria-label="Trait requis" aria-invalid="true" spellCheck="false" defaultValue="Empatique" style="height: 26px; min-width: 0; box-sizing: border-box; padding: 0 7px; border-radius: 6px; border: 1px solid #ff6b6b; background: #1c1c22; color: #dcdce4; font-family: 'IBM Plex Mono', monospace; font-size: 11px"><button type="button" style="border: none; background: transparent; padding: 0; font-family: inherit; font-size: 11.5px; color: #9a9aa4; cursor: pointer">annuler</button><span role="alert" style="grid-column: 2 / 4; font-size: 11.5px; line-height: 1.4; color: #ff6b6b">« Empatique » n'est pas au catalogue des traits : saisie refusée.</span><span style="grid-column: 2 / 4; font-size: 11.5px; color: #9a9aa4">Au catalogue : <button type="button" style="border: none; background: transparent; padding: 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8fb0ff; cursor: pointer">Empathique</button></span></sc-if>
               <span style="color: #9a9aa4">Respect</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #dcdce4">+1</span><button type="button" style="border: none; background: transparent; padding: 0; font-family: inherit; font-size: 11.5px; color: #9a9aa4; cursor: pointer">modifier</button>
+              <span style="color: #9a9aa4">Influence</span><span style="color: #dcdce4">aucune</span><button type="button" style="border: none; background: transparent; padding: 0; font-family: inherit; font-size: 11.5px; color: #9a9aa4; cursor: pointer">+ ajouter</button>
               <span style="color: #9a9aa4">Condition</span><span style="color: #dcdce4">toujours visible</span><button type="button" style="border: none; background: transparent; padding: 0; font-family: inherit; font-size: 11.5px; color: #9a9aa4; cursor: pointer">+ ajouter</button>
               <span style="color: #9a9aa4">Effets</span><span style="color: #dcdce4">aucun</span><button type="button" style="border: none; background: transparent; padding: 0; font-family: inherit; font-size: 11.5px; color: #9a9aa4; cursor: pointer">+ ajouter</button>
             </div>
@@ -260,6 +264,7 @@
           </svg>
         </div>
       </div>
+      <p style="flex: none; margin: 0; padding: 6px 40px 7px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 12px; line-height: 1.4; color: #9a9aa4">Exemple : coût en € de la suite, heure d'enregistrement et fin voulue posée sur « Je m'en vais… ».<sc-if value="{{pop.unknown}}" hint-placeholder-val="{{false}}"> La saisie « Empatique » est inventée.</sc-if> Répliques et réponses réelles (scène du forgeron).</p>
     </main>
   </div>
 
@@ -275,12 +280,12 @@
   </footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"lens":{"editor":"enum","options":["texte","technique"],"default":"texte"},"popover":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":900}}'>
+<script type="text/x-dc" data-dc-script data-props='{"lens":{"editor":"enum","options":["texte","technique"],"default":"texte"},"popover":{"editor":"boolean","default":false},"inconnu":{"editor":"boolean","default":false},"cadrage":{"editor":"enum","options":["ouverture","fin"],"default":"ouverture"},"$preview":{"width":1440,"height":900}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
     const p0 = props || this.props || {};
-    this.state = { lens: p0.lens === 'technique' ? 'technique' : 'texte', selected: 'START', pop: p0.popover ? 'start-test' : null, popXY: null, edges: [] };
+    this.state = { lens: p0.lens === 'technique' ? 'technique' : 'texte', selected: 'START', pop: p0.popover ? 'start-test' : null, popXY: null, edges: [], cadrage: p0.cadrage === 'fin' ? 'fin' : 'ouverture', pan: 0 };
     this.canvasEl = null;
     this.setCanvas = (el) => { this.canvasEl = el; };
     this.raf = 0;
@@ -314,7 +319,8 @@ class Component extends DCLogic {
       '36c5': { title: 'Échec', st: 'accepted', flag: '—',
         line: "Hmpf. Vous avez une façon de parler qui caresse les tissus sans toucher la corde qui les tient — beau, mais dangereux. J'ai tendu mes doigts au murmure des objets ; quand je recouds, je réarrange la trame.",
         ch: [
-          { t: "J'accepte le compromis. Restaurez la fonction, que la mémoire soit préservée autant que possible.", resp: 1 }
+          { t: "J'accepte le compromis. Restaurez la fonction, que la mémoire soit préservée autant que possible.", resp: 1 },
+          { t: "Je m'en vais. Vos mains ne toucheront pas ma tapisserie.", fin: true, num: '05' }
         ] }
     };
     this.layout = [
@@ -341,13 +347,13 @@ class Component extends DCLogic {
   }
 
   componentDidUpdate() {
-    const sig = this.state.lens + '|' + this.state.pop + '|' + this.state.selected + '|' + this.props.lens + '|' + this.props.popover;
+    const sig = this.state.lens + '|' + this.state.pop + '|' + this.state.selected + '|' + this.props.lens + '|' + this.props.popover + '|' + this.state.cadrage + '|' + this.state.pan + '|' + this.props.cadrage;
     if (this.lastSig !== sig) {
-      if (this.lastProps !== undefined && this.lastProps !== this.props.lens + '|' + this.props.popover) {
-        this.lastProps = this.props.lens + '|' + this.props.popover;
-        this.setState({ lens: this.props.lens === 'technique' ? 'technique' : 'texte', pop: this.props.popover ? 'start-test' : null });
+      const props = this.props.lens + '|' + this.props.popover + '|' + this.props.cadrage;
+      if (this.lastProps !== undefined && this.lastProps !== props) {
+        this.setState({ lens: this.props.lens === 'technique' ? 'technique' : 'texte', pop: this.props.popover ? 'start-test' : null, cadrage: this.props.cadrage === 'fin' ? 'fin' : 'ouverture', pan: 0 });
       }
-      if (this.lastProps === undefined) this.lastProps = this.props.lens + '|' + this.props.popover;
+      this.lastProps = props;
       this.lastSig = sig;
       this.scheduleMeasure();
     }
@@ -366,6 +372,11 @@ class Component extends DCLogic {
       return { x: ((r.left + r.right) / 2 - rr.left) / s, y: ((r.top + r.bottom) / 2 - rr.top) / s, top: (r.top - rr.top) / s, bottom: (r.bottom - rr.top) / s, left: (r.left - rr.left) / s };
     };
     if (this.ro) root.querySelectorAll('[data-node]').forEach((el) => this.ro.observe(el));
+    const end = this.state.cadrage === 'fin' && root.querySelector('[data-node="36c5"]');
+    if (end) {
+      const pan = Math.max(0, Math.round(this.state.pan + at(end).top - 24));
+      if (Math.abs(pan - this.state.pan) > 1) { this.setState({ pan: pan }); return; }
+    }
     const edges = [];
     root.querySelectorAll('[data-port]').forEach((el) => {
       const target = el.getAttribute('data-target');
@@ -451,6 +462,8 @@ class Component extends DCLogic {
         }
         if (c.resp) chips.push({ label: 'RESPECT ' + sign(c.resp), anchor: '', open: openPop(null) });
         if (c.inf) chips.push({ label: 'INFLUENCE ' + sign(c.inf), anchor: '', open: openPop(null) });
+        if (c.fin) chips.push({ label: '■ FIN', anchor: '', open: openPop(null) });
+        if (c.anchor) chips.forEach((k) => { k.open = openPop(c.anchor); });
         const outs = c.out || [];
         const anyOut = outs.some((x) => x);
         const port = id + ':' + i;
@@ -476,14 +489,14 @@ class Component extends DCLogic {
           isPending = true;
           pending = '4 ISSUES · À ÉCRIRE';
         }
-        const hasPort = !empty && !c.test;
+        const hasPort = !empty && !c.test && !c.fin;
         if (hasPort) {
           ghostCount += 1;
         }
         return {
-          num: String(i + 1).padStart(2, '0'),
+          num: c.num || String(i + 1).padStart(2, '0'),
           empty: empty, full: !empty, text: c.t,
-          chips: chips, hasChips: chips.length > 0,
+          chips: chips, hasChips: !empty, add: openPop(c.anchor || null),
           isTest: Boolean(c.test) && anyOut, outcomes: outcomes,
           isPending: isPending, pending: pending,
           hasPort: hasPort, port: port, portLine: 'dashed', portColor: 'rgba(255,255,255,0.4)'
@@ -515,7 +528,7 @@ class Component extends DCLogic {
         select: () => this.setState({ selected: id })
       };
     };
-    const columns = this.layout.map((c) => ({ x: c.x, y: c.y, nodes: c.ids.map(card) }));
+    const columns = this.layout.map((c) => ({ x: c.x, y: c.y - this.state.pan, nodes: c.ids.map(card) }));
     const edges = this.state.edges.map((e) => ({
       d: e.d,
       dash: e.dash,
@@ -533,7 +546,7 @@ class Component extends DCLogic {
       columns: columns,
       edges: edges,
       hasEdges: edges.length > 0,
-      pop: { open: Boolean(this.state.pop && p), x: p ? p.x : 0, y: p ? p.y : 0 },
+      pop: { open: Boolean(this.state.pop && p), x: p ? p.x : 0, y: p ? p.y : 0, known: !this.props.inconnu, unknown: Boolean(this.props.inconnu) },
       closePop: (ev) => { if (ev && ev.stopPropagation) ev.stopPropagation(); this.setState({ pop: null }); }
     };
   }

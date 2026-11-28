@@ -77,7 +77,7 @@
       </div>
       <figcaption style="flex: none; display: flex; flex-direction: column; gap: 5px">
         <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}">02 — ANNULER PLUTÔT QUE CONFIRMER</span>
-        <span style="font-size: 13px; line-height: 1.5; color: {{t.sec}}">Supprimer ne pose jamais de question : le toast propose d'annuler, et <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px">CTRL+Z</span> marche encore après.</span>
+        <span style="font-size: 13px; line-height: 1.5; color: {{t.sec}}">Supprimer une réplique ou une réponse ne pose pas de question : le toast propose d'annuler, <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px">CTRL+Z</span> marche après. Supprimer une scène demande confirmation.</span>
       </figcaption>
     </figure>
 
@@ -106,17 +106,15 @@
     <!-- 4 · Provenance -->
     <figure style="margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 14px; padding: 18px 20px 18px 0; border-right: 1px solid {{t.hair}}; border-bottom: 1px solid {{t.hair}}">
       <div style="flex: 1; min-height: 0; box-sizing: border-box; border: 1px solid {{t.hair2}}; border-radius: 8px; padding: 14px 18px; display: flex; flex-direction: column; gap: 11px; overflow: hidden">
-        <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 18px; line-height: 1.55; color: {{t.dia}}"><span style="color: {{t.dia}}">Ha. Vos mots ont la précision d'une lime fine.</span> <span class="pg-fade" style="color: {{genColor}}; background: {{genBg}}; border-radius: 2px; -webkit-box-decoration-break: clone; box-decoration-break: clone">Vous ne cédez pas la toile, Maîtresse, vous la confiez à quelqu'un qui respecte la trame des cicatrices.</span></p>
+        <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 18px; line-height: 1.55; color: {{t.dia}}"><span style="color: {{t.dia}}">Ha. Vos mots ont la précision d'une lime fine.</span> <span style="color: #c9d3f0; background: rgba(79,127,255,0.16); border-radius: 2px; -webkit-box-decoration-break: clone; box-decoration-break: clone">Vous ne cédez pas la toile, Maîtresse, vous la confiez à quelqu'un qui respecte la trame des cicatrices.</span></p>
         <div style="display: flex; align-items: center; gap: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}">
           <span style="display: flex; align-items: center; gap: 7px"><span aria-hidden="true" style="width: 14px; height: 9px; border-radius: 2px; background: rgba(79,127,255,0.16)"></span>GÉNÉRÉ · GPT-6.2 SOL</span>
           <span style="display: flex; align-items: center; gap: 7px"><span aria-hidden="true" style="width: 14px; height: 9px; border-radius: 2px; border: 1px solid {{t.chip2}}; box-sizing: border-box"></span>RETOUCHÉ</span>
-          <span style="flex: 1"></span>
-          <button type="button" onClick="{{toggleAlt}}" aria-pressed="{{alt}}" style="height: 24px; padding: 0 8px; border-radius: 6px; border: 1px solid {{altBorder}}; background: {{altBg}}; color: {{t.body}}; font: inherit; letter-spacing: inherit; cursor: pointer">L</button>
         </div>
       </div>
       <figcaption style="flex: none; display: flex; flex-direction: column; gap: 5px">
         <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}">04 — PROVENANCE DU TEXTE</span>
-        <span style="font-size: 13px; line-height: 1.5; color: {{t.sec}}">Le texte généré garde une teinte froide tant que personne n'y a touché ; <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px">L</span> la montre, le reste du temps elle s'efface.</span>
+        <span style="font-size: 13px; line-height: 1.5; color: {{t.sec}}">Le texte généré reste teinté, en permanence, tant que personne n'y a touché ; la première retouche efface la teinte.</span>
       </figcaption>
     </figure>
 
@@ -136,7 +134,7 @@
               <dt style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; line-height: 16px; color: {{t.accText}}">CTRL+K</dt><dd style="margin: 0; color: {{t.body}}">Rechercher, aller à, demander</dd>
               <dt style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; line-height: 16px; color: {{t.accText}}">CTRL+↵</dt><dd style="margin: 0; color: {{t.body}}">Générer la suite</dd>
               <dt style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; line-height: 16px; color: {{t.accText}}">TAB</dt><dd style="margin: 0; color: {{t.body}}">Suite vide suivante</dd>
-              <dt style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; line-height: 16px; color: {{t.accText}}">L</dt><dd style="margin: 0; color: {{t.body}}">Tout voir</dd>
+              <dt style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; line-height: 16px; color: {{t.accText}}">L</dt><dd style="margin: 0; color: {{t.body}}">Lentille Technique</dd>
             </dl>
           </div>
         </sc-if>
@@ -155,11 +153,11 @@
       <div style="flex: 1; min-height: 0; position: relative; box-sizing: border-box; border: 1px solid {{t.hair2}}; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end">
         <div role="dialog" aria-label="Problèmes" style="margin: 0 14px 9px; padding: 11px 14px 14px; border-radius: 10px; border: 1px solid {{t.hair2}}; background: {{t.card}}">
           <div style="display: flex; justify-content: space-between; margin-bottom: 7px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.sec}}"><span>PROBLÈMES</span><span>0</span></div>
-          <p style="margin: 0; font-size: 13px; line-height: 1.5; color: {{t.body}}">Aucun problème. Les erreurs de validation de l'export Unity s'afficheront ici, chacune avec un lien vers sa réplique.</p>
+          <p style="margin: 0; font-size: 13px; line-height: 1.5; color: {{t.body}}">Aucun problème. Les erreurs et les avertissements de la scène s'afficheront ici, chacun avec un lien vers sa réplique.</p>
         </div>
         <div style="height: 28px; flex: none; display: flex; align-items: center; gap: 20px; padding: 0 14px; border-top: 1px solid {{t.hair}}; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; color: {{t.muted}}">
           <span style="display: flex; align-items: center; gap: 7px"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 99px; background: {{t.ok}}"></span>ENREGISTRÉ · 11:24</span>
-          <span style="color: {{t.body}}">0 PROBLÈME ▴</span>
+          <span style="color: {{t.body}}">AUCUN PROBLÈME ▴</span>
         </div>
       </div>
       <figcaption style="flex: none; display: flex; flex-direction: column; gap: 5px">
@@ -243,7 +241,7 @@
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { v: 1, fs: 19, alt: true, help: true, undone: false, reduce: false, play: true };
+    this.state = { v: 1, fs: 19, help: true, undone: false, reduce: false, play: true };
     this.t = {
       app: '#17171b', input: '#1c1c22', raised: '#2a2a33', card: '#1f1f26', hair: 'rgba(255,255,255,0.06)', hair2: 'rgba(255,255,255,0.09)',
       chip: 'rgba(255,255,255,0.12)', chip2: 'rgba(255,255,255,0.22)', strong: '#f2f2f5', body: '#dcdce4', dia: '#f0efe9',
@@ -282,12 +280,6 @@ class Component extends DCLogic {
       fsPct: Math.round(((s.fs - 16) / 8) * 100),
       smaller: () => this.setState({ fs: Math.max(16, s.fs - 1) }),
       bigger: () => this.setState({ fs: Math.min(24, s.fs + 1) }),
-      alt: s.alt,
-      genColor: s.alt ? '#c9d3f0' : t.dia,
-      genBg: s.alt ? 'rgba(79,127,255,0.16)' : 'transparent',
-      altBorder: s.alt ? t.accent : t.ctrl,
-      altBg: s.alt ? t.selBg : 'transparent',
-      toggleAlt: () => this.setState({ alt: !s.alt }),
       help: s.help,
       noHelp: !s.help,
       helpBorder: s.help ? t.accent : t.ctrl,

@@ -129,7 +129,7 @@
                     <p style="margin: 0 0 14px; font-size: 15px; line-height: 1.6; font-style: italic; color: {{t.sec}}">{{p.text}}</p>
                   </sc-if>
                   <sc-if value="{{p.say}}" hint-placeholder-val="{{true}}">
-                    <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if><sc-if value="{{s.hl}}" hint-placeholder-val="{{false}}"><span data-hl="1" style="text-decoration: underline dotted {{t.pendLine}}; text-decoration-thickness: 1.5px; text-underline-offset: 5px; background: {{t.pendBg}}; border-radius: 2px">{{s.t}}</span></sc-if></sc-for></p>
+                    <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="display: block; font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if><sc-if value="{{s.hl}}" hint-placeholder-val="{{false}}"><span data-hl="1" style="text-decoration: underline dotted {{t.pendLine}}; text-decoration-thickness: 1.5px; text-underline-offset: 5px; background: {{t.pendBg}}; border-radius: 2px">{{s.t}}</span></sc-if></sc-for></p>
                   </sc-if>
                 </sc-for>
                 <div style="margin: 20px 0 34px">
@@ -141,7 +141,7 @@
                           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 23px; color: {{t.muted}}">{{c.num}}</span>
                           <span style="min-width: 0">
                             <sc-if value="{{c.empty}}" hint-placeholder-val="{{false}}"><span style="font-size: 14.5px; line-height: 23px; font-style: italic; color: {{t.muted}}">Réponse vide</span></sc-if>
-                            <sc-if value="{{c.full}}" hint-placeholder-val="{{true}}"><span style="display: block; font-size: 15px; line-height: 1.55; color: {{c.textColor}}"><sc-for list="{{c.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-style: italic; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></span></sc-if>
+                            <sc-if value="{{c.full}}" hint-placeholder-val="{{true}}"><span style="display: block; font-size: 15px; line-height: 1.55; color: {{c.textColor}}"><sc-for list="{{c.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="display: block; font-style: italic; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></span></sc-if>
                             <sc-if value="{{c.hasChips}}" hint-placeholder-val="{{false}}">
                               <span style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px">
                                 <sc-for list="{{c.chips}}" as="k" hint-placeholder-count="2"><span style="height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 99px; border: 1px solid {{t.chip}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{k.label}}</span></sc-for>
@@ -207,7 +207,7 @@
     <button type="button" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: {{t.muted}}; cursor: pointer">? RACCOURCIS</button>
   </footer>
 
-  <p style="position: absolute; left: 1102px; bottom: 41px; width: 300px; margin: 0; font-size: 12px; line-height: 1.45; color: #9a9aa4">Exemple : libellés des erreurs, heures de vérification (<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">11:24</span>) et de relecture (<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">11:20</span>). Réels : 12 réponses vides, 8 répliques jamais atteintes, tournures et fautes relevées.</p>
+  <p style="position: absolute; left: 1102px; bottom: 41px; width: 300px; margin: 0; font-size: 12px; line-height: 1.45; color: #9a9aa4">Exemple : libellés des erreurs, heures de vérification (<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">11:24</span>) et de relecture (<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">11:20</span>), coût de la relecture (<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">≈ 0,04 €</span>). Réels : 12 réponses vides, 8 répliques jamais atteintes, tournures et fautes relevées.</p>
 
   <sc-if value="{{popOn}}" hint-placeholder-val="{{true}}">
     <section id="sante" role="dialog" aria-label="Santé de la scène" class="pop" style="position: absolute; left: 9px; bottom: 37px; width: 394px; box-sizing: border-box; border-radius: 10px; border: 1px solid {{t.hair2}}; background: {{t.card}}; box-shadow: 0 18px 48px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.3); display: flex; flex-direction: column">
@@ -217,7 +217,7 @@
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: {{t.sec}}">SANTÉ DE LA SCÈNE</span>
           <button type="button" class="lk" onClick="{{togglePop}}" style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}">ÉCHAP</button>
         </div>
-        <span style="font-size: 13px; line-height: 1.45; color: {{t.body}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px">3</span> erreurs bloquent l'export Unity, toutes sur la même branche. <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px">2</span> avertissements n'empêchent rien ; la relecture se lance à la demande.</span>
+        <span style="font-size: 13px; line-height: 1.45; color: {{t.body}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px">3</span> erreurs, toutes sur la même branche ; seule la validation du schéma bloque l'export Unity. <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px">2</span> avertissements n'empêchent rien ; la relecture se lance à la demande.</span>
       </div>
       <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
         <div style="border-top: 1px solid {{t.hair}}; padding: 9px 0 5px">
@@ -242,9 +242,12 @@
           </ul>
         </div>
       </sc-for>
-      <div style="border-top: 1px solid {{t.hair}}; padding: 14px 14px 14px 20px; display: flex; align-items: center; gap: 14px">
-        <button type="button" class="tb" style="height: 30px; display: flex; align-items: center; gap: 9px; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Vérifier l'export Unity</button>
-        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; line-height: 1.5; color: {{t.muted}}">VALIDATION STRICTE<br>DERNIÈRE · 11:24</span>
+      <div style="border-top: 1px solid {{t.hair}}; padding: 14px 14px 14px 20px; display: flex; flex-direction: column; gap: 9px">
+        <div style="display: flex; align-items: center; gap: 14px">
+          <button type="button" class="tb" style="height: 30px; display: flex; align-items: center; gap: 9px; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Relire la scène<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.sec}}">≈ 0,04 €</span></button>
+          <button type="button" class="tb" style="height: 30px; display: flex; align-items: center; gap: 9px; padding: 0 12px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; cursor: pointer">Vérifier l'export Unity</button>
+        </div>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; line-height: 1.5; color: {{t.muted}}">EXPORT : VALIDATION STRICTE · DERNIÈRE · 11:24</span>
       </div>
     </section>
   </sc-if>
@@ -420,7 +423,7 @@ class Component extends DCLogic {
       t: t,
       blocks: blocks,
       groups: [
-        { label: 'ERREURS · 3 — BLOQUENT L’EXPORT', color: t.err, dot: t.err, items: errors },
+        { label: 'ERREURS · 3', color: t.err, dot: t.err, items: errors },
         { label: 'AVERTISSEMENTS · 2 — CALCULÉS EN CONTINU', color: t.pend, dot: t.pend, items: warnings },
         { label: 'RELECTURE · 3 — À LA DEMANDE · PASSE DE 11:20', color: t.label, dot: t.label, items: review }
       ],

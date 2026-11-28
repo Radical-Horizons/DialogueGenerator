@@ -10,7 +10,7 @@
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
-<style>body{margin:0}</style>
+<style>body{margin:0}.dc-field::placeholder{color:#8a8a95}.dc-field:focus{outline:none;border-color:#4f7fff!important}</style>
 </helmet>
 <div style="width: 1440px; height: 900px; display: flex; flex-direction: column; overflow: hidden; background: {{t.app}}; color: {{t.body}}; font-family: 'Instrument Sans', system-ui, sans-serif">
 
@@ -123,7 +123,7 @@
                       <p style="margin: 0 0 14px; font-size: 15px; line-height: 1.6; font-style: italic; color: {{t.sec}}">{{p.text}}</p>
                     </sc-if>
                     <sc-if value="{{p.say}}" hint-placeholder-val="{{true}}">
-                      <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p>
+                      <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="display: block; font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p>
                     </sc-if>
                   </sc-for>
                   <div data-k="{{b.respKey}}" style="margin: 20px 0 34px">
@@ -173,7 +173,7 @@
                       <label style="display: flex; align-items: center; gap: 9px; height: 38px; padding: 0 14px; border-bottom: 1px solid {{t.hair2}}">
                         <span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.accText}}">CTRL+K</span>
                         <input aria-label="Consigne pour la phrase sélectionnée" spellCheck="false" value="{{consigne}}" onChange="{{onConsigne}}" style="flex: 1; min-width: 0; height: 100%; border: none; background: transparent; color: {{t.strong}}; font-family: inherit; font-size: 13.5px; outline: none; caret-color: {{t.accent}}">
-                        <span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}">≈ 2 300 TOKENS · ↵ RELANCER</span>
+                        <span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}">≈ 2 300 TOKENS · ≈ 0,005 € · ↵ RELANCER</span>
                       </label>
                       <div style="display: flex; align-items: center; gap: 9px; height: 40px; padding: 0 9px 0 14px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">
                         <button type="button" onClick="{{acceptAll}}" style="border: none; background: transparent; padding: 0; font: inherit; letter-spacing: inherit; color: {{t.muted}}; cursor: pointer"><span style="color: {{t.strong}}">TAB</span> ACCEPTER</button>
@@ -228,10 +228,13 @@
 
               <section aria-label="Suite à écrire" style="border: 1px dashed {{t.chip2}}; border-radius: 8px; padding: 14px 18px 16px; display: flex; flex-direction: column; gap: 11px">
                 <div style="display: flex; align-items: center; gap: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.label}}"><span aria-hidden="true" style="width: 20px; height: 1px; background: {{t.hair2}}"></span>SUITE DE LA RÉPONSE 01 — À ÉCRIRE</div>
-                <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.muted}}">Écrire la réplique de Grish, ou décrire ce qui doit se passer…</p>
+                <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.muted}}">Écrire la réplique de Grish…</p>
+                <label style="display: flex; align-items: center; gap: 9px"><span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}">CONSIGNE</span><input class="dc-field" spellCheck="false" placeholder="Décrire ce qui doit se passer (facultatif)" style="flex: 1; min-width: 0; height: 30px; box-sizing: border-box; padding: 0 9px; border-radius: 6px; border: 1px solid #6a6a78; background: {{t.input}}; color: {{t.body}}; font-family: inherit; font-size: 13px"></label>
                 <div style="display: flex; align-items: center; gap: 14px">
                   <button type="button" style="height: 34px; display: flex; align-items: center; gap: 9px; padding: 0 14px; border: none; border-radius: 6px; background: {{t.fill}}; color: #ffffff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Générer la suite<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.05em">CTRL+↵</span></button>
                   <span style="font-size: 12.5px; color: {{t.sec}}">ou taper directement</span>
+                  <span style="flex: 1"></span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.muted}}">≈ 12 500 TOKENS · ≈ 0,05 €</span>
                 </div>
               </section>
             </div>

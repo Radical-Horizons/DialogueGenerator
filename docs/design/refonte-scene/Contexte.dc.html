@@ -19,7 +19,8 @@
 .dr{transition:opacity 200ms ease-out}
 .x:hover{color:#f2f2f5!important}
 .sel:hover{border-color:#3a3a45!important}
-@media (prefers-reduced-motion: reduce){.dr{transition:none}}</style>
+@media (prefers-reduced-motion: reduce){.dr{transition:none}}
+.dc-field::placeholder{color:#8a8a95}.dc-field:focus{outline:none;border-color:#4f7fff!important}</style>
 </helmet>
 <div style="position: relative; width: 1440px; height: 900px; display: flex; flex-direction: column; overflow: hidden; background: {{t.app}}; color: {{t.body}}; font-family: 'Instrument Sans', system-ui, sans-serif">
 
@@ -131,7 +132,7 @@
                     <p style="margin: 0 0 14px; font-size: 15px; line-height: 1.6; font-style: italic; color: {{t.sec}}">{{p.text}}</p>
                   </sc-if>
                   <sc-if value="{{p.say}}" hint-placeholder-val="{{true}}">
-                    <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if><sc-if value="{{s.hl}}" hint-placeholder-val="{{false}}"><span data-hl="1" style="text-decoration: underline dotted {{t.pendLine}}; text-decoration-thickness: 1.5px; text-underline-offset: 5px; background: {{t.pendBg}}; border-radius: 2px">{{s.t}}</span></sc-if></sc-for></p>
+                    <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="display: block; font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if><sc-if value="{{s.hl}}" hint-placeholder-val="{{false}}"><span data-hl="1" style="text-decoration: underline dotted {{t.pendLine}}; text-decoration-thickness: 1.5px; text-underline-offset: 5px; background: {{t.pendBg}}; border-radius: 2px">{{s.t}}</span></sc-if></sc-for></p>
                   </sc-if>
                 </sc-for>
                 <div style="margin: 20px 0 34px">
@@ -143,7 +144,7 @@
                           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 23px; color: {{t.muted}}">{{c.num}}</span>
                           <span style="min-width: 0">
                             <sc-if value="{{c.empty}}" hint-placeholder-val="{{false}}"><span style="font-size: 14.5px; line-height: 23px; font-style: italic; color: {{t.muted}}">Réponse vide</span></sc-if>
-                            <sc-if value="{{c.full}}" hint-placeholder-val="{{true}}"><span style="display: block; font-size: 15px; line-height: 1.55; color: {{c.textColor}}"><sc-for list="{{c.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-style: italic; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></span></sc-if>
+                            <sc-if value="{{c.full}}" hint-placeholder-val="{{true}}"><span style="display: block; font-size: 15px; line-height: 1.55; color: {{c.textColor}}"><sc-for list="{{c.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="display: block; font-style: italic; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></span></sc-if>
                             <sc-if value="{{c.hasChips}}" hint-placeholder-val="{{false}}">
                               <span style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px">
                                 <sc-for list="{{c.chips}}" as="k" hint-placeholder-count="2"><span style="height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 99px; border: 1px solid {{t.chip}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{k.label}}</span></sc-for>
@@ -182,12 +183,13 @@
                 <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.09em; color: {{t.sec}}">GRISH T'VOK</span>
                 <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.label}}">À ÉCRIRE</span>
               </div>
-              <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.muted}}"><span aria-hidden="true" style="display: inline-block; width: 1.5px; height: 19px; margin-right: 3px; vertical-align: -3px; background: {{t.accent}}"></span>Écrire la réplique de Grish, ou décrire ce qui doit se passer…</p>
+              <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 19px; line-height: 1.6; color: {{t.muted}}"><span aria-hidden="true" style="display: inline-block; width: 1.5px; height: 19px; margin-right: 3px; vertical-align: -3px; background: {{t.accent}}"></span>Écrire la réplique de Grish…</p>
+              <label style="display: flex; align-items: center; gap: 9px"><span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}">CONSIGNE</span><input class="dc-field" spellCheck="false" placeholder="Décrire ce qui doit se passer (facultatif)" style="flex: 1; min-width: 0; height: 30px; box-sizing: border-box; padding: 0 9px; border-radius: 6px; border: 1px solid #6a6a78; background: {{t.input}}; color: {{t.body}}; font-family: inherit; font-size: 13px"></label>
               <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap">
                 <button type="button" style="height: 34px; display: flex; align-items: center; gap: 9px; padding: 0 14px; border: none; border-radius: 6px; background: {{t.fill}}; color: #ffffff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Générer la suite<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.05em">CTRL+↵</span></button>
                 <span style="font-size: 12.5px; color: {{t.sec}}">ou taper directement</span>
                 <span style="flex: 1"></span>
-                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.muted}}">≈ {{totalLabel}} TOKENS · GPT-6.2 SOL · ≤ 4 OPTIONS</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.muted}}">≈ {{totalLabel}} TOKENS · ≈ {{cost}} € · GPT-6.2 SOL · 1 OPTION</span>
               </div>
             </section>
           </div>
@@ -232,7 +234,7 @@
         <div role="img" aria-label="Répartition des tokens par section" style="display: flex; gap: 2px; height: 6px; margin: 9px 0 9px">
           <sc-for list="{{sections}}" as="s" hint-placeholder-count="5"><span style="flex: {{s.flex}}; min-width: 3px; border-radius: 2px; background: {{s.color}}"></span></sc-for>
         </div>
-        <p style="margin: 0; font-size: 12px; line-height: 1.45; color: {{t.sec}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.06em">AUTO</span> : tout passe tel quel. Si la scène s'allonge, les fiches liées sont résumées d'abord, le chemin parcouru jamais.</p>
+        <p style="margin: 0; font-size: 12px; line-height: 1.45; color: {{t.sec}}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.06em">AUTO</span> : tout passe tel quel.</p>
 
         <sc-for list="{{sections}}" as="s" hint-placeholder-count="5">
           <section aria-label="{{s.name}}" style="padding: 9px 0 0; margin-top: 9px; border-top: 1px solid {{t.hair}}">
@@ -254,7 +256,7 @@
                     <span style="font-size: 13px; color: {{i.color}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{i.name}}</span>
                     <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{i.tag}}</span>
                   </span>
-                  <span><sc-if value="{{i.hasAction}}" hint-placeholder-val="{{false}}"><button type="button" class="lk" onClick="{{i.act}}" aria-label="{{i.actAria}}">{{i.action}}</button></sc-if></span>
+                  <span style="text-align: right"><span title="PNJ et PJ se changent dans la fiche de scène" style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.muted}}">{{i.lock}}</span><sc-if value="{{i.hasAction}}" hint-placeholder-val="{{false}}"><button type="button" class="lk" onClick="{{i.act}}" aria-label="{{i.actAria}}">{{i.action}}</button></sc-if></span>
                   <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: {{t.muted}}; text-align: right">{{i.tokens}}</span>
                 </li>
               </sc-for>
@@ -282,7 +284,7 @@
           <span style="font-size: 10px; letter-spacing: 0.1em; color: {{t.muted}}">ESTIMATION</span>
           <span style="flex: 1"></span>
           <span style="font-size: 11px; color: {{t.body}}">≈ {{cost}} € LA SUITE</span>
-          <span style="font-size: 10px; color: {{t.muted}}">· ≤ 4 OPTIONS</span>
+          <span style="font-size: 10px; color: {{t.muted}}">· 1 OPTION</span>
         </div>
         <p style="margin: 0; font-size: 12px; line-height: 1.45; color: #9a9aa4">Exemple : répartition par section et coût estimé. Le total (<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">≈ 12 500</span>) est la mesure réelle d'un nœud.</p>
       </div>
@@ -430,11 +432,11 @@ class Component extends DCLogic {
     const t = this.T;
     const rm = this.state.removed;
     const fiches = [
-      { id: 'grish', name: "Grish T'vok", tag: 'PERSONNAGES', av: 'GT', avBg: t.spk, avColor: t.onSpk, n: 3150 },
-      { id: 'uresair', name: 'Uresaïr', tag: 'PERSONNAGES', av: 'U', avBg: t.raised, avColor: t.body, n: 2880 }
+      { id: 'grish', name: "Grish T'vok", tag: 'PERSONNAGES', lock: 'PNJ', av: 'GT', avBg: t.spk, avColor: t.onSpk, n: 3150 },
+      { id: 'uresair', name: 'Uresaïr', tag: 'PERSONNAGES', lock: 'PJ', av: 'U', avBg: t.raised, avColor: t.body, n: 2880 }
     ].filter((f) => !rm[f.id]);
     const ramp = ['rgba(143,176,255,1)', 'rgba(143,176,255,0.72)', 'rgba(143,176,255,0.48)', 'rgba(143,176,255,0.32)', 'rgba(143,176,255,0.2)'];
-    const item = (o) => Object.assign({ hasAvatar: false, av: '', avBg: '', avColor: '', tag: '', color: t.body, hasAction: false, action: '', actAria: '', act: null }, o);
+    const item = (o) => Object.assign({ hasAvatar: false, av: '', avBg: '', avColor: '', tag: '', color: t.body, hasAction: false, action: '', actAria: '', act: null, lock: '' }, o);
     const pathItems = [
       item({ name: 'Ouverture', tag: 'GRISH', tokens: '180' }),
       item({ name: "Réponse d'Uresaïr", tag: '01 · TEST RÉUSSI', tokens: '60' }),
@@ -445,7 +447,7 @@ class Component extends DCLogic {
     const ficheTotal = fiches.reduce((a, f) => a + f.n, 0);
     const sections = [
       { name: 'Fiche de scène', label: 'FICHE DE SCÈNE', n: 420, desc: 'Titre, PNJ, PJ, lieu, brief et ton de la scène.', items: [], canAdd: false },
-      { name: 'Fiches liées', label: 'FICHES LIÉES · ' + fiches.length, n: ficheTotal, desc: fiches.length ? '' : "Aucune fiche liée : le modèle ne connaîtra que ce que dit la scène.", items: fiches.map((f) => item({ hasAvatar: true, av: f.av, avBg: f.avBg, avColor: f.avColor, name: f.name, tag: f.tag, tokens: this.fmt(f.n), hasAction: true, action: 'retirer', actAria: 'Retirer la fiche ' + f.name, act: () => this.remove(f.id) })), canAdd: true },
+      { name: 'Fiches liées', label: 'FICHES LIÉES · ' + fiches.length, n: ficheTotal, desc: fiches.length ? '' : "Aucune fiche liée : le modèle ne connaîtra que ce que dit la scène.", items: fiches.map((f) => item({ hasAvatar: true, av: f.av, avBg: f.avBg, avColor: f.avColor, name: f.name, tag: f.tag, tokens: this.fmt(f.n), lock: f.lock })), canAdd: true },
       { name: 'Chemin parcouru', label: 'CHEMIN PARCOURU · 4 RÉPLIQUES', n: 4160, desc: '', items: pathItems, canAdd: false },
       { name: "Consignes du profil d'auteur", label: "PROFIL D'AUTEUR", n: 610, desc: '', items: [], canAdd: false, inline: true, inlineName: 'Littéraire' },
       { name: 'Instructions techniques', label: 'INSTRUCTIONS TECHNIQUES', n: 1280, desc: 'Format Unity, tests et leurs issues, traits et effets.', items: [], canAdd: false }

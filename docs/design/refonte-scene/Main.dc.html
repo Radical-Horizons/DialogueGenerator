@@ -10,7 +10,7 @@
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
-<style>body{margin:0}</style>
+<style>body{margin:0}.dc-field::placeholder{color:#8a8a95}.dc-field:focus{outline:none;border-color:#4f7fff!important}</style>
 </helmet>
 <div style="width: 1440px; height: 900px; display: flex; flex-direction: column; overflow: hidden; background: {{t.app}}; color: {{t.body}}; font-family: 'Instrument Sans', system-ui, sans-serif">
 
@@ -97,7 +97,13 @@
           <a href="Graphe.dc.html" style="height: 26px; display: flex; align-items: center; padding: 0 11px; border-left: 1px solid {{t.ctrl}}; color: {{t.sec}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-decoration: none">GRAPHE</a>
           <a href="Jouer.dc.html" style="height: 26px; display: flex; align-items: center; padding: 0 11px; border-left: 1px solid {{t.ctrl}}; color: {{t.sec}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-decoration: none">JOUER</a>
         </nav>
-        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{crumb}}</span>
+        <span style="min-width: 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.label}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{crumb}}</span>
+        <span aria-hidden="true" style="flex: none; width: 1px; height: 20px; background: {{t.hair2}}"></span>
+        <div style="flex: none; display: flex; gap: 5px">
+          <button type="button" aria-label="Annuler CTRL+Z" style="width: 28px; height: 28px; border: 1px solid {{t.ctrl}}; border-radius: 6px; background: transparent; color: {{t.body}}; font-size: 14px; cursor: pointer">↶</button>
+          <button type="button" aria-label="Rétablir CTRL+Y" style="width: 28px; height: 28px; border: 1px solid {{t.ctrl}}; border-radius: 6px; background: transparent; color: {{t.body}}; font-size: 14px; cursor: pointer">↷</button>
+        </div>
+        <button type="button" style="flex: none; height: 44px; padding: 0 7px; border: none; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12.5px; white-space: nowrap; cursor: pointer">Actions ▾</button>
         <span style="flex: 1"></span>
         <div style="display: flex; gap: 5px">
           <button type="button" aria-label="Réduire le texte" onClick="{{smaller}}" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid {{t.ctrl}}; background: transparent; color: {{t.body}}; font-family: inherit; font-size: 12px; cursor: pointer">A−</button>
@@ -128,7 +134,7 @@
                       <p style="margin: 0 0 14px; font-size: 15px; line-height: 1.6; font-style: italic; color: {{t.sec}}">{{p.text}}</p>
                     </sc-if>
                     <sc-if value="{{p.say}}" hint-placeholder-val="{{true}}">
-                      <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: {{fs}}px; line-height: 1.6; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p>
+                      <p style="margin: 0 0 14px; font-family: 'Instrument Serif', Georgia, serif; font-size: {{fs}}px; line-height: 1.6; color: {{t.dia}}"><sc-for list="{{p.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="display: block; margin: 3px 0; font-family: 'Instrument Sans', system-ui, sans-serif; font-style: italic; font-size: 15px; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></p>
                     </sc-if>
                   </sc-for>
                   <div data-scroll="{{b.scrollKey}}" style="margin: 20px 0 34px">
@@ -136,19 +142,22 @@
                     <ol style="list-style: none; margin: 0; padding: 0; border-top: 1px solid {{t.hair}}">
                       <sc-for list="{{b.choices}}" as="c" hint-placeholder-count="3">
                         <li style="border-bottom: 1px solid {{t.hair}}; background: {{c.bg}}; box-shadow: {{c.rail}}">
-                          <button type="button" onClick="{{c.follow}}" style="width: 100%; display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 9px; align-items: start; padding: 11px 12px 11px 10px; border: none; background: transparent; text-align: left; cursor: pointer; font-family: inherit; color: inherit">
-                            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 23px; color: {{t.muted}}">{{c.num}}</span>
+                          <div onClick="{{c.follow}}" style="width: 100%; box-sizing: border-box; display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 9px; align-items: start; padding: 11px 12px 11px 10px; cursor: pointer">
+                            <button type="button" aria-label="Suivre la réponse {{c.num}}" style="border: none; background: transparent; padding: 0; text-align: left; font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 23px; color: {{t.muted}}; cursor: pointer">{{c.num}}</button>
                             <span style="min-width: 0">
-                              <sc-if value="{{c.empty}}" hint-placeholder-val="{{false}}"><span style="font-size: 14.5px; line-height: 23px; font-style: italic; color: {{t.muted}}">Réponse vide</span></sc-if>
-                              <sc-if value="{{c.full}}" hint-placeholder-val="{{true}}"><span style="display: block; font-size: 15px; line-height: 1.55; color: {{c.textColor}}"><sc-for list="{{c.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="font-style: italic; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></span></sc-if>
+                              <sc-if value="{{c.reading}}" hint-placeholder-val="{{true}}"><span role="textbox" tabIndex="0" aria-label="Texte de la réponse {{c.num}}" onClick="{{c.write}}" style="display: block; cursor: text">
+                                <sc-if value="{{c.empty}}" hint-placeholder-val="{{false}}"><span style="font-size: 14.5px; line-height: 23px; font-style: italic; color: {{t.muted}}">Réponse vide</span></sc-if>
+                                <sc-if value="{{c.full}}" hint-placeholder-val="{{true}}"><span style="display: block; font-size: 15px; line-height: 1.55; color: {{c.textColor}}"><sc-for list="{{c.segs}}" as="s" hint-placeholder-count="1"><sc-if value="{{s.it}}" hint-placeholder-val="{{false}}"><span style="display: block; font-style: italic; color: {{t.sec}}">{{s.t}}</span></sc-if><sc-if value="{{s.rm}}" hint-placeholder-val="{{true}}"><span>{{s.t}}</span></sc-if></sc-for></span></sc-if>
+                              </span></sc-if>
+                              <sc-if value="{{c.editing}}" hint-placeholder-val="{{false}}"><textarea aria-label="Texte brut de la réponse {{c.num}}" autoFocus="{{c.editing}}" spellCheck="false" rows="{{c.rows}}" onClick="{{c.hold}}" onKeyDown="{{c.leaveKey}}" onBlur="{{c.leave}}" onChange="{{c.type}}" value="{{c.raw}}" style="display: block; width: 100%; box-sizing: border-box; padding: 2px 6px; border: none; border-radius: 6px; outline: none; resize: none; background: {{t.input}}; box-shadow: inset 0 0 0 1px {{t.accent}}; font-family: inherit; font-size: 15px; line-height: 1.55; color: {{t.strong}}"></textarea></sc-if>
                               <sc-if value="{{c.hasChips}}" hint-placeholder-val="{{false}}">
                                 <span style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px">
                                   <sc-for list="{{c.chips}}" as="k" hint-placeholder-count="2"><span style="height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 99px; border: 1px solid {{t.chip}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.muted}}; white-space: nowrap">{{k.label}}</span></sc-for>
                                 </span>
                               </sc-if>
                             </span>
-                            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; line-height: 23px; color: {{c.metaColor}}; white-space: nowrap">{{c.meta}}</span>
-                          </button>
+                            <button type="button" style="border: none; background: transparent; padding: 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; line-height: 23px; color: {{c.metaColor}}; white-space: nowrap; cursor: pointer">{{c.meta}}</button>
+                          </div>
                           <sc-if value="{{c.showOutcomes}}" hint-placeholder-val="{{false}}">
                             <div role="group" aria-label="Issue du test à suivre" style="display: flex; flex-wrap: wrap; gap: 5px; padding: 0 12px 12px 47px">
                               <sc-for list="{{c.outs}}" as="o" hint-placeholder-count="4">
@@ -171,12 +180,13 @@
                     <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.09em; color: {{t.sec}}">GRISH T'VOK</span>
                     <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{t.label}}">À ÉCRIRE</span>
                   </div>
-                  <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: {{fs}}px; line-height: 1.6; color: {{t.muted}}"><span aria-hidden="true" style="display: inline-block; width: 1.5px; height: 19px; margin-right: 3px; vertical-align: -3px; background: {{t.accent}}"></span>Écrire la réplique de Grish, ou décrire ce qui doit se passer…</p>
+                  <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: {{fs}}px; line-height: 1.6; color: {{t.muted}}"><span aria-hidden="true" style="display: inline-block; width: 1.5px; height: 19px; margin-right: 3px; vertical-align: -3px; background: {{t.accent}}"></span>Écrire la réplique de Grish…</p>
+                  <label style="display: flex; align-items: center; gap: 9px"><span style="flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: {{t.label}}">CONSIGNE</span><input class="dc-field" spellCheck="false" placeholder="Décrire ce qui doit se passer (facultatif)" style="flex: 1; min-width: 0; height: 30px; box-sizing: border-box; padding: 0 9px; border-radius: 6px; border: 1px solid {{t.field}}; background: {{t.input}}; color: {{t.body}}; font-family: inherit; font-size: 13px"></label>
                   <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap">
                     <button type="button" style="height: 34px; display: flex; align-items: center; gap: 9px; padding: 0 14px; border: none; border-radius: 6px; background: {{t.fill}}; color: #ffffff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Générer la suite<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.05em">CTRL+↵</span></button>
                     <span style="font-size: 12.5px; color: {{t.sec}}">ou taper directement</span>
                     <span style="flex: 1"></span>
-                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.muted}}">≈ 12 500 TOKENS · GPT-6.2 SOL · ≤ 4 OPTIONS</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: {{t.muted}}">≈ 12 500 TOKENS · ≈ 0,05 € · GPT-6.2 SOL · 1 OPTION</span>
                   </div>
                 </section>
               </sc-if>
@@ -215,6 +225,7 @@
           </aside>
         </sc-if>
       </div>
+      <sc-if value="{{showNote}}" hint-placeholder-val="{{true}}"><p style="flex: none; margin: 0; padding: 6px 40px 7px; border-top: 1px solid {{t.hair}}; font-size: 12px; line-height: 1.4; color: {{t.sec}}">Exemple : coût en € de la suite et heure d'enregistrement. Répliques, réponses, mots et suites à écrire réels (scène du forgeron).</p></sc-if>
     </main>
   </div>
 
@@ -240,7 +251,7 @@ class Component extends DCLogic {
   constructor(props) {
     super(props);
     const p0 = props || this.props || {};
-    this.state = { path: [{ c: 0, o: 2 }, { c: 0 }], fs: 19, focus: p0.mode === 'focus' };
+    this.state = { path: [{ c: 0, o: 2 }, { c: 0 }], fs: 19, focus: p0.mode === 'focus', editing: null, edits: {} };
     this.scrollEl = null;
     this.setScroll = (el) => { this.scrollEl = el; };
     this.T = {
@@ -249,14 +260,14 @@ class Component extends DCLogic {
         chip: 'rgba(255,255,255,0.12)', chip2: 'rgba(255,255,255,0.22)', strong: '#f2f2f5', body: '#dcdce4', row: '#d5d5dd',
         dia: '#f0efe9', sec: '#9a9aa4', muted: '#8a8a95', label: '#84848f', accent: '#4f7fff', accText: '#8fb0ff',
         accLight: '#a9c3ff', selBg: 'rgba(79,127,255,0.08)', fill: '#3d6ae8', ok: '#27ae60', pend: '#f5a623',
-        err: '#ff6b6b', ctrl: '#2e2e36', spk: '#5fb8ac', onSpk: '#101013', rcrit: '#3d9bff'
+        err: '#ff6b6b', ctrl: '#2e2e36', field: '#6a6a78', spk: '#5fb8ac', onSpk: '#101013', rcrit: '#3d9bff'
       },
       papier: {
         app: '#f5f2ea', input: '#fbfaf6', raised: '#ebe6da', hair: 'rgba(28,25,20,0.08)', hair2: 'rgba(28,25,20,0.13)',
         chip: 'rgba(28,25,20,0.16)', chip2: 'rgba(28,25,20,0.30)', strong: '#1b1916', body: '#2c2924', row: '#2c2924',
         dia: '#1f1c18', sec: '#5c574d', muted: '#625d53', label: '#6b665b', accent: '#2f5bd3', accText: '#2a52c0',
         accLight: '#1f3f9a', selBg: 'rgba(47,91,211,0.08)', fill: '#2f5bd3', ok: '#1d7a44', pend: '#9a5b06',
-        err: '#b83232', ctrl: '#d6d0c3', spk: '#1f7a72', onSpk: '#ffffff', rcrit: '#1f5fbf'
+        err: '#b83232', ctrl: '#d6d0c3', field: '#8a8477', spk: '#1f7a72', onSpk: '#ffffff', rcrit: '#1f5fbf'
       }
     };
     this.OUT = ['É. CRIT', 'ÉCHEC', 'RÉUSSITE', 'R. CRIT'];
@@ -434,7 +445,7 @@ class Component extends DCLogic {
         else if (c.to) meta = 'SUITE ÉCRITE';
         else meta = 'SUITE À ÉCRIRE';
         const colors = [t.err, t.err, t.ok, t.rcrit];
-        const outs = hasOut ? this.OUT.map((label, oi) => {
+        const outs = c.test ? this.OUT.map((label, oi) => {
           const on = isSel && (sel.o === undefined ? 2 : sel.o) === oi;
           return {
             label: label, on: on,
@@ -444,16 +455,25 @@ class Component extends DCLogic {
             pick: (ev) => { if (ev && ev.stopPropagation) ev.stopPropagation(); this.pick(d, i, oi); }
           };
         }) : [];
+        const key = id + ':' + i;
+        const raw = this.state.edits[key] === undefined ? c.t : this.state.edits[key];
+        const editing = this.state.editing === key;
         return {
           num: String(i + 1).padStart(2, '0'),
-          empty: empty, full: !empty,
-          segs: empty ? [] : this.segs(c.t),
+          empty: !raw, full: Boolean(raw),
+          editing: editing, reading: !editing, raw: raw, rows: Math.max(1, Math.ceil(raw.length / 66)),
+          write: (ev) => { ev.stopPropagation(); this.setState({ editing: key }); },
+          hold: (ev) => ev.stopPropagation(),
+          leave: () => this.setState({ editing: null }),
+          leaveKey: (ev) => { if (ev.key === 'Escape') this.setState({ editing: null }); },
+          type: (ev) => this.setState({ edits: Object.assign({}, this.state.edits, { [key]: ev.target.value }) }),
+          segs: raw ? this.segs(raw) : [],
           chips: this.chips(c), hasChips: this.chips(c).length > 0,
           meta: meta, metaColor: metaColor,
           textColor: isSel ? t.strong : t.body,
           bg: isSel ? t.selBg : 'transparent',
           rail: isSel ? 'inset 2px 0 0 ' + t.accent : 'none',
-          showOutcomes: isSel && hasOut,
+          showOutcomes: isSel && Boolean(c.test),
           outs: outs,
           follow: () => this.follow(d, i)
         };
@@ -491,6 +511,11 @@ class Component extends DCLogic {
         continue;
       }
       link = 'RÉPONSE ' + num;
+      if (c.test) {
+        const o = sel.o === undefined ? 2 : sel.o;
+        crumbs.push(this.OUT[o]);
+        link += ' · ' + this.OUT[o];
+      }
       if (c.to) {
         blocks.push({ isNode: false, isGhost: false, isOut: true, link: link, op: 1 });
       } else {
@@ -505,6 +530,7 @@ class Component extends DCLogic {
       blocks: blocks,
       fil: fil,
       crumb: crumbs.join(' › '),
+      showNote: this.props.note !== false,
       focus: focus,
       focusBg: focus ? t.raised : 'transparent',
       showSide: !focus,

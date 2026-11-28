@@ -13,7 +13,7 @@
 <style>body{margin:0}.dc-q::placeholder{color:#8a8a95}.dc-q:focus{outline:none}.dc-pal{animation:dcin 140ms ease-out}@keyframes dcin{from{opacity:0}to{opacity:1}}@media (prefers-reduced-motion: reduce){.dc-pal{animation:none}}</style>
 </helmet>
 <div style="width: 1440px; height: 900px; position: relative; overflow: hidden; background: #17171b; font-family: 'Instrument Sans', system-ui, sans-serif">
-  <dc-import name="Main" theme="nuit" hint-size="1440px,900px"></dc-import>
+  <dc-import name="Main" theme="nuit" note="{{no}}" hint-size="1440px,900px"></dc-import>
 
   <sc-if value="{{open}}" hint-placeholder-val="{{true}}">
     <div onClick="{{close}}" aria-hidden="true" style="position: absolute; inset: 0; background: rgba(8, 8, 11, 0.64)"></div>
@@ -63,7 +63,7 @@
       </div>
 
       <div style="height: 36px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 0 20px; border-top: 1px solid {{t.hair2}}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{t.muted}}">
-        <span><span style="color: {{t.body}}">↑↓</span> NAVIGUER · <span style="color: {{t.body}}">↵</span> OUVRIR · <span style="color: {{t.body}}">TAB</span> ACTIONS · <span style="color: {{t.body}}">ÉCHAP</span> FERMER</span>
+        <span><span style="color: {{t.body}}">↑↓</span> NAVIGUER · <span style="color: {{t.body}}">↵</span> OUVRIR · <span style="color: {{t.body}}">ÉCHAP</span> FERMER</span>
         <span style="flex: 1"></span>
         <span>{{total}}</span>
       </div>
@@ -224,6 +224,7 @@ class Component extends DCLogic {
     const contentCount = rows.filter((r) => !r.isCmd).length;
 
     return {
+      no: false,
       t: t,
       open: this.state.open,
       query: raw,

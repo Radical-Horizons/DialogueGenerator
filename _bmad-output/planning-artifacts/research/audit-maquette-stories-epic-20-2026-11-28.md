@@ -53,27 +53,17 @@ Autres choix :
 - Nouvel endpoint « aperçu du prompt » (20.25) et d'estimation des discussions (20.21).
 - Aucun bouton « Synchroniser maintenant » (18.8).
 
-## Corrections restant à faire dans les boards
+## Boards
 
-| Board | À corriger |
-|---|---|
-| `Fiche` | « Salutation / première rencontre » et sa consigne sont un template, pas une voix : mettre une voix ; menu « Enregistrer comme template » et « Appliquer un template… » ; montrer le prix à côté des tokens |
-| `Main` | Texte d'une réponse = champ, pas un bouton ; didascalie à la ligne ; sélecteur d'issue sur un test non écrit ; prix dans l'emplacement ; légende TAB « suites vides » |
-| `Gestes` | Provenance permanente (pas sur L, pas « Tout voir ») ; toast mais confirmation pour une scène |
-| `Generer` | Ligne « TRACE ▸ » absente ; libellé de l'emplacement (le texte est la réplique) et champ de consigne distinct ; ÉCHAP replie |
-| `Jouer` | Retirer le dé (« JET », 1 et 20 critiques) : score comparé à la difficulté |
-| `Main`, `Fiche`, `Reecrire` | Emplacement : le texte tapé est la réplique, la consigne a son champ |
-| `Graphe` | Port sur la ligne « 4 ISSUES · À ÉCRIRE » ; « Influence » dans le popover ; puce « ■ FIN » ; « + Réponse » et « + » mécanique |
-| `Carte` | Retirer « / INSÉRER » (hors epic) ; « + Réponse » |
-| `Lot` | Retirer la durée (aucune source) ; montrer la barre de lot de sélection |
-| `Contexte` | PNJ et PJ non retirables ; retirer « résumées d'abord » tant que le résumé n'existe pas |
-| `Palette` | Retirer « TAB ACTIONS » (aucune action définie) |
-| `Bibliotheque`, `Ambiance` | Dire lequel est Liste et lequel Couvertures ; ajouter la sélection multiple, les collections et les filtres date et auteur (20.26) |
-| `Reglages` | Section Ambiance absente |
-| `Versions`, `Discussion` | Liste des discussions dans Versions |
-| `Technique` | Renommage « partout » et valeur inconnue non dessinés |
-| `Mobile` | « fiche de scène ▾ » (pas « fiche ▾ ») ; « PARTIE » (pas « ESSAI ») ; prix en € ; menu « ⋯ » sans contenu |
-| `Problemes` | Bouton « Relire la scène · ≈ x € » ; groupe bloquant limité à la validation de schéma |
+Corrigés le 2026-11-28 (19 fichiers `*.dc.html`, contrôlés sur rendu headless). La barre de vue de référence est celle
+de `Main`, `Graphe` et `Jouer` : les autres boards qui la redessinent n'ont pas « Actions ▾ » ni ↶ ↷, ce qui ne retire
+rien à la story 20.5. Restent, faute de choix de conception :
+
+- `Technique` : point d'entrée et occurrences du renommage « partout » ; valeur inconnue déjà présente dans un document.
+- `Mobile` : contenu du menu « ⋯ » ; champ de consigne absent des libellés courts (`Mobile`, `Etats`, `Gestes`, `Graphe`).
+- `Bibliotheque` : sélection multiple de l'accueil, laissée à la story 20.26.
+
+La maquette publiée sur claude.ai (canvas) n'a pas été republiée.
 
 `requirements-inventory.md` redit l'ancienne FR137 (« chaque élément ouvre son détail ») : non modifié ici.
 
