@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import asdict
-from typing import Annotated, Any, Dict, Optional
+from typing import Annotated, Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, status
 
@@ -17,9 +17,11 @@ from api.dependencies import (
     get_cost_governance_service,
     get_document_persistence_service,
     get_graph_node_orchestrator,
+    get_graph_prompt_context_factory,
     get_llm_pricing_service,
     get_llm_usage_service,
     get_request_id,
+    get_token_estimation_service,
     require_non_guest,
 )
 from api.exceptions import (
@@ -30,9 +32,8 @@ from api.exceptions import (
     ValidationException,
 )
 from api.middleware.billable_user_context import get_billable_user_id
-from api.middleware.cost_governance import DEFAULT_COMPLETION_TOKENS, DEFAULT_PROMPT_TOKENS
 from api.routers.auth import get_current_user
-from api.routers.graph_cost import fingerprint_for_selections_safe
+from api.routers.graph_cost import estimate_lot_tokens, fingerprint_for_selections_safe
 from api.routers.graph_router_helpers import (
     annotate_generated_nodes,
     create_llm_client_for_router,
@@ -46,7 +47,12 @@ from api.schemas.batch_node_generation import (
     BatchGenerateParentItemResponse,
     SuggestedConnectionPayload,
 )
-from api.schemas.graph import GenerateNodeRequest, GenerateNodeResponse, SuggestedConnection
+from api.schemas.graph import (
+    EstimateCostRequest,
+    GenerateNodeRequest,
+    GenerateNodeResponse,
+    SuggestedConnection,
+)
 from api.services.batch_node_generation_job_manager import BatchNodeGenerationJobManager
 from api.utils.batch_job_resume import resolve_resume_job_id
 from api.utils.job_ownership import job_owner_key
@@ -64,9 +70,11 @@ from services.configuration_service import ConfigurationService
 from services.cost_governance_service import CostGovernanceService
 from services.document_persistence_service import DocumentPersistenceService
 from services.graph_node_orchestrator import GraphNodeOrchestrator
+from services.graph_prompt_context import GraphPromptContextFactory
 from services.llm_call_provenance import collect_node_provenance
 from services.llm_pricing_service import LLMPricingService
 from services.llm_usage_service import LLMUsageService
+from services.token_estimation_service import TokenEstimationService
 
 logger = logging.getLogger(__name__)
 
@@ -85,23 +93,33 @@ def _owner_key(current_user: dict[str, object]) -> str:
     return job_owner_key(current_user)
 
 
-def _check_batch_budget_or_raise(
-    parent_count: int,
+async def _check_batch_budget_or_raise(
+    requests: List[EstimateCostRequest],
     model_id: Optional[str],
+    *,
+    token_service: TokenEstimationService,
+    prompt_context_factory: GraphPromptContextFactory,
+    context_builder: ContextBuilder,
     pricing_service: LLMPricingService,
     cost_service: CostGovernanceService,
     request_id: str,
 ) -> None:
-    """Vérifie le budget avec le N réel (post-parsing du body).
+    """Vérifie le budget sur le lot réel (post-parsing du body), avant tout appel LLM.
 
-    Le pré-check du middleware (``CostGovernanceMiddleware``) estime le coût
-    ×N depuis un header client (``X-Batch-Parent-Count``) que le body n'a pas
-    encore été lu à ce stade — un client peut y mentir sans conséquence. Ce
-    contrôle-ci utilise ``len(request_data.parents)``, la valeur réelle que le
-    job va traiter, et fait autorité : c'est lui qui bloque, pas le header.
+    Le montant opposé au budget est celui qu'``estimate-cost`` montre à l'auteur :
+    emplacements vides × (prompt complet + réponse). Il fait autorité sur le pré-check
+    forfaitaire du middleware (``CostGovernanceMiddleware``), qui ne lit pas le body.
     """
-    prompt_tokens = DEFAULT_PROMPT_TOKENS * parent_count
-    completion_tokens = DEFAULT_COMPLETION_TOKENS * parent_count
+    prompt_tokens, completion_tokens, slot_count = await asyncio.to_thread(
+        estimate_lot_tokens,
+        requests,
+        model_id or Defaults.MODEL_ID,
+        token_service=token_service,
+        prompt_context_factory=prompt_context_factory,
+        context_builder=context_builder,
+    )
+    if not slot_count:
+        return
     estimated_cost = pricing_service.calculate_cost(
         model_name=model_id or Defaults.MODEL_ID,
         prompt_tokens=prompt_tokens,
@@ -119,7 +137,8 @@ def _check_batch_budget_or_raise(
             details={
                 "percentage": budget_check["percentage"],
                 "estimated_cost": estimated_cost,
-                "parent_count": parent_count,
+                "parent_count": len(requests),
+                "slot_count": slot_count,
             },
             request_id=request_id,
         )
@@ -227,6 +246,12 @@ async def generate_node(
     persistence_service: Annotated[
         DocumentPersistenceService, Depends(get_document_persistence_service)
     ],
+    token_service: Annotated[TokenEstimationService, Depends(get_token_estimation_service)],
+    prompt_context_factory: Annotated[
+        GraphPromptContextFactory, Depends(get_graph_prompt_context_factory)
+    ],
+    pricing_service: Annotated[LLMPricingService, Depends(get_llm_pricing_service)],
+    cost_service: Annotated[CostGovernanceService, Depends(get_cost_governance_service)],
     request_id: Annotated[str, Depends(get_request_id)] = None,
 ) -> GenerateNodeResponse:
     """Génère un nœud en contexte (extension de /generate/unity-dialogue).
@@ -237,6 +262,22 @@ async def generate_node(
     3. Mapper le résultat vers le schéma HTTP
     """
     try:
+        if request_data.generate_all_choices:
+            await _check_batch_budget_or_raise(
+                [
+                    EstimateCostRequest.model_validate(
+                        request_data.model_dump(include=set(EstimateCostRequest.model_fields))
+                    )
+                ],
+                request_data.llm_model_identifier,
+                token_service=token_service,
+                prompt_context_factory=prompt_context_factory,
+                context_builder=context_builder,
+                pricing_service=pricing_service,
+                cost_service=cost_service,
+                request_id=request_id,
+            )
+
         llm_client = create_llm_client_for_router(
             request_data.llm_model_identifier,
             config_service,
@@ -322,7 +363,7 @@ async def generate_node(
             message=str(e),
             request_id=request_id,
         )
-    except ValidationException:
+    except APIException:
         raise
     except AllLLMProvidersUnavailableError:
         raise
@@ -354,6 +395,10 @@ async def start_batch_generate_from_nodes_job(
     context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
     pricing_service: Annotated[LLMPricingService, Depends(get_llm_pricing_service)],
     cost_service: Annotated[CostGovernanceService, Depends(get_cost_governance_service)],
+    token_service: Annotated[TokenEstimationService, Depends(get_token_estimation_service)],
+    prompt_context_factory: Annotated[
+        GraphPromptContextFactory, Depends(get_graph_prompt_context_factory)
+    ],
     current_user: Annotated[dict[str, object], Depends(get_current_user)],
     persistence_service: Annotated[
         DocumentPersistenceService, Depends(get_document_persistence_service)
@@ -405,12 +450,29 @@ async def start_batch_generate_from_nodes_job(
         if p.parent_node_id not in done
     ]
     if parents:
-        _check_batch_budget_or_raise(
-            len(parents),
+        await _check_batch_budget_or_raise(
+            [
+                EstimateCostRequest(
+                    parent_node_id=p.parent_node_id,
+                    parent_node_content=p.parent_node_content,
+                    user_instructions=p.user_instructions,
+                    context_selections=p.context_selections,
+                    npc_speaker_id=p.npc_speaker_id,
+                    player_character_id=p.player_character_id,
+                    dialogue_nodes=request_data.dialogue_nodes,
+                    narrative_tags=request_data.narrative_tags,
+                    author_profile=request_data.author_profile,
+                    max_choices=request_data.max_choices,
+                )
+                for p in parents
+            ],
             request_data.llm_model_identifier,
-            pricing_service,
-            cost_service,
-            request_id,
+            token_service=token_service,
+            prompt_context_factory=prompt_context_factory,
+            context_builder=context_builder,
+            pricing_service=pricing_service,
+            cost_service=cost_service,
+            request_id=request_id,
         )
 
     if resumed_job_id:

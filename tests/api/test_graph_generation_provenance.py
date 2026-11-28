@@ -236,9 +236,13 @@ def graph_client(
     app.dependency_overrides[get_unity_dialogue_orchestrator] = lambda: _start_orchestrator(
         usage, "req-expand"
     )
-    app.dependency_overrides[get_graph_prompt_context_factory] = lambda: MagicMock()
-    app.dependency_overrides[get_token_estimation_service] = lambda: MagicMock()
-    app.dependency_overrides[get_llm_pricing_service] = lambda: MagicMock()
+    factory = _prompt_factory()
+    tokens = _token_service()
+    pricing = MagicMock()
+    pricing.calculate_cost.return_value = 0.0
+    app.dependency_overrides[get_graph_prompt_context_factory] = lambda: factory
+    app.dependency_overrides[get_token_estimation_service] = lambda: tokens
+    app.dependency_overrides[get_llm_pricing_service] = lambda: pricing
     try:
         yield {
             "client": TestClient(app),
@@ -249,6 +253,21 @@ def graph_client(
         }
     finally:
         app.dependency_overrides.clear()
+
+
+def _prompt_factory() -> MagicMock:
+    """Fabrique de prompts factice, pour l'estimation du budget des lots."""
+    factory = MagicMock()
+    factory.default_system_prompt.return_value = "système"
+    factory.build.return_value.render.return_value = "prompt"
+    return factory
+
+
+def _token_service() -> MagicMock:
+    """Comptage de tokens factice."""
+    tokens = MagicMock()
+    tokens.estimate_tokens.return_value = (100, 50)
+    return tokens
 
 
 def _generation_logs(client: TestClient, dialogue_id: str) -> List[Dict[str, Any]]:
@@ -462,6 +481,8 @@ async def test_batch_job_annotates_every_node_on_its_call(
         context_builder=context_builder,
         pricing_service=pricing,
         cost_service=cost,
+        token_service=_token_service(),
+        prompt_context_factory=_prompt_factory(),
         current_user=user,
         persistence_service=app.state.container.get_document_persistence_service(),
         request_id="req-batch",
@@ -633,6 +654,8 @@ async def test_batch_job_annotates_parents_delivered_before_a_crash(
         context_builder=context_builder,
         pricing_service=pricing,
         cost_service=cost,
+        token_service=_token_service(),
+        prompt_context_factory=_prompt_factory(),
         current_user=user,
         persistence_service=app.state.container.get_document_persistence_service(),
         request_id="req-batch-crash",

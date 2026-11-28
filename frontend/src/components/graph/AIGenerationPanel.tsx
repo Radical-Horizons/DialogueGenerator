@@ -16,8 +16,10 @@ import { DEFAULT_MODEL } from '../../constants'
 import * as configAPI from '../../api/config'
 import type { LLMModelResponse } from '../../types/api'
 import {
+  choiceHasOpenSlot,
   countExpandedBatchNodesForChoices,
   getChoiceDisplayLabel,
+  type SlotChoice,
 } from '../../utils/graphChoiceLabels'
 import { serializeDialogueNodesForApi } from '../../utils/dialoguePathContext'
 import { composeSceneInstructions } from '../../utils/sceneSheet'
@@ -71,12 +73,7 @@ export function AIGenerationPanel({
   const parentNode = parentNodeId ? nodes.find((n) => n.id === parentNodeId) : null
 
   const batchAllNodesCount = useMemo(() => {
-    const ch = parentNode?.data?.choices as
-      | Array<{ targetNode?: string | null; test?: unknown }>
-      | undefined
-    if (!ch?.length) return 0
-    const unc = ch.filter((c) => !c.targetNode || c.targetNode === 'END')
-    return countExpandedBatchNodesForChoices(unc)
+    return countExpandedBatchNodesForChoices(parentNode?.data?.choices as SlotChoice[] | undefined)
   }, [parentNode])
 
   // Handler pour générer le nœud
@@ -118,11 +115,7 @@ export function AIGenerationPanel({
     if (generateAllChoices || isTestNode) {
       const totalNodes = isTestNode
         ? 4
-        : countExpandedBatchNodesForChoices(
-            (parentNode?.data?.choices as Array<{ targetNode?: string | null; test?: unknown }> | undefined)?.filter(
-              (c) => !c.targetNode || c.targetNode === 'END'
-            )
-          )
+        : countExpandedBatchNodesForChoices(parentNode?.data?.choices as SlotChoice[] | undefined)
       setBatchProgress({ current: 0, total: Math.max(1, totalNodes) })
     }
     
@@ -551,9 +544,7 @@ export function AIGenerationPanel({
           
           {/* Bouton "Générer pour tous les choix" */}
           {(() => {
-            const unconnectedChoices = (parentNode.data.choices as Array<{ targetNode?: string; [key: string]: unknown }>).filter(
-              (choice) => !choice.targetNode || choice.targetNode === 'END'
-            )
+            const unconnectedChoices = (parentNode.data.choices as SlotChoice[]).filter(choiceHasOpenSlot)
             const batchNodeTotal = countExpandedBatchNodesForChoices(unconnectedChoices)
             return unconnectedChoices.length > 1 ? (
               <button

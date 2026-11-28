@@ -1,27 +1,41 @@
 /**
- * Libellés et comptage batch pour les choix du graphe (aligné backend : test → 4 nœuds).
+ * Libellés et comptage batch pour les choix du graphe (aligné backend : un nœud par emplacement vide).
  */
 import type { Edge, Node } from 'reactflow'
+import { TEST_RESULT_EDGE_CONFIG } from './graphEdgeBuilders'
 
 export function choiceHasNonemptyTest(choice: { test?: unknown }): boolean {
   const tv = choice.test
   return tv != null && (typeof tv !== 'string' || String(tv).trim() !== '')
 }
 
-/**
- * Nombre de nœuds générés pour « tous les choix » (même règle que `_batch_count_from_request`).
- */
+export interface SlotChoice {
+  targetNode?: string | null
+  test?: unknown
+  testCriticalFailureNode?: string | null
+  testFailureNode?: string | null
+  testSuccessNode?: string | null
+  testCriticalSuccessNode?: string | null
+}
+
+const isOpenTarget = (target: string | null | undefined): boolean => !target || target === 'END'
+
+/** Nœuds qu'un lot écrit sous ce choix (miroir de `services/graph_choice_slots.py`). */
+function countOpenSlots(choice: SlotChoice): number {
+  if (!isOpenTarget(choice.targetNode)) return 0
+  if (!choiceHasNonemptyTest(choice)) return 1
+  return TEST_RESULT_EDGE_CONFIG.filter(({ field }) => isOpenTarget(choice[field])).length
+}
+
+export function choiceHasOpenSlot(choice: SlotChoice): boolean {
+  return countOpenSlots(choice) > 0
+}
+
+/** Nombre de nœuds générés pour « tous les choix » : les emplacements encore vides. */
 export function countExpandedBatchNodesForChoices(
-  choices: Array<{ targetNode?: string | null; test?: unknown }> | undefined | null
+  choices: SlotChoice[] | undefined | null
 ): number {
-  if (!choices?.length) return 0
-  let n = 0
-  for (const c of choices) {
-    const target = c.targetNode
-    if (target && target !== 'END') continue
-    n += choiceHasNonemptyTest(c) ? 4 : 1
-  }
-  return n
+  return (choices ?? []).reduce((total, choice) => total + countOpenSlots(choice), 0)
 }
 
 const GENERIC_CHOIX_RE = /^Choix\s+\d+$/i

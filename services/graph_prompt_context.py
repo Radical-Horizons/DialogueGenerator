@@ -11,6 +11,7 @@ prompt XML autour du corps propre à chaque appel LLM (un choix, une issue de te
 """
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional
@@ -172,3 +173,29 @@ class GraphPromptContextFactory:
             max_context_tokens=max_context_tokens,
             llm_model_identifier=llm_model_identifier,
         )
+
+
+class MemoizedPromptContextFactory:
+    """Même contrat que la fabrique, sans reconstruire deux fois le même contexte.
+
+    Sert à estimer un lot : ses parents partagent presque toujours la fiche de scène.
+    Durée de vie : une estimation (le GDD peut changer ensuite).
+    """
+
+    def __init__(self, factory: GraphPromptContextFactory) -> None:
+        """Enveloppe la fabrique réelle."""
+        self._factory = factory
+        self._built: Dict[str, GraphPromptContext] = {}
+
+    def default_system_prompt(self) -> str:
+        """System prompt de la fabrique enveloppée."""
+        return self._factory.default_system_prompt()
+
+    def build(self, context_selections: Dict[str, Any], **kwargs: Any) -> GraphPromptContext:
+        """Comme ``GraphPromptContextFactory.build``, mémorisé par arguments."""
+        key = json.dumps(
+            [context_selections, kwargs], sort_keys=True, ensure_ascii=False, default=str
+        )
+        if key not in self._built:
+            self._built[key] = self._factory.build(context_selections, **kwargs)
+        return self._built[key]

@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from typing import Any, Awaitable, Callable, Dict, List, Literal, Optional, Union
 
 from core.llm.llm_client import ILLMClient
+from services.graph_choice_slots import count_open_slots
 from services.graph_node_orchestrator import GenerationResult, GraphNodeOrchestrator
 
 logger = logging.getLogger(__name__)
@@ -26,16 +27,9 @@ def _now_iso() -> str:
 
 
 def _count_free_choices(parent_node_content: Dict[str, Any]) -> int:
-    """Nombre de choix sans cible (ou END) — base du compteur j/k."""
+    """Nombre de choix ayant quelque chose à écrire — base du compteur j/k."""
     choices = parent_node_content.get("choices") or []
-    count = 0
-    for choice in choices:
-        if not isinstance(choice, dict):
-            continue
-        target = choice.get("targetNode")
-        if not target or target == "END":
-            count += 1
-    return count
+    return sum(1 for c in choices if isinstance(c, dict) and count_open_slots(c))
 
 
 @dataclass

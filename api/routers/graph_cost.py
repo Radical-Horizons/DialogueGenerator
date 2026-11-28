@@ -6,7 +6,7 @@ import asyncio
 import hashlib
 import json
 import logging
-from typing import Annotated, Optional
+from typing import Annotated, Iterable, Optional, Union
 
 from cachetools import TTLCache
 from fastapi import APIRouter, Depends, status
@@ -21,7 +21,11 @@ from api.dependencies import (
     get_token_estimation_service,
 )
 from api.routers.graph_router_helpers import resolve_and_enrich_graph_context
-from services.graph_prompt_context import GraphPromptContextFactory
+from services.graph_choice_slots import count_parent_open_slots
+from services.graph_prompt_context import (
+    GraphPromptContextFactory,
+    MemoizedPromptContextFactory,
+)
 from api.exceptions import InternalServerException
 from api.schemas.graph import (
     EstimateCostPerNodeBreakdown,
@@ -157,21 +161,76 @@ def _resolve_model_and_provider(
 
 
 def _batch_count_from_request(request_data: EstimateCostRequest) -> int:
-    """Nombre de nœuds à estimer (1 si single, N si generate_all_choices).
-
-    Chaque choix avec test non vide génère 4 nœuds (issues de test) ; les autres 1.
-    """
+    """Nombre de nœuds à estimer (1 si single, les emplacements vides si en lot)."""
     if not request_data.generate_all_choices:
         return 1
-    choices = request_data.parent_node_content.get("choices", [])
-    count = 0
-    for c in choices:
-        target = c.get("targetNode")
-        if not target or target == "END":
-            tv = c.get("test")
-            has_test = tv is not None and (not isinstance(tv, str) or str(tv).strip())
-            count += 4 if has_test else 1
-    return max(1, count)
+    return max(1, count_parent_open_slots(request_data.parent_node_content))
+
+
+def estimate_tokens_per_node(
+    request_data: EstimateCostRequest,
+    model_id: str,
+    *,
+    token_service: TokenEstimationService,
+    prompt_context_factory: Union[GraphPromptContextFactory, MemoizedPromptContextFactory],
+    context_builder: ContextBuilder,
+) -> tuple[int, int]:
+    """Tokens (prompt, réponse) d'un nœud de cette requête, sans appel LLM (bloquant).
+
+    Estimation commune à ``estimate-cost`` (montrée à l'auteur) et au contrôle de budget.
+    """
+    dramatis = resolve_scene_dramatis(
+        player_character_id=request_data.player_character_id,
+        npc_speaker_id=request_data.npc_speaker_id,
+        context_selections=request_data.context_selections,
+    )
+    prompt = _build_representative_prompt_for_estimate(
+        request_data.parent_node_content,
+        request_data.user_instructions,
+        request_data.context_selections,
+        parent_node_id=request_data.parent_node_id,
+        dialogue_nodes=request_data.dialogue_nodes,
+        player_choice_label=dramatis.player_character_id,
+        prompt_context_factory=prompt_context_factory,
+        context_builder=context_builder,
+        npc_speaker_id=dramatis.npc_speaker_id,
+        narrative_tags=request_data.narrative_tags,
+        author_profile=request_data.author_profile,
+        model_id=model_id,
+        max_choices=request_data.max_choices,
+    )
+    return token_service.estimate_tokens(prompt, model_id)
+
+
+def estimate_lot_tokens(
+    requests: Iterable[EstimateCostRequest],
+    model_id: str,
+    *,
+    token_service: TokenEstimationService,
+    prompt_context_factory: GraphPromptContextFactory,
+    context_builder: ContextBuilder,
+) -> tuple[int, int, int]:
+    """Total (prompt, réponse, emplacements) d'un lot de choix, une requête par parent.
+
+    Chaque emplacement vide est un appel LLM qui renvoie le prompt complet (bloquant).
+    """
+    factory = MemoizedPromptContextFactory(prompt_context_factory)
+    prompt_total = completion_total = slot_total = 0
+    for request_data in requests:
+        slots = count_parent_open_slots(request_data.parent_node_content)
+        if not slots:
+            continue
+        prompt_tokens, completion_tokens = estimate_tokens_per_node(
+            request_data,
+            model_id,
+            token_service=token_service,
+            prompt_context_factory=factory,
+            context_builder=context_builder,
+        )
+        prompt_total += prompt_tokens * slots
+        completion_total += completion_tokens * slots
+        slot_total += slots
+    return prompt_total, completion_total, slot_total
 
 
 # Cache estimation coût par hash (contexte + instructions + model_id), TTL 60s (AC #1 <1s).
@@ -221,30 +280,16 @@ async def estimate_cost(
         cached = _estimate_cost_cache.get(cache_key)
         if cached is not None:
             return EstimateCostResponse(**cached)
-        dramatis = resolve_scene_dramatis(
-            player_character_id=request_data.player_character_id,
-            npc_speaker_id=request_data.npc_speaker_id,
-            context_selections=request_data.context_selections,
-        )
-        representative_prompt = await asyncio.to_thread(
-            _build_representative_prompt_for_estimate,
-            request_data.parent_node_content,
-            request_data.user_instructions,
-            request_data.context_selections,
-            parent_node_id=request_data.parent_node_id,
-            dialogue_nodes=request_data.dialogue_nodes,
-            player_choice_label=dramatis.player_character_id,
+        prompt_tokens_per_node, completion_tokens_per_node = await asyncio.to_thread(
+            estimate_tokens_per_node,
+            request_data,
+            model_id,
+            token_service=token_service,
             prompt_context_factory=prompt_context_factory,
             context_builder=context_builder,
-            npc_speaker_id=dramatis.npc_speaker_id,
-            narrative_tags=request_data.narrative_tags,
-            author_profile=request_data.author_profile,
-            model_id=model_id,
-            max_choices=request_data.max_choices,
         )
-        prompt_tokens, completion_tokens_per_node = token_service.estimate_tokens(
-            representative_prompt, model_id
-        )
+        # Un nœud = un appel LLM : le prompt complet est renvoyé à chaque fois.
+        prompt_tokens = prompt_tokens_per_node * batch_count
         total_completion_tokens = completion_tokens_per_node * batch_count
         cost_usd = pricing_service.calculate_cost(
             model_id, prompt_tokens, total_completion_tokens
@@ -252,33 +297,22 @@ async def estimate_cost(
         estimated_cost_eur = round(cost_usd * _USD_TO_EUR_RATE, 6)
         per_node_breakdown = None
         if batch_count > 1:
-            first_node_cost_eur = round(
-                pricing_service.calculate_cost(model_id, prompt_tokens, completion_tokens_per_node)
-                * _USD_TO_EUR_RATE,
-                6,
-            )
-            next_node_cost_eur = round(
-                pricing_service.calculate_cost(model_id, 0, completion_tokens_per_node)
+            node_cost_eur = round(
+                pricing_service.calculate_cost(
+                    model_id, prompt_tokens_per_node, completion_tokens_per_node
+                )
                 * _USD_TO_EUR_RATE,
                 6,
             )
             per_node_breakdown = [
                 EstimateCostPerNodeBreakdown(
-                    choice_index=0,
-                    prompt_tokens=prompt_tokens,
+                    choice_index=i,
+                    prompt_tokens=prompt_tokens_per_node,
                     completion_tokens=completion_tokens_per_node,
-                    estimated_cost_eur=first_node_cost_eur,
+                    estimated_cost_eur=node_cost_eur,
                 )
+                for i in range(batch_count)
             ]
-            for i in range(1, batch_count):
-                per_node_breakdown.append(
-                    EstimateCostPerNodeBreakdown(
-                        choice_index=i,
-                        prompt_tokens=0,
-                        completion_tokens=completion_tokens_per_node,
-                        estimated_cost_eur=next_node_cost_eur,
-                    )
-                )
 
         # AC #3 : comparaison avec le provider alternatif.
         alt_model = _ALTERNATIVE_MODEL.get(provider)
