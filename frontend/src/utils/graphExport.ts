@@ -2,7 +2,17 @@
  * Utilitaires pour exporter le graphe en PNG ou SVG.
  */
 
+import { resolveToken } from '../theme/publishTokens'
 import { redesignSurface } from '../theme/redesignTokens'
+
+/**
+ * Exclut les contrôles et la minimap. html-to-image passe aussi les nœuds texte et
+ * commentaire, qui n'ont pas de `classList`.
+ */
+function keepInExport(node: HTMLElement): boolean {
+  return !node.classList?.contains('react-flow__controls') &&
+         !node.classList?.contains('react-flow__minimap')
+}
 
 /**
  * Exporte le graphe visible en PNG.
@@ -27,12 +37,8 @@ export async function exportGraphToPNG(
     const options = {
       quality,
       pixelRatio: 2, // Pour une meilleure qualité
-      backgroundColor: getComputedStyle(reactFlowElement).backgroundColor || redesignSurface.canvas,
-      filter: (node: HTMLElement) => {
-        // Exclure les contrôles et la minimap
-        return !node.classList.contains('react-flow__controls') &&
-               !node.classList.contains('react-flow__minimap')
-      },
+      backgroundColor: getComputedStyle(reactFlowElement).backgroundColor || resolveToken(redesignSurface.canvas),
+      filter: keepInExport,
     }
     
     // Générer l'image PNG
@@ -68,12 +74,8 @@ export async function exportGraphToSVG(
     
     // Options pour l'export SVG
     const options = {
-      backgroundColor: getComputedStyle(reactFlowElement).backgroundColor || redesignSurface.canvas,
-      filter: (node: HTMLElement) => {
-        // Exclure les contrôles et la minimap
-        return !node.classList.contains('react-flow__controls') &&
-               !node.classList.contains('react-flow__minimap')
-      },
+      backgroundColor: getComputedStyle(reactFlowElement).backgroundColor || resolveToken(redesignSurface.canvas),
+      filter: keepInExport,
     }
     
     // Générer l'image SVG

@@ -86,6 +86,10 @@ describe('GraphCanvas — minimap à la demande', () => {
 
     await user.click(toggle)
     expect(screen.getByTestId('rf__minimap')).toBeInTheDocument()
+    expect(screen.getByTestId('rf__minimap').querySelector('.react-flow__minimap-mask')).toHaveAttribute(
+      'fill',
+      'var(--dg-surface-canvas-mask)'
+    )
     expect(toggle).toHaveAttribute('aria-pressed', 'true')
     expect(useUiLayoutStore.getState().showGraphMinimap).toBe(true)
 

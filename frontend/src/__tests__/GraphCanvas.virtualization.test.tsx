@@ -13,6 +13,7 @@ import { GraphCanvas } from '../components/graph/GraphCanvas'
 import { useGraphViewStore } from '../store/graphViewStore'
 import { DialogueNode, TestNode, EndNode } from '../components/graph/nodes'
 import { useGraphStore } from '../store/graphStore'
+import { redesignNodeBorder } from '../theme/redesignTokens'
 
 const capturedReactFlowProps: {
   onlyRenderVisibleElements?: boolean
@@ -249,8 +250,8 @@ describe('Node type colors (AC #2) - dialogue=bleu, test=orange, end=gris', () =
     isConnectable: true,
   })
 
-  // Refonte 2e : bordure neutre #3d3d46 (rgb(61, 61, 70)) par défaut sur les trois types.
-  it('DialogueNode uses neutral redesign border (#3d3d46) when not selected', () => {
+  // Refonte 2e : bordure neutre (token `nodeBorder.default`) par défaut sur les trois types.
+  it('DialogueNode uses neutral redesign border when not selected', () => {
     render(
       React.createElement(
         ReactFlowProvider,
@@ -259,10 +260,10 @@ describe('Node type colors (AC #2) - dialogue=bleu, test=orange, end=gris', () =
       )
     )
     const node = screen.getByTestId('graph-node-content')
-    expect(node.getAttribute('style')).toMatch(/61,\s*61,\s*70|3d3d46/i)
+    expect(node.getAttribute('style')).toContain(`1px solid ${redesignNodeBorder.default}`)
   })
 
-  it('TestNode uses neutral redesign border (#3d3d46) when not selected', () => {
+  it('TestNode uses neutral redesign border when not selected', () => {
     render(
       React.createElement(
         ReactFlowProvider,
@@ -271,10 +272,10 @@ describe('Node type colors (AC #2) - dialogue=bleu, test=orange, end=gris', () =
       )
     )
     const node = screen.getByTestId('graph-node-content')
-    expect(node.getAttribute('style')).toMatch(/61,\s*61,\s*70|3d3d46/i)
+    expect(node.getAttribute('style')).toContain(`1px solid ${redesignNodeBorder.default}`)
   })
 
-  it('EndNode uses neutral redesign border (#3d3d46) when not selected', () => {
+  it('EndNode uses neutral redesign border when not selected', () => {
     render(
       React.createElement(
         ReactFlowProvider,
@@ -283,6 +284,6 @@ describe('Node type colors (AC #2) - dialogue=bleu, test=orange, end=gris', () =
       )
     )
     const node = screen.getByTestId('graph-node-content')
-    expect(node.getAttribute('style')).toMatch(/61,\s*61,\s*70|3d3d46/i)
+    expect(node.getAttribute('style')).toContain(`1px solid ${redesignNodeBorder.default}`)
   })
 })

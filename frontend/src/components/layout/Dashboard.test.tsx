@@ -10,6 +10,7 @@ import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useContextStore } from '../../store/contextStore'
 import { useUiLayoutStore } from '../../store/uiLayoutStore'
 import { panelHeaderMonoLabel } from '../../theme/responsiveChrome'
+import { redesignAccent } from '../../theme/redesignTokens'
 
 const mockContextRefresh = vi.hoisted(() => vi.fn())
 const mockContextSelectorState = vi.hoisted(() => ({
@@ -714,8 +715,8 @@ describe('Dashboard', () => {
     )
 
     const resultFrame = await screen.findByTestId('generated-dialogue-result')
-    expect(resultFrame.style.borderLeftWidth).toBe('2px')
-    expect(resultFrame.style.borderLeftColor).toBe('rgb(79, 127, 255)')
+    // Le raccourci reste entier : jsdom ne le développe pas quand il contient `var()`.
+    expect(resultFrame.style.borderLeft).toBe(`2px solid ${redesignAccent.base}`)
 
     const diagnostic = screen.getByTestId('generated-dialogue-diagnostic')
     const diagnosticValue = (label: string) =>
