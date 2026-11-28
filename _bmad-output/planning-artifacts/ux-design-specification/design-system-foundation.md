@@ -18,7 +18,7 @@
 | Source | Rôle |
 | --- | --- |
 | Artifact « DialogueGenerator » — <https://claude.ai/artifact/REQGGaEUwUPLt2tgStXdjv> | Référence navigable : brand book, 107 jetons (dont 64 couleurs) et 35 styles de texte avec leur usage, 16 composants avec aperçu et règles, écrans 1c–2e, correspondance avec le code. Privé : le partager depuis son menu Share pour un autre lecteur. |
-| `frontend/src/theme.ts`, `frontend/src/theme/redesignTokens.ts` | **Source de vérité des valeurs** pour le code. Un écran importe ces jetons, il ne recopie jamais une valeur. |
+| `frontend/src/theme.ts`, `frontend/src/theme/tokenValues.ts` | **Source de vérité des valeurs** pour le code. Les tokens de la refonte sont publiés en variables CSS sur `:root` ; un écran les importe depuis `theme/redesignTokens.ts`, il ne recopie jamais une valeur. |
 | `docs/design/refonte-ui-2026/` | Maquettes HTML haute fidélité (1c, 2a–2e) et handoff. |
 | `.claude/rules/ui_redesign_2026.md` | Invariants que les agents doivent respecter en codant l'UI. |
 

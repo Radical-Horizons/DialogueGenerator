@@ -179,7 +179,7 @@ Sources : [`research/ux-refonte-scene-2026-11-19.md`](../../../_bmad-output/plan
 
 ## 10. Tokens
 
-**Nuit** : inchangé (`frontend/src/theme/redesignTokens.ts`). **Papier** (nouveau), contrastes calculés sur `#f5f2ea` :
+**Nuit** : inchangé (valeurs dans `frontend/src/theme/tokenValues.ts`). **Papier** (nouveau), contrastes calculés sur `#f5f2ea` :
 
 | Rôle | Valeur | Contraste |
 |---|---|---|

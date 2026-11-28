@@ -694,7 +694,7 @@ So that **écrire un nœud complet reste une séquence de frappe continue**.
 
 **Given** les tokens de focus
 **When** une carte, un champ ou une puce reçoit le focus
-**Then** l'anneau utilise des tokens de focus ajoutés à `redesignTokens.ts` (absorbe 14.2), visibles en Nuit comme en Papier (contraste ≥ 3:1 sur le fond adjacent), et uniquement en `:focus-visible`
+**Then** l'anneau utilise des tokens de focus ajoutés à `theme/tokenValues.ts` et lus par `redesignTokens.ts` (absorbe 14.2), visibles en Nuit comme en Papier (contraste ≥ 3:1 sur le fond adjacent), et uniquement en `:focus-visible`
 
 **Given** la vue Script
 **When** je presse `Tab` hors champ

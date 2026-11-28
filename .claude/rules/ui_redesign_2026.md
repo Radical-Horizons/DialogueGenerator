@@ -67,8 +67,11 @@ Invariants transverses (détail dans le README) :
 - Espacements : **5 / 9 / 14 / 20 / 34 px**, rien entre.
 - Rayons : 6 (contrôles) · 8 (nœuds) · 99 (chips).
 - Chaque panneau vide porte une phrase disant ce qui s'y affichera.
-- Tokens applicatifs : `frontend/src/theme/redesignTokens.ts` — ne pas redéfinir de valeur en dur
-  quand le token existe.
+- Tokens applicatifs : les composants importent `frontend/src/theme/redesignTokens.ts` — ne pas
+  redéfinir de valeur en dur quand le token existe. Les **valeurs** sont dans
+  `frontend/src/theme/tokenValues.ts`, publiées en variables CSS `--dg-…` sur `:root` : un nouveau
+  token s'écrit là (une nouvelle famille s'exporte aussi dans `redesignTokens.ts`). Couleurs et
+  ombre arrivent en `var(--dg-…)` : pas d'alpha concaténé, et `resolveToken` là où la valeur sort du CSS.
 
 ## Ne pas supprimer une fonctionnalité pour « faire comme la maquette »
 

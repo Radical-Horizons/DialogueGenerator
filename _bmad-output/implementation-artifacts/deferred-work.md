@@ -413,3 +413,4 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-20-3-tokens-en-variables-css-theme-nuit.md`
   summary: Des documents désignent encore `redesignTokens.ts` comme siège des valeurs ; depuis 20.3 elles sont dans `theme/tokenValues.ts`.
   evidence: `epic-18.md` (ajouter les tokens de focus « dans `redesignTokens.ts` » créerait une valeur non publiée), `design-system-foundation.md` (ligne 21), `.claude/rules/ui_redesign_2026.md`, `docs/design/refonte-scene/README.md` § 10. Différé : la correction touche une règle d'agent.
+  status: done — corrigé le 2026-11-28, aussi dans `visual-design-foundation.md`, `refonte-scene-architecture.md` (A8) et `project-context.md`.

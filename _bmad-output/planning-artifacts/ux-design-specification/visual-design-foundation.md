@@ -11,7 +11,7 @@
 > **Obsolète pour les couleurs, la typographie et l'espacement** (2026-09-27). Ces valeurs datent de
 > janvier 2026, avant la refonte UI : fond `#1a1a1a`, accent `#007bff`, police système, grille de 4 px.
 > Référence actuelle : `design-system-foundation.md`, l'artifact design system et
-> `frontend/src/theme/redesignTokens.ts`. Les sections « Mécaniques » et « Validation Strategy » restent valables.
+> `frontend/src/theme/tokenValues.ts`. Les sections « Mécaniques » et « Validation Strategy » restent valables.
 
 ## Color System
 
