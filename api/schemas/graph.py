@@ -82,6 +82,7 @@ class EstimateCostRequest(BaseModel):
     )
     system_prompt_override: Optional[str] = Field(None, description="Surcharge du system prompt")
     narrative_tags: Optional[List[str]] = Field(None, description="Tags narratifs")
+    author_profile: Optional[str] = Field(None, description="Directives d'auteur de la scène")
     llm_model_identifier: Optional[str] = Field(None, description="Identifiant du modèle LLM")
     target_choice_index: Optional[int] = Field(None, description="Index du choix spécifique (si None, tous les choix sans targetNode)")
     generate_all_choices: bool = Field(False, description="Si True, estimation pour un nœud par choix sans targetNode")
@@ -134,6 +135,7 @@ class GenerateNodeRequest(BaseModel):
     )
     system_prompt_override: Optional[str] = Field(None, description="Surcharge du system prompt")
     narrative_tags: Optional[List[str]] = Field(None, description="Tags narratifs")
+    author_profile: Optional[str] = Field(None, description="Directives d'auteur de la scène")
     llm_model_identifier: Optional[str] = Field(None, description="Identifiant du modèle LLM")
     target_choice_index: Optional[int] = Field(None, description="Index du choix spécifique à connecter (si None, génère pour tous les choix sans targetNode)")
     generate_all_choices: bool = Field(False, description="Si True, génère un nœud pour chaque choix sans targetNode")
@@ -453,6 +455,8 @@ class RegenerateNodeRequest(BaseModel):
     llm_model_identifier: Optional[str] = Field(None, description="Identifiant du modèle LLM")
     via_choice_index: Optional[int] = Field(None, description="Index du choix parent (si connexion par choix)")
     player_character_id: Optional[str] = Field(None, description="PJ jouable (voix des choices)")
+    narrative_tags: Optional[List[str]] = Field(None, description="Tags narratifs")
+    author_profile: Optional[str] = Field(None, description="Directives d'auteur de la scène")
     dialogue_nodes: Optional[List[Dict[str, Any]]] = Field(
         None,
         description="Nœuds du graphe pour reconstruire le chemin ancêtre dans le prompt",

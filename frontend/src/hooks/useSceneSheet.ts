@@ -1,9 +1,10 @@
 /**
  * Fiche de scène du dialogue ouvert, côté composants : enregistrée ou déduite.
  */
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useGraphStore } from '../store/graphStore'
-import { useSceneCatalogStore } from '../store/sceneCatalogStore'
+import { mentionNames, useSceneCatalogStore } from '../store/sceneCatalogStore'
+import { useSceneProfileStore } from '../store/sceneProfileStore'
 import {
   buildSceneGeneration,
   deduceSceneSheet,
@@ -23,12 +24,36 @@ export function useSceneSheet(): { sheet: SceneSheet; isDeduced: boolean } {
 }
 
 /** Ce qu'enverrait une génération partant de ce nœud (estimations, résumés). */
-export function useSceneGeneration(parentNodeId: string | null | undefined): SceneGeneration {
+export function useSceneGeneration(
+  parentNodeId: string | null | undefined,
+): SceneGeneration & { authorProfile: string | undefined } {
   const { sheet } = useSceneSheet()
   const nodes = useGraphStore((state) => state.nodes)
   const characters = useSceneCatalogStore((state) => state.characters)
-  return useMemo(
-    () => buildSceneGeneration({ sheet, nodes, parentNodeId, characters }),
-    [sheet, nodes, parentNodeId, characters],
+  const items = useSceneCatalogStore((state) => state.items)
+  const places = useSceneCatalogStore((state) => state.places)
+  const species = useSceneCatalogStore((state) => state.species)
+  const communities = useSceneCatalogStore((state) => state.communities)
+  const generation = useMemo(
+    () =>
+      buildSceneGeneration({
+        sheet,
+        nodes,
+        parentNodeId,
+        characters,
+        mentionNames: mentionNames({ characters, places, items, species, communities }),
+      }),
+    [sheet, nodes, parentNodeId, characters, places, items, species, communities],
   )
+
+  const profileId = generation.authorProfileId
+  const loadVoices = useSceneProfileStore((state) => state.load)
+  useEffect(() => {
+    if (profileId) void loadVoices()
+  }, [profileId, loadVoices])
+  const authorProfile = useSceneProfileStore(
+    (state) => state.voices.find((voice) => voice.id === profileId)?.content.trim() || undefined,
+  )
+
+  return useMemo(() => ({ ...generation, authorProfile }), [generation, authorProfile])
 }

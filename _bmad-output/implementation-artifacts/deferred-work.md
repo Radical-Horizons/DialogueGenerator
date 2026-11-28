@@ -416,11 +416,9 @@
   status: done — corrigé le 2026-11-28, aussi dans `visual-design-foundation.md`, `refonte-scene-architecture.md` (A8) et `project-context.md`.
 
 - source_spec: none
-  summary: Story 20.4, lot B — fiche complète du board `Fiche` : brief avec mention `@` et aperçu de la fiche du GDD (fiches liées), tons, profil d'auteur, premier emplacement à écrire sous la fiche d'une scène neuve (son geste « Générer » arrive en 20.11). La story 20.4 reste `in-progress` tant que B et C ne sont pas livrés.
-  evidence: Découpée le 2026-11-28, découpage approuvé par l'auteur (story estimée à 3 sessions, trois livrables fusionnables à part). Après la fusion du lot A, dans sa propre session ; même composant que C, donc pas en parallèle.
-- source_spec: none
   summary: Story 20.4, lot C — menu « fiche de scène ▾ » (README § 13) : Flags du dialogue, « Enregistrer comme profil d'auteur », métadonnées, partage, permissions, supprimer (confirmation actuelle gardée), en réutilisant les composants existants.
   evidence: Découpée le 2026-11-28 avec le lot B ; après le lot B.
+  note: lot B livré avec « profil d'auteur » = voix d'écriture (décision de l'auteur), alors que le README § 13 fait d'« Enregistrer comme profil d'auteur » le successeur de « Sauvegarder ce brief comme template » : à trancher avant de coder ce geste.
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-20-4a-fiche-de-scene-document-et-generation.md`
   summary: En lot par job, le contexte noté sur les nœuds créés est recalculé à l'application du rapport, pas celui envoyé au lancement.
@@ -437,7 +435,15 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-20-4a-fiche-de-scene-document-et-generation.md`
   summary: Mettre à jour le fait « PJ/PNJ d'une génération du graphe » de CLAUDE.md après la fusion de la fiche de scène.
   evidence: Il impose `resolveGraphGenerationDramatis`, supprimé ; la source est désormais `buildSceneGeneration` / `useSceneGeneration` (fiche de scène).
+  status: done — corrigé avec le lot B (story 20.4).
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-20-4a-fiche-de-scene-document-et-generation.md`
   summary: Toute sauvegarde d'un dialogue peut retirer sans le dire des réponses à test dont le texte est vide (risque de perte de données).
   evidence: Le `PUT` valide avec `normalize_unity_export_document(in_place=True)` puis écrit le document modifié. Sur `forgeron-itinerant.json`, le nœud ajouté à la main (`manual-e23d929d…`) a quatre réponses à test sans texte : après un seul geste sur la fiche (ou n'importe quelle autre modification), elles ont disparu du fichier avec leur barre de test. Chemin inchangé par la story 20.4.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-4b-fiche-de-scene-complete.md`
+  summary: La régénération d'un nœud applique sa réponse sans vérifier que le dialogue ouvert est encore le même.
+  evidence: `regenerateNode` (`generationSlice.ts`) remplace le nœud par son seul `nodeId` après l'appel LLM, sans contrôle de séquence de chargement, contrairement à `applyGenerateNodeResponse`. Si l'auteur change de dialogue pendant l'appel, un nœud de même identifiant (`START`) serait écrasé. Antérieur au lot B.
+- source_spec: `_bmad-output/implementation-artifacts/spec-20-4b-fiche-de-scene-complete.md`
+  summary: `test_un_tableau_vraiment_corrompu_est_signale` échoue sous Python 3.13.5 (venv neuf d'un worktree).
+  evidence: Échec reproduit sur la base propre ; 9/9 sous le venv du dépôt principal (3.13.3) et sous 3.11.0, version de la CI. Cause supposée, non vérifiée : l'avertissement émis depuis `emit` (`api/utils/log_file_handler.py`) est écarté par la garde anti-récursion de `logging`, donc perdu aussi en usage réel sous cette version.

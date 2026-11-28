@@ -6,7 +6,13 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { ContextSelection } from '../types/api'
 import {
+  addMentionedEntry,
+  addSceneTone,
   buildSceneGeneration,
+  findMentionQuery,
+  splitBriefMentions,
+  stripBriefMentions,
+  toggleSceneTone,
   composeSceneInstructions,
   deduceSceneSheet,
   findSpeakerIssues,
@@ -332,5 +338,101 @@ describe('parseSceneSheet', () => {
   it('absente ou mal formée : null', () => {
     expect(parseSceneSheet(undefined)).toBeNull()
     expect(parseSceneSheet([])).toBeNull()
+  })
+})
+
+describe('tons de la scène', () => {
+  it('coche, décoche et ajoute sans « # » ni doublon à la casse près', () => {
+    const toggled = toggleSceneTone(sheet(), 'tension')
+    expect(toggled.tones).toEqual(['tension'])
+    expect(toggleSceneTone(toggled, 'tension').tones).toEqual([])
+    expect(addSceneTone(toggled, ' #Menace ').tones).toEqual(['tension', 'menace'])
+    expect(addSceneTone(toggled, 'Tension')).toBe(toggled)
+    expect(addSceneTone(toggled, '  # ')).toBe(toggled)
+  })
+
+  it('partent avec la génération ; absents quand rien n’est coché', () => {
+    const build = (patch: Partial<SceneSheet>) =>
+      buildSceneGeneration({ sheet: sheet(patch), nodes, parentNodeId: 'a', characters: [] })
+
+    expect(build({ tones: ['tension'], authorProfileId: 'p' })).toMatchObject({
+      narrativeTags: ['tension'],
+      authorProfileId: 'p',
+    })
+    expect(build({ tones: [] })).toMatchObject({ narrativeTags: undefined, authorProfileId: null })
+  })
+})
+
+describe('mentions du brief', () => {
+  const names = [STRAIGHT, 'Korga', 'Korga l’Effritée']
+
+  it('découpe sur le nom connu le plus long, apostrophe indifférente, positions exactes', () => {
+    const brief = `Voir @${CURLY}, @Korga l'Effritée et @Korgan.`
+    const segments = splitBriefMentions(brief, names)
+
+    expect(segments.map((segment) => segment.text).join('')).toBe(brief)
+    expect(segments.filter((s) => s.mention).map((s) => s.mention)).toEqual([
+      STRAIGHT,
+      'Korga l’Effritée',
+    ])
+    for (const segment of segments) {
+      expect(brief.slice(segment.start, segment.start + segment.text.length)).toBe(segment.text)
+    }
+  })
+
+  it('retire le « @ » des seules fiches ; un courriel et « @xyz » restent', () => {
+    expect(stripBriefMentions('@Korga écrit à a@Korga et à @xyz', names)).toBe(
+      'Korga écrit à a@Korga et à @xyz',
+    )
+  })
+
+  it('le modèle reçoit le nom sans « @ », même après le retrait de la fiche liée', () => {
+    const generation = buildSceneGeneration({
+      sheet: sheet({ brief: 'Il cherche @Anneau.' }),
+      nodes,
+      parentNodeId: 'a',
+      characters: [],
+      mentionNames: ['Anneau'],
+    })
+
+    expect(generation.brief).toBe('Il cherche Anneau.')
+  })
+
+  it('cherche après « @ » ; rien après un nom complet suivi de texte', () => {
+    expect(findMentionQuery('vers @Gri', 9, names)).toEqual({ start: 5, query: 'Gri' })
+    expect(findMentionQuery('vers @', 6, names)).toBeNull()
+    expect(findMentionQuery('a@b', 3, names)).toBeNull()
+    expect(findMentionQuery('@Korga arrive', 13, names)).toBeNull()
+  })
+
+  it('curseur dans une mention déjà écrite : rien à proposer', () => {
+    expect(findMentionQuery('@Korga arrive', 3, names)).toBeNull()
+    expect(findMentionQuery('@Korga', 6, names)).toEqual({ start: 0, query: 'Korga' })
+  })
+
+  it('un nom qui en commence un plus long laisse écrire le plus long', () => {
+    const places = ['La Forge', 'La Forge ambulante']
+    const at = (text: string) => findMentionQuery(text, text.length, places)
+
+    expect(at('@La Forge ')).toEqual({ start: 0, query: 'La Forge ' })
+    expect(at('@La Forge amb')).toEqual({ start: 0, query: 'La Forge amb' })
+    expect(at('@La Forge dort')).toBeNull()
+  })
+
+  it('n’ajoute ni PNJ, ni PJ, ni lieu, ni doublon', () => {
+    const base = sheet({
+      npcs: [ref(STRAIGHT)],
+      pc: ref('Uresaïr'),
+      place: ref('La Forge'),
+      linkedEntries: [{ category: 'items', name: 'Anneau', mode: 'excerpt', entryId: null }],
+    })
+
+    expect(addMentionedEntry(base, 'characters', CURLY, null)).toBe(base)
+    expect(addMentionedEntry(base, 'characters', 'Uresaïr', null)).toBe(base)
+    expect(addMentionedEntry(base, 'locations', 'La Forge', null)).toBe(base)
+    expect(addMentionedEntry(base, 'items', 'Anneau', null)).toBe(base)
+    expect(addMentionedEntry(base, 'species', 'Moribandons', 'page-m').linkedEntries).toContainEqual(
+      { category: 'species', name: 'Moribandons', mode: 'full', entryId: 'page-m' },
+    )
   })
 })

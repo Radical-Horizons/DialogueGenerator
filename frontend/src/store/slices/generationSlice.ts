@@ -6,9 +6,9 @@ import type { Node } from 'reactflow'
 import type { GraphState } from '../types/graphState'
 import type { Choice } from '../../schemas/nodeEditorSchema'
 import { serializeDialogueNodesForApi } from '../../utils/dialoguePathContext'
-import { buildSceneGeneration, composeSceneInstructions } from '../../utils/sceneSheet'
-import { effectiveSceneSheet } from './sceneSlice'
-import { useSceneCatalogStore } from '../sceneCatalogStore'
+import { composeSceneInstructions } from '../../utils/sceneSheet'
+import { openSceneGeneration } from './sceneSlice'
+import { resolveSceneAuthorProfile } from '../sceneProfileStore'
 import * as graphAPI from '../../api/graph'
 import { markNodeDeleted } from '../../api/llmUsage'
 import { normalizeTestBars, normalizeTestBarsAfterLayout } from '../../utils/graphNormalizers'
@@ -206,14 +206,12 @@ export const createGenerationSlice: StateCreator<
         }
       }
 
-      // La fiche de scène est la seule source de PNJ, PJ, lieu, brief et fiches.
+      // La fiche de scène est la seule source de PNJ, PJ, lieu, brief, fiches, tons et profil.
       get().ensureSceneStored()
-      const generation = buildSceneGeneration({
-        sheet: effectiveSceneSheet(get()),
-        nodes: state.nodes,
+      const generation = openSceneGeneration(
+        { scene: get().scene, nodes: state.nodes },
         parentNodeId,
-        characters: useSceneCatalogStore.getState().characters,
-      })
+      )
       const contextSelections = generation.contextSelections as unknown as Record<string, unknown>
       const maxChoices =
         typeof options.max_choices === 'number' ? options.max_choices : null
@@ -221,9 +219,6 @@ export const createGenerationSlice: StateCreator<
         typeof options.system_prompt_override === 'string'
           ? options.system_prompt_override
           : undefined
-      const narrativeTags = Array.isArray(options.narrative_tags)
-        ? options.narrative_tags.filter((t): t is string => typeof t === 'string')
-        : undefined
       const llmModelIdentifier =
         typeof options.llm_model_identifier === 'string'
           ? options.llm_model_identifier
@@ -247,6 +242,10 @@ export const createGenerationSlice: StateCreator<
       // Ne pas envoyer de test vide pour un choix (évite 422 après suppression du TestNode)
       const normalizedContent = normalizeParentContentForGeneration(parentNodeContent)
       const dialogueNodesForApi = serializeDialogueNodesForApi(state.nodes)
+      // Sans profil, aucune attente : l'envoi reste immédiat.
+      const authorProfile = generation.authorProfileId
+        ? await resolveSceneAuthorProfile(generation.authorProfileId)
+        : undefined
       const response = await graphAPI.generateNode(
         {
           parent_node_id: parentNodeId,
@@ -260,7 +259,8 @@ export const createGenerationSlice: StateCreator<
           npc_speaker_id: generation.npcSpeakerId,
           player_character_id: generation.playerCharacterId,
           system_prompt_override: systemPromptOverride,
-          narrative_tags: narrativeTags,
+          narrative_tags: generation.narrativeTags,
+          author_profile: authorProfile,
           llm_model_identifier: llmModelIdentifier,
           target_choice_index: targetChoiceIndex,
           generate_all_choices: generateAllChoices,
@@ -766,16 +766,17 @@ export const createGenerationSlice: StateCreator<
 
       const existingData = node.data as Record<string, unknown>
       get().ensureSceneStored()
-      const generation = buildSceneGeneration({
-        sheet: effectiveSceneSheet(get()),
-        nodes: state.nodes,
-        parentNodeId: parentNode.id,
-        characters: useSceneCatalogStore.getState().characters,
-      })
+      const generation = openSceneGeneration(
+        { scene: get().scene, nodes: state.nodes },
+        parentNode.id,
+      )
       // L'endpoint de régénération lit le PNJ dans scene_protagonists (pas de champ dédié).
       const regenSelections = generation.contextSelections as unknown as Record<string, unknown>
 
       const overlay = useGenerationStore.getState().contextDroppingRulesOverlay
+      const authorProfile = generation.authorProfileId
+        ? await resolveSceneAuthorProfile(generation.authorProfileId)
+        : undefined
       const response = await graphAPI.regenerateNode(nodeId, {
         dialogue_id: dialogueId,
         new_instructions: withAntiDropClause(
@@ -788,6 +789,8 @@ export const createGenerationSlice: StateCreator<
         context_selections: regenSelections,
         via_choice_index,
         player_character_id: generation.playerCharacterId,
+        narrative_tags: generation.narrativeTags,
+        author_profile: authorProfile,
         dialogue_nodes: serializeDialogueNodesForApi(state.nodes),
         ...getAppliedTemplateLogFields(),
       })

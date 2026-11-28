@@ -79,6 +79,7 @@ def _build_representative_prompt_for_estimate(
     context_builder: Optional[ContextBuilder] = None,
     npc_speaker_id: Optional[str] = None,
     narrative_tags: Optional[list[str]] = None,
+    author_profile: Optional[str] = None,
     model_id: Optional[str] = None,
     max_choices: Optional[int] = None,
 ) -> str:
@@ -124,6 +125,7 @@ def _build_representative_prompt_for_estimate(
             player_character_id=dramatis.player_character_id,
             scene_instruction=user_instructions or "",
             narrative_tags=narrative_tags,
+            author_profile=author_profile,
             llm_model_identifier=model_id,
         )
         system_prompt = prompt_context_factory.default_system_prompt()
@@ -236,6 +238,7 @@ async def estimate_cost(
             context_builder=context_builder,
             npc_speaker_id=dramatis.npc_speaker_id,
             narrative_tags=request_data.narrative_tags,
+            author_profile=request_data.author_profile,
             model_id=model_id,
             max_choices=request_data.max_choices,
         )

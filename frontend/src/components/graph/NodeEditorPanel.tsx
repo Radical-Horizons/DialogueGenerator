@@ -662,6 +662,8 @@ export const NodeEditorPanel = memo(function NodeEditorPanel({
       dialogue_nodes: serializeDialogueNodesForApi(graphNodes),
       npc_speaker_id: sceneGeneration.npcSpeakerId,
       player_character_id: sceneGeneration.playerCharacterId,
+      narrative_tags: sceneGeneration.narrativeTags,
+      author_profile: sceneGeneration.authorProfile,
     }
   }, [selectedNodeId, selectedNode, userInstructions, sceneGeneration, llmModel, graphNodes])
   const { result: estimationResult, state: estimationState, error: estimationError, runEstimate, budgetExceeded, budgetWarning90 } = useEstimation({

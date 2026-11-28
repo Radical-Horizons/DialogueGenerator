@@ -64,6 +64,9 @@ export type StartBatchGenerateJobRequest = {
   document_id?: string
   parents: BatchGenerateParentSpec[]
   dialogue_nodes?: GenerateNodeRequest['dialogue_nodes']
+  /** Tons et profil d'auteur de la scène, communs à tous les parents. */
+  narrative_tags?: string[]
+  author_profile?: string
   llm_model_identifier?: string
   system_prompt_override?: string
   max_choices?: number | null

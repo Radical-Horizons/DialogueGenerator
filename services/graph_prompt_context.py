@@ -42,6 +42,7 @@ class GraphPromptContext:
     traits_list: List[str]
     scene_location: Optional[Dict[str, Any]] = None
     narrative_tags: Optional[List[str]] = None
+    author_profile: Optional[str] = None
     max_context_tokens: int = Defaults.CONTEXT_TOKENS
     llm_model_identifier: Optional[str] = None
 
@@ -68,6 +69,7 @@ class GraphPromptContext:
                 choices_mode="free" if max_choices is None else "capped",
                 max_choices=max_choices,
                 narrative_tags=self.narrative_tags,
+                author_profile=self.author_profile,
                 max_context_tokens=self.max_context_tokens,
                 llm_model_identifier=self.llm_model_identifier,
             )
@@ -113,6 +115,7 @@ class GraphPromptContextFactory:
         player_character_id: str,
         scene_instruction: str,
         narrative_tags: Optional[List[str]] = None,
+        author_profile: Optional[str] = None,
         llm_model_identifier: Optional[str] = None,
         max_context_tokens: int = Defaults.CONTEXT_TOKENS,
     ) -> GraphPromptContext:
@@ -124,6 +127,7 @@ class GraphPromptContextFactory:
             player_character_id: PJ qui parle dans ``choices``.
             scene_instruction: Consigne de l'auteur (sert au tri du contexte).
             narrative_tags: Tags de ton éventuels.
+            author_profile: Directives d'auteur éventuelles.
             llm_model_identifier: Modèle (comptage de tokens du prompt).
             max_context_tokens: Budget du bloc contexte GDD.
 
@@ -164,6 +168,7 @@ class GraphPromptContextFactory:
             traits_list=traits_list,
             scene_location=selection.scene_location,
             narrative_tags=narrative_tags,
+            author_profile=author_profile,
             max_context_tokens=max_context_tokens,
             llm_model_identifier=llm_model_identifier,
         )

@@ -14,11 +14,11 @@ import {
 import type { UseToastFn } from '../components/shared'
 import { useBatchNodeGenerationJobStore } from '../store/batchNodeGenerationJobStore'
 import { useGraphStore } from '../store/graphStore'
-import { effectiveSceneSheet } from '../store/slices/sceneSlice'
-import { useSceneCatalogStore } from '../store/sceneCatalogStore'
+import { effectiveSceneSheet, openSceneGeneration } from '../store/slices/sceneSlice'
+import { resolveSceneAuthorProfile } from '../store/sceneProfileStore'
 import { getErrorMessage } from '../types/errors'
 import { serializeDialogueNodesForApi } from '../utils/dialoguePathContext'
-import { buildSceneGeneration, composeSceneInstructions } from '../utils/sceneSheet'
+import { composeSceneInstructions, sceneAuthorProfileId, sceneTones } from '../utils/sceneSheet'
 
 export interface BatchGenerateProgress {
   current: number
@@ -50,13 +50,7 @@ function hasUnconnectedChoice(node: Node | undefined): boolean {
 
 /** Contexte, PNJ, PJ et brief d'un parent du lot : ceux de la fiche de scène. */
 function sceneGenerationFor(parentId: string) {
-  const state = useGraphStore.getState()
-  return buildSceneGeneration({
-    sheet: effectiveSceneSheet(state),
-    nodes: state.nodes,
-    parentNodeId: parentId,
-    characters: useSceneCatalogStore.getState().characters,
-  })
+  return openSceneGeneration(useGraphStore.getState(), parentId)
 }
 
 function contextForParent(parentId: string): Record<string, unknown> {
@@ -346,8 +340,13 @@ export function useBatchGenerateFromNodes(
       setShowModal(true)
       setReport(null)
       const state = useGraphStore.getState()
+      // Tons et profil sont ceux du dialogue : un seul envoi pour tous les parents.
+      const sheet = effectiveSceneSheet(state)
+      const tones = sceneTones(sheet)
       const created = await startBatchGenerateFromNodesJob({
         document_id: state.dialogueMetadata.filename || undefined,
+        narrative_tags: tones.length > 0 ? tones : undefined,
+        author_profile: await resolveSceneAuthorProfile(sceneAuthorProfileId(sheet)),
         parents: specs,
         dialogue_nodes: serializeDialogueNodesForApi(state.nodes),
         choices_mode: 'capped',

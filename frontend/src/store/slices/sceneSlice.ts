@@ -5,8 +5,13 @@
 import type { StateCreator } from 'zustand'
 import type { GraphState } from '../types/graphState'
 import { useAuthStore } from '../authStore'
-import { useSceneCatalogStore } from '../sceneCatalogStore'
-import { deduceSceneSheet, type SceneSheet } from '../../utils/sceneSheet'
+import { mentionNames, useSceneCatalogStore } from '../sceneCatalogStore'
+import {
+  buildSceneGeneration,
+  deduceSceneSheet,
+  type SceneGeneration,
+  type SceneSheet,
+} from '../../utils/sceneSheet'
 
 export type SceneSlice = Pick<
   GraphState,
@@ -16,6 +21,21 @@ export type SceneSlice = Pick<
 /** Fiche enregistrée, ou déduite du dialogue tant qu'il n'en a pas. */
 export function effectiveSceneSheet(state: Pick<GraphState, 'scene' | 'nodes'>): SceneSheet {
   return state.scene ?? deduceSceneSheet(state.nodes, useSceneCatalogStore.getState().characters)
+}
+
+/** Ce qu'envoie une génération du dialogue ouvert depuis ce nœud. */
+export function openSceneGeneration(
+  state: Pick<GraphState, 'scene' | 'nodes'>,
+  parentNodeId: string,
+): SceneGeneration {
+  const catalog = useSceneCatalogStore.getState()
+  return buildSceneGeneration({
+    sheet: effectiveSceneSheet(state),
+    nodes: state.nodes,
+    parentNodeId,
+    characters: catalog.characters,
+    mentionNames: mentionNames(catalog),
+  })
 }
 
 function isReadOnly(state: GraphState): boolean {

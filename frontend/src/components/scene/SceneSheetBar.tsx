@@ -1,101 +1,53 @@
 /**
- * Fiche de scène en tête de la vue Graphe (board `Fiche`, story 20.4 lot A).
+ * Fiche de scène en tête de la vue Graphe (board `Fiche`, story 20.4).
  *
- * Repliée en une ligne ; dépliée, elle se corrige sur place et s'enregistre seule avec
- * le dialogue. Sa distribution et ses fiches sont les seules envoyées aux générations.
+ * Repliée en une ligne, dépliée d'office pour une scène sans réplique ; elle se corrige sur
+ * place et s'enregistre seule avec le dialogue. Sa distribution, ses fiches, ses tons et son
+ * profil sont les seuls envoyés aux générations.
  */
-import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useState, type CSSProperties, type FormEvent } from 'react'
 import { useGraphStore } from '../../store/graphStore'
-import { useAuthStore } from '../../store/authStore'
 import { useContextStore } from '../../store/contextStore'
-import { useSceneCatalogStore } from '../../store/sceneCatalogStore'
+import { mentionCatalogs, useSceneCatalogStore } from '../../store/sceneCatalogStore'
 import { useSceneSheet } from '../../hooks/useSceneSheet'
+import { useSceneReadOnly } from '../../hooks/useSceneReadOnly'
 import {
   findSpeakerIssues,
   newLinkedEntries,
   sceneRefFor,
   speakerKey,
+  type MentionCategory,
   type SceneLinkedEntry,
   type SceneSheet,
 } from '../../utils/sceneSheet'
-import { PLAYABLE_CHARACTERS, isForbiddenNpc } from '../../utils/sceneDramatis'
+import { PLAYABLE_CHARACTERS, isDialogueGraphNode, isForbiddenNpc } from '../../utils/sceneDramatis'
 import { entityInitials } from '../../utils/entityInitials'
 import { formatDialogueTitle } from '../../utils/formatDialogueTitle'
 import { FuzzyPickerInput } from '../shared/FuzzyPickerInput'
 import {
   redesignAccent,
-  redesignControl,
   redesignFont,
   redesignHairline,
-  redesignMonoLabelStyle,
   redesignRadius,
   redesignSpacing,
   redesignSurface,
   redesignText,
 } from '../../theme/redesignTokens'
-
-const CATEGORY_LABELS: Record<string, string> = {
-  characters: 'personnage',
-  locations: 'lieu',
-  items: 'objet',
-  species: 'espèce',
-  communities: 'communauté',
-  dialogues_examples: 'exemple de dialogue',
-  narrative_structures: 'structure narrative',
-  chapters: 'chapitre',
-  scenes: 'scène',
-}
-
-const monoLabel: CSSProperties = {
-  ...redesignMonoLabelStyle,
-  fontSize: '10px',
-  letterSpacing: '0.1em',
-  color: redesignText.label,
-  whiteSpace: 'nowrap',
-}
-
-const buttonStyle: CSSProperties = {
-  minHeight: 28,
-  padding: '0 10px',
-  borderRadius: redesignRadius.control,
-  border: `1px solid ${redesignControl.border}`,
-  background: 'transparent',
-  color: redesignText.secondary,
-  fontFamily: 'inherit',
-  fontSize: '12.5px',
-  cursor: 'pointer',
-  flex: 'none',
-}
-
-const fieldStyle: CSSProperties = {
-  boxSizing: 'border-box',
-  borderRadius: redesignRadius.control,
-  border: `1px solid ${redesignControl.inputBorder}`,
-  background: redesignSurface.panel,
-  color: redesignText.body,
-  fontFamily: 'inherit',
-  fontSize: '13px',
-}
-
-const chipStyle: CSSProperties = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 7,
-  minHeight: 28,
-  boxSizing: 'border-box',
-  padding: '0 9px',
-  borderRadius: redesignRadius.chip,
-  border: `1px solid ${redesignHairline.strong}`,
-  fontSize: '13px',
-  color: redesignText.body,
-}
-
-const rowStyle: CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  flexWrap: 'wrap',
-  gap: redesignSpacing.sm,
-}
+import { SceneBriefField } from './SceneBriefField'
+import { SceneContextLine } from './SceneContextLine'
+import { SceneEntryPreview, type ScenePreviewTarget } from './SceneEntryPreview'
+import { SceneProfileField } from './SceneProfileField'
+import { SceneToneChips } from './SceneToneChips'
+import {
+  SCENE_CATEGORY_LABELS,
+  buttonStyle,
+  chipStyle,
+  fieldStyle,
+  initialsStyle,
+  monoLabel,
+  rowLabel,
+  rowStyle,
+} from './sceneStyles'
 
 const ellipsis: CSSProperties = {
   overflow: 'hidden',
@@ -116,20 +68,7 @@ function spellingDifference(other: string, target: string): string | null {
 
 function Initials({ name }: { name: string }) {
   return (
-    <span
-      aria-hidden="true"
-      style={{
-        width: 20,
-        height: 20,
-        borderRadius: redesignRadius.chip,
-        background: redesignSurface.nodeHeader,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: redesignFont.mono,
-        fontSize: '10px',
-      }}
-    >
+    <span aria-hidden="true" style={initialsStyle}>
       {entityInitials(name)}
     </span>
   )
@@ -165,13 +104,14 @@ export function SceneSheetBar() {
 }
 
 function SceneSheetPanel({ documentId }: { documentId: string }) {
-  const [expanded, setExpanded] = useState(false)
   const { sheet, isDeduced } = useSceneSheet()
   const nodes = useGraphStore((state) => state.nodes)
   const documentTitle = useGraphStore((state) => state.document?.title)
-  const canEditDocument = useGraphStore((state) => state.canEditDocument)
-  const isGuest = useAuthStore((state) => state.user?.role === 'guest')
-  const readOnly = isGuest || canEditDocument === false
+  const readOnly = useSceneReadOnly()
+  // Sans réplique, la fiche est dépliée tant que l'auteur n'en décide pas autrement.
+  const isNewScene = !(nodes ?? []).some(isDialogueGraphNode)
+  const [chosen, setChosen] = useState<boolean | null>(null)
+  const expanded = chosen ?? isNewScene
 
   const gddDataRevision = useContextStore((state) => state.gddDataRevision)
   const loadCatalog = useSceneCatalogStore((state) => state.load)
@@ -195,7 +135,7 @@ function SceneSheetPanel({ documentId }: { documentId: string }) {
       aria-label="Fiche de scène"
       style={{
         flexShrink: 0,
-        maxHeight: expanded ? '55%' : undefined,
+        maxHeight: expanded ? (isNewScene ? '70%' : '55%') : undefined,
         overflowY: expanded ? 'auto' : undefined,
         padding: expanded
           ? `${redesignSpacing.md}px ${redesignSpacing.lg}px`
@@ -218,6 +158,11 @@ function SceneSheetPanel({ documentId }: { documentId: string }) {
         }}
       >
         <span style={monoLabel}>Fiche de scène</span>
+        {isNewScene ? (
+          <span style={{ ...monoLabel, whiteSpace: 'normal' }}>
+            Nouvelle scène{readOnly ? '' : ' · chaque champ s’écrit sur place'}
+          </span>
+        ) : null}
         {isDeduced ? (
           <span style={{ ...monoLabel, color: redesignAccent.text }}>Déduite — vérifier</span>
         ) : null}
@@ -268,7 +213,7 @@ function SceneSheetPanel({ documentId }: { documentId: string }) {
         <button
           type="button"
           aria-expanded={expanded}
-          onClick={() => setExpanded((value) => !value)}
+          onClick={() => setChosen(!expanded)}
           style={{ ...buttonStyle, border: 'none', padding: 0 }}
         >
           {expanded ? 'replier la fiche ▴' : 'déplier la fiche ▾'}
@@ -305,6 +250,28 @@ function SceneSheetFields({
   const rewriteSpeakers = useGraphStore((state) => state.rewriteSpeakers)
   const characters = useSceneCatalogStore((state) => state.characters)
   const places = useSceneCatalogStore((state) => state.places)
+  const catalogItems = useSceneCatalogStore((state) => state.items)
+  const catalogSpecies = useSceneCatalogStore((state) => state.species)
+  const catalogCommunities = useSceneCatalogStore((state) => state.communities)
+  const catalogs = mentionCatalogs({
+    characters,
+    places,
+    items: catalogItems,
+    species: catalogSpecies,
+    communities: catalogCommunities,
+  })
+
+  const [preview, setPreview] = useState<ScenePreviewTarget | null>(null)
+  const closePreview = useCallback(() => setPreview(null), [])
+  const showPreview = useCallback(
+    (target: ScenePreviewTarget) =>
+      setPreview((current) => (current?.anchor === target.anchor ? null : target)),
+    [],
+  )
+  const hasSheet = (entry: SceneLinkedEntry) =>
+    catalogs[entry.category as MentionCategory]?.some(
+      (item) => speakerKey(item.name) === speakerKey(entry.name),
+    ) ?? false
 
   const selections = useContextStore((state) => state.selections)
   const items = useContextStore((state) => state.items)
@@ -493,21 +460,14 @@ function SceneSheetFields({
         ) : null}
       </div>
 
-      <label style={{ display: 'flex', flexDirection: 'column', gap: redesignSpacing.xs, maxWidth: 640 }}>
-        <span style={monoLabel}>Brief — ce qui doit se passer</span>
-        <textarea
-          aria-label="Brief de la scène"
-          value={sheet.brief}
-          readOnly={readOnly}
-          rows={3}
-          placeholder="Ce qui doit se passer dans la scène. Il précède chaque consigne envoyée au modèle."
-          onChange={(event) => {
-            const brief = event.target.value
-            updateScene((current) => ({ ...current, brief }))
-          }}
-          style={{ ...fieldStyle, padding: '7px 9px', fontSize: '15px', lineHeight: 1.6, resize: 'vertical' }}
-        />
-      </label>
+      <SceneBriefField sheet={sheet} readOnly={readOnly} onPreview={showPreview} />
+
+      <div style={rowStyle}>
+        <span style={rowLabel}>Ton</span>
+        <SceneToneChips sheet={sheet} readOnly={readOnly} />
+      </div>
+
+      <SceneProfileField sheet={sheet} readOnly={readOnly} />
 
       {spellings.length > 0 || emptyNodeIds.length > 0 ? (
         <div
@@ -564,9 +524,36 @@ function SceneSheetFields({
         <span style={monoLabel}>Fiches liées</span>
         {sheet.linkedEntries.map((entry) => (
           <span key={`${entry.category}:${entry.name}`} style={chipStyle}>
-            {entry.name}
+            {hasSheet(entry) ? (
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                aria-label={`Aperçu de ${entry.name}`}
+                onClick={(event) =>
+                  showPreview({
+                    category: entry.category as MentionCategory,
+                    name: entry.name,
+                    anchor: event.currentTarget,
+                  })
+                }
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  padding: 0,
+                  font: 'inherit',
+                  color: 'inherit',
+                  cursor: 'pointer',
+                  textDecoration: 'underline dotted',
+                  textUnderlineOffset: 3,
+                }}
+              >
+                {entry.name}
+              </button>
+            ) : (
+              entry.name
+            )}
             <span style={monoLabel}>
-              {CATEGORY_LABELS[entry.category] ?? entry.category}
+              {SCENE_CATEGORY_LABELS[entry.category] ?? entry.category}
               {entry.mode === 'excerpt' ? ' · extrait' : ''}
             </span>
             {!readOnly ? (
@@ -608,6 +595,10 @@ function SceneSheetFields({
           </button>
         ) : null}
       </div>
+
+      <SceneContextLine />
+
+      {preview ? <SceneEntryPreview target={preview} onClose={closePreview} /> : null}
     </div>
   )
 }

@@ -1,13 +1,18 @@
 /**
  * Fiche de scène en tête du graphe (story 20.4 lot A).
  */
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { SceneSheetBar } from './SceneSheetBar'
 import { useGraphStore } from '../../store/graphStore'
 import { useAuthStore } from '../../store/authStore'
 import { useContextStore } from '../../store/contextStore'
 import { useSceneCatalogStore } from '../../store/sceneCatalogStore'
+
+vi.mock('../../api/authorProfiles', () => ({
+  listAuthorProfilesApi: vi.fn().mockResolvedValue([]),
+  listPrebuiltAuthorProfilesApi: vi.fn().mockResolvedValue([]),
+}))
 
 const INITIAL_AUTH = useAuthStore.getState()
 
@@ -199,7 +204,11 @@ describe('SceneSheetBar', () => {
     expand()
 
     expect(screen.getByText('Lecture seule')).toBeInTheDocument()
-    expect(screen.getByRole('textbox', { name: 'Brief de la scène' })).toHaveAttribute('readonly')
+    expect(screen.queryByRole('textbox', { name: 'Brief de la scène' })).not.toBeInTheDocument()
+    expect(screen.getByRole('group', { name: 'Brief de la scène' })).toHaveTextContent('Aucun brief.')
+    expect(screen.queryByRole('combobox', { name: 'Profil d’auteur' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'tension' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Ajouter un ton' })).not.toBeInTheDocument()
     expect(screen.getByTestId('scene-sheet-place')).toBeDisabled()
     expect(screen.getByRole('combobox', { name: 'PJ' })).toBeDisabled()
     expect(screen.queryByRole('button', { name: '+ Personnage' })).not.toBeInTheDocument()

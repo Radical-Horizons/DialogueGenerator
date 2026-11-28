@@ -82,6 +82,7 @@ export interface GenerateNodeRequest {
   player_character_id?: string
   system_prompt_override?: string
   narrative_tags?: string[]
+  author_profile?: string
   llm_model_identifier?: string
   target_choice_index?: number | null
   generate_all_choices?: boolean
@@ -108,6 +109,7 @@ export interface EstimateCostRequest {
   player_character_id?: string
   system_prompt_override?: string
   narrative_tags?: string[]
+  author_profile?: string
   llm_model_identifier?: string
   target_choice_index?: number | null
   generate_all_choices?: boolean
@@ -170,6 +172,8 @@ export interface GenerateNodeResponse {
 }
 
 export interface RegenerateNodeRequest {
+  narrative_tags?: string[]
+  author_profile?: string
   dialogue_id: string
   new_instructions: string
   preserve_connections?: boolean

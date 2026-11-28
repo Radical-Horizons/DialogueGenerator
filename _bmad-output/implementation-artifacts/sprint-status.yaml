@@ -38,7 +38,7 @@ project: DialogueGenerator
 project_key: dialogue-generator
 tracking_system: file-system
 story_location: '{project-root}/_bmad-output/implementation-artifacts'
-last_updated: '2026-11-28T17:11:23+01:00'
+last_updated: '2026-11-28T18:23:00+01:00'
 development_status:
   # Flat list (not nested YAML): each epic block = epic → stories → retrospective, then the NEXT epic starts.
   # Order = delivery sequence (see epic-list.md): 0 → 16 → 1–3 → 17 → 4–15 — not strict epic ID sort.

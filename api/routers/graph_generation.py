@@ -267,6 +267,7 @@ async def generate_node(
                 choices_mode=request_data.choices_mode,
                 npc_speaker_id=dramatis.npc_speaker_id,
                 narrative_tags=request_data.narrative_tags,
+                author_profile=request_data.author_profile,
                 llm_model_identifier=request_data.llm_model_identifier,
             )
 
@@ -427,6 +428,8 @@ async def start_batch_generate_from_nodes_job(
     model_id = request_data.llm_model_identifier
     dialogue_nodes = request_data.dialogue_nodes
     system_prompt_override = request_data.system_prompt_override
+    narrative_tags = request_data.narrative_tags
+    author_profile = request_data.author_profile
     max_choices = request_data.max_choices
     choices_mode = request_data.choices_mode
     document_id = request_data.document_id
@@ -493,6 +496,8 @@ async def start_batch_generate_from_nodes_job(
                     on_item=on_item,
                     label_offset=offset,
                     label_total=len(parent_ids),
+                    narrative_tags=narrative_tags,
+                    author_profile=author_profile,
                 )
             fresh = {item.parent_node_id: item for item in run.items}
             merged = [
